@@ -10,7 +10,7 @@
  "field_order": [
   "article",
   "damage_description",
-  "estimated_replacement_cost_sar",
+  "estimated_replacement_cost",
   "serial_no"
  ],
  "fields": [
@@ -35,7 +35,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "estimated_replacement_cost_sar",
+   "fieldname": "estimated_replacement_cost",
    "fieldtype": "Currency",
    "label": "Estimated Replacement Cost (SAR)",
    "reqd": 1,

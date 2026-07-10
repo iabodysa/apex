@@ -19,7 +19,7 @@ class AccommodationStockLedger(Document):
 
 # [#swxhdr]
 _MASTER_FIELDS = {
-    "Custody Article": ("article_name", "unit_of_measure", "standard_unit_cost_sar"),
+    "Custody Article": ("article_name", "unit_of_measure", "standard_unit_cost"),
     "Maintenance Material": ("material_name", "default_uom", "estimated_unit_cost"),
 }
 
@@ -50,7 +50,7 @@ def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no
         "item_name": item_name,
         "uom": uom,
         "signed_qty": flt(qty),
-        "unit_cost_sar": unit_cost,
+        "unit_cost": unit_cost,
         "building": building,
         "cost_center": cost_center,
         "employee": employee,

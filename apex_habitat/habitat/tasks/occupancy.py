@@ -206,7 +206,7 @@ def daily_occupancy_snapshot() -> None:
         b["name"]: b
         for b in frappe.get_all(
             "Building",
-            fields=["name", "total_capacity", "annual_cost_per_capacity_sar"],
+            fields=["name", "total_capacity", "annual_cost_per_capacity"],
         )
     }
 
@@ -233,7 +233,7 @@ def daily_occupancy_snapshot() -> None:
                 occ_pct = round(active / total_capacity * 100, 2) if total_capacity else 0.0
                 available_capacity = max(total_capacity - active, 0)
 
-                annual_cost_per_capacity = meta.get("annual_cost_per_capacity_sar") or 0.0
+                annual_cost_per_capacity = meta.get("annual_cost_per_capacity") or 0.0
                 cost_bleeding = round(available_capacity * (annual_cost_per_capacity / days_in_year), 2)
 
                 frappe.get_doc({

@@ -18,7 +18,7 @@
   "status",
   "raised_on",
   "snooze_until",
-  "project_supervisor",
+  "responsible_supervisor",
   "operations_alert_system_col",
   "resolved_on",
   "resolution_note"
@@ -73,7 +73,7 @@
   },
   {
    "description": "The vehicle's project supervisor, resolved when the alert is raised; drives the Critical-alert notification.",
-   "fieldname": "project_supervisor",
+   "fieldname": "responsible_supervisor",
    "fieldtype": "Link",
    "label": "Project Supervisor",
    "options": "User",

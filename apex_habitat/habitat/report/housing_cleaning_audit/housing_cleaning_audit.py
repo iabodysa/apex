@@ -62,14 +62,14 @@ def execute(filters=None):
     all_buildings = frappe.get_all(
         "Building",
         filters=bld_filters,
-        fields=["name", "responsible_facility_supervisor"],
+        fields=["name", "responsible_supervisor"],
     )
     if not all_buildings:
         return columns, []
 
     # Build supervisor display name map (one query, not N+1).
-    supervisor_ids = list({b.responsible_facility_supervisor for b in all_buildings
-                           if b.responsible_facility_supervisor})
+    supervisor_ids = list({b.responsible_supervisor for b in all_buildings
+                           if b.responsible_supervisor})
     supervisor_names: dict[str, str] = {}
     if supervisor_ids:
         for u in frappe.get_all(
@@ -80,7 +80,7 @@ def execute(filters=None):
             supervisor_names[u.name] = u.full_name or u.name
 
     building_supervisor: dict[str, str] = {
-        b.name: supervisor_names.get(b.responsible_facility_supervisor, b.responsible_facility_supervisor or "")
+        b.name: supervisor_names.get(b.responsible_supervisor, b.responsible_supervisor or "")
         for b in all_buildings
     }
     building_names_set = set(building_supervisor)

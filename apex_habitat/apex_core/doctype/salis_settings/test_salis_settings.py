@@ -36,12 +36,12 @@ class TestSalisSettingsHelpers(FrappeTestCase):
         self.assertEqual(get_salis_int("admin_trip_ops_threshold", 5), 9)
 
     def test_float_returns_default_when_unset_not_zero(self):
-        frappe.db.set_single_value("Salis Settings", "writeoff_ops_threshold_sar", 0)
-        self.assertEqual(get_salis_float("writeoff_ops_threshold_sar", 2000.0), 2000.0)
+        frappe.db.set_single_value("Salis Settings", "writeoff_ops_threshold", 0)
+        self.assertEqual(get_salis_float("writeoff_ops_threshold", 2000.0), 2000.0)
 
     def test_float_returns_stored_nonzero_value(self):
-        frappe.db.set_single_value("Salis Settings", "writeoff_ops_threshold_sar", 3500)
-        self.assertEqual(get_salis_float("writeoff_ops_threshold_sar", 2000.0), 3500.0)
+        frappe.db.set_single_value("Salis Settings", "writeoff_ops_threshold", 3500)
+        self.assertEqual(get_salis_float("writeoff_ops_threshold", 2000.0), 3500.0)
 
     def test_license_expiring_warn_days_default(self):
         frappe.db.set_single_value("Salis Settings", "license_expiring_warn_days", 0)

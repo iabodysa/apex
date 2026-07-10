@@ -71,7 +71,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "afmco_owner",
+   "fieldname": "internal_owner",
    "fieldtype": "Link",
    "label": "AFMCO Owner",
    "options": "User",
@@ -168,7 +168,7 @@
   "remediation_deadline",
   "client_audit_remediation_plan_sec_ownership",
   "overall_status",
-  "afmco_owner",
+  "internal_owner",
   "client_audit_remediation_plan_ownership_col",
   "client_poc_name",
   "client_audit_remediation_plan_sec_table_buildings_in_scope",

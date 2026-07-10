@@ -1,7 +1,7 @@
 {
  "attach_print": 0,
  "channel": "Email",
- "condition": "doc.severity == 'Critical' and doc.project_supervisor",
+ "condition": "doc.severity == 'Critical' and doc.responsible_supervisor",
  "days_in_advance": 0,
  "docstatus": 0,
  "doctype": "Notification",
@@ -16,11 +16,11 @@
  "name": "Apex Core - Operations Alert Critical",
  "recipients": [
   {
-   "receiver_by_document_field": "project_supervisor"
+   "receiver_by_document_field": "responsible_supervisor"
   }
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "Critical Operations Alert: {{ doc.alert_type }}",
- "modified": "2026-06-25 13:11:26.883660"
+ "modified": "2026-07-10 07:15:17.110258"
 }

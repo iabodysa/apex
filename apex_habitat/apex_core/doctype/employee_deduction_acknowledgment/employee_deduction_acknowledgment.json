@@ -16,7 +16,7 @@
   "employee_deduction_ack_sec_deduction",
   "deduction_type",
   "salary_component",
-  "amount_sar",
+  "amount",
   "employee_deduction_ack_deduction_col",
   "source_doctype",
   "source_document",
@@ -114,7 +114,7 @@
   },
   {
    "description": "Amount the worker is acknowledging. Must respect the per-type cap and the 50% combined-wage ceiling on the Salary Deduction Policy.",
-   "fieldname": "amount_sar",
+   "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount (SAR)",

@@ -13,7 +13,7 @@
   "source_doctype",
   "trigger_event",
   "section_break_caps",
-  "cap_amount_per_event_sar",
+  "cap_amount_per_event",
   "max_percent_of_salary",
   "column_break_caps",
   "schedule",
@@ -80,7 +80,7 @@
   },
   {
    "description": "Hard ceiling on the SAR amount deducted for a single triggering event of this type, regardless of the assessed value. 0 = no per-event cap (not recommended).",
-   "fieldname": "cap_amount_per_event_sar",
+   "fieldname": "cap_amount_per_event",
    "fieldtype": "Currency",
    "label": "Cap Amount per Event (SAR)"
   },

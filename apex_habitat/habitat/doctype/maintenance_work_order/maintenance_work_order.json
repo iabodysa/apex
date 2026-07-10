@@ -23,7 +23,7 @@
   "maintenance_work_order_sec_table_procurement_items",
   "subcontractor_service_order",
   "maintenance_work_order_procurement_col",
-  "total_procurement_cost_sar",
+  "total_procurement_cost",
   "maintenance_work_order_sec_procurement_items_table",
   "procurement_items",
   "maintenance_work_order_sec_large_text",
@@ -120,7 +120,7 @@
    "label": "Procurement"
   },
   {
-   "fetch_from": "maintenance_request.subcontractor_dispatched",
+   "fetch_from": "maintenance_request.subcontractor_service_order",
    "fetch_if_empty": 1,
    "fieldname": "subcontractor_service_order",
    "fieldtype": "Link",
@@ -132,7 +132,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "total_procurement_cost_sar",
+   "fieldname": "total_procurement_cost",
    "fieldtype": "Currency",
    "label": "Total Procurement Cost (SAR)",
    "read_only": 1

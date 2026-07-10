@@ -78,7 +78,7 @@ frappe.ui.form.on("Lease", {
 							frappe.db.get_value("Building", frm.doc.building, "default_cost_center").then(res => {
 								const doc = frappe.model.get_new_doc("Expense Request Afmco");
 								doc.tax_invoice_number = frm.doc.name;
-								doc.beneficiary_name = frm.doc.supplier;
+								doc.beneficiary_name = frm.doc.landlord;
 								doc.amount = selected.amount || frm.doc.rent_amount;
 								doc.project = "";
 								doc.cost_center = (res && res.message && res.message.default_cost_center) || "";
@@ -101,14 +101,14 @@ frappe.ui.form.on("Lease", {
 						ref.reference_doctype = "Lease";
 						ref.reference_name = frm.doc.name;
 						ref.amount = selected.amount || frm.doc.rent_amount;
-						ref.supplier = frm.doc.supplier;
+						ref.supplier = frm.doc.landlord;
 						frappe.set_route("Form", "Payment Order", doc.name);
 					} else {
 						// [#mrbtun]
 						const doc = frappe.model.get_new_doc("Payment Entry");
 						doc.payment_type = "Pay";
 						doc.party_type = "Supplier";
-						doc.party = frm.doc.supplier;
+						doc.party = frm.doc.landlord;
 						doc.paid_amount = selected.amount || frm.doc.rent_amount;
 						doc.received_amount = selected.amount || frm.doc.rent_amount;
 						doc.reference_no = frm.doc.name;

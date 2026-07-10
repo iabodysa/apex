@@ -81,7 +81,7 @@ def get_pending_on_manifest(filters=None):
 def get_custody_value_in_employee_hands(filters=None):
     """Value-at-risk: SAR currently held in employee custody. [T-277]
 
-    Sums signed (qty * unit_cost_sar) over non-cancelled Custody Article rows of
+    Sums signed (qty * unit_cost) over non-cancelled Custody Article rows of
     the Accommodation Stock Ledger where an employee is set — issue rows add,
     return rows reverse, so the net is exactly what workers still hold. One bounded
     grouped query."""
@@ -90,7 +90,7 @@ def get_custody_value_in_employee_hands(filters=None):
     extra = f"AND {building_cond}" if building_cond else ""
     total = frappe.db.sql(
         f"""
-        SELECT COALESCE(SUM(signed_qty * COALESCE(unit_cost_sar, 0)), 0)
+        SELECT COALESCE(SUM(signed_qty * COALESCE(unit_cost, 0)), 0)
         FROM `tabAccommodation Stock Ledger`
         WHERE is_cancelled = 0
           AND item_type = 'Custody Article'
@@ -104,14 +104,14 @@ def get_custody_value_in_employee_hands(filters=None):
 def get_top_custody_holders_by_value(limit: int = 10) -> list[dict]:
     """Top holders by outstanding custody value, same definition as the
     value-in-hands card and the Outstanding-by-Worker report — net signed
-    (qty * unit_cost_sar) over non-cancelled Custody Article rows with an employee
+    (qty * unit_cost) over non-cancelled Custody Article rows with an employee
     set, grouped by employee. Holders whose net value is not positive are dropped.
     One bounded grouped query; returns ``[{employee, value}]`` value-desc."""
     building_cond = _building_condition()
     extra = f"AND {building_cond}" if building_cond else ""
     rows = frappe.db.sql(
         f"""
-        SELECT employee, COALESCE(SUM(signed_qty * COALESCE(unit_cost_sar, 0)), 0) AS value
+        SELECT employee, COALESCE(SUM(signed_qty * COALESCE(unit_cost, 0)), 0) AS value
         FROM `tabAccommodation Stock Ledger`
         WHERE is_cancelled = 0
           AND item_type = 'Custody Article'

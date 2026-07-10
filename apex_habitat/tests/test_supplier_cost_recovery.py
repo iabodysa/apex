@@ -40,7 +40,7 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
         self.building = frappe.get_doc({
             "doctype": "Building", "building_name": "B " + _h(), "site": self.site.name,
             "total_capacity": 10, "default_cost_center": self.cost_center,
-            "annual_rent_sar": 36500,
+            "annual_rent": 36500,
         }).insert(ignore_permissions=True)
         self.room = frappe.get_doc({
             "doctype": "Room", "naming_series": "ROOM-.####",

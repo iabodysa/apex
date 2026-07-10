@@ -32,7 +32,7 @@ class TestCustodyDamageItem(FrappeTestCase):
         row = frappe.new_doc("Custody Damage Item")
         row.article = "test-art"
         row.damage_description = "broken"
-        row.estimated_replacement_cost_sar = 100
+        row.estimated_replacement_cost = 100
         self.assertEqual(row.doctype, "Custody Damage Item")
 
     def test_required_fields_defined(self):
@@ -40,5 +40,5 @@ class TestCustodyDamageItem(FrappeTestCase):
         field_names = [f.fieldname for f in meta.fields]
         self.assertIn("article", field_names)
         self.assertIn("damage_description", field_names)
-        self.assertIn("estimated_replacement_cost_sar", field_names)
+        self.assertIn("estimated_replacement_cost", field_names)
         self.assertTrue(len(field_names) > 0)

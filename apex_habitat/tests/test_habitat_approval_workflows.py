@@ -186,7 +186,7 @@ class TestUtilityBillEntryWorkflow(_WorkflowSoDMixin, FrappeTestCase):
             "status": "Draft",
             "billing_period_from": "2026-07-01",
             "billing_period_to": "2026-07-31",
-            "bill_amount_sar": 100,
+            "bill_amount": 100,
         })
 
 
@@ -221,7 +221,7 @@ class TestCustodyDamageAssessmentWorkflow(_WorkflowSoDMixin, FrappeTestCase):
             "status": "Draft",
             "items": [{"doctype": "Custody Damage Item", "article": "QA-ART",
                         "damage_description": "cracked",
-                        "estimated_replacement_cost_sar": 150}],
+                        "estimated_replacement_cost": 150}],
         })
 
 
@@ -260,7 +260,7 @@ class TestEmployeeDeductionAcknowledgmentWorkflow(_WorkflowSoDMixin, FrappeTestC
             "party_type": "Employee",
             "party": "QA-EMP",
             "deduction_type": "Damage",
-            "amount_sar": 150,
+            "amount": 150,
             "consent_given": 1,
             "approval_status": "Pending",
         })

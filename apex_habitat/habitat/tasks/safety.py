@@ -177,7 +177,7 @@ def daily_safety_task_compliance_scan() -> None:
         buildings = frappe.get_all(
             "Building",
             filters={"status": "Active"},
-            fields=["name", "building_name", "responsible_facility_supervisor"],
+            fields=["name", "building_name", "responsible_supervisor"],
             limit_start=start,
             limit_page_length=batch_size,
         )
@@ -218,7 +218,7 @@ def daily_safety_task_compliance_scan() -> None:
                 # a direct system alert (the role-wide ping above may not be them).
                 _notify_operational("Building", b.name, msg)
                 _notify_user_system(
-                    b.responsible_facility_supervisor,
+                    b.responsible_supervisor,
                     subject=f"No recent safety round: {label}",
                     message=msg,
                 )
@@ -346,7 +346,7 @@ def audit_remediation_deadline_watch() -> None:
                 "overall_status": ["not in", ["Closed by Client", "Overdue"]],
                 "remediation_deadline": ["<", str(today_date)],
             },
-            fields=["name", "remediation_deadline", "afmco_owner", "client_project"],
+            fields=["name", "remediation_deadline", "internal_owner", "client_project"],
             limit_start=start,
             limit_page_length=batch_size,
         )
@@ -366,9 +366,9 @@ def audit_remediation_deadline_watch() -> None:
                 logger.warning(msg)
                 _notify_operational("Audit Remediation Plan", plan.name, msg)
                 # [#wave3-audit] notify the plan owner directly + the Operations Director role.
-                if plan.afmco_owner:
+                if plan.internal_owner:
                     _notify_user_system(
-                        plan.afmco_owner,
+                        plan.internal_owner,
                         f"Audit remediation overdue: {plan.name}",
                         msg,
                     )

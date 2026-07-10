@@ -111,7 +111,7 @@ class TestVehicleDamageWriteOff(FrappeTestCase):
     def test_needs_operations_derived_from_estimated_cost(self):
         # The Write-Off Operations Threshold is REAL: needs_operations is derived
         # server-side from estimated_cost vs the threshold (was a dead setting).
-        frappe.db.set_single_value("Salis Settings", "writeoff_ops_threshold_sar", 2000)
+        frappe.db.set_single_value("Salis Settings", "writeoff_ops_threshold", 2000)
         below = self._write_off(estimated_cost=1999)
         self.assertEqual(below.needs_operations, 0)
         at = self._write_off(estimated_cost=2000)
@@ -165,7 +165,7 @@ class TestVehicleDamageWriteOffDoA(FrappeTestCase):
 
     def setUp(self):
         frappe.set_user("Administrator")
-        frappe.db.set_single_value("Salis Settings", "writeoff_ops_threshold_sar", 2000)
+        frappe.db.set_single_value("Salis Settings", "writeoff_ops_threshold", 2000)
         # _case() applies a workflow (commits), so the per-method vehicle escapes
         # the savepoint rollback and leaks; reuse it (unique plate_normalized)
         # instead of colliding on a re-run or a shared, non-reset test bench.

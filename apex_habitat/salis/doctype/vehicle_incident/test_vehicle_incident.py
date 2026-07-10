@@ -63,7 +63,7 @@ class TestVehicleIncident(FrappeTestCase):
         )
         # [#6y3htq]
         inc.reload()
-        self.assertEqual(inc.previous_vehicle_status, "Active")
+        self.assertEqual(inc.previous_status, "Active")
         self.assertEqual(inc.previous_driver, self.driver)
 
     def test_theft_increments_open_incident_and_theft_cards(self):

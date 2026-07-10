@@ -3,11 +3,11 @@
 
 Proves the financial side effects of habitat/doctype/utility_bill_entry:
 - on_submit posts exactly ONE Accommodation Ledger row carrying the building's
-  share (total_site_cost == bill_amount_sar, no reversal_of);
+  share (total_site_cost == bill_amount, no reversal_of);
 - before_cancel posts a SECOND, offsetting row (total_site_cost negative,
   reversal_of == the original row) -- the reversal that keeps the building cost
   allocation balanced;
-- _compute_sharing turns a shared-meter invoice (total_bill_amount_sar +
+- _compute_sharing turns a shared-meter invoice (total_bill_amount +
   cost_bearing_pct) into the posted building share.
 
 The existing utility_bill_entry / qa_probe tests only cover insert / mandatory /
@@ -76,7 +76,7 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
             "utility_account": self.account,
             "billing_period_from": "2026-04-01",
             "billing_period_to": "2026-04-30",
-            "bill_amount_sar": 1200,
+            "bill_amount": 1200,
         }
         data.update(overrides)
         return frappe.get_doc(data)
@@ -130,7 +130,7 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
         )
 
     def test_submit_posts_one_ledger_row_for_the_period(self):
-        bill = self._bill(bill_amount_sar=1200)
+        bill = self._bill(bill_amount=1200)
         bill.insert(ignore_permissions=True)
         bill.submit()
 
@@ -142,13 +142,13 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
         row = rows[0]
         self.assertEqual(
             flt(row.total_site_cost), 1200.0,
-            "the posted row must carry the building's bill_amount_sar",
+            "the posted row must carry the building's bill_amount",
         )
         self.assertFalse(row.reversal_of, "the period post is not a reversal")
         self.assertEqual(row.ledger_type, "Electricity", "ledger_type mirrors the utility type")
 
     def test_cancel_posts_signed_reversal_referencing_the_original(self):
-        bill = self._bill(bill_amount_sar=1200)
+        bill = self._bill(bill_amount=1200)
         bill.insert(ignore_permissions=True)
         bill.submit()
 
@@ -170,7 +170,7 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
         )
         self.assertEqual(
             flt(rev.total_site_cost), -1200.0,
-            "the reversal must carry the negated bill_amount_sar",
+            "the reversal must carry the negated bill_amount",
         )
         # Money trail nets to zero across the two rows.
         all_rows = self._ledger_rows(bill.name)
@@ -182,12 +182,12 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
 
     def test_shared_meter_posts_only_the_bearing_share(self):
         # total 1000 borne at 40% => building share 400 (_compute_sharing).
-        bill = self._bill(total_bill_amount_sar=1000, cost_bearing_pct=40)
-        # bill_amount_sar is recomputed from the total/pct on validate; the seeded
+        bill = self._bill(total_bill_amount=1000, cost_bearing_pct=40)
+        # bill_amount is recomputed from the total/pct on validate; the seeded
         # default must NOT survive.
         bill.insert(ignore_permissions=True)
         self.assertEqual(
-            flt(bill.bill_amount_sar), 400.0,
+            flt(bill.bill_amount), 400.0,
             "shared-meter share must be total * pct/100",
         )
 

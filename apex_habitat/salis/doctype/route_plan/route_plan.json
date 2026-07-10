@@ -24,7 +24,7 @@
   "route_plan_sec_system",
   "naming_series",
   "requested_by_operations",
-  "fulfilled_by_movement",
+  "movement_planner",
   "amended_from"
  ],
  "fields": [
@@ -151,7 +151,7 @@
   },
   {
    "description": "Movement planner who fulfilled the request, set on submit (Movement fulfils the request).",
-   "fieldname": "fulfilled_by_movement",
+   "fieldname": "movement_planner",
    "fieldtype": "Link",
    "label": "Fulfilled By (Movement)",
    "options": "User",

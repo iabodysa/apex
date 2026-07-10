@@ -88,8 +88,8 @@ class TestInsertOperationsAlert(FrappeTestCase):
 
 
 class TestInsertOperationsAlertResolvesSupervisor(FrappeTestCase):
-    """The shared helper must denormalise project_supervisor onto the alert, or the
-    enabled Critical-alert Notification (receiver_by_document_field: project_supervisor)
+    """The shared helper must denormalise responsible_supervisor onto the alert, or the
+    enabled Critical-alert Notification (receiver_by_document_field: responsible_supervisor)
     fires with an empty recipient. Proves both directions: a vehicle whose project has
     a supervisor resolves that real User; no vehicle stays None."""
 
@@ -148,14 +148,14 @@ class TestInsertOperationsAlertResolvesSupervisor(FrappeTestCase):
         self.assertTrue(name)
         self.addCleanup(frappe.delete_doc, "Operations Alert", name, force=True, ignore_permissions=True)
         self.assertEqual(
-            frappe.db.get_value("Operations Alert", name, "project_supervisor"),
+            frappe.db.get_value("Operations Alert", name, "responsible_supervisor"),
             self.sup,
             "critical alert from a project-vehicle must carry that project's supervisor",
         )
 
     def test_no_vehicle_leaves_supervisor_empty(self):
         # Office-scoped alerts pass no vehicle; the notification condition requires
-        # project_supervisor and correctly skips them — never an empty-recipient send.
+        # responsible_supervisor and correctly skips them — never an empty-recipient send.
         name = insert_operations_alert(
             alert_type="Unsettled Rental",
             severity="Warning",
@@ -163,4 +163,4 @@ class TestInsertOperationsAlertResolvesSupervisor(FrappeTestCase):
         )
         self.assertTrue(name)
         self.addCleanup(frappe.delete_doc, "Operations Alert", name, force=True, ignore_permissions=True)
-        self.assertFalse(frappe.db.get_value("Operations Alert", name, "project_supervisor"))
+        self.assertFalse(frappe.db.get_value("Operations Alert", name, "responsible_supervisor"))

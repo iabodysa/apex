@@ -115,7 +115,7 @@ class TestBoardingScan(_WorkerTripMixin, FrappeTestCase):
         # An audit row was written, flagged as having created the boarding event.
         scan = frappe.get_doc("Boarding Scan Log", res["scan_log"])
         self.assertEqual(scan.result, "Valid")
-        self.assertEqual(scan.worker, self.w1)
+        self.assertEqual(scan.employee, self.w1)
         self.assertEqual(scan.dispatch_trip, dt.name)
         self.assertEqual(scan.trip_start_log, log.name)
         self.assertEqual(scan.boarding_event_created, 1)
@@ -138,7 +138,7 @@ class TestBoardingScan(_WorkerTripMixin, FrappeTestCase):
         # Both attempts are audited (1 Valid + 1 Duplicate).
         rows = frappe.get_all(
             "Boarding Scan Log",
-            filters={"dispatch_trip": dt.name, "worker": self.w1},
+            filters={"dispatch_trip": dt.name, "employee": self.w1},
             fields=["result"],
         )
         results = sorted(r["result"] for r in rows)

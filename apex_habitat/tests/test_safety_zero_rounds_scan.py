@@ -27,7 +27,7 @@ class TestSafetyZeroRoundsScan(ApexHabitatTestCase):
             "doctype": "Building",
             "building_name": f"Bldg {abbr}", "abbreviation": abbr,
             "site": self.site.name, "total_capacity": 10, "status": status,
-            "responsible_facility_supervisor": supervisor,
+            "responsible_supervisor": supervisor,
         }).insert(ignore_permissions=True)
 
     def _supervisor(self):

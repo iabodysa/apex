@@ -34,10 +34,10 @@ class TestUtilityBillEntry(FrappeTestCase):
             "utility_account": "UTIL-ACC-QA",
             "billing_period_from": "2026-06-01",
             "billing_period_to": "2026-06-30",
-            "bill_amount_sar": 1200,
+            "bill_amount": 1200,
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
-        self.assertEqual(doc.bill_amount_sar, 1200)
+        self.assertEqual(doc.bill_amount, 1200)
         frappe.delete_doc("Utility Bill Entry", doc.name, force=True, ignore_permissions=True)
 
     def test_missing_utility_account_raises(self):
@@ -46,7 +46,7 @@ class TestUtilityBillEntry(FrappeTestCase):
             "naming_series": "UTIL-BILL-.YYYY.-.#####",
             "billing_period_from": "2026-06-01",
             "billing_period_to": "2026-06-30",
-            "bill_amount_sar": 900,
+            "bill_amount": 900,
         })
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
@@ -59,7 +59,7 @@ class TestUtilityBillEntry(FrappeTestCase):
             "utility_account": "UTIL-ACC-QA",
             "billing_period_from": "2026-06-30",
             "billing_period_to": "2026-06-01",
-            "bill_amount_sar": 500,
+            "bill_amount": 500,
         })
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
@@ -69,7 +69,7 @@ class TestUtilityBillEntry(FrappeTestCase):
         base = {
             "doctype": "Utility Bill Entry", "naming_series": "UTIL-BILL-.YYYY.-.#####",
             "billing_period_from": "2026-06-01", "billing_period_to": "2026-06-30",
-            "bill_amount_sar": 100,
+            "bill_amount": 100,
         }
         base.update(kw)
         return frappe.get_doc(base)
@@ -124,7 +124,7 @@ class TestUtilityBillEntry(FrappeTestCase):
         m = frappe.generate_hash(length=6)
         doc = self._bill(
             company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
-            total_bill_amount_sar=-50, bill_amount_sar=0,
+            total_bill_amount=-50, bill_amount=0,
         )
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
@@ -135,7 +135,7 @@ class TestUtilityBillEntry(FrappeTestCase):
         src = "QA-UBE-NEG-" + m
         doc = self._bill(
             company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
-            bill_amount_sar=-100,
+            bill_amount=-100,
         )
         doc.name = src
         with self.assertRaises(frappe.ValidationError):
@@ -196,7 +196,7 @@ class TestUtilityBillEntry(FrappeTestCase):
         m = frappe.generate_hash(length=6)
         bld = self._ledger_building(m)
         src = "QA-UBE-IDEM-" + m
-        doc = self._bill(building=bld.name, utility_type="Electricity", bill_amount_sar=300)
+        doc = self._bill(building=bld.name, utility_type="Electricity", bill_amount=300)
         doc.name = src
         _post_ledger_row(doc)
         _post_ledger_row(doc)  # re-run must be a no-op
@@ -210,7 +210,7 @@ class TestUtilityBillEntry(FrappeTestCase):
         m = frappe.generate_hash(length=6)
         bld = self._ledger_building(m)
         src = "QA-UBE-REV-" + m
-        doc = self._bill(building=bld.name, utility_type="Electricity", bill_amount_sar=300)
+        doc = self._bill(building=bld.name, utility_type="Electricity", bill_amount=300)
         doc.name = src
         doc.cancellation_reason = "QA reversal test"
         _post_ledger_row(doc)

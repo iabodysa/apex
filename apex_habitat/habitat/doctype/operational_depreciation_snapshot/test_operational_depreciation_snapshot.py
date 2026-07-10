@@ -32,7 +32,7 @@ class TestNonFinancialDepreciationSnapshot(FrappeTestCase):
             "snapshot_date": "2026-06-30",
             "building": "QA-BLDG",
             "items": [{"doctype": "Depreciation Snapshot Item",
-                        "article": "QA-ART", "original_cost_sar": 200}],
+                        "article": "QA-ART", "original_cost": 200}],
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
         self.assertIsNotNone(doc.name)
@@ -77,13 +77,13 @@ class TestNonFinancialDepreciationSnapshot(FrappeTestCase):
             "building": "QA-BLDG",
             "items": [
                 {"doctype": "Depreciation Snapshot Item",
-                 "article": "QA-ART-1", "original_cost_sar": 1000,
+                 "article": "QA-ART-1", "original_cost": 1000,
                  "age_years": 2, "policy": "POLICY-QA-001"},
                 {"doctype": "Depreciation Snapshot Item",
-                 "article": "QA-ART-2", "original_cost_sar": 2000,
+                 "article": "QA-ART-2", "original_cost": 2000,
                  "age_years": 3, "policy": "POLICY-QA-001"},
                 {"doctype": "Depreciation Snapshot Item",
-                 "article": "QA-ART-3", "original_cost_sar": 3000,
+                 "article": "QA-ART-3", "original_cost": 3000,
                  "age_years": 4, "policy": "POLICY-QA-001"},
             ],
         })

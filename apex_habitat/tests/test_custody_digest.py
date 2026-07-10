@@ -34,7 +34,7 @@ class TestWeeklyCustodyDigest(FrappeTestCase):
                 {
                     "doctype": "Building",
                     "building_name": f"CD-BLD-{frappe.generate_hash(length=6)}",
-                    "responsible_facility_supervisor": supervisor,
+                    "responsible_supervisor": supervisor,
                 }
             )
             .insert(ignore_permissions=True)

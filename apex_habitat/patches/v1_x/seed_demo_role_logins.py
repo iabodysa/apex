@@ -7,7 +7,7 @@ data for each surface to render. This seeds that end-to-end for two personas:
 
   supervisor.demo@example.com  (Resident Supervisor + Fleet Supervisor)
     - scoped to ONE demo building via the building's
-      ``responsible_facility_supervisor`` (the canonical source of the
+      ``responsible_supervisor`` (the canonical source of the
       Accommodation Building User Permission) and to ONE demo Project, so the
       owner sees the *scoped* supervisor experience, not the global one.
     - lands the supervisor surfaces non-empty: the safety portal (a Safety
@@ -153,9 +153,9 @@ def _scope_supervisor_to_building(user, building):
     controller's on_update mints the Accommodation Building User Permission (the
     canonical source of the building scope). Belt-and-braces ensure the row even
     if the field was already set on a prior run."""
-    if frappe.db.get_value("Building", building, "responsible_facility_supervisor") != user:
+    if frappe.db.get_value("Building", building, "responsible_supervisor") != user:
         b = frappe.get_doc("Building", building)
-        b.responsible_facility_supervisor = user
+        b.responsible_supervisor = user
         b.save(ignore_permissions=True)  # audit-ok — triggers permission sync
     _user_permission(user, "Building", building)
 

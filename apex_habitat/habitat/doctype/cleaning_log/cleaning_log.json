@@ -16,7 +16,7 @@
   "cleaning_log_sec_performed_by",
   "cleaner_type",
   "cleaner_employee",
-  "cleaned_by",
+  "cleaner_name",
   "cleaning_log_performed_by_col",
   "subcontractor_service_order",
   "cleaning_log_sec_review",
@@ -108,7 +108,7 @@
   {
    "depends_on": "eval:doc.cleaner_type!='Internal Employee'",
    "description": "For Subcontractor or External Worker when Employee link is not available.",
-   "fieldname": "cleaned_by",
+   "fieldname": "cleaner_name",
    "fieldtype": "Data",
    "label": "Cleaner Name"
   },

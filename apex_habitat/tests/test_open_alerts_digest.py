@@ -2,7 +2,7 @@
 """Daily open-alerts digest (``salis.tasks.daily_open_alerts_digest``).
 
 Proves the job groups Open/Acknowledged Operations Alerts by their owning
-``project_supervisor`` and emails each supervisor only their own bucket, skips
+``responsible_supervisor`` and emails each supervisor only their own bucket, skips
 alerts with no owning supervisor, and is wired into the daily scheduler. Data is
 provisioned in setUp so the suite passes on a clean CI site; ``frappe.sendmail``
 is captured so the test asserts on recipients/counts without an outbox.
@@ -39,7 +39,7 @@ class TestOpenAlertsDigest(FrappeTestCase):
                 "severity": severity,
                 "status": status,
                 "message": f"{self.MARKER} " + frappe.generate_hash(length=6),
-                "project_supervisor": supervisor,
+                "responsible_supervisor": supervisor,
             }
         ).insert(ignore_permissions=True).name
 

@@ -179,7 +179,7 @@ class TestReports(ApexHabitatTestCase):
         site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
         building = frappe.get_doc({
             "doctype": "Building", "building_name": "B " + _h(), "site": site.name,
-            "total_capacity": 10, "default_cost_center": cost_center, "annual_rent_sar": 36500,
+            "total_capacity": 10, "default_cost_center": cost_center, "annual_rent": 36500,
         }).insert(ignore_permissions=True).name
 
         project_a = frappe.get_doc({

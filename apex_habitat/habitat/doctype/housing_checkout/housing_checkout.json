@@ -28,7 +28,7 @@
   "accommodation_checkout_financials_col",
   "cost_center",
   "accommodation_checkout_financials_col2",
-  "linked_additional_salary",
+  "additional_salary_deduction",
   "accommodation_checkout_sec_damage_notes",
   "damage_notes",
   "accommodation_checkout_tab_system",
@@ -182,7 +182,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "linked_additional_salary",
+   "fieldname": "additional_salary_deduction",
    "fieldtype": "Link",
    "label": "Additional Salary Deduction",
    "options": "Additional Salary",

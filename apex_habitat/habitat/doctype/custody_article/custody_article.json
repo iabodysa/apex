@@ -73,7 +73,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "standard_unit_cost_sar",
+   "fieldname": "standard_unit_cost",
    "fieldtype": "Currency",
    "label": "Standard Unit Cost (SAR)",
    "idx": 10
@@ -201,7 +201,7 @@
   "depreciation_policy",
   "is_serialized",
   "custody_article_sec_costing",
-  "standard_unit_cost_sar",
+  "standard_unit_cost",
   "consumable_lifespan_months",
   "custody_article_sec_large_text",
   "notes",

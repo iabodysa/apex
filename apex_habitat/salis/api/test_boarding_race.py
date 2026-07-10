@@ -174,7 +174,7 @@ class TestBoardingRace(FrappeTestCase):
         self.assertEqual(
             frappe.db.count(
                 "Boarding Scan Log",
-                {"dispatch_trip": self.trip.name, "worker": self.employee.name, "result": "Valid"},
+                {"dispatch_trip": self.trip.name, "employee": self.employee.name, "result": "Valid"},
             ),
             1,
             "exactly one Valid scan-log row",
@@ -182,7 +182,7 @@ class TestBoardingRace(FrappeTestCase):
         self.assertEqual(
             frappe.db.count(
                 "Boarding Scan Log",
-                {"dispatch_trip": self.trip.name, "worker": self.employee.name, "result": "Duplicate"},
+                {"dispatch_trip": self.trip.name, "employee": self.employee.name, "result": "Duplicate"},
             ),
             3,
             "each replay records a Duplicate audit row, no boarding side effect",

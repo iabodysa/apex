@@ -21,11 +21,11 @@ def daily_open_alerts_digest() -> None:
 
     Complements the per-alert Critical notification (fires once on raise) with a
     standing summary: every Open/Acknowledged alert, grouped by the denormalised
-    ``project_supervisor`` (the owning supervisor of the alert's project). Each
+    ``responsible_supervisor`` (the owning supervisor of the alert's project). Each
     supervisor receives only their own bucket, so the digest respects the same
     project boundary as the desk without re-deriving scope here.
 
-    Alerts with no ``project_supervisor`` (e.g. driver-only alerts that resolve no
+    Alerts with no ``responsible_supervisor`` (e.g. driver-only alerts that resolve no
     project) have no owning supervisor and are skipped — oversight roles already
     see every alert. Per-supervisor delivery is isolated (rollback before log) so
     one bad recipient never aborts the rest. Idempotent enough for daily cadence:
@@ -52,10 +52,10 @@ def daily_open_alerts_digest() -> None:
             ALERT_DOCTYPE,
             filters={
                 "status": ["in", ["Open", "Acknowledged"]],
-                "project_supervisor": ["is", "set"],
+                "responsible_supervisor": ["is", "set"],
             },
             fields=["name", "alert_type", "severity", "vehicle", "driver",
-                    "message", "project_supervisor"],
+                    "message", "responsible_supervisor"],
             order_by="severity asc, raised_on asc",
             limit_start=start,
             limit_page_length=BATCH_SIZE,
@@ -63,7 +63,7 @@ def daily_open_alerts_digest() -> None:
         if not alerts:
             break
         for a in alerts:
-            by_supervisor[a.project_supervisor].append(a)
+            by_supervisor[a.responsible_supervisor].append(a)
         start += BATCH_SIZE
 
     if not by_supervisor:

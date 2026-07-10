@@ -59,7 +59,7 @@ def execute():
         if damage_on:
             rule = _ensure_rule(policy, "Damage")
             _fill_if_empty(rule, "salary_component", old.get("damage_salary_component"))
-            _fill_if_empty(rule, "cap_amount_per_event_sar", old.get("max_damage_deduction_per_checkout_sar"))
+            _fill_if_empty(rule, "cap_amount_per_event", old.get("max_damage_deduction_per_checkout_sar"))
             rule.enabled = 1
 
         if rent_on:

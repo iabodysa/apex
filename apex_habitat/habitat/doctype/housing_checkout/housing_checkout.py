@@ -248,7 +248,7 @@ def on_submit(doc, method=None):
                     damage_doc.append("items", {
                         "article": item.article,
                         "damage_description": _("Reported during checkout ({0})").format(item.return_status),
-                        "estimated_replacement_cost_sar": 0,
+                        "estimated_replacement_cost": 0,
                     })
             try:
                 damage_doc.insert(ignore_permissions=True)  # audit-ok — post-submit side effect, no user session

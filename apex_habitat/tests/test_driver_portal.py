@@ -403,7 +403,7 @@ class TestManualBoarding(_DriverTripBuilder, FrappeTestCase):
 		# A Manual Boarding Scan Log audit row exists for this worker.
 		scan = frappe.get_all(
 			"Boarding Scan Log",
-			filters={"dispatch_trip": dt.name, "worker": self.w1},
+			filters={"dispatch_trip": dt.name, "employee": self.w1},
 			fields=["result", "method", "boarding_event_created"],
 		)
 		self.assertEqual(len(scan), 1)

@@ -130,7 +130,7 @@ class TestMoveDeductionPatch(FrappeTestCase):
         self.assertIsNotNone(damage, "the Damage rule must be created")
         self.assertEqual(damage.enabled, 1)
         self.assertEqual(damage.salary_component, component)
-        self.assertEqual(float(damage.cap_amount_per_event_sar), 350.0)
+        self.assertEqual(float(damage.cap_amount_per_event), 350.0)
 
         # idempotent: the orphan rows are gone, a re-run is a no-op
         remaining = frappe.db.sql(

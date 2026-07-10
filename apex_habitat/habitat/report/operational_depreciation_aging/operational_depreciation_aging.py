@@ -44,13 +44,13 @@ def execute(filters=None):
         },
         {
             "label": frappe._("Original Cost (SAR)"),
-            "fieldname": "original_cost_sar",
+            "fieldname": "original_cost",
             "fieldtype": "Currency",
             "width": 140,
         },
         {
             "label": frappe._("Book Value (SAR)"),
-            "fieldname": "book_value_sar",
+            "fieldname": "book_value",
             "fieldtype": "Currency",
             "width": 130,
         },
@@ -124,7 +124,7 @@ def execute(filters=None):
     child_rows = frappe.get_all(
         "Depreciation Snapshot Item",
         filters={"parent": ["in", snapshot_names], "parenttype": "Operational Depreciation Snapshot"},
-        fields=["parent", "article", "original_cost_sar", "book_value_sar", "age_years"],
+        fields=["parent", "article", "original_cost", "book_value", "age_years"],
         order_by="parent desc",
     )
 
@@ -145,8 +145,8 @@ def execute(filters=None):
     data = []
     for row in child_rows:
         parent = snapshot_map.get(row["parent"], {})
-        original_cost = row.get("original_cost_sar") or 0
-        book_value = row.get("book_value_sar") or 0
+        original_cost = row.get("original_cost") or 0
+        book_value = row.get("book_value") or 0
 
         # [#n01hq2]
         if original_cost:
@@ -171,8 +171,8 @@ def execute(filters=None):
                 "building": parent.get("building"),
                 "article": row.get("article"),
                 "category": article_category_map.get(row.get("article")),
-                "original_cost_sar": original_cost,
-                "book_value_sar": book_value,
+                "original_cost": original_cost,
+                "book_value": book_value,
                 "age_years": row.get("age_years") or 0,
                 "depreciation_pct": round(depreciation_pct, 2),
                 "status": status,

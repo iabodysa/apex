@@ -86,7 +86,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "average_monthly_bill_sar",
+   "fieldname": "average_monthly_bill",
    "fieldtype": "Currency",
    "label": "Average Monthly Bill (SAR)",
    "description": "Used for variance alerts. Updated monthly by the variance scan job."
@@ -194,7 +194,7 @@
   "status",
   "utility_account_sec_billing",
   "billing_email",
-  "average_monthly_bill_sar",
+  "average_monthly_bill",
   "utility_account_billing_col",
   "variance_threshold_pct",
   "utility_account_meter_sec",

@@ -34,7 +34,7 @@
   "compliance_documents",
   "vehicle_sec_fuel",
   "planned_fuel_grade",
-  "planned_daily_fuel_sar",
+  "planned_daily_fuel",
   "vehicle_sec_notes",
   "notes",
   "vehicle_tab_system",
@@ -207,7 +207,7 @@
    "options": "\nPetrol 91\nPetrol 95\nDiesel"
   },
   {
-   "fieldname": "planned_daily_fuel_sar",
+   "fieldname": "planned_daily_fuel",
    "fieldtype": "Currency",
    "label": "Planned Daily Fuel (SAR)"
   },

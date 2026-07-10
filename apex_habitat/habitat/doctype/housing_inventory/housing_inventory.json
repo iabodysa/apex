@@ -30,7 +30,7 @@
   "notes",
   "housing_inventory_tab_system",
   "housing_inventory_sec_asset_link",
-  "linked_facility_asset",
+  "facility_asset",
   "housing_inventory_asset_link_col",
   "last_count_date",
   "housing_inventory_sec_maintenance",
@@ -193,7 +193,7 @@
   },
   {
    "description": "Optional link when this item is a tracked facility fixed asset. Maintenance completed on that asset is reflected back here.",
-   "fieldname": "linked_facility_asset",
+   "fieldname": "facility_asset",
    "fieldtype": "Link",
    "label": "Linked Facility Asset",
    "options": "Facility Asset",

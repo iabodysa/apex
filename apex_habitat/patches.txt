@@ -77,6 +77,13 @@ apex_habitat.patches.v1_x.rename_freelance_party_type_to_freelancer
 apex_habitat.patches.v2_0.rename_doctypes_b7
 
 [post_model_sync]
+# v2.0.0 — B6 (P-160) field-rename wave (ONE-TIME). Runs FIRST in post_model_sync so
+# rename_field copies each old column into its new (JSON-synced) name BEFORE the v1_x
+# backfills below fill still-empty rows on the new fieldname. References POST-B7 DocType
+# names. Idempotent + guarded; no-op on fresh installs / re-run. PRUNE once every deployed
+# site has run it (tracked in tabPatch Log).
+apex_habitat.patches.v2_0.rename_fields_b6
+
 # v1.x — TEMPORARY safeguard (GitHub #97): ensure the Web Form keeps its `route` on
 # an upgrade (the v15-removed make_route_to_web_form helper is never needed).
 # Idempotent, only-if-missing (never clobbers a custom route), no-op on fresh installs.
@@ -153,8 +160,8 @@ apex_habitat.patches.v1_x.genericize_safety_task_catalog_client
 # PRUNE once every deployed site has run it (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.enable_custody_damage_assessment_notification
 
-# v1.55.x — backfill Accommodation Assignment.responsible_facility_supervisor (ONE-TIME,
-# T-569). The field fetches from building.responsible_facility_supervisor on save, so rows
+# v1.55.x — backfill Accommodation Assignment.responsible_supervisor (ONE-TIME,
+# T-569). The field fetches from building.responsible_supervisor on save, so rows
 # saved before the field existed stay empty and the Expected Checkout reminder never reaches
 # the building supervisor for them. Copies the building's supervisor into each empty row.
 # Never clobbers a set value; skips buildings with no supervisor. Idempotent, no-op on

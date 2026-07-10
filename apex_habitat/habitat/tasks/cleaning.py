@@ -106,7 +106,7 @@ def auto_create_cleaning_logs() -> None:
     This is the T-554 spec-named entry point. The heavier variant that also
     pre-populates room_details rows is ``daily_cleaning_log_generator``
     (registered separately). This function targets buildings that have an
-    assigned ``responsible_facility_supervisor`` and creates a minimal log so
+    assigned ``responsible_supervisor`` and creates a minimal log so
     the supervisor finds a ready record each morning.
 
     Guard: ``frappe.db.exists("Cleaning Log", {"building": bld, "cleaning_date":
@@ -122,9 +122,9 @@ def auto_create_cleaning_logs() -> None:
         "Building",
         filters={
             "status": "Active",
-            "responsible_facility_supervisor": ["is", "set"],
+            "responsible_supervisor": ["is", "set"],
         },
-        fields=["name", "responsible_facility_supervisor"],
+        fields=["name", "responsible_supervisor"],
     )
 
     created = 0

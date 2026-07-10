@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""The ONE-TIME backfill that copies a building's responsible_facility_supervisor
+"""The ONE-TIME backfill that copies a building's responsible_supervisor
 onto historical Accommodation Assignment rows whose field is still empty (the
 fetch_from only fires on save, so rows saved before the field existed stay blank)."""
 
@@ -40,7 +40,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
 
         # Building WITH a supervisor and building WITHOUT one.
         cls.bldg_with = factories.make_building(
-            "BAFS-WITH", company="Test AFMCO", responsible_facility_supervisor=cls.sup_a
+            "BAFS-WITH", company="Test AFMCO", responsible_supervisor=cls.sup_a
         ).name
         cls.bldg_without = factories.make_building("BAFS-WITHOUT", company="Test AFMCO").name
 
@@ -73,7 +73,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
             "stay_type": "Permanent",
             "check_in_date": frappe.utils.today(),
             "project": self.project,
-            "responsible_facility_supervisor": supervisor,
+            "responsible_supervisor": supervisor,
         })
         # Skip the occupancy/business validate(); keep framework field/link checks.
         doc.flags.ignore_validate = True
@@ -82,7 +82,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
         # for the rows the patch is meant to repair.
         if supervisor is None:
             frappe.db.set_value(
-                doc.doctype, doc.name, "responsible_facility_supervisor", None,
+                doc.doctype, doc.name, "responsible_supervisor", None,
                 update_modified=False,
             )
         return doc.name
@@ -92,7 +92,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
         execute()
         self.assertEqual(
             frappe.db.get_value("Housing Assignment", name,
-                                "responsible_facility_supervisor"),
+                                "responsible_supervisor"),
             self.sup_a,
         )
 
@@ -103,7 +103,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
         execute()
         self.assertFalse(
             frappe.db.get_value("Housing Assignment", name,
-                                "responsible_facility_supervisor")
+                                "responsible_supervisor")
         )
 
     def test_does_not_clobber_existing_supervisor(self):
@@ -114,7 +114,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
         execute()
         self.assertEqual(
             frappe.db.get_value("Housing Assignment", name,
-                                "responsible_facility_supervisor"),
+                                "responsible_supervisor"),
             self.sup_b,
         )
 
@@ -124,6 +124,6 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
         execute()
         self.assertEqual(
             frappe.db.get_value("Housing Assignment", name,
-                                "responsible_facility_supervisor"),
+                                "responsible_supervisor"),
             self.sup_a,
         )

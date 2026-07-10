@@ -102,7 +102,7 @@ class TestHousingInventoryMaintenanceReflection(FrappeTestCase):
         self.item = frappe.get_doc({
             "doctype": "Housing Inventory", "naming_series": "HINV-.YYYY.-.#####",
             "item_name": "AC Unit " + self._h(), "item_category": "Appliance",
-            "building": self.building, "linked_facility_asset": self.asset,
+            "building": self.building, "facility_asset": self.asset,
             "condition": "Needs Maintenance", "status": "Under Maintenance",
         }).insert(ignore_permissions=True).name
 

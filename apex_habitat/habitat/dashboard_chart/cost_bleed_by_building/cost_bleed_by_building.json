@@ -6,7 +6,7 @@
  "document_type": "Idle Resident Report",
  "group_by_based_on": "building",
  "group_by_type": "Sum",
- "aggregate_function_based_on": "estimated_accommodation_cost_bleed_sar",
+ "aggregate_function_based_on": "estimated_cost_bleed",
  "type": "Bar",
  "number_of_groups": 0,
  "currency": "SAR",
@@ -16,5 +16,5 @@
  "timeseries": 0,
  "use_report_chart": 0,
  "filters_json": "[[\"Idle Resident Report\", \"status\", \"in\", [\"Open\", \"Acknowledged\"]]]",
- "modified": "2026-06-25 00:00:00.000000"
+ "modified": "2026-07-10 07:15:17.110258"
 }

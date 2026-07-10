@@ -23,7 +23,7 @@
   "status",
   "days_idle",
   "idle_resident_tracking_col",
-  "estimated_accommodation_cost_bleed_sar",
+  "estimated_cost_bleed",
   "idle_resident_sec_resolution",
   "resolution_category",
   "resolution_notes",
@@ -159,7 +159,7 @@
   },
   {
    "description": "Estimated accommodation cost from the memo ledger only (not salary). Populated by the aging job.",
-   "fieldname": "estimated_accommodation_cost_bleed_sar",
+   "fieldname": "estimated_cost_bleed",
    "fieldtype": "Currency",
    "label": "Estimated Accommodation Cost Bleed (SAR)",
    "read_only": 1

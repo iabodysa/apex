@@ -21,7 +21,7 @@
   "custody_damage_assessment_sec_table_items",
   "items",
   "custody_damage_assessment_sec_totals",
-  "total_estimated_replacement_cost_sar",
+  "total_estimated_replacement_cost",
   "custody_damage_assessment_sec_large_text",
   "remarks",
   "custody_damage_assessment_sec_system",
@@ -132,7 +132,7 @@
    "permlevel": 1
   },
   {
-   "fieldname": "total_estimated_replacement_cost_sar",
+   "fieldname": "total_estimated_replacement_cost",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total Estimated Replacement Cost (SAR)",

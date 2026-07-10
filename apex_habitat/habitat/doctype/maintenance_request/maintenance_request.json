@@ -46,7 +46,7 @@
   "source_inspection",
   "source_execution",
   "maintenance_request_automation_col",
-  "subcontractor_dispatched",
+  "subcontractor_service_order",
   "maintenance_request_system_col1",
   "is_logged_to_asset_history",
   "maintenance_request_sec_system",
@@ -292,7 +292,7 @@
   },
   {
    "description": "Set when a subcontractor visit is created from this request",
-   "fieldname": "subcontractor_dispatched",
+   "fieldname": "subcontractor_service_order",
    "fieldtype": "Link",
    "label": "Subcontractor Dispatched",
    "options": "Subcontractor Service Order"

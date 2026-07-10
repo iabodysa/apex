@@ -126,7 +126,7 @@ class TestOperationsAlertCriticalNotification(FrappeTestCase):
         data = {
             "doctype": "Operations Alert", "alert_type": "License Expiry",
             "severity": "Critical", "status": "Open", "message": "QA critical",
-            "vehicle": self.vehicle, "project_supervisor": self.sup,
+            "vehicle": self.vehicle, "responsible_supervisor": self.sup,
         }
         data.update(overrides)
         return frappe.get_doc(data)
@@ -148,7 +148,7 @@ class TestOperationsAlertCriticalNotification(FrappeTestCase):
         )
         self.assertIsNotNone(name)
         self.assertEqual(
-            frappe.db.get_value("Operations Alert", name, "project_supervisor"),
+            frappe.db.get_value("Operations Alert", name, "responsible_supervisor"),
             self.sup,
         )
 
@@ -159,7 +159,7 @@ class TestOperationsAlertCriticalNotification(FrappeTestCase):
         self.assertTrue(notif.send_system_notification)
         self.assertEqual(
             [r.receiver_by_document_field for r in notif.recipients],
-            ["project_supervisor"],
+            ["responsible_supervisor"],
         )
 
     def test_condition_gates_on_critical_with_supervisor(self):
@@ -174,7 +174,7 @@ class TestOperationsAlertCriticalNotification(FrappeTestCase):
             frappe.safe_eval(notif.condition, None, get_context(warning))
         )
         # Critical but no resolvable supervisor must NOT fire.
-        orphan = self._critical_doc(project_supervisor=None)
+        orphan = self._critical_doc(responsible_supervisor=None)
         self.assertFalse(
             frappe.safe_eval(notif.condition, None, get_context(orphan))
         )

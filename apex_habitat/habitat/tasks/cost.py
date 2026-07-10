@@ -55,12 +55,12 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
     days_in_year = 366 if calendar.isleap(year) else 365
 
     cost_type_mapping = {
-        "Rent": "annual_rent_sar",
-        "Electricity": "annual_electricity_sar",
-        "Water": "annual_water_sar",
-        "Cleaning Staff Salary": "annual_cleaning_staff_sar",
-        "Supervisor Salary": "annual_supervision_sar",
-        "Other": "annual_other_expenses_sar"
+        "Rent": "annual_rent",
+        "Electricity": "annual_electricity",
+        "Water": "annual_water",
+        "Cleaning Staff Salary": "annual_cleaning_staff",
+        "Supervisor Salary": "annual_supervision",
+        "Other": "annual_other_expenses"
     }
 
     # [#3r52d7]
@@ -197,12 +197,12 @@ def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
         return 0
 
     cost_type_mapping = {
-        "Rent": "annual_rent_sar",
-        "Electricity": "annual_electricity_sar",
-        "Water": "annual_water_sar",
-        "Cleaning Staff Salary": "annual_cleaning_staff_sar",
-        "Supervisor Salary": "annual_supervision_sar",
-        "Other": "annual_other_expenses_sar",
+        "Rent": "annual_rent",
+        "Electricity": "annual_electricity",
+        "Water": "annual_water",
+        "Cleaning Staff Salary": "annual_cleaning_staff",
+        "Supervisor Salary": "annual_supervision",
+        "Other": "annual_other_expenses",
     }
 
     d = getdate(from_date)

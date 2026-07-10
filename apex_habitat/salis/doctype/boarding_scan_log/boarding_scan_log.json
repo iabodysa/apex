@@ -13,7 +13,7 @@
   "transport_request",
   "col_scan",
   "driver",
-  "worker",
+  "employee",
   "accommodation_building",
   "sec_result",
   "result",
@@ -76,7 +76,7 @@
   },
   {
    "description": "The worker the scanned pass identifies (registered Employee).",
-   "fieldname": "worker",
+   "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Worker",

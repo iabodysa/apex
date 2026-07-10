@@ -96,7 +96,7 @@ def validate(doc, method=None):
             )
     # Procurement lines carry estimated_cost (Maintenance Procurement Item has no
     # "amount" field); summing a non-existent key left the total stuck at 0.
-    doc.total_procurement_cost_sar = sum(
+    doc.total_procurement_cost = sum(
         flt(row.get("estimated_cost") or 0) for row in (doc.procurement_items or [])
     )
     if doc.status in ("Completed", "Closed") and not doc.completion_photo:
@@ -160,7 +160,7 @@ def mark_completed(work_order, completion_notes=None):
         frappe.throw(_("A completion photo is required before closing a Maintenance Work Order."))
 
     ledger_posted = False
-    cost = flt(doc.total_procurement_cost_sar)
+    cost = flt(doc.total_procurement_cost)
 
     try:
         doc.db_set("status", "Completed")

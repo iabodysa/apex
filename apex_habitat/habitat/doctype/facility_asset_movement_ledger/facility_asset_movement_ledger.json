@@ -7,13 +7,13 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "posting_date",
+  "posting_datetime",
   "facility_asset",
   "from_building",
   "from_location",
   "to_building",
   "to_location",
-  "moved_by",
+  "moved_by_user",
   "is_cancelled",
   "source_doctype",
   "source_name",
@@ -28,7 +28,7 @@
    "read_only": 1
   },
   {
-   "fieldname": "posting_date",
+   "fieldname": "posting_datetime",
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Posting Date",
@@ -72,7 +72,7 @@
   },
   {
    "description": "Portal user who executed the movement — not the Employee on the source Facility Asset Movement.",
-   "fieldname": "moved_by",
+   "fieldname": "moved_by_user",
    "fieldtype": "Link",
    "label": "Moved By",
    "options": "User",

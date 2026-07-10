@@ -57,9 +57,9 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
 
     Returns:
         dict shaped as ``{has_images, building, articles}`` where each article is
-        ``{article, article_name, uom, image, standard_unit_cost_sar,
+        ``{article, article_name, uom, image, standard_unit_cost,
         store_balance}``. ``image`` may be ``None`` (the client falls back to
-        initials/placeholder); ``standard_unit_cost_sar`` drives the cart value
+        initials/placeholder); ``standard_unit_cost`` drives the cart value
         subtotal client-side.
     """
     frappe.has_permission("Custody Article", "read", throw=True)
@@ -70,7 +70,7 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
             "article_name",
             "unit_of_measure as uom",
             "image",
-            "standard_unit_cost_sar",
+            "standard_unit_cost",
         ],
         order_by="article_name asc",
     )
@@ -197,7 +197,7 @@ def _resolve_article_scan(code: str, building: str | None) -> dict | None:
         "article_name",
         "unit_of_measure as uom",
         "image",
-        "standard_unit_cost_sar",
+        "standard_unit_cost",
     ]
     match = None
     if frappe.db.exists("Custody Article", code):

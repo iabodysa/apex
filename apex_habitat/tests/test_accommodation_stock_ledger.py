@@ -29,7 +29,7 @@ class TestAccommodationStockLedger(ApexHabitatTestCase):
             "doctype": "Custody Asset Category", "category_name": "Cat " + _h()}).insert(ignore_permissions=True).name
         self.article = frappe.get_doc({"doctype": "Custody Article", "naming_series": "ART-.####",
                                        "article_name": "Towel " + _h(), "category": cat,
-                                       "unit_of_measure": "Nos", "standard_unit_cost_sar": 12}).insert(ignore_permissions=True)
+                                       "unit_of_measure": "Nos", "standard_unit_cost": 12}).insert(ignore_permissions=True)
         self.employee = frappe.get_doc({"doctype": "Employee", "first_name": "E " + _h(), "company": self.company,
                                         "gender": "Male", "date_of_birth": "1990-01-01", "date_of_joining": "2020-01-01"}).insert(ignore_permissions=True).name
 
@@ -40,7 +40,7 @@ class TestAccommodationStockLedger(ApexHabitatTestCase):
         row = frappe.get_doc("Accommodation Stock Ledger", name)
         self.assertEqual(row.item_name, self.article.article_name)
         self.assertEqual(row.uom, "Nos")
-        self.assertEqual(flt(row.unit_cost_sar), 12.0)
+        self.assertEqual(flt(row.unit_cost), 12.0)
         self.assertEqual(flt(row.signed_qty), 5.0)
         self.assertEqual(row.cost_center, self.cc)
         self.assertEqual(row.employee, self.employee)

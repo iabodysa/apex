@@ -26,7 +26,7 @@ def get_columns():
         {"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 200},
         {"label": _("UOM"), "fieldname": "uom", "fieldtype": "Data", "width": 80},
         {"label": _("Balance Qty"), "fieldname": "balance_qty", "fieldtype": "Float", "width": 110},
-        {"label": _("Unit Cost (SAR)"), "fieldname": "unit_cost_sar", "fieldtype": "Currency", "width": 130},
+        {"label": _("Unit Cost (SAR)"), "fieldname": "unit_cost", "fieldtype": "Currency", "width": 130},
         {"label": _("Value (SAR)"), "fieldname": "value_sar", "fieldtype": "Currency", "width": 130},
     ]
 
@@ -58,7 +58,7 @@ def get_data(filters):
         "Accommodation Stock Ledger",
         filters=conditions,
         fields=["building", "employee", "item_type", "item", "item_name", "uom",
-                "signed_qty", "unit_cost_sar"],
+                "signed_qty", "unit_cost"],
     )
 
     # [#p7co0q]
@@ -68,11 +68,11 @@ def get_data(filters):
         bucket = agg.setdefault(key, {
             "building": r.building, "employee": r.employee, "item_type": r.item_type,
             "item": r.item, "item_name": r.item_name, "uom": r.uom,
-            "unit_cost_sar": flt(r.unit_cost_sar), "balance_qty": 0.0,
+            "unit_cost": flt(r.unit_cost), "balance_qty": 0.0,
         })
         bucket["balance_qty"] += flt(r.signed_qty)
-        if r.unit_cost_sar:
-            bucket["unit_cost_sar"] = flt(r.unit_cost_sar)
+        if r.unit_cost:
+            bucket["unit_cost"] = flt(r.unit_cost)
 
     show_zero = filters.get("show_zero_balances")
     data = []
@@ -80,7 +80,7 @@ def get_data(filters):
         if not show_zero and abs(bucket["balance_qty"]) < 1e-9:
             continue
         bucket["holder"] = _("Employee Custody") if bucket["employee"] else _("Building Store")
-        bucket["value_sar"] = flt(bucket["balance_qty"]) * flt(bucket["unit_cost_sar"])
+        bucket["value_sar"] = flt(bucket["balance_qty"]) * flt(bucket["unit_cost"])
         data.append(bucket)
 
     data.sort(key=lambda d: (d["building"] or "", d["holder"], d["item_name"] or d["item"] or ""))

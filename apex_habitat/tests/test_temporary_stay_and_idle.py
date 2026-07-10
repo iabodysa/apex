@@ -34,7 +34,7 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
 
     def test_expected_checkout_notification_targets_building_supervisor(self):
         # The Expected Checkout Approaching alert must resolve to the building's own
-        # responsible_facility_supervisor, not only the broad Resident Supervisor /
+        # responsible_supervisor, not only the broad Resident Supervisor /
         # Accommodation Manager roles. The supervisor is mirrored onto the assignment
         # via fetch_from so the notification's receiver_by_document_field can read it.
         from apex_habitat.tests.factories import make_bed, make_room
@@ -43,7 +43,7 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
         frappe.get_doc({"doctype": "User", "email": supervisor, "first_name": "Sup",
                         "send_welcome_email": 0}).insert(ignore_permissions=True)
         frappe.db.set_value("Building", self.building,
-                            "responsible_facility_supervisor", supervisor)
+                            "responsible_supervisor", supervisor)
 
         room = make_room(self.building, readiness_status="Ready")
         bed = make_bed(room.name)
@@ -53,13 +53,13 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
         asg.insert(ignore_permissions=True)
 
         # fetch_from must have mirrored the building supervisor onto the assignment row.
-        self.assertEqual(asg.responsible_facility_supervisor, supervisor)
+        self.assertEqual(asg.responsible_supervisor, supervisor)
 
         notification = frappe.get_doc("Notification", "Habitat - Expected Checkout Approaching")
         context = {"doc": asg, "alert": notification, "comments": None}
         recipients, _cc, _bcc = notification.get_list_of_recipients(asg, context)
         self.assertIn(supervisor, recipients,
-                      "the building's responsible_facility_supervisor must be a recipient")
+                      "the building's responsible_supervisor must be a recipient")
 
     def test_temporary_requires_expected_checkout_date(self):
         with self.assertRaises(frappe.ValidationError):
@@ -108,4 +108,4 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
         idle_resident_aging()
         rep.reload()
         self.assertEqual(rep.days_idle, 7)
-        self.assertEqual(rep.estimated_accommodation_cost_bleed_sar, 0)  # [#71g7ip]
+        self.assertEqual(rep.estimated_cost_bleed, 0)  # [#71g7ip]

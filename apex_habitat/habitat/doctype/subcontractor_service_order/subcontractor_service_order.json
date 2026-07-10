@@ -18,7 +18,7 @@
   "supervisor_confirmed",
   "completion_photo",
   "subcontractor_service_order_sec_cost",
-  "service_cost_sar",
+  "service_cost",
   "subcontractor_service_order_cost_col",
   "cost_center",
   "company",
@@ -109,7 +109,7 @@
    "label": "Cost"
   },
   {
-   "fieldname": "service_cost_sar",
+   "fieldname": "service_cost",
    "fieldtype": "Currency",
    "label": "Service Cost (SAR)",
    "permlevel": 1
@@ -208,7 +208,7 @@
   {
    "group": "Maintenance",
    "link_doctype": "Maintenance Request",
-   "link_fieldname": "subcontractor_dispatched"
+   "link_fieldname": "subcontractor_service_order"
   },
   {
    "group": "Maintenance",

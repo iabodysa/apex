@@ -6,7 +6,7 @@
 the three contacts the home card shows:
 
   * ``building_in_charge`` — the active assignment's building
-    ``responsible_facility_supervisor`` (name + mobile);
+    ``responsible_supervisor`` (name + mobile);
   * ``today_driver``       — the driver of the worker's OWN today Dispatch Trip;
   * ``housing_office_number`` — the Habitat Settings office number.
 
@@ -80,7 +80,7 @@ class TestMasarWorkerContacts(_WorkerTripMixin, FrappeTestCase):
         cls.supervisor = _supervisor_user()
         # The active assignment's building carries the in-charge contact.
         frappe.db.set_value(
-            "Building", cls.building, "responsible_facility_supervisor", cls.supervisor
+            "Building", cls.building, "responsible_supervisor", cls.supervisor
         )
         frappe.db.set_single_value("Habitat Settings", "housing_office_number", _OFFICE_NUMBER)
 
@@ -162,7 +162,7 @@ class TestMasarWorkerContacts(_WorkerTripMixin, FrappeTestCase):
 
         res = masar.get_worker_contacts(token=token)
 
-        # building in-charge — from the building's responsible_facility_supervisor
+        # building in-charge — from the building's responsible_supervisor
         self.assertIsNotNone(res["building_in_charge"], "in-charge must resolve from the assignment")
         self.assertEqual(res["building_in_charge"]["phone"], _SUPERVISOR_MOBILE)
         self.assertTrue(res["building_in_charge"]["name"])

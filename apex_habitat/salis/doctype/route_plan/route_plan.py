@@ -27,7 +27,7 @@ class RoutePlan(Document):
     def on_submit(self):
         # A plain attribute set in on_submit (which runs AFTER the doc is saved)
         # is never written back; db_set persists the fulfilling Movement planner.
-        self.db_set("fulfilled_by_movement", frappe.session.user)
+        self.db_set("movement_planner", frappe.session.user)
         self._mark_request_scheduled()
 
     def on_cancel(self):

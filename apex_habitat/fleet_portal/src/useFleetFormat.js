@@ -36,7 +36,7 @@ export function useFleetFormat(t) {
   }
 
   // Fuel display values. Prefers the vehicle's real planned-fuel plan
-  // (planned_fuel_grade + planned_daily_fuel_sar off Salis Vehicle); falls back
+  // (planned_fuel_grade + planned_daily_fuel off Salis Vehicle); falls back
   // to the category fuel type only to pick a sensible grade label.
   function fuelView(v) {
     const planned = trim(v.planned_fuel_grade); // "Petrol 91" | "Petrol 95" | "Diesel" | ""
@@ -49,7 +49,7 @@ export function useFleetFormat(t) {
         ? t("fuelGrade.petrol95")
         : t("fuelGrade.petrol91");
     const sarPerL = isDiesel ? 0.69 : is95 ? 2.33 : 2.18;
-    const dailySAR = Number(v.planned_daily_fuel_sar) || 0;
+    const dailySAR = Number(v.planned_daily_fuel) || 0;
     return {
       gradeLabel,
       sarPerL,

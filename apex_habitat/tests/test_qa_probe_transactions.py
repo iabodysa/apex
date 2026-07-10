@@ -322,7 +322,7 @@ class TestDuplicateOverlap(QABase):
             "doctype": "Utility Bill Entry", "naming_series": "UTIL-BILL-.YYYY.-.#####",
             "utility_account": account, "building": building, "utility_type": "Electricity",
             "billing_period_from": pfrom, "billing_period_to": pto,
-            "bill_amount_sar": amount, "total_bill_amount_sar": amount,
+            "bill_amount": amount, "total_bill_amount": amount,
         })
         b.insert(ignore_permissions=True)
         b.submit()

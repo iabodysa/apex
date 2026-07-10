@@ -193,7 +193,7 @@ def _log_scan(
             "trip_start_log": trip_start_log,
             "transport_request": trip.get("transport_request") if trip else None,
             "driver": trip.get("driver") if trip else None,
-            "worker": worker,
+            "employee": worker,
             "accommodation_building": accommodation_building,
             "result": result,
             "method": "QR",

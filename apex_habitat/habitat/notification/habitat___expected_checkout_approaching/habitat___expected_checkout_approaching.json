@@ -17,7 +17,7 @@
  "name": "Habitat - Expected Checkout Approaching",
  "recipients": [
   {
-   "receiver_by_document_field": "responsible_facility_supervisor"
+   "receiver_by_document_field": "responsible_supervisor"
   },
   {
    "receiver_by_role": "Resident Supervisor"
@@ -29,5 +29,5 @@
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "Expected Checkout Approaching: {{ doc.name }}",
- "modified": "2026-07-10 06:05:34.129545"
+ "modified": "2026-07-10 07:15:17.110258"
 }

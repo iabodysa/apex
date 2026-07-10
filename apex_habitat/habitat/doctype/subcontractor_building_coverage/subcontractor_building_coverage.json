@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "building",
-  "specific_rate_sar"
+  "specific_rate"
  ],
  "fields": [
   {
@@ -24,7 +24,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "specific_rate_sar",
+   "fieldname": "specific_rate",
    "fieldtype": "Currency",
    "label": "Specific Rate for this Building (SAR)",
    "description": "If different from contract default",

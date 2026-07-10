@@ -12,7 +12,7 @@ def execute(filters=None):
         {"label": frappe._("Assessment Date"), "fieldname": "assessment_date", "fieldtype": "Date", "width": 120},
         {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 150},
         {"label": frappe._("Custodian"), "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 160},
-        {"label": frappe._("Estimated Cost (SAR)"), "fieldname": "total_estimated_replacement_cost_sar", "fieldtype": "Currency", "width": 150},
+        {"label": frappe._("Estimated Cost (SAR)"), "fieldname": "total_estimated_replacement_cost", "fieldtype": "Currency", "width": 150},
         {"label": frappe._("Deduction Entry"), "fieldname": "deduction_entry", "fieldtype": "Link", "options": "Additional Salary", "width": 150},
     ]
 
@@ -40,7 +40,7 @@ def execute(filters=None):
             "assessment_date",
             "building",
             "employee",
-            "total_estimated_replacement_cost_sar",
+            "total_estimated_replacement_cost",
             "deduction_entry",
         ],
         order_by="assessment_date desc",

@@ -14,7 +14,7 @@
   "accommodation_building_overview_col",
   "site",
   "status",
-  "responsible_facility_supervisor",
+  "responsible_supervisor",
   "accommodation_building_sec_location",
   "city",
   "district",
@@ -41,20 +41,20 @@
   "is_procurement_store",
   "accommodation_building_tab_financials",
   "accommodation_building_sec_financials",
-  "annual_rent_sar",
-  "annual_total_cost_sar",
+  "annual_rent",
+  "annual_total_cost",
   "default_cost_center",
   "accommodation_building_financials_col",
-  "annual_cost_per_capacity_sar",
-  "monthly_cost_per_capacity_sar",
+  "annual_cost_per_capacity",
+  "monthly_cost_per_capacity",
   "internal_billing_model",
   "accommodation_building_sec_financials_expenses",
-  "annual_electricity_sar",
-  "annual_water_sar",
-  "annual_cleaning_staff_sar",
+  "annual_electricity",
+  "annual_water",
+  "annual_cleaning_staff",
   "accommodation_building_financials_expenses_col",
-  "annual_supervision_sar",
-  "annual_other_expenses_sar",
+  "annual_supervision",
+  "annual_other_expenses",
   "accommodation_building_sec_billing_notes",
   "internal_billing_notes",
   "accommodation_building_tab_setup",
@@ -148,7 +148,7 @@
    "options": "Active\nInactive\nUnder Renovation"
   },
   {
-   "fieldname": "responsible_facility_supervisor",
+   "fieldname": "responsible_supervisor",
    "fieldtype": "Link",
    "label": "Responsible Facility Supervisor",
    "options": "User"
@@ -308,13 +308,13 @@
   },
   {
    "description": "Derived from the active Accommodation Lease (annualized). Read-only.",
-   "fieldname": "annual_rent_sar",
+   "fieldname": "annual_rent",
    "fieldtype": "Currency",
    "label": "Annual Rent (SAR)",
    "read_only": 1
   },
   {
-   "fieldname": "annual_total_cost_sar",
+   "fieldname": "annual_total_cost",
    "fieldtype": "Currency",
    "label": "Annual Total Cost (SAR)",
    "read_only": 1
@@ -330,13 +330,13 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "annual_cost_per_capacity_sar",
+   "fieldname": "annual_cost_per_capacity",
    "fieldtype": "Currency",
    "label": "Annual Cost per Bed Capacity (SAR)",
    "read_only": 1
   },
   {
-   "fieldname": "monthly_cost_per_capacity_sar",
+   "fieldname": "monthly_cost_per_capacity",
    "fieldtype": "Currency",
    "label": "Monthly Cost per Bed Capacity (SAR)",
    "read_only": 1
@@ -354,17 +354,17 @@
    "label": "Annual Expenses"
   },
   {
-   "fieldname": "annual_electricity_sar",
+   "fieldname": "annual_electricity",
    "fieldtype": "Currency",
    "label": "Annual Electricity (SAR)"
   },
   {
-   "fieldname": "annual_water_sar",
+   "fieldname": "annual_water",
    "fieldtype": "Currency",
    "label": "Annual Water (SAR)"
   },
   {
-   "fieldname": "annual_cleaning_staff_sar",
+   "fieldname": "annual_cleaning_staff",
    "fieldtype": "Currency",
    "label": "Annual Cleaning Staff Cost (SAR)"
   },
@@ -373,12 +373,12 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "annual_supervision_sar",
+   "fieldname": "annual_supervision",
    "fieldtype": "Currency",
    "label": "Annual Supervision Cost (SAR)"
   },
   {
-   "fieldname": "annual_other_expenses_sar",
+   "fieldname": "annual_other_expenses",
    "fieldtype": "Currency",
    "label": "Annual Other Expenses (SAR)"
   },

@@ -19,6 +19,7 @@ def get_data(data=None):
     data["non_standard_fieldnames"].update({
         "Housing Assignment": "billed_to_supplier",
         "Accommodation Ledger": "billed_to_supplier",
+        "Lease": "landlord",
     })
     data["transactions"].extend([
         {"label": "Housing (Supplier-billed)",

@@ -53,7 +53,7 @@ def execute(filters=None):
         filters=query_filters,
         fields=[
             "name", "cleaning_date", "building", "cleaner_type",
-            "cleaner_employee", "cleaned_by", "missed_cleaning",
+            "cleaner_employee", "cleaner_name", "missed_cleaning",
             "missed_reason", "rework_required", "supervisor_approved",
             "scheduled_task_instance",
         ],
@@ -72,7 +72,7 @@ def execute(filters=None):
         filters=rework_filters,
         fields=[
             "name", "cleaning_date", "building", "cleaner_type",
-            "cleaner_employee", "cleaned_by", "missed_cleaning",
+            "cleaner_employee", "cleaner_name", "missed_cleaning",
             "missed_reason", "rework_required", "supervisor_approved",
             "scheduled_task_instance",
         ],
@@ -94,7 +94,7 @@ def execute(filters=None):
         employee_name_map = {e.name: e.employee_name for e in emp_rows}
 
     def build_row(log, issue_label):
-        cleaner_label = log.cleaned_by or ""
+        cleaner_label = log.cleaner_name or ""
         if log.cleaner_employee:
             cleaner_label = employee_name_map.get(log.cleaner_employee) or log.cleaner_employee
         days = date_diff(today_str, log.cleaning_date) if log.cleaning_date else 0

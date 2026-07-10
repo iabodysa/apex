@@ -102,7 +102,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "renewal_cost_estimate_sar",
+   "fieldname": "renewal_cost_estimate",
    "fieldtype": "Currency",
    "label": "Renewal Cost Estimate (SAR)"
   },
@@ -238,7 +238,7 @@
   "expiry_date",
   "building_license_sec_renewal",
   "renewal_lead_days",
-  "renewal_cost_estimate_sar",
+  "renewal_cost_estimate",
   "building_license_renewal_col",
   "responsible_role",
   "building_license_renewal_col2",

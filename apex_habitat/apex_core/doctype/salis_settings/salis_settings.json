@@ -53,9 +53,9 @@
   "passenger_count_ops_threshold",
   "admin_trip_ops_threshold",
   "salis_settings_sec_doa_thresholds",
-  "writeoff_ops_threshold_sar",
+  "writeoff_ops_threshold",
   "salis_settings_doa_col",
-  "cost_recovery_ops_threshold_sar"
+  "cost_recovery_ops_threshold"
  ],
  "fields": [
   {
@@ -357,7 +357,7 @@
   {
    "default": "2000",
    "description": "Vehicle Damage Write-Off cases at or above this estimated cost (SAR) require Operations-tier authority; lower-value cases require at least Regional-tier.",
-   "fieldname": "writeoff_ops_threshold_sar",
+   "fieldname": "writeoff_ops_threshold",
    "fieldtype": "Currency",
    "label": "Write-Off Operations Threshold (SAR)"
   },
@@ -368,7 +368,7 @@
   {
    "default": "1000",
    "description": "Movement Cost Recovery amounts at or above this value (SAR) require Operations-tier authority; lower amounts require at least Regional-tier.",
-   "fieldname": "cost_recovery_ops_threshold_sar",
+   "fieldname": "cost_recovery_ops_threshold",
    "fieldtype": "Currency",
    "label": "Cost Recovery Operations Threshold (SAR)"
   }

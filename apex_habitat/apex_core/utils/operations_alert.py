@@ -29,7 +29,7 @@ def _project_supervisor_for_vehicle(vehicle: str | None) -> str | None:
     specific project's supervisor (its ``receiver_by_document_field`` cannot
     follow the vehicle -> project -> supervisor chain declaratively). Office-scoped
     alerts pass no vehicle and correctly resolve None — the notification condition
-    requires ``project_supervisor`` and skips them. Never raises: a lookup failure
+    requires ``responsible_supervisor`` and skips them. Never raises: a lookup failure
     must not abort the calling job.
     """
     if not vehicle:
@@ -70,7 +70,7 @@ def insert_operations_alert(
                 "raised_on": now_datetime(),
                 "vehicle": vehicle,
                 "driver": driver,
-                "project_supervisor": _project_supervisor_for_vehicle(vehicle),
+                "responsible_supervisor": _project_supervisor_for_vehicle(vehicle),
                 "message": (message or "")[:_MESSAGE_MAX],
             }
         )

@@ -7,7 +7,7 @@ Write-Off Workflow": the Approve transition is restricted to the Fleet Manager /
 System Manager roles, with self-approval disabled.
 
 Delegation-of-Authority gate: ``estimated_cost`` is compared on save against the
-Write-Off Operations Threshold (``writeoff_ops_threshold_sar`` in Salis Settings)
+Write-Off Operations Threshold (``writeoff_ops_threshold`` in Salis Settings)
 to derive ``needs_operations``. The workflow's "Authorize (Regional)" transition
 (Fleet Supervisor) is gated off when that flag is set, so only the Operations tier
 (Fleet Manager / System Manager) can approve a high-value case. ``_enforce_doa_gate``
@@ -48,7 +48,7 @@ class VehicleDamageWriteOff(Document):
         be under-stated."""
         from apex_habitat.apex_core.doctype.salis_settings.salis_settings import get_salis_float
 
-        threshold = get_salis_float("writeoff_ops_threshold_sar", 2000.0)
+        threshold = get_salis_float("writeoff_ops_threshold", 2000.0)
         self.needs_operations = 1 if flt(self.estimated_cost) >= threshold else 0
 
     def _enforce_doa_gate(self):

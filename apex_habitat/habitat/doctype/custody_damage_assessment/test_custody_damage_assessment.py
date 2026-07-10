@@ -31,7 +31,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
             "assessment_date": "2026-07-10",
             "building": "QA-BLDG",
             "items": [{"doctype": "Custody Damage Item", "article": "QA-ART",
-                        "damage_description": "cracked", "estimated_replacement_cost_sar": 150}],
+                        "damage_description": "cracked", "estimated_replacement_cost": 150}],
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
         self.assertIsNotNone(doc.name)
@@ -71,7 +71,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
             "assessment_date": "2026-07-10",
             "building": "QA-BLDG",
             "items": [{"doctype": "Custody Damage Item", "article": "QA-ART",
-                        "damage_description": "cracked", "estimated_replacement_cost_sar": 150}],
+                        "damage_description": "cracked", "estimated_replacement_cost": 150}],
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
         result = get_deduction_status(doc.name)
@@ -115,7 +115,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
             "building": "QA-BLDG",
             "deduction_entry": add_sal.name,
             "items": [{"doctype": "Custody Damage Item", "article": "QA-ART",
-                        "damage_description": "cracked", "estimated_replacement_cost_sar": 150}],
+                        "damage_description": "cracked", "estimated_replacement_cost": 150}],
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
 
@@ -155,7 +155,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
             "assessment_date": "2026-07-10",
             "building": "QA-BLDG",
             "items": [{"doctype": "Custody Damage Item", "article": "QA-ART",
-                        "damage_description": "cracked", "estimated_replacement_cost_sar": 150}],
+                        "damage_description": "cracked", "estimated_replacement_cost": 150}],
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
 
@@ -267,11 +267,11 @@ class TestCustodyDamageAssessment(FrappeTestCase):
             "building": "QA-BLDG",
             "employee": emp.name,
             "items": [{"doctype": "Custody Damage Item", "article": "QA-ART",
-                        "damage_description": "cracked", "estimated_replacement_cost_sar": 150}],
+                        "damage_description": "cracked", "estimated_replacement_cost": 150}],
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
         # validate() populates the total the deduction amount reads from
-        doc.total_estimated_replacement_cost_sar = 150
+        doc.total_estimated_replacement_cost = 150
 
         # Additional Salary has no `remarks` column, so identify the deduction by its
         # real link tuple (employee + component + payroll_date) rather than remarks.

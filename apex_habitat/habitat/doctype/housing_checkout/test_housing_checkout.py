@@ -112,7 +112,7 @@ class TestAccommodationCheckout(FrappeTestCase):
     def test_on_submit_uses_correct_damage_assessment_fieldnames(self):
         """on_submit() auto-creates a Custody Damage Assessment using the correct
         child-table fieldnames from the Custody Damage Item schema:
-        'article', 'damage_description', 'estimated_replacement_cost_sar'.
+        'article', 'damage_description', 'estimated_replacement_cost'.
 
         Verifies the field mapping is correct by inspecting the source and the
         Custody Damage Item meta — guards against future fieldname renames breaking
@@ -127,13 +127,13 @@ class TestAccommodationCheckout(FrappeTestCase):
         self.assertIn('"article"', src, "on_submit must map 'article' to Custody Damage Item")
         self.assertIn('"damage_description"', src,
                       "on_submit must set 'damage_description' on the damage item")
-        self.assertIn('"estimated_replacement_cost_sar"', src,
-                      "on_submit must set 'estimated_replacement_cost_sar' on the damage item")
+        self.assertIn('"estimated_replacement_cost"', src,
+                      "on_submit must set 'estimated_replacement_cost' on the damage item")
 
         # [#73y8nk]
         meta = frappe.get_meta("Custody Damage Item")
         fieldnames = {f.fieldname for f in meta.fields}
-        for expected in ("article", "damage_description", "estimated_replacement_cost_sar"):
+        for expected in ("article", "damage_description", "estimated_replacement_cost"):
             self.assertIn(expected, fieldnames,
                           f"'{expected}' must exist on Custody Damage Item")
 
@@ -242,7 +242,7 @@ class TestAccommodationCheckout(FrappeTestCase):
         return frappe.get_doc({
             "doctype": "Custody Article", "naming_series": "CUST-ART-.####",
             "article_name": "A " + self._h(), "category": category,
-            "unit_of_measure": "Each", "standard_unit_cost_sar": 100,
+            "unit_of_measure": "Each", "standard_unit_cost": 100,
         }).insert(ignore_permissions=True).name
 
     def _hold(self, fx, article, qty):
@@ -251,7 +251,7 @@ class TestAccommodationCheckout(FrappeTestCase):
         frappe.get_doc({
             "doctype": "Accommodation Stock Ledger", "naming_series": "ACC-SLE-.YYYY.-.######",
             "posting_date": "2026-06-15", "item_type": "Custody Article", "item": article,
-            "signed_qty": qty, "unit_cost_sar": 100, "building": fx.building, "employee": fx.emp,
+            "signed_qty": qty, "unit_cost": 100, "building": fx.building, "employee": fx.emp,
         }).insert(ignore_permissions=True)
 
     def _draft_checkout(self, fx, reason="End of Contract"):

@@ -71,7 +71,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "witness_role",
+   "fieldname": "witness",
    "fieldtype": "Link",
    "label": "Witness Role",
    "options": "User",
@@ -195,7 +195,7 @@
   "building",
   "handover_date",
   "facility_asset_custody_assignment_overview_col",
-  "witness_role",
+  "witness",
   "all_assets_verified",
   "facility_asset_custody_assignment_sec_table_assets_in_custody",
   "assets_in_custody",

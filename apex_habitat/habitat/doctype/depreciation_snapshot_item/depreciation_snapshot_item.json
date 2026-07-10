@@ -9,9 +9,9 @@
  "description": "Child: one asset line in a Non-Financial Depreciation Snapshot.",
  "field_order": [
   "article",
-  "original_cost_sar",
+  "original_cost",
   "age_years",
-  "book_value_sar",
+  "book_value",
   "policy"
  ],
  "fields": [
@@ -27,7 +27,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "original_cost_sar",
+   "fieldname": "original_cost",
    "fieldtype": "Currency",
    "label": "Original Cost (SAR)",
    "reqd": 1,
@@ -44,7 +44,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "book_value_sar",
+   "fieldname": "book_value",
    "fieldtype": "Currency",
    "label": "Book Value (SAR)",
    "read_only": 1,

@@ -11,7 +11,7 @@
   "building",
   "nfds_details_col",
   "naming_series",
-  "total_book_value_sar",
+  "total_book_value",
   "nfds_sec_system",
   "cancellation_reason",
   "nfds_sec_table_items",
@@ -68,7 +68,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "total_book_value_sar",
+   "fieldname": "total_book_value",
    "fieldtype": "Currency",
    "idx": 7,
    "label": "Total Book Value (SAR)",

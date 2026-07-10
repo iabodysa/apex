@@ -128,7 +128,7 @@ def weekly_custody_digest() -> None:
     count already past ``expected_return_date``, the SAR value still in worker
     hands (net signed ledger value, the same definition as the value-in-hands
     card), and damage assessed month-to-date. Buildings are grouped by their
-    ``responsible_facility_supervisor`` so each supervisor receives only their own
+    ``responsible_supervisor`` so each supervisor receives only their own
     buildings. Buildings with no supervisor, or a disabled supervisor user, are
     skipped — oversight roles already see the dashboards.
 
@@ -150,8 +150,8 @@ def weekly_custody_digest() -> None:
 
     buildings = frappe.get_all(
         "Building",
-        filters={"responsible_facility_supervisor": ["is", "set"]},
-        fields=["name", "responsible_facility_supervisor"],
+        filters={"responsible_supervisor": ["is", "set"]},
+        fields=["name", "responsible_supervisor"],
     )
     if not buildings:
         logger.info("weekly_custody_digest: no building has a responsible supervisor.")
@@ -182,7 +182,7 @@ def weekly_custody_digest() -> None:
     value_by_building: dict[str, float] = defaultdict(float)
     for row in frappe.db.sql(
         """
-        SELECT building, COALESCE(SUM(signed_qty * COALESCE(unit_cost_sar, 0)), 0) AS value
+        SELECT building, COALESCE(SUM(signed_qty * COALESCE(unit_cost, 0)), 0) AS value
         FROM `tabAccommodation Stock Ledger`
         WHERE is_cancelled = 0
           AND item_type = 'Custody Article'
@@ -198,7 +198,7 @@ def weekly_custody_digest() -> None:
     damage_mtd: dict[str, float] = defaultdict(float)
     for row in frappe.db.sql(
         """
-        SELECT building, COALESCE(SUM(total_estimated_replacement_cost_sar), 0) AS cost
+        SELECT building, COALESCE(SUM(total_estimated_replacement_cost), 0) AS cost
         FROM `tabCustody Damage Assessment`
         WHERE docstatus = 1
           AND assessment_date >= %(month_start)s
@@ -212,7 +212,7 @@ def weekly_custody_digest() -> None:
 
     by_supervisor: dict[str, list] = defaultdict(list)
     for b in buildings:
-        by_supervisor[b.responsible_facility_supervisor].append(b.name)
+        by_supervisor[b.responsible_supervisor].append(b.name)
 
     list_url = get_url_to_list("Custody Issue")
     sent = 0

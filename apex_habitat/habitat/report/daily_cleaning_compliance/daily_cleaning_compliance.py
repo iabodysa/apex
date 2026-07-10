@@ -101,7 +101,7 @@ def execute(filters=None):
         "Cleaning Log",
         filters={"name": ["in", log_names]},
         fields=[
-            "name", "cleaner_type", "cleaner_employee", "cleaned_by",
+            "name", "cleaner_type", "cleaner_employee", "cleaner_name",
             "supervisor_approved", "supervisor_rating", "missed_cleaning",
             "missed_reason", "rework_required", "scheduled_task_instance",
         ],
@@ -127,7 +127,7 @@ def execute(filters=None):
         meta = enrich.get(log)
         cleaner_label = ""
         if meta:
-            cleaner_label = meta.cleaned_by or ""
+            cleaner_label = meta.cleaner_name or ""
             if meta.cleaner_employee:
                 cleaner_label = employee_name_map.get(meta.cleaner_employee) or meta.cleaner_employee
 

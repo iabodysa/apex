@@ -152,7 +152,7 @@ def get_fleet_os():
         fields=[
             "name", "plate_number", "vehicle_category", "status",
             "rental_office", "project", "current_driver",
-            "planned_fuel_grade", "planned_daily_fuel_sar",
+            "planned_fuel_grade", "planned_daily_fuel",
             "compliance_status", "next_expiry_date",
         ],
         base_filters=base_filters,
@@ -354,7 +354,7 @@ def get_fleet_os():
             "fuel": cat_fuel.get(v.vehicle_category, ""),
             # Real planned-fuel plan off Salis Vehicle (was always the design's "—").
             "planned_fuel_grade": v.planned_fuel_grade or "",
-            "planned_daily_fuel_sar": v.planned_daily_fuel_sar or 0,
+            "planned_daily_fuel": v.planned_daily_fuel or 0,
             # Compliance status + next expiry drive the card's pre-stop expiry flag.
             "compliance_status": v.compliance_status or "",
             "next_expiry_date": str(v.next_expiry_date or ""),
@@ -867,7 +867,7 @@ def recover(plate):
 
     When the vehicle has an open Theft Vehicle Incident on record, close it in the
     same transaction and restore the state it captured at report time
-    (``previous_driver`` / ``previous_vehicle_status``) — so a recovered vehicle is
+    (``previous_driver`` / ``previous_status``) — so a recovered vehicle is
     not left with a Theft incident Open forever. With no theft on record (a plain
     stop), recover simply returns the vehicle to Active.
     """
@@ -878,7 +878,7 @@ def recover(plate):
         "Vehicle Incident",
         {"vehicle": vehicle, "incident_type": "Theft", "docstatus": 1,
          "status": ["in", ("Open", "Under Review")]},
-        ["name", "previous_driver", "previous_vehicle_status"],
+        ["name", "previous_driver", "previous_status"],
         as_dict=True,
         order_by="creation desc",
     )
@@ -896,7 +896,7 @@ def recover(plate):
         frappe.db.set_value("Salis Driver", incident.previous_driver, "current_vehicle", vehicle)
 
     frappe.db.set_value(
-        "Salis Vehicle", vehicle, "status", incident.previous_vehicle_status or "Active"
+        "Salis Vehicle", vehicle, "status", incident.previous_status or "Active"
     )
     frappe.db.set_value("Vehicle Incident", incident.name, "status", "Closed")
     add_timeline_note(

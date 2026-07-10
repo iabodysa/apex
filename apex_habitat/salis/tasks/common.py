@@ -123,7 +123,7 @@ def _raise_alert(
 
     # [#sqhguz]
     alert_name = None
-    project_supervisor = _resolve_project_supervisor(vehicle)
+    responsible_supervisor = _resolve_project_supervisor(vehicle)
     try:
         alert = frappe.get_doc(
             {
@@ -134,7 +134,7 @@ def _raise_alert(
                 "raised_on": now_datetime(),
                 "vehicle": vehicle,
                 "driver": driver,
-                "project_supervisor": project_supervisor,
+                "responsible_supervisor": responsible_supervisor,
                 "message": message[:2000],
             }
         )

@@ -178,7 +178,7 @@ class TestMovementCostRecoveryDoA(FrappeTestCase):
         frappe.set_user("Administrator")
         # Pin the threshold so the test does not depend on the seeded default.
         self.settings = frappe.get_single("Salis Settings")
-        self.settings.cost_recovery_ops_threshold_sar = 1000
+        self.settings.cost_recovery_ops_threshold = 1000
         self.settings.save(ignore_permissions=True)
 
     def tearDown(self):

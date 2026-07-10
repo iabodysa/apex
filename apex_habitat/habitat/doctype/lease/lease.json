@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2026-05-23 23:31:43.779074",
- "description": "Formal lease contract holder for one building. Carries the rent payment schedule. The landlord is identified by the Lease's supplier field.",
+ "description": "Formal lease contract holder for one building. Carries the rent payment schedule. The landlord is identified by the Lease's landlord field.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -10,7 +10,7 @@
   "accommodation_lease_sec_contract",
   "company",
   "building",
-  "supplier",
+  "landlord",
   "accommodation_lease_contract_col",
   "lease_reference",
   "accommodation_lease_sec_term",
@@ -66,7 +66,7 @@
   },
   {
    "description": "Optional ERPNext Supplier FK for the landlord. Used to identify the payee for rent due reminders.",
-   "fieldname": "supplier",
+   "fieldname": "landlord",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Landlord Supplier",

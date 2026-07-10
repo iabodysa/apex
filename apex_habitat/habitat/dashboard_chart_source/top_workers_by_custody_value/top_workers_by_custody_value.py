@@ -2,7 +2,7 @@
 """Top Workers by Custody Value — chart source over the Accommodation Stock Ledger.
 
 Reuses the canonical outstanding-custody-value definition (net signed
-qty * unit_cost_sar over non-cancelled Custody Article rows with an employee set)
+qty * unit_cost over non-cancelled Custody Article rows with an employee set)
 shared by the value-in-hands Number Card and the Outstanding-by-Worker report,
 grouped per employee and capped at the top holders by value.
 """

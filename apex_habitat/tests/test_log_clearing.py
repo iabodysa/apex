@@ -120,7 +120,7 @@ class TestLogClearing(FrappeTestCase):
                 "items": [{
                     "doctype": "Depreciation Snapshot Item",
                     "article": f"ART-{marker}-{suffix}",
-                    "original_cost_sar": 200,
+                    "original_cost": 200,
                 }],
             })
             doc.insert(ignore_permissions=True, ignore_links=True)

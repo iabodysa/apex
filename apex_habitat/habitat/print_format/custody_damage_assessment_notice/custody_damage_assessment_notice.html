@@ -62,7 +62,7 @@
         <td>{{ row.article or "" }}</td>
         <td>{{ row.damage_description or "" }}</td>
         <td>{{ row.serial_no or "—" }}</td>
-        <td>{{ frappe.format(row.estimated_replacement_cost_sar, {"fieldtype": "Currency"}) }}</td>
+        <td>{{ frappe.format(row.estimated_replacement_cost, {"fieldtype": "Currency"}) }}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -70,7 +70,7 @@
 
   <div class="ah-total">
     Total Estimated Replacement Cost <span class="ah-ar">إجمالي تكلفة الاستبدال المقدّرة</span>:
-    {{ frappe.format(doc.total_estimated_replacement_cost_sar, {"fieldtype": "Currency"}) }}
+    {{ frappe.format(doc.total_estimated_replacement_cost, {"fieldtype": "Currency"}) }}
   </div>
 
   {% if doc.deduction_entry %}

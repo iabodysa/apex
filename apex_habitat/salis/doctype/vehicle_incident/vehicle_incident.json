@@ -30,7 +30,7 @@
   "write_off_case",
   "vi_sec_system",
   "naming_series",
-  "previous_vehicle_status",
+  "previous_status",
   "previous_driver",
   "amended_from"
  ],
@@ -186,7 +186,7 @@
    "reqd": 1
   },
   {
-   "fieldname": "previous_vehicle_status",
+   "fieldname": "previous_status",
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Previous Vehicle Status",

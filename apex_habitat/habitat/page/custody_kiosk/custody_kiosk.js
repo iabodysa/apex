@@ -643,7 +643,7 @@ class CustodyKiosk {
 				article_name: art.article_name || art.article,
 				uom: art.uom,
 				// Unit cost drives the cart value subtotal; may be 0/undefined.
-				rate: flt(art.standard_unit_cost_sar),
+				rate: flt(art.standard_unit_cost),
 				qty: 1,
 			};
 		}

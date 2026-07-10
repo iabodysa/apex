@@ -9,7 +9,7 @@
   "facility_asset",
   "asset_category",
   "serial_number",
-  "physical_condition",
+  "condition_at_handover",
   "condition_notes"
  ],
  "fields": [
@@ -49,7 +49,7 @@
   {
    "doctype": "DocField",
    "description": "Condition of the facility item recorded at handover, flagging faulty units and items that could not be located during the custody check.",
-   "fieldname": "physical_condition",
+   "fieldname": "condition_at_handover",
    "fieldtype": "Select",
    "label": "Condition at Handover",
    "options": "Good\nFair\nFaulty\nNot Found",

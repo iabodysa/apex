@@ -20,7 +20,7 @@ def _configure_damage_policy(enabled=1, cap=500, salary_component=None, default_
     if rule is None:
         rule = policy.append("type_rules", {"deduction_type": "Damage"})
     rule.enabled = 1 if enabled else 0
-    rule.cap_amount_per_event_sar = cap
+    rule.cap_amount_per_event = cap
     rule.salary_component = salary_component
     if bypass_validate:
         policy.flags.ignore_validate = True
@@ -196,7 +196,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
                 {
                     "article": self.article,
                     "damage_description": "Broken Chair",
-                    "estimated_replacement_cost_sar": 150.0
+                    "estimated_replacement_cost": 150.0
                 }
             ]
         })
@@ -242,7 +242,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
                 {
                     "article": self.article,
                     "damage_description": "Broken Chair",
-                    "estimated_replacement_cost_sar": 175.0,
+                    "estimated_replacement_cost": 175.0,
                 }
             ],
         })
@@ -257,7 +257,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
 
         checkout.reload()
         self.assertEqual(
-            checkout.linked_additional_salary,
+            checkout.additional_salary_deduction,
             assessment.deduction_entry,
             "Checkout must link the Additional Salary posted by its damage assessment.",
         )
@@ -294,7 +294,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
                 {
                     "article": self.article,
                     "damage_description": "Broken Table",
-                    "estimated_replacement_cost_sar": 200.0
+                    "estimated_replacement_cost": 200.0
                 }
             ]
         })

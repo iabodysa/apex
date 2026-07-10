@@ -40,7 +40,7 @@ class VehicleIncident(Document):
         if self.is_new() and frappe.session.user == "Guest":
             # A guest may only open an incident, never pre-judge its disposition.
             self.status = "Open"
-            for field in ("write_off_case", "previous_vehicle_status", "previous_driver"):
+            for field in ("write_off_case", "previous_status", "previous_driver"):
                 self.set(field, None)
 
         # Bound the attacker-controllable free-text fields (defense-in-depth;
@@ -61,7 +61,7 @@ class VehicleIncident(Document):
         prev_status, prev_driver = frappe.db.get_value(
             "Salis Vehicle", self.vehicle, ["status", "current_driver"]
         )
-        self.db_set("previous_vehicle_status", prev_status)
+        self.db_set("previous_status", prev_status)
         self.db_set("previous_driver", prev_driver)
 
         # [#558p5y]
@@ -109,7 +109,7 @@ class VehicleIncident(Document):
                 "Salis Vehicle",
                 self.vehicle,
                 "status",
-                self.previous_vehicle_status or "Active",
+                self.previous_status or "Active",
             )
 
         add_timeline_note(

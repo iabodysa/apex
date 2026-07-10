@@ -106,14 +106,14 @@ _LEASE_CYCLE_FACTOR = {"Monthly": 12, "Quarterly": 4, "Semi-Annual": 2, "Annual"
 
 def apply_active_lease(doc):
     """The active Accommodation Lease is the single source of truth for rent and the
-    landlord, so the building never duplicates them by hand. Derive ``annual_rent_sar``
+    landlord, so the building never duplicates them by hand. Derive ``annual_rent``
     from the lease (annualized by billing cycle, then the company's share) and back-fill
     ``landlord`` when it is unset. With no active lease there is no system-of-record
     rent, so the existing value is left untouched rather than zeroed."""
     lease = frappe.db.get_value(
         "Lease",
         {"building": doc.name, "status": ["in", ["Approved", "Active"]], "docstatus": ["<", 2]},
-        ["rent_amount", "billing_cycle", "company_share_pct", "supplier"],
+        ["rent_amount", "billing_cycle", "company_share_pct", "landlord"],
         as_dict=True,
         order_by="lease_start_date desc",
     )
@@ -122,9 +122,9 @@ def apply_active_lease(doc):
     annual = flt(lease.rent_amount) * _LEASE_CYCLE_FACTOR.get(lease.billing_cycle, 1)
     if flt(lease.company_share_pct):
         annual = annual * flt(lease.company_share_pct) / 100.0
-    doc.annual_rent_sar = annual
-    if not doc.landlord and lease.supplier:
-        doc.landlord = lease.supplier
+    doc.annual_rent = annual
+    if not doc.landlord and lease.landlord:
+        doc.landlord = lease.landlord
 
 
 def _derive_total_capacity(building_name):
@@ -145,7 +145,7 @@ def _derive_total_capacity(building_name):
     )
 
 
-# responsible_facility_supervisor is the single source of truth for the
+# responsible_supervisor is the single source of truth for the
 # building-scoped User Permission; on_update reconciles the permission to the field.
 def _building_supervisor_permissions(user, building):
     return frappe.get_all(
@@ -160,8 +160,8 @@ def on_update(doc, method=None):
     grant the new supervisor's permission for this building, drop the previous
     supervisor's; other users and other buildings are untouched."""
     before = doc.get_doc_before_save()
-    old_sup = before.responsible_facility_supervisor if before else None
-    new_sup = doc.responsible_facility_supervisor
+    old_sup = before.responsible_supervisor if before else None
+    new_sup = doc.responsible_supervisor
     if old_sup == new_sup:
         return
     if old_sup:
@@ -183,12 +183,12 @@ def on_update(doc, method=None):
 # controller, weekly_occupancy_sync, and the room/bed generator), so editing the
 # building need only refresh when one of these inputs actually changed.
 _ROLLUP_TRIGGER_FIELDS = (
-    "annual_rent_sar",
-    "annual_electricity_sar",
-    "annual_water_sar",
-    "annual_cleaning_staff_sar",
-    "annual_supervision_sar",
-    "annual_other_expenses_sar",
+    "annual_rent",
+    "annual_electricity",
+    "annual_water",
+    "annual_cleaning_staff",
+    "annual_supervision",
+    "annual_other_expenses",
     "total_capacity",
     "landlord",
 )
@@ -206,21 +206,21 @@ def _recompute_capacity_and_cost(doc):
     if _capacity_count is not None:
         doc.total_capacity = _capacity_count
 
-    doc.annual_total_cost_sar = (
-        (doc.annual_rent_sar or 0)
-        + (doc.annual_electricity_sar or 0)
-        + (doc.annual_water_sar or 0)
-        + (doc.annual_cleaning_staff_sar or 0)
-        + (doc.annual_supervision_sar or 0)
-        + (doc.annual_other_expenses_sar or 0)
+    doc.annual_total_cost = (
+        (doc.annual_rent or 0)
+        + (doc.annual_electricity or 0)
+        + (doc.annual_water or 0)
+        + (doc.annual_cleaning_staff or 0)
+        + (doc.annual_supervision or 0)
+        + (doc.annual_other_expenses or 0)
     )
 
     if doc.total_capacity:
-        doc.annual_cost_per_capacity_sar = doc.annual_total_cost_sar / doc.total_capacity
-        doc.monthly_cost_per_capacity_sar = doc.annual_cost_per_capacity_sar / 12
+        doc.annual_cost_per_capacity = doc.annual_total_cost / doc.total_capacity
+        doc.monthly_cost_per_capacity = doc.annual_cost_per_capacity / 12
     else:
-        doc.annual_cost_per_capacity_sar = 0
-        doc.monthly_cost_per_capacity_sar = 0
+        doc.annual_cost_per_capacity = 0
+        doc.monthly_cost_per_capacity = 0
 
 
 def _recompute_occupancy_and_structure(doc):
@@ -254,14 +254,14 @@ def _recompute_occupancy_and_structure(doc):
 
 
 # Annual cost inputs that must never be negative — a negative would silently drive a
-# negative monthly_cost_per_capacity_sar through the rollup.
+# negative monthly_cost_per_capacity through the rollup.
 _ANNUAL_COST_FIELDS = (
-    "annual_rent_sar",
-    "annual_electricity_sar",
-    "annual_water_sar",
-    "annual_cleaning_staff_sar",
-    "annual_supervision_sar",
-    "annual_other_expenses_sar",
+    "annual_rent",
+    "annual_electricity",
+    "annual_water",
+    "annual_cleaning_staff",
+    "annual_supervision",
+    "annual_other_expenses",
 )
 
 

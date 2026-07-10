@@ -17,7 +17,7 @@
   "billing_period_to",
   "due_date",
   "utility_bill_entry_billing_col",
-  "bill_amount_sar",
+  "bill_amount",
   "consumption_units",
   "utility_bill_meter_sec",
   "meter_reading_previous",
@@ -25,7 +25,7 @@
   "utility_bill_meter_col",
   "meter_units_consumed",
   "utility_bill_entry_sec_sharing",
-  "total_bill_amount_sar",
+  "total_bill_amount",
   "utility_bill_entry_sharing_col",
   "cost_bearing_pct",
   "utility_bill_entry_sec_sharing_note",
@@ -110,7 +110,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "bill_amount_sar",
+   "fieldname": "bill_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Bill Amount (SAR)",
@@ -157,7 +157,7 @@
   },
   {
    "description": "Full amount on the utility company's invoice (before sharing)",
-   "fieldname": "total_bill_amount_sar",
+   "fieldname": "total_bill_amount",
    "fieldtype": "Currency",
    "label": "Total Invoice Amount (SAR)"
   },

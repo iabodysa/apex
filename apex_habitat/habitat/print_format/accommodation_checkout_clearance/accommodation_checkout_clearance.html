@@ -54,7 +54,7 @@
       <td class="ah-lbl">Damage Deduction <span class="ah-ar">خصم التلف</span></td>
       <td>{{ frappe.format(doc.damage_deduction_amount, {"fieldtype": "Currency"}) }}</td>
       <td class="ah-lbl">Salary Entry <span class="ah-ar">قيد الراتب</span></td>
-      <td>{{ doc.linked_additional_salary or "—" }}</td>
+      <td>{{ doc.additional_salary_deduction or "—" }}</td>
     </tr>
     {% endif %}
   </table>

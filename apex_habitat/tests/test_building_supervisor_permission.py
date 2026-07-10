@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""The building's responsible_facility_supervisor is the single source of truth for
+"""The building's responsible_supervisor is the single source of truth for
 the building-scoped User Permission — on_update keeps the permission in sync (T-254).
 """
 
@@ -41,15 +41,15 @@ class TestBuildingSupervisorPermission(FrappeTestCase):
             or frappe.get_all("Company", limit=1)[0].name
         )
         b = make_building(
-            name="T254 Building", company=company, responsible_facility_supervisor=sup_a
+            name="T254 Building", company=company, responsible_supervisor=sup_a
         )
         self.assertTrue(_has_perm(sup_a, b.name))  # granted on create
 
-        b.responsible_facility_supervisor = sup_b
+        b.responsible_supervisor = sup_b
         b.save(ignore_permissions=True)
         self.assertFalse(_has_perm(sup_a, b.name))  # previous supervisor dropped
         self.assertTrue(_has_perm(sup_b, b.name))  # new supervisor granted
 
-        b.responsible_facility_supervisor = None
+        b.responsible_supervisor = None
         b.save(ignore_permissions=True)
         self.assertFalse(_has_perm(sup_b, b.name))  # cleared -> permission removed

@@ -26,7 +26,7 @@ def reflect_completed_maintenance(doc, method=None):
     Call from the Work Order completion chokepoint (mark_completed): completion sets
     status via db_set, which fires no on_update doc_event, so a hooks wiring would not
     catch it. The Work Order reaches its asset through the Maintenance Request's
-    related_facility_asset; every Housing Inventory row whose linked_facility_asset
+    related_facility_asset; every Housing Inventory row whose facility_asset
     matches gets its maintenance stamps advanced. Idempotent and order-safe: only
     advance last_maintenance_date (never roll it back) and clear a maintenance
     condition/status, so a re-run or an out-of-order completion leaves the latest.
@@ -40,7 +40,7 @@ def reflect_completed_maintenance(doc, method=None):
         return
     completion_date = getdate(doc.actual_end_date) if doc.actual_end_date else getdate()
     for name in frappe.get_all(
-        "Housing Inventory", filters={"linked_facility_asset": asset}, pluck="name"
+        "Housing Inventory", filters={"facility_asset": asset}, pluck="name"
     ):
         row = frappe.get_doc("Housing Inventory", name)
         if row.last_maintenance_date and getdate(row.last_maintenance_date) >= completion_date:

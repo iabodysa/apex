@@ -348,7 +348,7 @@ class TestReportScopeIntegration(FrappeTestCase):
                 "company": company,
                 "total_capacity": 10,
                 "default_cost_center": cost_center,
-                "annual_rent_sar": 36500,
+                "annual_rent": 36500,
             }).insert(ignore_permissions=True).name)
         return names[0], names[1]
 
@@ -382,7 +382,7 @@ class TestReportScopeIntegration(FrappeTestCase):
             "item_type": "Custody Article",
             "item": article,
             "signed_qty": qty,
-            "unit_cost_sar": 10,
+            "unit_cost": 10,
             "building": building,
             "employee": employee,
             "is_cancelled": 0,

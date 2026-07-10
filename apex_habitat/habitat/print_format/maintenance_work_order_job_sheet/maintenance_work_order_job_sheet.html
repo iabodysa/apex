@@ -77,7 +77,7 @@
       {% endfor %}
     </tbody>
   </table>
-  <div class="ah-total">Total Estimated Cost <span class="ah-ar">إجمالي التكلفة المقدّرة</span>: {{ frappe.format(doc.total_procurement_cost_sar, {"fieldtype": "Currency"}) }}</div>
+  <div class="ah-total">Total Estimated Cost <span class="ah-ar">إجمالي التكلفة المقدّرة</span>: {{ frappe.format(doc.total_procurement_cost, {"fieldtype": "Currency"}) }}</div>
   {% endif %}
 
   {% if doc.completion_notes %}<div style="margin-bottom:12px;"><b>Completion Notes <span class="ah-ar">ملاحظات الإنجاز</span>:</b> {{ doc.completion_notes }}</div>{% endif %}

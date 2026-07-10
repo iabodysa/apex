@@ -12,7 +12,7 @@ referenced Salis Payment Request; this controller posts NO General Ledger /
 Journal / Payment Entry and never performs the deduction itself.
 
 Delegation-of-Authority gate: ``amount`` is compared on save against the Cost
-Recovery Operations Threshold (``cost_recovery_ops_threshold_sar`` in Salis
+Recovery Operations Threshold (``cost_recovery_ops_threshold`` in Salis
 Settings) to derive ``needs_operations``. The workflow's Regional-tier approve
 (Fleet Supervisor) is gated off when that flag is set, so only the Operations
 tier (Fleet Manager / System Manager) can approve a high-value recovery.
@@ -53,7 +53,7 @@ class MovementCostRecovery(Document):
 		helper). Derived here — never trusted from the client."""
 		from apex_habitat.apex_core.doctype.salis_settings.salis_settings import get_salis_float
 
-		threshold = get_salis_float("cost_recovery_ops_threshold_sar", 1000.0)
+		threshold = get_salis_float("cost_recovery_ops_threshold", 1000.0)
 		self.needs_operations = 1 if flt(self.amount) >= threshold else 0
 
 	def _enforce_doa_gate(self):

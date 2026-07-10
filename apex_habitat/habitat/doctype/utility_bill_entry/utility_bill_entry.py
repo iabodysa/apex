@@ -4,8 +4,8 @@
 On submit: calculates variance from the Utility Account average, posts a
 summary row to the Accommodation Ledger (ledger_type = utility_type).
 
-Shared-meter support: when cost_bearing_pct < 100, bill_amount_sar is
-computed as total_bill_amount_sar × (cost_bearing_pct / 100). The full
+Shared-meter support: when cost_bearing_pct < 100, bill_amount is
+computed as total_bill_amount × (cost_bearing_pct / 100). The full
 invoice total and the bearing percentage are preserved for audit trail.
 The ledger row carries the building's actual share only.
 
@@ -63,13 +63,13 @@ def validate(doc, method=None):
 
     # reject negative amounts here; the intentional negative reversal is built
     # directly in before_cancel and never routes through validate.
-    if flt(doc.total_bill_amount_sar) < 0 or flt(doc.bill_amount_sar) < 0:
+    if flt(doc.total_bill_amount) < 0 or flt(doc.bill_amount) < 0:
         frappe.throw(_("Bill amounts cannot be negative."))
 
 
 def on_submit(doc, method=None):
     # variance_from_avg_pct is already computed and persisted by validate() on the
-    # submitting save (bill_amount_sar is finalized there), so no recompute is needed.
+    # submitting save (bill_amount is finalized there), so no recompute is needed.
     try:
         _post_ledger_row(doc)
     except Exception:
@@ -100,7 +100,7 @@ def before_cancel(doc, method=None):
             "posting_date": today(),
             "building": doc.building,
             "ledger_type": doc.utility_type,
-            "total_site_cost": -flt(doc.bill_amount_sar),
+            "total_site_cost": -flt(doc.bill_amount),
             "capacity_denominator": total_capacity or 0,
             "employee_daily_share": 0,
             "posting_mode": "Operational Memo",
@@ -128,12 +128,12 @@ def _compute_meter_readings(doc) -> None:
 
 def _compute_sharing(doc) -> None:
     """Compute building share from total invoice when meter is shared."""
-    total = flt(doc.total_bill_amount_sar)
+    total = flt(doc.total_bill_amount)
     pct = flt(doc.cost_bearing_pct) or 100.0
 
     if total > 0:
         share = total * pct / 100.0
-        doc.bill_amount_sar = round(share, 2)
+        doc.bill_amount = round(share, 2)
 
         if pct < 100.0:
             doc.bill_share_note = (
@@ -149,10 +149,10 @@ def _compute_variance(doc) -> None:
         doc.variance_from_avg_pct = 0.0
         return
     avg = flt(
-        frappe.db.get_value("Utility Account", doc.utility_account, "average_monthly_bill_sar")
+        frappe.db.get_value("Utility Account", doc.utility_account, "average_monthly_bill")
     )
     if avg > 0:
-        variance = ((flt(doc.bill_amount_sar) - avg) / avg) * 100
+        variance = ((flt(doc.bill_amount) - avg) / avg) * 100
         doc.variance_from_avg_pct = round(variance, 2)
     else:
         doc.variance_from_avg_pct = 0.0
@@ -161,7 +161,7 @@ def _compute_variance(doc) -> None:
 def _post_ledger_row(doc) -> None:
     """Post one summary Accommodation Ledger row for the billing period.
 
-    Uses bill_amount_sar (the building's actual share after bearing calculation).
+    Uses bill_amount (the building's actual share after bearing calculation).
     The bill_share_note provides the audit trail for shared-meter cases.
     """
     # idempotent: skip if a live (original, not-yet-reversed) ledger row already
@@ -178,7 +178,7 @@ def _post_ledger_row(doc) -> None:
         "posting_date": doc.billing_period_to,
         "building": doc.building,
         "ledger_type": doc.utility_type,
-        "total_site_cost": flt(doc.bill_amount_sar),
+        "total_site_cost": flt(doc.bill_amount),
         "capacity_denominator": total_capacity or 0,
         "employee_daily_share": 0,
         "posting_mode": "Operational Memo",

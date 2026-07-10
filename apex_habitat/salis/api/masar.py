@@ -760,7 +760,7 @@ def get_worker_accommodation(token=None):
                 "district",
                 "site",
                 "google_maps_url",
-                "responsible_facility_supervisor",
+                "responsible_supervisor",
                 "current_occupants",
                 "total_capacity",
             ],
@@ -768,7 +768,7 @@ def get_worker_accommodation(token=None):
         )
         if b:
             in_charge = None
-            user = b.get("responsible_facility_supervisor")
+            user = b.get("responsible_supervisor")
             if user:
                 in_charge = {
                     "name": frappe.utils.get_fullname(user) or user,
@@ -1195,7 +1195,7 @@ def _custody_issued_by(custody_issue, building):
         return frappe.utils.get_fullname(owner) or owner
     if building:
         sup = frappe.db.get_value(
-            "Building", building, "responsible_facility_supervisor"
+            "Building", building, "responsible_supervisor"
         )
         if sup:
             return frappe.utils.get_fullname(sup) or sup
@@ -1520,11 +1520,11 @@ def get_worker_home(token=None):
 
 def _building_in_charge(employee):
     """The worker's current building in-charge contact, or None. Resolved from the
-    active assignment's building (``responsible_facility_supervisor`` User), the
+    active assignment's building (``responsible_supervisor`` User), the
     same source the accommodation screen uses."""
     assignment = _active_assignment(employee)
     user = assignment and frappe.db.get_value(
-        "Building", assignment.get("building"), "responsible_facility_supervisor"
+        "Building", assignment.get("building"), "responsible_supervisor"
     )
     if not user:
         return None

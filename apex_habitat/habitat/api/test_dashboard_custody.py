@@ -3,7 +3,7 @@
 `get_custody_value_in_employee_hands` and the `Custody Outstanding by Worker`
 report. Both read the same non-cancelled Accommodation Stock Ledger Custody
 Article rows with an employee set: issue rows add, return rows reverse, so the
-net signed qty (and qty * unit_cost_sar) is what the worker still holds.
+net signed qty (and qty * unit_cost) is what the worker still holds.
 
 Ledger rows are inserted directly with ignore_permissions/ignore_links (the same
 approach the doctype's own smoke test uses) so the cases are deterministic and
@@ -57,7 +57,7 @@ class TestDashboardCustody(FrappeTestCase):
             "item_name": "Test Article",
             "uom": "Nos",
             "signed_qty": qty,
-            "unit_cost_sar": self.unit_cost,
+            "unit_cost": self.unit_cost,
             "building": self.building,
             "employee": employee,
             "is_cancelled": is_cancelled,
@@ -78,7 +78,7 @@ class TestDashboardCustody(FrappeTestCase):
         # direct sum scoped to this run's unique employee.
         seeded = frappe.db.sql(
             """
-            SELECT COALESCE(SUM(signed_qty * COALESCE(unit_cost_sar, 0)), 0)
+            SELECT COALESCE(SUM(signed_qty * COALESCE(unit_cost, 0)), 0)
             FROM `tabAccommodation Stock Ledger`
             WHERE is_cancelled = 0
               AND item_type = 'Custody Article'
@@ -120,7 +120,7 @@ class TestDashboardCustody(FrappeTestCase):
                          "outstanding qty = issue - partial return")
         self.assertEqual(flt(row["value_sar"]), self.net_value,
                          "value = outstanding qty * unit cost")
-        self.assertEqual(flt(row["unit_cost_sar"]), self.unit_cost)
+        self.assertEqual(flt(row["unit_cost"]), self.unit_cost)
 
     def test_cancelled_rows_are_excluded(self):
         """The +99 cancelled issue must not affect the report balance for this

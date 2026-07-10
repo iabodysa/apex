@@ -51,8 +51,8 @@ def validate(doc, method=None):
     sync_party_employee(doc)
     if not doc.items:
         frappe.throw(_("At least one damaged item is required."))
-    doc.total_estimated_replacement_cost_sar = sum(
-        flt(row.estimated_replacement_cost_sar) for row in doc.items
+    doc.total_estimated_replacement_cost = sum(
+        flt(row.estimated_replacement_cost) for row in doc.items
     )
 
 
@@ -68,8 +68,8 @@ def on_submit(doc, method=None):
         logger = frappe.logger()
 
         # [#cgz16m]
-        amount = flt(doc.total_estimated_replacement_cost_sar)
-        max_deduction = flt(rule.cap_amount_per_event_sar)
+        amount = flt(doc.total_estimated_replacement_cost)
+        max_deduction = flt(rule.cap_amount_per_event)
         if max_deduction > 0 and amount > max_deduction:
             amount = max_deduction
 
@@ -124,7 +124,7 @@ def on_submit(doc, method=None):
                 "Housing Checkout",
                 doc.source_checkout,
                 {
-                    "linked_additional_salary": add_sal.name,
+                    "additional_salary_deduction": add_sal.name,
                     "damage_deduction_amount": add_sal.amount,
                 },
             )

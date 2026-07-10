@@ -178,7 +178,7 @@ def idle_resident_aging() -> None:
                     )
                 frappe.db.set_value(
                     "Idle Resident Report", r.name,
-                    {"days_idle": days, "estimated_accommodation_cost_bleed_sar": cost},
+                    {"days_idle": days, "estimated_cost_bleed": cost},
                     update_modified=False,
                 )
                 if days and days % 7 == 0:

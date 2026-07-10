@@ -52,7 +52,7 @@ def validate(doc, method=None):
     if not doc.items:
         frappe.throw(_("At least one asset line is required."))
     _compute_book_values(doc)
-    doc.total_book_value_sar = sum(flt(row.book_value_sar) for row in doc.items)
+    doc.total_book_value = sum(flt(row.book_value) for row in doc.items)
 
 
 def before_cancel(doc, method=None):
@@ -71,7 +71,7 @@ def _compute_book_values(doc):
             )
 
     for row in doc.items:
-        original = flt(row.original_cost_sar)
+        original = flt(row.original_cost)
         age = flt(row.age_years)
         policy = policy_cache.get(row.policy) if row.policy else None
         if policy and flt(policy.useful_life_years) > 0:  # [#dt9fyv]
@@ -81,9 +81,9 @@ def _compute_book_values(doc):
             depreciable = original - residual
             if policy.depreciation_method == "Declining Balance":
                 rate = 1 - (residual_pct ** (1 / life)) if life > 0 and residual_pct > 0 else (1 / life if life > 0 else 0)
-                row.book_value_sar = original * ((1 - rate) ** age)
+                row.book_value = original * ((1 - rate) ** age)
             else:
                 annual = depreciable / life if life > 0 else 0
-                row.book_value_sar = max(residual, original - annual * age)
+                row.book_value = max(residual, original - annual * age)
         else:
-            row.book_value_sar = original
+            row.book_value = original
