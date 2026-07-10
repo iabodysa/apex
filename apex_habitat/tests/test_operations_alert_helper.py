@@ -20,12 +20,14 @@ from apex_habitat.tests._helpers import _user
 
 APP = frappe.get_app_path("apex_habitat")
 
-# Sanctioned raw-insert sites: the helper itself + the two scheduler notifiers
-# that wrap their own domain-specific dedupe around the insert.
+# Sanctioned raw-insert sites: the helper itself + the scheduler notifiers
+# that wrap their own domain-specific dedupe around the insert (the flat
+# habitat/salis tasks.py modules were split into packages).
 _SANCTIONED = {
     "apex_core/utils/operations_alert.py",
-    "salis/tasks.py",
-    "habitat/tasks.py",
+    "salis/tasks/common.py",
+    "habitat/tasks/maintenance.py",
+    "habitat/tasks/safety.py",
 }
 
 # Matches an Operations Alert insert dict: "doctype" as the LEADING key of a doc

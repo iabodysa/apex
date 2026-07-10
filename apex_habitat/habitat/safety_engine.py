@@ -24,6 +24,8 @@ from __future__ import annotations
 
 import frappe
 
+from apex_habitat.apex_core.utils.company import company_for_building
+
 LEDGER_DOCTYPE = "Safety Finding Ledger"
 EXECUTION_DOCTYPE = "Safety Task Execution"
 
@@ -84,18 +86,6 @@ def _insert_ledger_row(
     ).insert(ignore_permissions=True)  # audit-ok
 
 
-def _company_for_building(building: str | None) -> str | None:
-    """Resolve the owning company for a ledger row from the building.
-
-    Reference only — carried for reporting grouping; the ledger posts no GL.
-    Accommodation Building carries a direct company Link; best-effort, a building
-    with no company posts a None company.
-    """
-    if not building:
-        return None
-    return frappe.db.get_value("Accommodation Building", building, "company") or None
-
-
 def post_safety_findings(safety_round) -> int:
     """Post one immutable ledger row per finding on a submitted Safety Round.
 
@@ -112,7 +102,7 @@ def post_safety_findings(safety_round) -> int:
 
     posting_date = safety_round.round_date
     building = safety_round.building
-    company = _company_for_building(building)
+    company = company_for_building(building)
 
     executions = frappe.get_all(
         EXECUTION_DOCTYPE,

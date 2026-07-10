@@ -24,23 +24,10 @@ from __future__ import annotations
 import frappe
 from frappe.utils import cint, now_datetime
 
+from apex_habitat.apex_core.utils.company import company_for_building
+
 LEDGER_DOCTYPE = "Cleaning Compliance Ledger"
 SOURCE_DOCTYPE = "Cleaning Log"
-
-
-def _company_for_building(building: str | None) -> str | None:
-    """Resolve the owning company for a ledger row from the building, else the
-    Habitat Settings default. Reference only — carried for reporting grouping."""
-    company = None
-    if building:
-        company = frappe.db.get_value("Accommodation Building", building, "company")
-    if not company:
-        from apex_habitat.apex_core.doctype.habitat_settings.habitat_settings import (
-            get_default_company,
-        )
-
-        company = get_default_company()
-    return company or None
 
 
 def _row_already_posted(cleaning_log: str, source_detail_no: str) -> bool:
@@ -115,7 +102,7 @@ def post_cleaning_compliance(doc) -> int:
     if not rows:
         return 0
 
-    company = _company_for_building(doc.building)
+    company = company_for_building(doc.building)
     assignee = getattr(doc, "cleaner_employee", None) or None
 
     posted = 0

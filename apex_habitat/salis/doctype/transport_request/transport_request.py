@@ -55,6 +55,12 @@ class TransportRequest(Document):
         if self.get("website_field"):
             frappe.throw(_("Invalid submission."), frappe.PermissionError)
 
+        # The requested_by __user default records "Guest" for anonymous QR
+        # submissions; keep the anonymous path requester-less so tracking stays
+        # code-based, not tied to the Guest user row.
+        if self.requested_by == "Guest":
+            self.requested_by = None
+
         # [#byh3b2]
         if not self.requested_by or frappe.session.user == "Guest":
             self.source_channel = "Web QR"

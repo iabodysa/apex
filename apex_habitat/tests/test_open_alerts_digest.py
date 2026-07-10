@@ -104,6 +104,6 @@ class TestOpenAlertsDigest(FrappeTestCase):
         from apex_habitat import hooks
 
         self.assertIn(
-            "apex_habitat.salis.tasks.daily_open_alerts_digest",
+            "apex_habitat.salis.tasks.alerts.daily_open_alerts_digest",
             hooks.scheduler_events["daily"],
         )

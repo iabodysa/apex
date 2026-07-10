@@ -30,6 +30,8 @@ from __future__ import annotations
 import frappe
 from frappe.utils import today
 
+from apex_habitat.apex_core.utils.company import company_for_trip
+
 LEDGER_DOCTYPE = "Trip Boarding Ledger"
 
 # Trip Boarding State statuses that are a final, postable outcome at finalize.
@@ -50,24 +52,6 @@ def _ledger_exists(dispatch_trip: str, employee: str) -> bool:
             },
         )
     )
-
-
-def _company_for_trip(dispatch_trip: str | None) -> str | None:
-    """Resolve the owning company for a ledger row: the trip vehicle's own
-    company, else the Salis Settings default. Reference only — carried for
-    reporting grouping; the ledger posts no GL."""
-    company = None
-    if dispatch_trip:
-        vehicle = frappe.db.get_value("Dispatch Trip", dispatch_trip, "vehicle")
-        if vehicle:
-            company = frappe.db.get_value("Salis Vehicle", vehicle, "company")
-    if not company:
-        from apex_habitat.apex_core.doctype.salis_settings.salis_settings import (
-            get_default_company,
-        )
-
-        company = get_default_company()
-    return company or None
 
 
 def _worker_buildings(dispatch_trip: str) -> dict[str, str]:
@@ -153,7 +137,7 @@ def post_trip_boarding(dispatch_trip: str) -> int:
     if not rows:
         return 0
 
-    company = _company_for_trip(dispatch_trip)
+    company = company_for_trip(dispatch_trip)
     buildings = _worker_buildings(dispatch_trip)
     posting_date = today()
     posted = 0

@@ -34,7 +34,7 @@ class TestSeedDemoRoleLoginsGate(FrappeTestCase):
         # layer touches frappe.conf.allow_tests) resolve without raising.
         with patch.object(
             seed.frappe, "conf", new=frappe._dict(developer_mode=None)
-        ), patch.object(seed, "_company") as company, patch.object(
+        ), patch.object(seed, "resolve_company_or_any") as company, patch.object(
             seed, "_seed_supervisor"
         ) as seed_supervisor, patch.object(seed, "_seed_employee") as seed_employee:
             result = seed.execute()
@@ -78,7 +78,7 @@ class TestSeedDemoRoleLoginsGate(FrappeTestCase):
             seed.frappe, "conf", new=frappe._dict(developer_mode=1)
         ), patch.object(seed.frappe.db, "exists", return_value=True), patch.object(
             seed.frappe.db, "commit"
-        ), patch.object(seed, "_company", return_value="Demo Co"), patch.object(
+        ), patch.object(seed, "resolve_company_or_any", return_value="Demo Co"), patch.object(
             seed, "_seed_supervisor"
         ) as seed_supervisor, patch.object(
             seed, "_seed_employee", return_value="tok_demo_123"

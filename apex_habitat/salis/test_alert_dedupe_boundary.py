@@ -35,7 +35,9 @@ class TestAlertDedupeBoundary(FrappeTestCase):
             captured["filters"] = filters
             return True  # treat as "duplicate exists" -> _raise_alert returns None
 
-        with patch("apex_habitat.salis.tasks.frappe.db.exists", side_effect=_fake_exists):
+        with patch(
+            "apex_habitat.salis.tasks.common.frappe.db.exists", side_effect=_fake_exists
+        ):
             result = tasks._raise_alert("License Expiry", "Warning", "msg", driver="DRV-X")
 
         self.assertIsNone(result)  # dedupe short-circuited
@@ -57,7 +59,9 @@ class TestAlertDedupeBoundary(FrappeTestCase):
             captured["filters"] = filters
             return True
 
-        with patch("apex_habitat.salis.tasks.frappe.db.exists", side_effect=_fake_exists):
+        with patch(
+            "apex_habitat.salis.tasks.common.frappe.db.exists", side_effect=_fake_exists
+        ):
             tasks._raise_alert("License Expiry", "Warning", "msg", vehicle="VEH-X")
 
         lower, upper = captured["filters"]["raised_on"][1]

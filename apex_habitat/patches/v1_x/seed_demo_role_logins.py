@@ -33,6 +33,8 @@ non-secret demo value (a dev/demo site only) returned for the owner's recipe.
 
 import frappe
 
+from apex_habitat.apex_core.utils.company import resolve_company_or_any
+
 # Fixed, non-secret demo credential — only ever set on a developer_mode site
 # (the whole seeder is gated on that). Returned in the login recipe, never a real
 # secret.
@@ -62,13 +64,6 @@ _REQUIRED = (
     "Employee",
     "Masar Worker Token",
 )
-
-
-def _company():
-    return (
-        frappe.defaults.get_global_default("company")
-        or (frappe.get_all("Company", pluck="name", limit=1) or [None])[0]
-    )
 
 
 def _get_or_create(doctype, key_filters, make):
@@ -284,7 +279,7 @@ def execute():
             return
         if any(not frappe.db.exists("DocType", dt) for dt in _REQUIRED):
             return
-        company = _company()
+        company = resolve_company_or_any()
         if not company:
             return
 

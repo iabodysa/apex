@@ -109,6 +109,6 @@ class TestWeeklyCustodyDigest(FrappeTestCase):
         from apex_habitat import hooks
 
         self.assertIn(
-            "apex_habitat.habitat.tasks.weekly_custody_digest",
+            "apex_habitat.habitat.tasks.custody.weekly_custody_digest",
             hooks.scheduler_events["weekly"],
         )

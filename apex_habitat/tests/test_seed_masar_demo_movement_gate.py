@@ -30,7 +30,7 @@ class TestSeedMasarDemoMovementGate(FrappeTestCase):
         # frappe.conf is a _dict whose __dict__ is None, so patch.object can't reach
         # its .get; swap the whole conf for a plain dict (its .get drives the gate).
         with patch.object(seed.frappe, "conf", new={"developer_mode": None}), patch.object(
-            seed, "_company"
+            seed, "resolve_company_or_any"
         ) as company, patch.object(seed, "_driver_user") as driver_user, patch.object(
             seed, "_driver"
         ) as driver, patch.object(

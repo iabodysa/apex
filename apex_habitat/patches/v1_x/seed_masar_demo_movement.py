@@ -28,6 +28,8 @@ generic demo placeholders — no real personnel, contacts, or locations.
 
 import frappe
 
+from apex_habitat.apex_core.utils.company import resolve_company_or_any
+
 # Stable demo keys (idempotency anchors) — neutral placeholders, never real PII.
 _DEMO_USER = "demo.driver@masar.example"
 _DRIVER_NAME = "Demo Driver"
@@ -68,13 +70,6 @@ _REQUIRED = (
     "Accommodation Bed",
     "Accommodation Assignment",
 )
-
-
-def _company():
-    return (
-        frappe.defaults.get_global_default("company")
-        or (frappe.get_all("Company", pluck="name", limit=1) or [None])[0]
-    )
 
 
 def _get_or_create(doctype, key_filters, make):
@@ -393,7 +388,7 @@ def execute():
             return
         if any(not frappe.db.exists("DocType", dt) for dt in _REQUIRED):
             return
-        company = _company()
+        company = resolve_company_or_any()
         if not company:
             # No Company yet (very early install) — nothing to scope the demo to.
             return

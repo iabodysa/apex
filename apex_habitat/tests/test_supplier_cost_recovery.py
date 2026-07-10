@@ -104,7 +104,7 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
         a.insert(ignore_permissions=True)
         a.submit()
 
-        with patch("apex_habitat.habitat.tasks.frappe.enqueue") as enq:
+        with patch("apex_habitat.habitat.tasks.cost.frappe.enqueue") as enq:
             daily_accommodation_cost_allocation()
 
         buildings = [c.kwargs.get("building") for c in enq.call_args_list]
@@ -114,7 +114,7 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
             "per-building jobs must run on the long queue",
         )
         self.assertTrue(
-            all(c.args[0] == "apex_habitat.habitat.tasks.allocate_building_accommodation_cost"
+            all(c.args[0] == "apex_habitat.habitat.tasks.cost.allocate_building_accommodation_cost"
                 for c in enq.call_args_list),
             "dispatcher must enqueue the per-building worker",
         )

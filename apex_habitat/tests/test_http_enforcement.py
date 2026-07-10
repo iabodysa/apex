@@ -135,7 +135,7 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "permission-check.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/fuel.py",
         "submit_fuel_request",
         "Driver portal. The Salis Driver is resolved from the session "
         "server-side (never client-supplied) and the vehicle must be bound to "
@@ -143,14 +143,14 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "with the caller's own identity. Token/identity-resolved writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/support.py",
         "raise_support_ticket",
         "Driver portal. The Salis Driver and raised_by are resolved from the "
         "session server-side; the Issue is stamped with the caller's own "
         "identity. Token/identity-resolved writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/attendance.py",
         "driver_check_in",
         "Driver portal. The Salis Driver is resolved from the session "
         "server-side (_resolve_driver); the Driver Attendance is the caller's "
@@ -158,7 +158,7 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "ignore_permissions (audit-ok — session identity). Token/identity writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/attendance.py",
         "driver_check_out",
         "Driver portal. The Salis Driver is resolved from the session "
         "server-side (_resolve_driver); updates the caller's own (today's) "
@@ -166,7 +166,7 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "(audit-ok — session identity). Token/identity-resolved writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/support.py",
         "reply_to_ticket",
         "Driver portal. The Issue is resolved through _driver_issue, scoped to "
         "the session driver's own custom_driver, so a driver can only reply on "
@@ -174,14 +174,14 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "identity. Token/identity-resolved writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/support.py",
         "report_vehicle_problem",
         "Driver portal. The Salis Driver and bound vehicle are resolved from the "
         "session server-side; delegates to raise_support_ticket internals which "
         "stamp the caller's own identity. Token/identity-resolved writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/support.py",
         "request_license_renewal",
         "Driver portal. The Salis Driver is resolved from the session "
         "server-side; refuses unless the caller's own licence is within the "
@@ -189,7 +189,7 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "the caller's identity. Token/identity-resolved writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/execution.py",
         "start_my_trip",
         "Driver portal. The Salis Driver is resolved from the session "
         "server-side and the trip is honoured only when it belongs to that driver "
@@ -197,7 +197,7 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "own record. Token/identity-resolved writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/execution.py",
         "complete_my_trip",
         "Driver portal. The Salis Driver is resolved from the session "
         "server-side and the trip is honoured only when it belongs to that driver "
@@ -205,7 +205,7 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "Log. Token/identity-resolved writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/execution.py",
         "push_driver_position",
         "Driver portal. The Salis Driver is resolved from the session server-side "
         "and the trip is honoured only when it belongs to that driver "
@@ -213,7 +213,7 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "position (range-validated) onto that trip. Token/identity-resolved writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/boarding.py",
         "manual_board_workers",
         "Driver portal. The Salis Driver is resolved from the session server-side "
         "and the trip is honoured only when it belongs to that driver "
@@ -222,7 +222,7 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "Scan Log. Token/identity-resolved writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/execution.py",
         "mark_stop_progress",
         "Driver portal. The Salis Driver is resolved from the session server-side "
         "and the trip is honoured only when it belongs to that driver "
@@ -230,7 +230,7 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "on the caller's own open Trip Start Log. Token/identity-resolved writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/__init__.py",
         "mark_arrived",
         "Driver portal. The Salis Driver is resolved from the session server-side "
         "and the trip is honoured only when it belongs to that driver "
@@ -239,7 +239,7 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "mark_stop_progress). Token/identity-resolved writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/__init__.py",
         "save_push_subscription",
         "Driver portal. The Salis Driver is resolved from the session server-side "
         "(_resolve_driver, never client-supplied); the Driver Push Subscription is "
@@ -248,7 +248,7 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "Token/identity-resolved writer.",
     ),
     (
-        "salis/api/driver_portal.py",
+        "salis/api/driver_portal/notifications.py",
         "delete_push_subscription",
         "Driver portal. The Salis Driver is resolved from the session server-side "
         "(_resolve_driver); only the caller's own subscription (matched on "

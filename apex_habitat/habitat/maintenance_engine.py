@@ -24,6 +24,8 @@ from __future__ import annotations
 import frappe
 from frappe.utils import flt, now_datetime, today
 
+from apex_habitat.apex_core.utils.company import resolve_company
+
 LEDGER_DOCTYPE = "Maintenance Cost Ledger"
 SOURCE_DOCTYPE = "Maintenance Work Order"
 
@@ -43,17 +45,6 @@ def _ledger_row_exists(source_name: str, detail_no: int) -> bool:
             },
         )
     )
-
-
-def _company_for_work_order(work_order) -> str | None:
-    """Resolve the owning company for a ledger row. The Work Order has no company
-    field, so fall back to the Habitat Settings default. Reference only — carried
-    for reporting grouping; the ledger posts no GL."""
-    from apex_habitat.apex_core.doctype.habitat_settings.habitat_settings import (
-        get_default_company,
-    )
-
-    return get_default_company() or None
 
 
 def _insert_ledger_row(
@@ -96,7 +87,8 @@ def post_maintenance_cost(work_order) -> int:
     already ledgered is skipped, so re-running completion posts nothing new. Rows
     with a zero/blank estimated cost are skipped (no zero-amount memo).
     """
-    company = _company_for_work_order(work_order)
+    # Work Order carries no company field -> module default chain (reference only).
+    company = resolve_company("Habitat")
     posted = 0
     for detail_no, row in enumerate(work_order.procurement_items or [], start=1):
         amount = flt(row.get("estimated_cost") or 0)
