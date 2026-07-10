@@ -338,3 +338,12 @@ apex.patches.v1_x.add_asl_composite_index
 # Also wired into after_install (fresh sites skip patches) + after_migrate (self-heal
 # after any re-import re-stamps creation). Idempotent, no-op when order is right.
 apex.patches.v1_x.reorder_root_workspace_creation
+
+# v2.0.0 — P-204: enable the Habitat expiry Notifications that replaced the custom
+# expiry-watcher notify boilerplate (Building License / Building Lease / Temporary
+# Stay). They shipped enabled:0 as scaffolding, and Notification.enabled is in
+# import_file.ignore_values, so migrate preserves the stale DB value and never applies
+# the JSON enabled flip; flip enabled + send_system_notification on the live rows.
+# Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site has run
+# it (tracked in tabPatch Log).
+apex.patches.v1_x.enable_habitat_expiry_notifications

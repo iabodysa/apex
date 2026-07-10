@@ -7,7 +7,7 @@
  "docstatus": 0,
  "doctype": "Notification",
  "document_type": "Building License",
- "enabled": 0,
+ "enabled": 1,
  "event": "Days Before",
  "idx": 0,
  "is_standard": 1,
@@ -23,9 +23,9 @@
    "receiver_by_role": "Resident Supervisor"
   }
  ],
- "send_system_notification": 0,
+ "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "Building License Expiring Soon: {{ doc.name }}",
  "email_template": "Habitat - Building License Renewal Notice",
- "modified": "2026-06-07 19:13:04.002116"
+ "modified": "2026-07-11 01:59:46.491117"
 }

@@ -164,7 +164,6 @@ scheduler_events = {
         "apex.habitat.tasks.maintenance.daily_building_license_expiry_check",
         "apex.habitat.tasks.maintenance.open_maintenance_escalation",
         "apex.habitat.tasks.residency.lease_expiry_watchlist",
-        "apex.habitat.tasks.residency.temporary_stay_checkout_watchlist",
         "apex.habitat.tasks.residency.idle_resident_aging",
         "apex.habitat.tasks.custody.consumable_custody_expiry_watch",
         "apex.habitat.tasks.scheduled_tasks.daily_scheduled_task_instance_generator",

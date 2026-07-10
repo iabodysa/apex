@@ -5,20 +5,22 @@ from __future__ import annotations
 
 import frappe
 
-from apex.habitat.tasks.common import _notify_operational
-
 
 def daily_building_license_expiry_check() -> None:
-    """Warn when Building License documents are approaching or past expiry.
+    """Flip Building License status to Expired / Expiring Soon on the transition edge.
 
-    Updates status of Building License records:
-    - Expired: if today is past or equal to expiry_date.
-    - Expiring Soon: if today is within renewal_lead_days (default 60) of expiry_date.
+    Operator alerting is owned by the native Notifications ``Habitat - Building
+    License Expiring Soon`` and ``Habitat - Building License Expired`` (P-204). This
+    job carries ONLY the residual status flip those Notifications cannot perform:
+    ``set_property_after_alert`` is a no-op on a submitted document whose ``status``
+    field is not ``allow_on_submit`` (Building License is submitted), and it cannot
+    honour the per-record ``renewal_lead_days`` override. So the sweep is kept —
+    stripped of the old notify/message boilerplate — purely to keep the persisted
+    status accurate (Active/Expiring Soon are swept; Expired/Revoked are left alone).
     """
-    from frappe.utils import today, date_diff
+    from frappe.utils import date_diff, today
 
     today_str = today()
-    logger = frappe.logger()
 
     # [#bz69zh]
     start = 0
@@ -30,7 +32,7 @@ def daily_building_license_expiry_check() -> None:
                 "docstatus": 1,
                 "status": ["in", ["Active", "Expiring Soon"]]
             },
-            fields=["name", "expiry_date", "renewal_lead_days", "status", "license_number", "license_type"],
+            fields=["name", "expiry_date", "renewal_lead_days", "status"],
             limit_start=start,
             limit_page_length=batch_size,
         )
@@ -39,26 +41,19 @@ def daily_building_license_expiry_check() -> None:
 
         default_lead = frappe.db.get_single_value("Habitat Settings", "license_expiry_days_before") or 60
         for lic in licenses:
-            expiry_date = lic.expiry_date
-            if not expiry_date:
+            if not lic.expiry_date:
                 continue
 
             try:
                 lead_days = lic.renewal_lead_days if lic.renewal_lead_days is not None else default_lead
-                days_to_expiry = date_diff(expiry_date, today_str)
+                days_to_expiry = date_diff(lic.expiry_date, today_str)
 
                 if days_to_expiry <= 0:
                     if lic.status != "Expired":
                         frappe.db.set_value("Building License", lic.name, "status", "Expired")
-                        msg = f"Building License {lic.name} ({lic.license_type} {lic.license_number}) has expired on {expiry_date}."
-                        logger.warning(msg)
-                        _notify_operational("Building License", lic.name, msg)
                 elif days_to_expiry <= lead_days:
                     if lic.status != "Expiring Soon":
                         frappe.db.set_value("Building License", lic.name, "status", "Expiring Soon")
-                        msg = f"Building License {lic.name} ({lic.license_type} {lic.license_number}) is expiring soon on {expiry_date} ({days_to_expiry} days remaining)."
-                        logger.warning(msg)
-                        _notify_operational("Building License", lic.name, msg)
             except Exception:
                 frappe.db.rollback()  # [#7kjob3]
                 frappe.log_error(

@@ -38,7 +38,6 @@ from apex.habitat.tasks.maintenance import (
 from apex.habitat.tasks.residency import (
     idle_resident_aging,
     lease_expiry_watchlist,
-    temporary_stay_checkout_watchlist,
 )
 from apex.habitat.tasks.occupancy import (
     daily_occupancy_snapshot,
@@ -74,7 +73,6 @@ __all__ = [
     "idle_resident_aging",
     "lease_expiry_watchlist",
     "open_maintenance_escalation",
-    "temporary_stay_checkout_watchlist",
     "weekly_custody_digest",
     "weekly_occupancy_sync",
     "weekly_safety_coverage_gate",

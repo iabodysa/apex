@@ -9,20 +9,19 @@ from apex.habitat.tasks.common import _notify_operational
 
 
 def lease_expiry_watchlist() -> None:
-    """Alert on leases expiring within the configured lead days.
+    """Flip an expired Lease's status to Expired (residual of the P-204 refactor).
 
-    Queries Accommodation Lease (submitted, live status) directly —
-    the authoritative source for lease dates. A live lease is one the
-    approval workflow has submitted (status=Approved) or that has been
-    moved into its post-approval lifecycle (status=Active); both are
-    in force and watchlisted.
-    Sets lease status = Expired when lease_end_date has passed.
+    Operator alerting for expiring and expired leases is owned by the native
+    Notifications ``Habitat - Building Lease Expiring`` (Days Before, per Habitat
+    Settings lead) and ``Habitat - Building Lease Expired`` (Days Before 0). Those
+    cannot flip the status: ``set_property_after_alert`` is a no-op on a submitted,
+    workflow-driven document whose ``status`` field is not ``allow_on_submit``. So
+    this job keeps only the single-field flip to ``Expired`` (via ``db_set`` — the
+    same out-of-workflow write it always did) once ``lease_end_date`` has passed.
     """
     from frappe.utils import date_diff, today
 
     today_str = today()
-    logger = frappe.logger()
-    lease_lead = frappe.db.get_single_value("Habitat Settings", "lease_expiry_days_before") or 90
 
     start = 0
     batch_size = 500
@@ -31,7 +30,7 @@ def lease_expiry_watchlist() -> None:
             "Lease",
             filters={"docstatus": 1, "status": ["in", ["Approved", "Active"]],
                      "lease_end_date": ["is", "set"]},
-            fields=["name", "building", "lease_end_date"],
+            fields=["name", "lease_end_date"],
             limit_start=start,
             limit_page_length=batch_size,
         )
@@ -40,84 +39,13 @@ def lease_expiry_watchlist() -> None:
 
         for lease in leases:
             try:
-                days = date_diff(lease.lease_end_date, today_str)
-                if days < 0:
+                if date_diff(lease.lease_end_date, today_str) < 0:
                     frappe.db.set_value("Lease", lease.name, "status", "Expired")
-                    msg = (
-                        f"lease_expiry_watchlist: lease {lease.name} "
-                        f"(building {lease.building}) expired {abs(days)} days ago."
-                    )
-                    logger.warning(msg)
-                    _notify_operational("Lease", lease.name, msg)
-                elif 0 <= days <= lease_lead:
-                    msg = (
-                        f"lease_expiry_watchlist: lease {lease.name} "
-                        f"(building {lease.building}) expires in {days} days ({lease.lease_end_date})."
-                    )
-                    logger.warning(msg)
-                    _notify_operational("Lease", lease.name, msg)
             except Exception:
                 frappe.db.rollback()
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Lease expiry watchlist failed for {lease.name}"[:140],
-                )
-
-        start += batch_size
-
-
-def temporary_stay_checkout_watchlist() -> None:
-    """Flag temporary stays whose expected check-out date has arrived or passed
-    while the worker is still checked in.
-
-    Active stay = submitted Accommodation Assignment with no check_out_date. For
-    each temporary one, compare today to expected_checkout_date; post a timeline
-    comment (gated by Enable Operational Notifications) on overdue stays, and on
-    those due within the Temporary Stay Lead Days. Mirrors lease_expiry_watchlist:
-    paginated 500/batch, per-row error isolation. Sets no state field.
-    """
-    from frappe.utils import date_diff, today
-
-    today_str = today()
-    logger = frappe.logger()
-    start = 0
-    batch_size = 500
-    while True:
-        stays = frappe.get_all(
-            "Housing Assignment",
-            filters={
-                "stay_type": "Temporary",
-                "docstatus": 1,
-                "check_out_date": ["is", "not set"],
-                "expected_checkout_date": ["is", "set"],
-            },
-            fields=["name", "employee", "employee_name", "expected_checkout_date"],
-            limit_start=start,
-            limit_page_length=batch_size,
-        )
-        if not stays:
-            break
-
-        lead = frappe.db.get_single_value("Habitat Settings", "temporary_stay_days_before") or 2
-        for s in stays:
-            try:
-                days = date_diff(s.expected_checkout_date, today_str)
-                worker = s.employee_name or s.employee
-                if days < 0:
-                    msg = (f"temporary_stay_checkout_watchlist: {worker} is overdue — expected check-out was "
-                           f"{s.expected_checkout_date} ({abs(days)} days ago) and the worker is still checked in.")
-                    logger.warning(msg)
-                    _notify_operational("Housing Assignment", s.name, msg)
-                elif 0 <= days <= lead:
-                    msg = (f"temporary_stay_checkout_watchlist: {worker}'s temporary stay ends on "
-                           f"{s.expected_checkout_date} (in {days} days). Please arrange check-out.")
-                    logger.warning(msg)
-                    _notify_operational("Housing Assignment", s.name, msg)
-            except Exception:
-                frappe.db.rollback()
-                frappe.log_error(
-                    message=frappe.get_traceback(),
-                    title=f"Temporary stay watchlist failed for {s.name}"[:140],
                 )
 
         start += batch_size
