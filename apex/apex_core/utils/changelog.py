@@ -5,6 +5,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 2.0.0 — a generational release: a new Logistay workforce timesheet module reads client attendance into one standard record with a governed exception workbench, clearer plainer names and task-first daily workspaces across the app, one shared foundation behind the five worker and driver portals, and stronger safeguards throughout",
+        "app_name": "apex",
+        "link": "/app/logistay",
+        "creation": "2026-07-10 09:00:00",
+    },
+    {
         "title": "Apex 1.62.0 — housing and procurement staff can now confirm Asset Deliveries on-site: the Housing Portal has been fully wired into the app and now includes a dedicated Asset Delivery mobile interface; after the three exit checkpoints clear, the receiving supervisor enters the 6-digit on-site OTP directly from their phone to confirm receipt and securely log the asset transfer",
         "app_name": "apex",
         "link": "/housing",
