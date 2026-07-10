@@ -183,6 +183,8 @@ scheduler_events = {
         "apex_habitat.salis.tasks.alerts.daily_open_alerts_digest",
         "apex_habitat.salis.fuel_engine.accrue_fuel_consumption",
         "apex_habitat.salis.rental_engine.daily_rental_accrual",
+        # Logistay: post the immutable worker-hours ledger from COMPLETE Timesheet Lines.
+        "apex_habitat.logistay.timesheet_engine.post_timesheet_ledger",
         # [#ptjnq1]
         "apex_habitat.apex_core.utils.workflow_utils.cleanup_orphaned_workflow_actions",
     ],
@@ -362,8 +364,8 @@ fixtures = [
     # not fixtures, since a fixture import crashes on a fresh site's NULL-lft/rgt root.
     # [#t543it] Worker-housing procurement catalog for the Items shopping surface.
     {"dt": "Item", "filters": [["item_code", "like", "ACC-%"]]},
-    # Custom ERPNext Party Type so a Freelance can be a payable party on Journal/Payment Entry.
-    {"dt": "Party Type", "filters": [["name", "in", ["Freelance"]]]},
+    # Custom ERPNext Party Type so a Freelancer can be a payable party on Journal/Payment Entry.
+    {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},
 ]
 
 # [#6mioka]

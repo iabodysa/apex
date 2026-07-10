@@ -61,6 +61,14 @@ apex_habitat.patches.v1_x.rename_habitat_workspaces
 # Mirrors the building backfill pattern. PRUNE once every deployed site has run it.
 apex_habitat.patches.v1_x.backfill_accommodation_site_native_address
 
+# v1.x — Logistay foundation renames (ONE-TIME, pre-sync so the DocType rename lands
+# before the Logistay freelancer.json import). Freelance → Freelancer: the DocType
+# (T-033 adjective→noun, moved to Logistay) then the Party Type record (cascades
+# party_type on existing Journal/Payment Entry rows). Both guarded + idempotent.
+# PRUNE once every deployed site has run them.
+apex_habitat.patches.v1_x.rename_freelance_doctype_to_freelancer
+apex_habitat.patches.v1_x.rename_freelance_party_type_to_freelancer
+
 [post_model_sync]
 # v1.x — TEMPORARY safeguard (GitHub #97): ensure the Web Form keeps its `route` on
 # an upgrade (the v15-removed make_route_to_web_form helper is never needed).

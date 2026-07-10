@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Tests for the Freelance master: validation, the ID unique guard, the
+"""Tests for the Freelancer master: validation, the ID unique guard, the
 permlevel-1 PII gate, and the accounting-party proof (Journal/Payment Entry)."""
 
 from __future__ import annotations
@@ -15,18 +15,18 @@ def _accounting_available() -> bool:
     """ERPNext accounting present? Guard the Party-Entry proof so the suite runs
     on a site without erpnext installed."""
     return frappe.db.exists("DocType", "Journal Entry") and frappe.db.exists(
-        "Party Type", "Freelance"
+        "Party Type", "Freelancer"
     )
 
 
-class TestFreelance(FrappeTestCase):
+class TestFreelancer(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
 
     def _doc(self, **overrides):
         data = {
-            "doctype": "Freelance",
-            "full_name": "Test Freelance",
+            "doctype": "Freelancer",
+            "full_name": "Test Freelancer",
             "national_id_or_iqama": f"ID{frappe.generate_hash(length=8)}",
             "contract_start_date": nowdate(),
             "contract_end_date": add_days(nowdate(), 180),
@@ -83,7 +83,7 @@ class TestFreelance(FrappeTestCase):
 
         frappe.set_user(user.name)
         try:
-            fetched = frappe.get_doc("Freelance", doc.name)
+            fetched = frappe.get_doc("Freelancer", doc.name)
             fetched.check_permission("read")
             # The permlevel-1 read gate is enforced by apply_fieldlevel_read_permissions
             # (the same call the get_doc API applies before returning a doc) — it deletes
@@ -93,14 +93,14 @@ class TestFreelance(FrappeTestCase):
             self.assertIsNone(stripped.get("national_id_or_iqama"))
             self.assertIsNone(stripped.get("mobile_number"))
             # A permlevel-0 field stays visible — proves the doc itself is readable.
-            self.assertEqual(stripped.get("full_name"), "Test Freelance")
+            self.assertEqual(stripped.get("full_name"), "Test Freelancer")
         finally:
             frappe.set_user("Administrator")
 
     @unittest.skipUnless(_accounting_available(), "erpnext accounting not installed")
     def test_freelance_is_an_accounting_party(self):
         """The core proof: with the custom Party Type registered, a Journal Entry
-        can carry party_type='Freelance' + party=<a freelance>."""
+        can carry party_type='Freelancer' + party=<a freelance>."""
         freelance = self._doc().insert(ignore_permissions=True)
 
         company = frappe.db.get_value("Company", {}, "name")
@@ -136,7 +136,7 @@ class TestFreelance(FrappeTestCase):
                 "accounts": [
                     {
                         "account": payable,
-                        "party_type": "Freelance",
+                        "party_type": "Freelancer",
                         "party": freelance.name,
                         "credit_in_account_currency": 3000,
                     },
@@ -147,5 +147,5 @@ class TestFreelance(FrappeTestCase):
         # Reaching validate without a party-type error is the proof the party axis works.
         je.set_missing_values()
         je.validate()
-        self.assertEqual(je.accounts[0].party_type, "Freelance")
+        self.assertEqual(je.accounts[0].party_type, "Freelancer")
         self.assertEqual(je.accounts[0].party, freelance.name)

@@ -1,0 +1,44 @@
+{
+ "actions": [],
+ "creation": "2026-07-10 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "ts_canonical_field",
+  "ts_gate_severity"
+ ],
+ "fields": [
+  {
+   "columns": 6,
+   "fieldname": "ts_canonical_field",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Canonical Field",
+   "options": "ts_role_package\nts_payable_days\nts_shifts\nts_ot_hours\nts_kpi_van\nts_kpi_pod\nts_kpi_success_pct\nts_late_ge30_days\nts_departure_late_count\nts_days_lt20_flag\nts_training_days\nts_daily_status"
+  },
+  {
+   "columns": 4,
+   "default": "GATE",
+   "description": "GATE blocks reconciliation when the field is missing; WARN is nice-to-have.",
+   "fieldname": "ts_gate_severity",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Gate Severity",
+   "options": "GATE\nWARN"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-10 03:33:58.827229",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "Mapping Required Field",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

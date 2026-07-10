@@ -1,8 +1,8 @@
 [
  {
   "doctype": "Party Type",
-  "name": "Freelance",
-  "party_type": "Freelance",
+  "name": "Freelancer",
+  "party_type": "Freelancer",
   "account_type": "Payable"
  }
 ]

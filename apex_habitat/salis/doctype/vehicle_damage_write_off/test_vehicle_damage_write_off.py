@@ -20,17 +20,30 @@ from apex_habitat.tests._helpers import _grant_project, _project, _user
 WORKFLOW = "Vehicle Damage Write-Off Workflow"
 
 
+def _ensure_vehicle(plate_number):
+    """Get-or-create a Salis Vehicle by its unique normalized plate.
+
+    These tests commit mid-method (workflow apply / submit), so the per-method
+    vehicle escapes FrappeTestCase's savepoint rollback and persists. Reusing the
+    existing row keeps setUp idempotent on a re-run or a shared, non-reset bench.
+    """
+    normalized = "".join(plate_number.split()).upper()
+    existing = frappe.db.get_value("Salis Vehicle", {"plate_normalized": normalized})
+    if existing:
+        return existing
+    return frappe.get_doc(
+        {"doctype": "Salis Vehicle", "plate_number": plate_number, "status": "Active"}
+    ).insert(ignore_permissions=True).name
+
+
 class TestVehicleDamageWriteOff(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
         tag = self._testMethodName
-        self.vehicle = frappe.get_doc(
-            {
-                "doctype": "Salis Vehicle",
-                "plate_number": f"WO {tag}",
-                "status": "Active",
-            }
-        ).insert(ignore_permissions=True).name
+        # submit()/cancel() below commit, so the per-method vehicle escapes the
+        # savepoint rollback and leaks; reuse it (unique plate_normalized) instead
+        # of colliding on a re-run or a shared, non-reset test bench.
+        self.vehicle = _ensure_vehicle(f"WO {tag}")
         self.incident = frappe.get_doc(
             {
                 "doctype": "Vehicle Incident",
@@ -153,13 +166,10 @@ class TestVehicleDamageWriteOffDoA(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
         frappe.db.set_single_value("Salis Settings", "writeoff_ops_threshold_sar", 2000)
-        self.vehicle = frappe.get_doc(
-            {
-                "doctype": "Salis Vehicle",
-                "plate_number": f"WD {self._testMethodName}",
-                "status": "Active",
-            }
-        ).insert(ignore_permissions=True).name
+        # _case() applies a workflow (commits), so the per-method vehicle escapes
+        # the savepoint rollback and leaks; reuse it (unique plate_normalized)
+        # instead of colliding on a re-run or a shared, non-reset test bench.
+        self.vehicle = _ensure_vehicle(f"WD {self._testMethodName}")
 
     def tearDown(self):
         frappe.set_user("Administrator")
