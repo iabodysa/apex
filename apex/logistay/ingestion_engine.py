@@ -116,11 +116,22 @@ def normalize_pending_intakes() -> int:
     )
     processed = 0
     for name in sources:
+        # Per-record failure isolation: a single bad intake is rolled back,
+        # logged against its own record, and marked Failed so the rest of the
+        # batch still runs. Narrowed from a bare ``except`` to the realistic
+        # per-record data/validation failures — a genuine code or infrastructure
+        # bug (AttributeError, DB OperationalError, ...) now propagates to the
+        # scheduler's own job-level logging instead of being silently skipped.
         try:
             _process_source(name)
-        except Exception:
+        except (frappe.ValidationError, frappe.DoesNotExistError, ValueError, TypeError, KeyError):
             frappe.db.rollback()
-            frappe.log_error(title=f"Logistay intake failed: {name}")
+            frappe.log_error(
+                title=f"Logistay intake failed: {name}"[:140],
+                message=frappe.get_traceback(),
+                reference_doctype=INTAKE_DOCTYPE,
+                reference_name=name,
+            )
             _fail_source(name)
         processed += 1
 
