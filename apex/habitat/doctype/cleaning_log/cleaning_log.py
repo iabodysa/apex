@@ -76,3 +76,26 @@ class CleaningLog(Document):
 def _session_employee() -> str | None:
     """Resolve the current session user to their Employee, if any."""
     return frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
+
+
+def on_doctype_update():
+    """DB-level backstop for the app-level 'one non-cancelled log per (building,
+    cleaning_date)' guard.
+
+    Two daily scheduler jobs write Cleaning Logs — ``daily_cleaning_log_generator``
+    and ``auto_create_cleaning_logs`` — each with only a check-then-insert
+    ``frappe.db.exists`` guard. They are enqueued as separate RQ jobs that can run
+    concurrently, so both can pass their 'not exists yet' check for the same
+    building/day before either commits and double-create. This composite UNIQUE
+    index makes the second insert fail at the DB instead. ``docstatus`` is part of
+    the key (mirroring the app guard's ``docstatus != 2`` filter and the Scheduled
+    Task Instance precedent) so a cancelled log never blocks re-logging the same
+    building/day. Idempotent + duplicate-safe via ``add_unique_guarded``.
+    """
+    from apex.apex_core.utils.ledger_index import add_unique_guarded
+
+    add_unique_guarded(
+        "Cleaning Log",
+        ["building", "cleaning_date", "docstatus"],
+        "unique_cleaning_log_building_date_status",
+    )

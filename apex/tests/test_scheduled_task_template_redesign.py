@@ -6,13 +6,14 @@ Covers the Salary-Structure analogy:
   Scheduled Task Assignment (template → building link)
   Scheduled Task Instance   (auto-generated per assignment × item)
 
-Six tests:
+Seven tests:
   1. test_new_instance_created_for_active_assignment
   2. test_no_duplicate_instance_for_same_day
   3. test_cancelled_assignment_produces_no_instance
   4. test_template_with_3_items_and_2_assignments_creates_6_instances
   5. test_frequency_override_is_used_when_set
-  6. test_migration_patch_creates_assignment
+  6. test_migration_patch_creates_assignment            (backfill LOGIC + idempotency)
+  7. test_migration_patch_registered_pre_model_sync     (patch-phase ORDERING guard)
 """
 
 from __future__ import annotations
@@ -300,7 +301,14 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
     # ------------------------------------------------------------------
     def test_migration_patch_creates_assignment(self):
         """Call the migration patch execute() directly; confirm it creates an
-        Assignment when a template has a legacy building set in the DB."""
+        Assignment when a template has a legacy building set in the DB, and that a
+        re-run creates no duplicate (idempotency guard).
+
+        NOTE: this test validates backfill LOGIC only — it manufactures the legacy
+        `building` column, so it cannot observe the real deploy-time ordering (that
+        sync_all drops the column). The ordering guarantee is covered separately by
+        ``test_migration_patch_registered_pre_model_sync``.
+        """
         from apex.patches.v1_x.migrate_scheduled_task_template_to_assignments import execute
 
         # A fresh site built from the current JSON never created the legacy `building`
@@ -351,14 +359,55 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
         for a in old_asgns:
             frappe.delete_doc("Scheduled Task Assignment", a, force=True, ignore_permissions=True)
 
+        # Run twice: the (template, building) idempotency guard must prevent a
+        # second Assignment on re-run (patches can replay across migrates).
+        execute()
         execute()
 
-        created = frappe.db.exists(
-            "Scheduled Task Assignment", {"template": tmpl, "building": self.building_1}
+        created = frappe.get_all(
+            "Scheduled Task Assignment",
+            filters={"template": tmpl, "building": self.building_1},
+            pluck="name",
         )
-        # Cleanup the created assignment
-        if created:
-            self.addCleanup(frappe.delete_doc, "Scheduled Task Assignment", created,
+        for a in created:
+            self.addCleanup(frappe.delete_doc, "Scheduled Task Assignment", a,
                             force=True, ignore_permissions=True)
 
-        self.assertTrue(created, "Migration patch must create a Scheduled Task Assignment")
+        self.assertEqual(
+            len(created), 1,
+            "Migration patch must create exactly one Assignment and be idempotent on re-run",
+        )
+
+    # ------------------------------------------------------------------
+    # Test 7: The migration patch is registered in the [pre_model_sync]
+    # section — the real guard against the ordering regression that would
+    # let sync_all() drop the legacy `building` column before the backfill runs.
+    # ------------------------------------------------------------------
+    def test_migration_patch_registered_pre_model_sync(self):
+        """The backfill reads the legacy `building` column off tabScheduled Task
+        Template. sync_all() drops that column on the same migrate that ships this
+        release (the field was removed from the DocType JSON), so the patch MUST run
+        in [pre_model_sync] — before the column is dropped. If it slips into
+        [post_model_sync] the column is already gone and the whole backfill silently
+        no-ops. This asserts the patch's phase directly from patches.txt so the
+        regression cannot creep back in unnoticed."""
+        import os
+
+        import apex
+
+        patches_txt = os.path.join(os.path.dirname(apex.__file__), "patches.txt")
+        with open(patches_txt, encoding="utf-8") as fh:
+            lines = [ln.strip() for ln in fh]
+
+        patch = "apex.patches.v1_x.migrate_scheduled_task_template_to_assignments"
+        self.assertIn(patch, lines, "Migration patch must be registered in patches.txt")
+
+        pre_idx = lines.index("[pre_model_sync]")
+        post_idx = lines.index("[post_model_sync]")
+        patch_idx = lines.index(patch)
+        self.assertTrue(
+            pre_idx < patch_idx < post_idx,
+            "migrate_scheduled_task_template_to_assignments must be in the "
+            "[pre_model_sync] section (before [post_model_sync]) so it reads the "
+            "legacy `building` column before sync_all() drops it",
+        )

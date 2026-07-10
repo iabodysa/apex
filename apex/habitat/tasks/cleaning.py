@@ -5,6 +5,11 @@ from __future__ import annotations
 
 import frappe
 
+# Shared savepoint identifier for the per-building insert isolation in both daily
+# cleaning-log generators. Re-declaring the same name each loop iteration is safe:
+# a SAVEPOINT with an existing name replaces it, and it is released on success.
+_CLEANING_SAVEPOINT = "cleaning_log_insert"
+
 
 def daily_cleaning_log_generator() -> None:
     """Auto-create today's draft Cleaning Log for every ACTIVE building, so
@@ -67,15 +72,20 @@ def daily_cleaning_log_generator() -> None:
             break
 
         for building in buildings:
-            try:
-                if building in already:
-                    continue
-                rooms = rooms_by_building.get(building) or []
-                if not rooms:
-                    # A building with no rooms has nothing to clean; skip rather
-                    # than create an empty log.
-                    continue
+            if building in already:
+                continue
+            rooms = rooms_by_building.get(building) or []
+            if not rooms:
+                # A building with no rooms has nothing to clean; skip rather
+                # than create an empty log.
+                continue
 
+            # Per-building SAVEPOINT: a failure on one building rolls back ONLY
+            # that building's write, not the earlier successful inserts in this
+            # same job run. A bare frappe.db.rollback() would discard every prior
+            # uncommitted insert and leave `created` overstating the committed rows.
+            frappe.db.savepoint(_CLEANING_SAVEPOINT)
+            try:
                 log = frappe.get_doc({
                     "doctype": "Cleaning Log",
                     "building": building,
@@ -86,13 +96,15 @@ def daily_cleaning_log_generator() -> None:
                     "room_details": [{"room": room} for room in rooms],
                 })
                 log.insert(ignore_permissions=True)  # audit-ok — scheduler-run daily cleaning record, no user session
-                created += 1
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_CLEANING_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Daily cleaning log generation failed for {building}"[:140],
                 )
+            else:
+                frappe.db.release_savepoint(_CLEANING_SAVEPOINT)
+                created += 1
 
         start += batch_size
 
@@ -129,24 +141,32 @@ def auto_create_cleaning_logs() -> None:
 
     created = 0
     for bld in buildings:
+        if frappe.db.exists(
+            "Cleaning Log",
+            {"building": bld.name, "cleaning_date": cleaning_date, "docstatus": ["!=", 2]},
+        ):
+            continue
+
+        # Per-building SAVEPOINT: isolate each insert so one failing building rolls
+        # back only its own write, never the earlier successful inserts in this same
+        # job run (a bare frappe.db.rollback() would discard them all and desync the
+        # `created` count from what is actually committed).
+        frappe.db.savepoint(_CLEANING_SAVEPOINT)
         try:
-            if frappe.db.exists(
-                "Cleaning Log",
-                {"building": bld.name, "cleaning_date": cleaning_date, "docstatus": ["!=", 2]},
-            ):
-                continue
             log = frappe.get_doc({
                 "doctype": "Cleaning Log",
                 "building": bld.name,
                 "cleaning_date": cleaning_date,
             })
             log.insert(ignore_permissions=True)  # audit-ok — scheduler-run daily cleaning record
-            created += 1
         except Exception:
-            frappe.db.rollback()
+            frappe.db.rollback(save_point=_CLEANING_SAVEPOINT)
             frappe.log_error(
                 message=frappe.get_traceback(),
                 title=f"auto_create_cleaning_logs: insert failed for {bld.name}"[:140],
             )
+        else:
+            frappe.db.release_savepoint(_CLEANING_SAVEPOINT)
+            created += 1
 
     logger.info(f"auto_create_cleaning_logs: created {created} cleaning log(s) for {cleaning_date}.")

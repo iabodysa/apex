@@ -86,6 +86,16 @@ apex.patches.v2_0.rename_doctypes_b7
 # guarded. PRUNE once every deployed site has run it (tracked in tabPatch Log).
 apex.patches.v2_0.rename_reports_b4
 
+# v1.x — T-552 Phase B: create one Scheduled Task Assignment per legacy template that
+# had a building set (ONE-TIME). MUST run pre-sync: it reads the legacy `building`
+# column off `tabScheduled Task Template`, which sync_all() drops on this same migrate
+# (the field was removed from the DocType JSON). In post_model_sync the column would
+# already be gone and the backfill would silently no-op. The new Assignment DocType
+# replaces the per-template building field; this backfills existing templates so the
+# new generator finds them. Idempotent, no-op on fresh installs / re-run. PRUNE once
+# every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v1_x.migrate_scheduled_task_template_to_assignments
+
 [post_model_sync]
 # v2.0.0 — B6 (P-160) field-rename wave (ONE-TIME). Runs FIRST in post_model_sync so
 # rename_field copies each old column into its new (JSON-synced) name BEFORE the v1_x
@@ -266,11 +276,6 @@ apex.patches.v1_x.backfill_rental_office_native_address
 # PRUNE once every deployed site has run it.
 apex.patches.v1_x.rename_accommodation_goods_receipt_and_custody_handover
 
-# v1.x — T-552 Phase B: create one Scheduled Task Assignment per legacy template that
-# had a building set (ONE-TIME). The new Assignment DocType replaces the per-template
-# building field; this backfills existing templates so the new generator finds them.
-# Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site has run it.
-apex.patches.v1_x.migrate_scheduled_task_template_to_assignments
 # v1.x — T-552 Phase B: drop the legacy UNIQUE(template, due_date, docstatus) index
 # from Scheduled Task Instance. Phase B allows multiple assignments per template, so
 # that index blocks the second assignment from inserting on the same day. Replaced by

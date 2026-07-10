@@ -5,14 +5,21 @@ Scheduled Task Template that had a `building` field set.
 Background (T-552 Phase B): the old design stored one building per template
 (N×M templates). The new design uses a separate Scheduled Task Assignment DocType
 (template → building). This patch reads the legacy `building` column directly from
-the DB table (the column still exists in the database even after the field is removed
-from the DocType JSON — until migrate drops it) and creates one Assignment per unique
-(template, building) pair.
+the DB table and creates one Assignment per unique (template, building) pair.
+
+ORDERING (critical): registered in the `[pre_model_sync]` section of patches.txt so
+it runs BEFORE `sync_all()`. The same v2.0.0 change that ships this patch removes the
+`building` field from the Scheduled Task Template DocType JSON, so `sync_all()` drops
+the `building` column on this very migrate. Running pre-sync guarantees the column is
+still present when the SELECT below reads it; in post_model_sync the column would
+already be gone and the whole backfill would silently no-op (the try/except would
+swallow "Unknown column 'building'").
 
 Idempotency guards:
 - Skips if an Assignment already exists for the same (template, building) pair.
 - Skips templates whose building is NULL or empty.
-- Safe to re-run; no-op on fresh installs.
+- Safe to re-run; no-op on fresh installs (fresh installs mark patches as already
+  run without executing them, and the legacy column never existed there anyway).
 
 PRUNE from patches.txt once every deployed site has run it (check tabPatch Log).
 """
@@ -23,8 +30,9 @@ import frappe
 
 
 def execute():
-    # Read the legacy building column directly from the DB; it persists until
-    # bench migrate actually runs ALTER TABLE to drop it.
+    # Read the legacy building column directly from the DB. This patch is
+    # registered pre_model_sync, so the column is still present here (sync_all
+    # drops it later in the same migrate). See module docstring for ordering.
     try:
         templates = frappe.db.sql(
             """SELECT name, building FROM `tabScheduled Task Template`
@@ -32,8 +40,8 @@ def execute():
             as_dict=True,
         )
     except Exception:
-        # The column may already have been dropped on a fresh install that
-        # never had the building field — this is a no-op in that case.
+        # Defensive: only reached if the column is already gone (e.g. a fresh
+        # install where it never existed, or a re-order). No-op in that case.
         frappe.logger().info(
             "migrate_scheduled_task_template_to_assignments: "
             "building column not found — nothing to migrate."
