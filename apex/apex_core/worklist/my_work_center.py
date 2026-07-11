@@ -89,6 +89,13 @@ def _mine(doctype: str, states: list[str], *, recent: bool = False) -> list[dict
     error (one bad source must not break the whole worklist)."""
     if not frappe.db.exists("DocType", doctype):
         return []
+    # Silent read gate: get_list's internal has_permission check msgprints a
+    # "does not have doctype access" denial (server-log flood) for every registry
+    # doctype the user can't read. These universal My Work cards scan the whole
+    # registry, so a low-privilege user (e.g. Driver) floods on load. frappe's
+    # has_permission defaults throw=False (never msgprints); skip inaccessible ones.
+    if not frappe.has_permission(doctype, "read"):
+        return []
     filters: dict = {"owner": frappe.session.user, "status": ["in", states]}
     if recent:
         filters["modified"] = [">=", add_to_date(now_datetime(), hours=-_RECENT_HOURS)]
