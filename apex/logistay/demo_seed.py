@@ -371,7 +371,7 @@ def _exercise_reconciliation(report: list, client, branch, period, resolution, w
     run_doc.rec_total_payable = total_payable
     run_doc.rec_prepared_by = "Administrator"
     run_doc.rec_prepared_at = now_datetime()
-    run_doc.save(ignore_permissions=True)
+    run_doc.save(ignore_permissions=True)  # audit-ok: demo seeder
     _log(
         report,
         f"[recon] run {run} rated: billable {billable_amount}, payable {total_payable}, "
@@ -582,7 +582,7 @@ def clear_logistay_demo() -> dict:
             if raw:
                 frappe.db.delete(doctype, {"name": name})
             else:
-                frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
+                frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)  # audit-ok: demo seeder
         if names:
             removed.append(f"{doctype}: {len(names)}")
 
