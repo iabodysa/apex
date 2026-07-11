@@ -191,15 +191,24 @@ def _apply_component_routing(doc) -> None:
     here IS resolving the slip deduction's component. Only categories the policy
     governs (mapped or held) are touched - anything else keeps the chosen component,
     so non-P-192 structure deductions and un-seeded categories are never disturbed. A
-    mapped category has its component overwritten with the routed target; a held
-    category routes NOWHERE (``_block_held_category`` stops it posting).
+    mapped category has its component overwritten with the routed target; a HELD
+    (disabled/paused) category routes NOWHERE and must FAIL CLOSED so disabling a
+    category actually stops it posting.
     """
     routing_map, held = _load_deduction_routing()
     category = doc.pay_category
+    # Ungoverned category (neither mapped nor held): a non-P-192 / un-seeded
+    # deduction. Leave its component untouched — it is legitimately not our concern.
     if category not in routing_map and category not in held:
         return
     target = route_deduction_component(category, routing_map, held)
-    if target and getattr(doc, "salary_component", None) != target:
+    # A governed category that routes NOWHERE is HELD (the owner's pause mechanism):
+    # block it rather than silently letting it post on its chosen component.
+    if target is None:
+        frappe.throw(
+            _("Deduction category {0} is on hold and cannot post.").format(category)
+        )
+    if getattr(doc, "salary_component", None) != target:
         doc.salary_component = target
 
 
@@ -215,7 +224,10 @@ def enforce_release_gate(run) -> None:
         frappe.throw(_("WPS release governance (P-193) is not available yet; release is blocked."))
         return
 
+    # 6-arg signature: (entity, entity_id, action, amount, preparer, approver).
+    # entity is the DocType-name literal; run.name is the entity_id.
     verdict = enforce_gate(
+        "Payroll Run",
         run.name,
         "wps_release",
         run.pay_total_net,

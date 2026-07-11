@@ -154,8 +154,9 @@ class TestComponentRoutingWiring(FrappeTestCase):
     pulls it onto a Salary Slip. These tests inject SYNTHETIC routing DATA (never a
     real AFMCO config) at the loader seam and drive the real entry function - the same
     code that fires in production - so a #7 deduction lands on Loan Repayment and a
-    held category is left un-routed. Without the wired ``_apply_component_routing``
-    call, ``salary_component`` would never change (non-tautology).
+    held category FAILS CLOSED (cannot post). Without the wired
+    ``_apply_component_routing`` call, ``salary_component`` would never change and a
+    paused category would silently post (non-tautology).
     """
 
     def setUp(self):
@@ -186,10 +187,11 @@ class TestComponentRoutingWiring(FrappeTestCase):
         additional_salary_validate(doc)
         self.assertEqual(doc.salary_component, "Loan Repayment")
 
-    def test_wired_validate_leaves_held_category_unrouted(self):
-        # A held (disabled) category routes NOWHERE: its component is untouched and no
-        # rewrite happens. (Use a non-iqama held category so _block_held_category is
-        # a pass-through and we observe the routing decision, not the hard block.)
+    def test_wired_validate_held_category_fails_closed(self):
+        # A held (disabled) category is the owner's PAUSE mechanism: it routes NOWHERE
+        # and must FAIL CLOSED so a preparer with a valid consent cannot still post it.
+        # (Use a non-iqama held category so _block_held_category is a pass-through and
+        # we observe the routing fail-closed, not the category-8 hard block.)
         self._stub_routing({}, {"Vehicle Damages"})
         doc = frappe._dict(
             type="Deduction",
@@ -198,8 +200,8 @@ class TestComponentRoutingWiring(FrappeTestCase):
             amount=100,
             payroll_date="2026-03-31",
         )
-        additional_salary_validate(doc)
-        self.assertEqual(doc.salary_component, "Native Component")
+        with self.assertRaises(frappe.ValidationError):
+            additional_salary_validate(doc)
 
     def test_wired_validate_leaves_ungoverned_category_untouched(self):
         # A category the policy does not govern (not mapped, not held) keeps the chosen
@@ -215,6 +217,70 @@ class TestComponentRoutingWiring(FrappeTestCase):
         )
         additional_salary_validate(doc)
         self.assertEqual(doc.salary_component, "Native Component")
+
+
+class TestReleaseGateArgs(FrappeTestCase):
+    """enforce_release_gate — the WPS-release call into the shared governance gate.
+
+    Regression guard for the 5-arg call bug: ``enforce_gate`` requires 6 positional
+    args ``(entity, entity_id, action, amount, preparer, approver)``. The old call
+    passed only 5, so EVERY real WPS release raised ``TypeError: missing 'approver'``
+    and, worse, shifted every arg one slot. The stub below carries the SAME 6-arg
+    signature, so it binds each captured value by position — proving both the count
+    AND the order (a 5-arg call would raise TypeError inside the stub, failing loud).
+    """
+
+    def setUp(self):
+        import apex.logistay_governance.enforce_gate as gov
+
+        self._gov = gov
+        self._orig = gov.enforce_gate
+
+    def tearDown(self):
+        self._gov.enforce_gate = self._orig
+
+    def test_release_gate_passes_six_args_in_order(self):
+        captured = {}
+
+        def fake_enforce_gate(entity, entity_id, action, amount, preparer, approver, on_date=None):
+            captured.update(
+                entity=entity,
+                entity_id=entity_id,
+                action=action,
+                amount=amount,
+                preparer=preparer,
+                approver=approver,
+            )
+            return "ALLOW"
+
+        self._gov.enforce_gate = fake_enforce_gate
+        run = frappe._dict(
+            name="PR-TEST-0001",
+            pay_total_net=5000,
+            pay_prepared_by="preparer@example.com",
+            pay_approved_by="approver@example.com",
+        )
+        # Must NOT raise TypeError; must resolve a verdict (ALLOW) via the gate.
+        payroll_gate.enforce_release_gate(run)
+        # Each arg landed in its correct slot (order, not merely count).
+        self.assertEqual(captured["entity"], "Payroll Run")
+        self.assertEqual(captured["entity_id"], "PR-TEST-0001")
+        self.assertEqual(captured["action"], "wps_release")
+        self.assertEqual(captured["amount"], 5000)
+        self.assertEqual(captured["preparer"], "preparer@example.com")
+        self.assertEqual(captured["approver"], "approver@example.com")
+
+    def test_release_gate_blocks_on_non_allow_verdict(self):
+        # A non-ALLOW verdict must raise (fail-closed), not silently release.
+        self._gov.enforce_gate = lambda *a, **k: "authority_unknown"
+        run = frappe._dict(
+            name="PR-TEST-0002",
+            pay_total_net=5000,
+            pay_prepared_by="preparer@example.com",
+            pay_approved_by="approver@example.com",
+        )
+        with self.assertRaises(frappe.ValidationError):
+            payroll_gate.enforce_release_gate(run)
 
 
 if __name__ == "__main__":
