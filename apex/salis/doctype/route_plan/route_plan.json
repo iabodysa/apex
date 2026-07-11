@@ -156,6 +156,7 @@
    "in_standard_filter": 1,
    "label": "Supervisor Approval",
    "options": "Pending\nApproved\nRejected",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -169,6 +170,7 @@
    "fieldtype": "Link",
    "label": "Decision By",
    "options": "User",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -177,6 +179,7 @@
    "fieldname": "supervisor_action_on",
    "fieldtype": "Datetime",
    "label": "Decision On",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -186,6 +189,7 @@
    "fieldname": "supervisor_rejection_reason",
    "fieldtype": "Small Text",
    "label": "Rejection Reason",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -311,7 +315,13 @@
    "read": 1,
    "report": 1,
    "role": "Internal Auditor"
-  }
+  },
+  {"permlevel": 1, "read": 1, "role": "Fleet Manager"},
+  {"permlevel": 1, "read": 1, "role": "Fleet Project Manager"},
+  {"permlevel": 1, "read": 1, "role": "Fleet Supervisor"},
+  {"permlevel": 1, "read": 1, "role": "System Manager"},
+  {"permlevel": 1, "read": 1, "role": "Finance Manager"},
+  {"permlevel": 1, "read": 1, "role": "Internal Auditor"}
  ],
  "row_format": "Dynamic",
  "search_fields": "route_name, project, driver",
