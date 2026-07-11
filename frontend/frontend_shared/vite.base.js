@@ -19,13 +19,19 @@ import frappeui from "frappe-ui/vite";
 import path from "path";
 import fs from "fs";
 import crypto from "crypto";
+import { SW_PARAMS } from "./sw.params.js";
+import { renderServiceWorker } from "./sw.template.js";
 
-// After each build, stamp the service worker's BUILD marker with a hash of the
-// built bundle. The SW (served at the root so its scope can cover the portal
-// path) lives outside this app's outDir, so it is patched in place. Changing
-// these bytes per build is what makes the browser detect an updated worker ->
-// the SPA shows its reload banner. Defined once here; only the two PWA portals
-// (driver, worker) opt in by passing `sw`.
+// After each build, (re)generate the portal service worker from the single
+// sw.template.js + its per-portal params, stamping the BUILD marker with a hash of
+// the freshly built bundle. Both www/*-sw.min.js are SINGLE-SOURCED this way: the
+// whole file is emitted here, never hand-edited. The SW is served at the root so
+// its scope can cover the portal path, hence it lives outside this app's outDir and
+// is written in place. Changing these bytes per build (via the hash) is what makes
+// the browser detect an updated worker -> the SPA shows its reload banner. Defined
+// once here; only the two PWA portals (driver, worker) opt in by passing `sw`.
+// The emitted bytes are byte-reconstructable — `node sw.generate.js --check` (the
+// portal-tests CI job) verifies committed == render(params, committed-build).
 function stampServiceWorker({ dirname, name, sw }) {
   const swPath = path.resolve(dirname, "../../apex/www/" + sw);
   const bundlePath = path.resolve(dirname, "../../apex/public/" + name + "/assets/index.js");
@@ -33,11 +39,13 @@ function stampServiceWorker({ dirname, name, sw }) {
     name: "stamp-sw-" + name,
     closeBundle() {
       try {
+        const params = SW_PARAMS[name];
+        if (!params) throw new Error("no service-worker params for portal " + name);
         const bundle = fs.readFileSync(bundlePath);
         const hash = crypto.createHash("sha256").update(bundle).digest("hex").slice(0, 12);
-        const swSrc = fs.readFileSync(swPath, "utf8");
-        const stamped = swSrc.replace(/const BUILD = "[^"]*";/, `const BUILD = "${hash}";`);
-        if (stamped !== swSrc) fs.writeFileSync(swPath, stamped);
+        const rendered = renderServiceWorker({ ...params, build: hash });
+        const swSrc = fs.existsSync(swPath) ? fs.readFileSync(swPath, "utf8") : "";
+        if (rendered !== swSrc) fs.writeFileSync(swPath, rendered);
       } catch (e) {
         // Non-fatal: a missing SW just means no update-banner stamping this build.
         this.warn(name + " sw stamp skipped: " + e.message);
