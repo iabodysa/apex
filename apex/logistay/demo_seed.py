@@ -73,9 +73,7 @@ from apex.logistay.reconciliation_engine import (
 )
 from apex.logistay.timesheet_engine import post_timesheet_ledger
 
-# --------------------------------------------------------------------------- #
-# Synthetic constants — obviously-fake round numbers + "Demo" names ONLY.      #
-# --------------------------------------------------------------------------- #
+# Synthetic constants — obviously-fake round numbers + "Demo" names ONLY.
 TAG = "LGZY-DEMO"  # stable id prefix + clear() key
 
 CLIENT_CODE = f"{TAG}-CLIENT"
@@ -128,9 +126,7 @@ def _goc(doctype: str, key: dict, make: dict):
     return doc.name
 
 
-# --------------------------------------------------------------------------- #
-# Master + transaction scaffold                                               #
-# --------------------------------------------------------------------------- #
+# Master + transaction scaffold
 def _client() -> str:
     return _goc(
         "Client",
@@ -263,9 +259,7 @@ def _declaration(client: str, period: str) -> str:
     )
 
 
-# --------------------------------------------------------------------------- #
-# Engine exercises                                                            #
-# --------------------------------------------------------------------------- #
+# Engine exercises
 def _exercise_timesheet_engine(report: list) -> None:
     posted = post_timesheet_ledger()
     _log(report, f"[timesheet] post_timesheet_ledger posted {posted} ledger row(s) from COMPLETE lines.")
@@ -540,9 +534,7 @@ def _demo_band(role: str) -> str:
     return band.name
 
 
-# --------------------------------------------------------------------------- #
-# Entry points                                                                #
-# --------------------------------------------------------------------------- #
+# Entry points
 def make_logistay_demo() -> dict:
     """Build the synthetic scenario and exercise every runnable Logistay engine.
 

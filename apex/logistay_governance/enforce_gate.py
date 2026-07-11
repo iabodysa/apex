@@ -31,9 +31,7 @@ from frappe.utils import flt, getdate, now_datetime, nowdate
 SCANNER = "scan_output_leak.py"
 
 
-# --------------------------------------------------------------------------- #
-# DoA + SoD gate                                                              #
-# --------------------------------------------------------------------------- #
+# DoA + SoD gate
 def enforce_gate(
     entity: str,
     entity_id: str,
@@ -187,9 +185,7 @@ def _sod_block(entity: str, entity_id: str, preparer: str, approver: str) -> Non
     )
 
 
-# --------------------------------------------------------------------------- #
-# Immutable audit                                                             #
-# --------------------------------------------------------------------------- #
+# Immutable audit
 def write_audit(
     entity: str,
     entity_id: str,
@@ -223,9 +219,7 @@ def write_audit(
     return event.name
 
 
-# --------------------------------------------------------------------------- #
-# Export privacy gate                                                         #
-# --------------------------------------------------------------------------- #
+# Export privacy gate
 def gate_export(
     file_ref: str,
     audience: str,

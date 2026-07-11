@@ -4,7 +4,7 @@
 ONE-TIME: prune once every deployed site has run it (tracked in tabPatch Log).
 Companion to rename_freelance_doctype_to_freelancer: the fixture now ships the
 'Freelancer' Party Type, and rename_doc cascades party_type on existing
-Journal / Payment Entry rows. Party record names (FRL-#####) are unchanged.
+Journal / Payment Entry rows. Party record names (FRL-<serial>) are unchanged.
 """
 
 import frappe

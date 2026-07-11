@@ -13,7 +13,7 @@ frappe.pages['arrivals-desk'].on_page_load = function (wrapper) {
 // Arrivals Desk look restored on native Desk CSS variables — a Desk page ships no
 // stylesheet, so the removed arrivals_desk.css is re-expressed as inline style=""
 // overlays bound to Desk vars (theme + dark-mode aware) with logical properties so
-// the 3-pane desk mirrors correctly under RTL. No <style> injection (T-703).
+// the 3-pane desk mirrors correctly under RTL. No <style> injection.
 // Bed status palette (free/occupied/blocked/out-of-service) aliases the Desk
 // colour-scale vars — the same key Front Desk / Transfer Board use.
 const AX_BED_PALETTE = {

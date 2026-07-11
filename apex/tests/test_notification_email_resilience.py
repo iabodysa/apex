@@ -49,7 +49,7 @@ class TestNotificationEmailResilience(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # ---- helpers --------------------------------------------------------
+    # helpers
 
     def _driver(self):
         name = "A001 Driver " + frappe.generate_hash(length=8)

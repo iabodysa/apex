@@ -1,23 +1,10 @@
 // Copyright (c) 2026, AFMCO and contributors
-//
-// Single source for BOTH portal service workers (driver + masar). renderServiceWorker(p)
+// Single source for BOTH portal service workers (driver + masar): renderServiceWorker(p)
 // returns the full text of one www/*-sw.min.js from a per-portal params object (see
-// sw.params.js). The two SWs share 100% of their caching LOGIC; only real behavioural
-// differences are parameterized:
-//   - fonts        : masar self-hosts fonts (precache + cache-first branch); driver does
-//                    not (CDN fonts, left to the browser HTTP cache). p.fonts drives both
-//                    the SHELL_URLS precache list AND the presence of the cache-first
-//                    fetch branch. Empty => neither is emitted.
-//   - enablePush   : driver ships Web Push (push + notificationclick handlers); masar does
-//                    not. Toggles those two handlers so masar never gains push behaviour.
-//   - cacheVersion : "driver-pwa-v1-" vs "masar-pwa-v3-" — the version segment is portal
-//                    state (bumped independently to force a cache reset); NOT unified.
-//   - assetBase / navPath / dataEndpoints / dataCacheHost / displayName / swFilename.
-//   - build        : the bundle content-hash, injected by the stampServiceWorker vite
-//                    plugin (or, for a standalone regen, carried forward from the file).
-//
-// The emitted file is byte-reconstructable: renderServiceWorker(params) with the same
-// `build` reproduces the committed bytes exactly (see sw.generate.js --check).
+// sw.params.js). The two SWs share 100% of their caching LOGIC; only behavioural diffs
+// (fonts, enablePush, cacheVersion, endpoints, build hash) are parameterized — each
+// explained inline where used. Output is byte-reconstructable: same params + `build`
+// reproduce the committed bytes exactly (see sw.generate.js --check).
 
 export function renderServiceWorker(p) {
   const hasFonts = Array.isArray(p.fonts) && p.fonts.length > 0;
@@ -109,17 +96,12 @@ self.addEventListener("notificationclick", (event) => {
     : "";
 
   const prologue = `// Copyright (c) 2026, AFMCO and contributors
-// ${p.displayName} PWA service worker. Served at ROOT (/${p.swFilename}) so its scope
-// covers ${p.navPath}; *.min.js under www/ ships as static source (no Jinja). Shell +
-// portal data API are NETWORK-FIRST (latest build/data win online, cache only when
-// unreachable, bounded timeout);${headerFontClause} stale caches drop on activate. BUILD
-// is the bundle content-hash stamped by the vite plugin each build, so a deploy changes
-// these bytes -> updatefound -> reload banner. The worker does NOT auto-skipWaiting; it
-// activates only when the banner posts SKIP_WAITING.
-//
-// GENERATED FILE — do not edit by hand. Single-sourced from frontend/frontend_shared/
-// sw.template.js + sw.params.js. Regenerate:
-//   node frontend/frontend_shared/sw.generate.js --write
+// ${p.displayName} PWA service worker, served at ROOT (/${p.swFilename}) so its scope
+// covers ${p.navPath}. Shell + portal data API are NETWORK-FIRST;${headerFontClause} stale caches
+// drop on activate. BUILD (bundle content-hash, stamped per build) changes these bytes on
+// each deploy -> updatefound -> reload banner; no auto-skipWaiting (activates on SKIP_WAITING).
+// GENERATED — do not edit by hand. Single-sourced from frontend/frontend_shared/sw.template.js
+// + sw.params.js. Regenerate: node frontend/frontend_shared/sw.generate.js --write
 const BUILD = "${p.build}";
 
 const CACHE_VERSION = "${p.cacheVersion}" + BUILD;

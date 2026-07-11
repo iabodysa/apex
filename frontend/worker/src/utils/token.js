@@ -1,6 +1,6 @@
 // Copyright (c) 2026, AFMCO and contributors
 // [#s7slet]
-// [T-705/T-685] The personal token is NO LONGER readable by the SPA: it rides in
+// The personal token is NO LONGER readable by the SPA: it rides in
 // the httpOnly `masar_wt` cookie (set server-side from the one-time ?w= hit) and
 // the worker endpoints read it server-side. So the client sends NO token in its
 // API calls — `TOKEN` is intentionally empty and kept only so existing call sites

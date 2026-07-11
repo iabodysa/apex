@@ -123,7 +123,7 @@ class TestSharedPermissionScope(FrappeTestCase):
         frappe.set_user("Administrator")
         frappe.local.cache = {}
 
-    # ---- Building-scoped doctype (representative: Custody Issue) --------- #
+    # Building-scoped doctype (representative: Custody Issue)
     def test_building_scoped_supervisor(self):
         # 1) pqc fragment == `building` in (<my building>)
         self.assertEqual(
@@ -140,7 +140,7 @@ class TestSharedPermissionScope(FrappeTestCase):
         # submit is denied out-of-scope too (ptype-agnostic deny)
         self.assertFalse(HP.building_scoped_has_permission(d_out, "submit", user=self.bsup))
 
-    # ---- Project-scoped doctype (representative: Fuel Request) ----------- #
+    # Project-scoped doctype (representative: Fuel Request)
     def test_project_scoped_supervisor(self):
         self.assertEqual(
             SP.fuel_request_query(user=self.psup),
@@ -152,7 +152,7 @@ class TestSharedPermissionScope(FrappeTestCase):
         self.assertIsNone(SP.scoped_has_permission(d_in, "read", user=self.psup))
         self.assertFalse(SP.scoped_has_permission(d_out, "read", user=self.psup))
 
-    # ---- unscoped oversight roles: no restriction, always defer --------- #
+    # unscoped oversight roles: no restriction, always defer
     def test_building_oversight_role(self):
         self.assertEqual(HP.accommodation_assignment_query(user=self.bmgr), "")
         self.assertEqual(HP.report_building_scope(user=self.bmgr), (False, []))

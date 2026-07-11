@@ -15,7 +15,7 @@ frappe.pages["custody-kiosk"].on_page_load = function (wrapper) {
 // Kiosk look restored on native Desk CSS variables — a Desk page ships no stylesheet,
 // so the removed custody_kiosk.css is re-expressed as inline style="" overlays bound
 // to Desk vars (theme + dark-mode aware) with logical properties (RTL-mirrored). No
-// <style> injection (T-680).
+// <style> injection.
 const CK_STYLE = {
 	modebar:
 		"display:inline-flex;gap:0;margin-block:4px 12px;border:1px solid var(--border-color);border-radius:8px;overflow:hidden;background:var(--control-bg);",

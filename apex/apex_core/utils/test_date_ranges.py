@@ -44,7 +44,7 @@ def _query(rows, filters):
     return None
 
 
-# --- Lease scenario table -------------------------------------------------
+# Lease scenario table
 # New lease under test: building B1, [2026-03-01, 2026-06-30], name "NEW".
 _NEW_LEASE = {
     "building": "B1",
@@ -81,7 +81,7 @@ def _old_lease_filter(doc):
     }
 
 
-# --- Utility Bill Entry scenario table ------------------------------------
+# Utility Bill Entry scenario table
 # New bill under test: company C1, building B1, account A1,
 # billing period [2026-03-01, 2026-03-31], name "NEW".
 _NEW_UTIL = {

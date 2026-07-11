@@ -80,7 +80,7 @@ class TestRateCardInvariants(FrappeTestCase):
         doc.flags.ignore_links = True  # isolate the guards from the Client master cascade
         return doc
 
-    # --- WINDOW ------------------------------------------------------------- #
+    # WINDOW
     def test_window_rejects_from_after_to(self):
         doc = self._card(rc_effective_from="2026-03-31", rc_effective_to="2026-03-01")
         with self.assertRaises(frappe.ValidationError):
@@ -91,7 +91,7 @@ class TestRateCardInvariants(FrappeTestCase):
         doc.insert(ignore_permissions=True, ignore_mandatory=True)
         self.assertTrue(frappe.db.exists("Rate Card", doc.name))
 
-    # --- DIVISOR-PRESENT (C3) ---------------------------------------------- #
+    # DIVISOR-PRESENT (C3)
     def test_divisor_present_blocks_day_rate_line_without_basis(self):
         # package_day card + a day_rate line with NO basis -> C3 halts the save.
         doc = self._card(
@@ -120,7 +120,7 @@ class TestRateCardInvariants(FrappeTestCase):
         doc.insert(ignore_permissions=True, ignore_mandatory=True)
         self.assertTrue(frappe.db.exists("Rate Card", doc.name))
 
-    # --- NEVER-MUTATE ------------------------------------------------------- #
+    # NEVER-MUTATE
     def test_active_card_cannot_be_edited(self):
         doc = self._card(rc_status="active")
         doc.insert(ignore_permissions=True, ignore_mandatory=True)
@@ -184,7 +184,7 @@ class TestDayRateResolver(FrappeTestCase):
         doc.flags.ignore_links = True
         return doc
 
-    # --- CELL-FOR-CELL golden --------------------------------------------- #
+    # CELL-FOR-CELL golden
     def test_resolver_reproduces_golden_day_rate_for_each_basis(self):
         for basis in DAY_RATE_BASIS:
             with self.subTest(basis=basis):
@@ -203,7 +203,7 @@ class TestDayRateResolver(FrappeTestCase):
         rates = list(_GOLDEN_DAY_RATE.values())
         self.assertEqual(len(set(rates)), len(rates))
 
-    # --- NON-TAUTOLOGY: a wrong divisor must break the golden -------------- #
+    # NON-TAUTOLOGY: a wrong divisor must break the golden
     def test_wrong_divisor_breaks_the_golden(self):
         # div_31 must NOT resolve to the actual_cycle_days (÷30) figure; if the
         # resolver used the wrong divisor the golden assertion would FAIL. This
@@ -231,7 +231,7 @@ class TestDayRateResolver(FrappeTestCase):
         with self.assertRaises(ValueError):
             resolve_day_rate(_GOLDEN_SEEDED_VALUE, "actual_cycle_days", cycle_days=0)
 
-    # --- SNAPSHOT lands on BOTH lines with the resolved value ------------- #
+    # SNAPSHOT lands on BOTH lines with the resolved value
     def test_resolved_day_rate_and_basis_snapshot_onto_both_lines(self):
         for basis in DAY_RATE_BASIS:
             with self.subTest(basis=basis):

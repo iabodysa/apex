@@ -4,7 +4,7 @@
 ONE-TIME: prune once every deployed site has run it (tracked in tabPatch Log).
 Runs pre_model_sync so the rename lands BEFORE the Logistay freelancer.json
 import — otherwise sync would create a second, empty 'Freelancer' DocType and
-the rename would collide. Record names (FRL-#####) are unchanged, so party
+the rename would collide. Record names (FRL-<serial>) are unchanged, so party
 links stay valid.
 """
 

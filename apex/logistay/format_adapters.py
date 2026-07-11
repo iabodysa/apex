@@ -91,9 +91,7 @@ def build_payload_json(adapter_code: str, source, opts: Optional[dict] = None) -
     return json.dumps(parse_intake(adapter_code, source, opts), ensure_ascii=False)
 
 
-# --------------------------------------------------------------------------- #
 # helpers
-# --------------------------------------------------------------------------- #
 def _norm(value) -> str:
     return "" if value is None else str(value).strip()
 
@@ -136,9 +134,7 @@ def _load_path(path: str) -> list[list]:
         return [row for row in csv.reader(fh)]
 
 
-# --------------------------------------------------------------------------- #
 # A / B: grid parsers
-# --------------------------------------------------------------------------- #
 def _plan(header: list[str], opts: dict, positional: bool) -> dict:
     """Classify the header row into worker / day / token / total columns."""
     worker_col = (opts.get("worker_column") or "").strip().lower()
@@ -244,9 +240,7 @@ def parse_monthly_grid(source, opts: Optional[dict] = None) -> dict:
     return _parse_grid(source, opts or {}, positional=True)
 
 
-# --------------------------------------------------------------------------- #
 # PAPER: manual / keyed entry (no file parse)
-# --------------------------------------------------------------------------- #
 def _paper_record(raw) -> Optional[dict]:
     try:
         if not isinstance(raw, dict):
@@ -288,9 +282,7 @@ def parse_paper(source, opts: Optional[dict] = None) -> dict:
     return {"period_month": period_month, "rows": rows_out}
 
 
-# --------------------------------------------------------------------------- #
 # registry bindings
-# --------------------------------------------------------------------------- #
 register("A", parse_column_grid)
 register("B", parse_monthly_grid)
 register("PAPER", parse_paper)

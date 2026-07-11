@@ -129,7 +129,7 @@ class TestPostAccommodationLedgerRow(unittest.TestCase):
         self.assertEqual(captured, [], "idempotent: an existing row is never re-posted")
 
 
-# --- shared stubs for the two caller paths --------------------------------
+# shared stubs for the two caller paths
 
 def _building_doc():
     doc = MagicMock()

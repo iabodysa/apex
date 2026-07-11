@@ -24,7 +24,7 @@ from apex.salis.utils import days_until, expiry_state, lock_fuel_quota, normaliz
 
 
 class TestSalisUtils(FrappeTestCase):
-    # --- normalize_plate ------------------------------------------------
+    # normalize_plate
     def test_normalize_plate_strips_and_uppercases(self):
         self.assertEqual(normalize_plate("abc 123"), "ABC123")
         self.assertEqual(normalize_plate("  a b c  "), "ABC")
@@ -36,7 +36,7 @@ class TestSalisUtils(FrappeTestCase):
         # fleet_os wrapped the value in str(); the helper preserves that
         self.assertEqual(normalize_plate(12345), "12345")
 
-    # --- expiry_state ---------------------------------------------------
+    # expiry_state
     def _state_for_offset(self, offset_days, warn_days=30):
         expiry = add_days(getdate(), offset_days)
         return expiry_state(expiry, warn_days)
@@ -63,7 +63,7 @@ class TestSalisUtils(FrappeTestCase):
         self.assertEqual(days, 31)
         self.assertEqual(state, "valid")
 
-    # --- days_until -----------------------------------------------------
+    # days_until
     def test_days_until_none_for_empty(self):
         self.assertIsNone(days_until(None))
         self.assertIsNone(days_until(""))
@@ -76,7 +76,7 @@ class TestSalisUtils(FrappeTestCase):
         # a malformed value degrades to None rather than raising
         self.assertIsNone(days_until("not-a-date"))
 
-    # --- lock_fuel_quota ------------------------------------------------
+    # lock_fuel_quota
     def test_lock_fuel_quota_noop_on_empty(self):
         # matches the lock_vehicle/lock_driver house style: falsy name = no-op
         try:
