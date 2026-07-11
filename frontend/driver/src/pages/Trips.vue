@@ -189,18 +189,9 @@ import { useI18n } from "../i18n";
 import { pushToast } from "../toast";
 import { connectDriverRealtime } from "../realtime.js";
 
-const { t, te, fmtTime, dir } = useI18n();
+const { t, te, fmtTime } = useI18n();
 
 const tab = ref("today");
-
-const activeBoardingTrip = ref(null);
-function toggleBoardingMenu(trip) {
-  if (activeBoardingTrip.value === trip.name) {
-    activeBoardingTrip.value = null;
-  } else {
-    activeBoardingTrip.value = trip.name;
-  }
-}
 
 const currentWait = ref(null);
 let waitTimer = null;
