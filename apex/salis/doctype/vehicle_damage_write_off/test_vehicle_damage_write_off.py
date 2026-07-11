@@ -20,28 +20,66 @@ from apex.tests._helpers import _grant_project, _project, _user
 WORKFLOW = "Vehicle Damage Write-Off Workflow"
 
 
-def _ensure_vehicle(plate_number):
-    """Get-or-create a Salis Vehicle by its unique normalized plate.
+def _make_vehicle(prefix):
+    """Create a Salis Vehicle with a per-run-unique plate and return its name.
 
-    These tests commit mid-method (workflow apply / submit), so the per-method
-    vehicle escapes FrappeTestCase's savepoint rollback and persists. Reusing the
-    existing row keeps setUp idempotent on a re-run or a shared, non-reset bench.
+    These tests commit mid-method (workflow apply / submit), so the vehicle
+    escapes FrappeTestCase's savepoint rollback and persists on the test_ignore
+    Salis Vehicle table. A deterministic plate therefore trips the
+    ``plate_normalized`` unique index against a prior run's residual row
+    (the fixed-name variant of the P-216 collision class). A wide random suffix
+    keeps every run's fixture distinct from any residual row; ``_purge_fixtures``
+    clears them at class teardown so the table does not accumulate.
     """
-    normalized = "".join(plate_number.split()).upper()
-    existing = frappe.db.get_value("Salis Vehicle", {"plate_normalized": normalized})
-    if existing:
-        return existing
     return frappe.get_doc(
-        {"doctype": "Salis Vehicle", "plate_number": plate_number, "status": "Active"}
+        {
+            "doctype": "Salis Vehicle",
+            "plate_number": f"{prefix}-{frappe.generate_hash(length=12)}",
+            "status": "Active",
+        }
     ).insert(ignore_permissions=True).name
 
 
+def _purge_fixtures(vehicles, incidents=()):
+    """Delete the vehicles/incidents a test class committed. Call from tearDownClass.
+
+    The write-off submit/workflow paths commit, so these rows outlive the
+    per-test savepoint. Cleanup runs once at class teardown, not per test: a
+    per-test ``frappe.db.commit()`` corrupts FrappeTestCase's per-test savepoint
+    (the surrounding class already tolerates a commit here). Write-offs reach
+    docstatus 1 and ``delete_doc`` refuses a submitted doc even with force, so
+    raw-delete them (the DocType has no child tables to orphan); then the
+    incidents and the vehicles, which are docstatus 0.
+    """
+    frappe.set_user("Administrator")
+    for vehicle in vehicles:
+        frappe.db.delete("Vehicle Damage Write-Off", {"vehicle": vehicle})
+    for incident in incidents:
+        if frappe.db.exists("Vehicle Incident", incident):
+            frappe.delete_doc("Vehicle Incident", incident, force=True, ignore_permissions=True)
+    for vehicle in vehicles:
+        if frappe.db.exists("Salis Vehicle", vehicle):
+            frappe.delete_doc("Salis Vehicle", vehicle, force=True, ignore_permissions=True)
+    frappe.db.commit()
+
+
 class TestVehicleDamageWriteOff(FrappeTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls._vehicles = []
+        cls._incidents = []
+
+    @classmethod
+    def tearDownClass(cls):
+        # Fixtures escape savepoint rollback (submit/cancel commit); clear them.
+        _purge_fixtures(cls._vehicles, cls._incidents)
+        super().tearDownClass()
+
     def setUp(self):
         frappe.set_user("Administrator")
-        tag = self._testMethodName
         # [#99ioui]
-        self.vehicle = _ensure_vehicle(f"WO {tag}")
+        self.vehicle = _make_vehicle("WO")
         self.incident = frappe.get_doc(
             {
                 "doctype": "Vehicle Incident",
@@ -52,6 +90,8 @@ class TestVehicleDamageWriteOff(FrappeTestCase):
                 "fault": "Third party",
             }
         ).insert(ignore_permissions=True).name
+        type(self)._vehicles.append(self.vehicle)
+        type(self)._incidents.append(self.incident)
 
     def _write_off(self, **overrides):
         data = {
@@ -127,6 +167,7 @@ class TestVehicleDamageWriteOffDoA(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls._vehicles = []
         cls.supervisor = _user("vwo_sup@example.com", "Fleet Supervisor")
         cls.manager = _user("vwo_doa_mgr@example.com", "Fleet Manager")
         # [#nkqhd1]
@@ -144,6 +185,8 @@ class TestVehicleDamageWriteOffDoA(FrappeTestCase):
     def tearDownClass(cls):
         # [#aog6ng]
         frappe.set_user("Administrator")
+        # Clear committed write-offs + vehicles first so the driver delete is unblocked.
+        _purge_fixtures(cls._vehicles)
         frappe.db.delete("User Permission",
                          {"allow": "Project", "for_value": cls.project, "user": cls.supervisor})
         if frappe.db.exists("Salis Driver", cls.driver):
@@ -157,7 +200,8 @@ class TestVehicleDamageWriteOffDoA(FrappeTestCase):
         frappe.set_user("Administrator")
         frappe.db.set_single_value("Salis Settings", "writeoff_ops_threshold", 2000)
         # [#h8la3d]
-        self.vehicle = _ensure_vehicle(f"WD {self._testMethodName}")
+        self.vehicle = _make_vehicle("WD")
+        type(self)._vehicles.append(self.vehicle)
 
     def tearDown(self):
         frappe.set_user("Administrator")

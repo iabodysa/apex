@@ -23,6 +23,13 @@ setup_wizard_complete = "apex.apex_core.setup.setup_wizard.setup_wizard_complete
 
 # [#nc1irs]
 
+# Deliver the in-app System Notification before the email transport and keep a
+# missing outgoing Email Account from logging "Failed to send Notification"
+# when a System Notification fallback exists (app-layer, not a core patch).
+override_doctype_class = {
+    "Notification": "apex.apex_core.overrides.notification.ApexNotification",
+}
+
 # [#34xywz]
 doc_events = {
     # [#8xii8j]

@@ -1,0 +1,2 @@
+<p>{{ _("Custody items have been issued to you") }}: {{ doc.name }}.</p>
+<p>{{ _("Please confirm you have received them") }}: <a href="{{ frappe.utils.get_url('/my-custody-acknowledgment?custody_issue=' ~ doc.name) }}">{{ _("Acknowledge receipt") }}</a></p>

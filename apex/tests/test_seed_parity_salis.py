@@ -33,7 +33,8 @@ class TestSalisEmailTemplateSpec(unittest.TestCase):
         spec = _spec("Email Template")
         self.assertEqual(spec["key"], "name")
         self.assertTrue(spec["create_only"])
-        self.assertEqual(len(spec["records"]), 3)
+        # Orphan "Salis - Driver Clearance Issued" template removed (A-001): 3 -> 2.
+        self.assertEqual(len(spec["records"]), 2)
         for rec in spec["records"]:
             self.assertIn("name", rec)
 

@@ -4,12 +4,6 @@
   "create_only": true,
   "records": [
     {
-      "name": "Salis - Driver Clearance Issued",
-      "subject": "Driver clearance {{ doc.name }} issued",
-      "use_html": 1,
-      "response_html": "<p>Dear Sir/Madam,</p><p>Driver clearance <b>{{ doc.name }}</b> for driver <b>{{ doc.driver }}</b> ({{ doc.clearance_reason }}) has been issued with status <b>{{ doc.status }}</b>.</p><p>The driver may be redeployed once all custody, fuel chip, and vehicle items are returned.</p><p>Regards,<br>Fleet Management</p>"
-    },
-    {
       "name": "Salis - Rental Settlement Statement",
       "subject": "Rental settlement {{ doc.name }} for {{ doc.period_month }}",
       "use_html": 1,
