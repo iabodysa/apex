@@ -31,6 +31,13 @@ FLEET_ROLES = {
 }
 
 
+def has_apps_screen_access() -> bool:
+    """Gate for the /apps app-selector tile (A-024) — same FLEET_ROLES check
+    get_context() applies, so the tile never shows for a user the page itself
+    would turn away."""
+    return bool(FLEET_ROLES & set(frappe.get_roles()))
+
+
 def get_context(context):
     # [#nyktq0]
     guest_redirect("/fleet")

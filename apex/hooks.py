@@ -10,6 +10,49 @@ app_license = "MIT"
 # [#4d5ed9]
 required_apps = ["frappe", "erpnext", "hrms"]
 
+# [#a024ap]
+# One-click icons on the Frappe /apps app-selector screen (A-024) — one entry
+# per real www/ portal shell. Driver has no extra role gate (any logged-in
+# user); masar is guest-token-based so it also carries no gate. Fleet /
+# housing / safety are admin-style portals, so each has_permission points at a
+# has_apps_screen_access() living next to that page's own role-set, to keep
+# the /apps gate from drifting away from the page's real access check.
+add_to_apps_screen = [
+    {
+        "name": "apex-driver",
+        "logo": "/assets/apex/driver_portal/afmco-logo.svg",
+        "title": "Driver Portal",
+        "route": "/driver",
+    },
+    {
+        "name": "apex-masar",
+        "logo": "/assets/apex/worker_portal/icons/masar-icon-192.png",
+        "title": "Masar",
+        "route": "/masar",
+    },
+    {
+        "name": "apex-fleet",
+        "logo": "/assets/apex/driver_portal/afmco-logo.svg",
+        "title": "Fleet OS",
+        "route": "/fleet",
+        "has_permission": "apex.www.fleet.has_apps_screen_access",
+    },
+    {
+        "name": "apex-housing",
+        "logo": "/assets/apex/driver_portal/afmco-logo.svg",
+        "title": "Housing",
+        "route": "/housing",
+        "has_permission": "apex.www.housing.has_apps_screen_access",
+    },
+    {
+        "name": "apex-safety",
+        "logo": "/assets/apex/driver_portal/afmco-logo.svg",
+        "title": "Safety Rounds",
+        "route": "/safety",
+        "has_permission": "apex.www.safety.has_apps_screen_access",
+    },
+]
+
 # [#3n2bsa]
 export_python_type_annotations = True
 
