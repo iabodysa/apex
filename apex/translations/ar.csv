@@ -59,6 +59,7 @@ A payment request can only be raised on an Approved settlement (current status: 
 A push subscription endpoint is required.,عنوان اشتراك الإشعارات مطلوب.
 A reason is required to reject a handover.,يلزم سبب لرفض التسليم.
 A reason is required to waive an exception.,يلزم إدخال سبب للتنازل عن الاستثناء.
+A rejection reason is required.,سبب الرفض مطلوب.
 A rent payment is due today and remains unpaid,دفعة إيجار مستحقة اليوم ولم تُسدد بعد
 A request reference is required.,مرجع الطلب مطلوب.
 A round date is required to submit a round.,يلزم تاريخ جولة لاعتماد جولة.
@@ -1180,6 +1181,8 @@ Days to Expiry,الأيام المتبقية للانتهاء
 Deactivate Bed,تعطيل السرير
 Deactivate Room,تعطيل الغرفة
 December,ديسمبر
+Decision By,القرار بواسطة
+Decision On,تاريخ القرار
 Declaration,الإقرار
 Declaration Message,رسالة الإقرار
 Declaration Received,تم استلام الإقرار
@@ -2422,6 +2425,7 @@ No project yet,لا يوجد مشروع بعد
 No registered workers match. Register a new arrival below.,لا يوجد عمال مسجّلون مطابقون. سجّل وصولاً جديداً أدناه.
 No result lines to submit.,لا سطور نتائج لاعتمادها.
 No rooms found for this building.,لا توجد غرف لهذا المبنى.
+No salary-component routing is configured for deduction component {0}.,لا يوجد توجيهُ مكوّن راتبٍ مُهيَّأ لمكوّن الخصم {0}.
 No task executions recorded for this round.,لا توجد مهام منفذة مسجلة لهذه الجولة.
 No trips scheduled for today.,لا توجد رحلات مجدولة لليوم.
 No vehicle is assigned to you. Ask your supervisor to assign one before requesting fuel.,لا توجد مركبة مسندة إليك. اطلب من مشرفك إسناد مركبة قبل طلب الوقود.
@@ -2515,6 +2519,7 @@ Only a Fleet Manager or Fleet Project Manager can {0} a fuel request.,يمكن �
 Only a handover Under Review can be approved.,لا يمكن اعتماد إلا تسليم قيد المراجعة.
 Only a submitted delivery can be actioned.,لا يمكن اتخاذ إجراء إلا على تسليم معتمَد.
 Only a submitted handover can be actioned.,لا يمكن اتخاذ إجراء إلا على تسليم مُقدَّم.
+Only a submitted route plan can be approved or rejected.,لا يمكن اعتماد أو رفض إلا خطة مسار مُقدَّمة.
 Only a submitted transfer can be received.,لا يمكن استلام إلا النقل المعتمد.
 Only a {0} may clear this exit.,يحق فقط لـ {0} إخلاء هذا الخروج.
 "Only an active band participates in authority resolution. A revision supersedes by activating a new row, never by editing a live band.",لا تشارك في تحديد الصلاحية سوى الشريحة النشطة. وتُلغي المراجعة الشريحة بتفعيل صف جديد، لا بتعديل شريحة سارية.
@@ -3003,6 +3008,7 @@ Reallocation,إعادة تخصيص
 Reason,السبب
 Reason Category,سبب عدم التشغيل
 "Reason the driver is being stopped from operating, whether due to a violation, leave, termination, transfer, or another cause.",سبب إيقاف السائق عن العمل، سواء بسبب مخالفة أو إجازة أو إنهاء خدمة أو نقل أو سبب آخر.
+"Reason the supervisor rejected the plan, captured on rejection.",سبب رفض المشرف للمخطّط، يُسجَّل عند الرفض.
 "Reason the vehicle is being taken out of service, whether an accident, maintenance, violation, rental return, or another cause.",سبب إخراج المركبة من الخدمة، سواء حادث أو صيانة أو مخالفة أو إعادة مركبة مستأجرة أو سبب آخر.
 Reassign,إعادة الإسناد
 Reassign driver,إعادة إسناد السائق
@@ -3097,6 +3103,7 @@ Rejected,مرفوض
 Rejected by Client,مرفوض من قِبل العميل
 Rejected: {0},مرفوض: {0}
 Rejecting…,جارٍ الرفض…
+Rejection Reason,سبب الرفض
 Rejection failed for {0}.,فشل رفض {0}.
 Related Driver,السائق المرتبط
 Related Facility Asset,أصل المنشأة المرتبط
@@ -3357,8 +3364,11 @@ Route Assignment,إسناد مسار
 Route Name,اسم المسار
 Route Plan,خطة المسار
 Route Stop,محطة المسار
+Route Supervisor,مشرف المسار
 Route Template,قالب مسار
 Route Type,نوع المسار
+Route plan not found.,خطة المسار غير موجودة.
+Route supervisor portal,بوابة مشرف المسار
 Routed To Billing,مُوجَّه إلى الفوترة
 Routed To Deduction,مُوجَّه إلى الخصم
 Router,راوتر
@@ -3661,6 +3671,7 @@ Skip,تخطّي
 Skip Reason,سبب التخطّي
 Skipped,تم التخطّي
 Slips Built,الإيصالات المُنشأة
+Slips are held until the period's deduction declaration is received.,تُحجَز القسائم حتّى يُستلَم إقرار خصومات الفترة.
 Slips are held until this is 'received'.,تُحجز الإيصالات حتى تصبح هذه الحالة «مُستلَم».
 Slips built for this run.,الإيصالات المُنشأة لهذا التشغيل.
 Smoke Detector,كاشف دخان
@@ -3776,7 +3787,6 @@ Stop Reason,سبب الإيقاف
 Stop a Vehicle,أوقف مركبة
 Stop {0} cancelled.,أُلغي الإيقاف {0}.
 Stopped,متوقف
-Stopped > {0} days,متوقّف منذ أكثر من {0} يوم
 Stopped via {0}: {1}.,تم الإيقاف عبر {0}: {1}.
 Stops,المحطات
 Storage,مخزن
@@ -3815,7 +3825,9 @@ Sum of the linked Rental Accrual Ledger rows for this office and period — the 
 Sunday,الأحد
 Superseded,مُلغى بإصدار أحدث
 Superseding a Rate Card may only change its status; edit anything else by creating a new version.,إلغاء بطاقة الأسعار بإصدار أحدث لا يغيّر سوى حالتها؛ ولتعديل أي شيء آخر أنشئ إصداراً جديداً.
+Supervision,الإشراف
 Supervisor,مشرف
+Supervisor Approval,اعتماد المشرف
 Supervisor Approved,معتمد من المشرف
 Supervisor Confirmed Completion,أكد المشرف اكتمال العمل
 Supervisor Delay,تأخر المشرف
@@ -3826,6 +3838,7 @@ Supervisor Review,مراجعة المشرف
 Supervisor Salary,راتب المشرف
 Supervisor accountable for this asset; appears on facility custody report,المشرف المسؤول عن هذا الأصل؛ يظهر في تقرير عُهدة المنشأة
 Supervisor accountable for this item at count time; appears on the housing custody report.,المشرف المسؤول عن هذا الصنف وقت الجرد؛ يظهر في تقرير عهدة الإسكان.
+Supervisor approval decision for the plan. System-maintained by the Masar supervisor portal; never edited manually.,قرار اعتماد المشرف للمخطّط. يُدار آليّاً من بوابة مشرف المسار؛ لا يُحرَّر يدويّاً.
 Supervisor at the receiving accommodation who confirms the on-site code receipt.,المشرف في السكن المستلِم الذي يؤكد الاستلام برمز الموقع.
 Supervisor signature,توقيع المشرف
 Supplier,المورّد
@@ -3917,6 +3930,7 @@ The P-189 Rate Card Penalty Row that parameterized this rule.,صف غرامة ب
 The POSTED Reconciliation Run that is the ONLY source of the billed amounts (P-190). Every emitted Sales Invoice line traces back through it.,تشغيل التسوية المُرحَّل الذي هو المصدر الوحيد للمبالغ المفوترة (P-190). وكل بند فاتورة مبيعات صادر يعود إليه.
 The POSTED Reconciliation Run whose Payable Lines are the ONLY gross source for this payroll. Never hand-key gross.,تشغيل التسوية المُرحَّل الذي تُعدّ بنود مستحقاته المصدر الوحيد للإجمالي في هذه الرواتب. لا تُدخِل الإجمالي يدوياً أبداً.
 The Rate Card that priced this line.,بطاقة الأسعار التي سعّرت هذا البند.
+The Route Supervisor this plan is assigned to for approval and live oversight. Only this user may approve or reject the plan from the Masar supervisor portal.,مشرف المسار المُسنَد إليه هذا المخطّط للاعتماد والإشراف الحيّ. هذا المستخدم وحده يعتمد أو يرفض المخطّط من بوابة مشرف المسار.
 "The Safety Round this execution belongs to, if recorded as part of a round.",جولةُ السلامة التي ينتمي إليها هذا التنفيذ، إن سُجِّل ضمن جولة.
 "The Temporary Worker record this identity was created from, if any.",سجل العامل المؤقت الذي أُنشئت منه هذه الهوية، إن وُجد.
 The Trip Start Log this scan boarded onto (set only when a boarding row was created).,سجل بدء الرحلة الذي صعد عليه هذا المسح (يُضبط فقط عند إنشاء صف صعود).
@@ -3995,6 +4009,7 @@ The stock Service Item this billable line maps to (the P-191 invoice line).,صن
 The submitted Custody Issue whose receipt is being acknowledged.,صرف العهدة المعتمد الذي يجري الإقرار باستلامه.
 The subscription's auth secret (client auth token for payload encryption).,المفتاح السري لمصادقة الاشتراك (رمز مصادقة العميل لتشفير الحمولة).
 The subscription's p256dh public key (client key for payload encryption).,المفتاح العام p256dh للاشتراك (مفتاح العميل لتشفير الحمولة).
+The supervisor user who recorded the approval decision.,المستخدم المشرف الذي سجّل قرار الاعتماد.
 The tracked facility asset being delivered.,أصل المنشأة المتتبَّع الجاري تسليمه.
 The unit rc_value is expressed in.,الوحدة التي تُعبَّر بها قيمة rc_value.
 The unit the client format bills / reports in.,الوحدة التي تُفوتر/تُرفع بها صيغة العميل.
@@ -4026,10 +4041,13 @@ This building has rooms but every bed is occupied — use Over-capacity,يحتو
 This driver has been cleared on all movement-domain items listed below.,تم إخلاء طرف هذا السائق من جميع بنود نطاق الحركة المدرجة أدناه.
 This fuel request has been pending approval for too long,ظل طلب الوقود هذا بانتظار الاعتماد لفترة طويلة جدًا
 "This license is submitted. Amend it (Cancel, then Amend) with the new expiry date to renew.",تم إرسال هذا الترخيص. عدّله (ألغِ، ثم عدّل) بتاريخ الانتهاء الجديد للتجديد.
+This page is for route supervisors.,هذه الصفحة مخصصة لمشرفي المسارات.
 This page is for the fleet team.,هذه الصفحة مخصّصة لفريق الأسطول.
 This page is for the housing team.,هذه الصفحة مخصصة لفريق الإسكان.
 This page is for the safety team.,هذه الصفحة لفريق السلامة.
 This payment request is not finance-approved yet; it cannot be paid.,طلب الدفع هذا لم يُعتمد ماليًا بعد؛ لا يمكن دفعه.
+This plan has already been {0}.,تم {0} هذه الخطة مسبقاً.
+This portal is for route supervisors.,هذه البوابة مخصصة لمشرفي المسارات.
 This push subscription endpoint is not allowed.,نقطة اشتراك الإشعارات هذه غير مسموح بها.
 This recovery reaches the Operations threshold and can only be approved by Operations-tier authority (Fleet Manager).,يبلغ هذا الاسترداد حد العمليات، ولا يعتمده إلا صاحب صلاحية على مستوى العمليات (مدير الأسطول).
 This report records the safety tasks executed during the round and their outcomes.,يوثّق هذا التقرير مهام السلامة المنفذة خلال الجولة ونتائجها.
@@ -4038,6 +4056,7 @@ This resident has custody items. Opening the full Checkout form to clear custody
 This resident request has been resolved,تمت معالجة طلب الساكن
 This resident request is waiting for supporting evidence,طلب الساكن هذا بانتظار أدلة داعمة
 This resident's expected checkout date is approaching — please prepare the room and checkout,يقترب موعد المغادرة المتوقع لهذا النزيل — يرجى تجهيز الغرفة وإتمام إجراءات المغادرة
+This route plan is not assigned to you.,خطة المسار هذه غير مُسندة إليك.
 This session,هذه الجلسة
 This statement records a fleet incident (accident or theft) against the vehicle. It does not post to the general ledger; any recovery or write-off is handled separately.,يسجل هذا البيان حادث أسطول (اصطدام أو سرقة) على المركبة. لا يُرحّل إلى دفتر الأستاذ العام؛ ويُعالَج أي استرداد أو شطب على حدة.
 This temporary stay is ending soon — please arrange check-out,هذه الإقامة المؤقتة على وشك الانتهاء — يُرجى ترتيب المغادرة
@@ -4249,6 +4268,7 @@ Unreverted Temporary Topups,التعبئات المؤقتة غير المعكو�
 Unsatisfactory,غير مُرضٍ
 Unsettled Rental,إيجار غير مُسوَّى
 Unspecified,غير محدد
+Unsupported supervisor decision.,قرار المشرف غير مدعوم.
 Updating status...,جارٍ تحديث الحالة...
 Upload Photo (Optional),رفع صورة (اختياري)
 Urdu,الأردية
@@ -4422,6 +4442,7 @@ When the driver's GPS position was last refreshed. A stale timestamp lets the cl
 "When the inspection is carried out relative to work, distinguishing pre-work and post-work checks from routine periodic rounds and unplanned emergency inspections.",توقيت إجراء التفتيش نسبةً إلى العمل، يميّز فحوص ما قبل العمل وما بعده عن الجولات الدورية الاعتيادية وعمليات التفتيش الطارئة غير المخططة.
 When the recipient acknowledged receipt at the kiosk.,وقت إقرار المستلم بالاستلام في الكشك.
 When the resident accepted the housing terms at the tablet.,وقت موافقة الساكن على شروط السكن على اللوحي.
+When the supervisor recorded the approval decision.,وقت تسجيل المشرف لقرار الاعتماد.
 When the worker self-claimed boarding (drives the auto-confirm timeout).,عندما أعلن العامل صعوده ذاتيًا (يحرك مهلة التأكيد التلقائي).
 When this device last refreshed or confirmed its subscription.,متى حدّث هذا الجهاز اشتراكه أو أكّده آخر مرة.
 "When unchecked, the worker's personal Masar link stops resolving.",عند إلغاء التفعيل، يتوقف رابط مسار العامل الشخصي عن العمل.

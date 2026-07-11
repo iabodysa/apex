@@ -40,6 +40,31 @@ class RoutePlan(Document):
             clear_fields=["route_plan"],
         )
 
+    def set_supervisor_decision(self, decision: str, user: str, reason: str | None = None):
+        """Record the Route Supervisor's approval decision on this plan.
+
+        State-machine writer for the ``supervisor_approval`` field. Called only by the
+        guarded ``route_supervisor`` portal API after it has verified the caller is the
+        assigned supervisor and the plan is still Pending — the permission/precondition
+        gate lives there; this method just performs the write atomically.
+
+        ``supervisor_approval`` and its audit fields are ``allow_on_submit``, so the
+        decision persists on the already-submitted plan without an amendment. Uses
+        ``db_set`` (audit-only stamp, no re-validate) mirroring the driver-portal
+        execution stamps. Rejection reason is cleared on approval so a re-approval of a
+        previously rejected plan carries no stale reason."""
+        if decision not in ("Approved", "Rejected"):
+            frappe.throw(_("Unsupported supervisor decision."))
+        self.db_set(
+            {
+                "supervisor_approval": decision,
+                "supervisor_action_by": user,
+                "supervisor_action_on": frappe.utils.now_datetime(),
+                "supervisor_rejection_reason": reason if decision == "Rejected" else None,
+            },
+            update_modified=False,
+        )
+
     def _default_operations_requester(self):
         """Carry the Operations requester from the linked Transport Request
         (Operations owns the request) when not already set."""

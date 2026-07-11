@@ -21,6 +21,13 @@
   "rp_sec_stops",
   "total_stops",
   "stops",
+  "rp_sec_supervision",
+  "route_supervisor",
+  "supervisor_approval",
+  "rp_supervision_col",
+  "supervisor_action_by",
+  "supervisor_action_on",
+  "supervisor_rejection_reason",
   "route_plan_sec_system",
   "naming_series",
   "requested_by_operations",
@@ -127,6 +134,61 @@
    "options": "Route Stop"
   },
   {
+   "fieldname": "rp_sec_supervision",
+   "fieldtype": "Section Break",
+   "label": "Supervision"
+  },
+  {
+   "description": "The Route Supervisor this plan is assigned to for approval and live oversight. Only this user may approve or reject the plan from the Masar supervisor portal.",
+   "fieldname": "route_supervisor",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Route Supervisor",
+   "options": "User"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Pending",
+   "description": "Supervisor approval decision for the plan. System-maintained by the Masar supervisor portal; never edited manually.",
+   "fieldname": "supervisor_approval",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Supervisor Approval",
+   "options": "Pending\nApproved\nRejected",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_supervision_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "The supervisor user who recorded the approval decision.",
+   "fieldname": "supervisor_action_by",
+   "fieldtype": "Link",
+   "label": "Decision By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "When the supervisor recorded the approval decision.",
+   "fieldname": "supervisor_action_on",
+   "fieldtype": "Datetime",
+   "label": "Decision On",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.supervisor_approval=='Rejected'",
+   "description": "Reason the supervisor rejected the plan, captured on rejection.",
+   "fieldname": "supervisor_rejection_reason",
+   "fieldtype": "Small Text",
+   "label": "Rejection Reason",
+   "read_only": 1
+  },
+  {
    "fieldname": "route_plan_sec_system",
    "fieldtype": "Section Break",
    "label": "System",
@@ -191,7 +253,7 @@
    "link_fieldname": "route_plan"
   }
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-11 17:18:32.948383",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Plan",
