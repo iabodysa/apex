@@ -1,0 +1,67 @@
+{
+ "creation": "2026-07-11 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-07-11 20:55:46.174414",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Maintenance Work Order",
+ "owner": "Administrator",
+ "reference_doctype": "Maintenance Work Order",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Select the maintenance request this work order resolves.",
+   "fieldname": "maintenance_request",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Maintenance Request",
+   "position": "Right",
+   "title": "Link the Maintenance Request"
+  },
+  {
+   "description": "Choose the employee who will carry out the work.",
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Assigned To (Employee)",
+   "position": "Right",
+   "title": "Assign the Technician"
+  },
+  {
+   "description": "Set the date the work is planned to begin.",
+   "fieldname": "planned_start_date",
+   "fieldtype": "Date",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Planned Start Date",
+   "position": "Right",
+   "title": "Set the Planned Start"
+  },
+  {
+   "description": "Describe the work to be performed.",
+   "fieldname": "work_description",
+   "fieldtype": "Text Editor",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Work Description",
+   "position": "Bottom",
+   "title": "Describe the Work"
+  },
+  {
+   "description": "After the job, note what was done, then save.",
+   "fieldname": "completion_notes",
+   "fieldtype": "Small Text",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Completion Notes",
+   "position": "Bottom",
+   "title": "Record Completion Notes"
+  }
+ ],
+ "title": "Maintenance Work Order"
+}

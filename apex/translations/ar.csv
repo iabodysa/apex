@@ -4848,3 +4848,71 @@ zatca_erpgulf,تكامل زاتكا ERPGulf
 {0} {1} already has an active Accommodation Assignment: {2},{0} {1} لديه بالفعل إسناد سكن نشط: {2}
 {0} {1} does not exist.,{0} {1} غير موجود.
 {0}: {1} occupied bed(s) prevented capacity reduction.,{0}: {1} سرير/أسرّة مشغولة منعت تخفيض السعة.
+Select the Assignment,اختر التخصيص
+Pick the active housing assignment that is being closed.,اختر تخصيص السكن الساري الذي يجري إغلاقه.
+Set the Checkout Date,حدّد تاريخ المغادرة
+Set the date the resident leaves the accommodation.,حدّد تاريخ مغادرة الساكن للسكن.
+Choose the Checkout Reason,اختر سبب المغادرة
+State why the resident is checking out.,بيّن سبب مغادرة الساكن.
+Confirm Custody Cleared,أكّد تسليم العهدة
+Tick this once all issued custody has been returned.,علّم هذا الخيار بعد إرجاع كامل العهدة المصروفة.
+Record Any Damage Deduction,سجّل أي خصم للأضرار
+Enter any deduction for room or asset damage.,أدخل أي خصم مقابل أضرار الغرفة أو الأصول.
+Add Damage Notes,أضف ملاحظات الأضرار
+"Describe any damage, then save to close the stay.","صِف أي أضرار، ثم احفظ لإغلاق الإقامة."
+Set the Return Date,حدّد تاريخ الإرجاع
+Set the date the articles are returned.,حدّد تاريخ إرجاع الأصناف.
+Link the Custody Issue,اربط سند صرف العهدة
+Select the original custody issue being returned.,اختر سند صرف العهدة الأصلي الذي يجري إرجاعه.
+Confirm the type of worker returning the articles.,أكّد نوع العامل الذي يُرجع الأصناف.
+Pick the worker returning the articles.,اختر العامل الذي يُرجع الأصناف.
+List the Returned Items,أدرج الأصناف المُرجعة
+"Use this table to record every article returned, then save.","استخدم هذا الجدول لتسجيل كل صنف مُرجع، ثم احفظ."
+Link the Maintenance Request,اربط طلب الصيانة
+Select the maintenance request this work order resolves.,اختر طلب الصيانة الذي يعالجه أمر العمل هذا.
+Assign the Technician,عيّن الفني
+Choose the employee who will carry out the work.,اختر الموظف الذي سينفّذ العمل.
+Set the Planned Start,حدّد بداية العمل المخططة
+Set the date the work is planned to begin.,حدّد التاريخ المخطط لبدء العمل.
+Describe the Work,صِف العمل
+Describe the work to be performed.,صِف العمل المطلوب تنفيذه.
+Record Completion Notes,سجّل ملاحظات الإنجاز
+"After the job, note what was done, then save.","بعد إنجاز العمل، دوّن ما تم تنفيذه، ثم احفظ."
+Select the building being inspected.,اختر المبنى الجاري تفتيشه.
+Set the Round Date,حدّد تاريخ الجولة
+Set the date of this safety round.,حدّد تاريخ جولة السلامة هذه.
+Set the Cadence,حدّد التكرار
+Choose how often this round recurs.,اختر معدّل تكرار هذه الجولة.
+Assign the Supervisor,عيّن المشرف
+Select the supervisor responsible for this round.,اختر المشرف المسؤول عن هذه الجولة.
+Record the Result,سجّل النتيجة
+"Set the overall result of the round, then save.","حدّد النتيجة الإجمالية للجولة، ثم احفظ."
+Set the Incident Time,حدّد وقت الحادث
+Record when the incident happened.,سجّل وقت وقوع الحادث.
+Select the building where the incident occurred.,اختر المبنى الذي وقع فيه الحادث.
+Classify the Incident,صنّف الحادث
+Choose the type of incident.,اختر نوع الحادث.
+Set the Severity,حدّد درجة الخطورة
+Rate how serious the incident is.,قيّم درجة خطورة الحادث.
+Describe the Incident,صِف الحادث
+Describe what happened.,صِف ما حدث.
+Record Immediate Action,سجّل الإجراء الفوري
+"Note the immediate action taken, then save.","دوّن الإجراء الفوري المتخذ، ثم احفظ."
+Select the vehicle being handed over.,اختر المركبة الجاري تسليمها.
+Assign the Receiving Driver,عيّن السائق المستلم
+Select the driver receiving the vehicle.,اختر السائق المستلم للمركبة.
+Set the Handover Date,حدّد تاريخ التسليم
+Set the date of the handover.,حدّد تاريخ التسليم.
+Record the Odometer,سجّل قراءة العداد
+Enter the current odometer reading.,أدخل قراءة العداد الحالية.
+Note the Condition,دوّن الحالة
+"Describe the vehicle condition, then save.","صِف حالة المركبة، ثم احفظ."
+Set the Trip Date,حدّد تاريخ الرحلة
+Set the date of the trip.,حدّد تاريخ الرحلة.
+Assign the Vehicle,عيّن المركبة
+Select the vehicle for this trip.,اختر المركبة لهذه الرحلة.
+Select the driver for this trip.,اختر السائق لهذه الرحلة.
+Set the Departure Time,حدّد وقت المغادرة
+Enter the planned departure time.,أدخل وقت المغادرة المخطط.
+Add Transport Requests,أضف طلبات النقل
+"List the transport requests this trip serves, then save.","أدرج طلبات النقل التي تخدمها هذه الرحلة، ثم احفظ."

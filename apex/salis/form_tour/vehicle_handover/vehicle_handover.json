@@ -1,0 +1,67 @@
+{
+ "creation": "2026-07-11 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-07-11 20:55:46.174414",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Vehicle Handover",
+ "owner": "Administrator",
+ "reference_doctype": "Vehicle Handover",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Select the vehicle being handed over.",
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Vehicle",
+   "position": "Right",
+   "title": "Choose the Vehicle"
+  },
+  {
+   "description": "Select the driver receiving the vehicle.",
+   "fieldname": "to_driver",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "To Driver",
+   "position": "Right",
+   "title": "Assign the Receiving Driver"
+  },
+  {
+   "description": "Set the date of the handover.",
+   "fieldname": "handover_date",
+   "fieldtype": "Date",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Handover Date",
+   "position": "Right",
+   "title": "Set the Handover Date"
+  },
+  {
+   "description": "Enter the current odometer reading.",
+   "fieldname": "odometer_reading",
+   "fieldtype": "Int",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Odometer Reading",
+   "position": "Right",
+   "title": "Record the Odometer"
+  },
+  {
+   "description": "Describe the vehicle condition, then save.",
+   "fieldname": "condition_notes",
+   "fieldtype": "Small Text",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Condition Notes",
+   "position": "Bottom",
+   "title": "Note the Condition"
+  }
+ ],
+ "title": "Vehicle Handover"
+}

@@ -1,0 +1,67 @@
+{
+ "creation": "2026-07-11 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-07-11 20:55:46.174414",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Custody Return",
+ "owner": "Administrator",
+ "reference_doctype": "Custody Return",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Set the date the articles are returned.",
+   "fieldname": "return_date",
+   "fieldtype": "Date",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Return Date",
+   "position": "Right",
+   "title": "Set the Return Date"
+  },
+  {
+   "description": "Select the original custody issue being returned.",
+   "fieldname": "custody_issue",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Custody Issue",
+   "position": "Right",
+   "title": "Link the Custody Issue"
+  },
+  {
+   "description": "Confirm the type of worker returning the articles.",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Worker Type",
+   "position": "Right",
+   "title": "Worker Type"
+  },
+  {
+   "description": "Pick the worker returning the articles.",
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Worker",
+   "position": "Right",
+   "title": "Select the Worker"
+  },
+  {
+   "description": "Use this table to record every article returned, then save.",
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Returned Items",
+   "position": "Bottom",
+   "title": "List the Returned Items"
+  }
+ ],
+ "title": "Custody Return"
+}
