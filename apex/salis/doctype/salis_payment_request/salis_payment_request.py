@@ -29,6 +29,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now
 
+from apex.salis.utils import set_financial_defaults
+
 # [#72wj77]
 _FINANCE_ROLES = {"Finance Manager", "System Manager"}
 
@@ -58,7 +60,7 @@ class SalisPaymentRequest(Document):
 
 		if not self.requested_by:
 			self.requested_by = frappe.session.user
-		self._set_financial_defaults()
+		set_financial_defaults(self)
 		# [#lme2on]
 		if (self.amount or 0) <= 0:
 			frappe.throw(_("Amount must be greater than zero."))
@@ -69,19 +71,6 @@ class SalisPaymentRequest(Document):
 	# [#hbyegp]
 
 	# [#m88md8]
-
-	def _set_financial_defaults(self):
-		"""Default company and cost center from Salis Settings for reporting and
-		financial context. Reference fields only - no GL/Payment Entry is posted."""
-		from apex.apex_core.doctype.salis_settings.salis_settings import (
-			get_default_company,
-			get_default_cost_center,
-		)
-
-		if not self.company:
-			self.company = get_default_company()
-		if not self.cost_center:
-			self.cost_center = get_default_cost_center()
 
 	def _old_status(self):
 		previous = self.get_doc_before_save()

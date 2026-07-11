@@ -490,3 +490,44 @@ def add_timeline_note(doctype, name, message):
 		return
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Salis: timeline note failed")
+
+
+def set_financial_defaults(doc):
+	"""Default company and cost center from Salis Settings for reporting and
+	financial context. Reference fields only - no GL/Payment Entry is posted."""
+	from apex.apex_core.doctype.salis_settings.salis_settings import (
+		get_default_company,
+		get_default_cost_center,
+	)
+
+	if not doc.company:
+		doc.company = get_default_company()
+	if not doc.cost_center:
+		doc.cost_center = get_default_cost_center()
+
+
+def enforce_vehicle_compliance(doc):
+	"""Block (or warn) when the linked vehicle's compliance has expired.
+
+	Reads Salis Vehicle.compliance_status; if Expired, honours the
+	Salis Settings.block_assignment_on_expired_compliance flag: block when
+	set, otherwise warn. Safe default = warn.
+	"""
+	if not doc.vehicle:
+		return
+	status = frappe.db.get_value("Salis Vehicle", doc.vehicle, "compliance_status")
+	if status != "Expired":
+		return
+	if frappe.db.get_single_value(
+		"Salis Settings", "block_assignment_on_expired_compliance"
+	):
+		frappe.throw(
+			_("Vehicle {0} has expired compliance and cannot be dispatched/assigned.").format(
+				doc.vehicle
+			)
+		)
+	else:
+		frappe.msgprint(
+			_("Warning: vehicle {0} has expired compliance.").format(doc.vehicle),
+			indicator="orange",
+		)

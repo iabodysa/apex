@@ -27,13 +27,15 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from apex.salis.utils import set_financial_defaults
+
 # [#kj6uap]
 _OPERATIONS_ROLES = {"Fleet Manager", "System Manager"}
 
 
 class MovementCostRecovery(Document):
 	def validate(self):
-		self._set_financial_defaults()
+		set_financial_defaults(self)
 		if (self.amount or 0) <= 0:
 			frappe.throw(_("Amount must be greater than zero."))
 		if self.status == "Approved" and not self.basis_evidence:
@@ -65,18 +67,5 @@ class MovementCostRecovery(Document):
 					"This recovery reaches the Operations threshold and can only be approved by Operations-tier authority (Fleet Manager)."
 				)
 			)
-
-	def _set_financial_defaults(self):
-		"""Default company and cost center from Salis Settings for reporting and
-		financial context. Reference fields only - no GL/Payment Entry is posted."""
-		from apex.apex_core.doctype.salis_settings.salis_settings import (
-			get_default_company,
-			get_default_cost_center,
-		)
-
-		if not self.company:
-			self.company = get_default_company()
-		if not self.cost_center:
-			self.cost_center = get_default_cost_center()
 
 	# [#m7rmjl]

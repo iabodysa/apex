@@ -39,6 +39,7 @@ from frappe.utils import get_time, now_datetime
 from apex.salis.utils import (
     add_timeline_note,
     drive_transport_request,
+    enforce_vehicle_compliance,
     lock_vehicle,
     revert_transport_request,
 )
@@ -50,7 +51,7 @@ class DispatchTrip(Document):
         self._guard_initial_status()
         self._validate_odometer()
         self._validate_trip_times()
-        self._enforce_compliance()
+        enforce_vehicle_compliance(self)
         self._require_completion_notes()
         self._enforce_capacity()
 
@@ -174,32 +175,6 @@ class DispatchTrip(Document):
         if self.status == "Completed" and not (self.completion_notes or "").strip():
             frappe.throw(
                 _("Completion Notes are required when the trip status is Completed.")
-            )
-
-    def _enforce_compliance(self):
-        """Block (or warn) when the linked vehicle's compliance has expired.
-
-        Reads Salis Vehicle.compliance_status; if Expired, honours the
-        Salis Settings.block_assignment_on_expired_compliance flag: block when
-        set, otherwise warn. Safe default = warn.
-        """
-        if not self.vehicle:
-            return
-        status = frappe.db.get_value("Salis Vehicle", self.vehicle, "compliance_status")
-        if status != "Expired":
-            return
-        if frappe.db.get_single_value(
-            "Salis Settings", "block_assignment_on_expired_compliance"
-        ):
-            frappe.throw(
-                _("Vehicle {0} has expired compliance and cannot be dispatched/assigned.").format(
-                    self.vehicle
-                )
-            )
-        else:
-            frappe.msgprint(
-                _("Warning: vehicle {0} has expired compliance.").format(self.vehicle),
-                indicator="orange",
             )
 
     def _guard_initial_status(self):

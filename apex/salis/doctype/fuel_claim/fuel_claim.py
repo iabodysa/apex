@@ -31,6 +31,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex.salis.utils import set_financial_defaults
+
 # [#6n814k]
 VALID_STATUSES = (
 	"Draft",
@@ -58,22 +60,9 @@ class FuelClaim(Document):
 		# [#a05dfs]
 		if (self.claimed_amount or 0) < 0:
 			frappe.throw(_("Claimed Amount cannot be negative."))
-		self._set_financial_defaults()
+		set_financial_defaults(self)
 		self._compute_consumption()
 		self._guard_initial_status()
-
-	def _set_financial_defaults(self):
-		"""Default company and cost center from Salis Settings for reporting and
-		financial context. Reference fields only - no GL/Payment Entry is posted."""
-		from apex.apex_core.doctype.salis_settings.salis_settings import (
-			get_default_company,
-			get_default_cost_center,
-		)
-
-		if not self.company:
-			self.company = get_default_company()
-		if not self.cost_center:
-			self.cost_center = get_default_cost_center()
 
 	# [#a4g9yp]
 

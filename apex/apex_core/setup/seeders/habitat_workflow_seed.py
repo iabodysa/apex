@@ -25,6 +25,11 @@ import os
 
 import frappe
 
+from apex.apex_core.setup.seeders.workflow_seed_base import (
+    ensure_workflow_action,
+    ensure_workflow_state,
+)
+
 # [#t8tohs]
 _WORKFLOWS = [
     ("habitat", "utility_bill_entry_workflow"),
@@ -56,31 +61,6 @@ def _load_definition(module_dir, workflow_dir):
         return json.load(fh)
 
 
-def _ensure_workflow_state(state_name):
-    """Create the Workflow State master record if absent (autoname = the name)."""
-    if frappe.db.exists("Workflow State", state_name):
-        return
-    frappe.get_doc(
-        {
-            "doctype": "Workflow State",
-            "workflow_state_name": state_name,
-            "style": _STATE_STYLE.get(state_name, ""),
-        }
-    ).insert(ignore_permissions=True)  # audit-ok
-
-
-def _ensure_workflow_action(action_name):
-    """Create the Workflow Action Master record if absent (autoname = the name)."""
-    if frappe.db.exists("Workflow Action Master", action_name):
-        return
-    frappe.get_doc(
-        {
-            "doctype": "Workflow Action Master",
-            "workflow_action_name": action_name,
-        }
-    ).insert(ignore_permissions=True)  # audit-ok
-
-
 def _seed_one(definition):
     """Apply a single Workflow definition idempotently. Returns True if the
     workflow now exists, False if it was skipped (e.g. document type missing)."""
@@ -89,10 +69,10 @@ def _seed_one(definition):
         return False  # [#hbwf03]
 
     for state in definition.get("states", []):
-        _ensure_workflow_state(state["state"])
+        ensure_workflow_state(state["state"], _STATE_STYLE)
     for transition in definition.get("transitions", []):
-        _ensure_workflow_state(transition["next_state"])
-        _ensure_workflow_action(transition["action"])
+        ensure_workflow_state(transition["next_state"], _STATE_STYLE)
+        ensure_workflow_action(transition["action"])
 
     name = definition["name"]
     if frappe.db.exists("Workflow", name):

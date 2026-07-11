@@ -29,6 +29,8 @@ import os
 
 import frappe
 
+from apex.apex_core.setup.seeders.workflow_seed_base import seed_one
+
 # [#nhjgdf]
 _WORKFLOW_DIRS = [
     "transport_request_workflow",
@@ -107,99 +109,6 @@ def _load_definition(dir_name):
         return json.load(fh)
 
 
-def _ensure_workflow_state(state_name):
-    """Create the Workflow State master record if absent (autoname = the name)."""
-    if frappe.db.exists("Workflow State", state_name):
-        return
-    frappe.get_doc(
-        {
-            "doctype": "Workflow State",
-            "workflow_state_name": state_name,
-            "style": _STATE_STYLE.get(state_name, ""),
-        }
-    ).insert(ignore_permissions=True)  # audit-ok
-
-
-def _ensure_workflow_action(action_name):
-    """Create the Workflow Action Master record if absent (autoname = the name)."""
-    if frappe.db.exists("Workflow Action Master", action_name):
-        return
-    frappe.get_doc(
-        {
-            "doctype": "Workflow Action Master",
-            "workflow_action_name": action_name,
-        }
-    ).insert(ignore_permissions=True)  # audit-ok
-
-
-def _seed_one(definition):
-    """Apply a single Workflow definition idempotently. Returns True if the
-    workflow now exists, False if it was skipped (e.g. document type missing)."""
-    document_type = definition["document_type"]
-    if not frappe.db.exists("DocType", document_type):
-        return False  # [#fwtsf9]
-
-    # [#t2iz8u]
-    for state in definition.get("states", []):
-        _ensure_workflow_state(state["state"])
-    for transition in definition.get("transitions", []):
-        _ensure_workflow_state(transition["next_state"])
-        _ensure_workflow_action(transition["action"])
-
-    name = definition["name"]
-    if frappe.db.exists("Workflow", name):
-        # [#9ynomb]
-        doc = frappe.get_doc("Workflow", name)
-        _apply_definition(doc, definition, document_type)
-        doc.save(ignore_permissions=True)  # audit-ok
-        return True
-
-    doc = frappe.new_doc("Workflow")
-    _apply_definition(doc, definition, document_type)
-    # [#8o993l]
-    doc.name = name
-    doc.flags.name_set = True
-    doc.insert(ignore_permissions=True)  # audit-ok
-    return True
-
-
-def _apply_definition(doc, definition, document_type):
-    """Write the JSON definition's header + states + transitions onto ``doc``
-    (replacing any existing child rows), so create and reconcile share one path."""
-    name = definition["name"]
-    doc.workflow_name = definition.get("workflow_name", name)
-    doc.document_type = document_type
-    doc.workflow_state_field = definition["workflow_state_field"]
-    doc.is_active = definition.get("is_active", 1)
-    doc.override_status = definition.get("override_status", 0)
-    doc.send_email_alert = definition.get("send_email_alert", 0)
-
-    doc.states = []
-    for state in definition.get("states", []):
-        doc.append(
-            "states",
-            {
-                "state": state["state"],
-                "doc_status": state.get("doc_status", "0"),
-                "allow_edit": state.get("allow_edit"),
-                "is_optional_state": state.get("is_optional_state", 0),
-            },
-        )
-    doc.transitions = []
-    for transition in definition.get("transitions", []):
-        doc.append(
-            "transitions",
-            {
-                "state": transition["state"],
-                "action": transition["action"],
-                "next_state": transition["next_state"],
-                "allowed": transition.get("allowed"),
-                "allow_self_approval": transition.get("allow_self_approval", 1),
-                "condition": transition.get("condition") or "",
-            },
-        )
-
-
 def seed_salis_workflows():
     """Create the Salis native Workflows if absent. Idempotent + existence-guarded
     on the target DocType and every referenced state/action master — safe to
@@ -210,7 +119,7 @@ def seed_salis_workflows():
         frappe.db.savepoint(sp)
         try:
             definition = _load_definition(dir_name)
-            _seed_one(definition)
+            seed_one(definition, _STATE_STYLE)
         except Exception:
             # [#5rxgad]
             frappe.log_error(
