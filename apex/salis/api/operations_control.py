@@ -190,7 +190,7 @@ TIMELINE_LIMIT = 40
 def get_vehicle_timeline(vehicle):
     """Return one vehicle's consolidated operational history as a single date-sorted feed.
 
-    Unions four event sources into one timeline — Vehicle Incident, Vehicle Stop,
+    Unions four event sources into one timeline — Vehicle Incident, Vehicle Suspension,
     Vehicle Assignment and *resolved* Operations Alert — so the drawer shows the whole
     operational story of a vehicle in one place instead of three disconnected lists.
     Permission- and scope-gated identically to ``get_vehicle_detail``: read access to
@@ -222,7 +222,7 @@ def get_vehicle_timeline(vehicle):
         })
 
     for r in frappe.get_all(
-        "Vehicle Stop",
+        "Vehicle Suspension",
         filters={"vehicle": vehicle, "docstatus": ["<", 2]},
         fields=["name", "stop_reason", "stop_date", "return_date", "related_driver"],
         order_by="stop_date desc",
@@ -279,7 +279,7 @@ def get_vehicle_timeline(vehicle):
 def release_vehicle(vehicle, return_date=None):
     """Release a Stopped vehicle back to service from the Fleet Control drawer.
 
-    Closes the vehicle's open (submitted) Vehicle Stop through the NATIVE
+    Closes the vehicle's open (submitted) Vehicle Suspension through the NATIVE
     submittable lifecycle: the release fields are stamped on the stop and the
     document is then cancelled, so ``VehicleStop.on_cancel`` is what restores the
     vehicle to its ``previous_status`` (controllers are not bypassed — we never
@@ -295,7 +295,7 @@ def release_vehicle(vehicle, return_date=None):
     lock_vehicle(vehicle)
 
     stop = frappe.db.get_value(
-        "Vehicle Stop",
+        "Vehicle Suspension",
         {"vehicle": vehicle, "docstatus": 1},
         "name",
         order_by="creation desc",

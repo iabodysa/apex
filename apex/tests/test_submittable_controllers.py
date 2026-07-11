@@ -7,7 +7,7 @@ guards and on_submit / on_cancel side-effects but previously had no test:
   * Vehicle Handover
   * Vehicle Damage Write-Off
   * Movement Cost Transfer
-  * Vehicle Stop
+  * Vehicle Suspension
 
 Each test asserts at least one validate/before_submit guard rejection and one
 valid path (insert and, where the side-effect is observable, submit)."""
@@ -170,7 +170,7 @@ class TestVehicleStop(_SalisMastersMixin, FrappeTestCase):
     def test_before_submit_requires_evidence_for_incident_stop(self):
         v = self._vehicle()
         stop = frappe.get_doc({
-            "doctype": "Vehicle Stop",
+            "doctype": "Vehicle Suspension",
             "vehicle": v,
             "stop_reason": "Accident",
             "stop_date": today(),
@@ -181,7 +181,7 @@ class TestVehicleStop(_SalisMastersMixin, FrappeTestCase):
     def test_valid_maintenance_stop_sets_vehicle_stopped(self):
         v = self._vehicle()
         stop = frappe.get_doc({
-            "doctype": "Vehicle Stop",
+            "doctype": "Vehicle Suspension",
             "vehicle": v,
             "stop_reason": "Maintenance",
             "stop_date": today(),

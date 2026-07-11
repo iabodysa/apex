@@ -333,12 +333,12 @@ permission_query_conditions = {
     # [#1pfgq8]
     "Accommodation Stock Ledger": "apex.habitat.permissions.accommodation_stock_ledger_query",
     "Driver Attendance": "apex.salis.permissions.driver_attendance_query",
-    "Driver Stop": "apex.salis.permissions.driver_stop_query",
+    "Driver Suspension": "apex.salis.permissions.driver_stop_query",
     "Boarding Scan Log": "apex.salis.permissions.boarding_scan_log_query",
     "Vehicle Damage Write-Off": "apex.salis.permissions.vehicle_damage_write_off_query",
     "Vehicle Incident": "apex.salis.permissions.vehicle_incident_query",
     "Driver Clearance": "apex.salis.permissions.driver_clearance_query",
-    "Vehicle Stop": "apex.salis.permissions.vehicle_stop_query",
+    "Vehicle Suspension": "apex.salis.permissions.vehicle_stop_query",
     "Movement Cost Transfer": "apex.salis.permissions.movement_cost_transfer_query",
     # [#a38tvk]
     "Operations Alert": "apex.salis.permissions.operations_alert_query",
@@ -397,12 +397,12 @@ has_permission = {
     # [#6ggmz1]
     "Accommodation Stock Ledger": "apex.habitat.permissions.building_scoped_has_permission",
     "Driver Attendance": "apex.salis.permissions.driver_attendance_has_permission",
-    "Driver Stop": "apex.salis.permissions.driver_stop_has_permission",
+    "Driver Suspension": "apex.salis.permissions.driver_stop_has_permission",
     "Boarding Scan Log": "apex.salis.permissions.boarding_scan_log_has_permission",
     "Vehicle Damage Write-Off": "apex.salis.permissions.vehicle_damage_write_off_has_permission",
     "Vehicle Incident": "apex.salis.permissions.vehicle_incident_has_permission",
     "Driver Clearance": "apex.salis.permissions.driver_clearance_has_permission",
-    "Vehicle Stop": "apex.salis.permissions.vehicle_stop_has_permission",
+    "Vehicle Suspension": "apex.salis.permissions.vehicle_stop_has_permission",
     "Movement Cost Transfer": "apex.salis.permissions.movement_cost_transfer_has_permission",
     # [#dtq943]
     "Operations Alert": "apex.salis.permissions.operations_alert_has_permission",

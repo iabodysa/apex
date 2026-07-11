@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Tests for workshop_overstay_watch: a maintenance Vehicle Stop left open past
+"""Tests for workshop_overstay_watch: a maintenance Vehicle Suspension left open past
 the cutoff raises a Maintenance Overdue Operations Alert; a recent one does not.
 """
 
@@ -24,7 +24,7 @@ class TestWorkshopOverstay(FrappeTestCase):
         ).insert(ignore_permissions=True).name
         self.stop = frappe.get_doc(
             {
-                "doctype": "Vehicle Stop",
+                "doctype": "Vehicle Suspension",
                 "vehicle": vehicle,
                 "stop_reason": "Maintenance",
                 "stop_date": add_days(today(), -stop_days_ago),
@@ -33,7 +33,7 @@ class TestWorkshopOverstay(FrappeTestCase):
         self.stop.submit()  # [#ij3jpf]
         # [#hfcyz5]
         if return_date:
-            frappe.db.set_value("Vehicle Stop", self.stop.name, "return_date", return_date)
+            frappe.db.set_value("Vehicle Suspension", self.stop.name, "return_date", return_date)
         frappe.db.delete("Operations Alert", {"vehicle": vehicle, "alert_type": "Maintenance Overdue"})
         return vehicle
 
@@ -67,7 +67,7 @@ class TestWorkshopOverstay(FrappeTestCase):
         # [#th47of]
         self._vehicle_with_maintenance_stop(20)
         self.assertIsNone(
-            frappe.db.get_value("Vehicle Stop", self.stop.name, "return_date"),
+            frappe.db.get_value("Vehicle Suspension", self.stop.name, "return_date"),
             "guard: the submitted maintenance stop must have a NULL return_date",
         )
         names = {r.name for r in _overstay_stops()}

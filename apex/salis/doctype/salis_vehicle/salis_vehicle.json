@@ -281,12 +281,12 @@
   },
   {
    "group": "Fleet",
-   "link_doctype": "Vehicle Stop",
+   "link_doctype": "Vehicle Suspension",
    "link_fieldname": "vehicle"
   },
   {
    "group": "Fleet",
-   "link_doctype": "Driver Stop",
+   "link_doctype": "Driver Suspension",
    "link_fieldname": "related_vehicle"
   },
   {
@@ -355,7 +355,7 @@
    "link_fieldname": "vehicle"
   }
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-11 22:41:51.337489",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Vehicle",

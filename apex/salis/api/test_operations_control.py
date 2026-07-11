@@ -136,7 +136,7 @@ class TestSupervisorSurfaceParity(FrappeTestCase):
         v1 = self._vehicle()
         fleet_os.workshop_in(v1.plate_number)
         ws_stop = frappe.db.get_value(
-            "Vehicle Stop",
+            "Vehicle Suspension",
             {"vehicle": v1.name, "stop_reason": "Maintenance", "docstatus": 1},
             "name",
         )
@@ -146,7 +146,7 @@ class TestSupervisorSurfaceParity(FrappeTestCase):
         v2 = self._vehicle()
         stop_doc = frappe.get_doc(
             {
-                "doctype": "Vehicle Stop",
+                "doctype": "Vehicle Suspension",
                 "vehicle": v2.name,
                 "stop_reason": "Other",
                 "stop_date": today(),
@@ -157,6 +157,6 @@ class TestSupervisorSurfaceParity(FrappeTestCase):
 
         # [#8r83c0]
         for stop_name, veh in ((ws_stop, v1.name), (stop_doc.name, v2.name)):
-            self.assertEqual(frappe.db.get_value("Vehicle Stop", stop_name, "docstatus"), 2)
-            self.assertTrue(frappe.db.get_value("Vehicle Stop", stop_name, "return_date"))
+            self.assertEqual(frappe.db.get_value("Vehicle Suspension", stop_name, "docstatus"), 2)
+            self.assertTrue(frappe.db.get_value("Vehicle Suspension", stop_name, "return_date"))
             self.assertEqual(frappe.db.get_value("Salis Vehicle", veh, "status"), "Active")

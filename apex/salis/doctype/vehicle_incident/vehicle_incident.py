@@ -4,10 +4,10 @@
 Records a fleet incident event - an accident or a theft - against a vehicle.
 This is the event of record (location, report number, fault, evidence); it is
 distinct from a Vehicle Damage Write-Off (the disposition/authority gate) and a
-Vehicle Stop (the state change). A submitted Theft incident takes the vehicle out
+Vehicle Suspension (the state change). A submitted Theft incident takes the vehicle out
 of service and clears its driver, capturing the prior state so a cancel reverses
 it cleanly. An Accident incident records the event only; stopping the vehicle, if
-needed, is a separate Vehicle Stop.
+needed, is a separate Vehicle Suspension.
 """
 
 from __future__ import annotations
@@ -93,7 +93,7 @@ class VehicleIncident(Document):
 
         # [#nbueah]
         another_stop_in_force = frappe.db.exists(
-            "Vehicle Stop", {"vehicle": self.vehicle, "docstatus": 1}
+            "Vehicle Suspension", {"vehicle": self.vehicle, "docstatus": 1}
         )
         if (
             not another_stop_in_force

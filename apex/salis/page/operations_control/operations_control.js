@@ -1072,7 +1072,7 @@ class FleetControl {
 		);
 		$reassign.on("click", () => this.reassign_driver(v, $reassign));
 		$reassign.appendTo($head);
-		// Release back to service: closes the open Vehicle Stop natively (server side).
+		// Release back to service: closes the open Vehicle Suspension natively (server side).
 		if (v.status === "Stopped") {
 			const $rel = $('<button class="btn btn-xs btn-default fc-action fc-release"></button>').text(
 				__("Release vehicle")
@@ -1081,7 +1081,7 @@ class FleetControl {
 			$rel.appendTo($head);
 		}
 		// [#kv4vij]
-		["Vehicle Assignment", "Vehicle Stop", "Vehicle Incident"].forEach((doctype) => {
+		["Vehicle Assignment", "Vehicle Suspension", "Vehicle Incident"].forEach((doctype) => {
 			const $a = $('<button class="btn btn-xs btn-default fc-action"></button>').text("+ " + __(doctype));
 			$a.on("click", () => {
 				frappe.route_options = { vehicle: v.name };

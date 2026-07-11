@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Driver Stop controller.
+"""Driver Suspension controller.
 
 Stops a driver, optionally releasing the linked vehicle. Prior driver status is
 captured into previous_status for a reliable revert on cancel.
@@ -14,7 +14,7 @@ from frappe.model.document import Document
 from apex.salis.utils import add_timeline_note, lock_vehicle, lock_driver
 
 
-class DriverStop(Document):
+class DriverSuspension(Document):
     def validate(self):
         if self.release_vehicle:
             if not self.related_vehicle and self.driver:
@@ -62,7 +62,7 @@ class DriverStop(Document):
 
         # [#g024t7]
         another_stop_in_force = frappe.db.exists(
-            "Driver Stop",
+            "Driver Suspension",
             {"driver": self.driver, "docstatus": 1, "name": ["!=", self.name]},
         )
         if (

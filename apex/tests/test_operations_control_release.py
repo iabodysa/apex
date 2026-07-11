@@ -4,7 +4,7 @@
 
 Two properties must hold:
 
-  1. Release closes the vehicle's open Vehicle Stop through the NATIVE submittable
+  1. Release closes the vehicle's open Vehicle Suspension through the NATIVE submittable
      lifecycle — the stop is cancelled (docstatus 2) so its on_cancel restores the
      vehicle to its previous status (Active), and the release audit fields
      (return_date / released_on / released_by) are stamped on the stop. The
@@ -28,7 +28,7 @@ class TestOperationsControlRelease(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def _stopped_vehicle(self):
-        """An Active vehicle taken to 'Stopped' by submitting a Vehicle Stop, so
+        """An Active vehicle taken to 'Stopped' by submitting a Vehicle Suspension, so
         the release path has a real open stop to close. Keyed off the test method
         so the plate stays unique per test."""
         tag = self._testMethodName
@@ -42,7 +42,7 @@ class TestOperationsControlRelease(FrappeTestCase):
         ).insert(ignore_permissions=True)
         stop = frappe.get_doc(
             {
-                "doctype": "Vehicle Stop",
+                "doctype": "Vehicle Suspension",
                 "vehicle": vehicle.name,
                 "stop_reason": "Maintenance",
                 "stop_date": frappe.utils.today(),
@@ -77,14 +77,14 @@ class TestOperationsControlRelease(FrappeTestCase):
         self.assertTrue(res.get("ok"))
         self.assertEqual(res.get("stop"), stop)
         # [#nf1zak]
-        self.assertEqual(frappe.db.get_value("Vehicle Stop", stop, "docstatus"), 2)
+        self.assertEqual(frappe.db.get_value("Vehicle Suspension", stop, "docstatus"), 2)
         # [#kyp06e]
         self.assertEqual(
             frappe.db.get_value("Salis Vehicle", vehicle, "status"), "Active"
         )
         # [#mgxabx]
         row = frappe.db.get_value(
-            "Vehicle Stop", stop, ["return_date", "released_on", "released_by"], as_dict=True
+            "Vehicle Suspension", stop, ["return_date", "released_on", "released_by"], as_dict=True
         )
         today = frappe.utils.getdate()
         self.assertEqual(frappe.utils.getdate(row.return_date), today)
@@ -96,7 +96,7 @@ class TestOperationsControlRelease(FrappeTestCase):
         ret = frappe.utils.add_days(frappe.utils.today(), -2)
         release_vehicle(vehicle, return_date=ret)
         self.assertEqual(
-            frappe.utils.getdate(frappe.db.get_value("Vehicle Stop", stop, "return_date")),
+            frappe.utils.getdate(frappe.db.get_value("Vehicle Suspension", stop, "return_date")),
             frappe.utils.getdate(ret),
         )
 
@@ -170,7 +170,7 @@ class TestOperationsControlFleet(FrappeTestCase):
         # [#b5vb51]
         stop = frappe.get_doc(
             {
-                "doctype": "Vehicle Stop",
+                "doctype": "Vehicle Suspension",
                 "vehicle": name,
                 "stop_reason": "Maintenance",
                 "stop_date": frappe.utils.today(),
@@ -179,7 +179,7 @@ class TestOperationsControlFleet(FrappeTestCase):
         stop.insert(ignore_permissions=True)
         stop.submit()
         frappe.db.set_value(
-            "Vehicle Stop", stop.name, "stop_date", frappe.utils.add_days(frappe.utils.today(), -30)
+            "Vehicle Suspension", stop.name, "stop_date", frappe.utils.add_days(frappe.utils.today(), -30)
         )
 
         summary = get_fleet(search=plate)["summary"]

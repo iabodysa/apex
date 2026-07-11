@@ -18,7 +18,7 @@ server-side through the SAME ``_permitted_projects`` resolver the dispatch
 board, fleet control board and the list-view ``permission_query_conditions``
 use, so the dashboard never shows (or mutates) a project a scoped supervisor
 could not already see. Writes reuse the existing controllers (Vehicle
-Assignment, Vehicle Stop, Vehicle Incident) — no parallel logic.
+Assignment, Vehicle Suspension, Vehicle Incident) — no parallel logic.
 """
 
 from __future__ import annotations
@@ -304,7 +304,7 @@ def get_fleet_os():
         from apex.salis.tasks import _overstay_stops
 
         stops = frappe.get_all(
-            "Vehicle Stop",
+            "Vehicle Suspension",
             filters={
                 "vehicle": ["in", plates],
                 "stop_reason": "Maintenance",
@@ -500,7 +500,7 @@ def get_vehicle_timeline(plate):
         })
 
     for s in frappe.get_all(
-        "Vehicle Stop",
+        "Vehicle Suspension",
         filters={"vehicle": vehicle, "docstatus": ["<", 2]},
         fields=["name", "stop_reason", "stop_date", "return_date", "notes"],
         order_by="stop_date desc",
@@ -510,7 +510,7 @@ def get_vehicle_timeline(plate):
             "kind": "stop",
             "date": str(s.stop_date or ""),
             "title": _(s.stop_reason) if s.stop_reason else _("Stop"),
-            "ref_doctype": "Vehicle Stop",
+            "ref_doctype": "Vehicle Suspension",
             "ref_name": s.name,
             "return_date": str(s.return_date or ""),
             "notes": s.notes or "",
@@ -653,9 +653,9 @@ def create_handover(plate, driver_id, date=None, odometer=None, checklist_templa
 
 @frappe.whitelist(methods=["POST"])
 def stop_vehicle(plate, reason=None):
-    """Stop a vehicle and release its driver by submitting a Vehicle Stop.
+    """Stop a vehicle and release its driver by submitting a Vehicle Suspension.
 
-    Vehicle Stop.on_submit flips Salis Vehicle.status to "Stopped". The free-text
+    Vehicle Suspension.on_submit flips Salis Vehicle.status to "Stopped". The free-text
     reason is mapped to the nearest no-evidence Select option (default "Other")
     so the submit never trips the evidence gate. The current assignment is ended
     and the driver link cleared to match the released state.
@@ -667,7 +667,7 @@ def stop_vehicle(plate, reason=None):
     current_driver = frappe.db.get_value("Salis Vehicle", vehicle, "current_driver")
 
     doc = frappe.get_doc({
-        "doctype": "Vehicle Stop",
+        "doctype": "Vehicle Suspension",
         "vehicle": vehicle,
         "stop_reason": stop_reason,
         "stop_date": getdate(today()),
@@ -716,10 +716,10 @@ def report_theft(plate, location=None, report_number=None):
 
 @frappe.whitelist(methods=["POST"])
 def workshop_in(plate, expected_return=None, notes=None):
-    """Send a vehicle to the workshop via a submittable Maintenance Vehicle Stop.
+    """Send a vehicle to the workshop via a submittable Maintenance Vehicle Suspension.
 
     Mirrors stop_vehicle/report_theft/reassign: the workshop event is now an
-    audited submitted record, not a bare status flip. The Vehicle Stop controller
+    audited submitted record, not a bare status flip. The Vehicle Suspension controller
     (reason Maintenance) captures previous_status, writes the timeline note/comment
     and flips the vehicle to "Stopped"; we then set "Under Maintenance" so the
     board's workshop lane stays distinct from a plain stop (both states are the
@@ -738,7 +738,7 @@ def workshop_in(plate, expected_return=None, notes=None):
         note = f"{note}\n{expected}".strip() if note else expected
 
     doc = frappe.get_doc({
-        "doctype": "Vehicle Stop",
+        "doctype": "Vehicle Suspension",
         "vehicle": vehicle,
         "stop_reason": "Maintenance",
         "stop_date": getdate(today()),
@@ -758,7 +758,7 @@ def workshop_out(plate):
     """Return a vehicle from the workshop by closing its open Maintenance stop.
 
     Mirrors operations_control.release_vehicle: stamp the workshop-exit fields on
-    the open submitted Maintenance Vehicle Stop and cancel it, so the cancel leaves
+    the open submitted Maintenance Vehicle Suspension and cancel it, so the cancel leaves
     its own audit note. on_cancel only auto-restores when the vehicle still reads
     "Stopped"; since workshop_in parks it at "Under Maintenance", we restore the
     stop's captured previous_status here. Throws when there is no open workshop stop.
@@ -767,7 +767,7 @@ def workshop_out(plate):
     lock_vehicle(vehicle)
 
     stop = frappe.db.get_value(
-        "Vehicle Stop",
+        "Vehicle Suspension",
         {"vehicle": vehicle, "stop_reason": "Maintenance", "docstatus": 1,
          "return_date": ["is", "not set"]},
         ["name", "previous_status"],

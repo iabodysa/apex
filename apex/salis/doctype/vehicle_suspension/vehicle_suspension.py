@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Vehicle Stop controller.
+"""Vehicle Suspension controller.
 
 Stops a vehicle, capturing its prior status into previous_status so the effect
 can be reliably reversed on cancel.
@@ -14,7 +14,7 @@ from frappe.model.document import Document
 from apex.salis.utils import add_timeline_note, lock_vehicle
 
 
-class VehicleStop(Document):
+class VehicleSuspension(Document):
     def validate(self):
         if self.vehicle and not self.ownership_at_stop:
             self.ownership_at_stop = frappe.db.get_value("Salis Vehicle", self.vehicle, "ownership")
@@ -46,7 +46,7 @@ class VehicleStop(Document):
 
         # [#rmv8rq]
         another_stop_in_force = frappe.db.exists(
-            "Vehicle Stop",
+            "Vehicle Suspension",
             {"vehicle": self.vehicle, "docstatus": 1, "name": ["!=", self.name]},
         )
         if (

@@ -120,7 +120,7 @@ def reassign_vehicle_driver(vehicle, driver, start_date=None, reject_same_driver
 
 
 def close_open_stop(stop_name, return_date=None):
-	"""Close an open submitted Vehicle Stop through the native cancel lifecycle.
+	"""Close an open submitted Vehicle Suspension through the native cancel lifecycle.
 
 	The single native stop-close operation shared by both supervisor surfaces:
 	stamps the workshop-exit audit fields (return_date / released_on / released_by)
@@ -130,11 +130,11 @@ def close_open_stop(stop_name, return_date=None):
 	on = getdate(today())
 	ret = getdate(return_date) if return_date else on
 	frappe.db.set_value(
-		"Vehicle Stop",
+		"Vehicle Suspension",
 		stop_name,
 		{"return_date": ret, "released_on": on, "released_by": frappe.session.user},
 	)
-	frappe.get_doc("Vehicle Stop", stop_name).cancel()
+	frappe.get_doc("Vehicle Suspension", stop_name).cancel()
 
 
 # [#tqf298]

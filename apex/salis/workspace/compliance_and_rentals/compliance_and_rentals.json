@@ -98,9 +98,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Driver Stop",
+   "label": "Driver Suspension",
    "link_type": "DocType",
-   "link_to": "Driver Stop",
+   "link_to": "Driver Suspension",
    "idx": 5
   },
   {
@@ -288,5 +288,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-11 04:09:36.115685"
+ "modified": "2026-07-11 22:41:51.337489"
 }

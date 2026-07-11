@@ -143,9 +143,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Vehicle Stop",
+   "label": "Vehicle Suspension",
    "link_type": "DocType",
-   "link_to": "Vehicle Stop",
+   "link_to": "Vehicle Suspension",
    "idx": 9
   },
   {
@@ -312,5 +312,5 @@
  ],
  "custom_blocks": [],
  "quick_lists": [],
- "modified": "2026-07-10 14:33:26.666126"
+ "modified": "2026-07-11 22:41:51.337489"
 }

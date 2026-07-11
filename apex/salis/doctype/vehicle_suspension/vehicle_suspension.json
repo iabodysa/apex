@@ -1,58 +1,68 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "creation": "2026-05-26 02:45:00.000000",
- "description": "Driver stop record (violation, leave, termination, or transfer). May release the linked vehicle.",
+ "creation": "2026-05-26 02:44:00.000000",
+ "description": "Records a vehicle stop event with reason and ownership context.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "driver_stop_sec_details",
+  "vehicle_stop_tab_overview",
+  "vehicle_stop_sec_main",
   "naming_series",
-  "driver",
+  "vehicle",
   "stop_reason",
   "stop_date",
-  "driver_stop_details_col",
-  "release_vehicle",
-  "related_vehicle",
+  "return_date",
+  "vehicle_stop_main_col",
+  "ownership_at_stop",
+  "related_driver",
   "evidence",
-  "driver_stop_sec_notes",
+  "released_on",
+  "released_by",
+  "estimated_cost",
+  "vehicle_stop_sec_notes",
   "notes",
   "previous_status",
   "amended_from"
  ],
  "fields": [
   {
-   "fieldname": "driver_stop_sec_details",
+   "fieldname": "vehicle_stop_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "vehicle_stop_sec_main",
    "fieldtype": "Section Break",
    "label": "Stop Details"
   },
   {
-   "default": "SD-.######",
+   "default": "SV-.######",
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "SD-.######",
+   "options": "SV-.######",
    "reqd": 1
   },
   {
-   "fieldname": "driver",
+   "fieldname": "vehicle",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Driver",
-   "options": "Salis Driver",
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
    "reqd": 1,
    "search_index": 1
   },
   {
-   "description": "Reason the driver is being stopped from operating, whether due to a violation, leave, termination, transfer, or another cause.",
+   "description": "Reason the vehicle is being taken out of service, whether an accident, maintenance, violation, rental return, or another cause.",
    "fieldname": "stop_reason",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Stop Reason",
-   "options": "Violation\nLeave\nTermination\nTransfer\nOther",
+   "options": "Accident\nMaintenance\nViolation\nRental Return\nOther",
    "reqd": 1
   },
   {
@@ -63,33 +73,55 @@
    "reqd": 1
   },
   {
-   "fieldname": "driver_stop_details_col",
+   "fieldname": "return_date",
+   "fieldtype": "Date",
+   "label": "Return Date (Workshop Exit)"
+  },
+  {
+   "fieldname": "vehicle_stop_main_col",
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "description": "If set, the linked vehicle should be released from this driver.",
-   "fieldname": "release_vehicle",
-   "fieldtype": "Check",
-   "label": "Release Vehicle"
-  },
-  {
-   "depends_on": "eval:doc.release_vehicle==1",
-   "fetch_from": "driver.current_vehicle",
+   "fetch_from": "vehicle.ownership",
    "fetch_if_empty": 1,
-   "fieldname": "related_vehicle",
-   "fieldtype": "Link",
-   "label": "Related Vehicle",
-   "options": "Salis Vehicle"
+   "fieldname": "ownership_at_stop",
+   "fieldtype": "Data",
+   "label": "Ownership At Stop",
+   "read_only": 1
   },
   {
-   "description": "Required for Violation or Termination stops.",
+   "fetch_from": "vehicle.current_driver",
+   "fetch_if_empty": 1,
+   "fieldname": "related_driver",
+   "fieldtype": "Link",
+   "label": "Related Driver",
+   "options": "Salis Driver"
+  },
+  {
+   "description": "Required for Accident or Violation stops.",
    "fieldname": "evidence",
    "fieldtype": "Attach",
    "label": "Evidence"
   },
   {
-   "fieldname": "driver_stop_sec_notes",
+   "fieldname": "released_on",
+   "fieldtype": "Date",
+   "label": "Released On"
+  },
+  {
+   "fieldname": "released_by",
+   "fieldtype": "Link",
+   "label": "Released By",
+   "options": "User"
+  },
+  {
+   "fieldname": "estimated_cost",
+   "fieldtype": "Currency",
+   "label": "Estimated Cost (SAR)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "vehicle_stop_sec_notes",
    "fieldtype": "Section Break",
    "label": "Notes"
   },
@@ -111,7 +143,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Driver Stop",
+   "options": "Vehicle Suspension",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -119,27 +151,13 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-11 22:41:51.337489",
  "modified_by": "Administrator",
  "module": "Salis",
- "name": "Driver Stop",
+ "name": "Vehicle Suspension",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
-  {
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  },
   {
    "cancel": 1,
    "create": 1,
@@ -155,36 +173,38 @@
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Fleet Project Manager",
-   "share": 1,
    "submit": 1,
    "write": 1
   },
   {
    "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Fleet Supervisor",
+   "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
-   "if_owner": 1,
-   "read": 1,
-   "role": "Driver"
-  },
-  {
-   "export": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Finance Manager"
@@ -198,7 +218,7 @@
   }
  ],
  "row_format": "Dynamic",
- "search_fields": "driver, related_vehicle, stop_date",
+ "search_fields": "vehicle, related_driver, stop_date",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

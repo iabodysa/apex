@@ -195,7 +195,7 @@
   },
   {
    "group": "Fleet",
-   "link_doctype": "Driver Stop",
+   "link_doctype": "Driver Suspension",
    "link_fieldname": "driver"
   },
   {
@@ -254,7 +254,7 @@
    "link_fieldname": "driver"
   }
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-11 22:41:51.337489",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Driver",

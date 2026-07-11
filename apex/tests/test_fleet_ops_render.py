@@ -9,7 +9,7 @@ non-zero number, each Dashboard Chart a non-empty series, each onboarding step a
 target that opens?
 
 This seeds representative data in setUp (drafts where a Count/series includes them,
-a submitted Vehicle Stop where the metric requires docstatus=1) and asserts through
+a submitted Vehicle Suspension where the metric requires docstatus=1) and asserts through
 Frappe's OWN render paths -- never frappe.db.count:
 
   * Number Card  -> number_card.get_result(card, card.filters_json)  (the widget's path)
@@ -124,7 +124,7 @@ class TestFleetOpsRender(FrappeTestCase):
         vehicle = self._vehicle("Active", suffix="W")
         stop = frappe.get_doc(
             {
-                "doctype": "Vehicle Stop",
+                "doctype": "Vehicle Suspension",
                 "vehicle": vehicle,
                 "stop_reason": "Maintenance",
                 "stop_date": add_days(today(), -20),

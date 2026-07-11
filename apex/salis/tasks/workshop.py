@@ -13,22 +13,22 @@ from apex.salis.tasks.common import (
 
 
 def _overstay_stops() -> list:
-    """Submitted Maintenance Vehicle Stops still open past the overstay cutoff,
+    """Submitted Maintenance Vehicle Suspensions still open past the overstay cutoff,
     for vehicles still out of service.
 
     A vehicle is overstaying if it is still Stopped / Under Maintenance and
-    carries a submitted Vehicle Stop (reason Maintenance) with no ``return_date``
+    carries a submitted Vehicle Suspension (reason Maintenance) with no ``return_date``
     whose ``stop_date`` is on or before the cutoff (``workshop_overstay_days``;
     Salis Settings, default 14). Shared by ``workshop_overstay_watch`` (the alert)
     and ``get_workshop_overstay_count`` (the number card) so the rule cannot drift
-    between them. Returns the Vehicle Stop rows (name, vehicle, stop_date).
+    between them. Returns the Vehicle Suspension rows (name, vehicle, stop_date).
     """
     from frappe.utils import add_days, today
 
     days = _settings_int("workshop_overstay_days", 14)
     cutoff = add_days(today(), -days)
     rows = frappe.get_all(
-        "Vehicle Stop",
+        "Vehicle Suspension",
         filters={
             "stop_reason": "Maintenance",
             "docstatus": 1,
@@ -76,7 +76,7 @@ def workshop_overstay_watch() -> None:
             )
             _raise_alert(
                 "Maintenance Overdue", "Warning", msg,
-                source_doctype="Vehicle Stop", source_name=r.name, vehicle=r.vehicle,
+                source_doctype="Vehicle Suspension", source_name=r.name, vehicle=r.vehicle,
             )
         except Exception:
             frappe.db.rollback()

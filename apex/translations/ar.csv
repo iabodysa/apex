@@ -1035,7 +1035,7 @@ Create Route Plan,إنشاء خطة مسار
 Create Vehicle Assignment,إنشاء إسناد مركبة
 Create Vehicle Category,إنشاء فئة مركبات
 Create Vehicle Incident,إنشاء بلاغ مركبة
-Create Vehicle Stop,إنشاء إيقاف مركبة
+Create Vehicle Suspension,إنشاء إيقاف مركبة
 Create Work Order,إنشاء أمر عمل
 Create a Fuel Quota,إنشاء حصة وقود
 Create a Vehicle Category,أنشئ فئة مركبات
@@ -1344,7 +1344,7 @@ Driver Portal Theme,سمة بوابة سلس
 Driver Position Updated At,وقت آخر تحديث لموقع السائق
 Driver Push Subscription,اشتراك إشعارات السائق
 Driver Rejected,رفض السائق
-Driver Stop,إيقاف سائق
+Driver Suspension,إيقاف سائق
 Driver User,مستخدم السائق
 Driver Web Push,إشعارات الويب للسائق
 Driver assigned,تم إسناد سائق
@@ -1560,14 +1560,14 @@ F9,صيغة F9
 Facility Asset,أصل المنشأة
 Facility Asset Custody Assignment,تخصيص عهدة أصول المنشأة
 Facility Asset Delivery,تسليم أصل منشأة
-Facility Asset Movement,حركة أصول المرافق
+Facility Asset Movement,حركة أصول المنشأة
 Facility Asset Movement Ledger,سجل حركة أصول المنشأة
 Facility Asset Movement Ledger is a posted audit record and cannot be edited.,سجل حركة أصول المنشأة هو قيد تدقيق مُرحَّل ولا يمكن تعديله.
 Facility Assets,أصول المنشأة
 Facility Assets Needing Attention,أصول المنشأة التي تتطلب متابعة
 Facility Assets by Category,أصول المنشأة حسب التصنيف
 Facility Assets by Status,أصول المنشأة حسب الحالة
-Facility Custody Item,عهدة المرافق
+Facility Custody Item,عهدة المنشأة
 Facility Item,عنصر مرفق
 Fail,غير مجتاز
 Fail-closed: authority_unknown until enforce_gate resolves exactly one active band and the approver holds it.,الفشل الآمن: تبقى الصلاحية غير معروفة حتى تحدّد بوابة الإنفاذ شريحة نشطة واحدة بالضبط ويكون المعتمِد حائزاً لها.
@@ -3864,7 +3864,7 @@ TRAINING,تدريب
 TS Exception Disposition,التصرّف في استثناء الدوام
 TS Format Adapter,محوّل صيغة الدوام
 TS Intake Source,مصدر إدخال الدوام
-Take a vehicle out of service by recording a Vehicle Stop.,أخرِج مركبة من الخدمة بتسجيل إيقاف مركبة.
+Take a vehicle out of service by recording a Vehicle Suspension.,أخرِج مركبة من الخدمة بتسجيل إيقاف مركبة.
 Target Bed {0} does not belong to Room {1},السرير الهدف {0} لا ينتمي إلى الغرفة {1}
 Target Bed {0} is Out of Service.,السرير الهدف {0} خارج الخدمة.
 Target DocType,نوع المستند المستهدف
@@ -4350,7 +4350,7 @@ Vehicle Incident,بلاغ مركبة
 Vehicle Incident Statement,بيان بلاغ مركبة
 Vehicle Insurance Excess,تحمّل تأمين المركبة
 Vehicle Returned,تم إرجاع المركبة
-Vehicle Stop,إيقاف مركبة
+Vehicle Suspension,إيقاف مركبة
 Vehicle Utilisation,استغلال المركبات
 Vehicle Utilisation Snapshot,لقطة استغلال المركبة
 Vehicle and Driver,المركبة والسائق

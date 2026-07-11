@@ -79,6 +79,13 @@ apex.patches.v1_x.rename_freelance_party_type_to_freelancer
 # spelling guarded. PRUNE once every deployed site has run it (tracked in tabPatch Log).
 apex.patches.v2_0.rename_doctypes_b7
 
+# v2.0.0 — A-028 DocType rename (ONE-TIME, pre-sync so rename_doc runs before sync_all
+# rebuilds the tables — else sync creates an empty new-named table beside real data).
+# 'Stop' (=suspend from service, AR إيقاف) collided with the route-waypoint sense
+# (Route Stop): Driver Stop -> Driver Suspension, Vehicle Stop -> Vehicle Suspension.
+# Idempotent + both-spelling guarded. PRUNE once every deployed site has run it.
+apex.patches.v2_0.rename_stop_doctypes_to_suspension
+
 # v2.0.0 — B4 (P-158) Report rename/merge wave (ONE-TIME, pre-sync so rename_doc runs
 # before the is_standard Report JSON re-import — else the new-named report imports fresh
 # and the old-named DB row orphans). Renames 8 reports (Housing Supervisor Report ->

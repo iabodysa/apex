@@ -7,8 +7,8 @@
  "name": "Stop a Vehicle",
  "title": "Stop a Vehicle",
  "action": "Create Entry",
- "reference_document": "Vehicle Stop",
- "action_label": "Create Vehicle Stop",
- "description": "Take a vehicle out of service by recording a Vehicle Stop.",
- "intro_text": "Take a vehicle out of service - record a Vehicle Stop with its reason. Submitting it flips the vehicle's status out of Active and frees it from its driver."
+ "reference_document": "Vehicle Suspension",
+ "action_label": "Create Vehicle Suspension",
+ "description": "Take a vehicle out of service by recording a Vehicle Suspension.",
+ "intro_text": "Take a vehicle out of service - record a Vehicle Suspension with its reason. Submitting it flips the vehicle's status out of Active and frees it from its driver."
 }

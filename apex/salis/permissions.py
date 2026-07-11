@@ -328,7 +328,7 @@ def driver_attendance_query(user=None):
 
 
 def driver_stop_query(user=None):
-    """Driver Stop links a `driver`; the Driver role reads its own via if_owner."""
+    """Driver Suspension links a `driver`; the Driver role reads its own via if_owner."""
     return _driver_chain_condition(user, with_owner=True)
 
 
@@ -356,7 +356,7 @@ def driver_clearance_query(user=None):
 
 
 def vehicle_stop_query(user=None):
-    """Vehicle Stop reaches its tenant through `related_driver` (not `driver`); no
+    """Vehicle Suspension reaches its tenant through `related_driver` (not `driver`); no
     Driver DocPerm -> pure project scope through Salis Driver."""
     return _driver_chain_condition(user, column="`related_driver`", with_owner=False)
 

@@ -68,7 +68,7 @@ class TestWorkshopEvents(FrappeTestCase):
 
     def _open_maintenance_stop(self):
         return frappe.db.get_value(
-            "Vehicle Stop",
+            "Vehicle Suspension",
             {"vehicle": self.vehicle, "stop_reason": "Maintenance", "docstatus": 1,
              "return_date": ["is", "not set"]},
             ["name", "stop_reason", "docstatus"],
@@ -88,18 +88,18 @@ class TestWorkshopEvents(FrappeTestCase):
             frappe.db.get_value("Salis Vehicle", self.vehicle, "status"), "Under Maintenance"
         )
         # [#bo1uxf]
-        notes = frappe.db.get_value("Vehicle Stop", stop.name, "notes") or ""
+        notes = frappe.db.get_value("Vehicle Suspension", stop.name, "notes") or ""
         self.assertIn("2026-07-01", notes)
         self.assertIn("brakes", notes)
-        self.assertFalse(frappe.db.get_value("Vehicle Stop", stop.name, "return_date"))
+        self.assertFalse(frappe.db.get_value("Vehicle Suspension", stop.name, "return_date"))
 
     def test_workshop_out_closes_stop_and_restores_status(self):
         fleet_os.workshop_in(self.plate)
         stop_name = self._open_maintenance_stop().name
         fleet_os.workshop_out(self.plate)
         # [#25ns0m]
-        self.assertEqual(frappe.db.get_value("Vehicle Stop", stop_name, "docstatus"), 2)
-        self.assertTrue(frappe.db.get_value("Vehicle Stop", stop_name, "return_date"))
+        self.assertEqual(frappe.db.get_value("Vehicle Suspension", stop_name, "docstatus"), 2)
+        self.assertTrue(frappe.db.get_value("Vehicle Suspension", stop_name, "return_date"))
         # [#luh90t]
         self.assertEqual(
             frappe.db.get_value("Salis Vehicle", self.vehicle, "status"), "Active"

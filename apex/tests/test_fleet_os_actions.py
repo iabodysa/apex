@@ -6,7 +6,7 @@ properties must hold and were previously untested (test_salis_fleet_scope covers
 row-scoping and test_fleet_os_pii covers the read PII gate — neither the writes):
 
   1. Each action produces the CORRECT effect — reassign submits a Vehicle
-     Assignment, stop submits a Vehicle Stop and stops the vehicle, report_theft
+     Assignment, stop submits a Vehicle Suspension and stops the vehicle, report_theft
      submits a Theft Vehicle Incident, and workshop_in/out + recover move the
      vehicle status — so a refactor that wires an action to the wrong DocType or
      status fails here.
@@ -95,7 +95,7 @@ class TestFleetOsActions(FrappeTestCase):
         res = stop_vehicle(plate, reason="accident")
         self.assertTrue(res.get("ok"))
         self.assertEqual(
-            frappe.db.get_value("Vehicle Stop", res.get("stop"), "docstatus"), 1, "the stop must be submitted"
+            frappe.db.get_value("Vehicle Suspension", res.get("stop"), "docstatus"), 1, "the stop must be submitted"
         )
         self.assertEqual(frappe.db.get_value("Salis Vehicle", self._name(plate), "status"), "Stopped")
 
