@@ -11,10 +11,12 @@
   "maintenance_work_order",
   "maintenance_request",
   "building",
+  "mcl_col_item",
   "item",
   "material",
   "item_description",
   "amount",
+  "mcl_col_audit",
   "is_cancelled",
   "logged_at",
   "source_doctype",
@@ -64,6 +66,10 @@
    "search_index": 1
   },
   {
+   "fieldname": "mcl_col_item",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "item",
    "fieldtype": "Link",
    "label": "Item",
@@ -89,6 +95,10 @@
    "in_list_view": 1,
    "label": "Amount (SAR)",
    "read_only": 1
+  },
+  {
+   "fieldname": "mcl_col_audit",
+   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -133,7 +143,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-11 15:42:15.632827",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Cost Ledger",

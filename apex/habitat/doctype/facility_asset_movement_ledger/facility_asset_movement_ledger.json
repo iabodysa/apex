@@ -9,11 +9,13 @@
   "company",
   "posting_datetime",
   "facility_asset",
+  "faml_col_movement",
   "from_building",
   "from_location",
   "to_building",
   "to_location",
   "moved_by_user",
+  "faml_col_audit",
   "is_cancelled",
   "source_doctype",
   "source_name",
@@ -42,6 +44,10 @@
    "options": "Facility Asset",
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "faml_col_movement",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "from_building",
@@ -79,6 +85,10 @@
    "read_only": 1
   },
   {
+   "fieldname": "faml_col_audit",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "0",
    "description": "Set on the reversal row posted when the source movement is cancelled. The original row is preserved for audit.",
    "fieldname": "is_cancelled",
@@ -109,7 +119,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-11 15:42:15.632827",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Facility Asset Movement Ledger",
