@@ -11,7 +11,7 @@
  "is_hidden": 0,
  "sequence_id": 5.0,
  "parent_page": "",
- "content": "[{\"id\": \"mwHdrGoTo\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 6}}, {\"id\": \"mwScAlerts\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Operations Alert\", \"col\": 6}}, {\"id\": \"mwHdrNumbers\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwNcSubmitted\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 4}}, {\"id\": \"mwNcApproved\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 4}}, {\"id\": \"mwHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"mwCardTools\", \"type\": \"card\", \"data\": {\"card_name\": \"Tools\", \"col\": 4}}]",
+ "content": "[{\"id\": \"mwHdrGoTo\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 12}}, {\"id\": \"mwHdrNumbers\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwNcSubmitted\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 4}}, {\"id\": \"mwNcApproved\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 4}}, {\"id\": \"mwHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"mwCardTools\", \"type\": \"card\", \"data\": {\"card_name\": \"Tools\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -19,16 +19,6 @@
    "label": "Action Inbox",
    "idx": 1,
    "url": "/app/action-inbox"
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Operations Alert",
-   "link_to": "Operations Alert",
-   "stats_filter": "{\"status\": [\"!=\", \"Resolved\"]}",
-   "format": "{} Open",
-   "color": "Orange",
-   "idx": 2
   }
  ],
  "links": [
@@ -46,14 +36,6 @@
    "link_type": "Page",
    "link_to": "action-inbox",
    "idx": 2
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Operations Alert",
-   "link_type": "DocType",
-   "link_to": "Operations Alert",
-   "idx": 3
   }
  ],
  "number_cards": [
@@ -80,5 +62,5 @@
  "charts": [],
  "quick_lists": [],
  "roles": [],
- "modified": "2026-07-05 19:12:59.527483"
+ "modified": "2026-07-11 16:35:25.638531"
 }
