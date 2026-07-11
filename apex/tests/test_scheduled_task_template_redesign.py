@@ -385,3 +385,12 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
             "[pre_model_sync] section (before [post_model_sync]) so it reads the "
             "legacy `building` column before sync_all() drops it",
         )
+
+
+def tearDownModule():
+    # A test body here commits (ALTER TABLE / set_value), so the class-fixture
+    # Buildings survive FrappeTestCase rollback; drop every Building created after
+    # the pre-suite baseline (P-148).
+    from apex.tests import factories
+
+    factories.purge_test_buildings()

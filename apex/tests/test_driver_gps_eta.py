@@ -194,3 +194,9 @@ class TestDriverGpsEta(FrappeTestCase):
                     except Exception:
                         pass
                 frappe.delete_doc(dtype, name, ignore_permissions=True, force=True)
+
+
+def tearDownModule():
+    # This module commits (setUpClass/tearDownClass), so its Building survives
+    # FrappeTestCase rollback; drop every Building created after the baseline (P-148).
+    factories.purge_test_buildings()

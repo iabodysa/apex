@@ -200,3 +200,11 @@ class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
         for blank in (None, "", "   "):
             with self.assertRaises(frappe.PermissionError):
                 masar.submit_trip_rating(token=blank, dispatch_trip="X", rating=5)
+
+
+def tearDownModule():
+    # This module commits (tearDownClass), so its Building survives FrappeTestCase
+    # rollback; drop every Building created after the pre-suite baseline (P-148).
+    from apex.tests import factories
+
+    factories.purge_test_buildings()

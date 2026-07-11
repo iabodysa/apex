@@ -175,3 +175,11 @@ class TestMasarWorkerRoutePrefetch(_WorkerTripMixin, FrappeTestCase):
         self.assertEqual(housing_stop["pickup"]["name"], b["name"])
         self.assertEqual(housing_stop["pickup"]["building_name"], b["building_name"])
         self.assertEqual(housing_stop["pickup"]["google_maps_url"], b["google_maps_url"])
+
+
+def tearDownModule():
+    # This module commits (tearDownClass), so its Building survives FrappeTestCase
+    # rollback; drop every Building created after the pre-suite baseline (P-148).
+    from apex.tests import factories
+
+    factories.purge_test_buildings()

@@ -123,3 +123,9 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
                                 "responsible_supervisor"),
             self.sup_a,
         )
+
+
+def tearDownModule():
+    # This module commits (tearDownClass), so its class-fixture Buildings survive
+    # FrappeTestCase rollback; drop every Building created after the baseline (P-148).
+    factories.purge_test_buildings()

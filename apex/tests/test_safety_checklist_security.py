@@ -53,3 +53,11 @@ class TestSafetyChecklistSecurity(FrappeTestCase):
                 round_date=today(),
                 lines=lines,
             )
+
+
+def tearDownModule():
+    # A raw commit anywhere in the suite persists these Buildings past
+    # FrappeTestCase rollback; drop every Building created after the baseline (P-148).
+    from apex.tests import factories
+
+    factories.purge_test_buildings()
