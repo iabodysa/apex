@@ -107,7 +107,7 @@
   },
   {
    "default": "30",
-   "description": "Days to expiry at or below which a driver licence or vehicle compliance document is flagged 'expiring' (amber) in the driver portal. A blank or zero value falls back to the built-in default.",
+   "description": "Days to expiry at or below which a driver licence or vehicle compliance document is flagged 'expiring' (amber) in the driver portal; blank or zero uses the built-in default.",
    "fieldname": "license_expiring_warn_days",
    "fieldtype": "Int",
    "label": "License Expiring Warn Days"
@@ -143,7 +143,7 @@
   },
   {
    "default": "5",
-   "description": "Percent by which a vehicle's actual fuel consumption may exceed its monthly quota before an overage / excessive-topup alert is raised. A blank or zero value falls back to the built-in default.",
+   "description": "Percent a vehicle's actual fuel consumption may exceed its monthly quota before an overage / excessive-topup alert is raised; blank or zero uses the built-in default.",
    "fieldname": "fuel_overage_margin_percent",
    "fieldtype": "Int",
    "label": "Fuel Overage Margin (%)"
@@ -192,7 +192,7 @@
   },
   {
    "default": "40",
-   "description": "Assumed average fleet speed (km/h) used to estimate the worker's live ride ETA from the driver's GPS position (straight-line distance / speed). A blank or zero value falls back to the built-in default.",
+   "description": "Assumed average fleet speed (km/h) used to estimate the worker's live ride ETA from the driver's GPS position; blank or zero uses the built-in default.",
    "fieldname": "assumed_fleet_speed_kmph",
    "fieldtype": "Float",
    "label": "Assumed Fleet Speed (km/h)"
@@ -204,7 +204,7 @@
   },
   {
    "default": "3",
-   "description": "Maximum 'remaining passengers' notifications the driver may send a worker before that worker can be marked Absent at departure. A blank or zero value falls back to the built-in default.",
+   "description": "Maximum 'remaining passengers' notifications the driver may send a worker before that worker can be marked Absent at departure; blank or zero uses the default.",
    "fieldname": "boarding_notify_max_count",
    "fieldtype": "Int",
    "label": "Boarding Notify Max Count"
@@ -225,7 +225,7 @@
   },
   {
    "default": "15",
-   "description": "Minutes after a worker self-claims boarding before it is auto-confirmed (Boarded) when the driver neither confirms nor rejects. A blank or zero value falls back to the built-in default.",
+   "description": "Minutes after a worker self-claims boarding before it is auto-confirmed (Boarded) when the driver neither confirms nor rejects; blank or zero uses the default.",
    "fieldname": "boarding_auto_confirm_minutes",
    "fieldtype": "Int",
    "label": "Boarding Auto-Confirm (Minutes)"
@@ -263,7 +263,7 @@
   },
   {
    "default": "0",
-   "description": "Send background push notifications (trip assigned, fuel approved) to opted-in driver devices. Requires a VAPID key pair below and the pywebpush package on the server; until both are present every push is a safe no-op.",
+   "description": "Send background push notifications (trip assigned, fuel approved) to opted-in driver devices; needs the VAPID keys below plus pywebpush on the server, else a safe no-op.",
    "fieldname": "enable_web_push",
    "fieldtype": "Check",
    "label": "Enable Driver Web Push"
@@ -375,7 +375,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-07-10 09:22:42.696478",
+ "modified": "2026-07-11 19:12:42.964832",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",
