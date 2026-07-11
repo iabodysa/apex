@@ -33,7 +33,7 @@ from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger 
 from apex.tests.test_utils import ApexHabitatTestCase
 
 _HERE = os.path.dirname(__file__)
-_TRANSFER_CTL = os.path.normpath(os.path.join(_HERE, "accommodation_material_transfer.py"))
+_TRANSFER_CTL = os.path.normpath(os.path.join(_HERE, "material_transfer.py"))
 _HANDOVER_CTL = os.path.normpath(
     os.path.join(_HERE, "..", "custody_handover", "custody_handover.py")
 )
@@ -77,7 +77,7 @@ class TestStockSourceLocking(ApexHabitatTestCase):
 
     def _transfer(self, qty):
         t = frappe.get_doc({
-            "doctype": "Accommodation Material Transfer", "naming_series": "ACC-MTR-.YYYY.-.######",
+            "doctype": "Material Transfer", "naming_series": "ACC-MTR-.YYYY.-.######",
             "transfer_date": "2026-05-02", "from_building": self.source, "to_building": self.dest})
         t.append("items", {"item_type": "Custody Article", "item": self.article, "qty": qty})
         t.insert(ignore_permissions=True)

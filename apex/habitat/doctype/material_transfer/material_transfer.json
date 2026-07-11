@@ -83,7 +83,7 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Accommodation Material Transfer Item",
+   "options": "Material Transfer Item",
    "reqd": 1
   },
   {
@@ -113,7 +113,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Accommodation Material Transfer",
+   "options": "Material Transfer",
    "print_hide": 1,
    "read_only": 1
   }
@@ -121,10 +121,10 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-12 00:13:46.755746",
  "modified_by": "Administrator",
  "module": "Habitat",
- "name": "Accommodation Material Transfer",
+ "name": "Material Transfer",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

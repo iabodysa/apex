@@ -106,7 +106,7 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Accommodation Material Transfer Item",
+   "options": "Material Transfer Item",
    "reqd": 1
   },
   {

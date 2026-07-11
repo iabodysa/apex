@@ -38,7 +38,7 @@ _MUST_BE_CLEAN = frozenset(
         "test_driver_portal_today.py",
         "test_salis_controls.py",
         # [#g96emv]
-        "test_accommodation_material_transfer.py",
+        "test_material_transfer.py",
         "test_accommodation_stock_ledger.py",
         "test_backfill_assignment_facility_supervisor.py",
         "test_consumable_custody_expiry.py",

@@ -86,6 +86,14 @@ apex.patches.v2_0.rename_doctypes_b7
 # Idempotent + both-spelling guarded. PRUNE once every deployed site has run it.
 apex.patches.v2_0.rename_stop_doctypes_to_suspension
 
+# v2.0.0 — T-033 DocType rename (ONE-TIME, pre-sync so rename_doc runs before sync_all
+# rebuilds the tables — else sync creates an empty new-named table beside real data).
+# The redundant 'Accommodation' prefix dropped: Accommodation Material Transfer ->
+# Material Transfer (+ its child item). No other 'Material Transfer' DocType exists
+# (ERPNext's is 'Stock Entry'), so the shorter name stays unambiguous. Idempotent +
+# both-spelling guarded. PRUNE once every deployed site has run it.
+apex.patches.v2_0.rename_accommodation_material_transfer
+
 # v2.0.0 — B4 (P-158) Report rename/merge wave (ONE-TIME, pre-sync so rename_doc runs
 # before the is_standard Report JSON re-import — else the new-named report imports fresh
 # and the old-named DB row orphans). Renames 8 reports (Housing Supervisor Report ->

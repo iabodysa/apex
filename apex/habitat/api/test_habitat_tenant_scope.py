@@ -42,7 +42,7 @@ SINGLE_BUILDING = [
 
 # [#bq4qr3]
 DUAL_BUILDING = [
-    ("Accommodation Material Transfer", P.accommodation_material_transfer_query),
+    ("Material Transfer", P.material_transfer_query),
     ("Facility Asset Movement", P.facility_asset_movement_query),
     ("Custody Handover", P.custody_handover_query),
 ]
@@ -151,9 +151,9 @@ class TestHabitatTenantScope(FrappeTestCase):
 
     def test_dual_building_has_permission_matches_either_endpoint(self):
         # [#q8nsrj]
-        from_ok = frappe._dict(doctype="Accommodation Material Transfer", from_building=self.b1, to_building=self.b2)
-        to_ok = frappe._dict(doctype="Accommodation Material Transfer", from_building=self.b2, to_building=self.b1)
-        neither = frappe._dict(doctype="Accommodation Material Transfer", from_building=self.b2, to_building=self.b2)
+        from_ok = frappe._dict(doctype="Material Transfer", from_building=self.b1, to_building=self.b2)
+        to_ok = frappe._dict(doctype="Material Transfer", from_building=self.b2, to_building=self.b1)
+        neither = frappe._dict(doctype="Material Transfer", from_building=self.b2, to_building=self.b2)
         self.assertIsNone(P.dual_building_scoped_has_permission(from_ok, "read", user=self.scoped))
         self.assertIsNone(P.dual_building_scoped_has_permission(to_ok, "read", user=self.scoped))
         self.assertIs(P.dual_building_scoped_has_permission(neither, "read", user=self.scoped), False)
@@ -175,7 +175,7 @@ class TestHabitatTenantScope(FrappeTestCase):
     def test_scoped_user_with_no_building_sees_nothing(self):
         lonely = self._user("Resident Supervisor")  # [#s3pi7t]
         self.assertEqual(P.facility_asset_query(user=lonely), "1=0")
-        self.assertEqual(P.accommodation_material_transfer_query(user=lonely), "1=0")
+        self.assertEqual(P.material_transfer_query(user=lonely), "1=0")
 
     # [#ftanlm]
     def test_list_view_excludes_other_building_single(self):
@@ -193,7 +193,7 @@ class TestHabitatTenantScope(FrappeTestCase):
         # [#rijvzo]
         touching = self._transfer(self.b2, self.b1)
         outside = self._transfer(self.b2, self.b2)
-        names = self._list_names("Accommodation Material Transfer", self.scoped)
+        names = self._list_names("Material Transfer", self.scoped)
         self.assertIn(touching, names, "a transfer touching the user's estate is visible")
         self.assertNotIn(outside, names, "a transfer between two other estates is hidden")
 
@@ -205,14 +205,14 @@ class TestHabitatTenantScope(FrappeTestCase):
 
     def _transfer(self, from_b, to_b):
         doc = frappe.get_doc({
-            "doctype": "Accommodation Material Transfer",
+            "doctype": "Material Transfer",
             "from_building": from_b,
             "to_building": to_b,
         })
         doc.flags.ignore_validate = True
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         self.addCleanup(
-            frappe.delete_doc, "Accommodation Material Transfer", doc.name, force=True, ignore_permissions=True
+            frappe.delete_doc, "Material Transfer", doc.name, force=True, ignore_permissions=True
         )
         return doc.name
 

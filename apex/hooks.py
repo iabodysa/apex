@@ -137,10 +137,10 @@ doc_events = {
         "validate": "apex.habitat.doctype.idle_resident_report.idle_resident_report.validate",
         "after_insert": "apex.habitat.doctype.idle_resident_report.idle_resident_report.after_insert",
     },
-    "Accommodation Material Transfer": {
-        "validate": "apex.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.validate",
-        "on_submit": "apex.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.on_submit",
-        "on_cancel": "apex.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.on_cancel",
+    "Material Transfer": {
+        "validate": "apex.habitat.doctype.material_transfer.material_transfer.validate",
+        "on_submit": "apex.habitat.doctype.material_transfer.material_transfer.on_submit",
+        "on_cancel": "apex.habitat.doctype.material_transfer.material_transfer.on_cancel",
     },
     "Custody Issue": {
         "validate": "apex.habitat.doctype.custody_issue.custody_issue.validate",
@@ -316,7 +316,7 @@ permission_query_conditions = {
     "Operational Depreciation Snapshot": "apex.habitat.permissions.non_financial_depreciation_snapshot_query",
     "Custody Return": "apex.habitat.permissions.custody_return_query",
     "Custody Damage Assessment": "apex.habitat.permissions.custody_damage_assessment_query",
-    "Accommodation Material Transfer": "apex.habitat.permissions.accommodation_material_transfer_query",
+    "Material Transfer": "apex.habitat.permissions.material_transfer_query",
     "Facility Asset Movement": "apex.habitat.permissions.facility_asset_movement_query",
     "Custody Acknowledgment": "apex.habitat.permissions.custody_acknowledgment_query",
     "Custody Handover": "apex.habitat.permissions.custody_handover_query",
@@ -385,7 +385,7 @@ has_permission = {
     "Housing Inventory": "apex.habitat.permissions.building_scoped_has_permission",
     "Building License": "apex.habitat.permissions.building_scoped_has_permission",
     "Maintenance Work Order": "apex.habitat.permissions.building_scoped_has_permission",
-    "Accommodation Material Transfer": "apex.habitat.permissions.dual_building_scoped_has_permission",
+    "Material Transfer": "apex.habitat.permissions.dual_building_scoped_has_permission",
     "Facility Asset Movement": "apex.habitat.permissions.dual_building_scoped_has_permission",
     "Custody Handover": "apex.habitat.permissions.dual_building_scoped_has_permission",
     "Facility Asset Delivery": "apex.habitat.permissions.dual_building_scoped_has_permission",

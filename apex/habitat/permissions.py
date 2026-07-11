@@ -247,7 +247,7 @@ def custody_handover_query(user=None):
     return _dual_building_condition(user)
 
 
-def accommodation_material_transfer_query(user=None):
+def material_transfer_query(user=None):
     # [#d19wjd]
     return _dual_building_condition(user)
 

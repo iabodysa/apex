@@ -1,7 +1,7 @@
 // Copyright (c) 2026, AFMCO and contributors
 // [#hezt05]
 
-frappe.ui.form.on("Accommodation Material Transfer", {
+frappe.ui.form.on("Material Transfer", {
 	refresh(frm) {
 		frm.clear_custom_buttons();
 		if (frm.doc.docstatus === 1 && frm.doc.status === "In Transit") {
@@ -10,7 +10,7 @@ frappe.ui.form.on("Accommodation Material Transfer", {
 					[{ fieldname: "received_date", fieldtype: "Date", label: __("Received Date"), default: frappe.datetime.get_today(), reqd: 1 }],
 					(values) => {
 						frappe.call({
-							method: "apex.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.mark_received",
+							method: "apex.habitat.doctype.material_transfer.material_transfer.mark_received",
 							args: { transfer: frm.doc.name, received_date: values.received_date },
 							freeze: true,
 							callback: () => frm.reload_doc(),

@@ -104,9 +104,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Accommodation Material Transfer",
+   "label": "Material Transfer",
    "link_type": "DocType",
-   "link_to": "Accommodation Material Transfer",
+   "link_to": "Material Transfer",
    "idx": 7
   },
   {

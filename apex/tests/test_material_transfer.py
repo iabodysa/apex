@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Phase C — Accommodation Material Transfer moves stock between two building
+"""Phase C — Material Transfer moves stock between two building
 stores on the Accommodation Stock Ledger: submit ships out of the source store
 (In Transit), mark_received lands it in the destination store (Received), and
 cancel reverses every posted leg. Availability is enforced at submit."""
@@ -11,7 +11,7 @@ from apex.tests.factories import ApexHabitatTestCase
 from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
     post_stock_entry, get_store_balance,
 )
-from apex.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer import (
+from apex.habitat.doctype.material_transfer.material_transfer import (
     mark_received,
 )
 from apex.habitat.report.accommodation_stock_balance.accommodation_stock_balance import (
@@ -23,7 +23,7 @@ def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
-class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
+class TestMaterialTransfer(ApexHabitatTestCase):
     def setUp(self):
         self.company = frappe.db.get_value("Company", {}) or frappe.get_doc({
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
@@ -56,7 +56,7 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
                          building=building, voucher_type="Opening Stock", voucher_no="OPEN-" + _h())
 
     def _transfer(self, qty=4):
-        t = frappe.get_doc({"doctype": "Accommodation Material Transfer", "naming_series": "ACC-MTR-.YYYY.-.######",
+        t = frappe.get_doc({"doctype": "Material Transfer", "naming_series": "ACC-MTR-.YYYY.-.######",
                             "transfer_date": "2026-05-01", "from_building": self.b1, "to_building": self.b2})
         t.append("items", {"item_type": "Custody Article", "item": self.article, "qty": qty})
         t.insert(ignore_permissions=True)
@@ -105,7 +105,7 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
         self._set_finance_toggle(True)
         self._seed_store(self.b1, 10)
         t = self._transfer(4)
-        with patch("apex.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.frappe.sendmail") as mock_send:
+        with patch("apex.habitat.doctype.material_transfer.material_transfer.frappe.sendmail") as mock_send:
             mark_received(t.name, "2026-05-03")
         self.assertEqual(mock_send.call_count, 1, "a finance memo must be sent on cross-cost-center receipt")
         self.assertEqual(mock_send.call_args.kwargs["recipients"], ["finance@example.com"])
@@ -114,7 +114,7 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
         self._set_finance_toggle(False)
         self._seed_store(self.b1, 10)
         t = self._transfer(4)
-        with patch("apex.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.frappe.sendmail") as mock_send:
+        with patch("apex.habitat.doctype.material_transfer.material_transfer.frappe.sendmail") as mock_send:
             mark_received(t.name, "2026-05-03")
         mock_send.assert_not_called()
 
@@ -136,6 +136,6 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
         self._set_finance_toggle(True)
         self._seed_store(self.b1, 10)
         t = self._transfer(4)
-        with patch("apex.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.frappe.sendmail") as mock_send:
+        with patch("apex.habitat.doctype.material_transfer.material_transfer.frappe.sendmail") as mock_send:
             mark_received(t.name, "2026-05-03")
         mock_send.assert_not_called()

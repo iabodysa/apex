@@ -55,7 +55,7 @@
  "modified": "2026-06-09 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
- "name": "Accommodation Material Transfer Item",
+ "name": "Material Transfer Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

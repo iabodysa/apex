@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Accommodation Material Transfer controller — moves Custody Article / Maintenance
+"""Material Transfer controller — moves Custody Article / Maintenance
 Material stock between two building stores via the Accommodation Stock Ledger.
 
 Lifecycle: Draft -> (submit) In Transit -> (mark_received) Received; cancel reverses.
@@ -14,10 +14,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, today
 
-VOUCHER_TYPE = "Accommodation Material Transfer"
+VOUCHER_TYPE = "Material Transfer"
 
 
-class AccommodationMaterialTransfer(Document):
+class MaterialTransfer(Document):
     pass
 
 
