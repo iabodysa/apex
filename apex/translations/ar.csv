@@ -3787,6 +3787,7 @@ Stop Reason,سبب الإيقاف
 Stop a Vehicle,أوقف مركبة
 Stop {0} cancelled.,أُلغي الإيقاف {0}.
 Stopped,متوقف
+Stopped > {0} days,متوقّف منذ أكثر من {0} يوم
 Stopped via {0}: {1}.,تم الإيقاف عبر {0}: {1}.
 Stops,المحطات
 Storage,مخزن
