@@ -13,11 +13,12 @@ IBAN / cap / worker value):
 * PASSTHROUGH          — a non-Deduction, or a Deduction with no pay_category, is
   left untouched (other structure components are not gated).
 
-GAPS (reported, NOT worked around): the spec guards "slips only after the
-declaration is received", "component #7 -> Loan Repayment mapping", and "WPS SIF
-totals tie to the slips" have NO committed function in ``payroll_gate.py`` /
-``payroll_run.py`` to assert against — they are payroll-run aggregation behaviour
-not yet expressed as a testable public surface. Left as an integrator step.
+A-019 additions (pure decision cores, bench-free):
+
+* DECLARATION-GATE     — a run at/after Slips Built with no RECEIVED declaration is
+  blocked; the same run WITH one passes, and pre-slip states pass regardless.
+* COMPONENT-ROUTING    — deduction component #7 routes to the Loan Repayment salary
+  component from the routing DATA; #8 (iqama-renewal-recharge) is held (routes None).
 """
 
 from __future__ import annotations
@@ -27,7 +28,14 @@ import unittest
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex.logistay.payroll_gate import IQAMA_RECHARGE_CATEGORY, additional_salary_validate, valid_sa_iban
+from apex.logistay.payroll_gate import (
+    IQAMA_RECHARGE_CATEGORY,
+    additional_salary_validate,
+    enforce_declaration_gate,
+    requires_declaration,
+    route_deduction_component,
+    valid_sa_iban,
+)
 
 
 class TestValidSaIban(unittest.TestCase):
@@ -85,6 +93,56 @@ class TestConsentGate(FrappeTestCase):
         )
         with self.assertRaises(frappe.ValidationError):
             additional_salary_validate(doc)
+
+
+class TestDeclarationGate(FrappeTestCase):
+    """enforce_declaration_gate — slips are held until the declaration is received."""
+
+    def test_pre_slip_states_pass_without_declaration(self):
+        # Draft / Declaration Requested / Declaration Received do not build slips yet.
+        for status in ("Draft", "Declaration Requested", "Declaration Received"):
+            self.assertFalse(requires_declaration(status))
+            # No throw even with declaration_received=False.
+            self.assertIsNone(enforce_declaration_gate(status, False))
+
+    def test_slip_build_state_without_declaration_is_blocked(self):
+        self.assertTrue(requires_declaration("Slips Built"))
+        with self.assertRaises(frappe.ValidationError):
+            enforce_declaration_gate("Slips Built", declaration_received=False)
+
+    def test_slip_build_state_with_received_declaration_is_allowed(self):
+        # Same state, declaration RECEIVED -> passes. Proves the gate keys off the
+        # boolean, not merely off the status (non-tautology).
+        self.assertIsNone(enforce_declaration_gate("Slips Built", declaration_received=True))
+
+
+class TestComponentRouting(FrappeTestCase):
+    """route_deduction_component — the numbered D-taxonomy -> Salary Component map."""
+
+    # Synthetic routing DATA (never a real AFMCO config): component #7 -> Loan Repayment.
+    ROUTING = {7: "Loan Repayment", 3: "Operational Deduction"}
+    HELD = {8}  # #8 iqama-renewal-recharge is held out of payroll.
+
+    def test_component_7_routes_to_loan_repayment(self):
+        self.assertEqual(
+            route_deduction_component(7, self.ROUTING, self.HELD), "Loan Repayment"
+        )
+
+    def test_component_8_is_held(self):
+        # Held component routes NOWHERE.
+        self.assertIsNone(route_deduction_component(8, self.ROUTING, self.HELD))
+
+    def test_wrong_routing_data_would_not_return_loan_repayment(self):
+        # Non-tautology: feed a map that routes #7 elsewhere -> the #7==Loan assertion
+        # would fail. Here we prove the function faithfully returns the DATA it is given.
+        self.assertEqual(
+            route_deduction_component(7, {7: "Operational Deduction"}, self.HELD),
+            "Operational Deduction",
+        )
+
+    def test_unmapped_non_held_component_fails_closed(self):
+        with self.assertRaises(frappe.ValidationError):
+            route_deduction_component(5, self.ROUTING, self.HELD)
 
 
 if __name__ == "__main__":

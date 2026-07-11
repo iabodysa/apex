@@ -21,7 +21,13 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from apex.logistay.payroll_gate import employee_iban, enforce_release_gate, valid_sa_iban
+from apex.logistay.payroll_gate import (
+    employee_iban,
+    enforce_declaration_gate,
+    enforce_release_gate,
+    requires_declaration,
+    valid_sa_iban,
+)
 
 
 class PayrollRun(Document):
@@ -42,8 +48,34 @@ class PayrollRun(Document):
         self.name = "::".join(parts) + f"::v{n}"
 
     def validate(self) -> None:
+        self._enforce_declaration_gate()
         self._recompute_wps_readiness()
         self._enforce_release_preconditions()
+
+    def _enforce_declaration_gate(self) -> None:
+        # Slips are held until the period's Deduction Declaration is RECEIVED; this
+        # only matters once the run advances to slip-build. Earlier states pass.
+        if not requires_declaration(self.pay_status):
+            return
+        enforce_declaration_gate(self.pay_status, self._declaration_received())
+
+    def _declaration_received(self) -> bool:
+        base = {
+            "pay_client": self.pay_client,
+            "pay_period": self.pay_period,
+            "pay_status": "received",
+        }
+        # A branch-scoped run is covered by a matching branch declaration OR by a
+        # client-wide (branch-blank) declaration for the same period.
+        if self.pay_branch_site and frappe.db.exists(
+            "Deduction Declaration", {**base, "pay_branch_site": self.pay_branch_site}
+        ):
+            return True
+        return bool(
+            frappe.db.exists(
+                "Deduction Declaration", {**base, "pay_branch_site": ["in", [None, ""]]}
+            )
+        )
 
     def _recompute_wps_readiness(self) -> None:
         slips = frappe.get_all(

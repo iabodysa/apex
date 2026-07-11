@@ -27,6 +27,21 @@ from frappe.utils import flt, getdate
 IQAMA_RECHARGE_CATEGORY = "Iqama Renewal Recharge"
 CONSENT_DOCTYPE = "Employee Deduction Acknowledgment"
 
+# Payroll Run states at or beyond which slips exist and money can flow; every one of
+# these requires a RECEIVED deduction declaration for the period. States BEFORE this
+# set (Draft / Declaration Requested / Declaration Received) do not build slips yet.
+SLIP_BUILD_STATES = frozenset(
+    {
+        "Slips Built",
+        "Consent Checked",
+        "Netted",
+        "Awaiting Approval",
+        "WPS Generated",
+        "Released",
+        "Confirmed",
+    }
+)
+
 
 def valid_sa_iban(iban: str | None) -> bool:
     """Pure SA IBAN format check (fail-closed). No real IBAN is stored anywhere.
@@ -93,6 +108,53 @@ def _require_verified_consent(doc) -> None:
     # Within cap: the acknowledged amount bounds what may be withheld.
     if consent.pay_cap_amount and flt(doc.amount) > flt(consent.pay_cap_amount):
         frappe.throw(_("The deduction amount exceeds the amount the worker consented to."))
+
+
+def requires_declaration(status) -> bool:
+    """True when the Payroll Run status is at/after slip-build, so a RECEIVED
+    deduction declaration is a precondition. Pure lookup, no bench needed."""
+    return status in SLIP_BUILD_STATES
+
+
+def enforce_declaration_gate(status, declaration_received: bool) -> None:
+    """Slips are held until the period's Deduction Declaration is RECEIVED.
+
+    Silence is never clear: a missing declaration, or one still only 'requested',
+    blocks every state from Slips Built onward. States before slip-build pass through.
+    Pure decision (status + a resolved boolean) so it is unit-testable off-bench; the
+    controller supplies the boolean via a DB lookup.
+    """
+    if requires_declaration(status) and not declaration_received:
+        frappe.throw(
+            _("Slips are held until the period's deduction declaration is received.")
+        )
+
+
+def route_deduction_component(component, routing_map, held=None):
+    """Resolve which HRMS Salary Component a numbered deduction component posts as.
+
+    The D-taxonomy numbers each operational deduction component; each routes to a
+    stock HRMS Salary Component. ``routing_map`` is that map as DATA (seeded
+    out-of-repo / read from ``Salary Deduction Type Rule.salary_component``) - no
+    component->component pair is hardcoded here. Example (data): ``{7: "Loan
+    Repayment"}`` routes component #7 (advance / loan recovery) onto the stock Loan
+    Repayment component.
+
+    ``held`` is the set of components withheld from payroll (e.g. #8
+    iqama-renewal-recharge, held until the D9 legal decision). A held component routes
+    NOWHERE and returns ``None``. A non-held component with no mapping is a
+    configuration error and fails closed.
+    """
+    if held and component in held:
+        return None
+    target = routing_map.get(component) if routing_map else None
+    if not target:
+        frappe.throw(
+            _("No salary-component routing is configured for deduction component {0}.").format(
+                component
+            )
+        )
+    return target
 
 
 def enforce_release_gate(run) -> None:
