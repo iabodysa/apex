@@ -28,6 +28,7 @@ import unittest
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.logistay import payroll_gate
 from apex.logistay.payroll_gate import (
     IQAMA_RECHARGE_CATEGORY,
     additional_salary_validate,
@@ -143,6 +144,77 @@ class TestComponentRouting(FrappeTestCase):
     def test_unmapped_non_held_component_fails_closed(self):
         with self.assertRaises(frappe.ValidationError):
             route_deduction_component(5, self.ROUTING, self.HELD)
+
+
+class TestComponentRoutingWiring(FrappeTestCase):
+    """Proves route_deduction_component is WIRED into the real deduction call site.
+
+    ``additional_salary_validate`` (the ``Additional Salary.validate`` doc-event) is
+    where a P-192 deduction's target ``salary_component`` is resolved before HRMS
+    pulls it onto a Salary Slip. These tests inject SYNTHETIC routing DATA (never a
+    real AFMCO config) at the loader seam and drive the real entry function - the same
+    code that fires in production - so a #7 deduction lands on Loan Repayment and a
+    held category is left un-routed. Without the wired ``_apply_component_routing``
+    call, ``salary_component`` would never change (non-tautology).
+    """
+
+    def setUp(self):
+        self._orig_load = payroll_gate._load_deduction_routing
+        self._orig_consent = payroll_gate._require_verified_consent
+        # Consent verification needs seeded masters; stub it so this test isolates
+        # the routing wiring only (consent itself is covered by TestConsentGate).
+        payroll_gate._require_verified_consent = lambda doc: None
+
+    def tearDown(self):
+        payroll_gate._load_deduction_routing = self._orig_load
+        payroll_gate._require_verified_consent = self._orig_consent
+
+    def _stub_routing(self, routing_map, held):
+        payroll_gate._load_deduction_routing = lambda: (routing_map, held)
+
+    def test_wired_validate_routes_component_7_to_loan_repayment(self):
+        # Component #7 = "Loan Balance Offset"; the seeded DATA routes it to the stock
+        # Loan Repayment component. Driving the REAL validate rewrites salary_component.
+        self._stub_routing({"Loan Balance Offset": "Loan Repayment"}, {IQAMA_RECHARGE_CATEGORY})
+        doc = frappe._dict(
+            type="Deduction",
+            pay_category="Loan Balance Offset",
+            salary_component="Some Wrong Component",
+            amount=100,
+            payroll_date="2026-03-31",
+        )
+        additional_salary_validate(doc)
+        self.assertEqual(doc.salary_component, "Loan Repayment")
+
+    def test_wired_validate_leaves_held_category_unrouted(self):
+        # A held (disabled) category routes NOWHERE: its component is untouched and no
+        # rewrite happens. (Use a non-iqama held category so _block_held_category is
+        # a pass-through and we observe the routing decision, not the hard block.)
+        self._stub_routing({}, {"Vehicle Damages"})
+        doc = frappe._dict(
+            type="Deduction",
+            pay_category="Vehicle Damages",
+            salary_component="Native Component",
+            amount=100,
+            payroll_date="2026-03-31",
+        )
+        additional_salary_validate(doc)
+        self.assertEqual(doc.salary_component, "Native Component")
+
+    def test_wired_validate_leaves_ungoverned_category_untouched(self):
+        # A category the policy does not govern (not mapped, not held) keeps the chosen
+        # component - routing only fires on real DATA, so no regression for other
+        # deductions. Proves the rewrite is data-driven, not unconditional.
+        self._stub_routing({"Loan Balance Offset": "Loan Repayment"}, set())
+        doc = frappe._dict(
+            type="Deduction",
+            pay_category="Traffic Fine",
+            salary_component="Native Component",
+            amount=100,
+            payroll_date="2026-03-31",
+        )
+        additional_salary_validate(doc)
+        self.assertEqual(doc.salary_component, "Native Component")
 
 
 if __name__ == "__main__":

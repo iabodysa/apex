@@ -69,6 +69,7 @@ def additional_salary_validate(doc, method=None) -> None:
     if not getattr(doc, "pay_category", None):
         return
     _block_held_category(doc)
+    _apply_component_routing(doc)
     _require_verified_consent(doc)
 
 
@@ -155,6 +156,51 @@ def route_deduction_component(component, routing_map, held=None):
             )
         )
     return target
+
+
+def _load_deduction_routing():
+    """Build the deduction routing map + held set from committed DATA.
+
+    Source is the ``Salary Deduction Policy`` Single and its ``type_rules`` child
+    rows (``Salary Deduction Type Rule``). Each enabled row with a target contributes
+    one ``category -> Salary Component`` pair; a disabled row's category is HELD. No
+    pair is hardcoded here - every pair is a DB value seeded out-of-repo. Category-8
+    (iqama-renewal-recharge) is additionally held until its D9 legal flag is set.
+    """
+    routing_map: dict = {}
+    held: set = set()
+    policy = frappe.get_cached_doc("Salary Deduction Policy")
+    for row in policy.get("type_rules") or []:
+        category = row.deduction_type
+        if not category:
+            continue
+        if row.enabled and row.salary_component:
+            routing_map[category] = row.salary_component
+        else:
+            held.add(category)
+    if not policy.get("pay_category_8_legal_cleared"):
+        held.add(IQAMA_RECHARGE_CATEGORY)
+    return routing_map, held
+
+
+def _apply_component_routing(doc) -> None:
+    """Route a P-192 deduction onto its target HRMS Salary Component (the real wiring).
+
+    An ``Additional Salary`` of type Deduction is the row HRMS pulls onto a Salary
+    Slip; its ``salary_component`` is what that slip line posts as. So resolving it
+    here IS resolving the slip deduction's component. Only categories the policy
+    governs (mapped or held) are touched - anything else keeps the chosen component,
+    so non-P-192 structure deductions and un-seeded categories are never disturbed. A
+    mapped category has its component overwritten with the routed target; a held
+    category routes NOWHERE (``_block_held_category`` stops it posting).
+    """
+    routing_map, held = _load_deduction_routing()
+    category = doc.pay_category
+    if category not in routing_map and category not in held:
+        return
+    target = route_deduction_component(category, routing_map, held)
+    if target and getattr(doc, "salary_component", None) != target:
+        doc.salary_component = target
 
 
 def enforce_release_gate(run) -> None:
