@@ -1938,7 +1938,7 @@ Input screen: open an item to create or edit records.,شاشة إدخال: اف�
 Inspected by (Supervisor),تم التفتيش بواسطة (المشرف)
 Inspection,تفتيش
 Inspection Date,تاريخ الفحص
-Inspection Finding Item,بند ملاحظة التفتيش
+Inspection Finding Item,بند ملاحظة الفحص
 Inspection Type,نوع الفحص
 Inspection logged: {0},سُجِّل الفحص: {0}
 Inspector,المفتّش
@@ -2602,7 +2602,7 @@ Operational,تشغيلي
 Operational Alert Windows,نوافذ التنبيه التشغيلي
 Operational Depreciation Aging,أعمار الإهلاك التشغيلي
 Operational Depreciation Policy,سياسة الإهلاك التشغيلية
-Operational Depreciation Snapshot,لقطة إهلاك غير مالي
+Operational Depreciation Snapshot,لقطة الإهلاك التشغيلي
 Operational Markup,هامش تشغيلي
 Operational Memo,مذكرة تشغيلية
 Operational Notifications,الإشعارات التشغيلية
@@ -4208,8 +4208,8 @@ Trigger Event,الحدث المُشغِّل
 Trigger alert if monthly bill deviates from average by more than this percentage.,أطلق تنبيهاً إذا انحرفت الفاتورة الشهرية عن المتوسط بأكثر من هذه النسبة.
 Trip,الرحلة
 Trip Boarding Event,حدث صعود الرحلة
-Trip Boarding Ledger,سجل ركوب الرحلة
-Trip Boarding Ledger is a posted audit record and cannot be edited.,سجل ركوب الرحلة سجل تدقيق مُرحَّل ولا يمكن تعديله.
+Trip Boarding Ledger,سجل صعود الرحلة
+Trip Boarding Ledger is a posted audit record and cannot be edited.,سجل صعود الرحلة سجل تدقيق مُرحَّل ولا يمكن تعديله.
 Trip Boarding State,حالة صعود الرحلة
 Trip Cost,تكلفة الرحلة
 Trip Date,تاريخ الرحلة
@@ -4223,7 +4223,7 @@ Trip Purpose,غرض الرحلة
 Trip Start Log,سجل بدء الرحلة
 Trip Stop Progress,تقدم محطة الرحلة
 Trip Subject,موضوع الرحلة
-Trip boarding ledger. One immutable row per worker's final boarding outcome on a finalized Dispatch Trip. Maintained automatically by the system; never edited manually.,سجل ركوب الرحلة. صف واحد غير قابل للتعديل لكل عامل يوثّق نتيجة الركوب النهائية في رحلة إيفاد مُنجَزة. يُحدَّث تلقائيًا بواسطة النظام؛ ولا يُحرَّر يدويًا.
+Trip boarding ledger. One immutable row per worker's final boarding outcome on a finalized Dispatch Trip. Maintained automatically by the system; never edited manually.,سجل صعود الرحلة. صف واحد غير قابل للتعديل لكل عامل يوثّق نتيجة الصعود النهائية في رحلة إيفاد مُنجَزة. يُحدَّث تلقائيًا بواسطة النظام؛ ولا يُحرَّر يدويًا.
 Trip end odometer ({0}) cannot be less than start ({1}).,عداد مسافة نهاية الرحلة ({0}) لا يمكن أن يكون أقل من البداية ({1}).
 Trip fulfilment ledger. Maintained automatically by the system when a Dispatch Trip is completed and not edited manually.,دفتر تنفيذ الرحلات. يُحدّثه النظام آلياً عند اكتمال رحلة تسيير، ولا يُحرّر يدوياً.
 Trip not found.,الرحلة غير موجودة.
