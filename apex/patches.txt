@@ -347,3 +347,8 @@ apex.patches.v1_x.reorder_root_workspace_creation
 # Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site has run
 # it (tracked in tabPatch Log).
 apex.patches.v1_x.enable_habitat_expiry_notifications
+# v2.0.0 — heal Number Card rows left pointing at the pre-rename module path
+# apex_habitat.habitat.api.dashboard.* (dead app id) so the dashboard number cards
+# resolve again. Committed JSON is correct; only long-lived migrated sites carry the
+# stale value. Idempotent, no-op on fresh installs. PRUNE once every deployed site ran it.
+apex.patches.v2_0.fix_stale_apex_habitat_number_card_method
