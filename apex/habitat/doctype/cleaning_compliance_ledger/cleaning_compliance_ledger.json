@@ -125,7 +125,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-06-27 00:00:00.000000",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Cleaning Compliance Ledger",
@@ -171,6 +171,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "source_name, source_detail_no, company",
  "sort_field": "posting_date",
  "sort_order": "DESC",
  "states": []

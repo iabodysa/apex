@@ -111,7 +111,7 @@
  "is_submittable": 1,
  "issingle": 0,
  "istable": 0,
- "modified": "2026-06-12 09:30:00.000000",
+ "modified": "2026-07-11 04:09:36.115685",
  "module": "Habitat",
  "name": "Operational Depreciation Snapshot",
  "naming_rule": "By \"Naming Series\" field",
@@ -147,5 +147,7 @@
    "role": "Resident Supervisor",
    "write": 1
   }
- ]
+ ],
+ "search_fields": "building, snapshot_date",
+ "track_changes": 1
 }

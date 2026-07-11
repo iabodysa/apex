@@ -218,7 +218,7 @@
    "link_fieldname": "rental_settlement"
   }
  ],
- "modified": "2026-07-10 09:22:42.696478",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Rental Settlement",
@@ -291,6 +291,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "company, period_month, status",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [

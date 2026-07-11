@@ -161,7 +161,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-25 16:43:41.100016",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Inspection Report",
@@ -179,8 +179,10 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "building, facility_asset, inspection_date",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "building"
+ "title_field": "building",
+ "track_changes": 1
 }

@@ -134,7 +134,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-07-10 13:39:42.272850",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Masar Worker Token",
@@ -198,6 +198,7 @@
    "role": "Accommodation Manager"
   }
  ],
+ "search_fields": "employee_name, employee",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

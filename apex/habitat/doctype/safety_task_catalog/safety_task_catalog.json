@@ -148,7 +148,7 @@
    "link_fieldname": "safety_task_catalog"
   }
  ],
- "modified": "2026-06-22 17:00:00.000000",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Task Catalog",
@@ -183,6 +183,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "task_title, task_code",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

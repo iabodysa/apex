@@ -5,6 +5,7 @@
  "custom": 0,
  "istable": 0,
  "engine": "InnoDB",
+ "search_fields": "asset_name, serial_number, linked_erpnext_asset",
  "track_changes": 1,
  "autoname": "naming_series:",
  "naming_rule": "By \"Naming Series\" field",
@@ -322,5 +323,5 @@
   "movement_count",
   "last_movement_date"
  ],
- "modified": "2026-07-10 09:22:42.696478"
+ "modified": "2026-07-11 04:09:36.115685"
 }

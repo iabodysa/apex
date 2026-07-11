@@ -6,6 +6,7 @@
  "istable": 0,
  "is_submittable": 0,
  "engine": "InnoDB",
+ "search_fields": "template_name, issue_type",
  "track_changes": 1,
  "autoname": "field:template_name",
  "naming_rule": "By fieldname",

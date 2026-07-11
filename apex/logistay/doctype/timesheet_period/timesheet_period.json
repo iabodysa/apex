@@ -101,7 +101,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-10 04:43:13.687681",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Logistay",
  "name": "Timesheet Period",
@@ -139,6 +139,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "period_label, client, month",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

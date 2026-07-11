@@ -374,7 +374,7 @@
    "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-06-26 13:00:00.000000",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Assignment",
@@ -414,6 +414,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "employee_name, employee, building",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

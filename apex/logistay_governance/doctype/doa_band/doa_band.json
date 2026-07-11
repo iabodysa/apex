@@ -134,7 +134,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-10 00:00:00.000000",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Logistay Governance",
  "name": "DoA Band",
@@ -164,6 +164,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "gov_action, gov_required_role, gov_escalates_to",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

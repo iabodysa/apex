@@ -254,7 +254,7 @@
    "link_fieldname": "driver"
   }
  ],
- "modified": "2026-06-25 15:31:22.728275",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Driver",
@@ -338,6 +338,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "full_name, national_id, driver_id",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [

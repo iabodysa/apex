@@ -194,7 +194,7 @@
    "link_fieldname": "room"
   }
  ],
- "modified": "2026-06-08 20:00:00.000000",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Room",
@@ -225,6 +225,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "room_number, building, last_inventory_date",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [

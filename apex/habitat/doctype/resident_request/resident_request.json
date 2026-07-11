@@ -5,6 +5,7 @@
  "custom": 0,
  "is_submittable": 0,
  "engine": "InnoDB",
+ "search_fields": "worker_name, mobile_number, anonymous_tracking_code",
  "track_changes": 1,
  "field_order": [
   "arr_tab_overview",
@@ -355,5 +356,5 @@
  "naming_rule": "By \"Naming Series\" field",
  "sort_field": "modified",
  "sort_order": "DESC",
- "modified": "2026-06-17 16:00:00.000000"
+ "modified": "2026-07-11 04:09:36.115685"
 }

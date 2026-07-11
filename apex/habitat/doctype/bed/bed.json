@@ -167,7 +167,7 @@
    "link_fieldname": "to_bed"
   }
  ],
- "modified": "2026-06-08 20:00:00.000000",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Bed",
@@ -198,6 +198,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "bed_code, building, status",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [

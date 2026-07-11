@@ -6,6 +6,7 @@
  "istable": 0,
  "engine": "InnoDB",
  "is_submittable": 1,
+ "search_fields": "building, handover_date",
  "track_changes": 1,
  "autoname": "naming_series:",
  "naming_rule": "By \"Naming Series\" field",
@@ -206,5 +207,5 @@
   "facility_asset_custody_assignment_sec_system",
   "naming_series"
  ],
- "modified": "2026-07-10 09:22:42.696478"
+ "modified": "2026-07-11 04:09:36.115685"
 }

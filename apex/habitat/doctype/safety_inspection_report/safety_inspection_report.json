@@ -173,7 +173,7 @@
    "link_fieldname": "linked_inspection"
   }
  ],
- "modified": "2026-07-10 07:59:07.006746",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Inspection Report",
@@ -220,6 +220,7 @@
  ],
  "read_only": 1,
  "row_format": "Dynamic",
+ "search_fields": "building, inspection_date",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

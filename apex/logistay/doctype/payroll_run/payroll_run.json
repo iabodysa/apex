@@ -24,6 +24,7 @@
   "pay_wps_status",
   "pay_run_wps_col",
   "pay_iban_complete",
+  "pay_run_tab_authorization",
   "pay_run_sec_governance",
   "pay_doa_band",
   "pay_doa_status",
@@ -253,12 +254,17 @@
    "fieldname": "pay_notes",
    "fieldtype": "Small Text",
    "label": "Notes"
+  },
+  {
+   "fieldname": "pay_run_tab_authorization",
+   "fieldtype": "Tab Break",
+   "label": "Authorization"
   }
  ],
  "icon": "fa fa-money",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-11 09:00:00.000000",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Logistay",
  "name": "Payroll Run",
@@ -295,6 +301,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "pay_client, pay_period",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

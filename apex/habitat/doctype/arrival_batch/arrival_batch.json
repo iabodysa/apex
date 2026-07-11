@@ -6,6 +6,7 @@
  "issingle": 0,
  "is_submittable": 0,
  "engine": "InnoDB",
+ "search_fields": "title, building, labour_supplier",
  "track_changes": 1,
  "autoname": "naming_series:",
  "naming_rule": "By \"Naming Series\" field",
@@ -196,5 +197,5 @@
    "idx": 8
   }
  ],
- "modified": "2026-06-25 23:40:42.184627"
+ "modified": "2026-07-11 04:09:36.115685"
 }

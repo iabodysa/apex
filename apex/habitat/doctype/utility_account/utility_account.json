@@ -6,6 +6,7 @@
  "istable": 0,
  "is_submittable": 0,
  "engine": "InnoDB",
+ "search_fields": "account_number, meter_number, building",
  "track_changes": 1,
  "autoname": "naming_series:",
  "naming_rule": "By \"Naming Series\" field",
@@ -205,5 +206,5 @@
   "utility_account_sec_system",
   "naming_series"
  ],
- "modified": "2026-06-08 21:00:00.000000"
+ "modified": "2026-07-11 04:09:36.115685"
 }

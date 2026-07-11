@@ -165,7 +165,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-07-10 09:22:42.696478",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Boarding Scan Log",
@@ -231,6 +231,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "driver, employee, accommodation_building",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

@@ -133,7 +133,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-07-10 09:22:42.696478",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Cost Ledger",
@@ -166,6 +166,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "source_name, source_detail_no, company",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

@@ -46,6 +46,10 @@ apex.setup.slides_settings = [
 				fieldname: "apex_default_payment_method",
 				label: __("Default Payment Method"),
 				fieldtype: "Select",
+				// Stored VALUES = DocType names the server routes on (setup_wizard.py
+				// _apply_payment_routing: frappe.db.exists("DocType", value)). Do NOT
+				// __()-wrap them — that would store the Arabic string and break routing.
+				// The Arabic display is localized via translations/ar.csv (Select auto-translates the label).
 				options: "Payment Entry\nPayment Order\nExpense Request Afmco",
 				default: "Payment Entry",
 				description: __("The payment document the Pay action builds (sets the Payment Routing target). Leave on the default to use Payment Entry."),

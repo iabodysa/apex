@@ -168,7 +168,7 @@
    "link_fieldname": "source_handover"
   }
  ],
- "modified": "2026-06-25 22:39:05.098591",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Handover",
@@ -235,6 +235,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "checklist_template, vehicle, from_driver",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

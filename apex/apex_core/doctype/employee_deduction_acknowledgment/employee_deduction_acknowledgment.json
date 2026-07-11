@@ -21,6 +21,7 @@
   "source_doctype",
   "source_document",
   "payroll_date",
+  "employee_deduction_ack_tab_consent",
   "employee_deduction_ack_sec_consent",
   "consent_given",
   "consent_attachment",
@@ -239,12 +240,17 @@
    "fieldname": "notes",
    "fieldtype": "Small Text",
    "label": "Notes"
+  },
+  {
+   "fieldname": "employee_deduction_ack_tab_consent",
+   "fieldtype": "Tab Break",
+   "label": "Consent"
   }
  ],
  "icon": "fa fa-handshake-o",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-13 09:00:00.000000",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Employee Deduction Acknowledgment",
@@ -288,6 +294,7 @@
    "role": "Internal Auditor"
   }
  ],
+ "search_fields": "party, employee, company",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

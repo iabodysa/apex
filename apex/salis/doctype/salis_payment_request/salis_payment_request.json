@@ -260,7 +260,7 @@
    "link_fieldname": "payment_request"
   }
  ],
- "modified": "2026-07-10 09:22:42.696478",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Payment Request",
@@ -325,6 +325,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "expense_type, reference_name, reference_doctype",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [

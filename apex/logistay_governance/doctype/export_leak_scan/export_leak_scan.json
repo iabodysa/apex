@@ -98,7 +98,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-10 00:00:00.000000",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Logistay Governance",
  "name": "Export Leak Scan",
@@ -122,6 +122,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "gov_export_ref, gov_audience, gov_scanned_by",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

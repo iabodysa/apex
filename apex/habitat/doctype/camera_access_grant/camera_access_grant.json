@@ -6,6 +6,7 @@
  "istable": 0,
  "engine": "InnoDB",
  "is_submittable": 1,
+ "search_fields": "status, requested_for, access_level",
  "track_changes": 1,
  "autoname": "naming_series:",
  "naming_rule": "By \"Naming Series\" field",
@@ -189,5 +190,5 @@
   "camera_access_grant_system_col",
   "naming_series"
  ],
- "modified": "2026-06-09 09:00:00.000000"
+ "modified": "2026-07-11 04:09:36.115685"
 }

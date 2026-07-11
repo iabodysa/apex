@@ -451,7 +451,7 @@
    "link_fieldname": "transport_request"
   }
  ],
- "modified": "2026-07-10 03:11:22.316103",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",
@@ -535,6 +535,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "requester_name, mobile_number, anonymous_tracking_code",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [

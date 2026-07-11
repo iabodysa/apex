@@ -221,7 +221,7 @@
    "link_fieldname": "subcontractor_service_order"
   }
  ],
- "modified": "2026-06-12 09:59:52.443056",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Subcontractor Service Order",
@@ -269,6 +269,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "supplier, building, contract",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

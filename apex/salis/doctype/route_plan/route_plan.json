@@ -191,7 +191,7 @@
    "link_fieldname": "route_plan"
   }
  ],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Plan",
@@ -252,6 +252,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "route_name, project, driver",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

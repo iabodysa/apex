@@ -110,7 +110,7 @@
    "link_fieldname": "route_assignment"
   }
  ],
- "modified": "2026-06-28 12:00:00.000000",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Assignment",
@@ -168,6 +168,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "shift_name, route_template, work_shift",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

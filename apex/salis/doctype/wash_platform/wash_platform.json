@@ -72,7 +72,7 @@
    "link_fieldname": "wash_platform"
   }
  ],
- "modified": "2026-05-26 10:00:00.000000",
+ "modified": "2026-07-11 04:09:36.115685",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Wash Platform",
@@ -130,6 +130,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "platform_name, status",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
