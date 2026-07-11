@@ -1541,17 +1541,17 @@ External fleet identifier used as the data-import key (unique).,معرّف ال�
 External purchasing system PO or invoice number.,رقم أمر الشراء أو الفاتورة في نظام المشتريات الخارجي.
 External rental office that supplies rented vehicles to the fleet.,مكتب تأجير خارجي يزوّد الأسطول بالمركبات المستأجرة.
 Extracted tabular payload the engine consumes (JSON). See the ingestion engine docstring for the schema: a period_month plus a rows[] list of worker + tokens + daily.,الحمولة الجدولية المستخرجة التي يستهلكها المحرك (JSON). راجع توثيق محرك الإدخال لمعرفة المخطط: period_month مع قائمة rows[] تضم العامل والرموز والبيانات اليومية.
-F1,F1
-F10,F10
-F11,F11
-F2,F2
-F3,F3
-F4,F4
-F5,F5
-F6,F6
-F7,F7
-F8,F8
-F9,F9
+F1,صيغة F1
+F10,صيغة F10
+F11,صيغة F11
+F2,صيغة F2
+F3,صيغة F3
+F4,صيغة F4
+F5,صيغة F5
+F6,صيغة F6
+F7,صيغة F7
+F8,صيغة F8
+F9,صيغة F9
 Facility Asset,أصل المنشأة
 Facility Asset Custody Assignment,تخصيص عهدة أصول المنشأة
 Facility Asset Delivery,تسليم أصل منشأة
@@ -2043,7 +2043,7 @@ Item Type,نوع الصنف
 Item {0} does not belong to this building.,الصنف {0} لا يتبع هذا المبنى.
 Itemized List,قائمة مفصّلة
 Items,الأصناف
-JSON,JSON
+JSON,صيغة JSON
 January,يناير
 July,يوليو
 June,يونيو
@@ -3776,6 +3776,7 @@ Stop Reason,سبب الإيقاف
 Stop a Vehicle,أوقف مركبة
 Stop {0} cancelled.,أُلغي الإيقاف {0}.
 Stopped,متوقف
+Stopped > {0} days,متوقّف منذ أكثر من {0} يوم
 Stopped via {0}: {1}.,تم الإيقاف عبر {0}: {1}.
 Stops,المحطات
 Storage,مخزن
@@ -4371,7 +4372,7 @@ Voucher Detail No,رقم تفصيل القسيمة
 Voucher No,رقم القسيمة
 Voucher Type,نوع القسيمة
 WARN,تحذير
-WPS / SIF,WPS / SIF
+WPS / SIF,حماية الأجور WPS / SIF
 WPS Channel,قناة WPS
 WPS Generated,تم إنشاء WPS
 WPS Included,مُدرَج في WPS
@@ -4777,7 +4778,7 @@ workers,عمال
 workshop status,حالة الورشة
 wps_release,إصدار WPS
 year_month_mismatch,عدم تطابق السنة والشهر
-zatca_erpgulf,ZATCA ERPGulf
+zatca_erpgulf,تكامل زاتكا ERPGulf
 "{0} (Employee {1}) used the Masar worker portal to flag that their Iqama {2} is expiring (expiry {3}, {4} day(s) left). Please action the renewal.",استخدم {0} (الموظف {1}) بوابة عامل مسار للإشارة إلى أن إقامته {2} على وشك الانتهاء (الانتهاء {3}، {4} يوم متبقٍ). يُرجى اتخاذ إجراء التجديد.
 {0} acknowledged,{0} تم الإقرار بها
 {0} active,{0} نشط
