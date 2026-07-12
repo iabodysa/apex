@@ -31,8 +31,16 @@ Idempotent: the dotted sweep only touches rows still containing the literal
 """
 
 import json
+import re
 
 import frappe
+
+# Identifier allowlist for the DB-wide sweep: Frappe table/column names are
+# word chars + spaces only (e.g. `tabNumber Card`, `email_id`). Every table /
+# column comes from information_schema (never request input), but the back-
+# quoted identifiers are still validated with `.fullmatch` before they reach
+# the SQL text so a non-identifier value can never break out of the quoting.
+_SAFE_IDENT = re.compile(r"[\w ]+")
 
 OLD = "apex_habitat"
 NEW = "apex"
@@ -98,8 +106,13 @@ def _rewrite_dotted_paths():
         if table in _SWEEP_SKIP_TABLES:
             continue
         column = col.column_name
+        # Guard the interpolated identifiers (defence-in-depth over the trusted
+        # information_schema source): skip anything that is not a plain
+        # word-chars/space identifier before it is spliced into the DDL.
+        if not (_SAFE_IDENT.fullmatch(table) and _SAFE_IDENT.fullmatch(column)):
+            continue
         frappe.db.sql(
-            # nosec: identifiers come from information_schema, not user input.
+            # identifiers come from information_schema and are `.fullmatch`-guarded above.
             f"UPDATE `{table}` "
             f"SET `{column}` = REPLACE(`{column}`, %s, %s) "
             f"WHERE LOCATE(%s, `{column}`) > 0",
