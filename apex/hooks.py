@@ -416,6 +416,12 @@ fixtures = [
     {"dt": "Role", "filters": [["name", "in", ["Maintenance Technician", "Cleaning Supervisor", "Safety Officer", "Resident Request Coordinator"]]]},
     # [#e3f5ip]
     {"dt": "Role", "filters": [["name", "in", ["Fleet Project Manager", "Fleet Supervisor", "Government Relations Officer"]]]},
+    # [#a036dr]
+    # A-036: field-worker (Driver) role ships with desk_access=0 so a driver-only
+    # user is a native Website User — the core-level "User Type" isolation that
+    # keeps the desk module list (all Frappe/ERPNext/HRMS modules) off a field
+    # worker entirely. Drivers reach their work only through the /driver portal.
+    {"dt": "Role", "filters": [["name", "in", ["Driver"]]]},
     # [#40ogr7]
     # [#r6md4h]
     {"dt": "Item", "filters": [["item_code", "like", "ACC-%"]]},

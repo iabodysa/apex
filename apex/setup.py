@@ -77,6 +77,18 @@ def create_role_profiles():
             doc.insert(ignore_permissions=True)
             # [#7cx306]
             doc.unlock()
+    # [#a036rp]
+    # A-036: native provisioning of the Salis field-worker Role Profile bundling
+    # the desk_access=0 Driver role (was a fixture, which re-fired Role Profile's
+    # core on_update queue_action file lock on every worker-less migrate ->
+    # DocumentLockedError). Same exists-guard + insert + unlock pattern as above:
+    # skipped when it already exists, so re-runs never re-lock the doc.
+    if not frappe.db.exists("Role Profile", "Salis Driver"):
+        doc = frappe.new_doc("Role Profile")
+        doc.role_profile = "Salis Driver"
+        doc.append("roles", {"role": "Driver"})
+        doc.insert(ignore_permissions=True)
+        doc.unlock()
 
 
 def create_custody_asset_categories():

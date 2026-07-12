@@ -367,3 +367,14 @@ apex.patches.v1_x.enable_habitat_expiry_notifications
 # resolve again. Committed JSON is correct; only long-lived migrated sites carry the
 # stale value. Idempotent, no-op on fresh installs. PRUNE once every deployed site ran it.
 apex.patches.v2_0.fix_stale_apex_habitat_number_card_method
+
+# v2.0.0 — TEMPORARY app-identity cutover apex_habitat -> apex (ONE-TIME). Rewrites every
+# DB reference a pre-rename 1.60.x site carries: all stored dotted paths `apex_habitat.` ->
+# `apex.` (Number Card / Scheduled Job Type / Server Script / condition text / any config
+# column) via a token-gated DB-wide sweep, plus Module Def.app_name, Installed Application
+# child rows, and the installed_apps global. post_model_sync: reads no column a later sync
+# drops, and needs every table/column already synced. Idempotent, no-op on re-run / fresh
+# installs. Requires the installed_apps global flipped to `apex` BEFORE migrate (bootstrap;
+# see the patch docstring). PRUNE this line + the module after the v2 cutover (every deployed
+# site has run it — tracked in tabPatch Log).
+apex.patches.v2_0.rename_app_apex_habitat_to_apex
