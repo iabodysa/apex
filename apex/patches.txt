@@ -47,7 +47,6 @@ apex.patches.v1_0.seed_salis_portal_theme
 # is the install path; both also run from after_install/after_migrate.
 apex.patches.v1_x.seed_salis_communications
 apex.patches.v1_x.seed_salis_workflows
-apex.patches.v1_x.seed_logistay_workflows
 
 # v1.55.x — seed the Accommodation Item Groups (PERMANENT, idempotent, NestedSet-safe).
 # Item Group is a NestedSet; a fixture import crashed fresh-site install on the NULL
@@ -378,3 +377,11 @@ apex.patches.v2_0.fix_stale_apex_habitat_number_card_method
 # see the patch docstring). PRUNE this line + the module after the v2 cutover (every deployed
 # site has run it — tracked in tabPatch Log).
 apex.patches.v2_0.rename_app_apex_habitat_to_apex
+
+# v2.0.0 — reset Logistay to its lean two-master foundation (Freelancer + Temporary Worker).
+# Removes the ORPHANED DB records left by the archived v1 Logistay billing/timesheet/payroll
+# engine and the whole Logistay Governance module: their DocTypes + tables, the Logistay
+# workspace / Timesheet Exception Workbench report / TS Intake Source Workflow, the P-192
+# payroll Custom Fields, and the Logistay Governance Module Def. post_model_sync: the two
+# survivors already exist and are explicitly excluded. Fully guarded; no-op on fresh installs.
+apex.patches.v2_0.archive_logistay_v1_engine

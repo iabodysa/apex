@@ -198,13 +198,6 @@ doc_events = {
         "validate": "apex.habitat.doctype.maintenance_inspection_report.maintenance_inspection_report.validate",
         "before_cancel": "apex.habitat.doctype.maintenance_inspection_report.maintenance_inspection_report.before_cancel",
     },
-    # Logistay engine gates (P-191 invoice issuance, P-192 deduction consent)
-    "Sales Invoice": {
-        "before_submit": "apex.logistay.invoice_assembly.enforce_issuance_gate",
-    },
-    "Additional Salary": {
-        "validate": "apex.logistay.payroll_gate.additional_salary_validate",
-    },
 }
 
 # [#qjzdot]
@@ -239,10 +232,6 @@ scheduler_events = {
         "apex.salis.tasks.alerts.daily_open_alerts_digest",
         "apex.salis.fuel_engine.accrue_fuel_consumption",
         "apex.salis.rental_engine.daily_rental_accrual",
-        # [#9muy7i]
-        "apex.logistay.ingestion_engine.normalize_pending_intakes",
-        # [#c4f24z]
-        "apex.logistay.timesheet_engine.post_timesheet_ledger",
         # [#ptjnq1]
         "apex.apex_core.utils.workflow_utils.cleanup_orphaned_workflow_actions",
     ],
@@ -426,22 +415,8 @@ fixtures = [
     # [#r6md4h]
     {"dt": "Item", "filters": [["item_code", "like", "ACC-%"]]},
     # [#9e59wa]
+    # Freelancer is a native accounting Party Type (the surviving lean-Logistay master).
     {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},
-    # Logistay payroll (P-192) custom fields on stock Salary Slip / Additional Salary
-    # + apex_core Employee Deduction Acknowledgment / Salary Deduction Policy
-    {"dt": "Custom Field", "filters": [["name", "in", [
-        "Salary Slip-pay_payroll_run", "Salary Slip-pay_payable_line", "Salary Slip-pay_rec_run",
-        "Salary Slip-pay_partial_reason", "Salary Slip-pay_consent_complete", "Salary Slip-pay_net_negative",
-        "Salary Slip-pay_wps_included",
-        "Additional Salary-pay_category", "Additional Salary-pay_source", "Additional Salary-pay_candidate",
-        "Additional Salary-pay_consent", "Additional Salary-pay_payroll_run",
-        "Employee Deduction Acknowledgment-pay_category", "Employee Deduction Acknowledgment-pay_consent_scope",
-        "Employee Deduction Acknowledgment-pay_cap_amount", "Employee Deduction Acknowledgment-pay_valid_from",
-        "Employee Deduction Acknowledgment-pay_valid_to", "Employee Deduction Acknowledgment-pay_obtained_by",
-        "Employee Deduction Acknowledgment-pay_verified_by", "Employee Deduction Acknowledgment-pay_candidate",
-        "Employee Deduction Acknowledgment-pay_payroll_run", "Employee Deduction Acknowledgment-pay_held",
-        "Salary Deduction Policy-pay_category_8_legal_cleared",
-    ]]]},
 ]
 
 # [#6mioka]
@@ -458,7 +433,6 @@ after_install = [
     "apex.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
     # [#hbwf06]
     "apex.apex_core.setup.seeders.habitat_workflow_seed.seed_habitat_workflows",
-    "apex.apex_core.setup.seeders.logistay_workflow_seed.seed_logistay_workflows",
     # [#2oqhfm]
     "apex.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
     # [#r5fycj]
@@ -481,7 +455,6 @@ after_migrate = [
     "apex.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
     # [#hbwf07]
     "apex.apex_core.setup.seeders.habitat_workflow_seed.seed_habitat_workflows",
-    "apex.apex_core.setup.seeders.logistay_workflow_seed.seed_logistay_workflows",
     # [#tk37r7]
     "apex.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
     # [#hi9721]
