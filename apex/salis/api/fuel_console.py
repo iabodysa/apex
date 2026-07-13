@@ -44,8 +44,8 @@ from frappe import _
 from frappe.model.workflow import apply_workflow, get_transitions
 from frappe.utils import date_diff, flt, today
 
+from apex.salis.api.dispatch_board import _permitted_projects
 from apex.salis.api.enrich import vehicle_driver_titles
-from apex.salis.permissions import _allowed_projects, _is_unscoped
 
 
 def _drive_fuel_action(doc, action: str) -> None:
@@ -79,27 +79,6 @@ def _drive_fuel_action(doc, action: str) -> None:
         ),
         frappe.PermissionError,
     )
-
-
-def _permitted_projects():
-    """Resolve the project scope for the current user.
-
-    Returns a tuple ``(unscoped, projects)`` with the same contract as
-    ``dispatch_board._permitted_projects``:
-
-      * ``unscoped`` is True for oversight roles that see every project, in which
-        case ``projects`` is ``None`` (no project filter applied);
-      * otherwise ``projects`` is the list of Project names the user holds a User
-        Permission for. An empty list means the user is scoped but granted no
-        project, so the queue must be empty.
-
-    This delegates to the same helpers the ``permission_query_conditions`` hooks
-    use, so the console scope and the list-view scope can never diverge.
-    """
-    user = frappe.session.user
-    if _is_unscoped(user):
-        return True, None
-    return False, _allowed_projects(user)
 
 
 def _approval_threshold() -> float:
