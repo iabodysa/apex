@@ -27,7 +27,7 @@ from apex.habitat.api.custody_handover import (
     approve_handover,
     confirm_handover,
 )
-from apex.tests.test_utils import ApexHabitatTestCase
+from apex.tests.factories import ApexHabitatTestCase
 
 
 def _h(n=12):

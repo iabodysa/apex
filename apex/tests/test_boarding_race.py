@@ -26,19 +26,20 @@ test_stock_source_locking:
 from __future__ import annotations
 
 import ast
-import os
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, timeout
 
+from apex.salis.api import boarding as _boarding_mod
 from apex.salis.api.boarding import (
     _issue_token,
     get_boarding_pass,
     scan_boarding_pass,
 )
 
-_HERE = os.path.dirname(__file__)
-_BOARDING_SRC = os.path.normpath(os.path.join(_HERE, "boarding.py"))
+# Source path resolved from the module itself so this AST guard is independent of
+# where the test file lives (it was moved out of apex/salis/api/ into apex/tests/).
+_BOARDING_SRC = _boarding_mod.__file__
 
 
 def _h(n=12):
