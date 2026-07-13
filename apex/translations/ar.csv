@@ -50,7 +50,7 @@ A line is missing its item.,أحد السطور ينقصه الصنف.
 A linked Employee is required to raise departure transport (the manifest cannot carry a Temporary Worker).,يلزم موظف مرتبط لإنشاء نقل المغادرة (لا يمكن للبيان أن يحمل عاملاً مؤقتاً).
 A maintenance request has been assigned to you,تم إسناد طلب صيانة إليك
 A maintenance request raised automatically when the task execution indicates a repair is needed.,طلب صيانة يُنشأ آلياً عندما يشير تنفيذ المهمة إلى الحاجة لإصلاح.
-A maintenance request spawned from a safety finding requires the Facilities Supervisor in parallel,طلب صيانة ناتج عن ملاحظة سلامة يتطلب إشراف مشرف المرافق بالتوازي
+A maintenance request spawned from a safety finding requires the Facilities Supervisor in parallel,طلب صيانة ناتج عن ملاحظة سلامة يتطلب إشراف مشرف المنشأة بالتوازي
 A manifest can list at most {0} expected workers.,يمكن أن يضم كشف الوصول {0} عاملاً متوقعاً كحد أقصى.
 A new Dispatch Trip must start as Planned; {0} is reached through the workflow.,يجب أن تبدأ رحلة التشغيل الجديدة بالحالة مُخطَّطة؛ يتم الوصول إلى {0} عبر سير العمل.
 A new maintenance request awaits triage,طلب صيانة جديد بانتظار الفرز
@@ -269,7 +269,7 @@ Anonymous Tracking Code,رمز تتبع مجهول الهوية
 Apartment,شقة
 Apex Core is configured. The accommodation and fleet modules now share these settings.,تم تهيئة نواة أبيكس. تشترك الآن وحدتا السكن والأسطول في هذه الإعدادات.
 Apex Integration Settings,إعدادات تكامل أبيكس
-Apex Settings,إعدادات Apex
+Apex Settings,إعدادات أبيكس
 Apex Setup,إعداد أبيكس
 Apex messaging gateway test message.,رسالة اختبار بوابة مراسلة Apex.
 Appearance,المظهر
@@ -447,7 +447,7 @@ Auto-Generate Beds,توليد الأسرة تلقائياً
 "Auto-assign new support tickets across the division support team (load balancing). DISABLED by default: replace the placeholder user with your real support team, then enable.",إسناد تذاكر الدعم الجديدة تلقائيًا عبر فريق دعم القسم (موازنة الحمل). معطّل افتراضيًا: استبدل المستخدم النائب بفريق الدعم الفعلي ثم فعّله.
 Auto-calculated on validate. Positive = above average; negative = below average.,يُحسب آلياً عند التحقق. الموجب = أعلى من المتوسط؛ السالب = أقل من المتوسط.
 Auto-computed sum of all payment schedule rows.,مجموع محسوب آلياً لكل أسطر جدول الدفعات.
-Auto-create Facility Asset Movement on Transfer,إنشاء حركة أصل مرفق آلياً عند النقل
+Auto-create Facility Asset Movement on Transfer,إنشاء حركة أصل منشأة آلياً عند النقل
 Auto-derived from the building's physical beds.,مشتق آلياً من الأسرّة الفعلية للمبنى.
 Auto-fetched from Building,يُجلب آلياً من المبنى
 Auto-filled from Utility Account. Adjust if different for this bill.,يُعبّأ تلقائياً من حساب الخدمة. عدّله إذا كان مختلفاً لهذه الفاتورة.
@@ -1568,7 +1568,7 @@ Facility Assets Needing Attention,أصول المنشأة التي تتطلب م
 Facility Assets by Category,أصول المنشأة حسب التصنيف
 Facility Assets by Status,أصول المنشأة حسب الحالة
 Facility Custody Item,عهدة المنشأة
-Facility Item,عنصر مرفق
+Facility Item,عنصر منشأة
 Fail,غير مجتاز
 Fail-closed: authority_unknown until enforce_gate resolves exactly one active band and the approver holds it.,الفشل الآمن: تبقى الصلاحية غير معروفة حتى تحدّد بوابة الإنفاذ شريحة نشطة واحدة بالضبط ويكون المعتمِد حائزاً لها.
 Failed,فاشل
@@ -2290,7 +2290,7 @@ Median Alert Resolve Days,وسيط أيام حل التنبيه
 Medium,متوسطة
 Message,الرسالة
 Messaging Gateway,بوابة المراسلة
-Messaging gateway is not configured yet (Apex Integration Settings).,لم يتم إعداد بوابة المراسلة بعد (إعدادات تكامل Apex).
+Messaging gateway is not configured yet (Apex Integration Settings).,لم يتم إعداد بوابة المراسلة بعد (إعدادات تكامل أبيكس).
 Meter Number,رقم العدّاد
 Meter Readings,قراءات العداد
 Meter and Sharing,العدّاد والمشاركة
@@ -2858,7 +2858,7 @@ Policy Name,اسم السياسة
 Poor,رديء
 Poor Safety Task Executions,تنفيذات مهام السلامة الضعيفة
 Populated by the procured ZATCA app; never hand-set by custom code.,يُعبّأ بواسطة تطبيق ZATCA المُشترى؛ ولا يُضبَط يدوياً بكود مخصّص أبداً.
-Portal user who executed the movement — not the Employee on the source Facility Asset Movement.,مستخدم البوابة الذي نفّذ النقل — وليس الموظف المدوَّن في مستند نقل أصل المرفق المصدر.
+Portal user who executed the movement — not the Employee on the source Facility Asset Movement.,مستخدم البوابة الذي نفّذ النقل — وليس الموظف المدوَّن في مستند نقل أصل المنشأة المصدر.
 Post-Work,بعد العمل
 Posted (memo),مُرحّل (مذكرة)
 Poster,الملصق
@@ -3079,7 +3079,7 @@ Reference Name,اسم المرجع
 Reference to the file/artifact being exported.,مرجع الملف أو المُخرَج الجاري تصديره.
 Reference to the raised Salis Payment Request. Set automatically; this DocType never posts GL.,مرجع لطلب دفع سلس المُنشأ. يُضبط آلياً؛ ولا يرحّل هذا المستند أي قيد في دفتر الأستاذ العام.
 Reference-only link to the Finance/HR Payment Request handling the actual deduction. Movement posts no payment.,رابط للمرجعية فقط إلى طلب الدفع في المالية/الموارد البشرية الذي يتولى الخصم الفعلي. الحركة لا تُنشئ أي دفعة.
-Reflected from the linked Facility Asset's maintenance.,منعكس من صيانة أصل المرفق المرتبط.
+Reflected from the linked Facility Asset's maintenance.,منعكس من صيانة أصل المنشأة المرتبط.
 Refresh,تحديث
 Refresh Board,تحديث اللوحة
 Refresh Map,تحديث الخريطة
@@ -3816,7 +3816,7 @@ Submittable: formal work order derived from a Maintenance Request.,قابل لل
 Submittable: official on-site maintenance inspection record.,قابل للاعتماد: سجل تفتيش صيانة ميداني رسمي.
 Submittable: one execution of a Scheduled Task Template. Auto-generated by the daily scheduler job.,قابل للاعتماد: تنفيذ واحد لقالب مهمة مجدولة. يُنشأ آلياً بواسطة مهمة الجدولة اليومية.
 Submittable: periodic snapshot of operational asset book values. No GL impact.,قابل للاعتماد: لقطة دورية للقيم الدفترية للأصول التشغيلية. دون أثر على دفتر الأستاذ العام.
-Submittable: records facility/operational custody articles issued to a responsible party.,قابل للاعتماد: يسجّل أصناف عهدة المرافق/التشغيل المصروفة لجهة مسؤولة.
+Submittable: records facility/operational custody articles issued to a responsible party.,قابل للاعتماد: يسجّل أصناف عهدة المنشأة/التشغيل المصروفة لجهة مسؤولة.
 Submittable: records the return of custody articles against a prior Custody Issue.,قابل للاعتماد: يسجّل إرجاع أصناف العهدة مقابل صرف عهدة سابق.
 Submitted At,وقت الإرسال
 Submitted By Me,المُقدَّمة منّي
@@ -3986,7 +3986,7 @@ The linked Custody Issue {0} must be submitted before returning.,يجب تقدي
 The linked Deduction Consent is not verified and approved.,موافقة الخصم المرتبطة غير مُتحقَّق منها ولا مُعتمَدة.
 The login the subscription was created under (the driver's session user).,الحساب الذي أُنشئ الاشتراك تحته (مستخدم جلسة السائق).
 The manifest worker this boarding state tracks.,عامل القائمة الذي تتبعه حالة الصعود هذه.
-The messaging gateway is not enabled or is missing its URL/API key. Configure it in Apex Integration Settings first.,بوابة المراسلة غير مُفعّلة أو ينقصها الرابط أو مفتاح الواجهة البرمجية. قم بإعدادها في إعدادات تكامل Apex أولاً.
+The messaging gateway is not enabled or is missing its URL/API key. Configure it in Apex Integration Settings first.,بوابة المراسلة غير مُفعّلة أو ينقصها الرابط أو مفتاح الواجهة البرمجية. قم بإعدادها في إعدادات تكامل أبيكس أولاً.
 The new expiry date must be later than the current expiry date.,يجب أن يكون تاريخ الانتهاء الجديد لاحقًا لتاريخ الانتهاء الحالي.
 "The next band-up / Owner role authority escalates to. Owner sits ABOVE the bands, outside the SoD pair, and is never a substitute checker.",الشريحة الأعلى التالية أو دور المالك الذي تُصعَّد إليه الصلاحية. ويقع المالك فوق الشرائح، خارج زوج فصل المهام، ولا يكون بديلاً عن المدقّق أبداً.
 The on-site code has expired. Ask the initiator to regenerate it.,انتهت صلاحية رمز الموقع. اطلب من المُبادر إعادة توليده.
@@ -4184,7 +4184,7 @@ Transfer {0} is not In Transit.,النقل {0} ليس قيد النقل.
 Transferred,مُحوَّل
 Transferred: {0},تمّ النقل: {0}
 Transferring…,جارٍ النقل…
-Transfers responsibility of one or more Facility Assets to a supervisor.,ينقل مسؤولية أصل مرفق واحد أو أكثر إلى مشرف.
+Transfers responsibility of one or more Facility Assets to a supervisor.,ينقل مسؤولية أصل منشأة واحد أو أكثر إلى مشرف.
 Transform,التحويل
 Transport,النقل
 Transport Fulfilment SLA,اتفاقية مستوى خدمة تنفيذ النقل
@@ -4239,7 +4239,7 @@ Tuesday,الثلاثاء
 Type,النوع
 Type a message before sending.,اكتب رسالة قبل الإرسال.
 "Type of cost being recovered from a driver or party, such as vehicle damage, fuel misuse, custody loss, or a fine, which determines the recovery basis.",نوع التكلفة المستردة من سائق أو طرف، كتلف المركبة أو إساءة استخدام الوقود أو فقدان العهدة أو مخالفة، ما يحدّد أساس الاسترداد.
-"Type of fixed facility asset being tracked, grouping surveillance, network, fire-safety, and utility equipment for inventory, maintenance, and compliance reporting.",نوع الأصل الثابت للمرفق المُتتبَّع، يجمّع معدات المراقبة والشبكات والسلامة من الحريق والمرافق لأغراض الجرد والصيانة وتقارير الامتثال.
+"Type of fixed facility asset being tracked, grouping surveillance, network, fire-safety, and utility equipment for inventory, maintenance, and compliance reporting.",نوع الأصل الثابت للمنشأة المُتتبَّع، يجمّع معدات المراقبة والشبكات والسلامة من الحريق والمرافق لأغراض الجرد والصيانة وتقارير الامتثال.
 "Type of housing inventory item, grouping furniture, appliances, bedding, kitchenware, fixtures, and equipment for stock counts and replacement planning.",نوع صنف مخزون الإسكان، يجمّع الأثاث والأجهزة والمفروشات وأدوات المطبخ والتجهيزات والمعدات لأغراض جرد المخزون وتخطيط الاستبدال.
 Typically IT Specialist,عادةً أخصائي تقنية المعلومات
 UOM,وحدة القياس
