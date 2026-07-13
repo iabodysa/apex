@@ -16,6 +16,13 @@ Access gate:
 The CSRF token is exposed (same pattern as fleet.py/driver.py) so the SPA's whitelisted
 POSTs (approve / reject) pass Frappe's CSRF guard. no_cache is set because the page renders
 per-user, live data.
+
+Controller filename note: Frappe resolves a www page's controller by replacing hyphens
+with underscores in the template basename (see TemplatePage.set_pymodule_path —
+``template_basepath.replace("-", "_") + ".py"``). The template is ``masar-supervisor.html``
+so its controller MUST be ``masar_supervisor.py`` (underscore); a hyphenated
+``masar-supervisor.py`` is never imported, ``get_context`` never runs, and the page falls
+through to the "no role" branch for EVERY user regardless of their actual roles.
 """
 
 import frappe
