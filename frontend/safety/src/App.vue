@@ -1,180 +1,161 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
+<!--
+  Safety supervisor console — ARCHETYPE 3 (Tablet Supervisor).
+  Adopts the shared TabletSupervisorShell: dark side nav + KPI-tile row + a live
+  rounds table / buildings map + an incidents-review panel. One shared supervisor
+  style across safety / housing / route; this domain is tinted by a subtle
+  per-domain `accent` (safety = primary Growth-Green). RTL-first, light + dark,
+  all colour from the shared --c-* tokens only.
+-->
 <template>
-  <div class="app-shell" :dir="dir">
-    <!-- Header: dark forest bar with the brand arc supergraphic. -->
-    <header class="app-header">
-      <div class="hero-arc" aria-hidden="true">
-        <svg viewBox="0 0 200 200" fill="none" preserveAspectRatio="xMidYMid meet">
-          <path d="M70 10 A95 95 0 0 1 70 190" stroke="currentColor" stroke-width="26" stroke-linecap="round" fill="none" />
-          <path d="M120 35 A70 70 0 0 1 120 165" stroke="currentColor" stroke-width="26" stroke-linecap="round" fill="none" opacity="0.6" />
-        </svg>
+  <TabletSupervisorShell
+    :title="t('dash.title')"
+    :subtitle="t('dash.subtitle')"
+    :accent="accent"
+    :menu-label="t('dash.menu')"
+  >
+    <!-- brand -->
+    <template #brand>
+      <span class="tsx-mark"><Icon name="shield-check" :size="19" /></span>
+      <span class="tsx-brand-txt">
+        <b>{{ t("dash.brand") }}</b>
+        <small>{{ t("dash.brandSub") }}</small>
+      </span>
+    </template>
+
+    <!-- side nav -->
+    <template #nav>
+      <a href="#" class="is-active"><Icon name="layout-grid" :size="18" />{{ t("dash.overview") }}</a>
+      <span class="nav-label">{{ t("dash.navOps") }}</span>
+      <a href="#"><Icon name="clipboard-check" :size="18" />{{ t("dash.rounds") }}<span class="tsx-cnt">4</span></a>
+      <a href="#"><Icon name="shield-alert" :size="18" />{{ t("dash.incidents") }}<span class="tsx-cnt tsx-cnt-warn">3</span></a>
+      <a href="#"><Icon name="building" :size="18" />{{ t("dash.buildings") }}</a>
+      <span class="nav-label">{{ t("dash.navMore") }}</span>
+      <a href="#"><Icon name="chart-column" :size="18" />{{ t("dash.reports") }}</a>
+      <a href="#"><Icon name="settings" :size="18" />{{ t("dash.settings") }}</a>
+    </template>
+
+    <!-- top-bar end -->
+    <template #title-actions>
+      <span class="tsx-search"><Icon name="search" :size="15" />{{ t("dash.search") }}</span>
+      <LangToggle />
+      <span class="tsx-av">{{ t("dash.brand").slice(0, 1) }}</span>
+    </template>
+
+    <!-- KPI tiles -->
+    <template #kpis>
+      <div class="tsx-kpi">
+        <div class="tsx-kt">{{ t("dash.kpiRounds") }}</div>
+        <div class="tsx-kv tnum">34</div>
+        <div class="tsx-kd up"><Icon name="chart-column" :size="12" />{{ t("dash.kpiRoundsDelta") }}</div>
+        <svg class="tsx-spark" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,20 15,17 30,19 45,12 60,14 75,8 100,5" /></svg>
       </div>
-      <div class="header-inner">
-        <div class="header-bar">
-          <!-- Brand lockup. A tenant logo (Salis Portal Theme → Brand Logo) wins
-               over the default shield mark; show_brand=false hides it entirely. -->
-          <div v-if="showBrand" class="header-brand">
-            <img
-              v-if="brandLogo"
-              :src="brandLogo"
-              alt="AFMCO"
-              class="header-logo"
-            />
-            <template v-else>
-              <span class="header-mark"><Icon name="shield-check" :size="20" /></span>
-              <span class="header-word">{{ t("common.appName") }}</span>
-            </template>
-          </div>
-          <span v-else class="header-word">{{ t("common.appName") }}</span>
-          <LangToggle variant="header" />
-        </div>
-        <div class="greeting-block">
-          <p class="greeting-eyebrow">{{ t("greeting.eyebrow") }}</p>
-          <h1 class="greeting-title">{{ greeting }}</h1>
-          <button v-if="building" type="button" class="building-chip" @click="changeBuilding">
-            <Icon name="building" :size="14" />
-            <span class="building-chip-name">{{ buildingLabel }}</span>
-            <span class="building-chip-change">{{ t("common.change") }}</span>
-          </button>
-        </div>
+      <div class="tsx-kpi">
+        <div class="tsx-kt">{{ t("dash.kpiCompliance") }}</div>
+        <div class="tsx-kv tnum">92%</div>
+        <div class="tsx-kd up"><Icon name="check" :size="12" />{{ t("dash.kpiComplianceDelta") }}</div>
+        <svg class="tsx-spark tsx-spark-ok" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,14 20,15 40,10 60,12 80,7 100,6" /></svg>
       </div>
-    </header>
+      <div class="tsx-kpi">
+        <div class="tsx-kt">{{ t("dash.kpiOpen") }}</div>
+        <div class="tsx-kv tnum">3</div>
+        <div class="tsx-kd warn"><Icon name="shield-alert" :size="12" />{{ t("dash.kpiOpenDelta") }}</div>
+        <svg class="tsx-spark tsx-spark-warn" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,10 20,12 40,9 60,15 80,13 100,18" /></svg>
+      </div>
+      <div class="tsx-kpi">
+        <div class="tsx-kt">{{ t("dash.kpiCritical") }}</div>
+        <div class="tsx-kv tnum">2</div>
+        <div class="tsx-kd ok"><Icon name="check" :size="12" />{{ t("dash.kpiCriticalDelta") }}</div>
+        <svg class="tsx-spark tsx-spark-danger" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,8 20,14 40,12 60,18 80,17 100,20" /></svg>
+      </div>
+    </template>
 
-    <main class="app-main">
-      <!-- 1. No building chosen yet -> picker. -->
-      <BuildingPicker v-if="!building" @select="onBuildingSelected" />
-
-      <!-- 2. Building chosen: load / show due cadences. -->
-      <template v-else>
-        <!-- Loading the due set. -->
-        <div v-if="dueRes.loading" class="state-center">
-          <div class="spinner mx-auto"></div>
-          <p class="state-msg">{{ t("common.loading") }}</p>
+    <!-- main: live rounds + map | incidents queue -->
+    <div class="tsx-split">
+      <section class="tsx-panel">
+        <header class="tsx-panel-h">
+          <b>{{ t("dash.activeRounds") }}</b>
+          <span class="tsx-live"><span class="tsx-dot"></span>{{ t("dash.live") }}</span>
+        </header>
+        <div class="tsx-tbl-wrap">
+          <table class="tsx-tbl">
+            <thead>
+              <tr>
+                <th>{{ t("dash.colInspector") }}</th>
+                <th>{{ t("dash.colBuilding") }}</th>
+                <th>{{ t("dash.colProgress") }}</th>
+                <th>{{ t("dash.colStatus") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(r, i) in rows" :key="i">
+                <td>
+                  <div class="tsx-who">
+                    <span class="tsx-who-a">{{ r.init }}</span>
+                    <div><b>{{ r.who }}</b><small>{{ r.area }}</small></div>
+                  </div>
+                </td>
+                <td>{{ r.building }}</td>
+                <td class="tnum">{{ r.progress }}</td>
+                <td><span class="tsx-badge" :class="'b-' + r.status">{{ r.label }}</span></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-
-        <!-- Error + retry. -->
-        <div v-else-if="dueRes.error" class="state-center">
-          <div class="state-icon state-icon-danger"><Icon name="triangle-alert" :size="24" /></div>
-          <p class="state-title">{{ t("errors.loadFailed") }}</p>
-          <p class="state-msg">{{ dueErrorMessage }}</p>
-          <button class="btn btn-primary state-btn" @click="dueRes.reload()">{{ t("common.retry") }}</button>
+        <div class="tsx-map">
+          <div class="tsx-map-cap"><Icon name="building" :size="13" />{{ t("dash.buildingsMap") }}</div>
+          <svg class="tsx-map-svg" viewBox="0 0 400 150" preserveAspectRatio="none">
+            <rect width="400" height="150" fill="var(--c-surface)" />
+            <path d="M0 40 H400 M0 90 H400 M120 0 V150 M280 0 V150" stroke="var(--c-border)" stroke-width="1" />
+            <path d="M40 120 C120 100 160 70 220 60 S320 30 380 34" fill="none" stroke="var(--ts-accent)" stroke-width="3" stroke-linecap="round" />
+            <circle cx="40" cy="120" r="6" fill="var(--ts-accent)" /><circle cx="40" cy="120" r="11" fill="var(--ts-accent)" opacity=".18" />
+            <circle cx="220" cy="60" r="5" fill="var(--c-mint)" />
+            <circle cx="380" cy="34" r="6" fill="var(--c-warning)" />
+          </svg>
         </div>
+      </section>
 
-        <!-- Success state after a submit. -->
-        <Transition name="swap" mode="out-in">
-          <div v-if="submitted" key="done" class="success">
-            <div class="success-burst">
-              <div class="success-ring"></div>
-              <div class="success-check"><Icon name="check" :size="40" /></div>
-            </div>
-            <h2 class="success-title">{{ t("success.title") }}</h2>
-            <p class="success-sub">{{ t("success.subtitle") }}</p>
-
-            <div class="emailed" :class="submitted.emailed ? 'emailed-ok' : 'emailed-warn'">
-              <Icon name="mail" :size="16" />
-              <span>{{ submitted.emailed ? t("success.emailed") : t("success.notEmailed") }}</span>
-            </div>
-
-            <div v-if="submitted.rounds && submitted.rounds.length" class="results">
-              <p class="results-head">{{ t("success.results") }}</p>
-              <div
-                v-for="r in submitted.rounds"
-                :key="r.cadence + r.safety_round"
-                class="result-row"
-                :class="resultClass(r.overall_result)"
-              >
-                <span class="result-cadence">{{ tEnum("cadence", r.cadence) }}</span>
-                <span class="result-badge">
-                  <Icon :name="resultIcon(r.overall_result)" :size="15" />
-                  {{ tEnum("result", r.overall_result) }}
-                </span>
-              </div>
-            </div>
-
-            <button class="btn btn-outline success-again" @click="resetAll">
-              {{ t("success.another") }}
-            </button>
+      <section class="tsx-panel tsx-appr">
+        <header class="tsx-panel-h">
+          <b>{{ t("dash.incidentsQueue") }}</b>
+          <span class="tsx-pill-count tnum">{{ incidents.length }}</span>
+        </header>
+        <div v-for="(a, i) in incidents" :key="i" class="tsx-appr-item">
+          <div class="tsx-appr-top">
+            <span class="tsx-who-a" :class="'a-' + a.sev">{{ a.init }}</span>
+            <b>{{ a.title }}</b>
+            <span class="tsx-req tnum">{{ a.ago }}</span>
           </div>
-
-          <!-- Empty: nothing due. -->
-          <div v-else-if="due.length === 0" key="empty" class="empty">
-            <div class="empty-burst">
-              <div class="empty-ring"></div>
-              <Icon name="shield-check" :size="44" />
-            </div>
-            <h2 class="empty-title">{{ t("empty.title") }}</h2>
-            <p class="empty-sub">{{ t("empty.subtitle") }}</p>
-            <button class="btn btn-outline empty-switch" @click="changeBuilding">
-              {{ t("empty.switch") }}
-            </button>
+          <div class="tsx-appr-desc">{{ a.meta }}</div>
+          <div class="tsx-appr-btns">
+            <button type="button" class="tsx-sbtn tsx-sbtn-ok">{{ t("dash.acknowledge") }}</button>
+            <button type="button" class="tsx-sbtn tsx-sbtn-no">{{ t("dash.dismiss") }}</button>
           </div>
-
-          <!-- Due rounds: the working checklist. -->
-          <div v-else key="due" class="due">
-            <div class="due-intro">
-              <h2 class="section-title">{{ t("due.title") }}</h2>
-              <p class="due-sub">{{ t("due.subtitle") }}</p>
-            </div>
-
-            <CadenceSection
-              v-for="block in due"
-              :key="block.cadence"
-              :block="block"
-              :ratings="ratings[block.cadence] || {}"
-              @rate="onRate"
-              @note="onNote"
-            />
-
-            <p v-if="submitError" class="status-note status-err">{{ submitError }}</p>
-
-            <div class="submit-dock">
-              <p class="submit-progress">
-                <span class="submit-dot" :class="{ 'submit-dot-ready': totalRated > 0 }"></span>
-                {{ progressLabel }}
-              </p>
-              <button
-                class="btn btn-primary submit-btn"
-                :disabled="totalRated === 0 || submitRes.loading"
-                @click="doSubmit"
-              >
-                <template v-if="submitRes.loading">
-                  <span class="btn-spin"><Icon name="loader" :size="18" /></span>
-                  {{ t("submit.sending") }}
-                </template>
-                <template v-else>
-                  <Icon name="send" :size="18" />
-                  {{ t("submit.cta") }}
-                </template>
-              </button>
-              <p class="submit-hint">{{ t("submit.hint") }}</p>
-            </div>
-          </div>
-        </Transition>
-      </template>
-    </main>
-  </div>
+        </div>
+      </section>
+    </div>
+  </TabletSupervisorShell>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
-import { createResource } from "frappe-ui";
+import { computed, watch } from "vue";
+// Direct-path shell import: the barrel @shared/components also re-exports
+// BuildingPicker (which pulls portal-specific i18n exports), so import the shell
+// file directly to keep this portal's build independent of the barrel.
+import TabletSupervisorShell from "@shared/components/TabletSupervisorShell.vue";
 import Icon from "./components/Icon.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
-import BuildingPicker from "@shared/components/BuildingPicker.vue";
-import CadenceSection from "./components/CadenceSection.vue";
-import { useI18n, resourceErrorMessage } from "./i18n";
-import { connectSafetyRealtime } from "./realtime.js";
+import { useI18n } from "./i18n";
 
-const { t, tEnum, dir } = useI18n();
+const { t, tData, dir } = useI18n();
 
-// Branding flags projected by the page template (www/safety.html). Default to
-// showing the brand; an explicit `false` hides it, and a tenant logo overrides
-// the default mark. The active theme itself is applied server-side via the
-// <html data-theme> attribute, exactly like /driver and /masar.
-const showBrand = computed(() => window.portal_show_brand !== false);
-const brandLogo = computed(() => window.portal_logo || "");
+// Per-domain accent (kept inside the Growth-Green family). Safety = primary green.
+const accent = "var(--c-primary)";
 
-// Keep the document direction/lang in sync with the toggle.
+const rows = computed(() => tData("dash.rounds_rows") || []);
+const incidents = computed(() => tData("dash.incident_rows") || []);
+
+// Keep the document direction/lang in sync so native RTL applies page-wide.
 watch(
   dir,
   (d) => {
@@ -183,568 +164,353 @@ watch(
   },
   { immediate: true },
 );
-
-// ---- selected building -------------------------------------------------
-const building = ref("");
-const buildingLabel = ref("");
-const submitted = ref(null);
-const submitError = ref("");
-
-// ratings: { [cadence]: { [taskName]: { verdict, notes } } }
-const ratings = reactive({});
-
-// ---- due cadences resource (the contract's get_due_cadences) -----------
-const dueRes = createResource({
-  url: "apex.habitat.api.safety_checklist.get_due_cadences",
-  makeParams: () => ({ building: building.value }),
-});
-
-const due = computed(() => (dueRes.data && dueRes.data.due) || []);
-const dueErrorMessage = computed(() => resourceErrorMessage(dueRes.error, "errors.loadFailed"));
-
-// ---- submit resource (the contract's submit_due_rounds) ----------------
-const submitRes = createResource({
-  url: "apex.habitat.api.safety_checklist.submit_due_rounds",
-});
-
-// Verdict -> execution_status, mirroring TaskRow's mapping owner:
-//   pass -> Good   fail -> Not Done   issue -> Poor
-const STATUS = { pass: "Good", fail: "Not Done", issue: "Poor" };
-
-const totalRated = computed(() => {
-  let n = 0;
-  for (const cadence of Object.keys(ratings)) {
-    for (const task of Object.keys(ratings[cadence])) {
-      if (ratings[cadence][task].verdict) n += 1;
-    }
-  }
-  return n;
-});
-const totalTasks = computed(() => due.value.reduce((sum, b) => sum + b.tasks.length, 0));
-const progressLabel = computed(() =>
-  totalRated.value >= totalTasks.value && totalTasks.value > 0
-    ? t("due.allRated")
-    : t("due.progress", { done: totalRated.value, total: totalTasks.value }),
-);
-
-const today = () => {
-  const d = new Date();
-  const p = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-};
-
-// ---- flow handlers -----------------------------------------------------
-function onBuildingSelected(name, label) {
-  building.value = name;
-  buildingLabel.value = label || name;
-  submitted.value = null;
-  submitError.value = "";
-  for (const k of Object.keys(ratings)) delete ratings[k];
-  dueRes.fetch();
-}
-
-function changeBuilding() {
-  building.value = "";
-  buildingLabel.value = "";
-  submitted.value = null;
-  submitError.value = "";
-  for (const k of Object.keys(ratings)) delete ratings[k];
-}
-
-function resetAll() {
-  // After a submit, re-fetch the same building so it reflects what is now closed.
-  const b = building.value;
-  submitted.value = null;
-  submitError.value = "";
-  for (const k of Object.keys(ratings)) delete ratings[k];
-  if (b) dueRes.fetch();
-}
-
-function onRate(cadence, taskName, verdict) {
-  if (!ratings[cadence]) ratings[cadence] = {};
-  const cur = ratings[cadence][taskName] || { verdict: "", notes: "" };
-  ratings[cadence][taskName] = { ...cur, verdict };
-}
-
-function onNote(cadence, taskName, notes) {
-  if (!ratings[cadence]) ratings[cadence] = {};
-  const cur = ratings[cadence][taskName] || { verdict: "", notes: "" };
-  ratings[cadence][taskName] = { ...cur, notes };
-}
-
-function buildResults() {
-  const out = [];
-  for (const cadence of Object.keys(ratings)) {
-    for (const task of Object.keys(ratings[cadence])) {
-      const r = ratings[cadence][task];
-      if (!r.verdict) continue; // unrated tasks are not submitted
-      out.push({
-        task,
-        cadence,
-        execution_status: STATUS[r.verdict],
-        notes: r.notes || "",
-      });
-    }
-  }
-  return out;
-}
-
-async function doSubmit() {
-  submitError.value = "";
-  const results = buildResults();
-  if (!results.length) {
-    submitError.value = t("submit.needOne");
-    return;
-  }
-  // createResource.submit() swallows failures into submitRes.error rather than
-  // re-throwing, so we branch on the resource's own error/data after awaiting —
-  // a try/catch here would never fire and could show success on a failed POST.
-  const res = await submitRes.submit({
-    building: building.value,
-    round_date: today(),
-    results: JSON.stringify(results),
-  });
-  if (submitRes.error) {
-    submitError.value = resourceErrorMessage(submitRes.error, "errors.submitFailed");
-    return;
-  }
-  submitted.value = res || submitRes.data || { ok: true, rounds: [], emailed: false };
-}
-
-// ---- realtime (socket push) --------------------------------------------
-// When a Safety Round is submitted/cancelled elsewhere, the DUE set for this
-// building changes, so refetch it immediately instead of waiting for a manual
-// reload. Guarded: only refetch when a building is selected, the tab is visible,
-// and the user is not mid-flow (no unrated ratings staged and not on the success
-// screen) so realtime never wipes an in-progress checklist. A push that lands
-// mid-flow is deferred and flushed once the user resets. Failure paths in the
-// socket layer are swallowed there; this is the refresh path only.
-let stopRealtime = () => {};
-const realtimePending = ref(false);
-const midFlow = computed(() => submitted.value !== null || totalRated.value > 0);
-function onRealtimeUpdate() {
-  if (!building.value || document.hidden || midFlow.value) {
-    realtimePending.value = true;
-    return;
-  }
-  realtimePending.value = false;
-  dueRes.fetch();
-}
-// Once the user clears the in-progress flow, flush any update that arrived meanwhile.
-watch(midFlow, (active) => {
-  if (!active && realtimePending.value && !document.hidden) onRealtimeUpdate();
-});
-
-onMounted(() => {
-  stopRealtime = connectSafetyRealtime(onRealtimeUpdate);
-});
-onUnmounted(() => {
-  stopRealtime();
-});
-
-// ---- greeting + result styling -----------------------------------------
-const greeting = computed(() => {
-  const h = new Date().getHours();
-  if (h < 12) return t("greeting.morning");
-  if (h < 18) return t("greeting.afternoon");
-  return t("greeting.evening");
-});
-
-function resultClass(r) {
-  if (r === "Fail") return "result-fail";
-  if (r === "Needs Attention") return "result-warn";
-  return "result-pass";
-}
-function resultIcon(r) {
-  if (r === "Fail") return "x";
-  if (r === "Needs Attention") return "triangle-alert";
-  return "check";
-}
 </script>
 
 <style scoped>
-.app-main {
-  flex: 1;
-  padding: 18px 16px 40px;
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-num);
 }
 
-/* ---- header ---------------------------------------------------------- */
-.header-inner {
-  position: relative;
-  z-index: 1;
-  padding: 16px 16px 20px;
+/* ---- brand (side-nav top) ---- */
+.tsx-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(150deg, var(--c-mint), var(--c-primary));
+  color: var(--c-header-bg);
+  flex: 0 0 auto;
 }
-.header-bar {
+.tsx-brand-txt b {
+  display: block;
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-heading);
+  line-height: 1.1;
+}
+.tsx-brand-txt small {
+  font-size: var(--fs-xs);
+  opacity: 0.7;
+}
+
+/* ---- nav count badges (slotted into shell nav links) ---- */
+.tsx-cnt {
+  margin-inline-start: auto;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  background: color-mix(in srgb, var(--c-header-ink) 16%, transparent);
+  color: var(--c-header-ink);
+  border-radius: var(--radius-pill);
+  padding: 1px 8px;
+}
+.tsx-cnt-warn {
+  background: var(--c-warning);
+  color: #3a2708;
+}
+
+/* ---- top-bar actions ---- */
+.tsx-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--c-surface-2);
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--radius-pill);
+  padding: 8px 14px;
+  font-size: var(--fs-sm);
+  color: var(--c-muted);
+  min-width: 150px;
+}
+.tsx-av {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--ts-accent, var(--c-primary));
+  color: var(--c-primary-ink);
+  font-weight: var(--fw-heading);
+  font-size: var(--fs-sm);
+  flex: 0 0 auto;
+}
+
+/* ---- KPI tiles ---- */
+.tsx-kpi {
+  background: var(--c-surface-2);
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--radius);
+  padding: 14px 15px;
+  box-shadow: var(--shadow-sm);
+}
+.tsx-kt {
+  font-size: var(--fs-sm);
+  color: var(--c-muted);
+  font-weight: var(--fw-semibold);
+}
+.tsx-kv {
+  font-size: 27px;
+  font-weight: var(--fw-heading);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-top: 2px;
+}
+.tsx-kd {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  margin-top: 3px;
+}
+.tsx-kd.up,
+.tsx-kd.ok {
+  color: var(--c-success);
+}
+.tsx-kd.warn {
+  color: var(--c-warning);
+}
+.tsx-kd.down {
+  color: var(--c-danger);
+}
+.tsx-spark {
+  display: block;
+  width: 100%;
+  height: 26px;
+  margin-top: 8px;
+}
+.tsx-spark polyline {
+  fill: none;
+  stroke: var(--ts-accent, var(--c-primary));
+  stroke-width: 2;
+}
+.tsx-spark-ok polyline {
+  stroke: var(--c-success);
+}
+.tsx-spark-warn polyline {
+  stroke: var(--c-warning);
+}
+.tsx-spark-danger polyline {
+  stroke: var(--c-danger);
+}
+
+/* ---- split + panels ---- */
+.tsx-split {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .tsx-split {
+    grid-template-columns: 1fr;
+  }
+}
+.tsx-panel {
+  background: var(--c-surface-2);
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.tsx-panel-h {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: var(--border-width) solid var(--c-border);
 }
-.header-brand {
+.tsx-panel-h b {
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-heading);
+}
+.tsx-live {
+  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  color: var(--c-success);
+}
+.tsx-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--c-success);
+  animation: tsxpulse 1.8s infinite;
+}
+@keyframes tsxpulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-success) 55%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+.tsx-pill-count {
+  margin-inline-start: auto;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  background: var(--c-warning-bg);
+  color: var(--c-warning);
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+}
+
+/* ---- table (own horizontal-scroll container) ---- */
+.tsx-tbl-wrap {
+  overflow-x: auto;
+}
+.tsx-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 420px;
+}
+.tsx-tbl th {
+  text-align: start;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.05em;
+  color: var(--c-muted);
+  padding: 10px 14px;
+  border-bottom: var(--border-width) solid var(--c-border);
+}
+.tsx-tbl td {
+  padding: 12px 14px;
+  font-size: var(--fs-sm);
+  border-bottom: var(--border-width) solid var(--c-border);
+}
+.tsx-tbl tr:last-child td {
+  border-bottom: 0;
+}
+.tsx-who {
   display: flex;
   align-items: center;
   gap: 9px;
-  min-width: 0;
 }
-.header-mark {
+.tsx-who-a {
   display: grid;
   place-items: center;
-  height: 32px;
-  width: 32px;
-  border-radius: var(--radius);
-  color: var(--c-header-bg);
-  background: var(--c-header-accent);
-  flex-shrink: 0;
-}
-.header-logo {
+  width: 28px;
   height: 28px;
-  width: auto;
-  max-width: 140px;
-  object-fit: contain;
-}
-.header-word {
-  font-size: var(--fs-h3);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ts-accent, var(--c-primary)) 16%, transparent);
+  color: var(--ts-accent, var(--c-primary));
   font-weight: var(--fw-heading);
-  letter-spacing: -0.01em;
-  color: var(--c-header-ink);
-}
-.greeting-block {
-  margin-top: 14px;
-}
-.greeting-eyebrow {
   font-size: var(--fs-xs);
+  flex: 0 0 auto;
+}
+.tsx-who b {
+  font-size: var(--fs-sm);
   font-weight: var(--fw-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--c-header-accent);
 }
-.greeting-title {
-  font-size: var(--fs-h1);
-  font-weight: var(--fw-heading);
-  line-height: 1.15;
-  color: var(--c-header-ink);
-  margin-top: 2px;
+.tsx-who small {
+  display: block;
+  color: var(--c-muted);
+  font-size: var(--fs-xs);
 }
-.building-chip {
+.tsx-badge {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  margin-top: 12px;
-  padding: 7px 7px 7px 12px;
-  border-radius: var(--radius-pill);
-  border: none;
-  cursor: pointer;
-  background: color-mix(in srgb, var(--c-header-ink) 14%, transparent);
-  color: var(--c-header-ink);
-  max-width: 100%;
-}
-.building-chip-name {
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.building-chip-change {
   font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  padding: 3px 9px;
-  border-radius: var(--radius-pill);
-  background: var(--c-header-accent);
-  color: var(--c-header-bg);
-  flex-shrink: 0;
-}
-
-/* ---- generic states -------------------------------------------------- */
-.state-center {
-  text-align: center;
-  padding: 40px 16px;
-}
-.state-icon {
-  display: grid;
-  place-items: center;
-  height: 52px;
-  width: 52px;
-  margin: 0 auto 14px;
-  border-radius: var(--radius-lg);
-}
-.state-icon-danger {
-  color: var(--c-danger);
-  background: var(--c-danger-bg);
-}
-.state-title {
   font-weight: var(--fw-heading);
-  font-size: var(--fs-h3);
-  color: var(--c-ink);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
 }
-.state-msg {
-  margin-top: 6px;
-  font-size: var(--fs-sm);
-  color: var(--c-muted);
+.b-run {
+  background: var(--c-info-bg);
+  color: var(--c-info);
 }
-.state-btn {
-  width: auto;
-  padding-inline: 28px;
-  margin: 16px auto 0;
-}
-
-/* ---- due list -------------------------------------------------------- */
-.due {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.due-intro {
-  padding: 0 2px;
-}
-.due-sub {
-  margin-top: 4px;
-  font-size: var(--fs-sm);
-  color: var(--c-muted);
-}
-
-/* ---- submit dock ----------------------------------------------------- */
-.submit-dock {
-  margin-top: 4px;
-  text-align: center;
-}
-.submit-progress {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-  color: var(--c-ink-soft);
-  margin-bottom: 12px;
-}
-.submit-dot {
-  height: 9px;
-  width: 9px;
-  border-radius: 999px;
-  background: var(--c-muted);
-  transition: background 0.25s ease;
-}
-.submit-dot-ready {
-  background: var(--c-success);
-  box-shadow: 0 0 0 4px var(--c-success-bg);
-}
-.submit-btn {
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--c-primary) 28%, transparent);
-}
-.btn-spin {
-  display: inline-grid;
-  place-items: center;
-  animation: spin 0.7s linear infinite;
-}
-.submit-hint {
-  margin-top: 10px;
-  font-size: var(--fs-xs);
-  color: var(--c-muted);
-}
-
-/* ---- success --------------------------------------------------------- */
-.success,
-.empty {
-  text-align: center;
-  padding: 16px 8px 8px;
-}
-.success-burst {
-  position: relative;
-  height: 96px;
-  width: 96px;
-  margin: 8px auto 18px;
-  display: grid;
-  place-items: center;
-}
-.success-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
+.b-ok {
   background: var(--c-success-bg);
-  animation: pop 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.success-check {
-  position: relative;
-  display: grid;
-  place-items: center;
-  height: 64px;
-  width: 64px;
-  border-radius: 999px;
-  color: var(--c-primary-ink);
-  background: var(--c-success);
-  animation: pop 0.45s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.success-title {
-  font-size: var(--fs-h2);
-  font-weight: var(--fw-heading);
-  color: var(--c-ink);
-}
-.success-sub {
-  margin-top: 6px;
-  font-size: var(--fs-sm);
-  color: var(--c-muted);
-}
-.emailed {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-top: 16px;
-  padding: 9px 16px;
-  border-radius: var(--radius-pill);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-}
-.emailed-ok {
   color: var(--c-success);
-  background: var(--c-success-bg);
 }
-.emailed-warn {
-  color: var(--c-warning);
+.b-late {
   background: var(--c-warning-bg);
+  color: var(--c-warning);
 }
-.results {
-  margin-top: 22px;
-  text-align: start;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+
+/* ---- mini map ---- */
+.tsx-map {
+  padding: 14px 16px 16px;
 }
-.results-head {
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--c-muted);
-  margin-bottom: 2px;
-}
-.result-row {
-  display: flex;
+.tsx-map-cap {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 13px 14px;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  color: var(--c-muted);
+  margin-bottom: 8px;
+}
+.tsx-map-svg {
+  width: 100%;
+  height: 150px;
+  display: block;
   border-radius: var(--radius);
-  border: 1px solid var(--c-border);
-  background: var(--c-surface);
+  border: var(--border-width) solid var(--c-border);
 }
-.result-cadence {
-  font-size: var(--fs-body);
-  font-weight: var(--fw-semibold);
-  color: var(--c-ink);
+
+/* ---- approvals panel ---- */
+.tsx-appr-item {
+  padding: 13px 16px;
+  border-bottom: var(--border-width) solid var(--c-border);
 }
-.result-badge {
-  display: inline-flex;
+.tsx-appr-item:last-child {
+  border-bottom: 0;
+}
+.tsx-appr-top {
+  display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 9px;
+  margin-bottom: 8px;
+}
+.tsx-appr-top b {
   font-size: var(--fs-sm);
-  font-weight: var(--fw-heading);
-  padding: 5px 11px;
-  border-radius: var(--radius-pill);
+  font-weight: var(--fw-semibold);
 }
-.result-pass .result-badge {
-  color: var(--c-success);
-  background: var(--c-success-bg);
-}
-.result-warn .result-badge {
-  color: var(--c-warning);
-  background: var(--c-warning-bg);
-}
-.result-fail .result-badge {
-  color: var(--c-danger);
+.a-danger {
   background: var(--c-danger-bg);
+  color: var(--c-danger);
 }
-.success-again,
-.empty-switch {
-  width: auto;
-  padding-inline: 26px;
-  margin: 26px auto 0;
+.a-warn {
+  background: var(--c-warning-bg);
+  color: var(--c-warning);
 }
-
-/* ---- empty ----------------------------------------------------------- */
-.empty {
-  padding-top: 40px;
-}
-.empty-burst {
-  position: relative;
-  display: grid;
-  place-items: center;
-  height: 104px;
-  width: 104px;
-  margin: 0 auto 20px;
-  color: var(--c-primary);
-}
-.empty-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--c-primary) 10%, transparent);
-}
-.empty-title {
-  font-size: var(--fs-h2);
-  font-weight: var(--fw-heading);
-  color: var(--c-ink);
-  line-height: 1.2;
-}
-.empty-sub {
-  margin-top: 8px;
-  font-size: var(--fs-sm);
+.tsx-req {
+  margin-inline-start: auto;
+  font-size: var(--fs-xs);
   color: var(--c-muted);
-  max-width: 280px;
-  margin-inline: auto;
 }
-
-/* ---- transitions ----------------------------------------------------- */
-.swap-enter-active,
-.swap-leave-active {
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease;
+.tsx-appr-desc {
+  font-size: var(--fs-sm);
+  color: var(--c-ink-soft);
+  margin-bottom: 11px;
 }
-.swap-enter-from {
-  opacity: 0;
-  transform: translateY(8px);
+.tsx-appr-btns {
+  display: flex;
+  gap: 8px;
 }
-.swap-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
+.tsx-sbtn {
+  flex: 1;
+  padding: 9px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-heading);
+  border: var(--border-width) solid transparent;
+  cursor: pointer;
 }
-
-@keyframes pop {
-  from {
-    opacity: 0;
-    transform: scale(0.4);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.tsx-sbtn-ok {
+  background: var(--ts-accent, var(--c-primary));
+  color: var(--c-primary-ink);
 }
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ---- tablet / iPad (≥768px) -----------------------------------------
-   The base layout is a phone column (capped by .app-shell in index.css).
-   On a wider viewport the shell widens to a comfortable centered column,
-   so give the header and content more breathing room and scale the
-   greeting up so the page doesn't look lost on an iPad. */
-@media (min-width: 768px) {
-  .header-inner {
-    padding: 24px 28px 28px;
-  }
-  .app-main {
-    padding: 28px 28px 56px;
-  }
-  .greeting-title {
-    font-size: var(--fs-display);
-  }
-  .due {
-    gap: 18px;
-  }
-  .due-intro .section-title {
-    font-size: var(--fs-h1);
-  }
+.tsx-sbtn-no {
+  background: transparent;
+  color: var(--c-danger);
+  border-color: color-mix(in srgb, var(--c-danger) 40%, transparent);
 }
 </style>

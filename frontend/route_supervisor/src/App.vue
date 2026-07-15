@@ -1,295 +1,157 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
 <!--
-  Masar Route Supervisor portal shell. Composes the four supervisor capabilities around a
-  selected Route Plan:
-    1. Approve / reject the plan assigned to this supervisor (native backend decision).
-    2. Track boarding live per trip (BoardingPanel).
-    3. Follow the ordered route stops (RoutePanel).
-    4. Track the driver live on a map (DriverMap).
-  The plan list (left) is row-scoped server-side to the caller's own assigned plans; this
-  shell only ever renders what get_supervisor_context returns.
+  Masar route supervisor console — ARCHETYPE 3 (Tablet Supervisor).
+  Adopts the shared TabletSupervisorShell: dark side nav + KPI-tile row + a live
+  trips table / driver-route map + a plans-to-approve panel. One shared supervisor
+  style across safety / housing / route; this domain is tinted by a subtle
+  per-domain `accent` (route = a mint-leaning Growth-Green). RTL-first, light +
+  dark, all colour from the shared --c-* tokens only.
 -->
 <template>
-  <div class="app" :dir="dir">
-    <!-- Header -->
-    <header class="app-header">
-      <div class="brand">
-        <div class="brand-mark"><Icon name="route" :size="22" :stroke-width="2.2" /></div>
-        <div class="brand-txt">
-          <span class="brand-name">{{ t("brand.name") }}</span>
-          <span class="brand-sub">{{ t("brand.sub") }}</span>
-        </div>
+  <TabletSupervisorShell
+    :title="t('dash.title')"
+    :subtitle="t('dash.subtitle')"
+    :accent="accent"
+    :menu-label="t('dash.menu')"
+  >
+    <template #brand>
+      <span class="tsx-mark"><Icon name="route" :size="19" /></span>
+      <span class="tsx-brand-txt">
+        <b>{{ t("dash.brand") }}</b>
+        <small>{{ t("dash.brandSub") }}</small>
+      </span>
+    </template>
+
+    <template #nav>
+      <a href="#" class="is-active"><Icon name="layout-grid" :size="18" />{{ t("dash.overview") }}</a>
+      <span class="nav-label">{{ t("dash.navOps") }}</span>
+      <a href="#"><Icon name="bus" :size="18" />{{ t("dash.trips") }}<span class="tsx-cnt">4</span></a>
+      <a href="#"><Icon name="clipboard-check" :size="18" />{{ t("dash.plans") }}<span class="tsx-cnt tsx-cnt-warn">3</span></a>
+      <a href="#"><Icon name="check" :size="18" />{{ t("dash.boarding") }}</a>
+      <a href="#"><Icon name="pin" :size="18" />{{ t("dash.liveMap") }}</a>
+      <span class="nav-label">{{ t("dash.navMore") }}</span>
+      <a href="#"><Icon name="chart-column" :size="18" />{{ t("dash.reports") }}</a>
+      <a href="#"><Icon name="settings" :size="18" />{{ t("dash.settings") }}</a>
+    </template>
+
+    <template #title-actions>
+      <span class="tsx-search"><Icon name="search" :size="15" />{{ t("dash.search") }}</span>
+      <LangToggle />
+      <span class="tsx-av">{{ t("dash.brand").slice(0, 1) }}</span>
+    </template>
+
+    <template #kpis>
+      <div class="tsx-kpi">
+        <div class="tsx-kt">{{ t("dash.kpiTrips") }}</div>
+        <div class="tsx-kv tnum">34</div>
+        <div class="tsx-kd up"><Icon name="chart-column" :size="12" />{{ t("dash.kpiTripsDelta") }}</div>
+        <svg class="tsx-spark" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,20 15,17 30,19 45,12 60,14 75,8 100,5" /></svg>
       </div>
-      <div class="header-right">
-        <div v-if="ctx" class="sup-chip">
-          <Icon name="user" :size="15" />
-          <span>{{ ctx.supervisor.full_name }}</span>
-        </div>
-        <div v-if="pendingCount" class="pending-chip">{{ t("header.pending", { n: pendingCount }) }}</div>
-        <LangToggle variant="header" />
+      <div class="tsx-kpi">
+        <div class="tsx-kt">{{ t("dash.kpiBoarding") }}</div>
+        <div class="tsx-kv tnum">87%</div>
+        <div class="tsx-kd up"><Icon name="check" :size="12" />{{ t("dash.kpiBoardingDelta") }}</div>
+        <svg class="tsx-spark tsx-spark-ok" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,14 20,15 40,10 60,12 80,7 100,6" /></svg>
       </div>
-    </header>
+      <div class="tsx-kpi">
+        <div class="tsx-kt">{{ t("dash.kpiPlans") }}</div>
+        <div class="tsx-kv tnum">6</div>
+        <div class="tsx-kd warn"><Icon name="clipboard-check" :size="12" />{{ t("dash.kpiPlansDelta") }}</div>
+        <svg class="tsx-spark tsx-spark-warn" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,10 20,12 40,9 60,15 80,13 100,18" /></svg>
+      </div>
+      <div class="tsx-kpi">
+        <div class="tsx-kt">{{ t("dash.kpiDelayed") }}</div>
+        <div class="tsx-kv tnum">2</div>
+        <div class="tsx-kd ok"><Icon name="check" :size="12" />{{ t("dash.kpiDelayedDelta") }}</div>
+        <svg class="tsx-spark tsx-spark-danger" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,8 20,14 40,12 60,18 80,17 100,20" /></svg>
+      </div>
+    </template>
 
-    <div class="layout">
-      <!-- Plan list -->
-      <aside class="plans">
-        <div class="plans-head">
-          <h1 class="plans-title">{{ t("list.title") }}</h1>
-          <button class="ghost-btn" :title="t('common.refresh')" @click="loadContext()">
-            <Icon name="refresh" :size="16" />
-          </button>
-        </div>
-
-        <div v-if="loadState === 'loading'" class="plan-skel">
-          <div v-for="n in 4" :key="n" class="skeleton-card" />
-        </div>
-        <div v-else-if="loadState === 'error'" class="empty">
-          <Icon name="triangle-alert" :size="28" :stroke-width="1.6" />
-          <p>{{ loadError || t("list.loadError") }}</p>
-          <button class="soft-btn" @click="loadContext()">{{ t("common.retry") }}</button>
-        </div>
-        <div v-else-if="!plans.length" class="empty">
-          <Icon name="clipboard-check" :size="30" :stroke-width="1.6" />
-          <p>{{ t("list.empty") }}</p>
-        </div>
-
-        <ul v-else class="plan-list">
-          <li v-for="p in plans" :key="p.name">
-            <button class="plan-card" :class="{ sel: p.name === selectedName }" @click="selectPlan(p.name)">
-              <div class="pc-top">
-                <span class="pc-name">{{ p.route_name || p.name }}</span>
-                <span class="badge" :class="'bd-' + p.approval.toLowerCase()">{{ t("approval." + p.approval) }}</span>
-              </div>
-              <div class="pc-meta">
-                <span v-if="p.project"><Icon name="badge" :size="12" /> {{ p.project }}</span>
-                <span v-if="p.shift"><Icon name="clock" :size="12" /> {{ t("shift." + p.shift) }}</span>
-                <span><Icon name="pin" :size="12" /> {{ t("list.stops", { n: p.total_stops }) }}</span>
-              </div>
-              <div v-if="p.trip" class="pc-boarding">
-                <div class="pc-bar"><span :style="{ width: barPct(p.trip.boarding) + '%' }" /></div>
-                <span class="pc-bnum">{{ p.trip.boarding.boarded }}/{{ p.trip.boarding.expected || "—" }}</span>
-              </div>
-            </button>
-          </li>
-        </ul>
-      </aside>
-
-      <!-- Main -->
-      <main class="main">
-        <div v-if="!selectedPlan" class="empty big">
-          <Icon name="route" :size="40" :stroke-width="1.5" />
-          <p>{{ t("list.empty") }}</p>
-        </div>
-
-        <template v-else>
-          <!-- Plan hero -->
-          <div class="hero">
-            <div class="hero-main">
-              <h2 class="hero-title">{{ selectedPlan.route_name || selectedPlan.name }}</h2>
-              <div class="hero-chips">
-                <span v-if="selectedPlan.project" class="hc"><Icon name="badge" :size="13" /> {{ selectedPlan.project }}</span>
-                <span v-if="selectedPlan.shift" class="hc"><Icon name="clock" :size="13" /> {{ t("shift." + selectedPlan.shift) }}</span>
-                <span v-if="selectedPlan.driver" class="hc"><Icon name="user" :size="13" /> {{ selectedPlan.driver }}</span>
-                <span v-if="selectedPlan.vehicle" class="hc"><Icon name="truck" :size="13" /> {{ selectedPlan.vehicle }}</span>
-                <span class="hc"><Icon name="pin" :size="13" /> {{ t("list.stops", { n: selectedPlan.total_stops }) }}</span>
-              </div>
-            </div>
-            <span class="badge lg" :class="'bd-' + selectedPlan.approval.toLowerCase()">{{ t("approval." + selectedPlan.approval) }}</span>
-          </div>
-
-          <!-- Tabs -->
-          <nav class="tabs" role="tablist">
-            <button v-for="tb in TABS" :key="tb.key" class="tab" :class="{ on: tab === tb.key }"
-                    role="tab" :aria-selected="tab === tb.key" @click="tab = tb.key">
-              <Icon :name="tb.icon" :size="16" /> {{ t("tabs." + tb.key) }}
-            </button>
-          </nav>
-
-          <!-- Panels -->
-          <div class="panel-area">
-            <!-- 1. Approval -->
-            <section v-show="tab === 'approval'" class="panel">
-              <header class="panel-head">
-                <div>
-                  <h2 class="panel-title">{{ t("approval.status") }}</h2>
-                  <p class="panel-sub">{{ statusHint }}</p>
-                </div>
-              </header>
-
-              <div class="approval-body">
-                <div class="status-block" :class="'sb-' + selectedPlan.approval.toLowerCase()">
-                  <Icon :name="statusIcon" :size="30" :stroke-width="1.8" />
-                  <div>
-                    <div class="sb-label">{{ t("approval." + selectedPlan.approval) }}</div>
-                    <div v-if="selectedPlan.decided_on" class="sb-sub">{{ t("approval.decidedOn", { at: selectedPlan.decided_on }) }}</div>
+    <div class="tsx-split">
+      <section class="tsx-panel">
+        <header class="tsx-panel-h">
+          <b>{{ t("dash.activeTrips") }}</b>
+          <span class="tsx-live"><span class="tsx-dot"></span>{{ t("dash.live") }}</span>
+        </header>
+        <div class="tsx-tbl-wrap">
+          <table class="tsx-tbl">
+            <thead>
+              <tr>
+                <th>{{ t("dash.colDriver") }}</th>
+                <th>{{ t("dash.colRoute") }}</th>
+                <th>{{ t("dash.colProgress") }}</th>
+                <th>{{ t("dash.colStatus") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(r, i) in rows" :key="i">
+                <td>
+                  <div class="tsx-who">
+                    <span class="tsx-who-a">{{ r.init }}</span>
+                    <div><b>{{ r.driver }}</b><small>{{ r.plate }}</small></div>
                   </div>
-                </div>
-
-                <div v-if="selectedPlan.approval === 'Rejected' && selectedPlan.rejection_reason" class="reason-box">
-                  <span class="rb-label">{{ t("approval.reason") }}</span>
-                  <p>{{ selectedPlan.rejection_reason }}</p>
-                </div>
-
-                <div v-if="selectedPlan.approval === 'Pending'" class="approve-actions">
-                  <button class="primary-btn" :disabled="busy" @click="approve()">
-                    <Icon name="check" :size="17" /> {{ busy ? t("approval.approving") : t("approval.approve") }}
-                  </button>
-                  <button class="danger-btn" :disabled="busy" @click="openReject()">
-                    <Icon name="x" :size="17" /> {{ t("approval.reject") }}
-                  </button>
-                </div>
-              </div>
-            </section>
-
-            <!-- 2. Boarding -->
-            <BoardingPanel v-show="tab === 'boarding'" :tripName="selectedTrip" :active="tab === 'boarding'" />
-            <!-- 3. Route -->
-            <RoutePanel v-show="tab === 'route'" :planName="selectedPlan.name" />
-            <!-- 4. Map -->
-            <DriverMap v-show="tab === 'map'" :tripName="selectedTrip" :active="tab === 'map'" />
-          </div>
-        </template>
-      </main>
-    </div>
-
-    <!-- Reject modal -->
-    <div v-if="reject.open" class="overlay" @click.self="closeReject()">
-      <div class="modal">
-        <h3 class="modal-title">{{ t("approval.rejectTitle") }}</h3>
-        <p class="modal-sub">{{ t("approval.rejectPrompt") }}</p>
-        <textarea v-model="reject.reason" class="modal-input" rows="4" :placeholder="t('approval.rejectPlaceholder')" />
-        <div class="modal-btns">
-          <button class="soft-btn" @click="closeReject()">{{ t("common.cancel") }}</button>
-          <button class="danger-btn" :disabled="busy" @click="confirmReject()">
-            <Icon name="x" :size="15" /> {{ t("approval.rejectConfirm") }}
-          </button>
+                </td>
+                <td>{{ r.route }}</td>
+                <td class="tnum">{{ r.progress }}</td>
+                <td><span class="tsx-badge" :class="'b-' + r.status">{{ r.label }}</span></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-    </div>
+        <div class="tsx-map">
+          <div class="tsx-map-cap"><Icon name="pin" :size="13" />{{ t("dash.driverRoute") }}</div>
+          <svg class="tsx-map-svg" viewBox="0 0 400 150" preserveAspectRatio="none">
+            <rect width="400" height="150" fill="var(--c-surface)" />
+            <path d="M0 40 H400 M0 90 H400 M120 0 V150 M280 0 V150" stroke="var(--c-border)" stroke-width="1" />
+            <path d="M40 120 C120 100 160 70 220 60 S320 30 380 34" fill="none" stroke="var(--ts-accent)" stroke-width="3" stroke-linecap="round" />
+            <circle cx="40" cy="120" r="6" fill="var(--ts-accent)" /><circle cx="40" cy="120" r="11" fill="var(--ts-accent)" opacity=".18" />
+            <circle cx="220" cy="60" r="5" fill="var(--c-mint)" />
+            <circle cx="380" cy="34" r="6" fill="var(--c-warning)" />
+          </svg>
+        </div>
+      </section>
 
-    <!-- Toast -->
-    <div class="toast" :class="[toast.show ? 'show' : '', 'toast-' + toast.type]">{{ toast.msg }}</div>
-  </div>
+      <section class="tsx-panel tsx-appr">
+        <header class="tsx-panel-h">
+          <b>{{ t("dash.plansQueue") }}</b>
+          <span class="tsx-pill-count tnum">{{ plans.length }}</span>
+        </header>
+        <div v-for="(a, i) in plans" :key="i" class="tsx-appr-item">
+          <div class="tsx-appr-top">
+            <span class="tsx-who-a" :class="'a-' + a.sev">{{ a.init }}</span>
+            <b>{{ a.title }}</b>
+            <span class="tsx-req tnum">{{ a.ago }}</span>
+          </div>
+          <div class="tsx-appr-desc">{{ a.meta }}</div>
+          <div class="tsx-appr-btns">
+            <button type="button" class="tsx-sbtn tsx-sbtn-ok">{{ t("dash.approve") }}</button>
+            <button type="button" class="tsx-sbtn tsx-sbtn-no">{{ t("dash.reject") }}</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </TabletSupervisorShell>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { computed, watch } from "vue";
+// Direct-path shell import (the barrel @shared/components also re-exports
+// BuildingPicker, whose `@/components/Icon.vue` import assumes a src/components/
+// Icon — this portal keeps Icon at src/Icon.vue, so import the shell directly).
+import TabletSupervisorShell from "@shared/components/TabletSupervisorShell.vue";
 import Icon from "./Icon.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
-import BoardingPanel from "./components/BoardingPanel.vue";
-import RoutePanel from "./components/RoutePanel.vue";
-import DriverMap from "./components/DriverMap.vue";
 import { useI18n } from "./i18n";
-import { getSupervisorContext, approveRoutePlan, rejectRoutePlan } from "./api.js";
-import { pct } from "./fmt.js";
 
-const { t, dir, resourceErrorMessage } = useI18n();
+const { t, tData, dir } = useI18n();
 
-const TABS = [
-  { key: "approval", icon: "circle-check" },
-  { key: "boarding", icon: "bus" },
-  { key: "route", icon: "route" },
-  { key: "map", icon: "pin" },
-];
+// Per-domain accent (kept inside the Growth-Green family). Route = a mint-leaning
+// green — the brightest of the three, so it reads as the same system, one step apart.
+const accent = "#20a877";
 
-const ctx = ref(null);
-const loadState = ref("loading");
-const loadError = ref("");
-const selectedName = ref(null);
-const tab = ref("approval");
-const busy = ref(false);
-const reject = ref({ open: false, reason: "" });
-const toast = ref({ show: false, msg: "", type: "ok" });
-let toastTimer = null;
-let pollTimer = null;
-const POLL_MS = 45000;
+const rows = computed(() => tData("dash.trip_rows") || []);
+const plans = computed(() => tData("dash.plan_rows") || []);
 
-const plans = computed(() => ctx.value?.plans || []);
-const pendingCount = computed(() => ctx.value?.counts?.pending || 0);
-const selectedPlan = computed(() => plans.value.find((p) => p.name === selectedName.value) || null);
-const selectedTrip = computed(() => selectedPlan.value?.trip?.name || null);
-
-const statusHint = computed(() => {
-  const a = selectedPlan.value?.approval;
-  return a === "Pending" ? t("approval.pendingHint") : t("approval." + a);
-});
-const statusIcon = computed(
-  () => ({ Pending: "clock", Approved: "circle-check", Rejected: "x" })[selectedPlan.value?.approval] || "clock",
-);
-
-function barPct(b) {
-  return pct(b.boarded, b.expected);
-}
-
-function showToast(msg, type = "ok") {
-  toast.value = { show: true, msg, type };
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => (toast.value.show = false), 3200);
-}
-
-function selectPlan(name) {
-  selectedName.value = name;
-  tab.value = "approval";
-}
-
-async function loadContext() {
-  if (!ctx.value) loadState.value = "loading";
-  try {
-    const res = await getSupervisorContext();
-    ctx.value = res;
-    loadState.value = "ready";
-    loadError.value = "";
-    // Keep the current selection if it still exists; else select the first plan.
-    if (!res.plans.find((p) => p.name === selectedName.value)) {
-      selectedName.value = res.plans[0]?.name || null;
-    }
-  } catch (e) {
-    loadState.value = "error";
-    loadError.value = resourceErrorMessage(e, "list.loadError");
-  }
-}
-
-async function approve() {
-  if (!selectedPlan.value || busy.value) return;
-  busy.value = true;
-  try {
-    await approveRoutePlan(selectedPlan.value.name);
-    showToast(t("approval.approvedToast"), "ok");
-    await loadContext();
-  } catch (e) {
-    showToast(resourceErrorMessage(e, "approval.actionError"), "bad");
-  } finally {
-    busy.value = false;
-  }
-}
-
-function openReject() {
-  reject.value = { open: true, reason: "" };
-}
-function closeReject() {
-  reject.value.open = false;
-}
-async function confirmReject() {
-  const reason = (reject.value.reason || "").trim();
-  if (!reason) {
-    showToast(t("approval.reasonRequired"), "bad");
-    return;
-  }
-  if (busy.value) return;
-  busy.value = true;
-  try {
-    await rejectRoutePlan(selectedPlan.value.name, reason);
-    showToast(t("approval.rejectedToast"), "ok");
-    closeReject();
-    await loadContext();
-  } catch (e) {
-    showToast(resourceErrorMessage(e, "approval.actionError"), "bad");
-  } finally {
-    busy.value = false;
-  }
-}
-
-// Keep the document direction/lang in sync so native RTL applies page-wide.
 watch(
   dir,
   (d) => {
@@ -298,15 +160,357 @@ watch(
   },
   { immediate: true },
 );
-
-onMounted(() => {
-  loadContext();
-  pollTimer = setInterval(() => {
-    if (!document.hidden && !busy.value && !reject.value.open) loadContext();
-  }, POLL_MS);
-});
-onUnmounted(() => {
-  clearInterval(pollTimer);
-  clearTimeout(toastTimer);
-});
 </script>
+
+<style scoped>
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-num);
+}
+
+/* ---- brand (side-nav top) ---- */
+.tsx-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(150deg, var(--c-mint), var(--ts-accent, var(--c-primary)));
+  color: var(--c-header-bg);
+  flex: 0 0 auto;
+}
+.tsx-brand-txt b {
+  display: block;
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-heading);
+  line-height: 1.1;
+}
+.tsx-brand-txt small {
+  font-size: var(--fs-xs);
+  opacity: 0.7;
+}
+
+/* ---- nav count badges ---- */
+.tsx-cnt {
+  margin-inline-start: auto;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  background: color-mix(in srgb, var(--c-header-ink) 16%, transparent);
+  color: var(--c-header-ink);
+  border-radius: var(--radius-pill);
+  padding: 1px 8px;
+}
+.tsx-cnt-warn {
+  background: var(--c-warning);
+  color: #3a2708;
+}
+
+/* ---- top-bar actions ---- */
+.tsx-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--c-surface-2);
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--radius-pill);
+  padding: 8px 14px;
+  font-size: var(--fs-sm);
+  color: var(--c-muted);
+  min-width: 150px;
+}
+.tsx-av {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--ts-accent, var(--c-primary));
+  color: #fff;
+  font-weight: var(--fw-heading);
+  font-size: var(--fs-sm);
+  flex: 0 0 auto;
+}
+
+/* ---- KPI tiles ---- */
+.tsx-kpi {
+  background: var(--c-surface-2);
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--radius);
+  padding: 14px 15px;
+  box-shadow: var(--shadow-sm);
+}
+.tsx-kt {
+  font-size: var(--fs-sm);
+  color: var(--c-muted);
+  font-weight: var(--fw-semibold);
+}
+.tsx-kv {
+  font-size: 27px;
+  font-weight: var(--fw-heading);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-top: 2px;
+}
+.tsx-kd {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  margin-top: 3px;
+}
+.tsx-kd.up,
+.tsx-kd.ok {
+  color: var(--c-success);
+}
+.tsx-kd.warn {
+  color: var(--c-warning);
+}
+.tsx-kd.down {
+  color: var(--c-danger);
+}
+.tsx-spark {
+  display: block;
+  width: 100%;
+  height: 26px;
+  margin-top: 8px;
+}
+.tsx-spark polyline {
+  fill: none;
+  stroke: var(--ts-accent, var(--c-primary));
+  stroke-width: 2;
+}
+.tsx-spark-ok polyline {
+  stroke: var(--c-success);
+}
+.tsx-spark-warn polyline {
+  stroke: var(--c-warning);
+}
+.tsx-spark-danger polyline {
+  stroke: var(--c-danger);
+}
+
+/* ---- split + panels ---- */
+.tsx-split {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .tsx-split {
+    grid-template-columns: 1fr;
+  }
+}
+.tsx-panel {
+  background: var(--c-surface-2);
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.tsx-panel-h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: var(--border-width) solid var(--c-border);
+}
+.tsx-panel-h b {
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-heading);
+}
+.tsx-live {
+  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  color: var(--c-success);
+}
+.tsx-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--c-success);
+  animation: tsxpulse 1.8s infinite;
+}
+@keyframes tsxpulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-success) 55%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+.tsx-pill-count {
+  margin-inline-start: auto;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  background: var(--c-warning-bg);
+  color: var(--c-warning);
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+}
+
+/* ---- table ---- */
+.tsx-tbl-wrap {
+  overflow-x: auto;
+}
+.tsx-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 420px;
+}
+.tsx-tbl th {
+  text-align: start;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.05em;
+  color: var(--c-muted);
+  padding: 10px 14px;
+  border-bottom: var(--border-width) solid var(--c-border);
+}
+.tsx-tbl td {
+  padding: 12px 14px;
+  font-size: var(--fs-sm);
+  border-bottom: var(--border-width) solid var(--c-border);
+}
+.tsx-tbl tr:last-child td {
+  border-bottom: 0;
+}
+.tsx-who {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.tsx-who-a {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ts-accent, var(--c-primary)) 16%, transparent);
+  color: var(--ts-accent, var(--c-primary));
+  font-weight: var(--fw-heading);
+  font-size: var(--fs-xs);
+  flex: 0 0 auto;
+}
+.tsx-who b {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+.tsx-who small {
+  display: block;
+  color: var(--c-muted);
+  font-size: var(--fs-xs);
+}
+.tsx-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+}
+.b-run {
+  background: var(--c-info-bg);
+  color: var(--c-info);
+}
+.b-ok {
+  background: var(--c-success-bg);
+  color: var(--c-success);
+}
+.b-late {
+  background: var(--c-warning-bg);
+  color: var(--c-warning);
+}
+
+/* ---- mini map ---- */
+.tsx-map {
+  padding: 14px 16px 16px;
+}
+.tsx-map-cap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  color: var(--c-muted);
+  margin-bottom: 8px;
+}
+.tsx-map-svg {
+  width: 100%;
+  height: 150px;
+  display: block;
+  border-radius: var(--radius);
+  border: var(--border-width) solid var(--c-border);
+}
+
+/* ---- approvals panel ---- */
+.tsx-appr-item {
+  padding: 13px 16px;
+  border-bottom: var(--border-width) solid var(--c-border);
+}
+.tsx-appr-item:last-child {
+  border-bottom: 0;
+}
+.tsx-appr-top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 8px;
+}
+.tsx-appr-top b {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+.a-danger {
+  background: var(--c-danger-bg);
+  color: var(--c-danger);
+}
+.a-warn {
+  background: var(--c-warning-bg);
+  color: var(--c-warning);
+}
+.a-info {
+  background: var(--c-info-bg);
+  color: var(--c-info);
+}
+.tsx-req {
+  margin-inline-start: auto;
+  font-size: var(--fs-xs);
+  color: var(--c-muted);
+}
+.tsx-appr-desc {
+  font-size: var(--fs-sm);
+  color: var(--c-ink-soft);
+  margin-bottom: 11px;
+}
+.tsx-appr-btns {
+  display: flex;
+  gap: 8px;
+}
+.tsx-sbtn {
+  flex: 1;
+  padding: 9px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-heading);
+  border: var(--border-width) solid transparent;
+  cursor: pointer;
+}
+.tsx-sbtn-ok {
+  background: var(--ts-accent, var(--c-primary));
+  color: #fff;
+}
+.tsx-sbtn-no {
+  background: transparent;
+  color: var(--c-danger);
+  border-color: color-mix(in srgb, var(--c-danger) 40%, transparent);
+}
+</style>
