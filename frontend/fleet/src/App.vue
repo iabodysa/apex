@@ -12,10 +12,13 @@
  * top-level wiring that can't live inside any one composable without a cycle.
  */
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+// Direct-path import (documented + supported): the @shared/components barrel also
+// re-exports BuildingPicker, which needs a portal i18n export the Fleet portal
+// doesn't provide, so importing the shell file directly keeps the bundle clean.
+import FleetPageShell from "@shared/components/FleetPageShell.vue";
 import { connectFleetRealtime } from "./realtime.js";
 import Icon from "./components/Icon.vue";
 import LangToggle from "./components/LangToggle.vue";
-import FleetTopbar from "./components/FleetTopbar.vue";
 import FleetSidebar from "./components/FleetSidebar.vue";
 import FleetToolbar from "./components/FleetToolbar.vue";
 import FleetCardGrid from "./components/FleetCardGrid.vue";
@@ -193,13 +196,41 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <FleetTopbar
-    :f="f" :counts="counts" :countsLoading="countsLoading" :triage="triage"
-    :triageFilter="triageFilter" :alertTotal="alertTotal" :alertsOpen="alertsOpen"
-    :setSP="setSP" :setTriage="setTriage" :toggleAlerts="toggleAlerts" :t="t"
-  />
+  <FleetPageShell max-width="100%">
+    <template #brand>
+      <span class="fp-brandmark"><Icon name="car" :size="20" /></span>
+      <span class="fp-brandword">{{ t("brand.name") }}</span>
+    </template>
+    <template #actions>
+      <div class="search-bar fp-head-search">
+        <span class="si"><Icon name="search" :size="15" /></span>
+        <input v-model="f.search" :placeholder="t('topbar.searchPlaceholder')" />
+      </div>
+      <button class="alert-bell" :class="{ active: alertsOpen }" :title="t('alerts.bellTitle')" :aria-label="t('alerts.bellTitle')" @click="toggleAlerts">
+        <Icon name="bell" :size="18" />
+        <span v-if="alertTotal > 0" class="alert-bell-badge">{{ alertTotal > 99 ? "99+" : alertTotal }}</span>
+      </button>
+      <LangToggle />
+    </template>
 
-  <div class="layout">
+    <!-- STATUS / KPI / TRIAGE PILLS (shimmer until the first load resolves) -->
+    <div class="fp-pills-bar">
+      <template v-if="countsLoading">
+        <span v-for="n in 6" :key="n" class="sp fp-kpi-skel"></span>
+      </template>
+      <template v-else>
+        <span class="sp sp-all" :class="{ active: f.status === '' }" @click="setSP('')">{{ counts.total }} {{ t("topbar.allVehicles") }}</span>
+        <span class="sp sp-assigned" :class="{ active: f.status === 'assigned' }" @click="setSP('assigned')">{{ counts.assigned }} {{ t("statusShort.assigned") }}</span>
+        <span class="sp sp-available" :class="{ active: f.status === 'available' }" @click="setSP('available')">{{ counts.available }} {{ t("statusShort.available") }}</span>
+        <span class="sp sp-workshop" :class="{ active: f.status === 'workshop' }" @click="setSP('workshop')">{{ counts.workshop }} {{ t("statusShort.workshop") }}</span>
+        <span class="sp sp-stopped" :class="{ active: f.status === 'stopped' }" @click="setSP('stopped')">{{ counts.stopped }} {{ t("statusShort.stopped") }}</span>
+        <span class="sp sp-stolen" :class="{ active: f.status === 'stolen' }" @click="setSP('stolen')">{{ counts.stolen }} {{ t("statusShort.stolen") }}</span>
+        <span v-if="triage.incidents" class="sp sp-triage-incident" :class="{ active: triageFilter === 'incidents' }" @click="setTriage('incidents')"><Icon name="crash" :size="12" /> {{ triage.incidents }} {{ t("topbar.openIncidents") }}</span>
+        <span v-if="triage.expiring" class="sp sp-triage-expiry" :class="{ active: triageFilter === 'expiring' }" @click="setTriage('expiring')"><Icon name="shield-alert" :size="12" /> {{ triage.expiring }} {{ t("topbar.expiringSoon") }}</span>
+      </template>
+    </div>
+
+    <div class="layout">
     <FleetSidebar
       :f="f" :counts="counts" :countsLoading="countsLoading" :hasDateFilter="hasDateFilter"
       :dateInfo="dateInfo" :filtersSheetOpen="filtersSheetOpen" :closeFiltersSheet="closeFiltersSheet"
@@ -281,7 +312,8 @@ onUnmounted(() => {
         :calcTotalDaysNum="fmt.calcTotalDaysNum" :t="t"
       />
     </div>
-  </div>
+    </div>
+  </FleetPageShell>
 
   <AlertDrawer
     :alertsOpen="alertsOpen" :alertsState="alertsState" :alerts="alerts" :alertTotal="alertTotal"
