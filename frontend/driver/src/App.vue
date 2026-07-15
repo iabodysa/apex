@@ -17,73 +17,22 @@
       </div>
     </div>
 
-    <!-- Linked driver: branded shell with an icon tab bar. -->
+    <!-- Linked driver: shared Mobile-console archetype (sticky dark header,
+         single scrolling card column, sticky ≥52px bottom nav). -->
     <template v-else-if="linkedDriver">
-      <header class="app-header">
-        <!-- Brand supergraphic (decorative, flat, low-contrast) -->
-        <div class="hero-arc" aria-hidden="true">
-          <Brand mode="arc" />
-        </div>
+      <MobileConsoleShell :title="driverName" :subtitle="greeting" :max-width="480">
+        <!-- Header end: language toggle + driver avatar -->
+        <template #header-actions>
+          <LangToggle variant="header" />
+          <span
+            class="avatar h-9 w-9 text-sm"
+            style="background: var(--c-header-accent); color: var(--c-header-bg)"
+          >
+            {{ initial }}
+          </span>
+        </template>
 
-        <div class="header-inner relative z-[1] px-4 pt-4 pb-5">
-          <div class="header-bar flex items-center justify-between gap-3">
-            <!-- Brand lockup. Tappable home: with only Trips + Profile in the
-                 bottom bar, the brand is the one-tap return to the / dashboard. -->
-            <router-link
-              v-if="showBrand"
-              to="/"
-              class="flex items-center gap-2 min-w-0"
-              :aria-label="t('nav.home')"
-              style="text-decoration: none"
-            >
-              <img
-                v-if="brandLogo"
-                :src="brandLogo"
-                alt="AFMCO"
-                class="brand-logo"
-              />
-              <template v-else>
-                <Brand mode="mark" :size="26" />
-                <span class="text-lg font-extrabold tracking-tight" style="color: var(--c-header-ink)">
-                  AFMCO
-                </span>
-              </template>
-            </router-link>
-            <router-link
-              v-else
-              to="/"
-              class="text-lg font-extrabold tracking-tight"
-              :aria-label="t('nav.home')"
-              style="color: var(--c-header-ink); text-decoration: none"
-            >
-              Salis
-            </router-link>
-
-            <!-- Language selector + driver avatar -->
-            <div class="flex items-center gap-2 shrink-0">
-              <LangToggle variant="header" />
-              <span
-                class="avatar h-9 w-9 text-sm"
-                style="background: var(--c-header-accent); color: var(--c-header-bg)"
-              >
-                {{ initial }}
-              </span>
-            </div>
-          </div>
-
-          <!-- Greeting -->
-          <div class="greeting-block mt-3">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--c-header-accent)">
-              {{ t("common.driverPortal") }}
-            </p>
-            <h1 class="text-xl font-extrabold leading-tight truncate" style="color: var(--c-header-ink)">
-              {{ greeting }}<span v-if="firstName">, <bdi>{{ firstName }}</bdi></span>
-            </h1>
-          </div>
-        </div>
-      </header>
-
-      <main class="flex-1 px-4 pt-5 pb-28 space-y-5">
+        <!-- Scroll column: offline notice + install hint + the routed page. -->
         <!-- Offline banner: writes are blocked, reads fall back to cached data. -->
         <div v-if="!online" class="offline-banner">
           <Icon name="alert" :size="16" class="shrink-0" />
@@ -92,26 +41,25 @@
         <!-- First-visit Add-to-Home-Screen hint (self-hides when installed/dismissed). -->
         <InstallHint />
         <router-view :ctx="ctx.data" />
-      </main>
 
-      <nav class="tabbar" :style="{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }">
-        <!-- The Home tab ("/") is a prefix of every route, so its inclusive
-             active class would light up on every page. Disable inclusive matching
-             for it (active-class="") and keep exact-active so it highlights only
-             on "/". Other tabs keep the default inclusive active class. -->
-        <router-link
-          v-for="tab in tabs"
-          :key="tab.to"
-          :to="tab.to"
-          class="tab"
-          :active-class="tab.to === '/' ? '' : 'router-link-active'"
-          exact-active-class="router-link-active"
-        >
-          <span class="tab-icon-wrap"><Icon :name="tab.icon" :size="22" /></span>
-          <span>{{ t(tab.labelKey) }}</span>
-          <span class="tab-pip"></span>
-        </router-link>
-      </nav>
+        <!-- Bottom nav (3 primary destinations). The Home tab ("/") is a prefix
+             of every route, so its inclusive match would light up everywhere;
+             isTabActive() keeps Home exact and the others inclusive. The shell
+             tints the `.is-active` child with the brand. -->
+        <template #nav>
+          <router-link
+            v-for="tab in tabs"
+            :key="tab.to"
+            :to="tab.to"
+            :class="{ 'is-active': isTabActive(tab) }"
+            active-class=""
+            exact-active-class=""
+          >
+            <Icon :name="tab.icon" :size="22" />
+            <span>{{ t(tab.labelKey) }}</span>
+          </router-link>
+        </template>
+      </MobileConsoleShell>
 
       <!-- Transient toast host (auto-dismiss + cleared on route change). -->
       <Toast />
@@ -145,7 +93,10 @@ import { useRoute } from "vue-router";
 import { createResource } from "frappe-ui";
 import Unlinked from "./components/Unlinked.vue";
 import Icon from "./components/Icon.vue";
-import Brand from "@shared/components/Brand.vue";
+// Direct-path (not the barrel): the @shared/components barrel re-exports
+// BuildingPicker, which imports resourceErrorMessage from the portal i18n — a
+// symbol the driver i18n doesn't export, so the barrel would break this build.
+import MobileConsoleShell from "@shared/components/MobileConsoleShell.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
 import Toast from "./components/Toast.vue";
 import InstallHint from "./components/InstallHint.vue";
@@ -207,9 +158,16 @@ const linkedDriver = computed(
 const firstName = computed(
   () => (ctx.data?.driver?.full_name || "").trim().split(/\s+/)[0] || "",
 );
+// Header title = the driver's name; the greeting is the small line above it.
+const driverName = computed(() => (ctx.data?.driver?.full_name || "").trim() || firstName.value);
 const initial = computed(
   () => (ctx.data?.driver?.full_name || "?").trim().charAt(0).toUpperCase() || "?",
 );
+
+// Bottom-nav highlight: Home ("/") only on the exact root; every other tab is
+// active for its whole subtree (e.g. Trips stays lit on /trips/:id).
+const isTabActive = (tab) =>
+  tab.to === "/" ? route.path === "/" : route.path === tab.to || route.path.startsWith(tab.to + "/");
 
 // Time-of-day greeting (purely cosmetic).
 const greeting = computed(() => {
