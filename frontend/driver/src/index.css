@@ -1,294 +1,15 @@
 /* [#8wb1ff] */
 
-/* Shared brand primitives (--brand-green) + breakpoint tokens — single source. */
+/* Shared brand primitives (--brand-green) + full --c-* token vocabulary +
+   light/dark modes — the SINGLE source of truth. No local palette lives here:
+   the portal consumes tokens only, so the retired per-portal drift (afmco /
+   frappe / dark / gemini / atelier / creative copies) is gone. */
 @import "@shared/tokens.css";
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* [#kcdgzm] */
-:root,
-[data-theme="afmco"] {
-  /* [#7t3jhc] */
-  --c-primary: var(--brand-green); /* Growth Green */
-  --c-primary-ink: #ffffff; /* text/icon on primary */
-  --c-ink: #072b1a; /* Deep Forest — headings/body */
-  --c-ink-soft: #355040; /* muted forest for secondary text */
-  --c-canvas: #ece6d6; /* Sand — warm page background */
-  --c-surface: #f8f5ee; /* Off-White — cards/paper */
-  --c-surface-2: #ffffff; /* raised paper (hover) */
-  --c-accent: var(--brand-green); /* CTA accent (per-tenant override target) */
-  --c-mint: #60d297; /* Mint highlight/success */
-  --c-muted: #6f7e76; /* muted label text */
-  --c-border: #ddd5c2; /* hairline on sand/paper */
-  --c-border-strong: #cabfa3;
-  --c-success: var(--brand-green);
-  --c-success-bg: #d9f0e3;
-  --c-warning: #c9851f;
-  --c-warning-bg: #f7ead2;
-  --c-danger: #c0392b;
-  --c-danger-bg: #f6dcd8;
-  --c-header-bg: #072b1a; /* Deep Forest header bar */
-  --c-header-ink: #f8f5ee;
-  --c-header-accent: #60d297;
-  --c-arc: rgba(96, 210, 151, 0.16); /* hero supergraphic arc (subtle) */
-
-  /* [#a2jnqk] */
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 18px;
-  --radius-pill: 999px;
-  --shadow: none;
-  --shadow-lg: none;
-  --border-width: 1px;
-
-  /* [#5tdt8q] */
-  --font: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --fs-display: 28px;
-  --fs-h1: 22px;
-  --fs-h2: 20px;
-  --fs-h3: 16px;
-  --fs-body: 14px;
-  --fs-sm: 13px;
-  --fs-xs: 11px;
-  --fw-heading: 800;
-  --fw-semibold: 600;
-  --fw-body: 500;
-
-  /* [#png13p] */
-  --sp-1: 4px;
-  --sp-2: 8px;
-  --sp-3: 12px;
-  --sp-4: 16px;
-  --sp-5: 20px;
-  --sp-6: 24px;
-  --sp-8: 32px;
-}
-
-/* [#j5ktd8] */
-[data-theme="frappe"] {
-  --c-primary: #2490ef;
-  --c-primary-ink: #ffffff;
-  --c-ink: #1f272e;
-  --c-ink-soft: #525a62;
-  --c-canvas: #f4f5f6;
-  --c-surface: #ffffff;
-  --c-surface-2: #f9fafb;
-  --c-accent: #2490ef;
-  --c-mint: #28a745;
-  --c-muted: #6b7682;
-  --c-border: #e2e6e9;
-  --c-border-strong: #d1d8dd;
-  --c-success: #28a745;
-  --c-success-bg: #e6f4ea;
-  --c-warning: #cb8100;
-  --c-warning-bg: #fbf0d9;
-  --c-danger: #e03636;
-  --c-danger-bg: #fbe3e3;
-  --c-header-bg: #ffffff;
-  --c-header-ink: #1f272e;
-  --c-header-accent: #2490ef;
-  --c-arc: rgba(36, 144, 239, 0.08);
-
-  --radius-sm: 6px;
-  --radius: 8px;
-  --radius-lg: 10px;
-  --radius-pill: 999px;
-  /* [#435siu] */
-  --shadow: 0 1px 2px rgba(17, 43, 66, 0.08), 0 0 1px rgba(17, 43, 66, 0.12);
-  --shadow-lg: 0 4px 16px rgba(17, 43, 66, 0.12);
-  --border-width: 1px;
-
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --fw-heading: 700;
-  --fw-semibold: 600;
-  --fw-body: 400;
-}
-
-/* [#dzrw2q] */
-[data-theme="dark"] {
-  --c-primary: #00a862;
-  --c-primary-ink: #04130c;
-  --c-ink: #e7efe9;
-  --c-ink-soft: #a6b6ac;
-  --c-canvas: #0f1714;
-  --c-surface: #15211b;
-  --c-surface-2: #1c2c24;
-  --c-accent: #60d297;
-  --c-mint: #60d297;
-  --c-muted: #7d8f84;
-  --c-border: #25362c;
-  --c-border-strong: #324a3c;
-  --c-success: #60d297;
-  --c-success-bg: rgba(96, 210, 151, 0.14);
-  --c-warning: #e0a02f;
-  --c-warning-bg: rgba(224, 160, 47, 0.16);
-  --c-danger: #ef6b5e;
-  --c-danger-bg: rgba(239, 107, 94, 0.16);
-  --c-header-bg: #0c130f;
-  --c-header-ink: #e7efe9;
-  --c-header-accent: #60d297;
-  --c-arc: rgba(96, 210, 151, 0.1);
-
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 18px;
-  --radius-pill: 999px;
-  --shadow: none;
-  --shadow-lg: none;
-  --border-width: 1px;
-
-  --font: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
-}
-
-/* [#8ei0w2] */
-
-/* [#sj1aih] */
-[data-theme="frappe"] .hero-arc {
-  display: none !important;
-}
-
-/* [#ntzlrn] */
-[data-theme="frappe"] .app-header {
-  border-bottom: 1px solid var(--c-border);
-  box-shadow: var(--shadow);
-}
-[data-theme="frappe"] .app-header .header-inner {
-  padding: 10px 16px;
-}
-/* [#i0kmkk] */
-[data-theme="frappe"] .app-header .greeting-block {
-  margin-top: 2px;
-}
-[data-theme="frappe"] .app-header .greeting-block p {
-  display: none; /* drop the "DRIVER PORTAL" eyebrow — too brand-heavy for Frappe */
-}
-[data-theme="frappe"] .app-header .greeting-block h1 {
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-  color: var(--c-muted);
-}
-/* [#t5zpcr] */
-[data-theme="frappe"] .app-header .avatar {
-  height: 30px;
-  width: 30px;
-  font-size: var(--fs-xs);
-  border-radius: var(--radius-sm);
-}
-
-/* [#rcjw64] */
-[data-theme="frappe"] main {
-  padding-left: 12px;
-  padding-right: 12px;
-  padding-top: 14px;
-}
-[data-theme="frappe"] main > .space-y-5 > * + * {
-  margin-top: 14px;
-}
-
-/* [#kd7dbc] */
-[data-theme="frappe"] .card {
-  border-radius: var(--radius);
-}
-[data-theme="frappe"] .card-pad {
-  padding: var(--sp-3) var(--sp-4);
-}
-
-/* [#a9v6qe] */
-[data-theme="frappe"] .section-title {
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--c-muted);
-}
-
-/* [#2i5dgx] */
-[data-theme="frappe"] .grid.grid-cols-2:has(> .quick-action) {
-  grid-template-columns: 1fr;
-  gap: 8px;
-}
-[data-theme="frappe"] .quick-action {
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: var(--radius);
-  background: var(--c-surface) !important;
-  color: var(--c-ink) !important;
-  border: 1px solid var(--c-border) !important;
-  box-shadow: var(--shadow);
-}
-[data-theme="frappe"] .quick-action:hover {
-  border-color: var(--c-border-strong) !important;
-  background: var(--c-surface-2) !important;
-}
-[data-theme="frappe"] .quick-action:active {
-  transform: none;
-}
-/* [#2peeox] */
-[data-theme="frappe"] .quick-action svg {
-  color: var(--c-primary);
-  flex-shrink: 0;
-}
-[data-theme="frappe"] .quick-action span {
-  font-size: var(--fs-body);
-  font-weight: var(--fw-semibold);
-}
-
-/* [#3doh8i] */
-[data-theme="frappe"] .btn {
-  min-height: 38px;
-  padding: 9px 14px;
-  border-radius: var(--radius-sm);
-  font-size: var(--fs-body);
-  font-weight: var(--fw-semibold);
-}
-[data-theme="frappe"] .btn-primary {
-  box-shadow: var(--shadow);
-}
-/* [#9sx264] */
-[data-theme="frappe"] .btn-dark {
-  background: var(--c-surface-2);
-  color: var(--c-ink);
-  border-color: var(--c-border-strong);
-}
-
-/* [#9t5sdf] */
-[data-theme="frappe"] .input,
-[data-theme="frappe"] .select,
-[data-theme="frappe"] .textarea {
-  border-radius: var(--radius-sm);
-  border-color: var(--c-border-strong);
-  padding: 9px 12px;
-}
-[data-theme="frappe"] .input:focus,
-[data-theme="frappe"] .select:focus,
-[data-theme="frappe"] .textarea:focus {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-primary) 22%, transparent);
-}
-
-/* [#r4dlmz] */
-[data-theme="frappe"] .pill {
-  border-radius: var(--radius-sm);
-  letter-spacing: 0;
-}
-
-/* [#q4e33x] */
-[data-theme="frappe"] .stat {
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow);
-}
-
-/* [#g4se51] */
-[data-theme="frappe"] .tabbar {
-  box-shadow: var(--shadow-lg);
-}
-[data-theme="frappe"] .tab .tab-pip {
-  display: none;
-}
 
 /* [#glw00i] */
 html,
@@ -314,33 +35,6 @@ body {
     color: var(--c-ink);
   }
 
-  /* [#d25w4p] */
-  .app-header {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: var(--c-header-bg);
-    color: var(--c-header-ink);
-    overflow: hidden;
-  }
-
-  /* [#ssmlib] */
-  .hero-arc {
-    position: absolute;
-    pointer-events: none;
-    inset: 0;
-    z-index: 0;
-  }
-  .hero-arc svg {
-    position: absolute;
-    right: -28px;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 150%;
-    width: auto;
-    color: var(--c-arc);
-  }
-
   /* [#fxjcal] */
   .card {
     background: var(--c-surface);
@@ -350,6 +44,11 @@ body {
   }
   .card-pad {
     padding: var(--sp-4);
+  }
+  /* accent for the single most-urgent Home item */
+  .card-primary {
+    border-inline-start: 3px solid var(--c-primary);
+    background: color-mix(in srgb, var(--c-primary) 5%, var(--c-surface));
   }
 
   /* [#31inr0] */
@@ -500,56 +199,6 @@ body {
     letter-spacing: -0.01em;
   }
 
-  /* [#r6iuer] */
-  .tabbar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 20;
-    margin: 0 auto;
-    max-width: 480px;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    background: var(--c-surface);
-    border-top: var(--border-width) solid var(--c-border);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .tab {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    min-height: 56px;
-    padding: 8px 2px 6px;
-    font-size: var(--fs-xs);
-    font-weight: var(--fw-semibold);
-    color: var(--c-muted);
-    text-decoration: none;
-    transition: color 0.15s ease;
-  }
-  .tab-icon-wrap {
-    display: grid;
-    place-items: center;
-    height: 26px;
-    width: 26px;
-  }
-  /* [#q6nlic] */
-  .tab.router-link-active {
-    color: var(--c-primary);
-  }
-  .tab.router-link-active .tab-pip {
-    background: var(--c-primary);
-  }
-  .tab-pip {
-    height: 3px;
-    width: 18px;
-    border-radius: 999px;
-    background: transparent;
-    margin-top: 2px;
-  }
-
   /* [#ei3i1l] */
   .avatar {
     display: grid;
@@ -575,7 +224,8 @@ body {
   }
 }
 
-/* [#66a3tb] */
+/* [#66a3tb] Quick-action tile — richer surface + hairline so the "More" grid
+   reads as tappable cards, matching the console reference. */
 .quick-action {
   display: flex;
   flex-direction: column;
@@ -583,7 +233,9 @@ body {
   padding: 16px;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  transition: transform 0.06s ease;
+  transition:
+    transform 0.06s ease,
+    box-shadow 0.15s ease;
   text-decoration: none;
 }
 .quick-action:active {
@@ -605,6 +257,13 @@ body {
 .status-err {
   color: var(--c-danger);
   background: var(--c-danger-bg);
+}
+
+/* RTL: horizontally mirror direction-bearing icons (chevron / route / nav
+   arrows) so they point the correct way. GLOBAL (plain class) on purpose — a
+   [dir=rtl] rule inside a scoped block can mirror the whole page. */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
 }
 
 /* [#85x56s] */
@@ -629,213 +288,4 @@ body {
 .divider {
   height: var(--border-width);
   background: var(--c-border);
-}
-
-
-/* [#tjspm7] */
-
-[data-theme="gemini"] {
-  /* [#fio7c1] */
-  --c-canvas: #04050b;
-  --c-surface: rgba(15, 17, 26, 0.65);
-  
-  /* [#kysh8d] */
-  --c-primary: #a855f7; /* Purple Glow */
-  --c-primary-ink: #ffffff;
-  --c-accent: #3b82f6; /* Blue Glow */
-  --c-mint: #06b6d4; /* Cyan Glow */
-  
-  /* [#ansi9p] */
-  --c-ink: #f8fafc;
-  --c-ink-soft: #cbd5e1;
-  --c-muted: #64748b;
-  
-  /* [#70z41z] */
-  --c-border: rgba(148, 163, 184, 0.12);
-  --c-border-strong: rgba(148, 163, 184, 0.25);
-  
-  /* [#upo6lf] */
-  --c-success: #10b981;
-  --c-success-bg: rgba(16, 185, 129, 0.15);
-  --c-warning: #f59e0b;
-  --c-warning-bg: rgba(245, 158, 11, 0.15);
-  --c-danger: #ef4444;
-  --c-danger-bg: rgba(239, 68, 68, 0.15);
-  
-  /* [#t1qg5i] */
-  --c-header-bg: rgba(4, 5, 11, 0.85);
-  --c-header-ink: #ffffff;
-  --c-header-accent: #a855f7;
-  
-  /* [#trucpn] */
-  --radius-sm: 10px;
-  --radius: 16px;
-  --radius-lg: 24px;
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 16px 48px rgba(168, 85, 247, 0.2);
-  --border-width: 1px;
-}
-
-/* [#codfuk] */
-[data-theme="gemini"] .card,
-[data-theme="gemini"] .stat,
-[data-theme="gemini"] .quick-action,
-[data-theme="gemini"] .tabbar,
-[data-theme="gemini"] .app-header {
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  background: var(--c-surface);
-  box-shadow: var(--shadow);
-}
-
-/* [#jm4l8p] */
-[data-theme="gemini"] .btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #a855f7, #ec4899, #3b82f6);
-  background-size: 300% 300%;
-  animation: geminiGlow 4s ease infinite;
-  border: none;
-  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
-  color: white;
-  font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-@keyframes geminiGlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* [#defo5m] */
-[data-theme="gemini"] .tab.router-link-active .tab-pip {
-  background: linear-gradient(90deg, #3b82f6, #a855f7);
-  box-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
-}
-
-/* Atelier — premium editorial refinement of the AFMCO identity. Same brand
-   palette (Growth Green / Deep Forest / Sand), elevated finish: soft depth,
-   warmer paper hierarchy, a gold-leaf header hairline, tighter editorial type. */
-[data-theme="atelier"] {
-  --c-primary: var(--brand-green); /* Growth Green — unchanged brand primary */
-  --c-primary-ink: #ffffff;
-  --c-ink: #06241a; /* slightly deeper forest for crisper headings */
-  --c-ink-soft: #3a5448;
-  --c-canvas: #efe9da; /* soft sand canvas */
-  --c-surface: #fffdf7; /* true ivory paper — lifts cards off the sand */
-  --c-surface-2: #ffffff;
-  --c-accent: var(--brand-green);
-  --c-mint: #5ccf94;
-  --c-muted: #6f7e76;
-  --c-border: #e2dac6;
-  --c-border-strong: #cdc1a4;
-  --c-success: var(--brand-green);
-  --c-success-bg: #dcf1e5;
-  --c-warning: #b9791b;
-  --c-warning-bg: #f6e8cf;
-  --c-danger: #b83a2c;
-  --c-danger-bg: #f5dbd6;
-  --c-header-bg: #062019; /* deepened forest header */
-  --c-header-ink: #f8f5ee;
-  --c-header-accent: #d8c79a; /* gold-leaf accent (drawn from sand) */
-  --c-arc: rgba(216, 199, 154, 0.14); /* warm gold supergraphic arc */
-
-  --radius-sm: 10px;
-  --radius: 14px;
-  --radius-lg: 20px;
-  --radius-pill: 999px;
-  /* whisper-soft elevation — the core "premium" lift over flat AFMCO */
-  --shadow: 0 1px 2px rgba(7, 43, 26, 0.04), 0 6px 16px rgba(7, 43, 26, 0.06);
-  --shadow-lg: 0 12px 32px rgba(7, 43, 26, 0.1);
-  --border-width: 1px;
-
-  --font: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --fs-display: 30px;
-  --fw-heading: 800;
-  --fw-semibold: 600;
-  --fw-body: 500;
-}
-
-/* Gold-leaf hairline under the header — understated luxury, not a new colour. */
-[data-theme="atelier"] .app-header {
-  border-bottom: 1px solid color-mix(in srgb, var(--c-header-accent) 35%, transparent);
-}
-/* Editorial poise: tighter heading tracking. */
-[data-theme="atelier"] .section-title,
-[data-theme="atelier"] .stat-value {
-  letter-spacing: -0.02em;
-}
-/* Refined focus ring in brand green. */
-[data-theme="atelier"] .input:focus,
-[data-theme="atelier"] .select:focus,
-[data-theme="atelier"] .textarea:focus {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 14%, transparent);
-}
-
-/* Creative ("Nocturne") — the flagship distinctive-yet-professional theme.
-   A cool deep-navy editorial chrome with an electric-azure primary and a warm
-   amber accent — an unclaimed niche distinct from "dark" (brand forest-green)
-   and "gemini" (purple neon glass). No animation, no glassmorphism, no glow:
-   solid surfaces, crisp hairlines, restrained elevation — confident and calm.
-   High luminance separation keeps every text/control pair WCAG AA+ (ivory and
-   azure on near-black navy; see the theme block in the build verification).
-   Token-only re-skin: components consume the same --c-* / --radius / --shadow
-   variables, so the whole portal re-skins with no markup change. */
-[data-theme="creative"] {
-  --c-primary: #3ea6ff; /* Electric Azure — primary action / links (7.09:1 on canvas) */
-  --c-primary-ink: #04101f; /* near-black navy text on the bright azure button */
-  --c-ink: #eef2fb; /* Ivory — headings/body (16.39:1 on canvas) */
-  --c-ink-soft: #aab6d4; /* cool slate for secondary text (8.26:1 on surface) */
-  --c-canvas: #0d1424; /* deep navy page background */
-  --c-surface: #141d33; /* raised card navy */
-  --c-surface-2: #1b2742; /* hover / elevated paper */
-  --c-accent: #ffb454; /* Warm Amber — CTA accent (override target) */
-  --c-mint: #42d6a4; /* teal-mint success highlight */
-  --c-muted: #7e8bb0; /* muted label text (4.95:1 on surface) */
-  --c-border: #26314d; /* hairline on navy */
-  --c-border-strong: #364470;
-  --c-success: #42d6a4;
-  --c-success-bg: rgba(66, 214, 164, 0.14);
-  --c-warning: #ffc14d;
-  --c-warning-bg: rgba(255, 193, 77, 0.16);
-  --c-danger: #ff6b6b;
-  --c-danger-bg: rgba(255, 107, 107, 0.16);
-  --c-header-bg: #0a1120; /* deepest navy header bar */
-  --c-header-ink: #eef2fb;
-  --c-header-accent: #3ea6ff;
-  --c-arc: rgba(62, 166, 255, 0.12); /* azure hero supergraphic arc */
-
-  --radius-sm: 10px;
-  --radius: 14px;
-  --radius-lg: 20px;
-  --radius-pill: 999px;
-  /* restrained cool elevation — depth without the gemini glow */
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.28);
-  --shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.45);
-  --border-width: 1px;
-
-  --font: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --fs-display: 30px;
-  --fw-heading: 800;
-  --fw-semibold: 600;
-  --fw-body: 500;
-}
-
-/* Azure header hairline — the signature creative accent line. */
-[data-theme="creative"] .app-header {
-  border-bottom: 1px solid color-mix(in srgb, var(--c-header-accent) 30%, transparent);
-}
-/* Editorial poise: tighter heading tracking. */
-[data-theme="creative"] .section-title,
-[data-theme="creative"] .stat-value {
-  letter-spacing: -0.02em;
-}
-/* Azure focus ring. */
-[data-theme="creative"] .input:focus,
-[data-theme="creative"] .select:focus,
-[data-theme="creative"] .textarea:focus {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 22%, transparent);
-}
-/* Active tab pip carries the azure→amber creative duotone. */
-[data-theme="creative"] .tab.router-link-active .tab-pip {
-  background: linear-gradient(90deg, var(--c-primary), var(--c-accent));
 }

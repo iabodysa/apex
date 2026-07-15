@@ -46,55 +46,41 @@
       </div>
     </div>
 
-    <!-- Resolved worker: branded shell + bottom tab bar. -->
+    <!-- Resolved worker (مسار): shared Mobile-console archetype — sticky dark
+         header, single scrolling card column, sticky ≥52px bottom nav. -->
     <template v-else-if="worker">
-      <header class="app-header">
-        <div class="hero-arc" aria-hidden="true"><Brand mode="arc" /></div>
-        <div class="header-inner relative z-[1] px-4 pt-4 pb-5">
-          <div class="header-bar flex items-center justify-between gap-3">
-            <div v-if="showBrand" class="flex items-center gap-2 min-w-0">
-              <img v-if="brandLogo" :src="brandLogo" alt="AFMCO" class="h-7 w-auto max-w-[120px] object-contain" />
-              <template v-else>
-                <Brand mode="mark" :size="26" />
-                <span class="text-lg font-extrabold tracking-tight" style="color: var(--c-header-ink)">AFMCO</span>
-              </template>
-            </div>
-            <span v-else class="text-lg font-extrabold tracking-tight" style="color: var(--c-header-ink)">Masar</span>
+      <MobileConsoleShell :title="workerName" :subtitle="greeting" :max-width="480">
+        <!-- Header end: language toggle + worker avatar (photo when present). -->
+        <template #header-actions>
+          <LangToggle variant="header" />
+          <span
+            class="avatar h-9 w-9 text-sm overflow-hidden"
+            style="background: var(--c-header-accent); color: var(--c-header-bg)"
+          >
+            <img v-if="worker.photo" :src="worker.photo" alt="" class="h-full w-full object-cover" />
+            <template v-else>{{ initial }}</template>
+          </span>
+        </template>
 
-            <div class="flex items-center gap-2 shrink-0">
-              <LangToggle variant="header" />
-              <span
-                class="avatar h-9 w-9 text-sm overflow-hidden"
-                style="background: var(--c-header-accent); color: var(--c-header-bg)"
-              >
-                <img v-if="worker.photo" :src="worker.photo" alt="" class="h-full w-full object-cover" />
-                <template v-else>{{ initial }}</template>
-              </span>
-            </div>
-          </div>
-
-          <div class="greeting-block mt-3">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--c-header-accent)">
-              {{ t("common.workerApp") }}
-            </p>
-            <h1 class="text-xl font-extrabold leading-tight truncate" style="color: var(--c-header-ink)">
-              {{ greeting }}<span v-if="firstName">, <bdi>{{ firstName }}</bdi></span>
-            </h1>
-          </div>
-        </div>
-      </header>
-
-      <main class="flex-1 px-4 pt-5 pb-28">
+        <!-- Scroll column: the routed page. -->
         <router-view :ctx="ctx.data" />
-      </main>
 
-      <nav class="tabbar" :style="{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }">
-        <router-link v-for="tab in tabs" :key="tab.to" :to="tab.to" class="tab">
-          <span class="tab-icon-wrap"><Icon :name="tab.icon" :size="22" :class="{ 'rtl-flip': tab.icon === 'route' }" /></span>
-          <span>{{ t(tab.labelKey) }}</span>
-          <span class="tab-pip"></span>
-        </router-link>
-      </nav>
+        <!-- Bottom nav (3 primary destinations). isTabActive() keeps Home exact
+             and the others inclusive; the shell tints the `.is-active` child. -->
+        <template #nav>
+          <router-link
+            v-for="tab in tabs"
+            :key="tab.to"
+            :to="tab.to"
+            :class="{ 'is-active': isTabActive(tab) }"
+            active-class=""
+            exact-active-class=""
+          >
+            <Icon :name="tab.icon" :size="22" :class="{ 'rtl-flip': tab.icon === 'route' }" />
+            <span>{{ t(tab.labelKey) }}</span>
+          </router-link>
+        </template>
+      </MobileConsoleShell>
     </template>
 
     <!-- Error: invalid/disabled token, or a genuine server failure. -->
@@ -116,9 +102,12 @@
 
 <script setup>
 import { computed, watch, ref, onMounted, onUnmounted } from "vue";
+import { useRoute } from "vue-router";
 import { createResource } from "frappe-ui";
 import Icon from "./components/Icon.vue";
-import Brand from "@shared/components/Brand.vue";
+// Direct-path (not the @shared/components barrel) so only the shell is pulled
+// into the bundle, not every re-exported sibling component.
+import MobileConsoleShell from "@shared/components/MobileConsoleShell.vue";
 import LangToggle from "./components/LangToggle.vue";
 import { useI18n, resourceErrorMessage, setEnumLabels } from "./i18n";
 import { TOKEN, hasToken } from "./utils/token";
@@ -186,12 +175,21 @@ const worker = computed(() => ctx.data && ctx.data.employee && ctx.data);
 // it cheap: visible-only, refetch-on-show, no overlap, torn down on unmount.
 if (hasToken) usePoll(() => ctx.reload());
 
+const route = useRoute();
+
 const firstName = computed(
   () => (ctx.data?.employee_name || "").trim().split(/\s+/)[0] || "",
 );
+// Header title = the worker's name; the greeting is the small line above it.
+const workerName = computed(() => (ctx.data?.employee_name || "").trim() || firstName.value);
 const initial = computed(
   () => (ctx.data?.employee_name || "?").trim().charAt(0).toUpperCase() || "?",
 );
+
+// Bottom-nav highlight: Home ("/") only on the exact root; every other tab is
+// active for its whole subtree.
+const isTabActive = (tab) =>
+  tab.to === "/" ? route.path === "/" : route.path === tab.to || route.path.startsWith(tab.to + "/");
 
 const greeting = computed(() => {
   const h = new Date().getHours();
@@ -205,9 +203,6 @@ const greeting = computed(() => {
 // a real PermissionError (or an explicit server message) drives the
 // "invalid/disabled link" copy; transient failures get a retry-able message.
 const errorMessage = computed(() => resourceErrorMessage(ctx.error, "errors.invalidLink"));
-
-const showBrand = computed(() => window.portal_show_brand !== false);
-const brandLogo = computed(() => window.portal_logo || "");
 
 // [T-nav] Bottom bar carries only the three primary destinations. The
 // secondary sections (accommodation/custody/requests) keep their routes and
