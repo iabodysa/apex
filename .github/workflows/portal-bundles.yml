@@ -34,6 +34,8 @@ jobs:
             portal: safety_portal
           - dir: housing
             portal: housing_portal
+          - dir: route_supervisor
+            portal: route_supervisor_portal
     steps:
       - uses: actions/checkout@v5
 
