@@ -1,46 +1,31 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
 <script setup>
 /*
- * Fleet OS supervisor board — a thin shell that composes the board's concerns
- * (data, filters, selection, panel, alerts, actions) from src/use*.js and lays
- * out the presentational components in src/components/. The original ~1900-line
- * god component was split here with zero behavior change; each concern now lives
- * in its own cohesive composable/component.
+ * Fleet EMPLOYEE self-service page — served at the primary /fleet route.
  *
- * The live-sync lifecycle (poll + realtime) is orchestrated in THIS shell because
- * its pause guard must read confirm/panel/selection/action state — genuine
- * top-level wiring that can't live inside any one composable without a cycle.
+ * A calm, single-purpose page (archetype 1 of the approved reference
+ * scratch/portal-archetypes-preview.html): my vehicle status, a fuel-request
+ * form, and my recent trips. Built on the shared FleetPageShell (imported by
+ * DIRECT path, NOT the @shared/components barrel — the barrel re-exports
+ * BuildingPicker, which needs a portal i18n export this portal doesn't provide,
+ * so the direct path keeps the fleet bundle clean).
+ *
+ * The old supervisor board that used to live here is preserved untouched at
+ * /fleet-os (bundle fleet_os_portal). Data here is PLACEHOLDER — see
+ * useEmployee.js / BACKEND_GAPS; no server method is invented.
  */
-import { ref, computed, onMounted, onUnmounted, watch } from "vue";
-// Direct-path import (documented + supported): the @shared/components barrel also
-// re-exports BuildingPicker, which needs a portal i18n export the Fleet portal
-// doesn't provide, so importing the shell file directly keeps the bundle clean.
+import { ref, computed, watch } from "vue";
 import FleetPageShell from "@shared/components/FleetPageShell.vue";
-import { connectFleetRealtime } from "./realtime.js";
 import Icon from "./components/Icon.vue";
 import LangToggle from "./components/LangToggle.vue";
-import FleetSidebar from "./components/FleetSidebar.vue";
-import FleetToolbar from "./components/FleetToolbar.vue";
-import FleetCardGrid from "./components/FleetCardGrid.vue";
-import FleetDriverLens from "./components/FleetDriverLens.vue";
-import FleetTable from "./components/FleetTable.vue";
-import AlertDrawer from "./components/AlertDrawer.vue";
-import VehiclePanel from "./components/VehiclePanel.vue";
+import ThemeToggle from "./components/ThemeToggle.vue";
 import { useI18n } from "./i18n";
-import { useFleetFormat } from "./useFleetFormat.js";
 import { useToast } from "./useToast.js";
-import { useConfirm } from "./useConfirm.js";
-import { useFleetBoard } from "./useFleetBoard.js";
-import { useVehiclePanel } from "./useVehiclePanel.js";
-import { useAlerts } from "./useAlerts.js";
-import { useFleetFilters } from "./useFleetFilters.js";
-import { useSelection } from "./useSelection.js";
-import { useDriverAssignment } from "./useDriverAssignment.js";
-import { useFleetActions } from "./useFleetActions.js";
+import { useEmployee } from "./useEmployee.js";
 
-const { t, dir } = useI18n();
+const { t, lang, dir } = useI18n();
 
-// Keep the document direction/lang in sync so native RTL applies page-wide.
+// Keep <html dir/lang> in sync so native RTL applies page-wide.
 watch(
   dir,
   (d) => {
@@ -50,303 +35,225 @@ watch(
   { immediate: true },
 );
 
-// Display formatters (single source: pure helpers + t-bound ones).
-const fmt = useFleetFormat(t);
-
-// Board data model (vehicles + counts + triage).
-const board = useFleetBoard({ expiryFlag: fmt.expiryFlag });
-const {
-  vehicles, loadState, loadError, reloadStale, isScopeEmpty,
-  counts, countsLoading, triage, loadFleet,
-} = board;
-
-// Toast + promise-based confirm.
 const { toast, showToast } = useToast();
-const { cf, cfShow, cfDo } = useConfirm(t);
+const { vehicle, trips, fuelGrades, stations, form, submitting, loading, submitFuelRequest } =
+  useEmployee();
 
-// Detail drawer.
-const { panel, subForm, openPanel, closePanel, setPTab, tabDmg, tabAcc } = useVehiclePanel(vehicles);
-// Cancel-buttons close the open sub-form (a ref write kept out of child templates).
-function closeSubForm() {
-  subForm.value = null;
-}
+const avatarInitial = computed(() => Array.from(t("emp.brand"))[0] || "•");
 
-// Operations alerts (bell + drawer).
-const {
-  alerts, alertTotal, alertsState, alertsOpen,
-  loadAlerts, toggleAlerts, closeAlerts,
-  sevClass, sevLabel, alertVehicleOnBoard, openAlertTarget,
-} = useAlerts({ vehicles, t, openPanel });
-
-// Background re-pull wrapper: board fetch + re-point the open panel to the fresh
-// row (or close it if the vehicle left the scoped list).
-async function reloadFleet() {
-  await board.reloadFleet();
-  if (panel.open && panel.plate) {
-    const fresh = vehicles.value.find((x) => x.plate === panel.plate);
-    if (fresh) panel.vehicle = fresh;
-    else closePanel();
-  }
-}
-
-// Filters / sort / view + derived lists.
-const {
-  f, triageFilter,
-  setSP, setSheet, setFuel, setDateType, setView, setTriage, onSortCol,
-  setQuickDate, clearDateFilter, resetFilters,
-  hasDateFilter, anyFilterActive, filtered, driverGroups, dateInfo, activeFilterChips,
-  density, toggleDensity,
-  filtersSheetOpen, toggleFiltersSheet, closeFiltersSheet,
-} = useFleetFilters({ vehicles, fmt, t });
-
-// Multi-select (bulk actions).
-const {
-  selectMode, selected, selectedCount, isSelected,
-  toggleSelect, clearSelection, toggleSelectMode,
-  allVisibleSelected, toggleSelectAll,
-} = useSelection(filtered);
-
-// Assign/reassign flow (driver picker + optional handover).
-const {
-  rf, dp, onDriverQuery, pickDriver,
-  openReassignForm, openNewDriverForm, submitReassign,
-} = useDriverAssignment({ panel, subForm, showToast, cfShow, reloadFleet, t });
-
-// Status / quick / bulk actions.
-const {
-  busyPlates, isBusy,
-  sf, openStopForm, confirmStop,
-  stf, openStolenForm, submitStolen,
-  quickStop, quickReassign, sendWorkshop, exitWorkshop, setAvailable, recoverVehicle, markStolen,
-  bulkNote, bulkStop, bulkWorkshop,
-  changeStatus,
-} = useFleetActions({
-  vehicles, panel, subForm, openPanel,
-  showToast, cfShow, reloadFleet,
-  selected, clearSelection, openReassignForm, t,
+// Time-of-day greeting.
+const greeting = computed(() => {
+  const h = new Date().getHours();
+  if (h < 12) return t("emp.greetMorning");
+  if (h < 18) return t("emp.greetAfternoon");
+  return t("emp.greetEvening");
 });
 
-// Driver-centric lens: shown only when the server grants the capability flag.
-const caps = (typeof window !== "undefined" && window.fleet_caps) || {};
-const canDriverLens = computed(() => caps.driver_lens === true);
-
-// ═══════════ LIVE SYNC (poll + realtime) ═══════════
-// Paused while the tab is hidden, the first load hasn't landed, or the user is
-// mid-interaction (a write in flight, a sub-form/confirm open, or a selection
-// active) so a tick can't clobber their state.
-const POLL_MS = 30000;
-let pollTimer = null;
-const pollPaused = computed(
-  () =>
-    loadState.value !== "ready" ||
-    cf.open ||
-    !!subForm.value ||
-    busyPlates.value.size > 0 ||
-    selected.value.size > 0
+// Localized integer formatting: Arabic-Indic digits + separator under `ar`.
+function fmtInt(n) {
+  if (n == null) return "—";
+  const grouped = new Intl.NumberFormat(lang.value === "ar" ? "ar-SA" : "en-US").format(n);
+  return grouped;
+}
+const todayLabel = computed(() =>
+  new Intl.DateTimeFormat(lang.value === "ar" ? "ar-SA" : "en-US", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date()),
 );
-async function pollTick() {
-  if (document.hidden || pollPaused.value) return;
-  await reloadFleet();
-  await loadAlerts();
-}
-function startPoll() {
-  if (pollTimer) return;
-  pollTimer = setInterval(pollTick, POLL_MS);
-}
-function stopPoll() {
-  if (pollTimer) {
-    clearInterval(pollTimer);
-    pollTimer = null;
+const scheduledCount = computed(() => trips.value.filter((x) => x.status !== "completed").length);
+const subtitleText = computed(() => t("emp.subtitle", { date: todayLabel.value, n: scheduledCount.value }));
+
+// Vehicle status → pill class + label (reuses the board's status vocabulary).
+const statusMeta = {
+  available: { cls: "pill-ok", key: "statusShort.available" },
+  assigned: { cls: "pill-ok", key: "statusShort.assigned" },
+  workshop: { cls: "pill-warn", key: "statusShort.workshop" },
+  stopped: { cls: "pill-neutral", key: "statusShort.stopped" },
+  stolen: { cls: "pill-warn", key: "statusShort.stolen" },
+};
+const vehicleStatus = computed(() => statusMeta[vehicle.status] || statusMeta.available);
+
+const tripMeta = {
+  planned: { cls: "pill-warn", key: "emp.trips.planned" },
+  inProgress: { cls: "pill-ok", key: "emp.trips.inProgress" },
+  completed: { cls: "pill-ok", key: "emp.trips.completed" },
+};
+
+async function onSubmit() {
+  if (submitting.value) return;
+  try {
+    const res = await submitFuelRequest();
+    if (res && res.ok) showToast(t("emp.fuel.sent"), "green");
+  } catch (e) {
+    const msg = (e && (e.messages?.[0] || e.message)) || t("emp.fuel.error");
+    showToast(msg, "red");
   }
 }
-// Realtime socket push, ahead of the poll. A push that lands mid-interaction is
-// deferred via a pending flag, then flushed the moment the user is free.
-let stopRealtime = () => {};
-const realtimePending = ref(false);
-async function onRealtimeUpdate() {
-  if (document.hidden || pollPaused.value) {
-    realtimePending.value = true;
-    return;
-  }
-  realtimePending.value = false;
-  await reloadFleet();
-  await loadAlerts();
+function onSaveDraft() {
+  showToast(t("emp.fuel.draftSaved"), "amber");
 }
-watch(pollPaused, (paused) => {
-  if (!paused && realtimePending.value && !document.hidden) onRealtimeUpdate();
-});
-// Re-sync immediately when the tab regains focus, then keep polling.
-function onVisibility() {
-  if (document.hidden) return;
-  if (!pollPaused.value) reloadFleet();
-  else realtimePending.value = true; // flush the missed update once free
-}
-onMounted(() => {
-  loadFleet();
-  loadAlerts();
-  startPoll();
-  stopRealtime = connectFleetRealtime(onRealtimeUpdate);
-  document.addEventListener("visibilitychange", onVisibility);
-});
-onUnmounted(() => {
-  stopPoll();
-  stopRealtime();
-  document.removeEventListener("visibilitychange", onVisibility);
-});
 </script>
 
 <template>
-  <FleetPageShell max-width="100%">
+  <FleetPageShell :title="greeting" :subtitle="subtitleText" max-width="1120">
     <template #brand>
-      <span class="fp-brandmark"><Icon name="car" :size="20" /></span>
-      <span class="fp-brandword">{{ t("brand.name") }}</span>
+      <span class="emp-brandmark"><Icon name="car" :size="19" /></span>
+      <span class="emp-brandword">
+        {{ t("emp.brand") }}
+        <small>{{ t("emp.brandSub") }}</small>
+      </span>
     </template>
+
+    <template #nav>
+      <a href="#vehicle" class="is-active">{{ t("emp.nav.home") }}</a>
+      <a href="#trips">{{ t("emp.nav.trips") }}</a>
+      <a href="#fuel">{{ t("emp.nav.fuel") }}</a>
+    </template>
+
     <template #actions>
-      <div class="search-bar fp-head-search">
-        <span class="si"><Icon name="search" :size="15" /></span>
-        <input v-model="f.search" :placeholder="t('topbar.searchPlaceholder')" />
-      </div>
-      <button class="alert-bell" :class="{ active: alertsOpen }" :title="t('alerts.bellTitle')" :aria-label="t('alerts.bellTitle')" @click="toggleAlerts">
-        <Icon name="bell" :size="18" />
-        <span v-if="alertTotal > 0" class="alert-bell-badge">{{ alertTotal > 99 ? "99+" : alertTotal }}</span>
-      </button>
+      <ThemeToggle />
       <LangToggle />
+      <span class="emp-avatar" :title="t('emp.brand')">{{ avatarInitial }}</span>
     </template>
 
-    <!-- STATUS / KPI / TRIAGE PILLS (shimmer until the first load resolves) -->
-    <div class="fp-pills-bar">
-      <template v-if="countsLoading">
-        <span v-for="n in 6" :key="n" class="sp fp-kpi-skel"></span>
-      </template>
-      <template v-else>
-        <span class="sp sp-all" :class="{ active: f.status === '' }" @click="setSP('')">{{ counts.total }} {{ t("topbar.allVehicles") }}</span>
-        <span class="sp sp-assigned" :class="{ active: f.status === 'assigned' }" @click="setSP('assigned')">{{ counts.assigned }} {{ t("statusShort.assigned") }}</span>
-        <span class="sp sp-available" :class="{ active: f.status === 'available' }" @click="setSP('available')">{{ counts.available }} {{ t("statusShort.available") }}</span>
-        <span class="sp sp-workshop" :class="{ active: f.status === 'workshop' }" @click="setSP('workshop')">{{ counts.workshop }} {{ t("statusShort.workshop") }}</span>
-        <span class="sp sp-stopped" :class="{ active: f.status === 'stopped' }" @click="setSP('stopped')">{{ counts.stopped }} {{ t("statusShort.stopped") }}</span>
-        <span class="sp sp-stolen" :class="{ active: f.status === 'stolen' }" @click="setSP('stolen')">{{ counts.stolen }} {{ t("statusShort.stolen") }}</span>
-        <span v-if="triage.incidents" class="sp sp-triage-incident" :class="{ active: triageFilter === 'incidents' }" @click="setTriage('incidents')"><Icon name="crash" :size="12" /> {{ triage.incidents }} {{ t("topbar.openIncidents") }}</span>
-        <span v-if="triage.expiring" class="sp sp-triage-expiry" :class="{ active: triageFilter === 'expiring' }" @click="setTriage('expiring')"><Icon name="shield-alert" :size="12" /> {{ triage.expiring }} {{ t("topbar.expiringSoon") }}</span>
-      </template>
-    </div>
+    <!-- Greeting subtitle is provided via the `subtitle` prop above; the shell
+         renders it under the title. -->
 
-    <div class="layout">
-    <FleetSidebar
-      :f="f" :counts="counts" :countsLoading="countsLoading" :hasDateFilter="hasDateFilter"
-      :dateInfo="dateInfo" :filtersSheetOpen="filtersSheetOpen" :closeFiltersSheet="closeFiltersSheet"
-      :setSheet="setSheet" :setFuel="setFuel" :setDateType="setDateType" :setQuickDate="setQuickDate"
-      :clearDateFilter="clearDateFilter" :resetFilters="resetFilters" :t="t"
-    />
+    <div class="emp-grid">
+      <!-- LEFT: vehicle + trips -->
+      <div class="emp-col">
+        <!-- MY VEHICLE -->
+        <section id="vehicle" class="emp-card reveal d1">
+          <header class="emp-card-head">
+            <span class="emp-ic"><Icon name="car" :size="17" /></span>
+            <div class="emp-card-titles">
+              <h3>{{ t("emp.vehicle.title") }}</h3>
+              <p class="emp-hint">{{ t("emp.vehicle.hint") }}</p>
+            </div>
+          </header>
 
-    <div class="main">
-      <FleetToolbar
-        :f="f" :filtered="filtered" :anyFilterActive="anyFilterActive" :selectMode="selectMode"
-        :density="density" :canDriverLens="canDriverLens" :toggleFiltersSheet="toggleFiltersSheet"
-        :toggleSelectMode="toggleSelectMode" :setView="setView" :toggleDensity="toggleDensity" :t="t"
-      />
+          <p v-if="loading" class="emp-empty">{{ t("emp.loading") }}</p>
+          <p v-else-if="vehicle.empty" class="emp-empty">{{ t("emp.vehicle.empty") }}</p>
+          <template v-else>
+            <div class="emp-vehicle-hero">
+              <span class="emp-plate">{{ vehicle.plate }}</span>
+              <div class="emp-vinfo">
+                <b>{{ vehicle.model }}</b>
+                <span>{{ vehicle.office }}</span>
+              </div>
+              <span class="emp-pill" :class="vehicleStatus.cls">
+                <span class="dot"></span>{{ t(vehicleStatus.key) }}
+              </span>
+            </div>
 
-      <!-- BULK ACTION BAR: kept in the shell (bulkNote is a bare ref v-model) -->
-      <div v-if="selectMode && selectedCount" class="fp-bulk-bar">
-        <span class="fp-bulk-count">{{ t("bulk.selected", { n: selectedCount }) }}</span>
-        <input class="fp-bulk-note fs" v-model="bulkNote" :placeholder="t('stopForm.notesPlaceholder')" />
-        <div class="fp-bulk-actions">
-          <button class="btn btn-red" @click="bulkStop"><Icon name="circle-pause" :size="14" /> {{ t("bulk.stopSelected") }}</button>
-          <button class="btn btn-amber" @click="bulkWorkshop"><Icon name="wrench" :size="14" /> {{ t("bulk.workshopSelected") }}</button>
-          <button class="btn" @click="clearSelection"><Icon name="x" :size="14" /> {{ t("bulk.clear") }}</button>
-        </div>
+            <div class="emp-kv-row">
+              <div class="emp-kv">
+                <small>{{ t("emp.vehicle.odometer") }}</small>
+                <b class="tnum">{{ fmtInt(vehicle.odometerKm) }} {{ t("emp.vehicle.kmUnit") }}</b>
+              </div>
+              <div class="emp-kv">
+                <small>{{ t("emp.vehicle.registration") }}</small>
+                <b>{{ vehicle.registrationExpiry ? t("emp.vehicle.validUntil", { date: vehicle.registrationExpiry }) : t("common.none") }}</b>
+              </div>
+            </div>
+          </template>
+        </section>
+
+        <!-- MY TRIPS -->
+        <section id="trips" class="emp-card reveal d2">
+          <header class="emp-card-head">
+            <span class="emp-ic"><Icon name="clipboard-list" :size="17" /></span>
+            <div class="emp-card-titles">
+              <h3>{{ t("emp.trips.title") }}</h3>
+              <p class="emp-hint">{{ t("emp.trips.hint") }}</p>
+            </div>
+          </header>
+
+          <p v-if="loading" class="emp-empty">{{ t("emp.loading") }}</p>
+          <p v-else-if="!trips.length" class="emp-empty">{{ t("emp.trips.empty") }}</p>
+          <ul v-else class="emp-trips">
+            <li v-for="trip in trips" :key="trip.id" class="emp-trip">
+              <span class="emp-pill" :class="(tripMeta[trip.status] || tripMeta.planned).cls">
+                <span class="dot"></span>{{ t((tripMeta[trip.status] || tripMeta.planned).key) }}
+              </span>
+              <div class="emp-route">
+                <b>{{ trip.title }}</b>
+                <span>
+                  <template v-if="trip.date">{{ trip.date }}</template>
+                  <template v-if="trip.when"> · {{ trip.when }}</template>
+                  <template v-if="trip.distanceKm"> · {{ t("emp.trips.distance", { n: fmtInt(trip.distanceKm) }) }}</template>
+                </span>
+              </div>
+              <span class="emp-arrow"><Icon name="chevron" :size="17" /></span>
+            </li>
+          </ul>
+        </section>
       </div>
 
-      <!-- STALE (background refresh failed; the last good board is still shown) -->
-      <div v-if="loadState === 'ready' && reloadStale" class="fp-error-banner" style="border-color:var(--amber);background:color-mix(in srgb,var(--amber) 12%,transparent)">
-        <span style="color:var(--amber)"><Icon name="triangle-alert" :size="20" /></span>
-        <span class="fp-err-msg">{{ t("main.staleData") }}</span>
-        <button class="btn btn-amber" @click="reloadFleet">{{ t("common.retry") }}</button>
-      </div>
-
-      <!-- ERROR (persistent banner + retry) -->
-      <div v-if="loadState === 'error'" class="fp-error-banner">
-        <span style="color:var(--red-l)"><Icon name="triangle-alert" :size="20" /></span>
-        <span class="fp-err-msg">{{ t("main.loadError", { error: loadError }) }}</span>
-        <button class="btn btn-red" @click="loadFleet">{{ t("common.retry") }}</button>
-      </div>
-
-      <!-- LOADING (skeleton) -->
-      <div v-else-if="loadState === 'loading'" class="cards-wrap">
-        <div class="cards-grid">
-          <div class="fp-skel-card" v-for="n in 8" :key="n">
-            <div class="fp-skel-line" style="width:40%"></div>
-            <div class="fp-skel-line" style="width:70%"></div>
-            <div class="fp-skel-line" style="width:55%"></div>
-            <div class="fp-skel-line" style="width:80%"></div>
+      <!-- RIGHT: fuel request -->
+      <section id="fuel" class="emp-card emp-form-card reveal d3">
+        <header class="emp-card-head">
+          <span class="emp-ic"><Icon name="fuel" :size="17" /></span>
+          <div class="emp-card-titles">
+            <h3>{{ t("emp.fuel.title") }}</h3>
+            <p class="emp-hint">{{ t("emp.fuel.hint") }}</p>
           </div>
-        </div>
-      </div>
+        </header>
 
-      <FleetCardGrid
-        v-else-if="f.view === 'cards'"
-        :filtered="filtered" :density="density" :isScopeEmpty="isScopeEmpty"
-        :anyFilterActive="anyFilterActive" :activeFilterChips="activeFilterChips"
-        :selectMode="selectMode" :resetFilters="resetFilters" :isSelected="isSelected"
-        :toggleSelect="toggleSelect" :isBusy="isBusy" :openPanel="openPanel"
-        :sb="fmt.sb" :icon="fmt.icon" :trim="fmt.trim" :initials="fmt.initials"
-        :expiryFlag="fmt.expiryFlag" :calcTotalDaysNum="fmt.calcTotalDaysNum"
-        :quickStop="quickStop" :quickReassign="quickReassign" :sendWorkshop="sendWorkshop"
-        :exitWorkshop="exitWorkshop" :setAvailable="setAvailable" :recoverVehicle="recoverVehicle"
-        :markStolen="markStolen" :t="t"
-      />
+        <form @submit.prevent="onSubmit">
+          <div class="emp-field">
+            <label for="ff-grade">{{ t("emp.fuel.fuelType") }}</label>
+            <div class="emp-select-wrap">
+              <select id="ff-grade" v-model="form.fuelGrade" class="emp-control">
+                <option v-for="g in fuelGrades" :key="g" :value="g">{{ t("fuelGrade." + g) }}</option>
+              </select>
+              <Icon class="emp-select-caret" name="chevron" :size="15" />
+            </div>
+          </div>
 
-      <FleetDriverLens
-        v-else-if="f.view === 'drivers'"
-        :filtered="filtered" :isScopeEmpty="isScopeEmpty" :anyFilterActive="anyFilterActive"
-        :resetFilters="resetFilters" :driverGroups="driverGroups"
-        :initials="fmt.initials" :icon="fmt.icon" :sb="fmt.sb" :sl="fmt.sl" :trim="fmt.trim"
-        :openPanel="openPanel" :t="t"
-      />
+          <div class="emp-field">
+            <label for="ff-litres">{{ t("emp.fuel.quantity") }}</label>
+            <div class="emp-control emp-control-num">
+              <input id="ff-litres" v-model.number="form.litres" type="number" min="1" step="1" inputmode="numeric" />
+              <span class="emp-unit">{{ t("emp.fuel.litresUnit") }}</span>
+            </div>
+          </div>
 
-      <FleetTable
-        v-else
-        :filtered="filtered" :isScopeEmpty="isScopeEmpty" :selectMode="selectMode"
-        :allVisibleSelected="allVisibleSelected" :toggleSelectAll="toggleSelectAll"
-        :isSelected="isSelected" :toggleSelect="toggleSelect" :onSortCol="onSortCol"
-        :openPanel="openPanel" :icon="fmt.icon" :sb="fmt.sb" :sl="fmt.sl" :trim="fmt.trim"
-        :calcTotalDaysNum="fmt.calcTotalDaysNum" :t="t"
-      />
-    </div>
+          <div class="emp-field">
+            <label for="ff-station">{{ t("emp.fuel.station") }}</label>
+            <div class="emp-select-wrap">
+              <select id="ff-station" v-model="form.station" class="emp-control">
+                <option v-for="s in stations" :key="s" :value="s">{{ s }}</option>
+              </select>
+              <Icon class="emp-select-caret" name="chevron" :size="15" />
+            </div>
+          </div>
+
+          <div class="emp-field">
+            <label for="ff-notes">{{ t("emp.fuel.notes") }}</label>
+            <textarea
+              id="ff-notes"
+              v-model="form.notes"
+              class="emp-control emp-textarea"
+              rows="2"
+              :placeholder="t('emp.fuel.notesPlaceholder')"
+            ></textarea>
+          </div>
+
+          <button type="submit" class="emp-btn emp-btn-primary" :disabled="submitting">
+            <Icon v-if="!submitting" name="rotate-cw" :size="17" />
+            {{ submitting ? t("emp.fuel.sending") : t("emp.fuel.submit") }}
+          </button>
+          <button type="button" class="emp-btn emp-btn-ghost" @click="onSaveDraft">
+            {{ t("emp.fuel.saveDraft") }}
+          </button>
+        </form>
+      </section>
     </div>
   </FleetPageShell>
 
-  <AlertDrawer
-    :alertsOpen="alertsOpen" :alertsState="alertsState" :alerts="alerts" :alertTotal="alertTotal"
-    :closeAlerts="closeAlerts" :sevClass="sevClass" :sevLabel="sevLabel"
-    :alertVehicleOnBoard="alertVehicleOnBoard" :openAlertTarget="openAlertTarget" :t="t"
-  />
-
-  <VehiclePanel
-    :panel="panel" :subForm="subForm" :closePanel="closePanel" :setPTab="setPTab"
-    :tabDmg="tabDmg" :tabAcc="tabAcc" :closeSubForm="closeSubForm"
-    :sb="fmt.sb" :initials="fmt.initials" :calcTotalDaysNum="fmt.calcTotalDaysNum"
-    :calcActiveDaysNum="fmt.calcActiveDaysNum" :fuelView="fmt.fuelView" :trim="fmt.trim"
-    :historyItems="fmt.historyItems" :calcDur="fmt.calcDur" :today="fmt.today"
-    :openStopForm="openStopForm" :openReassignForm="openReassignForm" :sf="sf" :confirmStop="confirmStop"
-    :dp="dp" :onDriverQuery="onDriverQuery" :pickDriver="pickDriver"
-    :openNewDriverForm="openNewDriverForm" :rf="rf" :submitReassign="submitReassign"
-    :changeStatus="changeStatus" :stf="stf" :submitStolen="submitStolen"
-    :openStolenForm="openStolenForm" :recoverVehicle="recoverVehicle" :t="t"
-  />
-
   <!-- TOAST -->
   <div class="toast" :class="[toast.show ? 'show' : '', 'toast-' + toast.type]">{{ toast.msg }}</div>
-
-  <!-- CUSTOM CONFIRM MODAL -->
-  <div v-if="cf.open" class="cf-overlay" @click.self="cfDo(false)">
-    <div class="cf-box">
-      <div class="cf-icon"><Icon :name="cf.icon" :size="36" :stroke-width="1.75" /></div>
-      <div class="cf-title">{{ cf.title }}</div>
-      <div class="cf-msg">{{ cf.msg }}</div>
-      <div class="cf-btns">
-        <button class="btn" @click="cfDo(false)">{{ t("common.cancel") }}</button>
-        <button class="btn" :class="cf.okCls" @click="cfDo(true)">{{ cf.okLabel }}</button>
-      </div>
-    </div>
-  </div>
 </template>
