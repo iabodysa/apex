@@ -237,9 +237,9 @@ def submit_fuel_request(litres, vehicle=None, fuel_grade=None, station=None, not
             "status": "Pending",
         }
     )
-    # audit-ok — driver resolved server-side from session identity; the employee
-    # holds no create DocPerm on Fuel Request (staff/oversight DocType).
-    doc.insert(ignore_permissions=True)
+    # Driver resolved server-side from session identity; the employee holds no
+    # create DocPerm on Fuel Request (staff/oversight DocType).
+    doc.insert(ignore_permissions=True)  # audit-ok
 
     # fuel_grade / notes have no Fuel Request field — keep them on the timeline so
     # nothing the employee typed is silently lost.
