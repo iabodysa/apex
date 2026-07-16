@@ -79,10 +79,11 @@ export function createPortalConfig({ dirname, name, sw }) {
         "@": path.resolve(dirname, "src"),
         "@shared": path.resolve(dirname, "../frontend_shared"),
       },
-      // frontend_shared/ lives outside each portal's root and has no node_modules,
-      // so bare imports there (frappe-ui, vue, socket.io-client used by the shared
-      // realtime factory) must resolve to the importing portal's copy.
-      dedupe: ["vue", "frappe-ui", "socket.io-client"],
+      // frontend_shared/ AND the folded-in driver screens (the merged Masar portal
+      // builds frontend/driver/src from the worker host) live outside the building
+      // portal's root and have no node_modules, so their bare imports (frappe-ui, vue,
+      // vue-router, socket.io-client) must resolve to the building portal's copy.
+      dedupe: ["vue", "vue-router", "frappe-ui", "socket.io-client"],
     },
     build: {
       outDir: path.resolve(dirname, "../../apex/public/" + name),

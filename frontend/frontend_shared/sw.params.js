@@ -15,7 +15,11 @@ export const SW_PARAMS = {
     displayName: "Salis Driver",
     swFilename: "driver-sw.min.js",
     navPath: "/driver",
-    assetBase: "/assets/apex/driver_portal",
+    // Merged Masar portal: /driver now serves the SHARED worker_portal bundle, so the
+    // driver PWA precaches and offline-serves that bundle (its own driver_portal build
+    // is retired). navPath stays /driver (its own scope + push), only the asset base
+    // moves to the one merged output dir.
+    assetBase: "/assets/apex/worker_portal",
     // v1 cache generation for the driver PWA. Bump the digit to force a full
     // cache reset for installed drivers independently of the worker PWA.
     cacheVersion: "driver-pwa-v1-",

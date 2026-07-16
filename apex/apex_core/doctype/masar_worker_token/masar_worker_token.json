@@ -7,10 +7,12 @@
  "engine": "InnoDB",
  "field_order": [
   "section_worker",
+  "holder_type",
   "party_type",
   "party",
   "employee",
   "employee_name",
+  "driver",
   "column_break_main",
   "enabled",
   "section_token",
@@ -29,13 +31,25 @@
    "label": "Worker"
   },
   {
+   "fieldname": "holder_type",
+   "fieldtype": "Select",
+   "label": "Holder Type",
+   "options": "Worker\nDriver",
+   "default": "Worker",
+   "reqd": 1,
+   "in_standard_filter": 1,
+   "in_list_view": 1,
+   "description": "Which subject this access token grants entry for: a housed/transported Worker (Masar) or a fleet Driver (barcode entry, no Frappe User)."
+  },
+  {
    "fieldname": "party_type",
    "fieldtype": "Select",
    "label": "Worker Type",
    "options": "Employee\nTemporary Worker",
    "default": "Employee",
    "reqd": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "depends_on": "eval:doc.holder_type!='Driver'"
   },
   {
    "fieldname": "party",
@@ -43,7 +57,8 @@
    "label": "Worker",
    "options": "party_type",
    "in_list_view": 1,
-   "search_index": 1
+   "search_index": 1,
+   "depends_on": "eval:doc.holder_type!='Driver'"
   },
   {
    "fieldname": "employee",
@@ -53,7 +68,8 @@
    "options": "Employee",
    "read_only": 1,
    "unique": 1,
-   "search_index": 1
+   "search_index": 1,
+   "depends_on": "eval:doc.holder_type!='Driver'"
   },
   {
    "fetch_from": "employee.employee_name",
@@ -61,7 +77,20 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Employee Name",
-   "read_only": 1
+   "read_only": 1,
+   "depends_on": "eval:doc.holder_type!='Driver'"
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "label": "Driver",
+   "options": "Salis Driver",
+   "in_list_view": 1,
+   "read_only": 1,
+   "unique": 1,
+   "search_index": 1,
+   "depends_on": "eval:doc.holder_type=='Driver'",
+   "description": "The Salis Driver this barcode token grants portal entry for. Set on a Driver-holder token; the driver enters by scanning the QR with no Frappe User."
   },
   {
    "fieldname": "column_break_main",
@@ -134,7 +163,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-16 17:00:45.582563",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Masar Worker Token",

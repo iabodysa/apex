@@ -4,18 +4,24 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#072B1A" />
-    <link rel="manifest" href="/assets/apex/driver_portal/manifest.webmanifest" />
+    <link rel="manifest" href="/assets/apex/worker_portal/manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
     />
-    <link rel="stylesheet" href="/assets/apex/driver_portal/assets/index.css" />
+    <!-- Merged Masar portal: /driver loads the SAME built bundle as /masar
+         (worker_portal). window.holder_type below makes it boot the driver screens. -->
+    <link rel="stylesheet" href="/assets/apex/worker_portal/assets/index.css" />
     {%- include "apex/templates/includes/portal_accent.html" %}
     <title>Salis Driver</title>
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
+      // Merged Masar portal: this /driver entry boots the DRIVER screen set from the
+      // shared worker_portal bundle. The raw token never appears here — it rides in the
+      // httpOnly masar_dt cookie and is resolved server-side by the driver endpoints.
+      window.holder_type = "Driver";
       window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
       window.portal_logo = {{ (portal_logo or '') | tojson }};
       window.portal_theme = {{ (portal_theme or 'afmco') | tojson }};
@@ -29,7 +35,7 @@
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/assets/apex/driver_portal/assets/index.js"></script>
+    <script type="module" src="/assets/apex/worker_portal/assets/index.js"></script>
     <script>
       // Register the Salis Driver PWA service worker. The worker is served from
       // the ROOT (/driver-sw.min.js) so its scope can cover /driver — a service

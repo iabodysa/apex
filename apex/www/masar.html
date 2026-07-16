@@ -25,6 +25,9 @@
     <title>Masar</title>
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
+      // Merged Masar portal: this /masar entry boots the WORKER screen set. The one
+      // bundle (worker_portal) also serves /driver, which projects holder_type=Driver.
+      window.holder_type = "Worker";
       // [T-705] The raw personal token is NEVER inlined here. It rides in the
       // httpOnly `masar_wt` cookie (set server-side from the one-time ?w= hit) and
       // is read by the worker endpoints server-side. The shell only learns whether
