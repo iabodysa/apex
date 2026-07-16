@@ -82,6 +82,19 @@ class TestRouteSmoke(FrappeTestCase):
 		for key in _APPEARANCE_KEYS:
 			self.assertIn(key, ctx)
 
+	def test_driver_guest_context_keys(self):
+		# [#drv1gu] A-046: /driver is a passwordless token portal (like /masar) —
+		# guest-accessible, no login redirect. It projects driver_has_token from the
+		# httpOnly cookie and never leaks the raw token into the shell context.
+		frappe.set_user("Guest")
+		frappe.local.form_dict = frappe._dict()
+		ctx = driver_page.get_context(frappe._dict())
+		self.assertTrue(ctx.csrf_token)
+		self.assertIn("driver_has_token", ctx)
+		self.assertNotIn("driver_token", ctx, "the raw token must not be in the shell context")
+		for key in _APPEARANCE_KEYS:
+			self.assertIn(key, ctx)
+
 	def test_safety_context_role_gate_and_appearance(self):
 		# [#4l0371]
 		frappe.set_user("Administrator")
@@ -103,8 +116,10 @@ class TestRouteSmoke(FrappeTestCase):
 		self.assertNotIn("portal_theme", ctx)
 
 	def test_guest_is_redirected_on_admin_routes(self):
-		# [#fqysuh]
+		# [#fqysuh] /driver dropped from this list — A-046 made it a passwordless
+		# token portal (guest-accessible, covered by test_driver_guest_context_keys).
+		# fleet + safety remain login-gated admin routes.
 		frappe.set_user("Guest")
-		for page in (driver_page, fleet_page, safety_page):
+		for page in (fleet_page, safety_page):
 			with self.assertRaises(frappe.Redirect):
 				page.get_context(frappe._dict())

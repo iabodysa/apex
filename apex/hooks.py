@@ -204,7 +204,7 @@ doc_events = {
         "validate": "apex.habitat.doctype.maintenance_inspection_report.maintenance_inspection_report.validate",
         "before_cancel": "apex.habitat.doctype.maintenance_inspection_report.maintenance_inspection_report.before_cancel",
     },
-    # Auto-revoke the driver's passwordless barcode on إخلاء الطرف: a submitted Driver
+    # Auto-revoke the driver's passwordless barcode on exit clearance: a submitted Driver
     # Clearance disables the driver's access token(s) so a cleared-out driver can no
     # longer enter the portal. Additive to the controller's own on_submit.
     "Driver Clearance": {

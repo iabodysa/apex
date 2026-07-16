@@ -424,7 +424,7 @@ def revoke_driver_tokens(driver: str) -> int:
 
 def on_driver_clearance_submit(doc, method=None):
     """doc_events hook (Driver Clearance on_submit): auto-revoke the driver's barcode on
-    إخلاء الطرف. A submitted clearance is the exit event, so the passwordless bearer
+    exit clearance. A submitted clearance is the exit event, so the passwordless bearer
     credential is disabled the moment the driver is cleared out. Fail-safe: revoking is
     the safe direction; re-issue a fresh QR from the desk if a clearance is cancelled."""
     revoke_driver_tokens(getattr(doc, "driver", None))
