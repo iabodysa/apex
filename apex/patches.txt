@@ -385,3 +385,10 @@ apex.patches.v2_0.rename_app_apex_habitat_to_apex
 # payroll Custom Fields, and the Logistay Governance Module Def. post_model_sync: the two
 # survivors already exist and are explicitly excluded. Fully guarded; no-op on fresh installs.
 apex.patches.v2_0.archive_logistay_v1_engine
+
+# v2.0.0 — barcode cutover: DISABLE (never delete) the login Website-User accounts behind
+# the /driver portal, now that drivers enter by QR with no Frappe User. Hard-guarded so it
+# only touches a driver whose barcode token is already live (never locks out a driver),
+# skips System/desk/elevated users, and is reversible (User.enabled flip) + idempotent.
+# post_model_sync: reads the new Masar Worker Token.driver column. No-op on fresh installs.
+apex.patches.v2_0.disable_driver_login_users_barcode_cutover

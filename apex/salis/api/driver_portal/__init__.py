@@ -450,10 +450,15 @@ def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
 		if existing
 		else frappe.new_doc("Driver Push Subscription")
 	)
+	# Drivers enter by barcode with no Frappe User (full cutover), so the session is
+	# Guest — the subscription is keyed on the resolved ``driver`` (endpoint is the
+	# unique row key). Stamp ``user`` only when a real logged-in user is present
+	# (a desk staff preview), never the meaningless "Guest".
+	session_user = frappe.session.user
 	doc.update(
 		{
 			"driver": driver,
-			"user": frappe.session.user,
+			"user": None if session_user == "Guest" else session_user,
 			"endpoint": endpoint,
 			"p256dh": p256dh,
 			"auth": auth,

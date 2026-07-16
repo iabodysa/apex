@@ -28,6 +28,11 @@ from apex.apex_core.utils.party_link import sync_party_employee
 
 TOKEN_BYTES = 24  # [#9dvf8n]
 
+# Driver access-token cookie (barcode entry at /driver?d=<raw>). Distinct from the
+# worker cookie (masar_wt) so the two portals' credentials never cross-read; the
+# holder_type filter in the resolver is the second, authoritative guard.
+DRIVER_TOKEN_COOKIE = "masar_dt"
+
 # [#9haukd]
 
 
@@ -85,8 +90,25 @@ class MasarWorkerToken(Document):
                 pass
         return self.regenerate()
 
+    def autoname(self):
+        # Controller autoname overrides the meta field:party rule (which cannot name a
+        # driver row — a driver has no party). Name a Driver token by its Salis Driver,
+        # a Worker token by its party (Employee), exactly as before for workers.
+        if self.holder_type == "Driver":
+            if not self.driver:
+                frappe.throw(_("A Salis Driver is required for a driver access token."))
+            self.name = self.driver
+        else:
+            self.name = self.party
+
     # [#pewmoc]
     def before_validate(self):
+        # A Driver token binds a Salis Driver, not a worker party — skip the whole
+        # Employee/party sync + Temporary-Worker guard (those apply to workers only).
+        if self.holder_type == "Driver":
+            if not self.driver:
+                frappe.throw(_("A Salis Driver is required for a driver access token."))
+            return
         sync_party_employee(self, require_party=True)
         # [#c8p9h6]
         if self.party_type == "Temporary Worker":
@@ -99,7 +121,8 @@ class MasarWorkerToken(Document):
 
     def before_insert(self):
         # [#6ldmk7]
-        sync_party_employee(self)
+        if self.holder_type != "Driver":
+            sync_party_employee(self)
         # [#n4hnje]
         self._mint()
 
@@ -234,6 +257,177 @@ def batch_issue_worker_links(employees_json) -> list:
     for r in out:
         r["phone"] = phones.get(r["employee"])
     return out
+
+
+# ---------------------------------------------------------------------------
+# Driver access tokens — passwordless barcode entry for a Salis Driver.
+# Mirrors the worker issuance/resolution above; storage is identical (SHA-256
+# hash + Fernet ciphertext only, never a raw token at rest). Drivers have NO
+# Frappe User (full cutover): the token IS the identity, resolved server-side.
+# ---------------------------------------------------------------------------
+
+
+def _driver_link(token: str) -> str:
+    """The shareable personal driver-portal URL for a RAW token."""
+    return f"{frappe.utils.get_url()}/driver?d={token}"
+
+
+def get_or_create_for_driver(driver: str) -> "MasarWorkerToken":
+    """Return the driver's token row (holder_type=Driver), creating one on first use."""
+    if not frappe.db.exists("Salis Driver", driver):
+        frappe.throw(_("Salis Driver {0} does not exist.").format(driver))
+    name = frappe.db.get_value(
+        "Masar Worker Token", {"driver": driver, "holder_type": "Driver"}, "name"
+    )
+    if name:
+        return frappe.get_doc("Masar Worker Token", name)
+    doc = frappe.get_doc(
+        {"doctype": "Masar Worker Token", "holder_type": "Driver", "driver": driver}
+    )
+    doc.insert()
+    return doc
+
+
+@frappe.whitelist(methods=["POST"])
+def issue_driver_link(driver: str, regenerate: int = 0) -> dict:
+    """Desk action: issue (or rotate) a driver's personal barcode link + QR.
+
+    Permission-gated on write access to Masar Worker Token (same gate as the worker
+    action). Returns the link, the RAW token (shown ONCE), an SVG data-URI QR, the
+    expiry, and the driver's phone for a WhatsApp share. The raw token is never
+    stored or logged — only its hash + Fernet ciphertext persist. No financial impact."""
+    frappe.has_permission("Masar Worker Token", "write", throw=True)
+    doc = get_or_create_for_driver(driver)
+    # [#bqs6iz] mirror worker: reuse the just-minted plaintext, else rotate/recover.
+    raw = getattr(doc, "_plaintext_token", None)
+    if raw is None:
+        if frappe.utils.cint(regenerate) or not doc.token:
+            raw = doc.regenerate()
+        else:
+            raw = doc.recover_token()
+            doc.extend_expiry()
+
+    link = _driver_link(raw)
+    return {
+        "driver": doc.driver,
+        "driver_name": frappe.db.get_value("Salis Driver", doc.driver, "full_name"),
+        "enabled": bool(doc.enabled),
+        # [#cqj0cx] the ONE moment the raw token is returned; never persisted/logged.
+        "token": raw,
+        "link": link,
+        "qr": masar_qr_data_uri(link),
+        "expires_on": frappe.utils.cstr(doc.expires_on) if doc.expires_on else None,
+        "phone": frappe.db.get_value("Salis Driver", doc.driver, "phone"),
+    }
+
+
+@frappe.whitelist(methods=["POST"])
+def batch_issue_driver_links(drivers_json) -> list:
+    """Issue (or fetch) the barcode link + QR for several Salis Drivers in ONE call.
+
+    Same per-driver behaviour as issue_driver_link (mints a token when missing),
+    permission-checked once. Returns one row per driver: ``{driver, driver_name,
+    link, qr, phone}``. Raw tokens appear only in the returned payload, never logged."""
+    frappe.has_permission("Masar Worker Token", "write", throw=True)
+    drivers = frappe.parse_json(drivers_json) or []
+    out = []
+    for drv in drivers:
+        doc = get_or_create_for_driver(drv)
+        raw = getattr(doc, "_plaintext_token", None)
+        if raw is None:
+            if not doc.token:
+                raw = doc.regenerate()
+            else:
+                raw = doc.recover_token()
+                doc.extend_expiry()
+        link = _driver_link(raw)
+        out.append(
+            {
+                "driver": doc.driver,
+                "driver_name": frappe.db.get_value("Salis Driver", doc.driver, "full_name"),
+                "link": link,
+                "qr": masar_qr_data_uri(link),
+            }
+        )
+    driver_ids = [r["driver"] for r in out if r.get("driver")]
+    phones = dict(
+        frappe.get_all(
+            "Salis Driver",
+            filters={"name": ["in", driver_ids]},
+            fields=["name", "phone"],
+            as_list=True,
+        )
+    ) if driver_ids else {}
+    for r in out:
+        r["phone"] = phones.get(r["driver"])
+    return out
+
+
+def _driver_token_from_request(token=None) -> str:
+    """The driver token for this call: the explicit arg if given, else the httpOnly
+    ``masar_dt`` cookie. Returns '' when neither is present (resolver fails closed)."""
+    token = (token or "").strip()
+    if token:
+        return token
+    request = getattr(frappe.local, "request", None)
+    if request is not None:
+        try:
+            return (request.cookies.get(DRIVER_TOKEN_COOKIE) or "").strip()
+        except Exception:
+            return ""
+    return ""
+
+
+def resolve_driver_token(token=None):
+    """Resolve a driver access token (cookie or explicit arg) to its Salis Driver, or None.
+
+    The driver equivalent of ``masar._resolve_worker``: hashes the presented token and
+    matches it against an ENABLED, non-expired Driver-holder row. The ``holder_type ==
+    Driver`` filter means a worker token can never resolve a driver (cross-type
+    isolation). Soft (returns None, no throw) so the shared ``get_driver_for_user``
+    stays soft; the hard 403 is applied by ``_resolve_driver`` when this returns None."""
+    token = _driver_token_from_request(token)
+    if not token:
+        return None
+    row = frappe.db.get_value(
+        "Masar Worker Token",
+        {"token": _hash_token(token), "enabled": 1, "holder_type": "Driver"},
+        ["driver", "expires_on"],
+        as_dict=True,
+    )
+    if not row or not row.get("driver"):
+        return None
+    # Expired barcode refuses (mirrors the worker expiry gate).
+    if row.get("expires_on") and frappe.utils.now_datetime() > frappe.utils.get_datetime(
+        row["expires_on"]
+    ):
+        return None
+    return row["driver"]
+
+
+def revoke_driver_tokens(driver: str) -> int:
+    """Disable every enabled Driver-holder token for ``driver`` (auto-revoke on
+    clearance/off-boarding). Reversible (enabled flag only, hash+ciphertext kept) and
+    idempotent — a re-run finds nothing enabled and is a no-op. Returns how many were
+    disabled."""
+    if not driver:
+        return 0
+    names = frappe.get_all(
+        "Masar Worker Token",
+        filters={"driver": driver, "holder_type": "Driver", "enabled": 1},
+        pluck="name",
+    )
+    for name in names:
+        frappe.db.set_value("Masar Worker Token", name, "enabled", 0)
+    return len(names)
+
+
+def on_driver_clearance_submit(doc, method=None):
+    """doc_events hook (Driver Clearance on_submit): auto-revoke the driver's barcode on
+    إخلاء الطرف. A submitted clearance is the exit event, so the passwordless bearer
+    credential is disabled the moment the driver is cleared out. Fail-safe: revoking is
+    the safe direction; re-issue a fresh QR from the desk if a clearance is cancelled."""
+    revoke_driver_tokens(getattr(doc, "driver", None))
 
 
 def masar_qr_data_uri(text: str):

@@ -7,12 +7,25 @@ from frappe.utils import getdate, today
 
 
 def get_driver_for_user(user=None):
-	"""Return the Salis Driver name linked to ``user`` (session user if None), else None.
+	"""Return the Salis Driver for the caller, or None.
 
-	The single source for user -> Employee (user_id) -> Salis Driver (employee)
-	resolution. Soft (no throw) so unlinked callers (e.g. an admin previewing the
-	portal) get a friendly empty result, not a 403; callers that must have a driver
-	wrap this and throw on None (driver_portal._resolve_driver)."""
+	Drivers enter by BARCODE with no Frappe User (full cutover), so when no explicit
+	``user`` is passed the driver is resolved FROM THE ACCESS-TOKEN cookie first — the
+	single token -> Salis Driver identity gate mirroring ``masar._resolve_worker``. The
+	client never supplies a driver id, so one token can only ever surface its own
+	driver's data. The legacy session -> Employee(user_id) -> Salis Driver path is kept
+	only as a fallback (an explicit ``user``, or a desk staff/admin previewing the portal
+	with no token cookie), so a barcode-less desk user still resolves. Soft (no throw):
+	callers that must have a driver wrap this and throw on None (driver_portal._resolve_driver)."""
+	if user is None:
+		# Token-first: the barcode is the driver's identity (no session user exists).
+		from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
+			resolve_driver_token,
+		)
+
+		driver = resolve_driver_token()
+		if driver:
+			return driver
 	user = user or frappe.session.user
 	employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
 	if not employee:
