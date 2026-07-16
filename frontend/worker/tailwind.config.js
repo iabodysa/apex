@@ -1,6 +1,14 @@
 // Copyright (c) 2026, AFMCO and contributors
 export default {
-  content: ["./index.html", "./src/**/*.{vue,js}"],
+  // The merged Masar portal builds BOTH holder types from this one host, so Tailwind
+  // must scan the driver screens and the shared components too — otherwise driver-only
+  // utility classes would be purged and the driver screens would render unstyled.
+  content: [
+    "./index.html",
+    "./src/**/*.{vue,js}",
+    "../driver/src/**/*.{vue,js}",
+    "../frontend_shared/**/*.{vue,js}",
+  ],
   theme: {
     extend: {
       colors: {
