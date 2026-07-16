@@ -34,8 +34,14 @@ add_to_apps_screen = [
         "name": "apex-fleet",
         "logo": "/assets/apex/driver_portal/afmco-logo.svg",
         "title": "Fleet OS",
+        "route": "/fleet-os",
+        "has_permission": "apex.www.fleet_os.has_apps_screen_access",
+    },
+    {
+        "name": "apex-my-fleet",
+        "logo": "/assets/apex/driver_portal/afmco-logo.svg",
+        "title": "My Fleet",
         "route": "/fleet",
-        "has_permission": "apex.www.fleet.has_apps_screen_access",
     },
     {
         "name": "apex-housing",
