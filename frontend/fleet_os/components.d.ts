@@ -19,7 +19,6 @@ declare module 'vue' {
     LangToggle: typeof import('./src/components/LangToggle.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    ThemeToggle: typeof import('./src/components/ThemeToggle.vue')['default']
     VehiclePanel: typeof import('./src/components/VehiclePanel.vue')['default']
   }
 }
