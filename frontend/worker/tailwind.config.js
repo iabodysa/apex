@@ -8,6 +8,10 @@ export default {
     "./src/**/*.{vue,js}",
     "../driver/src/**/*.{vue,js}",
     "../frontend_shared/**/*.{vue,js}",
+    // Never scan an installed dependency tree: a stray frontend_shared/node_modules
+    // (gitignored, absent in CI) would otherwise inject env-specific utilities and
+    // make the committed bundle non-reproducible across a local vs CI build.
+    "!../frontend_shared/node_modules/**",
   ],
   theme: {
     extend: {
