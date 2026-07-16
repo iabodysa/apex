@@ -38,7 +38,6 @@ ARABIC_HOMES = (
     os.sep + "translations" + os.sep,
     os.sep + "print_format" + os.sep,
     "worker_portal",
-    "driver_portal",
     "fleet_portal",
     "fleet_os_portal",
     "safety_portal",

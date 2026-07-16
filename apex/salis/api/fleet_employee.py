@@ -84,7 +84,7 @@ def get_my_vehicle():
     The payload is shaped for the employee page's "My vehicle" card: plate,
     model (category label), office (project label), a status key mapped to the
     page's status-pill vocabulary, odometer, and the registration expiry."""
-    driver = get_driver_for_user()
+    driver = get_driver_for_user(frappe.session.user)
     vehicle = _bound_vehicle(driver) if driver else None
     if not vehicle:
         return {"vehicle": None}
@@ -123,7 +123,7 @@ def get_my_recent_trips(days=30, limit=20):
     Each row is shaped for the "My trips" card: route title, date/time, distance
     (from the odometer delta when both readings are present), and a status key
     mapped to the page's trip-pill vocabulary."""
-    driver = get_driver_for_user()
+    driver = get_driver_for_user(frappe.session.user)
     if not driver:
         return []
 
@@ -202,7 +202,7 @@ def submit_fuel_request(litres, vehicle=None, fuel_grade=None, station=None, not
     fuel_platform. ``fuel_grade`` and ``notes`` have no dedicated Fuel Request
     field, so they are preserved as a timeline note on the created request rather
     than dropped. Returns ``{"name": ...}``."""
-    driver = get_driver_for_user()
+    driver = get_driver_for_user(frappe.session.user)
     if not driver:
         frappe.throw(
             _("No fleet vehicle is assigned to you, so you cannot request fuel."),

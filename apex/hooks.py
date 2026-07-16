@@ -20,7 +20,7 @@ required_apps = ["frappe", "erpnext", "hrms"]
 add_to_apps_screen = [
     {
         "name": "apex-driver",
-        "logo": "/assets/apex/driver_portal/afmco-logo.svg",
+        "logo": "/assets/apex/worker_portal/afmco-logo.svg",
         "title": "Driver Portal",
         "route": "/driver",
     },
@@ -32,27 +32,27 @@ add_to_apps_screen = [
     },
     {
         "name": "apex-fleet",
-        "logo": "/assets/apex/driver_portal/afmco-logo.svg",
+        "logo": "/assets/apex/worker_portal/afmco-logo.svg",
         "title": "Fleet OS",
         "route": "/fleet-os",
         "has_permission": "apex.www.fleet_os.has_apps_screen_access",
     },
     {
         "name": "apex-my-fleet",
-        "logo": "/assets/apex/driver_portal/afmco-logo.svg",
+        "logo": "/assets/apex/worker_portal/afmco-logo.svg",
         "title": "My Fleet",
         "route": "/fleet",
     },
     {
         "name": "apex-housing",
-        "logo": "/assets/apex/driver_portal/afmco-logo.svg",
+        "logo": "/assets/apex/worker_portal/afmco-logo.svg",
         "title": "Housing",
         "route": "/housing",
         "has_permission": "apex.www.housing.has_apps_screen_access",
     },
     {
         "name": "apex-safety",
-        "logo": "/assets/apex/driver_portal/afmco-logo.svg",
+        "logo": "/assets/apex/worker_portal/afmco-logo.svg",
         "title": "Safety Rounds",
         "route": "/safety",
         "has_permission": "apex.www.safety.has_apps_screen_access",

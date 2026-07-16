@@ -27,9 +27,6 @@ jobs:
           - dir: worker
             portal: worker_portal
             sw: apex/www/masar-sw.min.js
-          - dir: driver
-            portal: driver_portal
-            sw: apex/www/driver-sw.min.js
           - dir: safety
             portal: safety_portal
           - dir: housing
@@ -76,7 +73,7 @@ jobs:
           set -uo pipefail
           canon=$(jq -S '.overrides' frontend/frontend_shared/pins.json)
           fail=0
-          for p in fleet worker driver safety housing; do
+          for p in fleet worker safety housing; do
             got=$(jq -S '.overrides' "frontend/${p}/package.json")
             if [ "$got" != "$canon" ]; then
               echo "::error::frontend/${p}/package.json overrides differ from frontend_shared/pins.json"
@@ -104,7 +101,7 @@ jobs:
           set -uo pipefail
           pins=frontend/frontend_shared/pins.json
           fail=0
-          for p in fleet worker driver safety housing; do
+          for p in fleet worker safety housing; do
             pkg="frontend/${p}/package.json"
             # Required deps: must exist (in dependencies or devDependencies) and match.
             while IFS=$'\t' read -r dep ver; do
