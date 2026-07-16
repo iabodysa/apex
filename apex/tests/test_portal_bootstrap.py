@@ -91,12 +91,14 @@ class TestRouteSmoke(FrappeTestCase):
 		for key in _APPEARANCE_KEYS:
 			self.assertIn(key, ctx)
 
-	def test_fleet_context_role_gate_no_appearance(self):
-		# [#p8eeoq]
+	def test_fleet_context_grants_access_no_appearance(self):
+		# [#p8eeoq] /fleet is now the employee page: any logged-in user gets
+		# can_view + csrf (no role gate; the FLEET_ROLES board moved to /fleet-os).
 		frappe.set_user("Administrator")
 		ctx = fleet_page.get_context(frappe._dict())
-		self.assertTrue(ctx.has_fleet_role)
+		self.assertTrue(ctx.can_view)
 		self.assertTrue(ctx.csrf_token)
+		self.assertNotIn("has_fleet_role", ctx)
 		self.assertIn("socketio_port", ctx)
 		self.assertNotIn("portal_theme", ctx)
 

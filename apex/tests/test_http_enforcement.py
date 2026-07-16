@@ -143,6 +143,17 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "with the caller's own identity. Token/identity-resolved writer.",
     ),
     (
+        "salis/api/fleet_employee.py",
+        "submit_fuel_request",
+        "Fleet employee page (/fleet). The Salis Driver is resolved from the "
+        "session server-side (get_driver_for_user, never client-supplied) and the "
+        "vehicle must be the caller's own bound vehicle (raises PermissionError "
+        "otherwise); the Fuel Request is created Pending for supervisor approval "
+        "and the employee holds no create DocPerm, so authorisation is the "
+        "server-side identity resolution, not a desk permission — same rail as "
+        "driver_portal.submit_fuel_request. Identity-resolved writer.",
+    ),
+    (
         "salis/api/driver_portal/support.py",
         "raise_support_ticket",
         "Driver portal. The Salis Driver and raised_by are resolved from the "

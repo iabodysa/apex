@@ -40,6 +40,7 @@ ARABIC_HOMES = (
     "worker_portal",
     "driver_portal",
     "fleet_portal",
+    "fleet_os_portal",
     "safety_portal",
     "housing_portal",
     "route_supervisor_portal",
