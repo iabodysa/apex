@@ -22,14 +22,112 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
+    _disable_legacy_driver_user,
     _hash_token,
     get_or_create_for_employee,
+    issue_driver_link,
+    resolve_driver_token,
+    revoke_driver_tokens,
 )
 from apex.salis.api import masar
 from apex.tests._helpers import _user
 
 # [#bwkatw]
 BLOCKED_STATUSES = ("Inactive", "Left")
+
+
+class TestDriverBarcodeCutover(FrappeTestCase):
+    def setUp(self):
+        frappe.set_user("Administrator")
+        self._token_meta = frappe.get_meta("Masar Worker Token")
+        self._original_autoname = self._token_meta.autoname
+        self._token_meta.autoname = "hash"
+
+    def tearDown(self):
+        self._token_meta.autoname = self._original_autoname
+        frappe.set_user("Administrator")
+
+    def _driver(self, user_type=None):
+        tag = frappe.generate_hash(length=12).lower()
+        user = None
+        if user_type:
+            user = frappe.get_doc(
+                {
+                    "doctype": "User",
+                    "email": f"barcode-{tag}@example.com",
+                    "first_name": f"Barcode {tag}",
+                    "enabled": 1,
+                    "send_welcome_email": 0,
+                }
+            ).insert(ignore_permissions=True).name
+            frappe.db.set_value("User", user, "user_type", user_type)
+
+        driver = frappe.get_doc(
+            {
+                "doctype": "Salis Driver",
+                "full_name": f"Barcode Driver {tag}",
+                "status": "Active",
+            }
+        ).insert(ignore_permissions=True).name
+        if user:
+            frappe.db.set_value("Salis Driver", driver, "driver_user", user)
+        return driver, user
+
+    def test_issue_disables_legacy_website_user_after_token_is_live(self):
+        driver, user = self._driver("Website User")
+
+        issued = issue_driver_link(driver)
+
+        self.assertEqual(resolve_driver_token(issued["token"]), driver)
+        self.assertEqual(frappe.db.get_value("User", user, "enabled"), 0)
+
+    def test_issue_never_disables_a_system_user(self):
+        driver, user = self._driver("System User")
+
+        issued = issue_driver_link(driver)
+
+        self.assertEqual(resolve_driver_token(issued["token"]), driver)
+        self.assertEqual(frappe.db.get_value("User", user, "enabled"), 1)
+
+    def test_expired_barcode_never_disables_the_legacy_user(self):
+        driver, user = self._driver("Website User")
+        issue_driver_link(driver)
+        frappe.db.set_value("User", user, "enabled", 1)
+        frappe.db.set_value(
+            "Masar Worker Token",
+            driver,
+            "expires_on",
+            frappe.utils.add_to_date(frappe.utils.now_datetime(), days=-1),
+        )
+
+        self.assertFalse(_disable_legacy_driver_user(driver))
+        self.assertEqual(frappe.db.get_value("User", user, "enabled"), 1)
+
+    def test_reissue_rotates_and_reenables_a_revoked_driver_token(self):
+        driver, _user_name = self._driver()
+        first = issue_driver_link(driver)
+        self.assertEqual(revoke_driver_tokens(driver), 1)
+        self.assertIsNone(resolve_driver_token(first["token"]))
+
+        second = issue_driver_link(driver)
+
+        self.assertNotEqual(second["token"], first["token"])
+        self.assertTrue(second["enabled"])
+        self.assertEqual(resolve_driver_token(second["token"]), driver)
+
+    def test_released_driver_cannot_be_reissued_until_restored_to_active(self):
+        driver, _user_name = self._driver()
+        first = issue_driver_link(driver)
+        revoke_driver_tokens(driver)
+        frappe.db.set_value("Salis Driver", driver, "status", "Released")
+
+        with self.assertRaises(frappe.ValidationError):
+            issue_driver_link(driver)
+        self.assertIsNone(resolve_driver_token(first["token"]))
+
+        frappe.db.set_value("Salis Driver", driver, "status", "Active")
+        second = issue_driver_link(driver)
+        self.assertEqual(resolve_driver_token(second["token"]), driver)
 
 
 class TestMasarWorkerTokenAuth(FrappeTestCase):

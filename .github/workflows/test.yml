@@ -96,7 +96,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        portal: [fleet, worker, driver, safety]
+        portal: [fleet, worker, safety]
     steps:
       - uses: actions/checkout@v5
 

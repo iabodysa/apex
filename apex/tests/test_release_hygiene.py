@@ -1,8 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Pure-Python release-hygiene guards (no live Frappe site required).
 
-These lock in three fixes made during the hardening overhaul so they cannot
-silently regress:
+These lock in release-hygiene invariants that must not silently regress:
 
   1. translations/ar.csv stays well-formed (2 columns, every row translated,
      placeholder parity between source and translation).
@@ -11,6 +10,7 @@ silently regress:
      tracked source (DocType permissions, hooks fixtures, seed lists, dashboard
      seeds, and is_standard Notification JSON recipients) — so a Frappe-core test
      fixture such as `_Test Role` can never be packaged and surfaced to operators.
+  4. Every portal in the SPA lockfile CI matrix ships both its manifest and lockfile.
 
 Run standalone:  python3 -m unittest tests.test_release_hygiene -v
 """
@@ -25,6 +25,7 @@ import types
 import unittest
 
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+REPO_ROOT = os.path.dirname(APP_ROOT)
 AR_CSV = os.path.join(APP_ROOT, "translations", "ar.csv")
 PATCHES_DIR = os.path.join(APP_ROOT, "patches")
 HOOKS_PY = os.path.join(APP_ROOT, "hooks.py")
@@ -61,6 +62,25 @@ KNOWN_FRAPPE_TEST_ROLES = {
     "_Test Role 3",
     "_Test Role 4",
 }
+
+
+def _matrix_axis_values(matrix_body, axis):
+    entry = re.search(
+        rf"(?m)^        {re.escape(axis)}:\s*(?P<inline>\[[^\n]*])?\s*$",
+        matrix_body,
+    )
+    if not entry:
+        return None
+
+    inline = entry.group("inline")
+    if inline:
+        return [value.strip() for value in inline[1:-1].split(",") if value.strip()]
+
+    block = matrix_body[entry.end() :]
+    next_axis = re.search(r"(?m)^        [a-zA-Z0-9_-]+:\s*", block)
+    if next_axis:
+        block = block[: next_axis.start()]
+    return re.findall(r"(?m)^          -\s*([a-zA-Z0-9_-]+)\s*$", block)
 
 
 def _is_test_role(name):
@@ -131,6 +151,65 @@ class TestNoPromptInjectionInPatches(unittest.TestCase):
         self.assertEqual(
             offenders, [], f"prompt-injection comment found in patches: {offenders}"
         )
+
+
+class TestSpaLockfileMatrix(unittest.TestCase):
+    def test_every_matrix_portal_has_committed_manifest_and_lockfile(self):
+        workflow_path = os.path.join(REPO_ROOT, ".github", "workflows", "test.yml")
+        with open(workflow_path, encoding="utf-8") as fh:
+            workflow = fh.read()
+
+        job = re.search(
+            r"(?ms)^  spa-lockfiles:\n(?P<body>.*?)(?=^  [a-z][a-z0-9_-]*:\n|\Z)",
+            workflow,
+        )
+        self.assertIsNotNone(job, "Tests workflow is missing the spa-lockfiles job")
+        matrix = re.search(
+            r"(?ms)^      matrix:\n(?P<body>.*?)(?=^    [a-z][a-z0-9_-]*:|\Z)",
+            job.group("body"),
+        )
+        self.assertIsNotNone(matrix, "spa-lockfiles job is missing its matrix")
+        portals = _matrix_axis_values(matrix.group("body"), "portal")
+        self.assertIsNotNone(portals, "spa-lockfiles matrix is missing its portal axis")
+        self.assertTrue(portals, "spa-lockfiles portal matrix is empty")
+        missing = []
+        for portal in portals:
+            for filename in ("package.json", "package-lock.json"):
+                path = os.path.join(REPO_ROOT, "frontend", portal, filename)
+                if not os.path.isfile(path):
+                    missing.append(os.path.relpath(path, REPO_ROOT))
+
+        self.assertEqual(
+            missing,
+            [],
+            f"spa-lockfiles matrix references retired or incomplete portals: {missing}",
+        )
+
+    def test_block_axis_stops_before_the_next_matrix_axis(self):
+        matrix = """        portal:
+          - fleet
+          - worker
+        node:
+          - 20
+          - 22
+"""
+        self.assertEqual(_matrix_axis_values(matrix, "portal"), ["fleet", "worker"])
+
+
+class TestMasarWorkerTokenNaming(unittest.TestCase):
+    def test_driver_name_is_not_synced_into_the_worker_party_field(self):
+        path = os.path.join(
+            APP_ROOT,
+            "apex_core",
+            "doctype",
+            "masar_worker_token",
+            "masar_worker_token.json",
+        )
+        with open(path, encoding="utf-8") as fh:
+            doctype = json.load(fh)
+
+        self.assertEqual(doctype.get("autoname"), "hash")
+        self.assertEqual(doctype.get("naming_rule"), "Random")
 
 
 class TestNoTestRolesShipped(unittest.TestCase):

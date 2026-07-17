@@ -259,12 +259,16 @@ def batch_issue_worker_links(employees_json) -> list:
     return out
 
 
-# ---------------------------------------------------------------------------
-# Driver access tokens — passwordless barcode entry for a Salis Driver.
-# Mirrors the worker issuance/resolution above; storage is identical (SHA-256
-# hash + Fernet ciphertext only, never a raw token at rest). Drivers have NO
-# Frappe User (full cutover): the token IS the identity, resolved server-side.
-# ---------------------------------------------------------------------------
+_ELEVATED_DRIVER_USER_ROLES = {
+    "System Manager",
+    "Fleet Manager",
+    "Fleet Project Manager",
+    "Fleet Supervisor",
+    "Finance Manager",
+    "HR User",
+    "HR Manager",
+    "Accommodation Manager",
+}
 
 
 def _driver_link(token: str) -> str:
@@ -276,6 +280,8 @@ def get_or_create_for_driver(driver: str) -> "MasarWorkerToken":
     """Return the driver's token row (holder_type=Driver), creating one on first use."""
     if not frappe.db.exists("Salis Driver", driver):
         frappe.throw(_("Salis Driver {0} does not exist.").format(driver))
+    if frappe.db.get_value("Salis Driver", driver, "status") == "Released":
+        frappe.throw(_("A released driver cannot receive a portal access token."))
     name = frappe.db.get_value(
         "Masar Worker Token", {"driver": driver, "holder_type": "Driver"}, "name"
     )
@@ -288,6 +294,55 @@ def get_or_create_for_driver(driver: str) -> "MasarWorkerToken":
     return doc
 
 
+def _disable_legacy_driver_user(driver: str) -> bool:
+    """Disable a legacy Website User only after the driver's barcode is live.
+
+    System users and Website Users with elevated operational roles stay enabled.
+    The operation is reversible and idempotent; it never deletes an account.
+    """
+    if not driver:
+        return False
+    token = frappe.db.get_value(
+        "Masar Worker Token",
+        {"driver": driver, "holder_type": "Driver", "enabled": 1},
+        ["token", "expires_on"],
+        as_dict=True,
+    )
+    if not token or not token.token:
+        return False
+    if token.expires_on and frappe.utils.now_datetime() > frappe.utils.get_datetime(
+        token.expires_on
+    ):
+        return False
+
+    user = frappe.db.get_value("Salis Driver", driver, "driver_user")
+    if not user or user in ("Administrator", "Guest"):
+        return False
+    info = frappe.db.get_value("User", user, ["enabled", "user_type"], as_dict=True)
+    if not info or not info.enabled or info.user_type != "Website User":
+        return False
+    if set(frappe.get_roles(user)) & _ELEVATED_DRIVER_USER_ROLES:
+        return False
+
+    frappe.db.set_value("User", user, "enabled", 0, update_modified=False)
+    return True
+
+
+def _issue_driver_token(doc: "MasarWorkerToken", regenerate: int = 0) -> str:
+    raw = getattr(doc, "_plaintext_token", None)
+    if not doc.enabled:
+        doc.enabled = 1
+        return doc.regenerate()
+    if raw is not None:
+        return raw
+    if frappe.utils.cint(regenerate) or not doc.token:
+        return doc.regenerate()
+
+    raw = doc.recover_token()
+    doc.extend_expiry()
+    return raw
+
+
 @frappe.whitelist(methods=["POST"])
 def issue_driver_link(driver: str, regenerate: int = 0) -> dict:
     """Desk action: issue (or rotate) a driver's personal barcode link + QR.
@@ -298,14 +353,8 @@ def issue_driver_link(driver: str, regenerate: int = 0) -> dict:
     stored or logged — only its hash + Fernet ciphertext persist. No financial impact."""
     frappe.has_permission("Masar Worker Token", "write", throw=True)
     doc = get_or_create_for_driver(driver)
-    # [#bqs6iz] mirror worker: reuse the just-minted plaintext, else rotate/recover.
-    raw = getattr(doc, "_plaintext_token", None)
-    if raw is None:
-        if frappe.utils.cint(regenerate) or not doc.token:
-            raw = doc.regenerate()
-        else:
-            raw = doc.recover_token()
-            doc.extend_expiry()
+    raw = _issue_driver_token(doc, regenerate)
+    _disable_legacy_driver_user(driver)
 
     link = _driver_link(raw)
     return {
@@ -333,13 +382,8 @@ def batch_issue_driver_links(drivers_json) -> list:
     out = []
     for drv in drivers:
         doc = get_or_create_for_driver(drv)
-        raw = getattr(doc, "_plaintext_token", None)
-        if raw is None:
-            if not doc.token:
-                raw = doc.regenerate()
-            else:
-                raw = doc.recover_token()
-                doc.extend_expiry()
+        raw = _issue_driver_token(doc)
+        _disable_legacy_driver_user(drv)
         link = _driver_link(raw)
         out.append(
             {
@@ -401,6 +445,8 @@ def resolve_driver_token(token=None):
     if row.get("expires_on") and frappe.utils.now_datetime() > frappe.utils.get_datetime(
         row["expires_on"]
     ):
+        return None
+    if frappe.db.get_value("Salis Driver", row["driver"], "status") == "Released":
         return None
     return row["driver"]
 

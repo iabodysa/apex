@@ -4917,3 +4917,14 @@ Set the Departure Time,حدّد وقت المغادرة
 Enter the planned departure time.,أدخل وقت المغادرة المخطط.
 Add Transport Requests,أضف طلبات النقل
 "List the transport requests this trip serves, then save.","أدرج طلبات النقل التي تخدمها هذه الرحلة، ثم احفظ."
+A Salis Driver is required for a driver access token.,يلزم تحديد سائق ساليس لإصدار رمز دخول للسائق.
+A released driver cannot receive a portal access token.,لا يمكن إصدار رمز دخول إلى البوابة لسائق مُفرج عنه.
+Dispatch trip,رحلة تشغيل
+Enter how many litres you need.,أدخل عدد اللترات التي تحتاج إليها.
+Holder Type,نوع حامل الرمز
+"No fleet vehicle is assigned to you, so you cannot request fuel.","لا توجد مركبة أسطول مسندة إليك، لذلك لا يمكنك طلب الوقود."
+Note: {0},ملاحظة: {0}
+Requested grade: {0},الدرجة المطلوبة: {0}
+Salis Driver {0} does not exist.,سائق ساليس {0} غير موجود.
+"The Salis Driver this barcode token grants portal entry for. Set on a Driver-holder token; the driver enters by scanning the QR with no Frappe User.","سائق ساليس الذي يمنحه رمز الباركود هذا الدخول إلى البوابة. يُحدد للرمز الخاص بالسائق، ويدخل السائق بمسح رمز الاستجابة السريعة من دون حساب مستخدم في فرابي."
+"Which subject this access token grants entry for: a housed/transported Worker (Masar) or a fleet Driver (barcode entry, no Frappe User).","الفئة التي يمنحها رمز الدخول صلاحية الوصول: عامل سكن أو نقل عبر مسار، أو سائق أسطول يدخل بالباركود من دون حساب مستخدم في فرابي."
