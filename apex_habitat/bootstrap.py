@@ -1,6 +1,10 @@
 """Canonicalize the installed app identity before normal migration patches."""
 
 import json
+import os
+import stat
+import tempfile
+from pathlib import Path
 
 import frappe
 
@@ -10,6 +14,70 @@ NEW = "apex"
 
 class IdentityCutoverError(RuntimeError):
 	"""Raised when the installed app registry cannot be cut over safely."""
+
+
+def _atomic_write(path, content):
+	"""Replace a UTF-8 text file atomically while retaining its access mode."""
+	path = Path(path)
+	mode = stat.S_IMODE(path.stat().st_mode)
+	file_descriptor, temp_name = tempfile.mkstemp(
+		dir=path.parent,
+		prefix=f".{path.name}.",
+		suffix=".tmp",
+	)
+	temp_path = Path(temp_name)
+
+	try:
+		temp_file = os.fdopen(
+			file_descriptor,
+			"w",
+			encoding="utf-8",
+			newline="",
+		)
+		file_descriptor = None
+		with temp_file:
+			temp_file.write(content)
+			temp_file.flush()
+			os.fsync(temp_file.fileno())
+		os.chmod(temp_path, mode)
+		os.replace(temp_path, path)
+	finally:
+		if file_descriptor is not None:
+			os.close(file_descriptor)
+		try:
+			temp_path.unlink()
+		except FileNotFoundError:
+			pass
+
+
+def rewrite_bench_apps_registry(path):
+	"""Atomically replace the sole legacy apps.txt identity with the canonical one."""
+	path = Path(path)
+	with path.open("r", encoding="utf-8", newline="") as apps_file:
+		content = apps_file.read()
+
+	lines = content.splitlines(keepends=True)
+	logical_lines = [line.rstrip("\r\n") for line in lines]
+	old_count = logical_lines.count(OLD)
+	new_count = logical_lines.count(NEW)
+
+	if old_count == 0 and new_count == 1:
+		return False
+	if old_count != 1 or new_count != 0:
+		raise IdentityCutoverError(
+			"sites/apps.txt has an ambiguous Apex application identity"
+		)
+
+	rewritten_lines = []
+	for line, logical_line in zip(lines, logical_lines, strict=True):
+		if logical_line == OLD:
+			line_ending = line[len(logical_line) :]
+			rewritten_lines.append(f"{NEW}{line_ending}")
+		else:
+			rewritten_lines.append(line)
+
+	_atomic_write(path, "".join(rewritten_lines))
+	return True
 
 
 def canonicalize_installed_apps(serialized_apps):

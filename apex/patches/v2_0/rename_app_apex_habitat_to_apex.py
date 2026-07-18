@@ -1,11 +1,12 @@
 # Copyright (c) 2026, AFMCO and contributors
 """TEMPORARY app-identity cutover: apex_habitat -> apex.
 
-DELETE THIS FILE (and its patches.txt line) after the v2 cutover, once every
-deployed site has run it (tracked in tabPatch Log). The app CODE is already
-renamed to `apex`; this rewrites the DB references a pre-rename 1.60.x site
-still carries so a single `bench migrate` completes the rename:
+DELETE THIS FILE (and its patches.txt line) only after the sole production
+site records it in tabPatch Log. The app CODE is already renamed to `apex`;
+this rewrites the filesystem and DB references a pre-rename 1.60.x site still
+carries so a single `bench migrate` completes the rename:
 
+  * the exact `apex_habitat` line in sites/apps.txt -> `apex`, atomically;
   * every stored dotted path `apex_habitat.<module>...` -> `apex.<module>...`
     (Number Card / Dashboard Chart .method, Scheduled Job Type .method,
     Server Script .script, Notification/Assignment Rule condition text, and
@@ -15,15 +16,12 @@ still carries so a single `bench migrate` completes the rename:
   * Installed Application child rows .app_name  'apex_habitat' -> 'apex';
   * the installed_apps global list element      'apex_habitat' -> 'apex'.
 
-BOOTSTRAP CAVEAT (why the global flip here is only belt-and-suspenders):
-patch_handler.get_all_patches() iterates frappe.get_installed_apps() and
-imports each app to read its patches.txt. If the installed_apps global still
-says `apex_habitat` (not on disk) migrate aborts before ANY patch runs, and
-`apex` is absent so apex/patches.txt is never read. So the operator MUST flip
-the installed_apps global to `apex` BEFORE this migrate (a one-line
-bench execute / DB edit). Reaching this patch means `apex` is already
-installed; the global rewrite below only normalises a mixed state (both ids
-present) and is a no-op after a clean pre-migrate swap.
+AUTOMATIC CUTOVER SEQUENCE:
+The temporary legacy before_migrate hook canonicalizes the installed_apps
+global while `apex_habitat` remains importable, allowing Frappe to discover
+the canonical `apex` patches. This patch then repairs sites/apps.txt with an
+atomic replacement, invalidates app-discovery caches, and performs the DB
+sweep below. No manual registry edit is required.
 
 Idempotent: the dotted sweep only touches rows still containing the literal
 `apex_habitat.`; the exact-value renames only touch rows still equal to
@@ -32,8 +30,11 @@ Idempotent: the dotted sweep only touches rows still containing the literal
 
 import json
 import re
+from pathlib import Path
 
 import frappe
+
+from apex_habitat.bootstrap import rewrite_bench_apps_registry
 
 # Identifier allowlist for the DB-wide sweep: Frappe table/column names are
 # word chars + spaces only (e.g. `tabNumber Card`, `email_id`). Every table /
@@ -70,10 +71,22 @@ _TEXT_TYPES = ("char", "varchar", "text", "tinytext", "mediumtext", "longtext")
 
 
 def execute():
+    _rename_bench_apps_registry()
     _rewrite_dotted_paths()
     _rename_module_def()
     _rename_installed_application_rows()
     _rename_installed_apps_global()
+
+
+def _rename_bench_apps_registry():
+    apps_path = Path(frappe.local.sites_path) / "apps.txt"
+    if not rewrite_bench_apps_registry(apps_path):
+        return
+
+    frappe.cache.delete_value(["app_hooks", "all_apps"])
+    request_cache = getattr(frappe.local, "request_cache", None)
+    if request_cache is not None:
+        request_cache.clear()
 
 
 def _rewrite_dotted_paths():
