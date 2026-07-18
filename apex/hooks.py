@@ -10,6 +10,9 @@ app_license = "MIT"
 # [#4d5ed9]
 required_apps = ["frappe", "erpnext", "hrms"]
 
+# Keep the temporary cutover reachable through either installed app identity.
+before_migrate = ["apex_habitat.bootstrap.before_migrate"]
+
 # [#a024ap]
 # One-click icons on the Frappe /apps app-selector screen (A-024) — one entry
 # per real www/ portal shell. Driver has no extra role gate (any logged-in

@@ -1,8 +1,8 @@
 # Copyright (c) 2026, AFMCO and contributors
 """TEMPORARY app-identity cutover: apex_habitat -> apex.
 
-DELETE THIS FILE (and its patches.txt line) only after the sole production
-site records it in tabPatch Log. The app CODE is already renamed to `apex`;
+DELETE THIS FILE (and its patches.txt line) only after every deployed site
+records it in tabPatch Log. The app CODE is already renamed to `apex`;
 this rewrites the filesystem and DB references a pre-rename 1.60.x site still
 carries so a single `bench migrate` completes the rename:
 
@@ -17,11 +17,12 @@ carries so a single `bench migrate` completes the rename:
   * the installed_apps global list element      'apex_habitat' -> 'apex'.
 
 AUTOMATIC CUTOVER SEQUENCE:
-The temporary legacy before_migrate hook canonicalizes the installed_apps
-global while `apex_habitat` remains importable, allowing Frappe to discover
-the canonical `apex` patches. This patch then repairs sites/apps.txt with an
-atomic replacement, invalidates app-discovery caches, and performs the DB
-sweep below. No manual registry edit is required.
+The temporary before_migrate hook remains reachable through both app
+identities. It atomically repairs sites/apps.txt, canonicalizes installed_apps
+and successful Patch Log identities, invalidates app-discovery caches, and
+rebuilds Frappe's module map before patch discovery and schema sync. This
+post-model patch then completes the stored-reference DB sweep below. No manual
+registry edit is required.
 
 Idempotent: the dotted sweep only touches rows still containing the literal
 `apex_habitat.`; the exact-value renames only touch rows still equal to
@@ -79,6 +80,7 @@ def execute():
 
 
 def _rename_bench_apps_registry():
+    """Provide a post-model recovery fallback for the early cutover hook."""
     apps_path = Path(frappe.local.sites_path) / "apps.txt"
     if not rewrite_bench_apps_registry(apps_path):
         return

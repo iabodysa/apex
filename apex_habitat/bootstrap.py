@@ -10,6 +10,18 @@ import frappe
 
 OLD = "apex_habitat"
 NEW = "apex"
+OLD_DOTTED = f"{OLD}."
+NEW_DOTTED = f"{NEW}."
+
+APP_DISCOVERY_CACHE_KEYS = [
+	"app_hooks",
+	"installed_apps",
+	"all_apps",
+	"app_modules",
+	"installed_app_modules",
+	"module_app",
+	"module_installed_app",
+]
 
 
 class IdentityCutoverError(RuntimeError):
@@ -110,17 +122,58 @@ def canonicalize_installed_apps(serialized_apps):
 	return canonical_apps
 
 
-def before_migrate():
-	"""Rewrite the legacy installed app identity before migration begins."""
-	serialized_apps = frappe.db.get_global("installed_apps")
-	canonical_apps = canonicalize_installed_apps(serialized_apps)
-	installed_apps = json.loads(serialized_apps)
+def canonicalize_successful_patch_log_identities():
+	"""Map successful legacy patch evidence before Frappe snapshots it."""
+	legacy_rows = frappe.db.sql(
+		"""
+		SELECT `name`
+		FROM `tabPatch Log`
+		WHERE `skipped` = 0
+		  AND LOCATE(%s, `patch`) = 1
+		LIMIT 1
+		""",
+		(OLD_DOTTED,),
+	)
+	if not legacy_rows:
+		return False
 
-	if installed_apps == canonical_apps:
-		return
+	frappe.db.sql(
+		"""
+		UPDATE `tabPatch Log`
+		SET `patch` = CONCAT(%s, SUBSTRING(`patch`, %s))
+		WHERE `skipped` = 0
+		  AND LOCATE(%s, `patch`) = 1
+		""",
+		(NEW_DOTTED, len(OLD_DOTTED) + 1, OLD_DOTTED),
+	)
+	return True
 
-	frappe.db.set_global("installed_apps", json.dumps(canonical_apps))
-	frappe.cache.delete_value(["app_hooks", "all_apps"])
+
+def _rebuild_app_discovery():
+	"""Discard legacy app caches and rebuild the canonical module map."""
+	frappe.cache.delete_value(APP_DISCOVERY_CACHE_KEYS)
 	request_cache = getattr(frappe.local, "request_cache", None)
 	if request_cache is not None:
 		request_cache.clear()
+
+	frappe.local.app_modules = None
+	frappe.local.module_app = None
+	frappe.setup_module_map(include_all_apps=True)
+
+
+def before_migrate():
+	"""Canonicalize every app-discovery input before patches and schema sync."""
+	serialized_apps = frappe.db.get_global("installed_apps")
+	canonical_apps = canonicalize_installed_apps(serialized_apps)
+	installed_apps = json.loads(serialized_apps)
+	registry_changed = rewrite_bench_apps_registry(
+		Path(frappe.local.sites_path) / "apps.txt"
+	)
+	patch_log_changed = canonicalize_successful_patch_log_identities()
+	installed_apps_changed = installed_apps != canonical_apps
+
+	if installed_apps_changed:
+		frappe.db.set_global("installed_apps", json.dumps(canonical_apps))
+
+	if registry_changed or patch_log_changed or installed_apps_changed:
+		_rebuild_app_discovery()

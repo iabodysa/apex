@@ -368,12 +368,11 @@ apex.patches.v1_x.enable_habitat_expiry_notifications
 apex.patches.v2_0.fix_stale_apex_habitat_number_card_method
 
 # v2.0.2 — TEMPORARY app-identity cutover apex_habitat -> apex (ONE-TIME). The automatic
-# sequence canonicalizes the installed_apps global in the legacy before_migrate hook, then
-# atomically repairs sites/apps.txt before this patch sweeps stored dotted paths and exact
-# DB identity values. post_model_sync: reads no column a later sync drops and needs every
-# table/column already synced. Idempotent, no-op on re-run / fresh installs. Retain this
-# line and module until the sole production site records the patch in tabPatch Log; remove
-# them only after that evidence is captured.
+# before_migrate bridge repairs the bench registry, installed-app and Patch Log identities,
+# then rebuilds the module map before schema sync. This post-model patch sweeps remaining
+# stored dotted paths and exact DB identity values after every table is current. Idempotent,
+# no-op on re-run / fresh installs. Retain the line and module until every deployed site
+# records the patch in tabPatch Log.
 apex.patches.v2_0.rename_app_apex_habitat_to_apex
 
 # v2.0.0 — reset Logistay to its lean two-master foundation (Freelancer + Temporary Worker).
