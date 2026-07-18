@@ -8,6 +8,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+from setuptools import find_packages
+
 from apex_habitat import bootstrap, hooks
 from apex_habitat.bootstrap import IdentityCutoverError, canonicalize_installed_apps
 from apex.patches.v2_0 import rename_app_apex_habitat_to_apex as rename_patch
@@ -261,6 +263,93 @@ class TestLegacyHooks(unittest.TestCase):
 		):
 			with self.subTest(hook_name=hook_name):
 				self.assertFalse(hasattr(hooks, hook_name))
+
+
+class TestCompatibilityPackaging(unittest.TestCase):
+	REPO_ROOT = Path(__file__).resolve().parents[2]
+
+	def test_setuptools_discovers_canonical_and_legacy_packages(self):
+		packages = set(find_packages(where=os.fspath(self.REPO_ROOT)))
+
+		self.assertIn("apex", packages)
+		self.assertIn("apex_habitat", packages)
+
+	def test_active_build_backend_explicitly_includes_both_packages(self):
+		config = (self.REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
+		self.assertIn('requires = ["setuptools>=68", "wheel"]', config)
+		self.assertIn('build-backend = "setuptools.build_meta"', config)
+		self.assertIn("[tool.setuptools.packages.find]", config)
+		self.assertIn('include = ["apex*", "apex_habitat*"]', config)
+
+	def test_source_manifest_includes_the_legacy_package(self):
+		manifest = (self.REPO_ROOT / "MANIFEST.in").read_text(encoding="utf-8")
+
+		self.assertIn("recursive-include apex_habitat *.py", manifest)
+
+
+class TestLegacyMigrationWorkflow(unittest.TestCase):
+	WORKFLOW = (
+		Path(__file__).resolve().parents[2]
+		/ ".github"
+		/ "workflows"
+		/ "migrate-check.yml"
+	)
+
+	def test_triggers_cover_the_bridge_and_packaging_inputs(self):
+		workflow = self.WORKFLOW.read_text(encoding="utf-8")
+
+		for required in (
+			"workflow_dispatch:",
+			'"apex_habitat/**"',
+			'"pyproject.toml"',
+			'"setup.py"',
+			'"MANIFEST.in"',
+		):
+			with self.subTest(required=required):
+				self.assertIn(required, workflow)
+
+	def test_stages_and_proves_the_exact_legacy_identity(self):
+		workflow = self.WORKFLOW.read_text(encoding="utf-8")
+
+		for required in (
+			'SET defvalue = REPLACE(defvalue, \'\\"apex\\"\', \'\\"apex_habitat\\"\')',
+			"SET app_name = 'apex_habitat' WHERE app_name = 'apex'",
+			"sed -i 's/^apex$/apex_habitat/' sites/apps.txt",
+			'assert apps.count("apex_habitat") == 1 and "apex" not in apps',
+			'test "$installed_application" = "apex_habitat"',
+			'test "$module_identity" = "apex_habitat"',
+			'test "$registry_identity" = "apex_habitat"',
+		):
+			with self.subTest(required=required):
+				self.assertIn(required, workflow)
+
+	def test_runs_the_standard_update_equivalent_order(self):
+		workflow = self.WORKFLOW.read_text(encoding="utf-8")
+		command = "bench --site test.localhost migrate"
+		first_migrate = workflow.find(command)
+		build = workflow.find("bench build --app apex", first_migrate + len(command))
+		second_migrate = workflow.find(command, first_migrate + len(command))
+
+		self.assertGreaterEqual(first_migrate, 0)
+		self.assertGreater(build, first_migrate)
+		self.assertGreater(second_migrate, build)
+
+	def test_verifies_every_canonical_cutover_surface_exactly(self):
+		workflow = self.WORKFLOW.read_text(encoding="utf-8")
+
+		for required in (
+			'assert apps.count("apex") == 1 and "apex_habitat" not in apps',
+			'test "$installed_application" = "apex"',
+			'test "$module_identity" = "apex"',
+			"apex.patches.v2_0.rename_app_apex_habitat_to_apex",
+			'test "$patch_log" = "apex.patches.v2_0.rename_app_apex_habitat_to_apex"',
+			'test "$registry_identity" = "apex"',
+		):
+			with self.subTest(required=required):
+				self.assertIn(required, workflow)
+
+		self.assertNotIn("${{ secrets.", workflow)
 
 
 if __name__ == "__main__":

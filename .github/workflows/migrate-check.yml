@@ -1,10 +1,15 @@
 name: Migration Smoke Check
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "apex/patches/**"
       - "apex/patches.txt"
+      - "apex_habitat/**"
+      - "pyproject.toml"
+      - "setup.py"
+      - "MANIFEST.in"
 
 jobs:
   migrate-check:
@@ -81,11 +86,45 @@ jobs:
         working-directory: frappe-bench
         run: bench get-app --skip-assets ${{ github.workspace }}
 
-      - name: Create site and migrate
+      - name: Create canonical site fixture
         working-directory: frappe-bench
         run: |
-          bench new-site test.localhost --db-root-password ${{ secrets.DB_ROOT_PASSWORD }} --admin-password ${{ secrets.ADMIN_PASSWORD }} --no-mariadb-socket
+          bench new-site test.localhost --db-root-password root --admin-password admin --no-mariadb-socket
           bench --site test.localhost install-app erpnext
           bench --site test.localhost install-app hrms
           bench --site test.localhost install-app apex
+
+      - name: Stage and verify legacy site fixture
+        working-directory: frappe-bench
+        run: |
+          bench --site test.localhost mariadb --execute "UPDATE \`tabDefaultValue\` SET defvalue = REPLACE(defvalue, '\"apex\"', '\"apex_habitat\"') WHERE parent = '__global' AND defkey = 'installed_apps'; UPDATE \`tabInstalled Application\` SET app_name = 'apex_habitat' WHERE app_name = 'apex'; UPDATE \`tabModule Def\` SET app_name = 'apex_habitat' WHERE app_name = 'apex'; DELETE FROM \`tabPatch Log\` WHERE patch = 'apex.patches.v2_0.rename_app_apex_habitat_to_apex';"
+          sed -i 's/^apex$/apex_habitat/' sites/apps.txt
+          legacy_global=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT defvalue FROM \`tabDefaultValue\` WHERE parent = '__global' AND defkey = 'installed_apps';")
+          LEGACY_GLOBAL="$legacy_global" python -c 'import json, os; apps = json.loads(os.environ["LEGACY_GLOBAL"]); assert apps.count("apex_habitat") == 1 and "apex" not in apps'
+          installed_application=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT app_name FROM \`tabInstalled Application\` WHERE app_name IN ('apex', 'apex_habitat') ORDER BY app_name;")
+          test "$installed_application" = "apex_habitat"
+          module_identity=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT DISTINCT app_name FROM \`tabModule Def\` WHERE app_name IN ('apex', 'apex_habitat') ORDER BY app_name;")
+          test "$module_identity" = "apex_habitat"
+          registry_identity=$(grep -E '^(apex|apex_habitat)$' sites/apps.txt)
+          test "$registry_identity" = "apex_habitat"
+
+      - name: Run standard update-equivalent sequence
+        working-directory: frappe-bench
+        run: |
           bench --site test.localhost migrate
+          bench build --app apex
+          bench --site test.localhost migrate
+
+      - name: Verify canonical identity and migration evidence
+        working-directory: frappe-bench
+        run: |
+          canonical_global=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT defvalue FROM \`tabDefaultValue\` WHERE parent = '__global' AND defkey = 'installed_apps';")
+          CANONICAL_GLOBAL="$canonical_global" python -c 'import json, os; apps = json.loads(os.environ["CANONICAL_GLOBAL"]); assert apps.count("apex") == 1 and "apex_habitat" not in apps'
+          installed_application=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT app_name FROM \`tabInstalled Application\` WHERE app_name IN ('apex', 'apex_habitat') ORDER BY app_name;")
+          test "$installed_application" = "apex"
+          module_identity=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT DISTINCT app_name FROM \`tabModule Def\` WHERE app_name IN ('apex', 'apex_habitat') ORDER BY app_name;")
+          test "$module_identity" = "apex"
+          patch_log=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT patch FROM \`tabPatch Log\` WHERE patch = 'apex.patches.v2_0.rename_app_apex_habitat_to_apex';")
+          test "$patch_log" = "apex.patches.v2_0.rename_app_apex_habitat_to_apex"
+          registry_identity=$(grep -E '^(apex|apex_habitat)$' sites/apps.txt)
+          test "$registry_identity" = "apex"

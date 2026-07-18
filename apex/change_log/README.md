@@ -5,11 +5,13 @@ Releases before 1.60 are consolidated into a single history note.
 
 ## Latest
 
+- [2.0.2](v2/v2_0_2.md) — Security and reliability improvements.
 - [2.0.1](v2/v2_0_1.md) — Simpler Logistay records, consistent task-focused portals, fleet employee self-service, and passwordless barcode access for drivers and workers.
 - [2.0.0](v2/v2_0_0.md) — A generational release: run workforce attendance timesheets end to end, manage the accommodation and logistics billing cycle, find your daily work faster on clearer, plainer-named screens, and rely on stronger safeguards throughout.
 
 ## All releases
 
+- [2.0.2](v2/v2_0_2.md) — Security and reliability improvements.
 - [2.0.1](v2/v2_0_1.md) — Simpler Logistay records, consistent task-focused portals, fleet employee self-service, and passwordless barcode access for drivers and workers.
 - [2.0.0](v2/v2_0_0.md) — A generational release: run workforce attendance timesheets end to end, manage the accommodation and logistics billing cycle, find your daily work faster on clearer, plainer-named screens, and rely on stronger safeguards throughout.
 - [1.62.0](v1/v1_62_0.md) — Confirm asset deliveries from your phone, rate your trips, and find your daily work faster on clearer workspaces.
