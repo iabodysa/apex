@@ -10,8 +10,14 @@ app_license = "MIT"
 # [#4d5ed9]
 required_apps = ["frappe", "erpnext", "hrms"]
 
-# Keep the temporary cutover reachable through either installed app identity.
-before_migrate = ["apex_habitat.bootstrap.before_migrate"]
+def bootstrap_legacy_app_identity():
+	from apex_habitat.bootstrap import before_migrate as compatibility_bootstrap
+
+	compatibility_bootstrap()
+
+
+# Keep the temporary cutover reachable without crossing Frappe's installed-app gate.
+before_migrate = ["apex.hooks.bootstrap_legacy_app_identity"]
 
 # [#a024ap]
 # One-click icons on the Frappe /apps app-selector screen (A-024) — one entry

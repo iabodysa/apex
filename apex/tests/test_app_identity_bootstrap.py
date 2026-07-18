@@ -349,10 +349,16 @@ class TestLegacyHooks(unittest.TestCase):
 				self.assertFalse(hasattr(hooks, hook_name))
 
 	def test_canonical_hooks_also_register_the_temporary_mixed_state_bridge(self):
-		self.assertIn(
-			"apex_habitat.bootstrap.before_migrate",
+		self.assertEqual(
 			canonical_hooks.before_migrate,
+			["apex.hooks.bootstrap_legacy_app_identity"],
 		)
+
+	def test_canonical_bridge_delegates_to_the_compatibility_bootstrap(self):
+		with patch.object(bootstrap, "before_migrate") as compatibility_bootstrap:
+			canonical_hooks.bootstrap_legacy_app_identity()
+
+		compatibility_bootstrap.assert_called_once_with()
 
 	def test_legacy_modules_file_matches_the_canonical_module_map(self):
 		repo_root = Path(__file__).resolve().parents[2]
