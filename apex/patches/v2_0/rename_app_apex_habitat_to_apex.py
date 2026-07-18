@@ -170,7 +170,7 @@ def _rename_installed_application_rows():
 
 def _rename_installed_apps_global():
     # Authoritative list migrate reads (tabDefaultValue defkey=installed_apps).
-    # Normally already flipped pre-migrate (see BOOTSTRAP CAVEAT); this only
+    # Normally already flipped pre-migrate (see AUTOMATIC CUTOVER SEQUENCE); this only
     # heals a mixed state. Dedupe so `apex` never appears twice.
     apps = json.loads(frappe.db.get_global("installed_apps") or "[]")
     if OLD not in apps:
