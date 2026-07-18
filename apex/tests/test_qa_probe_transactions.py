@@ -37,7 +37,7 @@ class QABase(ApexHabitatTestCase):
         }).insert(ignore_permissions=True)
 
     def _make_building(self, room_count=3, room_type="Standard", capacity=2, total_capacity=50):
-        abbr = "B" + _hash(3)
+        abbr = "B" + _hash()
         b = frappe.get_doc({
             "doctype": "Building",
             "building_name": f"Bldg {abbr}",
