@@ -1,0 +1,1 @@
+"""Safety Task Catalog DocType."""

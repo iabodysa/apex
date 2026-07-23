@@ -1,0 +1,30 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.status == 'Unpaid'",
+ "date_changed": "due_date",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Rent Payment Schedule",
+ "enabled": 0,
+ "event": "Days Before",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"A rent payment is due today and remains unpaid\") }}: SAR {{ doc.amount }} ({{ doc.due_date }}). {{ _(\"Please process this payment.\") }}",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - Rent Payment Due",
+ "recipients": [
+  {
+   "receiver_by_role": "Accommodation Manager"
+  },
+  {
+   "receiver_by_role": "Finance Manager"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "subject": "Rent Payment Due (Unpaid): SAR {{ doc.amount }}",
+ "modified": "2026-06-25 10:00:00.000000"
+}

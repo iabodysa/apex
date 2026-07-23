@@ -1,0 +1,440 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-06-29 00:00:00.000000",
+ "description": "Delivers a tracked Facility Asset from a procurement intake store to an accommodation, gated behind a 3-exit transfer lock and an on-site code receipt.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "fad_tab_overview",
+  "fad_sec_delivery",
+  "naming_series",
+  "delivery_date",
+  "status",
+  "fad_col_delivery",
+  "facility_asset",
+  "asset_serial_number",
+  "fad_sec_route",
+  "from_building",
+  "fad_col_route",
+  "to_building",
+  "to_location_in_building",
+  "fad_sec_parties",
+  "initiated_by",
+  "fad_col_parties",
+  "receiving_supervisor",
+  "fad_tab_exits",
+  "fad_sec_exit1",
+  "exit1_security_cleared",
+  "exit1_cleared_by",
+  "exit1_cleared_on",
+  "fad_sec_exit2",
+  "exit2_logistics_cleared",
+  "exit2_cleared_by",
+  "exit2_cleared_on",
+  "fad_sec_exit3",
+  "exit3_receiving_cleared",
+  "exit3_cleared_by",
+  "exit3_cleared_on",
+  "fad_tab_receipt",
+  "fad_sec_otp",
+  "otp_hash",
+  "otp_expires_at",
+  "otp_attempts",
+  "otp_locked_until",
+  "otp_verified_on",
+  "fad_sec_remarks",
+  "remarks",
+  "fad_tab_system",
+  "fad_sec_system",
+  "amended_from",
+  "cancellation_reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "fad_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "fad_sec_delivery",
+   "fieldtype": "Section Break",
+   "label": "Delivery"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "FAD-.YYYY.-.#####",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "delivery_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Delivery Date",
+   "reqd": 1
+  },
+  {
+   "default": "Draft",
+   "description": "Lifecycle of the asset delivery; Pending Exits marks a delivery waiting on outstanding item exits before it can be released, then delivered to the destination or cancelled.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nPending Exits\nReleased\nDelivered\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fad_col_delivery",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The tracked facility asset being delivered.",
+   "fieldname": "facility_asset",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Facility Asset",
+   "options": "Facility Asset",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "facility_asset.serial_number",
+   "fieldname": "asset_serial_number",
+   "fieldtype": "Data",
+   "label": "Serial Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fad_sec_route",
+   "fieldtype": "Section Break",
+   "label": "Route"
+  },
+  {
+   "description": "Procurement intake store the asset leaves.",
+   "fieldname": "from_building",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "From Building",
+   "options": "Building",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fad_col_route",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Receiving accommodation the asset is delivered to.",
+   "fieldname": "to_building",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "To Building",
+   "options": "Building",
+   "reqd": 1
+  },
+  {
+   "description": "Physical location in the receiving building (e.g. Laundry Room).",
+   "fieldname": "to_location_in_building",
+   "fieldtype": "Data",
+   "label": "To Location In Building"
+  },
+  {
+   "fieldname": "fad_sec_parties",
+   "fieldtype": "Section Break",
+   "label": "Parties"
+  },
+  {
+   "default": "__user",
+   "description": "Procurement / dispatch user who initiated the delivery. Cannot confirm the on-site receipt (separation of duties).",
+   "fieldname": "initiated_by",
+   "fieldtype": "Link",
+   "label": "Initiated By",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fad_col_parties",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Supervisor at the receiving accommodation who confirms the on-site code receipt.",
+   "fieldname": "receiving_supervisor",
+   "fieldtype": "Link",
+   "label": "Receiving Supervisor",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fad_tab_exits",
+   "fieldtype": "Tab Break",
+   "label": "Exit Checkpoints"
+  },
+  {
+   "description": "Exit 1 of 3 — gate-out clearance at the source by a Resident Supervisor.",
+   "fieldname": "fad_sec_exit1",
+   "fieldtype": "Section Break",
+   "label": "Exit 1 — Security / Gate"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "exit1_security_cleared",
+   "fieldtype": "Check",
+   "label": "Security Gate Cleared",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "exit1_cleared_by",
+   "fieldtype": "Link",
+   "label": "Cleared By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "exit1_cleared_on",
+   "fieldtype": "Datetime",
+   "label": "Cleared On",
+   "read_only": 1
+  },
+  {
+   "description": "Exit 2 of 3 — transit / dispatch authorization by an Accommodation Manager.",
+   "fieldname": "fad_sec_exit2",
+   "fieldtype": "Section Break",
+   "label": "Exit 2 — Logistics / Dispatch"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "exit2_logistics_cleared",
+   "fieldtype": "Check",
+   "label": "Logistics Cleared",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "exit2_cleared_by",
+   "fieldtype": "Link",
+   "label": "Cleared By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "exit2_cleared_on",
+   "fieldtype": "Datetime",
+   "label": "Cleared On",
+   "read_only": 1
+  },
+  {
+   "description": "Exit 3 of 3 — destination acceptance by the receiving supervisor or a Procurement Supervisor.",
+   "fieldname": "fad_sec_exit3",
+   "fieldtype": "Section Break",
+   "label": "Exit 3 — Receiving Acceptance"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "exit3_receiving_cleared",
+   "fieldtype": "Check",
+   "label": "Receiving Accepted",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "exit3_cleared_by",
+   "fieldtype": "Link",
+   "label": "Cleared By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "exit3_cleared_on",
+   "fieldtype": "Datetime",
+   "label": "Cleared On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fad_tab_receipt",
+   "fieldtype": "Tab Break",
+   "label": "On-Site Receipt"
+  },
+  {
+   "fieldname": "fad_sec_otp",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "On-Site Code"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "otp_hash",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Code Hash",
+   "no_copy": 1,
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "otp_expires_at",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Code Expires At",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "otp_attempts",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Code Attempts",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "otp_locked_until",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Code Locked Until",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "otp_verified_on",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Code Verified On",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "fad_sec_remarks",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "fad_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "fad_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Facility Asset Delivery",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "cancellation_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancellation Reason"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Facility Asset Delivery",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Procurement Supervisor",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Resident Supervisor",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Procurement Supervisor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accommodation Manager"
+  }
+ ],
+ "search_fields": "asset_serial_number, facility_asset, from_building",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

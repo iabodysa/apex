@@ -1,0 +1,332 @@
+{
+ "actions": [],
+ "creation": "2026-05-24 18:13:22.917770",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "habitat_settings_tab_details",
+  "habitat_settings_sec_company",
+  "company",
+  "habitat_settings_company_col",
+  "default_currency",
+  "habitat_settings_sec_custody",
+  "custody_integration_mode",
+  "enable_native_asset_link",
+  "habitat_settings_custody_col",
+  "enable_stock_posting",
+  "auto_create_asset_movement_on_transfer",
+  "habitat_settings_sec_housing",
+  "housing_office_number",
+  "habitat_settings_tab_notifications",
+  "operational_notifications_sec",
+  "enable_email_notifications",
+  "enable_operational_notifications",
+  "operational_notifications_col",
+  "license_expiry_days_before",
+  "lease_expiry_days_before",
+  "temporary_stay_days_before",
+  "safety_report_recipient",
+  "habitat_settings_sec_safety",
+  "safety_predue_days_before",
+  "safety_overdue_grace_days",
+  "habitat_settings_safety_col",
+  "require_weekly_all_building_coverage",
+  "habitat_settings_sec_custody_handover",
+  "require_handover_otp",
+  "handover_otp_validity_minutes",
+  "supplier_cost_recovery_sec",
+  "enable_supplier_markup",
+  "habitat_settings_supplier_col",
+  "supplier_markup_percent",
+  "internal_store_sec",
+  "notify_finance_on_liability_transfer",
+  "habitat_settings_store_col",
+  "finance_notification_email",
+  "habitat_settings_sec_arrivals",
+  "enable_passport_mrz_ocr",
+  "habitat_settings_sec_system",
+  "last_modified_by_role"
+ ],
+ "fields": [
+  {
+   "fieldname": "habitat_settings_tab_details",
+   "fieldtype": "Tab Break",
+   "label": "Configuration"
+  },
+  {
+   "fieldname": "habitat_settings_sec_company",
+   "fieldtype": "Section Break",
+   "label": "Company & Currency"
+  },
+  {
+   "description": "Default company for Accommodation Ledger, Maintenance, Utility, and Lease documents. Required before enabling financial posting.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "habitat_settings_company_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Operational currency for Habitat cost fields. Fetched from Company if left blank.",
+   "fetch_from": "company.default_currency",
+   "fieldname": "default_currency",
+   "fieldtype": "Link",
+   "label": "Default Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "habitat_settings_sec_custody",
+   "fieldtype": "Section Break",
+   "label": "Custody & Asset Integration"
+  },
+  {
+   "default": "Habitat Internal / No Financial Posting",
+   "description": "Default mode keeps all custody and depreciation inside Habitat with no financial posting.",
+   "fieldname": "custody_integration_mode",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Custody Integration Mode",
+   "options": "Habitat Internal / No Financial Posting\nERPNext Asset Integration\nERPNext Stock Integration",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_native_asset_link",
+   "fieldtype": "Check",
+   "label": "Enable ERPNext Asset Link"
+  },
+  {
+   "fieldname": "habitat_settings_custody_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_stock_posting",
+   "fieldtype": "Check",
+   "label": "Enable Stock Entry Posting"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_create_asset_movement_on_transfer",
+   "fieldtype": "Check",
+   "label": "Auto-create Facility Asset Movement on Transfer"
+  },
+  {
+   "fieldname": "habitat_settings_sec_housing",
+   "fieldtype": "Section Break",
+   "label": "Housing Office"
+  },
+  {
+   "description": "Housing office contact number shown to workers on the Masar home My Contacts card.",
+   "fieldname": "housing_office_number",
+   "fieldtype": "Data",
+   "label": "Housing Office Number",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "habitat_settings_tab_notifications",
+   "fieldtype": "Tab Break",
+   "label": "Notifications"
+  },
+  {
+   "fieldname": "operational_notifications_sec",
+   "fieldtype": "Section Break",
+   "label": "Operational Notifications"
+  },
+  {
+   "default": "0",
+   "description": "Master kill-switch for all outgoing email from this app. When OFF (default), the app sends no email even if individual Notifications or Auto Email Reports are enabled. Turn ON only after the site's outgoing email (SMTP) is configured.",
+   "fieldname": "enable_email_notifications",
+   "fieldtype": "Check",
+   "label": "Enable Email Notifications"
+  },
+  {
+   "default": "0",
+   "description": "When ON, expiry/overdue scheduler jobs post a timeline comment on the source document. Email is controlled by the Notification DocType. When OFF, jobs run silently.",
+   "fieldname": "enable_operational_notifications",
+   "fieldtype": "Check",
+   "label": "Enable Operational Notifications"
+  },
+  {
+   "fieldname": "operational_notifications_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "60",
+   "description": "Days before a Building License expiry date to flag it Expiring Soon (per-license renewal_lead_days still overrides).",
+   "fieldname": "license_expiry_days_before",
+   "fieldtype": "Int",
+   "label": "License Expiry Lead Days"
+  },
+  {
+   "default": "90",
+   "description": "Days before a building lease end date to flag it on the watchlist.",
+   "fieldname": "lease_expiry_days_before",
+   "fieldtype": "Int",
+   "label": "Lease Expiry Lead Days"
+  },
+  {
+   "default": "2",
+   "description": "Days before a temporary stay's expected check-out date to flag it on the supervisor's watchlist.",
+   "fieldname": "temporary_stay_days_before",
+   "fieldtype": "Int",
+   "label": "Temporary Stay Lead Days"
+  },
+  {
+   "description": "Email that receives the Safety Round report when a safety checklist round is submitted. If empty, the report goes to the Accommodation Manager(s).",
+   "fieldname": "safety_report_recipient",
+   "fieldtype": "Data",
+   "options": "Email",
+   "label": "Safety Report Recipient"
+  },
+  {
+   "fieldname": "habitat_settings_sec_safety",
+   "fieldtype": "Section Break",
+   "label": "Safety"
+  },
+  {
+   "default": "2",
+   "description": "Days before a safety task's due date to send a pre-due reminder.",
+   "fieldname": "safety_predue_days_before",
+   "fieldtype": "Int",
+   "label": "Safety Pre-Due Lead Days"
+  },
+  {
+   "default": "0",
+   "description": "Grace days after the due date before a safety task is flagged Overdue.",
+   "fieldname": "safety_overdue_grace_days",
+   "fieldtype": "Int",
+   "label": "Safety Overdue Grace Days"
+  },
+  {
+   "fieldname": "habitat_settings_safety_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "When ON, the weekly coverage gate requires every building to be covered by a safety round.",
+   "fieldname": "require_weekly_all_building_coverage",
+   "fieldtype": "Check",
+   "label": "Require Weekly All-Building Coverage"
+  },
+  {
+   "fieldname": "habitat_settings_sec_custody_handover",
+   "fieldtype": "Section Break",
+   "label": "Custody Handover"
+  },
+  {
+   "default": "1",
+   "description": "When ON, transferring externally-purchased goods into custody requires a one-time password confirmed by the receiving supervisor.",
+   "fieldname": "require_handover_otp",
+   "fieldtype": "Check",
+   "label": "Require Handover OTP"
+  },
+  {
+   "default": "10",
+   "depends_on": "eval:doc.require_handover_otp==1",
+   "description": "Minutes a handover one-time password stays valid before it expires.",
+   "fieldname": "handover_otp_validity_minutes",
+   "fieldtype": "Int",
+   "label": "Handover OTP Validity (Minutes)"
+  },
+  {
+   "fieldname": "supplier_cost_recovery_sec",
+   "fieldtype": "Section Break",
+   "label": "Supplier Cost Recovery"
+  },
+  {
+   "default": "0",
+   "description": "Apply an operational markup to external-supplier accommodation costs in the Supplier Cost Recovery report.",
+   "fieldname": "enable_supplier_markup",
+   "fieldtype": "Check",
+   "label": "Enable Supplier Markup"
+  },
+  {
+   "fieldname": "habitat_settings_supplier_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "5.0",
+   "depends_on": "eval:doc.enable_supplier_markup",
+   "fieldname": "supplier_markup_percent",
+   "fieldtype": "Percent",
+   "label": "Supplier Markup (%)"
+  },
+  {
+   "fieldname": "internal_store_sec",
+   "fieldtype": "Section Break",
+   "label": "Internal Store"
+  },
+  {
+   "default": "0",
+   "description": "Send a memo-only notification to Finance when a Material Transfer moves stock between buildings on different cost centers. No GL Entry is posted.",
+   "fieldname": "notify_finance_on_liability_transfer",
+   "fieldtype": "Check",
+   "label": "Notify Finance on Liability Transfer"
+  },
+  {
+   "fieldname": "habitat_settings_store_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.notify_finance_on_liability_transfer",
+   "description": "Recipient address for the cross-cost-center transfer memo. Falls back to the Finance Manager role if left blank.",
+   "fieldname": "finance_notification_email",
+   "fieldtype": "Data",
+   "label": "Finance Notification Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "habitat_settings_sec_arrivals",
+   "fieldtype": "Section Break",
+   "label": "Arrivals Intake"
+  },
+  {
+   "default": "0",
+   "description": "When ON, the Arrivals Desk register sheet offers a camera capture that reads a passport's machine-readable zone (MRZ) and pre-fills the name, passport number, nationality, and expiry. Requires an OCR engine to be available on the bench (see docs). When OFF (default) or when OCR is unavailable, manual entry is used.",
+   "fieldname": "enable_passport_mrz_ocr",
+   "fieldtype": "Check",
+   "label": "Enable Passport MRZ OCR Autofill"
+  },
+  {
+   "fieldname": "habitat_settings_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "last_modified_by_role",
+   "fieldtype": "Data",
+   "label": "Last Modified By Role",
+   "read_only": 1
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-10 09:22:42.696478",
+ "modified_by": "Administrator",
+ "module": "Apex Core",
+ "name": "Habitat Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

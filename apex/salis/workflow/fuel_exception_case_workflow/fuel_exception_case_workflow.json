@@ -1,0 +1,182 @@
+{
+ "doctype": "Workflow",
+ "name": "Fuel Exception Case Workflow",
+ "workflow_name": "Fuel Exception Case Workflow",
+ "document_type": "Fuel Exception Case",
+ "workflow_state_field": "status",
+ "is_active": 1,
+ "override_status": 0,
+ "send_email_alert": 0,
+ "states": [
+  {
+   "doctype": "Workflow Document State",
+   "state": "Open",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Under Investigation",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Evidence Required",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Resolved",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Rejected",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Closed",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  }
+ ],
+ "transitions": [
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Start Investigation",
+   "next_state": "Under Investigation",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Start Investigation",
+   "next_state": "Under Investigation",
+   "allowed": "Fleet Project Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Start Investigation",
+   "next_state": "Under Investigation",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Under Investigation",
+   "action": "Request Evidence",
+   "next_state": "Evidence Required",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Under Investigation",
+   "action": "Request Evidence",
+   "next_state": "Evidence Required",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Evidence Required",
+   "action": "Resume Investigation",
+   "next_state": "Under Investigation",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Evidence Required",
+   "action": "Resume Investigation",
+   "next_state": "Under Investigation",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Under Investigation",
+   "action": "Resolve",
+   "next_state": "Resolved",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.reported_by != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Evidence Required",
+   "action": "Resolve",
+   "next_state": "Resolved",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.reported_by != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Reject",
+   "next_state": "Rejected",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Under Investigation",
+   "action": "Reject",
+   "next_state": "Rejected",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Evidence Required",
+   "action": "Reject",
+   "next_state": "Rejected",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Resolved",
+   "action": "Close",
+   "next_state": "Closed",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Rejected",
+   "action": "Close",
+   "next_state": "Closed",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  }
+ ]
+}

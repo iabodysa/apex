@@ -1,0 +1,211 @@
+# Copyright (c) 2026, AFMCO and contributors
+"""Tests for the Salis control fixes (segregation of duties, portal gating,
+attendance uniqueness). These cover behaviour that must hold regardless of any
+later workflow refactor."""
+
+
+import frappe
+from frappe.tests.utils import FrappeTestCase
+from frappe.model.workflow import apply_workflow, get_transitions
+
+from apex.salis.api import driver_portal
+from apex.tests.factories import make_test_driver as _ensure_test_driver
+
+
+class TestDriverPortalGating(FrappeTestCase):
+    """Read and write endpoints must honour Salis Settings.enable_driver_portal."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        cls.driver = _ensure_test_driver()
+        cls.user = frappe.db.get_value(
+            "Employee", frappe.db.get_value("Salis Driver", cls.driver, "employee"), "user_id"
+        )
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+        frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
+
+    def test_reads_and_writes_blocked_when_portal_disabled(self):
+        frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 0)
+        frappe.set_user(self.user)
+        for call in (
+            driver_portal.my_trips_today,
+            driver_portal.my_support_tickets,
+            driver_portal.driver_check_in,
+            driver_portal.driver_check_out,
+        ):
+            with self.assertRaises(frappe.PermissionError):
+                call()
+
+
+class TestDriverAttendanceDuplicate(FrappeTestCase):
+    """One attendance row per driver per day."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        cls.driver = _ensure_test_driver()
+
+    def test_second_attendance_same_day_is_rejected(self):
+        today = frappe.utils.today()
+        frappe.db.delete("Driver Attendance", {"driver": self.driver, "attendance_date": today})
+        first = frappe.get_doc(
+            {"doctype": "Driver Attendance", "driver": self.driver,
+             "attendance_date": today, "status": "Present"}
+        ).insert(ignore_permissions=True)
+        with self.assertRaises(frappe.ValidationError):
+            frappe.get_doc(
+                {"doctype": "Driver Attendance", "driver": self.driver,
+                 "attendance_date": today, "status": "Present"}
+            ).insert(ignore_permissions=True)
+        first.delete(ignore_permissions=True)
+
+
+class TestPaymentRequestSoD(FrappeTestCase):
+    """A Finance approver may not approve a payment they themselves raised.
+
+    Transitions are owned by the native Salis Payment Request Workflow, so the
+    request is driven Draft -> Pending Finance -> Approved by Finance through
+    ``apply_workflow``. The maker != checker rule is held both by the workflow
+    condition and by the controller's finance gate (defence in depth); this test
+    exercises the canonical workflow path."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        cls.fin1 = cls._finance_user("fin1_sod@example.com")
+        cls.fin2 = cls._finance_user("fin2_sod@example.com")
+
+    @staticmethod
+    def _finance_user(email):
+        if not frappe.db.exists("User", email):
+            u = frappe.get_doc({"doctype": "User", "email": email,
+                                "first_name": email.split("@")[0], "send_welcome_email": 0})
+            u.insert(ignore_permissions=True)
+        else:
+            u = frappe.get_doc("User", email)
+        # [#dsrkir]
+        for role in ("Finance Manager", "Fleet Project Manager"):
+            if role not in frappe.get_roles(email):
+                u.add_roles(role)
+        return email
+
+    def _pending_request_by(self, user):
+        """A Pending Finance request whose requested_by is ``user``, reached via
+        the workflow (insert at Draft, then Submit to Finance)."""
+        frappe.set_user("Administrator")
+        doc = frappe.get_doc(
+            {"doctype": "Salis Payment Request", "expense_type": "Fuel",
+             "amount": 100, "requested_by": user, "status": "Draft"}
+        ).insert(ignore_permissions=True)
+        frappe.set_user(user)
+        apply_workflow(doc, "Submit to Finance")
+        frappe.set_user("Administrator")
+        doc.reload()
+        return doc
+
+    def test_requester_cannot_self_approve(self):
+        doc = self._pending_request_by(self.fin1)
+        self.assertEqual(doc.requested_by, self.fin1)
+        frappe.set_user(self.fin1)
+        # [#tr1ll9]
+        self.assertNotIn("Approve (Finance)", {t.action for t in get_transitions(doc)})
+        with self.assertRaises(frappe.ValidationError):
+            apply_workflow(doc, "Approve (Finance)")
+        frappe.set_user("Administrator")
+        frappe.delete_doc("Salis Payment Request", doc.name, ignore_permissions=True, force=True)
+
+    def test_other_finance_user_can_approve(self):
+        doc = self._pending_request_by(self.fin1)
+        frappe.set_user(self.fin2)
+        apply_workflow(doc, "Approve (Finance)")
+        doc.reload()
+        self.assertEqual(doc.status, "Approved by Finance")
+        self.assertEqual(doc.docstatus, 1)
+        self.assertEqual(doc.finance_approved_by, self.fin2)
+        # [#duvhvt]
+        frappe.set_user("Administrator")
+        doc.reload()
+        doc.cancel()
+        frappe.delete_doc("Salis Payment Request", doc.name, ignore_permissions=True, force=True)
+
+
+class TestRequestedByStamping(FrappeTestCase):
+    """``requested_by`` is stamped to the session user server-side and is a
+    read-only field on the SoD-bearing DocTypes, so the maker != checker gate
+    cannot be spoofed through the form path."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        cls.user = cls._mgr("rb_user@example.com")
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+    @staticmethod
+    def _mgr(email):
+        if not frappe.db.exists("User", email):
+            u = frappe.get_doc({"doctype": "User", "email": email,
+                                "first_name": email.split("@")[0], "send_welcome_email": 0})
+            u.insert(ignore_permissions=True)
+        else:
+            u = frappe.get_doc("User", email)
+        for role in ("Fleet Manager", "Fleet Project Manager"):
+            if role not in frappe.get_roles(email):
+                u.add_roles(role)
+        return email
+
+    def _vehicle(self, plate):
+        v = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
+        if not v:
+            v = frappe.get_doc({"doctype": "Salis Vehicle", "plate_number": plate,
+                                "status": "Active"}).insert(ignore_permissions=True).name
+        return v
+
+    def _project(self, name):
+        p = frappe.db.get_value("Project", {"project_name": name}, "name")
+        if not p:
+            p = frappe.get_doc({"doctype": "Project", "project_name": name}).insert(
+                ignore_permissions=True).name
+        return p
+
+    def test_field_is_read_only_in_schema(self):
+        for dt in ("Fuel Claim", "Rental Settlement",
+                   "Salis Payment Request"):
+            meta = frappe.get_meta(dt)
+            field = meta.get_field("requested_by")
+            self.assertIsNotNone(field, f"{dt} must declare requested_by")
+            self.assertTrue(field.read_only, f"{dt}.requested_by must be read_only")
+
+    def test_fuel_claim_stamps_session_user(self):
+        frappe.set_user(self.user)
+        doc = frappe.get_doc({
+            "doctype": "Fuel Claim", "project": self._project("RB Claim P"),
+            "vehicle": self._vehicle("RB CLAIM 1"), "period_month": "2026-05",
+            "claimed_litres": 50, "status": "Draft",
+        }).insert(ignore_permissions=True)
+        self.assertEqual(doc.requested_by, self.user)
+        frappe.set_user("Administrator")
+        frappe.delete_doc("Fuel Claim", doc.name, ignore_permissions=True, force=True)
+
+    def test_rental_settlement_stamps_session_user(self):
+        frappe.set_user(self.user)
+        office = frappe.db.get_value("Rental Office", {}, "name")
+        if not office:
+            office = frappe.get_doc({"doctype": "Rental Office",
+                                     "office_name": "RB Office"}).insert(
+                ignore_permissions=True).name
+        doc = frappe.get_doc({
+            "doctype": "Rental Settlement", "rental_office": office,
+            "period_month": "2026-05", "status": "Draft", "claimed_total": 0,
+        }).insert(ignore_permissions=True)
+        self.assertEqual(doc.requested_by, self.user)
+        frappe.set_user("Administrator")
+        frappe.delete_doc("Rental Settlement", doc.name, ignore_permissions=True, force=True)

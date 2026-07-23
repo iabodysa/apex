@@ -1,0 +1,333 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-23 23:07:23.555285",
+ "description": "Physical facility asset movement with intercompany approval controls.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "facility_asset_movement_tab_overview",
+  "facility_asset_movement_sec_movement",
+  "movement_date",
+  "facility_asset",
+  "movement_category",
+  "facility_asset_movement_movement_col",
+  "movement_reason",
+  "moved_by",
+  "facility_asset_movement_sec_large_text",
+  "remarks",
+  "facility_asset_movement_tab_locations",
+  "facility_asset_movement_sec_origin",
+  "from_building",
+  "facility_asset_movement_origin_col",
+  "from_room",
+  "facility_asset_movement_origin_col2",
+  "from_company",
+  "facility_asset_movement_sec_destination",
+  "to_building",
+  "facility_asset_movement_destination_col",
+  "to_room",
+  "facility_asset_movement_destination_col2",
+  "to_company",
+  "is_intercompany",
+  "facility_asset_movement_tab_approval",
+  "facility_asset_movement_sec_intercompany",
+  "release_approved_by",
+  "receiving_confirmed_by",
+  "gate_pass_reference",
+  "facility_asset_movement_intercompany_col",
+  "accounting_acknowledged",
+  "accounting_acknowledged_by",
+  "facility_asset_movement_tab_system",
+  "facility_asset_movement_sec_system",
+  "naming_series",
+  "facility_asset_movement_system_col",
+  "amended_from",
+  "facility_asset_movement_sec_cancellation",
+  "cancellation_reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "facility_asset_movement_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "facility_asset_movement_tab_locations",
+   "fieldtype": "Tab Break",
+   "label": "Locations"
+  },
+  {
+   "fieldname": "facility_asset_movement_tab_approval",
+   "fieldtype": "Tab Break",
+   "label": "Approval"
+  },
+  {
+   "fieldname": "facility_asset_movement_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "facility_asset_movement_sec_cancellation",
+   "fieldtype": "Section Break",
+   "label": "Cancellation",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "facility_asset_movement_sec_movement",
+   "fieldtype": "Section Break",
+   "label": "Movement"
+  },
+  {
+   "fieldname": "movement_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Movement Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "facility_asset",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Facility Asset",
+   "options": "Facility Asset",
+   "reqd": 1
+  },
+  {
+   "default": "Same-Company Relocation",
+   "description": "Business nature of the asset move, separating internal relocations from temporary or permanent transfers between companies and from maintenance, repair-return, or disposal movements, which drives cost and ownership treatment.",
+   "fieldname": "movement_category",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Movement Category",
+   "options": "Same-Company Relocation\nIntercompany Temporary\nIntercompany Permanent\nMaintenance Dispatch\nReturn from Repair\nDisposal/Scrap",
+   "reqd": 1
+  },
+  {
+   "fieldname": "facility_asset_movement_movement_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Reallocation",
+   "description": "Underlying reason the asset is being moved, whether to reallocate it, service it, condemn it, or another cause, used for movement analysis.",
+   "fieldname": "movement_reason",
+   "fieldtype": "Select",
+   "label": "Movement Reason",
+   "options": "Reallocation\nMaintenance\nCondemnation\nOther"
+  },
+  {
+   "fieldname": "moved_by",
+   "fieldtype": "Link",
+   "label": "Moved By (Employee)",
+   "options": "Employee"
+  },
+  {
+   "default": "FAM-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "FAM-.YYYY.-.####"
+  },
+  {
+   "fieldname": "facility_asset_movement_sec_origin",
+   "fieldtype": "Section Break",
+   "label": "Origin"
+  },
+  {
+   "fieldname": "from_building",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "From Building",
+   "options": "Building"
+  },
+  {
+   "fieldname": "facility_asset_movement_origin_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_room",
+   "fieldtype": "Link",
+   "label": "From Room",
+   "options": "Room"
+  },
+  {
+   "fieldname": "facility_asset_movement_origin_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_company",
+   "fieldtype": "Link",
+   "label": "From Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "facility_asset_movement_sec_destination",
+   "fieldtype": "Section Break",
+   "label": "Destination"
+  },
+  {
+   "fieldname": "to_building",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "To Building",
+   "options": "Building",
+   "reqd": 1
+  },
+  {
+   "fieldname": "facility_asset_movement_destination_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_room",
+   "fieldtype": "Link",
+   "label": "To Room",
+   "options": "Room"
+  },
+  {
+   "fieldname": "facility_asset_movement_destination_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_company",
+   "fieldtype": "Link",
+   "label": "To Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_intercompany",
+   "fieldtype": "Check",
+   "label": "Is Intercompany Movement",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:doc.is_intercompany==1",
+   "fieldname": "facility_asset_movement_sec_intercompany",
+   "fieldtype": "Section Break",
+   "label": "Intercompany Approval"
+  },
+  {
+   "depends_on": "eval:doc.is_intercompany==1",
+   "fieldname": "release_approved_by",
+   "fieldtype": "Link",
+   "label": "Release Approved By",
+   "options": "User"
+  },
+  {
+   "depends_on": "eval:doc.is_intercompany==1",
+   "fieldname": "receiving_confirmed_by",
+   "fieldtype": "Link",
+   "label": "Receiving Confirmed By",
+   "options": "User"
+  },
+  {
+   "depends_on": "eval:doc.is_intercompany==1",
+   "fieldname": "gate_pass_reference",
+   "fieldtype": "Data",
+   "label": "Gate Pass Reference"
+  },
+  {
+   "fieldname": "facility_asset_movement_intercompany_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_intercompany==1",
+   "fieldname": "accounting_acknowledged",
+   "fieldtype": "Check",
+   "label": "Accounting Acknowledged"
+  },
+  {
+   "depends_on": "eval:doc.accounting_acknowledged==1",
+   "fieldname": "accounting_acknowledged_by",
+   "fieldtype": "Link",
+   "label": "Acknowledged By (Finance)",
+   "options": "User"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "facility_asset_movement_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "facility_asset_movement_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "cancellation_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancellation Reason",
+   "read_only": 0,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "facility_asset_movement_system_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Facility Asset Movement",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Facility Asset Movement",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Resident Supervisor",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "gate_pass_reference, facility_asset, from_building",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

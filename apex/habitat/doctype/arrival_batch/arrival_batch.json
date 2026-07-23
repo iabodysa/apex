@@ -1,0 +1,201 @@
+{
+ "doctype": "DocType",
+ "name": "Arrival Batch",
+ "module": "Habitat",
+ "custom": 0,
+ "issingle": 0,
+ "is_submittable": 0,
+ "engine": "InnoDB",
+ "search_fields": "title, building, labour_supplier",
+ "track_changes": 1,
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "title_field": "title",
+ "sort_field": "expected_date",
+ "sort_order": "DESC",
+ "description": "Pre-arrival manifest: the workers a labour supplier expects to deliver to a building on a date. Captured up front via the public Arrival Manifest web form (front-desk intake) and managed here as the backend record the Arrivals Desk reconciles real arrivals against. Title, Expected Count and each row's Arrived As are system-maintained (read-only by design).",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "arrival_batch_sec_context",
+   "fieldtype": "Section Break",
+   "label": "Arrival Context",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "in_standard_filter": 1,
+   "in_list_view": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "expected_date",
+   "fieldtype": "Date",
+   "label": "Expected Date",
+   "reqd": 1,
+   "in_standard_filter": 1,
+   "in_list_view": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "arrival_batch_context_col",
+   "fieldtype": "Column Break",
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "labour_supplier",
+   "fieldtype": "Link",
+   "label": "Labour Supplier",
+   "options": "Supplier",
+   "in_standard_filter": 1,
+   "in_list_view": 1,
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "in_standard_filter": 1,
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "arrival_batch_sec_manifest",
+   "fieldtype": "Section Break",
+   "label": "Expected Workers",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "expected_workers",
+   "fieldtype": "Table",
+   "label": "Expected Workers",
+   "options": "Arrival Batch Worker",
+   "reqd": 1,
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "expected_count",
+   "fieldtype": "Int",
+   "label": "Expected Count",
+   "description": "Number of workers on the manifest. Computed from the Expected Workers rows on save — read-only by design.",
+   "read_only": 1,
+   "in_list_view": 1,
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "arrival_batch_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1,
+   "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "description": "Auto-generated from Building and Expected Date on save. Read-only by design.",
+   "read_only": 1,
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "ARR-BATCH-.YYYY.-.####",
+   "default": "ARR-BATCH-.YYYY.-.####",
+   "hidden": 1,
+   "reqd": 1,
+   "idx": 12
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "report": 1,
+   "share": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Accommodation Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "report": 1,
+   "share": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Resident Supervisor",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Internal Auditor",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "idx": 4
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1,
+   "idx": 5
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Accommodation Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1,
+   "idx": 6
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Resident Supervisor",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1,
+   "idx": 7
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Internal Auditor",
+   "permlevel": 1,
+   "read": 1,
+   "idx": 8
+  }
+ ],
+ "modified": "2026-07-11 04:09:36.115685"
+}

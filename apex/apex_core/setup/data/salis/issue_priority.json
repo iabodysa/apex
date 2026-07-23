@@ -1,0 +1,20 @@
+{
+  "doctype": "Issue Priority",
+  "key": "name",
+  "create_only": true,
+  "apply": false,
+  "records": [
+    {
+      "name": "Low"
+    },
+    {
+      "name": "Medium"
+    },
+    {
+      "name": "High"
+    },
+    {
+      "name": "Urgent"
+    }
+  ]
+}

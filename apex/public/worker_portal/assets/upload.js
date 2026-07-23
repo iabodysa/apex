@@ -1,0 +1,1 @@
+function t(r){return r?new Promise((o,n)=>{const e=new FileReader;e.onload=()=>o({photo:String(e.result||""),photo_filename:r.name}),e.onerror=()=>n(e.error||new Error("Unable to read photo.")),e.readAsDataURL(r)}):Promise.resolve({photo:null,photo_filename:null})}export{t as r};

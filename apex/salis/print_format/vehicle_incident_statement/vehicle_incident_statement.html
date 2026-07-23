@@ -1,0 +1,82 @@
+<style>
+  .sal-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
+  .sal-doc h1 { font-size: 18px; margin: 0; }
+  .sal-doc .sal-sub { color: #666; font-size: 12px; margin-top: 2px; }
+  .sal-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
+              display: flex; justify-content: space-between; align-items: flex-start; }
+  .sal-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .sal-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
+  .sal-meta .sal-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
+  .sal-ar { color: #555; font-size: 10px; }
+  .sal-block { border: 1px solid #e2e2ea; padding: 8px 10px; margin-bottom: 14px; }
+  .sal-block .sal-bt { font-weight: bold; margin-bottom: 4px; }
+  .sal-pos { color: #b00020; font-weight: bold; }
+  .sal-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
+  .sal-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
+  .sal-foot { margin-top: 20px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
+</style>
+
+<div class="sal-doc">
+  <div class="sal-head">
+    <div>
+      <h1>{{ _("Vehicle Incident Statement") }}</h1>
+      <div class="sal-sub">بيان بلاغ مركبة &bull; {{ doc.name }}</div>
+    </div>
+    <div style="text-align:right; font-size:11px; color:#666;">
+      {{ frappe.db.get_single_value("Salis Settings", "default_company") or "" }}
+    </div>
+  </div>
+
+  <table class="sal-meta">
+    <tr>
+      <td class="sal-lbl">Vehicle <span class="sal-ar">المركبة</span></td>
+      <td>{{ doc.vehicle or "" }}</td>
+      <td class="sal-lbl">Incident Type <span class="sal-ar">نوع البلاغ</span></td>
+      <td>{{ _(doc.incident_type) if doc.incident_type else "" }}</td>
+    </tr>
+    <tr>
+      <td class="sal-lbl">Incident Date <span class="sal-ar">تاريخ البلاغ</span></td>
+      <td>{{ frappe.format(doc.incident_date, {"fieldtype": "Date"}) if doc.incident_date else "" }}</td>
+      <td class="sal-lbl">Driver <span class="sal-ar">السائق</span></td>
+      <td>{{ doc.driver or "—" }}</td>
+    </tr>
+    <tr>
+      <td class="sal-lbl">Location <span class="sal-ar">الموقع</span></td>
+      <td>{{ doc.location or "—" }}</td>
+      <td class="sal-lbl">Police Report No. <span class="sal-ar">رقم بلاغ الشرطة</span></td>
+      <td>{{ doc.report_number or "—" }}</td>
+    </tr>
+    <tr>
+      <td class="sal-lbl">Status <span class="sal-ar">الحالة</span></td>
+      <td>{{ _(doc.status) if doc.status else "" }}</td>
+      <td class="sal-lbl">Estimated Cost <span class="sal-ar">التكلفة التقديرية</span></td>
+      <td>{{ frappe.format(doc.estimated_cost, {"fieldtype": "Currency"}) if doc.estimated_cost else "—" }}</td>
+    </tr>
+    {% if doc.incident_type == "Accident" %}
+    <tr>
+      <td class="sal-lbl">Fault / Liable Party <span class="sal-ar">الطرف المسؤول</span></td>
+      <td>{{ doc.fault or "—" }}</td>
+      <td class="sal-lbl">Damaged Parts <span class="sal-ar">الأجزاء المتضررة</span></td>
+      <td>{{ doc.damaged_parts or "—" }}</td>
+    </tr>
+    {% endif %}
+  </table>
+
+  <div class="sal-block">
+    <div class="sal-bt">Description <span class="sal-ar">الوصف</span></div>
+    <div>{{ doc.description or "" }}</div>
+  </div>
+
+  <table class="sal-sign">
+    <tr>
+      <td>Reported by <br><span class="sal-ar">سجّله</span></td>
+      <td style="text-align:right;">Reviewed by (Operations) <br><span class="sal-ar">راجعه (العمليات)</span></td>
+    </tr>
+  </table>
+
+  <div class="sal-foot">
+    {{ _("This statement records a fleet incident (accident or theft) against the vehicle. It does not post to the general ledger; any recovery or write-off is handled separately.") }}
+    يسجّل هذا البيان بلاغ حادث أو سرقة على المركبة، ولا يُرحَّل إلى دفتر الأستاذ العام.
+    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
+  </div>
+</div>

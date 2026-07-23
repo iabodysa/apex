@@ -1,0 +1,63 @@
+{
+ "custom_fields": [
+  {
+   "dt": "Address",
+   "fieldname": "saudi_national_address_section",
+   "label": "Saudi National Address",
+   "fieldtype": "Section Break",
+   "insert_after": "pincode",
+   "collapsible": 1,
+   "description": "Saudi Post (SPL) National Address. Pincode above is the 5-digit Postal Code; City and Street use the standard address fields."
+  },
+  {
+   "dt": "Address",
+   "fieldname": "short_address",
+   "label": "Short Address",
+   "fieldtype": "Data",
+   "insert_after": "saudi_national_address_section",
+   "length": 8,
+   "in_standard_filter": 1,
+   "translatable": 0,
+   "description": "8-character SPL code: 4 letters + 4 digits (e.g. RCTB4359)."
+  },
+  {
+   "dt": "Address",
+   "fieldname": "building_number",
+   "label": "Building Number",
+   "fieldtype": "Data",
+   "insert_after": "short_address",
+   "length": 4,
+   "translatable": 0,
+   "description": "4-digit building number."
+  },
+  {
+   "dt": "Address",
+   "fieldname": "saudi_address_column",
+   "fieldtype": "Column Break",
+   "insert_after": "building_number"
+  },
+  {
+   "dt": "Address",
+   "fieldname": "district",
+   "label": "District",
+   "fieldtype": "Data",
+   "insert_after": "saudi_address_column",
+   "translatable": 0,
+   "description": "District / neighborhood."
+  },
+  {
+   "dt": "Address",
+   "fieldname": "secondary_number",
+   "label": "Secondary Number",
+   "fieldtype": "Data",
+   "insert_after": "district",
+   "length": 4,
+   "translatable": 0,
+   "description": "4-digit secondary (additional) number."
+  }
+ ],
+ "custom_perms": [],
+ "doctype": "Address",
+ "property_setters": [],
+ "sync_on_migrate": 1
+}

@@ -1,0 +1,188 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-24 18:03:15.847320",
+ "description": "Submittable: official on-site maintenance inspection record.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "maintenance_inspection_report_tab_overview",
+  "maintenance_inspection_report_sec_overview",
+  "inspection_date",
+  "building",
+  "facility_asset",
+  "maintenance_inspection_report_overview_col",
+  "inspection_type",
+  "overall_result",
+  "maintenance_inspection_report_overview_col2",
+  "inspector",
+  "maintenance_work_order",
+  "maintenance_inspection_report_sec_large_text",
+  "remarks",
+  "maintenance_inspection_report_sec_table_findings",
+  "findings",
+  "maintenance_inspection_report_sec_system",
+  "naming_series",
+  "cancellation_reason",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "maintenance_inspection_report_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "maintenance_inspection_report_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details"
+  },
+  {
+   "fieldname": "inspection_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Inspection Date",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "maintenance_work_order.building",
+   "fetch_if_empty": 1,
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Optional: the specific Facility Asset this inspection covers. On submit its Last Inspected Date is stamped with the Inspection Date.",
+   "fieldname": "facility_asset",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Facility Asset",
+   "options": "Facility Asset",
+   "search_index": 1
+  },
+  {
+   "fieldname": "inspector",
+   "fieldtype": "Link",
+   "label": "Inspector (Employee)",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "maintenance_work_order",
+   "fieldtype": "Link",
+   "label": "Maintenance Work Order",
+   "options": "Maintenance Work Order"
+  },
+  {
+   "fieldname": "maintenance_inspection_report_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "maintenance_inspection_report_overview_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Post-Work",
+   "description": "When the inspection is carried out relative to work, distinguishing pre-work and post-work checks from routine periodic rounds and unplanned emergency inspections.",
+   "fieldname": "inspection_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Inspection Type",
+   "options": "Pre-Work\nPost-Work\nPeriodic\nEmergency"
+  },
+  {
+   "default": "Pass",
+   "fieldname": "overall_result",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Overall Result",
+   "options": "Pass\nPass with Observations\nFail"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "maintenance_inspection_report_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Additional Information"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "maintenance_inspection_report_sec_table_findings",
+   "fieldtype": "Section Break",
+   "label": "Findings"
+  },
+  {
+   "fieldname": "findings",
+   "fieldtype": "Table",
+   "label": "Findings",
+   "options": "Inspection Finding Item"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "maintenance_inspection_report_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "default": "MIR-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "MIR-.YYYY.-.####"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "cancellation_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancellation Reason",
+   "read_only": 0
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Maintenance Inspection Report",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Maintenance Inspection Report",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "building, facility_asset, inspection_date",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "building",
+ "track_changes": 1
+}

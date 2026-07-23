@@ -1,0 +1,17 @@
+include README.md
+include license.txt
+recursive-include apex *.py
+recursive-include apex *.json
+recursive-include apex *.js
+recursive-include apex *.css
+recursive-include apex *.html
+recursive-include apex *.md
+recursive-include apex *.txt
+recursive-include apex *.csv
+recursive-include apex *.woff2
+recursive-include apex *.png
+recursive-include apex *.svg
+recursive-include apex *.webmanifest
+recursive-include apex_habitat *.py *.txt
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]

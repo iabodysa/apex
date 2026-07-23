@@ -1,0 +1,15 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Complete a Maintenance Work Order",
+ "intro_text": "Turn an approved maintenance request into a work order, record the parts and labour, and close it out.",
+ "title": "Complete a Maintenance Work Order",
+ "action": "Go to Page",
+ "path": "List/Maintenance Work Order/List",
+ "reference_document": "Maintenance Work Order",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Open the work-order queue. Select a manager-created work order assigned to you, or ask an authorized creator when the queue is empty.",
+ "action_label": "Open Work Order Queue"
+}

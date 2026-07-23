@@ -1,0 +1,30 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.status == 'Waiting Evidence'",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Resident Request",
+ "enabled": 0,
+ "event": "Value Change",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"This resident request is waiting for supporting evidence\") }}: {{ doc.name }}.",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - Resident Request Waiting Evidence",
+ "recipients": [
+  {
+   "receiver_by_role": "Resident Supervisor"
+  },
+  {
+   "receiver_by_document_field": "assigned_to"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "subject": "Resident Request Waiting for Evidence: {{ doc.name }}",
+ "value_changed": "status",
+ "modified": "2026-07-10 06:05:34.129545"
+}

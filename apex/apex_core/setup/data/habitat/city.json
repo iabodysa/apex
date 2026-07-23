@@ -1,0 +1,25 @@
+{
+    "doctype": "City",
+    "key": "city_name",
+    "create_only": true,
+    "records": [
+        {"city_name": "Riyadh", "country": "Saudi Arabia"},
+        {"city_name": "Jeddah", "country": "Saudi Arabia"},
+        {"city_name": "Mecca", "country": "Saudi Arabia"},
+        {"city_name": "Medina", "country": "Saudi Arabia"},
+        {"city_name": "Dammam", "country": "Saudi Arabia"},
+        {"city_name": "Khobar", "country": "Saudi Arabia"},
+        {"city_name": "Dhahran", "country": "Saudi Arabia"},
+        {"city_name": "Jubail", "country": "Saudi Arabia"},
+        {"city_name": "Yanbu", "country": "Saudi Arabia"},
+        {"city_name": "Tabuk", "country": "Saudi Arabia"},
+        {"city_name": "Abha", "country": "Saudi Arabia"},
+        {"city_name": "Taif", "country": "Saudi Arabia"},
+        {"city_name": "Buraidah", "country": "Saudi Arabia"},
+        {"city_name": "Hail", "country": "Saudi Arabia"},
+        {"city_name": "Najran", "country": "Saudi Arabia"},
+        {"city_name": "Jizan", "country": "Saudi Arabia"},
+        {"city_name": "Arar", "country": "Saudi Arabia"},
+        {"city_name": "Sakakah", "country": "Saudi Arabia"}
+    ]
+}

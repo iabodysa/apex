@@ -1,0 +1,255 @@
+{
+ "doctype": "DocType",
+ "name": "Building License",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 0,
+ "engine": "InnoDB",
+ "is_submittable": 1,
+ "search_fields": "license_number, building, issue_date",
+ "track_changes": 1,
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "description": "Compliance document attached to a building (Balady, Civil Defence Certificate, Group Housing Permit, Lease Contract).",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "building_license_tab_details",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building_license_sec_details",
+   "fieldtype": "Section Break",
+   "label": "License Identity"
+  },
+  {
+   "doctype": "DocField",
+   "description": "Kind of regulatory document or permit held for the building, covering municipal, civil defence, housing, lease, labour authority, and insurance records tracked for expiry and compliance.",
+   "fieldname": "license_type",
+   "fieldtype": "Select",
+   "label": "License Type",
+   "options": "Balady Certificate\nCivil Defence Certificate\nGroup Housing Permit\nLease Contract\nMOL Worker Housing Approval\nInsurance Policy\nOther",
+   "reqd": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building_license_details_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "license_number",
+   "fieldtype": "Data",
+   "label": "License/Certificate Number",
+   "reqd": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "issuing_authority",
+   "fieldtype": "Data",
+   "label": "Issuing Authority"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building_license_sec_validity",
+   "fieldtype": "Section Break",
+   "label": "Validity"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "issue_date",
+   "fieldtype": "Date",
+   "label": "Issue Date",
+   "reqd": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building_license_validity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "label": "Expiry Date",
+   "reqd": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building_license_sec_renewal",
+   "fieldtype": "Section Break",
+   "label": "Renewal Management"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "renewal_lead_days",
+   "fieldtype": "Int",
+   "label": "Renewal Lead Days",
+   "default": 60,
+   "description": "Days before expiry to trigger renewal alert"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "renewal_cost_estimate",
+   "fieldtype": "Currency",
+   "label": "Renewal Cost Estimate (SAR)"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building_license_renewal_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "responsible_role",
+   "fieldtype": "Link",
+   "label": "Responsible Role",
+   "options": "Role",
+   "default": "Admin Manager"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building_license_renewal_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "attached_document",
+   "fieldtype": "Attach",
+   "label": "Certificate File"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building_license_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "doctype": "DocField",
+   "description": "Validity state of the license, flagging documents that are active, approaching expiry, already expired, in renewal, or revoked so compliance gaps are visible.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Active\nExpiring Soon\nExpired\nUnder Renewal\nRevoked",
+   "default": "Active"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "last_renewal_date",
+   "fieldtype": "Date",
+   "label": "Last Renewed On",
+   "read_only": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building_license_system_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "BLDG-LIC-.YYYY.-.####",
+   "default": "BLDG-LIC-.YYYY.-.####",
+   "reqd": 1,
+   "hidden": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Building License",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Accommodation Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Resident Supervisor",
+   "read": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Safety Officer",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "idx": 4
+  }
+ ],
+ "field_order": [
+  "building_license_tab_details",
+  "building_license_sec_details",
+  "license_type",
+  "building",
+  "building_license_details_col",
+  "license_number",
+  "issuing_authority",
+  "building_license_sec_validity",
+  "issue_date",
+  "building_license_validity_col",
+  "expiry_date",
+  "building_license_sec_renewal",
+  "renewal_lead_days",
+  "renewal_cost_estimate",
+  "building_license_renewal_col",
+  "responsible_role",
+  "building_license_renewal_col2",
+  "attached_document",
+  "building_license_sec_system",
+  "status",
+  "last_renewal_date",
+  "building_license_system_col",
+  "naming_series",
+  "amended_from"
+ ],
+ "modified": "2026-07-11 04:09:36.115685"
+}

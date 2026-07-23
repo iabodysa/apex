@@ -1,0 +1,156 @@
+{
+ "doctype": "DocType",
+ "name": "Scheduled Task Template",
+ "module": "Habitat",
+ "custom": 0,
+ "issingle": 0,
+ "istable": 0,
+ "engine": "InnoDB",
+ "description": "Master: recurring task template that drives automatic Scheduled Task Instance generation.",
+ "autoname": "field:template_name",
+ "naming_rule": "By fieldname",
+ "field_order": [
+  "scheduled_task_template_tab_details",
+  "scheduled_task_template_sec_details",
+  "template_name",
+  "task_type",
+  "scheduled_task_template_details_col",
+  "frequency",
+  "assigned_to",
+  "is_active",
+  "scheduled_task_template_sec_items",
+  "template_items",
+  "scheduled_task_template_sec_large_text",
+  "safety_task_catalog",
+  "description"
+ ],
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "scheduled_task_template_tab_details",
+   "fieldtype": "Tab Break",
+   "label": "Details",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "scheduled_task_template_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Information",
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "label": "Template Name",
+   "reqd": 1,
+   "unique": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "description": "Kind of recurring work this template generates, classifying instances as safety, maintenance, inspection, or cleaning for routing and reporting.",
+   "fieldname": "task_type",
+   "fieldtype": "Select",
+   "label": "Task Type",
+   "options": "Safety\nMaintenance\nInspection\nCleaning\nOther",
+   "default": "Maintenance",
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "scheduled_task_template_details_col",
+   "fieldtype": "Column Break",
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "description": "Recurrence interval used to generate task instances from this template, from daily through annually.",
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "label": "Frequency",
+   "options": "Daily\nWeekly\nMonthly\nQuarterly\nAnnually",
+   "default": "Monthly",
+   "reqd": 1,
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "label": "Default Assignee (Employee)",
+   "options": "Employee",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active",
+   "default": "1",
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "scheduled_task_template_sec_items",
+   "fieldtype": "Section Break",
+   "label": "Task Items",
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "template_items",
+   "fieldtype": "Table",
+   "label": "Task Items",
+   "options": "Scheduled Task Template Item",
+   "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "scheduled_task_template_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Additional Information",
+   "collapsible": 1,
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "safety_task_catalog",
+   "fieldtype": "Link",
+   "label": "Safety Task (from Catalog)",
+   "options": "Safety Task Catalog",
+   "idx": 12
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description",
+   "idx": 13
+  }
+ ],
+"links": [
+  {
+   "group": "Scheduling",
+   "link_doctype": "Scheduled Task Instance",
+   "link_fieldname": "template"
+  },
+  {
+   "group": "Scheduling",
+   "link_doctype": "Scheduled Task Assignment",
+   "link_fieldname": "template"
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  }
+ ],
+ "search_fields": "template_name, task_type, frequency"
+}

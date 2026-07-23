@@ -1,0 +1,93 @@
+{
+ "allow_comments": 0,
+ "allow_delete": 0,
+ "allow_edit": 0,
+ "allow_incomplete": 0,
+ "allow_multiple": 1,
+ "allow_print": 0,
+ "anonymous": 0,
+ "apply_document_permissions": 1,
+ "button_label": "Create Driver",
+ "client_script": "",
+ "condition_json": "[]",
+ "creation": "2026-06-26 00:00:00.000000",
+ "doc_type": "Salis Driver",
+ "docstatus": 0,
+ "doctype": "Web Form",
+ "introduction_text": "Register a new fleet driver, then return to the fleet board to assign them to a vehicle.",
+ "web_form_fields": [
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "hidden": 0,
+   "idx": 1,
+   "label": "Full Name",
+   "reqd": 1
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "national_id",
+   "fieldtype": "Data",
+   "hidden": 0,
+   "idx": 2,
+   "label": "National ID",
+   "reqd": 0
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "hidden": 0,
+   "idx": 3,
+   "label": "Phone",
+   "reqd": 0
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "hidden": 0,
+   "idx": 4,
+   "label": "Project",
+   "options": "Project",
+   "reqd": 0
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "license_number",
+   "fieldtype": "Data",
+   "hidden": 0,
+   "idx": 5,
+   "label": "License Number",
+   "reqd": 0
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "license_expiry",
+   "fieldtype": "Date",
+   "hidden": 0,
+   "idx": 6,
+   "label": "License Expiry",
+   "reqd": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": 1,
+ "login_required": 1,
+ "module": "Salis",
+ "name": "salis-driver",
+ "published": 1,
+ "route": "salis-driver",
+ "show_attachments": 0,
+ "show_list": 0,
+ "show_sidebar": 0,
+ "success_message": "Driver created. Return to the fleet board and search the driver to assign a vehicle.",
+ "title": "New Salis Driver"
+}

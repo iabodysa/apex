@@ -1,0 +1,112 @@
+{
+  "doctype": "DocType",
+  "name": "Custody Asset Category",
+  "module": "Habitat",
+  "custom": 0,
+  "issingle": 0,
+  "istable": 0,
+  "engine": "InnoDB",
+  "description": "Master categories for issuable custody articles.",
+  "autoname": "field:category_name",
+  "naming_rule": "By fieldname",
+  "field_order": [
+   "custody_asset_category_tab_details",
+   "custody_asset_category_sec_details",
+   "category_name",
+   "default_depreciation_policy",
+   "custody_asset_category_details_col",
+   "is_active",
+   "default_custody_days",
+   "custody_asset_category_sec_large_text",
+   "description"
+  ],
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_asset_category_tab_details",
+      "fieldtype": "Tab Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_asset_category_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Information",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "category_name",
+      "fieldtype": "Data",
+      "label": "Category Name",
+      "reqd": 1,
+      "unique": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "default_depreciation_policy",
+      "fieldtype": "Link",
+      "label": "Default Depreciation Policy",
+      "options": "Operational Depreciation Policy",
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_asset_category_details_col",
+      "fieldtype": "Column Break",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "is_active",
+      "fieldtype": "Check",
+      "label": "Is Active",
+      "default": "1",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "default_custody_days",
+      "fieldtype": "Int",
+      "label": "Default Custody Days",
+      "description": "Default number of days items in this category may be held before return is due.",
+      "non_negative": 1,
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_asset_category_sec_large_text",
+      "fieldtype": "Section Break",
+      "label": "Additional Information",
+      "collapsible": 1,
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "description",
+      "fieldtype": "Small Text",
+      "label": "Description",
+      "idx": 9
+    }
+  ],
+"links": [
+    {
+      "group": "Custody",
+      "link_doctype": "Custody Article",
+      "link_fieldname": "category"
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    }
+  ],
+ "search_fields": "category_name, default_depreciation_policy"
+}

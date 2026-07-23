@@ -1,0 +1,192 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-06-08 23:36:36.593424",
+ "description": "Reference catalog of standardized safety tasks. Each task defines its department, frequency, priority, and instructions.",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "safety_task_catalog_tab_overview",
+  "safety_task_catalog_sec_overview",
+  "task_title",
+  "department",
+  "safety_task_catalog_overview_col",
+  "task_code",
+  "frequency",
+  "priority",
+  "column_break_ftva",
+  "is_active",
+  "evidence_required",
+  "applicable_to_all_buildings",
+  "safety_task_catalog_sec_classification",
+  "instructions",
+  "safety_task_catalog_sec_large_text",
+  "applicable_buildings",
+  "naming_series"
+ ],
+ "fields": [
+  {
+   "fieldname": "safety_task_catalog_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "safety_task_catalog_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Task Identity"
+  },
+  {
+   "fieldname": "task_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Task Title",
+   "reqd": 1
+  },
+  {
+   "description": "Responsible safety domain that owns the catalog task, used to group and assign duties across fire safety, hygiene, security, maintenance, documentation, training, compliance, and emergency response.",
+   "fieldname": "department",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Department",
+   "options": "Fire Safety\nHealth and Hygiene\nSecurity\nMaintenance\nDocumentation\nAwareness and Training\nCompliance and Licensing\nEmergency and Crisis",
+   "reqd": 1
+  },
+  {
+   "fieldname": "safety_task_catalog_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "e.g., SAF-001, SEC-005",
+   "fieldname": "task_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Task Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "How often the catalog task must be performed, from daily to annual, or triggered as needed or on a resident entry rather than on a fixed cycle.",
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Frequency",
+   "options": "Daily\nWeekly\nMonthly\nQuarterly\nAnnual\nAs Needed\nOn Entry",
+   "reqd": 1
+  },
+  {
+   "default": "High",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "High\nMedium\nLow"
+  },
+  {
+   "fieldname": "column_break_ftva",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Active"
+  },
+  {
+   "default": "0",
+   "fieldname": "evidence_required",
+   "fieldtype": "Check",
+   "label": "Photo Evidence Required"
+  },
+  {
+   "default": "1",
+   "fieldname": "applicable_to_all_buildings",
+   "fieldtype": "Check",
+   "label": "Applies to All Buildings"
+  },
+  {
+   "fieldname": "safety_task_catalog_sec_classification",
+   "fieldtype": "Section Break",
+   "label": "Classification"
+  },
+  {
+   "fieldname": "instructions",
+   "fieldtype": "Small Text",
+   "label": "Execution Instructions"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "safety_task_catalog_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Execution Instructions"
+  },
+  {
+   "depends_on": "eval:doc.applicable_to_all_buildings==0",
+   "fieldname": "applicable_buildings",
+   "fieldtype": "Table",
+   "label": "Specific Buildings",
+   "options": "Safety Task Building Scope"
+  },
+  {
+   "default": "STC-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "STC-.####",
+   "reqd": 1
+  }
+ ],
+ "links": [
+  {
+   "group": "Safety",
+   "link_doctype": "Safety Task Execution",
+   "link_fieldname": "task"
+  },
+  {
+   "group": "Scheduling",
+   "link_doctype": "Scheduled Task Template",
+   "link_fieldname": "safety_task_catalog"
+  }
+ ],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Safety Task Catalog",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Resident Supervisor"
+  },
+  {
+   "read": 1,
+   "role": "Safety Officer"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "task_title, task_code",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "task_title",
+ "track_changes": 1
+}

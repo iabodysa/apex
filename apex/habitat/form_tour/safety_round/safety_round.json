@@ -1,0 +1,67 @@
+{
+ "creation": "2026-07-11 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-07-11 20:55:46.174414",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Safety Round",
+ "owner": "Administrator",
+ "reference_doctype": "Safety Round",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Select the building being inspected.",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Building",
+   "position": "Bottom",
+   "title": "Choose the Building"
+  },
+  {
+   "description": "Set the date of this safety round.",
+   "fieldname": "round_date",
+   "fieldtype": "Date",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Round Date",
+   "position": "Bottom",
+   "title": "Set the Round Date"
+  },
+  {
+   "description": "Choose how often this round recurs.",
+   "fieldname": "cadence",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Cadence",
+   "position": "Bottom",
+   "title": "Set the Cadence"
+  },
+  {
+   "description": "Select the supervisor responsible for this round.",
+   "fieldname": "supervisor",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Supervisor",
+   "position": "Bottom",
+   "title": "Assign the Supervisor"
+  },
+  {
+   "description": "Set the overall result of the round, then save.",
+   "fieldname": "overall_result",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Overall Result",
+   "position": "Bottom",
+   "title": "Record the Result"
+  }
+ ],
+ "title": "Safety Round"
+}

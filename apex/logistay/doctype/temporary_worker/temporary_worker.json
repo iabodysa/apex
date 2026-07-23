@@ -1,0 +1,282 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-31 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "temporary_worker_tab_overview",
+  "temporary_worker_sec_identity",
+  "worker_name",
+  "passport_number",
+  "nationality",
+  "temporary_worker_identity_col",
+  "iqama_number",
+  "cell_number",
+  "temporary_worker_sec_arrival_context",
+  "arrival_date",
+  "project",
+  "labour_supplier",
+  "arrival_batch",
+  "temporary_worker_arrival_context_col",
+  "building",
+  "temporary_worker_sec_window",
+  "window_days",
+  "temporary_worker_window_col",
+  "expiry_date",
+  "temporary_worker_sec_system",
+  "status",
+  "naming_series",
+  "temporary_worker_system_col",
+  "linked_employee",
+  "linked_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "temporary_worker_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "temporary_worker_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Worker Identity"
+  },
+  {
+   "fieldname": "worker_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Worker Name",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Passport is the only durable identifier until the Iqama issues. It cannot be changed once saved.",
+   "fieldname": "passport_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Passport Number",
+   "permlevel": 1,
+   "reqd": 1,
+   "search_index": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "nationality",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Nationality",
+   "options": "Country",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "temporary_worker_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Usually blank on arrival; populated when the Iqama is issued before the worker is linked to a permanent Employee.",
+   "fieldname": "iqama_number",
+   "fieldtype": "Data",
+   "label": "Iqama Number",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "cell_number",
+   "fieldtype": "Data",
+   "label": "Cell Number",
+   "options": "Phone",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "temporary_worker_sec_arrival_context",
+   "fieldtype": "Section Break",
+   "label": "Arrival Context"
+  },
+  {
+   "default": "Today",
+   "fieldname": "arrival_date",
+   "fieldtype": "Date",
+   "label": "Arrival Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "labour_supplier",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Labour Supplier",
+   "options": "Supplier"
+  },
+  {
+   "description": "The pre-arrival manifest this worker was expected on, if any.",
+   "fieldname": "arrival_batch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Arrival Batch",
+   "options": "Arrival Batch"
+  },
+  {
+   "fieldname": "temporary_worker_arrival_context_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Building"
+  },
+  {
+   "fieldname": "temporary_worker_sec_window",
+   "fieldtype": "Section Break",
+   "label": "Temporary Window"
+  },
+  {
+   "default": "30",
+   "description": "Days the worker may remain on a passport-only basis. Standard 30, extendable to a maximum of 90.",
+   "fieldname": "window_days",
+   "fieldtype": "Int",
+   "label": "Window Days"
+  },
+  {
+   "fieldname": "temporary_worker_window_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Arrival Date plus Window Days. Computed by the controller.",
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Expiry Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "temporary_worker_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nLinked\nExpired",
+   "reqd": 1
+  },
+  {
+   "default": "TEMP-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "TEMP-.YYYY.-.#####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "temporary_worker_system_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Set by the scheduled task once the Iqama issues and a permanent Employee record is created.",
+   "fieldname": "linked_employee",
+   "fieldtype": "Link",
+   "label": "Linked Employee",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "linked_on",
+   "fieldtype": "Datetime",
+   "label": "Linked On",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "Temporary Worker",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Resident Supervisor",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "worker_name, passport_number, iqama_number",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "worker_name",
+ "track_changes": 1
+}

@@ -1,0 +1,14 @@
+{
+ "doctype": "Onboarding Step",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "name": "Close a Rental Settlement",
+ "title": "Close a Rental Settlement",
+ "action": "Create Entry",
+ "reference_document": "Rental Settlement",
+ "action_label": "Create Rental Settlement",
+ "description": "Bill a rental office for its vehicles and print the statement.",
+ "intro_text": "Bill a rental office for its vehicles' days, reconcile against the accrual ledger, then print the settlement statement."
+}

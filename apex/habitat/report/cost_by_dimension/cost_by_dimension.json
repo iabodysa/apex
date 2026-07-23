@@ -1,0 +1,24 @@
+{
+ "doctype": "Report",
+ "name": "Cost by Dimension",
+ "report_name": "Cost by Dimension",
+ "ref_doctype": "Accommodation Ledger",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "add_total_row": 1,
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Finance Manager"
+  },
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
+}

@@ -1,0 +1,14 @@
+{
+ "doctype": "Onboarding Step",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "name": "Open Fleet Control",
+ "title": "Open Fleet Control",
+ "action": "Go to Page",
+ "path": "operations-control",
+ "action_label": "Open Fleet Control",
+ "description": "Open the live Fleet Control board to watch and act on every vehicle.",
+ "intro_text": "Fleet Control is your live operations board: every vehicle's status, driver and open incidents on one screen. Filter by status, office or project and act on a vehicle without leaving the board."
+}

@@ -1,0 +1,56 @@
+{
+  "doctype": "Kanban Board",
+  "key": "kanban_board_name",
+  "create_only": true,
+  "records": [
+    {
+      "kanban_board_name": "Resident Requests",
+      "reference_doctype": "Resident Request",
+      "field_name": "status",
+      "private": 0,
+      "show_labels": 1,
+      "filters": "[]",
+      "columns": [
+        { "column_name": "New", "status": "Active", "indicator": "Gray", "order": "[]" },
+        { "column_name": "Triaged", "status": "Active", "indicator": "Cyan", "order": "[]" },
+        { "column_name": "Assigned", "status": "Active", "indicator": "Blue", "order": "[]" },
+        { "column_name": "In Progress", "status": "Active", "indicator": "Orange", "order": "[]" },
+        { "column_name": "Waiting Evidence", "status": "Active", "indicator": "Yellow", "order": "[]" },
+        { "column_name": "Resolved", "status": "Active", "indicator": "Green", "order": "[]" },
+        { "column_name": "Rejected", "status": "Active", "indicator": "Red", "order": "[]" },
+        { "column_name": "Closed", "status": "Active", "indicator": "Green", "order": "[]" }
+      ]
+    },
+    {
+      "kanban_board_name": "Maintenance Requests",
+      "reference_doctype": "Maintenance Request",
+      "field_name": "status",
+      "private": 0,
+      "show_labels": 1,
+      "filters": "[]",
+      "columns": [
+        { "column_name": "Open", "status": "Active", "indicator": "Blue", "order": "[]" },
+        { "column_name": "Assigned", "status": "Active", "indicator": "Cyan", "order": "[]" },
+        { "column_name": "In Progress", "status": "Active", "indicator": "Orange", "order": "[]" },
+        { "column_name": "Resolved", "status": "Active", "indicator": "Green", "order": "[]" },
+        { "column_name": "Closed", "status": "Active", "indicator": "Gray", "order": "[]" },
+        { "column_name": "Reopened", "status": "Active", "indicator": "Red", "order": "[]" }
+      ]
+    },
+    {
+      "kanban_board_name": "Room Readiness",
+      "reference_doctype": "Room",
+      "field_name": "readiness_status",
+      "private": 0,
+      "show_labels": 1,
+      "filters": "[]",
+      "columns": [
+        { "column_name": "Unknown", "status": "Active", "indicator": "Gray", "order": "[]" },
+        { "column_name": "Needs Cleaning", "status": "Active", "indicator": "Yellow", "order": "[]" },
+        { "column_name": "Needs Repair", "status": "Active", "indicator": "Orange", "order": "[]" },
+        { "column_name": "Out of Service", "status": "Active", "indicator": "Red", "order": "[]" },
+        { "column_name": "Ready", "status": "Active", "indicator": "Green", "order": "[]" }
+      ]
+    }
+  ]
+}

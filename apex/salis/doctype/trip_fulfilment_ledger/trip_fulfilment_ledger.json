@@ -1,0 +1,158 @@
+{
+ "actions": [],
+ "autoname": "TFL-.######",
+ "creation": "2026-05-26 03:00:00.000000",
+ "description": "Trip fulfilment ledger. Maintained automatically by the system when a Dispatch Trip is completed and not edited manually.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "dispatch_trip",
+  "transport_request",
+  "route_plan",
+  "vehicle",
+  "driver",
+  "trip_date",
+  "worker_count",
+  "has_timestamps",
+  "logged_at",
+  "source_doctype",
+  "source_name",
+  "reversal_of"
+ ],
+ "fields": [
+  {
+   "fieldname": "dispatch_trip",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Dispatch Trip",
+   "options": "Dispatch Trip",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "dispatch_trip.transport_request",
+   "fetch_if_empty": 1,
+   "fieldname": "transport_request",
+   "fieldtype": "Link",
+   "label": "Transport Request",
+   "options": "Transport Request",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "dispatch_trip.route_plan",
+   "fetch_if_empty": 1,
+   "fieldname": "route_plan",
+   "fieldtype": "Link",
+   "label": "Route Plan",
+   "options": "Route Plan",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "dispatch_trip.vehicle",
+   "fetch_if_empty": 1,
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "dispatch_trip.driver",
+   "fetch_if_empty": 1,
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "label": "Driver",
+   "options": "Salis Driver",
+   "read_only": 1
+  },
+  {
+   "fieldname": "trip_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Trip Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "worker_count",
+   "fieldtype": "Int",
+   "label": "Worker Count",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "True when the trip recorded both a depart and return timestamp. Data-completeness flag — no planned return time is stored to judge punctuality against.",
+   "fieldname": "has_timestamps",
+   "fieldtype": "Check",
+   "label": "Has Timestamps",
+   "read_only": 1
+  },
+  {
+   "fieldname": "logged_at",
+   "fieldtype": "Datetime",
+   "label": "Logged At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_doctype",
+   "fieldtype": "Data",
+   "label": "Source DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_name",
+   "fieldtype": "Data",
+   "label": "Source Document",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "reversal_of",
+   "fieldtype": "Link",
+   "label": "Reversal Of",
+   "options": "Trip Fulfilment Ledger",
+   "read_only": 1
+  }
+ ],
+ "hidden": 1,
+ "in_create": 1,
+ "links": [],
+ "modified": "2026-07-22 17:52:15.287889",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Trip Fulfilment Ledger",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "source_name, vehicle, driver",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

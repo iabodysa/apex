@@ -1,0 +1,275 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 12:00:00.000000",
+ "description": "Disputed or suspicious fuel-control case. Holds usage/GPS evidence and enforces non-raiser closure (segregation of duties).",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "fec_tab_overview",
+  "fec_sec_subject",
+  "vehicle",
+  "driver",
+  "project",
+  "fec_subject_col",
+  "exception_type",
+  "fuel_request",
+  "fuel_quota",
+  "fec_sec_status",
+  "status",
+  "fec_sec_details",
+  "description",
+  "evidence",
+  "evidence_notes",
+  "fec_sec_resolution",
+  "resolution",
+  "amount_recovered",
+  "fec_sec_system",
+  "reported_by",
+  "closed_by",
+  "fec_system_col",
+  "naming_series",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "fec_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "fec_sec_subject",
+   "fieldtype": "Section Break",
+   "label": "Subject"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "vehicle.current_driver",
+   "fetch_if_empty": 1,
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "search_index": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "fec_subject_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Nature of the fuel anomaly under investigation, from over-consumption and GPS mismatches to duplicate claims, suspected fraud, or quota disputes, driving the investigation path.",
+   "fieldname": "exception_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Exception Type",
+   "options": "Over-Consumption\nGPS Mismatch\nDuplicate Claim\nSuspected Fraud\nQuota Dispute\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fuel_request",
+   "fieldtype": "Link",
+   "label": "Fuel Request",
+   "options": "Fuel Request",
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.fuel_request",
+   "fetch_from": "fuel_request.fuel_quota",
+   "fetch_if_empty": 1,
+   "fieldname": "fuel_quota",
+   "fieldtype": "Link",
+   "label": "Fuel Quota",
+   "options": "Fuel Quota"
+  },
+  {
+   "fieldname": "fec_sec_status",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Open",
+   "description": "Investigation stage of the fuel exception, tracking whether it is open, under investigation, awaiting evidence, resolved, rejected, or closed.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nUnder Investigation\nEvidence Required\nResolved\nRejected\nClosed"
+  },
+  {
+   "fieldname": "fec_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Case Details"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description",
+   "reqd": 1
+  },
+  {
+   "fieldname": "evidence",
+   "fieldtype": "Attach",
+   "label": "Evidence"
+  },
+  {
+   "depends_on": "eval:doc.evidence",
+   "fieldname": "evidence_notes",
+   "fieldtype": "Small Text",
+   "label": "Evidence Notes"
+  },
+  {
+   "fieldname": "fec_sec_resolution",
+   "fieldtype": "Section Break",
+   "label": "Resolution"
+  },
+  {
+   "depends_on": "eval:['Resolved','Rejected','Closed'].includes(doc.status)",
+   "fieldname": "resolution",
+   "fieldtype": "Text",
+   "label": "Resolution"
+  },
+  {
+   "depends_on": "eval:doc.status=='Resolved'||doc.status=='Closed'",
+   "fieldname": "amount_recovered",
+   "fieldtype": "Currency",
+   "label": "Amount Recovered (SAR)"
+  },
+  {
+   "fieldname": "fec_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "description": "The user who raised this case. Set automatically.",
+   "fieldname": "reported_by",
+   "fieldtype": "Link",
+   "label": "Reported By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "description": "The user who resolved or closed the case. Must differ from Reported By (segregation of duties).",
+   "fieldname": "closed_by",
+   "fieldtype": "Link",
+   "label": "Closed By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fec_system_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "FEX-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "FEX-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Fuel Exception Case",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Fuel Exception Case",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "submit": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "share": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "vehicle, driver, project",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "vehicle",
+ "track_changes": 1
+}

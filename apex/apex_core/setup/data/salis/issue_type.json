@@ -1,0 +1,23 @@
+{
+  "doctype": "Issue Type",
+  "key": "name",
+  "create_only": true,
+  "apply": false,
+  "records": [
+    {
+      "name": "Vehicle"
+    },
+    {
+      "name": "Fuel"
+    },
+    {
+      "name": "Attendance"
+    },
+    {
+      "name": "Salary"
+    },
+    {
+      "name": "Other"
+    }
+  ]
+}

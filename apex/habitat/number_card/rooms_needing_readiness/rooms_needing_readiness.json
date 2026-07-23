@@ -1,0 +1,16 @@
+{
+ "doctype": "Number Card",
+ "name": "Rooms Needing Readiness",
+ "label": "Rooms Needing Readiness",
+ "document_type": "Room",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Habitat",
+ "color": "#cb2929",
+ "filters_json": "[[\"Room\", \"readiness_status\", \"in\", [\"Needs Cleaning\", \"Needs Repair\", \"Out of Service\"]]]",
+ "modified": "2026-07-10 06:05:34.129545"
+}

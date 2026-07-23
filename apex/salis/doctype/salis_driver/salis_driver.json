@@ -1,0 +1,364 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 02:45:00.000000",
+ "description": "Fleet driver master record: identity, project, supervisor, vehicle linkage, and compliance.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "driver_tab_overview",
+  "driver_sec_identity",
+  "employee",
+  "driver_identity_col_1",
+  "full_name",
+  "driver_identity_col_2",
+  "national_id",
+  "driver_id",
+  "phone",
+  "driver_sec_deployment",
+  "status",
+  "project",
+  "driver_deployment_col",
+  "supervisor",
+  "current_vehicle",
+  "driver_sec_compliance",
+  "license_number",
+  "driver_compliance_col",
+  "license_expiry",
+  "driver_sec_system",
+  "driver_user",
+  "naming_series"
+ ],
+ "fields": [
+  {
+   "fieldname": "driver_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "driver_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Identity"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "search_index": 1
+  },
+  {
+   "fieldname": "driver_identity_col_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fetch_if_empty": 1,
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Full Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "driver_identity_col_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "national_id",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "National ID",
+   "permlevel": 1,
+   "search_index": 1
+  },
+  {
+   "description": "External fleet identifier used as the data-import key (unique).",
+   "fieldname": "driver_id",
+   "fieldtype": "Data",
+   "label": "Driver ID",
+   "permlevel": 1,
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "options": "Phone",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "driver_sec_deployment",
+   "fieldtype": "Section Break",
+   "label": "Deployment"
+  },
+  {
+   "default": "Active",
+   "description": "Current employment and availability state of the driver, distinguishing an active driver from one temporarily stopped or on leave, or released from the fleet.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nStopped\nOn Leave\nReleased"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project",
+   "search_index": 1
+  },
+  {
+   "fieldname": "driver_deployment_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supervisor",
+   "fieldtype": "Link",
+   "label": "Supervisor",
+   "options": "User"
+  },
+  {
+   "fieldname": "current_vehicle",
+   "fieldtype": "Link",
+   "label": "Current Vehicle",
+   "options": "Salis Vehicle"
+  },
+  {
+   "fieldname": "driver_sec_compliance",
+   "fieldtype": "Section Break",
+   "label": "License & Compliance"
+  },
+  {
+   "fieldname": "license_number",
+   "fieldtype": "Data",
+   "label": "License Number",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "driver_compliance_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "license_expiry",
+   "fieldtype": "Date",
+   "label": "License Expiry"
+  },
+  {
+   "fieldname": "driver_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "description": "The driver's portal/login user, mirrored from the linked Employee. Drives driver-facing notifications.",
+   "fetch_from": "employee.user_id",
+   "fetch_if_empty": 1,
+   "fieldname": "driver_user",
+   "fieldtype": "Link",
+   "label": "Driver User",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "default": "DRV-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "DRV-.######",
+   "print_hide": 1,
+   "report_hide": 1,
+   "reqd": 1
+  }
+ ],
+ "links": [
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Assignment",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Driver Attendance",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Driver Clearance",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Driver Suspension",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Dispatch Trip",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Route Plan",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Passenger Manifest",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Transport Request",
+   "link_fieldname": "assigned_driver"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Request",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Daily Log",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Exception Case",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Claim",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Damage Write-Off",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Support",
+   "link_doctype": "Issue",
+   "link_fieldname": "custom_driver"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Movement Cost Recovery",
+   "link_fieldname": "driver"
+  }
+ ],
+ "modified": "2026-07-11 22:41:51.337489",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Salis Driver",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "if_owner": 1,
+   "read": 1,
+   "role": "Driver"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "full_name, national_id, driver_id",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Green",
+   "title": "Active"
+  },
+  {
+   "color": "Orange",
+   "title": "Stopped"
+  },
+  {
+   "color": "Blue",
+   "title": "On Leave"
+  },
+  {
+   "color": "Gray",
+   "title": "Released"
+  }
+ ],
+ "title_field": "full_name",
+ "track_changes": 1
+}

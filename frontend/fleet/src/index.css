@@ -1,0 +1,224 @@
+/* Copyright (c) 2026, AFMCO and contributors */
+/* [#emp-fleet] Fleet EMPLOYEE page stylesheet.
+   Consumes ONLY the shared design system (--c-* Growth-Green tokens, light +
+   dark, RTL-first via logical properties). No hard-coded brand hex. The old
+   supervisor-board CSS that used to fill this file is preserved verbatim in the
+   fleet_os backup (frontend/fleet_os/src/index.css). */
+@import "@shared/tokens.css";
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; }
+body {
+  font-family: "Cairo", var(--font);
+  color: var(--c-ink);
+  font-size: var(--fs-body);
+  overflow-x: hidden;
+}
+.tnum { font-variant-numeric: tabular-nums; font-family: var(--font-num); }
+
+/* ---------- header slots (sit on the forest header) ---------- */
+.emp-brandmark {
+  width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(150deg, var(--c-mint), var(--c-primary));
+  color: var(--forest);
+}
+.emp-brandword {
+  font-size: 15px; font-weight: var(--fw-heading); letter-spacing: -0.2px;
+  color: var(--c-header-ink); line-height: 1.15;
+}
+.emp-brandword small {
+  display: block; font-weight: var(--fw-body); font-size: 11px;
+  color: color-mix(in srgb, var(--c-header-ink) 68%, transparent);
+}
+.emp-avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  display: grid; place-items: center; margin-inline-start: 4px;
+  background: var(--c-header-accent); color: var(--forest);
+  font-weight: var(--fw-heading); font-size: 14px;
+}
+
+/* ---------- layout ---------- */
+.emp-grid {
+  display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px;
+  align-items: start;
+}
+.emp-col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+/* ---------- card ---------- */
+.emp-card {
+  background: var(--c-surface-2); border: var(--border-width) solid var(--c-border);
+  border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm);
+}
+.emp-form-card { position: sticky; top: 90px; }
+.emp-card-head { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 16px; }
+.emp-ic {
+  width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: color-mix(in srgb, var(--c-primary) 12%, transparent); color: var(--c-primary);
+}
+.emp-card-titles { flex: 1; min-width: 0; }
+.emp-card-titles h3 { font-size: 15px; font-weight: var(--fw-heading); letter-spacing: -0.2px; }
+.emp-hint { font-size: 12px; color: var(--c-muted); margin-top: 2px; line-height: 1.5; }
+.emp-demo {
+  flex-shrink: 0; align-self: center; cursor: help;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.03em;
+  padding: 3px 9px; border-radius: var(--radius-pill);
+  color: var(--c-warning);
+  background: var(--c-warning-bg);
+  border: 1px solid color-mix(in srgb, var(--c-warning) 30%, transparent);
+}
+
+/* ---------- vehicle hero ---------- */
+.emp-vehicle-hero {
+  display: flex; align-items: center; gap: 14px; padding: 15px;
+  border-radius: var(--radius); margin-bottom: 13px;
+  border: var(--border-width) solid var(--c-border);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--c-primary) 10%, var(--c-surface-2)), var(--c-surface-2));
+}
+.emp-plate {
+  font-family: var(--font-num); font-weight: 800; font-size: 18px; letter-spacing: 3px;
+  padding: 8px 13px; border-radius: 9px; color: var(--c-ink); white-space: nowrap;
+  background: var(--c-surface); border: var(--border-width) solid var(--c-border-strong);
+}
+.emp-vinfo { min-width: 0; }
+.emp-vinfo b { display: block; font-size: 14px; font-weight: 700; }
+.emp-vinfo span { font-size: 12px; color: var(--c-muted); }
+
+/* ---------- pill ---------- */
+.emp-pill {
+  display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+  font-size: 11.5px; font-weight: 700; padding: 5px 11px; border-radius: var(--radius-pill);
+}
+.emp-vehicle-hero .emp-pill { margin-inline-start: auto; }
+.emp-pill .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.pill-ok { background: var(--c-success-bg); color: var(--c-success); }
+.pill-ok .dot { background: var(--c-success); }
+.pill-warn { background: var(--c-warning-bg); color: var(--c-warning); }
+.pill-warn .dot { background: var(--c-warning); }
+.pill-neutral {
+  background: color-mix(in srgb, var(--c-ink) 7%, transparent); color: var(--c-ink-soft);
+}
+.pill-neutral .dot { background: var(--c-muted); }
+
+/* ---------- key / value tiles ---------- */
+.emp-kv-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.emp-kv {
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  background: var(--c-surface); border: var(--border-width) solid var(--c-border);
+}
+.emp-kv small {
+  display: block; font-size: 10.5px; color: var(--c-muted);
+  letter-spacing: 0.03em; margin-bottom: 3px;
+}
+.emp-kv b { font-size: 14px; font-weight: 700; }
+
+/* ---------- trips ---------- */
+.emp-trips { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.emp-trip {
+  display: flex; align-items: center; gap: 12px; padding: 12px 13px;
+  border-radius: var(--radius); background: var(--c-surface);
+  border: var(--border-width) solid var(--c-border);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.emp-trip:hover { border-color: color-mix(in srgb, var(--c-primary) 45%, var(--c-border)); transform: translateY(-1px); }
+.emp-route { flex: 1; min-width: 0; }
+.emp-route b { display: block; font-size: 13.5px; font-weight: 700; }
+.emp-route span { font-size: 11.5px; color: var(--c-muted); }
+.emp-arrow { color: var(--c-muted); display: inline-flex; flex-shrink: 0; }
+.emp-empty { font-size: 13px; color: var(--c-muted); padding: 8px 2px; }
+
+/* ---------- fuel form ---------- */
+.emp-field { margin-bottom: 13px; }
+.emp-field label {
+  display: block; font-size: 12px; font-weight: 700;
+  color: var(--c-ink-soft); margin-bottom: 6px;
+}
+.emp-control {
+  width: 100%; padding: 11px 13px; border-radius: 10px;
+  font-family: inherit; font-size: 14px; color: var(--c-ink);
+  background: var(--c-surface); border: var(--border-width) solid var(--c-border-strong);
+  outline: none; transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.emp-control:focus {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 18%, transparent);
+}
+.emp-select-wrap { position: relative; }
+.emp-select-wrap select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-inline-end: 34px; }
+.emp-control:focus-within { border-color: var(--c-primary); }
+.emp-select-caret {
+  position: absolute; inset-inline-end: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--c-muted); pointer-events: none; rotate: -90deg;
+}
+.emp-control-num { display: flex; align-items: center; gap: 8px; padding-block: 0; padding-inline-end: 13px; }
+.emp-control-num input {
+  flex: 1; min-width: 0; border: none; outline: none; background: transparent;
+  padding: 11px 0 11px 13px; font-family: var(--font-num); font-size: 15px; font-weight: 700;
+  color: var(--c-ink);
+}
+.emp-unit { font-size: 12px; color: var(--c-muted); flex-shrink: 0; }
+.emp-textarea { resize: vertical; min-height: 46px; line-height: 1.6; }
+
+.emp-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 13px 18px; border-radius: 11px; margin-top: 6px;
+  font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+  border: var(--border-width) solid transparent; transition: filter 0.15s ease, transform 0.1s ease;
+}
+.emp-btn:active { transform: translateY(1px); }
+.emp-btn-primary {
+  background: var(--c-primary); color: var(--c-primary-ink);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--c-primary) 34%, transparent);
+}
+.emp-btn-primary:hover:not(:disabled) { filter: brightness(1.05); }
+.emp-btn-primary:disabled { opacity: 0.65; cursor: default; }
+.emp-btn-ghost {
+  background: transparent; color: var(--c-ink);
+  border-color: var(--c-border-strong); box-shadow: none; margin-top: 9px;
+}
+.emp-btn-ghost:hover { background: color-mix(in srgb, var(--c-ink) 5%, transparent); }
+
+/* ---------- toast ---------- */
+.toast {
+  position: fixed; bottom: 20px; inset-inline-start: 50%;
+  transform: translateX(50%) translateY(16px);
+  background: var(--c-surface-2); border: var(--border-width) solid var(--c-border-strong);
+  border-radius: var(--radius); padding: 11px 18px; font-size: 13px; font-weight: 600;
+  opacity: 0; z-index: 500; white-space: nowrap; box-shadow: var(--shadow-lg);
+  transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none;
+}
+/* RTL-safe centering: translateX sign flips with direction. */
+[dir="ltr"] .toast { transform: translateX(-50%) translateY(16px); }
+.toast.show { opacity: 1; transform: translateX(50%) translateY(0); }
+[dir="ltr"] .toast.show { transform: translateX(-50%) translateY(0); }
+.toast-green { color: var(--c-success); border-color: color-mix(in srgb, var(--c-success) 30%, transparent); }
+.toast-amber { color: var(--c-warning); border-color: color-mix(in srgb, var(--c-warning) 30%, transparent); }
+.toast-red { color: var(--c-danger); border-color: color-mix(in srgb, var(--c-danger) 30%, transparent); }
+
+/* ---------- entrance reveal ---------- */
+.reveal { opacity: 0; transform: translateY(14px); animation: empRise 0.55s ease forwards; }
+@keyframes empRise { to { opacity: 1; transform: none; } }
+.d1 { animation-delay: 0.05s; }
+.d2 { animation-delay: 0.15s; }
+.d3 { animation-delay: 0.1s; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { animation: none; opacity: 1; transform: none; }
+}
+
+/* ---------- responsive (768px = --bp-tablet) ---------- */
+@media (max-width: 860px) {
+  .emp-grid { grid-template-columns: 1fr; }
+  .emp-form-card { position: static; }
+}
+@media (max-width: 460px) {
+  .emp-vehicle-hero { flex-wrap: wrap; }
+  .emp-vehicle-hero .emp-pill { margin-inline-start: 0; }
+  .emp-kv-row { grid-template-columns: 1fr; }
+}
+
+/* thin scrollbar to match the portal chrome */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: var(--c-border-strong); border-radius: 3px; }
+::-webkit-scrollbar-track { background: transparent; }

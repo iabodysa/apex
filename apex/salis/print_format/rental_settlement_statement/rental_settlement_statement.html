@@ -1,0 +1,102 @@
+<style>
+  .sal-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
+  .sal-doc h1 { font-size: 18px; margin: 0; }
+  .sal-doc .sal-sub { color: #666; font-size: 12px; margin-top: 2px; }
+  .sal-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
+              display: flex; justify-content: space-between; align-items: flex-start; }
+  .sal-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .sal-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
+  .sal-meta .sal-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
+  .sal-items { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  .sal-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: left; }
+  .sal-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
+  .sal-items tr:nth-child(even) td { background: #f8f8fb; }
+  .sal-num { text-align: right; }
+  .sal-totals { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .sal-totals td { padding: 5px 8px; font-size: 12px; }
+  .sal-totals .sal-tl { text-align: right; width: 78%; }
+  .sal-totals .sal-tv { text-align: right; font-weight: bold; border-top: 1px solid #d8d8e0; }
+  .sal-ar { color: #555; font-size: 10px; }
+  .sal-pos { color: #b00020; font-weight: bold; }
+  .sal-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
+  .sal-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
+  .sal-foot { margin-top: 20px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
+</style>
+
+<div class="sal-doc">
+  <div class="sal-head">
+    <div>
+      <h1>{{ _("Rental Settlement Statement") }}</h1>
+      <div class="sal-sub">كشف تسوية إيجار &bull; {{ doc.name }}</div>
+    </div>
+    <div style="text-align:right; font-size:11px; color:#666;">
+      {{ frappe.db.get_single_value("Salis Settings", "default_company") or "" }}
+    </div>
+  </div>
+
+  <table class="sal-meta">
+    <tr>
+      <td class="sal-lbl">Rental Office <span class="sal-ar">مكتب التأجير</span></td>
+      <td>{{ doc.rental_office or "" }}</td>
+      <td class="sal-lbl">Period <span class="sal-ar">الفترة</span></td>
+      <td>{{ doc.period_month or "" }}</td>
+    </tr>
+    <tr>
+      <td class="sal-lbl">Status <span class="sal-ar">الحالة</span></td>
+      <td>{{ doc.status or "" }}</td>
+      <td class="sal-lbl">Payment Request <span class="sal-ar">طلب الدفع</span></td>
+      <td>{{ doc.payment_request or "—" }}</td>
+    </tr>
+  </table>
+
+  <table class="sal-items">
+    <thead>
+      <tr>
+        <th style="width:5%;">#</th>
+        <th>Vehicle <span class="sal-ar">المركبة</span></th>
+        <th style="width:14%;">Days <span class="sal-ar">الأيام</span></th>
+        <th style="width:20%;">Daily Rate <span class="sal-ar">السعر اليومي</span></th>
+        <th style="width:22%;">Amount <span class="sal-ar">المبلغ</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in doc.vehicles %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ row.vehicle or "" }}</td>
+        <td class="sal-num">{{ row.days or 0 }}</td>
+        <td class="sal-num">{{ frappe.format(row.daily_rate, {"fieldtype": "Currency"}) }}</td>
+        <td class="sal-num">{{ frappe.format(row.amount, {"fieldtype": "Currency"}) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table class="sal-totals">
+    <tr>
+      <td class="sal-tl">Accrued Total <span class="sal-ar">إجمالي المُستحَق</span></td>
+      <td class="sal-tv">{{ frappe.format(doc.accrued_total, {"fieldtype": "Currency"}) }}</td>
+    </tr>
+    <tr>
+      <td class="sal-tl">Claimed Total <span class="sal-ar">إجمالي المُطالَب به</span></td>
+      <td class="sal-tv">{{ frappe.format(doc.claimed_total, {"fieldtype": "Currency"}) }}</td>
+    </tr>
+    <tr>
+      <td class="sal-tl">Variance <span class="sal-ar">الفرق</span></td>
+      <td class="sal-tv">{% if (doc.variance or 0) != 0 %}<span class="sal-pos">{{ frappe.format(doc.variance, {"fieldtype": "Currency"}) }}</span>{% else %}{{ frappe.format(doc.variance, {"fieldtype": "Currency"}) }}{% endif %}</td>
+    </tr>
+  </table>
+
+  <table class="sal-sign">
+    <tr>
+      <td>Reconciled by (Fleet)<br><span class="sal-ar">سوّاها (الأسطول)</span></td>
+      <td style="text-align:right;">Approved by (Operations)<br><span class="sal-ar">اعتمدها (العمليات)</span></td>
+    </tr>
+  </table>
+
+  <div class="sal-foot">
+    {{ _("This statement reconciles the rental office claim against accrued rental days. It does not post to the general ledger; any payment is raised through a separate Salis Payment Request.") }}
+    يُسوّي هذا الكشف مطالبة مكتب التأجير مقابل أيام الإيجار المُستحَقة، ولا يُرحَّل إلى دفتر الأستاذ العام.
+    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
+  </div>
+</div>

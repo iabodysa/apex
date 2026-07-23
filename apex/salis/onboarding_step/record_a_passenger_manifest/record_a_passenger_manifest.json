@@ -1,0 +1,14 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Record a Passenger Manifest",
+ "title": "Record a Passenger Manifest",
+ "intro_text": "The Passenger Manifest captures who boarded each trip. It feeds the SLA report and confirms delivery against the Transport Request. Open a manifest after the trip departs to verify the boarding log.",
+ "action": "Create Entry",
+ "reference_document": "Passenger Manifest",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Record the passengers who boarded the dispatched trip to complete the movement lifecycle.",
+ "action_label": "Open Passenger Manifest"
+}

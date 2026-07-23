@@ -1,0 +1,14 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Process a Rental Settlement",
+ "title": "Process a Rental Settlement",
+ "intro_text": "A Rental Settlement reconciles the rental office invoice against actual vehicle usage. Process the first settlement to confirm the cost-recovery workflow is ready and the rental office balance is accurate.",
+ "action": "Create Entry",
+ "reference_document": "Rental Settlement",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Reconcile the first rental office invoice against actual usage.",
+ "action_label": "Open Rental Settlement"
+}

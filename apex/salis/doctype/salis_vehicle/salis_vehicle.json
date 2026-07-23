@@ -1,0 +1,445 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 02:40:00.000000",
+ "description": "Fleet vehicle master record. Stores plate, ownership, and operational status.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle_tab_overview",
+  "vehicle_sec_identity",
+  "plate_number",
+  "vehicle_identity_col",
+  "vehicle_category",
+  "vehicle_sec_status",
+  "status",
+  "vehicle_status_col1",
+  "ownership",
+  "rental_office",
+  "vehicle_status_col2",
+  "odometer",
+  "seat_capacity",
+  "vehicle_sec_assignment",
+  "company",
+  "vehicle_assignment_col1",
+  "project",
+  "vehicle_assignment_col2",
+  "current_driver",
+  "vehicle_sec_compliance",
+  "compliance_status",
+  "vehicle_compliance_col",
+  "next_expiry_date",
+  "vehicle_sec_documents",
+  "compliance_documents",
+  "vehicle_sec_fuel",
+  "planned_fuel_grade",
+  "planned_daily_fuel",
+  "vehicle_sec_notes",
+  "notes",
+  "vehicle_tab_system",
+  "vehicle_sec_system",
+  "naming_series",
+  "vehicle_sys_col",
+  "plate_normalized",
+  "current_driver_user"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "vehicle_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Identity"
+  },
+  {
+   "fieldname": "plate_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Plate Number",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "vehicle_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle Category",
+   "options": "Vehicle Category"
+  },
+  {
+   "fieldname": "vehicle_sec_status",
+   "fieldtype": "Section Break",
+   "label": "Operational Status"
+  },
+  {
+   "default": "Active",
+   "description": "Operational state of the vehicle, distinguishing an active vehicle from one stopped or under maintenance, or released from the fleet.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nStopped\nUnder Maintenance\nReleased"
+  },
+  {
+   "fieldname": "vehicle_status_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Owned",
+   "fieldname": "ownership",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Ownership",
+   "options": "Owned\nRented"
+  },
+  {
+   "depends_on": "eval:doc.ownership=='Rented'",
+   "fieldname": "rental_office",
+   "fieldtype": "Link",
+   "label": "Rental Office",
+   "options": "Rental Office"
+  },
+  {
+   "fieldname": "vehicle_status_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "odometer",
+   "fieldtype": "Int",
+   "label": "Odometer"
+  },
+  {
+   "default": "0",
+   "description": "Passenger seats. When set (non-zero), the trip assignment capacity guard caps the assigned requests' workers at this number.",
+   "fieldname": "seat_capacity",
+   "fieldtype": "Int",
+   "label": "Seat Capacity"
+  },
+  {
+   "fieldname": "vehicle_sec_assignment",
+   "fieldtype": "Section Break",
+   "label": "Assignment"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "vehicle_assignment_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "vehicle_assignment_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "current_driver",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Current Driver",
+   "options": "Salis Driver"
+  },
+  {
+   "fieldname": "vehicle_sec_compliance",
+   "fieldtype": "Section Break",
+   "label": "Compliance & Expiry"
+  },
+  {
+   "default": "Not Tracked",
+   "description": "Rolled-up regulatory compliance state of the vehicle across its documents, flagging vehicles that are compliant, approaching expiry, expired, or not tracked.",
+   "fieldname": "compliance_status",
+   "fieldtype": "Select",
+   "label": "Compliance Status",
+   "options": "Compliant\nExpiring Soon\nExpired\nNot Tracked",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_compliance_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "next_expiry_date",
+   "fieldtype": "Date",
+   "label": "Next Expiry Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_sec_documents",
+   "fieldtype": "Section Break",
+   "label": "Compliance Documents"
+  },
+  {
+   "fieldname": "compliance_documents",
+   "fieldtype": "Table",
+   "label": "Compliance Documents",
+   "options": "Salis Vehicle Compliance"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "vehicle_sec_fuel",
+   "fieldtype": "Section Break",
+   "label": "Fuel Plan"
+  },
+  {
+   "fieldname": "planned_fuel_grade",
+   "fieldtype": "Select",
+   "label": "Planned Fuel Grade",
+   "options": "\nPetrol 91\nPetrol 95\nDiesel"
+  },
+  {
+   "fieldname": "planned_daily_fuel",
+   "fieldtype": "Currency",
+   "label": "Planned Daily Fuel (SAR)"
+  },
+  {
+   "fieldname": "vehicle_sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "vehicle_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "vehicle_sec_system",
+   "fieldtype": "Section Break",
+   "label": "Identifiers"
+  },
+  {
+   "default": "VEH-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "VEH-.######",
+   "print_hide": 1,
+   "report_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle_sys_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Normalized plate (spaces removed, uppercased). Set automatically.",
+   "fieldname": "plate_normalized",
+   "fieldtype": "Data",
+   "label": "Plate (Normalized)",
+   "read_only": 1,
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "description": "The current driver's login user, mirrored from the assigned driver. Drives the driver-facing compliance notification.",
+   "fetch_from": "current_driver.driver_user",
+   "fieldname": "current_driver_user",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Current Driver User",
+   "options": "User",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Assignment",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Handover",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Suspension",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Driver Suspension",
+   "link_fieldname": "related_vehicle"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Damage Write-Off",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Dispatch Trip",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Route Plan",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Passenger Manifest",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Transport Request",
+   "link_fieldname": "assigned_vehicle"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Request",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Quota",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Daily Log",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Exception Case",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Claim",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Service",
+   "link_doctype": "Wash Request",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Rental",
+   "link_doctype": "Rental Vehicle Movement",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Movement Cost Recovery",
+   "link_fieldname": "vehicle"
+  }
+ ],
+ "modified": "2026-07-11 22:41:51.337489",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Salis Vehicle",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "plate_number, plate_normalized, vehicle_category",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Green",
+   "title": "Active"
+  },
+  {
+   "color": "Orange",
+   "title": "Stopped"
+  },
+  {
+   "color": "Red",
+   "title": "Under Maintenance"
+  },
+  {
+   "color": "Gray",
+   "title": "Released"
+  }
+ ],
+ "title_field": "plate_number",
+ "track_changes": 1
+}

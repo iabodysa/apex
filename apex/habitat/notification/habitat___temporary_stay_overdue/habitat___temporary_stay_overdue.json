@@ -1,0 +1,30 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.docstatus == 1 and doc.stay_type == 'Temporary' and not doc.check_out_date",
+ "date_changed": "expected_checkout_date",
+ "days_in_advance": 1,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Housing Assignment",
+ "enabled": 1,
+ "event": "Days After",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"This temporary stay is overdue for check-out — the worker is still checked in\") }}: {{ doc.name }} ({{ _(\"expected\") }} {{ doc.expected_checkout_date }}).",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - Temporary Stay Overdue",
+ "recipients": [
+  {
+   "receiver_by_role": "Resident Supervisor"
+  },
+  {
+   "receiver_by_role": "Accommodation Manager"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Temporary Stay Overdue: {{ doc.name }}",
+ "modified": "2026-07-11 01:59:46.491117"
+}

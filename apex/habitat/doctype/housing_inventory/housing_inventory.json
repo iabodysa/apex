@@ -1,0 +1,299 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-06-26 00:00:00.000000",
+ "description": "Countable housing item held at a building/room location (furniture, appliance, linen, kitchenware). One row per stocked article line; the periodic inventory count reconciles expected vs counted quantity. Tracked facility fixed assets stay in Facility Asset; this links to one optionally.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "housing_inventory_tab_overview",
+  "housing_inventory_sec_item",
+  "item_name",
+  "item_category",
+  "housing_inventory_item_col",
+  "uom",
+  "naming_series",
+  "housing_inventory_sec_location",
+  "building",
+  "room",
+  "housing_inventory_location_col",
+  "responsible_supervisor",
+  "housing_inventory_sec_count",
+  "expected_quantity",
+  "counted_quantity",
+  "housing_inventory_count_col",
+  "quantity_variance",
+  "condition",
+  "status",
+  "housing_inventory_sec_notes",
+  "notes",
+  "housing_inventory_tab_system",
+  "housing_inventory_sec_asset_link",
+  "facility_asset",
+  "housing_inventory_asset_link_col",
+  "last_count_date",
+  "housing_inventory_sec_maintenance",
+  "last_maintenance_date",
+  "last_maintenance_work_order",
+  "housing_inventory_maintenance_col",
+  "maintenance_count"
+ ],
+ "fields": [
+  {
+   "fieldname": "housing_inventory_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "housing_inventory_sec_item",
+   "fieldtype": "Section Break",
+   "label": "Item"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "reqd": 1
+  },
+  {
+   "description": "Type of housing inventory item, grouping furniture, appliances, bedding, kitchenware, fixtures, and equipment for stock counts and replacement planning.",
+   "fieldname": "item_category",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Category",
+   "options": "Furniture\nAppliance\nBedding & Linen\nKitchenware\nElectrical Fixture\nCleaning Equipment\nSafety Equipment\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "housing_inventory_item_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Unit",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "label": "Unit of Measure"
+  },
+  {
+   "default": "HINV-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "HINV-.YYYY.-.#####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "housing_inventory_sec_location",
+   "fieldtype": "Section Break",
+   "label": "Location"
+  },
+  {
+   "fetch_from": "room.building",
+   "fetch_if_empty": 1,
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Leave empty for building-level stock.",
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "label": "Room",
+   "options": "Room",
+   "search_index": 1
+  },
+  {
+   "fieldname": "housing_inventory_location_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Supervisor accountable for this item at count time; appears on the housing custody report.",
+   "fieldname": "responsible_supervisor",
+   "fieldtype": "Link",
+   "label": "Responsible Supervisor",
+   "options": "User"
+  },
+  {
+   "fieldname": "housing_inventory_sec_count",
+   "fieldtype": "Section Break",
+   "label": "Count"
+  },
+  {
+   "default": "0",
+   "description": "Quantity the records say should be present.",
+   "fieldname": "expected_quantity",
+   "fieldtype": "Float",
+   "label": "Expected Quantity"
+  },
+  {
+   "default": "0",
+   "description": "Quantity physically counted at the last inventory count.",
+   "fieldname": "counted_quantity",
+   "fieldtype": "Float",
+   "label": "Counted Quantity"
+  },
+  {
+   "fieldname": "housing_inventory_count_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Counted minus expected; negative means a shortage.",
+   "fieldname": "quantity_variance",
+   "fieldtype": "Float",
+   "label": "Quantity Variance",
+   "read_only": 1
+  },
+  {
+   "default": "Good",
+   "description": "Current condition of the inventory item, flagging units that need maintenance, are damaged, or are missing so replacements and charges can be raised.",
+   "fieldname": "condition",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Condition",
+   "options": "New\nGood\nFair\nNeeds Maintenance\nDamaged\nMissing"
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nUnder Maintenance\nWritten Off"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "housing_inventory_sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "housing_inventory_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "housing_inventory_sec_asset_link",
+   "fieldtype": "Section Break",
+   "label": "Asset Link"
+  },
+  {
+   "description": "Optional link when this item is a tracked facility fixed asset. Maintenance completed on that asset is reflected back here.",
+   "fieldname": "facility_asset",
+   "fieldtype": "Link",
+   "label": "Linked Facility Asset",
+   "options": "Facility Asset",
+   "search_index": 1
+  },
+  {
+   "fieldname": "housing_inventory_asset_link_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Date this item was last physically counted.",
+   "fieldname": "last_count_date",
+   "fieldtype": "Date",
+   "label": "Last Count Date"
+  },
+  {
+   "collapsible": 1,
+   "description": "Reflected from the linked Facility Asset's maintenance.",
+   "fieldname": "housing_inventory_sec_maintenance",
+   "fieldtype": "Section Break",
+   "label": "Maintenance Reflection"
+  },
+  {
+   "description": "Stamped when a Maintenance Work Order for the linked asset is completed.",
+   "fieldname": "last_maintenance_date",
+   "fieldtype": "Date",
+   "label": "Last Maintenance Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_maintenance_work_order",
+   "fieldtype": "Link",
+   "label": "Last Maintenance Work Order",
+   "options": "Maintenance Work Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "housing_inventory_maintenance_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Number of completed maintenance work orders reflected onto this item.",
+   "fieldname": "maintenance_count",
+   "fieldtype": "Int",
+   "label": "Maintenance Count",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Request",
+   "link_fieldname": "related_facility_asset"
+  }
+ ],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Housing Inventory",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Resident Supervisor",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "item_name, building, facility_asset",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "item_name",
+ "track_changes": 1
+}

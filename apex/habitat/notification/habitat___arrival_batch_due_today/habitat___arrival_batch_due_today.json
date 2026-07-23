@@ -1,0 +1,30 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "",
+ "date_changed": "expected_date",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Arrival Batch",
+ "enabled": 0,
+ "event": "Days Before",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"Workers are expected to arrive at this building today — prepare beds and custody\") }}: {{ doc.name }} ({{ doc.building }}, {{ doc.expected_count }} {{ _(\"expected\") }}).",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - Arrival Batch Due Today",
+ "recipients": [
+  {
+   "receiver_by_role": "Resident Supervisor"
+  },
+  {
+   "receiver_by_role": "Accommodation Manager"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Arrivals Expected Today: {{ doc.building }} ({{ doc.expected_count }})",
+ "modified": "2026-06-25 13:01:33.269538"
+}

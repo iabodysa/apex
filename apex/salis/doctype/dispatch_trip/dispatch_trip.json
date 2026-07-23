@@ -1,0 +1,377 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 02:45:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "__tab_0",
+  "dispatch_trip_sec_trip",
+  "route_plan",
+  "transport_request",
+  "route_assignment",
+  "shift_name",
+  "dispatch_trip_sec_trip_col1",
+  "trip_date",
+  "status",
+  "dispatch_trip_sec_assigned_requests",
+  "assigned_requests",
+  "dispatch_trip_sec_assignment",
+  "vehicle",
+  "dispatch_trip_sec_assignment_col1",
+  "driver",
+  "dispatch_trip_sec_execution",
+  "depart_time",
+  "return_time",
+  "dispatch_trip_sec_execution_col1",
+  "odometer_start",
+  "odometer_end",
+  "dispatch_trip_sec_completion",
+  "completion_notes",
+  "dispatch_trip_sec_boarding",
+  "boarding_state",
+  "dispatch_trip_sec_live_position",
+  "driver_lat",
+  "driver_lng",
+  "dispatch_trip_sec_live_position_col",
+  "driver_position_updated_at",
+  "dispatch_trip_sec_system",
+  "driver_user",
+  "naming_series",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "__tab_0",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_trip",
+   "fieldtype": "Section Break",
+   "label": "Trip"
+  },
+  {
+   "fieldname": "route_plan",
+   "fieldtype": "Link",
+   "label": "Route Plan",
+   "options": "Route Plan"
+  },
+  {
+   "fetch_from": "route_plan.transport_request",
+   "fetch_if_empty": 1,
+   "fieldname": "transport_request",
+   "fieldtype": "Link",
+   "label": "Transport Request",
+   "options": "Transport Request",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "route_plan.route_assignment",
+   "fetch_if_empty": 1,
+   "fieldname": "route_assignment",
+   "fieldtype": "Link",
+   "label": "Route Assignment",
+   "options": "Route Assignment",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "route_assignment.shift_name",
+   "fetch_if_empty": 1,
+   "fieldname": "shift_name",
+   "fieldtype": "Data",
+   "label": "Shift Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dispatch_trip_sec_trip_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "trip_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Trip Date",
+   "search_index": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Planned",
+   "description": "Execution stage of the dispatch trip, from a planned trip to one dispatched to the driver, then completed or cancelled.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Planned\nDispatched\nCompleted\nCancelled"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_assigned_requests",
+   "fieldtype": "Section Break",
+   "label": "Assigned Requests"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Transport requests the supervisor has assigned onto this trip. The trip manifest is the union of these requests' workers (plus any Route Plan request).",
+   "fieldname": "assigned_requests",
+   "fieldtype": "Table",
+   "label": "Assigned Requests",
+   "options": "Dispatch Trip Assigned Request"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_assignment",
+   "fieldtype": "Section Break",
+   "label": "Vehicle and Driver"
+  },
+  {
+   "fetch_from": "route_plan.vehicle",
+   "fetch_if_empty": 1,
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_assignment_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "route_plan.driver",
+   "fetch_if_empty": 1,
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Driver",
+   "options": "Salis Driver"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_execution",
+   "fieldtype": "Section Break",
+   "label": "Trip Execution"
+  },
+  {
+   "fieldname": "depart_time",
+   "fieldtype": "Time",
+   "label": "Depart Time"
+  },
+  {
+   "fieldname": "return_time",
+   "fieldtype": "Time",
+   "label": "Return Time"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_execution_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "odometer_start",
+   "fieldtype": "Int",
+   "label": "Odometer Start"
+  },
+  {
+   "fieldname": "odometer_end",
+   "fieldtype": "Int",
+   "label": "Odometer End"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_completion",
+   "fieldtype": "Section Break",
+   "label": "Completion Notes",
+   "depends_on": "eval:doc.status=='Completed'"
+  },
+  {
+   "depends_on": "eval:doc.status=='Completed'",
+   "fieldname": "completion_notes",
+   "fieldtype": "Small Text",
+   "label": "Completion Notes"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "dispatch_trip_sec_boarding",
+   "fieldtype": "Section Break",
+   "label": "Boarding State"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Per-manifest-worker boarding/departure state, populated from the manifest when the trip starts (first scan/self-confirm). System-maintained by the boarding flow.",
+   "fieldname": "boarding_state",
+   "fieldtype": "Table",
+   "label": "Boarding State",
+   "options": "Trip Boarding State",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "dispatch_trip_sec_live_position",
+   "fieldtype": "Section Break",
+   "label": "Live Driver Position"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Latest driver GPS latitude, pushed by the driver portal while the trip is dispatched. Feeds the worker's live ride ETA. System-maintained.",
+   "fieldname": "driver_lat",
+   "fieldtype": "Float",
+   "label": "Driver Latitude",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Latest driver GPS longitude, pushed by the driver portal while the trip is dispatched. Feeds the worker's live ride ETA. System-maintained.",
+   "fieldname": "driver_lng",
+   "fieldtype": "Float",
+   "label": "Driver Longitude",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dispatch_trip_sec_live_position_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "When the driver's GPS position was last refreshed. A stale timestamp lets the client suppress an out-of-date ETA.",
+   "fieldname": "driver_position_updated_at",
+   "fieldtype": "Datetime",
+   "label": "Driver Position Updated At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dispatch_trip_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "description": "The driver's login user, mirrored from the linked driver. Drives the driver-facing notification.",
+   "fetch_from": "driver.driver_user",
+   "fetch_if_empty": 1,
+   "fieldname": "driver_user",
+   "fieldtype": "Link",
+   "label": "Driver User",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "default": "DT-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "DT-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Dispatch Trip",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Movement",
+   "link_doctype": "Passenger Manifest",
+   "link_fieldname": "dispatch_trip"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Transport Request",
+   "link_fieldname": "dispatch_trip"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Trip Start Log",
+   "link_fieldname": "dispatch_trip"
+  }
+ ],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Dispatch Trip",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Fleet Project Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "shift_name, vehicle, driver",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Blue",
+   "title": "Planned"
+  },
+  {
+   "color": "Orange",
+   "title": "Dispatched"
+  },
+  {
+   "color": "Green",
+   "title": "Completed"
+  },
+  {
+   "color": "Red",
+   "title": "Cancelled"
+  }
+ ],
+ "track_changes": 1
+}

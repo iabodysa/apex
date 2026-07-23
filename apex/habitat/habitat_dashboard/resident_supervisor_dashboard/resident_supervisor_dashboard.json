@@ -1,0 +1,62 @@
+{
+ "cards": [
+  {
+   "card": "Open Maintenance Requests"
+  },
+  {
+   "card": "Escalated Maintenance Requests"
+  },
+  {
+   "card": "Maintenance Work Orders In Progress"
+  },
+  {
+   "card": "Overdue Scheduled Tasks"
+  },
+  {
+   "card": "Overdue Safety Tasks"
+  },
+  {
+   "card": "Open Resident Requests"
+  },
+  {
+   "card": "Custody Items Pending Return"
+  },
+  {
+   "card": "Tasks Due Today"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Maintenance Requests by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Maintenance Requests by Priority",
+   "width": "Half"
+  },
+  {
+   "chart": "Maintenance Work Orders by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Custody Issues by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Scheduled Task Instances by Status",
+   "width": "Full"
+  },
+  {
+   "chart": "Idle Resident Housing Cost by Building",
+   "width": "Half"
+  }
+ ],
+ "dashboard_name": "Resident Supervisor Dashboard",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "module": "Habitat",
+ "name": "Resident Supervisor Dashboard"
+}

@@ -1,0 +1,425 @@
+{
+ "actions": [],
+ "creation": "2026-05-26 10:00:00.000000",
+ "description": "Single configuration record for the Salis Fleet Management module.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "salis_settings_tab_general",
+  "salis_settings_sec_defaults",
+  "default_company",
+  "salis_settings_general_col",
+  "default_cost_center",
+  "salis_settings_sec_alerts",
+  "alert_lead_days",
+  "license_alert_lead_days",
+  "license_expiring_warn_days",
+  "salis_settings_alerts_col1",
+  "idle_vehicle_days",
+  "workshop_overstay_days",
+  "salis_settings_alerts_col2",
+  "fuel_pending_max_days",
+  "fuel_overage_margin_percent",
+  "salis_settings_sec_alert_aging",
+  "alert_aging_info_hours",
+  "salis_settings_alert_aging_col",
+  "alert_aging_warning_hours",
+  "alert_aging_critical_hours",
+  "salis_settings_sec_portal",
+  "enable_driver_portal",
+  "assumed_fleet_speed_kmph",
+  "salis_settings_sec_boarding_flow",
+  "boarding_notify_max_count",
+  "boarding_notify_window_seconds",
+  "boarding_grace_minutes",
+  "boarding_auto_confirm_minutes",
+  "salis_settings_boarding_flow_col",
+  "worker_wait_request_max",
+  "worker_wait_request_seconds",
+  "boarding_active_poll_seconds",
+  "salis_settings_sec_web_push",
+  "enable_web_push",
+  "web_push_vapid_subject",
+  "salis_settings_web_push_col",
+  "web_push_vapid_public_key",
+  "web_push_vapid_private_key",
+  "salis_settings_tab_approvals",
+  "salis_settings_sec_approvals",
+  "enable_approvals",
+  "cross_project_needs_approval",
+  "block_assignment_on_expired_compliance",
+  "salis_settings_approvals_col",
+  "fuel_request_approval_threshold_litres",
+  "passenger_count_ops_threshold",
+  "admin_trip_ops_threshold",
+  "salis_settings_sec_doa_thresholds",
+  "writeoff_ops_threshold",
+  "salis_settings_doa_col",
+  "cost_recovery_ops_threshold"
+ ],
+ "fields": [
+  {
+   "fieldname": "salis_settings_tab_general",
+   "fieldtype": "Tab Break",
+   "label": "General"
+  },
+  {
+   "fieldname": "salis_settings_sec_defaults",
+   "fieldtype": "Section Break",
+   "label": "Default Posting"
+  },
+  {
+   "description": "Default company applied to Salis transactions when not set explicitly.",
+   "fieldname": "default_company",
+   "fieldtype": "Link",
+   "label": "Default Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "salis_settings_general_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Default cost center used for fleet cost postings.",
+   "fieldname": "default_cost_center",
+   "fieldtype": "Link",
+   "label": "Default Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "salis_settings_sec_alerts",
+   "fieldtype": "Section Break",
+   "label": "Operational Alert Windows"
+  },
+  {
+   "default": "7",
+   "description": "Number of days before an expiry or due date to start raising alerts.",
+   "fieldname": "alert_lead_days",
+   "fieldtype": "Int",
+   "label": "Alert Lead Days"
+  },
+  {
+   "default": "30",
+   "description": "Lead days for driver licence-expiry alerts; the effective window is the larger of this and Alert Lead Days.",
+   "fieldname": "license_alert_lead_days",
+   "fieldtype": "Int",
+   "label": "License Alert Lead Days"
+  },
+  {
+   "default": "30",
+   "description": "Days to expiry at or below which a driver licence or vehicle compliance document is flagged 'expiring' (amber) in the driver portal; blank or zero uses the built-in default.",
+   "fieldname": "license_expiring_warn_days",
+   "fieldtype": "Int",
+   "label": "License Expiring Warn Days"
+  },
+  {
+   "fieldname": "salis_settings_alerts_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "7",
+   "description": "Number of days without a dispatch trip before an Active vehicle is flagged as idle.",
+   "fieldname": "idle_vehicle_days",
+   "fieldtype": "Int",
+   "label": "Idle Vehicle Days"
+  },
+  {
+   "default": "14",
+   "description": "Days a vehicle may remain in the workshop before a Maintenance Overdue alert is raised.",
+   "fieldname": "workshop_overstay_days",
+   "fieldtype": "Int",
+   "label": "Workshop Overstay Days"
+  },
+  {
+   "fieldname": "salis_settings_alerts_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "2",
+   "description": "Number of days a Fuel Request may stay Pending before it is flagged as overdue.",
+   "fieldname": "fuel_pending_max_days",
+   "fieldtype": "Int",
+   "label": "Fuel Request Pending Max Days"
+  },
+  {
+   "default": "5",
+   "description": "Percent a vehicle's actual fuel consumption may exceed its monthly quota before an overage / excessive-topup alert is raised; blank or zero uses the built-in default.",
+   "fieldname": "fuel_overage_margin_percent",
+   "fieldtype": "Int",
+   "label": "Fuel Overage Margin (%)"
+  },
+  {
+   "default": "72",
+   "description": "Hours an open Info alert may age before the queue flags it as overdue. A blank or zero value falls back to the built-in default.",
+   "fieldname": "alert_aging_info_hours",
+   "fieldtype": "Int",
+   "label": "Info Alert Aging Hours"
+  },
+  {
+   "default": "24",
+   "description": "Hours an open Warning alert may age before the queue flags it as overdue. A blank or zero value falls back to the built-in default.",
+   "fieldname": "alert_aging_warning_hours",
+   "fieldtype": "Int",
+   "label": "Warning Alert Aging Hours"
+  },
+  {
+   "default": "4",
+   "description": "Hours an open Critical alert may age before the queue flags it as overdue. A blank or zero value falls back to the built-in default.",
+   "fieldname": "alert_aging_critical_hours",
+   "fieldtype": "Int",
+   "label": "Critical Alert Aging Hours"
+  },
+  {
+   "fieldname": "salis_settings_sec_alert_aging",
+   "fieldtype": "Section Break",
+   "label": "Alert Aging SLA (Hours)"
+  },
+  {
+   "fieldname": "salis_settings_alert_aging_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "salis_settings_sec_portal",
+   "fieldtype": "Section Break",
+   "label": "Driver Portal"
+  },
+  {
+   "default": "0",
+   "description": "Allow drivers to access the self-service portal.",
+   "fieldname": "enable_driver_portal",
+   "fieldtype": "Check",
+   "label": "Enable Driver Portal"
+  },
+  {
+   "default": "40",
+   "description": "Assumed average fleet speed (km/h) used to estimate the worker's live ride ETA from the driver's GPS position; blank or zero uses the built-in default.",
+   "fieldname": "assumed_fleet_speed_kmph",
+   "fieldtype": "Float",
+   "label": "Assumed Fleet Speed (km/h)"
+  },
+  {
+   "fieldname": "salis_settings_sec_boarding_flow",
+   "fieldtype": "Section Break",
+   "label": "Boarding and Departure Flow"
+  },
+  {
+   "default": "3",
+   "description": "Maximum 'remaining passengers' notifications the driver may send a worker before that worker can be marked Absent at departure; blank or zero uses the default.",
+   "fieldname": "boarding_notify_max_count",
+   "fieldtype": "Int",
+   "label": "Boarding Notify Max Count"
+  },
+  {
+   "default": "60",
+   "description": "Seconds the worker has to respond after each driver notification (drives the client countdown). A blank or zero value falls back to the built-in default.",
+   "fieldname": "boarding_notify_window_seconds",
+   "fieldtype": "Int",
+   "label": "Boarding Notify Window (Seconds)"
+  },
+  {
+   "default": "3",
+   "description": "Grace period (minutes) from trip start before notify escalation and absence marking apply. A blank or zero value falls back to the built-in default.",
+   "fieldname": "boarding_grace_minutes",
+   "fieldtype": "Int",
+   "label": "Boarding Grace (Minutes)"
+  },
+  {
+   "default": "15",
+   "description": "Minutes after a worker self-claims boarding before it is auto-confirmed (Boarded) when the driver neither confirms nor rejects; blank or zero uses the default.",
+   "fieldname": "boarding_auto_confirm_minutes",
+   "fieldtype": "Int",
+   "label": "Boarding Auto-Confirm (Minutes)"
+  },
+  {
+   "fieldname": "salis_settings_boarding_flow_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "3",
+   "description": "Maximum 'please wait' requests a worker may send the driver per trip. A blank or zero value falls back to the built-in default.",
+   "fieldname": "worker_wait_request_max",
+   "fieldtype": "Int",
+   "label": "Worker Wait Request Max"
+  },
+  {
+   "default": "60",
+   "description": "Seconds a worker's 'please wait' request is held active (drives the client countdown). A blank or zero value falls back to the built-in default.",
+   "fieldname": "worker_wait_request_seconds",
+   "fieldtype": "Int",
+   "label": "Worker Wait Request (Seconds)"
+  },
+  {
+   "default": "10",
+   "description": "How often (seconds) the worker portal polls its boarding state during an active trip. A blank or zero value falls back to the built-in default.",
+   "fieldname": "boarding_active_poll_seconds",
+   "fieldtype": "Int",
+   "label": "Boarding Active Poll (Seconds)"
+  },
+  {
+   "depends_on": "eval:doc.enable_driver_portal",
+   "fieldname": "salis_settings_sec_web_push",
+   "fieldtype": "Section Break",
+   "label": "Driver Web Push"
+  },
+  {
+   "default": "0",
+   "description": "Send background push notifications (trip assigned, fuel approved) to opted-in driver devices; needs the VAPID keys below plus pywebpush on the server, else a safe no-op.",
+   "fieldname": "enable_web_push",
+   "fieldtype": "Check",
+   "label": "Enable Driver Web Push"
+  },
+  {
+   "depends_on": "eval:doc.enable_web_push",
+   "description": "VAPID 'sub' claim — a mailto: or https: contact the push service can reach (e.g. mailto:ops@yourcompany.com).",
+   "fieldname": "web_push_vapid_subject",
+   "fieldtype": "Data",
+   "label": "VAPID Subject"
+  },
+  {
+   "fieldname": "salis_settings_web_push_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.enable_web_push",
+   "description": "VAPID public key (base64url). Handed to the browser to subscribe; safe to expose.",
+   "fieldname": "web_push_vapid_public_key",
+   "fieldtype": "Small Text",
+   "label": "VAPID Public Key"
+  },
+  {
+   "depends_on": "eval:doc.enable_web_push",
+   "description": "VAPID private key. Secret — stored encrypted, never exposed to the client.",
+   "fieldname": "web_push_vapid_private_key",
+   "fieldtype": "Password",
+   "label": "VAPID Private Key"
+  },
+  {
+   "fieldname": "salis_settings_tab_approvals",
+   "fieldtype": "Tab Break",
+   "label": "Approvals"
+  },
+  {
+   "fieldname": "salis_settings_sec_approvals",
+   "fieldtype": "Section Break",
+   "label": "Approval Controls"
+  },
+  {
+   "default": "1",
+   "description": "Master switch to enable approval routing across Salis transactions.",
+   "fieldname": "enable_approvals",
+   "fieldtype": "Check",
+   "label": "Enable Approvals"
+  },
+  {
+   "default": "1",
+   "description": "Require approval when an assignment or transfer crosses project boundaries.",
+   "fieldname": "cross_project_needs_approval",
+   "fieldtype": "Check",
+   "label": "Cross-Project Needs Approval"
+  },
+  {
+   "default": "0",
+   "description": "Block vehicle assignment when the linked vehicle has expired compliance.",
+   "fieldname": "block_assignment_on_expired_compliance",
+   "fieldtype": "Check",
+   "label": "Block Assignment On Expired Compliance"
+  },
+  {
+   "fieldname": "salis_settings_approvals_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "100",
+   "description": "Fuel requests above this litre amount require approval.",
+   "fieldname": "fuel_request_approval_threshold_litres",
+   "fieldtype": "Float",
+   "label": "Fuel Request Approval Threshold (L)"
+  },
+  {
+   "default": "20",
+   "description": "Passenger counts above this number require Operations-tier authority.",
+   "fieldname": "passenger_count_ops_threshold",
+   "fieldtype": "Int",
+   "label": "Passenger Count Operations Threshold"
+  },
+  {
+   "default": "5",
+   "description": "Administrative / document-signing requests with more than this many trips this month require Operations-tier authority. A blank or zero value falls back to the built-in default.",
+   "fieldname": "admin_trip_ops_threshold",
+   "fieldtype": "Int",
+   "label": "Administrative Trip Operations Threshold"
+  },
+  {
+   "fieldname": "salis_settings_sec_doa_thresholds",
+   "fieldtype": "Section Break",
+   "label": "Delegation-of-Authority Thresholds (SAR)"
+  },
+  {
+   "default": "2000",
+   "description": "Vehicle Damage Write-Off cases at or above this estimated cost (SAR) require Operations-tier authority; lower-value cases require at least Regional-tier.",
+   "fieldname": "writeoff_ops_threshold",
+   "fieldtype": "Currency",
+   "label": "Write-Off Operations Threshold (SAR)"
+  },
+  {
+   "fieldname": "salis_settings_doa_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1000",
+   "description": "Movement Cost Recovery amounts at or above this value (SAR) require Operations-tier authority; lower amounts require at least Regional-tier.",
+   "fieldname": "cost_recovery_ops_threshold",
+   "fieldtype": "Currency",
+   "label": "Cost Recovery Operations Threshold (SAR)"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-11 19:12:42.964832",
+ "modified_by": "Administrator",
+ "module": "Apex Core",
+ "name": "Salis Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

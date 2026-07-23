@@ -1,0 +1,572 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 02:45:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "__tab_0",
+  "transport_request_sec_requester",
+  "requested_by",
+  "requester_name",
+  "transport_request_sec_requester_col1",
+  "mobile_number",
+  "transport_request_sec_service",
+  "service_line",
+  "request_type",
+  "transport_request_sec_service_col1",
+  "project",
+  "transport_request_sec_subject",
+  "accommodation_building",
+  "transport_request_sec_subject_col1",
+  "representative",
+  "transport_request_sec_scope",
+  "is_cross_region",
+  "destination",
+  "transport_request_sec_scope_col1",
+  "trips_this_month",
+  "needs_operations",
+  "__tab_1",
+  "transport_request_sec_route",
+  "from_location",
+  "to_location",
+  "transport_request_sec_route_col1",
+  "pickup_datetime",
+  "passenger_count",
+  "transport_request_sec_workers_list",
+  "worker_count",
+  "workers",
+  "transport_request_sec_adhoc",
+  "adhoc_passengers",
+  "transport_request_sec_purpose",
+  "transport_purpose",
+  "purpose",
+  "__tab_2",
+  "transport_request_sec_assignment",
+  "is_assigned",
+  "assigned_to_trip",
+  "assigned_vehicle",
+  "assigned_driver",
+  "transport_request_sec_assignment_col1",
+  "route_plan",
+  "dispatch_trip",
+  "transport_request_sec_completion",
+  "status",
+  "transport_request_sec_completion_col1",
+  "fulfilled_on",
+  "__tab_3",
+  "transport_request_sec_tracking",
+  "source_channel",
+  "site_token",
+  "transport_request_sec_tracking_col1",
+  "anonymous_tracking_code",
+  "transport_request_sec_system",
+  "naming_series",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "__tab_0",
+   "fieldtype": "Tab Break",
+   "label": "Request"
+  },
+  {
+   "fieldname": "transport_request_sec_requester",
+   "fieldtype": "Section Break",
+   "label": "Requester"
+  },
+  {
+   "default": "__user",
+   "fieldname": "requested_by",
+   "fieldtype": "Link",
+   "label": "Requested By",
+   "options": "User"
+  },
+  {
+   "fetch_from": "requested_by.full_name",
+   "fetch_if_empty": 1,
+   "fieldname": "requester_name",
+   "fieldtype": "Data",
+   "label": "Requester Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transport_request_sec_requester_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "requested_by.mobile_no",
+   "fetch_if_empty": 1,
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "transport_request_sec_service",
+   "fieldtype": "Section Break",
+   "label": "Service"
+  },
+  {
+   "description": "Transport type (Movement Department coordination): Site Transport moves the workforce from accommodation to the project site, Inter-City Relocation moves the workforce between cities, and Administrative Trip is a document/administrative trip.",
+   "fieldname": "service_line",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Transport Type",
+   "options": "Site Transport\nInter-City Relocation\nAdministrative Trip",
+   "reqd": 1
+  },
+  {
+   "fieldname": "request_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Request Type",
+   "options": "Accommodation to Project Shuttle\nInter-City Relocation\nAdministrative Trip / Document Signing",
+   "reqd": 1
+  },
+  {
+   "fieldname": "transport_request_sec_service_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "transport_request_sec_subject",
+   "fieldtype": "Section Break",
+   "label": "Trip Subject"
+  },
+  {
+   "depends_on": "eval:doc.service_line=='Site Transport' || doc.service_line=='Inter-City Relocation'",
+   "fieldname": "accommodation_building",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Building"
+  },
+  {
+   "fieldname": "transport_request_sec_subject_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.service_line=='Administrative Trip'",
+   "fieldname": "representative",
+   "fieldtype": "Link",
+   "label": "Representative",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "transport_request_sec_scope",
+   "fieldtype": "Section Break",
+   "label": "Scope and Authorization"
+  },
+  {
+   "depends_on": "eval:doc.service_line=='Site Transport'",
+   "fieldname": "is_cross_region",
+   "fieldtype": "Check",
+   "label": "Is Cross Region"
+  },
+  {
+   "depends_on": "eval:doc.service_line=='Administrative Trip'",
+   "fieldname": "destination",
+   "fieldtype": "Data",
+   "label": "Destination"
+  },
+  {
+   "fieldname": "transport_request_sec_scope_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.service_line=='Administrative Trip'",
+   "description": "Server-derived: submitted Administrative Trips this month for the project (incl. this one).",
+   "fieldname": "trips_this_month",
+   "fieldtype": "Int",
+   "label": "Trips This Month",
+   "read_only": 1
+  },
+  {
+   "description": "Server-derived Delegation-of-Authority flag: when set, only Operations-tier authorization is allowed. Read by workflow; cannot be hand-set.",
+   "fieldname": "needs_operations",
+   "fieldtype": "Check",
+   "label": "Needs Operations Authorization",
+   "read_only": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "__tab_1",
+   "fieldtype": "Tab Break",
+   "label": "Trip"
+  },
+  {
+   "fieldname": "transport_request_sec_route",
+   "fieldtype": "Section Break",
+   "label": "Route"
+  },
+  {
+   "fieldname": "from_location",
+   "fieldtype": "Data",
+   "label": "From Location"
+  },
+  {
+   "fieldname": "to_location",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "To Location"
+  },
+  {
+   "fieldname": "transport_request_sec_route_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pickup_datetime",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Pickup Datetime"
+  },
+  {
+   "fieldname": "passenger_count",
+   "fieldtype": "Int",
+   "label": "Passenger Count"
+  },
+  {
+   "fieldname": "transport_request_sec_workers_list",
+   "fieldtype": "Section Break",
+   "label": "Worker Manifest"
+  },
+  {
+   "fieldname": "worker_count",
+   "fieldtype": "Int",
+   "label": "Worker Count",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.service_line=='Site Transport' || doc.service_line=='Inter-City Relocation'",
+   "fieldname": "workers",
+   "fieldtype": "Table",
+   "label": "Workers",
+   "options": "Transport Request Worker"
+  },
+  {
+   "depends_on": "eval:doc.service_line=='Site Transport' || doc.service_line=='Inter-City Relocation'",
+   "fieldname": "transport_request_sec_adhoc",
+   "fieldtype": "Section Break",
+   "label": "Additional (Unregistered) Passengers",
+   "collapsible": 1
+  },
+  {
+   "depends_on": "eval:doc.service_line=='Site Transport' || doc.service_line=='Inter-City Relocation'",
+   "description": "Riders who are not registered Employees on the manifest above (e.g. a guest or a not-yet-onboarded worker).",
+   "fieldname": "adhoc_passengers",
+   "fieldtype": "Table",
+   "label": "Additional Passengers",
+   "options": "Transport Request Ad Hoc Passenger"
+  },
+  {
+   "fieldname": "transport_request_sec_purpose",
+   "fieldtype": "Section Break",
+   "label": "Purpose"
+  },
+  {
+   "default": "Other",
+   "description": "Classifies why this trip is requested; the transport supervisor reads it when assigning requests onto a trip.",
+   "fieldname": "transport_purpose",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Transport Purpose",
+   "options": "Shift Relocation\nTraining\nArrival\nBranch Coverage\nEmergency\nOther"
+  },
+  {
+   "fieldname": "purpose",
+   "fieldtype": "Small Text",
+   "label": "Purpose"
+  },
+  {
+   "fieldname": "__tab_2",
+   "fieldtype": "Tab Break",
+   "label": "Fulfillment"
+  },
+  {
+   "fieldname": "transport_request_sec_assignment",
+   "fieldtype": "Section Break",
+   "label": "Assignment"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "description": "Set when the transport supervisor assigns this request onto a Dispatch Trip. Status remains workflow-owned; this is the preliminary assignment flag.",
+   "fieldname": "is_assigned",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Assigned to Trip",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "assigned_to_trip",
+   "fieldtype": "Link",
+   "label": "Assigned Trip",
+   "no_copy": 1,
+   "options": "Dispatch Trip",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "New",
+   "description": "Handling stage of the transport request from intake through validation, approval, and scheduling to fulfilment, or a rejected or cancelled outcome.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "New\nValidated\nApproved\nScheduled\nFulfilled\nRejected\nCancelled",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "route_plan",
+   "fieldtype": "Link",
+   "label": "Route Plan",
+   "options": "Route Plan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "assigned_vehicle",
+   "fieldtype": "Link",
+   "label": "Assigned Vehicle",
+   "options": "Salis Vehicle"
+  },
+  {
+   "fieldname": "transport_request_sec_assignment_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "assigned_driver",
+   "fieldtype": "Link",
+   "label": "Assigned Driver",
+   "options": "Salis Driver"
+  },
+  {
+   "fieldname": "dispatch_trip",
+   "fieldtype": "Link",
+   "label": "Dispatch Trip",
+   "options": "Dispatch Trip"
+  },
+  {
+   "fieldname": "transport_request_sec_completion",
+   "fieldtype": "Section Break",
+   "label": "Completion"
+  },
+  {
+   "fieldname": "transport_request_sec_completion_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fulfilled_on",
+   "fieldtype": "Datetime",
+   "label": "Fulfilled On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "__tab_3",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "transport_request_sec_tracking",
+   "fieldtype": "Section Break",
+   "label": "Source and Tracking",
+   "collapsible": 1
+  },
+  {
+   "default": "Desk",
+   "fieldname": "source_channel",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Source Channel",
+   "options": "Desk\nWeb QR\nMasar Worker"
+  },
+  {
+   "fieldname": "site_token",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Site Token"
+  },
+  {
+   "fieldname": "transport_request_sec_tracking_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "anonymous_tracking_code",
+   "fieldtype": "Data",
+   "label": "Anonymous Tracking Code",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "transport_request_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "default": "TR-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "TR-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Transport Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Movement",
+   "link_doctype": "Route Plan",
+   "link_fieldname": "transport_request"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Dispatch Trip",
+   "link_fieldname": "transport_request"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Trip Start Log",
+   "link_fieldname": "transport_request"
+  }
+ ],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Transport Request",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Fleet Project Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Fleet Supervisor",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Project Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "requester_name, mobile_number, anonymous_tracking_code",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Blue",
+   "title": "New"
+  },
+  {
+   "color": "Blue",
+   "title": "Validated"
+  },
+  {
+   "color": "Blue",
+   "title": "Approved"
+  },
+  {
+   "color": "Orange",
+   "title": "Scheduled"
+  },
+  {
+   "color": "Green",
+   "title": "Fulfilled"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
+  },
+  {
+   "color": "Red",
+   "title": "Cancelled"
+  }
+ ],
+ "track_changes": 1
+}

@@ -1,0 +1,29 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.docstatus == 1",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Custody Damage Assessment",
+ "enabled": 1,
+ "event": "Submit",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"A custody damage assessment has been submitted and may create a salary deduction\") }}: {{ doc.name }}.",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - Custody Damage Assessment Created",
+ "recipients": [
+  {
+   "receiver_by_role": "Finance Manager"
+  },
+  {
+   "receiver_by_role": "Accommodation Manager"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Custody Damage Assessment Submitted: {{ doc.name }}",
+ "modified": "2026-06-25 00:00:00.000000"
+}

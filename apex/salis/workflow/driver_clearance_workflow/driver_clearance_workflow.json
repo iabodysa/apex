@@ -1,0 +1,112 @@
+{
+ "doctype": "Workflow",
+ "name": "Driver Clearance Workflow",
+ "workflow_name": "Driver Clearance Workflow",
+ "document_type": "Driver Clearance",
+ "workflow_state_field": "status",
+ "is_active": 1,
+ "override_status": 0,
+ "send_email_alert": 0,
+ "states": [
+  {
+   "doctype": "Workflow Document State",
+   "state": "Open",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "In Progress",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Blocked",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Cleared",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Cancelled",
+   "doc_status": "2",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  }
+ ],
+ "transitions": [
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Start Processing",
+   "next_state": "In Progress",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Block",
+   "next_state": "Blocked",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "In Progress",
+   "action": "Block",
+   "next_state": "Blocked",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Blocked",
+   "action": "Reopen",
+   "next_state": "In Progress",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "In Progress",
+   "action": "Clear",
+   "next_state": "Cleared",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": "doc.vehicle_returned and doc.fuel_chip_returned and doc.custody_returned and not doc.outstanding_fuel_exceptions and not doc.outstanding_recoveries"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Clear",
+   "next_state": "Cleared",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": "doc.vehicle_returned and doc.fuel_chip_returned and doc.custody_returned and not doc.outstanding_fuel_exceptions and not doc.outstanding_recoveries"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Cleared",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  }
+ ]
+}

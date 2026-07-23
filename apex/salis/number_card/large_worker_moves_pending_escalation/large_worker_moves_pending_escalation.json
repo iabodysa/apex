@@ -1,0 +1,15 @@
+{
+ "doctype": "Number Card",
+ "name": "Large Worker Moves Pending Escalation",
+ "label": "Large Worker Moves Pending Escalation",
+ "document_type": "Transport Request",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Salis",
+ "filters_json": "[[\"Transport Request\", \"service_line\", \"in\", [\"Site Transport\", \"Inter-City Relocation\"]], [\"Transport Request\", \"worker_count\", \">\", 20], [\"Transport Request\", \"status\", \"!=\", \"Fulfilled\"]]",
+ "modified": "2026-06-12 12:00:00.000000"
+}

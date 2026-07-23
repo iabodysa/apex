@@ -1,0 +1,169 @@
+{
+ "actions": [],
+ "autoname": "SFL-.######",
+ "creation": "2026-06-27 03:00:00.000000",
+ "description": "Safety finding ledger. Maintained automatically by the system when a Safety Round is submitted and not edited manually. One immutable row per finding observed on the round's executions, so a closed finding cannot silently reopen on the mutable parent report.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "posting_date",
+  "safety_round",
+  "building",
+  "finding",
+  "severity",
+  "status",
+  "resolved",
+  "logged_at",
+  "source_doctype",
+  "source_name",
+  "source_detail_no",
+  "is_cancelled",
+  "reversal_of"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "safety_round",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Safety Round",
+   "options": "Safety Round",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Building",
+   "options": "Building",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "finding",
+   "fieldtype": "Small Text",
+   "label": "Finding",
+   "read_only": 1
+  },
+  {
+   "fieldname": "severity",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Severity",
+   "read_only": 1
+  },
+  {
+   "description": "Snapshot of the finding's status at the moment the round was submitted (e.g. Open / In Progress / Resolved). Immutable so a later edit of the parent finding cannot rewrite history.",
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "True when the finding's snapshot status was Resolved at posting time.",
+   "fieldname": "resolved",
+   "fieldtype": "Check",
+   "label": "Resolved",
+   "read_only": 1
+  },
+  {
+   "fieldname": "logged_at",
+   "fieldtype": "Datetime",
+   "label": "Logged At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_doctype",
+   "fieldtype": "Data",
+   "label": "Source DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_name",
+   "fieldtype": "Data",
+   "label": "Source Document",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "description": "The originating child row index (Inspection Finding Item idx) within the source execution. Part of the idempotency key so each finding row posts at most once.",
+   "fieldname": "source_detail_no",
+   "fieldtype": "Int",
+   "label": "Source Detail No",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "True on a reversal (negating) row posted when the Safety Round is cancelled. The original row is preserved for audit.",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "label": "Is Cancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reversal_of",
+   "fieldtype": "Link",
+   "label": "Reversal Of",
+   "options": "Safety Finding Ledger",
+   "read_only": 1
+  }
+ ],
+ "hidden": 1,
+ "in_create": 1,
+ "links": [],
+ "modified": "2026-07-22 17:52:15.287889",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Safety Finding Ledger",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Safety Officer"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager"
+  }
+ ],
+ "read_only": 1,
+ "row_format": "Dynamic",
+ "search_fields": "source_name, source_detail_no, company",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

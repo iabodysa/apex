@@ -1,0 +1,16 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Raise a Transport Request",
+ "intro_text": "Capture a movement need — the request is then validated, scheduled, and dispatched. It is the entry point of the Movement workflow.",
+ "title": "Raise a Transport Request",
+ "action": "Create Entry",
+ "reference_document": "Transport Request",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 1,
+ "show_form_tour": 1,
+ "form_tour": "Transport Request",
+ "description": "Capture a movement need so it can be validated, scheduled, and dispatched.",
+ "action_label": "Raise Transport Request"
+}

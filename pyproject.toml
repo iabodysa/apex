@@ -1,0 +1,50 @@
+[project]
+name = "apex"
+version = "2.0.4"
+description = "Apex Habitat custom application for Frappe Framework v15."
+authors = [
+    { name = "AFMCO Support Services Co. Ltd", email = "afm@afmcoltd.com" }
+]
+requires-python = ">=3.10"
+readme = "README.md"
+license = { text = "MIT" }
+
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/iabodysa/apex"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["apex*", "apex_habitat*"]
+
+[tool.pytest.ini_options]
+testpaths = ["apex/tests", "apex/habitat"]
+python_files = "test_*.py"
+addopts = "--tb=short"
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+# Frappe auto-generates an `if TYPE_CHECKING: ... DF.Literal[...]` block in every
+# DocType controller. Treating frappe.types.DF as a typing module stops ruff from
+# evaluating those option strings as runtime forward references (F821), and F722
+# silences the matching forward-annotation syntax error. Both mirror the standard
+# Frappe / ERPNext / HRMS ruff config.
+ignore = ["F722"]
+typing-modules = ["frappe.types.DF"]
+
+# Package __init__.py files re-export their split submodules for back-compat
+# (the P-179/P-180 god-file splits); those imports are unused-by-design.
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401"]

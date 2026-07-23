@@ -1,0 +1,161 @@
+{
+ "doctype": "DocType",
+ "name": "Inspection Finding Item",
+ "module": "Habitat",
+ "custom": 0,
+ "issingle": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "editable_grid": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "description": "Unified child table for inspection findings used by Safety Inspection Report and Maintenance Inspection Report.",
+ "field_order": [
+  "inspection_finding_item_sec_finding",
+  "finding_category",
+  "severity",
+  "issue_type",
+  "inspection_finding_item_finding_col",
+  "description",
+  "inspection_finding_item_sec_resolution",
+  "room",
+  "priority",
+  "status",
+  "assigned_to",
+  "due_date",
+  "inspection_finding_item_resolution_col",
+  "resolution_notes",
+  "generated_maintenance_request"
+ ],
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "inspection_finding_item_sec_finding",
+   "fieldtype": "Section Break",
+   "label": "Finding",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "description": "Domain of the inspection finding, routing it to safety, maintenance, or hygiene handling, or general when it does not fit a specific domain.",
+   "fieldname": "finding_category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "Safety\nMaintenance\nHygiene\nGeneral",
+   "in_list_view": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "description": "How serious the finding is, driving remediation urgency from minor low-severity issues up to critical findings that require immediate correction.",
+   "fieldname": "severity",
+   "fieldtype": "Select",
+   "label": "Severity",
+   "options": "Low\nMedium\nHigh\nCritical",
+   "in_list_view": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "issue_type",
+   "fieldtype": "Select",
+   "label": "Issue Type",
+   "options": "\nElectrical\nPlumbing\nFurniture\nAir Conditioning\nFire Safety\nPest Control\nStructural\nOther",
+   "description": "Set an Issue Type to make this finding actionable: on report submit it spawns a Maintenance Request of this type.",
+   "in_list_view": 1,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "inspection_finding_item_finding_col",
+   "fieldtype": "Column Break",
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "reqd": 1,
+   "in_list_view": 1,
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "inspection_finding_item_sec_resolution",
+   "fieldtype": "Section Break",
+   "label": "Resolution",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "label": "Room",
+   "options": "Room",
+   "description": "Room the Maintenance Request will target. Required for a finding to be actionable.",
+   "in_list_view": 1,
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "description": "Handling priority assigned to the finding for scheduling remediation, independent of severity, from low up to critical.",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh\nCritical",
+   "default": "Medium",
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Open\nIn Progress\nResolved",
+   "default": "Open",
+   "in_list_view": 1,
+   "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "label": "Assigned To",
+   "options": "User",
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date",
+   "idx": 12
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "inspection_finding_item_resolution_col",
+   "fieldtype": "Column Break",
+   "idx": 13
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "resolution_notes",
+   "fieldtype": "Small Text",
+   "label": "Resolution Notes",
+   "idx": 14
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "generated_maintenance_request",
+   "fieldtype": "Link",
+   "label": "Generated Maintenance Request",
+   "options": "Maintenance Request",
+   "description": "Back-link to the Maintenance Request spawned from this finding. Presence makes the fan-out idempotent: a linked finding is never re-spawned. Intentionally copyable (no no_copy) so the link carries into an amended report and prevents duplicate tickets on amend.",
+   "read_only": 1,
+   "idx": 15
+  }
+ ],
+ "permissions": [],
+ "modified": "2026-06-09 10:00:00.000000"
+}

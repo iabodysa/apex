@@ -1,0 +1,121 @@
+{
+ "actions": [],
+ "creation": "2026-06-27 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "worker_section",
+  "employee",
+  "status",
+  "confirm_source",
+  "worker_col_break",
+  "notify_count",
+  "notify_at",
+  "worker_claim_at",
+  "reject_count",
+  "wait_section",
+  "wait_count",
+  "wait_col_break",
+  "wait_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "worker_section",
+   "fieldtype": "Section Break",
+   "label": "Worker"
+  },
+  {
+   "columns": 3,
+   "description": "The manifest worker this boarding state tracks.",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "default": "Pending",
+   "description": "Boarding state of a worker for the trip, tracking whether boarding is pending, the worker claimed a seat, actually boarded, was rejected by the driver, or was absent.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Pending\nWorker Claimed\nBoarded\nDriver Rejected\nAbsent"
+  },
+  {
+   "description": "How the boarding was confirmed: the worker's self-confirm, a QR scan, manual driver entry, the driver, or auto-confirmed after the worker-claim timeout (legacy).",
+   "fieldname": "confirm_source",
+   "fieldtype": "Select",
+   "label": "Confirm Source",
+   "options": "\nWorker\nDriver\nAuto\nScan\nManual"
+  },
+  {
+   "fieldname": "worker_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "description": "How many 'remaining passengers' notifications the driver has sent this worker.",
+   "fieldname": "notify_count",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Notify Count"
+  },
+  {
+   "fieldname": "notify_at",
+   "fieldtype": "Datetime",
+   "label": "Last Notified At"
+  },
+  {
+   "description": "When the worker self-claimed boarding (drives the auto-confirm timeout).",
+   "fieldname": "worker_claim_at",
+   "fieldtype": "Datetime",
+   "label": "Worker Claimed At"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "description": "How many times the driver has rejected this worker's boarding claim.",
+   "fieldname": "reject_count",
+   "fieldtype": "Int",
+   "label": "Reject Count"
+  },
+  {
+   "fieldname": "wait_section",
+   "fieldtype": "Section Break",
+   "label": "Wait Requests"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "description": "How many 'please wait' requests the worker has sent back to the driver.",
+   "fieldname": "wait_count",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Wait Count"
+  },
+  {
+   "fieldname": "wait_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "wait_at",
+   "fieldtype": "Datetime",
+   "label": "Last Wait Request At"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-27 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Trip Boarding State",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

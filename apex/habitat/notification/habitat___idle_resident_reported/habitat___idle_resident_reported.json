@@ -1,0 +1,29 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Idle Resident Report",
+ "enabled": 0,
+ "event": "New",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"An idle resident has been reported and routed to the responsible department\") }}: {{ doc.name }} ({{ doc.responsible_department }}).",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - Idle Resident Reported",
+ "recipients": [
+  {
+   "receiver_by_role": "Accommodation Manager"
+  },
+  {
+   "receiver_by_role": "HR Manager"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "subject": "Idle Resident Reported: {{ doc.name }}",
+ "modified": "2026-06-07 18:38:24.058196"
+}

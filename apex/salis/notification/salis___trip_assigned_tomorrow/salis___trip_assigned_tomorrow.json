@@ -1,0 +1,27 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.driver_user and doc.status in ('Planned', 'Dispatched')",
+ "date_changed": "trip_date",
+ "days_in_advance": 1,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Dispatch Trip",
+ "enabled": 1,
+ "event": "Days Before",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"You have a trip assigned for tomorrow\") }}: {{ doc.name }} ({{ doc.trip_date }}).",
+ "message_type": "HTML",
+ "module": "Salis",
+ "name": "Salis - Trip Assigned Tomorrow",
+ "recipients": [
+  {
+   "receiver_by_document_field": "driver_user"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Trip Tomorrow: {{ doc.name }}",
+ "modified": "2026-06-26 12:00:00.000000"
+}

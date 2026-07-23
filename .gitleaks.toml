@@ -1,0 +1,26 @@
+# Apex gitleaks configuration.
+# Extends the default ruleset and allowlists known false positives so the
+# CI secret scan (bounded to each push/PR commit range) does not block on
+# non-secrets.
+title = "Apex gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known false positives (not secrets)"
+# 'OKEY = \"fleetOS_offices_v1\"' in www/fleet.html is a localStorage cache-key
+# name from the supervisor's dashboard design, not an API key. The default
+# generic-api-key rule matches the 'OKEY=' assignment shape.
+regexes = [
+  '''fleetOS_offices_v1''',
+]
+# test_portal_xss.py and test_masar_1b.py assert that a hex-shaped token
+# (synthetic frappe.generate_hash output) survives the portal charset guard:
+# test_portal_xss checks the no-token-sink render, test_masar_1b checks the
+# valid-token clean-URL redirect. The fixture string is a fake test token, not a
+# real secret; the generic-api-key rule matches its high-entropy hex shape.
+paths = [
+  '''apex/tests/test_portal_xss\.py''',
+  '''apex/tests/test_masar_1b\.py''',
+]

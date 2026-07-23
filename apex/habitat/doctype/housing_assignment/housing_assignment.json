@@ -1,0 +1,423 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-23 23:31:39.092122",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "accommodation_assignment_tab_overview",
+  "accommodation_assignment_sec_resident",
+  "party_type",
+  "party",
+  "accommodation_assignment_resident_col",
+  "employee",
+  "employee_name",
+  "accommodation_assignment_sec_placement",
+  "building",
+  "responsible_supervisor",
+  "room",
+  "bed",
+  "accommodation_assignment_placement_col",
+  "previous_building",
+  "accommodation_assignment_sec_stay",
+  "assignment_type",
+  "stay_type",
+  "accommodation_assignment_stay_col",
+  "check_in_date",
+  "expected_checkout_date",
+  "accommodation_assignment_sec_billing",
+  "project",
+  "cost_center",
+  "accommodation_assignment_billing_col",
+  "is_external_supplier",
+  "billed_to_supplier",
+  "accommodation_assignment_sec_checkin_evidence",
+  "room_condition_snapshot",
+  "accommodation_assignment_sec_terms",
+  "terms_accepted_on",
+  "accommodation_assignment_terms_col",
+  "terms_signature",
+  "accommodation_assignment_sec_table_custody_items",
+  "custody_items",
+  "accommodation_assignment_sec_large_text",
+  "notes",
+  "accommodation_assignment_tab_system",
+  "accommodation_assignment_sec_occupancy_status",
+  "check_out_date",
+  "accommodation_assignment_occupancy_status_col",
+  "housing_allowance_suspended",
+  "accommodation_assignment_sec_system",
+  "naming_series",
+  "accommodation_assignment_system_col",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "accommodation_assignment_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "accommodation_assignment_sec_resident",
+   "fieldtype": "Section Break",
+   "label": "Resident"
+  },
+  {
+   "default": "Employee",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Resident Type",
+   "options": "Employee\nTemporary Worker",
+   "reqd": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Resident",
+   "options": "party_type",
+   "search_index": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_resident_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fetch_if_empty": 1,
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_sec_placement",
+   "fieldtype": "Section Break",
+   "label": "Placement"
+  },
+  {
+   "fetch_from": "room.building",
+   "fetch_if_empty": 1,
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Mirrors the building's supervisor so notifications can target the specific facility owner.",
+   "fetch_from": "building.responsible_supervisor",
+   "fetch_if_empty": 1,
+   "fieldname": "responsible_supervisor",
+   "fieldtype": "Link",
+   "label": "Responsible Facility Supervisor",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bed.room",
+   "fetch_if_empty": 1,
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Room",
+   "options": "Room",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "bed",
+   "fieldtype": "Link",
+   "label": "Bed",
+   "options": "Bed",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_placement_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.assignment_type=='Transfer'",
+   "fieldname": "previous_building",
+   "fieldtype": "Link",
+   "label": "Previous Building",
+   "options": "Building"
+  },
+  {
+   "fieldname": "accommodation_assignment_sec_stay",
+   "fieldtype": "Section Break",
+   "label": "Stay Details"
+  },
+  {
+   "default": "New Assignment",
+   "fieldname": "assignment_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Assignment Type",
+   "options": "New Assignment\nTransfer\nReturn from Leave",
+   "reqd": 1
+  },
+  {
+   "default": "Permanent",
+   "fieldname": "stay_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Stay Type",
+   "options": "Permanent\nTemporary",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_stay_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "check_in_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Check-in Date",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.stay_type=='Temporary'",
+   "description": "Planned departure date for a temporary stay; supervisor is alerted as it approaches or if the worker is still checked in past it.",
+   "fieldname": "expected_checkout_date",
+   "fieldtype": "Date",
+   "label": "Expected Check-out Date",
+   "mandatory_depends_on": "eval:doc.stay_type=='Temporary'"
+  },
+  {
+   "fieldname": "accommodation_assignment_sec_billing",
+   "fieldtype": "Section Break",
+   "label": "Billing"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "fetch_from": "building.default_cost_center",
+   "fetch_if_empty": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_billing_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_external_supplier",
+   "fieldtype": "Check",
+   "label": "Is External Supplier Worker?"
+  },
+  {
+   "depends_on": "eval:doc.is_external_supplier",
+   "fieldname": "billed_to_supplier",
+   "fieldtype": "Link",
+   "label": "Billed To Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "accommodation_assignment_sec_checkin_evidence",
+   "fieldtype": "Section Break",
+   "label": "Check-in Evidence",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "room_condition_snapshot",
+   "fieldtype": "Attach Image",
+   "label": "Room Condition Snapshot",
+   "allow_on_submit": 1,
+   "description": "Optional photo of the bed/room condition at check-in (handover evidence)."
+  },
+  {
+   "collapsible": 1,
+   "description": "Resident's signature accepting the housing terms, captured on the tablet at check-in.",
+   "fieldname": "accommodation_assignment_sec_terms",
+   "fieldtype": "Section Break",
+   "label": "Housing Terms Acceptance"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "When the resident accepted the housing terms at the tablet.",
+   "fieldname": "terms_accepted_on",
+   "fieldtype": "Datetime",
+   "label": "Terms Accepted On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_terms_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Resident's signature accepting the housing terms at check-in.",
+   "fieldname": "terms_signature",
+   "fieldtype": "Signature",
+   "label": "Terms Signature",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_sec_table_custody_items",
+   "fieldtype": "Section Break",
+   "label": "Issued Custody Items"
+  },
+  {
+   "fieldname": "custody_items",
+   "fieldtype": "Table",
+   "label": "Issued Custody Items",
+   "options": "Accommodation Custody Item"
+  },
+  {
+   "fieldname": "accommodation_assignment_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Additional Information",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "accommodation_assignment_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "accommodation_assignment_sec_occupancy_status",
+   "fieldtype": "Section Break",
+   "label": "Occupancy Status",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "check_out_date",
+   "fieldtype": "Date",
+   "label": "Check-out Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_occupancy_status_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "housing_allowance_suspended",
+   "fieldtype": "Check",
+   "label": "Housing Allowance Suspended",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "default": "ACC-ASGN-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "ACC-ASGN-.YYYY.-.####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_system_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Housing Assignment",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Accommodation",
+   "link_doctype": "Housing Checkout",
+   "link_fieldname": "assignment"
+  },
+  {
+   "group": "Accommodation",
+   "link_doctype": "Room Bed Transfer",
+   "link_fieldname": "assignment"
+  },
+  {
+   "group": "Reports",
+   "link_doctype": "Idle Resident Report",
+   "link_fieldname": "assignment"
+  }
+ ],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Housing Assignment",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "employee_name, employee, building",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name",
+ "track_changes": 1
+}

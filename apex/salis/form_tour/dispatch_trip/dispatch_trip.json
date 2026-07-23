@@ -1,0 +1,67 @@
+{
+ "creation": "2026-07-11 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-07-11 20:55:46.174414",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Dispatch Trip",
+ "owner": "Administrator",
+ "reference_doctype": "Dispatch Trip",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Set the date of the trip.",
+   "fieldname": "trip_date",
+   "fieldtype": "Date",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Trip Date",
+   "position": "Right",
+   "title": "Set the Trip Date"
+  },
+  {
+   "description": "Select the vehicle for this trip.",
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Vehicle",
+   "position": "Right",
+   "title": "Assign the Vehicle"
+  },
+  {
+   "description": "Select the driver for this trip.",
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Driver",
+   "position": "Right",
+   "title": "Assign the Driver"
+  },
+  {
+   "description": "Enter the planned departure time.",
+   "fieldname": "depart_time",
+   "fieldtype": "Time",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Depart Time",
+   "position": "Right",
+   "title": "Set the Departure Time"
+  },
+  {
+   "description": "List the transport requests this trip serves, then save.",
+   "fieldname": "assigned_requests",
+   "fieldtype": "Table",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Assigned Requests",
+   "position": "Bottom",
+   "title": "Add Transport Requests"
+  }
+ ],
+ "title": "Dispatch Trip"
+}

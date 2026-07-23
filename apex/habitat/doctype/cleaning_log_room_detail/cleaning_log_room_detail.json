@@ -1,0 +1,70 @@
+{
+ "doctype": "DocType",
+ "name": "Cleaning Log Room Detail",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "room",
+  "room_status",
+  "skip_reason",
+  "cleaned",
+  "notes"
+ ],
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "label": "Room",
+   "options": "Room",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 3,
+   "search_index": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "room_status",
+   "fieldtype": "Select",
+   "label": "Room Status",
+   "options": "Cleaned\nSkipped",
+   "default": "Cleaned",
+   "in_list_view": 1,
+   "columns": 2,
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "skip_reason",
+   "fieldtype": "Data",
+   "label": "Skip Reason",
+   "description": "Required when Room Status is Skipped.",
+   "depends_on": "eval:doc.room_status=='Skipped'",
+   "columns": 2,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "cleaned",
+   "fieldtype": "Check",
+   "label": "Cleaned",
+   "in_list_view": 1,
+   "columns": 2,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "in_list_view": 1,
+   "columns": 3,
+   "idx": 5
+  }
+ ],
+ "permissions": [],
+ "modified": "2026-06-26 00:00:00.000000"
+}

@@ -1,0 +1,110 @@
+{
+ "doctype": "Workflow",
+ "name": "Rental Settlement Workflow",
+ "workflow_name": "Rental Settlement Workflow",
+ "document_type": "Rental Settlement",
+ "workflow_state_field": "status",
+ "is_active": 1,
+ "override_status": 0,
+ "send_email_alert": 0,
+ "states": [
+  {
+   "doctype": "Workflow Document State",
+   "state": "Draft",
+   "doc_status": "0",
+   "allow_edit": "Fleet Project Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Reconciled",
+   "doc_status": "0",
+   "allow_edit": "Fleet Project Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Disputed",
+   "doc_status": "0",
+   "allow_edit": "Fleet Project Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Approved",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Paid",
+   "doc_status": "1",
+   "allow_edit": "Finance Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Cancelled",
+   "doc_status": "2",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  }
+ ],
+ "transitions": [
+  {
+   "doctype": "Workflow Transition",
+   "state": "Draft",
+   "action": "Reconcile",
+   "next_state": "Reconciled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Reconciled",
+   "action": "Dispute",
+   "next_state": "Disputed",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Disputed",
+   "action": "Re-reconcile",
+   "next_state": "Reconciled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Reconciled",
+   "action": "Approve",
+   "next_state": "Approved",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.requested_by != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Mark Paid",
+   "next_state": "Paid",
+   "allowed": "Finance Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.requested_by != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  }
+ ]
+}

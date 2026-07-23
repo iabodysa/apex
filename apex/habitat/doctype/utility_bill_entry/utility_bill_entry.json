@@ -1,0 +1,337 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-23 23:31:42.837470",
+ "description": "Single monthly utility bill linked to a Utility Account. Posts to Accommodation Ledger on submit.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "utility_bill_entry_tab_overview",
+  "utility_bill_entry_sec_overview",
+  "utility_account",
+  "status",
+  "utility_bill_entry_overview_col",
+  "attached_bill",
+  "utility_bill_entry_sec_billing",
+  "billing_period_from",
+  "billing_period_to",
+  "due_date",
+  "utility_bill_entry_billing_col",
+  "bill_amount",
+  "consumption_units",
+  "utility_bill_meter_sec",
+  "meter_reading_previous",
+  "meter_reading_current",
+  "utility_bill_meter_col",
+  "meter_units_consumed",
+  "utility_bill_entry_sec_sharing",
+  "total_bill_amount",
+  "utility_bill_entry_sharing_col",
+  "cost_bearing_pct",
+  "utility_bill_entry_sec_sharing_note",
+  "bill_share_note",
+  "utility_bill_entry_tab_system",
+  "utility_bill_entry_sec_fetched",
+  "company",
+  "building",
+  "utility_bill_entry_fetched_col",
+  "utility_type",
+  "utility_bill_entry_sec_variance",
+  "variance_from_avg_pct",
+  "utility_bill_entry_variance_col",
+  "utility_bill_entry_sec_system",
+  "cancellation_reason",
+  "linked_payment_entry",
+  "naming_series",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "utility_bill_entry_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "utility_bill_entry_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Bill Identity"
+  },
+  {
+   "fieldname": "utility_account",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Utility Account",
+   "options": "Utility Account",
+   "reqd": 1
+  },
+  {
+   "default": "Draft",
+   "description": "Approval and payment stage of the utility bill, from draft and received through review and approval to paid, or held as rejected or disputed.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nPending Approval\nApproved\nRejected\nReceived\nUnder Review\nPaid\nDisputed"
+  },
+  {
+   "fieldname": "utility_bill_entry_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attached_bill",
+   "fieldtype": "Attach",
+   "label": "Bill PDF"
+  },
+  {
+   "fieldname": "utility_bill_entry_sec_billing",
+   "fieldtype": "Section Break",
+   "label": "Billing Period and Amount"
+  },
+  {
+   "fieldname": "billing_period_from",
+   "fieldtype": "Date",
+   "label": "Billing Period From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "billing_period_to",
+   "fieldtype": "Date",
+   "label": "Billing Period To",
+   "reqd": 1
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date"
+  },
+  {
+   "fieldname": "utility_bill_entry_billing_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bill_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Bill Amount (SAR)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "consumption_units",
+   "fieldtype": "Float",
+   "label": "Consumption (kWh / m³)"
+  },
+  {
+   "fieldname": "utility_bill_meter_sec",
+   "fieldtype": "Section Break",
+   "label": "Meter Readings"
+  },
+  {
+   "fieldname": "meter_reading_previous",
+   "fieldtype": "Float",
+   "label": "Previous Reading",
+   "precision": "3"
+  },
+  {
+   "fieldname": "meter_reading_current",
+   "fieldtype": "Float",
+   "label": "Current Reading",
+   "precision": "3"
+  },
+  {
+   "fieldname": "utility_bill_meter_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Computed: Current Reading − Previous Reading",
+   "fieldname": "meter_units_consumed",
+   "fieldtype": "Float",
+   "label": "Units Consumed",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "utility_bill_entry_sec_sharing",
+   "fieldtype": "Section Break",
+   "label": "Cost Sharing"
+  },
+  {
+   "description": "Full amount on the utility company's invoice (before sharing)",
+   "fieldname": "total_bill_amount",
+   "fieldtype": "Currency",
+   "label": "Total Invoice Amount (SAR)"
+  },
+  {
+   "fieldname": "utility_bill_entry_sharing_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "100",
+   "description": "Auto-filled from Utility Account. Adjust if different for this bill.",
+   "fetch_from": "utility_account.cost_bearing_pct",
+   "fetch_if_empty": 1,
+   "fieldname": "cost_bearing_pct",
+   "fieldtype": "Percent",
+   "label": "Cost Bearing (%)"
+  },
+  {
+   "fieldname": "utility_bill_entry_sec_sharing_note",
+   "fieldtype": "Section Break",
+   "label": "Sharing Note"
+  },
+  {
+   "description": "Auto-generated summary of meter sharing calculation",
+   "fieldname": "bill_share_note",
+   "fieldtype": "Small Text",
+   "label": "Sharing Note",
+   "read_only": 1
+  },
+  {
+   "fieldname": "utility_bill_entry_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "utility_bill_entry_sec_fetched",
+   "fieldtype": "Section Break",
+   "label": "Derived Fields"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "utility_account.building",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Building",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "utility_bill_entry_fetched_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "utility_account.utility_type",
+   "fieldname": "utility_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Utility Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "utility_bill_entry_sec_variance",
+   "fieldtype": "Section Break",
+   "label": "Variance Monitoring"
+  },
+  {
+   "description": "Auto-calculated on validate. Positive = above average; negative = below average.",
+   "fieldname": "variance_from_avg_pct",
+   "fieldtype": "Percent",
+   "label": "Variance from Average (%)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "utility_bill_entry_variance_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "utility_bill_entry_sec_system",
+   "fieldtype": "Section Break",
+   "label": "Bookkeeping",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "cancellation_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancellation Reason",
+   "read_only": 0,
+   "allow_on_submit": 1,
+   "description": "Required to cancel a submitted bill; recorded on the reversal posted to the Accommodation Ledger."
+  },
+  {
+   "description": "Reference to a Payment Entry settling this bill, if any. Set externally; this controller posts no Payment Entry.",
+   "fieldname": "linked_payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "default": "UTIL-BILL-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "UTIL-BILL-.YYYY.-.#####"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Utility Bill Entry",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Utility Bill Entry",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "role": "Finance Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "utility_account, company, building",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "utility_account",
+ "track_changes": 1
+}

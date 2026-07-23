@@ -1,0 +1,359 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 12:00:00.000000",
+ "description": "Finance-boundary payment request. Routes any payable item through a Finance-exclusive approval gate. Posts NO GL: linked_payment_entry is a reference set externally; the controller never writes accounting.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "salis_payment_request_tab_overview",
+  "salis_payment_request_sec_overview",
+  "expense_type",
+  "amount",
+  "company",
+  "salis_payment_request_overview_col",
+  "requested_by",
+  "naming_series",
+  "salis_payment_request_sec_targets",
+  "vehicle",
+  "driver",
+  "project",
+  "salis_payment_request_targets_col",
+  "supplier",
+  "rental_office",
+  "cost_center",
+  "salis_payment_request_sec_reference",
+  "reference_doctype",
+  "salis_payment_request_reference_col",
+  "reference_name",
+  "salis_payment_request_sec_notes",
+  "remarks",
+  "salis_payment_request_tab_system",
+  "salis_payment_request_sec_finance",
+  "status",
+  "finance_approved_by",
+  "finance_approved_on",
+  "salis_payment_request_finance_col",
+  "linked_payment_entry",
+  "salis_payment_request_sec_system",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "salis_payment_request_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "salis_payment_request_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Request"
+  },
+  {
+   "description": "Kind of expense the payment request covers, such as fuel, rental, a fine, sponsorship fee, or maintenance, which drives approval routing and account coding.",
+   "fieldname": "expense_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Expense Type",
+   "options": "Fuel\nRental\nFine / Violation\nSponsorship Fee\nMaintenance\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount (SAR)",
+   "reqd": 1
+  },
+  {
+   "description": "Owning company; defaulted from Salis Settings. Reference only — posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "salis_payment_request_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Defaults to the session user on creation.",
+   "fieldname": "requested_by",
+   "fieldtype": "Link",
+   "label": "Requested By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "default": "PAY-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "PAY-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "salis_payment_request_sec_targets",
+   "fieldtype": "Section Break",
+   "label": "Subject"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "vehicle.current_driver",
+   "fetch_if_empty": 1,
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "search_index": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "salis_payment_request_targets_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fetch_from": "vehicle.rental_office",
+   "fetch_if_empty": 1,
+   "fieldname": "rental_office",
+   "fieldtype": "Link",
+   "label": "Rental Office",
+   "options": "Rental Office"
+  },
+  {
+   "description": "Cost center for grouping; defaults from Salis Settings. Reference only — no GL.",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "salis_payment_request_sec_reference",
+   "fieldtype": "Section Break",
+   "label": "Source Reference"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Reference Document Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "salis_payment_request_reference_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Name",
+   "options": "reference_doctype"
+  },
+  {
+   "fieldname": "salis_payment_request_sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "salis_payment_request_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "salis_payment_request_sec_finance",
+   "fieldtype": "Section Break",
+   "label": "Finance Decision"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Draft",
+   "description": "Approval and payment stage of the request, from draft to pending finance review, then approved and paid, or rejected or cancelled.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nPending Finance\nApproved by Finance\nPaid\nRejected\nCancelled",
+   "read_only": 1
+  },
+  {
+   "description": "Stamped automatically when Finance approves. Read-only.",
+   "fieldname": "finance_approved_by",
+   "fieldtype": "Link",
+   "label": "Finance Approved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "finance_approved_on",
+   "fieldtype": "Datetime",
+   "label": "Finance Approved On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "salis_payment_request_finance_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Set externally after Finance posts payment. This DocType never creates a GL or Payment Entry.",
+   "fieldname": "linked_payment_entry",
+   "fieldtype": "Link",
+   "label": "Linked Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "salis_payment_request_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Salis Payment Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Rental",
+   "link_doctype": "Rental Settlement",
+   "link_fieldname": "payment_request"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Movement Cost Recovery",
+   "link_fieldname": "payment_request"
+  }
+ ],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Salis Payment Request",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "expense_type, reference_name, reference_doctype",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Blue",
+   "title": "Draft"
+  },
+  {
+   "color": "Orange",
+   "title": "Pending Finance"
+  },
+  {
+   "color": "Blue",
+   "title": "Approved by Finance"
+  },
+  {
+   "color": "Green",
+   "title": "Paid"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
+  },
+  {
+   "color": "Red",
+   "title": "Cancelled"
+  }
+ ],
+ "title_field": "expense_type",
+ "track_changes": 1
+}

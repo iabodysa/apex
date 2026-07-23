@@ -1,0 +1,310 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-05-25 03:00:19.663962",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "asl_tab_entry",
+  "asl_sec_posting",
+  "naming_series",
+  "posting_date",
+  "company",
+  "asl_col_posting",
+  "signed_qty",
+  "unit_cost",
+  "asl_sec_item",
+  "item_type",
+  "item",
+  "asl_col_item",
+  "item_name",
+  "uom",
+  "asl_sec_store",
+  "building",
+  "cost_center",
+  "asl_col_store",
+  "employee",
+  "asl_tab_system",
+  "sec_context",
+  "from_building",
+  "to_building",
+  "col_break_2",
+  "voucher_type",
+  "voucher_no",
+  "voucher_detail_no",
+  "sec_status",
+  "is_cancelled",
+  "asl_col_status",
+  "reversal_of",
+  "sec_remarks",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "asl_tab_entry",
+   "fieldtype": "Tab Break",
+   "label": "Stock Entry"
+  },
+  {
+   "fieldname": "asl_sec_posting",
+   "fieldtype": "Section Break",
+   "label": "Posting"
+  },
+  {
+   "default": "ACC-SLE-.YYYY.-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "ACC-SLE-.YYYY.-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "asl_col_posting",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "signed_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Signed Qty",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit_cost",
+   "fieldtype": "Currency",
+   "label": "Unit Cost (SAR)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "asl_sec_item",
+   "fieldtype": "Section Break",
+   "label": "Item"
+  },
+  {
+   "fieldname": "item_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Type",
+   "options": "Custody Article\nMaintenance Material",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "item_type",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "asl_col_item",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "label": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "asl_sec_store",
+   "fieldtype": "Section Break",
+   "label": "Store & Custody"
+  },
+  {
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building (Store)",
+   "options": "Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "fieldname": "asl_col_store",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Employee (Custodian)",
+   "options": "Employee",
+   "search_index": 1
+  },
+  {
+   "fieldname": "asl_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sec_context",
+   "fieldtype": "Section Break",
+   "label": "Movement Context"
+  },
+  {
+   "fieldname": "from_building",
+   "fieldtype": "Link",
+   "label": "From Building",
+   "options": "Building",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to_building",
+   "fieldtype": "Link",
+   "label": "To Building",
+   "options": "Building",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Data",
+   "label": "Voucher Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Data",
+   "label": "Voucher No",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sec_status",
+   "fieldtype": "Section Break",
+   "label": "Reversal Status"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "label": "Is Cancelled",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "asl_col_status",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reversal_of",
+   "fieldtype": "Link",
+   "label": "Reversal Of",
+   "options": "Accommodation Stock Ledger",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_remarks",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  }
+ ],
+ "grid_page_length": 50,
+ "hidden": 1,
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-22 17:52:15.287889",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Accommodation Stock Ledger",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "search_fields": "item, item_name, voucher_no",
+ "sort_field": "posting_date",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "item"
+}

@@ -1,0 +1,14 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Plan a Route",
+ "title": "Plan a Route",
+ "intro_text": "A Route Plan groups stops and a vehicle into a repeatable trip pattern. Create one route so that Dispatch Trips can be generated from it automatically.",
+ "action": "Create Entry",
+ "reference_document": "Route Plan",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Create the first route plan so trips can be dispatched against it.",
+ "action_label": "Create Route Plan"
+}

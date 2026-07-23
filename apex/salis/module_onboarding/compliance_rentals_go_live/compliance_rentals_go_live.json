@@ -1,0 +1,23 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Compliance and Rentals Go-Live",
+ "title": "Compliance and Rentals Go-Live",
+ "module": "Salis",
+ "subtitle": "Confirm driver and vehicle compliance records, then settle your first rental cost.",
+ "success_message": "Compliance and Rentals is live. Driver clearances, vehicle compliance, and rental settlements are tracked.",
+ "is_complete": 0,
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Register a Vehicle Compliance Record"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Process a Rental Settlement"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Raise a Salis Payment Request"
+  }
+ ]
+}

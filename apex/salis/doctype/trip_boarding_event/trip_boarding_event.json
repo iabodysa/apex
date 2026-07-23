@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "creation": "2026-05-30 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "worker_section",
+  "worker",
+  "worker_name",
+  "worker_col_break",
+  "is_unregistered",
+  "contractor_id",
+  "boarding_section",
+  "stop_name",
+  "accommodation_building",
+  "boarding_col_break",
+  "boarded_at",
+  "method"
+ ],
+ "fields": [
+  {
+   "fieldname": "worker_section",
+   "fieldtype": "Section Break",
+   "label": "Worker"
+  },
+  {
+   "columns": 2,
+   "description": "Registered worker (Employee) who boarded. Leave blank and tick 'Unregistered' for a contractor not on the manifest.",
+   "fieldname": "worker",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Worker",
+   "options": "Employee"
+  },
+  {
+   "columns": 2,
+   "fetch_from": "worker.employee_name",
+   "fieldname": "worker_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Worker Name"
+  },
+  {
+   "fieldname": "worker_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "description": "Tick for a contractor/temp hire not registered on the trip's worker manifest.",
+   "fieldname": "is_unregistered",
+   "fieldtype": "Check",
+   "label": "Unregistered"
+  },
+  {
+   "columns": 2,
+   "depends_on": "eval:doc.is_unregistered",
+   "description": "Identifier (e.g. Iqama/contractor id) for an unregistered worker.",
+   "fieldname": "contractor_id",
+   "fieldtype": "Data",
+   "label": "Contractor / Temp ID"
+  },
+  {
+   "fieldname": "boarding_section",
+   "fieldtype": "Section Break",
+   "label": "Boarding"
+  },
+  {
+   "columns": 2,
+   "description": "The route stop where this worker boarded (mirrors the Route Stop name on the trip's route).",
+   "fieldname": "stop_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Stop",
+   "options": ""
+  },
+  {
+   "columns": 2,
+   "description": "Housing pickup for this boarding (Habitat-Salis bridge).",
+   "fieldname": "accommodation_building",
+   "fieldtype": "Link",
+   "label": "Pickup Building",
+   "options": "Building"
+  },
+  {
+   "fieldname": "boarding_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "boarded_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Boarded At"
+  },
+  {
+   "columns": 1,
+   "default": "Manual",
+   "description": "How the boarding was captured: QR (driver scan), Manual (driver entry), or Worker (worker self-confirm via the Masar portal).",
+   "fieldname": "method",
+   "fieldtype": "Select",
+   "label": "Method",
+   "options": "QR\nManual\nWorker"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-25 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Trip Boarding Event",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

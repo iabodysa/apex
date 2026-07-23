@@ -1,0 +1,17 @@
+{
+  "doctype": "Report",
+  "name": "Driver Clearance Register",
+  "report_name": "Driver Clearance Register",
+  "ref_doctype": "Driver Clearance",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Salis",
+  "roles": [
+    {
+      "role": "Fleet Manager"
+    },
+    {
+      "role": "Internal Auditor"
+    }
+  ]
+}

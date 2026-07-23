@@ -1,0 +1,66 @@
+{
+ "doctype": "DocType",
+ "name": "Linked Maintenance Request Item",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "editable_grid": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "field_order": [
+  "maintenance_request",
+  "room",
+  "issue_type",
+  "status"
+ ],
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "maintenance_request",
+   "fieldtype": "Link",
+   "label": "Maintenance Request",
+   "options": "Maintenance Request",
+   "read_only": 1,
+   "idx": 1,
+   "in_list_view": 1,
+   "columns": 3
+  },
+  {
+   "doctype": "DocField",
+   "fetch_from": "maintenance_request.room",
+   "fetch_if_empty": 1,
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "label": "Room",
+   "options": "Room",
+   "read_only": 1,
+   "idx": 2,
+   "in_list_view": 1,
+   "columns": 3,
+   "search_index": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "issue_type",
+   "fieldtype": "Data",
+   "label": "Issue Type",
+   "read_only": 1,
+   "idx": 3,
+   "in_list_view": 1,
+   "columns": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status",
+   "read_only": 1,
+   "idx": 4,
+   "in_list_view": 1,
+   "columns": 2
+  }
+ ],
+ "permissions": [],
+ "modified": "2026-06-09 10:00:00.000000"
+}

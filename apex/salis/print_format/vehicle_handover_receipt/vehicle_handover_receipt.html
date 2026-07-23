@@ -1,0 +1,98 @@
+<style>
+  .sal-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
+  .sal-doc h1 { font-size: 18px; margin: 0; }
+  .sal-doc .sal-sub { color: #666; font-size: 12px; margin-top: 2px; }
+  .sal-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
+              display: flex; justify-content: space-between; align-items: flex-start; }
+  .sal-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .sal-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
+  .sal-meta .sal-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
+  .sal-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .sal-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: left; }
+  .sal-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
+  .sal-items tr:nth-child(even) td { background: #f8f8fb; }
+  .sal-ar { color: #555; font-size: 10px; }
+  .sal-flag { font-weight: bold; }
+  .sal-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
+  .sal-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
+  .sal-foot { margin-top: 24px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
+</style>
+
+<div class="sal-doc">
+  <div class="sal-head">
+    <div>
+      <h1>{{ _("Vehicle Handover Receipt") }}</h1>
+      <div class="sal-sub">إيصال تسليم مركبة &bull; {{ doc.name }}</div>
+    </div>
+    <div style="text-align:right; font-size:11px; color:#666;">
+      {{ frappe.db.get_single_value("Salis Settings", "default_company") or "" }}
+    </div>
+  </div>
+
+  <table class="sal-meta">
+    <tr>
+      <td class="sal-lbl">Vehicle <span class="sal-ar">المركبة</span></td>
+      <td>{{ doc.vehicle or "" }}</td>
+      <td class="sal-lbl">Handover Date <span class="sal-ar">تاريخ التسليم</span></td>
+      <td>{{ frappe.format(doc.handover_date, {"fieldtype": "Date"}) }}</td>
+    </tr>
+    <tr>
+      <td class="sal-lbl">From Driver <span class="sal-ar">من السائق</span></td>
+      <td>{{ doc.from_driver or "—" }}</td>
+      <td class="sal-lbl">To Driver <span class="sal-ar">إلى السائق</span></td>
+      <td>{{ doc.to_driver or "" }}</td>
+    </tr>
+    <tr>
+      <td class="sal-lbl">Odometer <span class="sal-ar">عداد المسافة</span></td>
+      <td>{{ doc.odometer_reading or 0 }}</td>
+      <td class="sal-lbl">Discrepancy <span class="sal-ar">الفروقات</span></td>
+      <td>{{ doc.discrepancy_status or "" }}</td>
+    </tr>
+  </table>
+
+  {% if doc.condition_notes %}
+  <div style="margin-bottom:14px;">
+    <b>Condition Notes <span class="sal-ar">ملاحظات الحالة</span>:</b> {{ doc.condition_notes }}
+  </div>
+  {% endif %}
+
+  <table class="sal-items">
+    <thead>
+      <tr>
+        <th style="width:5%;">#</th>
+        <th>Check Item <span class="sal-ar">بند الفحص</span></th>
+        <th style="width:12%;">OK <span class="sal-ar">سليم</span></th>
+        <th style="width:40%;">Remark <span class="sal-ar">ملاحظة</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in doc.handover_check_items %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ row.check_item or "" }}</td>
+        <td>{% if row.ok %}&#10003;{% else %}&#10007;{% endif %}</td>
+        <td>{{ row.remark or "" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if doc.discrepancy_status and doc.discrepancy_status != "Clean" and doc.discrepancy_notes %}
+  <div style="margin-bottom:12px;">
+    <b class="sal-flag">Discrepancy Notes <span class="sal-ar">ملاحظات الفروقات</span>:</b> {{ doc.discrepancy_notes }}
+  </div>
+  {% endif %}
+
+  <table class="sal-sign">
+    <tr>
+      <td>Handed over by (Outgoing Driver)<br><span class="sal-ar">سلّمها (السائق المُسلِّم)</span></td>
+      <td style="text-align:right;">Received by (Incoming Driver)<br><span class="sal-ar">استلمها (السائق المُستلِم)</span></td>
+    </tr>
+  </table>
+
+  <div class="sal-foot">
+    {{ _("The incoming driver acknowledges receiving the vehicle in the condition recorded above.") }}
+    يقرّ السائق المُستلِم باستلام المركبة بالحالة المُسجّلة أعلاه.
+    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
+  </div>
+</div>

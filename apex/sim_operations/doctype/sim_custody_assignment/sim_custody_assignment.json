@@ -1,0 +1,312 @@
+{
+ "doctype": "DocType",
+ "name": "SIM Custody Assignment",
+ "module": "SIM Operations",
+ "custom": 0,
+ "istable": 0,
+ "engine": "InnoDB",
+ "is_submittable": 1,
+ "track_changes": 1,
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "search_fields": "sim_card, action, assignment_date",
+ "description": "One immutable custody event (assign, transfer, return, suspend, reactivate) for a SIM Card. The SIM's current state is projected from the latest submitted event.",
+ "field_order": [
+  "overview_tab",
+  "action_sec",
+  "company",
+  "sim_card",
+  "action",
+  "assignment_date",
+  "action_col",
+  "custodian_type",
+  "employee",
+  "project",
+  "snapshot_sec",
+  "employee_cost_center",
+  "project_cost_center",
+  "cost_center",
+  "snapshot_col",
+  "previous_custodian_type",
+  "previous_custodian_employee",
+  "previous_project",
+  "details_sec",
+  "reason",
+  "notes",
+  "system_sec",
+  "naming_series",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "overview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "action_sec",
+   "fieldtype": "Section Break",
+   "label": "Custody Action",
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "read_only": 1,
+   "search_index": 1,
+   "fetch_from": "sim_card.company",
+   "fetch_if_empty": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "sim_card",
+   "fieldtype": "Link",
+   "label": "SIM Card",
+   "options": "SIM Card",
+   "reqd": 1,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "action",
+   "fieldtype": "Select",
+   "label": "Action",
+   "options": "Assign\nTransfer\nReturn\nSuspend\nReactivate",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "assignment_date",
+   "fieldtype": "Date",
+   "label": "Action Date",
+   "reqd": 1,
+   "default": "Today",
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "action_col",
+   "fieldtype": "Column Break",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custodian_type",
+   "fieldtype": "Select",
+   "label": "Custodian Type",
+   "options": "\nEmployee\nProject",
+   "depends_on": "eval:['Assign','Transfer'].includes(doc.action)",
+   "mandatory_depends_on": "eval:['Assign','Transfer'].includes(doc.action)",
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "ignore_user_permissions": 1,
+   "depends_on": "eval:doc.custodian_type=='Employee' && ['Assign','Transfer'].includes(doc.action)",
+   "mandatory_depends_on": "eval:doc.custodian_type=='Employee' && ['Assign','Transfer'].includes(doc.action)",
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "ignore_user_permissions": 1,
+   "depends_on": "eval:doc.custodian_type=='Project' && ['Assign','Transfer'].includes(doc.action)",
+   "mandatory_depends_on": "eval:doc.custodian_type=='Project' && ['Assign','Transfer'].includes(doc.action)",
+   "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "snapshot_sec",
+   "fieldtype": "Section Break",
+   "label": "Cost Center Snapshot",
+   "description": "Resolved once at submission and never rewritten by a later master edit.",
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "employee_cost_center",
+   "fieldtype": "Link",
+   "label": "Employee Cost Center",
+   "options": "Cost Center",
+   "ignore_user_permissions": 1,
+   "read_only": 1,
+   "idx": 12
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "project_cost_center",
+   "fieldtype": "Link",
+   "label": "Project Cost Center",
+   "options": "Cost Center",
+   "ignore_user_permissions": 1,
+   "read_only": 1,
+   "idx": 13
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Effective Cost Center",
+   "options": "Cost Center",
+   "ignore_user_permissions": 1,
+   "read_only": 1,
+   "idx": 14
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "snapshot_col",
+   "fieldtype": "Column Break",
+   "idx": 15
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "previous_custodian_type",
+   "fieldtype": "Data",
+   "label": "Previous Custodian Type",
+   "read_only": 1,
+   "idx": 16
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "previous_custodian_employee",
+   "fieldtype": "Link",
+   "label": "Previous Employee",
+   "options": "Employee",
+   "ignore_user_permissions": 1,
+   "read_only": 1,
+   "idx": 17
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "previous_project",
+   "fieldtype": "Link",
+   "label": "Previous Project",
+   "options": "Project",
+   "ignore_user_permissions": 1,
+   "read_only": 1,
+   "idx": 18
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "details_sec",
+   "fieldtype": "Section Break",
+   "label": "Details",
+   "idx": 19
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Reason",
+   "idx": 20
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "idx": 21
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "system_sec",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1,
+   "idx": 22
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "SIM-CUST-.YYYY.-.#####",
+   "default": "SIM-CUST-.YYYY.-.#####",
+   "reqd": 1,
+   "hidden": 1,
+   "idx": 23
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "options": "SIM Custody Assignment",
+   "read_only": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "idx": 24
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "SIM Operations User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Finance Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Internal Auditor",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "idx": 4
+  }
+ ],
+ "modified": "2026-07-22 18:41:11.935365"
+}

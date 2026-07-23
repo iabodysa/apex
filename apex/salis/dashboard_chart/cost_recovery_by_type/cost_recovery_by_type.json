@@ -1,0 +1,18 @@
+{
+ "doctype": "Dashboard Chart",
+ "name": "Cost Recovery by Type",
+ "chart_name": "Cost Recovery by Type",
+ "chart_type": "Group By",
+ "document_type": "Movement Cost Recovery",
+ "group_by_based_on": "recovery_type",
+ "group_by_type": "Count",
+ "type": "Donut",
+ "number_of_groups": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "module": "Salis",
+ "timeseries": 0,
+ "use_report_chart": 0,
+ "filters_json": "[]",
+ "modified": "2026-06-02 13:30:00.000000"
+}

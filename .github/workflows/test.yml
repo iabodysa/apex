@@ -1,0 +1,244 @@
+name: Tests
+
+on:
+  push:
+    branches: [apex]
+  pull_request:
+    branches: [apex]
+
+jobs:
+  gitleaks:
+    # Required secret-scanning gate. gitleaks exits non-zero when it finds a
+    # leak, which fails this job and therefore the whole workflow — no push or
+    # merge to apex can land a committed secret. Scans only the commits
+    # introduced by THIS push/PR (the new commit range), not the full history,
+    # so the gate is fast and a secret added in any new commit is still caught.
+    # Known fixture false positives are allowlisted in the committed
+    # .gitleaks.toml at the repo root.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Need enough history to diff the push range (before..sha); a shallow
+          # tip-only clone cannot resolve the older end of the range. PRs fetch
+          # the base+head; pushes fetch a bounded window instead of all history.
+          fetch-depth: 50
+
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          GITLEAKS_VERSION=8.18.4
+          curl -sSfL \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            -o /tmp/gitleaks.tar.gz
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+          sudo install /tmp/gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      - name: Scan for committed secrets (required)
+        # Scan only the commits added by this push/PR, not the whole history.
+        # gitleaks reads the allowlist from the committed .gitleaks.toml.
+        run: |
+          set -uo pipefail
+          before="${{ github.event.before }}"
+          base="${{ github.event.pull_request.base.sha }}"
+          sha="${{ github.sha }}"
+          if [ -n "${base}" ] && git rev-parse --quiet --verify "${base}^{commit}" >/dev/null 2>&1; then
+            # Pull request: scan base..head.
+            log_opts="${base}..${sha}"
+          elif [ -n "${before}" ] && git rev-parse --quiet --verify "${before}^{commit}" >/dev/null 2>&1; then
+            # Push with a known previous tip: scan before..sha.
+            log_opts="${before}..${sha}"
+          else
+            # First push / new branch / shallow window: scan the tip commit only.
+            log_opts="-1 ${sha}"
+          fi
+          gitleaks detect --no-banner --redact --source . --log-opts="${log_opts}"
+
+      - name: No Arabic in commit messages (forward-only)
+        run: |
+          set -uo pipefail
+          before="${{ github.event.before }}"
+          sha="${{ github.sha }}"
+          if git rev-parse --quiet --verify "${before}^{commit}" >/dev/null 2>&1; then
+            range="${before}..${sha}"
+          else
+            range="-1 ${sha}"
+          fi
+          hits=$(git log --no-merges --format='%H %s%n%b' $range | grep -nP '[\x{0600}-\x{06FF}]' || true)
+          if [ -n "$hits" ]; then
+            echo "Arabic found in commit message(s) on this push — keep subjects/bodies English:"
+            echo "$hits"
+            exit 1
+          fi
+          echo "commit messages clean (no Arabic)"
+
+      - name: No automated attribution or private commit email
+        run: |
+          set -uo pipefail
+          before="${{ github.event.before }}"
+          sha="${{ github.sha }}"
+          if git rev-parse --quiet --verify "${before}^{commit}" >/dev/null 2>&1; then
+            range="${before}..${sha}"
+          else
+            range="-1 ${sha}"
+          fi
+
+          messages=$(git log --format='%H %s%n%b' $range)
+          attribution=$(printf '%s\n' "$messages" | grep -niE \
+            '(claude|anthropic|codex|openai|chatgpt|claude-session)' || true)
+          if [ -n "$attribution" ]; then
+            echo "Automated attribution or session metadata found in commit messages:"
+            echo "$attribution"
+            exit 1
+          fi
+
+          private_emails=$(git log --format='%H%x09%ae%x09%ce' $range | awk -F '\t' '
+            function is_public(email) {
+              return email == "noreply@github.com" ||
+                email ~ /@users\.noreply\.github\.com$/
+            }
+            !is_public($2) || !is_public($3) { print }
+          ')
+          if [ -n "$private_emails" ]; then
+            echo "Private author or committer email found:"
+            echo "$private_emails"
+            exit 1
+          fi
+          echo "commit attribution and email metadata clean"
+
+      - name: No internal/experimental files tracked
+        run: |
+          set -uo pipefail
+          bad=$(git ls-files | grep -iE '(^|/)(\.claude|\.agents|archive|_staging|_todo|scratch|prompts)/|\.ipynb$|\.pptx$|\.bak$|\.old$' || true)
+          if [ -n "$bad" ]; then
+            echo "Internal/experimental files are tracked (keep them git-ignored, never published):"
+            echo "$bad"
+            exit 1
+          fi
+          echo "no internal/experimental files tracked"
+
+      - name: Worker-portal phone normaliser unit test
+        run: node frontend/worker/phone.test.mjs
+
+  spa-lockfiles:
+    # Validate each SPA portal's committed npm lockfile is in sync with its
+    # package.json. `npm ci` fails if the two disagree, so this gate keeps the
+    # frozen lockfiles honest and reproducible. Build is intentionally NOT run
+    # here (too flaky for CI).
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        portal: [fleet, worker, safety]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install from frozen lockfile
+        working-directory: frontend/${{ matrix.portal }}
+        run: npm ci
+
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-queue:
+        image: redis:7
+        ports:
+          - 11000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-cache:
+        image: redis:7
+        ports:
+          - 13000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-socketio:
+        image: redis:7
+        ports:
+          - 12000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install bench CLI
+        run: pip install frappe-bench
+
+      - name: Create bench
+        run: bench init --skip-redis-config-generation --frappe-branch version-15 frappe-bench
+
+      - name: Configure bench Redis hosts
+        working-directory: frappe-bench
+        run: |
+          bench set-config -g redis_cache "redis://127.0.0.1:13000"
+          bench set-config -g redis_queue "redis://127.0.0.1:11000"
+          bench set-config -g redis_socketio "redis://127.0.0.1:12000"
+
+      - name: Get required Frappe apps
+        working-directory: frappe-bench
+        run: |
+          bench get-app --branch version-15 --skip-assets erpnext
+          bench get-app --branch version-15 --skip-assets hrms
+
+      - name: Get apex app
+        working-directory: frappe-bench
+        run: bench get-app --skip-assets ${{ github.workspace }}
+
+      - name: Create test site
+        working-directory: frappe-bench
+        run: |
+          bench new-site test.localhost --db-root-password ${{ secrets.DB_ROOT_PASSWORD }} --admin-password ${{ secrets.ADMIN_PASSWORD }} --no-mariadb-socket
+          bench --site test.localhost install-app erpnext
+          bench --site test.localhost install-app hrms
+          bench --site test.localhost install-app apex
+          # The full suite creates far more than Frappe's default cap of 60 new
+          # Users per 60s, which raises "Throttled" in many setUpClass blocks.
+          # Write the cap as an INT directly into site_config (bench set-config
+          # would store a string and break Frappe's `int > limit` comparison).
+          python3 -c "import json, pathlib; p = pathlib.Path('sites/test.localhost/site_config.json'); c = json.loads(p.read_text()); c['throttle_user_limit'] = 100000; p.write_text(json.dumps(c, indent=1))"
+
+      - name: Migrate (apply seeds, workflows and patches)
+        working-directory: frappe-bench
+        run: bench --site test.localhost migrate
+
+      - name: Run portal token security tests
+        working-directory: frappe-bench
+        run: bench --site test.localhost run-tests --module apex.tests.test_portal_token_security
+
+      - name: Run the full test suite
+        working-directory: frappe-bench
+        run: bench --site test.localhost run-tests --app apex

@@ -1,0 +1,25 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.action == 'Suspend'",
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "SIM Custody Assignment",
+ "enabled": 1,
+ "event": "Submit",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"A SIM has been suspended\") }}: {{ doc.sim_card }}{% if doc.previous_custodian_employee %} ({{ _(\"held by\") }} {{ doc.previous_custodian_employee }}){% endif %}.",
+ "message_type": "HTML",
+ "module": "SIM Operations",
+ "name": "SIM Operations - SIM Suspended",
+ "recipients": [
+  {
+   "receiver_by_role": "SIM Operations User"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "SIM Suspended: {{ doc.sim_card }}",
+ "modified": "2026-07-22 18:41:11.935365"
+}

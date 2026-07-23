@@ -1,0 +1,19 @@
+{
+  "doctype": "Salary Component",
+  "key": "salary_component",
+  "create_only": true,
+  "_note": "HRMS-native Salary Component shipped for the policy-driven Salary Deduction layer (T-098). Type = Deduction, disabled by default so it raises NO deduction until the Salary Deduction Policy and a type rule are explicitly activated after legal review. SKELETON: this fixture is NOT yet wired into the active seed loader (apex_core/setup/seed.py seeds only the 'habitat' and 'salis' module dirs) nor into hooks fixtures; it is staged here in the create-only {doctype,key,create_only,records} shape the loader understands, ready to be wired in a later increment without overwriting any admin edit. KEEP create_only true.",
+  "records": [
+    {
+      "salary_component": "Operational Deduction",
+      "salary_component_abbr": "OPD",
+      "type": "Deduction",
+      "disabled": 1,
+      "is_tax_applicable": 0,
+      "depends_on_payment_days": 0,
+      "do_not_include_in_total": 0,
+      "statistical_component": 0,
+      "description": "Operational deduction (damage / rent / fuel / custody) governed by the Salary Deduction Policy. Disabled by default. Enable only after the policy's global switch and the relevant type rule are activated and a worker Employee Deduction Acknowledgment (consent) is on file, within the KSA Labor Law caps."
+    }
+  ]
+}

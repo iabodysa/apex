@@ -1,0 +1,50 @@
+{
+ "doctype": "DocType",
+ "name": "Rent Payment Schedule",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "description": "One row per scheduled rent payment on an Accommodation Lease. Status tracks payment state; rent is paid externally (no GL).",
+ "field_order": [
+  "due_date",
+  "amount",
+  "status"
+ ],
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date",
+   "reqd": 1,
+   "in_list_view": 1,
+   "idx": 1,
+   "columns": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount (SAR)",
+   "reqd": 1,
+   "in_list_view": 1,
+   "idx": 2,
+   "columns": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Unpaid\nPaid\nOverdue",
+   "default": "Unpaid",
+   "reqd": 1,
+   "in_list_view": 1,
+   "idx": 3,
+   "columns": 2
+  }
+ ],
+ "permissions": [],
+ "modified": "2026-06-25 10:00:00.000000"
+}

@@ -1,0 +1,259 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-23 23:31:45.099192",
+ "description": "Records damage on returned custody articles. A salary deduction is applied only when damage deduction is enabled in Habitat Settings.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "custody_damage_assessment_tab_overview",
+  "custody_damage_assessment_sec_overview",
+  "assessment_date",
+  "custody_return",
+  "status",
+  "custody_damage_assessment_overview_col",
+  "building",
+  "custody_damage_assessment_sec_worker",
+  "party_type",
+  "party",
+  "custody_damage_assessment_worker_col",
+  "employee",
+  "custody_damage_assessment_sec_table_items",
+  "items",
+  "custody_damage_assessment_sec_totals",
+  "total_estimated_replacement_cost",
+  "custody_damage_assessment_sec_large_text",
+  "remarks",
+  "custody_damage_assessment_sec_system",
+  "naming_series",
+  "deduction_entry",
+  "source_checkout",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "custody_damage_assessment_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "custody_damage_assessment_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Assessment"
+  },
+  {
+   "fieldname": "assessment_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Assessment Date",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "custody_return",
+   "fieldtype": "Link",
+   "label": "Custody Return",
+   "options": "Custody Return"
+  },
+  {
+   "default": "Draft",
+   "description": "Approval state. Driven by the Custody Damage Assessment Workflow.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nPending Approval\nApproved\nRejected"
+  },
+  {
+   "fieldname": "custody_damage_assessment_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "custody_return.building",
+   "fetch_if_empty": 1,
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "custody_damage_assessment_sec_worker",
+   "fieldtype": "Section Break",
+   "label": "Responsible Worker"
+  },
+  {
+   "default": "Employee",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Worker Type",
+   "options": "Employee\nTemporary Worker"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Worker",
+   "options": "party_type",
+   "search_index": 1
+  },
+  {
+   "fieldname": "custody_damage_assessment_worker_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Employee Responsible",
+   "options": "Employee",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "custody_damage_assessment_sec_table_items",
+   "fieldtype": "Section Break",
+   "label": "Damaged Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Damaged Items",
+   "options": "Custody Damage Item"
+  },
+  {
+   "fieldname": "custody_damage_assessment_sec_totals",
+   "fieldtype": "Section Break",
+   "label": "Totals",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "total_estimated_replacement_cost",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Estimated Replacement Cost (SAR)",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "custody_damage_assessment_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Additional Information",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "custody_damage_assessment_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "default": "CUST-DMG-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "CUST-DMG-.YYYY.-.####"
+  },
+  {
+   "fieldname": "deduction_entry",
+   "fieldtype": "Link",
+   "label": "Additional Salary Deduction Entry",
+   "options": "Additional Salary",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_checkout",
+   "fieldtype": "Link",
+   "label": "Source Checkout",
+   "options": "Housing Checkout",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Custody Damage Assessment",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Custody Damage Assessment",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Finance Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "employee, building, assessment_date",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee",
+ "track_changes": 1
+}

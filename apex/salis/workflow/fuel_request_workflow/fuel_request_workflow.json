@@ -1,0 +1,164 @@
+{
+ "doctype": "Workflow",
+ "name": "Fuel Request Workflow",
+ "workflow_name": "Fuel Request Workflow",
+ "document_type": "Fuel Request",
+ "workflow_state_field": "status",
+ "is_active": 1,
+ "override_status": 0,
+ "send_email_alert": 0,
+ "states": [
+  {
+   "doctype": "Workflow Document State",
+   "state": "Pending",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Approved",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Done",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Failed",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Reverted",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Cancelled",
+   "doc_status": "2",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  }
+ ],
+ "transitions": [
+  {
+   "doctype": "Workflow Transition",
+   "state": "Pending",
+   "action": "Approve",
+   "next_state": "Approved",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.requested_by != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Pending",
+   "action": "Approve",
+   "next_state": "Approved",
+   "allowed": "Fleet Project Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.requested_by != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Pending",
+   "action": "Reject",
+   "next_state": "Failed",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.requested_by != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Pending",
+   "action": "Reject",
+   "next_state": "Failed",
+   "allowed": "Fleet Project Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.requested_by != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Complete",
+   "next_state": "Done",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Complete",
+   "next_state": "Done",
+   "allowed": "Fleet Project Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Mark Failed",
+   "next_state": "Failed",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": "doc.request_type=='Standard'"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Done",
+   "action": "Revert",
+   "next_state": "Reverted",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": "doc.request_type=='Top-up'"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Done",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Failed",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Reverted",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  }
+ ]
+}

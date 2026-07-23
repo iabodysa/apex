@@ -1,0 +1,109 @@
+# Copyright (c) 2026, AFMCO and contributors
+"""Shared test helpers for the Salis test suite."""
+
+import frappe
+
+
+def cancel_submitted_for_cleanup(doc):
+    """Cancel a submitted doc during teardown so it can be deleted, respecting the
+    A-083 workflow-bypass guard (``apex.apex_core.utils.workflow_guard``).
+
+    A bare ``doc.cancel()`` on a workflow-governed doctype whose workflow has a cancel
+    (docstatus-2) state is now blocked by the guard. Mirror what ``apply_workflow`` does
+    — land the workflow state field on that cancel state first — so the guard sees the
+    sanctioned target state and lets the cancel through. Runs as Administrator inside
+    ``addCleanup`` and only needs the record gone; it is NOT a substitute for a real
+    workflow transition in a test body. No-ops when the doc is not submitted, and for a
+    non-workflow (or no-cancel-state) doctype falls back to a plain cancel.
+    """
+    from frappe.model.workflow import get_workflow, get_workflow_name
+    from frappe.utils import cint
+
+    if doc.docstatus != 1:
+        return
+    if get_workflow_name(doc.doctype):
+        workflow = get_workflow(doc.doctype)
+        cancel_state = next(
+            (s.state for s in workflow.states if cint(s.doc_status) == 2), None
+        )
+        if cancel_state:
+            doc.set(workflow.workflow_state_field, cancel_state)
+    doc.cancel()
+
+
+def submit_via_workflow(doc):
+    """Submit a workflow-governed doc in a test the A-083-guard-compliant way.
+
+    A bare ``doc.submit()`` on a workflow-governed doctype is now refused by
+    ``apex.apex_core.utils.workflow_guard`` unless the current user holds an authorized
+    transition to a submit (doc_status 1) state. Tests whose subject is the controller's
+    ``on_submit`` SIDE-EFFECT (not the approval gate) used to rely on the native-submit
+    force-jump to reach docstatus 1. Reproduce that endpoint legitimately: land the
+    PERSISTED workflow state on the first submit (doc_status 1) state via a raw db write —
+    the same endpoint ``set_workflow_state_on_action`` force-jumped to — so both the
+    guard's fast-path and Frappe's ``validate_workflow`` (which rejects a multi-hop
+    in-memory state jump) see the state already at the sanctioned target, then submit.
+    ``on_submit`` fires with the submit-state, exactly as a real workflow approval would.
+
+    For a non-workflow doctype this is a plain submit. NOT a substitute for a real
+    ``apply_workflow`` transition in a test that exercises the approval/self-approval gate.
+    """
+    from frappe.model.workflow import get_workflow, get_workflow_name
+    from frappe.utils import cint
+
+    if get_workflow_name(doc.doctype):
+        workflow = get_workflow(doc.doctype)
+        submit_state = next(
+            (s.state for s in workflow.states if cint(s.doc_status) == 1), None
+        )
+        if submit_state:
+            frappe.db.set_value(
+                doc.doctype,
+                doc.name,
+                workflow.workflow_state_field,
+                submit_state,
+                update_modified=False,
+            )
+            doc.reload()
+    doc.submit()
+
+
+def _user(email, role):
+    """Return a User with ``email``, creating it if needed, and ensure it holds
+    ``role``. Idempotent: re-uses an existing user/role grant."""
+    if not frappe.db.exists("User", email):
+        u = frappe.get_doc({"doctype": "User", "email": email,
+                            "first_name": email.split("@")[0], "send_welcome_email": 0})
+        u.insert(ignore_permissions=True)
+    else:
+        u = frappe.get_doc("User", email)
+    if role not in frappe.get_roles(email):
+        u.add_roles(role)
+    return email
+
+
+def _project(project_name="QA Scope Project"):
+    """Return a Project named ``project_name``, creating it if absent. Idempotent.
+    Used to give a scoped Salis user a tenant to be permitted for."""
+    existing = frappe.db.get_value("Project", {"project_name": project_name}, "name")
+    if existing:
+        return existing
+    return frappe.get_doc(
+        {"doctype": "Project", "project_name": project_name}
+    ).insert(ignore_permissions=True).name
+
+
+def _grant_project(user, project):
+    """Grant ``user`` a Project User Permission for ``project`` (idempotent), so the
+    project-scoped Salis permission hooks admit the user's in-scope rows."""
+    if not frappe.db.exists(
+        "User Permission", {"user": user, "allow": "Project", "for_value": project}
+    ):
+        frappe.get_doc(
+            {
+                "doctype": "User Permission",
+                "user": user,
+                "allow": "Project",
+                "for_value": project,
+            }
+        ).insert(ignore_permissions=True)

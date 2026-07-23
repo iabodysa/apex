@@ -1,0 +1,11 @@
+{
+ "doctype": "Number Card",
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Custody Value in Employee Hands (SAR)",
+ "method": "apex.habitat.api.dashboard.get_custody_value_in_employee_hands",
+ "module": "Habitat",
+ "name": "Custody Value in Employee Hands (SAR)",
+ "type": "Custom",
+ "modified": "2026-06-19 00:00:00.000000"
+}

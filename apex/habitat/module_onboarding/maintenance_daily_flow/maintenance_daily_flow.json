@@ -1,0 +1,26 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Maintenance Daily Flow",
+ "title": "Maintenance Daily Flow",
+ "module": "Habitat",
+ "subtitle": "Raise a maintenance request and complete your first work order.",
+ "success_message": "Maintenance is set up. Raise requests and close work orders from your daily page.",
+ "is_complete": 0,
+ "modified": "2026-07-10 14:33:26.666126",
+ "allow_roles": [
+  {
+   "doctype": "Onboarding Permission",
+   "role": "Maintenance Technician"
+  }
+ ],
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Raise a Maintenance Request"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Complete a Maintenance Work Order"
+  }
+ ]
+}

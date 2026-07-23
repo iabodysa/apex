@@ -1,0 +1,33 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.docstatus == 1 and doc.expected_checkout_date and not doc.check_out_date",
+ "date_changed": "expected_checkout_date",
+ "days_in_advance": 7,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Housing Assignment",
+ "enabled": 0,
+ "event": "Days Before",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"This resident's expected checkout date is approaching — please prepare the room and checkout\") }}: {{ doc.name }} ({{ doc.expected_checkout_date }}).",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - Expected Checkout Approaching",
+ "recipients": [
+  {
+   "receiver_by_document_field": "responsible_supervisor"
+  },
+  {
+   "receiver_by_role": "Resident Supervisor"
+  },
+  {
+   "receiver_by_role": "Accommodation Manager"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Expected Checkout Approaching: {{ doc.name }}",
+ "modified": "2026-07-10 07:15:17.110258"
+}

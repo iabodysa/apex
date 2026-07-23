@@ -1,0 +1,17 @@
+{
+ "chart_name": "Beds by Building",
+ "chart_type": "Group By",
+ "doctype": "Dashboard Chart",
+ "document_type": "Bed",
+ "group_by_based_on": "building",
+ "group_by_type": "Count",
+ "is_public": 1,
+ "is_standard": 1,
+ "module": "Habitat",
+ "name": "Beds by Building",
+ "number_of_groups": 0,
+ "timeseries": 0,
+ "type": "Bar",
+ "filters_json": "[]",
+ "modified": "2026-07-10 06:05:34.129545"
+}

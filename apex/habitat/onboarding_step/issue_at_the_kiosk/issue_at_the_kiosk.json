@@ -1,0 +1,14 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Issue at the Kiosk",
+ "intro_text": "The Custody Kiosk is a POS-style screen for issuing articles to a worker and taking returns. Open it, pick a worker and building, and hand out your first articles.",
+ "title": "Issue at the Kiosk",
+ "action": "Go to Page",
+ "path": "custody-kiosk",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Issue articles to a worker from the POS-style Custody Kiosk.",
+ "action_label": "Open Custody Kiosk"
+}

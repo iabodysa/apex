@@ -1,0 +1,58 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-06-27 22:21:14.023292",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "transport_request",
+  "requested_count",
+  "purpose"
+ ],
+ "fields": [
+  {
+   "columns": 4,
+   "fieldname": "transport_request",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Transport Request",
+   "options": "Transport Request",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "description": "Worker count fetched from the assigned request; feeds the trip capacity guard.",
+   "fetch_from": "transport_request.worker_count",
+   "fieldname": "requested_count",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Requested Count",
+   "read_only": 1
+  },
+  {
+   "columns": 3,
+   "fetch_from": "transport_request.transport_purpose",
+   "fieldname": "purpose",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Purpose",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-27 22:21:14.023292",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Dispatch Trip Assigned Request",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

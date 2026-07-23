@@ -1,0 +1,15 @@
+{
+  "doctype": "Report",
+  "name": "Supplier Cost Recovery",
+  "report_name": "Supplier Cost Recovery",
+  "ref_doctype": "Accommodation Ledger",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "add_total_row": 1,
+  "module": "Habitat",
+  "roles": [
+    {"role": "Finance Manager"},
+    {"role": "Accommodation Manager"},
+    {"role": "System Manager"}
+  ]
+}

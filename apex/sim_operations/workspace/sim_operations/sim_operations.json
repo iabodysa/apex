@@ -1,0 +1,151 @@
+{
+ "doctype": "Workspace",
+ "name": "SIM Operations",
+ "label": "SIM Operations",
+ "title": "SIM Operations",
+ "module": "SIM Operations",
+ "icon": "phone",
+ "public": 1,
+ "is_standard": 1,
+ "is_default": 0,
+ "is_hidden": 0,
+ "sequence_id": 6.0,
+ "parent_page": "",
+ "content": "[{\"id\": \"tcHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Telecom Control</b></span>\", \"col\": 12}}, {\"id\": \"tcSc\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Telecom Control\", \"col\": 12}}, {\"id\": \"tcHdrM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"tcNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Total\", \"col\": 4}}, {\"id\": \"tcNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Assigned\", \"col\": 4}}, {\"id\": \"tcNc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Telecom Contracts\", \"col\": 4}}, {\"id\": \"tcHdrN\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"tcCardM\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"tcCardC\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody\", \"col\": 4}}, {\"id\": \"tcCardR\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Telecom Control",
+   "idx": 1,
+   "url": "/app/telecom-control",
+   "color": "Blue"
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Masters",
+   "description": "Set up telecom contracts and SIM cards.",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Telecom Contract",
+   "link_type": "DocType",
+   "link_to": "Telecom Contract",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "SIM Card",
+   "link_type": "DocType",
+   "link_to": "SIM Card",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Custody",
+   "description": "Assign, transfer, and return SIM custody.",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "SIM Custody Assignment",
+   "link_type": "DocType",
+   "link_to": "SIM Custody Assignment",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Reports",
+   "description": "Custody, expiry, cost, and exception reports.",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Current SIM Custody",
+   "link_type": "Report",
+   "link_to": "Current SIM Custody",
+   "is_query_report": 1,
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Employees Holding Multiple SIMs",
+   "link_type": "Report",
+   "link_to": "Employees Holding Multiple SIMs",
+   "is_query_report": 1,
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "SIMs by Contract and Supplier",
+   "link_type": "Report",
+   "link_to": "SIMs by Contract and Supplier",
+   "is_query_report": 1,
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Telecom Contract Expiry",
+   "link_type": "Report",
+   "link_to": "Telecom Contract Expiry",
+   "is_query_report": 1,
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Telecom Cost Allocation",
+   "link_type": "Report",
+   "link_to": "Telecom Cost Allocation",
+   "is_query_report": 1,
+   "idx": 11
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "SIM Exceptions",
+   "link_type": "Report",
+   "link_to": "SIM Exceptions",
+   "is_query_report": 1,
+   "idx": 12
+  }
+ ],
+ "number_cards": [
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "SIM Cards Total",
+   "label": "Total SIMs",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "SIM Cards Assigned",
+   "label": "Assigned SIMs",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Active Telecom Contracts",
+   "label": "Active Contracts",
+   "idx": 3
+  }
+ ],
+ "custom_blocks": [],
+ "charts": [],
+ "quick_lists": [],
+ "roles": [],
+ "modified": "2026-07-22 18:41:11.935365"
+}

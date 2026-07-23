@@ -1,0 +1,274 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-23 23:31:43.779074",
+ "description": "Formal lease contract holder for one building. Carries the rent payment schedule. The landlord is identified by the Lease's landlord field.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "accommodation_lease_tab_overview",
+  "accommodation_lease_sec_contract",
+  "company",
+  "building",
+  "landlord",
+  "accommodation_lease_contract_col",
+  "lease_reference",
+  "accommodation_lease_sec_term",
+  "status",
+  "accommodation_lease_term_col",
+  "lease_start_date",
+  "accommodation_lease_term_col2",
+  "lease_end_date",
+  "accommodation_lease_sec_rent",
+  "rent_amount",
+  "billing_cycle",
+  "accommodation_lease_rent_col",
+  "first_payment_date",
+  "company_share_pct",
+  "accommodation_lease_sec_large_text",
+  "notes",
+  "accommodation_lease_sec_system",
+  "naming_series",
+  "accommodation_lease_system_col",
+  "amended_from",
+  "accommodation_lease_tab_payment_schedule",
+  "accommodation_lease_sec_table_payment_schedule",
+  "total_scheduled",
+  "payment_schedule"
+ ],
+ "fields": [
+  {
+   "fieldname": "accommodation_lease_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "accommodation_lease_sec_contract",
+   "fieldtype": "Section Break",
+   "label": "Lease Contract"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Optional ERPNext Supplier FK for the landlord. Used to identify the payee for rent due reminders.",
+   "fieldname": "landlord",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Landlord",
+   "options": "Supplier"
+  },
+  {
+   "description": "Landlord-issued contract number or file reference.",
+   "fieldname": "lease_reference",
+   "fieldtype": "Data",
+   "label": "Lease / Contract Reference"
+  },
+  {
+   "fieldname": "accommodation_lease_contract_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accommodation_lease_sec_term",
+   "fieldtype": "Section Break",
+   "label": "Term & Status"
+  },
+  {
+   "default": "Draft",
+   "description": "Approval workflow drives the first four states (Draft → Pending Approval → Approved / Rejected); the remaining states are the post-approval lifecycle of an approved lease.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nPending Approval\nApproved\nRejected\nActive\nExpired\nTerminated"
+  },
+  {
+   "fieldname": "accommodation_lease_term_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lease_start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Lease Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accommodation_lease_term_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lease_end_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Lease End Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accommodation_lease_sec_rent",
+   "fieldtype": "Section Break",
+   "label": "Rent & Billing"
+  },
+  {
+   "fieldname": "rent_amount",
+   "fieldtype": "Currency",
+   "label": "Rent (SAR)",
+   "reqd": 1
+  },
+  {
+   "default": "100",
+   "description": "Company's share (%) of shared utility bills for this building. Agreed with the property management office. Does not affect rent.",
+   "fieldname": "company_share_pct",
+   "fieldtype": "Percent",
+   "label": "Utility Cost Share (%)"
+  },
+  {
+   "description": "Auto-computed sum of all payment schedule rows.",
+   "fieldname": "total_scheduled",
+   "fieldtype": "Currency",
+   "label": "Total Scheduled Amount (SAR)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_lease_rent_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Monthly",
+   "description": "How often rent payments are scheduled. Amount per installment is calculated automatically.",
+   "fieldname": "billing_cycle",
+   "fieldtype": "Select",
+   "label": "Billing Cycle",
+   "options": "Monthly\nQuarterly\nSemi-Annual\nAnnual",
+   "reqd": 1
+  },
+  {
+   "description": "Date of the first payment. Subsequent payments are calculated from this date based on Billing Cycle.",
+   "fieldname": "first_payment_date",
+   "fieldtype": "Date",
+   "label": "First Payment Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accommodation_lease_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Additional Information",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "accommodation_lease_tab_payment_schedule",
+   "fieldtype": "Tab Break",
+   "label": "Payment Schedule"
+  },
+  {
+   "fieldname": "accommodation_lease_sec_table_payment_schedule",
+   "fieldtype": "Section Break",
+   "label": "Schedule"
+  },
+  {
+   "fieldname": "payment_schedule",
+   "fieldtype": "Table",
+   "label": "Rent Payment Schedule",
+   "options": "Rent Payment Schedule"
+  },
+  {
+   "fieldname": "accommodation_lease_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "default": "ACC-LEASE-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "ACC-LEASE-.YYYY.-.####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accommodation_lease_system_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Lease",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Lease",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "role": "Finance Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "building, lease_reference, company",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "building",
+ "track_changes": 1
+}

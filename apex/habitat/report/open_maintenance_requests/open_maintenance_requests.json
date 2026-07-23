@@ -1,0 +1,20 @@
+{
+ "doctype": "Report",
+ "name": "Open Maintenance Requests",
+ "report_name": "Open Maintenance Requests",
+ "ref_doctype": "Maintenance Request",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
+}

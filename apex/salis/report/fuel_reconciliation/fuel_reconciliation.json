@@ -1,0 +1,20 @@
+{
+  "doctype": "Report",
+  "name": "Fuel Reconciliation",
+  "report_name": "Fuel Reconciliation",
+  "ref_doctype": "Fuel Consumption Ledger",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Salis",
+  "roles": [
+    {
+      "role": "Fleet Manager"
+    },
+    {
+      "role": "Finance Manager"
+    },
+    {
+      "role": "Internal Auditor"
+    }
+  ]
+}

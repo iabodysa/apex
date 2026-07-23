@@ -1,0 +1,282 @@
+{
+ "doctype": "DocType",
+ "name": "Subcontractor Service Contract",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 0,
+ "engine": "InnoDB",
+ "is_submittable": 1,
+ "search_fields": "supplier, contract_start_date, contract_end_date",
+ "track_changes": 1,
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "description": "Master agreement with an external subcontractor (pest control, sewage suction, deep cleaning, generator service, fire equipment service).",
+ "fields": [
+  {
+   "fieldname": "subcontractor_service_contract_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview",
+   "doctype": "DocField",
+   "idx": 1
+  },
+  {
+   "fieldname": "subcontractor_service_contract_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Contractor & Service",
+   "doctype": "DocField",
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "SUB-CON-.YYYY.-.####",
+   "default": "SUB-CON-.YYYY.-.####",
+   "reqd": 1,
+   "idx": 4,
+   "hidden": 1
+  },
+  {
+   "fieldname": "subcontractor_service_contract_overview_col",
+   "fieldtype": "Column Break",
+   "doctype": "DocField",
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "description": "Kind of outsourced facility service the contract covers, such as pest control, tank suction, deep cleaning, or equipment servicing, used to match orders to the right vendor scope.",
+   "fieldname": "service_type",
+   "fieldtype": "Select",
+   "label": "Service Type",
+   "options": "Pest Control\nSewage Tank Suction\nDeep Cleaning\nGenerator Service\nFire Equipment Service\nAC Maintenance\nWater Tank Cleaning\nOther",
+   "reqd": 1,
+   "idx": 6
+  },
+  {
+   "fieldname": "subcontractor_service_contract_sec_sla",
+   "fieldtype": "Section Break",
+   "label": "Service Level",
+   "doctype": "DocField",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "description": "How often the subcontractor is scheduled to visit under the contract, from weekly to quarterly, or on-call only when visits are requested as needed.",
+   "fieldname": "visit_frequency",
+   "fieldtype": "Select",
+   "label": "Scheduled Visit Frequency",
+   "options": "Weekly\nBi-weekly\nMonthly\nQuarterly\nOn-call Only",
+   "idx": 8
+  },
+  {
+   "fieldname": "subcontractor_service_contract_sla_col",
+   "fieldtype": "Column Break",
+   "doctype": "DocField",
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "response_sla_hours",
+   "fieldtype": "Int",
+   "label": "Response SLA (Hours)",
+   "idx": 10
+  },
+  {
+   "fieldname": "subcontractor_service_contract_sec_term",
+   "fieldtype": "Section Break",
+   "label": "Contract Term",
+   "doctype": "DocField",
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "contract_start_date",
+   "fieldtype": "Date",
+   "label": "Contract Start",
+   "reqd": 1,
+   "idx": 12
+  },
+  {
+   "doctype": "DocField",
+   "description": "Approval and validity state of the service contract, from draft and pending approval to active, or rejected, expired, or terminated.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nPending Approval\nActive\nRejected\nExpired\nTerminated",
+   "default": "Draft",
+   "idx": 13
+  },
+  {
+   "fieldname": "subcontractor_service_contract_term_col",
+   "fieldtype": "Column Break",
+   "doctype": "DocField",
+   "idx": 14
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "contract_end_date",
+   "fieldtype": "Date",
+   "label": "Contract End",
+   "reqd": 1,
+   "idx": 15
+  },
+  {
+   "fieldname": "subcontractor_service_contract_sec_commercial",
+   "fieldtype": "Section Break",
+   "label": "Commercial Terms",
+   "doctype": "DocField",
+   "permlevel": 1,
+   "idx": 16
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "rate_per_visit",
+   "fieldtype": "Currency",
+   "label": "Standard Rate Per Visit (SAR)",
+   "permlevel": 1,
+   "idx": 17
+  },
+  {
+   "fieldname": "subcontractor_service_contract_commercial_col",
+   "fieldtype": "Column Break",
+   "doctype": "DocField",
+   "idx": 18
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "monthly_retainer",
+   "fieldtype": "Currency",
+   "label": "Monthly Retainer (SAR)",
+   "permlevel": 1,
+   "idx": 19
+  },
+  {
+   "fieldname": "subcontractor_service_contract_sec_document",
+   "fieldtype": "Section Break",
+   "label": "Contract Document",
+   "doctype": "DocField",
+   "idx": 20
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "attached_contract",
+   "fieldtype": "Attach",
+   "label": "Contract Document",
+   "idx": 21
+  },
+  {
+   "fieldname": "subcontractor_service_contract_sec_table_covered_buildings",
+   "fieldtype": "Section Break",
+   "label": "Covered Buildings",
+   "doctype": "DocField",
+   "idx": 22
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "covered_buildings",
+   "fieldtype": "Table",
+   "label": "Covered Buildings",
+   "options": "Subcontractor Building Coverage",
+   "idx": 23
+  }
+ ],
+ "links": [
+  {
+   "group": "Subcontracting",
+   "link_doctype": "Subcontractor Service Order",
+   "link_fieldname": "contract"
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Accommodation Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Accommodation Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1,
+   "idx": 4
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Finance Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1,
+   "idx": 5
+  }
+ ],
+ "field_order": [
+  "subcontractor_service_contract_tab_overview",
+  "subcontractor_service_contract_sec_overview",
+  "supplier",
+  "naming_series",
+  "subcontractor_service_contract_overview_col",
+  "service_type",
+  "subcontractor_service_contract_sec_sla",
+  "visit_frequency",
+  "subcontractor_service_contract_sla_col",
+  "response_sla_hours",
+  "subcontractor_service_contract_sec_term",
+  "contract_start_date",
+  "status",
+  "subcontractor_service_contract_term_col",
+  "contract_end_date",
+  "subcontractor_service_contract_sec_commercial",
+  "rate_per_visit",
+  "subcontractor_service_contract_commercial_col",
+  "monthly_retainer",
+  "subcontractor_service_contract_sec_document",
+  "attached_contract",
+  "subcontractor_service_contract_sec_table_covered_buildings",
+  "covered_buildings"
+ ],
+ "modified": "2026-07-11 04:09:36.115685"
+}

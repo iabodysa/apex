@@ -1,0 +1,49 @@
+{
+ "doctype": "DocType",
+ "name": "Camera Access Building Scope",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "building",
+  "camera_count",
+  "notes"
+ ],
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 3,
+   "search_index": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "camera_count",
+   "fieldtype": "Int",
+   "label": "Cameras in Building",
+   "fetch_from": "building.cctv_camera_count",
+   "read_only": 1,
+   "in_list_view": 1,
+   "columns": 3,
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "notes",
+   "fieldtype": "Data",
+   "label": "Notes",
+   "in_list_view": 1,
+   "columns": 3,
+   "idx": 3
+  }
+ ],
+ "permissions": [],
+ "modified": "2026-06-09 10:00:00.000000"
+}

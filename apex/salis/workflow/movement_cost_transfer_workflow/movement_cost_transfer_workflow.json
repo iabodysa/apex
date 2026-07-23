@@ -1,0 +1,173 @@
+{
+ "doctype": "Workflow",
+ "name": "Movement Cost Transfer Workflow",
+ "workflow_name": "Movement Cost Transfer Workflow",
+ "document_type": "Movement Cost Transfer",
+ "workflow_state_field": "status",
+ "is_active": 1,
+ "override_status": 0,
+ "send_email_alert": 0,
+ "states": [
+  {
+   "doctype": "Workflow Document State",
+   "state": "Draft",
+   "doc_status": "0",
+   "allow_edit": "Fleet Project Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Pending Approval",
+   "doc_status": "0",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Approved",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Posted (memo)",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Rejected",
+   "doc_status": "0",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Cancelled",
+   "doc_status": "2",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  }
+ ],
+ "transitions": [
+  {
+   "doctype": "Workflow Transition",
+   "state": "Draft",
+   "action": "Submit for Approval",
+   "next_state": "Pending Approval",
+   "allowed": "Fleet Project Manager",
+   "allow_self_approval": 1,
+   "condition": "doc.from_project != doc.to_project"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Draft",
+   "action": "Submit for Approval",
+   "next_state": "Pending Approval",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": "doc.from_project != doc.to_project"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Draft",
+   "action": "Submit for Approval",
+   "next_state": "Pending Approval",
+   "allowed": "System Manager",
+   "allow_self_approval": 1,
+   "condition": "doc.from_project != doc.to_project"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Pending Approval",
+   "action": "Approve",
+   "next_state": "Approved",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.owner != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Pending Approval",
+   "action": "Approve",
+   "next_state": "Approved",
+   "allowed": "System Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.owner != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Pending Approval",
+   "action": "Reject",
+   "next_state": "Rejected",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Pending Approval",
+   "action": "Reject",
+   "next_state": "Rejected",
+   "allowed": "System Manager",
+   "allow_self_approval": 0,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Post (memo)",
+   "next_state": "Posted (memo)",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Post (memo)",
+   "next_state": "Posted (memo)",
+   "allowed": "System Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "System Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Posted (memo)",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Posted (memo)",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "System Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  }
+ ]
+}

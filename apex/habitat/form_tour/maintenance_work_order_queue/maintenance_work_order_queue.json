@@ -1,0 +1,42 @@
+{
+ "creation": "2026-07-19 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "list_name": "List",
+ "modified": "2026-07-19 19:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Maintenance Work Order Queue",
+ "owner": "Administrator",
+ "page_route": "[\"List\", \"Maintenance Work Order\", \"List\"]",
+ "reference_doctype": "Maintenance Work Order",
+ "steps": [
+  {
+   "description": "This queue contains the maintenance work orders you are allowed to see.",
+   "element_selector": ".page-title",
+   "position": "Bottom",
+   "title": "Your Work-Order Queue",
+   "ui_tour": 1
+  },
+  {
+   "description": "Use filters to focus on work assigned to you and its current status.",
+   "element_selector": ".filter-button",
+   "position": "Bottom Center",
+   "title": "Filter Assigned Work",
+   "ui_tour": 1
+  },
+  {
+   "description": "Open an assigned work order to record progress. If the queue is empty, ask an authorized creator to create and assign one.",
+   "element_selector": ".result",
+   "position": "Top Center",
+   "title": "Open Assigned Work",
+   "ui_tour": 1
+  }
+ ],
+ "title": "Maintenance Work Order Queue",
+ "track_steps": 1,
+ "ui_tour": 1,
+ "view_name": "List"
+}

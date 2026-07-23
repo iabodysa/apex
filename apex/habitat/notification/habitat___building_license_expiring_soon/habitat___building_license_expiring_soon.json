@@ -1,0 +1,31 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.docstatus == 1 and doc.status in ('Active', 'Expiring Soon')",
+ "date_changed": "expiry_date",
+ "days_in_advance": 60,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Building License",
+ "enabled": 1,
+ "event": "Days Before",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"Building License\") }} {{ doc.name }} ({{ doc.license_type }} {{ doc.license_number }}) {{ _(\"for building\") }} {{ doc.building }} {{ _(\"expires on\") }} {{ doc.expiry_date }}. {{ _(\"Please start renewal.\") }}",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - Building License Expiring Soon",
+ "recipients": [
+  {
+   "receiver_by_role": "Accommodation Manager"
+  },
+  {
+   "receiver_by_role": "Resident Supervisor"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Building License Expiring Soon: {{ doc.name }}",
+ "email_template": "Habitat - Building License Renewal Notice",
+ "modified": "2026-07-11 01:59:46.491117"
+}

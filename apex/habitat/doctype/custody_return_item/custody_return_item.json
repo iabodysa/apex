@@ -1,0 +1,59 @@
+{
+ "doctype": "DocType",
+ "name": "Custody Return Item",
+ "module": "Habitat",
+ "custom": 0,
+ "issingle": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "description": "Child: one article line on a Custody Return.",
+ "field_order": [
+  "article",
+  "qty",
+  "condition_on_return",
+  "serial_no"
+ ],
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "article",
+   "fieldtype": "Link",
+   "label": "Article",
+   "options": "Custody Article",
+   "reqd": 1,
+   "in_list_view": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "qty",
+   "fieldtype": "Int",
+   "label": "Qty",
+   "reqd": 1,
+   "default": "1",
+   "in_list_view": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "description": "Condition of the item when handed back, compared against its issue condition to decide whether a damage or loss charge applies to the holder.",
+   "fieldname": "condition_on_return",
+   "fieldtype": "Select",
+   "label": "Condition on Return",
+   "options": "Good\nFair\nDamaged\nLost",
+   "default": "Good",
+   "in_list_view": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "serial_no",
+   "fieldtype": "Data",
+   "label": "Serial No",
+   "idx": 4,
+   "in_list_view": 1
+  }
+ ],
+ "permissions": [],
+ "modified": "2026-06-09 10:00:00.000000"
+}

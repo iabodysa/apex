@@ -1,0 +1,1 @@
+"""Maintenance Procurement Item DocType."""

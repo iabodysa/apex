@@ -1,0 +1,275 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-24 06:15:19.463672",
+ "description": "Submittable: records facility/operational custody articles issued to a responsible party.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "custody_issue_tab_overview",
+  "custody_issue_sec_overview",
+  "issue_date",
+  "custody_issue_overview_col",
+  "building",
+  "expected_return_date",
+  "custody_issue_sec_worker",
+  "party_type",
+  "party",
+  "custody_issue_worker_col",
+  "issued_to_employee",
+  "custody_issue_worker_col2",
+  "issued_to_name",
+  "issued_to_user",
+  "custody_issue_sec_table_items",
+  "items",
+  "custody_issue_sec_large_text",
+  "remarks",
+  "custody_issue_sec_handover",
+  "acknowledged_on",
+  "custody_issue_handover_col",
+  "signature",
+  "custody_issue_sec_system",
+  "status",
+  "custody_issue_system_col1",
+  "naming_series",
+  "custody_issue_system_col2",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "custody_issue_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "custody_issue_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Issue"
+  },
+  {
+   "fieldname": "issue_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Issue Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "custody_issue_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Due date for returning these custody items. Defaults from the article category's default custody days.",
+   "fieldname": "expected_return_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Expected Return Date"
+  },
+  {
+   "fieldname": "custody_issue_sec_worker",
+   "fieldtype": "Section Break",
+   "label": "Recipient"
+  },
+  {
+   "default": "Employee",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Worker Type",
+   "options": "Employee\nTemporary Worker"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Worker",
+   "options": "party_type",
+   "search_index": 1
+  },
+  {
+   "fieldname": "custody_issue_worker_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "issued_to_employee",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Issued To (Employee)",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "custody_issue_worker_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.party_type!='Employee'",
+   "fieldname": "issued_to_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Issued To (Free Text)"
+  },
+  {
+   "description": "Holder's login user, mirrored from the employee so receipt notifications can reach a real address.",
+   "fetch_from": "issued_to_employee.user_id",
+   "fetch_if_empty": 1,
+   "fieldname": "issued_to_user",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Issued To (User)",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "custody_issue_sec_table_items",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Custody Issue Item"
+  },
+  {
+   "fieldname": "custody_issue_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "collapsible": 1,
+   "description": "Recipient's signature and acknowledgment captured in person at the kiosk when the items are handed over.",
+   "fieldname": "custody_issue_sec_handover",
+   "fieldtype": "Section Break",
+   "label": "Proof of Handover"
+  },
+  {
+   "description": "When the recipient acknowledged receipt at the kiosk.",
+   "fieldname": "acknowledged_on",
+   "fieldtype": "Datetime",
+   "label": "Acknowledged On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "custody_issue_handover_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Recipient's signature taken at handover time.",
+   "fieldname": "signature",
+   "fieldtype": "Signature",
+   "label": "Signature",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "custody_issue_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "default": "Draft",
+   "description": "State of the custody issue document, tracking whether items are still issued, fully or partially returned, or the issue was cancelled before handover.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nIssued\nReturned\nPartially Returned\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "custody_issue_system_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "CUST-ISS-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "CUST-ISS-.YYYY.-.####"
+  },
+  {
+   "fieldname": "custody_issue_system_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Custody Issue",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Custody",
+   "link_doctype": "Custody Return",
+   "link_fieldname": "custody_issue"
+  }
+ ],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Custody Issue",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "issued_to_name, building, issued_to_employee",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "issued_to_name",
+ "track_changes": 1
+}

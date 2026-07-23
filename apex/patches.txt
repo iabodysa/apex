@@ -1,0 +1,399 @@
+[pre_model_sync]
+# Patch lifecycle policy (audit 2026-06-03):
+#   PERMANENT = recurring/idempotent seeds; must stay so fresh installs replay them.
+#   ONE-TIME  = renames/cleanups/backfills; PRUNE (remove module + this line) once
+#              every deployed site has run it (tracked in tabPatch Log).
+#   Backfills are no-ops on fresh installs — never rely on them to seed fresh DBs.
+#
+#   2026-06-03 prune (no prod sites yet → gate vacuously met): removed 20 spent
+#   one-time / no-op patches — renames, backfills, workspace merges, cache/filter
+#   fixes, and the M-10/M-11-superseded kanban/assignment/email/salis-artifact
+#   no-ops (those records are now provisioned by the data-driven loader
+#   apex_core/setup/seed.seed_all, wired into after_install + after_migrate).
+#   HELD on purpose: add_city_doctype (now delegates to the data/ JSON loader
+#   data/habitat/city.json via seed_all — kept so already-migrated sites re-seed
+#   idempotently; fresh installs seed via after_install seed_all),
+#   rename_habitat_city_to_city (date-gated, remove on/after
+#   2026-06-24), v1_x.ensure_web_form_route (recent GitHub #97 route safeguard),
+#   seed_salis_operations_roles (a guarded no-op but still imported by hooks +
+#   salis/setup, so its module must stay). PERMANENT seeders kept below.
+apex.patches.v0_6.add_city_doctype
+apex.patches.v0_7.rename_habitat_city_to_city
+apex.patches.v0_7.add_bed_assignment_index
+
+# v0.8 — data completeness (PERMANENT, idempotent seeder)
+apex.patches.v0_8.seed_missing_material_templates
+
+# v0.8.4 — automation & communication (PERMANENT seeders + idempotent navbar)
+apex.patches.v0_8.seed_auto_email_reports
+apex.patches.v0_8.add_navbar_help_links
+
+# v0.8.6 — navbar route fix (Single, idempotent) + dashboards (PERMANENT seeders)
+apex.patches.v0_8.fix_navbar_command_center_route
+apex.patches.v0_9.seed_habitat_dashboard
+apex.patches.v0_9.seed_role_dashboards
+
+# v1.0 — Salis fleet module (PERMANENT, idempotent, existence-guarded seeders).
+# seed_salis_operations_roles is a guarded no-op kept because hooks + salis/setup
+# import it; the others seed DISTINCT records and fresh installs must replay them.
+apex.patches.v1_0.seed_salis_roles
+apex.patches.v1_0.seed_salis_authority_roles
+apex.patches.v1_0.seed_salis_operations_roles
+apex.patches.v1_0.seed_salis_settings
+apex.patches.v1_0.seed_salis_portal_theme
+
+# v1.x — Salis communications + native Workflow spine (PERMANENT, idempotent).
+# Frappe does not auto-import a Workflow from a module folder, so seed_salis_workflows
+# is the install path; both also run from after_install/after_migrate.
+apex.patches.v1_x.seed_salis_communications
+apex.patches.v1_x.seed_salis_workflows
+
+# v1.55.x — seed the Accommodation Item Groups (PERMANENT, idempotent, NestedSet-safe).
+# The permanent seeder waits for ERPNext to create its native Item Group root, then
+# loads the shipped item resource without fixture synchronization.
+apex.patches.v1_x.seed_accommodation_item_groups
+
+# v1.50.8 — workspace canonical rename (ONE-TIME). Removes the four stale workspace
+# records left behind when Habitat/Accommodation/Facilities/Apex Core were renamed to
+# Habitat Hub/Housing/Safety/Launchpad. PRUNE once every deployed site has run it.
+apex.patches.v1_x.rename_habitat_workspaces
+
+# v1.52.2 — Accommodation Site native Address backfill (ONE-TIME). Creates a Frappe
+# Address record for each site that has city/district data and no linked Address yet.
+# Mirrors the building backfill pattern. PRUNE once every deployed site has run it.
+apex.patches.v1_x.backfill_accommodation_site_native_address
+
+# v1.x — Logistay foundation renames (ONE-TIME, pre-sync so the DocType rename lands
+# before the Logistay freelancer.json import). Freelance → Freelancer: the DocType
+# (T-033 adjective→noun, moved to Logistay) then the Party Type record (cascades
+# party_type on existing Journal/Payment Entry rows). Both guarded + idempotent.
+# PRUNE once every deployed site has run them.
+apex.patches.v1_x.rename_freelance_doctype_to_freelancer
+apex.patches.v1_x.rename_freelance_party_type_to_freelancer
+
+# v2.0.0 — B7 (P-161) DocType-prefix rename wave (ONE-TIME, pre-sync so rename_doc
+# runs before sync_all rebuilds the tables — else sync creates an empty new-named
+# table beside real data). Renames 16 Habitat/Salis DocTypes (Accommodation Building
+# -> Building, ... Manifest Passenger -> Passenger Manifest Item). Idempotent + both-
+# spelling guarded. PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v2_0.rename_doctypes_b7
+
+# v2.0.0 — A-028 DocType rename (ONE-TIME, pre-sync so rename_doc runs before sync_all
+# rebuilds the tables — else sync creates an empty new-named table beside real data).
+# 'Stop' (=suspend from service, AR إيقاف) collided with the route-waypoint sense
+# (Route Stop): Driver Stop -> Driver Suspension, Vehicle Stop -> Vehicle Suspension.
+# Idempotent + both-spelling guarded. PRUNE once every deployed site has run it.
+apex.patches.v2_0.rename_stop_doctypes_to_suspension
+
+# v2.0.0 — T-033 DocType rename (ONE-TIME, pre-sync so rename_doc runs before sync_all
+# rebuilds the tables — else sync creates an empty new-named table beside real data).
+# The redundant 'Accommodation' prefix dropped: Accommodation Material Transfer ->
+# Material Transfer (+ its child item). No other 'Material Transfer' DocType exists
+# (ERPNext's is 'Stock Entry'), so the shorter name stays unambiguous. Idempotent +
+# both-spelling guarded. PRUNE once every deployed site has run it.
+apex.patches.v2_0.rename_accommodation_material_transfer
+
+# v2.0.0 — B4 (P-158) Report rename/merge wave (ONE-TIME, pre-sync so rename_doc runs
+# before the is_standard Report JSON re-import — else the new-named report imports fresh
+# and the old-named DB row orphans). Renames 8 reports (Housing Supervisor Report ->
+# Building Operations Summary, ... Salis Fleet Register -> Fleet Register) and deletes
+# 2 merged-away twins (Fuel Claim vs Consumption, Rental Variance Report). Idempotent +
+# guarded. PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v2_0.rename_reports_b4
+
+# v1.x — T-552 Phase B: create one Scheduled Task Assignment per legacy template that
+# had a building set (ONE-TIME). MUST run pre-sync: it reads the legacy `building`
+# column off `tabScheduled Task Template`, which sync_all() drops on this same migrate
+# (the field was removed from the DocType JSON). In post_model_sync the column would
+# already be gone and the backfill would silently no-op. The new Assignment DocType
+# replaces the per-template building field; this backfills existing templates so the
+# new generator finds them. Idempotent, no-op on fresh installs / re-run. PRUNE once
+# every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v1_x.migrate_scheduled_task_template_to_assignments
+
+[post_model_sync]
+# v2.0.0 — B6 (P-160) field-rename wave (ONE-TIME). Runs FIRST in post_model_sync so
+# rename_field copies each old column into its new (JSON-synced) name BEFORE the v1_x
+# backfills below fill still-empty rows on the new fieldname. References POST-B7 DocType
+# names. Idempotent + guarded; no-op on fresh installs / re-run. PRUNE once every deployed
+# site has run it (tracked in tabPatch Log).
+apex.patches.v2_0.rename_fields_b6
+
+# v1.x — TEMPORARY safeguard (GitHub #97): ensure the Web Form keeps its `route` on
+# an upgrade (the v15-removed make_route_to_web_form helper is never needed).
+# Idempotent, only-if-missing (never clobbers a custom route), no-op on fresh installs.
+# PRUNE once every deployed site is confirmed v15-correct (tracked in tabPatch Log).
+apex.patches.v1_x.ensure_web_form_route
+
+# v1.x — NATIVE-FIRST dashboards (ONE-TIME). The Habitat + Salis Dashboard parents now
+# ship as is_standard=1 module JSON (habitat/habitat_dashboard/, salis/salis_dashboard/),
+# imported by sync_dashboards. This deletes the legacy is_standard=0 Dashboard rows the
+# retired runtime seeders created so the SAME-migrate sync_dashboards() step (runs AFTER
+# post_model_sync patches) re-imports them as is_standard=1. GUARD: deletes a Dashboard
+# only if its is_standard==0; idempotent; no-op on fresh installs. PRUNE once every
+# deployed site has run it (tracked in tabPatch Log).
+apex.patches.v1_x.drop_legacy_is_standard0_dashboards
+
+# v2.0.0 — B3 (P-157) dashboards/charts/number-cards cleanup (ONE-TIME). The B3 wave
+# deleted duplicate twins and renamed charts/cards/dashboards by shipping them under new
+# is_standard=1 JSON; is_standard import is add/update-by-name only, so this force-deletes
+# the OLD-named orphan rows left on upgrading sites (the shipped dashboards already point at
+# the canonical/renamed names). Guarded exists-check; idempotent; no-op on fresh installs.
+# PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v2_0.drop_renamed_dashboards_charts_cards
+
+# A-042 — retire the four per-role landing Workspaces (Resident Supervisor / Fleet
+# Supervisor / Safety Officer / Maintenance Technician), folded into the business-domain
+# workspaces (Housing / Safety / fleet + the Salis tree). Deletes the orphaned Workspace
+# DB rows migrate leaves behind on a removed is_standard JSON, and clears any User whose
+# default_workspace still points at a removed page (reverses the retired B5/P-159
+# set_role_default_workspace stamp, removed here in the same change). Idempotent; no-op on
+# fresh installs / re-run. PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v2_0.remove_role_persona_workspaces
+
+# v1.52.x — backfill total_rooms / total_floors on existing buildings (ONE-TIME). The
+# controller now derives both from the generated rooms; rows saved earlier showed stale 0.
+# Idempotent, no-op on fresh installs. PRUNE once every deployed site has run it.
+apex.patches.v1_x.backfill_building_room_floor_counts
+
+# v1.52.x — relocate the app-wide enable_gl_posting finance gate (ONE-TIME) from
+# Habitat Settings to the new app-wide Apex Settings single (it serves both Habitat
+# and Salis). Copies any value a site already set on Habitat Settings into Apex
+# Settings, then deletes the Habitat Settings orphan row. Idempotent, no-op on fresh
+# installs. PRUNE once every deployed site has run it.
+apex.patches.v1_x.move_finance_settings_to_apex_settings
+
+# v1.x — retire the inert Apex Settings default_payment_method Select (ONE-TIME) in
+# favour of the Payment Routing Settings router. Seeds any old value into the router's
+# target_payment_doctype when it is unconfigured and the value names an installed
+# DocType, then deletes the orphan rows from Apex/Habitat Settings. Idempotent, no-op
+# on fresh installs. PRUNE once every deployed site has run it.
+apex.patches.v1_x.retire_default_payment_method
+
+# v1.x — Salis transport-type service_line refactor (ONE-TIME). Transport Request
+# service_line is now the transport type (Site Transport / Inter-City Relocation /
+# Administrative Trip) instead of the Workers/Representatives division. Maps existing
+# rows: 'Workers' -> 'Inter-City Relocation' when its request_type is an inter-city
+# relocation, else 'Site Transport'; 'Representatives' -> 'Administrative Trip' (gov
+# item 62 — they were submitted as transport requests, so they stay مسار). Idempotent,
+# no-op on fresh installs / re-run. PRUNE once every deployed site has run it.
+apex.patches.v1_x.refactor_transport_request_service_line
+# Rename the worker-transport Workspace 'Movement' -> 'Masar' so /app/masar
+# resolves (owner-reported 404). Idempotent; no-op on fresh installs / re-run.
+apex.patches.v1_x.rename_movement_workspace_to_masar
+
+# v1.54.x — backfill Accommodation Building.building_address (ONE-TIME, T-269). For each
+# building whose building_address is empty but which has a legacy default Address linked
+# via Dynamic Link, set building_address = get_default_address(...). Never clobbers a set
+# value; skips buildings with no resolvable Address. Idempotent, no-op on fresh installs.
+# PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v1_x.backfill_building_address_from_default_address
+
+# v1.55.0 — retire the superseded Safety Checklist desk Page (T-290, ONE-TIME). The
+# /safety Vue portal (1.54.29) replaced the desk Page; its standard files were removed,
+# but the Page and its 'Record a Safety Inspection' onboarding step persist as DB orphans
+# on existing sites and the page 500s on click (load_assets on a missing dir). Deletes
+# both orphans. Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed
+# site has run it (tracked in tabPatch Log).
+apex.patches.v1_x.retire_safety_checklist_desk_page
+
+# v1.55.x — privacy: strip the confidential client / H&S-accreditation-vendor names from
+# already-seeded Safety Task Catalog rows (T-291, ONE-TIME). The seed file was genericized
+# to client-neutral wording; the create-only loader never rewrites existing rows, so this
+# re-applies the corrected task_title/instructions from the clean JSON to any
+# row still carrying a confidential token. Idempotent, no-op on fresh installs / re-run.
+# PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v1_x.genericize_safety_task_catalog_client
+
+# v1.55.x — enable the Custody Damage Assessment Created notification on existing sites
+# (ONE-TIME). Notification.enabled is in import_file.ignore_values, so migrate preserves
+# the stale DB value and never applies the JSON enabled flip; flip enabled +
+# send_system_notification on the live row. Idempotent, no-op on fresh installs / re-run.
+# PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v1_x.enable_custody_damage_assessment_notification
+
+# v1.55.x — backfill Accommodation Assignment.responsible_supervisor (ONE-TIME,
+# T-569). The field fetches from building.responsible_supervisor on save, so rows
+# saved before the field existed stay empty and the Expected Checkout reminder never reaches
+# the building supervisor for them. Copies the building's supervisor into each empty row.
+# Never clobbers a set value; skips buildings with no supervisor. Idempotent, no-op on
+# fresh installs / re-run. PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v1_x.backfill_assignment_facility_supervisor
+
+# v1.55.x — enable the Vehicle Theft Reported + Workshop Overstay notifications on existing
+# sites (ONE-TIME). Notification.enabled is in import_file.ignore_values, so migrate
+# preserves the stale DB value and never applies the JSON enabled flip; flip enabled +
+# send_system_notification on the live rows. Idempotent, no-op on fresh installs / re-run.
+# PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v1_x.enable_salis_theft_overstay_notifications
+
+# v1.x — enable the driver-facing Blocked Driver Clearance + Vehicle Compliance Expiring
+# Soon notifications on existing sites (ONE-TIME, T-562). Notification.enabled is in
+# import_file.ignore_values, so migrate preserves the stale DB value and never applies the
+# JSON enabled flip; flip enabled + send_system_notification on the live rows. Idempotent,
+# no-op on fresh installs / re-run. PRUNE once every deployed site has run it (tracked in
+# tabPatch Log).
+apex.patches.v1_x.enable_salis_driver_notifications
+
+# v1.x — enable the Custody Return Overdue notification on existing sites (ONE-TIME).
+# The recipient was repointed to issued_to_user, but the record shipped enabled:0 and
+# Notification.enabled is in import_file.ignore_values, so migrate preserves the stale
+# DB value and never applies the JSON enabled flip; flip enabled +
+# send_system_notification on the live row. Idempotent, no-op on fresh installs / re-run.
+# PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v1_x.enable_custody_return_overdue_notification
+
+# v1.x — demo seeders (seed_masar_demo_movement, seed_demo_role_logins) are
+# deliberately NOT wired here (A-070): a normal `bench migrate` must never create
+# demo data. The modules stay on disk for a manual, developer_mode-only run —
+# `bench --site <site> execute apex.patches.v1_x.seed_masar_demo_movement.execute`
+# and `apex.patches.v1_x.seed_demo_role_logins.execute` — mirroring
+# apex/demo/demo_rich.py. Do NOT re-add either as an active patches.txt entry:
+# the demo-seed gate tests (tests/test_seed_*_gate.py) fail if you do.
+
+# v2.0.0 — B9 (P-163) changelog cutover stamp (ONE-TIME). Pins each already-onboarded
+# User's last_known_versions[apex] to the FINAL v1 series head (highest
+# change_log/v1/vX_Y_Z.md, derived) so the v2.0.0 "What's New" popup replays ONLY the
+# new v2 note, not the whole v1 back-catalogue. SUPERSEDES v1_x.stamp_changelog_seen_version
+# (retired here in the same change): that entry stamps the LIVE __version__, which at
+# cutover is 2.0.0 — it would suppress the v2.0.0 popup itself, so the two must not race.
+# Never downgrades a user already at/above the final v1 version. Idempotent; no-op on
+# fresh installs / re-run. PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v2_0.stamp_last_known_versions_v2_cutover
+
+# v1.x — reconcile Custody Issue.issued_to_user to valid User names (ONE-TIME). The
+# field changed from a free Data field to Link -> User; runs AFTER model sync so the
+# Link constraint exists. Keeps already-valid User names, remaps an email match to its
+# User name, blanks truly unresolvable values (an invalid Link value would block later
+# saves). Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site
+# has run it (tracked in tabPatch Log).
+apex.patches.v1_x.map_custody_issue_user_to_link
+
+# v1.60.8 — drop the bundled System Manager role from the existing Habitat
+# Accommodation Manager Role Profile (T-668, ONE-TIME). The seed fix only covers
+# fresh installs; this removes the privilege-escalation row on already-provisioned
+# sites. Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed
+# site has run it (tracked in tabPatch Log).
+apex.patches.v1_x.drop_sysmgr_from_accommodation_manager_profile
+
+# v1.x — adopt native Frappe Address for Rental Office (T-532, ONE-TIME). Rental Office
+# now wires the native Address (Address DocType + Dynamic Link, ERPNext pattern) via an
+# address_html field; this mirrors each office's legacy inline `city` value into a native
+# Address record. Runs AFTER model sync so the address_html field + Dynamic Link target
+# exist. Skips offices already linked or with no city; never deletes the inline value.
+# Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site has run it.
+apex.patches.v1_x.backfill_rental_office_native_address
+# ONE-TIME: renames Accommodation Goods Receipt → Goods Receipt and
+# Accommodation Custody Handover → Custody Handover (T-551 v1.60.18).
+# PRUNE once every deployed site has run it.
+apex.patches.v1_x.rename_accommodation_goods_receipt_and_custody_handover
+
+# v1.x — T-552 Phase B: drop the legacy UNIQUE(template, due_date, docstatus) index
+# from Scheduled Task Instance. Phase B allows multiple assignments per template, so
+# that index blocks the second assignment from inserting on the same day. Replaced by
+# UNIQUE(assignment, task_catalog, due_date, docstatus). (ONE-TIME)
+apex.patches.v1_x.drop_scheduled_task_instance_legacy_index
+
+# v1.x — P-091 Move 1: relocate the salary-deduction config (damage + housing) from
+# Habitat Settings to the law-aware Salary Deduction Policy (Damage + Rent type rules).
+# Runs AFTER model sync so the Policy meta + the new child fields exist. Copies any value
+# a site already set on Habitat Settings into the matching Policy rule, turns the global
+# master switch ON when either gate was enabled (so a live deduction never silently turns
+# off), then deletes the Habitat Settings orphan rows. Never clobbers a rule an admin
+# already configured. Idempotent, no-op on fresh installs / re-run. PRUNE once every
+# deployed site has run it (tracked in tabPatch Log).
+apex.patches.v1_x.move_deduction_to_salary_policy
+
+# v1.x — remove the Workspaces + Module Onboardings orphaned by the P-048 14->8 merge
+# (ONE-TIME). migrate is import-only and never reconciles a deleted JSON, so the merged-away
+# rows linger on installed sites and shadow the new set. Deletes them by name; guards against
+# the case-insensitive "Costs"/"costs" + "Fleet"/"fleet" aliases of live workspaces.
+# Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site has run it.
+apex.patches.v1_x.cleanup_p048_orphan_workspaces
+
+# v1.x — P-099 rename two Workspaces so name == title (costs -> "Costs and Leasing",
+# compliance_rentals -> "Compliance and Rentals"). The desk router keys by slug(name)
+# but the sidebar links by slug(title); when they differ the sidebar link 404s on open.
+# Carries deployed sites across the rename. Idempotent, no-op on fresh installs / re-run.
+# PRUNE once every deployed site has run it.
+apex.patches.v1_x.rename_workspaces_for_hierarchy
+
+# v1.x — stamp a generous expiry on existing Masar Worker Token rows (T-629, ONE-TIME).
+# The token gained a TTL (expires_on); rows minted before the field existed are NULL,
+# which the resolver treats as never-expiring. Runs AFTER model sync so the expires_on
+# field exists. Gives each live row the same generous window a fresh link gets, so no
+# currently distributed worker link is instantly invalidated. Never clobbers a set
+# expiry; idempotent; no-op on fresh installs / re-run. PRUNE once every deployed site
+# has run it (tracked in tabPatch Log).
+apex.patches.v1_x.backfill_masar_token_expiry
+
+# v2.0.0 — P-104: hash the Masar Worker Token at rest (ONE-TIME). The raw personal
+# token used to sit in the `token` column in clear; it now lives only as a SHA-256
+# hash (+ a site-key-encrypted recoverable copy in `token_enc`), so a direct row read
+# exposes zero usable secret. Runs AFTER model sync so `token_enc` exists. Hashes each
+# still-plaintext row in place; never logs a token value. Idempotent (skips 64-hex
+# rows), no-op on fresh installs. PRUNE once every deployed site has run it.
+apex.patches.v1_x.hash_masar_worker_tokens
+
+# v1.60.52 — P-102: add a composite index (is_cancelled, item_type, employee) on
+# Accommodation Stock Ledger for the custody/stock balance access path. Frappe only
+# emits single-column search_index rows, so this composite cannot live in the DocType
+# JSON. Idempotent: skips if the index already exists; no-op on re-run.
+apex.patches.v1_x.add_asl_composite_index
+
+# v1.x — P-108: make each module's ROOT workspace the deterministic breadcrumb target.
+# Desk breadcrumbs pick module_wise_workspaces[module][0], ordered by the Workspace
+# row's creation stamp; alphabetical JSON import + delete/reinsert on re-import let an
+# arbitrary child workspace sort first. Rewrites ONLY the root's creation to 1s before
+# its earliest sibling (modified untouched — bumping it would freeze future JSON syncs).
+# Also wired into after_install (fresh sites skip patches) + after_migrate (self-heal
+# after any re-import re-stamps creation). Idempotent, no-op when order is right.
+apex.patches.v1_x.reorder_root_workspace_creation
+
+# v2.0.0 — P-204: enable the Habitat expiry Notifications that replaced the custom
+# expiry-watcher notify boilerplate (Building License / Building Lease / Temporary
+# Stay). They shipped enabled:0 as scaffolding, and Notification.enabled is in
+# import_file.ignore_values, so migrate preserves the stale DB value and never applies
+# the JSON enabled flip; flip enabled + send_system_notification on the live rows.
+# Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site has run
+# it (tracked in tabPatch Log).
+apex.patches.v1_x.enable_habitat_expiry_notifications
+# v2.0.0 — heal Number Card rows left pointing at the pre-rename module path
+# apex_habitat.habitat.api.dashboard.* (dead app id) so the dashboard number cards
+# resolve again. Committed JSON is correct; only long-lived migrated sites carry the
+# stale value. Idempotent, no-op on fresh installs. PRUNE once every deployed site ran it.
+apex.patches.v2_0.fix_stale_apex_habitat_number_card_method
+
+# v2.0.2 — TEMPORARY app-identity cutover apex_habitat -> apex (ONE-TIME). The automatic
+# before_migrate bridge repairs the bench registry, installed-app and Patch Log identities,
+# then rebuilds the module map before schema sync. This post-model patch sweeps remaining
+# stored dotted paths and exact DB identity values after every table is current. Idempotent,
+# no-op on re-run / fresh installs. Retain the line and module until every deployed site
+# records the patch in tabPatch Log.
+apex.patches.v2_0.rename_app_apex_habitat_to_apex
+
+# v2.0.0 — reset Logistay to its lean two-master foundation (Freelancer + Temporary Worker).
+# Removes the ORPHANED DB records left by the archived v1 Logistay billing/timesheet/payroll
+# engine and the whole Logistay Governance module: their DocTypes + tables, the Logistay
+# workspace / Timesheet Exception Workbench report / TS Intake Source Workflow, the P-192
+# payroll Custom Fields, and the Logistay Governance Module Def. post_model_sync: the two
+# survivors already exist and are explicitly excluded. Fully guarded; no-op on fresh installs.
+apex.patches.v2_0.archive_logistay_v1_engine
+
+# v2.0.0 — barcode cutover: DISABLE (never delete) the login Website-User accounts behind
+# the /driver portal, now that drivers enter by QR with no Frappe User. Hard-guarded so it
+# only touches a driver whose barcode token is already live (never locks out a driver),
+# skips System/desk/elevated users, and is reversible (User.enabled flip) + idempotent.
+# post_model_sync: reads the new Masar Worker Token.driver column. No-op on fresh installs.
+apex.patches.v2_0.disable_driver_login_users_barcode_cutover
+
+# Remove the obsolete Worker default from otherwise exact Driver token bindings.
+apex.patches.v2_0.normalize_legacy_driver_token_bindings
+
+# v2.0.0 — migrate legacy site-level SIM records into SIM Operations (Telecom Contract,
+# SIM Card, opening SIM Custody Assignment). Reads an unknown site-level source DocType
+# defensively via a candidate + synonym map; idempotent (skips existing normalized mobiles,
+# reuses the migration contract, never re-opens custody); quarantines ambiguous rows rather
+# than guessing; freezes the source read-only after a real run. post_model_sync: writes the
+# new SIM Operations DocTypes. No-op when no legacy DocType exists (fresh installs).
+apex.patches.v2_0.migrate_sim_card_management

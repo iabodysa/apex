@@ -1,0 +1,49 @@
+{
+  "doctype": "Assignment Rule",
+  "key": "name",
+  "create_only": true,
+  "records": [
+    {
+      "name": "Habitat - Maintenance Request Intake",
+      "document_type": "Maintenance Request",
+      "rule": "Load Balancing",
+      "disabled": 1,
+      "description": "Auto-assign new maintenance requests across the maintenance team. DISABLED by default: replace the placeholder user with your real team, then enable.",
+      "assign_condition": "status == 'Open'",
+      "priority": 0,
+      "users": [
+        { "user": "Administrator" }
+      ],
+      "assignment_days": [
+        { "day": "Monday" },
+        { "day": "Tuesday" },
+        { "day": "Wednesday" },
+        { "day": "Thursday" },
+        { "day": "Friday" },
+        { "day": "Saturday" },
+        { "day": "Sunday" }
+      ]
+    },
+    {
+      "name": "Habitat - Resident Request Triage",
+      "document_type": "Resident Request",
+      "rule": "Round Robin",
+      "disabled": 1,
+      "description": "Auto-assign new resident requests to a triage owner (round robin). DISABLED by default: replace the placeholder user with your real triage team, then enable.",
+      "assign_condition": "status == 'New'",
+      "priority": 0,
+      "users": [
+        { "user": "Administrator" }
+      ],
+      "assignment_days": [
+        { "day": "Monday" },
+        { "day": "Tuesday" },
+        { "day": "Wednesday" },
+        { "day": "Thursday" },
+        { "day": "Friday" },
+        { "day": "Saturday" },
+        { "day": "Sunday" }
+      ]
+    }
+  ]
+}

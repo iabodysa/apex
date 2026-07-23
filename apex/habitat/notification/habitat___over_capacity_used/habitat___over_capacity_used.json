@@ -1,0 +1,29 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.is_temporary",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Bed",
+ "enabled": 0,
+ "event": "New",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"An over-capacity (temporary) bed was created to house a worker beyond the room's physical capacity\") }}: {{ doc.bed_code }} ({{ doc.building }}).",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - Over Capacity Used",
+ "recipients": [
+  {
+   "receiver_by_role": "Accommodation Manager"
+  },
+  {
+   "receiver_by_role": "Resident Supervisor"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Over-Capacity Bed Created: {{ doc.building }}",
+ "modified": "2026-07-10 06:05:34.129545"
+}

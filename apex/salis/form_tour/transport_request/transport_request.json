@@ -1,0 +1,67 @@
+{
+ "creation": "2026-07-05 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-07-10 06:05:34.129545",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Transport Request",
+ "owner": "Administrator",
+ "reference_doctype": "Transport Request",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Choose the type of transport service needed.",
+   "fieldname": "service_line",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Transport Type",
+   "position": "Right",
+   "title": "Transport Type"
+  },
+  {
+   "description": "Select the kind of request.",
+   "fieldname": "request_type",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Request Type",
+   "position": "Right",
+   "title": "Request Type"
+  },
+  {
+   "description": "Select the building the trip serves.",
+   "fieldname": "accommodation_building",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Building",
+   "position": "Right",
+   "title": "Origin Building"
+  },
+  {
+   "description": "State why the trip is needed.",
+   "fieldname": "transport_purpose",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Transport Purpose",
+   "position": "Right",
+   "title": "Trip Purpose"
+  },
+  {
+   "description": "Add any extra detail, then save to submit the request.",
+   "fieldname": "purpose",
+   "fieldtype": "Small Text",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Purpose",
+   "position": "Bottom",
+   "title": "Add Details"
+  }
+ ],
+ "title": "Transport Request"
+}

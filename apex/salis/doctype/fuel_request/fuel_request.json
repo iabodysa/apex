@@ -1,0 +1,470 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 11:00:00.000000",
+ "description": "Unified fuel request. A request_type (Standard / Top-up / Chip) selects the behaviour: Standard consumes quota and posts to the Fuel Consumption Ledger; Top-up adds litres and may be temporary (auto-reverted when overdue); Chip issues, replaces, or cancels a vehicle fuel chip.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "__tab_0",
+  "fuel_request_sec_request",
+  "request_type",
+  "fuel_request_sec_request_col1",
+  "request_date",
+  "fuel_request_sec_request_col2",
+  "status",
+  "fuel_request_sec_subject",
+  "vehicle",
+  "fuel_request_sec_subject_col1",
+  "project",
+  "fuel_request_sec_subject_col2",
+  "driver",
+  "fuel_request_sec_fuel_account",
+  "fuel_quota",
+  "fuel_request_sec_fuel_account_col1",
+  "fuel_platform",
+  "fuel_request_sec_amounts",
+  "requested_litres",
+  "fuel_request_sec_amounts_col1",
+  "topup_litres",
+  "fuel_request_sec_amounts_col2",
+  "amount",
+  "fuel_request_sec_temporary",
+  "is_temporary",
+  "fuel_request_sec_temporary_col1",
+  "revert_due_date",
+  "fuel_request_sec_temporary_col2",
+  "reverted",
+  "fuel_request_sec_chip_details",
+  "chip_number",
+  "fuel_request_sec_chip_details_col1",
+  "action",
+  "fuel_request_sec_chip",
+  "inactivity_evidence",
+  "owner_acknowledged",
+  "__tab_1",
+  "fuel_request_sec_actors",
+  "requested_by",
+  "fuel_request_sec_actors_col1",
+  "approved_by",
+  "fuel_request_sec_system",
+  "driver_user",
+  "naming_series",
+  "amended_from",
+  "fuel_request_sec_system_col1",
+  "migrated_from",
+  "quota_applied",
+  "ledgered"
+ ],
+ "fields": [
+  {
+   "fieldname": "__tab_0",
+   "fieldtype": "Tab Break",
+   "label": "Fuel Request"
+  },
+  {
+   "fieldname": "fuel_request_sec_request",
+   "fieldtype": "Section Break",
+   "label": "Request"
+  },
+  {
+   "default": "Standard",
+   "description": "Standard: quota consumption + ledger posting. Top-up: add litres, optionally temporary. Chip: issue/replace/cancel a fuel chip.",
+   "fieldname": "request_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Request Type",
+   "options": "Standard\nTop-up\nChip",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "fuel_request_sec_request_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "request_date",
+   "fieldtype": "Date",
+   "in_standard_filter": 1,
+   "label": "Request Date",
+   "search_index": 1
+  },
+  {
+   "fieldname": "fuel_request_sec_request_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Pending",
+   "description": "Processing state of the fuel top-up request, from pending approval to a completed dispense, or failed, reverted, or cancelled outcomes.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nApproved\nDone\nFailed\nReverted\nCancelled"
+  },
+  {
+   "fieldname": "fuel_request_sec_subject",
+   "fieldtype": "Section Break",
+   "label": "Vehicle and Project"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "fuel_request_sec_subject_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "fuel_request_sec_subject_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.current_driver",
+   "fetch_if_empty": 1,
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "search_index": 1
+  },
+  {
+   "fieldname": "fuel_request_sec_fuel_account",
+   "fieldtype": "Section Break",
+   "label": "Fuel Account",
+   "depends_on": "eval:doc.request_type=='Standard'"
+  },
+  {
+   "depends_on": "eval:doc.request_type=='Standard'",
+   "fieldname": "fuel_quota",
+   "fieldtype": "Link",
+   "label": "Fuel Quota",
+   "options": "Fuel Quota",
+   "search_index": 1
+  },
+  {
+   "fieldname": "fuel_request_sec_fuel_account_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.request_type=='Standard'",
+   "fieldname": "fuel_platform",
+   "fieldtype": "Link",
+   "label": "Fuel Platform",
+   "options": "Fuel Platform"
+  },
+  {
+   "fieldname": "fuel_request_sec_amounts",
+   "fieldtype": "Section Break",
+   "label": "Amounts",
+   "depends_on": "eval:doc.request_type=='Standard' || doc.request_type=='Top-up'"
+  },
+  {
+   "depends_on": "eval:doc.request_type=='Standard'",
+   "fieldname": "requested_litres",
+   "fieldtype": "Float",
+   "label": "Requested Litres"
+  },
+  {
+   "fieldname": "fuel_request_sec_amounts_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.request_type=='Top-up'",
+   "fieldname": "topup_litres",
+   "fieldtype": "Float",
+   "label": "Top-up Litres"
+  },
+  {
+   "fieldname": "fuel_request_sec_amounts_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.request_type=='Standard'",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount (SAR)"
+  },
+  {
+   "fieldname": "fuel_request_sec_temporary",
+   "fieldtype": "Section Break",
+   "label": "Temporary Top-up",
+   "depends_on": "eval:doc.request_type=='Top-up'"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.request_type=='Top-up'",
+   "fieldname": "is_temporary",
+   "fieldtype": "Check",
+   "label": "Is Temporary"
+  },
+  {
+   "fieldname": "fuel_request_sec_temporary_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.request_type=='Top-up' && doc.is_temporary==1",
+   "fieldname": "revert_due_date",
+   "fieldtype": "Date",
+   "label": "Revert Due Date"
+  },
+  {
+   "fieldname": "fuel_request_sec_temporary_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "depends_on": "eval:doc.request_type=='Top-up'",
+   "description": "Set when a temporary top-up has been reverted (by the daily auto-revert job or manually). Allowed on submit so the scheduler can flip it.",
+   "fieldname": "reverted",
+   "fieldtype": "Check",
+   "label": "Reverted"
+  },
+  {
+   "fieldname": "fuel_request_sec_chip_details",
+   "fieldtype": "Section Break",
+   "label": "Chip",
+   "depends_on": "eval:doc.request_type=='Chip'"
+  },
+  {
+   "depends_on": "eval:doc.request_type=='Chip'",
+   "fieldname": "chip_number",
+   "fieldtype": "Data",
+   "label": "Chip Number"
+  },
+  {
+   "fieldname": "fuel_request_sec_chip_details_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Issue",
+   "depends_on": "eval:doc.request_type=='Chip'",
+   "fieldname": "action",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Chip Action",
+   "options": "\nIssue\nReplace\nCancel"
+  },
+  {
+   "fieldname": "fuel_request_sec_chip",
+   "fieldtype": "Section Break",
+   "label": "Chip Cancellation",
+   "depends_on": "eval:doc.request_type=='Chip' && doc.action=='Cancel'",
+   "collapsible": 1
+  },
+  {
+   "depends_on": "eval:doc.request_type=='Chip' && doc.action=='Cancel'",
+   "fieldname": "inactivity_evidence",
+   "fieldtype": "Attach",
+   "label": "Inactivity Evidence"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.request_type=='Chip' && doc.action=='Cancel'",
+   "fieldname": "owner_acknowledged",
+   "fieldtype": "Check",
+   "label": "Owner Acknowledged"
+  },
+  {
+   "fieldname": "__tab_1",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "fuel_request_sec_actors",
+   "fieldtype": "Section Break",
+   "label": "Actors",
+   "collapsible": 1
+  },
+  {
+   "description": "Defaults to the session user. The workflow approval transition is SoD-gated on this field (approver ≠ requester).",
+   "fieldname": "requested_by",
+   "fieldtype": "Link",
+   "label": "Requested By",
+   "no_copy": 1,
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fuel_request_sec_actors_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Set when the request is approved.",
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fuel_request_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "description": "The driver's login user, mirrored from the linked driver. Drives the driver-facing notification.",
+   "fetch_from": "driver.driver_user",
+   "fetch_if_empty": 1,
+   "fieldname": "driver_user",
+   "fieldtype": "Link",
+   "label": "Driver User",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "default": "FR-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "FR-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Fuel Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "fuel_request_sec_system_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Source DocType:name this row was migrated from when Fuel Topup/Chip Request DocTypes merged into Fuel Request. Blank for native requests.",
+   "fieldname": "migrated_from",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Migrated From",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.request_type=='Standard'",
+   "description": "Set when this request's litres are posted to the quota's consumed total. Guards against double-application on resubmit.",
+   "fieldname": "quota_applied",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Quota Applied",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.request_type=='Standard'",
+   "description": "Set by the accrual engine once litres are posted to the Fuel Consumption Ledger. Guards against double-posting.",
+   "fieldname": "ledgered",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Ledgered",
+   "no_copy": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Governance",
+   "link_doctype": "Fuel Exception Case",
+   "link_fieldname": "fuel_request"
+  }
+ ],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Fuel Request",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "vehicle, chip_number, project",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "vehicle",
+ "track_changes": 1
+}

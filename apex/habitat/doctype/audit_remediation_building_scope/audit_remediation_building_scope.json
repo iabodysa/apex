@@ -1,0 +1,27 @@
+{
+ "doctype": "DocType",
+ "name": "Audit Remediation Building Scope",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "building"
+ ],
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "idx": 1,
+   "in_list_view": 1,
+   "columns": 3,
+   "search_index": 1
+  }
+ ],
+ "permissions": [],
+ "modified": "2026-06-09 10:00:00.000000"
+}

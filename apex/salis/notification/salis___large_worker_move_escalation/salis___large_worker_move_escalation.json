@@ -1,0 +1,27 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.worker_count and doc.worker_count >= 20 and doc.status in ('New', 'Validated')",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Transport Request",
+ "enabled": 0,
+ "event": "Value Change",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"A large worker-transport request needs management escalation\") }}: {{ doc.name }} ({{ doc.worker_count }} {{ _(\"workers\") }}).",
+ "message_type": "HTML",
+ "module": "Salis",
+ "name": "Salis - Large Worker Move Escalation",
+ "recipients": [
+  {
+   "receiver_by_role": "Fleet Manager"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "subject": "Large Worker Move Needs Escalation: {{ doc.name }}",
+ "value_changed": "status",
+ "modified": "2026-06-02 13:30:00.000000"
+}

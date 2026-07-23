@@ -1,0 +1,77 @@
+{
+ "creation": "2026-07-11 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-07-11 20:55:46.174414",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Safety Incident",
+ "owner": "Administrator",
+ "reference_doctype": "Safety Incident",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Record when the incident happened.",
+   "fieldname": "incident_datetime",
+   "fieldtype": "Datetime",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Incident Date and Time",
+   "position": "Bottom",
+   "title": "Set the Incident Time"
+  },
+  {
+   "description": "Select the building where the incident occurred.",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Building",
+   "position": "Bottom",
+   "title": "Choose the Building"
+  },
+  {
+   "description": "Choose the type of incident.",
+   "fieldname": "incident_type",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Incident Type",
+   "position": "Bottom",
+   "title": "Classify the Incident"
+  },
+  {
+   "description": "Rate how serious the incident is.",
+   "fieldname": "severity",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Severity",
+   "position": "Bottom",
+   "title": "Set the Severity"
+  },
+  {
+   "description": "Describe what happened.",
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Description",
+   "position": "Bottom",
+   "title": "Describe the Incident"
+  },
+  {
+   "description": "Note the immediate action taken, then save.",
+   "fieldname": "immediate_action_taken",
+   "fieldtype": "Small Text",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Immediate Action Taken",
+   "position": "Bottom",
+   "title": "Record Immediate Action"
+  }
+ ],
+ "title": "Safety Incident"
+}

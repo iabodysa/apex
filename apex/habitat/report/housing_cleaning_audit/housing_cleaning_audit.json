@@ -1,0 +1,48 @@
+{
+ "doctype": "Report",
+ "name": "Housing Cleaning Audit",
+ "report_name": "Housing Cleaning Audit",
+ "ref_doctype": "Cleaning Log",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  },
+  {
+   "role": "Cleaning Supervisor"
+  }
+ ],
+ "filters": [
+  {
+   "fieldname": "from_date",
+   "label": "From Date",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "default": "Today"
+  },
+  {
+   "fieldname": "to_date",
+   "label": "To Date",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "default": "Today"
+  },
+  {
+   "fieldname": "building",
+   "label": "Building",
+   "fieldtype": "Link",
+   "options": "Building"
+  }
+ ]
+}

@@ -1,0 +1,239 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-06-24 00:00:00.000000",
+ "description": "Append-only audit row for one QR boarding-pass scan-validate attempt (valid, duplicate, invalid, wrong-trip, or expired). The operational headcount lives on Trip Start Log; this is the immutable scan trail.",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_scan",
+  "dispatch_trip",
+  "trip_start_log",
+  "transport_request",
+  "col_scan",
+  "driver",
+  "employee",
+  "accommodation_building",
+  "sec_result",
+  "result",
+  "method",
+  "scanned_at",
+  "col_result",
+  "boarding_event_created",
+  "pass_token_hash",
+  "sec_notes",
+  "notes",
+  "naming_series"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_scan",
+   "fieldtype": "Section Break",
+   "label": "Scan"
+  },
+  {
+   "description": "The Dispatch Trip the scanned pass was issued against.",
+   "fieldname": "dispatch_trip",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Dispatch Trip",
+   "options": "Dispatch Trip",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "description": "The Trip Start Log this scan boarded onto (set only when a boarding row was created).",
+   "fieldname": "trip_start_log",
+   "fieldtype": "Link",
+   "label": "Trip Start Log",
+   "options": "Trip Start Log",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "dispatch_trip.transport_request",
+   "fieldname": "transport_request",
+   "fieldtype": "Link",
+   "label": "Transport Request",
+   "options": "Transport Request",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_scan",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "dispatch_trip.driver",
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "description": "The worker the scanned pass identifies (registered Employee).",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "description": "Housing pickup recorded with the scan (Habitat-Salis bridge), when present.",
+   "fieldname": "accommodation_building",
+   "fieldtype": "Link",
+   "label": "Pickup Building",
+   "options": "Building",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_result",
+   "fieldtype": "Section Break",
+   "label": "Result"
+  },
+  {
+   "description": "Outcome of validating the scanned pass token.",
+   "fieldname": "result",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Result",
+   "options": "Valid\nDuplicate\nInvalid Token\nWrong Trip\nExpired",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "QR",
+   "fieldname": "method",
+   "fieldtype": "Select",
+   "label": "Method",
+   "options": "QR\nManual",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scanned_at",
+   "fieldtype": "Datetime",
+   "label": "Scanned At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_result",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Set when this scan appended a boarding row to the Trip Start Log (a Valid first scan).",
+   "fieldname": "boarding_event_created",
+   "fieldtype": "Check",
+   "label": "Boarding Event Created",
+   "read_only": 1
+  },
+  {
+   "description": "SHA-256 digest of the scanned pass token (the raw token is never stored).",
+   "fieldname": "pass_token_hash",
+   "fieldtype": "Data",
+   "label": "Pass Token Hash",
+   "length": 64,
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "read_only": 1
+  },
+  {
+   "default": "BSL-.YYYY.-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "BSL-.YYYY.-.######",
+   "reqd": 1
+  }
+ ],
+ "in_create": 1,
+ "links": [],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Boarding Scan Log",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager"
+  },
+  {
+   "create": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor"
+  },
+  {
+   "if_owner": 1,
+   "read": 1,
+   "role": "Driver"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "driver, employee, accommodation_building",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

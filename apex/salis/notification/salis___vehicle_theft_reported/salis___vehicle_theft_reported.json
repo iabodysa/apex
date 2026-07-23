@@ -1,0 +1,31 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.incident_type == \"Theft\"",
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Vehicle Incident",
+ "enabled": 1,
+ "event": "Submit",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"A vehicle has been reported stolen\") }}: {{ doc.vehicle }} ({{ doc.name }}). {{ _(\"The vehicle has been taken out of service.\") }}",
+ "message_type": "HTML",
+ "module": "Salis",
+ "name": "Salis - Vehicle Theft Reported",
+ "recipients": [
+  {
+   "receiver_by_role": "Fleet Manager"
+  },
+  {
+   "receiver_by_role": "Fleet Supervisor"
+  },
+  {
+   "receiver_by_role": "Government Relations Officer"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Vehicle Theft Reported: {{ doc.vehicle }}",
+ "modified": "2026-06-25 11:51:11.301745"
+}

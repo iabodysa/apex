@@ -1,0 +1,473 @@
+/* Housing count portal — AFMCO theme tokens (Growth Green / Deep Forest / Sand),
+   mirrored from safety_portal so the housing surface matches the rest of the
+   habitat portals. Components consume these CSS variables exclusively, so a
+   tenant can re-skin by swapping the token block. */
+
+/* Shared brand primitives (--brand-green) + breakpoint tokens — single source. */
+@import "@shared/tokens.css";
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+[data-theme="afmco"] {
+  --c-primary: var(--brand-green);
+  --c-primary-ink: #ffffff;
+  --c-ink: #072b1a;
+  --c-ink-soft: #355040;
+  --c-canvas: #ece6d6;
+  --c-surface: #f8f5ee;
+  --c-surface-2: #ffffff;
+  --c-accent: var(--brand-green);
+  --c-mint: #60d297;
+  --c-muted: #6f7e76;
+  --c-border: #ddd5c2;
+  --c-border-strong: #cabfa3;
+  --c-success: var(--brand-green);
+  --c-success-bg: #d9f0e3;
+  --c-warning: #c9851f;
+  --c-warning-bg: #f7ead2;
+  --c-danger: #c0392b;
+  --c-danger-bg: #f6dcd8;
+  --c-header-bg: #072b1a;
+  --c-header-ink: #f8f5ee;
+  --c-header-accent: #60d297;
+  --c-arc: rgba(96, 210, 151, 0.16);
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+  --shadow: 0 1px 2px rgba(7, 43, 26, 0.04);
+  --shadow-lg: 0 10px 30px rgba(7, 43, 26, 0.1);
+  --border-width: 1px;
+
+  --font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-display: 28px;
+  --fs-h1: 22px;
+  --fs-h2: 20px;
+  --fs-h3: 16px;
+  --fs-body: 14px;
+  --fs-sm: 13px;
+  --fs-xs: 11px;
+  --fw-heading: 800;
+  --fw-semibold: 600;
+  --fw-body: 500;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+}
+
+/* Frappe Standard — neutral blue, lighter chrome (ported from the safety portal
+   so /housing-count renders identically when the Salis Portal Theme is set to
+   "Frappe Standard"). */
+[data-theme="frappe"] {
+  --c-primary: #2490ef;
+  --c-primary-ink: #ffffff;
+  --c-ink: #1f272e;
+  --c-ink-soft: #525a62;
+  --c-canvas: #f4f5f6;
+  --c-surface: #ffffff;
+  --c-surface-2: #f9fafb;
+  --c-accent: #2490ef;
+  --c-mint: #28a745;
+  --c-muted: #6b7682;
+  --c-border: #e2e6e9;
+  --c-border-strong: #d1d8dd;
+  --c-success: #28a745;
+  --c-success-bg: #e6f4ea;
+  --c-warning: #cb8100;
+  --c-warning-bg: #fbf0d9;
+  --c-danger: #e03636;
+  --c-danger-bg: #fbe3e3;
+  --c-header-bg: #ffffff;
+  --c-header-ink: #1f272e;
+  --c-header-accent: #2490ef;
+  --c-arc: rgba(36, 144, 239, 0.08);
+
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 10px;
+  --radius-pill: 999px;
+  --shadow: 0 1px 2px rgba(17, 43, 66, 0.08), 0 0 1px rgba(17, 43, 66, 0.12);
+  --shadow-lg: 0 4px 16px rgba(17, 43, 66, 0.12);
+  --border-width: 1px;
+
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Cairo", sans-serif;
+  --fw-heading: 700;
+  --fw-semibold: 600;
+  --fw-body: 400;
+}
+
+/* On Frappe Standard the header bar is light, so drop the dark-bar supergraphic
+   that only reads on the forest/dark chromes. */
+[data-theme="frappe"] .hero-arc {
+  display: none !important;
+}
+[data-theme="frappe"] .app-header {
+  border-bottom: 1px solid var(--c-border);
+  box-shadow: var(--shadow);
+}
+
+[data-theme="dark"] {
+  --c-primary: #00a862;
+  --c-primary-ink: #04130c;
+  --c-ink: #e7efe9;
+  --c-ink-soft: #a6b6ac;
+  --c-canvas: #0f1714;
+  --c-surface: #15211b;
+  --c-surface-2: #1c2c24;
+  --c-accent: #60d297;
+  --c-mint: #60d297;
+  --c-muted: #7d8f84;
+  --c-border: #25362c;
+  --c-border-strong: #324a3c;
+  --c-success: #60d297;
+  --c-success-bg: rgba(96, 210, 151, 0.14);
+  --c-warning: #e0a02f;
+  --c-warning-bg: rgba(224, 160, 47, 0.16);
+  --c-danger: #ef6b5e;
+  --c-danger-bg: rgba(239, 107, 94, 0.16);
+  --c-header-bg: #0c130f;
+  --c-header-ink: #e7efe9;
+  --c-header-accent: #60d297;
+  --c-arc: rgba(96, 210, 151, 0.1);
+  --shadow: none;
+  --shadow-lg: none;
+}
+
+/* Gemini — glassmorphic neon (ported from the safety portal so /housing-count
+   renders identically when the Salis Portal Theme is set to "Gemini"). */
+[data-theme="gemini"] {
+  --c-canvas: #04050b;
+  --c-surface: rgba(15, 17, 26, 0.65);
+  --c-surface-2: rgba(15, 17, 26, 0.65);
+
+  --c-primary: #a855f7; /* Purple Glow */
+  --c-primary-ink: #ffffff;
+  --c-accent: #3b82f6; /* Blue Glow */
+  --c-mint: #06b6d4; /* Cyan Glow */
+
+  --c-ink: #f8fafc;
+  --c-ink-soft: #cbd5e1;
+  --c-muted: #64748b;
+
+  --c-border: rgba(148, 163, 184, 0.12);
+  --c-border-strong: rgba(148, 163, 184, 0.25);
+
+  --c-success: #10b981;
+  --c-success-bg: rgba(16, 185, 129, 0.15);
+  --c-warning: #f59e0b;
+  --c-warning-bg: rgba(245, 158, 11, 0.15);
+  --c-danger: #ef4444;
+  --c-danger-bg: rgba(239, 68, 68, 0.15);
+
+  --c-header-bg: rgba(4, 5, 11, 0.85);
+  --c-header-ink: #ffffff;
+  --c-header-accent: #a855f7;
+  --c-arc: rgba(168, 85, 247, 0.18);
+
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 48px rgba(168, 85, 247, 0.2);
+  --border-width: 1px;
+}
+
+/* Frosted-glass surfaces + the neon submit gradient, matching the other portals
+   so the Gemini chrome is consistent across /driver, /masar, /safety and
+   /housing-count. */
+[data-theme="gemini"] .app-header,
+[data-theme="gemini"] .b-item,
+[data-theme="gemini"] .item-card,
+[data-theme="gemini"] .summary-row,
+[data-theme="gemini"] .room-group {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background: var(--c-surface);
+  box-shadow: var(--shadow);
+}
+[data-theme="gemini"] .btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #a855f7, #ec4899, #3b82f6);
+  background-size: 300% 300%;
+  animation: geminiGlow 4s ease infinite;
+  border: none;
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+@keyframes geminiGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Atelier — premium editorial refinement of the AFMCO identity (ported from the
+   safety portal so /housing-count renders identically when the Salis Portal
+   Theme is set to "Atelier"). Same brand palette, elevated finish. Keeps Cairo
+   for the RTL Arabic surface. */
+[data-theme="atelier"] {
+  --c-primary: var(--brand-green);
+  --c-primary-ink: #ffffff;
+  --c-ink: #06241a;
+  --c-ink-soft: #3a5448;
+  --c-canvas: #efe9da;
+  --c-surface: #fffdf7;
+  --c-surface-2: #ffffff;
+  --c-accent: var(--brand-green);
+  --c-mint: #5ccf94;
+  --c-muted: #6f7e76;
+  --c-border: #e2dac6;
+  --c-border-strong: #cdc1a4;
+  --c-success: var(--brand-green);
+  --c-success-bg: #dcf1e5;
+  --c-warning: #b9791b;
+  --c-warning-bg: #f6e8cf;
+  --c-danger: #b83a2c;
+  --c-danger-bg: #f5dbd6;
+  --c-header-bg: #062019;
+  --c-header-ink: #f8f5ee;
+  --c-header-accent: #d8c79a; /* gold-leaf accent (drawn from sand) */
+  --c-arc: rgba(216, 199, 154, 0.14);
+
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --shadow: 0 1px 2px rgba(7, 43, 26, 0.04), 0 6px 16px rgba(7, 43, 26, 0.06);
+  --shadow-lg: 0 12px 32px rgba(7, 43, 26, 0.1);
+  --border-width: 1px;
+}
+
+/* Gold-leaf hairline under the header — understated luxury, not a new colour. */
+[data-theme="atelier"] .app-header {
+  border-bottom: 1px solid color-mix(in srgb, var(--c-header-accent) 35%, transparent);
+}
+
+/* Creative ("Nocturne") — flagship distinctive-yet-professional theme (ported
+   from the safety portal so /housing-count renders identically when the Salis
+   Portal Theme is set to "Creative"). A cool deep-navy editorial chrome with an
+   electric-azure primary and a warm amber accent. Token-only re-skin. Keeps
+   Cairo for the RTL Arabic surface. */
+[data-theme="creative"] {
+  --c-primary: #3ea6ff; /* Electric Azure (7.09:1 on canvas) */
+  --c-primary-ink: #04101f;
+  --c-ink: #eef2fb; /* Ivory (16.39:1 on canvas) */
+  --c-ink-soft: #aab6d4;
+  --c-canvas: #0d1424;
+  --c-surface: #141d33;
+  --c-surface-2: #1b2742;
+  --c-accent: #ffb454; /* Warm Amber */
+  --c-mint: #42d6a4;
+  --c-muted: #7e8bb0;
+  --c-border: #26314d;
+  --c-border-strong: #364470;
+  --c-success: #42d6a4;
+  --c-success-bg: rgba(66, 214, 164, 0.14);
+  --c-warning: #ffc14d;
+  --c-warning-bg: rgba(255, 193, 77, 0.16);
+  --c-danger: #ff6b6b;
+  --c-danger-bg: rgba(255, 107, 107, 0.16);
+  --c-header-bg: #0a1120;
+  --c-header-ink: #eef2fb;
+  --c-header-accent: #3ea6ff;
+  --c-arc: rgba(62, 166, 255, 0.12);
+
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.45);
+  --border-width: 1px;
+}
+
+/* Azure header hairline — the signature creative accent line. */
+[data-theme="creative"] .app-header {
+  border-bottom: 1px solid color-mix(in srgb, var(--c-header-accent) 30%, transparent);
+}
+
+html,
+body {
+  background: var(--c-canvas);
+}
+body {
+  font-family: var(--font);
+  font-weight: var(--fw-body);
+  color: var(--c-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@layer components {
+  .app-shell {
+    @apply min-h-screen flex flex-col mx-auto w-full;
+    max-width: 480px;
+    background: var(--c-canvas);
+    color: var(--c-ink);
+  }
+  /* On iPad / tablet the phone-width column looks lost in the viewport. Widen
+     the centered shell to a comfortable reading column (≈720px). */
+  /* 768px = shared --bp-tablet (frontend_shared/tokens.css); keep in sync —
+     CSS @media conditions cannot read a custom property. */
+  @media (min-width: 768px) {
+    .app-shell {
+      max-width: 720px;
+    }
+  }
+
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--c-header-bg);
+    color: var(--c-header-ink);
+    overflow: hidden;
+  }
+
+  .hero-arc {
+    position: absolute;
+    pointer-events: none;
+    inset: 0;
+    z-index: 0;
+  }
+  .hero-arc svg {
+    position: absolute;
+    right: -28px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 150%;
+    width: auto;
+    color: var(--c-arc);
+  }
+  [dir="rtl"] .hero-arc svg {
+    right: auto;
+    left: -28px;
+    transform: translateY(-50%) scaleX(-1);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    line-height: 1;
+    padding: 5px 10px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.02em;
+  }
+  .pill-neutral {
+    background: color-mix(in srgb, var(--c-ink) 8%, transparent);
+    color: var(--c-ink-soft);
+  }
+  .pill-success {
+    background: var(--c-success-bg);
+    color: var(--c-success);
+  }
+  .pill-warning {
+    background: var(--c-warning-bg);
+    color: var(--c-warning);
+  }
+  .pill-danger {
+    background: var(--c-danger-bg);
+    color: var(--c-danger);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    font-family: var(--font);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-semibold);
+    line-height: 1;
+    border: var(--border-width) solid transparent;
+    cursor: pointer;
+    transition:
+      transform 0.06s ease,
+      filter 0.15s ease,
+      background 0.15s ease;
+  }
+  .btn:active {
+    transform: scale(0.98);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn:disabled:active {
+    transform: none;
+  }
+  .btn-primary {
+    background: var(--c-primary);
+    color: var(--c-primary-ink);
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--c-ink);
+    border-color: var(--c-border-strong);
+  }
+
+  .section-title {
+    font-size: var(--fs-h2);
+    font-weight: var(--fw-heading);
+    color: var(--c-ink);
+    letter-spacing: -0.01em;
+  }
+
+  .spinner {
+    height: 32px;
+    width: 32px;
+    border-radius: 999px;
+    border: 3px solid color-mix(in srgb, var(--c-primary) 25%, transparent);
+    border-top-color: var(--c-primary);
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+.status-note {
+  text-align: center;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+}
+.status-ok {
+  color: var(--c-success);
+  background: var(--c-success-bg);
+}
+.status-err {
+  color: var(--c-danger);
+  background: var(--c-danger-bg);
+}
+
+.text-muted {
+  color: var(--c-muted);
+}
+.mx-auto {
+  margin-inline: auto;
+}

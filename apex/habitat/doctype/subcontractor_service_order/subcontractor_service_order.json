@@ -1,0 +1,278 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-23 23:31:39.261849",
+ "description": "Single service visit, such as one pest control visit or one sewage tank suction.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "subcontractor_service_order_tab_overview",
+  "subcontractor_service_order_sec_overview",
+  "building",
+  "scheduled_date",
+  "actual_visit_date",
+  "subcontractor_service_order_overview_col",
+  "contract",
+  "status",
+  "subcontractor_service_order_sec_completion",
+  "supervisor_confirmed",
+  "completion_photo",
+  "subcontractor_service_order_sec_cost",
+  "service_cost",
+  "subcontractor_service_order_cost_col",
+  "cost_center",
+  "company",
+  "subcontractor_service_order_sec_large_text",
+  "visit_notes",
+  "subcontractor_service_order_tab_system",
+  "subcontractor_service_order_sec_system",
+  "supplier",
+  "service_type",
+  "subcontractor_service_order_system_col",
+  "linked_purchase_invoice",
+  "naming_series",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "subcontractor_service_order_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "subcontractor_service_order_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Visit"
+  },
+  {
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "scheduled_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Scheduled Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "actual_visit_date",
+   "fieldtype": "Date",
+   "label": "Actual Visit Date"
+  },
+  {
+   "fieldname": "subcontractor_service_order_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contract",
+   "fieldtype": "Link",
+   "label": "Service Contract",
+   "options": "Subcontractor Service Contract",
+   "reqd": 1
+  },
+  {
+   "default": "Scheduled",
+   "description": "State of an individual service visit order, tracking whether the visit is scheduled, in progress, completed, missed by the vendor, or cancelled.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Scheduled\nIn Progress\nCompleted\nMissed\nCancelled"
+  },
+  {
+   "fieldname": "subcontractor_service_order_sec_completion",
+   "fieldtype": "Section Break",
+   "label": "Completion"
+  },
+  {
+   "default": "0",
+   "fieldname": "supervisor_confirmed",
+   "fieldtype": "Check",
+   "label": "Supervisor Confirmed Completion"
+  },
+  {
+   "fieldname": "completion_photo",
+   "fieldtype": "Attach Image",
+   "label": "Completion Photo Evidence"
+  },
+  {
+   "fieldname": "subcontractor_service_order_sec_cost",
+   "fieldtype": "Section Break",
+   "label": "Cost"
+  },
+  {
+   "fieldname": "service_cost",
+   "fieldtype": "Currency",
+   "label": "Service Cost (SAR)",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "subcontractor_service_order_cost_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "building.default_cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "subcontractor_service_order_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Technician Notes",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "visit_notes",
+   "fieldtype": "Small Text",
+   "label": "Technician Notes"
+  },
+  {
+   "fieldname": "subcontractor_service_order_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "subcontractor_service_order_sec_system",
+   "fieldtype": "Section Break",
+   "label": "Contract-Derived References"
+  },
+  {
+   "fetch_from": "contract.supplier",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "contract.service_type",
+   "fieldname": "service_type",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Service Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "subcontractor_service_order_system_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Reference to a Purchase Invoice settling this visit, if any. Set externally; this DocType creates no Purchase Invoice.",
+   "fieldname": "linked_purchase_invoice",
+   "fieldtype": "Link",
+   "label": "Purchase Invoice",
+   "options": "Purchase Invoice"
+  },
+  {
+   "default": "SSO-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "SSO-.YYYY.-.#####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Subcontractor Service Order",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Request",
+   "link_fieldname": "subcontractor_service_order"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Work Order",
+   "link_fieldname": "subcontractor_service_order"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Cleaning Log",
+   "link_fieldname": "subcontractor_service_order"
+  }
+ ],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Subcontractor Service Order",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Finance Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "supplier, building, contract",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "supplier",
+ "track_changes": 1
+}

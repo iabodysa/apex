@@ -1,0 +1,30 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.docstatus == 1 and doc.issued_to_user and doc.status in ('Issued', 'Partially Returned')",
+ "date_changed": "expected_return_date",
+ "days_in_advance": 1,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Custody Issue",
+ "enabled": 1,
+ "event": "Days After",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"Custody items on this issue are overdue for return\") }}: {{ doc.name }} ({{ _(\"due\") }} {{ doc.expected_return_date }}).",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - Custody Return Overdue",
+ "recipients": [
+  {
+   "receiver_by_role": "Accommodation Manager"
+  },
+  {
+   "receiver_by_document_field": "issued_to_user"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Custody Return Overdue: {{ doc.name }}",
+ "modified": "2026-06-26 02:25:14.210664"
+}

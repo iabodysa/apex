@@ -1,0 +1,27 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.driver_user and doc.status in ('Approved', 'Failed')",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Fuel Request",
+ "enabled": 1,
+ "event": "Value Change",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"Your fuel request has been decided\") }}: {{ doc.name }} ({{ _(doc.status) }}).",
+ "message_type": "HTML",
+ "module": "Salis",
+ "name": "Salis - Fuel Request Decision",
+ "recipients": [
+  {
+   "receiver_by_document_field": "driver_user"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Fuel Request Decision: {{ doc.name }}",
+ "value_changed": "status",
+ "modified": "2026-06-26 12:00:00.000000"
+}

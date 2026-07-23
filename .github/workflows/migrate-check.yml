@@ -1,0 +1,167 @@
+name: Migration Smoke Check
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apex/patches/**"
+      - "apex/patches.txt"
+      - "apex/hooks.py"
+      - "apex/tests/test_app_identity_bootstrap.py"
+      - "apex_habitat/**"
+      - ".github/workflows/migrate-check.yml"
+      - "pyproject.toml"
+      - "setup.py"
+      - "MANIFEST.in"
+
+jobs:
+  migrate-check:
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-queue:
+        image: redis:7
+        ports:
+          - 11000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-cache:
+        image: redis:7
+        ports:
+          - 13000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-socketio:
+        image: redis:7
+        ports:
+          - 12000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install bench CLI
+        run: pip install frappe-bench
+
+      - name: Create bench
+        run: bench init --skip-redis-config-generation --frappe-branch version-15 frappe-bench
+
+      - name: Configure bench Redis hosts
+        working-directory: frappe-bench
+        run: |
+          bench set-config -g redis_cache "redis://127.0.0.1:13000"
+          bench set-config -g redis_queue "redis://127.0.0.1:11000"
+          bench set-config -g redis_socketio "redis://127.0.0.1:12000"
+
+      - name: Get required Frappe apps
+        working-directory: frappe-bench
+        run: |
+          bench get-app --branch version-15 --skip-assets erpnext
+          bench get-app --branch version-15 --skip-assets hrms
+
+      - name: Pin the last legacy-identity source
+        run: git checkout --detach d4b153bf36d6a8d4a752631377f8f50bf447430e
+
+      - name: Get legacy Apex app
+        working-directory: frappe-bench
+        run: |
+          bench get-app --skip-assets ${{ github.workspace }}
+          test "$(git -C apps/apex_habitat rev-parse HEAD)" = "d4b153bf36d6a8d4a752631377f8f50bf447430e"
+
+      - name: Create legacy site fixture
+        working-directory: frappe-bench
+        run: |
+          bench new-site test.localhost --db-root-password root --admin-password admin --no-mariadb-socket
+          bench --site test.localhost install-app erpnext
+          bench --site test.localhost install-app hrms
+          bench --site test.localhost install-app apex_habitat
+
+      - name: Verify the real legacy identity and schema lag
+        working-directory: frappe-bench
+        run: |
+          legacy_global=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT defvalue FROM \`tabDefaultValue\` WHERE parent = '__global' AND defkey = 'installed_apps';")
+          LEGACY_GLOBAL="$legacy_global" python -c 'import json, os; apps = json.loads(os.environ["LEGACY_GLOBAL"]); assert apps.count("apex_habitat") == 1 and "apex" not in apps'
+          installed_application=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT app_name FROM \`tabInstalled Application\` WHERE app_name IN ('apex', 'apex_habitat') ORDER BY app_name;")
+          test "$installed_application" = "apex_habitat"
+          module_identity=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT DISTINCT app_name FROM \`tabModule Def\` WHERE app_name IN ('apex', 'apex_habitat') ORDER BY app_name;")
+          test "$module_identity" = "apex_habitat"
+          registry_identity=$(grep -E '^(apex|apex_habitat)$' sites/apps.txt)
+          test "$registry_identity" = "apex_habitat"
+          schema_lag=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'tabMasar Worker Token' AND column_name = 'holder_type';")
+          test "$schema_lag" = "0"
+          legacy_patch=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT patch FROM \`tabPatch Log\` WHERE patch = 'apex_habitat.patches.v1_x.add_asl_composite_index' AND skipped = 0;")
+          test "$legacy_patch" = "apex_habitat.patches.v1_x.add_asl_composite_index"
+
+      - name: Match the production checkout topology
+        working-directory: frappe-bench
+        run: mv apps/apex_habitat apps/apex
+
+      - name: Restore the current source revision
+        run: git checkout --detach "$GITHUB_SHA"
+
+      - name: Switch the editable app to the current source
+        working-directory: frappe-bench/apps/apex
+        run: |
+          git fetch --no-tags upstream HEAD
+          git checkout --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+
+      - name: Install current Python requirements
+        working-directory: frappe-bench
+        run: |
+          bench setup requirements --python
+          ./env/bin/python -c 'import apex, apex_habitat; assert apex.__version__ == "2.0.2"'
+
+      - name: Run the single migration and build sequence
+        working-directory: frappe-bench
+        run: |
+          bench --site test.localhost migrate
+          bench build --app apex
+
+      - name: Verify canonical identity schema and patch evidence
+        working-directory: frappe-bench
+        run: |
+          canonical_global=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT defvalue FROM \`tabDefaultValue\` WHERE parent = '__global' AND defkey = 'installed_apps';")
+          CANONICAL_GLOBAL="$canonical_global" python -c 'import json, os; apps = json.loads(os.environ["CANONICAL_GLOBAL"]); assert apps.count("apex") == 1 and "apex_habitat" not in apps'
+          installed_application=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT app_name FROM \`tabInstalled Application\` WHERE app_name IN ('apex', 'apex_habitat') ORDER BY app_name;")
+          test "$installed_application" = "apex"
+          module_identity=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT DISTINCT app_name FROM \`tabModule Def\` WHERE app_name IN ('apex', 'apex_habitat') ORDER BY app_name;")
+          test "$module_identity" = "apex"
+          patch_log=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT patch FROM \`tabPatch Log\` WHERE patch = 'apex.patches.v2_0.rename_app_apex_habitat_to_apex';")
+          test "$patch_log" = "apex.patches.v2_0.rename_app_apex_habitat_to_apex"
+          historical_patch_count=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT COUNT(*) FROM \`tabPatch Log\` WHERE patch = 'apex.patches.v1_x.add_asl_composite_index' AND skipped = 0;")
+          test "$historical_patch_count" = "1"
+          legacy_success_count=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT COUNT(*) FROM \`tabPatch Log\` WHERE skipped = 0 AND LOCATE('apex_habitat.', patch) = 1;")
+          test "$legacy_success_count" = "0"
+          schema_synced=$(bench --site test.localhost mariadb --batch --skip-column-names --execute "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'tabMasar Worker Token' AND column_name = 'holder_type';")
+          test "$schema_synced" = "1"
+          registry_identity=$(grep -E '^(apex|apex_habitat)$' sites/apps.txt)
+          test "$registry_identity" = "apex"

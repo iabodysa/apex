@@ -1,0 +1,234 @@
+{
+ "actions": [],
+ "creation": "2026-06-13 09:00:00.000000",
+ "description": "Single config that governs whether, and how, operational events (damage, rent, fuel, custody) may be deducted from a worker's salary. Default = NO deduction: the global switch is OFF and every per-type rule is disabled until explicitly activated after legal review.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "salary_deduction_policy_tab_policy",
+  "salary_deduction_policy_sec_master",
+  "enable_salary_deductions",
+  "salary_deduction_policy_master_col",
+  "company",
+  "default_salary_component",
+  "salary_deduction_policy_sec_global_caps",
+  "global_max_percent_of_salary",
+  "salary_deduction_policy_global_caps_col",
+  "global_require_acknowledgment",
+  "salary_deduction_policy_sec_types",
+  "type_rules",
+  "salary_deduction_policy_tab_compliance",
+  "salary_deduction_policy_sec_legal",
+  "legal_review_required",
+  "legal_reviewed",
+  "salary_deduction_policy_legal_col",
+  "legal_reviewed_by",
+  "legal_review_date",
+  "legal_reference_document",
+  "salary_deduction_policy_sec_legal_note",
+  "ksa_labor_law_note",
+  "salary_deduction_policy_sec_activation",
+  "activated_by",
+  "activation_date",
+  "salary_deduction_policy_activation_col",
+  "authorization_document"
+ ],
+ "fields": [
+  {
+   "fieldname": "salary_deduction_policy_tab_policy",
+   "fieldtype": "Tab Break",
+   "label": "Policy"
+  },
+  {
+   "fieldname": "salary_deduction_policy_sec_master",
+   "fieldtype": "Section Break",
+   "label": "Master Switch"
+  },
+  {
+   "default": "0",
+   "description": "Global master switch for all salary deductions; off until legal review is recorded.",
+   "fieldname": "enable_salary_deductions",
+   "fieldtype": "Check",
+   "label": "Enable Salary Deductions"
+  },
+  {
+   "fieldname": "salary_deduction_policy_master_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Company whose payroll these deductions post against. Falls back to Habitat Settings company when blank.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "description": "Default HRMS Salary Component (Type = Deduction) used by any type rule that does not name its own. Defaults to the shipped 'Operational Deduction' component.",
+   "fieldname": "default_salary_component",
+   "fieldtype": "Link",
+   "label": "Default Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "salary_deduction_policy_sec_global_caps",
+   "fieldtype": "Section Break",
+   "label": "Global Caps (KSA Labor Law)"
+  },
+  {
+   "default": "50",
+   "description": "Combined ceiling for all deduction types per pay period; KSA Labor Law Art. 91 caps this at 50%.",
+   "fieldname": "global_max_percent_of_salary",
+   "fieldtype": "Percent",
+   "label": "Global Max % of Salary (all types)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "salary_deduction_policy_global_caps_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "Require an Employee Deduction Acknowledgment (worker consent) before any deduction posts.",
+   "fieldname": "global_require_acknowledgment",
+   "fieldtype": "Check",
+   "label": "Require Acknowledgment for All Deductions"
+  },
+  {
+   "fieldname": "salary_deduction_policy_sec_types",
+   "fieldtype": "Section Break",
+   "label": "Deduction Types"
+  },
+  {
+   "description": "Per-type rules sourced from operations. Each row is disabled by default. Damage / Rent / Fuel / Custody.",
+   "fieldname": "type_rules",
+   "fieldtype": "Table",
+   "label": "Deduction Type Rules",
+   "options": "Salary Deduction Type Rule"
+  },
+  {
+   "fieldname": "salary_deduction_policy_tab_compliance",
+   "fieldtype": "Tab Break",
+   "label": "Compliance"
+  },
+  {
+   "fieldname": "salary_deduction_policy_sec_legal",
+   "fieldtype": "Section Break",
+   "label": "Legal Review"
+  },
+  {
+   "default": "1",
+   "description": "Flags that this policy must be reviewed by Legal/HR against KSA Labor Law (wage-deduction articles) before activation. Kept ON by design as a standing reminder.",
+   "fieldname": "legal_review_required",
+   "fieldtype": "Check",
+   "label": "Legal Review Required"
+  },
+  {
+   "default": "0",
+   "description": "Set ON only after Legal/HR has reviewed the caps, the consent flow, and the per-type rules against current KSA Labor Law.",
+   "fieldname": "legal_reviewed",
+   "fieldtype": "Check",
+   "label": "Legal Review Completed"
+  },
+  {
+   "fieldname": "salary_deduction_policy_legal_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.legal_reviewed",
+   "fieldname": "legal_reviewed_by",
+   "fieldtype": "Link",
+   "label": "Legal Reviewed By",
+   "options": "User"
+  },
+  {
+   "depends_on": "eval:doc.legal_reviewed",
+   "fieldname": "legal_review_date",
+   "fieldtype": "Date",
+   "label": "Legal Review Date"
+  },
+  {
+   "depends_on": "eval:doc.legal_reviewed",
+   "description": "Attach the signed legal opinion / policy approving these deductions under KSA Labor Law.",
+   "fieldname": "legal_reference_document",
+   "fieldtype": "Attach",
+   "label": "Legal Reference Document"
+  },
+  {
+   "fieldname": "salary_deduction_policy_sec_legal_note",
+   "fieldtype": "Section Break",
+   "label": "KSA Labor Law Note"
+  },
+  {
+   "default": "Saudi Labor Law restricts deductions from a worker's wage. As a conservative baseline this policy: (1) requires the worker's written acknowledgment/consent before any damage, rent, fuel, or custody deduction; (2) caps the COMBINED deductions at 50% of wage per pay period (Art. 91 statutory ceiling) and sets each type well below it; and (3) ships fully INACTIVE - no deduction is raised until the global switch and the specific type are turned on after Legal/HR review. Review against the current official text before activation; these defaults are a safe starting point, not legal advice.",
+   "fieldname": "ksa_labor_law_note",
+   "fieldtype": "Small Text",
+   "label": "KSA Labor Law Note",
+   "read_only": 1
+  },
+  {
+   "fieldname": "salary_deduction_policy_sec_activation",
+   "fieldtype": "Section Break",
+   "label": "Activation"
+  },
+  {
+   "depends_on": "eval:doc.enable_salary_deductions",
+   "fieldname": "activated_by",
+   "fieldtype": "Link",
+   "label": "Activated By",
+   "options": "User"
+  },
+  {
+   "depends_on": "eval:doc.enable_salary_deductions",
+   "fieldname": "activation_date",
+   "fieldtype": "Date",
+   "label": "Activation Date"
+  },
+  {
+   "fieldname": "salary_deduction_policy_activation_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.enable_salary_deductions",
+   "description": "Internal authorization (management sign-off) to switch the layer on.",
+   "fieldname": "authorization_document",
+   "fieldtype": "Attach",
+   "label": "Authorization Document"
+  }
+ ],
+ "icon": "fa fa-money",
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-06-25 06:43:07.306015",
+ "modified_by": "Administrator",
+ "module": "Apex Core",
+ "name": "Salary Deduction Policy",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

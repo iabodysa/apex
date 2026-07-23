@@ -1,0 +1,491 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-23 23:31:44.837702",
+ "description": "Room-level maintenance ticket. Can be generated automatically from a safety inspection report.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "maintenance_request_tab_overview",
+  "maintenance_request_sec_overview",
+  "building",
+  "maintenance_request_overview_col",
+  "room",
+  "maintenance_request_overview_col2",
+  "bed",
+  "maintenance_request_overview_col3",
+  "company",
+  "maintenance_request_sec_ticket",
+  "issue_type",
+  "priority",
+  "maintenance_request_ticket_col1",
+  "status",
+  "assigned_to",
+  "maintenance_request_ticket_col2",
+  "reported_by",
+  "requires_procurement",
+  "maintenance_request_sec_primary_large_text",
+  "issue_description",
+  "maintenance_request_sec_asset_reference",
+  "related_facility_asset",
+  "target_asset",
+  "maintenance_request_asset_ref_col",
+  "target_asset_name",
+  "target_asset_category",
+  "target_asset_location",
+  "maintenance_request_sec_financial",
+  "cost_of_repair",
+  "maintenance_request_financial_col",
+  "cost_center",
+  "maintenance_request_sec_table_procurement_items",
+  "procurement_items",
+  "maintenance_request_sec_large_text",
+  "resolution_notes",
+  "maintenance_request_tab_system",
+  "maintenance_request_sec_automation",
+  "source_inspection",
+  "source_execution",
+  "maintenance_request_automation_col",
+  "subcontractor_service_order",
+  "maintenance_request_system_col1",
+  "is_logged_to_asset_history",
+  "maintenance_request_sec_system",
+  "naming_series",
+  "maintenance_request_system_col2",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "maintenance_request_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "maintenance_request_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Location"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "room.building",
+   "fetch_if_empty": 1,
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "maintenance_request_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "maintenance_request_overview_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "maintenance_request_overview_col3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "bed.room",
+   "fetch_if_empty": 1,
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "label": "Room",
+   "options": "Room",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Set only when the request concerns a specific bed.",
+   "fieldname": "bed",
+   "fieldtype": "Link",
+   "label": "Bed",
+   "options": "Bed",
+   "search_index": 1
+  },
+  {
+   "fieldname": "maintenance_request_sec_ticket",
+   "fieldtype": "Section Break",
+   "label": "Ticket"
+  },
+  {
+   "description": "Trade or fault type of the reported problem, which routes the request to the right maintenance skill and drives default materials, covering electrical, plumbing, air-conditioning, fire safety, pest control, and structural issues.",
+   "fieldname": "issue_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Issue Type",
+   "options": "Electrical\nPlumbing\nFurniture\nAir Conditioning\nFire Safety\nPest Control\nStructural\nOther",
+   "reqd": 1
+  },
+  {
+   "default": "Medium",
+   "description": "Urgency of the maintenance request, setting target response time and escalation from routine low priority to critical faults needing immediate attention.",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh\nCritical"
+  },
+  {
+   "fieldname": "maintenance_request_ticket_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Open",
+   "description": "Workflow stage of the maintenance request from open through assignment and active work to resolution and closure, including reopening when a fix does not hold.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nAssigned\nIn Progress\nResolved\nClosed\nReopened"
+  },
+  {
+   "default": "0",
+   "fieldname": "requires_procurement",
+   "fieldtype": "Check",
+   "label": "Requires Procurement"
+  },
+  {
+   "fieldname": "maintenance_request_ticket_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reported_by",
+   "fieldtype": "Link",
+   "label": "Reported By",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "label": "Assigned To",
+   "options": "User"
+  },
+  {
+   "fieldname": "maintenance_request_sec_primary_large_text",
+   "fieldtype": "Section Break",
+   "label": "Issue Description"
+  },
+  {
+   "fieldname": "issue_description",
+   "fieldtype": "Small Text",
+   "label": "Issue Description",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "maintenance_request_sec_asset_reference",
+   "fieldtype": "Section Break",
+   "label": "Asset Reference"
+  },
+  {
+   "description": "Use when the issue concerns a specific facility asset (e.g., CCTV camera, fire alarm panel)",
+   "fieldname": "related_facility_asset",
+   "fieldtype": "Link",
+   "label": "Related Facility Asset",
+   "options": "Facility Asset"
+  },
+  {
+   "fieldname": "maintenance_request_asset_ref_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Specific fixed asset this request concerns (e.g. AC-001). Enables maintenance history per asset.",
+   "fetch_from": "related_facility_asset.linked_erpnext_asset",
+   "fetch_if_empty": 1,
+   "fieldname": "target_asset",
+   "fieldtype": "Link",
+   "label": "Target ERPNext Asset",
+   "options": "Asset"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "maintenance_request_sec_financial",
+   "fieldtype": "Section Break",
+   "label": "Financial",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "cost_of_repair",
+   "fieldtype": "Currency",
+   "label": "Cost of Repair (SAR)",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "maintenance_request_financial_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Auto-fetched from Building",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "fetch_from": "building.default_cost_center",
+   "fetch_if_empty": 1,
+   "permlevel": 1
+  },
+  {
+   "fieldname": "maintenance_request_sec_table_procurement_items",
+   "fieldtype": "Section Break",
+   "label": "Procurement Items Required"
+  },
+  {
+   "depends_on": "eval:doc.requires_procurement==1",
+   "fieldname": "procurement_items",
+   "fieldtype": "Table",
+   "label": "Procurement Items Required",
+   "options": "Maintenance Procurement Item"
+  },
+  {
+   "fieldname": "maintenance_request_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Resolution"
+  },
+  {
+   "fieldname": "resolution_notes",
+   "fieldtype": "Small Text",
+   "label": "Resolution Notes"
+  },
+  {
+   "fieldname": "maintenance_request_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "maintenance_request_sec_automation",
+   "fieldtype": "Section Break",
+   "label": "Automation Links"
+  },
+  {
+   "description": "Set automatically when this request is generated from a safety inspection report.",
+   "fieldname": "source_inspection",
+   "fieldtype": "Link",
+   "label": "Source Inspection Report",
+   "options": "Safety Inspection Report"
+  },
+  {
+   "description": "Set automatically when this request is spawned from a failed safety task execution.",
+   "fieldname": "source_execution",
+   "fieldtype": "Link",
+   "label": "Source Safety Execution",
+   "options": "Safety Task Execution"
+  },
+  {
+   "fieldname": "maintenance_request_automation_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Set when a subcontractor visit is created from this request",
+   "fieldname": "subcontractor_service_order",
+   "fieldtype": "Link",
+   "label": "Subcontractor Dispatched",
+   "options": "Subcontractor Service Order"
+  },
+  {
+   "fetch_from": "target_asset.asset_name",
+   "fetch_if_empty": 1,
+   "fieldname": "target_asset_name",
+   "fieldtype": "Data",
+   "label": "Asset Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "target_asset.asset_category",
+   "fetch_if_empty": 1,
+   "fieldname": "target_asset_category",
+   "fieldtype": "Data",
+   "label": "Asset Category",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "target_asset.location",
+   "fetch_if_empty": 1,
+   "fieldname": "target_asset_location",
+   "fieldtype": "Data",
+   "label": "Asset Location",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "maintenance_request_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "default": "0",
+   "description": "Indicates the resolved request has been recorded in the asset's maintenance history.",
+   "fieldname": "is_logged_to_asset_history",
+   "fieldtype": "Check",
+   "label": "Logged to Asset Maintenance History",
+   "read_only": 1
+  },
+  {
+   "fieldname": "maintenance_request_system_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "MAINT-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "MAINT-.YYYY.-.#####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "maintenance_request_system_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Maintenance Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Work Order",
+   "link_fieldname": "maintenance_request"
+  },
+  {
+   "group": "Safety",
+   "link_doctype": "Safety Task Execution",
+   "link_fieldname": "linked_maintenance_request"
+  },
+  {
+   "group": "Maintenance",
+   "is_child_table": 1,
+   "link_doctype": "Linked Maintenance Request Item",
+   "link_fieldname": "maintenance_request",
+   "parent_doctype": "Safety Inspection Report",
+   "table_fieldname": "linked_maintenance_requests"
+  }
+ ],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Maintenance Request",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "if_owner": 1,
+   "read": 1,
+   "role": "All"
+  },
+  {
+   "read": 1,
+   "role": "Maintenance Technician"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Resident Request Coordinator",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Finance Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "issue_type, target_asset_name, company",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Red",
+   "title": "Open"
+  },
+  {
+   "color": "Blue",
+   "title": "Assigned"
+  },
+  {
+   "color": "Orange",
+   "title": "In Progress"
+  },
+  {
+   "color": "Green",
+   "title": "Resolved"
+  },
+  {
+   "color": "Gray",
+   "title": "Closed"
+  },
+  {
+   "color": "Red",
+   "title": "Reopened"
+  }
+ ],
+ "title_field": "issue_type",
+ "track_changes": 1
+}

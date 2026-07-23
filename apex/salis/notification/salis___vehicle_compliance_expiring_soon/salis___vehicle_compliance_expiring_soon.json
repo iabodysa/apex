@@ -1,0 +1,36 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.status != 'Stopped'",
+ "date_changed": "next_expiry_date",
+ "days_in_advance": 30,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Salis Vehicle",
+ "enabled": 1,
+ "event": "Days Before",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"A vehicle compliance document is expiring soon — please start renewal\") }}: {{ doc.name }} ({{ doc.next_expiry_date }}).",
+ "message_type": "HTML",
+ "module": "Salis",
+ "name": "Salis - Vehicle Compliance Expiring Soon",
+ "recipients": [
+  {
+   "receiver_by_document_field": "current_driver_user"
+  },
+  {
+   "receiver_by_role": "Fleet Manager"
+  },
+  {
+   "receiver_by_role": "Fleet Supervisor"
+  },
+  {
+   "receiver_by_role": "Government Relations Officer"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Vehicle Compliance Expiring Soon: {{ doc.name }}",
+ "modified": "2026-06-25 15:31:22.728275"
+}

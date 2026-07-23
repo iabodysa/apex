@@ -1,0 +1,303 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-23 23:31:44.022864",
+ "description": "Daily cleaning record per building with worker accountability and evidence controls.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "cleaning_log_tab_overview",
+  "cleaning_log_sec_details",
+  "building",
+  "cleaning_log_details_col",
+  "cleaning_date",
+  "cleaning_log_details_col_2",
+  "scheduled_task_instance",
+  "cleaning_log_sec_performed_by",
+  "cleaner_type",
+  "cleaner_employee",
+  "cleaner_name",
+  "cleaning_log_performed_by_col",
+  "subcontractor_service_order",
+  "cleaning_log_sec_review",
+  "supervisor_approved",
+  "approver",
+  "cleaning_log_review_col",
+  "supervisor_rating",
+  "cleaning_log_sec_exceptions",
+  "missed_cleaning",
+  "missed_reason",
+  "cleaning_log_exceptions_col",
+  "rework_required",
+  "cleaning_log_sec_evidence",
+  "evidence_photo",
+  "evidence_notes",
+  "cleaning_log_sec_table_area_photos",
+  "area_photos",
+  "cleaning_log_sec_table_room_details",
+  "room_details",
+  "cleaning_log_sec_system",
+  "naming_series",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "cleaning_log_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "cleaning_log_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Cleaning Record"
+  },
+  {
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "cleaning_log_details_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cleaning_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Cleaning Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cleaning_log_details_col_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Provenance: the scheduled task instance this cleaning fulfils, if generated from the schedule.",
+   "fieldname": "scheduled_task_instance",
+   "fieldtype": "Link",
+   "label": "Scheduled Task Instance",
+   "options": "Scheduled Task Instance"
+  },
+  {
+   "fieldname": "cleaning_log_sec_performed_by",
+   "fieldtype": "Section Break",
+   "label": "Performed By"
+  },
+  {
+   "default": "Internal Employee",
+   "fieldname": "cleaner_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Cleaner Type",
+   "options": "Internal Employee\nSubcontractor\nExternal Worker"
+  },
+  {
+   "depends_on": "eval:doc.cleaner_type=='Internal Employee'",
+   "fieldname": "cleaner_employee",
+   "fieldtype": "Link",
+   "label": "Cleaner (Employee)",
+   "options": "Employee"
+  },
+  {
+   "depends_on": "eval:doc.cleaner_type!='Internal Employee'",
+   "description": "For Subcontractor or External Worker when Employee link is not available.",
+   "fieldname": "cleaner_name",
+   "fieldtype": "Data",
+   "label": "Cleaner Name"
+  },
+  {
+   "fieldname": "cleaning_log_performed_by_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.cleaner_type=='Subcontractor'",
+   "fieldname": "subcontractor_service_order",
+   "fieldtype": "Link",
+   "label": "Subcontractor Service Order",
+   "options": "Subcontractor Service Order"
+  },
+  {
+   "fieldname": "cleaning_log_sec_review",
+   "fieldtype": "Section Break",
+   "label": "Supervisor Review"
+  },
+  {
+   "default": "0",
+   "fieldname": "supervisor_approved",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Approved by Supervisor"
+  },
+  {
+   "depends_on": "eval:doc.supervisor_approved==1",
+   "fieldname": "approver",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User"
+  },
+  {
+   "fieldname": "cleaning_log_review_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.supervisor_approved==1",
+   "fieldname": "supervisor_rating",
+   "fieldtype": "Select",
+   "label": "Supervisor Rating",
+   "options": "\nSatisfactory\nNeeds Improvement\nUnsatisfactory"
+  },
+  {
+   "fieldname": "cleaning_log_sec_exceptions",
+   "fieldtype": "Section Break",
+   "label": "Exceptions"
+  },
+  {
+   "default": "0",
+   "fieldname": "missed_cleaning",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Missed Cleaning"
+  },
+  {
+   "depends_on": "eval:doc.missed_cleaning==1",
+   "fieldname": "missed_reason",
+   "fieldtype": "Data",
+   "label": "Missed Reason"
+  },
+  {
+   "fieldname": "cleaning_log_exceptions_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "rework_required",
+   "fieldtype": "Check",
+   "label": "Rework Required"
+  },
+  {
+   "fieldname": "cleaning_log_sec_evidence",
+   "fieldtype": "Section Break",
+   "label": "Evidence"
+  },
+  {
+   "fieldname": "evidence_photo",
+   "fieldtype": "Attach Image",
+   "label": "Evidence Photo"
+  },
+  {
+   "fieldname": "evidence_notes",
+   "fieldtype": "Small Text",
+   "label": "Evidence Notes"
+  },
+  {
+   "fieldname": "cleaning_log_sec_table_area_photos",
+   "fieldtype": "Section Break",
+   "label": "Area Photo Evidence"
+  },
+  {
+   "description": "Required common-area evidence. Bathrooms, Kitchen, and Corridors must each have a Cleaned photo or be marked Not Cleaned / N/A with a note before submit.",
+   "fieldname": "area_photos",
+   "fieldtype": "Table",
+   "label": "Area Photo Evidence",
+   "options": "Cleaning Area Photo"
+  },
+  {
+   "fieldname": "cleaning_log_sec_table_room_details",
+   "fieldtype": "Section Break",
+   "label": "Room Cleaning Details"
+  },
+  {
+   "fieldname": "room_details",
+   "fieldtype": "Table",
+   "label": "Room Cleaning Details",
+   "options": "Cleaning Log Room Detail"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "cleaning_log_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "default": "CLEAN-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "CLEAN-.YYYY.-.####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Cleaning Log",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "in_create": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Cleaning Log",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Cleaning Supervisor",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "building, cleaner_name, cleaner_employee",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "building",
+ "track_changes": 1
+}

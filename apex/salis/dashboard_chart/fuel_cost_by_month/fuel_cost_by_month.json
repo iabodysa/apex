@@ -1,0 +1,22 @@
+{
+ "doctype": "Dashboard Chart",
+ "name": "Fuel Cost by Month",
+ "chart_name": "Fuel Cost by Month",
+ "chart_type": "Sum",
+ "document_type": "Fuel Request",
+ "based_on": "request_date",
+ "value_based_on": "amount",
+ "group_by_type": "Count",
+ "time_interval": "Monthly",
+ "timespan": "Last Year",
+ "timeseries": 1,
+ "type": "Bar",
+ "number_of_groups": 0,
+ "currency": "SAR",
+ "is_public": 1,
+ "is_standard": 1,
+ "module": "Salis",
+ "use_report_chart": 0,
+ "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Done\"]]",
+ "modified": "2026-06-02 13:30:00.000000"
+}

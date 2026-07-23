@@ -1,0 +1,112 @@
+{
+ "allow_comments": 0,
+ "allow_delete": 0,
+ "allow_edit": 0,
+ "allow_incomplete": 0,
+ "allow_multiple": 1,
+ "allow_print": 0,
+ "anonymous": 1,
+ "apply_document_permissions": 0,
+ "button_label": "Report Incident",
+ "client_script": "",
+ "condition_json": "[]",
+ "creation": "2026-06-26 00:00:00.000000",
+ "doc_type": "Vehicle Incident",
+ "docstatus": 0,
+ "doctype": "Web Form",
+ "introduction_text": "Report a fleet accident or theft against a vehicle. A supervisor reviews and confirms the report before it takes effect.",
+ "web_form_fields": [
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "incident_type",
+   "fieldtype": "Select",
+   "hidden": 0,
+   "idx": 1,
+   "label": "Incident Type",
+   "options": "Accident\nTheft",
+   "reqd": 1
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "hidden": 0,
+   "idx": 2,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "reqd": 1
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "incident_date",
+   "fieldtype": "Date",
+   "hidden": 0,
+   "idx": 3,
+   "label": "Incident Date",
+   "reqd": 1
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "hidden": 0,
+   "idx": 4,
+   "label": "Location",
+   "reqd": 0
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "report_number",
+   "fieldtype": "Data",
+   "hidden": 0,
+   "idx": 5,
+   "label": "Police Report Number",
+   "reqd": 0
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "hidden": 0,
+   "idx": 6,
+   "label": "What happened?",
+   "reqd": 1
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "reported_by",
+   "fieldtype": "Data",
+   "hidden": 0,
+   "idx": 7,
+   "label": "Reported By (Optional)",
+   "reqd": 0
+  },
+  {
+   "doctype": "Web Form Field",
+   "fieldname": "website_field",
+   "fieldtype": "Data",
+   "label": "Website",
+   "hidden": 1,
+   "reqd": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": 1,
+ "login_required": 0,
+ "module": "Salis",
+ "name": "vehicle-incident",
+ "published": 1,
+ "route": "vehicle-incident",
+ "show_attachments": 0,
+ "show_list": 0,
+ "show_sidebar": 0,
+ "success_message": "Your incident report was submitted. A supervisor will review and confirm it.",
+ "title": "Vehicle Incident"
+}

@@ -1,0 +1,19 @@
+{
+ "doctype": "Dashboard Chart",
+ "name": "Fuel Consumption by Month",
+ "chart_name": "Fuel Consumption by Month",
+ "chart_type": "Group By",
+ "document_type": "Fuel Consumption Ledger",
+ "group_by_based_on": "period_month",
+ "group_by_type": "Sum",
+ "aggregate_function_based_on": "litres",
+ "type": "Bar",
+ "number_of_groups": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "module": "Salis",
+ "timeseries": 0,
+ "use_report_chart": 0,
+ "filters_json": "[]",
+ "modified": "2026-06-02 13:30:00.000000"
+}

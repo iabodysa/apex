@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#072b1a" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <title>مسار — مشرف المسار</title>
+    {%- if has_supervisor_role %}
+    <!-- Leaflet (map) from CDN — the OpenStreetMap tiles it renders already require the
+         network at runtime, so loading the library the same way is consistent. The map
+         component degrades gracefully to a coordinate readout when window.L is absent. -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="/assets/apex/route_supervisor_portal/assets/index.css" />
+    <script>
+      window.csrf_token = {{ csrf_token | tojson }};
+      window.masar_sup_socket = {
+        site_name: {{ site_name | tojson }},
+        socketio_port: {{ socketio_port }},
+        enabled: {{ "true" if async_enabled else "false" }},
+        dev_server: {{ dev_server or 0 }},
+      };
+    </script>
+    {%- endif %}
+  </head>
+  <body>
+    {%- if has_supervisor_role %}
+    <div id="app"></div>
+    <script type="module" src="/assets/apex/route_supervisor_portal/assets/index.js"></script>
+    {%- else %}
+    <style>
+      body {
+        margin: 0;
+        font-family: "Cairo", sans-serif;
+        background: #0f1714;
+        color: #e7efe9;
+        display: flex;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+      }
+      .sup-na {
+        max-width: 420px;
+        padding: 40px 28px;
+        text-align: center;
+        background: #15211b;
+        border: 1px solid #25362c;
+        border-radius: 16px;
+      }
+      .sup-na h1 { font-size: 18px; margin: 0 0 10px; }
+      .sup-na p { font-size: 13px; color: #7d8f84; line-height: 1.8; margin: 0 0 4px; }
+      .sup-na a {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 9px 22px;
+        border-radius: 10px;
+        background: #00844e;
+        color: #fff;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+      }
+    </style>
+    <div class="sup-na">
+      <h1>{{ _("Route supervisor portal") }}</h1>
+      <p>{{ _("This page is for route supervisors.") }}</p>
+      <p>{{ _("Your account does not have a role to access it.") }}</p>
+      <p>{{ _("Contact your system administrator to request access.") }}</p>
+      <a href="/app">{{ _("Back to the system") }}</a>
+    </div>
+    {%- endif %}
+  </body>
+</html>

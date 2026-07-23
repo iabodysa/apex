@@ -1,0 +1,30 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.docstatus == 1 and doc.status == 'Pending'",
+ "date_changed": "request_date",
+ "days_in_advance": 2,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Fuel Request",
+ "enabled": 0,
+ "event": "Days After",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"This fuel request has been pending approval for too long\") }}: {{ doc.name }} ({{ doc.vehicle }}).",
+ "message_type": "HTML",
+ "module": "Salis",
+ "name": "Salis - Overdue Fuel Request",
+ "recipients": [
+  {
+   "receiver_by_role": "Fleet Manager"
+  },
+  {
+   "receiver_by_role": "Fleet Supervisor"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "subject": "Fuel Request Awaiting Approval: {{ doc.name }}",
+ "modified": "2026-06-02 13:30:00.000000"
+}

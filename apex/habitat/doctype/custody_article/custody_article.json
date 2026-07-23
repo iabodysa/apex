@@ -1,0 +1,214 @@
+{
+ "doctype": "DocType",
+ "name": "Custody Article",
+ "module": "Habitat",
+ "custom": 0,
+ "issingle": 0,
+ "istable": 0,
+ "engine": "InnoDB",
+ "description": "Catalog master for individual issuable articles.",
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "fields": [
+  {
+   "fieldname": "custody_article_tab_details",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "custody_article_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Article Details"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "article_name",
+   "fieldtype": "Data",
+   "label": "Article Name",
+   "reqd": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "label": "Category",
+   "options": "Custody Asset Category",
+   "reqd": 1,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "unit_of_measure",
+   "fieldtype": "Data",
+   "label": "Unit of Measure",
+   "default": "Each",
+   "idx": 5
+  },
+  {
+   "fieldname": "custody_article_details_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "depreciation_policy",
+   "fieldtype": "Link",
+   "label": "Depreciation Policy",
+   "options": "Operational Depreciation Policy",
+   "fetch_from": "category.default_depreciation_policy",
+   "fetch_if_empty": 1,
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "is_serialized",
+   "fieldtype": "Check",
+   "label": "Is Serialized",
+   "idx": 8
+  },
+  {
+   "fieldname": "custody_article_sec_costing",
+   "fieldtype": "Section Break",
+   "label": "Costing"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "standard_unit_cost",
+   "fieldtype": "Currency",
+   "label": "Standard Unit Cost (SAR)",
+   "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "consumable_lifespan_months",
+   "fieldtype": "Int",
+   "label": "Consumable Lifespan (Months)",
+   "description": "Service life of a consumable issue (linens, mattresses). 0 = no expiry; a daily job alerts on held items older than this.",
+   "idx": 11
+  },
+  {
+   "fieldname": "custody_article_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Notes & Image",
+   "collapsible": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "idx": 12
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "label": "Image"
+  },
+  {
+   "fieldname": "custody_article_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "CUST-ART-.####",
+   "default": "CUST-ART-.####",
+   "idx": 9,
+   "hidden": 1
+  }
+ ],
+ "links": [
+  {
+   "group": "Custody",
+   "is_child_table": 1,
+   "link_doctype": "Custody Issue Item",
+   "link_fieldname": "article",
+   "parent_doctype": "Custody Issue",
+   "table_fieldname": "items"
+  },
+  {
+   "group": "Custody",
+   "is_child_table": 1,
+   "link_doctype": "Custody Return Item",
+   "link_fieldname": "article",
+   "parent_doctype": "Custody Return",
+   "table_fieldname": "items"
+  },
+  {
+   "group": "Custody",
+   "is_child_table": 1,
+   "link_doctype": "Custody Damage Item",
+   "link_fieldname": "article",
+   "parent_doctype": "Custody Damage Assessment",
+   "table_fieldname": "items"
+  },
+  {
+   "group": "Accommodation",
+   "is_child_table": 1,
+   "link_doctype": "Accommodation Custody Item",
+   "link_fieldname": "article",
+   "parent_doctype": "Housing Assignment",
+   "table_fieldname": "custody_items"
+  },
+  {
+   "group": "Accommodation",
+   "is_child_table": 1,
+   "link_doctype": "Accommodation Custody Return Item",
+   "link_fieldname": "article",
+   "parent_doctype": "Housing Checkout",
+   "table_fieldname": "custody_return_items"
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "idx": 1
+  },
+  {
+   "role": "Accommodation Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "doctype": "DocPerm",
+   "idx": 2
+  },
+  {
+   "role": "Resident Supervisor",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "doctype": "DocPerm",
+   "idx": 3
+  }
+ ],
+ "field_order": [
+  "custody_article_tab_details",
+  "custody_article_sec_details",
+  "article_name",
+  "category",
+  "unit_of_measure",
+  "custody_article_details_col",
+  "depreciation_policy",
+  "is_serialized",
+  "custody_article_sec_costing",
+  "standard_unit_cost",
+  "consumable_lifespan_months",
+  "custody_article_sec_large_text",
+  "notes",
+  "image",
+  "custody_article_sec_system",
+  "naming_series"
+ ],
+ "modified": "2026-07-11 04:09:36.115685",
+ "search_fields": "article_name, consumable_lifespan_months"
+}

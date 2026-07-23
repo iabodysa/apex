@@ -1,0 +1,1 @@
+import{f as i}from"./index.js";const o=i([]);let u=0;function n(t,s="ok",f){if(!t)return;const a=++u,e=s==="err"?4e3:2500;o.value.push({id:a,message:t,kind:s}),setTimeout(()=>r(a),e)}function r(t){o.value=o.value.filter(s=>s.id!==t)}function c(){o.value=[]}export{c,r as d,n as p,o as t};

@@ -1,0 +1,342 @@
+# Copyright (c) 2026, AFMCO Support Services Co. Ltd
+# [#of2x05]
+
+import frappe
+
+from apex.apex_core.utils import permission_scope
+
+# [#mirgwe]
+PRIVILEGED_ROLES = {
+    "System Manager",
+    "Accommodation Manager",
+    "Resident Supervisor",
+    "Resident Request Coordinator",
+}
+
+
+def _resolve_user(user=None):
+    """Return the effective user, defaulting to the session user."""
+    return permission_scope.resolve_user(user)
+
+
+def _is_privileged(user):
+    """True when the user is the Administrator or holds any privileged role.
+
+    Guest is never privileged.
+    """
+    if user in ("Administrator", "Guest"):
+        return user == "Administrator"
+    return bool(set(frappe.get_roles(user)) & PRIVILEGED_ROLES)
+
+
+def maintenance_request_query(user=None):
+    """Owner-scope the Maintenance Request list/report view.
+
+    Returns "" (no restriction) for the Administrator and privileged oversight
+    roles. Returns "1=0" for Guest, who must see nothing. For every other user
+    the fragment confines the view to the tickets they raised (``owner``) or
+    were assigned (``assigned_to``).
+
+    NOTE on the ``if_owner`` interaction: when a user's ONLY read on Maintenance
+    Request is the universal "All" role's ``if_owner`` DocPerm, Frappe AND-s its
+    own ``owner = me`` match onto this fragment, so their LIST view collapses to
+    owner-only. The ``assigned_to`` branch therefore surfaces assigned rows in the
+    list only for users who also hold a plain (non-``if_owner``) read — i.e. the
+    operational roles such as Maintenance Technician (the realistic assignee).
+    Any assignee can still OPEN an assigned ticket via ``has_permission`` below.
+    """
+    user = _resolve_user(user)
+    if user == "Guest":
+        return "1=0"
+    if _is_privileged(user):
+        return ""
+
+    escaped = frappe.db.escape(user)
+    return "(`owner` = {0} or `assigned_to` = {0})".format(escaped)
+
+
+# [#f8guc4]
+def report_maintenance_request_scope(user=None):
+    """Return ``(restrict, user)`` for report-side maintenance-request scoping.
+
+    ``restrict`` is False for the Administrator and privileged oversight roles (the
+    report applies no extra filter — they see every ticket). When True the report must
+    confine its rows to ``owner == user OR assigned_to == user`` (e.g. via get_all's
+    ``or_filters``), matching the owner/assignee fragment in maintenance_request_query.
+    """
+    user = _resolve_user(user)
+    if _is_privileged(user):
+        return False, user
+    return True, user
+
+
+def maintenance_request_has_permission(doc, ptype, user=None):
+    """Confine individual Maintenance Request access to its owner/assignee.
+
+    Mirrors ``maintenance_request_query`` for the form view / REST resource /
+    link reads. Returns None to defer to Frappe's default permission resolution
+    for the Administrator and privileged oversight roles (so their DocPerms
+    govern, unwidened). For every other user it returns True only when the user
+    raised the ticket (``owner``) or is its ``assigned_to`` technician, and False
+    otherwise — never exposing a ticket the user neither raised nor was assigned.
+    """
+    user = _resolve_user(user)
+    if _is_privileged(user):
+        return None
+
+    if getattr(doc, "owner", None) == user:
+        return True
+    if getattr(doc, "assigned_to", None) == user:
+        return True
+    return False
+
+
+# [#qyfpkv]
+HOUSING_UNSCOPED_ROLES = {
+    "System Manager",
+    "Accommodation Manager",
+    "Internal Auditor",
+    "Finance Manager",
+}
+
+
+def _allowed_buildings(user):
+    """Building names the user has an explicit User Permission for (request-cached).
+
+    Thin wrapper over ``permission_scope.allowed_for`` binding the Building
+    ``allow`` doctype and the ``apex_allowed_buildings`` cache namespace. That
+    namespace is DISTINCT from Salis' ``apex_allowed_projects`` so a Building scope
+    and a Project scope can never collide in ``frappe.local.cache`` for the same
+    user in one request. See ``permission_scope.allowed_for`` for the
+    request-cache + no-cross-user-bleed invariant. Kept as a module-level function
+    because the scoped permission test-suite stubs this name directly.
+    """
+    return permission_scope.allowed_for(user, "Building", "apex_allowed_buildings")
+
+
+def _building_is_unscoped(user):
+    """True when the user is the Administrator or holds a building-oversight role."""
+    return permission_scope.is_unscoped(user, HOUSING_UNSCOPED_ROLES)
+
+
+def _building_condition(user=None, column="`building`"):
+    """SQL WHERE fragment restricting ``column`` to the user's allowed buildings.
+
+    "" for unscoped users (no restriction); "1=0" when the user is scoped but has
+    no allowed buildings (so they see nothing). Delegates the shared fragment
+    logic to ``permission_scope.scope_condition``, injecting this module's own
+    building resolvers so the Building oversight set + cache namespace stay bound
+    here.
+    """
+    return permission_scope.scope_condition(
+        user, _building_is_unscoped, _allowed_buildings, column
+    )
+
+
+# [#63ah2p]
+def accommodation_assignment_query(user=None):
+    return _building_condition(user)
+
+
+def custody_issue_query(user=None):
+    return _building_condition(user)
+
+
+def cleaning_log_query(user=None):
+    return _building_condition(user)
+
+
+def accommodation_building_query(user=None):
+    # [#3n6e22]
+    return _building_condition(user, column="`name`")
+
+
+# [#q79rfw]
+def safety_round_query(user=None):
+    return _building_condition(user)
+
+
+def safety_task_execution_query(user=None):
+    return _building_condition(user)
+
+
+def scheduled_task_instance_query(user=None):
+    return _building_condition(user)
+
+
+# [#fya0cl]
+def accommodation_resident_request_query(user=None):
+    return _building_condition(user)
+
+
+def idle_resident_report_query(user=None):
+    return _building_condition(user)
+
+
+# [#lz1v52]
+def report_building_scope(user=None):
+    """Return ``(restrict, allowed_buildings)`` for report-side building scoping.
+
+    ``restrict`` is False for unscoped oversight roles (the report applies no extra
+    filter — they see everything). When True the report must confine its rows to
+    ``allowed_buildings`` (an empty list means a scoped user with no permitted
+    building, i.e. the report should return no rows). Thin wrapper over
+    ``permission_scope.report_scope`` with this module's building resolvers.
+    """
+    return permission_scope.report_scope(
+        user, _building_is_unscoped, _allowed_buildings
+    )
+
+
+def building_scoped_has_permission(doc, ptype, user=None):
+    """Deny a building-scoped user acting on a doc outside their buildings.
+
+    Returns None to defer to Frappe's default resolution (unscoped users / in-scope
+    docs — keeps DocPerms intact), or False to block. The Building doc
+    is scoped on its own name; the transactions are scoped on their `building` field.
+
+    Deny-only + ptype-agnostic: it never branches on ``ptype``, so an out-of-building
+    doc is blocked for every action including ``submit`` — a scoped user can neither
+    read nor submit another estate's record.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return None
+
+    if getattr(doc, "doctype", None) == "Building":
+        building = getattr(doc, "name", None)
+    else:
+        building = getattr(doc, "building", None)
+
+    if not building:
+        # [#1i4wio]
+        return False
+    return None if building in _allowed_buildings(user) else False
+
+
+# [#qowz2x]
+
+# [#kl06xt]
+def facility_asset_custody_assignment_query(user=None):
+    return _building_condition(user)
+
+
+def non_financial_depreciation_snapshot_query(user=None):
+    return _building_condition(user)
+
+
+def custody_return_query(user=None):
+    return _building_condition(user)
+
+
+def custody_damage_assessment_query(user=None):
+    return _building_condition(user)
+
+
+def facility_asset_movement_query(user=None):
+    # [#53j3yv]
+    return _dual_building_condition(user)
+
+
+def custody_acknowledgment_query(user=None):
+    return _building_condition(user)
+
+
+def custody_handover_query(user=None):
+    # [#dvbjlx]
+    return _dual_building_condition(user)
+
+
+def material_transfer_query(user=None):
+    # [#d19wjd]
+    return _dual_building_condition(user)
+
+
+def facility_asset_delivery_query(user=None):
+    # [#1grzir]
+    return _dual_building_condition(user)
+
+
+def facility_asset_query(user=None):
+    return _building_condition(user)
+
+
+def housing_inventory_query(user=None):
+    return _building_condition(user)
+
+
+def building_license_query(user=None):
+    return _building_condition(user)
+
+
+def maintenance_work_order_query(user=None):
+    return _building_condition(user)
+
+
+# [#qu5wvy]
+def accommodation_occupancy_snapshot_query(user=None):
+    return _building_condition(user)
+
+
+def temporary_worker_query(user=None):
+    return _building_condition(user)
+
+
+def arrival_batch_query(user=None):
+    return _building_condition(user)
+
+
+def accommodation_room_query(user=None):
+    return _building_condition(user)
+
+
+def accommodation_bed_query(user=None):
+    return _building_condition(user)
+
+
+# [#h91pnc]
+def accommodation_stock_ledger_query(user=None):
+    return _building_condition(user)
+
+
+def _dual_building_condition(user=None):
+    """WHERE fragment scoping a from_building/to_building doc to the user's estate.
+
+    A single fragment (pqc hooks AND-join, so the OR must live inside one fragment):
+    matches a row when EITHER endpoint is one of the user's allowed buildings. "" for
+    unscoped users; "1=0" when the user is scoped but has no allowed buildings.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return ""
+    buildings = _allowed_buildings(user)
+    if not buildings:
+        return "1=0"
+    escaped = ", ".join(frappe.db.escape(b) for b in buildings)
+    return "(`from_building` in ({values}) or `to_building` in ({values}))".format(
+        values=escaped
+    )
+
+
+def dual_building_scoped_has_permission(doc, ptype, user=None):
+    """Deny a scoped user acting on a from/to_building doc outside their estate.
+
+    Mirrors ``_dual_building_condition`` for the form view / REST / submit. Returns
+    None to defer (unscoped users / in-scope docs — DocPerms intact), or False to
+    block. In scope when EITHER endpoint is the user's building; a cross-building doc
+    (neither endpoint in scope) is denied for every action including submit.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return None
+
+    allowed = _allowed_buildings(user)
+    endpoints = [
+        getattr(doc, "from_building", None),
+        getattr(doc, "to_building", None),
+    ]
+    endpoints = [b for b in endpoints if b]
+    if not endpoints:
+        # [#8w8orx]
+        return False
+    return None if any(b in allowed for b in endpoints) else False

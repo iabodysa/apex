@@ -1,0 +1,120 @@
+# Copyright (c) 2026, AFMCO and contributors
+"""End-to-end test for Supplier Accommodation Cost Recovery:
+daily allocation propagates billed_to_supplier to the ledger, and the
+Supplier Cost Recovery report aggregates the month with the markup applied."""
+
+import frappe
+from frappe.utils import flt, getdate
+from apex.tests.factories import ApexHabitatTestCase
+from apex.habitat.tasks import (
+    daily_accommodation_cost_allocation,
+    allocate_building_accommodation_cost,
+)
+from apex.habitat.report.supplier_cost_recovery.supplier_cost_recovery import execute
+
+
+def _h(n=12):
+    return frappe.generate_hash(length=n).upper()
+
+
+class TestSupplierCostRecovery(ApexHabitatTestCase):
+    def setUp(self):
+        self.company = frappe.db.get_value("Company", {}) or frappe.get_doc({
+            "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
+            "country": "Saudi Arabia",
+        }).insert(ignore_permissions=True).name
+        self.cost_center = (frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company})
+                            or frappe.db.get_value("Cost Center", {"is_group": 0}))
+        self.project = frappe.db.get_value("Project", {}) or frappe.get_doc({
+            "doctype": "Project", "project_name": "P " + _h(), "company": self.company,
+        }).insert(ignore_permissions=True).name
+        self.employee = frappe.get_doc({
+            "doctype": "Employee", "first_name": "Sup Emp " + _h(), "company": self.company,
+            "gender": "Male", "date_of_birth": "1990-01-01", "date_of_joining": "2020-01-01",
+        }).insert(ignore_permissions=True).name
+        self.supplier = frappe.get_doc({
+            "doctype": "Supplier", "supplier_name": "Vendor " + _h(),
+            "supplier_group": frappe.db.get_value("Supplier Group", {"is_group": 0}),
+        }).insert(ignore_permissions=True).name
+        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(12)}).insert(ignore_permissions=True)
+        self.building = frappe.get_doc({
+            "doctype": "Building", "building_name": "B " + _h(), "site": self.site.name,
+            "total_capacity": 10, "default_cost_center": self.cost_center,
+            "annual_rent": 36500,
+        }).insert(ignore_permissions=True)
+        self.room = frappe.get_doc({
+            "doctype": "Room", "naming_series": "ROOM-.####",
+            "building": self.building.name, "room_number": "R" + _h(), "bed_capacity": 2,
+        }).insert(ignore_permissions=True).name
+        self.bed = frappe.get_doc({
+            "doctype": "Bed", "naming_series": "BED-.####",
+            "room": self.room, "bed_code": "B" + _h(),
+        }).insert(ignore_permissions=True).name
+
+    def test_supplier_propagation_and_report_markup(self):
+        # [#3orr8w]
+        a = frappe.get_doc({
+            "doctype": "Housing Assignment", "employee": self.employee, "project": self.project,
+            "cost_center": self.cost_center, "building": self.building.name, "room": self.room,
+            "bed": self.bed, "check_in_date": getdate(), "assignment_type": "New Assignment",
+            "is_external_supplier": 1, "billed_to_supplier": self.supplier,
+        })
+        a.insert(ignore_permissions=True)
+        a.submit()
+
+        # [#phnc3g]
+        settings = frappe.get_single("Habitat Settings")
+        settings.enable_supplier_markup = 1
+        settings.supplier_markup_percent = 5.0
+        settings.save(ignore_permissions=True)
+
+        # [#p0kcvu]
+        allocate_building_accommodation_cost(self.building.name)
+
+        # [#bb1xf4]
+        rows = frappe.get_all("Accommodation Ledger",
+                              filters={"assignment": a.name},
+                              fields=["billed_to_supplier", "employee_daily_share"])
+        self.assertTrue(rows, "daily allocation created no ledger rows")
+        self.assertTrue(all(r.billed_to_supplier == self.supplier for r in rows),
+                        "billed_to_supplier was not propagated to the ledger")
+        base = flt(sum(flt(r.employee_daily_share) for r in rows), 2)
+        self.assertGreater(base, 0, "expected a non-zero daily share from annual_rent")
+
+        # [#lul8o8]
+        today = getdate()
+        columns, data = execute({"month": today.month, "year": today.year, "supplier": self.supplier})
+        mine = [d for d in data if d["billed_to_supplier"] == self.supplier and d["employee"] == self.employee]
+        self.assertEqual(len(mine), 1, "supplier/employee row missing from report")
+        row = mine[0]
+        self.assertGreaterEqual(row["days_housed"], 1)
+        self.assertAlmostEqual(row["base_cost"], base, places=2)
+        self.assertAlmostEqual(row["markup"], flt(base * 0.05, 2), places=2)
+        self.assertAlmostEqual(row["total_deduction"], flt(base + base * 0.05, 2), places=2)
+
+    def test_dispatcher_enqueues_per_building(self):
+        # [#ds1v02]
+        from unittest.mock import patch
+
+        a = frappe.get_doc({
+            "doctype": "Housing Assignment", "employee": self.employee, "project": self.project,
+            "cost_center": self.cost_center, "building": self.building.name, "room": self.room,
+            "bed": self.bed, "check_in_date": getdate(), "assignment_type": "New Assignment",
+        })
+        a.insert(ignore_permissions=True)
+        a.submit()
+
+        with patch("apex.habitat.tasks.cost.frappe.enqueue") as enq:
+            daily_accommodation_cost_allocation()
+
+        buildings = [c.kwargs.get("building") for c in enq.call_args_list]
+        self.assertIn(self.building.name, buildings, "dispatcher did not enqueue this building")
+        self.assertTrue(
+            all(c.kwargs.get("queue") == "long" for c in enq.call_args_list),
+            "per-building jobs must run on the long queue",
+        )
+        self.assertTrue(
+            all(c.args[0] == "apex.habitat.tasks.cost.allocate_building_accommodation_cost"
+                for c in enq.call_args_list),
+            "dispatcher must enqueue the per-building worker",
+        )

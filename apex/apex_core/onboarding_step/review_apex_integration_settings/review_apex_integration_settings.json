@@ -1,0 +1,14 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Review Apex Integration Settings",
+ "intro_text": "Apex Integration Settings is the shared switchboard for the external frontend — whether the integration is enabled, the frontend base URL, the API contract version, and the allowed origins. Review it once so any client app can reach this backend.",
+ "title": "Review Apex Integration Settings",
+ "action": "Update Settings",
+ "reference_document": "Apex Integration Settings",
+ "is_single": 1,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Review the shared integration switchboard: frontend URL, API version, and allowed origins.",
+ "action_label": "Review Integration Settings"
+}

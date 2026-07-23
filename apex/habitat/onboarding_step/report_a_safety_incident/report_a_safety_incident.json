@@ -1,0 +1,16 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Report a Safety Incident",
+ "intro_text": "Capture an incident with the guided Safety Incident form and save it for manager review.",
+ "title": "Report a Safety Incident",
+ "action": "Show Form Tour",
+ "reference_document": "Safety Incident",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 1,
+ "show_form_tour": 1,
+ "form_tour": "Safety Incident",
+ "description": "Report a safety incident as a draft, then send it to an authorized submitter for review and submission.",
+ "action_label": "Open Safety Incident Tour"
+}

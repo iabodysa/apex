@@ -1,0 +1,49 @@
+{
+  "doctype": "Assignment Rule",
+  "key": "name",
+  "create_only": true,
+  "records": [
+    {
+      "name": "Salis - Transport Request Routing",
+      "document_type": "Transport Request",
+      "rule": "Round Robin",
+      "disabled": 1,
+      "description": "Auto-assign new transport requests to the responsible Movement coordinator (round robin). DISABLED by default: replace the placeholder user with your real transport coordinators (Site Transport / Inter-City Relocation / Administrative Trip), then enable.",
+      "assign_condition": "status == 'New'",
+      "priority": 0,
+      "users": [
+        { "user": "Administrator" }
+      ],
+      "assignment_days": [
+        { "day": "Monday" },
+        { "day": "Tuesday" },
+        { "day": "Wednesday" },
+        { "day": "Thursday" },
+        { "day": "Friday" },
+        { "day": "Saturday" },
+        { "day": "Sunday" }
+      ]
+    },
+    {
+      "name": "Salis - Support Ticket Routing",
+      "document_type": "Issue",
+      "rule": "Load Balancing",
+      "disabled": 1,
+      "description": "Auto-assign new support tickets across the division support team (load balancing). DISABLED by default: replace the placeholder user with your real support team, then enable.",
+      "assign_condition": "status == 'Open'",
+      "priority": 0,
+      "users": [
+        { "user": "Administrator" }
+      ],
+      "assignment_days": [
+        { "day": "Monday" },
+        { "day": "Tuesday" },
+        { "day": "Wednesday" },
+        { "day": "Thursday" },
+        { "day": "Friday" },
+        { "day": "Saturday" },
+        { "day": "Sunday" }
+      ]
+    }
+  ]
+}

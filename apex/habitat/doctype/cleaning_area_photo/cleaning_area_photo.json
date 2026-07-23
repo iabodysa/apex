@@ -1,0 +1,85 @@
+{
+ "doctype": "DocType",
+ "name": "Cleaning Area Photo",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "editable_grid": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "description": "Required-area cleaning evidence: a photo and checklist status per audited common area (Bathrooms, Kitchen, Corridors, and optional extras).",
+ "field_order": [
+  "area",
+  "status",
+  "photo",
+  "note",
+  "captured_at",
+  "captured_by"
+ ],
+ "fields": [
+  {
+   "doctype": "DocField",
+   "description": "Which part of the accommodation this cleaning evidence photo covers, so before-and-after proof can be checked per area during cleaning audits.",
+   "fieldname": "area",
+   "fieldtype": "Select",
+   "label": "Area",
+   "options": "Bathrooms\nKitchen\nCorridors\nCommon Area\nExterior\nOther",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 2,
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Cleaned\nNot Cleaned\nN/A",
+   "default": "Cleaned",
+   "in_list_view": 1,
+   "columns": 2,
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "photo",
+   "fieldtype": "Attach Image",
+   "label": "Photo",
+   "in_list_view": 1,
+   "columns": 2,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note",
+   "description": "Required when status is Not Cleaned or N/A.",
+   "in_list_view": 1,
+   "columns": 3,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "captured_at",
+   "fieldtype": "Datetime",
+   "label": "Captured At",
+   "description": "Server-stamped when the photo is recorded. Not client-supplied.",
+   "read_only": 1,
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "captured_by",
+   "fieldtype": "Link",
+   "label": "Captured By",
+   "options": "Employee",
+   "description": "Cleaner who supplied the evidence, resolved from the tokenized portal.",
+   "read_only": 1,
+   "idx": 6
+  }
+ ],
+ "permissions": [],
+ "modified": "2026-06-26 00:00:00.000000"
+}

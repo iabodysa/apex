@@ -1,0 +1,15 @@
+{
+ "doctype": "Report",
+ "name": "Employees Holding Multiple SIMs",
+ "report_name": "Employees Holding Multiple SIMs",
+ "ref_doctype": "SIM Card",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "SIM Operations",
+ "roles": [
+  {"role": "SIM Operations User"},
+  {"role": "System Manager"},
+  {"role": "Finance Manager"},
+  {"role": "Internal Auditor"}
+ ]
+}

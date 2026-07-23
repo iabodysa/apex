@@ -1,0 +1,291 @@
+/* [#8wb1ff] */
+
+/* Shared brand primitives (--brand-green) + full --c-* token vocabulary +
+   light/dark modes — the SINGLE source of truth. No local palette lives here:
+   the portal consumes tokens only, so the retired per-portal drift (afmco /
+   frappe / dark / gemini / atelier / creative copies) is gone. */
+@import "@shared/tokens.css";
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* [#glw00i] */
+html,
+body {
+  background: var(--c-canvas);
+}
+
+body {
+  font-family: var(--font);
+  font-weight: var(--fw-body);
+  color: var(--c-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* [#5o3wjo] */
+@layer components {
+  /* [#8gmhoh] */
+  .app-shell {
+    @apply min-h-screen flex flex-col mx-auto w-full;
+    max-width: 480px;
+    background: var(--c-canvas);
+    color: var(--c-ink);
+  }
+
+  /* [#fxjcal] */
+  .card {
+    background: var(--c-surface);
+    border: var(--border-width) solid var(--c-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+  }
+  .card-pad {
+    padding: var(--sp-4);
+  }
+  /* accent for the single most-urgent Home item */
+  .card-primary {
+    border-inline-start: 3px solid var(--c-primary);
+    background: color-mix(in srgb, var(--c-primary) 5%, var(--c-surface));
+  }
+
+  /* [#31inr0] */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    line-height: 1;
+    padding: 5px 10px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.02em;
+  }
+  .pill-neutral {
+    background: color-mix(in srgb, var(--c-ink) 8%, transparent);
+    color: var(--c-ink-soft);
+  }
+  .pill-success {
+    background: var(--c-success-bg);
+    color: var(--c-success);
+  }
+  .pill-warning {
+    background: var(--c-warning-bg);
+    color: var(--c-warning);
+  }
+  .pill-danger {
+    background: var(--c-danger-bg);
+    color: var(--c-danger);
+  }
+  .pill-accent {
+    background: color-mix(in srgb, var(--c-mint) 30%, transparent);
+    color: var(--c-ink);
+  }
+
+  /* [#d0qr37] */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    font-family: var(--font);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-semibold);
+    line-height: 1;
+    border: var(--border-width) solid transparent;
+    cursor: pointer;
+    transition:
+      transform 0.06s ease,
+      filter 0.15s ease,
+      background 0.15s ease;
+  }
+  .btn:active {
+    transform: scale(0.98);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn:disabled:active {
+    transform: none;
+  }
+  .btn-primary {
+    background: var(--c-primary);
+    color: var(--c-primary-ink);
+  }
+  .btn-dark {
+    background: var(--c-ink);
+    color: var(--c-surface);
+  }
+  .btn-accent {
+    background: var(--c-mint);
+    color: var(--c-ink);
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--c-ink);
+    border-color: var(--c-border-strong);
+  }
+
+  /* [#1rmd0e] */
+  .field-label {
+    display: block;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--c-ink-soft);
+    margin-bottom: 6px;
+  }
+  .input,
+  .select,
+  .textarea {
+    width: 100%;
+    background: var(--c-surface);
+    color: var(--c-ink);
+    border: var(--border-width) solid var(--c-border-strong);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-family: var(--font);
+    font-size: var(--fs-body);
+    line-height: 1.3;
+    transition: border-color 0.15s ease;
+  }
+  .textarea {
+    min-height: 96px;
+    resize: vertical;
+  }
+  .input:focus,
+  .select:focus,
+  .textarea:focus {
+    outline: none;
+    border-color: var(--c-primary);
+  }
+  .input::placeholder,
+  .textarea::placeholder {
+    color: var(--c-muted);
+  }
+
+  /* [#3hvnzd] */
+  .stat {
+    background: var(--c-surface);
+    border: var(--border-width) solid var(--c-border);
+    border-radius: var(--radius);
+    padding: var(--sp-3) var(--sp-4);
+  }
+  .stat-label {
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--c-muted);
+  }
+  .stat-value {
+    font-size: var(--fs-h2);
+    font-weight: var(--fw-heading);
+    color: var(--c-ink);
+    line-height: 1.15;
+  }
+
+  /* [#rn4lw2] */
+  .section-title {
+    font-size: var(--fs-h2);
+    font-weight: var(--fw-heading);
+    color: var(--c-ink);
+    letter-spacing: -0.01em;
+  }
+
+  /* [#ei3i1l] */
+  .avatar {
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-pill);
+    font-weight: var(--fw-heading);
+    flex-shrink: 0;
+  }
+
+  /* [#bro4cs] */
+  .spinner {
+    height: 32px;
+    width: 32px;
+    border-radius: 999px;
+    border: 3px solid color-mix(in srgb, var(--c-primary) 25%, transparent);
+    border-top-color: var(--c-primary);
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+/* [#66a3tb] Quick-action tile — richer surface + hairline so the "More" grid
+   reads as tappable cards, matching the console reference. */
+.quick-action {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  transition:
+    transform 0.06s ease,
+    box-shadow 0.15s ease;
+  text-decoration: none;
+}
+.quick-action:active {
+  transform: scale(0.97);
+}
+
+/* [#6suoq3] */
+.status-note {
+  text-align: center;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+}
+.status-ok {
+  color: var(--c-success);
+  background: var(--c-success-bg);
+}
+.status-err {
+  color: var(--c-danger);
+  background: var(--c-danger-bg);
+}
+
+/* RTL: horizontally mirror direction-bearing icons (chevron / route / nav
+   arrows) so they point the correct way. GLOBAL (plain class) on purpose — a
+   [dir=rtl] rule inside a scoped block can mirror the whole page. */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+/* [#85x56s] */
+.text-muted {
+  color: var(--c-muted);
+}
+.text-warning {
+  color: var(--c-warning);
+}
+.text-soft {
+  color: var(--c-ink-soft);
+}
+.text-primary {
+  color: var(--c-primary);
+}
+.text-danger {
+  color: var(--c-danger);
+}
+.bg-canvas {
+  background: var(--c-canvas);
+}
+.divider {
+  height: var(--border-width);
+  background: var(--c-border);
+}

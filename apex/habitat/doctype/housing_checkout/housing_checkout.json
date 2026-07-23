@@ -1,0 +1,334 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-23 23:31:44.551429",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "accommodation_checkout_tab_overview",
+  "accommodation_checkout_sec_overview",
+  "assignment",
+  "checkout_date",
+  "accommodation_checkout_overview_col",
+  "checkout_reason",
+  "accommodation_checkout_sec_resident",
+  "party_type",
+  "party",
+  "accommodation_checkout_resident_col",
+  "employee",
+  "bed",
+  "accommodation_checkout_sec_table_custody_return_items",
+  "custody_return_items",
+  "custody_cleared",
+  "accommodation_checkout_sec_notes_evidence",
+  "room_condition_snapshot",
+  "accommodation_checkout_tab_financials",
+  "accommodation_checkout_sec_financials",
+  "damage_deduction_amount",
+  "accommodation_checkout_financials_col",
+  "cost_center",
+  "accommodation_checkout_financials_col2",
+  "additional_salary_deduction",
+  "accommodation_checkout_sec_damage_notes",
+  "damage_notes",
+  "accommodation_checkout_tab_system",
+  "accommodation_checkout_sec_cancellation",
+  "cancellation_reason",
+  "accommodation_checkout_sec_system",
+  "naming_series",
+  "departure_transport_request",
+  "accommodation_checkout_overview_col2",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "accommodation_checkout_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Checkout"
+  },
+  {
+   "fieldname": "accommodation_checkout_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Checkout Details"
+  },
+  {
+   "fieldname": "assignment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Housing Assignment",
+   "options": "Housing Assignment",
+   "reqd": 1
+  },
+  {
+   "fieldname": "checkout_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Checkout Date",
+   "reqd": 1
+  },
+  {
+   "description": "Why the resident is leaving the accommodation, separating a permanent departure such as final exit or absconding from a move that keeps the worker in the workforce such as an internal or project transfer.",
+   "fieldname": "checkout_reason",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Checkout Reason",
+   "options": "Final Exit\nInternal Transfer\nProject Transfer\nAbsconding\nEnd of Contract",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accommodation_checkout_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accommodation_checkout_overview_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "custody_cleared",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "All Custody Cleared"
+  },
+  {
+   "fieldname": "accommodation_checkout_sec_resident",
+   "fieldtype": "Section Break",
+   "label": "Resident"
+  },
+  {
+   "default": "Employee",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Resident Type",
+   "options": "Employee\nTemporary Worker",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Resident",
+   "options": "party_type",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "accommodation_checkout_resident_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "assignment.employee",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "assignment.bed",
+   "fieldname": "bed",
+   "fieldtype": "Link",
+   "label": "Bed",
+   "options": "Bed",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "accommodation_checkout_sec_table_custody_return_items",
+   "fieldtype": "Section Break",
+   "label": "Custody Return"
+  },
+  {
+   "fieldname": "custody_return_items",
+   "fieldtype": "Table",
+   "label": "Custody Return Items",
+   "options": "Accommodation Custody Return Item"
+  },
+  {
+   "fieldname": "accommodation_checkout_tab_financials",
+   "fieldtype": "Tab Break",
+   "label": "Financials"
+  },
+  {
+   "fieldname": "accommodation_checkout_sec_financials",
+   "fieldtype": "Section Break",
+   "label": "Damage Deduction",
+   "permlevel": 1
+  },
+  {
+   "fetch_from": "assignment.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_checkout_financials_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "damage_deduction_amount",
+   "fieldtype": "Currency",
+   "label": "Damage Deduction Amount (SAR)",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "accommodation_checkout_financials_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "additional_salary_deduction",
+   "fieldtype": "Link",
+   "label": "Additional Salary Deduction",
+   "options": "Additional Salary",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_checkout_sec_notes_evidence",
+   "fieldtype": "Section Break",
+   "collapsible": 1,
+   "label": "Notes & Evidence"
+  },
+  {
+   "fieldname": "accommodation_checkout_sec_damage_notes",
+   "fieldtype": "Section Break",
+   "collapsible": 1,
+   "label": "Damage Notes"
+  },
+  {
+   "fieldname": "damage_notes",
+   "fieldtype": "Small Text",
+   "label": "Damage Description"
+  },
+  {
+   "fieldname": "accommodation_checkout_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "accommodation_checkout_sec_cancellation",
+   "fieldtype": "Section Break",
+   "collapsible": 1,
+   "label": "Cancellation"
+  },
+  {
+   "fieldname": "cancellation_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancellation Reason",
+   "read_only": 0,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "room_condition_snapshot",
+   "fieldtype": "Attach Image",
+   "label": "Room Condition Snapshot",
+   "allow_on_submit": 1,
+   "description": "Optional photo of the bed/room condition at checkout (handover evidence)."
+  },
+  {
+   "fieldname": "accommodation_checkout_sec_system",
+   "fieldtype": "Section Break",
+   "collapsible": 1,
+   "label": "System"
+  },
+  {
+   "default": "ACC-CHKOUT-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "ACC-CHKOUT-.YYYY.-.####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "departure_transport_request",
+   "fieldtype": "Link",
+   "label": "Departure Transport Request",
+   "options": "Transport Request",
+   "no_copy": 1,
+   "read_only": 1,
+   "description": "Salis departure (relocation) transport raised for a Final Exit / End of Contract checkout."
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Housing Checkout",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-07-11 04:09:36.115685",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Housing Checkout",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Finance Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "assignment, employee, checkout_date",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "assignment",
+ "track_changes": 1
+}
