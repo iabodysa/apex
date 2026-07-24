@@ -18,7 +18,12 @@ jobs:
           python-version: "3.11"
 
       - name: Install ruff
-        run: pip install ruff
+        # Pinned: the repo's lint contract is ruff's default rule set (pyproject
+        # [tool.ruff.lint] declares no `select`). ruff 0.16 expanded its defaults, so an
+        # unpinned `pip install ruff` drifts CI red on ~200 rules the repo never opted
+        # into (BLE001, I001, RUF059, UP032, ISC004, SIM117, S110, ...) while 0.15.x and
+        # the green baseline stay clean. Pin so CI is deterministic and matches local.
+        run: pip install ruff==0.15.14
 
       - name: Run ruff
         run: ruff check apex/
