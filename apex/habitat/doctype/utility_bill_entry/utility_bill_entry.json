@@ -66,13 +66,14 @@
   },
   {
    "default": "Draft",
-   "description": "Approval and payment stage of the utility bill, from draft and received through review and approval to paid, or held as rejected or disputed.",
+   "description": "Approval stage of the utility bill: Draft, Pending Approval, Approved, or Rejected. Driven by the approval workflow.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Draft\nPending Approval\nApproved\nRejected\nReceived\nUnder Review\nPaid\nDisputed"
+   "options": "Draft\nPending Approval\nApproved\nRejected",
+   "read_only": 1
   },
   {
    "fieldname": "utility_bill_entry_overview_col",
@@ -286,7 +287,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-24 03:53:04.208692",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Utility Bill Entry",

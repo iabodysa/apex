@@ -383,3 +383,22 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.docstatus, 0)
         self.assertEqual(tr.source_channel, "Web QR")
         self.assertTrue(tr.anonymous_tracking_code)
+
+    # [#a085f4]
+
+    def test_rejected_request_can_be_reopened_to_new(self):
+        # A-085 finding 4: a rejected request is reopened back to New for rework
+        # instead of dead-ending in Rejected.
+        tr = self._new_tr()
+        frappe.set_user(self.supervisor)
+        self.assertIn("Reject", _actions(tr))
+        apply_workflow(tr, "Reject")
+        tr.reload()
+        self.assertEqual(tr.status, "Rejected")
+        self.assertEqual(tr.docstatus, 0)
+
+        self.assertIn("Reopen", _actions(tr))
+        apply_workflow(tr, "Reopen")
+        tr.reload()
+        self.assertEqual(tr.status, "New")
+        self.assertEqual(tr.docstatus, 0)

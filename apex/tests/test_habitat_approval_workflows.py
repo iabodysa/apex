@@ -232,3 +232,60 @@ class TestAccommodationLeaseWorkflow(_WorkflowSoDMixin, FrappeTestCase):
             "billing_cycle": "Monthly",
             "first_payment_date": "2026-07-01",
         })
+
+
+class TestHabitatWorkflowReconcile(FrappeTestCase):
+    """A-085 finding 6: ``habitat_workflow_seed`` now routes through the shared
+    ``workflow_seed_base.seed_one``, which re-applies the shipped states and
+    transitions onto an already-present Workflow on every migrate. Previously the
+    habitat path only flipped ``is_active`` and left a drifted definition in place.
+    """
+
+    WORKFLOW_DIR = "custody_damage_assessment_workflow"
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        seed_habitat_workflows()
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+    def test_seed_reapplies_drifted_transitions(self):
+        # seed_one saves without committing, so the drift + reconcile stay inside
+        # the test transaction and roll back cleanly.
+        from apex.apex_core.setup.seeders.habitat_workflow_seed import (
+            _STATE_STYLE,
+            _load_definition,
+        )
+        from apex.apex_core.setup.seeders.workflow_seed_base import seed_one
+
+        definition = _load_definition("habitat", self.WORKFLOW_DIR)
+        name = definition["name"]
+        self.assertTrue(
+            frappe.db.exists("Workflow", name),
+            f"{name} must be seeded by habitat_workflow_seed",
+        )
+        wf = frappe.get_doc("Workflow", name)
+        original = len(wf.transitions)
+        self.assertGreater(original, 0)
+
+        # drift: drop a transition, as a stray manual desk edit might
+        wf.transitions = wf.transitions[:-1]
+        wf.save(ignore_permissions=True)
+        wf.reload()
+        self.assertEqual(len(wf.transitions), original - 1)
+
+        # reconcile through the shared engine
+        seed_one(definition, _STATE_STYLE)
+        wf.reload()
+        self.assertEqual(
+            len(wf.transitions),
+            original,
+            "shared seed_one must re-apply the shipped transitions onto the "
+            "existing habitat Workflow (A-085 finding 6 reconcile)",
+        )

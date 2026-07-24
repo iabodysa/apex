@@ -168,6 +168,33 @@
    "allowed": "System Manager",
    "allow_self_approval": 1,
    "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Rejected",
+   "action": "Revise",
+   "next_state": "Draft",
+   "allowed": "Fleet Project Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Rejected",
+   "action": "Revise",
+   "next_state": "Draft",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Rejected",
+   "action": "Revise",
+   "next_state": "Draft",
+   "allowed": "System Manager",
+   "allow_self_approval": 1,
+   "condition": ""
   }
  ]
 }

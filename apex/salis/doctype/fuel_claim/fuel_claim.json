@@ -122,7 +122,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Draft\nSubmitted to Movement\nReconciled\nApproved\nDisputed\nClosed"
+   "options": "Draft\nSubmitted to Movement\nReconciled\nApproved\nDisputed\nClosed",
+   "read_only": 1
   },
   {
    "fieldname": "fuel_claim_sec_amounts",
@@ -226,7 +227,7 @@
  "icon": "fa fa-tint",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-24 03:53:04.208692",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Claim",

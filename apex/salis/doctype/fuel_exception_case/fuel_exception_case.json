@@ -112,7 +112,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Open\nUnder Investigation\nEvidence Required\nResolved\nRejected\nClosed"
+   "options": "Open\nUnder Investigation\nEvidence Required\nResolved\nRejected\nClosed",
+   "read_only": 1
   },
   {
    "fieldname": "fec_sec_details",
@@ -201,7 +202,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-24 03:53:04.208692",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Exception Case",

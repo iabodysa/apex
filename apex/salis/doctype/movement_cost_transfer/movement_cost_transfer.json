@@ -70,7 +70,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Draft\nPending Approval\nApproved\nPosted (memo)\nRejected\nCancelled"
+   "options": "Draft\nPending Approval\nApproved\nPosted (memo)\nRejected\nCancelled",
+   "read_only": 1
   },
   {
    "description": "Set when the transfer is approved.",
@@ -191,7 +192,7 @@
  "hidden": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-22 17:52:15.287889",
+ "modified": "2026-07-24 03:53:04.208692",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Movement Cost Transfer",

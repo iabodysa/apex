@@ -24,10 +24,7 @@ import os
 
 import frappe
 
-from apex.apex_core.setup.seeders.workflow_seed_base import (
-    ensure_workflow_action,
-    ensure_workflow_state,
-)
+from apex.apex_core.setup.seeders.workflow_seed_base import seed_one
 
 # [#t8tohs]
 _WORKFLOWS = [
@@ -59,65 +56,6 @@ def _load_definition(module_dir, workflow_dir):
         return json.load(fh)
 
 
-def _seed_one(definition):
-    """Apply a single Workflow definition idempotently. Returns True if the
-    workflow now exists, False if it was skipped (e.g. document type missing)."""
-    document_type = definition["document_type"]
-    if not frappe.db.exists("DocType", document_type):
-        return False  # [#hbwf03]
-
-    for state in definition.get("states", []):
-        ensure_workflow_state(state["state"], _STATE_STYLE)
-    for transition in definition.get("transitions", []):
-        ensure_workflow_state(transition["next_state"], _STATE_STYLE)
-        ensure_workflow_action(transition["action"])
-
-    name = definition["name"]
-    if frappe.db.exists("Workflow", name):
-        # [#j4a37y]
-        if definition.get("is_active") and not frappe.db.get_value("Workflow", name, "is_active"):
-            doc = frappe.get_doc("Workflow", name)
-            doc.is_active = 1
-            doc.save(ignore_permissions=True)  # audit-ok
-        return True
-
-    doc = frappe.new_doc("Workflow")
-    doc.workflow_name = definition.get("workflow_name", name)
-    doc.document_type = document_type
-    doc.workflow_state_field = definition["workflow_state_field"]
-    doc.is_active = definition.get("is_active", 1)
-    doc.override_status = definition.get("override_status", 0)
-    doc.send_email_alert = definition.get("send_email_alert", 0)
-
-    for state in definition.get("states", []):
-        doc.append(
-            "states",
-            {
-                "state": state["state"],
-                "doc_status": state.get("doc_status", "0"),
-                "allow_edit": state.get("allow_edit"),
-                "is_optional_state": state.get("is_optional_state", 0),
-            },
-        )
-    for transition in definition.get("transitions", []):
-        doc.append(
-            "transitions",
-            {
-                "state": transition["state"],
-                "action": transition["action"],
-                "next_state": transition["next_state"],
-                "allowed": transition.get("allowed"),
-                "allow_self_approval": transition.get("allow_self_approval", 1),
-                "condition": transition.get("condition") or "",
-            },
-        )
-
-    doc.name = name
-    doc.flags.name_set = True
-    doc.insert(ignore_permissions=True)  # audit-ok
-    return True
-
-
 def seed_habitat_workflows():
     """Create the Habitat / Apex Core approval Workflows if absent. Idempotent +
     existence-guarded on the target DocType and every referenced state/action
@@ -127,7 +65,7 @@ def seed_habitat_workflows():
         frappe.db.savepoint(sp)
         try:
             definition = _load_definition(module_dir, workflow_dir)
-            _seed_one(definition)
+            seed_one(definition, _STATE_STYLE)
         except Exception:
             # [#b9mw4c]
             frappe.log_error(

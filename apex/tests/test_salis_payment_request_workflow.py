@@ -271,3 +271,23 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
             )
             self.assertEqual(gl, [])
         self.assertFalse(pr.linked_payment_entry)
+
+    # [#a085f4]
+
+    def test_rejected_request_can_be_revised_to_draft(self):
+        # A-085 finding 4: a Finance rejection is not a dead end - the maker
+        # revises the request back to Draft to correct and resubmit.
+        pr = self._pending()
+        frappe.set_user(self.finance)
+        self.assertIn("Reject", _actions(pr))
+        apply_workflow(pr, "Reject")
+        pr.reload()
+        self.assertEqual(pr.status, "Rejected")
+        self.assertEqual(pr.docstatus, 0)
+
+        frappe.set_user(self.maker)
+        self.assertIn("Revise", _actions(pr))
+        apply_workflow(pr, "Revise")
+        pr.reload()
+        self.assertEqual(pr.status, "Draft")
+        self.assertEqual(pr.docstatus, 0)

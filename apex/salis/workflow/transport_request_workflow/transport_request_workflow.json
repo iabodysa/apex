@@ -139,6 +139,24 @@
    "allowed": "Fleet Manager",
    "allow_self_approval": 1,
    "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Rejected",
+   "action": "Reopen",
+   "next_state": "New",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Rejected",
+   "action": "Reopen",
+   "next_state": "New",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
   }
  ]
 }

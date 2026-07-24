@@ -103,7 +103,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Planned\nDispatched\nCompleted\nCancelled"
+   "options": "Planned\nDispatched\nCompleted\nCancelled",
+   "read_only": 1
   },
   {
    "fieldname": "dispatch_trip_sec_assigned_requests",
@@ -291,7 +292,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-24 03:53:04.208692",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",
