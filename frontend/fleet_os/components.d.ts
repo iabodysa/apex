@@ -14,7 +14,6 @@ declare module 'vue' {
     FleetSidebar: typeof import('./src/components/FleetSidebar.vue')['default']
     FleetTable: typeof import('./src/components/FleetTable.vue')['default']
     FleetToolbar: typeof import('./src/components/FleetToolbar.vue')['default']
-    FleetTopbar: typeof import('./src/components/FleetTopbar.vue')['default']
     Icon: typeof import('./src/components/Icon.vue')['default']
     LangToggle: typeof import('./src/components/LangToggle.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

@@ -11,8 +11,10 @@
  * so the direct path keeps the fleet bundle clean).
  *
  * The old supervisor board that used to live here is preserved untouched at
- * /fleet-os (bundle fleet_os_portal). Data here is PLACEHOLDER — see
- * useEmployee.js / BACKEND_GAPS; no server method is invented.
+ * /fleet-os (bundle fleet_os_portal). This page is LIVE — src/useEmployee.js
+ * calls the identity-scoped apex.salis.api.fleet_employee endpoints
+ * (get_my_vehicle / get_my_recent_trips / get_fuel_stations /
+ * submit_fuel_request).
  */
 import { ref, computed, watch } from "vue";
 import FleetPageShell from "@shared/components/FleetPageShell.vue";
