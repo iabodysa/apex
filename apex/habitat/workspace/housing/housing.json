@@ -163,26 +163,10 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Housing Inventory",
-   "link_type": "DocType",
-   "link_to": "Housing Inventory",
-   "idx": 12
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Idle Resident Report",
    "link_type": "DocType",
    "link_to": "Idle Resident Report",
    "idx": 13
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Resident Request",
-   "link_type": "DocType",
-   "link_to": "Resident Request",
-   "idx": 14
   },
   {
    "doctype": "Workspace Link",
@@ -363,5 +347,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-22 22:21:36.254925"
+ "modified": "2026-07-24 03:53:04.208692"
 }

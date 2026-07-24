@@ -3,15 +3,15 @@
  "name": "Backend Engines",
  "label": "Backend Engines",
  "title": "Backend Engines",
- "module": "Apex Core",
+ "module": "Habitat",
  "icon": "setting",
  "public": 1,
  "is_standard": 1,
  "is_default": 0,
- "is_hidden": 0,
+ "is_hidden": 1,
  "sequence_id": 90.1,
- "parent_page": "Launchpad",
- "content": "[{\"id\": \"beHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Backend Engine Ledgers &amp; Snapshots</b></span> \\u2014 system-written, read-only. Visible to System Manager only.\", \"col\": 12}}, {\"id\": \"beCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Engine\", \"col\": 4}}, {\"id\": \"beCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Fleet & Fuel Engine\", \"col\": 4}}, {\"id\": \"beCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement / Rental Engine\", \"col\": 4}}, {\"id\": \"beCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Assets & Maintenance Engine\", \"col\": 4}}, {\"id\": \"beCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety Engine\", \"col\": 4}}, {\"id\": \"beCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Scheduler / System-Written\", \"col\": 4}}]",
+ "parent_page": "",
+ "content": "[{\"id\": \"beHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Backend Engine Ledgers &amp; Snapshots</b></span> \\u2014 system-written, read-only. Visible to System Manager only.\", \"col\": 12}}, {\"id\": \"beCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Engine\", \"col\": 4}}, {\"id\": \"beCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Fleet & Fuel Engine\", \"col\": 4}}, {\"id\": \"beCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement / Rental Engine\", \"col\": 4}}, {\"id\": \"beCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Assets & Maintenance Engine\", \"col\": 4}}, {\"id\": \"beCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety Engine\", \"col\": 4}}, {\"id\": \"beCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Scheduler / System-Written\", \"col\": 4}}, {\"id\": \"beCard7\", \"type\": \"card\", \"data\": {\"card_name\": \"Portal-Managed Records\", \"col\": 4}}]",
  "shortcuts": [],
  "links": [
   {
@@ -193,6 +193,61 @@
    "link_type": "DocType",
    "link_to": "Scheduled Task Instance",
    "idx": 24
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Portal-Managed Records",
+   "idx": 25,
+   "description": "Records created and managed through the resident / worker / driver portals. Admin visibility only."
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Housing Inventory",
+   "link_type": "DocType",
+   "link_to": "Housing Inventory",
+   "idx": 26
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Resident Request",
+   "link_type": "DocType",
+   "link_to": "Resident Request",
+   "idx": 27
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Masar Worker Token",
+   "link_type": "DocType",
+   "link_to": "Masar Worker Token",
+   "idx": 28
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Transport Request",
+   "link_type": "DocType",
+   "link_to": "Transport Request",
+   "idx": 29
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Dispatch Trip",
+   "link_type": "DocType",
+   "link_to": "Dispatch Trip",
+   "idx": 30
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Request",
+   "link_type": "DocType",
+   "link_to": "Fuel Request",
+   "idx": 31
   }
  ],
  "number_cards": [],
@@ -203,5 +258,5 @@
    "role": "System Manager"
   }
  ],
- "modified": "2026-07-22 17:52:15.287889"
+ "modified": "2026-07-24 03:53:04.208692"
 }

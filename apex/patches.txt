@@ -163,3 +163,11 @@ apex.patches.v2_0.migrate_sim_card_management
 # that once had it. Idempotent, no-op on fresh installs / re-run. PRUNE once every
 # deployed site has run it (tracked in tabPatch Log).
 apex.patches.v2_0.drop_employee_deduction_acknowledgment
+
+# A-042 — remove the retired kernel landing Workspaces My Work + Launchpad (ONE-TIME).
+# Workspace consolidation folded their onboarding / settings / logs into the Habitat
+# root and relocated Backend Engines (hidden) into the Habitat module; the is_standard
+# JSONs are gone, so migrate leaves the orphaned Workspace + child rows behind. Deletes
+# them and clears any User default_workspace still pinned to one. Idempotent, no-op on
+# fresh installs / re-run. PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex.patches.v2_0.remove_kernel_landing_workspaces
