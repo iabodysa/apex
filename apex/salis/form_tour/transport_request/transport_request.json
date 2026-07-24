@@ -4,7 +4,7 @@
  "doctype": "Form Tour",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-07-10 06:05:34.129545",
+ "modified": "2026-07-23 18:32:44.150271",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",
@@ -19,7 +19,7 @@
    "has_next_condition": 0,
    "is_table_field": 0,
    "label": "Transport Type",
-   "position": "Right",
+   "position": "Bottom",
    "title": "Transport Type"
   },
   {
@@ -29,7 +29,7 @@
    "has_next_condition": 0,
    "is_table_field": 0,
    "label": "Request Type",
-   "position": "Right",
+   "position": "Bottom",
    "title": "Request Type"
   },
   {
@@ -39,7 +39,7 @@
    "has_next_condition": 0,
    "is_table_field": 0,
    "label": "Building",
-   "position": "Right",
+   "position": "Bottom",
    "title": "Origin Building"
   },
   {
@@ -49,7 +49,7 @@
    "has_next_condition": 0,
    "is_table_field": 0,
    "label": "Transport Purpose",
-   "position": "Right",
+   "position": "Bottom",
    "title": "Trip Purpose"
   },
   {

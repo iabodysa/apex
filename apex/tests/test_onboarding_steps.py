@@ -384,27 +384,44 @@ class TestOnboardingSteps(FrappeTestCase):
 
         self.assertEqual(bad, [], f"daily roles with fewer than two native tours: {bad}")
 
-    def test_daily_role_tour_popovers_are_safe_in_ltr_and_rtl(self):
+    def test_all_form_tours_load_and_targets_resolve(self):
+        # A shipped tour that will not load, or a step whose field/selector no longer
+        # resolves, silently breaks onboarding -- fail here the moment either regresses.
         tours = _source_records("Form Tour", "form_tour")
-        daily_tours = {
-            "Housing Assignment",
-            "Custody Issue",
-            "Maintenance Request",
-            "Fuel Request",
-            "Vehicle Handover",
-            "Safety Round",
-            "Safety Incident",
-            "Maintenance Work Order Queue",
-        }
         bad = []
 
-        for name in daily_tours:
+        for name, tour in tours.items():
+            try:
+                frappe.get_doc("Form Tour", name)
+            except Exception as exc:
+                bad.append(f"{name}: Form Tour does not load at runtime ({exc})")
+                continue
+            reference_doctype = tour.get("reference_doctype")
+            for index, step in enumerate(tour.get("steps", []), start=1):
+                fieldname = step.get("fieldname")
+                if step.get("is_table_field"):
+                    child_doctype = step.get("child_doctype")
+                    if not (child_doctype and frappe.get_meta(child_doctype).has_field(fieldname)):
+                        bad.append(f"{name} step {index}: table field {child_doctype}.{fieldname} missing")
+                elif tour.get("ui_tour") or step.get("element_selector"):
+                    if not step.get("element_selector"):
+                        bad.append(f"{name} step {index}: empty element_selector")
+                elif not frappe.get_meta(reference_doctype).has_field(fieldname):
+                    bad.append(f"{name} step {index}: field {reference_doctype}.{fieldname} missing")
+
+        self.assertEqual(bad, [], f"form tours that do not load or resolve their targets: {bad}")
+
+    def test_daily_role_tour_popovers_are_safe_in_ltr_and_rtl(self):
+        tours = _source_records("Form Tour", "form_tour")
+        bad = []
+
+        for name in tours:
             for index, row in enumerate(tours[name].get("steps", []), start=1):
                 position = (row.get("position") or "Bottom").lower()
                 if "left" in position or "right" in position:
                     bad.append(f"{name} step {index}: directional position {position}")
 
-        self.assertEqual(bad, [], f"daily tour popovers can clip in RTL/LTR: {bad}")
+        self.assertEqual(bad, [], f"shipped tour popovers can clip in RTL/LTR: {bad}")
 
     def test_guided_check_in_and_custody_issue_can_save_complete_drafts(self):
         tours = _source_records("Form Tour", "form_tour")

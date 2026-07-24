@@ -4,7 +4,7 @@
  "doctype": "Form Tour",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-07-11 20:55:46.174414",
+ "modified": "2026-07-23 18:32:44.150271",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Checkout",
@@ -19,7 +19,7 @@
    "has_next_condition": 0,
    "is_table_field": 0,
    "label": "Housing Assignment",
-   "position": "Right",
+   "position": "Bottom",
    "title": "Select the Assignment"
   },
   {
@@ -29,7 +29,7 @@
    "has_next_condition": 0,
    "is_table_field": 0,
    "label": "Checkout Date",
-   "position": "Right",
+   "position": "Bottom",
    "title": "Set the Checkout Date"
   },
   {
@@ -39,7 +39,7 @@
    "has_next_condition": 0,
    "is_table_field": 0,
    "label": "Checkout Reason",
-   "position": "Right",
+   "position": "Bottom",
    "title": "Choose the Checkout Reason"
   },
   {
@@ -49,7 +49,7 @@
    "has_next_condition": 0,
    "is_table_field": 0,
    "label": "All Custody Cleared",
-   "position": "Right",
+   "position": "Bottom",
    "title": "Confirm Custody Cleared"
   },
   {
@@ -59,7 +59,7 @@
    "has_next_condition": 0,
    "is_table_field": 0,
    "label": "Damage Deduction Amount (SAR)",
-   "position": "Left",
+   "position": "Bottom",
    "title": "Record Any Damage Deduction"
   },
   {
