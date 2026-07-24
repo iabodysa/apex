@@ -136,6 +136,12 @@ class TestPermissionParity(unittest.TestCase):
         offenders = []
         for map_name, entries in self.maps.items():
             for doctype in entries:
+                # "*" is Frappe's GLOBAL wildcard: doc_events["*"] registers a handler on
+                # EVERY doctype (the A-083 app-wide native-submit/native-cancel workflow
+                # guard, merged with the per-doctype events). It is a legitimate
+                # cross-cutting registration, not a stale post-rename doctype key.
+                if doctype == "*":
+                    continue
                 if doctype not in self.allowed:
                     offenders.append(f"{map_name}[{doctype!r}]")
         self.assertFalse(

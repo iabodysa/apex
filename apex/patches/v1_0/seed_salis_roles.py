@@ -12,7 +12,9 @@ SALIS_ROLES = [
     ("Fleet Manager", 1, 0, 0),
     ("Fleet Project Manager", 1, 0, 0),
     ("Fleet Supervisor", 1, 0, 0),
-    ("Driver", 1, 0, 0),
+    # Driver is a field worker: desk_access=0 (native Website User isolation). Kept in
+    # step with setup.create_roles, which also seeds Driver at desk_access=0 first.
+    ("Driver", 0, 0, 0),
 ]
 
 

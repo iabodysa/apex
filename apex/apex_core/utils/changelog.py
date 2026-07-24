@@ -5,6 +5,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 2.1.0 — a lighter, faster-migrating app with safer document approvals and Arabic-correct onboarding tours",
+        "app_name": "apex",
+        "link": "/app",
+        "creation": "2026-07-23 18:40:00",
+    },
+    {
         "title": "Apex 2.0.4 — Guided first-time setup, ready accommodation supplies, and preserved Item Group organization",
         "app_name": "apex",
         "link": "/app/launchpad",

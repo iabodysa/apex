@@ -10,15 +10,6 @@ app_license = "MIT"
 # [#4d5ed9]
 required_apps = ["frappe", "erpnext", "hrms"]
 
-def bootstrap_legacy_app_identity():
-	from apex_habitat.bootstrap import before_migrate as compatibility_bootstrap
-
-	compatibility_bootstrap()
-
-
-# Keep the temporary cutover reachable without crossing Frappe's installed-app gate.
-before_migrate = ["apex.hooks.bootstrap_legacy_app_identity"]
-
 # [#a024ap]
 # One-click icons on the Frappe /apps app-selector screen (A-024) — one entry
 # per real www/ portal shell. Driver has no extra role gate (any logged-in
@@ -445,19 +436,12 @@ has_permission = {
 }
 
 # [#eo76cf]
+# Role provisioning is native-first via the idempotent Python provisioners
+# (setup.create_roles + salis seed_salis_roles / seed_salis_authority_roles), NOT a
+# Role fixture: a Role fixture re-fired Role Profile's core queue_action file lock on
+# every worker-less migrate (DocumentLockedError). Party Type stays a fixture — it is
+# the sole fresh-install provisioner for the native Freelancer accounting master.
 fixtures = [
-    # [#qzi031]
-    {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
-    # [#r86uty]
-    {"dt": "Role", "filters": [["name", "in", ["Maintenance Technician", "Cleaning Supervisor", "Safety Officer", "Resident Request Coordinator"]]]},
-    # [#e3f5ip]
-    {"dt": "Role", "filters": [["name", "in", ["Fleet Project Manager", "Fleet Supervisor", "Government Relations Officer"]]]},
-    # [#a036dr]
-    # A-036: field-worker (Driver) role ships with desk_access=0 so a driver-only
-    # user is a native Website User — the core-level "User Type" isolation that
-    # keeps the desk module list (all Frappe/ERPNext/HRMS modules) off a field
-    # worker entirely. Drivers reach their work only through the /driver portal.
-    {"dt": "Role", "filters": [["name", "in", ["Driver"]]]},
     # [#9e59wa]
     # Freelancer is a native accounting Party Type (the surviving lean-Logistay master).
     {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},

@@ -5,6 +5,7 @@ Releases before 1.60 are consolidated into a single history note.
 
 ## Latest
 
+- [2.1.0](v2/v2_1_0.md) — A lighter, faster-migrating app with safer document approvals and onboarding tours that read correctly in Arabic.
 - [2.0.4](v2/v2_0_4.md) — Guided first-time setup, ready accommodation supplies, and preserved Item Group organization.
 - [2.0.3](v2/v2_0_3.md) — Security and reliability improvements.
 - [2.0.2](v2/v2_0_2.md) — Security and reliability improvements.
@@ -13,6 +14,7 @@ Releases before 1.60 are consolidated into a single history note.
 
 ## All releases
 
+- [2.1.0](v2/v2_1_0.md) — A lighter, faster-migrating app with safer document approvals and onboarding tours that read correctly in Arabic.
 - [2.0.4](v2/v2_0_4.md) — Guided first-time setup, ready accommodation supplies, and preserved Item Group organization.
 - [2.0.3](v2/v2_0_3.md) — Security and reliability improvements.
 - [2.0.2](v2/v2_0_2.md) — Security and reliability improvements.

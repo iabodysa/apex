@@ -132,27 +132,39 @@ def _load_accommodation_item_records():
 
 
 def create_roles():
+    # (role_name, desk_access). Native-first provisioning of the app's Roles (the
+    # Role fixture was retired — it re-locked the Role Profile queue_action on every
+    # worker-less migrate). Runs on both after_install and after_migrate, so these
+    # roles are durable on every migrate — unlike the Salis seed_salis_* patches,
+    # which a fresh install marks complete without running.
     roles = [
-        "Accommodation Manager",
-        "Resident Supervisor",
-        "Finance Manager",
-        "Internal Auditor",
-        "Maintenance Technician",
-        "Cleaning Supervisor",
-        "Safety Officer",
-        "Resident Request Coordinator",
-        "Admin Manager",
-        "Operations Director",
-        "Facilities Supervisor",
-        "Procurement Supervisor",
+        ("Accommodation Manager", 1),
+        ("Resident Supervisor", 1),
+        ("Finance Manager", 1),
+        ("Internal Auditor", 1),
+        ("Maintenance Technician", 1),
+        ("Cleaning Supervisor", 1),
+        ("Safety Officer", 1),
+        ("Resident Request Coordinator", 1),
+        ("Admin Manager", 1),
+        ("Operations Director", 1),
+        ("Facilities Supervisor", 1),
+        ("Procurement Supervisor", 1),
         # SIM Operations business role (telecom / SIM custody operators).
-        "SIM Operations User",
+        ("SIM Operations User", 1),
+        # Fleet approval role (Movement Cost Transfer / Vehicle Damage Write-Off
+        # workflows). Provisioned here too so the approver role is always present.
+        ("Fleet Manager", 1),
+        # Field-worker role: NO desk access (native Website User isolation keeps the
+        # whole desk module list off a driver). Must exist before create_role_profiles
+        # builds the Salis Driver profile below.
+        ("Driver", 0),
     ]
-    for role_name in roles:
+    for role_name, desk_access in roles:
         if not frappe.db.exists("Role", role_name):
             doc = frappe.new_doc("Role")
             doc.role_name = role_name
-            doc.desk_access = 1
+            doc.desk_access = desk_access
             doc.insert(ignore_permissions=True)
 
 

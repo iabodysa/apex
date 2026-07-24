@@ -41,7 +41,9 @@ def _roles_list():
             and isinstance(node.targets[0], ast.Name)
             and node.targets[0].id == "roles"
         ):
-            return ast.literal_eval(node.value)
+            raw = ast.literal_eval(node.value)
+            # create_roles now uses (name, desk_access) tuples; return names only.
+            return [r[0] if isinstance(r, tuple) else r for r in raw]
     return []
 
 
@@ -87,6 +89,11 @@ class TestCreateRolesList(unittest.TestCase):
     SIM_ROLES = [
         "SIM Operations User",
     ]
+    # Fleet operational roles now provisioned via create_roles (A-101 fixtures->Python).
+    FLEET_ROLES = [
+        "Fleet Manager",
+        "Driver",
+    ]
 
     @property
     def EXPECTED_ROLES(self):
@@ -95,6 +102,7 @@ class TestCreateRolesList(unittest.TestCase):
             + self.NEW_ROLES
             + self.GOVERNANCE_ROLES
             + self.SIM_ROLES
+            + self.FLEET_ROLES
         )
 
     def setUp(self):

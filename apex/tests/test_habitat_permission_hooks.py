@@ -3,8 +3,8 @@
 
 These are pure-Python tests (no live Frappe site required): they import the
 `apex.hooks` module — which declares no top-level `import frappe`, so it
-loads without a bench — and assert the registration dicts and the fixtures Role
-filter are wired exactly as the owner-scoping design requires.
+loads without a bench — and assert the registration dicts are wired exactly
+as the owner-scoping design requires.
 
 What they lock in:
 
@@ -16,11 +16,11 @@ What they lock in:
   3. Both referenced functions actually exist in
      `apex.habitat.permissions` (so a typo in the dotted path is caught
      here, not at runtime on a customer site).
-  4. A complementary Role fixture exports exactly the four new operational roles,
-     mirroring the existing Salis-roles fixture line, without clobbering the
-     existing Habitat-roles fixture or any ERPNext/HRMS-owned role.
-  5. The `Maintenance Request` `before_save` controller hook in `doc_events` is
+  4. The `Maintenance Request` `before_save` controller hook in `doc_events` is
      left intact (the new scoping wiring is additive, never a replacement).
+
+Role provisioning is intentionally NOT a fixture (A-101): it moved to the
+idempotent Python provisioners, so there is no Role-fixture guard here.
 
 Run standalone:  python3 -m unittest tests.test_habitat_permission_hooks -v
 """
@@ -70,84 +70,6 @@ class TestMaintenanceRequestScopingWiring(unittest.TestCase):
             "apex.habitat.doctype.maintenance_request."
             "maintenance_request.before_save",
         )
-
-
-class TestNewRoleFixture(unittest.TestCase):
-    """The complementary Role fixture exporting the four new operational roles."""
-
-    NEW_ROLES = {
-        "Maintenance Technician",
-        "Cleaning Supervisor",
-        "Safety Officer",
-        "Resident Request Coordinator",
-    }
-    EXISTING_HABITAT_ROLES = {
-        "Accommodation Manager",
-        "Resident Supervisor",
-        "Finance Manager",
-        "Internal Auditor",
-    }
-
-    def setUp(self):
-        import apex.hooks as hooks
-
-        self.fixtures = hooks.fixtures
-
-    def _role_filter_sets(self):
-        """Return the list of role-name sets, one per Role fixture entry."""
-        sets = []
-        for entry in self.fixtures:
-            if not (isinstance(entry, dict) and entry.get("dt") == "Role"):
-                continue
-            for flt in entry.get("filters", []) or []:
-                # [#hiejf5]
-                if (
-                    isinstance(flt, (list, tuple))
-                    and len(flt) == 3
-                    and flt[0] == "name"
-                    and flt[1] == "in"
-                ):
-                    sets.append(set(flt[2]))
-        return sets
-
-    def test_new_roles_fixture_present(self):
-        sets = self._role_filter_sets()
-        self.assertIn(
-            self.NEW_ROLES,
-            sets,
-            "no Role fixture exports exactly the four new operational roles",
-        )
-
-    def test_existing_habitat_roles_fixture_untouched(self):
-        sets = self._role_filter_sets()
-        self.assertIn(
-            self.EXISTING_HABITAT_ROLES,
-            sets,
-            "the existing Habitat-roles fixture must remain unchanged",
-        )
-
-    def test_new_role_fixture_is_complementary_not_merged(self):
-        # [#j4kye3]
-        sets = self._role_filter_sets()
-        self.assertNotIn(
-            self.NEW_ROLES | self.EXISTING_HABITAT_ROLES,
-            sets,
-            "new roles must be a separate fixture entry, not merged with the "
-            "existing Habitat roles",
-        )
-
-    def test_no_new_role_clobbers_a_native_role(self):
-        # [#175v0x]
-        native = {
-            "Employee",
-            "HR Manager",
-            "HR User",
-            "Stock Manager",
-            "Purchase Manager",
-            "Accounts Manager",
-            "Projects Manager",
-        }
-        self.assertEqual(self.NEW_ROLES & native, set())
 
 
 if __name__ == "__main__":

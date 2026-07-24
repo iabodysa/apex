@@ -16,8 +16,7 @@ themselves (``allow_self_approval = 0`` on the Approve transition), never
 re-implemented here.
 
 Seeds: Utility Bill Entry, Subcontractor Service Contract, Custody Damage
-Assessment (all in the Habitat module) and Employee Deduction
-Acknowledgment (Apex Core).
+Assessment, and Accommodation Lease (all in the Habitat module).
 """
 
 import json
@@ -36,7 +35,6 @@ _WORKFLOWS = [
     ("habitat", "subcontractor_service_contract_workflow"),
     ("habitat", "custody_damage_assessment_workflow"),
     ("habitat", "accommodation_lease_workflow"),
-    ("apex_core", "employee_deduction_acknowledgment_workflow"),
 ]
 
 # [#dy27i5]

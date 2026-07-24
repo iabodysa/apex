@@ -1,9 +1,9 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Native Workflow tests for the Habitat / Apex Core approval workflows.
 
-Covers the five approval workflows wired by ``habitat_workflow_seed``:
+Covers the four approval workflows wired by ``habitat_workflow_seed``:
 Utility Bill Entry, Subcontractor Service Contract, Custody Damage Assessment,
-Accommodation Lease and Employee Deduction Acknowledgment.
+and Accommodation Lease.
 
 Each workflow is proven on the three things that actually matter and that the
 prior (unverified) shipping got wrong:
@@ -231,24 +231,4 @@ class TestAccommodationLeaseWorkflow(_WorkflowSoDMixin, FrappeTestCase):
             "rent_amount": 8000,
             "billing_cycle": "Monthly",
             "first_payment_date": "2026-07-01",
-        })
-
-
-class TestEmployeeDeductionAcknowledgmentWorkflow(_WorkflowSoDMixin, FrappeTestCase):
-    DOCTYPE = "Employee Deduction Acknowledgment"
-    WORKFLOW = "Employee Deduction Acknowledgment Workflow"
-    APPROVER_ROLE = "Finance Manager"
-    # [#qm2i56]
-    STATE_FIELD = "approval_status"
-    PENDING_STATE = "Pending"
-
-    def _draft(self, owner):
-        return _insert_as(owner, {
-            "doctype": self.DOCTYPE,
-            "party_type": "Employee",
-            "party": "QA-EMP",
-            "deduction_type": "Damage",
-            "amount": 150,
-            "consent_given": 1,
-            "approval_status": "Pending",
         })
