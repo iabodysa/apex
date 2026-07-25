@@ -8,6 +8,8 @@ apex is a **backend** and the single source of truth. It owns the data model, au
 
 A **frontend** is any client that consumes this backend over HTTP. It is presentation only: it renders data and calls the API, but it never modifies the backend or its logic. Because all data, permissions, and workflow rules are enforced server-side, the client cannot weaken them.
 
+> **First-party portals are in-repo.** apex ships its own Vue portal frontends under `frontend/`, built to committed bundles in `apex/public/` and served by the Jinja shells in `apex/www/` — see [Served portal routes](../README.md#served-portal-routes). This guide is about **third-party** frontends, which live in their own repository and integrate over the HTTP contract described below.
+
 The frontend is **stack-agnostic**. It can be React, Vue, Angular, Svelte, Flutter, a native iOS/Android app, or a server-side service - anything that can send HTTP requests with a header. The two sides integrate through a clean, versioned HTTP contract, not by sharing code.
 
 ```
@@ -103,15 +105,28 @@ Filters use Frappe's list syntax (`[[fieldname, operator, value], ...]`, URL-enc
 
 ### 5.2 Whitelisted RPC - `/api/method/<dotted.path>`
 
-Purpose-built endpoints are exposed as whitelisted methods. Call them at `/api/method/<dotted.path>` with arguments as query parameters (`GET`) or a JSON/form body (`POST`). Available endpoints include:
+Purpose-built endpoints are exposed as whitelisted methods. Call them at `/api/method/<dotted.path>` with arguments as query parameters (`GET`) or a JSON/form body (`POST`). The modules under `apex/salis/api/` and `apex/habitat/api/` are the RPC surface; the ones an integrator is most likely to want:
 
-- **Driver portal** - `apex.salis.api.driver_portal.*`
-  (driver context, today's trips, support tickets, check-in / check-out, fuel-request submission, and support-ticket creation).
-- **Dispatch board** - `apex.salis.api.dispatch_board.*`
-  (the dispatch board view: vehicles, trips, drivers, and transport requests, optionally scoped by project).
+**Role-gated, usable with an API key**
+
+- **Fleet supervisor board** - `apex.salis.api.fleet_os.*` (13 endpoints: the scoped fleet with history, damages, accidents, theft and workshop state; driver typeahead; vehicle timeline; reassign, handover, stop, theft report and recovery, workshop in/out, and two bulk actions). Backs `/fleet-os`.
+- **Fleet employee self-service** - `apex.salis.api.fleet_employee.*` (4 endpoints, scoped to the caller's own vehicle, trips, and fuel requests). Backs `/fleet`.
+- **Route supervisor** - `apex.salis.api.route_supervisor.*` (6 endpoints: assigned route plans, approve / reject, live boarding and driver position). Backs `/masar-supervisor`; every read is additionally row-scoped to the caller's own plans.
+- **Fleet control desk** - `apex.salis.api.operations_control.*` (the Desk operations board: fleet view, vehicle timeline, reassign, release).
+- **Operations alerts** - `apex.salis.api.operations_alerts.*` (acknowledge, assign, snooze, and resolve operational alerts).
+- **Dispatch board** - `apex.salis.api.dispatch_board.*` (the dispatch board view: vehicles, trips, drivers, and transport requests, optionally scoped by project).
+- **Boarding** - `apex.salis.api.boarding.*` and `apex.salis.api.boarding_flow.*` (scan and boarding lifecycle).
 - **Fuel console** - `apex.salis.api.fuel_console.get_pending_fuel_requests`, `apex.salis.api.fuel_console.approve_fuel_request`, `apex.salis.api.fuel_console.reject_fuel_request`.
+- **Habitat desks** - `apex.habitat.api.*` (front desk, arrivals desk, custody kiosk, transfer board, safety map and checklist, housing count, building dashboard).
 
-These endpoints enforce the same roles, permissions, and project scoping as the rest of the backend.
+These enforce the same roles, permissions, and project or building scoping as the rest of the backend.
+
+**Personal-token portal endpoints - not reachable with an API key**
+
+- **Driver portal** - `apex.salis.api.driver_portal.*` (driver context, today's trips, route stops, check-in / check-out, fuel requests, support tickets, exit clearance).
+- **Worker portal (Masar)** - `apex.salis.api.masar.*` (worker profile, accommodation, transport, and self-service requests).
+
+These are declared `allow_guest=True` and are **not** authorized by roles. Identity comes from the personal portal token the worker or driver presents, which the endpoint resolves server-side to exactly one Salis Driver or Employee; a presented credential always wins over any signed-in user. An `Authorization: token <key>:<secret>` header carries no portal token, so these endpoints will not return another party's data to an integration account. Treat them as the portals' private contract, not as an integration surface.
 
 ### 5.3 Driving workflows - `apply_workflow`
 
@@ -182,7 +197,7 @@ Build the frontend against a known contract version and treat unexpected breakin
 
 ## 8. Reporting integration issues
 
-The frontend and backend live in separate repositories, and the frontend does not edit the backend. When you hit a backend-side integration problem - a missing endpoint, an unexpected `4xx`/`5xx`, a field you need, or a CORS/auth issue - open an issue on the backend repository:
+A third-party frontend lives in its own repository and does not edit the backend. (apex's own first-party portals are the exception noted in Section 1: they ship in this repository under `frontend/`.) When you hit a backend-side integration problem - a missing endpoint, an unexpected `4xx`/`5xx`, a field you need, or a CORS/auth issue - open an issue on the backend repository:
 
 **https://github.com/iabodysa/apex/issues**
 

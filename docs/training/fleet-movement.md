@@ -66,7 +66,11 @@ _[screenshot: Salis Vehicle record with compliance tab]_
 - **Issue** — field support tickets ride the **native ERPNext Issue** DocType (the
   old "Support Ticket" DocType was retired). A driver-raised Issue is tagged with a
   `custom_driver` field; Apex seeds the Issue Types, Priorities, and a default SLA.
-  Drivers hold Read/Create on their **own** Issues; fleet roles read/write them.
+  Apex adds **no** Issue permissions of its own (`apex/salis/custom/issue.json`
+  ships an empty `custom_perms`), so desk access to Issue is whatever the platform
+  grants. The Driver role holds none: the portal raises and reads a driver's
+  tickets on their behalf and refuses any Issue whose `custom_driver` is not the
+  resolved driver.
 
 ### Workflow
 1. **Assign a vehicle.** Create a **Vehicle Assignment** binding a vehicle to a

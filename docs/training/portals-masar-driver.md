@@ -2,8 +2,18 @@
 
 [← Back to index](README.md)
 
-Apex ships two mobile, self-service web portals. Both are **English** (staff are
-multinational) and **identity-scoped** — a user only ever sees their own records.
+Apex serves **seven** portal routes from six built bundles. Two of them are the
+mobile, self-service apps this page covers — `/driver` and `/masar` — reached by a
+personal link rather than a login. The other five are session- and role-gated
+operator surfaces: `/fleet` (employee self-service), `/fleet-os` (fleet supervisor
+board), `/housing`, `/safety`, and `/masar-supervisor` (route supervisor). Every
+route, its audience, and its authentication path are listed once in
+[Served portal routes](../../README.md#served-portal-routes).
+
+Both self-service apps are **multilingual** and **identity-scoped** — a worker or
+driver only ever sees their own records. Masar ships English, Arabic, Urdu, Hindi,
+and Bengali; the Driver portal ships English and Arabic. Each has an in-app
+language switcher, and Arabic and Urdu render right-to-left.
 
 ---
 
@@ -28,12 +38,32 @@ supplies a driver id; the server resolves it from the link credential.
 | **Exit clearance** | View their own clearance state and request a short-lived certificate download link after clearance is issued |
 
 ### Permissions
-Drivers hold only **Read** (and narrow **Create**) desk permissions — Driver
-Attendance (read/create/submit), **Issue** (read/create, own only), Salis
-Driver/Vehicle (read). They cannot browse other drivers' data. Field support
-tickets are native ERPNext **Issue** records (the old "Support Ticket" DocType was
-retired); a driver-raised Issue is tagged with a `custom_driver` field and is
-visible only to its owner. The portal is the intended surface; the desk is not.
+Drivers do not sign in to the desk. The **Driver** role is provisioned with
+`desk_access = 0`, so the role opens no desk at all, and the barcode cutover
+disables the legacy driver Website User account once that driver has a live token
+(`apex/patches/v2_0/disable_driver_login_users_barcode_cutover.py`; accounts that
+hold an elevated operational role are left enabled, and no account is ever
+deleted). Identity is the personal link token, resolved server-side on every call.
+
+The role still carries a minimal, **owner-only** document permission set, so a
+driver can never read another driver's rows even through the API:
+
+| DocType | Rights (all `if_owner`) |
+|---------|-------------------------|
+| Salis Driver | Read |
+| Boarding Scan Log | Read |
+| Driver Attendance | Read, Create, Submit |
+| Driver Suspension | Read |
+| Trip Start Log | Read, Write, Create, Submit |
+
+Those five are the whole grant. **Salis Vehicle** is not among them — the portal
+reads the bound vehicle on the driver's behalf after resolving the token.
+
+Field support tickets are native ERPNext **Issue** records (the old "Support
+Ticket" DocType was retired). The Driver role holds **no** Issue permission at
+all: the portal creates and reads the ticket on the driver's behalf, tagging it
+with a `custom_driver` link and refusing to return any Issue whose `custom_driver`
+is not the resolved driver. The portal is the only surface; the desk is not.
 
 ### Notes for trainers
 - The personal driver link is the credential. Do not share it; reissue it if it

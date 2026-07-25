@@ -1,118 +1,208 @@
 # Workspace Design: Task-First Information Architecture
 
-Apex's operational workspaces follow one repeatable layout: open on the role's
-daily work, then monitoring, then reference data — never the reverse. This
-page documents the method so a new daily-role workspace can be built the same
-way. It was introduced by the four daily role workspaces (Resident Supervisor,
-Fleet Supervisor, Safety Officer, Maintenance Technician).
+Apex's operational workspaces follow one repeatable layout: orient the user once,
+show the headline trend, then the day's actions, then what the role watches, then
+reference data. This page documents the method so a new workspace can be built the
+same way, and records the layout the shipped workspaces actually use.
 
-## 1. The three-section spine
+## 1. What ships
 
-Every daily-role workspace is built as three sections, top to bottom, with a
-short onboarding block above them:
+Nine public Workspaces ship as `is_standard` JSON. They live beside the module
+that owns them — `apex/habitat/workspace/<name>/<name>.json` and
+`apex/salis/workspace/<name>/<name>.json`. There is no workspace directory under
+`apex/apex_core/`.
 
-| # | Section | Content | Why it goes here |
-|---|---------|---------|-------------------|
-| 0 | Getting Started (optional) | An onboarding checklist for the role's first login. | Oriented once, then ignored. |
-| — | Quick Actions | Shortcuts to the role's most-used create screens and boards/portals. | One click to the day's first task. |
-| 1 | Daily Tasks | Input DocTypes the role creates or edits every day ("Create Records"). | The role's actual job comes first, not master data. |
-| 2 | Monitoring | Key-metric number cards, one trend chart, then boards/dashboards, then reports. | What the role watches and reacts to, ranked by how often they look at it: live numbers → live board/dashboard → periodic report. |
-| 3 | Master Data | Reference DocTypes (buildings, vehicles, item masters, etc.) set up once, not daily work. | Always last — it is configuration, not a task. |
+| Workspace | Module | Parent | `sequence_id` | Roles |
+|---|---|---|---|---|
+| **Habitat** | Habitat | — (root) | `2.0` | Accommodation Manager, Finance Manager, Resident Supervisor, Cleaning Supervisor, Safety Officer, Maintenance Technician, Internal Auditor, Fleet Manager, System Manager |
+| **Housing** | Habitat | Habitat | `2.1` | Accommodation Manager, Cleaning Supervisor, Resident Supervisor, System Manager |
+| **Safety** | Habitat | Habitat | `2.2` | Accommodation Manager, Resident Supervisor, Safety Officer, Maintenance Technician, Cleaning Supervisor, Internal Auditor, System Manager |
+| **Custody** | Habitat | Habitat | `2.3` | Accommodation Manager, Resident Supervisor, SIM Operations User, System Manager |
+| **Costs and Leasing** | Habitat | Habitat | `2.4` | Finance Manager, Accommodation Manager, System Manager |
+| **Salis** | Salis | — (root) | `3.0` | Finance Manager, Fleet Manager, Fleet Project Manager, Fleet Supervisor, System Manager |
+| **Compliance and Rentals** | Salis | Salis | `3.2` | Fleet Manager, Fleet Supervisor, Finance Manager, Government Relations Officer, Internal Auditor, System Manager |
+| **Fleet** | Salis | Salis | `4.0` | Fleet Manager, Fleet Project Manager, Fleet Supervisor, System Manager |
+| **Backend Engines** | Habitat | — (root, `is_hidden`) | `90.1` | System Manager |
 
-In the underlying Workspace `content` layout this is four headers in order —
-`Daily Tasks`, `Key Metrics` (+ 1 chart), `Boards and Dashboards`/`Monitoring`,
-`Key Reports`, `Master Data` — each followed by its `card`/`number_card`/`chart`
-block. A role with few boards/reports may merge the monitoring sub-headers
-into a single `Monitoring` header (see the Maintenance Technician example),
-but the ordering rule is fixed: **Daily Tasks → Monitoring (metrics, chart,
-boards, reports) → Master Data**, master data always last.
+Two module roots, six children, and one hidden root. **Backend Engines** is hidden
+because its ledgers and snapshots are system-written and read-only; it is reachable
+only by System Manager and only by direct navigation.
 
-## 2. Surface-type tags
+Workspaces are **module-scoped, not role-named**. A role reaches its daily work
+through the module workspace its roles grant it, not through a workspace named
+after the role. Logistay ships no workspace at all — its surface is the **Telecom
+Control** Desk page.
+
+Two landing Workspaces, **Launchpad** and **My Work**, were retired during
+workspace consolidation: the Launchpad's onboarding, settings, and logs folded
+into the Habitat root, and the personal **Action Inbox** became a shortcut on both
+module roots. `apex/patches/v2_0/remove_kernel_landing_workspaces.py` deletes the
+two orphaned rows on migrate, clears any user still pinned to one, and pins
+Backend Engines hidden.
+
+## 2. The block spine
+
+Every shipped workspace lays its `content` blocks out in the same order, top to
+bottom. Headers are the section markers; each is followed by the blocks it labels.
+
+| # | Header | Blocks under it | Why it goes here |
+|---|--------|-----------------|-------------------|
+| 0 | `Getting Started` | One `onboarding` block. | Oriented once, then ignored. |
+| — | *(no header)* | One `chart`, immediately after the onboarding block. | The single headline trend, visible without scrolling. |
+| 1 | `Quick Actions` | `shortcut` blocks — the role's most-used create screens, boards, and portals. | One click to the day's first task. |
+| 2 | `Key Metrics` | `number_card` blocks. | Live numbers the role reacts to. |
+| 3 | `Daily Tasks` | `card` blocks of input DocTypes the role creates or edits every day. | The role's actual job, not master data. |
+| 4 | `Key Reports` | `card` blocks of reports and dashboards. | Periodic, read-only; ranked below live numbers. |
+| 5 | `Master Data` | One `card` of reference DocTypes. | Configuration, not a task — so it goes last. |
+
+The ordering rule is fixed: **Getting Started → chart → Quick Actions → Key
+Metrics → Daily Tasks → Key Reports → Master Data.** Master data is last wherever
+it appears.
+
+Four shipped variations are deliberate, not drift:
+
+- **Costs and Leasing** has no onboarding, so it opens directly on its chart.
+- **Safety** carries two onboarding blocks (`Safety Readiness` and
+  `Maintenance Daily Flow`) because it hosts two distinct daily flows.
+- **Habitat** (the module root) names its first header `Habitat` rather than
+  `Getting Started`, and appends a final `Setup` section after `Master Data`.
+- **Backend Engines** is a flat list — one header and seven cards. It is a
+  read-only System Manager utility, not a daily-work surface, so the spine does
+  not apply.
+
+**Compliance and Rentals** ships no `Master Data` section: its reference records
+sit on the **Fleet** workspace instead, `Rental Office` among them.
+
+Onboardings in use: `Apex Setup` (Habitat), `Accommodation Go-Live` (Housing),
+`Safety Readiness` + `Maintenance Daily Flow` (Safety), `Custody Go-Live`
+(Custody), `Masar Go-Live` (Salis), `Salis Fuel Setup` (Fleet), and
+`Compliance and Rentals Go-Live`.
+
+## 3. Surface-type conventions
 
 A workspace mixes several kinds of link: a form you fill in, a live board, a
-dashboard, a portal, a read-only report. Two conventions make the type
-obvious without opening the link:
+dashboard, a portal, a read-only report. Two conventions make the type obvious
+without opening the link.
 
-- **Card-break legends** — the description under each `Card Break` states in
-  plain language what that group of links does, e.g. `Input screen: open an
-  item to create or edit records.` (Daily Tasks), `Monitoring boards and
-  dashboards: live views that refresh automatically.`, `Reports: read-only.
-  Open to view on screen or export.`, `Reference data: durable records you set
-  up once, not daily work.` (Master Data).
-- **Label suffix tags** — any shortcut or link whose type could be mistaken
-  for a plain form carries a parenthetical English tag in its label, translated
-  to Arabic in `translations/ar.csv`:
+### Card-break legends
 
-  | Tag | Meaning | Arabic |
-  |-----|---------|--------|
-  | `(Board)` | A live monitoring board/desk page. | `(لوحة متابعة)` |
-  | `(Dashboard)` | A Frappe Dashboard (charts + number cards). | `(لوحة معلومات)` |
-  | `(Portal)` | An external/worker-facing portal page. | `(بوابة)` |
+The `description` under each `Card Break` states in plain language what that group
+of links does. Reuse these exact strings so a new section inherits the existing
+`apex/translations/ar.csv` entries instead of adding untranslated ones:
 
-  Example: `Fleet Portal (Portal)` → `بوابة الأسطول (بوابة)`,
-  `Fleet Supervisor Dashboard (Dashboard)` → `لوحة معلومات مشرف الأسطول (لوحة معلومات)`.
-  A plain DocType link (a form) carries no suffix — untagged is the default
-  "input screen" case.
+| Section | Legend |
+|---------|--------|
+| Daily Tasks | `Input screen: open an item to create or edit records.` |
+| Key Reports | `Reports: read-only. Open to view on screen or export.` |
+| Dashboards | `Dashboards: live monitoring boards that refresh automatically.` |
+| Master Data | `Reference data: durable records you set up once, not daily work.` |
+| Setup | `Configuration and access: settings, users and roles.` |
+| Logs | `System logs: read-only diagnostics.` |
+| Portal-Managed Records | `Records created and managed through the resident / worker / driver portals. Admin visibility only.` |
 
-## 3. Default-workspace mechanism
+### Label suffix tags
 
-Two independent primitives combine to make the role's daily workspace the
-first thing a user in that role sees:
+A shortcut or link whose type could be mistaken for a plain form carries a
+parenthetical English tag in its label. The tag is part of the source string, so
+each tagged label needs its own row in `apex/translations/ar.csv`.
 
-1. **`sequence_id` ordering** — each daily-role Workspace sets a low
-   `sequence_id` (`1.0`–`1.3` for the four roles below) so it sorts near the
-   top of the Desk sidebar, ahead of the generic `Launchpad` (`90.0`) and
-   other module workspaces.
-2. **`User.default_workspace` provisioning patch** —
-   `apex/patches/v2_0/set_role_default_workspace.py`
-   (registered in `patches.txt` as
-   `apex.patches.v2_0.set_role_default_workspace`) is a guarded,
-   idempotent, run-once patch. For each of the four roles it finds every user
-   holding that role and, **only if `default_workspace` is still empty**,
-   stamps it to the role's workspace. It never overwrites a workspace the
-   user picked for themselves, and it skips a role whose workspace row is not
-   yet present (safe to land before the workspace JSON ships). `sequence_id`
-   makes the workspace easy to find manually; the patch makes it the page a
-   user actually lands on after login.
+| Tag | Meaning | In use today |
+|-----|---------|--------------|
+| `(Board)` | A live monitoring board or Desk page. | `Safety Map (Board)`, `Operations Control (Board)` |
+| `(Dashboard)` | A Frappe Dashboard (charts and number cards). | none |
+| `(Portal)` | A portal page. | none |
 
-To extend this to a fifth role: add its workspace name to `ROLE_WORKSPACE` in
-that patch (a **new** run-once patch is the right pattern if the original one
-has already run on deployed sites — see the module's `PRUNE` note) and give
-the workspace a `sequence_id` in the `1.x` range.
+A plain DocType link (a form) carries no suffix — untagged is the default "input
+screen" case.
 
-## 4. Worked examples
+> **Known gap.** Only `(Board)` is applied today. The portal shortcuts ship
+> untagged (`Fleet Portal`, `Housing Portal`, `Safety Checklist`, `Inventory
+> Count`), and `ar.csv` still carries translations for two tagged labels that no
+> workspace uses (`Fleet Portal (Portal)`, `Fleet Supervisor Dashboard
+> (Dashboard)`). Applying the tag to those shortcuts, or retiring the orphaned
+> rows, is outstanding work.
 
-The four daily role workspaces shipped under `apex/apex_core/workspace/`:
+### `(Portal)` — what a portal link actually is
 
-| Workspace | `sequence_id` | Daily Tasks (Create Records) | Monitoring | Master Data |
-|---|---|---|---|---|
-| **Resident Supervisor** | `1.0` | Housing Assignment, Housing Checkout, Resident Request, Room Bed Transfer, Cleaning Log, Custody Issue, Custody Return | 4 number cards + Occupancy Percent Trend chart; boards: Front Desk, Arrivals Desk, Custody Kiosk, Room Setup; dashboard: Resident Supervisor Dashboard; reports: Active Resident Register, Idle Resident Detection, Custody Outstanding by Worker | Building, Room, Bed, Site |
-| **Fleet Supervisor** | `1.1` | Vehicle Assignment, Vehicle Handover, Fuel Request, Vehicle Incident | 5 number cards + Fuel Cost by Month chart; board: Fleet Control; portal: Fleet Portal; dashboard: Fleet Supervisor Dashboard | vehicle/fleet master records |
-| **Safety Officer** | `1.2` | Safety Round, Safety Incident, Safety Task Execution | 5 number cards + Findings by Severity chart; board: Safety Map; portal: Safety Portal | safety master records |
-| **Maintenance Technician** | `1.3` | Maintenance Request, Maintenance Work Order, Maintenance Inspection Report, Facility Asset, Facility Asset Movement, Subcontractor Service Order | 4 number cards + Maintenance Requests by Status chart; monitoring list: Operations Alert, Scheduled Task Instance; reports: Open Maintenance Requests, Maintenance Aging, Operational Depreciation Aging | Maintenance Material, Maintenance Material Template, Subcontractor Service Contract |
+A portal page is a Vue single-page app built to `apex/public/<portal>/` and served
+by a Jinja shell in `apex/www/`. It is not a Desk page: it has its own
+authentication path, its own bundle, and its own audience — a personal-token
+worker app for people who are not Frappe users, or a session- and role-gated
+operator surface. The seven served routes, their audiences, and their
+authentication paths are listed once in
+[Served portal routes](../README.md#served-portal-routes).
 
-Each also carries a role-specific onboarding (e.g. `Accommodation Go-Live`,
-`Maintenance Daily Flow`) as the first "Getting Started" block, and Quick
-Action shortcuts that jump straight to the role's top 1–2 create screens plus
-its board/portal.
+Portal shortcuts that ship on a workspace today:
 
-## 5. Reproducing this for a new role
+| Workspace | Shortcut label | URL | Portal it opens |
+|---|---|---|---|
+| Fleet | `Fleet Portal` | `/fleet-os` | Fleet OS supervisor board |
+| Housing | `Housing Portal` | `/housing` | Housing operator portal |
+| Housing | `Inventory Count` | `/housing-count` | Redirect into the Housing portal's count view |
+| Safety | `Safety Checklist` | `/safety` | Safety operator portal |
 
-1. Create a public, `is_standard` Workspace scoped to the role (plus any
-   manager/System Manager roles that should also see it).
-2. Set `sequence_id` in the `1.x` range, below the four existing daily
-   workspaces if it is a fifth peer, or interleaved if it takes priority.
-3. Build the `content` blocks in order: Getting Started (onboarding) → Quick
-   Actions (shortcuts) → Daily Tasks (`Create Records` card) → Key Metrics
-   (number cards + one chart) → Monitoring/Boards and Dashboards → Key
-   Reports → Master Data.
-4. Add a `Card Break` per section with the matching legend description from
-   Section 2 above (reuse the existing English strings so they inherit the
-   existing `ar.csv` translations).
-5. Tag any Board/Dashboard/Portal shortcut or link label with the matching
-   `(Board)` / `(Dashboard)` / `(Portal)` suffix, and add the Arabic
-   translation to `translations/ar.csv` if it is a new label.
-6. Add the role → workspace mapping to `ROLE_WORKSPACE` in
-   `apex/patches/v2_0/set_role_default_workspace.py` (or a new
-   patch, per its `PRUNE` note) so the workspace becomes the role's default
-   landing page.
+The **Fleet** workspace is role-gated to the fleet team, so its portal shortcut
+targets the supervisor board at `/fleet-os` rather than the employee page at
+`/fleet`. The employee page needs no workspace shortcut: it is open to every
+signed-in user and is reached from the `My Fleet` tile on the `/apps` selector.
+
+> **Known gap.** No workspace links `/masar-supervisor`. Route supervisors reach
+> it from its `Masar Supervisor` tile on the `/apps` selector or a typed URL. A
+> Quick Actions shortcut on a movement workspace is the missing piece.
+
+## 4. How a user lands on the right workspace
+
+Two native primitives do the work. There is no provisioning patch that stamps
+`User.default_workspace`, and none is needed.
+
+1. **`roles`** — each Workspace lists the roles that may see it. A user sees only
+   the workspaces their roles grant, so the sidebar is already filtered to their
+   job. Leaving `roles` empty makes a workspace universal.
+2. **`sequence_id` ordering** — `sequence_id` sorts the Desk sidebar. Apex uses
+   `2.x` for Habitat and its children, `3.x`/`4.0` for Salis and its children, and
+   `90.1` for the hidden Backend Engines, so operational surfaces sort above
+   utilities.
+3. **`parent_page`** — a child workspace names its root, which nests it under that
+   root in the sidebar rather than adding another top-level entry.
+
+A user may still pin any workspace they can see as their own default through their
+User record; nothing in Apex overwrites that choice.
+
+## 5. Reproducing this for a new workspace
+
+1. Create a public, `is_standard` Workspace under the owning module's
+   `workspace/` directory — `apex/habitat/workspace/` or `apex/salis/workspace/`.
+2. List the roles that should see it in `roles`. Leave it empty only if the
+   workspace is genuinely universal.
+3. Set `parent_page` to its module root, and give it a `sequence_id` inside that
+   root's band (`2.x` for Habitat, `3.x`/`4.x` for Salis).
+4. Build the `content` blocks in the Section 2 order: Getting Started
+   (onboarding) → chart → Quick Actions (shortcuts) → Key Metrics (number cards)
+   → Daily Tasks (cards) → Key Reports (cards) → Master Data (card).
+5. Add a `Card Break` per section, reusing the exact legend strings from Section 3
+   so they inherit the existing `ar.csv` translations.
+6. Tag any Board, Dashboard, or Portal shortcut label with the matching suffix and
+   add the Arabic translation to `apex/translations/ar.csv` if the label is new.
+7. Remember that `is_standard` JSON is import-only on migrate. Deleting or
+   renaming a workspace file leaves the old row and its child Link, Shortcut,
+   Number Card, and Chart rows in the database — that removal needs its own
+   patch, the way `remove_kernel_landing_workspaces.py` handled Launchpad and
+   My Work.
+
+## 6. Keeping this page honest
+
+Section 1 is a published description of a directory. Run this from the repository
+root after adding, renaming, or retiring a workspace; it prints nothing and exits
+`0` only when the workspaces on disk and the table above are the same set:
+
+```bash
+diff \
+  <(python3 -c 'import json,pathlib
+for p in pathlib.Path("apex").rglob("workspace/*/*.json"):
+    print(json.load(open(p)).get("label") or json.load(open(p))["name"])' | sort) \
+  <(grep -oE '^\| \*\*[A-Za-z ]+\*\* \| (Habitat|Salis) \|' docs/WORKSPACE-DESIGN.md \
+    | sed 's/^| \*\*//; s/\*\* |.*//' | sort)
+```
+
+The equivalent check for the portal route table lives in
+[README.md](../README.md#keeping-the-route-table-honest).
