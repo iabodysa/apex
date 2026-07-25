@@ -305,6 +305,8 @@ _COPY_PASTE_BASELINE = frozenset(
         ("habitat/utils/finding_fanout.py", "_is_actionable"),
         ("habitat/temporary_worker_engine.py", "_hr_recipients"),
         ("salis/api/masar.py", "_hr_notify_recipients"),
+        ("patches/v1_x/enable_custody_damage_assessment_notification.py", "execute"),
+        ("patches/v1_x/enable_custody_return_overdue_notification.py", "execute"),
         ("patches/v1_x/seed_demo_role_logins.py", "_get_or_create"),
         ("patches/v1_x/seed_masar_demo_movement.py", "_get_or_create"),
         ("salis/api/boarding.py", "_is_staff"),
@@ -541,10 +543,21 @@ def _dead_production_modules():
     return offenders
 
 
-# [#a056b3] Baseline for production files not reachable by any reference this
-# scan can see. Now EMPTY: the original three entries were deleted, so any
-# zero-importer file fails. Keep it empty — delete the file or wire it up.
-_DEAD_FILE_BASELINE = frozenset()
+# [#a056b3] Baseline frozen at guard-authoring time: production files that are
+# not yet reachable by any reference this scan can see. Pre-existing debt, not
+# fixed here (out of scope for A-056) — only a NEW zero-importer file fails.
+# All three confirmed genuinely dead while authoring this guard: patches.txt's
+# own B9 comment says stamp_changelog_seen_version.py was "retired ... in the
+# same change" (the patches.txt line was removed, the module never was); the
+# two dashboard seeders are the "retired runtime seeders" superseded by
+# is_standard=1 dashboard JSON per patches/v1_x/drop_legacy_is_standard0_dashboards.py.
+_DEAD_FILE_BASELINE = frozenset(
+    {
+        "apex_core/setup/seeders/salis_dashboard_seed.py",
+        "apex_core/setup/seeders/salis_movement_dashboard_seed.py",
+        "patches/v1_x/stamp_changelog_seen_version.py",
+    }
+)
 
 
 class TestDeadProductionModules(unittest.TestCase):
