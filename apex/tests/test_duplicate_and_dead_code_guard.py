@@ -12,7 +12,35 @@ test_sql_interpolation_guard.py's ``SAFE_ALLOWLIST``: today's tree seeds the
 baseline (documented, pre-existing), and only a finding beyond it fails the build —
 so this guard blocks future regressions without demanding an unrelated cleanup PR.
 
-  1. TestDuplicateTopLevelFunctionNames — two different production files each bind
+Scan universe (A-170): checks 1 and 2 read PRODUCTION **AND TEST** files. They used
+to share ``_production_py_files()``, which skips ``tests/`` and every ``test_*.py``,
+so a helper duplicated across two test modules was invisible to CI — a near-duplicated
+workspace-reachability scan was caught only by a card's goal text, never by a guard.
+Checks 3-5 stay production-only ON PURPOSE: check 4 (dead modules) declares a file
+dead when nothing imports it, and a test module is *never* imported by anything, so
+widening it flags 348 of the 352 test files (measured); checks 3/5 scan DocType JSON
+and native-primitive imports, neither of which a test file owns. Only the two
+duplication detectors gain anything from test coverage, so only they were widened.
+
+Baselines. Widening check 1 to tests added exactly 4 names. One
+(``tearDownModule``, bound in 17 files) is unittest dispatch and went to
+DISPATCH_NAMES; the other 3 are the real finding, frozen in _DUP_NAME_BASELINE: a
+test module binds a module-level unwrapping shim under the SAME public name as the
+production Number Card method it wraps (tests/test_dashboard_arrivals.py:24
+``get_arrivals_today`` returns ``habitat.api.dashboard.get_arrivals_today()["value"]``).
+Confusing at a grep but harmless — frozen, not fixed, because renaming those shims
+belongs to the owner of those test files, not to the guard.
+
+Widening check 2 to tests found 21 groups / 64 functions of pre-existing duplication,
+all frozen in _COPY_PASTE_BASELINE and all fixture/assertion helpers pasted between
+test modules rather than promoted into tests/factories.py (P-135's shared home). The
+loudest: factories.py ALREADY exports ``make_project`` and 17 test modules re-inlined
+its body anyway. Two more are this guard family duplicating itself —
+tests/test_unit_test_coverage_guard.py grew the same ``_production_py_files`` and
+``_file_dotted_path`` helpers independently. None are fixed here: A-170 owns the two
+guard files only, and de-duplicating 40-odd test modules is its own card.
+
+  1. TestDuplicateTopLevelFunctionNames — two different files each bind
      a same-named PUBLIC module-level function. Scoped to module level (a Document
      subclass's own methods live inside the ClassDef body, which this scan never
      enters) and to public names: this codebase's "detached controller" style wires
@@ -32,6 +60,20 @@ so this guard blocks future regressions without demanding an unrelated cleanup P
      in size (>= 3 real statements, so a common one-line stub never matches).
      Independent of naming, so a rename-and-paste is still caught; independent of
      file, so even a same-file paste is caught.
+
+     Test code repeats itself far more than production code, so covering tests
+     needed a SHAPE, not a looser threshold. Raising the minimum statement count
+     was rejected: it buys silence by going blind (min=8 leaves 1 of 37 test
+     groups, but a 3-statement fixture builder — the exact helper this check
+     exists to catch — vanishes with it). Instead the threshold stays at 3
+     everywhere and a test file's UNITTEST-DISPATCHED functions are skipped: a
+     name unittest itself dispatches (``test*`` per TestLoader.testMethodPrefix,
+     plus setUp/tearDown/setUpClass/tearDownClass/setUpModule/tearDownModule)
+     that ALSO declares no parameter beyond self/cls. Those recur by nature and
+     were 16 of the 37 raw test groups. The no-parameter half of the rule is what
+     stops the laundering: a shared fixture builder takes arguments, so renaming
+     it ``test_make_x(building, room)`` does not buy it the exemption. Every one
+     of the 21 groups left is a genuine duplicated helper.
 
   3. TestOrphanDocTypes — a ``doctype/<x>/<x>.json`` whose declared ``module`` is
      not a name registered in modules.txt, or whose on-disk module folder does not
@@ -90,9 +132,15 @@ def _parse(path):
             return None
 
 
+def _is_test_file(rel):
+    """A central ``tests/`` module or a colocated ``test_*.py`` beside its unit."""
+    return rel.startswith("tests" + os.sep) or os.path.basename(rel).startswith("test_")
+
+
 def _production_py_files():
     """Every apex/**/*.py file except tests/ and node_modules — the universe for
-    the duplicate-name / copy-paste / dead-file scans."""
+    the orphan-doctype / dead-file / native-bypass scans (3-5), which a test file
+    can only add noise to (see module docstring)."""
     out = []
     for path in sorted(glob.glob(os.path.join(APP_ROOT, "**", "*.py"), recursive=True)):
         if "node_modules" in path:
@@ -102,6 +150,18 @@ def _production_py_files():
             continue
         out.append(path)
     return out
+
+
+def _scanned_py_files():
+    """Every apex/**/*.py file except node_modules — production AND test — the
+    universe for the two duplication scans (1-2). Duplication is exactly as much
+    of a defect in a test helper as in a controller, and a test module is the one
+    place the old production-only universe could never see (A-170)."""
+    return [
+        path
+        for path in sorted(glob.glob(os.path.join(APP_ROOT, "**", "*.py"), recursive=True))
+        if "node_modules" not in path
+    ]
 
 
 # 1. Duplicate top-level (module-scope) function names
@@ -120,6 +180,16 @@ DISPATCH_NAMES = {
     "before_print", "before_workflow_action", "after_workflow_action",
     "before_migrate", "after_migrate", "after_install", "before_tests",
     "before_request", "after_request", "on_doctype_update",
+    # [#a170dn] unittest's own module-level dispatch hooks — the test-tree analogue
+    # of the Frappe lifecycle names above (17 files bind tearDownModule by design).
+    "setUpModule", "tearDownModule", "load_tests",
+}
+
+# [#a170lc] unittest's class/method-level dispatch names. Paired with the
+# no-extra-parameter rule in _is_unittest_dispatched (see module docstring).
+UNITTEST_LIFECYCLE_NAMES = {
+    "setUp", "tearDown", "setUpClass", "tearDownClass",
+    "setUpModule", "tearDownModule",
 }
 
 
@@ -132,9 +202,9 @@ def _module_level_funcs(tree):
 
 def _duplicate_def_names():
     """{name: sorted[rel_paths]} for every PUBLIC top-level def name bound in 2+
-    different production files that is not a DISPATCH_NAMES entry."""
+    different files (production or test) that is not a DISPATCH_NAMES entry."""
     by_name = {}
-    for path in _production_py_files():
+    for path in _scanned_py_files():
         tree = _parse(path)
         if tree is None:
             continue
@@ -153,6 +223,19 @@ def _duplicate_def_names():
 # sibling doctypes/portals (verified while authoring this guard), not a case of
 # one file actually reusing another's code under a copied name.
 _DUP_NAME_BASELINE = {
+    # [#a170b1] The 3 names widening to tests added (see docstring).
+    "get_arrivals_today": [
+        "habitat/api/dashboard.py",
+        "tests/test_dashboard_arrivals.py",
+    ],
+    "get_buildings_over_threshold": [
+        "habitat/api/dashboard.py",
+        "tests/test_dashboard_buildings_over_threshold.py",
+    ],
+    "get_pending_on_manifest": [
+        "habitat/api/dashboard.py",
+        "tests/test_dashboard_arrivals.py",
+    ],
     "get_default_company": [
         "apex_core/doctype/habitat_settings/habitat_settings.py",
         "apex_core/doctype/salis_settings/salis_settings.py",
@@ -207,6 +290,19 @@ _DUP_NAME_BASELINE = {
 class TestDuplicateTopLevelFunctionNames(unittest.TestCase):
     def test_scan_finds_production_files(self):
         self.assertTrue(_production_py_files(), "production .py scan found nothing — path broke")
+
+    def test_duplication_scan_universe_includes_test_files(self):
+        # [#a170t1] The A-170 blind spot itself: assert the widened universe really
+        # holds test modules, central and colocated, and that it is a strict superset.
+        scanned = {_rel(p) for p in _scanned_py_files()}
+        production = {_rel(p) for p in _production_py_files()}
+        self.assertLess(production, scanned, "widened scan must strictly contain production")
+        self.assertIn(os.path.basename(__file__), [os.path.basename(p) for p in scanned])
+        self.assertIn("tests/factories.py".replace("/", os.sep), scanned)
+        self.assertTrue(
+            any(_is_test_file(rel) and os.sep in rel and not rel.startswith("tests") for rel in scanned),
+            "colocated test_*.py files must be in the duplication scan universe",
+        )
 
     def test_detector_ignores_dispatch_names_and_private_helpers(self):
         # [#a056t1]
@@ -269,47 +365,259 @@ def _body_signature(fn_node):
     return "\n".join(ast.dump(stmt, annotate_fields=False) for stmt in body)
 
 
+def _is_unittest_dispatched(fn_node):
+    """True for a function unittest CALLS rather than one the author wrote to be
+    reused: a dispatched name (``test*`` — TestLoader.testMethodPrefix — or a
+    lifecycle hook) that also takes no parameter beyond the implicit self/cls.
+    Only applied inside test files. The parameter half is load-bearing: a shared
+    fixture builder takes arguments, so it cannot buy the exemption by renaming
+    itself ``test_...``."""
+    if not (fn_node.name.startswith("test") or fn_node.name in UNITTEST_LIFECYCLE_NAMES):
+        return False
+    args = fn_node.args
+    positional = len(args.posonlyargs) + len(args.args)
+    return positional <= 1 and not args.kwonlyargs and args.vararg is None and args.kwarg is None
+
+
 def _copy_pasted_groups():
     """{signature: sorted[(rel_path, lineno, func_name), ...]} for every function
-    body of >= 3 real statements that structurally matches another function's body."""
+    body of >= 3 real statements that structurally matches another function's body,
+    across production AND test files."""
     by_sig = {}
-    for path in _production_py_files():
+    for path in _scanned_py_files():
         tree = _parse(path)
         if tree is None:
             continue
+        rel = _rel(path)
+        is_test = _is_test_file(rel)
         for fn in _all_funcs(tree):
             if len(_non_docstring_body(fn)) < 3:
                 continue
-            sig = _body_signature(fn)
-            by_sig.setdefault(sig, set()).add((_rel(path), fn.lineno, fn.name))
+            if is_test and _is_unittest_dispatched(fn):
+                continue
+            by_sig.setdefault(_body_signature(fn), set()).add((rel, fn.lineno, fn.name))
     return {sig: sorted(locs) for sig, locs in by_sig.items() if len(locs) > 1}
 
 
-# [#a056b2] Baseline frozen at guard-authoring time: (rel_path, func_name) pairs
-# already sharing a body today (line numbers excluded from the key so unrelated
-# edits elsewhere in the file — which shift line numbers — never spuriously
-# reopen an already-accepted pair). Real pre-existing duplication (confirmed
-# while authoring this guard, e.g. safety_task_execution._finding_escalates'
-# own docstring says it "mirrors finding_fanout._is_actionable") that A-056 did
-# not fix — out of this task's scope — but must not regress further.
+# [#a056b2] Baseline of bodies already shared today. Line numbers are excluded from
+# the key so an unrelated edit elsewhere in a file never spuriously reopens an
+# accepted pair. Each entry is ONE group: a finding passes only if its whole member
+# set falls inside a SINGLE baselined group. A-170 replaced the former flat set of
+# pairs with these groups because the flat shape accepted any duplication BETWEEN
+# two already-listed functions, and widening to tests grew that set from 16 pairs to
+# 80 — turning a small hole into a large one.
 _COPY_PASTE_BASELINE = frozenset(
     {
-        ("apex_core/setup/seeders/habitat_auto_email_reports_seed.py", "seed_auto_email_reports"),
-        ("apex_core/setup/seeders/salis_auto_email_reports_seed.py", "seed_salis_auto_email_reports"),
-        ("habitat/doctype/custody_handover/custody_handover.py", "on_cancel"),
-        ("habitat/doctype/goods_receipt/goods_receipt.py", "on_cancel"),
-        ("habitat/doctype/safety_task_execution/safety_task_execution.py", "_finding_escalates"),
-        ("habitat/utils/finding_fanout.py", "_is_actionable"),
-        ("habitat/temporary_worker_engine.py", "_hr_recipients"),
-        ("salis/api/masar.py", "_hr_notify_recipients"),
-        ("patches/v1_x/seed_demo_role_logins.py", "_get_or_create"),
-        ("patches/v1_x/seed_masar_demo_movement.py", "_get_or_create"),
-        ("salis/api/boarding.py", "_is_staff"),
-        ("salis/api/driver_portal/__init__.py", "_is_staff"),
-        ("salis/api/driver_portal/__init__.py", "_bound_vehicle"),
-        ("salis/api/fleet_employee.py", "_bound_vehicle"),
-        ("salis/permissions.py", "salis_driver_has_permission"),
-        ("salis/permissions.py", "trip_start_log_has_permission"),
+        # --- Production (frozen 2026-07-22 by A-056; unchanged in content) ---
+        frozenset(
+            {
+                ("apex_core/setup/seeders/habitat_auto_email_reports_seed.py", "seed_auto_email_reports"),
+                ("apex_core/setup/seeders/salis_auto_email_reports_seed.py", "seed_salis_auto_email_reports"),
+            }
+        ),
+        frozenset(
+            {
+                ("habitat/doctype/custody_handover/custody_handover.py", "on_cancel"),
+                ("habitat/doctype/goods_receipt/goods_receipt.py", "on_cancel"),
+            }
+        ),
+        # safety_task_execution._finding_escalates' own docstring admits it "mirrors
+        # finding_fanout._is_actionable" — real debt A-056 chose not to fix.
+        frozenset(
+            {
+                ("habitat/doctype/safety_task_execution/safety_task_execution.py", "_finding_escalates"),
+                ("habitat/utils/finding_fanout.py", "_is_actionable"),
+            }
+        ),
+        frozenset(
+            {
+                ("habitat/temporary_worker_engine.py", "_hr_recipients"),
+                ("salis/api/masar.py", "_hr_notify_recipients"),
+            }
+        ),
+        frozenset(
+            {
+                ("patches/v1_x/seed_demo_role_logins.py", "_get_or_create"),
+                ("patches/v1_x/seed_masar_demo_movement.py", "_get_or_create"),
+            }
+        ),
+        frozenset(
+            {
+                ("salis/api/boarding.py", "_is_staff"),
+                ("salis/api/driver_portal/__init__.py", "_is_staff"),
+            }
+        ),
+        frozenset(
+            {
+                ("salis/api/driver_portal/__init__.py", "_bound_vehicle"),
+                ("salis/api/fleet_employee.py", "_bound_vehicle"),
+            }
+        ),
+        frozenset(
+            {
+                ("salis/permissions.py", "salis_driver_has_permission"),
+                ("salis/permissions.py", "trip_start_log_has_permission"),
+            }
+        ),
+        # --- Tests (frozen 2026-07-25 by A-170; 21 groups, see docstring) ---
+        # factories.make_project re-inlined by 17 modules — the loudest finding.
+        frozenset(
+            {
+                ("tests/factories.py", "make_project"),
+                ("tests/test_dispatch_trip_workflow.py", "_project"),
+                ("tests/test_driver_clearance_workflow.py", "_project"),
+                ("tests/test_fuel_claim_workflow.py", "_project"),
+                ("tests/test_fuel_exception_case_workflow.py", "_project"),
+                ("tests/test_fuel_request_workflow.py", "_project"),
+                ("tests/test_operations_alert_actions.py", "_project"),
+                ("tests/test_report_scope.py", "_project"),
+                ("tests/test_salis_controls.py", "_project"),
+                ("tests/test_salis_fleet_scope.py", "_project"),
+                ("tests/test_salis_payment_approval_scope.py", "_project"),
+                ("tests/test_salis_payment_request_workflow.py", "_project"),
+                ("tests/test_salis_scoping.py", "_project"),
+                ("tests/test_salis_security.py", "_project"),
+                ("tests/test_salis_state_flow.py", "_get_or_create_project"),
+                ("tests/test_salis_tenant_scope.py", "_project"),
+                ("tests/test_transport_request_workflow.py", "_project"),
+                ("tests/test_workflow_submit_guard.py", "_project"),
+            }
+        ),
+        # A vehicle fixture builder pasted across 6 Salis workflow tests.
+        frozenset(
+            {
+                ("tests/test_driver_clearance_workflow.py", "_vehicle"),
+                ("tests/test_fuel_claim_workflow.py", "_vehicle"),
+                ("tests/test_fuel_exception_case_workflow.py", "_vehicle"),
+                ("tests/test_fuel_request_workflow.py", "_vehicle"),
+                ("tests/test_salis_controls.py", "_vehicle"),
+                ("tests/test_transport_request_workflow.py", "_vehicle"),
+            }
+        ),
+        frozenset(
+            {
+                ("salis/doctype/dispatch_trip/test_driver_user_fetch.py", "_vehicle"),
+                ("salis/doctype/fuel_request/test_rider_leave_guard.py", "_vehicle"),
+                ("tests/test_fuel_request_unified.py", "_vehicle"),
+            }
+        ),
+        # A scoped-user context manager pasted into 3 Habitat scope tests.
+        frozenset(
+            {
+                ("tests/test_arrivals_card_scope.py", "__enter__"),
+                ("tests/test_arrivals_custody_report_scope.py", "__enter__"),
+                ("tests/test_habitat_tenant_scope.py", "__enter__"),
+            }
+        ),
+        frozenset(
+            {
+                ("tests/test_fuel_request_unified.py", "_purge"),
+                ("tests/test_fuel_request_workflow.py", "_purge"),
+                ("tests/test_operations_alert_resolution.py", "_purge_request"),
+            }
+        ),
+        # Three helpers pasted wholesale between the rental accrual/settlement pair.
+        frozenset(
+            {
+                ("salis/doctype/rental_accrual_ledger/test_rental_accrual_ledger.py", "_approve"),
+                ("salis/doctype/rental_settlement/test_rental_settlement.py", "_approve"),
+            }
+        ),
+        frozenset(
+            {
+                ("salis/doctype/rental_accrual_ledger/test_rental_accrual_ledger.py", "_office"),
+                ("salis/doctype/rental_settlement/test_rental_settlement.py", "_office"),
+            }
+        ),
+        frozenset(
+            {
+                ("salis/doctype/rental_accrual_ledger/test_rental_accrual_ledger.py", "_vehicle"),
+                ("salis/doctype/rental_settlement/test_rental_settlement.py", "_vehicle"),
+            }
+        ),
+        frozenset(
+            {
+                ("tests/test_dispatch_trip_workflow.py", "_purge_trip"),
+                ("tests/test_salis_state_flow.py", "_purge_trip"),
+            }
+        ),
+        frozenset(
+            {
+                ("tests/test_dispatch_trip_workflow.py", "_purge_tr"),
+                ("tests/test_salis_state_flow.py", "_purge_tr_and_rp"),
+            }
+        ),
+        # These two are this guard family duplicating ITSELF — the blind spot's own
+        # best proof. tests/test_unit_test_coverage_guard.py is a sibling static
+        # guard; both files grew the same two path helpers independently.
+        frozenset(
+            {
+                ("tests/test_duplicate_and_dead_code_guard.py", "_file_dotted_path"),
+                ("tests/test_unit_test_coverage_guard.py", "_file_dotted_path"),
+            }
+        ),
+        frozenset(
+            {
+                ("tests/test_duplicate_and_dead_code_guard.py", "_production_py_files"),
+                ("tests/test_unit_test_coverage_guard.py", "_production_py_files"),
+            }
+        ),
+        frozenset(
+            {
+                ("apex_core/test_payment_router.py", "_set_gl_posting"),
+                ("tests/test_routed_payment_serialization.py", "_set_gl_posting"),
+            }
+        ),
+        frozenset(
+            {
+                ("habitat/doctype/custody_handover/test_custody_handover.py", "_receive"),
+                ("tests/test_custody_handover_confirm_race.py", "_receive"),
+            }
+        ),
+        frozenset(
+            {
+                ("habitat/doctype/maintenance_cost_ledger/test_maintenance_cost_ledger.py", "_submit_request"),
+                ("habitat/doctype/maintenance_work_order/test_maintenance_work_order.py", "_submit_request"),
+            }
+        ),
+        frozenset(
+            {
+                ("habitat/doctype/material_transfer/test_stock_source_locking.py", "_func_source"),
+                ("tests/test_boarding_race.py", "_func_source"),
+            }
+        ),
+        frozenset(
+            {
+                ("habitat/doctype/safety_finding_ledger/test_safety_finding_ledger.py", "_round"),
+                ("habitat/doctype/safety_round/test_safety_round.py", "_round"),
+            }
+        ),
+        frozenset(
+            {
+                ("tests/test_fleet_alert_notifications.py", "_recipients"),
+                ("tests/test_request_trip_notifications.py", "_recipients"),
+            }
+        ),
+        frozenset(
+            {
+                ("tests/test_habitat_tenant_scope.py", "_scoped_supervisor"),
+                ("tests/test_housing_count.py", "_scoped_supervisor"),
+            }
+        ),
+        frozenset(
+            {
+                ("tests/test_masar_trip_rating.py", "_token_for"),
+                ("tests/test_masar_worker_boarding_confirm.py", "_token_for"),
+            }
+        ),
+        # Single-member group: two classes in ONE file share a _get_doc body, so the
+        # (path, name) key collapses to one entry. Kept as a group so the pair stays
+        # frozen rather than disappearing from the scan entirely.
+        frozenset(
+            {
+                ("habitat/tasks/test_cost_posting.py", "_get_doc"),
+            }
+        ),
     }
 )
 
@@ -327,12 +635,44 @@ class TestCopyPastedFunctionBodies(unittest.TestCase):
         self.assertEqual(_body_signature(funcs["a"]), _body_signature(funcs["b"]))
         self.assertLess(len(_non_docstring_body(funcs["c"])), 3, "short stub must not qualify")
 
+    def test_unittest_dispatch_exemption_cannot_hide_a_parameterised_helper(self):
+        # [#a170t2] The exemption's two halves: an idiomatic zero-arg setUp/test
+        # method is skipped, but a helper is NOT exempt just for wearing the name.
+        src = (
+            "class T:\n"
+            "    def setUp(self):\n        pass\n"
+            "    def test_thing(self):\n        pass\n"
+            "    def test_make_building(self, site, rooms):\n        pass\n"
+            "    def _make_building(self, site):\n        pass\n"
+        )
+        by_name = {fn.name: fn for fn in _all_funcs(ast.parse(src))}
+        self.assertTrue(_is_unittest_dispatched(by_name["setUp"]))
+        self.assertTrue(_is_unittest_dispatched(by_name["test_thing"]))
+        self.assertFalse(
+            _is_unittest_dispatched(by_name["test_make_building"]),
+            "a test_-named function taking fixture arguments must stay in the scan",
+        )
+        self.assertFalse(_is_unittest_dispatched(by_name["_make_building"]))
+
+    def test_baseline_is_group_keyed_not_a_flat_pair_set(self):
+        # [#a170t3] Guards the containment shape: a cross-group union must not pass.
+        self.assertTrue(all(isinstance(g, frozenset) for g in _COPY_PASTE_BASELINE))
+        groups = [g for g in _COPY_PASTE_BASELINE if len(g) >= 2]
+        self.assertGreaterEqual(len(groups), 2, "need two groups to test cross-group leakage")
+        smuggled = {sorted(groups[0])[0], sorted(groups[1])[0]}
+        self.assertFalse(
+            any(smuggled <= g for g in _COPY_PASTE_BASELINE),
+            "one member from each of two different baselined groups must NOT be accepted",
+        )
+
     def test_no_new_copy_pasted_function_body(self):
         groups = _copy_pasted_groups()
         offenders = {}
         for sig, locs in groups.items():
             keys = {(rel, name) for rel, _lineno, name in locs}
-            if not keys <= _COPY_PASTE_BASELINE:
+            # Must fit inside ONE baselined group: accepting a union across groups
+            # would let two already-listed helpers become copies of each other.
+            if not any(keys <= group for group in _COPY_PASTE_BASELINE):
                 offenders[sig] = locs
         self.assertEqual(
             offenders,

@@ -15,11 +15,22 @@ entirely — and 4 of them already violated it undetected. The scan is now
 app-wide, so a test relocated out of ``apex/tests/`` carries the ratchet with it
 instead of silently leaving it.
 
+Importer scope (A-170): the offender scan used to iterate ``test_*.py`` only, so
+the ban was launderable in one hop. ``tests/`` legitimately holds non-``test_``
+modules — ``factories.py``, ``_helpers.py``, ``workspace_reachability.py`` — and a
+new one could ``from .test_x import helper`` and re-export it; every ``test_*``
+module then imports the shim, no ``test_*`` module imports a ``test_*`` module, and
+the ratchet reports clean while the coupling it exists to prevent is fully restored.
+The scan now treats EVERY ``.py`` under ``apex/`` as a possible importer. That is
+strictly stronger than closing the ``tests/``-helper hole alone and costs nothing:
+importing a test module is never legitimate from anywhere, production included, and
+the app-wide sweep finds 0 offenders today — so the baseline stays empty.
+
 The baseline is EMPTY (P-135 retired all 44 pairs — every shared helper and the
 base ``ApexHabitatTestCase`` were promoted into ``tests/factories.py``). The
-ratchet is therefore absolute: ANY import of a ``test_*`` module from another
-test file fails. Put the shared fixture in ``tests/factories.py`` (a
-non-``test_*`` module) instead of importing from a sibling test module.
+ratchet is therefore absolute: ANY import of a ``test_*`` module from any other
+module fails. Put the shared fixture in ``tests/factories.py`` (a non-``test_*``
+module) instead of importing from a sibling test module.
 """
 
 import ast
@@ -91,24 +102,25 @@ def _is_test_module(dotted):
     return bool(dotted) and dotted.rsplit(".", 1)[-1].startswith("test_")
 
 
-def _test_files():
-    """Every ``test_*.py`` anywhere under ``apex/`` — central AND colocated."""
+def _importer_files():
+    """Every ``.py`` anywhere under ``apex/`` — the offender universe.
+
+    Deliberately NOT just ``test_*.py``: a non-``test_`` module (a new
+    ``tests/`` helper, or any production module) importing a ``test_*`` module is
+    the laundering path this guard exists to close, and it is never legitimate
+    from any file, so the widest possible importer set is also the correct one."""
     out = []
-    for path in sorted(
-        glob.glob(os.path.join(_APP_ROOT, "**", "test_*.py"), recursive=True)
-    ):
+    for path in sorted(glob.glob(os.path.join(_APP_ROOT, "**", "*.py"), recursive=True)):
         if "node_modules" in path:
             continue
         out.append(path)
-    # tests/*.py non-test_ helpers (factories.py, _helpers.py) are legitimate
-    # shared homes and are never scanned as offenders — only as import targets.
     return out
 
 
 def _scan():
     """Return the set of (relpath, imported_test_module) pairs, app-wide."""
     found = set()
-    for path in _test_files():
+    for path in _importer_files():
         rel = os.path.relpath(path, _APP_ROOT)
         with open(path, encoding="utf-8") as fh:
             tree = ast.parse(fh.read(), filename=rel)
@@ -130,6 +142,20 @@ def _scan():
 
 
 class TestNoCrossTestImports(unittest.TestCase):
+    def test_importer_scan_covers_non_test_modules(self):
+        # [#a170i1] The A-170 blind spot: the shared non-test_ helpers under tests/
+        # are the laundering vector, so they must be in the OFFENDER universe, not
+        # only the import-target universe.
+        scanned = {os.path.relpath(p, _APP_ROOT) for p in _importer_files()}
+        for helper in ("factories.py", "_helpers.py", "workspace_reachability.py"):
+            rel = os.path.join("tests", helper)
+            self.assertTrue(os.path.exists(os.path.join(_APP_ROOT, rel)), f"{rel} moved — update this test")
+            self.assertIn(rel, scanned, f"{rel} could launder the ban if left unscanned")
+        self.assertTrue(
+            any(not os.path.basename(p).startswith("test_") for p in scanned),
+            "offender universe must not be limited to test_*.py",
+        )
+
     def test_no_new_cross_test_module_imports(self):
         found = _scan()
         new = found - _BASELINE
