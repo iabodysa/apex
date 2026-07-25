@@ -43,7 +43,6 @@ _APP_ROOT = os.path.dirname(_TESTS_DIR)
 _BASELINE = frozenset(
     {
         "test_action_inbox.py",
-        "test_alert_dedupe_boundary.py",
         "test_apex_settings_rearch.py",
         "test_b5_role_workspaces.py",
         "test_backfill_assignment_facility_supervisor.py",
@@ -70,7 +69,6 @@ _BASELINE = frozenset(
         "test_fuel_claim_workflow.py",
         "test_fuel_exception_case_workflow.py",
         "test_fuel_request_workflow.py",
-        "test_get_driver_for_user.py",
         "test_habitat_approval_workflows.py",
         "test_habitat_expiry_notifications.py",
         "test_housing_count_page_access_gate.py",
@@ -87,9 +85,7 @@ _BASELINE = frozenset(
         "test_no_cross_test_imports.py",
         "test_notification_email_resilience.py",
         "test_onboarding_steps.py",
-        "test_open_alerts_digest.py",
         "test_operations_alert_helper.py",
-        "test_operations_alert_resolution.py",
         "test_permission_parity.py",
         "test_permission_scope_cache.py",
         "test_permission_scope_shared.py",
@@ -111,7 +107,6 @@ _BASELINE = frozenset(
         "test_salis_auto_email_reports.py",
         "test_salis_payment_request_workflow.py",
         "test_salis_state_flow.py",
-        "test_salis_utils.py",
         "test_salis_workflow_seed_guard.py",
         "test_salis_workflow_transitions.py",
         "test_schema_integrity.py",
@@ -139,7 +134,6 @@ _BASELINE = frozenset(
         "test_worker_party.py",
         "test_workflow_state_governance.py",
         "test_workflow_submit_guard.py",
-        "test_workshop_overstay.py",
         "test_workspace_visibility.py",
     }
 )

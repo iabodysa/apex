@@ -513,7 +513,7 @@ _COPY_PASTE_BASELINE = frozenset(
             {
                 ("salis/test_fuel_request_unified.py", "_purge"),
                 ("tests/test_fuel_request_workflow.py", "_purge"),
-                ("tests/test_operations_alert_resolution.py", "_purge_request"),
+                ("salis/tasks/test_operations_alert_resolution.py", "_purge_request"),
             }
         ),
         # Three helpers pasted wholesale between the rental accrual/settlement pair.
