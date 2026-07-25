@@ -37,8 +37,18 @@ _ROOT = "Salis"  # [#h4z3kl]
 class TestReorderRootWorkspace(FrappeTestCase):
     def setUp(self):
         self._synthetic = []
-        if not self._is_single_root_module():
-            self.skipTest(f"{_MODULE} root workspace not synced as a single public root on this site")
+        # [#a140as] The single-public-root shape is the precondition execute() acts on
+        # AND the thing this class asserts, so skipping on it reported success for a
+        # site whose workspaces never synced. The app ships salis/workspace/salis.json
+        # with parent_page "" and its two children under it, and install/migrate
+        # imports them, so anything else is a real regression — fail, do not skip.
+        roots = self._public_roots()
+        self.assertEqual(
+            roots,
+            [_ROOT],
+            f"{_MODULE} must carry exactly one public root workspace ({_ROOT}); "
+            f"found {roots}. The shipped workspace JSONs are imported on install/migrate.",
+        )
         # [#k5mwfr]
         self._orig_dev_mode = frappe.conf.get("developer_mode")
         frappe.conf.developer_mode = 0
@@ -57,13 +67,14 @@ class TestReorderRootWorkspace(FrappeTestCase):
             frappe.conf.developer_mode = self._orig_dev_mode
 
     # [#f9hua6]
-    def _is_single_root_module(self):
-        roots = frappe.get_all(
+    def _public_roots(self):
+        """The public, parent-less workspaces of _MODULE — the set execute() requires
+        to hold exactly one member before it will reorder anything."""
+        return frappe.get_all(
             "Workspace",
             filters={"module": _MODULE, "public": 1, "for_user": "", "parent_page": ""},
             pluck="name",
         )
-        return roots == [_ROOT]
 
     def _module_creations(self):
         """{workspace_name: creation-as-datetime} for every public row of _MODULE."""

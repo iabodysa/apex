@@ -29,6 +29,7 @@ from apex.salis.utils import (
     raise_rider_clearance_task,
     rider_block_reason,
 )
+from apex.tests import factories
 
 test_ignore = [
     "Employee",
@@ -131,10 +132,16 @@ class TestRiderLeaveGuard(FrappeTestCase):
             )
 
     def test_inactive_employee_blocks_when_hrms_present(self):
-        """Employee Inactive/Left must block — only meaningful where HRMS/ERPNext
-        Employee exists; skipped otherwise so the suite stays bench-portable."""
-        if not frappe.db.exists("DocType", "Employee"):
-            self.skipTest("Employee DocType not installed on this bench.")
+        """A rider whose HRMS Employee has Left must be blocked.
+
+        [#a140as] hrms and erpnext are both in hooks.required_apps, so Employee is
+        always installed wherever apex is. The old ``skipTest`` on its absence made
+        this the one rider-block source that CI never actually exercised.
+        """
+        self.assertTrue(
+            frappe.db.exists("DocType", "Employee"),
+            "Employee must be installed — hrms is a required app",
+        )
         emp = self._left_employee("T119 Left Emp")
         # [#surnkf]
         driver = _driver("T119 EmpLeft Rider", status="Active", employee=emp)
@@ -251,7 +258,9 @@ class TestRiderLeaveGuard(FrappeTestCase):
         if emp:
             frappe.db.set_value("Employee", emp, "status", "Left")
             return emp
-        company = frappe.db.get_value("Company", {}, "name")
+        # [#a140fx] Built, not assumed: an Employee needs a Company, and nothing in
+        # before_tests guarantees one on a site that was never wizard-bootstrapped.
+        company = factories.ensure_company()
         doc = frappe.get_doc(
             {
                 "doctype": "Employee",

@@ -86,6 +86,22 @@ class _WorkflowSoDMixin:
     def _seeded(self):
         return get_workflow_name(self.DOCTYPE) == self.WORKFLOW
 
+    def _require_seeded(self):
+        """``setUpClass`` seeds the workflow, so an absent one is a real failure.
+
+        ``seed_habitat_workflows`` swallows a per-workflow error into the Error Log
+        (deliberately — a migrate must never abort on it), so this assertion is the
+        only thing standing between a broken seed and a hollow green. It used to be
+        a ``skipTest``, which reported success for a gate that was never applied —
+        the same A-077 hole ``test_salis_workflow_seed_guard`` closes for Salis.
+        """
+        self.assertTrue(
+            self._seeded(),
+            f"{self.WORKFLOW} must be seeded onto {self.DOCTYPE} by setUpClass; "
+            f"get_workflow_name resolved {get_workflow_name(self.DOCTYPE)!r} instead. "
+            f"Check the Error Log for a seed_habitat_workflows failure.",
+        )
+
     PENDING_STATE = "Pending Approval"
     STATE_FIELD = "status"
 
@@ -114,8 +130,7 @@ class _WorkflowSoDMixin:
         )
 
     def test_owner_cannot_self_approve(self):
-        if not self._seeded():
-            self.skipTest(f"{self.WORKFLOW} not seeded on this site")
+        self._require_seeded()
         doc = self._to_pending(self._draft(self.maker))
 
         # [#e1edaq]
@@ -126,8 +141,7 @@ class _WorkflowSoDMixin:
         self.assertEqual(doc.docstatus, 0)
 
     def test_other_approver_is_offered_approve(self):
-        if not self._seeded():
-            self.skipTest(f"{self.WORKFLOW} not seeded on this site")
+        self._require_seeded()
         doc = self._to_pending(self._draft(self.maker))
 
         # [#7kq0et]
@@ -135,8 +149,7 @@ class _WorkflowSoDMixin:
         self.assertIn(self.APPROVE_ACTION, _actions(doc))
 
     def test_wrong_role_cannot_approve(self):
-        if not self._seeded():
-            self.skipTest(f"{self.WORKFLOW} not seeded on this site")
+        self._require_seeded()
         doc = self._to_pending(self._draft(self.maker))
 
         # [#tirqxa]

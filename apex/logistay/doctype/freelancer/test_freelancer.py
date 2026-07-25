@@ -4,19 +4,11 @@ permlevel-1 PII gate, and the accounting-party proof (Journal/Payment Entry)."""
 
 from __future__ import annotations
 
-import unittest
-
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, nowdate
 
-
-def _accounting_available() -> bool:
-    """ERPNext accounting present? Guard the Party-Entry proof so the suite runs
-    on a site without erpnext installed."""
-    return frappe.db.exists("DocType", "Journal Entry") and frappe.db.exists(
-        "Party Type", "Freelancer"
-    )
+from apex.tests import factories
 
 
 class TestFreelancer(FrappeTestCase):
@@ -95,34 +87,35 @@ class TestFreelancer(FrappeTestCase):
         finally:
             frappe.set_user("Administrator")
 
-    @unittest.skipUnless(_accounting_available(), "erpnext accounting not installed")
     def test_freelance_is_an_accounting_party(self):
         """The core proof: with the custom Party Type registered, a Journal Entry
-        can carry party_type='Freelancer' + party=<a freelance>."""
+        can carry party_type='Freelancer' + party=<a freelance>.
+
+        [#a140as] The registration used to be a class-level ``skipUnless``, evaluated
+        at IMPORT time — so the one test that proves the shipped ``party_type.json``
+        fixture actually landed was silently dropped whenever it had not. Assert it:
+        the Party Type is shipped by this app and erpnext is a required app, so a
+        missing one is a fixture regression, not a portability concern.
+        """
+        self.assertTrue(
+            frappe.db.exists("DocType", "Journal Entry"),
+            "ERPNext Journal Entry must be installed — erpnext is a required app",
+        )
+        self.assertTrue(
+            frappe.db.exists("Party Type", "Freelancer"),
+            "the Freelancer Party Type must be registered — see apex/fixtures/party_type.json",
+        )
+
         freelance = self._doc().insert(ignore_permissions=True)
 
-        company = frappe.db.get_value("Company", {}, "name")
-        if not company:
-            self.skipTest("no Company configured")
+        # [#a140fx] Built, not skipped on: a fresh CI site's chart is not guaranteed
+        # to carry a non-group Payable and Cash account in the company's base
+        # currency, and without both there is no Journal Entry to hang the party on.
+        company = factories.ensure_company()
         # [#jbf66z]
         base_currency = frappe.db.get_value("Company", company, "default_currency")
-
-        def _account(account_type):
-            return frappe.db.get_value(
-                "Account",
-                {
-                    "company": company,
-                    "account_type": account_type,
-                    "is_group": 0,
-                    "account_currency": base_currency,
-                },
-                "name",
-            )
-
-        payable = _account("Payable")
-        cash = _account("Cash")
-        if not (payable and cash):
-            self.skipTest("no payable/cash account configured")
+        payable = factories.ensure_account(company, "Payable", "Liability", base_currency)
+        cash = factories.ensure_account(company, "Cash", "Asset", base_currency)
 
         je = frappe.get_doc(
             {

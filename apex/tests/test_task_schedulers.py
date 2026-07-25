@@ -2,12 +2,20 @@
 # [#j03s5a]
 """Unit tests for habitat/tasks.py scheduler functions.
 
-These tests use unittest.mock to avoid needing a live Frappe database.
-They verify correctness of logic without integration dependencies.
+Most of these need no Frappe at all — the occupancy and Select-option cases are
+pure arithmetic and set algebra, verified without a database.
+
+``TestDeadBeforeSaveGuardsRemoved`` is the exception: it imports the real
+controller modules, so it needs frappe IMPORTABLE (not a live site). That always
+holds under ``bench run-tests``. It used to swallow an ImportError into a
+``skipTest``, which turned "the controllers no longer import" — a genuine
+breakage — into a green run, so the import is now allowed to fail loudly.
 """
 
 from __future__ import annotations
 
+import importlib
+import inspect
 import unittest
 
 
@@ -116,43 +124,38 @@ class TestDeadBeforeSaveGuardsRemoved(unittest.TestCase):
     """Finding 4: dead before_save guards that check self.doctype != "..." have been removed."""
 
     def _get_before_save(self, module_path, class_name):
-        """Import a controller module and return its before_save method if present."""
-        import importlib
+        """Import a controller module and return its before_save method if present.
+
+        An ImportError is deliberately allowed to propagate: a controller module
+        that no longer imports is a failure, not a reason to report success.
+        """
         mod = importlib.import_module(module_path)
         cls = getattr(mod, class_name, None)
-        if cls is None:
-            return None
+        self.assertIsNotNone(cls, f"{class_name} missing from {module_path}")
         return getattr(cls, "before_save", None)
+
+    def _assert_no_dead_doctype_guard(self, module_path, class_name):
+        # [#scivu8] Either the controller has no before_save at all (the intended end
+        # state), or it has one that no longer carries the dead doctype-mismatch throw.
+        bs = self._get_before_save(module_path, class_name)
+        if bs is None:
+            return
+        # [#f3k0ws]
+        self.assertNotIn('frappe.throw("DocType mismatch")', inspect.getsource(bs))
 
     def test_accommodation_custody_item_has_no_before_save(self):
         """AccommodationCustodyItem must not define a dead before_save guard."""
-        try:
-            bs = self._get_before_save(
-                "apex.habitat.doctype.accommodation_custody_item.accommodation_custody_item",
-                "AccommodationCustodyItem",
-            )
-            # [#scivu8]
-            import inspect
-            if bs is not None:
-                # [#f3k0ws]
-                src = inspect.getsource(bs)
-                self.assertNotIn('frappe.throw("DocType mismatch")', src)
-        except ImportError:
-            self.skipTest("Frappe not available in this environment")
+        self._assert_no_dead_doctype_guard(
+            "apex.habitat.doctype.accommodation_custody_item.accommodation_custody_item",
+            "AccommodationCustodyItem",
+        )
 
     def test_maintenance_work_order_has_no_dead_guard(self):
         """MaintenanceWorkOrder must not have a dead doctype-mismatch guard in before_save."""
-        try:
-            bs = self._get_before_save(
-                "apex.habitat.doctype.maintenance_work_order.maintenance_work_order",
-                "MaintenanceWorkOrder",
-            )
-            import inspect
-            if bs is not None:
-                src = inspect.getsource(bs)
-                self.assertNotIn('frappe.throw("DocType mismatch")', src)
-        except ImportError:
-            self.skipTest("Frappe not available in this environment")
+        self._assert_no_dead_doctype_guard(
+            "apex.habitat.doctype.maintenance_work_order.maintenance_work_order",
+            "MaintenanceWorkOrder",
+        )
 
 
 if __name__ == "__main__":

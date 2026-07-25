@@ -16,6 +16,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
 from apex.apex_core.utils.employee_recovery import find_recovery_advance, raise_recovery_advance
+from apex.tests import factories
 
 
 class TestVehicleIncident(FrappeTestCase):
@@ -131,22 +132,33 @@ class TestVehicleIncident(FrappeTestCase):
         self.assertTrue(positive.name)
 
     def _employee(self):
-        """An Active employee to recover from, reusing the site's own if there is one."""
-        company = frappe.db.get_value("Company", {}, "name")
-        employee = frappe.db.get_value("Employee", {"status": "Active", "company": company})
-        if employee:
-            return company, employee
-        emp = frappe.get_doc(
-            {
-                "doctype": "Employee",
-                "first_name": f"Recovery {frappe.generate_hash(length=12)}",
-                "company": company,
-                "gender": "Male",
-                "date_of_birth": "1990-01-01",
-                "date_of_joining": "2020-01-01",
-            }
-        ).insert(ignore_permissions=True)
-        return company, emp.name
+        """A brand-new Active employee to recover from, on the site's company.
+
+        Never reuses whatever Employee the site happens to carry: a recovery test
+        that deducts from another test's worker passes for a reason unrelated to
+        the code under test.
+        """
+        company = factories.ensure_company()
+        return company, factories.make_payroll_employee(company, name_prefix="Incident Recovery")
+
+    def _pin_advance_account(self, company, account):
+        """Point ``company`` at ``account`` as its Default Employee Advance Account,
+        restoring the previous value on teardown.
+
+        ``FrappeTestCase`` rolls back only at CLASS teardown while every later
+        class's ``setUpClass`` commits, so an un-restored write here leaks into the
+        rest of the suite — which is how a sibling test ends up raising (or failing
+        to raise) an advance for a reason this file set.
+        """
+        previous = frappe.db.get_value("Company", company, "default_employee_advance_account")
+        self.addCleanup(
+            frappe.db.set_value,
+            "Company",
+            company,
+            "default_employee_advance_account",
+            previous,
+        )
+        frappe.db.set_value("Company", company, "default_employee_advance_account", account)
 
     def _recovery_incident(self, **overrides):
         company, employee = self._employee()
@@ -205,12 +217,11 @@ class TestVehicleIncident(FrappeTestCase):
 
     def test_signed_recovery_maps_once_to_one_employee_advance(self):
         company, _employee = self._employee()
-        receivable = frappe.db.get_value(
-            "Account", {"company": company, "account_type": "Receivable", "is_group": 0}, "name"
-        )
-        if not receivable:
-            self.skipTest("site has no Receivable account to use as the Employee Advance account")
-        frappe.db.set_value("Company", company, "default_employee_advance_account", receivable)
+        # [#a140fx] Built, not skipped on: a fresh CI site's chart may carry no
+        # non-group Receivable account, and HRMS refuses to submit an Employee
+        # Advance on any other account type — so the skip hid the whole proof.
+        receivable = factories.ensure_account(company, "Receivable", "Asset")
+        self._pin_advance_account(company, receivable)
 
         inc = self._recovery_incident(worker_signature="data:image/png;base64,SIGNED")
         inc.submit()
@@ -249,7 +260,7 @@ class TestVehicleIncident(FrappeTestCase):
 
     def test_recovery_is_a_noop_when_no_advance_account_is_configured(self):
         company, _employee = self._employee()
-        frappe.db.set_value("Company", company, "default_employee_advance_account", None)
+        self._pin_advance_account(company, None)
         inc = self._recovery_incident(worker_signature="data:image/png;base64,SIGNED")
         inc.submit()
         inc.reload()

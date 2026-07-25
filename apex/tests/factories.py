@@ -574,3 +574,168 @@ def purge_test_buildings():
         frappe.db.commit()
     return removed
 
+
+# [#a140fx] Accounting / payroll chain fixtures (A-140).
+#
+# ``tests/before_tests.py`` bootstraps a Company and a chart of accounts through
+# ERPNext's setup wizard, but NOTHING else: no Employee, no guaranteed Receivable
+# or Payable account, no wage. Tests that needed those used to ``skipTest`` and
+# report success without ever exercising the behaviour. These builders replace
+# that skip with a fixture.
+#
+# Site-wide masters (Company, Account) are get-or-create, because a second copy
+# would change what "the site's company" means for every other test. Records that
+# must be private to a test class (Employee, Salary Component, Salary Structure)
+# are always NEW, because borrowing whatever an earlier test happened to leave
+# behind is the order-dependence these fixtures exist to remove.
+
+
+def fixture_tag():
+    """A collision-free fixture suffix (>=12 random characters — the floor
+    ``apex/tests/test_fixture_identifier_entropy.py`` enforces)."""
+    return frappe.generate_hash(length=12)
+
+
+def ensure_company(name_prefix="Apex Test"):
+    """The site's Company, created when the site has none. Returns its name.
+
+    ``before_tests`` normally provisions one, so this usually returns what is
+    already there; the create path is what keeps a test off ``skipTest`` on a site
+    that was never wizard-bootstrapped.
+    """
+    existing = frappe.db.get_value("Company", {}, "name")
+    if existing:
+        return existing
+    tag = fixture_tag()
+    return frappe.get_doc(
+        {
+            "doctype": "Company",
+            "company_name": f"{name_prefix} {tag}",
+            # Full hash, never a slice — a narrowed random identifier is exactly
+            # what the fixture-entropy guard forbids.
+            "abbr": f"AT{tag}",
+            "default_currency": "SAR",
+            "country": "Saudi Arabia",
+        }
+    ).insert(ignore_permissions=True).name
+
+
+def ensure_account(company, account_type, root_type, account_currency=None):
+    """A non-group Account of ``account_type`` on ``company``; created under the
+    chart's ``root_type`` group when the chart has none. Returns its name.
+
+    HRMS refuses to submit an Employee Advance whose advance account is not
+    Receivable, and a Journal Entry party proof needs a real Payable/Cash pair, so
+    this account type is what those chains actually depend on. ``account_currency``
+    narrows both the lookup and the created row when a caller needs the company's
+    base currency specifically.
+    """
+    filters = {"company": company, "account_type": account_type, "is_group": 0}
+    if account_currency:
+        filters["account_currency"] = account_currency
+    existing = frappe.db.get_value("Account", filters, "name")
+    if existing:
+        return existing
+    parent = frappe.db.get_value(
+        "Account", {"company": company, "is_group": 1, "root_type": root_type}, "name"
+    )
+    assert parent, (
+        f"company {company} has no {root_type} group account to hang a "
+        f"{account_type} account under"
+    )
+    values = {
+        "doctype": "Account",
+        "account_name": f"Apex {account_type} {fixture_tag()}",
+        "company": company,
+        "parent_account": parent,
+        "root_type": root_type,
+        "account_type": account_type,
+        "is_group": 0,
+    }
+    if account_currency:
+        values["account_currency"] = account_currency
+    return frappe.get_doc(values).insert(ignore_permissions=True).name
+
+
+def make_payroll_employee(company, name_prefix="Apex Recovery"):
+    """A brand-new Active Employee on ``company``. Returns its name.
+
+    Deliberately never reuses the site's existing Employee: a test that recovers
+    from whatever worker an earlier test left behind passes for a reason that has
+    nothing to do with the code under test.
+    """
+    return frappe.get_doc(
+        {
+            "doctype": "Employee",
+            "first_name": f"{name_prefix} {fixture_tag()}",
+            "company": company,
+            "status": "Active",
+            "gender": "Male",
+            "date_of_birth": "1990-01-01",
+            "date_of_joining": "2020-01-01",
+        }
+    ).insert(ignore_permissions=True).name
+
+
+def make_salary_component(component_type, prefix="Apex"):
+    """A brand-new Salary Component of ``component_type`` (Earning / Deduction).
+
+    Type matters: an Earning component would silently PAY the worker the amount a
+    Deduction component recovers, so the recovery tests need both to prove the
+    engine tells them apart.
+    """
+    tag = fixture_tag()
+    return frappe.get_doc(
+        {
+            "doctype": "Salary Component",
+            "salary_component": f"{prefix} {component_type} {tag}",
+            "salary_component_abbr": f"{prefix[0]}{component_type[0]}{tag}",
+            "type": component_type,
+        }
+    ).insert(ignore_permissions=True).name
+
+
+def assign_monthly_wage(employee, company, wage, currency=None):
+    """Give ``employee`` a known monthly wage natively: a submitted Salary
+    Structure plus a submitted Salary Structure Assignment. Returns the structure.
+
+    ``employee_recovery._monthly_wage`` reads the assignment's ``base``, and every
+    statutory cap is a percentage of it. Without this a recovery test can only
+    ever observe "no wage known, recover nothing" — a zero that proves nothing.
+    """
+    currency = currency or frappe.db.get_value("Company", company, "default_currency") or "SAR"
+    tag = fixture_tag()
+    structure = frappe.get_doc(
+        {
+            "doctype": "Salary Structure",
+            "name": f"Apex Structure {tag}",
+            "company": company,
+            "is_active": "Yes",
+            "currency": currency,
+            "payroll_frequency": "Monthly",
+            "earnings": [
+                {
+                    "doctype": "Salary Detail",
+                    "salary_component": make_salary_component("Earning"),
+                    "amount": wage,
+                    "parentfield": "earnings",
+                }
+            ],
+        }
+    ).insert(ignore_permissions=True)
+    structure.submit()
+
+    assignment = frappe.get_doc(
+        {
+            "doctype": "Salary Structure Assignment",
+            "employee": employee,
+            "salary_structure": structure.name,
+            "company": company,
+            "currency": currency,
+            "from_date": "2020-01-01",
+            "base": wage,
+        }
+    ).insert(ignore_permissions=True)
+    assignment.submit()
+    return structure.name
+
