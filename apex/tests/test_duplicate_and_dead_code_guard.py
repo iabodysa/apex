@@ -36,7 +36,7 @@ tests/factories.py (P-135's shared home). A-176 is draining that set: each batch
 promotes one helper into factories.py (or a non-``test_`` sibling, since
 test_no_cross_test_imports.py forbids a test module importing a test module), points
 every copy at it, and deletes the group from _COPY_PASTE_BASELINE in the same commit,
-so the frozen set only ever shrinks. Remaining test groups: 9 / 17 functions.
+so the frozen set only ever shrinks. Remaining test groups: 5 / 10 functions.
 
   1. TestDuplicateTopLevelFunctionNames — two different files each bind
      a same-named PUBLIC module-level function. Scoped to module level (a Document
@@ -412,25 +412,6 @@ _COPY_PASTE_BASELINE = frozenset(
             }
         ),
         # --- Tests (frozen 2026-07-25 by A-170; drained by A-176) ---
-        # Three helpers pasted wholesale between the rental accrual/settlement pair.
-        frozenset(
-            {
-                ("salis/doctype/rental_accrual_ledger/test_rental_accrual_ledger.py", "_approve"),
-                ("salis/doctype/rental_settlement/test_rental_settlement.py", "_approve"),
-            }
-        ),
-        frozenset(
-            {
-                ("salis/doctype/rental_accrual_ledger/test_rental_accrual_ledger.py", "_office"),
-                ("salis/doctype/rental_settlement/test_rental_settlement.py", "_office"),
-            }
-        ),
-        frozenset(
-            {
-                ("salis/doctype/rental_accrual_ledger/test_rental_accrual_ledger.py", "_vehicle"),
-                ("salis/doctype/rental_settlement/test_rental_settlement.py", "_vehicle"),
-            }
-        ),
         frozenset(
             {
                 ("apex_core/test_payment_router.py", "_set_gl_posting"),
@@ -459,14 +440,6 @@ _COPY_PASTE_BASELINE = frozenset(
             {
                 ("habitat/doctype/safety_finding_ledger/test_safety_finding_ledger.py", "_round"),
                 ("habitat/doctype/safety_round/test_safety_round.py", "_round"),
-            }
-        ),
-        # Single-member group: two classes in ONE file share a _get_doc body, so the
-        # (path, name) key collapses to one entry. Kept as a group so the pair stays
-        # frozen rather than disappearing from the scan entirely.
-        frozenset(
-            {
-                ("habitat/tasks/test_cost_posting.py", "_get_doc"),
             }
         ),
     }

@@ -200,16 +200,33 @@ def purge_trip_request(tr_name, rp_name):
     purge_doc("Transport Request", tr_name)
 
 
-def make_vehicle(plate, odometer=None, project=None):
+def make_rental_office(name):
+    """Get-or-create an Active Rental Office by ``office_name``; return its name."""
+    office = frappe.db.get_value("Rental Office", {"office_name": name}, "name")
+    if not office:
+        office = frappe.get_doc(
+            {"doctype": "Rental Office", "office_name": name, "status": "Active"}
+        ).insert(ignore_permissions=True).name
+    return office
+
+
+def make_vehicle(plate, odometer=None, project=None, ownership=None):
     """Get-or-create an Active Salis Vehicle by ``plate_number``; return its name.
 
-    ``odometer`` / ``project`` are applied on the EXISTING row too, not only on a
-    freshly created one: the dispatch-trip workflow tests pass ``odometer=0`` to
-    assert a reading a previous module may already have moved.
+    Every optional field is applied on the EXISTING row too, not only on a freshly
+    created one: the dispatch-trip workflow tests pass ``odometer=0`` to assert a
+    reading a previous module may already have moved, and a rental test asking for
+    ``ownership="Rented"`` needs that to hold whoever created the plate first.
     """
     name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
     values = {
-        k: v for k, v in (("odometer", odometer), ("project", project)) if v is not None
+        k: v
+        for k, v in (
+            ("odometer", odometer),
+            ("project", project),
+            ("ownership", ownership),
+        )
+        if v is not None
     }
     if not name:
         return frappe.get_doc(

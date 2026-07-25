@@ -38,6 +38,29 @@ def notification_recipients(notification_name, doc):
     return recipients
 
 
+def approve_rental_settlement(rs, manager):
+    """Drive a Rental Settlement Draft -> Reconciled -> Approved (which submits it)
+    through its native workflow as ``manager``; returns the reloaded document.
+
+    Falls back to a direct status write + submit when the workflow is not seeded on
+    this site, so the accrual assertions still run on a bench that predates it.
+    """
+    from frappe.model.workflow import apply_workflow, get_workflow_name
+
+    if get_workflow_name("Rental Settlement") == "Rental Settlement Workflow":
+        frappe.set_user(manager)
+        apply_workflow(rs, "Reconcile")
+        rs.reload()
+        apply_workflow(rs, "Approve")
+        frappe.set_user("Administrator")
+    else:
+        rs.status = "Approved"
+        rs.save(ignore_permissions=True)
+        rs.submit()
+    rs.reload()
+    return rs
+
+
 def cancel_submitted_for_cleanup(doc):
     """Cancel a submitted doc during teardown so it can be deleted, respecting the
     A-083 workflow-bypass guard (``apex.apex_core.utils.workflow_guard``).
