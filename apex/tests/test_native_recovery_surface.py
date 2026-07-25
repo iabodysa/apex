@@ -124,9 +124,18 @@ class TestNoDanglingRetiredDoctypeReference(unittest.TestCase):
         self.assertGreater(len(files), 200, "package text scan found almost nothing — path broke")
 
     def test_no_retired_doctype_directory_remains(self):
+        """The clause is that the retired DocType no longer SHIPS.
+
+        Judged by content, not by the directory node: git tracks files, never
+        empty directories, so a working copy that once held the DocType keeps an
+        empty folder that a fresh CI checkout does not have. Asserting on the
+        node alone makes the verdict depend on which machine runs it — the same
+        defect A-135 fixed in the comment gate.
+        """
         leftovers = sorted(
             _rel(p)
             for p in glob.glob(os.path.join(APP_ROOT, "*", "doctype", _RETIRED_SLUG))
+            if any(os.scandir(p))
         )
         self.assertEqual(
             leftovers, [], f"the retired {_RETIRED_DOCTYPE} DocType directory is back"

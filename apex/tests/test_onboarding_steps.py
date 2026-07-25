@@ -39,7 +39,7 @@ DAILY_FLOW_CONTRACT = (
         "Housing Assignment",
     ),
     ("Resident Supervisor", "Custody", "Custody Go-Live", "Issue Custody", "Custody Issue"),
-    ("Fleet Supervisor", "fleet", "Salis Fuel Setup", "Record a Vehicle Handover", "Vehicle Handover"),
+    ("Fleet Supervisor", "Fleet", "Salis Fuel Setup", "Record a Vehicle Handover", "Vehicle Handover"),
     ("Safety Officer", "Safety", "Safety Readiness", "Record a Safety Round", "Safety Round"),
     ("Safety Officer", "Safety", "Safety Readiness", "Report a Safety Incident", "Safety Incident"),
     (

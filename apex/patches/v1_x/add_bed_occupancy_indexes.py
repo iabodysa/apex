@@ -22,21 +22,13 @@ guarantee the framework re-adds a dedicated one. The saving is one small varchar
 index; revisit only against a real per-site ``SHOW INDEX`` census.
 """
 
-import frappe
-
-
 def execute():
-    if not frappe.db.exists("DocType", "Housing Assignment"):
-        return
+    # [#bd7qm2] This patch exists for its REGISTRATION, not for a body of its own:
+    # v0_7 is already logged complete on every site, so it can never run again,
+    # while this module has never been seen by any Patch Log and therefore will.
+    # The work itself is v0_7's, which in turn delegates to the controller
+    # declaration — one source for the index names and column sets, so the
+    # fresh-install path and both patch paths cannot drift apart.
+    from apex.patches.v0_7 import add_bed_assignment_index
 
-    # [#bd7qm2] same index names the controller hook uses, so a site that already
-    # has them is a no-op instead of gaining duplicates under a second name.
-    from apex.apex_core.utils.ledger_index import add_index_guarded
-
-    add_index_guarded("Housing Assignment", ["bed"], "idx_asgn_bed")
-    add_index_guarded(
-        "Housing Assignment",
-        ["bed", "docstatus", "check_out_date"],
-        "idx_asgn_bed_active",
-    )
-    frappe.db.commit()
+    add_bed_assignment_index.execute()

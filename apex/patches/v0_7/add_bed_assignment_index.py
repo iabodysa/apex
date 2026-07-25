@@ -22,18 +22,12 @@ def execute():
     if not frappe.db.exists("DocType", "Housing Assignment"):
         return
 
-    from apex.apex_core.utils.ledger_index import add_index_guarded
-
-    # [#44ssmk] [#hb3fq9] `bed` is a Link (varchar 140), so the helper's
+    # [#44ssmk] [#cfszw1] Delegate to the controller declaration — one source for
+    # the index names and column sets, so this patch and the fresh-install path
+    # cannot drift apart. `bed` is a Link (varchar 140), so the helper's
     # full-column index is the same index the old `(bed`(140))` DDL created.
-    add_index_guarded("Housing Assignment", ["bed"], "idx_asgn_bed")
+    from apex.habitat.doctype.housing_assignment import housing_assignment
 
-    # [#cfszw1] [#kx0m7d] serves the active-occupancy check in
-    # validate()/on_submit()/on_cancel().
-    add_index_guarded(
-        "Housing Assignment",
-        ["bed", "docstatus", "check_out_date"],
-        "idx_asgn_bed_active",
-    )
+    housing_assignment.on_doctype_update()
 
     frappe.db.commit()

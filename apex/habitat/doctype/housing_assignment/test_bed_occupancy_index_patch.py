@@ -15,6 +15,13 @@ if the two drift apart a site ends up with the same index twice under two names.
 
 No live site or DB is needed: the DDL boundary (``add_index_guarded``) is mocked, so
 what is asserted is the delegation itself, never the SQL.
+
+The v1_x patch carries no body of its own — it exists so an already-installed site
+gets a Patch Log entry it has never seen, and it delegates to the v0_7 patch, which
+delegates to the controller declaration. That is why the ``frappe`` guard these tests
+mock lives on the v0_7 module: three copies of the same two calls is exactly what the
+duplicate-code guard rejects, and the drift it prevents is a site holding one index
+twice under two names.
 """
 
 import os
@@ -24,6 +31,7 @@ from unittest import mock
 import apex
 from apex.apex_core.utils import ledger_index
 from apex.habitat.doctype.housing_assignment import housing_assignment
+from apex.patches.v0_7 import add_bed_assignment_index as legacy_patch
 from apex.patches.v1_x import add_bed_occupancy_indexes as bed_index_patch
 
 _PATCH = "apex.patches.v1_x.add_bed_occupancy_indexes"
@@ -85,7 +93,7 @@ class TestBedOccupancyIndexPatchRegistration(unittest.TestCase):
 
 class TestBedOccupancyIndexPatchExecute(unittest.TestCase):
     def test_execute_delegates_both_indexes_to_the_guarded_helper(self):
-        with mock.patch.object(bed_index_patch, "frappe") as mock_frappe, mock.patch.object(
+        with mock.patch.object(legacy_patch, "frappe") as mock_frappe, mock.patch.object(
             ledger_index, "add_index_guarded", return_value=True
         ) as add_index:
             mock_frappe.db.exists.return_value = True
@@ -101,7 +109,7 @@ class TestBedOccupancyIndexPatchExecute(unittest.TestCase):
     def test_execute_writes_no_raw_ddl_of_its_own(self):
         """The helper owns the idempotency check and the rollback-on-error path; a
         patch issuing its own ALTER TABLE would abort migrate on a bad table."""
-        with mock.patch.object(bed_index_patch, "frappe") as mock_frappe, mock.patch.object(
+        with mock.patch.object(legacy_patch, "frappe") as mock_frappe, mock.patch.object(
             ledger_index, "add_index_guarded", return_value=True
         ):
             mock_frappe.db.exists.return_value = True
@@ -111,7 +119,7 @@ class TestBedOccupancyIndexPatchExecute(unittest.TestCase):
         mock_frappe.db.add_index.assert_not_called()
 
     def test_execute_is_a_noop_when_the_doctype_is_absent(self):
-        with mock.patch.object(bed_index_patch, "frappe") as mock_frappe, mock.patch.object(
+        with mock.patch.object(legacy_patch, "frappe") as mock_frappe, mock.patch.object(
             ledger_index, "add_index_guarded"
         ) as add_index:
             mock_frappe.db.exists.return_value = False
@@ -122,7 +130,7 @@ class TestBedOccupancyIndexPatchExecute(unittest.TestCase):
     def test_rerun_is_idempotent_at_the_helper_boundary(self):
         """Two consecutive runs issue the same guarded calls; the helper no-ops on an
         existing index, so replaying the patch can never duplicate one."""
-        with mock.patch.object(bed_index_patch, "frappe") as mock_frappe, mock.patch.object(
+        with mock.patch.object(legacy_patch, "frappe") as mock_frappe, mock.patch.object(
             ledger_index, "add_index_guarded", return_value=True
         ) as add_index:
             mock_frappe.db.exists.return_value = True

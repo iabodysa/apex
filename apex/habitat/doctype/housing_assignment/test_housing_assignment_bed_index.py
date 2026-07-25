@@ -52,6 +52,31 @@ def _index_columns(doctype, index_name):
     return [row["Column_name"] for row in sorted(rows, key=lambda r: r["Seq_in_index"])]
 
 
+def _indexes_covering(doctype, columns):
+    """Every index name whose ordered column list equals ``columns``.
+
+    Assert on THIS, not on an index name, wherever the framework may already
+    have built an equivalent index of its own. ``bed`` is a Link carrying
+    ``search_index: 1``, so Frappe creates its own single-column index (named
+    ``bed`` at table creation, ``bed_index`` on a later alter). Since A-129 the
+    guarded helper recognises that equivalence and declines to add a duplicate
+    under our name, so ``idx_asgn_bed`` is present on some sites and absent on
+    others while the invariant the query planner needs — bed is indexed — holds
+    on both. A test that pinned the name would fail on exactly the sites where
+    the deduplication worked.
+    """
+    rows = frappe.db.sql(f"SHOW INDEX FROM `tab{doctype}`", as_dict=True)
+    grouped = {}
+    for row in rows:
+        grouped.setdefault(row["Key_name"], []).append(row)
+    return {
+        name
+        for name, index_rows in grouped.items()
+        if [r["Column_name"] for r in sorted(index_rows, key=lambda r: r["Seq_in_index"])]
+        == list(columns)
+    }
+
+
 class TestHousingAssignmentBedIndexDeclaration(FrappeTestCase):
     def test_on_doctype_update_is_a_module_level_hook(self):
         """Frappe's sync/migrate calls the DocType module's MODULE-LEVEL
@@ -77,9 +102,12 @@ class TestHousingAssignmentBedIndexDeclaration(FrappeTestCase):
     def test_both_bed_indexes_are_declared_and_shaped_correctly(self):
         """The state a freshly synced site must end up in."""
         housing_assignment.on_doctype_update()
-        self.assertTrue(_index_exists(DOCTYPE, BED_INDEX))
+        self.assertTrue(
+            _indexes_covering(DOCTYPE, ["bed"]),
+            "no index covers the bed column alone — the occupancy lookup would "
+            "table-scan whether or not our own index name is the one present",
+        )
         self.assertTrue(_index_exists(DOCTYPE, ACTIVE_INDEX))
-        self.assertEqual(_index_columns(DOCTYPE, BED_INDEX), ["bed"])
         self.assertEqual(
             _index_columns(DOCTYPE, ACTIVE_INDEX),
             ["bed", "docstatus", "check_out_date"],
@@ -91,27 +119,39 @@ class TestHousingAssignmentBedIndexDeclaration(FrappeTestCase):
         add_index_guarded(DOCTYPE, fields, index_name)
 
     def _prove_declaration_recreates(self, index_name, fields):
-        """Drop the index, prove it is gone, then let the declaration put it back.
+        """Drop every index over these columns, prove none remain, then let the
+        declaration put coverage back.
 
         This is what makes the test causal: without the drop, a green would only
         show that SOME earlier migrate had created the index, which is exactly the
         upgraded-site case A-113 is NOT about.
+
+        Every equivalent index goes, not just ours — leaving the framework's own
+        ``bed`` search index in place would make the declaration a legitimate
+        no-op (A-129) and the test would prove nothing. The rebuild registered
+        first restores coverage under our name, which is the same invariant, not
+        necessarily the same index name the site started with.
         """
-        # Make sure it is there to drop (and register the rebuild first, so the
-        # index is restored even if an assertion below fails).
+        # Make sure coverage is there to drop (and register the rebuild first, so
+        # the column is indexed again even if an assertion below fails).
         housing_assignment.on_doctype_update()
         self.addCleanup(self._rebuild, index_name, fields)
-        frappe.db.sql(f"ALTER TABLE `tab{DOCTYPE}` DROP INDEX `{index_name}`")
-        self.assertFalse(
-            _index_exists(DOCTYPE, index_name),
-            f"{index_name} should be absent — this is the fresh-install starting state",
+        for existing in _indexes_covering(DOCTYPE, fields):
+            frappe.db.sql(f"ALTER TABLE `tab{DOCTYPE}` DROP INDEX `{existing}`")
+        self.assertEqual(
+            _indexes_covering(DOCTYPE, fields),
+            set(),
+            f"no index over {fields} should remain — this is the fresh-install "
+            "starting state",
         )
 
         housing_assignment.on_doctype_update()
 
-        self.assertTrue(
-            _index_exists(DOCTYPE, index_name),
-            f"on_doctype_update must create {index_name} on a site that does not have it",
+        self.assertIn(
+            index_name,
+            _indexes_covering(DOCTYPE, fields),
+            f"on_doctype_update must create {index_name} on a site where nothing "
+            f"else indexes {fields}",
         )
         self.assertEqual(_index_columns(DOCTYPE, index_name), fields)
 
@@ -138,7 +178,10 @@ class TestHousingAssignmentBedIndexDeclaration(FrappeTestCase):
             for row in frappe.db.sql(f"SHOW INDEX FROM `tab{DOCTYPE}`", as_dict=True)
         }
         self.assertEqual(after, before, "repeated declaration must add no new index")
-        self.assertIn(BED_INDEX, after)
+        self.assertTrue(
+            _indexes_covering(DOCTYPE, ["bed"]),
+            "the bed column must stay indexed under some name across re-declaration",
+        )
         self.assertIn(ACTIVE_INDEX, after)
 
     def test_the_legacy_patch_stays_registered_for_deployed_sites(self):
@@ -157,13 +200,27 @@ class TestHousingAssignmentBedIndexDeclaration(FrappeTestCase):
             registered = fh.read()
         self.assertIn(LEGACY_PATCH, registered, "the legacy bed-index patch was unregistered")
 
-        with open(patch_path, encoding="utf-8") as fh:
-            patch_source = fh.read()
+        # Assert what the patch DOES, not what its source says. The earlier version
+        # searched the file text for the two index names; when the patch was made to
+        # delegate to the controller declaration — removing the duplicated call pair
+        # the copy-paste guard rejected — the names left the file and this test went
+        # red on a refactor that improved the very property it exists to protect.
+        from unittest import mock
+
+        from apex.apex_core.utils import ledger_index
+        from apex.patches.v0_7 import add_bed_assignment_index
+
+        with mock.patch.object(
+            ledger_index, "add_index_guarded", return_value=True
+        ) as add_index:
+            add_bed_assignment_index.execute()
+
+        declared = {call.args[2] for call in add_index.call_args_list}
         for index_name in (BED_INDEX, ACTIVE_INDEX):
             with self.subTest(index=index_name):
                 self.assertIn(
                     index_name,
-                    patch_source,
+                    declared,
                     "the patch must use the SAME index name as the declaration, or a "
                     "migrated site would end up with two indexes for one access path",
                 )

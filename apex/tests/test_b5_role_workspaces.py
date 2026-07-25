@@ -30,14 +30,14 @@ REMOVED_ROLE_WORKSPACES = [
 
 # each retired role -> the domain workspace(s) that now carry its navigation
 ROLE_DOMAIN_WORKSPACES = {
-	"Fleet Supervisor": ["fleet", "Salis"],
+	"Fleet Supervisor": ["Fleet", "Salis"],
 	"Resident Supervisor": ["Housing", "Safety", "Custody"],
 	"Safety Officer": ["Safety"],
 	"Maintenance Technician": ["Safety"],
 }
 
 # domain workspaces whose every navigation target must resolve
-DOMAIN_WORKSPACES = ["fleet", "Salis", "Housing", "Safety", "Custody"]
+DOMAIN_WORKSPACES = ["Fleet", "Salis", "Housing", "Safety", "Custody"]
 
 
 class TestDomainOnlyWorkspaces(unittest.TestCase):
@@ -126,7 +126,7 @@ class TestDomainOnlyWorkspaces(unittest.TestCase):
 
 	def test_migrated_elements_landed_on_domain_home(self):
 		# [#a042migrate] Fleet Supervisor's only otherwise-unreachable board -> fleet
-		fleet = frappe.get_doc("Workspace", "fleet")
+		fleet = frappe.get_doc("Workspace", "Fleet")
 		self.assertIn("Fuel Approval Console", [s.label for s in fleet.shortcuts])
 		self.assertTrue(frappe.db.exists("Page", "fuel-approval-console"))
 

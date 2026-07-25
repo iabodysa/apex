@@ -250,7 +250,7 @@ class TestFleetOpsRender(FrappeTestCase):
 
     def test_render_scan_is_non_vacuous(self):
         # [#rotjf2]
-        content = json.loads(frappe.db.get_value("Workspace", "fleet", "content") or "[]")
+        content = json.loads(frappe.db.get_value("Workspace", "Fleet", "content") or "[]")
         referenced_cards = {b["data"]["number_card_name"] for b in content if b.get("type") == "number_card"}
         referenced_charts = {b["data"]["chart_name"] for b in content if b.get("type") == "chart"}
         # [#u5ioeg]

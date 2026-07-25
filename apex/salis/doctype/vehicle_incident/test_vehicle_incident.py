@@ -456,8 +456,17 @@ class TestVehicleIncident(FrappeTestCase):
         original_advance = inc.recovery_advance
         inc.cancel()
 
-        amended = frappe.copy_doc(inc)
+        # ignore_no_copy=False, deliberately: frappe.copy_doc defaults it to TRUE
+        # (frappe/__init__.py:1865), i.e. the default COPIES no_copy fields. The Desk
+        # amend path does honour them, so a test using the default would model a
+        # document no user can produce — and would pass while proving the opposite of
+        # what it claims.
+        amended = frappe.copy_doc(inc, ignore_no_copy=False)
         amended.amended_from = inc.name
+        # copy_doc carries docstatus across, so the copy of a cancelled document
+        # arrives as docstatus 2 and insert() refuses the 0 -> 2 transition. The
+        # Desk amend action resets it; a server-side amendment must do the same.
+        amended.docstatus = 0
         self.assertFalse(
             amended.recovery_advance,
             "the source link is no_copy, so an amendment must start unmapped",

@@ -126,8 +126,20 @@ class TestEmployeeRecoveryInstallments(FrappeTestCase):
         frappe.set_user("Administrator")
         type(self)._period_offset += 3
         self.payroll_date = add_months(today(), type(self)._period_offset)
+        # Pin the company default to this class's Receivable account. Without it the
+        # chain inherits whatever the site already had, and a long-lived bench whose
+        # default advance account is not Receivable fails every test here on an HRMS
+        # validation that has nothing to do with what is under test. A test that only
+        # passes on a site seeded a particular way is proving the seed, not the code.
+        previous = frappe.db.get_value(
+            "Company", self.company, "default_employee_advance_account"
+        )
+        self.addCleanup(self._restore_company_advance_account, previous)
+        frappe.db.set_value(
+            "Company", self.company, "default_employee_advance_account", self.advance_account
+        )
 
-    # -- fixtures -------------------------------------------------------------
+    # Fixtures below build the smallest HRMS chain each clause needs.
 
     @classmethod
     def _company(cls):
@@ -278,7 +290,7 @@ class TestEmployeeRecoveryInstallments(FrappeTestCase):
             "Additional Salary", {"ref_doctype": "Employee Advance", "ref_docname": advance}
         )
 
-    # -- clause: installment deductions are source-linked ---------------------
+    # Clause: a deduction has to trace back to the advance it repays.
 
     def test_the_installment_carries_the_native_link_back_to_its_advance(self):
         """``ref_doctype`` / ``ref_docname`` are the exact keys HRMS's own
@@ -340,7 +352,7 @@ class TestEmployeeRecoveryInstallments(FrappeTestCase):
         self.assertGreaterEqual(stored, str(get_first_day(self.payroll_date)))
         self.assertLessEqual(stored, str(get_last_day(self.payroll_date)))
 
-    # -- clause: installment deductions are duplicate-safe --------------------
+    # Clause: a re-run must not repay the same advance twice.
 
     def test_a_second_run_in_the_same_pay_period_queues_nothing(self):
         """A scheduler retry or a second manual click is a no-op — one
@@ -405,7 +417,7 @@ class TestEmployeeRecoveryInstallments(FrappeTestCase):
             )
         self.assertEqual(self._installment_count(advance), 0)
 
-    # -- clause: submit updates / cancel reverses the recovered balance -------
+    # Clause: submit moves the recovered balance and cancel returns it.
 
     def test_submitting_the_installment_updates_the_recovered_balance(self):
         """Natively: HRMS's own ``on_submit`` moves ``return_amount`` on the
@@ -459,7 +471,7 @@ class TestEmployeeRecoveryInstallments(FrappeTestCase):
             "cancelling the installment must reverse the recovered balance",
         )
 
-    # -- clause: Salary Component and advance account consistency -------------
+    # Clause: component and advance account must agree or payroll splits the entry.
 
     def test_an_earning_component_is_refused(self):
         """An Earning component would silently PAY the worker the damage, so the
