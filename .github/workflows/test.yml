@@ -187,6 +187,17 @@ jobs:
         run: pip install frappe-bench
 
       - name: Create bench
+        # DELIBERATELY UNPINNED — read this before adding a pin. `--frappe-branch
+        # version-15` resolves to that branch's HEAD at job time, so CI runs the
+        # framework the app must actually ship against. A pin would have HIDDEN A-155:
+        # frappe replaced validate_order_by_and_group_by's function BLACKLIST with an
+        # ALLOWLIST between 15.109.0 (the bench) and 15.116.0 (CI), and the portal's
+        # `field(...)` order_by stopped being legal. Tracking HEAD caught that before a
+        # user did; a pin defers the same break to production and leaves a version
+        # nobody owns to move. What makes the drift safe is the next step recording the
+        # resolved version: a framework-caused red is then dated on sight — diff it
+        # against the last green run before suspecting the app. Pin only to reproduce a
+        # specific red run, and drop the pin again in that same PR.
         run: bench init --skip-redis-config-generation --frappe-branch version-15 frappe-bench
 
       - name: Configure bench Redis hosts
@@ -201,6 +212,26 @@ jobs:
         run: |
           bench get-app --branch version-15 --skip-assets erpnext
           bench get-app --branch version-15 --skip-assets hrms
+
+      - name: Record the resolved framework versions
+        working-directory: frappe-bench
+        # Nothing pins these three, so "which framework did this run get?" has to be
+        # answerable from the run itself. Also written to the job summary, where it
+        # survives log truncation and is readable without opening the job.
+        run: |
+          set -uo pipefail
+          {
+            echo "| app | version | commit | committed |"
+            echo "| --- | --- | --- | --- |"
+            for app in frappe erpnext hrms; do
+              d="apps/$app"
+              [ -d "$d" ] || continue
+              printf '| %s | %s | %s | %s |\n' "$app" \
+                "$(grep -m1 '^__version__' "$d/$app/__init__.py" | tr -d ' "' | cut -d= -f2)" \
+                "$(git -C "$d" rev-parse --short HEAD)" \
+                "$(git -C "$d" show -s --format=%cI HEAD)"
+            done
+          } | tee -a "${GITHUB_STEP_SUMMARY:-/dev/null}"
 
       - name: Get apex app
         working-directory: frappe-bench
