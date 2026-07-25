@@ -26,7 +26,7 @@ Baselines. Widening check 1 to tests added exactly 4 names. One
 (``tearDownModule``, bound in 17 files) is unittest dispatch and went to
 DISPATCH_NAMES; the other 3 are the real finding, frozen in _DUP_NAME_BASELINE: a
 test module binds a module-level unwrapping shim under the SAME public name as the
-production Number Card method it wraps (tests/test_dashboard_arrivals.py:24
+production Number Card method it wraps (habitat/api/test_dashboard_arrivals.py:24
 ``get_arrivals_today`` returns ``habitat.api.dashboard.get_arrivals_today()["value"]``).
 Confusing at a grep but harmless — frozen, not fixed, because renaming those shims
 belongs to the owner of those test files, not to the guard.
@@ -226,15 +226,15 @@ _DUP_NAME_BASELINE = {
     # [#a170b1] The 3 names widening to tests added (see docstring).
     "get_arrivals_today": [
         "habitat/api/dashboard.py",
-        "tests/test_dashboard_arrivals.py",
+        "habitat/api/test_dashboard_arrivals.py",
     ],
     "get_buildings_over_threshold": [
         "habitat/api/dashboard.py",
-        "tests/test_dashboard_buildings_over_threshold.py",
+        "habitat/api/test_dashboard_buildings_over_threshold.py",
     ],
     "get_pending_on_manifest": [
         "habitat/api/dashboard.py",
-        "tests/test_dashboard_arrivals.py",
+        "habitat/api/test_dashboard_arrivals.py",
     ],
     "get_default_company": [
         "apex_core/doctype/habitat_settings/habitat_settings.py",
@@ -504,8 +504,8 @@ _COPY_PASTE_BASELINE = frozenset(
         # A scoped-user context manager pasted into 3 Habitat scope tests.
         frozenset(
             {
-                ("tests/test_arrivals_card_scope.py", "__enter__"),
-                ("tests/test_arrivals_custody_report_scope.py", "__enter__"),
+                ("habitat/api/test_arrivals_card_scope.py", "__enter__"),
+                ("habitat/api/test_arrivals_custody_report_scope.py", "__enter__"),
                 ("tests/test_habitat_tenant_scope.py", "__enter__"),
             }
         ),
@@ -571,7 +571,7 @@ _COPY_PASTE_BASELINE = frozenset(
         frozenset(
             {
                 ("habitat/doctype/custody_handover/test_custody_handover.py", "_receive"),
-                ("tests/test_custody_handover_confirm_race.py", "_receive"),
+                ("habitat/api/test_custody_handover_confirm_race.py", "_receive"),
             }
         ),
         frozenset(
@@ -601,7 +601,7 @@ _COPY_PASTE_BASELINE = frozenset(
         frozenset(
             {
                 ("tests/test_habitat_tenant_scope.py", "_scoped_supervisor"),
-                ("tests/test_housing_count.py", "_scoped_supervisor"),
+                ("habitat/api/test_housing_count.py", "_scoped_supervisor"),
             }
         ),
         frozenset(
