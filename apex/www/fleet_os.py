@@ -5,10 +5,17 @@ This is the untouched supervisor dashboard that used to live at /fleet. When
 /fleet became the employee self-service page, the full board was kept alive here
 as a fallback (bundle: fleet_os_portal) until the owner decides to retire it.
 
-Controller/route wiring mirrors fleet.py exactly (same FLEET_ROLES gate, same
-CSRF + socket bootstrap), the only differences being the redirect target and the
-served bundle. The route is hyphenated (/fleet-os via www/fleet-os.html) while
-THIS module is underscored so it is importable — a hyphenated .py never imports.
+Controller shape follows fleet.py (same FLEET_ROLES constant, same CSRF + socket
+bootstrap), but the GATES now differ: this board still requires a fleet role,
+whereas /fleet dropped its role check and admits every logged-in user. Route,
+redirect target and served bundle differ too. The route is hyphenated (/fleet-os
+via www/fleet-os.html) while THIS module is underscored so it is importable — a
+hyphenated .py never imports.
+
+Route trace: hooks.py tile "apex-fleet-os" (route /fleet-os) -> www/fleet-os.html
+-> /assets/apex/fleet_os_portal/assets/index.js, built from frontend/fleet_os
+(vite.config.js name="fleet_os_portal"), whose composables call
+apex.salis.api.fleet_os.
 """
 
 import frappe
