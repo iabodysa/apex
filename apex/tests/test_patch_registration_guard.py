@@ -93,11 +93,19 @@ def _registered_patches():
 
 
 def _modules_on_disk():
-    """{dotted path: filesystem path} for every patch module apex ships."""
+    """{dotted path: filesystem path} for every patch module apex ships.
+
+    A colocated ``test_*.py`` is not a patch module — it never runs on migrate
+    and can never be a patches.txt entry — so it is excluded, exactly as the
+    sibling guards' ``_production_py_files()`` excludes it. Without this a test
+    living beside the patch it exercises would read as an unregistered patch and
+    burn one of the MAX_UNREGISTERED escape-hatch slots to say so.
+    """
     found = {}
     pattern = os.path.join(PATCHES_DIR, "**", "*.py")
     for path in sorted(glob.glob(pattern, recursive=True)):
-        if os.path.basename(path) == "__init__.py":
+        base = os.path.basename(path)
+        if base == "__init__.py" or base.startswith("test_"):
             continue
         rel = os.path.relpath(path, REPO_ROOT)[: -len(".py")]
         found[rel.replace(os.sep, ".")] = path
