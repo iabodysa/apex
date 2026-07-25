@@ -24,12 +24,11 @@ duplication detectors gain anything from test coverage, so only they were widene
 
 Baselines. Widening check 1 to tests added exactly 4 names. One
 (``tearDownModule``, bound in 17 files) is unittest dispatch and went to
-DISPATCH_NAMES; the other 3 are the real finding, frozen in _DUP_NAME_BASELINE: a
-test module binds a module-level unwrapping shim under the SAME public name as the
-production Number Card method it wraps (tests/test_dashboard_arrivals.py:24
-``get_arrivals_today`` returns ``habitat.api.dashboard.get_arrivals_today()["value"]``).
-Confusing at a grep but harmless — frozen, not fixed, because renaming those shims
-belongs to the owner of those test files, not to the guard.
+DISPATCH_NAMES; the other 3 were real: a test module bound a module-level
+unwrapping shim under the SAME public name as the production Number Card method it
+wraps, so a grep for the API name landed on the test's redefinition. A-176 renamed
+all three to ``_<card>_value`` (private, and no longer a production API name), so
+_DUP_NAME_BASELINE holds only production parallel structure again.
 
 Widening check 2 to tests found 21 groups / 64 functions of pre-existing duplication,
 all fixture/assertion helpers pasted between test modules rather than promoted into
@@ -189,19 +188,6 @@ def _duplicate_def_names():
 # sibling doctypes/portals (verified while authoring this guard), not a case of
 # one file actually reusing another's code under a copied name.
 _DUP_NAME_BASELINE = {
-    # [#a170b1] The 3 names widening to tests added (see docstring).
-    "get_arrivals_today": [
-        "habitat/api/dashboard.py",
-        "tests/test_dashboard_arrivals.py",
-    ],
-    "get_buildings_over_threshold": [
-        "habitat/api/dashboard.py",
-        "tests/test_dashboard_buildings_over_threshold.py",
-    ],
-    "get_pending_on_manifest": [
-        "habitat/api/dashboard.py",
-        "tests/test_dashboard_arrivals.py",
-    ],
     "get_default_company": [
         "apex_core/doctype/habitat_settings/habitat_settings.py",
         "apex_core/doctype/salis_settings/salis_settings.py",
