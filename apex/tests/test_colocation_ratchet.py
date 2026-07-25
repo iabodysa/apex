@@ -264,6 +264,9 @@ _CENTRAL_BY_NECESSITY = frozenset(
         # Walks every shipped record folder in the app checking directory-name and
         # record-name parity; it belongs to the export layout, not to one record.
         "test_standard_record_path_parity.py",
+        # Reconciles the hooks apps-screen tile list against the gate helpers spread
+        # across apex/www; it spans hooks and five modules, so it owns no single one.
+        "test_apps_screen_gate_wiring.py",
     }
 )
 
