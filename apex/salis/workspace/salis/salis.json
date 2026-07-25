@@ -205,10 +205,26 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
+   "label": "Salis Vehicle",
+   "link_type": "DocType",
+   "link_to": "Salis Vehicle",
+   "idx": 16
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Driver",
+   "link_type": "DocType",
+   "link_to": "Salis Driver",
+   "idx": 17
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Route Template",
    "link_type": "DocType",
    "link_to": "Route Template",
-   "idx": 16
+   "idx": 18
   },
   {
    "doctype": "Workspace Link",
@@ -216,7 +232,7 @@
    "label": "Route Assignment",
    "link_type": "DocType",
    "link_to": "Route Assignment",
-   "idx": 17
+   "idx": 19
   }
  ],
  "charts": [
@@ -272,5 +288,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-25 19:27:11.409255"
+ "modified": "2026-07-25 23:27:17.150330"
 }
