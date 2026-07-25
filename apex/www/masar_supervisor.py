@@ -3,7 +3,7 @@
 
 The route supervisor is the person who dispatches buses: they approve the Route Plan
 assigned to them, watch boarding fill up live, follow the ordered stops, and track the
-driver on a map. Like the Fleet OS board (/fleet), this is an ADMIN portal, not a
+driver on a map. Like the Fleet OS board (/fleet-os), this is an ADMIN portal, not a
 guest-facing one — it requires a logged-in user holding a supervisor role. Every read the
 SPA makes is additionally row-scoped server-side to the caller's OWN assigned plans
 (route_supervisor == session user), so the role gate here is a coarse door, not the data

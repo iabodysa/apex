@@ -13,10 +13,16 @@ required_apps = ["frappe", "erpnext", "hrms"]
 # [#a024ap]
 # One-click icons on the Frappe /apps app-selector screen (A-024) — one entry
 # per real www/ portal shell. Driver has no extra role gate (any logged-in
-# user); masar is guest-token-based so it also carries no gate. Fleet /
-# housing / safety are admin-style portals, so each has_permission points at a
-# has_apps_screen_access() living next to that page's own role-set, to keep
-# the /apps gate from drifting away from the page's real access check.
+# user); masar is guest-token-based and /fleet is the open employee page, so
+# those three carry no gate. Masar Supervisor / Fleet OS / housing / safety are
+# admin-style portals, so each has_permission points at a has_apps_screen_access()
+# living next to that page's own role-set, to keep the /apps gate from drifting
+# away from the page's real access check.
+#
+# Identifier convention: "apex-" + the route slug, so the key always names the
+# route it opens. The key is render-time only — frappe/apps.py:43 returns the
+# INSTALLED APP name ("apex") to the client and User.default_app stores that
+# same app name, so no stored state keys off these strings.
 add_to_apps_screen = [
     {
         "name": "apex-driver",
@@ -38,14 +44,14 @@ add_to_apps_screen = [
         "has_permission": "apex.www.masar_supervisor.has_apps_screen_access",
     },
     {
-        "name": "apex-fleet",
+        "name": "apex-fleet-os",
         "logo": "/assets/apex/worker_portal/afmco-logo.svg",
         "title": "Fleet OS",
         "route": "/fleet-os",
         "has_permission": "apex.www.fleet_os.has_apps_screen_access",
     },
     {
-        "name": "apex-my-fleet",
+        "name": "apex-fleet",
         "logo": "/assets/apex/worker_portal/afmco-logo.svg",
         "title": "My Fleet",
         "route": "/fleet",
