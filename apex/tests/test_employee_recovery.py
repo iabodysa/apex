@@ -126,6 +126,25 @@ class TestRecoveryDeferralPaths(FrappeTestCase):
         frappe.set_user("Administrator")
         type(self)._period_offset += 3
         self.payroll_date = add_months(today(), type(self)._period_offset)
+        # Pin the company default to this class's Receivable account, restoring it
+        # afterwards. Setting advance_account on the document is not enough: HRMS
+        # re-derives it from the company during validate, so on a site whose default
+        # is not Receivable every test here dies on an HRMS validation unrelated to
+        # what is under test. A test that only passes on a particular seed is proving
+        # the seed, not the code.
+        previous = frappe.db.get_value(
+            "Company", self.company, "default_employee_advance_account"
+        )
+        self.addCleanup(
+            frappe.db.set_value,
+            "Company",
+            self.company,
+            "default_employee_advance_account",
+            previous,
+        )
+        frappe.db.set_value(
+            "Company", self.company, "default_employee_advance_account", self.advance_account
+        )
 
     def _advance(self, paid=0.0, amount=ADVANCE):
         """A submitted Employee Advance for this class's worker.
@@ -200,7 +219,10 @@ class TestRecoveryDeferralPaths(FrappeTestCase):
         # [#a102pa] Outstanding is measured from paid_amount, which only the native
         # employee-advance payment entry sets — no disbursement, no deduction.
         advance = self._advance()
-        self.assertEqual(advance.paid_amount, 0)
+        # Undisbursed reads as None here, not 0 — HRMS leaves paid_amount unset until
+        # its payment entry writes one, so assertEqual(..., 0) fails on the very state
+        # this test exists to cover.
+        self.assertFalse(advance.paid_amount, "the fixture must start undisbursed")
         with self._policy(enabled=True):
             self.assertEqual(
                 compute_recovery_installment(advance.name, self.payroll_date),
