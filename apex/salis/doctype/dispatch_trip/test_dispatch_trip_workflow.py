@@ -39,6 +39,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project, make_vehicle, purge_doc, purge_trip_request
 
 WORKFLOW = "Dispatch Trip Workflow"
 
@@ -64,7 +65,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         cls.supervisor = _user("dtwf_sup@example.com", "Fleet Supervisor")
         cls.pmanager = _user("dtwf_pm@example.com", "Fleet Project Manager")
         cls.manager = _user("dtwf_mgr@example.com", "Fleet Manager")
-        cls.project = cls._project("DT Workflow Project")
+        cls.project = make_project("DT Workflow Project")
         # [#tudkzf]
         for u in (cls.supervisor, cls.pmanager):
             if not frappe.db.exists(
@@ -97,29 +98,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         frappe.set_user("Administrator")
 
     # [#f9hua6]
-
-    @staticmethod
-    def _project(name):
-        p = frappe.db.get_value("Project", {"project_name": name}, "name")
-        if not p:
-            p = frappe.get_doc(
-                {"doctype": "Project", "project_name": name}
-            ).insert(ignore_permissions=True).name
-        return p
-
-    @staticmethod
-    def _vehicle(plate, odometer=0):
-        v = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-        if not v:
-            v = frappe.get_doc({
-                "doctype": "Salis Vehicle",
-                "plate_number": plate,
-                "status": "Active",
-                "odometer": odometer,
-            }).insert(ignore_permissions=True).name
-        else:
-            frappe.db.set_value("Salis Vehicle", v, "odometer", odometer)
-        return v
 
     @staticmethod
     def _driver(name):
@@ -164,7 +142,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         rp.submit()
         tr.reload()
         self.assertEqual(tr.status, "Scheduled")
-        self.addCleanup(lambda: self._purge_tr(tr.name, rp.name))
+        self.addCleanup(lambda: purge_trip_request(tr.name, rp.name))
         return tr, rp.name
 
     def _new_trip(self, route_plan, vehicle, driver):
@@ -176,49 +154,8 @@ class TestDispatchTripWorkflow(FrappeTestCase):
             "trip_date": frappe.utils.today(),
             "status": "Planned",
         }).insert(ignore_permissions=True)
-        self.addCleanup(lambda: self._purge_trip(dt.name))
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", dt.name))
         return dt
-
-    @staticmethod
-    def _purge_trip(name):
-        frappe.set_user("Administrator")
-        if not frappe.db.exists("Dispatch Trip", name):
-            return
-        doc = frappe.get_doc("Dispatch Trip", name)
-        if doc.docstatus == 1:
-            try:
-                doc.cancel()
-            except Exception:
-                pass
-        frappe.delete_doc("Dispatch Trip", name, ignore_permissions=True, force=True)
-
-    @staticmethod
-    def _purge_tr(tr_name, rp_name):
-        frappe.set_user("Administrator")
-        for ledger in frappe.get_all(
-            "Trip Fulfilment Ledger", filters={"transport_request": tr_name}, pluck="name"
-        ):
-            frappe.delete_doc(
-                "Trip Fulfilment Ledger", ledger, ignore_permissions=True, force=True
-            )
-        if frappe.db.exists("Route Plan", rp_name):
-            rp = frappe.get_doc("Route Plan", rp_name)
-            if rp.docstatus == 1:
-                try:
-                    rp.cancel()
-                except Exception:
-                    pass
-            frappe.delete_doc("Route Plan", rp_name, ignore_permissions=True, force=True)
-        if frappe.db.exists("Transport Request", tr_name):
-            tr = frappe.get_doc("Transport Request", tr_name)
-            if tr.docstatus == 1:
-                try:
-                    tr.cancel()
-                except Exception:
-                    pass
-            frappe.delete_doc(
-                "Transport Request", tr_name, ignore_permissions=True, force=True
-            )
 
     # [#8ggfrf]
 
@@ -242,7 +179,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
 
     def test_walk_to_completed_drives_tr_to_fulfilled_and_updates_odometer(self):
         tr, rp = self._scheduled_tr()
-        vehicle = self._vehicle("DT-WF-1", odometer=100)
+        vehicle = make_vehicle("DT-WF-1", odometer=100)
         driver = self._driver("DT WF Driver 1")
         dt = self._new_trip(rp, vehicle, driver)
         self.assertEqual(dt.docstatus, 0)
@@ -292,7 +229,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
 
     def test_cancel_completed_trip_reverses_fulfilment(self):
         tr, rp = self._scheduled_tr()
-        vehicle = self._vehicle("DT-WF-2", odometer=500)
+        vehicle = make_vehicle("DT-WF-2", odometer=500)
         driver = self._driver("DT WF Driver 2")
         dt = self._new_trip(rp, vehicle, driver)
 
@@ -332,7 +269,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
 
     def test_illegal_jump_planned_to_completed_blocked(self):
         tr, rp = self._scheduled_tr()
-        vehicle = self._vehicle("DT-WF-3", odometer=0)
+        vehicle = make_vehicle("DT-WF-3", odometer=0)
         driver = self._driver("DT WF Driver 3")
         dt = self._new_trip(rp, vehicle, driver)
 
@@ -349,7 +286,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         draft -> Cancelled (docstatus 0 -> 2) transition is forbidden by Frappe,
         so it is intentionally absent. A draft trip is called off by deletion."""
         tr, rp = self._scheduled_tr()
-        vehicle = self._vehicle("DT-WF-4", odometer=0)
+        vehicle = make_vehicle("DT-WF-4", odometer=0)
         driver = self._driver("DT WF Driver 4")
         dt = self._new_trip(rp, vehicle, driver)
 

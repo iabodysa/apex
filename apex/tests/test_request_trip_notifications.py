@@ -17,16 +17,10 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.tests._helpers import _user
+from apex.tests._helpers import notification_recipients
 
 RR_NOTIFICATION = "Habitat - Resident Request Resolved"
 TRIP_NOTIFICATION = "Salis - Trip Scheduled"
-
-
-def _recipients(notification_name, doc):
-	notification = frappe.get_doc("Notification", notification_name)
-	context = {"doc": doc, "alert": notification, "comments": None}
-	recipients, _cc, _bcc = notification.get_list_of_recipients(doc, context)
-	return recipients
 
 
 class TestRequestTripNotifications(FrappeTestCase):
@@ -82,7 +76,7 @@ class TestRequestTripNotifications(FrappeTestCase):
 
 		# [#nxvy20]
 		req.status = "Resolved"
-		recipients = _recipients(RR_NOTIFICATION, req)
+		recipients = notification_recipients(RR_NOTIFICATION, req)
 		self.assertIn(self.coordinator, recipients)
 		self.assertIn(self.assigned, recipients)
 
@@ -127,6 +121,6 @@ class TestRequestTripNotifications(FrappeTestCase):
 		)
 
 		tr.status = "Scheduled"
-		recipients = _recipients(TRIP_NOTIFICATION, tr)
+		recipients = notification_recipients(TRIP_NOTIFICATION, tr)
 		self.assertIn(self.fleet_sup, recipients)
 		self.assertIn(self.requested_by, recipients)

@@ -19,16 +19,10 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
 from apex.tests._helpers import _user
+from apex.tests._helpers import notification_recipients
 
 THEFT_NOTIFICATION = "Salis - Vehicle Theft Reported"
 OVERSTAY_NOTIFICATION = "Salis - Workshop Overstay"
-
-
-def _recipients(notification_name, doc):
-    notification = frappe.get_doc("Notification", notification_name)
-    context = {"doc": doc, "alert": notification, "comments": None}
-    recipients, _cc, _bcc = notification.get_list_of_recipients(doc, context)
-    return recipients
 
 
 class TestFleetAlertNotifications(FrappeTestCase):
@@ -104,7 +98,7 @@ class TestFleetAlertNotifications(FrappeTestCase):
         )
 
     def test_theft_notifies_fleet_and_government(self):
-        recipients = _recipients(THEFT_NOTIFICATION, self._incident("Theft"))
+        recipients = notification_recipients(THEFT_NOTIFICATION, self._incident("Theft"))
         self.assertIn(self.fleet_manager, recipients)
         self.assertIn(self.fleet_sup, recipients)
         self.assertIn(self.gro, recipients)
@@ -120,6 +114,6 @@ class TestFleetAlertNotifications(FrappeTestCase):
         )
 
     def test_overstay_notifies_fleet(self):
-        recipients = _recipients(OVERSTAY_NOTIFICATION, self._overdue_alert("Maintenance Overdue"))
+        recipients = notification_recipients(OVERSTAY_NOTIFICATION, self._overdue_alert("Maintenance Overdue"))
         self.assertIn(self.fleet_manager, recipients)
         self.assertIn(self.fleet_sup, recipients)

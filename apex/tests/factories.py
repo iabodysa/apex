@@ -162,6 +162,86 @@ def make_project(name):
     return p
 
 
+def purge_doc(doctype, name):
+    """Cancel (if submitted) then force-delete ``name`` as Administrator; a no-op
+    when the record is already gone.
+
+    A submitted document cannot be force-deleted directly, and a cancel the
+    workflow guard refuses must not break an ``addCleanup`` chain, so the cancel is
+    best-effort and the delete runs either way.
+    """
+    frappe.set_user("Administrator")
+    if not frappe.db.exists(doctype, name):
+        return
+    doc = frappe.get_doc(doctype, name)
+    if doc.docstatus == 1:
+        try:
+            doc.cancel()
+        except Exception:
+            # [#kgd2nu]
+            pass
+    frappe.delete_doc(doctype, name, ignore_permissions=True, force=True)
+
+
+def purge_trip_request(tr_name, rp_name):
+    """Tear down a Transport Request together with its Route Plan.
+
+    Trip Fulfilment Ledger rows link the request, so they go first or the request's
+    delete is refused by link validation.
+    """
+    frappe.set_user("Administrator")
+    for ledger in frappe.get_all(
+        "Trip Fulfilment Ledger", filters={"transport_request": tr_name}, pluck="name"
+    ):
+        frappe.delete_doc(
+            "Trip Fulfilment Ledger", ledger, ignore_permissions=True, force=True
+        )
+    purge_doc("Route Plan", rp_name)
+    purge_doc("Transport Request", tr_name)
+
+
+def make_rental_office(name):
+    """Get-or-create an Active Rental Office by ``office_name``; return its name."""
+    office = frappe.db.get_value("Rental Office", {"office_name": name}, "name")
+    if not office:
+        office = frappe.get_doc(
+            {"doctype": "Rental Office", "office_name": name, "status": "Active"}
+        ).insert(ignore_permissions=True).name
+    return office
+
+
+def make_vehicle(plate, odometer=None, project=None, ownership=None):
+    """Get-or-create an Active Salis Vehicle by ``plate_number``; return its name.
+
+    Every optional field is applied on the EXISTING row too, not only on a freshly
+    created one: the dispatch-trip workflow tests pass ``odometer=0`` to assert a
+    reading a previous module may already have moved, and a rental test asking for
+    ``ownership="Rented"`` needs that to hold whoever created the plate first.
+    """
+    name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
+    values = {
+        k: v
+        for k, v in (
+            ("odometer", odometer),
+            ("project", project),
+            ("ownership", ownership),
+        )
+        if v is not None
+    }
+    if not name:
+        return frappe.get_doc(
+            {
+                "doctype": "Salis Vehicle",
+                "plate_number": plate,
+                "status": "Active",
+                **values,
+            }
+        ).insert(ignore_permissions=True).name
+    if values:
+        frappe.db.set_value("Salis Vehicle", name, values)
+    return name
+
+
 def make_site(name):
     """Get-or-create an Accommodation Site by ``site_name``; return its name."""
     s = frappe.db.get_value("Site", {"site_name": name}, "name")
@@ -370,6 +450,99 @@ def make_worker_token(employee):
         .insert(ignore_permissions=True)
         ._plaintext_token
     )
+
+
+def make_goods_receipt(intake_building, article, procurement_supervisor, qty=5):
+    """A SUBMITTED Goods Receipt bringing ``qty`` of ``article`` into
+    ``intake_building``; returns the document. Submitted because the custody tests
+    need stock actually on hand, which only the submit posts."""
+    gr = frappe.get_doc(
+        {
+            "doctype": "Goods Receipt",
+            "naming_series": "ACC-GRN-.YYYY.-.#####",
+            "receipt_date": "2026-05-01",
+            "intake_building": intake_building,
+            "procurement_supervisor": procurement_supervisor,
+        }
+    )
+    gr.append("items", {"item_type": "Custody Article", "item": article, "qty": qty})
+    gr.insert(ignore_permissions=True)
+    gr.submit()
+    return gr
+
+
+def make_maintenance_request(building, room):
+    """A SUBMITTED Maintenance Request against ``building``/``room``; returns the
+    document. The plumbing issue text is arbitrary — every caller asserts on the
+    downstream work order / cost ledger, never on the issue itself."""
+    mr = frappe.get_doc(
+        {
+            "doctype": "Maintenance Request",
+            "naming_series": "MAINT-.YYYY.-.#####",
+            "building": building,
+            "room": room,
+            "reported_by": "Administrator",
+            "issue_type": "Plumbing",
+            "issue_description": "Leak under sink",
+        }
+    )
+    mr.insert(ignore_permissions=True, ignore_links=True)
+    mr.submit()
+    return mr
+
+
+def make_safety_round(building, **overrides):
+    """A draft Weekly Safety Round on ``building`` dated today; returns the
+    document. ``overrides`` replace any of those defaults (the re-inspection tests
+    pass ``is_reinspection=1``)."""
+    data = {
+        "doctype": "Safety Round",
+        "building": building,
+        "round_date": today(),
+        "cadence": "Weekly",
+    }
+    data.update(overrides)
+    return frappe.get_doc(data).insert(ignore_permissions=True)
+
+
+def ensure_worker_token(employee):
+    """The raw Masar Worker Token string for ``employee``, reusing an existing row.
+
+    Unlike ``make_worker_token`` (which always mints a fresh one), this re-enables
+    and recovers whatever token the employee already carries — a second live token
+    for one worker is not a state the portal is meant to reach.
+    """
+    existing = frappe.db.get_value("Masar Worker Token", {"employee": employee}, "name")
+    if not existing:
+        return make_worker_token(employee)
+    doc = frappe.get_doc("Masar Worker Token", existing)
+    if not doc.enabled:
+        doc.db_set("enabled", 1)
+    # [#edhau9]
+    return doc.recover_token()
+
+
+def make_scoped_supervisor(make_user, building, add_cleanup):
+    """A Resident Supervisor scoped to ``building`` by a Building User Permission;
+    returns the login email.
+
+    ``make_user`` mints the login and ``add_cleanup`` registers the permission's
+    teardown (normally ``cls.addClassCleanup``) — both are injected because each
+    test class names its own users and owns its own cleanup scope.
+    """
+    email = make_user("Resident Supervisor")
+    up = frappe.get_doc(
+        {
+            "doctype": "User Permission",
+            "user": email,
+            "allow": "Building",
+            "for_value": building,
+        }
+    ).insert(ignore_permissions=True)
+    add_cleanup(
+        frappe.delete_doc, "User Permission", up.name, force=True, ignore_permissions=True
+    )
+    return email
 
 
 def make_assignment(employee, building, project, room_number=None, bed_code=None, stay_type="Permanent"):

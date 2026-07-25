@@ -9,6 +9,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from apex.salis.permissions import scoped_has_permission
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project
 
 
 class TestProjectScoping(FrappeTestCase):
@@ -16,8 +17,8 @@ class TestProjectScoping(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        cls.pa = cls._project("Scope A")
-        cls.pb = cls._project("Scope B")
+        cls.pa = make_project("Scope A")
+        cls.pb = make_project("Scope B")
         cls.sup = _user("scope_sup@example.com", "Fleet Supervisor")   # [#pv84q9]
         cls.mgr = _user("scope_mgr@example.com", "Fleet Manager")      # [#f1j142]
         if not frappe.db.exists("User Permission",
@@ -36,14 +37,6 @@ class TestProjectScoping(FrappeTestCase):
                 frappe.delete_doc("Project", p, ignore_permissions=True, force=True)
         frappe.db.commit()
         super().tearDownClass()
-
-    @staticmethod
-    def _project(name):
-        p = frappe.db.get_value("Project", {"project_name": name}, "name")
-        if not p:
-            p = frappe.get_doc({"doctype": "Project", "project_name": name}).insert(
-                ignore_permissions=True).name
-        return p
 
     def _doc(self, project):
         return frappe._dict({"doctype": "Fuel Request", "project": project})

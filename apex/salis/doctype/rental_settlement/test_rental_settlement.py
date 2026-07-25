@@ -19,6 +19,8 @@ from frappe.utils import get_first_day, getdate, today
 
 from apex.salis import rental_engine
 from apex.tests._helpers import _user
+from apex.tests._helpers import approve_rental_settlement
+from apex.tests.factories import make_rental_office, make_vehicle
 
 LEDGER = "Rental Accrual Ledger"
 
@@ -49,32 +51,13 @@ class TestRentalSettlementStamping(FrappeTestCase):
         # [#41w3ao]
         self.requester = _user("rss_req@example.com", "Fleet Project Manager")
         self.manager = _user("rss_mgr@example.com", "Fleet Manager")
-        self.office = self._office("RSS Stamp Office")
-        self.vehicle = self._vehicle("RSS STAMP 1")
+        self.office = make_rental_office("RSS Stamp Office")
+        self.vehicle = make_vehicle("RSS STAMP 1", ownership="Rented")
         self.period = today()[:7]
         self.accrual_date = str(get_first_day(getdate(today())))
 
     def tearDown(self):
         frappe.set_user("Administrator")
-
-    @staticmethod
-    def _office(name):
-        o = frappe.db.get_value("Rental Office", {"office_name": name}, "name")
-        if not o:
-            o = frappe.get_doc(
-                {"doctype": "Rental Office", "office_name": name, "status": "Active"}
-            ).insert(ignore_permissions=True).name
-        return o
-
-    @staticmethod
-    def _vehicle(plate):
-        v = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-        if not v:
-            v = frappe.get_doc(
-                {"doctype": "Salis Vehicle", "plate_number": plate,
-                 "ownership": "Rented", "status": "Active"}
-            ).insert(ignore_permissions=True).name
-        return v
 
     def _accrual_row(self, amount=100.0):
         row = frappe.get_doc(
@@ -115,22 +98,6 @@ class TestRentalSettlementStamping(FrappeTestCase):
             doc.cancel()
         frappe.delete_doc("Rental Settlement", name, force=True, ignore_permissions=True)
 
-    def _approve(self, rs):
-        from frappe.model.workflow import apply_workflow, get_workflow_name
-
-        if get_workflow_name("Rental Settlement") == "Rental Settlement Workflow":
-            frappe.set_user(self.manager)
-            apply_workflow(rs, "Reconcile")
-            rs.reload()
-            apply_workflow(rs, "Approve")
-            frappe.set_user("Administrator")
-        else:
-            rs.status = "Approved"
-            rs.save(ignore_permissions=True)
-            rs.submit()
-        rs.reload()
-        return rs
-
     def test_submit_stamps_then_cancel_releases(self):
         row = self._accrual_row()
         rs = self._settlement()
@@ -139,7 +106,7 @@ class TestRentalSettlementStamping(FrappeTestCase):
         self.assertEqual(_settled(row).settled, 0)
         self.assertIsNone(_settled(row).rental_settlement)
 
-        self._approve(rs)
+        approve_rental_settlement(rs, self.manager)
         s = _settled(row)
         self.assertEqual(s.settled, 1, "Approve/submit must stamp the accrual row settled.")
         self.assertEqual(s.rental_settlement, rs.name, "The row must link back to the settlement.")

@@ -41,6 +41,7 @@ from apex.apex_core.setup.seeders.habitat_workflow_seed import seed_habitat_work
 from apex.apex_core.setup.seeders.salis_workflow_seed import seed_salis_workflows
 from apex.apex_core.utils.workflow_guard import before_submit as guard_before_submit
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project
 
 
 class TestWorkflowSubmitGuard(FrappeTestCase):
@@ -61,7 +62,7 @@ class TestWorkflowSubmitGuard(FrappeTestCase):
         cls.am_maker = _user("wfg_am_maker@example.com", "Accommodation Manager")
         cls.am_approver = _user("wfg_am_approver@example.com", "Accommodation Manager")
 
-        cls.project = cls._project("WFG Guard Project")
+        cls.project = make_project("WFG Guard Project")
         cls._grant_project(cls.maker, cls.project)
 
     @classmethod
@@ -83,15 +84,6 @@ class TestWorkflowSubmitGuard(FrappeTestCase):
         frappe.set_user("Administrator")
 
     # Fixtures
-
-    @staticmethod
-    def _project(name):
-        p = frappe.db.get_value("Project", {"project_name": name}, "name")
-        if not p:
-            p = frappe.get_doc({"doctype": "Project", "project_name": name}).insert(
-                ignore_permissions=True
-            ).name
-        return p
 
     @staticmethod
     def _grant_project(user, project):

@@ -29,24 +29,7 @@ from apex.salis.api.operations_alerts import (
 	resolve_alert,
 )
 from apex.tests._helpers import _user
-
-
-def _vehicle(plate, project=None):
-	name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-	if not name:
-		name = frappe.get_doc(
-			{"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active", "project": project}
-		).insert(ignore_permissions=True).name
-	elif project is not None:
-		frappe.db.set_value("Salis Vehicle", name, "project", project)
-	return name
-
-
-def _project(name):
-	p = frappe.db.get_value("Project", {"project_name": name}, "name")
-	if not p:
-		p = frappe.get_doc({"doctype": "Project", "project_name": name}).insert(ignore_permissions=True).name
-	return p
+from apex.tests.factories import make_project, make_vehicle
 
 
 def _alert(alert_type="Idle Vehicle", severity="Warning", vehicle=None):
@@ -142,10 +125,10 @@ class TestOpenAlertsQueueScope(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		frappe.set_user("Administrator")
-		cls.pa = _project("OA Scope A")
-		cls.pb = _project("OA Scope B")
-		cls.va = _vehicle("OA SCOPE A1", project=cls.pa)
-		cls.vb = _vehicle("OA SCOPE B1", project=cls.pb)
+		cls.pa = make_project("OA Scope A")
+		cls.pb = make_project("OA Scope B")
+		cls.va = make_vehicle("OA SCOPE A1", project=cls.pa)
+		cls.vb = make_vehicle("OA SCOPE B1", project=cls.pb)
 		cls.sup = _user("oa-scope-sup@example.com", "Fleet Supervisor")
 		if not frappe.db.exists(
 			"User Permission", {"allow": "Project", "for_value": cls.pa, "user": cls.sup}

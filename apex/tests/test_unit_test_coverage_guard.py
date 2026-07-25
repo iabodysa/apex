@@ -4,11 +4,11 @@
 Pure-Python, no live Frappe site required — same family as
 test_duplicate_and_dead_code_guard.py, test_release_hygiene.py,
 test_sql_interpolation_guard.py and test_no_cross_test_imports.py.
-Self-contained by design: it does NOT import anything from a sibling
-``test_*.py`` module (test_no_cross_test_imports.py's ratchet baseline is
-now EMPTY, so a cross-test import here would itself fail that guard) — every
-helper it needs is reimplemented locally, exactly like every guard in this
-family already does for ``APP_ROOT`` / ``_parse`` / ``_rel`` / etc.
+Its source-tree queries come from ``tests/source_tree.py``, the plain-named
+shared home this guard family uses — never from a sibling ``test_*.py`` module,
+which test_no_cross_test_imports.py's now-EMPTY baseline forbids outright.
+They used to be reimplemented locally, which is how this guard ended up
+duplicating the very code the sibling duplication guard scans for (A-176).
 
 Policy
 ------
@@ -40,7 +40,11 @@ low-false-positive proxy for "this file carries real logic":
 A unit is "covered" if ANY of the following holds, checked against every
 ``test_*.py`` file anywhere under apex/ (central ``apex/tests/`` AND any
 already-colocated file — A-108 Phase 1 relocates the former into the latter;
-this guard must recognise coverage in either home):
+this guard must recognise coverage in either home) PLUS the plain-named shared
+helpers under ``tests/`` (``source_tree.test_support_files``). A-176 proved why
+the second half matters: promoting a duplicated Goods Receipt fixture out of two
+test modules into factories.py moved the only ``"Goods Receipt"`` mention out of
+the ``test_*.py`` universe, and the guard scored a de-duplication as a lost test.
 
   a) a ``test_<name>.py`` file sits in the SAME DIRECTORY (true colocation;
      for a package ``__init__.py`` that is itself the module, ``<name>`` is
@@ -89,18 +93,26 @@ one is A-108 Phase 2's job, out of scope here; this guard only fails when the
 uncovered set grows BEYOND the frozen baseline, i.e. when NEW production code
 ships with no test anywhere in the tree.
 
-Run standalone:  python3 -m unittest apex.tests.test_unit_test_coverage_guard -v
+Run standalone (from the repo root, so ``apex.tests.source_tree`` resolves):
+  python3 -m unittest apex.tests.test_unit_test_coverage_guard -v
 """
 
 import ast
-import glob
 import json
 import os
 import re
 import unittest
 
-APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
-REPO_ROOT = os.path.dirname(APP_ROOT)
+from apex.tests.source_tree import (
+    APP_ROOT,
+    REPO_ROOT,
+    file_dotted_path as _file_dotted_path,
+    parse as _parse,
+    production_py_files as _production_py_files,
+    rel as _rel,
+    test_py_files as _test_py_files,
+    test_support_files as _test_support_files,
+)
 
 # [#a108rx] Dotted apex.<...> references mentioned as plain TEXT anywhere in a
 # test file (a `frappe.get_attr("apex.x.y.z")`-style literal string, or a
@@ -108,59 +120,6 @@ REPO_ROOT = os.path.dirname(APP_ROOT)
 # .py's `_DOTTED_RE`, narrowed to just the `apex` prefix (apex_habitat was
 # retired 2026-07).
 _DOTTED_RE = re.compile(r"\bapex(?:\.[A-Za-z_][A-Za-z0-9_]*)+")
-
-
-def _parse(path):
-    with open(path, encoding="utf-8") as fh:
-        try:
-            return ast.parse(fh.read(), filename=path)
-        except SyntaxError:
-            return None
-
-
-def _rel(path):
-    return os.path.relpath(path, APP_ROOT)
-
-
-def _production_py_files():
-    """Every apex/**/*.py file except tests/ (central or colocated) and
-    node_modules — reimplements test_duplicate_and_dead_code_guard.py's
-    identically-named helper locally to stay self-contained (see module
-    docstring: this file must not import from a sibling test module)."""
-    out = []
-    for path in sorted(glob.glob(os.path.join(APP_ROOT, "**", "*.py"), recursive=True)):
-        if "node_modules" in path:
-            continue
-        rel = _rel(path)
-        if rel.startswith("tests" + os.sep) or os.path.basename(path).startswith("test_"):
-            continue
-        out.append(path)
-    return out
-
-
-def _test_py_files():
-    """Every test_*.py anywhere under apex/ — central apex/tests/ AND any
-    already-colocated file (A-108 Phase 1 moves central tests next to their
-    module in batches; this guard must recognise coverage in either home, or
-    every relocation would look like new uncovered production code)."""
-    out = []
-    for path in sorted(glob.glob(os.path.join(APP_ROOT, "**", "test_*.py"), recursive=True)):
-        if "node_modules" in path:
-            continue
-        out.append(path)
-    return out
-
-
-def _file_dotted_path(path):
-    """<app>.<pkg>....<basename> dotted import path — mirrors Frappe's own
-    dotted-entrypoint convention and test_duplicate_and_dead_code_guard.py's
-    identically-named helper (reimplemented here to stay self-contained)."""
-    rel = os.path.relpath(path, REPO_ROOT)
-    if rel.endswith(os.sep + "__init__.py"):
-        rel = rel[: -len(os.sep + "__init__.py")]
-    else:
-        rel = rel[: -len(".py")]
-    return rel.replace(os.sep, ".")
 
 
 def _module_basename(path):
@@ -331,7 +290,7 @@ def _test_reference_index():
     basename_dirs = {}
     text_blobs = []
 
-    for tpath in _test_py_files():
+    for tpath in _test_py_files() + _test_support_files():
         tree = _parse(tpath)
         if tree is not None:
             for node in ast.walk(tree):
@@ -533,6 +492,16 @@ class TestCoverageSignals(unittest.TestCase):
         cleanly) but a made-up filename — fine, since none of these
         detectors touch the filesystem except _covered_by_doctype_name."""
         return os.path.join(REPO_ROOT, "apex", *parts)
+
+    def test_index_universe_includes_the_shared_test_helpers(self):
+        # [#a176t1] A fixture promoted into factories.py is still test presence —
+        # if this universe narrows back to test_*.py, de-duplicating reads as a
+        # lost test and the guard punishes the cleanup it should reward.
+        support = {os.path.basename(p) for p in _test_support_files()}
+        self.assertIn("factories.py", support)
+        self.assertIn("_helpers.py", support)
+        self.assertNotIn("__init__.py", support)
+        self.assertFalse(any(b.startswith("test_") for b in support))
 
     def test_covered_by_colocated_file(self):
         p = self._fake_path("salis", "widget", "widget.py")

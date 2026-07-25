@@ -138,6 +138,23 @@ def _building_doc():
     return doc
 
 
+def _capturing_get_doc(captured):
+    """A ``frappe.get_doc`` stand-in for the caller paths: a Building read returns
+    the fixture, and the dict form (a ledger row insert) is recorded into
+    ``captured`` instead of written, so both callers assert on the same rows."""
+
+    def _get_doc(*a, **k):
+        if a and a[0] == "Building":
+            return _building_doc()
+        doc = a[0]
+        captured.append(doc)
+        m = MagicMock()
+        m.insert = MagicMock()
+        return m
+
+    return _get_doc
+
+
 class TestCallerPaths(unittest.TestCase):
     """Exercise allocate_building_accommodation_cost and backdate_assignment_cost
     end to end (DB patched) to prove identical rows + distinct dup-handling."""
@@ -146,16 +163,7 @@ class TestCallerPaths(unittest.TestCase):
         """Run the batch allocator for one building/one assignment/Rent-only.
         Returns (captured_rows, rollback_mock, log_error_mock)."""
         captured = []
-
-        def _get_doc(*a, **k):
-            if a and a[0] == "Building":
-                return _building_doc()
-            # dict form -> a ledger row insert
-            doc = a[0]
-            captured.append(doc)
-            m = MagicMock()
-            m.insert = MagicMock()
-            return m
+        get_doc = _capturing_get_doc(captured)
 
         assignment = _D(name="HA-1", employee="EMP-1", project="PRJ-1",
                         cost_center="CC-1", billed_to_supplier="SUP-1")
@@ -167,7 +175,7 @@ class TestCallerPaths(unittest.TestCase):
         logger = MagicMock()
 
         patches = [
-            patch.object(cost.frappe, "get_doc", side_effect=_get_doc),
+            patch.object(cost.frappe, "get_doc", side_effect=get_doc),
             patch.object(cost.frappe.db, "exists", exists),
             patch.object(cost.frappe, "get_all", get_all),
             patch.object(cost.frappe.db, "rollback", rollback),
@@ -186,15 +194,7 @@ class TestCallerPaths(unittest.TestCase):
 
     def _run_backdate(self, insert_side_effect=None):
         captured = []
-
-        def _get_doc(*a, **k):
-            if a and a[0] == "Building":
-                return _building_doc()
-            doc = a[0]
-            captured.append(doc)
-            m = MagicMock()
-            m.insert = MagicMock()
-            return m
+        get_doc = _capturing_get_doc(captured)
 
         asgn = _D(name="HA-1", employee="EMP-1", building="BLD-1", project="PRJ-1",
                   cost_center="CC-1", billed_to_supplier="SUP-1")
@@ -205,7 +205,7 @@ class TestCallerPaths(unittest.TestCase):
         log_error = MagicMock()
 
         patches = [
-            patch.object(cost.frappe, "get_doc", side_effect=_get_doc),
+            patch.object(cost.frappe, "get_doc", side_effect=get_doc),
             patch.object(cost.frappe.db, "get_value", get_value),
             patch.object(cost.frappe.db, "exists", exists),
             patch.object(cost.frappe.db, "rollback", rollback),

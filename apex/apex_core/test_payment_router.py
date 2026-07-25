@@ -37,6 +37,7 @@ from apex.apex_core.payment_router import (
     get_target_doctype,
     route_payment,
 )
+from apex.tests._helpers import set_gl_posting
 
 SETTINGS = "Payment Routing Settings"
 STUB_DOCTYPE = "Test Routed Payment Stub"
@@ -94,15 +95,9 @@ class TestPaymentRouter(FrappeTestCase):
         s.set("field_map", [])
         s.save(ignore_permissions=True)
         # [#5hd2hx]
-        self._set_gl_posting(False)
+        set_gl_posting(False)
 
     # [#f9hua6]
-
-    def _set_gl_posting(self, enabled):
-        """Flip the app-wide enable_gl_posting flag the router's GL gate reads."""
-        apex = frappe.get_single("Apex Settings")
-        apex.enable_gl_posting = 1 if enabled else 0
-        apex.save(ignore_permissions=True)
 
     def _approved_request(self, **overrides):
         """An approved (finance-STAMPED, submitted) Salis Payment Request.
@@ -372,7 +367,7 @@ class TestPaymentRouter(FrappeTestCase):
 
     def test_auto_submit_submits_submittable_target_when_gl_on(self):
         # [#lwpe1f]
-        self._set_gl_posting(True)
+        set_gl_posting(True)
         pr = self._approved_request(amount=555.00)
         self._configure(
             STUB_DOCTYPE,
@@ -405,7 +400,7 @@ class TestPaymentRouter(FrappeTestCase):
 
     def test_no_auto_submit_leaves_draft(self):
         # [#ck9w8i]
-        self._set_gl_posting(True)
+        set_gl_posting(True)
         pr = self._approved_request()
         self._configure(
             STUB_DOCTYPE,

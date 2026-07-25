@@ -19,6 +19,8 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.habitat import permissions as P
+from apex.tests._helpers import as_user
+from apex.tests.factories import make_scoped_supervisor
 
 # [#fq2bhs]
 SINGLE_BUILDING = [
@@ -59,7 +61,7 @@ class TestHabitatTenantScope(FrappeTestCase):
         # [#lr074d]
         cls.b1 = cls._building()
         cls.b2 = cls._building()
-        cls.scoped = cls._scoped_supervisor(cls.b1)
+        cls.scoped = make_scoped_supervisor(cls._user, cls.b1, cls.addClassCleanup)
         cls.oversight = cls._oversight_manager()
 
     # [#kjq1ae]
@@ -84,19 +86,6 @@ class TestHabitatTenantScope(FrappeTestCase):
         })
         u.insert(ignore_permissions=True)
         cls.addClassCleanup(frappe.delete_doc, "User", email, force=True, ignore_permissions=True)
-        return email
-
-    @classmethod
-    def _scoped_supervisor(cls, building):
-        email = cls._user("Resident Supervisor")
-        up = frappe.get_doc({
-            "doctype": "User Permission",
-            "user": email,
-            "allow": "Building",
-            "for_value": building,
-        })
-        up.insert(ignore_permissions=True)
-        cls.addClassCleanup(frappe.delete_doc, "User Permission", up.name, force=True, ignore_permissions=True)
         return email
 
     @classmethod
@@ -218,7 +207,7 @@ class TestHabitatTenantScope(FrappeTestCase):
 
     @staticmethod
     def _list_names(doctype, user):
-        with _as_user(user):
+        with as_user(user):
             return {r.name for r in frappe.get_list(doctype, fields=["name"], limit_page_length=0)}
 
     # [#4sw1ec]
@@ -237,17 +226,3 @@ class TestHabitatTenantScope(FrappeTestCase):
             self.assertFalse(row.delete, "{0} must not delete history".format(role))
 
 
-class _as_user:
-    """Run a block as ``user`` then restore the session user."""
-
-    def __init__(self, user):
-        self.user = user
-
-    def __enter__(self):
-        self._prev = frappe.session.user
-        frappe.set_user(self.user)
-        return self
-
-    def __exit__(self, *exc):
-        frappe.set_user(self._prev)
-        return False

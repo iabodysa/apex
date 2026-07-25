@@ -1,7 +1,71 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Shared test helpers for the Salis test suite."""
+"""Shared test helpers: session switching, workflow-safe submit/cancel, fixtures."""
 
 import frappe
+
+
+class as_user:
+    """Run a block as ``user``, restoring the previous session user on exit.
+
+    Lower-cased on purpose — it is only ever used as ``with as_user(u):``, never
+    held as a value. Restores rather than resetting to Administrator, so a nested
+    block returns the caller to whatever user IT was running as.
+    """
+
+    def __init__(self, user):
+        self.user = user
+
+    def __enter__(self):
+        self._prev = frappe.session.user
+        frappe.set_user(self.user)
+        return self
+
+    def __exit__(self, *exc):
+        frappe.set_user(self._prev)
+        return False
+
+
+def notification_recipients(notification_name, doc):
+    """The To recipients a native Notification resolves for ``doc``.
+
+    Renders through the Notification's own ``get_list_of_recipients``, so a
+    recipient added by condition/role/field is resolved exactly as it would be on
+    a real send; cc/bcc are dropped because every caller asserts on To only.
+    """
+    notification = frappe.get_doc("Notification", notification_name)
+    context = {"doc": doc, "alert": notification, "comments": None}
+    recipients, _cc, _bcc = notification.get_list_of_recipients(doc, context)
+    return recipients
+
+
+def set_gl_posting(enabled):
+    """Flip the app-wide enable_gl_posting flag the payment router's GL gate reads."""
+    apex = frappe.get_single("Apex Settings")
+    apex.enable_gl_posting = 1 if enabled else 0
+    apex.save(ignore_permissions=True)
+
+
+def approve_rental_settlement(rs, manager):
+    """Drive a Rental Settlement Draft -> Reconciled -> Approved (which submits it)
+    through its native workflow as ``manager``; returns the reloaded document.
+
+    Falls back to a direct status write + submit when the workflow is not seeded on
+    this site, so the accrual assertions still run on a bench that predates it.
+    """
+    from frappe.model.workflow import apply_workflow, get_workflow_name
+
+    if get_workflow_name("Rental Settlement") == "Rental Settlement Workflow":
+        frappe.set_user(manager)
+        apply_workflow(rs, "Reconcile")
+        rs.reload()
+        apply_workflow(rs, "Approve")
+        frappe.set_user("Administrator")
+    else:
+        rs.status = "Approved"
+        rs.save(ignore_permissions=True)
+        rs.submit()
+    rs.reload()
+    return rs
 
 
 def cancel_submitted_for_cleanup(doc):
@@ -84,13 +148,15 @@ def _user(email, role):
 
 def _project(project_name="QA Scope Project"):
     """Return a Project named ``project_name``, creating it if absent. Idempotent.
-    Used to give a scoped Salis user a tenant to be permitted for."""
-    existing = frappe.db.get_value("Project", {"project_name": project_name}, "name")
-    if existing:
-        return existing
-    return frappe.get_doc(
-        {"doctype": "Project", "project_name": project_name}
-    ).insert(ignore_permissions=True).name
+    Used to give a scoped Salis user a tenant to be permitted for.
+
+    A thin default-carrying alias over ``factories.make_project``: it was a fourth
+    hand-written copy of that get-or-create, written in a shape the copy-paste
+    detector could not group with the other three (A-176).
+    """
+    from apex.tests.factories import make_project
+
+    return make_project(project_name)
 
 
 def _grant_project(user, project):

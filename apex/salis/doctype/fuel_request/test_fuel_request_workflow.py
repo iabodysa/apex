@@ -31,6 +31,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project, make_vehicle, purge_doc
 
 WORKFLOW = "Fuel Request Workflow"
 
@@ -58,8 +59,8 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		# [#npt94d]
 		cls.manager_maker = _user("frwf_mgrmaker@example.com", "Fleet Manager")
 		frappe.get_doc("User", cls.manager_maker).add_roles("Fleet Project Manager")
-		cls.project = cls._project("FR Workflow Project")
-		cls.vehicle = cls._vehicle("FR-WF-1")
+		cls.project = make_project("FR Workflow Project")
+		cls.vehicle = make_vehicle("FR-WF-1")
 		# [#pwic2j]
 		for u in (cls.requester, cls.manager, cls.manager_maker):
 			if not frappe.db.exists(
@@ -94,24 +95,6 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 
 	# [#m88md8]
 
-	@staticmethod
-	def _project(name):
-		p = frappe.db.get_value("Project", {"project_name": name}, "name")
-		if not p:
-			p = frappe.get_doc(
-				{"doctype": "Project", "project_name": name}
-			).insert(ignore_permissions=True).name
-		return p
-
-	@staticmethod
-	def _vehicle(plate):
-		v = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-		if not v:
-			v = frappe.get_doc(
-				{"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
-			).insert(ignore_permissions=True).name
-		return v
-
 	def _quota(self):
 		"""A fresh Active Fuel Quota for the test vehicle/project."""
 		q = frappe.get_doc({
@@ -140,21 +123,8 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		}
 		data.update(overrides)
 		doc = frappe.get_doc(data).insert(ignore_permissions=True)
-		self.addCleanup(lambda: self._purge(doc.name))
+		self.addCleanup(lambda: purge_doc("Fuel Request", doc.name))
 		return doc
-
-	@staticmethod
-	def _purge(name):
-		frappe.set_user("Administrator")
-		if not frappe.db.exists("Fuel Request", name):
-			return
-		doc = frappe.get_doc("Fuel Request", name)
-		if doc.docstatus == 1:
-			try:
-				doc.cancel()
-			except Exception:
-				pass
-		frappe.delete_doc("Fuel Request", name, ignore_permissions=True, force=True)
 
 	@staticmethod
 	def _purge_quota(name):

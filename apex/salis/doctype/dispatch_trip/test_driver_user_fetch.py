@@ -15,6 +15,8 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
+from apex.tests.factories import make_vehicle
+
 test_ignore = [
     "Employee",
     "Company",
@@ -59,19 +61,6 @@ def _driver_with_user(full_name, user):
     return name
 
 
-def _vehicle(plate, driver):
-    name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-    if not name:
-        name = (
-            frappe.get_doc(
-                {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
-            )
-            .insert(ignore_permissions=True)
-            .name
-        )
-    return name
-
-
 class TestDriverUserFetch(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
@@ -103,7 +92,7 @@ class TestDriverUserFetch(FrappeTestCase):
         )
 
     def test_fuel_request_mirrors_driver_user(self):
-        vehicle = _vehicle("TDU-FR-1", self.driver)
+        vehicle = make_vehicle("TDU-FR-1")
         fr = frappe.get_doc(
             {
                 "doctype": "Fuel Request",

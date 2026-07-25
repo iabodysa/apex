@@ -24,15 +24,7 @@ from frappe.tests.utils import FrappeTestCase
 from apex.salis.api import fuel_console
 from apex.salis.permissions import scoped_has_permission
 from apex.tests._helpers import _user
-
-
-def _project(name):
-    p = frappe.db.get_value("Project", {"project_name": name}, "name")
-    if not p:
-        p = frappe.get_doc({"doctype": "Project", "project_name": name}).insert(
-            ignore_permissions=True
-        ).name
-    return p
+from apex.tests.factories import make_project
 
 
 def _grant_project(user, project):
@@ -90,8 +82,8 @@ class TestFuelConsoleScoping(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        cls.pa = _project("FuelConsole A")
-        cls.pb = _project("FuelConsole B")
+        cls.pa = make_project("FuelConsole A")
+        cls.pb = make_project("FuelConsole B")
         # [#9xi43d]
         cls.sup = _user("fc_sup@example.com", "Fleet Supervisor")
         _grant_project(cls.sup, cls.pa)
@@ -225,8 +217,8 @@ class TestSupportTicketScoping(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        cls.pa = _project("Ticket A")
-        cls.pb = _project("Ticket B")
+        cls.pa = make_project("Ticket A")
+        cls.pb = make_project("Ticket B")
         cls.sup = _user("tk_sup@example.com", "Fleet Supervisor")
         _grant_project(cls.sup, cls.pa)
         cls.mgr = _user("tk_mgr@example.com", "Fleet Manager")

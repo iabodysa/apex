@@ -29,6 +29,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project, make_vehicle
 
 WORKFLOW = "Transport Request Workflow"
 
@@ -54,7 +55,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         cls.requester = _user("tr_req@example.com", "Fleet Project Manager")
         cls.supervisor = _user("tr_sup@example.com", "Fleet Supervisor")
         cls.manager = _user("tr_mgr@example.com", "Fleet Manager")
-        cls.project = cls._project("TR Workflow Project")
+        cls.project = make_project("TR Workflow Project")
         # [#l27h20]
         for u in (cls.requester, cls.supervisor):
             if not frappe.db.exists(
@@ -85,15 +86,6 @@ class TestTransportRequestWorkflow(FrappeTestCase):
 
     def tearDown(self):
         frappe.set_user("Administrator")
-
-    @staticmethod
-    def _project(name):
-        p = frappe.db.get_value("Project", {"project_name": name}, "name")
-        if not p:
-            p = frappe.get_doc(
-                {"doctype": "Project", "project_name": name}
-            ).insert(ignore_permissions=True).name
-        return p
 
     def _new_tr(self, **overrides):
         """A draft, validatable Administrative Trip (small scope => Regional tier)
@@ -302,7 +294,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         tr.reload()
         self.assertEqual(tr.status, "Scheduled")
 
-        vehicle = self._vehicle("WF-TRIP-1")
+        vehicle = make_vehicle("WF-TRIP-1")
         driver = self._driver("WF Driver 1")
         dt = frappe.get_doc({
             "doctype": "Dispatch Trip",
@@ -339,15 +331,6 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         tr.reload()
         self.assertEqual(tr.status, "Scheduled")
         self.assertIsNone(tr.dispatch_trip)
-
-    @staticmethod
-    def _vehicle(plate):
-        v = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-        if not v:
-            v = frappe.get_doc({
-                "doctype": "Salis Vehicle", "plate_number": plate, "status": "Active",
-            }).insert(ignore_permissions=True).name
-        return v
 
     @staticmethod
     def _driver(name):

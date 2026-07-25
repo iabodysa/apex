@@ -12,6 +12,7 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
+from apex.tests.factories import make_safety_round
 
 
 class TestSafetyFindingLedger(FrappeTestCase):
@@ -47,16 +48,6 @@ class TestSafetyFindingLedger(FrappeTestCase):
             .insert(ignore_permissions=True)
             .name
         )
-
-    def _round(self, **overrides):
-        data = {
-            "doctype": "Safety Round",
-            "building": self.building,
-            "round_date": today(),
-            "cadence": "Weekly",
-        }
-        data.update(overrides)
-        return frappe.get_doc(data).insert(ignore_permissions=True)
 
     def _execution(self, safety_round, status, findings):
         # [#m22hrm]
@@ -95,7 +86,7 @@ class TestSafetyFindingLedger(FrappeTestCase):
         )
 
     def test_submit_posts_one_row_per_finding(self):
-        rnd = self._round()
+        rnd = make_safety_round(self.building)
         self._execution(
             rnd.name,
             "Poor",
@@ -122,7 +113,7 @@ class TestSafetyFindingLedger(FrappeTestCase):
         self.assertEqual({r.source_detail_no for r in rows}, {1, 2})
 
     def test_posting_is_idempotent(self):
-        rnd = self._round()
+        rnd = make_safety_round(self.building)
         ex = self._execution(
             rnd.name,
             "Poor",
@@ -141,7 +132,7 @@ class TestSafetyFindingLedger(FrappeTestCase):
         self.assertTrue(ex.name)
 
     def test_rows_are_immutable(self):
-        rnd = self._round()
+        rnd = make_safety_round(self.building)
         self._execution(
             rnd.name,
             "Poor",
@@ -161,7 +152,7 @@ class TestSafetyFindingLedger(FrappeTestCase):
             )
 
     def test_cancel_reverses_not_deletes(self):
-        rnd = self._round()
+        rnd = make_safety_round(self.building)
         ex = self._execution(
             rnd.name,
             "Poor",
@@ -190,7 +181,7 @@ class TestSafetyFindingLedger(FrappeTestCase):
         )
 
     def test_cancel_reversal_is_idempotent(self):
-        rnd = self._round()
+        rnd = make_safety_round(self.building)
         ex = self._execution(
             rnd.name,
             "Poor",

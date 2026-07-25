@@ -34,6 +34,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project, purge_doc, purge_trip_request
 
 WORKFLOW = "Dispatch Trip Workflow"
 
@@ -79,7 +80,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         cls.manager = _user("ssf_mgr@example.com", "Fleet Manager")
         cls.supervisor = _user("ssf_sup@example.com", "Fleet Supervisor")
         cls.pmanager = _user("ssf_pm@example.com", "Fleet Project Manager")
-        cls.project = cls._get_or_create_project("SSF Test Project")
+        cls.project = make_project("SSF Test Project")
         # [#smuogs]
         for u in (cls.supervisor, cls.pmanager):
             if not frappe.db.exists(
@@ -112,15 +113,6 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         frappe.set_user("Administrator")
 
     # [#swr9rs]
-
-    @staticmethod
-    def _get_or_create_project(name):
-        p = frappe.db.get_value("Project", {"project_name": name}, "name")
-        if not p:
-            p = frappe.get_doc(
-                {"doctype": "Project", "project_name": name}
-            ).insert(ignore_permissions=True).name
-        return p
 
     @staticmethod
     def _make_vehicle(suffix=None, odometer=0):
@@ -192,53 +184,10 @@ class TestDispatchTripStateFlow(FrappeTestCase):
             "trip_date": frappe.utils.today(),
             "status": status,
         }).insert(ignore_permissions=True)
-        self.addCleanup(lambda: self._purge_trip(dt.name))
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", dt.name))
         return dt
 
     # [#omt543]
-
-    @staticmethod
-    def _purge_trip(name):
-        frappe.set_user("Administrator")
-        if not frappe.db.exists("Dispatch Trip", name):
-            return
-        doc = frappe.get_doc("Dispatch Trip", name)
-        if doc.docstatus == 1:
-            try:
-                doc.cancel()
-            except Exception:
-                pass
-        frappe.delete_doc("Dispatch Trip", name, ignore_permissions=True, force=True)
-
-    @staticmethod
-    def _purge_tr_and_rp(tr_name, rp_name):
-        frappe.set_user("Administrator")
-        for ledger in frappe.get_all(
-            "Trip Fulfilment Ledger",
-            filters={"transport_request": tr_name},
-            pluck="name",
-        ):
-            frappe.delete_doc(
-                "Trip Fulfilment Ledger", ledger, ignore_permissions=True, force=True
-            )
-        if frappe.db.exists("Route Plan", rp_name):
-            rp = frappe.get_doc("Route Plan", rp_name)
-            if rp.docstatus == 1:
-                try:
-                    rp.cancel()
-                except Exception:
-                    pass
-            frappe.delete_doc("Route Plan", rp_name, ignore_permissions=True, force=True)
-        if frappe.db.exists("Transport Request", tr_name):
-            tr = frappe.get_doc("Transport Request", tr_name)
-            if tr.docstatus == 1:
-                try:
-                    tr.cancel()
-                except Exception:
-                    pass
-            frappe.delete_doc(
-                "Transport Request", tr_name, ignore_permissions=True, force=True
-            )
 
     # [#dptus0]
 
@@ -273,7 +222,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
             "status": "Planned",
             "trip_date": frappe.utils.today(),
         }).insert(ignore_permissions=True)
-        self.addCleanup(lambda: self._purge_trip(dt.name))
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", dt.name))
         self.assertEqual(dt.status, "Planned")
         self.assertEqual(dt.docstatus, 0)
 
@@ -287,7 +236,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         (TR fulfilment, ledger) are tested in test_dispatch_trip_workflow.py.
         """
         tr, rp = self._make_scheduled_tr(self.project)
-        self.addCleanup(lambda: self._purge_tr_and_rp(tr.name, rp))
+        self.addCleanup(lambda: purge_trip_request(tr.name, rp))
         vehicle = self._make_vehicle("HP1")
         driver = self._make_driver("HP1")
         dt = self._make_trip(rp, vehicle, driver)
@@ -328,7 +277,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         must raise a ValidationError.
         """
         tr, rp = self._make_scheduled_tr(self.project)
-        self.addCleanup(lambda: self._purge_tr_and_rp(tr.name, rp))
+        self.addCleanup(lambda: purge_trip_request(tr.name, rp))
         vehicle = self._make_vehicle("INV1")
         driver = self._make_driver("INV1")
         dt = self._make_trip(rp, vehicle, driver)
@@ -346,7 +295,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         Cancel (Fleet Manager → Cancelled/docstatus 2).  Dispatch is not
         offered and apply_workflow must raise a ValidationError."""
         tr, rp = self._make_scheduled_tr(self.project)
-        self.addCleanup(lambda: self._purge_tr_and_rp(tr.name, rp))
+        self.addCleanup(lambda: purge_trip_request(tr.name, rp))
         vehicle = self._make_vehicle("INV2")
         driver = self._make_driver("INV2")
         dt = self._make_trip(rp, vehicle, driver)
@@ -380,7 +329,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         action has no outgoing edge from Dispatched, so the second call must
         raise a ValidationError rather than silently succeeding or crashing."""
         tr, rp = self._make_scheduled_tr(self.project)
-        self.addCleanup(lambda: self._purge_tr_and_rp(tr.name, rp))
+        self.addCleanup(lambda: purge_trip_request(tr.name, rp))
         vehicle = self._make_vehicle("IDP1")
         driver = self._make_driver("IDP1")
         dt = self._make_trip(rp, vehicle, driver)
@@ -414,7 +363,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         })
         bare.flags.ignore_validate = True
         bare.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        self.addCleanup(lambda: self._purge_trip(bare.name))
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", bare.name))
 
         # [#8gltyo]
         bare.flags.ignore_validate = False
@@ -443,7 +392,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         })
         bare.flags.ignore_validate = True
         bare.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        self.addCleanup(lambda: self._purge_trip(bare.name))
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", bare.name))
 
         # [#jj8dl4]
         bare.status = "Completed"
@@ -466,7 +415,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
             "odometer_start": 100,
             "odometer_end": 200,
         }).insert(ignore_permissions=True)
-        self.addCleanup(lambda: self._purge_trip(bare.name))
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", bare.name))
 
         # [#e8f7p8]
         bare.odometer_start = 500
@@ -487,7 +436,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
             "odometer_start": 100,
             "odometer_end": 200,
         }).insert(ignore_permissions=True)
-        self.addCleanup(lambda: self._purge_trip(bare.name))
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", bare.name))
 
         # [#8zjodm]
         bare.odometer_start = 100

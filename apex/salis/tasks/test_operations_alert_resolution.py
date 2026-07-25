@@ -31,6 +31,7 @@ from apex.salis.tasks import (
 	reconcile_operations_alerts,
 	unreverted_topup_watch,
 )
+from apex.tests.factories import purge_doc
 
 
 # [#36mh33]
@@ -102,19 +103,6 @@ def _open_alerts(alert_type, **subject):
 		filters={"alert_type": alert_type, "status": "Open", **subject},
 		pluck="name",
 	)
-
-
-def _purge_request(name):
-	frappe.set_user("Administrator")
-	if not frappe.db.exists("Fuel Request", name):
-		return
-	doc = frappe.get_doc("Fuel Request", name)
-	if doc.docstatus == 1:
-		try:
-			doc.cancel()
-		except Exception:
-			pass
-	frappe.delete_doc("Fuel Request", name, ignore_permissions=True, force=True)
 
 
 def _purge_alerts(alert_type, **subject):
@@ -308,7 +296,7 @@ class TestExcessiveTopupResolveOnRevert(FrappeTestCase):
 		_drive_to_done(doc)
 		name = doc.name
 		alert = self._raise_excessive()
-		self.addCleanup(lambda: _purge_request(name))
+		self.addCleanup(lambda: purge_doc("Fuel Request", name))
 		self.addCleanup(lambda: _purge_alerts("Excessive Topup", vehicle=self.vehicle))
 
 		self.assertEqual(frappe.db.get_value("Operations Alert", alert, "status"), "Open")
@@ -344,7 +332,7 @@ class TestExcessiveTopupResolveOnRevert(FrappeTestCase):
 		doc.insert(ignore_permissions=True)
 		_drive_to_done(doc)
 		name = doc.name
-		self.addCleanup(lambda: _purge_request(name))
+		self.addCleanup(lambda: purge_doc("Fuel Request", name))
 		self.addCleanup(lambda: _purge_alerts("Excessive Topup", vehicle=self.vehicle))
 
 		doc.reload()
@@ -385,7 +373,7 @@ class TestExcessiveTopupPeriodicResolve(FrappeTestCase):
 		doc.insert(ignore_permissions=True)
 		_drive_to_done(doc)
 		name = doc.name
-		self.addCleanup(lambda: _purge_request(name))
+		self.addCleanup(lambda: purge_doc("Fuel Request", name))
 
 		# [#1cgyej]
 		alert = frappe.get_doc(

@@ -29,6 +29,7 @@ from apex.tests.factories import (
     make_worker_employee as _employee,
     make_project as _project,
 )
+from apex.tests.factories import ensure_worker_token
 
 
 class TestMasarConfirmBoarding(_WorkerTripMixin, FrappeTestCase):
@@ -76,29 +77,6 @@ class TestMasarConfirmBoarding(_WorkerTripMixin, FrappeTestCase):
                     pass
             frappe.delete_doc("Trip Start Log", name, ignore_permissions=True, force=True)
 
-    def _token_for(self, employee):
-        """Issue an enabled Masar Worker Token for ``employee`` and return the
-        minted token string (server-generated, read back)."""
-        existing = frappe.db.get_value(
-            "Masar Worker Token", {"employee": employee}, "name"
-        )
-        if existing:
-            doc = frappe.get_doc("Masar Worker Token", existing)
-            if not doc.enabled:
-                doc.db_set("enabled", 1)
-            # [#edhau9]
-            return doc.recover_token()
-        doc = frappe.get_doc(
-            {
-                "doctype": "Masar Worker Token",
-                "party_type": "Employee",
-                "party": employee,
-                "employee": employee,
-                "enabled": 1,
-            }
-        ).insert(ignore_permissions=True)
-        return doc._plaintext_token
-
     def _boarding_rows_for(self, dispatch_trip, employee):
         """Trip Boarding Event rows for ``employee`` across this trip's Trip Start
         Log(s) — the actual proof a boarding event was created and scoped."""
@@ -126,7 +104,7 @@ class TestMasarConfirmBoarding(_WorkerTripMixin, FrappeTestCase):
             self.driver, self.project, self.building, [w1, w2], "CB Route A"
         )
         self.addCleanup(lambda: self._purge_trip_logs(dt.name))
-        token = self._token_for(w1)
+        token = ensure_worker_token(w1)
         # [#b6mf82]
         self.assertEqual(self._boarding_rows_for(dt.name, w1), [])
 
@@ -151,7 +129,7 @@ class TestMasarConfirmBoarding(_WorkerTripMixin, FrappeTestCase):
             self.driver, self.project, self.building, [w1], "CB Route B"
         )
         self.addCleanup(lambda: self._purge_trip_logs(dt.name))
-        token = self._token_for(w1)
+        token = ensure_worker_token(w1)
 
         first = masar.confirm_boarding(token=token, transport_request=tr.name)
         self.assertTrue(first["created"])
@@ -182,7 +160,7 @@ class TestMasarConfirmBoarding(_WorkerTripMixin, FrappeTestCase):
         token resolves, but nothing is written."""
         # [#r240vn]
         lonely = self._worker("lonely")
-        token = self._token_for(lonely)
+        token = ensure_worker_token(lonely)
         # [#7n7wi1]
         self.assertEqual(masar._resolve_worker(token), lonely)
 

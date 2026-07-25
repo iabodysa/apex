@@ -39,6 +39,8 @@ from apex.salis.report.rental_cost_by_office.rental_cost_by_office import (
     execute as rental_cost_by_office,
 )
 from apex.tests._helpers import _user, cancel_submitted_for_cleanup
+from apex.tests._helpers import approve_rental_settlement
+from apex.tests.factories import make_rental_office, make_vehicle
 
 LEDGER = "Rental Accrual Ledger"
 
@@ -70,9 +72,9 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         self.requester = _user("ral_req@example.com", "Fleet Project Manager")
         self.manager = _user("ral_mgr@example.com", "Fleet Manager")
         self.finance = _user("ral_fin@example.com", "Finance Manager")
-        self.office = self._office("RAL Recon Office")
-        self.other_office = self._office("RAL Other Office")
-        self.vehicle = self._vehicle("RAL RECON 1")
+        self.office = make_rental_office("RAL Recon Office")
+        self.other_office = make_rental_office("RAL Other Office")
+        self.vehicle = make_vehicle("RAL RECON 1", ownership="Rented")
         # [#24hmy0]
         self.period = today()[:7]
         self.accrual_date = str(get_first_day(getdate(today())))
@@ -81,25 +83,6 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         frappe.set_user("Administrator")
 
     # [#c64vod]
-
-    @staticmethod
-    def _office(name):
-        o = frappe.db.get_value("Rental Office", {"office_name": name}, "name")
-        if not o:
-            o = frappe.get_doc(
-                {"doctype": "Rental Office", "office_name": name, "status": "Active"}
-            ).insert(ignore_permissions=True).name
-        return o
-
-    @staticmethod
-    def _vehicle(plate):
-        v = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-        if not v:
-            v = frappe.get_doc(
-                {"doctype": "Salis Vehicle", "plate_number": plate,
-                 "ownership": "Rented", "status": "Active"}
-            ).insert(ignore_permissions=True).name
-        return v
 
     def _accrual_row(self, office, accrual_date, amount=100.0, vehicle=None):
         """Insert a machine-style accrual row (settled = 0, unlinked), exactly as
@@ -112,7 +95,7 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         what the stamping must match."""
         if vehicle is None:
             self._veh_counter = getattr(self, "_veh_counter", 0) + 1
-            vehicle = self._vehicle(f"RAL RECON ROW {self._veh_counter}")
+            vehicle = make_vehicle(f"RAL RECON ROW {self._veh_counter}", ownership="Rented")
         row = frappe.get_doc(
             {
                 "doctype": LEDGER,
@@ -156,25 +139,6 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
             cancel_submitted_for_cleanup(doc)
         frappe.delete_doc("Rental Settlement", name, force=True, ignore_permissions=True)
 
-    def _approve(self, rs):
-        """Drive Draft -> Reconciled -> Approved (submits) via the workflow as the
-        Fleet Manager, or fall back to a direct submit when the workflow is not
-        seeded on this site."""
-        from frappe.model.workflow import apply_workflow, get_workflow_name
-
-        if get_workflow_name("Rental Settlement") == "Rental Settlement Workflow":
-            frappe.set_user(self.manager)
-            apply_workflow(rs, "Reconcile")
-            rs.reload()
-            apply_workflow(rs, "Approve")
-            frappe.set_user("Administrator")
-        else:
-            rs.status = "Approved"
-            rs.save(ignore_permissions=True)
-            rs.submit()
-        rs.reload()
-        return rs
-
     def _mark_paid(self, rs):
         from frappe.model.workflow import apply_workflow, get_workflow_name
 
@@ -200,7 +164,7 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         )
 
         rs = self._settlement()
-        self._approve(rs)
+        approve_rental_settlement(rs, self.manager)
         self.assertEqual(rs.docstatus, 1)
         self.assertEqual(rs.status, "Approved")
 
@@ -219,7 +183,7 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
     def test_stamp_is_idempotent_across_postsubmit_saves(self):
         row = self._accrual_row(self.office, self.accrual_date)
         rs = self._settlement()
-        self._approve(rs)
+        approve_rental_settlement(rs, self.manager)
         self.assertEqual(_settled(row).settled, 1)
 
         # [#3uqtqh]
@@ -235,12 +199,12 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
     def test_second_settlement_finds_nothing_to_stamp(self):
         row = self._accrual_row(self.office, self.accrual_date)
         rs1 = self._settlement()
-        self._approve(rs1)
+        approve_rental_settlement(rs1, self.manager)
         self.assertEqual(_settled(row).rental_settlement, rs1.name)
 
         # [#39pd4h]
         rs2 = self._settlement()
-        self._approve(rs2)
+        approve_rental_settlement(rs2, self.manager)
         self.assertEqual(
             _settled(row).rental_settlement, rs1.name,
             "An already-settled row must never be re-pointed to a second settlement.",
@@ -251,7 +215,7 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
     def test_cancel_releases_rows(self):
         row = self._accrual_row(self.office, self.accrual_date)
         rs = self._settlement()
-        self._approve(rs)
+        approve_rental_settlement(rs, self.manager)
         self.assertEqual(_settled(row).settled, 1)
 
         frappe.set_user("Administrator")
@@ -276,7 +240,7 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         self.assertEqual(flt(bucket_before["outstanding_amount"]), 250.0)
 
         rs = self._settlement()
-        self._approve(rs)
+        approve_rental_settlement(rs, self.manager)
 
         # [#pmympz]
         _, after = rental_cost_by_office(
@@ -319,7 +283,7 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
 
     def test_monthly_reconciliation_flags_unsettled_closed_period(self):
         # [#e9v8ow]
-        recon_office = self._office("RAL Recon Closed Office")
+        recon_office = make_rental_office("RAL Recon Closed Office")
         closed_anchor = getdate(add_months(getdate(today()), -1))
         closed_date = str(get_first_day(closed_anchor))
         closed_period = str(closed_anchor)[:7]

@@ -31,6 +31,7 @@ from apex.tests.factories import (
     make_test_driver as _ensure_test_driver,
     make_worker_employee as _employee,
 )
+from apex.tests.factories import ensure_worker_token
 
 
 class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
@@ -62,29 +63,6 @@ class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
         never bleeds into another."""
         return _employee(f"Masar TR {self._testMethodName} {suffix}")
 
-    def _token_for(self, employee):
-        """Issue (or re-enable) a Masar Worker Token for ``employee`` and return
-        the server-generated token string."""
-        existing = frappe.db.get_value(
-            "Masar Worker Token", {"employee": employee}, "name"
-        )
-        if existing:
-            doc = frappe.get_doc("Masar Worker Token", existing)
-            if not doc.enabled:
-                doc.db_set("enabled", 1)
-            # [#edhau9]
-            return doc.recover_token()
-        doc = frappe.get_doc(
-            {
-                "doctype": "Masar Worker Token",
-                "party_type": "Employee",
-                "party": employee,
-                "employee": employee,
-                "enabled": 1,
-            }
-        ).insert(ignore_permissions=True)
-        return doc._plaintext_token
-
     def _purge_ratings(self, dispatch_trip):
         """Drop any Transport Trip Rating the endpoint wrote for a trip — the
         trip-mixin cleanup removes the Dispatch Trip but not these ratings."""
@@ -112,7 +90,7 @@ class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
             self.driver, self.project, self.building, [w1, w2], "TR Route A"
         )
         self.addCleanup(lambda: self._purge_ratings(dt.name))
-        token = self._token_for(w1)
+        token = ensure_worker_token(w1)
         # [#qp2m1c]
         self.assertEqual(self._ratings_for(dt.name, w1), [])
 
@@ -141,7 +119,7 @@ class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
             self.driver, self.project, self.building, [on], "TR Route B"
         )
         self.addCleanup(lambda: self._purge_ratings(dt.name))
-        token = self._token_for(off)
+        token = ensure_worker_token(off)
         # [#jzevkz]
         self.assertEqual(masar._resolve_worker(token), off)
 
@@ -159,7 +137,7 @@ class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
             self.driver, self.project, self.building, [w1], "TR Route C"
         )
         self.addCleanup(lambda: self._purge_ratings(dt.name))
-        token = self._token_for(w1)
+        token = ensure_worker_token(w1)
 
         first = masar.submit_trip_rating(
             token=token, dispatch_trip=dt.name, rating=5, transport_request=tr.name
@@ -182,7 +160,7 @@ class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
             self.driver, self.project, self.building, [w1], "TR Route D"
         )
         self.addCleanup(lambda: self._purge_ratings(dt.name))
-        token = self._token_for(w1)
+        token = ensure_worker_token(w1)
 
         for bad in (0, 6):
             with self.assertRaises(frappe.ValidationError):
