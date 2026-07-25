@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#072B1A" />
     <link rel="manifest" href="/assets/apex/worker_portal/manifest.webmanifest" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
-    />
+    <!-- Montserrat is served from the app's own assets, never a font CDN: this page is
+         authenticated, so a Google Fonts link leaks one third-party hit per page load,
+         and the driver PWA below precaches an app shell that must still render its own
+         face offline. The vendored copy keeps Google's own font-display: swap and
+         unicode-range, so first paint is unchanged. -->
+    <link rel="stylesheet" href="/assets/apex/vendor/montserrat-v31/montserrat.css" />
     <!-- Merged Masar portal: /driver loads the SAME built bundle as /masar
          (worker_portal). window.holder_type below makes it boot the driver screens. -->
     <link rel="stylesheet" href="/assets/apex/worker_portal/assets/index.css" />

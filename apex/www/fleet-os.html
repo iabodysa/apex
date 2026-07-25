@@ -4,12 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0f1117" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Fonts are served from the app's own assets, never a font CDN: this page is
+         authenticated, so a Google Fonts link leaks one third-party hit per page load.
+         The vendored copies keep Google's own font-display: swap and unicode-range,
+         so first paint and per-subset loading are unchanged. -->
+    <link rel="stylesheet" href="/assets/apex/vendor/cairo-v31/cairo.css" />
+    <link rel="stylesheet" href="/assets/apex/vendor/jetbrains-mono-v24/jetbrains-mono.css" />
     <title>Fleet OS — نظام إدارة الأسطول (نسخة احتياطية)</title>
     {%- if has_fleet_role %}
     <link rel="stylesheet" href="/assets/apex/fleet_os_portal/assets/index.css" />
