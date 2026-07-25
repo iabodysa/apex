@@ -233,18 +233,27 @@ _BASELINE = frozenset(
 # _BASELINE stays shrink-only; this set is the documented escape hatch, and every
 # entry must carry the reason it cannot sit beside a module. Adding to it is a
 # review decision, not a way to make room for an ordinary test.
+#
+# [#a152r1] "apex/www is not importable" is NOT a valid reason any more (A-152).
+# apex/www/__init__.py now exists, matching frappe/www/, erpnext/www/ and
+# hrms/www/, which all ship an empty one. Adding it changes no routing: route
+# discovery allowlists only html/xml/js/css/md (frappe/website/router.py:117),
+# and TemplatePage.can_render() refuses any path ending in a Python suffix
+# (frappe/website/page_renderers/template_page.py:74, PY_LOADER_SUFFIXES), so
+# neither __init__.py nor a colocated test_*.py can ever be served as a page.
+# Discovery already worked via PEP 420 — test_runner.py:149 os.walks the app
+# without pruning www and imports the file as a dotted path built at
+# test_runner.py:309-313 — so the marker is for tooling, not for the runner.
+# test_fleet_employee_nav.py drained to apex/www/ to prove the home works.
 _CENTRAL_BY_NECESSITY = frozenset(
     {
         # Scans every workspace JSON in the app for a parent chain that hides a
         # persona's only surface — no single module owns the invariant.
         "test_workspace_sidebar_reachability.py",
-        # Scans the whole apex/www tree for external CDN hosts; the directory it
-        # guards is not a Python package, so it cannot live inside it.
+        # Scans the whole apex/www tree for external CDN hosts. DRAINABLE since
+        # A-152 made apex/www a package; kept central only until a follow-up
+        # moves it, and it may never be cited as an importability blocker.
         "test_www_no_external_cdn_assets.py",
-        # Exercises apex/www/fleet.* and the fleet portal source. apex/www has no
-        # __init__.py, so there is no importable colocated home for a www test —
-        # tracked as its own card.
-        "test_fleet_employee_nav.py",
         # Asserts app-wide that no module still references the retired deduction
         # acknowledgment surface and that exactly one module raises an advance.
         "test_native_recovery_surface.py",

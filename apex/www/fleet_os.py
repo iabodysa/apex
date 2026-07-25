@@ -27,9 +27,9 @@ FLEET_ROLES = {
 
 
 def has_apps_screen_access() -> bool:
-    """Gate for an optional /apps app-selector tile — same FLEET_ROLES check
-    get_context() applies, so the tile never shows for a user the page turns
-    away. (Not wired into add_to_apps_screen; kept for parity with fleet.py.)"""
+    """Gate for the /apps app-selector tile — same FLEET_ROLES check get_context()
+    applies, so the tile never shows for a user the page turns away. Wired as the
+    has_permission of the "apex-fleet-os" tile in hooks.py add_to_apps_screen."""
     return bool(FLEET_ROLES & set(frappe.get_roles()))
 
 
