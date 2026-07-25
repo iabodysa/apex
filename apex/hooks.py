@@ -287,6 +287,12 @@ scheduler_events = {
         "*/5 * * * *": [
             "apex.salis.api.boarding_flow.auto_confirm_claimed_boardings",
         ],
+        # A-117 — size-based purge of oversized Access Log payload rows. The
+        # native Log Settings cleanup is age-based only, so a multi-megabyte
+        # print/export row inside the retention window is never reclaimed.
+        "0 23 * * *": [
+            "apex.apex_core.utils.access_log_cleanup.purge_oversized_access_logs",
+        ],
     },
 }
 
