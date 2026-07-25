@@ -472,13 +472,13 @@ _COPY_PASTE_BASELINE = frozenset(
                 ("salis/api/test_operations_alert_actions.py", "_project"),
                 ("tests/test_report_scope.py", "_project"),
                 ("salis/api/driver_portal/test_salis_controls.py", "_project"),
-                ("tests/test_salis_fleet_scope.py", "_project"),
-                ("tests/test_salis_payment_approval_scope.py", "_project"),
+                ("salis/test_salis_fleet_scope.py", "_project"),
+                ("salis/test_salis_payment_approval_scope.py", "_project"),
                 ("tests/test_salis_payment_request_workflow.py", "_project"),
-                ("tests/test_salis_scoping.py", "_project"),
-                ("tests/test_salis_security.py", "_project"),
+                ("salis/test_salis_scoping.py", "_project"),
+                ("salis/test_salis_security.py", "_project"),
                 ("tests/test_salis_state_flow.py", "_get_or_create_project"),
-                ("tests/test_salis_tenant_scope.py", "_project"),
+                ("salis/test_salis_tenant_scope.py", "_project"),
                 ("tests/test_transport_request_workflow.py", "_project"),
                 ("tests/test_workflow_submit_guard.py", "_project"),
             }
@@ -498,7 +498,7 @@ _COPY_PASTE_BASELINE = frozenset(
             {
                 ("salis/doctype/dispatch_trip/test_driver_user_fetch.py", "_vehicle"),
                 ("salis/doctype/fuel_request/test_rider_leave_guard.py", "_vehicle"),
-                ("tests/test_fuel_request_unified.py", "_vehicle"),
+                ("salis/test_fuel_request_unified.py", "_vehicle"),
             }
         ),
         # A scoped-user context manager pasted into 3 Habitat scope tests.
@@ -511,7 +511,7 @@ _COPY_PASTE_BASELINE = frozenset(
         ),
         frozenset(
             {
-                ("tests/test_fuel_request_unified.py", "_purge"),
+                ("salis/test_fuel_request_unified.py", "_purge"),
                 ("tests/test_fuel_request_workflow.py", "_purge"),
                 ("tests/test_operations_alert_resolution.py", "_purge_request"),
             }
