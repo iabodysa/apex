@@ -262,6 +262,9 @@ _CENTRAL_BY_NECESSITY = frozenset(
         "test_repo_gates.py",
         # Scans every workspace JSON for name/title/parent_page agreement.
         "test_workspace_identity_consistency.py",
+        # Reconciles every patch module on disk against patches.txt as a whole;
+        # it belongs to the register, not to any one patch.
+        "test_patch_registration_guard.py",
     }
 )
 
