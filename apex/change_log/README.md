@@ -5,6 +5,7 @@ The shipped notes start at 2.0.0; earlier releases are not carried forward.
 
 ## Latest
 
+- [2.1.1](v2/v2_1_1.md) — SIM and telecom management moved into Custody, damaged-item cost recovery through Employee Advance, and a steadier app to maintain.
 - [2.1.0](v2/v2_1_0.md) — A lighter, faster-migrating app with safer document approvals and onboarding tours that read correctly in Arabic.
 - [2.0.4](v2/v2_0_4.md) — Guided first-time setup, ready accommodation supplies, and preserved Item Group organization.
 - [2.0.3](v2/v2_0_3.md) — Security and reliability improvements.
@@ -14,6 +15,7 @@ The shipped notes start at 2.0.0; earlier releases are not carried forward.
 
 ## All releases
 
+- [2.1.1](v2/v2_1_1.md) — SIM and telecom management moved into Custody, damaged-item cost recovery through Employee Advance, and a steadier app to maintain.
 - [2.1.0](v2/v2_1_0.md) — A lighter, faster-migrating app with safer document approvals and onboarding tours that read correctly in Arabic.
 - [2.0.4](v2/v2_0_4.md) — Guided first-time setup, ready accommodation supplies, and preserved Item Group organization.
 - [2.0.3](v2/v2_0_3.md) — Security and reliability improvements.
