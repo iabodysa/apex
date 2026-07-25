@@ -20,8 +20,10 @@ apex.patches.v0_6.add_city_doctype
 # every deployed site has already migrated off that name.
 apex.patches.v0_7.rename_habitat_city_to_city
 
-# STILL-REQUIRED: the ONLY creator of the Housing Assignment.bed lookup index — the
-# controller ships no on_doctype_update, so nothing else adds it on an existing site.
+# STILL-REQUIRED: historical creator of the Housing Assignment.bed lookup indexes, kept
+# for the sites that genuinely ran it. It is logged complete-without-running on every
+# site installed since it was registered — v1_x.add_bed_occupancy_indexes is the entry
+# that actually reaches those.
 apex.patches.v0_7.add_bed_assignment_index
 
 # PERMANENT: replays the maintenance material + template seeder, so a site installed
@@ -141,3 +143,9 @@ apex.patches.v2_0.fold_sim_operations_into_logistay
 # STILL-REQUIRED (ONE-TIME): deletes the retired My Work / Launchpad Workspace rows and
 # unpins any User whose default_workspace still points at one.
 apex.patches.v2_0.remove_kernel_landing_workspaces
+
+# STILL-REQUIRED: adds the two Housing Assignment bed-occupancy indexes on an
+# already-installed site. Its controller on_doctype_update only fires when that DocType
+# JSON re-imports, and the older v0_7 patch is logged complete-without-running on every
+# site installed since it was registered, so neither reaches an existing site.
+apex.patches.v1_x.add_bed_occupancy_indexes
