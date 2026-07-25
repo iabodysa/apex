@@ -464,34 +464,34 @@ _COPY_PASTE_BASELINE = frozenset(
         frozenset(
             {
                 ("tests/factories.py", "make_project"),
-                ("tests/test_dispatch_trip_workflow.py", "_project"),
-                ("tests/test_driver_clearance_workflow.py", "_project"),
-                ("tests/test_fuel_claim_workflow.py", "_project"),
-                ("tests/test_fuel_exception_case_workflow.py", "_project"),
-                ("tests/test_fuel_request_workflow.py", "_project"),
+                ("salis/doctype/dispatch_trip/test_dispatch_trip_workflow.py", "_project"),
+                ("salis/doctype/driver_clearance/test_driver_clearance_workflow.py", "_project"),
+                ("salis/doctype/fuel_claim/test_fuel_claim_workflow.py", "_project"),
+                ("salis/doctype/fuel_exception_case/test_fuel_exception_case_workflow.py", "_project"),
+                ("salis/doctype/fuel_request/test_fuel_request_workflow.py", "_project"),
                 ("salis/api/test_operations_alert_actions.py", "_project"),
                 ("tests/test_report_scope.py", "_project"),
                 ("salis/api/driver_portal/test_salis_controls.py", "_project"),
                 ("salis/test_salis_fleet_scope.py", "_project"),
                 ("salis/test_salis_payment_approval_scope.py", "_project"),
-                ("tests/test_salis_payment_request_workflow.py", "_project"),
+                ("salis/doctype/salis_payment_request/test_salis_payment_request_workflow.py", "_project"),
                 ("salis/test_salis_scoping.py", "_project"),
                 ("salis/test_salis_security.py", "_project"),
-                ("tests/test_salis_state_flow.py", "_get_or_create_project"),
+                ("salis/doctype/dispatch_trip/test_salis_state_flow.py", "_get_or_create_project"),
                 ("salis/test_salis_tenant_scope.py", "_project"),
-                ("tests/test_transport_request_workflow.py", "_project"),
+                ("salis/web_form/transport_request/test_transport_request_workflow.py", "_project"),
                 ("tests/test_workflow_submit_guard.py", "_project"),
             }
         ),
         # A vehicle fixture builder pasted across 6 Salis workflow tests.
         frozenset(
             {
-                ("tests/test_driver_clearance_workflow.py", "_vehicle"),
-                ("tests/test_fuel_claim_workflow.py", "_vehicle"),
-                ("tests/test_fuel_exception_case_workflow.py", "_vehicle"),
-                ("tests/test_fuel_request_workflow.py", "_vehicle"),
+                ("salis/doctype/driver_clearance/test_driver_clearance_workflow.py", "_vehicle"),
+                ("salis/doctype/fuel_claim/test_fuel_claim_workflow.py", "_vehicle"),
+                ("salis/doctype/fuel_exception_case/test_fuel_exception_case_workflow.py", "_vehicle"),
+                ("salis/doctype/fuel_request/test_fuel_request_workflow.py", "_vehicle"),
                 ("salis/api/driver_portal/test_salis_controls.py", "_vehicle"),
-                ("tests/test_transport_request_workflow.py", "_vehicle"),
+                ("salis/web_form/transport_request/test_transport_request_workflow.py", "_vehicle"),
             }
         ),
         frozenset(
@@ -512,7 +512,7 @@ _COPY_PASTE_BASELINE = frozenset(
         frozenset(
             {
                 ("salis/test_fuel_request_unified.py", "_purge"),
-                ("tests/test_fuel_request_workflow.py", "_purge"),
+                ("salis/doctype/fuel_request/test_fuel_request_workflow.py", "_purge"),
                 ("salis/tasks/test_operations_alert_resolution.py", "_purge_request"),
             }
         ),
@@ -537,14 +537,14 @@ _COPY_PASTE_BASELINE = frozenset(
         ),
         frozenset(
             {
-                ("tests/test_dispatch_trip_workflow.py", "_purge_trip"),
-                ("tests/test_salis_state_flow.py", "_purge_trip"),
+                ("salis/doctype/dispatch_trip/test_dispatch_trip_workflow.py", "_purge_trip"),
+                ("salis/doctype/dispatch_trip/test_salis_state_flow.py", "_purge_trip"),
             }
         ),
         frozenset(
             {
-                ("tests/test_dispatch_trip_workflow.py", "_purge_tr"),
-                ("tests/test_salis_state_flow.py", "_purge_tr_and_rp"),
+                ("salis/doctype/dispatch_trip/test_dispatch_trip_workflow.py", "_purge_tr"),
+                ("salis/doctype/dispatch_trip/test_salis_state_flow.py", "_purge_tr_and_rp"),
             }
         ),
         # These two are this guard family duplicating ITSELF — the blind spot's own

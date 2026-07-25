@@ -4,7 +4,7 @@ half of the reconciliation, viewed from the settlement side.
 
 The cross-role Workflow controls (Reconcile/Approve/Mark Paid role gates, the
 Segregation-of-Duties conditions, the no-GL boundary) are covered in
-``apex/tests/test_rental_settlement_workflow.py``. These colocated tests
+the sibling ``test_rental_settlement_workflow.py``. These colocated tests
 add the settlement -> Rental Accrual Ledger stamping behavior the controller now
 owns: on reaching a settled state it stamps its office+period accrual rows, and
 on cancel it releases them. They also carry the ``test_ignore`` that lets
