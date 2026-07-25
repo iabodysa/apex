@@ -16,7 +16,7 @@
  * (get_my_vehicle / get_my_recent_trips / get_fuel_stations /
  * submit_fuel_request).
  */
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import FleetPageShell from "@shared/components/FleetPageShell.vue";
 import Icon from "./components/Icon.vue";
 import LangToggle from "./components/LangToggle.vue";
@@ -40,6 +40,86 @@ watch(
 const { toast, showToast } = useToast();
 const { vehicle, trips, fuelGrades, stations, form, submitting, loading, submitFuelRequest } =
   useEmployee();
+
+/* ---------------------------------------------------------------------------
+ * [#emp-nav] Section navigation for this single-scrolling-page archetype.
+ *
+ * The MOVEMENT is native, not scripted: every nav item is a real in-page anchor
+ * (<a href="#trips">), and index.css supplies `scroll-behavior: smooth` plus a
+ * `scroll-margin-block-start` that clears the sticky header — so the browser
+ * does the scrolling, it still works with JS disabled, it honours
+ * prefers-reduced-motion, and `:target` tints the section the reader landed on
+ * (the one guaranteed visible change at desktop, where the fuel card shares the
+ * grid's top row with the vehicle card and therefore barely moves).
+ *
+ * Only the ACTIVE HIGHLIGHT needs script. It is a scroll-spy: an
+ * IntersectionObserver watching a band just under the header names the section
+ * being read. A click pins the highlight to the clicked section until the
+ * reader scrolls by hand again — without that pin, clicking "fuel" at desktop
+ * would scroll to the shared top row and the spy would snap the highlight back
+ * to "vehicle".
+ * ------------------------------------------------------------------------- */
+const navItems = [
+  { id: "vehicle", key: "emp.nav.home" },
+  { id: "trips", key: "emp.nav.trips" },
+  { id: "fuel", key: "emp.nav.fuel" },
+];
+const activeSection = ref(navItems[0].id);
+// True while an explicit click owns the highlight; released by the next manual
+// scroll gesture. A plain flag, not a timer — the release is a real user event.
+let pinned = false;
+
+function selectSection(id) {
+  if (!navItems.some((n) => n.id === id)) return;
+  activeSection.value = id;
+  pinned = true;
+}
+function syncFromHash() {
+  // Deep link, reload, or browser back/forward: honour the fragment.
+  selectSection(decodeURIComponent(window.location.hash.replace(/^#/, "")));
+}
+function releasePin() {
+  pinned = false;
+}
+
+// keydown covers space/arrow/page scrolling; wheel and touchmove cover the rest.
+const MANUAL_SCROLL_EVENTS = ["wheel", "touchmove", "keydown"];
+let spy = null;
+
+onMounted(() => {
+  syncFromHash();
+  window.addEventListener("hashchange", syncFromHash);
+  MANUAL_SCROLL_EVENTS.forEach((ev) =>
+    window.addEventListener(ev, releasePin, { passive: true }),
+  );
+
+  const sections = navItems.map((n) => document.getElementById(n.id)).filter(Boolean);
+  if (!sections.length || typeof IntersectionObserver === "undefined") return;
+  const visible = new Set();
+  spy = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) visible.add(e.target.id);
+        else visible.delete(e.target.id);
+      }
+      if (pinned) return;
+      // Several sections share the band on the two-column desktop layout;
+      // reading order (navItems) breaks the tie deterministically.
+      const current = navItems.find((n) => visible.has(n.id));
+      if (current) activeSection.value = current.id;
+    },
+    // Detector band: starts below the sticky header, ends in the upper part of
+    // the viewport, so "current" means "at the top of what is being read".
+    { rootMargin: "-104px 0px -55% 0px", threshold: 0 },
+  );
+  sections.forEach((s) => spy.observe(s));
+});
+
+onBeforeUnmount(() => {
+  if (spy) spy.disconnect();
+  window.removeEventListener("hashchange", syncFromHash);
+  MANUAL_SCROLL_EVENTS.forEach((ev) => window.removeEventListener(ev, releasePin));
+});
 
 const avatarInitial = computed(() => Array.from(t("emp.brand"))[0] || "•");
 
@@ -108,10 +188,18 @@ function onSaveDraft() {
       </span>
     </template>
 
+    <!-- Real in-page anchors: the browser scrolls (see [#emp-nav] above), the
+         spy-driven `is-active` class marks the section being read. -->
     <template #nav>
-      <a href="#vehicle" class="is-active">{{ t("emp.nav.home") }}</a>
-      <a href="#trips">{{ t("emp.nav.trips") }}</a>
-      <a href="#fuel">{{ t("emp.nav.fuel") }}</a>
+      <a
+        v-for="item in navItems"
+        :key="item.id"
+        :href="'#' + item.id"
+        :class="{ 'is-active': activeSection === item.id }"
+        :aria-current="activeSection === item.id ? 'location' : undefined"
+        @click="selectSection(item.id)"
+        >{{ t(item.key) }}</a
+      >
     </template>
 
     <template #actions>
