@@ -4,8 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <meta name="theme-color" content="#072b1a" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fonts come from the app's own assets, never a font CDN: this page is
+         authenticated, so a font request leaks one third-party hit per page load.
+         Declared here rather than left to the portal bundle's @import, because that
+         only loads for a user WITH the role — the no-role branch below asked for a
+         Cairo that never arrived. Keeps Google's font-display: swap and unicode-range. -->
+    <link rel="stylesheet" href="/assets/apex/vendor/montserrat-v31/montserrat.css" />
+    <link rel="stylesheet" href="/assets/apex/vendor/cairo-v31/cairo.css" />
     <title>Safety Rounds — جولات السلامة</title>
     {%- if has_safety_role %}
     <link rel="stylesheet" href="/assets/apex/safety_portal/assets/index.css" />

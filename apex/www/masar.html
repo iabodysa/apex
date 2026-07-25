@@ -11,15 +11,15 @@
     <meta name="theme-color" content="#00844E" />
     <link rel="manifest" href="/assets/apex/worker_portal/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/assets/apex/worker_portal/icons/masar-icon-192.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Latin UI face (Montserrat) + Arabic UI face (Cairo). Masar defaults to
          Arabic, so an Arabic-capable webfont must load or RTL text falls back to
-         the device default and reads inconsistently next to the Latin chrome. -->
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap"
-    />
+         the device default and reads inconsistently next to the Latin chrome.
+         Both come from the app's own assets, never a font CDN: the no-referrer meta
+         above hides this token-bearing URL from a third party but does not stop the
+         request itself. The copies keep Google's font-display: swap and unicode-range,
+         so first paint is unchanged. -->
+    <link rel="stylesheet" href="/assets/apex/vendor/montserrat-v31/montserrat.css" />
+    <link rel="stylesheet" href="/assets/apex/vendor/cairo-v31/cairo.css" />
     <link rel="stylesheet" href="/assets/apex/worker_portal/assets/index.css" />
     {%- include "apex/templates/includes/portal_accent.html" %}
     <title>Masar</title>
