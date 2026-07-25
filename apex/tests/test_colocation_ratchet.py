@@ -261,6 +261,9 @@ _CENTRAL_BY_NECESSITY = frozenset(
         # Reconciles every patch module on disk against patches.txt as a whole;
         # it belongs to the register, not to any one patch.
         "test_patch_registration_guard.py",
+        # Walks every shipped record folder in the app checking directory-name and
+        # record-name parity; it belongs to the export layout, not to one record.
+        "test_standard_record_path_parity.py",
     }
 )
 

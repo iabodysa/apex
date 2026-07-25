@@ -74,8 +74,15 @@ def _record_folders():
                 continue
             for folder in sorted(os.listdir(slug_path)):
                 path = os.path.join(slug_path, folder)
-                if os.path.isdir(path):
-                    yield module, slug, folder, path
+                if not os.path.isdir(path):
+                    continue
+                # A record folder is one that SHIPS something. Skip the interpreter's
+                # __pycache__ and any directory git left behind empty when its files
+                # were removed: neither is in a fresh checkout, so judging them would
+                # make the verdict depend on which machine ran the gate.
+                if folder == "__pycache__" or not any(os.scandir(path)):
+                    continue
+                yield module, slug, folder, path
 
 
 class TestStandardRecordPathParity(unittest.TestCase):
