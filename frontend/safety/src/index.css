@@ -5,7 +5,10 @@
 
 /* Shared brand primitives (--brand-green) + breakpoint tokens — single source. */
 @import "@shared/tokens.css";
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap");
+
+/* No font @import here. Montserrat + Cairo are declared once by the hosting shell
+   (www/safety.html -> /assets/apex/vendor/{montserrat-v31,cairo-v31}/), whose vendored
+   variable faces span 400-800, so this bundle must never reach a font CDN. */
 
 @tailwind base;
 @tailwind components;

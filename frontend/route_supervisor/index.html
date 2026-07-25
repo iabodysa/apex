@@ -4,8 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Masar — Route Supervisor</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Vite dev entry only: the production shell is www/masar-supervisor.html, which
+         loads these same two vendored files behind its role check. Leaflet is served
+         from the app's own assets, never a CDN, and `vite dev` proxies /assets to the
+         bench so this path resolves there too. The path is left verbatim by the build
+         because it lives outside this portal's Vite root and its publicDir. -->
+    <link rel="stylesheet" href="/assets/apex/vendor/leaflet-1.9.4/leaflet.css" />
+    <script src="/assets/apex/vendor/leaflet-1.9.4/leaflet.js"></script>
   </head>
   <body>
     <div id="app"></div>

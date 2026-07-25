@@ -1,20 +1,11 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!doctype html>
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>الأسطول — مركبتي وطلباتي</title>
-    <script type="module" crossorigin src="/assets/apex/fleet_portal/assets/index.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/apex/fleet_portal/assets/index.css">
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>Apex portal bundle</title>
   </head>
   <body>
-    <div id="app"></div>
-  
-          <script>
-              {% for key in boot %}
-              window["{{ key }}"] = {{ boot[key] | tojson }};
-              {% endfor %}
-          </script>
-          </body>
-          
+    <p>Built portal assets. The application is served by its own web route, which checks access first.</p>
+  </body>
 </html>

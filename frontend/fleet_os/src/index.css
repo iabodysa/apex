@@ -2,7 +2,12 @@
    brand, full --c-* vocabulary, light + dark. The old standalone blue/purple
    palette that used to live here is retired. */
 @import "@shared/tokens.css";
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+/* No font @import here. Cairo + JetBrains Mono are declared once by the hosting
+   shell (www/fleet-os.html -> /assets/apex/vendor/{cairo-v31,jetbrains-mono-v24}/),
+   so this bundle must never reach a font CDN. Repointing the @import at that
+   vendored path is not an option: postcss-import reads a leading-slash @import as
+   a filesystem path and the build ENOENTs. */
 
 /* [#30acrv] */
 *{box-sizing:border-box;margin:0;padding:0}

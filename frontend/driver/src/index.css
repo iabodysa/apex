@@ -5,7 +5,10 @@
    the portal consumes tokens only, so the retired per-portal drift (afmco /
    frappe / dark / gemini / atelier / creative copies) is gone. */
 @import "@shared/tokens.css";
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
+
+/* No font @import here. Montserrat is declared once by the hosting shells
+   (www/driver.html + www/masar.html -> /assets/apex/vendor/montserrat-v31/), whose
+   vendored variable face spans 400-800, so this bundle must never reach a font CDN. */
 
 @tailwind base;
 @tailwind components;
