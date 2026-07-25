@@ -1,0 +1,28 @@
+#!/bin/sh
+# Reject a commit message that CI would reject, before the commit exists.
+#
+# Install (one line, from the repo root):
+#     git config core.hooksPath .githooks
+#
+# MIRROR OF .github/workflows/test.yml, job `gitleaks`, step "No automated
+# attribution or private commit email". ATTRIBUTION_PATTERN below is byte-identical
+# to the pattern that step greps with; apex/tests/test_repo_gates.py fails if the
+# two ever drift, because a local gate that disagrees with CI is worse than none.
+set -u
+
+ATTRIBUTION_PATTERN='(claude|anthropic|codex|openai|chatgpt|claude-session)'
+
+# Judge what git will STORE, not the editor buffer: drop the scissors block that
+# `git commit -v` appends (its diff is not part of the message and would match on
+# unrelated code) and then the comment lines, leaving what `--format=%s%n%b` reports.
+message=$(sed -e '/^#.*>8/,$d' "$1" | git stripspace --strip-comments)
+
+hits=$(printf '%s\n' "$message" | grep -niE "$ATTRIBUTION_PATTERN" || true)
+if [ -n "$hits" ]; then
+	echo "commit-msg: automated attribution or session metadata in the commit message:" >&2
+	printf '%s\n' "$hits" >&2
+	echo "commit-msg: same pattern as the CI guard; pushing this would turn the Tests workflow red." >&2
+	exit 1
+fi
+
+exit 0

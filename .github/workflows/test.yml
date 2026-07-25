@@ -73,6 +73,18 @@ jobs:
           fi
           echo "commit messages clean (no Arabic)"
 
+      # READ THE JOB NAME BEFORE BLAMING A TEST. This step and the two around it are
+      # metadata guards, not tests, and they run BEFORE this job's only tests (the two
+      # node unit tests at the end of this job) — so a red here means those never ran,
+      # not that one failed. The bench suite is in the separate `test` job below, which
+      # takes no `needs:` and therefore runs in parallel and is unaffected: when this
+      # job is red, "the suite passed" is neither proven nor disproven by this workflow's
+      # overall status, and the `test` job has to be read on its own.
+      #
+      # This step is mirrored locally by .githooks/commit-msg and .githooks/pre-commit,
+      # which refuse the same message pattern and the same private-email set before the
+      # commit exists. Install them once with:  git config core.hooksPath .githooks
+      # apex/tests/test_repo_gates.py fails if the local copies drift from this step.
       - name: No automated attribution or private commit email
         run: |
           set -uo pipefail

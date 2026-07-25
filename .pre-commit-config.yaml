@@ -6,6 +6,28 @@
 #     pre-commit install                 # writes .git/hooks/pre-commit
 #     pre-commit run --all-files         # one-off sweep without installing
 #
+# THE COMMIT-METADATA GATE IS NOT HERE — it is ./.githooks, and it IS meant to be
+# installed. One line, from the repo root, no dependency to install first:
+#
+#     git config core.hooksPath .githooks
+#
+# .githooks/commit-msg and .githooks/pre-commit mirror the CI step "No automated
+# attribution or private commit email" (.github/workflows/test.yml) so an attribution
+# trailer or a private author email is refused before the commit exists rather than
+# after it reaches origin. They live there and not in this file because this file is
+# unusable as a home for them: enabling it needs `pip install pre-commit` plus a second
+# `pre-commit install --hook-type commit-msg`, and its ruff-format hook would rewrite
+# 596 tracked files on the first run (see below) — so the one config a developer must
+# actually install cannot be the one config nobody can afford to install. A hook nobody
+# installs protects nobody.
+#
+# The two do not compose: `pre-commit install` refuses to run while core.hooksPath is
+# set. If this file is ever enabled, its hooks have to be invoked FROM .githooks rather
+# than by unsetting core.hooksPath, which would silently disable the metadata gate.
+# Prefer the relative path above to an absolute one: core.hooksPath resolves against the
+# work tree root, so it keeps working in every linked worktree and cannot rot into the
+# dead-directory state that silently disabled all local hooks on 2026-07-25.
+#
 # The enforced gates all live in .github/workflows/: ruff check, the comment audit and
 # the Arabic-translation coverage check (lint.yml), gitleaks plus the commit-metadata
 # and tracked-file checks (test.yml), the ignore_permissions baseline

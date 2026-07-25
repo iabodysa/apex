@@ -1,0 +1,43 @@
+#!/bin/sh
+# Reject a private author or committer email before the commit exists.
+#
+# Install (one line, from the repo root):
+#     git config core.hooksPath .githooks
+#
+# MIRROR OF .github/workflows/test.yml, job `gitleaks`, step "No automated
+# attribution or private commit email". The awk `is_public()` there admits exactly
+# the two forms below and nothing else; apex/tests/test_repo_gates.py runs that awk
+# and this hook over one table of addresses and fails if they classify any of them
+# differently.
+#
+# KNOWN GAP: `git var` reports the identity from config/environment, so an email
+# forced with `git commit --author=...` is not seen here. The CI step reads the
+# recorded %ae/%ce and still catches that case.
+set -u
+
+is_public() {
+	case "$1" in
+	noreply@github.com) return 0 ;;
+	*@users.noreply.github.com) return 0 ;;
+	*) return 1 ;;
+	esac
+}
+
+ident_email() {
+	git var "$1" 2>/dev/null | sed -n 's/.*<\(.*\)>.*/\1/p'
+}
+
+author=$(ident_email GIT_AUTHOR_IDENT)
+committer=$(ident_email GIT_COMMITTER_IDENT)
+
+for email in "$author" "$committer"; do
+	if ! is_public "$email"; then
+		echo "pre-commit: private author or committer email: '${email}'" >&2
+		echo "pre-commit: author='${author}' committer='${committer}'" >&2
+		echo "pre-commit: only noreply@github.com and *@users.noreply.github.com may leave this machine." >&2
+		echo "pre-commit: fix with  git config user.email '<id>+<user>@users.noreply.github.com'" >&2
+		exit 1
+	fi
+done
+
+exit 0
