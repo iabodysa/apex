@@ -119,7 +119,12 @@ class TestPartyFieldsInSchema(unittest.TestCase):
 
 
 # [#kthuni]
-if "frappe" not in sys.modules:
+# True only on the standalone (`python3 -m unittest`) path below, where frappe is
+# replaced by a local stub. Under `bench run-tests` the real frappe is always
+# already imported, so this stays False and nothing in this module skips.
+FRAPPE_IS_STUBBED = "frappe" not in sys.modules
+
+if FRAPPE_IS_STUBBED:
     _fake = types.ModuleType("frappe")
 
     class _ValidationError(Exception):
@@ -422,12 +427,23 @@ class TestPassportMrzParser(unittest.TestCase):
     """Deterministic specimen proof for the opt-in MRZ autofill parser.
 
     parse_mrz_text is the pure, testable core of the camera-capture feature; OCR
-    is pluggable. Needs the real bench frappe (now_datetime for the century rule),
-    so it skips under the standalone stub."""
+    is pluggable. It reads frappe.utils.now_datetime for the two-digit-year century
+    rule, so it needs the real bench frappe.
+
+    [#a140as] The retained skip fires ONLY on the standalone `python3 -m unittest`
+    path, where the module installs a local frappe stub that cannot import the
+    arrivals-desk API at all. Under `bench run-tests` — the CI path — FRAPPE_IS_STUBBED
+    is False and both tests below execute. The previous guard tested
+    `isinstance(frappe.utils, SimpleNamespace)`, an attribute the stub never defines,
+    so it never fired in either direction: it left the standalone run erroring on an
+    ImportError instead of skipping, and it was dead weight under a bench."""
 
     def _parser(self):
-        if isinstance(getattr(frappe, "utils", None), types.SimpleNamespace):
-            self.skipTest("needs the real bench frappe (now_datetime)")
+        if FRAPPE_IS_STUBBED:
+            self.skipTest(
+                "standalone run: the local frappe stub cannot import "
+                "apex.habitat.api.arrivals_desk (needs the real frappe.utils)"
+            )
         from apex.habitat.api.arrivals_desk import parse_mrz_text
 
         return parse_mrz_text

@@ -164,8 +164,13 @@ class TestPaymentRouter(FrappeTestCase):
         existing-PR lookup). Everything else - ``frappe.new_doc``, the field map,
         the currency default, the insert, the link stamp - is the real router path.
         """
-        if not frappe.db.exists("DocType", "Payment Request"):
-            self.skipTest("ERPNext Payment Request not installed on this site")
+        # [#a140as] erpnext is in hooks.required_apps, so Payment Request is always
+        # installed wherever apex is; skipping on it reported success for the default
+        # route without ever building one. Assert, so a missing target fails loudly.
+        self.assertTrue(
+            frappe.db.exists("DocType", "Payment Request"),
+            "ERPNext Payment Request must be installed — erpnext is a required app",
+        )
 
         pr = self._approved_request(amount=750.00, remarks="Default-route to native")
         # [#9p959q]
