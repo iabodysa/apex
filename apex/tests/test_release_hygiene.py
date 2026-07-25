@@ -92,6 +92,25 @@ def _is_test_role(name):
     return name in KNOWN_FRAPPE_TEST_ROLES or bool(TEST_ROLE_RE.search(name))
 
 
+def _duplicate_perm_pairs(permissions):
+    """The (role, permlevel) pairs a DocPerm list declares more than once.
+
+    Pure over its argument so the guard's planted-violation proof can drive it with
+    synthetic rows. permlevel is normalised because a permlevel-0 row usually omits the
+    key entirely while some rows spell it out.
+    """
+    seen, dupes = set(), set()
+    for row in permissions or []:
+        role = row.get("role")
+        if not role:
+            continue
+        pair = (role, int(row.get("permlevel") or 0))
+        if pair in seen:
+            dupes.add(pair)
+        seen.add(pair)
+    return dupes
+
+
 def _expected_naming_rule(autoname):
     """The canonical Frappe `naming_rule` implied by an `autoname` string.
 
@@ -447,6 +466,75 @@ class TestNamingRuleConsistency(unittest.TestCase):
             if expected and nr != expected:
                 bad.append((name, an, nr, expected))
         self.assertEqual(bad, [], f"naming_rule inconsistent with autoname style: {bad[:10]}")
+
+
+class TestNoDuplicateDocPermRows(unittest.TestCase):
+    """No shipped DocType may carry the same (role, permlevel) DocPerm row twice.
+
+    A duplicate row is not cosmetic. ``frappe/permissions.py:283-307``
+    ``get_role_permissions`` ORs every applicable row together, and line 287
+    ``has_permission_without_if_owner_enabled`` disables an ``if_owner`` narrowing for a
+    permission type as soon as ANY applicable row grants that type without ``if_owner``.
+    A second plain read row therefore silently converts an owner-scoped read into a read
+    of every record, with nothing in the JSON to show it happened.
+
+    The pair, not the role alone, is the invariant: line 284 ``is_perm_applicable`` keeps
+    only ``permlevel == 0`` rows, so a permlevel-1 row is a DIFFERENT grant governing the
+    permlevel-1 fields and coexists with the permlevel-0 row by design. Sixteen shipped
+    DocTypes carry a role twice across two permlevels for exactly that reason; keying on
+    role alone would condemn all of them and, if "fixed", would strip field-level access.
+    """
+
+    def _doctype_permissions(self):
+        """(DocType name, permissions list) for every DocType JSON apex ships."""
+        out = []
+        for fp in glob.glob(os.path.join(APP_ROOT, "*", "doctype", "*", "*.json")):
+            with open(fp, encoding="utf-8") as fh:
+                try:
+                    data = json.load(fh)
+                except json.JSONDecodeError:
+                    continue
+            if not isinstance(data, dict) or data.get("doctype") != "DocType":
+                continue
+            out.append((data.get("name"), data.get("permissions") or []))
+        return out
+
+    def test_scan_finds_doctypes(self):
+        names = {n for n, _ in self._doctype_permissions()}
+        self.assertIn("Salis Driver", names, "DocType scan found nothing — parser broke")
+
+    def test_no_doctype_ships_a_duplicate_role_permlevel_pair(self):
+        offenders = {}
+        for name, perms in self._doctype_permissions():
+            dupes = sorted(_duplicate_perm_pairs(perms))
+            if dupes:
+                offenders[name] = dupes
+        self.assertEqual(
+            offenders,
+            {},
+            "DocType ships the same (role, permlevel) permission row more than once. The "
+            "rows are OR-ed together, so a duplicate can silently disable an if_owner "
+            f"narrowing on the same role: {offenders}",
+        )
+
+    def test_the_detector_flags_a_planted_duplicate(self):
+        """Proof the guard can fail, driven with synthetic rows so it proves the DETECTOR
+        rather than the current file contents."""
+        planted = [
+            {"role": "Fleet Manager", "read": 1, "if_owner": 1},
+            {"role": "Fleet Manager", "read": 1},
+        ]
+        self.assertEqual(_duplicate_perm_pairs(planted), {("Fleet Manager", 0)})
+
+    def test_the_detector_allows_one_role_across_two_permlevels(self):
+        """The counter-case that keeps the guard from condemning a legitimate shape:
+        get_role_permissions filters to permlevel 0, so a permlevel-1 row is a separate
+        grant, not a duplicate."""
+        legitimate = [
+            {"role": "Fleet Manager", "read": 1, "write": 1},
+            {"role": "Fleet Manager", "read": 1, "permlevel": 1},
+        ]
+        self.assertEqual(_duplicate_perm_pairs(legitimate), set())
 
 
 class TestNoFutureDatedModified(unittest.TestCase):
