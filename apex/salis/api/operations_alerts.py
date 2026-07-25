@@ -1,6 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Operations Alert action API (read the open queue + advance the status ladder),
-for the operations-control board and the /fleet alert drawer.
+for the operations-control board and the /fleet-os alert drawer.
+
+Route trace: the alert drawer is a ``frontend/fleet_os`` composable
+(``useAlerts.js``), built into ``fleet_os_portal``, which ``www/fleet-os.html``
+loads — so the drawer is on ``/fleet-os``, NOT on ``/fleet`` (that bundle
+references ``apex.salis.api.fleet_employee`` only).
 
 Read-only ``get_open_alerts`` lists the Open/Acknowledged queue, project-scoped
 server-side through the SAME ``_permitted_projects`` resolver the dispatch board
