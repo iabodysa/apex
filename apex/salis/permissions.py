@@ -12,6 +12,10 @@ UNSCOPED_ROLES = {
     "Internal Auditor",
     # [#m3bfwj]
     "Finance Manager",
+    # A-171: an oversight viewer, same shape as Internal Auditor. Its two Salis
+    # Notifications alert it company-wide, so a project-scoped list would show
+    # zero rows for the very vehicles it was just emailed about.
+    "Government Relations Officer",
 }
 
 
