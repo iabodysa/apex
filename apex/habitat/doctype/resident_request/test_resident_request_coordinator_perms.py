@@ -13,14 +13,10 @@ import json
 import pathlib
 import unittest
 
-_DOCTYPE_JSON = (
-    pathlib.Path(__file__).parents[2]
-    / "apex"
-    / "habitat"
-    / "doctype"
-    / "resident_request"
-    / "resident_request.json"
-)
+# A sibling now. The old form walked up to the repo root and back down through
+# apex/habitat/doctype/resident_request/; colocated, that rebuilds the tail a second
+# time and reads a path that cannot exist.
+_DOCTYPE_JSON = pathlib.Path(__file__).with_name("resident_request.json")
 
 ROLE = "Resident Request Coordinator"
 

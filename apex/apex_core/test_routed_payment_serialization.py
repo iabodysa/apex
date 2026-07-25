@@ -70,13 +70,10 @@ SETTINGS = "Payment Routing Settings"
 # [#4bwi8x]
 STUB_DOCTYPE = "Test Routed Serialization Stub"
 
+# A sibling now: this test sits inside apex_core, so the old "../apex_core/" hop
+# (written when it lived in apex/tests/) would resolve to apex/apex_core/apex_core/.
 PAYMENT_ROUTER_SOURCE = os.path.normpath(
-    os.path.join(
-        os.path.dirname(__file__),
-        "..",
-        "apex_core",
-        "payment_router.py",
-    )
+    os.path.join(os.path.dirname(__file__), "payment_router.py")
 )
 
 

@@ -20,7 +20,10 @@ from apex.apex_core.worklist.my_work_center import (
     get_approved_last_48h_count,
 )
 
-APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+# Two levels up, not one: this test sits in apex/apex_core/worklist/, so APP_ROOT is
+# the apex package. A relocation that leaves this at ".." silently builds
+# apex/apex_core/apex_core/... and every source read raises FileNotFoundError.
+APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 
 def _h(n=12):
