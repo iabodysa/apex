@@ -1,6 +1,6 @@
 """E2E smoke-mount spec — every portal SPA mounts cleanly (P-206).
 
-WHY: the five portal SPAs (fleet, driver, worker/masar, housing, safety) build to
+WHY: the portal SPAs (fleet, fleet-os, driver, worker/masar, housing, safety) build to
 committed bundles served by the ``www/<portal>.html`` shells. A stale/broken bundle
 or a bad shared import (the exact class of regression the shared vite factory,
 bundle-guard, and the @shared dedup can introduce) makes the SPA fail to mount or
@@ -41,12 +41,21 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from desk_auth import authenticated_page  # noqa: E402
 
-# (served route, human label). Order mirrors the bundle-guard matrix; worker is
-# served at /masar (the Masar worker app).
+# (served route, human label) — one entry per SERVED shell, so every bundle the
+# bundle-guard matrix rebuilds is also proven to mount. The route and the bundle
+# name diverge: /fleet is the employee page (fleet_portal) while /fleet-os is the
+# supervisor board (fleet_os_portal), the worker bundle is served at /masar, and
+# route_supervisor_portal is served at /masar-supervisor.
 _PORTALS = [
-    ("fleet", "Fleet OS"),
+    ("fleet", "Fleet Employee"),
+    ("fleet-os", "Fleet OS Board"),
     ("driver", "Salis Driver"),
     ("masar", "Masar Worker"),
+    # /masar-supervisor (route_supervisor_portal) is deliberately NOT smoked yet: it
+    # mounts, but its only boot call
+    # (apex.salis.api.route_supervisor.get_supervisor_context) answers 417 on a fresh
+    # site even for Administrator, so listing it here would red every push. Tracked
+    # separately; re-add this route with the fix.
     ("housing", "Housing"),
     ("safety", "Safety"),
 ]

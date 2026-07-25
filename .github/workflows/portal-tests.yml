@@ -5,12 +5,16 @@ on:
     branches: [apex]
   pull_request:
     branches: [apex]
-  # The bench-dependent smoke job is manual (it needs a running site — see below).
+  # The served-site smoke runs on every push/PR too — it provisions its own bench
+  # (see portal-smoke) in ~6 min, in parallel with the ~17 min Tests job, so it
+  # costs no extra wall clock. Manual dispatch stays available and additionally
+  # accepts an already-served base_url.
   workflow_dispatch:
     inputs:
       base_url:
-        description: "Base URL of a running site with the portals built + served"
-        required: true
+        description: "Optional: smoke an ALREADY-served site instead of provisioning one in CI"
+        required: false
+        default: ""
 
 jobs:
   shared-components:
@@ -40,18 +44,76 @@ jobs:
 
   portal-smoke:
     # Smoke-mount e2e (P-206): opens each portal shell, asserts the SPA mounts
-    # (#app populated) with zero console/page errors. Mirrors the bundle-guard
-    # matrix (one leg per portal). It needs a RUNNING site with the portals built +
-    # served + a session credential, which PR CI here does not provide — so it runs
-    # only on manual dispatch (or a self-hosted/preview runner the integrator wires),
-    # against the `base_url` input. Locally the integrator runs the same spec on the
-    # bench: `APEX_PORTAL=<p> <bench>/env/bin/python e2e/portal_smoke_spec.py`.
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    # (#app populated) with zero console/page errors. A green bundle build proves
+    # only that the bundle compiles — this job is the RUNTIME half that proves a
+    # portal actually mounts when SERVED.
+    #
+    # It provisions its OWN site (bench + MariaDB + Redis services, same recipe as
+    # the Tests workflow) and serves it on 127.0.0.1:8000, then runs the spec
+    # against it. That replaces the previous design, which required a `base_url`
+    # pointing at an already-running site: a GitHub-hosted runner cannot reach a
+    # bench on someone's laptop, and the two SCREENSHOT_* secrets that design
+    # needed were never set — so the job was structurally undispatchable and had
+    # never run once in 200+ workflow runs. The optional `base_url` input is kept
+    # as an escape hatch for a genuinely reachable preview/staging URL; when it is
+    # supplied every provisioning step below is skipped.
+    #
+    # ONE job, not a per-portal matrix: the spec already loops every portal and
+    # reports each one, and a matrix would provision one whole bench per portal.
+    # The session user is Administrator — an account with no driver/worker link
+    # still MOUNTS each SPA (it renders the "unlinked" state), which is all a
+    # mount smoke asserts.
+    #
+    # PUSH-ENFORCED: because the job needs nothing external any more, it is a
+    # normal gate on push/PR rather than dispatch-only. It costs ~6 min of runner
+    # time and hides entirely behind the ~17 min Tests job it runs beside, and it
+    # is the only gate that would catch a portal that builds but does not boot.
+    #
+    # Locally the same spec runs on the bench:
+    # `APEX_PORTAL=<p> <bench>/env/bin/python e2e/portal_smoke_spec.py`
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        portal: [fleet, driver, masar, housing, safety]
+
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-queue:
+        image: redis:7
+        ports:
+          - 11000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-cache:
+        image: redis:7
+        ports:
+          - 13000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-socketio:
+        image: redis:7
+        ports:
+          - 12000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - uses: actions/checkout@v5
 
@@ -60,17 +122,102 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install bench CLI
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.base_url == '' }}
+        run: pip install frappe-bench
+
+      - name: Create bench
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.base_url == '' }}
+        run: bench init --skip-redis-config-generation --frappe-branch version-15 frappe-bench
+
+      - name: Configure bench Redis hosts
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.base_url == '' }}
+        working-directory: frappe-bench
+        run: |
+          bench set-config -g redis_cache "redis://127.0.0.1:13000"
+          bench set-config -g redis_queue "redis://127.0.0.1:11000"
+          bench set-config -g redis_socketio "redis://127.0.0.1:12000"
+          # No socketio process is started for this smoke, so tell the portals the
+          # realtime channel is off. Otherwise the shared realtime factory opens a
+          # socket.io connection whose 404 handshake is logged as a console error
+          # and the mount smoke fails on noise unrelated to mounting.
+          bench set-config -g disable_async 1
+
+      - name: Get required Frappe apps
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.base_url == '' }}
+        working-directory: frappe-bench
+        run: |
+          bench get-app --branch version-15 --skip-assets erpnext
+          bench get-app --branch version-15 --skip-assets hrms
+
+      - name: Get apex app
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.base_url == '' }}
+        working-directory: frappe-bench
+        run: bench get-app --skip-assets ${{ github.workspace }}
+
+      - name: Create the smoke site
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.base_url == '' }}
+        working-directory: frappe-bench
+        run: |
+          bench new-site test.localhost --db-root-password ${{ secrets.DB_ROOT_PASSWORD }} --admin-password ${{ secrets.ADMIN_PASSWORD }} --no-mariadb-socket
+          bench --site test.localhost install-app erpnext
+          bench --site test.localhost install-app hrms
+          bench --site test.localhost install-app apex
+
+      - name: Migrate (apply seeds, workflows and patches)
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.base_url == '' }}
+        working-directory: frappe-bench
+        run: bench --site test.localhost migrate
+
+      - name: Publish the committed portal bundles under sites/assets
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.base_url == '' }}
+        working-directory: frappe-bench
+        run: |
+          set -uo pipefail
+          # The portal bundles ship committed in apex/public/<portal>/; the dev
+          # server serves them from sites/assets/apex. `bench build` normally makes
+          # that link, but the app was fetched with --skip-assets, so link it
+          # explicitly (idempotent) and then assert one real bundle file resolves.
+          # frappe.app.serve mounts /assets on sites/assets (SharedDataMiddleware).
+          mkdir -p sites/assets
+          ln -sfn "$PWD/apps/apex/apex/public" sites/assets/apex
+          ls -l sites/assets/apex/
+          test -f sites/assets/apex/fleet_portal/assets/index.js
+
+      - name: Serve the site
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.base_url == '' }}
+        working-directory: frappe-bench
+        run: |
+          set -uo pipefail
+          # `bench serve` binds 0.0.0.0 and resolves the site from the Host header,
+          # so the runner must resolve test.localhost itself for the browser.
+          echo "127.0.0.1 test.localhost" | sudo tee -a /etc/hosts
+          nohup bench serve --port 8000 --noreload > /tmp/bench-serve.log 2>&1 &
+          for i in $(seq 1 90); do
+            if curl -fsS -H "Host: test.localhost" http://127.0.0.1:8000/api/method/frappe.ping > /dev/null; then
+              echo "site is serving after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::site did not start serving on port 8000"
+          cat /tmp/bench-serve.log
+          exit 1
+
       - name: Install Playwright
         run: |
           pip install playwright
           python -m playwright install --with-deps chromium
 
-      - name: Smoke-mount ${{ matrix.portal }}
+      - name: Smoke-mount every portal
         env:
-          APEX_PORTAL: ${{ matrix.portal }}
-          BASE_URL: ${{ github.event.inputs.base_url }}
-          # SCREENSHOT_USER / SCREENSHOT_PW come from repo secrets on the runner
-          # (desk_auth.py reads them); set them in the environment for a real run.
-          SCREENSHOT_USER: ${{ secrets.SCREENSHOT_USER }}
-          SCREENSHOT_PW: ${{ secrets.SCREENSHOT_PW }}
+          BASE_URL: ${{ inputs.base_url || 'http://test.localhost:8000' }}
+          # Administrator on the CI-provisioned site; an external base_url can
+          # instead supply its own SCREENSHOT_* repository secrets.
+          SCREENSHOT_USER: ${{ secrets.SCREENSHOT_USER || 'Administrator' }}
+          SCREENSHOT_PW: ${{ secrets.SCREENSHOT_PW || secrets.ADMIN_PASSWORD }}
         run: python e2e/portal_smoke_spec.py
+
+      - name: Dump the server log on failure
+        if: ${{ failure() && (github.event_name != 'workflow_dispatch' || inputs.base_url == '') }}
+        run: tail -n 200 /tmp/bench-serve.log
