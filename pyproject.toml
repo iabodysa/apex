@@ -28,7 +28,9 @@ build-backend = "setuptools.build_meta"
 include = ["apex*"]
 
 [tool.pytest.ini_options]
-testpaths = ["apex/tests", "apex/habitat"]
+# All four modules: colocated test_*.py live under salis/apex_core/logistay too,
+# and omitting them made pytest silently skip 58 of the 137 colocated tests.
+testpaths = ["apex/tests", "apex/habitat", "apex/salis", "apex/apex_core", "apex/logistay"]
 python_files = "test_*.py"
 addopts = "--tb=short"
 

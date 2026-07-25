@@ -22,7 +22,7 @@ import frappe
 from apex.habitat.web_form.my_custody_acknowledgment.my_custody_acknowledgment import (
     get_context,
 )
-from apex.tests.test_utils import ApexHabitatTestCase
+from apex.tests.factories import ApexHabitatTestCase
 
 
 def _h(n=12):

@@ -30,7 +30,7 @@ from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger 
     get_store_balance,
     post_stock_entry,
 )
-from apex.tests.test_utils import ApexHabitatTestCase
+from apex.tests.factories import ApexHabitatTestCase
 
 _HERE = os.path.dirname(__file__)
 _TRANSFER_CTL = os.path.normpath(os.path.join(_HERE, "material_transfer.py"))
