@@ -19,10 +19,10 @@ working redirect in review and is dead code at runtime -- ``PathResolver.resolve
 falls through every renderer to ``NotFoundPage`` (path_resolver.py:67-72) and the
 route answers 404.
 
-That is exactly the state ``www/housing_count.py`` is in, and the ``Inventory
-Count`` shortcut in the Housing workspace points straight at it. It is frozen
-below with its remedy rather than fixed here, because both available fixes are
-outside this module's write scope -- see ``_TEMPLATELESS_BASELINE``.
+That was exactly the state ``www/housing_count.py`` was in, and the ``Inventory
+Count`` shortcut in the Housing workspace points straight at it. A-174 fixed it
+by adding the sibling ``www/housing-count.html`` marker, so both baselines below
+are now EMPTY and the guard runs at zero tolerance.
 
 The route-reachability half of the guard closes the same gap from the other
 side: a workspace shortcut that names a portal route apex/www does not serve is
@@ -132,22 +132,13 @@ def _portal_shortcuts() -> list[tuple[str, str]]:
     ]
 
 
-# [#a147r1] Frozen 2026-07-25. SHRINK-ONLY: an entry leaves when the route is
-# fixed, and test_frozen_offenders_are_still_broken fails if one is fixed but not
-# pruned. Adding an entry is a review decision, never a way to ship a new one.
-_TEMPLATELESS_BASELINE = {
-    # /housing-count 404s: the redirect to /housing#/count in get_context is
-    # unreachable. Remedy is EITHER a www/housing-count.html marker (a redirect
-    # raises before setup_template_source, so the body never renders) OR
-    # repointing the Housing workspace "Inventory Count" shortcut at /housing.
-    # Both files are outside this module's write scope, and the marker route
-    # additionally trips test_www_no_external_cdn_assets.py:173, which requires
-    # every www/*.html to link a vendored font stylesheet.
-    "www/housing_count.py": "/housing-count",
-}
+# [#a147r1] Emptied by A-174. SHRINK-ONLY: an entry leaves when the route is fixed,
+# and test_frozen_offenders_are_still_broken fails if one is fixed but not pruned.
+# Adding an entry is a review decision, never a way to ship a new one.
+_TEMPLATELESS_BASELINE: dict[str, str] = {}
 
 # [#a147r2] Shortcut targets no www template serves. Same shrink-only rule.
-_DEAD_SHORTCUT_BASELINE = {"/housing-count"}
+_DEAD_SHORTCUT_BASELINE: set[str] = set()
 
 
 class TestFrameworkNeverServesABareController(unittest.TestCase):
@@ -229,6 +220,19 @@ class TestWwwControllersHaveTemplates(unittest.TestCase):
             "<route>.html, or serve the surface from a route that has one:\n  "
             + "\n  ".join(new),
         )
+
+    def test_housing_count_is_reachable_so_its_redirect_can_run(self):
+        # The A-174 fix, asserted along the resolver's own chain: a non-Python
+        # template exists, set_pymodule maps it back to the controller, and the
+        # route appears in the served set the shortcut check compares against.
+        template = WWW / "housing-count.html"
+        self.assertTrue(template.is_file(), "the marker template is gone -- /housing-count 404s again")
+        self.assertFalse(template.name.endswith(PY_LOADER_SUFFIXES))
+        self.assertEqual(
+            [p.name for p in _templates_binding_to(WWW / "housing_count.py")],
+            ["housing-count.html"],
+        )
+        self.assertIn("housing-count", _served_routes())
 
     def test_frozen_offenders_are_still_broken(self):
         fixed = sorted(set(_TEMPLATELESS_BASELINE) - set(_templateless(WWW)))
