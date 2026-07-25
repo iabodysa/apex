@@ -38,6 +38,7 @@ from apex.salis.api.driver_portal import (
     support,
     trips,
 )
+from apex.www import driver as driver_page, masar as masar_page
 
 
 def _image_data_uri(image_format="PNG"):
@@ -1506,6 +1507,72 @@ class TestPortalTokenSecurity(FrappeTestCase):
                 frappe.db.set_value("Salis Driver", self.driver, "status", status)
                 with self.assertRaises(frappe.PermissionError):
                     resolve_driver_token(driver_token._plaintext_token)
+
+    def test_bad_token_attempts_from_one_ip_are_rate_limited(self):
+        """Defense-in-depth: the (N+1)th rapid failed token from one IP is rejected
+        with RateLimitExceededError (HTTP 429), while the first N fail closed with the
+        ordinary PermissionError. Bench-run integration test -- the native limiter
+        counts in Redis and is a no-op without a request context (rate_limiter.py:134),
+        so it needs the live request/cache a bench provides."""
+        limit = token_security.BAD_TOKEN_ATTEMPTS_PER_MINUTE
+        bogus = "definitely-not-a-real-token"
+        frappe.set_user("Guest")
+        with _request_cookies({}):
+            cmd = frappe.local.form_dict.cmd
+            self.addCleanup(
+                frappe.cache.delete_value,
+                frappe.cache.make_key(f"rl:{cmd}:127.0.0.1"),
+            )
+            for _ in range(limit):
+                with self.assertRaises(frappe.PermissionError):
+                    resolve_driver_token(bogus)
+            with self.assertRaises(frappe.RateLimitExceededError) as raised:
+                resolve_driver_token(bogus)
+        self.assertEqual(getattr(raised.exception, "http_status_code", None), 429)
+
+    def test_valid_token_is_never_charged_against_the_bad_token_throttle(self):
+        """A legitimate holder is never blocked: a VALID credential resolved far past
+        the per-IP failure ceiling still returns its subject every time (only FAILED
+        resolutions are charged, so a valid link never consumes the window)."""
+        token = self._driver_token()
+        limit = token_security.BAD_TOKEN_ATTEMPTS_PER_MINUTE
+        frappe.set_user("Guest")
+        with _request_cookies({}):
+            cmd = frappe.local.form_dict.cmd
+            self.addCleanup(
+                frappe.cache.delete_value,
+                frappe.cache.make_key(f"rl:{cmd}:127.0.0.1"),
+            )
+            for _ in range(limit * 2 + 1):
+                self.assertEqual(
+                    resolve_driver_token(token._plaintext_token), self.driver
+                )
+
+    def test_www_entry_points_throttle_repeated_bad_links_from_one_ip(self):
+        """Both www entries enforce the per-IP throttle: a flood of well-formed but
+        unknown links (/masar?w=, /driver?d=) from one IP is cut off with 429, while
+        each well-formed link still redirects to the clean URL so the secret leaves the
+        address bar. Bench-run integration test (live Redis request context)."""
+        limit = token_security.BAD_TOKEN_ATTEMPTS_PER_MINUTE
+        bogus = "abcdef0123456789abcdef0123456789"
+        for page, field in ((masar_page, "w"), (driver_page, "d")):
+            with self.subTest(entry=page.__name__):
+                frappe.set_user("Guest")
+                with _request_cookies({}):
+                    frappe.local.form_dict[field] = bogus
+                    cmd = frappe.local.form_dict.cmd
+                    self.addCleanup(
+                        frappe.cache.delete_value,
+                        frappe.cache.make_key(f"rl:{cmd}:127.0.0.1"),
+                    )
+                    for _ in range(limit):
+                        with self.assertRaises(frappe.Redirect):
+                            page.get_context(frappe._dict())
+                    with self.assertRaises(frappe.RateLimitExceededError) as raised:
+                        page.get_context(frappe._dict())
+                self.assertEqual(
+                    getattr(raised.exception, "http_status_code", None), 429
+                )
 
     def test_employee_non_active_statuses_revoke_without_token_revival(self):
         for status in ("Inactive", "Suspended", "Left"):

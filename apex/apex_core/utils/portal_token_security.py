@@ -6,6 +6,7 @@ import hashlib
 
 import frappe
 from frappe import _
+from frappe.rate_limiter import rate_limit
 
 WORKER = "Worker"
 DRIVER = "Driver"
@@ -40,6 +41,19 @@ _TOKEN_SUBJECT_FIELDS = {
     WORKER: "employee",
     DRIVER: "driver",
 }
+
+# Defense-in-depth: cap blind portal-token guessing at 10 failed attempts / 60s per
+# IP. Only failed resolutions are charged (see _reject_invalid_token), so a valid
+# link never counts and a legitimate holder is never blocked. 10/60s mirrors the
+# app's tight tier (driver-portal writes) yet allows the odd revoked-link retry.
+BAD_TOKEN_ATTEMPTS_PER_MINUTE = 10
+
+
+@rate_limit(limit=BAD_TOKEN_ATTEMPTS_PER_MINUTE, seconds=60)
+def _throttle_bad_token_attempt() -> None:
+    """Charge one failed portal-token attempt against the per-IP window; the (N+1)th
+    raises RateLimitExceededError (HTTP 429). No-op without a request (rate_limiter.py
+    :134), so console/test callers are never throttled."""
 
 
 def _require_audience(audience: str) -> None:
@@ -107,6 +121,9 @@ def validate_subject_binding(
 
 
 def _reject_invalid_token() -> None:
+    # Charge the per-IP throttle before failing closed, so a flood of guesses from
+    # one IP is cut off (429) while a single bad link still returns the ordinary 403.
+    _throttle_bad_token_attempt()
     frappe.throw(
         _("This portal access token is invalid or inactive."),
         frappe.PermissionError,
@@ -160,6 +177,19 @@ def resolve_portal_subject(audience: str, token=None, required=False):
     if frappe.db.get_value(subject_doctype, subject, "status") != "Active":
         _reject_invalid_token()
     return subject
+
+
+def throttle_entry_token(audience: str, raw: str) -> None:
+    """Route a link opened at a www entry (/masar?w=, /driver?d=) through the shared
+    bad-token throttle before it is parked in the cookie. A valid link resolves and is
+    never charged; a failed/unknown one is charged (see resolve_portal_subject). The
+    403 is swallowed so every well-formed link still redirects to the clean URL (the
+    secret always leaves the address bar); the (N+1)th bad link's 429 propagates."""
+    _require_audience(audience)
+    try:
+        resolve_portal_subject(audience, raw, required=True)
+    except frappe.PermissionError:
+        pass
 
 
 def _deny_issuance(audience: str) -> None:
