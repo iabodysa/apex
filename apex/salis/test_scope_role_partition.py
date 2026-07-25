@@ -28,10 +28,10 @@ Run standalone:  python3 -m unittest apex.salis.test_scope_role_partition -v
 """
 
 import ast
-import glob
-import json
 import os
 import unittest
+
+from apex.tests.shipped_doctypes import shipped_doctypes
 
 _SALIS = os.path.dirname(os.path.abspath(__file__))
 _APP = os.path.normpath(os.path.join(_SALIS, ".."))
@@ -93,17 +93,9 @@ def scoped_doctypes():
 
 
 def _shipped_doctypes():
-    """DocType name -> shipped JSON."""
-    out = {}
-    for path in sorted(glob.glob(_DOCTYPE_GLOB)):
-        with open(path, encoding="utf-8") as fh:
-            try:
-                data = json.load(fh)
-            except json.JSONDecodeError:
-                continue
-        if isinstance(data, dict) and data.get("doctype") == "DocType" and data.get("name"):
-            out[data["name"]] = data
-    return out
+    """DocType name -> shipped JSON. Shared so this guard and the report-role
+    guard cannot drift apart on how they read the same files."""
+    return shipped_doctypes()
 
 
 def readers_of(doctypes, names):

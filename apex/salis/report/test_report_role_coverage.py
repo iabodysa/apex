@@ -31,6 +31,8 @@ import json
 import os
 import unittest
 
+from apex.tests.shipped_doctypes import shipped_doctypes
+
 _REPORT_DIR = os.path.dirname(os.path.abspath(__file__))
 _APP = os.path.normpath(os.path.join(_REPORT_DIR, "..", ".."))
 _SALIS_REPORT_GLOB = os.path.join(_REPORT_DIR, "*", "*.json")
@@ -112,17 +114,9 @@ MONEY_REPORTS_EXCLUDED_FROM_GRO = {
 
 
 def _load_doctypes():
-    """DocType name -> shipped JSON, for every DocType in the app."""
-    out = {}
-    for path in sorted(glob.glob(_DOCTYPE_GLOB)):
-        with open(path, encoding="utf-8") as fh:
-            try:
-                data = json.load(fh)
-            except json.JSONDecodeError:
-                continue
-        if isinstance(data, dict) and data.get("doctype") == "DocType" and data.get("name"):
-            out[data["name"]] = data
-    return out
+    """DocType name -> shipped JSON. Shared so this guard and the scope-partition
+    guard cannot drift apart on how they read the same files."""
+    return shipped_doctypes()
 
 
 def _child_to_parent(doctypes):
