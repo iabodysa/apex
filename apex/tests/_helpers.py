@@ -148,13 +148,15 @@ def _user(email, role):
 
 def _project(project_name="QA Scope Project"):
     """Return a Project named ``project_name``, creating it if absent. Idempotent.
-    Used to give a scoped Salis user a tenant to be permitted for."""
-    existing = frappe.db.get_value("Project", {"project_name": project_name}, "name")
-    if existing:
-        return existing
-    return frappe.get_doc(
-        {"doctype": "Project", "project_name": project_name}
-    ).insert(ignore_permissions=True).name
+    Used to give a scoped Salis user a tenant to be permitted for.
+
+    A thin default-carrying alias over ``factories.make_project``: it was a fourth
+    hand-written copy of that get-or-create, written in a shape the copy-paste
+    detector could not group with the other three (A-176).
+    """
+    from apex.tests.factories import make_project
+
+    return make_project(project_name)
 
 
 def _grant_project(user, project):
