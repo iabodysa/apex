@@ -28,6 +28,19 @@ build-backend = "setuptools.build_meta"
 include = ["apex*"]
 
 [tool.pytest.ini_options]
+# NOT a CI entry point — nothing in .github/workflows/ invokes pytest. The suite runs
+# via `bench --site test.localhost run-tests --app apex` (test.yml). Retained because
+# the tests are plain unittest.TestCase, so pytest can still COLLECT them locally for
+# counting or locating tests without a site.
+#
+# Verified 2026-07-25 on the bench py3.11 interpreter with pytest supplied via
+# PYTHONPATH: `pytest --collect-only` over these testpaths collects 1809 tests, but
+# EXECUTION dies
+# at frappe.exceptions.IncorrectSitePath — pytest never calls frappe.init()/connect(),
+# so there is no site, no DB and no per-test transaction. Promoting pytest to a real
+# entry point would need a conftest.py that bootstraps a site, and a fix for
+# apex/tests/test_salis_state_flow.py, which calls get_workflow_name() at import time
+# and therefore aborts collection outright (the one file excluded from the 1809).
 testpaths = ["apex/tests", "apex/habitat"]
 python_files = "test_*.py"
 addopts = "--tb=short"

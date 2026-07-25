@@ -1,3 +1,30 @@
+# DEVELOPER-OPTIONAL — this config is NOT a gate. No workflow runs `pre-commit`, and
+# nothing installs the hook, so none of it has ever executed on this repo. Opt in
+# locally if you want it:
+#
+#     pip install pre-commit
+#     pre-commit install                 # writes .git/hooks/pre-commit
+#     pre-commit run --all-files         # one-off sweep without installing
+#
+# The enforced gates all live in .github/workflows/: ruff check, the comment audit and
+# the Arabic-translation coverage check (lint.yml), gitleaks plus the commit-metadata
+# and tracked-file checks (test.yml), the ignore_permissions baseline
+# (permissions-guard.yml), the committed-bundle staleness and dependency-ownership
+# checks (portal-bundles.yml), and the shared-component vitest (portal-tests.yml).
+#
+# Why this stayed optional rather than becoming CI-enforced (measured 2026-07-25):
+#   * `ruff format` would rewrite 596 of 1062 tracked apex/*.py files (56%). CI's own
+#     `ruff check apex/` is green today, so enforcement buys lint nothing — it buys a
+#     mass reformat, which is an owner call, not a hygiene fix.
+#   * The `--select=I` import sorter below would rewrite imports across 183 findings.
+#   * The ruff rev pinned here (v0.8.1) is far older than the ruff CI pins
+#     (0.15.14 in lint.yml). Enforcing this file as-is would run two different rulesets
+#     against the same code and the two gates would disagree.
+#   * The prettier and eslint hooks below do NOT exclude the committed portal bundles
+#     under apex/public/*_portal/ (49 tracked .js files). portal-bundles.yml rebuilds
+#     those and fails on any diff versus the committed output, so a prettier pass over
+#     them could never match a fresh vite build — enforcing prettier and bundle-guard
+#     together is unsatisfiable until those paths are excluded here.
 exclude: 'node_modules|.git'
 default_stages: [pre-commit]
 fail_fast: false
@@ -46,6 +73,11 @@ repos:
             )$
 
 
+  # ADVISORY ONLY: the committed .eslintrc backs no running gate. This hook is the sole
+  # consumer of it and this file never runs (see the header), so .eslintrc documents the
+  # intended JS style rather than enforcing it. The JS that IS checked in CI is the
+  # shared-component vitest in portal-tests.yml; portal source is otherwise guarded only
+  # by the bundle-staleness diff in portal-bundles.yml.
   - repo: https://github.com/pre-commit/mirrors-eslint
     rev: v8.44.0
     hooks:
