@@ -98,6 +98,34 @@ def _request_cookies(cookies):
 
 
 @contextmanager
+def _request_from_ip(ip, cmd, cookies=None):
+    """The same request surface as ``_request_cookies``, with the remote address
+    and the rate-limit ``cmd`` pinned by the caller.
+
+    frappe's native limiter keys on ``rl:<form_dict.cmd>:<request_ip>``
+    (rate_limiter.py), so pinning both is what lets one test compare two
+    addresses inside a single window.
+    """
+    sentinel = object()
+    previous = {
+        name: getattr(frappe.local, name, sentinel)
+        for name in ("request", "request_ip", "form_dict")
+    }
+    frappe.local.request = _Request(cookies or {})
+    frappe.local.request_ip = ip
+    frappe.local.form_dict = frappe._dict({"cmd": cmd})
+    try:
+        yield
+    finally:
+        for fieldname, value in previous.items():
+            if value is sentinel:
+                if hasattr(frappe.local, fieldname):
+                    delattr(frappe.local, fieldname)
+            else:
+                setattr(frappe.local, fieldname, value)
+
+
+@contextmanager
 def _form_dict(values):
     sentinel = object()
     previous = getattr(frappe.local, "form_dict", sentinel)
@@ -1573,6 +1601,49 @@ class TestPortalTokenSecurity(FrappeTestCase):
                 self.assertEqual(
                     getattr(raised.exception, "http_status_code", None), 429
                 )
+
+    def test_bad_token_windows_are_independent_per_ip(self):
+        """The ceiling is PER IP, enforced by frappe's own rate_limit primitive.
+
+        One address exhausting its window must not lock a second address out —
+        otherwise a single abuser would deny the portal to every worker behind
+        every other connection. Proved two ways in one window: the second address
+        still gets its ordinary 403, and the native limiter's own counter
+        (``rl:<cmd>:<ip>``, the key rate_limiter.py builds) is shown to be keyed
+        by remote address rather than being one global counter.
+        """
+        limit = token_security.BAD_TOKEN_ATTEMPTS_PER_MINUTE
+        bogus = "definitely-not-a-real-token"
+        cmd = "portal-security-perip-" + frappe.generate_hash(length=12)
+        ip_a, ip_b = "198.51.100.7", "198.51.100.8"
+        keys = {ip: frappe.cache.make_key(f"rl:{cmd}:{ip}") for ip in (ip_a, ip_b)}
+        for cache_key in keys.values():
+            frappe.cache.delete_value(cache_key)
+            self.addCleanup(frappe.cache.delete_value, cache_key)
+
+        frappe.set_user("Guest")
+        with _request_from_ip(ip_a, cmd):
+            for _ in range(limit):
+                with self.assertRaises(frappe.PermissionError):
+                    resolve_driver_token(bogus)
+            with self.assertRaises(frappe.RateLimitExceededError) as raised:
+                resolve_driver_token(bogus)
+        self.assertEqual(getattr(raised.exception, "http_status_code", None), 429)
+        self.assertEqual(
+            int(frappe.cache.get(keys[ip_a]) or 0),
+            limit + 1,
+            "the native limiter must have counted every failed attempt from this address",
+        )
+        self.assertFalse(
+            frappe.cache.get(keys[ip_b]),
+            "the second address must not have been charged for the first's attempts",
+        )
+
+        # [#a110iso] The second address still answers with the ordinary 403 — the
+        # exhausted window belonged to IP A alone.
+        with _request_from_ip(ip_b, cmd):
+            with self.assertRaises(frappe.PermissionError):
+                resolve_driver_token(bogus)
 
     def test_employee_non_active_statuses_revoke_without_token_revival(self):
         for status in ("Inactive", "Suspended", "Left"):
