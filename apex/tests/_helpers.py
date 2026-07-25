@@ -25,6 +25,19 @@ class as_user:
         return False
 
 
+def notification_recipients(notification_name, doc):
+    """The To recipients a native Notification resolves for ``doc``.
+
+    Renders through the Notification's own ``get_list_of_recipients``, so a
+    recipient added by condition/role/field is resolved exactly as it would be on
+    a real send; cc/bcc are dropped because every caller asserts on To only.
+    """
+    notification = frappe.get_doc("Notification", notification_name)
+    context = {"doc": doc, "alert": notification, "comments": None}
+    recipients, _cc, _bcc = notification.get_list_of_recipients(doc, context)
+    return recipients
+
+
 def cancel_submitted_for_cleanup(doc):
     """Cancel a submitted doc during teardown so it can be deleted, respecting the
     A-083 workflow-bypass guard (``apex.apex_core.utils.workflow_guard``).

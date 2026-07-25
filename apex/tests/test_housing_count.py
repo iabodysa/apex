@@ -29,6 +29,7 @@ from apex.habitat.api.housing_count import (
     get_inventory_for_building,
     submit_counts,
 )
+from apex.tests.factories import make_scoped_supervisor
 
 
 def _h(n=12):
@@ -43,7 +44,7 @@ class TestHousingCount(FrappeTestCase):
         # [#c37lgq]
         cls.b1 = cls._building()
         cls.b2 = cls._building()
-        cls.scoped = cls._scoped_supervisor(cls.b1)
+        cls.scoped = make_scoped_supervisor(cls._user, cls.b1, cls.addClassCleanup)
         cls.auditor = cls._auditor()
         # [#2pdoxj]
         cls.item1 = cls._item(cls.b1, expected=10)
@@ -122,23 +123,6 @@ class TestHousingCount(FrappeTestCase):
         ).insert(ignore_permissions=True)
         cls.addClassCleanup(
             frappe.delete_doc, "User", email, force=True, ignore_permissions=True
-        )
-        return email
-
-    @classmethod
-    def _scoped_supervisor(cls, building):
-        email = cls._user("Resident Supervisor")
-        up = frappe.get_doc(
-            {
-                "doctype": "User Permission",
-                "user": email,
-                "allow": "Building",
-                "for_value": building,
-            }
-        )
-        up.insert(ignore_permissions=True)
-        cls.addClassCleanup(
-            frappe.delete_doc, "User Permission", up.name, force=True, ignore_permissions=True
         )
         return email
 

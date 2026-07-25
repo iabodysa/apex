@@ -36,7 +36,7 @@ tests/factories.py (P-135's shared home). A-176 is draining that set: each batch
 promotes one helper into factories.py (or a non-``test_`` sibling, since
 test_no_cross_test_imports.py forbids a test module importing a test module), points
 every copy at it, and deletes the group from _COPY_PASTE_BASELINE in the same commit,
-so the frozen set only ever shrinks. Remaining test groups: 12 / 23 functions.
+so the frozen set only ever shrinks. Remaining test groups: 9 / 17 functions.
 
   1. TestDuplicateTopLevelFunctionNames — two different files each bind
      a same-named PUBLIC module-level function. Scoped to module level (a Document
@@ -459,24 +459,6 @@ _COPY_PASTE_BASELINE = frozenset(
             {
                 ("habitat/doctype/safety_finding_ledger/test_safety_finding_ledger.py", "_round"),
                 ("habitat/doctype/safety_round/test_safety_round.py", "_round"),
-            }
-        ),
-        frozenset(
-            {
-                ("tests/test_fleet_alert_notifications.py", "_recipients"),
-                ("tests/test_request_trip_notifications.py", "_recipients"),
-            }
-        ),
-        frozenset(
-            {
-                ("tests/test_habitat_tenant_scope.py", "_scoped_supervisor"),
-                ("tests/test_housing_count.py", "_scoped_supervisor"),
-            }
-        ),
-        frozenset(
-            {
-                ("tests/test_masar_trip_rating.py", "_token_for"),
-                ("tests/test_masar_worker_boarding_confirm.py", "_token_for"),
             }
         ),
         # Single-member group: two classes in ONE file share a _get_doc body, so the

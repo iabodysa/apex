@@ -435,6 +435,46 @@ def make_worker_token(employee):
     )
 
 
+def ensure_worker_token(employee):
+    """The raw Masar Worker Token string for ``employee``, reusing an existing row.
+
+    Unlike ``make_worker_token`` (which always mints a fresh one), this re-enables
+    and recovers whatever token the employee already carries — a second live token
+    for one worker is not a state the portal is meant to reach.
+    """
+    existing = frappe.db.get_value("Masar Worker Token", {"employee": employee}, "name")
+    if not existing:
+        return make_worker_token(employee)
+    doc = frappe.get_doc("Masar Worker Token", existing)
+    if not doc.enabled:
+        doc.db_set("enabled", 1)
+    # [#edhau9]
+    return doc.recover_token()
+
+
+def make_scoped_supervisor(make_user, building, add_cleanup):
+    """A Resident Supervisor scoped to ``building`` by a Building User Permission;
+    returns the login email.
+
+    ``make_user`` mints the login and ``add_cleanup`` registers the permission's
+    teardown (normally ``cls.addClassCleanup``) — both are injected because each
+    test class names its own users and owns its own cleanup scope.
+    """
+    email = make_user("Resident Supervisor")
+    up = frappe.get_doc(
+        {
+            "doctype": "User Permission",
+            "user": email,
+            "allow": "Building",
+            "for_value": building,
+        }
+    ).insert(ignore_permissions=True)
+    add_cleanup(
+        frappe.delete_doc, "User Permission", up.name, force=True, ignore_permissions=True
+    )
+    return email
+
+
 def make_assignment(employee, building, project, room_number=None, bed_code=None, stay_type="Permanent"):
     """A submitted Accommodation Assignment placing ``employee`` in ``building``
     (creating the room + bed if needed). Returns the assignment name."""
