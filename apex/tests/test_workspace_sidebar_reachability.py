@@ -45,14 +45,10 @@ _WORKSPACE_GLOB = os.path.join(_APP, "*", "workspace", "*", "*.json")
 SIM_ROLE = "SIM Operations User"
 SIM_WORKSPACE = "Custody"
 
-# Ratchet, not an excuse list: these two pairs pre-date A-122 and are a live navigation
-# gap on the board, so the guard freezes them exactly rather than tolerating any orphan.
-KNOWN_ORPHAN_PAIRS = frozenset(
-    {
-        ("Compliance and Rentals", "Government Relations Officer"),
-        ("Compliance and Rentals", "Internal Auditor"),
-    }
-)
+# Ratchet, not an excuse list. A-125 closed the last two entries — Compliance and Rentals
+# granted Government Relations Officer and Internal Auditor while its Salis parent granted
+# neither — by widening the Salis root, so the set is now empty and ANY orphan fails.
+KNOWN_ORPHAN_PAIRS = frozenset()
 
 
 def _workspaces():
