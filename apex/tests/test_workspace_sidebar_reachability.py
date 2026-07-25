@@ -30,15 +30,22 @@ Two consequences this file encodes:
 File-level and stdlib-only on purpose: the invariant is a property of the shipped
 is_standard JSON, so it has to fail on the change that writes the bad JSON rather than on
 a site that has already migrated it.
+
+A-127 promoted the scan itself into ``tests/workspace_reachability.py`` so a second
+suite (``test_b5_role_workspaces.py``) can assert parent-chain reachability without
+either copying the logic or importing a sibling ``test_*`` module — which
+``tests/test_no_cross_test_imports.py`` forbids. This file keeps the A-122 persona
+assertions and the detector's own falsifiability tests.
 """
 
-import glob
-import json
-import os
 import unittest
 
-_APP = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
-_WORKSPACE_GLOB = os.path.join(_APP, "*", "workspace", "*", "*.json")
+from apex.tests.workspace_reachability import (
+    ancestors as _ancestors,
+    orphan_pairs as _orphan_pairs,
+    workspace_titles as _workspace_titles,
+    workspaces as _workspaces,
+)
 
 # The A-122 persona: the single role a SIM operator holds, and the workspace that
 # absorbed the SIM surface when the root SIM Operations workspace was folded away.
@@ -49,61 +56,6 @@ SIM_WORKSPACE = "Custody"
 # granted Government Relations Officer and Internal Auditor while its Salis parent granted
 # neither — by widening the Salis root, so the set is now empty and ANY orphan fails.
 KNOWN_ORPHAN_PAIRS = frozenset()
-
-
-def _workspaces():
-    """title -> {roles, parent, hidden, path} for every is_standard workspace on disk."""
-    pages = {}
-    for path in sorted(glob.glob(_WORKSPACE_GLOB)):
-        with open(path, encoding="utf-8") as fh:
-            data = json.load(fh)
-        title = data.get("title") or data.get("name")
-        pages[title] = {
-            "roles": {row["role"] for row in data.get("roles", []) if row.get("role")},
-            "parent": data.get("parent_page") or "",
-            "hidden": bool(data.get("is_hidden")),
-            "path": os.path.relpath(path, _APP),
-        }
-    return pages
-
-
-def _workspace_titles():
-    """Every workspace title on disk, WITH duplicates, so a collision stays visible."""
-    titles = []
-    for path in sorted(glob.glob(_WORKSPACE_GLOB)):
-        with open(path, encoding="utf-8") as fh:
-            data = json.load(fh)
-        titles.append(data.get("title") or data.get("name"))
-    return titles
-
-
-def _ancestors(pages, title):
-    """Parent chain from the immediate parent up to the root; None if the chain is broken."""
-    chain = []
-    seen = {title}
-    parent = pages[title]["parent"]
-    while parent:
-        if parent not in pages or parent in seen:
-            return None
-        chain.append(parent)
-        seen.add(parent)
-        parent = pages[parent]["parent"]
-    return chain
-
-
-def _orphan_pairs(pages):
-    """(workspace, role) pairs whose sidebar node no holder of that role can ever reach."""
-    orphans = set()
-    for title, page in pages.items():
-        chain = _ancestors(pages, title)
-        if chain is None:
-            continue
-        for ancestor in chain:
-            forebear = pages[ancestor]
-            for role in page["roles"]:
-                if forebear["hidden"] or (forebear["roles"] and role not in forebear["roles"]):
-                    orphans.add((title, role))
-    return orphans
 
 
 class TestSimOperationsSidebarReachability(unittest.TestCase):
