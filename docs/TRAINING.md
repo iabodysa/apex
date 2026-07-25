@@ -22,8 +22,16 @@ its DocTypes, roles and permissions, key fields, and typical workflow.
 - [Payments & Approvals (Segregation of Duties)](training/compliance.md)
 
 ### Portals & Shared
-- [Driver & Worker (Masar) Portals](training/portals-masar-driver.md)
+- [Driver & Worker (Masar) Portals](training/portals-masar-driver.md) — the two
+  personal-link self-service apps, `/driver` and `/masar`
 - [Settings & Desk Pages](training/settings.md)
+
+> Apex serves **seven** portal routes in total. Besides the two self-service apps
+> above, five are session- and role-gated operator surfaces: `/fleet` (employee
+> self-service), `/fleet-os` (fleet supervisor board), `/housing`, `/safety`, and
+> `/masar-supervisor` (route supervisor). Every route, its audience, and its
+> authentication path are listed once in
+> [Served portal routes](../README.md#served-portal-routes).
 
 > Screens are marked with `_[screenshot: ...]_` placeholders where an image should
 > be inserted. **System Manager** holds full rights on every DocType and is

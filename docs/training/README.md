@@ -5,7 +5,9 @@ operations suite. Apex hosts two functional modules plus a shared settings layer
 
 - **Habitat** — accommodation, custody, safety, maintenance, and facility costs.
 - **Salis** — movement and fleet: vehicles, drivers, fuel, dispatch, rentals,
-  plus mobile portals for **Drivers** and **Workers (Masar)**.
+  plus the portals for **Drivers** (`/driver`), **Workers / Masar** (`/masar`),
+  **employees** (`/fleet`), **fleet supervisors** (`/fleet-os`), and **route
+  supervisors** (`/masar-supervisor`).
 - **Apex Core** — shared configuration (Habitat / Salis / Integration settings).
 
 This guide explains, per functional area, **what each record is for**, **who can
@@ -47,7 +49,7 @@ that right.
 | **Fleet Project Manager** | Salis | Manages vehicles/drivers for assigned projects only |
 | **Fleet Supervisor** | Salis | Field supervisor; creates operational records |
 | **Government Relations Officer** | Salis | Compliance notification recipient + Compliance workspace viewer (no record-edit rights) |
-| **Driver** | Salis | Field driver; uses the mobile Driver Portal, minimal desk read |
+| **Driver** | Salis | Field driver; uses the mobile Driver Portal only. The role has `desk_access = 0` and an owner-only permission set on five Salis DocTypes — it never opens the desk |
 
 > **Maintenance Manager** is an ERPNext-supplied role (not created by Apex). When
 > it is present, Apex grants it Read/Write/Create on the maintenance material
@@ -80,18 +82,27 @@ that right.
 8. [Rentals](rentals.md) — rental offices, accrual, settlement
 9. [Payments & Approvals](compliance.md) — segregation of duties at the finance boundary
 
-> Salis is organised as a top-level **Salis** workspace with **four** child
-> workspaces — **Movement**, **Fleet**, **Compliance**, and **Rentals** — not a
-> single flat area.
+> Salis is organised as a top-level **Salis** workspace with **two** child
+> workspaces — **Fleet** and **Compliance and Rentals** — not a single flat area.
+> Movement lives on the Salis root itself.
 
 ### Portals
+
+Apex serves seven portal routes. Their audiences and authentication paths are
+listed once in [Served portal routes](../../README.md#served-portal-routes).
+
 10. [Driver & Worker Portals](portals-masar-driver.md) — mobile self-service (`/driver`, `/masar`)
+
+> The five session-gated operator portals — `/fleet` (employee self-service),
+> `/fleet-os` (fleet supervisor board), `/housing`, `/safety`, and
+> `/masar-supervisor` (route supervisor) — do not yet have training pages. Until
+> they do, use the route reference above for their audience and access rules.
 
 ### Shared
 11. [Settings & Desk Pages](settings.md) — Apex Core settings, operational desk consoles
 12. [Background Jobs](settings.md#background-jobs) — what runs automatically
 
-> **My Work** is a personal worklist workspace (no role filter) with Number Cards for Pending My Action, Submitted By Me, and Approved Last 48h, plus shortcuts to the Action Inbox and My Maintenance Requests. See [Settings & Desk Pages](settings.md).
+> **Action Inbox** is the personal worklist. It is a shortcut on both the Habitat and the Salis workspace, open to every user with no role filter. The former **My Work** and **Launchpad** landing workspaces were retired and are removed on migrate by `apex/patches/v2_0/remove_kernel_landing_workspaces.py`. See [Settings & Desk Pages](settings.md).
 
 ---
 

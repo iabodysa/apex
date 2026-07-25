@@ -48,18 +48,21 @@ _[screenshot: Salis Dispatch Board]_
 
 ---
 
-## My Work — personal worklist
+## Action Inbox — personal worklist
 
-**My Work** is a top-level **public** workspace with **no role filter**, so it is
-available to **every logged-in user**. It is the desk home for the universal
-Maintenance Request intake and carries:
+The **Action Inbox** desk page is the personal, cross-module worklist. It has no
+role filter, so it is available to **every logged-in user**, and it is reached
+from a shortcut on both the **Habitat** and the **Salis** workspace. Use it as the
+daily starting point: it surfaces what needs your action across both modules.
 
-- three Number Cards — **Pending My Action**, **Submitted By Me**, and
-  **Approved Last 48h**; and
-- shortcuts to the **Action Inbox** desk page and **My Maintenance Requests**.
-
-Use it as the daily starting point: it surfaces what *you* raised, what you
-submitted, and what needs your action across both modules.
+> The former **My Work** landing workspace, which carried this shortcut alongside
+> the **Launchpad** workspace, was retired during workspace consolidation. Both
+> are removed on migrate by
+> `apex/patches/v2_0/remove_kernel_landing_workspaces.py`, which also clears any
+> user still pinned to one. The three personal Number Cards — **Pending My
+> Action**, **Submitted By Me**, and **Approved Last 48h** — still ship under
+> `apex/apex_core/number_card/` and can be added to any dashboard or workspace,
+> but no shipped workspace places them.
 
 ---
 

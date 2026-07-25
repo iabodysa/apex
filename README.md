@@ -121,9 +121,9 @@ flowchart LR
     end
 
     subgraph UI ["Purpose-built interfaces"]
-        DESK["Workspaces and Desk pages<br/>My Work · Action Inbox · Control desks"]:::ui
-        PWA["Worker and driver PWA"]:::ui
-        PORTALS["Housing · Safety · Fleet · Masar portals"]:::ui
+        DESK["Workspaces and Desk pages<br/>Action Inbox · Control desks"]:::ui
+        PWA["Worker and driver PWA<br/>/masar · /driver"]:::ui
+        PORTALS["Session portals<br/>Fleet · Fleet OS · Housing · Safety<br/>Masar Route Supervisor"]:::ui
     end
 
     subgraph ID ["Identity"]
@@ -169,44 +169,32 @@ The interface changes by role, but identity, authorization, workflow checks, and
 
 ```mermaid
 graph LR
-    LP(["Launchpad<br/>shared entry point"]):::launch
-    MW["My Work<br/>personal queue"]:::universal
-    BE["Backend Engines<br/>system-written records"]:::restricted
+    HAB["Habitat<br/>module root"]:::hub_ws
+    SALIS["Salis<br/>module root"]:::sal_ws
+    BE["Backend Engines<br/>hidden · System Manager"]:::restricted
 
-    subgraph HAB_NAV ["Habitat"]
-        HAB["Habitat"]:::hub_ws
+    subgraph HAB_NAV ["Habitat children"]
         HOUSING["Housing"]:::ws
         SAFETY["Safety"]:::ws
         CUSTODY["Custody"]:::ws
         COSTS["Costs and Leasing"]:::ws
     end
 
-    subgraph SAL_NAV ["Salis"]
-        SALIS["Salis"]:::sal_ws
-        MASAR["Masar"]:::sal_child
+    subgraph SAL_NAV ["Salis children"]
         FLEET["Fleet"]:::sal_child
         COMP["Compliance and Rentals"]:::sal_child
     end
 
-    LOG["Logistay<br/>workforce · telecom"]:::log_ws
-
-    LP --> MW
-    LP --> HAB
-    LP --> SALIS
-    LP --> LOG
-    LP -. "System Manager" .-> BE
+    LOG["Telecom Control<br/>Logistay Desk page"]:::log_ws
 
     HAB --> HOUSING
     HAB --> SAFETY
     HAB --> CUSTODY
     HAB --> COSTS
 
-    SALIS --> MASAR
     SALIS --> FLEET
     SALIS --> COMP
 
-    classDef universal  fill:#1e3a8a,stroke:#1e3a8a,color:#fff;
-    classDef launch     fill:#5b21b6,stroke:#5b21b6,color:#fff;
     classDef restricted fill:#f1f5f9,stroke:#475569,color:#334155,stroke-dasharray:4 3;
     classDef hub_ws     fill:#1d4ed8,stroke:#1d4ed8,color:#fff;
     classDef ws         fill:#dbeafe,stroke:#1e3a8a,color:#1e3a8a;
@@ -215,7 +203,7 @@ graph LR
     classDef log_ws     fill:#9a3412,stroke:#9a3412,color:#fff;
 ```
 
-Launchpad connects the operating areas. My Work remains personal, while Backend Engines is limited to System Manager because its ledgers and snapshots are system-written and read-only.
+Nine public workspaces ship as `is_standard` JSON under `apex/habitat/workspace/` and `apex/salis/workspace/`: two module roots — Habitat with four children and Salis with two — plus **Backend Engines**, a hidden root limited to System Manager because its ledgers and snapshots are system-written and read-only. The personal **Action Inbox** is a shortcut on both module roots, not a workspace of its own. Logistay ships no workspace; it surfaces through its **Telecom Control** Desk page. See [Workspace design](docs/WORKSPACE-DESIGN.md) for the layout method these workspaces follow.
 
 ## Backend surfaces
 
@@ -273,13 +261,47 @@ Finance and salary-deduction switches are disabled by default. Enabling them doe
 Modern interfaces use a conventional source-build-route-test separation:
 
 ```text
-frontend/      Vue and Vite source applications
-apex/public/   compiled browser assets
-apex/www/      Frappe routes and authentication bootstrap
+frontend/      Vue and Vite source applications — one npm workspace
+apex/public/   compiled browser assets — one committed bundle per portal
+apex/www/      Frappe routes, page shells, and the authentication bootstrap
 e2e/           browser-level tests
 ```
 
-Desk users work through native workspaces, forms, reports, and operator pages. Mobile users receive smaller role-focused interfaces, including a shared worker and driver PWA with route-specific access.
+`frontend/` is a single npm workspace of seven packages — `fleet`, `fleet_os`, `frontend_shared`, `housing`, `route_supervisor`, `safety`, and `worker`, with the driver screens folded into `worker`. `frontend/package.json` is the only manifest that declares dependencies and `frontend/package-lock.json` the only lockfile, so a framework version cannot drift between portals. `npm run build` rebuilds all six committed bundles under `apex/public/`. The shared runtime, the Vite config factory, and the portal `src/` skeleton are documented in [`frontend/frontend_shared/README.md`](frontend/frontend_shared/README.md).
+
+### Served portal routes
+
+Apex serves **seven** portal routes. Each one is a single `apex/www/<route>.html` Jinja shell plus the matching controller that owns its authentication path — routing is pure `www/` file convention, with no `website_route_rules` or `page_renderer` indirection.
+
+| Route | Audience | Authentication path | Controller · bundle |
+|---|---|---|---|
+| `/driver` | Salis drivers, who are not Frappe users | Guest-accessible. The personal `?d=<token>` link is charset-validated, throttled, parked in an httpOnly cookie, then stripped from the URL by a redirect; every endpoint re-resolves the driver from that token server-side. | `apex/www/driver.py:34-49` · `worker_portal` |
+| `/masar` | Housed and transported workers, who are not Frappe users | Guest-accessible. The same personal-token pattern on `?w=<token>`; every query is scoped to the one Employee the token resolves to. | `apex/www/masar.py:38-57` · `worker_portal` |
+| `/fleet` | Any logged-in employee — their own vehicle, fuel request, and recent trips | Guests are redirected to login; after that there is **no role gate** and every signed-in user may open the page. Data is scoped per user on the server by `apex.salis.api.fleet_employee` (4 endpoints). | `apex/www/fleet.py:45,50` · `fleet_portal` |
+| `/fleet-os` | Fleet supervisors — the whole scoped fleet board | Guest redirect, then `FLEET_ROLES`: System Manager, Fleet Manager, Fleet Project Manager, Fleet Supervisor. Backed by `apex.salis.api.fleet_os` (13 endpoints), each re-checking `Salis Vehicle` permission server-side. | `apex/www/fleet_os.py:38,42` · `fleet_os_portal` |
+| `/housing` | Accommodation operators — the periodic housing inventory count and the three-exit facility-asset delivery clearance | Guest redirect, then `HOUSING_ROLES`, the union of the two flows' write roles: System Manager, Accommodation Manager, Resident Supervisor, Procurement Supervisor. A Resident Supervisor is further confined to their own buildings. | `apex/www/housing.py:54,57` · `housing_portal` |
+| `/safety` | Safety supervisors — pick a building, work the checklist cadences that are due, submit one round per cadence | Guest redirect, then `SAFETY_ROLES`: System Manager, Accommodation Manager, Resident Supervisor. | `apex/www/safety.py:46,49` · `safety_portal` |
+| `/masar-supervisor` | Route supervisors who dispatch buses | Guest redirect, then `SUPERVISOR_ROLES`: System Manager, Fleet Manager, Fleet Project Manager, Fleet Supervisor. Every read is additionally row-scoped to the caller's own route plans, so the role gate is a coarse door and not the data boundary. | `apex/www/masar_supervisor.py:44,47` · `route_supervisor_portal` |
+
+`/fleet` and `/fleet-os` are **not** duplicates. The first is the employee self-service page, open to anyone signed in; the second is the supervisor board behind a four-role gate. They share no endpoint, and neither covers the other's capability.
+
+On a gated route, a logged-in user without the required role gets a friendly access page rather than a raw 403. The role gate is only the door: every endpoint re-checks document permission and row scope on the server.
+
+`apex/www/housing_count.py` is not a route. It ships no template and exists only to redirect `/housing-count` to `/housing#/count`.
+
+Desk users work through native workspaces, forms, reports, and operator pages. Mobile users receive smaller role-focused interfaces, including a shared worker and driver PWA reached by personal token.
+
+### Keeping the route table honest
+
+The table above is a published description of a directory that changes whenever a portal is added, split, or retired. Run this from the repository root after any change under `apex/www/`. It prints nothing and exits `0` only when the shells on disk and the routes documented here are the same set:
+
+```bash
+diff \
+  <(ls apex/www/*.html | sed 's|.*/||; s|\.html$||' | sort) \
+  <(grep -oE '^\| `/[a-z-]+`' README.md | tr -d '|` /' | sort)
+```
+
+A line in the left column and not the right means a served route nobody documented. A line in the right column and not the left means the table promises a route that no longer exists.
 
 ## Security and integrity
 
