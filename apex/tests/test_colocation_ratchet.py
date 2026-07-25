@@ -54,29 +54,22 @@ _BASELINE = frozenset(
         "test_fleet_alert_notifications.py",
         "test_fleet_number_cards.py",
         "test_fleet_ops_render.py",
-        "test_fleet_page_access_gate.py",
         "test_fresh_install_defaults.py",
         "test_front_desk_rate_limit.py",
         "test_habitat_expiry_notifications.py",
-        "test_housing_count_page_access_gate.py",
         "test_housing_lifecycle.py",
         "test_http_enforcement.py",
         "test_internal_auditor_docperms.py",
         "test_log_clearing.py",
-        "test_masar_1b.py",
-        "test_masar_supervisor_page_access_gate.py",
         "test_no_cross_test_imports.py",
         "test_onboarding_steps.py",
         "test_permission_parity.py",
-        "test_portal_csrf_bootstrap.py",
         "test_portal_token_security.py",
-        "test_portal_xss.py",
         "test_qa_probe_systems.py",
         "test_qa_probe_transactions.py",
         "test_release_hygiene.py",
         "test_report_scope.py",
         "test_request_trip_notifications.py",
-        "test_safety_page_access_gate.py",
         "test_schema_integrity.py",
         "test_setup_roles.py",
         "test_sql_interpolation_guard.py",
@@ -99,10 +92,6 @@ _CENTRAL_BY_NECESSITY = frozenset(
         # Scans every workspace JSON in the app for a parent chain that hides a
         # persona's only surface — no single module owns the invariant.
         "test_workspace_sidebar_reachability.py",
-        # Scans the whole apex/www tree for external CDN hosts. DRAINABLE since
-        # A-152 made apex/www a package; kept central only until a follow-up
-        # moves it, and it may never be cited as an importability blocker.
-        "test_www_no_external_cdn_assets.py",
         # Asserts app-wide that no module still references the retired deduction
         # acknowledgment surface and that exactly one module raises an advance.
         "test_native_recovery_surface.py",
@@ -219,9 +208,19 @@ class TestColocationRatchet(unittest.TestCase):
         )
 
     def test_guard_actually_detects(self):
-        """Guard-of-the-guard: prove the scan is not silently empty."""
+        """Guard-of-the-guard: prove the scan is not silently empty.
+
+        [#a131g1] The central floor was 50, calibrated when the directory still
+        held ~190 modules. A-131 drained it to the app-wide guards, so that
+        number had become an assertion about the OLD inventory size rather than
+        about the scan working — it fails on a successful drain. The floor is
+        now 10, which still catches a scan that silently returns nothing (a
+        broken glob, a moved _TESTS_DIR) without re-encoding an inventory count
+        that this very card exists to shrink. The colocated floor keeps its 50:
+        that side only grows.
+        """
         central = _central_tests()
-        self.assertGreater(len(central), 50, "central scan returned implausibly few files")
+        self.assertGreater(len(central), 10, "central scan returned implausibly few files")
         self.assertGreater(
             len(_colocated_tests()), 50, "colocated scan returned implausibly few files"
         )
