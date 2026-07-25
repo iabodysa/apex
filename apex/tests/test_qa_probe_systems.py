@@ -80,7 +80,7 @@ class TestMaintenanceSafety(QASysBase):
         from apex.habitat.doctype.scheduled_task_instance.scheduled_task_instance import (
             start_task, mark_completed,
         )
-        # Template is building-independent (T-552); the STI lifecycle needs no building.
+        # Template is building-independent; the STI lifecycle needs no building.
         tmpl = frappe.get_doc({
             "doctype": "Scheduled Task Template", "template_name": "T " + _hash(),
             "task_type": "Safety", "frequency": "Monthly", "is_active": 1,

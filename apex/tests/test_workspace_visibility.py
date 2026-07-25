@@ -176,7 +176,9 @@ class TestWorkspaceOperationalLinkSeparation(unittest.TestCase):
     REMOVED_LINKS = {
         "salis/workspace/fleet/fleet.json": {"Driver Attendance", "Fuel Daily Log"},
         "habitat/workspace/safety/safety.json": {"Scheduled Task Instance"},
-        "salis/workspace/masar/masar.json": {"Trip Start Log", "Trip Boarding Event"},
+        # A-111 folded the Masar child workspace into the Salis root, which now carries
+        # its transport navigation — so the same engine records stay out of Salis.
+        "salis/workspace/salis/salis.json": {"Trip Start Log", "Trip Boarding Event"},
     }
 
     def test_daily_workspaces_exclude_portal_and_engine_records(self):

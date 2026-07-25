@@ -1,0 +1,15 @@
+{
+ "doctype": "Number Card",
+ "name": "Active Telecom Contracts",
+ "label": "Active Contracts",
+ "document_type": "Telecom Contract",
+ "function": "Count",
+ "is_public": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Logistay",
+ "filters_json": "[[\"Telecom Contract\", \"status\", \"=\", \"Active\"]]",
+ "is_standard": 1,
+ "modified": "2026-07-25 04:51:30.324102"
+}

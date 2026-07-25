@@ -1,0 +1,72 @@
+{
+ "doctype": "DocType",
+ "name": "Telecom Billing Document",
+ "module": "Logistay",
+ "custom": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "billing_period",
+  "document_type",
+  "document_name",
+  "amount",
+  "currency",
+  "created_on"
+ ],
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "billing_period",
+   "fieldtype": "Data",
+   "label": "Billing Period",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "document_type",
+   "fieldtype": "Select",
+   "label": "Document Type",
+   "options": "Material Request\nPayment Entry",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "document_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Document",
+   "options": "document_type",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "options": "currency",
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "created_on",
+   "fieldtype": "Datetime",
+   "label": "Created On",
+   "read_only": 1
+  }
+ ],
+ "permissions": [],
+ "modified": "2026-07-25 04:51:30.324102"
+}

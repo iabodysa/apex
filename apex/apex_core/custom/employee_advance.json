@@ -1,0 +1,50 @@
+{
+ "custom_fields": [
+  {
+   "dt": "Employee Advance",
+   "fieldname": "custom_source_section",
+   "label": "Operational Source",
+   "fieldtype": "Section Break",
+   "insert_after": "repay_unclaimed_amount_from_salary",
+   "collapsible": 1,
+   "translatable": 0
+  },
+  {
+   "dt": "Employee Advance",
+   "fieldname": "custom_source_doctype",
+   "label": "Source Document Type",
+   "description": "Operational document that caused this recovery, such as a Vehicle Incident. Set by the system; one source document raises at most one advance.",
+   "fieldtype": "Link",
+   "options": "DocType",
+   "insert_after": "custom_source_section",
+   "read_only": 1,
+   "no_copy": 1,
+   "in_standard_filter": 1,
+   "translatable": 0
+  },
+  {
+   "dt": "Employee Advance",
+   "fieldname": "custom_source_column",
+   "fieldtype": "Column Break",
+   "insert_after": "custom_source_doctype",
+   "translatable": 0
+  },
+  {
+   "dt": "Employee Advance",
+   "fieldname": "custom_source_document",
+   "label": "Source Document",
+   "description": "The originating operational document this advance recovers.",
+   "fieldtype": "Dynamic Link",
+   "options": "custom_source_doctype",
+   "insert_after": "custom_source_column",
+   "read_only": 1,
+   "no_copy": 1,
+   "search_index": 1,
+   "translatable": 0
+  }
+ ],
+ "custom_perms": [],
+ "doctype": "Employee Advance",
+ "property_setters": [],
+ "sync_on_migrate": 1
+}

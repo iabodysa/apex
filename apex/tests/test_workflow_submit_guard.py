@@ -82,7 +82,7 @@ class TestWorkflowSubmitGuard(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # ---- fixtures -------------------------------------------------------------
+    # Fixtures
 
     @staticmethod
     def _project(name):
@@ -192,7 +192,7 @@ class TestWorkflowSubmitGuard(FrappeTestCase):
             doc.submit()
         self.assertEqual(frappe.db.get_value(doctype, name, "docstatus"), 0)
 
-    # ---- NEGATIVE: force-jump bypass blocked ---------------------------------
+    # NEGATIVE: force-jump bypass blocked
 
     def test_bare_submit_salis_payment_request_blocked(self):
         # Draft has no authorized transition to a submit state (Draft -> Pending Finance
@@ -229,7 +229,7 @@ class TestWorkflowSubmitGuard(FrappeTestCase):
         cda = self._damage_assessment()
         self._assert_bare_submit_blocked("Custody Damage Assessment", cda.name)
 
-    # ---- NEGATIVE: self-approval blocked (has_approval_access) ----------------
+    # NEGATIVE: self-approval blocked (has_approval_access)
 
     def test_owner_self_approval_custody_damage_assessment_blocked(self):
         """The Approve transition (Pending Approval -> Approved) sets
@@ -249,7 +249,7 @@ class TestWorkflowSubmitGuard(FrappeTestCase):
             frappe.db.get_value("Custody Damage Assessment", cda.name, "docstatus"), 0
         )
 
-    # ---- POSITIVE: authorized approver still submits --------------------------
+    # POSITIVE: authorized approver still submits
 
     def test_apply_workflow_salis_payment_request_submits(self):
         pr = self._payment_request()

@@ -5,7 +5,7 @@ unrelated employee data leaking into rows or the detail drawer."""
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex.sim_operations.api import telecom_control
+from apex.logistay.api import telecom_control
 from apex.tests import factories
 
 

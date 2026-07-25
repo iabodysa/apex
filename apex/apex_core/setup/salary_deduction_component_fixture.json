@@ -13,7 +13,7 @@
       "depends_on_payment_days": 0,
       "do_not_include_in_total": 0,
       "statistical_component": 0,
-      "description": "Operational deduction (damage / rent / fuel / custody) governed by the Salary Deduction Policy. Disabled by default. Enable only after the policy's global switch and the relevant type rule are activated and a worker Employee Deduction Acknowledgment (consent) is on file, within the KSA Labor Law caps."
+      "description": "Operational deduction (damage / rent / fuel / custody) governed by the Salary Deduction Policy. Disabled by default. Enable only after the policy's global switch and the relevant type rule are activated and the worker's signed consent is on file on the source document, within the KSA Labor Law caps."
     }
   ]
 }

@@ -11,7 +11,7 @@ delete a SIM Operations record.
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex.sim_operations import permissions
+from apex.logistay import permissions
 from apex.tests import factories
 from apex.tests._helpers import _user
 
@@ -50,7 +50,7 @@ class TestSIMOperationsScoping(FrappeTestCase):
     def _doc(self, company):
         return frappe._dict({"doctype": "SIM Card", "company": company})
 
-    # --- has_permission -------------------------------------------------------
+    # has_permission
 
     def test_scoped_user_allowed_in_company(self):
         self.assertIsNone(
@@ -72,7 +72,7 @@ class TestSIMOperationsScoping(FrappeTestCase):
             permissions.company_scoped_has_permission(self._doc(self.company_b), "read", user=self.oversight)
         )
 
-    # --- permission_query_conditions ------------------------------------------
+    # permission_query_conditions
 
     def test_query_fragment_scopes_to_company(self):
         fragment = permissions.telecom_contract_query(self.scoped)
@@ -85,7 +85,7 @@ class TestSIMOperationsScoping(FrappeTestCase):
     def test_query_fragment_blocks_scoped_user_without_permission(self):
         self.assertEqual(permissions.sim_custody_assignment_query(self.no_perm), "1=0")
 
-    # --- deletion authority ---------------------------------------------------
+    # Deletion authority
 
     def test_no_delete_for_sim_operations_user(self):
         for dt in ("Telecom Contract", "SIM Card", "SIM Custody Assignment"):

@@ -15,8 +15,10 @@ module is now a guarded no-op). There is no consolidate_salis_roles patch — th
 earlier reference to one was stale; re-pointing any existing user off an old role
 name (on a legacy site that still has them) is an owner decision, not automated.
 
-This module is intentionally retained as a guarded no-op so the entry in
-patches.txt keeps resolving on already-installed sites; it seeds nothing.
+DE-REGISTERED from patches.txt (2026-07-25): execute() is an unconditional
+`return`, so running it and not running it are indistinguishable. The module is
+kept on disk because ``salis/setup.py`` imports it in the after_install seed
+chain and ``tests/test_release_hygiene.py`` reads this file for OPERATIONS_ROLES.
 """
 
 import frappe  # noqa: F401  (kept for parity with the seed module contract)

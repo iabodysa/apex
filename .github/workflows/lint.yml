@@ -6,6 +6,14 @@ on:
   pull_request:
     branches: [apex]
 
+# Stale ar.csv rows currently kept on purpose: 115 are live strings the extractor
+# cannot see (HTML fragments, >180 chars, framework labels this app overrides), 7
+# live in the portal SPAs, 4 in docs, 9 come from frappe/erpnext/hrms. They were
+# each cross-checked against the whole tree; the 731 that were provably dead are
+# already deleted. Lower this only after re-proving the rows have no live source.
+env:
+  STALE_BASELINE: 136
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -27,3 +35,20 @@ jobs:
 
       - name: Run ruff
         run: ruff check apex/
+
+      # Both gates below are stdlib-only Python: they enforce standards the local
+      # toolbox already checks, but that toolbox is not installable on a runner, so
+      # without an in-repo copy the standards silently rot between manual sweeps.
+      - name: Comment policy (why-not-what, no banners, no task ids)
+        run: python3 scripts/comment_audit.py apex
+
+      - name: Arabic translation coverage
+        # MISSING is a hard failure: an untranslated string ships as raw English to
+        # an Arabic user. STALE is capped at a baseline instead of zero — see the
+        # note on STALE_BASELINE above for why zero is not reachable or desirable.
+        run: |
+          python3 scripts/check_translations.py \
+            --package apex \
+            --lang ar \
+            --max-missing 0 \
+            --max-stale "$STALE_BASELINE"

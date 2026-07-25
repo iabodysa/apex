@@ -1,0 +1,318 @@
+{
+ "doctype": "DocType",
+ "name": "SIM Card",
+ "module": "Logistay",
+ "custom": 0,
+ "istable": 0,
+ "engine": "InnoDB",
+ "is_submittable": 0,
+ "track_changes": 1,
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "search_fields": "mobile_number, status, telecom_contract",
+ "title_field": "mobile_number",
+ "description": "A SIM Card asset belonging to one Telecom Contract. Its mobile number stays editable in place; custody state is projected from the latest submitted SIM Custody Assignment.",
+ "field_order": [
+  "overview_tab",
+  "identity_sec",
+  "company",
+  "telecom_contract",
+  "supplier",
+  "identity_col",
+  "mobile_number",
+  "iccid",
+  "plan_name",
+  "custody_sec",
+  "status",
+  "current_custodian_type",
+  "current_custodian_employee",
+  "current_project",
+  "custody_col",
+  "current_cost_center",
+  "current_assignment",
+  "assigned_on",
+  "keys_sec",
+  "mobile_number_normalized",
+  "iccid_normalized",
+  "notes_sec",
+  "notes",
+  "system_sec",
+  "naming_series"
+ ],
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "overview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "identity_sec",
+   "fieldtype": "Section Break",
+   "label": "Identity",
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "search_index": 1,
+   "fetch_from": "telecom_contract.company",
+   "fetch_if_empty": 1,
+   "description": "Owning company. Must match the contract's company; scopes visibility.",
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "telecom_contract",
+   "fieldtype": "Link",
+   "label": "Telecom Contract",
+   "options": "Telecom Contract",
+   "reqd": 1,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "ignore_user_permissions": 1,
+   "read_only": 1,
+   "fetch_from": "telecom_contract.supplier",
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "identity_col",
+   "fieldtype": "Column Break",
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number",
+   "reqd": 1,
+   "search_index": 1,
+   "in_list_view": 1,
+   "description": "Editable in place. Uniqueness is enforced on a normalized form, so layout differences do not create duplicates.",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "iccid",
+   "fieldtype": "Data",
+   "label": "ICCID",
+   "description": "Optional integrated-circuit card id. Unique when present.",
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "plan_name",
+   "fieldtype": "Data",
+   "label": "Plan",
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_sec",
+   "fieldtype": "Section Break",
+   "label": "Custody & Status",
+   "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Available\nAssigned\nSuspended\nLost\nTerminated",
+   "default": "Available",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Projected from the custody engine; not edited directly.",
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "current_custodian_type",
+   "fieldtype": "Select",
+   "label": "Custodian Type",
+   "options": "Unassigned\nEmployee\nProject",
+   "default": "Unassigned",
+   "read_only": 1,
+   "idx": 12
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "current_custodian_employee",
+   "fieldtype": "Link",
+   "label": "Current Employee",
+   "options": "Employee",
+   "ignore_user_permissions": 1,
+   "read_only": 1,
+   "idx": 13
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "current_project",
+   "fieldtype": "Link",
+   "label": "Current Project",
+   "options": "Project",
+   "ignore_user_permissions": 1,
+   "read_only": 1,
+   "idx": 14
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_col",
+   "fieldtype": "Column Break",
+   "idx": 15
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "current_cost_center",
+   "fieldtype": "Link",
+   "label": "Current Cost Center",
+   "options": "Cost Center",
+   "ignore_user_permissions": 1,
+   "read_only": 1,
+   "idx": 16
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "current_assignment",
+   "fieldtype": "Link",
+   "label": "Current Assignment",
+   "options": "SIM Custody Assignment",
+   "read_only": 1,
+   "idx": 17
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "assigned_on",
+   "fieldtype": "Date",
+   "label": "Assigned On",
+   "read_only": 1,
+   "idx": 18
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "keys_sec",
+   "fieldtype": "Section Break",
+   "label": "Normalized Keys",
+   "collapsible": 1,
+   "idx": 19
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "mobile_number_normalized",
+   "fieldtype": "Data",
+   "label": "Mobile Number (Normalized)",
+   "read_only": 1,
+   "hidden": 1,
+   "no_copy": 1,
+   "unique": 1,
+   "idx": 20
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "iccid_normalized",
+   "fieldtype": "Data",
+   "label": "ICCID (Normalized)",
+   "read_only": 1,
+   "hidden": 1,
+   "no_copy": 1,
+   "unique": 1,
+   "search_index": 1,
+   "idx": 21
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "notes_sec",
+   "fieldtype": "Section Break",
+   "label": "Notes",
+   "collapsible": 1,
+   "idx": 22
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "idx": 23
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "system_sec",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1,
+   "idx": 24
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "SIM-.YYYY.-.#####",
+   "default": "SIM-.YYYY.-.#####",
+   "reqd": 1,
+   "hidden": 1,
+   "idx": 25
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "SIM Operations User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Finance Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Internal Auditor",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "idx": 4
+  }
+ ],
+ "modified": "2026-07-25 04:51:30.324102"
+}

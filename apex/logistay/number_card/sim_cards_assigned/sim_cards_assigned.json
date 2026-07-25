@@ -1,0 +1,15 @@
+{
+ "doctype": "Number Card",
+ "name": "SIM Cards Assigned",
+ "label": "Assigned SIMs",
+ "document_type": "SIM Card",
+ "function": "Count",
+ "is_public": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Logistay",
+ "filters_json": "[[\"SIM Card\", \"status\", \"=\", \"Assigned\"]]",
+ "is_standard": 1,
+ "modified": "2026-07-25 04:51:30.324102"
+}

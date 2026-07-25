@@ -2,15 +2,8 @@
   "name": "frontend_shared",
   "private": true,
   "type": "module",
-  "description": "Dev-only test harness for the shared portal components/runtime. NOT a portal: the five *_portal builds import these source files via the @shared alias and never install this package. Only `npm install && npm test` HERE (or the portal-tests CI job) uses these devDependencies; the committed portal bundles and bundle-guard are unaffected.",
+  "description": "Dev-only test harness for the shared portal components/runtime. NOT a portal: the six *_portal builds import these source files via the @shared alias and emit no bundle from here. Its test deps (vitest, jsdom, @vue/test-utils) are declared once in the workspace root frontend/package.json, like every other frontend dep. Run `npm ci` at frontend/, then `npm test -w frontend_shared`.",
   "scripts": {
-    "test": "vitest run && node --test driver-storage.security.test.mjs driver-tickets-pagination.security.test.mjs sw.security.test.mjs"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.0",
-    "@vue/test-utils": "^2.4.0",
-    "jsdom": "^24.0.0",
-    "vitest": "^1.6.0",
-    "vue": "^3.4.0"
+    "test": "vitest run && node --test driver-storage.security.test.mjs driver-tickets-pagination.security.test.mjs sw.security.test.mjs && node sw.generate.js --check"
   }
 }

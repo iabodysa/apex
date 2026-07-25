@@ -118,30 +118,18 @@ jobs:
           fi
           echo "no internal/experimental files tracked"
 
+      # Dependency-free node unit tests for the worker/Masar pure helpers.
       - name: Worker-portal phone normaliser unit test
         run: node frontend/worker/phone.test.mjs
 
-  spa-lockfiles:
-    # Validate each SPA portal's committed npm lockfile is in sync with its
-    # package.json. `npm ci` fails if the two disagree, so this gate keeps the
-    # frozen lockfiles honest and reproducible. Build is intentionally NOT run
-    # here (too flaky for CI).
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        portal: [fleet, worker, safety]
-    steps:
-      - uses: actions/checkout@v5
+      - name: Worker-portal QR colour unit test
+        run: node frontend/worker/qrColor.test.mjs
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install from frozen lockfile
-        working-directory: frontend/${{ matrix.portal }}
-        run: npm ci
+  # The former `spa-lockfiles` matrix (one `npm ci` per portal lockfile) is gone:
+  # frontend/ is a single npm workspace with one frontend/package-lock.json, and the
+  # portal-bundles `bundle-guard` job already runs `npm ci` from that frozen lockfile
+  # before every portal build. Ownership of that lockfile is asserted by the
+  # portal-bundles `manifest-ownership` job.
 
   test:
     runs-on: ubuntu-latest

@@ -1,0 +1,24 @@
+{
+ "content": null,
+ "creation": "2026-07-22 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-07-25 04:51:30.324102",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "telecom-control",
+ "owner": "Administrator",
+ "page_name": "telecom-control",
+ "roles": [
+  {
+   "role": "SIM Operations User"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "standard": "Yes",
+ "system_page": 0,
+ "title": "Telecom Control"
+}

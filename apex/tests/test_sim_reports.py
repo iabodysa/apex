@@ -5,17 +5,17 @@ well-formed (columns, rows); the assigned-suspended digest runs cleanly."""
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex.sim_operations.report.current_sim_custody import current_sim_custody
-from apex.sim_operations.report.employees_holding_multiple_sims import (
+from apex.logistay.report.current_sim_custody import current_sim_custody
+from apex.logistay.report.employees_holding_multiple_sims import (
     employees_holding_multiple_sims,
 )
-from apex.sim_operations.report.sim_exceptions import sim_exceptions
-from apex.sim_operations.report.sims_by_contract_and_supplier import (
+from apex.logistay.report.sim_exceptions import sim_exceptions
+from apex.logistay.report.sims_by_contract_and_supplier import (
     sims_by_contract_and_supplier,
 )
-from apex.sim_operations.report.telecom_contract_expiry import telecom_contract_expiry
-from apex.sim_operations.report.telecom_cost_allocation import telecom_cost_allocation
-from apex.sim_operations.tasks import sim_alerts
+from apex.logistay.report.telecom_contract_expiry import telecom_contract_expiry
+from apex.logistay.report.telecom_cost_allocation import telecom_cost_allocation
+from apex.logistay.tasks import sim_alerts
 from apex.tests import factories
 
 ALL_REPORTS = [

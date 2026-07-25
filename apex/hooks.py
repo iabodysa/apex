@@ -258,8 +258,8 @@ scheduler_events = {
         "apex.salis.tasks.workshop.workshop_overstay_watch",
         "apex.salis.tasks.alerts.reconcile_operations_alerts",
         "apex.salis.tasks.alerts.daily_open_alerts_digest",
-        # [#simwatch] SIM Operations — assigned suspended / lost SIM digest.
-        "apex.sim_operations.tasks.sim_alerts.assigned_suspended_or_lost_watch",
+        # [#simwatch] Logistay SIM telecom — assigned suspended / lost SIM digest.
+        "apex.logistay.tasks.sim_alerts.assigned_suspended_or_lost_watch",
         "apex.salis.fuel_engine.accrue_fuel_consumption",
         "apex.salis.rental_engine.daily_rental_accrual",
         # [#ptjnq1]
@@ -277,6 +277,10 @@ scheduler_events = {
         "apex.salis.fuel_engine.monthly_fuel_reconciliation",
         # [#payd2f]
         "apex.salis.rental_engine.monthly_rental_reconciliation",
+        # [#a102mr] A-102 — queue this pay period's installment against every open
+        # employee cost-recovery advance. No-op until the Salary Deduction Policy
+        # Damage rule is activated (shipped OFF), and duplicate-safe per period.
+        "apex.apex_core.utils.employee_recovery.monthly_employee_recovery_run",
     ],
     # [#6g8f3l]
     "cron": {
@@ -361,10 +365,10 @@ permission_query_conditions = {
     "Movement Cost Transfer": "apex.salis.permissions.movement_cost_transfer_query",
     # [#a38tvk]
     "Operations Alert": "apex.salis.permissions.operations_alert_query",
-    # [#sim9q1] SIM Operations — company-scoped row security.
-    "Telecom Contract": "apex.sim_operations.permissions.telecom_contract_query",
-    "SIM Card": "apex.sim_operations.permissions.sim_card_query",
-    "SIM Custody Assignment": "apex.sim_operations.permissions.sim_custody_assignment_query",
+    # [#sim9q1] Logistay SIM telecom — company-scoped row security.
+    "Telecom Contract": "apex.logistay.permissions.telecom_contract_query",
+    "SIM Card": "apex.logistay.permissions.sim_card_query",
+    "SIM Custody Assignment": "apex.logistay.permissions.sim_custody_assignment_query",
 }
 
 has_permission = {
@@ -429,10 +433,10 @@ has_permission = {
     "Movement Cost Transfer": "apex.salis.permissions.movement_cost_transfer_has_permission",
     # [#dtq943]
     "Operations Alert": "apex.salis.permissions.operations_alert_has_permission",
-    # [#simhp1] SIM Operations — deny direct access to out-of-company SIM records.
-    "Telecom Contract": "apex.sim_operations.permissions.company_scoped_has_permission",
-    "SIM Card": "apex.sim_operations.permissions.company_scoped_has_permission",
-    "SIM Custody Assignment": "apex.sim_operations.permissions.company_scoped_has_permission",
+    # [#simhp1] Logistay SIM telecom — deny direct access to out-of-company SIM records.
+    "Telecom Contract": "apex.logistay.permissions.company_scoped_has_permission",
+    "SIM Card": "apex.logistay.permissions.company_scoped_has_permission",
+    "SIM Custody Assignment": "apex.logistay.permissions.company_scoped_has_permission",
 }
 
 # [#eo76cf]

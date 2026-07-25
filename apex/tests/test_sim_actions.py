@@ -6,7 +6,7 @@ history DocType."""
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex.sim_operations.api import sim_actions
+from apex.logistay.api import sim_actions
 from apex.tests import factories
 
 
