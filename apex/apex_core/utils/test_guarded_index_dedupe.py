@@ -18,7 +18,7 @@ helper instead of issuing raw ``ALTER TABLE`` that re-raises: a bad table state
 on a site where the patch has genuinely not run yet used to abort the entire
 ``bench migrate``. Failure must now log and continue.
 
-Run standalone:  python3 -m unittest apex.tests.test_guarded_index_dedupe -v
+Run standalone:  python3 -m unittest apex.apex_core.utils.test_guarded_index_dedupe -v
 """
 
 import re

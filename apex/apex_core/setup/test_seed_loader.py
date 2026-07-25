@@ -4,7 +4,7 @@
 The structural tests are pure (no site needed): they exercise ``load_specs``,
 which has no ``frappe`` dependency. (The legacy-seeder parity test was dropped in
 the seed consolidation (M-10/M-11) when the seeders it compared against were
-retired; the JSON shape is now guarded by tests/test_seed_parity_*.)
+retired; the JSON shape is now guarded by the sibling test_seed_parity_*.)
 """
 
 import json
