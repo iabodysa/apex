@@ -136,17 +136,19 @@ Portal shortcuts that ship on a workspace today:
 
 | Workspace | Shortcut label | URL | Portal it opens |
 |---|---|---|---|
-| Fleet | `Fleet Portal` | `/fleet` | Employee self-service page |
+| Fleet | `Fleet Portal` | `/fleet-os` | Fleet OS supervisor board |
 | Housing | `Housing Portal` | `/housing` | Housing operator portal |
 | Housing | `Inventory Count` | `/housing-count` | Redirect into the Housing portal's count view |
 | Safety | `Safety Checklist` | `/safety` | Safety operator portal |
 
-> **Known gap.** No workspace links `/fleet-os` or `/masar-supervisor`; both are
-> reachable only from the `/apps` selector or a typed URL, and `/masar-supervisor`
-> has no `/apps` tile either. The **Fleet** workspace shortcut labelled
-> `Fleet Portal` points at `/fleet`, which since the portal split is the *employee*
-> self-service page — a Fleet Supervisor clicking it lands on "my vehicle", not on
-> their board at `/fleet-os`.
+The **Fleet** workspace is role-gated to the fleet team, so its portal shortcut
+targets the supervisor board at `/fleet-os` rather than the employee page at
+`/fleet`. The employee page needs no workspace shortcut: it is open to every
+signed-in user and is reached from the `My Fleet` tile on the `/apps` selector.
+
+> **Known gap.** No workspace links `/masar-supervisor`. Route supervisors reach
+> it from its `Masar Supervisor` tile on the `/apps` selector or a typed URL. A
+> Quick Actions shortcut on a movement workspace is the missing piece.
 
 ## 4. How a user lands on the right workspace
 

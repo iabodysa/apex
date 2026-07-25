@@ -271,23 +271,25 @@ e2e/           browser-level tests
 
 ### Served portal routes
 
-Apex serves **seven** portal routes. Each one is a single `apex/www/<route>.html` Jinja shell plus the matching controller that owns its authentication path — routing is pure `www/` file convention, with no `website_route_rules` or `page_renderer` indirection.
+Apex serves **seven** portal routes. Each one is a single `apex/www/<route>.html` Jinja shell plus the matching controller that owns its authentication path — routing is pure `www/` file convention, with no `website_route_rules` or `page_renderer` indirection. Controllers are cited by module rather than by line, so ordinary edits inside a controller cannot silently outdate this table.
 
 | Route | Audience | Authentication path | Controller · bundle |
 |---|---|---|---|
-| `/driver` | Salis drivers, who are not Frappe users | Guest-accessible. The personal `?d=<token>` link is charset-validated, throttled, parked in an httpOnly cookie, then stripped from the URL by a redirect; every endpoint re-resolves the driver from that token server-side. | `apex/www/driver.py:34-49` · `worker_portal` |
-| `/masar` | Housed and transported workers, who are not Frappe users | Guest-accessible. The same personal-token pattern on `?w=<token>`; every query is scoped to the one Employee the token resolves to. | `apex/www/masar.py:38-57` · `worker_portal` |
-| `/fleet` | Any logged-in employee — their own vehicle, fuel request, and recent trips | Guests are redirected to login; after that there is **no role gate** and every signed-in user may open the page. Data is scoped per user on the server by `apex.salis.api.fleet_employee` (4 endpoints). | `apex/www/fleet.py:45,50` · `fleet_portal` |
-| `/fleet-os` | Fleet supervisors — the whole scoped fleet board | Guest redirect, then `FLEET_ROLES`: System Manager, Fleet Manager, Fleet Project Manager, Fleet Supervisor. Backed by `apex.salis.api.fleet_os` (13 endpoints), each re-checking `Salis Vehicle` permission server-side. | `apex/www/fleet_os.py:38,42` · `fleet_os_portal` |
-| `/housing` | Accommodation operators — the periodic housing inventory count and the three-exit facility-asset delivery clearance | Guest redirect, then `HOUSING_ROLES`, the union of the two flows' write roles: System Manager, Accommodation Manager, Resident Supervisor, Procurement Supervisor. A Resident Supervisor is further confined to their own buildings. | `apex/www/housing.py:54,57` · `housing_portal` |
-| `/safety` | Safety supervisors — pick a building, work the checklist cadences that are due, submit one round per cadence | Guest redirect, then `SAFETY_ROLES`: System Manager, Accommodation Manager, Resident Supervisor. | `apex/www/safety.py:46,49` · `safety_portal` |
-| `/masar-supervisor` | Route supervisors who dispatch buses | Guest redirect, then `SUPERVISOR_ROLES`: System Manager, Fleet Manager, Fleet Project Manager, Fleet Supervisor. Every read is additionally row-scoped to the caller's own route plans, so the role gate is a coarse door and not the data boundary. | `apex/www/masar_supervisor.py:44,47` · `route_supervisor_portal` |
+| `/driver` | Salis drivers, who are not Frappe users | Guest-accessible. The personal `?d=<token>` link is charset-validated, throttled, parked in an httpOnly cookie, then stripped from the URL by a redirect; every endpoint re-resolves the driver from that token server-side. | `apex/www/driver.py` · `worker_portal` |
+| `/masar` | Housed and transported workers, who are not Frappe users | Guest-accessible. The same personal-token pattern on `?w=<token>`; every query is scoped to the one Employee the token resolves to. | `apex/www/masar.py` · `worker_portal` |
+| `/fleet` | Any logged-in employee — their own vehicle, fuel request, and recent trips | Guests are redirected to login; after that there is **no role gate** and every signed-in user may open the page. Data is scoped per user on the server by `apex.salis.api.fleet_employee` (4 endpoints). | `apex/www/fleet.py` · `fleet_portal` |
+| `/fleet-os` | Fleet supervisors — the whole scoped fleet board | Guest redirect, then `FLEET_ROLES`: System Manager, Fleet Manager, Fleet Project Manager, Fleet Supervisor. Backed by `apex.salis.api.fleet_os` (13 endpoints), each re-checking `Salis Vehicle` permission server-side. | `apex/www/fleet_os.py` · `fleet_os_portal` |
+| `/housing` | Accommodation operators — the periodic housing inventory count and the three-exit facility-asset delivery clearance | Guest redirect, then `HOUSING_ROLES`, the union of the two flows' write roles: System Manager, Accommodation Manager, Resident Supervisor, Procurement Supervisor. A Resident Supervisor is further confined to their own buildings. | `apex/www/housing.py` · `housing_portal` |
+| `/safety` | Safety supervisors — pick a building, work the checklist cadences that are due, submit one round per cadence | Guest redirect, then `SAFETY_ROLES`: System Manager, Accommodation Manager, Resident Supervisor. | `apex/www/safety.py` · `safety_portal` |
+| `/masar-supervisor` | Route supervisors who dispatch buses | Guest redirect, then `SUPERVISOR_ROLES`: System Manager, Fleet Manager, Fleet Project Manager, Fleet Supervisor. Every read is additionally row-scoped to the caller's own route plans, so the role gate is a coarse door and not the data boundary. | `apex/www/masar_supervisor.py` · `route_supervisor_portal` |
 
 `/fleet` and `/fleet-os` are **not** duplicates. The first is the employee self-service page, open to anyone signed in; the second is the supervisor board behind a four-role gate. They share no endpoint, and neither covers the other's capability.
 
 On a gated route, a logged-in user without the required role gets a friendly access page rather than a raw 403. The role gate is only the door: every endpoint re-checks document permission and row scope on the server.
 
 `apex/www/housing_count.py` is not a route. It ships no template and exists only to redirect `/housing-count` to `/housing#/count`.
+
+Each route also gets a tile on the Frappe `/apps` selector, declared in `add_to_apps_screen` (`apex/hooks.py`). The gated tiles reuse the page's own role set through a `has_apps_screen_access()` helper that sits next to it, so a tile can never be shown to a user the page would turn away.
 
 Desk users work through native workspaces, forms, reports, and operator pages. Mobile users receive smaller role-focused interfaces, including a shared worker and driver PWA reached by personal token.
 
