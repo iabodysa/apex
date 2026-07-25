@@ -471,7 +471,7 @@ _COPY_PASTE_BASELINE = frozenset(
                 ("tests/test_fuel_request_workflow.py", "_project"),
                 ("salis/api/test_operations_alert_actions.py", "_project"),
                 ("tests/test_report_scope.py", "_project"),
-                ("tests/test_salis_controls.py", "_project"),
+                ("salis/api/driver_portal/test_salis_controls.py", "_project"),
                 ("tests/test_salis_fleet_scope.py", "_project"),
                 ("tests/test_salis_payment_approval_scope.py", "_project"),
                 ("tests/test_salis_payment_request_workflow.py", "_project"),
@@ -490,7 +490,7 @@ _COPY_PASTE_BASELINE = frozenset(
                 ("tests/test_fuel_claim_workflow.py", "_vehicle"),
                 ("tests/test_fuel_exception_case_workflow.py", "_vehicle"),
                 ("tests/test_fuel_request_workflow.py", "_vehicle"),
-                ("tests/test_salis_controls.py", "_vehicle"),
+                ("salis/api/driver_portal/test_salis_controls.py", "_vehicle"),
                 ("tests/test_transport_request_workflow.py", "_vehicle"),
             }
         ),
