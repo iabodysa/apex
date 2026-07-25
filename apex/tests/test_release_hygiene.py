@@ -22,6 +22,7 @@ import glob
 import json
 import os
 import re
+import subprocess
 import sys
 import types
 import unittest
@@ -518,10 +519,29 @@ class TestNoArabicInSource(unittest.TestCase):
         return paths
 
     def _published_doc_files(self):
-        """Every file under docs/, plus README.md — no extension filter, so a
-        published page cannot dodge the scan by not being Markdown."""
-        paths = glob.glob(os.path.join(PUBLISHED_DOCS_DIR, "**", "*"), recursive=True)
-        return [p for p in paths if os.path.isfile(p)] + [PUBLISHED_README]
+        """Every TRACKED file under docs/, plus README.md — no extension filter, so
+        a published page cannot dodge the scan by not being Markdown.
+
+        Tracked, because "published" means what git ships. `docs/` also holds local
+        working notes that are gitignored and absent from a fresh checkout; judging
+        those makes the verdict depend on whose machine ran it, which is the exact
+        defect A-135 fixed in the comment gate.
+        """
+        listed = subprocess.run(
+            ["git", "-C", REPO_ROOT, "ls-files", "-z", "--", "docs"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if listed.returncode != 0:
+            # No git (an sdist / tarball): fall back to the whole tree rather than
+            # an empty set, so the scan degrades loud instead of silently passing.
+            paths = glob.glob(os.path.join(PUBLISHED_DOCS_DIR, "**", "*"), recursive=True)
+            return [p for p in paths if os.path.isfile(p)] + [PUBLISHED_README]
+        tracked = [
+            os.path.join(REPO_ROOT, rel) for rel in listed.stdout.split("\0") if rel
+        ]
+        return [p for p in tracked if os.path.isfile(p)] + [PUBLISHED_README]
 
     def test_scan_reaches_html_and_published_docs(self):
         # Non-vacuity: a broken glob would green the scan below by finding nothing.

@@ -16,17 +16,23 @@ from apex.apex_core.utils.changelog import get_changelog_feed
 
 
 class TestChangelogFeed(unittest.TestCase):
+    # Counts are derived from _RELEASES, never hard-coded: a literal would make
+    # every release edit this file, and the version that forgot would look like a
+    # feed bug rather than a stale assertion.
     def test_since_before_all_returns_full_feed_newest_first(self):
         items = get_changelog_feed("2000-01-01 00:00:00")
-        self.assertEqual(len(items), 7)
-        self.assertEqual(items[0]["creation"], "2026-07-25 05:00:00")
+        self.assertEqual(len(items), min(len(changelog._RELEASES), changelog._FEED_MAX))
+        newest = max(r["creation"] for r in changelog._RELEASES)
+        self.assertEqual(items[0]["creation"], newest)
         creations = [i["creation"] for i in items]
         self.assertEqual(creations, sorted(creations, reverse=True))
 
     def test_since_is_an_exclusive_lower_bound(self):
-        items = get_changelog_feed("2026-07-24 00:00:00")
-        self.assertEqual(len(items), 1)
-        self.assertEqual(items[0]["creation"], "2026-07-25 05:00:00")
+        since = "2026-07-24 00:00:00"
+        expected = [r for r in changelog._RELEASES if r["creation"] > since]
+        items = get_changelog_feed(since)
+        self.assertEqual(len(items), len(expected))
+        self.assertEqual(items[0]["creation"], max(r["creation"] for r in expected))
 
     def test_future_since_returns_empty(self):
         self.assertEqual(get_changelog_feed("2030-01-01 00:00:00"), [])

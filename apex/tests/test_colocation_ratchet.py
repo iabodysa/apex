@@ -267,6 +267,17 @@ _CENTRAL_BY_NECESSITY = frozenset(
         # Reconciles the hooks apps-screen tile list against the gate helpers spread
         # across apex/www; it spans hooks and five modules, so it owns no single one.
         "test_apps_screen_gate_wiring.py",
+        # Compares the served shells, the bundle-guard matrix and the e2e smoke list
+        # against each other; the invariant lives between them, not in any one.
+        "test_portal_route_coverage.py",
+        # Checks every role named in any workspace grant against every DocPerm in the
+        # app; the invariant spans both trees, so no single module owns it.
+        "test_workspace_role_docperm_guard.py",
+        # Ties the published workspace tables to the shipped workspace JSON; it sits
+        # between docs/ and the app, and belongs to neither.
+        "test_workspace_doc_parity.py",
+        # Scans every shipped DocType field description for a translation row.
+        "test_schema_description_translation.py",
     }
 )
 
