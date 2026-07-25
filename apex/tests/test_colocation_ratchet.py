@@ -11,14 +11,22 @@ line 160 collects any ``test_*.py`` it finds, pruning only ``locals``, ``.git``,
 ``public`` and ``__pycache__``. A test is discovered wherever it sits.
 
 This guard makes the direction one-way. ``_BASELINE`` freezes the central
-inventory as of 2026-07-25; a test file may LEAVE ``apex/tests/`` freely (that
-is the 104-file relocation, carried by its own card), but a NEW central
+inventory; a test file may LEAVE ``apex/tests/`` freely, but a NEW central
 ``test_*.py`` that is not already in the baseline fails. New tests belong beside
 the module they exercise.
 
+A-131 drained the directory: 158 modules moved out to the api / doctype /
+report / tasks / utils / seeder / patch / www unit each one exercises, and each
+drained name was PRUNED from ``_BASELINE`` as it left. Pruning is what keeps the
+ratchet honest — ``test_central_test_count_never_grows`` compares the live count
+against ``len(_BASELINE) + len(_CENTRAL_BY_NECESSITY)``, so a drained entry left
+behind would silently buy headroom for a future central test nobody reviewed.
+
 Genuinely app-wide guards (release hygiene, schema integrity, translation
 coverage, this file) have no single module to sit beside and stay central
-forever — they simply remain baseline entries that never drain.
+forever — they simply remain baseline entries that never drain. What is left is
+that set plus a handful of cross-module suites whose invariant spans two or more
+unrelated units, so no single directory is the honest home.
 
 ``apex/www`` IS an importable home (A-152): ``apex/www/__init__.py`` now exists,
 matching the empty one frappe, erpnext and hrms each ship. It changes no routing —
@@ -39,7 +47,7 @@ import unittest
 _TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 _APP_ROOT = os.path.dirname(_TESTS_DIR)
 
-# [#a123r1] Frozen 2026-07-25. This set may only ever SHRINK.
+# [#a123r1] Frozen 2026-07-25, drained by A-131. This set may only ever SHRINK.
 _BASELINE = frozenset(
     {
         "test_b5_role_workspaces.py",
@@ -51,12 +59,10 @@ _BASELINE = frozenset(
         "test_duplicate_and_dead_code_guard.py",
         "test_financial_side_effects.py",
         "test_fixture_identifier_entropy.py",
-        "test_fleet_alert_notifications.py",
         "test_fleet_number_cards.py",
         "test_fleet_ops_render.py",
         "test_fresh_install_defaults.py",
         "test_front_desk_rate_limit.py",
-        "test_habitat_expiry_notifications.py",
         "test_housing_lifecycle.py",
         "test_http_enforcement.py",
         "test_internal_auditor_docperms.py",
@@ -71,7 +77,6 @@ _BASELINE = frozenset(
         "test_report_scope.py",
         "test_request_trip_notifications.py",
         "test_schema_integrity.py",
-        "test_setup_roles.py",
         "test_sql_interpolation_guard.py",
         "test_submittable_controllers.py",
         "test_translation_coverage.py",

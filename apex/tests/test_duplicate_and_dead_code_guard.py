@@ -594,7 +594,7 @@ _COPY_PASTE_BASELINE = frozenset(
         ),
         frozenset(
             {
-                ("tests/test_fleet_alert_notifications.py", "_recipients"),
+                ("salis/notification/test_fleet_alert_notifications.py", "_recipients"),
                 ("tests/test_request_trip_notifications.py", "_recipients"),
             }
         ),
