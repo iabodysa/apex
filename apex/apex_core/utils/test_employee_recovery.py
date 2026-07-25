@@ -12,7 +12,7 @@ Two layers:
     not actually paid out yet.
 
 Run standalone:
-    bench --site <site> run-tests --module apex.tests.test_employee_recovery
+    bench --site <site> run-tests --module apex.apex_core.utils.test_employee_recovery
 """
 
 from __future__ import annotations

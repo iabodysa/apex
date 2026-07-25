@@ -480,7 +480,7 @@ _COPY_PASTE_BASELINE = frozenset(
                 ("salis/doctype/dispatch_trip/test_salis_state_flow.py", "_get_or_create_project"),
                 ("salis/test_salis_tenant_scope.py", "_project"),
                 ("salis/web_form/transport_request/test_transport_request_workflow.py", "_project"),
-                ("tests/test_workflow_submit_guard.py", "_project"),
+                ("apex_core/utils/test_workflow_submit_guard.py", "_project"),
             }
         ),
         # A vehicle fixture builder pasted across 6 Salis workflow tests.
@@ -565,7 +565,7 @@ _COPY_PASTE_BASELINE = frozenset(
         frozenset(
             {
                 ("apex_core/test_payment_router.py", "_set_gl_posting"),
-                ("tests/test_routed_payment_serialization.py", "_set_gl_posting"),
+                ("apex_core/test_routed_payment_serialization.py", "_set_gl_posting"),
             }
         ),
         frozenset(
