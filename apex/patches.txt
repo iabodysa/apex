@@ -6,11 +6,21 @@
 #   STILL-REQUIRED = one-time rename / cleanup / backfill whose "every deployed site
 #                    has already run it" gate CANNOT be answered from source. Prune
 #                    only against a real tabPatch Log census, never on assumption.
-#   Every entry below carries its own reason. Removed this pass:
-#   v1_0.seed_salis_operations_roles — its execute() is an unconditional `return`, so
-#   registering it is indistinguishable from not registering it. The module stays on
-#   disk: salis/setup.py imports it and tests/test_release_hygiene.py reads the file.
+#   Every entry below carries its own reason.
 #   Earlier passes pruned 53 spent one-time patches (2026-06-03 and 2026-07-23).
+#
+#   A patch module on disk that is deliberately NOT registered here must say so in
+#   its OWN docstring, with two labelled lines carrying real reasons:
+#       UNREGISTERED-PATCH: <why registering it would be wrong>
+#       COVERED-BY:         <what provides that state instead>
+#   tests/test_patch_registration_guard.py fails the build on any patch module that
+#   is neither registered below nor carries both markers, and caps how many such
+#   documented exceptions may exist. Currently three, all recorded in this file:
+#     v1_0.seed_salis_operations_roles — execute() is an unconditional `return`, so
+#       registering it is indistinguishable from not registering it. The module stays
+#       on disk: salis/setup.py imports it and tests/test_release_hygiene.py reads it.
+#     v1_x.seed_masar_demo_movement, v1_x.seed_demo_role_logins — demo seeders; see
+#       the A-070 note in [post_model_sync] below.
 
 # PERMANENT: delegates to the create-only City loader in seed_all, so a site installed
 # before a city was added to the shipped JSON still gets it.
@@ -98,9 +108,10 @@ apex.patches.v1_x.move_deduction_to_salary_policy
 # deliberately NOT wired here (A-070): a normal `bench migrate` must never create
 # demo data. The modules stay on disk for a manual, developer_mode-only run —
 # `bench --site <site> execute apex.patches.v1_x.seed_masar_demo_movement.execute`
-# and `apex.patches.v1_x.seed_demo_role_logins.execute` — mirroring
-# apex/demo/demo_rich.py. Do NOT re-add either as an active patches.txt entry:
-# the demo-seed gate tests (tests/test_seed_*_gate.py) fail if you do.
+# and `apex.patches.v1_x.seed_demo_role_logins.execute`. Do NOT re-add either as
+# an active patches.txt entry: the demo-seed gate tests (tests/test_seed_*_gate.py)
+# fail if you do. Each module carries the UNREGISTERED-PATCH / COVERED-BY markers
+# the registration guard requires.
 
 # STILL-REQUIRED (ONE-TIME): stamps an expiry on Masar Worker Token rows minted before
 # the TTL field existed — the resolver still treats a NULL expiry as never-expiring.
