@@ -506,7 +506,7 @@ _COPY_PASTE_BASELINE = frozenset(
             {
                 ("habitat/api/test_arrivals_card_scope.py", "__enter__"),
                 ("habitat/api/test_arrivals_custody_report_scope.py", "__enter__"),
-                ("tests/test_habitat_tenant_scope.py", "__enter__"),
+                ("habitat/test_habitat_tenant_scope.py", "__enter__"),
             }
         ),
         frozenset(
@@ -600,7 +600,7 @@ _COPY_PASTE_BASELINE = frozenset(
         ),
         frozenset(
             {
-                ("tests/test_habitat_tenant_scope.py", "_scoped_supervisor"),
+                ("habitat/test_habitat_tenant_scope.py", "_scoped_supervisor"),
                 ("habitat/api/test_housing_count.py", "_scoped_supervisor"),
             }
         ),
