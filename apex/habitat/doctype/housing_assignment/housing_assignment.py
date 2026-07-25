@@ -22,6 +22,29 @@ class HousingAssignment(Document):
     pass
 
 
+def on_doctype_update():
+    """Bed-occupancy performance indexes, added here — not only via the legacy
+    ``add_bed_assignment_index`` patch — so a freshly installed site (which marks
+    patches complete without running them) gets them too. Same index names as the
+    patch, so an already-migrated site's indexes are recognised as already present
+    (idempotent no-op) rather than duplicated under a new name. Plain indexes, not
+    UNIQUE: MariaDB has no partial/filtered UNIQUE index, so real bed-occupancy
+    uniqueness stays an application-level guard (validate() + on_submit()'s
+    SELECT ... FOR UPDATE), never a DB constraint."""
+    from apex.apex_core.utils.ledger_index import add_index_guarded
+
+    # [#hb3fq9]
+    add_index_guarded("Housing Assignment", ["bed"], "idx_asgn_bed")
+
+    # [#kx0m7d] serves the active-occupancy check in validate()/on_submit()/on_cancel()
+    # ({"bed": ..., "docstatus": 1, "check_out_date": ["is", "not set"]})
+    add_index_guarded(
+        "Housing Assignment",
+        ["bed", "docstatus", "check_out_date"],
+        "idx_asgn_bed_active",
+    )
+
+
 def _flag_temporary_worker_past_expiry(doc) -> None:
     """Soft-flag housing a Temporary Worker whose passport-only window has lapsed.
 
