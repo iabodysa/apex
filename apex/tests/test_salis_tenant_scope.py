@@ -39,6 +39,7 @@ from apex.salis.permissions import (
     vehicle_stop_query,
 )
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project
 
 
 class TestSalisTenantScope(FrappeTestCase):
@@ -46,8 +47,8 @@ class TestSalisTenantScope(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        cls.pa = cls._project("Tenant Scope A")
-        cls.pb = cls._project("Tenant Scope B")
+        cls.pa = make_project("Tenant Scope A")
+        cls.pb = make_project("Tenant Scope B")
         cls.sup = _user("tenant_sup@example.com", "Fleet Supervisor")
         cls.mgr = _user("tenant_mgr@example.com", "Fleet Manager")  # [#dpuh30]
         cls.drv = _user("tenant_drv@example.com", "Driver")
@@ -72,17 +73,6 @@ class TestSalisTenantScope(FrappeTestCase):
         super().tearDownClass()
 
     # [#kjq1ae]
-
-    @staticmethod
-    def _project(name):
-        p = frappe.db.get_value("Project", {"project_name": name}, "name")
-        if not p:
-            p = (
-                frappe.get_doc({"doctype": "Project", "project_name": name})
-                .insert(ignore_permissions=True)
-                .name
-            )
-        return p
 
     @staticmethod
     def _user_perm(user, project):

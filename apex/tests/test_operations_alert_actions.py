@@ -29,6 +29,7 @@ from apex.salis.api.operations_alerts import (
 	resolve_alert,
 )
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project
 
 
 def _vehicle(plate, project=None):
@@ -40,13 +41,6 @@ def _vehicle(plate, project=None):
 	elif project is not None:
 		frappe.db.set_value("Salis Vehicle", name, "project", project)
 	return name
-
-
-def _project(name):
-	p = frappe.db.get_value("Project", {"project_name": name}, "name")
-	if not p:
-		p = frappe.get_doc({"doctype": "Project", "project_name": name}).insert(ignore_permissions=True).name
-	return p
 
 
 def _alert(alert_type="Idle Vehicle", severity="Warning", vehicle=None):
@@ -142,8 +136,8 @@ class TestOpenAlertsQueueScope(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		frappe.set_user("Administrator")
-		cls.pa = _project("OA Scope A")
-		cls.pb = _project("OA Scope B")
+		cls.pa = make_project("OA Scope A")
+		cls.pb = make_project("OA Scope B")
 		cls.va = _vehicle("OA SCOPE A1", project=cls.pa)
 		cls.vb = _vehicle("OA SCOPE B1", project=cls.pb)
 		cls.sup = _user("oa-scope-sup@example.com", "Fleet Supervisor")

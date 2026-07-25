@@ -32,13 +32,12 @@ Confusing at a grep but harmless — frozen, not fixed, because renaming those s
 belongs to the owner of those test files, not to the guard.
 
 Widening check 2 to tests found 21 groups / 64 functions of pre-existing duplication,
-all frozen in _COPY_PASTE_BASELINE and all fixture/assertion helpers pasted between
-test modules rather than promoted into tests/factories.py (P-135's shared home). The
-loudest: factories.py ALREADY exports ``make_project`` and 17 test modules re-inlined
-its body anyway. Two more are this guard family duplicating itself —
-tests/test_unit_test_coverage_guard.py grew the same ``_production_py_files`` and
-``_file_dotted_path`` helpers independently. None are fixed here: A-170 owns the two
-guard files only, and de-duplicating 40-odd test modules is its own card.
+all fixture/assertion helpers pasted between test modules rather than promoted into
+tests/factories.py (P-135's shared home). A-176 is draining that set: each batch
+promotes one helper into factories.py (or a non-``test_`` sibling, since
+test_no_cross_test_imports.py forbids a test module importing a test module), points
+every copy at it, and deletes the group from _COPY_PASTE_BASELINE in the same commit,
+so the frozen set only ever shrinks. Remaining test groups: 20 / 46 functions.
 
   1. TestDuplicateTopLevelFunctionNames — two different files each bind
      a same-named PUBLIC module-level function. Scoped to module level (a Document
@@ -459,30 +458,7 @@ _COPY_PASTE_BASELINE = frozenset(
                 ("salis/permissions.py", "trip_start_log_has_permission"),
             }
         ),
-        # --- Tests (frozen 2026-07-25 by A-170; 21 groups, see docstring) ---
-        # factories.make_project re-inlined by 17 modules — the loudest finding.
-        frozenset(
-            {
-                ("tests/factories.py", "make_project"),
-                ("tests/test_dispatch_trip_workflow.py", "_project"),
-                ("tests/test_driver_clearance_workflow.py", "_project"),
-                ("tests/test_fuel_claim_workflow.py", "_project"),
-                ("tests/test_fuel_exception_case_workflow.py", "_project"),
-                ("tests/test_fuel_request_workflow.py", "_project"),
-                ("tests/test_operations_alert_actions.py", "_project"),
-                ("tests/test_report_scope.py", "_project"),
-                ("tests/test_salis_controls.py", "_project"),
-                ("tests/test_salis_fleet_scope.py", "_project"),
-                ("tests/test_salis_payment_approval_scope.py", "_project"),
-                ("tests/test_salis_payment_request_workflow.py", "_project"),
-                ("tests/test_salis_scoping.py", "_project"),
-                ("tests/test_salis_security.py", "_project"),
-                ("tests/test_salis_state_flow.py", "_get_or_create_project"),
-                ("tests/test_salis_tenant_scope.py", "_project"),
-                ("tests/test_transport_request_workflow.py", "_project"),
-                ("tests/test_workflow_submit_guard.py", "_project"),
-            }
-        ),
+        # --- Tests (frozen 2026-07-25 by A-170; drained by A-176) ---
         # A vehicle fixture builder pasted across 6 Salis workflow tests.
         frozenset(
             {

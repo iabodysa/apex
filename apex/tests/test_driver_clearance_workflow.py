@@ -35,6 +35,7 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     resolve_driver_token,
 )
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project
 
 WORKFLOW = "Driver Clearance Workflow"
 
@@ -59,7 +60,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         cls.supervisor = _user("dc_sup@example.com", "Fleet Supervisor")
         cls.manager = _user("dc_mgr@example.com", "Fleet Manager")
         # [#fef3xr]
-        cls.project = cls._project("DC Workflow Project")
+        cls.project = make_project("DC Workflow Project")
         cls._user_perm(cls.supervisor, cls.project)
 
     @classmethod
@@ -80,15 +81,6 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
 
     def tearDown(self):
         frappe.set_user("Administrator")
-
-    @staticmethod
-    def _project(name):
-        p = frappe.db.get_value("Project", {"project_name": name}, "name")
-        if not p:
-            p = frappe.get_doc(
-                {"doctype": "Project", "project_name": name}
-            ).insert(ignore_permissions=True).name
-        return p
 
     @staticmethod
     def _user_perm(user, project):

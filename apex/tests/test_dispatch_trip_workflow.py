@@ -39,6 +39,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project
 
 WORKFLOW = "Dispatch Trip Workflow"
 
@@ -64,7 +65,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         cls.supervisor = _user("dtwf_sup@example.com", "Fleet Supervisor")
         cls.pmanager = _user("dtwf_pm@example.com", "Fleet Project Manager")
         cls.manager = _user("dtwf_mgr@example.com", "Fleet Manager")
-        cls.project = cls._project("DT Workflow Project")
+        cls.project = make_project("DT Workflow Project")
         # [#tudkzf]
         for u in (cls.supervisor, cls.pmanager):
             if not frappe.db.exists(
@@ -97,15 +98,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         frappe.set_user("Administrator")
 
     # [#f9hua6]
-
-    @staticmethod
-    def _project(name):
-        p = frappe.db.get_value("Project", {"project_name": name}, "name")
-        if not p:
-            p = frappe.get_doc(
-                {"doctype": "Project", "project_name": name}
-            ).insert(ignore_permissions=True).name
-        return p
 
     @staticmethod
     def _vehicle(plate, odometer=0):

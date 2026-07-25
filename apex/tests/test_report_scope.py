@@ -39,6 +39,7 @@ from apex.habitat.report.daily_cleaning_compliance import daily_cleaning_complia
 from apex.habitat.report.accommodation_stock_balance import accommodation_stock_balance as R_stock
 from apex.habitat.report.custody_outstanding_by_worker import custody_outstanding_by_worker as R_custody
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project
 
 
 def _last_filters(mock_get_all):
@@ -235,15 +236,6 @@ class TestReportScopeLogic(FrappeTestCase):
             self.assertNotIn("building", _last_filters(ga))
 
 
-def _project(name):
-    p = frappe.db.get_value("Project", {"project_name": name}, "name")
-    if not p:
-        p = frappe.get_doc({"doctype": "Project", "project_name": name}).insert(
-            ignore_permissions=True
-        ).name
-    return p
-
-
 def _grant(user, allow, value):
     if not frappe.db.exists(
         "User Permission", {"allow": allow, "for_value": value, "user": user}
@@ -269,8 +261,8 @@ class TestReportScopeIntegration(FrappeTestCase):
         cls.tag = frappe.generate_hash(length=12).upper()
 
         # [#11u6ev]
-        cls.pa = _project("RScope A " + cls.tag)
-        cls.pb = _project("RScope B " + cls.tag)
+        cls.pa = make_project("RScope A " + cls.tag)
+        cls.pb = make_project("RScope B " + cls.tag)
         cls.veh_a = cls._vehicle(cls.pa)
         cls.veh_b = cls._vehicle(cls.pb)
 

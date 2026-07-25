@@ -9,7 +9,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions
 
 from apex.salis.api import driver_portal
-from apex.tests.factories import make_test_driver as _ensure_test_driver
+from apex.tests.factories import make_project, make_test_driver as _ensure_test_driver
 
 
 class TestDriverPortalGating(FrappeTestCase):
@@ -169,13 +169,6 @@ class TestRequestedByStamping(FrappeTestCase):
                                 "status": "Active"}).insert(ignore_permissions=True).name
         return v
 
-    def _project(self, name):
-        p = frappe.db.get_value("Project", {"project_name": name}, "name")
-        if not p:
-            p = frappe.get_doc({"doctype": "Project", "project_name": name}).insert(
-                ignore_permissions=True).name
-        return p
-
     def test_field_is_read_only_in_schema(self):
         for dt in ("Fuel Claim", "Rental Settlement",
                    "Salis Payment Request"):
@@ -187,7 +180,7 @@ class TestRequestedByStamping(FrappeTestCase):
     def test_fuel_claim_stamps_session_user(self):
         frappe.set_user(self.user)
         doc = frappe.get_doc({
-            "doctype": "Fuel Claim", "project": self._project("RB Claim P"),
+            "doctype": "Fuel Claim", "project": make_project("RB Claim P"),
             "vehicle": self._vehicle("RB CLAIM 1"), "period_month": "2026-05",
             "claimed_litres": 50, "status": "Draft",
         }).insert(ignore_permissions=True)

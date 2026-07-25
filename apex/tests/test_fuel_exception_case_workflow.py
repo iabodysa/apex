@@ -30,6 +30,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project
 
 WORKFLOW = "Fuel Exception Case Workflow"
 
@@ -56,7 +57,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 		cls.manager = _user("fecw_mgr@example.com", "Fleet Manager")
 		cls.manager_maker = _user("fecw_mgrmaker@example.com", "Fleet Manager")
 		frappe.get_doc("User", cls.manager_maker).add_roles("Fleet Project Manager")
-		cls.project = cls._project("FEC Workflow Project")
+		cls.project = make_project("FEC Workflow Project")
 		cls.vehicle = cls._vehicle("FEC-WF-1")
 		for u in (cls.raiser, cls.manager, cls.manager_maker):
 			if not frappe.db.exists(
@@ -90,15 +91,6 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 		frappe.set_user("Administrator")
 
 	# [#m88md8]
-
-	@staticmethod
-	def _project(name):
-		p = frappe.db.get_value("Project", {"project_name": name}, "name")
-		if not p:
-			p = frappe.get_doc(
-				{"doctype": "Project", "project_name": name}
-			).insert(ignore_permissions=True).name
-		return p
 
 	@staticmethod
 	def _vehicle(plate):

@@ -50,15 +50,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from apex.salis.permissions import payment_sod_has_permission
 from apex.tests._helpers import _user
-
-
-def _project(name):
-    p = frappe.db.get_value("Project", {"project_name": name}, "name")
-    if not p:
-        p = frappe.get_doc({"doctype": "Project", "project_name": name}).insert(
-            ignore_permissions=True
-        ).name
-    return p
+from apex.tests.factories import make_project
 
 
 def _grant_project(user, project):
@@ -98,8 +90,8 @@ class TestSalisPaymentRequestScoping(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        cls.pa = _project("PayScope A")
-        cls.pb = _project("PayScope B")
+        cls.pa = make_project("PayScope A")
+        cls.pb = make_project("PayScope B")
         # [#l2h06o]
         cls.sup = _user("payscope_sup@example.com", "Fleet Supervisor")
         _grant_project(cls.sup, cls.pa)
@@ -218,7 +210,7 @@ class TestScopingDoesNotWeakenSoD(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        cls.pa = _project("SoDScope A")
+        cls.pa = make_project("SoDScope A")
         # [#a5dp4c]
         cls.requester = _user("sod_pm@example.com", "Fleet Project Manager")
         _grant_project(cls.requester, cls.pa)

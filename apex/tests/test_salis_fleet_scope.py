@@ -18,6 +18,7 @@ from apex.salis.permissions import (
     trip_start_log_query,
 )
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project
 
 
 class TestSalisFleetScoping(FrappeTestCase):
@@ -25,7 +26,7 @@ class TestSalisFleetScoping(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        cls.pa = cls._project("Fleet Scope A")
+        cls.pa = make_project("Fleet Scope A")
         cls.sup = _user("fleet_sup@example.com", "Fleet Supervisor")   # [#8j7xbz]
         cls.mgr = _user("fleet_mgr@example.com", "Fleet Manager")      # [#11zo7x]
         cls.drv = _user("fleet_drv@example.com", "Driver")             # [#hvm9mm]
@@ -46,15 +47,6 @@ class TestSalisFleetScoping(FrappeTestCase):
             frappe.delete_doc("Project", cls.pa, ignore_permissions=True, force=True)
         frappe.db.commit()
         super().tearDownClass()
-
-    @staticmethod
-    def _project(name):
-        p = frappe.db.get_value("Project", {"project_name": name}, "name")
-        if not p:
-            p = frappe.get_doc({"doctype": "Project", "project_name": name}).insert(
-                ignore_permissions=True
-            ).name
-        return p
 
     # [#tlagf1]
 

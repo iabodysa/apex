@@ -34,6 +34,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project
 
 WORKFLOW = "Dispatch Trip Workflow"
 
@@ -79,7 +80,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         cls.manager = _user("ssf_mgr@example.com", "Fleet Manager")
         cls.supervisor = _user("ssf_sup@example.com", "Fleet Supervisor")
         cls.pmanager = _user("ssf_pm@example.com", "Fleet Project Manager")
-        cls.project = cls._get_or_create_project("SSF Test Project")
+        cls.project = make_project("SSF Test Project")
         # [#smuogs]
         for u in (cls.supervisor, cls.pmanager):
             if not frappe.db.exists(
@@ -112,15 +113,6 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         frappe.set_user("Administrator")
 
     # [#swr9rs]
-
-    @staticmethod
-    def _get_or_create_project(name):
-        p = frappe.db.get_value("Project", {"project_name": name}, "name")
-        if not p:
-            p = frappe.get_doc(
-                {"doctype": "Project", "project_name": name}
-            ).insert(ignore_permissions=True).name
-        return p
 
     @staticmethod
     def _make_vehicle(suffix=None, odometer=0):

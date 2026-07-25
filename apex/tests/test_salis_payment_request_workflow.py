@@ -36,6 +36,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex.tests._helpers import _user
+from apex.tests.factories import make_project
 
 WORKFLOW = "Salis Payment Request Workflow"
 
@@ -65,7 +66,7 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         cls.finance_maker = _user("pr_finmaker@example.com", "Finance Manager")
         frappe.get_doc("User", cls.finance_maker).add_roles("Fleet Project Manager")
         # [#djtbkz]
-        cls.project = cls._project("PR Workflow Project")
+        cls.project = make_project("PR Workflow Project")
         for u in (cls.maker, cls.finance_maker):
             cls._grant_project(u, cls.project)
 
@@ -80,15 +81,6 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
             frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
         frappe.db.commit()
         super().tearDownClass()
-
-    @staticmethod
-    def _project(name):
-        p = frappe.db.get_value("Project", {"project_name": name}, "name")
-        if not p:
-            p = frappe.get_doc({"doctype": "Project", "project_name": name}).insert(
-                ignore_permissions=True
-            ).name
-        return p
 
     @staticmethod
     def _grant_project(user, project):
