@@ -37,7 +37,7 @@ tests/factories.py (P-135's shared home). A-176 is draining that set: each batch
 promotes one helper into factories.py (or a non-``test_`` sibling, since
 test_no_cross_test_imports.py forbids a test module importing a test module), points
 every copy at it, and deletes the group from _COPY_PASTE_BASELINE in the same commit,
-so the frozen set only ever shrinks. Remaining test groups: 18 / 37 functions.
+so the frozen set only ever shrinks. Remaining test groups: 16 / 33 functions.
 
   1. TestDuplicateTopLevelFunctionNames — two different files each bind
      a same-named PUBLIC module-level function. Scoped to module level (a Document
@@ -98,7 +98,8 @@ so the frozen set only ever shrinks. Remaining test groups: 18 / 37 functions.
      that ``frappe.generate_hash`` cannot replace, since generate_hash mints a new
      random value rather than hashing an existing secret).
 
-Run standalone:  python3 -m unittest tests.test_duplicate_and_dead_code_guard -v
+Run standalone (from the repo root, so ``apex.tests.source_tree`` resolves):
+  python3 -m unittest apex.tests.test_duplicate_and_dead_code_guard -v
 """
 
 import ast
@@ -108,8 +109,18 @@ import os
 import re
 import unittest
 
-APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
-REPO_ROOT = os.path.dirname(APP_ROOT)
+# Scan universes, aliased to say what each check reads: 3-5 stay production-only
+# (a test file can only add noise to them), 1-2 read production AND test.
+from apex.tests.source_tree import (
+    APP_ROOT,
+    all_py_files as _scanned_py_files,
+    file_dotted_path as _file_dotted_path,
+    is_test_file as _is_test_file,
+    parse as _parse,
+    production_py_files as _production_py_files,
+    rel as _rel,
+)
+
 MODULES_TXT = os.path.join(APP_ROOT, "modules.txt")
 PATCHES_TXT = os.path.join(APP_ROOT, "patches.txt")
 
@@ -117,50 +128,6 @@ PATCHES_TXT = os.path.join(APP_ROOT, "patches.txt")
 def _scrub(name):
     """Pure-python mirror of frappe.scrub() (no live site needed)."""
     return name.strip().lower().replace(" ", "_").replace("-", "_")
-
-
-def _rel(path):
-    return os.path.relpath(path, APP_ROOT)
-
-
-def _parse(path):
-    with open(path, encoding="utf-8") as fh:
-        try:
-            return ast.parse(fh.read(), filename=path)
-        except SyntaxError:
-            return None
-
-
-def _is_test_file(rel):
-    """A central ``tests/`` module or a colocated ``test_*.py`` beside its unit."""
-    return rel.startswith("tests" + os.sep) or os.path.basename(rel).startswith("test_")
-
-
-def _production_py_files():
-    """Every apex/**/*.py file except tests/ and node_modules — the universe for
-    the orphan-doctype / dead-file / native-bypass scans (3-5), which a test file
-    can only add noise to (see module docstring)."""
-    out = []
-    for path in sorted(glob.glob(os.path.join(APP_ROOT, "**", "*.py"), recursive=True)):
-        if "node_modules" in path:
-            continue
-        rel = _rel(path)
-        if rel.startswith("tests" + os.sep) or os.path.basename(path).startswith("test_"):
-            continue
-        out.append(path)
-    return out
-
-
-def _scanned_py_files():
-    """Every apex/**/*.py file except node_modules — production AND test — the
-    universe for the two duplication scans (1-2). Duplication is exactly as much
-    of a defect in a test helper as in a controller, and a test module is the one
-    place the old production-only universe could never see (A-170)."""
-    return [
-        path
-        for path in sorted(glob.glob(os.path.join(APP_ROOT, "**", "*.py"), recursive=True))
-        if "node_modules" not in path
-    ]
 
 
 # 1. Duplicate top-level (module-scope) function names
@@ -505,21 +472,6 @@ _COPY_PASTE_BASELINE = frozenset(
                 ("tests/test_salis_state_flow.py", "_purge_tr_and_rp"),
             }
         ),
-        # These two are this guard family duplicating ITSELF — the blind spot's own
-        # best proof. tests/test_unit_test_coverage_guard.py is a sibling static
-        # guard; both files grew the same two path helpers independently.
-        frozenset(
-            {
-                ("tests/test_duplicate_and_dead_code_guard.py", "_file_dotted_path"),
-                ("tests/test_unit_test_coverage_guard.py", "_file_dotted_path"),
-            }
-        ),
-        frozenset(
-            {
-                ("tests/test_duplicate_and_dead_code_guard.py", "_production_py_files"),
-                ("tests/test_unit_test_coverage_guard.py", "_production_py_files"),
-            }
-        ),
         frozenset(
             {
                 ("apex_core/test_payment_router.py", "_set_gl_posting"),
@@ -726,22 +678,11 @@ def _add_with_ancestors(refs, dotted):
         refs.add(".".join(parts[:i]))
 
 
-def _file_dotted_path(path):
-    rel = os.path.relpath(path, REPO_ROOT)
-    if rel.endswith(os.sep + "__init__.py"):
-        rel = rel[: -len(os.sep + "__init__.py")]
-    else:
-        rel = rel[: -len(".py")]
-    return rel.replace(os.sep, ".")
-
-
 def _collect_import_references():
     """Every dotted module path (+ its ancestors) imported anywhere under apex/
     (production AND tests — a file used only by a test fixture is not dead)."""
     refs = set()
-    for path in glob.glob(os.path.join(APP_ROOT, "**", "*.py"), recursive=True):
-        if "node_modules" in path:
-            continue
+    for path in _scanned_py_files():
         tree = _parse(path)
         if tree is None:
             continue
@@ -764,7 +705,7 @@ def _collect_text_references():
     Frappe wiring convention without hand-listing each one."""
     refs = set()
     texts = [PATCHES_TXT]
-    texts += glob.glob(os.path.join(APP_ROOT, "**", "*.py"), recursive=True)
+    texts += _scanned_py_files()
     texts += glob.glob(os.path.join(APP_ROOT, "**", "*.json"), recursive=True)
     for path in texts:
         if "node_modules" in path:
