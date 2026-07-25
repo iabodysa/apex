@@ -1,6 +1,6 @@
 {
  "doctype": "Workspace",
- "name": "fleet",
+ "name": "Fleet",
  "label": "Fleet",
  "title": "Fleet",
  "module": "Salis",
@@ -31,7 +31,7 @@
    "doctype": "Workspace Shortcut",
    "type": "URL",
    "label": "Fleet Portal",
-   "url": "/fleet",
+   "url": "/fleet-os",
    "color": "Green",
    "idx": 1
   },
@@ -418,5 +418,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-24 03:53:04.208692"
+ "modified": "2026-07-25 12:00:00.000000"
 }
