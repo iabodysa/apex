@@ -3,15 +3,23 @@
 
 A test module must NOT import fixture helpers from a sibling ``test_*`` module —
 shared builders belong in ``tests/factories.py``. This guard AST-scans every
-``tests/*.py`` for ``from apex.tests.test_<x> import ...`` (and the bare
-``import apex.tests.test_<x>``) and fails if any appears that is not in the
-frozen ``_BASELINE`` of pre-existing debt.
+``test_*.py`` ANYWHERE under ``apex/`` and fails on any import whose target
+module's final segment starts with ``test_`` (absolute ``from apex.x.test_y
+import z`` / ``import apex.x.test_y``, and the relative ``from .test_y import z``
+/ ``from . import test_y`` forms a colocated test can use), unless the pair is
+in the frozen ``_BASELINE`` of pre-existing debt.
 
-The baseline is now EMPTY (P-135 retired all 44 pairs — every shared helper and
-the base ``ApexHabitatTestCase`` were promoted into ``tests/factories.py``). The
-ratchet is therefore absolute: ANY ``from apex.tests.test_<x> import ...``
-in ``tests/*.py`` fails this test. Put the shared fixture in ``tests/factories.py``
-(a non-``test_*`` module) instead of importing from a sibling test module.
+Scope (A-123): the glob used to be ``tests/*.py`` only, so the 137 colocated
+``test_*.py`` files under habitat/salis/apex_core/logistay escaped the ratchet
+entirely — and 4 of them already violated it undetected. The scan is now
+app-wide, so a test relocated out of ``apex/tests/`` carries the ratchet with it
+instead of silently leaving it.
+
+The baseline is EMPTY (P-135 retired all 44 pairs — every shared helper and the
+base ``ApexHabitatTestCase`` were promoted into ``tests/factories.py``). The
+ratchet is therefore absolute: ANY import of a ``test_*`` module from another
+test file fails. Put the shared fixture in ``tests/factories.py`` (a
+non-``test_*`` module) instead of importing from a sibling test module.
 """
 
 import ast
@@ -20,7 +28,8 @@ import os
 import unittest
 
 _TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
-_PREFIX = "apex.tests.test_"
+# App root (``apex/``) — the widened scan walks every module, not just tests/.
+_APP_ROOT = os.path.dirname(_TESTS_DIR)
 
 # [#3d5i52]
 _BASELINE = frozenset()
@@ -73,21 +82,50 @@ _MUST_BE_CLEAN = frozenset(
 )
 
 
+def _is_test_module(dotted):
+    """True if a dotted module path's FINAL segment is a ``test_*`` module.
+
+    Generalises the old hardcoded ``apex.tests.test_`` prefix: once tests live
+    beside their unit, the offending import is ``apex.habitat.doctype.x.test_x``,
+    which that prefix never matched."""
+    return bool(dotted) and dotted.rsplit(".", 1)[-1].startswith("test_")
+
+
+def _test_files():
+    """Every ``test_*.py`` anywhere under ``apex/`` — central AND colocated."""
+    out = []
+    for path in sorted(
+        glob.glob(os.path.join(_APP_ROOT, "**", "test_*.py"), recursive=True)
+    ):
+        if "node_modules" in path:
+            continue
+        out.append(path)
+    # tests/*.py non-test_ helpers (factories.py, _helpers.py) are legitimate
+    # shared homes and are never scanned as offenders — only as import targets.
+    return out
+
+
 def _scan():
-    """Return the set of (filename, imported_test_module) pairs across tests/*.py."""
+    """Return the set of (relpath, imported_test_module) pairs, app-wide."""
     found = set()
-    for path in sorted(glob.glob(os.path.join(_TESTS_DIR, "*.py"))):
-        base = os.path.basename(path)
+    for path in _test_files():
+        rel = os.path.relpath(path, _APP_ROOT)
         with open(path, encoding="utf-8") as fh:
-            tree = ast.parse(fh.read(), filename=base)
+            tree = ast.parse(fh.read(), filename=rel)
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom):
-                if node.module and node.module.startswith(_PREFIX):
-                    found.add((base, node.module))
+                if node.level and not node.module:
+                    # `from . import test_sibling`
+                    for alias in node.names:
+                        if alias.name.startswith("test_"):
+                            found.add((rel, "." * node.level + alias.name))
+                elif _is_test_module(node.module):
+                    # `from apex.x.test_y import z` / `from .test_y import z`
+                    found.add((rel, "." * node.level + node.module))
             elif isinstance(node, ast.Import):
                 for alias in node.names:
-                    if alias.name.startswith(_PREFIX):
-                        found.add((base, alias.name))
+                    if _is_test_module(alias.name):
+                        found.add((rel, alias.name))
     return found
 
 
@@ -104,8 +142,10 @@ class TestNoCrossTestImports(unittest.TestCase):
         )
 
     def test_cleaned_files_have_no_cross_test_imports(self):
+        # _MUST_BE_CLEAN is keyed by bare basename (the P-129 files all lived in
+        # tests/); match on basename so it keeps holding after a relocation.
         offenders = sorted(
-            (f, m) for (f, m) in _scan() if f in _MUST_BE_CLEAN
+            (f, m) for (f, m) in _scan() if os.path.basename(f) in _MUST_BE_CLEAN
         )
         self.assertEqual(
             offenders,

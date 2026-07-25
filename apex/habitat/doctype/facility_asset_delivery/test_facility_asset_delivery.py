@@ -14,7 +14,7 @@ from apex.habitat.api.facility_asset_delivery import (
     pass_exit_2,
     pass_exit_3,
 )
-from apex.tests.test_utils import ApexHabitatTestCase
+from apex.tests.factories import ApexHabitatTestCase
 
 
 def _h(n=12):
