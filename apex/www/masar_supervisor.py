@@ -40,6 +40,12 @@ SUPERVISOR_ROLES = {
 }
 
 
+def has_apps_screen_access() -> bool:
+    """Gate for the /apps app-selector tile. Reuses the page's own SUPERVISOR_ROLES so
+    the tile can never show for a user get_context() would turn away."""
+    return bool(SUPERVISOR_ROLES & set(frappe.get_roles()))
+
+
 def get_context(context):
     guest_redirect("/masar-supervisor")
 
