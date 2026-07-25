@@ -14,10 +14,26 @@ Two layers:
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import flt
 
+from apex.apex_core.utils import employee_recovery
 from apex.apex_core.utils.employee_recovery import bounded_installment, compute_recovery_installment
+
+
+class _PolicyOff:
+    """A Salary Deduction Policy with no Damage rule in force — the shipped
+    default, expressed without writing to the Single (see
+    test_the_shipped_policy_default_deducts_nothing for why that matters)."""
+
+    global_max_percent_of_salary = 50.0
+    default_salary_component = None
+
+    def get_type_rule(self, rule_type):
+        return None
 
 
 class TestBoundedInstallment(FrappeTestCase):
@@ -52,23 +68,81 @@ class TestBoundedInstallment(FrappeTestCase):
 
 
 class TestRecoveryDeferralPaths(FrappeTestCase):
+    """The two "defer, post nothing" paths, against fixtures this class builds.
+
+    Nothing here self-skips: an earlier version bailed out with ``skipTest`` when
+    the site had no company / receivable account / active employee, which reported
+    green while proving nothing. Every prerequisite is now created on demand.
+    """
+
+    def _company(self):
+        existing = frappe.db.get_value("Company", {}, "name")
+        if existing:
+            return existing
+        tag = frappe.generate_hash(length=12)
+        return frappe.get_doc(
+            {
+                "doctype": "Company",
+                "company_name": f"A102 Deferral {tag}",
+                # Full hash, never a slice: a narrowed random identifier is what
+                # apex/tests/test_fixture_identifier_entropy.py forbids, and a
+                # colliding abbr is rejected by ERPNext's own uniqueness check.
+                "abbr": f"AD{tag}",
+                "default_currency": "SAR",
+                "country": "Saudi Arabia",
+            }
+        ).insert(ignore_permissions=True).name
+
+    def _receivable_account(self, company):
+        """HRMS refuses to submit an advance on a non-Receivable account, so the
+        account type — not merely the account — is the prerequisite."""
+        existing = frappe.db.get_value(
+            "Account",
+            {"company": company, "account_type": "Receivable", "is_group": 0},
+            "name",
+        )
+        if existing:
+            return existing
+        parent = frappe.db.get_value(
+            "Account", {"company": company, "is_group": 1, "root_type": "Asset"}, "name"
+        )
+        self.assertTrue(parent, f"company {company} has no Asset group account")
+        return frappe.get_doc(
+            {
+                "doctype": "Account",
+                "account_name": f"A102 Advances {frappe.generate_hash(length=12)}",
+                "company": company,
+                "parent_account": parent,
+                "root_type": "Asset",
+                "account_type": "Receivable",
+                "is_group": 0,
+            }
+        ).insert(ignore_permissions=True).name
+
+    def _employee(self, company):
+        return frappe.get_doc(
+            {
+                "doctype": "Employee",
+                "first_name": f"A102 Deferral {frappe.generate_hash(length=12)}",
+                "company": company,
+                "status": "Active",
+                "gender": "Male",
+                "date_of_birth": "1990-01-01",
+                "date_of_joining": "2020-01-01",
+            }
+        ).insert(ignore_permissions=True).name
+
     def _unpaid_advance(self):
         """A submitted Employee Advance the company has not paid out yet."""
-        company = frappe.db.get_value("Company", {}, "name")
-        receivable = frappe.db.get_value(
-            "Account", {"company": company, "account_type": "Receivable", "is_group": 0}, "name"
-        )
-        employee = frappe.db.get_value("Employee", {"status": "Active", "company": company})
-        if not (company and receivable and employee):
-            self.skipTest("site has no company / receivable account / active employee")
+        company = self._company()
         advance = frappe.get_doc(
             {
                 "doctype": "Employee Advance",
-                "employee": employee,
+                "employee": self._employee(company),
                 "company": company,
-                "purpose": "A-102 deferral test",
+                "purpose": f"A-102 deferral test {frappe.generate_hash(length=12)}",
                 "advance_amount": 1000,
-                "advance_account": receivable,
+                "advance_account": self._receivable_account(company),
                 "currency": frappe.db.get_value("Company", company, "default_currency"),
                 "exchange_rate": 1,
                 "repay_unclaimed_amount_from_salary": 1,
@@ -77,13 +151,51 @@ class TestRecoveryDeferralPaths(FrappeTestCase):
         advance.submit()
         return advance
 
+    def test_the_shipped_policy_default_deducts_nothing(self):
+        """[#a102po] The master switch ships OFF, so no wage is touched until the
+        policy is activated after legal review.
+
+        Read off a NEW policy document rather than the live Single: the policy is
+        a Single, and saving one inside a test commits a mutation that escapes the
+        suite's rollback and changes behaviour for every later test.
+        """
+        shipped = frappe.new_doc("Salary Deduction Policy")
+        self.assertFalse(
+            shipped.enable_salary_deductions,
+            "salary deductions must ship disabled by default",
+        )
+        shipped.append(
+            "type_rules",
+            {"deduction_type": "Damage", "enabled": 1, "max_percent_of_salary": 10},
+        )
+        self.assertIsNone(
+            shipped.get_type_rule("Damage"),
+            "the master switch must gate every type rule, even an enabled one",
+        )
+
+        # [#a102nv] Non-vacuity: the same rule DOES come back once the master
+        # switch is on, so the assertion above is about the switch, not about the
+        # row being unreachable.
+        shipped.enable_salary_deductions = 1
+        self.assertIsNotNone(shipped.get_type_rule("Damage"))
+
     def test_nothing_is_recovered_while_the_policy_is_off(self):
-        # [#a102po] The shipped default: master switch off, so no wage is ever touched.
-        policy = frappe.get_single("Salary Deduction Policy")
-        policy.enable_salary_deductions = 0
-        policy.save(ignore_permissions=True)
+        """[#a102po] With no Damage rule in force the engine recovers nothing —
+        even from an advance the company HAS paid out.
+
+        paid_amount is set deliberately: on an unpaid advance the engine returns
+        0.0 for a different reason (nothing outstanding), which would make this
+        assertion say nothing about the policy gate at all.
+        """
         advance = self._unpaid_advance()
-        self.assertEqual(compute_recovery_installment(advance.name), 0.0)
+        frappe.db.set_value("Employee Advance", advance.name, "paid_amount", 1000)
+        self.assertGreater(
+            flt(frappe.db.get_value("Employee Advance", advance.name, "paid_amount")),
+            0,
+            "the fixture must have a real outstanding balance, or this proves nothing",
+        )
+        with patch.object(employee_recovery, "get_policy", return_value=_PolicyOff()):
+            self.assertEqual(compute_recovery_installment(advance.name), 0.0)
 
     def test_nothing_is_recovered_before_the_company_has_paid(self):
         # [#a102pa] Outstanding is measured from paid_amount, which only the native
