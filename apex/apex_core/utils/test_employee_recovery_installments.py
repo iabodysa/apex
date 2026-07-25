@@ -1,7 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Wage-installment side of the native employee cost-recovery engine (A-102).
 
-The sibling ``apex/tests/test_employee_recovery.py`` proves the pure cap
+The sibling ``test_employee_recovery.py`` proves the pure cap
 arithmetic; this file proves what happens against a real payroll chain:
 
   * an installment is SOURCE-LINKED to its Employee Advance through the native

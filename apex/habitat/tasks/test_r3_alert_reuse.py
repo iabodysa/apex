@@ -14,7 +14,7 @@ that each site keeps its OWN dedupe — the helper never dedupes.
 
 The salis ``_raise_alert`` path is already covered by
 ``operations_alert/test_operations_alert.py::test_critical_alert_stamps_supervisor``
-(the responsible_supervisor denorm) and ``tests/test_alert_dedupe_boundary.py``.
+(the responsible_supervisor denorm) and ``salis/tasks/test_alert_dedupe_boundary.py``.
 """
 
 from __future__ import annotations

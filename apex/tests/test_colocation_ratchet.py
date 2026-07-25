@@ -11,14 +11,22 @@ line 160 collects any ``test_*.py`` it finds, pruning only ``locals``, ``.git``,
 ``public`` and ``__pycache__``. A test is discovered wherever it sits.
 
 This guard makes the direction one-way. ``_BASELINE`` freezes the central
-inventory as of 2026-07-25; a test file may LEAVE ``apex/tests/`` freely (that
-is the 104-file relocation, carried by its own card), but a NEW central
+inventory; a test file may LEAVE ``apex/tests/`` freely, but a NEW central
 ``test_*.py`` that is not already in the baseline fails. New tests belong beside
 the module they exercise.
 
+A-131 drained the directory: 158 modules moved out to the api / doctype /
+report / tasks / utils / seeder / patch / www unit each one exercises, and each
+drained name was PRUNED from ``_BASELINE`` as it left. Pruning is what keeps the
+ratchet honest — ``test_central_test_count_never_grows`` compares the live count
+against ``len(_BASELINE) + len(_CENTRAL_BY_NECESSITY)``, so a drained entry left
+behind would silently buy headroom for a future central test nobody reviewed.
+
 Genuinely app-wide guards (release hygiene, schema integrity, translation
 coverage, this file) have no single module to sit beside and stay central
-forever — they simply remain baseline entries that never drain.
+forever — they simply remain baseline entries that never drain. What is left is
+that set plus a handful of cross-module suites whose invariant spans two or more
+unrelated units, so no single directory is the honest home.
 
 ``apex/www`` IS an importable home (A-152): ``apex/www/__init__.py`` now exists,
 matching the empty one frappe, erpnext and hrms each ship. It changes no routing —
@@ -39,200 +47,43 @@ import unittest
 _TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 _APP_ROOT = os.path.dirname(_TESTS_DIR)
 
-# [#a123r1] Frozen 2026-07-25. This set may only ever SHRINK.
+# [#a123r1] Frozen 2026-07-25, drained by A-131. This set may only ever SHRINK.
 _BASELINE = frozenset(
     {
-        "test_accommodation_stock_ledger.py",
-        "test_accrual_loop_resilience.py",
-        "test_action_inbox.py",
-        "test_alert_analytics.py",
-        "test_alert_dedupe_boundary.py",
-        "test_apex_settings_rearch.py",
-        "test_arrivals_card_scope.py",
-        "test_arrivals_custody_report_scope.py",
-        "test_arrivals_slip_xss.py",
-        "test_arrivals_summary.py",
         "test_b5_role_workspaces.py",
-        "test_backfill_assignment_facility_supervisor.py",
         "test_bed_booking_concurrency.py",
-        "test_boarding_flow.py",
-        "test_boarding_race.py",
-        "test_boarding_scan.py",
-        "test_building_address_backfill.py",
-        "test_building_address_fallback.py",
-        "test_building_open_requests.py",
-        "test_building_site_address.py",
-        "test_building_supervisor_permission.py",
         "test_change_log_popup.py",
         "test_changelog_readme.py",
         "test_colocation_ratchet.py",
-        "test_consumable_custody_expiry.py",
-        "test_custody_digest.py",
-        "test_custody_handover_confirm_race.py",
-        "test_custody_stock_integration.py",
-        "test_dashboard_arrivals.py",
-        "test_dashboard_buildings_over_threshold.py",
-        "test_dashboard_compliance.py",
-        "test_dashboard_custody.py",
-        "test_date_ranges.py",
-        "test_dispatch_board.py",
-        "test_dispatch_trip_driver_scope.py",
-        "test_dispatch_trip_workflow.py",
-        "test_driver_clearance_workflow.py",
-        "test_driver_gps_eta.py",
-        "test_driver_portal.py",
-        "test_driver_portal_attendance.py",
         "test_driver_portal_csrf.py",
-        "test_driver_portal_enrich.py",
-        "test_driver_portal_enum_coverage.py",
-        "test_driver_portal_flag.py",
-        "test_driver_portal_push.py",
-        "test_driver_portal_scope.py",
-        "test_driver_portal_today.py",
         "test_duplicate_and_dead_code_guard.py",
-        "test_employee_recovery.py",
-        "test_enrich.py",
-        "test_facility_asset_movement_effects.py",
         "test_financial_side_effects.py",
         "test_fixture_identifier_entropy.py",
-        "test_fleet_alert_notifications.py",
-        "test_fleet_import_updates.py",
         "test_fleet_number_cards.py",
         "test_fleet_ops_render.py",
-        "test_fleet_os.py",
-        "test_fleet_os_actions.py",
-        "test_fleet_os_incidents.py",
-        "test_fleet_os_pii.py",
-        "test_fleet_os_search_drivers.py",
-        "test_fleet_page_access_gate.py",
-        "test_form_dashboards.py",
         "test_fresh_install_defaults.py",
-        "test_front_desk.py",
         "test_front_desk_rate_limit.py",
-        "test_front_desk_resolve_worker.py",
-        "test_fuel_claim_workflow.py",
-        "test_fuel_exception_case_workflow.py",
-        "test_fuel_request_unified.py",
-        "test_fuel_request_workflow.py",
-        "test_get_driver_for_user.py",
-        "test_habitat_approval_workflows.py",
-        "test_habitat_expiry_notifications.py",
-        "test_habitat_maintenance_scoping.py",
-        "test_habitat_permission_hooks.py",
-        "test_habitat_role_alignment.py",
-        "test_habitat_tenant_scope.py",
-        "test_housing_count.py",
-        "test_housing_count_page_access_gate.py",
         "test_housing_lifecycle.py",
-        "test_housing_supervisor_scope.py",
         "test_http_enforcement.py",
-        "test_idempotency_guards.py",
         "test_internal_auditor_docperms.py",
         "test_log_clearing.py",
-        "test_maintenance_report_scope.py",
-        "test_masar_1b.py",
-        "test_masar_dispatch_batch.py",
-        "test_masar_n1_prefetch.py",
-        "test_masar_night_shift.py",
-        "test_masar_route_maps.py",
-        "test_masar_supervisor_page_access_gate.py",
-        "test_masar_trip_rating.py",
-        "test_masar_worker_boarding_confirm.py",
-        "test_masar_worker_contacts.py",
-        "test_masar_worker_movement.py",
-        "test_masar_worker_scope.py",
-        "test_masar_worker_token_auth.py",
-        "test_masar_worker_token_hash.py",
-        "test_material_template_coverage.py",
-        "test_material_transfer.py",
-        "test_my_work_center.py",
         "test_no_cross_test_imports.py",
-        "test_notification_email_resilience.py",
-        "test_occupancy_snapshot.py",
         "test_onboarding_steps.py",
-        "test_open_alerts_digest.py",
-        "test_operations_alert_actions.py",
-        "test_operations_alert_helper.py",
-        "test_operations_alert_resolution.py",
-        "test_operations_control.py",
-        "test_operations_control_release.py",
         "test_permission_parity.py",
-        "test_permission_scope_cache.py",
-        "test_permission_scope_shared.py",
-        "test_portal_bootstrap.py",
-        "test_portal_csrf_bootstrap.py",
         "test_portal_token_security.py",
-        "test_portal_xss.py",
         "test_qa_probe_systems.py",
         "test_qa_probe_transactions.py",
-        "test_r3_alert_reuse.py",
         "test_release_hygiene.py",
-        "test_rental_settlement_workflow.py",
-        "test_reorder_root_workspace.py",
-        "test_report_helpers.py",
         "test_report_scope.py",
-        "test_reports.py",
         "test_request_trip_notifications.py",
-        "test_resident_request_convert.py",
-        "test_resident_request_coordinator_perms.py",
-        "test_resident_request_todo.py",
-        "test_room_bed_transfer_bed_swap.py",
-        "test_routed_payment_concurrency.py",
-        "test_routed_payment_serialization.py",
-        "test_safety_checklist.py",
-        "test_safety_checklist_building_scope.py",
-        "test_safety_checklist_cadence_guard.py",
-        "test_safety_checklist_security.py",
-        "test_safety_page_access_gate.py",
-        "test_safety_zero_rounds_scan.py",
-        "test_salis_auto_email_reports.py",
-        "test_salis_controls.py",
-        "test_salis_engines.py",
-        "test_salis_fleet_scope.py",
-        "test_salis_payment_approval_scope.py",
-        "test_salis_payment_request_workflow.py",
-        "test_salis_scoping.py",
-        "test_salis_security.py",
-        "test_salis_state_flow.py",
-        "test_salis_tenant_scope.py",
-        "test_salis_utils.py",
-        "test_salis_workflow_seed_guard.py",
-        "test_salis_workflow_transitions.py",
-        "test_scheduled_task_template_redesign.py",
         "test_schema_integrity.py",
-        "test_seed_demo_role_logins_gate.py",
-        "test_seed_loader.py",
-        "test_seed_masar_demo_movement_gate.py",
-        "test_seed_parity_habitat.py",
-        "test_seed_parity_salis.py",
-        "test_seed_parity_shared.py",
-        "test_setup_roles.py",
-        "test_setup_wizard.py",
-        "test_sim_actions.py",
-        "test_sim_contract_billing.py",
-        "test_sim_migration.py",
-        "test_sim_operations_scoping.py",
-        "test_sim_reports.py",
-        "test_sim_telecom_control.py",
         "test_sql_interpolation_guard.py",
-        "test_sti_generator_idempotency.py",
         "test_submittable_controllers.py",
-        "test_supplier_cost_recovery.py",
-        "test_task_schedulers.py",
-        "test_temporary_stay_and_idle.py",
         "test_translation_coverage.py",
-        "test_transport_request_workflow.py",
         "test_unit_test_coverage_guard.py",
-        "test_utility_bill_ledger_posting.py",
         "test_utils.py",
-        "test_v0_9_0_pages.py",
-        "test_vehicle_incident_web_form.py",
-        "test_web_push_ssrf.py",
         "test_worker_party.py",
-        "test_worker_portal_enum_coverage.py",
         "test_workflow_state_governance.py",
-        "test_workflow_submit_guard.py",
-        "test_workshop_overstay.py",
         "test_workspace_visibility.py",
     }
 )
@@ -246,10 +97,6 @@ _CENTRAL_BY_NECESSITY = frozenset(
         # Scans every workspace JSON in the app for a parent chain that hides a
         # persona's only surface — no single module owns the invariant.
         "test_workspace_sidebar_reachability.py",
-        # Scans the whole apex/www tree for external CDN hosts. DRAINABLE since
-        # A-152 made apex/www a package; kept central only until a follow-up
-        # moves it, and it may never be cited as an importability blocker.
-        "test_www_no_external_cdn_assets.py",
         # Asserts app-wide that no module still references the retired deduction
         # acknowledgment surface and that exactly one module raises an advance.
         "test_native_recovery_surface.py",
@@ -366,9 +213,19 @@ class TestColocationRatchet(unittest.TestCase):
         )
 
     def test_guard_actually_detects(self):
-        """Guard-of-the-guard: prove the scan is not silently empty."""
+        """Guard-of-the-guard: prove the scan is not silently empty.
+
+        [#a131g1] The central floor was 50, calibrated when the directory still
+        held ~190 modules. A-131 drained it to the app-wide guards, so that
+        number had become an assertion about the OLD inventory size rather than
+        about the scan working — it fails on a successful drain. The floor is
+        now 10, which still catches a scan that silently returns nothing (a
+        broken glob, a moved _TESTS_DIR) without re-encoding an inventory count
+        that this very card exists to shrink. The colocated floor keeps its 50:
+        that side only grows.
+        """
         central = _central_tests()
-        self.assertGreater(len(central), 50, "central scan returned implausibly few files")
+        self.assertGreater(len(central), 10, "central scan returned implausibly few files")
         self.assertGreater(
             len(_colocated_tests()), 50, "colocated scan returned implausibly few files"
         )

@@ -26,7 +26,7 @@ Baselines. Widening check 1 to tests added exactly 4 names. One
 (``tearDownModule``, bound in 17 files) is unittest dispatch and went to
 DISPATCH_NAMES; the other 3 are the real finding, frozen in _DUP_NAME_BASELINE: a
 test module binds a module-level unwrapping shim under the SAME public name as the
-production Number Card method it wraps (tests/test_dashboard_arrivals.py:24
+production Number Card method it wraps (habitat/api/test_dashboard_arrivals.py:24
 ``get_arrivals_today`` returns ``habitat.api.dashboard.get_arrivals_today()["value"]``).
 Confusing at a grep but harmless — frozen, not fixed, because renaming those shims
 belongs to the owner of those test files, not to the guard.
@@ -226,15 +226,15 @@ _DUP_NAME_BASELINE = {
     # [#a170b1] The 3 names widening to tests added (see docstring).
     "get_arrivals_today": [
         "habitat/api/dashboard.py",
-        "tests/test_dashboard_arrivals.py",
+        "habitat/api/test_dashboard_arrivals.py",
     ],
     "get_buildings_over_threshold": [
         "habitat/api/dashboard.py",
-        "tests/test_dashboard_buildings_over_threshold.py",
+        "habitat/api/test_dashboard_buildings_over_threshold.py",
     ],
     "get_pending_on_manifest": [
         "habitat/api/dashboard.py",
-        "tests/test_dashboard_arrivals.py",
+        "habitat/api/test_dashboard_arrivals.py",
     ],
     "get_default_company": [
         "apex_core/doctype/habitat_settings/habitat_settings.py",
@@ -464,56 +464,56 @@ _COPY_PASTE_BASELINE = frozenset(
         frozenset(
             {
                 ("tests/factories.py", "make_project"),
-                ("tests/test_dispatch_trip_workflow.py", "_project"),
-                ("tests/test_driver_clearance_workflow.py", "_project"),
-                ("tests/test_fuel_claim_workflow.py", "_project"),
-                ("tests/test_fuel_exception_case_workflow.py", "_project"),
-                ("tests/test_fuel_request_workflow.py", "_project"),
-                ("tests/test_operations_alert_actions.py", "_project"),
+                ("salis/doctype/dispatch_trip/test_dispatch_trip_workflow.py", "_project"),
+                ("salis/doctype/driver_clearance/test_driver_clearance_workflow.py", "_project"),
+                ("salis/doctype/fuel_claim/test_fuel_claim_workflow.py", "_project"),
+                ("salis/doctype/fuel_exception_case/test_fuel_exception_case_workflow.py", "_project"),
+                ("salis/doctype/fuel_request/test_fuel_request_workflow.py", "_project"),
+                ("salis/api/test_operations_alert_actions.py", "_project"),
                 ("tests/test_report_scope.py", "_project"),
-                ("tests/test_salis_controls.py", "_project"),
-                ("tests/test_salis_fleet_scope.py", "_project"),
-                ("tests/test_salis_payment_approval_scope.py", "_project"),
-                ("tests/test_salis_payment_request_workflow.py", "_project"),
-                ("tests/test_salis_scoping.py", "_project"),
-                ("tests/test_salis_security.py", "_project"),
-                ("tests/test_salis_state_flow.py", "_get_or_create_project"),
-                ("tests/test_salis_tenant_scope.py", "_project"),
-                ("tests/test_transport_request_workflow.py", "_project"),
-                ("tests/test_workflow_submit_guard.py", "_project"),
+                ("salis/api/driver_portal/test_salis_controls.py", "_project"),
+                ("salis/test_salis_fleet_scope.py", "_project"),
+                ("salis/test_salis_payment_approval_scope.py", "_project"),
+                ("salis/doctype/salis_payment_request/test_salis_payment_request_workflow.py", "_project"),
+                ("salis/test_salis_scoping.py", "_project"),
+                ("salis/test_salis_security.py", "_project"),
+                ("salis/doctype/dispatch_trip/test_salis_state_flow.py", "_get_or_create_project"),
+                ("salis/test_salis_tenant_scope.py", "_project"),
+                ("salis/web_form/transport_request/test_transport_request_workflow.py", "_project"),
+                ("apex_core/utils/test_workflow_submit_guard.py", "_project"),
             }
         ),
         # A vehicle fixture builder pasted across 6 Salis workflow tests.
         frozenset(
             {
-                ("tests/test_driver_clearance_workflow.py", "_vehicle"),
-                ("tests/test_fuel_claim_workflow.py", "_vehicle"),
-                ("tests/test_fuel_exception_case_workflow.py", "_vehicle"),
-                ("tests/test_fuel_request_workflow.py", "_vehicle"),
-                ("tests/test_salis_controls.py", "_vehicle"),
-                ("tests/test_transport_request_workflow.py", "_vehicle"),
+                ("salis/doctype/driver_clearance/test_driver_clearance_workflow.py", "_vehicle"),
+                ("salis/doctype/fuel_claim/test_fuel_claim_workflow.py", "_vehicle"),
+                ("salis/doctype/fuel_exception_case/test_fuel_exception_case_workflow.py", "_vehicle"),
+                ("salis/doctype/fuel_request/test_fuel_request_workflow.py", "_vehicle"),
+                ("salis/api/driver_portal/test_salis_controls.py", "_vehicle"),
+                ("salis/web_form/transport_request/test_transport_request_workflow.py", "_vehicle"),
             }
         ),
         frozenset(
             {
                 ("salis/doctype/dispatch_trip/test_driver_user_fetch.py", "_vehicle"),
                 ("salis/doctype/fuel_request/test_rider_leave_guard.py", "_vehicle"),
-                ("tests/test_fuel_request_unified.py", "_vehicle"),
+                ("salis/test_fuel_request_unified.py", "_vehicle"),
             }
         ),
         # A scoped-user context manager pasted into 3 Habitat scope tests.
         frozenset(
             {
-                ("tests/test_arrivals_card_scope.py", "__enter__"),
-                ("tests/test_arrivals_custody_report_scope.py", "__enter__"),
-                ("tests/test_habitat_tenant_scope.py", "__enter__"),
+                ("habitat/api/test_arrivals_card_scope.py", "__enter__"),
+                ("habitat/api/test_arrivals_custody_report_scope.py", "__enter__"),
+                ("habitat/test_habitat_tenant_scope.py", "__enter__"),
             }
         ),
         frozenset(
             {
-                ("tests/test_fuel_request_unified.py", "_purge"),
-                ("tests/test_fuel_request_workflow.py", "_purge"),
-                ("tests/test_operations_alert_resolution.py", "_purge_request"),
+                ("salis/test_fuel_request_unified.py", "_purge"),
+                ("salis/doctype/fuel_request/test_fuel_request_workflow.py", "_purge"),
+                ("salis/tasks/test_operations_alert_resolution.py", "_purge_request"),
             }
         ),
         # Three helpers pasted wholesale between the rental accrual/settlement pair.
@@ -537,14 +537,14 @@ _COPY_PASTE_BASELINE = frozenset(
         ),
         frozenset(
             {
-                ("tests/test_dispatch_trip_workflow.py", "_purge_trip"),
-                ("tests/test_salis_state_flow.py", "_purge_trip"),
+                ("salis/doctype/dispatch_trip/test_dispatch_trip_workflow.py", "_purge_trip"),
+                ("salis/doctype/dispatch_trip/test_salis_state_flow.py", "_purge_trip"),
             }
         ),
         frozenset(
             {
-                ("tests/test_dispatch_trip_workflow.py", "_purge_tr"),
-                ("tests/test_salis_state_flow.py", "_purge_tr_and_rp"),
+                ("salis/doctype/dispatch_trip/test_dispatch_trip_workflow.py", "_purge_tr"),
+                ("salis/doctype/dispatch_trip/test_salis_state_flow.py", "_purge_tr_and_rp"),
             }
         ),
         # These two are this guard family duplicating ITSELF — the blind spot's own
@@ -565,13 +565,13 @@ _COPY_PASTE_BASELINE = frozenset(
         frozenset(
             {
                 ("apex_core/test_payment_router.py", "_set_gl_posting"),
-                ("tests/test_routed_payment_serialization.py", "_set_gl_posting"),
+                ("apex_core/test_routed_payment_serialization.py", "_set_gl_posting"),
             }
         ),
         frozenset(
             {
                 ("habitat/doctype/custody_handover/test_custody_handover.py", "_receive"),
-                ("tests/test_custody_handover_confirm_race.py", "_receive"),
+                ("habitat/api/test_custody_handover_confirm_race.py", "_receive"),
             }
         ),
         frozenset(
@@ -583,7 +583,7 @@ _COPY_PASTE_BASELINE = frozenset(
         frozenset(
             {
                 ("habitat/doctype/material_transfer/test_stock_source_locking.py", "_func_source"),
-                ("tests/test_boarding_race.py", "_func_source"),
+                ("salis/api/test_boarding_race.py", "_func_source"),
             }
         ),
         frozenset(
@@ -594,20 +594,20 @@ _COPY_PASTE_BASELINE = frozenset(
         ),
         frozenset(
             {
-                ("tests/test_fleet_alert_notifications.py", "_recipients"),
+                ("salis/notification/test_fleet_alert_notifications.py", "_recipients"),
                 ("tests/test_request_trip_notifications.py", "_recipients"),
             }
         ),
         frozenset(
             {
-                ("tests/test_habitat_tenant_scope.py", "_scoped_supervisor"),
-                ("tests/test_housing_count.py", "_scoped_supervisor"),
+                ("habitat/test_habitat_tenant_scope.py", "_scoped_supervisor"),
+                ("habitat/api/test_housing_count.py", "_scoped_supervisor"),
             }
         ),
         frozenset(
             {
-                ("tests/test_masar_trip_rating.py", "_token_for"),
-                ("tests/test_masar_worker_boarding_confirm.py", "_token_for"),
+                ("salis/api/test_masar_trip_rating.py", "_token_for"),
+                ("salis/api/test_masar_worker_boarding_confirm.py", "_token_for"),
             }
         ),
         # Single-member group: two classes in ONE file share a _get_doc body, so the

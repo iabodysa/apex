@@ -43,7 +43,7 @@ include = ["apex*"]
 #
 # All four modules are listed: colocated test_*.py live under salis/apex_core/logistay
 # too, and omitting them made a collection silently miss 58 of the 137 colocated tests.
-testpaths = ["apex/tests", "apex/habitat", "apex/salis", "apex/apex_core", "apex/logistay"]
+testpaths = ["apex"]
 python_files = "test_*.py"
 addopts = "--tb=short"
 

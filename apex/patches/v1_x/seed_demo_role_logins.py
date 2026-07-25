@@ -36,7 +36,7 @@ UNREGISTERED-PATCH: a demo seeder deliberately kept out of the migrate path
     the reason — the module simply must never be reachable from patches.txt.
 COVERED-BY: a manual, developer-only run on a developer_mode site —
     ``bench --site <site> execute apex.patches.v1_x.seed_demo_role_logins.execute``.
-    ``apex/tests/test_seed_demo_role_logins_gate.py`` reds the build if this
+    ``apex/patches/v1_x/test_seed_demo_role_logins_gate.py`` reds the build if this
     module is ever re-added to patches.txt as an active entry.
 """
 

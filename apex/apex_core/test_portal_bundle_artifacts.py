@@ -20,7 +20,7 @@ emitted there that should never have been public.
      authenticated pages. Both families are vendored under apex/public/vendor/ and
      declared by the hosting shell instead.
 
-Companion to apex/tests/test_www_no_external_cdn_assets.py, which pins the same
+Companion to apex/www/test_www_no_external_cdn_assets.py, which pins the same
 no-CDN invariant for apex/www/ and explicitly leaves the built bundles to this guard.
 
 The Jinja scan is delimiter-specific on purpose. ``{{``, ``}}``, ``{#`` and ``%}`` all

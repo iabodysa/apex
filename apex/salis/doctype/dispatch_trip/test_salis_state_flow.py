@@ -11,8 +11,8 @@ These tests focus on the *controller-level* state guards (``_guard_initial_statu
 ``_enforce_dispatch_readiness``, ``_require_completion_notes``, odometer validation)
 that live in the Dispatch Trip controller independently of the native workflow.
 Full workflow-transition and side-effect tests (happy path, cancel reversal, TR
-fulfilment, ledger posting) live in tests/test_dispatch_trip_workflow.py; the two
-suites are complementary, not overlapping.
+fulfilment, ledger posting) live in the sibling test_dispatch_trip_workflow.py;
+the two suites are complementary, not overlapping.
 
 State machine summary (owned by Dispatch Trip Workflow):
 

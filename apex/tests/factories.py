@@ -508,7 +508,7 @@ class WorkerTripMixin:
     handle records, registering cleanup. Record creation is delegated to
     ``make_worker_trip``; everything is created as Administrator.
 
-    Promoted from tests/test_masar_worker_movement.py (P-135) so the Masar test
+    Promoted from salis/api/test_masar_worker_movement.py (P-135) so the Masar test
     modules share one mixin without a cross-test-module import."""
 
     def _worker_trip(self, driver, project, building, workers, route_name):

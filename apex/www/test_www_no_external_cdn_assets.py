@@ -47,7 +47,7 @@ and their sources under frontend/*/src/index.css still @import the same Google F
 URL. Removing that needs a frontend rebuild, so this guard covers apex/www/ only and
 must not be read as proof that a served page makes no font request.
 
-Run standalone:  python3 -m unittest apex.tests.test_www_no_external_cdn_assets -v
+Run standalone:  python3 -m unittest apex.www.test_www_no_external_cdn_assets -v
 """
 
 import re
