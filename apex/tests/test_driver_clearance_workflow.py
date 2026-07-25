@@ -35,7 +35,7 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     resolve_driver_token,
 )
 from apex.tests._helpers import _user
-from apex.tests.factories import make_project
+from apex.tests.factories import make_project, make_vehicle
 
 WORKFLOW = "Driver Clearance Workflow"
 
@@ -107,14 +107,6 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         if vehicle:
             frappe.db.set_value("Salis Driver", d, "current_vehicle", vehicle)
         return d
-
-    def _vehicle(self, plate):
-        v = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-        if not v:
-            v = frappe.get_doc(
-                {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
-            ).insert(ignore_permissions=True).name
-        return v
 
     def _new_clearance(self, driver, returned=True, **overrides):
         """A draft Driver Clearance. When ``returned`` is True the three return
@@ -228,7 +220,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
     # [#3i99er]
 
     def test_clear_releases_driver_and_clears_vehicle(self):
-        vehicle = self._vehicle("DC-REL-1")
+        vehicle = make_vehicle("DC-REL-1")
         driver = self._driver("DC Driver Release", vehicle=vehicle)
         self.assertEqual(
             frappe.db.get_value("Salis Driver", driver, "current_vehicle"), vehicle

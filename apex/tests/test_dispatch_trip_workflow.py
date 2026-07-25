@@ -39,7 +39,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex.tests._helpers import _user
-from apex.tests.factories import make_project
+from apex.tests.factories import make_project, make_vehicle
 
 WORKFLOW = "Dispatch Trip Workflow"
 
@@ -98,20 +98,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         frappe.set_user("Administrator")
 
     # [#f9hua6]
-
-    @staticmethod
-    def _vehicle(plate, odometer=0):
-        v = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-        if not v:
-            v = frappe.get_doc({
-                "doctype": "Salis Vehicle",
-                "plate_number": plate,
-                "status": "Active",
-                "odometer": odometer,
-            }).insert(ignore_permissions=True).name
-        else:
-            frappe.db.set_value("Salis Vehicle", v, "odometer", odometer)
-        return v
 
     @staticmethod
     def _driver(name):
@@ -234,7 +220,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
 
     def test_walk_to_completed_drives_tr_to_fulfilled_and_updates_odometer(self):
         tr, rp = self._scheduled_tr()
-        vehicle = self._vehicle("DT-WF-1", odometer=100)
+        vehicle = make_vehicle("DT-WF-1", odometer=100)
         driver = self._driver("DT WF Driver 1")
         dt = self._new_trip(rp, vehicle, driver)
         self.assertEqual(dt.docstatus, 0)
@@ -284,7 +270,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
 
     def test_cancel_completed_trip_reverses_fulfilment(self):
         tr, rp = self._scheduled_tr()
-        vehicle = self._vehicle("DT-WF-2", odometer=500)
+        vehicle = make_vehicle("DT-WF-2", odometer=500)
         driver = self._driver("DT WF Driver 2")
         dt = self._new_trip(rp, vehicle, driver)
 
@@ -324,7 +310,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
 
     def test_illegal_jump_planned_to_completed_blocked(self):
         tr, rp = self._scheduled_tr()
-        vehicle = self._vehicle("DT-WF-3", odometer=0)
+        vehicle = make_vehicle("DT-WF-3", odometer=0)
         driver = self._driver("DT WF Driver 3")
         dt = self._new_trip(rp, vehicle, driver)
 
@@ -341,7 +327,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         draft -> Cancelled (docstatus 0 -> 2) transition is forbidden by Frappe,
         so it is intentionally absent. A draft trip is called off by deletion."""
         tr, rp = self._scheduled_tr()
-        vehicle = self._vehicle("DT-WF-4", odometer=0)
+        vehicle = make_vehicle("DT-WF-4", odometer=0)
         driver = self._driver("DT WF Driver 4")
         dt = self._new_trip(rp, vehicle, driver)
 

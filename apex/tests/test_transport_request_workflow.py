@@ -29,7 +29,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex.tests._helpers import _user
-from apex.tests.factories import make_project
+from apex.tests.factories import make_project, make_vehicle
 
 WORKFLOW = "Transport Request Workflow"
 
@@ -294,7 +294,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         tr.reload()
         self.assertEqual(tr.status, "Scheduled")
 
-        vehicle = self._vehicle("WF-TRIP-1")
+        vehicle = make_vehicle("WF-TRIP-1")
         driver = self._driver("WF Driver 1")
         dt = frappe.get_doc({
             "doctype": "Dispatch Trip",
@@ -331,15 +331,6 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         tr.reload()
         self.assertEqual(tr.status, "Scheduled")
         self.assertIsNone(tr.dispatch_trip)
-
-    @staticmethod
-    def _vehicle(plate):
-        v = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-        if not v:
-            v = frappe.get_doc({
-                "doctype": "Salis Vehicle", "plate_number": plate, "status": "Active",
-            }).insert(ignore_permissions=True).name
-        return v
 
     @staticmethod
     def _driver(name):

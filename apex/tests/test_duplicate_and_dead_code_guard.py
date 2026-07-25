@@ -37,7 +37,7 @@ tests/factories.py (P-135's shared home). A-176 is draining that set: each batch
 promotes one helper into factories.py (or a non-``test_`` sibling, since
 test_no_cross_test_imports.py forbids a test module importing a test module), points
 every copy at it, and deletes the group from _COPY_PASTE_BASELINE in the same commit,
-so the frozen set only ever shrinks. Remaining test groups: 20 / 46 functions.
+so the frozen set only ever shrinks. Remaining test groups: 18 / 37 functions.
 
   1. TestDuplicateTopLevelFunctionNames — two different files each bind
      a same-named PUBLIC module-level function. Scoped to module level (a Document
@@ -459,24 +459,6 @@ _COPY_PASTE_BASELINE = frozenset(
             }
         ),
         # --- Tests (frozen 2026-07-25 by A-170; drained by A-176) ---
-        # A vehicle fixture builder pasted across 6 Salis workflow tests.
-        frozenset(
-            {
-                ("tests/test_driver_clearance_workflow.py", "_vehicle"),
-                ("tests/test_fuel_claim_workflow.py", "_vehicle"),
-                ("tests/test_fuel_exception_case_workflow.py", "_vehicle"),
-                ("tests/test_fuel_request_workflow.py", "_vehicle"),
-                ("tests/test_salis_controls.py", "_vehicle"),
-                ("tests/test_transport_request_workflow.py", "_vehicle"),
-            }
-        ),
-        frozenset(
-            {
-                ("salis/doctype/dispatch_trip/test_driver_user_fetch.py", "_vehicle"),
-                ("salis/doctype/fuel_request/test_rider_leave_guard.py", "_vehicle"),
-                ("tests/test_fuel_request_unified.py", "_vehicle"),
-            }
-        ),
         # A scoped-user context manager pasted into 3 Habitat scope tests.
         frozenset(
             {

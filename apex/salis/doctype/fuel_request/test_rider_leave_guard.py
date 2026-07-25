@@ -44,15 +44,6 @@ test_ignore = [
 ]
 
 
-def _vehicle(plate):
-    name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-    if not name:
-        name = frappe.get_doc(
-            {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
-        ).insert(ignore_permissions=True).name
-    return name
-
-
 def _driver(full_name, status="Active", employee=None, supervisor=None):
     name = frappe.db.get_value("Salis Driver", {"full_name": full_name}, "name")
     if not name:
@@ -154,7 +145,7 @@ class TestRiderLeaveGuard(FrappeTestCase):
 
     def test_fuel_request_rejected_for_onleave_rider(self):
         driver = _driver("T119 Fuel OnLeave", status="On Leave", supervisor=self.supervisor)
-        vehicle = _vehicle("T119-FUEL-1")
+        vehicle = factories.make_vehicle("T119-FUEL-1")
         fr = frappe.get_doc(
             {
                 "doctype": "Fuel Request",
@@ -186,7 +177,7 @@ class TestRiderLeaveGuard(FrappeTestCase):
 
     def test_vehicle_assignment_rejected_for_inactive_rider(self):
         driver = _driver("T119 VA Stopped", status="Stopped")
-        vehicle = _vehicle("T119-VA-1")
+        vehicle = factories.make_vehicle("T119-VA-1")
         va = frappe.get_doc(
             {
                 "doctype": "Vehicle Assignment",
@@ -202,7 +193,7 @@ class TestRiderLeaveGuard(FrappeTestCase):
     def test_vehicle_handover_rejected_when_to_driver_onleave(self):
         good = _driver("T119 HO From", status="Active")
         on_leave = _driver("T119 HO To OnLeave", status="On Leave")
-        vehicle = _vehicle("T119-HO-1")
+        vehicle = factories.make_vehicle("T119-HO-1")
         ho = frappe.get_doc(
             {
                 "doctype": "Vehicle Handover",
@@ -218,7 +209,7 @@ class TestRiderLeaveGuard(FrappeTestCase):
 
     def test_active_rider_fuel_request_passes(self):
         driver = _driver("T119 Fuel Active", status="Active")
-        vehicle = _vehicle("T119-FUEL-OK")
+        vehicle = factories.make_vehicle("T119-FUEL-OK")
         fr = frappe.get_doc(
             {
                 "doctype": "Fuel Request",

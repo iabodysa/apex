@@ -33,6 +33,7 @@ from frappe.utils import add_days, today
 from apex.salis.fuel_engine import accrue_fuel_consumption
 from apex.salis.tasks import unreverted_topup_watch
 from apex.tests._helpers import submit_via_workflow
+from apex.tests.factories import make_vehicle
 
 
 def _drive_to_done(doc):
@@ -60,15 +61,6 @@ def _drive_to_done(doc):
 		doc.status = "Done"
 		doc.save(ignore_permissions=True)
 		doc.submit()
-
-
-def _vehicle(plate):
-	name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-	if not name:
-		name = frappe.get_doc(
-			{"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
-		).insert(ignore_permissions=True).name
-	return name
 
 
 def _purge(name):
@@ -119,7 +111,7 @@ class TestFuelRequestStandard(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		frappe.set_user("Administrator")
-		cls.vehicle = _vehicle("FR STD 1")
+		cls.vehicle = make_vehicle("FR STD 1")
 
 	def _make_done_standard(self, request_date):
 		doc = frappe.get_doc({
@@ -185,7 +177,7 @@ class TestFuelRequestTopup(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		frappe.set_user("Administrator")
-		cls.vehicle = _vehicle("FR TOPUP 1")
+		cls.vehicle = make_vehicle("FR TOPUP 1")
 
 	def test_temporary_requires_revert_due_date(self):
 		doc = frappe.get_doc({
@@ -259,7 +251,7 @@ class TestFuelRequestChip(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		frappe.set_user("Administrator")
-		cls.vehicle = _vehicle("FR CHIP 1")
+		cls.vehicle = make_vehicle("FR CHIP 1")
 
 	def test_issue_chip_submits_without_evidence(self):
 		doc = frappe.get_doc({
@@ -321,7 +313,7 @@ class TestFuelRequestTypeGuards(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		frappe.set_user("Administrator")
-		cls.vehicle = _vehicle("FR GUARD 1")
+		cls.vehicle = make_vehicle("FR GUARD 1")
 
 	def test_invalid_request_type_rejected(self):
 		doc = frappe.get_doc({

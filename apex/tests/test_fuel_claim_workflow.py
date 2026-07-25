@@ -28,7 +28,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex.tests._helpers import _user
-from apex.tests.factories import make_project
+from apex.tests.factories import make_project, make_vehicle
 
 WORKFLOW = "Fuel Claim Workflow"
 
@@ -56,7 +56,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 		cls.manager_maker = _user("fcw_mgrmaker@example.com", "Fleet Manager")
 		frappe.get_doc("User", cls.manager_maker).add_roles("Fleet Project Manager")
 		cls.project = make_project("FC Workflow Project")
-		cls.vehicle = cls._vehicle("FC-WF-1")
+		cls.vehicle = make_vehicle("FC-WF-1")
 		for u in (cls.requester, cls.manager, cls.manager_maker):
 			if not frappe.db.exists(
 				"User Permission", {"user": u, "allow": "Project", "for_value": cls.project}
@@ -89,15 +89,6 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 		frappe.set_user("Administrator")
 
 	# [#m88md8]
-
-	@staticmethod
-	def _vehicle(plate):
-		v = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-		if not v:
-			v = frappe.get_doc(
-				{"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
-			).insert(ignore_permissions=True).name
-		return v
 
 	def _new(self, requested_by=None, **overrides):
 		"""A draft Fuel Claim at Draft, stamped to ``requested_by`` (defaults to the

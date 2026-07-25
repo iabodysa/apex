@@ -162,6 +162,31 @@ def make_project(name):
     return p
 
 
+def make_vehicle(plate, odometer=None, project=None):
+    """Get-or-create an Active Salis Vehicle by ``plate_number``; return its name.
+
+    ``odometer`` / ``project`` are applied on the EXISTING row too, not only on a
+    freshly created one: the dispatch-trip workflow tests pass ``odometer=0`` to
+    assert a reading a previous module may already have moved.
+    """
+    name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
+    values = {
+        k: v for k, v in (("odometer", odometer), ("project", project)) if v is not None
+    }
+    if not name:
+        return frappe.get_doc(
+            {
+                "doctype": "Salis Vehicle",
+                "plate_number": plate,
+                "status": "Active",
+                **values,
+            }
+        ).insert(ignore_permissions=True).name
+    if values:
+        frappe.db.set_value("Salis Vehicle", name, values)
+    return name
+
+
 def make_site(name):
     """Get-or-create an Accommodation Site by ``site_name``; return its name."""
     s = frappe.db.get_value("Site", {"site_name": name}, "name")

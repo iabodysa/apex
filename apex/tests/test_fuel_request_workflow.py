@@ -31,7 +31,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex.tests._helpers import _user
-from apex.tests.factories import make_project
+from apex.tests.factories import make_project, make_vehicle
 
 WORKFLOW = "Fuel Request Workflow"
 
@@ -60,7 +60,7 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		cls.manager_maker = _user("frwf_mgrmaker@example.com", "Fleet Manager")
 		frappe.get_doc("User", cls.manager_maker).add_roles("Fleet Project Manager")
 		cls.project = make_project("FR Workflow Project")
-		cls.vehicle = cls._vehicle("FR-WF-1")
+		cls.vehicle = make_vehicle("FR-WF-1")
 		# [#pwic2j]
 		for u in (cls.requester, cls.manager, cls.manager_maker):
 			if not frappe.db.exists(
@@ -94,15 +94,6 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		frappe.set_user("Administrator")
 
 	# [#m88md8]
-
-	@staticmethod
-	def _vehicle(plate):
-		v = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-		if not v:
-			v = frappe.get_doc(
-				{"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
-			).insert(ignore_permissions=True).name
-		return v
 
 	def _quota(self):
 		"""A fresh Active Fuel Quota for the test vehicle/project."""
