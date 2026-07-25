@@ -128,6 +128,11 @@ jobs:
 
       - name: Create bench
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.base_url == '' }}
+        # DELIBERATELY UNPINNED — the reasoning lives in full on the same step in
+        # test.yml. In short: version-15 HEAD at job time is the framework the app must
+        # ship against, a pin would have hidden the A-155 order_by allowlist break
+        # instead of catching it, and the drift is made safe by the next step recording
+        # which version a run actually resolved.
         run: bench init --skip-redis-config-generation --frappe-branch version-15 frappe-bench
 
       - name: Configure bench Redis hosts
@@ -150,6 +155,27 @@ jobs:
           bench get-app --branch version-15 --skip-assets erpnext
           bench get-app --branch version-15 --skip-assets hrms
 
+      - name: Record the resolved framework versions
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.base_url == '' }}
+        working-directory: frappe-bench
+        # Nothing pins these three, so "which framework did this run get?" has to be
+        # answerable from the run itself. Also written to the job summary, where it
+        # survives log truncation and is readable without opening the job.
+        run: |
+          set -uo pipefail
+          {
+            echo "| app | version | commit | committed |"
+            echo "| --- | --- | --- | --- |"
+            for app in frappe erpnext hrms; do
+              d="apps/$app"
+              [ -d "$d" ] || continue
+              printf '| %s | %s | %s | %s |\n' "$app" \
+                "$(grep -m1 '^__version__' "$d/$app/__init__.py" | tr -d ' "' | cut -d= -f2)" \
+                "$(git -C "$d" rev-parse --short HEAD)" \
+                "$(git -C "$d" show -s --format=%cI HEAD)"
+            done
+          } | tee -a "${GITHUB_STEP_SUMMARY:-/dev/null}"
+
       - name: Get apex app
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.base_url == '' }}
         working-directory: frappe-bench
@@ -163,6 +189,16 @@ jobs:
           bench --site test.localhost install-app erpnext
           bench --site test.localhost install-app hrms
           bench --site test.localhost install-app apex
+          # Make a portal failure diagnosable AT ALL. On a default site a 4xx from a JSON
+          # endpoint writes its traceback nowhere: handle_exception answers it from the
+          # respond_as_json branch, which skips the stdout print (gated on
+          # `not respond_as_json`) and skips log_error_snapshot (gated on status >= 500),
+          # while allow_error_traceback defaults off so the body carries no trace either.
+          # That is why A-155's HTTP 417 left an empty serve log. These two settings give
+          # the trace a home: the response body, and a per-request line in sites/*/logs.
+          bench --site test.localhost set-config enable_frappe_logger 1
+          bench --site test.localhost execute frappe.db.set_single_value \
+            --args "('System Settings', 'allow_error_traceback', 1)"
 
       - name: Migrate (apply seeds, workflows and patches)
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.base_url == '' }}
@@ -218,6 +254,39 @@ jobs:
           SCREENSHOT_PW: ${{ secrets.SCREENSHOT_PW || secrets.ADMIN_PASSWORD }}
         run: python e2e/portal_smoke_spec.py
 
-      - name: Dump the server log on failure
+      - name: Dump the diagnostics on failure
         if: ${{ failure() && (github.event_name != 'workflow_dispatch' || inputs.base_url == '') }}
-        run: tail -n 200 /tmp/bench-serve.log
+        env:
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        # Paths are workspace-relative rather than working-directory: frappe-bench, so a
+        # failure that happened BEFORE the bench existed still runs this step.
+        run: |
+          set -uo pipefail
+          # Self-test first. `order_by=version()` is refused by the OLD function blacklist
+          # and by the NEW allowlist alike, so it is the one probe that stays deterministic
+          # across the drift this workflow tolerates: it must answer 417 carrying a
+          # readable traceback. If it does not, the dumps below prove nothing and an empty
+          # one must not be read as "no error" — that misreading is what hid A-155.
+          echo "::group::probe: a deliberately invalid order_by must return a readable traceback"
+          jar=$(mktemp)
+          curl -sS -c "$jar" -H "Host: test.localhost" \
+            --data-urlencode "usr=Administrator" --data-urlencode "pwd=${ADMIN_PASSWORD}" \
+            -o /dev/null http://127.0.0.1:8000/api/method/login || true
+          curl -sS -b "$jar" -H "Host: test.localhost" -H "Accept: application/json" \
+            --get --data-urlencode "doctype=DocType" --data-urlencode "order_by=version()" \
+            -w '\n-- probe answered HTTP %{http_code} --\n' \
+            http://127.0.0.1:8000/api/method/frappe.client.get_list || true
+          echo "::endgroup::"
+
+          echo "::group::bench serve (stdout/stderr)"
+          tail -n 200 /tmp/bench-serve.log || true
+          echo "::endgroup::"
+
+          # The site's own logs carry the server-side traceback; the serve log only ever
+          # held werkzeug's request lines, which is why the old tail came back empty.
+          for f in frappe-bench/sites/test.localhost/logs/*.log frappe-bench/logs/*.log; do
+            [ -s "$f" ] || continue
+            echo "::group::$f"
+            tail -n 200 "$f"
+            echo "::endgroup::"
+          done
