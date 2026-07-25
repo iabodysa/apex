@@ -469,7 +469,7 @@ _COPY_PASTE_BASELINE = frozenset(
                 ("tests/test_fuel_claim_workflow.py", "_project"),
                 ("tests/test_fuel_exception_case_workflow.py", "_project"),
                 ("tests/test_fuel_request_workflow.py", "_project"),
-                ("tests/test_operations_alert_actions.py", "_project"),
+                ("salis/api/test_operations_alert_actions.py", "_project"),
                 ("tests/test_report_scope.py", "_project"),
                 ("tests/test_salis_controls.py", "_project"),
                 ("tests/test_salis_fleet_scope.py", "_project"),
@@ -583,7 +583,7 @@ _COPY_PASTE_BASELINE = frozenset(
         frozenset(
             {
                 ("habitat/doctype/material_transfer/test_stock_source_locking.py", "_func_source"),
-                ("tests/test_boarding_race.py", "_func_source"),
+                ("salis/api/test_boarding_race.py", "_func_source"),
             }
         ),
         frozenset(
