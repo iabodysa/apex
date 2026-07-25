@@ -430,41 +430,14 @@ def _uncovered_units():
     }
 
 
-# [#a108b1] Baseline frozen 2026-07-25: each path was hand-confirmed to carry zero
-# test presence in all five covered-by shapes, not to be a detector gap. The guard
-# fails only when the uncovered set grows BEYOND this set (i.e. NEW untested code).
-_BASELINE = frozenset(
-    {
-        # -- non-trivial DocType controllers, no test anywhere --
-        "apex_core/doctype/apex_integration_settings/apex_integration_settings.py",
-        "apex_core/doctype/payment_routing_field_map/payment_routing_field_map.py",
-        "apex_core/doctype/salary_deduction_type_rule/salary_deduction_type_rule.py",
-        "salis/doctype/dispatch_trip_assigned_request/dispatch_trip_assigned_request.py",
-        "salis/doctype/route_assignment/route_assignment.py",
-        # -- report controllers, execute() never invoked/named in any test --
-        "habitat/report/audit_remediation_status/audit_remediation_status.py",
-        "habitat/report/cost_by_dimension/cost_by_dimension.py",
-        "habitat/report/intercompany_movement_register/intercompany_movement_register.py",
-        "habitat/report/missed_cleaning_tasks/missed_cleaning_tasks.py",
-        "habitat/report/safety_open_findings/safety_open_findings.py",
-        "salis/report/driver_clearance_register/driver_clearance_register.py",
-        "salis/report/fuel_claim_register/fuel_claim_register.py",
-        "salis/report/fuel_exception_register/fuel_exception_register.py",
-        "salis/report/movement_kpi_summary/movement_kpi_summary.py",
-        "salis/report/vehicle_utilisation/vehicle_utilisation.py",
-        "salis/report/worker_transport_plan/worker_transport_plan.py",
-        # -- utils modules with public functions, no test anywhere --
-        "apex_core/utils/addresses.py",
-        "apex_core/utils/changelog.py",
-        "apex_core/utils/email_gate.py",
-        "apex_core/utils/ledger_index.py",
-        "apex_core/utils/system_notify.py",
-        "habitat/utils/finding_fanout.py",
-        "logistay/utils/billing.py",
-        "logistay/utils/cost_center.py",
-        "logistay/utils/normalize.py",
-    }
-)
+# [#a108b1] Baseline frozen 2026-07-25, then fully drained by A-114 (2026-07-25):
+# each of the original 25 units now carries a real colocated ``test_<name>.py``
+# that exercises its behaviour, so every one is detected as covered by the
+# signals above and the baseline is empty. The guard fails only when the
+# uncovered set grows BEYOND this set (i.e. NEW untested code) — with an empty
+# baseline that means the instant any new api/doctype/report/utils unit ships
+# with no test anywhere in the tree.
+_BASELINE = frozenset()
 
 
 class TestMustTestClassification(unittest.TestCase):

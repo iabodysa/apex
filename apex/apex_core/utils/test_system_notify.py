@@ -1,0 +1,80 @@
+# Copyright (c) 2026, AFMCO and contributors
+"""Unit tests for apex_core.utils.system_notify.notify_user_system.
+
+The Notification Log write is mocked, so the disabled-user guard, the unread
+dedup, the subject clip, and the optional source-document link are exercised
+without a live site.
+"""
+
+from __future__ import annotations
+
+import unittest
+from unittest import mock
+
+from apex.apex_core.utils import system_notify
+
+
+class _FakeDoc:
+    def __init__(self, payload):
+        self.payload = payload
+
+    def insert(self, *args, **kwargs):
+        return self
+
+
+class TestNotifyUserSystem(unittest.TestCase):
+    def test_falsy_user_is_a_noop(self):
+        with mock.patch.object(system_notify, "frappe") as mf:
+            self.assertFalse(system_notify.notify_user_system(None, "Hi"))
+            mf.db.get_value.assert_not_called()
+
+    def test_disabled_user_is_a_noop(self):
+        with mock.patch.object(system_notify, "frappe") as mf:
+            mf.db.get_value.return_value = 0
+            self.assertFalse(system_notify.notify_user_system("u@x", "Hi"))
+
+    def test_enabled_user_inserts_alert(self):
+        with mock.patch.object(system_notify, "frappe") as mf:
+            mf.db.get_value.return_value = 1
+            mf.db.exists.return_value = False
+            captured = {}
+            mf.get_doc.side_effect = lambda payload: captured.update(payload) or _FakeDoc(payload)
+            self.assertTrue(system_notify.notify_user_system("u@x", "Hello", "Body"))
+            self.assertEqual(captured["for_user"], "u@x")
+            self.assertEqual(captured["type"], "Alert")
+            self.assertEqual(captured["subject"], "Hello")
+            self.assertEqual(captured["email_content"], "Body")
+
+    def test_duplicate_unread_alert_is_skipped(self):
+        with mock.patch.object(system_notify, "frappe") as mf:
+            mf.db.get_value.return_value = 1
+            mf.db.exists.return_value = True
+            self.assertFalse(system_notify.notify_user_system("u@x", "Hello"))
+            mf.get_doc.assert_not_called()
+
+    def test_subject_is_clipped_to_140_chars(self):
+        with mock.patch.object(system_notify, "frappe") as mf:
+            mf.db.get_value.return_value = 1
+            mf.db.exists.return_value = False
+            captured = {}
+            mf.get_doc.side_effect = lambda payload: captured.update(payload) or _FakeDoc(payload)
+            self.assertTrue(system_notify.notify_user_system("u@x", "x" * 200))
+            self.assertEqual(len(captured["subject"]), 140)
+
+    def test_source_document_link_added_when_both_present(self):
+        with mock.patch.object(system_notify, "frappe") as mf:
+            mf.db.get_value.return_value = 1
+            mf.db.exists.return_value = False
+            captured = {}
+            mf.get_doc.side_effect = lambda payload: captured.update(payload) or _FakeDoc(payload)
+            self.assertTrue(
+                system_notify.notify_user_system(
+                    "u@x", "Hi", document_type="Building", document_name="B-1"
+                )
+            )
+            self.assertEqual(captured["document_type"], "Building")
+            self.assertEqual(captured["document_name"], "B-1")
+
+
+if __name__ == "__main__":
+    unittest.main()
