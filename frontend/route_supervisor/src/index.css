@@ -325,6 +325,14 @@ button { font-family: inherit; cursor: pointer; }
 .map-wrap { position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--c-border); }
 .map-canvas { height: 440px; width: 100%; background: var(--c-surface-2); transition: filter .3s; }
 .map-canvas.dim { filter: grayscale(0.4) opacity(0.75); }
+/* Tile-failure note. Sits above the canvas but below .map-overlay's z-index so a
+   missing GPS fix still wins, and never covers the driver marker. */
+.tile-note {
+  position: absolute; inset-block-start: 10px; inset-inline: 10px; margin: 0;
+  padding: 7px 12px; border-radius: 10px; z-index: 450; text-align: center;
+  background: color-mix(in srgb, var(--c-surface) 88%, transparent);
+  border: 1px dashed var(--c-border-strong); color: var(--c-muted); font-size: var(--fs-sm);
+}
 .map-overlay {
   position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 6px; text-align: center; padding: 20px;

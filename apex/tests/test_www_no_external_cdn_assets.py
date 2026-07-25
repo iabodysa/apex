@@ -29,6 +29,19 @@ Four invariants are pinned here:
   4. Every vendored font stylesheet a shell links exists on disk, resolves its own
      woff2 files, and keeps font-display: swap — losing swap would change first paint.
 
+Two scoping rules keep those invariants aimed at what a browser actually receives:
+
+  * Only SERVABLE suffixes are scanned. A ``.py`` under apex/www/ is a server-side
+    controller — Frappe's own ``can_render`` refuses to serve it — so a CDN hostname
+    written in its prose (e.g. the recorded acceptance of the map tile source in
+    www/masar_supervisor.py) reaches no client and is not a third-party request.
+  * "Portal shell", the population held to the vendored-font rule, is decided
+    STRUCTURALLY: a shell is a page that MOUNTS an SPA — it has the ``#app`` node
+    and the module script that loads a portal bundle. A redirect-only marker such as
+    www/housing-count.html has neither and never paints, so requiring a font
+    stylesheet of it would be a false positive. This is deliberately not a filename
+    allowlist: a new shell is covered the moment it mounts, with no list to update.
+
 Out of scope, tracked separately: the built portal bundles under apex/public/*_portal/
 and their sources under frontend/*/src/index.css still @import the same Google Fonts
 URL. Removing that needs a frontend rebuild, so this guard covers apex/www/ only and
@@ -86,9 +99,32 @@ FONT_DISPLAY = re.compile(r"font-display\s*:\s*([a-z-]+)\s*;", re.IGNORECASE)
 # An actual rule, not the words "@font-face" in a comment.
 FONT_FACE_RULE = re.compile(r"@font-face\s*\{(.*?)\}", re.DOTALL | re.IGNORECASE)
 
+# Suffixes a browser can receive from apex/www. Anything not listed here must be
+# classified below, so a new asset type cannot escape the scan by omission.
+SERVABLE_SUFFIXES = frozenset({".html", ".md", ".js", ".css", ".json", ".svg", ".txt"})
+# Server-side only: TemplatePage.can_render refuses a Python suffix outright
+# (template_page.py:70-75), so these bytes never leave the server. .pyc/.pyo are
+# the __pycache__ artefacts a local test run leaves behind.
+NON_SERVABLE_SUFFIXES = frozenset({".py", ".pyc", ".pyo"})
+
+# The two marks of a page that MOUNTS an SPA. A shell has both; a redirect marker,
+# an error stub or a plain server-rendered page has neither.
+MOUNT_NODE = re.compile(r"<div\b[^>]*\bid\s*=\s*[\"']app[\"']", re.IGNORECASE)
+BUNDLE_SCRIPT = re.compile(
+    r"<script\b[^>]*\bsrc\s*=\s*[\"']/assets/apex/[A-Za-z0-9_]+/assets/index\.js[\"']",
+    re.IGNORECASE,
+)
+
 
 def _www_files():
-    return sorted(p for p in WWW_DIR.rglob("*") if p.is_file())
+    return sorted(
+        p for p in WWW_DIR.rglob("*") if p.is_file() and p.suffix in SERVABLE_SUFFIXES
+    )
+
+
+def _is_portal_shell(text):
+    """True when the markup mounts a portal SPA — the font rule applies only here."""
+    return bool(MOUNT_NODE.search(text) and BUNDLE_SCRIPT.search(text))
 
 
 def _read(path):
@@ -104,6 +140,16 @@ def _offsite_script_srcs(text):
 
 def _vendor_path(url):
     return PUBLIC_DIR / "vendor" / url[len(VENDOR_PREFIX) :]
+
+
+def _linked_font_stylesheets(text):
+    """Vendored stylesheets the markup links whose file on disk declares @font-face.
+    leaflet.css is vendored too, so a font sheet is identified by what it declares."""
+    return [
+        href
+        for href in VENDOR_CSS_HREF.findall(text)
+        if FONT_FACE_RULE.search(_read(_vendor_path(href)))
+    ]
 
 
 class TestWwwNoExternalCdnAssets(unittest.TestCase):
@@ -170,22 +216,52 @@ class TestWwwNoExternalCdnAssets(unittest.TestCase):
         )
         self.assertEqual(VENDOR_CSS_HREF.findall(remote), [])
 
+    def test_every_suffix_under_www_is_classified_as_servable_or_not(self):
+        # Fail-closed: an unrecognised suffix means _www_files() silently stopped
+        # scanning a file, which would make every assertion above vacuous for it.
+        known = SERVABLE_SUFFIXES | NON_SERVABLE_SUFFIXES
+        stray = sorted({p.suffix for p in WWW_DIR.rglob("*") if p.is_file()} - known)
+        self.assertEqual(
+            stray,
+            [],
+            "unclassified file suffix under apex/www/ — add it to SERVABLE_SUFFIXES "
+            f"if a browser can fetch it, to NON_SERVABLE_SUFFIXES if it cannot: {stray}",
+        )
+
+    def test_a_python_controller_is_out_of_scope_but_a_template_is_not(self):
+        # A CDN host named in a controller's prose is not a request. The same string
+        # in a servable file is, so the exemption must be suffix-scoped, not global.
+        scanned = {p.suffix for p in _www_files()}
+        self.assertIn(".html", scanned)
+        self.assertNotIn(".py", scanned)
+        self.assertTrue(any(p.suffix == ".py" for p in WWW_DIR.rglob("*") if p.is_file()))
+
+    def test_detector_separates_a_mounting_shell_from_a_redirect_marker(self):
+        shell = _read(WWW_DIR / "masar-supervisor.html")
+        marker = '<!doctype html><html><body><p>Moved to <a href="/housing">/housing</a></p></body></html>'
+        self.assertTrue(_is_portal_shell(shell))
+        self.assertFalse(_is_portal_shell(marker))
+        self.assertFalse(_is_portal_shell('<div id="app"></div>'), "mount alone is not a shell")
+
+    def test_a_shell_stripped_of_its_font_link_is_still_a_shell_and_reds(self):
+        # The other direction of the narrowing: excluding redirect markers must not
+        # buy a real shell an exemption. Strip the font link and it must still fail.
+        text = _read(WWW_DIR / "masar-supervisor.html")
+        self.assertTrue(_linked_font_stylesheets(text), "fixture shell has no font link to strip")
+        stripped = re.sub(r'<link[^>]*vendor/cairo-[^>]*>', "", text)
+        self.assertTrue(_is_portal_shell(stripped), "stripping a font link must not un-classify it")
+        self.assertEqual(_linked_font_stylesheets(stripped), [])
+
     def test_every_portal_shell_links_a_vendored_font_stylesheet(self):
         # Each shell styles itself with a webfont. Dropping the CDN link without
         # putting a local one back would leave the page on the device default.
-        shells = [p for p in _www_files() if p.suffix == ".html"]
-        self.assertGreaterEqual(len(shells), 7)
-        missing = []
-        for path in shells:
-            # leaflet.css is vendored too, so identify a font sheet by what it
-            # declares rather than by where it sits.
-            fonts = [
-                href
-                for href in VENDOR_CSS_HREF.findall(_read(path))
-                if FONT_FACE_RULE.search(_read(_vendor_path(href)))
-            ]
-            if not fonts:
-                missing.append(str(path.relative_to(APP_ROOT)))
+        shells = [p for p in _www_files() if p.suffix == ".html" and _is_portal_shell(_read(p))]
+        self.assertGreaterEqual(len(shells), 7, f"shell scan found only {shells}")
+        missing = [
+            str(path.relative_to(APP_ROOT))
+            for path in shells
+            if not _linked_font_stylesheets(_read(path))
+        ]
         self.assertEqual(
             missing,
             [],
