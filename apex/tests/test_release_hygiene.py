@@ -11,6 +11,8 @@ These lock in release-hygiene invariants that must not silently regress:
      seeds, and is_standard Notification JSON recipients) — so a Frappe-core test
      fixture such as `_Test Role` can never be packaged and surfaced to operators.
   4. Every portal in the SPA lockfile CI matrix ships both its manifest and lockfile.
+  5. No Arabic reaches published source (.py/.json/.js/.html) or the published
+     documentation set (README.md and docs/) outside the localization homes.
 
 Run standalone:  python3 -m unittest tests.test_release_hygiene -v
 """
@@ -36,7 +38,6 @@ PLACEHOLDER = re.compile(r"\{\d+")
 # [#k9i6gc]
 ARABIC_HOMES = (
     os.sep + "tests" + os.sep,
-    os.sep + "translations" + os.sep,
     os.sep + "print_format" + os.sep,
     "worker_portal",
     "fleet_portal",
@@ -44,12 +45,29 @@ ARABIC_HOMES = (
     "safety_portal",
     "housing_portal",
     "route_supervisor_portal",
-    os.sep + "demo" + os.sep,
     os.sep + "change_log" + os.sep,
-    os.path.join("www", "fleet.html"),
-    os.path.join("www", "safety.html"),
+)
+
+# Homes that need not exist in every checkout, so the reachability check below
+# exempts them: translations/ holds only ar.csv, demo/ ships conditionally, and
+# node_modules/ appears only after a local install.
+OPTIONAL_ARABIC_HOMES = (
+    os.sep + "translations" + os.sep,
+    os.sep + "demo" + os.sep,
     os.sep + "node_modules" + os.sep,
 )
+
+ALL_ARABIC_HOMES = ARABIC_HOMES + OPTIONAL_ARABIC_HOMES
+
+# `.html` is in the set because the www Jinja shells and the print formats are
+# shipped source too, and an Arabic <title> there reaches every visitor.
+SCANNED_SOURCE_EXTS = ("py", "json", "js", "html")
+
+# The published Markdown set. Restricted to these two paths on purpose: globbing
+# the whole repo root would walk locally-ignored directories, so a developer's
+# tree would disagree with CI's fresh checkout.
+PUBLISHED_DOCS_DIR = os.path.join(REPO_ROOT, "docs")
+PUBLISHED_README = os.path.join(REPO_ROOT, "README.md")
 
 # [#oy1z45]
 LATIN_BRAND_SOURCES = {"AFMCO"}
@@ -476,26 +494,82 @@ class TestNoFutureDatedModified(unittest.TestCase):
 
 
 class TestNoArabicInSource(unittest.TestCase):
+    """Arabic belongs in ar.csv and the portal bundles, never in what we publish.
+
+    Two published surfaces used to escape this scan. The www Jinja shells are
+    `.html`, an extension the scan never read, so an Arabic `<title>` shipped
+    unreviewed on every portal route; and the docs/ tree GitHub renders was not
+    scanned at all. Both are covered here, so a translation review cannot be
+    skipped by choosing a different file type.
+
+    Two ARABIC_HOMES entries named those www shells. They were dead code — the
+    scan never read `.html`, so they exempted nothing — and they are retired
+    rather than kept: both shells now resolve their `<title>` through ar.csv, so
+    with `.html` scanned neither needs an exemption.
+    """
+
+    def _source_files(self):
+        """Published package source, minus the directories where Arabic belongs."""
+        paths = []
+        for ext in SCANNED_SOURCE_EXTS:
+            for path in glob.glob(os.path.join(APP_ROOT, "**", f"*.{ext}"), recursive=True):
+                if not any(home in path for home in ALL_ARABIC_HOMES):
+                    paths.append(path)
+        return paths
+
+    def _published_doc_files(self):
+        """Every file under docs/, plus README.md — no extension filter, so a
+        published page cannot dodge the scan by not being Markdown."""
+        paths = glob.glob(os.path.join(PUBLISHED_DOCS_DIR, "**", "*"), recursive=True)
+        return [p for p in paths if os.path.isfile(p)] + [PUBLISHED_README]
+
+    def test_scan_reaches_html_and_published_docs(self):
+        # Non-vacuity: a broken glob would green the scan below by finding nothing.
+        rels = {
+            os.path.relpath(p, REPO_ROOT)
+            for p in self._source_files() + self._published_doc_files()
+        }
+        for expected in (
+            os.path.join("apex", "www", "fleet-os.html"),
+            os.path.join("apex", "www", "masar-supervisor.html"),
+            os.path.join("apex", "hooks.py"),
+            os.path.join("docs", "WORKSPACE-DESIGN.md"),
+            os.path.join("docs", "training", "safety.md"),
+            "README.md",
+        ):
+            self.assertIn(expected, rels, f"the Arabic scan no longer reaches {expected}")
+
+    def test_every_arabic_home_still_matches_a_scanned_file(self):
+        """A home that matches nothing is dead code masquerading as an exemption —
+        exactly how the two www entries survived while the scan skipped .html."""
+        every = []
+        for ext in SCANNED_SOURCE_EXTS:
+            every += glob.glob(os.path.join(APP_ROOT, "**", f"*.{ext}"), recursive=True)
+        unreachable = [home for home in ARABIC_HOMES if not any(home in p for p in every)]
+        self.assertEqual(
+            unreachable,
+            [],
+            "ARABIC_HOMES entry matches no shipped file — exercise it, retire it, "
+            f"or move it to OPTIONAL_ARABIC_HOMES: {unreachable}",
+        )
+
     def test_no_arabic_in_published_code_or_metadata(self):
         """Keep Arabic in supported localization surfaces, not published source."""
         offenders = []
-        for ext in ("py", "json", "js"):
-            for path in glob.glob(os.path.join(APP_ROOT, "**", f"*.{ext}"), recursive=True):
-                if any(home in path for home in ARABIC_HOMES):
-                    continue
-                try:
-                    with open(path, encoding="utf-8") as fh:
-                        text = fh.read()
-                except (OSError, UnicodeDecodeError):
-                    continue
-                lines = [i + 1 for i, ln in enumerate(text.splitlines()) if ARABIC.search(ln)]
-                if lines:
-                    offenders.append(f"{os.path.relpath(path, APP_ROOT)}:{lines}")
+        for path in self._source_files() + self._published_doc_files():
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    text = fh.read()
+            except (OSError, UnicodeDecodeError):
+                continue
+            lines = [i + 1 for i, ln in enumerate(text.splitlines()) if ARABIC.search(ln)]
+            if lines:
+                offenders.append(f"{os.path.relpath(path, REPO_ROOT)}:{lines}")
         self.assertEqual(
             sorted(offenders),
             [],
-            "Arabic found in published source — move it to translations/ar.csv: "
-            f"{sorted(offenders)}",
+            "Arabic found in published source or documentation — move it to "
+            f"translations/ar.csv: {sorted(offenders)}",
         )
 
 

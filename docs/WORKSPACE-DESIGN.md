@@ -14,12 +14,12 @@ that owns them — `apex/habitat/workspace/<name>/<name>.json` and
 
 | Workspace | Module | Parent | `sequence_id` | Roles |
 |---|---|---|---|---|
-| **Habitat** | Habitat | — (root) | `2.0` | Accommodation Manager, Finance Manager, Resident Supervisor, Cleaning Supervisor, Safety Officer, Maintenance Technician, Internal Auditor, Fleet Manager, System Manager |
+| **Habitat** | Habitat | — (root) | `2.0` | Accommodation Manager, Finance Manager, Resident Supervisor, Cleaning Supervisor, Safety Officer, Maintenance Technician, Internal Auditor, SIM Operations User, System Manager, Fleet Manager, Administrator |
 | **Housing** | Habitat | Habitat | `2.1` | Accommodation Manager, Cleaning Supervisor, Resident Supervisor, System Manager |
 | **Safety** | Habitat | Habitat | `2.2` | Accommodation Manager, Resident Supervisor, Safety Officer, Maintenance Technician, Cleaning Supervisor, Internal Auditor, System Manager |
 | **Custody** | Habitat | Habitat | `2.3` | Accommodation Manager, Resident Supervisor, SIM Operations User, System Manager |
 | **Costs and Leasing** | Habitat | Habitat | `2.4` | Finance Manager, Accommodation Manager, System Manager |
-| **Salis** | Salis | — (root) | `3.0` | Finance Manager, Fleet Manager, Fleet Project Manager, Fleet Supervisor, System Manager |
+| **Salis** | Salis | — (root) | `3.0` | Finance Manager, Fleet Manager, Fleet Project Manager, Fleet Supervisor, Government Relations Officer, Internal Auditor, System Manager |
 | **Compliance and Rentals** | Salis | Salis | `3.2` | Fleet Manager, Fleet Supervisor, Finance Manager, Government Relations Officer, Internal Auditor, System Manager |
 | **Fleet** | Salis | Salis | `4.0` | Fleet Manager, Fleet Project Manager, Fleet Supervisor, System Manager |
 | **Backend Engines** | Habitat | — (root, `is_hidden`) | `90.1` | System Manager |
@@ -191,18 +191,19 @@ User record; nothing in Apex overwrites that choice.
 
 ## 6. Keeping this page honest
 
-Section 1 is a published description of a directory. Run this from the repository
-root after adding, renaming, or retiring a workspace; it prints nothing and exits
-`0` only when the workspaces on disk and the table above are the same set:
+Section 1 is a published description of a directory, and its `Roles` column is a
+published description of who can reach each workspace. Both are checked by
+`apex/tests/test_workspace_doc_parity.py`, which runs in CI: it parses the table
+above, reads every shipped workspace JSON, and fails the build when the two
+disagree on the workspace set, the roles granted, the owning module, the parent,
+the `sequence_id`, or the `is_hidden` annotation. Run it directly with:
 
 ```bash
-diff \
-  <(python3 -c 'import json,pathlib
-for p in pathlib.Path("apex").rglob("workspace/*/*.json"):
-    print(json.load(open(p)).get("label") or json.load(open(p))["name"])' | sort) \
-  <(grep -oE '^\| \*\*[A-Za-z ]+\*\* \| (Habitat|Salis) \|' docs/WORKSPACE-DESIGN.md \
-    | sed 's/^| \*\*//; s/\*\* |.*//' | sort)
+python3 -m unittest apex.tests.test_workspace_doc_parity -v
 ```
 
-The equivalent check for the portal route table lives in
-[README.md](../README.md#keeping-the-route-table-honest).
+A role added to a workspace JSON therefore cannot ship until this table names it.
+
+The portal route table in
+[README.md](../README.md#keeping-the-route-table-honest) still relies on the
+manual shell check documented there; it has no equivalent automated guard yet.
