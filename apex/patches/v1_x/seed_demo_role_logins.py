@@ -29,6 +29,15 @@ whole thing is a no-op unless ``developer_mode`` is on, and it is wrapped so it
 can never fail an install/migrate. All names are generic demo placeholders — no
 real personnel, contacts, or locations. The dev password is a fixed,
 non-secret demo value (a dev/demo site only) returned for the owner's recipe.
+
+UNREGISTERED-PATCH: a demo seeder deliberately kept out of the migrate path
+    (A-070) so a normal ``bench migrate`` can never create demo login personas on
+    a customer site. The ``developer_mode`` gate below is defence in depth, not
+    the reason — the module simply must never be reachable from patches.txt.
+COVERED-BY: a manual, developer-only run on a developer_mode site —
+    ``bench --site <site> execute apex.patches.v1_x.seed_demo_role_logins.execute``.
+    ``apex/tests/test_seed_demo_role_logins_gate.py`` reds the build if this
+    module is ever re-added to patches.txt as an active entry.
 """
 
 import frappe

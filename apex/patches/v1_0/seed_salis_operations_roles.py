@@ -15,10 +15,14 @@ module is now a guarded no-op). There is no consolidate_salis_roles patch — th
 earlier reference to one was stale; re-pointing any existing user off an old role
 name (on a legacy site that still has them) is an owner decision, not automated.
 
-DE-REGISTERED from patches.txt (2026-07-25): execute() is an unconditional
-`return`, so running it and not running it are indistinguishable. The module is
-kept on disk because ``salis/setup.py`` imports it in the after_install seed
-chain and ``tests/test_release_hygiene.py`` reads this file for OPERATIONS_ROLES.
+UNREGISTERED-PATCH: execute() is an unconditional `return`, so registering this
+    module in patches.txt would run a guaranteed no-op and write an empty Patch
+    Log row — running it and not running it are indistinguishable. It was
+    de-registered on 2026-07-25; only the patches.txt entry was dropped.
+COVERED-BY: ``apex/salis/setup.py`` imports this module and calls execute() in
+    the after_install Salis seed chain, and ``apex/tests/test_release_hygiene.py``
+    reads this file BY PATH for OPERATIONS_ROLES. Both references are why the
+    module must stay on disk even though registering it is pointless.
 """
 
 import frappe  # noqa: F401  (kept for parity with the seed module contract)
