@@ -113,15 +113,41 @@ class TestVehicleDamageWriteOff(_SalisMastersMixin, FrappeTestCase):
         frappe.set_user("Administrator")
 
     def test_validate_rejects_beyond_open_without_evidence(self):
+        """The CONTROLLER evidence gate must be what rejects this, not the
+        framework's mandatory check.
+
+        ``evidence`` is also ``reqd`` on the DocType and ``MandatoryError``
+        subclasses ``ValidationError``, so a bare ``assertRaises(ValidationError)``
+        here stayed green even with the controller guard deleted. Frappe runs the
+        controller ``validate()`` before ``_validate_mandatory()`` (Document.insert:
+        run_before_save_methods -> _validate), so with the guard in place the guard
+        is what fires; without it the mandatory check fires instead. Rejecting
+        ``MandatoryError`` explicitly — and pinning the guard's own message — makes
+        removing the guard fail this test. Every other field the DocType requires in
+        this state (``damage_description`` is mandatory once status leaves Open) is
+        populated so nothing but the evidence gate is left to trip.
+        """
         v = self._vehicle()
-        with self.assertRaises(frappe.ValidationError):
+        with self.assertRaises(frappe.ValidationError) as caught:
             frappe.get_doc({
                 "doctype": "Vehicle Damage Write-Off",
                 "vehicle": v,
                 "status": "Under Review",
                 "estimated_cost": 500,
+                "damage_description": "Rear bumper cracked during handover.",
                 # [#mziv9p]
             }).insert(ignore_permissions=True)
+        self.assertNotIsInstance(
+            caught.exception,
+            frappe.MandatoryError,
+            "The DocType mandatory check rejected this, not the controller's "
+            "evidence-beyond-Open guard — the guard is no longer being exercised.",
+        )
+        self.assertIn(
+            "beyond Open",
+            str(caught.exception),
+            "The rejection did not come from the controller's evidence gate.",
+        )
 
     def test_valid_open_case_inserts_and_submits(self):
         v = self._vehicle()
