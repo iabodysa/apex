@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -111,13 +112,45 @@ def scan_file(path: Path) -> list[dict]:
     return findings
 
 
+def git_files(root: Path) -> list[Path] | None:
+    """Files git accounts for under `root`, or None when git cannot answer.
+
+    Tracked plus not-yet-added files, never ignored ones. CI audits a fresh
+    checkout, so a gitignored file exists only on a developer's disk; letting one
+    set the exit code makes the local verdict disagree with the CI lane.
+    """
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "-z",
+             "--cached", "--others", "--exclude-standard"],
+            capture_output=True, check=False,
+        )
+    except OSError:
+        return None
+    if proc.returncode != 0:
+        return None
+    names = proc.stdout.decode("utf-8", "surrogateescape").split("\0")
+    return [root / name for name in names if name]
+
+
+def iter_files(root: Path) -> list[Path]:
+    """Auditable source files. Falls back to a raw walk outside a work tree (an
+    sdist or tarball), so a missing git degrades to the old behaviour, never to a
+    silent empty set that would pass everything."""
+    candidates = git_files(root)
+    if candidates is None:
+        candidates = root.rglob("*")
+    return sorted(
+        path for path in candidates
+        if path.suffix.lower() in _EXTS
+        and not any(part in str(path) for part in _EXCLUDED)
+        and path.is_file()
+    )
+
+
 def scan_tree(root: Path) -> list[dict]:
     out: list[dict] = []
-    for path in sorted(root.rglob("*")):
-        if path.suffix.lower() not in _EXTS or not path.is_file():
-            continue
-        if any(part in str(path) for part in _EXCLUDED):
-            continue
+    for path in iter_files(root):
         for finding in scan_file(path):
             out.append({"file": str(path.relative_to(root)), **finding})
     return out

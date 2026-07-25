@@ -20,6 +20,7 @@ import argparse
 import csv
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -115,8 +116,34 @@ def extract_workspace_content(content_str: str, found: set) -> None:
                 add_candidate(found, plain)
 
 
+def git_files(package: Path) -> list[Path] | None:
+    """Files git accounts for under `package`, or None when git cannot answer.
+
+    Tracked plus not-yet-added files, never ignored ones. An ignored file cuts
+    both ways here: its strings inflate MISSING (a local-only red) and they also
+    keep dead ar.csv rows out of STALE, which would hide a real CI failure.
+    """
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(package), "ls-files", "-z",
+             "--cached", "--others", "--exclude-standard"],
+            capture_output=True, check=False,
+        )
+    except OSError:
+        return None
+    if proc.returncode != 0:
+        return None
+    names = proc.stdout.decode("utf-8", "surrogateescape").split("\0")
+    return [package / name for name in names if name]
+
+
 def walk_files(package: Path):
-    for path in package.rglob("*"):
+    # Fall back to a raw walk outside a work tree (an sdist or tarball) so a
+    # missing git degrades to the old behaviour, not to an empty scan.
+    candidates = git_files(package)
+    if candidates is None:
+        candidates = package.rglob("*")
+    for path in candidates:
         if not path.is_file() or path.suffix.lower() not in SCAN_EXTS:
             continue
         if set(path.relative_to(package).parts[:-1]) & SKIP_DIRS:
