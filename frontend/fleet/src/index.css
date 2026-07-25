@@ -39,6 +39,24 @@ body {
   font-weight: var(--fw-heading); font-size: 14px;
 }
 
+/* ---------- section navigation ([#emp-nav]) ----------
+   The header nav items are real in-page anchors, so the SCROLL is native: the
+   browser handles it, it needs no script, and it self-disables under
+   prefers-reduced-motion. --emp-nav-offset is the sticky-header clearance the
+   scrolled-to card must keep; it also mirrors the IntersectionObserver
+   rootMargin in App.vue. Logical properties only, so it mirrors under RTL. */
+:root { --emp-nav-offset: 82px; }
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+.emp-card { scroll-margin-block-start: var(--emp-nav-offset); }
+/* :target is the arrival marker — the guaranteed visible change even at desktop,
+   where the fuel card shares the grid's top row and so barely moves. */
+.emp-card:target {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 20%, transparent), var(--shadow-sm);
+}
+
 /* ---------- layout ---------- */
 .emp-grid {
   display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px;
@@ -211,6 +229,24 @@ body {
 @media (max-width: 860px) {
   .emp-grid { grid-template-columns: 1fr; }
   .emp-form-card { position: static; }
+}
+/* Below --bp-tablet the shared shell hides its top nav (a portal with a router
+   would fall back to a bottom bar). This page has no router and no second nav,
+   so keep it — wrapped onto its own full-width row of the sticky header. The
+   three-part selector out-specifies the shell's scoped `display: none`; `order`
+   puts the row after brand+actions without touching the shell's slot order. */
+@media (max-width: 767px) {
+  :root { --emp-nav-offset: 122px; }
+  .fleet-shell .fleet-top { flex-wrap: wrap; row-gap: 8px; }
+  .fleet-shell .fleet-top .fleet-nav {
+    display: flex;
+    order: 3;
+    flex-basis: 100%;
+    margin-inline-start: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .fleet-shell .fleet-top .fleet-nav::-webkit-scrollbar { display: none; }
 }
 @media (max-width: 460px) {
   .emp-vehicle-hero { flex-wrap: wrap; }
