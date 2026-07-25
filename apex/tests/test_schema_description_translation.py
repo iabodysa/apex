@@ -1,22 +1,24 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Arabic-coverage guard for DocType field ``description`` prose.
+"""Arabic-coverage guard for DocType ``description`` prose, field and doctype-level.
 
-A field description is body text rendered under the input, so an untranslated one
-shows English under an Arabic label. ``scripts/check_translations.py`` does list
-``description`` in ``JSON_TEXT_KEYS``, but ``is_candidate_text`` drops any string
-over 180 characters — and a description is the one schema key that routinely runs
-past that. The cap cuts both ways: a long description is invisible to MISSING, so
-it can ship untranslated on a green gate, and it is equally absent from ``used``,
-so translating it lands the row in STALE instead. The gate therefore cannot catch
-the gap and penalises the fix, which is why this property needs its own guard.
+A description is body text rendered under the input (or in the list-view empty
+state), so an untranslated one shows English under an Arabic label.
 
-Found via Maintenance Request ``issue_type`` (229 chars, no ar.csv row) whose
-sibling ``priority`` (167 chars) was translated — the split is length, not intent.
+``scripts/check_translations.py`` used to miss these entirely: ``is_candidate_text``
+dropped any string over 180 characters, and a description is the one schema key that
+routinely runs past that. The cap cut both ways — a long description was invisible to
+MISSING, so it shipped untranslated on a green gate, and it was equally absent from
+``used``, so translating it landed the row in STALE. That is fixed: ``description``
+is now a DECLARED key there, exempt from the shape heuristics, because Frappe itself
+harvests it (translate.py) and renders it through ``__()`` at any length.
 
-REMAINDER is the tracked backlog: descriptions known to be untranslated when this
-guard landed. It is keyed by (schema path, fieldname) rather than by the English
-text so that rewording a description does not false-red the suite. The set may
-only shrink; a new untranslated description fails.
+This guard still earns its place beyond that gate: the gate drops ``&`` strings from
+MISSING (``is_auto_translatable``), and it never checks a description for a ``{0}``
+placeholder, which would reach the user unfilled.
+
+REMAINDER is the tracked backlog, keyed by (schema path, fieldname) rather than by
+the English text so that rewording a description does not false-red the suite. It is
+now drained — every shipped description has an Arabic row. The set may only shrink.
 """
 
 import csv
@@ -29,41 +31,15 @@ from frappe.tests.utils import FrappeTestCase
 
 APP = frappe.get_app_path("apex")
 
-# Untranslated when this guard landed; ar.csv rows are proposed but not yet merged.
-REMAINDER = {
-    ("apex_core/doctype/apex_integration_settings/apex_integration_settings.json", "allowed_origins"),
-    ("apex_core/doctype/apex_integration_settings/apex_integration_settings.json", "messaging_gateway_enabled"),
-    ("apex_core/doctype/apex_integration_settings/apex_integration_settings.json", "messaging_gateway_url"),
-    ("apex_core/doctype/apex_settings/apex_settings.json", "apex_settings_sec_retention"),
-    ("apex_core/doctype/habitat_settings/habitat_settings.json", "enable_email_notifications"),
-    ("apex_core/doctype/habitat_settings/habitat_settings.json", "enable_passport_mrz_ocr"),
-    ("apex_core/doctype/masar_worker_token/masar_worker_token.json", "token"),
-    ("apex_core/doctype/operations_alert/operations_alert.json", "alert_type"),
-    ("apex_core/doctype/payment_routing_settings/payment_routing_settings.json", "target_payment_doctype"),
-    ("apex_core/doctype/salary_deduction_type_rule/salary_deduction_type_rule.json", "deduction_type"),
-    ("apex_core/doctype/salary_deduction_type_rule/salary_deduction_type_rule.json", "enabled"),
-    ("apex_core/doctype/salary_deduction_type_rule/salary_deduction_type_rule.json", "max_percent_of_salary"),
-    ("apex_core/doctype/salary_deduction_type_rule/salary_deduction_type_rule.json", "salary_component"),
-    ("apex_core/doctype/salary_deduction_type_rule/salary_deduction_type_rule.json", "source_doctype"),
-    ("habitat/doctype/building_license/building_license.json", "license_type"),
-    ("habitat/doctype/facility_asset_movement/facility_asset_movement.json", "movement_category"),
-    ("habitat/doctype/floor_plan/floor_plan.json", "room_type"),
-    ("habitat/doctype/housing_checkout/housing_checkout.json", "checkout_reason"),
-    ("habitat/doctype/inspection_finding_item/inspection_finding_item.json", "generated_maintenance_request"),
-    ("habitat/doctype/maintenance_request/maintenance_request.json", "issue_type"),
-    ("habitat/doctype/maintenance_work_order/maintenance_work_order.json", "issue_type"),
-    ("habitat/doctype/resident_request/resident_request.json", "request_category"),
-    ("habitat/doctype/room/room.json", "room_type"),
-    ("habitat/doctype/safety_task_catalog/safety_task_catalog.json", "department"),
-    ("salis/doctype/driver_portal_theme/driver_portal_theme.json", "theme"),
-    ("salis/doctype/movement_cost_recovery/movement_cost_recovery.json", "needs_operations"),
-    ("salis/doctype/transport_request/transport_request.json", "service_line"),
-    ("salis/doctype/vehicle_damage_write_off/vehicle_damage_write_off.json", "needs_operations"),
-}
+# Drained: the 28 entries tracked here all carry an Arabic row as of the cap fix.
+REMAINDER: set[tuple[str, str | None]] = set()
 
 
 def _descriptions():
-    """Yield (relative schema path, fieldname, description) for every shipped DocType."""
+    """Yield (relative schema path, fieldname, description) for every shipped DocType.
+
+    A fieldname of None is the DocType's own description, which list_view.js renders
+    through ``__()`` in the empty state and so needs Arabic just as much."""
     for path in sorted(glob.glob(f"{APP}/**/doctype/*/*.json", recursive=True)):
         try:
             payload = json.loads(open(path, encoding="utf-8").read())
@@ -72,6 +48,9 @@ def _descriptions():
         if not isinstance(payload, dict) or payload.get("doctype") != "DocType":
             continue
         rel = path[len(APP) + 1:]
+        own = payload.get("description")
+        if isinstance(own, str) and own.strip():
+            yield rel, None, own.strip()
         for field in payload.get("fields") or []:
             if not isinstance(field, dict):
                 continue
@@ -96,18 +75,19 @@ class TestSchemaDescriptionTranslation(FrappeTestCase):
             for rel, fieldname, text in _descriptions()
             if not (ar.get(text) or "").strip()
         }
-        new = sorted(untranslated - REMAINDER)
+        # key=str: a doctype-level entry sorts a None fieldname against a str one.
+        new = sorted(untranslated - REMAINDER, key=str)
         self.assertEqual(
             new,
             [],
-            "DocType field descriptions with no Arabic row — an Arabic user sees "
+            "DocType descriptions with no Arabic row — an Arabic user sees "
             f"English body text under an Arabic label: {new}",
         )
 
     def test_remainder_entries_are_still_live(self):
         """Stops the backlog rotting: a removed or renamed field must leave REMAINDER."""
         live = {(rel, fieldname) for rel, fieldname, _ in _descriptions()}
-        dead = sorted(REMAINDER - live)
+        dead = sorted(REMAINDER - live, key=str)
         self.assertEqual(
             dead, [], f"REMAINDER names descriptions that no longer exist: {dead}"
         )
@@ -115,7 +95,7 @@ class TestSchemaDescriptionTranslation(FrappeTestCase):
     def test_descriptions_carry_no_static_placeholder(self):
         """A description renders verbatim, so an unfilled {0} would reach the user."""
         braced = sorted(
-            f"{rel}:{fieldname}"
+            f"{rel}:{fieldname or '<doctype>'}"
             for rel, fieldname, text in _descriptions()
             if re.search(r"\{\d+\}", text)
         )

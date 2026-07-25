@@ -7,19 +7,23 @@ on:
     branches: [apex]
 
 # Cap on ar.csv rows whose English source no longer appears in the scanned package.
-# 136 sit under it today, re-audited row by row: 16 are provably live through a shape
-# the extractor cannot read (a __() msgid containing ">", a description over 180
-# chars, onboarding intro_text, role names, a module name, hooks/changelog dict
-# values, workspace link labels the framework composes at runtime); 11 belong to
-# frappe/erpnext/hrms or to a portal SPA dictionary; 9 are superseded renames whose
-# successor row already exists; 100 have no live source found anywhere in the tree.
-# The remaining 14 is deliberate slack. Measured single-commit churn before this gate
+# 133 sit under it today (measured), down from 135: the extractor now treats a
+# `description` and any _()/__() msgid as DECLARED text and skips the shape
+# heuristics on it, so the two shapes the previous note listed as unreadable — a
+# __() msgid containing ">" and a description over 180 chars — became readable and
+# left STALE. No row was newly staled by that change.
+# The remaining rows are still live-but-unreadable shapes (onboarding intro_text,
+# role and module names, hooks/changelog dict values, workspace link labels the
+# framework composes at runtime), rows owned by frappe/erpnext/hrms or a portal SPA
+# dictionary, superseded renames whose successor row exists, and rows with no live
+# source found. That row-by-row split is inherited from the prior audit, not re-run
+# here; re-cut it by 2026-10-01.
+# 14 is deliberate slack, unchanged: measured single-commit churn before this gate
 # existed was +1, +8 and +31, so a baseline pinned to the exact count reds this lane
 # on whoever pushes the next honest label rename — a failure that reads as theirs.
-# Slack absorbs a workspace-scale rename, not a module retirement. The 100 unsourced
-# rows are queued for an owner decision; re-cut this number by 2026-10-01.
+# Slack absorbs a workspace-scale rename, not a module retirement.
 env:
-  STALE_BASELINE: 150
+  STALE_BASELINE: 147
 
 jobs:
   lint:
