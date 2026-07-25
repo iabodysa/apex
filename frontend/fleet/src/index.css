@@ -5,7 +5,10 @@
    supervisor-board CSS that used to fill this file is preserved verbatim in the
    fleet_os backup (frontend/fleet_os/src/index.css). */
 @import "@shared/tokens.css";
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+/* No font @import here. Cairo + JetBrains Mono are declared once by the hosting
+   shell (www/fleet.html -> /assets/apex/vendor/{cairo-v31,jetbrains-mono-v24}/), whose
+   vendored variable faces span 300-800 / 400-700, so this bundle never reaches a CDN. */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { min-height: 100%; }

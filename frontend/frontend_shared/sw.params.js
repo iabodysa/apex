@@ -32,7 +32,8 @@ export const SW_PARAMS = {
       "/api/method/apex.salis.api.boarding.",
       "/api/method/apex.salis.api.boarding_flow.",
     ],
-    // Driver fonts load from a CDN (not self-hosted): no precache, no cache-first.
+    // Driver's Montserrat is vendored under /assets/apex/vendor/, outside this worker's
+    // ASSET_BASE, so there is nothing here to precache or serve cache-first.
     fonts: [],
     // Driver ships Web Push (opt-in + VAPID-gated); the worker PWA does not.
     enablePush: true,
