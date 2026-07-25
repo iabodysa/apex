@@ -129,10 +129,34 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Cleaning Log",
+   "link_type": "DocType",
+   "link_to": "Cleaning Log",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Round",
+   "link_type": "DocType",
+   "link_to": "Safety Round",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "SIM Custody Assignment",
+   "link_type": "DocType",
+   "link_to": "SIM Custody Assignment",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Master Data",
    "description": "Reference data: durable records you set up once, not daily work.",
-   "idx": 6
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
@@ -140,13 +164,13 @@
    "label": "Building",
    "link_type": "DocType",
    "link_to": "Building",
-   "idx": 7
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Setup",
-   "idx": 8,
+   "idx": 11,
    "description": "Configuration and access: settings, users and roles."
   },
   {
@@ -155,7 +179,7 @@
    "label": "Habitat Settings",
    "link_type": "DocType",
    "link_to": "Habitat Settings",
-   "idx": 9
+   "idx": 12
   },
   {
    "doctype": "Workspace Link",
@@ -163,7 +187,7 @@
    "label": "Salis Settings",
    "link_type": "DocType",
    "link_to": "Salis Settings",
-   "idx": 10
+   "idx": 13
   },
   {
    "doctype": "Workspace Link",
@@ -171,7 +195,7 @@
    "label": "Apex Settings",
    "link_type": "DocType",
    "link_to": "Apex Settings",
-   "idx": 11
+   "idx": 14
   },
   {
    "doctype": "Workspace Link",
@@ -179,7 +203,7 @@
    "label": "Apex Integration Settings",
    "link_type": "DocType",
    "link_to": "Apex Integration Settings",
-   "idx": 12
+   "idx": 15
   },
   {
    "doctype": "Workspace Link",
@@ -187,7 +211,7 @@
    "label": "Payment Routing Settings",
    "link_type": "DocType",
    "link_to": "Payment Routing Settings",
-   "idx": 13
+   "idx": 16
   },
   {
    "doctype": "Workspace Link",
@@ -195,7 +219,7 @@
    "label": "Salary Deduction Policy",
    "link_type": "DocType",
    "link_to": "Salary Deduction Policy",
-   "idx": 14
+   "idx": 17
   },
   {
    "doctype": "Workspace Link",
@@ -203,7 +227,7 @@
    "label": "User",
    "link_type": "DocType",
    "link_to": "User",
-   "idx": 15
+   "idx": 18
   },
   {
    "doctype": "Workspace Link",
@@ -211,7 +235,7 @@
    "label": "Role",
    "link_type": "DocType",
    "link_to": "Role",
-   "idx": 16
+   "idx": 19
   },
   {
    "doctype": "Workspace Link",
@@ -219,13 +243,13 @@
    "label": "Role Profile",
    "link_type": "DocType",
    "link_to": "Role Profile",
-   "idx": 17
+   "idx": 20
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Logs",
-   "idx": 18,
+   "idx": 21,
    "description": "System logs: read-only diagnostics."
   },
   {
@@ -234,7 +258,7 @@
    "label": "Error Log",
    "link_type": "DocType",
    "link_to": "Error Log",
-   "idx": 19
+   "idx": 22
   },
   {
    "doctype": "Workspace Link",
@@ -242,7 +266,7 @@
    "label": "Scheduled Job Log",
    "link_type": "DocType",
    "link_to": "Scheduled Job Log",
-   "idx": 20
+   "idx": 23
   }
  ],
  "charts": [
@@ -274,5 +298,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-25 18:12:22.514064"
+ "modified": "2026-07-26 00:44:03.844136"
 }

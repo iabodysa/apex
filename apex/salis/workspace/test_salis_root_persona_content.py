@@ -30,9 +30,18 @@ masters, and it omitted ``Salis Vehicle`` and ``Salis Driver`` -- the two regist
 other Salis record links to, and the only Salis DocTypes whose reader set matches the
 root's grant list exactly. Adding them fills the card for all seven granted roles.
 
+A-178 then drained both ratchets this file carried. The ``Compliance and Rentals``
+Compliance card held exactly one link, at the istable ``Salis Vehicle Compliance``, so the
+whole card rendered for no non-Administrator; it now points at ``Salis Vehicle``, which
+embeds those rows in its ``compliance_documents`` Table field and is readable by every one
+of the six roles the workspace grants. The Habitat root's three stranded personas each
+gained the operational record their own child workspace leads with — Cleaning Log, Safety
+Round, SIM Custody Assignment — on the Operations card, which already collects the
+module's daily operational records.
+
 Nothing here widens access. ``is_item_allowed`` filters every link per user, so a link is
-only ever a shortcut to a list the user could already open by URL; the guard below asserts
-that each added link was already covered by an existing read DocPerm.
+only ever a shortcut to a list the user could already open by URL; the guards below assert
+that each added or retargeted link was already covered by an existing read DocPerm.
 
 Lives beside the workspace package it fixes: ``apex/tests/`` is closed to new modules
 (test_colocation_ratchet.py) and a cross-workspace invariant owns no single record dir.
@@ -61,31 +70,33 @@ _ALWAYS_PERMITTED = {"System Manager", "Administrator"}
 # persona open the same list by URL.
 ADDED_TO_SALIS_ROOT = ("Salis Vehicle", "Salis Driver")
 
-_HABITAT_ROOT_FROZEN = (
-    "Pre-existing when A-172 landed. The Habitat root's only cards are Accommodation, "
-    "Operations, Master Data, Setup and Logs; this role holds no read DocPerm on any of "
-    "their targets, and the Setup/Logs links (User, Role, Role Profile, Error Log, "
-    "Scheduled Job Log) are System Manager-only in frappe core. Same shape as the Salis "
-    "root gap A-172 fixed, one module over — carried by its own card. Ratchet entry."
-)
+HABITAT_ROOT = "Habitat"
+COMPLIANCE_WORKSPACE = "Compliance and Rentals"
+
+# A-178 drained both ratchets below to empty. The Habitat root's Operations card gained
+# one operational record per stranded persona, and the Compliance card was retargeted off
+# the child table onto its embedding parent. Each entry left as it was fixed, which is what
+# keeps the exact-equality assertions honest.
+ADDED_TO_HABITAT_ROOT = {
+    "Cleaning Supervisor": "Cleaning Log",
+    "Safety Officer": "Safety Round",
+    "SIM Operations User": "SIM Custody Assignment",
+}
+
+# The Compliance card's retarget. Salis Vehicle embeds the compliance rows in its
+# `compliance_documents` Table field, and its reader set covers every role the workspace
+# grants — so the card renders for all of them.
+COMPLIANCE_CARD_TARGET = "Salis Vehicle"
 
 KNOWN_EMPTY_WORKSPACE_ROLES = {
     # Frozen baseline of (workspace, role) -> reason. Exact equality: a NEW pair fails the
-    # build and a CLOSED pair fails until it is pruned from here.
-    ("Habitat", "Cleaning Supervisor"): _HABITAT_ROOT_FROZEN,
-    ("Habitat", "Safety Officer"): _HABITAT_ROOT_FROZEN,
-    ("Habitat", "SIM Operations User"): _HABITAT_ROOT_FROZEN,
+    # build and a CLOSED pair fails until it is pruned from here. Empty since A-178.
 }
 
 KNOWN_CHILD_TABLE_LINKS = {
     # A DocType link at an istable target is dead for everyone but Administrator, because
     # build_permissions never puts a child table into can_read. Not permissionable — the
-    # link has to point at the embedding parent instead. Reported, not fixed, by A-172.
-    ("Compliance and Rentals", "Salis Vehicle Compliance"): (
-        "Salis Vehicle Compliance is istable=1 with an empty permissions array; its rows "
-        "are governed by Salis Vehicle. The Compliance card link can never render for a "
-        "non-Administrator session. Needs its own card to retarget or drop the link."
-    ),
+    # link has to point at the embedding parent instead. Empty since A-178.
 }
 
 
@@ -230,6 +241,27 @@ class TestNoGrantedRoleLandsOnAnEmptyPage(unittest.TestCase):
             f"parent instead. On disk: {sorted(found)}",
         )
 
+    def test_the_detector_flags_a_planted_child_table_link(self):
+        """Proof the istable detector can still fail once its baseline is empty.
+
+        A drained ratchet that asserts equality against an empty set passes just as well
+        when the scan is broken, so the detector is driven with a planted link here.
+        """
+        istable = next(n for n, d in self.doctypes.items() if d.get("istable"))
+        planted = dict(self.workspaces)
+        page = dict(planted[SALIS_ROOT])
+        page["links"] = [
+            *(page.get("links") or []),
+            {"type": "Link", "link_type": "DocType", "link_to": istable},
+        ]
+        planted[SALIS_ROOT] = page
+        found = _child_table_links(planted, self.doctypes)
+        self.assertIn(
+            (SALIS_ROOT, istable),
+            found,
+            "the detector missed a DocType link pointing at a child table",
+        )
+
     def test_every_card_block_names_a_card_break(self):
         """A card renders only when a Card Break label equals the block's card_name."""
         mismatched = {}
@@ -315,6 +347,145 @@ class TestGovernmentRelationsOfficerReachesTheSalisRoot(unittest.TestCase):
                 with self.subTest(link=target):
                     granted = [flag for flag in write_flags if row.get(flag)]
                     self.assertEqual(granted, [], f"{target} grants {GRO_ROLE} {granted}")
+
+
+class TestComplianceCardRendersForItsGrantedRoles(unittest.TestCase):
+    """A-178's first half: the Compliance card pointed at a child table, so it rendered
+    for nobody. Asserted by name so the retarget cannot be silently reverted."""
+
+    def setUp(self):
+        self.workspaces = _workspaces()
+        self.doctypes = _doctypes()
+        self.reports = _reports()
+        self.workspace = self.workspaces[COMPLIANCE_WORKSPACE]
+
+    def _compliance_card_links(self):
+        """The links between the `Compliance` Card Break and the next one."""
+        out, inside = [], False
+        for link in self.workspace.get("links") or []:
+            if link.get("type") == "Card Break":
+                if inside:
+                    break
+                inside = link.get("label") == "Compliance"
+                continue
+            if inside:
+                out.append(link)
+        return out
+
+    def test_the_card_still_exists(self):
+        self.assertTrue(
+            self._compliance_card_links(), "the Compliance card lost all of its links"
+        )
+
+    def test_no_card_link_targets_a_child_table(self):
+        for link in self._compliance_card_links():
+            with self.subTest(link=link.get("link_to")):
+                target = self.doctypes.get(link.get("link_to"), {})
+                self.assertFalse(
+                    target.get("istable"),
+                    f"{link.get('link_to')} is istable; build_permissions never puts a "
+                    "child table into can_read, so the link renders for nobody",
+                )
+
+    def test_the_card_targets_the_embedding_parent(self):
+        targets = {link.get("link_to") for link in self._compliance_card_links()}
+        self.assertIn(COMPLIANCE_CARD_TARGET, targets)
+
+    def test_the_parent_actually_embeds_the_compliance_rows(self):
+        """The retarget is only correct if the parent is where the records live."""
+        fields = self.doctypes[COMPLIANCE_CARD_TARGET].get("fields") or []
+        embedded = [
+            f["fieldname"]
+            for f in fields
+            if f.get("fieldtype") == "Table" and f.get("options") == "Salis Vehicle Compliance"
+        ]
+        self.assertTrue(
+            embedded,
+            f"{COMPLIANCE_CARD_TARGET} has no Table field of Salis Vehicle Compliance, so "
+            "it is not the surface that shows the compliance records",
+        )
+
+    def test_every_granted_role_can_open_the_card_target(self):
+        """The goal: the card shows the records to the roles the workspace is gated to."""
+        for row in self.workspace.get("roles") or []:
+            role = row.get("role")
+            if not role or role in _ALWAYS_PERMITTED:
+                continue
+            with self.subTest(role=role):
+                self.assertIn(
+                    COMPLIANCE_CARD_TARGET,
+                    _can_read(role, self.doctypes),
+                    f"{role} is granted {COMPLIANCE_WORKSPACE} but cannot read "
+                    f"{COMPLIANCE_CARD_TARGET}, so the Compliance card is empty for it",
+                )
+
+    def test_the_retarget_exposes_nothing_new(self):
+        """is_item_allowed filters every link per user, so the link is only a shortcut to
+        a list the role could already open by URL — it must already hold the read row."""
+        rows = [
+            row
+            for row in self.doctypes[COMPLIANCE_CARD_TARGET].get("permissions") or []
+            if row.get("read") and not row.get("permlevel")
+        ]
+        self.assertTrue(rows, f"{COMPLIANCE_CARD_TARGET} ships no permlevel-0 read row")
+
+    def test_the_read_only_register_stays_on_the_reports_card(self):
+        """The card is an input screen ("open an item to create or edit records"); the
+        read-only register belongs to the Reports card and must not be duplicated here."""
+        card_targets = {link.get("link_to") for link in self._compliance_card_links()}
+        self.assertNotIn("Vehicle Compliance Register", card_targets)
+        all_reports = {
+            link.get("link_to")
+            for link in self.workspace.get("links") or []
+            if link.get("link_type") == "Report"
+        }
+        self.assertIn("Vehicle Compliance Register", all_reports)
+
+
+class TestHabitatRootPersonasCanOpenSomething(unittest.TestCase):
+    """A-178's second half: three roles were granted the Habitat root while every link on
+    it was System-Manager-only framework metadata. The root is their gateway — the desk
+    sidebar nests a child workspace only under an already-rendered parent — so each needs
+    something openable there."""
+
+    def setUp(self):
+        self.workspaces = _workspaces()
+        self.doctypes = _doctypes()
+        self.reports = _reports()
+
+    def test_each_persona_is_still_granted_the_root(self):
+        granted = {row.get("role") for row in self.workspaces[HABITAT_ROOT].get("roles") or []}
+        for role in ADDED_TO_HABITAT_ROOT:
+            with self.subTest(role=role):
+                self.assertIn(role, granted)
+
+    def test_each_persona_can_open_something_on_the_root(self):
+        for role, target in ADDED_TO_HABITAT_ROOT.items():
+            with self.subTest(role=role):
+                items = _openable_items(
+                    self.workspaces[HABITAT_ROOT], role, self.doctypes, self.reports
+                )
+                self.assertTrue(items, f"{role} lands on the Habitat root with nothing to open")
+                self.assertIn(target, items)
+
+    def test_no_persona_is_frozen_into_the_baseline(self):
+        for _workspace, role in KNOWN_EMPTY_WORKSPACE_ROLES:
+            self.assertNotIn(
+                role,
+                ADDED_TO_HABITAT_ROOT,
+                "A-178 must stay fixed in the workspace JSON, never frozen as a known gap",
+            )
+
+    def test_the_added_links_expose_nothing_new(self):
+        """Each added link was already covered by a read DocPerm the persona held."""
+        for role, target in ADDED_TO_HABITAT_ROOT.items():
+            with self.subTest(role=role):
+                self.assertIn(
+                    target,
+                    _can_read(role, self.doctypes),
+                    f"{target} was linked without a pre-existing read DocPerm for {role} — "
+                    "the link would be dead, and adding one would be a permission change",
+                )
 
 
 if __name__ == "__main__":
