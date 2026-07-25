@@ -40,7 +40,11 @@ low-false-positive proxy for "this file carries real logic":
 A unit is "covered" if ANY of the following holds, checked against every
 ``test_*.py`` file anywhere under apex/ (central ``apex/tests/`` AND any
 already-colocated file — A-108 Phase 1 relocates the former into the latter;
-this guard must recognise coverage in either home):
+this guard must recognise coverage in either home) PLUS the plain-named shared
+helpers under ``tests/`` (``source_tree.test_support_files``). A-176 proved why
+the second half matters: promoting a duplicated Goods Receipt fixture out of two
+test modules into factories.py moved the only ``"Goods Receipt"`` mention out of
+the ``test_*.py`` universe, and the guard scored a de-duplication as a lost test.
 
   a) a ``test_<name>.py`` file sits in the SAME DIRECTORY (true colocation;
      for a package ``__init__.py`` that is itself the module, ``<name>`` is
@@ -107,6 +111,7 @@ from apex.tests.source_tree import (
     production_py_files as _production_py_files,
     rel as _rel,
     test_py_files as _test_py_files,
+    test_support_files as _test_support_files,
 )
 
 # [#a108rx] Dotted apex.<...> references mentioned as plain TEXT anywhere in a
@@ -285,7 +290,7 @@ def _test_reference_index():
     basename_dirs = {}
     text_blobs = []
 
-    for tpath in _test_py_files():
+    for tpath in _test_py_files() + _test_support_files():
         tree = _parse(tpath)
         if tree is not None:
             for node in ast.walk(tree):
@@ -487,6 +492,16 @@ class TestCoverageSignals(unittest.TestCase):
         cleanly) but a made-up filename — fine, since none of these
         detectors touch the filesystem except _covered_by_doctype_name."""
         return os.path.join(REPO_ROOT, "apex", *parts)
+
+    def test_index_universe_includes_the_shared_test_helpers(self):
+        # [#a176t1] A fixture promoted into factories.py is still test presence —
+        # if this universe narrows back to test_*.py, de-duplicating reads as a
+        # lost test and the guard punishes the cleanup it should reward.
+        support = {os.path.basename(p) for p in _test_support_files()}
+        self.assertIn("factories.py", support)
+        self.assertIn("_helpers.py", support)
+        self.assertNotIn("__init__.py", support)
+        self.assertFalse(any(b.startswith("test_") for b in support))
 
     def test_covered_by_colocated_file(self):
         p = self._fake_path("salis", "widget", "widget.py")

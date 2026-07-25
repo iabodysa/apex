@@ -13,6 +13,7 @@ from apex.habitat.api.custody_handover import (
     confirm_handover,
 )
 from apex.tests.factories import ApexHabitatTestCase
+from apex.tests.factories import make_goods_receipt
 
 
 def _h(n=12):
@@ -73,16 +74,6 @@ class TestCustodyHandover(ApexHabitatTestCase):
         u.add_roles(*roles)
         return email
 
-    def _receive(self, qty=5):
-        gr = frappe.get_doc({
-            "doctype": "Goods Receipt", "naming_series": "ACC-GRN-.YYYY.-.#####",
-            "receipt_date": "2026-05-01", "intake_building": self.intake,
-            "procurement_supervisor": self.proc_user})
-        gr.append("items", {"item_type": "Custody Article", "item": self.article, "qty": qty})
-        gr.insert(ignore_permissions=True)
-        gr.submit()
-        return gr
-
     def _handover(self, qty=5):
         h = frappe.get_doc({
             "doctype": "Custody Handover", "naming_series": "ACC-HND-.YYYY.-.#####",
@@ -95,7 +86,7 @@ class TestCustodyHandover(ApexHabitatTestCase):
 
     def test_full_chain_receipt_to_otp_confirmed_handover(self):
         # [#i04hcl]
-        self._receive(5)
+        make_goods_receipt(self.intake, self.article, self.proc_user, 5)
         self.assertEqual(_store_bal(self.article, self.intake), 5.0)
 
         # [#besej4]
@@ -131,7 +122,7 @@ class TestCustodyHandover(ApexHabitatTestCase):
         self.assertEqual(_store_bal(self.article, self.intake), 0.0)
 
     def test_shipper_cannot_confirm_own_handover(self):
-        self._receive(3)
+        make_goods_receipt(self.intake, self.article, self.proc_user, 3)
         handover = self._handover(3)
         code = frappe.response.get("handover_otp")
         handover.db_set("all_items_verified", 1)
@@ -148,7 +139,7 @@ class TestCustodyHandover(ApexHabitatTestCase):
         self.assertEqual(_store_bal(self.article, self.dest), 0.0)
 
     def test_wrong_otp_does_not_post_receive_leg(self):
-        self._receive(2)
+        make_goods_receipt(self.intake, self.article, self.proc_user, 2)
         handover = self._handover(2)
         handover.db_set("all_items_verified", 1)
         handover.db_set("status", "Approved")

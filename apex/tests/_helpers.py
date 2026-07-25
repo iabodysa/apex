@@ -38,6 +38,13 @@ def notification_recipients(notification_name, doc):
     return recipients
 
 
+def set_gl_posting(enabled):
+    """Flip the app-wide enable_gl_posting flag the payment router's GL gate reads."""
+    apex = frappe.get_single("Apex Settings")
+    apex.enable_gl_posting = 1 if enabled else 0
+    apex.save(ignore_permissions=True)
+
+
 def approve_rental_settlement(rs, manager):
     """Drive a Rental Settlement Draft -> Reconciled -> Approved (which submits it)
     through its native workflow as ``manager``; returns the reloaded document.

@@ -2,6 +2,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
+from apex.tests.factories import make_maintenance_request
 
 # [#8evoal]
 test_ignore = [
@@ -97,20 +98,6 @@ class TestMaintenanceWorkOrderCancel(FrappeTestCase):
             }).insert(ignore_permissions=True, ignore_links=True)
         return "MWO-CANCEL-BLDG", "MWO-CANCEL-ROOM"
 
-    def _submit_request(self, building, room):
-        mr = frappe.get_doc({
-            "doctype": "Maintenance Request",
-            "naming_series": "MAINT-.YYYY.-.#####",
-            "building": building,
-            "room": room,
-            "reported_by": "Administrator",
-            "issue_type": "Plumbing",
-            "issue_description": "Leak under sink",
-        })
-        mr.insert(ignore_permissions=True, ignore_links=True)
-        mr.submit()
-        return mr
-
     def _submit_work_order(self, mr, building):
         wo = frappe.get_doc({
             "doctype": "Maintenance Work Order",
@@ -150,7 +137,7 @@ class TestMaintenanceWorkOrderCancel(FrappeTestCase):
         )
 
         building, room = self._ensure_location()
-        mr = self._submit_request(building, room)
+        mr = make_maintenance_request(building, room)
         wo = self._submit_work_order(mr, building)
         try:
             # [#siquc7]

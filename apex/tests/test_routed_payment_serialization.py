@@ -65,6 +65,7 @@ from apex.apex_core.payment_router import (
     SOURCE_DOCTYPE,
     route_payment,
 )
+from apex.tests._helpers import set_gl_posting
 
 SETTINGS = "Payment Routing Settings"
 # [#4bwi8x]
@@ -141,13 +142,7 @@ class TestRoutedPaymentSerialization(FrappeTestCase):
             ],
         )
         s.save(ignore_permissions=True)
-        self._set_gl_posting(True)
-
-    def _set_gl_posting(self, enabled):
-        """Flip the app-wide enable_gl_posting flag the router's GL gate reads."""
-        apex = frappe.get_single("Apex Settings")
-        apex.enable_gl_posting = 1 if enabled else 0
-        apex.save(ignore_permissions=True)
+        set_gl_posting(True)
 
     def _approved_request(self, **overrides):
         """A finance-STAMPED, submitted Salis Payment Request keyed to this test.

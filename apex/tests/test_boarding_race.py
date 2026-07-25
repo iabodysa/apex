@@ -25,7 +25,6 @@ test_stock_source_locking:
 
 from __future__ import annotations
 
-import ast
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, timeout
@@ -36,6 +35,7 @@ from apex.salis.api.boarding import (
     get_boarding_pass,
     scan_boarding_pass,
 )
+from apex.tests.source_tree import func_source
 
 # Source path resolved from the module itself so this AST guard is independent of
 # where the test file lives (it was moved out of apex/salis/api/ into apex/tests/).
@@ -253,7 +253,7 @@ class TestBoardingRace(FrappeTestCase):
     # [#tizr1n]
     def test_scan_locks_trip_before_get_or_create_log(self):
         src = _read(_BOARDING_SRC)
-        body = _func_source(src, _BOARDING_SRC, "scan_boarding_pass")
+        body = func_source(src, _BOARDING_SRC, "scan_boarding_pass")
         lock_pos = body.find('get_value("Dispatch Trip"')
         # [#1u42zt]
         lock_line = next(
@@ -276,7 +276,7 @@ class TestBoardingRace(FrappeTestCase):
     def test_get_or_create_log_uses_ignore_permissions(self):
         """Sanity: the helper still inserts the log audit-ok (the lock does not
         change the authorization model, only the ordering)."""
-        self.assertIn("ignore_permissions=True", _func_source(
+        self.assertIn("ignore_permissions=True", func_source(
             _read(_BOARDING_SRC), _BOARDING_SRC, "_get_or_create_log"))
 
 
@@ -285,10 +285,3 @@ def _read(path):
         return fh.read()
 
 
-def _func_source(src, path, name):
-    tree = ast.parse(src, filename=path)
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
-            lines = src.splitlines()
-            return "\n".join(lines[node.lineno - 1:node.end_lineno])
-    raise AssertionError(f"{name} not found in {path}")

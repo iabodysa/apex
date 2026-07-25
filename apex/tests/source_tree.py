@@ -68,6 +68,38 @@ def test_py_files():
     ]
 
 
+def test_support_files():
+    """The plain-named shared helper modules under ``tests/`` — factories.py,
+    _helpers.py, shipped_doctypes.py, this file.
+
+    Test presence lives here as much as in a ``test_*.py``: a fixture promoted out
+    of a test module into factories.py still exercises the production code it
+    builds. A coverage scan reading only ``test_*.py`` would score that promotion
+    as a LOST test and push the next author back to pasting the body inline.
+    """
+    return [
+        path
+        for path in sorted(glob.glob(os.path.join(APP_ROOT, "tests", "*.py")))
+        if not os.path.basename(path).startswith("test_")
+        and os.path.basename(path) != "__init__.py"
+    ]
+
+
+def func_source(src, path, name):
+    """The verbatim source lines of the function ``name`` in ``src``.
+
+    What the source-text guards assert against: they prove a specific line (a lock
+    clause, an ignore_permissions flag) sits inside ONE function rather than
+    anywhere in the file, which a whole-file substring check cannot tell apart.
+    """
+    tree = ast.parse(src, filename=path)
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
+            lines = src.splitlines()
+            return "\n".join(lines[node.lineno - 1:node.end_lineno])
+    raise AssertionError(f"{name} not found in {path}")
+
+
 def file_dotted_path(path):
     """``<app>.<pkg>...<basename>`` — Frappe's dotted-entrypoint convention. A
     package ``__init__.py`` IS the module, so it resolves to the package path."""

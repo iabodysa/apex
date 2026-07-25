@@ -32,11 +32,13 @@ _DUP_NAME_BASELINE holds only production parallel structure again.
 
 Widening check 2 to tests found 21 groups / 64 functions of pre-existing duplication,
 all fixture/assertion helpers pasted between test modules rather than promoted into
-tests/factories.py (P-135's shared home). A-176 is draining that set: each batch
-promotes one helper into factories.py (or a non-``test_`` sibling, since
-test_no_cross_test_imports.py forbids a test module importing a test module), points
-every copy at it, and deletes the group from _COPY_PASTE_BASELINE in the same commit,
-so the frozen set only ever shrinks. Remaining test groups: 5 / 10 functions.
+tests/factories.py (P-135's shared home). A-176 drained that set to ZERO: every one
+was promoted into factories.py, tests/_helpers.py or tests/source_tree.py — a
+non-``test_`` sibling each time, because test_no_cross_test_imports.py forbids a test
+module importing a test module — and its group left _COPY_PASTE_BASELINE in the same
+commit, so the frozen set only ever shrank. What remains below is production-only
+debt, untouched by A-176; a test-tree entry reappearing there is a regression, not a
+baseline.
 
   1. TestDuplicateTopLevelFunctionNames — two different files each bind
      a same-named PUBLIC module-level function. Scoped to module level (a Document
@@ -412,36 +414,6 @@ _COPY_PASTE_BASELINE = frozenset(
             }
         ),
         # --- Tests (frozen 2026-07-25 by A-170; drained by A-176) ---
-        frozenset(
-            {
-                ("apex_core/test_payment_router.py", "_set_gl_posting"),
-                ("tests/test_routed_payment_serialization.py", "_set_gl_posting"),
-            }
-        ),
-        frozenset(
-            {
-                ("habitat/doctype/custody_handover/test_custody_handover.py", "_receive"),
-                ("tests/test_custody_handover_confirm_race.py", "_receive"),
-            }
-        ),
-        frozenset(
-            {
-                ("habitat/doctype/maintenance_cost_ledger/test_maintenance_cost_ledger.py", "_submit_request"),
-                ("habitat/doctype/maintenance_work_order/test_maintenance_work_order.py", "_submit_request"),
-            }
-        ),
-        frozenset(
-            {
-                ("habitat/doctype/material_transfer/test_stock_source_locking.py", "_func_source"),
-                ("tests/test_boarding_race.py", "_func_source"),
-            }
-        ),
-        frozenset(
-            {
-                ("habitat/doctype/safety_finding_ledger/test_safety_finding_ledger.py", "_round"),
-                ("habitat/doctype/safety_round/test_safety_round.py", "_round"),
-            }
-        ),
     }
 )
 

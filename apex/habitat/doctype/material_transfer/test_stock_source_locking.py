@@ -19,7 +19,6 @@ first commit. This file proves three things:
 
 from __future__ import annotations
 
-import ast
 import os
 import unittest
 
@@ -31,6 +30,7 @@ from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger 
     post_stock_entry,
 )
 from apex.tests.factories import ApexHabitatTestCase
+from apex.tests.source_tree import func_source
 
 _HERE = os.path.dirname(__file__)
 _TRANSFER_CTL = os.path.normpath(os.path.join(_HERE, "material_transfer.py"))
@@ -160,7 +160,7 @@ class TestStockSourceLocking(ApexHabitatTestCase):
         for ctl, fn in ((_TRANSFER_CTL, "_assert_source_availability"),
                         (_HANDOVER_CTL, "_assert_source_availability")):
             src = _read(ctl)
-            body = _func_source(src, ctl, fn)
+            body = func_source(src, ctl, fn)
             self.assertIn(
                 "get_store_balance", body,
                 f"{os.path.basename(ctl)}:{fn} must read the source balance")
@@ -196,15 +196,6 @@ def _locked_balance(item, building, wait=True):
 def _read(path):
     with open(path, encoding="utf-8") as fh:
         return fh.read()
-
-
-def _func_source(src, path, name):
-    tree = ast.parse(src, filename=path)
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
-            lines = src.splitlines()
-            return "\n".join(lines[node.lineno - 1:node.end_lineno])
-    raise AssertionError(f"{name} not found in {path}")
 
 
 if __name__ == "__main__":

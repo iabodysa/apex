@@ -28,6 +28,7 @@ from apex.habitat.api.custody_handover import (
     confirm_handover,
 )
 from apex.tests.factories import ApexHabitatTestCase
+from apex.tests.factories import make_goods_receipt
 
 
 def _h(n=12):
@@ -85,16 +86,6 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
         u.add_roles(*roles)
         return email
 
-    def _receive(self, qty=5):
-        gr = frappe.get_doc({
-            "doctype": "Goods Receipt", "naming_series": "ACC-GRN-.YYYY.-.#####",
-            "receipt_date": "2026-05-01", "intake_building": self.intake,
-            "procurement_supervisor": self.proc_user})
-        gr.append("items", {"item_type": "Custody Article", "item": self.article, "qty": qty})
-        gr.insert(ignore_permissions=True)
-        gr.submit()
-        return gr
-
     def _approved_handover(self, qty=5):
         """A submitted, verified, Approved handover ready for OTP confirm; returns
         (doc, plaintext_code)."""
@@ -118,7 +109,7 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
 
     def test_two_correct_confirms_post_receive_leg_once(self):
         # [#du9kgd]
-        self._receive(5)
+        make_goods_receipt(self.intake, self.article, self.proc_user, 5)
         handover, code = self._approved_handover(5)
         self.assertEqual(_store_bal(self.article, self.dest), 0.0)
 
@@ -149,7 +140,7 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
 
     def test_receive_leg_guard_ignores_ship_leg(self):
         # [#e4piyg]
-        self._receive(3)
+        make_goods_receipt(self.intake, self.article, self.proc_user, 3)
         handover, _code = self._approved_handover(3)
         from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
             has_stock_entries,
@@ -165,7 +156,7 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
 
     def test_direct_reentry_into_post_is_idempotent(self):
         # [#pwenbr]
-        self._receive(4)
+        make_goods_receipt(self.intake, self.article, self.proc_user, 4)
         handover, code = self._approved_handover(4)
         frappe.set_user(self.recv_user)
         try:
@@ -180,7 +171,7 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
 
     def test_wrong_guesses_lock_out_at_max_attempts(self):
         # [#66lfnd]
-        self._receive(2)
+        make_goods_receipt(self.intake, self.article, self.proc_user, 2)
         handover, _code = self._approved_handover(2)
         frappe.set_user(self.recv_user)
         try:

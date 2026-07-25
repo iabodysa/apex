@@ -14,6 +14,7 @@ from unittest.mock import patch
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
+from apex.tests.factories import make_safety_round
 
 
 class TestSafetyRound(FrappeTestCase):
@@ -43,16 +44,6 @@ class TestSafetyRound(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-    def _round(self, **overrides):
-        data = {
-            "doctype": "Safety Round",
-            "building": self.building,
-            "round_date": today(),
-            "cadence": "Weekly",
-        }
-        data.update(overrides)
-        return frappe.get_doc(data).insert(ignore_permissions=True)
-
     def _execution(self, safety_round, status):
         return frappe.get_doc(
             {
@@ -66,18 +57,18 @@ class TestSafetyRound(FrappeTestCase):
         ).insert(ignore_permissions=True)
 
     def test_duplicate_first_round_is_blocked(self):
-        self._round()
+        make_safety_round(self.building)
         with self.assertRaises(frappe.ValidationError):
-            self._round()
+            make_safety_round(self.building)
 
     def test_reinspection_second_round_is_allowed(self):
-        self._round()
+        make_safety_round(self.building)
         # [#g7bx99]
-        second = self._round(is_reinspection=1)
+        second = make_safety_round(self.building, is_reinspection=1)
         self.assertTrue(second.name, "a marked re-inspection must be accepted")
 
     def test_overall_result_fail_when_a_task_not_done(self):
-        rnd = self._round()
+        rnd = make_safety_round(self.building)
         self._execution(rnd.name, "Good").submit()
         self._execution(rnd.name, "Not Done").submit()
         rnd.submit()
@@ -85,7 +76,7 @@ class TestSafetyRound(FrappeTestCase):
         self.assertEqual(rnd.overall_result, "Fail")
 
     def test_overall_result_needs_attention_when_a_task_poor(self):
-        rnd = self._round()
+        rnd = make_safety_round(self.building)
         self._execution(rnd.name, "Good").submit()
         self._execution(rnd.name, "Poor").submit()
         rnd.submit()
@@ -93,7 +84,7 @@ class TestSafetyRound(FrappeTestCase):
         self.assertEqual(rnd.overall_result, "Needs Attention")
 
     def test_overall_result_pass_when_all_good(self):
-        rnd = self._round()
+        rnd = make_safety_round(self.building)
         self._execution(rnd.name, "Excellent").submit()
         self._execution(rnd.name, "Good").submit()
         rnd.submit()
@@ -108,7 +99,7 @@ class TestSafetyRound(FrappeTestCase):
 
     def test_submit_publishes_safety_update(self):
         # [#pxbmyc]
-        rnd = self._round()
+        rnd = make_safety_round(self.building)
         with patch.object(frappe, "publish_realtime") as pub:
             rnd.submit()
         args, kwargs = self._safety_update_call(pub)
@@ -119,7 +110,7 @@ class TestSafetyRound(FrappeTestCase):
 
     def test_cancel_publishes_safety_update(self):
         # [#ihxzwx]
-        rnd = self._round()
+        rnd = make_safety_round(self.building)
         rnd.submit()
         with patch.object(frappe, "publish_realtime") as pub:
             rnd.cancel()

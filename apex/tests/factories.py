@@ -452,6 +452,59 @@ def make_worker_token(employee):
     )
 
 
+def make_goods_receipt(intake_building, article, procurement_supervisor, qty=5):
+    """A SUBMITTED Goods Receipt bringing ``qty`` of ``article`` into
+    ``intake_building``; returns the document. Submitted because the custody tests
+    need stock actually on hand, which only the submit posts."""
+    gr = frappe.get_doc(
+        {
+            "doctype": "Goods Receipt",
+            "naming_series": "ACC-GRN-.YYYY.-.#####",
+            "receipt_date": "2026-05-01",
+            "intake_building": intake_building,
+            "procurement_supervisor": procurement_supervisor,
+        }
+    )
+    gr.append("items", {"item_type": "Custody Article", "item": article, "qty": qty})
+    gr.insert(ignore_permissions=True)
+    gr.submit()
+    return gr
+
+
+def make_maintenance_request(building, room):
+    """A SUBMITTED Maintenance Request against ``building``/``room``; returns the
+    document. The plumbing issue text is arbitrary — every caller asserts on the
+    downstream work order / cost ledger, never on the issue itself."""
+    mr = frappe.get_doc(
+        {
+            "doctype": "Maintenance Request",
+            "naming_series": "MAINT-.YYYY.-.#####",
+            "building": building,
+            "room": room,
+            "reported_by": "Administrator",
+            "issue_type": "Plumbing",
+            "issue_description": "Leak under sink",
+        }
+    )
+    mr.insert(ignore_permissions=True, ignore_links=True)
+    mr.submit()
+    return mr
+
+
+def make_safety_round(building, **overrides):
+    """A draft Weekly Safety Round on ``building`` dated today; returns the
+    document. ``overrides`` replace any of those defaults (the re-inspection tests
+    pass ``is_reinspection=1``)."""
+    data = {
+        "doctype": "Safety Round",
+        "building": building,
+        "round_date": today(),
+        "cadence": "Weekly",
+    }
+    data.update(overrides)
+    return frappe.get_doc(data).insert(ignore_permissions=True)
+
+
 def ensure_worker_token(employee):
     """The raw Masar Worker Token string for ``employee``, reusing an existing row.
 
