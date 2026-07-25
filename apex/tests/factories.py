@@ -162,6 +162,44 @@ def make_project(name):
     return p
 
 
+def purge_doc(doctype, name):
+    """Cancel (if submitted) then force-delete ``name`` as Administrator; a no-op
+    when the record is already gone.
+
+    A submitted document cannot be force-deleted directly, and a cancel the
+    workflow guard refuses must not break an ``addCleanup`` chain, so the cancel is
+    best-effort and the delete runs either way.
+    """
+    frappe.set_user("Administrator")
+    if not frappe.db.exists(doctype, name):
+        return
+    doc = frappe.get_doc(doctype, name)
+    if doc.docstatus == 1:
+        try:
+            doc.cancel()
+        except Exception:
+            # [#kgd2nu]
+            pass
+    frappe.delete_doc(doctype, name, ignore_permissions=True, force=True)
+
+
+def purge_trip_request(tr_name, rp_name):
+    """Tear down a Transport Request together with its Route Plan.
+
+    Trip Fulfilment Ledger rows link the request, so they go first or the request's
+    delete is refused by link validation.
+    """
+    frappe.set_user("Administrator")
+    for ledger in frappe.get_all(
+        "Trip Fulfilment Ledger", filters={"transport_request": tr_name}, pluck="name"
+    ):
+        frappe.delete_doc(
+            "Trip Fulfilment Ledger", ledger, ignore_permissions=True, force=True
+        )
+    purge_doc("Route Plan", rp_name)
+    purge_doc("Transport Request", tr_name)
+
+
 def make_vehicle(plate, odometer=None, project=None):
     """Get-or-create an Active Salis Vehicle by ``plate_number``; return its name.
 

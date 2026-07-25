@@ -1,7 +1,28 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Shared test helpers for the Salis test suite."""
+"""Shared test helpers: session switching, workflow-safe submit/cancel, fixtures."""
 
 import frappe
+
+
+class as_user:
+    """Run a block as ``user``, restoring the previous session user on exit.
+
+    Lower-cased on purpose — it is only ever used as ``with as_user(u):``, never
+    held as a value. Restores rather than resetting to Administrator, so a nested
+    block returns the caller to whatever user IT was running as.
+    """
+
+    def __init__(self, user):
+        self.user = user
+
+    def __enter__(self):
+        self._prev = frappe.session.user
+        frappe.set_user(self.user)
+        return self
+
+    def __exit__(self, *exc):
+        frappe.set_user(self._prev)
+        return False
 
 
 def cancel_submitted_for_cleanup(doc):

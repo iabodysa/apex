@@ -39,7 +39,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex.tests._helpers import _user
-from apex.tests.factories import make_project, make_vehicle
+from apex.tests.factories import make_project, make_vehicle, purge_doc, purge_trip_request
 
 WORKFLOW = "Dispatch Trip Workflow"
 
@@ -142,7 +142,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         rp.submit()
         tr.reload()
         self.assertEqual(tr.status, "Scheduled")
-        self.addCleanup(lambda: self._purge_tr(tr.name, rp.name))
+        self.addCleanup(lambda: purge_trip_request(tr.name, rp.name))
         return tr, rp.name
 
     def _new_trip(self, route_plan, vehicle, driver):
@@ -154,49 +154,8 @@ class TestDispatchTripWorkflow(FrappeTestCase):
             "trip_date": frappe.utils.today(),
             "status": "Planned",
         }).insert(ignore_permissions=True)
-        self.addCleanup(lambda: self._purge_trip(dt.name))
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", dt.name))
         return dt
-
-    @staticmethod
-    def _purge_trip(name):
-        frappe.set_user("Administrator")
-        if not frappe.db.exists("Dispatch Trip", name):
-            return
-        doc = frappe.get_doc("Dispatch Trip", name)
-        if doc.docstatus == 1:
-            try:
-                doc.cancel()
-            except Exception:
-                pass
-        frappe.delete_doc("Dispatch Trip", name, ignore_permissions=True, force=True)
-
-    @staticmethod
-    def _purge_tr(tr_name, rp_name):
-        frappe.set_user("Administrator")
-        for ledger in frappe.get_all(
-            "Trip Fulfilment Ledger", filters={"transport_request": tr_name}, pluck="name"
-        ):
-            frappe.delete_doc(
-                "Trip Fulfilment Ledger", ledger, ignore_permissions=True, force=True
-            )
-        if frappe.db.exists("Route Plan", rp_name):
-            rp = frappe.get_doc("Route Plan", rp_name)
-            if rp.docstatus == 1:
-                try:
-                    rp.cancel()
-                except Exception:
-                    pass
-            frappe.delete_doc("Route Plan", rp_name, ignore_permissions=True, force=True)
-        if frappe.db.exists("Transport Request", tr_name):
-            tr = frappe.get_doc("Transport Request", tr_name)
-            if tr.docstatus == 1:
-                try:
-                    tr.cancel()
-                except Exception:
-                    pass
-            frappe.delete_doc(
-                "Transport Request", tr_name, ignore_permissions=True, force=True
-            )
 
     # [#8ggfrf]
 

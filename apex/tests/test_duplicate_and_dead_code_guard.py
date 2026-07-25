@@ -36,7 +36,7 @@ tests/factories.py (P-135's shared home). A-176 is draining that set: each batch
 promotes one helper into factories.py (or a non-``test_`` sibling, since
 test_no_cross_test_imports.py forbids a test module importing a test module), points
 every copy at it, and deletes the group from _COPY_PASTE_BASELINE in the same commit,
-so the frozen set only ever shrinks. Remaining test groups: 16 / 33 functions.
+so the frozen set only ever shrinks. Remaining test groups: 12 / 23 functions.
 
   1. TestDuplicateTopLevelFunctionNames — two different files each bind
      a same-named PUBLIC module-level function. Scoped to module level (a Document
@@ -412,21 +412,6 @@ _COPY_PASTE_BASELINE = frozenset(
             }
         ),
         # --- Tests (frozen 2026-07-25 by A-170; drained by A-176) ---
-        # A scoped-user context manager pasted into 3 Habitat scope tests.
-        frozenset(
-            {
-                ("tests/test_arrivals_card_scope.py", "__enter__"),
-                ("tests/test_arrivals_custody_report_scope.py", "__enter__"),
-                ("tests/test_habitat_tenant_scope.py", "__enter__"),
-            }
-        ),
-        frozenset(
-            {
-                ("tests/test_fuel_request_unified.py", "_purge"),
-                ("tests/test_fuel_request_workflow.py", "_purge"),
-                ("tests/test_operations_alert_resolution.py", "_purge_request"),
-            }
-        ),
         # Three helpers pasted wholesale between the rental accrual/settlement pair.
         frozenset(
             {
@@ -444,18 +429,6 @@ _COPY_PASTE_BASELINE = frozenset(
             {
                 ("salis/doctype/rental_accrual_ledger/test_rental_accrual_ledger.py", "_vehicle"),
                 ("salis/doctype/rental_settlement/test_rental_settlement.py", "_vehicle"),
-            }
-        ),
-        frozenset(
-            {
-                ("tests/test_dispatch_trip_workflow.py", "_purge_trip"),
-                ("tests/test_salis_state_flow.py", "_purge_trip"),
-            }
-        ),
-        frozenset(
-            {
-                ("tests/test_dispatch_trip_workflow.py", "_purge_tr"),
-                ("tests/test_salis_state_flow.py", "_purge_tr_and_rp"),
             }
         ),
         frozenset(

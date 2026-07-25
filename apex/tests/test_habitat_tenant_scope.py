@@ -19,6 +19,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.habitat import permissions as P
+from apex.tests._helpers import as_user
 
 # [#fq2bhs]
 SINGLE_BUILDING = [
@@ -218,7 +219,7 @@ class TestHabitatTenantScope(FrappeTestCase):
 
     @staticmethod
     def _list_names(doctype, user):
-        with _as_user(user):
+        with as_user(user):
             return {r.name for r in frappe.get_list(doctype, fields=["name"], limit_page_length=0)}
 
     # [#4sw1ec]
@@ -237,17 +238,3 @@ class TestHabitatTenantScope(FrappeTestCase):
             self.assertFalse(row.delete, "{0} must not delete history".format(role))
 
 
-class _as_user:
-    """Run a block as ``user`` then restore the session user."""
-
-    def __init__(self, user):
-        self.user = user
-
-    def __enter__(self):
-        self._prev = frappe.session.user
-        frappe.set_user(self.user)
-        return self
-
-    def __exit__(self, *exc):
-        frappe.set_user(self._prev)
-        return False

@@ -35,26 +35,11 @@ from apex.habitat.api.safety_checklist import (
     get_due_cadences,
     get_tasks_for_cadence,
 )
+from apex.tests._helpers import as_user
 
 
 def _h(n=12):
     return frappe.generate_hash(length=n).upper()
-
-
-class _as_user:
-    """Run a block as ``user`` then restore the session user."""
-
-    def __init__(self, user):
-        self.user = user
-
-    def __enter__(self):
-        self._prev = frappe.session.user
-        frappe.set_user(self.user)
-        return self
-
-    def __exit__(self, *exc):
-        frappe.set_user(self._prev)
-        return False
 
 
 class TestArrivalsCustodyReportScope(FrappeTestCase):
@@ -225,7 +210,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         # [#m2plrf]
         tw1 = self._temp_worker(self.b1)
         tw2 = self._temp_worker(self.b2)
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             parties = {r["party"] for r in search_arrivals_workers()}
         self.assertIn(tw1, parties, "scoped supervisor sees their own estate's worker")
         self.assertNotIn(
@@ -235,7 +220,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
     def test_search_workers_oversight_sees_all(self):
         tw1 = self._temp_worker(self.b1)
         tw2 = self._temp_worker(self.b2)
-        with _as_user(self.oversight):
+        with as_user(self.oversight):
             parties = {r["party"] for r in search_arrivals_workers()}
         self.assertIn(tw1, parties)
         self.assertIn(tw2, parties, "oversight role is unrestricted across estates")
@@ -244,7 +229,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         # [#ih2knq]
         self._temp_worker(self.b1)
         self._temp_worker(self.b2)
-        with _as_user(self.lonely):
+        with as_user(self.lonely):
             self.assertEqual(search_arrivals_workers(), [])
 
     # [#b8m2oe]
@@ -253,7 +238,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         tw = self._temp_worker(self.b1)
         issue1 = self._open_custody_issue(self.b1, "Temporary Worker", tw)
         issue2 = self._open_custody_issue(self.b2, "Temporary Worker", tw)
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             lines = get_party_custody("Temporary Worker", tw)["lines"]
         issues = {ln["custody_issue"] for ln in lines}
         self.assertIn(issue1, issues, "scoped supervisor sees their estate's custody")
@@ -269,7 +254,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         tw = self._temp_worker(self.b1)
         issue1 = self._open_custody_issue(self.b1, "Temporary Worker", tw)
         issue2 = self._open_custody_issue(self.b2, "Temporary Worker", tw)
-        with _as_user(self.oversight):
+        with as_user(self.oversight):
             issues = {
                 ln["custody_issue"]
                 for ln in get_party_custody("Temporary Worker", tw)["lines"]
@@ -280,13 +265,13 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
     def test_party_custody_lonely_scoped_user_sees_none(self):
         tw = self._temp_worker(self.b1)
         self._open_custody_issue(self.b1, "Temporary Worker", tw)
-        with _as_user(self.lonely):
+        with as_user(self.lonely):
             self.assertEqual(get_party_custody("Temporary Worker", tw)["lines"], [])
 
     # [#r1ur8e]
     def test_tasks_for_cadence_denies_off_scope_building(self):
         self._daily_task()
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             # [#rnrexq]
             out = get_tasks_for_cadence(self.b1, "Daily")
             self.assertEqual(out["building"], self.b1)
@@ -296,7 +281,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
 
     def test_due_cadences_denies_off_scope_building(self):
         self._daily_task()
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             out = get_due_cadences(self.b1)
             self.assertEqual(out["building"], self.b1)
             with self.assertRaises(frappe.PermissionError):
@@ -304,7 +289,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
 
     def test_safety_reads_unrestricted_for_oversight(self):
         self._daily_task()
-        with _as_user(self.oversight):
+        with as_user(self.oversight):
             # [#slk3a7]
             self.assertEqual(get_tasks_for_cadence(self.b2, "Daily")["building"], self.b2)
             self.assertEqual(get_due_cadences(self.b2)["building"], self.b2)

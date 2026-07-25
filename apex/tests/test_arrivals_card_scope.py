@@ -37,26 +37,11 @@ from apex.habitat.api.arrivals_desk import (
     send_masar_link_message,
 )
 from apex.salis.api import masar, messaging_gateway
+from apex.tests._helpers import as_user
 
 
 def _h(n=12):
     return frappe.generate_hash(length=n).upper()
-
-
-class _as_user:
-    """Run a block as ``user`` then restore the session user."""
-
-    def __init__(self, user):
-        self.user = user
-
-    def __enter__(self):
-        self._prev = frappe.session.user
-        frappe.set_user(self.user)
-        return self
-
-    def __exit__(self, *exc):
-        frappe.set_user(self._prev)
-        return False
 
 
 class TestArrivalsCardScope(FrappeTestCase):
@@ -202,7 +187,7 @@ class TestArrivalsCardScope(FrappeTestCase):
 
     # [#rhzq6s]
     def test_card_scoped_user_allowed_own_building(self):
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             card = get_arrival_card(party_type="Temporary Worker", party=self.tw1)
         # [#a3dhgo]
         self.assertEqual(card["party"], self.tw1)
@@ -211,12 +196,12 @@ class TestArrivalsCardScope(FrappeTestCase):
 
     def test_card_scoped_user_denied_other_building(self):
         """A b1-scoped supervisor cannot read a b2 worker's card at all."""
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             with self.assertRaises(frappe.PermissionError):
                 get_arrival_card(party_type="Temporary Worker", party=self.tw2)
 
     def test_card_oversight_unrestricted(self):
-        with _as_user(self.oversight):
+        with as_user(self.oversight):
             self.assertEqual(
                 get_arrival_card(party_type="Temporary Worker", party=self.tw2)["party"], self.tw2
             )
@@ -226,7 +211,7 @@ class TestArrivalsCardScope(FrappeTestCase):
         """An Employee actively housed in b2 must be denied by the scope gate."""
         emp = self._employee()
         self._house(emp, self.b2)
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             with self.assertRaises(frappe.PermissionError):
                 _assert_party_in_scope("Employee", emp)
 
@@ -234,13 +219,13 @@ class TestArrivalsCardScope(FrappeTestCase):
         """An unhoused Employee (intake) passes the scope gate so the check-in lookup
         is never broken — that path exposes only name + photo, never PII."""
         emp = self._employee()
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             _assert_party_in_scope("Employee", emp)  # [#nptgyw]
 
     def test_employee_housed_own_building_allowed(self):
         emp = self._employee()
         self._house(emp, self.b1)
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             _assert_party_in_scope("Employee", emp)  # [#nptgyw]
 
     def test_card_full_stack_housed_other_building_denied(self):
@@ -249,7 +234,7 @@ class TestArrivalsCardScope(FrappeTestCase):
         the out-of-scope card is never returned)."""
         emp = self._employee()
         self._house(emp, self.b2)
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             with self.assertRaises(frappe.PermissionError):
                 get_arrival_card(party_type="Employee", party=emp)
 
@@ -262,7 +247,7 @@ class TestArrivalsCardScope(FrappeTestCase):
 
         emp = self._employee()
         self._house(emp, self.b2)
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             with self.assertRaises(frappe.PermissionError):
                 get_employee_card(emp)
 
@@ -271,7 +256,7 @@ class TestArrivalsCardScope(FrappeTestCase):
         the building scope gate allows an employee with no live assignment. (The
         orthogonal HRMS type-level Employee read is a separate, pre-existing gate.)"""
         emp = self._employee()
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             _assert_party_in_scope("Employee", emp)  # [#5xhbdy]
 
     # [#kehrtd]
@@ -281,12 +266,12 @@ class TestArrivalsCardScope(FrappeTestCase):
         Asserts the call raises PermissionError (not that the PII is merely absent)
         — the gate fires before any get_value on the permlevel-1 fields.
         """
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             with self.assertRaises(frappe.PermissionError):
                 get_arrival_slip(party_type="Temporary Worker", party=self.tw2)
 
     def test_slip_scoped_user_allowed_own_building(self):
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             out = get_arrival_slip(party_type="Temporary Worker", party=self.tw1)
         # [#2yntkp]
         self.assertIn("html", out)
@@ -297,7 +282,7 @@ class TestArrivalsCardScope(FrappeTestCase):
         passport, iqama = frappe.db.get_value(
             "Temporary Worker", self.tw2, ["passport_number", "iqama_number"]
         )
-        with _as_user(self.scoped):
+        with as_user(self.scoped):
             try:
                 out = get_arrival_slip(party_type="Temporary Worker", party=self.tw2)
                 html = out.get("html", "")
@@ -311,7 +296,7 @@ class TestArrivalsCardScope(FrappeTestCase):
         self._house(employee, self.b2)
         self._worker_token(employee)
 
-        with _as_user(self.scoped), self.assertRaises(frappe.PermissionError):
+        with as_user(self.scoped), self.assertRaises(frappe.PermissionError):
             send_masar_link_message(employee)
 
     def test_send_link_rejects_attacker_selected_phone(self):
@@ -319,7 +304,7 @@ class TestArrivalsCardScope(FrappeTestCase):
         self._house(employee, self.b1)
         self._worker_token(employee)
 
-        with _as_user(self.scoped), self.assertRaises(
+        with as_user(self.scoped), self.assertRaises(
             frappe.PermissionError
         ) as error:
             send_masar_link_message(employee, phone="+966500000000")
@@ -341,7 +326,7 @@ class TestArrivalsCardScope(FrappeTestCase):
         with patch(
             "frappe.has_permission", side_effect=allow_employee_read
         ):
-            with _as_user(self.scoped):
+            with as_user(self.scoped):
                 slip = get_arrival_slip(
                     party_type="Employee", party=employee
                 )
@@ -367,7 +352,7 @@ class TestArrivalsCardScope(FrappeTestCase):
             "apex.salis.api.messaging_gateway.is_configured",
             return_value=True,
         ):
-            with _as_user(self.scoped):
+            with as_user(self.scoped):
                 result = send_masar_link_message(employee)
 
         self.assertTrue(result["queued"])
@@ -393,7 +378,7 @@ class TestArrivalsCardScope(FrappeTestCase):
         ), patch(
             "apex.salis.api.messaging_gateway.enqueue_message"
         ) as enqueue_message:
-            with _as_user(self.scoped):
+            with as_user(self.scoped):
                 result = send_masar_link_message(employee)
 
         self.assertFalse(result["queued"])
@@ -417,7 +402,7 @@ class TestArrivalsCardScope(FrappeTestCase):
         ), patch(
             "apex.salis.api.messaging_gateway.enqueue_message"
         ) as enqueue_message:
-            with _as_user(self.scoped):
+            with as_user(self.scoped):
                 result = send_masar_link_message(employee)
 
         self.assertFalse(result["queued"])
@@ -442,7 +427,7 @@ class TestArrivalsCardScope(FrappeTestCase):
             "apex.salis.api.messaging_gateway.enqueue_message",
             return_value={"queued": False, "reason": "gateway_error"},
         ):
-            with _as_user(self.scoped):
+            with as_user(self.scoped):
                 result = send_masar_link_message(employee)
 
         self.assertFalse(result["queued"])
