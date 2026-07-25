@@ -606,8 +606,8 @@ _COPY_PASTE_BASELINE = frozenset(
         ),
         frozenset(
             {
-                ("tests/test_masar_trip_rating.py", "_token_for"),
-                ("tests/test_masar_worker_boarding_confirm.py", "_token_for"),
+                ("salis/api/test_masar_trip_rating.py", "_token_for"),
+                ("salis/api/test_masar_worker_boarding_confirm.py", "_token_for"),
             }
         ),
         # Single-member group: two classes in ONE file share a _get_doc body, so the
