@@ -15,7 +15,7 @@
          (worker_portal). window.holder_type below makes it boot the driver screens. -->
     <link rel="stylesheet" href="/assets/apex/worker_portal/assets/index.css" />
     {%- include "apex/templates/includes/portal_accent.html" %}
-    <title>Salis Driver</title>
+    <title>{{ _("Salis Driver") }}</title>
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
       // Merged Masar portal: this /driver entry boots the DRIVER screen set from the

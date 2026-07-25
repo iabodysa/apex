@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="/assets/apex/vendor/cairo-v31/cairo.css" />
     <link rel="stylesheet" href="/assets/apex/worker_portal/assets/index.css" />
     {%- include "apex/templates/includes/portal_accent.html" %}
-    <title>Masar</title>
+    <title>{{ _("Masar") }}</title>
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
       // Merged Masar portal: this /masar entry boots the WORKER screen set. The one
