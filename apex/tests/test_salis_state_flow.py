@@ -29,8 +29,6 @@ Controller-level guards exercised here:
   * Workflow gate (no-op duplicate transition) — applying Dispatch twice raises.
 """
 
-import unittest
-
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
@@ -50,10 +48,6 @@ def _actions(doc):
     return {t.action for t in get_transitions(doc)}
 
 
-@unittest.skipUnless(
-    get_workflow_name("Dispatch Trip") == WORKFLOW,
-    "Dispatch Trip Workflow not seeded on this site",
-)
 class TestDispatchTripStateFlow(FrappeTestCase):
     """Controller-level state-machine tests.
 
@@ -73,6 +67,14 @@ class TestDispatchTripStateFlow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        # A-077/A-160: mandatory Salis workflow (salis_workflow_seed, every install/
+        # migrate); absence is a regression - FAIL, never skip. Resolved lazily here
+        # rather than in a class decorator, which would hit frappe.cache at IMPORT.
+        if get_workflow_name("Dispatch Trip") != WORKFLOW:
+            raise AssertionError(
+                f"Mandatory Salis workflow {WORKFLOW!r} not active for "
+                "'Dispatch Trip' (salis_workflow_seed regression)"
+            )
         frappe.set_user("Administrator")
         cls.manager = _user("ssf_mgr@example.com", "Fleet Manager")
         cls.supervisor = _user("ssf_sup@example.com", "Fleet Supervisor")

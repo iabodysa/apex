@@ -5,8 +5,9 @@
 ``patches/v1_x/seed_demo_role_logins`` used to be registered in patches.txt and
 fired on every migrate behind a ``developer_mode`` gate. A-070 removed that
 registration entirely: the module stays on disk for a manual, developer-only run
-(``bench --site <site> execute apex.patches.v1_x.seed_demo_role_logins.execute``,
-mirroring apex/demo/demo_rich.py), but a normal migrate must NOT run it.
+(``bench --site <site> execute apex.patches.v1_x.seed_demo_role_logins.execute``),
+but a normal migrate must NOT run it. That module path is the whole recipe — it
+ships in the published tree, so the command above resolves in a fresh checkout.
 
 Two guards, either of which fails the build the moment the seeder is re-wired:
 
