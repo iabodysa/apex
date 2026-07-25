@@ -31,6 +31,13 @@ add_to_apps_screen = [
         "route": "/masar",
     },
     {
+        "name": "apex-masar-supervisor",
+        "logo": "/assets/apex/worker_portal/icons/masar-icon-192.png",
+        "title": "Masar Supervisor",
+        "route": "/masar-supervisor",
+        "has_permission": "apex.www.masar_supervisor.has_apps_screen_access",
+    },
+    {
         "name": "apex-fleet",
         "logo": "/assets/apex/worker_portal/afmco-logo.svg",
         "title": "Fleet OS",

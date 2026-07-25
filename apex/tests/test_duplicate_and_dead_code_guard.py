@@ -173,6 +173,7 @@ _DUP_NAME_BASELINE = {
         "www/fleet.py",
         "www/fleet_os.py",
         "www/housing.py",
+        "www/masar_supervisor.py",
         "www/safety.py",
     ],
     "is_configured": [
