@@ -55,8 +55,20 @@ jobs:
       - name: Fail if the committed bundle is stale
         run: |
           set -uo pipefail
-          if ! git diff --exit-code -- "apex/public/${{ matrix.portal }}" ${{ matrix.sw }}; then
+          # `git diff` alone is blind to a file git has never tracked, so a rebuild that
+          # emits a BRAND-NEW chunk passed the guard while the old chunk names stayed
+          # byte-identical. rollup renumbers its `[name]` chunk suffixes on nearly any
+          # source change, so that is the normal shape of a stale multi-chunk portal.
+          # `git status --porcelain` covers all three drift shapes at once — untracked
+          # new output (`??`), rewritten tracked bytes (` M`), and a chunk that vanished
+          # under emptyOutDir (` D`) — while still honouring .gitignore, so ordinary
+          # build noise (.DS_Store, editor swap files) cannot red the job. The pathspec
+          # keeps the check confined to this portal's committed output.
+          drift=$(git status --porcelain --untracked-files=all -- "apex/public/${{ matrix.portal }}" ${{ matrix.sw }})
+          if [ -n "$drift" ]; then
             echo "::error::Committed bundle for ${{ matrix.portal }} is stale."
+            echo "$drift"
+            git diff -- "apex/public/${{ matrix.portal }}" ${{ matrix.sw }}
             echo "Run 'npm ci' in frontend/ then 'npm run build' in frontend/${{ matrix.dir }} and commit apex/public/${{ matrix.portal }}/ (and the stamped www SW, if any)."
             exit 1
           fi
