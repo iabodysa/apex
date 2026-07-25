@@ -31,7 +31,13 @@ only by System Manager and only by direct navigation.
 Workspaces are **module-scoped, not role-named**. A role reaches its daily work
 through the module workspace its roles grant it, not through a workspace named
 after the role. Logistay ships no workspace at all — its surface is the **Telecom
-Control** Desk page.
+Control** Desk page, and the **Custody** workspace is the single navigation host
+for it and for the rest of the telecom links, cards, and reports. That is why
+Custody grants `SIM Operations User`: a SIM in an employee's hands is a custody
+record, so it is reached beside the other company property an employee holds,
+while the module that owns the data stays Logistay. Do not read the Custody
+placement as the telecom surface having moved modules — nothing telecom-owned
+declares a module other than Logistay.
 
 Two landing Workspaces, **Launchpad** and **My Work**, were retired during
 workspace consolidation: the Launchpad's onboarding, settings, and logs folded
