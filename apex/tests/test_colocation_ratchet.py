@@ -229,6 +229,25 @@ _BASELINE = frozenset(
     }
 )
 
+# [#a123r2] Guards added AFTER the baseline froze that have no colocated home.
+# _BASELINE stays shrink-only; this set is the documented escape hatch, and every
+# entry must carry the reason it cannot sit beside a module. Adding to it is a
+# review decision, not a way to make room for an ordinary test.
+_CENTRAL_BY_NECESSITY = frozenset(
+    {
+        # Scans every workspace JSON in the app for a parent chain that hides a
+        # persona's only surface — no single module owns the invariant.
+        "test_workspace_sidebar_reachability.py",
+        # Scans the whole apex/www tree for external CDN hosts; the directory it
+        # guards is not a Python package, so it cannot live inside it.
+        "test_www_no_external_cdn_assets.py",
+        # Exercises apex/www/fleet.* and the fleet portal source. apex/www has no
+        # __init__.py, so there is no importable colocated home for a www test —
+        # tracked as its own card.
+        "test_fleet_employee_nav.py",
+    }
+)
+
 
 def _central_tests():
     """Basenames of every ``test_*.py`` directly under ``apex/tests/``."""
@@ -253,7 +272,7 @@ def _colocated_tests():
 class TestColocationRatchet(unittest.TestCase):
     def test_no_new_central_test_module(self):
         """A new test must be colocated with the module it exercises."""
-        added = sorted(_central_tests() - _BASELINE)
+        added = sorted(_central_tests() - _BASELINE - _CENTRAL_BY_NECESSITY)
         self.assertEqual(
             added,
             [],
@@ -267,12 +286,14 @@ class TestColocationRatchet(unittest.TestCase):
     def test_central_test_count_never_grows(self):
         """The ratchet proper: the central count is monotonically non-increasing."""
         current = len(_central_tests())
+        allowed = len(_BASELINE) + len(_CENTRAL_BY_NECESSITY)
         self.assertLessEqual(
             current,
-            len(_BASELINE),
+            allowed,
             f"apex/tests/ grew to {current} test modules (baseline "
-            f"{len(_BASELINE)}). The central directory may only shrink — "
-            "relocate tests out to their module, never add new ones in.",
+            f"{len(_BASELINE)} + {len(_CENTRAL_BY_NECESSITY)} central-by-necessity). "
+            "The central directory may only shrink — relocate tests out to their "
+            "module, never add new ones in.",
         )
 
     def test_baseline_has_no_phantom_entries(self):
@@ -294,6 +315,21 @@ class TestColocationRatchet(unittest.TestCase):
             "reappear as a colocated test. Prune it from _BASELINE instead of "
             "leaving a phantom that silently widens the ratchet:\n"
             + "\n".join(f"  {n}" for n in phantom),
+        )
+
+    def test_central_by_necessity_entries_all_exist(self):
+        """The escape hatch may not be padded with names that match no file.
+
+        Same anti-padding rule as the baseline: an entry that has been relocated
+        or deleted must be pruned, or it silently buys room for a future central
+        test that nobody reviewed."""
+        stale = sorted(_CENTRAL_BY_NECESSITY - _central_tests())
+        self.assertEqual(
+            stale,
+            [],
+            "Central-by-necessity entr(ies) match no file under apex/tests/. "
+            "Prune them instead of leaving room the ratchet cannot account for:\n"
+            + "\n".join(f"  {n}" for n in stale),
         )
 
     def test_guard_actually_detects(self):
