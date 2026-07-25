@@ -337,6 +337,12 @@
    "role": "Internal Auditor"
   },
   {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Government Relations Officer"
+  },
+  {
    "cancel": 1,
    "create": 1,
    "delete": 1,

@@ -327,6 +327,13 @@
    "role": "Internal Auditor"
   },
   {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Government Relations Officer"
+  },
+  {
    "permlevel": 1,
    "read": 1,
    "role": "Fleet Manager"

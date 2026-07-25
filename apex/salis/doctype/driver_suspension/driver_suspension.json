@@ -195,6 +195,13 @@
    "read": 1,
    "report": 1,
    "role": "Internal Auditor"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Government Relations Officer"
   }
  ],
  "row_format": "Dynamic",
