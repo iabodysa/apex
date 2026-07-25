@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Migrate legacy site-level SIM records into SIM Operations.
+"""Migrate legacy site-level SIM records into the Logistay SIM DocTypes.
 
 The legacy data lives in a SITE-LEVEL custom DocType (created per site, not shipped
 in this app), so its exact name and field set are unknown here. This patch resolves
@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import frappe
 
-from apex.sim_operations.utils.normalize import normalize_msisdn
+from apex.logistay.utils.normalize import normalize_msisdn
 
 # Legacy site DocTypes this migration knows how to read (first that exists wins).
 SOURCE_CANDIDATES = [

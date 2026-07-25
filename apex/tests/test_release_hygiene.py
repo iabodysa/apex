@@ -64,23 +64,6 @@ KNOWN_FRAPPE_TEST_ROLES = {
 }
 
 
-def _matrix_axis_values(matrix_body, axis):
-    entry = re.search(
-        rf"(?m)^        {re.escape(axis)}:\s*(?P<inline>\[[^\n]*])?\s*$",
-        matrix_body,
-    )
-    if not entry:
-        return None
-
-    inline = entry.group("inline")
-    if inline:
-        return [value.strip() for value in inline[1:-1].split(",") if value.strip()]
-
-    block = matrix_body[entry.end() :]
-    next_axis = re.search(r"(?m)^        [a-zA-Z0-9_-]+:\s*", block)
-    if next_axis:
-        block = block[: next_axis.start()]
-    return re.findall(r"(?m)^          -\s*([a-zA-Z0-9_-]+)\s*$", block)
 
 
 def _is_test_role(name):
@@ -153,47 +136,80 @@ class TestNoPromptInjectionInPatches(unittest.TestCase):
         )
 
 
-class TestSpaLockfileMatrix(unittest.TestCase):
-    def test_every_matrix_portal_has_committed_manifest_and_lockfile(self):
-        workflow_path = os.path.join(REPO_ROOT, ".github", "workflows", "test.yml")
-        with open(workflow_path, encoding="utf-8") as fh:
-            workflow = fh.read()
+class TestFrontendWorkspaceOwnership(unittest.TestCase):
+    """frontend/ is ONE npm workspace: exactly one manifest owns every dependency
+    and exactly one lockfile pins them. Replaces the retired per-portal
+    spa-lockfiles matrix (and frontend_shared/pins.json), which only existed to
+    keep six hand-mirrored manifests from drifting."""
 
-        job = re.search(
-            r"(?ms)^  spa-lockfiles:\n(?P<body>.*?)(?=^  [a-z][a-z0-9_-]*:\n|\Z)",
-            workflow,
-        )
-        self.assertIsNotNone(job, "Tests workflow is missing the spa-lockfiles job")
-        matrix = re.search(
-            r"(?ms)^      matrix:\n(?P<body>.*?)(?=^    [a-z][a-z0-9_-]*:|\Z)",
-            job.group("body"),
-        )
-        self.assertIsNotNone(matrix, "spa-lockfiles job is missing its matrix")
-        portals = _matrix_axis_values(matrix.group("body"), "portal")
-        self.assertIsNotNone(portals, "spa-lockfiles matrix is missing its portal axis")
-        self.assertTrue(portals, "spa-lockfiles portal matrix is empty")
-        missing = []
-        for portal in portals:
-            for filename in ("package.json", "package-lock.json"):
-                path = os.path.join(REPO_ROOT, "frontend", portal, filename)
-                if not os.path.isfile(path):
-                    missing.append(os.path.relpath(path, REPO_ROOT))
+    def _root_manifest(self):
+        path = os.path.join(REPO_ROOT, "frontend", "package.json")
+        self.assertTrue(os.path.isfile(path), "frontend/package.json is missing")
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
 
+    def test_exactly_one_lockfile_under_frontend(self):
+        lockfiles = []
+        for dirpath, dirnames, filenames in os.walk(os.path.join(REPO_ROOT, "frontend")):
+            dirnames[:] = [d for d in dirnames if d != "node_modules"]
+            if "package-lock.json" in filenames:
+                lockfiles.append(
+                    os.path.relpath(
+                        os.path.join(dirpath, "package-lock.json"), REPO_ROOT
+                    )
+                )
         self.assertEqual(
-            missing,
-            [],
-            f"spa-lockfiles matrix references retired or incomplete portals: {missing}",
+            sorted(lockfiles),
+            ["frontend/package-lock.json"],
+            "frontend/package-lock.json must be the only frontend lockfile",
         )
 
-    def test_block_axis_stops_before_the_next_matrix_axis(self):
-        matrix = """        portal:
-          - fleet
-          - worker
-        node:
-          - 20
-          - 22
-"""
-        self.assertEqual(_matrix_axis_values(matrix, "portal"), ["fleet", "worker"])
+    def test_only_the_root_manifest_declares_dependencies(self):
+        offenders = []
+        for workspace in self._root_manifest()["workspaces"]:
+            path = os.path.join(REPO_ROOT, "frontend", workspace, "package.json")
+            if not os.path.isfile(path):
+                offenders.append(f"{workspace}: no package.json")
+                continue
+            with open(path, encoding="utf-8") as fh:
+                manifest = json.load(fh)
+            owned = [
+                key
+                for key in ("dependencies", "devDependencies", "overrides")
+                if manifest.get(key)
+            ]
+            if owned:
+                offenders.append(f"{workspace}: declares {', '.join(owned)}")
+        self.assertEqual(
+            offenders,
+            [],
+            "frontend deps belong only in frontend/package.json: "
+            f"{offenders}",
+        )
+
+    def test_root_manifest_keeps_the_security_overrides(self):
+        overrides = self._root_manifest().get("overrides", {})
+        self.assertEqual(
+            sorted(overrides),
+            ["dompurify", "ws"],
+            "frontend/package.json must keep the dompurify + ws security overrides",
+        )
+
+    def test_every_workspace_that_builds_ships_a_committed_bundle(self):
+        """A workspace with a vite.config.js is a portal; its bundle is committed
+        under apex/public/<workspace>_portal/ and guarded by portal-bundles."""
+        missing = []
+        for workspace in sorted(self._root_manifest()["workspaces"]):
+            if not os.path.isfile(
+                os.path.join(REPO_ROOT, "frontend", workspace, "vite.config.js")
+            ):
+                continue
+            output = os.path.join(REPO_ROOT, "apex", "public", f"{workspace}_portal")
+            if not os.path.isdir(output):
+                missing.append(os.path.relpath(output, REPO_ROOT))
+        self.assertEqual(
+            missing, [], f"workspace portals with no committed bundle: {missing}"
+        )
 
 
 class TestMasarWorkerTokenNaming(unittest.TestCase):

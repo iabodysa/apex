@@ -9,12 +9,13 @@ on:
 jobs:
   bundle-guard:
     # Staleness guard for the committed SPA bundles. Each portal's built output
-    # (public/<portal>/) is shipped committed so the app installs without a Node
-    # toolchain. This job rebuilds every portal from its frozen lockfile and fails
-    # if the fresh output differs from what is committed — i.e. someone changed
-    # portal src (or the shared vite factory / frontend_shared) without rebuilding
-    # and committing the bundle. The SW portals also stamp their www/*-sw.min.js,
-    # so that file is diff-checked too. Mirrors the spa-lockfiles matrix shape.
+    # (apex/public/<portal>/) is shipped committed so the app installs without a Node
+    # toolchain. This job installs the ONE frontend workspace from the ONE frozen
+    # lockfile (frontend/package-lock.json), rebuilds every portal, and fails if the
+    # fresh output differs from what is committed — i.e. someone changed portal src
+    # (or the shared vite factory / frontend_shared / a dependency pin) without
+    # rebuilding and committing the bundle. The SW portal also stamps its
+    # www/*-sw.min.js, so those files are diff-checked too.
     # `dir` is the source tree (frontend/<dir>/); `portal` is the served output
     # dir name (apex/public/<portal>/) — the two diverge since the src relocated.
     runs-on: ubuntu-latest
@@ -24,6 +25,8 @@ jobs:
         include:
           - dir: fleet
             portal: fleet_portal
+          - dir: fleet_os
+            portal: fleet_os_portal
           - dir: worker
             portal: worker_portal
             sw: "apex/www/masar-sw.min.js apex/www/driver-sw.min.js"
@@ -41,8 +44,8 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install from frozen lockfile
-        working-directory: frontend/${{ matrix.dir }}
+      - name: Install the frontend workspace from the frozen lockfile
+        working-directory: frontend
         run: npm ci
 
       - name: Build the portal bundle
@@ -54,71 +57,59 @@ jobs:
           set -uo pipefail
           if ! git diff --exit-code -- "apex/public/${{ matrix.portal }}" ${{ matrix.sw }}; then
             echo "::error::Committed bundle for ${{ matrix.portal }} is stale."
-            echo "Run 'npm run build' in frontend/${{ matrix.dir }} and commit apex/public/${{ matrix.portal }}/ (and the stamped www SW, if any)."
+            echo "Run 'npm ci' in frontend/ then 'npm run build' in frontend/${{ matrix.dir }} and commit apex/public/${{ matrix.portal }}/ (and the stamped www SW, if any)."
             exit 1
           fi
           echo "${{ matrix.portal }} bundle is in sync with committed output"
 
-  override-pins:
-    # Single-source guard for the security npm `overrides` (dompurify, ws). The
-    # canonical values live in frontend/frontend_shared/pins.json; npm still
-    # needs the override in each package.json, so this fails if any of the five
-    # portals drifts from the canonical pin set.
+  manifest-ownership:
+    # frontend/ is ONE npm workspace: frontend/package.json is the only manifest that
+    # may declare dependencies and frontend/package-lock.json the only lockfile in the
+    # repo. That makes a framework-version drift between portals structurally
+    # impossible, which is why this single job replaces the old
+    # override-pins + dep-pins loops (and frontend_shared/pins.json, which existed
+    # only to simulate cross-package sharing npm workspaces now provide natively).
+    # It fails if a portal reintroduces its own deps/overrides or a second lockfile,
+    # or if the root manifest loses a security override.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      - name: Every portal's overrides match frontend_shared/pins.json
+      - name: One manifest owns every frontend dependency
         run: |
           set -uo pipefail
-          canon=$(jq -S '.overrides' frontend/frontend_shared/pins.json)
           fail=0
-          for p in fleet worker safety housing route_supervisor; do
-            got=$(jq -S '.overrides' "frontend/${p}/package.json")
-            if [ "$got" != "$canon" ]; then
-              echo "::error::frontend/${p}/package.json overrides differ from frontend_shared/pins.json"
-              diff <(echo "$canon") <(echo "$got") || true
+          root=frontend/package.json
+
+          strays=$(git ls-files 'frontend/**/package-lock.json' | grep -v '^frontend/package-lock.json$' || true)
+          if [ -n "$strays" ]; then
+            echo "::error::frontend/package-lock.json must be the only lockfile; found also:"
+            echo "$strays"
+            fail=1
+          fi
+          [ -f frontend/package-lock.json ] || { echo "::error::frontend/package-lock.json is missing"; fail=1; }
+
+          for ws in $(jq -r '.workspaces[]' "$root"); do
+            pkg="frontend/${ws}/package.json"
+            if [ ! -f "$pkg" ]; then
+              echo "::error::workspace '${ws}' declared in ${root} has no package.json"
+              fail=1
+              continue
+            fi
+            owned=$(jq '[(.dependencies // {}), (.devDependencies // {}), (.overrides // {})] | map(length) | add' "$pkg")
+            if [ "$owned" != "0" ]; then
+              echo "::error::${pkg} declares its own dependencies/overrides — declare them once in ${root}"
               fail=1
             fi
           done
-          [ "$fail" -eq 0 ] && echo "all portal overrides match the canonical pins"
-          exit "$fail"
 
-  dep-pins:
-    # Single-source guard for the shared framework dep versions (vue, vue-router,
-    # frappe-ui, vite, @vitejs/plugin-vue). The canonical block lives in
-    # frontend/frontend_shared/pins.json (.deps); this job fails if any of the
-    # five portals is missing a required dep or declares a different spec — the
-    # unguarded drift surface that override-pins (which only pins security
-    # overrides) never covered. optionalDeps (.optionalDeps, e.g.
-    # socket.io-client) are pinned only where a portal already declares them.
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Every portal's shared deps match frontend_shared/pins.json
-        run: |
-          set -uo pipefail
-          pins=frontend/frontend_shared/pins.json
-          fail=0
-          for p in fleet worker safety housing route_supervisor; do
-            pkg="frontend/${p}/package.json"
-            # Required deps: must exist (in dependencies or devDependencies) and match.
-            while IFS=$'\t' read -r dep ver; do
-              got=$(jq -r --arg d "$dep" '(.dependencies[$d] // .devDependencies[$d] // "MISSING")' "$pkg")
-              if [ "$got" != "$ver" ]; then
-                echo "::error::${pkg}: shared dep '${dep}' is '${got}', canonical (pins.json .deps) is '${ver}'"
-                fail=1
-              fi
-            done < <(jq -r '.deps | to_entries[] | "\(.key)\t\(.value)"' "$pins")
-            # Optional deps: checked only when the portal declares them.
-            while IFS=$'\t' read -r dep ver; do
-              got=$(jq -r --arg d "$dep" '(.dependencies[$d] // .devDependencies[$d] // "ABSENT")' "$pkg")
-              if [ "$got" != "ABSENT" ] && [ "$got" != "$ver" ]; then
-                echo "::error::${pkg}: optional dep '${dep}' is '${got}', canonical (pins.json .optionalDeps) is '${ver}'"
-                fail=1
-              fi
-            done < <(jq -r '(.optionalDeps // {}) | to_entries[] | "\(.key)\t\(.value)"' "$pins")
+          for key in dompurify ws; do
+            got=$(jq -r --arg k "$key" '.overrides[$k] // "MISSING"' "$root")
+            if [ "$got" = "MISSING" ]; then
+              echo "::error::${root} lost the '${key}' security override"
+              fail=1
+            fi
           done
-          [ "$fail" -eq 0 ] && echo "all portal shared deps match the canonical pins"
+
+          [ "$fail" -eq 0 ] && echo "frontend dependency ownership is single-sourced"
           exit "$fail"

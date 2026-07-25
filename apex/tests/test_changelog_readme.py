@@ -138,7 +138,9 @@ class TestFeedCoversPopups(unittest.TestCase):
         return versions
 
     def test_feed_parser_finds_titles(self):
-        self.assertIn("1.62.0", self._feed_versions(), "feed title parse broke")
+        # Sentinel is the 2.0.0 floor: the shipped feed and the popup dirs both
+        # start there, so a pre-2.0 sentinel would re-require retired history.
+        self.assertIn("2.0.0", self._feed_versions(), "feed title parse broke")
 
     def test_every_popup_version_is_in_releases(self):
         feed = self._feed_versions()

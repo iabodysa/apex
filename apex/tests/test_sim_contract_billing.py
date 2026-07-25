@@ -6,7 +6,7 @@ per billing period, mapped correctly, deduplicated, and never submitted."""
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex.sim_operations.api import contract_billing
+from apex.logistay.api import contract_billing
 from apex.tests import factories
 
 test_ignore = ["Company", "Supplier", "Currency", "Cost Center", "Project", "Item"]

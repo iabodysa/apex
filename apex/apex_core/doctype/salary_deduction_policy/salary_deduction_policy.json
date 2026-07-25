@@ -88,7 +88,7 @@
   },
   {
    "default": "1",
-   "description": "Require an Employee Deduction Acknowledgment (worker consent) before any deduction posts.",
+   "description": "Require the worker's recorded consent (the signed acknowledgment on the source operational document) before any deduction posts.",
    "fieldname": "global_require_acknowledgment",
    "fieldtype": "Check",
    "label": "Require Acknowledgment for All Deductions"
@@ -198,7 +198,7 @@
  "icon": "fa fa-money",
  "issingle": 1,
  "links": [],
- "modified": "2026-06-25 06:43:07.306015",
+ "modified": "2026-07-25 04:51:05.634595",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salary Deduction Policy",

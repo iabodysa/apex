@@ -1,28 +1,64 @@
 # frontend_shared
 
-Code shared by every `*_portal` SPA (fleet, worker, driver, safety, housing).
-These portals are standalone Vite + Vue 3 apps that build to committed bundles
-under `apex/public/<portal>/` and are served by the `www/<portal>.html`
-Jinja shells. `frontend_shared/` holds the parts that must not drift between
-portals.
+Code shared by every `*_portal` SPA (fleet, fleet_os, worker+driver, safety,
+housing, route_supervisor). These portals are Vite + Vue 3 apps that build to
+committed bundles under `apex/public/<portal>/` and are served by the
+`www/<portal>.html` Jinja shells. `frontend_shared/` holds the parts that must
+not drift between portals.
+
+## One workspace, one manifest, one lockfile
+
+`frontend/` is a single npm workspace. `frontend/package.json` is the **only**
+manifest that declares dependencies and `frontend/package-lock.json` the **only**
+lockfile; every portal package.json carries just its name and its `dev`/`build`
+scripts. A framework version therefore cannot drift between portals — the
+condition the retired `pins.json` + `override-pins`/`dep-pins` CI loops used to
+police by hand.
+
+```
+frontend/
+  package.json          # every dependency + the security `overrides`  <- the one manifest
+  package-lock.json     # the one lockfile
+  frontend_shared/      # shared runtime + components + vitest harness (no bundle)
+  fleet/ fleet_os/ housing/ route_supervisor/ safety/ worker/   # the six portals
+  driver/               # driver screens, no manifest — built INTO worker_portal
+```
+
+Build and test from `frontend/`:
+
+```bash
+npm ci                       # install the whole workspace from the frozen lockfile
+npm run build                # build every portal bundle
+npm run build -w fleet_portal   # or just one
+npm test                     # frontend_shared vitest + the node unit tests
+```
+
+Bumping a dependency is a one-file edit in `frontend/package.json`, then
+`npm install` (refreshes the lockfile) and `npm run build` (refreshes every
+committed bundle — `bundle-guard` fails otherwise).
+
+`driver/` has no package.json, vite.config.js or output dir on purpose: the
+driver and worker screens ship as ONE bundle whose host is `worker`
+(`worker/src/main.js` lazily imports `../../driver/src/*`), serving `/masar`
+for holder_type Worker and `/driver` for holder_type Driver.
 
 ## What lives here
 
 | File | Role |
 | --- | --- |
-| `vite.base.js` | `createPortalConfig({ dirname, name, sw? })` — the single Vite config factory. Every `<portal>/vite.config.js` is a <=15-line call to it. Defines the frappe-ui + vue plugins, the dev proxy, the `@`/`@shared` aliases, the vue/frappe-ui dedupe, the stable un-hashed output names, and the one `stampServiceWorker` plugin (opt-in via `sw`). |
+| `vite.base.js` | `createPortalConfig({ dirname, name, serviceWorkers? })` — the single Vite config factory. Every `<portal>/vite.config.js` is a <=15-line call to it. Defines the frappe-ui + vue plugins, the dev proxy, the `@`/`@shared` aliases, the vue/frappe-ui dedupe, the stable un-hashed output names, and the one `stampServiceWorkers` plugin (opt-in via `serviceWorkers`). |
 | `i18n.js` | Shared translation runtime. |
 | `call.js` | Shared Frappe API call helper. |
 | `bootstrap.js` | `bootstrapPortal({ App, router?, setup? })` — the one SPA boot sequence (configureApi + createApp + optional router + optional pre-mount `setup(app)` + mount). Every `<portal>/src/main.js` is a single call to it. |
 | `realtime.js` | `createRealtime({ socketGlobal, roomDoctype, event, extraEvents? })` — the Frappe Socket.IO subscription factory (host/join/refetch/teardown, every failure path swallowed). Used by the live portals (fleet, safety, driver); each supplies only its socket-config global, room doctype, event, and optional same-room extra events. Its `socket.io-client` import resolves via the factory's `dedupe`. |
 | `makeCache.js` | Shared offline/data cache factory. |
-| `components/` | Shared presentational `.vue` components imported via `@shared/components/*` (e.g. `Brand.vue` — the AFMCO inline-SVG emblem/supergraphic, self-contained, token-driven). |
-| `tokens.css` | Shared design tokens (CSS custom properties). |
-| `pins.json` | Canonical version pins every portal `package.json` must mirror: `overrides` (dompurify, ws — security), `deps` (vue, vue-router, frappe-ui, vite, @vitejs/plugin-vue — shared framework versions required in all five), and `optionalDeps` (socket.io-client — pinned only where a portal declares it). The `portal-bundles` CI (`override-pins` + `dep-pins`) fails on drift. |
+| `components/` | Shared presentational `.vue` components imported via `@shared/components/*` (e.g. `Brand.vue` — the AFMCO inline-SVG emblem/supergraphic, self-contained, token-driven) and the three page shells (`FleetPageShell`, `MobileConsoleShell`, `TabletSupervisorShell`). |
+| `tokens.css` | Shared design tokens (CSS custom properties) — the one Growth-Green source. |
 
 Import from a portal with the `@shared` alias, e.g. `import { call } from "@shared/call.js"`.
-`frontend_shared/` has no `node_modules`; bare imports (`vue`, `frappe-ui`) resolve
-to the importing portal's copy via the factory's `dedupe`.
+`frontend_shared/` has no `node_modules` of its own; bare imports (`vue`,
+`frappe-ui`) resolve to the workspace-hoisted copy at `frontend/node_modules`
+via the factory's `dedupe`.
 
 ## Canonical portal `src/` skeleton
 
@@ -32,7 +68,7 @@ by muscle memory:
 ```
 <portal>/
   vite.config.js        # <=15-line createPortalConfig() call
-  package.json          # deps + the shared `overrides` (see pins.json)
+  package.json          # name + dev/build scripts ONLY — deps live in frontend/package.json
   index.html            # Vite entry (dev); prod shell is www/<portal>.html
   src/
     main.js             # app bootstrap (createApp, router, mount) — root only
@@ -54,21 +90,26 @@ helper modules at the `src/` root.
 ## Serve layer (`apex/www/`)
 
 - `<portal>.html` — Jinja shell (csrf boot + SPA mount). The per-tenant accent
-  override is a shared partial: `{% include "apex/templates/includes/portal_accent.html" %}`
-  so its security rationale lives in exactly one place.
+  override is a shared partial: `{% include "apex/templates/includes/portal_accent.html" %}`,
+  included by exactly the shells whose `get_context` calls
+  `apply_portal_appearance` (driver, masar, housing, safety) so its security
+  rationale lives in exactly one place and no shell renders a variable it was
+  never given.
 - `driver-sw.min.js` / `masar-sw.min.js` — the two PWA service workers, served
   from root so their scope covers `/driver` and `/masar`. Their `BUILD` marker is
-  stamped with the bundle hash by the factory's `stampServiceWorker` plugin.
+  stamped with the bundle hash by the factory's `stampServiceWorkers` plugin.
 
 ## CI
 
 - `.github/workflows/portal-bundles.yml`
-  - `bundle-guard` — rebuilds each portal from its frozen lockfile and fails if
-    the committed `public/<portal>/` (and stamped `www` SW) is stale. Rebuild and
-    commit the bundle after any portal `src/` or `frontend_shared/` change.
-  - `override-pins` — fails if any portal's `package.json` `overrides` drift from
-    `pins.json`.
-  - `dep-pins` — fails if any portal is missing a shared framework dep or declares
-    a version different from `pins.json` `.deps` (or `.optionalDeps` where present).
-- `.github/workflows/test.yml` `spa-lockfiles` — `npm ci` per portal keeps the
-  frozen lockfiles honest.
+  - `bundle-guard` — installs the workspace from the frozen lockfile, rebuilds
+    each portal and fails if the committed `apex/public/<portal>/` (and stamped
+    `www` SW) is stale. Rebuild and commit the bundle after any portal `src/`,
+    `frontend_shared/` or dependency change.
+  - `manifest-ownership` — fails if a portal reintroduces its own
+    dependencies/overrides or a second lockfile, or if the root manifest loses
+    the `dompurify` / `ws` security overrides.
+- `.github/workflows/portal-tests.yml` `shared-components` — vitest for
+  `@shared/components/*`, run from the workspace.
+- `apex/tests/test_release_hygiene.py::TestFrontendWorkspaceOwnership` asserts the
+  same single-manifest/single-lockfile invariant from the Python suite.

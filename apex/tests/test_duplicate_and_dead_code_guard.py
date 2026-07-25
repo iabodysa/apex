@@ -104,9 +104,7 @@ def _production_py_files():
     return out
 
 
-# ---------------------------------------------------------------------------
 # 1. Duplicate top-level (module-scope) function names
-# ---------------------------------------------------------------------------
 
 # [#a056dn] Frappe dispatch / lifecycle names that recur across dozens of files
 # BY DESIGN (see module docstring) — never a duplication smell.
@@ -240,9 +238,7 @@ class TestDuplicateTopLevelFunctionNames(unittest.TestCase):
         )
 
 
-# ---------------------------------------------------------------------------
 # 2. Copy-pasted function bodies
-# ---------------------------------------------------------------------------
 
 def _all_funcs(tree):
     """Every FunctionDef/AsyncFunctionDef at any nesting level — copy-paste can
@@ -350,9 +346,7 @@ class TestCopyPastedFunctionBodies(unittest.TestCase):
         )
 
 
-# ---------------------------------------------------------------------------
 # 3. Orphan DocTypes (module JSON with no wiring)
-# ---------------------------------------------------------------------------
 
 def _module_registry():
     with open(MODULES_TXT, encoding="utf-8") as fh:
@@ -421,9 +415,7 @@ class TestOrphanDocTypes(unittest.TestCase):
         )
 
 
-# ---------------------------------------------------------------------------
 # 4. Dead production modules (zero importers / zero wiring)
-# ---------------------------------------------------------------------------
 
 _DOTTED_RE = re.compile(r"\bapex(?:_habitat)?(?:\.[A-Za-z_][A-Za-z0-9_]*)+")
 _CONVENTION_DIRS = {"doctype", "report", "page", "web_form", "notification"}
@@ -572,9 +564,7 @@ class TestDeadProductionModules(unittest.TestCase):
         )
 
 
-# ---------------------------------------------------------------------------
 # 5. Native-primitive bypass (custom code where a Frappe primitive exists)
-# ---------------------------------------------------------------------------
 
 # [#a056np] Kept deliberately SHORT: each entry names a stdlib primitive with NO
 # legitimate exception found in this repo today (see module docstring for why

@@ -28,6 +28,15 @@
   "status",
   "vi_disposition_col",
   "write_off_case",
+  "vi_sec_recovery",
+  "recover_from_driver",
+  "recovery_employee",
+  "recovery_amount",
+  "installment_amount",
+  "vi_recovery_col",
+  "worker_signature",
+  "signed_on",
+  "recovery_advance",
   "vi_sec_system",
   "naming_series",
   "previous_status",
@@ -171,6 +180,77 @@
    "read_only": 1
   },
   {
+   "fieldname": "vi_sec_recovery",
+   "fieldtype": "Section Break",
+   "label": "Cost Recovery from Driver"
+  },
+  {
+   "default": "0",
+   "description": "Recover the repair cost from the driver. On submit this raises one Employee Advance (the receivable); the wage installments are then governed by the Salary Deduction Policy and are OFF until it is activated.",
+   "fieldname": "recover_from_driver",
+   "fieldtype": "Check",
+   "label": "Recover Cost from Driver"
+  },
+  {
+   "depends_on": "eval:doc.recover_from_driver",
+   "description": "Employee the cost is recovered from. Fetched from the driver's employee record.",
+   "fetch_from": "driver.employee",
+   "fetch_if_empty": 1,
+   "fieldname": "recovery_employee",
+   "fieldtype": "Link",
+   "label": "Recover From Employee",
+   "mandatory_depends_on": "eval:doc.recover_from_driver",
+   "options": "Employee"
+  },
+  {
+   "depends_on": "eval:doc.recover_from_driver",
+   "description": "Total amount to recover. Never more than the estimated cost.",
+   "fieldname": "recovery_amount",
+   "fieldtype": "Currency",
+   "label": "Amount to Recover (SAR)",
+   "mandatory_depends_on": "eval:doc.recover_from_driver",
+   "non_negative": 1
+  },
+  {
+   "depends_on": "eval:doc.recover_from_driver",
+   "description": "Agreed amount to deduct per pay period. Leave blank to recover as fast as the statutory cap allows.",
+   "fieldname": "installment_amount",
+   "fieldtype": "Currency",
+   "label": "Agreed Installment per Pay Period (SAR)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "vi_recovery_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.recover_from_driver",
+   "description": "The worker's signed consent to the recovery. Required before the incident can be approved; KSA Labor Law requires the worker's consent for a wage deduction.",
+   "fieldname": "worker_signature",
+   "fieldtype": "Signature",
+   "label": "Worker Consent Signature",
+   "no_copy": 1
+  },
+  {
+   "depends_on": "eval:doc.recover_from_driver",
+   "description": "Stamped when the consent signature is first recorded.",
+   "fieldname": "signed_on",
+   "fieldtype": "Date",
+   "label": "Consent Signed On",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.recover_from_driver",
+   "description": "The Employee Advance raised for this incident. One incident raises at most one advance; the company payment and the wage installments both run on it.",
+   "fieldname": "recovery_advance",
+   "fieldtype": "Link",
+   "label": "Recovery Advance",
+   "no_copy": 1,
+   "options": "Employee Advance",
+   "read_only": 1
+  },
+  {
    "collapsible": 1,
    "fieldname": "vi_sec_system",
    "fieldtype": "Section Break",
@@ -215,7 +295,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-25 04:51:05.634595",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Incident",
