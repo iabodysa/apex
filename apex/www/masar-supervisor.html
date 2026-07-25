@@ -23,6 +23,10 @@
     <link rel="stylesheet" href="/assets/apex/route_supervisor_portal/assets/index.css" />
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
+      // Tile source override from site_config (apex_map_tile_url). Empty by default:
+      // the map then uses its own OpenStreetMap default, the acceptance recorded in
+      // masar_supervisor.py. A contracted source needs no code change, only this key.
+      window.apex_map_tiles = {{ map_tiles | tojson }};
       window.masar_sup_socket = {
         site_name: {{ site_name | tojson }},
         socketio_port: {{ socketio_port }},

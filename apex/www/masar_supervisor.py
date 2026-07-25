@@ -23,6 +23,40 @@ with underscores in the template basename (see TemplatePage.set_pymodule_path �
 so its controller MUST be ``masar_supervisor.py`` (underscore); a hyphenated
 ``masar-supervisor.py`` is never imported, ``get_context`` never runs, and the page falls
 through to the "no role" branch for EVERY user regardless of their actual roles.
+
+Map tile source — ACCEPTED THIRD-PARTY FETCH (A-175, 2026-07-25)
+The live driver map draws its background from tile.openstreetmap.org by default. That
+is a deliberate, recorded acceptance, not an oversight: self-hosting or rendering a tile
+pyramid is disproportionate for one supervisor panel, and the executable-code risk that
+forced Leaflet itself to be vendored does not apply here — a tile is a PNG image, not a
+script, so nothing third-party executes with the supervisor's session.
+
+What a tile request discloses, precisely:
+  * the tile path ``/{z}/{x}/{y}.png`` — the map's approximate viewport at tile
+    resolution. The map re-centres on the tracked driver, so this is approximately where
+    an AFMCO vehicle is, to roughly a city block at the zoom levels used;
+  * timing — one burst per pan/zoom, and the position poll runs every 10s while the map
+    tab is open and visible, so the request stream also reveals WHEN a trip is being
+    watched and that the vehicle is moving;
+  * ordinary HTTP metadata — the browser's public IP and User-Agent, plus the site's
+    ORIGIN as Referer (the default strict-origin-when-cross-origin policy trims the path,
+    so ``/masar-supervisor`` itself is not sent).
+
+What it does NOT disclose: no cookie or CSRF token crosses the boundary (a plain
+cross-origin image request carries no credentials), and no employee name, plate, trip id,
+Route Plan or any other Frappe record appears anywhere in a tile URL. The requests do
+originate from an authenticated supervisor session, so the coordinates are attributable
+to this deployment even though no identity is transmitted.
+
+Degradation: the map is never load-bearing. Leaflet missing → a plain coordinate readout;
+tile host unreachable → the driver marker, the live badge, the driver/vehicle strip and
+every other tab still render over a blank canvas, with a note that the background is
+unavailable. Asserted in DriverMap.vue.
+
+A deployment that needs a contracted or self-hosted tile source sets ``apex_map_tile_url``
+(and optionally ``apex_map_tile_attribution``) in site_config.json — no code change. The
+value must be https:// or a root-relative path; anything else is ignored so a
+misconfiguration cannot silently downgrade an https page into blocked mixed content.
 """
 
 import frappe
@@ -38,6 +72,17 @@ SUPERVISOR_ROLES = {
     "Fleet Project Manager",
     "Fleet Supervisor",
 }
+
+
+def map_tile_override(conf) -> dict:
+    """Site-config tile source, or empty to keep the component's OpenStreetMap default.
+    Rejects anything that is not https:// or root-relative — see the module docstring."""
+    url = str(conf.get("apex_map_tile_url") or "").strip()
+    # "//host/..." is protocol-relative, i.e. off-site, not root-relative.
+    root_relative = url.startswith("/") and not url.startswith("//")
+    if not (url.startswith("https://") or root_relative):
+        return {"url": "", "attribution": ""}
+    return {"url": url, "attribution": str(conf.get("apex_map_tile_attribution") or "").strip()}
 
 
 def has_apps_screen_access() -> bool:
@@ -59,4 +104,5 @@ def get_context(context):
         context.socketio_port = cint(conf.get("socketio_port")) or 9000
         context.async_enabled = not cint(conf.get("disable_async"))
         context.dev_server = 1 if frappe.conf.developer_mode else 0
+        context.map_tiles = map_tile_override(conf)
     return context
