@@ -158,5 +158,121 @@ class TestFeedCoversPopups(unittest.TestCase):
         )
 
 
+# [#a081x1]
+CHANGELOG_PY = os.path.join(APP_ROOT, "apex_core", "utils", "changelog.py")
+FEED_TITLE = re.compile(r'"title":\s*(["\'])(.*?)\1', re.DOTALL)
+README_LINK = re.compile(r"\[(\d+\.\d+(?:\.\d+)?)\]\((v\d+/v\d+_\d+_\d+\.md)\)")
+
+
+def _ver_key(version):
+    return [int(part) for part in version.split(".")]
+
+
+def _normalise(version):
+    """A 2-part release title ("Apex 2.1") names the X.Y.0 note on disk."""
+    parts = version.split(".")
+    return version if len(parts) == 3 else f"{parts[0]}.{parts[1]}.0"
+
+
+def _popup_versions():
+    """Versions that have a shipped note on disk under change_log/v*/."""
+    out = set()
+    for fp in _popup_files():
+        maj, minr, pat = POPUP_FILE.match(os.path.basename(fp)).groups()
+        out.add(f"{int(maj)}.{int(minr)}.{int(pat)}")
+    return out
+
+
+def _readme_links():
+    """Every (version, link target) pair indexed in change_log/README.md."""
+    with open(os.path.join(CHANGE_LOG, "README.md"), encoding="utf-8") as fh:
+        return [(_normalise(v), target) for v, target in README_LINK.findall(fh.read())]
+
+
+def _feed_release_versions():
+    """One version per _RELEASES entry: the first version its title declares.
+
+    Deliberately first-match rather than every match — a title may mention an
+    unrelated number ("ZATCA 2.0 invoicing"), and only the leading one names the
+    release. Returned as a list so a duplicated entry stays visible.
+    """
+    with open(CHANGELOG_PY, encoding="utf-8") as fh:
+        text = fh.read()
+    out = []
+    for match in FEED_TITLE.finditer(text):
+        found = VERSION_IN_TITLE.findall(match.group(2))
+        if found:
+            out.append(_normalise(found[0]))
+    return out
+
+
+def _disagreements(notes, readme, feed):
+    """Versions absent from at least one of the three shipped release sources.
+
+    Symmetric on purpose: the pre-existing guards above only run notes -> README
+    and notes -> feed, so a README line or a feed entry for a release with no note
+    on disk passed unseen. This compares all three sets in both directions at once.
+    """
+    out = []
+    sources = (("notes", notes), ("README", readme), ("feed", feed))
+    for version in sorted(notes | readme | feed, key=_ver_key):
+        absent = [name for name, known in sources if version not in known]
+        if absent:
+            out.append(f"{version} missing from {'+'.join(absent)}")
+    return out
+
+
+class TestReleaseSourcesAgree(unittest.TestCase):
+    """The notes on disk, the README index and the _RELEASES feed must match.
+
+    A release carried by one source and not the others is the drift that broke
+    the build when 2.1.2 shipped a note with no feed entry. All three are edited
+    by hand at release time, so nothing but this guard keeps them aligned.
+    """
+
+    def test_the_three_release_sources_carry_the_same_versions(self):
+        notes = _popup_versions()
+        readme = {version for version, _ in _readme_links()}
+        feed = set(_feed_release_versions())
+        self.assertEqual(
+            _disagreements(notes, readme, feed),
+            [],
+            "change_log notes, change_log/README.md and changelog.py _RELEASES "
+            "disagree. Add the release to whichever source omits it — a shipped "
+            "note is product history and is never removed to force agreement.",
+        )
+
+    def test_every_readme_link_resolves_to_the_note_it_names(self):
+        offenders = []
+        for version, target in _readme_links():
+            if not os.path.exists(os.path.join(CHANGE_LOG, target)):
+                offenders.append(f"{version} -> {target} (no such file)")
+            elif os.path.basename(target) != f"v{_normalise(version).replace('.', '_')}.md":
+                offenders.append(f"{version} -> {target} (target names another release)")
+        self.assertEqual(
+            sorted(offenders), [], f"broken README release links: {sorted(offenders)}"
+        )
+
+    def test_no_version_is_listed_twice_in_the_feed(self):
+        feed = _feed_release_versions()
+        dupes = sorted({v for v in feed if feed.count(v) > 1})
+        self.assertEqual(
+            dupes, [], f"_RELEASES carries more than one entry per version: {dupes}"
+        )
+
+    def test_guard_detects_a_release_missing_from_any_one_source(self):
+        """Guard-of-the-guard: prove the scans are populated and the comparison bites."""
+        notes, readme = _popup_versions(), {v for v, _ in _readme_links()}
+        feed = set(_feed_release_versions())
+        for name, found in (("notes", notes), ("README", readme), ("feed", feed)):
+            self.assertGreaterEqual(len(found), 2, f"{name} scan returned too little")
+        self.assertEqual(_disagreements({"9.9.9"}, {"9.9.9"}, {"9.9.9"}), [])
+        # Punch the hole in each slot in turn, so no slot is silently unchecked.
+        gap = min(notes, key=_ver_key)
+        for slots in ((notes - {gap}, readme, feed), (notes, readme - {gap}, feed),
+                      (notes, readme, feed - {gap})):
+            self.assertNotEqual(_disagreements(*slots), [], f"undetected hole: {gap}")
+
+
 if __name__ == "__main__":
     unittest.main()
