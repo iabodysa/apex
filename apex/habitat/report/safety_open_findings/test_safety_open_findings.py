@@ -36,7 +36,7 @@ class TestSafetyOpenFindings(FrappeTestCase):
         self.assertIsInstance(data, list)
 
     def test_open_execution_surfaces_with_zero_days_open(self):
-        tag = frappe.generate_hash(length=6)
+        tag = frappe.generate_hash(length=12)
         building = frappe.get_doc(
             {"doctype": "Building", "building_name": f"SOF Bldg {tag}", "status": "Active"}
         ).insert(ignore_permissions=True).name

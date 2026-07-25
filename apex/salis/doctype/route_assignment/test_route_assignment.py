@@ -19,7 +19,7 @@ class TestRouteAssignment(FrappeTestCase):
         self.project = frappe.get_doc(
             {
                 "doctype": "Project",
-                "project_name": f"RA Fetch Project {frappe.generate_hash(length=8)}",
+                "project_name": f"RA Fetch Project {frappe.generate_hash(length=12)}",
             }
         ).insert(ignore_permissions=True).name
 

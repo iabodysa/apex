@@ -25,6 +25,14 @@ class _FakeRow:
     def get(self, key, default=None):
         return self._fields.get(key, default)
 
+    def __getattr__(self, key):
+        """A real child row exposes its fields as attributes too, and the module
+        under test reads some that way (``finding.room``). Private/dunder names
+        must still miss so ``_fields`` itself never recurses."""
+        if key.startswith("_"):
+            raise AttributeError(key)
+        return self._fields.get(key)
+
     def db_set(self, field, value):
         self.db_set_calls.append((field, value))
         self._fields[field] = value

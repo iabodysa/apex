@@ -119,6 +119,9 @@ class TestRoutedPaymentSerialization(FrappeTestCase):
     @classmethod
     def tearDownClass(cls):
         frappe.set_user("Administrator")
+        # Drop the pointer BEFORE the stub DocType: leaving it behind gives the single
+        # a dangling Link, and _validate_links then aborts every later save of it.
+        frappe.db.set_single_value(SETTINGS, "target_payment_doctype", None)
         if frappe.db.exists("DocType", STUB_DOCTYPE):
             frappe.delete_doc("DocType", STUB_DOCTYPE, force=1, ignore_permissions=True)
             frappe.db.commit()
