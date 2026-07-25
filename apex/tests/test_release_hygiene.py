@@ -337,9 +337,6 @@ class TestNoTestRolesShipped(unittest.TestCase):
             os.path.join(
                 "apex_core", "setup", "seeders", "habitat_dashboard_seed.py"
             ),
-            os.path.join(
-                "apex_core", "setup", "seeders", "salis_dashboard_seed.py"
-            ),
         )
         return roles
 
