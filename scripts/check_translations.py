@@ -5,8 +5,14 @@ a row in apex/translations/ar.csv.
 MISSING (a live source string with no CSV row) is a hard failure — the user sees
 raw English. STALE (a CSV row whose English source is gone) is capped at a
 baseline instead: the extractor cannot see every live string (HTML fragments,
-long text, framework labels this app overrides), so a stale row is a *candidate*
-for deletion, not proof of death. Deleting one needs the manual cross-check.
+framework labels this app overrides), so a stale row is a *candidate* for
+deletion, not proof of death. Deleting one needs the manual cross-check.
+
+Strings come from two sources and are judged differently. A DECLARED string is
+one the framework or the author already committed to translating — an explicit
+_()/__() msgid, or a DocType/field `description`, which Frappe harvests
+(translate.py) and renders through __() verbatim at any length. Everything else
+is GUESSED from a JSON key, and only guesses get the shape heuristics below.
 
 Also lints static schema labels for {placeholders}: a label is rendered verbatim,
 so a brace in one is a bug — placeholders belong only to code _()/__() calls.
@@ -34,6 +40,8 @@ JSON_TEXT_KEYS = {"label", "title", "subtitle", "description", "message",
 # Subset that is a STATIC label shown verbatim, so it must never interpolate.
 LABEL_KEYS = {"label", "title", "subtitle", "options", "action_label",
               "button_label", "card_name", "chart_name", "column"}
+# Keys Frappe itself declares translatable, so the shape heuristics must not judge them.
+DECLARED_KEYS = {"description"}
 
 # Start of a translate call; the first literal (plus adjacently concatenated ones)
 # is the msgid. Matching the start, not the whole call, keeps __("Saved {0}", [n]).
@@ -52,20 +60,26 @@ def clean_text(value: str) -> str:
         return value.strip()
 
 
-def is_candidate_text(value: str, allow_placeholders: bool = False) -> bool:
+def is_candidate_text(value: str, declared: bool = False) -> bool:
+    """`declared` marks a string already committed to translation by the framework
+    or the author, so only Frappe's own is_translatable rules apply. The heuristics
+    below exist to stop a JSON *guess* slurping prose that is not a msgid; applied
+    to a declared string they hide real gaps instead — a 182-char description was
+    invisible to MISSING, and translating it landed the row in STALE."""
     text = value.strip()
-    if not text or len(text) > 180:
+    if not text:
         return False
     if not re.search(r"[A-Za-z]", text):
         return False
-    if re.search(r"[<>]", text):  # HTML fragment, not a msgid
-        return False
-    if "#" in text:  # naming-series / autoname placeholder, an identifier
-        return False
-    # Braces are valid in an explicit _()/__() msgid only; rejecting them for
-    # heuristic JSON extraction keeps translated format-strings out of stale.
-    if not allow_placeholders and re.search(r"[{}]", text):
-        return False
+    if not declared:
+        if len(text) > 180:
+            return False
+        if re.search(r"[<>]", text):  # HTML fragment, not a msgid
+            return False
+        if "#" in text:  # naming-series / autoname placeholder, an identifier
+            return False
+        if re.search(r"[{}]", text):  # a format-string only a real msgid may carry
+            return False
     return not text.startswith(("http://", "https://", "/", "#"))
 
 
@@ -75,10 +89,10 @@ def is_auto_translatable(text: str) -> bool:
     return "&" not in text
 
 
-def add_candidate(found: set, text: str, allow_placeholders: bool = False) -> None:
+def add_candidate(found: set, text: str, declared: bool = False) -> None:
     for part in text.splitlines():
         cleaned = part.strip()
-        if is_candidate_text(cleaned, allow_placeholders=allow_placeholders):
+        if is_candidate_text(cleaned, declared=declared):
             found.add(cleaned)
 
 
@@ -93,7 +107,7 @@ def scan_calls(content: str, found: set) -> None:
             parts.append(literal.group(2))
             pos = literal.end()
         if parts:
-            add_candidate(found, clean_text("".join(parts)), allow_placeholders=True)
+            add_candidate(found, clean_text("".join(parts)), declared=True)
 
 
 def extract_workspace_content(content_str: str, found: set) -> None:
@@ -183,7 +197,7 @@ def extract(package: Path) -> tuple[set, list[tuple[str, str, str]]]:
             elif isinstance(obj, str):
                 if key in JSON_TEXT_KEYS:
                     scan_calls(obj, found)  # Notification subject/message hold Jinja _()
-                    add_candidate(found, obj)
+                    add_candidate(found, obj, declared=key in DECLARED_KEYS)
                 if key in LABEL_KEYS and re.search(r"[{}]", obj) and re.search(r"[A-Za-z]", obj):
                     entry = (rel, key, obj.strip())
                     if entry not in warnings:
