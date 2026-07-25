@@ -1,10 +1,17 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Fleet OS supervisor dashboard API (read + live operations).
 
-Backs the ``/fleet`` www page, which is the fleet supervisor's single-screen
+Backs the ``/fleet-os`` www page, which is the fleet supervisor's single-screen
 dashboard. The page is a faithful copy of the supervisor's own design; this
 module replaces the design's embedded JSON with LIVE Salis data and routes its
 operations to the real DocTypes.
+
+Route trace (NOT ``/fleet`` — that is the unrelated employee self-service page,
+whose bundle calls ``apex.salis.api.fleet_employee`` only): hooks.py tile
+"apex-fleet-os" -> ``/fleet-os`` -> ``www/fleet-os.html`` ->
+``/assets/apex/fleet_os_portal/assets/index.js``, built from ``frontend/fleet_os``
+(``vite.config.js`` name="fleet_os_portal"), whose ``useFleetBoard`` /
+``useFleetActions`` / ``useDriverAssignment`` composables call this module.
 
 Contract: :func:`get_fleet_os` returns a ``vehicles`` list whose item / history
 shape matches exactly what the page's render code reads (``v.plate``,
@@ -39,7 +46,7 @@ from apex.salis.utils import (
 
 
 def _publish_fleet_update(plate: str | None = None, action: str | None = None) -> None:
-    """Signal the /fleet board to refetch ahead of its poll. Routed to the Salis
+    """Signal the /fleet-os board to refetch ahead of its poll. Routed to the Salis
     Vehicle doctype room; the socket server delivers only to recipients with read
     permission, so scope is honoured without extra filtering. after_commit so
     subscribers refetch committed state. The payload is advisory only — the SPA
@@ -468,7 +475,7 @@ def get_status_meta():
 
 @frappe.whitelist()
 def get_vehicle_timeline(plate):
-    """Merged per-vehicle audit timeline for the /fleet panel Log tab.
+    """Merged per-vehicle audit timeline for the /fleet-os panel Log tab.
 
     One descending feed of the vehicle's assignments, stops, incidents and
     Operations Alerts. Read-permission- and project-scope-gated through the SAME
@@ -589,7 +596,7 @@ def reassign(plate, driver_id, date=None):
 def create_handover(plate, driver_id, date=None, odometer=None, checklist_template=None, condition_notes=None):
     """Create an OPTIONAL DRAFT Vehicle Handover for a just-reassigned vehicle.
 
-    Called by /fleet AFTER reassign succeeds, only when the supervisor ticked the
+    Called by /fleet-os AFTER reassign succeeds, only when the supervisor ticked the
     optional capture box. Reuses the native Vehicle Handover DocType/controller —
     no parallel handover logic. It is left as a DRAFT (insert only, never submit):
     the controller requires signed evidence before submit, so a manager later

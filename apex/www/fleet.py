@@ -24,8 +24,8 @@ from frappe.utils import cint
 
 from apex.apex_core.utils.portal_bootstrap import guest_redirect
 
-# [#i6khen] Retained for the /apps app-selector tile gate below — the employee
-# page itself no longer gates on a role.
+# [#i6khen] Read only by the retained-unused helper below; /fleet itself gates on
+# nothing, so no runtime path consults this set.
 FLEET_ROLES = {
     "System Manager",
     "Fleet Manager",
@@ -35,8 +35,22 @@ FLEET_ROLES = {
 
 
 def has_apps_screen_access() -> bool:
-    """Gate for the /apps app-selector tile (A-024). The fleet team gets the tile
-    to their surface; ordinary employees reach /fleet directly, not via the tile."""
+    """retained-unused: /fleet is ungated by design, so no tile points here.
+
+    The "apex-fleet" tile in hooks.py add_to_apps_screen carries NO has_permission
+    key, so Frappe never calls this. That is deliberate, not a missing wire. The
+    /apps tile gate exists to MIRROR a page's own gate — README's contract is that
+    a tile "can never be shown to a user the page would turn away" — and
+    get_context() below turns nobody away: every logged-in user gets can_view = 1,
+    with per-user scoping enforced server-side by the fleet_employee endpoints.
+    Gating the tile on FLEET_ROLES would invert that contract, hiding "My Fleet"
+    from the ordinary employees the page exists to serve. The sibling open worker
+    pages /driver and /masar match this shape: no helper, no has_permission.
+
+    Kept rather than deleted so the fleet role-set stays documented beside the page
+    and the gate is one hooks line away should /fleet ever become role-restricted.
+    Contrast www/fleet_os.py, whose identical helper IS wired to "apex-fleet-os".
+    """
     return bool(FLEET_ROLES & set(frappe.get_roles()))
 
 
