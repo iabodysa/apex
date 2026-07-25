@@ -575,19 +575,11 @@ def purge_test_buildings():
     return removed
 
 
-# [#a140fx] Accounting / payroll chain fixtures (A-140).
-#
-# ``tests/before_tests.py`` bootstraps a Company and a chart of accounts through
-# ERPNext's setup wizard, but NOTHING else: no Employee, no guaranteed Receivable
-# or Payable account, no wage. Tests that needed those used to ``skipTest`` and
-# report success without ever exercising the behaviour. These builders replace
-# that skip with a fixture.
-#
-# Site-wide masters (Company, Account) are get-or-create, because a second copy
-# would change what "the site's company" means for every other test. Records that
-# must be private to a test class (Employee, Salary Component, Salary Structure)
-# are always NEW, because borrowing whatever an earlier test happened to leave
-# behind is the order-dependence these fixtures exist to remove.
+# [#a140fx] Accounting / payroll chain fixtures. Site-wide masters (Company, Account)
+# are get-or-create, since a second copy would change what "the site's company" means
+# for every other test; class-private records (Employee, Salary Component, Salary
+# Structure) are always NEW, because borrowing what an earlier test left behind is
+# exactly the order-dependence these builders exist to remove.
 
 
 def fixture_tag():

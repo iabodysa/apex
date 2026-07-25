@@ -20,6 +20,14 @@ Genuinely app-wide guards (release hygiene, schema integrity, translation
 coverage, this file) have no single module to sit beside and stay central
 forever — they simply remain baseline entries that never drain.
 
+``apex/www`` IS an importable home (A-152): ``apex/www/__init__.py`` now exists,
+matching the empty one frappe, erpnext and hrms each ship. It changes no routing —
+route discovery allowlists only html/xml/js/css/md (``frappe/website/router.py:117``)
+and ``TemplatePage.can_render()`` refuses any Python suffix
+(``frappe/website/page_renderers/template_page.py:74``), so neither ``__init__.py``
+nor a colocated ``test_*.py`` can be served as a page. Discovery already worked via
+PEP 420, so the marker is for tooling, not the runner.
+
 NOTE: this module must not import from a sibling ``test_*`` module (see
 test_no_cross_test_imports.py) — it is deliberately stdlib-only.
 """
@@ -229,22 +237,10 @@ _BASELINE = frozenset(
     }
 )
 
-# [#a123r2] Guards added AFTER the baseline froze that have no colocated home.
-# _BASELINE stays shrink-only; this set is the documented escape hatch, and every
-# entry must carry the reason it cannot sit beside a module. Adding to it is a
-# review decision, not a way to make room for an ordinary test.
-#
-# [#a152r1] "apex/www is not importable" is NOT a valid reason any more (A-152).
-# apex/www/__init__.py now exists, matching frappe/www/, erpnext/www/ and
-# hrms/www/, which all ship an empty one. Adding it changes no routing: route
-# discovery allowlists only html/xml/js/css/md (frappe/website/router.py:117),
-# and TemplatePage.can_render() refuses any path ending in a Python suffix
-# (frappe/website/page_renderers/template_page.py:74, PY_LOADER_SUFFIXES), so
-# neither __init__.py nor a colocated test_*.py can ever be served as a page.
-# Discovery already worked via PEP 420 — test_runner.py:149 os.walks the app
-# without pruning www and imports the file as a dotted path built at
-# test_runner.py:309-313 — so the marker is for tooling, not for the runner.
-# test_fleet_employee_nav.py drained to apex/www/ to prove the home works.
+# [#a123r2] [#a152r1] Guards added after the baseline froze that have no colocated
+# home. _BASELINE stays shrink-only; this is the documented escape hatch, and adding
+# to it is a review decision, not a way to make room for an ordinary test. See the
+# module docstring for why "apex/www is not importable" is no longer a valid reason.
 _CENTRAL_BY_NECESSITY = frozenset(
     {
         # Scans every workspace JSON in the app for a parent chain that hides a

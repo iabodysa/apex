@@ -10,19 +10,11 @@ app_license = "MIT"
 # [#4d5ed9]
 required_apps = ["frappe", "erpnext", "hrms"]
 
-# [#a024ap]
-# One-click icons on the Frappe /apps app-selector screen (A-024) — one entry
-# per real www/ portal shell. Driver has no extra role gate (any logged-in
-# user); masar is guest-token-based and /fleet is the open employee page, so
-# those three carry no gate. Masar Supervisor / Fleet OS / housing / safety are
-# admin-style portals, so each has_permission points at a has_apps_screen_access()
-# living next to that page's own role-set, to keep the /apps gate from drifting
-# away from the page's real access check.
-#
-# Identifier convention: "apex-" + the route slug, so the key always names the
-# route it opens. The key is render-time only — frappe/apps.py:43 returns the
-# INSTALLED APP name ("apex") to the client and User.default_app stores that
-# same app name, so no stored state keys off these strings.
+# [#a024ap] One tile per www/ portal shell. Each admin-style portal points its
+# has_permission at a has_apps_screen_access() beside that page's own role-set, so
+# the /apps gate cannot drift from the page's real check; driver, masar and /fleet
+# are ungated by design. Key convention is "apex-" + route slug, and the key is
+# render-time only (frappe/apps.py:43 returns the installed app name, not this one).
 add_to_apps_screen = [
     {
         "name": "apex-driver",
