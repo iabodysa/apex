@@ -245,6 +245,14 @@ _CENTRAL_BY_NECESSITY = frozenset(
         # __init__.py, so there is no importable colocated home for a www test —
         # tracked as its own card.
         "test_fleet_employee_nav.py",
+        # Asserts app-wide that no module still references the retired deduction
+        # acknowledgment surface and that exactly one module raises an advance.
+        "test_native_recovery_surface.py",
+        # Drives scripts/comment_audit.py and scripts/check_translations.py as
+        # subprocesses; they live outside the apex package and own no module.
+        "test_repo_gates.py",
+        # Scans every workspace JSON for name/title/parent_page agreement.
+        "test_workspace_identity_consistency.py",
     }
 )
 

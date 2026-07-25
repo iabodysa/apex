@@ -71,6 +71,12 @@ apex.patches.v1_x.seed_accommodation_item_groups
 # migrate; in post_model_sync the backfill would silently no-op. Census unprovable here.
 apex.patches.v1_x.migrate_scheduled_task_template_to_assignments
 
+# STILL-REQUIRED (ONE-TIME): MUST stay in [pre_model_sync] — renames the Workspace
+# primary key 'fleet' -> 'Fleet' BEFORE sync_all() re-imports fleet.json. After the
+# sync, PostgreSQL already holds a duplicate row plus an orphan and MariaDB has
+# already dropped the row and any User pinned to it. Non-destructive and idempotent.
+apex.patches.v2_0.rename_fleet_workspace_to_title_case
+
 [post_model_sync]
 # STILL-REQUIRED: only-if-missing Web Form route safeguard for a v15 upgrade
 # (GitHub #97). Nothing in source proves every deployed site is already v15-correct.
