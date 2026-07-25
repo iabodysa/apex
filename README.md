@@ -195,6 +195,8 @@ graph LR
     SALIS --> FLEET
     SALIS --> COMP
 
+    CUSTODY --> LOG
+
     classDef restricted fill:#f1f5f9,stroke:#475569,color:#334155,stroke-dasharray:4 3;
     classDef hub_ws     fill:#1d4ed8,stroke:#1d4ed8,color:#fff;
     classDef ws         fill:#dbeafe,stroke:#1e3a8a,color:#1e3a8a;
@@ -203,7 +205,9 @@ graph LR
     classDef log_ws     fill:#9a3412,stroke:#9a3412,color:#fff;
 ```
 
-Nine public workspaces ship as `is_standard` JSON under `apex/habitat/workspace/` and `apex/salis/workspace/`: two module roots — Habitat with four children and Salis with two — plus **Backend Engines**, a hidden root limited to System Manager because its ledgers and snapshots are system-written and read-only. The personal **Action Inbox** is a shortcut on both module roots, not a workspace of its own. Logistay ships no workspace; it surfaces through its **Telecom Control** Desk page. See [Workspace design](docs/WORKSPACE-DESIGN.md) for the layout method these workspaces follow.
+Nine public workspaces ship as `is_standard` JSON under `apex/habitat/workspace/` and `apex/salis/workspace/`: two module roots — Habitat with four children and Salis with two — plus **Backend Engines**, a hidden root limited to System Manager because its ledgers and snapshots are system-written and read-only. The personal **Action Inbox** is a shortcut on both module roots, not a workspace of its own. See [Workspace design](docs/WORKSPACE-DESIGN.md) for the layout method these workspaces follow.
+
+Logistay ships no workspace of its own, by design. It **owns** the telecom model — `SIM Card`, `SIM Custody Assignment`, `Telecom Contract`, and `Telecom Billing Document`, together with six telecom reports, three number cards, and the **Telecom Control** Desk page, every one of them declaring `"module": "Logistay"`. The **Custody** workspace is their single navigation host: the telecom card, the Telecom Control shortcut, the three telecom number cards, and the six telecom reports all sit there beside the custody flow, and the `SIM Operations User` role is granted on that workspace so the gate travels with the surface. This split is deliberate and settled — a SIM in an employee's hands is a custody record, so it belongs next to the rest of the company property an employee holds, while the module that owns the data stays Logistay. Ownership and navigation are separate questions here, and they have separate answers.
 
 ## Backend surfaces
 
@@ -283,11 +287,15 @@ Apex serves **seven** portal routes. Each one is a single `apex/www/<route>.html
 | `/safety` | Safety supervisors — pick a building, work the checklist cadences that are due, submit one round per cadence | Guest redirect, then `SAFETY_ROLES`: System Manager, Accommodation Manager, Resident Supervisor. | `apex/www/safety.py` · `safety_portal` |
 | `/masar-supervisor` | Route supervisors who dispatch buses | Guest redirect, then `SUPERVISOR_ROLES`: System Manager, Fleet Manager, Fleet Project Manager, Fleet Supervisor. Every read is additionally row-scoped to the caller's own route plans, so the role gate is a coarse door and not the data boundary. | `apex/www/masar_supervisor.py` · `route_supervisor_portal` |
 
-`/fleet` and `/fleet-os` are **not** duplicates. The first is the employee self-service page, open to anyone signed in; the second is the supervisor board behind a four-role gate. They share no endpoint, and neither covers the other's capability.
+`/fleet` and `/fleet-os` are **not** duplicates, and both are permanently supported. The first is the employee self-service page, open to anyone signed in; the second is the supervisor board behind a four-role gate. Their endpoint sets are disjoint: `apex.salis.api.fleet_employee` serves 4, `apex.salis.api.fleet_os` serves 13, and no endpoint name appears on both sides. Ten of the board's thirteen have no equivalent anywhere else in the application — `search_drivers`, `get_status_meta`, `create_handover`, `stop_vehicle`, `report_theft`, `workshop_in`, `workshop_out`, `bulk_stop_vehicles`, `bulk_workshop_in`, and `recover`. Only three overlap anything: the board read, the vehicle timeline, and the driver reassignment are also offered by the Desk-side `apex.salis.api.operations_control`, over a different key (vehicle name rather than plate) and to a Desk audience rather than a portal one.
+
+Merging or retiring either route was considered and rejected. There is no parity between them to consolidate toward, and folding the supervisor board away would drop ten working capabilities without removing a single user-facing surface. Treat the pair as settled architecture, not a pending consolidation.
+
+What the two portals genuinely share is a small amount of literal copy: five byte-identical files across `frontend/fleet/src` and `frontend/fleet_os/src` — `api.js`, `main.js`, `useToast.js`, `components/Icon.vue`, and `components/LangToggle.vue`, 200 lines together — plus the `FLEET_ROLES` set and the `has_apps_screen_access()` helper spelled out twice across the two controllers. That is a housekeeping item to fold into `frontend/frontend_shared`, and it is not a reason to retire a route.
 
 On a gated route, a logged-in user without the required role gets a friendly access page rather than a raw 403. The role gate is only the door: every endpoint re-checks document permission and row scope on the server.
 
-`apex/www/housing_count.py` is not a route. It ships no template and exists only to redirect `/housing-count` to `/housing#/count`.
+`/housing-count` is not a portal route. It is a legacy address kept alive only to redirect to `/housing#/count`, and it is the one `apex/www/*.html` file that is not a portal shell: `housing-count.html` is a redirect marker that mounts no application and loads no bundle. The marker cannot be deleted — Frappe resolves a `www` route by template file, so without it the sibling `housing_count.py` is never imported and the address answers 404 instead of redirecting. The check below therefore excludes it by name.
 
 Each route also gets a tile on the Frappe `/apps` selector, declared in `add_to_apps_screen` (`apex/hooks.py`). The gated tiles reuse the page's own role set through a `has_apps_screen_access()` helper that sits next to it, so a tile can never be shown to a user the page would turn away.
 
@@ -299,7 +307,7 @@ The table above is a published description of a directory that changes whenever 
 
 ```bash
 diff \
-  <(ls apex/www/*.html | sed 's|.*/||; s|\.html$||' | sort) \
+  <(ls apex/www/*.html | sed 's|.*/||; s|\.html$||' | grep -vx 'housing-count' | sort) \
   <(grep -oE '^\| `/[a-z-]+`' README.md | tr -d '|` /' | sort)
 ```
 
