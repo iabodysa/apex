@@ -232,6 +232,19 @@ def _boarding_summary(dispatch_trip: str, trip: dict | None = None) -> dict:
     }
 
 
+def _pending_first(plans: list) -> list:
+    """Order plans Pending-first, keeping the query's ``modified desc`` inside each group.
+
+    Ordered in PYTHON, not SQL: ``DatabaseQuery.validate_order_by_and_group_by`` rejects
+    every order_by function outside frappe's ``ALLOWED_ORDER_BY_FUNCTIONS`` allowlist, and
+    ``field()`` is not on it — the old ``field(supervisor_approval,'Pending') desc`` raised
+    ValidationError (HTTP 417) on every request, on any dataset. ``sort`` is stable, so the
+    SQL order survives within each group, and an unset approval counts as Pending here
+    exactly as it does in the payload."""
+    plans.sort(key=lambda p: (p.get("supervisor_approval") or "Pending") != "Pending")
+    return plans
+
+
 # ─────────────────────────────── read endpoints ───────────────────────────────
 
 @frappe.whitelist()
@@ -270,10 +283,10 @@ def get_supervisor_context():
             "supervisor_rejection_reason",
             "modified",
         ],
-        # Pending (0) before Approved/Rejected, then most-recently-touched first.
-        order_by="field(supervisor_approval,'Pending') desc, modified desc",
+        order_by="modified desc",
         limit_page_length=0,
     )
+    plans = _pending_first(plans)
 
     out = []
     for p in plans:
