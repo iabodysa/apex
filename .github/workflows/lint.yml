@@ -6,13 +6,20 @@ on:
   pull_request:
     branches: [apex]
 
-# Stale ar.csv rows currently kept on purpose: 115 are live strings the extractor
-# cannot see (HTML fragments, >180 chars, framework labels this app overrides), 7
-# live in the portal SPAs, 4 in docs, 9 come from frappe/erpnext/hrms. They were
-# each cross-checked against the whole tree; the 731 that were provably dead are
-# already deleted. Lower this only after re-proving the rows have no live source.
+# Cap on ar.csv rows whose English source no longer appears in the scanned package.
+# 136 sit under it today, re-audited row by row: 16 are provably live through a shape
+# the extractor cannot read (a __() msgid containing ">", a description over 180
+# chars, onboarding intro_text, role names, a module name, hooks/changelog dict
+# values, workspace link labels the framework composes at runtime); 11 belong to
+# frappe/erpnext/hrms or to a portal SPA dictionary; 9 are superseded renames whose
+# successor row already exists; 100 have no live source found anywhere in the tree.
+# The remaining 14 is deliberate slack. Measured single-commit churn before this gate
+# existed was +1, +8 and +31, so a baseline pinned to the exact count reds this lane
+# on whoever pushes the next honest label rename — a failure that reads as theirs.
+# Slack absorbs a workspace-scale rename, not a module retirement. The 100 unsourced
+# rows are queued for an owner decision; re-cut this number by 2026-10-01.
 env:
-  STALE_BASELINE: 136
+  STALE_BASELINE: 150
 
 jobs:
   lint:
