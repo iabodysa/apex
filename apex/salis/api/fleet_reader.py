@@ -6,12 +6,19 @@ vehicle's state and driver right now?" — and so must resolve scope and fetch t
 base vehicle set IDENTICALLY, even though they then shape the result for
 different surfaces:
 
-  * :mod:`apex.salis.api.fleet_os` — the ``/fleet`` SPA, which needs the
-    supervisor-design shape (per-vehicle ``current_driver``/``history``/
-    ``damages``/``accidents``/``stolen_info``);
+  * :mod:`apex.salis.api.fleet_os` — the ``/fleet-os`` supervisor SPA, which
+    needs the supervisor-design shape (per-vehicle ``current_driver``/
+    ``history``/``damages``/``accidents``/``stolen_info``);
   * :mod:`apex.salis.api.operations_control` — the ``operations-control``
     desk Page board, which needs the card/table shape (``current_driver_name``/
     ``open_incidents`` + a status ``summary``).
+
+Route trace for the SPA half, read off the built bundles rather than assumed:
+``www/fleet-os.html`` loads ``/assets/apex/fleet_os_portal/assets/index.js``, and
+that bundle is the only one referencing ``apex.salis.api.fleet_os``, which imports
+this module. The ``/fleet`` bundle (``fleet_portal``) references
+``apex.salis.api.fleet_employee`` alone, so nothing here reaches ``/fleet``. The
+desk half has no bundle at all — ``operations-control`` is a Desk Page.
 
 This module owns the SHARED half: the project-scope resolution and the bounded,
 N+1-free base ``Salis Vehicle`` query, plus the driver-name enrichment both

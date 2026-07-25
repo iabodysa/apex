@@ -1,13 +1,18 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Housing Inventory count API.
 
-The testable backend for the housing count portal (/housing-count): a mobile
-field surface where a supervisor picks a building, sees its Housing Inventory
-lines grouped by room, and records a physical count per line. It adds NO
-inventory model of its own — it reuses the Housing Inventory DocType and its
-existing count fields. The controller is the single deriver of
-``quantity_variance`` (counted minus expected) and the stamper of
-``last_count_date``; this API never writes those derived fields.
+The testable backend for the count surface inside the housing portal
+(``/housing#/count``): a mobile field surface where a supervisor picks a
+building, sees its Housing Inventory lines grouped by room, and records a
+physical count per line. It adds NO inventory model of its own — it reuses the
+Housing Inventory DocType and its existing count fields. The controller is the
+single deriver of ``quantity_variance`` (counted minus expected) and the stamper
+of ``last_count_date``; this API never writes those derived fields.
+
+Route trace, read off the built bundle: the only bundle referencing this module
+is ``housing_portal``, which ``www/housing.html`` loads. The older standalone
+``/housing-count`` route is now a redirect marker whose controller 301s to
+``/housing#/count``, so it hosts no surface of its own.
 
 Endpoints:
 
