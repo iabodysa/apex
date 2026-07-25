@@ -84,17 +84,66 @@ def _log_blocking_duplicates(doctype: str, fields: list[str], constraint_name: s
     )
 
 
-def _index_exists(doctype: str, index_name: str) -> bool:
-    """True if a (plain or unique) index with this name exists on the table."""
+def _column_set_indexed(doctype: str, fields: list[str]) -> bool:
+    """True if ANY index on the table spans exactly this ordered column set.
+
+    Frappe maintains its own single-column index for a ``search_index: 1`` field
+    under a name no caller here would guess — the bare column name when the table
+    is created (``frappe/database/schema.py``) or ``<column>_index`` when the
+    column is indexed by a later alter (``frappe/database/mariadb/schema.py``) —
+    so a name-only probe misses it and a genuine duplicate index gets created.
+
+    EXACT ordered equality, never leading-prefix coverage: Frappe's own
+    ``get_column_index`` discards composite keys (it drops any key that has a
+    ``Seq_in_index = 2`` row), so a composite never satisfies the framework's
+    single-column ``search_index`` and must not be treated here as covering one.
+    ``(a, b)`` and ``(b, a)`` are likewise different indexes.
+
+    Table name is BOUND, not interpolated, so no identifier reaches the SQL text.
+    Best-effort: any probe failure answers "not indexed" and the caller falls
+    through to its own guarded DDL.
+    """
+    wanted = [f.lower() for f in fields]
+    by_index: dict[str, list[str]] = {}
     try:
-        return bool(
-            frappe.db.sql(
-                "SHOW INDEX FROM `tab{dt}` WHERE Key_name = %s".format(dt=doctype),
-                (index_name,),
-            )
+        rows = frappe.db.sql(
+            """
+            SELECT INDEX_NAME AS idx, COLUMN_NAME AS col
+            FROM information_schema.STATISTICS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = %s
+            ORDER BY INDEX_NAME, SEQ_IN_INDEX
+            """,
+            ("tab" + doctype,),
+            as_dict=True,
         )
+        for row in rows or []:
+            by_index.setdefault(row["idx"], []).append((row["col"] or "").lower())
     except Exception:
         return False
+
+    return any(cols == wanted for cols in by_index.values())
+
+
+def _index_exists(doctype: str, index_name: str, fields: list[str] | None = None) -> bool:
+    """True if the table already carries this index.
+
+    Matches on NAME first; when ``fields`` is given, an index over exactly that
+    ordered column set counts too, whatever its name (see ``_column_set_indexed``)
+    — so an equivalent index Frappe already maintains is reused, not duplicated.
+    """
+    try:
+        named = frappe.db.sql(
+            "SHOW INDEX FROM `tab{dt}` WHERE Key_name = %s".format(dt=doctype),
+            (index_name,),
+        )
+    except Exception:
+        named = None
+
+    if named:
+        return True
+
+    return bool(fields) and _column_set_indexed(doctype, fields)
 
 
 def add_index_guarded(doctype: str, fields: list[str], index_name: str) -> bool:
@@ -103,10 +152,14 @@ def add_index_guarded(doctype: str, fields: list[str], index_name: str) -> bool:
     Called from a controller ``on_doctype_update`` so BOTH fresh installs (app
     sync applies it) and existing sites (``bench migrate``) get the index — a
     patch alone never reaches fresh installs, which mark patches complete without
-    running them. No-op when the index already exists; best-effort on DDL error
+    running them. No-op when the index already exists — under ``index_name`` OR
+    under any other name over the same ordered column set, so an index the
+    framework already maintains is never duplicated; best-effort on DDL error
     (logs and returns ``False`` rather than aborting migrate).
     """
-    if _index_exists(doctype, index_name):
+    # [#idxeqv] name OR equivalent column set; the post-DDL check below stays
+    # name-only, since there we must confirm the index we just asked for.
+    if _index_exists(doctype, index_name, fields):
         return True
 
     col_list = ", ".join(f"`{f}`" for f in fields)
