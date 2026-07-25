@@ -70,8 +70,8 @@ Four shipped variations are deliberate, not drift:
   read-only System Manager utility, not a daily-work surface, so the spine does
   not apply.
 
-**Compliance and Rentals** ships no `Master Data` section; its reference records
-live on the Salis root.
+**Compliance and Rentals** ships no `Master Data` section: its reference records
+sit on the **Fleet** workspace instead, `Rental Office` among them.
 
 Onboardings in use: `Apex Setup` (Habitat), `Accommodation Go-Live` (Housing),
 `Safety Readiness` + `Maintenance Daily Flow` (Safety), `Custody Go-Live`
@@ -98,7 +98,7 @@ of links does. Reuse these exact strings so a new section inherits the existing
 | Master Data | `Reference data: durable records you set up once, not daily work.` |
 | Setup | `Configuration and access: settings, users and roles.` |
 | Logs | `System logs: read-only diagnostics.` |
-| Portal-managed | `Records created and managed through the resident / worker / driver portals. Admin visibility only.` |
+| Portal-Managed Records | `Records created and managed through the resident / worker / driver portals. Admin visibility only.` |
 
 ### Label suffix tags
 
