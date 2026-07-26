@@ -11,8 +11,8 @@ Rented vehicles: registering offices, accruing cost, and settling.
 | DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Finance Manager |
 |---------|---------------|-----------------------|------------------|-----------------|
 | Rental Office (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read |
-| **Rental Vehicle Movement** *(submittable)* | Full | Read, Write, Create | Read, Write, Create | Read |
-| **Rental Settlement** *(workflow)* | Full | Read, Write, Create | — | Read, Write |
+| **Rental Vehicle Movement** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | Read |
+| **Rental Settlement** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | — | Read, Write |
 
 > **Internal Auditor** holds read-only oversight on all three records, and on the
 > derived **Rental Accrual Ledger**.

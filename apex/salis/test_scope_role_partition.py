@@ -32,6 +32,7 @@ import os
 import unittest
 
 from apex.tests.shipped_doctypes import shipped_doctypes
+from apex.tests.training_charter import documented_oversight_roles, role_charters
 
 _SALIS = os.path.dirname(os.path.abspath(__file__))
 _APP = os.path.normpath(os.path.join(_SALIS, ".."))
@@ -42,8 +43,10 @@ _DOCTYPE_GLOB = os.path.join(_APP, "*", "doctype", "*", "*.json")
 GRO_ROLE = "Government Relations Officer"
 
 # Roles that receive a User Permission on Project, so the scoped branch returns rows for
-# them. Source of truth: docs/training/README.md — "Fleet Project Managers and Supervisors
-# see only their permitted projects ... Grant access via a User Permission on Project."
+# them. The oversight bucket is READ from docs/training/README.md by
+# documented_oversight_roles(); this bucket cannot be, because the page names it in plural
+# prose rather than a parseable list. Each name is instead checked against the published
+# charter table below, so a role renamed on either side reds.
 PROJECT_SCOPED_ROLES = {
     "Fleet Project Manager",
     "Fleet Supervisor",
@@ -57,6 +60,11 @@ OWNER_SCOPED_ROLES = {
 
 # Administrator short-circuits in permission_scope.is_unscoped before any role lookup.
 _SUPERUSERS = {"Administrator"}
+
+# docs/training/README.md lists OPERATIONAL oversight roles and states in its own words
+# that System Manager is omitted from those tables. Anything unscoped beyond the published
+# list must therefore be one of these, never an unpublished persona.
+_UNSCOPED_BUT_NOT_A_PERSONA = {"System Manager", "Administrator"}
 
 KNOWN_ZEROED_ROLES = {
     # Frozen baseline of role -> why a role in none of the three buckets is tolerated.
@@ -143,6 +151,43 @@ class TestSalisScopeRolePartition(unittest.TestCase):
     def test_unscoped_roles_parsed_from_source(self):
         self.assertIn("Fleet Manager", self.unscoped)
         self.assertIn("Internal Auditor", self.unscoped)
+
+    def test_unscoped_roles_match_the_published_oversight_list(self):
+        """The published page and UNSCOPED_ROLES are one claim, read from both ends.
+
+        docs/training/README.md names the oversight set in a parenthesised list, so this
+        reads it rather than keeping a second copy, and asserts the two directions apart:
+        a role published as oversight that the code does not grant, and a role the code
+        unscopes that the page never names.
+        """
+        published = documented_oversight_roles()
+        self.assertEqual(
+            sorted(published - self.unscoped),
+            [],
+            "docs/training/README.md publishes role(s) as Salis oversight that "
+            "UNSCOPED_ROLES does not grant, so their lists resolve to '1=0' on a real "
+            f"site: {sorted(published - self.unscoped)}",
+        )
+        unpublished = self.unscoped - published - _UNSCOPED_BUT_NOT_A_PERSONA
+        self.assertEqual(
+            sorted(unpublished),
+            [],
+            "UNSCOPED_ROLES grants app-wide Salis visibility to persona(s) the published "
+            f"oversight list never names: {sorted(unpublished)}. That is an undocumented "
+            "widening of every project-scoped list — publish it or scope it.",
+        )
+
+    def test_project_scoped_roles_are_published_roles(self):
+        """A bucket naming a role the charter table does not list is already stale."""
+        charters = role_charters()
+        missing = sorted(role for role in PROJECT_SCOPED_ROLES if role not in charters)
+        self.assertEqual(
+            missing,
+            [],
+            f"PROJECT_SCOPED_ROLES names {missing}, absent from the Roles at a glance "
+            "table in docs/training/README.md — the role was renamed or retired on one "
+            "side only",
+        )
 
     def test_no_role_is_granted_a_list_it_can_never_see(self):
         found = zeroed_roles(self.readers, self.unscoped)

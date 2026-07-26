@@ -46,10 +46,11 @@ hold an elevated operational role are left enabled, and no account is ever
 deleted). Identity is the personal link token, resolved server-side on every call.
 
 The role still carries a minimal, **owner-only** document permission set, so a
-driver can never read another driver's rows even through the API:
+driver can never read another driver's rows even through the API. Every row below
+carries `if_owner`:
 
-| DocType | Rights (all `if_owner`) |
-|---------|-------------------------|
+| DocType | Driver |
+|---------|--------|
 | Salis Driver | Read |
 | Boarding Scan Log | Read |
 | Driver Attendance | Read, Create, Submit |

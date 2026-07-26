@@ -38,6 +38,7 @@ import os
 import unittest
 
 from apex.tests.shipped_doctypes import shipped_doctypes
+from apex.tests.training_charter import role_charters
 
 _REPORT_DIR = os.path.dirname(os.path.abspath(__file__))
 _APP = os.path.normpath(os.path.join(_REPORT_DIR, "..", ".."))
@@ -46,6 +47,10 @@ _DOCTYPE_GLOB = os.path.join(_APP, "*", "doctype", "*", "*.json")
 
 GRO_ROLE = "Government Relations Officer"
 SAFETY_ROLE = "Safety Officer"
+
+# The word in the published Safety Officer charter that makes a report over Safety Task
+# Execution in-charter. A lookup key into docs/training/README.md, not a copy of it.
+SAFETY_CAPABILITY = "executions"
 
 # System Manager reaches every report through the Report DocType itself, so its absence
 # from a roles table is never the bug this guard hunts.
@@ -386,23 +391,37 @@ class TestGovernmentRelationsOfficerReportAccess(unittest.TestCase):
 class TestSafetyOfficerReportAccess(unittest.TestCase):
     """A-172's own outcome: the safety operator reaches the reports built over its records.
 
-    Charter (docs/training/README.md): "Field safety operator; records inspections,
-    executions, and incidents". Both reports below read ``Safety Task Execution`` — the
-    executions the charter names — and neither carries a Currency column, so both sit
-    inside the charter. The third report over the same source already named the role,
-    which is what made the other two an omission rather than a decision.
+    The charter is READ from docs/training/README.md rather than quoted here. It is what
+    puts a Safety Task Execution report inside the persona's remit, so if the published
+    wording drops that capability the justification is gone and this class must red rather
+    than keep enforcing a rule the page no longer makes.
+
+    The granted set is derived from the shipped report JSON, not listed: every report over
+    the source must name the role, so a fourth one added later cannot quietly ship without
+    it — the same omission this class was written to catch.
     """
 
-    GRANTED = (
-        "Safety Open Findings",
-        "Safety Task Execution Log",
-        "Safety Task Compliance Summary",
-    )
     SOURCE = "Safety Task Execution"
 
     def setUp(self):
         self.reports = _shipped_reports()
         self.doctypes = _load_doctypes()
+
+    def _reports_over_the_source(self):
+        return sorted(name for name, (_l, ref) in self.reports.items() if ref == self.SOURCE)
+
+    def test_the_charter_still_covers_the_source(self):
+        charter = role_charters().get(SAFETY_ROLE)
+        self.assertIsNotNone(
+            charter, f"{SAFETY_ROLE} has no Roles at a glance row in docs/training/README.md"
+        )
+        self.assertIn(
+            SAFETY_CAPABILITY,
+            charter,
+            f"the published {SAFETY_ROLE} charter no longer names {SAFETY_CAPABILITY!r}, "
+            f"which is why reports over {self.SOURCE} are in-charter for it. Restore the "
+            f"wording or re-decide the grants. Charter now: {charter!r}",
+        )
 
     def test_the_persona_reads_the_source_it_is_reported_on(self):
         self.assertIn(
@@ -412,10 +431,11 @@ class TestSafetyOfficerReportAccess(unittest.TestCase):
         )
 
     def test_the_persona_reaches_its_safety_reports(self):
-        for name in self.GRANTED:
+        granted = self._reports_over_the_source()
+        self.assertGreaterEqual(len(granted), 3, f"no report reads {self.SOURCE} — scan broke")
+        for name in granted:
             with self.subTest(report=name):
-                listed, ref = self.reports[name]
-                self.assertEqual(ref, self.SOURCE, f"{name} no longer reads {self.SOURCE}")
+                listed, _ref = self.reports[name]
                 self.assertIn(
                     SAFETY_ROLE,
                     listed,

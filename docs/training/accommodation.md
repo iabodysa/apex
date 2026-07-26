@@ -12,7 +12,9 @@ checkout, and resident-request records.
 | DocType | Accommodation Manager | Resident Supervisor | Resident Request Coordinator | Finance Manager |
 |---------|----------------------|---------------------|------------------------------|-----------------|
 | Site (master) | Read, Write, Create | — | — | — |
-| Building / Room / Bed (masters) | Read, Write, Create | Read | — | — |
+| Building (master) | Read, Write, Create | Read | — | — |
+| Room (master) | Read, Write, Create | Read | — | — |
+| Bed (master) | Read, Write, Create | Read | — | — |
 | Facility Asset | Read, Write, Create | Read | — | — |
 | **Housing Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | — | — |
 | **Housing Checkout** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | — | — |

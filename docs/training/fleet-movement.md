@@ -14,13 +14,13 @@ This page covers fleet masters, compliance, dispatch, and transport.
 
 ### Permissions
 
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver | Finance / Auditor |
-|---------|---------------|-----------------------|------------------|--------|-------------------|
-| **Salis Vehicle** | Full | Read, Write, Create | Read, Write, Create | — | Read |
-| **Salis Driver** | Full | Read, Write, Create | Read, Write, Create | Read | Read |
-| Vehicle Category (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | — | Read |
-| **Salis Vehicle Compliance** *(child table)* | — | — | — | — | — |
-| **Driver Clearance** *(submittable)* | Full | — | Read, Write, Create | — | Read |
+| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver | Finance Manager | Internal Auditor |
+|---------|---------------|-----------------------|------------------|--------|-----------------|------------------|
+| **Salis Vehicle** | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | — | Read | Read |
+| **Salis Driver** | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read | Read | Read |
+| Vehicle Category (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | — | Read | Read |
+| **Salis Vehicle Compliance** *(child table)* | — | — | — | — | — | — |
+| **Driver Clearance** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | — | Read, Write, Create | — | Read | Read |
 
 > **Salis Vehicle Compliance is a child table, not a standalone record.** It is
 > the grid behind *Compliance Documents* on **Salis Vehicle**, and its permissions
@@ -64,15 +64,19 @@ _[screenshot: Salis Vehicle record with compliance tab]_
 
 | DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver |
 |---------|---------------|-----------------------|------------------|--------|
-| **Vehicle Assignment** *(submittable)* | Full | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create | — |
-| **Transport Request** *(workflow)* | Full | Read, Write, Create, Submit | Read, Write, Create, Submit | — |
-| **Dispatch Trip** *(workflow)* | Full | Read, Write, Create, Submit | Read, Write, Create | — |
-| **Route Plan** *(submittable)* | Full | Read, Write, Create, Submit | Read, Write, Create | — |
-| **Passenger Manifest** *(submittable)* | Full | Read, Write, Create, Submit | Read, Write, Create | — |
+| **Vehicle Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create | — |
+| **Transport Request** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create, Submit | — |
+| **Dispatch Trip** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
+| **Route Plan** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
+| **Passenger Manifest** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
 | **Issue** (field support) | — | — | — | — |
 
 > **Salis Vehicle** and **Salis Driver** are **not submittable** DocTypes — there
-> is no Submit action on either. Create the record and save it.
+> is no Submit action on either. Create the record and save it. The shipped Salis
+> Vehicle permission rows still carry Submit and Cancel flags for the Fleet
+> Manager and a Submit flag for the Fleet Project Manager. Frappe renders neither
+> action on a non-submittable DocType, so those flags grant nothing and the table
+> above leaves them out; treat the vehicle record as save-only.
 
 > **The Driver role holds no permission on Dispatch Trip or Passenger Manifest.**
 > A driver sees today's trips and manifest only because the portal resolves their
