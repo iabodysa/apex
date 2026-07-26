@@ -121,12 +121,14 @@ each tagged label needs its own row in `apex/translations/ar.csv`.
 A plain DocType link (a form) carries no suffix — untagged is the default "input
 screen" case.
 
-> **Known gap.** Only `(Board)` is applied today. The portal shortcuts ship
-> untagged (`Fleet Portal`, `Housing Portal`, `Safety Checklist`, `Inventory
-> Count`), and `ar.csv` still carries translations for two tagged labels that no
-> workspace uses (`Fleet Portal (Portal)`, `Fleet Supervisor Dashboard
-> (Dashboard)`). Applying the tag to those shortcuts, or retiring the orphaned
-> rows, is outstanding work.
+> **Known gap.** Only `(Board)` is applied today. Every portal shortcut in the
+> table below ships without a `(Portal)` tag — `Worker Route (Masar)` carries a
+> parenthetical, but it names the product, not the surface type. `ar.csv` also
+> still carries three rows no workspace label uses: `Fleet Portal` and `Fleet
+> Portal (Portal)`, both orphaned when the Fleet shortcut was renamed to
+> `Fleet OS`, and `Fleet Supervisor Dashboard (Dashboard)`, whose untagged form
+> is the label the Fleet workspace actually links. Applying the tag to those
+> shortcuts, or retiring the orphaned rows, is outstanding work.
 
 ### `(Portal)` — what a portal link actually is
 
@@ -142,20 +144,26 @@ Portal shortcuts that ship on a workspace today:
 
 | Workspace | Shortcut label | URL | Portal it opens |
 |---|---|---|---|
-| Fleet | `Fleet Portal` | `/fleet-os` | Fleet OS supervisor board |
+| Fleet | `Fleet OS` | `/fleet-os` | Fleet OS supervisor board |
+| Fleet | `Masar Supervisor` | `/masar-supervisor` | Route-supervisor dispatch board |
 | Housing | `Housing Portal` | `/housing` | Housing operator portal |
 | Housing | `Inventory Count` | `/housing-count` | Redirect into the Housing portal's count view |
 | Safety | `Safety Checklist` | `/safety` | Safety operator portal |
 | Salis | `Worker Route (Masar)` | `/masar` | Worker PWA, for a supervisor checking what a worker sees |
 
-The **Fleet** workspace is role-gated to the fleet team, so its portal shortcut
-targets the supervisor board at `/fleet-os` rather than the employee page at
-`/fleet`. The employee page needs no workspace shortcut: it is open to every
-signed-in user and is reached from the `My Fleet` tile on the `/apps` selector.
+The **Fleet** workspace is role-gated to the fleet team, so its `Fleet OS`
+shortcut targets the supervisor board at `/fleet-os` rather than the employee
+page at `/fleet`. The employee page needs no workspace shortcut: it is open to
+every signed-in user and is reached from the `My Fleet` tile on the `/apps`
+selector.
 
-> **Known gap.** No workspace links `/masar-supervisor`. Route supervisors reach
-> it from its `Masar Supervisor` tile on the `/apps` selector or a typed URL. A
-> Quick Actions shortcut on a movement workspace is the missing piece.
+`/masar-supervisor` had no workspace entry at all until the `Masar Supervisor`
+shortcut above was added. It sits on **Fleet** rather than on a Salis workspace
+because that workspace's four roles — Fleet Manager, Fleet Project Manager, Fleet
+Supervisor, System Manager — are exactly the `SUPERVISOR_ROLES` set the route
+itself enforces in `apex/www/masar_supervisor.py`, so no user sees a shortcut the
+portal would turn away. The route keeps its `/apps` selector tile as well, wired
+in `hooks.py` to that same role check.
 
 ## 4. How a user lands on the right workspace
 
@@ -198,18 +206,33 @@ User record; nothing in Apex overwrites that choice.
 
 ## 6. Keeping this page honest
 
-Section 1 is a published description of a directory, and its `Roles` column is a
-published description of who can reach each workspace. Both are checked by
-`apex/tests/test_workspace_doc_parity.py`, which runs in CI: it parses the table
-above, reads every shipped workspace JSON, and fails the build when the two
-disagree on the workspace set, the roles granted, the owning module, the parent,
-the `sequence_id`, or the `is_hidden` annotation. Run it directly with:
+Two tables on this page are published descriptions of shipped JSON, so both are
+derived from it by `apex/tests/test_workspace_doc_parity.py`, which runs in CI.
+It parses this page, reads every shipped workspace JSON, and fails the build on
+any disagreement:
+
+- **Section 1** — the workspace set, the roles granted, the owning module, the
+  parent, the `sequence_id`, and the `is_hidden` annotation.
+- **Section 3's portal-shortcut table** — the label, the URL, and the owning
+  workspace of every portal shortcut. A portal shortcut is a `shortcuts[]` row of
+  type `URL` whose target is a site-root route, which excludes the `/app/...`
+  Desk links that also ship as `URL` shortcuts. The check runs in both
+  directions, so an undocumented new portal shortcut fails just as loudly as a
+  documented one that no longer ships. It also fails when a `shortcuts[]` label
+  and its `content` block's `shortcut_name` disagree, because a shortcut whose
+  two halves disagree does not render at all.
+
+Run it directly with:
 
 ```bash
 python3 -m unittest apex.tests.test_workspace_doc_parity -v
 ```
 
-A role added to a workspace JSON therefore cannot ship until this table names it.
+A role added to a workspace JSON, or a portal shortcut added or renamed,
+therefore cannot ship until this page changes with it. Section 3's shortcut table
+went stale exactly once — `Fleet Portal` was renamed to `Fleet OS` and
+`Masar Supervisor` was added while only Section 1 was guarded — which is why the
+derivation now covers both.
 
 The portal route table in
 [README.md](../README.md#keeping-the-route-table-honest) still relies on the
