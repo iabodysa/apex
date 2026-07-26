@@ -107,6 +107,21 @@ scope rather than the salis/ scope previously recorded against it.
      with zero Python-side imports). Deliberately Python-only — JS/Vue dead-code
      is a separate, much larger problem and out of this guard's pragmatic scope.
 
+  4b. TestDeadProductionFunctions — the same question one level down: a
+     module-level ``def`` inside a LIVE file that nothing can reach. Check 4
+     cannot see these, because a single live sibling keeps the whole file
+     referenced. A def is reachable if any .py mentions its bare name (a call,
+     or a barrel's ``from … import x`` re-export), an ``__all__`` names it, a
+     dotted path ending in it appears in any .py/.json/.js/.html/.md/patches.txt
+     (hooks, Number Card ``method``, frappe.enqueue, frappe.call from Desk JS,
+     or a documented ``bench execute`` operator command), it carries
+     ``@frappe.whitelist``, or its name is a DISPATCH_NAMES lifecycle hook.
+     The reference universe is deliberately WIDER than check 4's: it adds .js,
+     .html and the published docs, because at function granularity check 4's
+     "any module holding a whitelist is exempt" shortcut is far too coarse —
+     226 endpoints here are named only from Desk JS, and three patch entry
+     points are named only in docs/UPGRADE-APP-IDENTITY.md.
+
   5. TestNativePrimitiveBypass — a hand-rolled reimplementation of a short, NAMED
      list of Frappe primitives (currently: raw smtplib instead of
      ``frappe.sendmail``; raw ``uuid`` instead of ``frappe.generate_hash``) with no
@@ -134,6 +149,7 @@ import unittest
 # (a test file can only add noise to them), 1-2 read production AND test.
 from apex.tests.source_tree import (
     APP_ROOT,
+    REPO_ROOT,
     all_py_files as _scanned_py_files,
     file_dotted_path as _file_dotted_path,
     is_test_file as _is_test_file,
@@ -864,6 +880,238 @@ class TestDeadProductionModules(unittest.TestCase):
             "a real Frappe entrypoint this scan doesn't recognise, extend "
             "_is_convention_loaded / _collect_text_references instead of ignoring it:\n"
             + "\n".join(f"  {f}" for f in sorted(new)),
+        )
+
+
+# 4b. Dead production FUNCTIONS (a live file's unreferenced module-level def)
+
+# [#a246df] Reachability rules and why the scan universe is wider than check 4's:
+# see the module docstring, item 4b.
+
+_WIRING_TEXT_EXTS = ("*.json", "*.js", "*.html", "*.txt", "*.md")
+
+
+def _wiring_text_files():
+    """Every non-Python file that can name a Python function by dotted path.
+
+    Includes the published docs, which are a REAL wiring surface: three entry
+    points in patches/v2_0/app_identity_cutover.py have no Python caller and
+    exist only to be run as `bench --site <site> execute apex....<fn>` per
+    docs/UPGRADE-APP-IDENTITY.md. Drop docs from this universe and the guard
+    reports live, documented operator commands as dead code.
+    """
+    paths = [PATCHES_TXT]
+    for pattern in _WIRING_TEXT_EXTS:
+        paths += glob.glob(os.path.join(APP_ROOT, "**", pattern), recursive=True)
+        paths += glob.glob(os.path.join(REPO_ROOT, "docs", "**", pattern), recursive=True)
+    paths += glob.glob(os.path.join(REPO_ROOT, "*.md"))
+    return [p for p in paths if "node_modules" not in p]
+
+
+def _dotted_tails(text, names):
+    """Add every segment of every dotted apex path in ``text``.
+
+    The whole path is kept, unlike _add_with_ancestors which throws the function
+    tail away — that tail is exactly what this check needs.
+    """
+    for match in _DOTTED_RE.finditer(text):
+        names.update(match.group(0).split("."))
+
+
+def _all_exported_names(tree):
+    """Names listed in a module's ``__all__`` (a barrel's re-export contract)."""
+    exported = set()
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            continue
+        if not any(isinstance(t, ast.Name) and t.id == "__all__" for t in node.targets):
+            continue
+        if isinstance(node.value, (ast.List, ast.Tuple, ast.Set)):
+            for element in node.value.elts:
+                if isinstance(element, ast.Constant) and isinstance(element.value, str):
+                    exported.add(element.value)
+    return exported
+
+
+def _referenced_function_names():
+    """Every identifier this app mentions in a position that could reach a def."""
+    names = set()
+    for path in _scanned_py_files():
+        tree = _parse(path)
+        if tree is None:
+            continue
+        names |= _all_exported_names(tree)
+        for node in ast.walk(tree):
+            # (a) a bare call/reference, and the alias half of any import —
+            # `from x import y` is how a re-exported name enters a barrel.
+            if isinstance(node, ast.Name):
+                names.add(node.id)
+            elif isinstance(node, ast.Attribute):
+                names.add(node.attr)
+            elif isinstance(node, ast.ImportFrom):
+                for alias in node.names:
+                    names.add(alias.name)
+                    if alias.asname:
+                        names.add(alias.asname)
+            elif isinstance(node, ast.Constant) and isinstance(node.value, str):
+                # (c) dotted wiring written as a Python string literal
+                _dotted_tails(node.value, names)
+    for path in _wiring_text_files():
+        try:
+            with open(path, encoding="utf-8") as fh:
+                text = fh.read()
+        except (OSError, UnicodeDecodeError):
+            continue
+        _dotted_tails(text, names)
+    return names
+
+
+def _is_whitelisted(fn):
+    """(d) @frappe.whitelist on THIS def — per-function, not per-module."""
+    for dec in fn.decorator_list:
+        target = dec.func if isinstance(dec, ast.Call) else dec
+        if isinstance(target, ast.Attribute) and target.attr == "whitelist":
+            return True
+        if isinstance(target, ast.Name) and target.id == "whitelist":
+            return True
+    return False
+
+
+def _dead_production_functions():
+    """[(rel_path, func_name)] for module-level defs nothing can reach."""
+    referenced = _referenced_function_names()
+    offenders = []
+    for path in _production_py_files():
+        if os.path.basename(path) == "hooks.py":
+            continue
+        tree = _parse(path)
+        if tree is None:
+            continue
+        for fn in _module_level_funcs(tree):
+            if fn.name in DISPATCH_NAMES or _is_whitelisted(fn):
+                continue
+            if fn.name in referenced:
+                continue
+            offenders.append((_rel(path), fn.name))
+    return offenders
+
+
+# [#a246fb] Pre-existing dead defs, frozen so this check can land green. Every
+# entry was verified unreachable by hand (no caller, no hook, no patches.txt, no
+# JSON/JS/docs dotted path, no whitelist) and every one sits OUTSIDE the write
+# scope of the change that added this check. Do not add to this set to silence a
+# new finding — delete the function or wire it up. Removing an entry is expected
+# and is enforced: test_baseline_holds_no_revived_function fails if a baselined
+# def stops being dead while its entry lingers.
+_DEAD_FUNCTION_BASELINE = frozenset(
+    {
+        # Settings accessors every real reader bypasses with frappe.get_single().
+        ("apex_core/doctype/habitat_settings/habitat_settings.py", "get_settings"),
+        ("apex_core/doctype/habitat_settings/habitat_settings.py", "get_default_currency"),
+        ("apex_core/doctype/habitat_settings/habitat_settings.py", "validate_posting_period"),
+        ("apex_core/doctype/payment_routing_settings/payment_routing_settings.py",
+         "get_routing_settings"),
+        ("apex_core/doctype/salis_settings/salis_settings.py", "get_salis_settings"),
+        # Driver-side twin of salis/api/masar.py::_token_from_request; live callers
+        # reach presented_token(DRIVER) directly, so this copy was never called.
+        ("apex_core/doctype/masar_worker_token/masar_worker_token.py",
+         "_driver_token_from_request"),
+        # Its own docstring calls it a retired no-op entrypoint, but no hook or
+        # patch names it; the two live siblings in this file ARE wired.
+        ("apex_core/setup/seeders/habitat_dashboard_seed.py", "seed_all_dashboards"),
+        # Latent wiring bug, not inert: the docstring claims the
+        # `setup_wizard_stages` hook, but hooks.py never declares that key
+        # (frappe/desk/page/setup_wizard/setup_wizard.py:200 only reads the hook).
+        # Behaviour is not lost today — the declared `setup_wizard_complete` hook
+        # does the same work — so wiring this in would DOUBLE-apply setup.
+        ("apex_core/setup/setup_wizard.py", "get_setup_stages"),
+    }
+)
+
+
+class TestDeadProductionFunctions(unittest.TestCase):
+    def test_baseline_holds_no_revived_function(self):
+        """A baselined def that is no longer dead must lose its entry."""
+        still_dead = set(_dead_production_functions())
+        revived = sorted(_DEAD_FUNCTION_BASELINE - still_dead)
+        self.assertEqual(
+            revived,
+            [],
+            "These functions are no longer dead (deleted, or now referenced). "
+            "Drop them from _DEAD_FUNCTION_BASELINE in the same commit:\n"
+            + "\n".join(f"  {p}: {n}" for p, n in revived),
+        )
+
+    # Both directions pinned: it must NAME a dead def and STAY SILENT on
+    # name-only wiring — a guard that flags hook targets gets switched off.
+
+    def test_a_plain_unreferenced_name_is_not_a_reference(self):
+        names = _referenced_function_names()
+        self.assertNotIn("zzz_apex_guard_probe_never_defined", names)
+
+    def test_dotted_path_string_counts_its_function_tail(self):
+        # hooks.py / Number Card `method` / frappe.enqueue(...) shape
+        names = set()
+        _dotted_tails('"apex.habitat.tasks.cost.daily_accommodation_cost_allocation"', names)
+        self.assertIn("daily_accommodation_cost_allocation", names)
+        self.assertIn("cost", names)
+
+    def test_dotted_path_tail_survives_unlike_the_module_scan(self):
+        # _add_with_ancestors (check 4) throws the tail away; this check needs it.
+        module_refs = set()
+        _add_with_ancestors(module_refs, "apex.a.b.some_function")
+        self.assertNotIn("some_function", module_refs)
+        function_refs = set()
+        _dotted_tails("apex.a.b.some_function", function_refs)
+        self.assertIn("some_function", function_refs)
+
+    def test_all_export_counts_as_a_reference(self):
+        tree = ast.parse('__all__ = ["get_workshop_overstay_count", "_raise_alert"]\n')
+        self.assertEqual(
+            _all_exported_names(tree),
+            {"get_workshop_overstay_count", "_raise_alert"},
+        )
+
+    def test_whitelisted_function_is_exempt(self):
+        for source in (
+            "@frappe.whitelist()\ndef endpoint():\n    pass\n",
+            '@frappe.whitelist(methods=["POST"])\ndef endpoint():\n    pass\n',
+            "@whitelist\ndef endpoint():\n    pass\n",
+        ):
+            fn = ast.parse(source).body[0]
+            self.assertTrue(_is_whitelisted(fn), source)
+
+    def test_undecorated_function_is_not_exempt(self):
+        fn = ast.parse("def endpoint():\n    pass\n").body[0]
+        self.assertFalse(_is_whitelisted(fn))
+
+    def test_documented_bench_execute_entrypoints_are_reachable(self):
+        # patches/v2_0/app_identity_cutover.py's three entry points have no
+        # Python caller; docs/UPGRADE-APP-IDENTITY.md is their only wiring.
+        names = _referenced_function_names()
+        for fn_name in ("preview_registry", "diagnose", "cutover"):
+            self.assertIn(fn_name, names, f"{fn_name} lost its docs reference")
+        dead = {n for _, n in _dead_production_functions()}
+        self.assertEqual(dead & {"preview_registry", "diagnose", "cutover"}, set())
+
+    def test_docs_are_in_the_reference_universe(self):
+        upgrade_doc = os.path.join(REPO_ROOT, "docs", "UPGRADE-APP-IDENTITY.md")
+        self.assertTrue(os.path.exists(upgrade_doc), "fixture path drifted")
+        self.assertIn(upgrade_doc, _wiring_text_files())
+
+    def test_no_new_dead_production_function(self):
+        offenders = set(_dead_production_functions())
+        new = offenders - _DEAD_FUNCTION_BASELINE
+        self.assertEqual(
+            new,
+            set(),
+            "Module-level function with no reachable reference (no Python caller, "
+            "no __all__ export, no dotted path in any .py/.json/.js/.html/"
+            "patches.txt, no @frappe.whitelist, not a Frappe dispatch name). "
+            "Delete it or wire it up; if it IS reachable by a mechanism this scan "
+            "cannot see, teach _referenced_function_names about that mechanism "
+            "rather than baselining it:\n"
+            + "\n".join(f"  {p}: {n}" for p, n in sorted(new)),
         )
 
 
