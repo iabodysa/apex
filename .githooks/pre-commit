@@ -10,9 +10,11 @@
 # and this hook over one table of addresses and fails if they classify any of them
 # differently.
 #
-# KNOWN GAP: `git var` reports the identity from config/environment, so an email
-# forced with `git commit --author=...` is not seen here. The CI step reads the
-# recorded %ae/%ce and still catches that case.
+# `git commit --author=...` IS caught: git exports the resolved author identity to
+# the hook, so `git var` reports the forced address, not the configured one. What no
+# pre-commit hook can see is a commit created with --no-verify or before the hooks
+# were installed; .githooks/pre-push re-checks the outgoing range through this same
+# allowlist for exactly that case.
 set -u
 
 is_public() {
@@ -27,8 +29,16 @@ ident_email() {
 	git var "$1" 2>/dev/null | sed -n 's/.*<\(.*\)>.*/\1/p'
 }
 
-author=$(ident_email GIT_AUTHOR_IDENT)
-committer=$(ident_email GIT_COMMITTER_IDENT)
+# Given two addresses, classify THOSE instead of this machine's identity. git never
+# passes arguments to pre-commit, so this lane belongs to pre-push, which reuses the
+# allowlist above over already-recorded commits rather than keeping a copy of it.
+if [ "$#" -eq 2 ]; then
+	author=$1
+	committer=$2
+else
+	author=$(ident_email GIT_AUTHOR_IDENT)
+	committer=$(ident_email GIT_COMMITTER_IDENT)
+fi
 
 for email in "$author" "$committer"; do
 	if ! is_public "$email"; then
