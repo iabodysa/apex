@@ -13,7 +13,7 @@ from frappe.rate_limiter import rate_limit
 # [#95hxd8]
 from apex.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_url
 from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401  (re-exported)
-from apex.salis.utils import expiry_state, get_driver_for_user
+from apex.salis.utils import bound_vehicle, expiry_state, get_driver_for_user
 
 
 # [#g14lmr]
@@ -266,13 +266,11 @@ def _today_attendance_state(driver):
 
 def _bound_vehicle(driver):
 	"""The vehicle bound to ``driver`` (current_vehicle, else Active Assignment), or None.
-	Same binding rule ``_vehicle_bound_to_driver`` enforces for fuel writes."""
-	vehicle = frappe.db.get_value("Salis Driver", driver, "current_vehicle")
-	if vehicle:
-		return vehicle
-	return frappe.db.get_value(
-		"Vehicle Assignment", {"driver": driver, "status": "Active"}, "vehicle"
-	)
+
+	Kept as the package-level name the portal submodules import; the rule itself
+	lives in ``salis.utils.bound_vehicle`` so this read can never drift from the
+	binding check ``_vehicle_bound_to_driver`` enforces for fuel writes."""
+	return bound_vehicle(driver)
 
 def _license_countdown(driver):
 	"""The driver's licence expiry with a server-computed near-/over-expiry state.

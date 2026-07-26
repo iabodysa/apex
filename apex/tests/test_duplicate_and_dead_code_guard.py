@@ -409,16 +409,6 @@ _COPY_PASTE_BASELINE = frozenset(
                 ("salis/api/driver_portal/__init__.py", "_is_staff"),
             }
         ),
-        # Both docstrings state the same rule ("current_vehicle, else Active
-        # Assignment") and warn it must match what fuel writes enforce — a divergence
-        # here is a real permission bug, so one home is the point. salis/utils/
-        # already holds the sibling get_driver_for_user. Needs a wave that owns salis/.
-        frozenset(
-            {
-                ("salis/api/driver_portal/__init__.py", "_bound_vehicle"),
-                ("salis/api/fleet_employee.py", "_bound_vehicle"),
-            }
-        ),
     }
 )
 

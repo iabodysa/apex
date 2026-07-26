@@ -22,7 +22,7 @@ docstatus 0, for supervisor approval) — no new DocType is invented.
 import frappe
 from frappe import _
 
-from apex.salis.utils import add_timeline_note, get_driver_for_session_user
+from apex.salis.utils import add_timeline_note, bound_vehicle, get_driver_for_session_user
 
 # Salis Vehicle status -> the frontend's status-pill vocabulary (statusMeta in
 # App.vue). "Active" reads as "assigned" here because the vehicle is, by
@@ -47,13 +47,11 @@ _REGISTRATION_TYPE = "Registration (Istimara)"
 
 def _bound_vehicle(driver):
     """The vehicle bound to ``driver`` (current_vehicle, else Active Assignment), or None.
-    The same binding rule fuel writes enforce, so reads and writes never diverge."""
-    vehicle = frappe.db.get_value("Salis Driver", driver, "current_vehicle")
-    if vehicle:
-        return vehicle
-    return frappe.db.get_value(
-        "Vehicle Assignment", {"driver": driver, "status": "Active"}, "vehicle"
-    )
+
+    Kept as a module-level name so the endpoints (and their tests) resolve it here;
+    the rule itself lives in ``salis.utils.bound_vehicle``, shared with the driver
+    portal, so this page's reads and the fuel writes can never diverge."""
+    return bound_vehicle(driver)
 
 
 def _registration_expiry(vehicle):
