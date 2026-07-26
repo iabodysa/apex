@@ -93,6 +93,70 @@ one is A-108 Phase 2's job, out of scope here; this guard only fails when the
 uncovered set grows BEYOND the frozen baseline, i.e. when NEW production code
 ships with no test anywhere in the tree.
 
+Standalone-runnability guard (A-192)
+------------------------------------
+A test module that documents a plain ``python3 -m unittest ...`` invocation is
+making a FALSIFIABLE claim: it imports and runs with no bench and no live site.
+That claim rots silently. ``apex_core/utils/test_guarded_index_dedupe.py`` made
+it, then a refactor gave the module under test a ``frappe._`` and a
+``frappe.model.document`` import its fake-frappe fallback did not stub — the
+documented command gave ``FAILED (errors=4)`` while CI stayed green, because
+``bench run-tests`` has the REAL frappe in ``sys.modules`` and never enters the
+fallback branch at all. Nothing detects that: the file was fixed, the CLASS was
+not. ``TestDeclaredStandaloneModulesStayRunnable`` below executes each claim.
+
+Shape, and why this one (cost matters — this module runs in CI's deliberately
+fast ``python3 -m unittest`` lane, not only under bench):
+  * A FULL RUN of the module's tests, not an import. Import-only was measured
+    and REJECTED: it is 15x cheaper (0.55s vs 8.2s across 21 modules) but it
+    misses the very defect A-192 is named for. ``test_guarded_index_dedupe``'s
+    regression was not a module-scope ImportError — its own comment records that
+    ``execute()`` drags in ``housing_assignment``, i.e. the uncovered
+    ``frappe.model.document`` import fires INSIDE a test method, which is why the
+    card observed ``FAILED (errors=4)`` rather than a load error. Import-only
+    goes green on that break. Measured here: it catches 1 of the 2 real rots in
+    this tree, missing ``test_habitat_permission_hooks``, whose
+    ``from apex.habitat.permissions import ...`` also sits inside a test body.
+    Running the documented command is the only honest check of the documented
+    command.
+  * ONE SUBPROCESS PER MODULE, the cost that cannot be optimised away: these
+    modules install a FAKE frappe into ``sys.modules`` at import time, so sharing
+    one interpreter lets module A's stub satisfy module B and every claim after
+    the first passes on borrowed state. Run in PARALLEL (threads around
+    subprocesses — the work is entirely out-of-process), so the wall cost is the
+    slowest module, not the sum.
+  * THIS module is excluded from its own sweep. Probing itself would re-enter
+    this sweep one level down, and its standalone claim is already proven
+    directly by the CI step that runs ``python3 -m unittest
+    apex.tests.test_unit_test_coverage_guard`` in a frappe-free lane.
+The probe
+~~~~~~~~~
+frappe is blocked by a ``sys.meta_path`` finder, NOT by stripping ``sys.path``
+(which would take ``apex`` out with it). This is the load-bearing part: the same
+module also runs under ``bench run-tests``, where frappe IS installed, so a probe
+that merely inherited the environment would import the real frappe, skip every
+fallback branch and prove nothing — the exact false green A-192 is about.
+``sys.modules`` is consulted BEFORE ``meta_path``, so a module's own fake-frappe
+fallback still works once it installs its stub; only the real frappe is
+unreachable. The finder raises ``ModuleNotFoundError``, which is what a genuinely
+absent module raises, so a module guarding with ``except ModuleNotFoundError``
+behaves exactly as it would off-bench. ``loadTestsFromName`` turns a load failure
+into a ``_FailedTest`` instead of raising, so an import error and a test error
+both land in ``wasSuccessful()``.
+
+Rot baseline
+~~~~~~~~~~~~
+Two modules already fail their own documented command; both are frozen in
+``_STANDALONE_ROT_BASELINE`` and both are outside A-192's write scope, so they
+are reported rather than edited here:
+  * ``www/test_masar_supervisor_map_tiles.py`` — module-scope import of
+    ``apex.www.masar_supervisor``, which imports frappe at module scope.
+  * ``habitat/test_habitat_permission_hooks.py`` — two tests import
+    ``apex.habitat.permissions`` inside the test body; it imports frappe at
+    module scope. Import-only probing cannot see this one at all.
+Fix either by stubbing what is imported, or by dropping the false standalone
+claim from the docstring; the entry is pruned either way.
+
 Run standalone (from the repo root, so ``apex.tests.source_tree`` resolves):
   python3 -m unittest apex.tests.test_unit_test_coverage_guard -v
 """
@@ -101,7 +165,11 @@ import ast
 import json
 import os
 import re
+import subprocess
+import sys
+import tempfile
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 
 from apex.tests.source_tree import (
     APP_ROOT,
@@ -399,6 +467,78 @@ def _uncovered_units():
 _BASELINE = frozenset()
 
 
+# Standalone-runnability guard (A-192) — see the module docstring for the shape
+# decision and its measured cost.
+
+# [#a192m1] The marker is the DOCUMENTED COMMAND, not the words "Run standalone".
+# Several modules use that heading for a `bench --site <site> run-tests` command,
+# which explicitly REQUIRES a live site and claims nothing about plain python.
+# Matching the heading would fail 3 modules for a promise they never made.
+_STANDALONE_CMD_RE = re.compile(r"python3?\s+-m\s+unittest")
+
+# [#a192p1] Runs in the probe subprocess; see "The probe" in the module docstring.
+_NO_FRAPPE_PROBE = """
+import sys
+import unittest
+
+
+class _NoFrappe:
+    def find_spec(self, name, path=None, target=None):
+        if name == "frappe" or name.startswith("frappe."):
+            raise ModuleNotFoundError("No module named 'frappe'", name=name)
+        return None
+
+
+sys.meta_path.insert(0, _NoFrappe())
+suite = unittest.TestLoader().loadTestsFromName(sys.argv[1])
+result = unittest.TextTestRunner(verbosity=0).run(suite)
+sys.exit(0 if result.wasSuccessful() else 1)
+"""
+
+# This module's own dotted path — excluded from the sweep it runs (see docstring).
+# Derived from __file__, not __name__, which is "__main__" under direct execution.
+_SELF_DOTTED = _file_dotted_path(os.path.abspath(__file__))
+
+# [#a192b1] Pre-existing rot this guard FOUND, frozen 2026-07-26 — not rot it
+# blesses; see "Rot baseline" in the module docstring for each entry and its fix.
+_STANDALONE_ROT_BASELINE = frozenset(
+    {
+        "apex.www.test_masar_supervisor_map_tiles",
+        "apex.habitat.test_habitat_permission_hooks",
+    }
+)
+
+
+def _standalone_declared_modules():
+    """{dotted path: rel path} for each test module documenting a plain
+    ``python3 -m unittest`` invocation, excluding this module itself."""
+    found = {}
+    for path in _test_py_files():
+        tree = _parse(path)
+        if tree is None:
+            continue
+        if _STANDALONE_CMD_RE.search(ast.get_docstring(tree) or ""):
+            dotted = _file_dotted_path(path)
+            if dotted != _SELF_DOTTED:
+                found[dotted] = _rel(path)
+    return found
+
+
+def _probe_standalone_run(dotted, extra_path=None):
+    """Run ``dotted``'s tests in a fresh interpreter that cannot import frappe.
+
+    REPO_ROOT leads PYTHONPATH so the probe always exercises THIS tree, never an
+    ``apex`` installed elsewhere (an editable bench install otherwise wins)."""
+    pythonpath = [REPO_ROOT] + list(extra_path or [])
+    return subprocess.run(
+        [sys.executable, "-c", _NO_FRAPPE_PROBE, dotted],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        env={**os.environ, "PYTHONPATH": os.pathsep.join(pythonpath)},
+    )
+
+
 class TestMustTestClassification(unittest.TestCase):
     """Self-tests for the four must-test classifiers — pure path/AST logic,
     no file I/O beyond the synthetic snippets and a few known repo fixtures.
@@ -605,6 +745,104 @@ class TestUnitTestCoverageGuard(unittest.TestCase):
             [],
             f"_BASELINE references path(s) that no longer exist — update the "
             f"baseline (the file was likely renamed or removed): {missing}",
+        )
+
+
+class TestDeclaredStandaloneModulesStayRunnable(unittest.TestCase):
+    """A-192: execute every self-declared standalone claim, don't just read it."""
+
+    def test_probe_cannot_reach_a_genuinely_importable_frappe(self):
+        """Guard-of-the-guard: prove the blocker BLOCKS, not that frappe is absent.
+
+        Without this, the whole guard silently degrades to a no-op on any machine
+        that has no frappe installed — every probe would pass for the wrong
+        reason, and on CI (where frappe IS installed) it would pass for the other
+        wrong reason. Plant a real, importable frappe and prove both directions.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            pkg = os.path.join(tmp, "frappe")
+            os.makedirs(pkg)
+            with open(os.path.join(pkg, "__init__.py"), "w", encoding="utf-8") as fh:
+                fh.write("MARKER = 'planted frappe'\n")
+
+            control = subprocess.run(
+                [sys.executable, "-c", "import frappe; print(frappe.MARKER)"],
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+                env={**os.environ, "PYTHONPATH": os.pathsep.join([REPO_ROOT, tmp])},
+            )
+            self.assertEqual(
+                control.returncode, 0, "planted frappe is not importable — test setup broke"
+            )
+            self.assertIn("planted frappe", control.stdout)
+
+            blocked = _probe_standalone_run("frappe", extra_path=[tmp])
+            self.assertNotEqual(
+                blocked.returncode,
+                0,
+                "the meta_path blocker did NOT block an importable frappe — every "
+                "standalone probe below is therefore meaningless",
+            )
+            self.assertIn("No module named 'frappe'", blocked.stderr)
+
+    def test_declared_standalone_modules_actually_run_without_frappe(self):
+        """Each module documenting `python3 -m unittest` must actually PASS with
+        no frappe available.
+
+        A failure means the documented command is a lie: the module, or something
+        it reaches, grew a frappe dependency its fake-frappe fallback does not
+        cover — and `bench run-tests` cannot see it, because with the real frappe
+        in sys.modules the fallback branch is never taken. Fix by stubbing what is
+        now imported, or by deleting the standalone claim if the module genuinely
+        needs a site.
+        """
+        declared = _standalone_declared_modules()
+        self.assertGreater(
+            len(declared), 10, "standalone-claim scan found implausibly few modules"
+        )
+
+        broken = {}
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            for dotted, result in zip(
+                sorted(declared), pool.map(_probe_standalone_run, sorted(declared))
+            ):
+                if result.returncode != 0:
+                    tail = result.stderr.strip().splitlines()
+                    broken[dotted] = tail[-1] if tail else f"exit {result.returncode}"
+
+        regressed = sorted(set(broken) - _STANDALONE_ROT_BASELINE)
+        self.assertEqual(
+            regressed,
+            [],
+            "Module(s) documenting a standalone `python3 -m unittest` run that no "
+            "longer pass without frappe — the documented command is broken while "
+            "bench run-tests stays green (it never takes the fallback branch):\n"
+            + "\n".join(f"  {d}  ({declared[d]})\n      {broken[d]}" for d in regressed),
+        )
+
+    def test_rot_baseline_is_neither_stale_nor_silently_fixed(self):
+        """The rot baseline may only shrink, and only for a real reason."""
+        declared = _standalone_declared_modules()
+        unknown = sorted(_STANDALONE_ROT_BASELINE - set(declared))
+        self.assertEqual(
+            unknown,
+            [],
+            "Rot-baseline entr(ies) no longer declare a standalone run at all — the "
+            "claim was dropped or the module moved. Prune them:\n"
+            + "\n".join(f"  {d}" for d in unknown),
+        )
+        still_broken = {
+            d for d in _STANDALONE_ROT_BASELINE
+            if _probe_standalone_run(d).returncode != 0
+        }
+        fixed = sorted(_STANDALONE_ROT_BASELINE - still_broken)
+        self.assertEqual(
+            fixed,
+            [],
+            "Rot-baseline entr(ies) now import cleanly — prune them so the "
+            "baseline cannot quietly re-absorb a future regression:\n"
+            + "\n".join(f"  {d}" for d in fixed),
         )
 
 
