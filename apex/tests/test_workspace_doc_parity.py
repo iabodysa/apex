@@ -1,5 +1,14 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""docs/WORKSPACE-DESIGN.md must match the shipped Workspace JSON.
+"""Every published table that describes shipped code is derived from it here.
+
+Three GitHub-public documents state facts about the shipped tree, and each one
+had already drifted before a guard read it: docs/WORKSPACE-DESIGN.md (workspace
+roles, portal shortcuts), README.md (the served portal routes), and
+docs/training/README.md (the declared modules). A published claim with nothing
+deriving it goes stale silently — the suite stays green while the document that
+represents the app on GitHub is wrong — so all three are derived in one place.
+
+docs/WORKSPACE-DESIGN.md must match the shipped Workspace JSON.
 
 Two published tables on that page describe shipped JSON, and both are derived
 from it here rather than maintained by hand.
@@ -27,13 +36,36 @@ Two shipped-JSON facts shape the shortcut check:
   documented-implies-shipped lets a new undocumented shortcut through in
   silence, which is the exact shape of the drift this file exists to stop.
 
+README.md's "Served portal routes" table states, per route, the audience, the
+authentication path — guest redirect or guest-accessible, and the role set the
+page applies — and the backing controller and bundle. It was the last public
+description of routing with nothing deriving it: the two neighbouring guards
+(test_portal_route_coverage, test_apps_screen_gate_wiring) compare code against
+code and never open the README. That is the same gap that let the workspace
+shortcut table above drift. The route side is now read from the shipped `www`
+tree, and the count sentence over the table is derived from it too.
+
+The role gate is read from what `get_context()` APPLIES, never from what the
+module defines. www/fleet.py defines FLEET_ROLES and consults it only in its
+/apps tile helper while gating on nothing, so a module-level scan would publish
+/fleet as role-gated. /fleet and /fleet-os differ in controller, bundle and
+gate, so swapping the two rows fails on all three.
+
+docs/training/README.md's opening states how many names `apex/modules.txt`
+declares and lists one bullet per module. It said FIVE, describing a SIM
+Operations module whose package no longer exists — true when written, false
+after the fold, and green the whole time. The count and the bullet set are both
+derived from modules.txt now, and README.md's own module bullets with them.
+
 The parsers take their roots as arguments so the falsifiability classes below
-can point them at a temporary tree: proving the comparison reports an added role
-or a renamed shortcut must not require editing a shipped workspace JSON.
+can point them at a temporary tree: proving the comparison reports an added role,
+a renamed shortcut, a retired route or a new module must not require editing a
+shipped file.
 
 Run standalone:  python3 -m unittest tests.test_workspace_doc_parity -v
 """
 
+import ast
 import glob
 import json
 import os
@@ -43,8 +75,13 @@ import tempfile
 import unittest
 
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+APP_PKG = os.path.basename(APP_ROOT)
 REPO_ROOT = os.path.dirname(APP_ROOT)
 DESIGN_DOC = os.path.join(REPO_ROOT, "docs", "WORKSPACE-DESIGN.md")
+README = os.path.join(REPO_ROOT, "README.md")
+TRAINING_DOC = os.path.join(REPO_ROOT, "docs", "training", "README.md")
+WWW_ROOT = os.path.join(APP_ROOT, "www")
+MODULES_TXT = os.path.join(APP_ROOT, "modules.txt")
 
 # A Section 1 row: | **Label** | Module | Parent | `sequence_id` | Role, Role, ... |
 DOC_ROW = re.compile(r"^\|\s*\*\*(?P<label>[^*]+)\*\*\s*\|(?P<rest>.*)\|\s*$")
@@ -516,6 +553,527 @@ class TestShortcutParityGuardIsFalsifiable(unittest.TestCase):
         shipped = shipped_portal_shortcuts(shipped_workspaces(self.pkg))
         self.assertNotIn(("Housing", "Front Desk"), shipped)
         self.assertIn(("Housing", "Housing Portal"), shipped)
+
+
+NUMBER_WORDS = {
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+    "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12,
+}
+
+# A portal shell mounts its SPA as /assets/<app>/<bundle>/assets/index.js. A www
+# page without one is not a portal route (the /housing-count redirect marker).
+SHELL_BUNDLE = re.compile(r'src="/assets/' + APP_PKG + r'/([A-Za-z0-9_]+)/assets/index\.js"')
+
+# A route row: | `/route` | audience | authentication path | `controller` · `bundle` |
+ROUTE_ROW = re.compile(
+    r"^\|\s*`(?P<route>/[a-z0-9-]+)`\s*"
+    r"\|(?P<audience>[^|]*)"
+    r"\|(?P<gate>[^|]*)"
+    r"\|(?P<backing>[^|]*)\|\s*$"
+)
+# The machine-readable half of a gate cell: the controller's role constant, then a
+# colon, then the roles, then a period. Prose may sit on either side of it.
+GATE_SPEC = re.compile(r"`(?P<const>[A-Z][A-Z0-9_]*_ROLES)`:\s*(?P<roles>[^.|]+)\.")
+BACKING_CELL = re.compile(r"^`(?P<controller>[^`]+)`\s*·\s*`(?P<bundle>[^`]+)`$")
+GUEST_MARKER = "Guest-accessible"
+SESSION_MARKER = "Guest redirect"
+
+ROUTE_COUNT = re.compile(r"serves \*\*(?P<count>[a-z]+)\*\* portal routes")
+SESSION_SENTENCE = re.compile(
+    r"The \*\*(?P<count>[a-z]+)\*\* session-gated operator portals"
+    r"(?P<body>.*?)do not yet have training pages"
+)
+INLINE_ROUTE = re.compile(r"`(/[a-z0-9-]+)`")
+
+MODULE_COUNT = re.compile(
+    r"`" + APP_PKG + r"/modules\.txt` declares \*\*(?P<count>[a-z]+)\*\* names"
+)
+MODULE_BULLET = re.compile(r"^-\s+\*\*(?P<name>[^*]+)\*\*")
+README_MODULE_ANCHOR = re.compile(r"^## Modules\s*$")
+TRAINING_MODULE_ANCHOR = re.compile(r"one per bullet below:")
+
+
+def _read(path):
+    with open(path, encoding="utf-8") as fh:
+        return fh.read()
+
+
+def _flat(text):
+    """One-line view of a document, so a sentence check survives Markdown wrapping."""
+    return re.sub(r"\s+", " ", text)
+
+
+def _number(word):
+    return NUMBER_WORDS.get((word or "").lower())
+
+
+def _module_level_role_sets(tree):
+    """{NAME: frozenset(roles)} for every module-level `NAME = {"Role", ...}`."""
+    found = {}
+    for node in tree.body:
+        if not isinstance(node, ast.Assign) or not isinstance(node.value, ast.Set):
+            continue
+        members = {
+            element.value
+            for element in node.value.elts
+            if isinstance(element, ast.Constant) and isinstance(element.value, str)
+        }
+        if len(members) != len(node.value.elts):
+            continue
+        for target in node.targets:
+            if isinstance(target, ast.Name):
+                found[target.id] = frozenset(members)
+    return found
+
+
+def _calls(node, name):
+    """True when `name(...)` is called anywhere inside `node`."""
+    for child in ast.walk(node):
+        if not isinstance(child, ast.Call):
+            continue
+        func = child.func
+        called = func.id if isinstance(func, ast.Name) else getattr(func, "attr", None)
+        if called == name:
+            return True
+    return False
+
+
+def controller_gate(source):
+    """(session_gated, applied constants, roles) read from a controller's get_context().
+
+    Only a constant get_context() itself reads counts as a gate: www/fleet.py
+    defines FLEET_ROLES and consults it solely in the /apps tile helper while
+    gating on nothing, so a module-level scan would publish /fleet as gated.
+    """
+    tree = ast.parse(source)
+    constants = _module_level_role_sets(tree)
+    context = next(
+        (n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "get_context"),
+        None,
+    )
+    if context is None:
+        return None, (), frozenset()
+    applied = sorted(
+        {n.id for n in ast.walk(context) if isinstance(n, ast.Name) and n.id in constants}
+    )
+    roles = frozenset().union(*(constants[name] for name in applied)) if applied else frozenset()
+    return _calls(context, "guest_redirect"), tuple(applied), roles
+
+
+def shipped_portal_routes(www_root=WWW_ROOT):
+    """{route: record} for every www shell that mounts a portal bundle."""
+    routes = {}
+    for shell in sorted(glob.glob(os.path.join(www_root, "*.html"))):
+        bundles = SHELL_BUNDLE.findall(_read(shell))
+        if not bundles:
+            continue
+        stem = os.path.basename(shell)[: -len(".html")]
+        # Frappe resolves a www controller by swapping hyphens for underscores.
+        module = stem.replace("-", "_")
+        path = os.path.join(www_root, module + ".py")
+        gate = controller_gate(_read(path)) if os.path.isfile(path) else (None, (), frozenset())
+        routes["/" + stem] = {
+            "controller": f"{APP_PKG}/www/{module}.py" if os.path.isfile(path) else None,
+            "bundle": bundles[0],
+            "session_gated": gate[0],
+            "constants": gate[1],
+            "roles": gate[2],
+        }
+    return routes
+
+
+def documented_portal_routes(path=README):
+    """{route: record} parsed from the README's served-portal-routes table."""
+    rows = {}
+    for line in _read(path).splitlines():
+        match = ROUTE_ROW.match(line)
+        if not match:
+            continue
+        gate, backing = match.group("gate"), match.group("backing").strip()
+        specs = GATE_SPEC.findall(gate)
+        cell = BACKING_CELL.match(backing)
+        guest, session = GUEST_MARKER in gate, SESSION_MARKER in gate
+        rows[match.group("route")] = {
+            "controller": cell.group("controller").strip() if cell else None,
+            "bundle": cell.group("bundle").strip() if cell else None,
+            # Neither marker, or both, is an unreadable cell — reported, not guessed.
+            "session_gated": session if guest != session else None,
+            "constants": tuple(const for const, _ in specs),
+            "roles": frozenset(
+                role.strip() for _, roles in specs for role in roles.split(",") if role.strip()
+            ),
+        }
+    return rows
+
+
+def _show(value):
+    if isinstance(value, (frozenset, set)):
+        return sorted(value) or "none"
+    if isinstance(value, tuple):
+        return list(value) or "none"
+    return value
+
+
+ROUTE_FIELDS = (
+    ("controller", "backing controller"),
+    ("bundle", "bundle"),
+    ("session_gated", "guest-redirect gate"),
+    ("constants", "role constant"),
+    ("roles", "gated roles"),
+)
+
+
+def portal_route_mismatches(documented, shipped):
+    """Both-direction diff of the routes the README and the www tree each claim."""
+    report = []
+    for route in sorted(set(documented) - set(shipped)):
+        report.append(f"{route}: documented in the README but no www shell serves it")
+    for route in sorted(set(shipped) - set(documented)):
+        report.append(
+            f"{route}: served by {shipped[route]['controller'] or 'no controller'} "
+            "but the README table omits it"
+        )
+    for route in sorted(set(documented) & set(shipped)):
+        doc, live = documented[route], shipped[route]
+        for key, label in ROUTE_FIELDS:
+            if doc[key] != live[key]:
+                report.append(
+                    f"{route}: {label} documented as {_show(doc[key])} "
+                    f"but ships as {_show(live[key])}"
+                )
+    return report
+
+
+def documented_route_count(path):
+    """The bolded number word in "Apex serves **N** portal routes"."""
+    match = ROUTE_COUNT.search(_flat(_read(path)))
+    return _number(match.group("count")) if match else None
+
+
+def documented_session_gated(path=TRAINING_DOC):
+    """(count, routes) from the training guide's session-gated portals note."""
+    match = SESSION_SENTENCE.search(_flat(_read(path)))
+    if not match:
+        return None, frozenset()
+    return _number(match.group("count")), frozenset(INLINE_ROUTE.findall(match.group("body")))
+
+
+def declared_modules(path=MODULES_TXT):
+    """modules.txt as frappe.get_file_items reads it: stripped, blank and # lines dropped."""
+    lines = [line.strip() for line in _read(path).splitlines()]
+    return [line for line in lines if line and not line.startswith("#")]
+
+
+def documented_module_count(path=TRAINING_DOC):
+    match = MODULE_COUNT.search(_flat(_read(path)))
+    return _number(match.group("count")) if match else None
+
+
+def documented_modules(path, anchor):
+    """Bolded bullet names in the first bullet run after `anchor`.
+
+    Anchored rather than file-wide: both documents carry other bolded bullet
+    lists further down, and only the run under the anchor is the module list.
+    """
+    names, started = [], False
+    for line in _read(path).splitlines():
+        if not started:
+            started = bool(anchor.search(line))
+            continue
+        bullet = MODULE_BULLET.match(line)
+        if bullet:
+            names.append(bullet.group("name").strip())
+        elif names and not line.startswith("  "):
+            break
+    return names
+
+
+def module_doc_mismatches(declared, documented, count=None):
+    """Both-direction diff of the modules a document lists against modules.txt."""
+    report = []
+    for name in sorted(set(documented) - set(declared)):
+        report.append(f"{name!r}: the document lists it but modules.txt does not declare it")
+    for name in sorted(set(declared) - set(documented)):
+        report.append(f"{name!r}: modules.txt declares it but the document lists no bullet")
+    if count is not None and count != len(declared):
+        report.append(
+            f"the document says modules.txt declares {count} names; it declares {len(declared)}"
+        )
+    return report
+
+
+class TestPortalRouteDocParity(unittest.TestCase):
+    """README.md's route table must be what apex/www/ actually serves."""
+
+    def setUp(self):
+        self.documented = documented_portal_routes()
+        self.shipped = shipped_portal_routes()
+
+    def test_both_sides_were_actually_parsed(self):
+        """Non-vacuity: a broken row regex or shell glob would agree on two empty sets."""
+        self.assertGreaterEqual(
+            len(self.documented), 5, "the README route table did not parse — regex broke"
+        )
+        self.assertGreaterEqual(
+            len(self.shipped), 5, "the www shell scan found nothing — glob broke"
+        )
+        gated = [route for route, row in self.shipped.items() if row["roles"]]
+        self.assertTrue(gated, "no controller parsed with a role gate — the AST read broke")
+        self.assertTrue(
+            all(row["bundle"] for row in self.shipped.values()), "a shell parsed with no bundle"
+        )
+
+    def test_the_table_matches_the_shipped_www_tree(self):
+        """A route, controller, bundle or gate cannot change without this table."""
+        mismatches = portal_route_mismatches(self.documented, self.shipped)
+        self.assertEqual(
+            mismatches,
+            [],
+            "README.md's served-portal-routes table misstates the shipped www tree. "
+            "A gated row names its controller's role constant in backticks, then a "
+            f"colon, then the comma-separated roles, then a period: {mismatches}",
+        )
+
+    def test_the_published_route_count_is_the_shipped_count(self):
+        """The count sentence is a claim about the same directory as the table."""
+        for path in (README, TRAINING_DOC):
+            with self.subTest(document=os.path.relpath(path, REPO_ROOT)):
+                self.assertEqual(
+                    documented_route_count(path),
+                    len(self.shipped),
+                    "the published portal-route count is not the number of served routes",
+                )
+
+    def test_the_training_guide_names_the_session_gated_portals(self):
+        """The guide's note is the other published list of the same routes."""
+        count, named = documented_session_gated()
+        derived = frozenset(r for r, row in self.shipped.items() if row["session_gated"])
+        self.assertEqual(
+            named,
+            derived,
+            "docs/training/README.md names a different set of session-gated portals "
+            "than the www controllers redirect guests from",
+        )
+        self.assertEqual(count, len(derived), "the note's count is not the derived count")
+
+
+class TestModuleDocParity(unittest.TestCase):
+    """Both public documents must list the modules apex/modules.txt declares."""
+
+    def setUp(self):
+        self.declared = declared_modules()
+
+    def test_the_registry_read_is_non_vacuous(self):
+        self.assertIn("Habitat", self.declared, "modules.txt read found no Habitat — parser broke")
+
+    def test_the_training_guide_matches_modules_txt(self):
+        documented = documented_modules(TRAINING_DOC, TRAINING_MODULE_ANCHOR)
+        self.assertTrue(documented, "the training guide's module bullets did not parse")
+        mismatches = module_doc_mismatches(
+            self.declared, documented, documented_module_count(TRAINING_DOC)
+        )
+        self.assertEqual(
+            mismatches, [], f"docs/training/README.md misstates the declared modules: {mismatches}"
+        )
+
+    def test_the_readme_module_section_matches_modules_txt(self):
+        documented = documented_modules(README, README_MODULE_ANCHOR)
+        self.assertTrue(documented, "the README's module bullets did not parse")
+        mismatches = module_doc_mismatches(self.declared, documented)
+        self.assertEqual(
+            mismatches, [], f"README.md's Modules section misstates the declared modules: {mismatches}"
+        )
+
+
+class TestPortalRouteGuardIsFalsifiable(unittest.TestCase):
+    """The route comparison must report drift in BOTH directions.
+
+    Proven against a temporary mirror of the README and the whole www tree: a
+    proof that mutates a shipped shell or controller to make its point is one
+    failed revert away from corrupting the tree it is proving.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+        self.readme = os.path.join(self.tmp, "README.md")
+        shutil.copyfile(README, self.readme)
+        self.www = os.path.join(self.tmp, "www")
+        shutil.copytree(WWW_ROOT, self.www)
+
+    def _compare(self):
+        shipped = shipped_portal_routes(self.www)
+        self.assertIn("/fleet-os", shipped, "fixture www tree did not parse")
+        return portal_route_mismatches(documented_portal_routes(self.readme), shipped)
+
+    def _edit_readme(self, old, new):
+        text = _read(self.readme)
+        edited = text.replace(old, new, 1)
+        self.assertNotEqual(edited, text, f"README copy no longer contains {old!r}")
+        with open(self.readme, "w", encoding="utf-8") as fh:
+            fh.write(edited)
+
+    def _plant_route(self, route, bundle="depot_portal"):
+        """A shell that mounts a bundle plus its controller — a served portal route."""
+        shell = f'<div id="app"></div>\n<script src="/assets/{APP_PKG}/{bundle}/assets/index.js">'
+        with open(os.path.join(self.www, route + ".html"), "w", encoding="utf-8") as fh:
+            fh.write(shell + "</script>\n")
+        controller = (
+            '"""Planted portal."""\n\n'
+            "from apex.apex_core.utils.portal_bootstrap import guest_redirect\n\n"
+            'DEPOT_ROLES = {"System Manager", "Fleet Manager"}\n\n\n'
+            "def get_context(context):\n"
+            f'    guest_redirect("/{route}")\n'
+            "    context.has_role = bool(DEPOT_ROLES & set(frappe.get_roles()))\n"
+            "    return context\n"
+        )
+        with open(os.path.join(self.www, route.replace("-", "_") + ".py"), "w", encoding="utf-8") as fh:
+            fh.write(controller)
+
+    def test_the_unmodified_copy_agrees(self):
+        self.assertEqual(self._compare(), [], "baseline fixture must start clean")
+
+    def test_a_documented_route_that_no_longer_ships_is_reported(self):
+        """One direction: the table promises a route the www tree no longer serves."""
+        self._edit_readme(
+            "| `/safety` |",
+            "| `/depot` | Depot staff | Guest redirect, then `DEPOT_ROLES`: System Manager. |"
+            f" `{APP_PKG}/www/depot.py` · `depot_portal` |\n| `/safety` |",
+        )
+        mismatches = self._compare()
+        self.assertEqual(len(mismatches), 1, f"retired route went unreported: {mismatches}")
+        self.assertIn("/depot", mismatches[0])
+        self.assertIn("no www shell serves it", mismatches[0])
+
+    def test_a_shipped_route_the_table_omits_is_reported(self):
+        """The direction a documented-implies-shipped guard misses entirely."""
+        self._plant_route("ghost")
+        mismatches = self._compare()
+        self.assertEqual(len(mismatches), 1, f"new route went unreported: {mismatches}")
+        self.assertIn("/ghost", mismatches[0])
+        self.assertIn("omits it", mismatches[0])
+
+    def test_a_role_added_to_a_gate_constant_is_reported(self):
+        """The gate column is derived from get_context(), not from prose."""
+        path = os.path.join(self.www, "safety.py")
+        source = _read(path).replace(
+            '"Resident Supervisor",', '"Resident Supervisor",\n    "Fleet Manager",', 1
+        )
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(source)
+
+        mismatches = self._compare()
+        self.assertEqual(len(mismatches), 1, f"widened gate went unreported: {mismatches}")
+        self.assertIn("/safety", mismatches[0])
+        self.assertIn("Fleet Manager", mismatches[0])
+
+    def test_a_retargeted_controller_or_bundle_is_reported(self):
+        """The /fleet and /fleet-os pair differs by controller, bundle and gate, so
+        swapping the two published rows fails on all three."""
+        self._edit_readme(f"`{APP_PKG}/www/fleet_os.py` · `fleet_os_portal`", "`x/y.py` · `nope`")
+        mismatches = self._compare()
+        self.assertEqual(len(mismatches), 2, f"backing cell drift went unreported: {mismatches}")
+        self.assertTrue(any("backing controller" in line for line in mismatches))
+        self.assertTrue(any("bundle" in line for line in mismatches))
+
+    def test_a_route_added_correctly_on_both_sides_stays_green(self):
+        """The lookalike: the same change as the failures above, done on BOTH sides.
+        It must pass, or the guard would just be blocking new portals."""
+        self._plant_route("depot")
+        self._edit_readme(
+            "| `/safety` |",
+            "| `/depot` | Depot staff | Guest redirect, then `DEPOT_ROLES`: System Manager,"
+            f" Fleet Manager. | `{APP_PKG}/www/depot.py` · `depot_portal` |\n| `/safety` |",
+        )
+        self.assertEqual(self._compare(), [], "a correctly documented route must stay green")
+
+        self._edit_readme("serves **seven** portal routes", "serves **eight** portal routes")
+        self.assertEqual(documented_route_count(self.readme), len(shipped_portal_routes(self.www)))
+
+    def test_a_constant_get_context_never_applies_is_not_a_gate(self):
+        """The /fleet shape, on a source string so the proof cannot go stale: a page
+        that defines a role set for its /apps tile while gating on nothing."""
+        source = (
+            'FLEET_ROLES = {"Fleet Manager"}\n\n\n'
+            "def has_apps_screen_access():\n"
+            "    return bool(FLEET_ROLES & set(frappe.get_roles()))\n\n\n"
+            "def get_context(context):\n"
+            '    guest_redirect("/fleet")\n'
+            "    context.can_view = 1\n"
+            "    return context\n"
+        )
+        self.assertEqual(controller_gate(source), (True, (), frozenset()))
+        gated = source.replace("context.can_view = 1", "context.ok = bool(FLEET_ROLES)")
+        self.assertEqual(controller_gate(gated), (True, ("FLEET_ROLES",), frozenset({"Fleet Manager"})))
+
+
+class TestModuleDocGuardIsFalsifiable(unittest.TestCase):
+    """The module comparison must report a modules.txt change the guide missed.
+
+    Same temp-mirror technique: modules.txt is the register a fresh install turns
+    into Module Def rows, so no proof may edit the shipped copy.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+        self.modules = os.path.join(self.tmp, "modules.txt")
+        shutil.copyfile(MODULES_TXT, self.modules)
+        self.guide = os.path.join(self.tmp, "training.md")
+        shutil.copyfile(TRAINING_DOC, self.guide)
+
+    def _compare(self):
+        declared = declared_modules(self.modules)
+        self.assertIn("Habitat", declared, "fixture modules.txt did not parse")
+        return module_doc_mismatches(
+            declared,
+            documented_modules(self.guide, TRAINING_MODULE_ANCHOR),
+            documented_module_count(self.guide),
+        )
+
+    def _append_module(self, name):
+        # The shipped modules.txt ends without a newline, so append, do not concatenate.
+        text = _read(self.modules)
+        with open(self.modules, "w", encoding="utf-8") as fh:
+            fh.write(text.rstrip("\n") + "\n" + name + "\n")
+
+    def _edit_guide(self, old, new):
+        text = _read(self.guide)
+        edited = text.replace(old, new, 1)
+        self.assertNotEqual(edited, text, f"guide copy no longer contains {old!r}")
+        with open(self.guide, "w", encoding="utf-8") as fh:
+            fh.write(edited)
+
+    def test_the_unmodified_copy_agrees(self):
+        self.assertEqual(self._compare(), [], "baseline fixture must start clean")
+
+    def test_a_module_added_to_modules_txt_reds_the_stale_guide(self):
+        """The A-195 shape in reverse: the register moved, the published page did not."""
+        self._append_module("Depot")
+        mismatches = self._compare()
+        self.assertEqual(len(mismatches), 2, f"added module went unreported: {mismatches}")
+        self.assertTrue(any("'Depot'" in line and "no bullet" in line for line in mismatches))
+        self.assertTrue(any("declares 4 names; it declares 5" in line for line in mismatches))
+
+    def test_a_module_dropped_from_modules_txt_reds_the_stale_guide(self):
+        """The exact A-195 defect: a bullet for a module the register no longer declares."""
+        kept = [name for name in declared_modules(self.modules) if name != "Logistay"]
+        with open(self.modules, "w", encoding="utf-8") as fh:
+            fh.write("\n".join(kept) + "\n")
+
+        mismatches = self._compare()
+        self.assertEqual(len(mismatches), 2, f"dropped module went unreported: {mismatches}")
+        self.assertTrue(any("'Logistay'" in line and "does not declare" in line for line in mismatches))
+        self.assertTrue(any("declares 4 names; it declares 3" in line for line in mismatches))
+
+    def test_a_module_added_correctly_on_both_sides_stays_green(self):
+        """The lookalike: register and page changed together must not fail."""
+        self._append_module("Depot")
+        self._edit_guide("declares **four** names", "declares **five** names")
+        self._edit_guide(
+            "- **Apex Core** —", "- **Depot** — planted fixture module.\n- **Apex Core** —"
+        )
+        self.assertEqual(self._compare(), [], "a correctly documented module must stay green")
 
 
 if __name__ == "__main__":
