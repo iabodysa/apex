@@ -400,15 +400,6 @@ _COPY_PASTE_BASELINE = frozenset(
                 ("patches/v1_x/seed_masar_demo_movement.py", "_get_or_create"),
             }
         ),
-        # Identical role-membership display hint; driver_portal/__init__.py is the
-        # package both sit under, so it is already the home — boarding.py should
-        # import it. Needs a wave that owns salis/.
-        frozenset(
-            {
-                ("salis/api/boarding.py", "_is_staff"),
-                ("salis/api/driver_portal/__init__.py", "_is_staff"),
-            }
-        ),
     }
 )
 

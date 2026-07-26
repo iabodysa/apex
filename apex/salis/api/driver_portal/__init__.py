@@ -13,10 +13,11 @@ from frappe.rate_limiter import rate_limit
 # [#95hxd8]
 from apex.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_url
 from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401  (re-exported)
-from apex.salis.utils import bound_vehicle, expiry_state, get_driver_for_user
+from apex.salis.utils import bound_vehicle, expiry_state, get_driver_for_user, has_any_role
 
 
-# [#g14lmr]
+# [#g14lmr] Display/navigation hint only. Deliberately WIDER than boarding.py's
+# same-named tuple: Finance Manager sees the desk links but may not scan a rider on.
 STAFF_ROLES = (
 	"Fleet Manager",
 	"Fleet Project Manager",
@@ -61,10 +62,7 @@ def _require_enabled():
 
 def _is_staff(user=None):
 	"""True when the user holds any Salis desk/oversight role (display hint)."""
-	user = user or frappe.session.user
-	if user == "Administrator":
-		return True
-	return bool(set(frappe.get_roles(user)) & set(STAFF_ROLES))
+	return has_any_role(user, STAFF_ROLES)
 
 def _staff_links(user=None):
 	"""Useful desk destinations for an unlinked staff user, filtered to what

@@ -25,7 +25,7 @@ from apex.apex_core.utils.portal_token_security import (
     presented_token,
     resolve_portal_subject,
 )
-from apex.salis.utils import get_driver_for_user
+from apex.salis.utils import get_driver_for_user, has_any_role
 
 # [#78ttpx]
 PASS_TTL_HOURS = 24
@@ -40,6 +40,8 @@ end
 return value
 """
 
+# Who may authorise a boarding scan. Deliberately NARROWER than the driver
+# portal's same-named tuple: Finance Manager reads fleet cost, never scans a rider on.
 STAFF_ROLES = (
     "Fleet Manager",
     "Fleet Project Manager",
@@ -103,10 +105,8 @@ def _token_hash(token: str) -> str:
 
 
 def _is_staff(user: str | None = None) -> bool:
-    user = user or frappe.session.user
-    if user == "Administrator":
-        return True
-    return bool(set(frappe.get_roles(user)) & set(STAFF_ROLES))
+    """True when the user may authorise a scan, per this module's own STAFF_ROLES."""
+    return has_any_role(user, STAFF_ROLES)
 
 
 def _driver_for_user(user: str | None = None) -> str | None:
