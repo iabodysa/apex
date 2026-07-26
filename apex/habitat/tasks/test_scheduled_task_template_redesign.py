@@ -47,7 +47,7 @@ def _make_catalog(suffix: str) -> str:
 
 
 def _make_building(suffix: str) -> str:
-    """Get or create a minimal Accommodation Building record; returns name."""
+    """Get or create a minimal Building record; returns name."""
     bname = f"Test Building {suffix}"
     existing = frappe.db.get_value(
         "Building", {"building_name": bname}, "name"

@@ -10,7 +10,7 @@ def _notify_operational(source_doctype: str, source_name: str, message: str) -> 
     """Post an operational notice to the source document's timeline, gated by the
     Habitat Settings "Enable Operational Notifications" toggle.
 
-    This replaces the deprecated Habitat Operations Alert inserts: native Frappe
+    This replaces the deprecated Operations Alert inserts: native Frappe
     timeline Comments (plus the configured Notification emails) carry operational
     notices. When the toggle is OFF the scheduler jobs run silently. Technical
     exceptions go to the standard Error Log, not here.

@@ -20,10 +20,12 @@ layer down, and it checks two axes:
   was already out of step when this guard landed, each with a reason; the assertion is
   exact equality, so a NEW divergence fails and a CLOSED one fails until it is pruned.
 
-Deliberately NOT a whole-table rewrite to match the JSON. Several frozen entries look like
-the APP being wrong rather than the page — a master DocType whose only DocPerm row is
-System Manager, for instance — and silently editing the page to agree would launder a
-permission gap into documented behaviour. Freezing states the disagreement instead.
+Deliberately NOT a whole-table rewrite to match the JSON. A frozen entry may well be the
+APP being wrong rather than the page — a master DocType whose only DocPerm row is System
+Manager, for instance — and silently editing the page to agree would launder a permission
+gap into documented behaviour. Freezing states the disagreement instead, and each entry
+names which side is wrong so that closing it is a decision rather than a silent edit to
+whichever file is easier to change. The baseline is empty as of A-184.
 
 Cells that do not spell out rights (``scoped``, ``Read (own)``, a child table's row) are
 listed in ``NON_SCHEMA_CELLS`` with a written reason. Declaring them is what keeps the
@@ -93,21 +95,12 @@ NON_SCHEMA_CELLS = {
     ),
 }
 
-_INERT_SUBMIT = (
-    "Salis Vehicle is not submittable (is_submittable is 0), yet its shipped permission "
-    "rows carry submit and cancel flags. Frappe renders neither action on a "
-    "non-submittable DocType, so the flags grant nothing and the page deliberately "
-    "publishes the operational rights instead. Closing this means dropping the dead "
-    "flags from the DocType JSON, not adding them to the page."
-)
-
-KNOWN_TABLE_DIVERGENCES = {
+KNOWN_TABLE_DIVERGENCES: dict[tuple[str, str, str], str] = {
     # Frozen baseline of (file, DocType, role) -> why the page and the JSON disagree.
     # Exact equality, so a NEW pair fails the build and a CLOSED pair fails until pruned.
-    # Each entry names which side is wrong, so closing one is a decision about the app or
-    # the page, never a silent edit to whichever is easier to change.
-    ("fleet-movement.md", "Salis Vehicle", "Fleet Manager"): _INERT_SUBMIT,
-    ("fleet-movement.md", "Salis Vehicle", "Fleet Project Manager"): _INERT_SUBMIT,
+    # Drained: the last two entries were Salis Vehicle's submit and cancel DocPerm flags
+    # on a DocType that is not submittable. The baseline named the JSON as the wrong side,
+    # and the flags have now been dropped there, so the page and the DocPerms agree.
 }
 
 
