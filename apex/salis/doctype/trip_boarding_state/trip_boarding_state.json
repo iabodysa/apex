@@ -2,7 +2,6 @@
  "actions": [],
  "creation": "2026-06-27 12:00:00.000000",
  "doctype": "DocType",
- "hidden": 1,
  "engine": "InnoDB",
  "field_order": [
   "worker_section",

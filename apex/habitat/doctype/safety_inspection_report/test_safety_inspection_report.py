@@ -224,10 +224,18 @@ class TestSafetyInspectionReportDeprecation(FrappeTestCase):
         with open(path, encoding="utf-8") as fh:
             return json.load(fh)
 
-    def test_sir_json_is_hidden_and_read_only(self):
+    def test_sir_json_is_read_only(self):
+        """``read_only`` is the whole of the concealment; it used to assert ``hidden`` too.
+
+        Frappe has no root ``hidden`` property on a DocType -- it is absent from
+        frappe/core/doctype/doctype/doctype.json, so BaseDocument.get_valid_dict never
+        persists it. Asserting it proved only that the JSON still carried a key nothing
+        reads. ``read_only`` is the honoured one: frappe labels it "User Cannot Search"
+        and frappe/utils/user.py drops such a doctype from can_search and can_read.
+        """
         schema = self._schema()
-        self.assertEqual(schema.get("hidden"), 1, "SIR must be hidden")
         self.assertEqual(schema.get("read_only"), 1, "SIR must be read_only")
+        self.assertNotIn("hidden", schema, "root 'hidden' is inert; do not re-add it")
 
     def test_sir_description_marks_deprecation(self):
         schema = self._schema()

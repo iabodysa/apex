@@ -4,7 +4,6 @@
  "creation": "2026-05-26 02:45:00.000000",
  "description": "Daily driver attendance record with check-in/out times and photographic evidence.",
  "doctype": "DocType",
- "hidden": 1,
  "engine": "InnoDB",
  "field_order": [
   "driver_attendance_sec_details",
