@@ -62,7 +62,7 @@ can point them at a temporary tree: proving the comparison reports an added role
 a renamed shortcut, a retired route or a new module must not require editing a
 shipped file.
 
-Run standalone:  python3 -m unittest tests.test_workspace_doc_parity -v
+Run standalone:  python3 -m unittest apex.tests.test_workspace_doc_parity -v
 """
 
 import ast
