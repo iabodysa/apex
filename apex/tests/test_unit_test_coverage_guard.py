@@ -291,17 +291,19 @@ and neither is a module that leaks only through a helper in another file.
 Serial, and why (measured 2026-07-26 against a live ``test`` site)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 18 probes serially: 71.3s wall. The probe FLOOR is ~0.2s (frappe import, init,
-connect, canary), so that number is the modules' own test time, not overhead. At 8
-workers it is 54.5s — and wrong: 18 interpreters against one site DB made
-``test_boarding_scan`` load 0 tests and flipped four other modules to failing, so
-the verdict stops meaning anything. 17s does not buy that. Hence serial, plus an
-assertion that every probe actually RAN tests, since a probe that runs nothing
-passes for the wrong reason.
+connect, canary), so that number is the modules' own test time, not overhead — the
+two heaviest account for 55s of it. At 8 workers the sweep is 54.5s and WRONG: 18
+interpreters against one site DB made ``test_boarding_scan`` load 0 tests and
+flipped four other modules to failing, so the verdict stops meaning anything. 17s
+does not buy that. Hence serial, plus an assertion that every probe actually RAN
+tests, since a probe that runs nothing passes for the wrong reason.
 
-Lane: this needs a live site, so the frappe-free fast lane SKIPS it and pays only
-a failed ``import frappe``; the scan itself is never called there and the scanner's
-self-tests are synthetic. It runs under ``bench run-tests``, ~71s of a ~25min job,
-which is where a guard against a whole-suite abort belongs.
+Lane: this needs a live site, so the frappe-free fast lane SKIPS it and pays only a
+failed ``import frappe`` — measured, the whole class plus its scanner self-tests
+cost 0.03s there including interpreter start, and the population scan is never
+called. It runs under ``bench run-tests``, where this module went from 5.02s to
+86.07s against the live ``test`` site (39 tests, contended). That +81s sits inside
+a ~25min job, which is where a guard against a whole-suite abort belongs.
 
 Leak baseline — ONE entry, found by this detector on its first full sweep
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
