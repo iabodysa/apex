@@ -1,14 +1,24 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Seed default Maintenance Material Templates on fresh install.
+"""Seed the Maintenance Material catalogue and its default Templates, in that order.
 
-T-050#3: Maintenance Material records are now the single source of truth via
-``apex_core/setup/data/habitat/maintenance_material.json`` (loaded by the
-data-driven loader ``seed_all`` on after_install/after_migrate).  The
-``MATERIAL_SEEDS`` list that used to live here was an exact duplicate of that
-JSON and has been removed.  ``seed_materials()`` is kept as a guarded no-op so
-any existing caller in setup.py continues to work without modification.
+``TEMPLATE_SEEDS`` child rows are REQUIRED Links onto Maintenance Material, so a
+template can only be created after every material it names exists — Frappe's
+``_validate_links`` walks child rows and rejects the whole document otherwise.
+The catalogue has two writers (the module list in
+``habitat/doctype/maintenance_material/maintenance_material_catalog.py`` and
+``apex_core/setup/data/habitat/maintenance_material.json``, which is the single
+source of truth for its 60 records), and the templates reference both. So
+``seed_templates`` owns the whole sequence: it runs both material writers first,
+which makes the templates independent of where it is called from in the install
+order. ``apex_core/setup/test_catalogue_writers.py`` keeps the two writers from
+drifting apart, and ``test_material_template_order.py`` keeps this order.
 """
 import frappe
+
+from apex.apex_core.setup.seed import seed
+from apex.habitat.doctype.maintenance_material.maintenance_material_catalog import (
+    seed_catalog,
+)
 
 TEMPLATE_SEEDS = [
     {
@@ -90,13 +100,13 @@ TEMPLATE_SEEDS = [
 
 
 def seed_materials():
-    """No-op stub kept for backward compatibility.
+    """Run BOTH writers of the Maintenance Material catalogue. Idempotent.
 
-    Maintenance Material records are seeded by the data-driven loader
-    (``seed_all``) from ``apex_core/setup/data/habitat/maintenance_material.json``
-    — that JSON is the single source of truth.  This function is intentionally
-    empty so callers (setup.py) continue to import and call it without error.
+    Both are create-only, so this is safe to call again even though ``seed_all``
+    re-applies the JSON later in the same install.
     """
+    seed_catalog()
+    return seed("habitat", only=["Maintenance Material"])
 
 
 def seed_templates():
