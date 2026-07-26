@@ -57,6 +57,20 @@ Operations module whose package no longer exists — true when written, false
 after the fold, and green the whole time. The count and the bullet set are both
 derived from modules.txt now, and README.md's own module bullets with them.
 
+docs/training/settings.md carried the same defect one page over: its desk-page
+note said Telecom Control's module "ships alongside Habitat, Salis, Apex Core,
+and SIM Operations", naming the retired module as still shipping. The
+derivation above covered the other two documents and stopped short of this one,
+so this page kept a module claim that nothing checked. It is covered here. The
+page states its module set as one bolded sentence rather than as bullets, so it
+gets its own parser, then the same both-direction comparison and the same count
+check as the other two.
+
+`SIM Operations User` is a live ROLE (apex/setup.py) held by the Custody and
+Habitat workspaces, the Telecom Control page and the telecom reports. It merely
+reads like the retired module. Nothing here derives roles from module names, so
+that the next reader of this file does not "finish the job" by deleting it.
+
 The parsers take their roots as arguments so the falsifiability classes below
 can point them at a temporary tree: proving the comparison reports an added role,
 a renamed shortcut, a retired route or a new module must not require editing a
@@ -80,6 +94,7 @@ REPO_ROOT = os.path.dirname(APP_ROOT)
 DESIGN_DOC = os.path.join(REPO_ROOT, "docs", "WORKSPACE-DESIGN.md")
 README = os.path.join(REPO_ROOT, "README.md")
 TRAINING_DOC = os.path.join(REPO_ROOT, "docs", "training", "README.md")
+SETTINGS_DOC = os.path.join(REPO_ROOT, "docs", "training", "settings.md")
 WWW_ROOT = os.path.join(APP_ROOT, "www")
 MODULES_TXT = os.path.join(APP_ROOT, "modules.txt")
 
@@ -592,6 +607,15 @@ MODULE_BULLET = re.compile(r"^-\s+\*\*(?P<name>[^*]+)\*\*")
 README_MODULE_ANCHOR = re.compile(r"^## Modules\s*$")
 TRAINING_MODULE_ANCHOR = re.compile(r"one per bullet below:")
 
+BOLD = re.compile(r"\*\*([^*]+)\*\*")
+# settings.md names its modules in one sentence rather than as bullets: the same
+# count phrase the other two documents use, an em dash, then every declared name
+# in bold up to the sentence's period. Anchored on that sentence and not scanned
+# file-wide, because the same blockquote bolds three desk-page names as well.
+SETTINGS_MODULE_SENTENCE = re.compile(
+    r"`" + APP_PKG + r"/modules\.txt` declares \*\*[a-z]+\*\* names\s*—(?P<names>[^.]+)\."
+)
+
 
 def _read(path):
     with open(path, encoding="utf-8") as fh:
@@ -601,6 +625,16 @@ def _read(path):
 def _flat(text):
     """One-line view of a document, so a sentence check survives Markdown wrapping."""
     return re.sub(r"\s+", " ", text)
+
+
+def _prose(text):
+    """`_flat` with Markdown blockquote markers dropped.
+
+    settings.md states its module set inside a `>` blockquote, so every wrap
+    point injects a `>` mid-sentence. Stripping the markers first makes the
+    parse independent of where the paragraph happens to wrap.
+    """
+    return _flat(re.sub(r"^\s*>\s?", "", text, flags=re.MULTILINE))
 
 
 def _number(word):
@@ -765,8 +799,15 @@ def declared_modules(path=MODULES_TXT):
 
 
 def documented_module_count(path=TRAINING_DOC):
-    match = MODULE_COUNT.search(_flat(_read(path)))
+    # _prose, not _flat: settings.md's count sentence sits in a blockquote.
+    match = MODULE_COUNT.search(_prose(_read(path)))
     return _number(match.group("count")) if match else None
+
+
+def documented_settings_modules(path=SETTINGS_DOC):
+    """The bolded module names in settings.md's declared-modules sentence."""
+    match = SETTINGS_MODULE_SENTENCE.search(_prose(_read(path)))
+    return [name.strip() for name in BOLD.findall(match.group("names"))] if match else []
 
 
 def documented_modules(path, anchor):
@@ -858,7 +899,7 @@ class TestPortalRouteDocParity(unittest.TestCase):
 
 
 class TestModuleDocParity(unittest.TestCase):
-    """Both public documents must list the modules apex/modules.txt declares."""
+    """Every public document that names the module set must match modules.txt."""
 
     def setUp(self):
         self.declared = declared_modules()
@@ -882,6 +923,27 @@ class TestModuleDocParity(unittest.TestCase):
         mismatches = module_doc_mismatches(self.declared, documented)
         self.assertEqual(
             mismatches, [], f"README.md's Modules section misstates the declared modules: {mismatches}"
+        )
+
+    def test_the_settings_page_matches_modules_txt(self):
+        """The desk-page note names the module set too, in prose rather than bullets.
+
+        It is the page that said the set "ships alongside ... SIM Operations"
+        after that module was folded away — the A-208 defect this covers.
+        """
+        documented = documented_settings_modules()
+        self.assertTrue(
+            documented,
+            "settings.md's declared-modules sentence did not parse — reword it to keep "
+            "the count phrase, an em dash, then every module name in bold",
+        )
+        mismatches = module_doc_mismatches(
+            self.declared, documented, documented_module_count(SETTINGS_DOC)
+        )
+        self.assertEqual(
+            mismatches,
+            [],
+            f"docs/training/settings.md misstates the declared modules: {mismatches}",
         )
 
 
@@ -1021,6 +1083,8 @@ class TestModuleDocGuardIsFalsifiable(unittest.TestCase):
         shutil.copyfile(MODULES_TXT, self.modules)
         self.guide = os.path.join(self.tmp, "training.md")
         shutil.copyfile(TRAINING_DOC, self.guide)
+        self.settings = os.path.join(self.tmp, "settings.md")
+        shutil.copyfile(SETTINGS_DOC, self.settings)
 
     def _compare(self):
         declared = declared_modules(self.modules)
@@ -1042,6 +1106,22 @@ class TestModuleDocGuardIsFalsifiable(unittest.TestCase):
         edited = text.replace(old, new, 1)
         self.assertNotEqual(edited, text, f"guide copy no longer contains {old!r}")
         with open(self.guide, "w", encoding="utf-8") as fh:
+            fh.write(edited)
+
+    def _compare_settings(self):
+        declared = declared_modules(self.modules)
+        self.assertIn("Habitat", declared, "fixture modules.txt did not parse")
+        documented = documented_settings_modules(self.settings)
+        self.assertTrue(documented, "fixture settings.md sentence did not parse")
+        return module_doc_mismatches(
+            declared, documented, documented_module_count(self.settings)
+        )
+
+    def _edit_settings(self, old, new):
+        text = _read(self.settings)
+        edited = text.replace(old, new, 1)
+        self.assertNotEqual(edited, text, f"settings copy no longer contains {old!r}")
+        with open(self.settings, "w", encoding="utf-8") as fh:
             fh.write(edited)
 
     def test_the_unmodified_copy_agrees(self):
@@ -1074,6 +1154,63 @@ class TestModuleDocGuardIsFalsifiable(unittest.TestCase):
             "- **Apex Core** —", "- **Depot** — planted fixture module.\n- **Apex Core** —"
         )
         self.assertEqual(self._compare(), [], "a correctly documented module must stay green")
+
+    def test_the_unmodified_settings_copy_agrees(self):
+        self.assertEqual(self._compare_settings(), [], "baseline fixture must start clean")
+
+    def test_a_module_added_to_modules_txt_reds_the_stale_settings_page(self):
+        """Direction one: the register grew and the desk-page note did not."""
+        self._append_module("Depot")
+        mismatches = self._compare_settings()
+        self.assertEqual(len(mismatches), 2, f"added module went unreported: {mismatches}")
+        self.assertTrue(any("'Depot'" in line and "no bullet" in line for line in mismatches))
+        self.assertTrue(any("declares 4 names; it declares 5" in line for line in mismatches))
+
+    def test_a_module_dropped_from_modules_txt_reds_the_stale_settings_page(self):
+        """Direction two — the exact A-208 defect: the note names a module the
+        register no longer declares, which is what `SIM Operations` had become."""
+        kept = [name for name in declared_modules(self.modules) if name != "Logistay"]
+        with open(self.modules, "w", encoding="utf-8") as fh:
+            fh.write("\n".join(kept) + "\n")
+
+        mismatches = self._compare_settings()
+        self.assertEqual(len(mismatches), 2, f"dropped module went unreported: {mismatches}")
+        self.assertTrue(
+            any("'Logistay'" in line and "does not declare" in line for line in mismatches)
+        )
+        self.assertTrue(any("declares 4 names; it declares 3" in line for line in mismatches))
+
+    def test_a_module_added_correctly_to_both_sides_of_settings_stays_green(self):
+        """The lookalike: register and note changed together must not fail."""
+        self._append_module("Depot")
+        self._edit_settings("declares **four** names", "declares **five** names")
+        self._edit_settings("and **Logistay**.", "**Logistay**, and **Depot**.")
+        self.assertEqual(
+            self._compare_settings(), [], "a correctly documented module must stay green"
+        )
+
+    def test_appending_to_the_registry_never_concatenates(self):
+        """The shipped modules.txt ends WITHOUT a trailing newline, and that is the
+        framework's own doing: Module Def.on_update -> add_to_modules_txt and
+        on_trash -> delete_module_from_file both write `"\\n".join(modules)`, and
+        bench's app boilerplate writes the first line the same way. A naive append
+        therefore yields a concatenated name — `LogistayDepot` was observed.
+
+        Adding the trailing newline would be undone by the next Module Def insert,
+        so the appender normalises instead. This proves it holds for a file that
+        ends either way, which is exactly what makes the framework's rewrites a
+        non-issue.
+        """
+        for trailing in ("", "\n"):
+            with self.subTest(trailing=repr(trailing)):
+                with open(self.modules, "w", encoding="utf-8") as fh:
+                    fh.write("\n".join(declared_modules(MODULES_TXT)) + trailing)
+                self._append_module("Depot")
+                declared = declared_modules(self.modules)
+                self.assertEqual(
+                    declared[-2:], ["Logistay", "Depot"], f"append concatenated: {declared}"
+                )
+                self.assertNotIn("LogistayDepot", declared)
 
 
 if __name__ == "__main__":
