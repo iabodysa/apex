@@ -11,7 +11,11 @@
 # place, `assert_lane_parity` fails loudly instead of letting the two rot apart.
 #
 # Modes:
-#   tree              the Lint lane: ruff, the shell parse check, and the content guards
+#   tree              every frappe-free CI guard a workstation can run: ruff, the shell
+#                     parse check, and the content guards. These do NOT all come from one
+#                     workflow, so each is reported under the lane it was read out of and
+#                     the run ends with a per-lane count - a PASS here is not a PASS of
+#                     any single lane, and a red names the workflow to go and read
 #   range <log-opts>  the redacted secret scan over a commit range (pre-push, CI)
 #   thresholds        the declared scope and limits as JSON, for a tool that must
 #                     gate on the same declaration instead of copying it
@@ -25,30 +29,64 @@ MAX_MISSING=0
 root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 cd "$root"
 
-LINT_WORKFLOW=.github/workflows/lint.yml
-TEST_WORKFLOW=.github/workflows/test.yml
+WORKFLOW_DIR=.github/workflows
+TEST_WORKFLOW=$WORKFLOW_DIR/test.yml
 
-# Read the workflow's SHELL, never its prose: lint.yml explains in a comment why it no
-# longer passes --max-stale, and a naive grep would read that sentence as the flag.
-workflow_shell() {
-	if [ ! -f "$LINT_WORKFLOW" ]; then
-		echo "guards: $LINT_WORKFLOW is missing, so there is nothing to mirror" >&2
+# WHICH LANE a guard belongs to is a fact about the repository, not one this script gets
+# to assert. Every guard below is looked up by STEP NAME across all workflows, and is
+# reported under the `name:` of the file it was actually found in - so moving a step from
+# one workflow to another moves its attribution with it, and there is no table here to
+# forget to update. This matters because tree mode is not one lane: the DocType contract
+# lives in the Tests workflow while ruff and the content guards live in Lint, and a run
+# that printed neither name let a reader take a two-lane PASS for a one-lane one and sent
+# a failure hunt to the wrong file.
+WORKFLOWS=""
+LANES_COVERED=""
+STEP_LANE=""
+STEP_BODY=""
+STEP_WORKFLOW=""
+
+discover_workflows() {
+	WORKFLOWS=$(ls -1 "$WORKFLOW_DIR"/*.yml 2>/dev/null || true)
+	if [ -z "$WORKFLOWS" ]; then
+		echo "guards: $WORKFLOW_DIR holds no workflow, so there is nothing to mirror" >&2
 		echo "guards: a local pass would stop meaning a CI pass - repair it before trusting this run" >&2
 		exit 2
 	fi
-	grep -v '^[[:space:]]*#' "$LINT_WORKFLOW"
 }
 
-# Lift a named step's shell OUT of lint.yml and run that, instead of writing the command
+# The lane's human name, read out of the workflow itself, so the label printed here is
+# the one GitHub prints on the check a developer then goes to open.
+lane_name() {
+	name=$(sed -n 's/^name:[[:space:]]*//p' "$1" | head -1)
+	if [ -z "$name" ]; then
+		name=$(basename "$1")
+	fi
+	printf '%s\n' "$name"
+}
+
+# Read a workflow's SHELL, never its prose: lint.yml explains in a comment why it no
+# longer passes --max-stale, and a naive grep would read that sentence as the flag.
+workflow_shell() {
+	file=$1
+	if [ ! -f "$file" ]; then
+		echo "guards: $file is missing, so there is nothing to mirror" >&2
+		echo "guards: a local pass would stop meaning a CI pass - repair it before trusting this run" >&2
+		exit 2
+	fi
+	grep -v '^[[:space:]]*#' "$file"
+}
+
+# Lift a named step's shell OUT of a workflow and run that, instead of writing the command
 # down a second time. A restated command is the drift this file exists to prevent, so
 # where a step's whole body is the parameter there is nothing to assert parity about:
-# the lane's own text is the only copy. Handles both `run:` forms - the inline scalar
-# and the `|` block - and a step it cannot find is FATAL, because a mirror that quietly
-# skips a gate it advertises is exactly the false PASS the header warns about.
-workflow_step_shell() {
-	step=$1
-	shell=$(workflow_shell)
-	body=$(printf '%s\n' "$shell" | awk -v want="$step" '
+# the lane's own text is the only copy. Handles both `run:` forms - the inline scalar and
+# the `|` block. Empty means this workflow does not own the step; locate_step below
+# decides what that means, because only it can see whether another workflow does.
+step_body() {
+	wf_file=$1
+	wf_step=$2
+	workflow_shell "$wf_file" | awk -v want="$wf_step" '
 		/^[ ]*-[ ]+name:[ ]*/ {
 			n = $0
 			sub(/^[ ]*-[ ]+name:[ ]*/, "", n)
@@ -77,14 +115,42 @@ workflow_step_shell() {
 			instep = 0
 			next
 		}
-	')
-	if [ -z "$body" ]; then
-		echo "guards: $LINT_WORKFLOW has no \"$step\" step with a run: body." >&2
+	'
+}
+
+# Find the ONE workflow that owns a step, and remember its shell, its file and its lane.
+# A step no workflow owns is FATAL, because a mirror that quietly skips a gate it
+# advertises is exactly the false PASS the header warns about. Two workflows owning the
+# same name is fatal too, rather than first-wins: the lane would then be a guess, and
+# every line this script prints presents it as a fact.
+locate_step() {
+	step=$1
+	[ -n "$WORKFLOWS" ] || discover_workflows
+	STEP_LANE=""
+	STEP_BODY=""
+	STEP_WORKFLOW=""
+	owners=""
+	for wf in $WORKFLOWS; do
+		body=$(step_body "$wf" "$step")
+		[ -n "$body" ] || continue
+		owners="$owners $wf"
+		STEP_WORKFLOW=$wf
+		STEP_LANE=$(lane_name "$wf")
+		STEP_BODY=$body
+	done
+	if [ -z "$STEP_BODY" ]; then
+		echo "guards: no workflow under $WORKFLOW_DIR has a \"$step\" step with a run: body." >&2
 		echo "guards: this script executes that step's own shell rather than a copy of it, so a" >&2
 		echo "guards: renamed or deleted step leaves the gate UNRUN - reconcile the two before pushing." >&2
 		exit 2
 	fi
-	printf '%s\n' "$body"
+	set -- $owners
+	if [ $# -gt 1 ]; then
+		echo "guards: \"$step\" has a run: body in $# workflows:$owners" >&2
+		echo "guards: the lane this script reports would then be a guess. Rename one of them, so" >&2
+		echo "guards: attribution stays derived from the file the step was actually read out of." >&2
+		exit 2
+	fi
 }
 
 # CI runs the lane inside a fresh CHECKOUT, which holds only what git tracks. A
@@ -100,11 +166,12 @@ workflow_step_shell() {
 # a fresh clone has no such file to find, which is why the lane itself stays green.
 #
 # comment_audit, check_translations and check_doctype_dates each draw this boundary for
-# themselves, with `git ls-files --cached --others --exclude-standard`. A LIFTED step
-# cannot: its command belongs to lint.yml, and rewriting it here is the drift this file
-# exists to prevent. So the boundary is applied to the step's INPUT instead - the same
-# file set, materialised, with this work tree's current contents so an uncommitted edit
-# is still graded. Only what a clone would never receive is left behind.
+# themselves, with `git ls-files --cached --others --exclude-standard`, so those three run
+# in the work tree where CI runs them. Rewriting a lifted step's command here to add the
+# boundary is the drift this file exists to prevent, so for the steps that DO walk a
+# directory they were handed, the boundary is applied to the step's INPUT instead - the
+# same file set, materialised, with this work tree's current contents so an uncommitted
+# edit is still graded. Only what a clone would never receive is left behind.
 CI_TREE=""
 
 build_ci_tree() {
@@ -137,30 +204,53 @@ for name in names:
 	fi
 }
 
-# Run the lane's step under a POSIX shell, against the files CI would have, and name the
-# step when it reds so the failure reads as "CI would reject this", not as a local script
-# blowing up.
+# Run a lifted step under a POSIX shell and NAME the lane it came from, both before it
+# runs and if it reds - so a pass says which lanes it spanned instead of implying one, and
+# a failure reads as "this workflow would reject this", not as a local script blowing up.
+# `where` is the directory to run it in: the materialised checkout for a step handed a
+# directory to walk, the work tree for one that asks git for its own file set.
 run_lane_step() {
-	step=$1
-	command_text=$(workflow_step_shell "$step")
-	if ! (cd "$CI_TREE" && sh -c "$command_text"); then
-		echo "guards: the Lint lane's \"$step\" step FAILS on this tree" >&2
+	lane_step=$1
+	lane_where=$2
+	locate_step "$lane_step"
+	echo "guards: [$STEP_LANE] $lane_step"
+	LANES_COVERED="$LANES_COVERED$STEP_LANE
+"
+	if ! (cd "$lane_where" && sh -c "$STEP_BODY"); then
+		echo "guards: the $STEP_LANE lane's \"$lane_step\" step FAILS on this tree" >&2
 		exit 1
 	fi
 }
 
+# Say out loud what the PASS actually covered. The counts come from the steps that ran,
+# grouped by the workflow each was read out of, so no lane can be credited with a guard
+# that lives somewhere else - and no lane can be read as fully passed, because tree mode
+# only ever runs the frappe-free subset of one.
+report_lanes_covered() {
+	echo "guards: PASS - steps run, by the lane each was read out of:"
+	printf '%s' "$LANES_COVERED" | sort | uniq -c | while read -r count lane; do
+		echo "guards:   $lane: $count"
+	done
+	echo "guards: each lane is covered only for the steps listed - the rest of its steps"
+	echo "guards: (bench install, full suite, portal builds) are not mirrored on a workstation."
+}
+
 # CI pins ruff because this repo's lint contract is ruff's DEFAULT rule set, and that set
 # moves between minors - a workstation on another version renders a verdict that is not
-# the lane's, in either direction. The pin is read out of the lane, never copied here.
-# An absent ruff is fatal: the gate would silently not run, and a green with a gate
-# missing is worse than a red.
+# the lane's, in either direction. The pin is read out of the lane, never copied here -
+# and out of whichever workflow the "Run ruff" step was found in, so a lane move carries
+# the pin with it. An absent ruff is fatal: the gate would silently not run, and a green
+# with a gate missing is worse than a red.
 check_ruff_version() {
-	shell=$(workflow_shell)
-	pinned=$(printf '%s\n' "$shell" | sed -n 's/.*pip install ruff==\([0-9.]*\).*/\1/p' | head -1)
+	locate_step "Run ruff"
+	ruff_lane=$STEP_LANE
+	ruff_workflow=$STEP_WORKFLOW
+	pinned=$(workflow_shell "$ruff_workflow" |
+		sed -n 's/.*pip install ruff==\([0-9.]*\).*/\1/p' | head -1)
 	local_ruff=$(ruff --version 2>/dev/null | awk '{print $2}')
 	if [ -z "$local_ruff" ]; then
-		echo "guards: ruff is not on PATH, so the Lint lane's first gate CANNOT run here." >&2
-		echo "guards: install the version the lane pins: pip install ruff==${pinned:-<see $LINT_WORKFLOW>}" >&2
+		echo "guards: ruff is not on PATH, so the $ruff_lane lane's first gate CANNOT run here." >&2
+		echo "guards: install the version it pins: pip install ruff==${pinned:-<see $ruff_workflow>}" >&2
 		exit 2
 	fi
 	if [ -n "$pinned" ] && [ "$pinned" != "$local_ruff" ]; then
@@ -180,67 +270,74 @@ note_sh_parser_drift() {
 	fi
 }
 
-# The Lint lane spells its flags out in its own shell, and they cannot be read out of
-# it without parsing YAML, so assert instead that both sides still say the same thing.
-# This is the honest second best: not one definition, but two that cannot silently
-# disagree.
+# The guard COMMANDS are no longer restated here - every one is lifted from the step that
+# owns it - so the only thing left that could drift is the declaration `thresholds` mode
+# publishes as JSON for a tool to gate on. That declaration is asserted against the BODY
+# of the steps it describes, not against a workflow file named here, so it keeps agreeing
+# with the guard wherever the guard's step lives.
 #
 # The stale ratchet has NO parameter left to mirror. It used to be a number, read out
-# of lint.yml so this file held no copy of it; it is now the recorded set in
+# of the lane so this file held no copy of it; it is now the recorded set in
 # apex/translations/<lang>.stale-baseline.txt, which both lanes read out of the same
 # commit. Nothing is passed, so nothing can drift - which is why a returning
 # --max-stale is rejected below as hard as a missing flag.
 assert_lane_parity() {
-	shell=$(workflow_shell)
+	locate_step "Comment policy (why-not-what, no banners, no task ids)"
+	comments_body=$STEP_BODY
+	locate_step "Arabic translation coverage"
+	translations_body=$STEP_BODY
+	translations_lane=$STEP_LANE
 
 	missing=""
+	if ! printf '%s\n' "$comments_body" | grep -qF -- "scripts/comment_audit.py $PACKAGE"; then
+		missing="$missing
+  scripts/comment_audit.py $PACKAGE"
+	fi
 	for fragment in \
-		"python3 scripts/comment_audit.py $PACKAGE" \
-		"python3 scripts/check_translations.py" \
 		"--package $PACKAGE" \
 		"--lang $LANG_CODE" \
 		"--max-missing $MAX_MISSING"; do
-		if ! printf '%s\n' "$shell" | grep -qF -- "$fragment"; then
+		if ! printf '%s\n' "$translations_body" | grep -qF -- "$fragment"; then
 			missing="$missing
   $fragment"
 		fi
 	done
 	if [ -n "$missing" ]; then
-		echo "guards: $LINT_WORKFLOW no longer invokes the guards this script mirrors." >&2
-		echo "guards: absent from the workflow:$missing" >&2
+		echo "guards: the $translations_lane lane no longer runs the guards on the scope this" >&2
+		echo "guards: script declares. Absent from the step bodies:$missing" >&2
 		echo "guards: a local pass would stop meaning a CI pass - reconcile the two before pushing." >&2
 		exit 2
 	fi
 
-	if printf '%s\n' "$shell" | grep -q -- "--max-stale"; then
-		echo "guards: $LINT_WORKFLOW passes --max-stale again, so this script no longer" >&2
-		echo "guards: runs what CI runs. The stale ratchet is a recorded SET, not a number:" >&2
+	if printf '%s\n' "$translations_body" | grep -q -- "--max-stale"; then
+		echo "guards: the $translations_lane lane passes --max-stale again, so this script no" >&2
+		echo "guards: longer runs what CI runs. The stale ratchet is a recorded SET, not a number:" >&2
 		echo "guards: drop the flag and re-record the set with" >&2
 		echo "  python3 scripts/check_translations.py --package $PACKAGE --lang $LANG_CODE --update-stale-baseline" >&2
 		exit 2
 	fi
 }
 
-# In the lane's own order, so the first red a developer sees here is the first red CI
-# would show them.
+# In the Lint lane's own order, so the first red a developer sees here is the first red
+# that lane would show them - with the one guard that belongs to a DIFFERENT workflow run
+# last and labelled as such, rather than folded in silently.
 #
-# The three python gates below are NOT run against the materialised tree: each already
-# asks git for its own file set, so here they run where CI runs them, in a work tree,
-# on the code path the lane exercises. Only the lifted steps, which walk directories
-# they were handed, need the boundary supplied for them.
+# The last three steps are NOT run against the materialised tree: each already asks git
+# for its own file set, so here they run where CI runs them, in a work tree, on the code
+# path their lane exercises. Only the first two, which walk directories they were handed,
+# need the boundary supplied for them.
 tree_guards() {
+	discover_workflows
 	assert_lane_parity
 	check_ruff_version
 	build_ci_tree
-	run_lane_step "Run ruff"
+	run_lane_step "Run ruff" "$CI_TREE"
 	note_sh_parser_drift
-	run_lane_step "Shell syntax"
-	python3 scripts/comment_audit.py "$PACKAGE"
-	python3 scripts/check_translations.py \
-		--package "$PACKAGE" \
-		--lang "$LANG_CODE" \
-		--max-missing "$MAX_MISSING"
-	python3 scripts/check_doctype_dates.py "$PACKAGE"
+	run_lane_step "Shell syntax" "$CI_TREE"
+	run_lane_step "Comment policy (why-not-what, no banners, no task ids)" "$root"
+	run_lane_step "Arabic translation coverage" "$root"
+	run_lane_step "DocType date and layout contract" "$root"
+	report_lanes_covered
 }
 
 # CI pins the scanner version; a workstation cannot be forced to match, so report the
