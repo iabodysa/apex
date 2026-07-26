@@ -163,13 +163,13 @@ itself would re-enter the sweep one level down, which is a reason about running 
 subprocess, not about comparing two strings.
 
 What the pattern must TOLERATE — a guard that reds on a legitimate spelling of
-the right command gets worked around, not obeyed. Verified against all 22
+the right command gets worked around, not obeyed. Verified against all 25
 declarations in this tree, and the matched SET is identical to the old
 trigger-only pattern, because every addition is optional:
   * ``python`` or ``python3``, and any run of whitespace between tokens;
   * the command WRAPPED across two lines — this module's own docstring wraps one,
     so the whitespace before the target has to match a newline;
-  * flags on EITHER side of the target: a trailing ``-v`` (all 21 sibling
+  * flags on EITHER side of the target: a trailing ``-v`` (all 24 sibling
     declarations end that way), ``--failfast``, a ``-k`` filter. Value-taking
     flags are consumed together WITH their value, so a dotted ``-k`` selector
     sitting before the target is never mistaken for the target itself;
@@ -207,19 +207,30 @@ times. Every other claim in the sweep costs 0.80s or less. So the fast lane sets
 ``APEX_SKIP_SLOW_STANDALONE_PROBES=1`` (inline on that one ``run:`` line, nowhere
 else) and the sweep drops that one module: 2.08 / 2.10 / 2.11s measured after.
 
-2.1s, not 0.7s, and the workflow comment now says so. The old ~0.7s is unrecoverable
-and was never going to come back by exempting one module: ~0.7s is what the two
-ratchet SCANS cost on their own, and the 19 remaining standalone runs cost ~1.1s wall
-however they are scheduled (measured at 8 / 16 / 24 workers: 1.12 / 1.31 / 1.27s —
-already past this machine's useful parallelism, so more threads make it worse). That
-~1.3s is the price of the only check that can see a broken documented command at all,
-since ``bench run-tests`` has the real frappe loaded and never enters a fallback
-branch. It is paid ahead of a ~25min bench install, and it is worth paying.
+The old ~0.7s is unrecoverable and was never going to come back by exempting one
+module: ~0.7s is what the two ratchet SCANS cost on their own, and the remaining
+standalone runs are the rest of the bill.
+
+RE-MEASURED 2026-07-26 (A-215), because the claim count grew from 20 to 24 and a
+timing welded to a different workload misattributes its own measurement. The 23
+runs the fast lane still sweeps cost 1.51 / 1.45 / 1.46s at 8 / 16 / 24 workers
+(best of three at each width); all 24, including the exempt module, cost 4.23s at
+8 workers. So ~1.5s, up from the ~1.1s that 19 runs cost — and the old "more
+threads make it worse" no longer holds: past 8 workers the wall is flat, a shade
+better, not worse. CAVEAT, since it bit the previous measurement too: other agents
+were building on this machine throughout (load average 1.4 rising to 2.1). These
+are CONTENDED numbers, an upper bound rather than the quiet-machine figure — the
+whole step measured 2.40 / 2.43 / 2.44s here against the 2.08 / 2.11s recorded on
+a quiet machine for a smaller sweep. That gap is CONTENTION, not regression.
+
+That ~1.5s is the price of the only check that can see a broken documented command
+at all, since ``bench run-tests`` has the real frappe loaded and never enters a
+fallback branch. It is paid ahead of a ~25min bench install, and it is worth paying.
 
 What the exemption costs, stated plainly: in the FAST lane that module's standalone
-claim is not executed, so a rot in it is not caught in ~1.3s. It is NOT unverified —
+claim is not executed, so a rot in it is not caught in ~1.5s. It is NOT unverified —
 this whole module also runs under ``bench run-tests --app apex``, which sets no such
-variable and therefore sweeps all 20 claims, and a plain local
+variable and therefore sweeps all 24 claims, and a plain local
 ``python3 -m unittest apex.tests.test_unit_test_coverage_guard`` does too. The cost
 is a DELAY on exactly one claim (fast lane -> the ~25min bench job), not a hole.
 Two ratchets keep it that narrow: ``test_the_fast_lane_exemption_stays_one_named
@@ -227,6 +238,83 @@ _live_claim`` refuses a second entry or a stale one, and
 ``test_only_the_fast_guards_step_sets_the_skip_flag`` refuses to let the variable
 escape that single command into a job- or workflow-level ``env:`` block, which is
 the one edit that WOULD blind the bench lane too.
+
+Process-global leak guard (A-231)
+---------------------------------
+A test that stubs a frappe PROCESS GLOBAL and never puts it back aborts every test
+that runs after it in the same interpreter — and each victim still passes IN
+ISOLATION, which is why this class of defect clears review. It happened here:
+a report test left ``frappe.local.db`` as a ``types.SimpleNamespace``, and
+``bench run-tests --app apex`` went from 2620 passing to ``259 errors`` with an
+early abort, every victim dying in ``FrappeTestCase.setUpClass`` on
+``AttributeError: 'types.SimpleNamespace' object has no attribute 'commit'``.
+setUpClass calls ``frappe.db.commit()``, and ``frappe.db`` is a proxy onto
+``frappe.local``, so one unrestored attribute reaches every later test class.
+
+The shape, and why nothing weaker will do: run the module in its OWN site-connected
+interpreter, diff ``frappe.local`` against a snapshot taken before it ran, then run
+a real ``FrappeTestCase`` canary IN THE SAME PROCESS. Neither half is redundant —
+the diff names WHAT was stranded but only guesses at the damage, and the canary
+proves the damage but cannot see a stub that merely looks harmless.
+
+What counts as left behind
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+  * an attribute that existed before and now holds a DIFFERENT TYPE — the incident
+    exactly (``MariaDBDatabase`` replaced by ``SimpleNamespace``);
+  * an attribute that existed before and is now deleted, or is now None;
+  * an attribute that did NOT exist before and is now None. ``frappe.local`` is a
+    werkzeug ``Local``: reading an unset name raises AttributeError and iterating
+    it does not list that name at all, so ABSENCE IS A VALUE and None is a
+    different state. A harness that snapshots with ``getattr(frappe.local, name,
+    None)`` and restores by ``setattr`` silently converts unset into None;
+  * an attribute that did not exist before and holds an object whose type the app
+    or ``unittest.mock`` defines — a stub the test built, parked on a framework
+    global;
+  * a ``sys.modules["frappe*"]`` entry swapped for another object, or removed.
+Deliberately NOT flagged: a NEW attribute holding a stdlib or third-party object.
+Frappe fills its own locals lazily, so a first run legitimately adds
+``request_cache`` (a ``collections.defaultdict``), ``jloader`` (a
+``jinja2.ChoiceLoader``), ``_link_count``, ``system_settings``; a draft that
+flagged every non-frappe type reported 13 of 18 clean modules as leaking.
+
+Population, and its boundary
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+18 of 367 test modules, selected statically: those that assign, ``setattr`` or
+``delattr`` under ``frappe.local``, or swap a ``sys.modules["frappe*"]`` entry.
+Probing all 367 would re-run the whole suite in subprocesses. A grep would not do
+the selecting: the file that caused the incident now writes through
+``setattr(frappe.local, name, value)`` and matches no ``frappe.local.x =`` text at
+all, so the scan is an AST walk over the assignment TARGET. The boundary stated
+plainly — a bare ``frappe.<attr> = stub`` monkeypatch is not in this population,
+and neither is a module that leaks only through a helper in another file.
+
+Serial, and why (measured 2026-07-26 against a live ``test`` site)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+18 probes serially: 71.3s wall. The probe FLOOR is ~0.2s (frappe import, init,
+connect, canary), so that number is the modules' own test time, not overhead. At 8
+workers it is 54.5s — and wrong: 18 interpreters against one site DB made
+``test_boarding_scan`` load 0 tests and flipped four other modules to failing, so
+the verdict stops meaning anything. 17s does not buy that. Hence serial, plus an
+assertion that every probe actually RAN tests, since a probe that runs nothing
+passes for the wrong reason.
+
+Lane: this needs a live site, so the frappe-free fast lane SKIPS it and pays only
+a failed ``import frappe``; the scan itself is never called there and the scanner's
+self-tests are synthetic. It runs under ``bench run-tests``, ~71s of a ~25min job,
+which is where a guard against a whole-suite abort belongs.
+
+Leak baseline — ONE entry, found by this detector on its first full sweep
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``apex_core/utils/test_portal_token_throttle.py`` snapshots with
+``getattr(frappe.local, name, None)`` and restores by ``setattr``, so ``request`` —
+UNSET before that module runs — is left as None afterwards. Harmless today, because
+frappe reads it with a defaulted getattr, but it is precisely the absent-attribute
+shape the incident's own fix had to solve, and it is caught by the diff alone: the
+canary passes. It is frozen rather than fixed only because that file belongs to
+another scope. The fix is four lines: a module-level ``_ABSENT = object()``
+sentinel as the ``getattr`` default, and a restore that ``delattr``s when the
+original is ``_ABSENT`` instead of writing None over it — the shape
+``checkout_pending_clearance``'s ``_ScopeCase`` already carries.
 
 Run standalone (from the repo root, so ``apex.tests.source_tree`` resolves):
   python3 -m unittest apex.tests.test_unit_test_coverage_guard -v
@@ -677,6 +765,217 @@ def _probe_standalone_run(dotted, extra_path=None):
     )
 
 
+# Process-global leak guard (A-231) — see the module docstring for the shape
+# decision, what counts as left behind, and the measured cost.
+
+def _is_frappe_local(node):
+    return (
+        isinstance(node, ast.Attribute)
+        and node.attr == "local"
+        and isinstance(node.value, ast.Name)
+        and node.value.id == "frappe"
+    )
+
+
+def _under_frappe_local(node):
+    """``frappe.local`` itself, or anything reached through it — the write target
+    ``frappe.local.flags.redirect_location`` mutates a process global just as
+    surely as ``frappe.local.db`` does."""
+    while isinstance(node, (ast.Attribute, ast.Subscript)):
+        if _is_frappe_local(node):
+            return True
+        node = node.value
+    return False
+
+
+def _is_frappe_module_slot(node):
+    """``sys.modules["frappe"]`` / ``sys.modules["frappe.model.document"]`` — the
+    other process global these tests swap, to install a fake frappe."""
+    return (
+        isinstance(node, ast.Subscript)
+        and isinstance(node.value, ast.Attribute)
+        and node.value.attr == "modules"
+        and isinstance(node.slice, ast.Constant)
+        and isinstance(node.slice.value, str)
+        and (node.slice.value == "frappe" or node.slice.value.startswith("frappe."))
+    )
+
+
+def _writes_process_globals(tree):
+    """Does this module WRITE a frappe process global anywhere?
+
+    An AST walk over assignment TARGETS, not a grep: the module whose leak cost the
+    whole suite now writes through ``setattr(frappe.local, name, value)`` and
+    contains no ``frappe.local.x =`` text at all, so a text scan would have dropped
+    the one file this guard exists for.
+    """
+    for node in ast.walk(tree):
+        targets = []
+        if isinstance(node, (ast.Assign, ast.Delete)):
+            targets = node.targets
+        elif isinstance(node, (ast.AugAssign, ast.AnnAssign)):
+            targets = [node.target]
+        if any(_under_frappe_local(t) or _is_frappe_module_slot(t) for t in targets):
+            return True
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in ("setattr", "delattr")
+            and node.args
+            and _under_frappe_local(node.args[0])
+        ):
+            return True
+    return False
+
+
+@lru_cache(maxsize=1)
+def _process_global_writers():
+    """``{dotted: rel}`` for every test module that writes a frappe process global.
+
+    Called only from the site-bound sweep, so the frappe-free lane never pays for
+    this tree scan.
+    """
+    writers = {}
+    for path in _test_py_files():
+        tree = _parse(path)
+        if tree is not None and _writes_process_globals(tree):
+            writers[_file_dotted_path(path)] = _rel(path)
+    return writers
+
+
+# [#a231p1] Runs in the probe subprocess; see "Process-global leak guard" in the
+# module docstring. argv: <site> <sites_path> <dotted target>.
+_PROCESS_GLOBAL_LEAK_PROBE = '''
+import json
+import os
+import sys
+import unittest
+
+import frappe
+from frappe.tests.utils import FrappeTestCase
+
+site, sites_path, target = sys.argv[1], sys.argv[2], sys.argv[3]
+frappe.init(site=site, sites_path=sites_path)
+frappe.connect()
+
+null = open(os.devnull, "w")
+
+
+def typename(value):
+    cls = type(value)
+    return cls.__module__ + "." + cls.__qualname__
+
+
+def run(suite):
+    return unittest.TextTestRunner(stream=null, verbosity=0).run(suite)
+
+
+def frappe_modules():
+    return {
+        name: mod
+        for name, mod in sys.modules.items()
+        if name == "frappe" or name.startswith("frappe.")
+    }
+
+
+class Canary(FrappeTestCase):
+    """The real thing, in the same process: setUpClass calls frappe.db.commit()."""
+
+    def test_a_real_frappe_test_case_still_runs(self):
+        self.assertTrue(frappe.db.get_value("DocType", "DocType", "name"))
+
+
+before, modules_before = dict(frappe.local), frappe_modules()
+outcome = run(unittest.TestLoader().loadTestsFromName(target))
+after, modules_after = dict(frappe.local), frappe_modules()
+
+leaks = []
+for name in sorted(before):
+    if name not in after:
+        leaks.append("frappe.local." + name + " deleted, was " + typename(before[name]))
+    elif type(after[name]) is not type(before[name]):
+        leaks.append(
+            "frappe.local." + name + " = " + typename(after[name])
+            + ", replaced " + typename(before[name])
+        )
+    elif after[name] is None and before[name] is not None:
+        leaks.append("frappe.local." + name + " = None, was " + typename(before[name]))
+for name in sorted(set(after) - set(before)):
+    value = after[name]
+    origin = type(value).__module__ or ""
+    if value is None:
+        leaks.append("frappe.local." + name + " = None, started UNSET and must end unset")
+    elif origin.split(".")[0] in ("apex", "unittest") or origin == target:
+        leaks.append("frappe.local." + name + " = " + typename(value) + ", built by the test")
+for name in sorted(modules_before):
+    if name not in modules_after:
+        leaks.append("sys.modules[" + repr(name) + "] removed")
+    elif modules_after[name] is not modules_before[name]:
+        leaks.append("sys.modules[" + repr(name) + "] replaced by a stand-in")
+
+canary = run(unittest.TestLoader().loadTestsFromTestCase(Canary))
+canary_error = ""
+for _case, traceback_text in list(canary.errors) + list(canary.failures):
+    canary_error = traceback_text.strip().splitlines()[-1]
+    break
+
+print(json.dumps({"leaks": leaks, "canary": canary_error, "tests": outcome.testsRun}))
+'''
+
+# Generous, because the point is to fail LOUDLY on a hung probe rather than let the
+# bench job sit on an InnoDB lock wait; the slowest real probe measured 39.7s.
+_LEAK_PROBE_TIMEOUT = 300
+
+
+def _live_frappe_site():
+    """``(site, absolute sites_path)`` when this run has a live site, else None.
+
+    frappe is imported lazily: this module's other half runs in a frappe-free lane
+    where the import itself is the thing being blocked.
+    """
+    try:
+        import frappe
+    except ImportError:
+        return None
+    site = getattr(frappe.local, "site", None)
+    sites_path = getattr(frappe.local, "sites_path", None)
+    if not site or not sites_path or getattr(frappe.local, "db", None) is None:
+        return None
+    return site, os.path.abspath(sites_path)
+
+
+def _probe_process_global_leak(dotted, site, sites_path, extra_path=None):
+    """Run ``dotted`` in a fresh site-connected interpreter and report what it left.
+
+    REPO_ROOT leads PYTHONPATH so the probe exercises THIS tree, never an ``apex``
+    installed elsewhere — a bench install otherwise wins, and it points at trunk.
+    """
+    pythonpath = [REPO_ROOT] + list(extra_path or [])
+    try:
+        proc = subprocess.run(
+            [sys.executable, "-c", _PROCESS_GLOBAL_LEAK_PROBE, site, sites_path, dotted],
+            cwd=sites_path,
+            capture_output=True,
+            text=True,
+            timeout=_LEAK_PROBE_TIMEOUT,
+            env={**os.environ, "PYTHONPATH": os.pathsep.join(pythonpath)},
+        )
+    except subprocess.TimeoutExpired:
+        return {"leaks": [], "canary": f"probe timed out after {_LEAK_PROBE_TIMEOUT}s", "tests": 0}
+    if proc.returncode != 0:
+        tail = proc.stderr.strip().splitlines()
+        return {"leaks": [], "canary": tail[-1] if tail else f"probe exit {proc.returncode}", "tests": 0}
+    return json.loads(proc.stdout.strip().splitlines()[-1])
+
+
+# [#a231b1] ONE entry: a real finding from this detector's first sweep, in a file
+# this card may not edit. See "Leak baseline" in the module docstring for the leak
+# and its fix.
+_PROCESS_GLOBAL_LEAK_BASELINE = frozenset(
+    {"apex.apex_core.utils.test_portal_token_throttle"}
+)
+
+
 class TestMustTestClassification(unittest.TestCase):
     """Self-tests for the four must-test classifiers — pure path/AST logic,
     no file I/O beyond the synthetic snippets and a few known repo fixtures.
@@ -898,7 +1197,7 @@ class TestStandaloneCommandExtraction(unittest.TestCase):
         return [m.group("target") for m in _STANDALONE_CMD_RE.finditer(text)]
 
     def test_reads_the_plain_documented_form(self):
-        # [#a213t1] The shape all 21 sibling declarations actually use.
+        # [#a213t1] The shape all 24 sibling declarations actually use.
         self.assertEqual(
             self._targets(
                 "Run standalone:  python3 -m unittest apex.tests.test_worker_party -v"
@@ -1162,6 +1461,226 @@ class TestDeclaredStandaloneModulesStayRunnable(unittest.TestCase):
             "Rot-baseline entr(ies) now import cleanly — prune them so the "
             "baseline cannot quietly re-absorb a future regression:\n"
             + "\n".join(f"  {d}" for d in fixed),
+        )
+
+
+class TestProcessGlobalWriterScan(unittest.TestCase):
+    """A-231 self-tests for the at-risk population scan. Synthetic snippets only —
+    no tree scan, so the frappe-free fast lane pays nothing for them."""
+
+    def _writes(self, src):
+        return _writes_process_globals(ast.parse(src))
+
+    def test_reads_every_shape_that_can_strand_a_stub(self):
+        # [#a231t1] Each of these is live in this tree today.
+        for label, src in (
+            ("plain attribute assign", "frappe.local.db = fake\n"),
+            ("nested attribute assign", "frappe.local.flags.redirect_location = '/x'\n"),
+            ("setattr, the shape a grep misses", "setattr(frappe.local, name, value)\n"),
+            ("delattr", "delattr(frappe.local, 'db')\n"),
+            ("del statement", "del frappe.local.db\n"),
+            ("sys.modules swap", "sys.modules['frappe'] = _FakeFrappe()\n"),
+            ("sys.modules submodule swap", "sys.modules['frappe.model.document'] = mod\n"),
+        ):
+            with self.subTest(label):
+                self.assertTrue(self._writes(src), src)
+
+    def test_ignores_a_read_and_an_unrelated_write(self):
+        # [#a231t2] The last two are the documented BOUNDARY, not an oversight:
+        # neither is a write the frappe.local diff can observe.
+        for label, src in (
+            ("read through the proxy", "user = frappe.local.session.user\n"),
+            ("defaulted read", "value = getattr(frappe.local, 'db', None)\n"),
+            ("a local variable that happens to be named local", "local = C()\nlocal.db = 1\n"),
+            ("another app's sys.modules slot", "sys.modules['erpnext'] = mod\n"),
+            ("a bare frappe module attribute", "frappe.sendmail = fake\n"),
+        ):
+            with self.subTest(label):
+                self.assertFalse(self._writes(src), src)
+
+
+class TestNoTestModuleLeaksProcessGlobals(unittest.TestCase):
+    """A-231: no test module may strand a stub in a frappe process global.
+
+    Every method here needs a live site, because the decisive half of the check is a
+    REAL ``FrappeTestCase`` running in the same interpreter as the module under test.
+    The frappe-free lane skips the class outright.
+    """
+
+    _LEAKY_PLANT = (
+        "import unittest\n"
+        "from types import SimpleNamespace\n"
+        "import frappe\n\n\n"
+        "class TestPlantedLeak(unittest.TestCase):\n"
+        "    def setUp(self):\n"
+        "        frappe.local.db = SimpleNamespace(get_value=lambda *a, **k: None)\n\n"
+        "    def test_passes_in_isolation(self):\n"
+        "        self.assertIsNone(frappe.local.db.get_value('DocType', 'DocType', 'name'))\n"
+    )
+
+    _ABSENT_PLANT = (
+        "import unittest\n"
+        "import frappe\n\n\n"
+        "class TestPlantedAbsent(unittest.TestCase):\n"
+        "    def setUp(self):\n"
+        "        original = getattr(frappe.local, 'request', None)\n"
+        "        self.addCleanup(setattr, frappe.local, 'request', original)\n"
+        "        frappe.local.request = object()\n\n"
+        "    def test_passes_in_isolation(self):\n"
+        "        self.assertIsNotNone(frappe.local.request)\n"
+    )
+
+    _RESTORING_PLANT = (
+        "import unittest\n"
+        "from types import SimpleNamespace\n"
+        "import frappe\n\n"
+        "_ABSENT = object()\n\n\n"
+        "class TestPlantedRestore(unittest.TestCase):\n"
+        "    def setUp(self):\n"
+        "        original = getattr(frappe.local, 'db', _ABSENT)\n"
+        "        self.addCleanup(self._restore, original)\n"
+        "        frappe.local.db = SimpleNamespace(get_value=lambda *a, **k: None)\n\n"
+        "    @staticmethod\n"
+        "    def _restore(original):\n"
+        "        if original is _ABSENT:\n"
+        "            delattr(frappe.local, 'db')\n"
+        "        else:\n"
+        "            frappe.local.db = original\n\n"
+        "    def test_passes_in_isolation(self):\n"
+        "        self.assertIsNone(frappe.local.db.get_value('DocType', 'DocType', 'name'))\n"
+    )
+
+    def setUp(self):
+        self.live = _live_frappe_site()
+        if self.live is None:
+            self.skipTest(
+                "needs a live frappe site — a FrappeTestCase canary cannot run in the "
+                "frappe-free lane, and this guard is meaningless without one"
+            )
+
+    def _probe_plant(self, source):
+        """Write ``source`` as a throwaway module and probe it, returning the report."""
+        site, sites_path = self.live
+        with tempfile.TemporaryDirectory() as tmp:
+            name = "apex_a231_plant"
+            with open(os.path.join(tmp, name + ".py"), "w", encoding="utf-8") as fh:
+                fh.write(source)
+            return _probe_process_global_leak(name, site, sites_path, extra_path=[tmp])
+
+    def test_the_probe_catches_a_stub_that_is_never_put_back(self):
+        """Guard-of-the-guard, and the incident replayed: a module that stubs
+        ``frappe.local.db`` and walks away must be caught by BOTH halves.
+
+        Validated against the real pre-fix revision of
+        ``habitat/report/checkout_pending_clearance/test_checkout_pending_clearance
+        .py`` while this guard was written; the plant below is that file's defect
+        reduced to its bones, so the proof stays runnable instead of being a claim
+        about a commit nobody re-checks.
+        """
+        report = self._probe_plant(self._LEAKY_PLANT)
+        self.assertEqual(report["tests"], 1, "the planted module did not run — probe broke")
+        self.assertTrue(
+            any("SimpleNamespace" in leak for leak in report["leaks"]),
+            f"the frappe.local diff missed a stranded db stub: {report['leaks']}",
+        )
+        self.assertIn(
+            "has no attribute 'commit'",
+            report["canary"],
+            "the canary did not die the way the whole suite died — it is not proving "
+            "the consequence, only the diff is",
+        )
+
+    def test_the_probe_catches_an_unset_global_left_as_none(self):
+        """The absent-attribute case, which the canary CANNOT see.
+
+        ``frappe.local`` is a werkzeug ``Local``: an unset name raises AttributeError
+        and is not listed at all, so restoring a snapshot taken with ``getattr(...,
+        None)`` turns unset into None. Nothing breaks today, which is exactly why
+        only the diff can catch it — the canary here must stay clean.
+        """
+        report = self._probe_plant(self._ABSENT_PLANT)
+        self.assertEqual(report["tests"], 1, "the planted module did not run — probe broke")
+        self.assertIn(
+            "frappe.local.request = None, started UNSET and must end unset",
+            report["leaks"],
+        )
+        self.assertEqual(report["canary"], "", "this plant is harmless — the canary must pass")
+
+    def test_the_probe_clears_a_stub_that_is_put_back(self):
+        """The negative control: a detector that reds on everything proves nothing.
+
+        Same stub as the leaking plant, restored through an ``_ABSENT`` sentinel that
+        DELETES an originally-unset attribute rather than writing None over it.
+        """
+        report = self._probe_plant(self._RESTORING_PLANT)
+        self.assertEqual(report["tests"], 1, "the planted module did not run — probe broke")
+        self.assertEqual(report["leaks"], [], "a correctly restored stub must read clean")
+        self.assertEqual(report["canary"], "")
+
+    def test_no_test_module_strands_a_stub_in_a_frappe_process_global(self):
+        """The sweep: every module that writes a process global must put it back.
+
+        A failure means the module named below leaves something behind in
+        ``frappe.local`` (or in ``sys.modules``), which will abort every test that
+        runs after it under ``bench run-tests`` while the module itself still passes
+        alone. Fix the OWNING module — snapshot before the write, restore through
+        ``addCleanup``, and treat an originally-unset attribute as unset, not None.
+        """
+        import frappe
+
+        site, sites_path = self.live
+        writers = _process_global_writers()
+        self.assertGreater(len(writers), 10, "at-risk scan found implausibly few modules")
+
+        # The probes run real site tests; releasing this run's row locks first keeps
+        # them off a 50s InnoDB lock wait apiece. This guard writes nothing itself.
+        frappe.db.rollback()
+
+        # Serial on purpose — 18 interpreters against one site DB corrupts the
+        # verdict for a 17s saving. See the docstring's measurement.
+        reports = {
+            dotted: _probe_process_global_leak(dotted, site, sites_path)
+            for dotted in sorted(writers)
+        }
+
+        unprobeable = sorted(d for d, r in reports.items() if not r["tests"])
+        self.assertEqual(
+            unprobeable,
+            [],
+            "Probe(s) that ran NO tests — a clean verdict from them means nothing, so "
+            "they are failed rather than counted:\n"
+            + "\n".join(f"  {d}  ({writers[d]})\n      {reports[d]['canary']}" for d in unprobeable),
+        )
+
+        leaking = {d: r for d, r in reports.items() if r["leaks"] or r["canary"]}
+        regressed = sorted(set(leaking) - _PROCESS_GLOBAL_LEAK_BASELINE)
+        self.assertEqual(
+            regressed,
+            [],
+            "Test module(s) leaving a stub in a frappe process global — every later "
+            "test in the same interpreter inherits it, while this module still passes "
+            "on its own:\n"
+            + "\n".join(
+                f"  {d}  ({writers[d]})\n      "
+                + "\n      ".join(leaking[d]["leaks"] + ([leaking[d]["canary"]] if leaking[d]["canary"] else []))
+                for d in regressed
+            ),
+        )
+
+        stale = sorted(_PROCESS_GLOBAL_LEAK_BASELINE - set(writers))
+        self.assertEqual(
+            stale,
+            [],
+            f"leak-baseline entr(ies) that no longer write a process global at all — "
+            f"prune them, they exempt nothing: {stale}",
+        )
+        cleaned = sorted(_PROCESS_GLOBAL_LEAK_BASELINE - set(leaking))
+        self.assertEqual(
+            cleaned,
+            [],
+            "leak-baseline entr(ies) that no longer leak — prune them so the baseline "
+            "cannot quietly re-absorb a future regression:\n"
+            + "\n".join(f"  {d}" for d in cleaned),
         )
 
 
