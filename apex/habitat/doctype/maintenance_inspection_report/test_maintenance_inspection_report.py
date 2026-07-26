@@ -1,4 +1,6 @@
 # Copyright (c) 2026, AFMCO and contributors
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
@@ -138,10 +140,26 @@ class TestMaintenanceInspectionAssetStamp(FrappeTestCase):
         self.assertIsNone(self._stamp())
 
     def test_report_without_asset_is_noop(self):
+        """No facility_asset means the controller writes to no Facility Asset at all.
+
+        Asserting only that this test's own asset stayed unstamped cannot fail:
+        ``frappe.db.set_value`` handed a None docname is treated as a Single and
+        writes to ``tabSingles``, never to a Facility Asset row, so removing either
+        early return would leave every asset untouched anyway and keep the stamp
+        assertions green. The falsifiable statement is the count of Facility Asset
+        writes, so the writes are recorded across both the submit and the cancel.
+        """
         # [#hhy0lr]
-        r = self._report("2026-06-15", None)
-        r.submit()
-        self.assertIsNone(self._stamp())
-        r.cancellation_reason = "test"
-        r.cancel()
+        with patch.object(frappe.db, "set_value", wraps=frappe.db.set_value) as writes:
+            r = self._report("2026-06-15", None)
+            r.submit()
+            r.cancellation_reason = "test"
+            r.cancel()
+
+        self.assertEqual(
+            [call.args[:2] for call in writes.call_args_list
+             if call.args and call.args[0] == "Facility Asset"],
+            [],
+            "an asset-less inspection must not write to Facility Asset",
+        )
         self.assertIsNone(self._stamp())

@@ -94,14 +94,23 @@ class TestBuildingLicense(FrappeTestCase):
 
         expiry_date is otherwise mandatory, so validate() is called directly to
         isolate the date comparison from the unrelated MandatoryError.
+
+        The issue date is deliberately in the FUTURE, and that is what makes the
+        assertion falsifiable. ``frappe.utils.getdate(None)`` returns TODAY, so on a
+        PAST issue date the comparison ``expiry <= issue`` is false on its own and the
+        ``self.expiry_date`` conjunct carries no weight — drop it from the guard and
+        this test would still pass. Against a future issue date, today reads as the
+        EARLIER of the two, so only the emptiness check keeps the throw away.
         """
+        from frappe.utils import add_days, today
+
         only_issue = frappe.get_doc({
             "doctype": "Building License",
             "naming_series": "BLDG-LIC-.YYYY.-.####",
             "license_type": "Civil Defence Certificate",
             "building": "QA-BLDG",
             "license_number": "LIC-QA-ISSUE-ONLY",
-            "issue_date": "2026-01-01",
+            "issue_date": add_days(today(), 30),
         })
         only_issue.validate()  # [#7unoan]
 
