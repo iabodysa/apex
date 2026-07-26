@@ -5,10 +5,10 @@
     is configured. -#}
 {%- if portal_accent %}
 <style>
-  /* Per-tenant accent override (Salis Portal Theme → Accent Color). Set on
+  /* Per-tenant accent override (Driver Portal Theme → Accent Color). Set on
      the element so it wins over the theme's token defaults. The www renderer
      has autoescape OFF; accent_color is source-validated to a strict CSS
-     colour in salis_portal_theme.validate(), so it cannot break out of the
+     colour in driver_portal_theme.validate(), so it cannot break out of the
      <style> (CSS does not decode HTML entities, so source validation is the
      real guard here). */
   html[data-theme] {

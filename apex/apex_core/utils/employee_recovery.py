@@ -326,7 +326,20 @@ def compute_recovery_installment(advance: str, payroll_date: str | None = None) 
 def _recovery_component(policy) -> str | None:
     """The Salary Component the Damage rule deducts through, verified to be of type
     Deduction. ``None`` (logged) when the policy has no usable component — an Earning
-    component would silently PAY the worker the damage, so it must never be used."""
+    component would silently PAY the worker the damage, so it must never be used.
+
+    TYPE is checked here; the component's LEDGER ACCOUNT deliberately is not, and an
+    earlier clause that claimed otherwise was wrong. This module writes no GL entry.
+    It reads the advance account off ``Company.default_employee_advance_account``
+    (never choosing it) and validates only what HRMS itself enforces on submit — that
+    the account is Receivable. Recovery is then reconciled by HRMS off the
+    ``ref_doctype``/``ref_docname`` link on the Additional Salary, not by any equality
+    between the component's account and the advance account. Adding such a check here
+    would fail CLOSED and SILENTLY (a ``None`` return queues no installment, ever), so
+    a site whose deduction component posts to a clearing account would lose wage
+    recovery that works today. Account agreement is payroll configuration, verifiable
+    only against a running HRMS site — not an invariant this module can assert.
+    """
     rule = policy.get_type_rule("Damage")
     if not rule:
         return None

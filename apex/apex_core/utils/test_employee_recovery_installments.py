@@ -471,7 +471,9 @@ class TestEmployeeRecoveryInstallments(FrappeTestCase):
             "cancelling the installment must reverse the recovered balance",
         )
 
-    # Clause: component and advance account must agree or payroll splits the entry.
+    # Clause: the component must be of type Deduction, or payroll PAYS the damage.
+    # Its ledger account is site payroll config apex never writes — see the
+    # rationale on _recovery_component for why no account comparison happens here.
 
     def test_an_earning_component_is_refused(self):
         """An Earning component would silently PAY the worker the damage, so the

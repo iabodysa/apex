@@ -1,11 +1,14 @@
 # Copyright (c) 2026, AFMCO and contributors
 # [#pb1bza]
 
-"""Shared bootstrap for the www portal host pages (driver / masar / fleet / safety).
+"""Shared bootstrap for the www portal host pages.
 
-The four ``www/*.py`` host pages each rendered the SAME two bits of boilerplate:
-the Salis Portal Theme appearance projection, and the Guest -> /login redirect.
-These helpers hold that single copy so the pages stay identical where they should.
+The four THEMED host pages (driver / masar / housing / safety) each rendered the
+SAME two bits of boilerplate: the Driver Portal Theme appearance projection, and
+the Guest -> /login redirect. These helpers hold that single copy so the pages stay
+identical where they should. The fixed-palette pages (fleet / fleet_os /
+masar_supervisor) take ``guest_redirect`` only — they set no ``data-theme`` and so
+never project an accent. See ``apex/templates/__init__.py`` for the full audit.
 
 Deliberately NOT here (kept local to each page): the CSRF-token mint, the masar
 ``?w`` token charset guard, per-page role gates, and fleet's Socket.IO config —
