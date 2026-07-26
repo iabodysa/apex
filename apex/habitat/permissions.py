@@ -253,12 +253,63 @@ def report_building_scope(user=None):
     )
 
 
+BUILDING_FETCH_ANCHOR = {
+    "Bed": ("room", "Room"),
+    "Custody Acknowledgment": ("custody_issue", "Custody Issue"),
+    "Custody Damage Assessment": ("custody_return", "Custody Return"),
+    "Custody Return": ("custody_issue", "Custody Issue"),
+    "Housing Assignment": ("bed", "Bed"),
+    "Housing Inventory": ("room", "Room"),
+    "Maintenance Work Order": ("maintenance_request", "Maintenance Request"),
+    "Resident Request": ("bed", "Bed"),
+    "Scheduled Task Instance": ("assignment", "Scheduled Task Assignment"),
+}
+
+
+def _doc_building(doc):
+    """Resolve the estate a Habitat doc belongs to, or None.
+
+    ``Document.insert`` runs ``check_permission("create")`` (document.py:300) BEFORE
+    ``_validate_links()`` (:302) applies ``fetch_from``, so on a server-side create every
+    ``building`` in ``BUILDING_FETCH_ANCHOR`` is still EMPTY at the create check. Reading
+    it alone would deny a scoped supervisor the creation of records in their OWN estate.
+    Each entry therefore names the link that is populated at that moment — the doc's own
+    parent link, which the payload always carries and which is never itself fetched — and
+    the estate is re-read from THAT document.
+
+    Marking ``building`` ``reqd`` does not help: mandatory fields are enforced in
+    ``_validate()`` (:310), long after the permission check. The anchor must be a real
+    link on the doc, not a promise about the fetched field.
+
+    Returns None when nothing resolves, so the caller still fails CLOSED — a doc whose
+    estate cannot be established is denied, never deferred.
+    """
+    doctype = getattr(doc, "doctype", None)
+    if doctype == "Building":
+        return getattr(doc, "name", None)
+
+    building = getattr(doc, "building", None)
+    if building:
+        return building
+
+    anchor = BUILDING_FETCH_ANCHOR.get(doctype)
+    if not anchor:
+        return None
+    fieldname, parent_doctype = anchor
+    parent = getattr(doc, fieldname, None)
+    if not parent:
+        return None
+    return frappe.db.get_value(parent_doctype, parent, "building")
+
+
 def building_scoped_has_permission(doc, ptype, user=None):
     """Deny a building-scoped user acting on a doc outside their buildings.
 
     Returns None to defer to Frappe's default resolution (unscoped users / in-scope
     docs — keeps DocPerms intact), or False to block. The Building doc
-    is scoped on its own name; the transactions are scoped on their `building` field.
+    is scoped on its own name; the transactions are scoped on their `building` field,
+    falling back to the anchor link in ``BUILDING_FETCH_ANCHOR`` when that field is a
+    ``fetch_from`` not yet applied at the create check.
 
     Deny-only + ptype-agnostic: it never branches on ``ptype``, so an out-of-building
     doc is blocked for every action including ``submit`` — a scoped user can neither
@@ -268,10 +319,7 @@ def building_scoped_has_permission(doc, ptype, user=None):
     if _building_is_unscoped(user):
         return None
 
-    if getattr(doc, "doctype", None) == "Building":
-        building = getattr(doc, "name", None)
-    else:
-        building = getattr(doc, "building", None)
+    building = _doc_building(doc)
 
     if not building:
         # [#1i4wio]
