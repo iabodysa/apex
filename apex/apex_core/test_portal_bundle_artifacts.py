@@ -25,8 +25,10 @@ no-CDN invariant for apex/www/ and explicitly leaves the built bundles to this g
 
 The Jinja scan is delimiter-specific on purpose. ``{{``, ``}}``, ``{#`` and ``%}`` all
 occur naturally in minified JS and CSS (``100%}``, a private class field, a template
-literal), so those are asserted on .html artifacts only. ``{%`` does not occur in
-minified output and is asserted across every text file in the tree.
+literal), so those are asserted on .html artifacts only — but on EVERY .html under
+apex/public/, not just the portal bundles, because the middleware publishes the whole
+directory. ``{%`` does not occur in minified output, so it is asserted across every
+text file the vite factory writes.
 
 Home: the tree this guards is apex/public/, which frappe's test runner prunes
 (frappe/test_runner.py), so no test can sit inside it; apex/tests/ is shrink-only under
@@ -92,6 +94,17 @@ def _built_files():
     return sorted(p for d in PORTAL_DIRS for p in d.rglob("*") if p.is_file())
 
 
+def _shipped_html():
+    """Every .html under apex/public/, not just the portal bundles.
+
+    The Jinja scan keys off what is SERVED, not off who wrote it: SharedDataMiddleware
+    publishes the whole of apex/public/, so an index.html dropped into any other
+    directory there leaks exactly the same way a portal one does. Scoping this to
+    `*_portal` left that reachable and unasserted.
+    """
+    return sorted(p for p in PUBLIC_DIR.rglob("*.html") if p.is_file())
+
+
 def _built_index_pages():
     return sorted(d / "index.html" for d in PORTAL_DIRS if (d / "index.html").is_file())
 
@@ -130,12 +143,13 @@ class TestPortalBundleArtifacts(unittest.TestCase):
         )
         self.assertGreater(len(_built_files()), 50, "built tree scan returned implausibly little")
         self.assertEqual(len(_built_index_pages()), len(PORTAL_DIRS))
+        # The Jinja scan runs over the whole served tree, so it must at least reach
+        # every portal index page — a bad PUBLIC_DIR would make it silently vacuous.
+        self.assertTrue(set(_built_index_pages()).issubset(set(_shipped_html())))
 
     def test_no_built_html_artifact_contains_jinja_delimiters(self):
         offenders = []
-        for path in _built_files():
-            if path.suffix.lower() != ".html":
-                continue
+        for path in _shipped_html():
             text = _read(path) or ""
             for delim in JINJA_HTML_DELIMS:
                 if delim in text:
