@@ -172,3 +172,8 @@ apex.patches.v2_0.remove_kernel_landing_workspaces
 # JSON re-imports, and the older v0_7 patch is logged complete-without-running on every
 # site installed since it was registered, so neither reaches an existing site.
 apex.patches.v1_x.add_bed_occupancy_indexes
+
+# STILL-REQUIRED (ONE-TIME): deletes the ghost "SIM Operations" Module Def that
+# add_module_defs minted from modules.txt on every site installed after the fold — those
+# sites logged the fold patch complete-without-running, so it can never reach them.
+apex.patches.v2_0.drop_ghost_sim_operations_module_def
