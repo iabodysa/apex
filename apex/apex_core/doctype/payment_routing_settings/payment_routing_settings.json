@@ -40,11 +40,12 @@
    "label": "Target Payment Document"
   },
   {
-   "description": "The payment DocType the Create Payment action builds (for example Payment Entry, Payment Order, or a client's custom payment DocType). Leave blank to use the native Payment Request, the default target.",
+   "description": "The payment DocType the Create Payment action builds (for example Payment Entry, Payment Order, or a client's custom payment DocType). Leave blank to use the native Payment Request, the default target. A Single settings record or a child table is refused: neither can be created as a standalone payment.",
    "fieldname": "target_payment_doctype",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Target Payment DocType",
+   "link_filters": "[[\"DocType\",\"issingle\",\"=\",0],[\"DocType\",\"istable\",\"=\",0]]",
    "options": "DocType"
   },
   {
@@ -80,7 +81,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-12 09:00:00.000000",
+ "modified": "2026-07-27 01:45:37.860380",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Payment Routing Settings",

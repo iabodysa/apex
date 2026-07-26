@@ -34,6 +34,7 @@
   "finance_approved_by",
   "finance_approved_on",
   "salis_payment_request_finance_col",
+  "linked_payment_doctype",
   "linked_payment_entry",
   "salis_payment_request_sec_system",
   "amended_from"
@@ -223,11 +224,19 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Set externally after Finance posts payment. This DocType never creates a GL or Payment Entry.",
-   "fieldname": "linked_payment_entry",
+   "description": "The DocType of the routed payment. Stamped by the Payment Router from the document it actually created, so the link below always resolves against the right table.",
+   "fieldname": "linked_payment_doctype",
    "fieldtype": "Link",
-   "label": "Linked Payment Entry",
-   "options": "Payment Entry",
+   "label": "Linked Payment DocType",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "description": "Set externally after Finance posts payment. This DocType never creates a GL or Payment Entry. A Dynamic Link because the Payment Routing target is configurable per deployment.",
+   "fieldname": "linked_payment_entry",
+   "fieldtype": "Dynamic Link",
+   "label": "Linked Payment",
+   "options": "linked_payment_doctype",
    "read_only": 1
   },
   {
@@ -260,7 +269,7 @@
    "link_fieldname": "payment_request"
   }
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-27 01:45:37.860380",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Payment Request",

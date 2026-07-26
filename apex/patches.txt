@@ -197,3 +197,10 @@ apex.patches.v1_x.add_bed_occupancy_indexes
 # add_module_defs minted from modules.txt on every site installed after the fold — those
 # sites logged the fold patch complete-without-running, so it can never reach them.
 apex.patches.v2_0.drop_ghost_sim_operations_module_def
+
+# STILL-REQUIRED (ONE-TIME): types the historical Salis Payment Request payment links.
+# linked_payment_entry was declared Link -> Payment Entry while the router built the
+# configured target (default: Payment Request), and it is stamped with db_set, which
+# skips validate — so existing rows hold a name their declared type cannot resolve.
+# Leaves an ambiguous row blank and logs it rather than guessing a type.
+apex.patches.v2_0.backfill_routed_payment_doctype
