@@ -118,10 +118,36 @@ jobs:
       # A-108's ratchet clause named a workflow STEP. Both guards already run
       # inside `run-tests --app apex` in the `test` job, so this is fail-fast, not
       # new enforcement: they are stdlib-only AST/filesystem scans (no frappe, no
-      # site, ~0.7s), so a colocation or coverage regression reds here in seconds
+      # site, ~2.1s), so a colocation or coverage regression reds here in seconds
       # instead of after the ~25min bench install the other job needs first.
+      #
+      # WHY 2.1s AND NOT THE 0.7s THIS COMMENT USED TO CLAIM (A-206). The number is
+      # measured, not estimated: 2.08 / 2.10 / 2.11s over three local runs of this
+      # exact command, against 5.01 / 5.03 / 5.09s before. 0.7s is gone for good, the old
+      # claim was false — A-192 added a standalone sweep that runs one subprocess per
+      # self-declared `python3 -m unittest` claim, and executing 19 of them costs
+      # ~1.1s wall on top of the ~0.7s the two ratchet scans always cost. Raising the
+      # worker count does not help; it was measured (8/16/24 workers -> 1.12/1.31/
+      # 1.27s), the work is already past this machine's useful parallelism. The extra
+      # ~1.3s buys the thing A-192 exists for: proof that every documented standalone
+      # command still runs, which `bench run-tests` structurally cannot check because
+      # it has the real frappe loaded and never enters a fallback branch. Expect
+      # somewhat more than 2.1s on a 2-core runner, where the sweep cannot spread as
+      # wide. Re-measure before editing this number.
+      #
+      # The flag is set INLINE here on purpose, and this is the only place in this
+      # file it may appear. ONE claim in that sweep —
+      # apex.tests.test_duplicate_and_dead_code_guard — cost 3.68s all by itself
+      # (3.55s even run directly: it AST-parses the whole tree several times), more
+      # than the entire rest of the step. Skipping that single probe here is what
+      # took 5.0s back to 2.1s. It is a DELAY, not a hole: the `test` job below sets
+      # no such variable, so its `run-tests --app apex` still executes that claim
+      # along with every other, and so does a plain local `python3 -m unittest`.
+      # Promoting this to a job- or workflow-level `env:` block WOULD blind the bench
+      # job — the guard's own test_only_the_fast_guards_step_sets_the_skip_flag fails
+      # if anyone tries.
       - name: Test colocation and unit-test coverage ratchets
-        run: python3 -m unittest apex.tests.test_colocation_ratchet apex.tests.test_unit_test_coverage_guard
+        run: APEX_SKIP_SLOW_STANDALONE_PROBES=1 python3 -m unittest apex.tests.test_colocation_ratchet apex.tests.test_unit_test_coverage_guard
 
       # test_repo_gates drives scripts/check_commit_metadata.py through all three of
       # its callers - the gate directly, a real commit through .githooks, and the

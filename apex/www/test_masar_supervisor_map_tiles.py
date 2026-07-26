@@ -20,13 +20,59 @@ it just keeps calling the third party:
      source-only edit that was never rebuilt cannot pass — that is the failure mode the
      Portal Bundles job exists for, and this catches it for this one wiring locally.
 
+Standalone stub (A-205)
+-----------------------
+``masar_supervisor`` imports frappe at module scope, so running the command below
+needs a fallback: the block after the imports stands up the minimum surface its
+import chain touches (``frappe.sessions.get_csrf_token``, ``frappe.utils.cint``,
+and — via ``portal_bootstrap`` -> ``driver_portal_theme`` — ``frappe._`` and
+``frappe.model.document.Document``). Same idiom as
+``apex_core/utils/test_guarded_index_dedupe.py``; under bench the REAL frappe is
+already in ``sys.modules`` and the branch never runs.
+
+Stubbing is the honest fix HERE, rather than deleting the claim, because the unit
+under test needs none of it: ``map_tile_override`` is pure string validation over a
+plain dict, and the other three tests read committed files. No test below CALLS the
+stub, so it cannot fake a passing assertion — it only lets the module carrying the
+function load. If ``masar_supervisor`` grows an import the stub does not cover, the
+A-192 probe in ``tests/test_unit_test_coverage_guard.py`` reds and names this module.
+
 Run standalone:  python3 -m unittest apex.www.test_masar_supervisor_map_tiles -v
 """
 
+import sys
+import types
 import unittest
 from pathlib import Path
 
-from apex.www.masar_supervisor import map_tile_override
+# [#a205mt] Load-bearing only off-bench — see "Standalone stub" in the module docstring
+# for what each entry is for and why stubbing cannot fake a pass here.
+if "frappe" not in sys.modules:
+    _fake_frappe = types.ModuleType("frappe")
+    _fake_frappe._ = lambda msg, *a, **k: msg
+
+    _fake_sessions = types.ModuleType("frappe.sessions")
+    _fake_sessions.get_csrf_token = lambda *a, **k: ""
+
+    _fake_utils = types.ModuleType("frappe.utils")
+    _fake_utils.cint = lambda value, *a, **k: int(value or 0)
+
+    _fake_model = types.ModuleType("frappe.model")
+    _fake_document = types.ModuleType("frappe.model.document")
+    _fake_document.Document = type("Document", (), {})
+    _fake_model.document = _fake_document
+
+    _fake_frappe.sessions = _fake_sessions
+    _fake_frappe.utils = _fake_utils
+    _fake_frappe.model = _fake_model
+
+    sys.modules["frappe"] = _fake_frappe
+    sys.modules["frappe.sessions"] = _fake_sessions
+    sys.modules["frappe.utils"] = _fake_utils
+    sys.modules["frappe.model"] = _fake_model
+    sys.modules["frappe.model.document"] = _fake_document
+
+from apex.www.masar_supervisor import map_tile_override  # noqa: E402
 
 WWW = Path(__file__).resolve().parent
 BUNDLE = WWW.parent / "public" / "route_supervisor_portal" / "assets" / "index.js"

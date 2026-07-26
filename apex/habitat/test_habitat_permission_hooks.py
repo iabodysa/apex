@@ -22,10 +22,32 @@ What they lock in:
 Role provisioning is intentionally NOT a fixture (A-101): it moved to the
 idempotent Python provisioners, so there is no Role-fixture guard here.
 
-Run standalone:  python3 -m unittest tests.test_habitat_permission_hooks -v
+Standalone stub (A-205)
+-----------------------
+`apex.hooks` needs nothing, but guards 3 and 4 import the real
+`apex.habitat.permissions`, which — with `apex.apex_core.utils.permission_scope`
+behind it — does `import frappe` at module scope, so the command below needs a
+fallback. A BARE module is the whole stub. Same idiom as
+`apex_core/utils/test_guarded_index_dedupe.py`; under bench the REAL frappe is
+already in `sys.modules` and the branch never runs.
+
+The assertions keep their full meaning: those imports still resolve the REAL
+permissions module and look up the REAL function names, so a typo in either dotted
+path still fails exactly as intended. Neither guard CALLS the resolved functions, so
+nothing can pass on the stub's behalf — a call would touch an attribute this stub
+does not define and raise.
+
+Run standalone:  python3 -m unittest apex.habitat.test_habitat_permission_hooks -v
 """
 
+import sys
+import types
 import unittest
+
+# [#a205hp] Load-bearing only off-bench — see "Standalone stub" in the module docstring
+# for why a bare module is the whole stub and cannot fake a pass.
+if "frappe" not in sys.modules:
+    sys.modules["frappe"] = types.ModuleType("frappe")
 
 
 class TestMaintenanceRequestScopingWiring(unittest.TestCase):

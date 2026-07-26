@@ -10,7 +10,7 @@ Two things are locked in so they cannot silently regress:
      (back-fills either direction, clears employee for a Temporary Worker, and
      enforces an identity when asked).
 
-Run standalone:  python3 -m unittest tests.test_worker_party -v
+Run standalone:  python3 -m unittest apex.tests.test_worker_party -v
 """
 
 import json

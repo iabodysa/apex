@@ -144,18 +144,48 @@ behaves exactly as it would off-bench. ``loadTestsFromName`` turns a load failur
 into a ``_FailedTest`` instead of raising, so an import error and a test error
 both land in ``wasSuccessful()``.
 
-Rot baseline
-~~~~~~~~~~~~
-Two modules already fail their own documented command; both are frozen in
-``_STANDALONE_ROT_BASELINE`` and both are outside A-192's write scope, so they
-are reported rather than edited here:
-  * ``www/test_masar_supervisor_map_tiles.py`` — module-scope import of
-    ``apex.www.masar_supervisor``, which imports frappe at module scope.
-  * ``habitat/test_habitat_permission_hooks.py`` — two tests import
-    ``apex.habitat.permissions`` inside the test body; it imports frappe at
-    module scope. Import-only probing cannot see this one at all.
-Fix either by stubbing what is imported, or by dropping the false standalone
-claim from the docstring; the entry is pruned either way.
+Rot baseline — EMPTY since A-205 (2026-07-26)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The two modules A-192 found now pass the command they advertise. Each grew the
+fake-frappe fallback its own import chain needs — ``www/test_masar_supervisor_map
+_tiles.py`` stubs ``frappe.sessions`` / ``frappe.utils`` / ``frappe.model.document``,
+``habitat/test_habitat_permission_hooks.py`` stubs a bare ``frappe`` module. Stubbing
+was the honest fix for BOTH rather than deleting the claim, because in neither case
+does the unit under test call frappe at all: ``map_tile_override`` is pure string
+validation over a plain dict, and the habitat guards only assert wiring and
+importability. Each file's own comment records why its stub cannot fake a pass.
+With the baseline empty, any module whose documented command breaks reds at once.
+
+Fast-lane exemption (A-206) — ONE module, in ONE lane
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This sweep made CI's frappe-free guards step go from ~0.7s to 5.0s (measured
+5.01 / 5.03 / 5.09s), and 3.68s of that was a SINGLE probe:
+``apex.tests.test_duplicate_and_dead_code_guard``. The subprocess is not the cost —
+that module takes 3.55s run directly, because it AST-parses the whole tree several
+times. Every other claim in the sweep costs 0.80s or less. So the fast lane sets
+``APEX_SKIP_SLOW_STANDALONE_PROBES=1`` (inline on that one ``run:`` line, nowhere
+else) and the sweep drops that one module: 2.08 / 2.10 / 2.11s measured after.
+
+2.1s, not 0.7s, and the workflow comment now says so. The old ~0.7s is unrecoverable
+and was never going to come back by exempting one module: ~0.7s is what the two
+ratchet SCANS cost on their own, and the 19 remaining standalone runs cost ~1.1s wall
+however they are scheduled (measured at 8 / 16 / 24 workers: 1.12 / 1.31 / 1.27s —
+already past this machine's useful parallelism, so more threads make it worse). That
+~1.3s is the price of the only check that can see a broken documented command at all,
+since ``bench run-tests`` has the real frappe loaded and never enters a fallback
+branch. It is paid ahead of a ~25min bench install, and it is worth paying.
+
+What the exemption costs, stated plainly: in the FAST lane that module's standalone
+claim is not executed, so a rot in it is not caught in ~1.3s. It is NOT unverified —
+this whole module also runs under ``bench run-tests --app apex``, which sets no such
+variable and therefore sweeps all 20 claims, and a plain local
+``python3 -m unittest apex.tests.test_unit_test_coverage_guard`` does too. The cost
+is a DELAY on exactly one claim (fast lane -> the ~25min bench job), not a hole.
+Two ratchets keep it that narrow: ``test_the_fast_lane_exemption_stays_one_named
+_live_claim`` refuses a second entry or a stale one, and
+``test_only_the_fast_guards_step_sets_the_skip_flag`` refuses to let the variable
+escape that single command into a job- or workflow-level ``env:`` block, which is
+the one edit that WOULD blind the bench lane too.
 
 Run standalone (from the repo root, so ``apex.tests.source_tree`` resolves):
   python3 -m unittest apex.tests.test_unit_test_coverage_guard -v
@@ -170,6 +200,7 @@ import sys
 import tempfile
 import unittest
 from concurrent.futures import ThreadPoolExecutor
+from functools import lru_cache
 
 from apex.tests.source_tree import (
     APP_ROOT,
@@ -499,19 +530,34 @@ sys.exit(0 if result.wasSuccessful() else 1)
 # Derived from __file__, not __name__, which is "__main__" under direct execution.
 _SELF_DOTTED = _file_dotted_path(os.path.abspath(__file__))
 
-# [#a192b1] Pre-existing rot this guard FOUND, frozen 2026-07-26 — not rot it
-# blesses; see "Rot baseline" in the module docstring for each entry and its fix.
-_STANDALONE_ROT_BASELINE = frozenset(
-    {
-        "apex.www.test_masar_supervisor_map_tiles",
-        "apex.habitat.test_habitat_permission_hooks",
-    }
-)
+# [#a192b1] The rot this guard FOUND is FIXED, not blessed: A-205 gave both modules the
+# fake-frappe fallback their import chains need, so the baseline is empty and every
+# declared claim is now enforced. See "Rot baseline" in the module docstring.
+_STANDALONE_ROT_BASELINE = frozenset()
+
+# [#a206s1] A-206: the one probe that cost more than the entire rest of the fast lane —
+# 3.68s of a 5.01s step, and 3.55s run directly, so this is the module's own tree-scan
+# cost, not subprocess overhead. Dropped from the sweep ONLY when the fast lane asks;
+# `bench run-tests` and a plain local run still execute it. See "Fast-lane exemption"
+# in the module docstring for what that delay costs and why it is not a hole.
+_SLOW_STANDALONE_MODULES = frozenset({"apex.tests.test_duplicate_and_dead_code_guard"})
+
+# Set inline on ONE `run:` line in .github/workflows/test.yml and nowhere else — a
+# job- or workflow-level `env:` block would reach the bench job too and turn the
+# delay into a real hole. test_only_the_fast_guards_step_sets_the_skip_flag refuses it.
+_SKIP_SLOW_PROBES_ENV = "APEX_SKIP_SLOW_STANDALONE_PROBES"
+_SKIP_SLOW_PROBES = os.environ.get(_SKIP_SLOW_PROBES_ENV) == "1"
 
 
+@lru_cache(maxsize=1)
 def _standalone_declared_modules():
     """{dotted path: rel path} for each test module documenting a plain
-    ``python3 -m unittest`` invocation, excluding this module itself."""
+    ``python3 -m unittest`` invocation, excluding this module itself.
+
+    Cached: it AST-parses every test file (0.17s), and three tests in this class ask
+    for it, so an uncached call was 0.34s of pure repeat in a lane whose whole point
+    is being fast. Callers only READ the mapping — never mutate the shared dict.
+    """
     found = {}
     for path in _test_py_files():
         tree = _parse(path)
@@ -802,11 +848,15 @@ class TestDeclaredStandaloneModulesStayRunnable(unittest.TestCase):
             len(declared), 10, "standalone-claim scan found implausibly few modules"
         )
 
+        # [#a206s2] The fast lane drops the one slow probe; every other caller
+        # (bench run-tests, a plain local run) sweeps the full set.
+        targets = sorted(
+            set(declared) - _SLOW_STANDALONE_MODULES if _SKIP_SLOW_PROBES else declared
+        )
+
         broken = {}
         with ThreadPoolExecutor(max_workers=8) as pool:
-            for dotted, result in zip(
-                sorted(declared), pool.map(_probe_standalone_run, sorted(declared))
-            ):
+            for dotted, result in zip(targets, pool.map(_probe_standalone_run, targets)):
                 if result.returncode != 0:
                     tail = result.stderr.strip().splitlines()
                     broken[dotted] = tail[-1] if tail else f"exit {result.returncode}"
@@ -819,6 +869,56 @@ class TestDeclaredStandaloneModulesStayRunnable(unittest.TestCase):
             "longer pass without frappe — the documented command is broken while "
             "bench run-tests stays green (it never takes the fallback branch):\n"
             + "\n".join(f"  {d}  ({declared[d]})\n      {broken[d]}" for d in regressed),
+        )
+
+    def test_the_fast_lane_exemption_stays_one_named_live_claim(self):
+        """A-206: the exemption may not grow, and may not cover a dead claim.
+
+        Its whole defence is that it costs the fast lane exactly ONE delayed claim.
+        A second entry, or an entry whose module stopped declaring a standalone run
+        (renamed, deleted, claim dropped), silently widens that cost — so both are
+        refused here rather than discovered later.
+        """
+        self.assertEqual(
+            len(_SLOW_STANDALONE_MODULES),
+            1,
+            "the fast-lane exemption grew beyond the one measured module — re-measure "
+            "the step and justify each addition in the module docstring, or drop it",
+        )
+        declared = _standalone_declared_modules()
+        stale = sorted(_SLOW_STANDALONE_MODULES - set(declared))
+        self.assertEqual(
+            stale,
+            [],
+            "fast-lane exemption names module(s) that declare no standalone run at "
+            f"all — prune them, they exempt nothing: {stale}",
+        )
+
+    def test_only_the_fast_guards_step_sets_the_skip_flag(self):
+        """A-206: the skip flag must stay welded to ONE command.
+
+        Promoting it to a job- or workflow-level ``env:`` block would reach the bench
+        job as well, and the exemption would stop being a delay and become the hole
+        the fast lane's whole defence says it is not. One occurrence, inline on the
+        one ``run:`` line that invokes this guard.
+        """
+        workflow = os.path.join(REPO_ROOT, ".github", "workflows", "test.yml")
+        self.assertTrue(os.path.exists(workflow), f"{workflow} moved — update this test")
+        with open(workflow, encoding="utf-8") as fh:
+            text = fh.read()
+        hits = [ln for ln in text.splitlines() if _SKIP_SLOW_PROBES_ENV in ln]
+        self.assertEqual(
+            len(hits),
+            1,
+            f"{_SKIP_SLOW_PROBES_ENV} must appear exactly once in test.yml, inline on "
+            f"the fast guards step; found {len(hits)} occurrence(s):\n"
+            + "\n".join(hits),
+        )
+        self.assertRegex(
+            hits[0],
+            r"run:\s*" + re.escape(_SKIP_SLOW_PROBES_ENV) + r"=1 python3 -m unittest ",
+            "the skip flag must be set inline on the guards step's own `run:` command, "
+            "never in an `env:` block that would also reach the bench job",
         )
 
     def test_rot_baseline_is_neither_stale_nor_silently_fixed(self):

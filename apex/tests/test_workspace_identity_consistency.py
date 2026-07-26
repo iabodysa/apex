@@ -21,7 +21,7 @@ Frappe reads a workspace's identity from three fields that must not drift:
 The failure mode is silent, which is why it needs a guard: a child declaring its
 parent by name renders nowhere, forever, with no error anywhere.
 
-Run standalone:  python3 -m unittest tests.test_workspace_identity_consistency -v
+Run standalone:  python3 -m unittest apex.tests.test_workspace_identity_consistency -v
 """
 
 import glob
