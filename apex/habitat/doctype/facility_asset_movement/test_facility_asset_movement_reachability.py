@@ -285,14 +285,14 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
             "create",
             doc=frappe.get_doc(self._in_scope_payload()),
             user=self.supervisor,
-            raise_exception=False,
+            throw=False,
         )
         out_of_scope_verdict = frappe.has_permission(
             MOVEMENT,
             "create",
             doc=frappe.get_doc(self._out_of_scope_payload()),
             user=self.supervisor,
-            raise_exception=False,
+            throw=False,
         )
         self.assertTrue(in_scope_verdict, "in-scope supervisor must be permitted to create")
         self.assertFalse(out_of_scope_verdict, "out-of-estate create must be refused")
@@ -333,7 +333,7 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
         # The supervisor initiates but may not submit — submission is the manager's gate.
         self.assertFalse(
             frappe.has_permission(
-                MOVEMENT, "submit", doc=movement, user=self.supervisor, raise_exception=False
+                MOVEMENT, "submit", doc=movement, user=self.supervisor, throw=False
             ),
             "Resident Supervisor holds no submit DocPerm; the maker/checker split is the "
             "reason the manager submits below",
