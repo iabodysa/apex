@@ -215,12 +215,12 @@ class _FakeSettings:
 class TestVapidKeyPairGuard(unittest.TestCase):
 	"""The toggle ON with only HALF a VAPID pair -- a state nothing else reaches.
 
-	``test_is_configured_false_without_keys`` and every sibling blank the keys and the
-	toggle TOGETHER, so the master-toggle guard (web_push.py:80) returns first and the
-	pair check below it (web_push.py:85) is exercised by nothing: deleting that check
-	outright would leave the whole file green. The state it exists for is an operator
-	who enables push having pasted only the public key -- without it, a send would go
-	out to sign with a private key that is None.
+	``test_is_configured_false_when_the_toggle_is_off`` and every sibling blank the keys
+	and the toggle TOGETHER, so the master-toggle guard (web_push.py:80) returns first
+	and the pair check below it (web_push.py:85) is exercised by nothing: deleting that
+	check outright would leave the whole file green. The state it exists for is an
+	operator who enables push having pasted only the public key -- without it, a send
+	would go out to sign with a private key that is None.
 
 	The Single is stubbed rather than written, so this needs no site and no settings
 	row: a credential guard that can only be exercised against a live bench is a guard
