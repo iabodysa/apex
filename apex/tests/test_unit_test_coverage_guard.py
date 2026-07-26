@@ -220,8 +220,11 @@ threads make it worse" no longer holds: past 8 workers the wall is flat, a shade
 better, not worse. CAVEAT, since it bit the previous measurement too: other agents
 were building on this machine throughout (load average 1.4 rising to 2.1). These
 are CONTENDED numbers, an upper bound rather than the quiet-machine figure — the
-whole step measured 2.40 / 2.43 / 2.44s here against the 2.08 / 2.11s recorded on
-a quiet machine for a smaller sweep. That gap is CONTENTION, not regression.
+whole step measured 2.40 / 2.43 / 2.44s at load 1.7 and 2.60 / 2.61 / 2.61s at
+load 2.5, against the 2.08 / 2.11s recorded on a quiet machine for a smaller
+sweep. That spread is CONTENTION, not regression: the A-231 class added below
+costs this lane 0.03s measured on its own, interpreter start included, because it
+skips without a site.
 
 That ~1.5s is the price of the only check that can see a broken documented command
 at all, since ``bench run-tests`` has the real frappe loaded and never enters a
@@ -279,10 +282,12 @@ flagged every non-frappe type reported 13 of 18 clean modules as leaking.
 
 Population, and its boundary
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-18 of 367 test modules, selected statically: those that assign, ``setattr`` or
-``delattr`` under ``frappe.local``, or swap a ``sys.modules["frappe*"]`` entry.
-Probing all 367 would re-run the whole suite in subprocesses. A grep would not do
-the selecting: the file that caused the incident now writes through
+21 of 370 test modules when this was measured (2026-07-26), selected statically:
+those that assign, ``setattr`` or ``delattr`` under ``frappe.local``, or swap a
+``sys.modules["frappe*"]`` entry. Probing them all would re-run the whole suite in
+subprocesses, and the population grows on its own — three modules joined it while
+this guard was being written. A grep would not do the selecting either: the file
+that caused the incident now writes through
 ``setattr(frappe.local, name, value)`` and matches no ``frappe.local.x =`` text at
 all, so the scan is an AST walk over the assignment TARGET. The boundary stated
 plainly — a bare ``frappe.<attr> = stub`` monkeypatch is not in this population,
@@ -290,13 +295,14 @@ and neither is a module that leaks only through a helper in another file.
 
 Serial, and why (measured 2026-07-26 against a live ``test`` site)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-18 probes serially: 71.3s wall. The probe FLOOR is ~0.2s (frappe import, init,
+21 probes serially: 78.2s wall. The probe FLOOR is ~0.2s (frappe import, init,
 connect, canary), so that number is the modules' own test time, not overhead — the
-two heaviest account for 55s of it. At 8 workers the sweep is 54.5s and WRONG: 18
-interpreters against one site DB made ``test_boarding_scan`` load 0 tests and
-flipped four other modules to failing, so the verdict stops meaning anything. 17s
-does not buy that. Hence serial, plus an assertion that every probe actually RAN
-tests, since a probe that runs nothing passes for the wrong reason.
+two heaviest account for 61s of it. At 8 workers the same sweep is 59.3s and WRONG:
+21 interpreters against one site DB made ``test_boarding_scan`` load ZERO tests, so
+its clean verdict means nothing. Reproduced twice, on two different populations,
+and an earlier 8-worker run flipped four more modules to failing. 19s does not buy
+that. Hence serial, plus an assertion that every probe actually RAN tests, since a
+probe that runs nothing passes for the wrong reason.
 
 Lane: this needs a live site, so the frappe-free fast lane SKIPS it and pays only a
 failed ``import frappe`` — measured, the whole class plus its scanner self-tests
