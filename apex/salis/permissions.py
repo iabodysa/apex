@@ -460,11 +460,61 @@ def _own_driver_basis(doc, user, driver_field="driver"):
     return False
 
 
+# A-250 — the DocTypes among the eleven this handler governs whose OWN model makes
+# `project` mandatory, so no legitimate create can ever be project-less. Deliberately
+# a named set and not a blanket rule: a project-less create is a modelled business
+# state on the other ten (see the A-250 survey note on
+# ``_unanchored_create_is_denied``), and denying it there would blackout an ordinary
+# flow rather than close a leak.
+PROJECT_MANDATORY_ON_CREATE = frozenset({"Fuel Claim"})
+
+
+def _unanchored_create_is_denied(doc):
+    """True when ``doc`` is an UNSAVED row of a DocType that cannot be project-less.
+
+    A-250 — the same tautology A-233 closed, in the project-less branch below.
+    ``Document.insert`` stamps ``owner`` with the acting user (document.py:298) two
+    statements before ``check_permission("create")`` (:300), so at the create check
+    ``owner == user`` is always true: the ownership escape admitted EVERY project-less
+    create. The discriminator is ``_is_unsaved`` (``__islocal``, document.py:295,
+    deleted at :338), reused from A-233 rather than a second mechanism, so this handler
+    stays deny-only and ptype-agnostic — what is distinguished is the document's storage
+    state, not the action.
+
+    IT IS APPLIED PER DOCTYPE ON PURPOSE. Applying it to all eleven would deny creates
+    the business genuinely makes: a Transport Request is project-less for two of its
+    three transport types (``TransportRequest.validate`` demands a project only for the
+    Accommodation-to-Project Shuttle), a Route Plan fulfils such a request, a Passenger
+    Manifest inherits that Route Plan, ``RentalSettlement.create_payment_request``
+    raises a rental Salis Payment Request that belongs to an office and not a project,
+    Issue is a shared core DocType whose non-fleet tickets have no project at all, an
+    unallocated Salis Vehicle and a platform-level Fuel Exception Case both precede any
+    project, and Vehicle Assignment / Fuel Request / Fuel Quota carry an OPTIONAL
+    ``project`` beside a mandatory ``vehicle`` — a desk user who leaves that optional
+    field blank would get "not permitted" instead of a field error.
+
+    Where ``project`` is ``reqd`` the desk cannot produce a project-less create at all
+    (``frappe.ui.form.check_mandatory`` gates the save call, save.js:20), so the only
+    thing denied here is a programmatic insert that skips the mandatory check —
+    ``ignore_mandatory``, or a caller that never populates the field. Nothing a human
+    can reach is affected.
+    """
+    return (
+        getattr(doc, "doctype", None) in PROJECT_MANDATORY_ON_CREATE
+        and _is_unsaved(doc)
+    )
+
+
 def scoped_has_permission(doc, ptype, user=None):
     """Deny a scoped user acting on a doc outside their allowed projects.
 
     Returns False to block, or None to defer to Frappe's default permission
     resolution (which keeps standard role-based checks intact).
+
+    A-250: on a project-less doc, ownership is still a valid basis for a row that
+    ALREADY EXISTS, but not for an unsaved row of a DocType whose model forbids a
+    project-less record — see ``_unanchored_create_is_denied`` for why that is a named
+    set rather than a rule over every DocType wired here.
     """
     user = _resolve_user(user)
     if _is_unscoped(user):
@@ -473,7 +523,7 @@ def scoped_has_permission(doc, ptype, user=None):
     project = _doc_project(doc)
     if not project:
         # [#n18ea0]
-        if getattr(doc, "owner", None) == user:
+        if getattr(doc, "owner", None) == user and not _unanchored_create_is_denied(doc):
             return None
         # [#kmesp4]
         return False
