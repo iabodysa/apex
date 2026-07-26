@@ -35,6 +35,36 @@ def get_driver_for_session_user(user=None):
 	return frappe.db.get_value("Salis Driver", {"employee": employee}, "name")
 
 
+def has_any_role(user, roles):
+	"""True when ``user`` holds any role in ``roles``; Administrator always True.
+
+	The membership TEST only — every caller keeps its own role tuple, because the
+	sets are deliberately not the same (the boarding scan gate excludes Finance
+	Manager, the driver-portal display hint includes it). Sharing the test without
+	sharing the set is what stops a copy of this three-liner drifting again.
+	"""
+	user = user or frappe.session.user
+	if user == "Administrator":
+		return True
+	return bool(set(frappe.get_roles(user)) & set(roles))
+
+
+def bound_vehicle(driver):
+	"""The vehicle bound to ``driver`` (current_vehicle, else Active Assignment), or None.
+
+	The single read-side binding rule, deliberately kept in one place beside the
+	driver resolvers: it must stay identical to the write-side check fuel requests
+	enforce (``driver_portal.fuel._vehicle_bound_to_driver``), so a drift between a
+	portal read and a fuel write would be a permission bug, not a cosmetic one.
+	"""
+	vehicle = frappe.db.get_value("Salis Driver", driver, "current_vehicle")
+	if vehicle:
+		return vehicle
+	return frappe.db.get_value(
+		"Vehicle Assignment", {"driver": driver, "status": "Active"}, "vehicle"
+	)
+
+
 def lock_vehicle(name):
 	"""Row-lock a Salis Vehicle to prevent concurrent assignment/handover races."""
 	if name:

@@ -47,9 +47,17 @@ the baseline mean one thing was the opposite move — prove every entry is real,
 each a written reason for surviving, and add test_baseline_holds_no_stale_group so a
 fixed entry can no longer linger. Three of the eight were promoted in that pass
 (auto_email_report_seed_base, accommodation_stock_ledger.reverse_and_mark_cancelled,
-finding_fanout.is_actionable); the remaining five are documented at the baseline
-itself, four blocked only by write scope and one — the patch pair — retained on
-merit, since a patch that has already run everywhere gains nothing from refactoring.
+finding_fanout.is_actionable).
+
+A later wave owning salis/ took three more, leaving TWO. Its lesson is why the
+surviving reasons are worth reading: two of those three copies had DRIFTED, so
+"fold one onto the other" was the wrong move twice. The _is_staff pair read
+same-named STAFF_ROLES tuples with different members, so only the membership test
+was shared (salis.utils.has_any_role) and each role SET stayed local — folding them
+would have let a Finance Manager authorise a boarding scan. What is left is the
+patch pair, retained on merit since a patch that has already run everywhere gains
+nothing from refactoring, and the HR-recipient pair, blocked by habitat/ write
+scope rather than the salis/ scope previously recorded against it.
 
   1. TestDuplicateTopLevelFunctionNames — two different files each bind
      a same-named PUBLIC module-level function. Scoped to module level (a Document
@@ -378,11 +386,12 @@ def _copy_pasted_groups():
 _COPY_PASTE_BASELINE = frozenset(
     {
         # Habitat's engine raises the automated alert, Masar's whitelisted one-tap
-        # raises the manual one; masar's docstring admits it "Mirrors
-        # temporary_worker_engine._hr_recipients". One rule ("HR Manager, else System
-        # Manager"), so the home is apex_core/utils/ — the shared kernel BOTH already
-        # import (system_notify). Left only because it spans the Habitat/Salis
-        # boundary, which needs a wave that owns salis/.
+        # raises the manual one; one rule ("HR Manager, else System Manager"), so the
+        # home is apex_core/utils/ — the shared kernel BOTH already import. Owning
+        # salis/ is NOT the blocker recorded here before: with habitat/ out of write
+        # scope, promoting the body only leaves habitat duplicating the NEW shared
+        # copy. The blocker is write access to temporary_worker_engine.py, where the
+        # remaining fix is an import plus a one-line call.
         frozenset(
             {
                 ("habitat/temporary_worker_engine.py", "_hr_recipients"),
@@ -398,36 +407,6 @@ _COPY_PASTE_BASELINE = frozenset(
             {
                 ("patches/v1_x/seed_demo_role_logins.py", "_get_or_create"),
                 ("patches/v1_x/seed_masar_demo_movement.py", "_get_or_create"),
-            }
-        ),
-        # Identical role-membership display hint; driver_portal/__init__.py is the
-        # package both sit under, so it is already the home — boarding.py should
-        # import it. Needs a wave that owns salis/.
-        frozenset(
-            {
-                ("salis/api/boarding.py", "_is_staff"),
-                ("salis/api/driver_portal/__init__.py", "_is_staff"),
-            }
-        ),
-        # Both docstrings state the same rule ("current_vehicle, else Active
-        # Assignment") and warn it must match what fuel writes enforce — a divergence
-        # here is a real permission bug, so one home is the point. salis/utils/
-        # already holds the sibling get_driver_for_user. Needs a wave that owns salis/.
-        frozenset(
-            {
-                ("salis/api/driver_portal/__init__.py", "_bound_vehicle"),
-                ("salis/api/fleet_employee.py", "_bound_vehicle"),
-            }
-        ),
-        # Same-FILE duplication, so the promotion is purely local (a shared
-        # owner-or-project-scope helper beside them) — the cheapest fix left, and the
-        # only one needing no cross-module import. Note both docstrings correctly
-        # explain why the EXISTING scoped_has_permission cannot be reused; that
-        # argument does not extend to the two of them duplicating each other.
-        frozenset(
-            {
-                ("salis/permissions.py", "salis_driver_has_permission"),
-                ("salis/permissions.py", "trip_start_log_has_permission"),
             }
         ),
     }

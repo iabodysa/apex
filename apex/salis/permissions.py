@@ -439,24 +439,17 @@ def scoped_has_permission(doc, ptype, user=None):
     return None
 
 
-def salis_driver_has_permission(doc, ptype, user=None):
-    """Project-scope direct Salis Driver document access, but never block a
-    Driver from reading their OWN profile.
+def _owner_or_project_has_permission(doc, user=None):
+    """Project-scope a doc while treating OWNERSHIP as an independent access basis.
 
-    Salis Driver carries a direct ``project`` Link AND grants the Driver role an
-    ``if_owner`` read DocPerm, while Fleet Supervisor / Fleet Project Manager get
-    an unconditional read across every row. ``salis_driver_query`` scopes the
-    list/report view (project OR owner), but without a matching ``has_permission``
-    hook the form view / REST resource / link reads were governed only by those
-    role DocPerms, letting a project-scoped supervisor open any other project's
-    driver record directly. This closes that direct-access leak.
+    The rule behind every ``if_owner`` DocPerm in Salis: an unscoped oversight user
+    defers to Frappe, the acting user's own row is always allowed, and every other
+    doc is confined to the user's allowed projects (a project-less doc fails closed).
+    Returns False to block, else None to defer to Frappe's default resolution.
 
-    It mirrors ``salis_driver_query`` exactly: ownership is an independent, valid
-    access basis (the if_owner self-profile), so the acting user's own row is
-    always allowed; everything else is confined to the user's allowed projects.
-    Using the shared ``scoped_has_permission`` here would be wrong — it denies a
-    project-BEARING doc outside scope, which would block a Driver (who holds no
-    Project User Permission) from reading their own project-tagged row.
+    Deliberately NOT ``scoped_has_permission``: that one denies a project-BEARING doc
+    outside scope before any ownership test, which would block a Driver (who holds no
+    Project User Permission) from opening their own project-tagged record.
     """
     user = _resolve_user(user)
     if _is_unscoped(user):
@@ -477,6 +470,28 @@ def salis_driver_has_permission(doc, ptype, user=None):
     return None
 
 
+def salis_driver_has_permission(doc, ptype, user=None):
+    """Project-scope direct Salis Driver document access, but never block a
+    Driver from reading their OWN profile.
+
+    Salis Driver carries a direct ``project`` Link AND grants the Driver role an
+    ``if_owner`` read DocPerm, while Fleet Supervisor / Fleet Project Manager get
+    an unconditional read across every row. ``salis_driver_query`` scopes the
+    list/report view (project OR owner), but without a matching ``has_permission``
+    hook the form view / REST resource / link reads were governed only by those
+    role DocPerms, letting a project-scoped supervisor open any other project's
+    driver record directly. This closes that direct-access leak.
+
+    It mirrors ``salis_driver_query`` exactly: ownership is an independent, valid
+    access basis (the if_owner self-profile), so the acting user's own row is
+    always allowed; everything else is confined to the user's allowed projects.
+    Using the shared ``scoped_has_permission`` here would be wrong — it denies a
+    project-BEARING doc outside scope, which would block a Driver (who holds no
+    Project User Permission) from reading their own project-tagged row.
+    """
+    return _owner_or_project_has_permission(doc, user)
+
+
 def trip_start_log_has_permission(doc, ptype, user=None):
     """Project-scope direct Trip Start Log document access, but never block a
     Driver from acting on their OWN log.
@@ -488,31 +503,13 @@ def trip_start_log_has_permission(doc, ptype, user=None):
     list/report view (project OR owner), so this hook mirrors it for the
     form view / REST resource / link reads.
 
-    It mirrors ``salis_driver_has_permission`` exactly: ownership is an
-    independent, valid access basis (the if_owner self record), so the acting
-    user's own row is always allowed; everything else is confined to the user's
-    allowed projects. Using the shared ``scoped_has_permission`` here would be
-    wrong — it denies a project-BEARING doc outside scope, which would block a
-    Driver (who holds no Project User Permission) from opening their own
-    project-tagged log.
+    It mirrors ``salis_driver_has_permission`` exactly — same rule, so both now
+    call the SAME ``_owner_or_project_has_permission`` and can never drift apart.
+    Using the shared ``scoped_has_permission`` here would still be wrong: it
+    denies a project-BEARING doc outside scope, which would block a Driver (who
+    holds no Project User Permission) from opening their own project-tagged log.
     """
-    user = _resolve_user(user)
-    if _is_unscoped(user):
-        return None
-
-    # [#dz5z4x]
-    if getattr(doc, "owner", None) == user:
-        return None
-
-    project = _doc_project(doc)
-    if not project:
-        # [#ocig5t]
-        return False
-
-    if project not in _allowed_projects(user):
-        return False
-
-    return None
+    return _owner_or_project_has_permission(doc, user)
 
 
 def dispatch_trip_has_permission(doc, ptype, user=None):
