@@ -49,7 +49,7 @@ if it differs by a byte from a fresh build, so it is what the site really serves
 Five instances of this defect had already been corrected one at a time
 (salis/api/fleet_os.py x4, then fleet_reader.py) before it was worth a guard.
 
-Run standalone:  python3 -m unittest tests.test_apps_screen_gate_wiring -v
+Run standalone:  python3 -m unittest apex.tests.test_apps_screen_gate_wiring -v
 """
 
 import ast

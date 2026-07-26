@@ -41,7 +41,7 @@ hand-rolled line scanner, so "active entry" here means exactly what it means to
 duplicate entry raises rather than silently double-counting.
 
 Pure stdlib — no live site needed.
-Run standalone:  python3 -m unittest tests.test_patch_registration_guard -v
+Run standalone:  python3 -m unittest apex.tests.test_patch_registration_guard -v
 """
 
 import ast
