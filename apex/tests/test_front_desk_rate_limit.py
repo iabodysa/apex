@@ -86,18 +86,31 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         self.ip = "203.0.113." + str(int(_h(12), 16) % 250 + 1)
         self.cmd = "test-rl-" + _h(12)
 
+    def _drop_window(self, name):
+        """Delete one rate-limit window by its RAW name, then prove it is gone.
+
+        ``delete_value`` applies ``make_key`` itself (redis_wrapper.py:141-142), so
+        handing it an already-made key prefixes the name a second time and clears
+        nothing. These cleanups were green for months while deleting nothing, which
+        is exactly why the absence is now asserted instead of assumed.
+        """
+        frappe.cache.delete_value(name)
+        self.assertIsNone(
+            frappe.cache.get(frappe.cache.make_key(name)),
+            f"the rate-limit window {name} outlived its cleanup",
+        )
+
     def _clear_window(self, cmd, ip):
-        frappe.cache.delete_value(frappe.cache.make_key(f"rl:{cmd}:{ip}"))
+        """The decorator's own window. ``key`` names a form_dict entry that a real
+        request never carries, so the identity is ``ip`` joined to an empty string
+        and the name ends in a bare colon (rate_limiter.py:145-155)."""
+        self._drop_window(f"rl:{cmd}:{ip}:")
 
     def _clear_actor_window(self, cmd, actor):
-        frappe.cache.delete_value(
-            frappe.cache.make_key(f"rl:{cmd}:scan-actor:{actor}")
-        )
+        self._drop_window(f"rl:{cmd}:scan-actor:{actor}")
 
     def _clear_unresolved_scan_window(self, cmd, ip):
-        frappe.cache.delete_value(
-            frappe.cache.make_key(f"rl:{cmd}:scan-unresolved-ip:{ip}")
-        )
+        self._drop_window(f"rl:{cmd}:scan-unresolved-ip:{ip}")
 
     def _driver_token(self):
         driver = frappe.get_doc(
