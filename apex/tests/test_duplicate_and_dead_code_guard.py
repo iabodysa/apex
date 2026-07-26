@@ -122,6 +122,28 @@ scope rather than the salis/ scope previously recorded against it.
      226 endpoints here are named only from Desk JS, and three patch entry
      points are named only in docs/UPGRADE-APP-IDENTITY.md.
 
+     Its ``_DEAD_FUNCTION_BASELINE`` seeded 8 pre-existing dead defs and is now
+     EMPTY — each was deleted, not re-wired, so the check is an outright gate
+     again. Five were settings accessors every real reader already bypassed with
+     ``frappe.get_single()`` (habitat_settings ``get_settings`` /
+     ``get_default_currency`` / ``validate_posting_period``,
+     payment_routing_settings ``get_routing_settings``, salis_settings
+     ``get_salis_settings``); ``validate_posting_period`` also duplicated a native
+     guard, since erpnext/hooks.py binds ``validate_accounting_period_on_doc_save``
+     to every ``period_closing_doctypes`` entry. One was
+     masar_worker_token ``_driver_token_from_request``, a driver-side twin of
+     salis/api/masar.py ``_token_from_request`` that live callers bypass by
+     reaching ``presented_token(DRIVER)`` directly. One was habitat_dashboard_seed
+     ``seed_all_dashboards``, a no-op stub whose docstring claimed an
+     after_migrate/after_install entrypoint no hook ever named (its two wired
+     siblings stay). The last was setup_wizard ``get_setup_stages``, and it is the
+     reason this list is worth reading: its docstring claimed the
+     ``setup_wizard_stages`` hook, which apex/hooks.py never declares. Declaring
+     it would NOT have been the fix — frappe concatenates the stage hooks and the
+     setup_wizard_complete hooks into ONE run (frappe/desk/page/setup_wizard/
+     setup_wizard.py:36), and the declared ``setup_wizard_complete`` already
+     applies the same configuration, so wiring it would have double-applied setup.
+
   5. TestNativePrimitiveBypass — a hand-rolled reimplementation of a short, NAMED
      list of Frappe primitives (currently: raw smtplib instead of
      ``frappe.sendmail``; raw ``uuid`` instead of ``frappe.generate_hash``) with no
@@ -996,37 +1018,14 @@ def _dead_production_functions():
     return offenders
 
 
-# [#a246fb] Pre-existing dead defs, frozen so this check can land green. Every
-# entry was verified unreachable by hand (no caller, no hook, no patches.txt, no
-# JSON/JS/docs dotted path, no whitelist) and every one sits OUTSIDE the write
-# scope of the change that added this check. Do not add to this set to silence a
-# new finding — delete the function or wire it up. Removing an entry is expected
-# and is enforced: test_baseline_holds_no_revived_function fails if a baselined
-# def stops being dead while its entry lingers.
-_DEAD_FUNCTION_BASELINE = frozenset(
-    {
-        # Settings accessors every real reader bypasses with frappe.get_single().
-        ("apex_core/doctype/habitat_settings/habitat_settings.py", "get_settings"),
-        ("apex_core/doctype/habitat_settings/habitat_settings.py", "get_default_currency"),
-        ("apex_core/doctype/habitat_settings/habitat_settings.py", "validate_posting_period"),
-        ("apex_core/doctype/payment_routing_settings/payment_routing_settings.py",
-         "get_routing_settings"),
-        ("apex_core/doctype/salis_settings/salis_settings.py", "get_salis_settings"),
-        # Driver-side twin of salis/api/masar.py::_token_from_request; live callers
-        # reach presented_token(DRIVER) directly, so this copy was never called.
-        ("apex_core/doctype/masar_worker_token/masar_worker_token.py",
-         "_driver_token_from_request"),
-        # Its own docstring calls it a retired no-op entrypoint, but no hook or
-        # patch names it; the two live siblings in this file ARE wired.
-        ("apex_core/setup/seeders/habitat_dashboard_seed.py", "seed_all_dashboards"),
-        # Latent wiring bug, not inert: the docstring claims the
-        # `setup_wizard_stages` hook, but hooks.py never declares that key
-        # (frappe/desk/page/setup_wizard/setup_wizard.py:200 only reads the hook).
-        # Behaviour is not lost today — the declared `setup_wizard_complete` hook
-        # does the same work — so wiring this in would DOUBLE-apply setup.
-        ("apex_core/setup/setup_wizard.py", "get_setup_stages"),
-    }
-)
+# [#a246fb] Seeded with 8 pre-existing dead defs so this check could land green,
+# and now EMPTY — every one was deleted rather than re-wired (see the module
+# docstring for what each was). So this check is a plain gate again: any dead def
+# a change introduces fails it outright. Do not re-open the set to silence a new
+# finding; delete the function or wire it up. If an entry ever is added back,
+# test_baseline_holds_no_revived_function forces its removal once it stops
+# being dead.
+_DEAD_FUNCTION_BASELINE = frozenset()
 
 
 class TestDeadProductionFunctions(unittest.TestCase):
