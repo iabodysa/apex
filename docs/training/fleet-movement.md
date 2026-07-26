@@ -14,13 +14,17 @@ This page covers fleet masters, compliance, dispatch, and transport.
 
 ### Permissions
 
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver | Finance / Auditor |
-|---------|---------------|-----------------------|------------------|--------|-------------------|
-| **Salis Vehicle** | Full | Read, Write, Create | Read, Write, Create | — | Read |
-| **Salis Driver** | Full | Read, Write, Create, Submit | Read, Write, Create | Read | Read |
-| Vehicle Category (master) | Read, Write, Create | Read | Read | — | Read |
-| **Salis Vehicle Compliance** *(submittable)* | Full | Read, Write, Create, Submit | Read, Write, Create | — | Read |
-| **Driver Clearance** *(submittable)* | Full | Read, Write, Create, Submit | Read, Write, Create | — | Read |
+| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver | Finance Manager | Internal Auditor |
+|---------|---------------|-----------------------|------------------|--------|-----------------|------------------|
+| **Salis Vehicle** | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | — | Read | Read |
+| **Salis Driver** | Read, Write, Create, Delete | Read, Write, Create, Submit | Read, Write, Create | Read | Read | Read |
+| Vehicle Category (master) | Read, Write, Create | Read | Read | — | Read | Read |
+| **Salis Vehicle Compliance** *(child table)* | child of Salis Vehicle | child of Salis Vehicle | child of Salis Vehicle | child of Salis Vehicle | child of Salis Vehicle | child of Salis Vehicle |
+| **Driver Clearance** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — | Read | Read |
+
+> **Salis Vehicle Compliance** is a **child table** of Salis Vehicle, not a
+> standalone record. Frappe stores no permissions on a child table — its rows are
+> governed entirely by the parent's Salis Vehicle row above.
 
 ### DocTypes
 - **Salis Vehicle** — the fleet asset: plate, category, compliance docs, status.
@@ -46,15 +50,18 @@ _[screenshot: Salis Vehicle record with compliance tab]_
 
 | DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver |
 |---------|---------------|-----------------------|------------------|--------|
-| **Vehicle Assignment** *(submittable)* | Full | Read, Write, Create, Submit, Cancel | Read, Write, Create | — |
-| **Transport Request** *(workflow)* | Full | Read, Write, Create, Submit | Read, Write, Create, Submit | — |
-| **Dispatch Trip** *(submittable)* | Full | Read, Write, Create, Submit | Read, Write, Create | Read (own, via portal) |
-| **Route Plan** *(submittable)* | Full | Read, Write, Create, Submit | Read, Write, Create | — |
-| **Passenger Manifest** *(submittable)* | Full | Read, Write, Create, Submit | Read, Write, Create | Read (own) |
-| **Issue** (field support) | Read, Write | — | Read, Write | Read, Create (own) |
+| **Vehicle Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit, Cancel | Read, Write, Create | — |
+| **Transport Request** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create, Submit | — |
+| **Dispatch Trip** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read (own, via portal) |
+| **Route Plan** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
+| **Passenger Manifest** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read (own) |
+| **Issue** (native ERPNext, field support) | Read, Write | — | Read, Write | Read, Create (own) |
 
 > **Salis Vehicle** is **not a submittable** DocType — there is no Submit action.
-> Create the record and save it.
+> Create the record and save it. Its shipped permission rows nonetheless carry
+> Submit and Cancel flags, which the table above reports because they are really
+> there. Frappe renders neither action on a non-submittable DocType, so they grant
+> nothing today; treat the vehicle record as save-only.
 
 ### DocTypes
 - **Vehicle Assignment** — binds a vehicle to a driver/project for a period.

@@ -10,7 +10,8 @@ Tracks articles and assets issued to residents/staff and their return or damage.
 
 | DocType | Accommodation Manager | Resident Supervisor | Cleaning Supervisor |
 |---------|----------------------|---------------------|---------------------|
-| Custody Article / Asset Category (masters) | Read, Write, Create, Delete | Read, Write, Create | — |
+| Custody Article (master) | Read, Write, Create, Delete | Read, Write, Create | — |
+| Custody Asset Category (master) | — | — | — |
 | **Custody Issue** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | — |
 | **Custody Return** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | — |
 | **Custody Damage Assessment** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | — |

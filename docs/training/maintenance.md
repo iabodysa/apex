@@ -9,18 +9,24 @@ coverage.
 
 ## Permissions
 
-| DocType | Accommodation Manager | Resident Supervisor | Resident Request Coordinator | Maintenance Technician | Maintenance Manager | All (any logged-in user) |
-|---------|----------------------|---------------------|------------------------------|------------------------|---------------------|--------------------------|
+The **All** column is the built-in Frappe role every logged-in user holds.
+
+| DocType | Accommodation Manager | Resident Supervisor | Resident Request Coordinator | Maintenance Technician | Maintenance Manager | All |
+|---------|----------------------|---------------------|------------------------------|------------------------|---------------------|-----|
 | **Maintenance Request** *(submittable)* | Read, Write, Create, Submit | Read, Write, Create, Submit | Read, Write, Create, Submit | Read | — | Create (Read own only) |
 | **Maintenance Inspection Report** *(submittable)* | Read, Write, Create, Submit | — | — | — | — | — |
 | **Maintenance Work Order** *(submittable)* | — | — | — | **Read, Write** | — | — |
-| Maintenance Material / Material Template (masters) | Read, Write, Create | — | — | — | **Read, Write, Create** | — |
-| Subcontractor Service Contract / Order | Read, Write, Create | Read | — | — | — | — |
+| Maintenance Material (master) | Read, Write, Create | — | — | **Read, Write, Create** | — | — |
+| Maintenance Material Template (master) | Read, Write, Create | — | — | **Read, Write, Create** | — | — |
+| **Subcontractor Service Contract** *(submittable)* | Read, Write, Create, Submit, Cancel | — | — | — | — | — |
+| **Subcontractor Service Order** *(submittable)* | Read, Write, Create, Submit | — | — | — | — | — |
 
 > **Universal intake:** any logged-in user can raise a **Maintenance Request** and sees only their own. The assigned technician also sees their ticket. Oversight roles see all.
 
-> **Maintenance Manager** is an ERPNext-supplied role (not created by Apex). When
-> present, it holds Read/Write/Create on the maintenance material masters only.
+> **Maintenance Manager** is an ERPNext-supplied role (not created by Apex). Apex
+> grants it nothing — no shipped DocType names it, so its column is empty
+> throughout. The maintenance material masters belong to the **Accommodation
+> Manager** and the **Maintenance Technician**.
 
 ---
 

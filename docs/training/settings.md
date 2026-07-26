@@ -14,7 +14,7 @@ automated background jobs.
 | **Habitat Settings** | Single | Defaults and toggles for the Habitat module (accommodation, custody, safety, maintenance). | System Manager / Accommodation Manager |
 | **Salis Settings** | Single | Defaults and toggles for the Salis module (fleet, fuel, dispatch, rentals). | System Manager / Fleet Manager |
 | **Apex Integration Settings** | Single | Configuration for external integrations. | System Manager |
-| **Salis Portal Theme** | Single | Driver/Worker portal appearance (AFMCO / Frappe / Dark + optional brand overrides). | System Manager |
+| **Driver Portal Theme** | Single | Driver/Worker portal appearance (AFMCO / Frappe / Dark + optional brand overrides). | System Manager |
 | **Masar Worker Token** | Record | Personal access tokens issued to workers for the Masar portal. | System Manager / Fleet Manager |
 
 > Settings are **configuration only** — they hold defaults and feature toggles,
@@ -22,7 +22,7 @@ automated background jobs.
 > to change.
 
 _[screenshot: Habitat Settings]_
-_[screenshot: Salis Portal Theme]_
+_[screenshot: Driver Portal Theme]_
 
 ---
 

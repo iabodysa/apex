@@ -11,10 +11,10 @@ deliberately split across the claim lifecycle.
 
 | DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Finance Manager |
 |---------|---------------|-----------------------|------------------|-----------------|
-| **Fuel Quota** *(submittable)* | Full | Read, Write, Create, Submit | Read, Write, Create | Read |
-| **Fuel Request** *(submittable)* | Full | Read, Write, Create, Submit | Read, Write, Create | Read |
-| **Fuel Claim** *(workflow)* | Full | Read, Write, Create | Read, Write, Create | Read, Write |
-| **Fuel Exception Case** *(workflow)* | Full | scoped | scoped | Read |
+| **Fuel Quota** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read |
+| **Fuel Request** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read |
+| **Fuel Claim** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | Read, Write |
+| **Fuel Exception Case** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | scoped | scoped | Read |
 | Fuel Platform (master) | Read, Write, Create | Read | Read | Read |
 
 ---

@@ -14,7 +14,7 @@ licenses.
 | Safety Task Catalog (master) | Read, Write, Create | Read | Read |
 | **Safety Inspection Report** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | Read, Write, Create |
 | **Safety Task Execution** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | Read, Write, Create |
-| **Habitat Safety Incident** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | Read, Write, Create |
+| **Safety Incident** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | Read, Write, Create |
 | **Building License** *(submittable)* | Read, Write, Create, Submit, Cancel | Read | — |
 
 ---
@@ -33,7 +33,7 @@ licenses.
 - **Purpose:** a structured site inspection with a findings grid.
 - **Key fields:** building, inspector, findings (severity, action, status).
 
-### Habitat Safety Incident *(submittable)*
+### Safety Incident *(submittable)*
 - **Purpose:** records an actual safety incident/near-miss.
 - **Key fields:** date, location, severity, description, corrective action.
 
@@ -49,7 +49,7 @@ licenses.
 1. **Catalog tasks.** The Manager maintains the **Safety Task Catalog**.
 2. **Execute.** A supervisor records a **Safety Task Execution** or a **Safety
    Inspection Report** in the field and **Submits** it as the official record.
-3. **Incidents.** Any incident is logged on **Habitat Safety Incident** and
+3. **Incidents.** Any incident is logged on **Safety Incident** and
    submitted.
 4. **Licenses.** Building licenses are tracked on **Building License**; a daily
    scheduled job flags upcoming expiries so the Manager can renew in time.

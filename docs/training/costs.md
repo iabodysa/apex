@@ -14,9 +14,9 @@ depreciation.
 | Utility Account (master) | Read, Write, Create | Read | — |
 | **Utility Bill Entry** *(submittable)* | Read, Write, Create, Submit | Read, Write, Create, Submit, Cancel | Read |
 | Operational Depreciation Policy (master) | Read, Write, Create | Read | — |
-| **Accommodation Lease** *(submittable)* | Read, Write, Create, Submit | **Read, Write, Create, Submit, Cancel** | Read |
+| **Lease** *(submittable)* | Read, Write, Create, Submit | **Read, Write, Create, Submit, Cancel** | Read |
 
-> **Finance Manager is a full maker/checker on the Accommodation Lease and Utility
+> **Finance Manager is a full maker/checker on the Lease and Utility
 > Bill Entry** — Read, Write, Create, Submit, and Cancel (not read-only). The
 > **Internal Auditor** holds read-only oversight across the Costs records (lease,
 > ledger, utility bill, occupancy/stock ledgers).
@@ -35,7 +35,7 @@ depreciation.
   cost-control owner.
 - **Key fields:** account, period, amount, building.
 
-### Accommodation Lease
+### Lease
 - **Purpose:** records a rented accommodation, its term, and rent schedule.
 - **Related:** Rent Payment Schedule drives monthly rent-due alerts.
 

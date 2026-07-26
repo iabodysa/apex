@@ -9,11 +9,11 @@ top of project scoping.
 
 ## Permissions
 
-| DocType | Fleet Manager | Fleet PM | Fleet Supervisor | Finance Manager |
-|---------|---------------|----------|------------------|-----------------|
-| **Salis Payment Request** *(workflow)* | Full | Read, Write, Create | Read, Write, Create | Read, Write, Submit, Cancel |
-| **Movement Cost Recovery** *(submittable)* | Full | — | Read, Write, Create | Read, Write |
-| **Movement Cost Transfer** *(submittable)* | Full | Read, Write, Create | — | Read, Write |
+| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Finance Manager |
+|---------|---------------|-----------------------|------------------|-----------------|
+| **Salis Payment Request** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | Read, Write, Submit, Cancel |
+| **Movement Cost Recovery** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | — | Read, Write, Create | Read, Write |
+| **Movement Cost Transfer** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | — | Read, Write |
 
 > Note the **asymmetry**: Fleet PM holds **no** permission on Movement Cost
 > Recovery, and Fleet Supervisor holds **no** permission on Movement Cost Transfer.

@@ -23,12 +23,21 @@ import json
 import os
 import unittest
 
+from apex.tests.training_charter import charter_count, role_charters
+
 _APP = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 _WORKSPACE_GLOB = os.path.join(_APP, "*", "workspace", "*", "*.json")
 _DOCTYPE_GLOB = os.path.join(_APP, "*", "doctype", "*", "*.json")
 
 # The A-162 persona, asserted by name so it can never be ratcheted away.
 GRO_ROLE = "Government Relations Officer"
+
+# The two machine-readable claims this guard binds itself to inside the published
+# charter. They are lookup keys INTO docs/training/README.md, never a local copy of
+# it: each is asserted to still be present before the property it implies is checked,
+# so a reworded charter reds here instead of silently unhooking the assertion.
+NO_EDIT_PHRASE = "no record-edit rights"
+DOCTYPE_COUNT_CLAIM = r"on (\w+) vehicle and driver compliance records"
 
 # Every DocPerm flag that lets a holder change something. A viewer charter grants none of
 # them; `read`/`report`/`export`/`print`/`email`/`select` are the read-side flags.
@@ -134,10 +143,36 @@ class TestEveryWorkspaceRoleHoldsADocPerm(unittest.TestCase):
 class TestGovernmentRelationsOfficerCharter(unittest.TestCase):
     """The A-162 persona itself: a read-only Salis compliance viewer.
 
-    Charter (docs/training/README.md): "Compliance notification recipient + Compliance
-    workspace viewer (no record-edit rights)". Both halves are asserted — that it can read
-    something, and that it can only read.
+    The charter is READ from ``docs/training/README.md`` rather than restated here, so the
+    page and the DocPerm JSON cannot drift in either direction: reword the charter and the
+    phrase assertions fail, re-grant the JSON and the property assertions fail.
     """
+
+    def test_the_charter_row_still_states_the_viewer_rule(self):
+        """Doc side of the loop: the claim this guard enforces must still be published."""
+        charter = role_charters().get(GRO_ROLE)
+        self.assertIsNotNone(
+            charter, f"{GRO_ROLE} has no Roles at a glance row in docs/training/README.md"
+        )
+        self.assertIn(
+            NO_EDIT_PHRASE,
+            charter,
+            f"the published {GRO_ROLE} charter no longer says '{NO_EDIT_PHRASE}', which is "
+            "the rule test_every_row_is_read_only enforces. Restore the wording or retire "
+            f"the assertion — do not leave the two out of step. Charter now: {charter!r}",
+        )
+
+    def test_the_charter_doctype_count_matches_the_docperms(self):
+        """The charter states how many records the persona reads; the JSON must agree."""
+        documented = charter_count(GRO_ROLE, DOCTYPE_COUNT_CLAIM)
+        held = sorted({doctype for doctype, _row in _docperm_rows().get(GRO_ROLE, [])})
+        self.assertEqual(
+            len(held),
+            documented,
+            f"docs/training/README.md says {GRO_ROLE} reads {documented} vehicle and driver "
+            f"compliance records, but it holds DocPerms on {len(held)}: {held}. Update "
+            "whichever side is wrong; they are one claim, not two.",
+        )
 
     def test_the_persona_is_never_allowlisted(self):
         self.assertNotIn(
@@ -154,6 +189,13 @@ class TestGovernmentRelationsOfficerCharter(unittest.TestCase):
         )
 
     def test_every_row_is_read_only(self):
+        charter = role_charters().get(GRO_ROLE) or ""
+        self.assertIn(
+            NO_EDIT_PHRASE,
+            charter,
+            "the read-only rule below is only enforceable while the published charter "
+            "still states it; it does not, so this assertion has lost its source",
+        )
         for doctype, row in _docperm_rows().get(GRO_ROLE, []):
             with self.subTest(doctype=doctype):
                 self.assertTrue(row.get("read"), f"{GRO_ROLE} row on {doctype} grants no read")
