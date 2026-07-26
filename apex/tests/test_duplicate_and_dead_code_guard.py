@@ -419,17 +419,6 @@ _COPY_PASTE_BASELINE = frozenset(
                 ("salis/api/fleet_employee.py", "_bound_vehicle"),
             }
         ),
-        # Same-FILE duplication, so the promotion is purely local (a shared
-        # owner-or-project-scope helper beside them) — the cheapest fix left, and the
-        # only one needing no cross-module import. Note both docstrings correctly
-        # explain why the EXISTING scoped_has_permission cannot be reused; that
-        # argument does not extend to the two of them duplicating each other.
-        frozenset(
-            {
-                ("salis/permissions.py", "salis_driver_has_permission"),
-                ("salis/permissions.py", "trip_start_log_has_permission"),
-            }
-        ),
     }
 )
 
