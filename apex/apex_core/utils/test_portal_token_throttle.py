@@ -13,6 +13,11 @@ TestThrottleAddressIsolation is the app-wide half (A-220): the window is keyed o
 the address alone, so two test files minting from one subnet share a budget and can
 red each other at random. It derives every file's subnet FROM THE SOURCE rather than
 listing a known pair, so a file added later is covered the day it is written.
+
+TestBadTokenAddressGuard is the A-228 half: ``test_a_console_or_job_caller_is_never_
+throttled`` clears the REQUEST, so the first guard returns and the address is never
+read -- the second guard had no test that could reach it. That class installs a
+request and removes only the address, so the inner guard is the one under test.
 """
 
 import ast
@@ -31,6 +36,8 @@ from apex.tests.source_tree import (
     test_support_files,
 )
 from apex.www import driver as driver_page, masar as masar_page
+
+_ABSENT = object()
 
 LIMIT = token_security.BAD_TOKEN_ATTEMPTS_PER_MINUTE
 BAD_TOKEN_SUBNET = "2001:db8:f10d::"
@@ -287,9 +294,13 @@ class TestPortalTokenThrottle(unittest.TestCase):
         self.assertEqual(self._counter(name), LIMIT + 1)
 
     def test_a_console_or_job_caller_is_never_throttled(self):
-        """No request means no address to attribute the attempt to, so a scheduled
-        job or a console call resolving a token can never consume a worker's window
-        (mirrors rate_limiter.py:134)."""
+        """No request at all, so a scheduled job or a console call resolving a token
+        can never consume a worker's window (mirrors rate_limiter.py:134).
+
+        This clears the REQUEST, which is the limiter's FIRST guard, so the address
+        read below it never runs here -- ``TestBadTokenAddressGuard`` is what covers
+        that second guard.
+        """
         name = self._arm()
         frappe.local.request = None
         frappe.local.form_dict = frappe._dict()
@@ -301,6 +312,87 @@ class TestPortalTokenThrottle(unittest.TestCase):
                     )
 
         self.assertEqual(self._counter(name), 0)
+
+
+class TestBadTokenAddressGuard(unittest.TestCase):
+    """A request that carries NO address -- the limiter's SECOND guard.
+
+    ``test_a_console_or_job_caller_is_never_throttled`` removes the request, so the
+    first guard returns and the address below it is never read: no test in the file
+    could reach the line that decides what to do with a missing address. Here the
+    request is PRESENT and only the address is gone, in both shapes it occurs in:
+    unset (a bare read raises ``AttributeError``) and None (``frappe.init`` sets it and
+    ``frappe.app`` fills it, so None is what every non-HTTP caller carries).
+
+    The window is keyed on the address ALONE (``BAD_TOKEN_WINDOW_KEY``), so a None
+    address charges a bucket literally named ``...:None`` -- ONE window shared by every
+    addressless caller in the app, which inverts a per-address ceiling into a way for
+    any one of them to 429 all the rest.
+
+    ``charge_window`` is spied rather than spent, so what is asserted is the DECISION
+    to charge. That needs no site and no Redis: a throttle whose guards can only be
+    exercised against a live bench is a throttle whose guards do not get tested.
+    """
+
+    def setUp(self):
+        self._saved = {
+            name: getattr(frappe.local, name, _ABSENT)
+            for name in ("request", "request_ip", "form_dict")
+        }
+        self.addCleanup(self._restore)
+        self.charged = []
+        spy = mock.patch.object(
+            token_security,
+            "charge_window",
+            side_effect=lambda name, window, limit: self.charged.append(name) or 1,
+        )
+        spy.start()
+        self.addCleanup(spy.stop)
+        frappe.local.form_dict = frappe._dict({"cmd": "a228-" + frappe.generate_hash(length=12)})
+
+    def _restore(self):
+        for name, previous in self._saved.items():
+            if previous is _ABSENT:
+                if hasattr(frappe.local, name):
+                    delattr(frappe.local, name)
+            else:
+                setattr(frappe.local, name, previous)
+
+    def test_a_request_with_no_address_declines_instead_of_charging(self):
+        for label, install_none in (("unset", False), ("None", True)):
+            with self.subTest(request_ip=label):
+                self.charged.clear()
+                if hasattr(frappe.local, "request_ip"):
+                    delattr(frappe.local, "request_ip")
+                if install_none:
+                    frappe.local.request_ip = None
+                frappe.local.request = _Request()
+
+                self.assertIsNone(token_security._throttle_bad_token_attempt())
+                self.assertEqual(
+                    self.charged,
+                    [],
+                    "an addressless caller was charged, so every one of them shares "
+                    "a single window and any of them can 429 the rest",
+                )
+
+    def test_the_guard_still_charges_a_request_that_has_an_address(self):
+        """Non-vacuous: the guard must decline an absent address, not every call.
+
+        Without this, replacing the whole body with ``return`` would pass the test
+        above and quietly retire the only ceiling on failed portal tokens. The address
+        stays inside this file's own reserved subnet even though a spied charge never
+        reaches a shared window.
+        """
+        frappe.local.request = _Request()
+        frappe.local.request_ip = BAD_TOKEN_SUBNET + frappe.generate_hash(length=12)
+
+        token_security._throttle_bad_token_attempt()
+
+        self.assertEqual(
+            self.charged,
+            [token_security.BAD_TOKEN_WINDOW_KEY.format(frappe.local.request_ip)],
+        )
 
 
 # An address-shaped string LITERAL: an IPv6 form (it carries a ``::``, which a
