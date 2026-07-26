@@ -20,6 +20,7 @@ import ast
 import csv
 import glob
 import os
+import subprocess
 
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 REPO_ROOT = os.path.dirname(APP_ROOT)
@@ -48,8 +49,37 @@ def is_test_file(relpath):
     )
 
 
+def _git_tracked_py_files():
+    """apex/**/*.py as CI would receive them, or None when git cannot answer.
+
+    CI grades a fresh clone, so a gitignored file exists only on a developer's
+    disk. A guard that walks the filesystem judges it anyway and reds locally
+    while CI stays green -- the same asymmetry comment_audit, check_translations
+    and check_doctype_dates already avoid with this exact enumeration.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "-C", REPO_ROOT, "ls-files", "-z", "--cached", "--others",
+             "--exclude-standard", "--", "*.py"],
+            capture_output=True,
+            check=True,
+        ).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    prefix = os.path.basename(APP_ROOT) + "/"
+    return sorted(
+        os.path.join(REPO_ROOT, entry)
+        for entry in out.decode().split("\0")
+        if entry.startswith(prefix)
+    )
+
+
 def all_py_files():
     """Every apex/**/*.py except node_modules — production AND test."""
+    tracked = _git_tracked_py_files()
+    if tracked is not None:
+        return [path for path in tracked if "node_modules" not in path]
+    # No git (an sdist, say): fall back to the walk rather than scanning nothing.
     return [
         path
         for path in sorted(glob.glob(os.path.join(APP_ROOT, "**", "*.py"), recursive=True))
