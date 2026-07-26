@@ -22,13 +22,10 @@ class TestPaymentRoutingFieldMap(FrappeTestCase):
         # this test owns only the field_map rows and must leave the rest untouched.
         self._target = settings.target_payment_doctype
         self._auto_submit = settings.auto_submit_target
+        # Snapshot the WHOLE row rather than a hand-picked field list, which would
+        # silently stop restoring any column added to the child later.
         self._rows = [
-            {
-                "target_fieldname": row.target_fieldname,
-                "source_fieldname": row.source_fieldname,
-                "is_static": row.is_static,
-                "static_value": row.static_value,
-            }
+            row.as_dict(no_default_fields=True, no_child_table_fields=True)
             for row in settings.field_map
         ]
         # _validate_links runs BEFORE validate (document.py _save), so a stale target

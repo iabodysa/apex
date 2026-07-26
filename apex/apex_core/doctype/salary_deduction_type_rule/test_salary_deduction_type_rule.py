@@ -20,15 +20,12 @@ class TestSalaryDeductionTypeRule(FrappeTestCase):
         # type_rules, so snapshot the rows and register the restore BEFORE mutating
         # (FrappeTestCase rolls back once per CLASS, not per test).
         policy = frappe.get_single("Salary Deduction Policy")
+        # Snapshot the WHOLE row: a hand-picked field list silently drops columns the
+        # parent's guards require (salary_component, authorized_by), so the restore
+        # itself throws. as_dict() sheds only frappe's own identity/link metadata,
+        # which a delete-and-recreate must re-derive anyway.
         self._rows = [
-            {
-                "deduction_type": row.deduction_type,
-                "enabled": row.enabled,
-                "cap_amount_per_event": row.cap_amount_per_event,
-                "max_percent_of_salary": row.max_percent_of_salary,
-                "schedule": row.schedule,
-                "trigger_event": row.trigger_event,
-            }
+            row.as_dict(no_default_fields=True, no_child_table_fields=True)
             for row in policy.type_rules
         ]
         self.addCleanup(self._restore_policy)
