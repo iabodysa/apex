@@ -43,20 +43,13 @@ SYNC_SLUGS = sorted({slug for _module, slug in IMPORTABLE_DOCTYPES})
 # per module below because the slug carries the module name.
 DASHBOARD_SLUGS = ("dashboard_chart", "number_card")
 
-# Frozen pre-existing mismatches, as "<module>/<slug>/<folder>". A-150 renamed
-# the two offenders in the sync walk; these five sit in the dashboard walk and
-# are deliberately left for their own card, because four of them scrub to a
-# folder carrying "(" or "%" and that spelling wants a decision, not a rename.
+# Frozen pre-existing mismatches, as "<module>/<slug>/<folder>". A-150 drained the
+# last five by renaming the FOLDER to scrub(name), punctuation included: the record
+# name is the primary key a Dashboard or Workspace row points at, so renaming the
+# record to buy a cleaner path would orphan those pointers, and "(" or "%" in a
+# record folder is what a Desk re-export writes anyway (ERPNext and HRMS ship many).
 # Nothing may be added here: a new entry admits a record re-export will duplicate.
-KNOWN_MISMATCHES = frozenset(
-    {
-        "habitat/dashboard_chart/vacant_capacity_cost_trend",
-        "habitat/number_card/custody_value_in_employee_hands",
-        "habitat/number_card/scheduled_task_completion_rate",
-        "salis/dashboard_chart/avg_vehicle_utilisation_all_time",
-        "salis/number_card/alert_median_resolve_days",
-    }
-)
+KNOWN_MISMATCHES = frozenset()
 
 # Floor for the vacuity check; the app shipped 522 record folders at A-150.
 MIN_RECORD_FOLDERS = 480
@@ -139,7 +132,7 @@ class TestStandardRecordPathParity(unittest.TestCase):
             "expected Module Onboarding folder not scanned -- the walk is broken",
         )
         self.assertIn(
-            "salis/number_card/alert_median_resolve_days",
+            "salis/number_card/median_alert_resolve_days",
             seen,
             "expected Number Card folder not scanned -- the dashboard walk is broken",
         )
