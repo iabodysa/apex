@@ -29,9 +29,23 @@ the module they exercise.
 A-131 drained the directory: 158 modules moved out to the api / doctype /
 report / tasks / utils / seeder / patch / www unit each one exercises, and each
 drained name was PRUNED from ``_BASELINE`` as it left. Pruning is what keeps the
-ratchet honest — ``test_central_test_count_never_grows`` compares the live count
-against ``len(_BASELINE) + len(_CENTRAL_BY_NECESSITY)``, so a drained entry left
-behind would silently buy headroom for a future central test nobody reviewed.
+ratchet honest — a drained entry left behind would silently buy headroom for a
+future central test nobody reviewed.
+
+A-197 closed the two ways that headroom could be BOUGHT rather than earned:
+
+  * The allowance used to be ``len(_BASELINE) + len(_CENTRAL_BY_NECESSITY)``,
+    which a padded set raises along with itself — one invented name in EITHER
+    set bought exactly one new central test. Proven: adding
+    ``test_fuel_request_unified.py`` (a real file, but at ``salis/``, never
+    central) to ``_BASELINE`` plus a new ``tests/test_fuel_request_unified.py``
+    left all five assertions green one file above the ceiling. The allowance is
+    now ``min(_CEILING, ...)`` against a frozen number that padding cannot move.
+  * The phantom check resolved a baseline entry against any same-named file
+    ANYWHERE under ``apex/``, so borrowing an existing colocated test's NAME
+    made an invented entry look like a legitimate drain. A baseline entry must
+    now be the central file it names — if it drained it must be pruned, not
+    re-resolved somewhere else — and no entry may name two homes at once.
 
 Genuinely app-wide guards (release hygiene, schema integrity, translation
 coverage, this file) have no single module to sit beside and stay central
@@ -145,6 +159,14 @@ _CENTRAL_BY_NECESSITY = frozenset(
     }
 )
 
+# [#a197c1] The ratchet's HARD ceiling, frozen 2026-07-26 at the count the two
+# sets above sum to. It exists because deriving the allowance from those two
+# lengths let a padded set buy its own headroom: one invented name raised the
+# allowance by exactly one. A frozen integer cannot be moved by padding. It may
+# only ever be LOWERED, in the same commit that drains an entry — see
+# test_central_test_count_never_grows, which fails if it drifts above the sum.
+_CEILING = 47
+
 
 def _central_tests():
     """Basenames of every ``test_*.py`` directly under ``apex/tests/``."""
@@ -211,35 +233,77 @@ class TestColocationRatchet(unittest.TestCase):
     def test_central_test_count_never_grows(self):
         """The ratchet proper: the central count is monotonically non-increasing."""
         current = len(_central_tests())
-        allowed = len(_BASELINE) + len(_CENTRAL_BY_NECESSITY)
+        accounted = len(_BASELINE) + len(_CENTRAL_BY_NECESSITY)
+        # [#a197c2] The ceiling must stay TIGHT against the sets, or it goes
+        # vestigial: a drain that shrinks them while _CEILING stays put would
+        # leave the difference as unreviewed headroom. Lower it with the drain.
+        self.assertLessEqual(
+            _CEILING,
+            accounted,
+            f"_CEILING ({_CEILING}) now exceeds baseline {len(_BASELINE)} + "
+            f"{len(_CENTRAL_BY_NECESSITY)} central-by-necessity = {accounted}. "
+            "An entry drained without the ceiling following it down — lower "
+            f"_CEILING to {accounted}, or the gap is free headroom.",
+        )
+        # [#a197c3] min(), never the sum alone: padding either set raises
+        # `accounted` but cannot move the frozen ceiling, so it buys no headroom.
+        allowed = min(_CEILING, accounted)
         self.assertLessEqual(
             current,
             allowed,
-            f"apex/tests/ grew to {current} test modules (baseline "
-            f"{len(_BASELINE)} + {len(_CENTRAL_BY_NECESSITY)} central-by-necessity). "
+            f"apex/tests/ grew to {current} test modules (allowed {allowed} = "
+            f"min(ceiling {_CEILING}, baseline {len(_BASELINE)} + "
+            f"{len(_CENTRAL_BY_NECESSITY)} central-by-necessity)). "
             "The central directory may only shrink — relocate tests out to their "
             "module, never add new ones in.",
         )
 
     def test_baseline_has_no_phantom_entries(self):
-        """Hygiene: the baseline must never gain a name that was never central.
+        """Hygiene: every baseline entry must BE the central file it names.
 
-        Guards the ratchet against being 'fixed' by padding _BASELINE with
-        invented names to make room for a new central test. Every baseline
-        entry must either still exist centrally, or exist as a colocated file
-        (i.e. it drained legitimately)."""
-        colocated_basenames = {os.path.basename(p) for p in _colocated_tests()}
+        [#a197c4] This used to accept an entry that matched any same-named file
+        ANYWHERE under apex/, on the theory that a drained entry "reappears" as
+        a colocated test. That resolved a drained name against a file it never
+        left from, so padding _BASELINE with the basename of any existing
+        colocated test passed as a legitimate drain and widened the ratchet.
+        A drained entry is PRUNED (module docstring), never re-resolved — so the
+        only file a baseline entry may resolve to is apex/tests/<name> itself.
+        """
         central = _central_tests()
-        phantom = sorted(
-            n for n in _BASELINE if n not in central and n not in colocated_basenames
-        )
+        phantom = sorted(n for n in _BASELINE if n not in central)
         self.assertEqual(
             phantom,
             [],
-            "Baseline entr(ies) match no file anywhere — a drained entry should "
-            "reappear as a colocated test. Prune it from _BASELINE instead of "
-            "leaving a phantom that silently widens the ratchet:\n"
-            + "\n".join(f"  {n}" for n in phantom),
+            "Baseline entr(ies) name no file in apex/tests/. A drained entry is "
+            "pruned from _BASELINE as it leaves — it must NOT be left behind to "
+            "resolve against a same-named file elsewhere in the tree, which "
+            "silently widens the ratchet:\n" + "\n".join(f"  {n}" for n in phantom),
+        )
+
+    def test_no_accounted_name_claims_two_homes(self):
+        """[#a197c5] An accounted central name may not also exist colocated.
+
+        The ratchet's contract is that a name is central until it drains, and
+        that draining deletes the central copy and prunes the entry — so the two
+        homes are mutually exclusive. A name living in both is the signature of
+        an entry padded by BORROWING an existing colocated test's identity to
+        make an invented central file look already-accounted-for.
+
+        Zero occurrences today (verified across all 47 central and 313 colocated
+        modules). If a colocated test ever legitimately wants a central guard's
+        basename, rename it or drain the central one — either is a review event,
+        which is the point.
+        """
+        colocated = {os.path.basename(p): p for p in sorted(_colocated_tests())}
+        accounted = _BASELINE | _CENTRAL_BY_NECESSITY
+        both = sorted(n for n in accounted & _central_tests() if n in colocated)
+        self.assertEqual(
+            both,
+            [],
+            "Accounted central name(s) ALSO exist as a colocated test. Either a "
+            "drain left its central copy behind, or an entry was padded with an "
+            "existing colocated name to buy headroom:\n"
+            + "\n".join(f"  apex/tests/{n}  vs  apex/{colocated[n]}" for n in both),
         )
 
     def test_central_by_necessity_entries_all_exist(self):
