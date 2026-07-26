@@ -91,6 +91,18 @@ AUTHENTICATED_READS = ((front_desk, "resolve_worker"),)
 
 CARRIERS = GUEST_SUBMITTERS + AUTHENTICATED_READS
 
+# Pinned, so "the declared ceiling is the enforced ceiling" cannot be satisfied by
+# moving BOTH: the spending tests read the declaration, so a raised limit would spend
+# the larger window and still agree with itself. 5/minute is the published guest-intake
+# figure each endpoint's own docstring promises; 60/minute is the Front Desk scan cadence.
+DECLARED_CEILINGS = {
+    "submit_resident_request": 5,
+    "submit_arrival_manifest": 5,
+    "submit_transport_request": 5,
+    "submit_vehicle_incident": 5,
+    "resolve_worker": 60,
+}
+
 _ABSENT = object()
 
 # The frappe frame a no-argument call is expected to die in: the limiter charges the
@@ -219,12 +231,13 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
         (rate_limiter.py:132-168), so the missing-argument TypeError lands only after
         the counter has already moved -- and no document is ever inserted.
 
-        The refusal is caught BY NAME. Every other exception propagates, and the one
-        TypeError that is tolerated must have been raised from inside the limiter's own
-        frame. A bare ``except`` here is the exact bug this file exists not to repeat:
-        the previous pass had a harness report OK at call 121 while every call was
-        raising FileNotFoundError, because the refusal was swallowed with everything
-        else. Every count is cross-checked against the bucket ledger besides.
+        The refusal is caught BY NAME, and NOTHING else is tolerated except that one
+        argument-binding TypeError -- identified on two independent counts, because a
+        bare ``except`` here is the exact bug this file exists not to repeat: the pass
+        before this one had a harness report OK at call 121 while every call was raising
+        FileNotFoundError, the refusal swallowed alongside it. The bucket ledger cannot
+        substitute for this check -- the limiter charges BEFORE it delegates, so a call
+        that crashed in the endpoint moves the counter exactly like one that succeeded.
         """
         form_dict = {"cmd": cmd}
         if param is not _ABSENT:
@@ -235,10 +248,17 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
         except frappe.RateLimitExceededError as refusal:
             return refusal
         except TypeError as crash:
+            # Both must hold: raised from the limiter's own frame (so the endpoint body
+            # was never entered) AND naming an unbound parameter. Either alone would let
+            # a TypeError from INSIDE the limiter read as a healthy call; requiring both
+            # means a future CPython rewording fails loudly here rather than quietly
+            # widening what counts as success.
             frame = crash.__traceback__
             while frame.tb_next is not None:
                 frame = frame.tb_next
             if frame.tb_frame.f_code.co_filename != _LIMITER_FILE:
+                raise
+            if "required positional argument" not in str(crash):
                 raise
             return None
         return None
@@ -246,10 +266,13 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
     def test_the_five_carriers_are_all_present_and_still_metered(self):
         """A rename or a dropped decorator must fail here, not pass quietly."""
         self.assertEqual(len(CARRIERS), 5)
+        self.assertEqual({name for _module, name in CARRIERS}, set(DECLARED_CEILINGS))
         for module, name in CARRIERS:
             with self.subTest(module=module.__name__, endpoint=name):
                 self.assertTrue(callable(getattr(module, name)))
-                self.assertIn("limit", _declared_limits(module, name))
+                self.assertEqual(
+                    _declared_limits(module, name).get("limit"), DECLARED_CEILINGS[name]
+                )
 
     def test_the_four_guest_submitters_are_still_guest_post_writers(self):
         """Why these four are ranked above the read: the surface that made a forged
