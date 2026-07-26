@@ -25,6 +25,10 @@ from apex.apex_core.utils.portal_token_security import (
     presented_token,
     resolve_portal_subject,
 )
+from apex.apex_core.utils.rate_window import (
+    INCR_AND_EXPIRE_SCRIPT,
+    charge_window,
+)
 from apex.salis.utils import get_driver_for_user, has_any_role
 
 # [#78ttpx]
@@ -32,13 +36,10 @@ PASS_TTL_HOURS = 24
 SCAN_ACTOR_LIMIT = 60
 SCAN_UNRESOLVED_IP_LIMIT = 60
 SCAN_RATE_WINDOW_SECONDS = 60
-SCAN_RATE_LIMIT_SCRIPT = """
-local value = redis.call("INCR", KEYS[1])
-if value == 1 then
-    redis.call("EXPIRE", KEYS[1], ARGV[1])
-end
-return value
-"""
+# The counter itself moved to apex_core.utils.rate_window so the portal token
+# throttle counts the same way; this name stays bound to it because
+# tests/test_front_desk_rate_limit.py drives the script directly.
+SCAN_RATE_LIMIT_SCRIPT = INCR_AND_EXPIRE_SCRIPT
 
 # Who may authorise a boarding scan. Deliberately NARROWER than the driver
 # portal's same-named tuple: Finance Manager reads fleet cost, never scans a rider on.
@@ -144,18 +145,11 @@ def _enforce_scan_rate_limit(scope: str, identity: str, limit: int) -> None:
         return
 
     command = frappe.form_dict.get("cmd") or "apex.salis.api.boarding.scan_boarding_pass"
-    cache_key = frappe.cache.make_key(f"rl:{command}:{scope}:{identity}")
-    value = frappe.cache.eval(
-        SCAN_RATE_LIMIT_SCRIPT,
-        1,
-        cache_key,
+    charge_window(
+        f"rl:{command}:{scope}:{identity}",
         SCAN_RATE_WINDOW_SECONDS,
+        limit,
     )
-    if value > limit:
-        frappe.throw(
-            _("You hit the rate limit because of too many requests. Please try after sometime."),
-            frappe.RateLimitExceededError,
-        )
 
 
 def _enforce_scan_actor_rate_limit(actor: str) -> None:

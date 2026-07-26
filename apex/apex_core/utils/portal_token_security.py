@@ -7,6 +7,8 @@ import hashlib
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.rate_window import charge_window
+
 WORKER = "Worker"
 DRIVER = "Driver"
 TOKEN_COOKIES = {WORKER: "masar_wt", DRIVER: "masar_dt"}
@@ -50,8 +52,7 @@ BAD_TOKEN_WINDOW_SECONDS = 60
 # ONE window per address, spent across EVERY portal entry -- the advertised budget,
 # not 10 per endpoint. frappe's @rate_limit cannot express that: it welds
 # form_dict.cmd into its key (rate_limiter.py:155), so each guest endpoint would
-# carry a private 10 and the real per-IP ceiling would be ~50x the stated one. The
-# body below otherwise mirrors rate_limiter.py:134-166.
+# carry a private 10 and the real per-IP ceiling would be ~50x the stated one.
 BAD_TOKEN_WINDOW_KEY = "rl:apex-portal-bad-token:{0}"
 
 
@@ -59,21 +60,22 @@ def _throttle_bad_token_attempt() -> None:
     """Charge one failed portal-token attempt against this address's window; the
     (N+1)th raises RateLimitExceededError (HTTP 429). A caller with no request or no
     remote address cannot be attributed to an address, so it is a no-op there --
-    console, scheduled-job and test callers are never throttled."""
+    console, scheduled-job and test callers are never throttled.
+
+    The counting itself is the shared atomic window, NOT rate_limiter.py's
+    read-then-write: this throttle exists to make a parallel flood visible, and the
+    framework's shape goes quiet under exactly that load (see rate_window)."""
     if not getattr(frappe.local, "request", None):
         return
     ip = getattr(frappe.local, "request_ip", None)
     if not ip:
         return
 
-    key = frappe.cache.make_key(BAD_TOKEN_WINDOW_KEY.format(ip))
-    if not frappe.cache.get(key):
-        frappe.cache.setex(key, BAD_TOKEN_WINDOW_SECONDS, 0)
-    if frappe.cache.incrby(key, 1) > BAD_TOKEN_ATTEMPTS_PER_MINUTE:
-        frappe.throw(
-            _("You hit the rate limit because of too many requests. Please try after sometime."),
-            frappe.RateLimitExceededError,
-        )
+    charge_window(
+        BAD_TOKEN_WINDOW_KEY.format(ip),
+        BAD_TOKEN_WINDOW_SECONDS,
+        BAD_TOKEN_ATTEMPTS_PER_MINUTE,
+    )
 
 
 def _require_audience(audience: str) -> None:
