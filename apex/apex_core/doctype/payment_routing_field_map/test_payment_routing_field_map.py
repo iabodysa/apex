@@ -37,9 +37,11 @@ class TestPaymentRoutingFieldMap(FrappeTestCase):
         # ValidationError). Clear it so the field map is what is actually under test.
         if self._target and not frappe.db.exists("DocType", self._target):
             self._target = None
+        # Register the restore BEFORE the first mutating save: if this very save
+        # throws, an un-registered cleanup would leave the Single wiped for good.
+        self.addCleanup(self._restore_settings)
         settings.target_payment_doctype = None
         settings.save(ignore_permissions=True)
-        self.addCleanup(self._restore_settings)
 
     def _restore_settings(self):
         settings = frappe.get_single(SETTINGS)
