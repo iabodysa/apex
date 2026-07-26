@@ -126,18 +126,51 @@ class TestCustodyDamageAssessment(FrappeTestCase):
         frappe.delete_doc("Additional Salary", add_sal.name, force=True, ignore_permissions=True)
 
     def test_additional_salary_insert_ignores_permissions(self):
-        """Regression (bug #3): the system-generated Additional Salary deduction
-        must insert with ignore_permissions=True so a non-HR submitter (e.g. a
-        Housing Supervisor) is not blocked by lacking Additional Salary create
-        rights — the whole submit would otherwise abort atomically. It stays
-        auditable: drafted, logged, and linked back via deduction_entry."""
-        import inspect
+        """Regression (bug #3): a non-HR submitter (e.g. a Housing Supervisor) has no
+        Additional Salary create right, so a permission-checked insert would abort the
+        whole submit atomically. The system-generated deduction must post anyway, and
+        stay auditable — drafted, logged, and linked back via deduction_entry.
+
+        Asserted as an OUTCOME rather than as a keyword in the source: on_submit runs
+        against a frappe whose insert REFUSES any permission-checked write, so the
+        test passes only if the deduction still lands and still gets linked back.
+        Reformatting or relocating the insert stays green; making it permission-
+        checked — the actual regression — does not.
+        """
+        from unittest.mock import MagicMock, patch
         from apex.habitat.doctype.custody_damage_assessment import (
             custody_damage_assessment as mod,
         )
-        source = inspect.getsource(mod.on_submit)
-        self.assertIn("ignore_permissions=True", source)
-        self.assertNotIn("ignore_permissions=False", source)
+        posted, linked = [], []
+        add_sal = MagicMock()
+        add_sal.name = "QA-ADD-SAL"
+        add_sal.amount = 150
+
+        def refuse_unless_bypassed(**kwargs):
+            if not kwargs.get("ignore_permissions"):
+                raise frappe.PermissionError("submitter holds no Additional Salary create right")
+            posted.append(kwargs)
+        add_sal.insert.side_effect = refuse_unless_bypassed
+
+        lookups = {"Employee": "QA Company", "Salary Component": "Deduction"}
+        stub = MagicMock()
+        stub.get_doc.return_value = add_sal
+        stub.db.get_value.side_effect = lambda doctype, _name, _field: lookups[doctype]
+        stub.db.set_value.side_effect = lambda *args: linked.append(args)
+        rule = frappe._dict(cap_amount_per_event=0, salary_component="QA-DMG-COMPONENT")
+        doc = frappe._dict(name="QA-CDA", employee="QA-EMP", deduction_entry=None,
+                           assessment_date="2026-07-10", source_checkout=None,
+                           total_estimated_replacement_cost=150)
+
+        with patch.object(mod, "frappe", stub), \
+                patch.object(mod, "get_damage_rule", lambda: rule):
+            mod.on_submit(doc)
+
+        self.assertTrue(posted, "the deduction must post despite the submitter's missing rights")
+        self.assertIn(
+            ("Custody Damage Assessment", "QA-CDA", "deduction_entry", "QA-ADD-SAL"), linked,
+            "the posted deduction must stay auditable — linked back via deduction_entry",
+        )
 
     def test_get_deduction_status_denied_without_cda_read(self):
         """IDOR: the whitelisted get_deduction_status must gate per-doc

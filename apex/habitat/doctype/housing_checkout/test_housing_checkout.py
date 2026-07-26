@@ -95,51 +95,93 @@ class TestAccommodationCheckout(FrappeTestCase):
         self.assertNotEqual(result, "")
 
     def test_on_submit_locks_assignment_against_concurrent_checkout(self):
-        """Regression (#4): on_submit must take a row lock on the assignment
-        (for_update) and re-check check_out_date, so two concurrent checkouts for
-        the same assignment serialize and the loser aborts. True concurrency is not
-        reproducible single-threaded; this guards the mechanism from being removed."""
-        import inspect
+        """Regression (#4): two concurrent checkouts for one assignment must
+        serialize and the loser must abort — on_submit re-reads the assignment's
+        check_out_date under a row lock and throws when it is already set.
+
+        True concurrency is not reproducible single-threaded, so the loser's race is
+        played back against a recording db layer: the run must abort, and the read
+        that decided it must have been a LOCKING read. Both are observed at the call
+        boundary, so moving the lock into a helper or renaming its locals stays green
+        while dropping for_update — the actual regression — does not.
+        """
+        from unittest.mock import MagicMock, patch
         from apex.habitat.doctype.housing_checkout import (
             housing_checkout as mod,
         )
-        src = inspect.getsource(mod.on_submit)
-        self.assertIn("for_update=True", src)
-        self.assertIn("check_out_date", src)
+        reads = []
+        stub = MagicMock()
+        stub.db.get_value.side_effect = lambda doctype, _name, field, **kw: (
+            reads.append((doctype, field, kw.get("for_update"))) or "2026-07-01"
+        )
+        stub.throw.side_effect = frappe.ValidationError
+        doc = frappe._dict(name="ACC-CHKOUT-QA", assignment="ACC-ASGN-QA",
+                           checkout_date="2026-07-05")
+
+        # `_` is swapped for identity so the run needs no translation cache.
+        with patch.object(mod, "frappe", stub), patch.object(mod, "_", lambda text: text):
+            with self.assertRaises(frappe.ValidationError):
+                mod.on_submit(doc)
+
+        self.assertIn(
+            ("Housing Assignment", "check_out_date", True), reads,
+            "the check_out_date re-read that decides the race must take a row lock",
+        )
 
     # [#10md08]
 
     def test_on_submit_uses_correct_damage_assessment_fieldnames(self):
-        """on_submit() auto-creates a Custody Damage Assessment using the correct
-        child-table fieldnames from the Custody Damage Item schema:
-        'article', 'damage_description', 'estimated_replacement_cost'.
+        """on_submit() auto-creates a draft Custody Damage Assessment carrying one
+        row per Damaged/Lost custody return item, mapped onto the Custody Damage Item
+        fieldnames 'article', 'damage_description', 'estimated_replacement_cost'.
 
-        Verifies the field mapping is correct by inspecting the source and the
-        Custody Damage Item meta — guards against future fieldname renames breaking
-        the draft assessment creation.
+        Asserted on the ROW that gets written, not on the source text that writes it:
+        the checkout is submitted against a recording frappe and the appended child
+        rows are read back. A fieldname rename in on_submit still fails here (the
+        row would carry the wrong key), while renaming its locals or moving the
+        mapping into a helper stays green. The schema half of the claim — that those
+        three fieldnames really exist — lives in the meta test below.
         """
-        import inspect
+        from unittest.mock import MagicMock, patch
         from apex.habitat.doctype.housing_checkout import (
             housing_checkout as mod,
         )
-        src = inspect.getsource(mod.on_submit)
-        # [#ozynyi]
-        self.assertIn('"article"', src, "on_submit must map 'article' to Custody Damage Item")
-        self.assertIn('"damage_description"', src,
-                      "on_submit must set 'damage_description' on the damage item")
-        self.assertIn('"estimated_replacement_cost"', src,
-                      "on_submit must set 'estimated_replacement_cost' on the damage item")
+        appended = []
+        assessment = MagicMock()
+        assessment.append.side_effect = lambda table, row: appended.append((table, row))
+        stub = MagicMock()
+        # Not yet checked out, so on_submit proceeds to the custody hand-off.
+        stub.db.get_value.return_value = None
+        stub.get_doc.side_effect = lambda *args: (
+            assessment if args and isinstance(args[0], dict) else MagicMock()
+        )
+        doc = frappe._dict(
+            name="ACC-CHKOUT-QA", assignment="ACC-ASGN-QA", bed="QA-BED",
+            employee="QA-EMP", checkout_date="2026-07-01",
+            custody_return_items=[
+                frappe._dict(article="QA-ART-DAMAGED", return_status="Damaged"),
+                frappe._dict(article="QA-ART-RETURNED", return_status="Returned"),
+            ],
+            add_comment=lambda *args, **kwargs: None,
+        )
 
-        # [#73y8nk]
-        meta = frappe.get_meta("Custody Damage Item")
-        fieldnames = {f.fieldname for f in meta.fields}
-        for expected in ("article", "damage_description", "estimated_replacement_cost"):
-            self.assertIn(expected, fieldnames,
-                          f"'{expected}' must exist on Custody Damage Item")
+        # `_` is swapped for identity so the run needs no translation cache.
+        with patch.object(mod, "frappe", stub), patch.object(mod, "_", lambda text: text), \
+                patch.object(mod, "recalculate_spatial", lambda *args: None):
+            mod.on_submit(doc)
+
+        rows = [row for table, row in appended if table == "items"]
+        self.assertEqual([r["article"] for r in rows], ["QA-ART-DAMAGED"],
+                         "only Damaged/Lost custody rows become damage items")
+        self.assertTrue(rows[0]["damage_description"],
+                        "the damage item must carry a damage_description")
+        self.assertEqual(rows[0]["estimated_replacement_cost"], 0,
+                         "the draft assessment leaves the cost for the manager")
 
     def test_damage_assessment_doctype_has_correct_building_and_items_fields(self):
         """Custody Damage Assessment must have 'building' (required Link) and
-        'items' (Table → Custody Damage Item) as expected by on_submit()."""
+        'items' (Table → Custody Damage Item) as expected by on_submit(), and
+        Custody Damage Item must carry the three fieldnames on_submit maps onto."""
         meta = frappe.get_meta("Custody Damage Assessment")
         fieldnames = {f.fieldname: f for f in meta.fields}
         self.assertIn("building", fieldnames,
@@ -147,6 +189,12 @@ class TestAccommodationCheckout(FrappeTestCase):
         self.assertIn("items", fieldnames,
                       "'items' table field must exist on Custody Damage Assessment")
         self.assertEqual(fieldnames["items"].options, "Custody Damage Item")
+
+        # [#73y8nk]
+        item_fieldnames = {f.fieldname for f in frappe.get_meta("Custody Damage Item").fields}
+        for expected in ("article", "damage_description", "estimated_replacement_cost"):
+            self.assertIn(expected, item_fieldnames,
+                          f"'{expected}' must exist on Custody Damage Item")
 
     # [#k1ngbj]
 

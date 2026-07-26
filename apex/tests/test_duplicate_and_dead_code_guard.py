@@ -115,6 +115,7 @@ Run standalone (from the repo root, so ``apex.tests.source_tree`` resolves):
 """
 
 import ast
+import copy
 import glob
 import json
 import os
@@ -320,14 +321,114 @@ def _non_docstring_body(fn_node):
     return body
 
 
+def _local_bindings(fn_node):
+    """``{original: placeholder}`` for every name the function BINDS ITSELF,
+    numbered in BINDING order — parameters in signature order, then assignment
+    targets in source order.
+
+    Binding order, never use order. With use order, ``load(a)`` and ``load(b)``
+    inside a two-parameter function would both number their argument first and
+    collapse into one signature, inventing a match between two functions that
+    call the same helper on different inputs (test_signature_numbers_locals_by_
+    binding_order_not_use_order pins this).
+
+    A bound name is EXCLUDED when the name is the identity of something outside
+    the function rather than a private label: an import binding (in
+    ``from m import alpha``, ``alpha`` names the imported symbol), a
+    ``global``/``nonlocal`` declaration, or a nested def/class, which a decorator
+    can register by name."""
+    external = set()
+    for node in ast.walk(fn_node):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            external.update((a.asname or a.name).split(".")[0] for a in node.names)
+        elif isinstance(node, (ast.Global, ast.Nonlocal)):
+            external.update(node.names)
+        elif node is not fn_node and isinstance(
+            node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+        ):
+            external.add(node.name)
+
+    args = fn_node.args
+    ordered = [
+        a.arg
+        for a in (*args.posonlyargs, *args.args, args.vararg, *args.kwonlyargs, args.kwarg)
+        if a
+    ]
+    placed = []
+    for node in ast.walk(fn_node):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            placed.append((node.lineno, node.col_offset, node.id))
+        elif isinstance(node, ast.ExceptHandler) and node.name:
+            placed.append((node.lineno, node.col_offset, node.name))
+    ordered += [name for _lineno, _col, name in sorted(placed)]
+
+    mapping = {}
+    for name in ordered:
+        if name not in external and name not in mapping:
+            mapping[name] = f"_v{len(mapping)}"
+    return mapping
+
+
+class _AlphaRename(ast.NodeTransformer):
+    """Rewrites ONLY the identifiers listed in the local-binding map.
+
+    Attribute names, constants and keyword-argument names sit in ``str`` fields of
+    other node types, which this visitor structurally never reaches — so a field
+    name, a DocType string or a ``for_update=True`` keyword cannot be normalised
+    away by a future edit here either."""
+
+    def __init__(self, mapping):
+        self._map = mapping
+
+    def visit_Name(self, node):
+        node.id = self._map.get(node.id, node.id)
+        return node
+
+    def visit_arg(self, node):
+        node.arg = self._map.get(node.arg, node.arg)
+        return node
+
+    def visit_ExceptHandler(self, node):
+        self.generic_visit(node)
+        if node.name:
+            node.name = self._map.get(node.name, node.name)
+        return node
+
+
 def _body_signature(fn_node):
-    """Structural signature of a function's body: name/argument-independent (a
-    rename-and-paste still matches) but literal/operator DEPENDENT (ast.dump
-    includes constant values), so only a byte-for-byte-equivalent body matches —
-    a copy-paste-with-one-value-changed deliberately does not (kept strict to
-    stay low-false-positive; see module docstring)."""
-    body = _non_docstring_body(fn_node)
-    return "\n".join(ast.dump(stmt, annotate_fields=False) for stmt in body)
+    """Structural signature of a function's body, alpha-renamed over the locals the
+    function binds itself, so a paste that renames them still matches.
+
+    ABSTRACTED, because the name is a private label carrying no meaning outside the
+    body: parameter names — including the ``self``/``doc`` split this codebase's
+    detached-controller style produces for one lifecycle body — and every name bound
+    by assignment, ``for``, ``with ... as``, walrus or ``except ... as``.
+
+    KEPT VERBATIM, because the name IS the meaning and normalising it would make two
+    genuinely different functions look identical: attribute and field names, string
+    and numeric literals (DocType names, fieldnames, status values), keyword-argument
+    names, and every FREE name — module-level helpers, imported symbols, constants.
+
+    Telling them apart needs no hand-written name list. Bound-vs-free is read off the
+    AST by ``_local_bindings``; the other three classes are unreachable from
+    ``_AlphaRename`` by construction. Operators and literal values stay significant,
+    so a copy-paste-with-one-value-changed still does not match (kept strict to stay
+    low-false-positive; see module docstring).
+
+    Statement ORDER stays significant on purpose — test_signature_stays_order_
+    sensitive carries the measurement behind that."""
+    clone = copy.deepcopy(fn_node)
+    _AlphaRename(_local_bindings(clone)).visit(clone)
+    return "\n".join(
+        ast.dump(stmt, annotate_fields=False) for stmt in _non_docstring_body(clone)
+    )
+
+
+def _signature_of(src, name):
+    """The signature of function ``name`` parsed out of the literal source ``src`` —
+    the fixture the signature's own unit tests are written against."""
+    by_name = {fn.name: fn for fn in _all_funcs(ast.parse(src))}
+    return _body_signature(by_name[name])
 
 
 def _is_unittest_dispatched(fn_node):
@@ -446,6 +547,66 @@ class TestCopyPastedFunctionBodies(unittest.TestCase):
         funcs = {fn.name: fn for fn in _all_funcs(tree)}
         self.assertEqual(_body_signature(funcs["a"]), _body_signature(funcs["b"]))
         self.assertLess(len(_non_docstring_body(funcs["c"])), 3, "short stub must not qualify")
+
+    def test_signature_matches_a_body_whose_locals_are_renamed(self):
+        # [#a185al] The escaped shape: one body pasted with every local relabelled,
+        # including the self/doc parameter split the detached-controller style makes.
+        original = (
+            "def a(self):\n"
+            "    rows = {}\n"
+            "    for row in read():\n"
+            "        rows[row[0]] = row[1]\n"
+            "    return rows\n"
+        )
+        pasted = (
+            "def b(doc):\n"
+            "    out = {}\n"
+            "    for r in read():\n"
+            "        out[r[0]] = r[1]\n"
+            "    return out\n"
+        )
+        self.assertEqual(_signature_of(original, "a"), _signature_of(pasted, "b"))
+
+    def test_signature_keeps_load_bearing_names(self):
+        # [#a185lb] Each variant differs from the base in exactly ONE name class that
+        # carries meaning; abstracting any of them would merge different functions.
+        base = 'def f(doc):\n    v = doc.status\n    log(v, "Open", safe=True)\n    return v\n'
+        variants = {
+            "field name": 'def f(doc):\n    v = doc.state\n    log(v, "Open", safe=True)\n    return v\n',
+            "free name": 'def f(doc):\n    v = doc.status\n    warn(v, "Open", safe=True)\n    return v\n',
+            "literal": 'def f(doc):\n    v = doc.status\n    log(v, "Closed", safe=True)\n    return v\n',
+            "keyword name": 'def f(doc):\n    v = doc.status\n    log(v, "Open", strict=True)\n    return v\n',
+        }
+        for label, src in variants.items():
+            self.assertNotEqual(
+                _signature_of(base, "f"),
+                _signature_of(src, "f"),
+                f"{label} is meaning, not a binding artefact — it must stay significant",
+            )
+
+    def test_signature_keeps_import_bound_names(self):
+        # [#a185ib] `from m import alpha` binds alpha, but the name IS the symbol.
+        first = "def f():\n    from m import alpha\n    v = alpha()\n    return v\n"
+        second = "def f():\n    from m import beta\n    v = beta()\n    return v\n"
+        self.assertNotEqual(_signature_of(first, "f"), _signature_of(second, "f"))
+
+    def test_signature_numbers_locals_by_binding_order_not_use_order(self):
+        # [#a185bo] Two parameters, one used: numbering by USE order would place
+        # whichever argument is read first at index 0 and call these one function.
+        first = "def f(a, b):\n    x = load(a)\n    check(x)\n    return x\n"
+        second = "def f(a, b):\n    x = load(b)\n    check(x)\n    return x\n"
+        self.assertNotEqual(_signature_of(first, "f"), _signature_of(second, "f"))
+
+    def test_signature_stays_order_sensitive(self):
+        # [#a185os] Statement reordering was measured and REJECTED: an
+        # order-insensitive body signature found zero duplication the alpha-renamed
+        # one did not, at HEAD and at two earlier revisions, while calling these two
+        # bodies equal — a save before the field is set is a different function.
+        write_then_save = 'def f(doc):\n    doc.total = 1\n    doc.save()\n    return doc.total\n'
+        save_then_write = 'def f(doc):\n    doc.save()\n    doc.total = 1\n    return doc.total\n'
+        self.assertNotEqual(
+            _signature_of(write_then_save, "f"), _signature_of(save_then_write, "f")
+        )
 
     def test_unittest_dispatch_exemption_cannot_hide_a_parameterised_helper(self):
         # [#a170t2] The exemption's two halves: an idiomatic zero-arg setUp/test
