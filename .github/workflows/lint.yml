@@ -6,27 +6,6 @@ on:
   pull_request:
     branches: [apex]
 
-# Cap on ar.csv rows whose English source no longer appears in the scanned package.
-# 132 sit under it today (measured), down from 134: the `Fleet Portal` and
-# `Fleet Portal (Portal)` rows were orphaned when the Fleet workspace shortcut was
-# renamed to `Fleet OS`, and are deleted here after a scan found neither string in
-# the app source, the built portal bundles under apex/public, or any workspace JSON.
-# The cap drops by the same two so the deletion tightens the ratchet instead of
-# banking two rows of slack for the next stale row to hide under.
-# (The previous note said 133; the measured count was 134. It is re-measured here.)
-# The remaining rows are still live-but-unreadable shapes (onboarding intro_text,
-# role and module names, hooks/changelog dict values, workspace link labels the
-# framework composes at runtime), rows owned by frappe/erpnext/hrms or a portal SPA
-# dictionary, superseded renames whose successor row exists, and rows with no live
-# source found. That row-by-row split is inherited from the prior audit, not re-run
-# here; re-cut it by 2026-10-01.
-# 13 is deliberate slack, unchanged in size: measured single-commit churn before this
-# gate existed was +1, +8 and +31, so a baseline pinned to the exact count reds this
-# lane on whoever pushes the next honest label rename — a failure that reads as
-# theirs. Slack absorbs a workspace-scale rename, not a module retirement.
-env:
-  STALE_BASELINE: 145
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -57,11 +36,16 @@ jobs:
 
       - name: Arabic translation coverage
         # MISSING is a hard failure: an untranslated string ships as raw English to
-        # an Arabic user. STALE is capped at a baseline instead of zero — see the
-        # note on STALE_BASELINE above for why zero is not reachable or desirable.
+        # an Arabic user. STALE is judged against the recorded set in
+        # apex/translations/ar.stale-baseline.txt rather than a count: the extractor
+        # cannot read every live string, so zero stale is not reachable, but a count
+        # only says a threshold moved — it never says which row moved it. Against the
+        # set, a failure lists exactly the rows a change just stranded (normally the
+        # one label it renamed), and the message spells out the re-record command.
+        # No --max-stale: it defaults to zero newly stale, and a numeric knob here is
+        # the first thing a red lane tempts someone to raise.
         run: |
           python3 scripts/check_translations.py \
             --package apex \
             --lang ar \
-            --max-missing 0 \
-            --max-stale "$STALE_BASELINE"
+            --max-missing 0

@@ -3,10 +3,19 @@
 a row in apex/translations/ar.csv.
 
 MISSING (a live source string with no CSV row) is a hard failure — the user sees
-raw English. STALE (a CSV row whose English source is gone) is capped at a
-baseline instead: the extractor cannot see every live string (HTML fragments,
-framework labels this app overrides), so a stale row is a *candidate* for
-deletion, not proof of death. Deleting one needs the manual cross-check.
+raw English. STALE (a CSV row whose English source is gone) is held against a
+recorded SET instead of zero: the extractor cannot see every live string (HTML
+fragments, framework labels this app overrides), so a stale row is a *candidate*
+for deletion, not proof of death. Deleting one needs the manual cross-check.
+
+The set, not a count, is what makes a stale failure actionable. A count says a
+threshold moved but not by whom, so the row a rename just stranded arrives buried
+in a hundred identical-looking lines. Holding the SET means a failure lists only
+the rows stale since it was recorded — normally the one label someone just
+renamed — and the fix belongs with that rename, not with whoever wrote the Arabic
+months earlier. Rows drained legitimately are re-recorded with
+--update-stale-baseline, which the failure message spells out: a ratchet nobody
+can advance is a ratchet everybody overrides.
 
 Strings come from two sources and are judged differently. A DECLARED string is
 one the framework or the author already committed to translating — an explicit
@@ -219,46 +228,106 @@ def read_csv_keys(path: Path) -> set:
         return {row[0] for row in csv.reader(handle) if len(row) >= 2 and row[0].strip()}
 
 
+def stale_baseline_path(package: Path, lang: str) -> Path:
+    # Beside the CSV it records, so the set is scoped to the package under test
+    # rather than to wherever this script happens to live.
+    return package / "translations" / f"{lang}.stale-baseline.txt"
+
+
+def read_stale_baseline(path: Path) -> set:
+    """Recorded stale rows, or an empty set when nothing is recorded yet.
+
+    A missing file records nothing, so every stale row reads as new. That is the
+    safe direction: a lost or unwritten set over-reports, it never hides a row.
+    A leading '#' is a comment: a source string starting with one is not a msgid
+    the extractor would ever match (is_candidate_text rejects it), so a row keyed
+    on one could never leave STALE and has no business being recorded.
+    """
+    if not path.exists():
+        return set()
+    lines = path.read_text(encoding="utf-8").splitlines()
+    return {line for line in lines if line.strip() and not line.startswith("#")}
+
+
+def write_stale_baseline(path: Path, stale: list, lang: str, regen: str) -> None:
+    header = (
+        f"# {lang}.csv rows whose English source string was already gone when this set\n"
+        "# was recorded. The gate fails only on stale rows NOT listed here, so its\n"
+        "# output names the row a change just stranded instead of all of them.\n"
+        f"# Regenerate after deleting drained rows:\n#   {regen}\n"
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(header + "".join(f"{text}\n" for text in stale), encoding="utf-8")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--package", default="apex", help="App package directory")
     parser.add_argument("--lang", default="ar", help="Target language")
     parser.add_argument("--max-missing", type=int, default=0)
-    parser.add_argument("--max-stale", type=int, default=0)
+    parser.add_argument("--max-stale", type=int, default=0,
+                        help="Stale rows allowed BEYOND the recorded set, not in total")
+    parser.add_argument("--update-stale-baseline", action="store_true",
+                        help="Re-record the stale set, then report against it")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
     package = Path(args.package).resolve()
     csv_path = package / "translations" / f"{args.lang}.csv"
+    baseline_path = stale_baseline_path(package, args.lang)
+    regen = ("python3 scripts/check_translations.py "
+             f"--package {args.package} --lang {args.lang} --update-stale-baseline")
     used, warnings = extract(package)
     existing = read_csv_keys(csv_path)
 
     missing = sorted({t for t in used if is_auto_translatable(t)} - existing)
     stale = sorted(existing - used)
+    recorded = read_stale_baseline(baseline_path)
+    new_stale = sorted(set(stale) - recorded)
+    # Recorded rows that are live or deleted again. Never a failure: the set names
+    # rows, so a spent entry can only ever excuse itself, never a different row.
+    drained = sorted(recorded - set(stale))
+
+    if args.update_stale_baseline:
+        write_stale_baseline(baseline_path, stale, args.lang, regen)
+        recorded, new_stale, drained = set(stale), [], []
+
     passed = (len(missing) <= args.max_missing
-              and len(stale) <= args.max_stale
+              and len(new_stale) <= args.max_stale
               and not warnings)
 
     if args.json:
         print(json.dumps({"missing_count": len(missing), "stale_count": len(stale),
+                          "new_stale_count": len(new_stale),
                           "label_warning_count": len(warnings),
                           "max_missing": args.max_missing, "max_stale": args.max_stale,
                           "passed": passed}, ensure_ascii=False, separators=(",", ":")))
         return 0 if passed else 1
 
-    print(f"translations ({args.lang}): {len(missing)} missing, {len(stale)} stale, "
+    if args.update_stale_baseline:
+        print(f"recorded {len(stale)} stale rows in {baseline_path.name}")
+    print(f"translations ({args.lang}): {len(missing)} missing, {len(stale)} stale "
+          f"({len(new_stale)} newly stale), "
           f"{len(warnings)} label placeholder warnings "
-          f"(allowed: {args.max_missing} missing, {args.max_stale} stale, 0 warnings)")
+          f"(allowed: {args.max_missing} missing, {args.max_stale} newly stale, 0 warnings)")
     if missing:
         print(f"\nMISSING — add an Arabic row to {csv_path.name} for each:")
         for text in missing:
             print(f"  {text}")
-    if len(stale) > args.max_stale:
-        print(f"\nSTALE over baseline ({len(stale)} > {args.max_stale}). Either the rows are "
-              "dead (verify no live source key, then delete and lower the baseline) or a "
-              "source string changed and its translation needs re-keying:")
-        for text in stale:
+    if len(new_stale) > args.max_stale:
+        print(f"\nNEWLY STALE ({len(new_stale)}) — these {csv_path.name} rows lost their "
+              f"English source since {baseline_path.name} was recorded. Deleting or "
+              "renaming a source string is what strands a row, so the fix belongs with "
+              "that change: re-key the row to the new source string, or delete the row "
+              "if the string is gone for good, then re-record the set with\n"
+              f"    {regen}")
+        for text in new_stale:
             print(f"  {text}")
+    if drained:
+        noun = "row is" if len(drained) == 1 else "rows are"
+        print(f"\n{len(drained)} recorded stale {noun} no longer stale. Not a failure — "
+              "a spent entry excuses only itself — but re-record to keep the set honest:\n"
+              f"    {regen}")
     for rel, key, text in warnings:
         print(f"\nLABEL PLACEHOLDER — {rel} ({key}): {text}")
         print("  A static label renders verbatim; move the placeholder into a code _() call.")

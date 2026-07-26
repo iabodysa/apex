@@ -1,0 +1,137 @@
+# ar.csv rows whose English source string was already gone when this set
+# was recorded. The gate fails only on stale rows NOT listed here, so its
+# output names the row a change just stranded instead of all of them.
+# Regenerate after deleting drained rows:
+#   python3 scripts/check_translations.py --package apex --lang ar --update-stale-baseline
+ABSENT
+AR
+Actor
+After
+Apex 2.0.4 — Guided first-time setup, ready accommodation supplies, and preserved Item Group organization
+Approval Status
+Approved On
+At
+Attendance
+Audience
+Audit
+Authority
+Awaiting Approval
+Before
+Billing Model
+Boards and Dashboards
+Branch Site
+By
+Capture an incident with the guided Safety Incident form and save it for manager review.
+Change
+Client
+Client Code
+Component
+Consent
+Content
+Create Records
+Day
+Deduction
+Detail
+EN
+Effective To
+Entity
+Export
+F1
+F10
+F2
+F3
+F4
+F5
+F6
+F7
+F8
+F9
+Field
+Fleet Supervisor
+Fleet Supervisor Dashboard (Dashboard)
+GATE
+Held
+Inspect a building with the guided Safety Round form and save the result for manager review.
+Intake
+JSON
+Latest
+Launchpad
+Locale
+Logistay
+Maintenance Technician
+Monitoring
+My Work
+OFF
+OT
+POD
+Party
+Party Type
+Payload
+Payroll Date
+Pricing
+Provenance
+Record the receiving driver and vehicle condition with the guided handover form.
+Records
+Reply
+Resident Supervisor
+Routing
+Rule
+Rule Applied
+Safety Officer
+Sales Taxes and Charges Template
+Scanner
+Shifts
+Site Code
+Source Field
+TRAINING
+TS Intake Source
+This worker link is invalid or has been disabled.
+Threshold
+Timesheet Exception Workbench
+Timesheet Period
+Tools
+Transform
+VAT
+Verdict
+Version
+active
+aggregated
+allowances
+basic
+blocked
+candidate
+clean
+cleaning
+clear
+client
+confirmed
+delivery
+draft
+exact
+external
+generated
+matched
+mixed
+normalized
+not_required
+ocr
+other
+paper
+pass
+pct
+per_event
+percent
+posted
+rated
+received
+released
+reported
+requested
+reversed
+security
+stamped
+standing
+superseded
+tabular
+timesheet
+trim
