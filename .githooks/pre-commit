@@ -4,34 +4,26 @@
 # Install (one line, from the repo root):
 #     git config core.hooksPath .githooks
 #
-# MIRROR OF .github/workflows/test.yml, job `gitleaks`, step "No automated
-# attribution or private commit email". The awk `is_public()` there admits exactly
-# the two forms below and nothing else; apex/tests/test_repo_gates.py runs that awk
-# and this hook over one table of addresses and fails if they classify any of them
-# differently.
+# The allowlist is NOT written here. scripts/check_commit_metadata.py holds it once,
+# for this hook and for the CI step "No automated attribution or private commit email";
+# this file only decides WHICH two addresses get judged.
 #
-# `git commit --author=...` IS caught: git exports the resolved author identity to
-# the hook, so `git var` reports the forced address, not the configured one. What no
-# pre-commit hook can see is a commit created with --no-verify or before the hooks
-# were installed; .githooks/pre-push re-checks the outgoing range through this same
-# allowlist for exactly that case.
+# `git commit --author=...` IS caught: git exports the resolved author identity to the
+# hook, so `git var` reports the forced address, not the configured one. What no
+# pre-commit hook can see is a commit created with --no-verify or before the hooks were
+# installed; .githooks/pre-push re-checks the outgoing range for exactly that case.
 set -u
 
-is_public() {
-	case "$1" in
-	noreply@github.com) return 0 ;;
-	*@users.noreply.github.com) return 0 ;;
-	*) return 1 ;;
-	esac
-}
+hookdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+gate="$hookdir/../scripts/check_commit_metadata.py"
 
 ident_email() {
 	git var "$1" 2>/dev/null | sed -n 's/.*<\(.*\)>.*/\1/p'
 }
 
 # Given two addresses, classify THOSE instead of this machine's identity. git never
-# passes arguments to pre-commit, so this lane belongs to pre-push, which reuses the
-# allowlist above over already-recorded commits rather than keeping a copy of it.
+# passes arguments to pre-commit, so this lane belongs to pre-push, which reuses this
+# hook over already-recorded commits rather than keeping a copy of the allowlist.
 if [ "$#" -eq 2 ]; then
 	author=$1
 	committer=$2
@@ -40,14 +32,14 @@ else
 	committer=$(ident_email GIT_COMMITTER_IDENT)
 fi
 
-for email in "$author" "$committer"; do
-	if ! is_public "$email"; then
-		echo "pre-commit: private author or committer email: '${email}'" >&2
-		echo "pre-commit: author='${author}' committer='${committer}'" >&2
-		echo "pre-commit: only noreply@github.com and *@users.noreply.github.com may leave this machine." >&2
-		echo "pre-commit: fix with  git config user.email '<id>+<user>@users.noreply.github.com'" >&2
-		exit 1
-	fi
-done
+# Fail closed, for the same reason commit-msg does.
+if [ ! -f "$gate" ]; then
+	echo "pre-commit: $gate is missing, so the commit metadata gate DID NOT RUN" >&2
+	exit 1
+fi
+if ! command -v python3 >/dev/null 2>&1; then
+	echo "pre-commit: python3 is required to run the commit metadata gate" >&2
+	exit 1
+fi
 
-exit 0
+exec python3 "$gate" email "$author" "$committer"

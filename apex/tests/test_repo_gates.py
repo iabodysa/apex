@@ -14,11 +14,13 @@ process exit code the Lint job reads — with no sys.path surgery and no second
 copy of the walking logic here.
 
 The same "local verdict must equal the CI verdict" contract covers the commit
-hooks under `.githooks`, which are driven here as real commits for the same reason.
+metadata gate. That one is no longer two copies kept in step: `scripts/
+check_commit_metadata.py` is its single definition, and the hooks under `.githooks`
+and the CI step all invoke it. So the tests below judge the VERDICT each lane
+returns rather than comparing one lane's source text with another's.
 """
 
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -30,10 +32,12 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = REPO_ROOT / "scripts"
 COMMENT_AUDIT = SCRIPTS / "comment_audit.py"
 CHECK_TRANSLATIONS = SCRIPTS / "check_translations.py"
+COMMIT_METADATA_GATE = SCRIPTS / "check_commit_metadata.py"
 
 GITHOOKS = REPO_ROOT / ".githooks"
 COMMIT_MSG_HOOK = GITHOOKS / "commit-msg"
 PRE_COMMIT_HOOK = GITHOOKS / "pre-commit"
+PRE_PUSH_HOOK = GITHOOKS / "pre-push"
 TEST_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "test.yml"
 PRE_COMMIT_CONFIG = REPO_ROOT / ".pre-commit-config.yaml"
 
@@ -59,9 +63,9 @@ GIT_ENV = {**os.environ,
            "GIT_CONFIG_SYSTEM": os.devnull}
 
 
-def _git(repo: Path, *args: str) -> None:
+def _git(repo: Path, *args: str, env=None) -> None:
     subprocess.run(["git", "-C", str(repo), *args], check=True,
-                   capture_output=True, env=GIT_ENV)
+                   capture_output=True, env={**GIT_ENV, **(env or {})})
 
 
 def _init_repo(repo: Path, ignore: str) -> None:
@@ -176,20 +180,6 @@ class TestTranslationGateIgnoresGitignoredFiles(unittest.TestCase):
         self.assertIn('"stale_count":1', result.stdout)
 
 
-def _extract(pattern: str, path: Path, flags: int = 0) -> str:
-    """The single capture of `pattern` in `path`, or a failure that names the file.
-
-    Both sides of the mirror are read out of their real homes rather than restated
-    here: a copy in this file would be a third pattern to keep in step."""
-    found = re.findall(pattern, path.read_text(encoding="utf-8"), flags)
-    if len(found) != 1:
-        raise AssertionError(
-            f"expected exactly one {pattern!r} in {path}, found {len(found)}. "
-            "The mirror check cannot run until that is unambiguous again."
-        )
-    return found[0]
-
-
 def _init_hooked_repo(repo: Path) -> None:
     _git(repo, "init", "-q")
     # Absolute, because the temp repo has no checkout of .githooks of its own.
@@ -209,22 +199,82 @@ def _attempt_commit(repo: Path, message: str, env=None) -> subprocess.CompletedP
     )
 
 
-HAVE_AWK = shutil.which("awk") is not None
+def _force_commit(repo: Path, message: str, env=None) -> None:
+    """Record a commit the way `--no-verify` does, so the after-the-fact lane has
+    something to judge. That case is exactly why pre-push and the CI step exist."""
+    _write(repo, "payload.txt", os.urandom(8).hex())
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "--no-verify", "-m", message, env=env)
+
+
+def _gate(*args: str, cwd: str = "") -> subprocess.CompletedProcess:
+    """Drive the shared gate as a process, which is how every caller drives it. The
+    exit code is the contract; no string inside the file is."""
+    return subprocess.run([sys.executable, str(COMMIT_METADATA_GATE), *args],
+                          capture_output=True, text=True, env=GIT_ENV,
+                          cwd=cwd or tempfile.gettempdir())
+
+
+ROBOT = "\U0001F916"
 LEAKED_TRAILER = "Co-Authored-By: " + "Claude Opus 5 (1M context) <noreply@anthropic.com>"
+CLEAN_SUBJECT = "fix: repoint the dead compliance link"
+PROSE_SUBJECT = "fix: correct the maintenance codex reference"
+
+# Refusal follows the SHAPE of attribution - a trailer, a session line, a generation
+# notice, a vendor host - not the presence of a vendor word. The old substring pattern
+# made PROSE_SUBJECT below unphraseable: it is ordinary English, and no rewording of it
+# could have been committed.
+MESSAGE_TABLE = (
+    ("fix: something real\n\n" + LEAKED_TRAILER, True),
+    ("fix: something real\n\nClaude-Session: https://example.invalid/s/1", True),
+    ("fix: something real\n\n" + ROBOT
+     + " Generated with [Claude Code](https://claude.com/claude-code)", True),
+    ("fix: something real\n\nCo-Authored-By: ChatGPT <bot@openai.com>", True),
+    ("fix: something real\n\nGenerated with Codex", True),
+    ("docs: quote https://claude.ai/code/session_abc in the runbook", True),
+    (PROSE_SUBJECT, False),
+    ("fix: vent the openair duct above the plant room", False),
+    ("docs: cite the anthropic principle in the survey note", False),
+    (CLEAN_SUBJECT, False),
+    ("chore: credit the reviewer\n\nCo-Authored-By: A Reviewer <" + PUBLIC_EMAIL + ">", False),
+)
+
+# The allowlist admits the two forms GitHub hands out for a hidden address and nothing
+# else, which is what the retired shell `case` and the retired CI awk both admitted.
+ADDRESS_TABLE = (
+    ("noreply@github.com", False),
+    ("248423400+iabodysa@users.noreply.github.com", False),
+    ("@users.noreply.github.com", False),
+    ("dev@example.com", True),
+    ("noreply@anthropic.com", True),
+    ("dev@users.noreply.github.example.com", True),
+    ("users.noreply.github.com", True),
+)
+
+GATE_INVOCATION = "scripts/check_commit_metadata.py"
+# "claude" is deliberately not in this list: an unrelated workflow step greps for a
+# `.claude/` path, and a directory name is not a second copy of the rule.
+VENDOR_TOKENS = ("anthropic", "chatgpt", "openai")
 
 
 @unittest.skipUnless(HAVE_GIT, "git is required to run the hooks")
 @unittest.skipUnless(COMMIT_MSG_HOOK.exists(), ".githooks is not present in this install")
 @unittest.skipUnless(TEST_WORKFLOW.exists(), ".github is not present in this install")
-class TestCommitMetadataHooksMirrorCI(unittest.TestCase):
-    """The local commit gate must reject exactly what the CI step rejects.
+@unittest.skipUnless(COMMIT_METADATA_GATE.exists(), "scripts/ is not present in this install")
+class TestCommitMetadataGate(unittest.TestCase):
+    """One rule, one file, three lanes that have to reach the same verdict.
 
     Commit 43955b8f reached origin carrying an attribution trailer and a session
     URL. CI caught it, but only after the push, and the red landed on a job named
     Tests — which reads as "a test failed" when it means "the metadata guard fired
     and this job's tests never ran". The hooks under .githooks move that refusal to
-    before the commit exists; these tests exist so the local copy can never come to
-    disagree with the CI step it mirrors, which would be worse than no hook at all.
+    before the commit exists.
+
+    Those hooks used to hold their own copy of the pattern and this class compared the
+    two strings. Comparing strings stops proving anything once there is only one
+    string, so what is tested now is the decision itself, taken through each caller:
+    the gate directly, a real commit through the installed hooks, and the recorded
+    range the CI step judges.
     """
 
     def setUp(self):
@@ -232,16 +282,59 @@ class TestCommitMetadataHooksMirrorCI(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.tmp, True)
         self.repo = Path(self.tmp)
         _init_hooked_repo(self.repo)
+        self.scratch = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.scratch, True)
 
-    def test_attribution_pattern_is_byte_identical_to_the_ci_step(self):
-        ci = _extract(r"grep -niE\s*\\?\s*'([^']+)'", TEST_WORKFLOW)
-        local = _extract(r"^ATTRIBUTION_PATTERN='([^']+)'", COMMIT_MSG_HOOK, re.M)
+    def _judge_as_hook(self, message: str) -> bool:
+        """The commit-msg lane: one prepared message file, judged before any commit."""
+        path = self.scratch / "message.txt"
+        path.write_text(message, encoding="utf-8")
+        return _gate("message", str(path)).returncode != 0
 
-        self.assertEqual(
-            local, ci,
-            "the commit-msg hook and the CI guard no longer grep the same pattern, "
-            "so a local pass stopped meaning a CI pass",
-        )
+    def test_the_rule_has_exactly_one_definition(self):
+        """Every caller points at the one file, and no caller carries a copy of the
+        vocabulary. This is what the retired byte-identity test was really protecting."""
+        gate_body = COMMIT_METADATA_GATE.read_text(encoding="utf-8").lower()
+        for token in VENDOR_TOKENS:
+            self.assertIn(token, gate_body, "the single definition lost part of its rule")
+
+        for path in (COMMIT_MSG_HOOK, PRE_COMMIT_HOOK, PRE_PUSH_HOOK, TEST_WORKFLOW):
+            with self.subTest(path=path.name):
+                body = path.read_text(encoding="utf-8")
+                self.assertIn(GATE_INVOCATION, body,
+                              f"{path.name} no longer reaches the one definition of the rule")
+                for token in VENDOR_TOKENS:
+                    self.assertNotIn(
+                        token, body.lower(),
+                        f"{path.name} carries a second copy of the rule, which is what "
+                        "collapsing the two greps into one script removed",
+                    )
+
+    def test_every_lane_decides_the_message_table_alike(self):
+        """The three lanes on one table. A disagreement here is the failure the old
+        mirror test existed to catch, proven by verdict instead of by string."""
+        for message, refused in MESSAGE_TABLE:
+            with self.subTest(subject=message.splitlines()[0], refused=refused):
+                self.assertEqual(self._judge_as_hook(message), refused,
+                                 "the gate decided this message wrongly")
+
+                real = _attempt_commit(self.repo, message)
+                self.assertEqual(real.returncode != 0, refused,
+                                 f"the installed hook disagreed: {real.stderr}")
+
+                if real.returncode != 0:
+                    _force_commit(self.repo, message)
+                ci = _gate("range", "-1", "HEAD", cwd=str(self.repo))
+                self.assertEqual(ci.returncode != 0, refused,
+                                 f"the CI lane disagreed: {ci.stdout}{ci.stderr}")
+
+    def test_a_vendor_word_in_ordinary_prose_still_commits(self):
+        """The trap this collapse was for: `codex` is an English word, and under a
+        substring pattern this sentence could not be phrased at all."""
+        result = _attempt_commit(self.repo, PROSE_SUBJECT)
+
+        self.assertEqual(result.returncode, 0, f"ordinary prose was refused: {result.stderr}")
+        self.assertEqual(_git_log_count(self.repo), 1)
 
     def test_a_message_carrying_an_attribution_trailer_is_refused(self):
         result = _attempt_commit(self.repo, "fix: something real\n\n" + LEAKED_TRAILER)
@@ -284,40 +377,25 @@ class TestCommitMetadataHooksMirrorCI(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0, "a private committer email was allowed")
         self.assertEqual(_git_log_count(self.repo), 0)
 
-    @unittest.skipUnless(HAVE_AWK, "awk is required to run the CI classifier")
-    def test_the_hook_and_the_ci_awk_classify_the_same_addresses_alike(self):
-        """Byte-equality is impossible here — CI expresses the allowlist as awk and
-        the hook as a shell `case` — so agreement is proven by running both."""
-        addresses = [
-            "noreply@github.com",
-            "248423400+iabodysa@users.noreply.github.com",
-            "@users.noreply.github.com",
-            "dev@example.com",
-            "noreply@anthropic.com",
-            "dev@users.noreply.github.example.com",
-            "users.noreply.github.com",
-        ]
-        awk_program = _extract(r"awk -F '\\t' '(.*?)'", TEST_WORKFLOW, re.S)
+    def test_every_lane_classifies_the_same_addresses_alike(self):
+        """The address allowlist used to be a shell `case` in the hook and an awk
+        function in the workflow, and this test ran both to prove they agreed. There is
+        now one allowlist, so the table below also pins WHAT it must decide."""
+        for address, refused in ADDRESS_TABLE:
+            with self.subTest(address=address, refused=refused):
+                self.assertEqual(_gate("email", address, address).returncode != 0, refused,
+                                 "the gate classified this address wrongly")
 
-        for address in addresses:
-            with self.subTest(address=address):
-                ci = subprocess.run(
-                    ["awk", "-F", "\\t", awk_program], capture_output=True, text=True,
-                    input=f"0000000\t{address}\t{address}\n",
-                )
-                self.assertEqual(ci.returncode, 0, ci.stderr)
-                ci_rejects = bool(ci.stdout.strip())
-
-                _git(self.repo, "config", "user.email", address or "x")
                 env = {"GIT_AUTHOR_EMAIL": address, "GIT_COMMITTER_EMAIL": address}
-                local = _attempt_commit(self.repo, f"fix: address {len(address)}", env=env)
-                local_rejects = local.returncode != 0
+                real = _attempt_commit(self.repo, CLEAN_SUBJECT, env=env)
+                self.assertEqual(real.returncode != 0, refused,
+                                 f"the installed hook disagreed about {address!r}: {real.stderr}")
 
-                self.assertEqual(
-                    local_rejects, ci_rejects,
-                    f"the hook and the CI awk disagree about {address!r}: "
-                    f"hook rejects={local_rejects}, CI rejects={ci_rejects}",
-                )
+                if real.returncode != 0:
+                    _force_commit(self.repo, CLEAN_SUBJECT, env=env)
+                ci = _gate("range", "-1", "HEAD", cwd=str(self.repo))
+                self.assertEqual(ci.returncode != 0, refused,
+                                 f"the CI lane disagreed about {address!r}: {ci.stdout}{ci.stderr}")
 
     def test_the_hooks_are_executable(self):
         """git skips a non-executable hook without a word, which is the quietest way

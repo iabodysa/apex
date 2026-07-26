@@ -4,25 +4,27 @@
 # Install (one line, from the repo root):
 #     git config core.hooksPath .githooks
 #
-# MIRROR OF .github/workflows/test.yml, job `gitleaks`, step "No automated
-# attribution or private commit email". ATTRIBUTION_PATTERN below is byte-identical
-# to the pattern that step greps with; apex/tests/test_repo_gates.py fails if the
-# two ever drift, because a local gate that disagrees with CI is worse than none.
+# The rule is NOT written here. scripts/check_commit_metadata.py is its one definition,
+# and the CI step "No automated attribution or private commit email" runs that same
+# file, so a local pass and a CI pass cannot come to mean different things. There used
+# to be a second copy of the pattern in this hook; a test proved the two agreed, which
+# is weaker than having only one.
 set -u
 
-ATTRIBUTION_PATTERN='(claude|anthropic|codex|openai|chatgpt|claude-session)'
+# Resolved against this hook, not against the work tree: core.hooksPath may point at
+# another clone's .githooks, and then the work tree has no copy of the gate to run.
+hookdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+gate="$hookdir/../scripts/check_commit_metadata.py"
 
-# Judge what git will STORE, not the editor buffer: drop the scissors block that
-# `git commit -v` appends (its diff is not part of the message and would match on
-# unrelated code) and then the comment lines, leaving what `--format=%s%n%b` reports.
-message=$(sed -e '/^#.*>8/,$d' "$1" | git stripspace --strip-comments)
-
-hits=$(printf '%s\n' "$message" | grep -niE "$ATTRIBUTION_PATTERN" || true)
-if [ -n "$hits" ]; then
-	echo "commit-msg: automated attribution or session metadata in the commit message:" >&2
-	printf '%s\n' "$hits" >&2
-	echo "commit-msg: same pattern as the CI guard; pushing this would turn the Tests workflow red." >&2
+# Fail closed. A missing gate or a missing interpreter must refuse the commit, never
+# wave it through: a guard that silently stops running is worse than no guard.
+if [ ! -f "$gate" ]; then
+	echo "commit-msg: $gate is missing, so the commit metadata gate DID NOT RUN" >&2
+	exit 1
+fi
+if ! command -v python3 >/dev/null 2>&1; then
+	echo "commit-msg: python3 is required to run the commit metadata gate" >&2
 	exit 1
 fi
 
-exit 0
+exec python3 "$gate" message "$1"
