@@ -64,26 +64,37 @@ def _compact_png_with_dimensions(width, height):
     return "data:image/png;base64," + base64.b64encode(payload).decode()
 
 
+def _fresh_ip():
+    """An address no other block can be using: the RFC 3849 documentation prefix
+    plus a random suffix. Needed because the bad-token window is keyed on the
+    ADDRESS ALONE, so a shared 127.0.0.1 would let one test's failed tokens spend
+    another test's budget."""
+    return "2001:db8::" + frappe.generate_hash(length=12)
+
+
 class _Request:
-    def __init__(self, cookies):
+    def __init__(self, cookies, remote_addr="127.0.0.1"):
         self.cookies = cookies
-        self.remote_addr = "127.0.0.1"
+        self.remote_addr = remote_addr
         self.host = None
 
 
 @contextmanager
-def _request_cookies(cookies):
+def _request_cookies(cookies, ip=None):
+    """One request surface per block, on its OWN address unless the caller pins one.
+    Yields the address so a throttle test can address its window."""
+    ip = ip or _fresh_ip()
     sentinel = object()
     previous_request = getattr(frappe.local, "request", sentinel)
     previous_ip = getattr(frappe.local, "request_ip", sentinel)
     previous_form = getattr(frappe.local, "form_dict", sentinel)
-    frappe.local.request = _Request(cookies)
-    frappe.local.request_ip = "127.0.0.1"
+    frappe.local.request = _Request(cookies, ip)
+    frappe.local.request_ip = ip
     frappe.local.form_dict = frappe._dict(
         {"cmd": "portal-security-" + frappe.generate_hash(length=12)}
     )
     try:
-        yield
+        yield ip
     finally:
         for fieldname, previous in (
             ("request", previous_request),
@@ -99,19 +110,19 @@ def _request_cookies(cookies):
 
 @contextmanager
 def _request_from_ip(ip, cmd, cookies=None):
-    """The same request surface as ``_request_cookies``, with the remote address
-    and the rate-limit ``cmd`` pinned by the caller.
+    """The same request surface as ``_request_cookies``, with the remote address and
+    the ``cmd`` both pinned by the caller.
 
-    frappe's native limiter keys on ``rl:<form_dict.cmd>:<request_ip>``
-    (rate_limiter.py), so pinning both is what lets one test compare two
-    addresses inside a single window.
+    The bad-token window ignores ``cmd`` by design (it is keyed on the address
+    alone), so pinning it here is what proves the endpoint no longer changes the
+    answer while the two addresses are compared.
     """
     sentinel = object()
     previous = {
         name: getattr(frappe.local, name, sentinel)
         for name in ("request", "request_ip", "form_dict")
     }
-    frappe.local.request = _Request(cookies or {})
+    frappe.local.request = _Request(cookies or {}, ip)
     frappe.local.request_ip = ip
     frappe.local.form_dict = frappe._dict({"cmd": cmd})
     try:
@@ -1536,21 +1547,40 @@ class TestPortalTokenSecurity(FrappeTestCase):
                 with self.assertRaises(frappe.PermissionError):
                     resolve_driver_token(driver_token._plaintext_token)
 
+    def _window_name(self, ip):
+        """The RAW cache name of one address's bad-token window."""
+        return token_security.BAD_TOKEN_WINDOW_KEY.format(ip)
+
+    def _assert_window_cleared(self, name):
+        """Registered BEFORE the delete so addCleanup's LIFO order runs it AFTER:
+        this is what proves the delete actually landed rather than silently missing
+        (the A-209 bug -- a pre-made key handed to ``delete_value`` is prefixed a
+        second time, redis_wrapper.py:141-142, and the counter outlives the test)."""
+        self.assertIsNone(
+            frappe.cache.get(frappe.cache.make_key(name)),
+            f"the bad-token window {name} outlived its cleanup",
+        )
+
+    def _clean_window(self, ip):
+        """Clear this address's window now and again at teardown, PROVING both."""
+        name = self._window_name(ip)
+        self.addCleanup(self._assert_window_cleared, name)
+        self.addCleanup(frappe.cache.delete_value, name)
+        frappe.cache.delete_value(name)
+        self._assert_window_cleared(name)
+        return name
+
     def test_bad_token_attempts_from_one_ip_are_rate_limited(self):
         """Defense-in-depth: the (N+1)th rapid failed token from one IP is rejected
         with RateLimitExceededError (HTTP 429), while the first N fail closed with the
-        ordinary PermissionError. Bench-run integration test -- the native limiter
-        counts in Redis and is a no-op without a request context (rate_limiter.py:134),
-        so it needs the live request/cache a bench provides."""
+        ordinary PermissionError. Bench-run integration test -- the throttle counts in
+        Redis and is a no-op without a request context, so it needs the live
+        request/cache a bench provides."""
         limit = token_security.BAD_TOKEN_ATTEMPTS_PER_MINUTE
         bogus = "definitely-not-a-real-token"
         frappe.set_user("Guest")
-        with _request_cookies({}):
-            cmd = frappe.local.form_dict.cmd
-            self.addCleanup(
-                frappe.cache.delete_value,
-                frappe.cache.make_key(f"rl:{cmd}:127.0.0.1"),
-            )
+        with _request_cookies({}) as ip:
+            self._clean_window(ip)
             for _ in range(limit):
                 with self.assertRaises(frappe.PermissionError):
                     resolve_driver_token(bogus)
@@ -1560,21 +1590,19 @@ class TestPortalTokenSecurity(FrappeTestCase):
 
     def test_valid_token_is_never_charged_against_the_bad_token_throttle(self):
         """A legitimate holder is never blocked: a VALID credential resolved far past
-        the per-IP failure ceiling still returns its subject every time (only FAILED
-        resolutions are charged, so a valid link never consumes the window)."""
+        the per-IP failure ceiling still returns its subject every time, and the
+        address's window is still EMPTY afterwards -- only FAILED resolutions are
+        charged, so a valid link never consumes the budget."""
         token = self._driver_token()
         limit = token_security.BAD_TOKEN_ATTEMPTS_PER_MINUTE
         frappe.set_user("Guest")
-        with _request_cookies({}):
-            cmd = frappe.local.form_dict.cmd
-            self.addCleanup(
-                frappe.cache.delete_value,
-                frappe.cache.make_key(f"rl:{cmd}:127.0.0.1"),
-            )
+        with _request_cookies({}) as ip:
+            name = self._clean_window(ip)
             for _ in range(limit * 2 + 1):
                 self.assertEqual(
                     resolve_driver_token(token._plaintext_token), self.driver
                 )
+            self.assertIsNone(frappe.cache.get(frappe.cache.make_key(name)))
 
     def test_www_entry_points_throttle_repeated_bad_links_from_one_ip(self):
         """Both www entries enforce the per-IP throttle: a flood of well-formed but
@@ -1586,13 +1614,9 @@ class TestPortalTokenSecurity(FrappeTestCase):
         for page, field in ((masar_page, "w"), (driver_page, "d")):
             with self.subTest(entry=page.__name__):
                 frappe.set_user("Guest")
-                with _request_cookies({}):
+                with _request_cookies({}) as ip:
+                    self._clean_window(ip)
                     frappe.local.form_dict[field] = bogus
-                    cmd = frappe.local.form_dict.cmd
-                    self.addCleanup(
-                        frappe.cache.delete_value,
-                        frappe.cache.make_key(f"rl:{cmd}:127.0.0.1"),
-                    )
                     for _ in range(limit):
                         with self.assertRaises(frappe.Redirect):
                             page.get_context(frappe._dict())
@@ -1602,24 +1626,57 @@ class TestPortalTokenSecurity(FrappeTestCase):
                     getattr(raised.exception, "http_status_code", None), 429
                 )
 
+    def test_bad_token_budget_is_one_shared_window_across_endpoints(self):
+        """The advertised 10/60s is per IP FULL STOP, not 10 per IP per endpoint.
+
+        frappe's own @rate_limit welds ``form_dict.cmd`` into its key
+        (rate_limiter.py:155), which hands each of the guest endpoints a private N and
+        multiplies the real ceiling by however many are reachable. Failures split
+        across two DIFFERENT cmd values must therefore trip the SAME ceiling, and a
+        third endpoint must find the budget already spent.
+        """
+        limit = token_security.BAD_TOKEN_ATTEMPTS_PER_MINUTE
+        bogus = "definitely-not-a-real-token"
+        ip = _fresh_ip()
+        name = self._clean_window(ip)
+        half = limit // 2
+
+        frappe.set_user("Guest")
+        for cmd, attempts in (
+            ("a210.endpoint.one", half),
+            ("a210.endpoint.two", limit - half),
+        ):
+            with _request_from_ip(ip, cmd):
+                for _ in range(attempts):
+                    with self.assertRaises(frappe.PermissionError):
+                        resolve_driver_token(bogus)
+        with _request_from_ip(ip, "a210.endpoint.three"):
+            with self.assertRaises(frappe.RateLimitExceededError) as raised:
+                resolve_driver_token(bogus)
+
+        self.assertEqual(getattr(raised.exception, "http_status_code", None), 429)
+        self.assertEqual(
+            int(frappe.cache.get(frappe.cache.make_key(name)) or 0),
+            limit + 1,
+            "three endpoints must have charged one window, not three",
+        )
+
     def test_bad_token_windows_are_independent_per_ip(self):
-        """The ceiling is PER IP, enforced by frappe's own rate_limit primitive.
+        """The ceiling is PER IP, and one address must never spend another's.
 
         One address exhausting its window must not lock a second address out —
         otherwise a single abuser would deny the portal to every worker behind
         every other connection. Proved two ways in one window: the second address
-        still gets its ordinary 403, and the native limiter's own counter
-        (``rl:<cmd>:<ip>``, the key rate_limiter.py builds) is shown to be keyed
-        by remote address rather than being one global counter.
+        still gets its ordinary 403, and the counter is shown to be keyed by remote
+        address rather than being one global counter.
         """
         limit = token_security.BAD_TOKEN_ATTEMPTS_PER_MINUTE
         bogus = "definitely-not-a-real-token"
         cmd = "portal-security-perip-" + frappe.generate_hash(length=12)
-        ip_a, ip_b = "198.51.100.7", "198.51.100.8"
-        keys = {ip: frappe.cache.make_key(f"rl:{cmd}:{ip}") for ip in (ip_a, ip_b)}
-        for cache_key in keys.values():
-            frappe.cache.delete_value(cache_key)
-            self.addCleanup(frappe.cache.delete_value, cache_key)
+        ip_a, ip_b = _fresh_ip(), _fresh_ip()
+        keys = {ip: frappe.cache.make_key(self._window_name(ip)) for ip in (ip_a, ip_b)}
+        for ip in (ip_a, ip_b):
+            self._clean_window(ip)
 
         frappe.set_user("Guest")
         with _request_from_ip(ip_a, cmd):
@@ -1632,7 +1689,7 @@ class TestPortalTokenSecurity(FrappeTestCase):
         self.assertEqual(
             int(frappe.cache.get(keys[ip_a]) or 0),
             limit + 1,
-            "the native limiter must have counted every failed attempt from this address",
+            "the throttle must have counted every failed attempt from this address",
         )
         self.assertFalse(
             frappe.cache.get(keys[ip_b]),
