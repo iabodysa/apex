@@ -13,6 +13,8 @@ These lock in release-hygiene invariants that must not silently regress:
   4. Every portal in the SPA lockfile CI matrix ships both its manifest and lockfile.
   5. No Arabic reaches published source (.py/.json/.js/.html) or the published
      documentation set (README.md and docs/) outside the localization homes.
+  6. Every shipped line-oriented data file (translations, modules.txt,
+     patches.txt) uses LF endings, so an edit diffs as the rows it changed.
 
 Run standalone:  python3 -m unittest tests.test_release_hygiene -v
 """
@@ -30,8 +32,13 @@ import unittest
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 REPO_ROOT = os.path.dirname(APP_ROOT)
 AR_CSV = os.path.join(APP_ROOT, "translations", "ar.csv")
+TRANSLATIONS_DIR = os.path.join(APP_ROOT, "translations")
 PATCHES_DIR = os.path.join(APP_ROOT, "patches")
 HOOKS_PY = os.path.join(APP_ROOT, "hooks.py")
+
+# Line-oriented data the app itself ships. Vendored third-party files are out:
+# they must stay byte-identical to upstream, CRLF included.
+SHIPPED_DATA_MANIFESTS = ("modules.txt", "patches.txt")
 
 ARABIC = re.compile(r"[؀-ۿ]")
 PLACEHOLDER = re.compile(r"\{\d+")
@@ -159,6 +166,43 @@ class TestTranslationFile(unittest.TestCase):
             if len(r) == 2 and len(PLACEHOLDER.findall(r[0])) != len(PLACEHOLDER.findall(r[1]))
         ]
         self.assertEqual(bad, [], f"ar.csv placeholder count mismatch: {bad[:10]}")
+
+
+class TestShippedDataLineEndings(unittest.TestCase):
+    """Two line-ending styles in one file make every edit unreviewable: the
+    editor renormalizes the minority rows, so a two-row change arrives as
+    thousands of identical-looking lines. LF is the required ending because
+    frappe/translate.py write_csv_file() regenerates the translation CSVs with
+    lineterminator="\\n" — any other choice is undone on the next
+    `bench update-translations`. .gitattributes prevents; this test detects.
+    """
+
+    def _files(self):
+        found = [os.path.join(APP_ROOT, n) for n in SHIPPED_DATA_MANIFESTS]
+        found += sorted(glob.glob(os.path.join(TRANSLATIONS_DIR, "*")))
+        return [fp for fp in found if os.path.isfile(fp)]
+
+    def test_scan_covers_the_translation_files(self):
+        names = {os.path.basename(fp) for fp in self._files()}
+        self.assertIn("ar.csv", names, f"line-ending scan missed ar.csv; saw {sorted(names)}")
+
+    def test_shipped_data_files_use_lf_only(self):
+        offenders = []
+        for fp in self._files():
+            with open(fp, "rb") as fh:
+                data = fh.read()
+            crlf = data.count(b"\r\n")
+            stray_cr = data.count(b"\r") - crlf
+            if crlf or stray_cr:
+                offenders.append(
+                    f"{os.path.relpath(fp, REPO_ROOT)} (CRLF rows: {crlf}, stray CR: {stray_cr})"
+                )
+        self.assertEqual(
+            offenders,
+            [],
+            "shipped data files must use LF line endings, else the next edit "
+            "rewrites every row; offenders: " + "; ".join(offenders),
+        )
 
 
 class TestNoPromptInjectionInPatches(unittest.TestCase):
