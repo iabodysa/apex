@@ -11,7 +11,7 @@
 # place, `assert_lane_parity` fails loudly instead of letting the two rot apart.
 #
 # Modes:
-#   tree              the Lint lane's content guards over the package
+#   tree              the Lint lane: ruff, the shell parse check, and the content guards
 #   range <log-opts>  the redacted secret scan over a commit range (pre-push, CI)
 #   thresholds        the declared scope and limits as JSON, for a tool that must
 #                     gate on the same declaration instead of copying it
@@ -37,6 +37,96 @@ workflow_shell() {
 		exit 2
 	fi
 	grep -v '^[[:space:]]*#' "$LINT_WORKFLOW"
+}
+
+# Lift a named step's shell OUT of lint.yml and run that, instead of writing the command
+# down a second time. A restated command is the drift this file exists to prevent, so
+# where a step's whole body is the parameter there is nothing to assert parity about:
+# the lane's own text is the only copy. Handles both `run:` forms - the inline scalar
+# and the `|` block - and a step it cannot find is FATAL, because a mirror that quietly
+# skips a gate it advertises is exactly the false PASS the header warns about.
+workflow_step_shell() {
+	step=$1
+	shell=$(workflow_shell)
+	body=$(printf '%s\n' "$shell" | awk -v want="$step" '
+		/^[ ]*-[ ]+name:[ ]*/ {
+			n = $0
+			sub(/^[ ]*-[ ]+name:[ ]*/, "", n)
+			instep = (n == want)
+			inblock = 0
+			next
+		}
+		inblock {
+			if ($0 ~ /^[ ]*$/) { print ""; next }
+			match($0, /^[ ]*/)
+			if (indent < 0) indent = RLENGTH
+			if (RLENGTH >= indent) { print substr($0, indent + 1); next }
+			inblock = 0
+			instep = 0
+			next
+		}
+		instep && /^[ ]*run:[ ]*/ {
+			r = $0
+			sub(/^[ ]*run:[ ]*/, "", r)
+			if (r == "|" || r == "|-" || r == ">" || r == ">-") {
+				inblock = 1
+				indent = -1
+				next
+			}
+			print r
+			instep = 0
+			next
+		}
+	')
+	if [ -z "$body" ]; then
+		echo "guards: $LINT_WORKFLOW has no \"$step\" step with a run: body." >&2
+		echo "guards: this script executes that step's own shell rather than a copy of it, so a" >&2
+		echo "guards: renamed or deleted step leaves the gate UNRUN - reconcile the two before pushing." >&2
+		exit 2
+	fi
+	printf '%s\n' "$body"
+}
+
+# Run the lane's step under a POSIX shell, and name the step when it reds so the failure
+# reads as "CI would reject this", not as a local script blowing up.
+run_lane_step() {
+	step=$1
+	command_text=$(workflow_step_shell "$step")
+	if ! sh -c "$command_text"; then
+		echo "guards: the Lint lane's \"$step\" step FAILS on this tree" >&2
+		exit 1
+	fi
+}
+
+# CI pins ruff because this repo's lint contract is ruff's DEFAULT rule set, and that set
+# moves between minors - a workstation on another version renders a verdict that is not
+# the lane's, in either direction. The pin is read out of the lane, never copied here.
+# An absent ruff is fatal: the gate would silently not run, and a green with a gate
+# missing is worse than a red.
+check_ruff_version() {
+	shell=$(workflow_shell)
+	pinned=$(printf '%s\n' "$shell" | sed -n 's/.*pip install ruff==\([0-9.]*\).*/\1/p' | head -1)
+	local_ruff=$(ruff --version 2>/dev/null | awk '{print $2}')
+	if [ -z "$local_ruff" ]; then
+		echo "guards: ruff is not on PATH, so the Lint lane's first gate CANNOT run here." >&2
+		echo "guards: install the version the lane pins: pip install ruff==${pinned:-<see $LINT_WORKFLOW>}" >&2
+		exit 2
+	fi
+	if [ -n "$pinned" ] && [ "$pinned" != "$local_ruff" ]; then
+		echo "guards: NOTE - local ruff $local_ruff, CI pins $pinned; the default rule set moves" >&2
+		echo "guards: between minors, so this ruff verdict is not the lane's" >&2
+	fi
+}
+
+# The lane parses with the runner's /bin/sh, which is dash. A workstation's /bin/sh is
+# whatever the OS ships - on macOS, bash in POSIX mode, which parses a few constructs
+# dash rejects. The command is identical; the parser underneath is not, and that gap
+# cannot be closed from here, so it gets said out loud instead of implied away.
+note_sh_parser_drift() {
+	if [ -n "$(/bin/sh -c 'echo ${BASH_VERSION:-}')" ]; then
+		echo "guards: NOTE - /bin/sh here is bash in POSIX mode, CI's is dash; a few constructs" >&2
+		echo "guards: dash would reject parse clean on this machine" >&2
+	fi
 }
 
 # The Lint lane spells its flags out in its own shell, and they cannot be read out of
@@ -80,8 +170,14 @@ assert_lane_parity() {
 	fi
 }
 
+# In the lane's own order, so the first red a developer sees here is the first red CI
+# would show them.
 tree_guards() {
 	assert_lane_parity
+	check_ruff_version
+	run_lane_step "Run ruff"
+	note_sh_parser_drift
+	run_lane_step "Shell syntax"
 	python3 scripts/comment_audit.py "$PACKAGE"
 	python3 scripts/check_translations.py \
 		--package "$PACKAGE" \
