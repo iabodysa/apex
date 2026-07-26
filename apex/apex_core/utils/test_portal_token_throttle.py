@@ -59,6 +59,35 @@ class _Request:
         self.method = "GET"
 
 
+class _RestoresFrappeLocals:
+    """Snapshot the request globals a test installs, and put them back EXACTLY.
+
+    ``frappe.local`` is a werkzeug ``Local``: reading an unset name raises and
+    iterating does not list it, so ABSENCE IS A VALUE and None is a different state.
+    Snapshotting with ``getattr(..., None)`` and restoring by ``setattr`` therefore
+    converts unset into None and strands it on a process global — invisible to a
+    ``FrappeTestCase`` canary (frappe reads ``request`` with a defaulted getattr) and
+    caught only by A-231's snapshot diff, which is how this file became that guard's
+    single baseline entry. ``_ABSENT`` keeps the distinction, and both classes below
+    share ONE implementation so the two cannot drift apart again.
+    """
+
+    LOCALS = ("request", "request_ip", "form_dict")
+
+    def snapshot_frappe_locals(self):
+        saved = {name: getattr(frappe.local, name, _ABSENT) for name in self.LOCALS}
+        self.addCleanup(self._restore_frappe_locals, saved)
+
+    @staticmethod
+    def _restore_frappe_locals(saved):
+        for name, previous in saved.items():
+            if previous is _ABSENT:
+                if hasattr(frappe.local, name):
+                    delattr(frappe.local, name)
+            else:
+                setattr(frappe.local, name, previous)
+
+
 def _valid_row(audience):
     """A row that satisfies validate_subject_binding for exactly this audience."""
     expires_on = frappe.utils.add_days(frappe.utils.now_datetime(), 30)
@@ -81,19 +110,11 @@ def _valid_row(audience):
     }
 
 
-class TestPortalTokenThrottle(unittest.TestCase):
+class TestPortalTokenThrottle(_RestoresFrappeLocals, unittest.TestCase):
     """Both directions of the failed-token throttle, on a constructed request."""
 
     def setUp(self):
-        self._saved = {
-            name: getattr(frappe.local, name, None)
-            for name in ("request", "request_ip", "form_dict")
-        }
-        self.addCleanup(self._restore)
-
-    def _restore(self):
-        for name, value in self._saved.items():
-            setattr(frappe.local, name, value)
+        self.snapshot_frappe_locals()
 
     def _arm(self, ip=None, cmd=None, cookies=None):
         """Stand up one request surface and return its throttle key NAME.
@@ -314,7 +335,7 @@ class TestPortalTokenThrottle(unittest.TestCase):
         self.assertEqual(self._counter(name), 0)
 
 
-class TestBadTokenAddressGuard(unittest.TestCase):
+class TestBadTokenAddressGuard(_RestoresFrappeLocals, unittest.TestCase):
     """A request that carries NO address -- the limiter's SECOND guard.
 
     ``test_a_console_or_job_caller_is_never_throttled`` removes the request, so the
@@ -335,11 +356,7 @@ class TestBadTokenAddressGuard(unittest.TestCase):
     """
 
     def setUp(self):
-        self._saved = {
-            name: getattr(frappe.local, name, _ABSENT)
-            for name in ("request", "request_ip", "form_dict")
-        }
-        self.addCleanup(self._restore)
+        self.snapshot_frappe_locals()
         self.charged = []
         spy = mock.patch.object(
             token_security,
@@ -349,14 +366,6 @@ class TestBadTokenAddressGuard(unittest.TestCase):
         spy.start()
         self.addCleanup(spy.stop)
         frappe.local.form_dict = frappe._dict({"cmd": "a228-" + frappe.generate_hash(length=12)})
-
-    def _restore(self):
-        for name, previous in self._saved.items():
-            if previous is _ABSENT:
-                if hasattr(frappe.local, name):
-                    delattr(frappe.local, name)
-            else:
-                setattr(frappe.local, name, previous)
 
     def test_a_request_with_no_address_declines_instead_of_charging(self):
         for label, install_none in (("unset", False), ("None", True)):
