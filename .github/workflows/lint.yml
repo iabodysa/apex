@@ -31,7 +31,18 @@ jobs:
         # error in a gate is not a style nit: an unlinted gate that breaks takes every
         # check it guards down with it, silently. Both paths were clean at 0.15.14 when
         # scripts/ was added, so this widened the scope without moving the baseline.
-        run: ruff check apex/ scripts/
+        #
+        # ONE root per invocation, chained, rather than `ruff check apex/ scripts/`. Handed
+        # two roots ruff honours .gitignore only sometimes: on a work tree carrying a
+        # gitignored apex/demo/*.py, the two-root form passed 5 of 20 runs with the cache
+        # wiped before each, while either root alone passed 20 of 20. CI cannot reproduce
+        # it — a fresh clone holds no ignored file to find — so the coin flip lands only on
+        # workstations, which run this lane's own text through scripts/run_guards.sh.
+        # Scope is unchanged, not merely similar: apex/ (1122 files) plus scripts/ (4) is
+        # the same 1126 the two-root form walked, so nothing was widened or dropped. The
+        # && matters — run_guards.sh lifts this line and executes it under a plain sh with
+        # no -e, where a newline between the two would let a red in apex/ pass unnoticed.
+        run: ruff check apex/ && ruff check scripts/
 
       - name: Shell syntax
         # run_guards.sh is a gate too, and ruff cannot see it. These are all `#!/bin/sh`,
