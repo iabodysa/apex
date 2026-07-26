@@ -13,12 +13,13 @@ Fleet Control page had no Arabic — a multi-arg call the scanner skipped) and
 extended app-wide in 1.54.20.
 """
 
-import csv
 import glob
 import re
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+
+from apex.tests.source_tree import translations
 
 APP = frappe.get_app_path("apex")
 
@@ -46,16 +47,8 @@ def _is_ui_text(s):
 
 
 class TestTranslationCoverage(FrappeTestCase):
-    def _ar(self):
-        rows = {}
-        with open(f"{APP}/translations/ar.csv", encoding="utf-8", newline="") as h:
-            for r in csv.reader(h):
-                if len(r) >= 2 and r[0].strip():
-                    rows[r[0]] = r[1]
-        return rows
-
     def test_desk_surfaces_have_arabic(self):
-        ar = self._ar()
+        ar = translations()
         files = (
             glob.glob(f"{APP}/salis/**/*.js", recursive=True)
             + glob.glob(f"{APP}/habitat/**/*.js", recursive=True)

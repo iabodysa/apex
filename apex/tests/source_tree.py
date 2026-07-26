@@ -1,5 +1,8 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Source-tree queries shared by the site-free static guards.
+"""Source-tree and shipped-artifact queries shared by the static guards.
+
+Frappe-free by construction: that is what lets the site-free guards import it, and
+costs the site-bound Arabic ones nothing to import it too.
 
 test_duplicate_and_dead_code_guard.py and test_unit_test_coverage_guard.py each
 grew their own ``_production_py_files`` and ``_file_dotted_path``, so the widened
@@ -14,11 +17,13 @@ shipped_doctypes.py carry plain names).
 """
 
 import ast
+import csv
 import glob
 import os
 
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 REPO_ROOT = os.path.dirname(APP_ROOT)
+AR_CSV = os.path.join(APP_ROOT, "translations", "ar.csv")
 
 
 def rel(path):
@@ -83,6 +88,21 @@ def test_support_files():
         if not os.path.basename(path).startswith("test_")
         and os.path.basename(path) != "__init__.py"
     ]
+
+
+def translations():
+    """``{source: translation}`` from the shipped ar.csv.
+
+    One reader, because two Arabic-coverage guards asking "is this string
+    translated?" must not drift apart on what an answered row looks like. A row
+    with no second column, or a blank source, answers for nothing.
+    """
+    rows = {}
+    with open(AR_CSV, encoding="utf-8", newline="") as handle:
+        for row in csv.reader(handle):
+            if len(row) >= 2 and row[0].strip():
+                rows[row[0]] = row[1]
+    return rows
 
 
 def func_source(src, path, name):

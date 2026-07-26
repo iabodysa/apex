@@ -21,13 +21,14 @@ the English text so that rewording a description does not false-red the suite. I
 now drained — every shipped description has an Arabic row. The set may only shrink.
 """
 
-import csv
 import glob
 import json
 import re
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+
+from apex.tests.source_tree import translations
 
 APP = frappe.get_app_path("apex")
 
@@ -60,16 +61,8 @@ def _descriptions():
 
 
 class TestSchemaDescriptionTranslation(FrappeTestCase):
-    def _ar(self):
-        rows = {}
-        with open(f"{APP}/translations/ar.csv", encoding="utf-8", newline="") as handle:
-            for row in csv.reader(handle):
-                if len(row) >= 2 and row[0].strip():
-                    rows[row[0]] = row[1]
-        return rows
-
     def test_field_descriptions_have_arabic(self):
-        ar = self._ar()
+        ar = translations()
         untranslated = {
             (rel, fieldname)
             for rel, fieldname, text in _descriptions()
