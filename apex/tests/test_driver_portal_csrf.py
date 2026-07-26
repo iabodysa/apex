@@ -123,16 +123,36 @@ BODY_RATE_LIMITED = set(BODY_RATE_LIMITED_DRIVER_ENDPOINTS)
 # `frappe.form_dict.get(key, "")`, and app.py:302-314 builds form_dict from the query
 # string, so any caller appending `?<key>=anything` lands in a private window per value
 # (identity is `<ip>:<value>`, rate_limiter.py:147-148). No key value is safe, so this
-# guard demands none. Now ZERO: every endpoint charges the plain `rl:<cmd>:<ip>`, which
-# no query string partitions. salis/api/test_rate_limit_identity.py spends the real
-# windows; this budget is the ratchet, lowered only — a newly keyed endpoint pushes over.
+# guard demands none. The two identity suites spend the real windows; this budget is the
+# ratchet, lowered only — a newly keyed endpoint anywhere in KEY_RATCHET_ENDPOINTS,
+# driver portal or not, pushes it over.
 LEGACY_FORM_DICT_KEY = "frappe.request.remote_addr"
 LEGACY_FORM_DICT_KEY_BUDGET = 0
+
+# The endpoints that carried the same key OUTSIDE the driver portal: four unauthenticated
+# guest web-form SUBMITTERS (a forged window there bought unlimited INSERTs, not just
+# unlimited reads) plus the Front Desk identifier scan. They are inside the ratchet's
+# population rather than beside it, because a budget that only counts driver_portal/
+# would sit at zero while the same bypass was re-introduced one directory away — which
+# is precisely how these five outlived the pass that closed the other 38.
+OFF_PORTAL_KEY_CARRIERS = {
+	(
+		"habitat/web_form/accommodation_resident_request/accommodation_resident_request.py",
+		"submit_resident_request",
+	),
+	("habitat/web_form/arrival_manifest/arrival_manifest.py", "submit_arrival_manifest"),
+	("salis/web_form/transport_request/transport_request.py", "submit_transport_request"),
+	("salis/web_form/vehicle_incident/vehicle_incident.py", "submit_vehicle_incident"),
+	("habitat/api/front_desk.py", "resolve_worker"),
+}
 
 NORMAL_DRIVER_WRITERS = DRIVER_WRITERS - TIGHT_DRIVER_WRITERS - BODY_RATE_LIMITED
 PER_IP_DRIVER_ENDPOINTS = (
 	DRIVER_PORTAL_ENDPOINTS | MIXED_DRIVER_ENDPOINTS
 ) - BODY_RATE_LIMITED
+
+# The full population the key budget is counted over.
+KEY_RATCHET_ENDPOINTS = PER_IP_DRIVER_ENDPOINTS | OFF_PORTAL_KEY_CARRIERS
 
 WORKER_ENDPOINTS = {
 	"worker_request_wait": {"allow_guest": True, "methods": ["POST"]},
@@ -184,6 +204,10 @@ def _module_endpoints(path: Path) -> dict[str, tuple[ast.FunctionDef, dict[str, 
 
 
 def _endpoint_path(filename: str, name: str) -> Path:
+	# Off-portal carriers name themselves by their path relative to the app root; the
+	# driver-portal entries are bare basenames, so the two shapes cannot be confused.
+	if (filename, name) in OFF_PORTAL_KEY_CARRIERS:
+		return ROOT / "apex" / filename
 	if (filename, name) in MIXED_DRIVER_ENDPOINTS:
 		return ROOT / "apex" / "salis" / "api" / filename
 	return DRIVER_PORTAL / filename
@@ -238,7 +262,6 @@ class TestDriverPortalGuestInventory(unittest.TestCase):
 			]
 			self.assertTrue(imports, path.name)
 
-		keyed = 0
 		for filename, name in sorted(PER_IP_DRIVER_ENDPOINTS):
 			path = _endpoint_path(filename, name)
 			node = _module_endpoints(path)[name][0]
@@ -248,20 +271,57 @@ class TestDriverPortalGuestInventory(unittest.TestCase):
 				rate_index, decorator = rate
 				whitelist_index = node.decorator_list.index(_whitelist(node))
 				self.assertGreater(rate_index, whitelist_index)
-				keywords = _literal_keywords(decorator)
+
+	def test_no_endpoint_lets_the_caller_name_its_own_rate_limit_window(self):
+		"""The ratchet, over the WHOLE population that ever carried the key.
+
+		Counted across the driver portal AND the off-portal carriers together, because
+		a budget scoped to one directory reads zero while the identical bypass lives one
+		directory away — which is exactly how the four guest submitters and the Front
+		Desk scan outlived the pass that de-keyed the other 38.
+
+		Reading `key` back is not the proof that the window is sound; the two identity
+		files spend the real windows for that. This is the ratchet: it may be lowered,
+		never raised, so a newly keyed endpoint cannot land quietly.
+		"""
+		keyed = []
+		for filename, name in sorted(KEY_RATCHET_ENDPOINTS):
+			path = _endpoint_path(filename, name)
+			node = _module_endpoints(path)[name][0]
+			with self.subTest(path=filename, endpoint=name):
+				rate = _rate_limit(node)
+				self.assertIsNotNone(rate)
+				keywords = _literal_keywords(rate[1])
 				# What makes the window per-IP is `ip_based`, which frappe defaults to
 				# True (rate_limiter.py:110) and which alone puts the request IP in the
 				# identity (rate_limiter.py:141,147-150). Losing it is the regression to
-				# catch here; the key string never carried this property. Matched against
-				# by IDENTITY against the framework's own `ip_based is True` test
+				# catch here; the key string never carried this property. Matched by
+				# IDENTITY against the framework's own `ip_based is True` test
 				# (rate_limiter.py:141): a truthy 1 fails that test and silently drops
 				# the address, and `== True` would wave it through.
 				self.assertIs(keywords.get("ip_based", True), True)
 				self.assertEqual(keywords.get("seconds"), 60)
 				if "key" in keywords:
 					self.assertEqual(keywords["key"], LEGACY_FORM_DICT_KEY)
-					keyed += 1
-		self.assertLessEqual(keyed, LEGACY_FORM_DICT_KEY_BUDGET)
+					keyed.append(f"{filename}:{name}")
+		self.assertLessEqual(
+			len(keyed),
+			LEGACY_FORM_DICT_KEY_BUDGET,
+			"endpoint(s) let the caller pick their own rate-limit window by appending "
+			"a query parameter. Drop the `key` argument; `ip_based` already keys the "
+			"window to the request address:\n" + "\n".join(f"  {row}" for row in keyed),
+		)
+
+	def test_the_ratchet_population_still_holds_the_off_portal_carriers(self):
+		"""Non-vacuous: dropping an off-portal carrier out of the set would leave the
+		budget at zero while that endpoint was free to be re-keyed."""
+		self.assertEqual(len(OFF_PORTAL_KEY_CARRIERS), 5)
+		self.assertLessEqual(OFF_PORTAL_KEY_CARRIERS, KEY_RATCHET_ENDPOINTS)
+		for filename, name in sorted(OFF_PORTAL_KEY_CARRIERS):
+			with self.subTest(path=filename, endpoint=name):
+				path = _endpoint_path(filename, name)
+				self.assertTrue(path.is_file(), f"{filename} moved — repair the set")
+				self.assertIn(name, _module_endpoints(path))
 
 	def test_driver_writer_limits_are_bounded_and_creation_is_tight(self):
 		for filename, name in sorted(PER_IP_DRIVER_ENDPOINTS):

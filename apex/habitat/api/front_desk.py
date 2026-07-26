@@ -465,7 +465,10 @@ def _has_active_assignment(party_type: str, party: str, employee: str | None) ->
 
 # [#ry9ai3]
 @frappe.whitelist()
-@rate_limit(key="frappe.request.remote_addr", limit=60, seconds=60)
+# No `key`: it was a form_dict lookup (rate_limiter.py:143) any caller could set from
+# the query string, buying a private window per value. `ip_based` (default True) is
+# what actually keys this window to the address (rate_limiter.py:110,141,147-150).
+@rate_limit(limit=60, seconds=60)
 def resolve_worker(identifier: str) -> dict:
     """Resolve a scanned identifier to one worker for the Front Desk check-in dialog.
 

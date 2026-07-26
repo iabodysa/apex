@@ -15,7 +15,10 @@ def get_context(context):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=5, seconds=60)
+# No `key`: it was a form_dict lookup (rate_limiter.py:143) any caller could set from
+# the query string, buying a private window per value. `ip_based` (default True) is
+# what actually keys this window to the address (rate_limiter.py:110,141,147-150).
+@rate_limit(limit=5, seconds=60)
 def submit_arrival_manifest(
     building,
     expected_date,
