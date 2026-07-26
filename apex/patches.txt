@@ -15,12 +15,18 @@
 #       COVERED-BY:         <what provides that state instead>
 #   tests/test_patch_registration_guard.py fails the build on any patch module that
 #   is neither registered below nor carries both markers, and caps how many such
-#   documented exceptions may exist. Currently three, all recorded in this file:
+#   documented exceptions may exist. Currently four, all recorded in this file:
 #     v1_0.seed_salis_operations_roles — execute() is an unconditional `return`, so
 #       registering it is indistinguishable from not registering it. The module stays
 #       on disk: salis/setup.py imports it and tests/test_release_hygiene.py reads it.
 #     v1_x.seed_masar_demo_movement, v1_x.seed_demo_role_logins — demo seeders; see
 #       the A-070 note in [post_model_sync] below.
+#     v2_0.app_identity_cutover — the apex_habitat -> apex upgrade path. It CANNOT be
+#       registered: frappe resolves patches per installed-app name (patch_handler.py
+#       get_all_patches -> get_app_path(app, "patches.txt")), and a pre-rename site's
+#       name is still the dead package, so it never opens this file. Registering it
+#       would reach only already-canonical sites and sweep every table for nothing.
+#       Operator-invoked instead, per docs/UPGRADE-APP-IDENTITY.md.
 
 # PERMANENT: delegates to the create-only City loader in seed_all, so a site installed
 # before a city was added to the shipped JSON still gets it.
