@@ -131,6 +131,9 @@ def _validate_intercompany_gates(doc):
         frappe.throw(_("Release Approved By is required for intercompany asset movement."))
     if not doc.receiving_confirmed_by:
         frappe.throw(_("Receiving Confirmed By is required for intercompany asset movement."))
+    # Only the three permlevel-0 writers can satisfy this gate (System Manager,
+    # Accommodation Manager, Resident Supervisor); Finance Manager is read-only here, so
+    # the field label no longer claims "(Finance)". See the colocated acknowledgement test.
     if doc.movement_category == "Intercompany Permanent" and not doc.accounting_acknowledged:
         frappe.throw(
             _("Accounting Acknowledged is required before submitting a permanent intercompany transfer.")

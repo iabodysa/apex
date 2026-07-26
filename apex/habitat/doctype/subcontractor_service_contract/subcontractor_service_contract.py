@@ -1,5 +1,17 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Subcontractor Service Contract controller."""
+"""Subcontractor Service Contract controller.
+
+A-218 -- why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row.
+It is a deliberate field overlay, not an omission: the role may read and set the
+commercial terms (``rate_per_visit``, ``monthly_retainer``) on a contract that
+Accommodation Manager opens, and may not open, create, submit or cancel it. Document
+access is resolved from permlevel-0 rows only, field access is resolved separately and
+unions every permlevel across the user's roles, so the two are independent grants --
+the row activates the moment one user holds both roles, with no DocPerm edit. No
+shipped role profile bundles them today, so this overlay is dormant until an
+administrator does. Proof and the framework citations are in
+``apex/habitat/doctype/custody_damage_assessment/test_finance_manager_field_overlay.py``.
+"""
 
 from __future__ import annotations
 
