@@ -4,13 +4,22 @@
 Desk breadcrumbs resolve a DocType's workspace as
 ``module_wise_workspaces[module][0]`` (frappe breadcrumbs.js), and that list is
 built ordered by the Workspace row's ``creation`` column
-(Workspace.get_module_wise_workspaces, ``order_by="creation"``). Our workspace
-JSONs ship no ``creation`` value, so ``db_insert`` stamps the import moment —
-a fresh install imports the directory scan alphabetically, so a CHILD lands
-before its module root (``costs_and_leasing`` < ``habitat``,
-``compliance_and_rentals`` < ``salis``), and every later JSON change re-imports
-via delete+insert, re-stamping ``creation = now()``. Net effect: an arbitrary
-sub-workspace wins the module breadcrumb (follow-up to P-055).
+(Workspace.get_module_wise_workspaces, ``order_by="creation"``). A workspace JSON
+that ships no ``creation`` value gets the import moment from ``db_insert``, and
+``get_doc_files`` scans the folder with bare ``os.listdir`` (frappe/model/sync.py),
+which is DIRECTORY order, not alphabetical — so which workspace lands first is
+arbitrary. Worse, every later JSON change re-imports via delete+insert,
+re-stamping ``creation = now()`` and dropping that workspace to LAST. Net effect:
+an arbitrary sub-workspace wins the module breadcrumb (follow-up to P-055).
+
+SUPERSEDED for the modules that ship a pinned ``creation`` (A-286). A past
+``creation`` in the workspace JSON survives both install paths untouched
+(document.py set_user_and_timestamp skips the overwrite under in_install /
+in_patch / in_migrate), so the ordering is restored by the very re-import that
+used to break it and this pass finds nothing to do. What remains here is the
+compensator for rows already in a database whose JSON carries no pin — note it
+ABSTAINS on any module without exactly one public root, which is why it never
+reached Habitat once Backend Engines was relocated into that module.
 
 Fix: rewrite ONLY the DB ``creation`` of each module's single public root
 workspace (``parent_page == ""``) to one second before its earliest sibling, so
