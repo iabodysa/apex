@@ -551,11 +551,30 @@ def dispatch_trip_has_permission(doc, ptype, user=None):
 # [#dr2hpm]
 
 def _driver_chain_project(doc, driver_field="driver"):
-    """Resolve a doc's project through its Salis Driver link, or None."""
+    """Resolve a doc's project through its Salis Driver link, or None.
+
+    Falls back to the doc's ``vehicle`` link, which carries the project directly. On
+    Vehicle Incident / Vehicle Damage Write-Off / Vehicle Suspension the driver link is
+    ``fetch_from`` ``vehicle.current_driver``, and ``Document.insert`` runs
+    ``check_permission("create")`` (document.py:300) BEFORE ``_validate_links()`` (:302)
+    applies ``fetch_from`` — so at the create check the driver is EMPTY while the
+    mandatory, never-fetched ``vehicle`` is already set. Without this a scoped supervisor
+    could not raise an incident on their own project's vehicle at all.
+
+    A no-op for the driver-owned DocTypes (Driver Attendance, Driver Suspension, Boarding
+    Scan Log): none of them carries a ``vehicle`` link, so nothing resolves and the
+    caller's existing fail-closed branch is reached unchanged.
+    """
     driver = getattr(doc, driver_field, None)
-    if not driver:
-        return None
-    return frappe.db.get_value("Salis Driver", driver, "project")
+    if driver:
+        project = frappe.db.get_value("Salis Driver", driver, "project")
+        if project:
+            return project
+
+    vehicle = getattr(doc, "vehicle", None)
+    if vehicle:
+        return frappe.db.get_value("Salis Vehicle", vehicle, "project")
+    return None
 
 
 def _driver_chain_has_permission(doc, user=None, driver_field="driver", with_owner=False):

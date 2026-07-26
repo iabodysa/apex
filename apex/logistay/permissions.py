@@ -15,6 +15,8 @@ one request.
 
 from __future__ import annotations
 
+import frappe
+
 from apex.apex_core.utils import permission_scope
 
 # Roles that see every company's SIM records (no company confinement).
@@ -76,6 +78,38 @@ def sim_custody_assignment_query(user=None):
 # has_permission (form / REST / direct-access scoping)
 
 
+COMPANY_FETCH_ANCHOR = {
+    "SIM Card": ("telecom_contract", "Telecom Contract"),
+    "SIM Custody Assignment": ("sim_card", "SIM Card"),
+}
+
+
+def _doc_company(doc):
+    """Resolve the company a SIM record belongs to, or None.
+
+    ``company`` is ``fetch_from`` on both child records (``telecom_contract.company`` /
+    ``sim_card.company``), and ``Document.insert`` runs ``check_permission("create")``
+    (document.py:300) BEFORE ``_validate_links()`` (:302) applies ``fetch_from`` — so at
+    the create check it is EMPTY and reading it alone would deny a scoped SIM Operations
+    User the creation of a card in their OWN company. Each anchor is the mandatory,
+    never-fetched parent link the payload always carries; the company is re-read from it.
+
+    Returns None when nothing resolves, so the caller still fails CLOSED.
+    """
+    company = getattr(doc, "company", None)
+    if company:
+        return company
+
+    anchor = COMPANY_FETCH_ANCHOR.get(getattr(doc, "doctype", None))
+    if not anchor:
+        return None
+    fieldname, parent_doctype = anchor
+    parent = getattr(doc, fieldname, None)
+    if not parent:
+        return None
+    return frappe.db.get_value(parent_doctype, parent, "company")
+
+
 def company_scoped_has_permission(doc, ptype, user=None):
     """Deny a company-scoped user acting on a SIM record outside their companies.
 
@@ -83,14 +117,14 @@ def company_scoped_has_permission(doc, ptype, user=None):
     users and in-scope docs), or False to block. Deny-only and ptype-agnostic: an
     out-of-company doc is blocked for every action — read, write, submit, export —
     so a scoped user can neither open nor mutate another company's record directly
-    through the form view or the REST resource, not just in list view. A doc with
-    no company fails closed.
+    through the form view or the REST resource, not just in list view. A doc whose
+    company resolves through neither its own field nor its anchor link fails closed.
     """
     user = _resolve_user(user)
     if _is_unscoped(user):
         return None
 
-    company = getattr(doc, "company", None)
+    company = _doc_company(doc)
     if not company:
         return False
     return None if company in _allowed_companies(user) else False
