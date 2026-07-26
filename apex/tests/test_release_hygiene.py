@@ -21,11 +21,13 @@ Run standalone:  python3 -m unittest tests.test_release_hygiene -v
 
 import csv
 import glob
+import io
 import json
 import os
 import re
 import subprocess
 import sys
+import tokenize
 import types
 import unittest
 
@@ -37,7 +39,8 @@ PATCHES_DIR = os.path.join(APP_ROOT, "patches")
 HOOKS_PY = os.path.join(APP_ROOT, "hooks.py")
 
 # Line-oriented data the app itself ships. Vendored third-party files are out:
-# they must stay byte-identical to upstream, CRLF included.
+# they must stay byte-identical to upstream, CRLF included -- see the scope
+# decision on TestShippedDataLineEndings before widening this.
 SHIPPED_DATA_MANIFESTS = ("modules.txt", "patches.txt")
 
 ARABIC = re.compile(r"[؀-ۿ]")
@@ -175,6 +178,30 @@ class TestShippedDataLineEndings(unittest.TestCase):
     frappe/translate.py write_csv_file() regenerates the translation CSVs with
     lineterminator="\\n" — any other choice is undone on the next
     `bench update-translations`. .gitattributes prevents; this test detects.
+
+    SCOPE — settled, do not re-litigate: this guard judges apex-owned files
+    only. The apps we depend on carry the same mixed-ending drift in the
+    same-named file; measured on the pinned checkouts, hrms
+    translations/ar.csv has 388 CRLF rows of 1234, erpnext
+    translations/ar.csv 459 of 9489. Widening the scan to reach them was
+    considered and rejected:
+
+      1. We cannot fix what we do not ship. Those files live in sibling apps,
+         outside this repo's tree and index. `_files()` roots at APP_ROOT and
+         the matching .gitattributes rules are written against apex/ paths, so
+         neither can reach them by construction. Normalizing them in place
+         would only make the checkout diverge from upstream — exactly what the
+         byte-identical rule above forbids.
+      2. A red nobody can clear is a red that gets deleted. Those endings come
+         back on the next dependency update, so the gate would fail for a
+         reason no commit in this repo can address, and would be switched off.
+      3. The blast radius is nil for us. The damage this guard prevents — a
+         two-row edit arriving as a whole-file rewrite — is confined to the
+         file that mixes endings, and no apex diff renders through a sibling
+         app's CSV.
+
+    Reporting the drift upstream stays a courtesy, never a release gate; that
+    fix belongs in a pull request to the app that owns the file.
     """
 
     def _files(self):
@@ -734,59 +761,59 @@ _METADATA_TEXT_KEYS = {"description", "label", "documentation", "options"}
 
 
 class TestNotificationCompanionModule(unittest.TestCase):
-	"""Every is_standard Notification dir must carry its <name>.py companion.
+    """Every is_standard Notification dir must carry its <name>.py companion.
 
-	When a standard Notification fires, Frappe imports
-	`<app>.<module>.notification.<slug>.<slug>` (Notification.load_standard_properties
-	→ get_doc_module). A JSON-only dir raises ModuleNotFoundError mid-send; because
-	alerts fire inside the document's try/except hook, the exception silently rolls
-	back the parent insert. Seven dirs shipped JSON-only (fixed here); this guard
-	stops a new one regressing — it bites the moment the notification is enabled.
-	"""
+    When a standard Notification fires, Frappe imports
+    `<app>.<module>.notification.<slug>.<slug>` (Notification.load_standard_properties
+    → get_doc_module). A JSON-only dir raises ModuleNotFoundError mid-send; because
+    alerts fire inside the document's try/except hook, the exception silently rolls
+    back the parent insert. Seven dirs shipped JSON-only (fixed here); this guard
+    stops a new one regressing — it bites the moment the notification is enabled.
+    """
 
-	def _notification_dirs(self):
-		"""(rel_dir, slug) for every shipped is_standard Notification dir."""
-		out = []
-		for fp in glob.glob(
-			os.path.join(APP_ROOT, "*", "notification", "*", "*.json"), recursive=False
-		):
-			if "node_modules" in fp:
-				continue
-			try:
-				with open(fp, encoding="utf-8") as fh:
-					data = json.load(fh)
-			except (OSError, json.JSONDecodeError):
-				continue
-			if not isinstance(data, dict) or data.get("doctype") != "Notification":
-				continue
-			if not data.get("is_standard"):
-				continue
-			d = os.path.dirname(fp)
-			out.append((os.path.relpath(d, APP_ROOT), os.path.basename(d)))
-		return out
+    def _notification_dirs(self):
+        """(rel_dir, slug) for every shipped is_standard Notification dir."""
+        out = []
+        for fp in glob.glob(
+            os.path.join(APP_ROOT, "*", "notification", "*", "*.json"), recursive=False
+        ):
+            if "node_modules" in fp:
+                continue
+            try:
+                with open(fp, encoding="utf-8") as fh:
+                    data = json.load(fh)
+            except (OSError, json.JSONDecodeError):
+                continue
+            if not isinstance(data, dict) or data.get("doctype") != "Notification":
+                continue
+            if not data.get("is_standard"):
+                continue
+            d = os.path.dirname(fp)
+            out.append((os.path.relpath(d, APP_ROOT), os.path.basename(d)))
+        return out
 
-	def test_scan_finds_notifications(self):
-		slugs = {slug for _, slug in self._notification_dirs()}
-		self.assertIn(
-			"salis___trip_scheduled",
-			slugs,
-			"Notification scan found nothing — parser broke",
-		)
+    def test_scan_finds_notifications(self):
+        slugs = {slug for _, slug in self._notification_dirs()}
+        self.assertIn(
+            "salis___trip_scheduled",
+            slugs,
+            "Notification scan found nothing — parser broke",
+        )
 
-	def test_every_standard_notification_has_py_companion(self):
-		missing = []
-		for rel, slug in self._notification_dirs():
-			d = os.path.join(APP_ROOT, rel)
-			if not os.path.exists(os.path.join(d, slug + ".py")):
-				missing.append(rel + "/" + slug + ".py")
-			if not os.path.exists(os.path.join(d, "__init__.py")):
-				missing.append(rel + "/__init__.py")
-		self.assertEqual(
-			missing,
-			[],
-			"is_standard Notification dir missing its companion module "
-			f"(ModuleNotFoundError on fire → silent parent rollback): {sorted(missing)}",
-		)
+    def test_every_standard_notification_has_py_companion(self):
+        missing = []
+        for rel, slug in self._notification_dirs():
+            d = os.path.join(APP_ROOT, rel)
+            if not os.path.exists(os.path.join(d, slug + ".py")):
+                missing.append(rel + "/" + slug + ".py")
+            if not os.path.exists(os.path.join(d, "__init__.py")):
+                missing.append(rel + "/__init__.py")
+        self.assertEqual(
+            missing,
+            [],
+            "is_standard Notification dir missing its companion module "
+            f"(ModuleNotFoundError on fire → silent parent rollback): {sorted(missing)}",
+        )
 
 
 class TestNoInternalMarkersInMetadata(unittest.TestCase):
@@ -929,6 +956,147 @@ class TestPrintFormatGuards(unittest.TestCase):
                 r"\{\{\s*doc\." + field + r"(\s*or\s*0)?\s*\}\}",
                 f"{field} printed raw without frappe.format",
             )
+
+
+TRACKED_MIXED_INDENT = frozenset(
+    {
+        "apex/salis/api/driver_portal/__init__.py",
+        "apex/salis/api/driver_portal/attendance.py",
+        "apex/salis/api/driver_portal/boarding.py",
+        "apex/salis/api/driver_portal/clearance.py",
+        "apex/salis/api/driver_portal/execution.py",
+        "apex/salis/api/driver_portal/fuel.py",
+        "apex/salis/api/driver_portal/home.py",
+        "apex/salis/api/driver_portal/notifications.py",
+        "apex/salis/api/driver_portal/profile.py",
+        "apex/salis/api/driver_portal/support.py",
+        "apex/salis/api/driver_portal/test_driver_portal.py",
+        "apex/salis/api/driver_portal/trips.py",
+        "apex/salis/api/web_push.py",
+        "apex/tests/test_b5_role_workspaces.py",
+    }
+)
+
+_NOT_INDENTATION = frozenset(
+    {tokenize.INDENT, tokenize.DEDENT, tokenize.ENDMARKER, tokenize.ENCODING}
+)
+
+
+class TestIndentationConsistency(unittest.TestCase):
+    """A file must indent with tabs or with spaces, never both.
+
+    The repo runs two styles on purpose: 81 files are tab-indented in the
+    Frappe house style and 695 are four-space, and .editorconfig still declares
+    tab. Neither is wrong, so this guard never judges which one a file picked —
+    only that it picked one. A file that runs both renders at a different width
+    in every reader whose tab stop is not four, and the mixed block is invisible
+    in review because the characters look identical.
+
+    Why this is a test and not a ruff rule: ruff's tab rule (W191) is a
+    style vote, not a consistency check — it fires on all 5867 tab-indented
+    lines across 97 files, which is a red nobody would keep. E101
+    (mixed-spaces-and-tabs) only catches a single line that mixes both
+    characters in one indent, so it scored zero on the file that provoked this
+    guard even while that file ran 42 tab lines against 589 space ones. Neither
+    rule expresses "one style per file", so the check lives here.
+
+    TRACKED_MIXED_INDENT freezes the files that already mix, so this lands at
+    zero new failures. It is not a permanent exemption: the stale-entry test
+    fails once an entry is cleaned up, so the list can only shrink.
+    """
+
+    @staticmethod
+    def _indent_styles(source):
+        """{"tab": [lines], "space": [lines]} for the LOGICAL lines of `source`.
+
+        Only the leading whitespace of a physical line that begins a logical
+        line counts. Continuation lines inside brackets and the interior of a
+        multi-line string never start one, so a space-aligned continuation in a
+        tab file — and a tab inside a string or docstring — is correctly not an
+        indentation defect.
+        """
+        lines = source.splitlines()
+        found = {"tab": [], "space": []}
+        at_line_start = True
+        for token in tokenize.generate_tokens(io.StringIO(source).readline):
+            if token.type in (tokenize.NEWLINE, tokenize.NL):
+                at_line_start = True
+                continue
+            if token.type in _NOT_INDENTATION:
+                continue
+            if not at_line_start:
+                continue
+            at_line_start = False
+            row = token.start[0]
+            text = lines[row - 1]
+            indent = text[: len(text) - len(text.lstrip(" \t"))]
+            if "\t" in indent:
+                found["tab"].append(row)
+            elif indent:
+                found["space"].append(row)
+        return found
+
+    def _tracked_python_files(self):
+        """Every tracked .py file, because "shipped" means what git ships."""
+        listed = subprocess.run(
+            ["git", "-C", REPO_ROOT, "ls-files", "-z", "--", "*.py"],
+            capture_output=True,
+            check=True,
+        ).stdout.decode("utf-8")
+        return sorted(p for p in listed.split("\0") if p)
+
+    def _mixed_files(self):
+        mixed = {}
+        for rel in self._tracked_python_files():
+            path = os.path.join(REPO_ROOT, rel)
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    source = fh.read()
+                styles = self._indent_styles(source)
+            except (OSError, UnicodeDecodeError, SyntaxError, tokenize.TokenError):
+                continue
+            if styles["tab"] and styles["space"]:
+                mixed[rel] = styles
+        return mixed
+
+    def test_scan_reads_the_package(self):
+        """Anti-vacuity: a broken scan must not pass by finding nothing."""
+        found = self._tracked_python_files()
+        self.assertIn(
+            "apex/tests/test_release_hygiene.py",
+            found,
+            f"python scan missed this very file; saw {len(found)} files",
+        )
+
+    def test_no_file_mixes_tabs_and_spaces(self):
+        offenders = []
+        for rel, styles in sorted(self._mixed_files().items()):
+            if rel in TRACKED_MIXED_INDENT:
+                continue
+            minority = min(styles, key=lambda k: len(styles[k]))
+            majority = "tab" if minority == "space" else "space"
+            offenders.append(
+                f"{rel}:{styles[minority][0]} ({len(styles[minority])} {minority}-indented "
+                f"vs {len(styles[majority])} {majority}-indented)"
+            )
+        self.assertEqual(
+            offenders,
+            [],
+            "a python file indents with both tabs and spaces — pick the style "
+            "already dominant in that file and reindent the minority: "
+            + "; ".join(offenders),
+        )
+
+    def test_no_stale_mixed_indent_entry(self):
+        """An entry that got cleaned up must leave, so the debt can only shrink."""
+        mixed = set(self._mixed_files())
+        stale = sorted(TRACKED_MIXED_INDENT - mixed)
+        self.assertEqual(
+            stale,
+            [],
+            "these files no longer mix indentation — drop them from "
+            f"TRACKED_MIXED_INDENT so they stay clean: {stale}",
+        )
 
 
 if __name__ == "__main__":
