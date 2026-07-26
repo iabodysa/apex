@@ -38,6 +38,11 @@ jobs:
       - name: Scan for committed secrets (required)
         # Scan only the commits added by this push/PR, not the whole history.
         # gitleaks reads the allowlist from the committed .gitleaks.toml.
+        #
+        # Resolving WHICH range this event adds is GitHub-event logic and belongs
+        # here. HOW the range is scanned - the binary, the redaction, the source -
+        # is a rule, and it is declared once in scripts/run_guards.sh so the
+        # pre-push hook cannot come to scan with different flags than this lane.
         run: |
           set -uo pipefail
           before="${{ github.event.before }}"
@@ -53,7 +58,7 @@ jobs:
             # First push / new branch / shallow window: scan the tip commit only.
             log_opts="-1 ${sha}"
           fi
-          gitleaks detect --no-banner --redact --source . --log-opts="${log_opts}"
+          scripts/run_guards.sh range "${log_opts}"
 
       - name: No Arabic in commit messages (forward-only)
         run: |
@@ -137,6 +142,20 @@ jobs:
       # instead of after the ~25min bench install the other job needs first.
       - name: Test colocation and unit-test coverage ratchets
         run: python3 -m unittest apex.tests.test_colocation_ratchet apex.tests.test_unit_test_coverage_guard
+
+      # test_repo_gates is what stops the two metadata guards above from drifting
+      # apart from .githooks. It used to run only inside `run-tests --app apex`, so a
+      # drift surfaced after the ~25min bench install in the other job - by which time
+      # the local hook had already waved the offending commit through. It is
+      # stdlib-only (no frappe, no site, ~2s), so it belongs in this fail-fast lane.
+      - name: Local hooks still mirror the CI metadata guards
+        run: python3 -m unittest apex.tests.test_repo_gates
+
+      # The DocType date/layout contract: field_order against fields both ways, one
+      # fieldtype per start/end pair, and the opening field rendered first. Defects
+      # that parse as valid JSON and only misbehave on a rendered form.
+      - name: DocType date and layout contract
+        run: python3 scripts/check_doctype_dates.py apex
 
       # Dependency-free node unit tests for the worker/Masar pure helpers.
       - name: Worker-portal phone normaliser unit test
