@@ -167,6 +167,23 @@ class TestEquivalentIndexDetection(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(db.ddl, [])
 
+    def test_a_name_collision_over_other_columns_is_still_a_noop(self):
+        """Isolates the NAME probe, which no other test can fail on.
+
+        The sibling tests register the index under BOTH the requested name and the
+        requested column set, so with the name probe (ledger_index.py:136-144)
+        deleted the column-set probe still answers True and they stay green. Here
+        ONLY the name matches -- which is also the real constraint, since the engine
+        refuses a second index under a name the table already carries.
+        """
+        result, db = self._run(
+            {"idx_asgn_bed": ["room"]}, "Housing Assignment", ["bed"], "idx_asgn_bed"
+        )
+        self.assertTrue(result)
+        self.assertEqual(
+            db.ddl, [], "helper issued DDL under a name the table already carries"
+        )
+
     def test_column_set_match_is_case_insensitive(self):
         result, db = self._run(
             {"BED_INDEX": ["BED"]}, "Housing Assignment", ["bed"], "idx_asgn_bed"
