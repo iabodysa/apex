@@ -7,23 +7,25 @@ on:
     branches: [apex]
 
 # Cap on ar.csv rows whose English source no longer appears in the scanned package.
-# 133 sit under it today (measured), down from 135: the extractor now treats a
-# `description` and any _()/__() msgid as DECLARED text and skips the shape
-# heuristics on it, so the two shapes the previous note listed as unreadable — a
-# __() msgid containing ">" and a description over 180 chars — became readable and
-# left STALE. No row was newly staled by that change.
+# 132 sit under it today (measured), down from 134: the `Fleet Portal` and
+# `Fleet Portal (Portal)` rows were orphaned when the Fleet workspace shortcut was
+# renamed to `Fleet OS`, and are deleted here after a scan found neither string in
+# the app source, the built portal bundles under apex/public, or any workspace JSON.
+# The cap drops by the same two so the deletion tightens the ratchet instead of
+# banking two rows of slack for the next stale row to hide under.
+# (The previous note said 133; the measured count was 134. It is re-measured here.)
 # The remaining rows are still live-but-unreadable shapes (onboarding intro_text,
 # role and module names, hooks/changelog dict values, workspace link labels the
 # framework composes at runtime), rows owned by frappe/erpnext/hrms or a portal SPA
 # dictionary, superseded renames whose successor row exists, and rows with no live
 # source found. That row-by-row split is inherited from the prior audit, not re-run
 # here; re-cut it by 2026-10-01.
-# 14 is deliberate slack, unchanged: measured single-commit churn before this gate
-# existed was +1, +8 and +31, so a baseline pinned to the exact count reds this lane
-# on whoever pushes the next honest label rename — a failure that reads as theirs.
-# Slack absorbs a workspace-scale rename, not a module retirement.
+# 13 is deliberate slack, unchanged in size: measured single-commit churn before this
+# gate existed was +1, +8 and +31, so a baseline pinned to the exact count reds this
+# lane on whoever pushes the next honest label rename — a failure that reads as
+# theirs. Slack absorbs a workspace-scale rename, not a module retirement.
 env:
-  STALE_BASELINE: 147
+  STALE_BASELINE: 145
 
 jobs:
   lint:
