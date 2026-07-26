@@ -1,12 +1,12 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Every root-level key in a shipped DocType JSON must be one Frappe actually reads.
 
-A-048/A-050 shipped ``"hidden": 1`` on 22 DocType records to keep operational users
-from finding them. ``hidden`` is not a DocType field: it is absent from frappe's own
-core/doctype/doctype/doctype.json, so it is not a column on ``tabDocType``, and
-``BaseDocument.get_valid_dict`` writes only ``meta.get_valid_columns()``. The key
-parsed, imported, and was dropped on the floor -- 22 records carried a concealment
-flag that concealed nothing, and nothing failed to say so.
+Twenty-two engine ledgers once shipped ``"hidden": 1`` at the root of their DocType
+JSON, to keep operational users from finding them. ``hidden`` is not a DocType
+property: it is absent from frappe's own core/doctype/doctype/doctype.json, so it is
+not a column on ``tabDocType``, and ``BaseDocument.get_valid_dict`` writes only
+``meta.get_valid_columns()``. The key parsed, imported, and was dropped on the floor
+-- 22 records carried a concealment flag that concealed nothing, and no gate said so.
 
 An unknown root key is silently inert exactly like that one, so the failure mode is
 always a placebo that reads as shipped policy. This guard is the alarm: it derives the
@@ -150,7 +150,7 @@ class TestDocTypeRootKeys(unittest.TestCase):
         )
 
     def test_hidden_key_stays_gone(self):
-        """The specific inert key A-048/A-050 shipped, named so its return is legible.
+        """The specific inert key this tree once shipped, named so its return is legible.
 
         Kept beside the general check because the general one only says "unsupported";
         a reader re-adding ``hidden`` to conceal a ledger needs to be told that THIS
