@@ -18,6 +18,16 @@ class TestApexIntegrationSettings(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
         self.doc = frappe.get_single("Apex Integration Settings")
+        # A Single lives in tabSingles, outside any row this test created, and
+        # FrappeTestCase only rolls back once per CLASS — so snapshot the deployment
+        # value and register the restore BEFORE the first mutating save below.
+        self._frontend_base_url = self.doc.frontend_base_url
+        self.addCleanup(self._restore_settings)
+
+    def _restore_settings(self):
+        doc = frappe.get_single("Apex Integration Settings")
+        doc.frontend_base_url = self._frontend_base_url
+        doc.save(ignore_permissions=True)
 
     def test_https_url_is_accepted(self):
         self.doc.frontend_base_url = "https://salis-fleet.com"
