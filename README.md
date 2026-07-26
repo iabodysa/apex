@@ -271,7 +271,7 @@ apex/www/      Frappe routes, page shells, and the authentication bootstrap
 e2e/           browser-level tests
 ```
 
-`frontend/` is a single npm workspace of seven packages — `fleet`, `fleet_os`, `frontend_shared`, `housing`, `route_supervisor`, `safety`, and `worker`, with the driver screens folded into `worker`. `frontend/package.json` is the only manifest that declares dependencies and `frontend/package-lock.json` the only lockfile, so a framework version cannot drift between portals. `npm run build` rebuilds all six committed bundles under `apex/public/`. The shared runtime, the Vite config factory, and the portal `src/` skeleton are documented in [`frontend/frontend_shared/README.md`](frontend/frontend_shared/README.md).
+`frontend/` is a single npm workspace of seven packages — `fleet`, `fleet_os`, `frontend_shared`, `housing`, `route_supervisor`, `safety`, and `worker`. The driver screens are folded into `worker`: they keep their own source tree at `frontend/driver/src`, which declares no manifest and is not an eighth package — `worker` imports it and builds both service workers, so `ls frontend/` shows one more directory than the workspace list. `frontend/package.json` is the only manifest that declares dependencies and `frontend/package-lock.json` the only lockfile, so a framework version cannot drift between portals. `npm run build` rebuilds all six committed bundles under `apex/public/`. The shared runtime, the Vite config factory, and the portal `src/` skeleton are documented in [`frontend/frontend_shared/README.md`](frontend/frontend_shared/README.md).
 
 ### Served portal routes
 
@@ -303,7 +303,11 @@ Desk users work through native workspaces, forms, reports, and operator pages. M
 
 ### Keeping the route table honest
 
-The table above is a published description of a directory that changes whenever a portal is added, split, or retired. Run this from the repository root after any change under `apex/www/`. It prints nothing and exits `0` only when the shells on disk and the routes documented here are the same set:
+The table above is a published description of a directory that changes whenever a portal is added, split, or retired. Two checks stand behind it, and they cover different things.
+
+`apex/tests/test_portal_route_coverage.py` runs with the suite. It parses the shells under `apex/www/`, the bundle-rebuild matrix in the Portal Bundles workflow, and the browser smoke list, and fails when those three sets disagree — so a served route can never ship a bundle that nothing rebuilds or nothing opens. `apex/tests/test_apps_screen_gate_wiring.py` closes the neighbouring gap: it resolves, per server module, the routes that actually reach it, and fails a module whose own docstring claims a route it does not serve.
+
+Neither guard reads the table above. Until one does, the table's own check is the command below; run it from the repository root after any change under `apex/www/`. It prints nothing and exits `0` only when the shells on disk and the routes documented here are the same set:
 
 ```bash
 diff \

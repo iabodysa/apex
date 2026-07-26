@@ -146,6 +146,7 @@ Portal shortcuts that ship on a workspace today:
 | Housing | `Housing Portal` | `/housing` | Housing operator portal |
 | Housing | `Inventory Count` | `/housing-count` | Redirect into the Housing portal's count view |
 | Safety | `Safety Checklist` | `/safety` | Safety operator portal |
+| Salis | `Worker Route (Masar)` | `/masar` | Worker PWA, for a supervisor checking what a worker sees |
 
 The **Fleet** workspace is role-gated to the fleet team, so its portal shortcut
 targets the supervisor board at `/fleet-os` rather than the employee page at

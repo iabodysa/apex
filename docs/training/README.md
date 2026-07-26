@@ -1,13 +1,19 @@
 # Apex Training Guide
 
 A practical, role-by-role guide to using **Apex** — the AFMCO workforce
-operations suite. Apex hosts two functional modules plus a shared settings layer:
+operations suite. Apex hosts three functional modules plus a shared settings
+layer — the four names in `apex/modules.txt`:
 
 - **Habitat** — accommodation, custody, safety, maintenance, and facility costs.
 - **Salis** — movement and fleet: vehicles, drivers, fuel, dispatch, rentals,
   plus the portals for **Drivers** (`/driver`), **Workers / Masar** (`/masar`),
   **employees** (`/fleet`), **fleet supervisors** (`/fleet-os`), and **route
   supervisors** (`/masar-supervisor`).
+- **Logistay** — workforce and telecom operations: freelancers, temporary
+  workers, telecom contracts, SIM inventory and custody, billing documents, and
+  the **Telecom Control** desk. It ships no workspace of its own; its reports,
+  cards, and desk are hosted on the **Custody** workspace. It has no training
+  page yet, and the Custody page below does not cover it.
 - **Apex Core** — shared configuration (Habitat / Salis / Integration settings).
 
 This guide explains, per functional area, **what each record is for**, **who can
@@ -48,12 +54,13 @@ that right.
 | **Fleet Manager** | Salis | Owns the fleet; unscoped across all projects |
 | **Fleet Project Manager** | Salis | Manages vehicles/drivers for assigned projects only |
 | **Fleet Supervisor** | Salis | Field supervisor; creates operational records |
-| **Government Relations Officer** | Salis | Compliance notification recipient + Compliance workspace viewer (no record-edit rights) |
+| **Government Relations Officer** | Salis | Compliance notification recipient + Compliance workspace viewer (no record-edit rights). It holds Read, Report, and Export on five vehicle and driver compliance records and on three registers, and is granted on the **Salis** root as well as on **Compliance and Rentals** |
 | **Driver** | Salis | Field driver; uses the mobile Driver Portal only. The role has `desk_access = 0` and an owner-only permission set on five Salis DocTypes — it never opens the desk |
 
-> **Maintenance Manager** is an ERPNext-supplied role (not created by Apex). When
-> it is present, Apex grants it Read/Write/Create on the maintenance material
-> masters (Maintenance Material, Maintenance Material Template).
+> **Maintenance Manager** is an ERPNext-supplied role. Apex neither creates it nor
+> grants it anything — no shipped DocType names it. Read/Write/Create on the
+> maintenance material masters (Maintenance Material, Maintenance Material
+> Template) belongs to **Accommodation Manager** and **Maintenance Technician**.
 
 > **Universal Maintenance Request intake:** *any* logged-in user (the built-in
 > **All** role) can raise a **Maintenance Request** — they hold Create, and Read
@@ -61,9 +68,9 @@ that right.
 > also let the assigned technician see a ticket, while hiding everyone else's. See
 > [Maintenance](maintenance.md).
 
-> **Project scoping (Salis):** Fleet Project Managers and Supervisors see only their permitted projects. Oversight roles (Fleet Manager, Finance Manager, Internal Auditor) see all. Grant access via a *User Permission* on **Project**.
+> **Project scoping (Salis):** Fleet Project Managers and Supervisors see only their permitted projects. Oversight roles (Fleet Manager, Finance Manager, Internal Auditor, Government Relations Officer) see all. Grant access via a *User Permission* on **Project**. The oversight set is `UNSCOPED_ROLES` in `apex/salis/permissions.py`; a role that is neither oversight nor project-granted would be shown lists that can only return no rows, so `apex/salis/test_scope_role_partition.py` fails the build on one.
 
-> **Building scoping (Habitat):** a **Resident Supervisor** is scoped to his building(s) via a *User Permission* on **Accommodation Building**, limiting his view to Assignment, Custody Issue, Cleaning Log, and Building records. Oversight roles are unscoped.
+> **Building scoping (Habitat):** a **Resident Supervisor** is scoped to his building(s) via a *User Permission* on **Building** — that is the DocType name; there is no `Accommodation Building`. The scope is broad, not a short list: `apex/hooks.py` wires a building check onto 28 DocTypes, covering assignment, custody, cleaning, safety, maintenance, rooms and beds, so read it as the default for any building-bearing record. The oversight roles (Accommodation Manager, Finance Manager, Internal Auditor) are unscoped; the set is `HOUSING_UNSCOPED_ROLES` in `apex/habitat/permissions.py`.
 
 ---
 
