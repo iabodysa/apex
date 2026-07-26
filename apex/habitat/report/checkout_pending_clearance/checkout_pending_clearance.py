@@ -1,8 +1,27 @@
 # Copyright (c) 2026, AFMCO and contributors
 # [#j03s5a]
 
+"""Checkout Pending Clearance — Script Report.
+
+Row scope (A-225). Every query below is ``frappe.get_all``, which forces the
+ignore-permissions path, so the ``Housing Checkout`` row boundary registered in
+``hooks.permission_query_conditions`` never reaches this SQL — a Script Report inherits
+nothing from it. ``Resident Supervisor`` is in the report's audience and is NOT in
+``habitat.permissions.HOUSING_UNSCOPED_ROLES``, so the scope has to be re-applied here in
+Python or that role reads every estate.
+
+Two boundaries, deliberately separate. ``readable`` is the permission boundary and gates
+the joined custody rows; ``listed`` is ``readable`` narrowed by the user's own building
+filter and gates the checkout list. Keeping them apart means an oversight role picking a
+building still gets that employee's full custody counts, while a scoped supervisor's
+counts and damage-assessment names stay confined to buildings they hold — the count and
+the name were the actual disclosure, not just the checkout row.
+"""
+
 import frappe
 from frappe.utils import date_diff, today
+
+from apex.habitat import permissions
 
 
 def execute(filters=None):
@@ -20,7 +39,23 @@ def execute(filters=None):
         {"label": frappe._("Days Since Checkout"), "fieldname": "days_since", "fieldtype": "Int", "width": 130},
     ]
 
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    chosen_building = filters.get("building") or ""
+    if restrict and (not allowed or (chosen_building and chosen_building not in allowed)):
+        return columns, []
+
+    readable = list(allowed) if restrict else []
+    listed = [chosen_building] if chosen_building else readable
+
     query_filters = {"docstatus": 1}
+    if listed:
+        # Housing Checkout has no building column, so narrow it by its in-scope beds.
+        in_scope_beds = frappe.get_all(
+            "Bed", filters={"building": ["in", listed]}, pluck="name"
+        )
+        if not in_scope_beds:
+            return columns, []
+        query_filters["bed"] = ["in", in_scope_beds]
 
     checkouts = frappe.get_all(
         "Housing Checkout",
@@ -43,17 +78,6 @@ def execute(filters=None):
         )
         bed_building_map = {b.name: b.building for b in bed_rows}
 
-    # [#mpblgu]
-    building_filter = filters.get("building")
-    if building_filter:
-        checkouts = [
-            co for co in checkouts
-            if bed_building_map.get(co.bed) == building_filter
-        ]
-
-    if not checkouts:
-        return columns, []
-
     all_employees = list({co.employee for co in checkouts if co.employee})
 
     # [#3wwr48]
@@ -71,9 +95,12 @@ def execute(filters=None):
     # [#7kb61x]
     issue_count_map = {}
     if all_employees:
+        issue_filters = {"issued_to_employee": ["in", all_employees], "docstatus": 1}
+        if readable:
+            issue_filters["building"] = ["in", readable]
         issue_rows = frappe.get_all(
             "Custody Issue",
-            filters={"issued_to_employee": ["in", all_employees], "docstatus": 1},
+            filters=issue_filters,
             fields=["issued_to_employee", "count(name) as issue_count"],
             group_by="issued_to_employee",
         )
@@ -82,9 +109,12 @@ def execute(filters=None):
     # [#5jlugb]
     damage_map = {}
     if all_employees:
+        damage_filters = {"employee": ["in", all_employees], "docstatus": 1}
+        if readable:
+            damage_filters["building"] = ["in", readable]
         damage_rows = frappe.get_all(
             "Custody Damage Assessment",
-            filters={"employee": ["in", all_employees], "docstatus": 1},
+            filters=damage_filters,
             fields=["employee", "name"],
             order_by="name asc",
         )
