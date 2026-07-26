@@ -2,8 +2,8 @@
 """Portal bad-token throttle (A-110), proved in BOTH directions.
 
 A rate limiter nobody proved fires is not hardening; one nobody proved lets real
-users through is an outage. These drive the REAL ``frappe.rate_limiter`` against a
-constructed request, so they need no served site and no fixtures: the only thing
+users through is an outage. These drive the REAL throttle and the REAL cache against
+a constructed request, so they need no served site and no fixtures: the only thing
 stubbed is the token row lookup, which keeps the whole module DB-write-free.
 
 The counterpart integration coverage in ``apex/tests/test_portal_token_security.py``
@@ -73,21 +73,33 @@ class TestPortalTokenThrottle(unittest.TestCase):
         for name, value in self._saved.items():
             setattr(frappe.local, name, value)
 
-    def _arm(self, ip="198.51.100.10", cmd=None, cookies=None):
-        """Stand up one request surface and return its rate-limit key NAME.
+    def _arm(self, ip=None, cmd=None, cookies=None):
+        """Stand up one request surface and return its throttle key NAME.
 
-        The name is deliberately RAW: ``delete_value`` re-applies ``make_key``
-        (redis_wrapper.py:142), so handing it an already-made key double-prefixes
-        and clears nothing. A unique cmd per test also guarantees a fresh window.
+        The window is keyed on the ADDRESS ALONE, so a unique address per call is
+        what buys a fresh window; ``cmd`` is set only to prove the key ignores it.
+        The name handed to the cache is deliberately RAW: ``delete_value`` re-applies
+        ``make_key`` (redis_wrapper.py:141-142), so an already-made key is prefixed a
+        second time and clears nothing.
         """
+        ip = ip or "2001:db8::" + frappe.generate_hash(length=12)
         frappe.local.request = _Request(cookies)
         frappe.local.request_ip = ip
         cmd = cmd if cmd is not None else "a110-" + frappe.generate_hash(length=12)
         frappe.local.form_dict = frappe._dict({"cmd": cmd} if cmd else {})
-        name = f"rl:{frappe.local.form_dict.cmd}:{ip}"
+        name = token_security.BAD_TOKEN_WINDOW_KEY.format(ip)
         frappe.cache.delete_value(name)
+        self.addCleanup(self._assert_window_cleared, name)
         self.addCleanup(frappe.cache.delete_value, name)
         return name
+
+    def _assert_window_cleared(self, name):
+        """Registered BEFORE the delete so LIFO runs it AFTER: the cleanup is proved
+        to land, not merely to have been written (the A-209 dead-cleanup bug)."""
+        self.assertIsNone(
+            frappe.cache.get(frappe.cache.make_key(name)),
+            f"the throttle window {name} outlived its cleanup",
+        )
 
     def _counter(self, name):
         return int(frappe.cache.get(frappe.cache.make_key(name)) or 0)
@@ -213,8 +225,8 @@ class TestPortalTokenThrottle(unittest.TestCase):
                 self.assertEqual(self._counter(name), 0)
 
     def test_both_www_entries_spend_one_shared_window_per_address(self):
-        """``cmd`` is empty on a website route, so /masar and /driver charge the SAME
-        key -- an attacker cannot double the entry budget by alternating the two."""
+        """/masar and /driver charge the SAME key -- an attacker cannot double the
+        entry budget by alternating the two."""
         name = self._arm(cmd="")
         with self._token_reads(), mock.patch.object(
             masar_page, "get_csrf_token", return_value="csrf"
@@ -227,29 +239,42 @@ class TestPortalTokenThrottle(unittest.TestCase):
 
         self.assertEqual(self._counter(name), 2)
 
-    def test_each_whitelisted_endpoint_carries_its_own_window(self):
-        """Characterisation of the ACCEPTED weakening, so it cannot drift silently.
+    def test_every_endpoint_spends_ONE_shared_window_per_address(self):
+        """The advertised budget is per IP FULL STOP, not per IP per endpoint.
 
-        frappe keys the window ``rl:<form_dict.cmd>:<ip>`` (rate_limiter.py:155) and
-        the REST layer sets cmd to the called method (api/v1.py:39), so one address
-        gets a fresh N per endpoint rather than one global N. Tolerated because the
-        token carries 192 bits; tighten this only with a deliberate review.
+        frappe's own ``@rate_limit`` welds ``form_dict.cmd`` into its key
+        (rate_limiter.py:155) and the REST layer sets cmd to the called method
+        (api/v1.py:39), which would hand every guest endpoint a private N. Failures
+        split across two DIFFERENT cmd values must trip the SAME ceiling, and a third
+        endpoint must find the budget already spent.
         """
-        names = [self._arm(cmd=f"a110.endpoint.{index}") for index in range(2)]
+        name = self._arm(cmd="a210.endpoint.one")
+        half = LIMIT // 2
         with self._token_reads():
-            for name, cmd in zip(names, ("a110.endpoint.0", "a110.endpoint.1")):
+            for cmd, attempts in (
+                ("a210.endpoint.one", half),
+                ("a210.endpoint.two", LIMIT - half),
+            ):
                 frappe.local.form_dict = frappe._dict({"cmd": cmd})
-                for _ in range(LIMIT):
+                for _ in range(attempts):
                     with self.assertRaises(frappe.PermissionError):
                         token_security.resolve_portal_subject(
                             token_security.DRIVER, BOGUS, required=True
                         )
+            frappe.local.form_dict = frappe._dict({"cmd": "a210.endpoint.three"})
+            with self.assertRaises(frappe.RateLimitExceededError) as raised:
+                token_security.resolve_portal_subject(
+                    token_security.DRIVER, BOGUS, required=True
+                )
 
-        self.assertEqual([self._counter(name) for name in names], [LIMIT, LIMIT])
+        self.assertEqual(getattr(raised.exception, "http_status_code", None), 429)
+        self.assertEqual(self._counter(name), LIMIT + 1)
 
     def test_a_console_or_job_caller_is_never_throttled(self):
-        """rate_limiter.py:134 no-ops without a request, so a scheduled job or a
-        console call resolving a token can never consume a worker's window."""
+        """No request means no address to attribute the attempt to, so a scheduled
+        job or a console call resolving a token can never consume a worker's window
+        (mirrors rate_limiter.py:134)."""
+        name = self._arm()
         frappe.local.request = None
         frappe.local.form_dict = frappe._dict()
         with self._token_reads():
@@ -258,3 +283,5 @@ class TestPortalTokenThrottle(unittest.TestCase):
                     token_security.resolve_portal_subject(
                         token_security.DRIVER, BOGUS, required=True
                     )
+
+        self.assertEqual(self._counter(name), 0)
