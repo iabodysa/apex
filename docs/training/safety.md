@@ -12,10 +12,17 @@ licenses.
 | DocType | Accommodation Manager | Resident Supervisor | Safety Officer |
 |---------|----------------------|---------------------|----------------|
 | Safety Task Catalog (master) | Read, Write, Create | Read | Read |
-| **Safety Inspection Report** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | Read, Write, Create |
-| **Safety Task Execution** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | Read, Write, Create |
-| **Habitat Safety Incident** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | Read, Write, Create |
-| **Building License** *(submittable)* | Read, Write, Create, Submit, Cancel | Read | — |
+| **Safety Inspection Report** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | Read, Write, Create |
+| **Safety Task Execution** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | Read, Write, Create |
+| **Safety Incident** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | Read, Write, Create |
+| **Building License** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read | Read, Write, Create |
+
+> The **Safety Officer** can raise and edit a **Building License** — it is not a
+> Manager-only record — but only the Accommodation Manager submits, cancels, or
+> amends one.
+
+> **Internal Auditor** holds read-only oversight (Read, Report) on **Safety
+> Incident**. The other safety records grant it nothing.
 
 ---
 
@@ -33,7 +40,7 @@ licenses.
 - **Purpose:** a structured site inspection with a findings grid.
 - **Key fields:** building, inspector, findings (severity, action, status).
 
-### Habitat Safety Incident *(submittable)*
+### Safety Incident *(submittable)*
 - **Purpose:** records an actual safety incident/near-miss.
 - **Key fields:** date, location, severity, description, corrective action.
 
@@ -49,12 +56,18 @@ licenses.
 1. **Catalog tasks.** The Manager maintains the **Safety Task Catalog**.
 2. **Execute.** A supervisor records a **Safety Task Execution** or a **Safety
    Inspection Report** in the field and **Submits** it as the official record.
-3. **Incidents.** Any incident is logged on **Habitat Safety Incident** and
+3. **Incidents.** Any incident is logged on **Safety Incident** and
    submitted.
 4. **Licenses.** Building licenses are tracked on **Building License**; a daily
    scheduled job flags upcoming expiries so the Manager can renew in time.
-5. **Compliance scan.** A weekly job scans for overdue safety tasks and raises
-   operational alerts.
+5. **Compliance scan.** A **daily** job flags overdue Scheduled Task Instances,
+   escalates the High and Critical ones with an Operations Alert and a
+   notification to the Safety Officer, and flags active buildings with no recent
+   safety round. A second **daily** job flags Audit Remediation Plans past their
+   remediation deadline.
+6. **Weekly coverage gate.** Separately, a **weekly** job checks that every
+   active building was covered by a submitted weekly Safety Round that week and
+   raises an alert for the buildings that were not.
 
 _[screenshot: Safety Inspection Report findings grid]_
 _[screenshot: Safety Map desk page]_
