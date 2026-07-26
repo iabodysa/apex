@@ -1,10 +1,12 @@
-"""E2E breadcrumb spec — the module breadcrumb points at the module ROOT (P-108).
+"""E2E breadcrumb spec — the module breadcrumb points at the module ROOT.
 
-WHY: P-108 rewrites each module root Workspace's ``creation`` so the Desk
-breadcrumb for a DocType in that module resolves to the module root
-(``module_wise_workspaces[module][0]``, breadcrumbs.js:161 → href
-``/app/<slug(workspace)>``, breadcrumbs.js:117). This spec is the RUNTIME half of
-the P-108 verification: it opens a Habitat DocType list and a Salis DocType list
+WHY: the Desk breadcrumb for a DocType resolves to whichever Workspace of that
+module sorts FIRST by ``creation`` (``module_wise_workspaces[module][0]``,
+breadcrumbs.js:161 → href ``/app/<slug(workspace)>``, breadcrumbs.js:117), so a
+module root Workspace stamped after one of its sub-workspaces silently hands the
+breadcrumb to that sub-workspace. The app keeps each module root sorting first
+(apex/patches/v1_x/reorder_root_workspace_creation.py); this spec is the RUNTIME
+half of that guarantee: it opens a Habitat DocType list and a Salis DocType list
 in a real authenticated Desk session and asserts the module breadcrumb anchor
 links to ``/app/habitat`` and ``/app/salis`` respectively — not to a sub-workspace
 (e.g. ``/app/fleet`` or ``/app/custody``).

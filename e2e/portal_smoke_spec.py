@@ -1,14 +1,13 @@
-"""E2E smoke-mount spec — every portal SPA mounts cleanly (P-206).
+"""E2E smoke-mount spec — every portal SPA mounts cleanly.
 
 WHY: the portal SPAs (fleet, fleet-os, driver, worker/masar, masar-supervisor, housing,
 safety) build to committed bundles served by the ``www/<portal>.html`` shells. A stale/broken bundle
 or a bad shared import (the exact class of regression the shared vite factory,
 bundle-guard, and the @shared dedup can introduce) makes the SPA fail to mount or
 throw at boot — with NOTHING in a green build to catch it. This spec is the RUNTIME
-half that MEMORY's "runtime open-smoke / verify the specific element" rule demands:
-it opens each portal, asserts the SPA root node (``#app``) is populated (the app
-actually mounted), and asserts ZERO console errors / uncaught page errors during
-boot.
+check a green build cannot stand in for: it opens each portal, asserts the SPA root
+node (``#app``) is populated (the app actually mounted), and asserts ZERO console
+errors / uncaught page errors during boot.
 
 SCOPE: this is a *mount* smoke, not a flow test. It proves the shell boots, the
 bundle loads, and the root component renders without throwing — for every portal,
