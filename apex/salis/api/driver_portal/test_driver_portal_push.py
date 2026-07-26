@@ -17,7 +17,15 @@ that contract WITHOUT any keys on file (the shipped state):
 
 The driver chain reuses the shared ``_ensure_test_driver`` builder; everything lives in
 the class transaction and rolls back at teardown.
+
+``TestVapidKeyPairGuard`` at the foot of the file covers the one state the class above
+cannot reach: the toggle ON with only HALF a key pair. Every case above blanks the keys
+and the toggle together, so the master-toggle guard returns first and the pair check
+below it never runs.
 """
+
+import unittest
+from unittest import mock
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -89,7 +97,11 @@ class TestDriverPortalWebPush(FrappeTestCase):
 		self.assertFalse(r["queued"])
 		self.assertEqual(r["reason"], "not_configured")
 
-	def test_is_configured_false_without_keys(self):
+	def test_is_configured_false_when_the_toggle_is_off(self):
+		"""The shipped state: toggle off AND no keys, so the MASTER TOGGLE guard
+		(web_push.py:80) is what returns and the pair check below it never runs. Named
+		for the toggle, not the keys -- ``TestVapidKeyPairGuard`` covers the pair.
+		"""
 		self.assertFalse(web_push.is_configured())
 		self.assertIsNone(web_push.public_key())
 
@@ -184,3 +196,70 @@ class TestDriverPortalWebPush(FrappeTestCase):
 		r = web_push.send_to_driver(self.driver, "Trip assigned", "Your next trip is ready.")
 		self.assertEqual(r["sent"], 0)
 		self.assertEqual(r["devices"], 1)
+
+
+class _FakeSettings:
+	"""Only the two reads ``_vapid_config`` makes off the Single."""
+
+	def __init__(self, values, private):
+		self._values = values
+		self._private = private
+
+	def get(self, field, *args):
+		return self._values.get(field)
+
+	def get_password(self, field, raise_exception=True):
+		return self._private
+
+
+class TestVapidKeyPairGuard(unittest.TestCase):
+	"""The toggle ON with only HALF a VAPID pair -- a state nothing else reaches.
+
+	``test_is_configured_false_when_the_toggle_is_off`` and every sibling blank the keys
+	and the toggle TOGETHER, so the master-toggle guard (web_push.py:80) returns first
+	and the pair check below it (web_push.py:85) is exercised by nothing: deleting that
+	check outright would leave the whole file green. The state it exists for is an
+	operator who enables push having pasted only the public key -- without it, a send
+	would go out to sign with a private key that is None.
+
+	The Single is stubbed rather than written, so this needs no site and no settings
+	row: a credential guard that can only be exercised against a live bench is a guard
+	that does not get tested.
+	"""
+
+	def _config_with(self, public, private):
+		settings = _FakeSettings(
+			{
+				"enable_web_push": 1,
+				"web_push_vapid_public_key": public,
+				"web_push_vapid_subject": "mailto:ops@example.com",
+			},
+			private,
+		)
+		with mock.patch.object(web_push.frappe, "get_single", return_value=settings):
+			return web_push._vapid_config()
+
+	def test_the_toggle_on_with_half_a_pair_is_still_unconfigured(self):
+		for label, public, private in (
+			("private unset", _TEST_PUBLIC, None),
+			("private blank", _TEST_PUBLIC, ""),
+			("public blank", "", _TEST_PRIVATE),
+			("public whitespace only", "   ", _TEST_PRIVATE),
+		):
+			with self.subTest(case=label):
+				self.assertIsNone(
+					self._config_with(public, private),
+					"push reported itself configured on half a key pair, so a send "
+					"would sign with a missing key",
+				)
+
+	def test_the_toggle_on_with_a_whole_pair_is_configured(self):
+		"""Non-vacuous: the guard must decline a HALF pair, not every enabled config.
+
+		Without this, replacing the body with ``return None`` would pass the test above
+		and retire web push entirely while the suite stayed green.
+		"""
+		config = self._config_with(_TEST_PUBLIC, _TEST_PRIVATE)
+
+		self.assertEqual(config["public_key"], _TEST_PUBLIC)
+		self.assertEqual(config["private_key"], _TEST_PRIVATE)
