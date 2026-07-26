@@ -8,7 +8,18 @@ OPPOSITE way, out of ``api``/``utils`` and INTO ``apex/tests/``, on the premise
 that Frappe only discovers tests under ``tests/`` or ``doctype/`` folders. That
 premise is FALSE: ``frappe/test_runner.py:149`` os.walks the ENTIRE app path and
 line 160 collects any ``test_*.py`` it finds, pruning only ``locals``, ``.git``,
-``public`` and ``__pycache__``. A test is discovered wherever it sits.
+``public`` and ``__pycache__``. A test is discovered wherever it sits — with ONE
+exception, the app root itself.
+
+A-196: a ``test_*.py`` sitting DIRECTLY at ``apex/`` runs nothing. ``_add_test``
+computes ``relative_path = os.path.relpath(path, app_path)``
+(``test_runner.py:305``), which is ``"."`` at the app root, so line 307 sets
+``module_name`` to the app PACKAGE ``"apex"``, line 313 imports that package, and
+line 330's ``loadTestsFromModule`` finds no TestCase in it — measured zero, for
+every app-root file, each one shadowing the last. Two files sat there carrying 20
+live methods that had never executed; ``_colocated_tests()`` counted the app root
+as a valid colocated home, which is what blessed them. It no longer does, and
+``test_no_test_module_at_the_app_root`` now fails outright on any new one.
 
 This guard makes the direction one-way. ``_BASELINE`` freezes the central
 inventory; a test file may LEAVE ``apex/tests/`` freely, but a NEW central
@@ -125,6 +136,12 @@ _CENTRAL_BY_NECESSITY = frozenset(
         "test_workspace_doc_parity.py",
         # Scans every shipped DocType field description for a translation row.
         "test_schema_description_translation.py",
+        # [#a196c1] Reconciles every modules.txt line against every shipped record
+        # and every module package at once; like the patches.txt guard above it
+        # belongs to the root-level register, not to any one module. Admitted by
+        # A-196 to rescue it from the app root, where it collected zero tests —
+        # a relocation of an existing guard, not new headroom for a new one.
+        "test_declared_modules_are_alive.py",
     }
 )
 
@@ -137,13 +154,26 @@ def _central_tests():
     }
 
 
+def _app_root_tests():
+    """Basenames of every ``test_*.py`` sitting DIRECTLY at ``apex/``.
+
+    Frappe collects zero tests from each of them (module docstring, A-196), so this
+    set must always be empty — it is a stranded-file scan, not an inventory.
+    """
+    return {os.path.basename(p) for p in glob.glob(os.path.join(_APP_ROOT, "test_*.py"))}
+
+
 def _colocated_tests():
-    """Every ``test_*.py`` anywhere under ``apex/`` EXCEPT ``apex/tests/``."""
+    """Every ``test_*.py`` under ``apex/`` that has a real package home.
+
+    Excludes ``apex/tests/`` (central) and the app root itself: the root is not a
+    home, it is where a test goes to never run.
+    """
     out = set()
     for p in glob.glob(os.path.join(_APP_ROOT, "**", "test_*.py"), recursive=True):
         if "node_modules" in p:
             continue
-        if os.path.dirname(os.path.abspath(p)) == _TESTS_DIR:
+        if os.path.dirname(os.path.abspath(p)) in (_TESTS_DIR, _APP_ROOT):
             continue
         out.add(os.path.relpath(p, _APP_ROOT))
     return out
@@ -161,6 +191,21 @@ class TestColocationRatchet(unittest.TestCase):
             "(frappe/test_runner.py:149 os.walks the whole app path), so a new "
             "test belongs NEXT TO the module it exercises, not here:\n"
             + "\n".join(f"  apex/tests/{f}" for f in added),
+        )
+
+    def test_no_test_module_at_the_app_root(self):
+        """A ``test_*.py`` directly at ``apex/`` executes NOTHING (A-196)."""
+        stranded = sorted(_app_root_tests())
+        self.assertEqual(
+            stranded,
+            [],
+            "test module(s) sitting directly at apex/. Frappe walks the file but "
+            "imports it as the app PACKAGE — frappe/test_runner.py:305 makes "
+            "relative_path '.' at the app root, line 307 sets module_name to "
+            "'apex', and line 330 loads zero tests from it. The file passes review "
+            "and silently never runs. Move it into a package: beside the module it "
+            "exercises, or apex/tests/ if the invariant is genuinely app-wide:\n"
+            + "\n".join(f"  apex/{f}" for f in stranded),
         )
 
     def test_central_test_count_never_grows(self):
@@ -232,6 +277,14 @@ class TestColocationRatchet(unittest.TestCase):
         self.assertIn(os.path.basename(__file__), central)
         # A name that is not in the baseline must be reported as an addition.
         self.assertNotIn("test_definitely_not_a_real_module_a123.py", _BASELINE)
+        # [#a196g1] The app-root scan asserts an EMPTY set, so it would also pass
+        # against a _APP_ROOT pointing nowhere. Prove the directory it globs is
+        # really the app root before believing that emptiness.
+        for marker in ("modules.txt", "hooks.py", "setup.py"):
+            self.assertTrue(
+                os.path.exists(os.path.join(_APP_ROOT, marker)),
+                f"_APP_ROOT is not the app root — {marker} missing, app-root scan is blind",
+            )
 
 
 if __name__ == "__main__":

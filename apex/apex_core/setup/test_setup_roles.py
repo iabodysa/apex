@@ -22,6 +22,13 @@ The role-count check asserts the set of expected roles is exactly covered
 (every expected role present, no unexpected extras, no duplicates) rather than a
 brittle magic number, so the list can grow without silently passing a stale
 hard-coded count.
+
+Home (A-196): the unit under test is ``apex/setup.py``, whose directory is the app
+root — where frappe collects zero tests (see test_colocation_ratchet.py's app-root
+clause), which is exactly where this file sat unrun. The nearest honest home is the
+app's install-time provisioning package, beside the other structural setup guards
+(test_setup_wizard.py, test_seed_loader.py). Not habitat/: the roles it checks span
+Salis and SIM too.
 """
 
 import ast

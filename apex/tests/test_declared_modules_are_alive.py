@@ -31,9 +31,15 @@ no escape-hatch marker for "reserved name, empty by design": reserving a name in
 modules.txt is not free, it publishes a ghost to every new site, and a name costs
 nothing to add on the day the first record or file lands.
 
+Central by necessity (A-196): the invariant is over ``apex/modules.txt`` — a
+root-level register — and over EVERY module's records and package at once, so no
+single module directory is an honest home. Same shape as the patches.txt guard
+beside it. It shipped at ``apex/test_declared_modules_are_alive.py`` where frappe
+collects zero tests from it (see test_colocation_ratchet.py's app-root clause).
+
 Pure stdlib — no live site needed.
 Run standalone (from the repo root):
-  python3 -m unittest apex.test_declared_modules_are_alive -v
+  python3 -m unittest apex.tests.test_declared_modules_are_alive -v
 """
 
 import glob
@@ -41,7 +47,8 @@ import json
 import os
 import unittest
 
-APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+# This module lives under apex/tests/, so the app root is one level up.
+APP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODULES_TXT = os.path.join(APP_ROOT, "modules.txt")
 
 
