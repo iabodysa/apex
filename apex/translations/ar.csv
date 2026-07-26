@@ -4270,12 +4270,8 @@ Your transport request was submitted. Save your tracking code to follow up with 
 active,نشط
 aggregated,مُجمَّع
 allowances,بدلات
-article,صنف
-article_name,اسم الصنف
 assignments,الإسنادات
 basic,أساسي
-bed,سرير
-bed_status,حالة السرير
 blocked,محجوب
 candidate,مرشّح
 clean,سليم
@@ -4283,31 +4279,24 @@ cleaning,تنظيف
 clear,صريح
 cleared,أُلغي
 client,عميل
-cnt,العدد
 confirmed,مؤكَّد
-consumed,مُستهلَك
-cost,التكلفة
 currency,العملة
 damages,الأضرار
 delivery,تسليم
-distance,المسافة
 draft,مسودة
 driver,السائق
 drivers,السائقون
 due,مستحق
 "e.g., SAF-001, SEC-005",مثل: SAF-001، SEC-005
 "e.g., Saudi Electricity Co., NWC, Mobily",مثل: الشركة السعودية للكهرباء، شركة المياه الوطنية، موبايلي
-employee,موظّف
 ends,تنتهي
 ends on,ينتهي في
-entries,المدخلات
 exact,مطابقة تامة
 expected,متوقع
 expired {0} ago,انتهى منذ {0}
 expires in {0},ينتهي خلال {0}
 expires on,تنتهي صلاحيته في
 external,خارجي
-first_held,أول احتجاز
 for building,للمبنى
 fuel grades,أنواع الوقود
 generated,مُنشأ
@@ -4316,12 +4305,9 @@ has expired,انتهت صلاحيته
 held by,بحوزة
 incidents,البلاغات
 lft,يسار
-lifespan,العمر
 matched,مطابق
 mixed,مختلط
-n,لا
 n/a,غير متاح
-net_qty,الكمية الصافية
 none,لا شيء
 normalized,موحّد
 not recorded,غير مسجّل
@@ -4331,7 +4317,6 @@ of,من
 old_parent,الأصل السابق
 on file,مُسجَّل
 other,أخرى
-outstanding,مستحق قائم
 paper,ورقي
 party_type and party are required.,حقلا party_type و party مطلوبان.
 pass,ناجح
@@ -4340,17 +4325,13 @@ pending,معلّق
 per_event,لكل حدث
 percent,نسبة مئوية
 posted,مُرحَّل
-quota,الحصة
 rated,مُسعَّر
-readiness_status,حالة الجاهزية
 received,مُستلَم
 released,مُصدَّر
 reported,مُبلَّغ عنه
 requested,مطلوب
 reversed,معكوس
 rgt,يمين
-room_floor,طابق الغرفة
-room_type,نوع الغرفة
 security,أمن
 stamped,مختوم
 standing,دائم
@@ -4358,13 +4339,9 @@ superseded,مُلغى بإصدار أحدث
 tabular,جدولي
 temporary top-up {0} was reverted,تم عكس التعبئة المؤقتة {0}
 timesheet,سجل الدوام
-total_cost,التكلفة الإجمالية
 trim,تشذيب
-trip_count,عدد الرحلات
 unknown,غير معروفة
 until {0},حتى {0}
-value,القيمة
-vehicle,مركبة
 workers,عمال
 workshop status,حالة الورشة
 "{0} (Employee {1}) used the Masar worker portal to flag that their Iqama {2} is expiring (expiry {3}, {4} day(s) left). Please action the renewal.",استخدم {0} (الموظف {1}) بوابة عامل مسار للإشارة إلى أن إقامته {2} على وشك الانتهاء (الانتهاء {3}، {4} يوم متبقٍ). يُرجى اتخاذ إجراء التجديد.
