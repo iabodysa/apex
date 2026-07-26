@@ -1,9 +1,10 @@
 """Playwright Desk-auth helper — log a screenshot session into the Frappe Desk.
 
-WHY: visual evidence (the show-fixed-pages Evidence Contract) needs an
-authenticated, NON-Guest Desk session. This helper reads a synthetic
-screenshot-bot credential from the environment (never inline) and establishes
-the Frappe session cookie, so a task can then goto /app/<page> and screenshot it.
+WHY: screenshotting a Desk page needs an authenticated, NON-Guest session — an
+unauthenticated hit bounces to login and never renders the page. This helper
+reads a synthetic screenshot-bot credential from the environment (never inline)
+and establishes the Frappe session cookie, so a task can then goto /app/<page>
+and screenshot it.
 
 CRED LOCATION (gitignored): e2e/.env.local  — keys BASE_URL, SCREENSHOT_USER,
 SCREENSHOT_PW. A committed template lives at e2e/.env.local.example. The

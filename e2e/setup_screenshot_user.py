@@ -1,10 +1,10 @@
 """Idempotent setup of the screenshot-bot Desk user on the `test` bench.
 
 Run through bench console so a Playwright session can authenticate to the Desk
-and capture visual evidence (the show-fixed-pages Evidence Contract) WITHOUT
-set-admin-password. Re-runnable: re-uses an existing user/role grant and only
-resets the password. NOT a hooks-registered patch on purpose — this is a
-test-bench-only screenshot account, never provisioned on a real site.
+and capture screenshots of the operator pages WITHOUT set-admin-password.
+Re-runnable: re-uses an existing user/role grant and only resets the password.
+NOT a hooks-registered patch on purpose — this is a test-bench-only screenshot
+account, never provisioned on a real site.
 
 Credential source: env (loaded from e2e/.env.local, which is GITIGNORED). The
 password is never hardcoded here. From the bench root, source the cred then run
