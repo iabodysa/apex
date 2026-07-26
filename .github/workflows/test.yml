@@ -138,13 +138,14 @@ jobs:
       #   the same command WITHOUT the
       #     skip flag ..................... 5.63–5.80s at load 1.7–3.4
       #   the two ratchet scans alone,
-      #     the standalone sweep removed .. 1.06s at load 4.9–6.0
+      #     the standalone sweep removed .. 1.06 / 1.57 / 1.06s at load 4.9–6.0 (the
+      #                                     middle run is the contention, not a mode)
       #   the sweep itself, 23 subprocess
       #     runs, at 8 / 16 / 24 workers .. 1.53 / 1.47 / 1.50s best-of-three,
       #                                     load 3.0–5.5
       #
       # Two things this file used to claim are now false and are corrected above. The
-      # ~0.7s attributed to the two scans is gone: they measure 1.06s. And raising the
+      # ~0.7s attributed to the two scans is gone: 1.06s is their BEST. And raising the
       # worker count no longer HURTS — past 8 workers the wall is flat, a shade
       # better — though it still buys too little to be worth a knob. What the sweep's
       # ~1.5s does buy is the thing A-192 exists for: proof that every documented
