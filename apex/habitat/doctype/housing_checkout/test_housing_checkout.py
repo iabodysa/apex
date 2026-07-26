@@ -1,4 +1,6 @@
 # Copyright (c) 2026, AFMCO and contributors
+from unittest import mock
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
@@ -84,7 +86,14 @@ class TestAccommodationCheckout(FrappeTestCase):
             resolve_damage_assessment_building(assignment, "ANY-BED"), "QA-BLDG-A"
         )
 
-    def test_resolve_building_never_empty_string(self):
+    def test_resolve_building_returns_none_when_neither_side_has_one(self):
+        """Both terms answer None, so the or-chain yields None on its own.
+
+        Named for what it reaches: with no building anywhere the ``or None`` tail is
+        not load-bearing (``None or None`` is already None), so this cannot detect its
+        removal -- ``test_resolve_building_normalises_an_empty_bed_building`` is the
+        case that can.
+        """
         # [#pdkwyk]
         from apex.habitat.doctype.housing_checkout.housing_checkout import (
             resolve_damage_assessment_building,
@@ -93,6 +102,30 @@ class TestAccommodationCheckout(FrappeTestCase):
         result = resolve_damage_assessment_building(assignment, "NONEXISTENT-BED")
         self.assertIsNone(result)
         self.assertNotEqual(result, "")
+
+    def test_resolve_building_normalises_an_empty_bed_building(self):
+        """The one input the ``or None`` tail exists for: a Bed row whose building
+        column holds "" rather than NULL, which is what an unset Link on an EXISTING
+        row actually stores.
+
+        ``a or b or None`` returns b when both are falsy, so without the tail this
+        answers "" -- a value that passes as set yet fails the mandatory Building
+        link, silently dropping the assessment inside the best-effort try/except.
+        Every sibling case feeds None, where the tail changes nothing.
+        """
+        from apex.habitat.doctype.housing_checkout import housing_checkout
+
+        assignment = frappe._dict({"building": ""})
+        with mock.patch.object(housing_checkout.frappe.db, "get_value", return_value=""):
+            result = housing_checkout.resolve_damage_assessment_building(
+                assignment, "BED-WITH-BLANK-BUILDING"
+            )
+
+        self.assertIsNone(
+            result,
+            'an empty building leaked out as "", which passes as a value and then '
+            "fails the mandatory Building link",
+        )
 
     def test_on_submit_locks_assignment_against_concurrent_checkout(self):
         """Regression (#4): two concurrent checkouts for one assignment must
