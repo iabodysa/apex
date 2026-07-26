@@ -9,6 +9,7 @@ cancelling clears it, keeping the Incident<->Write-Off link bidirectional.
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
 import frappe
 from frappe.model.workflow import apply_workflow, get_workflow_name
@@ -127,8 +128,25 @@ class TestVehicleDamageWriteOff(FrappeTestCase):
         )
 
     def test_submit_without_source_incident_is_noop(self):
+        """No source_incident means on_submit writes to no Vehicle Incident at all.
+
+        Asserting only that this test's own incident stayed unstamped cannot fail:
+        with source_incident empty, ``frappe.db.set_value`` would be handed a None
+        docname, which it treats as a Single and writes to ``tabSingles`` — no
+        Vehicle Incident row moves either way, so removing the guard would keep the
+        assertion below green. The falsifiable statement is the count of Vehicle
+        Incident writes.
+        """
         case = self._write_off(source_incident=None)
-        submit_via_workflow(case)
+        with patch.object(frappe.db, "set_value", wraps=frappe.db.set_value) as writes:
+            submit_via_workflow(case)
+
+        self.assertEqual(
+            [call.args[:2] for call in writes.call_args_list
+             if call.args and call.args[0] == "Vehicle Incident"],
+            [],
+            "no source_incident means no Vehicle Incident write",
+        )
         self.assertFalse(
             frappe.db.get_value("Vehicle Incident", self.incident, "write_off_case"),
             "an unrelated incident must not be touched when no source_incident is set",

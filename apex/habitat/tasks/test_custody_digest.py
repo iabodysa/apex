@@ -11,6 +11,8 @@ framework link/field checks — the digest reads the rows, it does not re-run th
 issue lifecycle.
 """
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
@@ -75,7 +77,37 @@ class TestWeeklyCustodyDigest(FrappeTestCase):
         # [#7gulyb]
         self.assertIn(self.building, mine[0]["message"])
 
+    def _every_user_enabled(self):
+        """``frappe.db.get_value``, except that every User reads as enabled.
+
+        Scoped to the single query it has to neutralise and delegating everything
+        else VERBATIM: this sits on the whole framework's document loader for the
+        length of the run, which calls it with keyword arguments, so the wrapper
+        must not re-bind the positional signature it forwards.
+        """
+        original = frappe.db.get_value
+
+        def get_value(*args, **kwargs):
+            doctype = kwargs.get("doctype", args[0] if args else None)
+            fieldname = kwargs.get("fieldname", args[2] if len(args) > 2 else "name")
+            if doctype == "User" and fieldname == "enabled":
+                return 1
+            return original(*args, **kwargs)
+
+        return get_value
+
     def test_building_without_supervisor_is_skipped(self):
+        """The ``responsible_supervisor is set`` filter on the Building query.
+
+        The digest carries a SECOND, later guard — it skips a supervisor whose User
+        row is not enabled — and an unsupervised building arrives there as a FALSY
+        supervisor, which reads as not-enabled. So it would be dropped by the
+        backstop even with the Building filter gone, and asserting the outcome alone
+        proves nothing about the filter this test is named for. The backstop is
+        therefore neutralised for the length of the run (every User reads as
+        enabled), leaving the named filter as the only thing that can keep the
+        orphan out.
+        """
         # [#s9a1x8]
         orphan = frappe.get_doc(
             {
@@ -85,9 +117,15 @@ class TestWeeklyCustodyDigest(FrappeTestCase):
         ).insert(ignore_permissions=True).name
         self._issue(orphan, "Issued", add_days(today(), 7))
 
-        sent = self._run_capturing_mail()
+        with patch.object(frappe.db, "get_value", self._every_user_enabled()):
+            sent = self._run_capturing_mail()
         # [#jow14m]
         self.assertEqual([m for m in sent if orphan in m.get("message", "")], [])
+        # A run that mailed nobody would satisfy the line above for the wrong reason.
+        self.assertTrue(
+            [m for m in sent if m["recipients"] == [self.sup]],
+            "the supervised building's digest must still go out",
+        )
 
     def test_no_sendmail_when_email_disabled(self):
         self._issue(self.building, "Issued", add_days(today(), 7))
