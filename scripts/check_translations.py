@@ -83,6 +83,10 @@ RETIRED_NAMES = {
     "Accommodation Assignment": "Housing Assignment",
     "Accommodation Building": "Building",
     "Accommodation Checkout": "Housing Checkout",
+    "Accommodation Lease": "Lease",
+    "Accommodation Resident Request": "Resident Request",
+    "Habitat Safety Incident": "Safety Incident",
+    "Salis Portal Theme": "Driver Portal Theme",
 }
 
 
@@ -308,12 +312,20 @@ def retired_name_hits(calls: set, doctypes: set) -> tuple[list, list]:
     blacklist of strings nobody can justify: an entry that has stopped being true
     fails loudly instead of quietly blocking a legitimate message.
 
-    RETIRED_NAMES is seeded only with names this repo can still PROVE were
-    retired — the controller file, its module docstring and the DocType JSON
-    beside it disagree on the name. Ordinary prose that merely reads like a
-    record ("fleet vehicles stopped", whose DocType is Salis Vehicle) is
-    deliberately absent: a guard that flags a name nobody retired teaches people
-    to route around it.
+    RETIRED_NAMES carries the six names apex/apex_core/test_training_doc_parity.py
+    already asserts stay out of the training docs, plus Accommodation Building,
+    whose live DocType is Building. That is a SECOND home for the same list and
+    the two must be extended together — this gate is stdlib-only and self-contained
+    so it can run on a CI runner, which rules out importing the test module. The
+    entry validation below is what keeps the copy honest.
+
+    Matching is case-SENSITIVE on purpose. A record name is Title Case, so that is
+    the form that misleads; lowercase "the accommodation building address" is
+    ordinary English naming a place, not a record, and flagging it would red a
+    legitimate sentence and teach people to route around the gate.
+
+    Ordinary prose that merely reads like a record ("fleet vehicles stopped",
+    whose DocType is Salis Vehicle) is deliberately absent for the same reason.
 
     `doctypes` is empty when the package ships no DocType JSON (a fixture package
     under test), and an empty set would call every replacement missing. The
