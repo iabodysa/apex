@@ -67,10 +67,27 @@ DROPPED from the report instead, because a grant would have been a real widening
 
 * ``Custody Damage Register`` / ``Finance Manager``. The role's only row on Custody Damage
   Assessment is permlevel 1, read+write over exactly ``total_estimated_replacement_cost``
-  — a layered field unlock on a document another role opens, not a document grant — and
-  it holds no permlevel-0 row anywhere else in the custody domain. A permlevel-0 row would
-  have handed it the custodian (``employee``/``party``), the damaged ``items``,
-  ``remarks`` and the ``deduction_entry`` payroll link, for every building at once.
+  — a layered field unlock on a document another role opens, not a document grant, because
+  ``is_perm_applicable`` keeps only permlevel-0 rows (frappe/permissions.py:283-284), so
+  the role cannot open that document at all. A permlevel-0 row would have handed it the
+  damaged ``items``, ``remarks`` and the ``deduction_entry`` payroll link, none of which
+  it reaches today.
+
+  A-279 CORRECTS a second clause this entry used to carry — "it holds no permlevel-0 row
+  anywhere else in the custody domain" — which was FALSE, and false in the direction that
+  stops the next reader looking. Accommodation Stock Ledger grants Finance Manager
+  read+report+export+print+email+share at permlevel 0, the role is named in
+  ``habitat/permissions.py`` ``HOUSING_UNSCOPED_ROLES``, and
+  ``accommodation_stock_ledger_query`` therefore returns "" — no row filter, every
+  building. That ledger carries ``employee`` ("Employee (Custodian)"), ``signed_qty`` and
+  ``unit_cost`` at permlevel 0, the exact inputs of ``Custody Outstanding by Worker``,
+  whose ``value_sar`` column is computed as balance x unit cost rather than stored. So the
+  custodian and the per-person custody value ARE readable and exportable estate-wide
+  today; what the dropped grant withheld is the damage-assessment record, not the custody
+  holding. Whether a finance role should hold that ledger read is the owner's call, and it
+  is not decided in a report's roles table: the roles table only clears
+  ``Report.is_permitted`` (query_report.py:41), while the scope lives in the DocPerm row
+  and in ``HOUSING_UNSCOPED_ROLES``.
 
 STILL FROZEN — the three Housing Assignment reports, which are ONE question
 ---------------------------------------------------------------------------
