@@ -139,7 +139,7 @@ def weekly_occupancy_sync() -> None:
 
 def daily_occupancy_snapshot() -> None:
     """Write a daily point-in-time occupancy row per building to the read-only
-    Accommodation Occupancy Snapshot engine, so occupancy history/trends survive
+    Occupancy Snapshot engine, so occupancy history/trends survive
     (the live occupancy_percent field is overwritten and keeps no history).
 
     The per-building inputs (already-snapshotted set, room counts by status,

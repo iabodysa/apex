@@ -72,7 +72,7 @@ def daily_safety_task_compliance_scan() -> None:
     Critical task additionally raises an idempotent Operations Alert AND posts a system
     Notification to the Safety Officer, so urgent safety lapses surface immediately.
 
-    Second pass: every ACTIVE Accommodation Building (``status == "Active"``) with ZERO
+    Second pass: every ACTIVE Building (``status == "Active"``) with ZERO
     submitted Safety Rounds of ANY cadence dated within the trailing
     ``ZERO_ROUNDS_WINDOW_DAYS`` raises an idempotent Operations Alert, notifies the
     Safety Officer, posts the reminder to the building timeline, and alerts the
@@ -231,7 +231,7 @@ def weekly_safety_coverage_gate() -> None:
     Gated by Habitat Settings ``require_weekly_all_building_coverage`` (read as
     ``value if not None else 1`` — the gate defaults ON, but a falsy stored value on
     the Single turns it off, per the Single new-field caveat). When the gate is ON,
-    each ACTIVE Accommodation Building (``status == "Active"``) with no submitted
+    each ACTIVE Building (``status == "Active"``) with no submitted
     Weekly-cadence Safety Round dated within the current ISO week raises an idempotent
     Operations Alert and posts a system Notification to the Safety Officer. Per-row
     error isolation.

@@ -14,7 +14,7 @@ def daily_cleaning_log_generator() -> None:
     housing cleaning becomes a system-of-record instead of relying on a
     supervisor to remember to open a log.
 
-    For each ACTIVE Accommodation Building (``status == "Active"``) with at least
+    For each ACTIVE Building (``status == "Active"``) with at least
     one room, a draft Cleaning Log dated today is created if one does not already
     exist, with its ``room_details`` pre-populated from the building's rooms ready
     to mark. The supervisor then marks each room, attaches the required area-photo

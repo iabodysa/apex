@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""v0.8.5 — Temporary-stay validation on Accommodation Assignment and the Idle
+"""v0.8.5 — Temporary-stay validation on Housing Assignment and the Idle
 Resident Report status flow (schema groundwork; no automation yet)."""
 
 import frappe
