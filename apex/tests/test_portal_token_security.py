@@ -64,16 +64,25 @@ def _compact_png_with_dimensions(width, height):
     return "data:image/png;base64," + base64.b64encode(payload).decode()
 
 
+BAD_TOKEN_SUBNET = "2001:db8:5ec0::"
+
+
 def _fresh_ip():
-    """An address no other block can be using: the RFC 3849 documentation prefix
-    plus a random suffix. Needed because the bad-token window is keyed on the
-    ADDRESS ALONE, so a shared 127.0.0.1 would let one test's failed tokens spend
-    another test's budget."""
-    return "2001:db8::" + frappe.generate_hash(length=12)
+    """An address no other block in the app can be using: this file's own slice of
+    the RFC 3849 documentation prefix, plus a random suffix.
+
+    The portal bad-token window is keyed on the ADDRESS ALONE, so sharing a subnet
+    with another test file would let this file's failed tokens spend that file's
+    budget. TestThrottleAddressIsolation (apex_core/utils/test_portal_token_throttle.py)
+    holds every such file's subnet apart app-wide.
+    """
+    return BAD_TOKEN_SUBNET + frappe.generate_hash(length=12)
 
 
 class _Request:
-    def __init__(self, cookies, remote_addr="127.0.0.1"):
+    # No default address: the address decides WHICH window a call spends, so a
+    # caller that forgets one must fail loudly rather than land on a shared window.
+    def __init__(self, cookies, remote_addr):
         self.cookies = cookies
         self.remote_addr = remote_addr
         self.host = None
