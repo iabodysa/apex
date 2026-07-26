@@ -248,11 +248,16 @@ def _apply_field_map(target, source, field_map) -> None:
 
 def route_payment(payment_request: str) -> str:
     """Build (and optionally submit) the configured target payment from a
-    finance-approved Salis Payment Request, then stamp ``linked_payment_entry``.
+    finance-approved Salis Payment Request, then stamp the typed link back.
     Idempotent: returns the existing payment when already linked. Submit is gated on
     ``auto_submit_target`` + a submittable target + ``enable_gl_posting`` (submit is
     what posts the native doc's GL). The create uses ``ignore_permissions``, so the
     caller's write/submit permission on the request is enforced just below. [T-151]
+
+    Fail-closed: the target and the field map are re-validated here, immediately
+    before the build, and the link stamp carries the created document's own doctype.
+    Refusing is the desired outcome for a bad config - a payment that merely LOOKS
+    right is worse, because it is never read a second time.
     """
     settings = frappe.get_single("Payment Routing Settings")
     target_doctype = get_target_doctype(settings)

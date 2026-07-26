@@ -8,6 +8,11 @@ replaced the retired default_payment_method), and the deduction/GL toggles are
 applied SAFELY — they stay OFF when their prerequisites (an authorizer, accounts)
 are missing, so the wizard never fails and the app never silently starts deducting
 at first install.
+
+Safe-by-default is not the same as fail-open, and the second half of this file draws
+that line: a toggle whose prerequisites are missing stays OFF, but a payment target
+the operator actually NAMED and that cannot build a payment stops setup with a
+message, because dropping it silently pointed the router somewhere they never chose.
 """
 
 import unittest
@@ -16,6 +21,8 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.apex_core.setup.setup_wizard import setup_wizard_complete
+
+ROUTER = "Payment Routing Settings"
 
 
 def _rule_enabled(policy, rule_type):
@@ -59,6 +66,55 @@ class TestApexSetupWizard(FrappeTestCase):
         policy = frappe.get_single("Salary Deduction Policy")
         self.assertEqual(policy.enable_salary_deductions, 0)
         self.assertEqual(_rule_enabled(policy, "Rent"), 0)
+
+    def test_setup_refuses_a_payment_target_the_site_does_not_have(self):
+        """The fail-open this guard exists for.
+
+        Setup used to DROP a chosen target it could not find and report success, so
+        the router stayed on the native default while the operator believed their
+        choice had applied — every later payment built as a different document than
+        the one they picked, with nothing anywhere saying so. The valid choice must
+        still apply, or the refusal proves nothing.
+        """
+        setup_wizard_complete({"apex_default_payment_method": "Payment Entry"})
+        self.assertEqual(
+            frappe.get_single(ROUTER).target_payment_doctype, "Payment Entry"
+        )
+
+        ghost = "Apex A278 Absent Payment DocType"
+        self.assertFalse(frappe.db.exists("DocType", ghost))
+        with self.assertRaises(frappe.ValidationError) as cm:
+            setup_wizard_complete({"apex_default_payment_method": ghost})
+        self.assertIn(ghost, str(cm.exception))
+        self.assertIn("not installed", str(cm.exception))
+        # Refused before anything was written, so the previous routing still stands.
+        self.assertEqual(
+            frappe.get_single(ROUTER).target_payment_doctype, "Payment Entry"
+        )
+
+    def test_setup_refuses_a_single_as_the_payment_target(self):
+        """A Single is a real DocType, so it passes every existence check and only a
+        structural guard stops it — creating one overwrites that settings record."""
+        setup_wizard_complete({"apex_default_payment_method": "Payment Entry"})
+        self.assertEqual(
+            frappe.get_single(ROUTER).target_payment_doctype, "Payment Entry"
+        )
+
+        with self.assertRaises(frappe.ValidationError) as cm:
+            setup_wizard_complete({"apex_default_payment_method": "Apex Settings"})
+        self.assertIn("Single", str(cm.exception))
+        self.assertEqual(
+            frappe.get_single(ROUTER).target_payment_doctype, "Payment Entry"
+        )
+
+    def test_blank_payment_target_stays_skip_safe(self):
+        """Fail-closed applies to a choice the operator MADE. Leaving the field blank
+        is not a mistake, so it must neither refuse nor overwrite."""
+        setup_wizard_complete({"apex_default_payment_method": "Payment Entry"})
+        setup_wizard_complete({"apex_default_payment_method": ""})
+        self.assertEqual(
+            frappe.get_single(ROUTER).target_payment_doctype, "Payment Entry"
+        )
 
 
 if __name__ == "__main__":

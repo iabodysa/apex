@@ -53,10 +53,12 @@ def apply_apex_setup(args=None):
     — Frappe commits after all setup stages succeed."""
     args = frappe._dict(args or {})
 
+    # Payment routing FIRST: it is the only step that can refuse, so refusing here
+    # leaves nothing half-applied for the operator to unpick.
+    _apply_payment_routing(args)
     _apply_apex_settings(args)
     _apply_habitat_settings(args)
     _apply_salis_settings(args)
-    _apply_payment_routing(args)
     _apply_deduction_policy(args)
 
 
