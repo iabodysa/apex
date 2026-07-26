@@ -17,9 +17,9 @@ imported by ``apex/setup.py`` (after_install) and by the legacy
 ``patches/v0_9/seed_habitat_dashboard.py`` / ``seed_role_dashboards.py`` patches.
 Keeping the names importable avoids an ImportError on those call sites while the
 actual provisioning is owned entirely by the shipped JSON. A run-once patch
-(``patches/v1_x/drop_legacy_is_standard0_dashboards``) deletes the old
-is_standard=0 Dashboard rows on upgrading sites so migrate re-imports them from
-the new JSON as is_standard=1.
+deleted the old is_standard=0 Dashboard rows on upgrading sites so migrate
+re-imported them from the new JSON as is_standard=1; that patch has since been
+pruned as spent.
 
 Do not re-add record-building logic here: an is_standard Dashboard must be edited
 through its JSON, and Dashboard.validate forbids an is_standard Dashboard from

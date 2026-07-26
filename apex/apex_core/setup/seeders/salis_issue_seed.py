@@ -3,10 +3,10 @@
 support-ticket experience after Support Ticket was retired in favour of Issue +
 SLA.
 
-Mirrors ``salis/notifications_seed.py``: every step is idempotent (created only
-if absent, so admins can freely edit afterwards) and existence-guarded on the
-DocType it touches, so running it twice — or before ERPNext is fully migrated —
-never raises and never aborts ``bench migrate``.
+Every step is idempotent (created only if absent, so admins can freely edit
+afterwards) and existence-guarded on the DocType it touches, so running it twice
+— or before ERPNext is fully migrated — never raises and never aborts
+``bench migrate``.
 
 Seeds three things:
 
