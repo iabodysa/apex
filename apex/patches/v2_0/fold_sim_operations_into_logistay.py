@@ -29,6 +29,12 @@ post-model patches) so the daily SIM watch keeps its existing row instead of gai
 duplicate. Fully guarded and idempotent — the module filter matches nothing and the
 LOCATE-gated sweep rewrites nothing on a second migrate, and a fresh install (which
 never had the module) is a complete no-op.
+
+A-187 correction: that last clause was FALSE until A-187. The modules.txt line above was
+never actually dropped, so ``add_module_defs`` kept minting a ``SIM Operations`` Module
+Def on every fresh install while ``set_all_patches_as_completed`` logged this patch as
+done without running it. ``drop_ghost_sim_operations_module_def`` is the one-time repair
+for the sites that gap produced; modules.txt is now correct, so the clause holds.
 """
 
 from __future__ import annotations
