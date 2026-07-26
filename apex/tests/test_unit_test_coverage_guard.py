@@ -144,6 +144,47 @@ behaves exactly as it would off-bench. ``loadTestsFromName`` turns a load failur
 into a ``_FailedTest`` instead of raising, so an import error and a test error
 both land in ``wasSuccessful()``.
 
+The DOCUMENTED target, not just the file's location (A-213)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The docstring used to be only a TRIGGER: match the command, then probe a dotted
+path computed from the FILE PATH, never reading the string the docstring actually
+prints. So a module could advertise ``tests.test_x`` — which resolves from
+nowhere, this repo has no top-level ``tests/`` package — and the probe went green
+while the documented line failed for the human who copied it. Seven docstrings
+really did carry that shape; they were found and fixed BY HAND, by eye, not by
+the guard whose entire purpose is that class.
+
+``_STANDALONE_CMD_RE`` now CAPTURES the target, and
+``test_documented_standalone_command_names_its_own_module`` asserts it names the
+module it sits in — exactly, or as a ``Class[.method]`` selector beneath it,
+since documenting one test method is a legitimate narrowing rather than a wrong
+path. That check covers THIS module too: self-exclusion exists because probing
+itself would re-enter the sweep one level down, which is a reason about running a
+subprocess, not about comparing two strings.
+
+What the pattern must TOLERATE — a guard that reds on a legitimate spelling of
+the right command gets worked around, not obeyed. Verified against all 22
+declarations in this tree, and the matched SET is identical to the old
+trigger-only pattern, because every addition is optional:
+  * ``python`` or ``python3``, and any run of whitespace between tokens;
+  * the command WRAPPED across two lines — this module's own docstring wraps one,
+    so the whitespace before the target has to match a newline;
+  * flags on EITHER side of the target: a trailing ``-v`` (all 21 sibling
+    declarations end that way), ``--failfast``, a ``-k`` filter. Value-taking
+    flags are consumed together WITH their value, so a dotted ``-k`` selector
+    sitting before the target is never mistaken for the target itself;
+  * a target wrapped in RST double-backticks, or ending a sentence — ``\\w`` stops
+    at the backtick and the dotted tail cannot eat a trailing full stop;
+  * a PROSE mention carrying no target at all — the ``...`` placeholder above and
+    the bare "fast lane" phrase further up are both in THIS docstring, so the
+    target group is optional and such a match documents nothing to check.
+The one thing it deliberately does not read: a target must contain a DOT. A
+dotless token after the command is far likelier to be an English word than a
+module path, and every real target in this app is ``apex.<...>``. The cost is
+that a path-form target (``apex/tests/<name>.py``) is not captured — which reds
+as "documents no resolvable target" rather than passing silently, so it is a loud
+gap, not a hole.
+
 Rot baseline — EMPTY since A-205 (2026-07-26)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The two modules A-192 found now pass the command they advertise. Each grew the
@@ -505,7 +546,31 @@ _BASELINE = frozenset()
 # Several modules use that heading for a `bench --site <site> run-tests` command,
 # which explicitly REQUIRES a live site and claims nothing about plain python.
 # Matching the heading would fail 3 modules for a promise they never made.
-_STANDALONE_CMD_RE = re.compile(r"python3?\s+-m\s+unittest")
+#
+# [#a213m1] It also CAPTURES the target — reading only the trigger is how a wrong
+# documented path stayed green. Tolerances: "The DOCUMENTED target" in the docstring.
+_STANDALONE_CMD_RE = re.compile(
+    r"python3?\s+-m\s+unittest"
+    # flags before the target; the value-taking ones swallow their value too
+    r"(?:\s+(?:--pattern|--start-directory|--top-level-directory|-k|-p|-s|-t)\s+\S+"
+    r"|\s+-{1,2}[A-Za-z][\w-]*)*"
+    r"(?:\s+(?P<target>[A-Za-z_]\w*(?:\.\w+)+))?"
+)
+
+
+def _target_names_module(target, dotted):
+    """Does the documented target actually run THIS module's tests?
+
+    Exact match, or a ``Class``/``Class.method`` selector BENEATH it
+    (``apex.tests.test_x.TestY.test_z``) — ``loadTestsFromName`` resolves those to
+    this same file, so documenting one is a deliberate narrowing, not a wrong
+    path. A PARENT package is refused: ``loadTestsFromName("apex.tests")``
+    collects nothing from a plain package, so it would be a broken command rather
+    than a broader one. Same exact-or-descendant rule as
+    ``_covered_by_dotted_reference`` above, for the same reason.
+    """
+    return target == dotted or target.startswith(dotted + ".")
+
 
 # [#a192p1] Runs in the probe subprocess; see "The probe" in the module docstring.
 _NO_FRAPPE_PROBE = """
@@ -550,24 +615,51 @@ _SKIP_SLOW_PROBES = os.environ.get(_SKIP_SLOW_PROBES_ENV) == "1"
 
 
 @lru_cache(maxsize=1)
-def _standalone_declared_modules():
-    """{dotted path: rel path} for each test module documenting a plain
-    ``python3 -m unittest`` invocation, excluding this module itself.
+def _standalone_declarations():
+    """``((rel, dotted, documented_targets), ...)`` for every test module whose
+    MODULE docstring documents a plain ``python3 -m unittest`` run — this module
+    INCLUDED, and ``documented_targets`` de-duplicated in first-seen order.
 
-    Cached: it AST-parses every test file (0.17s), and three tests in this class ask
-    for it, so an uncached call was 0.34s of pure repeat in a lane whose whole point
-    is being fast. Callers only READ the mapping — never mutate the shared dict.
+    Both what the sweep runs (``dotted``, derived from the file's location) and
+    what the docstring claims (``documented_targets``, read out of the string),
+    from ONE pass — A-213 is precisely the bug of having only the first.
+
+    Cached: it AST-parses every test file (0.17s) and four tests below ask for it,
+    so an uncached call was pure repeat in a lane whose whole point is being fast.
+    Callers only READ the result; the tuples are immutable on purpose.
     """
-    found = {}
+    found = []
     for path in _test_py_files():
         tree = _parse(path)
         if tree is None:
             continue
-        if _STANDALONE_CMD_RE.search(ast.get_docstring(tree) or ""):
-            dotted = _file_dotted_path(path)
-            if dotted != _SELF_DOTTED:
-                found[dotted] = _rel(path)
-    return found
+        matches = list(_STANDALONE_CMD_RE.finditer(ast.get_docstring(tree) or ""))
+        if not matches:
+            continue
+        targets = tuple(
+            dict.fromkeys(m.group("target") for m in matches if m.group("target"))
+        )
+        found.append((_rel(path), _file_dotted_path(path), targets))
+    return tuple(found)
+
+
+@lru_cache(maxsize=1)
+def _standalone_declared_modules():
+    """{dotted path: rel path} for each test module documenting a plain
+    ``python3 -m unittest`` invocation, excluding this module itself.
+
+    The SWEEP's view of the scan above. It stays keyed on the path derived from
+    the file's location, not on the documented string: that derived path is what
+    the fast-lane exemption and the rot baseline name, and — now that
+    ``test_documented_standalone_command_names_its_own_module`` proves the two
+    agree — probing it is never weaker than probing the documented target, which
+    may legitimately be a single-method selector beneath it.
+    """
+    return {
+        dotted: rel
+        for rel, dotted, _targets in _standalone_declarations()
+        if dotted != _SELF_DOTTED
+    }
 
 
 def _probe_standalone_run(dotted, extra_path=None):
@@ -794,6 +886,86 @@ class TestUnitTestCoverageGuard(unittest.TestCase):
         )
 
 
+class TestStandaloneCommandExtraction(unittest.TestCase):
+    """A-213 self-tests for the documented-command pattern: what it must READ, and
+    what it must not over-fire on. Synthetic strings — no repo scan needed.
+
+    The over-firing half matters as much as the reading half: a guard that reds on
+    a legitimate way of spelling the right command gets worked around, not obeyed.
+    """
+
+    def _targets(self, text):
+        return [m.group("target") for m in _STANDALONE_CMD_RE.finditer(text)]
+
+    def test_reads_the_plain_documented_form(self):
+        # [#a213t1] The shape all 21 sibling declarations actually use.
+        self.assertEqual(
+            self._targets(
+                "Run standalone:  python3 -m unittest apex.tests.test_worker_party -v"
+            ),
+            ["apex.tests.test_worker_party"],
+        )
+
+    def test_tolerates_every_legitimate_way_to_spell_the_same_command(self):
+        # [#a213t2] Each documents the SAME correct target and must read as such.
+        for label, text in (
+            ("python, not python3", "python -m unittest apex.tests.test_x"),
+            ("trailing -v", "python3 -m unittest apex.tests.test_x -v"),
+            ("-k selector after", "python3 -m unittest apex.tests.test_x -k role"),
+            ("long + short flags", "python3 -m unittest apex.tests.test_x --failfast -b"),
+            ("loose whitespace", "python3   -m   unittest   apex.tests.test_x"),
+            ("wrapped over two lines", "Run it:\n  python3 -m unittest\n  apex.tests.test_x -v\n"),
+            ("RST double-backticks", "``python3 -m unittest apex.tests.test_x`` does too."),
+            ("ends a sentence", "Run standalone: python3 -m unittest apex.tests.test_x -v."),
+            ("flag BEFORE the target", "python3 -m unittest -v apex.tests.test_x"),
+            ("dotted -k value first", "python3 -m unittest -k some.dotted apex.tests.test_x"),
+        ):
+            with self.subTest(label):
+                self.assertEqual(self._targets(text), ["apex.tests.test_x"], text)
+
+    def test_a_prose_mention_carrying_no_target_reads_as_none(self):
+        # [#a213t3] Both shapes live in THIS module's own docstring, which the
+        # scan reads — capturing a target from either would red the guard on itself.
+        self.assertEqual(
+            self._targets("documents a plain ``python3 -m unittest ...`` invocation"),
+            [None],
+        )
+        self.assertEqual(
+            self._targets("CI's deliberately fast ``python3 -m unittest`` lane"), [None]
+        )
+
+    def test_reads_the_wrong_path_this_guard_was_blind_to(self):
+        # [#a213t4] The exact defect: no top-level `tests/` package exists, so the
+        # documented command fails while the derived path the probe uses works.
+        self.assertEqual(
+            self._targets("Run standalone:  python3 -m unittest tests.test_worker_party -v"),
+            ["tests.test_worker_party"],
+        )
+        self.assertFalse(
+            _target_names_module("tests.test_worker_party", "apex.tests.test_worker_party")
+        )
+        # ...and a plain typo in an otherwise correct path.
+        self.assertFalse(
+            _target_names_module("apex.tests.test_worker_prty", "apex.tests.test_worker_party")
+        )
+
+    def test_a_selector_beneath_the_module_still_names_it(self):
+        # [#a213t5] No declaration documents one today; the rule is stated up front
+        # so narrowing to one method never has to be "fixed" by loosening the guard.
+        dotted = "apex.tests.test_worker_party"
+        self.assertTrue(_target_names_module(dotted, dotted))
+        self.assertTrue(_target_names_module(dotted + ".TestWorkerParty", dotted))
+        self.assertTrue(_target_names_module(dotted + ".TestWorkerParty.test_identity", dotted))
+        self.assertFalse(
+            _target_names_module("apex.tests", dotted),
+            "a parent package runs none of this file's tests — a broken command, not a broader one",
+        )
+        self.assertFalse(
+            _target_names_module(dotted + "_extra", dotted),
+            "a longer sibling name is a different module, not a selector",
+        )
+
+
 class TestDeclaredStandaloneModulesStayRunnable(unittest.TestCase):
     """A-192: execute every self-declared standalone claim, don't just read it."""
 
@@ -869,6 +1041,53 @@ class TestDeclaredStandaloneModulesStayRunnable(unittest.TestCase):
             "longer pass without frappe — the documented command is broken while "
             "bench run-tests stays green (it never takes the fallback branch):\n"
             + "\n".join(f"  {d}  ({declared[d]})\n      {broken[d]}" for d in regressed),
+        )
+
+    def test_documented_standalone_command_names_its_own_module(self):
+        """A-213: the documented command must name THIS module — read it, don't
+        just use it as a trigger.
+
+        The sweep above probes a dotted path computed from the FILE PATH, so it
+        stayed green on docstrings printing ``tests.test_x``, a path that resolves
+        from nowhere (there is no top-level ``tests/`` package). Seven of those
+        shipped and were caught by eye. A failure here means a human copying the
+        documented line gets a different result from the one this guard proves.
+
+        Fix the DOCSTRING, never this assertion: the derived path is the truth,
+        because it is what CI, the probe, and ``loadTestsFromName`` all resolve.
+        """
+        declarations = _standalone_declarations()
+        self.assertGreater(
+            len(declarations), 10, "standalone-claim scan found implausibly few modules"
+        )
+
+        mismatched = [
+            f"  {rel}\n      documented: {target}\n      actual:     {dotted}"
+            for rel, dotted, targets in declarations
+            for target in targets
+            if not _target_names_module(target, dotted)
+        ]
+        self.assertEqual(
+            mismatched,
+            [],
+            "Module(s) documenting a `python3 -m unittest` target that is not their "
+            "own dotted path — the printed command fails for a human while the probe "
+            "passes on the path derived from the file's location:\n"
+            + "\n".join(mismatched),
+        )
+
+        # Guard-of-the-guard: an every-target-is-fine verdict is only worth
+        # anything if targets were actually READ. Should the capture group ever
+        # stop capturing, the comprehension above would sweep an empty set and
+        # pass for the wrong reason — this lists every module it read nothing from.
+        unreadable = sorted(rel for rel, _dotted, targets in declarations if not targets)
+        self.assertEqual(
+            unreadable,
+            [],
+            "Module(s) declaring a standalone run whose documented target this guard "
+            "could not read — write it as a dotted path (`apex.<pkg>.<module>`, "
+            "optionally narrowed to a Class or method) so the claim is checkable and "
+            "not merely runnable-looking:\n" + "\n".join(f"  {r}" for r in unreadable),
         )
 
     def test_the_fast_lane_exemption_stays_one_named_live_claim(self):
