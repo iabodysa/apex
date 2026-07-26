@@ -32,6 +32,8 @@ docs/
 docs/*
 !docs/INTEGRATION.md
 !docs/TRAINING.md
+# Operator upgrade runbook: the supported pre-rename app-identity cutover path.
+!docs/UPGRADE-APP-IDENTITY.md
 !docs/WORKSPACE-DESIGN.md
 # Public per-area training guide (index + one file per functional area)
 !docs/training/
