@@ -14,8 +14,19 @@ deliberately split across the claim lifecycle.
 | **Fuel Quota** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read |
 | **Fuel Request** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read |
 | **Fuel Claim** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | Read, Write |
-| **Fuel Exception Case** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | scoped | scoped | Read |
-| Fuel Platform (master) | Read, Write, Create | Read | Read | Read |
+| **Fuel Exception Case** *(workflow)* | Read, Write, Create, Submit, Cancel, Amend, Delete | Read, Write, Create | Read, Write, Create | Read |
+| Fuel Platform (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read |
+
+> **Fuel Platform is not read-only for the project roles.** Both the Fleet Project
+> Manager and the Fleet Supervisor can create and edit a platform record; only the
+> Fleet Manager can delete one.
+
+> **Row scoping** is layered on top of these rights. A Fleet Project Manager or
+> Fleet Supervisor sees only the rows for the projects they are permitted to, on
+> every fuel record in this table.
+
+> **Internal Auditor** holds read-only oversight (Read, Report, Export) on all
+> five records.
 
 ---
 
@@ -28,7 +39,9 @@ deliberately split across the claim lifecycle.
 ### Fuel Request *(submittable)*
 - **Purpose:** a request to draw fuel against a vehicle.
 - **Source:** a supervisor, or a driver from the Driver Portal.
-- **On submit:** consumes quota.
+- **On submit:** only a **Standard** request that is already *Done* consumes
+  quota. A **Top-up** or **Chip** request consumes none — it records a note on the
+  vehicle's timeline instead.
 
 ### Fuel Claim *(workflow)*
 - **Purpose:** reconciles requested vs. actual fuel cost.
@@ -49,7 +62,8 @@ deliberately split across the claim lifecycle.
 
 1. **Set quotas.** Fleet Manager/PM define **Fuel Quota** per vehicle/project.
 2. **Request fuel.** A supervisor (or a driver from the portal) raises a **Fuel
-   Request** against the vehicle; it is submitted and consumes quota.
+   Request** against the vehicle and submits it. A Standard request draws down
+   quota once it is Done; top-ups and chip actions do not.
 3. **Claim & reconcile.** **Fuel Claim** runs its workflow; Finance Manager
    reconciles. Movement and finance are kept separate.
 4. **Exceptions.** Anomalies become **Fuel Exception Cases**; daily jobs watch for

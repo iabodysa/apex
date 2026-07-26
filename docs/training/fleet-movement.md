@@ -16,21 +16,35 @@ This page covers fleet masters, compliance, dispatch, and transport.
 
 | DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver | Finance Manager | Internal Auditor |
 |---------|---------------|-----------------------|------------------|--------|-----------------|------------------|
-| **Salis Vehicle** | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | — | Read | Read |
-| **Salis Driver** | Read, Write, Create, Delete | Read, Write, Create, Submit | Read, Write, Create | Read | Read | Read |
-| Vehicle Category (master) | Read, Write, Create | Read | Read | — | Read | Read |
-| **Salis Vehicle Compliance** *(child table)* | child of Salis Vehicle | child of Salis Vehicle | child of Salis Vehicle | child of Salis Vehicle | child of Salis Vehicle | child of Salis Vehicle |
-| **Driver Clearance** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — | Read | Read |
+| **Salis Vehicle** | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | — | Read | Read |
+| **Salis Driver** | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read | Read | Read |
+| Vehicle Category (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | — | Read | Read |
+| **Salis Vehicle Compliance** *(child table)* | — | — | — | — | — | — |
+| **Driver Clearance** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | — | Read, Write, Create | — | Read | Read |
 
-> **Salis Vehicle Compliance** is a **child table** of Salis Vehicle, not a
-> standalone record. Frappe stores no permissions on a child table — its rows are
-> governed entirely by the parent's Salis Vehicle row above.
+> **Salis Vehicle Compliance is a child table, not a standalone record.** It is
+> the grid behind *Compliance Documents* on **Salis Vehicle**, and its permissions
+> list is empty — it grants no role anything on its own. Access to a compliance
+> row is whatever the user holds on the parent vehicle. Do not look for it in the
+> DocType list or expect to submit one.
+
+> **Driver Clearance is not open to the Fleet Project Manager** — that role holds
+> nothing on it. Clearance casework belongs to the Fleet Manager and the Fleet
+> Supervisor.
+
+> **Vehicle Category is not read-only for the project roles:** both the Fleet
+> Project Manager and the Fleet Supervisor can create and edit categories.
+
+> **Government Relations Officer** holds read-only access (Read, Report, Export)
+> on Salis Vehicle, Salis Driver, Driver Clearance, and Driver Suspension.
 
 ### DocTypes
 - **Salis Vehicle** — the fleet asset: plate, category, compliance docs, status.
 - **Salis Driver** — the driver record: license dates, project, linked user.
-- **Salis Vehicle Compliance** — insurance/registration/inspection validity.
-- **Driver Clearance** — sponsorship/clearance casework (Government Relations).
+- **Salis Vehicle Compliance** — insurance/registration/inspection validity, held
+  as rows in the vehicle's *Compliance Documents* grid.
+- **Driver Clearance** — sponsorship/clearance casework (Government Relations);
+  submittable and driven by a shipped workflow.
 - **Vehicle Handover** — vehicle hand-over checklist between holders.
 
 ### Workflow
@@ -50,18 +64,29 @@ _[screenshot: Salis Vehicle record with compliance tab]_
 
 | DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver |
 |---------|---------------|-----------------------|------------------|--------|
-| **Vehicle Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit, Cancel | Read, Write, Create | — |
+| **Vehicle Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create | — |
 | **Transport Request** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create, Submit | — |
-| **Dispatch Trip** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read (own, via portal) |
+| **Dispatch Trip** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
 | **Route Plan** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
-| **Passenger Manifest** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read (own) |
-| **Issue** (native ERPNext, field support) | Read, Write | — | Read, Write | Read, Create (own) |
+| **Passenger Manifest** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
+| **Issue** (field support) | — | — | — | — |
 
-> **Salis Vehicle** is **not a submittable** DocType — there is no Submit action.
-> Create the record and save it. Its shipped permission rows nonetheless carry
-> Submit and Cancel flags, which the table above reports because they are really
-> there. Frappe renders neither action on a non-submittable DocType, so they grant
-> nothing today; treat the vehicle record as save-only.
+> **Salis Vehicle** and **Salis Driver** are **not submittable** DocTypes — there
+> is no Submit action on either. Create the record and save it. The shipped Salis
+> Vehicle permission rows still carry Submit and Cancel flags for the Fleet
+> Manager and a Submit flag for the Fleet Project Manager. Frappe renders neither
+> action on a non-submittable DocType, so those flags grant nothing and the table
+> above leaves them out; treat the vehicle record as save-only.
+
+> **The Driver role holds no permission on Dispatch Trip or Passenger Manifest.**
+> A driver sees today's trips and manifest only because the portal resolves their
+> token server-side and reads on their behalf. The Driver role's entire document
+> grant is the five owner-scoped rows listed in
+> [Portals — Driver & Worker](portals-masar-driver.md).
+
+> **Apex grants no Issue permissions at all.** `apex/salis/custom/issue.json`
+> ships an empty `custom_perms`, so every cell in the Issue row is blank by
+> design: desk access to Issue is whatever the platform already grants a user.
 
 ### DocTypes
 - **Vehicle Assignment** — binds a vehicle to a driver/project for a period.
@@ -91,6 +116,9 @@ _[screenshot: Salis Vehicle record with compliance tab]_
 
 _[screenshot: Dispatch Board page]_
 
-> Background jobs in this area: driver-license / vehicle-compliance expiry,
-> idle-vehicle, missing-attendance, vehicle-utilisation summary. See
+> Background jobs in this area — **daily:** driver-license expiry,
+> vehicle-compliance expiry, idle-vehicle, missing-attendance, workshop overstay,
+> operations-alert reconciliation, and the open-alerts digest. **Weekly:**
+> vehicle-utilisation summary and the utilisation snapshot. A **five-minute cron**
+> also auto-confirms claimed boardings. See
 > [Background Jobs](settings.md#background-jobs).

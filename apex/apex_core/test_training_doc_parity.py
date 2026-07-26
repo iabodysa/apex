@@ -54,14 +54,16 @@ APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 REPO_ROOT = os.path.dirname(APP_ROOT)
 TRAINING_DIR = os.path.join(REPO_ROOT, "docs", "training")
 
-# The six rights the published tables use. Frappe stores more (report, export, print,
-# email, share, amend); the tables never spell those out, so comparing them would fail on
-# every row for a claim the page does not make.
-DOCUMENTED_FLAGS = ("read", "write", "create", "submit", "cancel", "delete")
+# The rights the published tables actually spell out. Frappe stores more (report, export,
+# print, email, share); the tables never name those, so comparing them would fail on every
+# row over a claim the page does not make.
+DOCUMENTED_FLAGS = ("read", "write", "create", "submit", "cancel", "amend", "delete")
 
 _TABLE_DIVIDER = re.compile(r"^\|[\s:\-|]+\|$")
 # A trailing "(master)" / "(submittable)" / "(workflow)" annotation on a DocType cell.
-_ANNOTATION = re.compile(r"\((master|masters|submittable|workflow|child table|native [^)]*)\)")
+_ANNOTATION = re.compile(
+    r"\((master|masters|submittable|workflow|child table|field support|native [^)]*)\)"
+)
 
 EXTERNAL_DOCTYPES = {
     "Issue": (
@@ -83,108 +85,29 @@ ROLE_HEADERS_OUTSIDE_THE_CHARTER = {
     ),
 }
 
-_CHILD_TABLE = (
-    "Salis Vehicle Compliance is a child table. Frappe stores no DocPerms on a child "
-    "table — its rows are governed by the embedding parent, Salis Vehicle, whose row is "
-    "checked one line above. The cell says so instead of restating the parent's rights."
-)
-
-_OWNER_SCOPED = (
-    "an if_owner grant reached through the Driver Portal, not a plain rights list. The "
-    "row filter is the claim, and a flag comparison cannot express it; "
-    "apex/salis/test_scope_role_partition.py guards the owner bucket instead."
-)
-
-_WORKFLOW_SCOPED = (
-    "the Fuel Exception Case rights are decided by the active Frappe Workflow state, not "
-    "by a fixed DocPerm set, so no single rights list is true for the whole lifecycle."
-)
-
 NON_SCHEMA_CELLS = {
-    "child of Salis Vehicle": _CHILD_TABLE,
-    "scoped": _WORKFLOW_SCOPED,
-    "Read (own, via portal)": _OWNER_SCOPED,
-    "Read (own)": _OWNER_SCOPED,
-    "Read, Create (own)": _OWNER_SCOPED,
-    "Create (Read own only)": (
-        "the universal Maintenance Request intake: Create for everyone plus an if_owner "
-        "read row. Two different grants in one cell, so a flat rights list is not what it "
-        "claims; apex/habitat/permissions.py owns the read side."
+    "Read, Create (own only)": (
+        "the universal Maintenance Request intake. The rights are ordinary, but the "
+        "'own only' qualifier is an if_owner row filter, and a flag comparison cannot "
+        "express which ROWS come back; apex/habitat/permissions.py owns that side."
     ),
 }
+
+_INERT_SUBMIT = (
+    "Salis Vehicle is not submittable (is_submittable is 0), yet its shipped permission "
+    "rows carry submit and cancel flags. Frappe renders neither action on a "
+    "non-submittable DocType, so the flags grant nothing and the page deliberately "
+    "publishes the operational rights instead. Closing this means dropping the dead "
+    "flags from the DocType JSON, not adding them to the page."
+)
 
 KNOWN_TABLE_DIVERGENCES = {
     # Frozen baseline of (file, DocType, role) -> why the page and the JSON disagree.
     # Exact equality, so a NEW pair fails the build and a CLOSED pair fails until pruned.
-    # Every entry below was already out of step when this guard landed; none was
-    # introduced by it. Each names which side looks wrong, so closing one is a decision
-    # about the app or the page, never a silent edit to whichever is easier to change.
-    ("costs.md", "Operational Depreciation Policy", "Accommodation Manager"): (
-        "APP looks wrong: the JSON grants this master to System Manager only, so the "
-        "Accommodation Manager who is documented to maintain depreciation policy cannot "
-        "open it. Publishing '—' would document the gap away."
-    ),
-    ("costs.md", "Operational Depreciation Policy", "Finance Manager"): (
-        "Same row as above: Finance Manager holds no DocPerm on the policy master at all."
-    ),
-    ("custody.md", "Facility Asset Custody Assignment", "Accommodation Manager"): (
-        "PAGE looks stale: the JSON has grown Submit and Cancel on this record while the "
-        "table still describes it as a plain save. Confirm the record is meant to be "
-        "submittable before republishing the wider set."
-    ),
-    ("custody.md", "Facility Asset Custody Assignment", "Resident Supervisor"): (
-        "Same row: the JSON grants Write, Create and Submit where the page says Read only. "
-        "The wider grant needs confirming against the building-scoping rule."
-    ),
-    ("custody.md", "Cleaning Log", "Cleaning Supervisor"): (
-        "PAGE looks stale on Submit: the note under the table calls Cleaning Log 'not "
-        "submittable', but the JSON grants the Cleaning Supervisor Submit. One of the two "
-        "is a mistake and it is not safe to guess which."
-    ),
-    ("compliance.md", "Movement Cost Recovery", "Fleet Supervisor"): (
-        "PAGE looks stale: the JSON grants Submit, so a supervisor can post a recovery "
-        "the page says only Finance can. A segregation-of-duties question, not a typo."
-    ),
-    ("fleet-movement.md", "Salis Vehicle", "Fleet Project Manager"): (
-        "PAGE looks stale: the JSON grants Submit on a DocType the same page states is "
-        "not submittable. The contradiction is inside the app, so freeze rather than pick."
-    ),
-    ("fleet-movement.md", "Salis Driver", "Fleet Project Manager"): (
-        "APP looks wrong the other way: the page documents Submit and the JSON grants "
-        "none, so the driver-record approval step the guide teaches cannot be performed."
-    ),
-    ("fleet-movement.md", "Vehicle Category", "Fleet Manager"): (
-        "PAGE understates by one flag: the JSON also grants Delete on this master."
-    ),
-    ("fleet-movement.md", "Vehicle Category", "Fleet Project Manager"): (
-        "PAGE understates: read-only in the guide, Write and Create in the JSON. A master "
-        "editable by every project manager is a data-quality decision worth confirming."
-    ),
-    ("fleet-movement.md", "Vehicle Category", "Fleet Supervisor"): (
-        "Same master, same widening one role down."
-    ),
-    ("fleet-movement.md", "Driver Clearance", "Fleet Project Manager"): (
-        "APP looks wrong: the page documents the project manager as the maker on driver "
-        "clearance and the JSON gives it no row at all, so the documented step is unusable."
-    ),
-    ("fuel.md", "Fuel Platform", "Fleet Manager"): (
-        "PAGE understates by one flag: the JSON also grants Delete on this master."
-    ),
-    ("fuel.md", "Fuel Platform", "Fleet Project Manager"): (
-        "PAGE understates: read-only in the guide, Write and Create in the JSON."
-    ),
-    ("fuel.md", "Fuel Platform", "Fleet Supervisor"): (
-        "Same master, same widening one role down."
-    ),
-    ("maintenance.md", "Maintenance Inspection Report", "Accommodation Manager"): (
-        "APP looks wrong: the JSON's only permission row is System Manager, so the "
-        "inspection step between request and work order has no operational owner."
-    ),
-    ("safety.md", "Building License", "Safety Officer"): (
-        "APP looks wrong: the page publishes '—' and the JSON grants Read, Write and "
-        "Create. Building licences sit outside the published Safety Officer charter "
-        "(inspections, executions, incidents), so this reads as an over-grant."
-    ),
+    # Each entry names which side is wrong, so closing one is a decision about the app or
+    # the page, never a silent edit to whichever is easier to change.
+    ("fleet-movement.md", "Salis Vehicle", "Fleet Manager"): _INERT_SUBMIT,
+    ("fleet-movement.md", "Salis Vehicle", "Fleet Project Manager"): _INERT_SUBMIT,
 }
 
 
@@ -503,10 +426,10 @@ class TestParityGuardIsFalsifiable(unittest.TestCase):
     def test_a_flipped_documented_cell_is_reported(self):
         """Doc side: drop Create from the Safety Officer cell and it must red."""
         self._edit_doc(
-            "| **Safety Task Execution** *(submittable)* | Read, Write, Create, Submit, Cancel "
-            "| Read, Write, Create, Submit | Read, Write, Create |",
-            "| **Safety Task Execution** *(submittable)* | Read, Write, Create, Submit, Cancel "
-            "| Read, Write, Create, Submit | Read, Write |",
+            "| **Safety Task Execution** *(submittable)* | Read, Write, Create, Submit, "
+            "Cancel, Amend | Read, Write, Create, Submit | Read, Write, Create |",
+            "| **Safety Task Execution** *(submittable)* | Read, Write, Create, Submit, "
+            "Cancel, Amend | Read, Write, Create, Submit | Read, Write |",
         )
         found = self._compare()
         self.assertIn((self.DOC, self.DOCTYPE, self.ROLE), found, f"flip went unreported: {found}")
