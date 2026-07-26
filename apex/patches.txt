@@ -118,6 +118,26 @@ apex.patches.v1_x.move_deduction_to_salary_policy
 # an active patches.txt entry: the demo-seed gate tests (tests/test_seed_*_gate.py)
 # fail if you do. Each module carries the UNREGISTERED-PATCH / COVERED-BY markers
 # the registration guard requires.
+#
+# HISTORICAL (security, A-248): seed_demo_role_logins used to carry the demo login
+# password as a source literal, so every checkout shared one working password. It now
+# requires APEX_DEMO_PASSWORD from the operator and refuses to run unset. The literal
+# is gone from the tree but REMAINS IN GIT HISTORY, so it must be treated as burned.
+#
+# NOT ANSWERABLE FROM SOURCE: whether any real site ever created those two accounts.
+# The seeder only writes Users when developer_mode is on, and it has not been an active
+# entry here for the whole of this repository's history (A-070 un-wired it earlier still,
+# in history this repo no longer carries), so it can only have run by an explicit
+# bench execute or by a migrate predating that un-wiring.
+#
+# OPERATOR ACTION, per site, in this order:
+#   1. tabPatch Log for apex.patches.v1_x.seed_demo_role_logins — a row means a migrate
+#      reached the module while it was still registered. It does NOT mean Users were
+#      created: the developer_mode gate may have returned first. Absence of a row is
+#      likewise not an all-clear, since a manual bench execute logs nothing.
+#   2. tabUser for the two demo emails named in the module — this is the decisive check.
+#      Present means the published password is live on that site: disable or reset.
+# Until step 2 is done on a given site, those accounts are UNKNOWN, not safe.
 
 # STILL-REQUIRED (ONE-TIME): stamps an expiry on Masar Worker Token rows minted before
 # the TTL field existed — the resolver still treats a NULL expiry as never-expiring.

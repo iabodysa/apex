@@ -24,28 +24,35 @@ Both personas reuse the demo estate keys from seed_masar_demo_movement (same
 building / site / project / company), so the two seeders compose and a re-run of
 either adds nothing.
 
-Idempotent and install-safe: every record is get-or-created by a stable key, the
-whole thing is a no-op unless ``developer_mode`` is on, and it is wrapped so it
-can never fail an install/migrate. All names are generic demo placeholders — no
-real personnel, contacts, or locations. The dev password is a fixed,
-non-secret demo value (a dev/demo site only) returned for the owner's recipe.
+The login password is NOT shipped. It is supplied by the operator through the
+``APEX_DEMO_PASSWORD`` environment variable, and the seeder refuses to start
+without it rather than falling back to anything — a literal here would be a
+working credential published in the source tree, and every checkout would share
+it. With the variable set, the run is still a no-op unless ``developer_mode`` is
+on, every record is get-or-created by a stable key, and the seeding itself is
+wrapped so it can never fail an install/migrate. All names are generic demo
+placeholders — no real personnel, contacts, or locations.
 
 UNREGISTERED-PATCH: a demo seeder deliberately kept out of the migrate path
     (A-070) so a normal ``bench migrate`` can never create demo login personas on
     a customer site. The ``developer_mode`` gate below is defence in depth, not
     the reason — the module simply must never be reachable from patches.txt.
-COVERED-BY: a manual, developer-only run on a developer_mode site —
-    ``bench --site <site> execute apex.patches.v1_x.seed_demo_role_logins.execute``.
+COVERED-BY: a manual, developer-only run on a developer_mode site, with the
+    password passed in by the operator:
+    ``APEX_DEMO_PASSWORD=... bench --site <site> execute apex.patches.v1_x.seed_demo_role_logins.execute``.
     ``apex/patches/v1_x/test_seed_demo_role_logins_gate.py`` reds the build if this
     module is ever re-added to patches.txt as an active entry.
 """
+
+import os
 
 import frappe
 
 from apex.apex_core.utils.company import resolve_company_or_any
 
-# [#ma0k24]
-_DEMO_PASSWORD = "ApexDemo#2024"
+# [#ma0k24] Operator-supplied, never shipped: a password literal in this file is
+# a live credential in public source, identical on every checkout.
+_PASSWORD_ENV = "APEX_DEMO_PASSWORD"
 
 # [#ogdqsc]
 _SUP_USER = "supervisor.demo@example.com"
@@ -70,6 +77,23 @@ _REQUIRED = (
     "Employee",
     "Masar Worker Token",
 )
+
+
+def _demo_password():
+    """The demo logins' password, read from the operator's environment.
+
+    Raises rather than defaulting: any fallback value would be the shipped
+    credential this indirection exists to remove.
+    """
+    password = os.environ.get(_PASSWORD_ENV)
+    if not password:
+        raise RuntimeError(
+            f"{_PASSWORD_ENV} is not set. This seeder ships no password of its "
+            f"own, so choose one and pass it in, e.g. {_PASSWORD_ENV}=<password> "
+            "bench --site <site> execute "
+            "apex.patches.v1_x.seed_demo_role_logins.execute"
+        )
+    return password
 
 
 def _get_or_create(doctype, key_filters, make):
@@ -115,8 +139,8 @@ def _project():
     )
 
 
-def _user(email, full_name, roles):
-    """Get-or-create a demo User with a fixed demo password and the given roles."""
+def _user(email, full_name, roles, password):
+    """Get-or-create a demo User with the operator's password and the given roles."""
     if not frappe.db.exists("User", email):
         frappe.get_doc(
             {
@@ -124,7 +148,7 @@ def _user(email, full_name, roles):
                 "email": email,
                 "first_name": full_name,
                 "send_welcome_email": 0,
-                "new_password": _DEMO_PASSWORD,
+                "new_password": password,
             }
         ).insert(ignore_permissions=True)  # audit-ok
     user = frappe.get_doc("User", email)
@@ -256,10 +280,10 @@ def _worker_token(employee):
     return get_or_create_for_employee(employee).token
 
 
-def _seed_supervisor(company):
+def _seed_supervisor(company, password):
     building = _building(company)
     project = _project()
-    user = _user(_SUP_USER, _SUP_NAME, _SUP_ROLES)
+    user = _user(_SUP_USER, _SUP_NAME, _SUP_ROLES, password)
     _scope_supervisor_to_building(user, building)
     # [#43h85p]
     _user_permission(user, "Project", project)
@@ -268,15 +292,20 @@ def _seed_supervisor(company):
     _safety_round(building, user)
 
 
-def _seed_employee(company):
-    user = _user(_EMP_USER, _EMP_NAME, ())
+def _seed_employee(company, password):
+    user = _user(_EMP_USER, _EMP_NAME, (), password)
     emp = _employee(_EMP_NAME, company, user_id=user)
     return _worker_token(emp)
 
 
 def execute():
     """Seed both demo logins. Returns a dict of login recipes (and the minted
-    Masar token) on a dev site; None / a no-op otherwise."""
+    Masar token) on a dev site; None / a no-op otherwise.
+
+    Resolved outside the guard below on purpose: a missing password is an
+    operator error to surface, not a seeding failure to swallow into the log.
+    """
+    password = _demo_password()
     try:
         # [#2oze4d]
         if not frappe.conf.get("developer_mode"):
@@ -287,13 +316,13 @@ def execute():
         if not company:
             return
 
-        _seed_supervisor(company)
+        _seed_supervisor(company, password)
         frappe.db.commit()
 
         # [#l837ss]
         token = None
         try:
-            token = _seed_employee(company)
+            token = _seed_employee(company, password)
             frappe.db.commit()
         except Exception:
             frappe.db.rollback()
@@ -303,17 +332,18 @@ def execute():
             )
 
         base = frappe.utils.get_url()
+        # [#7qk1zd] The recipe names where the password came from instead of
+        # repeating it: this return value is printed to a terminal and logged.
         return {
+            "password_source": f"the value of {_PASSWORD_ENV} in this run",
             "supervisor": {
                 "email": _SUP_USER,
-                "password": _DEMO_PASSWORD,
                 "roles": list(_SUP_ROLES),
                 "scoped_building": _BUILDING,
                 "login": f"{base}/login  (then open /app or /safety)",
             },
             "employee": {
                 "email": _EMP_USER,
-                "password": _DEMO_PASSWORD,
                 "masar_link": f"{base}/masar?w={token}" if token else None,
             },
         }
