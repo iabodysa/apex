@@ -311,18 +311,20 @@ called. It runs under ``bench run-tests``, where this module went from 5.02s to
 86.07s against the live ``test`` site (39 tests, contended). That +81s sits inside
 a ~25min job, which is where a guard against a whole-suite abort belongs.
 
-Leak baseline — ONE entry, found by this detector on its first full sweep
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-``apex_core/utils/test_portal_token_throttle.py`` snapshots with
-``getattr(frappe.local, name, None)`` and restores by ``setattr``, so ``request`` —
-UNSET before that module runs — is left as None afterwards. Harmless today, because
-frappe reads it with a defaulted getattr, but it is precisely the absent-attribute
-shape the incident's own fix had to solve, and it is caught by the diff alone: the
-canary passes. It is frozen rather than fixed only because that file belongs to
-another scope. The fix is four lines: a module-level ``_ABSENT = object()``
-sentinel as the ``getattr`` default, and a restore that ``delattr``s when the
-original is ``_ABSENT`` instead of writing None over it — the shape
-``checkout_pending_clearance``'s ``_ScopeCase`` already carries.
+Leak baseline — EMPTY since A-236 (2026-07-26)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The one entry this detector found on its first full sweep is fixed, not blessed:
+``apex_core/utils/test_portal_token_throttle.py`` snapshotted with
+``getattr(frappe.local, name, None)`` and restored by ``setattr``, so ``request`` —
+UNSET before that module ran — was left as None afterwards. Harmless in itself,
+because frappe reads it with a defaulted getattr, so the canary passed and only the
+diff could see it; but it is precisely the absent-attribute shape the incident's own
+fix had to solve. That module now snapshots against an ``_ABSENT`` sentinel and
+``delattr``s an originally-unset name instead of writing None over it, through ONE
+shared helper both its test classes use. With the baseline empty, any module that
+strands a global reds at once, and the two assertions below stay live: a baseline
+entry that stops leaking must be pruned, and one that stops writing globals at all
+must be pruned too — so a drained entry can never be faked by deleting the stubbing.
 
 Run standalone (from the repo root, so ``apex.tests.source_tree`` resolves):
   python3 -m unittest apex.tests.test_unit_test_coverage_guard -v
@@ -976,12 +978,10 @@ def _probe_process_global_leak(dotted, site, sites_path, extra_path=None):
     return json.loads(proc.stdout.strip().splitlines()[-1])
 
 
-# [#a231b1] ONE entry: a real finding from this detector's first sweep, in a file
-# this card may not edit. See "Leak baseline" in the module docstring for the leak
-# and its fix.
-_PROCESS_GLOBAL_LEAK_BASELINE = frozenset(
-    {"apex.apex_core.utils.test_portal_token_throttle"}
-)
+# [#a231b1] The one leak this detector FOUND is FIXED, not blessed: A-236 gave
+# test_portal_token_throttle.py an `_ABSENT`-sentinel snapshot/restore, so the baseline
+# is empty and every process-global writer is enforced. See "Leak baseline" above.
+_PROCESS_GLOBAL_LEAK_BASELINE = frozenset()
 
 
 class TestMustTestClassification(unittest.TestCase):
