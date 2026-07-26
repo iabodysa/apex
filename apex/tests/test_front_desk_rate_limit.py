@@ -109,9 +109,21 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         )
 
     def _clear_window(self, cmd, ip):
-        """The decorator's own window. ``key`` names a form_dict entry that a real
-        request never carries, so the identity is ``ip`` joined to an empty string
-        and the name ends in a bare colon (rate_limiter.py:145-155)."""
+        """The decorator's own window, in BOTH identity shapes this file still drives.
+
+        Un-keyed (the guest driver endpoints): the identity is the bare address, so the
+        name is ``rl:<cmd>:<ip>`` (rate_limiter.py:150,155).
+
+        Keyed (``resolve_worker``, which still passes ``key``): the identity is the
+        address joined to the form_dict lookup, and a real request carries no field by
+        that name, so the lookup yields "" and the name ends in a bare colon
+        (rate_limiter.py:143,147-148).
+
+        Both are cleared because guessing wrong here is silent: ``_drop_window`` deletes
+        a name that was never created and then asserts it is absent, which passes while
+        leaving the window that WAS spent to leak into the next test.
+        """
+        self._drop_window(f"rl:{cmd}:{ip}")
         self._drop_window(f"rl:{cmd}:{ip}:")
 
     def _clear_actor_window(self, cmd, actor):

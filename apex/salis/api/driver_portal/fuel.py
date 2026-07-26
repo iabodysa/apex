@@ -44,7 +44,7 @@ def _vehicle_bound_to_driver(driver, vehicle):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=10, seconds=60)
+@rate_limit(limit=10, seconds=60)
 def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
 	_require_enabled()
 	driver = _resolve_driver()
@@ -68,7 +68,7 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def my_fuel_quota(vehicle=None):
 	"""This month's Fuel Quota for the driver's bound vehicle (read).
 
@@ -127,7 +127,7 @@ def my_fuel_quota(vehicle=None):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def my_fuel_requests(limit=30):
 	"""The current driver's OWN fuel-request history (read).
 

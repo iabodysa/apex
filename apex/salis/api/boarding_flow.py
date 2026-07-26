@@ -380,7 +380,7 @@ def _state_payload(row, window_seconds):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def get_trip_boarding(dispatch_trip):
     """Driver panel read: the trip's full boarding state (READ, no side effects).
 
@@ -416,7 +416,7 @@ def get_trip_boarding(dispatch_trip):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=30, seconds=60)
+@rate_limit(limit=30, seconds=60)
 def notify_remaining_passengers(dispatch_trip):
     """Driver action: nudge every still-Pending worker (write, driver-scoped).
 
@@ -609,7 +609,7 @@ def _remove_boarding_event(dispatch_trip, employee):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=30, seconds=60)
+@rate_limit(limit=30, seconds=60)
 def driver_mark_not_boarded(dispatch_trip, employee):
     """Driver EXCEPTION override: reverse a worker's self-confirm (write, driver-scoped).
 
@@ -716,7 +716,7 @@ def worker_trip_boarding(token=None):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=30, seconds=60)
+@rate_limit(limit=30, seconds=60)
 def depart_and_finalize(dispatch_trip):
     """Driver action: depart — mark exhausted Pending workers Absent, close the
     manifest (write, driver-scoped).

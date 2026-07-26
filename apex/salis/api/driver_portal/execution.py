@@ -38,7 +38,7 @@ def _trip_log_state(driver, dispatch_trip):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=10, seconds=60)
+@rate_limit(limit=10, seconds=60)
 def start_my_trip(dispatch_trip):
 	"""Mark the driver's own trip Started, creating its Trip Start Log (write).
 
@@ -75,7 +75,7 @@ def start_my_trip(dispatch_trip):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=30, seconds=60)
+@rate_limit(limit=30, seconds=60)
 def complete_my_trip(dispatch_trip):
 	"""Mark the driver's own trip Completed on its Trip Start Log (write).
 
@@ -114,7 +114,7 @@ def complete_my_trip(dispatch_trip):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=30, seconds=60)
+@rate_limit(limit=30, seconds=60)
 def push_driver_position(dispatch_trip, lat, lng):
 	"""Record the driver's live GPS position onto their own Dispatch Trip (write).
 
@@ -163,7 +163,7 @@ def _validate_coords(lat, lng):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=30, seconds=60)
+@rate_limit(limit=30, seconds=60)
 def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_name=None):
 	"""Mark one route stop done/undone on the driver's STARTED trip (write).
 

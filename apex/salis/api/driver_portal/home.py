@@ -59,7 +59,7 @@ def _next_trip_today(driver):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def get_my_today():
 	"""One composite "today" payload for the driver Home screen (read).
 

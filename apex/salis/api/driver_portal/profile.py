@@ -77,7 +77,7 @@ def _project_label(code):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def get_driver_context():
 	"""Portal bootstrap (read): enabled flag, whether the user is linked to a
 	driver, and the driver profile. Never raises for an unlinked user.
@@ -123,7 +123,7 @@ def get_driver_context():
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def get_driver_profile():
 	"""The current driver's OWN profile (read).
 
@@ -203,7 +203,7 @@ def _vehicle_compliance(vehicle):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def get_my_vehicle():
 	"""The current driver's CURRENT vehicle, enriched for the driver view (read).
 

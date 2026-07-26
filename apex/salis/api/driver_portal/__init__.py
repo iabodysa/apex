@@ -385,7 +385,7 @@ def _attach_stop_progress(stops, route_plan, dispatch_trip, driver):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=30, seconds=60)
+@rate_limit(limit=30, seconds=60)
 def mark_arrived(dispatch_trip, route_stop, arrived=1, sequence=None, stop_name=None):
 	"""Driver action: "I've arrived at this pickup stop" (write).
 
@@ -446,7 +446,7 @@ def mark_arrived(dispatch_trip, route_stop, arrived=1, sequence=None, stop_name=
 	}
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=10, seconds=60)
+@rate_limit(limit=10, seconds=60)
 def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
 	"""Store (or refresh) the driver's Web Push subscription on opt-in (write).
 

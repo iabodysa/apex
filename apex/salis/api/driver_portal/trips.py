@@ -31,7 +31,7 @@ def _bounded_positive(value, default, maximum):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def my_trips_today():
 	"""Today's Dispatch Trips for the current driver (read)."""
 	_require_enabled()
@@ -51,7 +51,7 @@ def my_trips_today():
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def my_trips_recent(days=30, limit=50):
 	"""The current driver's recent Dispatch Trips, newest first (read).
 
@@ -106,7 +106,7 @@ def _enrich_workers_with_phone(workers):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def my_worker_route_today():
     """The current driver's worker-transport route today (read), surfaced in the
     driver portal's "My Route" screen.
@@ -127,7 +127,7 @@ def my_worker_route_today():
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def my_trip_route(dispatch_trip):
     """One trip's ordered route for the current driver (read).
 

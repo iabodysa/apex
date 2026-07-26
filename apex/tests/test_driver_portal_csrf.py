@@ -123,10 +123,11 @@ BODY_RATE_LIMITED = set(BODY_RATE_LIMITED_DRIVER_ENDPOINTS)
 # `frappe.form_dict.get(key, "")`, and app.py:302-314 builds form_dict from the query
 # string, so any caller appending `?<key>=anything` lands in a private window per value
 # (identity is `<ip>:<value>`, rate_limiter.py:147-148). No key value is safe, so this
-# guard demands none. The endpoints still carrying the legacy literal are tracked debt:
-# the budget may only ever be lowered, and a newly keyed endpoint pushes it over.
+# guard demands none. Now ZERO: every endpoint charges the plain `rl:<cmd>:<ip>`, which
+# no query string partitions. salis/api/test_rate_limit_identity.py spends the real
+# windows; this budget is the ratchet, lowered only — a newly keyed endpoint pushes over.
 LEGACY_FORM_DICT_KEY = "frappe.request.remote_addr"
-LEGACY_FORM_DICT_KEY_BUDGET = 38
+LEGACY_FORM_DICT_KEY_BUDGET = 0
 
 NORMAL_DRIVER_WRITERS = DRIVER_WRITERS - TIGHT_DRIVER_WRITERS - BODY_RATE_LIMITED
 PER_IP_DRIVER_ENDPOINTS = (
