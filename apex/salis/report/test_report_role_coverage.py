@@ -370,6 +370,12 @@ class TestReportRefDoctypeIsRunnable(unittest.TestCase):
 
     Vehicle Compliance Register shipped with ``ref_doctype`` = Salis Vehicle Compliance and
     threw for all four of its granted roles, Fleet Manager and Internal Auditor included.
+
+    A-189 generalised the mechanism: an ORDINARY ref denies just as hard when its DocPerms
+    omit ``report`` for a role, and ``test_workspace_report_runnable`` checks every
+    workspace Report link against its ref for each role the link is shown to. This class
+    stays because it covers every shipped report, linked or not; that one covers every
+    linked report, istable ref or not. Neither is a subset of the other.
     """
 
     def setUp(self):
