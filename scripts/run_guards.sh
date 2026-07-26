@@ -87,12 +87,63 @@ workflow_step_shell() {
 	printf '%s\n' "$body"
 }
 
-# Run the lane's step under a POSIX shell, and name the step when it reds so the failure
-# reads as "CI would reject this", not as a local script blowing up.
+# CI runs the lane inside a fresh CHECKOUT, which holds only what git tracks. A
+# workstation runs it inside a work tree that also holds ignored scratch, and the lane
+# hands ruff two DIRECTORIES to walk rather than a file list - so ruff decides for itself
+# what is in scope, and with two roots that decision is not stable. Measured here, with a
+# gitignored apex/demo/*.py present, `ruff check apex/ scripts/` alternated between
+# "All checks passed" and "Found 7 errors" across back-to-back runs with the cache
+# untouched (P F P P F P F F F F F F P F F), while the same command with a single root
+# honoured .gitignore 20 times out of 20. The hook environment is not the variable: the
+# same command scored 7/20 bare and 7/20 under the GIT_DIR the pre-push hook exports.
+# So the lane's own text, pointed at a work tree, is a coin flip CI can never reproduce -
+# a fresh clone has no such file to find, which is why the lane itself stays green.
+#
+# comment_audit, check_translations and check_doctype_dates each draw this boundary for
+# themselves, with `git ls-files --cached --others --exclude-standard`. A LIFTED step
+# cannot: its command belongs to lint.yml, and rewriting it here is the drift this file
+# exists to prevent. So the boundary is applied to the step's INPUT instead - the same
+# file set, materialised, with this work tree's current contents so an uncommitted edit
+# is still graded. Only what a clone would never receive is left behind.
+CI_TREE=""
+
+build_ci_tree() {
+	CI_TREE=$(mktemp -d) || {
+		echo "guards: cannot create a temporary directory to mirror the checkout in" >&2
+		exit 2
+	}
+	trap 'rm -rf "$CI_TREE"' EXIT INT TERM
+	if ! git ls-files -z --cached --others --exclude-standard |
+		python3 -c '
+import os, shutil, sys
+
+dest = sys.argv[1]
+raw = sys.stdin.buffer.read().decode("utf-8", "surrogateescape")
+names = [name for name in raw.split("\0") if name]
+if not names:
+    sys.exit(1)
+for name in names:
+    # A tracked file deleted from the work tree cannot be graded here; the lane would
+    # not see it either, because the deletion is what gets pushed.
+    if not os.path.isfile(name):
+        continue
+    target = os.path.join(dest, name)
+    os.makedirs(os.path.dirname(target) or ".", exist_ok=True)
+    shutil.copy2(name, target)
+' "$CI_TREE"; then
+		echo "guards: git could not list the files a fresh clone would hold, so this run" >&2
+		echo "guards: would grade a tree CI never sees - repair the work tree before pushing." >&2
+		exit 2
+	fi
+}
+
+# Run the lane's step under a POSIX shell, against the files CI would have, and name the
+# step when it reds so the failure reads as "CI would reject this", not as a local script
+# blowing up.
 run_lane_step() {
 	step=$1
 	command_text=$(workflow_step_shell "$step")
-	if ! sh -c "$command_text"; then
+	if ! (cd "$CI_TREE" && sh -c "$command_text"); then
 		echo "guards: the Lint lane's \"$step\" step FAILS on this tree" >&2
 		exit 1
 	fi
@@ -172,9 +223,15 @@ assert_lane_parity() {
 
 # In the lane's own order, so the first red a developer sees here is the first red CI
 # would show them.
+#
+# The three python gates below are NOT run against the materialised tree: each already
+# asks git for its own file set, so here they run where CI runs them, in a work tree,
+# on the code path the lane exercises. Only the lifted steps, which walk directories
+# they were handed, need the boundary supplied for them.
 tree_guards() {
 	assert_lane_parity
 	check_ruff_version
+	build_ci_tree
 	run_lane_step "Run ruff"
 	note_sh_parser_drift
 	run_lane_step "Shell syntax"
