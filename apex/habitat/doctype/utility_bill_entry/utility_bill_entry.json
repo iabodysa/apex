@@ -287,7 +287,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-24 03:53:04.208692",
+ "modified": "2026-07-26 09:03:55.752811",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Utility Bill Entry",
@@ -301,6 +301,7 @@
    "email": 1,
    "print": 1,
    "read": 1,
+   "report": 1,
    "role": "System Manager",
    "share": 1,
    "submit": 1,
@@ -309,6 +310,7 @@
   {
    "create": 1,
    "read": 1,
+   "report": 1,
    "role": "Accommodation Manager",
    "submit": 1,
    "write": 1
@@ -317,6 +319,7 @@
    "cancel": 1,
    "create": 1,
    "read": 1,
+   "report": 1,
    "role": "Finance Manager",
    "submit": 1,
    "write": 1

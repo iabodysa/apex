@@ -112,7 +112,7 @@
  "is_submittable": 1,
  "issingle": 0,
  "istable": 0,
- "modified": "2026-07-22 17:52:15.287889",
+ "modified": "2026-07-26 09:03:55.752811",
  "module": "Habitat",
  "name": "Operational Depreciation Snapshot",
  "naming_rule": "By \"Naming Series\" field",
@@ -124,6 +124,7 @@
    "doctype": "DocPerm",
    "idx": 1,
    "read": 1,
+   "report": 1,
    "role": "System Manager",
    "submit": 1,
    "write": 1
@@ -136,6 +137,7 @@
    "doctype": "DocPerm",
    "idx": 2,
    "read": 1,
+   "report": 1,
    "role": "Accommodation Manager",
    "submit": 1,
    "write": 1
@@ -147,6 +149,14 @@
    "read": 1,
    "role": "Resident Supervisor",
    "write": 1
+  },
+  {
+   "doctype": "DocPerm",
+   "export": 1,
+   "idx": 4,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
   }
  ],
  "search_fields": "building, snapshot_date",

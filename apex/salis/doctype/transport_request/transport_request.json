@@ -451,7 +451,7 @@
    "link_fieldname": "transport_request"
   }
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-26 09:03:55.752811",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",
@@ -475,6 +475,7 @@
   {
    "create": 1,
    "read": 1,
+   "report": 1,
    "role": "Fleet Project Manager",
    "submit": 1,
    "write": 1
