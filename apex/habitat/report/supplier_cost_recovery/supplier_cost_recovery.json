@@ -9,7 +9,6 @@
   "module": "Habitat",
   "roles": [
     {"role": "Finance Manager"},
-    {"role": "Accommodation Manager"},
     {"role": "System Manager"}
   ]
 }

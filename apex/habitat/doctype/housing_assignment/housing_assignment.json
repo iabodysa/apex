@@ -374,7 +374,7 @@
    "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-07-26 09:03:55.752811",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Assignment",
@@ -401,6 +401,7 @@
    "cancel": 1,
    "create": 1,
    "read": 1,
+   "report": 1,
    "role": "Accommodation Manager",
    "submit": 1,
    "write": 1
@@ -408,6 +409,7 @@
   {
    "create": 1,
    "read": 1,
+   "report": 1,
    "role": "Resident Supervisor",
    "submit": 1,
    "write": 1

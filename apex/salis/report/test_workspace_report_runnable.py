@@ -45,6 +45,17 @@ Scope: every module's workspace tree, ``links`` and ``shortcuts`` alike — ``ge
 (desktop.py:299) runs the same ``is_item_allowed`` check. No Report shortcut ships today;
 covering it costs nothing and stops the next one arriving unguarded.
 
+A-200 drained the baseline to empty. All 34 (ref_doctype, role) pairs behind the original
+27 links were resolved as access decisions, not flag flips: 30 rows that already held a
+permlevel-0 read gained an explicit ``"report": 1``; ``Internal Auditor`` gained the
+app's standard read/report/export oversight row on ``Audit Remediation Plan`` and
+``Operational Depreciation Snapshot``; and two roles were dropped from six reports whose
+source DocPerms never admitted them (``Accommodation Manager`` off the four Accommodation
+Ledger reports, ``Resident Supervisor`` off the two Accommodation Stock Ledger reports).
+Every grant on a row-scoped source was checked against that source's
+``permission_query_conditions`` scope: each report self-scopes before it queries, so no
+role gained rows outside the estate or project it is held inside.
+
 This module sits beside ``test_report_role_coverage.py`` for the reason that file records:
 the invariant spans the workspace, report and doctype trees of every module, so it owns no
 single home, and the central ``apex/tests/`` directory is shrink-only
@@ -68,146 +79,10 @@ _REPORT_GLOB = os.path.join(_APP, "*", "report", "*", "*.json")
 # is_item_allowed returns True for it before any lookup), so it is never the bug.
 _ALWAYS_PERMITTED = frozenset({"Administrator"})
 
-_REPORT_FLAG_MISSING = (
-    "The role holds a permlevel-0 read DocPerm on the report's ref_doctype, but the row "
-    "omits `report`, which stores 0 rather than the field default of 1. The link renders "
-    'and throws "You don\'t have permission to get a report on: <ref>" on click. Owed fix '
-    'is `"report": 1` on that EXISTING row — a DocType JSON write, outside the A-189 write '
-    "scope and contested with another agent's tree. Ratchet entry: review and remove, "
-    "never grow."
-)
-
-_NO_READ_GRANT = (
-    "The role holds NO permlevel-0 DocPerm on the report's ref_doctype at all, so it can "
-    "neither read the source nor run the report, yet the report's roles table admits it to "
-    "the link. Adding a DocPerm row to light a link is forbidden; the honest resolutions "
-    "are to drop the role from the report's roles table or to grant the source read on a "
-    "stated charter basis. Both are outside the A-189 write scope. Ratchet entry: review "
-    "and remove, never grow."
-)
-
-# Frozen baseline of "workspace :: report" -> {role: why it is tolerated}. The assertion is
-# exact equality, so a NEW pair fails the build and a CLOSED pair fails until it is pruned
-# from here. Generated from the shipped JSON on 2026-07-26 and runtime-confirmed against the
-# live bench for a sample of five pairs; every entry is an OPEN access bug, not a decision.
-KNOWN_UNRUNNABLE_REPORT_LINKS = {
-    "Costs and Leasing :: Accommodation Cost Distribution": {
-        "Accommodation Manager": _NO_READ_GRANT,
-        "Finance Manager": _REPORT_FLAG_MISSING,
-        "System Manager": _REPORT_FLAG_MISSING,
-    },
-    "Costs and Leasing :: Accommodation Ledger Summary": {
-        "Accommodation Manager": _NO_READ_GRANT,
-        "Finance Manager": _REPORT_FLAG_MISSING,
-        "System Manager": _REPORT_FLAG_MISSING,
-    },
-    "Costs and Leasing :: Cost by Dimension": {
-        "Accommodation Manager": _NO_READ_GRANT,
-        "Finance Manager": _REPORT_FLAG_MISSING,
-        "System Manager": _REPORT_FLAG_MISSING,
-    },
-    "Costs and Leasing :: Lease Expiry Watchlist": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Finance Manager": _REPORT_FLAG_MISSING,
-        "System Manager": _REPORT_FLAG_MISSING,
-    },
-    "Costs and Leasing :: Supplier Cost Recovery": {
-        "Accommodation Manager": _NO_READ_GRANT,
-        "Finance Manager": _REPORT_FLAG_MISSING,
-        "System Manager": _REPORT_FLAG_MISSING,
-    },
-    "Costs and Leasing :: Utility Variance": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Finance Manager": _REPORT_FLAG_MISSING,
-        "System Manager": _REPORT_FLAG_MISSING,
-    },
-    "Custody :: Accommodation Stock Balance": {
-        "Resident Supervisor": _NO_READ_GRANT,
-    },
-    "Custody :: Custody Damage Register": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "System Manager": _REPORT_FLAG_MISSING,
-    },
-    "Custody :: Custody Outstanding by Worker": {
-        "Resident Supervisor": _NO_READ_GRANT,
-    },
-    "Custody :: Intercompany Movement Register": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "System Manager": _REPORT_FLAG_MISSING,
-    },
-    "Custody :: Operational Depreciation Aging": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "System Manager": _REPORT_FLAG_MISSING,
-    },
-    "Housing :: Accommodation Occupancy Summary": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Resident Supervisor": _REPORT_FLAG_MISSING,
-    },
-    "Housing :: Active Resident Register": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Resident Supervisor": _REPORT_FLAG_MISSING,
-    },
-    "Housing :: Building Operations Summary": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Resident Supervisor": _REPORT_FLAG_MISSING,
-    },
-    "Housing :: Checkout Pending Clearance": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Resident Supervisor": _REPORT_FLAG_MISSING,
-    },
-    "Housing :: Housing Cleaning Audit": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Cleaning Supervisor": _REPORT_FLAG_MISSING,
-        "Resident Supervisor": _REPORT_FLAG_MISSING,
-    },
-    "Housing :: Idle Resident Detection": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Resident Supervisor": _REPORT_FLAG_MISSING,
-    },
-    "Safety :: Audit Remediation Status": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Internal Auditor": _NO_READ_GRANT,
-    },
-    "Safety :: Daily Cleaning Compliance": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Resident Supervisor": _REPORT_FLAG_MISSING,
-    },
-    "Safety :: Maintenance Aging": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Resident Supervisor": _REPORT_FLAG_MISSING,
-    },
-    "Safety :: Missed Cleaning Tasks": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Resident Supervisor": _REPORT_FLAG_MISSING,
-    },
-    "Safety :: Open Maintenance Requests": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Resident Supervisor": _REPORT_FLAG_MISSING,
-    },
-    "Safety :: Operational Depreciation Aging": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Internal Auditor": _NO_READ_GRANT,
-        "System Manager": _REPORT_FLAG_MISSING,
-    },
-    "Safety :: Safety Open Findings": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Resident Supervisor": _REPORT_FLAG_MISSING,
-        "Safety Officer": _REPORT_FLAG_MISSING,
-    },
-    "Safety :: Safety Task Compliance Summary": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Resident Supervisor": _REPORT_FLAG_MISSING,
-        "Safety Officer": _REPORT_FLAG_MISSING,
-    },
-    "Safety :: Safety Task Execution Log": {
-        "Accommodation Manager": _REPORT_FLAG_MISSING,
-        "Resident Supervisor": _REPORT_FLAG_MISSING,
-        "Safety Officer": _REPORT_FLAG_MISSING,
-    },
-    "Salis :: Worker Transport Plan": {
-        "Fleet Project Manager": _REPORT_FLAG_MISSING,
-    },
-}
+# A-200 emptied this. Every workspace Report link is now runnable by every role it is
+# shown to, so the baseline is exact-equality against {} — one new offender fails the build.
+# An entry added here needs a written reason (test_every_frozen_pair_carries_a_reason).
+KNOWN_UNRUNNABLE_REPORT_LINKS = {}
 
 
 def _load(pattern, doctype):
@@ -562,19 +437,33 @@ class TestTheShippedJsonMatchesTheRuntimeReading(unittest.TestCase):
                 else:
                     without_flag += 1
         self.assertGreater(with_flag, 0, "no shipped DocPerm sets `report` — reading is wrong")
-        self.assertGreater(without_flag, 0, "no shipped DocPerm omits `report` — baseline stale")
-        ledger = self.doctypes.get("Accommodation Ledger")
-        self.assertIsNotNone(ledger, "the sampled DocType is gone; re-anchor this assertion")
-        flags = {row["role"]: bool(row.get("report")) for row in ledger["permissions"]}
+        self.assertGreater(
+            without_flag,
+            0,
+            "every shipped permlevel-0 DocPerm now sets `report`, so an omission can no "
+            "longer be told apart from a DocType this app simply never writes the flag on. "
+            "Re-anchor the sample below before trusting the scan again.",
+        )
+        # Sampled on a DocType A-200 touched, so a future re-flattening of these rows lands
+        # here first. Internal Auditor is the app's read/report/export oversight shape;
+        # Resident Supervisor is an operator row that deliberately carries no `report`.
+        sample = self.doctypes.get("Custody Damage Assessment")
+        self.assertIsNotNone(sample, "the sampled DocType is gone; re-anchor this assertion")
+        flags = {
+            row["role"]: bool(row.get("report"))
+            for row in sample["permissions"]
+            if not int(row.get("permlevel") or 0)
+        }
         self.assertEqual(
             flags.get("Internal Auditor"),
             True,
-            "Accommodation Ledger no longer grants Internal Auditor `report`",
+            "Custody Damage Assessment no longer grants Internal Auditor `report`",
         )
         self.assertEqual(
-            flags.get("System Manager"),
+            flags.get("Resident Supervisor"),
             False,
-            "Accommodation Ledger / System Manager was fixed; prune it from the baseline",
+            "Custody Damage Assessment / Resident Supervisor now sets `report`; if that was "
+            "an access decision, re-anchor this sample on another both-shapes DocType",
         )
 
     def test_no_linked_report_declares_a_child_table_ref(self):

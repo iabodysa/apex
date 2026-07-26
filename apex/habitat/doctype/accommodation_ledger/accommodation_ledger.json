@@ -252,7 +252,7 @@
  "hidden": 1,
  "in_create": 1,
  "links": [],
- "modified": "2026-07-22 17:52:15.287889",
+ "modified": "2026-07-26 09:03:55.752811",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Ledger",
@@ -260,10 +260,12 @@
  "permissions": [
   {
    "read": 1,
+   "report": 1,
    "role": "System Manager"
   },
   {
    "read": 1,
+   "report": 1,
    "role": "Finance Manager"
   },
   {
