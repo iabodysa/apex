@@ -4,7 +4,6 @@
  "creation": "2026-06-24 00:00:00.000000",
  "description": "Append-only audit row for one QR boarding-pass scan-validate attempt (valid, duplicate, invalid, wrong-trip, or expired). The operational headcount lives on Trip Start Log; this is the immutable scan trail.",
  "doctype": "DocType",
- "hidden": 1,
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
