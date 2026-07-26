@@ -62,8 +62,10 @@ Apex ships **eleven** desk pages:
 
 > **Room Setup, Operations Control, and Telecom Control** are shipped pages that
 > earlier versions of this guide left out. Telecom Control belongs to the
-> **Logistay** module, which also ships alongside Habitat, Salis, Apex Core, and
-> SIM Operations.
+> **Logistay** module, and `apex/modules.txt` declares **four** names —
+> **Habitat**, **Salis**, **Apex Core**, and **Logistay**. The SIM records live
+> in Logistay as well; there is no separate SIM Operations module, and
+> `SIM Operations User` in the table above is a role, not a module.
 
 _[screenshot: Front Desk page]_
 _[screenshot: Salis Dispatch Board]_
