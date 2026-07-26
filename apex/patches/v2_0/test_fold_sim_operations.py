@@ -21,9 +21,26 @@ the retired module) and proves one run repairs it and a second changes nothing.
 is therefore explicit rather than transactional, and the module-stamp mutation
 registers its restore with ``addCleanup`` BEFORE it mutates, so a mid-test
 failure still hands the suite back a Logistay-owned schema.
+
+That broken state is planted with ``db_insert()``, never ``insert()`` (A-203).
+``ModuleDef.on_update`` (frappe module_def.py:29-35) calls ``create_modules_folder``
+and ``add_to_modules_txt`` whenever ``developer_mode`` is on, so a controller insert
+wrote ``SIM Operations`` back into ``apex/modules.txt`` and recreated
+``apex/sim_operations/`` in the SOURCE TREE on every run — resurrecting the exact
+ghost module ``apex/tests/test_declared_modules_are_alive.py`` exists to forbid.
+The modules.txt half is cache-gated (``add_to_modules_txt`` short-circuits while a
+warm ``app_modules`` cache still lists the module), so it fires intermittently —
+always on the cold cache a fresh bench or CI run starts from. Nothing is weakened
+by the change: ``frappe.installer.add_module_defs`` mints a real site's Module Def
+with ``frappe.new_doc`` + ``insert``, so the row planted here is field-identical
+(``custom = 0`` included), and the patch only ever reads it via ``db.exists`` /
+``db.delete`` by name. ``custom = 1`` would also skip ``on_update``, but it would
+plant a user-created module where a deployed site carries an app-shipped one.
 """
 
 from __future__ import annotations
+
+from pathlib import Path
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -114,6 +131,15 @@ class TestFoldSIMOperationsIdempotency(FrappeTestCase):
         )
         self.assertEqual(self._modules(), owned_by_logistay)
 
+    @staticmethod
+    def _source_tree_state() -> tuple[str, bool]:
+        """The two things ``ModuleDef.on_update`` writes to disk in developer_mode:
+        modules.txt content, and whether the retired module package exists."""
+        return (
+            Path(frappe.get_app_path("apex", "modules.txt")).read_text(),
+            Path(frappe.get_app_path("apex", fold.OLD_MODULE)).exists(),
+        )
+
     def _restore_logistay_ownership(self):
         for doctype in SIM_DOCTYPES:
             frappe.db.set_value(
@@ -131,9 +157,19 @@ class TestFoldSIMOperationsIdempotency(FrappeTestCase):
         # Registered BEFORE the mutation so a failure mid-test still restores.
         self.addCleanup(self._restore_logistay_ownership)
 
-        frappe.get_doc(
-            {"doctype": "Module Def", "module_name": fold.OLD_MODULE, "app_name": "apex"}
-        ).insert(ignore_permissions=True)
+        # db_insert, never insert(): the controller's on_update would write the retired
+        # module back into the source tree in developer_mode (see the module docstring).
+        tree_before = self._source_tree_state()
+        ghost = frappe.new_doc("Module Def")
+        ghost.module_name = fold.OLD_MODULE
+        ghost.app_name = "apex"
+        ghost.db_insert()
+        self.assertEqual(
+            self._source_tree_state(),
+            tree_before,
+            "planting the retired Module Def must not write to the source tree",
+        )
+
         for doctype in SIM_DOCTYPES:
             frappe.db.set_value(
                 "DocType", doctype, "module", fold.OLD_MODULE, update_modified=False
