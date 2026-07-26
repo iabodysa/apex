@@ -16,7 +16,7 @@ These lock in release-hygiene invariants that must not silently regress:
   6. Every shipped line-oriented data file (translations, modules.txt,
      patches.txt) uses LF endings, so an edit diffs as the rows it changed.
 
-Run standalone:  python3 -m unittest tests.test_release_hygiene -v
+Run standalone:  python3 -m unittest apex.tests.test_release_hygiene -v
 """
 
 import csv
