@@ -26,7 +26,18 @@ jobs:
         run: pip install ruff==0.15.14
 
       - name: Run ruff
-        run: ruff check apex/
+        # scripts/ is linted alongside the package because it holds the gates the rest of
+        # this lane runs — comment_audit, check_translations, check_doctype_dates. A ruff
+        # error in a gate is not a style nit: an unlinted gate that breaks takes every
+        # check it guards down with it, silently. Both paths were clean at 0.15.14 when
+        # scripts/ was added, so this widened the scope without moving the baseline.
+        run: ruff check apex/ scripts/
+
+      - name: Shell syntax
+        # run_guards.sh is a gate too, and ruff cannot see it. These are all `#!/bin/sh`,
+        # so `sh -n` (dash on the runner) is the matching parser, not `bash -n`. A parse
+        # check only — not shellcheck, which would be a rule set to adopt and argue over.
+        run: for f in scripts/run_guards.sh .githooks/*; do sh -n "$f" || exit 1; done
 
       # Both gates below are stdlib-only Python: they enforce standards the local
       # toolbox already checks, but that toolbox is not installable on a runner, so
