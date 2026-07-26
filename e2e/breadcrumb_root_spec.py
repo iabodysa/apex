@@ -61,9 +61,9 @@ _CASES = [
 
 # The Desk router settles a route within a second of boot; longer means a dead page.
 _ROUTE_TIMEOUT_MS = 10000
-# Standard routes a /app/<slug> resolves to when the slug IS a readable DocType
-# (router.js set_doctype_route); anything else means the slug matched no DocType.
-_DOCTYPE_VIEWS = ("List", "Form", "Tree", "Report")
+# The three standard routes a /app/<slug> resolves to when the slug IS a readable
+# DocType (router.js set_doctype_route); anything else means it matched no DocType.
+_DOCTYPE_VIEWS = ("List", "Form", "Tree")
 
 
 class RouteNotResolved(AssertionError):
