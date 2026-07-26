@@ -250,9 +250,12 @@ class TestDriverPortalGuestInventory(unittest.TestCase):
 				keywords = _literal_keywords(decorator)
 				# What makes the window per-IP is `ip_based`, which frappe defaults to
 				# True (rate_limiter.py:110) and which alone puts the request IP in the
-				# identity (rate_limiter.py:141,147-150). Opting out is the regression
-				# to catch here; the key string never carried this property.
-				self.assertIsNot(keywords.get("ip_based"), False)
+				# identity (rate_limiter.py:141,147-150). Losing it is the regression to
+				# catch here; the key string never carried this property. Matched against
+				# by IDENTITY against the framework's own `ip_based is True` test
+				# (rate_limiter.py:141): a truthy 1 fails that test and silently drops
+				# the address, and `== True` would wave it through.
+				self.assertIs(keywords.get("ip_based", True), True)
 				self.assertEqual(keywords.get("seconds"), 60)
 				if "key" in keywords:
 					self.assertEqual(keywords["key"], LEGACY_FORM_DICT_KEY)
