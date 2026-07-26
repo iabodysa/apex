@@ -1490,6 +1490,8 @@ Field Map row {0}: Source Fieldname is required when the row is not Static.,صف
 Field Map row {0}: Target Fieldname is required.,صف تعيين الحقول {0}: اسم الحقل المستهدف مطلوب.
 Field Map row {0}: Target Fieldname {1} is mapped more than once.,صف تعيين الحقول {0}: اسم الحقل المستهدف {1} مُعيَّن أكثر من مرة.
 Field Map row {0}: clear Source Fieldname on a Static row.,صف تعيين الحقول {0}: امسح اسم الحقل المصدر في الصف الثابت.
+"Field Map row {0}: {1} is not a field on the target payment DocType {2}, so it would be dropped and the payment created without it. Fix the fieldname.","صف تعيين الحقول {0}: الحقل {1} غير موجود في نوع مستند الدفع المستهدف {2}، لذلك سيُهمل وسيُنشأ الدفع بدونه. صحّح اسم الحقل."
+"Field Map row {0}: {1} is not a field on {2}, so the target field would be written blank. Fix the fieldname.","صف تعيين الحقول {0}: الحقل {1} غير موجود في {2}، لذلك سيُكتب الحقل المستهدف فارغًا. صحّح اسم الحقل."
 "Fieldname on the Salis Payment Request to copy FROM (for example amount, supplier, company, cost_center). Ignored when Static is checked.",اسم الحقل في طلب دفع ساليس المراد النسخ منه (مثل المبلغ، المورّد، الشركة، مركز التكلفة). يُتجاهل عند تفعيل خيار ثابت.
 "Fieldname on the TARGET payment DocType to populate (for example party, paid_amount, posting_date).",اسم الحقل في مستند الدفع المستهدف المراد تعبئته (مثل الطرف، المبلغ المدفوع، تاريخ الترحيل).
 Filter Assigned Work,رشّح العمل المسند
@@ -1846,6 +1848,8 @@ Internal cost-allocation ledger. Maintained automatically by the system and not 
 "Internal fuel consumption ledger. Maintained automatically by the system from Fuel Daily Log and Done Fuel Request records, and not edited manually.",دفتر استهلاك وقود داخلي. يُحدّثه النظام آلياً من سجلات سجل الوقود اليومي وطلبات الوقود المنجزة، ولا يُحرّر يدوياً.
 Internet,إنترنت
 Invalid Odometer Reading,قراءة عداد مسافة غير صالحة
+Invalid Payment Field Map,تعيين حقول دفع غير صالح
+Invalid Payment Target,هدف دفع غير صالح
 Invalid Request Type: {0},نوع طلب غير صالح: {0}
 Invalid SQL identifier: doctype {0},معرّف SQL غير صالح: نوع المستند {0}
 Invalid SQL identifier: field {0},معرّف SQL غير صالح: الحقل {0}
@@ -2014,6 +2018,8 @@ Linked Facility Asset,الأصل المرتبط
 Linked Housing Assignment already has a check-out date: {0},التسكين المرتبط لديه بالفعل تاريخ مغادرة: {0}
 Linked Housing Assignment must be submitted.,يجب اعتماد التسكين المرتبط.
 Linked Maintenance,طلب الصيانة المرتبط
+Linked Payment,الدفع المرتبط
+Linked Payment DocType,نوع مستند الدفع المرتبط
 Linked Maintenance Request,طلب الصيانة المرتبط
 Linked Maintenance Request Item,بند طلب الصيانة المرتبط
 Linked On,تاريخ الربط
@@ -2272,6 +2278,7 @@ No open safety or maintenance signals for this building.,لا توجد إشار�
 No open transport requests.,لا توجد طلبات نقل مفتوحة.
 No pending fuel requests for this project.,لا توجد طلبات وقود معلّقة لهذا المشروع.
 No pending fuel requests. The queue is clear.,لا توجد طلبات وقود معلّقة. القائمة خالية.
+"No payment target is set and no default could be resolved, so no payment can be created.",لم يُحدَّد هدف للدفع ولم يتوفّر بديل افتراضي، لذلك لا يمكن إنشاء أي دفع.
 No photo on file,لا توجد صورة
 No project yet,لا يوجد مشروع بعد
 No registered workers match. Register a new arrival below.,لا يوجد عمال مسجّلون مطابقون. سجّل وصولاً جديداً أدناه.
@@ -2564,6 +2571,9 @@ Payment Order,أمر دفع
 Payment Request,طلب دفع
 Payment Request {0} raised for {1} SAR.,تم رفع طلب الدفع {0} بمبلغ {1} ريال.
 Payment Routing Field Map,تعيين حقول توجيه الدفع
+"Payment target {0} is a Single settings record, so creating a payment would overwrite it instead of adding one. Choose a normal payment DocType.","هدف الدفع {0} سجل إعدادات مفرد، لذلك سيؤدي إنشاء الدفع إلى استبداله بدل إضافة مستند جديد. اختر نوع مستند دفع عادي."
+"Payment target {0} is a child table row, which cannot exist on its own. Choose the parent payment DocType instead.","هدف الدفع {0} صف جدول فرعي لا يمكن أن يوجد بذاته. اختر نوع مستند الدفع الأصلي بدلاً منه."
+"Payment target {0} is not installed on this site. Choose a payment DocType that exists here, or clear the Target Payment DocType to use the native {1}.","هدف الدفع {0} غير مثبّت في هذا الموقع. اختر نوع مستند دفع موجود هنا، أو امسح نوع مستند الدفع المستهدف لاستخدام {1} الأصلي."
 Payment Routing Settings,إعدادات توجيه الدفع
 Payment Schedule,جدول الدفع
 "Payment method saved. To enable salary deductions, set the authorizer and salary components on the Salary Deduction Policy first, then turn the rules on there.",حُفظت طريقة الدفع. لتفعيل حسوم الراتب، حدد المُفوِّض ومكونات الراتب في سياسة حسم الراتب أولًا، ثم فعّل القواعد هناك.

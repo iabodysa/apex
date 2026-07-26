@@ -16,47 +16,24 @@ config time with no hard-coded per-DocType branches here.
 
 from __future__ import annotations
 
-import frappe
-from frappe import _
 from frappe.model.document import Document
 
 
 class PaymentRoutingSettings(Document):
     def validate(self):
-        self._validate_field_map()
+        """Refuse an unroutable configuration at config time, fail-closed.
 
-    def _validate_field_map(self):
-        """Guard obvious config mistakes before the router relies on the rows.
-
-        Every row must name a target field. A non-static row must name a source
-        field to copy from; a static row must carry a static value. These are
-        config-integrity checks only - they post nothing and create nothing.
+        Both guards live in ``apex.apex_core.payment_router`` and are re-run there
+        immediately before the insert, because this ``validate`` is skipped by
+        ``db_set``, raw SQL and patches. Config-integrity only - nothing is posted
+        or created here.
         """
-        seen = set()
-        for row in self.field_map or []:
-            target = (row.target_fieldname or "").strip()
-            if not target:
-                frappe.throw(
-                    _("Field Map row {0}: Target Fieldname is required.").format(row.idx)
-                )
-            if target in seen:
-                frappe.throw(
-                    _("Field Map row {0}: Target Fieldname {1} is mapped more than once.").format(
-                        row.idx, target
-                    )
-                )
-            seen.add(target)
-            if row.is_static:
-                # [#hju7o1]
-                if (row.source_fieldname or "").strip():
-                    frappe.throw(
-                        _("Field Map row {0}: clear Source Fieldname on a Static row.").format(
-                            row.idx
-                        )
-                    )
-            elif not (row.source_fieldname or "").strip():
-                frappe.throw(
-                    _("Field Map row {0}: Source Fieldname is required when the row is not Static.").format(
-                        row.idx
-                    )
-                )
+        from apex.apex_core.payment_router import (
+            get_target_doctype,
+            validate_field_map,
+            validate_target_doctype,
+        )
+
+        target = get_target_doctype(self)
+        validate_target_doctype(target)
+        validate_field_map(target, self.field_map or [])

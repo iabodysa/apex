@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.model import default_fields
 
 from apex.apex_core.doctype.apex_settings.apex_settings import gl_posting_enabled
 
@@ -22,6 +23,11 @@ SOURCE_DOCTYPE = "Salis Payment Request"
 
 # [#asggke]
 DEFAULT_TARGET_DOCTYPE = "Payment Request"
+
+# The link-type companion the router stamps beside the payment name, so the
+# Dynamic Link on the source can never name a DocType other than the one built.
+LINK_DOCTYPE_FIELD = "linked_payment_doctype"
+LINK_NAME_FIELD = "linked_payment_entry"
 
 
 def get_target_doctype(settings=None) -> str:
@@ -46,6 +52,122 @@ def get_target_payment_doctype() -> str:
     when the router is unconfigured.
     """
     return get_target_doctype()
+
+
+def validate_target_doctype(target_doctype) -> None:
+    """Refuse a structurally impossible payment target BEFORE anything is built.
+
+    ``frappe.new_doc(dt).insert()`` succeeds for far more than payment documents,
+    so without this the router turns a config typo into a convincing artefact that
+    is not a payment - worse than refusing, because nobody re-reads it. Three
+    refusals, each a real failure mode:
+
+    * missing - the operator named a DocType this site does not have (an optional
+      client app that was never installed). Silently falling back to the native
+      default would pay every request through the wrong document.
+    * Single - ``insert`` on a Single writes ``tabSingles``, so routing a payment
+      would OVERWRITE that settings record rather than create anything.
+    * child table - the row would be inserted parentless and belong to nothing.
+
+    Deliberately structural, not semantic: the router supports any client payment
+    DocType by design, so it refuses what cannot be a document at all rather than
+    policing a whitelist it has no authority to define.
+    """
+    target_doctype = (target_doctype or "").strip()
+    if not target_doctype:
+        frappe.throw(
+            _("No payment target is set and no default could be resolved, so no payment can be created."),
+            title=_("Invalid Payment Target"),
+        )
+    if not frappe.db.exists("DocType", target_doctype):
+        frappe.throw(
+            _(
+                "Payment target {0} is not installed on this site. Choose a payment DocType that exists here, or clear the Target Payment DocType to use the native {1}."
+            ).format(target_doctype, DEFAULT_TARGET_DOCTYPE),
+            title=_("Invalid Payment Target"),
+        )
+    meta = frappe.get_meta(target_doctype)
+    if meta.issingle:
+        frappe.throw(
+            _(
+                "Payment target {0} is a Single settings record, so creating a payment would overwrite it instead of adding one. Choose a normal payment DocType."
+            ).format(target_doctype),
+            title=_("Invalid Payment Target"),
+        )
+    if meta.istable:
+        frappe.throw(
+            _(
+                "Payment target {0} is a child table row, which cannot exist on its own. Choose the parent payment DocType instead."
+            ).format(target_doctype),
+            title=_("Invalid Payment Target"),
+        )
+
+
+def validate_field_map(target_doctype, field_map) -> None:
+    """Refuse a field map that cannot build the target, BEFORE any insert.
+
+    Shape checks (a row names a target, names it once, and carries either a source
+    field or a static value) plus the check that actually stops a wrong payment:
+    both fieldnames must EXIST. ``BaseDocument.set`` writes to ``__dict__`` with no
+    meta check and ``get_valid_dict`` then keeps only ``meta.get_valid_columns()``,
+    so a mistyped target fieldname is dropped in silence and the payment is created
+    with that field simply unset - a 0.00 payment that looks entirely normal. A
+    mistyped SOURCE fieldname is worse still: ``source.get`` returns ``None``, so
+    the field is written, just blank.
+
+    Called from the controller (config time) AND from the router (run time),
+    because ``db_set`` / raw SQL / a patch can all write the Single while skipping
+    ``validate`` - a control that lived only in the controller would be bypassed.
+    """
+    target_meta = frappe.get_meta(target_doctype)
+    # get_valid_columns() is exactly the set that survives an insert.
+    writable = set(target_meta.get_valid_columns())
+    source_meta = frappe.get_meta(SOURCE_DOCTYPE)
+    seen = set()
+    for row in field_map or []:
+        target_field = (row.target_fieldname or "").strip()
+        if not target_field:
+            frappe.throw(
+                _("Field Map row {0}: Target Fieldname is required.").format(row.idx)
+            )
+        if target_field in seen:
+            frappe.throw(
+                _("Field Map row {0}: Target Fieldname {1} is mapped more than once.").format(
+                    row.idx, target_field
+                )
+            )
+        seen.add(target_field)
+        if target_field not in writable:
+            frappe.throw(
+                _(
+                    "Field Map row {0}: {1} is not a field on the target payment DocType {2}, so it would be dropped and the payment created without it. Fix the fieldname."
+                ).format(row.idx, target_field, target_doctype),
+                title=_("Invalid Payment Field Map"),
+            )
+        if row.is_static:
+            # [#hju7o1]
+            if (row.source_fieldname or "").strip():
+                frappe.throw(
+                    _("Field Map row {0}: clear Source Fieldname on a Static row.").format(
+                        row.idx
+                    )
+                )
+            continue
+        source_field = (row.source_fieldname or "").strip()
+        if not source_field:
+            frappe.throw(
+                _("Field Map row {0}: Source Fieldname is required when the row is not Static.").format(
+                    row.idx
+                )
+            )
+        if not (source_meta.has_field(source_field) or source_field in default_fields):
+            frappe.throw(
+                _(
+                    "Field Map row {0}: {1} is not a field on {2}, so the target field would be written blank. Fix the fieldname."
+                ).format(row.idx, source_field, SOURCE_DOCTYPE),
+                title=_("Invalid Payment Field Map"),
+            )
+
 
 # [#qj7x3p]
 _FALLBACK_CURRENCY = "SAR"
@@ -126,11 +248,16 @@ def _apply_field_map(target, source, field_map) -> None:
 
 def route_payment(payment_request: str) -> str:
     """Build (and optionally submit) the configured target payment from a
-    finance-approved Salis Payment Request, then stamp ``linked_payment_entry``.
+    finance-approved Salis Payment Request, then stamp the typed link back.
     Idempotent: returns the existing payment when already linked. Submit is gated on
     ``auto_submit_target`` + a submittable target + ``enable_gl_posting`` (submit is
     what posts the native doc's GL). The create uses ``ignore_permissions``, so the
     caller's write/submit permission on the request is enforced just below. [T-151]
+
+    Fail-closed: the target and the field map are re-validated here, immediately
+    before the build, and the link stamp carries the created document's own doctype.
+    Refusing is the desired outcome for a bad config - a payment that merely LOOKS
+    right is worse, because it is never read a second time.
     """
     settings = frappe.get_single("Payment Routing Settings")
     target_doctype = get_target_doctype(settings)
@@ -152,6 +279,11 @@ def route_payment(payment_request: str) -> str:
     if source.linked_payment_entry:
         return source.linked_payment_entry
 
+    # Fail closed at the build boundary, not only in the Single's validate: db_set,
+    # raw SQL and patches all write that config while skipping the controller.
+    validate_target_doctype(target_doctype)
+    validate_field_map(target_doctype, settings.field_map or [])
+
     target = frappe.new_doc(target_doctype)
     _apply_field_map(target, source, settings.field_map or [])
     # [#5dt0v6]
@@ -162,8 +294,11 @@ def route_payment(payment_request: str) -> str:
     if settings.auto_submit_target and target.meta.is_submittable and gl_posting_enabled():
         target.submit()
 
-    # [#rx80aq]
-    source.db_set("linked_payment_entry", target.name)
+    # [#rx80aq] Both halves of the Dynamic Link are stamped from the document that
+    # was actually created, so the stored type can never disagree with the value.
+    source.db_set(
+        {LINK_DOCTYPE_FIELD: target.doctype, LINK_NAME_FIELD: target.name}
+    )
 
     return target.name
 

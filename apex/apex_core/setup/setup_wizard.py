@@ -18,6 +18,11 @@ at its pre-filled value) keeps the Single's own default — the wizard never wri
 a phantom value. The deduction master switch and the GL gate stay OFF unless the
 operator explicitly opts in. Idempotent: re-running with the same args is harmless.
 
+Skip-safe is NOT fail-open: a payment target the operator actually named but that
+cannot build a payment stops setup with an actionable message rather than being
+dropped, because a dropped choice leaves the router pointing somewhere the
+operator never picked.
+
 The sibling `setup_wizard_stages` hook is deliberately NOT declared and this module
 deliberately exposes no stage builder for it. Frappe concatenates BOTH hook families
 into one run (frappe/desk/page/setup_wizard/setup_wizard.py:36 adds get_stages_hooks
@@ -28,6 +33,8 @@ whole configuration a second time on the same wizard submission.
 import frappe
 from frappe import _
 from frappe.utils import cint
+
+from apex.apex_core.payment_router import validate_target_doctype
 
 
 def setup_wizard_complete(args=None):
@@ -46,10 +53,12 @@ def apply_apex_setup(args=None):
     — Frappe commits after all setup stages succeed."""
     args = frappe._dict(args or {})
 
+    # Payment routing FIRST: it is the only step that can refuse, so refusing here
+    # leaves nothing half-applied for the operator to unpick.
+    _apply_payment_routing(args)
     _apply_apex_settings(args)
     _apply_habitat_settings(args)
     _apply_salis_settings(args)
-    _apply_payment_routing(args)
     _apply_deduction_policy(args)
 
 
@@ -93,15 +102,22 @@ def _apply_salis_settings(args):
 
 def _apply_payment_routing(args):
     """Payment Routing Settings — route the operator's chosen payment DocType to the
-    Pay-action target, but only when that DocType exists on the site (e.g. Expense
-    Request Afmco is an optional client DocType), so the router never points at a
-    missing target. Blank keeps the native Payment Request default."""
-    payment_method = args.get("apex_default_payment_method")
-    # [#55h4xa]
-    if payment_method and frappe.db.exists("DocType", payment_method):
-        router = frappe.get_single("Payment Routing Settings")
-        router.target_payment_doctype = payment_method
-        router.save(ignore_permissions=True)  # audit-ok
+    Pay-action target, REFUSING anything that cannot be a payment document.
+
+    Blank keeps the native Payment Request default. A named target is validated by
+    the router's own guard and the setup fails loudly if it does not hold: silently
+    dropping the choice (the previous behaviour when e.g. the optional Expense
+    Request Afmco DocType was absent) let setup report success while every later
+    payment was built as a different document than the operator selected."""
+    payment_method = (args.get("apex_default_payment_method") or "").strip()
+    if not payment_method:
+        return
+    # [#55h4xa] Shared with the router and the Single's validate — one definition of
+    # a valid target, enforced at every write boundary.
+    validate_target_doctype(payment_method)
+    router = frappe.get_single("Payment Routing Settings")
+    router.target_payment_doctype = payment_method
+    router.save(ignore_permissions=True)  # audit-ok
 
 
 def _apply_deduction_policy(args):
