@@ -2,7 +2,7 @@
   "doctype": "Report",
   "name": "Vehicle Compliance Register",
   "report_name": "Vehicle Compliance Register",
-  "ref_doctype": "Salis Vehicle Compliance",
+  "ref_doctype": "Salis Vehicle",
   "report_type": "Script Report",
   "is_standard": "Yes",
   "module": "Salis",
