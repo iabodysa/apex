@@ -54,14 +54,13 @@ DECLARED_KEYS = {"description"}
 
 # Start of a translate call; the first literal (plus adjacently concatenated ones)
 # is the msgid. Matching the start, not the whole call, keeps __("Saved {0}", [n]).
-_CALL_START = re.compile(r"(?:frappe\.)?_(?:lt)?\(|__\(")
-# The same call, required to be BARE. _CALL_START also matches the tail of
-# `sle.item.as_("article")` and of `def __init__(`, which is inert while only a
-# literal argument is read but would let a query alias resolve a constant. So the
-# constant path re-checks here while the literal path keeps the loose form:
-# tightening that would strand the 23 alias rows ar.csv already carries, which is
-# a deletion decision of its own and not this gate's to bury in an unrelated diff.
-_BARE_CALL = re.compile(r"(?<![A-Za-z0-9_])(?:(?:frappe\.)?_(?:lt)?|__)\(")
+# The callee must be BARE. Without the lookbehind this also matches the TAIL of an
+# attribute call whose name ends in `_` — `sle.item.as_("article")` — and of
+# `def __init__(`, so query-builder column aliases were harvested as msgids and 23
+# of them (`article`, `bed`, `cnt`, `n`, `total_cost`, ...) were translated. A `.`
+# is still a legal preceding character, so `frappe._()` keeps matching; only a word
+# character immediately before the name disqualifies it.
+_CALL_START = re.compile(r"(?<![A-Za-z0-9_])(?:(?:frappe\.)?_(?:lt)?|__)\(")
 _NEXT_LITERAL = re.compile(r"""\s*\+?\s*(['"])((?:\\.|(?!\1).)*?)\1""")
 # A guard that keeps its message in a module constant and throws `_(_MESSAGE)` puts
 # no literal at the call site, so the msgid has to be resolved from the constant.
@@ -156,7 +155,7 @@ def scan_calls(content: str, found: set, constants: dict | None = None) -> None:
         # Same standing as a literal — the author already committed to translating
         # it — so it is declared too, which is what lets a long braced guard message
         # through the shape heuristics.
-        if not constants or _BARE_CALL.match(content, call.start()) is None:
+        if not constants:
             continue
         ident = _IDENT_ARG.match(content, pos)
         if ident is not None and ident.group(1) in constants:
