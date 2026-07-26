@@ -8,9 +8,9 @@
 # They cannot see a commit created with --no-verify, or one made before the hooks
 # were installed on this clone - and by push time such a commit is already history.
 # So this hook re-runs BOTH of them over every outgoing commit. It re-runs them, it
-# does not reimplement them: the attribution pattern stays declared once in
-# commit-msg and the address allowlist once in pre-commit, which is what keeps this
-# gate honest when either rule changes.
+# does not reimplement them: the attribution rule and the address allowlist are both
+# declared once, in scripts/check_commit_metadata.py, which those two hooks and the CI
+# step all invoke. That is what keeps this gate honest when either rule changes.
 set -eu
 
 hookdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)

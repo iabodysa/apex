@@ -86,10 +86,11 @@ jobs:
       # job is red, "the suite passed" is neither proven nor disproven by this workflow's
       # overall status, and the `test` job has to be read on its own.
       #
-      # This step is mirrored locally by .githooks/commit-msg and .githooks/pre-commit,
-      # which refuse the same message pattern and the same private-email set before the
-      # commit exists. Install them once with:  git config core.hooksPath .githooks
-      # apex/tests/test_repo_gates.py fails if the local copies drift from this step.
+      # The rule this step enforces is NOT written here. scripts/check_commit_metadata.py
+      # is its one definition, and .githooks/commit-msg and .githooks/pre-commit invoke
+      # that same file to refuse a bad message or a private address before the commit
+      # exists. Install them once with:  git config core.hooksPath .githooks
+      # apex/tests/test_repo_gates.py fails if a second copy of the rule reappears.
       - name: No automated attribution or private commit email
         run: |
           set -uo pipefail
@@ -100,29 +101,8 @@ jobs:
           else
             range="-1 ${sha}"
           fi
-
-          messages=$(git log --format='%H %s%n%b' $range)
-          attribution=$(printf '%s\n' "$messages" | grep -niE \
-            '(claude|anthropic|codex|openai|chatgpt|claude-session)' || true)
-          if [ -n "$attribution" ]; then
-            echo "Automated attribution or session metadata found in commit messages:"
-            echo "$attribution"
-            exit 1
-          fi
-
-          private_emails=$(git log --format='%H%x09%ae%x09%ce' $range | awk -F '\t' '
-            function is_public(email) {
-              return email == "noreply@github.com" ||
-                email ~ /@users\.noreply\.github\.com$/
-            }
-            !is_public($2) || !is_public($3) { print }
-          ')
-          if [ -n "$private_emails" ]; then
-            echo "Private author or committer email found:"
-            echo "$private_emails"
-            exit 1
-          fi
-          echo "commit attribution and email metadata clean"
+          # Deliberately unquoted: a first push is judged as the two words "-1 <sha>".
+          python3 scripts/check_commit_metadata.py range ${range}
 
       - name: No internal/experimental files tracked
         run: |
@@ -143,12 +123,14 @@ jobs:
       - name: Test colocation and unit-test coverage ratchets
         run: python3 -m unittest apex.tests.test_colocation_ratchet apex.tests.test_unit_test_coverage_guard
 
-      # test_repo_gates is what stops the two metadata guards above from drifting
-      # apart from .githooks. It used to run only inside `run-tests --app apex`, so a
-      # drift surfaced after the ~25min bench install in the other job - by which time
-      # the local hook had already waved the offending commit through. It is
-      # stdlib-only (no frappe, no site, ~2s), so it belongs in this fail-fast lane.
-      - name: Local hooks still mirror the CI metadata guards
+      # test_repo_gates drives scripts/check_commit_metadata.py through all three of
+      # its callers - the gate directly, a real commit through .githooks, and the
+      # recorded range this workflow judges - and fails if they reach different
+      # verdicts or if a second copy of the rule reappears anywhere. It used to run
+      # only inside `run-tests --app apex`, so a disagreement surfaced after the ~25min
+      # bench install in the other job, by which time the local hook had already waved
+      # the offending commit through. It is stdlib-only (no frappe, no site, ~4s).
+      - name: Commit metadata gate decides alike in every lane
         run: python3 -m unittest apex.tests.test_repo_gates
 
       # The DocType date/layout contract: field_order against fields both ways, one

@@ -4,18 +4,17 @@
 # Install the hooks that call it (one line, from the repo root):
 #     git config core.hooksPath .githooks
 #
-# Every threshold and every scanner flag below is READ from the workflow that
-# declares it rather than restated here. A guard written down twice drifts, and the
-# copy that drifts is always the one a developer runs before pushing: it passes
-# locally and reds in CI, or worse it passes in CI after a local red taught someone
-# to wave reds through. Where a value genuinely cannot be read from one place, the
-# `assert_lane_parity` check below fails loudly instead of letting the two rot apart.
+# No threshold below is a second copy of a number CI decides. A guard written down
+# twice drifts, and the copy that drifts is always the one a developer runs before
+# pushing: it passes locally and reds in CI, or worse it passes in CI after a local red
+# taught someone to wave reds through. Where a value genuinely cannot be read from one
+# place, `assert_lane_parity` fails loudly instead of letting the two rot apart.
 #
 # Modes:
 #   tree              the Lint lane's content guards over the package
 #   range <log-opts>  the redacted secret scan over a commit range (pre-push, CI)
 #   thresholds        the declared scope and limits as JSON, for a tool that must
-#                     gate on the same numbers instead of copying them
+#                     gate on the same declaration instead of copying it
 set -eu
 
 MODE="${1:-tree}"
@@ -29,39 +28,38 @@ cd "$root"
 LINT_WORKFLOW=.github/workflows/lint.yml
 TEST_WORKFLOW=.github/workflows/test.yml
 
-# The stale cap is declared once, in the Lint workflow, next to the audit that
-# justifies its value. Read it; never copy it.
-read_stale_baseline() {
+# Read the workflow's SHELL, never its prose: lint.yml explains in a comment why it no
+# longer passes --max-stale, and a naive grep would read that sentence as the flag.
+workflow_shell() {
 	if [ ! -f "$LINT_WORKFLOW" ]; then
-		echo "guards: $LINT_WORKFLOW is missing, so the stale cap has no declaration to read" >&2
+		echo "guards: $LINT_WORKFLOW is missing, so there is nothing to mirror" >&2
+		echo "guards: a local pass would stop meaning a CI pass - repair it before trusting this run" >&2
 		exit 2
 	fi
-	value=$(sed -n 's/^[[:space:]]*STALE_BASELINE:[[:space:]]*\([0-9][0-9]*\).*$/\1/p' "$LINT_WORKFLOW")
-	# A blank or multi-line capture both land in the reject arm: two declarations are
-	# as broken as none, because neither tells us which one CI actually uses.
-	case "$value" in
-	"" | *[!0-9]*)
-		echo "guards: cannot read exactly one STALE_BASELINE out of $LINT_WORKFLOW" >&2
-		echo "guards: that file is the only declaration of the cap - repair it before trusting this run" >&2
-		exit 2
-		;;
-	esac
-	printf '%s' "$value"
+	grep -v '^[[:space:]]*#' "$LINT_WORKFLOW"
 }
 
-# The remaining flags are structural constants that the Lint lane spells out in its
-# own shell. They cannot be read out of it without parsing YAML, so assert instead
-# that both sides still say the same thing. This is the honest second best: not one
-# definition, but two that cannot silently disagree.
+# The Lint lane spells its flags out in its own shell, and they cannot be read out of
+# it without parsing YAML, so assert instead that both sides still say the same thing.
+# This is the honest second best: not one definition, but two that cannot silently
+# disagree.
+#
+# The stale ratchet has NO parameter left to mirror. It used to be a number, read out
+# of lint.yml so this file held no copy of it; it is now the recorded set in
+# apex/translations/<lang>.stale-baseline.txt, which both lanes read out of the same
+# commit. Nothing is passed, so nothing can drift - which is why a returning
+# --max-stale is rejected below as hard as a missing flag.
 assert_lane_parity() {
+	shell=$(workflow_shell)
+
 	missing=""
 	for fragment in \
 		"python3 scripts/comment_audit.py $PACKAGE" \
+		"python3 scripts/check_translations.py" \
 		"--package $PACKAGE" \
 		"--lang $LANG_CODE" \
-		"--max-missing $MAX_MISSING" \
-		'--max-stale "$STALE_BASELINE"'; do
-		if ! grep -qF -- "$fragment" "$LINT_WORKFLOW"; then
+		"--max-missing $MAX_MISSING"; do
+		if ! printf '%s\n' "$shell" | grep -qF -- "$fragment"; then
 			missing="$missing
   $fragment"
 		fi
@@ -72,6 +70,14 @@ assert_lane_parity() {
 		echo "guards: a local pass would stop meaning a CI pass - reconcile the two before pushing." >&2
 		exit 2
 	fi
+
+	if printf '%s\n' "$shell" | grep -q -- "--max-stale"; then
+		echo "guards: $LINT_WORKFLOW passes --max-stale again, so this script no longer" >&2
+		echo "guards: runs what CI runs. The stale ratchet is a recorded SET, not a number:" >&2
+		echo "guards: drop the flag and re-record the set with" >&2
+		echo "  python3 scripts/check_translations.py --package $PACKAGE --lang $LANG_CODE --update-stale-baseline" >&2
+		exit 2
+	fi
 }
 
 tree_guards() {
@@ -80,8 +86,7 @@ tree_guards() {
 	python3 scripts/check_translations.py \
 		--package "$PACKAGE" \
 		--lang "$LANG_CODE" \
-		--max-missing "$MAX_MISSING" \
-		--max-stale "$(read_stale_baseline)"
+		--max-missing "$MAX_MISSING"
 	python3 scripts/check_doctype_dates.py "$PACKAGE"
 }
 
@@ -121,8 +126,12 @@ range)
 	secret_scan "${2:?range mode needs git log options, e.g. origin/apex..HEAD}"
 	;;
 thresholds)
-	printf '{"package":"%s","lang":"%s","max_missing":%s,"max_stale":%s}\n' \
-		"$PACKAGE" "$LANG_CODE" "$MAX_MISSING" "$(read_stale_baseline)"
+	# The stale ratchet reports a PATH, not a number: the set recorded in that file is
+	# the whole parameter, and it is the same file in both lanes.
+	assert_lane_parity
+	printf '{"package":"%s","lang":"%s","max_missing":%s,"stale_baseline":"%s"}\n' \
+		"$PACKAGE" "$LANG_CODE" "$MAX_MISSING" \
+		"$PACKAGE/translations/$LANG_CODE.stale-baseline.txt"
 	;;
 *)
 	echo "usage: scripts/run_guards.sh [tree|range <log-opts>|thresholds]" >&2
