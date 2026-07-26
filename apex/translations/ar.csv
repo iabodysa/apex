@@ -599,6 +599,8 @@ Capacity Denominator,مقام السعة المعتمد
 Capacity Policies,سياسات السعة
 Capacity and Occupancy,السعة والإشغال
 Capacity reductions blocked ({0} room(s) have occupied surplus beds):,تعليق تخفيضات السعة ({0} غرفة/غرف بها أسرّة زائدة مشغولة):
+Capacity: {0} bed,السعة: {0} سرير
+Capacity: {0} beds,السعة: {0} أسرّة
 Caps (KSA Labor Law),الحدود القصوى (نظام العمل السعودي)
 Caption,التعليق
 "Capture a movement need so it can be validated, scheduled, and dispatched.",سجّل حاجة حركة ليتسنى التحقق منها وجدولتها وتشغيلها.
@@ -1544,6 +1546,7 @@ Floor {0},الطابق {0}
 Floor {0} — {1},الطابق {0} — {1}
 Floors,الطوابق
 For Subcontractor or External Worker when Employee link is not available.,للمقاول من الباطن أو العامل الخارجي عند عدم توفّر ارتباط الموظف.
+For emergencies contact your supervisor directly.,للطوارئ تواصل مع مشرفك مباشرة.
 For example: Camera-Laundry-Room.,مثال: Camera-Laundry-Room.
 "For life or safety emergencies, contact the accommodation supervisor directly.",في حالات الطوارئ المتعلقة بالحياة أو السلامة، تواصل مع مشرف السكن مباشرة.
 Forgotten Request,طلب منسي
@@ -1716,6 +1719,7 @@ Housing,السكن
 Housing Allowance Suspended,تعليق بدل السكن
 Housing Assignment,تسكين
 Housing Checkout,إخلاء السكن
+Housing Checkout Clearance,إخلاء السكن
 Housing Cleaning Audit,تدقيق نظافة السكن
 Housing Inventory,جرد السكن
 Housing Office,مكتب الإسكان
