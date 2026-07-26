@@ -19,8 +19,8 @@
 <div class="ah-doc">
   <div class="ah-head">
     <div>
-      <h1>Accommodation Checkout Clearance</h1>
-      <div class="ah-sub">إخلاء طرف مغادرة السكن &bull; {{ doc.name }}</div>
+      <h1>{{ _("Housing Checkout Clearance") }}</h1>
+      <div class="ah-sub">إخلاء السكن &bull; {{ doc.name }}</div>
     </div>
     <div style="text-align:right; font-size:11px; color:#666;">
       {{ frappe.db.get_single_value("Habitat Settings", "company") or "" }}

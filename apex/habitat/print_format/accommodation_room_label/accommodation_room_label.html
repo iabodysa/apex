@@ -64,15 +64,15 @@
   <div class="building-name">{{ building_name or "" }}</div>
   <div class="room-number">{{ doc.room_number }}</div>
   <div class="room-meta">
-    {% if doc.floor %}Floor {{ doc.floor }} &nbsp;|&nbsp; {% endif %}
-    Capacity: {{ doc.bed_capacity }} bed{% if doc.bed_capacity != 1 %}s{% endif %}
+    {% if doc.floor %}{{ _("Floor {0}").format(doc.floor) }} &nbsp;|&nbsp; {% endif %}
+    {{ _("Capacity: {0} bed").format(doc.bed_capacity) if doc.bed_capacity == 1 else _("Capacity: {0} beds").format(doc.bed_capacity) }}
   </div>
   <div class="room-type-badge">{{ doc.room_type }}</div>
   {% if doc.readiness_status and doc.readiness_status != "Ready" and doc.readiness_status != "Unknown" %}
   <div class="readiness-warning">&#9888; {{ doc.readiness_status }}</div>
   {% endif %}
   <div class="footer-note">
-    For emergencies contact your supervisor directly.
+    {{ _("For emergencies contact your supervisor directly.") }}
     <br>Apex Habitat &bull; {{ frappe.utils.today() }}
   </div>
 </div>
