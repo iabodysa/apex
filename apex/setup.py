@@ -10,9 +10,6 @@ from apex.apex_core.setup.seeders.habitat_dashboard_seed import (
     seed_habitat_dashboard,
     seed_role_dashboards,
 )
-from apex.habitat.doctype.maintenance_material.maintenance_material_catalog import (
-    seed_catalog,
-)
 from apex.apex_core.setup.seeders.maintenance_material_template_seed import (
     seed_templates,
 )
@@ -36,7 +33,8 @@ def after_install():
     create_custody_articles()
     create_operational_depreciation_policies()
     create_safety_task_catalogs()
-    seed_catalog()
+    # Single call: seed_templates owns both Maintenance Material writers and runs
+    # them first, so the templates' REQUIRED child Links can never dangle here.
     seed_templates()
     seed_auto_email_reports()
     seed_habitat_dashboard()

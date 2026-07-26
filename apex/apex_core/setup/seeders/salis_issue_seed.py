@@ -20,7 +20,10 @@ Seeds three things:
 3. **One Service Level Agreement** on Issue ("Salis Support SLA") with a
    response/resolution target per priority, a 24x7 service window and the
    Issue resolved/closed states as the SLA-fulfilled statuses. It is created as
-   the *default* SLA for Issue so every new portal Issue is auto-tracked.
+   the *default* SLA for Issue so every new portal Issue is auto-tracked. Its
+   required ``holiday_list`` is the site's own where one exists, otherwise an
+   empty fallback list created here — no app provisions a Holiday List on a
+   fresh site, and without one this SLA was never created at all.
 
 It also grants the Salis role DocPerms on the core **Issue** DocType (via
 ``frappe.permissions.add_permission`` / ``update_permission_property``, which
@@ -54,6 +57,10 @@ _SLA_PRIORITIES = [
 ]
 
 _WORKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+# Fallback Holiday List for the SLA's required Link, only used when the site has none.
+_SLA_HOLIDAY_LIST = "Apex Support 24x7"
+_SLA_HOLIDAY_WINDOW = ("2000-01-01", "2099-12-31")
 
 # [#99gs2t]
 _ISSUE_ROLE_PERMS = [
@@ -92,9 +99,7 @@ def _seed_issue_priorities():
 
 
 def _pick_holiday_list():
-    """A Service Level Agreement requires a Holiday List. Return one to use, or
-    None if the site has none (in which case the SLA seed is skipped — it is not
-    worth fabricating a holiday list here)."""
+    """Return the site's own Holiday List to hang the SLA on, or None if it has none."""
     # [#jdlc8a]
     company = frappe.defaults.get_global_default("company") or frappe.db.get_value(
         "Company", {}, "name"
@@ -104,6 +109,30 @@ def _pick_holiday_list():
         if hl and frappe.db.exists("Holiday List", hl):
             return hl
     return frappe.db.get_value("Holiday List", {}, "name")
+
+
+def _ensure_holiday_list():
+    """Return a Holiday List for the SLA, creating the fallback one if the site has none.
+
+    ``Service Level Agreement.holiday_list`` is a REQUIRED core ERPNext Link and
+    nothing on a fresh site creates a Holiday List — neither the ERPNext setup
+    wizard nor hrms — so waiting for one meant the default Issue SLA was never
+    created on any new deployment. An existing list always wins, so this changes
+    nothing on a configured site.
+    """
+    existing = _pick_holiday_list()
+    if existing:
+        return existing
+    if not frappe.db.exists("DocType", "Holiday List"):
+        return None
+    doc = frappe.new_doc("Holiday List")
+    doc.holiday_list_name = _SLA_HOLIDAY_LIST
+    # Zero holiday rows IS the 24x7 window the SLA declares below, and the SLA clock
+    # reads only those rows — never from_date/to_date — so the window never expires.
+    doc.from_date = _SLA_HOLIDAY_WINDOW[0]
+    doc.to_date = _SLA_HOLIDAY_WINDOW[1]
+    doc.insert(ignore_permissions=True)  # audit-ok — system SLA prerequisite
+    return doc.name
 
 
 def _seed_sla():
@@ -116,7 +145,7 @@ def _seed_sla():
     # [#6zbcj0]
     if not frappe.db.exists("DocType", "Issue"):
         return
-    holiday_list = _pick_holiday_list()
+    holiday_list = _ensure_holiday_list()
     if not holiday_list:
         # [#fyc1fs]
         frappe.logger().info(

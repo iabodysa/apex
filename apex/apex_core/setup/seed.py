@@ -26,7 +26,8 @@ switch is behaviour-preserving:
 - **create-only by default**: a record matched on ``key`` is never overwritten,
   so admin edits survive both re-runs and ``bench migrate``;
 - **existence-guarded**: a record is skipped (never fatal) if its DocType or any
-  Link target is missing;
+  Link target — top-level *or* on a child row — is missing, and the log names the
+  target that could not be resolved;
 - **per-record savepoint + log-then-rollback**: one bad record cannot abort the
   rest (the proven pattern from the workflow / movement seeders).
 
@@ -110,14 +111,32 @@ def _exists(frappe, doctype, key, value):
     return bool(frappe.db.exists(doctype, {key: value}))
 
 
-def _links_present(frappe, doctype, record):
-    """True if every Link field that is set points at an existing target."""
+def _unresolved_link(frappe, doctype, record):
+    """Name the first Link target this record cannot resolve, or None if all resolve.
+
+    Child rows are walked too: a Table row's Link is as fatal as a top-level one
+    (Frappe's own ``_validate_links`` checks children), so a record whose rows
+    dangle must be refused here rather than raising mid-batch.
+    """
     meta = frappe.get_meta(doctype)
     for field in meta.get("fields", {"fieldtype": "Link"}):
         value = record.get(field.fieldname)
         if value and field.options and not frappe.db.exists(field.options, value):
-            return False
-    return True
+            return f"{field.fieldname} -> {field.options} '{value}'"
+
+    for table in meta.get_table_fields():
+        child_links = frappe.get_meta(table.options).get("fields", {"fieldtype": "Link"})
+        for idx, row in enumerate(record.get(table.fieldname) or [], start=1):
+            if not isinstance(row, dict):
+                continue
+            for field in child_links:
+                value = row.get(field.fieldname)
+                if value and field.options and not frappe.db.exists(field.options, value):
+                    return (
+                        f"{table.fieldname} row {idx}: "
+                        f"{field.fieldname} -> {field.options} '{value}'"
+                    )
+    return None
 
 
 def apply_spec(spec):
@@ -139,9 +158,12 @@ def apply_spec(spec):
         if spec["create_only"] and _exists(frappe, doctype, key, value):
             skipped += 1
             continue
-        if not _links_present(frappe, doctype, record):
+        unresolved = _unresolved_link(frappe, doctype, record)
+        if unresolved:
+            # Name the target: a bare "a Link is missing" leaves the operator with
+            # nothing to fix, and this is the only trace a skipped record leaves.
             frappe.logger().warning(
-                f"seed: {doctype} '{value}' skipped — a Link target is missing"
+                f"seed: {doctype} '{value}' skipped — missing Link target {unresolved}"
             )
             skipped += 1
             continue
