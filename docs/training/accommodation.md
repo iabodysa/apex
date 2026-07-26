@@ -1,93 +1,120 @@
-# 1. Accommodation
+# Accommodation Operations
 
-[← Back to index](README.md)
+[Back to training index](README.md)
 
-Master data (sites, buildings, rooms, beds) underpins the day-to-day assignment,
-checkout, and resident-request records.
+## Audience
 
----
+Accommodation Managers, Resident Supervisors, and Resident Request
+Coordinators. Trainers may use a System Manager account for setup and cleanup.
 
-## Permissions
+## Outcome
 
-| DocType | Accommodation Manager | Resident Supervisor | Resident Request Coordinator | Finance Manager |
-|---------|----------------------|---------------------|------------------------------|-----------------|
-| Site (master) | Read, Write, Create | — | — | — |
-| Building (master) | Read, Write, Create | Read | — | — |
-| Room (master) | Read, Write, Create | Read | — | — |
-| Bed (master) | Read, Write, Create | Read | — | — |
-| Facility Asset | Read, Write, Create | Read | — | — |
-| **Housing Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | — | — |
-| **Housing Checkout** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | — | — |
-| Resident Request | Read, Write, Create | Read, Write, Create | Read, Write, Create | — |
+Place a resident in an available bed, handle a housing request, and complete a
+controlled checkout without bypassing occupancy or custody controls.
 
-> **Site is Manager-only.** Unlike Building, Room, and Bed, the **Site** master
-> grants the Resident Supervisor nothing — supervisors read the building
-> hierarchy from Building downwards.
+## Prerequisites
 
-> **Resident Request Coordinator** is the dedicated triage role for resident
-> requests: it holds Read/Write/Create on **Resident Request**.
+- A non-production training site.
+- A training Employee or Temporary Worker, Project, and Cost Center.
+- A training Building with at least one Room and Bed.
+- Building User Permissions for any building-scoped learner.
+- The [accommodation permission reference](../reference/permissions.md#accommodation-permissions).
 
-> **Building scoping:** a Resident Supervisor sees only his assigned buildings' records (Housing Assignment, Custody Issue, Cleaning Log). Set scope via *User Permission* on **Building**. Oversight roles are unscoped.
+## Operating model
 
-> **Triage-field split:** the three housing roles — Accommodation Manager,
-> Resident Supervisor, and Resident Request Coordinator — hold Read/Write on the
-> `permlevel 1` triage fields of Resident Request, separating resident-entered
-> data from internal triage handling.
+Use Frappe masters for reusable structure and submitted documents for changes
+that need history.
 
-> **Internal Auditor** holds read-only oversight (Read, Report, Export) on
-> **Facility Asset**. It holds nothing on the Site/Building/Room/Bed masters or
-> on the assignment and checkout records.
+| Record | Operational purpose |
+|---|---|
+| `Site`, `Building`, `Room`, `Bed` | Physical hierarchy and capacity. |
+| `Housing Assignment` | Submitted active stay in one bed. |
+| `Room Bed Transfer` | Submitted move to another available Bed; Transfer Board limits its choices to the current Building. |
+| `Housing Checkout` | Submitted end of a stay and custody-clearance gate. |
+| `Resident Request` | QR or Desk intake, triage, assignment, and resolution. |
 
----
+`Accommodation Ledger` and `Occupancy Snapshot` are system-written records.
+Use them for traceability and reports; do not enter or correct them manually.
 
-## DocTypes in this area
+## Operational flow
 
-### Site / Building / Room / Bed (masters)
-- **Purpose:** the physical housing hierarchy — Site → Building → Room → Bed.
-- **Roles:** Accommodation Manager maintains; supervisors read Building, Room,
-  and Bed to pick beds. Site is Manager-only.
-- **Key fields:** name/code, capacity, status (active/inactive), parent link.
+1. Create the `Site` and `Building` masters. From a saved Building, use
+   **Setup Rooms**, review the floor plan, then choose **Approve and Generate**.
+   The generator creates or reconciles Rooms and Beds. Once Rooms exist, the
+   Building abbreviation is locked because it forms their numbering.
+2. Before check-in, confirm the Room readiness is **Ready** or **Unknown** and
+   the Bed is **Available**. Use the **Front Desk** Desk page or create a
+   `Housing Assignment`. Select the resident, Project, check-in date, and Cost
+   Center. A temporary stay also needs an expected checkout date.
+3. Submit the assignment. The controller locks and rechecks the Bed, marks it
+   **Occupied**, and recalculates Room and Building occupancy. Housing-allowance
+   suspension runs only when the Rent rule in `Salary Deduction Policy` is
+   active.
+4. For a move within one Building, an Accommodation Manager or System Manager
+   can use **Transfer Board** or submit a `Room Bed Transfer`. Resident
+   Supervisor has neither Page entry nor Create on the transfer record and must
+   hand the move to an authorized role. Transfer Board blocks cross-building
+   choices, but the direct DocType currently accepts a target Room in another
+   Building and rewrites the assignment Building. That path does not rerun the
+   full checkout and new-assignment checks. Until the application enforces one
+   rule, use checkout and a new assignment for an operational cross-building
+   move.
+5. Triage each `Resident Request`. Setting **Assigned** requires an assignee;
+   resolving or closing requires resolution notes. Maintenance, utility,
+   cleaning, pest-control, and facility-item categories can create a
+   `Maintenance Request`; Safety can create a `Safety Incident`; Custody can
+   create a `Custody Issue`. The source keeps the target link and conversion is
+   idempotent.
+6. To end the stay, create a `Housing Checkout` from the submitted assignment.
+   Resolve every outstanding custody line as **Returned**, **Lost**, or
+   **Damaged**. Submission closes the assignment, releases the Bed, and marks
+   the Room **Needs Cleaning**. Lost or damaged lines create a draft
+   `Custody Damage Assessment` for review.
+7. Verify the result in **Active Resident Register**, **Checkout Pending
+   Clearance**, and **Accommodation Occupancy Summary**. See the
+   [automation reference](../reference/automation.md) for reconciliation,
+   snapshots, expiry checks, and daily cost allocation.
 
-### Housing Assignment *(submittable)*
-- **Purpose:** places a resident in a specific bed.
-- **Roles:** supervisors prepare and submit; only the Manager can cancel or amend.
-- **Key fields:** employee/resident, bed, start date, project.
-- **On submit:** marks the bed **Occupied**, re-derives the room's and building's
-  occupancy counts, and suspends the housing allowance when the *Rent* rule of the
-  Salary Deduction Policy is active. It writes **no** ledger row — accommodation
-  cost reaches the **Accommodation Ledger** later, through the daily allocation
-  job.
+Navigation and portal entry points are listed in the
+[route and workspace reference](../reference/routes-workspaces.md). They do not
+replace DocPerm, workflow, or Building scope.
 
-### Housing Checkout *(submittable)*
-- **Purpose:** records a resident leaving and frees the bed.
-- **Roles:** supervisors prepare and submit; Manager cancels if raised in error.
-- **Key fields:** assignment reference, checkout date, condition notes.
+## Non-production exercise
 
-### Resident Request
-- **Purpose:** resident self-service intake (maintenance, complaint, move).
-- **Roles:** filed by residents via QR web form; triaged by Manager/supervisors.
-- **Key fields:** request type, location (QR), description, status.
+1. Ask the trainer for an unused training Bed and a resident with no active
+   assignment.
+2. Create and submit a `Housing Assignment` through Front Desk.
+3. Verify the assignment is submitted, the Bed is **Occupied**, and the Room
+   and Building counters changed.
+4. Create a Maintenance-category `Resident Request` for the same Room.
+5. Move it to **Triaged**, convert it, and verify the linked
+   `Maintenance Request`.
+6. With no custody outstanding, submit a `Housing Checkout`.
+7. Verify the Bed is **Available**, the Room is **Needs Cleaning**, and the
+   assignment carries the checkout date.
 
----
+## Verification
 
-## Basic workflow
+The learner can show:
 
-1. **Set up masters once.** The Accommodation Manager creates the Site → Building
-   → Room → Bed hierarchy. Supervisors have read access so they can pick beds.
-2. **Assign a resident.** A supervisor creates a **Housing Assignment**,
-   selects the employee and an available bed, and **Submits** it. Submission marks
-   the bed occupied and re-derives the room and building occupancy counts.
-3. **Check out.** When a resident leaves, create a **Housing Checkout** and
-   **Submit** it to free the bed. Only the Accommodation Manager can **Cancel** a
-   submitted assignment or checkout if it was raised in error.
-4. **Resident self-service.** Residents scan a **QR Location** and
-   file a **Resident Request**. The Manager and supervisors triage
-   these from the desk.
+- the submitted assignment and checkout;
+- the Resident Request and its linked target;
+- the Bed and Room state changes;
+- the Project and Cost Center retained on the assignment;
+- the difference between Transfer Board policy and the direct transfer
+  controller, and why operations use checkout plus a new assignment across
+  Buildings.
 
-_[screenshot: Housing Assignment form with bed selection]_
-_[screenshot: Resident Request intake via QR web form]_
+## Cleanup and data safety
 
-> Related background jobs (all daily): occupancy snapshot, lease expiry,
-> idle-resident aging, temporary-worker linking, and the accommodation cost
-> allocation that builds the Accommodation Ledger. A weekly occupancy sync also
-> runs. See [Background Jobs](settings.md#background-jobs).
+Use records clearly marked for training. Never practise on an occupied
+production Bed.
+
+For a reversible training scenario, cancel the `Housing Checkout` first with a
+reason, then cancel the `Housing Assignment`. Handle the converted maintenance
+draft separately. Let the trainer remove remaining draft-only training records
+or reset the disposable site.
+
+Do not edit occupancy counters or delete system-written ledger and snapshot
+rows. If automation ran during the exercise, preserve its rows and use the
+document cancellation or site-reset path.

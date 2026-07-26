@@ -1,120 +1,102 @@
-# Apex Training Guide
+# Apex Training
 
-A practical, role-by-role guide to using **Apex** — the AFMCO workforce
-operations suite. `apex/modules.txt` declares **four** names — three functional
-modules plus a shared settings layer, one per bullet below:
+Use these guides on a non-production site. Choose the role track that matches
+the learner's job and follow its links in order. Each track places the
+foundation lessons and operating guides in one curriculum; use the standalone
+pages below only as refreshers.
 
-- **Habitat** — accommodation, custody, safety, maintenance, and facility costs.
-- **Salis** — movement and fleet: vehicles, drivers, fuel, dispatch, rentals,
-  plus the portals for **Drivers** (`/driver`), **Workers / Masar** (`/masar`),
-  **employees** (`/fleet`), **fleet supervisors** (`/fleet-os`), and **route
-  supervisors** (`/masar-supervisor`).
-- **Logistay** — workforce and telecom operations: freelancers, temporary
-  workers, telecom contracts, SIM inventory and custody, billing documents, and
-  the **Telecom Control** desk. It ships no workspace of its own; its reports,
-  cards, and desk are hosted on the **Custody** workspace. The SIM records
-  (`SIM Card`, `SIM Custody Assignment`) belong to this module and are reached
-  through **Custody**. Logistay has no training page yet, and the Custody page
-  below does not cover it.
-- **Apex Core** — shared configuration (Habitat / Salis / Integration settings).
+## Start and assessment
 
-This guide explains, per functional area, **what each record is for**, **who can
-do what** (roles and permissions), the **key fields**, and the **typical
-workflow** an operator follows.
+Trainers first prepare and rehearse the disposable site with
+[Trainer Setup and Reset](trainer-setup.md). Every Desk learner then completes
+[Frappe Foundations](foundations.md) before choosing one role track. A
+portal-only Driver skips Foundations and goes directly to
+[Driver and Worker Portals](portals-masar-driver.md).
 
-_[screenshot: Apex desk — module cards for Habitat and Salis]_
+Allow about three hours for one role track after trainer setup. Pass a Desk
+learner only when they complete their role-owned checkpoint, show the resulting
+record and timeline evidence, and name the next role at each handoff. A learner
+who owns a workflow transition completes its real Workflow Action; another
+learner identifies the documented handoff and confirms that no action for that
+source appears in Action Inbox. A scoped role proves an out-of-scope denial; an
+unscoped role repeats the trainer-rehearsed denied operation. Use the portal
+guide's verification for a Driver. Do not add broader roles to make an
+assessment pass.
 
----
+## Foundation refresher library
 
-## How to read the permission tables
+1. [Getting Started in Apex](lessons/getting-started.md)
+2. [Records and Workflows](lessons/records-and-workflows.md)
+3. [Search, Filter, and Export](lessons/search-filter-export.md)
 
-Columns are the standard Frappe document rights: **Read**, **Write**, **Create**,
-**Submit**, **Cancel**, **Delete**. A blank cell (—) means the role does not hold
-that right.
+## Role tracks
 
-- **Submit** freezes a document as an official record.
-- **Cancel** reverses a submitted record (and its side effects).
-- **Delete** is reserved for cleanup of unsubmitted drafts.
+- [Housing Operations](tracks/housing-operations.md)
+- [Safety Operations](tracks/safety-operations.md)
+- [Fleet Operations](tracks/fleet-operations.md)
+- [Telecom Operations](tracks/telecom-operations.md)
+- [IT Operations](tracks/it-operations.md)
 
-> **System Manager** always holds full rights on every DocType and is omitted
-> from the per-area tables to keep them focused on operational roles.
+Use only the checkpoints owned by the learner's role, not every checkpoint in
+the linked track.
 
----
+| Learner role | Track and owned checkpoints |
+|--------------|-----------------------------|
+| Accommodation Manager or Resident Supervisor | Housing and Safety: permitted housing, custody, safety, and Building-scoped handoffs |
+| Resident Request Coordinator | Housing: no dedicated workspace; use Awesome Bar to open Resident Request or Maintenance Request |
+| Cleaning Supervisor or Maintenance Technician | Housing: cleaning or prepared-draft work fields only |
+| Procurement Supervisor | Housing: no dedicated workspace; use Awesome Bar to open Goods Receipt or Custody Handover |
+| Safety Officer | Safety: preparation, evidence, and documented handoff only |
+| Fleet Manager, Fleet Project Manager, or Fleet Supervisor | Fleet: only the Project scope, workflow, and operating actions granted to that role |
+| Government Relations Officer | Fleet: compliance and register checkpoints, read-only |
+| Finance Manager | Housing, Fleet, or Telecom: finance review checkpoints only |
+| SIM Operations User | Telecom: Company-scoped contract, SIM, and custody checkpoints |
+| System Manager | IT: provisioning, navigation, settings, and access-support checkpoints |
+| Internal Auditor | Relevant Housing, Safety, Fleet, and Telecom checkpoints, read-only where explicitly granted |
+| Driver | Fleet portal checkpoint only when a reviewed driver-link issuance action exists |
 
-## Roles at a glance
+## Operating guides
 
-| Role | Module | Typical user |
-|------|--------|--------------|
-| **Accommodation Manager** | Habitat | Owns housing, custody, safety, and license records |
-| **Resident Supervisor** | Habitat | On-site supervisor; raises and executes day-to-day records (building-scoped) |
-| **Maintenance Technician** | Habitat | Field technician; reads requests and works **Maintenance Work Orders** |
-| **Cleaning Supervisor** | Habitat | Records housekeeping on the **Cleaning Log** |
-| **Safety Officer** | Habitat | Field safety operator; records inspections, executions, and incidents |
-| **Resident Request Coordinator** | Habitat | Triages resident requests and raises/submits maintenance requests |
-| **Finance Manager** | Both | Central finance control; approves payments, reconciles costs |
-| **Internal Auditor** | Both | Read-only oversight across all records |
-| **Fleet Manager** | Salis | Owns the fleet; unscoped across all projects |
-| **Fleet Project Manager** | Salis | Manages vehicles/drivers for assigned projects only |
-| **Fleet Supervisor** | Salis | Field supervisor; creates operational records |
-| **Government Relations Officer** | Salis | Compliance notification recipient + Compliance workspace viewer (no record-edit rights). It holds Read, Report, and Export on five vehicle and driver compliance records and on three registers, and is granted on the **Salis** root as well as on **Compliance and Rentals** |
-| **Driver** | Salis | Field driver; uses the mobile Driver Portal only. The role has `desk_access = 0` and an owner-only permission set on five Salis DocTypes — it never opens the desk |
+### Housing and facilities
 
-> **Maintenance Manager** is an ERPNext-supplied role. Apex neither creates it nor
-> grants it anything — no shipped DocType names it. Read/Write/Create on the
-> maintenance material masters (Maintenance Material, Maintenance Material
-> Template) belongs to **Accommodation Manager** and **Maintenance Technician**.
+- [Accommodation](accommodation.md) — assign residents, transfer beds, and
+  complete checkout.
+- [Contingent Workers](contingent-workers.md) — distinguish passport-only
+  arrivals, Employees, and accounting Freelancers.
+- [Custody](custody.md) — issue, acknowledge, return, and assess company
+  property.
+- [Maintenance](maintenance.md) — turn reported work into inspected work
+  orders.
+- [Safety](safety.md) — complete safety rounds and follow findings.
+- [Costs and Leasing](costs.md) — maintain leases, utilities, and operational
+  cost records.
 
-> **Universal Maintenance Request intake:** *any* logged-in user (the built-in
-> **All** role) can raise a **Maintenance Request** — they hold Create, and Read
-> only on rows they own. A server hook (`habitat/permissions.py`) extends that to
-> also let the assigned technician see a ticket, while hiding everyone else's. See
-> [Maintenance](maintenance.md).
+### Fleet and movement
 
-> **Project scoping (Salis):** Fleet Project Managers and Supervisors see only their permitted projects. Oversight roles (Fleet Manager, Finance Manager, Internal Auditor, Government Relations Officer) see all. Grant access via a *User Permission* on **Project**. The oversight set is `UNSCOPED_ROLES` in `apex/salis/permissions.py`; a role that is neither oversight nor project-granted would be shown lists that can only return no rows, so `apex/salis/test_scope_role_partition.py` fails the build on one.
+- [Fleet and Movement](fleet-movement.md) — manage vehicles, drivers,
+  assignments, transport requests, and dispatch.
+- [Fuel](fuel.md) — manage quotas, requests, claims, and exceptions.
+- [Rentals](rentals.md) — receive rented vehicles, accrue cost, and settle
+  periods.
+- [Payments and Approvals](compliance.md) — preserve maker-checker controls at
+  the finance boundary.
 
-> **Building scoping (Habitat):** a **Resident Supervisor** is scoped to his building(s) via a *User Permission* on **Building** — that is the DocType name; there is no `Accommodation Building`. The scope is broad, not a short list: `apex/hooks.py` wires a building check onto 28 DocTypes, covering assignment, custody, cleaning, safety, maintenance, rooms and beds, so read it as the default for any building-bearing record. The oversight roles (Accommodation Manager, Finance Manager, Internal Auditor) are unscoped; the set is `HOUSING_UNSCOPED_ROLES` in `apex/habitat/permissions.py`.
+### Telecom and self-service
 
----
+- [Telecom](telecom.md) — manage contracts, SIM cards, custody, and billing
+  drafts.
+- [Driver and Worker Portals](portals-masar-driver.md) — use the shared mobile
+  build through distinct worker and driver entry paths.
+- [Settings and Desk Pages](settings.md) — configure shared behavior and
+  support operational screens.
 
-## Contents
+## Authoritative references
 
-### Habitat
-1. [Accommodation](accommodation.md) — sites, buildings, rooms, beds, assignment, checkout, resident requests
-2. [Custody](custody.md) — articles issued to residents/staff, returns, damage
-3. [Safety](safety.md) — inspections, task catalog/execution, building licenses
-4. [Maintenance](maintenance.md) — requests, inspections, work orders
-5. [Costs (Facilities & Utilities)](costs.md) — utility accounts, bills, cost allocation
+- [Permissions and roles](../reference/permissions.md)
+- [Modules, workspaces, and routes](../reference/routes-workspaces.md)
+- [Scheduled automation](../reference/automation.md)
+- [Business glossary](../reference/glossary.md)
+- [Troubleshooting](../reference/troubleshooting.md)
 
-### Salis (Movement & Fleet)
-6. [Fleet & Compliance](fleet-movement.md) — vehicles, drivers, dispatch, transport, compliance
-7. [Fuel](fuel.md) — quotas, requests, claims, exceptions
-8. [Rentals](rentals.md) — rental offices, accrual, settlement
-9. [Payments & Approvals](compliance.md) — segregation of duties at the finance boundary
-
-> Salis is organised as a top-level **Salis** workspace with **two** child
-> workspaces — **Fleet** and **Compliance and Rentals** — not a single flat area.
-> Movement lives on the Salis root itself.
-
-### Portals
-
-Apex serves **seven** portal routes. Their audiences and authentication paths
-are listed once in [Served portal routes](../../README.md#served-portal-routes).
-
-10. [Driver & Worker Portals](portals-masar-driver.md) — mobile self-service (`/driver`, `/masar`)
-
-> The **five** session-gated operator portals — `/fleet` (employee
-> self-service), `/fleet-os` (fleet supervisor board), `/housing`, `/safety`,
-> and `/masar-supervisor` (route supervisor) — do not yet have training pages.
-> Until they do, use the route reference above for their audience and access
-> rules.
-
-### Shared
-11. [Settings & Desk Pages](settings.md) — Apex Core settings, operational desk consoles
-12. [Background Jobs](settings.md#background-jobs) — what runs automatically
-
-> **Action Inbox** is the personal worklist. It is a shortcut on both the Habitat and the Salis workspace, open to every user with no role filter. The former **My Work** and **Launchpad** landing workspaces were retired and are removed on migrate by `apex/patches/v2_0/remove_kernel_landing_workspaces.py`. See [Settings & Desk Pages](settings.md).
-
----
-
-> **Trainer note:** Each area page is self-contained and a few screens long.
-> Print or share individual pages with the team that owns that area.
+Workspaces and portal links provide navigation. They do not grant record
+permission or replace workflow, DocPerm, or row scope.

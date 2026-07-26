@@ -1,91 +1,123 @@
-# 2. Custody
+# Custody Operations
 
-[← Back to index](README.md)
+[Back to training index](README.md)
 
-Tracks articles and assets issued to residents/staff and their return or damage.
+## Audience
 
----
+Accommodation Managers, Resident Supervisors, Procurement Supervisors, and
+custody counter operators.
 
-## Permissions
+## Outcome
 
-| DocType | Accommodation Manager | Resident Supervisor | Cleaning Supervisor |
-|---------|----------------------|---------------------|---------------------|
-| Custody Article (master) | Read, Write, Create, Delete | Read, Write, Create | — |
-| Custody Asset Category (master) | — | — | — |
-| **Custody Issue** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend, Delete | Read, Write, Create | — |
-| **Custody Return** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend, Delete | Read, Write, Create | — |
-| **Custody Damage Assessment** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend, Delete | Read, Write, Create | — |
-| **Facility Asset Custody Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | — |
-| **Cleaning Log** *(submittable)* | Read, Write, Create | Read, Write, Create | Read, Write, Create, Submit |
+Issue and return an in-stock article with a complete audit trail, then route
+damage or a durable facility asset through the correct record.
 
-> Supervisors can **prepare** custody issues, returns, and damage assessments but
-> cannot **submit** them — the Accommodation Manager submits, keeping a single
-> point of accountability. **Facility Asset Custody Assignment is the exception:**
-> the Resident Supervisor submits that one himself.
+## Prerequisites
 
-> **Custody Asset Category is System Manager-only.** Unlike Custody Article, it
-> grants no operational role anything — treat the category list as an
-> administrator setting.
+- A non-production training site.
+- A training Building, Employee, and non-serialized `Custody Article`.
+- Positive store balance for the article in that Building.
+- Building User Permissions for any building-scoped learner.
+- The [custody permission reference](../reference/permissions.md#custody-permissions).
 
-> **Cleaning Log is submittable, and the Cleaning Supervisor is the one who
-> submits it.** The Accommodation Manager and Resident Supervisor can prepare and
-> edit a log but cannot submit it. The Resident Supervisor is building-scoped on
-> Cleaning Log.
+## Operating model
 
-> **Internal Auditor** holds read-only oversight (Read, Report, Export) on
-> Custody Issue, Custody Return, Custody Damage Assessment, Facility Asset
-> Custody Assignment, and Cleaning Log.
+Frappe submission and cancellation preserve the business documents. Apex posts
+the quantity effects to its no-GL stock ledger.
 
----
+| Record | Operational purpose |
+|---|---|
+| `Custody Asset Category`, `Custody Article` | Reusable item catalogue and return rules. |
+| `Goods Receipt` | External stock received into a procurement intake store. |
+| `Custody Handover` | Controlled stock handover between Buildings. |
+| `Custody Issue`, `Custody Return` | Articles handed to and received from a worker. |
+| `Custody Damage Assessment` | Approval and replacement-cost review for damaged or lost items. |
+| `Facility Asset`, `Facility Asset Custody Assignment`, `Facility Asset Movement` | Durable equipment, supervisor custody, and location history. |
 
-## DocTypes in this area
+`Accommodation Stock Ledger` is system-written. It is an operational quantity
+ledger, not ERPNext Stock Ledger or a General Ledger posting.
 
-### Custody Article / Custody Asset Category (masters)
-- **Purpose:** the catalogue of issuable items and their categories.
-- **Key fields:** article name, category, default value, depreciation policy link.
-- **Access:** the Accommodation Manager and Resident Supervisor maintain **Custody
-  Article**; **Custody Asset Category** is System Manager-only.
+## Operational flow
 
-### Cleaning Log *(submittable)*
-- **Purpose:** the per-building daily cleaning record.
-- **Roles:** three roles can prepare one, but **only the Cleaning Supervisor can
-  submit it** — not even the System Manager role carries Submit here.
-- **Automation:** two daily jobs create today's draft logs for active buildings.
+1. Maintain the item catalogue. Mark serialized articles correctly; each
+   serialized issue or return line must carry one serial number and a quantity
+   of one.
+2. Establish stock before issue. A Procurement Supervisor submits a
+   `Goods Receipt` into a Building marked as a procurement intake store. Use a
+   submitted `Custody Handover` when stock must move to another Building. The
+   receiving side reviews, approves, and confirms the handover; confirmation
+   posts the receiving ledger leg.
+3. For a normal non-serialized issue, open **Custody Kiosk**, select the
+   Building and worker, add the articles, capture the signature when available,
+   and issue. The page submits a real `Custody Issue`; it does not bypass the
+   stock or quantity checks.
+4. Use the kiosk Return mode for an ordinary return. It groups lines by their
+   source issue, submits one `Custody Return` per issue, blocks over-return, and
+   updates the issue to **Partially Returned** or **Returned**.
+5. Use the full `Custody Issue` or `Custody Return` form for serialized items.
+   Use the full Return form for damaged or lost items because the kiosk does not
+   capture condition. After submitting that return, choose **Create Damage
+   Assessment**.
+6. Send `Custody Damage Assessment` through its Frappe Workflow:
+   **Draft**, **Pending Approval**, then **Approved** or **Rejected**. Approval
+   records the assessed value. If the Damage rule in
+   `Salary Deduction Policy` is active and the holder is an Employee, submission
+   can create one draft `Additional Salary` deduction. Payroll staff must still
+   review it; the assessment does not submit payroll.
+7. Use `Facility Asset` for durable building equipment. A custody assignment
+   changes the responsible supervisor. The movement record models location
+   changes and intercompany approvals, but no role currently has Create on
+   `Facility Asset Movement`; do not teach or attempt a new movement until that
+   DocPerm gap is corrected.
+8. Review **Custody Outstanding by Worker**, **Accommodation Stock Balance**,
+   and **Custody Damage Register**. Custody expiry alerts and the weekly digest
+   are described in the
+   [automation reference](../reference/automation.md).
 
-### Custody Issue *(submittable)*
-- **Purpose:** records items handed to a holder.
-- **Key fields:** holder (employee), item grid, issue date.
-- **On submit:** the items are placed on that person's custody.
+The kiosk and workspace entry points are listed in the
+[route and workspace reference](../reference/routes-workspaces.md).
 
-### Custody Return *(submittable)*
-- **Purpose:** records items handed back.
-- **Key fields:** linked issue, returned item grid, condition.
-- **On submit:** outstanding custody is reduced.
+## Current boundaries
 
-### Custody Damage Assessment *(submittable)*
-- **Purpose:** records damaged/lost items returned.
-- **Roles:** the Resident Supervisor prepares it (Read/Write/Create); the
-  Accommodation Manager submits it.
-- **Feeds:** non-financial (operational) depreciation snapshots.
+- A Temporary Worker can hold a `Custody Issue`, but an issue submitted without
+  a linked Employee posts no store or Employee ledger legs.
+- A Resident Supervisor can open Custody Kiosk, but the current DocPerm does not
+  grant Submit on `Custody Issue` or `Custody Return`. An account with Submit
+  permission must complete the operation.
+- Custody Kiosk does not collect serial numbers or return condition. Use the
+  full forms for those cases.
+- `Facility Asset Movement` currently has no Create grant, including for System
+  Manager. Existing records have role-specific Read, Write, Submit, and Cancel
+  rights, but a normal user cannot start a new one.
+- A damage assessment creates at most a draft payroll record, and only when the
+  policy and salary component are configured.
 
-### Facility Asset & related
-- **Facility Asset** / **Facility Asset Custody Assignment** / **Facility Asset
-  Movement** track durable facility equipment and its location/holder over time.
+## Non-production exercise
 
----
+1. Ask the trainer for a pre-stocked, non-serialized training article.
+2. In Custody Kiosk, select the training Building and Employee.
+3. Issue one unit and capture a training signature.
+4. Verify the `Custody Issue` is submitted with status **Issued**.
+5. In **Custody Outstanding by Worker**, confirm the Employee holds one unit.
+6. Return that unit in the kiosk.
+7. Verify the linked issue is **Returned** and the store balance is restored.
 
-## Basic workflow
+## Verification
 
-1. **Define articles** in the Custody Article master (with category).
-2. **Issue.** Create a **Custody Issue**, list the items and the holder, then the
-   Manager **Submits** it — the items are now on that person's custody.
-3. **Return.** On hand-back, create a **Custody Return** referencing the issue and
-   **Submit** it; outstanding custody is reduced.
-4. **Damage.** If items come back damaged, the Manager raises a **Custody Damage
-   Assessment** and submits it to record the loss.
+The learner can show:
 
-_[screenshot: Custody Issue with item grid]_
-_[screenshot: Custody Kiosk desk page]_
+- the source `Custody Issue` and `Custody Return`;
+- the worker, Building, article, quantity, and signature evidence;
+- the matching store and Employee legs in `Accommodation Stock Ledger`;
+- the updated issue status and outstanding-custody report;
+- when the full form is required instead of Custody Kiosk.
 
-> A **Custody Kiosk** desk page provides a fast issue/return surface for the
-> front desk. See [Settings & Desk Pages](settings.md#desk-pages).
+## Cleanup and data safety
+
+Cancel the submitted `Custody Return` before cancelling its source
+`Custody Issue`. A live Return blocks cancellation of the Issue, and a submitted
+damage assessment blocks cancellation of its Return.
+
+Cancellation posts reversal rows. Never delete or edit
+`Accommodation Stock Ledger` to restore a balance. Do not test with serialized
+production equipment, live worker custody, or a production procurement store.

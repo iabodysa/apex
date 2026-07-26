@@ -1,77 +1,135 @@
-# 7. Fuel (Salis)
+# Fuel Operations
 
-[← Back to index](README.md)
+[Back to the training index](README.md)
 
-Quotas, requests, claims, and exception handling. Movement and finance are
-deliberately split across the claim lifecycle.
+## Audience
 
----
+Fleet operators who set quotas, raise and review fuel requests, reconcile
+claims, and investigate fuel exceptions. Finance reviewers use the reports but
+do not replace the fleet workflow.
 
-## Permissions
+## Outcome
 
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Finance Manager |
-|---------|---------------|-----------------------|------------------|-----------------|
-| **Fuel Quota** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read |
-| **Fuel Request** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read |
-| **Fuel Claim** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | Read, Write |
-| **Fuel Exception Case** *(workflow)* | Read, Write, Create, Submit, Cancel, Amend, Delete | Read, Write, Create | Read, Write, Create | Read |
-| Fuel Platform (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read |
+Trace one fuel request from a monthly quota through approval, completion,
+ledgering, claim reconciliation, and safe reversal.
 
-> **Fuel Platform is not read-only for the project roles.** Both the Fleet Project
-> Manager and the Fleet Supervisor can create and edit a platform record; only the
-> Fleet Manager can delete one.
+## Prerequisites
 
-> **Row scoping** is layered on top of these rights. A Fleet Project Manager or
-> Fleet Supervisor sees only the rows for the projects they are permitted to, on
-> every fuel record in this table.
+- Use a non-production site with a training `Project`, active `Salis Vehicle`,
+  active `Salis Driver`, and `Fuel Platform`.
+- Prepare separate requester and reviewer accounts. Workflow self-approval is
+  blocked.
+- Confirm Project User Permissions before entering data. See
+  [Fuel permissions](../reference/permissions.md#fuel-permissions).
+- Use the shipped navigation described in
+  [Modules, Workspaces, and Routes](../reference/routes-workspaces.md).
 
-> **Internal Auditor** holds read-only oversight (Read, Report, Export) on all
-> five records.
+## Native records and controls
 
----
+- `Fuel Quota` is a submitted monthly allocation for one vehicle and period.
+- `Fuel Request` uses a Frappe Workflow for approval and completion.
+- `Fuel Daily Log` records measured daily consumption.
+- `Fuel Consumption Ledger` is system-written from source records. Operators
+  do not create or edit it.
+- `Fuel Claim` uses a Frappe Workflow and derives consumed litres from the
+  ledger.
+- `Fuel Exception Case` uses a Frappe Workflow for evidence and resolution.
+- Attachments, timeline comments, and Version history retain supporting evidence
+  and changes.
 
-## DocTypes in this area
+## Operational flow
 
-### Fuel Quota *(submittable)*
-- **Purpose:** the fuel allowance per vehicle/project for a period.
-- **Key fields:** vehicle/project, period, quota amount.
+### Set the quota
 
-### Fuel Request *(submittable)*
-- **Purpose:** a request to draw fuel against a vehicle.
-- **Source:** a supervisor, or a driver from the Driver Portal.
-- **On submit:** only a **Standard** request that is already *Done* consumes
-  quota. A **Top-up** or **Chip** request consumes none — it records a note on the
-  vehicle's timeline instead.
+Create and submit one `Fuel Quota` per vehicle and month. Monthly litres must be
+positive. A second live quota for the same vehicle and period is rejected.
 
-### Fuel Claim *(workflow)*
-- **Purpose:** reconciles requested vs. actual fuel cost.
-- **Workflow states:** Draft → *Submitted to Movement* → *Reconciled* /
-  *Disputed* → *Approved* → *Closed*.
-- **Roles:** Finance Manager has write to reconcile; movement and finance are
-  deliberately split.
+### Raise and complete a request
 
-### Fuel Exception Case *(workflow)*
-- **Purpose:** captures anomalies (e.g. un-reverted top-ups) for follow-up.
+`Fuel Request` supports three request types:
 
-### Fuel Platform (master)
-- **Purpose:** the fuel card/platform/station definitions.
+- Standard requires positive requested litres and can link a `Fuel Quota`.
+- Top-up requires positive top-up litres. A temporary top-up also requires a
+  revert due date.
+- Chip records Issue, Replace, or Cancel. Replace and Cancel require a chip
+  number; Cancel also requires inactivity evidence and owner acknowledgment
+  before submit.
 
----
+Every new request starts in `Pending`. The `Fuel Request Workflow` follows:
 
-## Basic workflow
+`Pending` → `Approved` → `Done`
 
-1. **Set quotas.** Fleet Manager/PM define **Fuel Quota** per vehicle/project.
-2. **Request fuel.** A supervisor (or a driver from the portal) raises a **Fuel
-   Request** against the vehicle and submits it. A Standard request draws down
-   quota once it is Done; top-ups and chip actions do not.
-3. **Claim & reconcile.** **Fuel Claim** runs its workflow; Finance Manager
-   reconciles. Movement and finance are kept separate.
-4. **Exceptions.** Anomalies become **Fuel Exception Cases**; daily jobs watch for
-   overdue requests and un-reverted top-ups. Monthly fuel reconciliation runs
-   automatically.
+Rejected requests enter `Failed`. A completed Top-up can enter `Reverted`;
+submitted states can be cancelled through the available workflow action.
+Approval submits the request, but a Standard request consumes its linked quota
+only when it reaches `Done`. Cancelling it reverses that quota consumption.
 
-_[screenshot: Fuel Console]_
-_[screenshot: Fuel Approval Console desk page]_
+System Manager, Fleet Manager, Fleet Project Manager, and Finance Manager can
+open `Fuel Approval Console` to review the project-scoped pending queue. Fleet
+Supervisor has no Page role. Approve and Reject call the same native workflow;
+the console does not bypass permissions or self-approval controls.
 
-> A **Fuel Approval Console** desk page accelerates claim review. See
-> [Settings & Desk Pages](settings.md#desk-pages).
+### Reconcile claims and exceptions
+
+`Fuel Claim` compares claimed litres with ledgered consumption for the same
+vehicle and period. Its workflow follows:
+
+`Draft` → `Submitted to Movement` → `Reconciled` → `Approved` → `Closed`
+
+A claim can move to `Disputed` and return for reconciliation. Approval cannot be
+performed by the requester. `Company` and `Cost Center` are reporting context;
+the claim does not post to the General Ledger.
+
+Use `Fuel Exception Case` for over-consumption, GPS mismatch, duplicate claim,
+suspected fraud, quota dispute, or another documented anomaly. Investigate,
+request evidence when needed, and resolve with evidence using a reviewer other
+than the reporter.
+
+### Review generated results
+
+The fuel engine creates `Fuel Consumption Ledger` rows from recent
+`Fuel Daily Log` records and submitted, unledgered `Done` requests. Cancellation
+adds a negative reversal instead of deleting ledger history.
+
+Use `Fuel Consumption Summary`, `Fuel Reconciliation`, `Fuel Spend by Vehicle`,
+`Fuel Claim Register`, and `Fuel Exception Register` for review. Scheduled
+accrual, overdue-request, temporary-top-up, and monthly quota checks are defined
+in the [Scheduled Automation Reference](../reference/automation.md).
+
+## Non-production exercise
+
+1. Submit a training `Fuel Quota` with enough litres for one request.
+2. Create a Standard `Fuel Request` against that quota under the training
+   Project.
+3. Record the quota's consumed litres before approval.
+4. Approve the request with a different authorized account, then confirm the
+   quota has not changed yet.
+5. Complete the request and confirm the quota now includes the requested litres.
+6. After the training site's normal fuel-accrual job runs, locate the generated
+   ledger row by source document.
+7. Create a draft `Fuel Claim` for the same vehicle and period and compare its
+   consumed and variance fields with the ledger.
+
+Do not use live quotas, cards, chips, vehicles, or employee records.
+
+## Verification
+
+- The quota is unique for the vehicle and month.
+- The request moves through workflow actions; no field edit skips a state.
+- The requester and approver are different users.
+- Quota consumption changes at `Done`, not at `Approved`.
+- A generated ledger row identifies the request or daily log as its source.
+- Claim consumption equals the ledger total for the selected vehicle and month.
+- Project filters do not expose another Project.
+
+## Cleanup and data safety
+
+1. Delete the draft training claim and any draft exception case.
+2. Cancel the `Fuel Request` through its workflow. Confirm quota consumption is
+   restored.
+3. If the request was ledgered, keep the original and generated negative
+   reversal rows; never delete either.
+4. Cancel the training `Fuel Quota`.
+5. Remove the training platform or masters only when no links remain.
+
+Do not change read-only counters, workflow status, or ledger rows directly.

@@ -1,124 +1,138 @@
-# 6. Fleet & Compliance (Salis)
+# Fleet and Movement
 
-[← Back to index](README.md)
+[Back to the training index](README.md)
 
-> All operational Salis transactions are **project-scoped**. A Fleet Supervisor or
-> Fleet Project Manager only sees records for their assigned projects. Always set
-> the correct **Project** on a new record.
+## Audience
 
-This page covers fleet masters, compliance, dispatch, and transport.
+Fleet desk operators who maintain vehicles and drivers, assign custody, approve
+transport, plan routes, and dispatch trips.
 
----
+## Outcome
 
-## Fleet masters — Vehicles & Drivers
+Complete one project-scoped movement from request to fulfilment while preserving
+the source record, workflow state, vehicle assignment, and generated audit
+records.
 
-### Permissions
+## Prerequisites
 
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver | Finance Manager | Internal Auditor |
-|---------|---------------|-----------------------|------------------|--------|-----------------|------------------|
-| **Salis Vehicle** | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | — | Read | Read |
-| **Salis Driver** | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read | Read | Read |
-| Vehicle Category (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | — | Read | Read |
-| **Salis Vehicle Compliance** *(child table)* | — | — | — | — | — | — |
-| **Driver Clearance** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | — | Read, Write, Create | — | Read | Read |
+- Use a non-production site and a dedicated training `Project`.
+- Prepare one active `Salis Vehicle`, one active `Salis Driver`, and two user
+  accounts so the requester and authorizer are different people.
+- Grant the trainee only the role and Project User Permission needed for the
+  exercise. See [Fleet permissions](../reference/permissions.md#fleet-master-permissions).
+- Review the shipped Desk and portal entry points in
+  [Modules, Workspaces, and Routes](../reference/routes-workspaces.md).
 
-> **Salis Vehicle Compliance is a child table, not a standalone record.** It is
-> the grid behind *Compliance Documents* on **Salis Vehicle**, and its permissions
-> list is empty — it grants no role anything on its own. Access to a compliance
-> row is whatever the user holds on the parent vehicle. Do not look for it in the
-> DocType list or expect to submit one.
+## Native records and controls
 
-> **Driver Clearance is not open to the Fleet Project Manager** — that role holds
-> nothing on it. Clearance casework belongs to the Fleet Manager and the Fleet
-> Supervisor.
+Apex uses standard Frappe forms, Submit/Cancel, Workflows, attachments, timeline
+comments, and Version history around these records:
 
-> **Vehicle Category is not read-only for the project roles:** both the Fleet
-> Project Manager and the Fleet Supervisor can create and edit categories.
+- `Salis Vehicle` and `Salis Driver` are the fleet masters.
+- `Vehicle Assignment` is the authoritative submitted vehicle-to-driver
+  pairing. The current vehicle and driver fields on the masters are mirrors.
+- `Vehicle Handover` records the custody checklist and signed evidence. It does
+  not replace `Vehicle Assignment`.
+- `Transport Request` owns demand and its approval workflow.
+- `Route Plan` and `Passenger Manifest` hold the planned stops and passengers.
+- `Dispatch Trip` owns execution and its workflow.
+- `Trip Fulfilment Ledger` is generated when a trip completes. Operators do not
+  create or edit it.
 
-> **Government Relations Officer** holds read-only access (Read, Report, Export)
-> on Salis Vehicle, Salis Driver, Driver Clearance, and Driver Suspension.
+## Operational flow
 
-### DocTypes
-- **Salis Vehicle** — the fleet asset: plate, category, compliance docs, status.
-- **Salis Driver** — the driver record: license dates, project, linked user.
-- **Salis Vehicle Compliance** — insurance/registration/inspection validity, held
-  as rows in the vehicle's *Compliance Documents* grid.
-- **Driver Clearance** — sponsorship/clearance casework (Government Relations);
-  submittable and driven by a shipped workflow.
-- **Vehicle Handover** — vehicle hand-over checklist between holders.
+### Maintain and assign the fleet
 
-### Workflow
-1. **Register the fleet.** Fleet Manager/PM create **Salis Vehicle** and **Salis
-   Driver** records.
-2. **Compliance & licenses.** Daily jobs watch driver-license and
-   vehicle-compliance expiries and raise operational alerts before they lapse.
-3. **Idle watch.** A daily idle-vehicle job flags vehicles with no recent movement.
+1. Set the vehicle plate, category, Project, status, ownership, seat capacity,
+   and compliance documents on `Salis Vehicle`.
+2. Link `Salis Driver` to the employee and set the Project, licence details, and
+   status.
+3. Submit `Vehicle Assignment` with the vehicle, driver, Project, and start
+   date. The controller blocks overlapping active assignments and drivers who
+   are stopped, released, inactive, or on approved leave.
+4. Use `Vehicle Handover` when physical custody changes. Signed evidence is
+   required before submit, and discrepancy notes are required when a
+   discrepancy is recorded.
 
-_[screenshot: Salis Vehicle record with compliance tab]_
+Expired vehicle compliance can warn or block assignment and dispatch according
+to `Salis Settings`. Do not bypass that decision by editing the master mirrors.
 
----
+### Approve a transport request
 
-## Dispatch & Transport
+Choose the transport type that matches the work:
 
-### Permissions
+- Site Transport requires a Building and Project.
+- Inter-City Relocation requires at least one worker.
+- Administrative Trip requires a destination and cannot carry a worker
+  manifest.
 
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver |
-|---------|---------------|-----------------------|------------------|--------|
-| **Vehicle Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create | — |
-| **Transport Request** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create, Submit | — |
-| **Dispatch Trip** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
-| **Route Plan** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
-| **Passenger Manifest** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
-| **Issue** (field support) | — | — | — | — |
+The `Transport Request Workflow` follows:
 
-> **Salis Vehicle** and **Salis Driver** are **not submittable** DocTypes — there
-> is no Submit action on either. Create the record and save it. The shipped Salis
-> Vehicle permission rows still carry Submit and Cancel flags for the Fleet
-> Manager and a Submit flag for the Fleet Project Manager. Frappe renders neither
-> action on a non-submittable DocType, so those flags grant nothing and the table
-> above leaves them out; treat the vehicle record as save-only.
+`New` → `Validated` → `Approved` → `Scheduled` → `Fulfilled`
 
-> **The Driver role holds no permission on Dispatch Trip or Passenger Manifest.**
-> A driver sees today's trips and manifest only because the portal resolves their
-> token server-side and reads on their behalf. The Driver role's entire document
-> grant is the five owner-scoped rows listed in
-> [Portals — Driver & Worker](portals-masar-driver.md).
+A request can also be rejected, reopened, or cancelled through the available
+workflow action. The system derives worker count and authority tier; a client
+cannot lower the required approval. The requester cannot authorize their own
+request.
 
-> **Apex grants no Issue permissions at all.** `apex/salis/custom/issue.json`
-> ships an empty `custom_perms`, so every cell in the Issue row is blank by
-> design: desk access to Issue is whatever the platform already grants a user.
+### Plan and execute the trip
 
-### DocTypes
-- **Vehicle Assignment** — binds a vehicle to a driver/project for a period.
-- **Transport Request** — captures who needs moving where; runs the *Transport
-  Request Workflow* (Draft → approval → fulfilment).
-- **Dispatch Trip** — schedules the actual run; the driver sees it in the portal.
-- **Route Plan / Route Stop** — groups ordered stops for a trip.
-- **Passenger Manifest** — the people carried on a trip.
-- **Issue** — field support tickets ride the **native ERPNext Issue** DocType (the
-  old "Support Ticket" DocType was retired). A driver-raised Issue is tagged with a
-  `custom_driver` field; Apex seeds the Issue Types, Priorities, and a default SLA.
-  Apex adds **no** Issue permissions of its own (`apex/salis/custom/issue.json`
-  ships an empty `custom_perms`), so desk access to Issue is whatever the platform
-  grants. The Driver role holds none: the portal raises and reads a driver's
-  tickets on their behalf and refuses any Issue whose `custom_driver` is not the
-  resolved driver.
+1. Create a `Route Plan` from the approved request, add ordered stops, vehicle,
+   driver, and Project, then submit it. Submission moves the linked request to
+   `Scheduled`.
+2. Add a `Passenger Manifest` when a named passenger list is required. Duplicate
+   employees are rejected.
+3. Create `Dispatch Trip` in `Planned`, link the route, vehicle, driver, and trip
+   date, then use the workflow:
 
-### Workflow
-1. **Assign a vehicle.** Create a **Vehicle Assignment** binding a vehicle to a
-   driver/project; submit it.
-2. **Request transport.** A **Transport Request** runs through the native
-   workflow rather than a plain submit.
-3. **Dispatch.** A **Dispatch Trip** schedules the run; **Route Plan** groups
-   stops. The driver sees today's trips in the portal.
-4. **Tickets.** Field issues are logged as native **Issue** records (drivers raise
-   them from the Driver Portal; fleet staff resolve them on the desk).
+   `Planned` → `Dispatched` → `Completed`
 
-_[screenshot: Dispatch Board page]_
+4. Enter completion notes. If odometer values are used, enter both start and end
+   and keep the end value at or above the start value.
+5. Completing the trip submits it, advances the vehicle odometer, moves the
+   request to `Fulfilled`, and writes one `Trip Fulfilment Ledger` row.
 
-> Background jobs in this area — **daily:** driver-license expiry,
-> vehicle-compliance expiry, idle-vehicle, missing-attendance, workshop overstay,
-> operations-alert reconciliation, and the open-alerts digest. **Weekly:**
-> vehicle-utilisation summary and the utilisation snapshot. A **five-minute cron**
-> also auto-confirms claimed boardings. See
-> [Background Jobs](settings.md#background-jobs).
+Use `Fleet Control` for the scoped vehicle view and `Salis Dispatch Board` for
+today's vehicles, drivers, trips, and open requests. Use `Worker Transport Plan`
+before dispatch and `Transport Fulfilment SLA` after fulfilment.
+
+Automation that checks idle vehicles, attendance, utilisation, and boarding is
+listed in the [Scheduled Automation Reference](../reference/automation.md).
+
+## Non-production exercise
+
+1. Create training vehicle and driver masters under the training Project.
+2. Submit a `Vehicle Assignment`.
+3. Create an Administrative Trip `Transport Request` with a future pickup time,
+   destination, and the training Project.
+4. Use the requester account to validate it and a different authorized account
+   to approve it.
+5. Submit a one-stop `Route Plan` linked to the request.
+6. Create a `Dispatch Trip`, dispatch it, then complete it with notes and a small
+   valid odometer increase.
+
+Do not add real employees to the manifest and do not use a production vehicle,
+driver, Project, or route.
+
+## Verification
+
+- The assignment is submitted and both fleet masters show the same pairing.
+- The request ends in `Fulfilled` and links the route, vehicle, driver, and trip.
+- The trip is submitted in `Completed`.
+- The vehicle odometer reflects the completed trip.
+- Exactly one generated `Trip Fulfilment Ledger` row points to the trip.
+- The Project-filtered board and reports do not expose another Project.
+
+## Cleanup and data safety
+
+Cancel records through their native lifecycle in reverse order:
+
+1. Cancel the completed `Dispatch Trip`; the request returns to `Scheduled` and
+   the system removes or reverses its generated trip effects.
+2. Cancel the `Route Plan`; the request returns to `Approved`.
+3. Cancel the `Transport Request` through its workflow.
+4. Cancel the `Vehicle Assignment`.
+5. Delete only unused training drafts and masters that have no remaining links.
+
+Never edit generated ledgers, change `docstatus` directly, or delete submitted
+production records.
