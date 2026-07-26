@@ -16,9 +16,11 @@ The framework already states the intended relationship: ``Report.set_doctype_rol
 correspondence for every shipped report, allowing a report to hold MORE roles than its
 source DocType (a curated audience) but never to silently drop one.
 
-Child-table ``ref_doctype`` (Vehicle Compliance Register reads ``Salis Vehicle
-Compliance``) resolves to the embedding parent, because a child table carries no DocPerms
-of its own and its rows are governed by the parent's.
+Child-table ``ref_doctype`` resolves to the embedding parent for the coverage scan, because
+a child table carries no DocPerms of its own and its rows are governed by the parent's.
+A-178b then found that frappe does NOT make that same resolution when the report is opened,
+so a report must never DECLARE a child table as its ``ref_doctype`` — see
+``TestReportRefDoctypeIsRunnable`` below.
 
 Scope: A-172 widened the glob from Salis alone to EVERY module's report tree — Habitat
 and Logistay included. Logistay was already clean; Habitat contributed 13 reports whose
@@ -256,6 +258,18 @@ def _report_paths_by_name():
     return out
 
 
+def _istable_ref_reports(reports, doctypes):
+    """{report: ref_doctype} for every report declaring a child table as its source.
+
+    Pure over its inputs so the planted-violation proof can drive it with fake data.
+    """
+    return {
+        name: ref
+        for name, (_listed, ref) in reports.items()
+        if ref in doctypes and doctypes[ref].get("istable")
+    }
+
+
 def _uncovered_pairs(reports, doctypes):
     """{report: {roles that read the source but are absent from its roles table}}.
 
@@ -342,6 +356,57 @@ class TestReportRoleCoverage(unittest.TestCase):
                         reason and reason.strip(),
                         f"frozen pair {report}/{role} has no documented reason",
                     )
+
+
+class TestReportRefDoctypeIsRunnable(unittest.TestCase):
+    """A report whose ``ref_doctype`` is a child table is unopenable by everyone.
+
+    ``frappe/desk/query_report.py:47`` gates ``get_report_doc`` on
+    ``frappe.has_permission(ref_doctype, "report")``. For an istable ref that call routes
+    through ``frappe/permissions.py:120`` into ``has_child_permission``, which returns
+    False at :785 when no ``parent_doctype`` is supplied — and query_report supplies none.
+    Meanwhile ``desktop.py`` ``is_item_allowed`` clears a Report link on the roles table
+    alone, so the workspace link renders and then throws PermissionError on click.
+
+    Vehicle Compliance Register shipped with ``ref_doctype`` = Salis Vehicle Compliance and
+    threw for all four of its granted roles, Fleet Manager and Internal Auditor included.
+    """
+
+    def setUp(self):
+        self.doctypes = _load_doctypes()
+        self.reports = _shipped_reports()
+
+    def test_no_report_declares_a_child_table_ref_doctype(self):
+        self.assertEqual(
+            _istable_ref_reports(self.reports, self.doctypes),
+            {},
+            "this report's ref_doctype is a child table, so frappe denies "
+            'has_permission(ref, "report") for every non-Administrator and the report '
+            "throws on open — point ref_doctype at the DocType that embeds it.",
+        )
+
+    def test_the_detector_flags_a_planted_child_table_ref(self):
+        """Proof the guard can fail, so an empty result is never vacuously green."""
+        planted = dict(self.reports)
+        planted["Planted Report"] = (set(), "Salis Vehicle Compliance")
+        self.assertEqual(
+            _istable_ref_reports(planted, self.doctypes),
+            {"Planted Report": "Salis Vehicle Compliance"},
+        )
+
+    def test_the_compliance_register_points_at_the_embedding_parent(self):
+        """Its rows are Salis Vehicle Compliance children, every one under a Salis Vehicle."""
+        _listed, ref = self.reports["Vehicle Compliance Register"]
+        self.assertEqual(ref, "Salis Vehicle")
+        self.assertEqual(
+            _child_to_parent(self.doctypes).get("Salis Vehicle Compliance"),
+            "Salis Vehicle",
+        )
+
+    def test_the_persona_reads_the_parent_it_now_reports_on(self):
+        """Re-pointing the ref must not hand the report an audience the source denies."""
+        _listed, ref = self.reports["Vehicle Compliance Register"]
+        self.assertIn(GRO_ROLE, _read_roles(ref, self.doctypes))
 
 
 class TestGovernmentRelationsOfficerReportAccess(unittest.TestCase):
