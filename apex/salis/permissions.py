@@ -389,21 +389,26 @@ def movement_cost_transfer_query(user=None):
 def _doc_project(doc):
     """Resolve the project a document belongs to, including the docs that reach
     their project through a Route Plan (Dispatch Trip, Trip Start Log, Passenger
-    Manifest)."""
+    Manifest).
+
+    Trip Start Log resolves through ``dispatch_trip`` as well as its own ``route_plan``:
+    that field is ``fetch_from`` ``dispatch_trip.route_plan``, and ``Document.insert``
+    runs ``check_permission("create")`` (document.py:300) BEFORE ``_validate_links()``
+    (:302) applies ``fetch_from`` — so at the create check it is EMPTY while the
+    mandatory, never-fetched ``dispatch_trip`` is already set. Passenger Manifest needs
+    the same fallback for a different reason (a manifest may be keyed by
+    ``dispatch_trip`` alone), so the two share one branch. Dispatch Trip carries no
+    ``dispatch_trip`` link, so the fallback is inert for it.
+    """
     project = getattr(doc, "project", None)
     if project:
         return project
 
     doctype = getattr(doc, "doctype", None)
-    if doctype in ("Dispatch Trip", "Trip Start Log"):
-        route_plan = getattr(doc, "route_plan", None)
-        if route_plan:
-            return frappe.db.get_value("Route Plan", route_plan, "project")
-
-    if doctype == "Passenger Manifest":
-        # [#qiimpb]
+    if doctype in ("Dispatch Trip", "Trip Start Log", "Passenger Manifest"):
         route_plan = getattr(doc, "route_plan", None)
         if not route_plan:
+            # [#qiimpb]
             dispatch_trip = getattr(doc, "dispatch_trip", None)
             if dispatch_trip:
                 route_plan = frappe.db.get_value(
@@ -413,6 +418,46 @@ def _doc_project(doc):
             return frappe.db.get_value("Route Plan", route_plan, "project")
 
     return None
+
+
+def _is_unsaved(doc):
+    """True when ``doc`` does not exist yet — i.e. this IS the create check.
+
+    ``Document.insert`` sets ``__islocal`` (document.py:295) BEFORE
+    ``check_permission("create")`` (:300) and deletes it once the row is written (:338),
+    so the flag is the framework's own statement that this row is not stored yet. A doc
+    read back from the database never carries it.
+
+    Read INSTEAD OF ``ptype`` on purpose. The Salis ``has_permission`` handlers are
+    deny-only and ptype-agnostic by contract — the same denial applies to every action —
+    and this keeps that intact: what is being distinguished is the DOCUMENT, not the
+    verb. A branch on ``ptype`` would have broken the contract; a branch on the
+    document's storage state does not.
+    """
+    return bool(getattr(doc, "__islocal", False))
+
+
+def _own_driver_basis(doc, user, driver_field="driver"):
+    """True when the doc's driver — its own link, else its parent trip's — is ``user``'s.
+
+    The create-time stand-in for ownership on the driver-owned DocTypes: a link to the
+    acting user's own Salis Driver is a durable, verifiable fact about the row, which
+    ``owner`` at the create check is not. Falls back to the parent Dispatch Trip's driver
+    because Trip Start Log and Boarding Scan Log both fetch their own ``driver`` from it,
+    so that link is still empty when the create check runs. Same basis
+    ``dispatch_trip_has_permission`` already applies to the parent itself.
+    """
+    own_driver = get_driver_for_session_user(user)
+    if not own_driver:
+        return False
+    if getattr(doc, driver_field, None) == own_driver:
+        return True
+    dispatch_trip = getattr(doc, "dispatch_trip", None)
+    if dispatch_trip:
+        return (
+            frappe.db.get_value("Dispatch Trip", dispatch_trip, "driver") == own_driver
+        )
+    return False
 
 
 def scoped_has_permission(doc, ptype, user=None):
@@ -440,34 +485,54 @@ def scoped_has_permission(doc, ptype, user=None):
 
 
 def _owner_or_project_has_permission(doc, user=None):
-    """Project-scope a doc while treating OWNERSHIP as an independent access basis.
+    """Project-scope a doc, treating OWNERSHIP as an independent access basis ON A ROW
+    THAT ALREADY EXISTS.
 
     The rule behind every ``if_owner`` DocPerm in Salis: an unscoped oversight user
-    defers to Frappe, the acting user's own row is always allowed, and every other
-    doc is confined to the user's allowed projects (a project-less doc fails closed).
-    Returns False to block, else None to defer to Frappe's default resolution.
+    defers to Frappe, the acting user's own STORED row is always allowed, and every other
+    doc is confined to the user's allowed projects (a doc that anchors to no project
+    fails closed). Returns False to block, else None to defer to Frappe's default
+    resolution.
 
     Deliberately NOT ``scoped_has_permission``: that one denies a project-BEARING doc
     outside scope before any ownership test, which would block a Driver (who holds no
     Project User Permission) from opening their own project-tagged record.
+
+    A-233 — OWNERSHIP IS NOT AN ACCESS BASIS ON AN UNSAVED ROW. ``Document.insert``
+    stamps ``owner`` with the acting user (document.py:298) two statements before
+    ``check_permission("create")`` (:300), so at the create check ``owner == user`` is a
+    tautology: it records who is asking, not anything about the row. Testing it first
+    therefore returned None for EVERY create and the project test below was never
+    reached, letting a scoped user create a record under another scope's parent. Frappe's
+    own core draws exactly this line — when User Permissions do not match a document it
+    falls back to the if_owner permission set and forces ``create`` to 0
+    (permissions.py:236-238, "if_owner does not come with create rights").
+
+    So on an unsaved row the ownership branch is skipped and the row must anchor itself:
+    its project must be in scope, or its driver link must resolve to the acting user's
+    own Salis Driver (``_own_driver_basis``), which stays true after the insert. Once
+    stored, ownership is a durable historical fact and is sufficient again, exactly as
+    the ``if_owner`` DocPerms and the matching query fragments require.
     """
     user = _resolve_user(user)
     if _is_unscoped(user):
         return None
 
+    unsaved = _is_unsaved(doc)
+
     # [#jc6moa]
-    if getattr(doc, "owner", None) == user:
+    if not unsaved and getattr(doc, "owner", None) == user:
         return None
 
     project = _doc_project(doc)
-    if not project:
-        # [#kk3lw5]
-        return False
+    if project and project in _allowed_projects(user):
+        return None
 
-    if project not in _allowed_projects(user):
-        return False
+    if unsaved and _own_driver_basis(doc, user):
+        return None
 
-    return None
+    # [#kk3lw5]
+    return False
 
 
 def salis_driver_has_permission(doc, ptype, user=None):
@@ -483,11 +548,19 @@ def salis_driver_has_permission(doc, ptype, user=None):
     driver record directly. This closes that direct-access leak.
 
     It mirrors ``salis_driver_query`` exactly: ownership is an independent, valid
-    access basis (the if_owner self-profile), so the acting user's own row is
+    access basis (the if_owner self-profile), so the acting user's own STORED row is
     always allowed; everything else is confined to the user's allowed projects.
     Using the shared ``scoped_has_permission`` here would be wrong — it denies a
     project-BEARING doc outside scope, which would block a Driver (who holds no
     Project User Permission) from reading their own project-tagged row.
+
+    A-233: ownership is not a basis on an UNSAVED row (see
+    ``_owner_or_project_has_permission``), so a scoped user's create must carry a
+    ``project`` they are permitted for. Salis Driver's ``project`` is optional and never
+    fetched, so an empty one at the create check is a real choice by the creator, not the
+    ordering artefact it is on the fetched links — and a scoped user may no longer create
+    an unanchored driver record that only they can then see. The Driver role holds no
+    create DocPerm here, so no self-service path is affected.
     """
     return _owner_or_project_has_permission(doc, user)
 
@@ -508,6 +581,14 @@ def trip_start_log_has_permission(doc, ptype, user=None):
     Using the shared ``scoped_has_permission`` here would still be wrong: it
     denies a project-BEARING doc outside scope, which would block a Driver (who
     holds no Project User Permission) from opening their own project-tagged log.
+
+    A-233: ownership is not a basis on an UNSAVED row (see
+    ``_owner_or_project_has_permission``), so a create is decided by the mandatory
+    ``dispatch_trip`` link instead — its Route Plan's project must be in scope, or the
+    trip must be one dispatched to the acting user's own Salis Driver. That keeps the
+    Driver's own create working (their ``driver`` link is still unfetched at the check,
+    so the parent trip's driver is what resolves) while a scoped supervisor can no longer
+    open a log against another project's trip.
     """
     return _owner_or_project_has_permission(doc, user)
 
@@ -553,17 +634,20 @@ def dispatch_trip_has_permission(doc, ptype, user=None):
 def _driver_chain_project(doc, driver_field="driver"):
     """Resolve a doc's project through its Salis Driver link, or None.
 
-    Falls back to the doc's ``vehicle`` link, which carries the project directly. On
-    Vehicle Incident / Vehicle Damage Write-Off / Vehicle Suspension the driver link is
-    ``fetch_from`` ``vehicle.current_driver``, and ``Document.insert`` runs
+    Falls back to the doc's ``vehicle`` link and then to its ``dispatch_trip`` link: both
+    reach the project where the driver link cannot yet. ``Document.insert`` runs
     ``check_permission("create")`` (document.py:300) BEFORE ``_validate_links()`` (:302)
-    applies ``fetch_from`` — so at the create check the driver is EMPTY while the
-    mandatory, never-fetched ``vehicle`` is already set. Without this a scoped supervisor
-    could not raise an incident on their own project's vehicle at all.
+    applies ``fetch_from``, so at the create check every fetched driver link is EMPTY
+    while the link it is fetched FROM is already set — ``vehicle.current_driver`` on
+    Vehicle Incident / Vehicle Damage Write-Off / Vehicle Suspension, and
+    ``dispatch_trip.driver`` on Boarding Scan Log. Without the vehicle fallback a scoped
+    supervisor could not raise an incident on their own project's vehicle at all; without
+    the trip fallback, once ownership stopped rescuing an unsaved row (A-233), they could
+    not record a boarding scan on their own project's trip either.
 
-    A no-op for the driver-owned DocTypes (Driver Attendance, Driver Suspension, Boarding
-    Scan Log): none of them carries a ``vehicle`` link, so nothing resolves and the
-    caller's existing fail-closed branch is reached unchanged.
+    Still a no-op for Driver Attendance and Driver Suspension: both make ``driver``
+    mandatory and never fetch it, and neither carries a ``vehicle`` or ``dispatch_trip``
+    link, so nothing extra resolves and the caller's fail-closed branch is unchanged.
     """
     driver = getattr(doc, driver_field, None)
     if driver:
@@ -574,6 +658,12 @@ def _driver_chain_project(doc, driver_field="driver"):
     vehicle = getattr(doc, "vehicle", None)
     if vehicle:
         return frappe.db.get_value("Salis Vehicle", vehicle, "project")
+
+    dispatch_trip = getattr(doc, "dispatch_trip", None)
+    if dispatch_trip:
+        route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan")
+        if route_plan:
+            return frappe.db.get_value("Route Plan", route_plan, "project")
     return None
 
 
@@ -582,42 +672,77 @@ def _driver_chain_has_permission(doc, user=None, driver_field="driver", with_own
 
     Resolves the doc's project through ``driver_field -> Salis Driver -> project``.
     When ``with_owner`` is True (the doc grants the Driver role an if_owner perm),
-    the acting user's own row is always allowed — mirroring the OR-owner clause in
+    the acting user's own STORED row is always allowed — mirroring the OR-owner clause in
     the matching query. Returns False to block, else None to defer to Frappe's
     default resolution. Not folded into ``scoped_has_permission`` because that helper
     reads ``doc.project`` directly, which these indirect-tenant docs do not carry.
+
+    A-233 — OWNERSHIP IS NOT AN ACCESS BASIS ON AN UNSAVED ROW. ``Document.insert``
+    stamps ``owner`` with the acting user (document.py:298) two statements before
+    ``check_permission("create")`` (:300), so at the create check ``owner == user`` is a
+    tautology and the ``with_owner`` branch deferred EVERY create — a scoped user could
+    attach an attendance, a suspension or a boarding scan to another project's driver.
+    Frappe's own core draws the same line, forcing ``create`` to 0 in the if_owner
+    fallback (permissions.py:236-238).
+
+    On an unsaved row the ownership branch is therefore skipped and the driver chain
+    decides. The Driver's own create is not collateral: ``_own_driver_basis`` accepts a
+    row whose driver link — or whose parent trip's driver — is the acting user's own
+    Salis Driver, which is durable where ``owner`` is not, so a Driver still records their
+    own attendance while holding no Project User Permission. Still deny-only, and still
+    never reads ``ptype``: the discriminator is the document's storage state, not the
+    action.
     """
     user = _resolve_user(user)
     if _is_unscoped(user):
         return None
 
+    unsaved = _is_unsaved(doc)
+
     # [#dr3own]
-    if with_owner and getattr(doc, "owner", None) == user:
+    if with_owner and not unsaved and getattr(doc, "owner", None) == user:
         return None
 
     project = _driver_chain_project(doc, driver_field=driver_field)
-    if not project:
-        # [#dr4nul]
-        return None if with_owner and getattr(doc, "owner", None) == user else False
+    if project and project in _allowed_projects(user):
+        return None
 
-    if project not in _allowed_projects(user):
-        return False
+    if with_owner and unsaved and _own_driver_basis(doc, user, driver_field=driver_field):
+        return None
 
-    return None
+    # [#dr4nul]
+    return False
 
 
 def driver_attendance_has_permission(doc, ptype, user=None):
-    """Mirror driver_attendance_query: project via driver, OR the Driver's own row."""
+    """Mirror driver_attendance_query: project via driver, OR the Driver's own STORED row.
+
+    A-233: ownership is not a basis on an UNSAVED row (see
+    ``_driver_chain_has_permission``), so a create is decided by the mandatory ``driver``
+    link — its project must be in scope, or it must be the acting user's own driver.
+    """
     return _driver_chain_has_permission(doc, user=user, with_owner=True)
 
 
 def driver_stop_has_permission(doc, ptype, user=None):
-    """Mirror driver_stop_query: project via driver, OR the Driver's own row."""
+    """Mirror driver_stop_query: project via driver, OR the Driver's own STORED row.
+
+    A-233: ownership is not a basis on an UNSAVED row (see
+    ``_driver_chain_has_permission``), so a create is decided by the mandatory ``driver``
+    link — a scoped user can no longer suspend another project's driver.
+    """
     return _driver_chain_has_permission(doc, user=user, with_owner=True)
 
 
 def boarding_scan_log_has_permission(doc, ptype, user=None):
-    """Mirror boarding_scan_log_query: project via driver, OR the Driver's own row."""
+    """Mirror boarding_scan_log_query: project via driver, OR the Driver's own STORED row.
+
+    A-233: ownership is not a basis on an UNSAVED row (see
+    ``_driver_chain_has_permission``). ``driver`` here is fetched from
+    ``dispatch_trip.driver`` and so is empty at the create check, which is why
+    ``_driver_chain_project`` also resolves through ``dispatch_trip``; the scan must
+    belong to a trip in the acting user's projects, or to their own driver.
+    """
     return _driver_chain_has_permission(doc, user=user, with_owner=True)
 
 
@@ -740,6 +865,17 @@ def payment_sod_has_permission(doc, ptype, user=None):
 
     The document is denied if EITHER control denies. Returns False to block;
     otherwise returns None to defer to Frappe's default permission resolution.
+
+    A-233 — THE PTYPE GATE ON CONTROL 2 IS LOAD-BEARING, NOT A SHORTCUT. Both identities
+    control 2 compares against are unset or meaningless at the create check:
+    ``requested_by`` is written in ``before_insert`` (document.py:303) and ``owner`` is
+    stamped at :298, while ``check_permission("create")`` runs at :300. So on a create
+    ``requested_by`` is empty and ``owner`` is ALWAYS the acting user — control 2 would
+    self-deny every create the moment it were reached. The only reason it is not reached
+    is the ``ptype not in ("submit", "write")`` return below. Anyone making this handler
+    ptype-agnostic (as the other Salis handlers are) must first give control 2 a
+    create-safe basis; deleting the gate alone reopens this. Control 1 is unaffected:
+    ``project`` is a direct, never-fetched Link and is already set at the create check.
     """
     if getattr(doc, "doctype", None) != "Salis Payment Request":
         return None

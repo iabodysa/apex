@@ -219,7 +219,14 @@ class TestTheDriverOwnedDocTypesAreUnchanged(_ScopeCase):
         ("Boarding Scan Log", SP.boarding_scan_log_has_permission),
     ]
 
-    def test_the_owner_still_decides_before_the_chain(self):
+    def test_the_owner_still_decides_before_the_chain_on_a_stored_row(self):
+        """These docs carry no ``__islocal``, so they are STORED rows.
+
+        A-233 later made ownership insufficient on an UNSAVED row, which is a different
+        document state, not a different action — the create-side counterpart of this
+        assertion lives in ``test_create_path_ownership_scope``. Kept here as the stored
+        half, which is what shows the vehicle fallback did not disturb these three.
+        """
         self.scoped()
         for doctype, handler in self.HANDLERS:
             with self.subTest(doctype=doctype):
@@ -228,7 +235,7 @@ class TestTheDriverOwnedDocTypesAreUnchanged(_ScopeCase):
                         SimpleNamespace(
                             doctype=doctype, driver=None, owner="supervisor@example.com"
                         ),
-                        "create",
+                        "read",
                     )
                 )
 
