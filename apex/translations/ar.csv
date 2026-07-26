@@ -1668,7 +1668,6 @@ Grace period (minutes) from trip start before notify escalation and absence mark
 Ground,أرضي
 Ground Floor,الطابق الأرضي
 Group Housing Permit,تصريح السكن الجماعي
-Group nodes classify materials and are not selectable as a concrete material,العُقد التصنيفية تصنّف المواد ولا يمكن اختيارها كمادة فعلية
 HR,الموارد البشرية
 HR Case,قضية موارد بشرية
 Habitat,الإسكان
@@ -1871,7 +1870,6 @@ Is Active,نشط
 Is Cancelled,ملغى
 Is Cross Region,عابر للمناطق
 Is External Supplier Worker?,هل هو عامل مورد خارجي؟
-Is Group,مجموعة
 Is Intercompany Movement,حركة بين الشركات
 Is Re-inspection,إعادة فحص
 Is Serialized,مرمز / ذو رقم تسلسلي
@@ -2531,7 +2529,6 @@ P256DH Key,مفتاح P256DH
 POD,إثبات التسليم
 Page {0} of {1} · {2} SIMs,صفحة {0} من {1} · {2} شريحة
 Paid,مدفوع
-Parent Maintenance Material,مادة الصيانة الأصل
 Partial / Attention: {0},جزئي / انتباه: {0}
 Partially Occupied,مشغول جزئياً
 Partially Occupied Rooms,الغرف المشغولة جزئياً
@@ -4303,7 +4300,6 @@ has ended,انتهى
 has expired,انتهت صلاحيته
 held by,بحوزة
 incidents,البلاغات
-lft,يسار
 matched,مطابق
 mixed,مختلط
 n/a,غير متاح
@@ -4313,7 +4309,6 @@ not recorded,غير مسجّل
 not_required,غير مطلوب
 ocr,تعرّف ضوئي على النصوص
 of,من
-old_parent,الأصل السابق
 on file,مُسجَّل
 other,أخرى
 paper,ورقي
@@ -4330,7 +4325,6 @@ released,مُصدَّر
 reported,مُبلَّغ عنه
 requested,مطلوب
 reversed,معكوس
-rgt,يمين
 security,أمن
 stamped,مختوم
 standing,دائم
