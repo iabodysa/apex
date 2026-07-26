@@ -130,6 +130,14 @@ jobs:
           fi
           echo "no internal/experimental files tracked"
 
+      # A-108's ratchet clause named a workflow STEP. Both guards already run
+      # inside `run-tests --app apex` in the `test` job, so this is fail-fast, not
+      # new enforcement: they are stdlib-only AST/filesystem scans (no frappe, no
+      # site, ~0.7s), so a colocation or coverage regression reds here in seconds
+      # instead of after the ~25min bench install the other job needs first.
+      - name: Test colocation and unit-test coverage ratchets
+        run: python3 -m unittest apex.tests.test_colocation_ratchet apex.tests.test_unit_test_coverage_guard
+
       # Dependency-free node unit tests for the worker/Masar pure helpers.
       - name: Worker-portal phone normaliser unit test
         run: node frontend/worker/phone.test.mjs
