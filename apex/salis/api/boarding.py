@@ -16,7 +16,6 @@ import json
 
 import frappe
 from frappe import _
-from frappe.rate_limiter import rate_limit
 from frappe.utils import cint, get_datetime, now_datetime, time_diff_in_seconds
 from frappe.utils.password import get_encryption_key
 
@@ -33,6 +32,18 @@ PASS_TTL_HOURS = 24
 SCAN_ACTOR_LIMIT = 60
 SCAN_UNRESOLVED_IP_LIMIT = 60
 SCAN_RATE_WINDOW_SECONDS = 60
+
+# The pass read's two ceilings. The ADDRESS one is the 120-per-minute this endpoint
+# has always advertised, on the same identity it has always used. The PEER one counts
+# the transport connection, which no caller can choose -- see _enforce_pass_read_rate_limit.
+PASS_ADDRESS_LIMIT = 120
+# Ten address-budgets. Behind a reverse proxy the peer is the EDGE, so every caller
+# shares this one window: it is sized as a bound on how far one connection may amplify
+# a forged address, not as a per-caller cadence. Twenty reads a second on a single
+# endpoint is far above the one-pass-per-scan the driver app issues, so an honest fleet
+# never reaches it; a deployment that does should raise this rather than drop it.
+PASS_PEER_LIMIT = 1200
+PASS_RATE_WINDOW_SECONDS = 60
 
 # Who may authorise a boarding scan. Deliberately NARROWER than the driver
 # portal's same-named tuple: Finance Manager reads fleet cost, never scans a rider on.
@@ -132,16 +143,40 @@ def _authorize_scan_actor() -> str:
     )
 
 
-def _enforce_scan_rate_limit(scope: str, identity: str, limit: int) -> None:
-    """Charge a scan bucket only after its identity is selected server-side."""
+def _charge_request_window(
+    scope: str, identity: str, limit: int, window_seconds: int, endpoint: str
+) -> None:
+    """Charge this request against one named window.
+
+    ``rl:<cmd>:<scope>:<identity>`` keeps every window here readable beside the
+    framework's own ``rl:<cmd>:<identity>`` (rate_limiter.py:155), with a scope
+    segment because one endpoint in this module charges more than one bucket.
+    ``endpoint`` names the window when the route set no ``cmd``, so a direct call
+    never lands in an unnamed bucket shared with the next one.
+
+    No request means no traffic to meter, so console and job callers are never
+    charged -- the same first guard the framework's decorator applies
+    (rate_limiter.py:134).
+    """
     if not getattr(frappe.local, "request", None):
         return
 
-    command = frappe.form_dict.get("cmd") or "apex.salis.api.boarding.scan_boarding_pass"
+    command = frappe.form_dict.get("cmd") or endpoint
     charge_window(
         f"rl:{command}:{scope}:{identity}",
-        SCAN_RATE_WINDOW_SECONDS,
+        window_seconds,
         limit,
+    )
+
+
+def _enforce_scan_rate_limit(scope: str, identity: str, limit: int) -> None:
+    """Charge a scan bucket only after its identity is selected server-side."""
+    _charge_request_window(
+        scope,
+        identity,
+        limit,
+        SCAN_RATE_WINDOW_SECONDS,
+        "apex.salis.api.boarding.scan_boarding_pass",
     )
 
 
@@ -168,6 +203,61 @@ def _enforce_scan_unresolved_ip_rate_limit() -> None:
     if not ip:
         return
     _enforce_scan_rate_limit("scan-unresolved-ip", ip, SCAN_UNRESOLVED_IP_LIMIT)
+
+
+def _transport_peer() -> str | None:
+    """The address the CONNECTION came from -- the one a caller cannot choose.
+
+    werkzeug fills it from the WSGI environ's ``REMOTE_ADDR``
+    (werkzeug/wrappers/request.py:127), so it is what the socket reported and no
+    request header can move it. ``frappe.local.request_ip`` can: frappe takes it
+    from the FIRST ``X-Forwarded-For`` entry with no trusted-proxy check at all
+    (auth.py:64-75), which is what apex_core.utils.request_ip_trust exists to grade.
+
+    Behind a reverse proxy this is the EDGE, not the caller, so it identifies one
+    connection rather than one person -- which is exactly why it carries its own far
+    looser ceiling instead of the per-address one.
+    """
+    return getattr(getattr(frappe.local, "request", None), "remote_addr", None)
+
+
+def _enforce_pass_read_rate_limit() -> None:
+    """Bound the pass read on the address it CLAIMS and the connection it CAME FROM.
+
+    The address window is unchanged: the same 120 per minute on the same
+    ``request_ip``, so nothing that was refused before is admitted now. What it never
+    had is a bound a forger cannot step out of -- ``request_ip`` is whatever the first
+    X-Forwarded-For entry says, so one caller rotating that header opens a fresh
+    window per request and the ceiling never arrives. The peer window is the one that
+    does not move under it.
+
+    This is what the decorator's ``key="frappe.request.remote_addr"`` was reaching for
+    and could not have. ``key`` is a FORM_DICT LOOKUP, ``frappe.form_dict.get(key, "")``
+    (rate_limiter.py:143), so the string named a request FIELD, never the attribute it
+    reads like. No caller sends a field by that name, the lookup returned "", and the
+    identity became ``<ip>:`` (rate_limiter.py:147-148) -- the plain address the string
+    was written to improve on. Worse, form_dict is built from the query string and body
+    (app.py:302-314), so a caller who DID send that field bought a private window per
+    value and left the limit behind entirely. Dropping the key closes that: every value
+    now counts in one address window.
+
+    An identity that is absent declines to charge rather than pooling every such caller
+    into a bucket named after nothing -- the same call the sibling scan limiter makes,
+    because a shared bucket is not a ceiling, it is a way for one caller to 429 the rest.
+    """
+    for scope, identity, limit in (
+        ("pass-address", getattr(frappe.local, "request_ip", None), PASS_ADDRESS_LIMIT),
+        ("pass-peer", _transport_peer(), PASS_PEER_LIMIT),
+    ):
+        if not identity:
+            continue
+        _charge_request_window(
+            scope,
+            identity,
+            limit,
+            PASS_RATE_WINDOW_SECONDS,
+            "apex.salis.api.boarding.get_boarding_pass",
+        )
 
 
 def _resolve_trip(dispatch_trip: str) -> dict:
@@ -300,7 +390,6 @@ def _log_scan(
 
 # [#8xubuw]
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
 def get_boarding_pass(dispatch_trip, worker):
     """Issue a signed QR boarding pass for ``worker`` on ``dispatch_trip`` (read).
 
@@ -309,7 +398,13 @@ def get_boarding_pass(dispatch_trip, worker):
     must be on the trip's Transport Request manifest. Returns the pass token plus
     a ``qr_payload`` (the same token, what the SPA renders as a QR image) and
     display fields. Issues no DB write — a pass is just a signed claim; it only
-    matters when scanned."""
+    matters when scanned.
+
+    Rate-limited in the body rather than by ``@rate_limit`` because the ceiling this
+    read needs is keyed on the transport peer, which that decorator's ``key`` cannot
+    name — see _enforce_pass_read_rate_limit. Charged first, before any lookup, which
+    is where the decorator charged it."""
+    _enforce_pass_read_rate_limit()
     trip = _resolve_trip(dispatch_trip)
 
     manifest = _trip_manifest_workers(trip.get("transport_request"), dispatch_trip)
