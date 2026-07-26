@@ -68,16 +68,36 @@ class TestAutoEmailReportNotExternalised(unittest.TestCase):
         self.assertEqual(load_specs("habitat", only=["Auto Email Report"]), [])
 
     def test_legacy_seeder_resolves_dynamic_fields(self):
-        # [#4n0oed] Reads the shared seeding engine, not the module wrapper: A-176
-        # promoted the identical Habitat/Salis bodies into it, so that is where the
-        # two runtime lookups this test exists to prove now live.
-        import inspect
+        """The claim above, asserted on the RECORD the seeder builds rather than on
+        the source text that builds it: both fields must arrive from a live lookup,
+        so a seeder that hardcoded either one fails here while any refactor of how
+        it reads them stays green. Reads the shared engine, not the module wrapper —
+        A-176 promoted the identical Habitat/Salis bodies into it.
 
-        from apex.apex_core.setup.seeders import auto_email_report_seed_base
+        Site-free: the engine's ``frappe`` is swapped for a recording stub, so the
+        two lookups are observed at the call boundary wherever they end up living.
+        """
+        from unittest.mock import MagicMock, patch
 
-        src = inspect.getsource(auto_email_report_seed_base.seed_auto_email_reports_for)
-        self.assertIn('frappe.db.get_value("User", "Administrator", "email")', src)
-        self.assertIn('frappe.db.get_value("Report", cfg["report"], "report_type")', src)
+        from apex.apex_core.setup.seeders import auto_email_report_seed_base as engine
+
+        live = {
+            ("User", "Administrator", "email"): "live-admin@example.com",
+            ("Report", "QA Digest", "report_type"): "Query Report",
+        }
+        built = []
+        stub = MagicMock()
+        stub.db.get_value.side_effect = lambda *args: live[args]
+        # Nothing seeded yet, and the Report itself is installed.
+        stub.db.exists.side_effect = lambda doctype, _filters: doctype == "Report"
+        stub.get_doc.side_effect = lambda payload: built.append(payload) or MagicMock()
+
+        with patch.object(engine, "frappe", stub):
+            engine.seed_auto_email_reports_for([{"report": "QA Digest", "frequency": "Daily"}])
+
+        self.assertEqual(len(built), 1, "one Auto Email Report must be created")
+        self.assertEqual(built[0]["email_to"], "live-admin@example.com")
+        self.assertEqual(built[0]["report_type"], "Query Report")
 
 
 if __name__ == "__main__":
