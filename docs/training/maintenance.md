@@ -9,18 +9,29 @@ coverage.
 
 ## Permissions
 
-| DocType | Accommodation Manager | Resident Supervisor | Resident Request Coordinator | Maintenance Technician | Maintenance Manager | All (any logged-in user) |
-|---------|----------------------|---------------------|------------------------------|------------------------|---------------------|--------------------------|
-| **Maintenance Request** *(submittable)* | Read, Write, Create, Submit | Read, Write, Create, Submit | Read, Write, Create, Submit | Read | — | Create (Read own only) |
-| **Maintenance Inspection Report** *(submittable)* | Read, Write, Create, Submit | — | — | — | — | — |
-| **Maintenance Work Order** *(submittable)* | — | — | — | **Read, Write** | — | — |
-| Maintenance Material / Material Template (masters) | Read, Write, Create | — | — | — | **Read, Write, Create** | — |
-| Subcontractor Service Contract / Order | Read, Write, Create | Read | — | — | — | — |
+| DocType | Accommodation Manager | Resident Supervisor | Resident Request Coordinator | Maintenance Technician | All (any logged-in user) |
+|---------|----------------------|---------------------|------------------------------|------------------------|--------------------------|
+| **Maintenance Request** *(submittable)* | Read, Write, Create, Submit | Read, Write, Create, Submit | Read, Write, Create, Submit | Read | Read, Create *(own only)* |
+| **Maintenance Inspection Report** *(submittable)* | — | — | — | — | — |
+| **Maintenance Work Order** *(submittable)* | — | — | — | **Read, Write** | — |
+| Maintenance Material / Material Template (masters) | Read, Write, Create | — | — | **Read, Write, Create** | — |
+| **Subcontractor Service Contract** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | — | — | — | — |
+| **Subcontractor Service Order** *(submittable)* | Read, Write, Create, Submit | — | — | — | — |
 
 > **Universal intake:** any logged-in user can raise a **Maintenance Request** and sees only their own. The assigned technician also sees their ticket. Oversight roles see all.
 
-> **Maintenance Manager** is an ERPNext-supplied role (not created by Apex). When
-> present, it holds Read/Write/Create on the maintenance material masters only.
+> **There is no Maintenance Manager role in Apex.** The maintenance material
+> masters are held by the **Maintenance Technician** — Read, Write, Create —
+> alongside the Accommodation Manager. Do not look for a Maintenance Manager
+> when assigning material access.
+
+> **Maintenance Inspection Report is System Manager-only.** Its permissions grant
+> no operational role anything, so an Accommodation Manager cannot open, create,
+> or submit one without an administrator role. Treat the inspection step as
+> administrator-run until that changes.
+
+> **Subcontractor records are Accommodation Manager-only.** The Resident
+> Supervisor holds nothing on the service contract or the service order.
 
 ---
 
@@ -36,7 +47,8 @@ coverage.
 
 ### Maintenance Inspection Report *(submittable)*
 - **Purpose:** scopes the job and the materials needed.
-- **Roles:** Manager only.
+- **Roles:** System Manager only — no operational maintenance or housing role
+  holds any right on it.
 - **Key fields:** linked request, findings, material estimate.
 
 ### Maintenance Work Order *(submittable)*
@@ -59,8 +71,8 @@ coverage.
 
 1. **Raise a request.** A supervisor (or a resident via the request web form)
    creates a **Maintenance Request** and submits it.
-2. **Inspect.** The Manager records a **Maintenance Inspection Report** to scope
-   the job and material needs.
+2. **Inspect.** A **Maintenance Inspection Report** scopes the job and material
+   needs. Only a System Manager can record one today.
 3. **Work order.** A **Maintenance Work Order** is issued against the request and
    worked by the **Maintenance Technician** (who holds Read/Write on it). A daily
    escalation job surfaces requests left open too long.
