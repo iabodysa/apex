@@ -45,10 +45,10 @@ def validate(doc, method=None):
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)
 
     if assignment.docstatus != 1:
-        frappe.throw(_("Linked Accommodation Assignment must be submitted."))
+        frappe.throw(_("Linked Housing Assignment must be submitted."))
 
     if assignment.check_out_date:
-        frappe.throw(_("Linked Accommodation Assignment already has a check-out date: {0}").format(assignment.check_out_date))
+        frappe.throw(_("Linked Housing Assignment already has a check-out date: {0}").format(assignment.check_out_date))
 
     if doc.checkout_date and assignment.check_in_date and getdate(doc.checkout_date) < getdate(assignment.check_in_date):
         frappe.throw(_("Checkout date cannot be earlier than assignment check-in date."))
@@ -58,7 +58,7 @@ def validate(doc, method=None):
         {"assignment": doc.assignment, "docstatus": 1, "name": ["!=", doc.name]},
     )
     if duplicate:
-        frappe.throw(_("A submitted Accommodation Checkout already exists for this assignment: {0}").format(duplicate))
+        frappe.throw(_("A submitted Housing Checkout already exists for this assignment: {0}").format(duplicate))
 
     if not doc.employee:
         doc.employee = assignment.employee
@@ -250,7 +250,7 @@ def on_submit(doc, method=None):
                 "building": building,
                 # [#he8cmw]
                 "source_checkout": doc.name,
-                "remarks": _("Auto-generated from Accommodation Checkout {0}. Review replacement costs and submit.").format(doc.name),
+                "remarks": _("Auto-generated from Housing Checkout {0}. Review replacement costs and submit.").format(doc.name),
             })
             for item in doc.custody_return_items:
                 if item.return_status in ("Damaged", "Lost"):
@@ -336,7 +336,7 @@ def _build_departure_transport(checkout, assignment):
         "source_channel": "Desk",
         "status": "New",
         "from_location": frappe.db.get_value("Building", building, "building_name") if building else None,
-        "purpose": _("Departure transport for {0} ({1}). Raised from Accommodation Checkout {2}.").format(
+        "purpose": _("Departure transport for {0} ({1}). Raised from Housing Checkout {2}.").format(
             checkout.employee, checkout.checkout_reason, checkout.name
         ),
         "workers": [{"employee": checkout.employee, "pickup_point": building}],

@@ -109,7 +109,7 @@ class TransportRequest(Document):
         if self.request_type == "Accommodation to Project Shuttle":
             if not self.accommodation_building or not self.project:
                 frappe.throw(
-                    _("Accommodation Building and Project are required for an Accommodation to Project Shuttle.")
+                    _("Building and Project are required for an Accommodation to Project Shuttle.")
                 )
         elif self.request_type == "Inter-City Relocation":
             if not (self.workers or []):

@@ -58,7 +58,7 @@ A round date is required to submit a round.,يلزم تاريخ جولة لاع�
 A round date is required to submit rounds.,يلزم تاريخ الجولة لاعتماد الجولات.
 A row here may be a whole building or a single leased unit — name it as the property is known operationally.,السجل هنا قد يكون مبنى كاملاً أو وحدة مستأجرة واحدة — سمِّه بالاسم المتداول للعقار في التشغيل.
 A severe or critical safety incident has been reported and requires immediate management attention,تم الإبلاغ عن حادث سلامة جسيم أو حرج ويتطلب اهتمامًا فوريًا من الإدارة
-A submitted Accommodation Checkout already exists for this assignment: {0},توجد بالفعل مغادرة سكن مُقدَّمة لهذا التسكين: {0}
+A submitted Housing Checkout already exists for this assignment: {0},يوجد بالفعل إخلاء سكن مُقدَّم لهذا التسكين: {0}
 A telecom service agreement with one supplier that governs one or more SIM Cards and drives recurring billing.,اتفاقية خدمة اتصالات مع مورّد واحد تحكم شريحة اتصال واحدة أو أكثر وتُشغّل الفوترة الدورية.
 A temporary top-up requires a revert due date.,تتطلب التعبئة المؤقتة تحديد تاريخ استحقاق للاسترجاع.
 A trip has been scheduled,تمت جدولة رحلة
@@ -85,7 +85,6 @@ Access Level,مستوى الصلاحية
 Accident,حادث
 Accommodation,السكن
 Accommodation Building (Pickup),مبنى السكن (نقطة الالتقاط)
-Accommodation Building and Project are required for an Accommodation to Project Shuttle.,مبنى السكن والمشروع مطلوبان لرحلة النقل من السكن إلى المشروع.
 Accommodation Check-in,تسجيل وصول السكن
 Accommodation Cost Distribution,توزيع تكلفة السكن
 Accommodation Cost by Type,تكلفة الإسكان حسب النوع
@@ -428,8 +427,8 @@ Auto-create Facility Asset Movement on Transfer,إنشاء حركة أصل من�
 Auto-derived from the building's physical beds.,مشتق آلياً من الأسرّة الفعلية للمبنى.
 Auto-fetched from Building,يُجلب آلياً من المبنى
 Auto-filled from Utility Account. Adjust if different for this bill.,يُعبّأ تلقائياً من حساب الخدمة. عدّله إذا كان مختلفاً لهذه الفاتورة.
-Auto-generated from Accommodation Checkout {0}. Review replacement costs and submit.,أُنشئ تلقائيًا من مغادرة السكن {0}. راجع تكاليف الاستبدال ثم قدّمه.
 Auto-generated from Building and Expected Date on save. Read-only by design.,يُولَّد آلياً من المبنى والتاريخ المتوقع عند الحفظ. للقراءة فقط بحكم التصميم.
+Auto-generated from Housing Checkout {0}. Review replacement costs and submit.,أُنشئ تلقائيًا من إخلاء السكن {0}. راجع تكاليف الاستبدال ثم قدّمه.
 Auto-generated from {0} {1},مُولَّد آلياً من {0} {1}
 Auto-generated summary of meter sharing calculation,ملخّص يُنشأ تلقائياً لحساب مشاركة العدّاد
 Auto-resolved: {0},تمت المعالجة تلقائيًا: {0}
@@ -551,6 +550,7 @@ Building Licenses by Status,رخص المباني حسب الحالة
 Building Number,رقم المبنى
 Building Operations Summary,تقرير مشرف السكن
 Building Store,مخزن المبنى
+Building and Project are required for an Accommodation to Project Shuttle.,المبنى والمشروع مطلوبان لرحلة النقل من السكن إلى المشروع.
 Building arrival cards…,جارٍ إنشاء بطاقات الوصول…
 Building is at full capacity ({0} of {1}). Over-capacity not allowed.,المبنى ممتلئ بالكامل ({0} من {1}). تجاوز السعة غير مسموح به.
 Building is required to mark Completed.,المبنى مطلوب للوسم كمكتمل.
@@ -1163,7 +1163,7 @@ Departure Transport Request raised: {0},تم إنشاء طلب نقل المغا
 Departure Transport Request {0} raised.,تم إنشاء طلب نقل المغادرة {0}.
 Departure transport applies only to a Final Exit or End of Contract checkout.,نقل المغادرة ينطبق فقط على إخلاء سكن لخروج نهائي أو نهاية عقد.
 Departure transport can only be raised for a submitted checkout.,لا يمكن إنشاء نقل المغادرة إلا لإخلاء سكن مُرحَّل.
-Departure transport for {0} ({1}). Raised from Accommodation Checkout {2}.,نقل مغادرة لـ {0} ({1}). تم إنشاؤه من إخلاء السكن {2}.
+Departure transport for {0} ({1}). Raised from Housing Checkout {2}.,نقل مغادرة لـ {0} ({1}). تم إنشاؤه من إخلاء السكن {2}.
 Deployed,مشغّل
 Deployment,التوزيع
 Depreciation %,نسبة الإهلاك (%)
@@ -1329,7 +1329,7 @@ Employee Daily Share,الحصة اليومية للموظف
 Employee Daily Share (SAR),حصة الموظف اليومية (ريال)
 Employee Name,اسم الموظف
 Employee Responsible,الموظف المسؤول
-Employee {0} already has an active Accommodation Assignment: {1},الموظف {0} لديه بالفعل إسناد سكن نشط: {1}
+Employee {0} already has an active Housing Assignment: {1},الموظف {0} لديه بالفعل تسكين نشط: {1}
 Employee {0} appears more than once in the passenger list.,الموظف {0} يظهر أكثر من مرة في قائمة الركاب.
 "Employee {0} belongs to company {1}, not the SIM's company {2}.",الموظف {0} يتبع الشركة {1}، وليست شركة الشريحة {2}.
 Employee {0} does not exist.,الموظف {0} غير موجود.
@@ -2004,11 +2004,11 @@ Link sent to {0},تم إرسال الرابط إلى {0}
 Link the Custody Issue,اربط سند صرف العهدة
 Link the Maintenance Request,اربط طلب الصيانة
 Linked,مرتبط
-Linked Accommodation Assignment already has a check-out date: {0},إسناد السكن المرتبط لديه بالفعل تاريخ مغادرة: {0}
-Linked Accommodation Assignment must be submitted.,يجب اعتماد التسكين المرتبط.
 "Linked ERPNext Supplier for the rental office, where applicable.",المورّد المرتبط في ERPNext لمكتب التأجير، عند الانطباق.
 Linked Employee,الموظّف المرتبط
 Linked Facility Asset,الأصل المرتبط
+Linked Housing Assignment already has a check-out date: {0},التسكين المرتبط لديه بالفعل تاريخ مغادرة: {0}
+Linked Housing Assignment must be submitted.,يجب اعتماد التسكين المرتبط.
 Linked Maintenance,طلب الصيانة المرتبط
 Linked Maintenance Request,طلب الصيانة المرتبط
 Linked Maintenance Request Item,بند طلب الصيانة المرتبط
@@ -4375,7 +4375,7 @@ workshop status,حالة الورشة
 {0} surplus bed(s) retired (Out of Service).,أُحيلت {0} سرير/أسرّة زائدة إلى «خارج الخدمة».
 {0} total,{0} الإجمالي
 {0} vehicles,{0} مركبة
-{0} {1} already has an active Accommodation Assignment: {2},{0} {1} لديه بالفعل إسناد سكن نشط: {2}
+{0} {1} already has an active Housing Assignment: {2},{0} {1} لديه بالفعل تسكين نشط: {2}
 {0} {1} does not exist.,{0} {1} غير موجود.
 {0}: {1} occupied bed(s) prevented capacity reduction.,{0}: {1} سرير/أسرّة مشغولة منعت تخفيض السعة.
 Cost Recovery from Driver,استرداد التكلفة من السائق
