@@ -70,7 +70,9 @@ def _throttle_bad_token_attempt() -> None:
     frappe takes request_ip from the first X-Forwarded-For entry with no trusted-proxy
     check (auth.py:65-66), so a caller that forges a fresh XFF per request buys a fresh
     window every time and walks straight through. Deployments must have the reverse
-    proxy OVERWRITE X-Forwarded-For rather than append to it. This is a speed bump on
+    proxy OVERWRITE X-Forwarded-For rather than append to it, and that requirement is
+    now CHECKABLE rather than merely stated: apex_core.utils.request_ip_trust grades a
+    live deployment from one authenticated request. This is a speed bump on
     unsophisticated guessing, not the control that makes the token safe -- 192 bits of
     entropy is."""
     if not getattr(frappe.local, "request", None):
