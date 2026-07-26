@@ -1,9 +1,8 @@
 # Apex Training Guide
 
 A practical, role-by-role guide to using **Apex** — the AFMCO workforce
-operations suite. Apex hosts three functional modules plus a shared settings
-layer. `apex/modules.txt` declares **five** names — those four, plus a reserved
-`SIM Operations` entry that ships no records of its own:
+operations suite. `apex/modules.txt` declares **four** names — three functional
+modules plus a shared settings layer, one per bullet below:
 
 - **Habitat** — accommodation, custody, safety, maintenance, and facility costs.
 - **Salis** — movement and fleet: vehicles, drivers, fuel, dispatch, rentals,
@@ -13,13 +12,11 @@ layer. `apex/modules.txt` declares **five** names — those four, plus a reserve
 - **Logistay** — workforce and telecom operations: freelancers, temporary
   workers, telecom contracts, SIM inventory and custody, billing documents, and
   the **Telecom Control** desk. It ships no workspace of its own; its reports,
-  cards, and desk are hosted on the **Custody** workspace. It has no training
-  page yet, and the Custody page below does not cover it.
+  cards, and desk are hosted on the **Custody** workspace. The SIM records
+  (`SIM Card`, `SIM Custody Assignment`) belong to this module and are reached
+  through **Custody**. Logistay has no training page yet, and the Custody page
+  below does not cover it.
 - **Apex Core** — shared configuration (Habitat / Salis / Integration settings).
-- **SIM Operations** — a reserved module name only. Its package holds nothing but
-  an `__init__.py`, and no DocType, report, or workspace declares it; the SIM
-  records themselves (`SIM Card`, `SIM Custody Assignment`) declare **Logistay**.
-  Do not look for SIM functionality here — it is reached through **Custody**.
 
 This guide explains, per functional area, **what each record is for**, **who can
 do what** (roles and permissions), the **key fields**, and the **typical
@@ -100,15 +97,16 @@ that right.
 
 ### Portals
 
-Apex serves seven portal routes. Their audiences and authentication paths are
-listed once in [Served portal routes](../../README.md#served-portal-routes).
+Apex serves **seven** portal routes. Their audiences and authentication paths
+are listed once in [Served portal routes](../../README.md#served-portal-routes).
 
 10. [Driver & Worker Portals](portals-masar-driver.md) — mobile self-service (`/driver`, `/masar`)
 
-> The five session-gated operator portals — `/fleet` (employee self-service),
-> `/fleet-os` (fleet supervisor board), `/housing`, `/safety`, and
-> `/masar-supervisor` (route supervisor) — do not yet have training pages. Until
-> they do, use the route reference above for their audience and access rules.
+> The **five** session-gated operator portals — `/fleet` (employee
+> self-service), `/fleet-os` (fleet supervisor board), `/housing`, `/safety`,
+> and `/masar-supervisor` (route supervisor) — do not yet have training pages.
+> Until they do, use the route reference above for their audience and access
+> rules.
 
 ### Shared
 11. [Settings & Desk Pages](settings.md) — Apex Core settings, operational desk consoles

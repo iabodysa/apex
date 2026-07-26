@@ -281,9 +281,9 @@ Apex serves **seven** portal routes. Each one is a single `apex/www/<route>.html
 |---|---|---|---|
 | `/driver` | Salis drivers, who are not Frappe users | Guest-accessible. The personal `?d=<token>` link is charset-validated, throttled, parked in an httpOnly cookie, then stripped from the URL by a redirect; every endpoint re-resolves the driver from that token server-side. | `apex/www/driver.py` · `worker_portal` |
 | `/masar` | Housed and transported workers, who are not Frappe users | Guest-accessible. The same personal-token pattern on `?w=<token>`; every query is scoped to the one Employee the token resolves to. | `apex/www/masar.py` · `worker_portal` |
-| `/fleet` | Any logged-in employee — their own vehicle, fuel request, and recent trips | Guests are redirected to login; after that there is **no role gate** and every signed-in user may open the page. Data is scoped per user on the server by `apex.salis.api.fleet_employee` (4 endpoints). | `apex/www/fleet.py` · `fleet_portal` |
+| `/fleet` | Any logged-in employee — their own vehicle, fuel request, and recent trips | Guest redirect, then **no role gate**: every signed-in user may open the page. Data is scoped per user on the server by `apex.salis.api.fleet_employee` (4 endpoints). | `apex/www/fleet.py` · `fleet_portal` |
 | `/fleet-os` | Fleet supervisors — the whole scoped fleet board | Guest redirect, then `FLEET_ROLES`: System Manager, Fleet Manager, Fleet Project Manager, Fleet Supervisor. Backed by `apex.salis.api.fleet_os` (13 endpoints), each re-checking `Salis Vehicle` permission server-side. | `apex/www/fleet_os.py` · `fleet_os_portal` |
-| `/housing` | Accommodation operators — the periodic housing inventory count and the three-exit facility-asset delivery clearance | Guest redirect, then `HOUSING_ROLES`, the union of the two flows' write roles: System Manager, Accommodation Manager, Resident Supervisor, Procurement Supervisor. A Resident Supervisor is further confined to their own buildings. | `apex/www/housing.py` · `housing_portal` |
+| `/housing` | Accommodation operators — the periodic housing inventory count and the three-exit facility-asset delivery clearance | Guest redirect, then `HOUSING_ROLES`: System Manager, Accommodation Manager, Resident Supervisor, Procurement Supervisor. That set is the union of the two flows' write roles, and a Resident Supervisor is further confined to their own buildings. | `apex/www/housing.py` · `housing_portal` |
 | `/safety` | Safety supervisors — pick a building, work the checklist cadences that are due, submit one round per cadence | Guest redirect, then `SAFETY_ROLES`: System Manager, Accommodation Manager, Resident Supervisor. | `apex/www/safety.py` · `safety_portal` |
 | `/masar-supervisor` | Route supervisors who dispatch buses | Guest redirect, then `SUPERVISOR_ROLES`: System Manager, Fleet Manager, Fleet Project Manager, Fleet Supervisor. Every read is additionally row-scoped to the caller's own route plans, so the role gate is a coarse door and not the data boundary. | `apex/www/masar_supervisor.py` · `route_supervisor_portal` |
 
@@ -295,7 +295,7 @@ What the two portals genuinely share is a small amount of literal copy: five byt
 
 On a gated route, a logged-in user without the required role gets a friendly access page rather than a raw 403. The role gate is only the door: every endpoint re-checks document permission and row scope on the server.
 
-`/housing-count` is not a portal route. It is a legacy address kept alive only to redirect to `/housing#/count`, and it is the one `apex/www/*.html` file that is not a portal shell: `housing-count.html` is a redirect marker that mounts no application and loads no bundle. The marker cannot be deleted — Frappe resolves a `www` route by template file, so without it the sibling `housing_count.py` is never imported and the address answers 404 instead of redirecting. The check below therefore excludes it by name.
+`/housing-count` is not a portal route. It is a legacy address kept alive only to redirect to `/housing#/count`, and it is the one `apex/www/*.html` file that is not a portal shell: `housing-count.html` is a redirect marker that mounts no application and loads no bundle. The marker cannot be deleted — Frappe resolves a `www` route by template file, so without it the sibling `housing_count.py` is never imported and the address answers 404 instead of redirecting. The parity guard below excludes it structurally rather than by name: a `www` page counts as a portal route only when its shell loads a portal bundle, and this one loads none.
 
 Each route also gets a tile on the Frappe `/apps` selector, declared in `add_to_apps_screen` (`apex/hooks.py`). The gated tiles reuse the page's own role set through a `has_apps_screen_access()` helper that sits next to it, so a tile can never be shown to a user the page would turn away.
 
@@ -303,19 +303,13 @@ Desk users work through native workspaces, forms, reports, and operator pages. M
 
 ### Keeping the route table honest
 
-The table above is a published description of a directory that changes whenever a portal is added, split, or retired. Two checks stand behind it, and they cover different things.
+The table above is a published description of a directory that changes whenever a portal is added, split, or retired. Three checks stand behind it, and they cover different things.
 
-`apex/tests/test_portal_route_coverage.py` runs with the suite. It parses the shells under `apex/www/`, the bundle-rebuild matrix in the Portal Bundles workflow, and the browser smoke list, and fails when those three sets disagree — so a served route can never ship a bundle that nothing rebuilds or nothing opens. `apex/tests/test_apps_screen_gate_wiring.py` closes the neighbouring gap: it resolves, per server module, the routes that actually reach it, and fails a module whose own docstring claims a route it does not serve.
+`apex/tests/test_workspace_doc_parity.py` derives the table itself, so nothing in it is maintained by hand. It reads every shell and controller under `apex/www/` and compares, row by row, the route, the controller module, the bundle the shell mounts, whether guests are redirected to login, and the exact role set the controller's `get_context()` applies. The route count in the sentence above is derived the same way. The comparison runs in both directions: a documented route that no longer ships and a shipped route this table omits both fail, and so does a role added to or dropped from a gate constant without the table following it.
 
-Neither guard reads the table above. Until one does, the table's own check is the command below; run it from the repository root after any change under `apex/www/`. It prints nothing and exits `0` only when the shells on disk and the routes documented here are the same set:
+`apex/tests/test_portal_route_coverage.py` covers a different set. It parses the shells under `apex/www/`, the bundle-rebuild matrix in the Portal Bundles workflow, and the browser smoke list, and fails when those three disagree — so a served route can never ship a bundle that nothing rebuilds or nothing opens. `apex/tests/test_apps_screen_gate_wiring.py` closes the neighbouring gap: it resolves, per server module, the routes that actually reach it, and fails a module whose own docstring claims a route it does not serve.
 
-```bash
-diff \
-  <(ls apex/www/*.html | sed 's|.*/||; s|\.html$||' | grep -vx 'housing-count' | sort) \
-  <(grep -oE '^\| `/[a-z-]+`' README.md | tr -d '|` /' | sort)
-```
-
-A line in the left column and not the right means a served route nobody documented. A line in the right column and not the left means the table promises a route that no longer exists.
+Because the gate column is derived, it carries a fixed shape: a gated row names its controller's role constant in backticks, followed immediately by a colon and the comma-separated role list, ending in a period. Prose may sit either side of that segment. A row with no such segment asserts the route applies no role gate at all, and reds if the controller applies one.
 
 ## Security and integrity
 
