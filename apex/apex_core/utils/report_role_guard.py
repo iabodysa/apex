@@ -85,9 +85,10 @@ _APP = "apex"
 # is never the role that loses access.
 _ALWAYS_PERMITTED = frozenset({"Administrator"})
 
-# Held as a module constant, like workflow_guard._MESSAGE: check_translations.py extracts
-# only a literal sitting directly inside _(), so an ar.csv row for this text is owed and
-# must be added by hand.
+# A module constant, like workflow_guard._MESSAGE; check_translations.py resolves one
+# passed through _(), so this text is gated like any literal msgid. Deliberately a plain
+# str: _() runs at call time inside the request, where the lang is already the reader's,
+# and _lt() would return a lazy proxy with no .format for the two placeholders.
 _MESSAGE = (
     "{0} does not grant {1} the Report permission, so a user holding only {1} sees this "
     "report and gets a PermissionError on opening it. Either grant report on {0} to {1} "

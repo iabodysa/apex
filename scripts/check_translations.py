@@ -54,8 +54,21 @@ DECLARED_KEYS = {"description"}
 
 # Start of a translate call; the first literal (plus adjacently concatenated ones)
 # is the msgid. Matching the start, not the whole call, keeps __("Saved {0}", [n]).
-_CALL_START = re.compile(r"(?:frappe\.)?_\(|__\(")
+_CALL_START = re.compile(r"(?:frappe\.)?_(?:lt)?\(|__\(")
+# The same call, required to be BARE. _CALL_START also matches the tail of
+# `sle.item.as_("article")` and of `def __init__(`, which is inert while only a
+# literal argument is read but would let a query alias resolve a constant. So the
+# constant path re-checks here while the literal path keeps the loose form:
+# tightening that would strand the 23 alias rows ar.csv already carries, which is
+# a deletion decision of its own and not this gate's to bury in an unrelated diff.
+_BARE_CALL = re.compile(r"(?<![A-Za-z0-9_])(?:(?:frappe\.)?_(?:lt)?|__)\(")
 _NEXT_LITERAL = re.compile(r"""\s*\+?\s*(['"])((?:\\.|(?!\1).)*?)\1""")
+# A guard that keeps its message in a module constant and throws `_(_MESSAGE)` puts
+# no literal at the call site, so the msgid has to be resolved from the constant.
+# Column 0 only: a module constant is a fixed msgid, while an indented local is not
+# — `_(doctype)` on a function parameter has no one string to harvest.
+_CONST_ASSIGN = re.compile(r"^(?:(?:const|let|var)\s+)?([A-Za-z_$][\w$]*)\s*=\s*\(?", re.M)
+_IDENT_ARG = re.compile(r"\s*([A-Za-z_$][\w$]*)\s*[,)]")
 _HTML_TAG = re.compile(r"<[^>]+>")
 
 
@@ -105,7 +118,28 @@ def add_candidate(found: set, text: str, declared: bool = False) -> None:
             found.add(cleaned)
 
 
-def scan_calls(content: str, found: set) -> None:
+def string_constants(content: str) -> dict:
+    """Module-level ``NAME = "text"`` bindings, so ``_(NAME)`` resolves to a msgid.
+
+    Adjacent literals are joined exactly as at a call site, which is what makes a
+    parenthesised multi-line constant one string. A name bound to something that
+    does not start with a literal is simply absent, and an absent name is ignored."""
+    constants: dict = {}
+    for assign in _CONST_ASSIGN.finditer(content):
+        pos = assign.end()
+        parts: list[str] = []
+        while True:
+            literal = _NEXT_LITERAL.match(content, pos)
+            if literal is None:
+                break
+            parts.append(literal.group(2))
+            pos = literal.end()
+        if parts:
+            constants[assign.group(1)] = clean_text("".join(parts))
+    return constants
+
+
+def scan_calls(content: str, found: set, constants: dict | None = None) -> None:
     for call in _CALL_START.finditer(content):
         pos = call.end()
         parts: list[str] = []
@@ -117,6 +151,16 @@ def scan_calls(content: str, found: set) -> None:
             pos = literal.end()
         if parts:
             add_candidate(found, clean_text("".join(parts)), declared=True)
+            continue
+        # No literal here: the msgid may be held in a module constant, _(_MESSAGE).
+        # Same standing as a literal — the author already committed to translating
+        # it — so it is declared too, which is what lets a long braced guard message
+        # through the shape heuristics.
+        if not constants or _BARE_CALL.match(content, call.start()) is None:
+            continue
+        ident = _IDENT_ARG.match(content, pos)
+        if ident is not None and ident.group(1) in constants:
+            add_candidate(found, constants[ident.group(1)], declared=True)
 
 
 def extract_workspace_content(content_str: str, found: set) -> None:
@@ -183,9 +227,10 @@ def extract(package: Path) -> tuple[set, list[tuple[str, str, str]]]:
         rel = str(path.relative_to(package))
         if path.suffix.lower() != ".json":
             try:
-                scan_calls(path.read_text(encoding="utf-8"), found)
+                content = path.read_text(encoding="utf-8")
             except (OSError, UnicodeDecodeError):
-                pass
+                continue
+            scan_calls(content, found, string_constants(content))
             continue
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
