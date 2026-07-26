@@ -60,8 +60,3 @@ class PaymentRoutingSettings(Document):
                         row.idx
                     )
                 )
-
-
-def get_routing_settings() -> Document:
-    """Return the Payment Routing Settings single document."""
-    return frappe.get_single("Payment Routing Settings")

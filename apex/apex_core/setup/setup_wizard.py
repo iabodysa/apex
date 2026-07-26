@@ -17,30 +17,17 @@ Safe-by-default + skip-safe: a field the operator leaves blank (or a toggle left
 at its pre-filled value) keeps the Single's own default — the wizard never writes
 a phantom value. The deduction master switch and the GL gate stay OFF unless the
 operator explicitly opts in. Idempotent: re-running with the same args is harmless.
+
+The sibling `setup_wizard_stages` hook is deliberately NOT declared and this module
+deliberately exposes no stage builder for it. Frappe concatenates BOTH hook families
+into one run (frappe/desk/page/setup_wizard/setup_wizard.py:36 adds get_stages_hooks
++ get_setup_complete_hooks), so a stage that called apply_apex_setup would apply the
+whole configuration a second time on the same wizard submission.
 """
 
 import frappe
 from frappe import _
 from frappe.utils import cint
-
-
-def get_setup_stages(args=None):
-    """`setup_wizard_stages` hook — a tracked stage that applies the Apex choices
-    during the native wizard's completion sequence."""
-    return [
-        {
-            "status": _("Configuring Apex"),
-            "fail_msg": _("Failed to apply the Apex configuration"),
-            "tasks": [
-                {
-                    "fn": apply_apex_setup,
-                    "args": args,
-                    "fail_msg": _("Failed to apply the Apex configuration"),
-                    "app_name": "apex",
-                }
-            ],
-        }
-    ]
 
 
 def setup_wizard_complete(args=None):

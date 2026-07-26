@@ -30,7 +30,6 @@ from apex.apex_core.utils.portal_token_security import (
     TOKEN_COOKIES,
     authorize_issuance,
     hash_token,
-    presented_token,
     revoke_subject_tokens,
     resolve_portal_subject,
     validate_subject_binding,
@@ -574,12 +573,6 @@ def batch_issue_driver_links(drivers_json) -> list:
     for r in out:
         r["phone"] = phones.get(r["driver"])
     return out
-
-
-def _driver_token_from_request(token=None) -> str:
-    """The driver token for this call: the explicit arg if given, else the httpOnly
-    ``masar_dt`` cookie. Returns '' when neither is present (resolver fails closed)."""
-    return presented_token(DRIVER, token)[0]
 
 
 def resolve_driver_token(token=None):

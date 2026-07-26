@@ -33,7 +33,3 @@ def seed_habitat_dashboard(*args, **kwargs):
 
 def seed_role_dashboards(*args, **kwargs):
     """No-op. Role dashboards now ship as is_standard JSON (see module docstring)."""
-
-
-def seed_all_dashboards(*args, **kwargs):
-    """No-op after_migrate/after_install entrypoint (retired — see module docstring)."""

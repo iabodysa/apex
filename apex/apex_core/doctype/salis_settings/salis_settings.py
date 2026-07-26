@@ -19,10 +19,6 @@ class SalisSettings(Document):
             frappe.throw(_("Fuel Request Approval Threshold cannot be negative."))
 
 
-def get_salis_settings():
-    return frappe.get_single("Salis Settings")
-
-
 # [#92zfgx]
 def get_salis_int(field: str, default: int) -> int:
     """Read an Int from the Salis Settings single, falling back to ``default``
