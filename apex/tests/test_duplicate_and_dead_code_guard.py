@@ -47,9 +47,17 @@ the baseline mean one thing was the opposite move — prove every entry is real,
 each a written reason for surviving, and add test_baseline_holds_no_stale_group so a
 fixed entry can no longer linger. Three of the eight were promoted in that pass
 (auto_email_report_seed_base, accommodation_stock_ledger.reverse_and_mark_cancelled,
-finding_fanout.is_actionable); the remaining five are documented at the baseline
-itself, four blocked only by write scope and one — the patch pair — retained on
-merit, since a patch that has already run everywhere gains nothing from refactoring.
+finding_fanout.is_actionable).
+
+A later wave owning salis/ took three more, leaving TWO. Its lesson is why the
+surviving reasons are worth reading: two of those three copies had DRIFTED, so
+"fold one onto the other" was the wrong move twice. The _is_staff pair read
+same-named STAFF_ROLES tuples with different members, so only the membership test
+was shared (salis.utils.has_any_role) and each role SET stayed local — folding them
+would have let a Finance Manager authorise a boarding scan. What is left is the
+patch pair, retained on merit since a patch that has already run everywhere gains
+nothing from refactoring, and the HR-recipient pair, blocked by habitat/ write
+scope rather than the salis/ scope previously recorded against it.
 
   1. TestDuplicateTopLevelFunctionNames — two different files each bind
      a same-named PUBLIC module-level function. Scoped to module level (a Document
@@ -378,11 +386,12 @@ def _copy_pasted_groups():
 _COPY_PASTE_BASELINE = frozenset(
     {
         # Habitat's engine raises the automated alert, Masar's whitelisted one-tap
-        # raises the manual one; masar's docstring admits it "Mirrors
-        # temporary_worker_engine._hr_recipients". One rule ("HR Manager, else System
-        # Manager"), so the home is apex_core/utils/ — the shared kernel BOTH already
-        # import (system_notify). Left only because it spans the Habitat/Salis
-        # boundary, which needs a wave that owns salis/.
+        # raises the manual one; one rule ("HR Manager, else System Manager"), so the
+        # home is apex_core/utils/ — the shared kernel BOTH already import. Owning
+        # salis/ is NOT the blocker recorded here before: with habitat/ out of write
+        # scope, promoting the body only leaves habitat duplicating the NEW shared
+        # copy. The blocker is write access to temporary_worker_engine.py, where the
+        # remaining fix is an import plus a one-line call.
         frozenset(
             {
                 ("habitat/temporary_worker_engine.py", "_hr_recipients"),
