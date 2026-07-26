@@ -124,16 +124,45 @@ class _Recorder:
         return [c.filters for c in self.calls if c.doctype == doctype]
 
 
+_ABSENT = object()
+
+
 class _ScopeCase(unittest.TestCase):
     """Shared harness: a constructed session, db and scope, and no site anywhere."""
 
     def setUp(self):
-        frappe.local.session = frappe._dict(user="supervisor@example.com")
-        frappe.local.lang = "en"
-        frappe.local.db = SimpleNamespace(
+        # These are PROCESS globals — `frappe.db`, `frappe.session` and `frappe.lang` are
+        # proxies onto `frappe.local`, so a stub left installed is inherited by every later
+        # test in the run. Left unrestored, the db stub aborted the whole suite in
+        # FrappeTestCase.setUpClass, which calls frappe.db.commit().
+        self._stub_local("session", frappe._dict(user="supervisor@example.com"))
+        self._stub_local("lang", "en")
+        self._stub_local("db", SimpleNamespace(
             escape=lambda value: "'{0}'".format(value),
             get_value=self._get_value,
-        )
+        ))
+
+    def _stub_local(self, name, value):
+        """Install a stub on ``frappe.local``, queueing its restore BEFORE the write.
+
+        Registering the cleanup after the mutation would strand the stub if anything
+        between the two throws.
+        """
+        self.addCleanup(self._restore_local, name, getattr(frappe.local, name, _ABSENT))
+        setattr(frappe.local, name, value)
+
+    @staticmethod
+    def _restore_local(name, original):
+        """Restore the ORIGINAL, and absence is a value: werkzeug's ``Local`` raises
+        AttributeError for an unset name, so leaving ``None`` behind is not the same thing.
+        """
+        if original is _ABSENT:
+            try:
+                delattr(frappe.local, name)
+            except AttributeError:
+                pass
+        else:
+            setattr(frappe.local, name, original)
 
     @staticmethod
     def _get_value(doctype, name, fieldname):
