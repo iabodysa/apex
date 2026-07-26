@@ -1,5 +1,22 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Maintenance Request controller."""
+"""Maintenance Request controller.
+
+A-218 -- why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row, and
+why this DocType is the exception among the five that share the shape. It is a
+deliberate field overlay: the role may read and set ``cost_of_repair`` and
+``cost_center`` on a request another role opens. Document access is resolved from
+permlevel-0 rows only, field access is resolved separately and unions every permlevel
+across the user's roles, so the two are independent grants.
+
+The exception: this DocType also ships an ``All`` permlevel-0 row (read+create,
+if_owner), and every logged-in user holds ``All``. ``if_owner`` never restricts
+``create``, so a Finance-Manager-only user can raise their OWN request and the
+permlevel-1 row keeps the cost they enter instead of resetting it. They still cannot
+edit or submit it. Elsewhere in the five the overlay needs a second role; here it is
+already live, so do not reason about this DocType from the other four.
+Proof and the framework citations are in
+``apex/habitat/doctype/custody_damage_assessment/test_finance_manager_field_overlay.py``.
+"""
 
 from __future__ import annotations
 

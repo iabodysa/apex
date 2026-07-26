@@ -1,5 +1,16 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Custody Damage Assessment controller."""
+"""Custody Damage Assessment controller.
+
+A-218 -- why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row.
+It is a deliberate field overlay, not an omission: the role may read the money
+(``total_estimated_replacement_cost``) on a document another role opens, and may not
+open, create, submit or cancel it. Document access is resolved from permlevel-0 rows
+only, field access is resolved separately and unions every permlevel across the user's
+roles, so the two are independent grants. Live today: the shipped ``Habitat Finance
+Reviewer`` profile is Finance Manager + Internal Auditor, and Internal Auditor's
+permlevel-0 read is what opens this document for it. Proof and the framework citations
+are in ``test_finance_manager_field_overlay.py`` beside this file.
+"""
 
 from __future__ import annotations
 
