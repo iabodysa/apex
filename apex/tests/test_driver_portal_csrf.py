@@ -104,11 +104,34 @@ TIGHT_DRIVER_WRITERS = {
 	("support.py", "request_license_renewal"),
 }
 
-ACTOR_RATE_LIMITED_DRIVER_WRITERS = {("boarding.py", "scan_boarding_pass")}
-NORMAL_DRIVER_WRITERS = DRIVER_WRITERS - TIGHT_DRIVER_WRITERS - ACTOR_RATE_LIMITED_DRIVER_WRITERS
+# Endpoints that charge their ceiling in the FUNCTION BODY instead of via @rate_limit,
+# each mapped to the call that must do the charging. The decorator cannot express these:
+# its identity is the request IP plus a form_dict lookup, and neither reaches the actor
+# these endpoints must meter. Listing one here is an obligation, not an excuse — the
+# mapped calls are asserted in the body below, so an endpoint that leaves
+# PER_IP_DRIVER_ENDPOINTS still has to arrive somewhere that checks it.
+BODY_RATE_LIMITED_DRIVER_ENDPOINTS = {
+	("boarding.py", "scan_boarding_pass"): (
+		"_enforce_scan_actor_rate_limit",
+		"_enforce_scan_unresolved_ip_rate_limit",
+	),
+	("boarding.py", "get_boarding_pass"): ("_enforce_pass_read_rate_limit",),
+}
+BODY_RATE_LIMITED = set(BODY_RATE_LIMITED_DRIVER_ENDPOINTS)
+
+# `key` is NOT the request attribute it reads like: rate_limiter.py:143 resolves it as
+# `frappe.form_dict.get(key, "")`, and app.py:302-314 builds form_dict from the query
+# string, so any caller appending `?<key>=anything` lands in a private window per value
+# (identity is `<ip>:<value>`, rate_limiter.py:147-148). No key value is safe, so this
+# guard demands none. The endpoints still carrying the legacy literal are tracked debt:
+# the budget may only ever be lowered, and a newly keyed endpoint pushes it over.
+LEGACY_FORM_DICT_KEY = "frappe.request.remote_addr"
+LEGACY_FORM_DICT_KEY_BUDGET = 38
+
+NORMAL_DRIVER_WRITERS = DRIVER_WRITERS - TIGHT_DRIVER_WRITERS - BODY_RATE_LIMITED
 PER_IP_DRIVER_ENDPOINTS = (
 	DRIVER_PORTAL_ENDPOINTS | MIXED_DRIVER_ENDPOINTS
-) - ACTOR_RATE_LIMITED_DRIVER_WRITERS
+) - BODY_RATE_LIMITED
 
 WORKER_ENDPOINTS = {
 	"worker_request_wait": {"allow_guest": True, "methods": ["POST"]},
@@ -214,6 +237,7 @@ class TestDriverPortalGuestInventory(unittest.TestCase):
 			]
 			self.assertTrue(imports, path.name)
 
+		keyed = 0
 		for filename, name in sorted(PER_IP_DRIVER_ENDPOINTS):
 			path = _endpoint_path(filename, name)
 			node = _module_endpoints(path)[name][0]
@@ -224,8 +248,19 @@ class TestDriverPortalGuestInventory(unittest.TestCase):
 				whitelist_index = node.decorator_list.index(_whitelist(node))
 				self.assertGreater(rate_index, whitelist_index)
 				keywords = _literal_keywords(decorator)
-				self.assertEqual(keywords.get("key"), "frappe.request.remote_addr")
+				# What makes the window per-IP is `ip_based`, which frappe defaults to
+				# True (rate_limiter.py:110) and which alone puts the request IP in the
+				# identity (rate_limiter.py:141,147-150). Losing it is the regression to
+				# catch here; the key string never carried this property. Matched against
+				# by IDENTITY against the framework's own `ip_based is True` test
+				# (rate_limiter.py:141): a truthy 1 fails that test and silently drops
+				# the address, and `== True` would wave it through.
+				self.assertIs(keywords.get("ip_based", True), True)
 				self.assertEqual(keywords.get("seconds"), 60)
+				if "key" in keywords:
+					self.assertEqual(keywords["key"], LEGACY_FORM_DICT_KEY)
+					keyed += 1
+		self.assertLessEqual(keyed, LEGACY_FORM_DICT_KEY_BUDGET)
 
 	def test_driver_writer_limits_are_bounded_and_creation_is_tight(self):
 		for filename, name in sorted(PER_IP_DRIVER_ENDPOINTS):
@@ -241,6 +276,38 @@ class TestDriverPortalGuestInventory(unittest.TestCase):
 					self.assertEqual(limit, 30)
 				else:
 					self.assertEqual(limit, 120)
+
+	def test_body_rate_limited_endpoints_still_charge_a_ceiling(self):
+		"""Leaving the decorator set is a move, not an exit: the body must still charge."""
+		self.assertLessEqual(
+			BODY_RATE_LIMITED, DRIVER_PORTAL_ENDPOINTS | MIXED_DRIVER_ENDPOINTS
+		)
+		for endpoint, limiters in sorted(BODY_RATE_LIMITED_DRIVER_ENDPOINTS.items()):
+			filename, name = endpoint
+			node = _module_endpoints(_endpoint_path(filename, name))[name][0]
+			with self.subTest(path=filename, endpoint=name):
+				# Body-limited means body-limited: no decorator may creep back and
+				# re-introduce the caller-chosen window this endpoint moved to escape.
+				self.assertIsNone(_rate_limit(node))
+				calls = {
+					_call_name(call)
+					for call in ast.walk(node)
+					if isinstance(call, ast.Call)
+				}
+				for limiter in limiters:
+					self.assertIn(limiter, calls)
+
+	def test_boarding_pass_read_keeps_its_published_address_ceiling(self):
+		"""The body limit inherited the decorator's 120-per-minute; nothing looser."""
+		constants = {
+			target.id: node.value.value
+			for node in _tree(BOARDING).body
+			if isinstance(node, ast.Assign) and isinstance(node.value, ast.Constant)
+			for target in node.targets
+			if isinstance(target, ast.Name)
+		}
+		self.assertEqual(constants.get("PASS_ADDRESS_LIMIT"), 120)
+		self.assertEqual(constants.get("PASS_RATE_WINDOW_SECONDS"), 60)
 
 	def test_scan_resolves_actor_before_charging_only_its_quota(self):
 		node = _module_endpoints(BOARDING)["scan_boarding_pass"][0]

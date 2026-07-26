@@ -11,7 +11,9 @@ Proves the end-to-end boarding flow on ``salis.api.boarding``:
   3. a forged/tampered token is Invalid Token and creates no boarding row;
   4. a pass for a worker not on the trip's manifest is rejected at issue time, and
      a hand-built token for an off-manifest worker scans as Wrong Trip;
-  5. the issued pass never leaks the raw token into the audit row (only its hash).
+  5. the issued pass never leaks the raw token into the audit row (only its hash);
+  6. the pass read's ceiling keys on the TRANSPORT PEER as well as the address, and a
+     caller can no longer name its own bucket (A-252) — see TestBoardingPassRateKey.
 
 The trip fixture reuses the proven worker-trip builder from the Masar movement
 tests; everything is created as Administrator with ignore_permissions, then the
@@ -489,6 +491,151 @@ class TestBoardingScan(_WorkerTripMixin, FrappeTestCase):
         scan = frappe.get_doc("Boarding Scan Log", res["scan_log"])
         self.assertNotEqual(scan.pass_token_hash, pass_data["pass_token"])
         self.assertEqual(len(scan.pass_token_hash), 64)  # [#kllefw]
+
+
+class TestBoardingPassRateKey(FrappeTestCase):
+    """What the pass read's ceiling actually counts (A-252).
+
+    The endpoint shipped ``@rate_limit(key="frappe.request.remote_addr", ...)``, which
+    reads like the transport peer and is not: ``key`` is a form_dict LOOKUP,
+    ``frappe.form_dict.get(key, "")`` (rate_limiter.py:143), so it named a request FIELD.
+    Nobody sends a field by that name, the identity collapsed to ``<ip>:``
+    (rate_limiter.py:147-148), and a caller who DID send one chose their own bucket --
+    form_dict is built from the query string and body (app.py:302-314).
+
+    These tests spend REAL windows and read the counters back, because a test that
+    asserts the decorator's arguments proves only that the string is still typed. The
+    trip does not exist, so every call is refused after the charge and before any write:
+    what is under test is which bucket the request landed in, not what it returned.
+    """
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def _count(self, name):
+        """The live count in one window, by its RAW name; None if never opened."""
+        raw = frappe.cache.get(frappe.cache.make_key(name))
+        return None if raw is None else int(raw)
+
+    def _forget(self, *names):
+        """Drop windows on the way out, RAW: delete_value re-applies make_key
+        (redis_wrapper.py:141-142), so an already-made key clears nothing."""
+        self.addCleanup(lambda: [frappe.cache.delete_value(n) for n in names])
+
+    def _refused_pass_read(self):
+        """One charged call. The trip is absent, so the answer is always the throw."""
+        with self.assertRaises(frappe.DoesNotExistError):
+            boarding.get_boarding_pass(
+                "NO-SUCH-TRIP-" + frappe.generate_hash(length=12), "NO-EMP"
+            )
+
+    def test_two_peers_behind_one_address_consume_separate_windows(self):
+        """The proof the card asks for: change ONLY the peer, get a separate window.
+
+        The address is held constant across both calls, so the split cannot be the
+        address doing the work -- and the address window counting BOTH is what shows
+        the two calls really were one address wearing two connections.
+        """
+        with _request_cookies({}) as ip:
+            cmd = frappe.local.form_dict.cmd
+            peer_a, peer_b = "192.0.2.11", "192.0.2.12"
+            self._forget(
+                f"rl:{cmd}:pass-peer:{peer_a}",
+                f"rl:{cmd}:pass-peer:{peer_b}",
+                f"rl:{cmd}:pass-address:{ip}",
+            )
+
+            for peer in (peer_a, peer_b):
+                frappe.local.request.remote_addr = peer
+                self._refused_pass_read()
+
+            self.assertEqual(self._count(f"rl:{cmd}:pass-peer:{peer_a}"), 1)
+            self.assertEqual(self._count(f"rl:{cmd}:pass-peer:{peer_b}"), 1)
+            self.assertEqual(self._count(f"rl:{cmd}:pass-address:{ip}"), 2)
+
+    def test_one_peer_spends_a_single_shared_window(self):
+        """The other half: same peer twice is one window at two, not two windows."""
+        with _request_cookies({}) as ip:
+            cmd = frappe.local.form_dict.cmd
+            peer = "192.0.2.13"
+            self._forget(
+                f"rl:{cmd}:pass-peer:{peer}", f"rl:{cmd}:pass-address:{ip}"
+            )
+
+            frappe.local.request.remote_addr = peer
+            self._refused_pass_read()
+            self._refused_pass_read()
+
+            self.assertEqual(self._count(f"rl:{cmd}:pass-peer:{peer}"), 2)
+
+    def test_the_peer_ceiling_refuses_the_call_that_passes_it(self):
+        """A counter nobody enforces is a metric. The limit is patched, never the
+        identity: the key under test is still derived by the shipped code path.
+
+        The address ceiling is left at its shipped 120 and only three calls are made,
+        so the 429 cannot be coming from it.
+        """
+        with _request_cookies({}) as ip, patch.object(boarding, "PASS_PEER_LIMIT", 2):
+            cmd = frappe.local.form_dict.cmd
+            peer = "192.0.2.14"
+            self._forget(
+                f"rl:{cmd}:pass-peer:{peer}", f"rl:{cmd}:pass-address:{ip}"
+            )
+
+            frappe.local.request.remote_addr = peer
+            self._refused_pass_read()
+            self._refused_pass_read()
+            with self.assertRaises(frappe.RateLimitExceededError) as raised:
+                boarding.get_boarding_pass("NO-SUCH-TRIP", "NO-EMP")
+
+        self.assertEqual(getattr(raised.exception, "http_status_code", None), 429)
+        self.assertLess(3, boarding.PASS_ADDRESS_LIMIT)
+
+    def test_a_caller_supplied_field_no_longer_buys_its_own_window(self):
+        """The bypass the shipped key opened, closed.
+
+        Two calls differing ONLY in a form field named ``frappe.request.remote_addr``
+        must land in ONE address window. Under the decorator each value produced the
+        identity ``<ip>:<value>`` and therefore a private 120, so a query string was
+        enough to leave the limit behind. Both the old bucket names are asserted
+        ABSENT, which is what distinguishes this from the counter simply moving.
+        """
+        with _request_cookies({}) as ip:
+            cmd = frappe.local.form_dict.cmd
+            chosen = ("first", "second")
+            self._forget(
+                f"rl:{cmd}:pass-address:{ip}",
+                *(f"rl:{cmd}:{ip}:{value}" for value in chosen),
+            )
+
+            for value in chosen:
+                frappe.local.form_dict["frappe.request.remote_addr"] = value
+                self._refused_pass_read()
+                self.assertIsNone(self._count(f"rl:{cmd}:{ip}:{value}"))
+
+            self.assertEqual(self._count(f"rl:{cmd}:pass-address:{ip}"), 2)
+
+    def test_a_request_with_no_peer_declines_instead_of_pooling(self):
+        """No peer means no bucket, not a bucket named after nothing.
+
+        Charging one anyway would put every peerless caller in a single window, so any
+        of them could 429 the rest -- the same call the scan limiter above it makes.
+        The second half is what keeps the first honest: with a peer present the charge
+        must happen, or an empty body would pass the decline assertion.
+        """
+        for peer, expected in ((None, ["pass-address"]), ("192.0.2.15", ["pass-address", "pass-peer"])):
+            with self.subTest(peer=peer), _request_cookies({}):
+                frappe.local.request.remote_addr = peer
+                charged = []
+                with patch.object(
+                    boarding,
+                    "charge_window",
+                    side_effect=lambda name, window, limit: charged.append(name) or 1,
+                ):
+                    boarding._enforce_pass_read_rate_limit()
+                # rl:<cmd>:<scope>:<identity> -- indexed from the FRONT because the
+                # identity is an IPv6 address here and carries colons of its own.
+                self.assertEqual([name.split(":")[2] for name in charged], expected)
 
 
 def tearDownModule():
