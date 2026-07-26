@@ -97,7 +97,7 @@ class TestBuildingLicense(FrappeTestCase):
 
         The issue date is deliberately in the FUTURE, and that is what makes the
         assertion falsifiable. ``frappe.utils.getdate(None)`` returns TODAY, so on a
-        PAST issue date the comparison `expiry <= issue` is false on its own and the
+        PAST issue date the comparison ``expiry <= issue`` is false on its own and the
         ``self.expiry_date`` conjunct carries no weight — drop it from the guard and
         this test would still pass. Against a future issue date, today reads as the
         EARLIER of the two, so only the emptiness check keeps the throw away.
