@@ -56,10 +56,11 @@ REPO_ROOT = os.path.dirname(APP_ROOT)
 PATCHES_DIR = os.path.join(APP_ROOT, "patches")
 PATCHES_TXT = os.path.join(APP_ROOT, "patches.txt")
 
-# [#pq4m7t] The escape hatch stays small on purpose: three modules earn it today
+# [#pq4m7t] The escape hatch stays small on purpose: four modules earn it today
 # (one no-op kept alive by after_install + a by-path test read, two demo seeders
-# held out of the migrate path). Raising this ceiling is a reviewed decision, not
-# a way to make a failing guard pass.
+# held out of the migrate path, one operator-only cutover a pre-rename site can
+# never reach). Raising this ceiling is a reviewed decision, not a way to make a
+# failing guard pass.
 MAX_UNREGISTERED = 5
 
 MARKER_WHY = "UNREGISTERED-PATCH:"
