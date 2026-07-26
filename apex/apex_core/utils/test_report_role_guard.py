@@ -1,0 +1,435 @@
+# Copyright (c) 2026, AFMCO and contributors
+"""A-201 — the Report ``validate`` hook that refuses an unrunnable role.
+
+Pure-Python against a stubbed frappe, so the refusal is proven with no live site: the
+shared bench was closed to writes for this wave, and the guard's whole job is to make a
+``doc.save()`` fail, which cannot be demonstrated read-only. A live demonstration is
+therefore still OWED — everything below drives ``report_role_guard.validate`` with a
+constructed document instead of a saved one.
+
+The stub is deliberately narrow: it answers only the four things the hook asks frappe
+(the ref's module, the module's owning app, the ref's meta, and the migration flags) and
+records what the hook did (throw / msgprint). Every test patches
+``report_role_guard.frappe`` with it, so the same assertions hold whether the real frappe
+is importable or not — which is what makes the documented standalone command honest.
+
+Four properties, matching the card's proofs:
+
+1. REFUSED — a role its ``ref_doctype`` denies is thrown on, and the message names both
+   the role and the ref_doctype. Driven for all four denial shapes (no row, permlevel
+   above 0, ``report`` unset, ``if_owner``-only) plus the child-table ref.
+2. ALLOWED — a role whose ref DOES grant ``report`` saves with nothing raised and
+   nothing printed. Without this control a hook that refused everything would look right.
+3. THE APP'S OWN REPORTS STILL SAVE — every shipped Report JSON is replayed through the
+   hook as both the incoming and the stored document, and none of them throws. Seven of
+   them DO carry an unrunnable role and are frozen in ``KNOWN_UNRUNNABLE_REPORT_ROLES``
+   with a reason; they warn instead of throwing, which is exactly the pre-existing-row
+   clause, and the frozen set is exact-equality so a NEW one fails the build.
+4. THE DETECTOR CAN FAIL — every clause has a control that must stay clean, and
+   ``test_removing_the_report_flag_check_lets_the_offender_through`` reproduces the
+   guard with that one clause deleted and asserts it goes blind.
+
+Also proven here, because they are the two ways this hook could do damage:
+``TestAMigrateIsNeverAborted`` (no throw under any migration flag) and
+``TestAPreExistingRoleDoesNotBrickAnEdit`` (no throw for a role already stored).
+
+Run standalone:  python3 -m unittest apex.apex_core.utils.test_report_role_guard -v
+"""
+
+import glob
+import json
+import os
+import sys
+import types
+import unittest
+from unittest import mock
+
+# [#a201stb] Same stubbing idiom as apex_core/utils/test_guarded_index_dedupe.py: use the
+# real frappe under bench, otherwise stand up the bare module so the import below
+# resolves. Nothing is read off it — every test patches the module's `frappe` name.
+if "frappe" not in sys.modules:
+    sys.modules["frappe"] = types.ModuleType("frappe")
+
+from apex.apex_core.utils import report_role_guard  # noqa: E402
+from apex.tests.shipped_doctypes import APP_ROOT, shipped_doctypes  # noqa: E402
+
+_REPORT_GLOB = os.path.join(APP_ROOT, "*", "report", "*", "*.json")
+
+REF = "_A201 Source"
+REPORT_ROLE = "_A201 Role"
+OTHER_ROLE = "_A201 Other Role"
+
+_UNLINKED = (
+    "Pre-existing when A-201 landed, and NOT a workspace link: A-200 drained the "
+    "workspace-linked baseline, which is the intersection of a workspace's roles with a "
+    "report's roles, so a role that reaches the report through the Reports list or the "
+    "awesomebar instead of a workspace card was never in that scan. "
+    "boot.get_user_pages_or_reports hands the report to the role either way, and "
+    "query_report.py:47 then refuses it. Repairing one means editing a DocPerm table or "
+    "a report's roles table, both outside A-201's write scope — the hook warns on these "
+    "rather than throwing, because they are already stored."
+)
+
+# Exact equality, like the sibling baselines. Each entry is (ref_doctype, [roles]); a new
+# offender fails the build, a repaired one must be pruned. Verified individually against
+# the shipped DocPerms: Internal Auditor holds NO row at all on Housing Assignment,
+# Finance Manager holds none on Facility Asset Movement or Operational Depreciation
+# Snapshot, holds a permlevel-1-only row on Custody Damage Assessment, and holds a
+# permlevel-0 read/write row that never sets `report` on Fuel Daily Log.
+KNOWN_UNRUNNABLE_REPORT_ROLES = {
+    "Accommodation Occupancy Summary": ("Housing Assignment", ["Internal Auditor"], _UNLINKED),
+    "Active Resident Register": ("Housing Assignment", ["Internal Auditor"], _UNLINKED),
+    "Custody Damage Register": ("Custody Damage Assessment", ["Finance Manager"], _UNLINKED),
+    "Fuel Consumption Summary": ("Fuel Daily Log", ["Finance Manager"], _UNLINKED),
+    "Idle Resident Detection": ("Housing Assignment", ["Internal Auditor"], _UNLINKED),
+    "Intercompany Movement Register": ("Facility Asset Movement", ["Finance Manager"], _UNLINKED),
+    "Operational Depreciation Aging": (
+        "Operational Depreciation Snapshot",
+        ["Finance Manager"],
+        _UNLINKED,
+    ),
+}
+
+
+class Refused(Exception):
+    """What the stub raises in place of frappe.throw's ValidationError."""
+
+
+def _scrub(txt):
+    """frappe.scrub, reproduced so the stub needs no frappe."""
+    return txt.replace(" ", "_").replace("-", "_").lower()
+
+
+class FrappeStub:
+    """The four questions report_role_guard asks frappe, and a log of what it did."""
+
+    def __init__(self, doctypes, *, owner_app="apex", flags=None):
+        self.doctypes = doctypes
+        self.owner_app = owner_app
+        self.flags = dict(flags or {})
+        self.local = types.SimpleNamespace(
+            module_app={_scrub(d.get("module") or "Habitat"): owner_app for d in doctypes.values()}
+        )
+        self.db = types.SimpleNamespace(get_value=self._get_value)
+        self.thrown = []
+        self.printed = []
+        self.meta_reads = []
+
+    scrub = staticmethod(_scrub)
+
+    def _get_value(self, doctype, name, field):
+        assert (doctype, field) == ("DocType", "module"), (doctype, field)
+        return (self.doctypes.get(name) or {}).get("module")
+
+    def get_meta(self, doctype):
+        self.meta_reads.append(doctype)
+        data = self.doctypes[doctype]
+        return types.SimpleNamespace(
+            permissions=data.get("permissions") or [], istable=data.get("istable") or 0
+        )
+
+    def _(self, msg):
+        return msg
+
+    def throw(self, msg, title=None):
+        self.thrown.append(msg)
+        raise Refused(msg)
+
+    def msgprint(self, msg, title=None, indicator=None):
+        self.printed.append(msg)
+
+
+class ReportDoc(dict):
+    """A Report document carrying only what the hook reads off it."""
+
+    def __init__(self, ref_doctype, roles, stored=None):
+        super().__init__(ref_doctype=ref_doctype, roles=[{"role": r} for r in roles])
+        self.stored = stored
+
+    def get_doc_before_save(self):
+        return None if self.stored is None else ReportDoc(self["ref_doctype"], self.stored)
+
+
+def _doctype(permission_rows, *, istable=0, module="Habitat"):
+    return {REF: {"module": module, "istable": istable, "permissions": list(permission_rows)}}
+
+
+def _save(stub, doc):
+    """Run the hook exactly as frappe's doc_events composer would."""
+    with mock.patch.object(report_role_guard, "frappe", stub):
+        report_role_guard.validate(doc)
+
+
+def _read_json(path):
+    with open(path, encoding="utf-8") as fh:
+        try:
+            return json.load(fh)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return {}
+
+
+def shipped_reports():
+    """Report name -> its shipped JSON, every module's report tree."""
+    loaded = (_read_json(path) for path in sorted(glob.glob(_REPORT_GLOB)))
+    return {
+        data["name"]: data
+        for data in loaded
+        if isinstance(data, dict) and data.get("doctype") == "Report" and data.get("name")
+    }
+
+
+class TestARoleTheRefDeniesIsRefused(unittest.TestCase):
+    """Proof 1 — the save is refused, and the message names role and ref_doctype."""
+
+    def _refusal(self, permission_rows, *, istable=0, roles=(REPORT_ROLE,)):
+        stub = FrappeStub(_doctype(permission_rows, istable=istable))
+        with self.assertRaises(Refused) as caught:
+            _save(stub, ReportDoc(REF, list(roles)))
+        return stub, str(caught.exception)
+
+    def test_a_ref_that_omits_the_report_flag_refuses_the_save(self):
+        _stub, message = self._refusal([{"role": REPORT_ROLE, "read": 1}])
+        self.assertIn(REPORT_ROLE, message, "the refusal does not name the role")
+        self.assertIn(REF, message, "the refusal does not name the ref_doctype")
+        self.assertIn("report", message)
+
+    def test_a_ref_with_no_row_for_the_role_refuses_the_save(self):
+        _stub, message = self._refusal([{"role": OTHER_ROLE, "read": 1, "report": 1}])
+        self.assertIn(REPORT_ROLE, message)
+        self.assertIn(REF, message)
+
+    def test_a_report_grant_above_permlevel_zero_refuses_the_save(self):
+        """permissions.py:284 discards every row whose permlevel is not 0."""
+        _stub, message = self._refusal(
+            [{"role": REPORT_ROLE, "read": 1, "report": 1, "permlevel": 1}]
+        )
+        self.assertIn(REPORT_ROLE, message)
+
+    def test_an_if_owner_only_report_grant_refuses_the_save(self):
+        """permissions.py:297-307 rewrites `report` back to 0 for an if_owner-only grant."""
+        _stub, message = self._refusal(
+            [{"role": REPORT_ROLE, "read": 1, "report": 1, "if_owner": 1}]
+        )
+        self.assertIn(REPORT_ROLE, message)
+
+    def test_a_child_table_ref_refuses_every_role_however_generous_the_row(self):
+        """has_permission routes an istable ref into has_child_permission, which denies
+        without a parent_doctype (permissions.py:120, :785) and query_report supplies none."""
+        _stub, message = self._refusal(
+            [{"role": REPORT_ROLE, "read": 1, "report": 1}], istable=1
+        )
+        self.assertIn(REPORT_ROLE, message)
+
+    def test_the_refusal_names_every_offending_role(self):
+        _stub, message = self._refusal(
+            [{"role": REPORT_ROLE, "read": 1}], roles=(REPORT_ROLE, OTHER_ROLE)
+        )
+        self.assertIn(REPORT_ROLE, message)
+        self.assertIn(OTHER_ROLE, message)
+
+
+class TestALegitimateReportStillSaves(unittest.TestCase):
+    """Proof 2 — the control. A hook that refused everything would pass proof 1 too."""
+
+    def _clean_save(self, doctypes, doc):
+        stub = FrappeStub(doctypes)
+        _save(stub, doc)
+        self.assertEqual(stub.thrown, [], "a legitimate save was refused")
+        self.assertEqual(stub.printed, [], "a legitimate save was warned about")
+        return stub
+
+    def test_a_role_whose_ref_grants_report_saves_cleanly(self):
+        self._clean_save(
+            _doctype([{"role": REPORT_ROLE, "read": 1, "report": 1}]),
+            ReportDoc(REF, [REPORT_ROLE]),
+        )
+
+    def test_a_plain_row_beside_an_if_owner_row_saves_cleanly(self):
+        """Control for the if_owner clause: a non-if_owner grant survives the sibling."""
+        self._clean_save(
+            _doctype(
+                [
+                    {"role": REPORT_ROLE, "read": 1, "report": 1, "if_owner": 1},
+                    {"role": REPORT_ROLE, "read": 1, "report": 1},
+                ]
+            ),
+            ReportDoc(REF, [REPORT_ROLE]),
+        )
+
+    def test_an_empty_roles_table_saves_cleanly(self):
+        """A role-less report is open to everyone and names nobody to refuse."""
+        self._clean_save(_doctype([{"role": OTHER_ROLE, "read": 1}]), ReportDoc(REF, []))
+
+    def test_administrator_is_never_refused(self):
+        """Administrator short-circuits every permission check (permissions.py:107)."""
+        self._clean_save(_doctype([]), ReportDoc(REF, ["Administrator"]))
+
+
+class TestTheHookStaysOutOfOtherApps(unittest.TestCase):
+    """A doc_events hook on Report fires for erpnext and hrms too; this one must no-op."""
+
+    def test_a_ref_owned_by_another_app_is_not_judged(self):
+        stub = FrappeStub(_doctype([{"role": REPORT_ROLE, "read": 1}]), owner_app="hrms")
+        _save(stub, ReportDoc(REF, [REPORT_ROLE]))
+        self.assertEqual(stub.thrown, [])
+        self.assertEqual(stub.printed, [])
+        self.assertEqual(
+            stub.meta_reads, [], "the hook read the meta of a DocType apex does not own"
+        )
+
+    def test_a_ref_that_resolves_to_no_module_is_not_judged(self):
+        stub = FrappeStub({})
+        _save(stub, ReportDoc("Salary Slip", [REPORT_ROLE]))
+        self.assertEqual((stub.thrown, stub.printed, stub.meta_reads), ([], [], []))
+
+    def test_a_report_with_no_ref_doctype_is_not_judged(self):
+        stub = FrappeStub(_doctype([]))
+        _save(stub, ReportDoc(None, [REPORT_ROLE]))
+        self.assertEqual((stub.thrown, stub.printed, stub.meta_reads), ([], [], []))
+
+
+class TestAMigrateIsNeverAborted(unittest.TestCase):
+    """The blocker A-201 had to clear before the hook could be written at all.
+
+    Module JSON never reaches validate (import_file.py:233-237 sets ignore_validate and
+    document.py:1139-1140 returns on it), but sync_fixtures imports with
+    ``data_import=True``, which leaves validate ON in the middle of a migrate
+    (data_import.py:289-291, migrate.py:143), and a patch that saves a Report is the same
+    shape. So the flags are checked directly rather than inferred.
+    """
+
+    def test_no_migration_context_throws(self):
+        for flag in report_role_guard._MIGRATION_FLAGS:
+            with self.subTest(flag=flag):
+                stub = FrappeStub(
+                    _doctype([{"role": REPORT_ROLE, "read": 1}]), flags={flag: True}
+                )
+                _save(stub, ReportDoc(REF, [REPORT_ROLE]))
+                self.assertEqual(stub.thrown, [], f"the hook threw while {flag} was set")
+                self.assertEqual(len(stub.printed), 1, "the offender was silently dropped")
+                self.assertIn(REPORT_ROLE, stub.printed[0])
+
+    def test_the_same_save_outside_a_migration_does_throw(self):
+        """Control: the flag is what spares it, not a hook that never fires."""
+        stub = FrappeStub(_doctype([{"role": REPORT_ROLE, "read": 1}]))
+        with self.assertRaises(Refused):
+            _save(stub, ReportDoc(REF, [REPORT_ROLE]))
+
+
+class TestAPreExistingRoleDoesNotBrickAnEdit(unittest.TestCase):
+    """A site holding a non-conforming row must still be able to edit that report."""
+
+    def test_an_already_stored_offender_only_warns(self):
+        stub = FrappeStub(_doctype([{"role": REPORT_ROLE, "read": 1}]))
+        _save(stub, ReportDoc(REF, [REPORT_ROLE], stored=[REPORT_ROLE]))
+        self.assertEqual(stub.thrown, [], "an unrelated edit to a legacy report was blocked")
+        self.assertEqual(len(stub.printed), 1)
+
+    def test_a_role_added_beside_a_stored_offender_still_throws(self):
+        stub = FrappeStub(_doctype([{"role": REPORT_ROLE, "read": 1}]))
+        with self.assertRaises(Refused) as caught:
+            _save(stub, ReportDoc(REF, [REPORT_ROLE, OTHER_ROLE], stored=[REPORT_ROLE]))
+        self.assertIn(OTHER_ROLE, str(caught.exception))
+
+    def test_a_brand_new_report_has_nothing_stored_so_every_offender_throws(self):
+        """Report.set_doctype_roles (report.py:107-112) seeds a new report's roles from
+        every permlevel-0 row with no look at `report`, so this is the default path."""
+        stub = FrappeStub(_doctype([{"role": REPORT_ROLE, "read": 1}]))
+        with self.assertRaises(Refused):
+            _save(stub, ReportDoc(REF, [REPORT_ROLE], stored=None))
+
+
+class TestTheAppsOwnReportsStillSave(unittest.TestCase):
+    """Proof 3 — replay every shipped Report JSON through the hook."""
+
+    def setUp(self):
+        self.doctypes = shipped_doctypes()
+        self.reports = shipped_reports()
+
+    def _stub(self):
+        return FrappeStub(self.doctypes)
+
+    @staticmethod
+    def _roles(report):
+        return [row["role"] for row in report.get("roles") or [] if row.get("role")]
+
+    def test_the_scan_sees_the_shipped_tree(self):
+        self.assertTrue(self.reports, "no report JSON found — the glob broke")
+        self.assertTrue(self.doctypes, "no DocType JSON found — the loader broke")
+        pairs = sum(len(self._roles(report)) for report in self.reports.values())
+        self.assertGreaterEqual(pairs, 150, f"only {pairs} report/role pairs — the scan broke")
+
+    def test_no_shipped_report_is_refused_on_save(self):
+        """As they exist on disk every named role is already stored, so the pre-existing
+        clause spares them — a migrate-installed site can re-save any of them."""
+        for name, report in sorted(self.reports.items()):
+            roles = self._roles(report)
+            with self.subTest(report=name):
+                stub = self._stub()
+                _save(stub, ReportDoc(report.get("ref_doctype"), roles, stored=roles))
+                self.assertEqual(stub.thrown, [], f"{name} would be refused on save")
+
+    def test_adding_a_shipped_report_role_back_is_still_checked(self):
+        """The same reports with nothing stored: the ratchet of what actually offends."""
+        found = {}
+        for name, report in self.reports.items():
+            ref = report.get("ref_doctype")
+            if ref not in self.doctypes:
+                continue
+            data = self.doctypes[ref]
+            denied = report_role_guard.denied_roles(
+                data.get("permissions") or [], data.get("istable") or 0, self._roles(report)
+            )
+            if denied:
+                found[name] = (ref, denied)
+        expected = {name: (ref, roles) for name, (ref, roles, _why) in
+                    KNOWN_UNRUNNABLE_REPORT_ROLES.items()}
+        self.assertEqual(
+            found,
+            expected,
+            "shipped report/role runnability changed. A NEW entry means that role is "
+            "handed the report by boot.get_user_pages_or_reports and then refused by "
+            "query_report.py:47 on open — grant `report` on the ref_doctype row it "
+            "already holds, or drop the role from the report's roles table. A MISSING "
+            "entry means one was repaired and this baseline must shrink to match.",
+        )
+
+    def test_every_frozen_entry_carries_a_reason(self):
+        for name, (_ref, roles, why) in KNOWN_UNRUNNABLE_REPORT_ROLES.items():
+            with self.subTest(report=name):
+                self.assertTrue(roles, f"{name} is frozen with no role named")
+                self.assertTrue(why and why.strip(), f"{name} is frozen with no reason")
+
+    def test_no_frozen_entry_names_a_report_that_stopped_shipping(self):
+        phantom = sorted(set(KNOWN_UNRUNNABLE_REPORT_ROLES) - set(self.reports))
+        self.assertEqual(phantom, [], "the baseline names report(s) this app no longer ships")
+
+
+class TestTheDetectorCanFail(unittest.TestCase):
+    """Proof 4 — reproduce the predicate with the check removed and watch it go blind."""
+
+    ROWS = [{"role": REPORT_ROLE, "read": 1}]
+
+    def test_the_check_present_refuses(self):
+        self.assertEqual(
+            report_role_guard.denied_roles(self.ROWS, 0, [REPORT_ROLE]), [REPORT_ROLE]
+        )
+
+    def test_removing_the_report_flag_check_lets_the_offender_through(self):
+        """The mutant: `report` no longer required, exactly the reading A-189 disproved
+        (DocPerm.report defaults to 1 in frappe's JSON, but import_file never applies a
+        field default, so an omitted flag really is 0)."""
+        blind = {
+            row["role"]
+            for row in self.ROWS
+            if row.get("role") and not row.get("if_owner") and not int(row.get("permlevel") or 0)
+        }
+        self.assertEqual(
+            sorted({REPORT_ROLE} - blind),
+            [],
+            "the mutant still refuses, so this file is not proving the report clause",
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()
