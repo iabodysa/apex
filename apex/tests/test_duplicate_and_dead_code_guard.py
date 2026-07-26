@@ -37,8 +37,19 @@ was promoted into factories.py, tests/_helpers.py or tests/source_tree.py — a
 non-``test_`` sibling each time, because test_no_cross_test_imports.py forbids a test
 module importing a test module — and its group left _COPY_PASTE_BASELINE in the same
 commit, so the frozen set only ever shrank. What remains below is production-only
-debt, untouched by A-176; a test-tree entry reappearing there is a regression, not a
-baseline.
+debt; a test-tree entry reappearing there is a regression, not a baseline.
+
+A-176 then audited all 8 surviving PRODUCTION groups one by one and found NOT ONE
+incidental match — every pair either carries a docstring admitting it mirrors the
+other, or is a byte-identical helper. So the guard needs no "coincidental" category:
+building one would be dead flexibility for an empty set, and the honest way to make
+the baseline mean one thing was the opposite move — prove every entry is real, give
+each a written reason for surviving, and add test_baseline_holds_no_stale_group so a
+fixed entry can no longer linger. Three of the eight were promoted in that pass
+(auto_email_report_seed_base, accommodation_stock_ledger.reverse_and_mark_cancelled,
+finding_fanout.is_actionable); the remaining five are documented at the baseline
+itself, four blocked only by write scope and one — the patch pair — retained on
+merit, since a patch that has already run everywhere gains nothing from refactoring.
 
   1. TestDuplicateTopLevelFunctionNames — two different files each bind
      a same-named PUBLIC module-level function. Scoped to module level (a Document
@@ -360,60 +371,65 @@ def _copy_pasted_groups():
 # pairs with these groups because the flat shape accepted any duplication BETWEEN
 # two already-listed functions, and widening to tests grew that set from 16 pairs to
 # 80 — turning a small hole into a large one.
+
+# Every entry below is REAL duplication carrying a stated reason for still being
+# here — see test_baseline_holds_no_stale_group, which mechanises that meaning by
+# failing the moment an entry's duplication is gone.
 _COPY_PASTE_BASELINE = frozenset(
     {
-        # --- Production (frozen 2026-07-22 by A-056; unchanged in content) ---
-        frozenset(
-            {
-                ("apex_core/setup/seeders/habitat_auto_email_reports_seed.py", "seed_auto_email_reports"),
-                ("apex_core/setup/seeders/salis_auto_email_reports_seed.py", "seed_salis_auto_email_reports"),
-            }
-        ),
-        frozenset(
-            {
-                ("habitat/doctype/custody_handover/custody_handover.py", "on_cancel"),
-                ("habitat/doctype/goods_receipt/goods_receipt.py", "on_cancel"),
-            }
-        ),
-        # safety_task_execution._finding_escalates' own docstring admits it "mirrors
-        # finding_fanout._is_actionable" — real debt A-056 chose not to fix.
-        frozenset(
-            {
-                ("habitat/doctype/safety_task_execution/safety_task_execution.py", "_finding_escalates"),
-                ("habitat/utils/finding_fanout.py", "_is_actionable"),
-            }
-        ),
+        # Habitat's engine raises the automated alert, Masar's whitelisted one-tap
+        # raises the manual one; masar's docstring admits it "Mirrors
+        # temporary_worker_engine._hr_recipients". One rule ("HR Manager, else System
+        # Manager"), so the home is apex_core/utils/ — the shared kernel BOTH already
+        # import (system_notify). Left only because it spans the Habitat/Salis
+        # boundary, which needs a wave that owns salis/.
         frozenset(
             {
                 ("habitat/temporary_worker_engine.py", "_hr_recipients"),
                 ("salis/api/masar.py", "_hr_notify_recipients"),
             }
         ),
+        # The ONLY entry retained on merit rather than scope. Patches are frozen
+        # history: both have already run on every installed site and are skipped
+        # forever after (patch log), so promoting a shared helper changes no runtime
+        # behaviour anywhere while risking a re-run on a fresh install. Duplication
+        # is the correct trade for a one-shot script; do not "fix" this.
         frozenset(
             {
                 ("patches/v1_x/seed_demo_role_logins.py", "_get_or_create"),
                 ("patches/v1_x/seed_masar_demo_movement.py", "_get_or_create"),
             }
         ),
+        # Identical role-membership display hint; driver_portal/__init__.py is the
+        # package both sit under, so it is already the home — boarding.py should
+        # import it. Needs a wave that owns salis/.
         frozenset(
             {
                 ("salis/api/boarding.py", "_is_staff"),
                 ("salis/api/driver_portal/__init__.py", "_is_staff"),
             }
         ),
+        # Both docstrings state the same rule ("current_vehicle, else Active
+        # Assignment") and warn it must match what fuel writes enforce — a divergence
+        # here is a real permission bug, so one home is the point. salis/utils/
+        # already holds the sibling get_driver_for_user. Needs a wave that owns salis/.
         frozenset(
             {
                 ("salis/api/driver_portal/__init__.py", "_bound_vehicle"),
                 ("salis/api/fleet_employee.py", "_bound_vehicle"),
             }
         ),
+        # Same-FILE duplication, so the promotion is purely local (a shared
+        # owner-or-project-scope helper beside them) — the cheapest fix left, and the
+        # only one needing no cross-module import. Note both docstrings correctly
+        # explain why the EXISTING scoped_has_permission cannot be reused; that
+        # argument does not extend to the two of them duplicating each other.
         frozenset(
             {
                 ("salis/permissions.py", "salis_driver_has_permission"),
                 ("salis/permissions.py", "trip_start_log_has_permission"),
             }
         ),
-        # --- Tests (frozen 2026-07-25 by A-170; drained by A-176) ---
     }
 )
 
@@ -459,6 +475,27 @@ class TestCopyPastedFunctionBodies(unittest.TestCase):
         self.assertFalse(
             any(smuggled <= g for g in _COPY_PASTE_BASELINE),
             "one member from each of two different baselined groups must NOT be accepted",
+        )
+
+    def test_baseline_holds_no_stale_group(self):
+        # [#a176st] The ratchet's other direction. test_no_new_copy_pasted_function_body
+        # only stops the frozen set GROWING; nothing stopped it keeping an entry whose
+        # duplication had already been removed, so "listed" would have degraded into
+        # "listed once, for reasons nobody can still check". Failing on a stale entry
+        # forces the de-duplication and the shrink into the SAME commit and makes
+        # membership mean exactly one thing: real, still-live, deliberately retained.
+        live = [{(rel, name) for rel, _lineno, name in locs}
+                for locs in _copy_pasted_groups().values()]
+        stale = sorted(
+            sorted(group) for group in _COPY_PASTE_BASELINE
+            if not any(keys <= group for keys in live)
+        )
+        self.assertEqual(
+            stale,
+            [],
+            "Baselined copy-paste group(s) no longer duplicated — the debt is gone, so "
+            "delete the entry from _COPY_PASTE_BASELINE in the commit that fixed it:\n"
+            + "\n".join(f"  {g}" for g in stale),
         )
 
     def test_no_new_copy_pasted_function_body(self):

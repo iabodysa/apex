@@ -67,7 +67,6 @@ class GoodsReceipt(Document):
     def on_cancel(self):
         """Reverse every ledger row this receipt posted."""
         from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-            reverse_stock_entries,
+            reverse_and_mark_cancelled,
         )
-        reverse_stock_entries(VOUCHER_TYPE, self.name)
-        self.db_set("status", "Cancelled")
+        reverse_and_mark_cancelled(self, VOUCHER_TYPE)

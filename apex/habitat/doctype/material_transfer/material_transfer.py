@@ -171,7 +171,6 @@ def _role_emails(role):
 def on_cancel(doc, method=None):
     """Reverse every ledger row this transfer posted (ship and, if any, receive legs)."""
     from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        reverse_stock_entries,
+        reverse_and_mark_cancelled,
     )
-    reverse_stock_entries(VOUCHER_TYPE, doc.name)
-    doc.db_set("status", "Cancelled")
+    reverse_and_mark_cancelled(doc, VOUCHER_TYPE)

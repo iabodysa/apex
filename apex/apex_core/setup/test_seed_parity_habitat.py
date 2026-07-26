@@ -68,12 +68,14 @@ class TestAutoEmailReportNotExternalised(unittest.TestCase):
         self.assertEqual(load_specs("habitat", only=["Auto Email Report"]), [])
 
     def test_legacy_seeder_resolves_dynamic_fields(self):
-        # [#4n0oed]
+        # [#4n0oed] Reads the shared seeding engine, not the module wrapper: A-176
+        # promoted the identical Habitat/Salis bodies into it, so that is where the
+        # two runtime lookups this test exists to prove now live.
         import inspect
 
-        from apex.apex_core.setup.seeders import habitat_auto_email_reports_seed as auto_email_reports_seed
+        from apex.apex_core.setup.seeders import auto_email_report_seed_base
 
-        src = inspect.getsource(auto_email_reports_seed.seed_auto_email_reports)
+        src = inspect.getsource(auto_email_report_seed_base.seed_auto_email_reports_for)
         self.assertIn('frappe.db.get_value("User", "Administrator", "email")', src)
         self.assertIn('frappe.db.get_value("Report", cfg["report"], "report_type")', src)
 

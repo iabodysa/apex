@@ -135,3 +135,12 @@ def reverse_stock_entries(voucher_type: str, voucher_no: str) -> None:
         # [#4eui8g]
         frappe.db.set_value("Accommodation Stock Ledger", r.name, "is_cancelled", 1)
         frappe.db.set_value("Accommodation Stock Ledger", rev, "is_cancelled", 1)
+
+
+def reverse_and_mark_cancelled(doc, voucher_type: str) -> None:
+    """The whole on_cancel routine every stock voucher shares: reverse each ledger
+    row this voucher posted, then stamp the voucher Cancelled. Reversal is keyed on
+    voucher_type/voucher_no only, so it never reads the doc and the two steps are
+    order-independent."""
+    reverse_stock_entries(voucher_type, doc.name)
+    doc.db_set("status", "Cancelled")

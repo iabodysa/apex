@@ -19,7 +19,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex.habitat.utils.finding_fanout import fan_out_findings
+from apex.habitat.utils.finding_fanout import fan_out_findings, is_actionable
 
 # [#f1ge3a]
 _SECURITY_CATEGORY = "security"
@@ -158,15 +158,9 @@ class SafetyTaskExecution(Document):
 
 
 def _finding_escalates(finding) -> bool:
-    """A finding escalates when it is actionable: it names an Issue Type and a
-    Room and is not already Resolved (mirrors finding_fanout._is_actionable)."""
-    if not finding.get("issue_type"):
-        return False
-    if not finding.get("room"):
-        return False
-    if (finding.get("status") or "") == "Resolved":
-        return False
-    return True
+    """A finding escalates when it is actionable — the same rule that decides
+    whether it spawns a ticket, so escalation and fan-out can never disagree."""
+    return is_actionable(finding)
 
 
 def _row_category_is_security(finding) -> bool:
