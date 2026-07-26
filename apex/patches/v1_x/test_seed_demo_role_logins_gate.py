@@ -15,13 +15,22 @@ Two guards, either of which fails the build the moment the seeder is re-wired:
   * on a migrate-only site the two demo login Users (and the demo Employee that
     carries the Masar token) it would create are all absent.
 
+A third guard covers the password. The seeder used to carry the demo login
+password as a literal, which made it a working credential in public source,
+identical on every checkout. It now reads ``APEX_DEMO_PASSWORD`` from the
+operator's environment and refuses to run without it, so two more assertions
+hold: an unset variable stops the run with a message naming the variable, and no
+password string reaches the User record from inside this module.
+
 The import of the seeder module below is deliberate: it keeps the module
 referenced for the dead-code guard (the modules are kept, only un-wired) and lets
 the assertions key off the seeder's own demo constants, so they can never drift
 from what the seeder would actually create.
 """
 
+import ast
 import os
+from unittest import mock
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -63,4 +72,61 @@ class TestSeedDemoRoleLoginsGate(FrappeTestCase):
             f"demo Employee {seed._EMP_NAME!r} (which carries the demo Masar "
             "Worker Token) exists — a normal migrate must not seed it (seeder "
             "un-wired, A-070)",
+        )
+
+
+class TestSeedDemoRoleLoginsPassword(FrappeTestCase):
+    def test_execute_stops_when_the_password_variable_is_unset(self):
+        """No variable, no run — and the operator is told which one is missing.
+
+        The check sits ahead of the seeder's own try/except so the failure
+        surfaces to the caller instead of being swallowed into the error log,
+        and ahead of any database work so this assertion cannot seed anything.
+        """
+        with mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop(seed._PASSWORD_ENV, None)
+            with self.assertRaises(RuntimeError) as raised:
+                seed.execute()
+        self.assertIn(
+            seed._PASSWORD_ENV,
+            str(raised.exception),
+            "the refusal must NAME the variable the operator has to set, "
+            "otherwise the message is not actionable",
+        )
+
+    def test_password_comes_from_the_environment_unchanged(self):
+        """Whatever the operator exports is what the demo logins get — no
+        transformation, and no fallback to substitute for a missing value."""
+        chosen = frappe.generate_hash(length=20)
+        with mock.patch.dict(os.environ, {seed._PASSWORD_ENV: chosen}):
+            self.assertEqual(seed._demo_password(), chosen)
+
+    def test_module_ships_no_password_of_its_own(self):
+        """The regression this guard exists for: a password written into the
+        source is a live credential every checkout shares.
+
+        Structural rather than textual — it fails on ANY literal handed to the
+        User record's ``new_password``, not just the one that was removed, and
+        it survives renaming or moving the value it does allow.
+        """
+        with open(seed.__file__, encoding="utf-8") as fh:
+            tree = ast.parse(fh.read(), filename=seed.__file__)
+
+        literals = [
+            node.lineno
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Dict)
+            for key, value in zip(node.keys, node.values)
+            if isinstance(key, ast.Constant)
+            and key.value == "new_password"
+            and isinstance(value, ast.Constant)
+            and isinstance(value.value, str)
+        ]
+        self.assertEqual(
+            literals,
+            [],
+            f"{seed.__file__} assigns a string literal to `new_password` "
+            f"(line(s) {literals}). The demo password must come from "
+            f"{seed._PASSWORD_ENV} at runtime — a literal here ships a working "
+            "login in public source.",
         )
