@@ -1,7 +1,7 @@
 """E2E smoke-mount spec — every portal SPA mounts cleanly (P-206).
 
-WHY: the portal SPAs (fleet, fleet-os, driver, worker/masar, housing, safety) build to
-committed bundles served by the ``www/<portal>.html`` shells. A stale/broken bundle
+WHY: the portal SPAs (fleet, fleet-os, driver, worker/masar, masar-supervisor, housing,
+safety) build to committed bundles served by the ``www/<portal>.html`` shells. A stale/broken bundle
 or a bad shared import (the exact class of regression the shared vite factory,
 bundle-guard, and the @shared dedup can introduce) makes the SPA fail to mount or
 throw at boot — with NOTHING in a green build to catch it. This spec is the RUNTIME
@@ -20,8 +20,12 @@ gitignored ``e2e/.env.local`` credential (template ``e2e/.env.local.example``). 
 session is needed because each shell boots with a CSRF token; an unauthenticated
 hit would bounce to login and never mount the SPA. The screenshot user need not be
 a driver/worker — an unlinked account still MOUNTS the SPA (it renders the
-"unlinked" state), which is all a mount smoke asserts. If a portal logs a resource
-error for an account that lacks its domain data, provision a portal-scoped user (see
+"unlinked" state), which is all a mount smoke asserts. ONE exception: the
+/masar-supervisor shell renders ``#app`` only for a holder of a supervisor role
+(masar_supervisor.py SUPERVISOR_ROLES) and otherwise serves a role-less notice page
+with no mount node, so that route needs a supervisor-roled session — Administrator
+holds every role, which is what CI uses. If a portal logs a resource error for an
+account that lacks its domain data, provision a portal-scoped user (see
 e2e/setup_screenshot_user.py) and re-run.
 
 RUN (from bench root, against a running site with the portals built + served):
@@ -51,11 +55,7 @@ _PORTALS = [
     ("fleet-os", "Fleet OS Board"),
     ("driver", "Salis Driver"),
     ("masar", "Masar Worker"),
-    # /masar-supervisor (route_supervisor_portal) is deliberately NOT smoked yet: it
-    # mounts, but its only boot call
-    # (apex.salis.api.route_supervisor.get_supervisor_context) answers 417 on a fresh
-    # site even for Administrator, so listing it here would red every push. Tracked
-    # separately; re-add this route with the fix.
+    ("masar-supervisor", "Masar Supervisor"),
     ("housing", "Housing"),
     ("safety", "Safety"),
 ]
