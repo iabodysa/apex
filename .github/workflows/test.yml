@@ -126,10 +126,12 @@ jobs:
       #
       # WHAT THIS STEP COSTS — RE-MEASURED 2026-07-26 (A-237), because the figures
       # this comment used to carry had already been corrected in the guard's own
-      # docstring and were left standing here. THE WORKSTATION WAS NOT QUIET: other
-      # agents were building throughout, so every local number below is a CONTENDED
-      # upper bound and carries the 1-minute load average it was taken at. The spread
-      # between windows is contention, not regression.
+      # docstring and were left standing here. THE WORKSTATION WAS NOT QUIET, and a
+      # quiet one could not be got: a waiter polled for ten minutes for a 1-minute load
+      # average under 1.20 and never saw one, because other agents were building
+      # throughout. So every local number below is a CONTENDED upper bound and carries
+      # the load average it was taken at. The spread between windows is contention, not
+      # regression - and a contended number said out loud beats a clean-looking one.
       #
       #   this step, on the runner ........ 6 / 6 / 6 / 7 / 12s (last five green runs,
       #                                     2026-07-26; whole seconds is all the API
