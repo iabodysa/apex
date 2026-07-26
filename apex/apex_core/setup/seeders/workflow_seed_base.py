@@ -4,11 +4,11 @@
 Frappe's ``bench migrate`` does NOT auto-import a ``Workflow`` from a module
 folder (Workflow is not in ``frappe.model.sync.IMPORTABLE_DOCTYPES``), so each
 module ships its Workflows as ``<module>/workflow/<name>/<name>.json`` design
-artifacts and applies them here, idempotently and existence-guarded. The three
-module seeders (``habitat_workflow_seed`` / ``logistay_workflow_seed`` /
-``salis_workflow_seed``) reuse the primitives below so the create/reconcile
-logic lives in exactly one place; each module keeps only its own workflow list,
-state-colour map, and definition loader.
+artifacts and applies them here, idempotently and existence-guarded. The module
+seeders (``habitat_workflow_seed`` / ``salis_workflow_seed``) reuse the
+primitives below so the create/reconcile logic lives in exactly one place; each
+module keeps only its own workflow list, state-colour map, and definition
+loader.
 """
 
 import frappe

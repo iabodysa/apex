@@ -8,7 +8,7 @@ on a schedule. These are the periodic movement/fleet operational digests:
 - Transport Fulfilment SLA    — Weekly  (Fleet Manager — service-level watch)
 - Vehicle Compliance Register — Monthly (Government Relations — renewals)
 
-Mirrors ``habitat/auto_email_reports_seed.py``. An Auto Email Report must name a
+Mirrors ``habitat_auto_email_reports_seed.py``. An Auto Email Report must name a
 real recipient; the customer's users/emails are unknown at install, so each is
 created **disabled** with Administrator as the placeholder user/recipient. An
 admin sets the real recipients and enables it. Idempotent — created only if
