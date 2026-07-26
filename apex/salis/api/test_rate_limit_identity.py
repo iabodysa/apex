@@ -85,7 +85,16 @@ ALREADY_KEYLESS_ENDPOINTS = 3
 EXPECTED_ENDPOINTS = DE_KEYED_ENDPOINTS + ALREADY_KEYLESS_ENDPOINTS
 
 _ABSENT = object()
-_STUB_IP = "203.0.113.41"
+
+# This file's own reserved slice of RFC 3849 documentation space. Every test file that
+# installs frappe.local.request_ip must own a prefix no other file's can be a prefix of,
+# because the bad-token window is keyed on the address alone: two files drawing from one
+# subnet share one budget, and whichever runs second reds for a reason nowhere in its own
+# source. test_portal_token_throttle.TestThrottleAddressIsolation enforces it. The first
+# draft here used 203.0.113. and 198.51.100., both already owned by
+# tests/test_front_desk_rate_limit.py, and that guard caught it.
+ADDRESS_SUBNET = "2001:db8:4a71::"
+_STUB_IP = ADDRESS_SUBNET + "29"
 
 
 def _decorated_endpoints():
@@ -150,7 +159,7 @@ class _FakeCache:
 class _FakeRequest:
     method = "GET"
     cookies: dict = {}
-    remote_addr = "198.51.100.7"
+    remote_addr = ADDRESS_SUBNET + "7"
 
 
 class TestGuestDriverRateLimitIdentity(unittest.TestCase):
