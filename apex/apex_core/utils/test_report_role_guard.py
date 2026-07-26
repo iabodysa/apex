@@ -49,9 +49,12 @@ GRANTED ``report`` on the ref, because the role's own charter already demanded i
 record carries no personal data:
 
 * ``Facility Asset Movement`` / ``Finance Manager`` — read+report at permlevel 0. The
-  DocType ships ``accounting_acknowledged_by`` labelled "Acknowledged By (Finance)", and
+  DocType ships an ``accounting_acknowledged``/``accounting_acknowledged_by`` gate, and
   the controller refuses to submit an Intercompany Permanent movement that is not
-  acknowledged, so Finance is a named and enforced participant in this document.
+  acknowledged, so an accounting sign-off is enforced on this document. A-218 later
+  dropped the "(Finance)" parenthetical from that field's label, because the role holds
+  no write here and so was never the one closing the gate; that narrows the label, not
+  this read-only grant.
 * ``Operational Depreciation Snapshot`` / ``Finance Manager`` — read+report at permlevel
   0. Book values over ``Custody Article``, carrying no personal data; the role already
   reports on both sibling snapshots (Occupancy, Vehicle Utilisation) and on the whole
