@@ -42,18 +42,21 @@ _TOKEN_SUBJECT_FIELDS = {
     DRIVER: "driver",
 }
 
-# Defense-in-depth: cap blind portal-token guessing at 10 failed attempts / 60s per
-# IP. Only failed resolutions are charged (see _reject_invalid_token), so a valid
-# link never counts and a legitimate holder is never blocked. 10/60s mirrors the
-# app's tight tier (driver-portal writes) yet allows the odd revoked-link retry.
+# Defense-in-depth: cap blind portal-token guessing at 10 failed attempts / 60s.
+# Only FAILED resolutions are charged (see _reject_invalid_token), so a valid link
+# never counts and a working holder is never blocked, even behind an office NAT.
+# Scope is frappe's own window (rate_limiter.py:155 keys rl:<form_dict.cmd>:<ip>):
+# both www entries share one (cmd is None on a website route), each whitelisted
+# endpoint gets its own -- so the cap is per IP PER ENDPOINT, not one global 10/min.
+# Accepted: 192-bit tokens make the residual guess rate irrelevant either way.
 BAD_TOKEN_ATTEMPTS_PER_MINUTE = 10
 
 
 @rate_limit(limit=BAD_TOKEN_ATTEMPTS_PER_MINUTE, seconds=60)
 def _throttle_bad_token_attempt() -> None:
-    """Charge one failed portal-token attempt against the per-IP window; the (N+1)th
-    raises RateLimitExceededError (HTTP 429). No-op without a request (rate_limiter.py
-    :134), so console/test callers are never throttled."""
+    """Charge one failed portal-token attempt against this request's rate-limit
+    window; the (N+1)th raises RateLimitExceededError (HTTP 429). No-op without a
+    request (rate_limiter.py:134), so console/test callers are never throttled."""
 
 
 def _require_audience(audience: str) -> None:
