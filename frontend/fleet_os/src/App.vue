@@ -28,7 +28,7 @@ import AlertDrawer from "./components/AlertDrawer.vue";
 import VehiclePanel from "./components/VehiclePanel.vue";
 import { useI18n } from "./i18n";
 import { useFleetFormat } from "./useFleetFormat.js";
-import { useToast } from "./useToast.js";
+import { useToast } from "@shared/useToast.js";
 import { useConfirm } from "./useConfirm.js";
 import { useFleetBoard } from "./useFleetBoard.js";
 import { useVehiclePanel } from "./useVehiclePanel.js";

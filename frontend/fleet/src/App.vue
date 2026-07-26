@@ -19,10 +19,13 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import FleetPageShell from "@shared/components/FleetPageShell.vue";
 import Icon from "./components/Icon.vue";
-import LangToggle from "./components/LangToggle.vue";
+// [#a281] Direct path, never the "@shared/components" barrel: a name-import from the
+// barrel resolves EVERY component it re-exports (incl. any portal-i18n-coupled one)
+// in this portal, which is what broke the A-041 builds. See components/index.js.
+import LangToggle from "@shared/components/LangToggle.vue";
 import ThemeToggle from "./components/ThemeToggle.vue";
 import { useI18n } from "./i18n";
-import { useToast } from "./useToast.js";
+import { useToast } from "@shared/useToast.js";
 import { useEmployee } from "./useEmployee.js";
 
 const { t, lang, dir } = useI18n();
@@ -204,7 +207,9 @@ function onSaveDraft() {
 
     <template #actions>
       <ThemeToggle />
-      <LangToggle />
+      <!-- variant="header" tints the control for the forest header bar, matching
+           the sibling driver / safety / route_supervisor portals. -->
+      <LangToggle variant="header" />
       <span class="emp-avatar" :title="t('emp.brand')">{{ avatarInitial }}</span>
     </template>
 
