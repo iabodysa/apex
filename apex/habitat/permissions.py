@@ -173,6 +173,71 @@ def idle_resident_report_query(user=None):
     return _building_condition(user)
 
 
+def housing_checkout_query(user=None):
+    """Scope Housing Checkout to the user's buildings through its ``bed``.
+
+    The DocType carries no ``building`` column, so ``_building_condition`` cannot serve
+    it: the estate is one hop away as ``bed`` -> ``Bed.building``. The fragment is
+    therefore a subquery on ``tabBed``, the shape ``salis.permissions.dispatch_trip_query``
+    uses to reach a Route Plan's project.
+
+    Renders the two edge cases exactly like every sibling housing fragment: "" (no
+    restriction at all) for the Administrator and the oversight roles in
+    ``HOUSING_UNSCOPED_ROLES``, and "1=0" (matches nothing) for a scoped user holding no
+    building — never the other way round, which would blackout oversight and leak to a
+    supervisor. A checkout whose ``bed`` is NULL matches no subquery row and so stays
+    hidden from a scoped user: fail closed. Stored rows always carry one, because ``bed``
+    is fetched from ``assignment.bed`` and Housing Assignment makes ``bed`` mandatory.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return ""
+    buildings = _allowed_buildings(user)
+    if not buildings:
+        return "1=0"
+    escaped = ", ".join(frappe.db.escape(b) for b in buildings)
+    return "`bed` in (select `name` from `tabBed` where `building` in ({values}))".format(
+        values=escaped
+    )
+
+
+def housing_checkout_has_permission(doc, ptype, user=None):
+    """Deny a scoped user acting on a checkout outside their buildings.
+
+    ``building_scoped_has_permission`` cannot be reused here. It resolves the estate from
+    ``doc.building``, a field Housing Checkout does not have, so it would read None for
+    every checkout and return False — denying a building-scoped supervisor their OWN
+    building's records too. A guard that blacks out the role it is meant to bound reviews
+    as correct and is not.
+
+    So this mirrors ``housing_checkout_query``'s hop instead: ``bed`` -> ``Bed.building``.
+    It falls back to ``assignment`` -> ``Housing Assignment.building`` because
+    ``Document.insert`` runs ``check_permission("create")`` (document.py:300) BEFORE
+    ``_validate_links()`` (:302) applies ``fetch_from``, so on a server-side create ``bed``
+    is not populated yet while the mandatory ``assignment`` always is. Without the
+    fallback a scoped supervisor could not create a checkout at all.
+
+    Deny-only and ptype-agnostic, like its siblings: returns None to defer to the
+    DocPerms, False to block every action including submit.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return None
+
+    building = None
+    bed = getattr(doc, "bed", None)
+    if bed:
+        building = frappe.db.get_value("Bed", bed, "building")
+    if not building:
+        assignment = getattr(doc, "assignment", None)
+        if assignment:
+            building = frappe.db.get_value("Housing Assignment", assignment, "building")
+    if not building:
+        # [#1i4wio]
+        return False
+    return None if building in _allowed_buildings(user) else False
+
+
 # [#lz1v52]
 def report_building_scope(user=None):
     """Return ``(restrict, allowed_buildings)`` for report-side building scoping.

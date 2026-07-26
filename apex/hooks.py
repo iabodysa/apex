@@ -336,6 +336,8 @@ permission_query_conditions = {
     "Scheduled Task Instance": "apex.habitat.permissions.scheduled_task_instance_query",
     "Resident Request": "apex.habitat.permissions.accommodation_resident_request_query",
     "Idle Resident Report": "apex.habitat.permissions.idle_resident_report_query",
+    # Scoped through `bed` -> Bed.building; the DocType has no building column.
+    "Housing Checkout": "apex.habitat.permissions.housing_checkout_query",
     "Vehicle Assignment": "apex.salis.permissions.vehicle_assignment_query",
     "Fuel Request": "apex.salis.permissions.fuel_request_query",
     "Dispatch Trip": "apex.salis.permissions.dispatch_trip_query",
@@ -402,6 +404,8 @@ has_permission = {
     "Scheduled Task Instance": "apex.habitat.permissions.building_scoped_has_permission",
     "Resident Request": "apex.habitat.permissions.building_scoped_has_permission",
     "Idle Resident Report": "apex.habitat.permissions.building_scoped_has_permission",
+    # Own handler, not the shared one: a checkout carries no `building` to read.
+    "Housing Checkout": "apex.habitat.permissions.housing_checkout_has_permission",
     "Vehicle Assignment": "apex.salis.permissions.scoped_has_permission",
     "Fuel Request": "apex.salis.permissions.scoped_has_permission",
     "Dispatch Trip": "apex.salis.permissions.dispatch_trip_has_permission",

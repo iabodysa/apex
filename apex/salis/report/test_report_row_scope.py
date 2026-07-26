@@ -40,7 +40,7 @@ across the report tree today (counts below are app-wide, so they include reports
 ref is unscoped and which scope a JOINED master instead), and a name allowlist would have
 to be extended for each -- the same class of defect as a hardcoded DocType list:
 
-  1. ``permissions.report_building_scope(user)``      -- 11 habitat reports
+  1. ``permissions.report_building_scope(user)``      -- 12 habitat reports
   2. ``permissions.report_project_scope(user)``       -- 12 salis reports
   3. ``permissions.report_company_scope(user)``       -- 6 logistay reports
   4. ``permissions._building_is_unscoped(user)`` paired with ``_allowed_buildings(user)``
@@ -74,14 +74,15 @@ WHAT THIS STATIC CHECK CANNOT SEE, STATED RATHER THAN GUESSED
     can never quietly swallow a report.
   * The invariant is keyed on ``ref_doctype``, which is the DocType whose DocPerms gate
     the report and whose rows it is presumed to expose. A report whose ref is UNSCOPED
-    but which joins a scoped DocType is outside it. Two ship: ``Checkout Pending
-    Clearance`` (ref ``Housing Checkout``, joins Custody Issue / Custody Damage
-    Assessment / Bed) and ``Transport Fulfilment SLA`` (ref ``Trip Fulfilment Ledger``,
-    joins Transport Request). Neither was made a ratchet here: the only way to spot them
-    statically is to scan for DocType names as string literals, and measured over this
-    tree that scan returns 10 reports of which 8 are Link column ``options`` rather than
-    queries -- a 20 percent precision detector is a guard that cries wolf, not a guard.
-    They are recorded in the A-217 report as findings instead.
+    but which joins a scoped DocType is outside it. ONE ships: ``Transport Fulfilment
+    SLA`` (ref ``Trip Fulfilment Ledger``, joins Transport Request). The other,
+    ``Checkout Pending Clearance``, was the leak A-225 closed — its ref ``Housing
+    Checkout`` is now row-scoped in hooks.py, which brought the report INSIDE this
+    invariant and the report now resolves the scope. It was not made a ratchet here: the
+    only way to spot the remaining shape statically is to scan for DocType names as string
+    literals, and measured over this tree that scan returns 10 reports of which 8 are Link
+    column ``options`` rather than queries -- a 20 percent precision detector is a guard
+    that cries wolf, not a guard. It is recorded in the A-217 report as a finding instead.
 
 Run standalone:  python3 -m unittest apex.salis.report.test_report_row_scope -v
 """
@@ -649,46 +650,77 @@ class TestTheDetectorCanFail(unittest.TestCase):
 class TestTheEnumerationIsLive(unittest.TestCase):
     """The proof the scoped set is READ, not written down: scope one more DocType.
 
-    ``Housing Checkout`` ships today with no permission_query_conditions entry, and
-    ``Checkout Pending Clearance`` is its Script Report, which resolves no scope. Scope
-    the DocType in a mirrored hooks file — no shipped file is touched — and the report
-    must appear as an offender with nothing else in this module changed. A hardcoded
-    DocType list could not produce that.
+    Take a DocType no hook scopes today whose only Script Report resolves no scope, scope
+    it in a mirrored hooks file — no shipped file is touched — and that report must appear
+    as an offender with nothing else moved. A hardcoded DocType list could not produce
+    that.
+
+    The fixture is DISCOVERED, not named. It used to name ``Housing Checkout`` /
+    ``Checkout Pending Clearance``, and A-225 then scoped that DocType for real — which
+    broke this proof, because its material had become the very thing it was demonstrating.
+    A named fixture makes every future scoping wave edit this file; picking the fixture off
+    the same enumeration the guard already reads means the next wave does not have to.
     """
 
-    NEW_REF = "Housing Checkout"
-    NEW_REPORT = "Checkout Pending Clearance"
     HANDLER = "apex.habitat.permissions.accommodation_assignment_query"
 
     def setUp(self):
         self.reports = shipped_script_reports()
         self.real = scope_owning_modules()
+        self.baseline = unscoped_reports(self.reports, self.real)
+        self.ref, self.report_name = self._fixture()
 
-    def test_the_doctype_is_genuinely_unscoped_today(self):
-        """The premise. If it were already scoped the proof below would prove nothing."""
-        self.assertNotIn(self.NEW_REF, self.real)
-        self.assertEqual(self.reports[self.NEW_REPORT].ref, self.NEW_REF)
-        self.assertNotIn(self.NEW_REPORT, unscoped_reports(self.reports, self.real))
+    def _fixture(self):
+        """An unscoped ref with exactly ONE Script Report, and that report skips the scope.
+
+        Exactly one report keeps the "moved nothing else" assertion below exact. The scope
+        check is run against ``HANDLER``'s module, which is the module the mirror will name,
+        so a candidate that already speaks that vocabulary is never chosen.
+        """
+        module = self.HANDLER.rsplit(".", 1)[0]
+        exported = permissions_exports(module)
+        refs = [r.ref for r in self.reports.values()]
+        for name, report in sorted(self.reports.items()):
+            if report.ref is None or report.ref in self.real or report.source is None:
+                continue
+            if refs.count(report.ref) != 1:
+                continue
+            if applies_scope(_text(report.source), module, exported):
+                continue
+            return report.ref, name
+        return None, None
+
+    def test_a_fixture_for_the_proof_exists(self):
+        """The premise. Without an unscoped ref to scope, the proof below is vacuous."""
+        self.assertIsNotNone(
+            self.ref,
+            "no Script Report is left over an unscoped ref, so this liveness proof has no "
+            "material. That is a GOOD tree state, not a bug: replace the discovered fixture "
+            "with a synthetic ref + source file (see TestTheDetectorCanFail for the shape) "
+            "rather than deleting the proof.",
+        )
+        self.assertNotIn(self.ref, self.real)
+        self.assertNotIn(self.report_name, self.baseline)
 
     def test_scoping_it_in_a_mirrored_hooks_flags_its_report(self):
-        mirror = _mirror_hooks_with(self.NEW_REF, self.HANDLER)
+        mirror = _mirror_hooks_with(self.ref, self.HANDLER)
         self.addCleanup(os.unlink, mirror)
         mirrored = scope_owning_modules(mirror)
         self.assertEqual(
             set(mirrored) - set(self.real),
-            {self.NEW_REF},
+            {self.ref},
             "the mirror changed more than the one entry it was supposed to add",
         )
         found = unscoped_reports(self.reports, mirrored)
         self.assertIn(
-            self.NEW_REPORT,
+            self.report_name,
             found,
             "a newly scoped DocType did not put its unfiltered report in the offender set, "
             "so the enumeration is not live",
         )
         self.assertEqual(
-            set(found) - set(unscoped_reports(self.reports, self.real)),
-            {self.NEW_REPORT},
+            set(found) - set(self.baseline),
+            {self.report_name},
             "scoping one DocType moved more than that DocType's report",
         )
 
