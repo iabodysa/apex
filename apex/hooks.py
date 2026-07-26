@@ -93,6 +93,12 @@ doc_events = {
         "before_submit": "apex.apex_core.utils.workflow_guard.before_submit",
         "before_cancel": "apex.apex_core.utils.workflow_guard.before_cancel",
     },
+    # A-201: a Report must not name a role its ref_doctype refuses `report` to, or the
+    # workspace link renders and dies on click. Scoped to apex-owned refs; never throws
+    # mid-migrate (see report_role_guard's module docstring).
+    "Report": {
+        "validate": "apex.apex_core.utils.report_role_guard.validate",
+    },
     "Employee": {
         "on_change": "apex.apex_core.utils.portal_token_security.on_employee_change",
     },

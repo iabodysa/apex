@@ -22,6 +22,7 @@ CORE_ALLOWLIST = {
     "Employee": "hrms",  # Portal credential lifecycle revocation
     "Sales Invoice": "erpnext",  # Logistay invoice issuance gate (P-191)
     "Additional Salary": "hrms",  # Logistay payroll/WPS validate gate (P-192)
+    "Report": "frappe",  # A-201 report-role runnability guard (apex-owned refs only)
 }
 
 # [#j1p8io]
