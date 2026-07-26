@@ -145,9 +145,8 @@ def before_cancel(doc, method=None):
 
 
 def on_cancel(doc, method=None):
-    doc.db_set("status", "Cancelled")
     from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        reverse_stock_entries,
+        reverse_and_mark_cancelled,
     )
-    reverse_stock_entries("Custody Issue", doc.name)
+    reverse_and_mark_cancelled(doc, "Custody Issue")
 

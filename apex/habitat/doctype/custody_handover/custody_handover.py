@@ -61,10 +61,9 @@ class CustodyHandover(Document):
     def on_cancel(self):
         """Reverse every ledger row this handover posted (ship and, if any, receive)."""
         from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-            reverse_stock_entries,
+            reverse_and_mark_cancelled,
         )
-        reverse_stock_entries(VOUCHER_TYPE, self.name)
-        self.db_set("status", "Cancelled")
+        reverse_and_mark_cancelled(self, VOUCHER_TYPE)
 
     def _assert_source_availability(self):
         """Reject the handover if the source store cannot cover the requested

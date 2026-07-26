@@ -48,12 +48,12 @@ def fan_out_findings(findings_rows, source_doc) -> list[str]:
         skipped as not-actionable or already-linked are not included).
 
     Idempotent: a finding already carrying a live generated_maintenance_request
-    is skipped; only actionable findings (see :func:`_is_actionable`) spawn a
+    is skipped; only actionable findings (see :func:`is_actionable`) spawn a
     ticket.
     """
     created: list[str] = []
     for finding in findings_rows or []:
-        if not _is_actionable(finding):
+        if not is_actionable(finding):
             continue
         if _already_linked(finding):
             continue
@@ -106,10 +106,13 @@ def _reported_by(source_doc) -> str:
     )
 
 
-def _is_actionable(finding) -> bool:
+def is_actionable(finding) -> bool:
     """A finding warrants a ticket when it names an issue_type and a room and is
     not already resolved. issue_type is the explicit 'this needs maintenance'
-    signal; a resolved finding needs no new ticket."""
+    signal; a resolved finding needs no new ticket.
+
+    Public because the same rule decides safety-notification escalation; this
+    module owns it, callers import it rather than re-stating the three tests."""
     if not finding.get("issue_type"):
         return False
     if not finding.get("room"):
