@@ -17,7 +17,7 @@ false-green. Cairo, Montserrat and JetBrains Mono are now vendored under
 apex/public/vendor/<family>-<version>/ and the hosts are in the list below, which is
 what closes it.
 
-Four invariants are pinned here:
+Five invariants are pinned here:
 
   1. No <script src> under apex/www/ points off-site. Third-party executable code
      on a logged-in page is the security case; this is the hard rule.
@@ -28,6 +28,10 @@ Four invariants are pinned here:
      so "no CDN" cannot be satisfied by pointing the page at a 404.
   4. Every vendored font stylesheet a shell links exists on disk, resolves its own
      woff2 files, and keeps font-display: swap — losing swap would change first paint.
+  5. No CDN host appears in a portal SPA's source under frontend/*/src/ or in its BUILT
+     bundle under apex/public/*_portal/. Both sides are checked: the source so a
+     regression is caught at review, the committed bundle so a stale build cannot pass
+     on the strength of a source that was already fixed.
 
 Two scoping rules keep those invariants aimed at what a browser actually receives:
 
@@ -42,10 +46,11 @@ Two scoping rules keep those invariants aimed at what a browser actually receive
     stylesheet of it would be a false positive. This is deliberately not a filename
     allowlist: a new shell is covered the moment it mounts, with no list to update.
 
-Out of scope, tracked separately: the built portal bundles under apex/public/*_portal/
-and their sources under frontend/*/src/index.css still @import the same Google Fonts
-URL. Removing that needs a frontend rebuild, so this guard covers apex/www/ only and
-must not be read as proof that a served page makes no font request.
+The SPA a shell mounts is covered too. The sources under frontend/*/src/ and the built
+bundles under apex/public/*_portal/ once @imported the same Google Fonts URL, so a
+served page still made a third-party font request even with apex/www/ itself clean.
+Those imports are gone, and invariant 5 pins it — a shell being clean is not evidence
+about the bundle the browser actually executes.
 
 Run standalone:  python3 -m unittest apex.www.test_www_no_external_cdn_assets -v
 """
@@ -57,6 +62,8 @@ from pathlib import Path
 APP_ROOT = Path(__file__).resolve().parents[1]
 WWW_DIR = APP_ROOT / "www"
 PUBLIC_DIR = APP_ROOT / "public"
+REPO_ROOT = APP_ROOT.parent
+FRONTEND_DIR = REPO_ROOT / "frontend"
 
 # Package/script CDNs. A page that needs one of these needs a vendored copy instead.
 CDN_HOSTS = (
@@ -107,6 +114,9 @@ SERVABLE_SUFFIXES = frozenset({".html", ".md", ".js", ".css", ".json", ".svg", "
 # the __pycache__ artefacts a local test run leaves behind.
 NON_SERVABLE_SUFFIXES = frozenset({".py", ".pyc", ".pyo"})
 
+# Text a bundler can carry a URL in, on either side of the build.
+BUNDLE_SUFFIXES = frozenset({".css", ".js", ".ts", ".vue", ".html", ".json"})
+
 # The two marks of a page that MOUNTS an SPA. A shell has both; a redirect marker,
 # an error stub or a plain server-rendered page has neither.
 MOUNT_NODE = re.compile(r"<div\b[^>]*\bid\s*=\s*[\"']app[\"']", re.IGNORECASE)
@@ -119,6 +129,18 @@ BUNDLE_SCRIPT = re.compile(
 def _www_files():
     return sorted(
         p for p in WWW_DIR.rglob("*") if p.is_file() and p.suffix in SERVABLE_SUFFIXES
+    )
+
+
+def _portal_bundle_files():
+    """Portal SPA sources plus the built bundles a shell mounts. Scanning src/ rather
+    than each frontend app root is what keeps node_modules out of the walk."""
+    roots = sorted(FRONTEND_DIR.glob("*/src")) + sorted(PUBLIC_DIR.glob("*_portal/assets"))
+    return sorted(
+        p
+        for root in roots
+        for p in root.rglob("*")
+        if p.is_file() and p.suffix in BUNDLE_SUFFIXES
     )
 
 
@@ -195,6 +217,30 @@ class TestWwwNoExternalCdnAssets(unittest.TestCase):
             "instead. For a font that means a vendored family under "
             "apex/public/vendor/, not a preconnect kept 'just for warming':\n  "
             + "\n  ".join(offenders),
+        )
+
+    def test_no_cdn_host_appears_in_a_portal_bundle_or_its_source(self):
+        # A clean shell is not evidence about the SPA it mounts: the bundle is what the
+        # browser executes, so an @import there is still a third-party request.
+        files = _portal_bundle_files()
+        sides = {"frontend" if FRONTEND_DIR in p.parents else "public" for p in files}
+        self.assertEqual(
+            sides,
+            {"frontend", "public"},
+            f"one side of the scan matched nothing ({len(files)} files) — the glob broke",
+        )
+        offenders = []
+        for path in files:
+            text = _read(path)
+            for host in CDN_HOSTS:
+                if host in text:
+                    offenders.append(f"{path.relative_to(REPO_ROOT)}: {host}")
+        self.assertEqual(
+            offenders,
+            [],
+            "CDN host in a portal SPA source or its built bundle — the shell being "
+            "clean does not help, the browser still makes the request. Vendor it under "
+            "apex/public/vendor/ and rebuild the bundle:\n  " + "\n  ".join(offenders),
         )
 
     def test_masar_supervisor_uses_the_vendored_leaflet_that_exists(self):
