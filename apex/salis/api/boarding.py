@@ -25,10 +25,7 @@ from apex.apex_core.utils.portal_token_security import (
     presented_token,
     resolve_portal_subject,
 )
-from apex.apex_core.utils.rate_window import (
-    INCR_AND_EXPIRE_SCRIPT,
-    charge_window,
-)
+from apex.apex_core.utils.rate_window import charge_window
 from apex.salis.utils import get_driver_for_user, has_any_role
 
 # [#78ttpx]
@@ -36,10 +33,6 @@ PASS_TTL_HOURS = 24
 SCAN_ACTOR_LIMIT = 60
 SCAN_UNRESOLVED_IP_LIMIT = 60
 SCAN_RATE_WINDOW_SECONDS = 60
-# The counter itself moved to apex_core.utils.rate_window so the portal token
-# throttle counts the same way; this name stays bound to it because
-# tests/test_front_desk_rate_limit.py drives the script directly.
-SCAN_RATE_LIMIT_SCRIPT = INCR_AND_EXPIRE_SCRIPT
 
 # Who may authorise a boarding scan. Deliberately NARROWER than the driver
 # portal's same-named tuple: Finance Manager reads fleet cost, never scans a rider on.
@@ -158,14 +151,23 @@ def _enforce_scan_actor_rate_limit(actor: str) -> None:
 
 
 def _enforce_scan_unresolved_ip_rate_limit() -> None:
-    """Bound rejected scan credentials without charging authenticated NAT peers."""
+    """Bound rejected scan credentials without charging authenticated NAT peers.
+
+    Guarded like the bad-token limiter it shares a counter with
+    (portal_token_security._throttle_bad_token_attempt), because here the bucket IS
+    the address, so a request carrying none must decline to count. Reading it bare
+    raised AttributeError where the attribute is unset, and where it is merely None
+    (``frappe.init``'s value until ``frappe.app`` fills it) pooled every addressless
+    caller into ONE bucket — the opposite of a per-address ceiling. The sibling actor
+    limiter needs no address guard: its identity comes from the session, not the
+    connection, so it is never absent.
+    """
     if not getattr(frappe.local, "request", None):
         return
-    _enforce_scan_rate_limit(
-        "scan-unresolved-ip",
-        frappe.local.request_ip,
-        SCAN_UNRESOLVED_IP_LIMIT,
-    )
+    ip = getattr(frappe.local, "request_ip", None)
+    if not ip:
+        return
+    _enforce_scan_rate_limit("scan-unresolved-ip", ip, SCAN_UNRESOLVED_IP_LIMIT)
 
 
 def _resolve_trip(dispatch_trip: str) -> dict:
