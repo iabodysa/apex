@@ -14,11 +14,13 @@ dependencies = []
 [project.urls]
 Repository = "https://github.com/iabodysa/apex"
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-]
+# No pytest extra and no [tool.pytest.ini_options] on purpose: the suite runs under the
+# bench, via `bench --site test.localhost run-tests --app apex` (.github/workflows/
+# test.yml). 271 of the 358 test_*.py files subclass frappe's FrappeTestCase, which needs
+# an initialised site and a per-test transaction, so plain pytest cannot execute them.
+# Verified 2026-07-26: pytest is absent from both the system and the bench interpreter,
+# and no workflow invokes it — declaring it here would advertise a runner that does not
+# work. Use bench, or `bench --site test.localhost run-tests --module <dotted.path>`.
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
@@ -26,26 +28,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["apex*"]
-
-[tool.pytest.ini_options]
-# NOT a CI entry point — nothing in .github/workflows/ invokes pytest. The suite runs
-# via `bench --site test.localhost run-tests --app apex` (test.yml). Retained because
-# the tests are plain unittest.TestCase, so pytest can still COLLECT them locally for
-# counting or locating tests without a site.
-#
-# Verified 2026-07-25 on the bench py3.11 interpreter with pytest supplied via
-# PYTHONPATH: `pytest --collect-only` collects 1809 tests, but EXECUTION dies at
-# frappe.exceptions.IncorrectSitePath — pytest never calls frappe.init()/connect(),
-# so there is no site, no DB and no per-test transaction. Promoting pytest to a real
-# entry point would need a conftest.py that bootstraps a site, and a fix for
-# apex/tests/test_salis_state_flow.py, which calls get_workflow_name() at import time
-# and therefore aborts collection outright (the one file excluded from the 1809).
-#
-# All four modules are listed: colocated test_*.py live under salis/apex_core/logistay
-# too, and omitting them made a collection silently miss 58 of the 137 colocated tests.
-testpaths = ["apex"]
-python_files = "test_*.py"
-addopts = "--tb=short"
 
 [tool.ruff]
 target-version = "py310"
