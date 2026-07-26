@@ -150,7 +150,7 @@ def validate(doc, method=None):
         )
         if active_asg:
             frappe.throw(
-                _("Employee {0} already has an active Accommodation Assignment: {1}").format(
+                _("Employee {0} already has an active Housing Assignment: {1}").format(
                     doc.employee, active_asg
                 )
             )
@@ -169,7 +169,7 @@ def validate(doc, method=None):
         )
         if dup:
             frappe.throw(
-                _("{0} {1} already has an active Accommodation Assignment: {2}").format(
+                _("{0} {1} already has an active Housing Assignment: {2}").format(
                     _(doc.party_type), doc.party, dup
                 )
             )

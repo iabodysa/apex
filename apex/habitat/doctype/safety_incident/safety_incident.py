@@ -26,4 +26,4 @@ class SafetyIncident(Document):
             frappe.throw(_("Casualties cannot be negative."))
 
         if self.status == "Closed" and not (self.resolution_notes or "").strip():
-            frappe.throw(_("Resolution Notes are required to close a Habitat Safety Incident."))
+            frappe.throw(_("Resolution Notes are required to close a Safety Incident."))

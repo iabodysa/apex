@@ -26,6 +26,13 @@ is GUESSED from a JSON key, and only guesses get the shape heuristics below.
 Also lints static schema labels for {placeholders}: a label is rendered verbatim,
 so a brace in one is a bug — placeholders belong only to code _()/__() calls.
 
+And it fails any translate call whose msgid still names a record a rename
+retired (RETIRED_NAMES). A rename repoints the queries — they stop resolving
+otherwise — but a message is only prose to the interpreter, so the old name
+survives there and the user reads a record that no longer exists. That check
+runs on the extractor's own call harvest, not on a text search of the file, so
+a multi-argument or constant-held msgid cannot hide from it.
+
 Stdlib-only and self-contained ON PURPOSE: the maintainer's local toolbox is not
 installable on a CI runner, so the gate has to live in the repo to run there.
 """
@@ -69,6 +76,18 @@ _NEXT_LITERAL = re.compile(r"""\s*\+?\s*(['"])((?:\\.|(?!\1).)*?)\1""")
 _CONST_ASSIGN = re.compile(r"^(?:(?:const|let|var)\s+)?([A-Za-z_$][\w$]*)\s*=\s*\(?", re.M)
 _IDENT_ARG = re.compile(r"\s*([A-Za-z_$][\w$]*)\s*[,)]")
 _HTML_TAG = re.compile(r"<[^>]+>")
+
+# Retired record name -> the name that replaced it; matched case-sensitively as a
+# substring, because a retired name survives INSIDE a sentence. See retired_name_hits.
+RETIRED_NAMES = {
+    "Accommodation Assignment": "Housing Assignment",
+    "Accommodation Building": "Building",
+    "Accommodation Checkout": "Housing Checkout",
+    "Accommodation Lease": "Lease",
+    "Accommodation Resident Request": "Resident Request",
+    "Habitat Safety Incident": "Safety Incident",
+    "Salis Portal Theme": "Driver Portal Theme",
+}
 
 
 def clean_text(value: str) -> str:
@@ -138,7 +157,15 @@ def string_constants(content: str) -> dict:
     return constants
 
 
-def scan_calls(content: str, found: set, constants: dict | None = None) -> None:
+def scan_calls(content: str, found: set, constants: dict | None = None,
+               calls: set | None = None, origin: str = "") -> None:
+    """`calls` collects ``(origin, msgid)`` for every real translate CALL.
+
+    `found` cannot answer the retired-name question: it also holds strings guessed
+    from a JSON label, and several of those legitimately still carry a retired name
+    (a shipped Number Card's stored name, say, which only a rename patch may
+    change). Only a call site is a string an author can simply reword.
+    """
     for call in _CALL_START.finditer(content):
         pos = call.end()
         parts: list[str] = []
@@ -149,7 +176,10 @@ def scan_calls(content: str, found: set, constants: dict | None = None) -> None:
             parts.append(literal.group(2))
             pos = literal.end()
         if parts:
-            add_candidate(found, clean_text("".join(parts)), declared=True)
+            msgid = clean_text("".join(parts))
+            add_candidate(found, msgid, declared=True)
+            if calls is not None:
+                calls.add((origin, msgid))
             continue
         # No literal here: the msgid may be held in a module constant, _(_MESSAGE).
         # Same standing as a literal — the author already committed to translating
@@ -160,6 +190,8 @@ def scan_calls(content: str, found: set, constants: dict | None = None) -> None:
         ident = _IDENT_ARG.match(content, pos)
         if ident is not None and ident.group(1) in constants:
             add_candidate(found, constants[ident.group(1)], declared=True)
+            if calls is not None:
+                calls.add((origin, constants[ident.group(1)]))
 
 
 def extract_workspace_content(content_str: str, found: set) -> None:
@@ -217,10 +249,13 @@ def walk_files(package: Path):
         yield path
 
 
-def extract(package: Path) -> tuple[set, list[tuple[str, str, str]]]:
-    """Return (used source strings, static-label placeholder warnings)."""
+def extract(package: Path) -> tuple[set, list[tuple[str, str, str]], set, set]:
+    """Return (used source strings, static-label placeholder warnings,
+    (file, msgid) pairs from real translate calls, shipped DocType names)."""
     found: set = set()
     warnings: list[tuple[str, str, str]] = []
+    calls: set = set()
+    doctypes: set = set()
 
     for path in walk_files(package):
         rel = str(path.relative_to(package))
@@ -229,7 +264,7 @@ def extract(package: Path) -> tuple[set, list[tuple[str, str, str]]]:
                 content = path.read_text(encoding="utf-8")
             except (OSError, UnicodeDecodeError):
                 continue
-            scan_calls(content, found, string_constants(content))
+            scan_calls(content, found, string_constants(content), calls, rel)
             continue
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
@@ -249,7 +284,8 @@ def extract(package: Path) -> tuple[set, list[tuple[str, str, str]]]:
                     visit(item, key)
             elif isinstance(obj, str):
                 if key in JSON_TEXT_KEYS:
-                    scan_calls(obj, found)  # Notification subject/message hold Jinja _()
+                    # Notification subject/message hold Jinja _()
+                    scan_calls(obj, found, None, calls, rel)
                     add_candidate(found, obj, declared=key in DECLARED_KEYS)
                 if key in LABEL_KEYS and re.search(r"[{}]", obj) and re.search(r"[A-Za-z]", obj):
                     entry = (rel, key, obj.strip())
@@ -259,10 +295,56 @@ def extract(package: Path) -> tuple[set, list[tuple[str, str, str]]]:
         if isinstance(payload, dict):
             if payload.get("doctype") == "DocType" and payload.get("name"):
                 add_candidate(found, str(payload["name"]))
+                doctypes.add(str(payload["name"]))
             if payload.get("doctype") == "Workspace":
                 extract_workspace_content(payload.get("content", ""), found)
         visit(payload)
-    return found, warnings
+    return found, warnings, calls, doctypes
+
+
+def retired_name_hits(calls: set, doctypes: set) -> tuple[list, list]:
+    """Return (violations, entry errors).
+
+    A violation is a translate call whose msgid still names a retired record. An
+    entry error is a RETIRED_NAMES row that no longer describes reality — the
+    retired name ships as a DocType again, or its replacement does not ship at
+    all. Reporting those separately is what stops the table rotting into a
+    blacklist of strings nobody can justify: an entry that has stopped being true
+    fails loudly instead of quietly blocking a legitimate message.
+
+    RETIRED_NAMES carries the six names apex/apex_core/test_training_doc_parity.py
+    already asserts stay out of the training docs, plus Accommodation Building,
+    whose live DocType is Building. That is a SECOND home for the same list and
+    the two must be extended together — this gate is stdlib-only and self-contained
+    so it can run on a CI runner, which rules out importing the test module. The
+    entry validation below is what keeps the copy honest.
+
+    Matching is case-SENSITIVE on purpose. A record name is Title Case, so that is
+    the form that misleads; lowercase "the accommodation building address" is
+    ordinary English naming a place, not a record, and flagging it would red a
+    legitimate sentence and teach people to route around the gate.
+
+    Ordinary prose that merely reads like a record ("fleet vehicles stopped",
+    whose DocType is Salis Vehicle) is deliberately absent for the same reason.
+
+    `doctypes` is empty when the package ships no DocType JSON (a fixture package
+    under test), and an empty set would call every replacement missing. The
+    validation is skipped in that case rather than inverted.
+    """
+    violations = []
+    for origin, text in sorted(calls):
+        for name, replacement in RETIRED_NAMES.items():
+            if name in text:
+                violations.append((origin, name, replacement, text))
+
+    errors = []
+    if doctypes:
+        for name, replacement in sorted(RETIRED_NAMES.items()):
+            if name in doctypes:
+                errors.append((name, "ships as a DocType again, so it is not retired"))
+            if replacement not in doctypes:
+                errors.append((name, f"replacement {replacement!r} ships no DocType"))
+    return violations, errors
 
 
 def read_csv_keys(path: Path) -> set:
@@ -321,8 +403,9 @@ def main() -> int:
     baseline_path = stale_baseline_path(package, args.lang)
     regen = ("python3 scripts/check_translations.py "
              f"--package {args.package} --lang {args.lang} --update-stale-baseline")
-    used, warnings = extract(package)
+    used, warnings, calls, doctypes = extract(package)
     existing = read_csv_keys(csv_path)
+    retired, retired_entry_errors = retired_name_hits(calls, doctypes)
 
     missing = sorted({t for t in used if is_auto_translatable(t)} - existing)
     stale = sorted(existing - used)
@@ -338,12 +421,16 @@ def main() -> int:
 
     passed = (len(missing) <= args.max_missing
               and len(new_stale) <= args.max_stale
-              and not warnings)
+              and not warnings
+              and not retired
+              and not retired_entry_errors)
 
     if args.json:
         print(json.dumps({"missing_count": len(missing), "stale_count": len(stale),
                           "new_stale_count": len(new_stale),
                           "label_warning_count": len(warnings),
+                          "retired_name_count": len(retired),
+                          "retired_entry_error_count": len(retired_entry_errors),
                           "max_missing": args.max_missing, "max_stale": args.max_stale,
                           "passed": passed}, ensure_ascii=False, separators=(",", ":")))
         return 0 if passed else 1
@@ -352,8 +439,10 @@ def main() -> int:
         print(f"recorded {len(stale)} stale rows in {baseline_path.name}")
     print(f"translations ({args.lang}): {len(missing)} missing, {len(stale)} stale "
           f"({len(new_stale)} newly stale), "
-          f"{len(warnings)} label placeholder warnings "
-          f"(allowed: {args.max_missing} missing, {args.max_stale} newly stale, 0 warnings)")
+          f"{len(warnings)} label placeholder warnings, "
+          f"{len(retired)} retired names in translate calls "
+          f"(allowed: {args.max_missing} missing, {args.max_stale} newly stale, 0 warnings, "
+          "0 retired)")
     if missing:
         print(f"\nMISSING — add an Arabic row to {csv_path.name} for each:")
         for text in missing:
@@ -375,6 +464,17 @@ def main() -> int:
     for rel, key, text in warnings:
         print(f"\nLABEL PLACEHOLDER — {rel} ({key}): {text}")
         print("  A static label renders verbatim; move the placeholder into a code _() call.")
+    if retired:
+        print(f"\nRETIRED NAME ({len(retired)}) — a translate call still names a record "
+              "the rename retired, so the user reads a record that no longer exists. "
+              f"Reword the message, then re-key its {csv_path.name} row to the new "
+              "English source in the SAME change — the row is keyed on that string and "
+              "editing it alone strands the Arabic:")
+        for rel, name, replacement, text in retired:
+            print(f"  {rel}: {name!r} -> {replacement!r}\n      {text}")
+    for name, problem in retired_entry_errors:
+        print(f"\nRETIRED ENTRY — {name!r}: {problem}")
+        print("  Fix or drop the RETIRED_NAMES entry in scripts/check_translations.py.")
     print("\n" + ("PASS" if passed else "FAIL"))
     return 0 if passed else 1
 
