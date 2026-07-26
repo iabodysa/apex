@@ -60,7 +60,8 @@
   {% endif %}
 </style>
 
-<div class="room-label">
+<!-- Fully translated: no pinned print language, so dir must follow the reader's. -->
+<div class="room-label" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
   <div class="building-name">{{ building_name or "" }}</div>
   <div class="room-number">{{ doc.room_number }}</div>
   <div class="room-meta">
