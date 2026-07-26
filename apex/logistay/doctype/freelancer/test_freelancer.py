@@ -87,6 +87,99 @@ class TestFreelancer(FrappeTestCase):
         finally:
             frappe.set_user("Administrator")
 
+    def _user_with_role(self, role):
+        """A fresh System User holding exactly one apex role."""
+        user = frappe.get_doc(
+            {
+                "doctype": "User",
+                "email": f"freelance_{frappe.generate_hash(length=12)}@example.com",
+                "first_name": role.split()[0],
+                "roles": [{"role": role}],
+            }
+        ).insert(ignore_permissions=True)
+        return user.name
+
+    def test_only_the_permlevel1_roles_can_create(self):
+        """The pair, in one test so the two verdicts cannot collapse into one.
+
+        [#a290pr] Finance Manager holds create AND a permlevel-1 write row, so it
+        can supply `national_id_or_iqama` and the insert lands. Accommodation
+        Manager holds no permlevel-1 row, so its create was REMOVED rather than
+        left to fail: `Document.insert` resets the unwritable PII to the
+        `frappe.new_doc` value (empty) at document.py:306 before
+        `_validate_mandatory` runs at :310, so the button used to raise
+        MandatoryError on every single press.
+
+        The refusal is caught by NAME: `frappe.PermissionError` does not descend
+        from `ValidationError` (frappe/exceptions.py:34 vs :18), so the old
+        MandatoryError could never satisfy this assertion.
+        """
+        self.addCleanup(frappe.set_user, "Administrator")
+        finance = self._user_with_role("Finance Manager")
+        housing = self._user_with_role("Accommodation Manager")
+
+        # `has_permission` returns bool(perm) (frappe/permissions.py:193), so `assertIs`
+        # is safe and 1 would not pass for True.
+        self.assertIs(frappe.has_permission("Freelancer", "create", user=finance), True)
+        self.assertIs(frappe.has_permission("Freelancer", "create", user=housing), False)
+        # Only create was withdrawn — the housing role still maintains what exists.
+        self.assertIs(frappe.has_permission("Freelancer", "read", user=housing), True)
+        self.assertIs(frappe.has_permission("Freelancer", "write", user=housing), True)
+
+        nid = f"ID{frappe.generate_hash(length=12)}"
+
+        frappe.set_user(finance)
+        created = self._doc(national_id_or_iqama=nid).insert()
+        self.assertTrue(created.name.startswith("FRL-"))
+        self.assertEqual(
+            frappe.db.get_value("Freelancer", created.name, "national_id_or_iqama"),
+            nid,
+            "the permlevel-1 PII the create depends on must survive the reset pass",
+        )
+        self.assertIn(
+            1,
+            created.get_permlevel_access("write"),
+            "Finance Manager must reach permlevel 1, or its create only appears to work",
+        )
+
+        frappe.set_user(housing)
+        refused = self._doc(national_id_or_iqama=f"ID{frappe.generate_hash(length=12)}")
+        self.assertNotIn(
+            1,
+            refused.get_permlevel_access("write"),
+            "the housing role holds no permlevel-1 write — the reason create was "
+            "removed instead of the PII boundary being widened",
+        )
+        with self.assertRaises(frappe.PermissionError):
+            refused.insert()
+
+    def test_the_housing_role_can_still_maintain_an_existing_freelance(self):
+        """Removing create must not have cost the role the records it already keeps.
+
+        On UPDATE the same reset pass restores the unwritable PII from the stored
+        row (base_document.py:1288) instead of blanking it, so the save succeeds
+        and the national id is untouched — the opposite outcome to a create.
+        """
+        self.addCleanup(frappe.set_user, "Administrator")
+        nid = f"ID{frappe.generate_hash(length=12)}"
+        existing = self._doc(national_id_or_iqama=nid).insert(ignore_permissions=True)
+
+        housing = self._user_with_role("Accommodation Manager")
+        frappe.set_user(housing)
+
+        maintained = frappe.get_doc("Freelancer", existing.name)
+        maintained.status = "Terminated"
+        maintained.save()
+
+        self.assertEqual(
+            frappe.db.get_value("Freelancer", existing.name, "status"), "Terminated"
+        )
+        self.assertEqual(
+            frappe.db.get_value("Freelancer", existing.name, "national_id_or_iqama"),
+            nid,
+            "an update by a role without permlevel-1 write must not erase the PII",
+        )
+
     def test_freelance_is_an_accounting_party(self):
         """The core proof: with the custom Party Type registered, a Journal Entry
         can carry party_type='Freelancer' + party=<a freelance>.

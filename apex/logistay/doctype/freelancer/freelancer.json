@@ -142,7 +142,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-10 03:32:21.249675",
+ "modified": "2026-07-27 01:43:23.140095",
  "modified_by": "Administrator",
  "module": "Logistay",
  "name": "Freelancer",
@@ -150,7 +150,6 @@
  "owner": "Administrator",
  "permissions": [
   {
-   "create": 1,
    "delete": 1,
    "email": 1,
    "export": 1,
