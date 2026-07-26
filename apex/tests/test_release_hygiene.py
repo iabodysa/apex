@@ -37,7 +37,8 @@ PATCHES_DIR = os.path.join(APP_ROOT, "patches")
 HOOKS_PY = os.path.join(APP_ROOT, "hooks.py")
 
 # Line-oriented data the app itself ships. Vendored third-party files are out:
-# they must stay byte-identical to upstream, CRLF included.
+# they must stay byte-identical to upstream, CRLF included -- see the scope
+# decision on TestShippedDataLineEndings before widening this.
 SHIPPED_DATA_MANIFESTS = ("modules.txt", "patches.txt")
 
 ARABIC = re.compile(r"[؀-ۿ]")
@@ -175,6 +176,30 @@ class TestShippedDataLineEndings(unittest.TestCase):
     frappe/translate.py write_csv_file() regenerates the translation CSVs with
     lineterminator="\\n" — any other choice is undone on the next
     `bench update-translations`. .gitattributes prevents; this test detects.
+
+    SCOPE — settled, do not re-litigate: this guard judges apex-owned files
+    only. The apps we depend on carry the same mixed-ending drift in the
+    same-named file; measured on the pinned checkouts, hrms
+    translations/ar.csv has 388 CRLF rows of 1234, erpnext
+    translations/ar.csv 459 of 9489. Widening the scan to reach them was
+    considered and rejected:
+
+      1. We cannot fix what we do not ship. Those files live in sibling apps,
+         outside this repo's tree and index. `_files()` roots at APP_ROOT and
+         the matching .gitattributes rules are written against apex/ paths, so
+         neither can reach them by construction. Normalizing them in place
+         would only make the checkout diverge from upstream — exactly what the
+         byte-identical rule above forbids.
+      2. A red nobody can clear is a red that gets deleted. Those endings come
+         back on the next dependency update, so the gate would fail for a
+         reason no commit in this repo can address, and would be switched off.
+      3. The blast radius is nil for us. The damage this guard prevents — a
+         two-row edit arriving as a whole-file rewrite — is confined to the
+         file that mixes endings, and no apex diff renders through a sibling
+         app's CSV.
+
+    Reporting the drift upstream stays a courtesy, never a release gate; that
+    fix belongs in a pull request to the app that owns the file.
     """
 
     def _files(self):
