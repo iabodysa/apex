@@ -46,9 +46,28 @@ if "frappe" not in sys.modules:
     _fake_pypika = types.ModuleType("pypika")
     _fake_pypika.Order = types.SimpleNamespace(desc="desc", asc="asc")
 
+    # Since the patch delegates to the controller, execute() drags in
+    # housing_assignment and its imports; these exist only to let that chain
+    # import, never to behave — every test patches the frappe it actually calls.
+    _fake_frappe._ = lambda msg, *a, **k: msg
+
+    _fake_model = types.ModuleType("frappe.model")
+    _fake_document = types.ModuleType("frappe.model.document")
+    _fake_document.Document = type("Document", (), {})
+    _fake_model.document = _fake_document
+    _fake_frappe.model = _fake_model
+
+    _fake_utils = types.ModuleType("frappe.utils")
+    _fake_utils.flt = lambda value, *a, **k: float(value or 0)
+    _fake_utils.today = lambda: "1970-01-01"
+    _fake_frappe.utils = _fake_utils
+
     sys.modules["frappe"] = _fake_frappe
     sys.modules["frappe.query_builder"] = _fake_qb
     sys.modules["frappe.query_builder.functions"] = _fake_qb_functions
+    sys.modules["frappe.model"] = _fake_model
+    sys.modules["frappe.model.document"] = _fake_document
+    sys.modules["frappe.utils"] = _fake_utils
     sys.modules.setdefault("pypika", _fake_pypika)
 
 from apex.apex_core.utils import ledger_index  # noqa: E402
