@@ -311,6 +311,45 @@ called. It runs under ``bench run-tests``, where this module went from 5.02s to
 86.07s against the live ``test`` site (39 tests, contended). That +81s sits inside
 a ~25min job, which is where a guard against a whole-suite abort belongs.
 
+Why a zero-test probe is RETRIED (A-253, root cause measured 2026-07-26)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The zero-test assertion above fired in 2 of 5 consecutive runs, each time naming a
+DIFFERENT innocent module — ``test_permission_scope_shared`` once,
+``test_boarding_scan`` twice — with three clean runs between. Two causes were
+possible and the fix differs completely between them, so it was measured, not
+guessed. It is NOT the guard's scheduling: this sweep is serial (the dict
+comprehension below), and the ThreadPoolExecutor in this file belongs to the
+frappe-free standalone sweep, which cannot emit this message at all. It is the
+SHARED SITE. Reproduced by running 8 probes of ``test_boarding_scan`` at once
+against the live ``test`` site: 7 of 8 returned exit code 0 with ``testsRun == 0``,
+each having died in ``setUpClass`` on
+``QueryDeadlockError: (1020, "Record has changed since last read in table 'tabseries'")``
+— the naming-series row every autonamed fixture takes.
+
+Two separate defects made that unreadable:
+  * ``testsRun`` counts tests that STARTED. A ``setUpClass`` that raises is recorded
+    against a class-level error holder and never increments it, so the probe exits
+    0 reporting zero tests — indistinguishable, to the old code, from a module with
+    no tests. The probe now also returns ``problems``, the target's own errors and
+    failures, so the message carries the deadlock instead of an empty line.
+  * A transient serialization conflict is retryable by definition; a single verdict
+    from it is not. ``_probe_until_tests_run`` re-probes a zero-test return once in
+    a FRESH interpreter with a fresh connection, and a module is named only when
+    the retry also runs nothing. From the observed rate — one failing probe per 2.5
+    runs over 21 probes, so p ≈ 0.019 each — one retry moves a run's odds from
+    ~40% to well under 1%, which is why the second retry is not worth the delay it
+    would add before a genuinely testless module is named.
+The retry costs NOTHING on a healthy run: it fires only after a zero, and a
+successful probe is returned on its first attempt (asserted below). So the lane
+recommendation is unchanged — still serial, still bench-lane only, still skipped in
+the frappe-free lane. Worst case is one extra probe for one module.
+
+What this deliberately does NOT do is hide the deadlock: a retried-away conflict is
+a property of a site shared with the parent test run and with whatever else is
+connected, not of the module, so it is not this guard's finding to report. What
+WOULD be a hole is a retry that swallows a real empty module, and that is closed by
+a live plant that loads cleanly and defines no test.
+
 Leak baseline — EMPTY since A-236 (2026-07-26)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The one entry this detector found on its first full sweep is fixed, not blessed:
@@ -340,6 +379,7 @@ import tempfile
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
+from unittest import mock
 
 from apex.tests.source_tree import (
     APP_ROOT,
@@ -929,12 +969,27 @@ for _case, traceback_text in list(canary.errors) + list(canary.failures):
     canary_error = traceback_text.strip().splitlines()[-1]
     break
 
-print(json.dumps({"leaks": leaks, "canary": canary_error, "tests": outcome.testsRun}))
+# testsRun counts tests that STARTED, so a setUpClass that raises leaves it at 0
+# with a clean exit — report the target's own errors or "no tests" is undiagnosable.
+problems = [
+    str(case) + ": " + text.strip().splitlines()[-1]
+    for case, text in list(outcome.errors) + list(outcome.failures)
+]
+
+print(json.dumps({
+    "leaks": leaks,
+    "canary": canary_error,
+    "tests": outcome.testsRun,
+    "problems": problems,
+}))
 '''
 
 # Generous, because the point is to fail LOUDLY on a hung probe rather than let the
 # bench job sit on an InnoDB lock wait; the slowest real probe measured 39.7s.
 _LEAK_PROBE_TIMEOUT = 300
+
+# [#a253r1] One retry of a zero-test verdict; see "Why a zero-test probe is retried".
+_LEAK_PROBE_ATTEMPTS = 2
 
 
 def _live_frappe_site():
@@ -971,11 +1026,40 @@ def _probe_process_global_leak(dotted, site, sites_path, extra_path=None):
             env={**os.environ, "PYTHONPATH": os.pathsep.join(pythonpath)},
         )
     except subprocess.TimeoutExpired:
-        return {"leaks": [], "canary": f"probe timed out after {_LEAK_PROBE_TIMEOUT}s", "tests": 0}
+        return {
+            "leaks": [],
+            "canary": f"probe timed out after {_LEAK_PROBE_TIMEOUT}s",
+            "tests": 0,
+            "problems": [],
+        }
     if proc.returncode != 0:
         tail = proc.stderr.strip().splitlines()
-        return {"leaks": [], "canary": tail[-1] if tail else f"probe exit {proc.returncode}", "tests": 0}
+        return {
+            "leaks": [],
+            "canary": tail[-1] if tail else f"probe exit {proc.returncode}",
+            "tests": 0,
+            # The whole stderr, not just its last line: a probe that dies before it can
+            # report is the case with the least evidence and the most need for it.
+            "problems": tail[-8:],
+        }
     return json.loads(proc.stdout.strip().splitlines()[-1])
+
+
+def _probe_until_tests_run(dotted, site, sites_path, extra_path=None):
+    """``_probe_process_global_leak``, retried while it reports that NOTHING ran.
+
+    Returns the last report, with ``attempts`` and the diagnosis of every discarded
+    try folded in, so a module is named only after the retry ALSO ran nothing.
+    """
+    discarded = []
+    for attempt in range(1, _LEAK_PROBE_ATTEMPTS + 1):
+        report = _probe_process_global_leak(dotted, site, sites_path, extra_path)
+        report["attempts"] = attempt
+        if report["tests"]:
+            return report
+        discarded.extend(report["problems"])
+    report["problems"] = discarded
+    return report
 
 
 # [#a231b1] The one leak this detector FOUND is FIXED, not blessed: A-236 gave
@@ -1507,6 +1591,67 @@ class TestProcessGlobalWriterScan(unittest.TestCase):
                 self.assertFalse(self._writes(src), src)
 
 
+class _ScriptedProbe:
+    """A stand-in for the subprocess probe that replays a scripted list of reports.
+
+    The last entry is sticky, so "always returns nothing" is one entry rather than a
+    count that has to be kept in step with ``_LEAK_PROBE_ATTEMPTS``.
+    """
+
+    def __init__(self, *reports):
+        self.reports = reports
+        self.calls = []
+
+    def __call__(self, dotted, site, sites_path, extra_path=None):
+        self.calls.append(dotted)
+        return dict(self.reports[min(len(self.calls), len(self.reports)) - 1])
+
+
+def _report(tests, problems=()):
+    return {"leaks": [], "canary": "", "tests": tests, "problems": list(problems)}
+
+
+_DEADLOCK = "setUpClass (x.TestX): frappe.exceptions.QueryDeadlockError: (1020, ...)"
+
+
+class TestZeroTestProbeIsRetried(unittest.TestCase):
+    """A-253: a probe that ran nothing is retried before its module is named.
+
+    Deliberately frappe-free — the retry is scheduling logic over a report dict, so
+    proving it must not cost a live site, and the fast lane checks it too.
+    """
+
+    def _retry(self, probe):
+        with mock.patch(__name__ + "._probe_process_global_leak", probe):
+            return _probe_until_tests_run("apex.some.test_victim", "test", "/sites")
+
+    def test_a_probe_that_ran_tests_is_never_retried(self):
+        """The cost claim: on a healthy run the retry is free, not merely cheap."""
+        probe = _ScriptedProbe(_report(7))
+        report = self._retry(probe)
+        self.assertEqual(report["tests"], 7)
+        self.assertEqual(report["attempts"], 1)
+        self.assertEqual(len(probe.calls), 1)
+
+    def test_one_zero_test_return_is_absorbed_by_the_retry(self):
+        """The flake, forced ONCE: the second answer stands and nothing is named."""
+        probe = _ScriptedProbe(_report(0, [_DEADLOCK]), _report(22))
+        report = self._retry(probe)
+        self.assertEqual(report["tests"], 22, "the retry's real answer must win")
+        self.assertEqual(report["attempts"], _LEAK_PROBE_ATTEMPTS)
+        self.assertEqual(len(probe.calls), 2)
+
+    def test_a_module_that_runs_nothing_every_time_is_still_reported(self):
+        """The hole a retry could open, forced ALWAYS: an empty module stays named,
+        and every attempt's diagnosis is carried so the site cause is readable."""
+        probe = _ScriptedProbe(_report(0, [_DEADLOCK]))
+        report = self._retry(probe)
+        self.assertEqual(report["tests"], 0, "giving up must still report zero")
+        self.assertEqual(report["attempts"], _LEAK_PROBE_ATTEMPTS)
+        self.assertEqual(len(probe.calls), _LEAK_PROBE_ATTEMPTS)
+        self.assertEqual(report["problems"], [_DEADLOCK] * _LEAK_PROBE_ATTEMPTS)
+
+
 class TestNoTestModuleLeaksProcessGlobals(unittest.TestCase):
     """A-231: no test module may strand a stub in a frappe process global.
 
@@ -1558,6 +1703,10 @@ class TestNoTestModuleLeaksProcessGlobals(unittest.TestCase):
         "        self.assertIsNone(frappe.local.db.get_value('DocType', 'DocType', 'name'))\n"
     )
 
+    # [#a253e1] Imports and loads, defines no test — the shape the retry must still
+    # name, since a testless module is a real finding and not a lost slot.
+    _EMPTY_PLANT = "import frappe\n\nOK = bool(frappe)\n"
+
     def setUp(self):
         self.live = _live_frappe_site()
         if self.live is None:
@@ -1573,7 +1722,7 @@ class TestNoTestModuleLeaksProcessGlobals(unittest.TestCase):
             name = "apex_a231_plant"
             with open(os.path.join(tmp, name + ".py"), "w", encoding="utf-8") as fh:
                 fh.write(source)
-            return _probe_process_global_leak(name, site, sites_path, extra_path=[tmp])
+            return _probe_until_tests_run(name, site, sites_path, extra_path=[tmp])
 
     def test_the_probe_catches_a_stub_that_is_never_put_back(self):
         """Guard-of-the-guard, and the incident replayed: a module that stubs
@@ -1625,6 +1774,18 @@ class TestNoTestModuleLeaksProcessGlobals(unittest.TestCase):
         self.assertEqual(report["leaks"], [], "a correctly restored stub must read clean")
         self.assertEqual(report["canary"], "")
 
+    def test_a_genuinely_testless_module_survives_the_retry_and_is_still_named(self):
+        """A-253's hole, closed against a REAL probe rather than a scripted one.
+
+        The retry that absorbs a deadlocked slot must not also absorb a module that
+        truly runs nothing: this plant loads cleanly and defines no test, so both
+        attempts honestly return zero and the sweep names it.
+        """
+        report = self._probe_plant(self._EMPTY_PLANT)
+        self.assertEqual(report["tests"], 0)
+        self.assertEqual(report["attempts"], _LEAK_PROBE_ATTEMPTS, "it must be RETRIED, not named on the first zero")
+        self.assertEqual(report["problems"], [], "nothing failed here — the module simply has no tests")
+
     def test_no_test_module_strands_a_stub_in_a_frappe_process_global(self):
         """The sweep: every module that writes a process global must put it back.
 
@@ -1647,7 +1808,7 @@ class TestNoTestModuleLeaksProcessGlobals(unittest.TestCase):
         # Serial on purpose — 18 interpreters against one site DB corrupts the
         # verdict for a 17s saving. See the docstring's measurement.
         reports = {
-            dotted: _probe_process_global_leak(dotted, site, sites_path)
+            dotted: _probe_until_tests_run(dotted, site, sites_path)
             for dotted in sorted(writers)
         }
 
@@ -1655,9 +1816,15 @@ class TestNoTestModuleLeaksProcessGlobals(unittest.TestCase):
         self.assertEqual(
             unprobeable,
             [],
-            "Probe(s) that ran NO tests — a clean verdict from them means nothing, so "
-            "they are failed rather than counted:\n"
-            + "\n".join(f"  {d}  ({writers[d]})\n      {reports[d]['canary']}" for d in unprobeable),
+            "Probe(s) that ran NO tests on EVERY attempt — a clean verdict from them "
+            "means nothing, so they are failed rather than counted. Read the diagnosis "
+            "below before touching the module: a QueryDeadlockError or a connection "
+            "error is this shared site, not this module.\n"
+            + "\n".join(
+                f"  {d}  ({writers[d]}, {reports[d]['attempts']} attempts)\n      "
+                + "\n      ".join(reports[d]["problems"] or [reports[d]["canary"] or "no tests found"])
+                for d in unprobeable
+            ),
         )
 
         leaking = {d: r for d, r in reports.items() if r["leaks"] or r["canary"]}
