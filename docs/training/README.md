@@ -2,7 +2,8 @@
 
 A practical, role-by-role guide to using **Apex** — the AFMCO workforce
 operations suite. Apex hosts three functional modules plus a shared settings
-layer — the four names in `apex/modules.txt`:
+layer. `apex/modules.txt` declares **five** names — those four, plus a reserved
+`SIM Operations` entry that ships no records of its own:
 
 - **Habitat** — accommodation, custody, safety, maintenance, and facility costs.
 - **Salis** — movement and fleet: vehicles, drivers, fuel, dispatch, rentals,
@@ -15,6 +16,10 @@ layer — the four names in `apex/modules.txt`:
   cards, and desk are hosted on the **Custody** workspace. It has no training
   page yet, and the Custody page below does not cover it.
 - **Apex Core** — shared configuration (Habitat / Salis / Integration settings).
+- **SIM Operations** — a reserved module name only. Its package holds nothing but
+  an `__init__.py`, and no DocType, report, or workspace declares it; the SIM
+  records themselves (`SIM Card`, `SIM Custody Assignment`) declare **Logistay**.
+  Do not look for SIM functionality here — it is reached through **Custody**.
 
 This guide explains, per functional area, **what each record is for**, **who can
 do what** (roles and permissions), the **key fields**, and the **typical
