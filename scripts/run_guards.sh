@@ -1,5 +1,6 @@
 #!/bin/sh
-# The one command that reproduces a CI guard lane on a workstation.
+# The one command that reproduces the CI guards a workstation can run - which come from
+# more than one lane, and are reported under the lane each was read out of.
 #
 # Install the hooks that call it (one line, from the repo root):
 #     git config core.hooksPath .githooks
@@ -47,7 +48,9 @@ STEP_BODY=""
 STEP_WORKFLOW=""
 
 discover_workflows() {
-	WORKFLOWS=$(ls -1 "$WORKFLOW_DIR"/*.yml 2>/dev/null || true)
+	# Both extensions: GitHub reads either, and a step that moved into a .yaml file
+	# would otherwise report as owned by nobody.
+	WORKFLOWS=$(ls -1 "$WORKFLOW_DIR"/*.yml "$WORKFLOW_DIR"/*.yaml 2>/dev/null || true)
 	if [ -z "$WORKFLOWS" ]; then
 		echo "guards: $WORKFLOW_DIR holds no workflow, so there is nothing to mirror" >&2
 		echo "guards: a local pass would stop meaning a CI pass - repair it before trusting this run" >&2
