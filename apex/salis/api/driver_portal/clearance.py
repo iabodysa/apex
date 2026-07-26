@@ -35,7 +35,7 @@ def _latest_clearance(driver):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def my_clearance():
 	"""The driver's exit-clearance state and certificate availability (read).
 
@@ -70,7 +70,7 @@ def my_clearance():
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=10, seconds=60)
+@rate_limit(limit=10, seconds=60)
 def get_my_clearance_certificate():
 	"""Issue or reuse one finite print key for the resolved driver's clearance."""
 	from urllib.parse import urlencode

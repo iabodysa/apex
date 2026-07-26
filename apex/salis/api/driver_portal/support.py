@@ -51,7 +51,7 @@ def _driver_identity(driver):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def my_support_tickets():
 	"""The current driver's support tickets, now native ERPNext Issues (read).
 
@@ -80,7 +80,7 @@ def my_support_tickets():
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=10, seconds=60)
+@rate_limit(limit=10, seconds=60)
 def raise_support_ticket(
 	category,
 	priority,
@@ -192,7 +192,7 @@ def _driver_issue(name, driver):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def get_ticket(name, communication_offset=0, communication_limit=COMMUNICATION_PAGE_DEFAULT):
 	"""One support ticket's detail + its conversation (read).
 
@@ -249,7 +249,7 @@ def get_ticket(name, communication_offset=0, communication_limit=COMMUNICATION_P
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=10, seconds=60)
+@rate_limit(limit=10, seconds=60)
 def reply_to_ticket(name, message):
 	"""Post the driver's reply to their OWN ticket as a native Communication (write).
 
@@ -287,7 +287,7 @@ def reply_to_ticket(name, message):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=10, seconds=60)
+@rate_limit(limit=10, seconds=60)
 def report_vehicle_problem(subject, description, priority=None):
 	"""Raise a Vehicle Issue prefilled with the driver's bound vehicle (write).
 
@@ -315,7 +315,7 @@ def report_vehicle_problem(subject, description, priority=None):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=10, seconds=60)
+@rate_limit(limit=10, seconds=60)
 def request_license_renewal():
 	"""Raise a Compliance Issue for the driver's licence renewal (write).
 

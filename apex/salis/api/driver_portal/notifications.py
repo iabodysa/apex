@@ -34,7 +34,7 @@ def _owns_notification_reference(driver, document_type, document_name):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def get_my_notifications(limit=20):
 	"""The resolved driver's recent native Notification Log rows (read).
 
@@ -96,7 +96,7 @@ def get_my_notifications(limit=20):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def get_push_config():
 	"""Web Push opt-in config for the SPA (read).
 
@@ -129,7 +129,7 @@ def get_push_config():
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=30, seconds=60)
+@rate_limit(limit=30, seconds=60)
 def delete_push_subscription(endpoint):
 	"""Opt the driver's device out of Web Push (write).
 

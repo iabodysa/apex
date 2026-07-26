@@ -49,7 +49,7 @@ def _today_attendance(driver):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def get_today_attendance():
 	"""Today's attendance state for the current driver (read).
 
@@ -78,7 +78,7 @@ def _month_bounds(month=None):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def my_attendance(month=None):
 	"""The current driver's OWN attendance rows for a month (read).
 
@@ -160,7 +160,7 @@ def _attach_attendance_photo(doc, photo, photo_filename):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=10, seconds=60)
+@rate_limit(limit=10, seconds=60)
 def driver_check_in(photo=None, photo_filename=None):
 	"""Record the driver's presence for today and SUBMIT it.
 
@@ -196,7 +196,7 @@ def driver_check_in(photo=None, photo_filename=None):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=10, seconds=60)
+@rate_limit(limit=10, seconds=60)
 def driver_check_out(photo=None, photo_filename=None):
 	"""Stamp check-out on today's attendance.
 

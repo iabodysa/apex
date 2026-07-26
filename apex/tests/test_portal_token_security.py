@@ -1,6 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Adversarial coverage for worker and driver portal bearer isolation."""
 
+import ast
 import base64
 from contextlib import contextmanager
 from io import BytesIO
@@ -735,13 +736,35 @@ class TestPortalTokenSecurity(FrappeTestCase):
         with self.assertRaises(frappe.exceptions.LinkExpired):
             validate_key(key, frappe.get_doc("Driver Clearance", own.name))
 
-        source = inspect.getsource(clearance)
-        self.assertIn(
-            '@frappe.whitelist(allow_guest=True, methods=["POST"])\n'
-            '@rate_limit(key="frappe.request.remote_addr", limit=10, seconds=60)\n'
-            "def get_my_clearance_certificate",
-            source,
-        )
+        # Asserted as PROPERTIES, not as a source-text block. The old form pinned the
+        # exact two decorator lines, so it broke on any safe reformat and -- worse --
+        # it MANDATED `key="frappe.request.remote_addr"`. That key is a form_dict
+        # lookup (rate_limiter.py:143) over a dict built from the query string
+        # (app.py:310-311), so it let any caller buy a private window per value. The
+        # properties that actually bound this endpoint are the guest+POST surface and
+        # a bounded per-address window; `key` was never one of them.
+        decorators = {}
+        for node in ast.parse(inspect.getsource(clearance)).body:
+            if not (isinstance(node, ast.FunctionDef) and node.name == "get_my_clearance_certificate"):
+                continue
+            for decorator in node.decorator_list:
+                if not isinstance(decorator, ast.Call):
+                    continue
+                func = decorator.func
+                name = func.attr if isinstance(func, ast.Attribute) else func.id
+                decorators[name] = {
+                    keyword.arg: ast.literal_eval(keyword.value)
+                    for keyword in decorator.keywords
+                }
+        self.assertIs(decorators["whitelist"].get("allow_guest"), True)
+        self.assertEqual(decorators["whitelist"].get("methods"), ["POST"])
+        # `ip_based` is what puts the address in the identity, and frappe tests it with
+        # `is True` (rate_limiter.py:141) -- a truthy 1 silently drops the address, and
+        # `assertIn`/`==` would wave it through, so the check is by IDENTITY.
+        self.assertIs(decorators["rate_limit"].get("ip_based", True), True)
+        self.assertEqual(decorators["rate_limit"].get("limit"), 10)
+        self.assertEqual(decorators["rate_limit"].get("seconds"), 60)
+        self.assertNotIn("key", decorators["rate_limit"])
 
     def test_clearance_certificate_serializes_exact_expiry_without_deleting_other_shares(self):
         token = self._driver_token()

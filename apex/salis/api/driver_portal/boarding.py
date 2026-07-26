@@ -82,7 +82,7 @@ def _manifest_for_board(transport_request):
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
+@rate_limit(limit=120, seconds=60)
 def manual_boarding_sheet(dispatch_trip):
 	"""The manual-boarding checklist for the driver's own trip (read).
 
@@ -127,7 +127,7 @@ def manual_boarding_sheet(dispatch_trip):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="frappe.request.remote_addr", limit=10, seconds=60)
+@rate_limit(limit=10, seconds=60)
 def manual_board_workers(dispatch_trip, workers, stop_name=None, accommodation_building=None):
 	"""Mark one or more manifest workers aboard MANUALLY (write) — the no-scan fallback.
 
