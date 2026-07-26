@@ -20,6 +20,7 @@ from frappe.tests.utils import FrappeTestCase
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     issue_driver_link,
 )
+from apex.apex_core.utils import portal_token_security as token_security
 from apex.salis import utils
 from apex.salis.api import boarding, driver_portal, fleet_employee
 from apex.salis import permissions
@@ -29,21 +30,45 @@ def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
+BAD_TOKEN_SUBNET = "2001:db8:d41e::"
+
+
+def _fresh_ip():
+    """An address no other block in the app can be using: this file's own slice of
+    the RFC 3849 documentation prefix, plus a random suffix.
+
+    The portal bad-token window is keyed on the ADDRESS ALONE (one budget of
+    ``BAD_TOKEN_ATTEMPTS_PER_MINUTE`` per IP, spent across every entry), so a
+    shared ``127.0.0.1`` would let this file's failed cookies spend another test
+    file's budget and turn somebody else's push red.
+    """
+    return BAD_TOKEN_SUBNET + frappe.generate_hash(length=12)
+
+
 class _Request:
-    def __init__(self, cookies):
+    def __init__(self, cookies, remote_addr):
         self.cookies = cookies
+        self.remote_addr = remote_addr
 
 
 @contextmanager
 def _request_cookies(cookies):
+    """One request surface per block, on its OWN address, leaving no window behind.
+
+    The name handed to the cache on the way out is deliberately RAW:
+    ``delete_value`` re-applies ``make_key`` (redis_wrapper.py:141-142), so an
+    already-made key is prefixed a second time and clears nothing.
+    """
+    ip = _fresh_ip()
     sentinel = object()
     previous_request = getattr(frappe.local, "request", sentinel)
     previous_ip = getattr(frappe.local, "request_ip", sentinel)
-    frappe.local.request = _Request(cookies)
-    frappe.local.request_ip = "127.0.0.1"
+    frappe.local.request = _Request(cookies, ip)
+    frappe.local.request_ip = ip
     try:
-        yield
+        yield ip
     finally:
+        frappe.cache.delete_value(token_security.BAD_TOKEN_WINDOW_KEY.format(ip))
         for fieldname, previous in (
             ("request", previous_request),
             ("request_ip", previous_ip),
@@ -227,6 +252,33 @@ class TestGetDriverForUser(FrappeTestCase):
                 utils.get_driver_for_session_user(self.user),
                 self.driver.name,
             )
+
+    def test_each_request_block_gets_a_private_bad_token_window(self):
+        """Non-vacuous isolation: every block starts on an address whose window is
+        EMPTY (so the counter reads 1, not 2), and leaves no window behind.
+
+        A shared address would pool this file's three charged failures with another
+        file's into one 10-per-minute budget, and the eleventh would answer 429
+        where a test asserted PermissionError -- red on whoever pushed next.
+        """
+        frappe.set_user(self.user)
+        addresses = []
+        for _ in range(2):
+            with _request_cookies({"masar_dt": "invalid"}) as ip:
+                addresses.append(ip)
+                name = token_security.BAD_TOKEN_WINDOW_KEY.format(ip)
+                with self.assertRaises(frappe.PermissionError):
+                    utils.get_driver_for_user()
+                self.assertEqual(
+                    int(frappe.cache.get(frappe.cache.make_key(name)) or 0),
+                    1,
+                    "a reused address would carry another block's failed attempts",
+                )
+            self.assertIsNone(
+                frappe.cache.get(frappe.cache.make_key(name)),
+                f"the throttle window {name} outlived its cleanup",
+            )
+        self.assertNotEqual(addresses[0], addresses[1])
 
     def test_cookie_context_restores_previously_absent_request_state(self):
         sentinel = object()
