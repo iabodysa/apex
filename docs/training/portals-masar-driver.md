@@ -71,7 +71,7 @@ is not the resolved driver. The portal is the only surface; the desk is not.
 - The driver must be linked to a vehicle for vehicle and fuel actions to resolve.
 - Clearance status is read-only in the portal. The certificate key is generated
   only when the driver taps the download action and expires automatically.
-- Appearance follows the **Salis Portal Theme** (AFMCO / Frappe / Dark); no
+- Appearance follows the **Driver Portal Theme** (AFMCO / Frappe / Dark); no
   configuration is needed for it to render with safe defaults.
 
 _[screenshot: Driver Portal home — check-in, my vehicle, today's trips]_
@@ -102,7 +102,7 @@ server-side, scoping every query to one Employee.
 - The token link is **personal and unguessable** — treat it like a password; do
   not share or post it.
 - Tokens are managed via the **Masar Worker Token** record (Apex Core).
-- Appearance reuses the **Salis Portal Theme** (theme + optional brand overrides).
+- Appearance reuses the **Driver Portal Theme** (theme + optional brand overrides).
 
 _[screenshot: Masar worker home — profile, accommodation, transport]_
 

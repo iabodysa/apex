@@ -11,41 +11,57 @@ checkout, and resident-request records.
 
 | DocType | Accommodation Manager | Resident Supervisor | Resident Request Coordinator | Finance Manager |
 |---------|----------------------|---------------------|------------------------------|-----------------|
-| Accommodation Site / Building | Read, Write, Create | Read | — | — |
-| Accommodation Room / Bed | Read, Write, Create | Read | — | — |
+| Site (master) | Read, Write, Create | — | — | — |
+| Building / Room / Bed (masters) | Read, Write, Create | Read | — | — |
 | Facility Asset | Read, Write, Create | Read | — | — |
-| **Accommodation Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | — | — |
-| **Accommodation Checkout** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | — | — |
-| Accommodation Resident Request | Read, Write, Create | Read, Write, Create | Read, Write, Create | — |
+| **Housing Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | — | — |
+| **Housing Checkout** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | — | — |
+| Resident Request | Read, Write, Create | Read, Write, Create | Read, Write, Create | — |
+
+> **Site is Manager-only.** Unlike Building, Room, and Bed, the **Site** master
+> grants the Resident Supervisor nothing — supervisors read the building
+> hierarchy from Building downwards.
 
 > **Resident Request Coordinator** is the dedicated triage role for resident
-> requests: it holds Read/Write/Create on **Accommodation Resident Request**.
+> requests: it holds Read/Write/Create on **Resident Request**.
 
-> **Building scoping:** a Resident Supervisor sees only his assigned buildings' records (Assignment, Custody Issue, Cleaning Log). Set scope via *User Permission* on **Accommodation Building**. Oversight roles are unscoped.
+> **Building scoping:** a Resident Supervisor sees only his assigned buildings' records (Housing Assignment, Custody Issue, Cleaning Log). Set scope via *User Permission* on **Building**. Oversight roles are unscoped.
 
-> **Triage-field split:** the three housing roles hold Read/Write on the `permlevel 1` triage fields of Accommodation Resident Request, separating resident-entered data from internal triage handling.
+> **Triage-field split:** the three housing roles — Accommodation Manager,
+> Resident Supervisor, and Resident Request Coordinator — hold Read/Write on the
+> `permlevel 1` triage fields of Resident Request, separating resident-entered
+> data from internal triage handling.
+
+> **Internal Auditor** holds read-only oversight (Read, Report, Export) on
+> **Facility Asset**. It holds nothing on the Site/Building/Room/Bed masters or
+> on the assignment and checkout records.
 
 ---
 
 ## DocTypes in this area
 
-### Accommodation Site / Building / Room / Bed (masters)
+### Site / Building / Room / Bed (masters)
 - **Purpose:** the physical housing hierarchy — Site → Building → Room → Bed.
-- **Roles:** Accommodation Manager maintains; supervisors read to pick beds.
+- **Roles:** Accommodation Manager maintains; supervisors read Building, Room,
+  and Bed to pick beds. Site is Manager-only.
 - **Key fields:** name/code, capacity, status (active/inactive), parent link.
 
-### Accommodation Assignment *(submittable)*
+### Housing Assignment *(submittable)*
 - **Purpose:** places a resident in a specific bed.
-- **Roles:** supervisors prepare and submit; only the Manager can cancel.
+- **Roles:** supervisors prepare and submit; only the Manager can cancel or amend.
 - **Key fields:** employee/resident, bed, start date, project.
-- **On submit:** marks the bed occupied and posts to the occupancy ledger.
+- **On submit:** marks the bed **Occupied**, re-derives the room's and building's
+  occupancy counts, and suspends the housing allowance when the *Rent* rule of the
+  Salary Deduction Policy is active. It writes **no** ledger row — accommodation
+  cost reaches the **Accommodation Ledger** later, through the daily allocation
+  job.
 
-### Accommodation Checkout *(submittable)*
+### Housing Checkout *(submittable)*
 - **Purpose:** records a resident leaving and frees the bed.
 - **Roles:** supervisors prepare and submit; Manager cancels if raised in error.
 - **Key fields:** assignment reference, checkout date, condition notes.
 
-### Accommodation Resident Request
+### Resident Request
 - **Purpose:** resident self-service intake (maintenance, complaint, move).
 - **Roles:** filed by residents via QR web form; triaged by Manager/supervisors.
 - **Key fields:** request type, location (QR), description, status.
@@ -56,18 +72,20 @@ checkout, and resident-request records.
 
 1. **Set up masters once.** The Accommodation Manager creates the Site → Building
    → Room → Bed hierarchy. Supervisors have read access so they can pick beds.
-2. **Assign a resident.** A supervisor creates an **Accommodation Assignment**,
+2. **Assign a resident.** A supervisor creates a **Housing Assignment**,
    selects the employee and an available bed, and **Submits** it. Submission marks
-   the bed occupied and posts to the occupancy ledger.
-3. **Check out.** When a resident leaves, create an **Accommodation Checkout** and
+   the bed occupied and re-derives the room and building occupancy counts.
+3. **Check out.** When a resident leaves, create a **Housing Checkout** and
    **Submit** it to free the bed. Only the Accommodation Manager can **Cancel** a
    submitted assignment or checkout if it was raised in error.
-4. **Resident self-service.** Residents scan an **Accommodation QR Location** and
-   file an **Accommodation Resident Request**. The Manager and supervisors triage
+4. **Resident self-service.** Residents scan a **QR Location** and
+   file a **Resident Request**. The Manager and supervisors triage
    these from the desk.
 
-_[screenshot: Accommodation Assignment form with bed selection]_
+_[screenshot: Housing Assignment form with bed selection]_
 _[screenshot: Resident Request intake via QR web form]_
 
-> Related background jobs: occupancy snapshot, lease/temporary-stay watchlists,
-> idle-resident aging. See [Background Jobs](settings.md#background-jobs).
+> Related background jobs (all daily): occupancy snapshot, lease expiry,
+> idle-resident aging, temporary-worker linking, and the accommodation cost
+> allocation that builds the Accommodation Ledger. A weekly occupancy sync also
+> runs. See [Background Jobs](settings.md#background-jobs).

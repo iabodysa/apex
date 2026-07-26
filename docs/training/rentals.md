@@ -11,8 +11,11 @@ Rented vehicles: registering offices, accruing cost, and settling.
 | DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Finance Manager |
 |---------|---------------|-----------------------|------------------|-----------------|
 | Rental Office (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read |
-| Rental Vehicle Movement | Full | Read, Write, Create | Read, Write, Create | Read |
+| **Rental Vehicle Movement** *(submittable)* | Full | Read, Write, Create | Read, Write, Create | Read |
 | **Rental Settlement** *(workflow)* | Full | Read, Write, Create | — | Read, Write |
+
+> **Internal Auditor** holds read-only oversight on all three records, and on the
+> derived **Rental Accrual Ledger**.
 
 ---
 
@@ -22,9 +25,9 @@ Rented vehicles: registering offices, accruing cost, and settling.
 - **Purpose:** an external office that supplies rented vehicles.
 - **Key fields:** office name, contact, contract terms.
 
-### Rental Vehicle Movement
+### Rental Vehicle Movement *(submittable)*
 - **Purpose:** records a rented vehicle entering/leaving service.
-- **Feeds:** the rental accrual ledger.
+- **Feeds:** the Rental Accrual Ledger.
 
 ### Rental Settlement *(workflow)*
 - **Purpose:** the periodic reconciliation/payment against a rental office.
@@ -41,8 +44,12 @@ Rented vehicles: registering offices, accruing cost, and settling.
 3. **Settle.** A **Rental Settlement** runs the *Rental Settlement Workflow*;
    Finance Manager reviews and writes the settlement figures; Fleet Manager closes
    it.
+4. **Monthly check.** A **monthly** reconciliation job flags any Rental Office
+   still carrying unsettled accrual rows, so a missed settlement surfaces rather
+   than sitting silently in the ledger.
 
 _[screenshot: Rental Settlement form]_
 
-> The accrual ledger is **derived** automatically — operators register movements
-> and offices; the daily job builds the accrual.
+> The **Rental Accrual Ledger** is **derived** automatically — operators register
+> movements and offices; the daily job builds the accrual and the monthly job
+> checks it was settled.
