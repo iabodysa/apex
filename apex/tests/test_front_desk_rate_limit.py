@@ -359,6 +359,13 @@ class TestFrontDeskRateLimit(FrappeTestCase):
             self.assertFalse(resolve_worker("NOPE-" + _h())["found"])
 
     def test_unresolved_scan_limiter_is_a_noop_without_request_context(self):
+        """No request at all, so a console or job caller is never charged.
+
+        This deletes the REQUEST, which is the limiter's FIRST guard (boarding.py:165),
+        so the address read below it never runs here -- what this covers is the outer
+        contract only. ``TestUnresolvedScanAddressGuard`` is what reaches the second
+        guard, the one that decides what a request with NO address costs.
+        """
         absent = object()
         previous_request = getattr(frappe.local, "request", absent)
         previous_ip = getattr(frappe.local, "request_ip", absent)
