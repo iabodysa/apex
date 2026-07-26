@@ -21,10 +21,11 @@ Four properties, matching the card's proofs:
 2. ALLOWED — a role whose ref DOES grant ``report`` saves with nothing raised and
    nothing printed. Without this control a hook that refused everything would look right.
 3. THE APP'S OWN REPORTS STILL SAVE — every shipped Report JSON is replayed through the
-   hook as both the incoming and the stored document, and none of them throws. Seven of
-   them DO carry an unrunnable role and are frozen in ``KNOWN_UNRUNNABLE_REPORT_ROLES``
-   with a reason; they warn instead of throwing, which is exactly the pre-existing-row
-   clause, and the frozen set is exact-equality so a NEW one fails the build.
+   hook as both the incoming and the stored document, and none of them throws. A-211 took
+   ``KNOWN_UNRUNNABLE_REPORT_ROLES`` from seven entries to three; the three that remain
+   are one unresolved question, not three, and they warn instead of throwing, which is
+   exactly the pre-existing-row clause. The set stays exact-equality, so a NEW offender
+   fails the build rather than being absorbed.
 4. THE DETECTOR CAN FAIL — every clause has a control that must stay clean, and
    ``test_removing_the_report_flag_check_lets_the_offender_through`` reproduces the
    guard with that one clause deleted and asserts it goes blind.
@@ -32,6 +33,52 @@ Four properties, matching the card's proofs:
 Also proven here, because they are the two ways this hook could do damage:
 ``TestAMigrateIsNeverAborted`` (no throw under any migration flag) and
 ``TestAPreExistingRoleDoesNotBrickAnEdit`` (no throw for a role already stored).
+
+THE A-211 DRAIN — four of the seven entries resolved
+----------------------------------------------------
+All seven frozen entries reached their role through the Reports list and the awesomebar
+(``boot.get_user_pages_or_reports``) rather than a workspace card, which is why A-200's
+workspace sweep never saw them. Each was judged on its own evidence rather than flattened
+by a blanket grant. Both roles involved are named in ``habitat/permissions.py``
+``HOUSING_UNSCOPED_ROLES`` and ``salis/permissions.py`` ``UNSCOPED_ROLES``, and all seven
+reports re-apply that scope themselves in Python, so no grant below lifts a row filter the
+role was actually held behind — the usual "a Script Report bypasses
+permission_query_conditions" hazard does not fire for these two roles.
+
+GRANTED ``report`` on the ref, because the role's own charter already demanded it and the
+record carries no personal data:
+
+* ``Facility Asset Movement`` / ``Finance Manager`` — read+report at permlevel 0. The
+  DocType ships ``accounting_acknowledged_by`` labelled "Acknowledged By (Finance)", and
+  the controller refuses to submit an Intercompany Permanent movement that is not
+  acknowledged, so Finance is a named and enforced participant in this document.
+* ``Operational Depreciation Snapshot`` / ``Finance Manager`` — read+report at permlevel
+  0. Book values over ``Custody Article``, carrying no personal data; the role already
+  reports on both sibling snapshots (Occupancy, Vehicle Utilisation) and on the whole
+  Habitat cost surface.
+* ``Fuel Daily Log`` / ``Finance Manager`` — ``report`` added to the row it already held.
+  The role reports on 5 of the 6 Fuel DocTypes it touches and uniquely holds ``write``
+  here; the grant widens no row and no field, only the list/report view.
+
+DROPPED from the report instead, because a grant would have been a real widening:
+
+* ``Custody Damage Register`` / ``Finance Manager``. The role's only row on Custody Damage
+  Assessment is permlevel 1, read+write over exactly ``total_estimated_replacement_cost``
+  — a layered field unlock on a document another role opens, not a document grant — and
+  it holds no permlevel-0 row anywhere else in the custody domain. A permlevel-0 row would
+  have handed it the custodian (``employee``/``party``), the damaged ``items``,
+  ``remarks`` and the ``deduction_entry`` payroll link, for every building at once.
+
+STILL FROZEN — the three Housing Assignment reports, which are ONE question
+---------------------------------------------------------------------------
+``Accommodation Occupancy Summary``, ``Active Resident Register`` and ``Idle Resident
+Detection`` all name ``Internal Auditor`` over the same ref, so the three entries stand or
+fall together on a single decision about one DocPerm row. That decision is the owner's:
+Housing Assignment ships no permlevel-1 section, so any permlevel-0 read of it is a read
+of the WHOLE record — resident identity, the check-in signature and free-text notes,
+estate-wide, for a role that holds nothing on that DocType today. This file records what
+is observably true about the gap and deliberately does not name a remedy; see the reason
+string on the entries themselves.
 
 Run standalone:  python3 -m unittest apex.apex_core.utils.test_report_role_guard -v
 """
@@ -59,34 +106,42 @@ REF = "_A201 Source"
 REPORT_ROLE = "_A201 Role"
 OTHER_ROLE = "_A201 Other Role"
 
-_UNLINKED = (
-    "Pre-existing when A-201 landed, and NOT a workspace link: A-200 drained the "
-    "workspace-linked baseline, which is the intersection of a workspace's roles with a "
-    "report's roles, so a role that reaches the report through the Reports list or the "
-    "awesomebar instead of a workspace card was never in that scan. "
-    "boot.get_user_pages_or_reports hands the report to the role either way, and "
-    "query_report.py:47 then refuses it. Repairing one means editing a DocPerm table or "
-    "a report's roles table, both outside A-201's write scope — the hook warns on these "
-    "rather than throwing, because they are already stored."
+# An OBSERVATION, not an instruction. It states what is true about the gap and stops there,
+# because the remedy is a personnel-data decision reserved to the owner — a reason string
+# that names a fix is read by the next agent as a work order and gets executed.
+_OWNER_DECISION_HOUSING = (
+    "Observed, not prescribed — do NOT act on this entry from this file. Internal Auditor "
+    "is named in habitat/permissions.py HOUSING_UNSCOPED_ROLES, so Housing Assignment's "
+    "building-scope exemption already covers this role while it holds no DocPerm row on "
+    "that DocType for the exemption to apply to. The role reaches these reports through "
+    "the Reports list and the awesomebar (boot.get_user_pages_or_reports) rather than a "
+    "workspace card, which is why the A-200 workspace sweep never saw them, and "
+    "query_report.py:47 refuses the report on open. Housing Assignment ships no "
+    "permlevel-1 section, so a permlevel-0 read of it is a read of the entire record: "
+    "resident identity (party, employee, employee_name), room_condition_snapshot, "
+    "terms_signature and free-text notes, across every building. Whether this role should "
+    "hold that is a personnel-data decision for the owner, not a technical gap for an "
+    "agent to close; all three entries turn on the same single DocPerm row."
 )
 
-# Exact equality, like the sibling baselines. Each entry is (ref_doctype, [roles]); a new
-# offender fails the build, a repaired one must be pruned. Verified individually against
-# the shipped DocPerms: Internal Auditor holds NO row at all on Housing Assignment,
-# Finance Manager holds none on Facility Asset Movement or Operational Depreciation
-# Snapshot, holds a permlevel-1-only row on Custody Damage Assessment, and holds a
-# permlevel-0 read/write row that never sets `report` on Fuel Daily Log.
+# Exact equality, like the sibling baselines. Each entry is (ref_doctype, [roles], reason);
+# a new offender fails the build, a repaired one must be pruned. A-211 resolved four of the
+# original seven — see "THE A-211 DRAIN" in the module docstring for each call.
 KNOWN_UNRUNNABLE_REPORT_ROLES = {
-    "Accommodation Occupancy Summary": ("Housing Assignment", ["Internal Auditor"], _UNLINKED),
-    "Active Resident Register": ("Housing Assignment", ["Internal Auditor"], _UNLINKED),
-    "Custody Damage Register": ("Custody Damage Assessment", ["Finance Manager"], _UNLINKED),
-    "Fuel Consumption Summary": ("Fuel Daily Log", ["Finance Manager"], _UNLINKED),
-    "Idle Resident Detection": ("Housing Assignment", ["Internal Auditor"], _UNLINKED),
-    "Intercompany Movement Register": ("Facility Asset Movement", ["Finance Manager"], _UNLINKED),
-    "Operational Depreciation Aging": (
-        "Operational Depreciation Snapshot",
-        ["Finance Manager"],
-        _UNLINKED,
+    "Accommodation Occupancy Summary": (
+        "Housing Assignment",
+        ["Internal Auditor"],
+        _OWNER_DECISION_HOUSING,
+    ),
+    "Active Resident Register": (
+        "Housing Assignment",
+        ["Internal Auditor"],
+        _OWNER_DECISION_HOUSING,
+    ),
+    "Idle Resident Detection": (
+        "Housing Assignment",
+        ["Internal Auditor"],
+        _OWNER_DECISION_HOUSING,
     ),
 }
 
