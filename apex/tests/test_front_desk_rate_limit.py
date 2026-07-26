@@ -109,19 +109,20 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         )
 
     def _clear_window(self, cmd, ip):
-        """The decorator's own window, in BOTH identity shapes this file still drives.
+        """The decorator's own window, in BOTH identity shapes.
 
-        Un-keyed (the guest driver endpoints): the identity is the bare address, so the
-        name is ``rl:<cmd>:<ip>`` (rate_limiter.py:150,155).
+        Un-keyed, which every endpoint this file drives now is (``resolve_worker``
+        included, since A-294): the identity is the bare address, so the name is
+        ``rl:<cmd>:<ip>`` (rate_limiter.py:150,155).
 
-        Keyed (``resolve_worker``, which still passes ``key``): the identity is the
-        address joined to the form_dict lookup, and a real request carries no field by
-        that name, so the lookup yields "" and the name ends in a bare colon
-        (rate_limiter.py:143,147-148).
-
-        Both are cleared because guessing wrong here is silent: ``_drop_window`` deletes
-        a name that was never created and then asserts it is absent, which passes while
-        leaving the window that WAS spent to leak into the next test.
+        Keyed, which none is any longer: the identity was the address joined to a
+        form_dict lookup, and a real request carries no field by that name, so the
+        lookup yielded "" and the name ended in a bare colon (rate_limiter.py:143,
+        147-148). The retired shape is still swept because a cleanup that clears a
+        window by a HARDCODED name is silently vacuous the day the name changes:
+        ``_drop_window`` deletes a name that was never created and then asserts it is
+        absent, which stays GREEN while the window that WAS spent leaks into the next
+        test. Dropping this line is only safe once nothing can produce the shape.
         """
         self._drop_window(f"rl:{cmd}:{ip}")
         self._drop_window(f"rl:{cmd}:{ip}:")
