@@ -734,59 +734,59 @@ _METADATA_TEXT_KEYS = {"description", "label", "documentation", "options"}
 
 
 class TestNotificationCompanionModule(unittest.TestCase):
-	"""Every is_standard Notification dir must carry its <name>.py companion.
+    """Every is_standard Notification dir must carry its <name>.py companion.
 
-	When a standard Notification fires, Frappe imports
-	`<app>.<module>.notification.<slug>.<slug>` (Notification.load_standard_properties
-	→ get_doc_module). A JSON-only dir raises ModuleNotFoundError mid-send; because
-	alerts fire inside the document's try/except hook, the exception silently rolls
-	back the parent insert. Seven dirs shipped JSON-only (fixed here); this guard
-	stops a new one regressing — it bites the moment the notification is enabled.
-	"""
+    When a standard Notification fires, Frappe imports
+    `<app>.<module>.notification.<slug>.<slug>` (Notification.load_standard_properties
+    → get_doc_module). A JSON-only dir raises ModuleNotFoundError mid-send; because
+    alerts fire inside the document's try/except hook, the exception silently rolls
+    back the parent insert. Seven dirs shipped JSON-only (fixed here); this guard
+    stops a new one regressing — it bites the moment the notification is enabled.
+    """
 
-	def _notification_dirs(self):
-		"""(rel_dir, slug) for every shipped is_standard Notification dir."""
-		out = []
-		for fp in glob.glob(
-			os.path.join(APP_ROOT, "*", "notification", "*", "*.json"), recursive=False
-		):
-			if "node_modules" in fp:
-				continue
-			try:
-				with open(fp, encoding="utf-8") as fh:
-					data = json.load(fh)
-			except (OSError, json.JSONDecodeError):
-				continue
-			if not isinstance(data, dict) or data.get("doctype") != "Notification":
-				continue
-			if not data.get("is_standard"):
-				continue
-			d = os.path.dirname(fp)
-			out.append((os.path.relpath(d, APP_ROOT), os.path.basename(d)))
-		return out
+    def _notification_dirs(self):
+        """(rel_dir, slug) for every shipped is_standard Notification dir."""
+        out = []
+        for fp in glob.glob(
+            os.path.join(APP_ROOT, "*", "notification", "*", "*.json"), recursive=False
+        ):
+            if "node_modules" in fp:
+                continue
+            try:
+                with open(fp, encoding="utf-8") as fh:
+                    data = json.load(fh)
+            except (OSError, json.JSONDecodeError):
+                continue
+            if not isinstance(data, dict) or data.get("doctype") != "Notification":
+                continue
+            if not data.get("is_standard"):
+                continue
+            d = os.path.dirname(fp)
+            out.append((os.path.relpath(d, APP_ROOT), os.path.basename(d)))
+        return out
 
-	def test_scan_finds_notifications(self):
-		slugs = {slug for _, slug in self._notification_dirs()}
-		self.assertIn(
-			"salis___trip_scheduled",
-			slugs,
-			"Notification scan found nothing — parser broke",
-		)
+    def test_scan_finds_notifications(self):
+        slugs = {slug for _, slug in self._notification_dirs()}
+        self.assertIn(
+            "salis___trip_scheduled",
+            slugs,
+            "Notification scan found nothing — parser broke",
+        )
 
-	def test_every_standard_notification_has_py_companion(self):
-		missing = []
-		for rel, slug in self._notification_dirs():
-			d = os.path.join(APP_ROOT, rel)
-			if not os.path.exists(os.path.join(d, slug + ".py")):
-				missing.append(rel + "/" + slug + ".py")
-			if not os.path.exists(os.path.join(d, "__init__.py")):
-				missing.append(rel + "/__init__.py")
-		self.assertEqual(
-			missing,
-			[],
-			"is_standard Notification dir missing its companion module "
-			f"(ModuleNotFoundError on fire → silent parent rollback): {sorted(missing)}",
-		)
+    def test_every_standard_notification_has_py_companion(self):
+        missing = []
+        for rel, slug in self._notification_dirs():
+            d = os.path.join(APP_ROOT, rel)
+            if not os.path.exists(os.path.join(d, slug + ".py")):
+                missing.append(rel + "/" + slug + ".py")
+            if not os.path.exists(os.path.join(d, "__init__.py")):
+                missing.append(rel + "/__init__.py")
+        self.assertEqual(
+            missing,
+            [],
+            "is_standard Notification dir missing its companion module "
+            f"(ModuleNotFoundError on fire → silent parent rollback): {sorted(missing)}",
+        )
 
 
 class TestNoInternalMarkersInMetadata(unittest.TestCase):
