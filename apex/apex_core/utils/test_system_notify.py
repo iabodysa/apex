@@ -29,9 +29,18 @@ class TestNotifyUserSystem(unittest.TestCase):
             mf.db.get_value.assert_not_called()
 
     def test_disabled_user_is_a_noop(self):
+        """The ENABLED check is what stops it, so nothing below may run.
+
+        ``frappe`` is a bare mock, so ``db.exists`` answers truthy and the dedup
+        branch also returns False: asserting only the False would pass just as well
+        with the enabled clause deleted. Pinning the calls below the guard is what
+        makes this test able to fail.
+        """
         with mock.patch.object(system_notify, "frappe") as mf:
             mf.db.get_value.return_value = 0
             self.assertFalse(system_notify.notify_user_system("u@x", "Hi"))
+            mf.db.exists.assert_not_called()
+            mf.get_doc.assert_not_called()
 
     def test_enabled_user_inserts_alert(self):
         with mock.patch.object(system_notify, "frappe") as mf:
