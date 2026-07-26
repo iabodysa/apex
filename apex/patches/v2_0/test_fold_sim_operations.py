@@ -53,6 +53,9 @@ class TestFoldSIMOperationsIdempotency(FrappeTestCase):
                 "supplier": cls.supplier,
                 "contract_start_date": "2026-01-01",
                 "contract_end_date": "2027-01-01",
+                # Mandatory on the shipped DocType; omitting it aborts the fixture
+                # before any assertion runs, which a static check cannot see.
+                "recurring_amount": 100,
             }
         ).insert(ignore_permissions=True).name
         cls.sim = frappe.get_doc(
