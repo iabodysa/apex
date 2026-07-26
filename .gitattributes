@@ -1,0 +1,10 @@
+# Frappe regenerates the translation CSVs itself — frappe/translate.py
+# write_csv_file() opens with newline="" and passes lineterminator="\n" — so any
+# other ending is undone on the next `bench update-translations` and re-mixes the
+# file, which turns a two-row edit into a whole-file diff nobody can review.
+apex/translations/** text eol=lf
+
+# Same reason for the shipped line-oriented manifests: an editor that appends
+# CRLF rows renormalizes the rest and buries the one line that actually changed.
+apex/modules.txt text eol=lf
+apex/patches.txt text eol=lf
