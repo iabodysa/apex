@@ -21,19 +21,27 @@ assert (both the class and the 429 status).
 tests therefore stand up a minimal request context so the limit is actually
 exercised. The decorator counts in Redis, so this is an integration test (live
 bench), like the sibling concurrency tests.
+
+The one exception is ``TestUnresolvedScanAddressGuard`` at the foot of the file: it
+spies the counter instead of spending it, so it needs neither a site nor Redis.
 """
 
 from __future__ import annotations
 
+import unittest
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
+from unittest import mock
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.apex_core.utils import rate_window
 from apex.habitat.api.front_desk import resolve_worker
 from apex.salis.api import boarding, driver_portal
 from apex.salis.api.boarding import get_boarding_pass, scan_boarding_pass
+
+_ABSENT = object()
 
 # [#sxhul5]
 LIMIT = 60
@@ -304,7 +312,9 @@ class TestFrontDeskRateLimit(FrappeTestCase):
             frappe.set_user(previous_user)
 
     def test_scan_bucket_initialization_is_atomic_and_expiry_is_not_refreshed(self):
-        script = getattr(boarding, "SCAN_RATE_LIMIT_SCRIPT", None)
+        # The counter is shared, so the script is read from the module that OWNS it
+        # rather than through a re-export kept alive only for this line.
+        script = rate_window.INCR_AND_EXPIRE_SCRIPT
         self.assertIsInstance(script, str)
 
         cache = frappe.cache
@@ -367,3 +377,82 @@ class TestFrontDeskRateLimit(FrappeTestCase):
                         delattr(frappe.local, fieldname)
                 else:
                     setattr(frappe.local, fieldname, previous)
+
+
+class TestUnresolvedScanAddressGuard(unittest.TestCase):
+    """A request that carries NO address, which the class above cannot reach.
+
+    ``test_unresolved_scan_limiter_is_a_noop_without_request_context`` deletes the
+    request too, so the guard on ``frappe.local.request`` short-circuits and the
+    address is never read -- it passed against the bare read it was meant to cover.
+    Here the request is PRESENT and only the address is missing, in both shapes it
+    occurs in: unset (``AttributeError`` from the bare read) and None (``frappe.init``
+    sets it, ``frappe.app`` fills it, so None is what every non-HTTP caller carries).
+    A None address charged a bucket literally named ``...:None`` -- one window shared
+    by every addressless caller in the app, which is the opposite of a per-address
+    ceiling and would 429 an innocent third party.
+
+    ``charge_window`` is spied rather than spent, so what is asserted is the DECISION
+    to charge. That needs no site and no Redis, which is the whole point: a throttle
+    whose guards can only be exercised against a live bench is a throttle whose guards
+    do not get tested.
+    """
+
+    def setUp(self):
+        self._saved = {
+            name: getattr(frappe.local, name, _ABSENT)
+            for name in ("request", "request_ip", "form_dict")
+        }
+        self.addCleanup(self._restore)
+        self.charged = []
+        spy = mock.patch.object(
+            boarding,
+            "charge_window",
+            side_effect=lambda name, window, limit: self.charged.append(name) or 1,
+        )
+        spy.start()
+        self.addCleanup(spy.stop)
+        frappe.local.form_dict = frappe._dict({"cmd": "a226-" + _h()})
+
+    def _restore(self):
+        for name, previous in self._saved.items():
+            if previous is _ABSENT:
+                if hasattr(frappe.local, name):
+                    delattr(frappe.local, name)
+            else:
+                setattr(frappe.local, name, previous)
+
+    def test_a_request_with_no_address_declines_instead_of_charging(self):
+        for label, install_none in (("unset", False), ("None", True)):
+            with self.subTest(request_ip=label):
+                self.charged.clear()
+                if hasattr(frappe.local, "request_ip"):
+                    delattr(frappe.local, "request_ip")
+                if install_none:
+                    frappe.local.request_ip = None
+                frappe.local.request = _FakeRequest("POST")
+
+                self.assertIsNone(boarding._enforce_scan_unresolved_ip_rate_limit())
+                self.assertEqual(
+                    self.charged,
+                    [],
+                    "an addressless caller was charged, so every one of them shares "
+                    "a single window and any of them can 429 the rest",
+                )
+
+    def test_the_guard_still_charges_a_request_that_has_an_address(self):
+        """Non-vacuous: the guard must decline an absent address, not every call.
+
+        Without this, replacing the whole body with ``return`` would pass the test
+        above and quietly retire the only ceiling on rejected scan credentials. The
+        address stays inside this file's own 203.0.113.0/24 slice (RFC 5737) even
+        though a spied charge never reaches a shared window.
+        """
+        frappe.local.request = _FakeRequest("POST")
+        frappe.local.request_ip = "203.0.113." + str(int(_h(12), 16) % 250 + 1)
+
+        boarding._enforce_scan_unresolved_ip_rate_limit()
+
+        self.assertEqual(len(self.charged), 1)
+        self.assertIn(":scan-unresolved-ip:", self.charged[0])
+        self.assertTrue(self.charged[0].endswith(frappe.local.request_ip))
