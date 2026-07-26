@@ -290,7 +290,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-26 12:05:43.391990",
+ "modified": "2026-07-27 01:41:11.852479",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Facility Asset Movement",
@@ -299,6 +299,7 @@
  "permissions": [
   {
    "cancel": 1,
+   "create": 1,
    "delete": 1,
    "read": 1,
    "report": 1,
@@ -308,6 +309,7 @@
   },
   {
    "cancel": 1,
+   "create": 1,
    "read": 1,
    "report": 1,
    "role": "Accommodation Manager",
@@ -315,6 +317,7 @@
    "write": 1
   },
   {
+   "create": 1,
    "read": 1,
    "role": "Resident Supervisor",
    "write": 1
