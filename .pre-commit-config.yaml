@@ -1,32 +1,21 @@
-# DEVELOPER-OPTIONAL — this config is NOT a gate. No workflow runs `pre-commit`, and
-# nothing installs the hook, so none of it has ever executed on this repo. Opt in
-# locally if you want it:
+# DEVELOPER-OPTIONAL — nothing in this file is a gate. No workflow runs `pre-commit` and
+# nothing installs it, so none of it has ever executed on this repo. Opt in locally with
+# a one-off sweep that installs no hook:
 #
-#     pip install pre-commit
-#     pre-commit install                 # writes .git/hooks/pre-commit
-#     pre-commit run --all-files         # one-off sweep without installing
+#     pip install pre-commit && pre-commit run --all-files
 #
-# THE COMMIT-METADATA GATE IS NOT HERE — it is ./.githooks, and it IS meant to be
-# installed. One line, from the repo root, no dependency to install first:
+# THE LOCAL GATE IS ./.githooks, AND IT IS THE ONLY LOCAL HOOK MECHANISM HERE:
 #
 #     git config core.hooksPath .githooks
 #
 # .githooks/commit-msg and .githooks/pre-commit mirror the CI step "No automated
-# attribution or private commit email" (.github/workflows/test.yml) so an attribution
-# trailer or a private author email is refused before the commit exists rather than
-# after it reaches origin. They live there and not in this file because this file is
-# unusable as a home for them: enabling it needs `pip install pre-commit` plus a second
-# `pre-commit install --hook-type commit-msg`, and its ruff-format hook would rewrite
-# 596 tracked files on the first run (see below) — so the one config a developer must
-# actually install cannot be the one config nobody can afford to install. A hook nobody
-# installs protects nobody.
-#
-# The two do not compose: `pre-commit install` refuses to run while core.hooksPath is
-# set. If this file is ever enabled, its hooks have to be invoked FROM .githooks rather
-# than by unsetting core.hooksPath, which would silently disable the metadata gate.
-# Prefer the relative path above to an absolute one: core.hooksPath resolves against the
-# work tree root, so it keeps working in every linked worktree and cannot rot into the
-# dead-directory state that silently disabled all local hooks on 2026-07-25.
+# attribution or private commit email" (.github/workflows/test.yml), so a bad trailer or
+# a private author email is refused before the commit exists. They are not in this file
+# because the two mechanisms cannot coexist: `pre-commit install` refuses to run while
+# core.hooksPath is set, so adopting pre-commit as a hook would silently disable the
+# metadata gate. Prefer the relative path above to an absolute one — core.hooksPath
+# resolves against the work tree root, so it keeps working in every linked worktree and
+# cannot rot into the dead-directory state that disabled all local hooks on 2026-07-25.
 #
 # The enforced gates all live in .github/workflows/: ruff check, the comment audit and
 # the Arabic-translation coverage check (lint.yml), gitleaks plus the commit-metadata
@@ -34,19 +23,23 @@
 # (permissions-guard.yml), the committed-bundle staleness and dependency-ownership
 # checks (portal-bundles.yml), and the shared-component vitest (portal-tests.yml).
 #
-# Why this stayed optional rather than becoming CI-enforced (measured 2026-07-25):
-#   * `ruff format` would rewrite 596 of 1062 tracked apex/*.py files (56%). CI's own
-#     `ruff check apex/` is green today, so enforcement buys lint nothing — it buys a
-#     mass reformat, which is an owner call, not a hygiene fix.
-#   * The `--select=I` import sorter below would rewrite imports across 183 findings.
-#   * The ruff rev pinned here (v0.8.1) is far older than the ruff CI pins
-#     (0.15.14 in lint.yml). Enforcing this file as-is would run two different rulesets
-#     against the same code and the two gates would disagree.
-#   * The prettier and eslint hooks below do NOT exclude the committed portal bundles
-#     under apex/public/*_portal/ (49 tracked .js files). portal-bundles.yml rebuilds
-#     those and fails on any diff versus the committed output, so a prettier pass over
-#     them could never match a fresh vite build — enforcing prettier and bundle-guard
-#     together is unsatisfiable until those paths are excluded here.
+# Dropped 2026-07-26 — these hooks could never PASS, not merely never ran, and a hook
+# that cannot pass is worse than no hook because a reviewer reads it as a standard:
+#   * prettier and eslint. Neither excluded apex/public/*_portal/ — 49 committed vite
+#     bundles, minified to one 91,795-char line at the widest. portal-bundles.yml
+#     rebuilds those and fails on any diff against the committed output, so reformatting
+#     them is permanently red; prettier and the bundle guard cannot both be satisfied.
+#   * .eslintrc was deleted with the eslint hook: that hook was its only consumer, eslint
+#     appears in none of the 8 package.json files, and the file was unmodified Frappe
+#     boilerplate (globals for Cypress, PhotoSwipe, qz — none used here).
+#   * ruff-format and the `--select=I` import sorter. They would rewrite 596 of 1062
+#     tracked apex/*.py files and 183 import findings. `ruff check apex/` is green today,
+#     so enforcing them buys lint nothing and costs a mass reformat — an owner call.
+#
+# The ruff rev below tracks lint.yml's `ruff==0.15.14` pin exactly (it was v0.8.1, which
+# ran a different ruleset against the same code). If one moves, move both. There is no
+# `ci:` autoupdate block for the same reason: pre-commit.ci is not enabled, and a weekly
+# autoupdate would silently walk this rev off CI's pin.
 exclude: 'node_modules|.git'
 default_stages: [pre-commit]
 fail_fast: false
@@ -58,7 +51,9 @@ repos:
     hooks:
       - id: trailing-whitespace
         files: "apex.*"
-        exclude: ".*json$|.*txt$|.*csv|.*md|.*svg"
+        # Committed portal bundles are excluded for the same reason prettier was: they
+        # must match a fresh vite build byte for byte.
+        exclude: ".*json$|.*txt$|.*csv|.*md|.*svg|apex/public/.*_portal/.*"
       - id: check-merge-conflict
       - id: check-ast
       - id: check-json
@@ -67,57 +62,7 @@ repos:
       - id: debug-statements
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.1
+    rev: v0.15.14
     hooks:
-      - id: ruff
-        name: "Run ruff import sorter"
-        args: ["--select=I", "--fix"]
-
       - id: ruff
         name: "Run ruff linter"
-
-      - id: ruff-format
-        name: "Run ruff formatter"
-
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.7.1
-    hooks:
-      - id: prettier
-        types_or: [javascript, vue, scss]
-        # Ignore any files that might contain jinja / bundles
-        exclude: |
-            (?x)^(
-                apex/public/dist/.*|
-                .*node_modules.*|
-                .*boilerplate.*|
-                apex/templates/includes/.*|
-                apex/public/js/lib/.*
-            )$
-
-
-  # ADVISORY ONLY: the committed .eslintrc backs no running gate. This hook is the sole
-  # consumer of it and this file never runs (see the header), so .eslintrc documents the
-  # intended JS style rather than enforcing it. The JS that IS checked in CI is the
-  # shared-component vitest in portal-tests.yml; portal source is otherwise guarded only
-  # by the bundle-staleness diff in portal-bundles.yml.
-  - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.44.0
-    hooks:
-      - id: eslint
-        types_or: [javascript]
-        args: ['--quiet']
-        # Ignore any files that might contain jinja / bundles
-        exclude: |
-            (?x)^(
-                apex/public/dist/.*|
-                cypress/.*|
-                .*node_modules.*|
-                .*boilerplate.*|
-                apex/templates/includes/.*|
-                apex/public/js/lib/.*
-            )$
-
-ci:
-    autoupdate_schedule: weekly
-    skip: []
-    submodules: false
