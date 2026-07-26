@@ -112,7 +112,7 @@ Purpose-built endpoints are exposed as whitelisted methods. Call them at `/api/m
 - **Fleet supervisor board** - `apex.salis.api.fleet_os.*` (13 endpoints: the scoped fleet with history, damages, accidents, theft and workshop state; driver typeahead; vehicle timeline; reassign, handover, stop, theft report and recovery, workshop in/out, and two bulk actions). Backs `/fleet-os`.
 - **Fleet employee self-service** - `apex.salis.api.fleet_employee.*` (4 endpoints, scoped to the caller's own vehicle, trips, and fuel requests). Backs `/fleet`.
 - **Route supervisor** - `apex.salis.api.route_supervisor.*` (6 endpoints: assigned route plans, approve / reject, live boarding and driver position). Backs `/masar-supervisor`; every read is additionally row-scoped to the caller's own plans.
-- **Fleet control desk** - `apex.salis.api.operations_control.*` (the Desk operations board: fleet view, vehicle timeline, reassign, release).
+- **Fleet control desk** - `apex.salis.api.operations_control.*` (5 endpoints backing the Desk operations board: fleet view, vehicle detail, vehicle timeline, reassign, release). Three of these overlap `fleet_os` in purpose but not in name, and they key on the vehicle name rather than the plate.
 - **Operations alerts** - `apex.salis.api.operations_alerts.*` (acknowledge, assign, snooze, and resolve operational alerts).
 - **Dispatch board** - `apex.salis.api.dispatch_board.*` (the dispatch board view: vehicles, trips, drivers, and transport requests, optionally scoped by project).
 - **Boarding** - `apex.salis.api.boarding.*` and `apex.salis.api.boarding_flow.*` (scan and boarding lifecycle).
