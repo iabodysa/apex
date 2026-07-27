@@ -46,6 +46,9 @@ Use them for traceability and reports; do not enter or correct them manually.
    the Bed is **Available**. Use the **Front Desk** Desk page or create a
    `Housing Assignment`. Select the resident, Project, check-in date, and Cost
    Center. A temporary stay also needs an expected checkout date.
+
+   ![Housing Assignment form showing two synthetic available beds filtered to one room.](../assets/training/accommodation/apex-training-accommodation-assignment-bed-selection-en.png)
+
 3. Submit the assignment. The controller locks and rechecks the Bed, marks it
    **Occupied**, and recalculates Room and Building occupancy. Housing-allowance
    suspension runs only when the Rent rule in `Salary Deduction Policy` is
@@ -65,6 +68,9 @@ Use them for traceability and reports; do not enter or correct them manually.
    `Maintenance Request`; Safety can create a `Safety Incident`; Custody can
    create a `Custody Issue`. The source keeps the target link and conversion is
    idempotent.
+
+   ![Arabic Resident Request web form showing a synthetic pre-submission maintenance request.](../assets/training/accommodation/apex-training-accommodation-resident-request-intake-ar.png)
+
 6. To end the stay, create a `Housing Checkout` from the submitted assignment.
    Resolve every outstanding custody line as **Returned**, **Lost**, or
    **Damaged**. Submission closes the assignment, releases the Bed, and marks
