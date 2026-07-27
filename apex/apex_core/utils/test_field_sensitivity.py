@@ -24,12 +24,14 @@ Four properties:
    numbers quoted in the model's docstring, so the premise cannot rot silently.
 
 DRAINED SO FAR, each with a colocated proof named after it: ``Freelancer.monthly_salary``,
-then four signatures — on Housing Assignment, Custody Issue, Custody Acknowledgment and
-Facility Asset Custody Assignment. Every level-1 row there carries WRITE, not merely read,
-because those fields are set on a CREATE path, where a new document resolves an unreachable
-level from ``frappe.new_doc`` — the default, not the stored row — so a read-only row empties
-the signature on capture instead of protecting it. The portal case, Custody Acknowledgment,
-is safe for a different reason: the Web Form insert bypasses levels (``web_form.py:663``).
+then five signatures — on Housing Assignment, Custody Issue, Custody Acknowledgment,
+Facility Asset Custody Assignment and Vehicle Incident. Every level-1 row there carries
+WRITE, not merely read, because those fields are set on a CREATE path, where a new document
+resolves an unreachable level from ``frappe.new_doc`` — the default, not the stored row — so
+a read-only row empties the signature on capture instead of protecting it. The portal case,
+Custody Acknowledgment, is safe for a different reason: the Web Form insert bypasses levels
+(``web_form.py:663``); Vehicle Incident's own Guest intake never reaches the question,
+because its controller blanks the whole recovery block for Guest before validate returns.
 
 Run standalone:  python3 -m unittest apex.apex_core.utils.test_field_sensitivity -v
 """
@@ -51,12 +53,6 @@ from apex.tests.shipped_doctypes import shipped_doctypes  # noqa: E402
 # examples; applying it module by module is deliberately later work, one reviewable change
 # per module. Every entry below is an ACCEPTED EXPOSURE with a named owner decision behind
 # it, not a bug someone forgot.
-_SIGNATURES_NOT_YET_LAYERED = (
-    "Category 1 (signature), not yet layered. Raising a Signature to level 1 needs a "
-    "level-1 DocPerm row on this DocType for whichever role countersigns, and that role "
-    "differs per custody flow — so each one is its own module change with its own reviewer. "
-    "The exposure today: any role holding read on the record sees the captured mark."
-)
 _RESIDENT_REQUEST_PROSE = (
     "Category 5 (free text about a person). Resident Request is a person master and these "
     "three fields are exactly the unbounded prose the model warns about — a resident's own "
@@ -75,8 +71,7 @@ _RESIDENT_REQUEST_PROSE = (
 )
 
 KNOWN_LEVEL_ZERO_SENSITIVE = {
-    # Two left. The five already drained are listed in this module's docstring.
-    "Vehicle Incident": ([("worker_signature", "signature")], _SIGNATURES_NOT_YET_LAYERED),
+    # One left. The six already drained are listed in this module's docstring.
     "Resident Request": (
         [
             ("description", "free_text"),
@@ -352,7 +347,7 @@ class TestTheModelMatchesTheShippedTree(unittest.TestCase):
         )
         self.assertEqual(
             (total, with_high_field, with_high_row),
-            (153, 23, 20),
+            (153, 24, 21),
             "the adoption numbers in field_sensitivity.py's docstring are stale — update "
             "the docstring and this assertion together, so the premise cannot rot.",
         )
