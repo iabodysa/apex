@@ -63,7 +63,8 @@ KNOWN_LEVEL_ZERO_SENSITIVE = {
     # now permlevel 1. The ratchet tightened by one, which is the whole point of exact
     # equality — a repaired entry MUST be pruned or the guard stops meaning anything.
     "Custody Acknowledgment": ([("signature", "signature")], _SIGNATURES_NOT_YET_LAYERED),
-    "Custody Issue": ([("signature", "signature")], _SIGNATURES_NOT_YET_LAYERED),
+    # DRAINED: Custody Issue.signature — permlevel 1, level-1 rows for the three Custody
+    # Kiosk roles, none for Internal Auditor. Proof: test_custody_issue_signature_permlevel.
     "Facility Asset Custody Assignment": (
         [("supervisor_signature", "signature")],
         _SIGNATURES_NOT_YET_LAYERED,
@@ -313,7 +314,7 @@ class TestTheModelMatchesTheShippedTree(unittest.TestCase):
         )
         self.assertEqual(
             (total, with_high_field, with_high_row),
-            (153, 20, 17),
+            (153, 21, 18),
             "the adoption numbers in field_sensitivity.py's docstring are stale — update "
             "the docstring and this assertion together, so the premise cannot rot.",
         )

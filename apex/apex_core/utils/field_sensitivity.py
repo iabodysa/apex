@@ -3,8 +3,8 @@
 
 Frappe already ships per-field sensitivity via DocField ``permlevel`` plus a per-level
 DocPerm row, but the app was not using it. Measured across the shipped tree (reproduced
-by ``test_field_sensitivity.TestTheModelMatchesTheShippedTree``): 153 DocTypes, 20 with a
-field above level 0, 17 with a DocPerm row above level 0 -- 133 entirely level 0, so any
+by ``test_field_sensitivity.TestTheModelMatchesTheShippedTree``): 153 DocTypes, 21 with a
+field above level 0, 18 with a DocPerm row above level 0 -- 132 entirely level 0, so any
 role that can read one of those records reads EVERY field on it. This model classifies
 by KIND of data, so a field that does not exist yet is already classified.
 LEVELS -- 0 OPERATIONAL (default): facts about the WORK -- location, state, timing,
