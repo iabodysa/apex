@@ -312,3 +312,72 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		self.assertEqual(topup.docstatus, 1)
 		# A Top-up posts no quota consumption, so the quota is untouched.
 		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 10)
+
+	def test_oversized_first_standard_draw_is_refused(self):
+		"""A FIRST draw larger than the whole allocation must be refused too.
+
+		The exhaustion test alone cannot see this one: 15 L against a 10 L quota
+		with nothing consumed satisfies ``consumed < monthly``, so the request used
+		to approve, complete, and push consumed_litres to 15 — a silent 5 L overrun
+		that only a msgprint on the quota ever mentioned. Top-up is the sanctioned
+		way to draw beyond the allocation, so the same 15 L as a Top-up must still
+		go through."""
+		q = self._quota(monthly_litres=10)
+
+		oversized = self._new("Standard", requested_litres=15, amount=225, fuel_quota=q.name)
+		frappe.set_user(self.manager)
+		with self.assertRaises(frappe.ValidationError):
+			apply_workflow(oversized, "Approve")
+
+		# Refused before submit: nothing consumed, nothing submitted, no flag set.
+		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 0)
+		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "status"), "Active")
+		self.assertEqual(frappe.db.get_value("Fuel Request", oversized.name, "docstatus"), 0)
+		self.assertEqual(frappe.db.get_value("Fuel Request", oversized.name, "quota_applied"), 0)
+
+		# The same size as a Top-up is the sanctioned route and stays open.
+		frappe.set_user("Administrator")
+		topup = self._new("Top-up", topup_litres=15, fuel_quota=q.name)
+		frappe.set_user(self.manager)
+		apply_workflow(topup, "Approve")
+		topup.reload()
+		apply_workflow(topup, "Complete")
+		topup.reload()
+		self.assertEqual(topup.status, "Done")
+		self.assertEqual(topup.docstatus, 1)
+		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 0)
+
+	def test_two_in_flight_draws_cannot_jointly_overrun_the_quota(self):
+		"""Each draw fits alone, both approve, and the second is caught at Complete.
+
+		This is why the gate is re-checked inside the locked consumption step and
+		not only before submit: at Approve time both 6 L requests fit the 10 L
+		allocation, and only the authoritative read after the first one posts can
+		see that the second would overrun. Asserted on the SIDE EFFECT
+		(consumed_litres / quota_applied), never on the status field — Frappe writes
+		the row before ``on_update_after_submit`` runs, so the status is not
+		evidence of whether the hook refused."""
+		q = self._quota(monthly_litres=10)
+
+		first = self._new("Standard", requested_litres=6, amount=90, fuel_quota=q.name)
+		second = self._new("Standard", requested_litres=6, amount=90, fuel_quota=q.name)
+
+		frappe.set_user(self.manager)
+		apply_workflow(first, "Approve")
+		first.reload()
+		apply_workflow(second, "Approve")
+		second.reload()
+		# Both fit the allocation on their own, so both reach Approved.
+		self.assertEqual(first.docstatus, 1)
+		self.assertEqual(second.docstatus, 1)
+
+		apply_workflow(first, "Complete")
+		first.reload()
+		self.assertEqual(first.status, "Done")
+		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 6)
+
+		# 6 + 6 > 10: the locked read refuses the second draw at Complete.
+		with self.assertRaises(frappe.ValidationError):
+			apply_workflow(second, "Complete")
+		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 6)
+		self.assertEqual(frappe.db.get_value("Fuel Request", second.name, "quota_applied"), 0)
