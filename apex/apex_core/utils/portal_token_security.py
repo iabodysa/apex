@@ -464,6 +464,12 @@ def authorize_revocation(audience: str, subject: str, user=None) -> bool:
 
     Deliberately reuses issuance's deny path so an out-of-scope caller cannot tell
     the two apart, and so there is only one refusal to keep correct.
+
+    DRIVER only today, and not safe to wire to WORKER unexamined: the Resident
+    Supervisor scope branch admits a worker only through a live Housing Assignment
+    (submitted, no check-out date), so dropping the Active requirement would not
+    actually reach a checked-out worker -- the case a worker revocation is for. That
+    branch needs its own carve-out before this is offered for WORKER.
     """
     return authorize_issuance(audience, subject, user, require_active=False)
 
