@@ -43,7 +43,7 @@ class TestSeedMasarDemoMovementGate(FrappeTestCase):
         self.assertNotIn(
             _PATCH,
             lines,
-            f"{_PATCH} must stay UN-WIRED from patches.txt (A-070): a normal "
+            f"{_PATCH} must stay UN-WIRED from patches.txt: a normal "
             "migrate must not seed the demo movement scenario. Keep the module on "
             "disk for a manual `bench execute` run instead of re-adding it here.",
         )
@@ -56,21 +56,21 @@ class TestSeedMasarDemoMovementGate(FrappeTestCase):
         self.assertFalse(
             frappe.db.exists("User", seed._DEMO_USER),
             f"demo driver User {seed._DEMO_USER} exists — the seeder must be "
-            "un-wired from patches.txt so a normal migrate never creates it (A-070)",
+            "un-wired from patches.txt so a normal migrate never creates it",
         )
         self.assertFalse(
             frappe.db.exists("Building", {"building_name": seed._BUILDING}),
             f"demo Building {seed._BUILDING!r} exists — a normal migrate must not "
-            "seed it (seeder un-wired, A-070)",
+            "seed it (the seeder is un-wired)",
         )
         self.assertFalse(
             frappe.db.exists("Route Plan", {"route_name": seed._ROUTE}),
             f"demo Route Plan {seed._ROUTE!r} (and its Dispatch Trip) exists — a "
-            "normal migrate must not seed it (seeder un-wired, A-070)",
+            "normal migrate must not seed it (the seeder is un-wired)",
         )
         self.assertFalse(
             frappe.db.exists("Employee", {"employee_name": seed._WORKER_ONE}),
             f"demo worker Employee {seed._WORKER_ONE!r} (which carries the demo "
             "Masar Worker Token) exists — a normal migrate must not seed it "
-            "(seeder un-wired, A-070)",
+            "(the seeder is un-wired)",
         )

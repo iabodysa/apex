@@ -609,7 +609,7 @@ class TestEmployeeRecoveryInstallments(FrappeTestCase):
                 source_name=subject,
                 employee=subject,
                 amount=500,
-                purpose=f"A-102 wrong account {_tag()}",
+                purpose=f"non-receivable advance account {_tag()}",
             ),
             "a non-Receivable advance account must raise nothing, and must not throw",
         )

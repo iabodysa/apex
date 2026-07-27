@@ -419,7 +419,7 @@ class TestBoardingFlow(FrappeTestCase):
         self.assertEqual(len(arrival_calls), 1, "mark_arrived publishes one boarding_arrived event")
         kwargs = arrival_calls[0].kwargs
         self.assertEqual(kwargs.get("doctype"), "Dispatch Trip")
-        self.assertTrue(kwargs.get("after_commit"), "arrival publishes after_commit (P-032 pattern)")
+        self.assertTrue(kwargs.get("after_commit"), "arrival must publish after_commit")
         self.assertEqual(arrival_calls[0].args[1].get("dispatch_trip"), self.trip.name)
         self.assertEqual(arrival_calls[0].args[1].get("route_stop"), route_stop)
 

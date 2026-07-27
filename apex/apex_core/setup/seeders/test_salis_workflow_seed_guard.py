@@ -45,7 +45,7 @@ class TestSalisMandatoryWorkflows(FrappeTestCase):
                 get_workflow_name(document_type),
                 workflow_name,
                 f"Mandatory Salis workflow {workflow_name!r} is not active for "
-                f"{document_type!r} - salis_workflow_seed regression (A-077)",
+                f"{document_type!r} - salis_workflow_seed regression",
             )
             self.assertTrue(
                 frappe.db.get_value("Workflow", workflow_name, "is_active"),

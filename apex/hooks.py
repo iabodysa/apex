@@ -86,14 +86,14 @@ override_doctype_class = {
 
 # [#34xywz]
 doc_events = {
-    # A-083: app-wide guard blocking the native-submit / native-cancel workflow
+    # App-wide guard blocking the native-submit / native-cancel workflow
     # bypass. Runs in ADDITION to any per-doctype handlers below (Frappe merges the
     # "*" wildcard with the specific-doctype events); no-ops for non-workflow types.
     "*": {
         "before_submit": "apex.apex_core.utils.workflow_guard.before_submit",
         "before_cancel": "apex.apex_core.utils.workflow_guard.before_cancel",
     },
-    # A-201: a Report must not name a role its ref_doctype refuses `report` to, or the
+    # A Report must not name a role its ref_doctype refuses `report` to, or the
     # workspace link renders and dies on click. Scoped to apex-owned refs; never throws
     # mid-migrate (see report_role_guard's module docstring).
     "Report": {
@@ -288,7 +288,7 @@ scheduler_events = {
         "apex.salis.fuel_engine.monthly_fuel_reconciliation",
         # [#payd2f]
         "apex.salis.rental_engine.monthly_rental_reconciliation",
-        # [#a102mr] A-102 — queue this pay period's installment against every open
+        # [#a102mr] Queue this pay period's installment against every open
         # employee cost-recovery advance. No-op until the Salary Deduction Policy
         # Damage rule is activated (shipped OFF), and duplicate-safe per period.
         "apex.apex_core.utils.employee_recovery.monthly_employee_recovery_run",
@@ -298,7 +298,7 @@ scheduler_events = {
         "*/5 * * * *": [
             "apex.salis.api.boarding_flow.auto_confirm_claimed_boardings",
         ],
-        # A-117 — size-based purge of oversized Access Log payload rows. The
+        # Size-based purge of oversized Access Log payload rows. The
         # native Log Settings cleanup is age-based only, so a multi-megabyte
         # print/export row inside the retention window is never reclaimed.
         "0 23 * * *": [

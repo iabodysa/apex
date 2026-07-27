@@ -218,7 +218,8 @@ class TestSalisScopeRolePartition(unittest.TestCase):
         self.assertIn(
             GRO_ROLE,
             zeroed_roles(self.readers, self.unscoped - {GRO_ROLE}),
-            "removing the persona from UNSCOPED_ROLES no longer reproduces A-171",
+            "removing the persona from UNSCOPED_ROLES no longer zeroes its lists, "
+            "so the detector proves nothing",
         )
 
     def test_the_buckets_are_disjoint(self):
@@ -266,7 +267,7 @@ class TestGovernmentRelationsOfficerScope(unittest.TestCase):
         self.assertNotIn(
             GRO_ROLE,
             KNOWN_ZEROED_ROLES,
-            "A-171 must stay fixed in permissions.py, never frozen as a known gap",
+            f"{GRO_ROLE} must stay fixed in permissions.py, never frozen as a known gap",
         )
 
     def test_the_persona_holds_no_field_level_grant(self):
@@ -282,7 +283,7 @@ class TestGovernmentRelationsOfficerScope(unittest.TestCase):
             elevated,
             [],
             f"{GRO_ROLE} gained a permlevel>0 DocPerm on {elevated}; unscoping it would now "
-            "also widen FIELD visibility, which A-171 did not authorise",
+            "also widen FIELD visibility, which unscoping the row filter never authorised",
         )
 
 

@@ -79,7 +79,7 @@ class TestMasarReflectedXSS(FrappeTestCase):
 		"""End-to-end: the clean /masar render inlines only the presence boolean, so
 		there is no ``window.masar_token = "<secret>"`` sink in the HTML at all."""
 		html, ctx = _render_masar_shell({})
-		self.assertNotIn("window.masar_token", html, "the raw token must never be inlined (T-705)")
+		self.assertNotIn("window.masar_token", html, "the raw token must never be inlined")
 		self.assertRegex(html, r"window\.masar_has_token = (true|false);")
 
 	def test_valid_token_redirects_to_clean_url(self):

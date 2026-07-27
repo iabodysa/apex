@@ -453,7 +453,7 @@ class TestTheSetIsHeldToTheModelAndTheWiring(unittest.TestCase):
         self.assertEqual(
             wired,
             {label for label, *_ in ALL_CASES},
-            "the DocTypes wired to scoped_has_permission changed; redo the A-250 "
+            "the DocTypes wired to scoped_has_permission changed; redo the "
             "per-DocType survey before trusting PROJECT_MANDATORY_ON_CREATE",
         )
 

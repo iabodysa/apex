@@ -241,7 +241,7 @@ class TestAccessLogPurgeAgainstRealTable(FrappeTestCase):
         total_rows = frappe.db.count(mod.DOCTYPE)
 
         print(
-            f"\n[A-149] Access Log scan cost: rows_in_table={total_rows} "
+            f"\n[access-log] scan cost: rows_in_table={total_rows} "
             f"plan_type={step.get('type')} key={step.get('key')} "
             f"rows_examined={step.get('rows')} extra={step.get('Extra')!r} "
             f"scan_ms={elapsed_ms:.1f}"

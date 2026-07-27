@@ -300,5 +300,5 @@ class TestHabitatWorkflowReconcile(FrappeTestCase):
             len(wf.transitions),
             original,
             "shared seed_one must re-apply the shipped transitions onto the "
-            "existing habitat Workflow (A-085 finding 6 reconcile)",
+            "existing habitat Workflow rather than leaving it as found",
         )
