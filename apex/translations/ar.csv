@@ -3833,7 +3833,9 @@ This statement records a fleet incident (accident or theft) against the vehicle.
 This temporary stay is ending soon — please arrange check-out,هذه الإقامة المؤقتة على وشك الانتهاء — يُرجى ترتيب المغادرة
 This temporary stay is overdue for check-out — the worker is still checked in,هذه الإقامة المؤقتة تجاوزت موعد المغادرة — وما زال العامل مسجّلاً في الدخول
 This temporary top-up is past its revert due date ({0}) and has not been reverted.,هذه التعبئة المؤقتة تجاوزت تاريخ استحقاق عكسها ({0}) ولم تُعكَس.
+This transfer can no longer be reversed: the resident is no longer in Bed {0}.,لم يعد بالإمكان التراجع عن هذا النقل: الساكن لم يعد في السرير {0}.
 This transfer needs an active (checked-in) assignment to move.,يحتاج هذا النقل إلى تعيين نشط (تم تسجيل الدخول فيه) ليتم تحريكه.
+This transfer was raised from Bed {0} but the resident is now in Bed {1}.,أُنشئ هذا النقل من السرير {0} لكن الساكن الآن في السرير {1}.
 This vehicle has no open stop to release.,لا يوجد إيقاف مفتوح لهذه المركبة لإخراجها.
 This vehicle has no open workshop stop to return.,لا يوجد لهذه المركبة إيقاف ورشة مفتوح لإعادتها.
 This vehicle is under maintenance and should not be dispatched.,هذه المركبة تحت الصيانة ولا يجوز توزيعها.
