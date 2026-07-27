@@ -46,6 +46,7 @@ from pathlib import Path
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import getdate
 
 _FACA_JSON = Path(__file__).resolve().parent / "facility_asset_custody_assignment.json"
 
@@ -149,9 +150,24 @@ class TestFacilityAssetCustodySignaturePermlevel(FrappeTestCase):
             audited.get("supervisor_signature"),
             f"{AUDIT_ROLE} can still read the supervisor's signature",
         )
-        self.assertEqual(
+        # Both sides through `getdate`. The seeded document holds the string literal it was
+        # built with, while the round-tripped copy comes back as a `datetime.date`, so a raw
+        # comparison fails on TYPE while the level-0 value survived perfectly — an assertion
+        # that can never pass is as useless as one that can never fail. Compared against the
+        # value actually seeded (`doc.handover_date`) rather than a re-typed literal, so the
+        # fixture and the assertion cannot drift apart.
+        # Presence first, and not only for tidiness: `getdate(None)` returns TODAY
+        # (frappe/utils/data.py:91-92), so a date wrongly stripped to None would still be
+        # compared as a real date. It fails today because the seed is a fixed literal, but
+        # the day someone reseeds this fixture with `today()` the clause below would go
+        # vacuous. This line is what stops that.
+        self.assertTrue(
             audited.get("handover_date"),
-            doc.handover_date,
+            "the strip removed a level-0 date — it is supposed to be surgical",
+        )
+        self.assertEqual(
+            getdate(audited.get("handover_date")),
+            getdate(doc.handover_date),
             "level-0 handover facts must survive the strip — the auditor still audits",
         )
 
