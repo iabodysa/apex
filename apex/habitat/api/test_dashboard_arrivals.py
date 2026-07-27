@@ -11,6 +11,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
 from apex.habitat.api.dashboard import get_arrivals_today, get_pending_on_manifest
+from apex.tests._helpers import as_user
 
 
 def _h(n=12):
@@ -142,3 +143,161 @@ class TestDashboardArrivals(FrappeTestCase):
             self.assertIn("value", res, "the number must live under the 'value' key")
             self.assertIsInstance(res["value"], int)
             self.assertEqual(res.get("fieldtype"), "Int")
+
+
+class TestDashboardArrivalsScope(FrappeTestCase):
+    """Building row-scope for the two arrivals cards.
+
+    ``get_arrivals_today`` counts through ``frappe.db.count`` and
+    ``get_pending_on_manifest`` through raw SQL. Neither path consults
+    ``permission_query_conditions``, so the estate filter the Assignment / Batch
+    LIST views get is absent and a building-scoped supervisor would otherwise be
+    handed an estate-wide number. Rows land in b2 only; a supervisor scoped to b1
+    must still read their own pre-b2 baseline while oversight sees the increase.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.b1 = cls._building()
+        cls.b2 = cls._building()
+        cls.scoped = cls._user("Resident Supervisor", building=cls.b1)
+        cls.oversight = cls._user("Accommodation Manager")
+
+    @classmethod
+    def _building(cls):
+        doc = frappe.get_doc({"doctype": "Building", "building_name": "ARS-" + _h()})
+        doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        cls.addClassCleanup(
+            frappe.delete_doc, "Building", doc.name, force=True, ignore_permissions=True
+        )
+        return doc.name
+
+    @classmethod
+    def _user(cls, role, building=None):
+        email = "ars-{0}@example.com".format(_h()).lower()
+        frappe.get_doc({
+            "doctype": "User",
+            "email": email,
+            "first_name": "Ars",
+            "send_welcome_email": 0,
+            "roles": [{"role": role}],
+        }).insert(ignore_permissions=True)
+        cls.addClassCleanup(
+            frappe.delete_doc, "User", email, force=True, ignore_permissions=True
+        )
+        if building:
+            up = frappe.get_doc({
+                "doctype": "User Permission",
+                "user": email,
+                "allow": "Building",
+                "for_value": building,
+            })
+            up.insert(ignore_permissions=True)
+            cls.addClassCleanup(
+                frappe.delete_doc,
+                "User Permission",
+                up.name,
+                force=True,
+                ignore_permissions=True,
+            )
+        return email
+
+    def setUp(self):
+        self.addCleanup(frappe.set_user, "Administrator")
+
+    def _assignment(self, building, check_in_date):
+        doc = frappe.get_doc({
+            "doctype": "Housing Assignment",
+            "naming_series": "ACC-ASGN-.YYYY.-.####",
+            "party_type": "Employee",
+            "party": "EMP-" + _h(),
+            "employee": "EMP-" + _h(),
+            "building": building,
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        frappe.db.set_value(
+            "Housing Assignment", doc.name,
+            {"docstatus": 1, "check_in_date": check_in_date}, update_modified=False,
+        )
+        self.addCleanup(
+            lambda n=doc.name: (
+                frappe.db.set_value("Housing Assignment", n, "docstatus", 0,
+                                    update_modified=False),
+                frappe.delete_doc("Housing Assignment", n, force=True,
+                                  ignore_permissions=True),
+            )
+        )
+        return doc.name
+
+    def _batch(self, building, expected_date, expected_n):
+        doc = frappe.get_doc({
+            "doctype": "Arrival Batch",
+            "building": building,
+            "expected_date": expected_date,
+            "expected_workers": [
+                {"worker_name": "W-" + _h(), "passport_number": "P" + _h(12)}
+                for _ in range(expected_n)
+            ],
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        self.addCleanup(
+            frappe.delete_doc, "Arrival Batch", doc.name, force=True,
+            ignore_permissions=True,
+        )
+        return doc.name
+
+    def test_arrivals_today_excludes_other_building(self):
+        with as_user(self.scoped):
+            scoped_base = _arrivals_today_value()
+        with as_user(self.oversight):
+            oversight_base = _arrivals_today_value()
+
+        self._assignment(self.b2, today())
+
+        with as_user(self.scoped):
+            self.assertEqual(
+                _arrivals_today_value(), scoped_base,
+                "a b2 arrival must not reach a b1-scoped supervisor's card",
+            )
+        with as_user(self.oversight):
+            self.assertEqual(
+                _arrivals_today_value(), oversight_base + 1,
+                "oversight still counts the arrival across estates",
+            )
+
+    def test_arrivals_today_counts_own_building(self):
+        """The scope filter is a filter, not a blanket zero."""
+        with as_user(self.scoped):
+            scoped_base = _arrivals_today_value()
+        self._assignment(self.b1, today())
+        with as_user(self.scoped):
+            self.assertEqual(_arrivals_today_value(), scoped_base + 1)
+
+    def test_pending_on_manifest_excludes_other_building(self):
+        yesterday = add_days(today(), -1)
+        with as_user(self.scoped):
+            scoped_base = _pending_on_manifest_value()
+        with as_user(self.oversight):
+            oversight_base = _pending_on_manifest_value()
+
+        self._batch(self.b2, yesterday, 3)
+
+        with as_user(self.scoped):
+            self.assertEqual(
+                _pending_on_manifest_value(), scoped_base,
+                "a b2 manifest gap must not reach a b1-scoped supervisor's card",
+            )
+        with as_user(self.oversight):
+            self.assertEqual(
+                _pending_on_manifest_value(), oversight_base + 3,
+                "oversight still sees the whole estate's manifest gap",
+            )
+
+    def test_pending_on_manifest_counts_own_building(self):
+        yesterday = add_days(today(), -1)
+        with as_user(self.scoped):
+            scoped_base = _pending_on_manifest_value()
+        self._batch(self.b1, yesterday, 2)
+        with as_user(self.scoped):
+            self.assertEqual(_pending_on_manifest_value(), scoped_base + 2)

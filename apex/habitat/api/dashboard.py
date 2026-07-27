@@ -3,7 +3,7 @@ import frappe
 from frappe.utils import flt, today
 from frappe.query_builder.functions import Coalesce, Count
 from pypika.functions import NullIf
-from apex.habitat.permissions import _building_condition
+from apex.habitat.permissions import _building_condition, report_building_scope
 
 # [#eyjxdy]
 @frappe.whitelist()
@@ -25,16 +25,28 @@ def get_buildings_over_threshold(filters=None):
     over_capacity_threshold_percent) — a static Document Type filter cannot
     compare two fields, so this is a Custom Number Card. An unset/zero threshold
     falls back to the field default (120) rather than counting as a 0% threshold.
+
+    Row scope is spliced explicitly: ``frappe.qb`` never consults
+    ``permission_query_conditions``, so without this a building-scoped supervisor
+    would be told how many buildings are over capacity ACROSS the whole estate.
     """
     frappe.has_permission("Building", "read", throw=True)
+    # Here the estate axis is the Building's own name, not a `building` link.
+    restrict, allowed = report_building_scope(frappe.session.user)
+    if restrict and not allowed:
+        return {"value": 0, "fieldtype": "Int"}
+
     Building = frappe.qb.DocType("Building")
     # [#rccxmo]
     threshold = Coalesce(NullIf(Building.over_capacity_threshold_percent, 0), 120)
-    row = (
+    query = (
         frappe.qb.from_(Building)
         .select(Count(Building.name))
         .where(Building.occupancy_percent > threshold)
-    ).run()
+    )
+    if restrict:
+        query = query.where(Building.name.isin(allowed))
+    row = query.run()
     return {"value": int(row[0][0]) if row else 0, "fieldtype": "Int"}
 
 
@@ -42,12 +54,20 @@ def get_buildings_over_threshold(filters=None):
 def get_arrivals_today(filters=None):
     """Count workers housed today: submitted Accommodation Assignments whose
     check_in_date is today. Custom (not a Document Type filter) so the date is
-    resolved server-side on each render rather than frozen into a saved filter."""
+    resolved server-side on each render rather than frozen into a saved filter.
+
+    Row scope is spliced explicitly: ``frappe.db.count`` builds its query through
+    ``frappe.qb.get_query``, which never consults ``permission_query_conditions``,
+    so the estate filter the Assignment LIST gets is absent here."""
     frappe.has_permission("Housing Assignment", "read", throw=True)
-    count = frappe.db.count(
-        "Housing Assignment",
-        {"check_in_date": today(), "docstatus": 1},
-    )
+    restrict, allowed = report_building_scope(frappe.session.user)
+    if restrict and not allowed:
+        return {"value": 0, "fieldtype": "Int"}
+
+    filters = {"check_in_date": today(), "docstatus": 1}
+    if restrict:
+        filters["building"] = ["in", allowed]
+    count = frappe.db.count("Housing Assignment", filters)
     return {"value": count, "fieldtype": "Int"}
 
 
@@ -59,8 +79,18 @@ def get_pending_on_manifest(filters=None):
     actually housed in the building on the expected date), summed across all
     Arrival Batches whose expected_date has arrived. One bounded grouped query
     instead of loading each batch; negatives (over-arrival) clamp to 0 so they
-    never offset another batch's shortfall."""
+    never offset another batch's shortfall.
+
+    Row scope is spliced explicitly: raw SQL never consults
+    ``permission_query_conditions``, so without the estate predicate a scoped
+    supervisor would be shown the whole estate's manifest gap. Scoping the outer
+    Arrival Batch is enough — the housed subquery only ever joins back on an
+    in-scope building."""
     frappe.has_permission("Arrival Batch", "read", throw=True)
+    restrict, allowed = report_building_scope(frappe.session.user)
+    if restrict and not allowed:
+        return {"value": 0, "fieldtype": "Int"}
+
     row = frappe.db.sql(
         """
         SELECT COALESCE(SUM(GREATEST(b.expected_count - COALESCE(h.housed, 0), 0)), 0)
@@ -72,8 +102,16 @@ def get_pending_on_manifest(filters=None):
             GROUP BY building, check_in_date
         ) h ON h.building = b.building AND h.check_in_date = b.expected_date
         WHERE b.expected_date <= %(today)s
+          AND (%(unscoped)s = 1 OR b.building IN %(buildings)s)
         """,
-        {"today": today()},
+        {
+            "today": today(),
+            "unscoped": 0 if restrict else 1,
+            # Bound as a sequence so the query TEXT stays a literal (no
+            # interpolation). The unscoped placeholder row exists only because
+            # `IN ()` is a MariaDB syntax error; the flag above discards it.
+            "buildings": tuple(allowed) if restrict else ("",),
+        },
     )
     return {"value": int(row[0][0]) if row else 0, "fieldtype": "Int"}
 
