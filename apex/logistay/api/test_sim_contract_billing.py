@@ -1,7 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Contract billing actions: a submitted Telecom Contract yields one draft
-purchase request (Material Request) and one draft payment order (Payment Entry)
-per billing period, mapped correctly, deduplicated, and never submitted."""
+"""Contract billing actions: a submitted Telecom Contract yields one draft purchase
+request (Material Request) per billing period, mapped correctly, deduplicated, and
+never submitted.
+
+The payment half lives in ``test_telecom_payment_allocation.py``: a payment needs a
+Purchase Invoice to allocate against, so its fixtures are finance fixtures and do
+not belong next to the procurement ones."""
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -12,13 +16,35 @@ from apex.tests import factories
 test_ignore = ["Company", "Supplier", "Currency", "Cost Center", "Project", "Item"]
 
 
+def service_item(name):
+    """Get-or-create the non-stock service Item a telecom contract bills through.
+
+    Module-level and shared with the payment tests: factories.py covers no Item, and
+    a second copy of this get-or-create is what the copy-paste guard exists to stop.
+    """
+    if frappe.db.exists("Item", name):
+        return name
+    group = frappe.db.get_value("Item Group", {"is_group": 0}, "name")
+    frappe.get_doc(
+        {
+            "doctype": "Item",
+            "item_code": name,
+            "item_name": name,
+            "item_group": group,
+            "stock_uom": "Nos",
+            "is_stock_item": 0,
+        }
+    ).insert(ignore_permissions=True)
+    return name
+
+
 class TestSIMContractBilling(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.company = factories.make_company("Test AFMCO").name
         cls.supplier = cls._supplier("QA Telecom Operator")
-        cls.item = cls._service_item("QA Telecom Service")
+        cls.item = service_item("QA Telecom Service")
         # Ensure a default cash account so the payment-order path resolves.
         cash = frappe.db.get_value(
             "Account", {"company": cls.company, "account_type": "Cash", "is_group": 0}, "name"
@@ -32,23 +58,6 @@ class TestSIMContractBilling(FrappeTestCase):
             frappe.get_doc(
                 {"doctype": "Supplier", "supplier_name": name, "supplier_group": "All Supplier Groups"}
             ).insert(ignore_permissions=True)
-        return name
-
-    @staticmethod
-    def _service_item(name):
-        if frappe.db.exists("Item", name):
-            return name
-        group = frappe.db.get_value("Item Group", {"is_group": 0}, "name")
-        frappe.get_doc(
-            {
-                "doctype": "Item",
-                "item_code": name,
-                "item_name": name,
-                "item_group": group,
-                "stock_uom": "Nos",
-                "is_stock_item": 0,
-            }
-        ).insert(ignore_permissions=True)
         return name
 
     def _contract(self, with_item=True, submit=True):
@@ -99,17 +108,18 @@ class TestSIMContractBilling(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             contract_billing.create_purchase_request(contract.name, "2026-07")
 
-    def test_payment_order_draft_only_no_submit(self):
+    def test_no_action_here_raises_a_payment_on_its_own(self):
+        """The retired ``create_payment_order`` created an UNALLOCATED Payment Entry
+        from the contract alone — no invoice, no reference, nothing settled. It is
+        gone, and the procurement action must not have grown a payment side door."""
+        self.assertFalse(hasattr(contract_billing, "create_payment_order"))
         contract = self._contract()
-        result = contract_billing.create_payment_order(contract.name, "2026-07")
-        pe = frappe.get_doc("Payment Entry", result["document_name"])
-        self.assertEqual(pe.docstatus, 0)
-        self.assertEqual(pe.payment_type, "Pay")
-        self.assertEqual(pe.party, self.supplier)
-        self.assertEqual(pe.paid_amount, 250)
-        # Duplicate call returns the same draft.
-        again = contract_billing.create_payment_order(contract.name, "2026-07")
-        self.assertEqual(again["document_name"], result["document_name"])
+        before = frappe.db.count("Payment Entry", {"party_type": "Supplier", "party": self.supplier})
+        contract_billing.create_purchase_request(contract.name, "2026-07")
+        self.assertEqual(
+            frappe.db.count("Payment Entry", {"party_type": "Supplier", "party": self.supplier}),
+            before,
+        )
 
     def test_actions_require_submitted_contract(self):
         draft = self._contract(submit=False)
