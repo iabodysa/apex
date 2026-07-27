@@ -1,7 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-298 — `monthly_salary` moved to permlevel 1, and what that actually changed.
+"""`monthly_salary` moved to permlevel 1, and what that actually changed.
 
-The A-303 sensitivity model calls per-person pay a level-1 category: what one named person
+The field_sensitivity model calls per-person pay a level-1 category: what one named person
 is paid belongs beside this record's national ID, not beside its contract dates. Freelancer
 already ran a level-1 section for `national_id_or_iqama` and `mobile_number`, and Finance
 Manager and System Manager already held the level-1 read+write rows, so this move cost NO
@@ -24,7 +24,7 @@ not refused, and the two verdicts this file asserts are "persisted" versus "reve
 That is also why the housing role can still save: the field it cannot see is restored from
 the database rather than blanked, so `Freelancer.validate`'s positive-salary check
 (freelancer.py:39) sees the stored amount and passes. Had the framework blanked it instead,
-every housing edit would have died on that check — which is exactly what A-290 found on the
+every housing edit would have died on that check — which is exactly what happens on the
 CREATE path, where the reference document is `frappe.new_doc` and the value really is empty.
 
 Run under bench:
@@ -83,8 +83,6 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
             }
         ).insert(ignore_permissions=True)
 
-    # ---------------------------------------------------------------- the pair, one method
-
     def test_finance_sets_the_salary_and_the_housing_role_cannot(self):
         """THE PAIR. Both verdicts in one method so they cannot drift apart, and asserted
         explicitly different at the end — a bug that reverted BOTH writes would otherwise
@@ -141,8 +139,6 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
             "both roles produced the same verdict — the pair collapsed",
         )
 
-    # ------------------------------------------------- the save must still work end-to-end
-
     def test_the_housing_role_can_still_save_with_the_salary_intact(self):
         """The regression this move could plausibly have caused.
 
@@ -192,8 +188,6 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
             5100.0,
             "saving a document whose salary was stripped on read erased the stored value",
         )
-
-    # ------------------------------------------------------- the read side, and the no-cost
 
     def test_the_housing_role_cannot_read_the_salary_through_the_api(self):
         """`write` was left alone, so the only thing that changed for this role is the read.
@@ -245,7 +239,7 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
         self.assertEqual(
             high,
             {FINANCE_ROLE, "System Manager"},
-            "the permlevel-1 role set changed — A-298 was supposed to cost no new row",
+            "the permlevel-1 role set changed — this move was supposed to cost no new row",
         )
         for role in high:
             row = [p for p in rows if p["role"] == role and int(p.get("permlevel") or 0) == 1]
@@ -262,7 +256,7 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
         )
 
     def test_write_and_delete_at_level_zero_were_left_alone(self):
-        """The explicit non-change. A-298 moved a field, not a role's authority."""
+        """The explicit non-change. Only a field moved, not a role's authority."""
         shipped = json.loads(_FREELANCER_JSON.read_text(encoding="utf-8"))
         housing = [
             p

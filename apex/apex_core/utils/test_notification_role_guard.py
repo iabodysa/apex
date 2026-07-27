@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-301 — prove ``notification_role_guard`` over the notifications the app ships.
+"""Prove ``notification_role_guard`` over the notifications the app ships.
 
 Colocated with the guard, not in ``apex/tests/``: the colocation ratchet
 (``tests/test_colocation_ratchet.py``) fails any NEW central test module, and this
@@ -58,26 +58,21 @@ _DEAD_ROLE = "_A301 Role Without A Grant"
 _LIVE_ROLE = "_A301 Role That Can Open"
 
 
-# ---------------------------------------------------------------------------
-# The frozen baseline.
-#
-# Exact equality, like the sibling report-role baseline: a NEW offender fails the
-# build, and a REPAIRED one fails until it is pruned from here. Each entry is
+# The frozen baseline: exact equality, like the sibling report-role baseline -- a NEW
+# offender fails the build, a REPAIRED one fails until pruned. Each entry is
 # (document_type, role) -> reason.
-#
-# A-301 drained three of the original seven, all by REPOINTING: the roles they named
-# — Facilities Supervisor, Admin Manager, Operations Director — hold no DocPerm
-# anywhere in this app at all, so they are names in setup.py's role list rather than
-# personas with a surface, and each notification now names a role that already holds
-# a permlevel-0 read on the record. A fourth (Finance Manager on Custody Damage
-# Assessment) was planned as a grant, attempted, and REVERTED; its entry below records
-# why, and it is the only frozen entry whose notification ships `enabled: 1`.
-#
-# The other three survivors ship `enabled: 0`, and that is NOT a reason to drop them.
-# The DB's `enabled` value overwrites the on-disk one on every re-import
+
+# Three of the original seven were drained by REPOINTING: the roles they named --
+# Facilities Supervisor, Admin Manager, Operations Director -- hold no DocPerm
+# anywhere in this app, so each notification now names a role that already holds a
+# permlevel-0 read. A fourth (Finance Manager on Custody Damage Assessment) was
+# planned as a grant, attempted, and REVERTED; its entry below records why, and it is
+# the only frozen entry whose notification ships `enabled: 1`.
+
+# The other three survivors ship `enabled: 0`; that is NOT a reason to drop them --
+# the DB's `enabled` value overwrites the on-disk one on every re-import
 # (frappe/modules/import_file.py:33, consumed :262-265), so a site that toggles one
-# of these on keeps it on and no migrate will turn it back off.
-# ---------------------------------------------------------------------------
+# on keeps it on, and no migrate will turn it back off.
 
 _CHILD_TABLE_IS_A_DIFFERENT_DEFECT = (
     "Observed, not prescribed — do NOT act on this entry from this file. Rent Payment "
@@ -219,14 +214,14 @@ class TestShippedNotificationReceiversCanOpenTheRecord(unittest.TestCase):
         )
 
     def test_repointed_notifications_carry_a_bumped_modified(self):
-        """The three A-301 repoints must actually reach a site.
+        """The three repointed notifications must actually reach a site.
 
         A shipped Notification whose on-disk ``modified`` is not strictly newer than the
         row already in the DB is skipped by ``import_file_by_path``
         (frappe/modules/import_file.py:143-144; note the ``<=`` on :127). The
         ``migration_hash`` content compare that rescues a DocType is gated on
         ``doctype == "DocType"`` (:132) and does not apply here. This asserts the
-        stamps were bumped past the values they carried before A-301, so a repoint
+        stamps were bumped past the values they carried before the repoint, so it
         cannot be shipped as a silent no-op.
         """
         previous = {
@@ -308,8 +303,8 @@ class TestEachClauseIsLoadBearing(unittest.TestCase):
         Custody Damage Assessment / Finance Manager entry. The row carries
         ``read: 1`` and sits on the very DocType the notification names, so a
         detector missing the permlevel clause would read it as a grant and pass the
-        broken pair. That is the false pass this clause exists to prevent, and A-218
-        deliberately keeps the tree in this state (see the frozen entry's reason).
+        broken pair. That is the false pass this clause exists to prevent; the tree is
+        deliberately kept in this state (see the frozen entry's reason).
         """
         permissions, istable = self._perms("Custody Damage Assessment")
 

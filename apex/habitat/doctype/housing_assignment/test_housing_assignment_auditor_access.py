@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-216 — Internal Auditor reads Housing Assignment, and cannot export it.
+"""Internal Auditor reads Housing Assignment, and cannot export it.
 
 THE CONTRADICTION THIS CLOSES
 -----------------------------
@@ -65,8 +65,6 @@ class TestInternalAuditorHousingAccess(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-    # ------------------------------------------------------------------ the pair, one method
-
     def test_the_auditor_opens_the_report_and_is_refused_the_export(self):
         """THE PAIR. Both halves in one method, asserted explicitly different at the end —
         a bug that granted everything would satisfy the open, and a bug that granted
@@ -129,10 +127,8 @@ class TestInternalAuditorHousingAccess(FrappeTestCase):
         with self.assertRaises(frappe.PermissionError):
             get_report_doc("Active Resident Register")
 
-    # ------------------------------------------------------------------- the shipped row
-
     def test_the_row_grants_exactly_read_and_report(self):
-        """Read off the shipped JSON: a right must be absent by OMISSION, not shipped as 0."""
+        """The shipped row: a right must be absent by OMISSION, not shipped as 0."""
         shipped = json.loads(_HOUSING_ASSIGNMENT_JSON.read_text(encoding="utf-8"))
         rows = [
             p
@@ -172,7 +168,7 @@ class TestInternalAuditorHousingAccess(FrappeTestCase):
         self.assertEqual(
             sorted(by_role),
             ["Accommodation Manager", AUDITOR_ROLE, "Resident Supervisor", "System Manager"],
-            "the role set on Housing Assignment changed beyond the A-216 grant",
+            "the role set on Housing Assignment changed beyond the Internal Auditor grant",
         )
         for role, rows in by_role.items():
             self.assertEqual(len(rows), 1, f"{role} gained a second row — check if_owner")

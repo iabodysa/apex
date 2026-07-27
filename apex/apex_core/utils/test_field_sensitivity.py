@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-303 — the guard that reds when a sensitive field ships at permlevel 0.
+"""The guard that reds when a sensitive field ships at permlevel 0.
 
 The model is ``field_sensitivity``; read its docstring first, because this file only
 ENFORCES the categories stated there. Site-free: it reads the shipped DocType JSON off
@@ -39,7 +39,7 @@ if "frappe" not in sys.modules:
 from apex.apex_core.utils import field_sensitivity  # noqa: E402
 from apex.tests.shipped_doctypes import shipped_doctypes  # noqa: E402
 
-# WHY EACH ENTRY IS STILL AT LEVEL 0. A-303 shipped the model, the guard and two worked
+# WHY EACH ENTRY IS STILL AT LEVEL 0. This model shipped with its guard and two worked
 # examples; applying it module by module is deliberately later work, one reviewable change
 # per module. Every entry below is an ACCEPTED EXPOSURE with a named owner decision behind
 # it, not a bug someone forgot.
@@ -67,7 +67,7 @@ _RESIDENT_REQUEST_PROSE = (
 )
 
 KNOWN_LEVEL_ZERO_SENSITIVE = {
-    # A-298 DRAINED the one category-4 entry that stood here: Freelancer.monthly_salary is
+    # DRAINED: the one category-4 entry that used to stand here, Freelancer.monthly_salary,
     # now permlevel 1. The ratchet tightened by one, which is the whole point of exact
     # equality — a repaired entry MUST be pruned or the guard stops meaning anything.
     "Custody Acknowledgment": ([("signature", "signature")], _SIGNATURES_NOT_YET_LAYERED),
@@ -259,7 +259,7 @@ class TestTheModelIsEnforcedOnTheShippedTree(unittest.TestCase):
         self.assertEqual(
             _baseline_shape(field_sensitivity.offenders(self.doctypes)),
             _expected_shape(),
-            "field sensitivity changed. A NEW entry means a field the A-303 model calls "
+            "field sensitivity changed. A NEW entry means a field this file's model calls "
             "personal or financial is readable by every role that can open the record — "
             "give it \"permlevel\": 1 and make sure some role holds a permlevel-1 DocPerm "
             "row, or, if the model is wrong for this field, argue that in "
@@ -278,13 +278,14 @@ class TestTheModelIsEnforcedOnTheShippedTree(unittest.TestCase):
         self.assertEqual(phantom, [], "the baseline names DocType(s) this app no longer ships")
 
     def test_the_freelancer_salary_stayed_drained(self):
-        """A-298 raised it and pruned its entry. If either half regresses, say so here
-        rather than letting the exact-equality diff explain it obliquely."""
+        """The Freelancer salary fix raised it and pruned its entry. If either half
+        regresses, say so here rather than letting the exact-equality diff explain it
+        obliquely."""
         self.assertNotIn(
             "Freelancer",
             KNOWN_LEVEL_ZERO_SENSITIVE,
-            "the A-298 entry came back — the salary was un-raised, or re-frozen instead "
-            "of fixed",
+            "the Freelancer entry came back — the salary was un-raised, or re-frozen "
+            "instead of fixed",
         )
         raised = dict(
             (fieldname, permlevel)
@@ -293,7 +294,8 @@ class TestTheModelIsEnforcedOnTheShippedTree(unittest.TestCase):
             )
         )
         self.assertEqual(
-            raised.get("monthly_salary"), 1, "A-298 regressed: the salary is back at level 0"
+            raised.get("monthly_salary"), 1,
+            "the Freelancer monthly_salary fix regressed: the salary is back at level 0"
         )
 
 class TestTheModelMatchesTheShippedTree(unittest.TestCase):
