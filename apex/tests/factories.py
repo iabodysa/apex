@@ -1,8 +1,16 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Shared test fixture helpers for Habitat doctypes.
+"""Shared test fixture helpers.
+
+Mostly Habitat doctype builders, plus the app-wide site-free stubs a probe suite
+needs (``ExistsShortCircuitDB``). This module is the ONE sanctioned home for a
+fixture two test modules share: ``test_no_cross_test_imports.py`` bans importing a
+``test_*`` sibling outright, and the colocation ratchet counts only ``test_*.py``
+under ``apex/tests/``, so promoting into this existing non-``test_`` module is the
+only route that clears both.
 
 Usage:
     from apex.tests.factories import make_building, make_room, make_bed, make_assignment
+    from apex.tests.factories import ExistsShortCircuitDB
 """
 
 from __future__ import annotations
@@ -24,6 +32,42 @@ class ApexHabitatTestCase(FrappeTestCase):
 
 class ApexHabitatUnitTestCase(_UnitTestCase):
     """Base test case for apex unit tests (no database)."""
+
+
+class ExistsShortCircuitDB:
+    """A site-free ``frappe.db`` that reproduces the ``exists`` short-circuit.
+
+    ``frappe.db.exists(dt, dn)`` answers ``dn`` back WITHOUT touching the database
+    when the two are equal (database.py:1259 — the deliberate "a Single always
+    exists" rule), so any gate probing POSITIONALLY clears itself on the literal
+    DocType string. Six probe suites across habitat/, logistay/ and salis/ pin that
+    defect for their own module; each had written this same stub, which is what the
+    copy-pasted-body guard caught.
+
+    ``present`` maps DocType -> the set of names on file. ``queried`` records every
+    call that actually REACHED the database, which is how a case asserts the probe
+    queried rather than short-circuited. The return follows real Frappe: the name
+    when found, ``None`` when not — never a bare bool, so a case that asserts on the
+    value is not lied to. A suite holding a richer row shape overrides ``names``.
+    """
+
+    def __init__(self, present=None):
+        self.present = {} if present is None else present
+        self.queried = []
+
+    def names(self, doctype):
+        """The set of names on file for ``doctype``."""
+        return self.present.get(doctype, set())
+
+    def exists(self, doctype, key=None, **_kwargs):
+        if isinstance(key, str) and key == doctype and doctype != "DocType":
+            return key
+        self.queried.append((doctype, key))
+        rows = self.names(doctype)
+        if isinstance(key, dict):
+            return next((value for value in key.values() if value in rows), None)
+        return key if key in rows else None
+
 
 # [#8evoal]
 test_ignore = [

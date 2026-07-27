@@ -12,8 +12,10 @@ Both masters autoname by their name field, so the CSV value IS the row name: the
 name filter is the correct probe and stays duplicate-safe, which the second case
 pins by re-running the loader against a database that now holds the row.
 
-Site-free: the loader's ``frappe`` is swapped for a stub that reproduces the
-short-circuit faithfully; the CSVs are written to a temporary directory.
+Site-free: the loader's ``frappe`` is swapped for
+``tests.factories.ExistsShortCircuitDB`` — the shared stub that reproduces the
+short-circuit faithfully for every suite pinning this defect; the CSVs are written
+to a temporary directory.
 """
 
 import csv
@@ -23,23 +25,12 @@ import unittest
 from unittest.mock import patch
 
 from apex.salis import fleet_import
+from apex.tests.factories import ExistsShortCircuitDB
 
 
-class _StubDB:
-    """``frappe.db``, faithful to database.py:1259 on the positional call shape."""
-
-    def __init__(self, present):
-        self.present = present
-        self.queried = []
-
-    def exists(self, doctype, key=None, **_kwargs):
-        if isinstance(key, str) and key == doctype and doctype != "DocType":
-            return key
-        self.queried.append((doctype, key))
-        rows = self.present.setdefault(doctype, set())
-        if isinstance(key, dict):
-            return next((v for v in key.values() if v in rows), None)
-        return key if key in rows else None
+class _StubDB(ExistsShortCircuitDB):
+    """The loader writes as well as reads; none of the writes decide anything these
+    cases assert, so they only have to be inert."""
 
     def get_value(self, doctype, filters, fieldname=None, **_kwargs):
         return None

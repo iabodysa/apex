@@ -21,33 +21,30 @@ directions. ``_row_exists`` itself moved off its earlier ``name != doctype``
 rejection, which only traded the false positive for a false negative.
 
 Site-free: only ``frappe.db.exists`` decides these paths, so the module's ``frappe``
-is swapped for a stub that reproduces the short-circuit faithfully.
+is swapped for ``tests.factories.ExistsShortCircuitDB`` — the shared stub that
+reproduces the short-circuit faithfully for every suite pinning this defect.
 """
 
 import unittest
 from unittest.mock import patch
 
 from apex.habitat.api import custody_kiosk
+from apex.tests.factories import ExistsShortCircuitDB
 
 ARTICLE_DOCTYPE = "Custody Article"
 PARTY_DOCTYPE = "Employee"
 
 
-class _StubDB:
-    """``frappe.db``, faithful to database.py:1259 on the positional call shape."""
+class _StubDB(ExistsShortCircuitDB):
+    """The kiosk reads whole rows, so this suite holds dicts rather than bare names
+    and the shared stub's name set is derived from them."""
 
     def __init__(self, rows):
+        super().__init__(rows)
         self.rows = rows
-        self.queried = []
 
-    def exists(self, doctype, key):
-        if isinstance(key, str) and key == doctype and doctype != "DocType":
-            return key
-        self.queried.append((doctype, key))
-        names = {row["name"] for row in self.rows.get(doctype, [])}
-        if isinstance(key, dict):
-            return next((value for value in key.values() if value in names), None)
-        return key if key in names else None
+    def names(self, doctype):
+        return {row["name"] for row in self.rows.get(doctype, [])}
 
     def get_value(self, doctype, name, fields, as_dict=False):
         for row in self.rows.get(doctype, []):

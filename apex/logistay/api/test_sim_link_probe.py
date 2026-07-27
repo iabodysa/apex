@@ -23,7 +23,8 @@ genuinely bears that name is still found, which a bare ``name != doctype`` rejec
 would have broken.
 
 Site-free: only ``frappe.db.exists`` decides these paths, so each module's ``frappe``
-is swapped for a stub that reproduces the short-circuit faithfully.
+is swapped for ``tests.factories.ExistsShortCircuitDB`` — the shared stub that
+reproduces the short-circuit faithfully for every suite pinning this defect.
 """
 
 import unittest
@@ -31,6 +32,7 @@ from inspect import unwrap
 from unittest.mock import patch
 
 from apex.logistay.api import sim_actions, telecom_control
+from apex.tests.factories import ExistsShortCircuitDB
 
 SIM_DOCTYPE = "SIM Card"
 CONTRACT_DOCTYPE = "Telecom Contract"
@@ -43,21 +45,9 @@ _get_sim_detail = unwrap(telecom_control.get_sim_detail)
 _move_to_contract = unwrap(sim_actions.move_to_contract)
 
 
-class _StubDB:
-    """``frappe.db``, faithful to database.py:1259 on the positional call shape."""
-
-    def __init__(self, present):
-        self.present = present
-        self.queried = []
-
-    def exists(self, doctype, key):
-        if isinstance(key, str) and key == doctype and doctype != "DocType":
-            return key
-        self.queried.append((doctype, key))
-        rows = self.present.get(doctype, set())
-        if isinstance(key, dict):
-            return any(value in rows for value in key.values())
-        return key in rows
+class _StubDB(ExistsShortCircuitDB):
+    """``move_to_contract``'s fall-through landed in ``get_value``, so reaching it
+    here means the gate was skipped."""
 
     def get_value(self, doctype, name, *args, **kwargs):
         raise AssertionError(f"the guard let {doctype} {name!r} through to get_value")
