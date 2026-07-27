@@ -34,7 +34,9 @@ Could not complete the Work Order. No changes were saved. Please try again or co
 Could not log the inspection. Please try again.
 Could not post the reversal to the ledger. The cancellation was rejected.
 Could not post the utility cost to the ledger. The bill was not submitted.
+Could not read the payment settings. Please try again.
 Could not update bed occupancy. The assignment was not submitted.
+Could not verify the Expense Request Afmco DocType. Please try again.
 Create Records
 Day
 Deduction
@@ -42,6 +44,7 @@ Detail
 EN
 Effective To
 Entity
+Expense Request Afmco DocType is not installed.
 Export
 F1
 F10
@@ -87,6 +90,7 @@ Pricing
 Provenance
 Record the receiving driver and vehicle condition with the guided handover form.
 Records
+Rent payment generated for building: {0} under lease {1}
 Reply
 Resident Supervisor
 Routing
