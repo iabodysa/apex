@@ -129,6 +129,17 @@ def _decorated_endpoints():
     return found
 
 
+def _canonical_window(module, name):
+    """The window this endpoint charges, whatever ``cmd`` the caller spelled.
+
+    The name is the endpoint's DEFINING dotted path, not the request field
+    (apex_core/utils/rate_limit_identity.py). It is built here from the module the
+    definition was PARSED out of rather than read back from the limiter, so a bug that
+    made the name follow the caller again would red rather than agree with itself.
+    """
+    return f"rl:{module.__name__}.{name}:{_STUB_IP}"
+
+
 class _FakeCache:
     """The four calls the limiter makes, plus a ledger of the raw names it charged."""
 
@@ -232,7 +243,7 @@ class TestGuestDriverRateLimitIdentity(unittest.TestCase):
             with self.subTest(module=module.__name__, endpoint=name):
                 cache = _FakeCache()
                 cmd = f"a261-share-{name}"
-                shared = f"rl:{cmd}:{_STUB_IP}"
+                shared = _canonical_window(module, name)
                 with mock.patch.object(frappe, "cache", cache):
                     for param in (_ABSENT, "alpha", "beta"):
                         self.assertIsNone(
@@ -269,7 +280,7 @@ class TestGuestDriverRateLimitIdentity(unittest.TestCase):
             with self.subTest(module=module.__name__, endpoint=name, limit=limit):
                 cache = _FakeCache()
                 cmd = f"a261-ceiling-{name}"
-                shared = f"rl:{cmd}:{_STUB_IP}"
+                shared = _canonical_window(module, name)
                 endpoint = getattr(module, name)
                 with mock.patch.object(frappe, "cache", cache):
                     for index in range(limit):

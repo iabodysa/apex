@@ -37,6 +37,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.apex_core.utils import rate_window
+from apex.apex_core.utils.rate_limit_identity import canonical_command
 from apex.salis.api import boarding, driver_portal
 
 # Modules, never the metered functions themselves. A module-level ``from front_desk
@@ -115,11 +116,13 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         )
 
     def _clear_window(self, cmd, ip):
-        """The decorator's own window, in BOTH identity shapes.
+        """A cmd-named window, in BOTH identity shapes. Body-charged endpoints only.
 
         Un-keyed, which every endpoint this file drives now is (``resolve_worker``
         included, since A-294): the identity is the bare address, so the name is
-        ``rl:<cmd>:<ip>`` (rate_limiter.py:150,155).
+        ``rl:<cmd>:<ip>`` (rate_limiter.py:150,155). Since A-297.1 the ``@rate_limit``
+        endpoints no longer take their name from ``cmd`` at all and belong to
+        ``_clear_metered_window``; what is left here charges in its own body.
 
         Keyed, which none is any longer: the identity was the address joined to a
         form_dict lookup, and a real request carries no field by that name, so the
@@ -132,6 +135,19 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         """
         self._drop_window(f"rl:{cmd}:{ip}")
         self._drop_window(f"rl:{cmd}:{ip}:")
+
+    def _clear_metered_window(self, endpoint, ip):
+        """The window a ``@rate_limit`` endpoint really charges.
+
+        Not ``rl:<this test's synthetic cmd>:<ip>``. Apex names those windows after the
+        HANDLER (apex_core/utils/rate_limit_identity.py), precisely so two dotted paths
+        to one function cannot buy two ceilings -- which also means the per-test ``cmd``
+        no longer partitions them, and a cleanup written against it would delete a name
+        that was never created while the spent window lived on for its full 60s. The
+        endpoints charging in their own BODY (salis/api/boarding.py:164) still read
+        ``cmd``, so those keep ``_clear_window``.
+        """
+        self._drop_window(f"rl:{canonical_command(endpoint)}:{ip}")
 
     def _clear_actor_window(self, cmd, actor):
         self._drop_window(f"rl:{cmd}:scan-actor:{actor}")
@@ -165,7 +181,7 @@ class TestFrontDeskRateLimit(FrappeTestCase):
 
     def _assert_guest_endpoint_throttles(self, endpoint, args, limit, method):
         cmd = self.cmd + "-" + endpoint.__name__
-        self.addCleanup(self._clear_window, cmd, self.ip)
+        self.addCleanup(self._clear_metered_window, endpoint, self.ip)
         frappe.set_user("Guest")
         with _request_from(self.ip, cmd, method):
             for _ in range(limit):
@@ -225,7 +241,7 @@ class TestFrontDeskRateLimit(FrappeTestCase):
 
     def test_resolve_worker_throttles_the_61st_call_from_one_ip(self):
         cmd = self.cmd + "-rw"
-        self.addCleanup(self._clear_window, cmd, self.ip)
+        self.addCleanup(self._clear_metered_window, front_desk.resolve_worker, self.ip)
         with _request_from(self.ip, cmd):
             # [#etrqqx]
             for i in range(LIMIT):
@@ -257,8 +273,8 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         cmd = self.cmd + "-iso"
         ip_a = "198.51.100.10"
         ip_b = "198.51.100.20"
-        self.addCleanup(self._clear_window, cmd, ip_a)
-        self.addCleanup(self._clear_window, cmd, ip_b)
+        self.addCleanup(self._clear_metered_window, front_desk.resolve_worker, ip_a)
+        self.addCleanup(self._clear_metered_window, front_desk.resolve_worker, ip_b)
 
         with _request_from(ip_a, cmd):
             for _ in range(LIMIT):
