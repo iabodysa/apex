@@ -260,12 +260,12 @@ class TestSafetyRoundMakerChecker(FrappeTestCase):
     def _round(self, building=None, cadence=None):
         """A draft Safety Round inserted AS THE CURRENT USER — no ignore_permissions.
 
-        Each method mints its own cadence suffix-free unique date-free identity via
-        ``is_reinspection``: sibling methods share the class-level building, and the
-        controller's duplicate guard rejects a second non-reinspection round on the
-        same (building, date, cadence). Flagging the round as a re-inspection is the
-        shipped way to record a legitimate second round, so it keeps the methods
-        independent without weakening what is being proven.
+        Flagged ``is_reinspection`` because FrappeTestCase rolls back once per CLASS:
+        sibling methods share the class-level building AND each other's rows, so a
+        second plain round on the same (building, date, cadence) would hit the
+        controller's duplicate guard and fail for a reason the test is not about.
+        A re-inspection is the shipped way to record a legitimate second round, so
+        this keeps the methods independent without weakening what is proven.
         """
         return frappe.get_doc(
             {
