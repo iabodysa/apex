@@ -358,3 +358,70 @@ class TestSettlementFollowsTheLedger(_PaymentCase):
         self.assertNotEqual(status["settlement"], contract_billing.SETTLED)
         self.assertEqual(status["settlement"], contract_billing.AWAITING_APPROVAL)
         self.assertEqual(status["allocated_amount"], 0)
+
+
+class TestTheLedgerOutranksTheBillingLog(_PaymentCase):
+    """The billing row is HISTORY, not ownership. It must not veto Accounts
+    cancelling the payment — and the exemption that allows that must stay narrow
+    enough that the row can never end up pointing at a document that is gone.
+    """
+
+    def settled_payment(self):
+        contract = self.contract()
+        invoice = self.invoice()
+        result = contract_billing.create_payment_entry(contract.name, "2026-07", invoice.name)
+        payment = frappe.get_doc("Payment Entry", result["document_name"])
+        payment.submit()
+        return contract, payment
+
+    def test_the_cancel_exemption_is_wired_to_payment_entry(self):
+        """A correct handler nobody calls is not a fix. Naming the wiring here means
+        an unwired hook fails as itself rather than as a puzzling LinkExistsError."""
+        # get_doc_hooks is the exact lookup run_method uses (document.py:1367).
+        handlers = frappe.get_doc_hooks().get("Payment Entry", {}).get("on_cancel", [])
+        self.assertIn(
+            "apex.logistay.api.contract_billing.allow_cancel_despite_billing_log", handlers
+        )
+
+    def test_the_billing_row_survives_the_cancellation_as_history(self):
+        """Reversal is DERIVED, so the row is never cleared: erasing it would erase
+        the audit trail of which payment was raised and later reversed."""
+        contract, payment = self.settled_payment()
+        payment.reload()
+        payment.cancel()
+
+        contract.reload()
+        row = next(r for r in contract.billing_documents if r.document_type == "Payment Entry")
+        self.assertEqual(row.document_name, payment.name)
+
+    def test_a_cancelled_payment_the_contract_still_cites_cannot_be_deleted(self):
+        """The load-bearing guard on the exemption's SCOPE. Frappe reads
+        ignore_linked_doctypes only when cancelling, so deletion stays blocked and the
+        billing row cannot be orphaned. Widening the exemption to deletes reds here.
+        """
+        contract, payment = self.settled_payment()
+        payment.reload()
+        payment.cancel()
+
+        with self.assertRaises(frappe.LinkExistsError):
+            frappe.delete_doc("Payment Entry", payment.name)
+        self.assertTrue(frappe.db.exists("Payment Entry", payment.name))
+
+    def test_the_exemption_keeps_erpnext_s_own_ledger_entries(self):
+        """Assigning instead of appending would drop GL Entry and Payment Ledger Entry
+        from the list ERPNext builds in its own on_cancel, breaking EVERY Payment Entry
+        cancellation on the site — telecom or not."""
+        payment = frappe.new_doc("Payment Entry")
+        payment.ignore_linked_doctypes = ("GL Entry", "Payment Ledger Entry")
+
+        contract_billing.allow_cancel_despite_billing_log(payment)
+
+        self.assertIn("Telecom Contract", payment.ignore_linked_doctypes)
+        self.assertIn("GL Entry", payment.ignore_linked_doctypes)
+        self.assertIn("Payment Ledger Entry", payment.ignore_linked_doctypes)
+
+    def test_the_exemption_is_added_once_however_often_it_runs(self):
+        payment = frappe.new_doc("Payment Entry")
+        contract_billing.allow_cancel_despite_billing_log(payment)
+        contract_billing.allow_cancel_despite_billing_log(payment)
+        self.assertEqual(list(payment.ignore_linked_doctypes).count("Telecom Contract"), 1)
