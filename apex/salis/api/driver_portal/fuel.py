@@ -23,6 +23,24 @@ def _bounded_request_limit(value):
 	return min(parsed, FUEL_REQUEST_MAX_LIMIT)
 
 
+def _period_quota(vehicle, period_month, fields):
+	"""The live Fuel Quota row for ``vehicle`` in ``period_month``, or None.
+
+	One resolver behind both fuel endpoints, so the quota bar the portal renders and
+	the allowance a portal request is held to can never name different rows.
+	``docstatus < 2`` keeps a draft or submitted allocation and drops a cancelled one
+	— the same scope the Fuel Quota duplicate guard treats as live, so at most one
+	row can match a (vehicle, period) pair."""
+	if not vehicle:
+		return None
+	return frappe.db.get_value(
+		"Fuel Quota",
+		{"vehicle": vehicle, "period_month": period_month, "docstatus": ["<", 2]},
+		fields,
+		as_dict=True,
+	)
+
+
 def _vehicle_bound_to_driver(driver, vehicle):
 	"""True when ``vehicle`` is genuinely bound to ``driver``.
 
@@ -46,6 +64,20 @@ def _vehicle_bound_to_driver(driver, vehicle):
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
+	"""Raise a Standard Fuel Request for the driver's own vehicle (write).
+
+	Identity-scoped: the driver is resolved credential-first and the vehicle must be
+	bound to them (``_vehicle_bound_to_driver``), so fuel can never be charged to
+	someone else's vehicle.
+
+	The request carries the Fuel Quota for its OWN request month, resolved through the
+	same ``_period_quota`` read that feeds the portal's quota bar. That link is what
+	makes the controller's allowance gate live: with ``fuel_quota`` empty,
+	``_guard_quota_allowance`` returns at its first line and the portal draws past an
+	allocation the desk and the approval console are both held to. An oversized draw is
+	therefore refused here, before anything is written, with the very message the desk
+	raises — the gate runs again at ``before_submit`` and inside the locked consumption
+	step, which is what catches two in-flight requests that only overrun together."""
 	_require_enabled()
 	driver = _resolve_driver()
 	vehicle = vehicle or frappe.db.get_value("Salis Driver", driver, "current_vehicle")
@@ -57,11 +89,17 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
 			_("That vehicle is not assigned to you. You can only request fuel for your own vehicle."),
 			frappe.PermissionError,
 		)
+	request_date = frappe.utils.today()
+	quota = _period_quota(vehicle, request_date[:7], ["name"])
 	doc = frappe.get_doc(
-		{"doctype": "Fuel Request", "driver": driver, "vehicle": vehicle,
+		{"doctype": "Fuel Request", "request_type": "Standard", "driver": driver,
+		 "vehicle": vehicle, "fuel_quota": quota.name if quota else None,
 		 "fuel_platform": fuel_platform, "requested_litres": frappe.utils.flt(litres),
-		 "request_date": frappe.utils.today(), "status": "Pending"}
+		 "request_date": request_date, "status": "Pending"}
 	)
+	# The controller's own gate, called on the unsaved doc — reused rather than
+	# restated, so the portal can never drift from the refusal the desk enforces.
+	doc._guard_quota_allowance()
 	doc.insert(ignore_permissions=True)  # audit-ok — driver resolved server-side
 	return {"name": doc.name}
 
@@ -77,7 +115,10 @@ def my_fuel_quota(vehicle=None):
 	check fuel writes use (``_vehicle_bound_to_driver``) — so a driver can never read
 	another vehicle's quota by guessing an id; an unbound id falls back to the bound
 	vehicle. The quota row is the native Fuel Quota for (vehicle, this YYYY-MM period),
-	the same record the fuel engine keeps ``consumed_litres`` on.
+	the same record the fuel engine keeps ``consumed_litres`` on — and, through the
+	shared ``_period_quota`` read, the very row ``submit_fuel_request`` binds a new
+	request to, so the bar the driver sees and the allowance they are held to cannot
+	disagree.
 
 	Returns ``{"has_quota": False, ...}`` (a friendly empty state, never a 403) when no
 	vehicle is bound or no quota exists for the month, so the SPA omits the card.
@@ -96,11 +137,10 @@ def my_fuel_quota(vehicle=None):
 		return {"has_quota": False, "vehicle": None, "approval_threshold_litres": threshold}
 
 	period_month = frappe.utils.today()[:7]
-	row = frappe.db.get_value(
-		"Fuel Quota",
-		{"vehicle": vehicle, "period_month": period_month, "docstatus": ["<", 2]},
+	row = _period_quota(
+		vehicle,
+		period_month,
 		["name", "monthly_litres", "monthly_amount", "consumed_litres", "status"],
-		as_dict=True,
 	)
 	if not row:
 		return {
