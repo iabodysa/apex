@@ -397,6 +397,12 @@ permission_query_conditions = {
     "Telecom Contract": "apex.logistay.permissions.telecom_contract_query",
     "SIM Card": "apex.logistay.permissions.sim_card_query",
     "SIM Custody Assignment": "apex.logistay.permissions.sim_custody_assignment_query",
+    # Habitat safety/cleaning records — each carries its own `building`, so they scope on
+    # the same column fragment as their already-wired siblings Safety Round / Cleaning Log.
+    "Safety Incident": "apex.habitat.permissions.safety_incident_query",
+    "Safety Inspection Report": "apex.habitat.permissions.safety_inspection_report_query",
+    "Safety Finding Ledger": "apex.habitat.permissions.safety_finding_ledger_query",
+    "Cleaning Compliance Ledger": "apex.habitat.permissions.cleaning_compliance_ledger_query",
 }
 
 has_permission = {
@@ -469,6 +475,13 @@ has_permission = {
     "Telecom Contract": "apex.logistay.permissions.company_scoped_has_permission",
     "SIM Card": "apex.logistay.permissions.company_scoped_has_permission",
     "SIM Custody Assignment": "apex.logistay.permissions.company_scoped_has_permission",
+    # Form / REST / submit side of the four fragments above. The shared handler reads
+    # `doc.building` directly — none of the four fetches it from a parent, so no
+    # BUILDING_FETCH_ANCHOR entry is needed and the create path resolves at :300.
+    "Safety Incident": "apex.habitat.permissions.building_scoped_has_permission",
+    "Safety Inspection Report": "apex.habitat.permissions.building_scoped_has_permission",
+    "Safety Finding Ledger": "apex.habitat.permissions.building_scoped_has_permission",
+    "Cleaning Compliance Ledger": "apex.habitat.permissions.building_scoped_has_permission",
 }
 
 # [#eo76cf]
