@@ -164,6 +164,31 @@ def scheduled_task_instance_query(user=None):
     return _building_condition(user)
 
 
+# The remaining safety/cleaning records each carry exactly ONE Building link — their own
+# `building` column — so the shared column fragment serves them with no anchor hop. Their
+# already-wired siblings (Safety Round, Safety Task Execution, Cleaning Log) prove the shape.
+#
+# WHY these need a fragment even though a Building User Permission already narrows the list:
+# frappe's native match (db_query.py:1090) is `ifnull(building,'')='' or building in (...)`,
+# so a row whose building is empty stays visible, and a scoped user holding NO Building
+# permission at all gets no condition and sees every estate. `_building_condition` closes
+# both: it emits "1=0" for a scoped user with no buildings and never OR-s an empty value in.
+def safety_incident_query(user=None):
+    return _building_condition(user)
+
+
+def safety_inspection_report_query(user=None):
+    return _building_condition(user)
+
+
+def safety_finding_ledger_query(user=None):
+    return _building_condition(user)
+
+
+def cleaning_compliance_ledger_query(user=None):
+    return _building_condition(user)
+
+
 # [#fya0cl]
 def accommodation_resident_request_query(user=None):
     return _building_condition(user)
