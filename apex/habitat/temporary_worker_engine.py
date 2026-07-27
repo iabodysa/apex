@@ -22,6 +22,10 @@ from apex.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORK
 # [#tutwiu]
 _IDENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_ ]*$")
 
+# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
+# rather than stacking one per row.
+_ROW_SAVEPOINT = "temporary_worker_row"
+
 # [#g9r6ee]
 PARTY_DOCTYPES = {
     "Housing Assignment": "employee",
@@ -55,14 +59,18 @@ def link_temporary_workers() -> None:
         if not workers:
             break
         for tw in workers:
-            try:  # [#s7axbr]
+            # [#s7axbr] The loop CONTINUES past a failure, so the rollback must be
+            # row-scoped: a bare frappe.db.rollback() discards the whole transaction,
+            # i.e. every worker already linked in this run (as in salis/fuel_engine.py).
+            frappe.db.savepoint(_ROW_SAVEPOINT)
+            try:
                 employee = _match_employee(tw)
                 if employee:
                     _link(tw, employee)
                 elif tw.expiry_date and str(tw.expiry_date) < today_str:
                     _expire(tw)
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Temporary Worker link failed for {tw.name}"[:140],
