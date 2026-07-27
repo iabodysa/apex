@@ -52,7 +52,14 @@ class TestMaintenanceMaterialTemplateLoad(FrappeTestCase):
             "doctype": "Site", "site_name": "A333-MMT-" + _hash(),
         }).insert(ignore_permissions=True).name
 
-    def _template(self, issue_type):
+    def _candidate_template(self, issue_type):
+        """One ACTIVE single-item template for ``issue_type``.
+
+        A candidate, never "the" template: ``load_template_into_doc`` resolves by
+        ``{"issue_type": ..., "is_active": 1}`` with ``limit=1``, so on a seeded site
+        it may well pick one of the shipped templates instead. This exists so the
+        tests still have something to resolve on a site with no seed data.
+        """
         material = frappe.get_doc({
             "doctype": "Maintenance Material",
             "material_name": "Washer " + _hash(),
@@ -90,7 +97,7 @@ class TestMaintenanceMaterialTemplateLoad(FrappeTestCase):
         )
 
         witness = self._witness_row()
-        template = self._template("Plumbing")
+        template = self._candidate_template("Plumbing")
         request = self._draft_request("Plumbing")
         # Reaches a state before_save refuses without going through validate.
         frappe.db.set_value("Maintenance Request", request.name, "status", "Assigned")
@@ -109,22 +116,48 @@ class TestMaintenanceMaterialTemplateLoad(FrappeTestCase):
         )
         self.assertTrue(
             frappe.db.exists("Maintenance Material Template", template.name),
-            "the template read by the refused load must survive the refusal too",
+            "the template minted earlier in this request must survive the refusal too",
         )
 
-    def test_a_successful_load_appends_the_template_rows(self):
+    def test_a_successful_load_appends_every_row_of_the_resolved_template(self):
         """The success path, so the refusal test above is graded against a load that
-        demonstrably works on the same fixtures."""
+        demonstrably works on the same fixtures.
+
+        ``rows_added`` counts the rows appended to the TARGET document, one per item
+        of the template the endpoint RESOLVED — which is the first active template
+        for the issue type (``limit=1``), not the one a caller happens to have minted.
+        Asserting a literal here graded the seed data instead of the loader: the
+        shipped ``Electrical - Basic`` carries five items
+        (apex_core/setup/data/habitat/maintenance_material_template.json), so a
+        one-item fixture still produced five. The expectation is therefore read off
+        the resolved template the endpoint names in its own return value.
+        """
         from apex.habitat.doctype.maintenance_material_template.maintenance_material_template import (
             load_template_into_doc,
         )
 
-        self._template("Electrical")
+        self._candidate_template("Electrical")
         request = self._draft_request("Electrical")
 
         result = load_template_into_doc("Maintenance Request", request.name, "Electrical")
 
-        self.assertEqual(result["rows_added"], 1)
+        resolved = frappe.get_doc("Maintenance Material Template", result["template"])
+        self.assertEqual(resolved.issue_type, "Electrical", "resolved the wrong issue type")
+        self.assertTrue(resolved.is_active, "an inactive template must never be resolved")
+        self.assertGreaterEqual(len(resolved.items), 1, "precondition: the template has rows")
+
+        self.assertEqual(
+            result["rows_added"], len(resolved.items),
+            "every item of the resolved template must be appended, none dropped",
+        )
         request.reload()
-        self.assertEqual(len(request.procurement_items), 1)
+        self.assertEqual(
+            len(request.procurement_items), len(resolved.items),
+            "the appended rows must actually be stored on the target request",
+        )
+        self.assertEqual(
+            {row.material for row in request.procurement_items},
+            {item.material for item in resolved.items},
+            "the stored rows must carry the resolved template's materials",
+        )
         self.assertEqual(request.requires_procurement, 1)
