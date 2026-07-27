@@ -221,6 +221,68 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         self.assertEqual(d.status, "Released")
         self.assertEqual(frappe.db.get_value("Facility Asset", self.asset, "building"), self.intake)
 
+    def test_cancelling_a_superseded_delivery_cannot_drag_the_asset_back(self):
+        """A Delivered delivery followed by a movement onward: cancelling the delivery
+        used to restore from_building blindly, teleporting the asset back into the
+        intake store it had physically left."""
+        d = self._delivery()
+        code = self._release(d)
+        frappe.set_user(self.receiver)
+        try:
+            confirm_receipt(d.name, code)
+        finally:
+            frappe.set_user("Administrator")
+        d.reload()
+        self.assertEqual(d.status, "Delivered")
+
+        onward = frappe.get_doc(
+            {
+                "doctype": "Building",
+                "building_name": "Onward " + _h(),
+                "site": self.site.name,
+                "company": self.company,
+            }
+        ).insert(ignore_permissions=True, ignore_mandatory=True).name
+        mv = frappe.get_doc(
+            {
+                "doctype": "Facility Asset Movement",
+                "movement_date": "2026-06-30",
+                "facility_asset": self.asset,
+                "movement_category": "Same-Company Relocation",
+                "from_building": self.dest,
+                "to_building": onward,
+            }
+        ).insert(ignore_permissions=True)
+        mv.submit()
+        self.assertEqual(
+            frappe.db.get_value("Facility Asset", self.asset, "building"),
+            onward,
+            "the movement must have carried the asset past the delivery destination",
+        )
+
+        d.db_set("cancellation_reason", "Out-of-order cancel attempt")
+        d.reload()
+        with self.assertRaises(frappe.ValidationError) as caught:
+            d.cancel()
+        # Every framework pre-cancel check subclasses ValidationError too, so a bare
+        # assertRaises would pass on a link or timestamp failure instead of the guard.
+        self.assertNotIsInstance(
+            caught.exception,
+            (frappe.LinkValidationError, frappe.TimestampMismatchError),
+            "the refusal must come from the ordering guard, not a framework pre-cancel check",
+        )
+
+        landed = frappe.db.get_value("Facility Asset", self.asset, "building")
+        self.assertEqual(landed, onward, "a superseded delivery cancel must not move the asset")
+        self.assertNotEqual(
+            landed, self.intake, "the asset must never be dragged back to the intake store"
+        )
+        self.assertEqual(
+            frappe.db.get_value("Facility Asset Delivery", d.name, "docstatus"),
+            1,
+            "a refused cancel must leave the delivery submitted",
+        )
+
     def test_wrong_code_does_not_move_asset(self):
         d = self._delivery()
         self._release(d)

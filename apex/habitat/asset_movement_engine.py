@@ -17,8 +17,36 @@ a negated reversal row on cancel instead of editing or deleting the original.
 from __future__ import annotations
 
 import frappe
+from frappe import _
 
 LEDGER_DOCTYPE = "Facility Asset Movement Ledger"
+
+
+def ensure_asset_still_at(facility_asset: str, **expected) -> None:
+    """Refuse to cancel a relocation record the asset has already moved on from.
+
+    A Facility Asset carries ONE mutable location, so restoring a cancelled
+    record's origin while a LATER relocation is still submitted would silently
+    discard that later move and leave the asset contradicting its own ledger. The
+    honest remedy is last-in-first-out: cancel the newest relocation first.
+
+    ``expected`` maps Facility Asset location fieldnames to the values this record
+    wrote when it moved the asset; only the fields passed are compared, because
+    the delivery path leaves the room untouched when it carries no destination
+    room of its own.
+    """
+    fields = list(dict.fromkeys(["building", *expected]))
+    current = frappe.db.get_value("Facility Asset", facility_asset, fields, as_dict=True)
+    if not current:
+        return
+    if all((current.get(field) or None) == (value or None) for field, value in expected.items()):
+        return
+    frappe.throw(
+        _(
+            "Facility Asset {0} has moved on to {1} since this record; cancelling it now"
+            " would undo a later relocation. Cancel the newest relocation first."
+        ).format(facility_asset, current.building)
+    )
 
 
 def _ledger_exists(source_doctype: str, source_name: str) -> bool:

@@ -156,3 +156,95 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
             asset.location_in_building, self.room_l0, "cancel must revert the asset to L0"
         )
         self.assertEqual(asset.movement_count, 0, "cancel must decrement movement_count back to 0")
+
+    # An out-of-order cancel used to restore from_* blindly, dragging an asset that had
+    # already moved on back to a building it had physically left.
+
+    def _second_leg(self):
+        """Building C + room L2, and a SUBMITTED second movement B -> C on the same
+        asset. Returns (bldg_c, room_l2, movement)."""
+        tag = self._testMethodName
+        bldg_c = frappe.get_doc(
+            {"doctype": "Building", "building_name": f"FAM-EFFECTS C {tag}"}
+        ).insert(ignore_permissions=True).name
+        room_l2 = frappe.get_doc(
+            {"doctype": "Room", "building": bldg_c, "room_number": f"FAM-EFFECTS L2 {tag}"}
+        ).insert(ignore_permissions=True).name
+        mv2 = frappe.get_doc(
+            {
+                "doctype": "Facility Asset Movement",
+                "movement_date": today(),
+                "facility_asset": self.asset,
+                "movement_category": "Same-Company Relocation",
+                "from_building": self.bldg_b,
+                "from_room": self.room_l1,
+                "to_building": bldg_c,
+                "to_room": room_l2,
+            }
+        ).insert(ignore_permissions=True)
+        mv2.submit()
+        return bldg_c, room_l2, mv2
+
+    def test_cancelling_a_superseded_movement_cannot_drag_the_asset_back(self):
+        mv1 = self._movement()
+        mv1.submit()
+        bldg_c, room_l2, _mv2 = self._second_leg()
+        self.assertEqual(
+            frappe.db.get_value("Facility Asset", self.asset, "building"),
+            bldg_c,
+            "the second movement must have left the asset at C",
+        )
+
+        mv1.db_set("cancellation_reason", "Out-of-order cancel attempt")
+        mv1.reload()
+        with self.assertRaises(frappe.ValidationError) as caught:
+            mv1.cancel()
+        # Every framework pre-cancel check subclasses ValidationError too, so a bare
+        # assertRaises would pass on a link or timestamp failure instead of the guard.
+        self.assertNotIsInstance(
+            caught.exception,
+            (frappe.LinkValidationError, frappe.TimestampMismatchError),
+            "the refusal must come from the ordering guard, not a framework pre-cancel check",
+        )
+
+        asset = frappe.db.get_value(
+            "Facility Asset",
+            self.asset,
+            ["building", "location_in_building", "movement_count"],
+            as_dict=True,
+        )
+        self.assertEqual(
+            asset.building, bldg_c, "a superseded cancel must leave the asset at C"
+        )
+        self.assertNotEqual(
+            asset.building, self.bldg_a, "the asset must never be dragged back to A"
+        )
+        self.assertEqual(asset.location_in_building, room_l2, "the room must stay at L2")
+        self.assertEqual(asset.movement_count, 2, "a refused cancel must not decrement the count")
+        self.assertEqual(
+            frappe.db.get_value("Facility Asset Movement", mv1.name, "docstatus"),
+            1,
+            "a refused cancel must leave the first movement submitted",
+        )
+
+    def test_cancelling_newest_first_walks_the_asset_back_leg_by_leg(self):
+        """The remedy the refusal message names must actually work, or the guard is
+        a dead end rather than an ordering rule."""
+        mv1 = self._movement()
+        mv1.submit()
+        _bldg_c, _room_l2, mv2 = self._second_leg()
+
+        for mv in (mv2, mv1):
+            mv.db_set("cancellation_reason", "Reversed newest first in test")
+            mv.reload()
+            mv.cancel()
+
+        asset = frappe.db.get_value(
+            "Facility Asset",
+            self.asset,
+            ["building", "location_in_building", "movement_count"],
+            as_dict=True,
+        )
+        self.assertEqual(asset.building, self.bldg_a, "last-in-first-out must land back at A")
+        self.assertEqual(asset.location_in_building, self.room_l0, "and back at L0")
+        self.assertEqual(asset.movement_count, 0, "both cancels must decrement the count")

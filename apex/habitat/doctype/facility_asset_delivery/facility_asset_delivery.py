@@ -46,6 +46,7 @@ from apex.habitat.doctype.custody_handover.custody_handover import (
     generate_otp,
 )
 from apex.habitat.asset_movement_engine import (
+    ensure_asset_still_at,
     post_asset_movement,
     reverse_asset_movement,
 )
@@ -100,7 +101,10 @@ class FacilityAssetDelivery(Document):
     def on_cancel(self):
         """Reverse the movement ledger if the asset already moved (Delivered), then
         mark Cancelled. A delivery cancelled before Delivered never moved the asset,
-        so the reversal is a no-op there (idempotent)."""
+        so the reversal is a no-op there (idempotent).
+
+        Safe to restore the origin unconditionally because ``before_cancel`` has
+        already refused any cancel whose asset has since moved on."""
         if self.status == "Delivered":
             reverse_asset_movement(LEDGER_SOURCE, self.name)
             # [#kv9ve6]
@@ -119,6 +123,11 @@ class FacilityAssetDelivery(Document):
     def before_cancel(self):
         if not self.cancellation_reason:
             frappe.throw(_("Cancellation Reason is required before cancelling a delivery."))
+        # Only a Delivered delivery ever wrote a location; the room is not compared
+        # because move_asset_on_delivery leaves it untouched when to_location_in_building
+        # is blank.
+        if self.status == "Delivered":
+            ensure_asset_still_at(self.facility_asset, building=self.to_building)
 
 
 def move_asset_on_delivery(doc) -> None:
