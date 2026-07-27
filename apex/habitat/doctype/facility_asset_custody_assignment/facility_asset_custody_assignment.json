@@ -105,7 +105,7 @@
    "fieldname": "supervisor_signature",
    "fieldtype": "Signature",
    "label": "Supervisor E-Signature",
-   "description": "The supervisor's own mark accepting custody of these assets. A captured signature is biometric-adjacent and the raw material for forgery, so it sits at level 1 and only the custody desk roles can see it.",
+   "description": "The supervisor's own signature accepting custody of these assets. A signature can be copied and reused, so only the custody desk roles can see this field.",
    "permlevel": 1,
    "idx": 12
   },

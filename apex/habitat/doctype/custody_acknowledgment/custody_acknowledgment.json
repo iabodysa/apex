@@ -136,7 +136,7 @@
   },
   {
    "depends_on": "eval:doc.confirmation_method=='Signature'",
-   "description": "Fallback when the holder cannot tick the confirmation: sign here to acknowledge receipt. A captured signature is biometric-adjacent and the raw material for forgery, so it sits at level 1 and only the custody desk roles can see it.",
+   "description": "Fallback when the holder cannot tick the confirmation: sign here to acknowledge receipt. A signature can be copied and reused, so only the custody desk roles can see this field.",
    "fieldname": "signature",
    "fieldtype": "Signature",
    "label": "Signature",

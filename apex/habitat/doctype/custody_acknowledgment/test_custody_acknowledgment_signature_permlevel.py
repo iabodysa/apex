@@ -299,6 +299,12 @@ class TestCustodyAcknowledgmentSignaturePermlevel(FrappeTestCase):
             {"because", "so", "since"} & set(described.split()),
             "the tooltip states the restriction but never says WHY it is restricted",
         )
+        # This one is read by a WORKER on the portal, in Arabic, so system jargon is worst
+        # of all here. Say WHO keeps the field and WHY, never HOW it is enforced.
+        for jargon in ("permlevel", "level 1", "level 0", "docperm"):
+            self.assertNotIn(
+                jargon, described, f"the tooltip leaks the system term {jargon!r} to a worker"
+            )
 
     def test_the_auditors_level_zero_authority_was_not_collateral_damage(self):
         """The explicit non-change: one field narrowed, not a role's authority."""

@@ -168,7 +168,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Recipient's signature taken at handover time. A captured signature is biometric-adjacent and the raw material for forgery, so it sits at level 1: only the custody desk roles that take it can see it.",
+   "description": "Recipient's signature taken at handover time. A signature can be copied and reused, so only the custody desk roles that take it can see this field.",
    "fieldname": "signature",
    "fieldtype": "Signature",
    "label": "Signature",

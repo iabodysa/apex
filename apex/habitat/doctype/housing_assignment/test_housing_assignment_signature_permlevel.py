@@ -345,6 +345,14 @@ class TestHousingAssignmentSignaturePermlevel(FrappeTestCase):
             {"because", "so", "since"} & set(described.split()),
             "the tooltip states the restriction but never says WHY it is restricted",
         )
+        # The first draft of this description said "it sits at level 1". That is the
+        # setting's internal name in a clerk's face, and it goes to the translators as
+        # well — an Arabic tooltip about "level 1" means nothing at a front desk. Say WHO
+        # keeps the field and WHY, never HOW it is enforced.
+        for jargon in ("permlevel", "level 1", "level 0", "docperm"):
+            self.assertNotIn(
+                jargon, described, f"the tooltip leaks the system term {jargon!r} to a clerk"
+            )
 
     def test_the_auditors_level_zero_authority_was_not_collateral_damage(self):
         """The explicit non-change. A-216 gave Internal Auditor estate-wide read on this
