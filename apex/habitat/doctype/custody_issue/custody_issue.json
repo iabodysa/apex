@@ -168,10 +168,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Recipient's signature taken at handover time.",
+   "description": "Recipient's signature taken at handover time. A signature can be copied and reused, so only the custody desk roles that take it can see this field.",
    "fieldname": "signature",
    "fieldtype": "Signature",
    "label": "Signature",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -263,6 +264,24 @@
    "read": 1,
    "report": 1,
    "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
+   "write": 1
   }
  ],
  "row_format": "Dynamic",

@@ -49,34 +49,41 @@ _SIGNATURES_NOT_YET_LAYERED = (
     "differs per custody flow — so each one is its own module change with its own reviewer. "
     "The exposure today: any role holding read on the record sees the captured mark."
 )
-_HOUSING_SIGNATURE = (
-    "Category 1 (signature), not yet layered — AND the field A-216 just widened. Granting "
-    "Internal Auditor read at level 0 on Housing Assignment (same batch) hands that role "
-    "this signature, because Housing Assignment ships no level-1 section for it to sit "
-    "behind. That was the known cost of the A-216 decision, recorded here rather than left "
-    "for the next reader to discover. Layering Housing Assignment is the module change that "
-    "closes it."
-)
 _RESIDENT_REQUEST_PROSE = (
     "Category 5 (free text about a person). Resident Request is a person master and these "
     "three fields are exactly the unbounded prose the model warns about — a resident's own "
-    "complaint text plus the triage and resolution notes written about them. They are NOT "
-    "raised yet because the request workflow is read by the housing supervisors who must "
-    "act on it, and a level-1 wall would need those roles given level-1 rows, which is a "
-    "re-read of the whole Resident Request permission table rather than a field flip."
+    "complaint text plus the triage and resolution notes written about them. They stay at "
+    "level 0 because RAISING THEM WOULD PROTECT THEM FROM NOBODY, which is a different "
+    "reason from the one this entry used to give. Every role holding read on this DocType "
+    "already holds a permlevel-1 read row — all four of them, added when `mobile_number` "
+    "was raised — so a level-1 wall here has nobody on the far side of it. "
+    "`test_raising_the_resident_request_prose_would_shut_nobody_out` proves that off the "
+    "shipped JSON rather than asserting it in prose, and will start failing the moment a "
+    "role is given level-0 read without a level-1 row, which is the day raising these three "
+    "fields starts buying something. Until then the flip is theatre with a real cost: "
+    "`description` is `reqd`, and a required field at level 1 breaks create outright for "
+    "any role lacking a level-1 write row. Closing this exposure needs a narrower read role "
+    "to exist first, or an owner decision to accept it — not a field flip."
 )
 
 KNOWN_LEVEL_ZERO_SENSITIVE = {
     # DRAINED: the one category-4 entry that used to stand here, Freelancer.monthly_salary,
     # now permlevel 1. The ratchet tightened by one, which is the whole point of exact
     # equality — a repaired entry MUST be pruned or the guard stops meaning anything.
-    "Custody Acknowledgment": ([("signature", "signature")], _SIGNATURES_NOT_YET_LAYERED),
-    "Custody Issue": ([("signature", "signature")], _SIGNATURES_NOT_YET_LAYERED),
-    "Facility Asset Custody Assignment": (
-        [("supervisor_signature", "signature")],
-        _SIGNATURES_NOT_YET_LAYERED,
-    ),
-    "Housing Assignment": ([("terms_signature", "signature")], _HOUSING_SIGNATURE),
+    # DRAINED: Custody Acknowledgment.signature — permlevel 1, level-1 rows for the three
+    # custody desk roles, none for Internal Auditor. The subject signs this one over the
+    # portal, and the Web Form insert bypasses levels entirely (web_form.py:663), so the
+    # worker's own path is untouched. Proof:
+    # test_custody_acknowledgment_signature_permlevel.
+    # DRAINED: Custody Issue.signature — permlevel 1, level-1 rows for the three Custody
+    # Kiosk roles, none for Internal Auditor. Proof: test_custody_issue_signature_permlevel.
+    # DRAINED: Facility Asset Custody Assignment.supervisor_signature — permlevel 1, level-1
+    # rows for the three custody desk roles, none for Internal Auditor. Proof:
+    # test_facility_asset_custody_assignment_signature_permlevel.
+    # DRAINED: Housing Assignment.terms_signature, the entry A-216 created and A-308 called
+    # the urgent one. Now permlevel 1, with level-1 rows for the three Arrivals Desk roles
+    # and none for Internal Auditor — so the estate-wide audit read stops at level 0, which
+    # was the whole exposure. Proof: test_housing_assignment_signature_permlevel.
     "Vehicle Incident": ([("worker_signature", "signature")], _SIGNATURES_NOT_YET_LAYERED),
     "Resident Request": (
         [
@@ -277,6 +284,41 @@ class TestTheModelIsEnforcedOnTheShippedTree(unittest.TestCase):
         phantom = sorted(set(KNOWN_LEVEL_ZERO_SENSITIVE) - set(self.doctypes))
         self.assertEqual(phantom, [], "the baseline names DocType(s) this app no longer ships")
 
+    def test_raising_the_resident_request_prose_would_shut_nobody_out(self):
+        """The Resident Request entry's reason, made falsifiable.
+
+        That entry used to say the three prose fields were unraised because raising them
+        would need the housing roles given level-1 rows. They already have them: all four
+        roles that hold read on this DocType also hold a permlevel-1 read row, added when
+        `mobile_number` was raised. So the flip protects nobody, and the entry's real reason
+        is that there is no role on the far side of the wall — not that the wall is
+        expensive to build.
+
+        A reason left in prose rots silently and the next reader does unnecessary work, or
+        worse, does the flip and believes an exposure was closed. This asserts the fact
+        instead. It fails the day someone grants level-0 read without a level-1 row, which
+        is exactly the day raising these fields starts to buy something — at which point
+        the entry should be drained rather than re-explained.
+
+        Read is what matters here: a role that cannot READ the prose cannot leak it,
+        whatever its write rows say.
+        """
+        request = self.doctypes["Resident Request"]
+        rows = request["permissions"]
+        can_read = {p["role"] for p in rows if int(p.get("permlevel") or 0) == 0 and p.get("read")}
+        reach_level_1 = {
+            p["role"] for p in rows if int(p.get("permlevel") or 0) == 1 and p.get("read")
+        }
+        self.assertTrue(can_read, "Resident Request ships no level-0 read row at all")
+        self.assertEqual(
+            can_read - reach_level_1,
+            set(),
+            "a role now reads Resident Request without a permlevel-1 row, so raising "
+            "description/triage_notes/resolution_notes would finally hide them from "
+            "someone. Drain the baseline entry and do the flip — but note description is "
+            "`reqd`, so that role needs a permlevel-1 WRITE row too or its create breaks.",
+        )
+
     def test_the_freelancer_salary_stayed_drained(self):
         """The Freelancer salary fix raised it and pruned its entry. If either half
         regresses, say so here rather than letting the exact-equality diff explain it
@@ -318,7 +360,7 @@ class TestTheModelMatchesTheShippedTree(unittest.TestCase):
         )
         self.assertEqual(
             (total, with_high_field, with_high_row),
-            (153, 19, 16),
+            (153, 23, 20),
             "the adoption numbers in field_sensitivity.py's docstring are stale — update "
             "the docstring and this assertion together, so the premise cannot rot.",
         )

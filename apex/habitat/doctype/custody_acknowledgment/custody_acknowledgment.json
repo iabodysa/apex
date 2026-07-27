@@ -136,10 +136,11 @@
   },
   {
    "depends_on": "eval:doc.confirmation_method=='Signature'",
-   "description": "Fallback when the holder cannot tick the confirmation: sign here to acknowledge receipt.",
+   "description": "Fallback when the holder cannot tick the confirmation: sign here to acknowledge receipt. A signature can be copied and reused, so only the custody desk roles can see this field.",
    "fieldname": "signature",
    "fieldtype": "Signature",
-   "label": "Signature"
+   "label": "Signature",
+   "permlevel": 1
   },
   {
    "fieldname": "cack_sec_remarks",
@@ -212,6 +213,24 @@
    "read": 1,
    "report": 1,
    "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
+   "write": 1
   }
  ],
  "search_fields": "custody_issue, building, acknowledged_by_employee",
