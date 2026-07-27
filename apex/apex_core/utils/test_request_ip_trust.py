@@ -134,9 +134,9 @@ class TestTheCheckGradesBothDeployments(unittest.TestCase):
         """Non-vacuity: the check must clear a good deployment, not fire on all."""
         report = self._grade(REAL_PEER, probe_planted=True)
         self.assertEqual(report["verdict"], OVERWRITTEN)
-        self.assertTrue(report["trusted"])
-        self.assertFalse(report["forgeable"])
-        self.assertFalse(report["probe_seen"])
+        self.assertIs(report["trusted"], True)
+        self.assertIs(report["forgeable"], False)
+        self.assertIs(report["probe_seen"], False)
         self.assertEqual(report["resolved_ip"], REAL_PEER)
 
     def test_a_passthrough_edge_fires(self):
@@ -144,8 +144,9 @@ class TestTheCheckGradesBothDeployments(unittest.TestCase):
         the case a mere entry COUNT cannot catch -- one entry, wholly forged."""
         report = self._grade(PROBE_ADDRESS, probe_planted=True)
         self.assertEqual(report["verdict"], FORGEABLE)
-        self.assertTrue(report["forgeable"])
-        self.assertTrue(report["probe_seen"])
+        self.assertIs(report["forgeable"], True)
+        self.assertIs(report["trusted"], False)
+        self.assertIs(report["probe_seen"], True)
         self.assertEqual(report["resolved_ip"], PROBE_ADDRESS)
 
     def test_an_appending_edge_fires_even_with_no_probe(self):
@@ -153,7 +154,8 @@ class TestTheCheckGradesBothDeployments(unittest.TestCase):
         client's. Caught passively, without the deployer planting anything."""
         report = self._grade(f"{FORGED_CLAIM}, {REAL_PEER}")
         self.assertEqual(report["verdict"], APPENDED)
-        self.assertTrue(report["forgeable"])
+        self.assertIs(report["forgeable"], True)
+        self.assertIs(report["trusted"], False)
         self.assertEqual(report["entries"], [FORGED_CLAIM, REAL_PEER])
 
     def test_a_safe_overwrite_then_append_chain_is_not_called_forgeable(self):
