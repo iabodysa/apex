@@ -3236,6 +3236,8 @@ Safety Report Recipient,مستلِم تقرير السلامة
 Safety Reports,تقارير السلامة
 Safety Round,جولة سلامة
 Safety Round Report,تقرير جولة السلامة
+No Rated Safety Task,لا توجد مهمة سلامة مُقيَّمة
+Safety Round {0} has no rated safety task. Record at least one Safety Task Execution against the round before submitting it.,جولة السلامة {0} لا تحوي أي مهمة سلامة مُقيَّمة. سجّل تنفيذ مهمة سلامة واحدة على الأقل على الجولة قبل اعتمادها.
 Safety Round Report: {0} ({1}),تقرير جولة السلامة: {0} ({1})
 Safety Rounds,جولات السلامة
 Safety Section — No Issues,قسم السلامة — لا توجد ملاحظات
