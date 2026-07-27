@@ -1011,3 +1011,23 @@ def assign_monthly_wage(employee, company, wage, currency=None):
     assignment.submit()
     return structure.name
 
+
+def make_submitted_custody_issue():
+    """A submitted Custody Issue for the QA building, the anchor an acknowledgment needs.
+
+    Shared because the acknowledgment's behaviour suite and its signature-permlevel suite
+    both need one and neither may import the other.
+    """
+    issue = frappe.get_doc(
+        {
+            "doctype": "Custody Issue",
+            "naming_series": "CUST-ISS-.YYYY.-.####",
+            "issue_date": "2026-06-01",
+            "building": "QA-BLDG",
+            "items": [{"doctype": "Custody Issue Item", "article": "QA-ART", "qty": 1}],
+        }
+    )
+    issue.insert(ignore_permissions=True, ignore_links=True)
+    issue.submit()
+    return issue
+

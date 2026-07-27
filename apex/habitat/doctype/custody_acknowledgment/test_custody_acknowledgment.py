@@ -2,6 +2,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.tests.factories import make_submitted_custody_issue
+
 test_ignore = [
     "Building",
     "Custody Article",
@@ -15,16 +17,7 @@ test_ignore = [
 class TestCustodyAcknowledgment(FrappeTestCase):
 
     def _make_submitted_issue(self):
-        issue = frappe.get_doc({
-            "doctype": "Custody Issue",
-            "naming_series": "CUST-ISS-.YYYY.-.####",
-            "issue_date": "2026-06-01",
-            "building": "QA-BLDG",
-            "items": [{"doctype": "Custody Issue Item", "article": "QA-ART", "qty": 1}],
-        })
-        issue.insert(ignore_permissions=True, ignore_links=True)
-        issue.submit()
-        return issue
+        return make_submitted_custody_issue()
 
     def test_confirmed_receipt_records_ack(self):
         issue = self._make_submitted_issue()

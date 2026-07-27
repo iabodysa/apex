@@ -48,6 +48,8 @@ from pathlib import Path
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.tests.factories import make_submitted_custody_issue
+
 _ACK_JSON = Path(__file__).resolve().parent / "custody_acknowledgment.json"
 
 # Both roles sit in habitat.permissions.HOUSING_UNSCOPED_ROLES, so
@@ -84,18 +86,7 @@ class TestCustodyAcknowledgmentSignaturePermlevel(FrappeTestCase):
         ).insert(ignore_permissions=True).name
 
     def _submitted_issue(self):
-        issue = frappe.get_doc(
-            {
-                "doctype": "Custody Issue",
-                "naming_series": "CUST-ISS-.YYYY.-.####",
-                "issue_date": "2026-06-01",
-                "building": "QA-BLDG",
-                "items": [{"doctype": "Custody Issue Item", "article": "QA-ART", "qty": 1}],
-            }
-        )
-        issue.insert(ignore_permissions=True, ignore_links=True)
-        issue.submit()
-        return issue
+        return make_submitted_custody_issue()
 
     def _signed_ack(self):
         issue = self._submitted_issue()
