@@ -54,6 +54,30 @@ def get_target_payment_doctype() -> str:
     return get_target_doctype()
 
 
+def require_configured_target(built_doctype: str) -> None:
+    """Refuse when the deployment's configured payment target is not what the caller builds.
+
+    For a surface that can route ANY target, :func:`route_payment` is the answer: it
+    reads the configured target and the field map and builds whatever they name. A
+    surface that can only ever produce ONE document type cannot do that, because the
+    field map is written against :data:`SOURCE_DOCTYPE` fields and describes no other
+    source. Its only honest options are to obey the configuration or to refuse.
+
+    So it refuses. Quietly building a different document type than the one configured
+    is the failure this exists to stop: the operator sees a plausible payment and never
+    learns the deployment's routing choice was ignored on this one screen.
+    """
+    configured = get_target_doctype()
+    if configured == built_doctype:
+        return
+    frappe.throw(
+        _(
+            "Payments on this site are configured to be raised as {0}, but this action can only create a {1} allocated against the supplier's invoice. Set Target Payment DocType to {1} in Payment Routing Settings, or raise this payment from a {2} instead."
+        ).format(_(configured), _(built_doctype), _(SOURCE_DOCTYPE)),
+        title=_("Payment Target Mismatch"),
+    )
+
+
 def validate_target_doctype(target_doctype) -> None:
     """Refuse a structurally impossible payment target BEFORE anything is built.
 

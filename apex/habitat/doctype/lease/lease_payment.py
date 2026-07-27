@@ -23,6 +23,13 @@ to the payment, Accounts can cancel it without the lease vetoing the cancellatio
 
 Boundary — this layer submits nothing and posts no GL. The Payment Entry is created in
 Draft and left for finance to review and submit.
+
+Which document type gets raised is NOT decided here either. The button used to read the
+Payment Routing target in the browser and then pick among three hard-coded branches,
+so a deployment could configure one target and be handed another from this one screen.
+The target is now read server-side and a mismatch is refused outright: a rent payment
+settles a landlord Purchase Invoice, and only a Payment Entry carries the allocation
+that does it, so this surface obeys the configuration or declines to act.
 """
 
 from __future__ import annotations
@@ -31,6 +38,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, getdate, today
 
+from apex.apex_core.payment_router import require_configured_target
 from apex.apex_core.utils import payable_allocation
 
 LEASE_DOCTYPE = "Lease"
@@ -39,11 +47,18 @@ LEASE_DOCTYPE = "Lease"
 def _load_eligible_lease(lease: str):
     """Return the submitted Lease the caller may read, or throw.
 
+    The configured payment target is checked FIRST, before anything about this
+    particular lease: a deployment routing payments elsewhere cannot raise rent from
+    this surface at all, so the lease is beside the point. Gating here rather than in
+    the browser puts it on the one path all three endpoints share, where a direct call
+    to the API cannot step around it.
+
     ``lease`` arrives from a whitelisted endpoint, so the existence probe filters on
     ``name``: the positional form answers the value back without querying when it equals
     the DocType (database.py:1259), letting the literal string "Lease" clear this gate
     and reach ``get_doc`` — a bare framework 404 in place of the named refusal below.
     """
+    require_configured_target(payable_allocation.PAYMENT_ENTRY_DOCTYPE)
     if not lease or not frappe.db.exists(LEASE_DOCTYPE, {"name": lease}):
         frappe.throw(_("Lease {0} does not exist.").format(lease))
     doc = frappe.get_doc(LEASE_DOCTYPE, lease)
