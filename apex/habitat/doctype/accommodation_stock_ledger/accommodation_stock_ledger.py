@@ -151,15 +151,42 @@ def _assert_reversal_keeps_stock_positive(rows) -> None:
         )
 
 
-def reverse_stock_entries(voucher_type: str, voucher_no: str) -> None:
-    """Reverse (do not delete) all live rows of a voucher: post negative mirror
-    entries and mark the originals cancelled. Idempotent."""
-    rows = frappe.get_all(
+def _live_rows(voucher_type: str, voucher_no: str):
+    """The rows a reversal of this voucher would mirror: its not-yet-cancelled
+    entries. One query shape shared by the refusal check and the reversal itself."""
+    return frappe.get_all(
         "Accommodation Stock Ledger",
         filters={"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},
         fields=["name", "item_type", "item", "signed_qty", "building", "employee",
                 "from_building", "to_building"],
     )
+
+
+def assert_reversal_allowed(voucher_type: str, voucher_no: str) -> None:
+    """REFUSAL half of a stock voucher's cancel — call from ``before_cancel``.
+
+    Frappe runs before_cancel from run_before_save_methods() BEFORE db_update()
+    stamps docstatus 2 (frappe/model/document.py:414 vs :428), while on_cancel runs
+    after it from run_post_save_methods() (:431). A refusal raised from on_cancel
+    therefore leaves docstatus 2 written in the open transaction, so everything that
+    reads the voucher later in the same request sees it as cancelled and only the
+    request-level rollback undoes it. Raised from here nothing is written at all:
+    this function only reads, so a throw leaves the ledger AND the voucher untouched.
+
+    The RESTORATION half (writing the mirror rows) stays in reverse_stock_entries,
+    which on_cancel still runs."""
+    _assert_reversal_keeps_stock_positive(_live_rows(voucher_type, voucher_no))
+
+
+def reverse_stock_entries(voucher_type: str, voucher_no: str) -> None:
+    """RESTORATION half: reverse (do not delete) all live rows of a voucher — post
+    negative mirror entries and mark the originals cancelled. Idempotent.
+
+    The positivity check runs again here rather than trusting the caller's
+    before_cancel: this is also the entry point for reject_handover, which is not a
+    docstatus transition and so has no before_cancel to hook, and re-reading inside
+    the same transaction is free (the locking read already holds the rows)."""
+    rows = _live_rows(voucher_type, voucher_no)
     _assert_reversal_keeps_stock_positive(rows)
     for r in rows:
         rev = post_stock_entry(
@@ -177,7 +204,11 @@ def reverse_and_mark_cancelled(doc, voucher_type: str) -> None:
     """The whole on_cancel routine every stock voucher shares: reverse each ledger
     row this voucher posted, then stamp the voucher Cancelled. Reversal is keyed on
     voucher_type/voucher_no only, so it never reads the doc and the two steps are
-    order-independent. Reversal runs first and may throw, so a voucher whose stock
-    has already moved on is never stamped Cancelled."""
+    order-independent.
+
+    Pair this with assert_reversal_allowed() in the voucher's before_cancel: that is
+    where a voucher whose stock has already moved on is refused, early enough that
+    docstatus 2 is never written. The re-check inside reverse_stock_entries stays as
+    the backstop for callers that reach the ledger without a cancel."""
     reverse_stock_entries(voucher_type, doc.name)
     doc.db_set("status", "Cancelled")

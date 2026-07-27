@@ -175,7 +175,12 @@ def approve_handover(handover: str):
 
 @frappe.whitelist(methods=["POST"])
 def reject_handover(handover: str, reason: str):
-    """Reject a handover: reverse the ship leg and mark it Rejected."""
+    """Reject a handover: reverse the ship leg and mark it Rejected.
+
+    Not a cancel — docstatus stays 1 — so there is no before_cancel to move the
+    positivity refusal into. It is already ordered correctly: reverse_stock_entries
+    raises before the comment and the status write below, so a refused rejection
+    leaves the handover exactly as it was."""
     doc = _get_submitted(handover)
     _require_receiving_side(doc)
     if not (reason or "").strip():

@@ -122,6 +122,22 @@ class TestCustodyStockIntegration(ApexHabitatTestCase):
         with self.assertRaises(frappe.ValidationError):
             receipt.cancel()
 
+        # The refusal fires in before_cancel, which Frappe runs from
+        # run_before_save_methods() BEFORE db_update() stamps docstatus 2. Raised from
+        # on_cancel instead, the 2 is already written in the open transaction and every
+        # read for the rest of the request sees the receipt as cancelled — only the
+        # request-level rollback undoes it. Reading the row, not the in-memory object:
+        # Document._cancel() assigns self.docstatus = 2 before save() is ever called,
+        # so the Python attribute is 2 either way and proves nothing.
+        self.assertEqual(
+            frappe.db.get_value("Goods Receipt", receipt.name, "docstatus"), 1,
+            "a refused cancel must leave the receipt submitted, not cancelled-in-the-row",
+        )
+        receipt.reload()
+        self.assertEqual(
+            receipt.docstatus, 1,
+            "reloading the receipt in the same request must still read it as submitted",
+        )
         self.assertGreaterEqual(
             get_store_balance("Custody Article", self.article, building), 0.0,
             "a refused reversal must never drive the building store negative",

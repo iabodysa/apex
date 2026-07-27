@@ -131,6 +131,9 @@ def _post_custody_stock(doc):
 
 
 def before_cancel(doc, method=None):
+    """Every refusal a cancel can raise lives here, before db_update() stamps
+    docstatus 2 — so a refused issue is left submitted rather than reading as
+    cancelled for the rest of the request. Read-only; writes nothing."""
     returned = frappe.get_all(
         "Custody Return",
         filters={"custody_issue": doc.name, "docstatus": 1},
@@ -142,6 +145,10 @@ def before_cancel(doc, method=None):
                 doc.name, returned[0].name
             )
         )
+    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+        assert_reversal_allowed,
+    )
+    assert_reversal_allowed("Custody Issue", doc.name)
 
 
 def on_cancel(doc, method=None):
