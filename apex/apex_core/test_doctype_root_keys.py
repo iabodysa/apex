@@ -39,6 +39,46 @@ FRAPPE_DOCTYPE_JSON = os.path.join(
     "frappe", "core", "doctype", "doctype", "doctype.json"
 )
 
+# The engine records kept out of Desk search. This is the SAME 22 that once shipped the
+# inert root ``hidden`` key -- when that placebo was dropped the concealment intent was
+# re-expressed as root ``read_only``, which frappe actually honours. They are machine
+# written: posting ledgers, period snapshots, and scan/attendance logs that an operator
+# reaches through their own surfaces, never by typing a name into the awesomebar.
+#
+# Written as an explicit SET rather than a count because a count cannot tell a swap from
+# a no-op: one record silently losing the flag while another gains it keeps the total
+# and loses the policy.
+SEARCH_CONCEALED = frozenset({
+    "Accommodation Ledger",
+    "Accommodation Stock Ledger",
+    "Boarding Scan Log",
+    "Cleaning Compliance Ledger",
+    "Driver Attendance",
+    "Facility Asset Movement Ledger",
+    "Fuel Consumption Ledger",
+    "Fuel Daily Log",
+    "Maintenance Cost Ledger",
+    "Movement Cost Recovery",
+    "Movement Cost Transfer",
+    "Occupancy Snapshot",
+    "Operational Depreciation Snapshot",
+    "Rental Accrual Ledger",
+    "Safety Finding Ledger",
+    "Safety Inspection Report",
+    "Scheduled Task Instance",
+    "Trip Boarding Ledger",
+    "Trip Boarding State",
+    "Trip Fulfilment Ledger",
+    "Trip Start Log",
+    "Vehicle Utilisation Snapshot",
+})
+
+# Both branches that read root ``read_only`` are guarded on ``not istable``
+# (frappe/utils/user.py:130 and :162), so on a child table the flag is inert. It is set
+# anyway so the set above reads without an exception, and the guard tolerates it rather
+# than calling it a defect -- see the child-table test for why that stays honest.
+INERT_ON_CHILD_TABLE = frozenset({"Trip Boarding State"})
+
 
 def _frappe_root():
     """Directory holding the installed ``frappe`` package, without importing it.
@@ -162,9 +202,75 @@ class TestDocTypeRootKeys(unittest.TestCase):
             carriers,
             [],
             "root 'hidden' is not a DocType field and conceals nothing; use root "
-            "'read_only' (frappe labels it \"User Cannot Search\") -- but note it is "
-            "role-blind and also drops the doctype from can_read, hiding its workspace "
-            f"links for every non-Administrator: {carriers}",
+            "'read_only' (frappe labels it \"User Cannot Search\") -- but note what that "
+            "does and does not do: it drops the doctype from can_search for everyone, and "
+            "moves can_read to all_read only for a read-without-write grant. It keeps the "
+            f"records out of search, it does not hide them: {carriers}",
+        )
+
+    def test_engine_ledgers_stay_out_of_search(self):
+        """The POSITIVE of the concealment policy: the flag is still on, on exactly these.
+
+        Every other check in this file is negative -- it catches a key that should not be
+        there. Nothing asserted that the honoured key is still PRESENT, so any edit could
+        drop ``read_only`` from a ledger and no gate would say a word. This set already
+        shipped a concealment flag that was wrong for months; the positive is the half
+        that would have caught it.
+
+        What root ``read_only`` does, precisely (frappe labels it "User Cannot Search"):
+        it drops the doctype from ``can_search`` unconditionally
+        (frappe/utils/user.py:162-164), and it diverts ``can_read`` to ``all_read`` only
+        for a read-WITHOUT-write-or-create grant (:138-144). It does not hide the data:
+        a role with write or create is untouched, and every row stays reachable through
+        list views, reports, links, and the API.
+
+        Asserted as set EQUALITY in both directions, so the tree cannot drift from the
+        declared policy in either one: dropping the flag from a member fails, and adding
+        it to a new doctype fails until that doctype is named here deliberately. A new
+        ledger that ships with no flag at all is caught the moment its author has to
+        decide whether it belongs in this list.
+        """
+        files = doctype_json_files()
+        where = {doc.get("name"): rel(path) for path, doc in files}
+        carriers = {doc.get("name") for _p, doc in files if doc.get("read_only")}
+
+        def _named(names):
+            # Name the JSON, not just the DocType: the reader has to go edit a file.
+            return [f"{n} -> {where.get(n, 'no DocType JSON in tree')}" for n in sorted(names)]
+
+        self.assertEqual(
+            carriers,
+            set(SEARCH_CONCEALED),
+            "the set of DocTypes carrying root 'read_only' has drifted.\n"
+            "  lost the flag (now searchable):\n    "
+            + "\n    ".join(_named(SEARCH_CONCEALED - carriers) or ["-"])
+            + "\n  newly carrying it (undeclared):\n    "
+            + "\n    ".join(_named(carriers - SEARCH_CONCEALED) or ["-"])
+            + "\n  Restore the flag, or update SEARCH_CONCEALED in this file and say why.",
+        )
+
+    def test_child_table_member_is_knowingly_inert(self):
+        """The one member the flag cannot act on, pinned so the tolerance stays truthful.
+
+        Both branches reading root ``read_only`` sit under ``not istable``, so on a child
+        table it changes nothing. That is tolerated, not a defect -- but the tolerance is
+        only honest while the record really is a child table. If it ever stops being one
+        the flag becomes live and its effect needs a fresh decision, so this pins the
+        premise instead of leaving it as a comment nobody rechecks.
+        """
+        istable = {doc.get("name") for _p, doc in doctype_json_files() if doc.get("istable")}
+        self.assertLessEqual(
+            INERT_ON_CHILD_TABLE,
+            set(SEARCH_CONCEALED),
+            "a doctype listed as inert-on-child-table is not in the concealed set",
+        )
+        self.assertEqual(
+            set(SEARCH_CONCEALED) & istable,
+            set(INERT_ON_CHILD_TABLE),
+            "the child tables inside the concealed set changed; root 'read_only' is inert "
+            "on a child table (guarded by 'not istable'), so review whether the flag now "
+            f"acts -- expected {sorted(INERT_ON_CHILD_TABLE)}, "
+            f"found {sorted(set(SEARCH_CONCEALED) & istable)}",
         )
 
     def test_guard_reads_the_installed_frappe(self):
