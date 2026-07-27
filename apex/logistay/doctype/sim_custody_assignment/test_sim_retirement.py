@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-270 — retiring a SIM as Lost or Terminated.
+"""Retiring a SIM as Lost or Terminated.
 
 Retirement is an EVENT in the custody chain, not a status edit, so the proofs here
 are about the chain: the terminal event closes the active custody, the SIM and its

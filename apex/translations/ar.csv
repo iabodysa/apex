@@ -4518,3 +4518,4 @@ There is no submitted Purchase Invoice outstanding for {0} under this company. R
 {0} {1} has nothing outstanding — it is already settled.,{0} {1} لا يوجد عليها مبلغ مستحق — فهي مسددة بالفعل.
 "{0} {1} is billed by {2}, not the contract's supplier {3}.",{0} {1} صادرة من المورّد {2} وليس مورّد العقد {3}.
 {0} {1} is not submitted. Only an approved invoice can be paid.,{0} {1} غير معتمدة. لا يمكن دفع سوى فاتورة معتمدة.
+Facility Asset {0} has moved on to {1} since this record; cancelling it now would undo a later relocation. Cancel the newest relocation first.,الأصل {0} انتقل إلى {1} بعد هذا السجل؛ وإلغاؤه الآن يُلغي نقلة أحدث منه. ألغِ أحدث نقلة أولًا.

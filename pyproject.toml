@@ -1,7 +1,7 @@
 [project]
 name = "apex"
 version = "2.1.2"
-description = "Apex Habitat custom application for Frappe Framework v15."
+description = "Apex: Frappe Framework v15 application providing the Habitat, Salis, Logistay, and Apex Core modules."
 authors = [
     { name = "AFMCO Support Services Co. Ltd", email = "afm@afmcoltd.com" }
 ]

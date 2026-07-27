@@ -23,5 +23,5 @@
  "send_to_all_assignees": 0,
  "subject": "Severe Safety Incident Reported: {{ doc.name }}",
  "value_changed": "severity",
- "modified": "2026-07-27 09:00:00.000000"
+ "modified": "2026-07-27 06:57:01.292929"
 }

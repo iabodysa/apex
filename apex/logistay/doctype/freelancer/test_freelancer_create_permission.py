@@ -131,8 +131,8 @@ class TestFreelancerCreateGrantIsUsable(unittest.TestCase):
     def test_the_pii_field_is_still_the_reason_this_guard_exists(self):
         """Guard-of-the-guard: an empty scan would pass every assertion below.
 
-        A-298 added the second entry: `monthly_salary` moved to permlevel 1 under the A-303
-        sensitivity model (per-person pay), and it is `reqd` with no default, so it joins
+        The second entry arrived when `monthly_salary` moved to permlevel 1 under the field
+        sensitivity model (per-person pay); it is `reqd` with no default, so it joins
         `national_id_or_iqama` as a field a create must be able to write. That is precisely
         why this guard is worth keeping — the move was only safe because every role holding
         `create` here (Finance Manager, System Manager) also holds a permlevel-1 write row,
