@@ -8,15 +8,11 @@ paperwork, one set per billing period:
 * ``create_payment_entry``    -> a draft native **Payment Entry** ALLOCATED against
   a submitted **Purchase Invoice**.
 
-Why a Purchase Invoice is required. A Payment Entry with no ``references`` row is
-an ON-ACCOUNT payment in ERPNext: it debits the supplier's payable in aggregate and
-settles no particular bill, so no invoice's ``outstanding_amount`` moves and nothing
-reconciles. Presenting that as "the telecom bill is paid" is a claim the ledger does
-not support. The native primitive for settling a payable is
-``erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry``, which
-builds the Payment Entry FROM the invoice and fills the ``references`` child table
-with the allocation (payment_entry.py:3008). That function is the whole mechanism
-here — this module only chooses and guards the source invoice.
+Why a Purchase Invoice is required, and how one is chosen and guarded, is
+``apex_core.utils.payable_allocation`` — the shared engine a building Lease raises its
+rent payment through as well. This module contributes only what is telecom's: which
+contract is eligible, that a billing period is one YYYY-MM, and the billing log that
+records one document per (contract, period, type).
 
 Boundary — this layer posts NO GL and submits NOTHING. Both targets are created in
 Draft and left for finance to review and submit; a Payment Entry posts its ledger
@@ -43,14 +39,13 @@ import datetime
 
 import frappe
 from frappe import _
-from frappe.utils import flt, today
+from frappe.utils import today
+
+from apex.apex_core.utils import payable_allocation
 
 CONTRACT_DOCTYPE = "Telecom Contract"
 PURCHASE_REQUEST_DOCTYPE = "Material Request"
-PAYMENT_ENTRY_DOCTYPE = "Payment Entry"
-# The approved native payable a telecom payment must settle. A Payment Entry is
-# raised FROM one of these, never on account.
-PAYABLE_SOURCE_DOCTYPE = "Purchase Invoice"
+PAYMENT_ENTRY_DOCTYPE = payable_allocation.PAYMENT_ENTRY_DOCTYPE
 
 
 # Shared guards
@@ -74,14 +69,6 @@ def _load_eligible_contract(contract: str):
     if doc.docstatus != 1:
         frappe.throw(_("Billing documents can only be raised from a submitted contract."))
     return doc
-
-
-def _require_target(doctype: str) -> None:
-    """Fail closed when the target DocType is not installed, or the caller lacks
-    create permission on it."""
-    if not frappe.db.exists("DocType", doctype):
-        frappe.throw(_("The {0} DocType is not available on this site.").format(_(doctype)))
-    frappe.has_permission(doctype, "create", throw=True)
 
 
 def _normalize_period(billing_period: str) -> str:
@@ -149,7 +136,7 @@ def _result(document_type, document_name, existing):
 def create_purchase_request(contract: str, billing_period: str):
     """Create (or return) a draft Material Request (Purchase) for one billing period."""
     contract_doc = _load_eligible_contract(contract)
-    _require_target(PURCHASE_REQUEST_DOCTYPE)
+    payable_allocation.require_target(PURCHASE_REQUEST_DOCTYPE)
     billing_period = _normalize_period(billing_period)
 
     if not contract_doc.service_item:
@@ -204,137 +191,24 @@ def create_purchase_request(contract: str, billing_period: str):
 # Payment (native Payment Entry allocated against a Purchase Invoice)
 
 
-def _require_money_source(company: str) -> None:
-    """Fail closed unless the company has a default Cash or Bank account.
-
-    ``get_payment_entry`` resolves this itself via ``get_bank_cash_account``
-    (payment_entry.py:3226) but does NOT guard the miss: with neither account it
-    dereferences ``bank.account`` on a None and raises AttributeError
-    (payment_entry.py:2940). Checking first turns that crash into a message naming
-    what finance must configure.
-    """
-    from erpnext.accounts.doctype.payment_entry.payment_entry import (
-        get_default_bank_cash_account,
-    )
-
-    source = get_default_bank_cash_account(company, "Cash") or get_default_bank_cash_account(
-        company, "Bank"
-    )
-    if not source or not source.get("account"):
-        frappe.throw(
-            _(
-                "Configure a default Cash or Bank account on company {0} before raising a payment."
-            ).format(company)
-        )
-
-
-def _payable_invoice_filters(contract_doc) -> dict:
-    """Filters selecting the submitted, still-outstanding Purchase Invoices this
-    contract's payment may settle: the contract's own supplier and company only."""
-    return {
-        "docstatus": 1,
-        "company": contract_doc.company,
-        "supplier": contract_doc.supplier,
-        "outstanding_amount": [">", 0],
-    }
-
-
-def _payable_invoice_count(contract_doc):
-    """How many eligible payables exist, or ``None`` when the caller may not read
-    invoices at all — so a status read never throws for a SIM Operations User who
-    can see the contract but not the finance documents behind it."""
-    if not frappe.db.exists("DocType", PAYABLE_SOURCE_DOCTYPE):
-        return 0
-    if not frappe.has_permission(PAYABLE_SOURCE_DOCTYPE, "read"):
-        return None
-    return frappe.db.count(PAYABLE_SOURCE_DOCTYPE, _payable_invoice_filters(contract_doc))
-
-
 @frappe.whitelist()
 def list_payable_invoices(contract: str):
-    """The submitted Purchase Invoices a payment for this contract may settle.
-
-    Read-only. An empty list is the "fail closed / hide the action" signal: with no
-    approved payable there is nothing a payment could legitimately be allocated to.
-    """
+    """The submitted Purchase Invoices a payment for this contract may settle."""
     contract_doc = _load_eligible_contract(contract)
-    if not frappe.db.exists("DocType", PAYABLE_SOURCE_DOCTYPE):
-        return []
-    frappe.has_permission(PAYABLE_SOURCE_DOCTYPE, "read", throw=True)
-    return frappe.get_all(
-        PAYABLE_SOURCE_DOCTYPE,
-        filters=_payable_invoice_filters(contract_doc),
-        fields=["name", "bill_no", "posting_date", "grand_total", "outstanding_amount", "currency"],
-        order_by="posting_date asc",
-        limit_page_length=50,
-    )
-
-
-def _load_eligible_payable(contract_doc, purchase_invoice: str):
-    """Return the submitted Purchase Invoice this payment may settle, or throw.
-
-    Every condition is re-checked here rather than trusted from the picker: the
-    caller is a browser and the eligible set can change between listing and paying.
-    """
-    if not purchase_invoice:
-        frappe.throw(
-            _(
-                "Select the {0} this payment settles. A payment with no invoice behind it "
-                "settles nothing in the ledger."
-            ).format(_(PAYABLE_SOURCE_DOCTYPE)),
-            title=_("Payable Source Required"),
-        )
-    if not frappe.db.exists(PAYABLE_SOURCE_DOCTYPE, {"name": purchase_invoice}):
-        frappe.throw(
-            _("{0} {1} does not exist.").format(_(PAYABLE_SOURCE_DOCTYPE), purchase_invoice)
-        )
-    invoice = frappe.get_doc(PAYABLE_SOURCE_DOCTYPE, purchase_invoice)
-    invoice.check_permission("read")
-
-    if invoice.docstatus != 1:
-        frappe.throw(
-            _("{0} {1} is not submitted. Only an approved invoice can be paid.").format(
-                _(PAYABLE_SOURCE_DOCTYPE), invoice.name
-            )
-        )
-    if invoice.company != contract_doc.company:
-        frappe.throw(
-            _("{0} {1} belongs to company {2}, not the contract's company {3}.").format(
-                _(PAYABLE_SOURCE_DOCTYPE), invoice.name, invoice.company, contract_doc.company
-            )
-        )
-    if invoice.supplier != contract_doc.supplier:
-        frappe.throw(
-            _("{0} {1} is billed by {2}, not the contract's supplier {3}.").format(
-                _(PAYABLE_SOURCE_DOCTYPE), invoice.name, invoice.supplier, contract_doc.supplier
-            )
-        )
-    if flt(invoice.outstanding_amount) <= 0:
-        frappe.throw(
-            _("{0} {1} has nothing outstanding — it is already settled.").format(
-                _(PAYABLE_SOURCE_DOCTYPE), invoice.name
-            )
-        )
-    return invoice
-
-
-def _allocated_total(pe) -> float:
-    return sum(flt(row.allocated_amount) for row in (pe.references or []))
+    return payable_allocation.list_payables(contract_doc.company, contract_doc.supplier)
 
 
 @frappe.whitelist(methods=["POST"])
 def create_payment_entry(contract: str, billing_period: str, purchase_invoice: str | None = None):
     """Create (or return) a draft Payment Entry ALLOCATED against ``purchase_invoice``.
 
-    Built by the native ``get_payment_entry``, so the ``references`` row and its
-    allocated amount come from ERPNext's own payable logic rather than from an
+    Built by the shared ``payable_allocation`` engine, so the ``references`` row and
+    its allocated amount come from ERPNext's own payable logic rather than from an
     amount copied off the contract. Left in Draft — Apex posts no GL and never
     submits it.
     """
-    from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-
     contract_doc = _load_eligible_contract(contract)
-    _require_target(PAYMENT_ENTRY_DOCTYPE)
+    payable_allocation.require_target(PAYMENT_ENTRY_DOCTYPE)
     billing_period = _normalize_period(billing_period)
 
     frappe.db.get_value("Telecom Contract", contract_doc.name, "name", for_update=True)
@@ -344,20 +218,9 @@ def create_payment_entry(contract: str, billing_period: str, purchase_invoice: s
     if existing:
         return _result(PAYMENT_ENTRY_DOCTYPE, existing, True)
 
-    invoice = _load_eligible_payable(contract_doc, purchase_invoice)
-    _require_money_source(contract_doc.company)
-
-    pe = get_payment_entry(PAYABLE_SOURCE_DOCTYPE, invoice.name)
-    # Fail closed rather than persist an on-account payment: if the native builder
-    # produced no allocation (the invoice was settled between the check and here),
-    # the document would settle nothing while looking like a telecom payment.
-    if _allocated_total(pe) <= 0:
-        frappe.throw(
-            _("No amount could be allocated against {0} {1}. Refresh and try again.").format(
-                _(PAYABLE_SOURCE_DOCTYPE), invoice.name
-            )
-        )
-
+    pe, invoice = payable_allocation.build_allocated_payment(
+        contract_doc.company, contract_doc.supplier, purchase_invoice
+    )
     pe.posting_date = today()
     pe.cost_center = contract_doc.cost_center or pe.cost_center
     pe.project = contract_doc.project or pe.project
@@ -373,7 +236,7 @@ def create_payment_entry(contract: str, billing_period: str, purchase_invoice: s
         billing_period,
         PAYMENT_ENTRY_DOCTYPE,
         pe.name,
-        _allocated_total(pe),
+        payable_allocation.allocated_total(pe),
         pe.paid_to_account_currency or contract_doc.currency,
     )
     return _result(PAYMENT_ENTRY_DOCTYPE, pe.name, False)
@@ -382,52 +245,22 @@ def create_payment_entry(contract: str, billing_period: str, purchase_invoice: s
 # Derived settlement status
 
 
-# Settlement states, in the order the operator sees them. Stored nowhere: each one
-# is read from the live Payment Entry, so cancelling the payment reverses the status
-# with no reversal code and nothing to drift out of step with the ledger.
-NOT_RAISED = "Not Raised"
-AWAITING_APPROVAL = "Awaiting Finance Approval"
-SETTLED = "Settled"
-REVERSED = "Payment Cancelled"
-
-
 @frappe.whitelist()
 def get_billing_status(contract: str, billing_period: str):
     """What this contract's billing period actually looks like right now.
 
-    ``settlement`` is derived, never stored:
-      * no linked Payment Entry              -> Not Raised
-      * linked but still Draft               -> Awaiting Finance Approval
-      * submitted WITH an allocated reference -> Settled
-      * cancelled                             -> Payment Cancelled
-
-    A submitted Payment Entry carrying no allocation is deliberately NOT reported as
-    settled: it moved money on account and closed no invoice, so calling it a
-    settlement would be the exact claim this module exists to stop.
+    ``settlement`` is derived by the shared engine, never stored — so a payment
+    cancelled in Accounts reverses the operational status here with no reversal code.
     """
     contract_doc = _load_eligible_contract(contract)
     billing_period = _normalize_period(billing_period)
 
     payment_name = _existing_link(contract_doc, billing_period, PAYMENT_ENTRY_DOCTYPE)
-    status = {
-        "billing_period": billing_period,
-        "payment_entry": payment_name,
-        "settlement": NOT_RAISED,
-        "allocated_amount": 0.0,
-        "payable_invoices": _payable_invoice_count(contract_doc),
-    }
-    if not payment_name:
-        return status
-
-    payment = frappe.get_doc(PAYMENT_ENTRY_DOCTYPE, payment_name)
-    allocated = _allocated_total(payment)
-    status["allocated_amount"] = allocated
-    if payment.docstatus == 2:
-        status["settlement"] = REVERSED
-    elif payment.docstatus == 1 and allocated > 0:
-        status["settlement"] = SETTLED
-    else:
-        status["settlement"] = AWAITING_APPROVAL
+    status = payable_allocation.settlement_of(payment_name)
+    status["billing_period"] = billing_period
+    status["payable_invoices"] = payable_allocation.payable_count(
+        contract_doc.company, contract_doc.supplier
+    )
     return status
 
 
