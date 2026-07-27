@@ -175,22 +175,20 @@ class TestBackfillRoutedPaymentDoctype(FrappeTestCase):
             per_row_verdict[request] = matches[0] if len(matches) == 1 else None
         self.assertEqual(per_row_verdict, expected)
 
-        # frappe.db.sql is the one choke point every read funnels through -- get_all,
-        # db.exists and frappe.qb all end up there (frappe/query_builder/utils.py:87) --
-        # so counting the statements naming a candidate's table cannot be dodged by
-        # switching which ORM call the patch uses. Values reach that layer as bound
-        # parameters, never interpolated, so no payload can spoof a table name into it.
-        # The match is a bare substring, so a table merely PREFIXED by a candidate's
-        # ("tabRole Profile") would over-count. Deliberate: nothing execute() touches is
-        # named that way, and over-counting fails loudly with the statements attached,
-        # where matching the closing quote instead would count zero and pass in silence
-        # the day the quoting character changes.
+        # Count at frappe.db.sql: get_all, db.exists and frappe.qb all funnel through it
+        # (frappe/query_builder/utils.py:87), so the count cannot be dodged by switching
+        # ORM call, and values arrive there as bound parameters, so no payload can spoof
+        # a table name into the text.
         candidate_tables = tuple(f"tab{doctype}" for doctype in candidates)
         probes = []
         real_sql = frappe.db.sql
 
         def counting_sql(query, *args, **kwargs):
             text = query if isinstance(query, str) else str(query)
+            # Bare substring, so a table merely PREFIXED by a candidate's ("tabRole
+            # Profile") over-counts. Deliberate: execute() touches none, and over-counting
+            # fails loudly with the statements attached, where matching the closing quote
+            # would count zero and pass in silence if that quote character ever changed.
             if any(table in text for table in candidate_tables):
                 probes.append(text)
             return real_sql(query, *args, **kwargs)
