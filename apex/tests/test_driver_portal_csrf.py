@@ -252,12 +252,17 @@ class TestDriverPortalGuestInventory(unittest.TestCase):
 			_endpoint_path(filename, name)
 			for filename, name in PER_IP_DRIVER_ENDPOINTS
 		}
+		# Apex's decorator, never the framework's: the framework names the window after
+		# the caller's cmd (rate_limiter.py:155), so a module that imports it back gives
+		# every endpoint in it one ceiling per dotted path -- and the package publishes a
+		# second path for most of these. apex_core/utils/test_submit_rate_limit_identity
+		# holds the same line across all 61 metered endpoints.
 		for path in paths:
 			imports = [
 				node
 				for node in _tree(path).body
 				if isinstance(node, ast.ImportFrom)
-				and node.module == "frappe.rate_limiter"
+				and node.module == "apex.apex_core.utils.rate_limit_identity"
 				and any(alias.name == "rate_limit" for alias in node.names)
 			]
 			self.assertTrue(imports, path.name)

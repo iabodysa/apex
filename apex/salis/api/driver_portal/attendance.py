@@ -3,8 +3,8 @@
 
 import frappe
 from frappe import _
-from frappe.rate_limiter import rate_limit
 
+from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.salis.api.driver_portal import (
     _resolve_driver,
     _require_enabled,

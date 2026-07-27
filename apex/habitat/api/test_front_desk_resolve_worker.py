@@ -9,7 +9,12 @@ use) so the active-bed flag is genuinely exercised without the bed-lock gate."""
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex.habitat.api.front_desk import resolve_worker
+# The MODULE, never the function: a module-level ``from front_desk import
+# resolve_worker`` would publish apex.habitat.api.test_front_desk_resolve_worker.
+# resolve_worker as a second dotted path frappe resolves like any other, and the
+# rate-limit bucket is named after the caller's spelling (rate_limiter.py:155), so
+# that second name would carry its own full window.
+from apex.habitat.api import front_desk
 from apex.tests._helpers import as_user
 from apex.tests.factories import make_open_assignment
 
@@ -97,7 +102,7 @@ class TestResolveWorker(FrappeTestCase):
             frappe.delete_doc(dt, name, force=True, ignore_permissions=True)
 
     def test_resolves_temporary_worker_by_iqama(self):
-        r = resolve_worker(self.iqama)
+        r = front_desk.resolve_worker(self.iqama)
         self.assertTrue(r["found"])
         self.assertEqual(r["party_type"], "Temporary Worker")
         self.assertEqual(r["party"], self.tw.name)
@@ -107,14 +112,14 @@ class TestResolveWorker(FrappeTestCase):
 
     def test_flags_already_housed_worker(self):
         self._house("Temporary Worker", self.tw.name)
-        r = resolve_worker(self.iqama)
+        r = front_desk.resolve_worker(self.iqama)
         self.assertTrue(r["found"])
         self.assertTrue(r["has_active_assignment"], "a worker holding a live bed is flagged")
 
     def test_resolves_masar_token(self):
         emp = self._employee()
         tok = self._token_for(emp.name)
-        r = resolve_worker(tok._plaintext_token)
+        r = front_desk.resolve_worker(tok._plaintext_token)
         self.assertTrue(r["found"])
         self.assertEqual(r["party_type"], "Employee")
         self.assertEqual(r["party"], emp.name)
@@ -124,7 +129,7 @@ class TestResolveWorker(FrappeTestCase):
         emp = self._employee()
         tok = self._token_for(emp.name)
         self._house("Employee", emp.name, employee=emp.name)
-        r = resolve_worker(tok._plaintext_token)
+        r = front_desk.resolve_worker(tok._plaintext_token)
         self.assertTrue(r["has_active_assignment"], "an Employee holding a live bed is flagged")
 
     def test_disabled_token_does_not_resolve(self):
@@ -132,16 +137,16 @@ class TestResolveWorker(FrappeTestCase):
         tok = self._token_for(emp.name)
         frappe.db.set_value("Masar Worker Token", tok.name, "enabled", 0)
         # [#i6750x]
-        self.assertFalse(resolve_worker(tok._plaintext_token)["found"])
+        self.assertFalse(front_desk.resolve_worker(tok._plaintext_token)["found"])
 
     def test_unknown_identifier_returns_not_found(self):
-        r = resolve_worker("NOPE-" + _h())
+        r = front_desk.resolve_worker("NOPE-" + _h())
         self.assertFalse(r["found"])
         self.assertIn("message", r)
 
     def test_blank_identifier_returns_not_found(self):
-        self.assertFalse(resolve_worker("   ")["found"])
-        self.assertFalse(resolve_worker("")["found"])
+        self.assertFalse(front_desk.resolve_worker("   ")["found"])
+        self.assertFalse(front_desk.resolve_worker("")["found"])
 
 
 class TestResolveWorkerBuildingScope(FrappeTestCase):
@@ -281,7 +286,7 @@ class TestResolveWorkerBuildingScope(FrappeTestCase):
         _tw, iqama = self._temp_worker(self.b2)
         with as_user(self.scoped):
             with self.assertRaises(frappe.PermissionError):
-                resolve_worker(iqama)
+                front_desk.resolve_worker(iqama)
 
     def test_masar_token_of_other_building_worker_denied(self):
         """Same refusal through the token path: the Employee is housed in b2."""
@@ -290,13 +295,13 @@ class TestResolveWorkerBuildingScope(FrappeTestCase):
         make_open_assignment(emp, self.b2, self.addCleanup)
         with as_user(self.scoped):
             with self.assertRaises(frappe.PermissionError):
-                resolve_worker(tok._plaintext_token)
+                front_desk.resolve_worker(tok._plaintext_token)
 
     def test_iqama_of_own_building_worker_still_resolves(self):
         """The gate is a scope gate, not a blanket denial — b1 still resolves."""
         tw, iqama = self._temp_worker(self.b1)
         with as_user(self.scoped):
-            result = resolve_worker(iqama)
+            result = front_desk.resolve_worker(iqama)
         self.assertTrue(result["found"])
         self.assertEqual(result["party"], tw)
 
@@ -306,7 +311,7 @@ class TestResolveWorkerBuildingScope(FrappeTestCase):
         emp = self._employee()
         tok = self._token_for(emp)
         with as_user(self.scoped):
-            result = resolve_worker(tok._plaintext_token)
+            result = front_desk.resolve_worker(tok._plaintext_token)
         self.assertTrue(result["found"])
         self.assertEqual(result["party"], emp)
 
@@ -314,6 +319,6 @@ class TestResolveWorkerBuildingScope(FrappeTestCase):
         """An unscoped oversight role keeps estate-wide reach."""
         tw, iqama = self._temp_worker(self.b2)
         with as_user(self.oversight):
-            result = resolve_worker(iqama)
+            result = front_desk.resolve_worker(iqama)
         self.assertTrue(result["found"])
         self.assertEqual(result["party"], tw)

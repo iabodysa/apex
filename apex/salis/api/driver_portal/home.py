@@ -2,8 +2,8 @@
 """Salis Driver Portal — home endpoints (split from the driver_portal god module in P-180). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
 
 import frappe
-from frappe.rate_limiter import rate_limit
 
+from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.salis.api.driver_portal import (
     _resolve_driver,
     _require_enabled,

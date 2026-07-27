@@ -15,8 +15,8 @@ existing /driver portal and have no GL or write side effects.
 
 import frappe
 from frappe import _
-from frappe.rate_limiter import rate_limit
 
+from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.apex_core.utils.portal_token_security import (
     WORKER,
     TOKEN_COOKIES,

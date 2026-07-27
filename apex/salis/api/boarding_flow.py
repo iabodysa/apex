@@ -29,9 +29,9 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
-from frappe.rate_limiter import rate_limit
 from frappe.utils import cint, now_datetime, time_diff_in_seconds
 
+from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.apex_core.doctype.salis_settings.salis_settings import (
     get_boarding_setting,
 )

@@ -37,9 +37,16 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.apex_core.utils import rate_window
-from apex.habitat.api.front_desk import resolve_worker
+from apex.apex_core.utils.rate_limit_identity import canonical_command
 from apex.salis.api import boarding, driver_portal
-from apex.salis.api.boarding import get_boarding_pass, scan_boarding_pass
+
+# Modules, never the metered functions themselves. A module-level ``from front_desk
+# import resolve_worker`` publishes apex.tests.test_front_desk_rate_limit.
+# resolve_worker, which frappe resolves like any other dotted path
+# (handler.py:294-303 -> __init__.py:1748-1750) while the window is named after the
+# caller's spelling (rate_limiter.py:155) -- so the second name buys a second full
+# window. This file ships in the package, so its names are as reachable as any.
+from apex.habitat.api import front_desk
 
 _ABSENT = object()
 
@@ -109,11 +116,13 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         )
 
     def _clear_window(self, cmd, ip):
-        """The decorator's own window, in BOTH identity shapes.
+        """A cmd-named window, in BOTH identity shapes. Body-charged endpoints only.
 
         Un-keyed, which every endpoint this file drives now is (``resolve_worker``
         included, since A-294): the identity is the bare address, so the name is
-        ``rl:<cmd>:<ip>`` (rate_limiter.py:150,155).
+        ``rl:<cmd>:<ip>`` (rate_limiter.py:150,155). The ``@rate_limit`` endpoints no
+        longer take their name from ``cmd`` at all and belong to
+        ``_clear_metered_window``; what is left here charges in its own body.
 
         Keyed, which none is any longer: the identity was the address joined to a
         form_dict lookup, and a real request carries no field by that name, so the
@@ -126,6 +135,19 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         """
         self._drop_window(f"rl:{cmd}:{ip}")
         self._drop_window(f"rl:{cmd}:{ip}:")
+
+    def _clear_metered_window(self, endpoint, ip):
+        """The window a ``@rate_limit`` endpoint really charges.
+
+        Not ``rl:<this test's synthetic cmd>:<ip>``. Apex names those windows after the
+        HANDLER (apex_core/utils/rate_limit_identity.py), precisely so two dotted paths
+        to one function cannot buy two ceilings -- which also means the per-test ``cmd``
+        no longer partitions them, and a cleanup written against it would delete a name
+        that was never created while the spent window lived on for its full 60s. The
+        endpoints charging in their own BODY (salis/api/boarding.py:164) still read
+        ``cmd``, so those keep ``_clear_window``.
+        """
+        self._drop_window(f"rl:{canonical_command(endpoint)}:{ip}")
 
     def _clear_actor_window(self, cmd, actor):
         self._drop_window(f"rl:{cmd}:scan-actor:{actor}")
@@ -159,7 +181,7 @@ class TestFrontDeskRateLimit(FrappeTestCase):
 
     def _assert_guest_endpoint_throttles(self, endpoint, args, limit, method):
         cmd = self.cmd + "-" + endpoint.__name__
-        self.addCleanup(self._clear_window, cmd, self.ip)
+        self.addCleanup(self._clear_metered_window, endpoint, self.ip)
         frappe.set_user("Guest")
         with _request_from(self.ip, cmd, method):
             for _ in range(limit):
@@ -219,16 +241,16 @@ class TestFrontDeskRateLimit(FrappeTestCase):
 
     def test_resolve_worker_throttles_the_61st_call_from_one_ip(self):
         cmd = self.cmd + "-rw"
-        self.addCleanup(self._clear_window, cmd, self.ip)
+        self.addCleanup(self._clear_metered_window, front_desk.resolve_worker, self.ip)
         with _request_from(self.ip, cmd):
             # [#etrqqx]
             for i in range(LIMIT):
-                r = resolve_worker("NOPE-" + _h())
+                r = front_desk.resolve_worker("NOPE-" + _h())
                 self.assertFalse(r["found"], f"call {i + 1} should answer, not throttle")
 
             # [#kp82cz]
             with self.assertRaises(frappe.RateLimitExceededError) as cm:
-                resolve_worker("NOPE-" + _h())
+                front_desk.resolve_worker("NOPE-" + _h())
             self.assertEqual(getattr(cm.exception, "http_status_code", None), 429)
 
     def test_get_boarding_pass_throttles_the_121st_call_from_one_ip(self):
@@ -238,10 +260,10 @@ class TestFrontDeskRateLimit(FrappeTestCase):
             # [#72k58u]
             for i in range(BOARDING_LIMIT):
                 with self.assertRaises(frappe.DoesNotExistError):
-                    get_boarding_pass("NO-SUCH-TRIP-" + _h(), "NO-EMP")
+                    boarding.get_boarding_pass("NO-SUCH-TRIP-" + _h(), "NO-EMP")
 
             with self.assertRaises(frappe.RateLimitExceededError) as cm:
-                get_boarding_pass("NO-SUCH-TRIP-" + _h(), "NO-EMP")
+                boarding.get_boarding_pass("NO-SUCH-TRIP-" + _h(), "NO-EMP")
             self.assertEqual(getattr(cm.exception, "http_status_code", None), 429)
 
     def test_distinct_ips_have_independent_windows(self):
@@ -251,18 +273,18 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         cmd = self.cmd + "-iso"
         ip_a = "198.51.100.10"
         ip_b = "198.51.100.20"
-        self.addCleanup(self._clear_window, cmd, ip_a)
-        self.addCleanup(self._clear_window, cmd, ip_b)
+        self.addCleanup(self._clear_metered_window, front_desk.resolve_worker, ip_a)
+        self.addCleanup(self._clear_metered_window, front_desk.resolve_worker, ip_b)
 
         with _request_from(ip_a, cmd):
             for _ in range(LIMIT):
-                resolve_worker("NOPE-" + _h())
+                front_desk.resolve_worker("NOPE-" + _h())
             with self.assertRaises(frappe.RateLimitExceededError):
-                resolve_worker("NOPE-" + _h())
+                front_desk.resolve_worker("NOPE-" + _h())
 
         # [#x67r2c]
         with _request_from(ip_b, cmd):
-            r = resolve_worker("NOPE-" + _h())
+            r = front_desk.resolve_worker("NOPE-" + _h())
             self.assertFalse(r["found"], "a different IP must not inherit IP A's spent window")
 
     def test_scan_peak_quota_is_independent_for_two_drivers_behind_one_ip(self):
@@ -283,12 +305,12 @@ class TestFrontDeskRateLimit(FrappeTestCase):
             ):
                 for _ in range(LIMIT):
                     self.assertEqual(
-                        scan_boarding_pass("invalid-pass")["result"],
+                        boarding.scan_boarding_pass("invalid-pass")["result"],
                         "Invalid Token",
                     )
                 for _ in range(LIMIT, 301):
                     with self.assertRaises(frappe.RateLimitExceededError) as cm:
-                        scan_boarding_pass("invalid-pass")
+                        boarding.scan_boarding_pass("invalid-pass")
                     self.assertEqual(
                         getattr(cm.exception, "http_status_code", None), 429
                     )
@@ -300,7 +322,7 @@ class TestFrontDeskRateLimit(FrappeTestCase):
                 {"masar_dt": token_b},
             ):
                 try:
-                    result = scan_boarding_pass("invalid-pass")
+                    result = boarding.scan_boarding_pass("invalid-pass")
                 except frappe.RateLimitExceededError:
                     result = None
                 self.assertEqual(result and result["result"], "Invalid Token")
@@ -317,9 +339,9 @@ class TestFrontDeskRateLimit(FrappeTestCase):
             with _request_from(self.ip, cmd, "POST"):
                 for _ in range(LIMIT):
                     with self.assertRaises(frappe.PermissionError):
-                        scan_boarding_pass("invalid-pass")
+                        boarding.scan_boarding_pass("invalid-pass")
                 with self.assertRaises(frappe.RateLimitExceededError) as cm:
-                    scan_boarding_pass("invalid-pass")
+                    boarding.scan_boarding_pass("invalid-pass")
                 self.assertEqual(getattr(cm.exception, "http_status_code", None), 429)
         finally:
             frappe.set_user(previous_user)
@@ -369,7 +391,7 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         functional boarding/resolve tests can loop freely."""
         # [#mohszr]
         for _ in range(LIMIT + 5):
-            self.assertFalse(resolve_worker("NOPE-" + _h())["found"])
+            self.assertFalse(front_desk.resolve_worker("NOPE-" + _h())["found"])
 
     def test_unresolved_scan_limiter_is_a_noop_without_request_context(self):
         """No request at all, so a console or job caller is never charged.

@@ -21,6 +21,11 @@ They now pass no ``key``. ``ip_based`` defaults to True (rate_limiter.py:110) an
 already put the address in the identity (rate_limiter.py:141,147-150), so the ceiling is
 unchanged and the caller-chosen suffix is gone.
 
+The window's NAME was the same bug through another door. frappe names it after the
+caller's ``cmd`` (rate_limiter.py:155) but resolves the handler separately, so two paths
+to one function were two ceilings -- 35 over 61 endpoints. Apex names every window after
+the HANDLER now (rate_limit_identity.py); this file grew from the five to all 61.
+
 Nothing here asserts that from the decorator's arguments, which would only restate the
 edit. The decorator is parsed for ONE thing: where each ceiling is DECLARED. What gets
 asserted is the ceiling frappe ENFORCES, spent call by call, with the attack replayed
@@ -58,12 +63,19 @@ from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
 import apex
+from apex.apex_core.utils import rate_limit_identity
 from apex.habitat.api import front_desk
 from apex.habitat.doctype.arrival_batch import arrival_batch
 from apex.habitat.web_form.accommodation_resident_request import (
     accommodation_resident_request as resident_request,
 )
 from apex.habitat.web_form.arrival_manifest import arrival_manifest
+
+# Both driver-portal spellings of one endpoint, imported as MODULES so this file adds no
+# second dotted path of its own: the package (what the SPA calls) and the submodule the
+# function is defined in. The shared-window case below drives one function through both.
+from apex.salis.api import driver_portal
+from apex.salis.api.driver_portal import fuel
 from apex.salis.web_form.transport_request import transport_request
 from apex.salis.web_form.vehicle_incident import vehicle_incident
 
@@ -110,12 +122,24 @@ DECLARED_CEILINGS = {
     "resolve_worker": 60,
 }
 
+# The whole metered surface, not just the five carriers above. Pinned so a new endpoint,
+# or one that quietly loses its decorator, has to come through here.
+RATE_LIMITED_ENDPOINTS = 61
+
+# The driver portal package re-exporting its own submodules. Every one is a live second
+# dotted path -- the SPA calls the SHORT name (frontend/driver/src/pages/Fuel.vue:113)
+# while the function is defined in the long one -- so they are pinned as EXPECTED rather
+# than forbidden. Deleting one breaks the portal; adding one is now free of charge.
+DRIVER_PORTAL_RE_EXPORTS = 32
+
+IDENTITY_MODULE = "apex.apex_core.utils.rate_limit_identity"
+
 _ABSENT = object()
 
-# The frappe frame a no-argument call is expected to die in: the limiter charges the
-# window and only THEN delegates (rate_limiter.py:132-168), so the missing-argument
-# TypeError is raised from inside the limiter's own wrapper, after the counter moved.
-_LIMITER_FILE = frappe.rate_limiter.__file__
+# The frame a no-argument call is expected to die in. The window is charged and only THEN
+# is the endpoint delegated to (rate_limit_identity.py), so the missing-argument
+# TypeError is raised from inside Apex's wrapper, after the counter has already moved.
+_LIMITER_FILE = rate_limit_identity.__file__
 
 # The bound each submitter puts on ONE admitted call, pinned here rather than read
 # from the endpoint for the same reason DECLARED_CEILINGS is: a test that imports the
@@ -195,6 +219,49 @@ def _dotted_module(path):
     if parts and parts[-1] == "__init__":
         parts.pop()
     return ".".join(["apex", *parts])
+
+
+def _rate_limited_endpoints():
+    """Every ``@rate_limit``-decorated function in the package, and where it got the
+    decorator FROM.
+
+    Parsed, never imported, for the same reason the alias scan is: several modules want
+    a site and this has to hold site-free. Only module-level ``def``s are collected --
+    that is the only shape ``frappe.get_attr`` can reach (__init__.py:1748-1750).
+
+    Returns ``{dotted_endpoint: module the name ``rate_limit`` was imported from}``. The
+    source is the load-bearing half: the whole defence is that the decorator naming the
+    window is Apex's and not the framework's, and a module that imports the framework's
+    directly has opted every endpoint in it back into per-spelling ceilings.
+    """
+    endpoints = {}
+    for path in sorted(_PACKAGE_ROOT.rglob("*.py")):
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+        except (SyntaxError, UnicodeDecodeError):
+            continue
+        module = _dotted_module(path)
+        source = None
+        for node in tree.body:
+            if not (isinstance(node, ast.ImportFrom) and node.module and not node.level):
+                continue
+            for imported in node.names:
+                if (imported.asname or imported.name) == "rate_limit":
+                    source = node.module
+        for node in tree.body:
+            if not isinstance(node, ast.FunctionDef):
+                continue
+            for decorator in node.decorator_list:
+                func = getattr(decorator, "func", None)
+                if isinstance(func, ast.Name) and func.id == "rate_limit":
+                    endpoints[f"{module}.{node.name}"] = source
+    return endpoints
+
+
+def _canonical_window(module, name, identity):
+    """The window ``module.name`` charges, built here rather than read back from the
+    limiter -- a test that asks the code under test for the answer agrees with any."""
+    return f"rl:{module.__name__}.{name}:{identity}"
 
 
 def _module_level_aliases():
@@ -360,9 +427,9 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
 
         The endpoint is invoked with NO arguments. That is deliberate and safe: the
         whitelist wrapper short-circuits its type transform on an empty call
-        (typing_validations.py:88) and the limiter charges the window BEFORE delegating
-        (rate_limiter.py:132-168), so the missing-argument TypeError lands only after
-        the counter has already moved -- and no document is ever inserted.
+        (typing_validations.py:88) and the window is charged BEFORE the endpoint is
+        delegated to (rate_limit_identity.py), so the missing-argument TypeError lands
+        only after the counter has already moved -- and no document is ever inserted.
 
         The refusal is caught BY NAME, and NOTHING else is tolerated except that one
         argument-binding TypeError -- identified on two independent counts, because a
@@ -381,9 +448,9 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
         except frappe.RateLimitExceededError as refusal:
             return refusal
         except TypeError as crash:
-            # Both must hold: raised from the limiter's own frame (so the endpoint body
-            # was never entered) AND naming an unbound parameter. Either alone would let
-            # a TypeError from INSIDE the limiter read as a healthy call; requiring both
+            # Both must hold: raised from the charging wrapper's own frame (so the
+            # endpoint body was never entered) AND naming an unbound parameter. Either
+            # alone would let a TypeError from INSIDE it read as a healthy call; both
             # means a future CPython rewording fails loudly here rather than quietly
             # widening what counts as success.
             frame = crash.__traceback__
@@ -426,7 +493,7 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
             with self.subTest(module=module.__name__, endpoint=name):
                 cache = _FakeCache()
                 cmd = f"a294-share-{name}"
-                shared = f"rl:{cmd}:{_STUB_IP}"
+                shared = _canonical_window(module, name, _STUB_IP)
                 endpoint = getattr(module, name)
                 with mock.patch.object(frappe, "cache", cache):
                     for param in (_ABSENT, "alpha", "beta"):
@@ -464,7 +531,7 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
             with self.subTest(module=module.__name__, endpoint=name, limit=limit):
                 cache = _FakeCache()
                 cmd = f"a294-ceiling-{name}"
-                shared = f"rl:{cmd}:{_STUB_IP}"
+                shared = _canonical_window(module, name, _STUB_IP)
                 endpoint = getattr(module, name)
                 with mock.patch.object(frappe, "cache", cache):
                     for index in range(limit):
@@ -483,24 +550,26 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
                 self.assertEqual(cache.charged(), {shared})
                 self.assertEqual(cache.count(shared), limit + 1)
 
-    def test_two_spellings_of_one_handler_each_get_a_full_window(self):
-        """The window is named after the caller's SPELLING, not the handler it reached.
+    def test_the_two_live_spellings_of_a_driver_endpoint_share_one_window(self):
+        """The real production pair, spent through both names against one ceiling.
 
-        frappe builds the bucket from the raw request field, ``rl:{form_dict.cmd}:{ip}``
-        (rate_limiter.py:155), and resolves the handler separately by attribute lookup
-        on the module that same string names (handler.py:294-303 -> __init__.py:
-        1748-1750). Nothing joins the two. So the ceiling is per spelling, and a caller
-        who knows two dotted paths to one function spends two full windows -- the same
-        bypass the de-keying closed, arriving through a different door.
+        Not a synthetic second path: ``apex.salis.api.driver_portal.submit_fuel_request``
+        is what the SPA sends (frontend/driver/src/pages/Fuel.vue:113) and
+        ``...driver_portal.fuel.submit_fuel_request`` is where the function is defined,
+        so both resolve and both are live. Under the framework's own naming this admitted
+        20 against a ceiling of 10; the control below still measures exactly that, so a
+        pass here cannot be the fake cache being generous.
 
-        This is what makes the scan below load-bearing rather than tidiness. Should
-        frappe ever key the bucket on the resolved handler, this test is the one that
-        reds, and the scan can then be retired deliberately instead of by assumption.
+        The spellings are asserted to reach the SAME object first -- two windows for two
+        DIFFERENT functions would be correct, and would otherwise look identical here.
         """
-        module, name = GUEST_SUBMITTERS[0]
-        endpoint = getattr(module, name)
-        limit = DECLARED_CEILINGS[name]
-        spellings = (f"{module.__name__}.{name}", f"apex.a294.second.path.{name}")
+        self.assertIs(driver_portal.submit_fuel_request, fuel.submit_fuel_request)
+        endpoint = driver_portal.submit_fuel_request
+        limit = _declared_limits(fuel, "submit_fuel_request")["limit"]
+        spellings = (
+            "apex.salis.api.driver_portal.submit_fuel_request",
+            "apex.salis.api.driver_portal.fuel.submit_fuel_request",
+        )
         admitted = 0
         cache = _FakeCache()
         with mock.patch.object(frappe, "cache", cache):
@@ -509,16 +578,57 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
                     if self._spend_one(endpoint, spelling) is not None:
                         break
                     admitted += 1
+                # The caller's own spelling has to be back before the endpoint body sees
+                # it: the substitution is a write to frappe.local.form_dict, a process
+                # global no transaction rolls back.
+                self.assertEqual(frappe.local.form_dict["cmd"], spelling)
 
         self.assertEqual(
             admitted,
-            limit * 2,
-            f"{name} did not admit a full {limit} under each of two spellings",
+            limit,
+            f"submit_fuel_request admitted {admitted} against its ceiling of {limit}: "
+            "the second dotted path still buys a window of its own",
         )
         self.assertEqual(
             cache.charged(),
+            {_canonical_window(fuel, "submit_fuel_request", _STUB_IP)},
+            "the window is not named after the handler both spellings resolve to",
+        )
+
+    def test_the_framework_alone_would_still_hand_each_spelling_a_full_window(self):
+        """The control: why the Apex decorator exists at all, measured not asserted.
+
+        A function metered by ``frappe.rate_limiter.rate_limit`` directly, driven through
+        the same fake cache and the same two spellings, must still admit ``limit`` twice
+        and open two windows. Without this, the case above passes just as well if the
+        fake stopped counting, and the day frappe keys its own bucket on the resolved
+        handler this is the test that reds and retires the Apex decorator deliberately
+        rather than by assumption.
+        """
+        limit = 3
+
+        @frappe.rate_limiter.rate_limit(limit=limit, seconds=60)
+        def framework_keyed_endpoint():
+            return None
+
+        spellings = ("apex.a294.first.spelling", "apex.a294.second.spelling")
+        admitted = 0
+        cache = _FakeCache()
+        with mock.patch.object(frappe, "cache", cache):
+            for spelling in spellings:
+                for _ in range(limit + 1):
+                    frappe.local.form_dict = frappe._dict({"cmd": spelling})
+                    try:
+                        framework_keyed_endpoint()
+                    except frappe.RateLimitExceededError:
+                        break
+                    admitted += 1
+
+        self.assertEqual(admitted, limit * 2)
+        self.assertEqual(
+            cache.charged(),
             {f"rl:{spelling}:{_STUB_IP}" for spelling in spellings},
-            "the two spellings did not open two separate windows",
+            "the framework limiter stopped naming its window after the caller's cmd",
         )
 
     @contextlib.contextmanager
@@ -587,18 +697,72 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
             limit * 2,
             f"{name} did not admit a full {limit} under each forged address",
         )
-        self.assertEqual(cache.charged(), {f"rl:{cmd}:{claim}" for claim in claims})
+        self.assertEqual(
+            cache.charged(),
+            {_canonical_window(module, name, claim) for claim in claims},
+        )
 
-    def test_no_guest_submitter_is_reachable_under_a_second_dotted_path(self):
-        """Given the above, each submitter must have exactly ONE spelling.
+    def test_every_metered_endpoint_in_the_package_is_keyed_on_its_own_identity(self):
+        """All 61, not just the five above: none may take the framework's decorator.
 
-        The whole package is scanned, not just the four defining modules: a second path
-        is created by whoever IMPORTS the function, so the evidence has to come from
-        everywhere a module-level import can appear. This is the check, not an
-        inspection -- a re-export added in any package ``__init__``, or a test module
-        that imports the endpoint instead of its module, reds here by name.
+        This is the whole defence in one assertion. A module that writes
+        ``from frappe.rate_limiter import rate_limit`` names its windows after the
+        caller's ``cmd`` again (rate_limiter.py:155), so every endpoint in it goes back
+        to one ceiling per spelling -- and the driver portal publishes a second spelling
+        for 32 of them by design, so the regression would be live on arrival rather than
+        latent.
+
+        The count is pinned as well as the source: an endpoint that quietly loses its
+        decorator leaves this scan silently, and a shrinking population would otherwise
+        read as a clean one.
         """
-        canonical = {f"{module.__name__}.{name}" for module, name in GUEST_SUBMITTERS}
+        endpoints = _rate_limited_endpoints()
+
+        self.assertIn(
+            "apex.salis.api.driver_portal.fuel.submit_fuel_request",
+            endpoints,
+            "the scan missed an endpoint this file drives by hand, so an all-clear below "
+            "would mean a broken scan rather than a clean package",
+        )
+        self.assertEqual(
+            len(endpoints),
+            RATE_LIMITED_ENDPOINTS,
+            f"the metered surface moved from {RATE_LIMITED_ENDPOINTS} to "
+            f"{len(endpoints)} endpoints without this guard being told",
+        )
+
+        framework_keyed = sorted(
+            f"{endpoint} (rate_limit from {source})"
+            for endpoint, source in endpoints.items()
+            if source != IDENTITY_MODULE
+        )
+        self.assertEqual(
+            framework_keyed,
+            [],
+            "endpoint(s) metered on the caller-supplied cmd instead of the resolved "
+            f"handler; import rate_limit from {IDENTITY_MODULE}:\n"
+            + "\n".join(framework_keyed),
+        )
+
+    def test_every_second_dotted_path_reaches_an_identity_keyed_endpoint(self):
+        """Extended from the four submitters to all 61 metered endpoints.
+
+        The whole package is scanned, not just the defining modules: a second path is
+        created by whoever IMPORTS the function, so the evidence has to come from
+        everywhere a module-level import can appear -- a package ``__init__`` re-export,
+        or a test module that imports the endpoint instead of its module. A test module
+        counts like any other; it ships in the package, so a ``cmd`` through one resolves
+        for a caller just as well.
+
+        Second paths are no longer forbidden. They are ENUMERATED, and every one has to
+        land on an endpoint the case above has already proved is keyed on its handler.
+        The 32 that exist are the driver portal package re-exporting its own submodules
+        while the SPA calls the short name, so both spellings are production and neither
+        can be deleted -- pinning the count is what makes this a ratchet in both
+        directions: a 33rd is free of charge but must be seen, and a missing one means
+        the portal just lost an endpoint.
+        """
+        endpoints = _rate_limited_endpoints()
         aliases = _module_level_aliases()
 
         self.assertIn(
@@ -614,14 +778,38 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
             "no longer see every second path the package publishes",
         )
 
-        second_paths = sorted(
-            f"{alias} -> {target}" for alias, target in aliases.items() if target in canonical
+        second_paths = {
+            alias: target for alias, target in aliases.items() if target in endpoints
+        }
+        unguarded = sorted(
+            f"{alias} -> {target}"
+            for alias, target in second_paths.items()
+            if endpoints[target] != IDENTITY_MODULE
         )
         self.assertEqual(
-            second_paths,
+            unguarded,
             [],
-            "guest submitter(s) reachable under a second dotted path, and each path "
-            "carries its own full rate-limit window:\n" + "\n".join(second_paths),
+            "endpoint(s) reachable under a second dotted path AND metered on the "
+            "caller's cmd, so each path carries its own full window:\n"
+            + "\n".join(unguarded),
+        )
+
+        outside_the_portal = sorted(
+            alias
+            for alias in second_paths
+            if not alias.startswith("apex.salis.api.driver_portal.")
+        )
+        self.assertEqual(
+            outside_the_portal,
+            [],
+            "a second dotted path appeared outside the driver portal's known "
+            "re-exports:\n" + "\n".join(outside_the_portal),
+        )
+        self.assertEqual(
+            len(second_paths),
+            DRIVER_PORTAL_RE_EXPORTS,
+            f"the driver portal published {len(second_paths)} re-exports, not "
+            f"{DRIVER_PORTAL_RE_EXPORTS}; the SPA calls these names directly",
         )
 
     def test_the_window_length_is_the_declared_one_and_is_never_refreshed(self):
@@ -635,7 +823,7 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
             with self.subTest(module=module.__name__, endpoint=name):
                 cache = _FakeCache()
                 cmd = f"a294-window-{name}"
-                shared = f"rl:{cmd}:{_STUB_IP}"
+                shared = _canonical_window(module, name, _STUB_IP)
                 endpoint = getattr(module, name)
                 with mock.patch.object(frappe, "cache", cache):
                     self._spend_one(endpoint, cmd, "first")
