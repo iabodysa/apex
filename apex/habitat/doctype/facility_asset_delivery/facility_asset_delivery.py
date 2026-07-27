@@ -47,6 +47,7 @@ from apex.habitat.doctype.custody_handover.custody_handover import (
 )
 from apex.habitat.asset_movement_engine import (
     ensure_asset_still_at,
+    ledgered_origin,
     post_asset_movement,
     reverse_asset_movement,
 )
@@ -103,31 +104,40 @@ class FacilityAssetDelivery(Document):
         mark Cancelled. A delivery cancelled before Delivered never moved the asset,
         so the reversal is a no-op there (idempotent).
 
+        Restores the ROOM as well as the building: move_asset_on_delivery writes
+        both, so restoring only the building left the asset back at the origin
+        while still reporting the destination's room. The room comes from the
+        delivery's own ledger row because the record carries no origin-room field.
+
         Safe to restore the origin unconditionally because ``before_cancel`` has
         already refused any cancel whose asset has since moved on."""
         if self.status == "Delivered":
+            origin = ledgered_origin(LEDGER_SOURCE, self.name)
             reverse_asset_movement(LEDGER_SOURCE, self.name)
             # [#kv9ve6]
             if frappe.db.exists("Facility Asset", self.facility_asset):
                 count = frappe.db.get_value("Facility Asset", self.facility_asset, "movement_count") or 0
-                frappe.db.set_value(
-                    "Facility Asset",
-                    self.facility_asset,
-                    {
-                        "building": self.from_building,
-                        "movement_count": max(0, count - 1),
-                    },
-                )
+                restored = {
+                    "building": self.from_building,
+                    "movement_count": max(0, count - 1),
+                }
+                if origin:
+                    restored["location_in_building"] = origin.from_location
+                frappe.db.set_value("Facility Asset", self.facility_asset, restored)
         self.db_set("status", "Cancelled")
 
     def before_cancel(self):
         if not self.cancellation_reason:
             frappe.throw(_("Cancellation Reason is required before cancelling a delivery."))
-        # Only a Delivered delivery ever wrote a location; the room is not compared
-        # because move_asset_on_delivery leaves it untouched when to_location_in_building
-        # is blank.
+        # Only a Delivered delivery ever wrote a location. The room joins the
+        # comparison only when this delivery actually set one — with a blank
+        # to_location_in_building move_asset_on_delivery leaves the room untouched,
+        # so there is nothing of ours to have been superseded.
         if self.status == "Delivered":
-            ensure_asset_still_at(self.facility_asset, building=self.to_building)
+            expected = {"building": self.to_building}
+            if self.to_location_in_building:
+                expected["location_in_building"] = self.to_location_in_building
+            ensure_asset_still_at(self.facility_asset, **expected)
 
 
 def move_asset_on_delivery(doc) -> None:
@@ -137,7 +147,12 @@ def move_asset_on_delivery(doc) -> None:
     Facility Asset Movement uses) and updates the asset's current location +
     previous_* audit fields in place. Idempotent: the ledger engine skips a source
     already ledgered, and the in-place update is guarded by the Delivered-status
-    short-circuit in the confirm API."""
+    short-circuit in the confirm API.
+
+    The ledger's origin room is the room the asset is leaving, read off the asset:
+    the delivery record has no origin-room field, so a NULL there would erase the
+    only record of where the asset came from and leave cancel unable to put it
+    back."""
     asset = frappe.db.get_value(
         "Facility Asset",
         doc.facility_asset,
@@ -153,7 +168,7 @@ def move_asset_on_delivery(doc) -> None:
         name=doc.name,
         facility_asset=doc.facility_asset,
         from_building=doc.from_building,
-        from_room=None,
+        from_room=asset.location_in_building,
         to_building=doc.to_building,
         to_room=doc.to_location_in_building,
         from_company=company,

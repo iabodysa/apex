@@ -49,6 +49,28 @@ def ensure_asset_still_at(facility_asset: str, **expected) -> None:
     )
 
 
+def ledgered_origin(source_doctype: str, source_name: str):
+    """Where this source took the asset FROM, as it ledgered the move — or None if
+    it never posted a row.
+
+    A Facility Asset Delivery has no origin-room field of its own (only
+    ``to_location_in_building``), so its ledger row is the one place the room the
+    asset actually left survives. Cancel reads it back to return the asset to that
+    room instead of leaving it parked in the destination's.
+    """
+    rows = frappe.get_all(
+        LEDGER_DOCTYPE,
+        filters={
+            "source_doctype": source_doctype,
+            "source_name": source_name,
+            "reversal_of": ["is", "not set"],
+        },
+        fields=["from_building", "from_location"],
+        limit=1,
+    )
+    return rows[0] if rows else None
+
+
 def _ledger_exists(source_doctype: str, source_name: str) -> bool:
     """True if an original ledger row already exists for this source (idempotency
     key = source + not-a-reversal), so a re-submit cannot double-post."""

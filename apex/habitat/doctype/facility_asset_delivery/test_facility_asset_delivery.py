@@ -221,6 +221,58 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         self.assertEqual(d.status, "Released")
         self.assertEqual(frappe.db.get_value("Facility Asset", self.asset, "building"), self.intake)
 
+    def _deliver(self):
+        """A delivery carried all the way to Delivered. Returns the delivery doc."""
+        d = self._delivery()
+        code = self._release(d)
+        frappe.set_user(self.receiver)
+        try:
+            confirm_receipt(d.name, code)
+        finally:
+            frappe.set_user("Administrator")
+        d.reload()
+        self.assertEqual(d.status, "Delivered")
+        return d
+
+    def test_cancelling_a_delivery_returns_the_asset_to_the_room_it_left(self):
+        """Cancel restored only the building while move_asset_on_delivery writes the
+        room too, so the asset landed back in the intake store still reporting the
+        destination's room — a location that had never existed."""
+        origin_room = "Intake Shelf " + _h(6)
+        frappe.db.set_value("Facility Asset", self.asset, "location_in_building", origin_room)
+
+        d = self._deliver()
+        self.assertEqual(
+            frappe.db.get_value("Facility Asset", self.asset, "location_in_building"),
+            d.to_location_in_building,
+            "the delivery must have put the asset in the destination room first",
+        )
+
+        d.db_set("cancellation_reason", "Delivery reversed in test")
+        d.reload()
+        d.cancel()
+
+        asset = frappe.db.get_value(
+            "Facility Asset",
+            self.asset,
+            ["building", "location_in_building", "movement_count"],
+            as_dict=True,
+        )
+        self.assertEqual(
+            asset.building, self.intake, "cancel must return the asset to the intake store"
+        )
+        self.assertEqual(
+            asset.location_in_building,
+            origin_room,
+            "cancel must return the asset to the room it left",
+        )
+        self.assertNotEqual(
+            asset.location_in_building,
+            d.to_location_in_building,
+            "the destination room must not survive the cancel",
+        )
+        self.assertEqual(asset.movement_count, 0, "cancel must decrement movement_count back to 0")
+
     def test_cancelling_a_superseded_delivery_cannot_drag_the_asset_back(self):
         """A Delivered delivery followed by a movement onward: cancelling the delivery
         used to restore from_building blindly, teleporting the asset back into the
