@@ -52,6 +52,13 @@ class SalisPaymentRequest(Document):
 	def before_insert(self):
 		if not self.requested_by:
 			self.requested_by = frappe.session.user
+		# An amendment is a NEW payable and must route its own payment. no_copy does
+		# NOT do this: the desk's amend copies every field (create_new.js applies
+		# no_copy only when NOT amending), and route_payment short-circuits on this
+		# link, so an inherited one hands Finance the cancelled original's payment.
+		if self.amended_from:
+			self.linked_payment_doctype = None
+			self.linked_payment_entry = None
 
 	def validate(self):
 		# [#3b4mlx]

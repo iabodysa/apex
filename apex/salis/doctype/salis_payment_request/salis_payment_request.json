@@ -228,6 +228,7 @@
    "fieldname": "linked_payment_doctype",
    "fieldtype": "Link",
    "label": "Linked Payment DocType",
+   "no_copy": 1,
    "options": "DocType",
    "read_only": 1
   },
@@ -236,6 +237,7 @@
    "fieldname": "linked_payment_entry",
    "fieldtype": "Dynamic Link",
    "label": "Linked Payment",
+   "no_copy": 1,
    "options": "linked_payment_doctype",
    "read_only": 1
   },

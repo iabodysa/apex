@@ -132,9 +132,10 @@ def _load_accommodation_item_records():
 def create_roles():
     # (role_name, desk_access). Native-first provisioning of the app's Roles (the
     # Role fixture was retired — it re-locked the Role Profile queue_action on every
-    # worker-less migrate). Runs on both after_install and after_migrate, so these
-    # roles are durable on every migrate — unlike the Salis seed_salis_* patches,
-    # which a fresh install marks complete without running.
+    # worker-less migrate). hooks.py lists this in after_install (via after_install
+    # above) AND directly in after_migrate, so the roles are durable on every migrate
+    # — unlike the Salis seed_salis_* roles, which salis.setup.after_install runs once
+    # at install and patches.txt then replays only on already-installed sites.
     roles = [
         ("Accommodation Manager", 1),
         ("Resident Supervisor", 1),
@@ -232,7 +233,9 @@ def create_custody_articles():
         {"article_name": "Padlock", "category": "Facility Keys", "is_returnable": 1},
     ]
     for article in articles:
-        if not frappe.db.exists("Custody Article", article["article_name"]):
+        # Filter, not a name probe: Custody Article autonames by naming_series, so a
+        # probe keyed on the name never matches and every run re-inserts all ten.
+        if not frappe.db.exists("Custody Article", {"article_name": article["article_name"]}):
             doc = frappe.new_doc("Custody Article")
             doc.update(article)
             doc.insert(ignore_permissions=True)

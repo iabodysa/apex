@@ -35,10 +35,12 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
-from apex.tests._helpers import _user
+from apex.apex_core.payment_router import route_payment
+from apex.tests._helpers import _user, submit_via_workflow
 from apex.tests.factories import make_project
 
 WORKFLOW = "Salis Payment Request Workflow"
+ROUTING_SETTINGS = "Payment Routing Settings"
 
 
 def _actions(doc):
@@ -283,3 +285,107 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         pr.reload()
         self.assertEqual(pr.status, "Draft")
         self.assertEqual(pr.docstatus, 0)
+
+
+class TestAmendedRequestRoutesANewPayment(FrappeTestCase):
+    """An amendment is a NEW payable and must route its OWN payment.
+
+    ``payment_router.route_payment`` short-circuits on ``linked_payment_entry``
+    and returns it, so whatever the amend copy carries over IS the answer. The
+    desk's amend keeps every field — ``no_copy`` is honoured only on Duplicate
+    (``create_new.js``: ``is_no_copy = !from_amend && ...``) — so the cancelled
+    original's link had to be cleared on the amended insert, or Finance re-reads
+    a payment raised against a cancelled request.
+
+    Targets ``Note``: a dependency-free core DocType, the same stand-in the
+    router's own tests use, so the assertion is about re-routing and not about
+    an accounting doctype's validations.
+    """
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+        settings = frappe.get_single(ROUTING_SETTINGS)
+        # A Single does NOT roll back with the test transaction — restore it by hand,
+        # registered BEFORE the mutation so a mid-test failure still restores.
+        self.addCleanup(
+            self._restore,
+            settings.target_payment_doctype,
+            [
+                {
+                    "target_fieldname": r.target_fieldname,
+                    "source_fieldname": r.source_fieldname,
+                    "is_static": r.is_static,
+                    "static_value": r.static_value,
+                }
+                for r in (settings.field_map or [])
+            ],
+        )
+        settings.target_payment_doctype = "Note"
+        # Draft target only: auto-submit is a separate concern and would drag in the GL gate.
+        settings.auto_submit_target = 0
+        settings.set("field_map", [{"target_fieldname": "title", "source_fieldname": "name"}])
+        settings.save(ignore_permissions=True)
+
+    @staticmethod
+    def _restore(target, rows):
+        frappe.set_user("Administrator")
+        settings = frappe.get_single(ROUTING_SETTINGS)
+        settings.target_payment_doctype = target
+        settings.set("field_map", rows)
+        settings.save(ignore_permissions=True)
+
+    def _routable(self):
+        """A submitted request carrying the finance stamp the router gates on.
+
+        The stamp is written after submit because ``_guard_finance_stamp`` reverts any
+        caller-supplied value; the approval gate itself is proven by the workflow tests
+        above, so it is a fixture here rather than the subject.
+        """
+        doc = frappe.get_doc(
+            {
+                "doctype": "Salis Payment Request",
+                "expense_type": "Rental",
+                "amount": 500,
+                "remarks": "Amend re-route",
+                "status": "Draft",
+            }
+        ).insert(ignore_permissions=True)
+        submit_via_workflow(doc)
+        doc.db_set("finance_approved_by", "Administrator", update_modified=False)
+        doc.reload()
+        return doc
+
+    def test_amended_request_routes_a_new_payment(self):
+        original = self._routable()
+        first = route_payment(original.name)
+        original.reload()
+        self.assertEqual(original.linked_payment_entry, first)
+
+        original.cancel()
+        # The desk amend copies every field (no_copy included) and clears only
+        # name/amended_from/amendment_date, which is what frappe.copy_doc does by
+        # default. docstatus survives copy_doc under in_test, so reset it explicitly.
+        amended = frappe.copy_doc(original)
+        amended.amended_from = original.name
+        amended.docstatus = 0
+        # An amendment re-enters the flow as a draft. Carrying the cancelled doc's
+        # "Approved by Finance" status instead would trip the SoD gate on insert —
+        # a different behaviour, already covered above, and not the subject here.
+        amended.status = "Draft"
+        amended.insert(ignore_permissions=True)
+        self.assertFalse(
+            amended.linked_payment_entry,
+            "the amendment inherited the cancelled original's payment link",
+        )
+
+        submit_via_workflow(amended)
+        amended.db_set("finance_approved_by", "Administrator", update_modified=False)
+        amended.reload()
+
+        notes_before = frappe.db.count("Note")
+        second = route_payment(amended.name)
+
+        self.assertNotEqual(second, first, "the amendment re-returned the original's payment")
+        self.assertEqual(frappe.db.count("Note"), notes_before + 1)
+        amended.reload()
+        self.assertEqual(amended.linked_payment_entry, second)
