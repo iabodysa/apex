@@ -60,6 +60,7 @@ Locale
 Logistay
 Maintenance Technician
 Monitoring
+Must be Admin Manager
 My Work
 OFF
 OT

@@ -232,6 +232,13 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
         `is_perm_applicable` keeps only permlevel-0 rows (frappe/permissions.py:284), so the
         two rows answer different questions and deduplicating on role alone would strip the
         field access this whole change depends on.
+
+        The description is checked for MEANING, never for the literal token `permlevel`.
+        That description is the tooltip a payroll clerk reads on the form, and user-facing
+        text carries no system jargon — so a token probe could only ever pass on a
+        description that leaked the setting's internal name into the clerk's face. The
+        intent it was standing in for survives: the field must say WHO keeps the column
+        and WHY, so a description that merely restates the restriction still fails here.
         """
         shipped = json.loads(_FREELANCER_JSON.read_text(encoding="utf-8"))
         rows = shipped["permissions"]
@@ -249,10 +256,21 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
 
         salary = [f for f in shipped["fields"] if f["fieldname"] == "monthly_salary"][0]
         self.assertEqual(salary.get("permlevel"), 1, "monthly_salary is not at permlevel 1")
+        described = (salary.get("description") or "").lower()
+        for role in sorted(high):
+            # The role's leading word, not its full name: the tooltip says "Finance",
+            # which is how a clerk names the department that keeps the column.
+            self.assertIn(
+                role.split()[0].lower(),
+                described,
+                f"the description does not say {role} is who keeps the column",
+            )
         self.assertIn(
-            "permlevel",
-            (salary.get("description") or ""),
-            "the field must carry WHY it sits at level 1, not just the setting",
+            "only", described, "the description does not say the access is exclusive"
+        )
+        self.assertTrue(
+            {"because", "so", "since"} & set(described.split()),
+            "the description states the restriction but never says WHY it is restricted",
         )
 
     def test_write_and_delete_at_level_zero_were_left_alone(self):

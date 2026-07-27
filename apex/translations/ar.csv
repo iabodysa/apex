@@ -4519,3 +4519,5 @@ There is no submitted Purchase Invoice outstanding for {0} under this company. R
 "{0} {1} is billed by {2}, not the contract's supplier {3}.",{0} {1} صادرة من المورّد {2} وليس مورّد العقد {3}.
 {0} {1} is not submitted. Only an approved invoice can be paid.,{0} {1} غير معتمدة. لا يمكن دفع سوى فاتورة معتمدة.
 Facility Asset {0} has moved on to {1} since this record; cancelling it now would undo a later relocation. Cancel the newest relocation first.,الأصل {0} انتقل إلى {1} بعد هذا السجل؛ وإلغاؤه الآن يُلغي نقلة أحدث منه. ألغِ أحدث نقلة أولًا.
+Authorized By (Record Only),المُخوِّل (للسجل فقط)
+Written record of who authorized this request outside the system. Nothing in the app reads this field and a grant submits whether it is filled in or left empty.,تدوين لمن خوّل هذا الطلب خارج النظام. لا يقرأ التطبيق هذا الحقل ويُعتمد التصريح سواء عُبِّئ أو تُرك فارغًا.

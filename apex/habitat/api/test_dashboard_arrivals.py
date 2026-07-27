@@ -4,7 +4,8 @@ get_pending_on_manifest. Each case scopes to a unique building so the asserts ar
 exact regardless of pre-existing site data. Assignments are inserted directly and
 forced to docstatus=1 + check_in_date via db.set_value (validate would otherwise
 run the bed-lock/occupancy gates) — the same direct approach the sibling
-dashboard tests use."""
+dashboard tests use. The scope class below needs REAL buildings for its User
+Permission, so it cannot skip validate and builds through the shared factory."""
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -12,6 +13,12 @@ from frappe.utils import add_days, today
 
 from apex.habitat.api.dashboard import get_arrivals_today, get_pending_on_manifest
 from apex.tests._helpers import as_user
+from apex.tests.factories import (
+    make_assignment,
+    make_project,
+    make_worker_employee,
+    purge_doc,
+)
 
 
 def _h(n=12):
@@ -163,6 +170,10 @@ class TestDashboardArrivalsScope(FrappeTestCase):
         cls.b2 = cls._building()
         cls.scoped = cls._user("Resident Supervisor", building=cls.b1)
         cls.oversight = cls._user("Accommodation Manager")
+        # A real Building makes Housing Assignment run its whole validate chain, and a
+        # cost-carrying assignment is refused without a Project.
+        cls.project = make_project("Arrivals Scope Project")
+        cls.addClassCleanup(purge_doc, "Project", cls.project)
 
     @classmethod
     def _building(cls):
@@ -206,29 +217,25 @@ class TestDashboardArrivalsScope(FrappeTestCase):
     def setUp(self):
         self.addCleanup(frappe.set_user, "Administrator")
 
-    def _assignment(self, building, check_in_date):
-        doc = frappe.get_doc({
-            "doctype": "Housing Assignment",
-            "naming_series": "ACC-ASGN-.YYYY.-.####",
-            "party_type": "Employee",
-            "party": "EMP-" + _h(),
-            "employee": "EMP-" + _h(),
-            "building": building,
-        })
-        doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        frappe.db.set_value(
-            "Housing Assignment", doc.name,
-            {"docstatus": 1, "check_in_date": check_in_date}, update_modified=False,
+    def _assignment(self, building):
+        """A submitted Housing Assignment checking a fresh worker into ``building``
+        today — exactly what the arrivals card counts.
+
+        Built through the shared factory rather than the bare insert the sibling class
+        uses: that class names a building that does not exist, which makes the
+        controller return before it asks for a project, a cost centre and a room/bed
+        chain. Here the building is real, so the whole chain has to be satisfied.
+        """
+        room, bed = building + "-ARS-R", building + "-ARS-B"
+        name = make_assignment(
+            make_worker_employee("ARS Worker " + _h()), building, self.project,
+            room_number=room, bed_code=bed,
         )
-        self.addCleanup(
-            lambda n=doc.name: (
-                frappe.db.set_value("Housing Assignment", n, "docstatus", 0,
-                                    update_modified=False),
-                frappe.delete_doc("Housing Assignment", n, force=True,
-                                  ignore_permissions=True),
-            )
-        )
-        return doc.name
+        # LIFO: the assignment is purged before the bed and room it cites.
+        self.addCleanup(purge_doc, "Room", room)
+        self.addCleanup(purge_doc, "Bed", bed)
+        self.addCleanup(purge_doc, "Housing Assignment", name)
+        return name
 
     def _batch(self, building, expected_date, expected_n):
         doc = frappe.get_doc({
@@ -253,7 +260,7 @@ class TestDashboardArrivalsScope(FrappeTestCase):
         with as_user(self.oversight):
             oversight_base = _arrivals_today_value()
 
-        self._assignment(self.b2, today())
+        self._assignment(self.b2)
 
         with as_user(self.scoped):
             self.assertEqual(
@@ -270,7 +277,7 @@ class TestDashboardArrivalsScope(FrappeTestCase):
         """The scope filter is a filter, not a blanket zero."""
         with as_user(self.scoped):
             scoped_base = _arrivals_today_value()
-        self._assignment(self.b1, today())
+        self._assignment(self.b1)
         with as_user(self.scoped):
             self.assertEqual(_arrivals_today_value(), scoped_base + 1)
 

@@ -23,6 +23,8 @@ CORE_ALLOWLIST = {
     "Sales Invoice": "erpnext",  # Logistay invoice issuance gate (P-191)
     "Additional Salary": "hrms",  # Logistay payroll/WPS validate gate (P-192)
     "Report": "frappe",  # A-201 report-role runnability guard (apex-owned refs only)
+    # on_cancel: lets Accounts cancel a payment a Telecom Contract billing log still cites.
+    "Payment Entry": "erpnext",
 }
 
 # [#j1p8io]
