@@ -458,9 +458,21 @@ class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
             for p in meta.permissions
             if getattr(p, "permlevel", 0) == 1 and p.read
         }
-        self.assertIn("System Manager", high)
-        self.assertIn("Accommodation Manager", high)
-        for low in ("Resident Supervisor", "HR User", "Fleet Supervisor"):
+        # Owner decision 2026-07-27: System Manager alone holds level 1. The housing
+        # role's read row was withdrawn -- no written reason for it was ever found.
+        self.assertEqual(
+            high,
+            {"System Manager"},
+            "permlevel-1 read must be System Manager alone",
+        )
+        for low in (
+            "Accommodation Manager",
+            "Resident Supervisor",
+            "HR User",
+            "Fleet Supervisor",
+            "Fleet Manager",
+            "Fleet Project Manager",
+        ):
             self.assertNotIn(
                 low, high, f"{low} must NOT have permlevel-1 read on the token field"
             )
