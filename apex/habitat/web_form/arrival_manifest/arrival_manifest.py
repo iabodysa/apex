@@ -20,9 +20,9 @@ per-supplier identity to key a budget on; today it is anonymous by design.
 
 import frappe
 from frappe import _
-from frappe.rate_limiter import rate_limit
 
 # [#8g8lrm]
+from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.habitat.doctype.arrival_batch.arrival_batch import _MAX_EXPECTED_WORKERS
 
 # [#g4hzd4]

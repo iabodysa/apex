@@ -8,7 +8,8 @@ supplies a driver id.
 
 import frappe
 from frappe import _
-from frappe.rate_limiter import rate_limit
+
+from apex.apex_core.utils.rate_limit_identity import rate_limit
 
 # [#95hxd8]
 from apex.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_url

@@ -21,8 +21,9 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
-from frappe.rate_limiter import rate_limit
 from frappe.utils import now, today
+
+from apex.apex_core.utils.rate_limit_identity import rate_limit
 
 
 def _bed_color(bed_status: str, condition: str, readiness_status: str) -> str:
