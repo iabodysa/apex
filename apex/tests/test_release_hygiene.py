@@ -31,11 +31,6 @@ import tokenize
 import types
 import unittest
 
-from apex.tests.shipped_notifications import (
-    notification_role_pairs,
-    shipped_notifications,
-)
-
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 REPO_ROOT = os.path.dirname(APP_ROOT)
 AR_CSV = os.path.join(APP_ROOT, "translations", "ar.csv")
@@ -436,16 +431,26 @@ class TestNoTestRolesShipped(unittest.TestCase):
         retired `notifications_seed.py` modules. Harvest every
         `recipients[].receiver_by_role` so the hygiene check still covers
         notification recipient roles.
-
-        Reads through `tests/shipped_notifications`, the one home for this parse
-        (A-301). This module had grown TWO private scanners over the same tree —
-        this one and `TestNotificationCompanionModule._notification_dirs` — and a
-        third was about to be written for the receiver-permission guard.
         """
-        return {
-            role
-            for _name, _dt, role, _enabled in notification_role_pairs()
-        }
+        roles = set()
+        for fp in glob.glob(
+            os.path.join(APP_ROOT, "**", "notification", "**", "*.json"),
+            recursive=True,
+        ):
+            if "node_modules" in fp:
+                continue
+            with open(fp, encoding="utf-8") as fh:
+                try:
+                    data = json.load(fh)
+                except json.JSONDecodeError:
+                    continue
+            if not isinstance(data, dict):
+                continue
+            for recipient in data.get("recipients", []) or []:
+                role = recipient.get("receiver_by_role")
+                if role:
+                    roles.add(role)
+        return roles
 
     def _all_declared_roles(self):
         roles = set()
@@ -767,18 +772,25 @@ class TestNotificationCompanionModule(unittest.TestCase):
     """
 
     def _notification_dirs(self):
-        """(rel_dir, slug) for every shipped is_standard Notification dir.
-
-        Reads through `tests/shipped_notifications` (A-301), so this scan and the
-        recipient-role scan above cannot drift apart on what "shipped" means.
-        """
-        return [
-            (
-                os.path.relpath(os.path.dirname(path), APP_ROOT),
-                os.path.basename(os.path.dirname(path)),
-            )
-            for path, _data in shipped_notifications()
-        ]
+        """(rel_dir, slug) for every shipped is_standard Notification dir."""
+        out = []
+        for fp in glob.glob(
+            os.path.join(APP_ROOT, "*", "notification", "*", "*.json"), recursive=False
+        ):
+            if "node_modules" in fp:
+                continue
+            try:
+                with open(fp, encoding="utf-8") as fh:
+                    data = json.load(fh)
+            except (OSError, json.JSONDecodeError):
+                continue
+            if not isinstance(data, dict) or data.get("doctype") != "Notification":
+                continue
+            if not data.get("is_standard"):
+                continue
+            d = os.path.dirname(fp)
+            out.append((os.path.relpath(d, APP_ROOT), os.path.basename(d)))
+        return out
 
     def test_scan_finds_notifications(self):
         slugs = {slug for _, slug in self._notification_dirs()}
