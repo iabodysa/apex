@@ -624,6 +624,63 @@ class TestMaintenanceWorkOrderSideEffects(MaintenanceWorkOrderPersonas):
             "cancel must release the request off Closed",
         )
 
+    def _witness_row(self):
+        """A Site row: one mandatory Data field, no links, untouched by the Work Order
+        path, so its survival isolates the transaction behaviour from the completion's
+        own ledger side effects."""
+        return frappe.get_doc({
+            "doctype": "Site", "site_name": "A333-MWO-" + uuid.uuid4().hex,
+        }).insert(ignore_permissions=True).name
+
+    def test_a_failed_completion_keeps_rows_written_earlier_in_the_same_request(self):
+        """``mark_completed`` used to wrap its whole write sequence in
+        ``except Exception: frappe.db.rollback(); frappe.throw(generic)``.
+        ``frappe.db.rollback()`` takes no savepoint, so it discarded the WHOLE request
+        transaction — everything the request wrote before the completion, not just
+        this Work Order — and its "No changes were saved" message hid the failure.
+
+        The fault is planted on the LAST step of the sequence on purpose: by then the
+        evidence db_set, the request status write and the ledger insert have all
+        happened, so this is the case where a global rollback destroyed the most.
+        """
+        from unittest.mock import patch
+
+        from apex.habitat.doctype.maintenance_work_order.maintenance_work_order import (
+            mark_completed,
+            start_work,
+        )
+
+        _mr, wo = self._issue_work_order(cost=25)
+        with as_user(self.tech):
+            start_work(wo.name)
+        witness = self._witness_row()
+
+        with patch(
+            "apex.habitat.maintenance_engine.post_maintenance_cost",
+            side_effect=RuntimeError("cost ledger posting failed"),
+        ):
+            with as_user(self.tech):
+                with self.assertRaises(RuntimeError) as caught:
+                    mark_completed(
+                        wo.name,
+                        actual_end_date=today(),
+                        completion_photo="/files/a333-failed.png",
+                    )
+
+        self.assertIn(
+            "cost ledger posting failed", str(caught.exception),
+            "the real error must reach the caller instead of a generic completion "
+            "message that names neither the failing step nor its cause",
+        )
+        self.assertTrue(
+            frappe.db.exists("Site", witness),
+            "a failed completion must not discard rows this request wrote before it",
+        )
+        self.assertTrue(
+            frappe.db.exists("Maintenance Work Order", wo.name),
+            "the Work Order itself must outlive the failed completion",
+        )
+
     def test_cancel_requires_a_reason(self):
         _mr, wo = self._issue_work_order()
         with as_user(self.manager):

@@ -177,6 +177,53 @@ class TestAccommodationAssignment(FrappeTestCase):
         self.assertEqual(sig.fieldtype, "Signature")
         self.assertIsNotNone(meta.get_field("terms_accepted_on"))
 
+    def _witness_row(self):
+        """A Site row: one mandatory Data field, no links, untouched by anything else
+        in this module, so its survival isolates the transaction behaviour from the
+        assignment's own side effects."""
+        return frappe.get_doc({
+            "doctype": "Site", "site_name": "A333-ASGN-" + self._h() + self._h(),
+        }).insert(ignore_permissions=True).name
+
+    def test_a_failed_submit_keeps_rows_written_earlier_in_the_same_request(self):
+        """on_submit used to wrap its occupancy writes in ``except Exception:
+        frappe.db.rollback(); frappe.throw(generic)``. ``frappe.db.rollback()`` takes
+        no savepoint, so it discarded the WHOLE request transaction — everything the
+        request wrote before the submit, not just this assignment — and replaced the
+        real error with "Could not update bed occupancy".
+
+        The recount is made to fail deliberately: nothing reachable from a fixture
+        makes ``recalculate_spatial`` throw, and the point under test is what a
+        failure ANYWHERE in that block costs, not which failure it was.
+        """
+        from unittest.mock import patch
+
+        fx = self._fixtures()
+        witness = self._witness_row()
+        doc = self._assignment(fx, fx.emps[0], fx.beds[0])
+        doc.insert(ignore_permissions=True)
+
+        with patch(
+            "apex.habitat.doctype.housing_assignment.housing_assignment.recalculate_spatial",
+            side_effect=RuntimeError("occupancy recount failed"),
+        ):
+            with self.assertRaises(RuntimeError) as caught:
+                doc.submit()
+
+        self.assertIn(
+            "occupancy recount failed", str(caught.exception),
+            "the real error must reach the caller instead of a generic bed-occupancy "
+            "message that names neither the failure nor its cause",
+        )
+        self.assertTrue(
+            frappe.db.exists("Site", witness),
+            "a failed submit must not discard rows this request wrote before it",
+        )
+        self.assertTrue(
+            frappe.db.exists("Bed", fx.beds[0]),
+            "the fixtures this request built must outlive the failed submit too",
+        )
+
     def test_terms_signature_persists(self):
         """A captured terms signature is stored on the assignment."""
         fx = self._fixtures()

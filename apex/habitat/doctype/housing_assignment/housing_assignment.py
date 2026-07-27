@@ -274,12 +274,15 @@ def on_submit(doc, method=None):
                 )
             )
 
-    try:
-        frappe.db.set_value("Bed", doc.bed, "status", "Occupied")
-        recalculate_spatial(doc.room, doc.building)
-    except Exception:
-        frappe.db.rollback()
-        frappe.throw(_("Could not update bed occupancy. The assignment was not submitted."))
+    # No try/except around the occupancy writes. frappe.db.rollback() discards the
+    # WHOLE request transaction, not this assignment's rows, so it also destroyed
+    # anything the caller wrote earlier in the same request, and then swapped the
+    # real error for a generic one. Letting the exception propagate aborts the
+    # submit and leaves Frappe's own request-level rollback to unwind exactly what
+    # this request wrote. No savepoint replaces it: nothing here continues past a
+    # failure, so there is no partial work to salvage.
+    frappe.db.set_value("Bed", doc.bed, "status", "Occupied")
+    recalculate_spatial(doc.room, doc.building)
 
     # [#7ezsfj]
     rent_rule = get_policy().get_type_rule("Rent")

@@ -67,6 +67,11 @@ apex/demo/
 # (*.egg-info is covered once, above.)
 build/
 dist/
+# A wheel built outside dist/ still has to be ignored: scripts/run_guards.sh
+# mirrors its CI tree from `git ls-files --cached --others --exclude-standard`,
+# which includes untracked-but-unignored files, so an unignored stray wheel
+# enters every local guard run while a fresh clone never holds it.
+*.whl
 
 # Dead code archive.
 archive/

@@ -190,8 +190,8 @@ def mark_completed(
     if not doc.building:
         frappe.throw(_("Building is required to mark Completed."))
 
-    # Evidence is resolved and checked BEFORE the transaction below, so a refusal
-    # reports the field at fault instead of the generic rollback message.
+    # Evidence is resolved and checked BEFORE the writes below, so a refusal costs
+    # the Work Order nothing at all — not even a write to undo.
     start_date = actual_start_date or doc.actual_start_date
     end_date = actual_end_date or doc.actual_end_date or today()
     photo = completion_photo or doc.completion_photo
@@ -205,55 +205,58 @@ def mark_completed(
     ledger_posted = False
     cost = flt(doc.total_procurement_cost)
 
-    try:
-        evidence = {
-            "actual_start_date": start_date,
-            "actual_end_date": end_date,
-            "completion_photo": photo,
-            "status": "Completed",
-        }
-        if completion_notes:
-            evidence["completion_notes"] = completion_notes
-        doc.db_set(evidence)
+    # The completion writes below are deliberately unguarded. The frappe.db.rollback()
+    # that wrapped them discarded the WHOLE request transaction, not this Work Order's
+    # rows, so any failure here also destroyed what the caller wrote earlier in the same
+    # request — and the "No changes were saved" message hid the real refusal. Propagating
+    # aborts the completion and leaves Frappe's request-level rollback to unwind exactly
+    # what this request wrote. No savepoint replaces it: this method rethrows rather than
+    # continuing, so there is no partial completion to salvage.
+    evidence = {
+        "actual_start_date": start_date,
+        "actual_end_date": end_date,
+        "completion_photo": photo,
+        "status": "Completed",
+    }
+    if completion_notes:
+        evidence["completion_notes"] = completion_notes
+    doc.db_set(evidence)
 
-        if frappe.db.exists("DocType", "Maintenance Request") and doc.maintenance_request:
-            mr_status_field = {f.fieldname for f in frappe.get_meta("Maintenance Request").fields}
-            if "status" in mr_status_field:
-                frappe.db.set_value("Maintenance Request", doc.maintenance_request, "status", "Closed")
+    if frappe.db.exists("DocType", "Maintenance Request") and doc.maintenance_request:
+        mr_status_field = {f.fieldname for f in frappe.get_meta("Maintenance Request").fields}
+        if "status" in mr_status_field:
+            frappe.db.set_value("Maintenance Request", doc.maintenance_request, "status", "Closed")
 
-        # [#hm35wu]
-        from apex.habitat.doctype.housing_inventory.housing_inventory import reflect_completed_maintenance
-        reflect_completed_maintenance(doc)
+    # [#hm35wu]
+    from apex.habitat.doctype.housing_inventory.housing_inventory import reflect_completed_maintenance
+    reflect_completed_maintenance(doc)
 
-        already_posted = frappe.db.exists(
-            "Accommodation Ledger",
-            {"source_doctype": "Maintenance Work Order", "source_name": doc.name},
-        )
-        if cost > 0 and not already_posted:
-            # [#c07kbo]
-            frappe.get_doc({
-                "doctype": "Accommodation Ledger",
-                "posting_date": doc.actual_end_date or today(),
-                "building": doc.building,
-                "ledger_type": "Maintenance",
-                "total_site_cost": cost,
-                "capacity_denominator": 0,
-                "employee_daily_share": 0,
-                "posting_mode": "Operational Memo",
-                "source_doctype": "Maintenance Work Order",
-                "source_name": doc.name,
-                "allocation_basis": "Direct",
-                "allocation_period_start": doc.actual_start_date,
-                "allocation_period_end": doc.actual_end_date,
-            }).insert(ignore_permissions=True)  # audit-ok — system ledger memo on completion, gated by Work Order write (above)
-            ledger_posted = True
+    already_posted = frappe.db.exists(
+        "Accommodation Ledger",
+        {"source_doctype": "Maintenance Work Order", "source_name": doc.name},
+    )
+    if cost > 0 and not already_posted:
+        # [#c07kbo]
+        frappe.get_doc({
+            "doctype": "Accommodation Ledger",
+            "posting_date": doc.actual_end_date or today(),
+            "building": doc.building,
+            "ledger_type": "Maintenance",
+            "total_site_cost": cost,
+            "capacity_denominator": 0,
+            "employee_daily_share": 0,
+            "posting_mode": "Operational Memo",
+            "source_doctype": "Maintenance Work Order",
+            "source_name": doc.name,
+            "allocation_basis": "Direct",
+            "allocation_period_start": doc.actual_start_date,
+            "allocation_period_end": doc.actual_end_date,
+        }).insert(ignore_permissions=True)  # audit-ok — system ledger memo on completion, gated by Work Order write (above)
+        ledger_posted = True
 
-        # [#n9hvl5]
-        from apex.habitat.maintenance_engine import post_maintenance_cost
-        post_maintenance_cost(doc)
-    except Exception:
-        frappe.db.rollback()
-        frappe.throw(_("Could not complete the Work Order. No changes were saved. Please try again or contact support."))
+    # [#n9hvl5]
+    from apex.habitat.maintenance_engine import post_maintenance_cost
+    post_maintenance_cost(doc)
 
     doc.add_comment("Comment", _("Marked Completed via controlled method."))
     return {"status": "Completed", "ledger_posted": ledger_posted, "cost": cost}
