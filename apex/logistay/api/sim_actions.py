@@ -31,7 +31,16 @@ _VALID_ACTIONS = (
 
 
 def _load_sim(sim_card):
-    if not sim_card or not frappe.db.exists("SIM Card", sim_card):
+    """Return the SIM Card named ``sim_card``, or throw this module's own refusal.
+
+    ``sim_card`` arrives from a whitelisted endpoint, so the existence probe filters
+    on ``name``: the positional form answers the value back without querying when it
+    equals the DocType (database.py:1259), letting the literal string "SIM Card"
+    clear this gate and reach ``get_doc`` — which raises a bare framework 404 instead
+    of the named refusal below. Permission checking is unaffected (``check_permission``
+    still runs at every call site); what the short-circuit costs is this message.
+    """
+    if not sim_card or not frappe.db.exists("SIM Card", {"name": sim_card}):
         frappe.throw(_("SIM Card {0} does not exist.").format(sim_card))
     return frappe.get_doc("SIM Card", sim_card)
 
@@ -108,8 +117,14 @@ def move_to_contract(sim_card, telecom_contract):
 
     The SIM controller re-validates that the SIM company matches the new contract's
     company, so a cross-company move fails closed.
+
+    The contract probe filters on ``name`` for the same reason as :func:`_load_sim`.
+    Here the positional short-circuit costs more than a message: the literal string
+    "Telecom Contract" cleared this gate, and the ``get_value`` below then returned
+    ``None``, so reading ``target.docstatus`` raised an unhandled ``AttributeError``
+    in place of the named refusal.
     """
-    if not telecom_contract or not frappe.db.exists("Telecom Contract", telecom_contract):
+    if not telecom_contract or not frappe.db.exists("Telecom Contract", {"name": telecom_contract}):
         frappe.throw(_("Telecom Contract {0} does not exist.").format(telecom_contract))
     sim = _load_sim(sim_card)
     sim.check_permission("write")

@@ -45,15 +45,18 @@ from apex.habitat import permissions
 def _row_exists(doctype: str, name: str) -> bool:
     """True only when a REAL row of ``doctype`` is named ``name``.
 
-    ``frappe.db.exists(dt, dn)`` returns ``dn`` WITHOUT touching the database when
-    ``dn`` equals ``dt`` (frappe/database/database.py:1259 — the deliberate "a
-    Single always exists" short-circuit). A kiosk scanner is semi-trusted input, so
-    the literal token ``Employee`` would otherwise clear every existence gate here
-    and come back as a worker on a site with zero such rows. Reject the self-named
-    token first, then run the normal lookup — the caller's existing not-found path
-    then handles both cases identically, so the refusal leaks nothing.
+    Every existence gate in this module routes through here, on one idiom: the DICT
+    filter. ``frappe.db.exists(dt, dn)`` returns ``dn`` WITHOUT touching the database
+    when ``dn`` equals ``dt`` (frappe/database/database.py:1259 — the deliberate "a
+    Single always exists" short-circuit), and a kiosk scanner is semi-trusted input,
+    so the literal token ``Employee`` would clear the gate on a site with zero such
+    rows. Filtering on ``name`` (database.py:1253-1257) cannot short-circuit and is
+    correct in BOTH directions — rejecting the self-named token instead would only
+    trade that false positive for a false negative, refusing a row that really is
+    named after its DocType. The caller's ordinary not-found path handles the refusal,
+    so a self-named token and an absent docname stay indistinguishable.
     """
-    return name != doctype and bool(frappe.db.exists(doctype, name))
+    return bool(frappe.db.exists(doctype, {"name": name}))
 
 
 @frappe.whitelist()
@@ -202,6 +205,13 @@ def _resolve_article_scan(code: str, building: str | None) -> dict | None:
     name match is ignored — the operator must pick). When ``building`` is given the
     tile carries the live store balance (same source as the catalog). Read-only and
     permission-gated. Returns ``None`` on no/ambiguous match.
+
+    The docname probe goes through :func:`_row_exists` like the two party gates, so
+    the scanned token cannot clear it on the strength of the string. Latent rather
+    than live: the positional form let ``Custody Article`` take the docname branch,
+    but ``get_value`` then returned ``None`` and the scan degraded into a benign
+    miss. What it cost was the ``article_name`` fallback below, which never ran for
+    that token — an article TITLED "Custody Article" was unfindable by scan.
     """
     if not frappe.has_permission("Custody Article", "read"):
         return None
@@ -214,7 +224,7 @@ def _resolve_article_scan(code: str, building: str | None) -> dict | None:
         "standard_unit_cost",
     ]
     match = None
-    if frappe.db.exists("Custody Article", code):
+    if _row_exists("Custody Article", code):
         match = frappe.db.get_value("Custody Article", code, fields, as_dict=True)
     else:
         by_name = frappe.get_all(
