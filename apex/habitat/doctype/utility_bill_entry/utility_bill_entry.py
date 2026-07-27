@@ -4,6 +4,10 @@
 On submit: calculates variance from the Utility Account average, posts a
 summary row to the Accommodation Ledger (ledger_type = utility_type).
 
+On cancel the work is split the way every other reversing voucher here splits
+it: before_cancel refuses (read-only, nothing written), on_cancel posts the
+offsetting mirror row.
+
 Shared-meter support: when cost_bearing_pct < 100, bill_amount is
 computed as total_bill_amount × (cost_bearing_pct / 100). The full
 invoice total and the bearing percentage are preserved for audit trail.
@@ -18,11 +22,19 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, fmt_money
+from frappe.utils import flt, fmt_money, today
 
 
 class UtilityBillEntry(Document):
-    pass
+    def on_cancel(self):
+        """RESTORATION half of the cancel: post the offsetting ledger row.
+
+        A Document method rather than a module function like the rest of this
+        controller, because Frappe dispatches it from the class (run_method at
+        frappe/model/document.py:1005) with no hooks.py doc_events entry to
+        add — this DocType registers none for on_cancel.
+        """
+        _post_reversal_row(self)
 
 
 def validate(doc, method=None):
@@ -77,40 +89,25 @@ def on_submit(doc, method=None):
 
 
 def before_cancel(doc, method=None):
+    """REFUSAL half of the cancel — reads only, writes nothing.
+
+    Frappe dispatches before_cancel from run_before_save_methods()
+    (frappe/model/document.py:414), strictly before db_update() stamps
+    docstatus 2 (:428) and before on_cancel runs from run_post_save_methods()
+    (:431). Every reason to refuse a cancel belongs here, where a throw leaves
+    the bill and the ledger untouched.
+
+    The offsetting ledger row is the RESTORATION half and is posted from
+    UtilityBillEntry.on_cancel. Written here it would outlive any later refusal
+    in the same cancel — a second before_cancel handler, or the
+    check_no_back_links_exist() that run_post_save_methods() calls right after
+    on_cancel (:1186) — leaving a reversal on the books for a cancel that never
+    completed. Refusing costs nothing to restore either way: the mirror is a
+    memo row, so unlike a stock reversal there is no physical precondition to
+    pre-check, and the missing reason is the whole refusal set.
+    """
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is mandatory."))
-
-    total_capacity = frappe.db.get_value("Building", doc.building, "total_capacity")
-    from frappe.utils import today
-
-    original_row = frappe.db.get_value(
-        "Accommodation Ledger",
-        {
-            "source_doctype": "Utility Bill Entry",
-            "source_name": doc.name,
-            "reversal_of": ["is", "not set"],
-        },
-        "name",
-    )
-
-    try:
-        frappe.get_doc({
-            "doctype": "Accommodation Ledger",
-            "posting_date": today(),
-            "building": doc.building,
-            "ledger_type": doc.utility_type,
-            "total_site_cost": -flt(doc.bill_amount),
-            "capacity_denominator": total_capacity or 0,
-            "employee_daily_share": 0,
-            "posting_mode": "Operational Memo",
-            "source_doctype": "Utility Bill Entry",
-            "source_name": doc.name,
-            "allocation_basis": "Direct",
-            "reversal_of": original_row,
-        }).insert(ignore_permissions=True)
-    except Exception:
-        frappe.db.rollback()
-        frappe.throw(_("Could not post the reversal to the ledger. The cancellation was rejected."))
 
 
 def _compute_meter_readings(doc) -> None:
@@ -186,6 +183,42 @@ def _post_ledger_row(doc) -> None:
         "allocation_period_start": doc.billing_period_from,
         "allocation_period_end": doc.billing_period_to,
         **({"remarks": remarks} if remarks else {}),
+    }).insert(ignore_permissions=True)
+
+
+def _post_reversal_row(doc) -> None:
+    """Offset this bill's period posting with a negated mirror row.
+
+    Idempotent: keyed on the LIVE original, so a bill whose posting is already
+    reversed writes nothing. A bill with no live original writes nothing either
+    — a mirror carrying an unset reversal_of would read as a second period
+    post, and _live_ledger_row would then hand it back as the live row.
+
+    No try/except around the insert. frappe.db.rollback() discards the whole
+    request transaction, including work the caller did before the cancel, and
+    then swaps the real error for a generic one. Letting the exception
+    propagate out of on_cancel aborts the cancel and leaves the framework's own
+    request-level rollback to unwind exactly what this request wrote.
+    """
+    original = _live_ledger_row(doc.name)
+    if not original:
+        return
+
+    total_capacity = frappe.db.get_value("Building", doc.building, "total_capacity")
+
+    frappe.get_doc({
+        "doctype": "Accommodation Ledger",
+        "posting_date": today(),
+        "building": doc.building,
+        "ledger_type": doc.utility_type,
+        "total_site_cost": -flt(doc.bill_amount),
+        "capacity_denominator": total_capacity or 0,
+        "employee_daily_share": 0,
+        "posting_mode": "Operational Memo",
+        "source_doctype": "Utility Bill Entry",
+        "source_name": doc.name,
+        "allocation_basis": "Direct",
+        "reversal_of": original,
     }).insert(ignore_permissions=True)
 
 

@@ -204,8 +204,9 @@ class TestUtilityBillEntry(FrappeTestCase):
         frappe.delete_doc("Building", bld.name, force=True, ignore_permissions=True)
 
     def test_cancel_negative_reversal_still_posts(self):
+        """before_cancel only refuses; the offsetting row comes from on_cancel."""
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import (
-            _post_ledger_row, before_cancel,
+            _post_ledger_row, _post_reversal_row, before_cancel,
         )
         m = frappe.generate_hash(length=12)
         bld = self._ledger_building(m)
@@ -214,7 +215,12 @@ class TestUtilityBillEntry(FrappeTestCase):
         doc.name = src
         doc.cancellation_reason = "QA reversal test"
         _post_ledger_row(doc)
+
+        # The refusal hook is read-only: passing it writes nothing at all.
         before_cancel(doc)
+        self.assertEqual(self._ledger_count(src, reversal=True), 0)
+
+        _post_reversal_row(doc)
         # [#g9w8qj]
         self.assertEqual(self._ledger_count(src), 1)
         self.assertEqual(self._ledger_count(src, reversal=True), 1)
@@ -224,4 +230,23 @@ class TestUtilityBillEntry(FrappeTestCase):
             "total_site_cost",
         )
         self.assertEqual(rev, -300)
+
+        # Idempotent: the posting is keyed on the LIVE original, and the first
+        # mirror already reversed it.
+        _post_reversal_row(doc)
+        self.assertEqual(self._ledger_count(src, reversal=True), 1)
+        frappe.delete_doc("Building", bld.name, force=True, ignore_permissions=True)
+
+    def test_reversal_is_skipped_when_the_bill_never_posted(self):
+        """No live original means nothing to offset. A mirror written anyway
+        would carry an unset reversal_of and read as a second period post."""
+        from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import _post_reversal_row
+        m = frappe.generate_hash(length=12)
+        bld = self._ledger_building(m)
+        src = "QA-UBE-NOPOST-" + m
+        doc = self._bill(building=bld.name, utility_type="Electricity", bill_amount=300)
+        doc.name = src
+        _post_reversal_row(doc)
+        self.assertEqual(self._ledger_count(src), 0)
+        self.assertEqual(self._ledger_count(src, reversal=True), 0)
         frappe.delete_doc("Building", bld.name, force=True, ignore_permissions=True)
