@@ -6,7 +6,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, getdate, today
 
 
 class MaintenanceWorkOrder(Document):
@@ -41,8 +41,6 @@ class MaintenanceWorkOrder(Document):
     def _reverse_accommodation_memo(self):
         """Post a negative mirror for the live completion memo this Work Order
         posted. Idempotent: skips if the original was already reversed."""
-        from frappe.utils import today
-
         original = frappe.db.get_value(
             "Accommodation Ledger",
             {
@@ -77,6 +75,12 @@ def validate(doc, method=None):
     if doc.planned_end_date and doc.planned_start_date:
         if doc.planned_end_date < doc.planned_start_date:
             frappe.throw(_("Planned End Date must be on or after Planned Start Date."))
+    # The draft half of the actual-date ordering rule. validate() cannot cover the
+    # after-submit half: run_before_save_methods dispatches before_update_after_submit
+    # there, never validate (frappe/model/document.py), so mark_completed re-checks it.
+    if doc.actual_end_date and doc.actual_start_date:
+        if getdate(doc.actual_end_date) < getdate(doc.actual_start_date):
+            frappe.throw(_("Actual End Date must be on or after Actual Start Date."))
     # [#j3wyod]
     if doc.maintenance_request:
         dup = frappe.db.exists(
@@ -116,7 +120,14 @@ def before_cancel(doc, method=None):
 
 @frappe.whitelist(methods=["POST"])
 def start_work(work_order):
-    """Transition Maintenance Work Order from Planned to In Progress."""
+    """Transition Maintenance Work Order from Planned to In Progress, stamping the
+    actual start date.
+
+    Starting the job IS its actual start, so the date is recorded here rather than
+    asked for. That matters because ``actual_start_date`` is deliberately not an
+    allow_on_submit field — see ``mark_completed`` for why — which leaves this method
+    and ``mark_completed`` its only writers once the Work Order is submitted.
+    """
     doc = frappe.get_doc("Maintenance Work Order", work_order)
     # [#eu1e7a]
     frappe.has_permission("Maintenance Work Order", "write", doc=doc, throw=True)
@@ -126,21 +137,45 @@ def start_work(work_order):
     if doc.status != "Planned":
         frappe.throw(_("Only Work Orders with status Planned can be marked In Progress."))
 
-    doc.db_set("status", "In Progress")
+    updates = {"status": "In Progress"}
+    if not doc.actual_start_date:
+        updates["actual_start_date"] = today()
+    doc.db_set(updates)
     doc.add_comment("Comment", _("Work started — status set to In Progress."))
-    return {"status": "In Progress"}
+    return {"status": "In Progress", "actual_start_date": doc.actual_start_date}
 
 
 @frappe.whitelist(methods=["POST"])
-def mark_completed(work_order, completion_notes=None):
-    """Controlled transition to Completed.
+def mark_completed(
+    work_order,
+    completion_notes=None,
+    actual_end_date=None,
+    completion_photo=None,
+    actual_start_date=None,
+):
+    """Record the technician's completion evidence and transition to Completed.
 
-    The status field is not changed through a normal after-submit save. This
-    method performs the transition and posts a one-time operational memo row.
-    No GL Entry, Payment Entry, Purchase Invoice, or salary document is created.
+    Why the evidence travels through this method instead of the form. Saving a
+    submitted document is ``update_after_submit``, and Frappe gates that on the
+    SUBMIT permission, not write (``frappe/model/document.py`` set_docstatus). The
+    Maintenance Technician holds write WITHOUT submit by design, so no field on a
+    submitted Work Order is reachable from the form for the person doing the work —
+    not even ``completion_photo``, whose Desk attach control issues
+    ``frm.save("Update")`` once docstatus is 1. Widening the DocPerm to reach those
+    fields would also hand the executing technician authority to submit and cancel
+    the very Work Order they are working, which is the separation this DocType keeps.
+    A Frappe Workflow transition is no better: it moves a state field and carries no
+    payload, so it cannot capture two dates and a photo, and it still routes through
+    save.
+
+    So the date fields stay non-allow_on_submit and this method is their only writer
+    at docstatus 1. It re-checks write itself because ``db_set`` goes straight to the
+    database, skipping both the permission check and validate(), and it enforces the
+    actual-date ordering here because validate() does not run on the after-submit path.
+
+    The transition posts a one-time operational memo row. No GL Entry, Payment Entry,
+    Purchase Invoice, or salary document is created.
     """
-    from frappe.utils import today
-
     doc = frappe.get_doc("Maintenance Work Order", work_order)
     frappe.has_permission("Maintenance Work Order", "write", doc=doc, throw=True)
 
@@ -148,20 +183,38 @@ def mark_completed(work_order, completion_notes=None):
         frappe.throw(_("Only submitted Maintenance Work Orders can be marked Completed."))
     if doc.status == "Completed":
         frappe.throw(_("This Maintenance Work Order is already Completed."))
+    if doc.status != "In Progress":
+        frappe.throw(
+            _("Start the work first — only a Work Order In Progress can be Completed.")
+        )
     if not doc.building:
         frappe.throw(_("Building is required to mark Completed."))
-    if not doc.actual_start_date or not doc.actual_end_date:
-        frappe.throw(_("Actual Start Date and Actual End Date are required to mark Completed."))
-    if not doc.completion_photo:
+
+    # Evidence is resolved and checked BEFORE the transaction below, so a refusal
+    # reports the field at fault instead of the generic rollback message.
+    start_date = actual_start_date or doc.actual_start_date
+    end_date = actual_end_date or doc.actual_end_date or today()
+    photo = completion_photo or doc.completion_photo
+    if not start_date:
+        frappe.throw(_("Actual Start Date is required to mark Completed."))
+    if getdate(end_date) < getdate(start_date):
+        frappe.throw(_("Actual End Date must be on or after Actual Start Date."))
+    if not photo:
         frappe.throw(_("A completion photo is required before closing a Maintenance Work Order."))
 
     ledger_posted = False
     cost = flt(doc.total_procurement_cost)
 
     try:
-        doc.db_set("status", "Completed")
-        if completion_notes and not doc.completion_notes:
-            doc.db_set("completion_notes", completion_notes)
+        evidence = {
+            "actual_start_date": start_date,
+            "actual_end_date": end_date,
+            "completion_photo": photo,
+            "status": "Completed",
+        }
+        if completion_notes:
+            evidence["completion_notes"] = completion_notes
+        doc.db_set(evidence)
 
         if frappe.db.exists("DocType", "Maintenance Request") and doc.maintenance_request:
             mr_status_field = {f.fieldname for f in frappe.get_meta("Maintenance Request").fields}
