@@ -51,6 +51,7 @@ A photo and filename are required together.,يجب إرفاق الصورة وا�
 A portal access token is required.,يلزم وجود رمز وصول إلى البوابة.
 A push subscription endpoint is required.,عنوان اشتراك الإشعارات مطلوب.
 A reason is required to reject a handover.,يلزم سبب لرفض التسليم.
+A Reason is required to record SIM {0} as {1}.,يلزم تسجيل سبب لاعتماد الشريحة {0} بحالة {1}.
 A rejection reason is required.,سبب الرفض مطلوب.
 A rent payment is due today and remains unpaid,دفعة إيجار مستحقة اليوم ولم تُسدد بعد
 A request reference is required.,مرجع الطلب مطلوب.
@@ -454,6 +455,7 @@ Awaiting Approval,بانتظار الاعتماد
 Awareness and Training,التوعية والتدريب
 Back,رجوع
 Back to the system,العودة إلى النظام
+Back-Dated Retirement,إخراج من الخدمة بتاريخ سابق
 Backend Engines,المحرّكات الخلفيّة
 Background notifications are not enabled.,الإشعارات في الخلفية غير مفعّلة.
 Balady Certificate,شهادة بلدي
@@ -802,7 +804,7 @@ Condition on Issue,الحالة عند صرف العهدة
 Condition on Return,الحالة عند إرجاع العهدة
 Configuration,التهيئة
 "Configuration and access: settings, users and roles.",التهيئة والصلاحيات: الإعدادات والمستخدمون والأدوار.
-Configure a default Cash or Bank account on company {0} before raising a payment order.,هيّئ حساب نقدية أو بنك افتراضياً للشركة {0} قبل إصدار أمر دفع.
+Configure a default Cash or Bank account on company {0} before raising a payment.,هيّئ حساب نقدية أو بنك افتراضياً للشركة {0} قبل إصدار سند دفع.
 Configure required safety controls. Use 'Generate Safety Setup' button to create task templates.,"اضبط ضوابط السلامة المطلوبة. استخدم زر ""توليد إعداد السلامة"" لإنشاء قوالب المهام."
 Confirm,تأكيد
 Confirm Custody Cleared,أكّد تسليم العهدة
@@ -2105,6 +2107,7 @@ Manual Entry,إدخال يدوي
 Mapping rows applied in order. Each: target field = static value (when Static) else the value of the source field on the request.,تُطبّق صفوف التعيين بالترتيب. كل صف: الحقل المستهدف = قيمة ثابتة (عند خيار ثابت) وإلا قيمة الحقل المصدر في الطلب.
 March,مارس
 Mark Completed,تحديد كمكتمل
+Mark Lost,تسجيل كمفقودة
 Mark Missed,تحديد كـ فائت
 Mark Ready,تعليم كجاهزة
 Mark Received,تأكيد الاستلام
@@ -2371,7 +2374,7 @@ On-Site Receipt,الاستلام في الموقع
 On-call Only,عند الطلب فقط
 One Time,مرة واحدة
 One document is created per contract and billing period (e.g. 2026-07).,يُنشأ مستند واحد لكل عقد وفترة فوترة (مثل 2026-07).
-"One immutable custody event (assign, transfer, return, suspend, reactivate) for a SIM Card. The SIM's current state is projected from the latest submitted event.",حدث عهدة واحد غير قابل للتعديل (إسناد، نقل، إرجاع، تعليق، إعادة تفعيل) لشريحة اتصال. تُشتق حالة الشريحة الحالية من آخر حدث مُعتمد.
+"One immutable custody event (assign, transfer, return, suspend, reactivate, lost, terminated) for a SIM Card. The SIM's current state is projected from the latest submitted event.",حدث عهدة واحد غير قابل للتعديل (إسناد، نقل، إرجاع، تعليق، إعادة تفعيل، فقدان، إنهاء) لشريحة اتصال. تُشتق حالة الشريحة الحالية من آخر حدث مُعتمد.
 One row per scheduled rent payment on an Accommodation Lease. Status tracks payment state; rent is paid externally (no GL).,صف واحد لكل دفعة إيجار مجدولة على عقد إيجار إسكان. تتتبع الحالة وضع الدفع؛ يُسدد الإيجار خارجيًا (دون دفتر أستاذ).
 One-Time Password,رمز التحقق لمرة واحدة
 Only Finance can approve or mark a payment as paid. This step cannot be bypassed.,المالية فقط تعتمد أو تؤكّد الدفع. لا يمكن تجاوز هذه الخطوة.
@@ -2572,7 +2575,6 @@ Passport {0},جواز السفر {0}
 Payload,الحمولة
 Payment,دفعة
 Payment Entry,قيد الدفع
-Payment Order,أمر دفع
 Payment Request,طلب دفع
 Payment Request {0} raised for {1} SAR.,تم رفع طلب الدفع {0} بمبلغ {1} ريال.
 Payment Routing Field Map,تعيين حقول توجيه الدفع
@@ -2774,7 +2776,6 @@ Provider,مزود الخدمة
 Public URL,الرابط العام
 "Public base URL of the external frontend that consumes this backend, for example https://salis-fleet.com.",العنوان الأساسي العام للواجهة الأمامية الخارجية التي تستهلك هذا الخادم الخلفي، مثل https://salis-fleet.com.
 Purchase Invoice,فاتورة المشتريات
-Purchase Request,طلب شراء
 Purpose,الغرض
 Purpose / Notes,الغرض / ملاحظات
 Purpose is too long. Please keep it under 2000 characters.,الغرض طويل جداً. يرجى إبقاؤه أقل من 2000 حرف.
@@ -2809,7 +2810,7 @@ Quota period in YYYY-MM format (e.g. 2026-05).,فترة الحصة بصيغة YY
 Quota-increase claim - requires Operations-tier approval and a Finance consult note.,طلب زيادة حصة الوقود — يستلزم موافقة مستوى العمليات وملاحظة استشارة مالية.
 Raise Fuel Request,إنشاء طلب وقود
 Raise Maintenance Request,رفع طلب صيانة
-Raise Payment Order,إصدار أمر دفع
+Raise Payment Entry,إصدار سند دفع
 Raise Payment Request,رفع طلب دفع
 Raise Purchase Request,إصدار طلب شراء
 Raise Transport Request,إنشاء طلب نقل
@@ -2837,6 +2838,7 @@ Ready,جاهز
 Reallocation,إعادة تخصيص
 Reason,السبب
 Reason Category,سبب عدم التشغيل
+Reason Required,السبب مطلوب
 "Reason the driver is being stopped from operating, whether due to a violation, leave, termination, transfer, or another cause.",سبب إيقاف السائق عن العمل، سواء بسبب مخالفة أو إجازة أو إنهاء خدمة أو نقل أو سبب آخر.
 "Reason the supervisor rejected the plan, captured on rejection.",سبب رفض المشرف للمخطّط، يُسجَّل عند الرفض.
 "Reason the vehicle is being taken out of service, whether an accident, maintenance, violation, rental return, or another cause.",سبب إخراج المركبة من الخدمة، سواء حادث أو صيانة أو مخالفة أو إعادة مركبة مستأجرة أو سبب آخر.
@@ -3055,6 +3057,7 @@ Required for Accident or Violation stops.,مطلوب لحالات الإيقاف
 Required for Violation or Termination stops.,مطلوب لحالات الإيقاف بسبب مخالفة أو إنهاء خدمة.
 Required to cancel a submitted bill; recorded on the reversal posted to the Accommodation Ledger.,مطلوب لإلغاء فاتورة مُقدَّمة؛ يُسجَّل في القيد العكسي المُرحَّل إلى دفتر أستاذ السكن.
 Required when Room Status is Skipped.,مطلوب عندما تكون حالة الغرفة (تم التخطّي).
+Required when retiring a SIM as Lost or Terminated: this is the record of why custody ended.,مطلوب عند إخراج الشريحة من الخدمة بحالة مفقودة أو مُنهاة: هذا هو سجل سبب انتهاء العهدة.
 Required when status is Not Cleaned or N/A.,مطلوبة عندما تكون الحالة (لم يُنظَّف) أو (لا ينطبق).
 "Required-area cleaning evidence: a photo and checklist status per audited common area (Bathrooms, Kitchen, Corridors, and optional extras).",دليل نظافة المناطق المطلوبة: صورة وحالة قائمة فحص لكل منطقة مشتركة مدققة (الحمامات، المطبخ، الممرات، وإضافات اختيارية).
 Requires Procurement,يتطلب شراء
@@ -3669,7 +3672,6 @@ Supplier Contract Reference,مرجع عقد المورّد
 Supplier Cost Recovery,استرداد تكلفة المورد
 Supplier Markup (%),هامش المورد (٪)
 Supplier Name,اسم المورّد
-Supplier {0} has no payable account for company {1}.,المورّد {0} ليس له حساب دائن للشركة {1}.
 Supplier-Billed Cost This Month,التكلفة المحمَّلة على المورّد هذا الشهر
 Supporting evidence for the loss and its valuation. Required before the recovery can be Approved.,أدلة داعمة للخسارة وتقييمها. مطلوبة قبل أن يتسنى اعتماد الاسترداد.
 Surveillance,المراقبة
@@ -3722,7 +3724,7 @@ Telecom Cost Allocation,توزيع تكاليف الاتصالات
 Telecom Supplier,مورّد الاتصالات
 Telecom contract expires soon,عقد اتصالات على وشك الانتهاء
 Telecom service — {0} — {1} ({2}),خدمة اتصالات — {0} — {1} ({2})
-Telecom {0} — billing period {1} ({2}).,اتصالات {0} — فترة الفوترة {1} ({2}).
+"Telecom {0} — billing period {1} ({2}), settling {3}.","اتصالات {0} — فترة الفوترة {1} ({2})، سداداً للفاتورة {3}."
 Temp,مؤقت
 Template,القالب
 Template Items,عناصر القالب
@@ -3742,12 +3744,14 @@ Temporary Worker {0} does not exist.,العامل المؤقت {0} غير موج
 Temporary Worker {0}'s stay window expired on {1}.,انتهت مهلة إقامة العامل المؤقت {0} في {1}.
 Temporary Worker — use the Arrivals Desk to house this worker.,عامل مؤقت — استخدم مكتب الوصول لتسكين هذا العامل.
 Temporary workers board via the trip’s unregistered manifest.,لوحة العمال المؤقتين عبر بيان الرحلة غير المسجل.
+Terminate,إنهاء الخدمة
 Terminated,مُنهى
 Termination,إنهاء خدمة
 Terms Accepted On,تاريخ قبول الشروط
 Terms Signature,توقيع الموافقة
 Thank you. Your receipt of the custody items has been recorded.,شكراً لك. تم تسجيل استلامك أصناف العهدة.
 That vehicle is not assigned to you. You can only request fuel for your own vehicle.,تلك المركبة غير مسندة إليك. يمكنك طلب الوقود لمركبتك فقط.
+This ends the current custody and retires the SIM. The SIM and its history are kept; the action can be undone by cancelling the custody record.,ينهي هذا العهدة الحالية ويُخرج الشريحة من الخدمة. تبقى الشريحة وسجلها محفوظين؛ ويمكن التراجع عن الإجراء بإلغاء سجل العهدة.
 The Dispatch Trip being executed; its linked Transport Request carries the worker manifest this log records boarding against.,رحلة التشغيل قيد التنفيذ؛ يحمل طلب النقل المرتبط بها قائمة العمّال التي يسجّل هذا السجل الصعود مقابلها.
 The Dispatch Trip the scanned pass was issued against.,رحلة التشغيل التي صدر التصريح الممسوح مقابلها.
 The GPS position is outside the valid coordinate range.,موقع GPS خارج نطاق الإحداثيات الصحيح.
@@ -3808,6 +3812,7 @@ The vehicle has been taken out of service.,تم إخراج المركبة من �
 "The vehicle's project supervisor, resolved when the alert is raised; drives the Critical-alert notification.",مشرف مشروع المركبة، يُحدَّد عند رفع التنبيه؛ يقود إشعار التنبيه الحرج.
 The worker the scanned pass identifies (registered Employee).,العامل الذي تحدده البطاقة الممسوحة (موظف مسجل).
 The {0} DocType is not available on this site.,نوع المستند {0} غير متاح على هذا الموقع.
+The {0} date {1} is before SIM {2}'s last custody event on {3}. Record the retirement on or after that date.,تاريخ {0} وهو {1} أسبق من آخر حدث عهدة للشريحة {2} بتاريخ {3}. سجّل الإخراج من الخدمة في ذلك التاريخ أو بعده.
 Theft,سرقة
 Theft report {0} cancelled.,أُلغي بلاغ السرقة {0}.
 Theme,السمة
@@ -4500,3 +4505,16 @@ Boarding row #{0}: worker {1} has already boarded on this trip.,صف الركو�
 "Operational deduction (damage / rent / fuel / custody) governed by the Salary Deduction Policy. Disabled by default. Enable only after the policy's global switch and the relevant type rule are activated and the worker's signed consent is on file on the source document, within the KSA Labor Law caps.",خصم تشغيلي (تلف / إيجار / وقود / عهدة) تحكمه سياسة خصم الرواتب. معطّل افتراضياً. لا تفعّله إلا بعد تفعيل المفتاح العام للسياسة وقاعدة النوع المعنية، ووجود موافقة العامل الموقّعة في المستند المصدر، وضمن سقوف نظام العمل السعودي.
 "Safety Task Catalog {0} has frequency ""{1}"", which has no scheduling equivalent. Set a supported catalog frequency (Daily, Weekly, Monthly, Quarterly, Annual) or map it before generating.","فهرس مهام السلامة {0} وتيرته ""{1}"" وليس لها ما يقابلها في الجدولة. اضبط وتيرة مدعومة (يومي، أسبوعي، شهري، ربع سنوي، سنوي) أو اربطها قبل التوليد."
 This statement reconciles the rental office claim against accrued rental days. It does not post to the general ledger; any payment is raised through a separate Salis Payment Request.,يطابق هذا الكشف مطالبة مكتب التأجير مع أيام الإيجار المستحقة. ولا يقيّد في دفتر الأستاذ العام؛ وأي دفع يُنشأ عبر طلب دفع مستقل في ساليس.
+Checking outstanding invoices…,جارٍ التحقق من الفواتير المستحقة…
+Invoice,فاتورة
+No Outstanding Invoice,لا توجد فاتورة مستحقة
+No amount could be allocated against {0} {1}. Refresh and try again.,تعذّر تخصيص أي مبلغ مقابل {0} {1}. حدّث الصفحة وحاول مرة أخرى.
+No payment raised for this period yet.,لم يُصدر أي دفع لهذه الفترة بعد.
+Payable Source Required,مصدر الالتزام مطلوب
+Select the {0} this payment settles. A payment with no invoice behind it settles nothing in the ledger.,اختر {0} التي يسددها هذا الدفع. الدفع بلا فاتورة خلفه لا يسدد شيئاً في دفتر الأستاذ.
+The submitted supplier invoice this payment settles.,فاتورة المورّد المعتمدة التي يسددها هذا الدفع.
+There is no submitted Purchase Invoice outstanding for {0} under this company. Raise and submit the supplier invoice first — a payment with no invoice behind it settles nothing.,لا توجد فاتورة شراء معتمدة ومستحقة للمورّد {0} في هذه الشركة. أصدر فاتورة المورّد واعتمدها أولاً — فالدفع بلا فاتورة خلفه لا يسدد شيئاً.
+"{0} {1} belongs to company {2}, not the contract's company {3}.",{0} {1} تتبع الشركة {2} وليست شركة العقد {3}.
+{0} {1} has nothing outstanding — it is already settled.,{0} {1} لا يوجد عليها مبلغ مستحق — فهي مسددة بالفعل.
+"{0} {1} is billed by {2}, not the contract's supplier {3}.",{0} {1} صادرة من المورّد {2} وليس مورّد العقد {3}.
+{0} {1} is not submitted. Only an approved invoice can be paid.,{0} {1} غير معتمدة. لا يمكن دفع سوى فاتورة معتمدة.
