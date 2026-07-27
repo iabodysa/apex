@@ -1528,7 +1528,7 @@ First Aid Kit Required,حقيبة الإسعافات الأولية مطلوبة
 First Payment Date,تاريخ أول دفعة
 First Payment Date cannot be before Lease Start Date.,لا يمكن أن يكون تاريخ أول دفعة قبل تاريخ بداية عقد الإيجار.
 Fixed Asset (Capex),أصل ثابت (مصروفات رأس مالية)
-Fixed monthly salary in SAR. No car and no allowances. Paid via a native ERPNext Payment Entry against this freelance as a party.,راتب شهري ثابت بالريال السعودي. بلا سيارة وبلا بدلات. يُدفع عبر قيد دفع أصيل في ERPNext على هذا المستقل بصفته طرفًا.
+Fixed monthly salary in SAR. No car and no allowances. Paid via a native ERPNext Payment Entry against this freelance as a party. Pay is personal so only Finance and System Manager can see this column.,راتب شهري ثابت بالريال السعودي. بلا سيارة وبلا بدلات. يُدفع عبر قيد دفع أصيل في ERPNext على هذا المستقل بصفته طرفًا. الراتب بيانات شخصية، فلا يظهر هذا العمود إلا لمدير الشؤون المالية ومدير النظام.
 Flags a building that receives externally-purchased goods before they are handed over into custody.,يُعلِّم المبنى الذي يستلم البضائع المشتراة خارجياً قبل تسليمها إلى العهدة.
 Flags that this policy must be reviewed by Legal/HR against KSA Labor Law (wage-deduction articles) before activation. Kept ON by design as a standing reminder.,يشير إلى وجوب مراجعة هذه السياسة من قبل الشؤون القانونية/الموارد البشرية وفق نظام العمل السعودي (مواد خصم الأجور) قبل التفعيل. يبقى مفعّلًا بالتصميم كتذكير دائم.
 Fleet,الأسطول
