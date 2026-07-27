@@ -44,6 +44,7 @@ from apex.habitat.api.safety_checklist import (
     get_tasks_for_cadence,
 )
 from apex.tests._helpers import as_user
+from apex.tests.factories import make_open_assignment
 
 
 def _h(n=12):
@@ -243,33 +244,6 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         )
         return doc.name, token
 
-    def _house(self, employee, building):
-        """A submitted, still-open Housing Assignment placing ``employee`` in
-        ``building`` — the only thing that gives an Employee an estate."""
-        doc = frappe.get_doc(
-            {
-                "doctype": "Housing Assignment",
-                "party_type": "Employee",
-                "party": employee,
-                "employee": employee,
-                "building": building,
-                "check_in_date": frappe.utils.today(),
-            }
-        )
-        doc.flags.ignore_validate = True
-        doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        frappe.db.set_value("Housing Assignment", doc.name, "docstatus", 1)
-        # [#1i4y73]
-        self.addCleanup(
-            lambda n=doc.name: (
-                frappe.db.set_value("Housing Assignment", n, "docstatus", 0),
-                frappe.delete_doc(
-                    "Housing Assignment", n, force=True, ignore_permissions=True
-                ),
-            )
-        )
-        return doc.name
-
     def setUp(self):
         self.addCleanup(frappe.set_user, "Administrator")
 
@@ -310,7 +284,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         returned that Employee estate-wide.
         """
         emp, token = self._employee()
-        self._house(emp, self.b2)
+        make_open_assignment(emp, self.b2, self.addCleanup)
         with as_user(self.scoped_hr):
             parties = {r["party"] for r in search_arrivals_workers(txt=token)}
         self.assertNotIn(
@@ -333,7 +307,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         """The pre-existing housed-exclusion still holds: an Employee already in the
         caller's OWN estate is not offered for a fresh check-in either."""
         emp, token = self._employee()
-        self._house(emp, self.b1)
+        make_open_assignment(emp, self.b1, self.addCleanup)
         with as_user(self.scoped_hr):
             parties = {r["party"] for r in search_arrivals_workers(txt=token)}
         self.assertNotIn(

@@ -11,6 +11,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from apex.habitat.api.front_desk import resolve_worker
 from apex.tests._helpers import as_user
+from apex.tests.factories import make_open_assignment
 
 
 def _h(n=12):
@@ -272,31 +273,6 @@ class TestResolveWorkerBuildingScope(FrappeTestCase):
         )
         return tok
 
-    def _house(self, employee, building):
-        """A submitted, still-open assignment placing ``employee`` in ``building``."""
-        doc = frappe.get_doc(
-            {
-                "doctype": "Housing Assignment",
-                "party_type": "Employee",
-                "party": employee,
-                "employee": employee,
-                "building": building,
-                "check_in_date": frappe.utils.today(),
-            }
-        )
-        doc.flags.ignore_validate = True
-        doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        frappe.db.set_value("Housing Assignment", doc.name, "docstatus", 1)
-        self.addCleanup(
-            lambda n=doc.name: (
-                frappe.db.set_value("Housing Assignment", n, "docstatus", 0),
-                frappe.delete_doc(
-                    "Housing Assignment", n, force=True, ignore_permissions=True
-                ),
-            )
-        )
-        return doc.name
-
     def setUp(self):
         self.addCleanup(frappe.set_user, "Administrator")
 
@@ -311,7 +287,7 @@ class TestResolveWorkerBuildingScope(FrappeTestCase):
         """Same refusal through the token path: the Employee is housed in b2."""
         emp = self._employee()
         tok = self._token_for(emp)
-        self._house(emp, self.b2)
+        make_open_assignment(emp, self.b2, self.addCleanup)
         with as_user(self.scoped):
             with self.assertRaises(frappe.PermissionError):
                 resolve_worker(tok._plaintext_token)
