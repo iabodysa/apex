@@ -76,7 +76,7 @@ class SafetyRound(Document):
         In before_submit rather than validate so the maker can still SAVE the
         round first — an execution needs an existing round to link to.
         """
-        if frappe.db.count(
+        if frappe.db.exists(
             "Safety Task Execution",
             {"safety_round": self.name, "docstatus": ["<", 2]},
         ):
