@@ -17,7 +17,7 @@ EACH CLAUSE, WHY IT IS LOAD-BEARING (the colocated test re-derives the predicate
 one clause dropped and shows it goes blind on a REAL row): permlevel-0 only -- a row is
 kept only when ``cint(perm.permlevel) == 0`` (``frappe/permissions.py:283-284``, filter
 :289), since a permlevel-1+ row never grants the DocType, only widens FIELD access --
-Finance Manager on Custody Damage Assessment held exactly that shape. Not
+Finance Manager on Housing Checkout holds exactly that shape. Not
 ``if_owner``-only -- a role-targeted notification reaches non-owners too, and an
 owner-scoped grant does not look like a denial (``frappe/permissions.py:297-307``
 rewrites it to ``read=1``, list view still opens) while rows are filtered away per-row
