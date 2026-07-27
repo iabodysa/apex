@@ -30,9 +30,10 @@ transition; ``Done`` / ``Failed`` / ``Reverted`` are then reachable post-submit
 
 This controller keeps only what the workflow cannot express: the per-type
 required-field validation, the Chip evidence/acknowledgement gate, the
-initial-status guard (a request must be created at Pending), the exhausted-quota
-gate (a Standard draw against a spent allocation is refused at Approve and again
-at the locked consumption step), and the idempotent
+initial-status guard (a request must be created at Pending), the quota-allowance
+gate (a Standard draw is refused when the allocation is spent OR when the draw
+itself would overrun what is left — checked at Approve and again at the locked
+consumption step), and the idempotent
 quota side-effects — Standard quota
 consumption is applied when the request reaches Done (on submit if it submits
 straight into Done, or on the post-submit transition into Done) and reversed on
@@ -250,11 +251,21 @@ class FuelRequest(Document):
 	# [#5u90n1]
 
 	def _guard_quota_allowance(self, quota=None):
-		"""A Standard request draws down a monthly allocation, so a quota with
-		nothing left must not be drawn again — Top-up is the sanctioned way to add
-		fuel beyond the allocation and stays exempt. Called once before submit for
-		early desk feedback and again inside the consumption step, where the quota
-		row is already locked and the read is authoritative against a concurrent draw."""
+		"""A Standard request draws down a monthly allocation, so the allocation
+		must cover it — Top-up is the sanctioned way to add fuel beyond the
+		allocation and stays exempt. Two refusals share this one enforcement point:
+
+		* the quota has nothing left at all (status Exhausted, or consumption has
+		  already reached the allocation), and
+		* this draw alone would overrun what is left. An exhaustion test on its own
+		  cannot see that: 15 L against a 10 L quota with 0 consumed satisfies
+		  ``consumed < monthly``, so the oversized FIRST draw used to pass here and
+		  push consumed_litres past the allocation at Done.
+
+		Called once before submit for early desk feedback and again inside the
+		consumption step, where the quota row is already locked and the read is
+		authoritative — that second call is what catches two in-flight requests
+		that each fit on their own but together overrun the allocation."""
 		if not self.fuel_quota:
 			return
 		if quota is None:
@@ -274,6 +285,15 @@ class FuelRequest(Document):
 					"Fuel Quota {0} is exhausted ({1} of {2} L already consumed). "
 					"Raise a Top-up request to dispense more fuel this period."
 				).format(self.fuel_quota, consumed, monthly)
+			)
+		requested = flt(self.requested_litres)
+		if monthly and consumed + requested > monthly:
+			frappe.throw(
+				_(
+					"This request of {0} L exceeds the {1} L left on Fuel Quota {2} "
+					"({3} of {4} L already consumed). Reduce the request, or raise a "
+					"Top-up request to dispense more fuel this period."
+				).format(requested, monthly - consumed, self.fuel_quota, consumed, monthly)
 			)
 
 	def _apply_quota_consumption(self):

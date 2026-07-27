@@ -23,6 +23,10 @@ class FuelQuota(Document):
 			frappe.throw(_("Monthly litres must be greater than zero."))
 		monthly = self.monthly_litres or 0
 		consumed = self.consumed_litres or 0
+		# Overrun by a fuel draw is now REFUSED at the source (Fuel Request's
+		# quota-allowance gate), so this can only be reached by a direct edit that
+		# lowers the allocation below what is already consumed — stays advisory so
+		# the operator can still open the record and correct it.
 		if monthly and consumed > monthly:
 			frappe.msgprint(
 				_("Consumed litres ({0}) exceed the monthly quota ({1}).").format(
