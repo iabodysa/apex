@@ -83,6 +83,14 @@ A ``permlevel`` is enforced in the DOCUMENT and DESK-VIEW layers only.
   * ENFORCED on the Desk view: the list/report view drops an unreadable level column
     (``frappe/desk/reportview.py:126-128``), and ``frappe.get_list`` drops it too
     (``frappe/model/db_query.py:270`` -> ``:668``).
+  * ENFORCED on print: ``is_visible`` hides an unreadable level field from the print
+    layout (``frappe/www/printview.py:542-548``). Checked, because a print format looked
+    like an obvious hole and is not one.
+  * NOT ENFORCED in a Notification: neither ``frappe/email/doctype/notification/
+    notification.py`` nor ``frappe/core/doctype/communication/email.py`` mentions
+    permlevel, so a notification template that interpolates a level-1 field mails it to
+    whoever the recipient rule names. Raising a field does not audit the templates that
+    already reference it.
   * NOT ENFORCED under ``frappe.get_all``. That same db_query filter returns early on
     ``ignore_permissions`` (``db_query.py:683-684``), and ``frappe.get_all`` sets exactly
     that flag (``frappe/__init__.py:2050``). So ``get_all`` hands a level-1 column to
