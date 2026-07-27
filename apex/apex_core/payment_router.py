@@ -72,7 +72,7 @@ def require_configured_target(built_doctype: str) -> None:
         return
     frappe.throw(
         _(
-            "Payments on this site are configured to be raised as {0}, but this action can only create a {1} allocated against the supplier's invoice. Set Target Payment DocType to {1} in Payment Routing Settings, or raise this payment from a {2} instead."
+            "This site is configured to raise payments as {0}, but this action can only create a {1} allocated against the supplier's invoice. Raise this payment from a {2}, which builds the configured target, or set Target Payment DocType to {1} in Payment Routing Settings."
         ).format(_(configured), _(built_doctype), _(SOURCE_DOCTYPE)),
         title=_("Payment Target Mismatch"),
     )

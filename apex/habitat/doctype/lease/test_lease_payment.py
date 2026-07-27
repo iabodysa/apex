@@ -17,6 +17,12 @@ Entry, so cancelling it in Accounts must reverse the lease's view with no revers
 running — and, unlike the Telecom Contract, no cancel exemption either: the lease stores
 no link to the payment, so nothing on it can veto the cancellation.
 
+``TestTheRentSurfaceObeysTheConfiguredPaymentTarget`` covers the other divergence: the
+button used to read the Payment Routing target in the BROWSER and then pick among three
+hard-coded branches, so every target those branches did not name — the router's own
+Payment Request default included — quietly opened a Payment Entry anyway. Those cases
+change the configuration and assert the outcome changes with it.
+
 Every submitted lease here is approved through ``apply_workflow``. Lease is governed by
 the Accommodation Lease Workflow, so a bare ``doc.submit()`` is refused by
 ``apex_core.utils.workflow_guard`` — and reaching docstatus 1 any other way would build
@@ -52,6 +58,8 @@ SECOND_DUE = "2026-02-01"
 # tell an allocated payment apart from an amount copied off the schedule.
 RENT = 8000
 INVOICE_TOTAL = 5500
+ROUTING_SETTINGS = "Payment Routing Settings"
+TARGET_FIELD = "target_payment_doctype"
 # Distinguishes "the caller did not choose a landlord" from "the caller chose none",
 # which is a real lease state: the field is not mandatory.
 _UNSET = object()
@@ -75,10 +83,28 @@ class _RentPaymentCase(FrappeTestCase):
     def setUp(self):
         self.addCleanup(frappe.set_user, "Administrator")
         frappe.db.savepoint("lease_payment_test")
+        # The rent surface refuses unless the deployment routes payments to a Payment
+        # Entry, so every case below states that configuration rather than inheriting
+        # whatever this site happens to hold.
+        self.route_payments_to(payable_allocation.PAYMENT_ENTRY_DOCTYPE)
 
     def tearDown(self):
         frappe.set_user("Administrator")
         frappe.db.rollback(save_point="lease_payment_test")
+
+    def route_payments_to(self, target_doctype):
+        """Point Payment Routing Settings at ``target_doctype`` for one test.
+
+        The restore is registered BEFORE the write and goes back through the same
+        setter, because a Single is not a row this suite's savepoint can undo on its
+        own: ``set_single_value`` clears the document cache as it writes, so a rolled
+        back ``tabSingles`` would still be read back through whatever the last writer
+        cached. Blank is passed as "" rather than None — it is what an unconfigured
+        router actually holds, and the router reads it as the Payment Request default.
+        """
+        original = frappe.db.get_single_value(ROUTING_SETTINGS, TARGET_FIELD) or ""
+        self.addCleanup(frappe.db.set_single_value, ROUTING_SETTINGS, TARGET_FIELD, original)
+        frappe.db.set_single_value(ROUTING_SETTINGS, TARGET_FIELD, target_doctype)
 
     # Fixtures
 
@@ -352,3 +378,72 @@ class TestRentSettlementFollowsTheLedger(_RentPaymentCase):
         again = lease_payment.create_rent_payment(lease.name, FIRST_DUE, self.invoice().name)
         self.assertTrue(again["existing"])
         self.assertEqual(again["document_name"], result["document_name"])
+
+
+class TestTheRentSurfaceObeysTheConfiguredPaymentTarget(_RentPaymentCase):
+    """A deployment configures one payment target; this screen must not raise another.
+
+    The exposure was bounded — the old branches opened UNSAVED drafts, so nothing was
+    written behind the operator's back. What diverged was the document TYPE: the
+    configuration said one thing and this one surface did another.
+    """
+
+    def _refuse(self, callable_, *args):
+        """Run a rent action that must be refused, and prove no payment came of it."""
+        before = self.payment_count(self.landlord)
+        with self.assertRaises(frappe.ValidationError) as caught:
+            callable_(*args)
+        self.assertEqual(self.payment_count(self.landlord), before)
+        return str(caught.exception)
+
+    def test_changing_the_configured_target_changes_what_this_surface_opens(self):
+        """The pair the card turns on. Same lease, same invoice, two configurations —
+        so the outcome can only be attributed to the configuration."""
+        lease = self.lease()
+        invoice = self.invoice()
+
+        self.route_payments_to("Payment Request")
+        self._refuse(lease_payment.create_rent_payment, lease.name, FIRST_DUE, invoice.name)
+
+        self.route_payments_to(payable_allocation.PAYMENT_ENTRY_DOCTYPE)
+        result = lease_payment.create_rent_payment(lease.name, FIRST_DUE, invoice.name)
+        self.assertEqual(result["document_type"], payable_allocation.PAYMENT_ENTRY_DOCTYPE)
+        self.assertFalse(result["existing"])
+
+    def test_the_unconfigured_router_default_is_refused_not_quietly_paid(self):
+        """The first case the card names. An unconfigured router answers Payment
+        Request; the old button had no branch for that answer, so it fell through to
+        the else branch and opened a Payment Entry — the configured default ignored on
+        the one screen that read it."""
+        self.route_payments_to("")
+        message = self._refuse(
+            lease_payment.create_rent_payment, self.lease().name, FIRST_DUE, self.invoice().name
+        )
+        self.assertIn("Payment Request", message)
+
+    def test_a_client_custom_target_is_refused_by_name(self):
+        """The router supports any client payment DocType, so the refusal cannot be a
+        whitelist of the two the old branches knew. It names whatever is configured."""
+        self.route_payments_to("Payment Order")
+        message = self._refuse(
+            lease_payment.create_rent_payment, self.lease().name, FIRST_DUE, self.invoice().name
+        )
+        self.assertIn("Payment Order", message)
+        # Actionable, not merely correct: the operator is told which setting to change.
+        self.assertIn(ROUTING_SETTINGS, message)
+
+    def test_a_mismatched_target_stops_the_action_before_the_dialog_opens(self):
+        """The refusal has to reach the button, not just the writer. The eligible-payable
+        listing is the first call the button makes, so gating there is what stops an
+        operator filling in a dialog whose submit could only fail."""
+        lease = self.lease()
+        self.invoice()
+        self.route_payments_to("Payment Order")
+        self.assertIn("Payment Order", self._refuse(lease_payment.list_rent_payables, lease.name))
+
+    def test_the_status_read_is_refused_too(self):
+        """One gate on the path all three endpoints share, so no endpoint can be added
+        later that reads or writes rent payments without passing it."""
+        lease = self.lease()
+        self.route_payments_to("Payment Order")
+        self._refuse(lease_payment.get_rent_payment_status, lease.name, FIRST_DUE)
