@@ -156,6 +156,7 @@
    "role": "System Manager"
   }
  ],
+ "read_only": 1,
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
  "search_fields": "vehicle, snapshot_date, period_days",

@@ -230,6 +230,7 @@
    "role": "Internal Auditor"
   }
  ],
+ "read_only": 1,
  "row_format": "Dynamic",
  "search_fields": "driver, employee, accommodation_building",
  "sort_field": "creation",
