@@ -32,12 +32,39 @@ from pathlib import Path
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.salis.doctype.transport_request.transport_request import (
+    SERVICE_LINE_REQUEST_TYPE,
+    WORKER_MANIFEST_SERVICE_LINES,
+)
+
 _REQUEST_JSON = Path(__file__).resolve().parent / "transport_request.json"
 
 FLEET_MANAGER = "Fleet Manager"
 # Read + report at level 0, no write anywhere, and in salis/permissions.py UNSCOPED_ROLES —
 # so it reaches every row and any refusal it hits is a FIELD verdict, not a row filter.
 INTERNAL_AUDITOR = "Internal Auditor"
+
+# THE FIXTURE PAIR, derived rather than written down.
+#
+# `service_line` and `request_type` are two `reqd` Selects that must AGREE:
+# `TransportRequest.validate` (transport_request.py:81-91) looks the transport type up in
+# SERVICE_LINE_REQUEST_TYPE and throws when the request type is set to anything else. And
+# `request_type` declares no `default`, so Frappe's `_set_defaults` seeds a reqd Select
+# with its FIRST option — naming only the transport type leaves the other half sitting on
+# a default that contradicts it. Both halves must be stated.
+#
+# Which pair: the transport type NOT in WORKER_MANIFEST_SERVICE_LINES
+# (transport_request.py:42) is the one that carries no worker manifest, and therefore the
+# one whose validate branch needs no Building, no Project and no worker rows — the lightest
+# document that still exercises the fetch this proof is about. Derived from the
+# controller's own two constants, so a renamed option or a re-paired request type moves
+# this fixture with it; asserted single below, so a THIRD manifest-free type is reported
+# rather than silently picked.
+_MANIFEST_FREE_SERVICE_LINES = sorted(
+    set(SERVICE_LINE_REQUEST_TYPE) - set(WORKER_MANIFEST_SERVICE_LINES)
+)
+FIXTURE_SERVICE_LINE = _MANIFEST_FREE_SERVICE_LINES[0]
+FIXTURE_REQUEST_TYPE = SERVICE_LINE_REQUEST_TYPE[FIXTURE_SERVICE_LINE]
 
 
 class TestTransportRequestPiiPermlevel(FrappeTestCase):
@@ -70,23 +97,66 @@ class TestTransportRequestPiiPermlevel(FrappeTestCase):
             .name
         )
 
+    def _request(self, requester):
+        """Insert the lightest valid Transport Request AS THE CALLING USER.
+
+        Deliberately not `ignore_permissions`: the whole point is that the insert runs
+        under the acting user's DocPerms, because `validate_higher_perm_levels` returns
+        early on that flag (document.py:785) and an ignored insert would prove nothing
+        about permlevels. `destination` is what the derived request type's validate branch
+        requires (transport_request.py:117-119).
+        """
+        return frappe.get_doc(
+            {
+                "doctype": "Transport Request",
+                "requested_by": requester,
+                "service_line": FIXTURE_SERVICE_LINE,
+                "request_type": FIXTURE_REQUEST_TYPE,
+                "destination": "S005 Destination",
+            }
+        ).insert()
+
+    def test_the_fixture_pair_is_the_one_the_controller_declares(self):
+        """Non-vacuity for the fixture itself.
+
+        The derivation must yield exactly ONE candidate, and both halves must be live
+        options on the shipped Selects — otherwise the two proofs below would die on a
+        fixture error and report it as a permlevel failure, which is how this file failed
+        the first time it ran.
+        """
+        self.assertEqual(
+            len(_MANIFEST_FREE_SERVICE_LINES),
+            1,
+            "more than one transport type now carries no worker manifest — pick the "
+            f"fixture pair deliberately instead of taking the first: {_MANIFEST_FREE_SERVICE_LINES}",
+        )
+        shipped = json.loads(_REQUEST_JSON.read_text(encoding="utf-8"))
+        for fieldname, expected in (
+            ("service_line", FIXTURE_SERVICE_LINE),
+            ("request_type", FIXTURE_REQUEST_TYPE),
+        ):
+            with self.subTest(field=fieldname):
+                field = next(f for f in shipped["fields"] if f["fieldname"] == fieldname)
+                options = [o for o in (field.get("options") or "").split("\n") if o.strip()]
+                self.assertIn(
+                    expected,
+                    options,
+                    f"the controller pairs {fieldname} to {expected!r}, which is not a "
+                    "shipped Select option — controller and JSON have drifted",
+                )
+                self.assertIsNone(
+                    field.get("default"),
+                    f"{fieldname} gained a default; re-check that it agrees with its pair, "
+                    "because a reqd Select with no default silently takes its FIRST option",
+                )
+
     def test_a_fleet_manager_insert_keeps_the_fetched_mobile_number(self):
         """The card's create-path proof: `requested_by` populated, `mobile_number` non-empty
         after insert. Before the write flag it was fetched at document.py:302 and blanked at
         :306, so the request reached dispatch with no way to phone the requester."""
         manager = self._user_with_role(FLEET_MANAGER, mobile="0533221100")
         frappe.set_user(manager)
-        doc = frappe.get_doc(
-            {
-                "doctype": "Transport Request",
-                "requested_by": manager,
-                # The lightest valid shape: an Administrative Trip needs only a destination
-                # (transport_request.py:117-119), where the two manifest transport types
-                # drag in a building, a project or a worker table this proof does not use.
-                "service_line": "Administrative Trip",
-                "destination": "S005 Destination",
-            }
-        ).insert()
+        doc = self._request(manager)
 
         stored = frappe.db.get_value("Transport Request", doc.name, "mobile_number")
         self.assertTrue(
@@ -103,17 +173,7 @@ class TestTransportRequestPiiPermlevel(FrappeTestCase):
         auditor = self._user_with_role(INTERNAL_AUDITOR)
 
         frappe.set_user(manager)
-        doc = frappe.get_doc(
-            {
-                "doctype": "Transport Request",
-                "requested_by": manager,
-                # The lightest valid shape: an Administrative Trip needs only a destination
-                # (transport_request.py:117-119), where the two manifest transport types
-                # drag in a building, a project or a worker table this proof does not use.
-                "service_line": "Administrative Trip",
-                "destination": "S005 Destination",
-            }
-        ).insert()
+        doc = self._request(manager)
         self.assertIn(
             1,
             frappe.get_doc("Transport Request", doc.name).get_permlevel_access("write"),
