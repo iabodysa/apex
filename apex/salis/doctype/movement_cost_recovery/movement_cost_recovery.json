@@ -289,6 +289,7 @@
    "write": 1
   }
  ],
+ "read_only": 1,
  "row_format": "Dynamic",
  "search_fields": "recovery_type, reference_name, reference_doctype",
  "sort_field": "modified",

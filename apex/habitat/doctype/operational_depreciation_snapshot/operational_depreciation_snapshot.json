@@ -180,6 +180,7 @@
    "write": 0
   }
  ],
+ "read_only": 1,
  "search_fields": "building, snapshot_date",
  "track_changes": 1
 }

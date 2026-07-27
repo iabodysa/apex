@@ -196,6 +196,7 @@
    "role": "Internal Auditor"
   }
  ],
+ "read_only": 1,
  "row_format": "Dynamic",
  "search_fields": "driver, attendance_date, status",
  "sort_field": "modified",

@@ -192,6 +192,7 @@
    "role": "Internal Auditor"
   }
  ],
+ "read_only": 1,
  "row_format": "Dynamic",
  "search_fields": "vehicle, driver, log_date",
  "sort_field": "modified",

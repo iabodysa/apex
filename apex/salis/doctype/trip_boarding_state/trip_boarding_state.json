@@ -115,6 +115,7 @@
  "name": "Trip Boarding State",
  "owner": "Administrator",
  "permissions": [],
+ "read_only": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

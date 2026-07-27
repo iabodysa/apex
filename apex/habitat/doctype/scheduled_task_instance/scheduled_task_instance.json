@@ -183,6 +183,7 @@
    "write": 1
   }
  ],
+ "read_only": 1,
  "row_format": "Dynamic",
  "search_fields": "template, building, due_date",
  "sort_field": "modified",
