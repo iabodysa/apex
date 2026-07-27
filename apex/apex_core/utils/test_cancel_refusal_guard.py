@@ -67,17 +67,12 @@ _REFUSAL_HOOK = "before_cancel"
 _THROW_NAMES = frozenset({"frappe.throw", "throw"})
 
 # {"<dotted.module>:<qualname>": "why this one still stands"}
-# One entry, a DEFERRAL not an exception: the sweep that moved six stock-voucher
-# refusals into before_cancel read only handler BODIES, so this seventh - a throw
-# one call down, in _release_recovery_advance - was never seen. Same defect, and
-# it stays only because vehicle_incident is outside this change's write scope.
-# Fix: move the paid/recovered check to before_cancel, then delete this entry.
-_BASELINE: dict[str, str] = {
-    "apex.salis.doctype.vehicle_incident.vehicle_incident:VehicleIncident.on_cancel": (
-        "refuses when the linked Employee Advance already carries a paid or "
-        "recovered amount; belongs in before_cancel"
-    ),
-}
+# Empty, and it should stay that way. The one deferral it held - VehicleIncident.on_cancel
+# refusing a paid/recovered Employee Advance one call down in _release_recovery_advance -
+# was drained when that check moved into before_cancel, so the entry stopped naming a real
+# finding and test_baseline_holds_no_stale_entry failed on it. That failure is the ratchet
+# working: an entry outlives its defect and the guard says so.
+_BASELINE: dict[str, str] = {}
 
 
 def _dotted(node):
