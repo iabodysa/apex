@@ -16,11 +16,27 @@ human-written masters alike, since duplicate rows abort migrate regardless of
 who wrote them. Add a row when another Salis DocType takes a composite UNIQUE
 index.
 
+A table-driven test grades only the rows it lists, so the table has to prove its
+own completeness or a half-covered subject reports green: this one listed two of
+four controllers while every assertion passed.
+``test_guarded_lists_every_salis_on_doctype_update`` closes that by globbing
+``salis/**/*.py``, keeping the files that declare the hook, and asserting that
+set equals ``GUARDED``'s. It is deliberately keyed on DECLARING THE HOOK, not on
+taking a UNIQUE index: the hook is the seam that can abort migrate, and it is
+what the rest of this module actually calls.
+
+It does NOT reach outside ``salis/`` — a Habitat or Apex Core controller taking
+the same hook needs its own guard — and it cannot tell a correct constraint from
+a wrong one, only that some row exists for the module.
+
 Pure unit test — the DDL is mocked, so it needs no site and no live table.
 """
 
 from __future__ import annotations
 
+import ast
+import glob
+import os
 import unittest
 from unittest import mock
 
@@ -64,9 +80,44 @@ DUPLICATE_ENTRY = (
 )
 
 
+HOOK = "on_doctype_update"
+SALIS_ROOT = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+)
+
+
 def _source(module):
     with open(module.__file__, encoding="utf-8") as fh:
         return fh.read()
+
+
+def _declares_hook(path):
+    """True when the file defines ``on_doctype_update`` anywhere.
+
+    Anywhere, not just at module level: a controller that declares it as a METHOD
+    is silently never called by Frappe, and pulling it in here means the author
+    is told to add a row and then told by the module-level assertion why the row
+    fails — instead of the file staying invisible to both.
+    """
+    with open(path, encoding="utf-8") as fh:
+        try:
+            tree = ast.parse(fh.read(), filename=path)
+        except SyntaxError:
+            return False
+    return any(
+        isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == HOOK
+        for node in ast.walk(tree)
+    )
+
+
+def salis_modules_declaring_hook():
+    """Absolute paths of every non-test ``salis/**/*.py`` that declares the hook."""
+    return {
+        os.path.realpath(path)
+        for path in glob.glob(os.path.join(SALIS_ROOT, "**", "*.py"), recursive=True)
+        if not os.path.basename(path).startswith("test_")
+        and _declares_hook(path)
+    }
 
 
 class TestSalisLedgerMigrateGuard(unittest.TestCase):
@@ -131,6 +182,42 @@ class TestSalisLedgerMigrateGuard(unittest.TestCase):
                 self.assertTrue(
                     callable(hook), f"{doctype} declares no on_doctype_update"
                 )
+
+    def test_guarded_lists_every_salis_on_doctype_update(self):
+        """The table must cover its whole subject, or a green run means nothing.
+
+        Every assertion above iterates GUARDED, so a controller left out of the
+        table is not weakly covered — it is not covered at all, while the suite
+        still reports green. This is the only assertion that can see that.
+        """
+        on_disk = salis_modules_declaring_hook()
+        listed = {os.path.realpath(module.__file__) for module, *_rest in GUARDED}
+        missing = sorted(os.path.relpath(p, SALIS_ROOT) for p in on_disk - listed)
+        extra = sorted(os.path.relpath(p, SALIS_ROOT) for p in listed - on_disk)
+        self.assertEqual(
+            ([], []),
+            (missing, extra),
+            f"GUARDED must list every salis controller declaring {HOOK}. Missing a "
+            f"row (uncovered, and a duplicate-data site would abort migrate there): "
+            f"{missing}. Listed but no longer declaring the hook (drop the row): "
+            f"{extra}.",
+        )
+
+    def test_the_completeness_scan_is_not_silently_empty(self):
+        """Guard-of-the-guard: an empty scan would make the check above vacuous.
+
+        ``salis_modules_declaring_hook`` returning nothing — a moved SALIS_ROOT, a
+        broken glob — turns the completeness assertion into ``[] == []``. Prove
+        the root is really salis/ and that the scan finds this module's own
+        subject before believing any equality it reports.
+        """
+        self.assertTrue(
+            os.path.isdir(os.path.join(SALIS_ROOT, "doctype")),
+            f"SALIS_ROOT is not the salis module: {SALIS_ROOT}",
+        )
+        found = salis_modules_declaring_hook()
+        self.assertGreaterEqual(len(found), 4, "hook scan returned implausibly few files")
+        self.assertIn(os.path.realpath(vehicle_utilisation_snapshot.__file__), found)
 
 
 if __name__ == "__main__":
