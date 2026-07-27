@@ -31,8 +31,12 @@ def _employee_documents(employee):
 	so every field is read via ``.get()`` on the cached doc and a missing field
 	surfaces as None rather than erroring. Returns a list of ``{type, number, expiry,
 	days_left}`` entries (only for documents on file), the same shape the Masar
-	profile consumes — so the SPA reuses one renderer. Read-only."""
-	if not employee or not frappe.db.exists("Employee", employee):
+	profile consumes — so the SPA reuses one renderer. Read-only.
+
+	The probe filters on ``name`` so a row named after its DocType is answered from
+	the database, not from the positional short-circuit (database.py:1259) that
+	would send the literal "Employee" on to ``get_cached_doc`` and raise."""
+	if not employee or not frappe.db.exists("Employee", {"name": employee}):
 		return []
 	emp = frappe.get_cached_doc("Employee", employee)
 	documents = []

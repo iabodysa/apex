@@ -449,10 +449,15 @@ def _resolve_owned_plan_doc(name: str):
     """Load the Route Plan doc for a decision write, enforcing the same ownership +
     lifecycle preconditions for both approve and reject: the caller must be the assigned
     supervisor (Administrator bypass), the plan must be submitted, and no decision may
-    have been recorded yet (idempotent — a decided plan cannot be re-decided)."""
+    have been recorded yet (idempotent — a decided plan cannot be re-decided).
+
+    The existence probe filters on ``name``: the positional form answers the value
+    back without querying when it equals the DocType (database.py:1259), so the
+    literal "Route Plan" cleared the not-found throw and fell through to the
+    ownership branch — a supervisor-mismatch error, or a bare 404 for an admin."""
     user = frappe.session.user
     supervisor = frappe.db.get_value("Route Plan", name, "route_supervisor")
-    if supervisor is None and not frappe.db.exists("Route Plan", name):
+    if supervisor is None and not frappe.db.exists("Route Plan", {"name": name}):
         frappe.throw(_("Route plan not found."), frappe.DoesNotExistError)
     if not _is_admin(user) and supervisor != user:
         frappe.throw(_("This route plan is not assigned to you."), frappe.PermissionError)

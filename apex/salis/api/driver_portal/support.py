@@ -141,9 +141,13 @@ def _create_support_ticket(
 		"status": "Open",
 	}
 	# [#3u8b90]
-	if category and frappe.db.exists("Issue Type", category):
+	# Name-filtered: both values come straight from the caller, and the positional
+	# probe answers them back unqueried when they equal the DocType
+	# (database.py:1259) — the literal "Issue Type"/"Issue Priority" then became a
+	# dangling link on insert and lost the ticket instead of being dropped here.
+	if category and frappe.db.exists("Issue Type", {"name": category}):
 		data["issue_type"] = category
-	if priority and frappe.db.exists("Issue Priority", priority):
+	if priority and frappe.db.exists("Issue Priority", {"name": priority}):
 		data["priority"] = priority
 	if project:
 		data["project"] = project
