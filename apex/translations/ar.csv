@@ -1484,7 +1484,7 @@ Failed,فاشل
 Failed Fuel Requests,طلبات الوقود الفاشلة
 Failures ({0}):,الإخفاقات ({0}):
 Fair,مقبول
-Fallback when the holder cannot tick the confirmation: sign here to acknowledge receipt.,بديل عندما يتعذّر على الحائز تحديد خانة التأكيد: وقّع هنا للإقرار بالاستلام.
+"Fallback when the holder cannot tick the confirmation: sign here to acknowledge receipt. A signature can be copied and reused, so only the custody desk roles can see this field.",بديل عندما يتعذّر على الحائز تحديد خانة التأكيد: وقّع هنا للإقرار بالاستلام. التوقيع يمكن نسخه وإعادة استعماله، فلا يظهر هذا الحقل إلا لأدوار مكتب العهد.
 Fault / Liable Party,الطرف المسؤول
 "Fault type this material template applies to, so the standard set of parts is suggested when a matching electrical, plumbing, air-conditioning, or other issue is raised.",نوع العطل الذي ينطبق عليه قالب المواد هذا، بحيث تُقترح المجموعة القياسية من القطع عند رفع مشكلة كهربائية أو سباكة أو تكييف أو غيرها مطابقة.
 Faulty,معطل
@@ -2862,7 +2862,8 @@ Recipient,المستلم
 Recipient Signature,توقيع المستلم
 Recipient address for the cross-cost-center transfer memo. Falls back to the Finance Manager role if left blank.,عنوان مستلم مذكرة التحويل بين مراكز التكلفة. يُستعاض عنه بدور المدير المالي إذا تُرك فارغاً.
 Recipient's signature and acknowledgment captured in person at the kiosk when the items are handed over.,توقيع المستلم وإقراره المُلتقطان حضورياً في الكشك عند تسليم الأصناف.
-Recipient's signature taken at handover time.,توقيع المستلم المأخوذ وقت التسليم.
+"Recipient's signature taken at handover time. A signature can be copied and reused, so only the custody desk roles that take it can see this field.",توقيع المستلم المأخوذ وقت التسليم. التوقيع يمكن نسخه وإعادة استعماله، فلا يظهر هذا الحقل إلا لأدوار مكتب العهد التي تأخذه.
+"The supervisor's own signature accepting custody of these assets. A signature can be copied and reused, so only the custody desk roles can see this field.",توقيع المشرف نفسه بقبول عهدة هذه الأصول. التوقيع يمكن نسخه وإعادة استعماله، فلا يظهر هذا الحقل إلا لأدوار مكتب العهد.
 Recommended Action,الإجراء الموصى به
 "Recommended disposition for the damaged vehicle, whether to repair it, write it off, recover the cost from the driver, or file an insurance claim.",التصرّف الموصى به للمركبة المتضررة، سواء إصلاحها أو شطبها أو استرداد التكلفة من السائق أو رفع مطالبة تأمين.
 Reconcile the first rental office invoice against actual usage.,سوِّ أول فاتورة مكتب إيجار وفق الاستخدام الفعلي.
@@ -3070,7 +3071,7 @@ Resident Supervisor Dashboard,لوحة معلومات مشرف الساكنين
 Resident Support Services,خدمات دعم المقيمين
 Resident Type,نوع المقيم
 Resident request assigned for follow-up: {0},تم إسناد طلب المقيم للمتابعة: {0}
-Resident's signature accepting the housing terms at check-in.,توقيع الساكن بالموافقة على شروط السكن عند تسجيل الدخول.
+"Resident's signature accepting the housing terms at check-in. A signature can be copied and reused, so only the front desk roles that capture it can see this field.",توقيع الساكن بالموافقة على شروط السكن عند تسجيل الدخول. التوقيع يمكن نسخه وإعادة استعماله، فلا يظهر هذا الحقل إلا لأدوار مكتب الاستقبال التي تلتقطه.
 "Resident's signature accepting the housing terms, captured on the tablet at check-in.",توقيع الساكن بالموافقة على شروط السكن، يُلتقط على اللوحي عند تسجيل الدخول.
 Residents and Rooms,الساكنون والغرف
 Residual Value (%),القيمة المتبقية (%)
