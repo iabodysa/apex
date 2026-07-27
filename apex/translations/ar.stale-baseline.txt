@@ -3,6 +3,7 @@
 # output names the row a change just stranded instead of all of them.
 # Regenerate after deleting drained rows:
 #   python3 scripts/check_translations.py --package apex --lang ar --update-stale-baseline
+A building is required to log an inspection.
 ABSENT
 AR
 Actor
@@ -20,6 +21,7 @@ Before
 Billing Model
 Boards and Dashboards
 Branch Site
+Building safety inspection.
 By
 Capture an incident with the guided Safety Incident form and save it for manager review.
 Change
@@ -29,6 +31,7 @@ Component
 Consent
 Content
 Could not complete the Work Order. No changes were saved. Please try again or contact support.
+Could not log the inspection. Please try again.
 Could not post the reversal to the ledger. The cancellation was rejected.
 Could not post the utility cost to the ledger. The bill was not submitted.
 Could not update bed occupancy. The assignment was not submitted.
@@ -51,17 +54,23 @@ F7
 F8
 F9
 Field
+Finding Description
 Fleet Supervisor
 Fleet Supervisor Dashboard (Dashboard)
 GATE
 Held
+If execution discovered an issue requiring formal inspection
 Inspect a building with the guided Safety Round form and save the result for manager review.
+Inspection logged: {0}
 Intake
 JSON
 Latest
 Launchpad
 Lease payment reference: {0}
 Locale
+Log Inspection
+Log Inspection — {0}
+Logging inspection…
 Logistay
 Maintenance Technician
 Monitoring
@@ -86,6 +95,7 @@ Rule Applied
 Safety Officer
 Sales Taxes and Charges Template
 Scanner
+Set automatically when this request is generated from a safety inspection report.
 Shifts
 Site Code
 Source Field

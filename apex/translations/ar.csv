@@ -3176,7 +3176,8 @@ Room {0} does not exist.,الغرفة {0} غير موجودة.
 Room {0} has {1} current occupant(s). Check them out before deactivating it.,الغرفة {0} بها {1} شاغل حالي. أنهِ إقامتهم قبل إلغاء تنشيطها.
 Room {0} is currently '{1}' and cannot be assigned to an employee.,الغرفة {0} حاليًا '{1}' ولا يمكن إسنادها إلى موظف.
 Room {0}: {1},الغرفة {0}: {1}
-Room-level maintenance ticket. Can be generated automatically from a safety inspection report.,تذكرة صيانة على مستوى الغرفة. يمكن إنشاؤها آلياً من تقرير تفتيش السلامة.
+Room-level maintenance ticket. Can be generated automatically from a safety task execution.,تذكرة صيانة على مستوى الغرفة. يمكن إنشاؤها آلياً من تنفيذ مهمة سلامة.
+Historical only. The deprecated Safety Inspection Report this request came from. New safety-driven requests carry Source Safety Execution instead.,للتاريخ فقط. تقرير تفتيش السلامة الملغى الذي جاء منه هذا الطلب. الطلبات الجديدة النابعة من السلامة تحمل تنفيذ السلامة المصدر بدلاً عنه.
 Rooms,الغرف
 Rooms Cleaned,الغرف التي تم تنظيفها
 Rooms Generated,تم توليد الغرف
