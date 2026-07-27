@@ -23,6 +23,14 @@ Four properties:
 4. THE MEASUREMENT IS REAL — ``TestTheModelMatchesTheShippedTree`` recomputes the adoption
    numbers quoted in the model's docstring, so the premise cannot rot silently.
 
+DRAINED SO FAR, each with a colocated proof named after it: ``Freelancer.monthly_salary``,
+then four signatures — on Housing Assignment, Custody Issue, Custody Acknowledgment and
+Facility Asset Custody Assignment. Every level-1 row there carries WRITE, not merely read,
+because those fields are set on a CREATE path, where a new document resolves an unreachable
+level from ``frappe.new_doc`` — the default, not the stored row — so a read-only row empties
+the signature on capture instead of protecting it. The portal case, Custody Acknowledgment,
+is safe for a different reason: the Web Form insert bypasses levels (``web_form.py:663``).
+
 Run standalone:  python3 -m unittest apex.apex_core.utils.test_field_sensitivity -v
 """
 
@@ -67,23 +75,7 @@ _RESIDENT_REQUEST_PROSE = (
 )
 
 KNOWN_LEVEL_ZERO_SENSITIVE = {
-    # DRAINED: the one category-4 entry that used to stand here, Freelancer.monthly_salary,
-    # now permlevel 1. The ratchet tightened by one, which is the whole point of exact
-    # equality — a repaired entry MUST be pruned or the guard stops meaning anything.
-    # DRAINED: Custody Acknowledgment.signature — permlevel 1, level-1 rows for the three
-    # custody desk roles, none for Internal Auditor. The subject signs this one over the
-    # portal, and the Web Form insert bypasses levels entirely (web_form.py:663), so the
-    # worker's own path is untouched. Proof:
-    # test_custody_acknowledgment_signature_permlevel.
-    # DRAINED: Custody Issue.signature — permlevel 1, level-1 rows for the three Custody
-    # Kiosk roles, none for Internal Auditor. Proof: test_custody_issue_signature_permlevel.
-    # DRAINED: Facility Asset Custody Assignment.supervisor_signature — permlevel 1, level-1
-    # rows for the three custody desk roles, none for Internal Auditor. Proof:
-    # test_facility_asset_custody_assignment_signature_permlevel.
-    # DRAINED: Housing Assignment.terms_signature, the entry A-216 created and A-308 called
-    # the urgent one. Now permlevel 1, with level-1 rows for the three Arrivals Desk roles
-    # and none for Internal Auditor — so the estate-wide audit read stops at level 0, which
-    # was the whole exposure. Proof: test_housing_assignment_signature_permlevel.
+    # Two left. The five already drained are listed in this module's docstring.
     "Vehicle Incident": ([("worker_signature", "signature")], _SIGNATURES_NOT_YET_LAYERED),
     "Resident Request": (
         [

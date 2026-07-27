@@ -3,8 +3,8 @@
 
 The field_sensitivity model calls a captured signature an ABSOLUTE level-1 category: it is
 biometric-adjacent and the raw material for forgery, so it is sensitive wherever it appears,
-person master or not. This DocType was the urgent one. A-216 granted Internal Auditor a
-level-0 read on Housing Assignment for estate-wide audit, and Housing Assignment shipped no
+person master or not. This DocType was the urgent one. Internal Auditor had just been granted
+a level-0 read on Housing Assignment for estate-wide audit, and Housing Assignment shipped no
 level-1 section, so that grant handed the auditor every resident's captured mark along with
 the placement facts it was actually for. Raising the field is what separates the two.
 
@@ -198,7 +198,8 @@ class TestHousingAssignmentSignaturePermlevel(FrappeTestCase):
         self.assertNotIn(
             1,
             frappe.get_doc("Housing Assignment", doc.name).get_permlevel_access("read"),
-            f"{AUDIT_ROLE} reaches permlevel 1 — the A-216 exposure is back",
+            f"{AUDIT_ROLE} reaches permlevel 1 — its estate-wide read is back on the "
+            "resident's captured signature",
         )
 
         # Verdict A — the auditor's copy is CONCEALED.
@@ -325,8 +326,8 @@ class TestHousingAssignmentSignaturePermlevel(FrappeTestCase):
         self.assertNotIn(
             AUDIT_ROLE,
             high,
-            f"{AUDIT_ROLE} holds a permlevel-1 row — that is the exact A-216 exposure this "
-            "change exists to close",
+            f"{AUDIT_ROLE} holds a permlevel-1 row — that hands every resident's captured "
+            "signature back to the role this change exists to keep it from",
         )
         for role in sorted(high):
             row = [p for p in rows if p["role"] == role and int(p.get("permlevel") or 0) == 1]
@@ -361,7 +362,7 @@ class TestHousingAssignmentSignaturePermlevel(FrappeTestCase):
             )
 
     def test_the_auditors_level_zero_authority_was_not_collateral_damage(self):
-        """The explicit non-change. A-216 gave Internal Auditor estate-wide read on this
+        """The explicit non-change. Internal Auditor was given estate-wide read on this
         record for a reason; this change narrows one field, not that grant."""
         shipped = json.loads(_ASSIGNMENT_JSON.read_text(encoding="utf-8"))
         auditor = [
