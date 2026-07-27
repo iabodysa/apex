@@ -45,6 +45,10 @@ PARENTS = {
     "Custody Issue": {"CI-A": BLD_A, "CI-B": BLD_B},
     "Custody Return": {"CR-A": BLD_A, "CR-B": BLD_B},
     "Maintenance Request": {"MR-A": BLD_A, "MR-B": BLD_B},
+    # Maintenance Inspection Report anchors on `maintenance_work_order`; without a
+    # row here _anchor_names raises KeyError and its create-path pair errors out
+    # instead of testing anything.
+    "Maintenance Work Order": {"MWO-A": BLD_A, "MWO-B": BLD_B},
     "Scheduled Task Assignment": {"STA-A": BLD_A, "STA-B": BLD_B},
     # Room Bed Transfer anchors on `assignment`, so its parent is the assignment,
     # not a room or a bed. Without a row here _anchor_names raises

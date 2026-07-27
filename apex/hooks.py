@@ -376,6 +376,8 @@ permission_query_conditions = {
     "Housing Inventory": "apex.habitat.permissions.housing_inventory_query",
     "Building License": "apex.habitat.permissions.building_license_query",
     "Maintenance Work Order": "apex.habitat.permissions.maintenance_work_order_query",
+    # Stored rows always carry `building`; only the create check hops the work order.
+    "Maintenance Inspection Report": "apex.habitat.permissions.maintenance_inspection_report_query",
     "Occupancy Snapshot": "apex.habitat.permissions.accommodation_occupancy_snapshot_query",
     "Temporary Worker": "apex.habitat.permissions.temporary_worker_query",
     "Arrival Batch": "apex.habitat.permissions.arrival_batch_query",
@@ -450,6 +452,8 @@ has_permission = {
     "Housing Inventory": "apex.habitat.permissions.building_scoped_has_permission",
     "Building License": "apex.habitat.permissions.building_scoped_has_permission",
     "Maintenance Work Order": "apex.habitat.permissions.building_scoped_has_permission",
+    # Reaches the estate via the BUILDING_FETCH_ANCHOR work-order hop on create.
+    "Maintenance Inspection Report": "apex.habitat.permissions.building_scoped_has_permission",
     "Material Transfer": "apex.habitat.permissions.dual_building_scoped_has_permission",
     "Facility Asset Movement": "apex.habitat.permissions.dual_building_scoped_has_permission",
     "Custody Handover": "apex.habitat.permissions.dual_building_scoped_has_permission",

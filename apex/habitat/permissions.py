@@ -315,6 +315,12 @@ BUILDING_FETCH_ANCHOR = {
     "Custody Return": ("custody_issue", "Custody Issue"),
     "Housing Assignment": ("bed", "Bed"),
     "Housing Inventory": ("room", "Room"),
+    # `building` is fetch_from maintenance_work_order.building, so it is empty at the
+    # create check; the work order is the link the payload carries at that moment.
+    "Maintenance Inspection Report": (
+        "maintenance_work_order",
+        "Maintenance Work Order",
+    ),
     "Maintenance Work Order": ("maintenance_request", "Maintenance Request"),
     "Resident Request": ("bed", "Bed"),
     # The transfer has no building of its own; its estate is the assignment's, and
@@ -441,6 +447,18 @@ def building_license_query(user=None):
 
 
 def maintenance_work_order_query(user=None):
+    return _building_condition(user)
+
+
+def maintenance_inspection_report_query(user=None):
+    """Scope Maintenance Inspection Report on its own stored ``building``.
+
+    The column is populated on every stored row — ``reqd`` plus a ``fetch_from``
+    on ``maintenance_work_order.building`` — so the shared column fragment serves
+    the LIST view with no hop. Only the CREATE check needs the work-order anchor
+    (``BUILDING_FETCH_ANCHOR``), because ``fetch_from`` has not run yet at that
+    point; a row that reaches this fragment has already been written.
+    """
     return _building_condition(user)
 
 
