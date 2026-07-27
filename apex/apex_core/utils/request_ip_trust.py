@@ -45,6 +45,22 @@ reaches the app carrying no forwarded header at all measured nothing about overw
 so it is graded incomplete even when a probe was planted and destroyed: the deployment
 where the edge strips the header and sets nothing keys every client onto the proxy's own
 address, which is a different failure, not a pass.
+
+TWO LIMITS ARE IRREDUCIBLE and a passing verdict states the first of them out loud.
+
+The assertion cannot be verified. A header the edge destroyed is precisely what the
+server cannot see, so nothing distinguishes "I planted a probe and the edge erased it"
+from "I asserted the flag and sent an ordinary address". A deployer probing their own
+site cannot be defrauded by that, but an AUTOMATED check keyed on ``trusted`` can drift
+into it -- if the step that injects the header is ever dropped while the query flag
+survives, the check reports a permanent pass. Keep the header and the flag in one
+command, and treat a pass as void whenever they are edited apart.
+
+A bogon-stripping edge is indistinguishable from an overwriting one. Some edges drop
+reserved and documentation ranges from the header as a half-measure while forwarding an
+ordinary forged claim untouched. The probe vanishes in both, so this check reads such an
+edge as correct. Widening the recognised spellings cannot fix it: the blind spot is the
+choice of a non-routable probe, and a routable one could belong to a real client.
 """
 
 from __future__ import annotations
@@ -88,17 +104,21 @@ FAILING_VERDICTS = (FORGEABLE, APPENDED)
 
 _DETAIL = {
     OVERWRITTEN: (
-        "PASS. The probe was sent and the server did not resolve it, so the edge "
-        f"overwrites {FORWARDED_HEADER} with the real peer. Per-address limits key "
-        "on a value the caller cannot choose."
+        "PASS, resting on your assertion that this request carried a "
+        f"documentation-range {FORWARDED_HEADER}. No such entry arrived, so the edge "
+        "overwrites the header with the real peer and per-address limits key on a "
+        "value the caller cannot choose. The verdict is VOID if the request did not "
+        "in fact carry the probe: a destroyed header is exactly what the server "
+        "cannot see, so the assertion is taken on trust and never verified."
     ),
     OVERWRITTEN_THEN_APPENDED: (
-        f"PASS. The probe was sent and no {FORWARDED_HEADER} entry carries it, so the "
-        "hop facing the caller REPLACED the header; the later entries were appended "
+        "PASS, resting on your assertion that this request carried a "
+        f"documentation-range {FORWARDED_HEADER}. No entry carries it, so the hop "
+        "facing the caller REPLACED the header and the later entries were appended "
         "behind that replacement by hops further in. frappe reads the FIRST entry "
-        "(auth.py:66), which is the replacement, so per-address limits key on a value "
-        "the caller cannot choose. Confirm every later entry is a hop you operate: "
-        "putting an APPENDING hop in front of the replacing one turns this forgeable."
+        "(auth.py:66), which is the replacement. Same caveat: the assertion is taken "
+        "on trust. Confirm every later entry is a hop you operate, because putting an "
+        "APPENDING hop in front of the replacing one turns this forgeable."
     ),
     FORGEABLE: (
         "FAIL. The documentation-range probe survived the edge, so "
@@ -185,15 +205,23 @@ def classify_forwarding(
     it is as safe as a lone replacement. The probe present anywhere means the opposite,
     whatever address frappe happened to resolve.
 
-    Three shapes must never reach a passing verdict, and each is graded before the
+    Four shapes must never reach a passing verdict, and each is graded before the
     passes: no header at all, because an erased header measures nothing about
     overwriting; a surviving probe, because caller content demonstrably reaches the app;
-    and a resolved address that is not the first entry, because the reasoning above is
-    then about a precedence the framework is not following.
+    an entry that does not parse as an address, because a probe wearing a rendering this
+    module cannot read is indistinguishable from an erased one and the pass signal is
+    absence; and a resolved address that is not the first entry, because the reasoning
+    above is then about a precedence the framework is not following.
+
+    That third one is why unreadable is REFUSED rather than ignored. Every spelling the
+    parser does not recognise would otherwise count as evidence of erasure, so the set
+    of strings that silently certify a deployment would be unbounded and would grow with
+    every rendering some future edge invents.
     """
     entries = forwarded_entries(raw)
     probe_seen = any(is_documentation_address(entry) for entry in entries)
     reads_first_entry = bool(entries) and resolved_ip == entries[0]
+    unreadable = [entry for entry in entries if _bare_address(entry) is None]
 
     if not entries:
         verdict = NO_HEADER
@@ -201,6 +229,8 @@ def classify_forwarding(
         verdict = FORGEABLE
     elif not probe_planted:
         verdict = APPENDED if len(entries) > 1 else INCONCLUSIVE
+    elif unreadable:
+        verdict = INCONCLUSIVE
     elif not reads_first_entry:
         verdict = INCONCLUSIVE
     elif len(entries) > 1:

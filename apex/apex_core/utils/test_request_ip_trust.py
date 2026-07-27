@@ -246,6 +246,46 @@ class TestNothingUnproveableIsCertified(unittest.TestCase):
         self.assertIs(report["trusted"], False)
         self.assertIs(report["probe_seen"], True)
 
+    def test_an_entry_that_does_not_parse_is_refused_rather_than_ignored(self):
+        """The unbounded hole. Absence of the probe is what certifies a deployment, so
+        every rendering the parser cannot read used to count as absence -- making the
+        set of strings that silently pass a deployment infinite and growing with each
+        form some future edge invents. These four were each demonstrated to return
+        "overwritten" with trusted true while sitting unchanged in the header, which is
+        a header the edge did NOT overwrite. Refusing what cannot be read turns the
+        spelling table into a convenience instead of the security boundary."""
+        for entry in (
+            f"{PROBE_ADDRESS}/32",
+            f"{PROBE_ADDRESS}:80:1",
+            # Escaped, never pasted: a literal zero-width space is invisible in a diff,
+            # and str.strip() does not remove it the way it removes a space or NBSP.
+            PROBE_ADDRESS + "\u200b",
+            "not-an-address-at-all",
+        ):
+            with self.subTest(entry=entry):
+                report = classify_forwarding(entry, entry, probe_planted=True)
+                self.assertEqual(report["verdict"], INCONCLUSIVE)
+                self.assertIs(report["trusted"], False)
+
+    def test_one_unreadable_entry_taints_an_otherwise_readable_chain(self):
+        """The probe could be hiding in the entry that will not parse, and which hop
+        wrote it is exactly what a chain verdict turns on, so the whole header is
+        refused rather than the readable part being graded on its own."""
+        report = classify_forwarding(
+            f"{REAL_PEER}, {PROBE_ADDRESS}/32", REAL_PEER, probe_planted=True
+        )
+        self.assertEqual(report["verdict"], INCONCLUSIVE)
+        self.assertIs(report["trusted"], False)
+
+    def test_a_readable_probe_still_fails_rather_than_merely_being_refused(self):
+        """The refusal must not swallow the FAIL: a probe the parser CAN read is proof,
+        and proof outranks the cannot-read refusal in the branch order."""
+        report = classify_forwarding(
+            f"{PROBE_ADDRESS}, junk-hop", PROBE_ADDRESS, probe_planted=True
+        )
+        self.assertEqual(report["verdict"], FORGEABLE)
+        self.assertIs(report["forgeable"], True)
+
     def test_a_resolved_address_that_is_not_the_first_entry_is_not_certified(self):
         """Every passing verdict argues from auth.py:66 taking the HEAD entry. If the
         address actually in use is not that entry, something else chose it and the
