@@ -22,10 +22,10 @@ Four properties, matching the card's proofs:
    nothing printed. Without this control a hook that refused everything would look right.
 3. THE APP'S OWN REPORTS STILL SAVE — every shipped Report JSON is replayed through the
    hook as both the incoming and the stored document, and none of them throws. A-211 took
-   ``KNOWN_UNRUNNABLE_REPORT_ROLES`` from seven entries to three; the three that remain
-   are one unresolved question, not three, and they warn instead of throwing, which is
-   exactly the pre-existing-row clause. The set stays exact-equality, so a NEW offender
-   fails the build rather than being absorbed.
+   ``KNOWN_UNRUNNABLE_REPORT_ROLES`` from seven entries to three; A-216 took the last
+   three to ZERO, so every role named on a shipped report can now actually run it. The set
+   stays exact-equality, so a NEW offender fails the build rather than being absorbed —
+   and with the baseline empty, the guard is now a plain invariant rather than a ratchet.
 4. THE DETECTOR CAN FAIL — every clause has a control that must stay clean, and
    ``test_removing_the_report_flag_check_lets_the_offender_through`` reproduces the
    guard with that one clause deleted and asserts it goes blind.
@@ -89,16 +89,53 @@ DROPPED from the report instead, because a grant would have been a real widening
   ``Report.is_permitted`` (query_report.py:41), while the scope lives in the DocPerm row
   and in ``HOUSING_UNSCOPED_ROLES``.
 
-STILL FROZEN — the three Housing Assignment reports, which are ONE question
----------------------------------------------------------------------------
+THE A-216 DRAIN — the last three entries, which were ONE question
+------------------------------------------------------------------
 ``Accommodation Occupancy Summary``, ``Active Resident Register`` and ``Idle Resident
-Detection`` all name ``Internal Auditor`` over the same ref, so the three entries stand or
-fall together on a single decision about one DocPerm row. That decision is the owner's:
-Housing Assignment ships no permlevel-1 section, so any permlevel-0 read of it is a read
-of the WHOLE record — resident identity, the check-in signature and free-text notes,
-estate-wide, for a role that holds nothing on that DocType today. This file records what
-is observably true about the gap and deliberately does not name a remedy; see the reason
-string on the entries themselves.
+Detection`` all named ``Internal Auditor`` over the same ref, so the three stood or fell
+together on a single decision about one DocPerm row. The owner decided: GRANT ``read`` and
+``report`` at permlevel 0 on Housing Assignment, and WITHHOLD ``export``.
+
+The grant closes a contradiction, not just a gap. Internal Auditor was already named in
+``habitat/permissions.py`` ``HOUSING_UNSCOPED_ROLES`` — the set that lifts the building
+filter — so the exemption had been written for a role that could not read the DocType at
+all, while three shipped reports rendered in its Reports list and threw on click
+(``query_report.py:47``).
+
+``export`` is withheld by OMITTING the key, never by writing ``0``: ``import_file`` skips
+field defaults (``document.py:833`` under ``frappe.flags.in_import``), so an omitted flag
+imports as 0, while an explicit 0 would read as a deliberate future toggle.
+
+WHAT WITHHOLDING ``export`` DOES AND DOES NOT BUY — stated here because assuming otherwise
+is the likely next mistake:
+
+* IT DOES gate the report download endpoint. ``export_query`` calls
+  ``can_export(ref_doctype, raise_exception=True)`` (``query_report.py:323``), which reads
+  ``get_role_permissions(doctype).export`` (``permissions.py:608-616``). With no ``export``
+  on the row, the auditor's download raises ``PermissionError``.
+* IT DOES NOT hide a single row. The report still RENDERS every row on screen; only the
+  file download is refused. This is a friction-and-audit-trail control, not a
+  confidentiality one.
+* IT DOES NOT confine the row set, because these three reports do not read through the
+  permission layer at all. All three call ``frappe.get_all``
+  (``active_resident_register.py:42``, ``idle_resident_detection.py:67``), which sets
+  ``ignore_permissions=True`` (``frappe/__init__.py:2050``), so neither
+  ``accommodation_assignment_query`` nor the permlevel field filter
+  (``db_query.py:683-684``) ever runs. Each report re-implements the building scope in its
+  own Python instead. For THIS role that changes nothing — Internal Auditor is unscoped by
+  design, so the hand-rolled block and the hook agree — but the equivalence is duplication,
+  not enforcement, and a future change to the hook would not reach these reports. That is a
+  finding recorded against the reports, not a defect in this grant.
+* WHAT THE REPORTS ACTUALLY EXPOSE is narrower than the DocPerm does. The two that read
+  Housing Assignment select ``name, employee, employee_name, building, room, bed,
+  check_in_date, project[, cost_center]`` — no ``party``, no ``room_condition_snapshot``,
+  no ``terms_signature``, no ``notes``. (``Accommodation Occupancy Summary`` reads no
+  Housing Assignment row at all; it needs the grant purely for ``query_report.py:47`` to
+  let it open.) The DocPerm, however, opens the whole record on the FORM, including the
+  check-in signature and the free-text notes. That residual exposure is recorded as the
+  ``Housing Assignment`` entry in ``test_field_sensitivity.KNOWN_LEVEL_ZERO_SENSITIVE``
+  rather than left for the next reader to discover — Housing Assignment ships no
+  permlevel-1 section, and layering it is A-303's module-by-module follow-on work.
 
 Run standalone:  python3 -m unittest apex.apex_core.utils.test_report_role_guard -v
 """
@@ -126,44 +163,12 @@ REF = "_A201 Source"
 REPORT_ROLE = "_A201 Role"
 OTHER_ROLE = "_A201 Other Role"
 
-# An OBSERVATION, not an instruction. It states what is true about the gap and stops there,
-# because the remedy is a personnel-data decision reserved to the owner — a reason string
-# that names a fix is read by the next agent as a work order and gets executed.
-_OWNER_DECISION_HOUSING = (
-    "Observed, not prescribed — do NOT act on this entry from this file. Internal Auditor "
-    "is named in habitat/permissions.py HOUSING_UNSCOPED_ROLES, so Housing Assignment's "
-    "building-scope exemption already covers this role while it holds no DocPerm row on "
-    "that DocType for the exemption to apply to. The role reaches these reports through "
-    "the Reports list and the awesomebar (boot.get_user_pages_or_reports) rather than a "
-    "workspace card, which is why the A-200 workspace sweep never saw them, and "
-    "query_report.py:47 refuses the report on open. Housing Assignment ships no "
-    "permlevel-1 section, so a permlevel-0 read of it is a read of the entire record: "
-    "resident identity (party, employee, employee_name), room_condition_snapshot, "
-    "terms_signature and free-text notes, across every building. Whether this role should "
-    "hold that is a personnel-data decision for the owner, not a technical gap for an "
-    "agent to close; all three entries turn on the same single DocPerm row."
-)
-
 # Exact equality, like the sibling baselines. Each entry is (ref_doctype, [roles], reason);
 # a new offender fails the build, a repaired one must be pruned. A-211 resolved four of the
-# original seven — see "THE A-211 DRAIN" in the module docstring for each call.
-KNOWN_UNRUNNABLE_REPORT_ROLES = {
-    "Accommodation Occupancy Summary": (
-        "Housing Assignment",
-        ["Internal Auditor"],
-        _OWNER_DECISION_HOUSING,
-    ),
-    "Active Resident Register": (
-        "Housing Assignment",
-        ["Internal Auditor"],
-        _OWNER_DECISION_HOUSING,
-    ),
-    "Idle Resident Detection": (
-        "Housing Assignment",
-        ["Internal Auditor"],
-        _OWNER_DECISION_HOUSING,
-    ),
-}
+# original seven; A-216 resolved the remaining three — see "THE A-216 DRAIN" in the module
+# docstring. The baseline is now EMPTY, which is the state it was always meant to reach:
+# every role named on a shipped report can actually run it.
+KNOWN_UNRUNNABLE_REPORT_ROLES = {}
 
 
 class Refused(Exception):
