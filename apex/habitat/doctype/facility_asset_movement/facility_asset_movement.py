@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.utils import today
 
 from apex.habitat.asset_movement_engine import (
+    ensure_asset_still_at,
     post_asset_movement,
     reverse_asset_movement,
 )
@@ -61,7 +62,10 @@ def on_submit(doc, method=None):
 
 
 def on_cancel(doc, method=None):
-    """Revert the asset to where it came from when a submitted movement is cancelled."""
+    """Revert the asset to where it came from when a submitted movement is cancelled.
+
+    Safe to restore the origin unconditionally because ``before_cancel`` has already
+    refused any cancel whose asset no longer sits where this movement left it."""
     # [#ts0anf]
     reverse_asset_movement(doc.doctype, doc.name)
     if not frappe.db.exists("Facility Asset", doc.facility_asset):
@@ -77,6 +81,13 @@ def on_cancel(doc, method=None):
 def before_cancel(doc, method=None):
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is required before cancelling a Facility Asset Movement."))
+    # Fail before the docstatus flip: on_cancel restores from_* blindly, so an
+    # out-of-order cancel would clobber whatever moved the asset afterwards.
+    ensure_asset_still_at(
+        doc.facility_asset,
+        building=doc.to_building,
+        location_in_building=doc.to_room,
+    )
 
 
 def _reconcile_origin(doc):
