@@ -26,6 +26,9 @@ _IDENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_ ]*$")
 # rather than stacking one per row.
 _ROW_SAVEPOINT = "temporary_worker_row"
 
+# Page size, module-level so the paging itself is testable without seeding a full page.
+_BATCH_SIZE = 500
+
 # [#g9r6ee]
 PARTY_DOCTYPES = {
     "Housing Assignment": "employee",
@@ -42,19 +45,32 @@ PARTY_DOCTYPES = {
 
 
 def link_temporary_workers() -> None:
-    """Daily scheduler: link matured Temporary Workers to Employees; expire lapsed ones."""
+    """Daily scheduler: link matured Temporary Workers to Employees; expire lapsed ones.
+
+    Every Active worker is reached in one run, however many there are. The loop
+    MUTATES the very field it filters on — ``_link`` flips status to Linked and
+    ``_expire`` to Expired — so a processed row LEAVES the result set. Under the old
+    offset cursor (``limit_start += page``) the rows behind it shifted down into the
+    range the cursor had just passed and were skipped for the day, silently and with
+    nothing logged. Paging on the last NAME seen fixes that: a key cannot shift, and
+    ``name`` is immutable here (autoname is a naming series).
+
+    ``fuel_engine``'s re-query-from-zero-and-exclude-failures idiom does not transfer:
+    there a successful pass drains the filter, whereas a worker with no Employee yet
+    legitimately STAYS Active, so its exclusion set would grow to the whole table.
+    """
     from frappe.utils import today
 
     today_str = today()
-    start = 0
-    batch_size = 500
+    # [#5nnjxa]
+    cursor = ""
     while True:
         workers = frappe.get_all(
             "Temporary Worker",
-            filters={"status": "Active"},
+            filters={"status": "Active", "name": [">", cursor]},
             fields=["name", "passport_number", "worker_name", "expiry_date"],
-            limit_start=start,
-            limit_page_length=batch_size,
+            order_by="name asc",
+            limit_page_length=_BATCH_SIZE,
         )
         if not workers:
             break
@@ -75,7 +91,8 @@ def link_temporary_workers() -> None:
                     message=frappe.get_traceback(),
                     title=f"Temporary Worker link failed for {tw.name}"[:140],
                 )
-        start += batch_size
+        # Strictly increasing (the filter is ">"), so the walk always terminates.
+        cursor = workers[-1].name
 
 
 def _match_employee(tw) -> str | None:

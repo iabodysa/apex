@@ -12,12 +12,17 @@ Two properties, one per test: a worker linked BEFORE the failure keeps its link,
 and a worker reached AFTER the failure is still linked. Both also assert the
 failed worker itself is left clean — its own write is what the savepoint undoes.
 
-The engine's Temporary Worker page query is narrowed to this test's own two rows.
-That is isolation, not convenience: a pre-existing Active worker on the site
-would drag the run through ``habitat/tasks/cost.py`` and
-``apex_core/utils/system_notify.py``, both of which still hold a BARE
-``frappe.db.rollback()``. Either would discard this test's transaction and red
-the assertions for a reason that has nothing to do with the loop under test.
+The engine's Temporary Worker page query is narrowed to this test's own rows.
+That is isolation, not convenience: a pre-existing Active worker on the site would
+drag the run through unrelated modules and make a failure there look like a failure
+here.
+
+``TestTemporaryWorkerPagingReachesEveryWorker`` covers the other way this loop lost
+work. It pages over ``status = Active`` while ``_link`` flips that same status to
+Linked, so rows left the result set under an advancing OFFSET cursor and everything
+that shifted down was skipped — silently, with no error anywhere. It seeds more
+workers than fit in one page and asserts every one is reached. Shrinking the page
+size rather than seeding 500 rows is what makes that assertion affordable.
 """
 
 from unittest.mock import patch
@@ -32,33 +37,34 @@ def _h():
     return frappe.generate_hash(length=12).upper()
 
 
+def _pair():
+    """One Temporary Worker plus the Active Employee its passport matches."""
+    passport = "P" + _h()
+    emp = frappe.get_doc({
+        "doctype": "Employee",
+        "first_name": "EMP-" + _h(),
+        "naming_series": "HR-EMP-",
+        "passport_number": passport,
+        "status": "Active",
+    })
+    emp.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+    tw = frappe.get_doc({
+        "doctype": "Temporary Worker",
+        "worker_name": "TW-" + _h(),
+        "passport_number": passport,
+        "status": "Active",
+    })
+    tw.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+    return tw.name, emp.name
+
+
 class TestTemporaryWorkerLinkLoopResilience(FrappeTestCase):
     """One failing worker must not discard the workers linked around it."""
 
     def setUp(self):
         frappe.set_user("Administrator")
-        self.pairs = dict([self._pair(), self._pair()])
+        self.pairs = dict([_pair(), _pair()])
         self.mine = set(self.pairs)
-
-    def _pair(self):
-        """One Temporary Worker plus the Active Employee its passport matches."""
-        passport = "P" + _h()
-        emp = frappe.get_doc({
-            "doctype": "Employee",
-            "first_name": "EMP-" + _h(),
-            "naming_series": "HR-EMP-",
-            "passport_number": passport,
-            "status": "Active",
-        })
-        emp.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        tw = frappe.get_doc({
-            "doctype": "Temporary Worker",
-            "worker_name": "TW-" + _h(),
-            "passport_number": passport,
-            "status": "Active",
-        })
-        tw.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        return tw.name, emp.name
 
     def _run(self, fail_at):
         """Drive the daily linker over this test's two workers, raising on the
@@ -130,3 +136,70 @@ class TestTemporaryWorkerLinkLoopResilience(FrappeTestCase):
             "continues, and the failure rolls back only its own row.",
         )
         self._assert_untouched(first)
+
+
+class TestTemporaryWorkerPagingReachesEveryWorker(FrappeTestCase):
+    """More Active workers than fit in one page must ALL be reached in one run.
+
+    The page size is shrunk instead of seeding 500 workers, so the loop really runs
+    several pages. The harness narrows the result to this test's own rows but keeps
+    every part of the engine's query — its status filter, its name cursor, its
+    ordering and its page length — so the paging under test stays the engine's.
+    """
+
+    PAGE = 2
+    WORKERS = 5  # 3 pages at PAGE=2, so a skip cannot hide in a single boundary
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+        self.pairs = dict(_pair() for _ in range(self.WORKERS))
+        self.mine = set(self.pairs)
+
+    def _run(self):
+        """Drive the real linker over this test's workers at a 2-row page size."""
+        real_get_all = frappe.get_all
+        mine = self.mine
+        pages = []
+
+        def _only_mine(doctype, *args, **kwargs):
+            if doctype != "Temporary Worker":
+                return real_get_all(doctype, *args, **kwargs)
+            # Apply the engine's OWN filters over an unpaged read, then take its page
+            # off this test's rows: a foreign Active worker must not consume a slot,
+            # or the harness would fabricate the very skip it is looking for.
+            unpaged = dict(kwargs, limit_start=0, limit_page_length=0)
+            rows = [r for r in real_get_all(doctype, *args, **unpaged) if r.name in mine]
+            rows = rows[: kwargs.get("limit_page_length") or len(rows)]
+            pages.append([r.name for r in rows])
+            return rows
+
+        with patch.object(engine, "_BATCH_SIZE", self.PAGE), \
+                patch.object(engine.frappe, "get_all", side_effect=_only_mine):
+            engine.link_temporary_workers()
+        return pages
+
+    def test_every_active_worker_is_linked_across_pages(self):
+        pages = self._run()
+
+        self.assertGreater(
+            len(pages), 1,
+            "the harness collapsed the run into one page, so it cannot see a paging skip",
+        )
+        self.assertTrue(
+            all(len(p) <= self.PAGE for p in pages),
+            f"the engine ignored its page size, so these are not real pages: {pages}",
+        )
+        reached = {name for page in pages for name in page}
+        self.assertEqual(
+            reached, self.mine,
+            "the run never even READ some workers - an offset cursor advancing over a "
+            "filter the loop mutates walks straight past the rows that shifted down",
+        )
+        unlinked = sorted(
+            w for w in self.mine
+            if frappe.db.get_value("Temporary Worker", w, "status") != "Linked"
+        )
+        self.assertEqual(
+            unlinked, [],
+            f"workers left unlinked after one full run: {unlinked}",
+        )
