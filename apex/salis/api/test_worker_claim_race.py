@@ -146,12 +146,49 @@ class TestSelfConfirmBoardingIsSingleRow(WorkerTripMixin, FrappeTestCase):
             frappe.db.set_value("Trip Start Log", name, "docstatus", 0, update_modified=False)
             frappe.delete_doc("Trip Start Log", name, ignore_permissions=True, force=True)
 
-    def _fixture(self, route):
-        from apex.tests.factories import ensure_worker_token, make_worker_employee
+    @staticmethod
+    def _purge_worker(employee):
+        """Best-effort removal of the tagged worker and its token, so a per-run
+        Employee does not accumulate. Never raises: a row left on a disposable test
+        bench is not worth turning a green test red."""
+        frappe.set_user("Administrator")
+        token = frappe.db.get_value("Masar Worker Token", {"employee": employee}, "name")
+        for doctype, name in (("Masar Worker Token", token), ("Employee", employee)):
+            if not name:
+                continue
+            try:
+                frappe.delete_doc(doctype, name, ignore_permissions=True, force=True)
+            except Exception:
+                # Cleanup must never mask the verdict of the test it follows.
+                pass
 
-        worker = make_worker_employee(f"Worker Claim Race {self._testMethodName}")
+    def _fixture(self, route):
+        """A worker and trip that nothing else can already be holding.
+
+        The identity used to be ``self._testMethodName``, which is STABLE ACROSS
+        RUNS while ``make_worker_employee`` is get-or-create and nothing here ever
+        deletes an Employee. Every run therefore re-adopted the previous run's
+        worker together with any Transport Request that run failed to clean up —
+        and ``_worker_today_dispatch_trip`` resolves over EVERY today-trip the
+        employee is on, breaking ties by ``depart_time asc`` when every fixture
+        departs 06:30. A second live request for that worker can hand back a trip
+        that is not this test's, on which they are already aboard, so the endpoint
+        legitimately answers ``created=False``. A random tag makes the worker new
+        on every run, which is the only thing that closes it.
+        """
+        from apex.tests.factories import (
+            ensure_worker_token,
+            fixture_tag,
+            make_worker_employee,
+        )
+
+        tag = fixture_tag()
+        worker = make_worker_employee(f"Worker Claim Race {tag}")
+        # Registered FIRST so it runs LAST (addCleanup is LIFO) — after the trip and
+        # request that reference this employee have already been purged.
+        self.addCleanup(lambda: self._purge_worker(worker))
         tr, _rp, dt = self._worker_trip(
-            self.driver, self.project, self.building, [worker], route
+            self.driver, self.project, self.building, [worker], f"{route} {tag}"
         )
         self.addCleanup(lambda: self._purge_trip_logs(dt.name))
         return worker, dt, ensure_worker_token(worker)
@@ -251,9 +288,24 @@ class TestSelfConfirmBoardingIsSingleRow(WorkerTripMixin, FrappeTestCase):
         test_confirm_boarding_holds_the_trip_lock_against_a_live_second_connection.
         """
         worker, dt, token = self._fixture("Worker Claim Race D")
+        # Flush the fixture — and any sibling's still-pending cleanup deletes — out
+        # of the winner's transaction before it starts. The loser runs on a SEPARATE
+        # connection and can only ever see committed rows.
+        frappe.db.commit()
+        self.addCleanup(frappe.db.rollback)
 
         with self.primary_connection():
-            self.assertTrue(masar.confirm_boarding(token=token)["created"])
+            winner = masar.confirm_boarding(token=token)
+            # Named before `created` is read: a wrong (or None) trip here means the
+            # worker is on more than one live request, which is fixture bleed, not a
+            # broken lock. Without it that shows up only as `created is False`.
+            self.assertEqual(
+                winner.get("dispatch_trip"),
+                dt.name,
+                "the winner must resolve to THIS test's trip (None = no boardable "
+                "trip resolved at all)",
+            )
+            self.assertTrue(winner["created"], "the uncontended winner must record the boarding")
             frappe.db.commit()
 
         self.assertEqual(self._counts(dt.name, worker), (1, 1))
