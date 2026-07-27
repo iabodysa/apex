@@ -38,7 +38,7 @@ from pathlib import Path
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, nowdate
+from frappe.utils import add_days, flt, nowdate
 
 _FREELANCER_JSON = Path(__file__).resolve().parent / "freelancer.json"
 
@@ -199,15 +199,21 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
         """`write` was left alone, so the only thing that changed for this role is the read.
         Asserted through the API path, since that is where the strip lives — an in-process
         `frappe.get_doc` does NOT strip (only frappe/client.py:110, desk/form/load.py:53,
-        api/v1.py:81 and api/v2.py do), and asserting on the raw doc would prove nothing."""
+        api/v1.py:81 and api/v2.py do), and asserting on the raw doc would prove nothing.
+
+        The strip deletes the attribute (document.py:771), but `as_dict` rebuilds every
+        column and coerces a float-like fieldtype with `flt()` (base_document.py:402), so a
+        concealed Currency arrives as 0.0 where a concealed Data arrives as None. Assert
+        the real salary is gone, not that the key is None — that would only ever pass for
+        the Data field beside it."""
         doc = self._freelance(salary=6300)
         housing = self._user_with_role(HOUSING_ROLE)
         finance = self._user_with_role(FINANCE_ROLE)
 
         frappe.set_user(housing)
         stripped = frappe.client.get("Freelancer", doc.name)
-        self.assertIsNone(
-            stripped.get("monthly_salary"), f"{HOUSING_ROLE} can still read the salary"
+        self.assertFalse(
+            flt(stripped.get("monthly_salary")), f"{HOUSING_ROLE} can still read the salary"
         )
         self.assertIsNone(
             stripped.get("national_id_or_iqama"),
