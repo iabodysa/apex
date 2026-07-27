@@ -16,11 +16,17 @@ The reversal cases are the other half. Settlement is derived from the live Payme
 Entry, so cancelling it in Accounts must reverse the lease's view with no reversal code
 running — and, unlike the Telecom Contract, no cancel exemption either: the lease stores
 no link to the payment, so nothing on it can veto the cancellation.
+
+Every submitted lease here is approved through ``apply_workflow``. Lease is governed by
+the Accommodation Lease Workflow, so a bare ``doc.submit()`` is refused by
+``apex_core.utils.workflow_guard`` — and reaching docstatus 1 any other way would build
+a fixture in a state no approver can actually produce.
 """
 
 from __future__ import annotations
 
 import frappe
+from frappe.model.workflow import apply_workflow
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
@@ -83,7 +89,12 @@ class _RentPaymentCase(FrappeTestCase):
         ).insert(ignore_permissions=True).name
 
     def lease(self, landlord=_UNSET, company=None, submit=True):
-        """A submitted lease with a monthly schedule starting at FIRST_DUE."""
+        """A lease with a monthly schedule starting at FIRST_DUE.
+
+        Approved through the workflow, never bare-submitted: Draft -> Submit for
+        Approval -> Approve is the only route to docstatus 1 the product offers, and the
+        Approved state is what ``_load_eligible_lease`` demands.
+        """
         doc = frappe.get_doc(
             {
                 "doctype": "Lease",
@@ -91,6 +102,7 @@ class _RentPaymentCase(FrappeTestCase):
                 "company": company or self.company,
                 "building": self.building(),
                 "landlord": self.landlord if landlord is _UNSET else landlord,
+                "status": "Draft",
                 "lease_start_date": FIRST_DUE,
                 "lease_end_date": "2026-06-30",
                 "rent_amount": RENT,
@@ -100,7 +112,9 @@ class _RentPaymentCase(FrappeTestCase):
         )
         doc.insert(ignore_permissions=True, ignore_links=True)
         if submit:
-            doc.submit()
+            apply_workflow(doc, "Submit for Approval")
+            apply_workflow(doc, "Approve")
+            doc.reload()
         return doc
 
     def invoice(self, company=None, landlord=None, total=INVOICE_TOTAL, submit=True):
