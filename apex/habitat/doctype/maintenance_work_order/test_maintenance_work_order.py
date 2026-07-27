@@ -29,7 +29,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, flt, getdate, today
 
 from apex.tests._helpers import _user, as_user
-from apex.tests.factories import make_employee, make_maintenance_request
+from apex.tests.factories import make_company, make_employee, make_maintenance_request
 
 # [#8evoal]
 test_ignore = [
@@ -152,6 +152,8 @@ class MaintenanceWorkOrderPersonas(FrappeTestCase):
         from apex.setup import create_roles
 
         create_roles()
+        # make_employee defaults its company to this one and does not create it.
+        make_company()
         cls.building = cls._building("A271-HOME")
         cls.other_building = cls._building("A271-AWAY")
         cls.room = cls._room(cls.building, "A271-HOME-R1")
