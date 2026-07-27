@@ -113,14 +113,25 @@ class _QueryBuilder:
 
 
 class _FakeDB:
+    """Records the savepoint traffic, because that is now part of the contract.
+
+    The fake previously offered a no-arg ``rollback`` and no ``savepoint`` at all,
+    which is the shape of the bug: it could only model an all-or-nothing recovery.
+    """
+
     def __init__(self):
         self.writes = {}
+        self.savepoints = []
+        self.rollbacks = []
 
     def set_value(self, doctype, name, values, update_modified=True):
         self.writes.setdefault(doctype, {})[name] = dict(values)
 
-    def rollback(self):
-        pass
+    def savepoint(self, save_point):
+        self.savepoints.append(save_point)
+
+    def rollback(self, save_point=None):
+        self.rollbacks.append(save_point)
 
 
 class _FakeFrappe:
@@ -243,6 +254,45 @@ class TestWeeklyOccupancySyncEmptyBuilding(unittest.TestCase):
             results,
             {"BLDG-PROOF": {"current_occupants": 2, "occupancy_percent": 50.0}},
         )
+
+    def test_one_failed_building_does_not_discard_the_buildings_already_written(self):
+        """The recovery must be row-scoped, not all-or-nothing.
+
+        The loop CONTINUES past a failure, so a bare ``frappe.db.rollback()`` would
+        throw away every building the run had already counted. Assert the failing row
+        rolls back to a NAMED savepoint (so the surviving rows are untouched) and that
+        the run reaches the building after the failure.
+        """
+        buildings = ["BLDG-BEFORE", "BLDG-BOOM", "BLDG-AFTER"]
+        fake = _FakeFrappe(
+            rows={"Building": [SimpleNamespace(name=b, total_capacity=10) for b in buildings]},
+            grouped={
+                ("Room", ("building",)): [{"building": b, "n": 2} for b in buildings],
+                ("Housing Assignment", ("building",)): [{"building": b, "n": 5} for b in buildings],
+            },
+        )
+        good = fake.db.set_value
+
+        def _boom(doctype, name, values, update_modified=True):
+            if name == "BLDG-BOOM":
+                raise RuntimeError("write failed")
+            good(doctype, name, values, update_modified=update_modified)
+
+        fake.db.set_value = _boom
+        with mock.patch.object(occupancy, "frappe", fake):
+            occupancy.weekly_occupancy_sync()
+
+        written = fake.db.writes.get("Building", {})
+        self.assertIn("BLDG-BEFORE", written, "the row written before the failure was discarded")
+        self.assertIn("BLDG-AFTER", written, "the loop stopped reaching rows after the failure")
+        self.assertNotIn("BLDG-BOOM", written)
+        self.assertEqual(
+            fake.db.rollbacks,
+            [occupancy._ROW_SAVEPOINT],
+            "recovery must roll back to the row savepoint, never the whole transaction",
+        )
+        self.assertIn(occupancy._ROW_SAVEPOINT, fake.db.savepoints)
+        self.assertEqual(len(fake.errors), 1)
 
 
 def _select_options(doctype_slug, fieldname):
