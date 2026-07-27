@@ -100,15 +100,19 @@ def daily_safety_task_compliance_scan() -> None:
     total_overdue = 0
     escalated = 0
 
-    # [#4qriyf]
-    start = 0
+    # [#4qriyf] Keyed cursor, not an offset: this pass flips status OUT of the very
+    # set it filters on, so rows behind an offset shift down into the range it just
+    # passed and are skipped. The building passes below keep their offset — their
+    # filters are stable, nothing in those loops writes Building.status.
+    cursor = ""
     batch_size = 500
     while True:
         overdue = frappe.get_all(
             "Scheduled Task Instance",
-            filters={"docstatus": 0, "status": ["in", ["Open", "In Progress"]], "due_date": ["<=", cutoff]},
+            filters={"docstatus": 0, "status": ["in", ["Open", "In Progress"]],
+                     "due_date": ["<=", cutoff], "name": [">", cursor]},
             fields=["name", "due_date", "template", "building"],
-            limit_start=start,
+            order_by="name asc",
             limit_page_length=batch_size,
         )
         if not overdue:
@@ -149,7 +153,7 @@ def daily_safety_task_compliance_scan() -> None:
                 )
 
         total_overdue += len(overdue)
-        start += batch_size
+        cursor = overdue[-1].name
 
     if total_overdue:
         logger.warning(
@@ -333,7 +337,10 @@ def audit_remediation_deadline_watch() -> None:
     logger = frappe.logger()
     flagged = 0
 
-    start = 0
+    # Keyed cursor, not an offset: the body flips overall_status to Overdue, which is
+    # excluded by this very filter, so rows behind an offset shift down into the range
+    # it just passed and are skipped.
+    cursor = ""
     batch_size = 500
     while True:
         plans = frappe.get_all(
@@ -342,9 +349,10 @@ def audit_remediation_deadline_watch() -> None:
                 "docstatus": 1,
                 "overall_status": ["not in", ["Closed by Client", "Overdue"]],
                 "remediation_deadline": ["<", str(today_date)],
+                "name": [">", cursor],
             },
             fields=["name", "remediation_deadline", "internal_owner", "client_project"],
-            limit_start=start,
+            order_by="name asc",
             limit_page_length=batch_size,
         )
         if not plans:
@@ -383,6 +391,6 @@ def audit_remediation_deadline_watch() -> None:
                     title=f"Audit remediation watch failed for {plan.name}"[:140],
                 )
 
-        start += batch_size
+        cursor = plans[-1].name
 
     logger.info(f"audit_remediation_deadline_watch: {flagged} remediation plan(s) flagged Overdue.")

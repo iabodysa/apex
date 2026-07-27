@@ -27,15 +27,18 @@ def lease_expiry_watchlist() -> None:
 
     today_str = today()
 
-    start = 0
+    # Keyed cursor, not an offset: the body flips status OUT of the very set this
+    # filters on, so rows behind an offset shift down into the range it just passed
+    # and are skipped. name is immutable, so a key cursor cannot lose a row.
+    cursor = ""
     batch_size = 500
     while True:
         leases = frappe.get_all(
             "Lease",
             filters={"docstatus": 1, "status": ["in", ["Approved", "Active"]],
-                     "lease_end_date": ["is", "set"]},
+                     "lease_end_date": ["is", "set"], "name": [">", cursor]},
             fields=["name", "lease_end_date"],
-            limit_start=start,
+            order_by="name asc",
             limit_page_length=batch_size,
         )
         if not leases:
@@ -53,7 +56,7 @@ def lease_expiry_watchlist() -> None:
                     title=f"Lease expiry watchlist failed for {lease.name}"[:140],
                 )
 
-        start += batch_size
+        cursor = leases[-1].name
 
 
 def idle_resident_aging() -> None:

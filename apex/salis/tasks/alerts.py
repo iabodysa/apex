@@ -258,15 +258,17 @@ def reconcile_operations_alerts() -> None:
     def _driver_active(driver: str | None) -> bool:
         return bool(driver) and frappe.db.get_value("Salis Driver", driver, "status") == "Active"
 
-    # [#dkxfl4]
+    # [#dkxfl4] Keyed cursor, not an offset: _resolve_alert flips status to Resolved,
+    # dropping the row out of the very set this filters on, so rows behind an offset
+    # shift down into the range it just passed and are skipped for the day.
     resolved_projects: set[str | None] = set()
-    start = 0
+    cursor = ""
     while True:
         alerts = frappe.get_all(
             ALERT_DOCTYPE,
-            filters={"status": ["in", ["Open", "Acknowledged"]]},
+            filters={"status": ["in", ["Open", "Acknowledged"]], "name": [">", cursor]},
             fields=["name", "alert_type", "vehicle", "driver", "raised_on"],
-            limit_start=start,
+            order_by="name asc",
             limit_page_length=BATCH_SIZE,
         )
         if not alerts:
@@ -331,7 +333,7 @@ def reconcile_operations_alerts() -> None:
                     title=f"Alert reconciliation failed for {a.name}"[:140],
                 )
 
-        start += BATCH_SIZE
+        cursor = alerts[-1].name
 
     # [#470qkc]
     for project in resolved_projects:

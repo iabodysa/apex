@@ -42,7 +42,10 @@ def unreverted_topup_watch() -> None:
     today_str = today()
     logger = frappe.logger()
 
-    start = 0
+    # Keyed cursor, not an offset: the body sets reverted=1 and status=Reverted, both
+    # filtered on here, so rows behind an offset shift down into the range it just
+    # passed and are skipped. name is immutable, so a key cursor cannot lose a row.
+    cursor = ""
     while True:
         topups = frappe.get_all(
             "Fuel Request",
@@ -52,9 +55,10 @@ def unreverted_topup_watch() -> None:
                 "reverted": 0,
                 "status": ["in", ["Approved", "Done"]],
                 "revert_due_date": ["<", today_str],
+                "name": [">", cursor],
             },
             fields=["name", "vehicle", "driver", "revert_due_date", "topup_litres"],
-            limit_start=start,
+            order_by="name asc",
             limit_page_length=BATCH_SIZE,
         )
         if not topups:
@@ -90,7 +94,7 @@ def unreverted_topup_watch() -> None:
                     title=f"Unreverted top-up watch failed for {t.name}"[:140],
                 )
 
-        start += BATCH_SIZE
+        cursor = topups[-1].name
 
 
 def overdue_fuel_request_watch() -> None:

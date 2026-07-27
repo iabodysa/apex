@@ -30,18 +30,21 @@ def daily_building_license_expiry_check() -> None:
 
     today_str = today()
 
-    # [#bz69zh]
-    start = 0
+    # [#bz69zh] Keyed cursor, not an offset: the body flips status OUT of the very
+    # set this filters on, so rows behind an offset shift down into the range it just
+    # passed and are skipped. name is immutable, so a key cursor cannot lose a row.
+    cursor = ""
     batch_size = 500
     while True:
         licenses = frappe.get_all(
             "Building License",
             filters={
                 "docstatus": 1,
-                "status": ["in", ["Active", "Expiring Soon"]]
+                "status": ["in", ["Active", "Expiring Soon"]],
+                "name": [">", cursor],
             },
             fields=["name", "expiry_date", "renewal_lead_days", "status"],
-            limit_start=start,
+            order_by="name asc",
             limit_page_length=batch_size,
         )
         if not licenses:
@@ -70,7 +73,7 @@ def daily_building_license_expiry_check() -> None:
                     title=f"License expiry check failed for {lic.name}"[:140],
                 )
 
-        start += batch_size
+        cursor = licenses[-1].name
 
 
 def _raise_maintenance_alert(
