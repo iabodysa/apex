@@ -1,10 +1,29 @@
 # Copyright (c) 2026, AFMCO and contributors
+"""Public Arrival Manifest intake, and what bounds ONE call of it.
+
+The rate limit bounds how many calls arrive; two other bounds decide how much a
+single admitted call can insert. Rows are capped by the controller's own ceiling,
+imported below rather than restated, because two copies of one number are two
+numbers as soon as either is edited. Row WIDTH needs nothing here: every field a
+guest may write is Data or Link, and frappe refuses a value past the column's
+varchar width before insert (base_document.py:1000-1005), so an admitted call is
+bounded in bytes as well as in rows.
+
+NO AGGREGATE DAILY CAP -- decided, not overlooked. Keyed on the address, a daily
+budget is spent by exactly the rotating proxy pool that already walks past the
+per-address ceiling: it costs the attacker nothing and costs an honest supplier a
+refusal. Keyed on the FORM it is worse, because one shared budget means the first
+abuser to spend it refuses every real supplier for the rest of the day, which
+converts a flood into a guaranteed outage. Revisit only if this form ever gains a
+per-supplier identity to key a budget on; today it is anonymous by design.
+"""
+
 import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
 
 # [#8g8lrm]
-_MAX_EXPECTED_WORKERS = 500
+from apex.habitat.doctype.arrival_batch.arrival_batch import _MAX_EXPECTED_WORKERS
 
 # [#g4hzd4]
 _ALLOWED_WORKER_FIELDS = ("worker_name", "passport_number", "nationality")

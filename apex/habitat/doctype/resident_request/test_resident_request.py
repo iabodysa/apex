@@ -11,8 +11,12 @@ from apex.habitat.doctype.resident_request.resident_request import (
     advance_triage_status,
     bulk_triage,
 )
-from apex.habitat.web_form.accommodation_resident_request.accommodation_resident_request import (
-    submit_resident_request,
+# The MODULE, never the endpoint itself. frappe resolves a request's `cmd` by attribute
+# lookup on the module the string names (handler.py:294-303), so importing the function
+# here would publish a second dotted path to it -- and the rate-limit window is named
+# after the caller's spelling (rate_limiter.py:155), so a second path is a second window.
+from apex.habitat.web_form.accommodation_resident_request import (
+    accommodation_resident_request as intake,
 )
 
 
@@ -180,7 +184,7 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         """A non-empty honeypot field is treated as spam: the call short-circuits
         with a null result and creates no request row."""
         before = frappe.db.count("Resident Request")
-        res = submit_resident_request(
+        res = intake.submit_resident_request(
             location_token=None,
             request_type="Maintenance",
             description="spam body",
@@ -192,7 +196,7 @@ class TestAccommodationResidentRequest(FrappeTestCase):
     def test_honeypot_empty_passes(self):
         """An empty honeypot lets a genuine submission through and creates a row
         with a tracking code."""
-        res = submit_resident_request(
+        res = intake.submit_resident_request(
             location_token=None,
             request_type="Maintenance",
             description="genuine request",
@@ -209,7 +213,7 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         Under the old commit-in-request code the row would survive the rollback,
         so this asserts the anti-pattern fix. [[reference-frappe-commit-in-request-antipattern]]"""
         frappe.db.savepoint("pre_submit")
-        res = submit_resident_request(
+        res = intake.submit_resident_request(
             location_token=None,
             request_type="Maintenance",
             description="rollback-safety probe",
