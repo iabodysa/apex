@@ -1693,6 +1693,11 @@ def confirm_boarding(token=None, transport_request=None):
         return {"trip": None, "created": False}
     dispatch_trip, request_name, stop_name, building = resolved
 
+    # Serialize concurrent confirms for the same worker on the SAME Dispatch Trip row the
+    # driver scan locks (salis/api/boarding.py): without it two simultaneous confirms both
+    # read no open log / no boarding row and each writes one, double-boarding the worker.
+    frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
+
     log = _get_or_create_trip_log(dispatch_trip)
 
     # [#f3nr8r]
