@@ -78,9 +78,9 @@
    "doctype": "DocField",
    "fieldname": "approved_by",
    "fieldtype": "Link",
-   "label": "Approved By",
+   "label": "Authorized By (Record Only)",
    "options": "User",
-   "description": "Must be Admin Manager"
+   "description": "Written record of who authorized this request outside the system. Nothing in the app reads this field and a grant submits whether it is filled in or left empty."
   },
   {
    "doctype": "DocField",

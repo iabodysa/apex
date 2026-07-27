@@ -236,11 +236,6 @@
    "read": 1,
    "role": "System Manager",
    "write": 1
-  },
-  {
-   "permlevel": 1,
-   "read": 1,
-   "role": "Accommodation Manager"
   }
  ],
  "search_fields": "employee_name, employee",

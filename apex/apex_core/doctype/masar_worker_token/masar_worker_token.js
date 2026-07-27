@@ -11,7 +11,11 @@ frappe.ui.form.on("Masar Worker Token", {
 		// re-displayed from the record. Issuing is ROTATE-ONLY: a fresh link + QR is
 		// minted and shown ONCE here; re-opening this action rotates (invalidating any
 		// previously shared link) rather than re-showing the old secret.
-		const has_link = Boolean(frm.doc.token);
+		// `token` sits at permlevel 1 and reaches System Manager alone, so keying the
+		// rotation warning off it would hide that warning from every other desk role.
+		const has_link = Boolean(
+			frm.doc.token || frm.doc.last_generated_on || frm.doc.expires_on
+		);
 		frm.add_custom_button(
 			has_link ? __("Rotate Link and QR") : __("Issue Link and QR"),
 			() => {
