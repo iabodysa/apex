@@ -30,6 +30,7 @@ Consent
 Content
 Could not complete the Work Order. No changes were saved. Please try again or contact support.
 Could not post the reversal to the ledger. The cancellation was rejected.
+Could not post the utility cost to the ledger. The bill was not submitted.
 Could not update bed occupancy. The assignment was not submitted.
 Create Records
 Day
