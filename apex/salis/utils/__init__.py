@@ -88,6 +88,31 @@ def lock_fuel_quota(name):
 		).for_update().run()
 
 
+def period_quota(vehicle, period_month, fields):
+	"""The live Fuel Quota row for ``vehicle`` in ``period_month``, or None.
+
+	One resolver behind every fuel door — the driver portal and the /fleet employee
+	page — so the quota bar a rider sees and the allowance their request is held to
+	can never name different rows. It lives here, beside ``lock_fuel_quota``, because
+	both callers already depend on this package; a copy inside either endpoint module
+	would make the other import a private name across packages.
+
+	``docstatus < 2`` keeps a draft or submitted allocation and drops a cancelled one
+	— the same scope the Fuel Quota duplicate guard treats as live, so at most one
+	row can match a (vehicle, period) pair. A vehicle with NO allocation that month
+	yields None, which is not a refusal: the allocation is what creates a ceiling, so
+	the caller binds an empty ``fuel_quota`` and the controller's allowance gate
+	returns at its first line."""
+	if not vehicle:
+		return None
+	return frappe.db.get_value(
+		"Fuel Quota",
+		{"vehicle": vehicle, "period_month": period_month, "docstatus": ["<", 2]},
+		fields,
+		as_dict=True,
+	)
+
+
 def normalize_plate(plate):
 	"""Canonical plate key: strip all whitespace and upper-case.
 

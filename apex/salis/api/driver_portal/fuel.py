@@ -10,6 +10,7 @@ from apex.salis.api.driver_portal import (
     _require_enabled,
     _bound_vehicle,
 )
+from apex.salis.utils import period_quota
 
 
 FUEL_REQUEST_DEFAULT_LIMIT = 30
@@ -21,24 +22,6 @@ def _bounded_request_limit(value):
 	if parsed <= 0:
 		return FUEL_REQUEST_DEFAULT_LIMIT
 	return min(parsed, FUEL_REQUEST_MAX_LIMIT)
-
-
-def _period_quota(vehicle, period_month, fields):
-	"""The live Fuel Quota row for ``vehicle`` in ``period_month``, or None.
-
-	One resolver behind both fuel endpoints, so the quota bar the portal renders and
-	the allowance a portal request is held to can never name different rows.
-	``docstatus < 2`` keeps a draft or submitted allocation and drops a cancelled one
-	— the same scope the Fuel Quota duplicate guard treats as live, so at most one
-	row can match a (vehicle, period) pair."""
-	if not vehicle:
-		return None
-	return frappe.db.get_value(
-		"Fuel Quota",
-		{"vehicle": vehicle, "period_month": period_month, "docstatus": ["<", 2]},
-		fields,
-		as_dict=True,
-	)
 
 
 def _vehicle_bound_to_driver(driver, vehicle):
@@ -71,7 +54,7 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
 	someone else's vehicle.
 
 	The request carries the Fuel Quota for its OWN request month, resolved through the
-	same ``_period_quota`` read that feeds the portal's quota bar. That link is what
+	shared ``salis.utils.period_quota`` read that feeds the portal's quota bar. That is what
 	makes the controller's allowance gate live: with ``fuel_quota`` empty,
 	``_guard_quota_allowance`` returns at its first line and the portal draws past an
 	allocation the desk and the approval console are both held to. An oversized draw is
@@ -90,7 +73,7 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
 			frappe.PermissionError,
 		)
 	request_date = frappe.utils.today()
-	quota = _period_quota(vehicle, request_date[:7], ["name"])
+	quota = period_quota(vehicle, request_date[:7], ["name"])
 	doc = frappe.get_doc(
 		{"doctype": "Fuel Request", "request_type": "Standard", "driver": driver,
 		 "vehicle": vehicle, "fuel_quota": quota.name if quota else None,
@@ -116,9 +99,9 @@ def my_fuel_quota(vehicle=None):
 	another vehicle's quota by guessing an id; an unbound id falls back to the bound
 	vehicle. The quota row is the native Fuel Quota for (vehicle, this YYYY-MM period),
 	the same record the fuel engine keeps ``consumed_litres`` on — and, through the
-	shared ``_period_quota`` read, the very row ``submit_fuel_request`` binds a new
-	request to, so the bar the driver sees and the allowance they are held to cannot
-	disagree.
+	shared ``salis.utils.period_quota`` read, the very row ``submit_fuel_request`` binds
+	a new request to, so the bar the driver sees and the allowance they are held to
+	cannot disagree.
 
 	Returns ``{"has_quota": False, ...}`` (a friendly empty state, never a 403) when no
 	vehicle is bound or no quota exists for the month, so the SPA omits the card.
@@ -137,7 +120,7 @@ def my_fuel_quota(vehicle=None):
 		return {"has_quota": False, "vehicle": None, "approval_threshold_litres": threshold}
 
 	period_month = frappe.utils.today()[:7]
-	row = _period_quota(
+	row = period_quota(
 		vehicle,
 		period_month,
 		["name", "monthly_litres", "monthly_amount", "consumed_litres", "status"],

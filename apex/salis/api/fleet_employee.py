@@ -22,7 +22,12 @@ docstatus 0, for supervisor approval) — no new DocType is invented.
 import frappe
 from frappe import _
 
-from apex.salis.utils import add_timeline_note, bound_vehicle, get_driver_for_session_user
+from apex.salis.utils import (
+    add_timeline_note,
+    bound_vehicle,
+    get_driver_for_session_user,
+    period_quota,
+)
 
 # Salis Vehicle status -> the frontend's status-pill vocabulary (statusMeta in
 # App.vue). "Active" reads as "assigned" here because the vehicle is, by
@@ -231,13 +236,10 @@ def submit_fuel_request(litres, vehicle=None, fuel_grade=None, station=None, not
     if litres <= 0:
         frappe.throw(_("Enter how many litres you need."))
 
-    # The driver portal's resolver, imported rather than restated, so the two
-    # employee-facing fuel doors can never bind a request to different rows.
-    # Deferred to call time: /fleet renders without paying for the portal package.
-    from apex.salis.api.driver_portal.fuel import _period_quota
-
+    # The shared resolver, called rather than restated, so the two employee-facing
+    # fuel doors can never bind a request to different rows.
     request_date = frappe.utils.today()
-    quota = _period_quota(vehicle, request_date[:7], ["name"])
+    quota = period_quota(vehicle, request_date[:7], ["name"])
     doc = frappe.get_doc(
         {
             "doctype": "Fuel Request",
