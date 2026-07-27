@@ -43,6 +43,7 @@ from __future__ import annotations
 
 import ast
 import inspect
+import json
 import pathlib
 import tempfile
 import unittest
@@ -53,6 +54,7 @@ import frappe.rate_limiter
 import frappe.translate
 
 from apex.habitat.api import front_desk
+from apex.habitat.doctype.arrival_batch import arrival_batch
 from apex.habitat.web_form.accommodation_resident_request import (
     accommodation_resident_request as resident_request,
 )
@@ -109,6 +111,70 @@ _ABSENT = object()
 # window and only THEN delegates (rate_limiter.py:132-168), so the missing-argument
 # TypeError is raised from inside the limiter's own wrapper, after the counter moved.
 _LIMITER_FILE = frappe.rate_limiter.__file__
+
+# The bound each submitter puts on ONE admitted call, pinned here rather than read
+# from the endpoint for the same reason DECLARED_CEILINGS is: a test that imports the
+# ceiling it is checking agrees with any value, so a widened cap would spend the
+# larger allowance and still pass. The manifest's unit is ROWS; the other three cap a
+# free-text field in CHARACTERS.
+MANIFEST_ROW_CAP = 500
+RESIDENT_DESCRIPTION_CAP = 2000
+TRANSPORT_PURPOSE_CAP = 2000
+INCIDENT_DESCRIPTION_CAP = 4000
+
+
+def _manifest_call(rows):
+    """One manifest submission carrying ``rows`` expected workers.
+
+    ``expected_workers`` goes as a JSON STRING, which is the only shape that arrives
+    over the wire: form_dict values are built from the query string and body
+    (app.py:302-314), so the endpoint's parse branch is the live one.
+    """
+    return {
+        "building": "BUILDING-CAPTURED",
+        "expected_date": "2026-01-01",
+        "expected_workers": json.dumps(
+            [{"worker_name": f"Worker {index}"} for index in range(rows)]
+        ),
+    }
+
+
+def _resident_call(chars):
+    return {
+        "location_token": "LOCATION-CAPTURED",
+        "request_type": "Maintenance",
+        "description": "d" * chars,
+    }
+
+
+def _transport_call(chars):
+    return {
+        "from_location": "ORIGIN-CAPTURED",
+        "to_location": "DESTINATION-CAPTURED",
+        "pickup_datetime": "2026-01-01 08:00:00",
+        "passenger_count": 4,
+        "purpose": "p" * chars,
+    }
+
+
+def _incident_call(chars):
+    return {
+        "incident_type": "Accident",
+        "vehicle": "VEHICLE-CAPTURED",
+        "incident_date": "2026-01-01",
+        "description": "d" * chars,
+    }
+
+
+# Each submitter with the ceiling on what one call may carry and a builder that sizes
+# a call to any figure, so the refused call and the accepted one are the SAME call at
+# two sizes and nothing but the size can explain the difference.
+PAYLOAD_BOUNDS = (
+    (arrival_manifest, "submit_arrival_manifest", MANIFEST_ROW_CAP, _manifest_call),
+    (resident_request, "submit_resident_request", RESIDENT_DESCRIPTION_CAP, _resident_call),
+    (transport_request, "submit_transport_request", TRANSPORT_PURPOSE_CAP, _transport_call),
+    (vehicle_incident, "submit_vehicle_incident", INCIDENT_DESCRIPTION_CAP, _incident_call),
+)
 
 
 def _declared_limits(module, name):
@@ -376,6 +442,148 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
                     "rolling period rather than a fixed one",
                 )
                 self.assertEqual(declared["seconds"], 60)
+
+
+class _CapturedDocument:
+    """Stands in for ``frappe.get_doc`` so an accepted call is provable with no database.
+
+    A refusal is easy to observe; an ACCEPTANCE is the half that normally needs a site,
+    because the endpoint's last act is an insert. Recording the document the endpoint
+    built, and the insert it asked for, makes "the cap let this through" an assertion
+    about the write that would have happened rather than about the absence of a throw.
+    """
+
+    name = "CAPTURED-DOCUMENT"
+    anonymous_tracking_code = "CAPTURED-TRACKING-CODE"
+
+    def __init__(self):
+        self.built = []
+        self.inserted = 0
+
+    def __call__(self, payload):
+        self.built.append(payload)
+        return self
+
+    def insert(self, **kwargs):
+        self.inserted += 1
+        return self
+
+
+class TestOneCallIsBoundedOnWhatItInserts(unittest.TestCase):
+    """The call ceiling and the payload ceiling are different levers, spent here.
+
+    Five calls a minute per address says nothing about how much ONE of those calls
+    carries, and all four submitters insert with ``ignore_permissions=True``, so the
+    payload bound is the only thing standing between an admitted call and the queue.
+
+    Both directions are proven for each submitter, because either alone is satisfiable
+    by a broken cap: a cap that refuses everything passes the over-the-cap case, and a
+    cap that refuses nothing passes the at-the-cap case. The refusal is additionally
+    required to NAME its ceiling, since a submitter who cannot see the number cannot
+    resize the call, and to land before the document is built rather than after.
+
+    The window is not what is under test, so ``frappe.request`` is left unset and the
+    limiter hands the call straight through (rate_limiter.py:134). That is what keeps
+    these cases independent: a shared counter would make each one's verdict depend on
+    how many calls the case before it happened to spend.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        if getattr(frappe.local, "initialised", False):
+            return
+        sites = pathlib.Path(tempfile.mkdtemp())
+        (sites / "apps.txt").write_text("frappe\napex\n", encoding="utf-8")
+        (sites / "common_site_config.json").write_text("{}", encoding="utf-8")
+        frappe.init(site="", sites_path=str(sites))
+
+    def setUp(self):
+        self._saved = [(name, getattr(frappe.local, name, _ABSENT)) for name in ("request",)]
+        self.addCleanup(self._put_request_state_back)
+        translations = mock.patch.object(
+            frappe.translate, "get_all_translations", lambda *a, **k: {}
+        )
+        translations.start()
+        self.addCleanup(translations.stop)
+        frappe.local.request = None
+
+    def _put_request_state_back(self):
+        while self._saved:
+            name, previous = self._saved.pop()
+            if previous is _ABSENT:
+                if hasattr(frappe.local, name):
+                    delattr(frappe.local, name)
+            else:
+                setattr(frappe.local, name, previous)
+
+    def _submit(self, module, name, arguments, captured):
+        with mock.patch.object(frappe, "get_doc", captured):
+            return getattr(module, name)(**arguments)
+
+    def test_a_call_over_the_cap_is_refused_before_anything_is_built(self):
+        """One unit past the ceiling must be refused, and refused EARLY.
+
+        The endpoint's check is what keeps an oversized table from being materialised
+        at all; a refusal that arrived from the controller instead would still refuse,
+        but only after the row list had been built from whatever the caller sent.
+        """
+        for module, name, cap, build in PAYLOAD_BOUNDS:
+            with self.subTest(endpoint=name, cap=cap):
+                captured = _CapturedDocument()
+                with self.assertRaises(frappe.ValidationError) as refusal:
+                    self._submit(module, name, build(cap + 1), captured)
+                self.assertEqual(
+                    captured.built, [], f"{name} built a document for a call it refused"
+                )
+                self.assertEqual(captured.inserted, 0)
+                self.assertIn(
+                    str(cap),
+                    str(refusal.exception),
+                    f"{name} refused without naming the ceiling, so a real submitter "
+                    "cannot tell how far over the call was",
+                )
+
+    def test_a_call_exactly_at_the_cap_is_accepted(self):
+        """The other direction: the cap must admit a call that sits exactly on it."""
+        for module, name, cap, build in PAYLOAD_BOUNDS:
+            with self.subTest(endpoint=name, cap=cap):
+                captured = _CapturedDocument()
+                self._submit(module, name, build(cap), captured)
+                self.assertEqual(
+                    captured.inserted,
+                    1,
+                    f"{name} refused a call sitting exactly on its ceiling",
+                )
+                self.assertEqual(len(captured.built), 1)
+
+    def test_the_manifest_at_its_cap_inserts_every_row_it_was_sent(self):
+        """Accepted has to mean accepted WHOLE.
+
+        A cap enforced by silently dropping the overflow would satisfy both directions
+        above and quietly lose a supplier's workers, which is worse than a refusal
+        because nothing tells the supplier it happened.
+        """
+        captured = _CapturedDocument()
+        self._submit(
+            arrival_manifest,
+            "submit_arrival_manifest",
+            _manifest_call(MANIFEST_ROW_CAP),
+            captured,
+        )
+        self.assertEqual(len(captured.built[0]["expected_workers"]), MANIFEST_ROW_CAP)
+
+    def test_the_endpoint_cap_and_the_controller_cap_are_one_number(self):
+        """Two copies of a ceiling are two ceilings the moment either is edited.
+
+        The endpoint keeps its own pre-insert check on purpose -- it refuses before the
+        row list is built -- but it must MIRROR the controller rather than restate it,
+        so a cap lowered in one place cannot leave the public form admitting the old
+        figure. Identity, not equality: equal literals are exactly the state that drifts.
+        """
+        self.assertIs(
+            arrival_manifest._MAX_EXPECTED_WORKERS, arrival_batch._MAX_EXPECTED_WORKERS
+        )
+        self.assertEqual(arrival_manifest._MAX_EXPECTED_WORKERS, MANIFEST_ROW_CAP)
 
 
 if __name__ == "__main__":
