@@ -413,6 +413,11 @@
    "role": "Resident Supervisor",
    "submit": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
   }
  ],
  "row_format": "Dynamic",
