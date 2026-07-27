@@ -300,8 +300,16 @@ def get_cost_center_totals(filters=None):
 def get_sim_detail(sim_card):
     """Drawer data for one SIM: its own fields plus custody history. Company and
     document permission are enforced by loading the doc through the permission
-    layer; unrelated employee fields are never returned."""
-    if not sim_card or not frappe.db.exists("SIM Card", sim_card):
+    layer; unrelated employee fields are never returned.
+
+    ``sim_card`` arrives from a whitelisted endpoint, so the existence probe filters
+    on ``name``: the positional form answers the value back without querying when it
+    equals the DocType (database.py:1259), letting the literal string "SIM Card"
+    clear this gate and reach ``get_doc`` — a bare framework 404 in place of the named
+    refusal below. ``check_permission`` still runs on whatever loads, so what the
+    short-circuit costs is this module's own message, not the permission check.
+    """
+    if not sim_card or not frappe.db.exists("SIM Card", {"name": sim_card}):
         frappe.throw(_("SIM Card {0} does not exist.").format(sim_card))
     doc = frappe.get_doc("SIM Card", sim_card)
     doc.check_permission("read")
