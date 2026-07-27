@@ -18,9 +18,10 @@ WHAT IS PROVEN, AND WHY EACH PROOF EXISTS
    detector that flagged everything unconditionally would pass proof 1.
 3. ``test_permlevel_0_clause_is_load_bearing`` — re-derive the predicate with the
    ``permlevel_0`` clause dropped and watch it go blind on a REAL shipped row, not a
-   synthetic one: Finance Manager's ``read: 1`` row on Custody Damage Assessment,
-   which sits at permlevel 1 and is exactly the shape that fools a detector missing
-   this clause.
+   synthetic one: Finance Manager's ``read: 1`` row on Housing Checkout, which sits
+   at permlevel 1 and is exactly the shape that fools a detector missing this
+   clause. Since the 2026-07-27 grant, no frozen entry is in that state any more, so
+   this proof is phrased over the ROW rather than over an entry, as (4) already was.
 4. ``test_not_if_owner_clause_is_load_bearing`` — same for ``not_if_owner``. No
    shipped pair is in that state, so this one is proven against the ``All`` /
    ``if_owner`` row Maintenance Request really ships, which is why the assertion is
@@ -65,11 +66,25 @@ _LIVE_ROLE = "_A301 Role That Can Open"
 # Three of the original seven were drained by REPOINTING: the roles they named --
 # Facilities Supervisor, Admin Manager, Operations Director -- hold no DocPerm
 # anywhere in this app, so each notification now names a role that already holds a
-# permlevel-0 read. A fourth (Finance Manager on Custody Damage Assessment) was
-# planned as a grant, attempted, and REVERTED; its entry below records why, and it is
-# the only frozen entry whose notification ships `enabled: 1`.
+# permlevel-0 read.
 
-# The other three survivors ship `enabled: 0`; that is NOT a reason to drop them --
+# A FOURTH WAS DRAINED BY GRANT on 2026-07-27, and this paragraph is the reason its
+# entry is gone rather than a green build nobody can account for. Custody Damage
+# Assessment now ships Finance Manager a permlevel-0, non-if_owner `read`, so the
+# receiver of `Habitat - Custody Damage Assessment Created` can open the record the
+# mail links to.
+
+# An earlier pass attempted that same grant and reverted it, because the omission was
+# recorded as deliberate beside the rows. It was then argued on its own evidence and
+# the owner granted it anyway, over three costs he was shown: the shipped role profile
+# already pairs the role with Internal Auditor, who holds the read; a level-0 read is
+# the WHOLE record, resident identity included, where the permlevel-1 row unlocked one
+# field; and Finance Manager is unscoped, so the read spans every building.
+
+# It was the only frozen entry whose notification ships `enabled: 1` -- which is
+# precisely why it was the one worth arguing, and why the other three can wait.
+
+# The three survivors ship `enabled: 0`; that is NOT a reason to drop them --
 # the DB's `enabled` value overwrites the on-disk one on every re-import
 # (frappe/modules/import_file.py:33, consumed :262-265), so a site that toggles one
 # on keeps it on, and no migrate will turn it back off.
@@ -87,38 +102,6 @@ _CHILD_TABLE_IS_A_DIFFERENT_DEFECT = (
 )
 
 KNOWN_UNREACHABLE_NOTIFICATION_ROLES = {
-    (
-        "Habitat - Custody Damage Assessment Created",
-        "Custody Damage Assessment",
-        "Finance Manager",
-    ): (
-        "Observed, not prescribed — do NOT act on this entry from this file, and in "
-        "particular do NOT 'fix' it by adding a permlevel-0 read row. A-301 tried "
-        "exactly that and reverted it: A-218 had already investigated this row and "
-        "recorded the missing permlevel-0 companion as DELIBERATE, with a guard written "
-        "to catch precisely this edit (habitat/doctype/custody_damage_assessment/"
-        "test_finance_manager_field_overlay.py — 'that is a document grant and must be "
-        "argued for on its own evidence'). Both sides, so the next reader need not "
-        "re-derive them:\n"
-        "  FOR the grant — the app really does ship a notification that emails this role "
-        "about this record, the resolver never checks permissions "
-        "(notification.py:366), and a Finance-Manager-ONLY user therefore gets a link "
-        "that throws.\n"
-        "  AGAINST — the shipped provisioning path is the role PROFILE 'Habitat Finance "
-        "Reviewer' = Finance Manager + Internal Auditor (apex/setup.py:174), and "
-        "Internal Auditor holds permlevel-0 read here. A Finance Manager provisioned the "
-        "shipped way OPENS this record today; only a hand-assembled solo Finance Manager "
-        "cannot. The permlevel-1 row that exists unlocks exactly one field "
-        "(total_estimated_replacement_cost), whereas a permlevel-0 read grants the WHOLE "
-        "record — resident identity and damage narrative — and Finance Manager sits in "
-        "habitat/permissions.py HOUSING_UNSCOPED_ROLES, so it would be estate-wide "
-        "across every building rather than building-scoped.\n"
-        "So this pair is NOT the dead-role defect the other entries describe: the record "
-        "is reachable, through provisioning rather than through this role's own DocPerm. "
-        "Whether a solo Finance Manager should exist at all, and whether that user should "
-        "read the whole record to action a payroll deduction, is an access decision for "
-        "the owner."
-    ),
     ("Habitat - Idle Resident Reported", "Idle Resident Report", "HR Manager"): (
         "Observed, not prescribed — do NOT act on this entry from this file. HR Manager "
         "is an HRMS role. It holds a great deal of permission in HRMS and not ONE "
@@ -297,23 +280,24 @@ class TestEachClauseIsLoadBearing(unittest.TestCase):
         return data.get("permissions"), data.get("istable")
 
     def test_permlevel_0_clause_is_load_bearing(self):
-        """Custody Damage Assessment really ships Finance Manager at permlevel 1 ONLY.
+        """Housing Checkout really ships Finance Manager at permlevel 1 ONLY.
 
-        No synthetic row is needed: this is the live shape of the frozen
-        Custody Damage Assessment / Finance Manager entry. The row carries
-        ``read: 1`` and sits on the very DocType the notification names, so a
-        detector missing the permlevel clause would read it as a grant and pass the
-        broken pair. That is the false pass this clause exists to prevent; the tree is
-        deliberately kept in this state (see the frozen entry's reason).
+        The anchor moved here on 2026-07-27. Custody Damage Assessment used to carry
+        both this shape and a frozen entry, so the proof could be phrased over the
+        entry; it was then granted a permlevel-0 read and stopped being an example of
+        the shape at all. No shipped notification names this pair, so the assertion is
+        phrased over the ROW, exactly as the ``not_if_owner`` proof below already is.
+        The row is real, carries ``read: 1``, and is precisely what a detector missing
+        the permlevel clause would misread as a grant.
         """
-        permissions, istable = self._perms("Custody Damage Assessment")
+        permissions, istable = self._perms("Housing Checkout")
 
         rows = [r for r in permissions if r.get("role") == "Finance Manager"]
         self.assertEqual(
             sorted(int(r.get("permlevel") or 0) for r in rows),
             [1],
-            "this proof needs Finance Manager at permlevel 1 ONLY on Custody Damage "
-            "Assessment; the fixture it is built on changed",
+            "this proof needs Finance Manager at permlevel 1 ONLY on Housing "
+            "Checkout; the fixture it is built on changed",
         )
         self.assertTrue(rows[0].get("read"), "the row must carry read for the mutant to bite")
 

@@ -1,10 +1,10 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-218: the Finance Manager permlevel-1 rows that ship WITHOUT a permlevel-0 companion.
+"""The Finance Manager permlevel-1 rows, and the one DocType that also holds permlevel 0.
 
 Five Habitat DocTypes -- Custody Damage Assessment, Housing Checkout, Maintenance
 Request, Subcontractor Service Contract, Subcontractor Service Order -- give
-``Finance Manager`` a permlevel-1 read+write row and no permlevel-0 row at all. Two
-readings were possible and the pattern carried no recorded reason:
+``Finance Manager`` a permlevel-1 read+write row. Four of them still ship no
+permlevel-0 row at all. Two readings of that shape were possible:
 
 LAYERED  the row is a deliberate FIELD unlock over a document some OTHER role opens.
 FLAT     the row is inert, because a role with no permlevel-0 row cannot open the doc.
@@ -23,14 +23,17 @@ document, and the two levels are independent grants -- which is also why a perml
 row is never a duplicate of a permlevel-0 row and dedupe must key on the
 (role, permlevel) PAIR.
 
-The shipped evidence that the shape is deliberate rather than an omission: on all five,
-the two roles that DO open the document (System Manager, Accommodation Manager) carry
-their own permlevel-1 rows ALONGSIDE their permlevel-0 rows. Whoever wrote these knew
-permlevel-0 write does not imply permlevel-1 write and re-granted it explicitly. Finance
-Manager is the same construct with the opener half deliberately withheld: it may see and
-set the money, it may not open, create, submit or cancel the document.
+THE 2026-07-27 DECISION -- Custody Damage Assessment now ALSO carries a permlevel-0
+``read`` row for Finance Manager. The omission used to be recorded here as deliberate;
+it was then argued on its own evidence and the owner granted it anyway, over three
+stated costs: the shipped role profile already pairs Finance Manager with Internal
+Auditor, who holds the read, so only a hand-assembled solo finance user lacked it; the
+permlevel-1 row unlocks exactly one field while a level-0 read is the WHOLE record,
+resident identity included; and Finance Manager is unscoped, so the read spans every
+building. ``TestTheGrantedReadIsWhatWasDecided`` keeps that cost visible in the test
+instead of only in a decision note. The other four keep the overlay-only shape.
 
-MAINTENANCE REQUEST IS THE ONE EXCEPTION and is asserted separately below: it ships an
+MAINTENANCE REQUEST IS A SECOND EXCEPTION and is asserted separately below: it ships an
 ``All`` permlevel-0 row (read+create, if_owner), and every logged-in user holds ``All``
 (``frappe/permissions.py:520``). A Finance-Manager-only user therefore CAN create one and
 populate the financial fields on it. On that DocType the flat "inert" reading is false
@@ -63,6 +66,13 @@ OVERLAY = {
 }
 
 FINANCE = "Finance Manager"
+
+# The one of the five the 2026-07-27 decision granted a permlevel-0 read on.
+GRANTED = "custody_damage_assessment"
+
+# Fields the granted read newly puts in front of Finance Manager. Named so the cost of
+# the decision is asserted, not just described: these carry who the damage is charged to.
+RESIDENT_IDENTITY = ("party_type", "party", "employee")
 
 
 def load(slug: str) -> dict:
@@ -118,17 +128,21 @@ def rows_for(meta: dict, role: str) -> dict:
 
 
 class TestThePatternStillShips(unittest.TestCase):
-    """Change-detector. If a later wave normalises one of these five by adding a
-    permlevel-0 Finance Manager row, that is a document grant and must be argued for
-    on its own evidence -- it must not arrive as a silent side effect."""
+    """Change-detector. Adding a permlevel-0 Finance Manager row to one of these five is
+    a document grant, so it may not arrive as a silent side effect of unrelated work.
+    Custody Damage Assessment is the one that HAS been argued and granted, on
+    2026-07-27; every other slug still has to come through the same door."""
 
-    def test_all_five_ship_permlevel_one_only(self):
+    def test_four_ship_permlevel_one_only_and_the_granted_one_carries_both(self):
         for slug in OVERLAY:
             with self.subTest(slug=slug):
                 levels = rows_for(load(slug), FINANCE)
                 self.assertEqual(
-                    set(levels), {1},
-                    f"{slug}: Finance Manager rows are no longer permlevel-1-only",
+                    set(levels), {0, 1} if slug == GRANTED else {1},
+                    f"{slug}: the Finance Manager permlevel set changed. A new "
+                    "permlevel-0 row is a grant of the whole document to an unscoped "
+                    "role and needs its own decision; a lost one revokes access "
+                    "someone is relying on",
                 )
                 self.assertTrue(levels[1].get("read"))
                 self.assertTrue(levels[1].get("write"))
@@ -160,9 +174,11 @@ class TestThePatternStillShips(unittest.TestCase):
 
 class TestLayeredNotFlat(unittest.TestCase):
 
-    def test_a_solo_finance_manager_cannot_open_four_of_the_five(self):
+    def test_a_solo_finance_manager_still_cannot_open_three_of_the_five(self):
+        """Two are now out of this set for different reasons: Maintenance Request through
+        its ``All`` row, Custody Damage Assessment through the 2026-07-27 grant."""
         for slug in OVERLAY:
-            if slug == "maintenance_request":
+            if slug in ("maintenance_request", GRANTED):
                 continue
             with self.subTest(slug=slug):
                 meta = load(slug)
@@ -208,8 +224,48 @@ class TestLayeredNotFlat(unittest.TestCase):
         self.assertNotIn("total_estimated_replacement_cost", visible_fields(stripped, profile))
 
 
-class TestMaintenanceRequestIsTheExceptionOfTheFive(unittest.TestCase):
-    """The two readings agree on four DocTypes and disagree on this one.
+class TestTheGrantedReadIsWhatWasDecided(unittest.TestCase):
+    """The 2026-07-27 grant and its price, asserted together."""
+
+    def test_a_solo_finance_manager_now_opens_the_record_and_reads_the_resident(self):
+        """One method on purpose: the access and what it exposes are the same fact, and
+        splitting them lets a reader see the grant without ever meeting its cost."""
+        meta = load(GRANTED)
+        solo = {FINANCE} | AUTOMATIC_ROLES
+
+        self.assertEqual(
+            doc_access(meta, solo, "read"),
+            1,
+            "the 2026-07-27 grant is gone -- a Finance Manager holding no other role "
+            "can no longer open this record",
+        )
+
+        # What the read is actually worth: every permlevel-0 field, not merely the money
+        # the permlevel-1 row already unlocked. This is the whole record, estate-wide.
+        visible = visible_fields(meta, solo)
+        for fieldname in RESIDENT_IDENTITY:
+            with self.subTest(field=fieldname):
+                self.assertIn(
+                    fieldname,
+                    visible,
+                    f"{fieldname} no longer reaches Finance Manager. If the field moved "
+                    "behind a permlevel the recorded cost of this grant is now wrong; "
+                    "if it was renamed, rename it here too",
+                )
+
+        # A read and nothing more. Any of these turning 1 is a widening no one decided.
+        for ptype in ("write", "create", "submit", "cancel", "delete", "export", "share"):
+            with self.subTest(ptype=ptype):
+                self.assertEqual(
+                    doc_access(meta, solo, ptype),
+                    0,
+                    f"the grant widened to {ptype}; 2026-07-27 decided a read only",
+                )
+
+
+class TestMaintenanceRequestIsTheOtherExceptionOfTheFive(unittest.TestCase):
+    """The two readings agree on three DocTypes and disagree on this one, and they
+    disagree on it without any grant having been made.
 
     Maintenance Request ships an ``All`` permlevel-0 row (read+create, if_owner). Every
     logged-in user holds ``All``, so a Finance-Manager-only user reaches permlevel-0
