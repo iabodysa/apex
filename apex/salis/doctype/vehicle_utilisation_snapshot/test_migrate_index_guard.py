@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Migrate-safety guard for the Salis machine-written ledgers' UNIQUE indexes.
+"""Migrate-safety guard for the Salis composite UNIQUE indexes.
 
 ``on_doctype_update`` runs inside ``bench migrate``. A raw ``frappe.db.add_unique``
 there propagates MariaDB error 1062 the moment the table already holds duplicate
@@ -10,8 +10,11 @@ blocking duplicate groups and returns False so migrate continues.
 
 One table-driven test rather than a near-copy per doctype directory: these
 controllers are identical in shape, so a per-directory duplicate would add no
-coverage. Add a row to ``GUARDED`` when another machine-written Salis ledger
-takes a composite UNIQUE index.
+coverage. ``GUARDED`` must list EVERY Salis controller with an
+``on_doctype_update`` — the machine-written ledgers/snapshots and the
+human-written masters alike, since duplicate rows abort migrate regardless of
+who wrote them. Add a row when another Salis DocType takes a composite UNIQUE
+index.
 
 Pure unit test — the DDL is mocked, so it needs no site and no live table.
 """
@@ -22,11 +25,25 @@ import unittest
 from unittest import mock
 
 from apex.apex_core.utils import ledger_index
+from apex.salis.doctype.fuel_consumption_ledger import fuel_consumption_ledger
+from apex.salis.doctype.fuel_quota import fuel_quota
 from apex.salis.doctype.rental_accrual_ledger import rental_accrual_ledger
 from apex.salis.doctype.vehicle_utilisation_snapshot import vehicle_utilisation_snapshot
 
 # (controller module, DocType, constraint columns, constraint name)
 GUARDED = [
+    (
+        fuel_consumption_ledger,
+        "Fuel Consumption Ledger",
+        ["source_type", "source_name"],
+        "unique_fcl_source",
+    ),
+    (
+        fuel_quota,
+        "Fuel Quota",
+        ["vehicle", "period_month", "docstatus"],
+        "uq_fuel_quota_vehicle_period",
+    ),
     (
         rental_accrual_ledger,
         "Rental Accrual Ledger",
