@@ -90,9 +90,15 @@ class TestPaymentRouter(FrappeTestCase):
     def tearDownClass(cls):
         # [#nhevq4]
         frappe.set_user("Administrator")
+        # Reset the router as a PAIR before the stub goes. The last test may have left
+        # it pointing here with a matching map; once the DocType is deleted the target
+        # is a dangling Link and the rows name fields the default Payment Request does
+        # not have — both would abort the next module's first save, not ours.
+        frappe.db.delete("Payment Routing Field Map", {"parent": SETTINGS})
+        frappe.db.set_single_value(SETTINGS, "target_payment_doctype", None)
         if frappe.db.exists("DocType", STUB_DOCTYPE):
             frappe.delete_doc("DocType", STUB_DOCTYPE, force=1, ignore_permissions=True)
-            frappe.db.commit()
+        frappe.db.commit()
         super().tearDownClass()
 
     def setUp(self):

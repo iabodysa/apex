@@ -23,6 +23,7 @@ from frappe.tests.utils import FrappeTestCase
 from apex.apex_core.setup.setup_wizard import setup_wizard_complete
 
 ROUTER = "Payment Routing Settings"
+FIELD_MAP_CHILD = "Payment Routing Field Map"
 
 
 def _rule_enabled(policy, rule_type):
@@ -32,6 +33,14 @@ def _rule_enabled(policy, rule_type):
 
 
 class TestApexSetupWizard(FrappeTestCase):
+    def setUp(self):
+        frappe.set_user("Administrator")
+        # Setup re-points the router's TARGET, so any field map inherited from another
+        # module is left describing a DocType nobody chose here and is refused against
+        # the new target. A fresh install has no rows; start from that.
+        frappe.db.delete(FIELD_MAP_CHILD, {"parent": ROUTER})
+        frappe.db.set_single_value(ROUTER, "target_payment_doctype", None)
+
     def test_payment_method_routes_to_router_and_toggles_stay_safe(self):
         # [#p21yh6]
         setup_wizard_complete(

@@ -62,12 +62,15 @@ from frappe.tests.utils import FrappeTestCase
 from apex.tests._helpers import submit_via_workflow
 
 from apex.apex_core.payment_router import (
+    LINK_DOCTYPE_FIELD,
+    LINK_NAME_FIELD,
     SOURCE_DOCTYPE,
     route_payment,
 )
 from apex.tests._helpers import set_gl_posting
 
 SETTINGS = "Payment Routing Settings"
+FIELD_MAP_CHILD = "Payment Routing Field Map"
 # [#4bwi8x]
 STUB_DOCTYPE = "Test Routed Serialization Stub"
 
@@ -118,11 +121,14 @@ class TestRoutedPaymentSerialization(FrappeTestCase):
     def tearDownClass(cls):
         frappe.set_user("Administrator")
         # Drop the pointer BEFORE the stub DocType: leaving it behind gives the single
-        # a dangling Link, and _validate_links then aborts every later save of it.
+        # a dangling Link, and _validate_links then aborts every later save of it. The
+        # rows go with it — a map naming stub fieldnames is validated against the
+        # default Payment Request once the target is cleared, and refused there.
+        frappe.db.delete(FIELD_MAP_CHILD, {"parent": SETTINGS})
         frappe.db.set_single_value(SETTINGS, "target_payment_doctype", None)
         if frappe.db.exists("DocType", STUB_DOCTYPE):
             frappe.delete_doc("DocType", STUB_DOCTYPE, force=1, ignore_permissions=True)
-            frappe.db.commit()
+        frappe.db.commit()
         super().tearDownClass()
 
     def setUp(self):
@@ -240,11 +246,17 @@ class TestRoutedPaymentSerialization(FrappeTestCase):
         name without creating any target -- the loser-transaction path.
         """
         pr = self._approved_request(amount=42.00)
-        # [#chqd9u]
+        # [#chqd9u] Stamp BOTH halves, the way a real winner leaves the row: the link
+        # is a Dynamic Link, so a name without its companion doctype is a state the
+        # router itself can never produce and would be refused on the next save.
         sentinel = "SENTINEL-EXISTING-PAYMENT"
-        pr.db_set("linked_payment_entry", sentinel, update_modified=False)
+        pr.db_set(
+            {LINK_DOCTYPE_FIELD: STUB_DOCTYPE, LINK_NAME_FIELD: sentinel},
+            update_modified=False,
+        )
         pr.reload()
         self.assertEqual(pr.linked_payment_entry, sentinel)
+        self.assertEqual(pr.linked_payment_doctype, STUB_DOCTYPE)
 
         targets_before = frappe.db.count(STUB_DOCTYPE)
         returned = route_payment(pr.name)
@@ -297,13 +309,20 @@ class TestRoutedPaymentSerialization(FrappeTestCase):
             "route_payment; restore it so concurrent routes serialize to one "
             "payment before merging.",
         )
-        # [#fobbgo]
+        # [#fobbgo] Key this to the STAMP CALL, not to a literal fieldname. The stamp
+        # now writes both halves of the Dynamic Link through module constants, and a
+        # guard spelled '"linked_payment_entry"' failed on that refactor while the
+        # invariant it exists to protect was never touched.
         lock_pos = func_source.find("for_update=True")
-        stamp_pos = func_source.find('"linked_payment_entry"')
-        self.assertGreater(stamp_pos, -1, "the linked_payment_entry stamp was not found in route_payment")
+        stamp_pos = func_source.find("db_set")
+        self.assertGreater(stamp_pos, -1, "the link stamp was not found in route_payment")
         self.assertGreater(
             stamp_pos,
             lock_pos,
-            "the linked_payment_entry stamp must be written AFTER the for_update "
-            "lock, or the duplicate check is not race-protected.",
+            "the link stamp must be written AFTER the for_update lock, or the "
+            "duplicate check is not race-protected.",
         )
+        # Both halves in that one stamp: a name written without its companion doctype
+        # lets the source claim a payment type it did not create.
+        self.assertIn("LINK_DOCTYPE_FIELD", func_source)
+        self.assertIn("LINK_NAME_FIELD", func_source)

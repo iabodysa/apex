@@ -46,7 +46,10 @@ class TestBackfillRoutedPaymentDoctype(FrappeTestCase):
 
     def test_types_a_resolvable_link_and_refuses_to_guess_an_unresolvable_one(self):
         # Note becomes a candidate by being the configured target, which also proves
-        # the patch reads the router's config rather than a hard-coded list.
+        # the patch reads the router's config rather than a hard-coded list. Cleanup
+        # is registered BEFORE the write: a Single is the one thing rollback is least
+        # reliable about, and leaving this set would re-point a later module's router.
+        self.addCleanup(frappe.db.set_single_value, ROUTER, "target_payment_doctype", None)
         frappe.db.set_single_value(ROUTER, "target_payment_doctype", "Note")
         note = frappe.get_doc(
             {"doctype": "Note", "title": f"Apex A278 {frappe.generate_hash(length=14)}"}
@@ -73,6 +76,7 @@ class TestBackfillRoutedPaymentDoctype(FrappeTestCase):
     def test_already_typed_rows_are_left_alone(self):
         """Idempotence: a second migrate must not re-decide a row that already has a
         type, or a hand-corrected row would be overwritten by the guess it replaced."""
+        self.addCleanup(frappe.db.set_single_value, ROUTER, "target_payment_doctype", None)
         frappe.db.set_single_value(ROUTER, "target_payment_doctype", "Note")
         note = frappe.get_doc(
             {"doctype": "Note", "title": f"Apex A278 {frappe.generate_hash(length=14)}"}

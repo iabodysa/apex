@@ -44,11 +44,14 @@ from frappe.tests.utils import FrappeTestCase, timeout
 from apex.tests._helpers import submit_via_workflow
 
 from apex.apex_core.payment_router import (
+    LINK_DOCTYPE_FIELD,
+    LINK_NAME_FIELD,
     SOURCE_DOCTYPE,
     route_payment,
 )
 
 SETTINGS = "Payment Routing Settings"
+FIELD_MAP_CHILD = "Payment Routing Field Map"
 # [#8o6y3a]
 STUB_DOCTYPE = "Test Routed Concurrency Stub"
 
@@ -87,9 +90,15 @@ class TestRoutedPaymentConcurrency(FrappeTestCase):
     @classmethod
     def tearDownClass(cls):
         frappe.set_user("Administrator")
+        # Reset the router as a PAIR before the stub goes: a target pointing at a
+        # deleted DocType aborts every later save on _validate_links, and rows naming
+        # stub fieldnames are then validated against the default Payment Request and
+        # refused — both land on whichever module happens to run next.
+        frappe.db.delete(FIELD_MAP_CHILD, {"parent": SETTINGS})
+        frappe.db.set_single_value(SETTINGS, "target_payment_doctype", None)
         if frappe.db.exists("DocType", STUB_DOCTYPE):
             frappe.delete_doc("DocType", STUB_DOCTYPE, force=1, ignore_permissions=True)
-            frappe.db.commit()
+        frappe.db.commit()
         super().tearDownClass()
 
     def setUp(self):
@@ -227,11 +236,28 @@ class TestRoutedPaymentConcurrency(FrappeTestCase):
         self.addCleanup(self._cleanup_target, first)
 
     def _cleanup_target(self, name):
-        """Cancel+delete a submitted target built by a committed route (own tx)."""
-        if not frappe.db.exists(STUB_DOCTYPE, name):
-            return
-        doc = frappe.get_doc(STUB_DOCTYPE, name)
-        if doc.docstatus == 1:
-            doc.cancel()
-        frappe.delete_doc(STUB_DOCTYPE, name, force=1, ignore_permissions=True)
+        """Unlink the source, then cancel+delete the committed target (own tx).
+
+        The stamp has to be cleared FIRST, and that is the router's typed link doing
+        its job: the payment is now genuinely discoverable from the request that
+        authorised it, so ``cancel`` runs ``check_if_doc_is_dynamically_linked``
+        (frappe/model/document.py:1299-1306) and refuses while a SUBMITTED request
+        still points at this target (model/delete_doc.py:350,366-371). Clearing it
+        also stops a committed row outliving the throwaway DocType and breaking a
+        later module's saves.
+        """
+        for source in frappe.get_all(
+            SOURCE_DOCTYPE, filters={LINK_NAME_FIELD: name}, pluck="name"
+        ):
+            frappe.db.set_value(
+                SOURCE_DOCTYPE,
+                source,
+                {LINK_DOCTYPE_FIELD: None, LINK_NAME_FIELD: None},
+                update_modified=False,
+            )
+        if frappe.db.exists(STUB_DOCTYPE, name):
+            doc = frappe.get_doc(STUB_DOCTYPE, name)
+            if doc.docstatus == 1:
+                doc.cancel()
+            frappe.delete_doc(STUB_DOCTYPE, name, force=1, ignore_permissions=True)
         frappe.db.commit()
