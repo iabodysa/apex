@@ -191,7 +191,7 @@ class SafetyMap {
 			const $grid = $('<div class="sm-grid"></div>').attr("style", SM_STYLE.grid).appendTo($floor);
 
 			(floor.rooms || []).forEach((room) => {
-				this._render_room_tile(floor, room).appendTo($grid);
+				this._render_room_tile(room).appendTo($grid);
 			});
 
 			// [#fk2nxe]
@@ -201,7 +201,7 @@ class SafetyMap {
 		});
 	}
 
-	_render_room_tile(floor, room) {
+	_render_room_tile(room) {
 		const $tile = $(
 			`<div class="sm-room sm-room--${room.signal}" tabindex="0" role="button"></div>`
 		);
@@ -231,7 +231,7 @@ class SafetyMap {
 				.appendTo($tile);
 		}
 
-		const handler = () => this._open_inspection_dialog(floor, null);
+		const handler = () => this._open_safety_round();
 		$tile.on("click", handler);
 		$tile.on("keydown", (e) => {
 			if (e.key === "Enter" || e.key === " ") {
@@ -248,7 +248,7 @@ class SafetyMap {
 		$('<div class="sm-zone-icon"></div>').css("font-size", "18px").text("◇").appendTo($tile);
 		$('<div class="sm-zone-label"></div>').css("font-size", "var(--text-sm, 12px)").text(zone.zone_label).appendTo($tile);
 
-		const handler = () => this._open_inspection_dialog(floor, zone.zone_label);
+		const handler = () => this._open_safety_round();
 		$tile.on("click", handler);
 		$tile.on("keydown", (e) => {
 			if (e.key === "Enter" || e.key === " ") {
@@ -259,75 +259,12 @@ class SafetyMap {
 		return $tile;
 	}
 
-	_open_inspection_dialog(floor, zone_label) {
-		const floor_val = floor && floor.floor ? floor.floor : null;
-		const scope_label = zone_label
-			? zone_label
-			: floor
-			? floor.floor_label
-			: this.data.building_title || this.building;
-
-		const d = new frappe.ui.Dialog({
-			title: __("Log Inspection — {0}", [scope_label]),
-			fields: [
-				{
-					fieldname: "scope_info",
-					fieldtype: "HTML",
-					options: `<div class="text-muted" style="margin-bottom:8px">${frappe.utils.escape_html(
-						`${this.data.building_title || this.building} · ${scope_label}`
-					)}</div>`,
-				},
-				{
-					fieldname: "overall_result",
-					label: __("Overall Result"),
-					fieldtype: "Select",
-					options: "Pass\nNeeds Attention\nFail",
-					default: "Pass",
-				},
-				{
-					fieldname: "notes",
-					label: __("Finding Description"),
-					fieldtype: "Small Text",
-				},
-			],
-			primary_action_label: __("Log Inspection"),
-			primary_action: (values) => {
-				frappe.call({
-					method: "apex.habitat.api.safety_map.log_building_inspection",
-					args: {
-						building: this.building,
-						floor: floor_val,
-						zone_label: zone_label || null,
-						overall_result: values.overall_result || null,
-						notes: values.notes || null,
-					},
-					freeze: true,
-					freeze_message: __("Logging inspection…"),
-					callback: (r) => {
-						if (r.exc || !r.message) {
-							frappe.show_alert({
-								message: __("Could not log the inspection. Please try again."),
-								indicator: "red",
-							});
-							return;
-						}
-						d.hide();
-						frappe.show_alert({
-							message: __("Inspection logged: {0}", [r.message.report]),
-							indicator: "green",
-						});
-						// [#1q9tno]
-						this.refresh();
-					},
-					error: () => {
-						frappe.show_alert({
-							message: __("Could not log the inspection. Please try again."),
-							indicator: "red",
-						});
-					},
-				});
-			},
-		});
-		d.show();
+	// The map is READ-ONLY. A tile used to open a dialog that created AND submitted
+	// a Safety Inspection Report in one call — a deprecated record, written past the
+	// Safety Round maker-checker gate. It now routes to a draft Safety Round for the
+	// building, so the finding is recorded where a checker has to ratify it.
+	_open_safety_round() {
+		if (!this.building) return;
+		frappe.new_doc("Safety Round", { building: this.building });
 	}
 }

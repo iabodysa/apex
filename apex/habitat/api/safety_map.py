@@ -1,21 +1,23 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Safety Map API (v0.9.0).
 
-A thin presentation + orchestration layer over Maintenance Request, Custody
-Damage Assessment, and the Safety Inspection Report controller. This module adds
-NO maintenance-request, posting, or ledger logic of its own.
+A READ-ONLY presentation layer over Room, Maintenance Request and Custody Damage
+Assessment. This module adds NO maintenance-request, posting, or ledger logic of
+its own, and since the Safety Inspection Report retirement it writes nothing at
+all — the page has exactly one whitelisted endpoint, :func:`get_safety_map`.
 
-Two intentionally distinct signal layers:
+Room tiles get a server-computed ``signal`` (red / amber / green) driven by open
+Maintenance Requests and a building-level recent-damage flag. The client must NOT
+recompute the signal.
 
-- Room-level (maintenance/damage): each room tile gets a server-computed
-  ``signal`` (red / amber / green) driven by open Maintenance Requests and a
-  building-level recent-damage flag. The client must NOT recompute the signal.
-- Building/floor-level (safety): safety findings (fire exits, extinguishers,
-  corridors, common areas) are inherently a building/floor concern, NOT a
-  per-bedroom concern. They are logged via :func:`log_building_inspection`,
-  which builds and submits a building-scoped Safety Inspection Report. We do NOT
-  force a ``room`` field onto the report or onto Inspection Finding Item; floor /
-  zone context is carried in a seeded finding row and in the notes.
+Safety EVIDENCE is not written here. This module used to expose a
+``log_building_inspection`` POST that built and submitted a building-scoped
+Safety Inspection Report; that record is deprecated in favour of Safety Round,
+and the endpoint was its last remaining producer. It also bypassed the Safety
+Round maker-checker gate outright — one caller inserted AND submitted in a single
+request, so the author ratified their own evidence. Common-area findings now go
+through Safety Round + its Safety Task Execution rows, which the page links to
+rather than writes.
 
 :func:`get_safety_map` is read-only and built from a BOUNDED set of bulk queries
 (no N+1): one rooms query, one open-Maintenance-Request query grouped by room in
@@ -59,8 +61,10 @@ def get_safety_map(building):
       green -> no open signals.
     The client must NOT recompute the signal.
 
-    Each floor also gets a per-floor common-zone tile so the operator can log a
-    building/floor-scoped Safety Inspection Report against shared areas.
+    Each floor also gets a per-floor common-zone tile standing for the shared
+    areas (corridors, fire exits, extinguishers) that no bedroom covers. It is a
+    navigation affordance only: the page routes it to Safety Round, it does not
+    write safety evidence.
 
     Args:
         building: Accommodation Building docname (source of truth).
@@ -179,96 +183,4 @@ def _build_floor(floor, rooms_list, floor_label):
             "zone_label": _("Common Area"),
             "signal": "zone",
         },
-    }
-
-
-@frappe.whitelist(methods=["POST"])
-def log_building_inspection(building, floor=None, zone_label=None,
-                            overall_result=None, notes=None):
-    """Build and submit a Safety Inspection Report at BUILDING/FLOOR scope.
-
-    By design, safety is evaluated at the building/floor level (fire exits,
-    extinguishers, corridors, common areas), NOT per bedroom — so this endpoint
-    does NOT take a ``room`` and the Safety Inspection Report stays
-    building-scoped (no room field is forced onto the DocType). An optional
-    ``floor`` and/or ``zone_label`` narrows the finding to a floor or common
-    zone; they are carried into the seeded finding row's description and into the
-    report notes (the roadmap decision — carry scope as context, not a room
-    link).
-
-    The inspector is ``frappe.session.user``. A single Inspection Finding Item is
-    seeded into ``safety_findings`` so the report is meaningful on submit; its
-    severity maps from ``overall_result`` (Fail -> High, Needs Attention ->
-    Medium, otherwise Low). The Safety Inspection Report controller then runs
-    natively (including any on-submit maintenance-request generation) — this
-    method adds none of that logic itself.
-
-    Permission: caller must have ``create`` AND ``submit`` on Safety Inspection
-    Report (checked explicitly below; defense in depth over the role grant).
-
-    Args:
-        building: Accommodation Building docname (source of truth).
-        floor: optional floor label/number, descriptive scope only.
-        zone_label: optional common-zone label, descriptive scope only.
-        overall_result: optional Select-like result ("Pass" / "Needs Attention"
-            / "Fail"); maps to the seeded finding severity.
-        notes: optional free-text observation appended to the finding.
-
-    Returns:
-        dict: ``{"report": <Safety Inspection Report docname>, "building": ...,
-        "floor": ..., "zone_label": ...}``.
-    """
-    frappe.has_permission("Safety Inspection Report", "create", throw=True)
-    frappe.has_permission("Safety Inspection Report", "submit", throw=True)
-
-    if not building:
-        frappe.throw(_("A building is required to log an inspection."))
-
-    # [#c53rux]
-    scope_bits = []
-    if floor:
-        scope_bits.append(_("Floor {0}").format(floor))
-    if zone_label:
-        scope_bits.append(zone_label)
-    scope_prefix = " / ".join(scope_bits)
-
-    description = notes or _("Building safety inspection.")
-    if scope_prefix:
-        description = f"{scope_prefix}: {description}"
-
-    # [#1xwiff]
-    severity = "Low"
-    safety_clear = 0
-    if overall_result == "Fail":
-        severity = "High"
-    elif overall_result == "Needs Attention":
-        severity = "Medium"
-    elif overall_result == "Pass":
-        severity = "Low"
-        safety_clear = 1
-
-    doc = frappe.get_doc(
-        {
-            "doctype": "Safety Inspection Report",
-            "building": building,
-            "inspection_date": today(),
-            "inspector": frappe.session.user,
-            "safety_section_clear": safety_clear,
-            "safety_findings": [
-                {
-                    "finding_category": "Safety",
-                    "description": description,
-                    "severity": severity,
-                    "status": "Open",
-                }
-            ],
-        }
-    )
-    doc.insert(ignore_permissions=False)
-    doc.submit()
-    return {
-        "report": doc.name,
-        "building": building,
-        "floor": floor,
-        "zone_label": zone_label,
     }
