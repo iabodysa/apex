@@ -17,11 +17,12 @@ Three layers:
      the race window cannot be reopened by a later edit. ``scan_boarding_pass`` is
      deliberately absent — test_boarding_race.py already guards it, and a second
      copy of that assertion would be pure duplication.
-  2. Contention (site, two live connections): while ``confirm_boarding`` sits
-     mid-flight and UNCOMMITTED on connection A, connection B's locking read of the
-     same Dispatch Trip row is rejected. Real cross-transaction contention, and it
-     proves the ENDPOINT ITSELF holds the row across its whole critical section —
-     not merely that a hand-taken lock contends.
+  2. Contention (site, two live connections, BOTH self-confirm endpoints): while
+     the endpoint sits mid-flight and UNCOMMITTED on connection A, connection B's
+     locking read of the same Dispatch Trip row is rejected. Real cross-transaction
+     contention, and it proves the ENDPOINT ITSELF holds the row across its whole
+     critical section — not merely that a hand-taken lock contends. One shared body
+     runs against each endpoint, so neither can gain the layer without the other.
   3. Behavioural (site): one log and one boarding row survive a repeat confirm, and
      a confirm that runs in its own connection AFTER a committed winner merges onto
      it instead of writing a second row.
@@ -29,11 +30,10 @@ Three layers:
 Honest limit on layer 3: those tests drive the two calls in sequence, the winner
 committing before the loser starts, so they are a SEQUENCING APPROXIMATION, not
 true interleaving. They prove the merge-on-re-read OUTCOME; they do not prove the
-loser was ever blocked. The blocking comes from layer 2 for ``confirm_boarding``,
-and from test_boarding_race.test_concurrent_scan_lock_blocks_second_connection for
-the row lock in general; layer 1 is what ties each path to that lock.
-``worker_claim_boarded`` carries layers 1 and 3 only — its blocking rests on the
-shared row lock, not on a contention test of its own.
+loser was ever blocked — a layer 3 test still passes with the lock deleted. The
+blocking comes from layer 2, now carried by both self-confirm endpoints, and from
+test_boarding_race.test_concurrent_scan_lock_blocks_second_connection for the row
+lock in general; layer 1 is what ties each path to that lock.
 
 Proven nowhere here: that two confirms dispatched at the same instant interleave in
 a particular order. Nothing in this repo forks genuinely simultaneous callers; the
@@ -67,6 +67,21 @@ LOCK_BEFORE_GET_OR_CREATE = [
 def _read(path):
     with open(path, encoding="utf-8") as fh:
         return fh.read()
+
+
+# The two self-confirm endpoints answer in DIFFERENT shapes — confirm_boarding
+# reports ``created``, worker_claim_boarded reports ``status`` — and that is the
+# only thing the contention layer needs to differ on. Each adapter runs its own
+# endpoint and reports just the Dispatch Trip it resolved; everything after that
+# is one shared body, so the two endpoints cannot drift apart in coverage.
+def _confirm_boarding_trip(token):
+    """Run ``masar.confirm_boarding``; return the Dispatch Trip it resolved."""
+    return masar.confirm_boarding(token=token).get("dispatch_trip")
+
+
+def _worker_claim_trip(token):
+    """Run ``boarding_flow.worker_claim_boarded``; return the Dispatch Trip it resolved."""
+    return boarding_flow.worker_claim_boarded(token=token).get("dispatch_trip")
 
 
 class TestBoardingWritePathsLockTheTrip(unittest.TestCase):
@@ -246,29 +261,43 @@ class TestSelfConfirmBoardingIsSingleRow(WorkerTripMixin, FrappeTestCase):
         self.assertEqual(logs, 1, "the loser claim must NOT open a second Trip Start Log")
         self.assertEqual(events, 1, "the loser claim must NOT append a second boarding event")
 
-    @timeout(15, "The confirm_boarding trip lock did not contend across connections")
-    def test_confirm_boarding_holds_the_trip_lock_against_a_live_second_connection(self):
-        """A LIVE confirm_boarding blocks a concurrent transaction on the trip row.
+    def _assert_live_endpoint_blocks_a_second_connection(self, run_endpoint, route):
+        """The genuinely interleaved assertion, run against ONE self-confirm endpoint.
 
-        This is the only genuinely interleaved assertion in this file. Connection A
-        runs the real endpoint and does NOT commit, so it is sitting inside its own
-        critical section holding the Dispatch Trip row. Connection B — standing in
-        for the simultaneous second confirm — takes the same locking read with
-        ``wait=False`` and is rejected (QueryTimeoutError). That is the endpoint's
-        own transaction contending, so a second confirm cannot reach
+        Connection A runs the real endpoint and does NOT commit, so it is sitting
+        inside its own critical section holding the Dispatch Trip row. Connection B —
+        standing in for the simultaneous second confirm — takes the same locking read
+        with ``wait=False`` and is rejected (QueryTimeoutError). That is the
+        endpoint's own transaction contending, so a second confirm cannot reach
         ``_get_or_create_trip_log`` / ``_already_boarded`` on a stale read while the
         first is mid-write.
 
+        The uncommitted ``_counts`` read is what makes the lock claim honest: it is
+        taken on connection A, before B probes, and proves the endpoint had already
+        reached its WRITES — so the row B cannot take is being held across the whole
+        read-modify-write, not merely grabbed and dropped at the top.
+
         What it does NOT establish: which of two same-instant callers wins, or the
-        blocked caller's eventual result — that outcome is the sequencing test below.
+        blocked caller's eventual result — that outcome is the sequencing tests.
         """
-        _worker, dt, token = self._fixture("Worker Claim Race C")
+        worker, dt, token = self._fixture(route)
         # The second connection can only see (and therefore lock) a committed row.
         frappe.db.commit()
         self.addCleanup(frappe.db.rollback)
 
         with self.primary_connection():
-            self.assertTrue(masar.confirm_boarding(token=token)["created"])
+            self.assertEqual(
+                run_endpoint(token),
+                dt.name,
+                "the endpoint must resolve to THIS test's trip (None = no boardable "
+                "trip resolved at all, which is fixture bleed, not a broken lock)",
+            )
+            self.assertEqual(
+                self._counts(dt.name, worker),
+                (1, 1),
+                "the endpoint must be past its log + boarding write, uncommitted, "
+                "and therefore still inside its critical section",
+            )
 
             with self.secondary_connection(), self.assertRaises(frappe.QueryTimeoutError):
                 frappe.db.get_value(
@@ -276,6 +305,27 @@ class TestSelfConfirmBoardingIsSingleRow(WorkerTripMixin, FrappeTestCase):
                 )
 
             frappe.db.rollback()  # release the row; the fixture survives on its commit
+
+    @timeout(15, "The confirm_boarding trip lock did not contend across connections")
+    def test_confirm_boarding_holds_the_trip_lock_against_a_live_second_connection(self):
+        """A LIVE confirm_boarding blocks a concurrent transaction on the trip row."""
+        self._assert_live_endpoint_blocks_a_second_connection(
+            _confirm_boarding_trip, "Worker Claim Race C"
+        )
+
+    @timeout(15, "The worker_claim_boarded trip lock did not contend across connections")
+    def test_worker_claim_holds_the_trip_lock_against_a_live_second_connection(self):
+        """A LIVE worker_claim_boarded blocks a concurrent transaction on the trip row.
+
+        Closes this file's asymmetry. ``worker_claim_boarded`` previously had no
+        contention layer: its only cross-connection test runs the winner all the way
+        to a COMMIT before the loser starts, so nothing is ever blocked there and it
+        keeps passing with the endpoint's ``for_update`` read deleted. This one does
+        not — it is the sibling of the confirm_boarding case above, over one body.
+        """
+        self._assert_live_endpoint_blocks_a_second_connection(
+            _worker_claim_trip, "Worker Claim Race E"
+        )
 
     @timeout(15, "Second connection did not serialize onto the committed confirm")
     def test_second_connection_confirm_merges_onto_the_committed_winner(self):
