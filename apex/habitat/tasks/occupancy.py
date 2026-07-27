@@ -7,6 +7,10 @@ import calendar
 import frappe
 from frappe.query_builder.functions import Count
 
+# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
+# rather than stacking one per row. The loops here never nest.
+_ROW_SAVEPOINT = "occupancy_row"
+
 
 def weekly_occupancy_sync() -> None:
     """Recalculate occupancy counters on all Accommodation Rooms and Buildings.
@@ -42,6 +46,7 @@ def weekly_occupancy_sync() -> None:
             break
 
         for room in rooms:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 active = active_by_room.get(room.name, 0)
                 capacity = room.bed_capacity or 0
@@ -62,7 +67,7 @@ def weekly_occupancy_sync() -> None:
                     update_modified=False,
                 )
             except Exception:
-                frappe.db.rollback()  # [#7kjob3]
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Occupancy sync failed for room {room.name}"[:140],
@@ -107,6 +112,7 @@ def weekly_occupancy_sync() -> None:
             break
 
         for building in buildings:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 total_rooms = rooms_per_building.get(building.name, 0)
                 if not total_rooms:
@@ -126,7 +132,7 @@ def weekly_occupancy_sync() -> None:
                     update_modified=False,
                 )
             except Exception:
-                frappe.db.rollback()  # [#7kjob3]
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Occupancy sync failed for building {building.name}"[:140],
@@ -210,6 +216,7 @@ def daily_occupancy_snapshot() -> None:
         if not building_names:
             break
         for building_name in building_names:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 if building_name in already:
                     continue
@@ -240,7 +247,7 @@ def daily_occupancy_snapshot() -> None:
                     "available_rooms": room_bucket.get("Available", 0),
                 }).insert(ignore_permissions=True)  # audit-ok
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Occupancy snapshot failed for building {building_name}"[:140],

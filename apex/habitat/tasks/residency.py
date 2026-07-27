@@ -7,6 +7,10 @@ import frappe
 
 from apex.habitat.tasks.common import _notify_operational
 
+# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
+# rather than stacking one per row. Distinct from the notifier helpers' names.
+_ROW_SAVEPOINT = "residency_row"
+
 
 def lease_expiry_watchlist() -> None:
     """Flip an expired Lease's status to Expired (residual of the P-204 refactor).
@@ -38,11 +42,12 @@ def lease_expiry_watchlist() -> None:
             break
 
         for lease in leases:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 if date_diff(lease.lease_end_date, today_str) < 0:
                     frappe.db.set_value("Lease", lease.name, "status", "Expired")
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Lease expiry watchlist failed for {lease.name}"[:140],
@@ -89,6 +94,7 @@ def idle_resident_aging() -> None:
                 ledger_by_assignment.setdefault(x.assignment, []).append(x)
 
         for r in reports:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 days = date_diff(today_str, r.reported_on) if r.reported_on else 0
                 cost = 0.0
@@ -114,7 +120,7 @@ def idle_resident_aging() -> None:
                         f"(estimated accommodation cost {cost} SAR).",
                     )
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Idle resident aging failed for {r.name}"[:140],

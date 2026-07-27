@@ -12,6 +12,12 @@ from apex.habitat.tasks.common import (
     _notify_user_system,
 )
 
+# One savepoint per nesting level, distinct names: a helper re-using the loop's name
+# would REPLACE it mid-iteration and silently destroy the row isolation. Re-issued
+# each iteration — MariaDB replaces a same-named savepoint rather than stacking.
+_ROW_SAVEPOINT = "safety_row"
+_ALERT_SAVEPOINT = "safety_alert_dedupe"
+
 
 def _raise_safety_alert(alert_type: str, severity: str, message: str, dedupe_token: str) -> str | None:
     """Insert an Operations Alert for a safety obligation breach (idempotent).
@@ -25,6 +31,7 @@ def _raise_safety_alert(alert_type: str, severity: str, message: str, dedupe_tok
     from frappe.utils import today
 
     today_str = today()
+    frappe.db.savepoint(_ALERT_SAVEPOINT)
     try:
         if frappe.db.exists(
             "Operations Alert",
@@ -37,7 +44,7 @@ def _raise_safety_alert(alert_type: str, severity: str, message: str, dedupe_tok
         ):
             return None
     except Exception:
-        frappe.db.rollback()
+        frappe.db.rollback(save_point=_ALERT_SAVEPOINT)
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"Safety alert dedupe check failed ({dedupe_token})"[:140],
@@ -108,6 +115,7 @@ def daily_safety_task_compliance_scan() -> None:
             break
 
         for inst in overdue:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 frappe.db.set_value("Scheduled Task Instance", inst.name, "status", "Overdue")
                 _notify_operational(
@@ -134,7 +142,7 @@ def daily_safety_task_compliance_scan() -> None:
                     )
                     escalated += 1
             except Exception:
-                frappe.db.rollback()  # [#7kjob3]
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Safety compliance scan failed for {inst.name}"[:140],
@@ -169,6 +177,7 @@ def daily_safety_task_compliance_scan() -> None:
             break
 
         for b in buildings:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 has_round = frappe.db.exists(
                     "Safety Round",
@@ -211,7 +220,7 @@ def daily_safety_task_compliance_scan() -> None:
                 )
                 no_rounds += 1
             except Exception:
-                frappe.db.rollback()  # [#7kjob3]
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Zero-rounds scan failed for {b.name}"[:140],
@@ -266,6 +275,7 @@ def weekly_safety_coverage_gate() -> None:
             break
 
         for b in buildings:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 covered = frappe.db.exists(
                     "Safety Round",
@@ -297,7 +307,7 @@ def weekly_safety_coverage_gate() -> None:
                 )
                 uncovered += 1
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Safety coverage gate failed for {b.name}"[:140],
@@ -341,6 +351,7 @@ def audit_remediation_deadline_watch() -> None:
             break
 
         for plan in plans:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 frappe.db.set_value(
                     "Audit Remediation Plan", plan.name, "overall_status", "Overdue"
@@ -366,7 +377,7 @@ def audit_remediation_deadline_watch() -> None:
                 )
                 flagged += 1
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Audit remediation watch failed for {plan.name}"[:140],
