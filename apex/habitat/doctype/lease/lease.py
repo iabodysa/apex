@@ -112,9 +112,10 @@ def regenerate_schedule(name):
     doc.payment_schedule = []
     _build_schedule(doc)
     doc.total_scheduled = sum(flt(r.amount) for r in doc.payment_schedule)
-    try:
-        doc.save()
-    except Exception:
-        frappe.db.rollback()
-        frappe.throw(_("Could not save changes. Please try again or contact support."))
+    # save() is left unguarded on purpose. The frappe.db.rollback() that used to wrap
+    # it discarded the whole request transaction — every row the caller wrote before
+    # this endpoint ran, not just the lease — and reported a generic message in place
+    # of the validation error that actually refused the save. Propagating aborts the
+    # regeneration and leaves the request-level rollback to unwind only this request.
+    doc.save()
     return len(doc.payment_schedule)
