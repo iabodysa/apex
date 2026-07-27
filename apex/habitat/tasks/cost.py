@@ -17,6 +17,10 @@ _COST_TYPE_MAPPING = {
     "Other": "annual_other_expenses",
 }
 
+# Constant name, re-issued per (assignment, ledger_type): MariaDB replaces a
+# same-named savepoint rather than stacking one per row.
+_ROW_SAVEPOINT = "cost_row"
+
 
 def _post_accommodation_ledger_row(
     *,
@@ -176,6 +180,7 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
                 if annual_cost <= 0:
                     continue
 
+                frappe.db.savepoint(_ROW_SAVEPOINT)
                 try:
                     _post_accommodation_ledger_row(
                         posting_date=posting_date,
@@ -191,9 +196,9 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
                         days_in_year=days_in_year,
                     )
                 except frappe.exceptions.DuplicateEntryError:
-                    frappe.db.rollback()  # [#g4zbzv]
+                    frappe.db.rollback(save_point=_ROW_SAVEPOINT)  # [#g4zbzv]
                 except Exception as e:
-                    frappe.db.rollback()  # [#9hso8i]
+                    frappe.db.rollback(save_point=_ROW_SAVEPOINT)  # [#9hso8i]
                     logger.error(
                         f"allocate_building_accommodation_cost: Failed to insert ledger row for assignment {asgn.name}, cost {ledger_type}: {e}"
                     )
@@ -246,6 +251,7 @@ def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
             annual_cost = flt(building.get(building_field))
             if annual_cost <= 0:
                 continue
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 _post_accommodation_ledger_row(
                     posting_date=posting_date,
@@ -261,7 +267,7 @@ def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
                     days_in_year=days_in_year,
                 )
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Backdate cost insert failed ({asgn.name}/{ledger_type})"[:140],

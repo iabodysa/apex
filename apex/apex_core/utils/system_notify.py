@@ -26,6 +26,11 @@ LOG_DOCTYPE = "Notification Log"
 # [#f5xz9g]
 _SUBJECT_MAX = 140
 
+# Every caller loops this per user, so recovery must be row-scoped. A bare
+# frappe.db.rollback() would discard the caller's whole run AND destroy the
+# per-row savepoint it set, leaving a later rollback to hit MariaDB 1305.
+_SAVEPOINT = "apex_system_notify"
+
 
 def notify_user_system(
     user: str | None,
@@ -39,9 +44,10 @@ def notify_user_system(
 
     Returns ``True`` only when a row was inserted. Falsy or disabled ``user`` is a
     no-op (returns ``False``). System-written from scheduler jobs, so
-    ``ignore_permissions``. Best-effort: a failure rolls back and logs but never
-    raises, so the calling job keeps running. ``document_type``/``document_name``
-    optionally link the alert to its source record (both required to link).
+    ``ignore_permissions``. Best-effort: a failure rolls back to this call's OWN
+    savepoint and logs but never raises, so the caller keeps both the rows it already
+    wrote and its own outer savepoint. ``document_type``/``document_name`` optionally
+    link the alert to its source record (both required to link).
 
     Deduped: returns ``False`` without inserting when an UNREAD Alert with the same
     ``for_user`` and dedup key — the source doc link when supplied, else the clipped
@@ -62,6 +68,7 @@ def notify_user_system(
     if document_type and document_name:
         payload["document_type"] = document_type
         payload["document_name"] = document_name
+    frappe.db.savepoint(_SAVEPOINT)
     try:
         # [#a069dd] Skip a duplicate UNREAD alert so a re-running job (e.g. the daily zero-rounds
         # scan) can't stack bell notifications: key on the source doc link, else the subject —
@@ -77,7 +84,7 @@ def notify_user_system(
         frappe.get_doc(payload).insert(ignore_permissions=True)  # audit-ok — scheduler-run system alert
         return True
     except Exception:
-        frappe.db.rollback()
+        frappe.db.rollback(save_point=_SAVEPOINT)
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"System notify failed ({user})"[:140],

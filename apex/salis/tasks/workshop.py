@@ -11,6 +11,10 @@ from apex.salis.tasks.common import (
     _settings_int,
 )
 
+# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
+# rather than stacking one per row. Distinct from _raise_alert's own name.
+_ROW_SAVEPOINT = "salis_workshop_row"
+
 
 def _overstay_stops() -> list:
     """Submitted Maintenance Vehicle Suspensions still open past the overstay cutoff,
@@ -66,6 +70,7 @@ def workshop_overstay_watch() -> None:
     days = _settings_int("workshop_overstay_days", 14)
     logger = frappe.logger()
     for r in _overstay_stops():
+        frappe.db.savepoint(_ROW_SAVEPOINT)
         try:
             msg = _("Vehicle {0} has been in the workshop since {1} (over {2} days).").format(
                 r.vehicle, r.stop_date, days
@@ -79,7 +84,7 @@ def workshop_overstay_watch() -> None:
                 source_doctype="Vehicle Suspension", source_name=r.name, vehicle=r.vehicle,
             )
         except Exception:
-            frappe.db.rollback()
+            frappe.db.rollback(save_point=_ROW_SAVEPOINT)
             frappe.log_error(
                 message=frappe.get_traceback(),
                 title=f"Workshop overstay watch failed for {r.name}"[:140],

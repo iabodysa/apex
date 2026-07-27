@@ -7,6 +7,12 @@ import frappe
 
 from apex.apex_core.utils.operations_alert import insert_operations_alert
 
+# One savepoint per nesting level, distinct names: _raise_maintenance_alert runs
+# INSIDE the escalation loop, so re-using the loop's name there would replace it
+# mid-iteration and silently destroy the row isolation.
+_ROW_SAVEPOINT = "maintenance_row"
+_ALERT_SAVEPOINT = "maintenance_alert"
+
 
 def daily_building_license_expiry_check() -> None:
     """Flip Building License status to Expired / Expiring Soon on the transition edge.
@@ -24,18 +30,21 @@ def daily_building_license_expiry_check() -> None:
 
     today_str = today()
 
-    # [#bz69zh]
-    start = 0
+    # [#bz69zh] Keyed cursor, not an offset: the body flips status OUT of the very
+    # set this filters on, so rows behind an offset shift down into the range it just
+    # passed and are skipped. name is immutable, so a key cursor cannot lose a row.
+    cursor = ""
     batch_size = 500
     while True:
         licenses = frappe.get_all(
             "Building License",
             filters={
                 "docstatus": 1,
-                "status": ["in", ["Active", "Expiring Soon"]]
+                "status": ["in", ["Active", "Expiring Soon"]],
+                "name": [">", cursor],
             },
             fields=["name", "expiry_date", "renewal_lead_days", "status"],
-            limit_start=start,
+            order_by="name asc",
             limit_page_length=batch_size,
         )
         if not licenses:
@@ -46,6 +55,7 @@ def daily_building_license_expiry_check() -> None:
             if not lic.expiry_date:
                 continue
 
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 lead_days = lic.renewal_lead_days if lic.renewal_lead_days is not None else default_lead
                 days_to_expiry = date_diff(lic.expiry_date, today_str)
@@ -57,13 +67,13 @@ def daily_building_license_expiry_check() -> None:
                     if lic.status != "Expiring Soon":
                         frappe.db.set_value("Building License", lic.name, "status", "Expiring Soon")
             except Exception:
-                frappe.db.rollback()  # [#7kjob3]
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"License expiry check failed for {lic.name}"[:140],
                 )
 
-        start += batch_size
+        cursor = licenses[-1].name
 
 
 def _raise_maintenance_alert(
@@ -93,6 +103,7 @@ def _raise_maintenance_alert(
     )[:2000]
 
     # [#glisou]
+    frappe.db.savepoint(_ALERT_SAVEPOINT)
     try:
         today_str = today()
         if frappe.db.exists(
@@ -106,7 +117,7 @@ def _raise_maintenance_alert(
         ):
             return
     except Exception:
-        frappe.db.rollback()
+        frappe.db.rollback(save_point=_ALERT_SAVEPOINT)
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"Maintenance alert dedupe check failed ({req_name})"[:140],
@@ -120,10 +131,11 @@ def _raise_maintenance_alert(
         return
 
     # [#q02x8v]
+    frappe.db.savepoint(_ALERT_SAVEPOINT)
     try:
         frappe.get_doc("Maintenance Request", req_name).add_comment("Comment", message)
     except Exception:
-        frappe.db.rollback()
+        frappe.db.rollback(save_point=_ALERT_SAVEPOINT)
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"Maintenance alert comment failed for {req_name}"[:140],
@@ -169,6 +181,7 @@ def open_maintenance_escalation() -> None:
             break
 
         for req in open_requests:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:  # [#jrhqtd]
                 priority = req.priority or "Medium"
                 threshold_hours = thresholds.get(priority, 168)
@@ -190,7 +203,7 @@ def open_maintenance_escalation() -> None:
                         status=req.status or "",
                     )
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Maintenance escalation failed for {req.name}"[:140],

@@ -8,6 +8,12 @@ from frappe import _
 from frappe.query_builder.functions import Coalesce, Sum
 from pypika.functions import Min
 
+# One savepoint per nesting level, distinct names: _raise_consumable_alert runs
+# INSIDE the expiry loop, so re-using the loop's name there would replace it
+# mid-iteration and silently destroy the row isolation.
+_ROW_SAVEPOINT = "custody_row"
+_ALERT_SAVEPOINT = "custody_alert"
+
 
 def _raise_consumable_alert(message: str, dedupe_token: str) -> str | None:
     """Raise a Consumable Expired Operations Alert (idempotent), via the shared helper.
@@ -23,6 +29,7 @@ def _raise_consumable_alert(message: str, dedupe_token: str) -> str | None:
     from apex.apex_core.utils.operations_alert import insert_operations_alert
 
     today_str = today()
+    frappe.db.savepoint(_ALERT_SAVEPOINT)
     try:
         if frappe.db.exists(
             "Operations Alert",
@@ -35,7 +42,7 @@ def _raise_consumable_alert(message: str, dedupe_token: str) -> str | None:
         ):
             return None
     except Exception:
-        frappe.db.rollback()
+        frappe.db.rollback(save_point=_ALERT_SAVEPOINT)
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"Consumable alert dedupe check failed ({dedupe_token})"[:140],
@@ -96,6 +103,7 @@ def consumable_custody_expiry_watch() -> None:
     flagged = 0
     for r in rows:
         # [#pjbauj]
+        frappe.db.savepoint(_ROW_SAVEPOINT)
         try:
             if not r.first_held:
                 continue
@@ -116,7 +124,7 @@ def consumable_custody_expiry_watch() -> None:
             if _raise_consumable_alert(message, dedupe_token=token):
                 flagged += 1
         except Exception:
-            frappe.db.rollback()
+            frappe.db.rollback(save_point=_ROW_SAVEPOINT)
             logger.error(
                 f"consumable_custody_expiry_watch row failed "
                 f"(employee={r.employee}, article={r.article}): {frappe.get_traceback()}"
@@ -220,6 +228,7 @@ def weekly_custody_digest() -> None:
     list_url = get_url_to_list("Custody Issue")
     sent = 0
     for supervisor, names in by_supervisor.items():
+        frappe.db.savepoint(_ROW_SAVEPOINT)
         try:
             if not frappe.db.get_value("User", supervisor, "enabled"):
                 continue
@@ -255,7 +264,7 @@ def weekly_custody_digest() -> None:
             )
             sent += 1
         except Exception:
-            frappe.db.rollback()
+            frappe.db.rollback(save_point=_ROW_SAVEPOINT)
             frappe.log_error(
                 message=frappe.get_traceback(),
                 title=f"Custody digest failed for {supervisor}"[:140],

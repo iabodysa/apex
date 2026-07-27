@@ -5,6 +5,11 @@ from __future__ import annotations
 
 import frappe
 
+# Called per row from scheduler loops, so recovery must be row-scoped. A bare
+# frappe.db.rollback() would discard the caller's whole run AND destroy the
+# per-row savepoint it set, leaving a later rollback to hit MariaDB 1305.
+_SAVEPOINT = "apex_notify_operational"
+
 
 def _notify_operational(source_doctype: str, source_name: str, message: str) -> None:
     """Post an operational notice to the source document's timeline, gated by the
@@ -19,10 +24,11 @@ def _notify_operational(source_doctype: str, source_name: str, message: str) -> 
         return
     if not (source_doctype and source_name):
         return
+    frappe.db.savepoint(_SAVEPOINT)
     try:
         frappe.get_doc(source_doctype, source_name).add_comment("Comment", message)
     except Exception:
-        frappe.db.rollback()
+        frappe.db.rollback(save_point=_SAVEPOINT)
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"Operational notification comment failed for {source_name}"[:140],
@@ -42,7 +48,8 @@ def _notify_role_system(
 
     Mirrors temporary_worker_engine._notify_hr: the in-desk alert the Wave-3 safety
     jobs raise for the Safety Officer / Operations Director. Best-effort — a failure
-    rolls back and logs but never aborts the calling job. No recipients = no-op.
+    rolls back to the helper's own savepoint and logs, so the calling job keeps both
+    its earlier rows and its own savepoint. No recipients = no-op.
     Per-user delivery via the shared system_notify helper (the single Notification
     Log writer). Optional ``document_type``/``document_name`` link the alert to its
     source record, which is also the helper's per-user dedup key.

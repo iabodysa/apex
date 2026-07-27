@@ -84,6 +84,23 @@ class TestNotifyUserSystem(unittest.TestCase):
             self.assertEqual(captured["document_type"], "Building")
             self.assertEqual(captured["document_name"], "B-1")
 
+    def test_insert_failure_rolls_back_only_this_calls_savepoint(self):
+        """This helper is looped per user by every scheduler job that alerts.
+
+        A bare ``frappe.db.rollback()`` here would discard the caller's whole run and
+        also DESTROY the per-row savepoint the caller had set, so a later rollback in
+        the same iteration would hit MariaDB 1305 uncaught and kill the job. The
+        recovery must therefore name this call's own savepoint.
+        """
+        with mock.patch.object(system_notify, "frappe") as mf:
+            mf.db.get_value.return_value = 1
+            mf.db.exists.return_value = False
+            mf.get_doc.side_effect = RuntimeError("insert failed")
+            self.assertFalse(system_notify.notify_user_system("u@x", "Hi"))
+            mf.db.savepoint.assert_called_once_with(system_notify._SAVEPOINT)
+            mf.db.rollback.assert_called_once_with(save_point=system_notify._SAVEPOINT)
+            mf.log_error.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

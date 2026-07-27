@@ -14,6 +14,14 @@ from apex.salis.tasks.common import (
     _settings_int,
 )
 
+# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
+# rather than stacking one per row. Distinct from _raise_alert's own name.
+_ROW_SAVEPOINT = "salis_fuel_row"
+
+# resolve_excessive_topup_alerts runs on a Fuel Request save, not in a job, so its
+# recovery must not reach past its own work into the user's transaction.
+_RESOLVE_SAVEPOINT = "salis_topup_resolve"
+
 
 def unreverted_topup_watch() -> None:
     """Auto-revert temporary fuel top-ups that are past their revert-due date,
@@ -34,7 +42,10 @@ def unreverted_topup_watch() -> None:
     today_str = today()
     logger = frappe.logger()
 
-    start = 0
+    # Keyed cursor, not an offset: the body sets reverted=1 and status=Reverted, both
+    # filtered on here, so rows behind an offset shift down into the range it just
+    # passed and are skipped. name is immutable, so a key cursor cannot lose a row.
+    cursor = ""
     while True:
         topups = frappe.get_all(
             "Fuel Request",
@@ -44,15 +55,17 @@ def unreverted_topup_watch() -> None:
                 "reverted": 0,
                 "status": ["in", ["Approved", "Done"]],
                 "revert_due_date": ["<", today_str],
+                "name": [">", cursor],
             },
             fields=["name", "vehicle", "driver", "revert_due_date", "topup_litres"],
-            limit_start=start,
+            order_by="name asc",
             limit_page_length=BATCH_SIZE,
         )
         if not topups:
             break
 
         for t in topups:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 # [#6vxo7i]
                 doc = frappe.get_doc("Fuel Request", t.name)
@@ -75,13 +88,13 @@ def unreverted_topup_watch() -> None:
                              "Fuel Request", t.name,
                              vehicle=t.vehicle, driver=t.driver)
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Unreverted top-up watch failed for {t.name}"[:140],
                 )
 
-        start += BATCH_SIZE
+        cursor = topups[-1].name
 
 
 def overdue_fuel_request_watch() -> None:
@@ -115,6 +128,7 @@ def overdue_fuel_request_watch() -> None:
             break
 
         for r in requests:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 age = date_diff(today_str, r.request_date) if r.request_date else 0
                 msg = (f"overdue_fuel_request_watch: fuel request {r.name} has been "
@@ -124,7 +138,7 @@ def overdue_fuel_request_watch() -> None:
                              "Fuel Request", r.name,
                              vehicle=r.vehicle, driver=r.driver)
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Overdue fuel request watch failed for {r.name}"[:140],
@@ -140,14 +154,16 @@ def resolve_excessive_topup_alerts(vehicle: str | None, reason: str) -> int:
     clean source event (e.g. a temporary top-up is reverted) so the alert clears
     immediately rather than waiting for the next daily reconciliation pass. Safe
     to call even when no matching alert exists (returns 0) and idempotent
-    (already-Resolved rows are filtered out). Never raises: a failure is logged
-    and swallowed so it cannot abort the source-document save that triggered it.
+    (already-Resolved rows are filtered out). Never raises: a failure rolls back only
+    to this call's own savepoint and is logged, so it can neither raise into nor
+    discard the source-document save that triggered it.
 
     Returns the number of alerts this call resolved.
     """
     if not vehicle:
         return 0
     resolved = 0
+    frappe.db.savepoint(_RESOLVE_SAVEPOINT)
     try:
         open_alerts = frappe.get_all(
             ALERT_DOCTYPE,
@@ -162,7 +178,7 @@ def resolve_excessive_topup_alerts(vehicle: str | None, reason: str) -> int:
             if _resolve_alert(name, reason):
                 resolved += 1
     except Exception:
-        frappe.db.rollback()
+        frappe.db.rollback(save_point=_RESOLVE_SAVEPOINT)
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"Excessive-topup alert resolve-on-event failed ({vehicle})"[:140],

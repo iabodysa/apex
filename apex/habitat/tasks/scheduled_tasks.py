@@ -5,6 +5,10 @@ from __future__ import annotations
 
 import frappe
 
+# Constant name, re-issued per template item: MariaDB replaces a same-named
+# savepoint rather than stacking one per row.
+_ROW_SAVEPOINT = "scheduled_task_row"
+
 
 def daily_scheduled_task_instance_generator() -> None:
     """Generate Scheduled Task Instance records using the Assignment × Item pattern.
@@ -83,6 +87,7 @@ def daily_scheduled_task_instance_generator() -> None:
                 ):
                     continue
 
+                frappe.db.savepoint(_ROW_SAVEPOINT)
                 try:
                     instance = frappe.get_doc({
                         "doctype": "Scheduled Task Instance",
@@ -104,7 +109,7 @@ def daily_scheduled_task_instance_generator() -> None:
                         due_date,
                     )
                 except Exception as e:  # noqa: BLE001
-                    frappe.db.rollback()  # [#7kjob3]
+                    frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                     logger.error(
                         "daily_scheduled_task_instance_generator: failed for "
                         "assignment=%s, task_catalog=%s: %s",

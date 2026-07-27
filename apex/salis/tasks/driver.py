@@ -11,6 +11,10 @@ from apex.salis.tasks.common import (
     _settings_int,
 )
 
+# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
+# rather than stacking one per row. Distinct from _raise_alert's own name.
+_ROW_SAVEPOINT = "salis_driver_row"
+
 
 def driver_license_expiry_watch() -> None:
     """Warn when an active driver's licence is at or past its expiry window.
@@ -41,6 +45,7 @@ def driver_license_expiry_watch() -> None:
             break
 
         for d in drivers:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 days = date_diff(d.license_expiry, today_str)
                 # [#bces73]
@@ -58,7 +63,7 @@ def driver_license_expiry_watch() -> None:
                     _raise_alert("License Expiry", "Warning", msg,
                                  "Salis Driver", d.name, driver=d.name)
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Driver licence watch failed for {d.name}"[:140],

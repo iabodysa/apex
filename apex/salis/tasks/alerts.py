@@ -16,6 +16,10 @@ from apex.salis.tasks.common import (
     _vehicle_project,
 )
 
+# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
+# rather than stacking one per row. Distinct from _raise_alert's own name.
+_ROW_SAVEPOINT = "salis_alerts_row"
+
 
 def daily_open_alerts_digest() -> None:
     """Email each Fleet Supervisor a daily roll-up of their open Operations Alerts.
@@ -74,6 +78,7 @@ def daily_open_alerts_digest() -> None:
     severities = ("Critical", "Warning", "Info")
     sent = 0
     for supervisor, rows in by_supervisor.items():
+        frappe.db.savepoint(_ROW_SAVEPOINT)
         try:
             if not frappe.db.get_value("User", supervisor, "enabled"):
                 continue
@@ -104,7 +109,7 @@ def daily_open_alerts_digest() -> None:
             )
             sent += 1
         except Exception:
-            frappe.db.rollback()
+            frappe.db.rollback(save_point=_ROW_SAVEPOINT)
             frappe.log_error(
                 message=frappe.get_traceback(),
                 title=f"Open-alerts digest failed for {supervisor}"[:140],
@@ -253,21 +258,24 @@ def reconcile_operations_alerts() -> None:
     def _driver_active(driver: str | None) -> bool:
         return bool(driver) and frappe.db.get_value("Salis Driver", driver, "status") == "Active"
 
-    # [#dkxfl4]
+    # [#dkxfl4] Keyed cursor, not an offset: _resolve_alert flips status to Resolved,
+    # dropping the row out of the very set this filters on, so rows behind an offset
+    # shift down into the range it just passed and are skipped for the day.
     resolved_projects: set[str | None] = set()
-    start = 0
+    cursor = ""
     while True:
         alerts = frappe.get_all(
             ALERT_DOCTYPE,
-            filters={"status": ["in", ["Open", "Acknowledged"]]},
+            filters={"status": ["in", ["Open", "Acknowledged"]], "name": [">", cursor]},
             fields=["name", "alert_type", "vehicle", "driver", "raised_on"],
-            limit_start=start,
+            order_by="name asc",
             limit_page_length=BATCH_SIZE,
         )
         if not alerts:
             break
 
         for a in alerts:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 clear = False
                 reason = ""
@@ -319,13 +327,13 @@ def reconcile_operations_alerts() -> None:
                     resolved_count += 1
                     resolved_projects.add(_vehicle_project(a.vehicle))
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Alert reconciliation failed for {a.name}"[:140],
                 )
 
-        start += BATCH_SIZE
+        cursor = alerts[-1].name
 
     # [#470qkc]
     for project in resolved_projects:

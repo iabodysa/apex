@@ -12,7 +12,10 @@ These tests pin the financial behaviour that must never drift:
   4. the batch allocator and the back-date path post an IDENTICAL row; and
   5. the callers keep their DISTINCT duplicate-handling — the batch path swallows
      DuplicateEntryError WITHOUT logging (only rolls back) and logs other errors,
-     while the back-date path logs every error under a single Exception guard.
+     while the back-date path logs every error under a single Exception guard; and
+  6. every one of those recoveries rolls back to the per-row SAVEPOINT, never the
+     whole transaction — both loops continue past a failure, so a bare rollback
+     would discard the ledger rows the run had already posted.
 
 Pure-logic tests: frappe DB access is patched, so no site is required.
 """
@@ -171,6 +174,7 @@ class TestCallerPaths(unittest.TestCase):
         exists = MagicMock(side_effect=lambda dt, *a, **k: dt == "Building")
         get_all = MagicMock(side_effect=[[assignment], []])
         rollback = MagicMock()
+        savepoint = MagicMock()
         log_error = MagicMock()
         logger = MagicMock()
 
@@ -178,6 +182,7 @@ class TestCallerPaths(unittest.TestCase):
             patch.object(cost.frappe, "get_doc", side_effect=get_doc),
             patch.object(cost.frappe.db, "exists", exists),
             patch.object(cost.frappe, "get_all", get_all),
+            patch.object(cost.frappe.db, "savepoint", savepoint, create=True),
             patch.object(cost.frappe.db, "rollback", rollback),
             patch.object(cost.frappe, "log_error", log_error),
             patch.object(cost.frappe, "logger", return_value=logger),
@@ -202,12 +207,14 @@ class TestCallerPaths(unittest.TestCase):
         get_value = MagicMock(return_value=asgn)
         exists = MagicMock(return_value=None)  # ledger existence check
         rollback = MagicMock()
+        savepoint = MagicMock()
         log_error = MagicMock()
 
         patches = [
             patch.object(cost.frappe, "get_doc", side_effect=get_doc),
             patch.object(cost.frappe.db, "get_value", get_value),
             patch.object(cost.frappe.db, "exists", exists),
+            patch.object(cost.frappe.db, "savepoint", savepoint, create=True),
             patch.object(cost.frappe.db, "rollback", rollback),
             patch.object(cost.frappe, "log_error", log_error),
             patch("apex.habitat.doctype.building.building.apply_active_lease",
@@ -239,7 +246,7 @@ class TestCallerPaths(unittest.TestCase):
             raise dup("dup")
 
         _, rollback, log_error = self._run_batch(insert_side_effect=_raise)
-        rollback.assert_called_once()
+        rollback.assert_called_once_with(save_point=cost._ROW_SAVEPOINT)
         log_error.assert_not_called()  # [#g4zbzv] duplicate is a benign no-op
 
     def test_batch_logs_other_errors(self):
@@ -247,7 +254,7 @@ class TestCallerPaths(unittest.TestCase):
             raise ValueError("boom")
 
         _, rollback, log_error = self._run_batch(insert_side_effect=_raise)
-        rollback.assert_called_once()
+        rollback.assert_called_once_with(save_point=cost._ROW_SAVEPOINT)
         log_error.assert_called_once()  # [#9hso8i] real failure is logged
 
     def test_backdate_logs_every_error_single_guard(self):
@@ -259,7 +266,7 @@ class TestCallerPaths(unittest.TestCase):
             raise dup("dup")
 
         _, rollback, log_error, days = self._run_backdate(insert_side_effect=_raise)
-        rollback.assert_called_once()
+        rollback.assert_called_once_with(save_point=cost._ROW_SAVEPOINT)
         log_error.assert_called_once()
         self.assertEqual(days, 1)
 
