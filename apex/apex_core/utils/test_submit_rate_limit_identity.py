@@ -21,22 +21,10 @@ They now pass no ``key``. ``ip_based`` defaults to True (rate_limiter.py:110) an
 already put the address in the identity (rate_limiter.py:141,147-150), so the ceiling is
 unchanged and the caller-chosen suffix is gone.
 
-The SECOND half of the bucket name was the same bug through a different door, and this
-file grew to cover it app-wide (A-297.1). The framework names the window after the raw
-request field, ``rl:{form_dict.cmd}:{identity}`` (rate_limiter.py:155), but resolves the
-handler separately by attribute lookup on the module that string names (handler.py:
-294-303 -> __init__.py:1748-1750) and checks the whitelist on the resolved OBJECT
-(__init__.py:872). Nothing joins them, so two dotted paths to one function were two
-ceilings: ``submit_resident_request`` admitted 10 against its 5, and
-``driver_portal.submit_fuel_request`` 20 against its 10. 35 such second paths existed
-across 61 metered endpoints. 32 are the driver portal package re-exporting its own
-submodules while the SPA calls the SHORT name -- both spellings production, neither
-deletable. So the fix is the other route: every Apex endpoint now charges through
-rate_limit_identity.rate_limit, which names the window after the HANDLER. What is
-guarded below is that no endpoint slips back to the framework's decorator, that the
-scan which would see it is not blind, and -- spent call by call -- that two real
-spellings of one driver-portal endpoint share one window while the framework alone
-would still hand each a full one.
+The window's NAME was the same bug through another door. frappe names it after the
+caller's ``cmd`` (rate_limiter.py:155) but resolves the handler separately, so two paths
+to one function were two ceilings -- 35 over 61 endpoints. Apex names every window after
+the HANDLER now (rate_limit_identity.py); this file grew from the five to all 61.
 
 Nothing here asserts that from the decorator's arguments, which would only restate the
 edit. The decorator is parsed for ONE thing: where each ceiling is DECLARED. What gets
@@ -145,7 +133,6 @@ RATE_LIMITED_ENDPOINTS = 61
 DRIVER_PORTAL_RE_EXPORTS = 32
 
 IDENTITY_MODULE = "apex.apex_core.utils.rate_limit_identity"
-FRAMEWORK_LIMITER_MODULE = "frappe.rate_limiter"
 
 _ABSENT = object()
 

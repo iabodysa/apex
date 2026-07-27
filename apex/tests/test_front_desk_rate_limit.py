@@ -120,8 +120,8 @@ class TestFrontDeskRateLimit(FrappeTestCase):
 
         Un-keyed, which every endpoint this file drives now is (``resolve_worker``
         included, since A-294): the identity is the bare address, so the name is
-        ``rl:<cmd>:<ip>`` (rate_limiter.py:150,155). Since A-297.1 the ``@rate_limit``
-        endpoints no longer take their name from ``cmd`` at all and belong to
+        ``rl:<cmd>:<ip>`` (rate_limiter.py:150,155). The ``@rate_limit`` endpoints no
+        longer take their name from ``cmd`` at all and belong to
         ``_clear_metered_window``; what is left here charges in its own body.
 
         Keyed, which none is any longer: the identity was the address joined to a
