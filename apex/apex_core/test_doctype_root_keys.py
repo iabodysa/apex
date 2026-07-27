@@ -42,6 +42,8 @@ FRAPPE_DOCTYPE_JSON = os.path.join(
 # Machine-written engine records kept out of Desk search: the SAME 22 that once shipped
 # the inert root ``hidden`` key, re-expressed as root ``read_only``, which frappe honours.
 # A SET rather than a count, because a count cannot tell a swap from a no-op.
+# Concealment is search and link only, never access — see the reach and the zero-exposure
+# report audit in ``test_engine_ledgers_stay_out_of_search``.
 SEARCH_CONCEALED = frozenset({
     "Accommodation Ledger",
     "Accommodation Stock Ledger",
@@ -213,10 +215,20 @@ class TestDocTypeRootKeys(unittest.TestCase):
 
         What root ``read_only`` does, precisely (frappe labels it "User Cannot Search"):
         it drops the doctype from ``can_search`` unconditionally
-        (frappe/utils/user.py:162-164), and it diverts ``can_read`` to ``all_read`` only
-        for a read-WITHOUT-write-or-create grant (:138-144). It does not hide the data:
-        a role with write or create is untouched, and every row stays reachable through
-        list views, reports, links, and the API.
+        (frappe/utils/user.py:162-164), and it suppresses the list-view and workspace LINK
+        via ``no_list_view_link``, removed from ``can_read`` at (:139-142, :181-183). It
+        diverts ``can_read`` to ``all_read`` only for a read-WITHOUT-write-or-create grant.
+        It does not hide the data: a role with write or create is untouched, and every row
+        stays reachable through list views, reports, links, and the API.
+
+        Settled 2026-07-27 so it is not re-derived by inspection: ``read_only`` appears
+        ZERO times in ``frappe/permissions.py`` and ``frappe/model/db_query.py``, so
+        ``has_permission`` and the query builder never consult it. Report access is
+        roles-only by design -- ``can_get_report`` is built from the ``report`` DocPerm
+        alone (:155-157), with no ``read_only`` branch. An audit of all 18 Script Reports,
+        14 Number Cards and 14 Dashboard Charts over these doctypes found ZERO exposures:
+        ``report_roles - doctype_permlevel0_read_roles`` is empty for every one, so each
+        audience already holds the access and none of them is a defect to "fix".
 
         Asserted as set EQUALITY in both directions, so the tree cannot drift from the
         declared policy in either one: dropping the flag from a member fails, and adding
