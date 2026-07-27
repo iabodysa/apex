@@ -69,10 +69,9 @@ KNOWN_LEVEL_ZERO_SENSITIVE = {
     # test_custody_acknowledgment_signature_permlevel.
     # DRAINED: Custody Issue.signature — permlevel 1, level-1 rows for the three Custody
     # Kiosk roles, none for Internal Auditor. Proof: test_custody_issue_signature_permlevel.
-    "Facility Asset Custody Assignment": (
-        [("supervisor_signature", "signature")],
-        _SIGNATURES_NOT_YET_LAYERED,
-    ),
+    # DRAINED: Facility Asset Custody Assignment.supervisor_signature — permlevel 1, level-1
+    # rows for the three custody desk roles, none for Internal Auditor. Proof:
+    # test_facility_asset_custody_assignment_signature_permlevel.
     # DRAINED: Housing Assignment.terms_signature, the entry A-216 created and A-308 called
     # the urgent one. Now permlevel 1, with level-1 rows for the three Arrivals Desk roles
     # and none for Internal Auditor — so the estate-wide audit read stops at level 0, which
@@ -318,7 +317,7 @@ class TestTheModelMatchesTheShippedTree(unittest.TestCase):
         )
         self.assertEqual(
             (total, with_high_field, with_high_row),
-            (153, 22, 19),
+            (153, 23, 20),
             "the adoption numbers in field_sensitivity.py's docstring are stale — update "
             "the docstring and this assertion together, so the premise cannot rot.",
         )
