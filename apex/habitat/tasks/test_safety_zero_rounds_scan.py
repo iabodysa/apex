@@ -36,6 +36,32 @@ class TestSafetyZeroRoundsScan(ApexHabitatTestCase):
             "send_welcome_email": 0,
         }).insert(ignore_permissions=True).name
 
+    def _submitted_round(self, building):
+        """A SUBMITTED Safety Round on ``building``, carrying one rated task.
+
+        The scan only cares that a submitted round exists, but a round cannot be
+        submitted without a Safety Task Execution: an unrated round would derive
+        "Pass" from an empty status set. The rating is fixture detail here — it
+        just has to be real. Scoped to no building (``applicable_to_all_buildings``
+        off, no scope rows) so the catalog row stays inert for the scan."""
+        task = frappe.get_doc({
+            "doctype": "Safety Task Catalog", "task_code": f"ZR-{_hash()}",
+            "task_title": "Zero Rounds Fixture Task", "department": "Fire Safety",
+            "frequency": "Daily", "priority": "High",
+            "applicable_to_all_buildings": 0, "is_active": 1,
+        }).insert(ignore_permissions=True).name
+        rnd = frappe.get_doc({
+            "doctype": "Safety Round", "naming_series": "SRN-.YYYY.-.#####",
+            "building": building, "round_date": today(), "cadence": "Daily",
+        }).insert(ignore_permissions=True)
+        frappe.get_doc({
+            "doctype": "Safety Task Execution",
+            "building": building, "task": task, "execution_date": today(),
+            "execution_status": "Good", "safety_round": rnd.name,
+        }).insert(ignore_permissions=True).submit()
+        rnd.submit()
+        return rnd
+
     def _zero_rounds_alert_exists(self, building):
         return bool(frappe.db.exists("Operations Alert", {
             "alert_type": "Supervisor Delay",
@@ -58,10 +84,7 @@ class TestSafetyZeroRoundsScan(ApexHabitatTestCase):
 
     def test_recent_round_suppresses_flag(self):
         b = self._building()
-        frappe.get_doc({
-            "doctype": "Safety Round", "naming_series": "SRN-.YYYY.-.#####",
-            "building": b.name, "round_date": today(), "cadence": "Daily",
-        }).insert(ignore_permissions=True).submit()
+        self._submitted_round(b.name)
         daily_safety_task_compliance_scan()
         self.assertFalse(
             self._zero_rounds_alert_exists(b.name),
@@ -88,10 +111,7 @@ class TestSafetyZeroRoundsScan(ApexHabitatTestCase):
     def test_responsible_supervisor_not_notified_when_round_exists(self):
         sup = self._supervisor()
         b = self._building(supervisor=sup)
-        frappe.get_doc({
-            "doctype": "Safety Round", "naming_series": "SRN-.YYYY.-.#####",
-            "building": b.name, "round_date": today(), "cadence": "Daily",
-        }).insert(ignore_permissions=True).submit()
+        self._submitted_round(b.name)
         daily_safety_task_compliance_scan()
         self.assertFalse(
             self._supervisor_notified(sup, b.name),
@@ -129,10 +149,7 @@ class TestSafetyZeroRoundsScan(ApexHabitatTestCase):
         b = self._building(supervisor=sup)
         daily_safety_task_compliance_scan()
         self.assertEqual(self._unread_bell_count(sup, b.name), 1)
-        frappe.get_doc({
-            "doctype": "Safety Round", "naming_series": "SRN-.YYYY.-.#####",
-            "building": b.name, "round_date": today(), "cadence": "Daily",
-        }).insert(ignore_permissions=True).submit()
+        self._submitted_round(b.name)
         self.assertEqual(
             self._unread_bell_count(sup, b.name),
             0,

@@ -148,14 +148,6 @@
   },
   {
    "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Safety Inspection Report",
-   "link_type": "DocType",
-   "link_to": "Safety Inspection Report",
-   "idx": 10
-  },
-  {
-   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Daily Work",
    "idx": 11
@@ -496,5 +488,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-22 22:21:36.254925"
+ "modified": "2026-07-27 09:00:00.000000"
 }
