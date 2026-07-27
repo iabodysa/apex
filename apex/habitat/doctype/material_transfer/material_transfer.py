@@ -18,7 +18,18 @@ VOUCHER_TYPE = "Material Transfer"
 
 
 class MaterialTransfer(Document):
-    pass
+    def before_cancel(self):
+        """Refuse the cancel here, not in on_cancel: this runs before db_update()
+        stamps docstatus 2, so a transfer whose stock has already moved on is left
+        submitted instead of reading as cancelled for the rest of the request.
+
+        A Document method rather than a module function like the rest of this
+        controller, because Frappe dispatches it from the class with no hooks.py
+        doc_events entry to add — this DocType has none registered for before_cancel."""
+        from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+            assert_reversal_allowed,
+        )
+        assert_reversal_allowed(VOUCHER_TYPE, self.name)
 
 
 def validate(doc, method=None):
