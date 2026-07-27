@@ -47,22 +47,20 @@ def after_insert(doc, method=None):
     if not assignees:
         return
     # [#foc6qa]
-    _perm_flag = frappe.flags.ignore_permissions
-    frappe.flags.ignore_permissions = True
-    try:
-        _assign_to.add(
-            {
-                "doctype": doc.doctype,
-                "name": doc.name,
-                "assign_to": assignees,
-                "description": _("Idle resident reported to {0}: employee {1} (building {2}). Please action.").format(
-                    doc.responsible_department, doc.employee_name or doc.employee, doc.building),
-                "priority": "High" if doc.reason_category == "Legal Case" else "Medium",
-                "assigned_by": frappe.session.user,
-            }
-        )
-    finally:
-        frappe.flags.ignore_permissions = _perm_flag
+    # assign_to.add re-reads the parent to re-check read as the very user who just
+    # created it; scope that with its own keyword rather than a process-global flag.
+    _assign_to.add(
+        {
+            "doctype": doc.doctype,
+            "name": doc.name,
+            "assign_to": assignees,
+            "description": _("Idle resident reported to {0}: employee {1} (building {2}). Please action.").format(
+                doc.responsible_department, doc.employee_name or doc.employee, doc.building),
+            "priority": "High" if doc.reason_category == "Legal Case" else "Medium",
+            "assigned_by": frappe.session.user,
+        },
+        ignore_permissions=True,  # audit-ok - skips only the creator's redundant self-read recheck
+    )
 
 
 def _validate_status_transition(doc):

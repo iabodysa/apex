@@ -6,20 +6,28 @@ on:
   pull_request:
     branches: [apex]
 
-# Baseline: number of unaudited ignore_permissions=True call sites in PRODUCTION
-# code (test files are excluded — see the grep below). Any call site without a
+# Baseline: number of unaudited permission-bypass call sites in PRODUCTION code
+# (test files are excluded — see the grep below). Any call site without a
 # "# audit-ok" comment on the same line counts toward the total.
 #
-# To add a NEW ignore_permissions=True that is genuinely necessary:
-#   1. Add "# audit-ok" to the same line.
+# The count is ONE combined number over every spelling of the bypass, because they
+# are the same runtime grant and a guard blind to one spelling is no guard:
+#   ignore_permissions=True          keyword argument, unspaced
+#   ignore_permissions = True        assignment or PEP8-spaced keyword
+#   doc.flags.ignore_permissions = True / frappe.flags.ignore_permissions = True
+# POSIX [[:space:]] is used rather than \s so the expression means the same thing
+# under BSD grep locally and GNU grep on the runner.
+#
+# To add a NEW bypass that is genuinely necessary:
+#   1. Add "# audit-ok" to the same line, with a reason.
 #   2. The line will be excluded from the count automatically.
 #
-# To raise the baseline (rare — requires security review):
-#   1. Update BASELINE below.
-#   2. Add a comment explaining why the new call site is safe.
+# BASELINE is a ratchet: it may FALL as bypasses are audited away, and is raised
+# only after a security review that records why the new call site is safe.
 
 env:
-  BASELINE: 23
+  BASELINE: 19
+  BYPASS_RE: 'ignore_permissions[[:space:]]*=[[:space:]]*True'
 
 jobs:
   permissions-guard:
@@ -27,34 +35,34 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Count unaudited ignore_permissions=True call sites
+      - name: Count unaudited permission-bypass call sites
         run: |
           # Production code only. Test files (tests/ and test_*.py) legitimately use
-          # ignore_permissions=True to build fixtures and are not a runtime security
+          # a permission bypass to build fixtures and are not a runtime security
           # surface, so they are excluded from the guard.
-          COUNT=$(grep -rn "ignore_permissions=True" apex/ --include="*.py" \
+          COUNT=$(grep -rnE "$BYPASS_RE" apex/ --include="*.py" \
             | grep -v "# audit-ok" \
             | grep -vE '/tests/|/test_[A-Za-z0-9_]*\.py:' \
             | wc -l \
             | tr -d ' ')
 
-          echo "Unaudited ignore_permissions=True count: $COUNT"
+          echo "Unaudited permission-bypass count: $COUNT"
           echo "Baseline: $BASELINE"
 
           if [ "$COUNT" -gt "$BASELINE" ]; then
             echo ""
-            echo "ERROR: $COUNT unaudited ignore_permissions=True call sites found."
+            echo "ERROR: $COUNT unaudited permission-bypass call sites found."
             echo "Baseline is $BASELINE."
             echo ""
-            echo "New call sites (not present when baseline was set):"
-            grep -rn "ignore_permissions=True" apex/ --include="*.py" \
+            echo "Unaudited call sites:"
+            grep -rnE "$BYPASS_RE" apex/ --include="*.py" \
               | grep -v "# audit-ok" \
               | grep -vE '/tests/|/test_[A-Za-z0-9_]*\.py:' || true
             echo ""
             echo "To fix:"
             echo "  - If the new call site is genuinely required, append '# audit-ok'"
-            echo "    to that line and update BASELINE in .github/workflows/permissions-guard.yml."
-            echo "  - If it was added by mistake, remove ignore_permissions=True."
+            echo "    and a reason to that line; BASELINE stays where it is."
+            echo "  - If it was added by mistake, remove the bypass."
             exit 1
           fi
 
