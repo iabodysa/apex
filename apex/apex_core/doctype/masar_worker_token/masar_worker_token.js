@@ -37,23 +37,38 @@ frappe.ui.form.on("Masar Worker Token", {
 	},
 });
 
+// [#a267hb] A Driver row carries no employee, so the worker endpoint would have been
+// called with an undefined subject; route on holder_type instead of assuming Worker.
 function _show_link(frm, regenerate) {
+	const is_driver = frm.doc.holder_type === "Driver";
 	frappe.call({
-		method: "apex.apex_core.doctype.masar_worker_token.masar_worker_token.issue_worker_link",
-		args: { employee: frm.doc.employee, regenerate: regenerate },
+		method: is_driver
+			? "apex.apex_core.doctype.masar_worker_token.masar_worker_token.issue_driver_link"
+			: "apex.apex_core.doctype.masar_worker_token.masar_worker_token.issue_worker_link",
+		args: is_driver
+			? { driver: frm.doc.driver, regenerate: regenerate }
+			: { employee: frm.doc.employee, regenerate: regenerate },
 		freeze: true,
-		freeze_message: __("Issuing worker link…"),
+		freeze_message: is_driver
+			? __("Issuing driver link…")
+			: __("Issuing worker link…"),
 		callback: (r) => {
 			if (r.exc || !r.message) {
 				return;
 			}
 			frm.reload_doc();
 			// [#f43ja4]
-			apex.masar.show_worker_link_dialog(r.message);
+			if (is_driver) {
+				apex.masar.show_driver_link_dialog(r.message);
+			} else {
+				apex.masar.show_worker_link_dialog(r.message);
+			}
 		},
 		error: () => {
 			frappe.show_alert({
-				message: __("Could not issue the worker link. Please try again."),
+				message: is_driver
+					? __("Could not issue the driver link. Please try again.")
+					: __("Could not issue the worker link. Please try again."),
 				indicator: "red",
 			});
 		},

@@ -26,10 +26,16 @@ from frappe.utils.password import decrypt, encrypt
 
 from apex.apex_core.utils.portal_token_security import (
     DRIVER,
+    ISSUED,
+    REISSUED,
+    RESHARED,
+    ROTATED,
     WORKER,
     TOKEN_COOKIES,
     authorize_issuance,
+    authorize_revocation,
     hash_token,
+    log_credential_event,
     revoke_subject_tokens,
     resolve_portal_subject,
     validate_subject_binding,
@@ -441,18 +447,29 @@ def _issue_token(
     doc: "MasarWorkerToken", regenerate: int = 0, scoped_issuer: bool = False
 ) -> str:
     """Issue or rotate a token for any holder (worker or driver): the logic is
-    holder-agnostic, keyed only off the MasarWorkerToken doc."""
+    holder-agnostic, keyed only off the MasarWorkerToken doc.
+
+    [#a267ai] Every worker and driver desk issuance funnels through here, so the one
+    audit write lives here too — naming the branch actually taken, because "re-shared
+    the same link" and "rotated, invalidating the old QR" are different events for
+    anyone later reconstructing who held a live credential when."""
+    audience, subject = doc._issuance_subject()
     raw = getattr(doc, "_plaintext_token", None)
     if not doc.enabled:
         doc.enabled = 1
-        return doc.regenerate()
-    if raw is not None:
-        return raw
-    if scoped_issuer or frappe.utils.cint(regenerate) or not doc.token:
-        return doc.regenerate()
-
-    raw = doc.recover_token()
-    doc.extend_expiry()
+        action, raw = REISSUED, doc.regenerate()
+    elif raw is not None:
+        action = ISSUED
+    elif scoped_issuer or frappe.utils.cint(regenerate) or not doc.token:
+        action, raw = ROTATED, doc.regenerate()
+    else:
+        # recover_token falls back to a rotation for a legacy row with no usable
+        # ciphertext, so the hash decides the label rather than the intent.
+        previous = doc.token
+        raw = doc.recover_token()
+        doc.extend_expiry()
+        action = RESHARED if doc.token == previous else ROTATED
+    log_credential_event(audience, subject, action, doc.name)
     return raw
 
 
@@ -573,6 +590,32 @@ def batch_issue_driver_links(drivers_json) -> list:
     for r in out:
         r["phone"] = phones.get(r["driver"])
     return out
+
+
+@frappe.whitelist(methods=["POST"])
+def revoke_driver_link(driver: str) -> dict:
+    """Desk action: kill a driver's barcode link now, without waiting for clearance.
+
+    The automatic revocations (clearance submit, suspension, a non-Active status) each
+    need an event to happen first. A lost phone, a shared QR or a driver who walked off
+    site is not one of those events, so without this the only way to withdraw a live
+    passwordless credential from the desk was to ROTATE it — which mints a NEW working
+    link rather than leaving none. Rotation is the wrong tool for withdrawal.
+
+    Authorized by ``authorize_revocation``: the same fleet roles and the same project
+    scope as issuance, minus the still-Active requirement (see that function). Returns
+    how many enabled rows were disabled — 0 is the honest answer for a driver who had
+    no live link, not a failure. The revocation itself is audit-logged inside
+    ``revoke_subject_tokens``, so every path lands one row. No financial impact."""
+    frappe.has_permission("Masar Worker Token", "write", throw=True)
+    authorize_revocation(DRIVER, driver)
+    revoked = revoke_driver_tokens(driver)
+    return {
+        "driver": driver,
+        "driver_name": frappe.db.get_value("Salis Driver", driver, "full_name"),
+        "revoked": revoked,
+        "enabled": False,
+    }
 
 
 def resolve_driver_token(token=None):
