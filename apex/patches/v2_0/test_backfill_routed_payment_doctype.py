@@ -112,8 +112,16 @@ class TestBackfillRoutedPaymentDoctype(FrappeTestCase):
         patch that stopped looking anything up, and the verdicts alone would pass on the
         version this replaced.
         """
+        # The configured target is the one candidate this test puts rows into, and the
+        # ambiguity needs a row NAMED exactly after the legacy candidate -- so it has to
+        # be a DocType whose docname is settable. Role is ``autoname: field:role_name``
+        # (frappe/core/doctype/role/role.json:4). Not Note: Note is ``autoname: hash``
+        # (frappe/desk/doctype/note/note.json:3), so a Note titled "Payment Entry" is
+        # named a random hash, the second match never existed, and every row this test
+        # called ambiguous was really a plain resolvable one.
+        configured = "Role"
         self.addCleanup(frappe.db.set_single_value, ROUTER, "target_payment_doctype", None)
-        frappe.db.set_single_value(ROUTER, "target_payment_doctype", "Note")
+        frappe.db.set_single_value(ROUTER, "target_payment_doctype", configured)
 
         candidates = _candidate_doctypes()
         self.assertLessEqual(len(candidates), 3)
@@ -121,23 +129,37 @@ class TestBackfillRoutedPaymentDoctype(FrappeTestCase):
         # DocType and ERPNext is a required app, so this is a precondition, not a skip.
         self.assertIn(LEGACY_TARGET_DOCTYPE, candidates)
 
-        # An ambiguous name has to match two candidates at once. This one does that
-        # without building an ERPNext payment: frappe.db.exists returns the name unread
-        # when the DocType equals it (frappe/database/database.py:1259-1261), so the
-        # legacy candidate matches on its own, and a Note carrying that title makes the
-        # configured candidate match it too.
+        # An ambiguous name has to match two candidates at once, without building an
+        # ERPNext payment. frappe.db.exists returns the name unread when the DocType
+        # equals it (frappe/database/database.py:1259-1261), so the legacy candidate
+        # matches this name on its own; a row named after it in the configured candidate
+        # supplies the second match.
         ambiguous = LEGACY_TARGET_DOCTYPE
-        if not frappe.db.exists("Note", ambiguous):
-            frappe.get_doc({"doctype": "Note", "title": ambiguous}).insert(ignore_permissions=True)
+        if not frappe.db.exists(configured, ambiguous):
+            frappe.get_doc({"doctype": configured, "role_name": ambiguous}).insert(
+                ignore_permissions=True
+            )
+        # Asserted, never assumed: this row's NAME is the entire ambiguity, and the naming
+        # rule behind it is exactly what the first version of this test got wrong.
+        self.assertTrue(frappe.db.exists(configured, ambiguous))
 
         payments = {}
         expected = {}
         for _ in range(ROWS_PER_SHAPE):
-            note = frappe.get_doc(
-                {"doctype": "Note", "title": f"Apex A278 {frappe.generate_hash(length=14)}"}
+            # Read the name back instead of predicting it -- a resolvable row only has to
+            # exist in exactly one candidate, whatever it ended up being called.
+            resolvable = frappe.get_doc(
+                {
+                    "doctype": configured,
+                    "role_name": f"Apex A278 {frappe.generate_hash(length=14)}",
+                }
             ).insert(ignore_permissions=True)
             orphan = f"APEX-A278-ABSENT-{frappe.generate_hash(length=14)}"
-            for payment, verdict in ((note.name, "Note"), (ambiguous, None), (orphan, None)):
+            for payment, verdict in (
+                (resolvable.name, configured),
+                (ambiguous, None),
+                (orphan, None),
+            ):
                 request = self._untyped_request(payment)
                 payments[request] = payment
                 expected[request] = verdict
@@ -158,6 +180,11 @@ class TestBackfillRoutedPaymentDoctype(FrappeTestCase):
         # so counting the statements naming a candidate's table cannot be dodged by
         # switching which ORM call the patch uses. Values reach that layer as bound
         # parameters, never interpolated, so no payload can spoof a table name into it.
+        # The match is a bare substring, so a table merely PREFIXED by a candidate's
+        # ("tabRole Profile") would over-count. Deliberate: nothing execute() touches is
+        # named that way, and over-counting fails loudly with the statements attached,
+        # where matching the closing quote instead would count zero and pass in silence
+        # the day the quoting character changes.
         candidate_tables = tuple(f"tab{doctype}" for doctype in candidates)
         probes = []
         real_sql = frappe.db.sql
