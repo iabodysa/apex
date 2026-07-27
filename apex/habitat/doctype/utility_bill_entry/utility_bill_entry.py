@@ -80,12 +80,18 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    # [#fcr6id]
-    try:
-        _post_ledger_row(doc)
-    except Exception:
-        frappe.db.rollback()
-        frappe.throw(_("Could not post the utility cost to the ledger. The bill was not submitted."))
+    """Post this bill's period row to the Accommodation Ledger.
+
+    No try/except around the post, for the reason _post_reversal_row gives for
+    the cancel half. frappe.db.rollback() takes no savepoint, so it discarded
+    the WHOLE request transaction — every row the caller wrote before reaching
+    this submit, not just the bill — and then swapped the real error for a
+    generic one that named no cause. Nothing here continues past a failed post;
+    it rethrew, so a savepoint would be ceremony. Letting the exception
+    propagate aborts the submit, surfaces the real error, and leaves Frappe's
+    own request-level rollback to unwind exactly what this request wrote.
+    """
+    _post_ledger_row(doc)
 
 
 def before_cancel(doc, method=None):

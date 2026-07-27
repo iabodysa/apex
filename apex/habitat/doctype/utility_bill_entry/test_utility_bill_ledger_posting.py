@@ -9,6 +9,9 @@ Proves the financial side effects of habitat/doctype/utility_bill_entry:
   allocation balanced;
 - before_cancel refuses only, so a cancel blocked after it has run leaves no
   offsetting row behind;
+- a FAILED post hands the caller the real exception and leaves rows written
+  earlier in the same request alone, rather than rolling the whole transaction
+  back behind a generic message;
 - _compute_sharing turns a shared-meter invoice (total_bill_amount +
   cost_bearing_pct) into the posted building share.
 
@@ -164,6 +167,60 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
         )
         self.assertFalse(row.reversal_of, "the period post is not a reversal")
         self.assertEqual(row.ledger_type, "Electricity", "ledger_type mirrors the utility type")
+
+    def _witness_row(self):
+        """A Site row: one mandatory Data field, no links, and nothing else in this
+        module touches it, so its survival isolates the transaction behaviour from
+        the submit's own ledger side effect."""
+        return frappe.get_doc({
+            "doctype": "Site", "site_name": "A332-UBE-" + _hash(),
+        }).insert(ignore_permissions=True).name
+
+    def test_a_failed_post_keeps_rows_written_earlier_in_the_same_request(self):
+        """on_submit used to wrap _post_ledger_row in ``except Exception:
+        frappe.db.rollback(); frappe.throw(generic)``. frappe.db.rollback() takes no
+        savepoint, so it discarded the WHOLE request transaction — every row written
+        before the submit was reached, not just this bill — and the generic message
+        then stood in for the error that actually failed the post.
+
+        Both halves are graded: the caller is handed the original exception (a
+        RuntimeError, where the wrapper would have converted it to a
+        frappe.ValidationError carrying no cause), and a row written earlier in the
+        same request outlives the failure.
+
+        docstatus is deliberately NOT asserted. db_update() stamps docstatus 1
+        (frappe/model/document.py:428) before run_post_save_methods() dispatches
+        on_submit (:431), so with the wrapper gone the stamp survives inside this
+        still-open test transaction. A real request unwinds it at the request
+        boundary; asserting it here would grade the absence of that boundary in the
+        test harness, not the product.
+        """
+        from unittest.mock import patch
+
+        witness = self._witness_row()
+        bill = self._bill(bill_amount=1200)
+        bill.insert(ignore_permissions=True)
+
+        with patch(
+            "apex.habitat.doctype.utility_bill_entry.utility_bill_entry._post_ledger_row",
+            side_effect=RuntimeError("accommodation ledger insert failed"),
+        ):
+            with self.assertRaises(RuntimeError) as caught:
+                submit_via_workflow(bill)
+
+        self.assertIn(
+            "accommodation ledger insert failed", str(caught.exception),
+            "the real error must reach the caller instead of a generic message that "
+            "names neither the failing step nor its cause",
+        )
+        self.assertTrue(
+            frappe.db.exists("Site", witness),
+            "a failed post must not discard rows this request wrote before it",
+        )
+        self.assertTrue(
+            frappe.db.exists("Building", self.building),
+            "the fixtures this test set up must outlive the failed post too",
+        )
 
     def test_cancel_posts_signed_reversal_referencing_the_original(self):
         bill = self._bill(bill_amount=1200)
