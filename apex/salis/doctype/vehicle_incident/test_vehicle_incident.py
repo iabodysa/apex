@@ -10,12 +10,30 @@ native HRMS Employee Advance.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
 from apex.apex_core.utils.employee_recovery import find_recovery_advance, raise_recovery_advance
+
+_INCIDENT_JSON = Path(__file__).resolve().parent / "vehicle_incident.json"
+
+# The roles that OPEN and handle an incident, and therefore capture the consent, against
+# the two that only read the file afterwards.
+OPERATING_ROLES = {"Fleet Supervisor", "Fleet Project Manager", "Fleet Manager", "System Manager"}
+AUDIT_ROLES = {"Internal Auditor", "Government Relations Officer"}
+# Fleet Manager rather than Fleet Supervisor as the worked example, and the choice is
+# load-bearing: reading an incident also passes vehicle_incident_has_permission, which
+# denies any role outside salis.permissions.UNSCOPED_ROLES that holds no User Permission
+# for the driver's project. Fleet Manager and Internal Auditor are BOTH unscoped there, so
+# the permlevel-1 row is the only thing left separating them. Pairing a scoped role
+# against an unscoped one would prove project scope and say nothing about the level.
+OPERATING_ROLE = "Fleet Manager"
+AUDIT_ROLE = "Internal Auditor"
+
+_CONSENT = "data:image/png;base64,iVBORw0KGgo="
 
 
 class TestVehicleIncident(FrappeTestCase):
@@ -520,4 +538,188 @@ class TestVehicleIncident(FrappeTestCase):
             ),
             1,
             "exactly one LIVE advance across the cancelled original and its amendment",
+        )
+
+    def _user_with_role(self, role):
+        return frappe.get_doc({
+            "doctype": "User",
+            "email": f"vi_{frappe.generate_hash(length=12)}@example.com",
+            "first_name": role.split()[0],
+            "roles": [{"role": role}],
+        }).insert(ignore_permissions=True).name
+
+    def test_the_consent_signature_is_level_one_for_the_operating_roles_only(self):
+        """The shipped JSON, checked rather than trusted.
+
+        A permlevel-1 row is NOT a duplicate of the same role's permlevel-0 row:
+        `is_perm_applicable` keeps only permlevel-0 rows (frappe/permissions.py:284), so
+        the two answer different questions, and rows are counted on the (role, permlevel)
+        PAIR. Every one of them carries WRITE as well as read -- the create-path test
+        below is what that half is for.
+        """
+        shipped = json.loads(_INCIDENT_JSON.read_text(encoding="utf-8"))
+        rows = shipped["permissions"]
+
+        signature = [f for f in shipped["fields"] if f["fieldname"] == "worker_signature"][0]
+        self.assertEqual(
+            signature.get("permlevel"), 1,
+            "the consent signature is back at level 0, readable by every role that can "
+            "open the incident",
+        )
+
+        high = {p["role"] for p in rows if int(p.get("permlevel") or 0) == 1}
+        self.assertEqual(
+            high, OPERATING_ROLES,
+            "the permlevel-1 role set changed. Adding a role hands it every worker's "
+            "captured consent mark; removing one silently blanks the consent that role "
+            "is the one to capture.",
+        )
+        for role in sorted(high):
+            row = [p for p in rows if p["role"] == role and int(p.get("permlevel") or 0) == 1]
+            self.assertEqual(len(row), 1, f"{role}: expected exactly one permlevel-1 row")
+            # Checked explicitly, never by omission: an absent DocPerm flag ships as 0
+            # rather than as its default, so a row written by omission grants nothing.
+            self.assertEqual(row[0].get("read"), 1, f"{role}: permlevel-1 read missing")
+            self.assertEqual(
+                row[0].get("write"), 1,
+                f"{role}: permlevel-1 write missing -- the consent would be blanked on "
+                "every incident this role opens",
+            )
+
+        for role in sorted(AUDIT_ROLES):
+            self.assertNotIn(
+                role, high,
+                f"{role} holds a permlevel-1 row -- that hands back the exact biometric "
+                "mark this change exists to keep from it",
+            )
+            zero = [p for p in rows if p["role"] == role and int(p.get("permlevel") or 0) == 0]
+            self.assertEqual(len(zero), 1, f"{role}: its level-0 row was moved or duplicated")
+            self.assertEqual(
+                zero[0].get("read"), 1,
+                f"{role} lost its read on the incident -- this change narrows one field, "
+                "not the audit grant",
+            )
+
+    def test_an_audit_role_reads_the_consent_concealed_and_a_fleet_role_does_not(self):
+        """THE PAIR. Both verdicts in one method so they cannot drift, and compared as
+        VERDICTS ALONE at the end. Comparing (role, value) tuples can never be equal --
+        the role names are different literals -- so such a pair passes even with the
+        permlevel removed entirely.
+
+        Asserted through `frappe.client.get`, because that is where the read strip lives
+        (frappe/client.py:110). An in-process `frappe.get_doc` does NOT strip, so
+        asserting on the raw document would prove nothing about what the auditor receives.
+        """
+        self.addCleanup(frappe.set_user, "Administrator")
+        inc = self._recovery_incident(worker_signature=_CONSENT)
+        self.assertEqual(inc.worker_signature, _CONSENT, "precondition: the fixture is signed")
+        auditor = self._user_with_role(AUDIT_ROLE)
+        fleet = self._user_with_role(OPERATING_ROLE)
+
+        # The access itself, before either read: level 1 must be reachable for one and not
+        # the other, or the two outcomes below say nothing about permlevels.
+        frappe.set_user(fleet)
+        self.assertIn(
+            1, frappe.get_doc("Vehicle Incident", inc.name).get_permlevel_access("read"),
+            f"{OPERATING_ROLE} lost its permlevel-1 read row",
+        )
+        frappe.set_user(auditor)
+        self.assertNotIn(
+            1, frappe.get_doc("Vehicle Incident", inc.name).get_permlevel_access("read"),
+            f"{AUDIT_ROLE} reaches permlevel 1 -- its fleet-wide read is back on the "
+            "worker's captured consent",
+        )
+
+        frappe.set_user(auditor)
+        audited = frappe.client.get("Vehicle Incident", inc.name)
+        frappe.set_user(fleet)
+        at_desk = frappe.client.get("Vehicle Incident", inc.name)
+
+        # assertFalse, not assertIsNone: the strip deletes the attribute
+        # (frappe/model/document.py:771) but as_dict rebuilds every column and coerces it
+        # by fieldtype (frappe/model/base_document.py:402), so what comes back depends on
+        # the fieldtype rather than on whether the strip worked.
+        self.assertFalse(
+            audited.get("worker_signature"),
+            f"{AUDIT_ROLE} can still read the worker's captured consent mark",
+        )
+        self.assertEqual(
+            audited.get("recovery_amount"), inc.recovery_amount,
+            "the level-0 recovery facts must survive the strip -- the auditor is still "
+            "auditing the deduction",
+        )
+        self.assertEqual(
+            at_desk.get("worker_signature"), _CONSENT,
+            f"{OPERATING_ROLE} lost the consent it has to be able to produce on demand",
+        )
+
+        audit_verdict = "visible" if audited.get("worker_signature") else "concealed"
+        fleet_verdict = "visible" if at_desk.get("worker_signature") else "concealed"
+        self.assertNotEqual(
+            audit_verdict, fleet_verdict,
+            f"both roles produced the same verdict ({audit_verdict}) -- the pair collapsed: "
+            "either the permlevel stopped being enforced for anyone, or it is now enforced "
+            f"against {OPERATING_ROLE} too",
+        )
+
+    def test_the_create_path_keeps_the_consent_signature_for_a_fleet_role(self):
+        """Why every level-1 row here carries WRITE and not merely read.
+
+        On a NEW document `reset_values_if_no_permlevel_access` takes its reference from
+        `frappe.new_doc` rather than from the stored row
+        (frappe/model/base_document.py:1277-1279), so a field the caller holds no level-1
+        write row for is set to the field DEFAULT -- empty. Not refused, not raised:
+        silently emptied, while the controller stamps `signed_on` beside it, filing an
+        incident that claims consent and holds none. A read-only level-1 row on a field a
+        create path writes is data loss before it is privacy.
+
+        `validate_higher_perm_levels` is the exact call `insert` makes
+        (frappe/model/document.py:306), so the outcome is about the permlevel and not
+        about the link permissions a full insert would also need.
+        """
+        self.addCleanup(frappe.set_user, "Administrator")
+        fleet = self._user_with_role(OPERATING_ROLE)
+        auditor = self._user_with_role(AUDIT_ROLE)
+
+        def surviving_consent(as_user):
+            frappe.set_user(as_user)
+            fresh = frappe.get_doc({
+                "doctype": "Vehicle Incident",
+                "incident_type": "Accident",
+                "vehicle": self.vehicle,
+                "incident_date": today(),
+                "description": "Consent captured at the scene",
+                "recover_from_driver": 1,
+                "recovery_amount": 1200,
+                "worker_signature": _CONSENT,
+            })
+            # `insert` sets this at frappe/model/document.py:295, eleven lines before it
+            # calls validate_higher_perm_levels at :306, and is_new() reads exactly that
+            # flag (base_document.py:465). Setting it is what makes this the CREATE path:
+            # without it the reset resolves from get_latest() -- a stored row that does
+            # not exist yet -- and the test would silently be about updates instead.
+            fresh.set("__islocal", True)
+            self.assertTrue(fresh.is_new(), "precondition: the create path needs a NEW doc")
+            fresh.validate_higher_perm_levels()
+            return fresh.worker_signature
+
+        kept = surviving_consent(fleet)
+        blanked = surviving_consent(auditor)
+
+        self.assertEqual(
+            kept, _CONSENT,
+            f"{OPERATING_ROLE} lost the consent on the CREATE path -- the fleet would file "
+            "recoveries stamped as signed with nothing behind them",
+        )
+        self.assertFalse(
+            blanked,
+            "a role with no permlevel-1 write row kept a consent mark it cannot reach on "
+            "create",
+        )
+        kept_verdict = "kept" if kept else "blanked"
+        blanked_verdict = "kept" if blanked else "blanked"
+        self.assertNotEqual(
+            kept_verdict, blanked_verdict,
+            f"both roles produced the same verdict ({kept_verdict}) -- this pair no longer "
+            "distinguishes a role that holds the level-1 write row from one that does not",
         )

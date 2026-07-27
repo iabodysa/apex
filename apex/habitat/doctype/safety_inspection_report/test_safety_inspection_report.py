@@ -38,6 +38,67 @@ class TestSafetyInspectionReport(FrappeTestCase):
         self.assertEqual(p.create, 1)
         self.assertFalse(getattr(p, "submit", 0), "Safety Officer must NOT have submit on SIR")
 
+    def _user_with_role(self, role):
+        return frappe.get_doc({
+            "doctype": "User",
+            "email": f"sir_{frappe.generate_hash(length=12)}@example.com",
+            "first_name": role.split()[0],
+            "roles": [{"role": role}],
+        }).insert(ignore_permissions=True).name
+
+    def test_a_role_holding_create_is_not_offered_the_new_action(self):
+        """The deprecation withdraws the New action without touching a DocPerm row.
+
+        The Desk decides whether to offer New from `frappe.boot.user.can_create`
+        (frappe/public/js/frappe/model/model.js:366, and the awesomebar's "New X" at
+        search_utils.js:161). Root `in_create` diverts a DocType out of that list into a
+        separate `in_create` list (frappe/utils/user.py:132-133), then folds that list
+        straight back into `can_write` (:172) -- so every draft already in flight stays
+        editable and submittable, and only the offer to open a NEW one goes away.
+
+        Withdrawing the affordance rather than the row is the deliberate half. Revoking
+        `create` from the DocPerm rows would take amend with it: `insert` checks the
+        create right for an amended document too (frappe/model/document.py:300), so a
+        submitted report could never be corrected again.
+
+        Safety Round is the control -- the same user holds create on the successor, so
+        the boot payload is not simply empty and the absence below is about this DocType.
+        """
+        user = self._user_with_role("Safety Officer")
+        # Process state, and no rollback restores it: register the undo before the change.
+        self.addCleanup(frappe.set_user, "Administrator")
+        frappe.set_user(user)
+        # Built for the SESSION user: build_perm_map resolves roles through get_valid_perms,
+        # which falls back to frappe.session.user (frappe/permissions.py:467-469). Asking
+        # for another user's payload while Administrator holds the session returns
+        # Administrator's rights under that user's name.
+        boot = frappe.get_user().load_user()
+
+        self.assertIn(
+            "Safety Round", boot["can_create"],
+            "control failed: the role lost create on the successor, so the assertion "
+            "below would pass for a reason that has nothing to do with in_create",
+        )
+        self.assertNotIn(
+            "Safety Inspection Report", boot["can_create"],
+            "the Desk still offers New on the deprecated report -- root in_create was "
+            "dropped from safety_inspection_report.json, or the site has not migrated",
+        )
+        self.assertIn(
+            "Safety Inspection Report", boot["in_create"],
+            "the report is absent from BOTH boot lists, which means the role lost its "
+            "DocPerm create row rather than being diverted out of the New action",
+        )
+        self.assertIn(
+            "Safety Inspection Report", boot["can_write"],
+            "the reports already filed went read-only for the role that owns them",
+        )
+        self.assertTrue(
+            frappe.has_permission("Safety Inspection Report", "create", user=user),
+            "the DocPerm create rows were revoked as well -- amending a submitted report "
+            "needs the create right, and every server-side writer starts throwing",
+        )
+
     def test_create_valid_inspection(self):
         doc = frappe.get_doc({
             "doctype": "Safety Inspection Report",
