@@ -236,6 +236,9 @@ def check_request_ip_trust(probe_planted=None) -> dict:
              -H 'X-Forwarded-For: 192.0.2.7' \\
              'https://<site>/api/method/apex.apex_core.utils.request_ip_trust.check_request_ip_trust?probe_planted=1'
 
+    Send the digit: ``cint`` reads ``true`` and ``yes`` as 0, so a word spells the
+    assertion away and the reply comes back inconclusive rather than graded.
+
     ``overwritten`` and ``overwritten-then-appended`` are the passes; both are also
     reported as ``trusted: true``, which is the field to key an automated check on.
     Every other verdict, ``no-header`` included, is a refusal to certify.
