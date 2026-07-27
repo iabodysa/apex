@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""The Salis Driver desk surface for the Driver Portal barcode (A-267).
+"""The Salis Driver desk surface for the Driver Portal barcode.
 
 Stdlib-only by design: it reads the two client scripts and the token controller as
 text/AST, so it runs with no bench and no site. What it guards is the wiring a

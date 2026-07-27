@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Desk issuance and revocation of the Driver Portal barcode (A-267).
+"""Desk issuance and revocation of the Driver Portal barcode.
 
 What makes this surface different from an ordinary desk action: a driver has no
 Frappe account and no password. They scan a barcode, and the raw token in that
