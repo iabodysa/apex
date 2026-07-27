@@ -106,7 +106,20 @@ def _record_key_value(spec, record):
 
 
 def _exists(frappe, doctype, key, value):
-    if key == "name":
+    """True only when a real row already carries this natural key.
+
+    ``frappe.db.exists(dt, dn)`` returns ``dn`` WITHOUT touching the database when
+    ``dn`` equals ``dt`` (database.py:1259, the deliberate "a Single always exists"
+    short-circuit). Every spec keyed on ``name`` therefore read a record named after
+    its own DocType as already-seeded and suppressed it on every install — the guard
+    silently lost a real row instead of admitting a ghost.
+
+    The value is NOT rejected outright: a row that genuinely is named after its
+    DocType must still count as present, or create-only would re-insert it. It is
+    routed to the dict-filter form instead, a documented call shape (database.py:1256)
+    that always queries and so answers correctly in both directions.
+    """
+    if key == "name" and value != doctype:
         return bool(frappe.db.exists(doctype, value))
     return bool(frappe.db.exists(doctype, {key: value}))
 
@@ -117,11 +130,16 @@ def _unresolved_link(frappe, doctype, record):
     Child rows are walked too: a Table row's Link is as fatal as a top-level one
     (Frappe's own ``_validate_links`` checks children), so a record whose rows
     dangle must be refused here rather than raising mid-batch.
+
+    Both probes filter on ``name`` rather than passing the value positionally: the
+    positional form short-circuits when the value equals the target DocType
+    (database.py:1259), which passed a dangling link off as resolved and turned a
+    named skip into a bare insert failure downstream.
     """
     meta = frappe.get_meta(doctype)
     for field in meta.get("fields", {"fieldtype": "Link"}):
         value = record.get(field.fieldname)
-        if value and field.options and not frappe.db.exists(field.options, value):
+        if value and field.options and not frappe.db.exists(field.options, {"name": value}):
             return f"{field.fieldname} -> {field.options} '{value}'"
 
     for table in meta.get_table_fields():
@@ -131,7 +149,7 @@ def _unresolved_link(frappe, doctype, record):
                 continue
             for field in child_links:
                 value = row.get(field.fieldname)
-                if value and field.options and not frappe.db.exists(field.options, value):
+                if value and field.options and not frappe.db.exists(field.options, {"name": value}):
                     return (
                         f"{table.fieldname} row {idx}: "
                         f"{field.fieldname} -> {field.options} '{value}'"
