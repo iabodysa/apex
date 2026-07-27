@@ -9,7 +9,6 @@ posts NO General Ledger / accounting entry — each row is an operational memo.
 
 from __future__ import annotations
 
-import frappe
 from frappe.model.document import Document
 
 
@@ -22,8 +21,11 @@ def on_doctype_update():
     accrual_date) so the daily one-row-per-vehicle-per-day accrual cannot be
     double-posted at the DB level even if the engine's check-then-insert is
     bypassed by a race. Created/kept in sync on migrate via Frappe's
-    on_doctype_update hook."""
-    frappe.db.add_unique(
+    on_doctype_update hook. Guarded so pre-existing duplicate data logs rather
+    than aborting migrate."""
+    from apex.apex_core.utils.ledger_index import add_unique_guarded
+
+    add_unique_guarded(
         "Rental Accrual Ledger",
         ["vehicle", "accrual_date"],
         constraint_name="unique_ral_vehicle_date",
