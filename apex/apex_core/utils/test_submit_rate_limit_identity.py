@@ -42,6 +42,7 @@ the app-wide address-isolation guard this file's subnet answers to.
 from __future__ import annotations
 
 import ast
+import contextlib
 import inspect
 import json
 import pathlib
@@ -52,7 +53,11 @@ from unittest import mock
 import frappe
 import frappe.rate_limiter
 import frappe.translate
+from frappe.auth import HTTPRequest
+from werkzeug.test import EnvironBuilder
+from werkzeug.wrappers import Request
 
+import apex
 from apex.habitat.api import front_desk
 from apex.habitat.doctype.arrival_batch import arrival_batch
 from apex.habitat.web_form.accommodation_resident_request import (
@@ -175,6 +180,68 @@ PAYLOAD_BOUNDS = (
     (transport_request, "submit_transport_request", TRANSPORT_PURPOSE_CAP, _transport_call),
     (vehicle_incident, "submit_vehicle_incident", INCIDENT_DESCRIPTION_CAP, _incident_call),
 )
+
+
+# The tree the alias scan walks. Taken from the imported package rather than from this
+# file's own location, so a run that imported apex from somewhere else -- another
+# worktree, a stale editable install -- scans the code it actually imported and cannot
+# grade a tree nothing here is testing.
+_PACKAGE_ROOT = pathlib.Path(apex.__file__).resolve().parent
+
+
+def _dotted_module(path):
+    """The dotted name frappe would have to be sent to reach this file's module."""
+    parts = list(path.resolve().relative_to(_PACKAGE_ROOT).with_suffix("").parts)
+    if parts and parts[-1] == "__init__":
+        parts.pop()
+    return ".".join(["apex", *parts])
+
+
+def _module_level_aliases():
+    """Every module-level name in the package bound to something defined elsewhere.
+
+    Source is parsed, never imported. Comparing live function objects would mean
+    importing every module in the app, several of which want a site, and this has to
+    hold as a site-free guard. Parsing loses nothing here because the thing being looked
+    for IS the import statement: frappe resolves a request's ``cmd`` by attribute lookup
+    on the module the string names (handler.py:294-303 -> __init__.py:1748-1750), and a
+    module-level ``from X import f`` is exactly what puts ``f`` among that module's
+    attributes. A test module counts like any other -- it ships in the package, so a
+    dotted path through one resolves for a caller just as well as any other path.
+
+    Returns ``{second_path: defining_path}``.
+    """
+    aliases = {}
+    for path in sorted(_PACKAGE_ROOT.rglob("*.py")):
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+        except (SyntaxError, UnicodeDecodeError):
+            continue
+        module = _dotted_module(path)
+        for node in tree.body:
+            if isinstance(node, ast.ImportFrom) and node.module and not node.level:
+                for imported in node.names:
+                    if imported.name != "*":
+                        bound = imported.asname or imported.name
+                        aliases[f"{module}.{bound}"] = f"{node.module}.{imported.name}"
+            elif isinstance(node, ast.Assign) and isinstance(node.value, ast.Name):
+                for target in node.targets:
+                    if isinstance(target, ast.Name):
+                        aliases[f"{module}.{target.id}"] = f"{module}.{node.value.id}"
+    return aliases
+
+
+def _relative_imports():
+    """Files using a relative import, which the alias scan cannot resolve to a path."""
+    offenders = []
+    for path in sorted(_PACKAGE_ROOT.rglob("*.py")):
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+        except (SyntaxError, UnicodeDecodeError):
+            continue
+        if any(isinstance(n, ast.ImportFrom) and n.level for n in ast.walk(tree)):
+            offenders.append(_dotted_module(path))
+    return offenders
 
 
 def _declared_limits(module, name):
@@ -415,6 +482,147 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
                 self.assertEqual(getattr(refused, "http_status_code", None), 429)
                 self.assertEqual(cache.charged(), {shared})
                 self.assertEqual(cache.count(shared), limit + 1)
+
+    def test_two_spellings_of_one_handler_each_get_a_full_window(self):
+        """The window is named after the caller's SPELLING, not the handler it reached.
+
+        frappe builds the bucket from the raw request field, ``rl:{form_dict.cmd}:{ip}``
+        (rate_limiter.py:155), and resolves the handler separately by attribute lookup
+        on the module that same string names (handler.py:294-303 -> __init__.py:
+        1748-1750). Nothing joins the two. So the ceiling is per spelling, and a caller
+        who knows two dotted paths to one function spends two full windows -- the same
+        bypass the de-keying closed, arriving through a different door.
+
+        This is what makes the scan below load-bearing rather than tidiness. Should
+        frappe ever key the bucket on the resolved handler, this test is the one that
+        reds, and the scan can then be retired deliberately instead of by assumption.
+        """
+        module, name = GUEST_SUBMITTERS[0]
+        endpoint = getattr(module, name)
+        limit = DECLARED_CEILINGS[name]
+        spellings = (f"{module.__name__}.{name}", f"apex.a294.second.path.{name}")
+        admitted = 0
+        cache = _FakeCache()
+        with mock.patch.object(frappe, "cache", cache):
+            for spelling in spellings:
+                for _ in range(limit + 1):
+                    if self._spend_one(endpoint, spelling) is not None:
+                        break
+                    admitted += 1
+
+        self.assertEqual(
+            admitted,
+            limit * 2,
+            f"{name} did not admit a full {limit} under each of two spellings",
+        )
+        self.assertEqual(
+            cache.charged(),
+            {f"rl:{spelling}:{_STUB_IP}" for spelling in spellings},
+            "the two spellings did not open two separate windows",
+        )
+
+    @contextlib.contextmanager
+    def _behind_an_appending_edge(self, claim):
+        """Let frappe resolve ``request_ip`` from a header, instead of stubbing it.
+
+        The edge modelled is the appending one, which is what nginx's stock
+        ``$proxy_add_x_forwarded_for`` builds: the caller's claim arrives FIRST and the
+        real peer behind it. ``set_request_ip`` is the installed framework's own
+        (auth.py:64-75), so this cannot drift from the precedence frappe follows.
+        """
+        environ = EnvironBuilder(
+            path="/api/method/submit",
+            method="POST",
+            environ_base={"REMOTE_ADDR": ADDRESS_SUBNET + "7"},
+            headers={"X-Forwarded-For": f"{claim}, {ADDRESS_SUBNET}7"},
+        ).get_environ()
+        saved = [(name, getattr(frappe.local, name, _ABSENT)) for name in ("request", "request_ip")]
+        frappe.local.request = Request(environ)
+        try:
+            HTTPRequest.set_request_ip(HTTPRequest.__new__(HTTPRequest))
+            yield frappe.local.request_ip
+        finally:
+            for name, previous in saved:
+                if previous is _ABSENT:
+                    if hasattr(frappe.local, name):
+                        delattr(frappe.local, name)
+                else:
+                    setattr(frappe.local, name, previous)
+
+    def test_a_forged_forwarded_claim_mints_a_fresh_window_per_address(self):
+        """The other half of the bucket name, taken from the framework not from a stub.
+
+        Every other case in this file installs ``request_ip`` directly. That is honest
+        about what is under test, but it quietly assumes the value is the server's to
+        decide, and it is not: frappe fills it from the FIRST X-Forwarded-For entry
+        (auth.py:64-75), an appending edge puts the caller's claim first, and the bucket
+        is ``rl:{cmd}:{request_ip}`` (rate_limiter.py:155). Composed, those three make
+        the ceiling per CLAIMED address rather than per caller, so the whole limit rests
+        on the deployment overwriting that header -- the thing request_ip_trust.py
+        exists to measure and no app-side code can enforce.
+
+        Both claims come from this file's declared subnet, so the app-wide guard on
+        address isolation between test files still reads one seed here.
+        """
+        module, name = GUEST_SUBMITTERS[0]
+        endpoint = getattr(module, name)
+        limit = DECLARED_CEILINGS[name]
+        cmd = f"a294-forwarded-{name}"
+        claims = (ADDRESS_SUBNET + "aa", ADDRESS_SUBNET + "bb")
+        admitted = 0
+        cache = _FakeCache()
+        with mock.patch.object(frappe, "cache", cache):
+            for claim in claims:
+                with self._behind_an_appending_edge(claim) as resolved:
+                    self.assertEqual(
+                        resolved, claim, "frappe did not take the caller's claim first"
+                    )
+                    for _ in range(limit + 1):
+                        if self._spend_one(endpoint, cmd) is not None:
+                            break
+                        admitted += 1
+
+        self.assertEqual(
+            admitted,
+            limit * 2,
+            f"{name} did not admit a full {limit} under each forged address",
+        )
+        self.assertEqual(cache.charged(), {f"rl:{cmd}:{claim}" for claim in claims})
+
+    def test_no_guest_submitter_is_reachable_under_a_second_dotted_path(self):
+        """Given the above, each submitter must have exactly ONE spelling.
+
+        The whole package is scanned, not just the four defining modules: a second path
+        is created by whoever IMPORTS the function, so the evidence has to come from
+        everywhere a module-level import can appear. This is the check, not an
+        inspection -- a re-export added in any package ``__init__``, or a test module
+        that imports the endpoint instead of its module, reds here by name.
+        """
+        canonical = {f"{module.__name__}.{name}" for module, name in GUEST_SUBMITTERS}
+        aliases = _module_level_aliases()
+
+        self.assertIn(
+            "apex.apex_core.utils.test_submit_rate_limit_identity.arrival_batch",
+            aliases,
+            "the scan did not record this file's own module-level import, so an empty "
+            "result below would mean a broken scan rather than a clean package",
+        )
+        self.assertEqual(
+            _relative_imports(),
+            [],
+            "a relative import cannot be resolved to a dotted path, so the scan would "
+            "no longer see every second path the package publishes",
+        )
+
+        second_paths = sorted(
+            f"{alias} -> {target}" for alias, target in aliases.items() if target in canonical
+        )
+        self.assertEqual(
+            second_paths,
+            [],
+            "guest submitter(s) reachable under a second dotted path, and each path "
+            "carries its own full rate-limit window:\n" + "\n".join(second_paths),
+        )
 
     def test_the_window_length_is_the_declared_one_and_is_never_refreshed(self):
         """The count ceiling is only half of "did not widen": a window opened for longer
