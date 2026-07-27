@@ -59,59 +59,14 @@ frappe.ui.form.on("Lease", {
 					return;
 				}
 
-				// The target payment DocType comes from the Payment Routing Settings
-				// router (replacing the retired Apex Settings default_payment_method).
-				// An unconfigured router answers "Payment Request"; this lease button
-				// has no Payment Request branch, so it keeps its prior default of
-				// Payment Entry in that case.
-				frappe.call({
-					method: "apex.apex_core.payment_router.get_target_payment_doctype",
-				}).then(r => {
-					const method = r && r.message;
-					if (method === "Expense Request Afmco") {
-						frappe.db.exists("DocType", "Expense Request Afmco").then(exists => {
-							if (!exists) {
-								frappe.msgprint({message: __("Expense Request Afmco DocType is not installed."), indicator: "red"});
-								return;
-							}
-							// [#ofbr6f]
-							frappe.db.get_value("Building", frm.doc.building, "default_cost_center").then(res => {
-								const doc = frappe.model.get_new_doc("Expense Request Afmco");
-								doc.tax_invoice_number = frm.doc.name;
-								doc.beneficiary_name = frm.doc.landlord;
-								doc.amount = selected.amount || frm.doc.rent_amount;
-								doc.project = "";
-								doc.cost_center = (res && res.message && res.message.default_cost_center) || "";
-								doc.jv_status = "JV Not Created";
-								doc.naming_series = "PR-.YYYY.-";
-								doc.date = frappe.datetime.nowdate();
-								doc.bank_payment_date = frappe.datetime.nowdate();
-								doc.payment_type = "Rent";
-								doc.remark = __("Rent payment generated for building: {0} under lease {1}", [frm.doc.building, frm.doc.name]);
-								frappe.set_route("Form", "Expense Request Afmco", doc.name);
-							});
-						}).catch(() => {
-							frappe.msgprint({message: __("Could not verify the Expense Request Afmco DocType. Please try again."), indicator: "red"});
-						});
-					} else if (method === "Payment Order") {
-						const doc = frappe.model.get_new_doc("Payment Order");
-						doc.payment_order_date = frappe.datetime.nowdate();
-						doc.company = frm.doc.company;
-						const ref = frappe.model.add_child(doc, "references");
-						ref.reference_doctype = "Lease";
-						ref.reference_name = frm.doc.name;
-						ref.amount = selected.amount || frm.doc.rent_amount;
-						ref.supplier = frm.doc.landlord;
-						frappe.set_route("Form", "Payment Order", doc.name);
-					} else {
-						// [#mrbtun] A Payment Entry is raised SERVER-side from the landlord's
-						// invoice, never built here from the rent schedule: a browser-built one
-						// carried no references row, so it settled no invoice at all.
-						raise_rent_payment(frm, selected);
-					}
-				}).catch(() => {
-					frappe.msgprint({message: __("Could not read the payment settings. Please try again."), indicator: "red"});
-				});
+				// [#mrbtun] Which payment document this raises is decided SERVER-side and
+				// nowhere else. This button used to read the Payment Routing target and
+				// then choose among three hard-coded branches, so a deployment could
+				// configure one target and be handed another here. The server reads the
+				// configured target, refuses a mismatch by name, and builds the Payment
+				// Entry from the landlord's invoice — a browser-built one carried no
+				// references row and settled no invoice at all.
+				raise_rent_payment(frm, selected);
 			});
 		}
 	},
