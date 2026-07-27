@@ -347,6 +347,8 @@ permission_query_conditions = {
     "Housing Checkout": "apex.habitat.permissions.housing_checkout_query",
     # Scoped through `assignment` -> Housing Assignment.building, likewise.
     "Room Bed Transfer": "apex.habitat.permissions.room_bed_transfer_query",
+    # Scoped through the `buildings_in_scope` child table; the plan has no building.
+    "Audit Remediation Plan": "apex.habitat.permissions.audit_remediation_plan_query",
     "Vehicle Assignment": "apex.salis.permissions.vehicle_assignment_query",
     "Fuel Request": "apex.salis.permissions.fuel_request_query",
     "Dispatch Trip": "apex.salis.permissions.dispatch_trip_query",
@@ -423,6 +425,8 @@ has_permission = {
     "Idle Resident Report": "apex.habitat.permissions.building_scoped_has_permission",
     # Own handler, not the shared one: a checkout carries no `building` to read.
     "Housing Checkout": "apex.habitat.permissions.housing_checkout_has_permission",
+    # Likewise: the plan's estate is its child scope table, not a `building` field.
+    "Audit Remediation Plan": "apex.habitat.permissions.audit_remediation_plan_has_permission",
     # Shared handler reaches the estate via the BUILDING_FETCH_ANCHOR assignment hop.
     "Room Bed Transfer": "apex.habitat.permissions.building_scoped_has_permission",
     "Vehicle Assignment": "apex.salis.permissions.scoped_has_permission",

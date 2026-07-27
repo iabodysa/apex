@@ -4,6 +4,8 @@
 import frappe
 from frappe.utils import getdate, today
 
+from apex.habitat import permissions
+
 
 def execute(filters=None):
     columns = [
@@ -17,9 +19,33 @@ def execute(filters=None):
         {"label": frappe._("Overdue"), "fieldname": "overdue", "fieldtype": "Data", "width": 90},
     ]
 
+    # Audit Remediation Plan became row-scoped on its child buildings table, and a
+    # Script Report inherits nothing from permission_query_conditions: query_report.py
+    # checks `report` on the ref once, then runs this module, whose frappe.get_all
+    # forces ignore_permissions. The rows below are CHILD rows carrying no building of
+    # their own, so the visible plan set is resolved first from the same scope table the
+    # fragment subqueries, and the child query confined to it. A plan naming no building
+    # resolves into no plan and stays hidden: fail closed, exactly like the fragment.
+    item_filters = {"parenttype": "Audit Remediation Plan"}
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    if restrict:
+        if not allowed:
+            return columns, []
+        plans = frappe.get_all(
+            "Audit Remediation Building Scope",
+            filters={
+                "parenttype": "Audit Remediation Plan",
+                "building": ["in", allowed],
+            },
+            pluck="parent",
+        )
+        if not plans:
+            return columns, []
+        item_filters["parent"] = ["in", sorted(set(plans))]
+
     rows = frappe.get_all(
         "Audit Remediation Item",
-        filters={"parenttype": "Audit Remediation Plan"},
+        filters=item_filters,
         fields=[
             "parent as plan",
             "remediation_action",

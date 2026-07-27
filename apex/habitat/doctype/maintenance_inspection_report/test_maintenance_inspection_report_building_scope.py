@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Building row-scoping for Maintenance Inspection Report (A-317).
+"""Building row-scoping for Maintenance Inspection Report.
 
 The DocType carries a `building` Link but appeared in NEITHER permission hook dict,
 unlike its already-wired sibling Maintenance Work Order. Wiring it needs one extra
@@ -389,7 +389,7 @@ class TestMaintenanceInspectionReportScopeRuntime(FrappeTestCase):
         )
 
     def test_a_create_with_building_unfetched_is_decided_by_the_work_order(self):
-        """The A-317 create path against real rows, both ways.
+        """The create path against real rows, both ways.
 
         `frappe.get_doc` applies no `fetch_from` -- that runs in `_validate_links()`
         during insert -- so `building` here is genuinely empty at the moment
