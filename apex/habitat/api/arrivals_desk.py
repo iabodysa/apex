@@ -275,6 +275,22 @@ def search_arrivals_workers(building=None, txt=None) -> list:
     housed_emp = {h.employee for h in housed if h.employee}
     housed_tw = {h.party for h in housed if h.party_type == "Temporary Worker" and h.party}
 
+    # Employee carries no building of its own, so the search below is estate-wide.
+    # Without this, an Employee housed OUTSIDE the caller's estate is missing from
+    # the scope-restricted housed_emp above and is therefore offered to them.
+    blocked_emp = set()
+    if restrict:
+        blocked = frappe.get_all(
+            "Housing Assignment",
+            filters={
+                "docstatus": 1,
+                "check_out_date": ["is", "not set"],
+                "building": ["not in", allowed],
+            },
+            fields=["employee"],
+        )
+        blocked_emp = {b.employee for b in blocked if b.employee}
+
     if frappe.has_permission("Employee", "read"):
         emps = frappe.get_all(
             "Employee",
@@ -294,7 +310,7 @@ def search_arrivals_workers(building=None, txt=None) -> list:
                 "sub": e.designation or e.name,
             }
             for e in emps
-            if e.name not in housed_emp
+            if e.name not in housed_emp and e.name not in blocked_emp
         ]
 
     if frappe.has_permission("Temporary Worker", "read"):

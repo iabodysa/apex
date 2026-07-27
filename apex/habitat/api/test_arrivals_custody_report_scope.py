@@ -12,6 +12,14 @@ Covered (all as a Resident Supervisor scoped to ONE building via User
 Permission):
   * ``arrivals_desk.search_arrivals_workers`` — Temporary Worker candidates and
     the housed-exclusion set are confined to the user's building.
+  * ``arrivals_desk.search_arrivals_workers`` again, for the EMPLOYEE branch.
+    Temporary Worker is scoped on its own ``building`` field, but Employee carries
+    no building at all — its estate is the building of its live Housing
+    Assignment — so that branch needs its own out-of-estate exclusion and its own
+    proof. The Employee cases use a second fixture user holding HR User ALONGSIDE
+    Resident Supervisor: the branch sits behind a type-level
+    ``has_permission("Employee", "read")``, so without that role it is never
+    entered and an Employee assertion would pass against unscoped code.
   * ``custody_kiosk.get_party_custody`` — open Custody Issues are confined to the
     user's building, so another estate's custody is never surfaced.
   * ``safety_checklist.get_tasks_for_cadence`` / ``get_due_cadences`` — gated on
@@ -49,9 +57,16 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         # [#ge40ld]
         cls.b1 = cls._building()
         cls.b2 = cls._building()
-        cls.scoped = cls._user("Resident Supervisor", building=cls.b1)
-        cls.oversight = cls._user("Accommodation Manager")
-        cls.lonely = cls._user("Resident Supervisor")  # [#s3pi7t]
+        cls.scoped = cls._user(["Resident Supervisor"], building=cls.b1)
+        cls.oversight = cls._user(["Accommodation Manager"])
+        cls.lonely = cls._user(["Resident Supervisor"])  # [#s3pi7t]
+        # HR User is what opens the Employee branch of the search; see the module
+        # docstring. Kept separate from cls.scoped so the Temporary Worker cases
+        # keep exercising a supervisor who cannot read Employee at all.
+        cls.scoped_hr = cls._user(
+            ["Resident Supervisor", "HR User"], building=cls.b1
+        )
+        cls.oversight_hr = cls._user(["Accommodation Manager", "HR User"])
 
     # [#ir0iwd]
     @classmethod
@@ -70,7 +85,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         return doc.name
 
     @classmethod
-    def _user(cls, role, building=None):
+    def _user(cls, roles, building=None):
         email = "rpt-{0}@example.com".format(_h()).lower()
         frappe.get_doc(
             {
@@ -78,7 +93,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
                 "email": email,
                 "first_name": "Rpt",
                 "send_welcome_email": 0,
-                "roles": [{"role": role}],
+                "roles": [{"role": r} for r in roles],
             }
         ).insert(ignore_permissions=True)
         cls.addClassCleanup(
@@ -202,6 +217,59 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         )
         return doc.name
 
+    def _employee(self):
+        """An Active Employee, returned with the token that finds it in the search.
+
+        The search matches on ``employee_name``, and ERPNext's Employee.validate
+        REBUILDS ``employee_name`` from first/middle/last name — so the unique token
+        has to be planted in ``first_name`` to survive the insert. Returned so each
+        case can pass it as ``txt`` and pin the search to its own fixture instead of
+        relying on the endpoint's unfiltered 15-row page.
+        """
+        token = _h()
+        doc = frappe.get_doc(
+            {
+                "doctype": "Employee",
+                "first_name": "RptScope" + token,
+                "status": "Active",
+                "gender": "Male",
+                "date_of_birth": "1990-01-01",
+                "date_of_joining": "2020-01-01",
+            }
+        )
+        doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        self.addCleanup(
+            frappe.delete_doc, "Employee", doc.name, force=True, ignore_permissions=True
+        )
+        return doc.name, token
+
+    def _house(self, employee, building):
+        """A submitted, still-open Housing Assignment placing ``employee`` in
+        ``building`` — the only thing that gives an Employee an estate."""
+        doc = frappe.get_doc(
+            {
+                "doctype": "Housing Assignment",
+                "party_type": "Employee",
+                "party": employee,
+                "employee": employee,
+                "building": building,
+                "check_in_date": frappe.utils.today(),
+            }
+        )
+        doc.flags.ignore_validate = True
+        doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        frappe.db.set_value("Housing Assignment", doc.name, "docstatus", 1)
+        # [#1i4y73]
+        self.addCleanup(
+            lambda n=doc.name: (
+                frappe.db.set_value("Housing Assignment", n, "docstatus", 0),
+                frappe.delete_doc(
+                    "Housing Assignment", n, force=True, ignore_permissions=True
+                ),
+            )
+        )
+        return doc.name
+
     def setUp(self):
         self.addCleanup(frappe.set_user, "Administrator")
 
@@ -231,6 +299,54 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         self._temp_worker(self.b2)
         with as_user(self.lonely):
             self.assertEqual(search_arrivals_workers(), [])
+
+    def test_search_workers_excludes_employee_housed_in_other_estate(self):
+        """The Employee-branch leak: an Employee housed in b2 must not be offered
+        to a b1-scoped supervisor.
+
+        The housed-exclusion set is built from a b1-restricted query, so a b2-housed
+        Employee is absent from it — and the Employee search itself has no building
+        of its own to filter on. Before the out-of-estate exclusion this call
+        returned that Employee estate-wide.
+        """
+        emp, token = self._employee()
+        self._house(emp, self.b2)
+        with as_user(self.scoped_hr):
+            parties = {r["party"] for r in search_arrivals_workers(txt=token)}
+        self.assertNotIn(
+            emp,
+            parties,
+            "scoped supervisor must NOT see an Employee housed in another estate",
+        )
+
+    def test_search_workers_keeps_unhoused_employee(self):
+        """The exclusion is out-of-estate, not blanket: an Employee with no live
+        assignment is the intake case the desk exists for and must stay offered."""
+        emp, token = self._employee()
+        with as_user(self.scoped_hr):
+            parties = {r["party"] for r in search_arrivals_workers(txt=token)}
+        self.assertIn(
+            emp, parties, "a not-yet-housed arrival must remain searchable"
+        )
+
+    def test_search_workers_excludes_employee_already_housed_here(self):
+        """The pre-existing housed-exclusion still holds: an Employee already in the
+        caller's OWN estate is not offered for a fresh check-in either."""
+        emp, token = self._employee()
+        self._house(emp, self.b1)
+        with as_user(self.scoped_hr):
+            parties = {r["party"] for r in search_arrivals_workers(txt=token)}
+        self.assertNotIn(
+            emp, parties, "an Employee already housed here is not a check-in candidate"
+        )
+
+    def test_search_workers_oversight_keeps_unhoused_employee(self):
+        """An unscoped oversight role computes no out-of-estate set at all; the
+        Employee branch stays estate-wide for them."""
+        emp, token = self._employee()
+        with as_user(self.oversight_hr):
+            parties = {r["party"] for r in search_arrivals_workers(txt=token)}
+        self.assertIn(emp, parties, "oversight role is unrestricted across estates")
 
     # [#b8m2oe]
     def test_party_custody_scoped_excludes_other_estate(self):
