@@ -11,6 +11,7 @@ from frappe.utils import today
 from apex.habitat.asset_movement_engine import (
     ensure_asset_still_at,
     post_asset_movement,
+    restore_asset_audit_trail,
     reverse_asset_movement,
 )
 
@@ -62,7 +63,8 @@ def on_submit(doc, method=None):
 
 
 def on_cancel(doc, method=None):
-    """Revert the asset to where it came from when a submitted movement is cancelled.
+    """Revert the asset to where it came from when a submitted movement is cancelled,
+    and re-derive the audit trail from the movements that still stand.
 
     Safe to restore the origin unconditionally because ``before_cancel`` has already
     refused any cancel whose asset no longer sits where this movement left it."""
@@ -76,6 +78,9 @@ def on_cancel(doc, method=None):
         "location_in_building": doc.from_room,
         "movement_count": max(0, count - 1),
     })
+    # previous_*/last_movement_date are on_submit snapshots; leaving them behind
+    # makes the asset read "at A, previously A" and cite a cancelled move's date.
+    restore_asset_audit_trail(doc.facility_asset)
 
 
 def before_cancel(doc, method=None):

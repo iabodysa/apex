@@ -157,6 +157,54 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
         )
         self.assertEqual(asset.movement_count, 0, "cancel must decrement movement_count back to 0")
 
+    _AUDIT_TRAIL = (
+        "previous_building",
+        "previous_location_in_building",
+        "last_movement_date",
+    )
+
+    def _audit_trail(self):
+        return frappe.db.get_value(
+            "Facility Asset", self.asset, list(self._AUDIT_TRAIL), as_dict=True
+        )
+
+    def test_cancel_clears_the_audit_trail_of_the_movement_it_undid(self):
+        """previous_*/last_movement_date are on_submit snapshots that no on_cancel
+        reset, so reverting the only movement on a fresh asset left it reading "at A,
+        previously A" and still stamped with the date of a move that no longer
+        exists. The audit PAIR must survive or vanish together with the movement it
+        describes."""
+        before = self._audit_trail()
+        # A never-moved asset carries no trail; that is the value cancel must return to.
+        self.assertFalse(before.previous_building, "seed asset must carry no previous building")
+        self.assertFalse(before.last_movement_date, "seed asset must carry no movement date")
+
+        mv = self._movement()
+        mv.submit()
+        stamped = self._audit_trail()
+        self.assertEqual(
+            stamped.previous_building, self.bldg_a, "submit must stamp the prior building"
+        )
+        self.assertTrue(stamped.last_movement_date, "submit must stamp the movement date")
+
+        mv.db_set("cancellation_reason", "Movement reversed in test")
+        mv.reload()
+        mv.cancel()
+
+        after = self._audit_trail()
+        for field in self._AUDIT_TRAIL:
+            # NULL and "" both read as blank; compare on that axis, not on identity.
+            self.assertEqual(
+                after.get(field) or None,
+                before.get(field) or None,
+                f"cancel must return {field} to its pre-submit value",
+            )
+        self.assertNotEqual(
+            after.previous_building,
+            self.bldg_a,
+            "an asset back at A must not also claim it was previously at A",
+        )
+
     # An out-of-order cancel used to restore from_* blindly, dragging an asset that had
     # already moved on back to a building it had physically left.
 
