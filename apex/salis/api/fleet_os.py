@@ -117,14 +117,19 @@ def _resolve_plate(plate: str, ptype: str = "write") -> str:
     """Resolve a plate string from the dashboard to a Salis Vehicle name,
     permission-checked. Matches plate_number, then plate_normalized, then name.
     Raises if not found or not permitted. ``ptype`` is "write" for the action
-    endpoints (the default) and "read" for read-only ones (the timeline)."""
+    endpoints (the default) and "read" for read-only ones (the timeline).
+
+    The name probe filters on ``name`` rather than passing the plate positionally:
+    the positional form returns the value unqueried when it equals the DocType
+    (database.py:1259), so a caller posting the literal "Salis Vehicle" skipped the
+    named refusal below and got a bare framework 404 from the permission check."""
     if not plate:
         frappe.throw(_("Plate is required."))
     name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
     if not name:
         normalized = normalize_plate(plate)
         name = frappe.db.get_value("Salis Vehicle", {"plate_normalized": normalized}, "name")
-    if not name and frappe.db.exists("Salis Vehicle", plate):
+    if not name and frappe.db.exists("Salis Vehicle", {"name": plate}):
         name = plate
     if not name:
         frappe.throw(_("Vehicle {0} not found.").format(plate))
@@ -579,7 +584,9 @@ def reassign(plate, driver_id, date=None):
         frappe.throw(_("Driver is required."))
 
     driver = frappe.db.get_value("Salis Driver", {"driver_id": driver_id}, "name")
-    if not driver and frappe.db.exists("Salis Driver", driver_id):
+    # Name-filtered: the positional probe answers "Salis Driver" back unqueried
+    # (database.py:1259), clearing the refusal below for that literal string.
+    if not driver and frappe.db.exists("Salis Driver", {"name": driver_id}):
         driver = driver_id
     if not driver:
         frappe.throw(_("Driver {0} not found.").format(driver_id))
@@ -613,7 +620,9 @@ def create_handover(plate, driver_id, date=None, odometer=None, checklist_templa
         frappe.throw(_("Driver is required."))
 
     to_driver = frappe.db.get_value("Salis Driver", {"driver_id": driver_id}, "name")
-    if not to_driver and frappe.db.exists("Salis Driver", driver_id):
+    # Name-filtered as in reassign: the unqueried "Salis Driver" answer cleared this
+    # refusal and reached the handover insert as a dangling to_driver link.
+    if not to_driver and frappe.db.exists("Salis Driver", {"name": driver_id}):
         to_driver = driver_id
     if not to_driver:
         frappe.throw(_("Driver {0} not found.").format(driver_id))
@@ -648,7 +657,11 @@ def create_handover(plate, driver_id, date=None, odometer=None, checklist_templa
             pass
     doc.insert()
 
-    if checklist_template and frappe.db.exists("Vehicle Handover Checklist Template", checklist_template):
+    # Name-filtered: an unknown template is meant to be ignored, but the positional
+    # probe cleared this guard for the literal DocType and hard-failed the loader.
+    if checklist_template and frappe.db.exists(
+        "Vehicle Handover Checklist Template", {"name": checklist_template}
+    ):
         from apex.salis.doctype.vehicle_handover_checklist_template.vehicle_handover_checklist_template import (
             load_template_into_doc,
         )

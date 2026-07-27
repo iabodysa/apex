@@ -200,7 +200,11 @@ def get_vehicle_timeline(vehicle):
     and renders without reparsing per source.
     """
     frappe.has_permission("Salis Vehicle", "read", doc=vehicle, throw=True)
-    if not frappe.db.exists("Salis Vehicle", vehicle):
+    # Name-filtered: the positional probe answers the value back unqueried when it
+    # equals the DocType (database.py:1259). Administrator short-circuits the
+    # permission check above (permissions.py:107), so the literal "Salis Vehicle"
+    # reached here, cleared this gate and returned an empty feed as a success.
+    if not frappe.db.exists("Salis Vehicle", {"name": vehicle}):
         frappe.throw(_("Vehicle not found."))
 
     events = []
@@ -328,7 +332,9 @@ def reassign_driver(vehicle, driver, start_date=None):
     if not driver:
         frappe.throw(_("Driver is required."))
     frappe.has_permission("Salis Vehicle", "write", doc=vehicle, throw=True)
-    if not frappe.db.exists("Salis Driver", driver):
+    # Name-filtered: the literal "Salis Driver" cleared the positional probe and hit
+    # the permission check below, replacing this refusal with a framework 404.
+    if not frappe.db.exists("Salis Driver", {"name": driver}):
         frappe.throw(_("Driver {0} not found.").format(driver))
     frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
 
