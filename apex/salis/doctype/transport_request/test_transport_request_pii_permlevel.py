@@ -44,22 +44,12 @@ FLEET_MANAGER = "Fleet Manager"
 # so it reaches every row and any refusal it hits is a FIELD verdict, not a row filter.
 INTERNAL_AUDITOR = "Internal Auditor"
 
-# THE FIXTURE PAIR, derived rather than written down.
-#
-# `service_line` and `request_type` are two `reqd` Selects that must AGREE:
-# `TransportRequest.validate` (transport_request.py:81-91) looks the transport type up in
-# SERVICE_LINE_REQUEST_TYPE and throws when the request type is set to anything else. And
-# `request_type` declares no `default`, so Frappe's `_set_defaults` seeds a reqd Select
-# with its FIRST option — naming only the transport type leaves the other half sitting on
-# a default that contradicts it. Both halves must be stated.
-#
-# Which pair: the transport type NOT in WORKER_MANIFEST_SERVICE_LINES
-# (transport_request.py:42) is the one that carries no worker manifest, and therefore the
-# one whose validate branch needs no Building, no Project and no worker rows — the lightest
-# document that still exercises the fetch this proof is about. Derived from the
-# controller's own two constants, so a renamed option or a re-paired request type moves
-# this fixture with it; asserted single below, so a THIRD manifest-free type is reported
-# rather than silently picked.
+# Both halves of the pair must be stated: validate (transport_request.py:81-91) throws when
+# they disagree, and request_type declares no `default`, so naming only the transport type
+# leaves Frappe seeding the other half with the Select's FIRST option, which contradicts it.
+# The manifest-free type (transport_request.py:42) needs no Building, Project or worker rows,
+# so it is the lightest valid document. Derived from the controller's own constants, and
+# asserted single below so a third manifest-free type is reported, not silently picked.
 _MANIFEST_FREE_SERVICE_LINES = sorted(
     set(SERVICE_LINE_REQUEST_TYPE) - set(WORKER_MANIFEST_SERVICE_LINES)
 )
