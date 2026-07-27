@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-291 — a telecom payment must settle a real payable, not sit on account.
+"""A telecom payment must settle a real payable, not sit on account.
 
 A Payment Entry with no ``references`` row is an ON-ACCOUNT payment: it moves money
 against the supplier's payable in aggregate and closes no invoice, so no
@@ -25,8 +25,8 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
 from apex.logistay.api import contract_billing
-from apex.logistay.api.test_sim_contract_billing import service_item
 from apex.tests import factories
+from apex.tests.factories import service_item
 
 test_ignore = ["Company", "Supplier", "Currency", "Cost Center", "Project", "Item"]
 

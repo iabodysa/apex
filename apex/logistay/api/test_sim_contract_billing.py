@@ -16,26 +16,7 @@ from apex.tests import factories
 test_ignore = ["Company", "Supplier", "Currency", "Cost Center", "Project", "Item"]
 
 
-def service_item(name):
-    """Get-or-create the non-stock service Item a telecom contract bills through.
-
-    Module-level and shared with the payment tests: factories.py covers no Item, and
-    a second copy of this get-or-create is what the copy-paste guard exists to stop.
-    """
-    if frappe.db.exists("Item", name):
-        return name
-    group = frappe.db.get_value("Item Group", {"is_group": 0}, "name")
-    frappe.get_doc(
-        {
-            "doctype": "Item",
-            "item_code": name,
-            "item_name": name,
-            "item_group": group,
-            "stock_uom": "Nos",
-            "is_stock_item": 0,
-        }
-    ).insert(ignore_permissions=True)
-    return name
+service_item = factories.service_item
 
 
 class TestSIMContractBilling(FrappeTestCase):

@@ -144,6 +144,29 @@ def make_supplier(name, **kwargs):
     return name
 
 
+def service_item(name):
+    """Get-or-create the non-stock service Item a telecom contract bills through.
+
+    Lives here rather than beside either caller: two test modules need it, and a
+    colocated copy is what the duplicate-code guard exists to stop while importing
+    one test module from another is what the cross-test-import guard exists to stop.
+    """
+    if frappe.db.exists("Item", name):
+        return name
+    group = frappe.db.get_value("Item Group", {"is_group": 0}, "name")
+    frappe.get_doc(
+        {
+            "doctype": "Item",
+            "item_code": name,
+            "item_name": name,
+            "item_group": group,
+            "stock_uom": "Nos",
+            "is_stock_item": 0,
+        }
+    ).insert(ignore_permissions=True)
+    return name
+
+
 def default_company():
     """The site's default company name (global default, else the first Company)."""
     return (
