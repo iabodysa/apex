@@ -42,6 +42,20 @@ from apex.apex_core.utils.party_link import (
 from apex.habitat import permissions
 
 
+def _row_exists(doctype: str, name: str) -> bool:
+    """True only when a REAL row of ``doctype`` is named ``name``.
+
+    ``frappe.db.exists(dt, dn)`` returns ``dn`` WITHOUT touching the database when
+    ``dn`` equals ``dt`` (frappe/database/database.py:1259 — the deliberate "a
+    Single always exists" short-circuit). A kiosk scanner is semi-trusted input, so
+    the literal token ``Employee`` would otherwise clear every existence gate here
+    and come back as a worker on a site with zero such rows. Reject the self-named
+    token first, then run the normal lookup — the caller's existing not-found path
+    then handles both cases identically, so the refusal leaks nothing.
+    """
+    return name != doctype and bool(frappe.db.exists(doctype, name))
+
+
 @frappe.whitelist()
 def get_kiosk_catalog(building: str | None = None) -> dict:
     """Return the Custody Article catalog for the kiosk tile grid.
@@ -168,7 +182,7 @@ def _resolve_worker_scan(code: str, party_type: str | None) -> dict | None:
     for pt in order:
         if not frappe.has_permission(pt, "read"):
             continue
-        if frappe.db.exists(pt, code):
+        if _row_exists(pt, code):
             # [#34wx4m]
             title_field = frappe.get_meta(pt).get_title_field()
             party_name = frappe.db.get_value(pt, code, title_field)
@@ -347,7 +361,7 @@ def _normalize_party(party_type: str | None, party: str | None) -> tuple[str, st
         frappe.throw(_("Select a valid worker type (Employee or Temporary Worker)."))
     if not party:
         frappe.throw(_("Select a worker before continuing."))
-    if not frappe.db.exists(party_type, party):
+    if not _row_exists(party_type, party):
         frappe.throw(_("{0} {1} does not exist.").format(_(party_type), party))
     return party_type, party
 
