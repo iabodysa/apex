@@ -14,10 +14,9 @@ either one is the silent failure this exists to catch.
 Query-shaped by design (frappe.get_all is stubbed) rather than fixture-built: the
 function is a two-query summation, and the thing that breaks is WHICH doctype and
 WHICH date column it asks for. It follows test_housing_supervisor_scope.py, which
-already exercises this report's scoping the same way. Runs without a site:
-
-    python3 -m unittest \\
-        apex.habitat.report.building_operations_summary.test_building_operations_summary
+already exercises this report's scoping the same way. It needs no SITE, but it is
+not frappe-free — the report module imports frappe — so it claims no standalone
+run and stays a suite test.
 """
 
 from __future__ import annotations
