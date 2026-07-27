@@ -62,7 +62,11 @@ KNOWN_LEVEL_ZERO_SENSITIVE = {
     # DRAINED: the one category-4 entry that used to stand here, Freelancer.monthly_salary,
     # now permlevel 1. The ratchet tightened by one, which is the whole point of exact
     # equality — a repaired entry MUST be pruned or the guard stops meaning anything.
-    "Custody Acknowledgment": ([("signature", "signature")], _SIGNATURES_NOT_YET_LAYERED),
+    # DRAINED: Custody Acknowledgment.signature — permlevel 1, level-1 rows for the three
+    # custody desk roles, none for Internal Auditor. The subject signs this one over the
+    # portal, and the Web Form insert bypasses levels entirely (web_form.py:663), so the
+    # worker's own path is untouched. Proof:
+    # test_custody_acknowledgment_signature_permlevel.
     # DRAINED: Custody Issue.signature — permlevel 1, level-1 rows for the three Custody
     # Kiosk roles, none for Internal Auditor. Proof: test_custody_issue_signature_permlevel.
     "Facility Asset Custody Assignment": (
@@ -314,7 +318,7 @@ class TestTheModelMatchesTheShippedTree(unittest.TestCase):
         )
         self.assertEqual(
             (total, with_high_field, with_high_row),
-            (153, 21, 18),
+            (153, 22, 19),
             "the adoption numbers in field_sensitivity.py's docstring are stale — update "
             "the docstring and this assertion together, so the premise cannot rot.",
         )
