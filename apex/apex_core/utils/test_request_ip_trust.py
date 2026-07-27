@@ -41,11 +41,14 @@ from werkzeug.wrappers import Request
 from apex.apex_core.utils import request_ip_trust
 from apex.apex_core.utils.request_ip_trust import (
     APPENDED,
+    FAILING_VERDICTS,
     FORGEABLE,
     FORWARDED_HEADER,
     INCONCLUSIVE,
     NO_HEADER,
     OVERWRITTEN,
+    OVERWRITTEN_THEN_APPENDED,
+    PASSING_VERDICTS,
     PROBE_ADDRESS,
     classify_forwarding,
     forwarded_entries,
@@ -60,6 +63,8 @@ _TOUCHED = ("request", "request_ip")
 REAL_SUBNET = "10.242.0."
 REAL_PEER = REAL_SUBNET + "5"
 FORGED_CLAIM = REAL_SUBNET + "99"
+# An inner hop that appends its own peer behind whatever the outer hop already wrote.
+INNER_HOP = REAL_SUBNET + "1"
 ENDPOINT = "/api/method/apex.apex_core.utils.request_ip_trust.check_request_ip_trust"
 
 
@@ -129,9 +134,9 @@ class TestTheCheckGradesBothDeployments(unittest.TestCase):
         """Non-vacuity: the check must clear a good deployment, not fire on all."""
         report = self._grade(REAL_PEER, probe_planted=True)
         self.assertEqual(report["verdict"], OVERWRITTEN)
-        self.assertTrue(report["trusted"])
-        self.assertFalse(report["forgeable"])
-        self.assertFalse(report["probe_seen"])
+        self.assertIs(report["trusted"], True)
+        self.assertIs(report["forgeable"], False)
+        self.assertIs(report["probe_seen"], False)
         self.assertEqual(report["resolved_ip"], REAL_PEER)
 
     def test_a_passthrough_edge_fires(self):
@@ -139,8 +144,9 @@ class TestTheCheckGradesBothDeployments(unittest.TestCase):
         the case a mere entry COUNT cannot catch -- one entry, wholly forged."""
         report = self._grade(PROBE_ADDRESS, probe_planted=True)
         self.assertEqual(report["verdict"], FORGEABLE)
-        self.assertTrue(report["forgeable"])
-        self.assertTrue(report["probe_seen"])
+        self.assertIs(report["forgeable"], True)
+        self.assertIs(report["trusted"], False)
+        self.assertIs(report["probe_seen"], True)
         self.assertEqual(report["resolved_ip"], PROBE_ADDRESS)
 
     def test_an_appending_edge_fires_even_with_no_probe(self):
@@ -148,15 +154,37 @@ class TestTheCheckGradesBothDeployments(unittest.TestCase):
         client's. Caught passively, without the deployer planting anything."""
         report = self._grade(f"{FORGED_CLAIM}, {REAL_PEER}")
         self.assertEqual(report["verdict"], APPENDED)
-        self.assertTrue(report["forgeable"])
+        self.assertIs(report["forgeable"], True)
+        self.assertIs(report["trusted"], False)
         self.assertEqual(report["entries"], [FORGED_CLAIM, REAL_PEER])
 
-    def test_an_appending_edge_is_not_absolved_by_a_passing_probe(self):
-        """A multi-entry header stays a FAIL even where the probe did not survive, so
-        a stray extra hop cannot be graded away by one lucky measurement."""
-        report = self._grade(f"{FORGED_CLAIM}, {REAL_PEER}", probe_planted=True)
-        self.assertEqual(report["verdict"], APPENDED)
-        self.assertTrue(report["forgeable"])
+    def test_a_safe_overwrite_then_append_chain_is_not_called_forgeable(self):
+        """CLAUSE 2. The caller-facing hop REPLACED the header, so the planted probe is
+        gone from every entry; an inner hop then appended its own peer behind that
+        replacement. frappe reads the head, which is the replacement, so this chain is
+        as safe as a lone overwrite -- grading it by entry count alone reports a
+        correctly configured edge as broken and sends the deployer to 'fix' it."""
+        with _forwarded_request(f"{REAL_PEER}, {INNER_HOP}") as resolved:
+            self.assertEqual(resolved, REAL_PEER, "frappe must still read the head")
+            report = classify_forwarding(
+                f"{REAL_PEER}, {INNER_HOP}", resolved, probe_planted=True
+            )
+        self.assertEqual(report["verdict"], OVERWRITTEN_THEN_APPENDED)
+        self.assertIs(report["trusted"], True)
+        self.assertIs(report["forgeable"], False)
+        self.assertIs(report["probe_seen"], False)
+        self.assertEqual(report["entries"], [REAL_PEER, INNER_HOP])
+
+    def test_an_appending_chain_in_front_of_the_replacement_still_fails(self):
+        """CLAUSE 3. The mirror of the case above and the reason entry count cannot be
+        dropped as evidence on its own: here the caller-facing hop APPENDED, so the
+        probe rides at the head and frappe resolves it. Same entry count, opposite
+        verdict, and the discriminator is the probe rather than the length."""
+        report = self._grade(f"{PROBE_ADDRESS}, {REAL_PEER}", probe_planted=True)
+        self.assertEqual(report["verdict"], FORGEABLE)
+        self.assertIs(report["forgeable"], True)
+        self.assertIs(report["trusted"], False)
+        self.assertEqual(report["resolved_ip"], PROBE_ADDRESS)
 
     def test_one_entry_without_a_probe_refuses_to_guess(self):
         """An overwriting proxy and a directly exposed app are the SAME shape here.
@@ -175,6 +203,135 @@ class TestTheCheckGradesBothDeployments(unittest.TestCase):
         self.assertEqual(report["entries"], [])
 
 
+class TestNothingUnproveableIsCertified(unittest.TestCase):
+    """The shapes that must never reach a passing verdict, however the probe is sent.
+
+    Each asserts ``trusted is False`` with ``assertIs`` on purpose: ``assertFalse``
+    accepts 0, "" and None, so a verdict key that had gone missing from the passing
+    tuple and started returning None would satisfy it while certifying nothing.
+    """
+
+    def test_a_planted_probe_with_no_forwarded_header_never_passes(self):
+        """CLAUSE 1. The probe rode in on a header that never reached the app, so
+        frappe fell through to REMOTE_ADDR (auth.py:68-72) and NOTHING was learned about
+        whether the edge overwrites. Reading the probe's absence as an overwrite here
+        confuses 'the edge replaced my claim' with 'the edge deleted the header' -- and
+        the second one keys every client in the world onto the proxy's own address, so
+        one abuser 429s the entire site. It is an incomplete measurement, not a pass."""
+        with _forwarded_request(None) as resolved:
+            report = classify_forwarding(None, resolved, probe_planted=True)
+        self.assertEqual(report["verdict"], NO_HEADER)
+        self.assertIs(report["trusted"], False)
+        self.assertNotIn(report["verdict"], PASSING_VERDICTS)
+        self.assertEqual(report["entries"], [])
+
+    def test_an_empty_forwarded_header_with_a_probe_never_passes(self):
+        """The same hole reached through a header that arrives but carries nothing
+        usable: no entry means no evidence, whatever the separators look like."""
+        for raw in ("", "   ", " , "):
+            with self.subTest(raw=repr(raw)):
+                report = classify_forwarding(raw, REAL_PEER, probe_planted=True)
+                self.assertEqual(report["verdict"], NO_HEADER)
+                self.assertIs(report["trusted"], False)
+
+    def test_a_probe_that_survived_never_passes_whatever_was_resolved(self):
+        """CLAUSE 3. Caller-supplied content is sitting in the header the app received,
+        which is proof the edge does not sanitise it. The shipped check only looked at
+        the RESOLVED address, so this shape -- probe intact in the header, some other
+        address resolved -- was certified as an overwrite while ``probe_seen`` was true
+        in the very same report. Only a change in frappe's precedence produces it today
+        (auth.py:66 takes the head), which is exactly when a stale pass is worst."""
+        report = classify_forwarding(PROBE_ADDRESS, REAL_PEER, probe_planted=True)
+        self.assertEqual(report["verdict"], FORGEABLE)
+        self.assertIs(report["trusted"], False)
+        self.assertIs(report["probe_seen"], True)
+
+    def test_an_entry_that_does_not_parse_is_refused_rather_than_ignored(self):
+        """The unbounded hole. Absence of the probe is what certifies a deployment, so
+        every rendering the parser cannot read used to count as absence -- making the
+        set of strings that silently pass a deployment infinite and growing with each
+        form some future edge invents. These four were each demonstrated to return
+        "overwritten" with trusted true while sitting unchanged in the header, which is
+        a header the edge did NOT overwrite. Refusing what cannot be read turns the
+        spelling table into a convenience instead of the security boundary."""
+        for entry in (
+            f"{PROBE_ADDRESS}/32",
+            f"{PROBE_ADDRESS}:80:1",
+            # Escaped, never pasted: a literal zero-width space is invisible in a diff,
+            # and str.strip() does not remove it the way it removes a space or NBSP.
+            PROBE_ADDRESS + "\u200b",
+            "not-an-address-at-all",
+        ):
+            with self.subTest(entry=entry):
+                report = classify_forwarding(entry, entry, probe_planted=True)
+                self.assertEqual(report["verdict"], INCONCLUSIVE)
+                self.assertIs(report["trusted"], False)
+
+    def test_one_unreadable_entry_taints_an_otherwise_readable_chain(self):
+        """The probe could be hiding in the entry that will not parse, and which hop
+        wrote it is exactly what a chain verdict turns on, so the whole header is
+        refused rather than the readable part being graded on its own."""
+        report = classify_forwarding(
+            f"{REAL_PEER}, {PROBE_ADDRESS}/32", REAL_PEER, probe_planted=True
+        )
+        self.assertEqual(report["verdict"], INCONCLUSIVE)
+        self.assertIs(report["trusted"], False)
+
+    def test_a_readable_probe_still_fails_rather_than_merely_being_refused(self):
+        """The refusal must not swallow the FAIL: a probe the parser CAN read is proof,
+        and proof outranks the cannot-read refusal in the branch order."""
+        report = classify_forwarding(
+            f"{PROBE_ADDRESS}, junk-hop", PROBE_ADDRESS, probe_planted=True
+        )
+        self.assertEqual(report["verdict"], FORGEABLE)
+        self.assertIs(report["forgeable"], True)
+
+    def test_a_resolved_address_that_is_not_the_first_entry_is_not_certified(self):
+        """Every passing verdict argues from auth.py:66 taking the HEAD entry. If the
+        address actually in use is not that entry, something else chose it and the
+        argument does not apply, so the check refuses rather than passing on a rule
+        nothing is following."""
+        report = classify_forwarding(REAL_PEER, FORGED_CLAIM, probe_planted=True)
+        self.assertEqual(report["verdict"], INCONCLUSIVE)
+        self.assertIs(report["trusted"], False)
+
+    def test_no_verdict_is_both_trusted_and_forgeable(self):
+        """The two flags are read independently by whoever automates this, so a verdict
+        drifting into both tuples would let one caller pass and the other fail."""
+        self.assertEqual(set(PASSING_VERDICTS) & set(FAILING_VERDICTS), set())
+
+    def test_every_verdict_the_classifier_can_emit_carries_a_detail_string(self):
+        """The runbook quotes these strings verbatim. A verdict with no detail would
+        raise KeyError inside the endpoint, turning the diagnostic into a 500."""
+        emitted = set()
+        cases = [
+            (None, REAL_PEER, True),
+            (None, REAL_PEER, False),
+            (REAL_PEER, REAL_PEER, True),
+            (REAL_PEER, REAL_PEER, False),
+            (f"{REAL_PEER}, {INNER_HOP}", REAL_PEER, True),
+            (f"{FORGED_CLAIM}, {REAL_PEER}", FORGED_CLAIM, False),
+            (PROBE_ADDRESS, PROBE_ADDRESS, True),
+            (REAL_PEER, FORGED_CLAIM, True),
+        ]
+        for raw, resolved, planted in cases:
+            report = classify_forwarding(raw, resolved, probe_planted=planted)
+            emitted.add(report["verdict"])
+            self.assertTrue(report["detail"], f"no detail for {report['verdict']}")
+        self.assertEqual(
+            emitted,
+            {
+                OVERWRITTEN,
+                OVERWRITTEN_THEN_APPENDED,
+                FORGEABLE,
+                APPENDED,
+                NO_HEADER,
+                INCONCLUSIVE,
+            },
+            "the deployer runbook is written against this exact set of verdict strings",
+        )
+
+
 class TestProbeRecognition(unittest.TestCase):
     """The documentation ranges, read off the module rather than restated."""
 
@@ -186,6 +343,31 @@ class TestProbeRecognition(unittest.TestCase):
     def test_the_named_probe_address_is_inside_a_declared_range(self):
         """The runbook's address must stay one the check actually recognises."""
         self.assertTrue(is_documentation_address(PROBE_ADDRESS))
+
+    def test_the_probe_is_recognised_in_the_spellings_edges_write(self):
+        """A spelling the check does not recognise is a FALSE PASS, not a near miss:
+        an unrecognised probe looks erased, and erasure is what certifies the edge.
+        Bracketed IPv6, the ``ip:port`` form some load balancers record, and the
+        IPv4-mapped IPv6 rendering of the same address all have to land as the probe."""
+        for value in (
+            PROBE_ADDRESS,
+            f"{PROBE_ADDRESS}:41234",
+            f"::ffff:{PROBE_ADDRESS}",
+            f"[::ffff:{PROBE_ADDRESS}]:41234",
+            "2001:db8::7",
+            "[2001:db8::7]:8443",
+        ):
+            with self.subTest(value=value):
+                self.assertIs(is_documentation_address(value), True)
+
+    def test_a_probe_wearing_another_spelling_still_fails_the_deployment(self):
+        """The same gap reached through the verdict rather than the predicate: the
+        probe survived, so this must fail however the edge chose to render it."""
+        for value in (f"{PROBE_ADDRESS}:41234", f"::ffff:{PROBE_ADDRESS}"):
+            with self.subTest(value=value):
+                report = classify_forwarding(value, value, probe_planted=True)
+                self.assertEqual(report["verdict"], FORGEABLE)
+                self.assertIs(report["trusted"], False)
 
     def test_a_real_address_is_not_mistaken_for_a_probe(self):
         """Without this the check would grade every deployment FORGEABLE."""
