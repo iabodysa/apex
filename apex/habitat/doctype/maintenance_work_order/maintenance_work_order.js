@@ -74,18 +74,46 @@ frappe.ui.form.on("Maintenance Work Order", {
 				});
 			}
 
-			if (frm.doc.status !== "Completed" && frm.doc.status !== "Cancelled") {
+			// The completion evidence is collected here and posted to the server
+			// method, because a submitted Work Order cannot be saved by the
+			// technician who works it — that save needs the submit permission.
+			if (frm.doc.status === "In Progress") {
 				frm.add_custom_button(__("Mark as Completed"), function () {
-					if (!frm.doc.completion_photo) {
-						frappe.msgprint(__("Please attach a completion photo before marking as completed."));
-						return;
-					}
-					frappe.confirm(
-						__("Mark this Work Order as Completed? This will post an operational ledger row."),
-						function () {
+					let dialog = new frappe.ui.Dialog({
+						title: __("Complete Work Order"),
+						fields: [
+							{
+								fieldname: "actual_end_date",
+								fieldtype: "Date",
+								label: __("Actual End Date"),
+								reqd: 1,
+								default: frm.doc.actual_end_date || frappe.datetime.get_today(),
+							},
+							{
+								fieldname: "completion_photo",
+								fieldtype: "Attach",
+								label: __("Completion Photo"),
+								reqd: frm.doc.completion_photo ? 0 : 1,
+								default: frm.doc.completion_photo,
+							},
+							{
+								fieldname: "completion_notes",
+								fieldtype: "Small Text",
+								label: __("Completion Notes"),
+								default: frm.doc.completion_notes,
+							},
+						],
+						primary_action_label: __("Mark as Completed"),
+						primary_action: function (values) {
+							dialog.hide();
 							frappe.call({
 								method: "apex.habitat.doctype.maintenance_work_order.maintenance_work_order.mark_completed",
-								args: { work_order: frm.doc.name },
+								args: {
+									work_order: frm.doc.name,
+									actual_end_date: values.actual_end_date,
+									completion_photo: values.completion_photo,
+									completion_notes: values.completion_notes,
+								},
 								freeze: true,
 								freeze_message: __("Marking Completed..."),
 								callback: function (r) {
@@ -104,8 +132,9 @@ frappe.ui.form.on("Maintenance Work Order", {
 									});
 								},
 							});
-						}
-					);
+						},
+					});
+					dialog.show();
 				});
 			}
 		}

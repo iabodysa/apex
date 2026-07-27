@@ -150,9 +150,10 @@ Active Vehicles by Category,المركبات النشطة حسب الفئة
 Actor,المُنفِّذ
 Actors,الأطراف
 Actual End Date,تاريخ النهاية الفعلي
+Actual End Date must be on or after Actual Start Date.,يجب أن يكون تاريخ النهاية الفعلي بعد تاريخ البداية الفعلي أو مساوياً له.
 Actual Occupancy,الإشغال الفعلي
 Actual Start Date,تاريخ البداية الفعلي
-Actual Start Date and Actual End Date are required to mark Completed.,تاريخ البدء الفعلي وتاريخ الانتهاء الفعلي مطلوبان للوسم كمكتمل.
+Actual Start Date is required to mark Completed.,تاريخ البداية الفعلي مطلوب للوسم كمكتمل.
 Actual Visit Date,تاريخ الزيارة الفعلي
 Add,إضافة
 Add Compliance Record,إضافة سجل امتثال
@@ -758,6 +759,7 @@ Company's share (%) of shared utility bills for this building. Agreed with the p
 Complaint,شكوى
 Complete,إكمال
 Complete Trip,إتمام الرحلة
+Complete Work Order,إكمال أمر العمل
 Complete a Maintenance Work Order,إكمال أمر عمل صيانة
 Completed,مكتمل
 Completed (timed),المكتملة (موقّتة)
@@ -2108,7 +2110,6 @@ Mark this Service Order as In Progress?,هل تريد تحديد حالة أمر
 Mark this Service Order as Missed? This indicates the scheduled work was not completed on time.,هل تريد تحديد حالة أمر الخدمة هذا كـ 'فائت'؟ يشير ذلك إلى عدم اكتمال العمل المجدول في الوقت المحدد.
 Mark this Task Instance as Completed?,تحديد هذه المهمة كمكتملة؟
 Mark this Task Instance as In Progress?,هل تريد تحديد حالة تنفيذ المهمة هذا كـ 'قيد التنفيذ'؟
-Mark this Work Order as Completed? This will post an operational ledger row.,وسم أمر العمل هذا كمكتمل؟ سيُرحّل ذلك سطراً في السجل التشغيلي.
 Mark this Work Order as In Progress?,هل تريد تحديد حالة أمر العمل هذا كـ 'قيد التنفيذ'؟
 Marked Completed via controlled method.,تم الوسم كمكتمل عبر الطريقة المعتمدة.
 Marked Missed — work was not completed by the scheduled date.,مُصنَّف كفائت — لم يكتمل العمل في الموعد المحدد.
@@ -2675,7 +2676,6 @@ Platform Details,تفاصيل المنصة
 Platform Name,اسم المنصة
 Platform Name is required.,اسم المنصة مطلوب.
 Please action my driving licence renewal. Expiry on file: {0}.,يرجى مباشرة تجديد رخصة قيادتي. تاريخ الانتهاء المسجّل: {0}.
-Please attach a completion photo before marking as completed.,يرجى إرفاق صورة الإنجاز قبل وضع علامة مكتمل.
 Please confirm you have received them,يرجى تأكيد استلامك لها
 Please describe where you need to go.,يُرجى وصف الوجهة التي تريد الذهاب إليها.
 Please describe your request.,يرجى وصف طلبك.
@@ -3236,6 +3236,8 @@ Safety Report Recipient,مستلِم تقرير السلامة
 Safety Reports,تقارير السلامة
 Safety Round,جولة سلامة
 Safety Round Report,تقرير جولة السلامة
+No Rated Safety Task,لا توجد مهمة سلامة مُقيَّمة
+Safety Round {0} has no rated safety task. Record at least one Safety Task Execution against the round before submitting it.,جولة السلامة {0} لا تحوي أي مهمة سلامة مُقيَّمة. سجّل تنفيذ مهمة سلامة واحدة على الأقل على الجولة قبل اعتمادها.
 Safety Round Report: {0} ({1}),تقرير جولة السلامة: {0} ({1})
 Safety Rounds,جولات السلامة
 Safety Section — No Issues,قسم السلامة — لا توجد ملاحظات
@@ -3570,6 +3572,7 @@ Start Task,بدء المهمة
 Start Time,وقت البداية
 Start Work,بدء العمل
 Start the trip before marking arrival.,ابدأ الرحلة قبل تسجيل الوصول.
+Start the work first — only a Work Order In Progress can be Completed.,ابدأ العمل أولاً — لا يُوسم كمكتمل إلا أمر عمل قيد التنفيذ.
 Start the trip before marking stops.,ابدأ الرحلة قبل وضع علامات على المحطات.
 Started,بدأ
 Starting Room Number,بداية ترقيم الغرف

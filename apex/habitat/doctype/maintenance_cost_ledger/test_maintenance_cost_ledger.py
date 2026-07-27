@@ -57,6 +57,12 @@ class TestMaintenanceCostLedger(FrappeTestCase):
         })
         wo.insert(ignore_permissions=True, ignore_links=True)
         wo.submit()
+        # Completion is only legal from In Progress, so the ledger fixtures walk the
+        # real lifecycle rather than jumping a submitted Work Order straight to done.
+        from apex.habitat.doctype.maintenance_work_order.maintenance_work_order import start_work
+
+        start_work(wo.name)
+        wo.reload()
         return wo
 
     def _originals(self, wo_name):
