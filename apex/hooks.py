@@ -237,6 +237,13 @@ doc_events = {
     "Driver Suspension": {
         "on_submit": "apex.apex_core.utils.portal_token_security.on_driver_suspension_submit",
     },
+    # A Telecom Contract only RECORDS which payment settled a period, so its billing
+    # log must not veto Accounts cancelling that payment. Cancel-scoped by the
+    # framework; deleting a cited payment stays blocked. Additive to ERPNext's own
+    # on_cancel, which runs first and sets the ledger entries this appends to.
+    "Payment Entry": {
+        "on_cancel": "apex.logistay.api.contract_billing.allow_cancel_despite_billing_log",
+    },
 }
 
 # [#qjzdot]

@@ -23,7 +23,9 @@ Draft and left for finance to review and submit; a Payment Entry posts its ledge
 only on its own submit, which never happens here. Settlement is therefore never
 stored on the contract: it is DERIVED from the live Payment Entry by
 ``get_billing_status``, so a cancelled payment reverses the operational status with
-no reversal code and no field to drift out of step with the ledger.
+no reversal code and no field to drift out of step with the ledger. That reversal is
+only reachable because ``allow_cancel_despite_billing_log`` stops the contract's own
+billing log from vetoing the cancellation; deleting a cited payment stays blocked.
 
 Every action:
   * requires an eligible submitted contract the caller may read (company-scoped),
@@ -43,6 +45,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, today
 
+CONTRACT_DOCTYPE = "Telecom Contract"
 PURCHASE_REQUEST_DOCTYPE = "Material Request"
 PAYMENT_ENTRY_DOCTYPE = "Payment Entry"
 # The approved native payable a telecom payment must settle. A Payment Entry is
@@ -409,3 +412,31 @@ def get_billing_status(contract: str, billing_period: str):
     else:
         status["settlement"] = AWAITING_APPROVAL
     return status
+
+
+# Letting Accounts cancel a payment the billing log cites
+
+
+def allow_cancel_despite_billing_log(doc, method=None):
+    """Stop the contract's billing log from vetoing a Payment Entry cancellation.
+
+    The billing table's ``document_name`` is a Dynamic Link, so a SUBMITTED contract
+    citing a payment makes ``check_no_back_links_exist`` raise LinkExistsError and
+    Accounts can never cancel (delete_doc.py:396-404). Telecom operations only RECORD
+    which payment settled a period; they do not own its lifecycle, and an operational
+    record must not veto the accounting ledger.
+
+    The native release valve is the doc-level ``ignore_linked_doctypes`` read at
+    delete_doc.py:403, which is guarded by ``method == "Cancel"`` — so DELETING a cited
+    payment stays blocked and the billing row can never point at nothing. That
+    method guard is why this is used instead of the ``ignore_links_on_delete`` hook,
+    whose branches (delete_doc.py:277 and :402) carry no such condition and would also
+    unblock deleting the contract's Supplier, Company, Cost Center, Project and Item.
+
+    ERPNext sets this same attribute for its own ledgers in ``PaymentEntry.on_cancel``,
+    which runs before this handler and before the link check (document.py:1185-1186);
+    appending rather than assigning is what keeps those ledger entries intact.
+    """
+    existing = tuple(doc.get("ignore_linked_doctypes") or ())
+    if CONTRACT_DOCTYPE not in existing:
+        doc.ignore_linked_doctypes = (*existing, CONTRACT_DOCTYPE)
