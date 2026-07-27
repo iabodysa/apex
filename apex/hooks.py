@@ -347,6 +347,8 @@ permission_query_conditions = {
     "Housing Checkout": "apex.habitat.permissions.housing_checkout_query",
     # Scoped through `assignment` -> Housing Assignment.building, likewise.
     "Room Bed Transfer": "apex.habitat.permissions.room_bed_transfer_query",
+    # Scoped through the `buildings_in_scope` child table; the plan has no building.
+    "Audit Remediation Plan": "apex.habitat.permissions.audit_remediation_plan_query",
     "Vehicle Assignment": "apex.salis.permissions.vehicle_assignment_query",
     "Fuel Request": "apex.salis.permissions.fuel_request_query",
     "Dispatch Trip": "apex.salis.permissions.dispatch_trip_query",
@@ -376,6 +378,8 @@ permission_query_conditions = {
     "Housing Inventory": "apex.habitat.permissions.housing_inventory_query",
     "Building License": "apex.habitat.permissions.building_license_query",
     "Maintenance Work Order": "apex.habitat.permissions.maintenance_work_order_query",
+    # Stored rows always carry `building`; only the create check hops the work order.
+    "Maintenance Inspection Report": "apex.habitat.permissions.maintenance_inspection_report_query",
     "Occupancy Snapshot": "apex.habitat.permissions.accommodation_occupancy_snapshot_query",
     "Temporary Worker": "apex.habitat.permissions.temporary_worker_query",
     "Arrival Batch": "apex.habitat.permissions.arrival_batch_query",
@@ -421,6 +425,8 @@ has_permission = {
     "Idle Resident Report": "apex.habitat.permissions.building_scoped_has_permission",
     # Own handler, not the shared one: a checkout carries no `building` to read.
     "Housing Checkout": "apex.habitat.permissions.housing_checkout_has_permission",
+    # Likewise: the plan's estate is its child scope table, not a `building` field.
+    "Audit Remediation Plan": "apex.habitat.permissions.audit_remediation_plan_has_permission",
     # Shared handler reaches the estate via the BUILDING_FETCH_ANCHOR assignment hop.
     "Room Bed Transfer": "apex.habitat.permissions.building_scoped_has_permission",
     "Vehicle Assignment": "apex.salis.permissions.scoped_has_permission",
@@ -450,6 +456,8 @@ has_permission = {
     "Housing Inventory": "apex.habitat.permissions.building_scoped_has_permission",
     "Building License": "apex.habitat.permissions.building_scoped_has_permission",
     "Maintenance Work Order": "apex.habitat.permissions.building_scoped_has_permission",
+    # Reaches the estate via the BUILDING_FETCH_ANCHOR work-order hop on create.
+    "Maintenance Inspection Report": "apex.habitat.permissions.building_scoped_has_permission",
     "Material Transfer": "apex.habitat.permissions.dual_building_scoped_has_permission",
     "Facility Asset Movement": "apex.habitat.permissions.dual_building_scoped_has_permission",
     "Custody Handover": "apex.habitat.permissions.dual_building_scoped_has_permission",

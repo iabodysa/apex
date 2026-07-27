@@ -256,6 +256,74 @@ def room_bed_transfer_query(user=None):
     )
 
 
+def audit_remediation_plan_query(user=None):
+    """Scope Audit Remediation Plan to the user's buildings through its child scope.
+
+    The plan carries NO ``building`` column at all — the estate it touches is the set
+    of buildings listed in its ``buildings_in_scope`` child table — so neither
+    ``_building_condition`` nor the single-hop shape serves it. The fragment is a
+    subquery on ``tabAudit Remediation Building Scope`` keyed on ``parent``, the same
+    shape ``housing_checkout_query`` uses for its bed hop, widened from one link to a
+    row set: a plan matches when ANY building it names is one of the user's.
+
+    Because the plan has no Building Link of its own, frappe's native User Permission
+    match (db_query.py:1079) emits NOTHING for this DocType — a Building User
+    Permission alone leaves every plan visible. This fragment is the only row scope
+    there is here, not a tightening of a native one.
+
+    Renders the two edge cases exactly like every sibling housing fragment: "" (no
+    restriction) for the Administrator and the oversight roles in
+    ``HOUSING_UNSCOPED_ROLES``, and "1=0" for a scoped user holding no building. A plan
+    whose scope table is EMPTY names no building, matches no subquery row, and so stays
+    hidden from a scoped user while oversight still sees it: fail closed.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return ""
+    buildings = _allowed_buildings(user)
+    if not buildings:
+        return "1=0"
+    escaped = ", ".join(frappe.db.escape(b) for b in buildings)
+    return (
+        "`name` in (select `parent` from `tabAudit Remediation Building Scope` "
+        "where `parenttype` = 'Audit Remediation Plan' and `building` in ({values}))"
+        .format(values=escaped)
+    )
+
+
+def audit_remediation_plan_has_permission(doc, ptype, user=None):
+    """Deny a scoped user acting on a plan that names none of their buildings.
+
+    ``building_scoped_has_permission`` cannot be reused: it resolves the estate from
+    ``doc.building``, a field this DocType does not have, so it would read None for
+    every plan and return False — blacking out a scoped supervisor's OWN plans too. A
+    guard that denies the role it is meant to bound reviews as correct and is not.
+
+    So this mirrors ``audit_remediation_plan_query``'s hop instead, reading the child
+    rows directly. No create-path anchor is owed: child tables arrive with the payload
+    and are built in ``Document.__init__``, so unlike a ``fetch_from`` field the scope
+    rows ARE populated when ``check_permission("create")`` runs at document.py:300.
+
+    Deny-only and ptype-agnostic, like its siblings: returns None to defer to the
+    DocPerms, False to block every action including submit. A plan naming no building
+    at all is denied rather than deferred — fail closed, matching the fragment.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return None
+
+    buildings = [
+        getattr(row, "building", None)
+        for row in (getattr(doc, "buildings_in_scope", None) or [])
+    ]
+    buildings = [b for b in buildings if b]
+    if not buildings:
+        # [#1i4wio]
+        return False
+    allowed = _allowed_buildings(user)
+    return None if any(b in allowed for b in buildings) else False
+
+
 def housing_checkout_has_permission(doc, ptype, user=None):
     """Deny a scoped user acting on a checkout outside their buildings.
 
@@ -315,6 +383,12 @@ BUILDING_FETCH_ANCHOR = {
     "Custody Return": ("custody_issue", "Custody Issue"),
     "Housing Assignment": ("bed", "Bed"),
     "Housing Inventory": ("room", "Room"),
+    # `building` is fetch_from maintenance_work_order.building, so it is empty at the
+    # create check; the work order is the link the payload carries at that moment.
+    "Maintenance Inspection Report": (
+        "maintenance_work_order",
+        "Maintenance Work Order",
+    ),
     "Maintenance Work Order": ("maintenance_request", "Maintenance Request"),
     "Resident Request": ("bed", "Bed"),
     # The transfer has no building of its own; its estate is the assignment's, and
@@ -441,6 +515,18 @@ def building_license_query(user=None):
 
 
 def maintenance_work_order_query(user=None):
+    return _building_condition(user)
+
+
+def maintenance_inspection_report_query(user=None):
+    """Scope Maintenance Inspection Report on its own stored ``building``.
+
+    The column is populated on every stored row — ``reqd`` plus a ``fetch_from``
+    on ``maintenance_work_order.building`` — so the shared column fragment serves
+    the LIST view with no hop. Only the CREATE check needs the work-order anchor
+    (``BUILDING_FETCH_ANCHOR``), because ``fetch_from`` has not run yet at that
+    point; a row that reaches this fragment has already been written.
+    """
     return _building_condition(user)
 
 
