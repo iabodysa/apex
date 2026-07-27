@@ -24,6 +24,7 @@ reproduces the short-circuit faithfully for every suite pinning this defect.
 import unittest
 from unittest.mock import patch
 
+from apex.apex_core.utils import payable_allocation
 from apex.logistay.api import contract_billing
 from apex.tests.factories import ExistsShortCircuitDB
 
@@ -128,12 +129,16 @@ class TestWhitelistedIdentifiersCannotClearTheirOwnGate(unittest.TestCase):
     itself and clear an existence gate without a query. The document is still
     absent, so ``get_doc`` then raises a bare framework 404 in place of the named
     refusal each loader defines — the guard is skipped, not the permission check.
+
+    The payable loader now lives in the shared ``payable_allocation`` engine, so its
+    case patches THAT module's globals: a module's ``frappe`` is its own, and pinning
+    the defect against the caller would have graded a name the guard no longer reads.
     """
 
-    def _refuses(self, call, doctype):
+    def _refuses(self, module, call, doctype):
         stub = _StubFrappe({doctype: set()})
-        with patch.object(contract_billing, "frappe", stub), patch.object(
-            contract_billing, "_", lambda text: text
+        with patch.object(module, "frappe", stub), patch.object(
+            module, "_", lambda text: text
         ):
             with self.assertRaises(_Thrown):
                 call()
@@ -141,13 +146,17 @@ class TestWhitelistedIdentifiersCannotClearTheirOwnGate(unittest.TestCase):
 
     def test_a_contract_id_equal_to_its_doctype_is_refused(self):
         self._refuses(
+            contract_billing,
             lambda: contract_billing._load_eligible_contract("Telecom Contract"),
             "Telecom Contract",
         )
 
     def test_a_payable_id_equal_to_its_doctype_is_refused(self):
         self._refuses(
-            lambda: contract_billing._load_eligible_payable(_Contract([]), "Purchase Invoice"),
+            payable_allocation,
+            lambda: payable_allocation.load_eligible_payable(
+                "Test AFMCO", "QA Telecom Operator", "Purchase Invoice"
+            ),
             "Purchase Invoice",
         )
 

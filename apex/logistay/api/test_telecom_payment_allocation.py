@@ -24,6 +24,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
+from apex.apex_core.utils import payable_allocation
 from apex.logistay.api import contract_billing
 from apex.tests import factories
 from apex.tests.factories import service_item
@@ -261,7 +262,7 @@ class TestSettlementFollowsTheLedger(_PaymentCase):
     def test_a_period_with_no_payment_is_not_raised(self):
         contract = self.contract()
         status = contract_billing.get_billing_status(contract.name, "2026-07")
-        self.assertEqual(status["settlement"], contract_billing.NOT_RAISED)
+        self.assertEqual(status["settlement"], payable_allocation.NOT_RAISED)
         self.assertIsNone(status["payment_entry"])
 
     def test_a_draft_payment_is_awaiting_approval_not_settled(self):
@@ -269,7 +270,7 @@ class TestSettlementFollowsTheLedger(_PaymentCase):
         invoice = self.invoice()
         contract_billing.create_payment_entry(contract.name, "2026-07", invoice.name)
         status = contract_billing.get_billing_status(contract.name, "2026-07")
-        self.assertEqual(status["settlement"], contract_billing.AWAITING_APPROVAL)
+        self.assertEqual(status["settlement"], payable_allocation.AWAITING_APPROVAL)
 
     def test_settled_only_after_the_payment_is_submitted(self):
         contract = self.contract()
@@ -280,7 +281,7 @@ class TestSettlementFollowsTheLedger(_PaymentCase):
         payment.submit()
 
         status = contract_billing.get_billing_status(contract.name, "2026-07")
-        self.assertEqual(status["settlement"], contract_billing.SETTLED)
+        self.assertEqual(status["settlement"], payable_allocation.SETTLED)
         self.assertGreater(status["allocated_amount"], 0)
         # The ledger agrees: the invoice it settled is no longer outstanding.
         self.assertEqual(
@@ -297,14 +298,14 @@ class TestSettlementFollowsTheLedger(_PaymentCase):
         payment.submit()
         self.assertEqual(
             contract_billing.get_billing_status(contract.name, "2026-07")["settlement"],
-            contract_billing.SETTLED,
+            payable_allocation.SETTLED,
         )
 
         payment.reload()
         payment.cancel()
 
         status = contract_billing.get_billing_status(contract.name, "2026-07")
-        self.assertEqual(status["settlement"], contract_billing.REVERSED)
+        self.assertEqual(status["settlement"], payable_allocation.REVERSED)
         # The invoice is outstanding again — operational status and ledger agree.
         self.assertGreater(
             frappe.db.get_value("Purchase Invoice", invoice.name, "outstanding_amount"), 0
@@ -355,8 +356,8 @@ class TestSettlementFollowsTheLedger(_PaymentCase):
         contract.save(ignore_permissions=True)
 
         status = contract_billing.get_billing_status(contract.name, "2026-07")
-        self.assertNotEqual(status["settlement"], contract_billing.SETTLED)
-        self.assertEqual(status["settlement"], contract_billing.AWAITING_APPROVAL)
+        self.assertNotEqual(status["settlement"], payable_allocation.SETTLED)
+        self.assertEqual(status["settlement"], payable_allocation.AWAITING_APPROVAL)
         self.assertEqual(status["allocated_amount"], 0)
 
 
