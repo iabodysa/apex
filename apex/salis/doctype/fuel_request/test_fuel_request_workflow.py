@@ -95,14 +95,14 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 
 	# [#m88md8]
 
-	def _quota(self):
+	def _quota(self, monthly_litres=100):
 		"""A fresh Active Fuel Quota for the test vehicle/project."""
 		q = frappe.get_doc({
 			"doctype": "Fuel Quota",
 			"vehicle": self.vehicle,
 			"project": self.project,
 			"period_month": "2026-05",
-			"monthly_litres": 100,
+			"monthly_litres": monthly_litres,
 			"consumed_litres": 0,
 			"status": "Active",
 		}).insert(ignore_permissions=True)
@@ -273,3 +273,42 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		self.assertEqual(fr.status, "Cancelled")
 		self.assertEqual(fr.docstatus, 2)
 		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 0)
+
+	def test_exhausted_quota_blocks_a_second_standard_draw(self):
+		"""An Exhausted quota must refuse the next Standard draw instead of letting
+		it approve and overrun the allocation. Top-up is the sanctioned way to add
+		fuel beyond the quota, so it must stay approvable against the same quota."""
+		q = self._quota(monthly_litres=10)
+
+		first = self._new("Standard", requested_litres=10, amount=150, fuel_quota=q.name)
+		frappe.set_user(self.manager)
+		apply_workflow(first, "Approve")
+		first.reload()
+		apply_workflow(first, "Complete")
+		first.reload()
+		self.assertEqual(first.status, "Done")
+		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 10)
+		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "status"), "Exhausted")
+
+		# The exhausted quota must refuse the next Standard draw and stay at 10 L.
+		frappe.set_user("Administrator")
+		second = self._new("Standard", requested_litres=5, amount=75, fuel_quota=q.name)
+		frappe.set_user(self.manager)
+		with self.assertRaises(frappe.ValidationError):
+			apply_workflow(second, "Approve")
+		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 10)
+		self.assertEqual(frappe.db.get_value("Fuel Request", second.name, "docstatus"), 0)
+		self.assertEqual(frappe.db.get_value("Fuel Request", second.name, "quota_applied"), 0)
+
+		# A Top-up against the very same exhausted quota still goes through.
+		frappe.set_user("Administrator")
+		topup = self._new("Top-up", topup_litres=5, fuel_quota=q.name)
+		frappe.set_user(self.manager)
+		apply_workflow(topup, "Approve")
+		topup.reload()
+		apply_workflow(topup, "Complete")
+		topup.reload()
+		self.assertEqual(topup.status, "Done")
+		self.assertEqual(topup.docstatus, 1)
+		# A Top-up posts no quota consumption, so the quota is untouched.
+		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 10)

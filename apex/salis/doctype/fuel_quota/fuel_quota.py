@@ -68,8 +68,12 @@ def on_doctype_update():
 	cancelled original. A bare two-column index would reject those legitimate
 	flows with DuplicateEntryError; including docstatus lets a Cancelled row
 	coexist while still blocking a duplicate live quota (mirrors the Scheduled
-	Task Instance backstop)."""
-	frappe.db.add_unique(
+	Task Instance backstop).
+
+	Guarded so pre-existing duplicate data logs rather than aborting migrate."""
+	from apex.apex_core.utils.ledger_index import add_unique_guarded
+
+	add_unique_guarded(
 		"Fuel Quota",
 		["vehicle", "period_month", "docstatus"],
 		constraint_name="uq_fuel_quota_vehicle_period",

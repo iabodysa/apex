@@ -80,3 +80,54 @@ class TestCustodyStockIntegration(ApexHabitatTestCase):
         issue.cancel()
         self.assertFalse(has_stock_entries("Custody Issue", issue.name))
         self.assertEqual(_bal(self.article, self.building, self.emp), 0.0)
+
+    def _procurement_building(self):
+        """A building flagged as a procurement intake store, so a Goods Receipt can
+        book stock into it and a Custody Issue can draw it out of the same store."""
+        cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) or frappe.db.get_value("Cost Center", {"is_group": 0})
+        return frappe.get_doc({
+            "doctype": "Building", "building_name": "PB " + _h(), "site": self.site.name,
+            "total_capacity": 4, "company": self.company, "default_cost_center": cc,
+            "is_procurement_store": 1,
+        }).insert(ignore_permissions=True).name
+
+    def test_cancel_receipt_blocked_once_stock_has_been_issued_out(self):
+        """Cancelling a receipt whose goods already left the store must be refused,
+        not mirrored: the reversal would drive the store negative and invent stock
+        that is physically in an employee's hands. Nothing may be written on refusal."""
+        from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+            get_store_balance,
+        )
+        building = self._procurement_building()
+
+        receipt = frappe.get_doc({
+            "doctype": "Goods Receipt", "naming_series": "ACC-GRN-.YYYY.-.#####",
+            "receipt_date": "2026-05-01", "intake_building": building,
+            "procurement_supervisor": "Administrator",
+        })
+        receipt.append("items", {"item_type": "Custody Article", "item": self.article, "qty": 10})
+        receipt.insert(ignore_permissions=True)
+        receipt.submit()
+        self.assertEqual(get_store_balance("Custody Article", self.article, building), 10.0)
+
+        issue = frappe.get_doc({"doctype": "Custody Issue", "naming_series": "CUST-ISS-.####",
+                                "issue_date": "2026-05-02", "issued_to_employee": self.emp,
+                                "building": building})
+        issue.append("items", {"article": self.article, "qty": 10})
+        issue.insert(ignore_permissions=True)
+        issue.submit()
+        self.assertEqual(get_store_balance("Custody Article", self.article, building), 0.0)
+
+        receipt.reload()
+        with self.assertRaises(frappe.ValidationError):
+            receipt.cancel()
+
+        self.assertGreaterEqual(
+            get_store_balance("Custody Article", self.article, building), 0.0,
+            "a refused reversal must never drive the building store negative",
+        )
+        self.assertEqual(
+            frappe.db.count("Accommodation Stock Ledger",
+                            {"voucher_no": receipt.name, "reversal_of": ["is", "set"]}), 0,
+            "a refused reversal must write no mirror row for the cancelled voucher",
+        )

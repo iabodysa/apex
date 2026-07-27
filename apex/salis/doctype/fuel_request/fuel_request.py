@@ -30,7 +30,9 @@ transition; ``Done`` / ``Failed`` / ``Reverted`` are then reachable post-submit
 
 This controller keeps only what the workflow cannot express: the per-type
 required-field validation, the Chip evidence/acknowledgement gate, the
-initial-status guard (a request must be created at Pending), and the idempotent
+initial-status guard (a request must be created at Pending), the exhausted-quota
+gate (a Standard draw against a spent allocation is refused at Approve and again
+at the locked consumption step), and the idempotent
 quota side-effects — Standard quota
 consumption is applied when the request reaches Done (on submit if it submits
 straight into Done, or on the post-submit transition into Done) and reversed on
@@ -42,7 +44,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, nowdate
+from frappe.utils import flt, getdate, nowdate
 
 from apex.salis.utils import (
 	add_timeline_note,
@@ -109,7 +111,9 @@ class FuelRequest(Document):
 
 	def before_submit(self):
 		# [#g1h3oq]
-		if self.request_type == "Chip":
+		if self.request_type == "Standard":
+			self._guard_quota_allowance()
+		elif self.request_type == "Chip":
 			self._guard_chip_cancellation()
 
 	def on_submit(self):
@@ -245,6 +249,33 @@ class FuelRequest(Document):
 
 	# [#5u90n1]
 
+	def _guard_quota_allowance(self, quota=None):
+		"""A Standard request draws down a monthly allocation, so a quota with
+		nothing left must not be drawn again — Top-up is the sanctioned way to add
+		fuel beyond the allocation and stays exempt. Called once before submit for
+		early desk feedback and again inside the consumption step, where the quota
+		row is already locked and the read is authoritative against a concurrent draw."""
+		if not self.fuel_quota:
+			return
+		if quota is None:
+			quota = frappe.db.get_value(
+				"Fuel Quota",
+				self.fuel_quota,
+				["consumed_litres", "monthly_litres", "status"],
+				as_dict=True,
+			)
+		if not quota:
+			return
+		monthly = flt(quota.monthly_litres)
+		consumed = flt(quota.consumed_litres)
+		if quota.status == "Exhausted" or (monthly and consumed >= monthly):
+			frappe.throw(
+				_(
+					"Fuel Quota {0} is exhausted ({1} of {2} L already consumed). "
+					"Raise a Top-up request to dispense more fuel this period."
+				).format(self.fuel_quota, consumed, monthly)
+			)
+
 	def _apply_quota_consumption(self):
 		"""Idempotently add requested_litres to the quota's consumed_litres."""
 		if self.quota_applied or not self.fuel_quota:
@@ -258,6 +289,8 @@ class FuelRequest(Document):
 		)
 		if not quota:
 			return
+
+		self._guard_quota_allowance(quota)
 
 		new_consumed = (quota.consumed_litres or 0) + (self.requested_litres or 0)
 		updates = {"consumed_litres": new_consumed}
