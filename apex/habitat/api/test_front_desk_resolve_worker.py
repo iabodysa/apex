@@ -10,6 +10,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.habitat.api.front_desk import resolve_worker
+from apex.tests._helpers import as_user
 
 
 def _h(n=12):
@@ -140,3 +141,203 @@ class TestResolveWorker(FrappeTestCase):
     def test_blank_identifier_returns_not_found(self):
         self.assertFalse(resolve_worker("   ")["found"])
         self.assertFalse(resolve_worker("")["found"])
+
+
+class TestResolveWorkerBuildingScope(FrappeTestCase):
+    """Per-doc BUILDING scope for the scanned-identifier lookup.
+
+    ``resolve_worker`` takes a CLIENT-SUPPLIED identifier and answers with worker
+    identity. Every lookup it makes is a ``frappe.db.get_value``, which never
+    consults ``permission_query_conditions`` — so before the gate a supervisor
+    scoped to b1 could scan (or simply type) an out-of-estate Iqama or Masar token
+    and be handed that worker's name, photo and housing state.
+
+    The test user deliberately holds HR User ALONGSIDE Resident Supervisor: the
+    endpoint opens with a type-level ``has_permission("Employee", "read")``, and
+    without that role the call would raise on the type gate and prove nothing
+    about the building gate. Rows are inserted with
+    ``ignore_permissions/links/mandatory`` and docstatus is flipped via
+    ``db.set_value`` — these pin the read SCOPE, not the write controllers.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.b1 = cls._building()
+        cls.b2 = cls._building()
+        cls.scoped = cls._user(["Resident Supervisor", "HR User"], building=cls.b1)
+        cls.oversight = cls._user(["Accommodation Manager", "HR User"])
+
+    @classmethod
+    def _building(cls):
+        doc = frappe.get_doc({"doctype": "Building", "building_name": "RSV-" + _h()})
+        doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        cls.addClassCleanup(
+            frappe.delete_doc, "Building", doc.name, force=True, ignore_permissions=True
+        )
+        return doc.name
+
+    @classmethod
+    def _user(cls, roles, building=None):
+        email = "rsv-{0}@example.com".format(_h()).lower()
+        frappe.get_doc(
+            {
+                "doctype": "User",
+                "email": email,
+                "first_name": "Rsv",
+                "send_welcome_email": 0,
+                "roles": [{"role": r} for r in roles],
+            }
+        ).insert(ignore_permissions=True)
+        cls.addClassCleanup(
+            frappe.delete_doc, "User", email, force=True, ignore_permissions=True
+        )
+        if building:
+            up = frappe.get_doc(
+                {
+                    "doctype": "User Permission",
+                    "user": email,
+                    "allow": "Building",
+                    "for_value": building,
+                }
+            )
+            up.insert(ignore_permissions=True)
+            cls.addClassCleanup(
+                frappe.delete_doc,
+                "User Permission",
+                up.name,
+                force=True,
+                ignore_permissions=True,
+            )
+        return email
+
+    def _temp_worker(self, building):
+        """A Temporary Worker whose estate is ``building``, carrying an Iqama."""
+        iqama = "IQ" + _h()
+        doc = frappe.get_doc(
+            {
+                "doctype": "Temporary Worker",
+                "worker_name": "TW-" + _h(),
+                "passport_number": "P" + _h(),
+                "iqama_number": iqama,
+                "building": building,
+                "status": "Active",
+            }
+        )
+        doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        self.addCleanup(
+            frappe.delete_doc,
+            "Temporary Worker",
+            doc.name,
+            force=True,
+            ignore_permissions=True,
+        )
+        return doc.name, iqama
+
+    def _employee(self):
+        doc = frappe.get_doc(
+            {
+                "doctype": "Employee",
+                "employee_name": "Emp " + _h(),
+                "first_name": "Emp",
+                "status": "Active",
+                "gender": "Male",
+                "date_of_birth": "1990-01-01",
+                "date_of_joining": "2020-01-01",
+            }
+        )
+        doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        self.addCleanup(
+            frappe.delete_doc, "Employee", doc.name, force=True, ignore_permissions=True
+        )
+        return doc.name
+
+    def _token_for(self, employee):
+        tok = frappe.get_doc(
+            {
+                "doctype": "Masar Worker Token",
+                "party_type": "Employee",
+                "party": employee,
+                "employee": employee,
+                "enabled": 1,
+            }
+        )
+        tok.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        self.addCleanup(
+            frappe.delete_doc,
+            "Masar Worker Token",
+            tok.name,
+            force=True,
+            ignore_permissions=True,
+        )
+        return tok
+
+    def _house(self, employee, building):
+        """A submitted, still-open assignment placing ``employee`` in ``building``."""
+        doc = frappe.get_doc(
+            {
+                "doctype": "Housing Assignment",
+                "party_type": "Employee",
+                "party": employee,
+                "employee": employee,
+                "building": building,
+                "check_in_date": frappe.utils.today(),
+            }
+        )
+        doc.flags.ignore_validate = True
+        doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        frappe.db.set_value("Housing Assignment", doc.name, "docstatus", 1)
+        self.addCleanup(
+            lambda n=doc.name: (
+                frappe.db.set_value("Housing Assignment", n, "docstatus", 0),
+                frappe.delete_doc(
+                    "Housing Assignment", n, force=True, ignore_permissions=True
+                ),
+            )
+        )
+        return doc.name
+
+    def setUp(self):
+        self.addCleanup(frappe.set_user, "Administrator")
+
+    def test_iqama_of_other_building_worker_denied(self):
+        """A b1-scoped supervisor scanning a b2 worker's Iqama is refused."""
+        _tw, iqama = self._temp_worker(self.b2)
+        with as_user(self.scoped):
+            with self.assertRaises(frappe.PermissionError):
+                resolve_worker(iqama)
+
+    def test_masar_token_of_other_building_worker_denied(self):
+        """Same refusal through the token path: the Employee is housed in b2."""
+        emp = self._employee()
+        tok = self._token_for(emp)
+        self._house(emp, self.b2)
+        with as_user(self.scoped):
+            with self.assertRaises(frappe.PermissionError):
+                resolve_worker(tok._plaintext_token)
+
+    def test_iqama_of_own_building_worker_still_resolves(self):
+        """The gate is a scope gate, not a blanket denial — b1 still resolves."""
+        tw, iqama = self._temp_worker(self.b1)
+        with as_user(self.scoped):
+            result = resolve_worker(iqama)
+        self.assertTrue(result["found"])
+        self.assertEqual(result["party"], tw)
+
+    def test_unhoused_employee_token_not_blocked_by_scope(self):
+        """An Employee with no live assignment is the intake case the check-in
+        dialog depends on; the building gate must not break it."""
+        emp = self._employee()
+        tok = self._token_for(emp)
+        with as_user(self.scoped):
+            result = resolve_worker(tok._plaintext_token)
+        self.assertTrue(result["found"])
+        self.assertEqual(result["party"], emp)
+
+    def test_oversight_role_resolves_across_estates(self):
+        """An unscoped oversight role keeps estate-wide reach."""
+        tw, iqama = self._temp_worker(self.b2)
+        with as_user(self.oversight):
+            result = resolve_worker(iqama)
+        self.assertTrue(result["found"])
+        self.assertEqual(result["party"], tw)

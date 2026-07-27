@@ -482,7 +482,11 @@ def resolve_worker(identifier: str) -> dict:
 
     Permission: gated on ``Employee`` read (the same gate as
     ``get_employee_card``); a Temporary Worker result additionally requires
-    ``Temporary Worker`` read so it cannot leak across DocType permissions.
+    ``Temporary Worker`` read so it cannot leak across DocType permissions. The
+    resolved party is then put through the SAME per-doc building gate as
+    ``get_employee_card`` — a type-level read only proves the caller may read the
+    doctype, not that the worker belongs to their estate, and every lookup below
+    is a ``db.get_value`` that bypasses ``permission_query_conditions``.
 
     Args:
         identifier: an Iqama number or a scanned Masar token.
@@ -545,6 +549,12 @@ def resolve_worker(identifier: str) -> dict:
     # [#7a2hxg]
     if party_type == "Temporary Worker":
         frappe.has_permission("Temporary Worker", "read", throw=True)
+
+    # A scanned identifier is CLIENT-SUPPLIED, so an out-of-estate Iqama or token
+    # would otherwise return another building's worker identity to a scoped user.
+    from apex.habitat.api.arrivals_desk import _assert_party_in_scope
+
+    _assert_party_in_scope(party_type, party)
 
     if employee:
         image = frappe.db.get_value("Employee", employee, "image")
