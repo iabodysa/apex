@@ -451,7 +451,7 @@
    "link_fieldname": "transport_request"
   }
  ],
- "modified": "2026-07-26 09:03:55.752811",
+ "modified": "2026-07-27 16:05:31.414754",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",
@@ -515,12 +515,14 @@
   {
    "permlevel": 1,
    "read": 1,
-   "role": "Fleet Manager"
+   "role": "Fleet Manager",
+   "write": 1
   },
   {
    "permlevel": 1,
    "read": 1,
-   "role": "System Manager"
+   "role": "System Manager",
+   "write": 1
   },
   {
    "permlevel": 1,
