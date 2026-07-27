@@ -195,6 +195,22 @@ class TestFreshInstallDefaults(FrappeTestCase):
             "Customized locally",
         )
 
+    def test_custody_article_seeder_is_idempotent(self):
+        """Custody Article autonames by naming_series, so the old guard — a probe on
+        frappe.db.exists("Custody Article", <article_name>) — could never match a
+        CART-#### name and every after_install re-inserted all ten. The guard is keyed
+        on the article_name FIELD, like create_safety_task_catalogs. Runs the seeder
+        twice in one process and counts rows, because a single run always passes."""
+        frappe.db.delete("Custody Article")
+
+        setup.create_custody_articles()
+        first = sorted(frappe.get_all("Custody Article", pluck="article_name"))
+        setup.create_custody_articles()
+        second = sorted(frappe.get_all("Custody Article", pluck="article_name"))
+
+        self.assertEqual(len(first), 10)
+        self.assertEqual(second, first, "the second run re-inserted the whole catalogue")
+
     def test_after_migrate_recovery_is_hooked_and_defers_without_root(self):
         self.assertIn("apex.setup.after_migrate", hooks.after_migrate)
         with patch.object(setup, "_get_item_group_root", return_value=None):
