@@ -160,18 +160,25 @@ class TestInternalAuditorHousingAccess(FrappeTestCase):
 
     def test_the_grant_did_not_disturb_the_other_roles(self):
         """A second plain read row for an existing role would silently disable an if_owner
-        constraint (permissions.py:286-287). Nothing else on this table may have moved."""
+        constraint (permissions.py:286-287). Nothing else on this table may have moved.
+
+        Counted at permlevel 0 only. A permlevel-1 row is field access, not a second grant
+        of the record, and it cannot reach the if_owner path this guards -- so counting by
+        role alone would flag the signature concealment as a duplicate and push the next
+        author to delete the row that hides it.
+        """
         shipped = json.loads(_HOUSING_ASSIGNMENT_JSON.read_text(encoding="utf-8"))
         by_role = {}
         for p in shipped["permissions"]:
-            by_role.setdefault(p["role"], []).append(p)
+            if int(p.get("permlevel") or 0) == 0:
+                by_role.setdefault(p["role"], []).append(p)
         self.assertEqual(
             sorted(by_role),
             ["Accommodation Manager", AUDITOR_ROLE, "Resident Supervisor", "System Manager"],
             "the role set on Housing Assignment changed beyond the Internal Auditor grant",
         )
         for role, rows in by_role.items():
-            self.assertEqual(len(rows), 1, f"{role} gained a second row — check if_owner")
+            self.assertEqual(len(rows), 1, f"{role} gained a second permlevel-0 row — check if_owner")
 
     def test_the_auditor_holds_no_write_authority(self):
         """The read-only shape, proven at runtime rather than inferred from the JSON."""
