@@ -432,7 +432,20 @@ class TestVehicleIncident(FrappeTestCase):
     def test_cancelling_is_blocked_once_the_advance_carries_a_recovered_amount(self):
         """Once real money has moved — the company has paid, or an installment has
         been recovered — reversing is an accounting decision, so the cancel is
-        refused rather than silently unwinding a posted balance."""
+        refused rather than silently unwinding a posted balance.
+
+        The refusal fires in before_cancel, which Frappe runs from
+        run_before_save_methods() BEFORE db_update() stamps docstatus 2
+        (frappe/model/document.py:414 vs :428, and :431 dispatches on_cancel after
+        the write). Raised from on_cancel instead, the 2 is already in the open
+        transaction and every read for the rest of the request sees the incident as
+        cancelled — only the request-level rollback undoes it.
+
+        Graded on the ROW plus a reload, never on the attribute: Document._cancel()
+        assigns self.docstatus = 2 (:1085) before save() is ever called, so
+        inc.docstatus reads 2 after ANY blocked cancel and proves nothing about
+        which hook refused.
+        """
         inc = self._approved_recovery()
         advance = inc.recovery_advance
         frappe.db.set_value("Employee Advance", advance, "paid_amount", 500)
@@ -441,6 +454,17 @@ class TestVehicleIncident(FrappeTestCase):
             inc.cancel()
         self._assert_raised_by_the_controller_guard(
             cm, "already carries a paid or recovered amount"
+        )
+        self.assertEqual(
+            frappe.db.get_value("Vehicle Incident", inc.name, "docstatus"),
+            1,
+            "a refused cancel must leave the incident submitted, not cancelled-in-the-row",
+        )
+        inc.reload()
+        self.assertEqual(
+            inc.docstatus,
+            1,
+            "reloading the incident in the same request must still read it as submitted",
         )
         self.assertEqual(
             frappe.db.get_value("Employee Advance", advance, "docstatus"),

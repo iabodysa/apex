@@ -155,29 +155,61 @@ class VehicleIncident(Document):
         if advance:
             self.db_set("recovery_advance", advance)
 
-    def _release_recovery_advance(self):
-        """Reverse the receivable when the incident is cancelled.
+    def _live_recovery_advance(self):
+        """The linked Employee Advance while it is still submitted, else None.
 
-        Cancelling the advance reverses the recovered balance natively (HRMS reverses
-        each linked Additional Salary's contribution on its own cancel). Once real
-        money has moved - the company has paid, or an installment has been recovered -
-        the reversal is an accounting decision, so the cancel is blocked instead.
+        One reader for both halves of the cancel: there is nothing to refuse and
+        nothing to reverse when the incident raised no advance, or when the advance
+        is already a draft or cancelled.
         """
         advance = self.recovery_advance
         if not advance:
-            return
+            return None
         state = frappe.db.get_value(
-            "Employee Advance", advance, ["docstatus", "paid_amount", "return_amount"], as_dict=True
+            "Employee Advance",
+            advance,
+            ["name", "docstatus", "paid_amount", "return_amount"],
+            as_dict=True,
         )
-        if not state or state.docstatus != 1:
-            return
-        if flt(state.paid_amount) or flt(state.return_amount):
+        return state if state and state.docstatus == 1 else None
+
+    def before_cancel(self):
+        """REFUSAL half of the cancel: once real money has moved - the company has
+        paid, or an installment has been recovered - reversing is an accounting
+        decision, so the cancel is refused instead of silently unwinding a posted
+        balance.
+
+        Here and not in on_cancel: Frappe dispatches before_cancel from
+        run_before_save_methods() (frappe/model/document.py:414), writes the row with
+        db_update() (:428) and only then dispatches on_cancel from
+        run_post_save_methods() (:431). Thrown from on_cancel, this refusal leaves
+        docstatus 2 already stamped in the open transaction, so everything reading
+        the incident later in the request sees a refused cancel as cancelled and only
+        the request-level rollback undoes it. This method only reads, so a throw
+        leaves the incident AND the advance untouched.
+
+        A Document method with no hooks.py entry: Frappe composes the class method
+        ahead of the app-wide workflow_guard.before_cancel handler.
+        """
+        state = self._live_recovery_advance()
+        if state and (flt(state.paid_amount) or flt(state.return_amount)):
             frappe.throw(
                 _(
                     "Cannot cancel incident {0}: Employee Advance {1} already carries a paid or recovered amount. Reverse it in Accounts first."
-                ).format(self.name, advance)
+                ).format(self.name, state.name)
             )
-        frappe.get_doc("Employee Advance", advance).cancel()
+
+    def _release_recovery_advance(self):
+        """RESTORATION half: reverse the receivable when the incident is cancelled.
+
+        Cancelling the advance reverses the recovered balance natively (HRMS reverses
+        each linked Additional Salary's contribution on its own cancel). The paid /
+        recovered refusal is not re-checked here - before_cancel has already run and
+        nothing between the two hooks can pay the advance.
+        """
+        state = self._live_recovery_advance()
+        if state:
+            frappe.get_doc("Employee Advance", state.name).cancel()
 
     def on_cancel(self):
         self._release_recovery_advance()
