@@ -259,8 +259,10 @@ class TestTheReasonIsRecordedBesideThePattern(unittest.TestCase):
                 path = os.path.join(_HABITAT_DOCTYPES, slug, f"{slug}.py")
                 with open(path, encoding="utf-8") as handle:
                     head = handle.read(2400)
+                # The board id this used to also assert is deliberately gone: a card
+                # reference means nothing to a reader without the board, and pinning
+                # one here blocked draining it from the five docstrings.
                 self.assertIn(self.MARKER, head, f"{slug}: permlevel reason no longer recorded")
-                self.assertIn("A-218", head, f"{slug}: reason lost its card reference")
 
 
 if __name__ == "__main__":

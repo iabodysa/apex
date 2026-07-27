@@ -93,7 +93,8 @@ class TestSimOperationsSidebarReachability(unittest.TestCase):
         self.assertNotIn(
             (SIM_WORKSPACE, SIM_ROLE),
             KNOWN_ORPHAN_PAIRS,
-            "the A-122 persona must be fixed in the workspace JSON, never frozen into the ratchet",
+            f"the {SIM_ROLE} / '{SIM_WORKSPACE}' pair must be fixed in the workspace "
+            "JSON, never frozen into the ratchet",
         )
 
 

@@ -443,7 +443,8 @@ class TestGovernmentRelationsOfficerReportAccess(unittest.TestCase):
                 self.assertNotIn(
                     GRO_ROLE,
                     roles,
-                    "A-171 must stay fixed in the report JSON, never frozen as a known gap",
+                    f"{GRO_ROLE} must stay fixed in the report JSON, never frozen "
+                    "as a known gap",
                 )
 
     def test_money_reports_stay_closed_to_the_persona(self):
@@ -520,7 +521,8 @@ class TestSafetyOfficerReportAccess(unittest.TestCase):
                 self.assertNotIn(
                     SAFETY_ROLE,
                     roles,
-                    "A-172 must stay fixed in the report JSON, never frozen as a known gap",
+                    f"{SAFETY_ROLE} must stay fixed in the report JSON, never frozen "
+                    "as a known gap",
                 )
 
     def test_money_reports_stay_closed_to_the_persona(self):

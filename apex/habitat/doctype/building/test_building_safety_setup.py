@@ -255,7 +255,8 @@ class TestGenerateSafetySetup(FrappeTestCase):
         # structural: the field is truly absent from the doctype
         self.assertIsNone(
             frappe.get_meta("Scheduled Task Template").get_field("building"),
-            "Scheduled Task Template must have no 'building' field (dropped by T-552)",
+            "Scheduled Task Template must have no 'building' field; it was dropped "
+            "when the template stopped being building-scoped",
         )
 
         # source guard: grep the app tree for a Scheduled Task Template built or filtered

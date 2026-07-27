@@ -317,7 +317,8 @@ class TestGovernmentRelationsOfficerReachesTheSalisRoot(unittest.TestCase):
             self.assertNotEqual(
                 role,
                 GRO_ROLE,
-                "A-172 must stay fixed in the workspace JSON, never frozen as a known gap",
+                f"{GRO_ROLE} must stay fixed in the workspace JSON, never frozen "
+                "as a known gap",
             )
 
     def test_the_added_links_expose_nothing_new(self):
@@ -473,7 +474,8 @@ class TestHabitatRootPersonasCanOpenSomething(unittest.TestCase):
             self.assertNotIn(
                 role,
                 ADDED_TO_HABITAT_ROOT,
-                "A-178 must stay fixed in the workspace JSON, never frozen as a known gap",
+                "a role given Habitat-root content must stay fixed in the workspace "
+                "JSON, never frozen back as a known gap",
             )
 
     def test_the_added_links_expose_nothing_new(self):

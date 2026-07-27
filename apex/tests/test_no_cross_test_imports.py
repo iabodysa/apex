@@ -176,7 +176,7 @@ class TestNoCrossTestImports(unittest.TestCase):
         self.assertEqual(
             offenders,
             [],
-            "A P-129-cleaned file re-introduced a cross-test-module import:\n"
+            "An already-cleaned file re-introduced a cross-test-module import:\n"
             + "\n".join(f"  {f} -> {m}" for f, m in offenders),
         )
 

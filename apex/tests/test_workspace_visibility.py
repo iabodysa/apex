@@ -164,7 +164,8 @@ class TestWorkspaceHeadlineCharts(unittest.TestCase):
         self.assertTrue(_all_workspace_files(), "no workspace JSON discovered across modules")
         self.assertTrue(
             _workspace_referenced_charts(),
-            "no workspace headline charts discovered — the P-094 headline-chart design expects them",
+            "no workspace headline charts discovered — every persona root is designed "
+            "to open on one",
         )
 
 

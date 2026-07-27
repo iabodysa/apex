@@ -44,7 +44,8 @@ class TestWorkflowStateGovernance(FrappeTestCase):
         self.assertEqual(
             offenders,
             [],
-            "workflow-state fields must be read_only (A-085): " + ", ".join(offenders),
+            "workflow-state fields must be read_only, or a user can type a state the "
+            "workflow never granted: " + ", ".join(offenders),
         )
         # guard against the enumeration silently going empty (vacuous pass)
         self.assertGreaterEqual(checked, 10, "expected >=10 state fields, enumeration looks empty")
@@ -56,5 +57,5 @@ class TestWorkflowStateGovernance(FrappeTestCase):
             options,
             ["Draft", "Pending Approval", "Approved", "Rejected"],
             "Utility Bill Entry.status must expose only the four approval states "
-            "(dead Received/Under Review/Paid/Disputed dropped, A-085 finding 1)",
+            "(the dead Received/Under Review/Paid/Disputed options were dropped)",
         )

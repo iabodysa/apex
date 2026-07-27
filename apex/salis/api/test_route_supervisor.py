@@ -168,7 +168,7 @@ class TestSortClauseSafety(FrappeTestCase):
             [],
             "DatabaseQuery.validate_order_by_and_group_by allows only the functions in "
             "frappe's ALLOWED_ORDER_BY_FUNCTIONS; anything else raises ValidationError, "
-            "which a portal sees as HTTP 417. Sort in Python instead (A-155):\n"
+            "which a portal sees as HTTP 417. Sort in Python instead:\n"
             + "\n".join(sorted(offenders)),
         )
 

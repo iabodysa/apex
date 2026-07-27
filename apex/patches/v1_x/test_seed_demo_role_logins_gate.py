@@ -52,7 +52,7 @@ class TestSeedDemoRoleLoginsGate(FrappeTestCase):
         self.assertNotIn(
             _PATCH,
             lines,
-            f"{_PATCH} must stay UN-WIRED from patches.txt (A-070): a normal "
+            f"{_PATCH} must stay UN-WIRED from patches.txt: a normal "
             "migrate must not seed demo logins. Keep the module on disk for a "
             "manual `bench execute` run instead of re-adding it here.",
         )
@@ -65,13 +65,13 @@ class TestSeedDemoRoleLoginsGate(FrappeTestCase):
             self.assertFalse(
                 frappe.db.exists("User", email),
                 f"demo login User {email} exists — the seeder must be un-wired "
-                "from patches.txt so a normal migrate never creates it (A-070)",
+                "from patches.txt so a normal migrate never creates it",
             )
         self.assertFalse(
             frappe.db.exists("Employee", {"employee_name": seed._EMP_NAME}),
             f"demo Employee {seed._EMP_NAME!r} (which carries the demo Masar "
-            "Worker Token) exists — a normal migrate must not seed it (seeder "
-            "un-wired, A-070)",
+            "Worker Token) exists — a normal migrate must not seed it (the "
+            "seeder is un-wired)",
         )
 
 

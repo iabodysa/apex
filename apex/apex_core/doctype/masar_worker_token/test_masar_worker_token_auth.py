@@ -450,7 +450,7 @@ class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
         meta = frappe.get_meta("Masar Worker Token")
         field = meta.get_field("token")
         self.assertIsNotNone(field, "token field must exist")
-        self.assertEqual(field.permlevel, 1, "token must be at permlevel 1 (T-662)")
+        self.assertEqual(field.permlevel, 1, "token must be at permlevel 1")
 
         # [#eezxp6]
         high = {
