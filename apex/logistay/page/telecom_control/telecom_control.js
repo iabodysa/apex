@@ -42,6 +42,15 @@ const TC_STATUS_COLOR = {
 
 const TC_FILTER_KEY = 'telecom_control_filters';
 
+// Retirement actions and the statuses they may be raised from. This MIRRORS
+// ALLOWED_PRIOR_STATUS in sim_custody_assignment.py — the server re-checks the
+// transition under a row lock, so a stale button here fails cleanly rather than
+// retiring the wrong SIM. Terminated is absorbing: it appears in no "from" list.
+const TC_RETIRE_FROM = {
+	Lost: ['Available', 'Assigned', 'Suspended'],
+	Terminated: ['Available', 'Assigned', 'Suspended', 'Lost'],
+};
+
 class TelecomControl {
 	constructor(page) {
 		this.page = page;
@@ -330,6 +339,12 @@ class TelecomControl {
 		if (status === 'Suspended') {
 			btn(__('Reactivate'), () => this._custody_dialog(detail, 'Reactivate'), 'btn-primary');
 		}
+		if (TC_RETIRE_FROM.Lost.includes(status)) {
+			btn(__('Mark Lost'), () => this._custody_dialog(detail, 'Lost'), 'btn-danger');
+		}
+		if (TC_RETIRE_FROM.Terminated.includes(status)) {
+			btn(__('Terminate'), () => this._custody_dialog(detail, 'Terminated'), 'btn-danger');
+		}
 		btn(__('Edit Mobile Number'), () => this._edit_mobile_dialog(detail));
 		btn(__('Move to Contract'), () => this._move_contract_dialog(detail));
 		btn(__('Open SIM'), () => frappe.set_route('Form', 'SIM Card', detail.name));
@@ -340,19 +355,34 @@ class TelecomControl {
 
 	_custody_dialog(detail, action) {
 		const needs_custodian = action === 'Assign' || action === 'Transfer';
+		const retiring = Object.prototype.hasOwnProperty.call(TC_RETIRE_FROM, action);
 		const fields = [];
+		if (retiring) {
+			fields.push({
+				fieldtype: 'HTML',
+				fieldname: 'retire_warning',
+				options: `<div class="text-muted">${frappe.utils.escape_html(
+					__('This ends the current custody and retires the SIM. The SIM and its history are kept; the action can be undone by cancelling the custody record.'),
+				)}</div>`,
+			});
+		}
 		if (needs_custodian) {
 			fields.push({ fieldname: 'custodian_type', label: __('Custodian Type'), fieldtype: 'Select', options: 'Employee\nProject', reqd: 1, default: 'Employee' });
 			fields.push({ fieldname: 'employee', label: __('Employee'), fieldtype: 'Link', options: 'Employee', depends_on: "eval:doc.custodian_type=='Employee'", get_query: () => ({ filters: { status: 'Active', company: detail.company } }) });
 			fields.push({ fieldname: 'project', label: __('Project'), fieldtype: 'Link', options: 'Project', depends_on: "eval:doc.custodian_type=='Project'" });
 		}
 		fields.push({ fieldname: 'assignment_date', label: __('Action Date'), fieldtype: 'Date', reqd: 1, default: frappe.datetime.get_today() });
-		fields.push({ fieldname: 'reason', label: __('Reason'), fieldtype: 'Small Text' });
+		// Retirement must say why. The server re-enforces this — the dialog only
+		// saves the user a round trip.
+		fields.push({ fieldname: 'reason', label: __('Reason'), fieldtype: 'Small Text', reqd: retiring ? 1 : 0 });
 
+		// "Lost" / "Terminated" are statuses, not commands — label the button with the
+		// verb the operator is performing.
+		const verb = { Lost: __('Mark Lost'), Terminated: __('Terminate') }[action] || __(action);
 		const dialog = new frappe.ui.Dialog({
-			title: __('{0} SIM {1}', [__(action), detail.mobile_number || detail.name]),
+			title: __('{0} SIM {1}', [verb, detail.mobile_number || detail.name]),
 			fields,
-			primary_action_label: __(action),
+			primary_action_label: verb,
 			primary_action: (values) => {
 				dialog.hide();
 				this._run_action('perform_custody_action', {

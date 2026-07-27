@@ -19,7 +19,15 @@ from frappe.utils import today
 
 from apex.logistay.utils.normalize import normalize_msisdn
 
-_VALID_ACTIONS = ("Assign", "Transfer", "Return", "Suspend", "Reactivate")
+_VALID_ACTIONS = (
+    "Assign",
+    "Transfer",
+    "Return",
+    "Suspend",
+    "Reactivate",
+    "Lost",
+    "Terminated",
+)
 
 
 def _load_sim(sim_card):
@@ -41,8 +49,11 @@ def perform_custody_action(
     """Create and submit one SIM Custody Assignment for the given action.
 
     The controller enforces the state machine, the single-active-custody row lock,
-    the company compatibility check, and the cost-center snapshot. Permission is the
-    acting user's own create/submit right plus the company-scope hook — no bypass.
+    the company compatibility check, the retirement reason, and the cost-center
+    snapshot. Permission is the acting user's own create/submit right plus the
+    company-scope hook — no bypass. Retiring a SIM (Lost / Terminated) travels this
+    same path, so it is a submitted event, not a status edit, and needs no delete
+    right on either DocType.
     """
     if action not in _VALID_ACTIONS:
         frappe.throw(_("Unknown custody action: {0}").format(action))

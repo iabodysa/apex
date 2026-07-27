@@ -95,7 +95,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Fixed monthly salary in SAR. No car and no allowances. Paid via a native ERPNext Payment Entry against this freelance as a party. Permlevel 1 because it is per-person pay, which the field sensitivity model places beside this record's national ID rather than beside its contract dates. Finance Manager and System Manager already hold the permlevel-1 rows, so this costs no new row; the housing roles keep read and write on the record and simply stop seeing this column.",
+   "description": "Fixed monthly salary in SAR. No car and no allowances. Paid via a native ERPNext Payment Entry against this freelance as a party. Pay is personal so only Finance and System Manager can see this column.",
    "fieldname": "monthly_salary",
    "fieldtype": "Currency",
    "in_list_view": 1,
