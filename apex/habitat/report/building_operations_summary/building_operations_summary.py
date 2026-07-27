@@ -156,15 +156,31 @@ def _cleaning(building_names, date_from, date_to):
 
 
 def _safety_inspections(building_names, date_from, date_to):
+    """Submitted safety checks per building in the window, across BOTH records.
+
+    Safety Round is the live one. Safety Inspection Report is deprecated and
+    nothing produces a new one, but it is still counted: it is the only record
+    that exists for a period before the cutover, and reading only Safety Round
+    would silently drop those periods to zero -- a report that empties reads as
+    "the buildings were never checked", which is the opposite of the truth.
+    The legacy leg becomes naturally dead as its window ages out; it is a read of
+    history, not a write, so it does not keep the deprecated record alive.
+
+    Each record carries its own date field (round_date / inspection_date), so the
+    window is applied per leg rather than once.
+    """
     result = defaultdict(int)
-    rows = frappe.get_all(
-        "Safety Inspection Report",
-        filters={"building": ["in", building_names], "docstatus": 1,
-                 "inspection_date": ["between", [str(date_from), str(date_to)]]},
-        fields=["building"],
-    )
-    for r in rows:
-        result[r.building] += 1
+    window = ["between", [str(date_from), str(date_to)]]
+    for doctype, date_field in (("Safety Round", "round_date"),
+                                ("Safety Inspection Report", "inspection_date")):
+        rows = frappe.get_all(
+            doctype,
+            filters={"building": ["in", building_names], "docstatus": 1,
+                     date_field: window},
+            fields=["building"],
+        )
+        for r in rows:
+            result[r.building] += 1
     return result
 
 
