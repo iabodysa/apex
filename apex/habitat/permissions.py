@@ -201,6 +201,38 @@ def housing_checkout_query(user=None):
     )
 
 
+def room_bed_transfer_query(user=None):
+    """Scope Room Bed Transfer to the user's buildings through its ``assignment``.
+
+    The DocType carries no ``building`` column, so ``_building_condition`` cannot
+    serve it: the estate is one hop away as ``assignment`` ->
+    ``Housing Assignment.building``, the same subquery shape
+    ``housing_checkout_query`` uses for its ``bed`` hop.
+
+    One anchor is enough BECAUSE the controller rejects a cross-building move: the
+    source and target buildings of a valid transfer are the same building, so the
+    assignment's estate is the whole estate the record touches. Were that rule ever
+    relaxed, this fragment would have to widen to both endpoints (the
+    ``_dual_building_condition`` shape) or it would leak.
+
+    Renders the two edge cases exactly like every sibling housing fragment: "" for
+    the Administrator and the oversight roles, "1=0" for a scoped user holding no
+    building. A transfer whose ``assignment`` is somehow unset matches no subquery
+    row and stays hidden: fail closed.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return ""
+    buildings = _allowed_buildings(user)
+    if not buildings:
+        return "1=0"
+    escaped = ", ".join(frappe.db.escape(b) for b in buildings)
+    return (
+        "`assignment` in (select `name` from `tabHousing Assignment` "
+        "where `building` in ({values}))".format(values=escaped)
+    )
+
+
 def housing_checkout_has_permission(doc, ptype, user=None):
     """Deny a scoped user acting on a checkout outside their buildings.
 
@@ -262,6 +294,9 @@ BUILDING_FETCH_ANCHOR = {
     "Housing Inventory": ("room", "Room"),
     "Maintenance Work Order": ("maintenance_request", "Maintenance Request"),
     "Resident Request": ("bed", "Bed"),
+    # The transfer has no building of its own; its estate is the assignment's, and
+    # the controller's cross-building rejection keeps source and target identical.
+    "Room Bed Transfer": ("assignment", "Housing Assignment"),
     "Scheduled Task Instance": ("assignment", "Scheduled Task Assignment"),
 }
 

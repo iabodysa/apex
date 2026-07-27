@@ -9,11 +9,16 @@ N+1-free call per pane) to render two side-by-side building bed grids. The only
 write is :func:`transfer_occupant`, which resolves the move SERVER-SIDE and then
 builds + submits a real Room Bed Transfer so the existing controller runs:
 
-- ``validate()`` rejects an Out-of-Service or already-Occupied target and checks
-  bed/room/building consistency;
-- ``on_submit()`` flips the bed statuses and re-points the active assignment's
+- ``validate()`` rejects an Out-of-Service or already-Occupied target, checks
+  bed/room/building consistency, and REJECTS A CROSS-BUILDING MOVE;
+- ``on_submit()`` flips the bed statuses, re-points the active assignment's
   ``bed`` / ``room`` / ``building`` in place (no new assignment, no checkout, no
-  ledger entry).
+  ledger entry), and recalculates the room/building occupancy counters.
+
+The cross-building rule used to be raised HERE as well. It is not any more: this
+page is one caller among several, so a copy of the rule in the page left the Desk
+form, ``frappe.client`` REST and Data Import free to bypass it. The rule now lives
+only in the controller, where every path meets it, and this page inherits it.
 
 Concurrency: the integrity guarantee lives in the controller, not in this page.
 The Room Bed Transfer controller is being hardened with a ``SELECT ... FOR
@@ -43,16 +48,14 @@ def transfer_occupant(source_bed, target_bed, transfer_date=None, reason=None):
 
     1. Resolve the single active Accommodation Assignment on ``source_bed``
        (``docstatus == 1`` AND ``check_out_date`` is not set). Throw if none.
-    2. Resolve the target room from ``target_bed``; resolve both beds' buildings.
-    3. Reject cross-building moves (the Room Bed Transfer controller is defined
-       for intra-building moves; cross-building must go through Check-out plus a
-       new Check-in so cost-center / allowance effects run).
-    4. Build ``{doctype: "Room Bed Transfer", assignment, to_room, to_bed,
+    2. Resolve the target room from ``target_bed``.
+    3. Build ``{doctype: "Room Bed Transfer", assignment, to_room, to_bed,
        transfer_date or today, reason}``. ``from_bed`` and ``employee`` are
        ``fetch_from`` the assignment on the DocType, so they are NOT set here.
-    5. ``insert()`` + ``submit()`` so the Room Bed Transfer controller runs
-       natively (validation, the SELECT ... FOR UPDATE target-bed lock, bed
-       status flips, and the in-place assignment re-point).
+    4. ``insert()`` + ``submit()`` so the Room Bed Transfer controller runs
+       natively — including its cross-building rejection, the SELECT ... FOR
+       UPDATE target-bed lock, the bed status flips, the in-place assignment
+       re-point, and the occupancy recalculation.
 
     This method adds NO bed-status, locking, or ledger logic of its own.
 
@@ -91,13 +94,6 @@ def transfer_occupant(source_bed, target_bed, transfer_date=None, reason=None):
     )
     if not target_room or not target_building:
         frappe.throw(_("Target bed {0} is not linked to a room and building.").format(target_bed))
-
-    source_building = frappe.db.get_value("Bed", source_bed, "building")
-
-    if source_building and target_building and source_building != target_building:
-        frappe.throw(
-            _("Cross-building moves are not supported here. Use Check-out and a new Check-in.")
-        )
 
     doc = frappe.get_doc(
         {

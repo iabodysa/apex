@@ -1,8 +1,24 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Room Bed Transfer controller.
 
-In-place move of an active occupant from one bed to another without closing
-and re-opening the Accommodation Assignment.
+In-place move of an active occupant from one bed to another WITHIN ONE BUILDING,
+without closing and re-opening the Housing Assignment.
+
+The cross-building rule lives here, in ``validate()``, and nowhere else. That is
+the one choke point every write path passes — the Desk form, ``frappe.client``
+REST, Data Import, a Server Script, and the Transfer Board page — because
+``submit()`` re-runs ``validate()`` on the submitting save (document.py:1080-1083
+-> :1123-1131). A copy of the rule in the Transfer Board API would leave every
+other path open, which is exactly the gap this controller closes.
+
+Why the rule is a REJECTION and not a re-derivation: the move re-points the live
+assignment with ``db_set``, which writes straight to the row and never runs
+``Housing Assignment.validate()``. That validate is what derives ``cost_center``
+from the building (and its Company), and ``housing_allowance_suspended`` is only
+ever set in the assignment's own ``on_submit``. A building change made here would
+therefore carry the OLD building's cost centre and allowance state into the NEW
+building's Company. Housing Checkout plus a fresh check-in is the path that runs
+those effects, so a cross-building move goes there.
 """
 
 from __future__ import annotations
@@ -12,10 +28,27 @@ from frappe import _
 from frappe.model.document import Document
 
 from apex.apex_core.utils.party_link import sync_party_employee
+from apex.habitat.doctype.housing_assignment.housing_assignment import recalculate_spatial
 
 
 class RoomBedTransfer(Document):
     pass
+
+
+def _source_building(doc):
+    """Building the resident is being moved OUT of, or None.
+
+    The live Housing Assignment is authoritative because ``on_submit`` re-points
+    exactly that row. ``from_bed`` is only the fallback: it is a ``fetch_from``
+    snapshot taken when the draft was saved and is NOT refreshed on the submitting
+    save (base_document.py:850 skips the fetch once ``docstatus`` is submitted).
+    """
+    building = None
+    if doc.assignment:
+        building = frappe.db.get_value("Housing Assignment", doc.assignment, "building")
+    if not building and doc.from_bed:
+        building = frappe.db.get_value("Bed", doc.from_bed, "building")
+    return building
 
 
 def validate(doc, method=None):
@@ -40,14 +73,34 @@ def validate(doc, method=None):
     if not to_building:
         frappe.throw(_("Target Room {0} is not associated with any Building.").format(doc.to_room))
 
+    # The single cross-building rule. Same wording the Transfer Board used to raise
+    # on its own, so the operator sees no change and the string stays translated.
+    from_building = _source_building(doc)
+    if from_building and from_building != to_building:
+        frappe.throw(
+            _("Cross-building moves are not supported here. Use Check-out and a new Check-in.")
+        )
+
 
 def on_submit(doc, method=None):
     # [#lfwp8g]
     asg = frappe.db.get_value(
-        "Housing Assignment", doc.assignment, ["docstatus", "check_out_date"], as_dict=True
+        "Housing Assignment",
+        doc.assignment,
+        ["docstatus", "check_out_date", "bed", "room", "building"],
+        as_dict=True,
     )
     if not asg or asg.docstatus != 1 or asg.check_out_date:
         frappe.throw(_("This transfer needs an active (checked-in) assignment to move."))
+
+    # from_bed is frozen at draft save. If the resident has moved since, freeing it
+    # would release a bed that is no longer theirs and strand the one they now hold.
+    if asg.bed != doc.from_bed:
+        frappe.throw(
+            _("This transfer was raised from Bed {0} but the resident is now in Bed {1}.").format(
+                doc.from_bed, asg.bed
+            )
+        )
 
     # [#hzjmc4]
     locked_status = frappe.db.get_value("Bed", doc.to_bed, "status", for_update=True)
@@ -64,19 +117,43 @@ def on_submit(doc, method=None):
     assignment.db_set("room", doc.to_room)
     assignment.db_set("building", to_building)
 
+    # db_set skips validate(), so nothing else recomputes the spatial counters.
+    # Both endpoints, and after the re-point, or one side is counted twice.
+    recalculate_spatial(asg.room, asg.building)
+    recalculate_spatial(doc.to_room, to_building)
+
 
 def on_cancel(doc, method=None):
     # [#l362nf]
-    frappe.db.set_value("Bed", doc.to_bed, "status", "Available")
-    frappe.db.set_value("Bed", doc.from_bed, "status", "Occupied")
+    asg = frappe.db.get_value(
+        "Housing Assignment",
+        doc.assignment,
+        ["docstatus", "check_out_date", "bed"],
+        as_dict=True,
+    )
+    # Refuse rather than half-reverse: flipping the beds back while the resident has
+    # since moved on (or checked out) leaves from_bed Occupied by nobody.
+    if not asg or asg.docstatus != 1 or asg.check_out_date or asg.bed != doc.to_bed:
+        frappe.throw(
+            _("This transfer can no longer be reversed: the resident is no longer in Bed {0}.").format(
+                doc.to_bed
+            )
+        )
 
     from_room = frappe.db.get_value("Bed", doc.from_bed, "room")
     from_building = (
         frappe.db.get_value("Room", from_room, "building") if from_room else None
     )
+    to_building = frappe.db.get_value("Room", doc.to_room, "building")
+
+    frappe.db.set_value("Bed", doc.to_bed, "status", "Available")
+    frappe.db.set_value("Bed", doc.from_bed, "status", "Occupied")
+
     # [#egcusl]
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)
-    if assignment.bed == doc.to_bed:
-        assignment.db_set("bed", doc.from_bed)
-        assignment.db_set("room", from_room)
-        assignment.db_set("building", from_building)
+    assignment.db_set("bed", doc.from_bed)
+    assignment.db_set("room", from_room)
+    assignment.db_set("building", from_building)
+
+    recalculate_spatial(doc.to_room, to_building)
+    recalculate_spatial(from_room, from_building)
