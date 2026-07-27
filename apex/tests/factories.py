@@ -656,6 +656,46 @@ def make_assignment(employee, building, project, room_number=None, bed_code=None
     return doc.name
 
 
+def make_open_assignment(employee, building, add_cleanup):
+    """A submitted, still-open Housing Assignment placing ``employee`` in
+    ``building`` — the SYNTHETIC-row twin of ``make_assignment`` above.
+
+    Bypasses the controller entirely (``ignore_validate`` plus a direct
+    ``docstatus`` write) so no ledger posting or party-link mirroring fires. The
+    building-scope suites that share this pin a READ scope, not the write
+    controllers, and a real ``submit()`` would drag in the Room / Bed / company /
+    cost-center fixtures they otherwise never need. Reach for ``make_assignment``
+    instead whenever the controller's own behaviour is what is under test.
+
+    ``add_cleanup`` is injected rather than assumed, matching
+    ``make_scoped_supervisor``: each test class owns its own cleanup scope. The
+    registered teardown resets ``docstatus`` before deleting, because a submitted
+    document cannot be removed.
+    """
+    doc = frappe.get_doc(
+        {
+            "doctype": "Housing Assignment",
+            "party_type": "Employee",
+            "party": employee,
+            "employee": employee,
+            "building": building,
+            "check_in_date": today(),
+        }
+    )
+    doc.flags.ignore_validate = True
+    doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+    frappe.db.set_value("Housing Assignment", doc.name, "docstatus", 1)
+    add_cleanup(
+        lambda n=doc.name: (
+            frappe.db.set_value("Housing Assignment", n, "docstatus", 0),
+            frappe.delete_doc(
+                "Housing Assignment", n, force=True, ignore_permissions=True
+            ),
+        )
+    )
+    return doc.name
+
+
 def make_worker_trip(
     driver,
     project,
