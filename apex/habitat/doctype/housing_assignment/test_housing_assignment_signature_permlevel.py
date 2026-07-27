@@ -270,6 +270,12 @@ class TestHousingAssignmentSignaturePermlevel(FrappeTestCase):
                     "terms_signature": _SIGNATURE,
                 }
             )
+            # `insert` sets this at document.py:295, eleven lines before it calls
+            # validate_higher_perm_levels at :306, and `is_new()` reads exactly that flag
+            # (base_document.py:465). Setting it here is what makes this the CREATE path:
+            # without it the reset would resolve from `get_latest()` — a stored row that
+            # does not exist yet — and the test would silently be about updates instead.
+            fresh.set("__islocal", True)
             self.assertTrue(fresh.is_new(), "precondition: the create path needs a NEW doc")
             fresh.validate_higher_perm_levels()
             return fresh.terms_signature
