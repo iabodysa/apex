@@ -4514,9 +4514,9 @@ Payable Source Required,مصدر الالتزام مطلوب
 Select the {0} this payment settles. A payment with no invoice behind it settles nothing in the ledger.,اختر {0} التي يسددها هذا الدفع. الدفع بلا فاتورة خلفه لا يسدد شيئاً في دفتر الأستاذ.
 The submitted supplier invoice this payment settles.,فاتورة المورّد المعتمدة التي يسددها هذا الدفع.
 There is no submitted Purchase Invoice outstanding for {0} under this company. Raise and submit the supplier invoice first — a payment with no invoice behind it settles nothing.,لا توجد فاتورة شراء معتمدة ومستحقة للمورّد {0} في هذه الشركة. أصدر فاتورة المورّد واعتمدها أولاً — فالدفع بلا فاتورة خلفه لا يسدد شيئاً.
-"{0} {1} belongs to company {2}, not the contract's company {3}.",{0} {1} تتبع الشركة {2} وليست شركة العقد {3}.
+"{0} {1} belongs to company {2}, not company {3}.",{0} {1} تتبع الشركة {2} وليست الشركة {3}.
 {0} {1} has nothing outstanding — it is already settled.,{0} {1} لا يوجد عليها مبلغ مستحق — فهي مسددة بالفعل.
-"{0} {1} is billed by {2}, not the contract's supplier {3}.",{0} {1} صادرة من المورّد {2} وليس مورّد العقد {3}.
+"{0} {1} is billed by {2}, not by {3}.",{0} {1} صادرة من المورّد {2} وليس من {3}.
 {0} {1} is not submitted. Only an approved invoice can be paid.,{0} {1} غير معتمدة. لا يمكن دفع سوى فاتورة معتمدة.
 Facility Asset {0} has moved on to {1} since this record; cancelling it now would undo a later relocation. Cancel the newest relocation first.,الأصل {0} انتقل إلى {1} بعد هذا السجل؛ وإلغاؤه الآن يُلغي نقلة أحدث منه. ألغِ أحدث نقلة أولًا.
 Authorized By (Record Only),المُخوِّل (للسجل فقط)
@@ -4525,3 +4525,14 @@ Cannot reverse {0} unit(s) of {1} in {2}: employee {3} now holds only {4}. Rever
 Cannot reverse {0} unit(s) of {1} in {2}: only {3} left in the building store. Reverse the later movements first.,لا يمكن عكس {0} وحدة من {1} في {2}: لم يتبقَّ في مخزن المبنى سوى {3}. اعكس الحركات الأحدث أولًا.
 Fuel Quota {0} is exhausted ({1} of {2} L already consumed). Raise a Top-up request to dispense more fuel this period.,حصة الوقود {0} استُنفدت (صُرف {1} من {2} لتر). أنشئ طلب دعم إضافي لصرف وقود إضافي هذه الفترة.
 "This request of {0} L exceeds the {1} L left on Fuel Quota {2} ({3} of {4} L already consumed). Reduce the request, or raise a Top-up request to dispense more fuel this period.",هذا الطلب {0} لتر يتجاوز المتبقي {1} لتر في حصة الوقود {2} (صُرف {3} من {4} لتر). قلّل الكمية المطلوبة، أو أنشئ طلب دعم إضافي لصرف وقود إضافي هذه الفترة.
+Raise Rent Payment,إصدار دفعة إيجار
+Instalment Due Date,تاريخ استحقاق القسط
+Select the rent instalment this payment covers.,اختر قسط الإيجار الذي تغطيه هذه الدفعة.
+The submitted landlord invoice this payment settles.,فاتورة المؤجّر المعتمدة التي تسددها هذه الدفعة.
+No payment raised for this instalment yet.,ما صدرت دفعة لهذا القسط بعد.
+Lease {0} does not exist.,العقد {0} غير موجود.
+Lease {0} has no rent instalment due on {1}.,العقد {0} ما فيه قسط إيجار مستحق في {1}.
+Rent payments can only be raised from a submitted lease.,دفعات الإيجار تُصدر من عقد معتمد فقط.
+"Rent for {0} — instalment due {1} ({2}), settling {3}.",إيجار {0} — قسط مستحق في {1} ({2})، تسديد {3}.
+Set a Landlord on lease {0} before raising a rent payment — a payment needs a party to settle with.,حدّد المؤجّر في العقد {0} قبل إصدار دفعة إيجار — الدفعة تحتاج طرفًا تُسدَّد له.
+There is no submitted Purchase Invoice outstanding for {0} under this company. Raise and submit the landlord invoice first — a payment with no invoice behind it settles nothing.,ما فيه فاتورة شراء معتمدة ومستحقة لـ {0} في هذه الشركة. أصدر فاتورة المؤجّر واعتمدها أولًا — دفعة بلا فاتورة خلفها لا تسدّد شيئًا.
