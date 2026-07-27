@@ -4,9 +4,11 @@
 Proves the financial side effects of habitat/doctype/utility_bill_entry:
 - on_submit posts exactly ONE Accommodation Ledger row carrying the building's
   share (total_site_cost == bill_amount, no reversal_of);
-- before_cancel posts a SECOND, offsetting row (total_site_cost negative,
+- on_cancel posts a SECOND, offsetting row (total_site_cost negative,
   reversal_of == the original row) -- the reversal that keeps the building cost
   allocation balanced;
+- before_cancel refuses only, so a cancel blocked after it has run leaves no
+  offsetting row behind;
 - _compute_sharing turns a shared-meter invoice (total_bill_amount +
   cost_bearing_pct) into the posted building share.
 
@@ -35,6 +37,24 @@ def _hash(n: int = 12) -> str:
 
 # [#19fkf8]
 _NOT_REVERSAL = ["is", "not set"]
+
+_REFUSING_HANDLER = (
+    "apex.habitat.doctype.utility_bill_entry."
+    "test_utility_bill_ledger_posting.refuse_cancel"
+)
+
+
+def refuse_cancel(doc, method=None):
+    """Test-only SECOND before_cancel handler for Utility Bill Entry.
+
+    Registered at the END of the doctype's before_cancel handler list so it
+    runs AFTER the controller's own: Document.hook's compose calls the class
+    method first, then each doc_events handler in list order
+    (frappe/model/document.py:1354-1374). Raises the exception class directly
+    rather than through frappe.throw so this refusal never enters the
+    translation surface.
+    """
+    raise frappe.ValidationError("Utility Bill Entry cancel refused after before_cancel")
 
 
 class TestUtilityBillLedgerPosting(FrappeTestCase):
@@ -176,6 +196,82 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
         self.assertEqual(
             flt(sum(flt(r.total_site_cost) for r in all_rows)), 0.0,
             "post and reversal must net to zero",
+        )
+
+    def _refuse_cancel_after_before_cancel(self):
+        """Append refuse_cancel to Utility Bill Entry's before_cancel handlers.
+
+        frappe.local.doc_events_hooks is a process global that no test rollback
+        undoes, so the patch is a fresh copy and cleanup restores the original
+        dict BY IDENTITY -- mutating the cached dict in place would leak the
+        extra handler into every later test sharing this process.
+        """
+        original = frappe.get_doc_hooks()
+        patched = {
+            doctype: {event: list(handlers) for event, handlers in events.items()}
+            for doctype, events in original.items()
+        }
+        patched.setdefault("Utility Bill Entry", {}).setdefault(
+            "before_cancel", []
+        ).append(_REFUSING_HANDLER)
+
+        self.addCleanup(setattr, frappe.local, "doc_events_hooks", original)
+        frappe.local.doc_events_hooks = patched
+        self.assertIs(
+            frappe.get_doc_hooks(), patched,
+            "the refusing handler must be the live hook table, not a discarded copy",
+        )
+
+    def test_a_refusal_after_before_cancel_posts_no_reversal(self):
+        """A cancel refused once before_cancel has run must leave the ledger clean.
+
+        Frappe dispatches every before_cancel handler from
+        run_before_save_methods() (frappe/model/document.py:414), strictly
+        before db_update() stamps docstatus 2 (:428) and before on_cancel runs
+        (:431). The controller's before_cancel only reads, so a refusal raised
+        after it aborts the cancel with nothing written -- where an insert done
+        from before_cancel would leave an offsetting row on the books for a
+        cancel that never completed.
+        """
+        bill = self._bill(bill_amount=1200)
+        bill.insert(ignore_permissions=True)
+        submit_via_workflow(bill)
+        self.assertEqual(
+            len(self._ledger_rows(bill.name, reversal=False)), 1,
+            "precondition: one period row exists",
+        )
+
+        self._refuse_cancel_after_before_cancel()
+
+        bill.reload()
+        bill.cancellation_reason = "QA refusal"
+        with self.assertRaises(frappe.ValidationError):
+            bill.cancel()
+
+        # docstatus is NOT evidence of a refusal: Document._cancel() assigns
+        # self.docstatus = 2 (frappe/model/document.py:1085) before save() is
+        # ever called, so the in-memory attribute reads 2 whichever hook
+        # refused. Grade the stored row, then a reload.
+        self.assertEqual(
+            frappe.db.get_value("Utility Bill Entry", bill.name, "docstatus"), 1,
+            "a refused cancel must leave the bill submitted, not cancelled-in-the-row",
+        )
+        bill.reload()
+        self.assertEqual(
+            bill.docstatus, 1,
+            "reloading the bill in the same request must still read it as submitted",
+        )
+        self.assertEqual(
+            frappe.db.count(
+                "Accommodation Ledger",
+                {
+                    "source_doctype": "Utility Bill Entry",
+                    "source_name": bill.name,
+                    "reversal_of": ["is", "set"],
+                },
+            ),
+            0,
+            "a refused cancel must post no offsetting Accommodation Ledger row",
         )
 
     def test_shared_meter_posts_only_the_bearing_share(self):
