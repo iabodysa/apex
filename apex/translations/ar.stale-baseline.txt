@@ -28,6 +28,8 @@ Client Code
 Component
 Consent
 Content
+Could not complete the Work Order. No changes were saved. Please try again or contact support.
+Could not update bed occupancy. The assignment was not submitted.
 Create Records
 Day
 Deduction
