@@ -57,8 +57,16 @@ PAYABLE_SOURCE_DOCTYPE = "Purchase Invoice"
 
 
 def _load_eligible_contract(contract: str):
-    """Return the submitted Telecom Contract the caller may read, or throw."""
-    if not contract or not frappe.db.exists("Telecom Contract", contract):
+    """Return the submitted Telecom Contract the caller may read, or throw.
+
+    ``contract`` arrives from a whitelisted endpoint, so the existence probe filters
+    on ``name``: the positional form answers the value back without querying when it
+    equals the DocType (database.py:1259), letting the literal string "Telecom
+    Contract" clear this gate and reach ``get_doc`` — which raises a bare framework
+    404 instead of the named refusal below. Permission checking is unaffected; what
+    the short-circuit costs is this function's own message.
+    """
+    if not contract or not frappe.db.exists("Telecom Contract", {"name": contract}):
         frappe.throw(_("Telecom Contract {0} does not exist.").format(contract))
     doc = frappe.get_doc("Telecom Contract", contract)
     # Company-scoped read permission (has_permission hook enforces company scope).
@@ -276,7 +284,7 @@ def _load_eligible_payable(contract_doc, purchase_invoice: str):
             ).format(_(PAYABLE_SOURCE_DOCTYPE)),
             title=_("Payable Source Required"),
         )
-    if not frappe.db.exists(PAYABLE_SOURCE_DOCTYPE, purchase_invoice):
+    if not frappe.db.exists(PAYABLE_SOURCE_DOCTYPE, {"name": purchase_invoice}):
         frappe.throw(
             _("{0} {1} does not exist.").format(_(PAYABLE_SOURCE_DOCTYPE), purchase_invoice)
         )

@@ -57,9 +57,21 @@ class _StubDB:
         return key in rows
 
 
+class _Thrown(Exception):
+    """What the module's own ``frappe.throw`` refusal looks like to these cases."""
+
+
 class _StubFrappe:
     def __init__(self, present):
         self.db = _StubDB(present)
+        self.loaded = []
+
+    def throw(self, message, **_kwargs):
+        raise _Thrown(message)
+
+    def get_doc(self, doctype, name):
+        self.loaded.append((doctype, name))
+        raise AssertionError(f"the guard let {doctype} {name!r} through to get_doc")
 
 
 def _run(rows, present, document_type):
@@ -123,6 +135,36 @@ class TestRecordedNameIsVerifiedAgainstTheDatabase(unittest.TestCase):
             document_type="Material Request",
         )
         self.assertIsNone(found)
+
+
+class TestWhitelistedIdentifiersCannotClearTheirOwnGate(unittest.TestCase):
+    """The reachable half of the same defect: both loaders take their identifier
+    straight from a whitelisted endpoint, so a caller can pass the DocType name
+    itself and clear an existence gate without a query. The document is still
+    absent, so ``get_doc`` then raises a bare framework 404 in place of the named
+    refusal each loader defines — the guard is skipped, not the permission check.
+    """
+
+    def _refuses(self, call, doctype):
+        stub = _StubFrappe({doctype: set()})
+        with patch.object(contract_billing, "frappe", stub), patch.object(
+            contract_billing, "_", lambda text: text
+        ):
+            with self.assertRaises(_Thrown):
+                call()
+        self.assertEqual(stub.loaded, [], "the refusal must land before get_doc")
+
+    def test_a_contract_id_equal_to_its_doctype_is_refused(self):
+        self._refuses(
+            lambda: contract_billing._load_eligible_contract("Telecom Contract"),
+            "Telecom Contract",
+        )
+
+    def test_a_payable_id_equal_to_its_doctype_is_refused(self):
+        self._refuses(
+            lambda: contract_billing._load_eligible_payable(_Contract([]), "Purchase Invoice"),
+            "Purchase Invoice",
+        )
 
 
 if __name__ == "__main__":
