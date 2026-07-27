@@ -52,7 +52,13 @@ def run(csv_dir=None):
     made = 0
     for r in _read(csv_dir, "vehicle_category.csv"):
         cn = (r.get("category_name") or "").strip()
-        if cn and not frappe.db.exists("Vehicle Category", cn):
+        # Name-filtered: both masters autoname by their name field, so the CSV value
+        # IS the row name. Probed positionally, frappe.db.exists answers the value
+        # back without querying when it equals the DocType (database.py:1259), so a
+        # category named "Vehicle Category" read as already-imported and its row was
+        # dropped without a count or a log. The dict form always queries, and the
+        # field-autoname keeps it duplicate-safe: the inserted row bears this name.
+        if cn and not frappe.db.exists("Vehicle Category", {"name": cn}):
             try:
                 frappe.get_doc({"doctype": "Vehicle Category", "category_name": cn,
                                 "default_fuel_type": (r.get("default_fuel_type") or "").strip() or None}
@@ -66,7 +72,7 @@ def run(csv_dir=None):
     made = 0
     for r in _read(csv_dir, "rental_office.csv"):
         on = (r.get("office_name") or "").strip()
-        if on and not frappe.db.exists("Rental Office", on):
+        if on and not frappe.db.exists("Rental Office", {"name": on}):
             try:
                 frappe.get_doc({"doctype": "Rental Office", "office_name": on,
                                 "status": (r.get("status") or "Active").strip()}).insert(ignore_permissions=True)  # audit-ok: admin bulk migration loader
