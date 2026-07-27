@@ -65,7 +65,6 @@ _BASELINE: dict[str, dict[str, int]] = {
     "apex_core/test_routed_payment_serialization.py": {"long-docstring": 1},
     "apex_core/utils/report_role_guard.py": {"long-docstring": 1},
     "apex_core/utils/request_ip_trust.py": {"long-docstring": 1},
-    "apex_core/utils/test_report_role_guard.py": {"long-docstring": 1},
     "apex_core/utils/workflow_guard.py": {"long-docstring": 1},
     "change_log/test_release_note_claims.py": {"long-docstring": 1},
     "habitat/doctype/facility_asset_movement/"
@@ -92,8 +91,8 @@ _BASELINE: dict[str, dict[str, int]] = {
 # That is its own card, drained per module. Until then these can only FALL: an
 # added id fails, and each module drained lowers the number.
 _KIND_CEILING: dict[str, int] = {
-    KIND_DOCSTRING_ID: 376,
-    KIND_COMMENT_ID: 79,
+    KIND_DOCSTRING_ID: 368,
+    KIND_COMMENT_ID: 77,
 }
 
 

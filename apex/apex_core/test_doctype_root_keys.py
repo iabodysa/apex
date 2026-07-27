@@ -39,15 +39,9 @@ FRAPPE_DOCTYPE_JSON = os.path.join(
     "frappe", "core", "doctype", "doctype", "doctype.json"
 )
 
-# The engine records kept out of Desk search. This is the SAME 22 that once shipped the
-# inert root ``hidden`` key -- when that placebo was dropped the concealment intent was
-# re-expressed as root ``read_only``, which frappe actually honours. They are machine
-# written: posting ledgers, period snapshots, and scan/attendance logs that an operator
-# reaches through their own surfaces, never by typing a name into the awesomebar.
-#
-# Written as an explicit SET rather than a count because a count cannot tell a swap from
-# a no-op: one record silently losing the flag while another gains it keeps the total
-# and loses the policy.
+# Machine-written engine records kept out of Desk search: the SAME 22 that once shipped
+# the inert root ``hidden`` key, re-expressed as root ``read_only``, which frappe honours.
+# A SET rather than a count, because a count cannot tell a swap from a no-op.
 SEARCH_CONCEALED = frozenset({
     "Accommodation Ledger",
     "Accommodation Stock Ledger",

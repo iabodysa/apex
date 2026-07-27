@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-201 — the Report ``validate`` hook that refuses an unrunnable role.
+"""The Report ``validate`` hook that refuses an unrunnable role.
 
 Pure-Python against a stubbed frappe, so the refusal is proven with no live site: the
 shared bench was closed to writes for this wave, and the guard's whole job is to make a
@@ -13,7 +13,7 @@ records what the hook did (throw / msgprint). Every test patches
 ``report_role_guard.frappe`` with it, so the same assertions hold whether the real frappe
 is importable or not — which is what makes the documented standalone command honest.
 
-Four properties, matching the card's proofs:
+Four properties:
 
 1. REFUSED — a role its ``ref_doctype`` denies is thrown on, and the message names both
    the role and the ref_doctype. Driven for all four denial shapes (no row, permlevel
@@ -21,11 +21,13 @@ Four properties, matching the card's proofs:
 2. ALLOWED — a role whose ref DOES grant ``report`` saves with nothing raised and
    nothing printed. Without this control a hook that refused everything would look right.
 3. THE APP'S OWN REPORTS STILL SAVE — every shipped Report JSON is replayed through the
-   hook as both the incoming and the stored document, and none of them throws. A-211 took
-   ``KNOWN_UNRUNNABLE_REPORT_ROLES`` from seven entries to three; A-216 took the last
-   three to ZERO, so every role named on a shipped report can now actually run it. The set
-   stays exact-equality, so a NEW offender fails the build rather than being absorbed —
-   and with the baseline empty, the guard is now a plain invariant rather than a ratchet.
+   hook as both the incoming and the stored document, and none of them throws. Every role
+   named on a shipped report can now actually run it: ``KNOWN_UNRUNNABLE_REPORT_ROLES`` is
+   empty, so the set stays exact-equality (a NEW offender fails the build) and the guard is
+   now a plain invariant rather than a ratchet. The drain history and the per-role
+   permission reasoning that emptied it live in
+   ``_staging/2026-07-27-report-role-guard-drain-history.md`` (design rationale, not test
+   logic).
 4. THE DETECTOR CAN FAIL — every clause has a control that must stay clean, and
    ``test_removing_the_report_flag_check_lets_the_offender_through`` reproduces the
    guard with that one clause deleted and asserts it goes blind.
@@ -33,109 +35,6 @@ Four properties, matching the card's proofs:
 Also proven here, because they are the two ways this hook could do damage:
 ``TestAMigrateIsNeverAborted`` (no throw under any migration flag) and
 ``TestAPreExistingRoleDoesNotBrickAnEdit`` (no throw for a role already stored).
-
-THE A-211 DRAIN — four of the seven entries resolved
-----------------------------------------------------
-All seven frozen entries reached their role through the Reports list and the awesomebar
-(``boot.get_user_pages_or_reports``) rather than a workspace card, which is why A-200's
-workspace sweep never saw them. Each was judged on its own evidence rather than flattened
-by a blanket grant. Both roles involved are named in ``habitat/permissions.py``
-``HOUSING_UNSCOPED_ROLES`` and ``salis/permissions.py`` ``UNSCOPED_ROLES``, and all seven
-reports re-apply that scope themselves in Python, so no grant below lifts a row filter the
-role was actually held behind — the usual "a Script Report bypasses
-permission_query_conditions" hazard does not fire for these two roles.
-
-GRANTED ``report`` on the ref, because the role's own charter already demanded it and the
-record carries no personal data:
-
-* ``Facility Asset Movement`` / ``Finance Manager`` — read+report at permlevel 0. The
-  DocType ships an ``accounting_acknowledged``/``accounting_acknowledged_by`` gate, and
-  the controller refuses to submit an Intercompany Permanent movement that is not
-  acknowledged, so an accounting sign-off is enforced on this document. A-218 later
-  dropped the "(Finance)" parenthetical from that field's label, because the role holds
-  no write here and so was never the one closing the gate; that narrows the label, not
-  this read-only grant.
-* ``Operational Depreciation Snapshot`` / ``Finance Manager`` — read+report at permlevel
-  0. Book values over ``Custody Article``, carrying no personal data; the role already
-  reports on both sibling snapshots (Occupancy, Vehicle Utilisation) and on the whole
-  Habitat cost surface.
-* ``Fuel Daily Log`` / ``Finance Manager`` — ``report`` added to the row it already held.
-  The role reports on 5 of the 6 Fuel DocTypes it touches and uniquely holds ``write``
-  here; the grant widens no row and no field, only the list/report view.
-
-DROPPED from the report instead, because a grant would have been a real widening:
-
-* ``Custody Damage Register`` / ``Finance Manager``. The role's only row on Custody Damage
-  Assessment is permlevel 1, read+write over exactly ``total_estimated_replacement_cost``
-  — a layered field unlock on a document another role opens, not a document grant, because
-  ``is_perm_applicable`` keeps only permlevel-0 rows (frappe/permissions.py:283-284), so
-  the role cannot open that document at all. A permlevel-0 row would have handed it the
-  damaged ``items``, ``remarks`` and the ``deduction_entry`` payroll link, none of which
-  it reaches today.
-
-  A-279 CORRECTS a second clause this entry used to carry — "it holds no permlevel-0 row
-  anywhere else in the custody domain" — which was FALSE, and false in the direction that
-  stops the next reader looking. Accommodation Stock Ledger grants Finance Manager
-  read+report+export+print+email+share at permlevel 0, the role is named in
-  ``habitat/permissions.py`` ``HOUSING_UNSCOPED_ROLES``, and
-  ``accommodation_stock_ledger_query`` therefore returns "" — no row filter, every
-  building. That ledger carries ``employee`` ("Employee (Custodian)"), ``signed_qty`` and
-  ``unit_cost`` at permlevel 0, the exact inputs of ``Custody Outstanding by Worker``,
-  whose ``value_sar`` column is computed as balance x unit cost rather than stored. So the
-  custodian and the per-person custody value ARE readable and exportable estate-wide
-  today; what the dropped grant withheld is the damage-assessment record, not the custody
-  holding. Whether a finance role should hold that ledger read is the owner's call, and it
-  is not decided in a report's roles table: the roles table only clears
-  ``Report.is_permitted`` (query_report.py:41), while the scope lives in the DocPerm row
-  and in ``HOUSING_UNSCOPED_ROLES``.
-
-THE A-216 DRAIN — the last three entries, which were ONE question
-------------------------------------------------------------------
-``Accommodation Occupancy Summary``, ``Active Resident Register`` and ``Idle Resident
-Detection`` all named ``Internal Auditor`` over the same ref, so the three stood or fell
-together on a single decision about one DocPerm row. The owner decided: GRANT ``read`` and
-``report`` at permlevel 0 on Housing Assignment, and WITHHOLD ``export``.
-
-The grant closes a contradiction, not just a gap. Internal Auditor was already named in
-``habitat/permissions.py`` ``HOUSING_UNSCOPED_ROLES`` — the set that lifts the building
-filter — so the exemption had been written for a role that could not read the DocType at
-all, while three shipped reports rendered in its Reports list and threw on click
-(``query_report.py:47``).
-
-``export`` is withheld by OMITTING the key, never by writing ``0``: ``import_file`` skips
-field defaults (``document.py:833`` under ``frappe.flags.in_import``), so an omitted flag
-imports as 0, while an explicit 0 would read as a deliberate future toggle.
-
-WHAT WITHHOLDING ``export`` DOES AND DOES NOT BUY — stated here because assuming otherwise
-is the likely next mistake:
-
-* IT DOES gate the report download endpoint. ``export_query`` calls
-  ``can_export(ref_doctype, raise_exception=True)`` (``query_report.py:323``), which reads
-  ``get_role_permissions(doctype).export`` (``permissions.py:608-616``). With no ``export``
-  on the row, the auditor's download raises ``PermissionError``.
-* IT DOES NOT hide a single row. The report still RENDERS every row on screen; only the
-  file download is refused. This is a friction-and-audit-trail control, not a
-  confidentiality one.
-* IT DOES NOT confine the row set, because these three reports do not read through the
-  permission layer at all. All three call ``frappe.get_all``
-  (``active_resident_register.py:42``, ``idle_resident_detection.py:67``), which sets
-  ``ignore_permissions=True`` (``frappe/__init__.py:2050``), so neither
-  ``accommodation_assignment_query`` nor the permlevel field filter
-  (``db_query.py:683-684``) ever runs. Each report re-implements the building scope in its
-  own Python instead. For THIS role that changes nothing — Internal Auditor is unscoped by
-  design, so the hand-rolled block and the hook agree — but the equivalence is duplication,
-  not enforcement, and a future change to the hook would not reach these reports. That is a
-  finding recorded against the reports, not a defect in this grant.
-* WHAT THE REPORTS ACTUALLY EXPOSE is narrower than the DocPerm does. The two that read
-  Housing Assignment select ``name, employee, employee_name, building, room, bed,
-  check_in_date, project[, cost_center]`` — no ``party``, no ``room_condition_snapshot``,
-  no ``terms_signature``, no ``notes``. (``Accommodation Occupancy Summary`` reads no
-  Housing Assignment row at all; it needs the grant purely for ``query_report.py:47`` to
-  let it open.) The DocPerm, however, opens the whole record on the FORM, including the
-  check-in signature and the free-text notes. That residual exposure is recorded as the
-  ``Housing Assignment`` entry in ``test_field_sensitivity.KNOWN_LEVEL_ZERO_SENSITIVE``
-  rather than left for the next reader to discover — Housing Assignment ships no
-  permlevel-1 section, and layering it is A-303's module-by-module follow-on work.
 
 Run standalone:  python3 -m unittest apex.apex_core.utils.test_report_role_guard -v
 """
@@ -164,10 +63,11 @@ REPORT_ROLE = "_A201 Role"
 OTHER_ROLE = "_A201 Other Role"
 
 # Exact equality, like the sibling baselines. Each entry is (ref_doctype, [roles], reason);
-# a new offender fails the build, a repaired one must be pruned. A-211 resolved four of the
-# original seven; A-216 resolved the remaining three — see "THE A-216 DRAIN" in the module
-# docstring. The baseline is now EMPTY, which is the state it was always meant to reach:
-# every role named on a shipped report can actually run it.
+# a new offender fails the build, a repaired one must be pruned. All seven originally
+# frozen roles were resolved to runnable over two passes — see
+# _staging/2026-07-27-report-role-guard-drain-history.md for the per-role reasoning. The
+# baseline is now EMPTY, which is the state it was always meant to reach: every role named
+# on a shipped report can actually run it.
 KNOWN_UNRUNNABLE_REPORT_ROLES = {}
 
 
@@ -369,7 +269,7 @@ class TestTheHookStaysOutOfOtherApps(unittest.TestCase):
 
 
 class TestAMigrateIsNeverAborted(unittest.TestCase):
-    """The blocker A-201 had to clear before the hook could be written at all.
+    """The migration-safety problem the hook had to solve before it could exist at all.
 
     Module JSON never reaches validate (import_file.py:233-237 sets ignore_validate and
     document.py:1139-1140 returns on it), but sync_fixtures imports with
@@ -496,9 +396,9 @@ class TestTheDetectorCanFail(unittest.TestCase):
         )
 
     def test_removing_the_report_flag_check_lets_the_offender_through(self):
-        """The mutant: `report` no longer required, exactly the reading A-189 disproved
-        (DocPerm.report defaults to 1 in frappe's JSON, but import_file never applies a
-        field default, so an omitted flag really is 0)."""
+        """The mutant: `report` no longer required — exactly the misreading disproved
+        earlier: DocPerm.report defaults to 1 in frappe's JSON, but import_file never
+        applies a field default, so an omitted flag really is 0."""
         blind = {
             row["role"]
             for row in self.ROWS
