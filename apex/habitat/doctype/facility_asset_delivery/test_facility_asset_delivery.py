@@ -238,7 +238,7 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         """Cancel restored only the building while move_asset_on_delivery writes the
         room too, so the asset landed back in the intake store still reporting the
         destination's room — a location that had never existed."""
-        origin_room = "Intake Shelf " + _h(6)
+        origin_room = "Intake Shelf " + _h(12)
         frappe.db.set_value("Facility Asset", self.asset, "location_in_building", origin_room)
 
         d = self._deliver()
