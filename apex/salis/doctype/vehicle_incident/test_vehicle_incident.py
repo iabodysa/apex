@@ -24,7 +24,13 @@ _INCIDENT_JSON = Path(__file__).resolve().parent / "vehicle_incident.json"
 # the two that only read the file afterwards.
 OPERATING_ROLES = {"Fleet Supervisor", "Fleet Project Manager", "Fleet Manager", "System Manager"}
 AUDIT_ROLES = {"Internal Auditor", "Government Relations Officer"}
-OPERATING_ROLE = "Fleet Supervisor"
+# Fleet Manager rather than Fleet Supervisor as the worked example, and the choice is
+# load-bearing: reading an incident also passes vehicle_incident_has_permission, which
+# denies any role outside salis.permissions.UNSCOPED_ROLES that holds no User Permission
+# for the driver's project. Fleet Manager and Internal Auditor are BOTH unscoped there, so
+# the permlevel-1 row is the only thing left separating them. Pairing a scoped role
+# against an unscoped one would prove project scope and say nothing about the level.
+OPERATING_ROLE = "Fleet Manager"
 AUDIT_ROLE = "Internal Auditor"
 
 _CONSENT = "data:image/png;base64,iVBORw0KGgo="
