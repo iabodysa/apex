@@ -267,6 +267,69 @@ def _lock_subject_token_rows(audience: str, subject: str):
     )
 
 
+ISSUED = "Issued"
+REISSUED = "Reissued"
+RESHARED = "Re-shared"
+ROTATED = "Rotated"
+REVOKED = "Revoked"
+
+
+def _credential_event_subject(action: str, audience: str, subject: str) -> str:
+    """The Activity Log sentence for one credential action.
+
+    Five whole literal sentences rather than a shared frame plus a translated verb:
+    Arabic inflects a verb with its noun, and the app's existing ``Issued`` row
+    already means dispensed-from-stores, so a shared verb would render the wrong
+    word here. An unknown action raises rather than logging a vague line -- the only
+    callers are the constants above.
+    """
+    return {
+        ISSUED: _("Portal credential issued for {0} {1}"),
+        REISSUED: _("Portal credential reissued for {0} {1}"),
+        RESHARED: _("Portal credential re-shared for {0} {1}"),
+        ROTATED: _("Portal credential rotated for {0} {1}"),
+        REVOKED: _("Portal credential revoked for {0} {1}"),
+    }[action].format(_(audience), subject)
+
+
+def log_credential_event(
+    audience: str,
+    subject: str,
+    action: str,
+    token_name=None,
+    user=None,
+) -> str | None:
+    """Record WHO moved a portal credential and FOR WHOM, in the native Activity Log.
+
+    The token row carries only ``last_generated_by``/``last_generated_on`` -- one
+    slot, overwritten by the next action -- and revocation writes with
+    ``update_modified=False``, so before this the strongest surviving statement about
+    a passwordless bearer credential was "someone, at some point". Activity Log is
+    Frappe's own append-only actor trail: System Manager is its ONLY reading role
+    (activity_log.json permissions), native Log Settings ages it out, and
+    ``link_doctype``/``link_name`` make "every move on this driver" one query.
+
+    The raw token is not a parameter here, so no call site can log the secret: the row
+    names the SUBJECT and the token ROW, never the credential. ``operation`` and
+    ``status`` are left to Frappe -- both are closed Selects, and a value outside the
+    set is swallowed silently on insert.
+    """
+    _require_audience(audience)
+    if not subject:
+        return None
+    return frappe.get_doc(
+        {
+            "doctype": "Activity Log",
+            "user": user or frappe.session.user,
+            "subject": _credential_event_subject(action, audience, subject),
+            "reference_doctype": "Masar Worker Token",
+            "reference_name": token_name,
+            "link_doctype": _SUBJECT_DOCTYPES[audience],
+            "link_name": subject,
+        }
+    ).insert(ignore_permissions=True, ignore_links=True).name
+
+
 def revoke_subject_tokens(audience: str, subject: str) -> int:
     """Disable enabled credentials for one exact audience and subject."""
     _require_audience(audience)
@@ -284,6 +347,10 @@ def revoke_subject_tokens(audience: str, subject: str) -> int:
             0,
             update_modified=False,
         )
+        # [#a267au] Every revocation path lands here -- desk action, clearance
+        # submit, suspension, employee/driver status change -- so one call covers
+        # them all rather than four that can drift apart.
+        log_credential_event(audience, subject, REVOKED, row.name)
         disabled += 1
     return disabled
 
@@ -317,7 +384,13 @@ def on_driver_suspension_submit(doc, method=None) -> int:
     return revoke_subject_tokens(DRIVER, getattr(doc, "driver", None))
 
 
-def authorize_issuance(audience: str, subject: str, user=None) -> bool:
+def authorize_issuance(
+    audience: str,
+    subject: str,
+    user=None,
+    *,
+    require_active: bool = True,
+) -> bool:
     """Authorize one issuer and subject, returning whether scope is restricted."""
     _require_audience(audience)
     user = user or frappe.session.user
@@ -325,7 +398,7 @@ def authorize_issuance(audience: str, subject: str, user=None) -> bool:
         "Masar Worker Token", "write", user=user, throw=True
     )
 
-    subject_row = _lock_subject_row(audience, subject, require_active=True)
+    subject_row = _lock_subject_row(audience, subject, require_active=require_active)
     if not subject_row:
         _deny_issuance(audience)
     _lock_subject_token_rows(audience, subject)
@@ -374,6 +447,23 @@ def authorize_issuance(audience: str, subject: str, user=None) -> bool:
         )
 
     _deny_issuance(audience)
+
+
+def authorize_revocation(audience: str, subject: str, user=None) -> bool:
+    """Authorize a MANUAL revocation: same issuer roles, same project/building scope.
+
+    Identical to issuance except that the subject need not still be Active. Requiring
+    Active would make the desk kill switch unreachable in exactly the cases it exists
+    for -- a driver already Released by a clearance, or Stopped mid-investigation --
+    while the automatic hooks that revoke on those transitions are the very reason a
+    non-Active subject is the normal state at revocation time. Withdrawing a bearer
+    credential is the safe direction; the scope check still stops a supervisor
+    reaching a driver outside their project, so this widens WHEN, never WHO.
+
+    Deliberately reuses issuance's deny path so an out-of-scope caller cannot tell
+    the two apart, and so there is only one refusal to keep correct.
+    """
+    return authorize_issuance(audience, subject, user, require_active=False)
 
 
 def credential_delivery_destination(

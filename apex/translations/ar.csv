@@ -900,6 +900,7 @@ Could not create the target document. Please try again.,تعذّر إنشاء ا
 Could not generate a unique worker token. Please try again.,تعذّر إنشاء رمز عامل فريد. يرجى المحاولة مجدداً.
 Could not identify the worker.,تعذّر تحديد هوية العامل.
 Could not issue the cart. Please review and try again.,تعذّر صرف السلة. يرجى المراجعة والمحاولة مجدداً.
+Could not issue the driver link. Please try again.,تعذّر إصدار رابط السائق. حاول مرة أخرى.
 Could not issue the worker link. Please try again.,تعذّر إصدار رابط العامل. حاول مرة أخرى.
 Could not load SIM.,تعذّر تحميل الشريحة.
 Could not load Telecom Control. Please retry.,تعذّر تحميل مركز التحكم بالاتصالات. يرجى إعادة المحاولة.
@@ -937,6 +938,7 @@ Could not reject the handover. Please try again.,تعذّر رفض التسلي�
 Could not renew the license. Please try again.,تعذّر تجديد الترخيص. حاول مرة أخرى.
 Could not resolve the scan. Please try again.,تعذّر تحديد نتيجة المسح. يرجى المحاولة مرة أخرى.
 Could not return the cart. Please review and try again.,تعذّر إرجاع السلة. الرجاء المراجعة والمحاولة مرة أخرى.
+Could not revoke the driver link. Please try again.,تعذّر إلغاء رابط السائق. حاول مرة أخرى.
 Could not save changes. Please try again or contact support.,تعذّر حفظ التغييرات. يرجى المحاولة مجدداً أو التواصل مع الدعم الفني.
 Could not send the link.,تعذّر إرسال الرابط.
 Could not snooze the selected alerts.,تعذّر تأجيل التنبيهات المحددة.
@@ -1268,6 +1270,7 @@ Driver credential issuance requires an allowed Project.,يتطلب إصدار ب
 Driver is required.,السائق مطلوب.
 Driver license expired on {0}.,انتهت صلاحية رخصة السائق في {0}.
 Driver license has expired. Renew before assigning to trips.,انتهت صلاحية رخصة القيادة. يرجى التجديد قبل الإسناد للرحلات.
+Driver link revoked.,تم إلغاء رابط السائق.
 Driver portal is not enabled.,بوابة السائق غير مفعّلة.
 Driver reassigned,تمت إعادة إسناد السائق
 "Driver stop record (violation, leave, termination, or transfer). May release the linked vehicle.",سجل إيقاف سائق (مخالفة أو إجازة أو إنهاء خدمة أو نقل). قد يُحرّر المركبة المرتبطة.
@@ -1908,6 +1911,7 @@ Issued to {0}: {1},صُرف إلى {0}: {1}
 "Issues observed during this execution. On submit, each actionable finding (Issue Type + Room, not Resolved) spawns one Maintenance Request.",الملاحظات المرصودة خلال هذا التنفيذ. عند الإرسال، تُنشئ كل ملاحظة قابلة للمعالجة (نوع الملاحظة + الغرفة، غير محلولة) طلب صيانة واحدًا.
 Issuing Authority,جهة الإصدار
 Issuing custody…,جارٍ إصدار العهدة…
+Issuing driver link…,جارٍ إصدار رابط السائق…
 Issuing worker link…,جارٍ إصدار رابط العامل…
 Issuing…,جارٍ الإصدار…
 Item,صنف
@@ -2692,6 +2696,11 @@ Policy,السياسة
 Policy Name,اسم السياسة
 Poor,رديء
 Poor Safety Task Executions,تنفيذات مهام السلامة الضعيفة
+Portal credential issued for {0} {1},أُصدر تصريح دخول البوابة لـ {0} {1}
+Portal credential re-shared for {0} {1},أُعيدت مشاركة تصريح دخول البوابة لـ {0} {1}
+Portal credential reissued for {0} {1},أُعيد إصدار تصريح دخول البوابة لـ {0} {1}
+Portal credential revoked for {0} {1},أُلغي تصريح دخول البوابة لـ {0} {1}
+Portal credential rotated for {0} {1},جُدِّد تصريح دخول البوابة لـ {0} {1}
 Portal token audience must be Worker or Driver.,يجب أن تكون فئة رمز البوابة عاملًا أو سائقًا.
 Portal token subject binding cannot be changed after issuance.,لا يمكن تغيير ارتباط صاحب رمز البوابة بعد إصداره.
 Portal token subject binding is invalid.,ارتباط صاحب رمز البوابة غير صالح.
@@ -3124,7 +3133,10 @@ Review the Active Resident Register,راجع سجل الساكنين النشط�
 Review the Safety Task Catalog,مراجعة دليل مهام السلامة
 "Review the shared integration switchboard: frontend URL, API version, and allowed origins.",راجع لوحة التكامل المشتركة: رابط الواجهة، وإصدار الواجهة البرمجية، والمصادر المسموح بها.
 Reviewed by,روجع بواسطة
+Revoke Portal Link,إلغاء رابط البوابة
 Revoked,مُلغى
+Revoking driver link…,جارٍ إلغاء رابط السائق…
+Revoking stops this driver's barcode working immediately. Issue a new one to restore access. Continue?,الإلغاء يوقف باركود السائق فورًا. أصدر باركود جديدًا لإعادة الدخول. هل تريد المتابعة؟
 Rework Required,يلزم إعادة العمل
 Rider {0} is marked {1} and cannot receive a vehicle or fuel.,الراكب {0} مُعلَّم بـ {1} ولا يمكنه استلام مركبة أو وقود.
 Rider {0} is on approved leave ({1}) covering {2} and cannot receive a vehicle or fuel.,الراكب {0} في إجازة معتمدة ({1}) تشمل {2} ولا يمكنه استلام مركبة أو وقود.
@@ -3173,6 +3185,8 @@ Rooms and beds created.,تم إنشاء الغرف والأسرّة.
 Rooms needing readiness,الغرف التي تحتاج إلى تجهيز
 Rooms on Floor,عدد الغرف في الطابق
 Rotate Link and QR,تدوير الرابط ورمز QR
+Rotate Portal Link,تجديد رابط البوابة
+Rotating issues a NEW barcode and stops the previous one working. Continue?,التجديد يصدر باركود جديدًا ويوقف الباركود السابق. هل تريد المتابعة؟
 Round,جولة
 Round Date,تاريخ الجولة
 Route,المسار
@@ -3487,6 +3501,7 @@ Short Address must be 4 letters followed by 4 digits (e.g. RCTB4359).,يجب أ�
 Short code used to prefix generated room numbers.,رمز مختصر يُستخدم كبادئة لأرقام الغرف المُنشأة.
 Show AFMCO brand mark and wordmark in the portal header.,إظهار علامة وشعار AFMCO النصي في رأس البوابة.
 Show Brand,إظهار العلامة التجارية
+Show Portal Link,عرض رابط البوابة
 Show Zero Balances,عرض الأرصدة الصفرية
 Show only available,عرض المتاح فقط
 Sign to accept the housing terms,وقّع للموافقة على شروط السكن
@@ -3803,6 +3818,7 @@ This building has no rooms yet.,لا توجد غرف في هذا المبنى ب
 This building has rooms but every bed is occupied — use Over-capacity,يحتوي هذا المبنى على غرف لكن جميع الأسرّة مشغولة — استخدم تجاوز السعة
 "This building's own address. If empty, the Accommodation Site's address is shown.",عنوانُ هذا المبنى الخاصّ. إن تُرِك فارغًا، يُعرَض عنوانُ موقع السكن.
 "This certificate covers movement-domain clearance only (vehicle, fuel chip, and custody). HR end-of-service and visa clearance are out of scope.",تغطي هذه الشهادة إخلاء طرف نطاق الحركة فقط (المركبة، شريحة الوقود، والعهدة). إخلاء طرف نهاية الخدمة والتأشيرة لدى الموارد البشرية خارج النطاق.
+This driver had no live link.,لا يوجد رابط فعّال لهذا السائق.
 This driver has been cleared on all movement-domain items listed below.,تم إخلاء طرف هذا السائق من جميع بنود نطاق الحركة المدرجة أدناه.
 This fuel request has been pending approval for too long,ظل طلب الوقود هذا بانتظار الاعتماد لفترة طويلة جدًا
 "This license is submitted. Amend it (Cancel, then Amend) with the new expiry date to renew.",تم إرسال هذا الترخيص. عدّله (ألغِ، ثم عدّل) بتاريخ الانتهاء الجديد للتجديد.
