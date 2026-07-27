@@ -302,6 +302,31 @@ class TestProbeRecognition(unittest.TestCase):
         """The runbook's address must stay one the check actually recognises."""
         self.assertTrue(is_documentation_address(PROBE_ADDRESS))
 
+    def test_the_probe_is_recognised_in_the_spellings_edges_write(self):
+        """A spelling the check does not recognise is a FALSE PASS, not a near miss:
+        an unrecognised probe looks erased, and erasure is what certifies the edge.
+        Bracketed IPv6, the ``ip:port`` form some load balancers record, and the
+        IPv4-mapped IPv6 rendering of the same address all have to land as the probe."""
+        for value in (
+            PROBE_ADDRESS,
+            f"{PROBE_ADDRESS}:41234",
+            f"::ffff:{PROBE_ADDRESS}",
+            f"[::ffff:{PROBE_ADDRESS}]:41234",
+            "2001:db8::7",
+            "[2001:db8::7]:8443",
+        ):
+            with self.subTest(value=value):
+                self.assertIs(is_documentation_address(value), True)
+
+    def test_a_probe_wearing_another_spelling_still_fails_the_deployment(self):
+        """The same gap reached through the verdict rather than the predicate: the
+        probe survived, so this must fail however the edge chose to render it."""
+        for value in (f"{PROBE_ADDRESS}:41234", f"::ffff:{PROBE_ADDRESS}"):
+            with self.subTest(value=value):
+                report = classify_forwarding(value, value, probe_planted=True)
+                self.assertEqual(report["verdict"], FORGEABLE)
+                self.assertIs(report["trusted"], False)
+
     def test_a_real_address_is_not_mistaken_for_a_probe(self):
         """Without this the check would grade every deployment FORGEABLE."""
         for value in (REAL_PEER, FORGED_CLAIM, "not-an-address", "", None):

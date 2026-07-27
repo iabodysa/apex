@@ -136,11 +136,31 @@ def forwarded_entries(raw: str | None) -> list[str]:
     return [entry.strip() for entry in (raw or "").split(",") if entry.strip()]
 
 
+def _bare_address(value: str | None) -> ipaddress._BaseAddress | None:
+    """One forwarded entry reduced to the address inside it, or None if there is none.
+
+    Every spelling this fails to recognise is a FALSE PASS, not a missed detail: an
+    unrecognised probe reads as an erased one, and erasure is the pass signal. So the
+    forms edges actually write are unwrapped first -- some load balancers record
+    ``ip:port`` and bracket IPv6, and an IPv4-mapped IPv6 address is the same address
+    in different clothes.
+    """
+    text = (value or "").strip()
+    if text.startswith("["):
+        text = text[1:].split("]", 1)[0]
+    elif text.count(":") == 1:
+        text = text.split(":", 1)[0]
+    try:
+        address = ipaddress.ip_address(text)
+    except ValueError:
+        return None
+    return getattr(address, "ipv4_mapped", None) or address
+
+
 def is_documentation_address(value: str | None) -> bool:
     """Whether a value is reserved for documentation, so no real client can carry it."""
-    try:
-        address = ipaddress.ip_address((value or "").strip())
-    except ValueError:
+    address = _bare_address(value)
+    if address is None:
         return False
     return any(address in network for network in _DOCUMENTATION_NETWORKS)
 
