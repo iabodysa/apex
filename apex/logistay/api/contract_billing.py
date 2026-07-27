@@ -57,8 +57,16 @@ PAYABLE_SOURCE_DOCTYPE = "Purchase Invoice"
 
 
 def _load_eligible_contract(contract: str):
-    """Return the submitted Telecom Contract the caller may read, or throw."""
-    if not contract or not frappe.db.exists("Telecom Contract", contract):
+    """Return the submitted Telecom Contract the caller may read, or throw.
+
+    ``contract`` arrives from a whitelisted endpoint, so the existence probe filters
+    on ``name``: the positional form answers the value back without querying when it
+    equals the DocType (database.py:1259), letting the literal string "Telecom
+    Contract" clear this gate and reach ``get_doc`` — which raises a bare framework
+    404 instead of the named refusal below. Permission checking is unaffected; what
+    the short-circuit costs is this function's own message.
+    """
+    if not contract or not frappe.db.exists("Telecom Contract", {"name": contract}):
         frappe.throw(_("Telecom Contract {0} does not exist.").format(contract))
     doc = frappe.get_doc("Telecom Contract", contract)
     # Company-scoped read permission (has_permission hook enforces company scope).
@@ -94,10 +102,19 @@ def _period_end(billing_period: str):
 
 
 def _existing_link(contract_doc, billing_period: str, document_type: str):
-    """Return an already-recorded draft for this (period, type) if it still exists."""
+    """Return an already-recorded draft for this (period, type) if it still exists.
+
+    The probe filters on ``name`` rather than passing the recorded value positionally:
+    ``frappe.db.exists(dt, dn)`` answers ``dn`` back WITHOUT touching the database when
+    the two are equal (database.py:1259), so a logged name of "Payment Entry" would be
+    reported as a live draft on the strength of the string alone. The Dynamic Link on
+    the billing row makes that pair hard to persist today, so this is the guard
+    refusing to depend on a neighbouring layer for its own correctness rather than a
+    live defect — duplicate-safety is this function's whole job.
+    """
     for row in contract_doc.billing_documents or []:
         if row.billing_period == billing_period and row.document_type == document_type:
-            if row.document_name and frappe.db.exists(document_type, row.document_name):
+            if row.document_name and frappe.db.exists(document_type, {"name": row.document_name}):
                 return row.document_name
     return None
 
@@ -267,7 +284,7 @@ def _load_eligible_payable(contract_doc, purchase_invoice: str):
             ).format(_(PAYABLE_SOURCE_DOCTYPE)),
             title=_("Payable Source Required"),
         )
-    if not frappe.db.exists(PAYABLE_SOURCE_DOCTYPE, purchase_invoice):
+    if not frappe.db.exists(PAYABLE_SOURCE_DOCTYPE, {"name": purchase_invoice}):
         frappe.throw(
             _("{0} {1} does not exist.").format(_(PAYABLE_SOURCE_DOCTYPE), purchase_invoice)
         )

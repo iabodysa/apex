@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Guards for the seed loader's Link check, including child-table rows.
+"""Guards for the seed loader's existence and Link checks, including child-table rows.
 
 ``apply_spec`` used to inspect only TOP-LEVEL Link fields, so a record whose CHILD
 rows pointed at missing targets passed the guard and was handed to
@@ -80,6 +80,12 @@ class _StubDB:
         return doctype in self.present
 
     def exists(self, doctype, key):
+        # Faithful to database.py:1259: a POSITIONAL lookup answers the name back
+        # without querying when it equals the DocType. Modelling the short-circuit is
+        # what makes the self-named cases below fail against the unfixed loader; a
+        # friendlier stub would have passed either way and proved nothing.
+        if isinstance(key, str) and key == doctype and doctype != "DocType":
+            return key
         rows = self.present.get(doctype, set())
         if isinstance(key, dict):
             return any(value in rows for value in key.values())
@@ -242,6 +248,78 @@ class TestCreateOnlyStillHolds(_SeedLoaderCase):
         counts, stub = self._run(_template_spec([_FIRE_SAFETY]), materials=set())
         self.assertEqual(counts["failed"], 0)
         self.assertEqual(stub.errors, [], "a skipped record must not raise an error log")
+
+
+_NAMED = "Email Template"
+
+
+class TestSelfNamedKeyIsNotReadAsAlreadySeeded(unittest.TestCase):
+    """A record whose natural key equals its own DocType name must still be created.
+
+    ``frappe.db.exists(dt, dn)`` answers ``dn`` back without querying when the two
+    match, so every spec keyed on ``name`` — Email Template, Assignment Rule, Issue
+    Type, Issue Priority — read such a record as already present and dropped it on
+    every install. The failure is silent: no warning, no error log, just a row that
+    never arrives and a ``skipped`` count that looks routine.
+    """
+
+    def _run(self, records, present):
+        spec = {
+            "doctype": _NAMED,
+            "key": "name",
+            "create_only": True,
+            "records": records,
+            "__source__": "test",
+        }
+        stub = _StubFrappe(present=present, metas={_NAMED: _Meta([])})
+        with patch.dict(sys.modules, {"frappe": stub}):
+            return apply_spec(spec), stub
+
+    def test_record_named_after_its_own_doctype_is_created(self):
+        counts, stub = self._run([{"name": _NAMED}], present={_NAMED: set()})
+        self.assertEqual(counts, {"created": 1, "skipped": 0, "failed": 0})
+        self.assertEqual([row["name"] for row in stub.inserted], [_NAMED])
+
+    def test_that_row_is_still_skipped_once_it_really_exists(self):
+        """The other direction, which a bare ``value != doctype`` rejection would
+        get wrong: a real self-named row must keep its create-only protection."""
+        counts, stub = self._run([{"name": _NAMED}], present={_NAMED: {_NAMED}})
+        self.assertEqual(counts, {"created": 0, "skipped": 1, "failed": 0})
+        self.assertEqual(stub.inserted, [])
+
+    def test_an_ordinary_key_is_unaffected_in_both_directions(self):
+        counts, _ = self._run([{"name": "Welcome Resident"}], present={_NAMED: set()})
+        self.assertEqual(counts["created"], 1)
+        counts, _ = self._run(
+            [{"name": "Welcome Resident"}], present={_NAMED: {"Welcome Resident"}}
+        )
+        self.assertEqual(counts["skipped"], 1)
+
+
+class TestSelfNamedLinkTargetIsCheckedAgainstTheDatabase(_SeedLoaderCase):
+    """The Link probe carries the same short-circuit, in the opposite direction.
+
+    A child row pointing at the literal string ``Maintenance Material`` cleared the
+    guard without a lookup, so a dangling link was handed to ``doc.insert()``. In
+    production Frappe's own ``_validate_links`` then raised, converting a clean
+    skip that names the missing target into a bare ``failed`` and an error log.
+    """
+
+    def _spec(self):
+        record = dict(_FIRE_SAFETY, items=[{"material": _MATERIAL, "quantity": 1}])
+        return _template_spec([record])
+
+    def test_missing_self_named_target_is_skipped_and_named(self):
+        counts, stub = self._run(self._spec(), materials=set())
+        self.assertEqual(counts, {"created": 0, "skipped": 1, "failed": 0})
+        self.assertEqual(stub.inserted, [], "a dangling record must never be inserted")
+        self.assertIn(_MATERIAL, stub.warnings[0])
+        self.assertIn("items row 1", stub.warnings[0])
+
+    def test_a_target_really_named_after_its_doctype_resolves(self):
+        counts, stub = self._run(self._spec(), materials={_MATERIAL})
+        self.assertEqual(counts, {"created": 1, "skipped": 0, "failed": 0})
+        self.assertEqual(stub.warnings, [])
 
 
 if __name__ == "__main__":
