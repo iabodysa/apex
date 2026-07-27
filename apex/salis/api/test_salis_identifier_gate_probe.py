@@ -13,13 +13,15 @@ ignored, so the short-circuit turned a silent drop into a dangling load. That ca
 asserts the drop, not a refusal.
 
 Site-free: only ``frappe.db.exists`` is exercised, so each module's ``frappe`` is
-swapped for a stub that reproduces the short-circuit faithfully.
+swapped for ``tests.factories.ExistsShortCircuitDB`` — the shared stub that
+reproduces the short-circuit faithfully for every suite pinning this defect.
 """
 
 import unittest
 from unittest.mock import patch
 
 from apex.salis.api import fleet_os, operations_control, route_supervisor
+from apex.tests.factories import ExistsShortCircuitDB
 
 _SUPERVISOR = "supervisor@example.invalid"
 
@@ -36,25 +38,14 @@ def _endpoint(fn):
     return getattr(fn, "__wrapped__", fn)
 
 
-class _StubDB:
-    """``frappe.db``, faithful to database.py:1259 on the positional call shape."""
-
-    def __init__(self, present=None):
-        self.present = present or {}
-        self.queried = []
-
-    def exists(self, doctype, key=None, **_kwargs):
-        if isinstance(key, str) and key == doctype and doctype != "DocType":
-            return key
-        self.queried.append((doctype, key))
-        rows = self.present.get(doctype, set())
-        if isinstance(key, dict):
-            return next((v for v in key.values() if v in rows), None)
-        return key if key in rows else None
+class _StubDB(ExistsShortCircuitDB):
+    """Some of these gates read through ``get_value``. It answers from the same
+    rows but carries NO short-circuit, because the real one does not either — only
+    ``exists`` short-circuits (database.py:1259)."""
 
     def get_value(self, doctype, filters, fieldname=None, **_kwargs):
         self.queried.append((doctype, filters))
-        rows = self.present.get(doctype, set())
+        rows = self.names(doctype)
         if isinstance(filters, dict):
             return next((v for v in filters.values() if v in rows), None)
         return filters if filters in rows else None

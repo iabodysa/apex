@@ -12,30 +12,19 @@ permission; both exist so an unknown value is dropped quietly:
   latent today; the case pins the probe's own contract rather than a live path.
 
 Site-free: only ``frappe.db.exists`` is exercised, so each module's ``frappe`` is
-swapped for a stub that reproduces the short-circuit faithfully.
+swapped for ``tests.factories.ExistsShortCircuitDB`` — the shared stub that
+reproduces the short-circuit faithfully for every suite pinning this defect.
 """
 
 import unittest
 from unittest.mock import patch
 
 from apex.salis.api.driver_portal import profile, support
+from apex.tests.factories import ExistsShortCircuitDB
 
 
-class _StubDB:
-    """``frappe.db``, faithful to database.py:1259 on the positional call shape."""
-
-    def __init__(self, present=None):
-        self.present = present or {}
-        self.queried = []
-
-    def exists(self, doctype, key=None, **_kwargs):
-        if isinstance(key, str) and key == doctype and doctype != "DocType":
-            return key
-        self.queried.append((doctype, key))
-        rows = self.present.get(doctype, set())
-        if isinstance(key, dict):
-            return next((v for v in key.values() if v in rows), None)
-        return key if key in rows else None
+class _StubDB(ExistsShortCircuitDB):
+    """Nothing on these paths reads a field, so ``get_value`` only has to be inert."""
 
     def get_value(self, doctype, filters, fieldname=None, **_kwargs):
         return None

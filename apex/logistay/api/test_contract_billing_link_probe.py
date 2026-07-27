@@ -17,13 +17,15 @@ what this function exists for, and it must not rest on a neighbouring layer
 happening to filter the input first.
 
 Site-free: only ``frappe.db.exists`` is exercised, so the module's ``frappe`` is
-swapped for a stub that reproduces the short-circuit faithfully.
+swapped for ``tests.factories.ExistsShortCircuitDB`` — the shared stub that
+reproduces the short-circuit faithfully for every suite pinning this defect.
 """
 
 import unittest
 from unittest.mock import patch
 
 from apex.logistay.api import contract_billing
+from apex.tests.factories import ExistsShortCircuitDB
 
 _PERIOD = "2026-07"
 
@@ -40,30 +42,13 @@ class _Contract:
         self.billing_documents = rows
 
 
-class _StubDB:
-    """``frappe.db``, faithful to database.py:1259 on the positional call shape."""
-
-    def __init__(self, present):
-        self.present = present
-        self.queried = []
-
-    def exists(self, doctype, key):
-        if isinstance(key, str) and key == doctype and doctype != "DocType":
-            return key
-        self.queried.append((doctype, key))
-        rows = self.present.get(doctype, set())
-        if isinstance(key, dict):
-            return any(value in rows for value in key.values())
-        return key in rows
-
-
 class _Thrown(Exception):
     """What the module's own ``frappe.throw`` refusal looks like to these cases."""
 
 
 class _StubFrappe:
     def __init__(self, present):
-        self.db = _StubDB(present)
+        self.db = ExistsShortCircuitDB(present)
         self.loaded = []
 
     def throw(self, message, **_kwargs):
