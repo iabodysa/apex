@@ -427,9 +427,9 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
 
         The endpoint is invoked with NO arguments. That is deliberate and safe: the
         whitelist wrapper short-circuits its type transform on an empty call
-        (typing_validations.py:88) and the limiter charges the window BEFORE delegating
-        (rate_limiter.py:132-168), so the missing-argument TypeError lands only after
-        the counter has already moved -- and no document is ever inserted.
+        (typing_validations.py:88) and the window is charged BEFORE the endpoint is
+        delegated to (rate_limit_identity.py), so the missing-argument TypeError lands
+        only after the counter has already moved -- and no document is ever inserted.
 
         The refusal is caught BY NAME, and NOTHING else is tolerated except that one
         argument-binding TypeError -- identified on two independent counts, because a
@@ -448,9 +448,9 @@ class TestSubmitRateLimitIdentity(unittest.TestCase):
         except frappe.RateLimitExceededError as refusal:
             return refusal
         except TypeError as crash:
-            # Both must hold: raised from the limiter's own frame (so the endpoint body
-            # was never entered) AND naming an unbound parameter. Either alone would let
-            # a TypeError from INSIDE the limiter read as a healthy call; requiring both
+            # Both must hold: raised from the charging wrapper's own frame (so the
+            # endpoint body was never entered) AND naming an unbound parameter. Either
+            # alone would let a TypeError from INSIDE it read as a healthy call; both
             # means a future CPython rewording fails loudly here rather than quietly
             # widening what counts as success.
             frame = crash.__traceback__
