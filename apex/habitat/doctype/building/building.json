@@ -650,7 +650,7 @@
   },
   {
    "group": "Safety",
-   "link_doctype": "Safety Inspection Report",
+   "link_doctype": "Safety Round",
    "link_fieldname": "building"
   },
   {
@@ -684,7 +684,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-07-26 09:03:55.752811",
+ "modified": "2026-07-27 17:33:17.937518",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Building",

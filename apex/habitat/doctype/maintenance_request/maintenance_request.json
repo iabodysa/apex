@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2026-05-23 23:31:44.837702",
- "description": "Room-level maintenance ticket. Can be generated automatically from a safety inspection report.",
+ "description": "Room-level maintenance ticket. Can be generated automatically from a safety task execution.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -274,11 +274,13 @@
    "label": "Automation Links"
   },
   {
-   "description": "Set automatically when this request is generated from a safety inspection report.",
+   "description": "Historical only. The deprecated Safety Inspection Report this request came from. New safety-driven requests carry Source Safety Execution instead.",
    "fieldname": "source_inspection",
    "fieldtype": "Link",
    "label": "Source Inspection Report",
-   "options": "Safety Inspection Report"
+   "no_copy": 1,
+   "options": "Safety Inspection Report",
+   "read_only": 1
   },
   {
    "description": "Set automatically when this request is spawned from a failed safety task execution.",
@@ -375,17 +377,9 @@
    "group": "Safety",
    "link_doctype": "Safety Task Execution",
    "link_fieldname": "linked_maintenance_request"
-  },
-  {
-   "group": "Maintenance",
-   "is_child_table": 1,
-   "link_doctype": "Linked Maintenance Request Item",
-   "link_fieldname": "maintenance_request",
-   "parent_doctype": "Safety Inspection Report",
-   "table_fieldname": "linked_maintenance_requests"
   }
  ],
- "modified": "2026-07-26 09:03:55.752811",
+ "modified": "2026-07-27 17:33:17.937518",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Request",
