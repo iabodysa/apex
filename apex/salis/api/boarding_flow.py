@@ -547,6 +547,11 @@ def worker_claim_boarded(token=None):
         return {"trip": None, "status": None}
     dispatch_trip, request_name, stop_name, building = resolved
 
+    # Serialize concurrent claims for the same worker on the SAME Dispatch Trip row the
+    # driver scan locks (salis/api/boarding.py): without it two simultaneous claims both
+    # read no open log / no boarding row and each writes one, double-boarding the worker.
+    frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
+
     ensure_trip_boarding_state(dispatch_trip)
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     target = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
