@@ -46,6 +46,10 @@ PARENTS = {
     "Custody Return": {"CR-A": BLD_A, "CR-B": BLD_B},
     "Maintenance Request": {"MR-A": BLD_A, "MR-B": BLD_B},
     "Scheduled Task Assignment": {"STA-A": BLD_A, "STA-B": BLD_B},
+    # Room Bed Transfer anchors on `assignment`, so its parent is the assignment,
+    # not a room or a bed. Without a row here _anchor_names raises
+    # KeyError and the create-path pair errors instead of testing anything.
+    "Housing Assignment": {"HA-A": BLD_A, "HA-B": BLD_B},
 }
 
 _ABSENT = object()
@@ -285,6 +289,11 @@ class TestTheAnchorMapCoversTheWholeClass(unittest.TestCase):
                 continue
             data = self.doctypes.get(doctype)
             if not data:
+                continue
+            if doctype in HP.BUILDING_FETCH_ANCHOR:
+                # Scope resolves through the declared anchor instead of a local
+                # `building` field. test_each_anchor_names_a_link_that_actually_exists
+                # is what proves that anchor real, so this is a redirect, not an escape.
                 continue
             if not any(f.get("fieldname") == "building" for f in data.get("fields", [])):
                 missing.append(doctype)
