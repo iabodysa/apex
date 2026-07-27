@@ -15,6 +15,12 @@ BATCH_SIZE = 500
 # [#661ibk]
 ALERT_DOCTYPE = "Operations Alert"
 
+# _raise_alert runs INSIDE the Salis scheduler loops, so its own recovery must be
+# scoped to a savepoint of its own: a bare rollback would discard the caller's whole
+# run AND destroy the per-row savepoint the caller set. Distinct from the loops'
+# names, which would otherwise be replaced mid-iteration.
+_ALERT_SAVEPOINT = "salis_alert"
+
 
 def _settings_int(fieldname: str, default: int) -> int:
     """Read an Int from the Salis Settings single, falling back to ``default``.
@@ -86,8 +92,9 @@ def _raise_alert(
     ``(alert_type, vehicle or driver, date(raised_on))``). This prevents the
     daily jobs from spamming duplicate alerts on every run.
 
-    Both the insert and the timeline comment are wrapped so a notify failure
-    rolls back and logs but never aborts the calling job.
+    Both the insert and the timeline comment are wrapped so a notify failure rolls
+    back to this helper's OWN savepoint and logs, leaving the calling loop's rows and
+    its own per-row savepoint intact.
 
     Returns the new alert name, or ``None`` if a duplicate was skipped or the
     insert failed.
@@ -106,11 +113,12 @@ def _raise_alert(
     elif driver:
         dedupe_filters["driver"] = driver
 
+    frappe.db.savepoint(_ALERT_SAVEPOINT)
     try:
         if frappe.db.exists(ALERT_DOCTYPE, dedupe_filters):
             return None
     except Exception:
-        frappe.db.rollback()
+        frappe.db.rollback(save_point=_ALERT_SAVEPOINT)
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"Salis alert dedupe check failed ({alert_type})"[:140],
@@ -136,10 +144,11 @@ def _raise_alert(
 
     # [#gg8xk4]
     if source_doctype and source_name:
+        frappe.db.savepoint(_ALERT_SAVEPOINT)
         try:
             frappe.get_doc(source_doctype, source_name).add_comment("Comment", message)
         except Exception:
-            frappe.db.rollback()
+            frappe.db.rollback(save_point=_ALERT_SAVEPOINT)
             frappe.log_error(
                 message=frappe.get_traceback(),
                 title=f"Salis alert comment failed for {source_name}"[:140],

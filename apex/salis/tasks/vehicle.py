@@ -13,6 +13,11 @@ from apex.salis.tasks.common import (
     _settings_int,
 )
 
+# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
+# rather than stacking one per row. Distinct from _raise_alert's own name, which
+# runs inside these loops.
+_ROW_SAVEPOINT = "salis_vehicle_row"
+
 
 def idle_vehicle_watch() -> None:
     """Flag Active vehicles with no dispatch trip in the last ``idle_vehicle_days``.
@@ -65,6 +70,7 @@ def idle_vehicle_watch() -> None:
             break
 
         for v in vehicles:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 if v.name in vehicles_with_recent_trip:
                     continue
@@ -75,7 +81,7 @@ def idle_vehicle_watch() -> None:
                 _raise_alert("Idle Vehicle", "Info", msg,
                              "Salis Vehicle", v.name, vehicle=v.name)
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Idle vehicle watch failed for {v.name}"[:140],
@@ -114,6 +120,7 @@ def vehicle_compliance_expiry_watch() -> None:
             break
 
         for c in rows:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 expired = bool(c.expiry_date) and getdate(c.expiry_date) < today_date
                 severity = "Critical" if expired else "Warning"
@@ -124,7 +131,7 @@ def vehicle_compliance_expiry_watch() -> None:
                 _raise_alert("License Expiry", severity, msg,
                              "Salis Vehicle", c.parent, vehicle=c.parent)
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Vehicle compliance watch failed for {c.parent}"[:140],
@@ -194,6 +201,7 @@ def vehicle_utilization_summary() -> None:
             break
 
         for v in vehicles:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 trip_count, distance = util_by_vehicle.get(v.name, (0, 0))
 
@@ -209,7 +217,7 @@ def vehicle_utilization_summary() -> None:
                     _raise_alert("Idle Vehicle", "Info", msg,
                                  "Salis Vehicle", v.name, vehicle=v.name)
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Vehicle utilisation summary failed for {v.name}"[:140],

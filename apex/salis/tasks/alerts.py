@@ -16,6 +16,10 @@ from apex.salis.tasks.common import (
     _vehicle_project,
 )
 
+# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
+# rather than stacking one per row. Distinct from _raise_alert's own name.
+_ROW_SAVEPOINT = "salis_alerts_row"
+
 
 def daily_open_alerts_digest() -> None:
     """Email each Fleet Supervisor a daily roll-up of their open Operations Alerts.
@@ -74,6 +78,7 @@ def daily_open_alerts_digest() -> None:
     severities = ("Critical", "Warning", "Info")
     sent = 0
     for supervisor, rows in by_supervisor.items():
+        frappe.db.savepoint(_ROW_SAVEPOINT)
         try:
             if not frappe.db.get_value("User", supervisor, "enabled"):
                 continue
@@ -104,7 +109,7 @@ def daily_open_alerts_digest() -> None:
             )
             sent += 1
         except Exception:
-            frappe.db.rollback()
+            frappe.db.rollback(save_point=_ROW_SAVEPOINT)
             frappe.log_error(
                 message=frappe.get_traceback(),
                 title=f"Open-alerts digest failed for {supervisor}"[:140],
@@ -268,6 +273,7 @@ def reconcile_operations_alerts() -> None:
             break
 
         for a in alerts:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 clear = False
                 reason = ""
@@ -319,7 +325,7 @@ def reconcile_operations_alerts() -> None:
                     resolved_count += 1
                     resolved_projects.add(_vehicle_project(a.vehicle))
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Alert reconciliation failed for {a.name}"[:140],
