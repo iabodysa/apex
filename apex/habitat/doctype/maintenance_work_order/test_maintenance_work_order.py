@@ -29,7 +29,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, flt, getdate, today
 
 from apex.tests._helpers import _user, as_user
-from apex.tests.factories import make_maintenance_request
+from apex.tests.factories import make_employee, make_maintenance_request
 
 # [#8evoal]
 test_ignore = [
@@ -163,6 +163,11 @@ class MaintenanceWorkOrderPersonas(FrappeTestCase):
         cls.away_tech = cls._scoped_technician("a271_away@example.com", cls.other_building)
         # Holds no Maintenance Work Order DocPerm at all — the unauthorized caller.
         cls.bystander = _user("a271_bystander@example.com", "Cleaning Supervisor")
+
+    def tearDown(self):
+        # The session user is a process global; the rows-only rollback never restores it,
+        # so a method that dies inside a persona would hand the next one that persona.
+        frappe.set_user("Administrator")
 
     @classmethod
     def _building(cls, name):
@@ -305,25 +310,23 @@ class TestMaintenanceWorkOrderLifecycle(MaintenanceWorkOrderPersonas):
             "to that field once the order is submitted",
         )
 
-    def test_assignment_is_recorded_before_submit_and_frozen_after(self):
-        """``assigned_to`` is a draft-time field: the issuing manager sets it, and it is
-        not allow_on_submit, so the crew on a submitted order cannot be swapped silently.
+    def test_the_manager_assigns_the_crew_and_submit_freezes_it(self):
+        """``assigned_to`` is a draft-time field: the issuing manager names the crew, and
+        the field is not allow_on_submit, so a submitted order cannot be quietly
+        reassigned to somebody else's technician.
         """
-        mr = make_maintenance_request(self.building, self.room)
-        self.addCleanup(self._drop_request, mr.name)
+        employee = make_employee("A271 Technician")
+        _mr, draft = self._draft_work_order()
         with as_user(self.manager):
-            wo = frappe.get_doc({
-                "doctype": "Maintenance Work Order",
-                "naming_series": "MWO-.YYYY.-.####",
-                "maintenance_request": mr.name,
-                "work_description": "Assignment route",
-                "planned_start_date": today(),
-                "planned_end_date": add_days(today(), 1),
-            })
-            wo.insert()
-            self.addCleanup(self._drop_work_order, wo.name)
-            wo.submit()
+            doc = frappe.get_doc("Maintenance Work Order", draft.name)
+            doc.assigned_to = employee.name
+            doc.save()
+            doc.submit()
 
+        self.assertEqual(
+            frappe.db.get_value("Maintenance Work Order", draft.name, "assigned_to"),
+            employee.name,
+        )
         self.assertFalse(
             frappe.get_meta("Maintenance Work Order").get_field("assigned_to").allow_on_submit,
             "assigned_to is frozen at submit; reassignment is an amend, not a quiet edit",
