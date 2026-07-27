@@ -4,11 +4,14 @@
 decentralized internal-store engine. Each Accommodation Building is its own store.
 Rows are posted only through the helpers below (never created manually); a blank
 employee means the stock sits unassigned in the building's store, a set employee
-means it is in that employee's custody. Reversals are negative mirror entries."""
+means it is in that employee's custody. Reversals are negative mirror entries, and
+are refused outright when the mirror would drive a store or a custody holding
+negative — the stock has already moved on and must be unwound in order."""
 
 from __future__ import annotations
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, today
 
@@ -116,6 +119,38 @@ def has_stock_entries(voucher_type: str, voucher_no: str) -> bool:
     ))
 
 
+def _assert_reversal_keeps_stock_positive(rows) -> None:
+    """A reversal moves real stock, it does not erase history: withdrawing a voucher
+    whose goods have already left the store would drive that store negative. Refuse
+    before writing any mirror row, so a blocked cancel leaves the ledger untouched."""
+    drained: dict[tuple, float] = {}
+    for r in rows:
+        # A mirror posts -signed_qty, so a positive original DRAINS its bucket.
+        key = (r.item_type, r.item, r.building, r.employee or None)
+        drained[key] = drained.get(key, 0.0) + flt(r.signed_qty)
+    for (item_type, item, building, employee), qty in drained.items():
+        if flt(qty) <= 0:
+            continue
+        available = get_store_balance(item_type, item, building, employee, for_update=True)
+        if flt(qty) <= available:
+            continue
+        # Two whole sentences rather than an interpolated fragment: Arabic word
+        # order will not survive a translated clause dropped into a template.
+        if employee:
+            frappe.throw(
+                _(
+                    "Cannot reverse {0} unit(s) of {1} in {2}: employee {3} now holds only {4}. "
+                    "Reverse the later movements first."
+                ).format(flt(qty), item, building, employee, available)
+            )
+        frappe.throw(
+            _(
+                "Cannot reverse {0} unit(s) of {1} in {2}: only {3} left in the building store. "
+                "Reverse the later movements first."
+            ).format(flt(qty), item, building, available)
+        )
+
+
 def reverse_stock_entries(voucher_type: str, voucher_no: str) -> None:
     """Reverse (do not delete) all live rows of a voucher: post negative mirror
     entries and mark the originals cancelled. Idempotent."""
@@ -125,6 +160,7 @@ def reverse_stock_entries(voucher_type: str, voucher_no: str) -> None:
         fields=["name", "item_type", "item", "signed_qty", "building", "employee",
                 "from_building", "to_building"],
     )
+    _assert_reversal_keeps_stock_positive(rows)
     for r in rows:
         rev = post_stock_entry(
             item_type=r.item_type, item=r.item, qty=-flt(r.signed_qty), building=r.building,
@@ -141,6 +177,7 @@ def reverse_and_mark_cancelled(doc, voucher_type: str) -> None:
     """The whole on_cancel routine every stock voucher shares: reverse each ledger
     row this voucher posted, then stamp the voucher Cancelled. Reversal is keyed on
     voucher_type/voucher_no only, so it never reads the doc and the two steps are
-    order-independent."""
+    order-independent. Reversal runs first and may throw, so a voucher whose stock
+    has already moved on is never stamped Cancelled."""
     reverse_stock_entries(voucher_type, doc.name)
     doc.db_set("status", "Cancelled")
