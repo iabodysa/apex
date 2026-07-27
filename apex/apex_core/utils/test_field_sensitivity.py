@@ -66,16 +66,10 @@ _RESIDENT_REQUEST_PROSE = (
     "re-read of the whole Resident Request permission table rather than a field flip."
 )
 
-_FREELANCER_SALARY = (
-    "Category 4 (per-person pay). The ONLY per-person pay field in the app, and the one "
-    "A-298 is about to drain in this same batch: Freelancer already runs a level-1 section "
-    "and Finance Manager and System Manager already hold the level-1 rows, so raising it "
-    "costs no new row. Listed here so this commit tells the truth about the tree it "
-    "guards; A-298 removes this entry and the ratchet tightens by one."
-)
-
 KNOWN_LEVEL_ZERO_SENSITIVE = {
-    "Freelancer": ([("monthly_salary", "per_person_pay")], _FREELANCER_SALARY),
+    # A-298 DRAINED the one category-4 entry that stood here: Freelancer.monthly_salary is
+    # now permlevel 1. The ratchet tightened by one, which is the whole point of exact
+    # equality — a repaired entry MUST be pruned or the guard stops meaning anything.
     "Custody Acknowledgment": ([("signature", "signature")], _SIGNATURES_NOT_YET_LAYERED),
     "Custody Issue": ([("signature", "signature")], _SIGNATURES_NOT_YET_LAYERED),
     "Facility Asset Custody Assignment": (
@@ -282,6 +276,25 @@ class TestTheModelIsEnforcedOnTheShippedTree(unittest.TestCase):
     def test_no_frozen_entry_names_a_doctype_that_stopped_shipping(self):
         phantom = sorted(set(KNOWN_LEVEL_ZERO_SENSITIVE) - set(self.doctypes))
         self.assertEqual(phantom, [], "the baseline names DocType(s) this app no longer ships")
+
+    def test_the_freelancer_salary_stayed_drained(self):
+        """A-298 raised it and pruned its entry. If either half regresses, say so here
+        rather than letting the exact-equality diff explain it obliquely."""
+        self.assertNotIn(
+            "Freelancer",
+            KNOWN_LEVEL_ZERO_SENSITIVE,
+            "the A-298 entry came back — the salary was un-raised, or re-frozen instead "
+            "of fixed",
+        )
+        raised = dict(
+            (fieldname, permlevel)
+            for fieldname, _cat, permlevel in field_sensitivity.sensitive_fields(
+                self.doctypes["Freelancer"]
+            )
+        )
+        self.assertEqual(
+            raised.get("monthly_salary"), 1, "A-298 regressed: the salary is back at level 0"
+        )
 
 class TestTheModelMatchesTheShippedTree(unittest.TestCase):
     """Proof 4 — the adoption numbers quoted in field_sensitivity's docstring."""

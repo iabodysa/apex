@@ -129,11 +129,19 @@ class TestFreelancerCreateGrantIsUsable(unittest.TestCase):
         return [p for p in self.perms if p.get("role") == role and _permlevel(p) == permlevel]
 
     def test_the_pii_field_is_still_the_reason_this_guard_exists(self):
-        """Guard-of-the-guard: an empty scan would pass every assertion below."""
+        """Guard-of-the-guard: an empty scan would pass every assertion below.
+
+        A-298 added the second entry: `monthly_salary` moved to permlevel 1 under the A-303
+        sensitivity model (per-person pay), and it is `reqd` with no default, so it joins
+        `national_id_or_iqama` as a field a create must be able to write. That is precisely
+        why this guard is worth keeping — the move was only safe because every role holding
+        `create` here (Finance Manager, System Manager) also holds a permlevel-1 write row,
+        which `test_no_role_holds_a_create_it_can_never_complete` re-checks below.
+        """
         blocking = _blocking_reqd_fields(self.doctype)
         self.assertEqual(
             [f["fieldname"] for f in blocking],
-            ["national_id_or_iqama"],
+            ["national_id_or_iqama", "monthly_salary"],
             "Freelancer's mandatory-above-permlevel-0 set changed; re-derive who may create",
         )
 
