@@ -52,10 +52,18 @@ _SIGNATURES_NOT_YET_LAYERED = (
 _RESIDENT_REQUEST_PROSE = (
     "Category 5 (free text about a person). Resident Request is a person master and these "
     "three fields are exactly the unbounded prose the model warns about — a resident's own "
-    "complaint text plus the triage and resolution notes written about them. They are NOT "
-    "raised yet because the request workflow is read by the housing supervisors who must "
-    "act on it, and a level-1 wall would need those roles given level-1 rows, which is a "
-    "re-read of the whole Resident Request permission table rather than a field flip."
+    "complaint text plus the triage and resolution notes written about them. They stay at "
+    "level 0 because RAISING THEM WOULD PROTECT THEM FROM NOBODY, which is a different "
+    "reason from the one this entry used to give. Every role holding read on this DocType "
+    "already holds a permlevel-1 read row — all four of them, added when `mobile_number` "
+    "was raised — so a level-1 wall here has nobody on the far side of it. "
+    "`test_raising_the_resident_request_prose_would_shut_nobody_out` proves that off the "
+    "shipped JSON rather than asserting it in prose, and will start failing the moment a "
+    "role is given level-0 read without a level-1 row, which is the day raising these three "
+    "fields starts buying something. Until then the flip is theatre with a real cost: "
+    "`description` is `reqd`, and a required field at level 1 breaks create outright for "
+    "any role lacking a level-1 write row. Closing this exposure needs a narrower read role "
+    "to exist first, or an owner decision to accept it — not a field flip."
 )
 
 KNOWN_LEVEL_ZERO_SENSITIVE = {
@@ -275,6 +283,41 @@ class TestTheModelIsEnforcedOnTheShippedTree(unittest.TestCase):
     def test_no_frozen_entry_names_a_doctype_that_stopped_shipping(self):
         phantom = sorted(set(KNOWN_LEVEL_ZERO_SENSITIVE) - set(self.doctypes))
         self.assertEqual(phantom, [], "the baseline names DocType(s) this app no longer ships")
+
+    def test_raising_the_resident_request_prose_would_shut_nobody_out(self):
+        """The Resident Request entry's reason, made falsifiable.
+
+        That entry used to say the three prose fields were unraised because raising them
+        would need the housing roles given level-1 rows. They already have them: all four
+        roles that hold read on this DocType also hold a permlevel-1 read row, added when
+        `mobile_number` was raised. So the flip protects nobody, and the entry's real reason
+        is that there is no role on the far side of the wall — not that the wall is
+        expensive to build.
+
+        A reason left in prose rots silently and the next reader does unnecessary work, or
+        worse, does the flip and believes an exposure was closed. This asserts the fact
+        instead. It fails the day someone grants level-0 read without a level-1 row, which
+        is exactly the day raising these fields starts to buy something — at which point
+        the entry should be drained rather than re-explained.
+
+        Read is what matters here: a role that cannot READ the prose cannot leak it,
+        whatever its write rows say.
+        """
+        request = self.doctypes["Resident Request"]
+        rows = request["permissions"]
+        can_read = {p["role"] for p in rows if int(p.get("permlevel") or 0) == 0 and p.get("read")}
+        reach_level_1 = {
+            p["role"] for p in rows if int(p.get("permlevel") or 0) == 1 and p.get("read")
+        }
+        self.assertTrue(can_read, "Resident Request ships no level-0 read row at all")
+        self.assertEqual(
+            can_read - reach_level_1,
+            set(),
+            "a role now reads Resident Request without a permlevel-1 row, so raising "
+            "description/triage_notes/resolution_notes would finally hide them from "
+            "someone. Drain the baseline entry and do the flip — but note description is "
+            "`reqd`, so that role needs a permlevel-1 WRITE row too or its create breaks.",
+        )
 
     def test_the_freelancer_salary_stayed_drained(self):
         """The Freelancer salary fix raised it and pruned its entry. If either half
