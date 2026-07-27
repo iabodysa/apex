@@ -1,18 +1,27 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Room Bed Transfer submit/cancel side-effects: the bed occupancy swap.
+"""Room Bed Transfer submit/cancel side-effects: the bed swap AND the occupancy
+counters that have to move with it.
 
-The shipped ``test_room_bed_transfer`` only ``insert(... ignore_links=True)``s and
-checks mandatory fields; it never submits or cancels, so the controller's actual
-job is unguarded. ``on_submit`` (room_bed_transfer.py) frees ``from_bed``, occupies
-``to_bed``, and re-points the live Accommodation Assignment's bed/room/building to
-the target; ``on_cancel`` reverses the two bed statuses. A regression that leaves
-``from_bed`` Occupied or fails to flip ``to_bed`` (or skips the cancel reversal)
-would double-book or strand beds in the occupancy grid with no failing test. This
-guards both the submit swap (incl. assignment re-pointing) and the cancel reversal.
+``on_submit`` frees ``from_bed``, occupies ``to_bed``, and re-points the live
+Housing Assignment's bed/room/building; ``on_cancel`` reverses all of it. A
+regression that leaves ``from_bed`` Occupied or fails to flip ``to_bed`` would
+double-book or strand beds in the occupancy grid.
 
-Fixtures are built fresh per test (keyed off ``self._testMethodName``) so the suite
-passes on a migrated site with NO production data; assertions on the seeded state
-keep it non-vacuous.
+The move is BETWEEN TWO ROOMS OF ONE BUILDING. It used to be written across two
+buildings, which encoded as correct the very behaviour the controller now
+rejects: a cross-building move re-points the assignment with ``db_set`` and so
+never re-derives the cost centre, Company or allowance state that the new
+building implies. Two rooms in one building still exercise every spatial field
+the swap touches, and they are what makes the ROOM counters observable — a
+same-room move would hide the drift this module now guards.
+
+Counters are asserted as DELTAS around the move, and against the live
+active-assignment count. Housing Assignment and Housing Checkout have always
+called ``recalculate_spatial`` on every move; the transfer alone did not, so both
+rooms' ``current_occupancy`` silently drifted until the weekly sync job ran.
+
+Fixtures are built fresh per test so the suite passes on a migrated site with NO
+production data; assertions on the seeded state keep it non-vacuous.
 """
 
 from __future__ import annotations
@@ -52,14 +61,10 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
         return frappe.generate_hash(length=12).upper()
 
     def _fixtures(self):
-        """A fully consistent two-building / two-room / two-bed world so the
-        Accommodation Assignment controller's full validate() runs (not link-ignored
-        stubs) and a cross-building transfer genuinely changes room AND building.
-
-        Returns the from-side (building/room/bed) and to-side (building/room/bed)
-        plus the employee, so the swap re-point is observable across all three
-        spatial fields.
-        """
+        """One building, two rooms, one bed each, so the Housing Assignment
+        controller's full validate() runs (not link-ignored stubs) and the move
+        changes bed AND room while staying inside the building the controller
+        allows. Returns both sides plus the employee."""
         company = frappe.db.get_value("Company", {}) or frappe.get_doc(
             {
                 "doctype": "Company",
@@ -76,19 +81,18 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
             {"doctype": "Site", "site_name": self._h() + self._h()}
         ).insert(ignore_permissions=True).name
 
-        def _building():
-            return frappe.get_doc(
-                {
-                    "doctype": "Building",
-                    "building_name": "B " + self._h(),
-                    "site": site,
-                    "total_capacity": 4,
-                    "company": company,
-                    "default_cost_center": cc,
-                }
-            ).insert(ignore_permissions=True).name
+        building = frappe.get_doc(
+            {
+                "doctype": "Building",
+                "building_name": "B " + self._h(),
+                "site": site,
+                "total_capacity": 4,
+                "company": company,
+                "default_cost_center": cc,
+            }
+        ).insert(ignore_permissions=True).name
 
-        def _room(building):
+        def _room():
             return frappe.get_doc(
                 {
                     "doctype": "Room",
@@ -100,7 +104,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
                 }
             ).insert(ignore_permissions=True).name
 
-        def _bed(building, room):
+        def _bed(room):
             return frappe.get_doc(
                 {
                     "doctype": "Bed",
@@ -112,13 +116,10 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
                 }
             ).insert(ignore_permissions=True).name
 
-        from_building = _building()
-        from_room = _room(from_building)
-        from_bed = _bed(from_building, from_room)
-
-        to_building = _building()
-        to_room = _room(to_building)
-        to_bed = _bed(to_building, to_room)
+        from_room = _room()
+        from_bed = _bed(from_room)
+        to_room = _room()
+        to_bed = _bed(to_room)
 
         project = frappe.get_doc(
             {"doctype": "Project", "project_name": "P " + self._h()}
@@ -137,10 +138,9 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
         return frappe._dict(
             company=company,
             cc=cc,
-            from_building=from_building,
+            building=building,
             from_room=from_room,
             from_bed=from_bed,
-            to_building=to_building,
             to_room=to_room,
             to_bed=to_bed,
             project=project,
@@ -156,7 +156,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
                 "naming_series": "ACC-ASGN-.YYYY.-.####",
                 "employee": fx.emp,
                 "project": fx.project,
-                "building": fx.from_building,
+                "building": fx.building,
                 "room": fx.from_room,
                 "bed": fx.from_bed,
                 "cost_center": fx.cc,
@@ -179,6 +179,21 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
             }
         )
 
+    def _counters(self, fx):
+        """``(from_room stored, to_room stored, building stored, building live)``.
+
+        The live count is carried alongside the stored one so a counter that is
+        consistently wrong cannot pass as a counter that is right."""
+        return (
+            int(frappe.db.get_value("Room", fx.from_room, "current_occupancy") or 0),
+            int(frappe.db.get_value("Room", fx.to_room, "current_occupancy") or 0),
+            int(frappe.db.get_value("Building", fx.building, "current_occupants") or 0),
+            frappe.db.count(
+                "Housing Assignment",
+                {"building": fx.building, "docstatus": 1, "check_out_date": ["is", "not set"]},
+            ),
+        )
+
     def test_submit_swaps_beds_and_repoints_assignment(self):
         fx = self._fixtures()
         asg = self._active_assignment(fx)
@@ -195,6 +210,12 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
             "Available",
             "seed precondition: to_bed must start Available",
         )
+        self.assertEqual(
+            self._counters(fx),
+            (1, 0, 1, 1),
+            "seed precondition: the resident is counted in the source room only",
+        )
+
         # [#flajtg]
         transfer = self._transfer(fx)
         transfer.insert(ignore_permissions=True)
@@ -226,7 +247,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
         self.assertEqual(row.bed, fx.to_bed, "assignment must now reference the target bed")
         self.assertEqual(row.room, fx.to_room, "assignment must now reference the target room")
         self.assertEqual(
-            row.building, fx.to_building, "assignment must now reference the target building"
+            row.building, fx.building, "an in-building move must not change the building"
         )
         # [#9xf9v0]
         self.assertEqual(row.docstatus, 1, "the transfer must not cancel the assignment")
@@ -234,10 +255,17 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
             row.check_out_date, "the transfer must keep the assignment checked in"
         )
 
+        self.assertEqual(
+            self._counters(fx),
+            (0, 1, 1, 1),
+            "the occupancy must move room to room and the building total must not drift",
+        )
+
     def test_cancel_reverses_the_swap(self):
         fx = self._fixtures()
         asg = self._active_assignment(fx)
         self._asg_name = asg.name
+        before = self._counters(fx)
 
         transfer = self._transfer(fx)
         transfer.insert(ignore_permissions=True)
@@ -254,6 +282,9 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
             "Occupied",
             "precondition: submit occupied to_bed",
         )
+        self.assertNotEqual(
+            self._counters(fx), before, "precondition: submit actually moved the counters"
+        )
 
         transfer.cancel()
 
@@ -267,4 +298,13 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
             frappe.db.get_value("Bed", fx.from_bed, "status"),
             "Occupied",
             "on_cancel must re-occupy the source bed",
+        )
+        row = frappe.db.get_value(
+            "Housing Assignment", asg.name, ["bed", "room", "building"], as_dict=True
+        )
+        self.assertEqual(row.bed, fx.from_bed, "cancel must put the resident back")
+        self.assertEqual(row.room, fx.from_room)
+        self.assertEqual(row.building, fx.building)
+        self.assertEqual(
+            self._counters(fx), before, "cancel must return the counters to their pre-move values"
         )

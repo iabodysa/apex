@@ -32,7 +32,22 @@ from apex.habitat.doctype.housing_assignment.housing_assignment import recalcula
 
 
 class RoomBedTransfer(Document):
-    pass
+    """Preconditions run in ``before_*``, side effects in ``on_*``.
+
+    Not a style choice: ``_save`` writes the new ``docstatus`` (document.py:428)
+    BEFORE ``run_post_save_methods`` fires ``on_submit`` / ``on_cancel`` (:431),
+    while ``before_submit`` / ``before_cancel`` fire at :414, ahead of that write.
+    A refusal raised from ``on_cancel`` therefore relies on the request rollback to
+    undo a docstatus that is already in the row; raised from ``before_cancel`` it
+    never gets written at all. Declared as controller methods (the shape Housing
+    Checkout uses) so no second hooks.py registration can drift from them.
+    """
+
+    def before_submit(self):
+        before_submit(self)
+
+    def before_cancel(self):
+        before_cancel(self)
 
 
 def _source_building(doc):
@@ -75,6 +90,9 @@ def validate(doc, method=None):
 
     # The single cross-building rule. Same wording the Transfer Board used to raise
     # on its own, so the operator sees no change and the string stays translated.
+    # An assignment carrying NO building is not blocked here — it has no estate to
+    # leave, the move stamps one, and a building-scoped user cannot reach it anyway
+    # (building_scoped_has_permission resolves None and denies).
     from_building = _source_building(doc)
     if from_building and from_building != to_building:
         frappe.throw(
@@ -82,13 +100,20 @@ def validate(doc, method=None):
         )
 
 
-def on_submit(doc, method=None):
+def before_submit(doc, method=None):
     # [#lfwp8g]
+    # Locked, not merely read: the assignment row is what serialises every move of
+    # ONE resident, so two transfers racing to move the same person cannot both see
+    # him in from_bed and leave him occupying two beds. The lock is held for the rest
+    # of the transaction, which is why on_submit below needs no second check. Locking
+    # the assignment BEFORE the bed keeps one global order and cannot deadlock with
+    # the target-bed lock.
     asg = frappe.db.get_value(
         "Housing Assignment",
         doc.assignment,
-        ["docstatus", "check_out_date", "bed", "room", "building"],
+        ["docstatus", "check_out_date", "bed"],
         as_dict=True,
+        for_update=True,
     )
     if not asg or asg.docstatus != 1 or asg.check_out_date:
         frappe.throw(_("This transfer needs an active (checked-in) assignment to move."))
@@ -101,6 +126,13 @@ def on_submit(doc, method=None):
                 doc.from_bed, asg.bed
             )
         )
+
+
+def on_submit(doc, method=None):
+    # The OLD spatial position, read before the re-point below moves it.
+    asg = frappe.db.get_value(
+        "Housing Assignment", doc.assignment, ["room", "building"], as_dict=True
+    )
 
     # [#hzjmc4]
     locked_status = frappe.db.get_value("Bed", doc.to_bed, "status", for_update=True)
@@ -123,16 +155,24 @@ def on_submit(doc, method=None):
     recalculate_spatial(doc.to_room, to_building)
 
 
-def on_cancel(doc, method=None):
-    # [#l362nf]
+def before_cancel(doc, method=None):
+    """Refuse rather than half-reverse.
+
+    The reversal below flips both bed statuses. Doing that while the resident has
+    since moved on — or checked out — re-occupies ``from_bed`` for somebody who is
+    not in it, a phantom occupancy no report can explain. The old code guarded only
+    the assignment re-point and flipped the beds regardless.
+
+    Locked like ``before_submit``, and for the same reason: the check and the
+    reversal it authorises must see the same assignment row.
+    """
     asg = frappe.db.get_value(
         "Housing Assignment",
         doc.assignment,
         ["docstatus", "check_out_date", "bed"],
         as_dict=True,
+        for_update=True,
     )
-    # Refuse rather than half-reverse: flipping the beds back while the resident has
-    # since moved on (or checked out) leaves from_bed Occupied by nobody.
     if not asg or asg.docstatus != 1 or asg.check_out_date or asg.bed != doc.to_bed:
         frappe.throw(
             _("This transfer can no longer be reversed: the resident is no longer in Bed {0}.").format(
@@ -140,6 +180,9 @@ def on_cancel(doc, method=None):
             )
         )
 
+
+def on_cancel(doc, method=None):
+    # [#l362nf]
     from_room = frappe.db.get_value("Bed", doc.from_bed, "room")
     from_building = (
         frappe.db.get_value("Room", from_room, "building") if from_room else None
