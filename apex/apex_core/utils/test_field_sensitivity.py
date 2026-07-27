@@ -49,14 +49,6 @@ _SIGNATURES_NOT_YET_LAYERED = (
     "differs per custody flow — so each one is its own module change with its own reviewer. "
     "The exposure today: any role holding read on the record sees the captured mark."
 )
-_HOUSING_SIGNATURE = (
-    "Category 1 (signature), not yet layered — AND the field A-216 just widened. Granting "
-    "Internal Auditor read at level 0 on Housing Assignment (same batch) hands that role "
-    "this signature, because Housing Assignment ships no level-1 section for it to sit "
-    "behind. That was the known cost of the A-216 decision, recorded here rather than left "
-    "for the next reader to discover. Layering Housing Assignment is the module change that "
-    "closes it."
-)
 _RESIDENT_REQUEST_PROSE = (
     "Category 5 (free text about a person). Resident Request is a person master and these "
     "three fields are exactly the unbounded prose the model warns about — a resident's own "
@@ -76,7 +68,10 @@ KNOWN_LEVEL_ZERO_SENSITIVE = {
         [("supervisor_signature", "signature")],
         _SIGNATURES_NOT_YET_LAYERED,
     ),
-    "Housing Assignment": ([("terms_signature", "signature")], _HOUSING_SIGNATURE),
+    # DRAINED: Housing Assignment.terms_signature, the entry A-216 created and A-308 called
+    # the urgent one. Now permlevel 1, with level-1 rows for the three Arrivals Desk roles
+    # and none for Internal Auditor — so the estate-wide audit read stops at level 0, which
+    # was the whole exposure. Proof: test_housing_assignment_signature_permlevel.
     "Vehicle Incident": ([("worker_signature", "signature")], _SIGNATURES_NOT_YET_LAYERED),
     "Resident Request": (
         [
@@ -318,7 +313,7 @@ class TestTheModelMatchesTheShippedTree(unittest.TestCase):
         )
         self.assertEqual(
             (total, with_high_field, with_high_row),
-            (153, 19, 16),
+            (153, 20, 17),
             "the adoption numbers in field_sensitivity.py's docstring are stale — update "
             "the docstring and this assertion together, so the premise cannot rot.",
         )

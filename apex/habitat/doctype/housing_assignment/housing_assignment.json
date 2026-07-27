@@ -271,10 +271,11 @@
   },
   {
    "allow_on_submit": 1,
-   "description": "Resident's signature accepting the housing terms at check-in.",
+   "description": "Resident's signature accepting the housing terms at check-in. A captured signature is biometric-adjacent and the raw material for forgery, so it sits at level 1: only the desk roles that capture it read it, and the Internal Auditor's estate-wide read stops at level 0.",
    "fieldname": "terms_signature",
    "fieldtype": "Signature",
    "label": "Terms Signature",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -418,6 +419,24 @@
    "read": 1,
    "report": 1,
    "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
+   "write": 1
   }
  ],
  "row_format": "Dynamic",
