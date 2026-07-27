@@ -19,14 +19,18 @@ coverage.
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex.salis.api.masar import _ENUM_SOURCES, get_enum_labels
+# The module, never the metered function: ``from masar import get_enum_labels``
+# would publish apex.salis.api.test_worker_portal_enum_coverage.get_enum_labels as a
+# second dotted path, and the rate-limit window is named after the caller's spelling
+# (rate_limiter.py:155), so the second name would carry its own full window.
+from apex.salis.api import masar
 
 
 class TestWorkerPortalEnumCoverage(FrappeTestCase):
     def test_endpoint_covers_live_options_in_arabic(self):
-        labels = get_enum_labels(lang="ar")
+        labels = masar.get_enum_labels(lang="ar")
         missing = []
-        for ns, (dt, field) in _ENUM_SOURCES.items():
+        for ns, (dt, field) in masar._ENUM_SOURCES.items():
             meta_field = frappe.get_meta(dt).get_field(field)
             self.assertIsNotNone(
                 meta_field, f"{dt}.{field} missing (declared enum source for '{ns}')"
