@@ -16,15 +16,12 @@
  "name": "Habitat - Severe Safety Incident",
  "recipients": [
   {
-   "receiver_by_role": "Admin Manager"
-  },
-  {
-   "receiver_by_role": "Operations Director"
+   "receiver_by_role": "Accommodation Manager"
   }
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "Severe Safety Incident Reported: {{ doc.name }}",
  "value_changed": "severity",
- "modified": "2026-07-10 06:05:34.129545"
+ "modified": "2026-07-27 09:00:00.000000"
 }

@@ -41,7 +41,7 @@ A line is missing its item.,أحد السطور ينقصه الصنف.
 A linked Employee is required to raise departure transport (the manifest cannot carry a Temporary Worker).,يلزم موظف مرتبط لإنشاء نقل المغادرة (لا يمكن للبيان أن يحمل عاملاً مؤقتاً).
 A maintenance request has been assigned to you,تم إسناد طلب صيانة إليك
 A maintenance request raised automatically when the task execution indicates a repair is needed.,طلب صيانة يُنشأ آلياً عندما يشير تنفيذ المهمة إلى الحاجة لإصلاح.
-A maintenance request spawned from a safety finding requires the Facilities Supervisor in parallel,طلب صيانة ناتج عن ملاحظة سلامة يتطلب إشراف مشرف المنشأة بالتوازي
+A maintenance request spawned from a safety finding requires the maintenance technician in parallel,طلب صيانة ناتج عن ملاحظة سلامة يتطلب تدخل فني الصيانة بالتوازي
 A manifest can list at most {0} expected workers.,يمكن أن يضم كشف الوصول {0} عاملاً متوقعاً كحد أقصى.
 A new Dispatch Trip must start as Planned; {0} is reached through the workflow.,يجب أن تبدأ رحلة التشغيل الجديدة بالحالة مُخطَّطة؛ يتم الوصول إلى {0} عبر سير العمل.
 A new maintenance request awaits triage,طلب صيانة جديد بانتظار الفرز

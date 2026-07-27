@@ -10,17 +10,17 @@
  "event": "New",
  "idx": 0,
  "is_standard": 1,
- "message": "{{ _(\"A maintenance request spawned from a safety finding requires the Facilities Supervisor in parallel\") }}: {{ doc.name }}.<br><br>\n<a href=\"/app/maintenance-request/{{ doc.name }}\">{{ _(\"Open the maintenance request\") }}</a>",
+ "message": "{{ _(\"A maintenance request spawned from a safety finding requires the maintenance technician in parallel\") }}: {{ doc.name }}.<br><br>\n<a href=\"/app/maintenance-request/{{ doc.name }}\">{{ _(\"Open the maintenance request\") }}</a>",
  "message_type": "HTML",
  "module": "Habitat",
  "name": "Habitat - Maintenance From Safety - Facilities Supervisor",
  "recipients": [
   {
-   "receiver_by_role": "Facilities Supervisor"
+   "receiver_by_role": "Maintenance Technician"
   }
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "Maintenance From Safety Finding: {{ doc.name }}",
- "modified": "2026-06-23 12:00:00.000000"
+ "modified": "2026-07-27 09:00:00.000000"
 }
