@@ -47,8 +47,9 @@ def after_insert(doc, method=None):
     if not assignees:
         return
     # [#foc6qa]
-    # assign_to.add re-reads the parent to re-check read as the very user who just
-    # created it; scope that with its own keyword rather than a process-global flag.
+    # No permission kwarg: add()'s only check is a read recheck on this doc as its
+    # creator, which cannot fail here — every role with create also has read, and the
+    # building has_permission hook is deny-only and ptype-agnostic (create pass = read pass).
     _assign_to.add(
         {
             "doctype": doc.doctype,
@@ -58,8 +59,7 @@ def after_insert(doc, method=None):
                 doc.responsible_department, doc.employee_name or doc.employee, doc.building),
             "priority": "High" if doc.reason_category == "Legal Case" else "Medium",
             "assigned_by": frappe.session.user,
-        },
-        ignore_permissions=True,  # audit-ok - skips only the creator's redundant self-read recheck
+        }
     )
 
 
