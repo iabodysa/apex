@@ -101,13 +101,13 @@
   },
   {
    "doctype": "DocField",
-   "fetch_from": "linked_maintenance_request.source_inspection",
-   "fetch_if_empty": 1,
    "fieldname": "linked_inspection",
    "fieldtype": "Link",
    "label": "Linked Safety Inspection Report",
    "options": "Safety Inspection Report",
-   "description": "If execution discovered an issue requiring formal inspection",
+   "hidden": 1,
+   "no_copy": 1,
+   "read_only": 1,
    "idx": 11
   },
   {
@@ -288,5 +288,5 @@
   "priority",
   "naming_series"
  ],
- "modified": "2026-07-26 09:03:55.752811"
+ "modified": "2026-07-27 17:33:17.937518"
 }
