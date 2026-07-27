@@ -49,6 +49,7 @@ from apex.habitat.asset_movement_engine import (
     ensure_asset_still_at,
     ledgered_origin,
     post_asset_movement,
+    restore_asset_audit_trail,
     reverse_asset_movement,
 )
 
@@ -124,6 +125,9 @@ class FacilityAssetDelivery(Document):
                 if origin:
                     restored["location_in_building"] = origin.from_location
                 frappe.db.set_value("Facility Asset", self.facility_asset, restored)
+                # previous_*/last_movement_date are move-time snapshots; leaving
+                # them behind makes the asset cite a delivery that no longer exists.
+                restore_asset_audit_trail(self.facility_asset)
         self.db_set("status", "Cancelled")
 
     def before_cancel(self):

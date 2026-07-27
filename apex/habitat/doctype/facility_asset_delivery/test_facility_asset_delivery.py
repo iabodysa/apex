@@ -273,6 +273,51 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         )
         self.assertEqual(asset.movement_count, 0, "cancel must decrement movement_count back to 0")
 
+    _AUDIT_TRAIL = (
+        "previous_building",
+        "previous_location_in_building",
+        "last_movement_date",
+    )
+
+    def _audit_trail(self):
+        return frappe.db.get_value(
+            "Facility Asset", self.asset, list(self._AUDIT_TRAIL), as_dict=True
+        )
+
+    def test_cancelling_a_delivery_clears_the_audit_trail_it_stamped(self):
+        """move_asset_on_delivery stamps previous_*/last_movement_date and on_cancel
+        reset none of them, so a cancelled delivery left the asset back in the intake
+        store claiming it had previously been in the intake store, dated to a
+        delivery that no longer exists."""
+        before = self._audit_trail()
+        self.assertFalse(before.previous_building, "seed asset must carry no previous building")
+        self.assertFalse(before.last_movement_date, "seed asset must carry no movement date")
+
+        d = self._deliver()
+        stamped = self._audit_trail()
+        self.assertEqual(
+            stamped.previous_building, self.intake, "the delivery must stamp the prior building"
+        )
+        self.assertTrue(stamped.last_movement_date, "the delivery must stamp the movement date")
+
+        d.db_set("cancellation_reason", "Delivery reversed in test")
+        d.reload()
+        d.cancel()
+
+        after = self._audit_trail()
+        for field in self._AUDIT_TRAIL:
+            # NULL and "" both read as blank; compare on that axis, not on identity.
+            self.assertEqual(
+                after.get(field) or None,
+                before.get(field) or None,
+                f"cancel must return {field} to its pre-delivery value",
+            )
+        self.assertNotEqual(
+            after.previous_building,
+            self.intake,
+            "an asset back in the intake store must not also claim it came from there",
+        )
+
     def test_cancelling_a_superseded_delivery_cannot_drag_the_asset_back(self):
         """A Delivered delivery followed by a movement onward: cancelling the delivery
         used to restore from_building blindly, teleporting the asset back into the

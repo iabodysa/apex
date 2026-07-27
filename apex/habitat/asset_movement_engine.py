@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.utils import getdate
 
 LEDGER_DOCTYPE = "Facility Asset Movement Ledger"
 
@@ -69,6 +70,58 @@ def ledgered_origin(source_doctype: str, source_name: str):
         limit=1,
     )
     return rows[0] if rows else None
+
+
+def _latest_surviving_movement(facility_asset: str):
+    """The newest original ledger row for the asset that no reversal points at —
+    i.e. the asset's most recent move that still stands. None once every move it
+    ever made has been cancelled."""
+    reversed_originals = set(
+        frappe.get_all(
+            LEDGER_DOCTYPE,
+            filters={"facility_asset": facility_asset, "reversal_of": ["is", "set"]},
+            pluck="reversal_of",
+        )
+    )
+    rows = frappe.get_all(
+        LEDGER_DOCTYPE,
+        filters={"facility_asset": facility_asset, "reversal_of": ["is", "not set"]},
+        fields=["name", "posting_datetime", "from_building", "from_location"],
+        order_by="posting_datetime desc, creation desc",
+    )
+    for row in rows:
+        if row.name not in reversed_originals:
+            return row
+    return None
+
+
+def restore_asset_audit_trail(facility_asset: str) -> None:
+    """Re-derive the asset's movement audit trail from the history a cancel left
+    standing.
+
+    ``previous_building``, ``previous_location_in_building`` and
+    ``last_movement_date`` are snapshots taken on SUBMIT. A cancel that restores
+    the location but leaves those three behind has the asset citing a movement
+    that no longer exists: reverting one move on a fresh asset read "at A,
+    previously A", still stamped with the cancelled move's date.
+
+    The ledger is the movement history, so the honest values are the newest
+    surviving row's origin and posting date — or blank when the cancel undid the
+    asset's only move, which is exactly what a never-moved asset reads.
+
+    Call AFTER ``reverse_asset_movement``, so the row being cancelled is already
+    excluded from the history.
+    """
+    latest = _latest_surviving_movement(facility_asset)
+    frappe.db.set_value(
+        "Facility Asset",
+        facility_asset,
+        {
+            "previous_building": latest.from_building if latest else None,
+            "previous_location_in_building": latest.from_location if latest else None,
+            "last_movement_date": getdate(latest.posting_datetime) if latest else None,
+        },
+    )
 
 
 def _ledger_exists(source_doctype: str, source_name: str) -> bool:
