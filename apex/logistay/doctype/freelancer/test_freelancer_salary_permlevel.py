@@ -132,11 +132,18 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
             "the unprivileged value landed — the permlevel is not being enforced on write",
         )
         # The explicit difference the card asked for: same field, same document, two roles,
-        # two outcomes.
+        # two outcomes. Compare the VERDICTS alone. An earlier form compared
+        # (role, value, verdict) triples, which could never be equal — the role names are
+        # different literals — so it passed even when both verdicts read "persisted",
+        # which is the one state it claimed to catch.
+        finance_verdict = "persisted" if float(finance_stored) == 7777.0 else "reverted"
+        housing_verdict = "persisted" if float(housing_stored) == 1.0 else "reverted"
         self.assertNotEqual(
-            (FINANCE_ROLE, 7777.0, "persisted"),
-            (HOUSING_ROLE, float(housing_stored), "reverted" if housing_stored != 1 else "persisted"),
-            "both roles produced the same verdict — the pair collapsed",
+            finance_verdict,
+            housing_verdict,
+            f"both roles produced the same verdict ({finance_verdict}) — the pair "
+            "collapsed: either the permlevel stopped being enforced for anyone, or it "
+            "is now enforced against Finance Manager too",
         )
 
     def test_the_housing_role_can_still_save_with_the_salary_intact(self):
