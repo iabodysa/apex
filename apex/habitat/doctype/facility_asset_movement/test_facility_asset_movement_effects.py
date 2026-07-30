@@ -157,6 +157,83 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
         )
         self.assertEqual(asset.movement_count, 0, "cancel must decrement movement_count back to 0")
 
+    # A delivered room that is not a Room record used to be erased by the next movement.
+
+    FREE_TEXT_ROOM = "Storage Annex B"
+
+    def test_movement_round_trip_preserves_a_room_that_is_not_a_room_record(self):
+        """An asset parked in a free-text room survives submit + cancel.
+
+        Facility Asset Delivery.to_location_in_building is Data and Facility Asset
+        .location_in_building is Data, but the movement's from_room/to_room are Link
+        Room. So a delivery can park an asset in a room string that is not a Room
+        record. _reconcile_origin narrows that to the Link and leaves from_room blank,
+        which is unavoidable; what was NOT unavoidable is that on_submit then ledgered
+        the blank as the origin and on_cancel restored the blank onto the asset --
+        erasing the only record of where the asset came from, with no warning.
+
+        The ledger's from_location is Data, so it can hold the recorded room whatever
+        its shape; the origin is kept there and read back on cancel, the same way
+        Facility Asset Delivery.on_cancel already does through ledgered_origin.
+        """
+        # The state a delivery leaves behind: its destination room is Data, and
+        # move_asset_on_delivery copies it verbatim onto the asset's Data room. Asserted
+        # on the meta rather than staged through a whole 3-exit delivery, so this stays a
+        # movement test -- but it is why a non-Room string can be there at all.
+        for doctype, field in (
+            ("Facility Asset Delivery", "to_location_in_building"),
+            ("Facility Asset", "location_in_building"),
+        ):
+            self.assertEqual(
+                frappe.get_meta(doctype).get_field(field).fieldtype,
+                "Data",
+                f"{doctype}.{field} must be free text for this scenario to be reachable",
+            )
+        frappe.db.set_value(
+            "Facility Asset", self.asset, "location_in_building", self.FREE_TEXT_ROOM
+        )
+        self.assertFalse(
+            frappe.db.exists("Room", self.FREE_TEXT_ROOM),
+            "the fixture room must NOT be a Room record, or this proves nothing",
+        )
+
+        mv = frappe.get_doc(
+            {
+                "doctype": "Facility Asset Movement",
+                "movement_date": today(),
+                "facility_asset": self.asset,
+                "movement_category": "Same-Company Relocation",
+                "from_building": self.bldg_a,
+                "to_building": self.bldg_b,
+                "to_room": self.room_l1,
+            }
+        ).insert(ignore_permissions=True)
+        self.assertFalse(
+            mv.from_room, "a non-Room origin cannot go in the Link field; from_room stays blank"
+        )
+        mv.submit()
+
+        # The room the asset actually left survives in the ledger, not in from_room.
+        self.assertEqual(
+            frappe.db.get_value(
+                "Facility Asset Movement Ledger",
+                {"source_doctype": mv.doctype, "source_name": mv.name, "reversal_of": ["is", "not set"]},
+                "from_location",
+            ),
+            self.FREE_TEXT_ROOM,
+            "the movement must ledger the room the asset really left, not the blank Link",
+        )
+
+        mv.db_set("cancellation_reason", "Movement reversed in test")
+        mv.reload()
+        mv.cancel()
+
+        self.assertEqual(
+            frappe.db.get_value("Facility Asset", self.asset, "location_in_building"),
+            self.FREE_TEXT_ROOM,
+            "cancel must put the asset back in the room it came from, not blank it",
+        )
+
     _AUDIT_TRAIL = (
         "previous_building",
         "previous_location_in_building",
