@@ -41,8 +41,18 @@ watch(
 );
 
 const { toast, showToast } = useToast();
-const { vehicle, trips, fuelGrades, stations, form, submitting, loading, submitFuelRequest } =
-  useEmployee();
+const {
+  vehicle,
+  trips,
+  fuelGrades,
+  stations,
+  form,
+  submitting,
+  loading,
+  loadError,
+  reload,
+  submitFuelRequest,
+} = useEmployee();
 
 /* ---------------------------------------------------------------------------
  * [#emp-nav] Section navigation for this single-scrolling-page archetype.
@@ -230,6 +240,17 @@ function onSaveDraft() {
           </header>
 
           <p v-if="loading" class="emp-empty">{{ t("emp.loading") }}</p>
+          <!-- [#emp-fail] Failure BEFORE the empty state. `vehicle.empty` starts true and
+               a broken load never clears it, so without this branch a failed request
+               rendered as "no vehicle is assigned to you" — a driver WITH a vehicle was
+               told they had none. Also gated on `empty` so a vehicle that did load still
+               shows when only a sibling request failed. -->
+          <div v-else-if="loadError && vehicle.empty" class="emp-fail">
+            <p>{{ t("emp.loadError") }}</p>
+            <button type="button" class="emp-btn emp-btn-ghost emp-retry" @click="reload">
+              <Icon name="rotate-cw" :size="15" />{{ t("common.retry") }}
+            </button>
+          </div>
           <p v-else-if="vehicle.empty" class="emp-empty">{{ t("emp.vehicle.empty") }}</p>
           <template v-else>
             <div class="emp-vehicle-hero">
@@ -267,6 +288,13 @@ function onSaveDraft() {
           </header>
 
           <p v-if="loading" class="emp-empty">{{ t("emp.loading") }}</p>
+          <!-- Same [#emp-fail] rule: "the trips request broke" is not "you have no trips". -->
+          <div v-else-if="loadError && !trips.length" class="emp-fail">
+            <p>{{ t("emp.loadError") }}</p>
+            <button type="button" class="emp-btn emp-btn-ghost emp-retry" @click="reload">
+              <Icon name="rotate-cw" :size="15" />{{ t("common.retry") }}
+            </button>
+          </div>
           <p v-else-if="!trips.length" class="emp-empty">{{ t("emp.trips.empty") }}</p>
           <ul v-else class="emp-trips">
             <li v-for="trip in trips" :key="trip.id" class="emp-trip">

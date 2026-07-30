@@ -405,6 +405,7 @@ const messages = {
       greetEvening: "Good evening",
       subtitle: "{date} · Your vehicle is ready and you have {n} trip scheduled today.",
       loading: "Loading…",
+      loadError: "Couldn't load your data",
       demoBadge: "Sample data",
       demoTitle: "Placeholder — waiting on an employee-scoped backend endpoint",
       vehicle: {
@@ -841,6 +842,7 @@ const messages = {
       greetEvening: "مساء الخير",
       subtitle: "{date} · مركبتك جاهزة ولديك {n} رحلة مجدولة اليوم.",
       loading: "جارٍ التحميل…",
+      loadError: "تعذّر تحميل بياناتك",
       demoBadge: "بيانات تجريبية",
       demoTitle: "بيانات مبدئية — بانتظار خدمة خلفية خاصة بالموظف",
       vehicle: {
