@@ -292,6 +292,62 @@ class TestBoardingFlow(FrappeTestCase):
             self._boarding_events().count(self.employee.name), 1, "no duplicate boarding event"
         )
 
+    def test_worker_claim_names_the_trip_dispatch_trip_on_every_return(self):
+        """One key name for the trip on all three paths, so the two no-ops are
+        distinguishable.
+
+        The endpoint used to answer ``trip`` on both no-ops and ``dispatch_trip`` on
+        success, so a SPA reading ``result.dispatch_trip`` got ``undefined`` and could
+        not tell "no boardable trip today" from "not on this trip's manifest" — the
+        second of which carries a REAL trip id. Both no-ops are asserted here because
+        they differ in exactly that value: None versus the resolved trip.
+        """
+        from apex.salis.api import masar
+
+        self._seed_state()
+
+        # No boardable trip today: the forward resolver finds nothing.
+        with patch.object(masar, "_resolve_worker", return_value=self.employee.name), \
+                patch.object(masar, "_worker_today_dispatch_trip", return_value=None):
+            no_trip = boarding_flow.worker_claim_boarded(token="t")
+
+        # Resolved onto a real trip, but this worker is not on its manifest, so
+        # ensure_trip_boarding_state seeds no row for them.
+        outsider = frappe.get_doc(
+            {"doctype": "Employee", "first_name": "OUT-" + _h(), "naming_series": "HR-EMP-"}
+        )
+        outsider.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        self._cleanup.append(("Employee", outsider.name))
+        with patch.object(masar, "_resolve_worker", return_value=outsider.name), \
+                patch.object(
+                    masar,
+                    "_worker_today_dispatch_trip",
+                    return_value=(self.trip.name, self.request.name, "Gate", None),
+                ):
+            off_manifest = boarding_flow.worker_claim_boarded(token="t")
+
+        with _patch_masar_resolver(self.trip.name, self.request.name):
+            boarded = boarding_flow.worker_claim_boarded(token="t")
+
+        # [#a339ky] one key name everywhere -- the regression is `trip` coming back.
+        for label, result in (
+            ("no-trip", no_trip), ("not-on-manifest", off_manifest), ("boarded", boarded)
+        ):
+            self.assertIn("dispatch_trip", result, f"the {label} return must name the trip dispatch_trip")
+            self.assertNotIn("trip", result, f"the {label} return must not resurrect the `trip` key")
+
+        # The two no-ops are told apart by the trip value, not by a missing key.
+        self.assertIsNone(no_trip["dispatch_trip"], "no boardable trip resolves to None")
+        self.assertIsNone(no_trip["status"])
+        self.assertEqual(
+            off_manifest["dispatch_trip"],
+            self.trip.name,
+            "not-on-manifest carries the REAL trip it resolved onto",
+        )
+        self.assertIsNone(off_manifest["status"], "not-on-manifest boards nobody")
+        self.assertEqual(boarded["dispatch_trip"], self.trip.name)
+        self.assertEqual(boarded["status"], "Boarded")
+
     def test_driver_mark_not_boarded_reverses_self_confirm(self):
         # [#5lg6d0]
         self._seed_state()

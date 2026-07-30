@@ -533,7 +533,14 @@ def worker_claim_boarded(token=None):
     Idempotent: an already-Boarded row records no second event and stays Boarded; a
     re-confirm from ``Pending`` (e.g. after a driver "not boarded" override) boards
     again. A worker with no boardable trip today, or not on the trip's boarding
-    state, is a clean no-op. Tight rate_limit so a personal link cannot spam."""
+    state, is a clean no-op. Tight rate_limit so a personal link cannot spam.
+
+    Returns ``{"dispatch_trip": str|None, "status": str|None, ...}`` on EVERY path —
+    one key name for the trip, so a caller can tell the two no-ops apart instead of
+    reading ``undefined``: no boardable trip today is ``dispatch_trip = None``, a
+    worker not on that trip's manifest is a REAL ``dispatch_trip`` with
+    ``status = None``, and a self-confirm is ``status = "Boarded"`` plus
+    ``confirm_source`` and ``reject_count``."""
     from apex.salis.api.masar import (
         _already_boarded,
         _get_or_create_trip_log,
@@ -544,7 +551,7 @@ def worker_claim_boarded(token=None):
     employee = _resolve_worker(token)
     resolved = _worker_today_dispatch_trip(employee)
     if not resolved:
-        return {"trip": None, "status": None}
+        return {"dispatch_trip": None, "status": None}
     dispatch_trip, request_name, stop_name, building = resolved
 
     # Serialize concurrent claims for the same worker on the SAME Dispatch Trip row the
@@ -556,7 +563,7 @@ def worker_claim_boarded(token=None):
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     target = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     if target is None:
-        return {"trip": dispatch_trip, "status": None}
+        return {"dispatch_trip": dispatch_trip, "status": None}
 
     # [#gkl1pw]
     log = _get_or_create_trip_log(dispatch_trip)
