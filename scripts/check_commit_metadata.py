@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Commit metadata gate: no automated attribution, no session metadata and no private
-address in anything that becomes public history.
+"""Commit metadata gate: no automated attribution, no session metadata, no private
+address and no description of the tooling in anything that becomes public history.
 
 This file is the ONLY definition of that rule. The commit-msg hook, the pre-commit
 hook, the pre-push hook and the CI step "No automated attribution or private commit
@@ -61,6 +61,64 @@ ATTRIBUTION_RULES = (
     ),
 )
 
+# A message describes what the CODE does for a user of the application. It never
+# describes the tooling that found the problem, the process around it, or a path the
+# published tree does not contain: a reader who clones this repo can open none of
+# those, so the sentence is noise at best, and at worst it publishes the shape of a
+# private toolbox to everyone who reads the log.
+#
+# Declared ONCE, here, beside the attribution rules that already work this way. Every
+# entry is a snake_case identifier - none is an English phrase, so a bare mention is
+# always a reference to the tool and never ordinary prose. That is exactly why these
+# may be matched as whole words where a bare vendor word could not be: `codex` is a
+# word, `check_translations` is a filename.
+TOOL_NAMES = (
+    "all_py_files",
+    "check_commit_metadata",
+    "check_doctype_dates",
+    "check_translations",
+    "comment_audit",
+    "run_guards",
+)
+
+# Multi-word on purpose. A single word - "guard", "gate", "lane", "hook" - is ordinary
+# product vocabulary here: the app itself ships report_role_guard and a workflow guard,
+# and refusing those would repeat the mistake the attribution rules already learned.
+# Only phrases that cannot be anything but a sentence about this repository's own
+# machinery are listed.
+GUARD_PHRASES = (
+    r"\bCI\b[^\n]{0,20}?\b(?:stayed|was|went|turned|remained)\s+(?:green|red)",
+    r"\b(?:redden(?:ed|s)?|red)\s+the\s+trunk\b",
+    r"\btrunk\s+(?:went|stayed|turned|was)\s+(?:red|green)\b",
+    r"\b(?:pre-push|pre-commit|commit-msg)\s+hook\b",
+    r"--no-verify",
+    r"\bgitleaks\b",
+    r"\b(?:Lint|Tests)\s+(?:lane|job|workflow)\b",
+    r"\bdead-(?:function|code)\s+guard\b",
+)
+
+TOOLING_RULES = (
+    (
+        "owner tool or guard script named",
+        re.compile(r"\b(?:" + "|".join(TOOL_NAMES) + r")\b"),
+    ),
+    (
+        "internal guard or CI process narrated",
+        re.compile("|".join(GUARD_PHRASES), re.I),
+    ),
+)
+
+# A slash-bearing token is the only shape worth asking git about. A bare word is not a
+# path, and handing git every word would make the verdict depend on what happens to sit
+# on this disk rather than on what the repository publishes.
+PATH_TOKEN = re.compile(r"(?<![\w./-])((?:[\w.@-]+/)+[\w.@-]*)")
+
+# Prose separates alternatives with slashes too: `.py/.json/.js/.html/.md` is a list of
+# extensions, not a directory five deep. One leading-dot segment is an ordinary path
+# (.github/workflows/lint.yml); two or more in a row is a list, and reading it as a path
+# refused an honest message.
+EXTENSION_SEGMENT = re.compile(r"^\.\w+$")
+
 PUBLIC_EMAIL = "noreply@github.com"
 PUBLIC_SUFFIX = "@users.noreply.github.com"
 
@@ -87,6 +145,70 @@ def email_is_public(email: str) -> bool:
     return email == PUBLIC_EMAIL or email.endswith(PUBLIC_SUFFIX)
 
 
+def ignored_paths(message: str) -> list[str]:
+    """The paths a message names that git says a clone does not receive.
+
+    Derived from git, never from a list here: .gitignore already IS the declaration of
+    what stays unpublished, and only git resolves its negations correctly - `docs/*`
+    hides the directory and a later `!docs/INTEGRATION.md` publishes one file back out
+    of it, which no second copy of the rules in this file would get right for long."""
+    # Ask about BOTH shapes of every token, and remember which one the message wrote.
+    # A directory-only rule (`apex/demo/`) matches the trailing-slash form only, and git
+    # cannot infer directoryness for a path that is absent here - which it always is,
+    # because a path being absent is precisely what makes it worth refusing.
+    asked: dict[str, str] = {}
+    for match in PATH_TOKEN.finditer(message):
+        # Trailing sentence punctuation belongs to the prose, not to the path.
+        written = match.group(1).rstrip(".,;:")
+        bare = written.rstrip("/")
+        if not bare:
+            continue
+        segments = bare.split("/")
+        if sum(1 for part in segments if EXTENSION_SEGMENT.match(part)) > 1:
+            continue
+        asked.setdefault(bare, written)
+        asked.setdefault(bare + "/", written)
+    if not asked:
+        return []
+    # --no-index judges the RULES, not whether the path is tracked: without it git
+    # declines to answer for anything in the index, so a published file could never be
+    # distinguished from an unpublished one.
+    code, out = _git(["check-ignore", "--no-index", "--stdin"], "\n".join(asked) + "\n")
+    if code not in (0, 1):
+        # Never silent: a rule that stops running without saying so is the failure this
+        # whole file exists to prevent.
+        sys.stderr.write("commit-metadata: WARNING - git could not resolve the ignore "
+                         "rules, so the ignored-path rule DID NOT RUN\n")
+        return []
+    hits: dict[str, None] = {}
+    for line in out.splitlines():
+        answer = line.strip()
+        if answer in asked:
+            hits[asked[answer]] = None
+    return list(hits)
+
+
+def scan_tooling(message: str) -> list[str]:
+    """Every "this describes the tooling, not the change" finding in one message.
+
+    Reports the matched TOKEN, never the line. The attribution rules above quote the
+    whole line and are right to: their offending text is a trailer the author deletes
+    verbatim. Here the offending text is the commit's own prose, so echoing the line
+    would reprint into the refusal - and into any log that captures it - the very
+    sentence the rule exists to keep out of public sight."""
+    findings: dict[str, None] = {}
+    for kind, rule in TOOLING_RULES:
+        for match in rule.finditer(message):
+            number = message.count("\n", 0, match.start()) + 1
+            # A phrase may be wrapped across the message's own line break; report it as
+            # the phrase it is, so the reader can search for it.
+            token = " ".join(match.group(0).split())
+            findings[f"{number}: {kind}: {token!r}"] = None
+    for token in ignored_paths(message):
+        findings[f"git-ignored path named: {token!r}"] = None
+    return list(findings)
+
+
 def scan_message(message: str) -> list[str]:
     """Every attribution finding in one message, as `<line>: <kind>: <text>`."""
     lines = message.splitlines()
@@ -98,6 +220,7 @@ def scan_message(message: str) -> list[str]:
             number = message.count("\n", 0, match.start()) + 1
             text = lines[number - 1].strip() if number <= len(lines) else ""
             findings[f"{number}: {kind}: {text}"] = None
+    findings.update(dict.fromkeys(scan_tooling(message)))
     return list(findings)
 
 
@@ -173,17 +296,21 @@ def main(argv: list[str]) -> int:
         return 2
 
     if not findings:
-        print("commit-metadata: clean - no automated attribution, no private address.")
+        print("commit-metadata: clean - describes the code, not the tooling; "
+              "no automated attribution, no private address.")
         return 0
 
-    sys.stderr.write("commit-metadata: automated attribution, session metadata or a "
-                     "private address in what would become public history:\n")
+    sys.stderr.write("commit-metadata: this message carries automated attribution, "
+                     "session metadata, a private address, or a description of the "
+                     "tooling rather than of the change:\n")
     for item in findings:
         sys.stderr.write(f"  {item}\n")
     sys.stderr.write(
         "commit-metadata: this is the same gate CI runs, so pushing it would turn the "
         "Tests workflow red.\n"
-        "commit-metadata: drop the trailer, or fix the address with\n"
+        "commit-metadata: say what the change does for a user of the application - not "
+        "which tool found it, not what the build did, and not a path a clone never\n"
+        "commit-metadata: receives. Drop the trailer, or fix the address with\n"
         "  git config user.email '<id>+<user>@users.noreply.github.com'\n")
     return 1
 
