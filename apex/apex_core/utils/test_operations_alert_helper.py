@@ -156,40 +156,40 @@ class TestInsertOperationsAlertResolvesSupervisor(FrappeTestCase):
 
 
 class TestAFailedAlertSpareTheCallersEarlierRows(FrappeTestCase):
-	"""A failing alert must not undo rows the calling loop already wrote.
+    """A failing alert must not undo rows the calling loop already wrote.
 
-	Every scheduler loop that learned to survive one bad row calls this helper, so a
-	bare ``frappe.db.rollback()`` inside it would discard the whole run and defeat all
-	of them at once. The savepoint is what keeps the caller's earlier work.
-	"""
+    Every scheduler loop that learned to survive one bad row calls this helper, so a
+    bare ``frappe.db.rollback()`` inside it would discard the whole run and defeat all
+    of them at once. The savepoint is what keeps the caller's earlier work.
+    """
 
-	def setUp(self):
-		frappe.set_user("Administrator")
+    def setUp(self):
+        frappe.set_user("Administrator")
 
-	def test_a_failing_alert_leaves_an_earlier_row_intact(self):
-		earlier = frappe.get_doc(
-			{
-				"doctype": "ToDo",
-				"description": "row written before the alert fails",
-				"allocated_to": "Administrator",
-			}
-		).insert(ignore_permissions=True)
-		self.addCleanup(
-			frappe.delete_doc, "ToDo", earlier.name, force=True, ignore_permissions=True
-		)
+    def test_a_failing_alert_leaves_an_earlier_row_intact(self):
+        earlier = frappe.get_doc(
+            {
+                "doctype": "ToDo",
+                "description": "row written before the alert fails",
+                "allocated_to": "Administrator",
+            }
+        ).insert(ignore_permissions=True)
+        self.addCleanup(
+            frappe.delete_doc, "ToDo", earlier.name, force=True, ignore_permissions=True
+        )
 
-		# An unknown alert_type fails the Select validation inside the helper, which is
-		# the real failure shape: raised by insert, caught by the helper's own except.
-		self.assertIsNone(
-			insert_operations_alert(
-				alert_type="No Such Alert Type",
-				severity="Warning",
-				message="probe that must not take the earlier row down with it",
-			),
-			"the helper swallows the failure and returns None",
-		)
+        # An unknown alert_type fails the Select validation inside the helper, which is
+        # the real failure shape: raised by insert, caught by the helper's own except.
+        self.assertIsNone(
+            insert_operations_alert(
+                alert_type="No Such Alert Type",
+                severity="Warning",
+                message="probe that must not take the earlier row down with it",
+            ),
+            "the helper swallows the failure and returns None",
+        )
 
-		self.assertTrue(
-			frappe.db.exists("ToDo", earlier.name),
-			"the caller's earlier row was rolled back by the failing alert",
-		)
+        self.assertTrue(
+            frappe.db.exists("ToDo", earlier.name),
+            "the caller's earlier row was rolled back by the failing alert",
+        )
