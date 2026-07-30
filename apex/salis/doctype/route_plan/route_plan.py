@@ -64,6 +64,16 @@ class RoutePlan(Document):
             },
             update_modified=False,
         )
+        # The supervisor portal polled every 45s because nothing told it a decision had
+        # landed. Both endpoints funnel through this one writer, so publishing here can
+        # never cover approve and miss reject. after_commit so a rolled-back decision is
+        # never announced; doctype-scoped so only Route Plan subscribers wake.
+        frappe.publish_realtime(
+            "route_plan_decision",
+            {"name": self.name, "approval": decision},
+            doctype="Route Plan",
+            after_commit=True,
+        )
 
     def _default_operations_requester(self):
         """Carry the Operations requester from the linked Transport Request

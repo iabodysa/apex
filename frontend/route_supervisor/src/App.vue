@@ -182,6 +182,7 @@ import RoutePanel from "./components/RoutePanel.vue";
 import DriverMap from "./components/DriverMap.vue";
 import { useI18n } from "./i18n";
 import { getSupervisorContext, approveRoutePlan, rejectRoutePlan } from "./api.js";
+import { connectRouteSupervisorRealtime } from "./realtime.js";
 import { pct } from "./fmt.js";
 
 const { t, dir, resourceErrorMessage } = useI18n();
@@ -204,6 +205,7 @@ const reject = ref({ open: false, reason: "" });
 // "green" default never reaches the `toast-*` class this portal styles.
 const { toast, showToast } = useToast();
 let pollTimer = null;
+let stopRealtime = null;
 const POLL_MS = 45000;
 
 const plans = computed(() => ctx.value?.plans || []);
@@ -295,13 +297,21 @@ watch(
   { immediate: true },
 );
 
+// The server now announces a decision (RoutePlan.set_supervisor_decision), so the
+// socket carries the update instantly instead of the supervisor waiting out a 45s
+// window. The interval stays as the fallback the shared factory's swallow-everything
+// contract requires: if the socket never connects, the portal must still refresh.
 onMounted(() => {
   loadContext();
+  stopRealtime = connectRouteSupervisorRealtime(() => {
+    if (!busy.value && !reject.value.open) loadContext();
+  });
   pollTimer = setInterval(() => {
     if (!document.hidden && !busy.value && !reject.value.open) loadContext();
   }, POLL_MS);
 });
 onUnmounted(() => {
   clearInterval(pollTimer);
+  if (stopRealtime) stopRealtime();
 });
 </script>
