@@ -21,6 +21,15 @@ shrink, and a new central ``test_*.py`` fails the build. Frappe discovers tests
 wherever they sit (``frappe/test_runner.py:149`` os.walks the whole app path),
 so colocation costs no discovery.
 
+A NEW app-wide guard does NOT come here (owner decision, 2026-07-28). It colocates
+beside the module that owns the invariant's DESTINATION -- the place a violation
+would be written, not the many places it could be written from. A sweep over the
+whole tree is still colocated by that rule: the guard on ledger concealment lives
+with the ledger, not in a central "guards" bucket. This keeps the ratchet strictly
+shrinking and needs no admission path into ``_CENTRAL_BY_NECESSITY``, which stays
+frozen. If no single destination module owns the invariant, that is the signal the
+invariant is really two, not that the guard belongs here.
+
 Shared fixtures go in ``tests/factories.py`` (never imported from a sibling
 ``test_*`` module -- enforced by ``test_no_cross_test_imports.py``).
 """

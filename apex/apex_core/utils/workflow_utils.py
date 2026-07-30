@@ -27,7 +27,14 @@ _IDENT = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 def cleanup_orphaned_workflow_actions():
     """Delete Open Workflow Actions whose document moved past the recorded state
     (Case B) or no longer exists (Case A). Per-workflow, guarded and isolated so one
-    bad doctype never aborts the run."""
+    bad doctype never aborts the run.
+
+    The two bare ``frappe.db.rollback()`` calls below are COMMIT-BOUNDED, which is why
+    they are not the whole-transaction hazard a bare rollback usually is: each sits in a
+    try whose success path commits first, so the rollback can only discard the current
+    doctype's own deletes. A loop that continues past a failure without that commit needs
+    a row savepoint instead — see ``habitat/tasks/common.py``.
+    """
     for wf in frappe.get_all(
         "Workflow", filters={"is_active": 1}, fields=["document_type", "workflow_state_field"]
     ):
