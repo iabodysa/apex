@@ -176,6 +176,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import Icon from "./Icon.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
+import { useToast } from "@shared/useToast.js";
 import BoardingPanel from "./components/BoardingPanel.vue";
 import RoutePanel from "./components/RoutePanel.vue";
 import DriverMap from "./components/DriverMap.vue";
@@ -199,8 +200,9 @@ const selectedName = ref(null);
 const tab = ref("approval");
 const busy = ref(false);
 const reject = ref({ open: false, reason: "" });
-const toast = ref({ show: false, msg: "", type: "ok" });
-let toastTimer = null;
+// Shared toast: every call site below passes its type explicitly, so the shared
+// "green" default never reaches the `toast-*` class this portal styles.
+const { toast, showToast } = useToast();
 let pollTimer = null;
 const POLL_MS = 45000;
 
@@ -219,12 +221,6 @@ const statusIcon = computed(
 
 function barPct(b) {
   return pct(b.boarded, b.expected);
-}
-
-function showToast(msg, type = "ok") {
-  toast.value = { show: true, msg, type };
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => (toast.value.show = false), 3200);
 }
 
 function selectPlan(name) {
@@ -307,6 +303,5 @@ onMounted(() => {
 });
 onUnmounted(() => {
   clearInterval(pollTimer);
-  clearTimeout(toastTimer);
 });
 </script>
