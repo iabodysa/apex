@@ -218,6 +218,8 @@ const messages = {
       wrongBusHint: "Go to your assigned vehicle. Call or message your driver if you need help.",
       arrivedTitle: "Your driver has arrived",
       arrivedHint: "The driver is at your pickup point. Head out to board.",
+      stale: "Boarding status is out of date — retrying.",
+      staleHint: "Wait for it to refresh before confirming you're on the bus.",
     },
     reqTransport: {
       title: "Request transport",
@@ -524,6 +526,8 @@ const messages = {
       wrongBusHint: "توجّه إلى مركبتك المخصّصة. اتصل بسائقك أو راسله إن احتجت مساعدة.",
       arrivedTitle: "وصل سائقك",
       arrivedHint: "السائق عند نقطة استلامك. توجّه للركوب.",
+      stale: "حالة الإركاب غير محدّثة — جارٍ إعادة المحاولة.",
+      staleHint: "انتظر تحديثها قبل تأكيد ركوبك.",
     },
     reqTransport: {
       title: "طلب نقل",

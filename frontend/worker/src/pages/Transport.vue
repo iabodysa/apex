@@ -138,7 +138,8 @@
           v-if="trip === upcoming[0]"
           :trip="trip"
           :boarding="boardingState"
-          @refresh="boardingResource.reload()"
+          :stale="boardingStale"
+          @refresh="boardingResource.reload().catch(() => {})"
         />
 
         <!-- [T-323] "I'm at the pickup": simple self-confirm for the OTHER upcoming
@@ -221,6 +222,7 @@
         v-if="boardingState && boardingState.wrong_bus"
         :trip="null"
         :boarding="boardingState"
+        :stale="boardingStale"
       />
       <div class="card card-pad text-center space-y-3">
         <div>
@@ -311,10 +313,20 @@ function destination(trip) {
 // state machine). Drives the boarding flow component. Polled adaptively: fast
 // (poll_seconds, ~10s) while a boarding window is active, off otherwise — the
 // app-shell's slow ~45s poll already refreshes the trip list for idle workers.
+// frappe-ui keeps the PREVIOUS payload when a reload fails, so without this flag a
+// worker on weak signal would keep seeing a live-looking claim button and countdown
+// built on a snapshot that may be minutes old.
+const boardingStale = ref(false);
 const boardingResource = createResource({
   url: "apex.salis.api.boarding_flow.worker_trip_boarding",
   params: { token: TOKEN },
   auto: true,
+  onSuccess: () => {
+    boardingStale.value = false;
+  },
+  onError: () => {
+    boardingStale.value = true;
+  },
 });
 const boardingState = computed(() => boardingResource.data || null);
 
@@ -336,7 +348,9 @@ function stopBoardingPoll() {
 function startBoardingPoll(seconds) {
   stopBoardingPoll();
   boardingTimer = setInterval(() => {
-    if (!document.hidden) boardingResource.reload();
+    // frappe-ui's handleError rethrows even with an onError, so absorb the rejection
+    // here — onError has already flagged the board stale.
+    if (!document.hidden) boardingResource.reload().catch(() => {});
   }, seconds * 1000);
 }
 // Arm/disarm the fast poll as the window opens/closes; re-arm if the cadence

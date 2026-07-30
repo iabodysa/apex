@@ -35,6 +35,16 @@
     </div>
 
     <template v-else>
+      <!-- STALE: the poll is failing, so everything below is drawn from an old
+           snapshot. Say so, and keep the boarding writes disabled until it refreshes. -->
+      <div v-if="stale" class="bflow-stale" role="status">
+        <Icon name="alert" :size="18" class="shrink-0" />
+        <div>
+          <p class="bflow-strong">{{ t("boarding.stale") }}</p>
+          <p class="bflow-muted">{{ t("boarding.staleHint") }}</p>
+        </div>
+      </div>
+
       <!-- DRIVER ARRIVED: the driver marked arrival at this worker's pickup stop.
            A green, reassuring band shown while the worker is still boarding. -->
       <div v-if="driverArrived && !['Boarded', 'Absent'].includes(status)" class="bflow-panel bflow-arrived">
@@ -81,7 +91,7 @@
       <button
         v-else
         class="btn btn-primary"
-        :disabled="claim.loading"
+        :disabled="claim.loading || stale"
         @click="doClaim"
       >
         <Icon name="check" :size="18" />
@@ -99,7 +109,7 @@
         </p>
         <button
           class="btn btn-outline"
-          :disabled="wait.loading || waitCapReached"
+          :disabled="wait.loading || waitCapReached || stale"
           @click="doWait"
         >
           <Icon name="clock" :size="18" />
@@ -133,7 +143,7 @@ import { computed, reactive, ref, onUnmounted, watch } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "./Icon.vue";
 import BoardingPassOverlay from "./BoardingPassOverlay.vue";
-import { useI18n } from "../i18n";
+import { useI18n, resourceErrorMessage } from "../i18n";
 import { TOKEN } from "../utils/token";
 import { waLink } from "../utils/phone";
 
@@ -145,6 +155,10 @@ const props = defineProps({
   // The live worker_trip_boarding snapshot (server state machine), polled by the
   // parent. Null/{trip:null} means no active boarding — the flow renders nothing.
   boarding: { type: Object, default: null },
+  // True while the last poll FAILED, so this snapshot is known out of date. The
+  // writes are blocked meanwhile: claiming "I'm on the bus" off a stale snapshot
+  // can confirm a worker onto a trip the server has already moved on from.
+  stale: { type: Boolean, default: false },
 });
 
 // --- Derived server state -------------------------------------------------
@@ -227,7 +241,7 @@ const claim = createResource({
     emitRefresh();
   },
   onError: (e) => {
-    claimError.value = e?.messages?.[0] || e?.message || t("transport.atPickupFailed");
+    claimError.value = resourceErrorMessage(e, "transport.atPickupFailed");
   },
 });
 function doClaim() {
@@ -244,7 +258,7 @@ const wait = createResource({
     emitRefresh();
   },
   onError: (e) => {
-    waitError.value = e?.messages?.[0] || e?.message || t("transport.atPickupFailed");
+    waitError.value = resourceErrorMessage(e, "transport.atPickupFailed");
   },
 });
 function doWait() {
@@ -268,7 +282,7 @@ const passResource = createResource({
   onError: (e) => {
     // Surface the failure (matches the claim/wait resources) instead of letting
     // it fall through to the static "none" text with no signal that a fetch failed.
-    passErrorMsg.value = e?.messages?.[0] || e?.message || t("boarding.none");
+    passErrorMsg.value = resourceErrorMessage(e, "boarding.failed");
   },
   onSuccess: () => {
     passErrorMsg.value = "";
@@ -378,6 +392,25 @@ function openPass() {
 }
 .bflow-danger .bflow-strong,
 .bflow-danger .bflow-muted {
+  color: inherit;
+}
+/* Stale: an amber warning row, same shape as the inline status rows. */
+.bflow-stale {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-lg);
+  border: var(--border-width) solid var(--c-warning);
+  background: var(--c-warning-bg);
+  color: var(--c-warning);
+}
+.bflow-stale p {
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+.bflow-stale .bflow-strong,
+.bflow-stale .bflow-muted {
   color: inherit;
 }
 .bflow-wait-note {
