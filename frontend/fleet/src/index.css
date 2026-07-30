@@ -153,7 +153,9 @@ body {
    broke" cannot be read as "you have nothing". The retry re-runs the whole load. */
 .emp-fail { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 8px 2px; }
 .emp-fail p { font-size: 13px; font-weight: 600; color: var(--c-danger); }
-.emp-retry { width: auto; margin: 0; padding: 8px 14px; font-size: 13px; }
+/* Two class names deep on purpose: the .emp-btn base below is the full-width form
+   button, and an equal-specificity override would lose to it on source order. */
+.emp-fail .emp-retry { width: auto; margin: 0; padding: 8px 14px; font-size: 13px; }
 
 /* ---------- fuel form ---------- */
 .emp-field { margin-bottom: 13px; }
