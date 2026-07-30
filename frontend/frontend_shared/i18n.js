@@ -69,9 +69,12 @@ export function createI18n({
 
   const dir = computed(() => (rtlLangs.includes(lang.value) ? "rtl" : "ltr"));
 
-  // Map a frappe-ui resource error to a short, language-aware line. Portals that
-  // define errors.rateLimited / errors.sessionExpired / <fallbackKey> in their
-  // messages get localized copy; others fall back to the raw server message.
+  // Map a frappe-ui resource error to a short line in the language the user picked.
+  // The server sentence is deliberately never rendered: frappe.throw(_("…")) resolves
+  // against frappe.local.lang (site/User language), not this portal's toggle, so it can
+  // arrive in a language the user never chose — worker alone offers five. It also
+  // carries the request URL and the exception class in e.message. Localizing at source
+  // is the backend half of this fix and is deferred, so every path ends in translate().
   function resourceErrorMessage(e, fallbackKey = "errors.loadError") {
     if (!e) return translate(fallbackKey);
     const status = e.response?.status;
@@ -82,7 +85,7 @@ export function createI18n({
     if (excType.includes("CSRFTokenError") || excType.includes("Authorization")) {
       return translate("errors.sessionExpired");
     }
-    return e.messages?.[0] || e.message || translate(fallbackKey);
+    return translate(fallbackKey);
   }
 
   return { lang, dir, lookup, interpolate, translate, setLang, resourceErrorMessage };

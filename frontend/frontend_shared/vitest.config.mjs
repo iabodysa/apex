@@ -22,6 +22,6 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
-    include: ["components/__tests__/**/*.test.mjs"],
+    include: ["**/__tests__/**/*.test.mjs"],
   },
 });
