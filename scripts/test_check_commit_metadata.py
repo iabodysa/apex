@@ -86,6 +86,15 @@ class TestToolingRules(unittest.TestCase):
         self.assertEqual(result.returncode, 0,
                          f"a clean rewrite was refused:\n{result.stderr}")
 
+    def test_a_slash_separated_extension_list_is_not_a_path(self):
+        """Prose separates alternatives with slashes too. Reading `.py/.json/.js` as a
+        directory five deep refused an honest message when this rule first ran over
+        the existing history."""
+        result = run_gate("Validate more file kinds\n\n"
+                          "The check now covers .py/.json/.js/.html/.md inputs.\n")
+        self.assertEqual(result.returncode, 0,
+                         f"an extension list was read as a path:\n{result.stderr}")
+
     def test_a_published_path_is_not_treated_as_ignored(self):
         """`docs/*` hides the directory and a later `!` line publishes one file back
         out of it. Asking git is what gets that pair right; a list here would not."""

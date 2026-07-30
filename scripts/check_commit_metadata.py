@@ -113,6 +113,12 @@ TOOLING_RULES = (
 # on this disk rather than on what the repository publishes.
 PATH_TOKEN = re.compile(r"(?<![\w./-])((?:[\w.@-]+/)+[\w.@-]*)")
 
+# Prose separates alternatives with slashes too: `.py/.json/.js/.html/.md` is a list of
+# extensions, not a directory five deep. One leading-dot segment is an ordinary path
+# (.github/workflows/lint.yml); two or more in a row is a list, and reading it as a path
+# refused an honest message.
+EXTENSION_SEGMENT = re.compile(r"^\.\w+$")
+
 PUBLIC_EMAIL = "noreply@github.com"
 PUBLIC_SUFFIX = "@users.noreply.github.com"
 
@@ -155,9 +161,13 @@ def ignored_paths(message: str) -> list[str]:
         # Trailing sentence punctuation belongs to the prose, not to the path.
         written = match.group(1).rstrip(".,;:")
         bare = written.rstrip("/")
-        if bare:
-            asked.setdefault(bare, written)
-            asked.setdefault(bare + "/", written)
+        if not bare:
+            continue
+        segments = bare.split("/")
+        if sum(1 for part in segments if EXTENSION_SEGMENT.match(part)) > 1:
+            continue
+        asked.setdefault(bare, written)
+        asked.setdefault(bare + "/", written)
     if not asked:
         return []
     # --no-index judges the RULES, not whether the path is tracked: without it git
