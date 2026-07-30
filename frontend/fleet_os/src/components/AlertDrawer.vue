@@ -11,7 +11,8 @@ defineProps([
 <template>
   <!-- ALERT DRAWER -->
   <transition name="fp-overlay">
-    <div v-if="alertsOpen" class="panel-overlay open" @click.self="closeAlerts"></div>
+    <!-- Backdrop only duplicates the labelled close button, so it is hidden from AT. -->
+    <div v-if="alertsOpen" class="panel-overlay open" aria-hidden="true" @click.self="closeAlerts"></div>
   </transition>
   <transition name="fp-panel">
     <div v-if="alertsOpen" class="alert-drawer">
@@ -20,7 +21,8 @@ defineProps([
           <div class="ph-plate"><Icon name="bell" :size="18" /> {{ t("alerts.title") }}</div>
           <div class="ph-sub">{{ alertTotal }}</div>
         </div>
-        <button class="panel-close" @click="closeAlerts"><Icon name="x" :size="18" /></button>
+        <!-- Icon-only: IconBase marks its svg aria-hidden, so the name must come from aria-label. -->
+        <button class="panel-close" :aria-label="t('alerts.close')" @click="closeAlerts"><Icon name="x" :size="18" /></button>
       </div>
       <div class="panel-body">
         <div v-if="alertsState === 'loading'" class="ad-empty">{{ t("alerts.title") }}…</div>

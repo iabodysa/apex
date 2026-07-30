@@ -69,10 +69,14 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .search-bar input:focus{border-color:var(--blue)}
 .search-bar .si{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;pointer-events:none}
 .status-pills{display:flex;gap:6px;margin-right:auto;flex-wrap:wrap}
+/* The status/triage pills are real <button>s (keyboard-reachable); the shimmer
+   placeholders reuse the class as <span>. The appearance reset keeps both looking
+   identical to the pre-button styling. Focus ring comes from the global rule. */
 .sp{
   padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;
   font-family:'JetBrains Mono',monospace;cursor:pointer;border:1px solid transparent;
   transition:all .15s;user-select:none;
+  appearance:none;-webkit-appearance:none;line-height:inherit;
 }
 .sp:hover{filter:brightness(1.2)}
 .sp-all{background:var(--blue-d);color:var(--blue-l);border-color:rgba(59,130,246,.2)}
@@ -539,9 +543,13 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
   background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r4);
   box-shadow:0 8px 24px rgba(0,0,0,.35);
 }
+/* Driver-picker rows are <button>s inside the <li>, so a keyboard user can Tab to
+   a result and pick it; the reset keeps the row looking like plain list text. */
 .dp-opt{
   display:flex;align-items:center;gap:8px;flex-wrap:wrap;
   padding:8px 10px;border-radius:var(--r4);cursor:pointer;font-size:13px;
+  width:100%;text-align:start;appearance:none;-webkit-appearance:none;
+  background:none;border:0;color:inherit;font-family:inherit;
 }
 .dp-opt:hover{background:var(--bg3)}
 .dp-name{font-weight:600;color:var(--t1)}

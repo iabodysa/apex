@@ -219,14 +219,14 @@ onUnmounted(() => {
         <span v-for="n in 6" :key="n" class="sp fp-kpi-skel"></span>
       </template>
       <template v-else>
-        <span class="sp sp-all" :class="{ active: f.status === '' }" @click="setSP('')">{{ counts.total }} {{ t("topbar.allVehicles") }}</span>
-        <span class="sp sp-assigned" :class="{ active: f.status === 'assigned' }" @click="setSP('assigned')">{{ counts.assigned }} {{ t("statusShort.assigned") }}</span>
-        <span class="sp sp-available" :class="{ active: f.status === 'available' }" @click="setSP('available')">{{ counts.available }} {{ t("statusShort.available") }}</span>
-        <span class="sp sp-workshop" :class="{ active: f.status === 'workshop' }" @click="setSP('workshop')">{{ counts.workshop }} {{ t("statusShort.workshop") }}</span>
-        <span class="sp sp-stopped" :class="{ active: f.status === 'stopped' }" @click="setSP('stopped')">{{ counts.stopped }} {{ t("statusShort.stopped") }}</span>
-        <span class="sp sp-stolen" :class="{ active: f.status === 'stolen' }" @click="setSP('stolen')">{{ counts.stolen }} {{ t("statusShort.stolen") }}</span>
-        <span v-if="triage.incidents" class="sp sp-triage-incident" :class="{ active: triageFilter === 'incidents' }" @click="setTriage('incidents')"><Icon name="crash" :size="12" /> {{ triage.incidents }} {{ t("topbar.openIncidents") }}</span>
-        <span v-if="triage.expiring" class="sp sp-triage-expiry" :class="{ active: triageFilter === 'expiring' }" @click="setTriage('expiring')"><Icon name="shield-alert" :size="12" /> {{ triage.expiring }} {{ t("topbar.expiringSoon") }}</span>
+        <button type="button" class="sp sp-all" :class="{ active: f.status === '' }" :aria-pressed="f.status === ''" @click="setSP('')">{{ counts.total }} {{ t("topbar.allVehicles") }}</button>
+        <button type="button" class="sp sp-assigned" :class="{ active: f.status === 'assigned' }" :aria-pressed="f.status === 'assigned'" @click="setSP('assigned')">{{ counts.assigned }} {{ t("statusShort.assigned") }}</button>
+        <button type="button" class="sp sp-available" :class="{ active: f.status === 'available' }" :aria-pressed="f.status === 'available'" @click="setSP('available')">{{ counts.available }} {{ t("statusShort.available") }}</button>
+        <button type="button" class="sp sp-workshop" :class="{ active: f.status === 'workshop' }" :aria-pressed="f.status === 'workshop'" @click="setSP('workshop')">{{ counts.workshop }} {{ t("statusShort.workshop") }}</button>
+        <button type="button" class="sp sp-stopped" :class="{ active: f.status === 'stopped' }" :aria-pressed="f.status === 'stopped'" @click="setSP('stopped')">{{ counts.stopped }} {{ t("statusShort.stopped") }}</button>
+        <button type="button" class="sp sp-stolen" :class="{ active: f.status === 'stolen' }" :aria-pressed="f.status === 'stolen'" @click="setSP('stolen')">{{ counts.stolen }} {{ t("statusShort.stolen") }}</button>
+        <button v-if="triage.incidents" type="button" class="sp sp-triage-incident" :class="{ active: triageFilter === 'incidents' }" :aria-pressed="triageFilter === 'incidents'" @click="setTriage('incidents')"><Icon name="crash" :size="12" /> {{ triage.incidents }} {{ t("topbar.openIncidents") }}</button>
+        <button v-if="triage.expiring" type="button" class="sp sp-triage-expiry" :class="{ active: triageFilter === 'expiring' }" :aria-pressed="triageFilter === 'expiring'" @click="setTriage('expiring')"><Icon name="shield-alert" :size="12" /> {{ triage.expiring }} {{ t("topbar.expiringSoon") }}</button>
       </template>
     </div>
 
@@ -266,7 +266,7 @@ onUnmounted(() => {
       <!-- ERROR (persistent banner + retry) -->
       <div v-if="loadState === 'error'" class="fp-error-banner">
         <span style="color:var(--red-l)"><Icon name="triangle-alert" :size="20" /></span>
-        <span class="fp-err-msg">{{ t("main.loadError", { error: loadError }) }}</span>
+        <span class="fp-err-msg">{{ loadError }}</span>
         <button class="btn btn-red" @click="loadFleet">{{ t("common.retry") }}</button>
       </div>
 

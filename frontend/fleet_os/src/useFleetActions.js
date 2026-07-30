@@ -6,7 +6,8 @@
 // (for status → assign) the driver-assignment flow, all injected.
 import { reactive, ref } from "vue";
 import { call } from "./api.js";
-import { today, trim, statusKey, serverMsg } from "./fleetHelpers.js";
+import { today, trim, statusKey } from "./fleetHelpers.js";
+import { resourceErrorMessage } from "./i18n.js";
 
 const POST = (m) => "apex.salis.api.fleet_os." + m;
 
@@ -73,7 +74,7 @@ export function useFleetActions({
       subForm.value = null;
       await reloadFleet();
     } catch (e) {
-      showToast(serverMsg(e), "red");
+      showToast(resourceErrorMessage(e, "errors.actionError"), "red");
     }
   }
 
@@ -104,7 +105,7 @@ export function useFleetActions({
       subForm.value = null;
       await reloadFleet();
     } catch (e) {
-      showToast(serverMsg(e), "red");
+      showToast(resourceErrorMessage(e, "errors.actionError"), "red");
     }
   }
 
@@ -139,7 +140,7 @@ export function useFleetActions({
         showToast(t("toast.sentToWorkshop"), "amber");
         await reloadFleet();
       } catch (e) {
-        showToast(serverMsg(e), "red");
+        showToast(resourceErrorMessage(e, "errors.actionError"), "red");
       }
     });
   }
@@ -160,7 +161,7 @@ export function useFleetActions({
         showToast(t("toast.leftWorkshop"), "green");
         await reloadFleet();
       } catch (e) {
-        showToast(serverMsg(e), "red");
+        showToast(resourceErrorMessage(e, "errors.actionError"), "red");
       }
     });
   }
@@ -181,7 +182,7 @@ export function useFleetActions({
         showToast(t("toast.availableAtOffice"), "green");
         await reloadFleet();
       } catch (e) {
-        showToast(serverMsg(e), "red");
+        showToast(resourceErrorMessage(e, "errors.actionError"), "red");
       }
     });
   }
@@ -202,7 +203,7 @@ export function useFleetActions({
         showToast(t("toast.recovered"), "green");
         await reloadFleet();
       } catch (e) {
-        showToast(serverMsg(e), "red");
+        showToast(resourceErrorMessage(e, "errors.actionError"), "red");
       }
     });
   }
@@ -242,7 +243,7 @@ export function useFleetActions({
       clearSelection();
       await reloadFleet();
     } catch (e) {
-      showToast(serverMsg(e), "red");
+      showToast(resourceErrorMessage(e, "errors.actionError"), "red");
     }
   }
   async function bulkWorkshop() {
@@ -266,7 +267,7 @@ export function useFleetActions({
       clearSelection();
       await reloadFleet();
     } catch (e) {
-      showToast(serverMsg(e), "red");
+      showToast(resourceErrorMessage(e, "errors.actionError"), "red");
     }
   }
 
@@ -317,7 +318,7 @@ export function useFleetActions({
       showToast(t("toast.statusUpdated"), "green");
       await reloadFleet();
     } catch (e) {
-      showToast(serverMsg(e), "red");
+      showToast(resourceErrorMessage(e, "errors.actionError"), "red");
     }
   }
 

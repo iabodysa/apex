@@ -13,7 +13,6 @@ import {
   calcTotalDaysNum,
   calcActiveDaysNum,
   historyItems,
-  serverMsg,
 } from "./fleetHelpers.js";
 
 export function useFleetFormat(t) {
@@ -96,7 +95,7 @@ export function useFleetFormat(t) {
   return {
     // pure passthrough (single formatting source for the template)
     statusKey, icon, initials, trim, today,
-    calcTotalDaysNum, calcActiveDaysNum, historyItems, serverMsg,
+    calcTotalDaysNum, calcActiveDaysNum, historyItems,
     // t-bound
     sb, sl, calcDur, fuelView, expiryFlag,
   };

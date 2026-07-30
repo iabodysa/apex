@@ -15,7 +15,8 @@ defineProps([
 <template>
   <!-- PANEL (right drawer) -->
   <transition name="fp-overlay">
-    <div v-if="panel.open" class="panel-overlay open" @click.self="closePanel"></div>
+    <!-- Backdrop only duplicates the labelled close button, so it is hidden from AT. -->
+    <div v-if="panel.open" class="panel-overlay open" aria-hidden="true" @click.self="closePanel"></div>
   </transition>
   <transition name="fp-panel">
     <div v-if="panel.open && panel.vehicle" class="panel" style="display:flex">
@@ -30,7 +31,8 @@ defineProps([
             <span class="sbadge" :class="sb(panel.vehicle).cls" style="font-size:10px;display:inline-flex;gap:4px"><Icon :name="sb(panel.vehicle).ic" :size="11" />{{ sb(panel.vehicle).label }}</span>
           </div>
         </div>
-        <button class="panel-close" @click="closePanel"><Icon name="x" :size="18" /></button>
+        <!-- Icon-only: IconBase marks its svg aria-hidden, so the name must come from aria-label. -->
+        <button class="panel-close" :aria-label="t('panel.close')" @click="closePanel"><Icon name="x" :size="18" /></button>
       </div>
       <div class="panel-tabs" style="flex-wrap:wrap">
         <button class="ptab" :class="{ on: panel.tab === 0 }" @click="setPTab(0)"><Icon name="home" :size="14" /> {{ t("panel.overview") }}</button>
@@ -158,10 +160,12 @@ defineProps([
                   <div v-if="dp.loading" class="dp-hint">{{ t("reassignForm.searching") }}</div>
                   <div v-else-if="dp.open && !dp.results.length && trim(dp.query)" class="dp-hint">{{ t("reassignForm.noDrivers") }}</div>
                   <ul v-if="dp.open && dp.results.length" class="dp-menu">
-                    <li v-for="d in dp.results" :key="d.name" class="dp-opt" @click="pickDriver(d)">
-                      <span class="dp-name">{{ d.full_name || d.name }}</span>
-                      <span v-if="d.driver_id" class="dp-meta mono"><bdi>{{ d.driver_id }}</bdi></span>
-                      <span v-if="d.phone" class="dp-meta mono"><bdi>{{ d.phone }}</bdi></span>
+                    <li v-for="d in dp.results" :key="d.name">
+                      <button type="button" class="dp-opt" @click="pickDriver(d)">
+                        <span class="dp-name">{{ d.full_name || d.name }}</span>
+                        <span v-if="d.driver_id" class="dp-meta mono"><bdi>{{ d.driver_id }}</bdi></span>
+                        <span v-if="d.phone" class="dp-meta mono"><bdi>{{ d.phone }}</bdi></span>
+                      </button>
                     </li>
                   </ul>
                   <button type="button" class="dp-newlink" @click="openNewDriverForm"><Icon name="user" :size="13" /> {{ t("reassignForm.newDriver") }}</button>
@@ -194,10 +198,12 @@ defineProps([
                 <div v-if="dp.loading" class="dp-hint">{{ t("reassignForm.searching") }}</div>
                 <div v-else-if="dp.open && !dp.results.length && trim(dp.query)" class="dp-hint">{{ t("reassignForm.noDrivers") }}</div>
                 <ul v-if="dp.open && dp.results.length" class="dp-menu">
-                  <li v-for="d in dp.results" :key="d.name" class="dp-opt" @click="pickDriver(d)">
-                    <span class="dp-name">{{ d.full_name || d.name }}</span>
-                    <span v-if="d.driver_id" class="dp-meta mono"><bdi>{{ d.driver_id }}</bdi></span>
-                    <span v-if="d.phone" class="dp-meta mono"><bdi>{{ d.phone }}</bdi></span>
+                  <li v-for="d in dp.results" :key="d.name">
+                    <button type="button" class="dp-opt" @click="pickDriver(d)">
+                      <span class="dp-name">{{ d.full_name || d.name }}</span>
+                      <span v-if="d.driver_id" class="dp-meta mono"><bdi>{{ d.driver_id }}</bdi></span>
+                      <span v-if="d.phone" class="dp-meta mono"><bdi>{{ d.phone }}</bdi></span>
+                    </button>
                   </li>
                 </ul>
                 <button type="button" class="dp-newlink" @click="openNewDriverForm"><Icon name="user" :size="13" /> {{ t("reassignForm.newDriver") }}</button>

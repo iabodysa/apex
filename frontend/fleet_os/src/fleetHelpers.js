@@ -60,25 +60,3 @@ export function normalize(v) {
   if (!Array.isArray(v.history)) v.history = [];
   return v;
 }
-
-// Frappe surfaces thrown errors as a JSON-encoded _server_messages array; pull
-// the human message out of whatever shape arrived.
-export function serverMsg(e) {
-  let raw = (e && e.message) || String(e || "");
-  try {
-    const parsed = JSON.parse(raw);
-    const arr = Array.isArray(parsed) ? parsed : [parsed];
-    const msgs = arr.map((m) => {
-      try {
-        const o = typeof m === "string" ? JSON.parse(m) : m;
-        return o.message || o;
-      } catch (_) {
-        return m;
-      }
-    });
-    raw = msgs.join(" — ");
-  } catch (_) {
-    /* not JSON — use as-is */
-  }
-  return String(raw).replace(/<[^>]*>/g, "").trim();
-}

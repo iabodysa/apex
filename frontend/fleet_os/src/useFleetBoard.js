@@ -5,7 +5,8 @@
 // /action state to know when to pause, so it belongs in the top-level shell).
 import { ref, computed } from "vue";
 import { call } from "./api.js";
-import { normalize, serverMsg } from "./fleetHelpers.js";
+import { normalize } from "./fleetHelpers.js";
+import { resourceErrorMessage } from "./i18n.js";
 
 const GET = "apex.salis.api.fleet_os.get_fleet_os";
 
@@ -27,7 +28,7 @@ export function useFleetBoard({ expiryFlag }) {
       loadReason.value = (r && r.reason) || null;
       loadState.value = "ready";
     } catch (e) {
-      loadError.value = serverMsg(e);
+      loadError.value = resourceErrorMessage(e, "main.loadFailed");
       loadState.value = "error";
     }
   }
@@ -41,7 +42,8 @@ export function useFleetBoard({ expiryFlag }) {
       loadReason.value = (r && r.reason) || null;
       reloadStale.value = false;
     } catch (e) {
-      console.warn("[fleet] background reload failed:", serverMsg(e));
+      // Console only, so the raw error object is the useful thing to log here.
+      console.warn("[fleet] background reload failed:", e);
       reloadStale.value = true;
     }
   }

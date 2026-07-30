@@ -145,7 +145,17 @@
     <!-- My Contacts: building in-charge, today's driver, housing office.
          Its own resource, so it renders even if the "today" payload is empty;
          shown only once at least one contact resolves. -->
-    <section v-if="contacts.data && hasContacts" class="card card-pad space-y-4">
+    <!-- A first-load failure used to leave this card unrendered — visually identical
+         to "no contacts are configured", hiding the numbers a worker calls for help. -->
+    <section v-if="contacts.error" class="card card-pad text-center">
+      <p class="text-sm font-bold mb-1">{{ t("contacts.title") }}</p>
+      <p class="text-sm text-muted">{{ contactsErrorMessage }}</p>
+      <button class="btn btn-primary mt-3" style="width: auto; padding-inline: 24px" @click="contacts.reload()">
+        {{ t("common.retry") }}
+      </button>
+    </section>
+
+    <section v-else-if="contacts.data && hasContacts" class="card card-pad space-y-4">
       <div class="flex items-center gap-2">
         <Icon name="phone" :size="18" class="text-primary shrink-0" />
         <span class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("contacts.title") }}</span>
@@ -188,6 +198,9 @@ const home = createResource({
   url: "apex.salis.api.masar.get_worker_home",
   params: { token: TOKEN },
   auto: true,
+  // Failure is owned here (and opted out of frappe-ui's global fallback handler);
+  // frappe-ui rethrows regardless, so the template is what renders home.error.
+  onError: () => {},
 });
 
 // The three home contacts (building in-charge, today's driver, housing office)
@@ -196,7 +209,11 @@ const contacts = createResource({
   url: "apex.salis.api.masar.get_worker_contacts",
   params: { token: TOKEN },
   auto: true,
+  // Failure is owned here (and opted out of frappe-ui's global fallback handler);
+  // frappe-ui rethrows regardless, so the template is what renders contacts.error.
+  onError: () => {},
 });
+const contactsErrorMessage = computed(() => resourceErrorMessage(contacts.error));
 const buildingInCharge = computed(() => contacts.data?.building_in_charge || null);
 // The driver carries full_name; normalize to the {name, phone} shape ContactPerson reads.
 const todayDriver = computed(() => {
