@@ -60,9 +60,18 @@ const messages = {
     brand: {
       name: "Fleet OS",
     },
+    // Shared resource-error copy: the wording the other five portals already use,
+    // so one failure reads the same everywhere.
+    errors: {
+      loadError: "Couldn't load this section.",
+      actionError: "The action could not be completed.",
+      rateLimited: "Too many requests. Please wait a moment and try again.",
+      sessionExpired: "Your session expired. Please refresh the page.",
+    },
     alerts: {
       title: "Operations alerts",
       bellTitle: "Open operations alerts",
+      close: "Close alerts",
       empty: "No open alerts",
       loadError: "Couldn't load alerts",
       openInDesk: "Open in Desk",
@@ -80,6 +89,7 @@ const messages = {
     sidebar: {
       filters: "Filters",
       filtersAndStats: "Filters & statistics",
+      close: "Close filters",
       vehicleType: "Vehicle type",
       all: "All",
       cars: "Cars",
@@ -141,7 +151,7 @@ const messages = {
       compact: "Compact",
       comfortable: "Comfortable",
       densityTitle: "Toggle card density",
-      loadError: "Couldn't load fleet data: {error}",
+      loadFailed: "Couldn't load fleet data.",
       staleData: "Showing the last loaded board — a background refresh failed",
       noResultsFilters: "No results match the filters",
       noVehicles: "No vehicles",
@@ -204,6 +214,7 @@ const messages = {
       details: "Details",
     },
     panel: {
+      close: "Close vehicle details",
       noProject: "No project",
       overview: "Overview",
       driver: "Driver",
@@ -449,9 +460,16 @@ const messages = {
     brand: {
       name: "Fleet OS",
     },
+    errors: {
+      loadError: "تعذّر تحميل هذا القسم.",
+      actionError: "تعذّر إتمام الإجراء.",
+      rateLimited: "طلبات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.",
+      sessionExpired: "انتهت صلاحية الجلسة. يرجى تحديث الصفحة.",
+    },
     alerts: {
       title: "تنبيهات التشغيل",
       bellTitle: "تنبيهات التشغيل المفتوحة",
+      close: "إغلاق التنبيهات",
       empty: "لا توجد تنبيهات مفتوحة",
       loadError: "تعذّر تحميل التنبيهات",
       openInDesk: "فتح في النظام",
@@ -469,6 +487,7 @@ const messages = {
     sidebar: {
       filters: "الفلاتر",
       filtersAndStats: "الفلاتر والإحصائيات",
+      close: "إغلاق الفلاتر",
       vehicleType: "نوع المركبة",
       all: "الكل",
       cars: "سيارات",
@@ -530,7 +549,7 @@ const messages = {
       compact: "مضغوط",
       comfortable: "مريح",
       densityTitle: "تبديل كثافة الكروت",
-      loadError: "تعذّر تحميل بيانات الأسطول: {error}",
+      loadFailed: "تعذّر تحميل بيانات الأسطول.",
       staleData: "تُعرض آخر لوحة محمّلة — فشل التحديث في الخلفية",
       noResultsFilters: "لا نتائج مطابقة للفلاتر",
       noVehicles: "لا توجد مركبات",
@@ -593,6 +612,7 @@ const messages = {
       details: "تفاصيل",
     },
     panel: {
+      close: "إغلاق تفاصيل المركبة",
       noProject: "بدون مشروع",
       overview: "نظرة عامة",
       driver: "السائق",
@@ -789,13 +809,13 @@ const messages = {
 };
 
 // supervisor board defaults to Arabic (mirrors driver/safety portals)
-const { lang, dir, translate, setLang } = createI18n({
+const { lang, dir, translate, setLang, resourceErrorMessage } = createI18n({
   messages,
   storageKey: STORAGE_KEY,
   supported: SUPPORTED,
 });
 
-export { translate, setLang };
+export { translate, setLang, resourceErrorMessage };
 
 export function useI18n() {
   return {
@@ -803,5 +823,6 @@ export function useI18n() {
     lang,
     dir,
     setLang,
+    resourceErrorMessage,
   };
 }

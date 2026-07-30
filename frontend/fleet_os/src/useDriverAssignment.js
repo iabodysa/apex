@@ -4,7 +4,8 @@
 // Vehicle Handover capture. Assignment succeeds independently of the handover.
 import { reactive } from "vue";
 import { call } from "./api.js";
-import { today, trim, serverMsg } from "./fleetHelpers.js";
+import { today, trim } from "./fleetHelpers.js";
+import { resourceErrorMessage } from "./i18n.js";
 
 const POST = (m) => "apex.salis.api.fleet_os." + m;
 
@@ -35,7 +36,7 @@ export function useDriverAssignment({ panel, subForm, showToast, cfShow, reloadF
       dp.open = true;
     } catch (e) {
       dp.results = [];
-      showToast(serverMsg(e), "red");
+      showToast(resourceErrorMessage(e, "errors.loadError"), "red");
     } finally {
       dp.loading = false;
     }
@@ -104,13 +105,13 @@ export function useDriverAssignment({ panel, subForm, showToast, cfShow, reloadF
             showToast(t("toast.handoverSkipped"), "green");
           }
         } catch (e) {
-          showToast(t("toast.handoverFailed", { msg: serverMsg(e) }), "amber");
+          showToast(t("toast.handoverFailed", { msg: resourceErrorMessage(e, "errors.actionError") }), "amber");
         }
       }
       subForm.value = null;
       await reloadFleet();
     } catch (e) {
-      showToast(serverMsg(e), "red");
+      showToast(resourceErrorMessage(e, "errors.actionError"), "red");
     }
   }
 
