@@ -59,11 +59,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Padding is 2px, not the shared LangToggle's 3px, because this group also carries a
+   1px border: 2+1 per side matches the switcher's 3, so at the same 44px option height
+   the two header controls come out exactly the same height. */
 .emp-theme {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 3px;
+  padding: 2px;
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--c-header-ink) 9%, transparent);
   border: 1px solid color-mix(in srgb, var(--c-header-ink) 20%, transparent);
@@ -73,7 +76,9 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  min-height: 26px;
+  /* 44px — the accessible touch target the shared LangToggle beside it uses. This
+     control sits on the same worker-facing header, so it may not be the smaller one. */
+  min-height: 44px;
   padding: 4px 10px;
   border: none;
   border-radius: var(--radius-pill);
@@ -90,10 +95,15 @@ onMounted(() => {
   background: var(--c-header-accent);
   color: var(--forest);
 }
-/* On phones the label hides, leaving just the glyph. */
+/* On phones the label hides, leaving just the glyph — which would shrink the button
+   below the 44px touch target on the axis the label was holding open. */
 @media (max-width: 480px) {
   .emp-theme-opt span {
     display: none;
+  }
+  .emp-theme-opt {
+    min-width: 44px;
+    justify-content: center;
   }
 }
 </style>
