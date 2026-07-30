@@ -221,6 +221,10 @@ _TR_STATE_DOCSTATUS = {
 # [#6jujlr]
 _TR_TERMINAL = {"Fulfilled", "Cancelled"}
 
+# Distinct from habitat's notify savepoint: both can be live in one request, and a
+# shared name would let one helper's rollback destroy the other's mark.
+_CLEARANCE_SAVEPOINT = "apex_salis_rider_clearance"
+
 
 def drive_transport_request(tr_name, action, target_state, extra_fields=None):
 	"""Advance a Transport Request from a related Movement document.
@@ -445,6 +449,10 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
 	if not driver:
 		return []
 
+	# The docstring's "can never abort the guarded transaction" promise needs a SAVEPOINT:
+	# a bare frappe.db.rollback() discards the caller's whole transaction, including the
+	# rejection this follow-up task is meant to accompany.
+	frappe.db.savepoint(_CLEARANCE_SAVEPOINT)
 	try:
 		# [#q5qqgf]
 		existing = frappe.get_all(
@@ -491,7 +499,7 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
 
 		return created
 	except Exception:
-		frappe.db.rollback()
+		frappe.db.rollback(save_point=_CLEARANCE_SAVEPOINT)
 		frappe.log_error(frappe.get_traceback(), "Salis: rider clearance task failed")
 		return []
 

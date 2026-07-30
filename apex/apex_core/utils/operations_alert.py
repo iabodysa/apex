@@ -21,6 +21,12 @@ ALERT_DOCTYPE = "Operations Alert"
 # [#qqv12a]
 _MESSAGE_MAX = 2000
 
+# Every fixed scheduler loop calls this helper, so a bare frappe.db.rollback() here would
+# undo the whole run each caller just learned to protect — one failed alert discarding
+# every row already written. Own savepoint, distinct from the notify and clearance marks
+# because more than one can be live in a single request.
+_SAVEPOINT = "apex_operations_alert"
+
 
 def _project_supervisor_for_vehicle(vehicle: str | None) -> str | None:
     """Resolve the vehicle's project supervisor User, or None.
@@ -60,6 +66,7 @@ def insert_operations_alert(
     """
     from frappe.utils import now_datetime
 
+    frappe.db.savepoint(_SAVEPOINT)
     try:
         alert = frappe.get_doc(
             {
@@ -77,7 +84,7 @@ def insert_operations_alert(
         alert.insert(ignore_permissions=True)  # audit-ok — scheduler-run alert
         return alert.name
     except Exception:
-        frappe.db.rollback()
+        frappe.db.rollback(save_point=_SAVEPOINT)
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"Operations Alert insert failed ({alert_type})"[:140],

@@ -138,3 +138,42 @@ class TestSalisUtils(FrappeTestCase):
             lock_fuel_quota(f"NO-SUCH-QUOTA-{frappe.generate_hash(length=12)}")
         except Exception as exc:  # pragma: no cover
             self.fail(f"lock_fuel_quota raised on a valid table lock: {exc!r}")
+
+
+class TestRiderClearanceSparesTheCallersEarlierRows(FrappeTestCase):
+	"""The docstring promises the helper "can never abort the guarded transaction".
+
+	Only a savepoint can keep that promise: a bare rollback discards the caller's whole
+	transaction, including the very rejection this follow-up task accompanies. This test
+	is what makes the promise falsifiable rather than decorative.
+	"""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+
+	def test_a_failing_clearance_leaves_an_earlier_row_intact(self):
+		from apex.salis.utils import raise_rider_clearance_task
+
+		earlier = frappe.get_doc(
+			{
+				"doctype": "ToDo",
+				"description": "row written before the clearance helper fails",
+				"allocated_to": "Administrator",
+			}
+		).insert(ignore_permissions=True)
+		self.addCleanup(
+			frappe.delete_doc, "ToDo", earlier.name, force=True, ignore_permissions=True
+		)
+
+		# A driver name that resolves to no Salis Driver: assignee resolution raises
+		# inside the try, which is the failure shape the except block exists for.
+		self.assertEqual(
+			raise_rider_clearance_task("NO-SUCH-DRIVER-FOR-CLEARANCE-PROBE"),
+			[],
+			"the helper swallows the failure and returns an empty list",
+		)
+
+		self.assertTrue(
+			frappe.db.exists("ToDo", earlier.name),
+			"the caller's earlier row was rolled back by the failing clearance helper",
+		)
