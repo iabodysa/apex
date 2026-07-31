@@ -14,8 +14,12 @@ What is asserted, and why each one is the falsifiable part of "the nav works":
     to a missing id scrolls nowhere;
   * the movement is wired: `scroll-behavior: smooth` plus a
     `scroll-margin-block-start` on the cards (so the sticky header does not
-    cover the section the reader was sent to), and an IntersectionObserver that
-    drives the highlight from the scroll position;
+    cover the section the reader was sent to), and an IntersectionObserver whose
+    callback actually writes the highlight state -- the word appearing in the
+    file is equally true of an observer that never fires;
+  * the highlight's TRACKING has a gate that can fail. No source guard can watch
+    a scroll, so that half is proven by mounting the page (vitest, jsdom) and
+    driving the observer; this suite only makes sure that proof still exists.
   * the nav survives narrow viewports: the shared shell hides its top nav below
     the tablet breakpoint, and this page has no second navigation to fall back
     on, so index.css must put it back -- RTL-safely, with logical properties.
@@ -31,6 +35,12 @@ from frappe.tests.utils import FrappeTestCase
 REPO_ROOT = os.path.dirname(frappe.get_app_path("apex"))
 APP_VUE = f"{REPO_ROOT}/frontend/fleet/src/App.vue"
 PAGE_CSS = f"{REPO_ROOT}/frontend/fleet/src/index.css"
+# Runtime half of the proof. CI runs it as Portal Tests / shared-components
+# (`npm test -w frontend_shared`); the shared harness is where it lives because
+# fleet ships a bundle, not a test runner.
+NAV_RUNTIME_TEST = (
+    f"{REPO_ROOT}/frontend/frontend_shared/components/__tests__/fleet-employee-nav.test.mjs"
+)
 
 # The shared FleetPageShell hides .fleet-nav below --bp-tablet (768px).
 TABLET_BREAKPOINT = 768
@@ -45,9 +55,9 @@ def _read(path):
 
 
 def _block(text, start_index):
-    """Body of the {...} or [...] group whose opening bracket is at start_index."""
+    """Body of the {...}, [...] or (...) group whose opening bracket is at start_index."""
     opening = text[start_index]
-    closing = {"{": "}", "[": "]"}[opening]
+    closing = {"{": "}", "[": "]", "(": ")"}[opening]
     depth = 0
     for i in range(start_index, len(text)):
         if text[i] == opening:
@@ -126,10 +136,45 @@ class TestFleetEmployeeNav(FrappeTestCase):
             r"\.emp-card[^{}]*\{[^{}]*scroll-margin-block-start",
             "the scrolled-to card needs header clearance or it lands under the sticky bar",
         )
+        m = re.search(r"new\s+IntersectionObserver\s*\(", self.sfc)
+        self.assertTrue(
+            m,
+            "nothing observes the scroll position, so the highlight cannot follow it",
+        )
+        # The observer has to WRITE the highlight, not merely exist: an observer
+        # whose callback drops the entries leaves the class pinned to whatever the
+        # page loaded with, which is the old hardcoded bug wearing a spy.
+        self.assertRegex(
+            _block(self.sfc, m.end() - 1),
+            r"\bactiveSection\.value\s*=",
+            "the scroll observer never assigns the active section",
+        )
+
+    def test_the_tracking_has_a_runtime_gate_that_can_fail(self):
+        """No source guard can watch a scroll; this asserts the gate that can.
+
+        Everything above is text. Whether reaching a section MARKS its nav item and
+        UNMARKS the others is only answerable by mounting the page, which the vitest
+        file below does: it stubs IntersectionObserver (jsdom has none, and the page
+        skips the spy entirely when the constructor is missing), then feeds it the
+        reader's position. Deleting that file would leave the tracking claim with no
+        gate at all while this suite stayed green -- the exact shape of the
+        partially-closed cards this test family exists to prevent.
+        """
+        self.assertTrue(
+            os.path.exists(NAV_RUNTIME_TEST),
+            f"the runtime proof of the nav highlight is gone: {NAV_RUNTIME_TEST}",
+        )
+        proof = _read(NAV_RUNTIME_TEST)
+        self.assertIn(
+            "fleet/src/App.vue",
+            proof,
+            "the runtime proof must mount the real page, not a stand-in",
+        )
         self.assertIn(
             "IntersectionObserver",
-            self.sfc,
-            "nothing observes the scroll position, so the highlight cannot follow it",
+            proof,
+            "the runtime proof must drive the scroll spy, or it tests nothing new",
         )
 
     def test_nav_stays_reachable_and_rtl_safe_when_narrow(self):
