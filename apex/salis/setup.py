@@ -15,22 +15,22 @@ skip-missing, so running them twice (install + migrate) is safe.
 import frappe
 
 from apex.patches.v1_0 import (
-	seed_salis_roles,
-	seed_salis_authority_roles,
-	seed_salis_operations_roles,
-	seed_salis_settings,
+    seed_salis_roles,
+    seed_salis_authority_roles,
+    seed_salis_operations_roles,
+    seed_salis_settings,
 )
 
 
 def after_install():
-	"""Seed Salis roles + settings on first install (idempotent)."""
-	for step in (
-		seed_salis_roles.execute,
-		seed_salis_authority_roles.execute,
-		seed_salis_operations_roles.execute,
-		seed_salis_settings.execute,
-	):
-		try:
-			step()
-		except Exception:
-			frappe.log_error(frappe.get_traceback(), "Salis after_install seed failed")
+    """Seed Salis roles + settings on first install (idempotent)."""
+    for step in (
+        seed_salis_roles.execute,
+        seed_salis_authority_roles.execute,
+        seed_salis_operations_roles.execute,
+        seed_salis_settings.execute,
+    ):
+        try:
+            step()
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "Salis after_install seed failed")

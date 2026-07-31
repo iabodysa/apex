@@ -24,36 +24,36 @@ RECENT_TRIP_MAX_LIMIT = 100
 
 
 def _bounded_positive(value, default, maximum):
-	parsed = frappe.utils.cint(value)
-	if parsed <= 0:
-		return default
-	return min(parsed, maximum)
+    parsed = frappe.utils.cint(value)
+    if parsed <= 0:
+        return default
+    return min(parsed, maximum)
 
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def my_trips_today():
-	"""Today's Dispatch Trips for the current driver (read)."""
-	_require_enabled()
-	driver = _resolve_driver()
-	trips = frappe.get_all(
-		"Dispatch Trip",
-		filters={"driver": driver, "trip_date": frappe.utils.today()},
-		fields=["name", "route_plan", "vehicle", "transport_request", "depart_time", "return_time", "status"],
-		order_by="depart_time asc",
-	)
-	_attach_trip_maps(trips)  # [#c8i03i]
-	_label_trips(trips)  # [#jlry93]
-	_attach_trip_log_state(trips, driver)  # [#qu3kwf]
-	_attach_boarding_counts(trips, driver)  # [#d6x6zw]
-	return trips
+    """Today's Dispatch Trips for the current driver (read)."""
+    _require_enabled()
+    driver = _resolve_driver()
+    trips = frappe.get_all(
+        "Dispatch Trip",
+        filters={"driver": driver, "trip_date": frappe.utils.today()},
+        fields=["name", "route_plan", "vehicle", "transport_request", "depart_time", "return_time", "status"],
+        order_by="depart_time asc",
+    )
+    _attach_trip_maps(trips)  # [#c8i03i]
+    _label_trips(trips)  # [#jlry93]
+    _attach_trip_log_state(trips, driver)  # [#qu3kwf]
+    _attach_boarding_counts(trips, driver)  # [#d6x6zw]
+    return trips
 
 
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def my_trips_recent(days=30, limit=50):
-	"""The current driver's recent Dispatch Trips, newest first (read).
+    """The current driver's recent Dispatch Trips, newest first (read).
 
 	Identity-scoped via endpoint-scoped ``get_all`` (the ``my_trips_today``
 	precedent): the driver is resolved credential-first and every row is filtered
@@ -66,23 +66,23 @@ def my_trips_recent(days=30, limit=50):
 	``limit`` caps the rows, so the list never grows unbounded for a long-tenured
 	driver. ``trip_date`` is included (and stringified) so the SPA can group/sort by
 	day. Read-only, no commit."""
-	_require_enabled()
-	driver = _resolve_driver()
-	days = _bounded_positive(days, RECENT_TRIP_DEFAULT_DAYS, RECENT_TRIP_MAX_DAYS)
-	limit = _bounded_positive(limit, RECENT_TRIP_DEFAULT_LIMIT, RECENT_TRIP_MAX_LIMIT)
-	since = frappe.utils.add_days(frappe.utils.today(), -days)
-	trips = frappe.get_all(
-		"Dispatch Trip",
-		filters={"driver": driver, "trip_date": [">=", since]},
-		fields=["name", "trip_date", "route_plan", "vehicle", "depart_time", "return_time", "status"],
-		order_by="trip_date desc, depart_time desc",
-		limit=limit,
-	)
-	_attach_trip_maps(trips)  # [#c8i03i]
-	_label_trips(trips)  # [#jlry93]
-	for t in trips:
-		t["trip_date"] = frappe.utils.cstr(t["trip_date"]) if t.get("trip_date") else None
-	return trips
+    _require_enabled()
+    driver = _resolve_driver()
+    days = _bounded_positive(days, RECENT_TRIP_DEFAULT_DAYS, RECENT_TRIP_MAX_DAYS)
+    limit = _bounded_positive(limit, RECENT_TRIP_DEFAULT_LIMIT, RECENT_TRIP_MAX_LIMIT)
+    since = frappe.utils.add_days(frappe.utils.today(), -days)
+    trips = frappe.get_all(
+        "Dispatch Trip",
+        filters={"driver": driver, "trip_date": [">=", since]},
+        fields=["name", "trip_date", "route_plan", "vehicle", "depart_time", "return_time", "status"],
+        order_by="trip_date desc, depart_time desc",
+        limit=limit,
+    )
+    _attach_trip_maps(trips)  # [#c8i03i]
+    _label_trips(trips)  # [#jlry93]
+    for t in trips:
+        t["trip_date"] = frappe.utils.cstr(t["trip_date"]) if t.get("trip_date") else None
+    return trips
 
 
 

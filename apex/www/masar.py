@@ -36,58 +36,58 @@ _COOKIE_MAX_AGE_SECONDS = 180 * 24 * 60 * 60
 
 
 def get_context(context):
-	# [#kqaxzl]
-	context.no_cache = 1
+    # [#kqaxzl]
+    context.no_cache = 1
 
-	# [#7j4iyc]
+    # [#7j4iyc]
 
-	# [#4arwxd]
-	context.csrf_token = get_csrf_token()
+    # [#4arwxd]
+    context.csrf_token = get_csrf_token()
 
-	# [#4xli65]
-	raw_token = frappe.form_dict.get("w") or ""
-	valid_token = raw_token if _TOKEN_RE.match(raw_token) else ""
-	if valid_token:
-		# Defense-in-depth: charge the shared per-IP bad-token throttle for a
-		# failed/unknown link before it is parked in the cookie; a valid link is
-		# never charged and the redirect still fires so the secret leaves the URL.
-		throttle_entry_token(WORKER, valid_token)
-		_set_token_cookie(valid_token)
-		# [#luoj26]
-		frappe.local.flags.redirect_location = "/masar"
-		raise frappe.Redirect
+    # [#4xli65]
+    raw_token = frappe.form_dict.get("w") or ""
+    valid_token = raw_token if _TOKEN_RE.match(raw_token) else ""
+    if valid_token:
+        # Defense-in-depth: charge the shared per-IP bad-token throttle for a
+        # failed/unknown link before it is parked in the cookie; a valid link is
+        # never charged and the redirect still fires so the secret leaves the URL.
+        throttle_entry_token(WORKER, valid_token)
+        _set_token_cookie(valid_token)
+        # [#luoj26]
+        frappe.local.flags.redirect_location = "/masar"
+        raise frappe.Redirect
 
-	# [#cdgoup]
-	context.masar_has_token = bool(_request_token_cookie())
+    # [#cdgoup]
+    context.masar_has_token = bool(_request_token_cookie())
 
-	# [#bsuwds]
-	apply_portal_appearance(context)
-	return context
+    # [#bsuwds]
+    apply_portal_appearance(context)
+    return context
 
 
 def _set_token_cookie(token: str) -> None:
-	"""Persist the validated token in the httpOnly /masar cookie (best-effort).
+    """Persist the validated token in the httpOnly /masar cookie (best-effort).
 
 	Guarded so a missing cookie_manager (e.g. a non-request render path) degrades to
 	leaving the query-string token in place rather than 500-ing the page."""
-	cm = getattr(frappe.local, "cookie_manager", None)
-	if cm is None:
-		return
-	cm.set_cookie(
-		MASAR_TOKEN_COOKIE,
-		token,
-		httponly=True,
-		samesite="Lax",
-		max_age=_COOKIE_MAX_AGE_SECONDS,
-	)
+    cm = getattr(frappe.local, "cookie_manager", None)
+    if cm is None:
+        return
+    cm.set_cookie(
+        MASAR_TOKEN_COOKIE,
+        token,
+        httponly=True,
+        samesite="Lax",
+        max_age=_COOKIE_MAX_AGE_SECONDS,
+    )
 
 
 def _request_token_cookie() -> str:
-	"""The token already stored in the request's httpOnly cookie, or ''."""
-	request = getattr(frappe.local, "request", None)
-	if request is None:
-		return ""
-	try:
-		return (request.cookies.get(MASAR_TOKEN_COOKIE) or "").strip()
-	except Exception:
-		return ""
+    """The token already stored in the request's httpOnly cookie, or ''."""
+    request = getattr(frappe.local, "request", None)
+    if request is None:
+        return ""
+    try:
+        return (request.cookies.get(MASAR_TOKEN_COOKIE) or "").strip()
+    except Exception:
+        return ""

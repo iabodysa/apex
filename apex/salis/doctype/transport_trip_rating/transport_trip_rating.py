@@ -6,18 +6,18 @@ from frappe.model.document import Document
 
 
 class TransportTripRating(Document):
-	# [#q6y9j5]
+    # [#q6y9j5]
 
-	from typing import TYPE_CHECKING
+    from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
-		from frappe.types import DF
+    if TYPE_CHECKING:
+        from frappe.types import DF
 
-		dispatch_trip: DF.Link
-		employee: DF.Link
-		feedback: DF.SmallText | None
-		naming_series: DF.Literal["TTR-.####"]
-		rating: DF.Rating
-		transport_request: DF.Link | None
-	# [#g4leg3]
-	pass
+        dispatch_trip: DF.Link
+        employee: DF.Link
+        feedback: DF.SmallText | None
+        naming_series: DF.Literal["TTR-.####"]
+        rating: DF.Rating
+        transport_request: DF.Link | None
+    # [#g4leg3]
+    pass

@@ -39,6 +39,19 @@ _SHIPPED = {
 }
 
 
+def _clear_both_keys():
+    """Clear the OLD key as well as the new one.
+
+    A site that has not run the patch yet still carries the pre-rename row, and
+    inserting the fixture on top of it errors before a single assertion runs — which
+    is a fixture defect, not a finding about the patch.
+    """
+    frappe.db.delete(
+        "Dashboard Chart",
+        {"name": ["in", ("Accommodation Leases by Status", "Leases by Status")]},
+    )
+
+
 class TestRenameRetiredHabitatRecordNames(FrappeTestCase):
     def _chart(self, name):
         """A private Dashboard Chart under ``name``, so the fixture never collides with
@@ -68,7 +81,7 @@ class TestRenameRetiredHabitatRecordNames(FrappeTestCase):
         return doc
 
     def test_an_upgrading_site_keeps_one_row_under_the_new_key(self):
-        frappe.db.delete("Dashboard Chart", {"name": "Leases by Status"})
+        _clear_both_keys()
         self._chart("Accommodation Leases by Status")
 
         execute()
@@ -77,7 +90,7 @@ class TestRenameRetiredHabitatRecordNames(FrappeTestCase):
         self.assertTrue(frappe.db.exists("Dashboard Chart", "Leases by Status"))
 
     def test_running_it_twice_leaves_the_same_single_row(self):
-        frappe.db.delete("Dashboard Chart", {"name": "Leases by Status"})
+        _clear_both_keys()
         self._chart("Accommodation Leases by Status")
 
         execute()
@@ -87,7 +100,7 @@ class TestRenameRetiredHabitatRecordNames(FrappeTestCase):
         self.assertTrue(frappe.db.exists("Dashboard Chart", "Leases by Status"))
 
     def test_a_site_holding_both_keys_loses_neither(self):
-        frappe.db.delete("Dashboard Chart", {"name": "Leases by Status"})
+        _clear_both_keys()
         self._chart("Accommodation Leases by Status")
         self._chart("Leases by Status")
 

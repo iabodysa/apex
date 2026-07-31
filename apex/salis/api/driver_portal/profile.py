@@ -20,12 +20,12 @@ from apex.salis.utils import expiry_state
 
 
 def _fmt_date(value):
-	return frappe.utils.cstr(value) if value else None
+    return frappe.utils.cstr(value) if value else None
 
 
 
 def _employee_documents(employee):
-	"""The linked Employee's Iqama/passport identity expiries, read defensively.
+    """The linked Employee's Iqama/passport identity expiries, read defensively.
 
 	Mirrors ``masar.get_worker_context``: Employee field names vary across HR setups,
 	so every field is read via ``.get()`` on the cached doc and a missing field
@@ -36,54 +36,54 @@ def _employee_documents(employee):
 	The probe filters on ``name`` so a row named after its DocType is answered from
 	the database, not from the positional short-circuit (database.py:1259) that
 	would send the literal "Employee" on to ``get_cached_doc`` and raise."""
-	if not employee or not frappe.db.exists("Employee", {"name": employee}):
-		return []
-	emp = frappe.get_cached_doc("Employee", employee)
-	documents = []
-	# [#bakgm3]
-	iqama_no = emp.get("iqama") or emp.get("iqama_no")
-	iqama_expiry = emp.get("iqama_expiry") or emp.get("valid_upto")
-	if iqama_no or iqama_expiry:
-		documents.append(
-			{
-				"type": "iqama",
-				"number": iqama_no,
-				"expiry": _fmt_date(iqama_expiry),
-				"days_left": _days_until(iqama_expiry),
-			}
-		)
-	# [#hch49w]
-	passport_no = emp.get("passport_number")
-	if passport_no:
-		documents.append(
-			{
-				"type": "passport",
-				"number": passport_no,
-				"expiry": _fmt_date(emp.get("passport_expiry")),
-				"days_left": _days_until(emp.get("passport_expiry")),
-			}
-		)
-	return documents
+    if not employee or not frappe.db.exists("Employee", {"name": employee}):
+        return []
+    emp = frappe.get_cached_doc("Employee", employee)
+    documents = []
+    # [#bakgm3]
+    iqama_no = emp.get("iqama") or emp.get("iqama_no")
+    iqama_expiry = emp.get("iqama_expiry") or emp.get("valid_upto")
+    if iqama_no or iqama_expiry:
+        documents.append(
+            {
+                "type": "iqama",
+                "number": iqama_no,
+                "expiry": _fmt_date(iqama_expiry),
+                "days_left": _days_until(iqama_expiry),
+            }
+        )
+    # [#hch49w]
+    passport_no = emp.get("passport_number")
+    if passport_no:
+        documents.append(
+            {
+                "type": "passport",
+                "number": passport_no,
+                "expiry": _fmt_date(emp.get("passport_expiry")),
+                "days_left": _days_until(emp.get("passport_expiry")),
+            }
+        )
+    return documents
 
 
 
 def _project_label(code):
-	"""Resolve a Project link id (e.g. ``PROJ-0038``) to its display name.
+    """Resolve a Project link id (e.g. ``PROJ-0038``) to its display name.
 
 	The portal shows the project's human ``project_name`` (the Project DocType's
 	title field), not the autonamed series code. Returns the resolved name, or the
 	code itself as a fallback when the link is blank or cannot be resolved — so a
 	missing/renamed project never blanks the field. Read-only."""
-	if not code:
-		return code
-	return frappe.db.get_value("Project", code, "project_name") or code
+    if not code:
+        return code
+    return frappe.db.get_value("Project", code, "project_name") or code
 
 
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def get_driver_context():
-	"""Portal bootstrap (read): enabled flag, whether the user is linked to a
+    """Portal bootstrap (read): enabled flag, whether the user is linked to a
 	driver, and the driver profile. Never raises for an unlinked user.
 
 	For an UNLINKED user the payload is still useful (not a dead-end): it carries
@@ -91,81 +91,81 @@ def get_driver_context():
 	and ``links`` — a permission-filtered set of desk destinations. The SPA renders
 	a friendly staff panel or a generic explainer from these fields instead of a
 	bare error. Action endpoints remain strictly driver-scoped (unchanged)."""
-	user = frappe.session.user
-	driver = _find_driver()
-	if not _portal_enabled():
-		# [#p6q8jd]
-		staff = _is_staff(user)
-		return {
-			"enabled": False,
-			"linked": False,
-			"driver": None,
-			"is_staff": staff,
-			"full_name": _user_full_name(user),
-			"links": _staff_links(user) if staff else [],
-		}
-	if not driver:
-		staff = _is_staff(user)
-		return {
-			"enabled": True,
-			"linked": False,
-			"driver": None,
-			"is_staff": staff,
-			"full_name": _user_full_name(user),
-			"links": _staff_links(user) if staff else [],
-		}
-	d = frappe.db.get_value(
-		"Salis Driver", driver,
-		["name", "full_name", "status", "current_vehicle", "license_expiry"],
-		as_dict=True,
-	)
-	# [#1grmf3]
-	if d and d.get("license_expiry"):
-		d["license_expiry"] = frappe.utils.cstr(d["license_expiry"])
-	return {"enabled": True, "linked": True, "driver": d}
+    user = frappe.session.user
+    driver = _find_driver()
+    if not _portal_enabled():
+        # [#p6q8jd]
+        staff = _is_staff(user)
+        return {
+            "enabled": False,
+            "linked": False,
+            "driver": None,
+            "is_staff": staff,
+            "full_name": _user_full_name(user),
+            "links": _staff_links(user) if staff else [],
+        }
+    if not driver:
+        staff = _is_staff(user)
+        return {
+            "enabled": True,
+            "linked": False,
+            "driver": None,
+            "is_staff": staff,
+            "full_name": _user_full_name(user),
+            "links": _staff_links(user) if staff else [],
+        }
+    d = frappe.db.get_value(
+        "Salis Driver", driver,
+        ["name", "full_name", "status", "current_vehicle", "license_expiry"],
+        as_dict=True,
+    )
+    # [#1grmf3]
+    if d and d.get("license_expiry"):
+        d["license_expiry"] = frappe.utils.cstr(d["license_expiry"])
+    return {"enabled": True, "linked": True, "driver": d}
 
 
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def get_driver_profile():
-	"""The current driver's OWN profile (read).
+    """The current driver's OWN profile (read).
 
 	Identity-scoped: the driver is resolved credential-first, never client-supplied,
 	so this can only ever return the caller's own record — it cannot leak another
 	driver's data. Read-only, no commit. Returns the durable fields the portal
 	profile view shows (name, employee, status, license, contact, current vehicle).
 	Date fields are stringified so the JSON response always serializes."""
-	_require_enabled()
-	driver = _resolve_driver()
-	d = frappe.db.get_value(
-		"Salis Driver", driver,
-		["name", "full_name", "employee", "status", "phone", "project",
-		 "license_number", "license_expiry", "current_vehicle"],
-		as_dict=True,
-	) or {}
-	if d.get("license_expiry"):
-		d["license_expiry"] = frappe.utils.cstr(d["license_expiry"])
-	# [#mlgvqm]
-	if d.get("project"):
-		d["project"] = _project_label(d["project"])
-	# [#1mupnp]
-	d["documents"] = _employee_documents(d.get("employee"))
-	return d
+    _require_enabled()
+    driver = _resolve_driver()
+    d = frappe.db.get_value(
+        "Salis Driver", driver,
+        ["name", "full_name", "employee", "status", "phone", "project",
+         "license_number", "license_expiry", "current_vehicle"],
+        as_dict=True,
+    ) or {}
+    if d.get("license_expiry"):
+        d["license_expiry"] = frappe.utils.cstr(d["license_expiry"])
+    # [#mlgvqm]
+    if d.get("project"):
+        d["project"] = _project_label(d["project"])
+    # [#1mupnp]
+    d["documents"] = _employee_documents(d.get("employee"))
+    return d
 
 
 
 # [#f1dc1a]
 _DRIVER_COMPLIANCE_TYPES = (
-	"Registration (Istimara)",
-	"Insurance",
-	"Periodic Inspection",
+    "Registration (Istimara)",
+    "Insurance",
+    "Periodic Inspection",
 )
 
 
 
 def _vehicle_compliance(vehicle):
-	"""The driver-relevant compliance documents for a vehicle (read).
+    """The driver-relevant compliance documents for a vehicle (read).
 
 	Reads the ``compliance_documents`` child table and returns one entry per
 	driver-relevant document type (registration/insurance/inspection) that has an
@@ -181,35 +181,35 @@ def _vehicle_compliance(vehicle):
 	the SPA needs no date math and both portal languages render identically. Returns
 	an empty list when the vehicle tracks no documents — the page omits the section.
 	"""
-	rows = frappe.get_all(
-		"Salis Vehicle Compliance",
-		filters={"parent": vehicle, "parenttype": "Salis Vehicle"},
-		fields=["compliance_type", "document_number", "expiry_date"],
-		order_by="expiry_date asc",
-	)
-	warn_days = _license_warn_days()
-	out = []
-	for r in rows:
-		if r.get("compliance_type") not in _DRIVER_COMPLIANCE_TYPES or not r.get("expiry_date"):
-			continue
-		days, state = expiry_state(r["expiry_date"], warn_days)
-		out.append(
-			{
-				"compliance_type": r["compliance_type"],
-				"document_number": r.get("document_number") or None,
-				"expiry_date": frappe.utils.cstr(r["expiry_date"]),
-				"days_to_expiry": days,
-				"state": state,
-			}
-		)
-	return out
+    rows = frappe.get_all(
+        "Salis Vehicle Compliance",
+        filters={"parent": vehicle, "parenttype": "Salis Vehicle"},
+        fields=["compliance_type", "document_number", "expiry_date"],
+        order_by="expiry_date asc",
+    )
+    warn_days = _license_warn_days()
+    out = []
+    for r in rows:
+        if r.get("compliance_type") not in _DRIVER_COMPLIANCE_TYPES or not r.get("expiry_date"):
+            continue
+        days, state = expiry_state(r["expiry_date"], warn_days)
+        out.append(
+            {
+                "compliance_type": r["compliance_type"],
+                "document_number": r.get("document_number") or None,
+                "expiry_date": frappe.utils.cstr(r["expiry_date"]),
+                "days_to_expiry": days,
+                "state": state,
+            }
+        )
+    return out
 
 
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def get_my_vehicle():
-	"""The current driver's CURRENT vehicle, enriched for the driver view (read).
+    """The current driver's CURRENT vehicle, enriched for the driver view (read).
 
 	Identity-scoped: resolves the driver credential-first, then returns the vehicle
 	bound to them — their ``current_vehicle`` if set, otherwise the vehicle on an
@@ -225,52 +225,52 @@ def get_my_vehicle():
 	is intentionally NOT surfaced: it is a back-office attribute with no meaning to a
 	driver. Empty fields are returned as null/[] so the SPA omits them cleanly.
 	"""
-	_require_enabled()
-	driver = _resolve_driver()
+    _require_enabled()
+    driver = _resolve_driver()
 
-	vehicle = frappe.db.get_value("Salis Driver", driver, "current_vehicle")
-	assignment = None
-	if not vehicle:
-		# [#n00nxa]
-		assignment = frappe.db.get_value(
-			"Vehicle Assignment",
-			{"driver": driver, "status": "Active"},
-			["name", "vehicle", "start_date"],
-			as_dict=True,
-		)
-		if assignment:
-			vehicle = assignment.get("vehicle")
+    vehicle = frappe.db.get_value("Salis Driver", driver, "current_vehicle")
+    assignment = None
+    if not vehicle:
+        # [#n00nxa]
+        assignment = frappe.db.get_value(
+            "Vehicle Assignment",
+            {"driver": driver, "status": "Active"},
+            ["name", "vehicle", "start_date"],
+            as_dict=True,
+        )
+        if assignment:
+            vehicle = assignment.get("vehicle")
 
-	if not vehicle:
-		return {"vehicle": None}
+    if not vehicle:
+        return {"vehicle": None}
 
-	v = frappe.db.get_value(
-		"Salis Vehicle", vehicle,
-		["name", "plate_number", "vehicle_category", "status", "odometer",
-		 "planned_fuel_grade", "compliance_status", "project"],
-		as_dict=True,
-	) or {}
+    v = frappe.db.get_value(
+        "Salis Vehicle", vehicle,
+        ["name", "plate_number", "vehicle_category", "status", "odometer",
+         "planned_fuel_grade", "compliance_status", "project"],
+        as_dict=True,
+    ) or {}
 
-	# [#mlgvqm]
-	if v.get("project"):
-		v["project"] = _project_label(v["project"])
+    # [#mlgvqm]
+    if v.get("project"):
+        v["project"] = _project_label(v["project"])
 
-	# [#drxwau]
-	v["compliance"] = _vehicle_compliance(vehicle)
+    # [#drxwau]
+    v["compliance"] = _vehicle_compliance(vehicle)
 
-	# [#kcrj1g]
-	if assignment is None:
-		assignment = frappe.db.get_value(
-			"Vehicle Assignment",
-			{"driver": driver, "vehicle": vehicle, "status": "Active"},
-			["name", "start_date"],
-			as_dict=True,
-		)
-	v["assignment_start"] = (
-		frappe.utils.cstr(assignment["start_date"])
-		if assignment and assignment.get("start_date")
-		else None
-	)
-	# [#gw6jyz]
-	v["last_site_maps_url"] = _vehicle_last_site_maps_url(vehicle)
-	return {"vehicle": v}
+    # [#kcrj1g]
+    if assignment is None:
+        assignment = frappe.db.get_value(
+            "Vehicle Assignment",
+            {"driver": driver, "vehicle": vehicle, "status": "Active"},
+            ["name", "start_date"],
+            as_dict=True,
+        )
+    v["assignment_start"] = (
+        frappe.utils.cstr(assignment["start_date"])
+        if assignment and assignment.get("start_date")
+        else None
+    )
+    # [#gw6jyz]
+    v["last_site_maps_url"] = _vehicle_last_site_maps_url(vehicle)
+    return {"vehicle": v}

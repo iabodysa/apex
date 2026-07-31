@@ -29,45 +29,45 @@ from frappe.model.document import Document
 
 
 class MovementCostTransfer(Document):
-	def validate(self):
-		self._set_company_default()
-		# [#nyun3y]
-		if (self.amount or 0) <= 0:
-			frappe.throw(_("Amount must be greater than zero."))
-		self._validate_distinct_targets()
-		self._stamp_approver()
+    def validate(self):
+        self._set_company_default()
+        # [#nyun3y]
+        if (self.amount or 0) <= 0:
+            frappe.throw(_("Amount must be greater than zero."))
+        self._validate_distinct_targets()
+        self._stamp_approver()
 
-	def _set_company_default(self):
-		"""Default the owning company from Salis Settings for reporting and
+    def _set_company_default(self):
+        """Default the owning company from Salis Settings for reporting and
 		financial context. Reference field only - this memo posts no GL."""
-		if not self.company:
-			from apex.apex_core.doctype.salis_settings.salis_settings import (
-				get_default_company,
-			)
+        if not self.company:
+            from apex.apex_core.doctype.salis_settings.salis_settings import (
+                get_default_company,
+            )
 
-			self.company = get_default_company()
+            self.company = get_default_company()
 
-	# [#7eplyn]
+    # [#7eplyn]
 
-	# [#m88md8]
+    # [#m88md8]
 
-	def _validate_distinct_targets(self):
-		"""A transfer must move cost between two different projects, and between
+    def _validate_distinct_targets(self):
+        """A transfer must move cost between two different projects, and between
 		two different cost centers when both are set."""
-		if self.from_project and self.to_project and self.from_project == self.to_project:
-			frappe.throw(
-				_("From Project and To Project must be different for a cost transfer.")
-			)
+        if self.from_project and self.to_project and self.from_project == self.to_project:
+            frappe.throw(
+                _("From Project and To Project must be different for a cost transfer.")
+            )
 
-		if (
-			self.from_cost_center
-			and self.to_cost_center
-			and self.from_cost_center == self.to_cost_center
-		):
-			frappe.throw(
-				_("From Cost Center and To Cost Center must be different when both are set.")
-			)
+        if (
+            self.from_cost_center
+            and self.to_cost_center
+            and self.from_cost_center == self.to_cost_center
+        ):
+            frappe.throw(
+                _("From Cost Center and To Cost Center must be different when both are set.")
+            )
 
-	def _stamp_approver(self):
-		if self.status == "Approved" and not self.approved_by:
-			self.approved_by = frappe.session.user
+    def _stamp_approver(self):
+        if self.status == "Approved" and not self.approved_by:
+            self.approved_by = frappe.session.user

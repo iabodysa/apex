@@ -16,53 +16,53 @@ from apex.salis.utils import lock_vehicle
 
 
 class FuelQuota(Document):
-	def validate(self):
-		self._guard_duplicate()
-		# [#eortzg]
-		if flt(self.monthly_litres) <= 0:
-			frappe.throw(_("Monthly litres must be greater than zero."))
-		monthly = self.monthly_litres or 0
-		consumed = self.consumed_litres or 0
-		# Overrun by a fuel draw is now REFUSED at the source (Fuel Request's
-		# quota-allowance gate), so this can only be reached by a direct edit that
-		# lowers the allocation below what is already consumed — stays advisory so
-		# the operator can still open the record and correct it.
-		if monthly and consumed > monthly:
-			frappe.msgprint(
-				_("Consumed litres ({0}) exceed the monthly quota ({1}).").format(
-					consumed, monthly
-				),
-				indicator="orange",
-				title=_("Quota Exceeded"),
-			)
+    def validate(self):
+        self._guard_duplicate()
+        # [#eortzg]
+        if flt(self.monthly_litres) <= 0:
+            frappe.throw(_("Monthly litres must be greater than zero."))
+        monthly = self.monthly_litres or 0
+        consumed = self.consumed_litres or 0
+        # Overrun by a fuel draw is now REFUSED at the source (Fuel Request's
+        # quota-allowance gate), so this can only be reached by a direct edit that
+        # lowers the allocation below what is already consumed — stays advisory so
+        # the operator can still open the record and correct it.
+        if monthly and consumed > monthly:
+            frappe.msgprint(
+                _("Consumed litres ({0}) exceed the monthly quota ({1}).").format(
+                    consumed, monthly
+                ),
+                indicator="orange",
+                title=_("Quota Exceeded"),
+            )
 
-	def _guard_duplicate(self):
-		"""One live quota per vehicle per period — a second (vehicle, period_month)
+    def _guard_duplicate(self):
+        """One live quota per vehicle per period — a second (vehicle, period_month)
 		would double-allocate the same month. Scoped to docstatus < 2 so a
 		cancelled quota can be re-issued and an amendment of this same doc passes."""
-		if not (self.vehicle and self.period_month):
-			return
-		# [#5gtjsg]
-		lock_vehicle(self.vehicle)
-		dup = frappe.db.exists(
-			"Fuel Quota",
-			{
-				"vehicle": self.vehicle,
-				"period_month": self.period_month,
-				"docstatus": ["<", 2],
-				"name": ["!=", self.name or ""],
-			},
-		)
-		if dup:
-			frappe.throw(
-				_("Fuel Quota {0} already exists for vehicle {1} in period {2}.").format(
-					dup, self.vehicle, self.period_month
-				)
-			)
+        if not (self.vehicle and self.period_month):
+            return
+        # [#5gtjsg]
+        lock_vehicle(self.vehicle)
+        dup = frappe.db.exists(
+            "Fuel Quota",
+            {
+                "vehicle": self.vehicle,
+                "period_month": self.period_month,
+                "docstatus": ["<", 2],
+                "name": ["!=", self.name or ""],
+            },
+        )
+        if dup:
+            frappe.throw(
+                _("Fuel Quota {0} already exists for vehicle {1} in period {2}.").format(
+                    dup, self.vehicle, self.period_month
+                )
+            )
 
 
 def on_doctype_update():
-	"""Belt-and-suspenders: a composite DB-level unique index prevents any duplicate
+    """Belt-and-suspenders: a composite DB-level unique index prevents any duplicate
 	that slips past the application-layer guard (e.g. direct DB inserts or a race
 	that bypasses validate). Applied once at migrate/patch time.
 
@@ -75,11 +75,11 @@ def on_doctype_update():
 	Task Instance backstop).
 
 	Guarded so pre-existing duplicate data logs rather than aborting migrate."""
-	from apex.apex_core.utils.ledger_index import add_unique_guarded
+    from apex.apex_core.utils.ledger_index import add_unique_guarded
 
-	add_unique_guarded(
-		"Fuel Quota",
-		["vehicle", "period_month", "docstatus"],
-		constraint_name="uq_fuel_quota_vehicle_period",
-	)
-	# [#qzsfcl]
+    add_unique_guarded(
+        "Fuel Quota",
+        ["vehicle", "period_month", "docstatus"],
+        constraint_name="uq_fuel_quota_vehicle_period",
+    )
+    # [#qzsfcl]

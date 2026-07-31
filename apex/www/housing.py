@@ -30,34 +30,34 @@ import frappe
 from frappe.sessions import get_csrf_token
 
 from apex.apex_core.utils.portal_bootstrap import (
-	apply_portal_appearance,
-	guest_redirect,
+    apply_portal_appearance,
+    guest_redirect,
 )
 
 # [#8p519c]
 HOUSING_ROLES = {
-	"System Manager",
-	"Accommodation Manager",
-	"Resident Supervisor",
-	"Procurement Supervisor",
+    "System Manager",
+    "Accommodation Manager",
+    "Resident Supervisor",
+    "Procurement Supervisor",
 }
 
 
 def has_apps_screen_access() -> bool:
-	"""Gate for the /apps app-selector tile (A-024) — same HOUSING_ROLES check
+    """Gate for the /apps app-selector tile (A-024) — same HOUSING_ROLES check
 	get_context() applies, so the tile never shows for a user the page itself
 	would turn away. Wired as the has_permission of the "apex-housing" tile in
 	hooks.py add_to_apps_screen."""
-	return bool(HOUSING_ROLES & set(frappe.get_roles()))
+    return bool(HOUSING_ROLES & set(frappe.get_roles()))
 
 
 def get_context(context):
-	guest_redirect("/housing")
+    guest_redirect("/housing")
 
-	context.no_cache = 1
-	context.has_housing_role = bool(HOUSING_ROLES & set(frappe.get_roles()))
-	if context.has_housing_role:
-		context.csrf_token = get_csrf_token()
-		# [#t0tojh]
-		apply_portal_appearance(context)
-	return context
+    context.no_cache = 1
+    context.has_housing_role = bool(HOUSING_ROLES & set(frappe.get_roles()))
+    if context.has_housing_role:
+        context.csrf_token = get_csrf_token()
+        # [#t0tojh]
+        apply_portal_appearance(context)
+    return context

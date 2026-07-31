@@ -35,12 +35,12 @@ from frappe.utils import flt
 
 # [#26k8q4]
 VALID_STATUSES = (
-	"Open",
-	"Under Investigation",
-	"Evidence Required",
-	"Resolved",
-	"Rejected",
-	"Closed",
+    "Open",
+    "Under Investigation",
+    "Evidence Required",
+    "Resolved",
+    "Rejected",
+    "Closed",
 )
 
 # [#i41sti]
@@ -48,48 +48,48 @@ _CLOSING_STATUSES = {"Resolved", "Closed"}
 
 
 class FuelExceptionCase(Document):
-	def before_insert(self):
-		self._default_reporter()
+    def before_insert(self):
+        self._default_reporter()
 
-	def validate(self):
-		self._default_reporter()
-		# [#97d5be]
-		if flt(self.amount_recovered) < 0:
-			frappe.throw(_("Amount recovered cannot be negative."))
-		if self.status and self.status not in VALID_STATUSES:
-			frappe.throw(_("Invalid status: {0}").format(self.status))
-		self._guard_initial_status()
-		self._enforce_closure_controls()
+    def validate(self):
+        self._default_reporter()
+        # [#97d5be]
+        if flt(self.amount_recovered) < 0:
+            frappe.throw(_("Amount recovered cannot be negative."))
+        if self.status and self.status not in VALID_STATUSES:
+            frappe.throw(_("Invalid status: {0}").format(self.status))
+        self._guard_initial_status()
+        self._enforce_closure_controls()
 
-	# [#hk8b8a]
+    # [#hk8b8a]
 
-	# [#m88md8]
+    # [#m88md8]
 
-	def _default_reporter(self):
-		"""Default the raiser to the current session user when blank."""
-		if not self.reported_by:
-			self.reported_by = frappe.session.user
+    def _default_reporter(self):
+        """Default the raiser to the current session user when blank."""
+        if not self.reported_by:
+            self.reported_by = frappe.session.user
 
-	def _guard_initial_status(self):
-		"""A new case must be created at the initial state (Open). Later states are
+    def _guard_initial_status(self):
+        """A new case must be created at the initial state (Open). Later states are
 		reached only through the Fuel Exception Case Workflow, which the desk
 		drives — this closes the insert-bypass the workflow itself cannot cover (a
 		brand-new document inserted directly at a later/terminal status)."""
-		if self.is_new() and self.status and self.status != "Open":
-			frappe.throw(
-				_("A Fuel Exception Case must be created with status Open; {0} is reached through the workflow.").format(
-					_(self.status)
-				)
-			)
+        if self.is_new() and self.status and self.status != "Open":
+            frappe.throw(
+                _("A Fuel Exception Case must be created with status Open; {0} is reached through the workflow.").format(
+                    _(self.status)
+                )
+            )
 
-	def _enforce_closure_controls(self):
-		"""Require evidence before resolution and enforce non-raiser resolution (segregation of duties)."""
-		if self.status not in _CLOSING_STATUSES:
-			return
+    def _enforce_closure_controls(self):
+        """Require evidence before resolution and enforce non-raiser resolution (segregation of duties)."""
+        if self.status not in _CLOSING_STATUSES:
+            return
 
-		if not (self.evidence or self.evidence_notes):
-			frappe.throw(_("Evidence required before resolving"))
+        if not (self.evidence or self.evidence_notes):
+            frappe.throw(_("Evidence required before resolving"))
 
-		self.closed_by = frappe.session.user
-		if self.closed_by == self.reported_by:
-			frappe.throw(_("The closer must differ from the person who raised the case."))
+        self.closed_by = frappe.session.user
+        if self.closed_by == self.reported_by:
+            frappe.throw(_("The closer must differ from the person who raised the case."))

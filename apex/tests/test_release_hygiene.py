@@ -958,24 +958,10 @@ class TestPrintFormatGuards(unittest.TestCase):
             )
 
 
-TRACKED_MIXED_INDENT = frozenset(
-    {
-        "apex/salis/api/driver_portal/__init__.py",
-        "apex/salis/api/driver_portal/attendance.py",
-        "apex/salis/api/driver_portal/boarding.py",
-        "apex/salis/api/driver_portal/clearance.py",
-        "apex/salis/api/driver_portal/execution.py",
-        "apex/salis/api/driver_portal/fuel.py",
-        "apex/salis/api/driver_portal/home.py",
-        "apex/salis/api/driver_portal/notifications.py",
-        "apex/salis/api/driver_portal/profile.py",
-        "apex/salis/api/driver_portal/support.py",
-        "apex/salis/api/driver_portal/test_driver_portal.py",
-        "apex/salis/api/driver_portal/trips.py",
-        "apex/salis/api/web_push.py",
-        "apex/tests/test_b5_role_workspaces.py",
-    }
-)
+# Empty since the repo went all-spaces: the 14 files that used to mix were the
+# tab-indented ones, and reindenting them left nothing to exempt. Kept as the
+# mechanism rather than deleted so a future mixed file has a landing place.
+TRACKED_MIXED_INDENT = frozenset()
 
 _NOT_INDENTATION = frozenset(
     {tokenize.INDENT, tokenize.DEDENT, tokenize.ENDMARKER, tokenize.ENCODING}
@@ -985,24 +971,24 @@ _NOT_INDENTATION = frozenset(
 class TestIndentationConsistency(unittest.TestCase):
     """A file must indent with tabs or with spaces, never both.
 
-    The repo runs two styles on purpose: 81 files are tab-indented in the
-    Frappe house style and 695 are four-space, and .editorconfig still declares
-    tab. Neither is wrong, so this guard never judges which one a file picked —
-    only that it picked one. A file that runs both renders at a different width
-    in every reader whose tab stop is not four, and the mixed block is invisible
-    in review because the characters look identical.
+    The repo settled on spaces: .editorconfig declares indent_style = space and
+    all 876 indented .py files follow it. This guard still never judges which
+    style a file picked — only that it picked one — because the failure it
+    catches is mixing, not tabs. A file that runs both renders at a different
+    width in every reader whose tab stop is not four, and the mixed block is
+    invisible in review because the characters look identical.
 
-    Why this is a test and not a ruff rule: ruff's tab rule (W191) is a
-    style vote, not a consistency check — it fires on all 5867 tab-indented
-    lines across 97 files, which is a red nobody would keep. E101
-    (mixed-spaces-and-tabs) only catches a single line that mixes both
-    characters in one indent, so it scored zero on the file that provoked this
-    guard even while that file ran 42 tab lines against 589 space ones. Neither
-    rule expresses "one style per file", so the check lives here.
+    Why this is a test and not a ruff rule: ruff's tab rule (W191) is a style
+    vote, not a consistency check, and E101 (mixed-spaces-and-tabs) only catches
+    a single line that mixes both characters in one indent — it scored zero on
+    the file that provoked this guard even while that file ran 42 tab lines
+    against 589 space ones. Neither rule expresses "one style per file", so the
+    check lives here.
 
-    TRACKED_MIXED_INDENT freezes the files that already mix, so this lands at
-    zero new failures. It is not a permanent exemption: the stale-entry test
-    fails once an entry is cleaned up, so the list can only shrink.
+    Only the leading whitespace of a physical line that starts a logical line is
+    judged, so the 800 tab characters still sitting inside docstring bodies are
+    correctly ignored: they are string data, and rewriting them would change
+    what the code evaluates to.
     """
 
     @staticmethod

@@ -17,13 +17,13 @@ import frappe
 
 
 def before_tests():
-	from erpnext.setup.utils import before_tests as erpnext_before_tests
+    from erpnext.setup.utils import before_tests as erpnext_before_tests
 
-	erpnext_before_tests()
-	frappe.db.commit()
+    erpnext_before_tests()
+    frappe.db.commit()
 
-	# [#9ov3i5]
-	from apex.tests import factories
+    # [#9ov3i5]
+    from apex.tests import factories
 
-	factories.snapshot_building_baseline()
+    factories.snapshot_building_baseline()
 

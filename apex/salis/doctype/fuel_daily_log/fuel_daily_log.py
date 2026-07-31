@@ -16,23 +16,23 @@ from apex.salis.utils import add_timeline_note
 
 
 class FuelDailyLog(Document):
-	def validate(self):
-		if self.litres is not None and self.litres < 0:
-			frappe.throw(_("Litres cannot be negative."))
-		if self.odometer is not None and self.odometer < 0:
-			frappe.throw(_("Odometer cannot be negative."))
+    def validate(self):
+        if self.litres is not None and self.litres < 0:
+            frappe.throw(_("Litres cannot be negative."))
+        if self.odometer is not None and self.odometer < 0:
+            frappe.throw(_("Odometer cannot be negative."))
 
-	def after_insert(self):
-		add_timeline_note(
-			"Salis Vehicle",
-			self.vehicle,
-			_("Fuel daily log {0}: {1} L, {2} SAR.").format(
-				self.name, self.litres, self.amount
-			),
-		)
+    def after_insert(self):
+        add_timeline_note(
+            "Salis Vehicle",
+            self.vehicle,
+            _("Fuel daily log {0}: {1} L, {2} SAR.").format(
+                self.name, self.litres, self.amount
+            ),
+        )
 
-	def on_trash(self):
-		# [#dp8lfk]
-		from apex.salis.fuel_engine import reverse_fuel_ledger
+    def on_trash(self):
+        # [#dp8lfk]
+        from apex.salis.fuel_engine import reverse_fuel_ledger
 
-		reverse_fuel_ledger("Fuel Daily Log", self.name)
+        reverse_fuel_ledger("Fuel Daily Log", self.name)

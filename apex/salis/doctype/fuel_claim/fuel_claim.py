@@ -35,63 +35,63 @@ from apex.salis.utils import set_financial_defaults
 
 # [#6n814k]
 VALID_STATUSES = (
-	"Draft",
-	"Submitted to Movement",
-	"Reconciled",
-	"Approved",
-	"Disputed",
-	"Closed",
+    "Draft",
+    "Submitted to Movement",
+    "Reconciled",
+    "Approved",
+    "Disputed",
+    "Closed",
 )
 
 
 class FuelClaim(Document):
-	def before_insert(self):
-		# [#lmqimg]
-		if not self.requested_by:
-			self.requested_by = frappe.session.user
+    def before_insert(self):
+        # [#lmqimg]
+        if not self.requested_by:
+            self.requested_by = frappe.session.user
 
-	def validate(self):
-		if not self.requested_by:
-			self.requested_by = frappe.session.user
-		if self.status and self.status not in VALID_STATUSES:
-			frappe.throw(_("Invalid status: {0}").format(self.status))
-		if (self.claimed_litres or 0) <= 0:
-			frappe.throw(_("Claimed Litres must be greater than zero."))
-		# [#a05dfs]
-		if (self.claimed_amount or 0) < 0:
-			frappe.throw(_("Claimed Amount cannot be negative."))
-		set_financial_defaults(self)
-		self._compute_consumption()
-		self._guard_initial_status()
+    def validate(self):
+        if not self.requested_by:
+            self.requested_by = frappe.session.user
+        if self.status and self.status not in VALID_STATUSES:
+            frappe.throw(_("Invalid status: {0}").format(self.status))
+        if (self.claimed_litres or 0) <= 0:
+            frappe.throw(_("Claimed Litres must be greater than zero."))
+        # [#a05dfs]
+        if (self.claimed_amount or 0) < 0:
+            frappe.throw(_("Claimed Amount cannot be negative."))
+        set_financial_defaults(self)
+        self._compute_consumption()
+        self._guard_initial_status()
 
-	# [#a4g9yp]
+    # [#a4g9yp]
 
-	# [#m88md8]
+    # [#m88md8]
 
-	def _compute_consumption(self):
-		"""Derive consumed litres from the Fuel Consumption Ledger and the
+    def _compute_consumption(self):
+        """Derive consumed litres from the Fuel Consumption Ledger and the
 		claimed-vs-consumed variance. Consumed litres is the sum of ledger
 		litres for this claim's vehicle and period."""
-		consumed = 0.0
-		if self.vehicle and self.period_month:
-			rows = frappe.get_all(
-				"Fuel Consumption Ledger",
-				filters={"vehicle": self.vehicle, "period_month": self.period_month},
-				fields=["litres"],
-			)
-			consumed = sum((row.litres or 0) for row in rows)
+        consumed = 0.0
+        if self.vehicle and self.period_month:
+            rows = frappe.get_all(
+                "Fuel Consumption Ledger",
+                filters={"vehicle": self.vehicle, "period_month": self.period_month},
+                fields=["litres"],
+            )
+            consumed = sum((row.litres or 0) for row in rows)
 
-		self.consumed_litres = consumed
-		self.variance_litres = (self.claimed_litres or 0) - consumed
+        self.consumed_litres = consumed
+        self.variance_litres = (self.claimed_litres or 0) - consumed
 
-	def _guard_initial_status(self):
-		"""A new claim must be created at the initial state (Draft). Later states
+    def _guard_initial_status(self):
+        """A new claim must be created at the initial state (Draft). Later states
 		are reached only through the Fuel Claim Workflow, which the desk drives —
 		this closes the insert-bypass the workflow itself cannot cover (a brand-new
 		document inserted directly at a later/terminal status)."""
-		if self.is_new() and self.status and self.status != "Draft":
-			frappe.throw(
-				_("A Fuel Claim must be created with status Draft; {0} is reached through the workflow.").format(
-					_(self.status)
-				)
-			)
+        if self.is_new() and self.status and self.status != "Draft":
+            frappe.throw(
+                _("A Fuel Claim must be created with status Draft; {0} is reached through the workflow.").format(
+                    _(self.status)
+                )
+            )

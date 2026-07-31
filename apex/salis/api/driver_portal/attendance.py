@@ -13,74 +13,74 @@ from apex.salis.api.driver_portal import (
 
 
 def _attendance_state(doc):
-	"""Project a Driver Attendance doc to the portal's state shape.
+    """Project a Driver Attendance doc to the portal's state shape.
 
 	The single source of truth for what the SPA shows — identical in shape to
 	``get_today_attendance``'s return — so a check-in/out response updates the page
 	reactively without a reload. Time fields are stringified for JSON."""
-	check_in = frappe.utils.cstr(doc.check_in) if doc.check_in else None
-	check_out = frappe.utils.cstr(doc.check_out) if doc.check_out else None
-	return {
-		"name": doc.name,
-		"exists": True,
-		"checked_in": bool(check_in),
-		"checked_out": bool(check_out),
-		"status": doc.status,
-		"check_in": check_in,
-		"check_out": check_out,
-		"worked_hours": doc.worked_hours,
-	}
+    check_in = frappe.utils.cstr(doc.check_in) if doc.check_in else None
+    check_out = frappe.utils.cstr(doc.check_out) if doc.check_out else None
+    return {
+        "name": doc.name,
+        "exists": True,
+        "checked_in": bool(check_in),
+        "checked_out": bool(check_out),
+        "status": doc.status,
+        "check_in": check_in,
+        "check_out": check_out,
+        "worked_hours": doc.worked_hours,
+    }
 
 
 
 def _today_attendance(driver):
-	name = frappe.db.get_value(
-		"Driver Attendance",
-		{"driver": driver, "attendance_date": frappe.utils.today(), "docstatus": ["<", 2]},
-		"name",
-	)
-	if name:
-		return frappe.get_doc("Driver Attendance", name)
-	return frappe.get_doc(
-		{"doctype": "Driver Attendance", "driver": driver,
-		 "attendance_date": frappe.utils.today(), "status": "Present"}
-	)
+    name = frappe.db.get_value(
+        "Driver Attendance",
+        {"driver": driver, "attendance_date": frappe.utils.today(), "docstatus": ["<", 2]},
+        "name",
+    )
+    if name:
+        return frappe.get_doc("Driver Attendance", name)
+    return frappe.get_doc(
+        {"doctype": "Driver Attendance", "driver": driver,
+         "attendance_date": frappe.utils.today(), "status": "Present"}
+    )
 
 
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def get_today_attendance():
-	"""Today's attendance state for the current driver (read).
+    """Today's attendance state for the current driver (read).
 
 	Identity-scoped: the driver is resolved credential-first, never client-supplied,
 	so this can only ever return the caller's own record. Read-only, no commit.
 	The payload shape and flags are documented on ``_today_attendance_state``."""
-	_require_enabled()
-	driver = _resolve_driver()
-	return _today_attendance_state(driver)
+    _require_enabled()
+    driver = _resolve_driver()
+    return _today_attendance_state(driver)
 
 
 
 def _month_bounds(month=None):
-	"""(first_day, last_day) for ``month`` (``YYYY-MM``), defaulting to this month.
+    """(first_day, last_day) for ``month`` (``YYYY-MM``), defaulting to this month.
 
 	An unparseable/blank value falls back to the current month rather than raising,
 	so a malformed client param never 500s the history view."""
-	anchor = frappe.utils.getdate()
-	if month:
-		try:
-			anchor = frappe.utils.getdate(f"{month}-01")
-		except Exception:
-			pass
-	return frappe.utils.get_first_day(anchor), frappe.utils.get_last_day(anchor)
+    anchor = frappe.utils.getdate()
+    if month:
+        try:
+            anchor = frappe.utils.getdate(f"{month}-01")
+        except Exception:
+            pass
+    return frappe.utils.get_first_day(anchor), frappe.utils.get_last_day(anchor)
 
 
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def my_attendance(month=None):
-	"""The current driver's OWN attendance rows for a month (read).
+    """The current driver's OWN attendance rows for a month (read).
 
 	Identity-scoped: the driver is resolved credential-first, never client-supplied,
 	so this can only ever return the caller's own records — it cannot read another
@@ -90,29 +90,29 @@ def my_attendance(month=None):
 	stringified check-in/out times (newest day first) — the same display vocabulary
 	the today card uses, so the SPA renders the month strip with no extra mapping.
 	Read-only, no commit."""
-	_require_enabled()
-	driver = _resolve_driver()
-	start, end = _month_bounds(month)
-	rows = frappe.get_all(
-		"Driver Attendance",
-		filters={
-			"driver": driver,
-			"attendance_date": ["between", [start, end]],
-			"docstatus": ["<", 2],
-		},
-		fields=["name", "attendance_date", "status", "check_in", "check_out", "worked_hours"],
-		order_by="attendance_date desc",
-	)
-	for r in rows:
-		r["attendance_date"] = frappe.utils.cstr(r["attendance_date"])
-		r["check_in"] = frappe.utils.cstr(r["check_in"]) if r.get("check_in") else None
-		r["check_out"] = frappe.utils.cstr(r["check_out"]) if r.get("check_out") else None
-	return {"month": frappe.utils.cstr(start)[:7], "rows": rows}
+    _require_enabled()
+    driver = _resolve_driver()
+    start, end = _month_bounds(month)
+    rows = frappe.get_all(
+        "Driver Attendance",
+        filters={
+            "driver": driver,
+            "attendance_date": ["between", [start, end]],
+            "docstatus": ["<", 2],
+        },
+        fields=["name", "attendance_date", "status", "check_in", "check_out", "worked_hours"],
+        order_by="attendance_date desc",
+    )
+    for r in rows:
+        r["attendance_date"] = frappe.utils.cstr(r["attendance_date"])
+        r["check_in"] = frappe.utils.cstr(r["check_in"]) if r.get("check_in") else None
+        r["check_out"] = frappe.utils.cstr(r["check_out"]) if r.get("check_out") else None
+    return {"month": frappe.utils.cstr(start)[:7], "rows": rows}
 
 
 
 def _persist_attendance(doc):
-	"""Persist a get-or-created Driver Attendance as a SUBMITTED presence record.
+    """Persist a get-or-created Driver Attendance as a SUBMITTED presence record.
 
 	A portal check-in/out is authoritative, so the record must reach docstatus 1 —
 	that is what ``missing_attendance_watch`` and the Supervisor-Delay reconciler key
@@ -130,39 +130,39 @@ def _persist_attendance(doc):
 	  are ``allow_on_submit`` on the DocType, so ``save`` persists them with no
 	  amendment.
 	"""
-	doc.flags.ignore_permissions = True  # audit-ok — driver resolved credential-first
-	if doc.docstatus == 0:
-		doc.insert()
-		doc.submit()
-	else:
-		doc.save()
+    doc.flags.ignore_permissions = True  # audit-ok — driver resolved credential-first
+    if doc.docstatus == 0:
+        doc.insert()
+        doc.submit()
+    else:
+        doc.save()
 
 
 def _attach_attendance_photo(doc, photo, photo_filename):
-	"""Save one validated private File and reference it from the owned attendance."""
-	from apex.salis.api.driver_portal.images import save_driver_image
+    """Save one validated private File and reference it from the owned attendance."""
+    from apex.salis.api.driver_portal.images import save_driver_image
 
-	file_doc = save_driver_image(
-		photo,
-		photo_filename,
-		doc.doctype,
-		doc.name,
-	)
-	if not file_doc:
-		return
-	doc.append(
-		"images",
-		{"image": file_doc.file_url, "captured_at": frappe.utils.now_datetime()},
-	)
-	doc.flags.ignore_permissions = True  # audit-ok — driver resolved from credential
-	doc.save()
+    file_doc = save_driver_image(
+        photo,
+        photo_filename,
+        doc.doctype,
+        doc.name,
+    )
+    if not file_doc:
+        return
+    doc.append(
+        "images",
+        {"image": file_doc.file_url, "captured_at": frappe.utils.now_datetime()},
+    )
+    doc.flags.ignore_permissions = True  # audit-ok — driver resolved from credential
+    doc.save()
 
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def driver_check_in(photo=None, photo_filename=None):
-	"""Record the driver's presence for today and SUBMIT it.
+    """Record the driver's presence for today and SUBMIT it.
 
 	A portal check-in is an authoritative record of presence, so the Driver
 	Attendance is submitted (docstatus 1) — not left in draft. This is what the
@@ -177,28 +177,28 @@ def driver_check_in(photo=None, photo_filename=None):
 	identity-scoped resolution here); ``ignore_permissions`` keeps the write
 	server-authoritative regardless.
 	"""
-	_require_enabled()
-	driver = _resolve_driver()
-	doc = _today_attendance(driver)
-	doc.check_in = frappe.utils.nowtime()
-	# [#9ywqrd]
-	doc.check_out = None
-	doc.worked_hours = 0
-	for _field in ("check_out", "worked_hours"):
-		if _field not in doc.dont_update_if_missing:
-			doc.dont_update_if_missing.append(_field)
-	if not doc.status:
-		doc.status = "Present"
-	_persist_attendance(doc)
-	_attach_attendance_photo(doc, photo, photo_filename)
-	return _attendance_state(doc)
+    _require_enabled()
+    driver = _resolve_driver()
+    doc = _today_attendance(driver)
+    doc.check_in = frappe.utils.nowtime()
+    # [#9ywqrd]
+    doc.check_out = None
+    doc.worked_hours = 0
+    for _field in ("check_out", "worked_hours"):
+        if _field not in doc.dont_update_if_missing:
+            doc.dont_update_if_missing.append(_field)
+    if not doc.status:
+        doc.status = "Present"
+    _persist_attendance(doc)
+    _attach_attendance_photo(doc, photo, photo_filename)
+    return _attendance_state(doc)
 
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def driver_check_out(photo=None, photo_filename=None):
-	"""Stamp check-out on today's attendance.
+    """Stamp check-out on today's attendance.
 
 	Check-in already submitted the record, so check-out updates a submitted Driver
 	Attendance — ``check_out``, ``worked_hours`` and the ``images`` table are
@@ -207,32 +207,32 @@ def driver_check_out(photo=None, photo_filename=None):
 	get-or-create returns a fresh draft, which is inserted and submitted here so the
 	day still counts as recorded presence.
 	"""
-	_require_enabled()
-	driver = _resolve_driver()
-	doc = _today_attendance(driver)
-	now = frappe.utils.nowtime()
-	# [#p0le20]
-	if doc.check_in and not _is_after(doc.attendance_date, doc.check_in, now):
-		frappe.throw(
-			_("You can't check out at or before your check-in time. Try again in a moment.")
-		)
-	# [#4rq5ag]
-	if not doc.check_in:
-		doc.check_in = None
-		if "check_in" not in doc.dont_update_if_missing:
-			doc.dont_update_if_missing.append("check_in")
-	doc.check_out = now
-	if not doc.status:
-		doc.status = "Present"
-	_persist_attendance(doc)
-	_attach_attendance_photo(doc, photo, photo_filename)
-	return _attendance_state(doc)
+    _require_enabled()
+    driver = _resolve_driver()
+    doc = _today_attendance(driver)
+    now = frappe.utils.nowtime()
+    # [#p0le20]
+    if doc.check_in and not _is_after(doc.attendance_date, doc.check_in, now):
+        frappe.throw(
+            _("You can't check out at or before your check-in time. Try again in a moment.")
+        )
+    # [#4rq5ag]
+    if not doc.check_in:
+        doc.check_in = None
+        if "check_in" not in doc.dont_update_if_missing:
+            doc.dont_update_if_missing.append("check_in")
+    doc.check_out = now
+    if not doc.status:
+        doc.status = "Present"
+    _persist_attendance(doc)
+    _attach_attendance_photo(doc, photo, photo_filename)
+    return _attendance_state(doc)
 
 
 
 def _is_after(attendance_date, earlier_time, later_time):
-	"""True when ``later_time`` is strictly after ``earlier_time`` (both Frappe Time
+    """True when ``later_time`` is strictly after ``earlier_time`` (both Frappe Time
 	values on the same ``attendance_date``). Used to reject a zero-length shift."""
-	earlier = frappe.utils.get_datetime(f"{attendance_date} {earlier_time}")
-	later = frappe.utils.get_datetime(f"{attendance_date} {later_time}")
-	return frappe.utils.time_diff_in_seconds(later, earlier) > 0
+    earlier = frappe.utils.get_datetime(f"{attendance_date} {earlier_time}")
+    later = frappe.utils.get_datetime(f"{attendance_date} {later_time}")
+    return frappe.utils.time_diff_in_seconds(later, earlier) > 0

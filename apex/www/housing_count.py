@@ -10,5 +10,5 @@ comment, and www/test_www_controller_has_template.py for the guard that holds it
 import frappe
 
 def get_context(context):
-	frappe.local.flags.redirect_location = "/housing#/count"
-	raise frappe.Redirect
+    frappe.local.flags.redirect_location = "/housing#/count"
+    raise frappe.Redirect

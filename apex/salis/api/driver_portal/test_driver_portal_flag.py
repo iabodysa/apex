@@ -17,61 +17,61 @@ from apex.tests.factories import make_test_driver as _ensure_test_driver
 
 
 class TestDriverPortalDisabledFlag(FrappeTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		frappe.set_user("Administrator")
-		cls.driver = _ensure_test_driver()
-		cls.user = frappe.db.get_value(
-			"Employee", frappe.db.get_value("Salis Driver", cls.driver, "employee"), "user_id"
-		)
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        cls.driver = _ensure_test_driver()
+        cls.user = frappe.db.get_value(
+            "Employee", frappe.db.get_value("Salis Driver", cls.driver, "employee"), "user_id"
+        )
 
-	def _disable_portal(self):
-		frappe.set_user("Administrator")
-		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 0)
+    def _disable_portal(self):
+        frappe.set_user("Administrator")
+        frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 0)
 
-	def tearDown(self):
-		# [#836nbx]
-		frappe.set_user("Administrator")
-		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
+    def tearDown(self):
+        # [#836nbx]
+        frappe.set_user("Administrator")
+        frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
 
-	def test_context_reports_disabled_for_linked_driver(self):
-		"""With the flag off the bootstrap returns a disabled, unlinked payload —
+    def test_context_reports_disabled_for_linked_driver(self):
+        """With the flag off the bootstrap returns a disabled, unlinked payload —
 		``enabled`` is falsy and no driver profile is exposed — even for a user who
 		IS linked to a Salis Driver. The SPA renders the 'portal off' state, never a
 		live cockpit."""
-		self._disable_portal()
-		frappe.set_user(self.user)
-		ctx = driver_portal.get_driver_context()
-		self.assertFalse(ctx["enabled"], "Disabled flag must yield enabled=False.")
-		self.assertFalse(ctx["linked"])
-		self.assertIsNone(ctx["driver"])
-		frappe.set_user("Administrator")
+        self._disable_portal()
+        frappe.set_user(self.user)
+        ctx = driver_portal.get_driver_context()
+        self.assertFalse(ctx["enabled"], "Disabled flag must yield enabled=False.")
+        self.assertFalse(ctx["linked"])
+        self.assertIsNone(ctx["driver"])
+        frappe.set_user("Administrator")
 
-	def test_check_in_blocked_when_disabled(self):
-		"""The check-in WRITE endpoint must refuse when the portal is off, even for a
+    def test_check_in_blocked_when_disabled(self):
+        """The check-in WRITE endpoint must refuse when the portal is off, even for a
 		resolved driver — no Driver Attendance may be created behind a closed portal."""
-		self._disable_portal()
-		frappe.set_user(self.user)
-		with self.assertRaises(frappe.PermissionError):
-			driver_portal.driver_check_in()
-		frappe.set_user("Administrator")
+        self._disable_portal()
+        frappe.set_user(self.user)
+        with self.assertRaises(frappe.PermissionError):
+            driver_portal.driver_check_in()
+        frappe.set_user("Administrator")
 
-	def test_fuel_request_blocked_when_disabled(self):
-		"""The fuel-request WRITE endpoint must refuse when the portal is off — a
+    def test_fuel_request_blocked_when_disabled(self):
+        """The fuel-request WRITE endpoint must refuse when the portal is off — a
 		disabled portal cannot raise a Fuel Request for a linked driver."""
-		self._disable_portal()
-		frappe.set_user(self.user)
-		with self.assertRaises(frappe.PermissionError):
-			driver_portal.submit_fuel_request(litres=25)
-		frappe.set_user("Administrator")
+        self._disable_portal()
+        frappe.set_user(self.user)
+        with self.assertRaises(frappe.PermissionError):
+            driver_portal.submit_fuel_request(litres=25)
+        frappe.set_user("Administrator")
 
-	def test_reads_blocked_when_disabled(self):
-		"""Read endpoints guard on the same flag, so a disabled portal exposes no
+    def test_reads_blocked_when_disabled(self):
+        """Read endpoints guard on the same flag, so a disabled portal exposes no
 		trip or ticket data either."""
-		self._disable_portal()
-		frappe.set_user(self.user)
-		for call in (driver_portal.my_trips_today, driver_portal.my_support_tickets):
-			with self.assertRaises(frappe.PermissionError):
-				call()
-		frappe.set_user("Administrator")
+        self._disable_portal()
+        frappe.set_user(self.user)
+        for call in (driver_portal.my_trips_today, driver_portal.my_support_tickets):
+            with self.assertRaises(frappe.PermissionError):
+                call()
+        frappe.set_user("Administrator")
