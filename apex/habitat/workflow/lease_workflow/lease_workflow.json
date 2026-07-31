@@ -1,7 +1,7 @@
 {
  "doctype": "Workflow",
- "name": "Accommodation Lease Workflow",
- "workflow_name": "Accommodation Lease Workflow",
+ "name": "Lease Workflow",
+ "workflow_name": "Lease Workflow",
  "document_type": "Lease",
  "workflow_state_field": "status",
  "is_active": 1,

@@ -229,7 +229,7 @@ class TestCustodyDamageAssessmentWorkflow(_WorkflowSoDMixin, FrappeTestCase):
 
 class TestAccommodationLeaseWorkflow(_WorkflowSoDMixin, FrappeTestCase):
     DOCTYPE = "Lease"
-    WORKFLOW = "Accommodation Lease Workflow"
+    WORKFLOW = "Lease Workflow"
     # [#8zk3af]
     APPROVER_ROLE = "Finance Manager"
 

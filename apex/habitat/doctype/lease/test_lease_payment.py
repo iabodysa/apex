@@ -24,7 +24,7 @@ Payment Request default included — quietly opened a Payment Entry anyway. Thos
 change the configuration and assert the outcome changes with it.
 
 Every submitted lease here is approved through ``apply_workflow``. Lease is governed by
-the Accommodation Lease Workflow, so a bare ``doc.submit()`` is refused by
+the Lease Workflow, so a bare ``doc.submit()`` is refused by
 ``apex_core.utils.workflow_guard`` — and reaching docstatus 1 any other way would build
 a fixture in a state no approver can actually produce.
 """

@@ -93,7 +93,7 @@ Accommodation Custody Item,بند عهدة السكن
 Accommodation Custody Return Item,بند إرجاع عهدة السكن
 Accommodation Engine,محرّك السكن
 Accommodation Go-Live,إطلاق تشغيل السكن
-Accommodation Leases by Status,عقود السكن حسب الحالة
+Leases by Status,عقود السكن حسب الحالة
 Accommodation Ledger,دفتر تكاليف السكن
 Accommodation Ledger Summary,ملخص دفتر تكاليف السكن
 Accommodation Manager Dashboard,لوحة معلومات مدير السكن
@@ -135,7 +135,7 @@ Activated By,فُعِّل بواسطة
 Activation,التفعيل
 Activation Date,تاريخ التفعيل
 Active,نشط
-Active Accommodation Assignments,التسكينات النشطة
+Active Housing Assignments,التسكينات النشطة
 Active CCTV Cameras,كاميرات المراقبة المفعّلة
 Active Contracts,العقود النشطة
 Active Drivers,السائقون النشطون
@@ -965,7 +965,7 @@ Counts must be a list.,يجب أن تكون الأعداد قائمة.
 Counts must be valid JSON.,يجب أن تكون الأعداد بصيغة JSON صحيحة.
 Covered Buildings,المباني المشمولة
 Create,إنشاء
-Create Accommodation Assignment,إنشاء تسكين
+Create Housing Assignment,إنشاء تسكين
 Create Custody Article,إنشاء مادة عهدة
 Create Custody Damage Assessment,إنشاء تقييم ضرر عهدة
 Create Custody Return,إنشاء إرجاع عهدة
@@ -2589,7 +2589,7 @@ Payment schedule will be generated automatically on first save.,سيتم تول�
 Payment {0} created.,أُنشئت الدفعة {0}.
 Payroll Date,تاريخ مسير الرواتب
 Pending,قيد الانتظار
-Pending Accommodation Checkouts,مغادرات السكن المعلقة
+Pending Housing Checkouts,مغادرات السكن المعلقة
 Pending Approval,بانتظار الاعتماد
 Pending Approvals,الموافقات المعلقة
 Pending Exits,بانتظار نقاط الخروج
@@ -2881,7 +2881,7 @@ Record a Vehicle Incident,سجّل بلاغ مركبة
 "Record a safety round as a draft, then send it to an authorized submitter for review and submission.",سجّل جولة سلامة كمسودة، ثم أرسلها إلى مخوّل بالتقديم للمراجعة والتقديم.
 "Record a vehicle handover as a draft, then send it to an authorized submitter for review and submission.",سجّل تسليم مركبة كمسودة، ثم أرسلها إلى مخوّل بالتقديم للمراجعة والتقديم.
 "Record actual fuelling and spend, then reconcile it against the quota and request.",سجّل التزويد والإنفاق الفعلي، ثم طابقه مع الحصة والطلب.
-Record an Accommodation Assignment,تسجيل تسكين
+Record a Housing Assignment,تسجيل تسكين
 Record damage and its cost for returned articles.,سجّل الضرر وتكلفته للمواد المُرجعة.
 Record returned articles against their source Custody Issue.,سجّل المواد المُرجعة مقابل سند صرف العهدة الأصلي.
 Record the Odometer,سجّل قراءة العداد

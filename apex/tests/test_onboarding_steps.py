@@ -35,7 +35,7 @@ DAILY_FLOW_CONTRACT = (
         "Resident Supervisor",
         "Housing",
         "Accommodation Go-Live",
-        "Record an Accommodation Assignment",
+        "Record a Housing Assignment",
         "Housing Assignment",
     ),
     ("Resident Supervisor", "Custody", "Custody Go-Live", "Issue Custody", "Custody Issue"),

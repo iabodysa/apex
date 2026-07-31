@@ -99,6 +99,13 @@ apex.patches.v2_0.rename_fleet_workspace_to_title_case
 # otherwise leave the retired key orphaned in the print dropdown beside the new one.
 apex.patches.v2_0.rename_checkout_clearance_print_format
 
+# STILL-REQUIRED (ONE-TIME): MUST stay in [pre_model_sync] — renames the last five stored
+# records still keyed on a retired DocType name (two Number Cards, a Dashboard Chart, an
+# Onboarding Step and a Workflow). The first four are re-imported by name on every migrate,
+# so renaming after the sync would leave the retired key orphaned beside the new one; the
+# Workflow is never imported at all, so nothing but this patch can move its row.
+apex.patches.v2_0.rename_retired_habitat_record_names
+
 [post_model_sync]
 # STILL-REQUIRED: only-if-missing Web Form route safeguard for a v15 upgrade
 # (GitHub #97). Nothing in source proves every deployed site is already v15-correct.

@@ -1,7 +1,7 @@
 {
  "doctype": "Number Card",
- "name": "Active Accommodation Assignments",
- "label": "Active Accommodation Assignments",
+ "name": "Active Housing Assignments",
+ "label": "Active Housing Assignments",
  "document_type": "Housing Assignment",
  "function": "Count",
  "is_public": 1,

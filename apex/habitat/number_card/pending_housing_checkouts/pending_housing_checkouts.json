@@ -1,7 +1,7 @@
 {
  "doctype": "Number Card",
- "name": "Pending Accommodation Checkouts",
- "label": "Pending Accommodation Checkouts",
+ "name": "Pending Housing Checkouts",
+ "label": "Pending Housing Checkouts",
  "document_type": "Housing Checkout",
  "function": "Count",
  "is_public": 1,
