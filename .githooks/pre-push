@@ -9,8 +9,14 @@
 # were installed on this clone - and by push time such a commit is already history.
 # So this hook re-runs BOTH of them over every outgoing commit. It re-runs them, it
 # does not reimplement them: the attribution rule and the address allowlist are both
-# declared once, in scripts/check_commit_metadata.py, which those two hooks and the CI
-# step all invoke. That is what keeps this gate honest when either rule changes.
+# declared once, in .claude/tools/scripts/check_commit_metadata.py, which those two hooks
+# invoke. That is what keeps this gate honest when either rule changes.
+#
+# The scanners and the metadata gate are the maintainer's own tooling and are NOT
+# published with the app, so no CI lane runs them any more. This hook is the last and
+# only gate before anything becomes public, which is why every branch below refuses
+# rather than warns: a missing runner now means the guards did not run, and a push that
+# proceeds on that basis is indistinguishable from a clean one.
 set -eu
 
 hookdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
@@ -59,15 +65,21 @@ scan_range() {
 	done
 	[ "$failed" -eq 0 ] || return 1
 
-	# The scanners live behind the shared runner so this hook and the CI lanes cannot
-	# come to run different flags or thresholds. A clone that has the hooks but not
-	# the scripts is not this repo; say so rather than reporting an unscanned pass.
-	if [ -x "$root/scripts/run_guards.sh" ]; then
-		"$root/scripts/run_guards.sh" range "$1"
-		"$root/scripts/run_guards.sh" tree
-	else
-		echo "pre-push: WARNING - scripts/run_guards.sh is absent, content and secret guards DID NOT RUN" >&2
+	# The scanners live behind the shared runner. This used to degrade to a WARNING when
+	# the runner was absent, and the push went through: the one branch where nothing was
+	# scanned printed a line to stderr and then read, to anyone glancing at the output,
+	# exactly like a clean scan. Moving the runner out of the published tree turned that
+	# rare branch into the DEFAULT for every clone that lacks it, so it is now a refusal.
+	# There is no CI lane behind this to catch what slips past.
+	guards="$root/.claude/tools/scripts/run_guards.sh"
+	if [ ! -x "$guards" ]; then
+		echo "pre-push: $guards is missing or not executable, so the content and secret" >&2
+		echo "pre-push: guards DID NOT RUN. Refusing the push rather than reporting an" >&2
+		echo "pre-push: unscanned range as clean - no CI lane re-checks this." >&2
+		return 1
 	fi
+	"$guards" range "$1"
+	"$guards" tree
 }
 
 while read -r _local_ref local_sha _remote_ref remote_sha; do

@@ -39,10 +39,14 @@ jobs:
         # Scan only the commits added by this push/PR, not the whole history.
         # gitleaks reads the allowlist from the committed .gitleaks.toml.
         #
-        # Resolving WHICH range this event adds is GitHub-event logic and belongs
-        # here. HOW the range is scanned - the binary, the redaction, the source -
-        # is a rule, and it is declared once in scripts/run_guards.sh so the
-        # pre-push hook cannot come to scan with different flags than this lane.
+        # Resolving WHICH range this event adds is GitHub-event logic and belongs here.
+        # HOW the range is scanned used to be declared once in a shared runner that the
+        # pre-push hook invoked too, so neither lane could drift onto different flags.
+        # That runner is maintainer tooling and no longer ships, so this lane owns the
+        # invocation outright — there is no second in-repo copy left for it to drift from.
+        #
+        # --redact is not optional: an unredacted finding copies the secret into a log
+        # that outlives the commit it came from.
         run: |
           set -uo pipefail
           before="${{ github.event.before }}"
@@ -58,7 +62,7 @@ jobs:
             # First push / new branch / shallow window: scan the tip commit only.
             log_opts="-1 ${sha}"
           fi
-          scripts/run_guards.sh range "${log_opts}"
+          gitleaks detect --no-banner --redact --source . --log-opts="${log_opts}"
 
       - name: No Arabic in commit messages (forward-only)
         run: |
@@ -78,7 +82,7 @@ jobs:
           fi
           echo "commit messages clean (no Arabic)"
 
-      # READ THE JOB NAME BEFORE BLAMING A TEST. This step and the two around it are
+      # READ THE JOB NAME BEFORE BLAMING A TEST. This step and the ones around it are
       # metadata guards, not tests, and they run BEFORE this job's only tests (the two
       # node unit tests at the end of this job) — so a red here means those never ran,
       # not that one failed. The bench suite is in the separate `test` job below, which
@@ -86,24 +90,11 @@ jobs:
       # job is red, "the suite passed" is neither proven nor disproven by this workflow's
       # overall status, and the `test` job has to be read on its own.
       #
-      # The rule this step enforces is NOT written here. scripts/check_commit_metadata.py
-      # is its one definition, and .githooks/commit-msg and .githooks/pre-commit invoke
-      # that same file to refuse a bad message or a private address before the commit
-      # exists. Install them once with:  git config core.hooksPath .githooks
-      # apex/tests/test_repo_gates.py fails if a second copy of the rule reappears.
-      - name: No automated attribution or private commit email
-        run: |
-          set -uo pipefail
-          before="${{ github.event.before }}"
-          sha="${{ github.sha }}"
-          if git rev-parse --quiet --verify "${before}^{commit}" >/dev/null 2>&1; then
-            range="${before}..${sha}"
-          else
-            range="-1 ${sha}"
-          fi
-          # Deliberately unquoted: a first push is judged as the two words "-1 <sha>".
-          python3 scripts/check_commit_metadata.py range ${range}
-
+      # The commit-metadata rule (no automated attribution, no private author address)
+      # is no longer checked here. Its one definition is maintainer tooling that does not
+      # ship, so .githooks/commit-msg and .githooks/pre-commit are now the only lanes
+      # that enforce it, before the commit exists rather than after it is pushed.
+      # Install them once with:  git config core.hooksPath .githooks
       - name: No internal/experimental files tracked
         run: |
           set -uo pipefail
@@ -170,24 +161,6 @@ jobs:
       # test_only_the_fast_guards_step_sets_the_skip_flag fails if anyone tries.
       - name: Test colocation and unit-test coverage ratchets
         run: APEX_SKIP_SLOW_STANDALONE_PROBES=1 python3 -m unittest apex.tests.test_colocation_ratchet apex.tests.test_unit_test_coverage_guard
-
-      # test_repo_gates drives scripts/check_commit_metadata.py through all three of
-      # its callers - the gate directly, a real commit through .githooks, and the
-      # recorded range this workflow judges - and fails if they reach different
-      # verdicts or if a second copy of the rule reappears anywhere. It used to run
-      # only inside `run-tests --app apex`, so a disagreement surfaced only after that
-      # job's whole 13.5-18.8 min, by which time the local hook had already waved the
-      # offending commit through. It is stdlib-only (no frappe, no site): 3 / 4 / 3 /
-      # 4 / 4s on the runner over the last five green runs, and 3.49-3.72s locally at
-      # load 2.2-3.8 (all measured 2026-07-26).
-      - name: Commit metadata gate decides alike in every lane
-        run: python3 -m unittest apex.tests.test_repo_gates
-
-      # The DocType date/layout contract: field_order against fields both ways, one
-      # fieldtype per start/end pair, and the opening field rendered first. Defects
-      # that parse as valid JSON and only misbehave on a rendered form.
-      - name: DocType date and layout contract
-        run: python3 scripts/check_doctype_dates.py apex
 
       # Dependency-free node unit tests for the worker/Masar pure helpers.
       - name: Worker-portal phone normaliser unit test

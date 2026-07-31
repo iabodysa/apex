@@ -1,8 +1,8 @@
 # ar.csv rows whose English source string was already gone when this set
 # was recorded. The gate fails only on stale rows NOT listed here, so its
 # output names the row a change just stranded instead of all of them.
-# Regenerate after deleting drained rows:
-#   python3 scripts/check_translations.py --package apex --lang ar --update-stale-baseline
+# Regenerate after deleting drained rows, with the translation gate:
+#   --package apex --lang ar --update-stale-baseline
 A building is required to log an inspection.
 ABSENT
 AR

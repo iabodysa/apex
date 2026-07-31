@@ -85,7 +85,7 @@ _APP = "apex"
 # is never the role that loses access.
 _ALWAYS_PERMITTED = frozenset({"Administrator"})
 
-# A module constant, like workflow_guard._MESSAGE; check_translations.py resolves one
+# A module constant, like workflow_guard._MESSAGE; the translation extractor resolves one
 # passed through _(), so this text is gated like any literal msgid. Deliberately a plain
 # str: _() runs at call time inside the request, where the lang is already the reader's,
 # and _lt() would return a lazy proxy with no .format for the two placeholders.

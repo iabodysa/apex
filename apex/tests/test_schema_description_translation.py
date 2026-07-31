@@ -4,17 +4,20 @@
 A description is body text rendered under the input (or in the list-view empty
 state), so an untranslated one shows English under an Arabic label.
 
-``scripts/check_translations.py`` used to miss these entirely: ``is_candidate_text``
-dropped any string over 180 characters, and a description is the one schema key that
-routinely runs past that. The cap cut both ways — a long description was invisible to
-MISSING, so it shipped untranslated on a green gate, and it was equally absent from
-``used``, so translating it landed the row in STALE. That is fixed: ``description``
-is now a DECLARED key there, exempt from the shape heuristics, because Frappe itself
-harvests it (translate.py) and renders it through ``__()`` at any length.
+The maintainer's translation-coverage gate used to miss these entirely:
+``is_candidate_text`` dropped any string over 180 characters, and a description is the
+one schema key that routinely runs past that. The cap cut both ways — a long
+description was invisible to MISSING, so it shipped untranslated on a green gate, and
+it was equally absent from ``used``, so translating it landed the row in STALE. That is
+fixed: ``description`` is now a DECLARED key there, exempt from the shape heuristics,
+because Frappe itself harvests it (translate.py) and renders it through ``__()`` at any
+length.
 
-This guard still earns its place beyond that gate: the gate drops ``&`` strings from
-MISSING (``is_auto_translatable``), and it never checks a description for a ``{0}``
-placeholder, which would reach the user unfilled.
+This guard is what the application itself can prove, and it is now the ONLY Arabic
+check on descriptions that a clone receives: that gate is maintainer tooling and does
+not ship. It also covers two things the gate never did — the gate drops ``&`` strings
+from MISSING (``is_auto_translatable``), and it never checks a description for a
+``{0}`` placeholder, which would reach the user unfilled.
 
 REMAINDER is the tracked backlog, keyed by (schema path, fieldname) rather than by
 the English text so that rewording a description does not false-red the suite. It is

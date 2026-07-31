@@ -125,9 +125,6 @@ _CENTRAL_BY_NECESSITY = frozenset(
         # Asserts app-wide that no module still references the retired deduction
         # acknowledgment surface and that exactly one module raises an advance.
         "test_native_recovery_surface.py",
-        # Drives scripts/comment_audit.py and scripts/check_translations.py as
-        # subprocesses; they live outside the apex package and own no module.
-        "test_repo_gates.py",
         # Scans every workspace JSON for name/title/parent_page agreement.
         "test_workspace_identity_consistency.py",
         # Reconciles every patch module on disk against patches.txt as a whole;
@@ -139,8 +136,8 @@ _CENTRAL_BY_NECESSITY = frozenset(
         # Reconciles the hooks apps-screen tile list against the gate helpers spread
         # across apex/www; it spans hooks and five modules, so it owns no single one.
         "test_apps_screen_gate_wiring.py",
-        # Compares the served shells, the bundle-guard matrix and the e2e smoke list
-        # against each other; the invariant lives between them, not in any one.
+        # Compares the served shells against the bundle-guard matrix; the invariant
+        # lives between them, not in either one.
         "test_portal_route_coverage.py",
         # Checks every role named in any workspace grant against every DocPerm in the
         # app; the invariant spans both trees, so no single module owns it.
@@ -159,13 +156,13 @@ _CENTRAL_BY_NECESSITY = frozenset(
     }
 )
 
-# [#a197c1] The ratchet's HARD ceiling, frozen 2026-07-26 at the count the two
-# sets above sum to. It exists because deriving the allowance from those two
-# lengths let a padded set buy its own headroom: one invented name raised the
-# allowance by exactly one. A frozen integer cannot be moved by padding. It may
-# only ever be LOWERED, in the same commit that drains an entry — see
-# test_central_test_count_never_grows, which fails if it drifts above the sum.
-_CEILING = 47
+# [#a197c1] The ratchet's HARD ceiling, frozen at the count the two sets above sum
+# to. Deriving the allowance from those two lengths let a padded set buy its own
+# headroom: one invented name raised the allowance by exactly one, and a frozen
+# integer cannot be moved by padding. LOWER it in the same commit that drains an
+# entry — test_central_test_count_never_grows fails if it drifts above the sum.
+# 47 -> 46: test_repo_gates.py drained, it tested the toolbox, not the app.
+_CEILING = 46
 
 
 def _central_tests():

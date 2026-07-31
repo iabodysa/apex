@@ -4,9 +4,9 @@
 # Install (one line, from the repo root):
 #     git config core.hooksPath .githooks
 #
-# The allowlist is NOT written here. scripts/check_commit_metadata.py holds it once,
-# for this hook and for the CI step "No automated attribution or private commit email";
-# this file only decides WHICH two addresses get judged.
+# The allowlist is NOT written here. .claude/tools/scripts/check_commit_metadata.py holds
+# it once, for this hook and for commit-msg; this file only decides WHICH two addresses
+# get judged. That gate is unpublished maintainer tooling, so no CI lane can re-check it.
 #
 # `git commit --author=...` IS caught: git exports the resolved author identity to the
 # hook, so `git var` reports the forced address, not the configured one. What no
@@ -15,7 +15,7 @@
 set -u
 
 hookdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-gate="$hookdir/../scripts/check_commit_metadata.py"
+gate="$hookdir/../.claude/tools/scripts/check_commit_metadata.py"
 
 ident_email() {
 	git var "$1" 2>/dev/null | sed -n 's/.*<\(.*\)>.*/\1/p'
