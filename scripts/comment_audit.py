@@ -57,11 +57,13 @@ _BASELINE: dict[str, dict[str, int]] = {
     # reservation. It goes when the reservation lifts.
     "tests/test_workspace_role_docperm_guard.py": {"message-task-id": 1},
 
-    # DECLARED, not deferred: 19 essay-length docstrings, each one a guard's
+    # DECLARED, not deferred: the essay-length docstrings, each one a guard's
     # rationale sitting beside the guard. There is nowhere lossless to drain
     # them to -- docs/ is reserved, and deleting a real reason to satisfy a line
-    # ceiling was ruled out. Named one per line so the twentieth cannot arrive
-    # unnoticed; the ceiling's job on this class is forward-only.
+    # ceiling was ruled out. Named one per line so the next one cannot arrive
+    # unnoticed; the ceiling's job on this class is forward-only. The list IS the
+    # count -- a total written out beside it is a second copy that drifts, and the
+    # one this replaced already had.
     "apex_core/test_routed_payment_serialization.py": {"long-docstring": 1},
     "apex_core/utils/report_role_guard.py": {"long-docstring": 1},
     "apex_core/utils/request_ip_trust.py": {"long-docstring": 1},
@@ -83,15 +85,18 @@ _BASELINE: dict[str, dict[str, int]] = {
     "www/test_www_no_external_cdn_assets.py": {"long-docstring": 1},
 }
 
-# The legacy volume that was deliberately NOT swept: 455 board ids in comments
-# and docstrings over ~180 files. Sweeping changes no behaviour, conflicts with
-# every open branch, and costs provenance a maintainer uses; what it would buy
-# is that a public reader stops meeting ids they can never resolve.
+# The legacy volume that was deliberately NOT swept: 444 board ids in comments and
+# docstrings over 189 files (re-measured 2026-07-31). Sweeping changes no
+# behaviour, conflicts with every open branch, and costs provenance a maintainer
+# uses; what it would buy is that a public reader stops meeting ids they can never
+# resolve.
 #
 # That is its own card, drained per module. Until then these can only FALL: an
-# added id fails, and each module drained lowers the number.
+# added id fails, and each module drained lowers the number. EXACT, never rounded
+# up: a ceiling one above the count is one free id, and the gate's own slack note
+# is the standing instruction to close that gap.
 _KIND_CEILING: dict[str, int] = {
-    KIND_DOCSTRING_ID: 368,
+    KIND_DOCSTRING_ID: 367,
     KIND_COMMENT_ID: 77,
 }
 

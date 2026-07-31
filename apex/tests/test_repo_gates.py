@@ -18,9 +18,16 @@ metadata gate. That one is no longer two copies kept in step: `scripts/
 check_commit_metadata.py` is its single definition, and the hooks under `.githooks`
 and the CI step all invoke it. So the tests below judge the VERDICT each lane
 returns rather than comparing one lane's source text with another's.
+
+Those gates ship fixture suites of their own under `scripts/`, and until now no
+workflow, hook or runner invoked them: they proved the gates worked only to
+whoever happened to type the command. They live outside the package, so nothing
+discovers them by accident either. `TestTheScriptsGateFixturesRun` is where they
+are reached from, as a subprocess like every other gate here.
 """
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -178,6 +185,77 @@ class TestTranslationGateIgnoresGitignoredFiles(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, f"stale row must surface: {result.stdout}")
         self.assertIn('"stale_count":1', result.stdout)
+
+
+DEAD_ROWS = ("First Retired Caption", "Second Retired Caption", "Third Retired Caption")
+
+
+@unittest.skipUnless(HAVE_GIT, "git is required to resolve the ignore rules")
+@unittest.skipUnless(CHECK_TRANSLATIONS.exists(), "scripts/ is not present in this install")
+class TestTheStaleTranslationBaselineCannotBuyHeadroom(unittest.TestCase):
+    """What a recorded stale row may excuse, and what a spent one may not.
+
+    This baseline records the ROW TEXT rather than a count, and that choice is what
+    makes a spent entry harmless: it can only ever excuse itself. A count would
+    behave differently — draining one row would leave an allowance a DIFFERENT row
+    could then spend, silently. The decision is only prose until something fails on
+    the count version, which is what the last case here does.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+        self.repo = Path(self.tmp)
+        _init_repo(self.repo, "demo/\n")
+        _write(self.repo, "pkg/clean.py", "value = 1\n")
+        _git(self.repo, "add", "pkg/clean.py")
+
+    def _csv(self, *sources: str) -> None:
+        _write(self.repo, "pkg/translations/ar.csv",
+               "".join(f'"{source}","ترجمة"\n' for source in sources))
+
+    def _check(self, *extra: str) -> subprocess.CompletedProcess:
+        return _run(CHECK_TRANSLATIONS, "--package", str(self.repo / "pkg"),
+                    "--lang", "ar", "--max-missing", "0", "--max-stale", "0",
+                    "--json", *extra)
+
+    def _record(self, *sources: str) -> None:
+        self._csv(*sources)
+        result = self._check("--update-stale-baseline")
+        self.assertEqual(result.returncode, 0,
+                         f"recording the stale set must pass: {result.stdout}")
+
+    def test_a_recorded_row_is_excused(self):
+        self._record(DEAD_ROWS[0], DEAD_ROWS[1])
+        result = self._check()
+
+        self.assertEqual(result.returncode, 0, f"recorded rows must pass: {result.stdout}")
+        self.assertIn('"new_stale_count":0', result.stdout)
+
+    def test_a_row_the_set_never_named_still_fails(self):
+        """Guards the case above from passing because the set excuses everything."""
+        self._record(DEAD_ROWS[0], DEAD_ROWS[1])
+        self._csv(*DEAD_ROWS)
+        result = self._check()
+
+        self.assertEqual(result.returncode, 1, f"an unrecorded row must fail: {result.stdout}")
+        self.assertIn('"new_stale_count":1', result.stdout)
+
+    def test_a_spent_entry_cannot_excuse_a_different_row(self):
+        """The expiry property. Two recorded rows, one of them drained away and a
+        fresh dead row arriving in its place: under a count the tally is unchanged
+        and this passes, which is the failure a text-keyed set cannot have."""
+        self._record(DEAD_ROWS[0], DEAD_ROWS[1])
+        self._csv(DEAD_ROWS[0], DEAD_ROWS[2])
+        result = self._check()
+
+        self.assertEqual(
+            result.returncode, 1,
+            "a drained entry bought headroom for a row nobody reviewed, so the "
+            f"recorded set is behaving like a count: {result.stdout}",
+        )
+        self.assertIn('"stale_count":2', result.stdout)
+        self.assertIn('"new_stale_count":1', result.stdout)
 
 
 def _init_hooked_repo(repo: Path) -> None:
@@ -410,6 +488,95 @@ class TestCommitMetadataGate(unittest.TestCase):
         for path in (PRE_COMMIT_CONFIG, TEST_WORKFLOW, COMMIT_MSG_HOOK, PRE_COMMIT_HOOK):
             with self.subTest(path=path.name):
                 self.assertIn(INSTALL_COMMAND, path.read_text(encoding="utf-8"))
+
+
+# Each fixture suite under scripts/, with the number of tests it discovers today.
+# A FLOOR, not an equality: adding a case must not red the lane, but losing one has
+# to. The count is the only thing that can see this class of failure, because the
+# verdict cannot: `unittest discover` exits 0 when it finds nothing, so a renamed
+# file, a moved directory or an import error inside a suite turns the gate off in
+# silence while every assertion here still passes.
+SCRIPT_FIXTURE_FLOORS = {
+    "test_comment_audit.py": 24,
+    "test_check_commit_metadata.py": 9,
+}
+# unittest's summary line. Parsed rather than counted a second way, because it is
+# what the runner actually executed; an unparseable line fails loudly below rather
+# than defaulting to a number that would read as a pass.
+RAN_LINE = re.compile(r"^Ran (\d+) tests? in ", re.MULTILINE)
+
+
+def _discover(pattern: str) -> subprocess.CompletedProcess:
+    """Run one scripts/ fixture suite from an unrelated cwd.
+
+    Absolute -s/-t: the suite has to give the same verdict wherever it is driven
+    from, and the bench runs this from the bench directory, not the repo root.
+    """
+    return subprocess.run(
+        [sys.executable, "-m", "unittest", "discover",
+         "-s", str(SCRIPTS), "-t", str(SCRIPTS), "-p", pattern],
+        capture_output=True, text=True, env=GIT_ENV, cwd=tempfile.gettempdir(),
+    )
+
+
+@unittest.skipUnless(HAVE_GIT, "git is required by the fixture suites")
+@unittest.skipUnless(SCRIPTS.is_dir(), "scripts/ is not present in this install")
+class TestTheScriptsGateFixturesRun(unittest.TestCase):
+    """The gates' own fixture suites, reached from a runner that actually runs.
+
+    They plant every violation class the gates detect and drive the baseline
+    arithmetic directly, which is coverage nothing else here has. Reaching them
+    from the app suite is what makes that coverage real: a suite no lane invokes
+    proves the gate works to nobody.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.results = {name: _discover(name) for name in SCRIPT_FIXTURE_FLOORS}
+
+    def _ran(self, result: subprocess.CompletedProcess) -> int:
+        found = RAN_LINE.search(result.stderr)
+        self.assertIsNotNone(
+            found,
+            "unittest printed no summary line, so the number of tests that ran "
+            f"cannot be read and no floor below means anything: {result.stderr}",
+        )
+        return int(found.group(1))
+
+    def test_every_fixture_suite_passes(self):
+        for name, result in sorted(self.results.items()):
+            with self.subTest(suite=name):
+                self.assertEqual(
+                    result.returncode, 0,
+                    f"scripts/{name} fails, so the gate it covers is unproven: "
+                    f"{result.stderr}",
+                )
+
+    def test_no_fixture_suite_discovers_an_empty_set(self):
+        """The failure a green verdict cannot show: discovery that found nothing."""
+        for name, floor in sorted(SCRIPT_FIXTURE_FLOORS.items()):
+            with self.subTest(suite=name):
+                ran = self._ran(self.results[name])
+                self.assertGreaterEqual(
+                    ran, floor,
+                    f"scripts/{name} ran {ran} tests against a floor of {floor}. "
+                    "Coverage was removed, or discovery stopped reaching the file; "
+                    "either way the gate is less proven than the last person to "
+                    "read this believed.",
+                )
+
+    def test_the_suite_table_lists_every_fixture_file_on_disk(self):
+        """A hand-written table grades only the rows it lists, so it has to prove
+        its own completeness: a new fixture suite added and never invoked is the
+        same silence this class exists to end."""
+        on_disk = {path.name for path in SCRIPTS.glob("test_*.py")}
+        self.assertEqual(
+            on_disk, set(SCRIPT_FIXTURE_FLOORS),
+            "scripts/ holds fixture suites this table does not run "
+            f"({sorted(on_disk - set(SCRIPT_FIXTURE_FLOORS))}), or names ones that "
+            f"are gone ({sorted(set(SCRIPT_FIXTURE_FLOORS) - on_disk)}). Add or drop "
+            "the row with its floor.",
+        )
 
 
 def _git_log_count(repo: Path) -> int:
