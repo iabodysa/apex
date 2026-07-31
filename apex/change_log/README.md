@@ -5,6 +5,7 @@ The shipped notes start at 2.0.0; earlier releases are not carried forward.
 
 ## Latest
 
+- [2.1.5](v2/v2_1_5.md)
 - [2.1.4](v2/v2_1_4.md)
 - [2.1.3](v2/v2_1_3.md)
 - [2.1.2](v2/v2_1_2.md) — Blank sidebars restored for three personas, portals served with no script or typeface from another host, a working fleet page menu, and quieter access logs.

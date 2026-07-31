@@ -8,6 +8,12 @@ from frappe.utils import get_datetime
 # "What's New" popup and this bell feed now agree on the same 2.x floor.
 _RELEASES = [
     {
+        "title": "Apex 2.1.5 — Alerts no longer point at records their audience cannot open, and an incompatible framework argument is caught in seconds instead of mid-suite",
+        "app_name": "apex",
+        "link": "/app",
+        "creation": "2026-07-31 07:37:20",
+    },
+    {
         "title": "Apex 2.1.4 — permission decisions that explain themselves in the code, and repository gates that are themselves guarded",
         "app_name": "apex",
         "link": "/app",
