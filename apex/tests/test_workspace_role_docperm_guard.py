@@ -18,11 +18,14 @@ fail on the change that WRITES the bad JSON rather than on a site that already m
 Run standalone:  python3 -m unittest apex.tests.test_workspace_role_docperm_guard -v
 """
 
+import ast
 import glob
 import json
 import os
 import unittest
 
+from apex.apex_core.utils import notification_role_guard as guard
+from apex.tests.shipped_doctypes import shipped_doctypes
 from apex.tests.training_charter import charter_count, role_charters
 
 _APP = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
@@ -224,4 +227,349 @@ class TestGovernmentRelationsOfficerCharter(unittest.TestCase):
             set(),
             f"{GRO_ROLE} is emailed about {sorted(watched - readable)} but holds no read "
             "DocPerm on it, so the alert links to a page it cannot open",
+        )
+
+
+_PY_GLOB = os.path.join(_APP, "**", "*.py")
+
+# The one helper that resolves an audience BY ROLE and can attach a document link
+# (apex/habitat/tasks/common.py, re-exported from apex.habitat.tasks). Matched on the
+# bare attribute name so both the direct call and a module-qualified one are seen.
+ROLE_ALERT_HELPERS = frozenset({"_notify_role_system"})
+
+# Frozen baselines, exact equality like the sibling guards: a NEW entry fails the build,
+# a REPAIRED one fails until pruned. All three are empty, and that emptiness is the claim.
+KNOWN_UNREADABLE_ROLE_ALERTS: dict[tuple[str, str, str], str] = {}
+KNOWN_ROLE_ALERTS_WITHOUT_A_DOCPERM: dict[tuple[str, str], str] = {}
+KNOWN_DYNAMIC_ROLE_ALERTS: dict[tuple[str, int], str] = {}
+
+
+class RoleAlert(tuple):
+    """One ``_notify_role_system`` call site, as read off disk.
+
+    ``role``/``document_type`` are the literal values, or None when the argument is
+    absent or is not a literal. ``links`` is True only when BOTH document_type and
+    document_name were passed, which is the exact condition under which
+    ``apex_core.utils.system_notify.notify_user_system`` writes the link onto the row.
+    ``dynamic`` names the arguments that were present but could not be read literally.
+    """
+
+    __slots__ = ()
+
+    def __new__(cls, module, lineno, role, document_type, links, dynamic):
+        return super().__new__(cls, (module, lineno, role, document_type, links, dynamic))
+
+    module = property(lambda self: self[0])
+    lineno = property(lambda self: self[1])
+    role = property(lambda self: self[2])
+    document_type = property(lambda self: self[3])
+    links = property(lambda self: self[4])
+    dynamic = property(lambda self: self[5])
+
+
+def _string_literal(node):
+    """The node's value when it is a plain string literal, else None."""
+    return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else None
+
+
+def role_alert_calls(tree, module):
+    """Every role-alert call site in one parsed module. Pure, so the proofs below can
+    drive it with synthetic source instead of planting a call in a shipped file.
+
+    Only ``role`` is read positionally: the helper declares document_type/document_name
+    keyword-only (apex/habitat/tasks/common.py), so they can never arrive as args.
+    """
+    found = []
+    for call in ast.walk(tree):
+        if not isinstance(call, ast.Call):
+            continue
+        func = call.func
+        name = func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", None)
+        if name not in ROLE_ALERT_HELPERS:
+            continue
+        passed = {"role": call.args[0] if call.args else None}
+        for keyword in call.keywords:
+            if keyword.arg in ("role", "document_type", "document_name"):
+                passed[keyword.arg] = keyword.value
+        values = {key: _string_literal(arg) for key, arg in passed.items() if arg is not None}
+        dynamic = frozenset(
+            key for key in ("role", "document_type") if key in passed and values.get(key) is None
+        )
+        links = passed.get("document_type") is not None and passed.get("document_name") is not None
+        found.append(
+            RoleAlert(
+                module,
+                call.lineno,
+                values.get("role"),
+                values.get("document_type"),
+                links,
+                dynamic,
+            )
+        )
+    return found
+
+
+def shipped_role_alerts():
+    """Every role-alert call site the app ships, outside its own test modules.
+
+    Test modules are skipped deliberately: a guard grades what runs in production, and a
+    test is free to construct a deliberately broken call as a fixture. The proofs below
+    therefore build their inputs with ``ast.parse`` on a source string, never by planting
+    a call in a file this scan would read back.
+    """
+    calls = []
+    for path in sorted(glob.glob(_PY_GLOB, recursive=True)):
+        if os.path.basename(path).startswith("test_"):
+            continue
+        with open(path, encoding="utf-8") as fh:
+            source = fh.read()
+        if not any(helper in source for helper in ROLE_ALERT_HELPERS):
+            continue
+        calls.extend(
+            role_alert_calls(ast.parse(source), os.path.relpath(path, _APP).replace(os.sep, "/"))
+        )
+    return calls
+
+
+def unreadable_role_alerts(calls, doctypes):
+    """(module, role, document_type) for every LINKED alert whose role cannot open it.
+
+    A document_type this app does not ship is skipped rather than graded — the same line
+    ``notification_role_guard.unreachable_pairs`` draws, and pinned to empty below.
+    """
+    out = set()
+    for call in calls:
+        if not (call.links and call.role and call.document_type):
+            continue
+        if call.role in guard.ALWAYS_PERMITTED:
+            continue
+        shipped = doctypes.get(call.document_type)
+        if shipped is None:
+            continue
+        allowed = guard.roles_that_can_open(shipped.get("permissions"), shipped.get("istable"))
+        if call.role not in allowed:
+            out.add((call.module, call.role, call.document_type))
+    return sorted(out)
+
+
+def role_alerts_without_a_docperm(calls, permitted_roles):
+    """(module, role) for every alerted role holding no DocPerm anywhere in apex."""
+    return sorted(
+        {
+            (call.module, call.role)
+            for call in calls
+            if call.role
+            and call.role not in guard.ALWAYS_PERMITTED
+            and call.role not in permitted_roles
+        }
+    )
+
+
+class TestPythonRoleAlertsReachARoleThatCanRead(unittest.TestCase):
+    """The same defect one layer further out, invisible to both guards above.
+
+    The workspace guard reads workspace JSON and the sibling notification guard
+    (apex/apex_core/utils/test_notification_role_guard.py) reads Notification JSON, so a
+    scheduler job posting a role-targeted Notification Log from PYTHON is graded by
+    neither. ``habitat.tasks.common._notify_role_system`` resolves its audience with
+    ``frappe.utils.user.get_users_with_role`` -- a plain Role -> Has Role -> User walk
+    with no has_permission on it -- then hands document_type/document_name straight onto
+    the row, so delivery always succeeds and the bell link throws PermissionError on
+    click with no signal anywhere. The readable surface is the call sites, parsed by ast.
+
+    Two invariants, because two distinct shapes were found: a call site that LINKS a
+    document must name a role holding a permlevel-0, non-if_owner read on it (predicate
+    imported from notification_role_guard, never restated, so the JSON and Python halves
+    cannot disagree); and any alerted role must hold a DocPerm somewhere in apex, linked
+    or not, which is the property TestEveryWorkspaceRoleHoldsADocPerm already asserts for
+    workspaces -- hence this module rather than a third guard.
+
+    RESIDUAL GAP, STATED RATHER THAN HIDDEN: the scan keys on the helper by NAME, so an
+    ``import ... as`` alias, or code calling get_users_with_role itself and writing a
+    linked row per user, would dodge it -- in the second case the role is only
+    recoverable by dataflow. Neither exists today: every other get_users_with_role site
+    (safety_checklist, material_transfer, temporary_worker_engine, salis.api.masar)
+    sends mail or an unlinked alert, and no caller aliases the helper.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.calls = shipped_role_alerts()
+        cls.doctypes = shipped_doctypes()
+        cls.permitted = set(_docperm_rows())
+
+    def test_the_scan_reaches_the_shipped_call_sites(self):
+        """A parser that found nothing would make every assertion below vacuously green."""
+        modules = {call.module for call in self.calls}
+        self.assertIn(
+            "habitat/tasks/safety.py",
+            modules,
+            "the AST scan found no role alert in habitat/tasks/safety.py — the scan "
+            f"broke, or the helper was renamed away from {sorted(ROLE_ALERT_HELPERS)}",
+        )
+        self.assertGreaterEqual(len(self.calls), 4, "implausibly few role-alert call sites")
+
+    def test_every_linked_alert_names_a_role_that_can_open_the_record(self):
+        found = unreadable_role_alerts(self.calls, self.doctypes)
+        self.assertEqual(
+            found,
+            sorted(KNOWN_UNREADABLE_ROLE_ALERTS),
+            "a role-targeted alert links a document its own audience cannot open. "
+            "get_users_with_role never consults has_permission, so delivery succeeds "
+            "and the bell link throws PermissionError on click, silently. Either grant "
+            "that role a permlevel-0, non-if_owner read on the document_type, repoint "
+            "the call at a role that already holds one, or drop the "
+            "document_type/document_name pair so the alert carries no link at all.",
+        )
+
+    def test_every_alerted_role_holds_a_docperm_somewhere(self):
+        """The Operations Director shape: a role with no grant anywhere in the app."""
+        found = role_alerts_without_a_docperm(self.calls, self.permitted)
+        self.assertEqual(
+            found,
+            sorted(KNOWN_ROLE_ALERTS_WITHOUT_A_DOCPERM),
+            "a scheduled job alerts a role that holds no DocPerm anywhere in apex, so "
+            "its members are told about work they cannot open even without a link. "
+            "Repoint the call at a role this app actually grants a surface to.",
+        )
+
+    def test_no_call_site_hides_its_role_or_document_behind_a_variable(self):
+        """A non-literal role or document_type is UNGRADABLE, not innocent.
+
+        Without this pin, moving a role name into a variable would silently exempt the
+        call site from both invariants above and read as a clean build.
+        """
+        found = sorted({(call.module, call.lineno) for call in self.calls if call.dynamic})
+        self.assertEqual(
+            found,
+            sorted(KNOWN_DYNAMIC_ROLE_ALERTS),
+            "role-alert call site(s) compute their role or document_type at runtime, so "
+            "this guard cannot grade them. Pass literals, or record why the site is "
+            "exempt in KNOWN_DYNAMIC_ROLE_ALERTS.",
+        )
+
+    def test_every_linked_document_type_is_ours(self):
+        """Pin the one exemption in ``unreadable_role_alerts`` to the empty set."""
+        foreign = sorted(
+            {
+                call.document_type
+                for call in self.calls
+                if call.links and call.document_type and call.document_type not in self.doctypes
+            }
+        )
+        self.assertEqual(
+            foreign,
+            [],
+            "a role alert links a DocType this app does not ship, so the guard does not "
+            "grade it — decide whether to judge another app's DocPerms",
+        )
+
+    def test_every_frozen_entry_carries_a_reason(self):
+        for baseline in (
+            KNOWN_UNREADABLE_ROLE_ALERTS,
+            KNOWN_ROLE_ALERTS_WITHOUT_A_DOCPERM,
+            KNOWN_DYNAMIC_ROLE_ALERTS,
+        ):
+            for key, why in baseline.items():
+                with self.subTest(entry=key):
+                    self.assertTrue(why and why.strip(), f"{key} is frozen with no reason")
+
+
+class TestTheCallSiteDetectorFiresAndStaysSilent(unittest.TestCase):
+    """Proof the call-site detector can fail, and does not fail on everything.
+
+    Inputs are parsed from source strings: planting a broken call in a shipped file
+    would be picked up by ``shipped_role_alerts`` and red the ratchet above.
+    """
+
+    FAKE_DT = "_A309 Alerted Record"
+    DEAD_ROLE = "_A309 Role Without A Grant"
+    LIVE_ROLE = "_A309 Role That Can Open"
+    DOCTYPES = {FAKE_DT: {"name": FAKE_DT, "permissions": [{"role": LIVE_ROLE, "read": 1}]}}
+
+    def _calls(self, source):
+        return role_alert_calls(ast.parse(source), "synthetic.py")
+
+    def test_the_detector_flags_a_planted_unreadable_alert(self):
+        calls = self._calls(
+            f'_notify_role_system("{self.DEAD_ROLE}", subject="s",'
+            f' document_type="{self.FAKE_DT}", document_name=x)'
+        )
+        self.assertEqual(
+            unreadable_role_alerts(calls, self.DOCTYPES),
+            [("synthetic.py", self.DEAD_ROLE, self.FAKE_DT)],
+        )
+
+    def test_the_detector_stays_silent_for_a_role_that_can_open(self):
+        """The proof above alone is satisfied by a detector that flags everything."""
+        calls = self._calls(
+            f'_notify_role_system("{self.LIVE_ROLE}", subject="s",'
+            f' document_type="{self.FAKE_DT}", document_name=x)'
+        )
+        self.assertEqual(unreadable_role_alerts(calls, self.DOCTYPES), [])
+
+    def test_a_document_type_without_a_document_name_does_not_link(self):
+        """notify_user_system writes the link only when BOTH are supplied
+        (apex/apex_core/utils/system_notify.py), so half a pair is not a broken link."""
+        calls = self._calls(
+            f'_notify_role_system("{self.DEAD_ROLE}", subject="s", document_type="{self.FAKE_DT}")'
+        )
+        self.assertFalse(calls[0].links)
+        self.assertEqual(unreadable_role_alerts(calls, self.DOCTYPES), [])
+
+    def test_an_unlinked_alert_still_fails_the_docperm_invariant(self):
+        """The Operations Director shape: no link to break, no grant either."""
+        calls = self._calls(f'_notify_role_system("{self.DEAD_ROLE}", subject="s", message=m)')
+        self.assertEqual(
+            role_alerts_without_a_docperm(calls, {self.LIVE_ROLE}),
+            [("synthetic.py", self.DEAD_ROLE)],
+        )
+        self.assertEqual(
+            role_alerts_without_a_docperm(calls, {self.LIVE_ROLE, self.DEAD_ROLE}), []
+        )
+
+    def test_a_role_passed_as_a_keyword_is_read(self):
+        calls = self._calls(f'_notify_role_system(role="{self.DEAD_ROLE}", subject="s")')
+        self.assertEqual(calls[0].role, self.DEAD_ROLE)
+
+    def test_a_computed_role_is_reported_as_dynamic(self):
+        calls = self._calls("_notify_role_system(chosen_role, subject='s')")
+        self.assertEqual(calls[0].dynamic, frozenset({"role"}))
+        self.assertIsNone(calls[0].role)
+
+    def test_administrator_is_never_the_offender(self):
+        calls = self._calls(
+            f'_notify_role_system("Administrator", subject="s",'
+            f' document_type="{self.FAKE_DT}", document_name=x)'
+        )
+        self.assertEqual(unreadable_role_alerts(calls, self.DOCTYPES), [])
+        self.assertEqual(role_alerts_without_a_docperm(calls, set()), [])
+
+
+class TestTheRepairedCallSitesStayRepaired(unittest.TestCase):
+    """The two repaired defects, pinned by name so a revert is named, not just counted."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.calls = [c for c in shipped_role_alerts() if c.module == "habitat/tasks/safety.py"]
+
+    def test_the_safety_officer_alert_carries_no_building_link(self):
+        """Building ships its whole Financials tab at permlevel 0, so the fix was to drop
+        the link rather than widen a safety persona onto every building's cost model."""
+        linked = [c for c in self.calls if c.role == "Safety Officer" and c.links]
+        self.assertEqual(
+            linked,
+            [],
+            "a Safety Officer alert links a document again; Safety Officer holds read on "
+            f"the safety records only, and would need a grant for {linked}",
+        )
+
+    def test_no_safety_alert_names_the_operations_director(self):
+        """The role holds no DocPerm anywhere in apex; three shipped Notifications were
+        repointed off it earlier for the same reason."""
+        self.assertNotIn(
+            "Operations Director",
+            {call.role for call in self.calls},
+            "Operations Director holds no DocPerm anywhere in apex, so alerting it is "
+            "the defect this guard exists to catch, not a fix",
         )

@@ -19,6 +19,16 @@ _ROW_SAVEPOINT = "safety_row"
 _ALERT_SAVEPOINT = "safety_alert_dedupe"
 
 
+def zero_rounds_alert_subject(label: str) -> str:
+    """Subject of the daily "no recent safety round" alert for a building.
+
+    Shared with Safety Round's submit-time cleanup: the Safety Officer's copy carries
+    no Building link (that role holds no read on Building), so it is deduped and
+    cleared by SUBJECT. Producer and clearer must not drift, hence one owner here.
+    """
+    return f"No recent safety round: {label}"
+
+
 def _raise_safety_alert(alert_type: str, severity: str, message: str, dedupe_token: str) -> str | None:
     """Insert an Operations Alert for a safety obligation breach (idempotent).
 
@@ -206,18 +216,21 @@ def daily_safety_task_compliance_scan() -> None:
                     message=msg,
                     dedupe_token=token,
                 )
+                # No Building link on the role alert: Safety Officer holds no read on
+                # Building, and Building carries the whole permlevel-0 Financials tab
+                # (rent, billing model, expense breakdown), so granting one to deliver a
+                # coverage reminder would hand the safety persona every building's cost
+                # model. The subject names the building, which is all the alert needs.
                 _notify_role_system(
                     "Safety Officer",
-                    subject=f"No recent safety round: {label}",
+                    subject=zero_rounds_alert_subject(label),
                     message=msg,
-                    document_type="Building",
-                    document_name=b.name,
                 )
                 # [#76la3e]
                 _notify_operational("Building", b.name, msg)
                 _notify_user_system(
                     b.responsible_supervisor,
-                    subject=f"No recent safety round: {label}",
+                    subject=zero_rounds_alert_subject(label),
                     message=msg,
                     document_type="Building",
                     document_name=b.name,
@@ -328,8 +341,9 @@ def audit_remediation_deadline_watch() -> None:
     A submitted plan whose ``overall_status`` is not yet closed (anything other than
     "Closed by Client" / "Overdue") and whose ``remediation_deadline`` is before today
     is set to "Overdue", and a system Notification is posted to the plan's AFMCO owner
-    and to the Operations Director. Mirrors daily_building_license_expiry_check:
-    paginated 500/batch with per-row error isolation.
+    and to the Accommodation Manager role, which holds the read and the write that
+    closes the plan. Mirrors daily_building_license_expiry_check: paginated 500/batch
+    with per-row error isolation.
     """
     from frappe.utils import today, getdate
 
@@ -378,10 +392,19 @@ def audit_remediation_deadline_watch() -> None:
                         f"Audit remediation overdue: {plan.name}",
                         msg,
                     )
+                # Accommodation Manager, not Operations Director: that role holds no
+                # DocPerm anywhere in apex, so its members are alerted about a plan none
+                # of them can open. Accommodation Manager holds the permlevel-0,
+                # non-if_owner read AND the write/submit that closes the plan, so the
+                # alert now reaches someone who can both read it and act on it. The
+                # individual escalation is unchanged: the plan's internal_owner (the
+                # Operations Director by default) still gets the per-user alert above.
                 _notify_role_system(
-                    "Operations Director",
+                    "Accommodation Manager",
                     subject=f"Audit remediation overdue: {plan.name}",
                     message=msg,
+                    document_type="Audit Remediation Plan",
+                    document_name=plan.name,
                 )
                 flagged += 1
             except Exception:

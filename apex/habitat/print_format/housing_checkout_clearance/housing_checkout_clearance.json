@@ -12,7 +12,7 @@
  "idx": 0,
  "line_breaks": 0,
  "module": "Habitat",
- "name": "Accommodation Checkout Clearance",
+ "name": "Housing Checkout Clearance",
  "print_format_builder": 0,
  "print_format_builder_beta": 0,
  "print_format_type": "Jinja",

@@ -136,11 +136,15 @@ class SafetyRound(Document):
         """Auto-clear the unread "no recent safety round" bell alerts for this building.
 
         A submitted round of any cadence satisfies the daily zero-rounds scan (which
-        only checks for a submitted round in the trailing window), so its Building-linked
-        Notification Log alerts — raised to the Safety Officer and the responsible
-        supervisor — are now stale; mark every unread Alert linked to this Building read
-        in one write. The weekly-coverage alert is subject-keyed (no Building link) and
-        intentionally untouched: a daily round does not satisfy weekly coverage."""
+        only checks for a submitted round in the trailing window), so its alerts are now
+        stale. Two writes because the scan raises the same notice on two keys: the
+        responsible supervisor's copy is Building-linked, while the Safety Officer's
+        carries no link (that role holds no read on Building) and is keyed by subject.
+        The weekly-coverage alert has its own subject and stays untouched: a daily round
+        does not satisfy weekly coverage."""
+        from apex.habitat.tasks.safety import zero_rounds_alert_subject
+
+        label = frappe.db.get_value("Building", self.building, "building_name") or self.building
         try:
             frappe.db.set_value(
                 "Notification Log",
@@ -149,6 +153,19 @@ class SafetyRound(Document):
                     "read": 0,
                     "document_type": "Building",
                     "document_name": self.building,
+                },
+                "read",
+                1,
+                update_modified=False,
+            )
+            # The supervisor's copy shares this subject but was already cleared by the
+            # link write above, so `read: 0` leaves only the unlinked Safety Officer one.
+            frappe.db.set_value(
+                "Notification Log",
+                {
+                    "type": "Alert",
+                    "read": 0,
+                    "subject": zero_rounds_alert_subject(label),
                 },
                 "read",
                 1,

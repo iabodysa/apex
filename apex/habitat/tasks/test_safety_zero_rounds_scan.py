@@ -156,6 +156,58 @@ class TestSafetyZeroRoundsScan(ApexHabitatTestCase):
             "BUG: submitting a round did not clear the building's unread bell notifications",
         )
 
+    # The Safety Officer copy of the zero-rounds alert carries NO Building link, because
+    # that role holds no read on Building (whose Financials tab is permlevel 0). These
+    # two prove the pair that trade-off rests on: the link really is gone, and the
+    # subject-keyed cleanup really does retire the alert a submitted round makes stale.
+    def _safety_officer(self):
+        email = f"zro-{_hash()}@example.com".lower()
+        user = frappe.get_doc({
+            "doctype": "User", "email": email, "first_name": "ZR Safety Officer",
+            "send_welcome_email": 0,
+        }).insert(ignore_permissions=True)
+        user.add_roles("Safety Officer")
+        return user.name
+
+    def _officer_alerts(self, user, building_name, read=0):
+        return frappe.db.count("Notification Log", {
+            "for_user": user, "type": "Alert", "read": read,
+            "subject": f"No recent safety round: {building_name}",
+        })
+
+    def test_safety_officer_alert_carries_no_building_link(self):
+        """A link the officer cannot open is worse than no link: delivery succeeds and
+        the click throws PermissionError, with nothing logged anywhere."""
+        officer = self._safety_officer()
+        b = self._building()
+        daily_safety_task_compliance_scan()
+        self.assertEqual(
+            self._officer_alerts(officer, b.building_name),
+            1,
+            "BUG: the Safety Officer was not alerted about the building with no round",
+        )
+        self.assertEqual(
+            frappe.db.count("Notification Log", {
+                "for_user": officer, "type": "Alert",
+                "document_type": "Building", "document_name": b.name,
+            }),
+            0,
+            "BUG: the Safety Officer alert links to Building, which that role cannot read",
+        )
+
+    def test_submitting_round_clears_the_unlinked_officer_alert(self):
+        officer = self._safety_officer()
+        b = self._building()
+        daily_safety_task_compliance_scan()
+        self.assertEqual(self._officer_alerts(officer, b.building_name), 1)
+        self._submitted_round(b.name)
+        self.assertEqual(
+            self._officer_alerts(officer, b.building_name),
+            0,
+            "BUG: a submitted round left the Safety Officer's stale bell alert unread — "
+            "dropping the Building link must not cost the subject-keyed cleanup",
+        )
+
     # [#5yf1my]
     def _task_instance(self, building, due_date):
         """A draft Scheduled Task Instance in the Open state, due on ``due_date``."""

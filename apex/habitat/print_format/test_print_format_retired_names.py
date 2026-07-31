@@ -15,8 +15,11 @@ apex/tests/ because the central directory is a shrink-only ratchet.
 
 Scope is the template body only. The Print Format RECORD name (the JSON `name`)
 is a stored identifier that other records point at, so retiring it needs a
-rename patch rather than an edit; _RECORD_NAME_DEBT tracks the one that still
-carries a retired name so the exemption stays visible instead of silent.
+rename patch rather than an edit; _RECORD_NAME_DEBT tracks any that still carry
+a retired name so the exemption stays visible instead of silent. The last entry
+was drained by patches/v2_0/rename_checkout_clearance_print_format.py, so the set
+is empty and test_no_undeclared_retired_record_name now covers every shipped
+print format with no exemption at all.
 """
 
 from __future__ import annotations
@@ -47,8 +50,9 @@ _RETIRED_NAMES = {
 
 # Print Format record names still carrying a retired name. A record name is a
 # link target, so draining one needs a rename patch -- not a text edit. Staff
-# read these in the print dropdown; no worker reads them on paper.
-_RECORD_NAME_DEBT = frozenset({"Accommodation Checkout Clearance"})
+# read these in the print dropdown; no worker reads them on paper. Now EMPTY: keep
+# it that way by shipping the patch, never by adding an entry here.
+_RECORD_NAME_DEBT = frozenset()
 
 
 def _templates() -> list:
@@ -88,6 +92,22 @@ class TestPrintFormatRetiredNames(unittest.TestCase):
             "A print format prints a record name the rename retired, so the "
             "worker holding the sheet reads a record that no longer exists. "
             "Use the replacement name:\n" + "\n".join(violations),
+        )
+
+    def test_no_print_format_is_exempt(self):
+        """The exemption set must stay empty.
+
+        A rename patch and the record's JSON are ONE change -- import_doc resolves the
+        record by the JSON's ``name`` and delete+inserts it, so a JSON left on the old
+        key is undone by the next migrate. That makes "queue the patch later" an
+        unshippable plan, and an entry here would be the way to ship it anyway.
+        """
+        self.assertEqual(
+            set(_RECORD_NAME_DEBT),
+            set(),
+            "a print format record name was exempted instead of renamed. Ship the "
+            "rename patch and the JSON name in the SAME change; there is no valid "
+            "intermediate state to record here.",
         )
 
     def test_record_name_debt_is_real(self):

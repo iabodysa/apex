@@ -93,6 +93,12 @@ apex.patches.v1_x.migrate_scheduled_task_template_to_assignments
 # already dropped the row and any User pinned to it. Non-destructive and idempotent.
 apex.patches.v2_0.rename_fleet_workspace_to_title_case
 
+# STILL-REQUIRED (ONE-TIME): MUST stay in [pre_model_sync] — renames the Print Format
+# key 'Accommodation Checkout Clearance' -> 'Housing Checkout Clearance' BEFORE
+# sync_all() re-imports the shipped JSON, which resolves the record by name and would
+# otherwise leave the retired key orphaned in the print dropdown beside the new one.
+apex.patches.v2_0.rename_checkout_clearance_print_format
+
 [post_model_sync]
 # STILL-REQUIRED: only-if-missing Web Form route safeguard for a v15 upgrade
 # (GitHub #97). Nothing in source proves every deployed site is already v15-correct.
