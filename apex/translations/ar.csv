@@ -3279,6 +3279,7 @@ Safety rounds were recorded for {0} on {1}.,سُجِّلت جولات السلا
 Safety task '{0}' failed on {1} (result: {2}). Repair required.,فشلت مهمة السلامة '{0}' بتاريخ {1} (النتيجة: {2}). يلزم إجراء إصلاح.
 Salary Component,مكوّن الراتب
 Salary Component {0} must be of type Deduction (deduction type {1}).,يجب أن يكون مكون الراتب {0} من نوع خصم (نوع الخصم {1}).
+"Salary Component {0} posts to {1} for company {2}, but employee advances are paid from {3}. Damage recovery would clear the deduction without clearing the advance. Point both at one account.","مكوّن الراتب {0} يُقيَّد على {1} في شركة {2}، بينما تُصرف سلف الموظفين من {3}. استرداد الضرر سيُغلق الخصم دون إغلاق السلفة. وحِّد الحسابين."
 Salary Deduction,خصم من الراتب
 Salary Deduction Policy,سياسة الخصم من الراتب
 Salary Deduction Type Rule,قاعدة نوع الخصم من الراتب
