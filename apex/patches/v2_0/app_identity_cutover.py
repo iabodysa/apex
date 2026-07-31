@@ -10,15 +10,18 @@ stored dotted Python path (Number Card ``method``, Scheduled Job Type
 Once the app source is upgraded past the rename, ``apex_habitat`` is no longer a
 package on disk, so every one of those stored names is an unimportable module:
 
-* ``bench migrate`` raises in ``Migrate.pre_schema_updates``, which calls
-  ``frappe.get_hooks("before_migrate", app_name=app)`` for each entry of the
-  UNFILTERED ``frappe.get_installed_apps()`` (frappe/migrate.py:113-115).
-  ``frappe._load_app_hooks`` prints ``Could not find app "apex_habitat"`` and
-  re-raises the ImportError (frappe/__init__.py:1592-1601).
-* Ordinary request hook loading instead uses
-  ``get_installed_apps(_ensure_on_bench=True)``, which drops any app absent from
-  ``sites/apps.txt`` (frappe/__init__.py:1561-1563). Repairing the registry file
-  alone therefore brings the site back up before any DB write happens.
+* ``bench migrate`` dies in ``Migrate.setUp`` -> ``clear_global_cache``
+  (frappe/migrate.py:83), which loads hooks; ``_load_app_hooks`` prints
+  ``Could not find app "apex_habitat"`` and re-raises (frappe/__init__.py:1592-
+  1601). Rehearsed on frappe 15.109.0: it never reaches ``pre_schema_updates``.
+* Hook loading drops apps absent from ``sites/apps.txt``
+  (``get_installed_apps(_ensure_on_bench=True)``, frappe/__init__.py:1561-1563),
+  so repairing that file is what brings the site back up - but the read is
+  memoised in redis under ``all_apps`` (:1562) and ``bench clear-cache`` itself
+  loads hooks, so the stale value must be dropped from redis directly.
+* ``frappe.get_attr`` refuses an app missing from ``get_installed_apps()``
+  (frappe/__init__.py:1744-1746), so ``bench execute apex....`` raises
+  AppNotInstalledError until the DB identity is already repaired.
 
 This is deliberately NOT a migrate patch, and must never become one: patch
 discovery is gated on the same broken list. ``get_all_patches`` iterates
@@ -33,9 +36,9 @@ UNREGISTERED-PATCH: a pre-rename site never reads apex/patches.txt at all, since
     dead package; registering this would reach only sites that are already
     canonical, sweeping every table of every healthy site to change nothing.
 COVERED-BY: a deliberate operator cutover inside a maintenance window, driven by
-    docs/UPGRADE-APP-IDENTITY.md and invoked as ``bench --site <site> execute
-    apex.patches.v2_0.app_identity_cutover.cutover``; the pure planning helpers
-    are exercised off-bench by the colocated test_app_identity_cutover.py.
+    docs/UPGRADE-APP-IDENTITY.md; the pure planning helpers are exercised
+    off-bench by the colocated test_app_identity_cutover.py. Reaching them needs
+    an invocation that skips the ``get_attr`` gate named above.
 """
 
 import json
@@ -199,7 +202,10 @@ def _frappe():
 
 
 def _registry_path(frappe):
-    return Path(frappe.local.sites_path) / "apps.txt"
+    # Resolved, because bench runs commands with the sites directory as cwd and
+    # sites_path is then "." - an operator told to rewrite "apps.txt" would look
+    # for it at the bench root, where there is no such file.
+    return (Path(frappe.local.sites_path) / "apps.txt").resolve()
 
 
 def _text_columns(frappe):

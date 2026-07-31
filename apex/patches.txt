@@ -217,3 +217,9 @@ apex.patches.v2_0.drop_ghost_sim_operations_module_def
 # skips validate — so existing rows hold a name their declared type cannot resolve.
 # Leaves an ambiguous row blank and logs it rather than guessing a type.
 apex.patches.v2_0.backfill_routed_payment_doctype
+
+# STILL-REQUIRED (ONE-TIME): re-seeds the Apex Integration Settings help panels from the
+# shipped DocType defaults. A Text Editor default seeds a Single once, so every site
+# installed before the API guidance was corrected still shows a browser client being told
+# to carry an API secret. Must stay in [post_model_sync]: it reads the imported default.
+apex.patches.v2_1.refresh_integration_settings_help
