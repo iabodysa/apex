@@ -20,6 +20,10 @@
 #   range <log-opts>  the redacted secret scan over a commit range (pre-push, CI)
 #   thresholds        the declared scope and limits as JSON, for a tool that must
 #                     gate on the same declaration instead of copying it
+#   doctor [--fix]    whether the hooks in THIS work tree will actually run on it. Every
+#                     other mode above answers "does the content pass"; this one answers
+#                     the question underneath it, "did any gate run at all", which is the
+#                     failure that leaves no trace in a log
 set -eu
 
 MODE="${1:-tree}"
@@ -371,9 +375,182 @@ secret_scan() {
 	fi
 }
 
+# A guard that never ran leaves no red to read, which is the one failure the modes above
+# cannot report on themselves: they only ever speak about a tree git already handed them.
+# Everything below judges the WIRING - whether the hooks committed in this work tree are
+# the hooks git would actually execute here - and it is the standing answer to "is the
+# local gate live", asked without having to remember what to look at.
+HOOKS_DIRNAME=.githooks
+HOOKED_FILES="commit-msg pre-commit pre-push"
+DOCTOR_FAULTS=0
+DOCTOR_FOREIGN=0
+
+# Canonical form or nothing: two spellings of one directory must not read as two
+# directories, and a path that cannot be entered is not a hooks directory at all.
+# `pwd -P` because the comparison below is an identity test and the two sides arrive
+# spelled differently - git reports a resolved work tree root while a configured value
+# keeps whatever symlink it was written with, so a logical pwd reports one directory
+# reached two ways as a mismatch (/var against /private/var on macOS).
+canonical_dir() {
+	(CDPATH= cd -- "$1" 2>/dev/null && pwd -P) || return 1
+}
+
+# Git runs a hook from the work tree root, so a RELATIVE core.hooksPath resolves per
+# work tree and an absolute one pins every linked work tree to whichever checkout the
+# value was written from. That difference is the whole subject of this mode.
+resolved_hooks_dir() {
+	case "$1" in
+	/*) printf '%s\n' "$1" ;;
+	*) printf '%s\n' "$root/$1" ;;
+	esac
+}
+
+# How many work trees hold no .githooks of their own. A foreign absolute value is the only
+# thing gating those, so this count is what makes the repair below refusable on evidence
+# rather than on caution. Prints NOTHING when the enumeration itself fails, because a
+# repair that proceeds on an unreadable fleet is the fail-open this count exists to close.
+trees_without_hooks() {
+	listing=$(git worktree list --porcelain 2>/dev/null) || return 1
+	[ -n "$listing" ] || return 1
+	printf '%s\n' "$listing" |
+		while read -r key value; do
+			[ "$key" = "worktree" ] || continue
+			[ -d "$value/$HOOKS_DIRNAME" ] || echo x
+		done | wc -l | tr -d ' '
+}
+
+doctor_fault() {
+	DOCTOR_FAULTS=$((DOCTOR_FAULTS + 1))
+	echo "doctor: FAIL - $1" >&2
+}
+
+# Setting a path that currently resolves nowhere can only ADD gating: no hook runs today,
+# and afterwards the work trees that carry .githooks are gated while the ones that do not
+# are exactly as unguarded as they already were. That is the whole test for whether a
+# repair is safe to write, and it is why the live case below is refused instead.
+#
+# A condition this run has just repaired is NOT counted as a fault. Exiting non-zero after
+# fixing the thing would train a caller to ignore this mode's exit code, which is the only
+# part of it a script can read.
+repair_hooks_path() {
+	if [ "$DOCTOR_FIX" -eq 1 ]; then
+		git config core.hooksPath "$HOOKS_DIRNAME"
+		echo "doctor: $1"
+		echo "doctor: repaired - core.hooksPath is now $HOOKS_DIRNAME"
+		return 0
+	fi
+	doctor_fault "$1"
+	echo "doctor: re-run with --fix to set it, or by hand: git config core.hooksPath $HOOKS_DIRNAME" >&2
+}
+
+check_hooks_path() {
+	configured=$(git config --get core.hooksPath || true)
+
+	if [ -z "$configured" ]; then
+		repair_hooks_path "core.hooksPath is unset, so no commit-msg, pre-commit or pre-push
+doctor:        hook runs here and every local gate is silently skipped"
+		return 0
+	fi
+
+	target=$(resolved_hooks_dir "$configured")
+	if [ ! -d "$target" ]; then
+		repair_hooks_path "core.hooksPath names $configured, which does not exist. git skips a
+doctor:        missing hooks directory without a word, so the local gate is dead"
+		return 0
+	fi
+
+	here=$(canonical_dir "$root/$HOOKS_DIRNAME" || true)
+	there=$(canonical_dir "$target" || true)
+	[ "$here" = "$there" ] && return 0
+
+	# Not a fault: this value is what keeps the hookless work trees gated at all. It is
+	# reported because it means an edit to .githooks or to a gate script in THIS tree is
+	# never exercised by the author who made it - the hooks that fire belong elsewhere.
+	DOCTOR_FOREIGN=1
+	stale=$(trees_without_hooks || true)
+	echo "doctor: NOTE - the hooks that fire here are $there, not $root/$HOOKS_DIRNAME" >&2
+	echo "doctor: so an edit to $HOOKS_DIRNAME/ or scripts/ in this tree is not exercised by its own" >&2
+	echo "doctor: author, and a clone or a move of this checkout finds no hooks at all." >&2
+
+	# The count IS the precondition, measured rather than remembered. While any work tree
+	# carries no hooks of its own, this foreign value is the only thing gating it and
+	# rewriting it would convert a latent portability defect into an active outage on every
+	# one of them. Once nothing depends on it, the same command performs the repair.
+	if [ -z "$stale" ]; then
+		echo "doctor: NOT repaired: the work trees could not be enumerated, so there is no" >&2
+		echo "doctor: evidence that rewriting this value would leave every one of them gated." >&2
+		return 0
+	fi
+	if [ "$stale" -gt 0 ]; then
+		echo "doctor: NOT repaired, and --fix will not repair it: $stale work trees hold no" >&2
+		echo "doctor: $HOOKS_DIRNAME of their own, and this value is the only thing gating them today." >&2
+		echo "doctor: re-run once that count reaches zero and --fix will set $HOOKS_DIRNAME." >&2
+		return 0
+	fi
+	if [ "$DOCTOR_FIX" -eq 0 ]; then
+		echo "doctor: every work tree now carries its own $HOOKS_DIRNAME, so this is safe to repair:" >&2
+		echo "doctor: re-run with --fix, or by hand: git config core.hooksPath $HOOKS_DIRNAME" >&2
+		return 0
+	fi
+	git config core.hooksPath "$HOOKS_DIRNAME"
+	DOCTOR_FOREIGN=0
+	echo "doctor: repaired - core.hooksPath is now $HOOKS_DIRNAME, resolved per work tree"
+}
+
+# git skips a hook it cannot execute and says nothing, which is the quietest way for this
+# gate to stop existing - so the bit is checked rather than the file's presence.
+check_hooks_executable() {
+	for hook in $HOOKED_FILES; do
+		path="$root/$HOOKS_DIRNAME/$hook"
+		if [ ! -f "$path" ]; then
+			doctor_fault "$HOOKS_DIRNAME/$hook is missing from this work tree"
+			continue
+		fi
+		[ -x "$path" ] && continue
+		if [ "$DOCTOR_FIX" -eq 1 ]; then
+			chmod +x "$path"
+			echo "doctor: made $HOOKS_DIRNAME/$hook executable"
+			continue
+		fi
+		doctor_fault "$HOOKS_DIRNAME/$hook is not executable, so git skips it in silence"
+	done
+}
+
+# The gates the hooks reach have to exist for the hooks to mean anything: pre-commit and
+# commit-msg both refuse the commit outright when the metadata gate is absent, and
+# pre-push degrades to a warning when this runner is, so an absent file here is the
+# difference between a gate and a printed sentence.
+check_gates_reachable() {
+	for gate in scripts/check_commit_metadata.py scripts/run_guards.sh; do
+		[ -f "$root/$gate" ] || doctor_fault "$gate is absent, so the hooks that call it cannot gate"
+	done
+	command -v python3 >/dev/null 2>&1 ||
+		doctor_fault "python3 is not on PATH, so the commit metadata gate refuses every commit"
+}
+
+hook_doctor() {
+	check_hooks_path
+	check_hooks_executable
+	check_gates_reachable
+	if [ "$DOCTOR_FAULTS" -ne 0 ]; then
+		echo "doctor: $DOCTOR_FAULTS fault(s) - the local gate is not live on this work tree" >&2
+		exit 1
+	fi
+	if [ "$DOCTOR_FOREIGN" -eq 1 ]; then
+		echo "doctor: PASS - a gate is live here, but it is another checkout's copy (see the NOTE)"
+		return 0
+	fi
+	echo "doctor: PASS - the hooks in this work tree are the hooks git runs here"
+}
+
 case "$MODE" in
 tree)
 	tree_guards
+	;;
+doctor)
+	DOCTOR_FIX=0
+	[ "${2:-}" = "--fix" ] && DOCTOR_FIX=1
+	hook_doctor
 	;;
 range)
 	secret_scan "${2:?range mode needs git log options, e.g. origin/apex..HEAD}"
@@ -387,7 +564,7 @@ thresholds)
 		"$PACKAGE/translations/$LANG_CODE.stale-baseline.txt"
 	;;
 *)
-	echo "usage: scripts/run_guards.sh [tree|range <log-opts>|thresholds]" >&2
+	echo "usage: scripts/run_guards.sh [tree|range <log-opts>|thresholds|doctor [--fix]]" >&2
 	exit 2
 	;;
 esac
