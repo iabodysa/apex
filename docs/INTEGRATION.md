@@ -12,6 +12,8 @@ A **frontend** is any client that consumes this backend over HTTP. It is present
 
 The frontend is **stack-agnostic**. It can be React, Vue, Angular, Svelte, Flutter, a native iOS/Android app, or a server-side service - anything that can send HTTP requests with a header. The two sides integrate through a clean, versioned HTTP contract, not by sharing code.
 
+Stack does not decide **how you authenticate**; where the credential lives does. A client you control and can keep a secret on - a server, a container, a scheduled job - is a **confidential** client and uses an API key and secret. A client you hand to end users - a page running in their browser, an app installed from a store - is a **public** client and cannot hold a secret, because everything shipped to it can be read back out. Section 3 covers the first case, Section 3a the second.
+
 ```
 +------------------+        HTTP + token auth        +-----------------------------+
 |  Your frontend   |  ---------------------------->  |  apex (Frappe v15)  |
@@ -32,9 +34,11 @@ bench --site <your-site> migrate
 
 After `migrate` completes, the DocTypes, permissions, workflows, and seed data are available, and the API is ready to use.
 
-## 3. Authentication - API token (key + secret)
+## 3. Authentication for a confidential client - API token (key + secret)
 
-Because the frontend lives on a **different origin** from the backend, use Frappe's **API key / secret token** authentication. Do not rely on cookie/session login from a separate origin.
+Use this section when the caller runs on infrastructure you control: your own server, a container, a scheduled job, or a backend-for-frontend that sits between your users and this backend. Because that caller lives on a **different origin** from the backend, use Frappe's **API key / secret token** authentication rather than cookie/session login.
+
+> **Do not use an API key and secret from a browser page or a distributed mobile app.** The secret would be shipped to the user's device, where it can be read out of the bundle, the network log, or the device storage - and it authenticates as its user against every endpoint that user can reach, not just the one you meant to expose. Obfuscation and "load it from config at runtime" do not change this: whatever the client can read, its user can read. See [Section 3a](#3a-authentication-for-a-browser-or-mobile-app).
 
 ### Generate a key and secret
 
@@ -61,6 +65,26 @@ Operational notes:
 - Use **HTTPS** only - the token is a bearer credential.
 - **Scope keys per role**: create a dedicated user (or users) for the frontend and assign only the roles it needs. Permissions and project scoping are enforced server-side per user.
 - **Rotate / revoke** keys as needed by regenerating them on the User record.
+
+## 3a. Authentication for a browser or mobile app
+
+A page running in a browser and an app installed from a store are **public** clients: they hold no secret. Pick one of the two supported paths.
+
+### Option A - native OAuth authorization code with PKCE
+
+Frappe ships the OAuth server; you do not build one. Create an **OAuth Client** record, set its **Grant Type** to *Authorization Code*, and register your redirect URI. The client then runs the standard authorization-code flow and adds **PKCE**, which replaces the client secret with a one-time proof generated per login:
+
+1. The client generates a random `code_verifier` and sends its SHA-256 hash as `code_challenge` (with `code_challenge_method=S256`) on the authorization request.
+2. The user signs in against the backend and is redirected back with a short-lived authorization code.
+3. The client exchanges that code for a token, presenting the original `code_verifier`. The backend recomputes the hash and rejects a mismatch, so an intercepted code is useless on its own.
+
+Each user ends up with a token that carries **their own** permissions, which is what the server-side rules in this app are written against. Nothing long-lived is stored in the client.
+
+### Option B - backend-for-frontend
+
+Keep an API key and secret on a small service of your own and let the browser or app talk only to that service, over your own session. The secret never leaves your infrastructure, and the service decides which calls it is willing to make on a user's behalf. Choose this when you need to aggregate or reshape responses anyway, or when you are integrating a client that cannot complete an OAuth redirect.
+
+Whichever you pick, the permission model does not move: the backend still enforces every rule per user, so a client cannot widen its own access by changing what it sends.
 
 ## 4. CORS
 
@@ -148,6 +172,8 @@ with the document and the action to apply. Role checks and segregation-of-duties
 
 ## 6. A minimal authenticated example
 
+Both examples below are **confidential-client** calls: they carry an API key and secret and belong on a machine you control. Do not copy either into a browser bundle or a shipped mobile app - authenticate those through [Section 3a](#3a-authentication-for-a-browser-or-mobile-app).
+
 ### curl
 
 ```bash
@@ -157,11 +183,14 @@ curl -X GET \
   -H 'Accept: application/json'
 ```
 
-### JavaScript (`fetch`)
+### JavaScript (`fetch`) - server-side only
+
+This example runs on **your server** (Node, or the backend-for-frontend from Section 3a), not in a browser bundle. It reads the secret from the server's environment, where the user never sees it. A browser or mobile client authenticates through [Section 3a](#3a-authentication-for-a-browser-or-mobile-app) instead and sends its own OAuth token.
 
 ```js
 const BASE = "https://your-backend.example.com";
-const TOKEN = "token <api_key>:<api_secret>"; // load from secure config, never hard-code
+// Server-side environment only. Shipping this string to a browser exposes the secret.
+const TOKEN = `token ${process.env.APEX_API_KEY}:${process.env.APEX_API_SECRET}`;
 
 async function listWorkerTransportRequests() {
   const filters = encodeURIComponent('[["service_line","=","Workers"]]');
@@ -184,7 +213,7 @@ async function listWorkerTransportRequests() {
 }
 ```
 
-The same `Authorization: token <key>:<secret>` header works for every endpoint in Section 5, on any HTTP client. The pattern is identical whether you use `fetch`, `axios`, a mobile HTTP library, or a backend-to-backend call.
+The same `Authorization: token <key>:<secret>` header works for every endpoint in Section 5, from any HTTP client **running on infrastructure you control** - `fetch` or `axios` on your server, a scheduled job, or a backend-to-backend call. The endpoints and their request/response shapes are the same for a browser or mobile client; only the credential differs, because that client carries an OAuth token from Section 3a instead of a key and secret.
 
 ## 7. Versioned contract
 
