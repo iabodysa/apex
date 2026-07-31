@@ -50,15 +50,6 @@ _TRIP_STATUS_KEY = {
 _REGISTRATION_TYPE = "Registration (Istimara)"
 
 
-def _bound_vehicle(driver):
-    """The vehicle bound to ``driver`` (current_vehicle, else Active Assignment), or None.
-
-    Kept as a module-level name so the endpoints (and their tests) resolve it here;
-    the rule itself lives in ``salis.utils.bound_vehicle``, shared with the driver
-    portal, so this page's reads and the fuel writes can never diverge."""
-    return bound_vehicle(driver)
-
-
 def _registration_expiry(vehicle):
     """The vehicle's registration (Istimara) expiry, else its next rolled-up expiry.
 
@@ -88,7 +79,7 @@ def get_my_vehicle():
     model (category label), office (project label), a status key mapped to the
     page's status-pill vocabulary, odometer, and the registration expiry."""
     driver = get_driver_for_session_user(frappe.session.user)
-    vehicle = _bound_vehicle(driver) if driver else None
+    vehicle = bound_vehicle(driver) if driver else None
     if not vehicle:
         return {"vehicle": None}
 
@@ -220,7 +211,7 @@ def submit_fuel_request(litres, vehicle=None, fuel_grade=None, station=None, not
             frappe.PermissionError,
         )
 
-    bound = _bound_vehicle(driver)
+    bound = bound_vehicle(driver)
     if vehicle and vehicle != bound:
         frappe.throw(
             _("That vehicle is not assigned to you. You can only request fuel for your own vehicle."),

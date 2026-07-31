@@ -304,10 +304,10 @@ class TestGetDriverForUser(FrappeTestCase):
     def test_fleet_vehicle_endpoint_ignores_foreign_driver_cookie(self):
         frappe.set_user(self.user)
         with _request_cookies({"masar_dt": self.other_driver_token}), patch.object(
-            fleet_employee, "_bound_vehicle", return_value=None
-        ) as bound_vehicle:
+            fleet_employee, "bound_vehicle", return_value=None
+        ) as bound:
             self.assertEqual(fleet_employee.get_my_vehicle(), {"vehicle": None})
-        bound_vehicle.assert_called_once_with(self.driver.name)
+        bound.assert_called_once_with(self.driver.name)
 
     def test_fleet_trips_endpoint_ignores_foreign_driver_cookie(self):
         frappe.set_user(self.user)
@@ -320,10 +320,10 @@ class TestGetDriverForUser(FrappeTestCase):
     def test_fleet_fuel_endpoint_ignores_foreign_driver_cookie(self):
         frappe.set_user(self.user)
         with _request_cookies({"masar_dt": self.other_driver_token}), patch.object(
-            fleet_employee, "_bound_vehicle", return_value=None
-        ) as bound_vehicle, self.assertRaises(frappe.ValidationError):
+            fleet_employee, "bound_vehicle", return_value=None
+        ) as bound, self.assertRaises(frappe.ValidationError):
             fleet_employee.submit_fuel_request(10)
-        bound_vehicle.assert_called_once_with(self.driver.name)
+        bound.assert_called_once_with(self.driver.name)
 
     def test_dispatch_permission_hook_ignores_foreign_driver_cookie(self):
         frappe.set_user(self.user)
