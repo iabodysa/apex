@@ -1,43 +1,98 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
 <!--
-  Masar Route Supervisor portal shell. Composes the four supervisor capabilities around a
-  selected Route Plan:
+  Masar Route Supervisor portal — ARCHETYPE 3, review tier.
+
+  Mounts the shared @shared/components/TabletSupervisorShell.vue rather than a
+  hand-rolled header + grid. That shell was written for this archetype and then
+  had no consumer at all, so the one tablet supervisor console in the tree carried
+  its own answer to drawer collapse, side-nav states and top-bar spacing. Adopting
+  it was chosen over deleting it because deleting removes the archetype from the
+  system entirely, and this portal is the smallest of the two archetype-3 consoles
+  (one screen, four tabs) — the cheapest place to prove the shell fits. The shell
+  now owns the chrome; this file owns only the work area.
+
+  Side nav = the four capabilities around a selected Route Plan; the detail keeps
+  its own tab strip because the nav is a drawer below --bp-desktop and the strip is
+  what remains reachable there.
     1. Approve / reject the plan assigned to this supervisor (native backend decision).
     2. Track boarding live per trip (BoardingPanel).
     3. Follow the ordered route stops (RoutePanel).
     4. Track the driver live on a map (DriverMap).
-  The plan list (left) is row-scoped server-side to the caller's own assigned plans; this
+  The plan list is row-scoped server-side to the caller's own assigned plans; this
   shell only ever renders what get_supervisor_context returns.
 -->
 <template>
-  <div class="app" :dir="dir">
-    <!-- Header -->
-    <header class="app-header">
-      <div class="brand">
-        <div class="brand-mark"><Icon name="route" :size="22" :stroke-width="2.2" /></div>
-        <div class="brand-txt">
-          <span class="brand-name">{{ t("brand.name") }}</span>
-          <span class="brand-sub">{{ t("brand.sub") }}</span>
-        </div>
-      </div>
-      <div class="header-right">
-        <div v-if="ctx" class="sup-chip">
-          <Icon name="user" :size="15" />
-          <span>{{ ctx.supervisor.full_name }}</span>
-        </div>
-        <div v-if="pendingCount" class="pending-chip">{{ t("header.pending", { n: pendingCount }) }}</div>
-        <LangToggle variant="header" />
-      </div>
-    </header>
+  <TabletSupervisorShell
+    :dir="dir"
+    :title="t('list.title')"
+    :subtitle="summary"
+    :menu-label="t('nav.menu')"
+  >
+    <template #brand>
+      <span class="brand-mark"><Icon name="route" :size="20" :stroke-width="2.2" /></span>
+      <span class="brand-txt">
+        <span class="brand-name">{{ t("brand.name") }}</span>
+        <span class="brand-sub">{{ t("brand.sub") }}</span>
+      </span>
+    </template>
 
-    <div class="layout">
+    <template #nav>
+      <span class="nav-label">{{ t("nav.work") }}</span>
+      <button
+        v-for="tb in TABS"
+        :key="tb.key"
+        type="button"
+        :class="{ 'is-active': tab === tb.key }"
+        :disabled="!selectedPlan"
+        @click="tab = tb.key"
+      >
+        <Icon :name="tb.icon" :size="17" />
+        <span>{{ t("tabs." + tb.key) }}</span>
+        <span v-if="tb.key === 'approval' && pendingCount" class="nav-count">{{ pendingCount }}</span>
+      </button>
+
+      <span class="nav-label">{{ t("nav.account") }}</span>
+      <span v-if="ctx" class="nav-user">
+        <Icon name="user" :size="16" />
+        <span>{{ ctx.supervisor.full_name }}</span>
+      </span>
+    </template>
+
+    <template #title-actions>
+      <button
+        type="button"
+        class="ghost-btn"
+        :title="t('common.refresh')"
+        :aria-label="t('common.refresh')"
+        @click="loadContext()"
+      >
+        <Icon name="refresh" :size="16" />
+      </button>
+      <!-- Default variant, not "header": title-actions sits on the light top bar,
+           where the header-tinted ink would read cream-on-cream. -->
+      <LangToggle />
+    </template>
+
+    <template #kpis>
+      <div class="kpi">
+        <span class="kpi-label">{{ t("kpi.pending") }}</span>
+        <b class="kpi-num">{{ pendingCount }}</b>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">{{ t("kpi.active") }}</span>
+        <b class="kpi-num">{{ totalCount }}</b>
+      </div>
+      <div v-if="selectedBoarding" class="kpi">
+        <span class="kpi-label">{{ t("kpi.boarding") }}</span>
+        <b class="kpi-num">{{ selectedBoarding.boarded }}/{{ selectedBoarding.expected || "—" }}</b>
+      </div>
+    </template>
+
+    <div class="work">
       <!-- Plan list -->
       <aside class="plans">
         <div class="plans-head">
-          <h1 class="plans-title">{{ t("list.title") }}</h1>
-          <button class="ghost-btn" :title="t('common.refresh')" @click="loadContext()">
-            <Icon name="refresh" :size="16" />
-          </button>
+          <h2 class="plans-title">{{ t("header.plans") }}</h2>
         </div>
 
         <div v-if="loadState === 'loading'" class="plan-skel">
@@ -74,8 +129,8 @@
         </ul>
       </aside>
 
-      <!-- Main -->
-      <main class="main">
+      <!-- Detail -->
+      <section class="detail">
         <div v-if="!selectedPlan" class="empty big">
           <Icon name="route" :size="40" :stroke-width="1.5" />
           <p>{{ t("list.empty") }}</p>
@@ -149,7 +204,7 @@
             <DriverMap v-show="tab === 'map'" :tripName="selectedTrip" :active="tab === 'map'" />
           </div>
         </template>
-      </main>
+      </section>
     </div>
 
     <!-- Reject modal -->
@@ -169,13 +224,16 @@
 
     <!-- Toast -->
     <div class="toast" :class="[toast.show ? 'show' : '', 'toast-' + toast.type]">{{ toast.msg }}</div>
-  </div>
+  </TabletSupervisorShell>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import Icon from "./Icon.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
+// Direct path, not the barrel: the barrel drags every shared component into this
+// bundle (frontend_shared/components/index.js records why that matters).
+import TabletSupervisorShell from "@shared/components/TabletSupervisorShell.vue";
 import { useToast } from "@shared/useToast.js";
 import { usePoll } from "@shared/usePoll.js";
 import BoardingPanel from "./components/BoardingPanel.vue";
@@ -210,8 +268,14 @@ const POLL_MS = 45000;
 
 const plans = computed(() => ctx.value?.plans || []);
 const pendingCount = computed(() => ctx.value?.counts?.pending || 0);
+const totalCount = computed(() => ctx.value?.counts?.total || 0);
 const selectedPlan = computed(() => plans.value.find((p) => p.name === selectedName.value) || null);
 const selectedTrip = computed(() => selectedPlan.value?.trip?.name || null);
+const selectedBoarding = computed(() => selectedPlan.value?.trip?.boarding || null);
+
+// Top-bar subtitle. Only the two counts the endpoint actually returns — the KPI row
+// beside it carries no metric the backend does not already compute.
+const summary = computed(() => t("header.summary", { p: pendingCount.value, t: totalCount.value }));
 
 const statusHint = computed(() => {
   const a = selectedPlan.value?.approval;

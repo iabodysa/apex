@@ -11,7 +11,13 @@ const messages = {
   en: {
     lang: { en: "EN", ar: "ع", label: "Language", english: "English", arabic: "العربية" },
     brand: { name: "Masar", sub: "Route Supervisor" },
-    header: { plans: "Route plans", pending: "{n} pending" },
+    header: {
+      plans: "Route plans",
+      pending: "{n} pending",
+      summary: "{p} awaiting your approval · {t} active plans",
+    },
+    nav: { work: "Work", account: "Account", menu: "Menu" },
+    kpi: { pending: "Awaiting approval", active: "Active plans", boarding: "Boarded now" },
     common: {
       none: "—",
       retry: "Retry",
@@ -110,7 +116,13 @@ const messages = {
   ar: {
     lang: { en: "EN", ar: "ع", label: "اللغة", english: "English", arabic: "العربية" },
     brand: { name: "مسار", sub: "مشرف المسار" },
-    header: { plans: "خطط المسارات", pending: "{n} بانتظار الاعتماد" },
+    header: {
+      plans: "خطط المسارات",
+      pending: "{n} بانتظار الاعتماد",
+      summary: "{p} بانتظار اعتمادك · {t} خطة نشطة",
+    },
+    nav: { work: "العمل", account: "الحساب", menu: "القائمة" },
+    kpi: { pending: "بانتظار الاعتماد", active: "الخطط النشطة", boarding: "الصاعدون الآن" },
     common: {
       none: "—",
       retry: "إعادة المحاولة",

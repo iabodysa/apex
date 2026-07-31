@@ -28,6 +28,20 @@
  *   - :root[data-theme="light"|"dark"] → explicit toggle wins both ways
  *   - [data-theme="afmco"] kept as a light alias for the legacy theme setting.
  *
+ * KNOWN GAP — auto-dark never reaches four portals, and the cause is here.
+ * masar.html, driver.html, safety.html and housing.html all server-render
+ * data-theme="{{ portal_theme or 'afmco' }}", so the attribute says "default
+ * identity" rather than "stay light" — yet the dark block below excludes it, and
+ * those four can never go dark however clean their own stylesheet is.
+ * Dropping the :not([data-theme="afmco"]) clause is NOT sufficient on its own:
+ * housing/src/index.css and safety/src/index.css still declare a full local --c-*
+ * palette in literal hex while resolving --c-primary/--c-accent/--c-success from
+ * the shared --brand-green primitive (and their cards from --shadow). Switching
+ * the primitives alone would darken those three tokens and the elevation over
+ * surfaces that stay light — a mixed palette, worse than the current all-light.
+ * The two changes belong in one step: delete those two local palettes, then drop
+ * the clause. Verify by opening all seven portals on a dark device.
+ *
  * NOTE: CSS @media conditions cannot read custom properties, so the responsive
  * breakpoints below are the DOCUMENTED source of truth; a `@media (min-width:
  * 768px)` rule must cite --bp-tablet in a comment and keep the same pixel value.
@@ -92,8 +106,14 @@
   --c-warning-bg: var(--warn-bg);
   --c-danger: var(--danger);
   --c-danger-bg: var(--danger-bg);
+  /* Ink ON a saturated danger fill. Mode-independent: white clears both the light
+     (#c0392b) and the dark (#ef6b5e) red, so it is declared once, not per mode. */
+  --c-danger-ink: #ffffff;
   --c-info: var(--info);
   --c-info-bg: var(--info-bg);
+  /* The single ring colour every :focus-visible outline uses, so the keyboard path
+     is one decision instead of one per portal. */
+  --c-focus: var(--brand-green);
   --c-header-bg: var(--header-bg);
   --c-header-ink: var(--header-ink);
   --c-header-accent: var(--header-accent);
@@ -132,6 +152,7 @@
   /* ---- Responsive breakpoints (documented source; see NOTE above) ---- */
   --bp-phone: 480px; /* single-column phone shell max-width */
   --bp-tablet: 768px; /* widen the centered shell to a reading column */
+  --bp-wide: 860px; /* a secondary column inside the work area folds away */
   --bp-desktop: 1024px; /* side-nav supervisor layout unlocks */
 }
 

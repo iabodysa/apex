@@ -94,4 +94,19 @@ describe("TabletSupervisorShell", () => {
     const w = mount(TabletSupervisorShell, { slots: { default: "x" } });
     expect(w.find(".ts-kpis").exists()).toBe(false);
   });
+
+  // The side-nav look (padding, active tint, disabled and focus states) is written
+  // with :slotted(), which compiles to a `<scopeId>-s` attribute the runtime stamps
+  // on slot content. Route Supervisor supplies bare <button>s and relies entirely on
+  // that stamp, so a regression here would silently unstyle the whole nav.
+  it("stamps the slot scope id on nav items so :slotted rules reach them", () => {
+    const w = mount(TabletSupervisorShell, {
+      slots: { nav: "<button class='item' disabled>Boarding</button>" },
+    });
+    const item = w.find(".ts-nav-list .item");
+    expect(item.exists()).toBe(true);
+    const slotScoped = Object.keys(item.attributes()).filter((a) => a.endsWith("-s"));
+    expect(slotScoped.length).toBe(1);
+    expect(slotScoped[0]).toBe(TabletSupervisorShell.__scopeId + "-s");
+  });
 });

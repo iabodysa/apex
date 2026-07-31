@@ -148,6 +148,20 @@ const shellVars = computed(() => ({
   color: var(--c-header-ink);
   font-weight: var(--fw-heading);
 }
+/* Disabled and focus are two of the eight mandatory component states; a nav item
+   that cannot act until a record is selected must say so rather than silently
+   no-op, and the keyboard path needs a visible ring on the dark ground. */
+.ts-nav-list :slotted(a[aria-disabled="true"]),
+.ts-nav-list :slotted(button:disabled) {
+  opacity: 0.45;
+  cursor: default;
+  background: none;
+}
+.ts-nav-list :slotted(a:focus-visible),
+.ts-nav-list :slotted(button:focus-visible) {
+  outline: 2px solid var(--c-header-accent, var(--c-focus));
+  outline-offset: 2px;
+}
 .ts-nav-list :slotted(.nav-label) {
   font-size: var(--fs-xs);
   font-weight: var(--fw-heading);
@@ -183,6 +197,10 @@ const shellVars = computed(() => ({
   color: var(--c-ink);
   cursor: pointer;
   flex: 0 0 auto;
+}
+.ts-menu:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 2px;
 }
 .ts-title h1 {
   margin: 0;
