@@ -23,6 +23,11 @@ def execute():
         # [#8xhyiq]
         if frappe.db.exists("Role", role_name):
             continue
+        # One savepoint per role so a bad row discards only its own writes. A bare
+        # rollback here ran mid-migrate: it threw away every role already seeded AND
+        # whatever the migrate had done before this patch, then the loop carried on
+        # and committed a half-seeded set as if it had succeeded.
+        frappe.db.savepoint("salis_role")
         try:
             doc = frappe.get_doc(
                 {
@@ -36,7 +41,7 @@ def execute():
             doc.insert(ignore_permissions=True)  # audit-ok
         except Exception:
             # [#kyey4m]
-            frappe.db.rollback()
+            frappe.db.rollback(save_point="salis_role")
             frappe.log_error(
                 title=f"seed_salis_roles failed: {role_name}",
                 message=frappe.get_traceback(),

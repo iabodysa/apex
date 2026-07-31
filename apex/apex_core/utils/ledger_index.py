@@ -170,7 +170,12 @@ def add_index_guarded(doctype: str, fields: list[str], index_name: str) -> bool:
             )
         )
     except Exception:
-        frappe.db.rollback()
+        # [#ddlspt] No rollback here, of either kind. ALTER TABLE implicitly commits in
+        # MariaDB whether it succeeds or fails, so by the time this runs the caller's
+        # work is already committed and every open savepoint is released. A bare
+        # rollback would undo nothing while still resetting the caller's commit hooks;
+        # a savepoint rollback would raise 1305 SAVEPOINT ... does not exist, uncaught,
+        # and abort the migrate this helper exists to survive.
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"Index add failed: {index_name}"[:140],
@@ -193,7 +198,10 @@ def add_unique_guarded(doctype: str, fields: list[str], constraint_name: str) ->
     try:
         frappe.db.add_unique(doctype, fields, constraint_name=constraint_name)
     except Exception:
-        frappe.db.rollback()
+        # [#ddlspt] frappe.db.add_unique commits before it runs its ALTER TABLE
+        # (frappe/database/mariadb/database.py:447), so the caller's work is committed
+        # and its savepoints released before this can ever be reached. See the twin
+        # note in add_index_guarded for why neither rollback form belongs here.
         _log_blocking_duplicates(doctype, fields, constraint_name)
         return False
 

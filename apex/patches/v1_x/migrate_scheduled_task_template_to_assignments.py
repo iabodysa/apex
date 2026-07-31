@@ -52,6 +52,10 @@ def execute():
             {"template": t.name, "building": t.building},
         ):
             continue
+        # Row-scoped: a bare rollback discarded every assignment already migrated in
+        # this run, and the `created` counter kept climbing, so the log reported rows
+        # that no longer existed.
+        frappe.db.savepoint("sta_row")
         try:
             frappe.get_doc({
                 "doctype": "Scheduled Task Assignment",
@@ -62,7 +66,7 @@ def execute():
             }).insert(ignore_permissions=True)
             created += 1
         except Exception:
-            frappe.db.rollback()
+            frappe.db.rollback(save_point="sta_row")
             frappe.log_error(
                 message=frappe.get_traceback(),
                 title=(

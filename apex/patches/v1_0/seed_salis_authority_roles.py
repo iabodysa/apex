@@ -25,6 +25,9 @@ def execute():
         # [#8xhyiq]
         if frappe.db.exists("Role", role_name):
             continue
+        # Row-scoped, for the same reason as seed_salis_roles: a bare rollback
+        # mid-migrate discarded every earlier row and the migrate's own prior work.
+        frappe.db.savepoint("salis_authority_role")
         try:
             doc = frappe.get_doc(
                 {
@@ -36,7 +39,7 @@ def execute():
             doc.insert(ignore_permissions=True)  # audit-ok
         except Exception:
             # [#kyey4m]
-            frappe.db.rollback()
+            frappe.db.rollback(save_point="salis_authority_role")
             frappe.log_error(
                 title=f"seed_salis_authority_roles failed: {role_name}",
                 message=frappe.get_traceback(),

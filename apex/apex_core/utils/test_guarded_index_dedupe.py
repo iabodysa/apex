@@ -232,7 +232,12 @@ class TestEquivalentIndexDetection(unittest.TestCase):
         with mock.patch.object(ledger_index, "frappe", frappe_ns):
             result = ledger_index.add_index_guarded("Housing Assignment", ["bed"], "idx_asgn_bed")
         self.assertFalse(result)
-        self.assertEqual(db.rollbacks, 1)
+        # No rollback of either kind. ALTER TABLE implicitly commits in MariaDB even
+        # when it fails, so the caller's work is already committed and its savepoints
+        # released by the time this runs: a bare rollback would undo nothing while
+        # resetting the caller's commit hooks, and a scoped one would raise
+        # 1305 SAVEPOINT ... does not exist and abort the migrate.
+        self.assertEqual(db.rollbacks, 0)
         frappe_ns.log_error.assert_called_once()
 
     def test_column_set_probe_binds_the_table_name(self):
@@ -314,7 +319,10 @@ class TestBedAssignmentIndexPatch(unittest.TestCase):
         returned, frappe_ns = self._execute(db)
         self.assertIsNone(returned)
         self.assertEqual(len(db.ddl), 2, "both indexes must still be attempted")
-        self.assertEqual(db.rollbacks, 2)
+        # Neither failed index rolls anything back — see the note on
+        # test_ddl_failure_still_logs_and_returns_false. A rollback here would have
+        # discarded whatever the migrate did before this patch ran.
+        self.assertEqual(db.rollbacks, 0)
         self.assertEqual(frappe_ns.log_error.call_count, 2)
         self.assertEqual(db.commits, 1, "the patch must still finish cleanly")
 

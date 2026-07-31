@@ -158,7 +158,14 @@ class TestSalisLedgerMigrateGuard(unittest.TestCase):
                     mf.db.add_unique.assert_called_once_with(
                         doctype, cols, constraint_name=constraint
                     )
-                    mf.db.rollback.assert_called_once()
+                    # Nothing is rolled back. frappe.db.add_unique commits before it
+                    # runs its own ALTER TABLE (frappe/database/mariadb/database.py:447),
+                    # so the caller's work is committed and its savepoints released
+                    # before this except can be reached: a bare rollback would undo
+                    # nothing while resetting the caller's commit hooks, and a scoped
+                    # one would raise 1305 SAVEPOINT ... does not exist and abort the
+                    # migrate this guard exists to survive.
+                    mf.db.rollback.assert_not_called()
                     logged.assert_called_once_with(doctype, cols, constraint)
 
     def test_on_doctype_update_creates_the_expected_constraint_when_clean(self):

@@ -15,6 +15,14 @@ The ledger row carries the building's actual share only.
 
 Employee-level daily distribution is handled by the daily cost allocation
 scheduled job, not here.
+
+``linked_payment_entry`` is declared but nothing in the app writes it, and it is
+read_only + no_copy so nothing can. Before adding a writer, make it a Dynamic Link
+over the Payment Routing target the way Salis Payment Request had to become one: a
+fixed ``Link -> Payment Entry`` stores names the configured target cannot resolve,
+and that only surfaced after rows had already been written (patches/v2_0/
+backfill_routed_payment_doctype.py had to type them retroactively, leaving the
+ambiguous ones blank).
 """
 
 from __future__ import annotations

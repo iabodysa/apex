@@ -31,12 +31,16 @@ class TestAddIndexGuarded(unittest.TestCase):
             self.assertIn("ADD INDEX `idx_foo`", sql)
             self.assertIn("`a`, `b`", sql)
 
-    def test_returns_false_and_rolls_back_on_ddl_error(self):
+    def test_returns_false_and_rolls_nothing_back_on_ddl_error(self):
         with mock.patch.object(ledger_index, "_index_exists", return_value=False), \
              mock.patch.object(ledger_index, "frappe") as mf:
             mf.db.sql.side_effect = Exception("boom")
             self.assertFalse(ledger_index.add_index_guarded("Foo", ["a"], "idx_foo"))
-            mf.db.rollback.assert_called_once()
+            # MariaDB implicitly commits around ALTER TABLE even when it fails, so the
+            # caller's work is committed and its savepoints released before this runs:
+            # a bare rollback undoes nothing while resetting the caller's commit hooks,
+            # and a scoped one raises 1305 and aborts the migrate.
+            mf.db.rollback.assert_not_called()
             mf.log_error.assert_called_once()
 
 
@@ -59,7 +63,10 @@ class TestAddUniqueGuarded(unittest.TestCase):
              mock.patch.object(ledger_index, "frappe") as mf:
             mf.db.add_unique.side_effect = Exception("1062 duplicate")
             self.assertFalse(ledger_index.add_unique_guarded("Foo", ["a"], "uq_foo"))
-            mf.db.rollback.assert_called_once()
+            # frappe.db.add_unique commits before its own ALTER TABLE
+            # (frappe/database/mariadb/database.py:447), so there is nothing left to
+            # roll back and no savepoint left to roll back to.
+            mf.db.rollback.assert_not_called()
             log_dupes.assert_called_once_with("Foo", ["a"], "uq_foo")
 
 

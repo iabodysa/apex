@@ -263,6 +263,7 @@
    "fieldname": "linked_payment_entry",
    "fieldtype": "Link",
    "label": "Payment Entry",
+   "no_copy": 1,
    "options": "Payment Entry",
    "read_only": 1
   },
