@@ -177,6 +177,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import Icon from "./Icon.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
 import { useToast } from "@shared/useToast.js";
+import { usePoll } from "@shared/usePoll.js";
 import BoardingPanel from "./components/BoardingPanel.vue";
 import RoutePanel from "./components/RoutePanel.vue";
 import DriverMap from "./components/DriverMap.vue";
@@ -204,7 +205,6 @@ const reject = ref({ open: false, reason: "" });
 // Shared toast: every call site below passes its type explicitly, so the shared
 // "green" default never reaches the `toast-*` class this portal styles.
 const { toast, showToast } = useToast();
-let pollTimer = null;
 let stopRealtime = null;
 const POLL_MS = 45000;
 
@@ -301,17 +301,22 @@ watch(
 // socket carries the update instantly instead of the supervisor waiting out a 45s
 // window. The interval stays as the fallback the shared factory's swallow-everything
 // contract requires: if the socket never connects, the portal must still refresh.
+//
+// Shared poll, not a local setInterval: this screen is where route and boarding
+// plans get approved or rejected, so a supervisor returning from another tab must
+// not be shown a snapshot up to a full interval old. usePoll stops the timer while
+// the tab is hidden and refetches the moment it comes back.
+usePoll(() => {
+  if (!busy.value && !reject.value.open) loadContext();
+}, POLL_MS);
+
 onMounted(() => {
   loadContext();
   stopRealtime = connectRouteSupervisorRealtime(() => {
     if (!busy.value && !reject.value.open) loadContext();
   });
-  pollTimer = setInterval(() => {
-    if (!document.hidden && !busy.value && !reject.value.open) loadContext();
-  }, POLL_MS);
 });
 onUnmounted(() => {
-  clearInterval(pollTimer);
   if (stopRealtime) stopRealtime();
 });
 </script>

@@ -112,7 +112,7 @@ import LangToggle from "./components/LangToggle.vue";
 import { useI18n, resourceErrorMessage, setEnumLabels } from "./i18n";
 import { TOKEN, hasToken } from "./utils/token";
 import { updateReady, applyUpdate, initPwaUpdates } from "./pwa";
-import { usePoll } from "./composables/usePoll";
+import { usePoll } from "@shared/usePoll.js";
 
 const { t, dir } = useI18n();
 

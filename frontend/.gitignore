@@ -1,0 +1,13 @@
+# Editor-only type stubs written by the portal build, one pair per Vite root.
+# createPortalConfig() calls frappeui(), whose lucideIcons() option defaults ON and
+# registers unplugin-auto-import + unplugin-vue-components; each writes its own
+# .d.ts next to the portal's vite.config.js on every `npm run build`. Nothing in the
+# tree imports them and there is no tsconfig.json or vue-tsc step anywhere under
+# frontend/, so they are build output that only an editor reads.
+#
+# This is the line between the two kinds of generated artefact here: the portal
+# bundles under apex/public/<portal>/ stay TRACKED because the app must install on a
+# site with no Node toolchain, while these stubs ship to nobody and are rewritten
+# byte-identically by the next build.
+auto-imports.d.ts
+components.d.ts

@@ -139,7 +139,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, onUnmounted, watch } from "vue";
+import { computed, ref, onUnmounted, watch } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "./Icon.vue";
 import BoardingPassOverlay from "./BoardingPassOverlay.vue";
