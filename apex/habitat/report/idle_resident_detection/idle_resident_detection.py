@@ -53,9 +53,8 @@ def _get_data(filters):
     query_filters = {"docstatus": 1, "check_out_date": ["is", "not set"]}
 
     # [#cxlwka]
-    user = frappe.session.user
-    if not permissions._building_is_unscoped(user):
-        allowed = permissions._allowed_buildings(user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    if restrict:
         if filters.get("building"):
             allowed = [b for b in allowed if b == filters["building"]]
         if not allowed:

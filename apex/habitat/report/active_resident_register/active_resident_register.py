@@ -28,9 +28,8 @@ def execute(filters=None):
         query_filters["project"] = filters["project"]
 
     # [#b52yr6]
-    user = frappe.session.user
-    if not permissions._building_is_unscoped(user):
-        allowed = permissions._allowed_buildings(user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    if restrict:
         if not allowed:
             return columns, []
         chosen = query_filters.get("building")
