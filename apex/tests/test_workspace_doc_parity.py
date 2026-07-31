@@ -14,8 +14,8 @@ Two published tables on that page describe shipped JSON, and both are derived
 from it here rather than maintained by hand.
 
 Section 1 states, per workspace, the module that owns it, where it sits in the
-sidebar, and the exact list of roles it grants. Nothing under `apex/` or
-`scripts/` referenced the page, so a role added to a workspace JSON left the
+sidebar, and the exact list of roles it grants. Nothing in the tree referenced
+the page, so a role added to a workspace JSON left the
 published grant table quietly wrong — the Salis and Habitat rows had each
 drifted by two roles before this guard existed. A reader treating the table as
 the access-control record was reading a stale one.

@@ -2,12 +2,16 @@
 
 A-288: the checkout clearance slip -- a sheet physically handed to a worker at
 checkout -- titled itself "Accommodation Checkout Clearance" for the whole life
-of the rename, and every gate stayed green. scripts/check_translations.py owns
-the retired-name check, but it runs on the extractor's own harvest of _() CALLS
-(see its module docstring), so a name written as a BARE template literal is
-invisible to it. That is exactly how a print format hides: its headings are
-plain HTML text, not translate calls, so the one surface a worker physically
-holds was the one surface with no retired-name coverage at all.
+of the rename, and every gate stayed green. The translation gate owned the
+retired-name check, but it ran on the extractor's own harvest of _() CALLS, so a
+name written as a BARE template literal was invisible to it. That is exactly how
+a print format hides: its headings are plain HTML text, not translate calls, so
+the one surface a worker physically holds was the one surface with no
+retired-name coverage at all.
+
+That gate is maintainer tooling and no longer ships, so _RETIRED_NAMES below is
+now the application's OWN list rather than a mirror of it. The drift check moved
+out with the gate -- only something that can see both files can compare them.
 
 This guard closes that hole by scanning the template TEXT instead of the call
 harvest. It is colocated with the print formats rather than living in
@@ -25,19 +29,15 @@ print format with no exemption at all.
 from __future__ import annotations
 
 import glob
-import importlib.util
 import json
 import os
 import unittest
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-# apex/habitat/print_format -> apex/habitat -> apex -> repo root
+# apex/habitat/print_format -> apex/habitat -> apex
 _APP_ROOT = os.path.dirname(os.path.dirname(_HERE))
-_REPO_ROOT = os.path.dirname(_APP_ROOT)
-_GATE = os.path.join(_REPO_ROOT, "scripts", "check_translations.py")
 
-# Mirrors scripts/check_translations.py RETIRED_NAMES; test_matches_the_shipped_gate
-# fails if the two drift, so neither list can be updated alone.
+# The application's own record of which names the rename retired.
 _RETIRED_NAMES = {
     "Accommodation Assignment": "Housing Assignment",
     "Accommodation Building": "Building",
@@ -141,20 +141,6 @@ class TestPrintFormatRetiredNames(unittest.TestCase):
             "A print format RECORD name carries a retired name. Renaming a "
             "record needs a patch; add it to _RECORD_NAME_DEBT with that patch "
             "queued:\n" + "\n".join(violations),
-        )
-
-    def test_matches_the_shipped_gate(self):
-        """One retired-name list, two enforcement points -- they may not drift."""
-        if not os.path.exists(_GATE):
-            self.skipTest("scripts/check_translations.py is not part of an installed package")
-        spec = importlib.util.spec_from_file_location("_apex_translation_gate", _GATE)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        self.assertEqual(
-            _RETIRED_NAMES,
-            module.RETIRED_NAMES,
-            "_RETIRED_NAMES drifted from scripts/check_translations.py RETIRED_NAMES. "
-            "Update both, or this guard stops covering a name the gate retired.",
         )
 
     def test_guard_actually_detects(self):

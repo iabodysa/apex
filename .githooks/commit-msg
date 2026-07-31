@@ -4,17 +4,16 @@
 # Install (one line, from the repo root):
 #     git config core.hooksPath .githooks
 #
-# The rule is NOT written here. scripts/check_commit_metadata.py is its one definition,
-# and the CI step "No automated attribution or private commit email" runs that same
-# file, so a local pass and a CI pass cannot come to mean different things. There used
-# to be a second copy of the pattern in this hook; a test proved the two agreed, which
-# is weaker than having only one.
+# The rule is NOT written here. .claude/tools/scripts/check_commit_metadata.py is its one
+# definition. That file is the maintainer's own tooling and is not published with the
+# app, so no CI lane can run it any more: this hook and pre-push are now the ONLY place
+# the rule is enforced, which is why both fail closed rather than warn.
 set -u
 
 # Resolved against this hook, not against the work tree: core.hooksPath may point at
 # another clone's .githooks, and then the work tree has no copy of the gate to run.
 hookdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-gate="$hookdir/../scripts/check_commit_metadata.py"
+gate="$hookdir/../.claude/tools/scripts/check_commit_metadata.py"
 
 # Fail closed. A missing gate or a missing interpreter must refuse the commit, never
 # wave it through: a guard that silently stops running is worse than no guard.

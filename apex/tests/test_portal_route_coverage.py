@@ -1,42 +1,36 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Served portal routes, the bundle-guard matrix and the e2e smoke list must agree.
+"""Served portal routes and the bundle-guard matrix must agree.
 
-Three independent lists describe the same set of portal SPAs and had drifted apart:
+Two independent lists describe the same set of portal SPAs and had drifted apart:
 
   1. SERVED   — ``apex/www/<route>.html``, each shell mounting one built bundle.
   2. GUARDED  — the ``bundle-guard`` matrix in .github/workflows/portal-bundles.yml,
                 which rebuilds each bundle and fails on stale committed output.
-  3. SMOKED   — ``_PORTALS`` in e2e/portal_smoke_spec.py, the runtime mount smoke.
 
-A route served but absent from (2) ships a bundle nothing proves is fresh; absent
-from (3) it ships a bundle nothing proves still mounts. The counts legitimately
-differ — ``worker_portal`` is served at BOTH /driver and /masar — so this guard
-compares the mapped SETS, never the raw counts.
+A route served but absent from (2) ships a bundle nothing proves is fresh. The
+counts legitimately differ — ``worker_portal`` is served at BOTH /driver and
+/masar — so this guard compares the mapped SETS, never the raw counts.
 
-A route may be held out of the smoke list, but only with the reason written INSIDE
-the ``_PORTALS`` literal, next to where its entry would sit. That keeps a temporary
-exclusion self-documenting instead of silently shrinking coverage.
+There was a third list: SMOKED, the ``_PORTALS`` route list of a browser harness
+that opened each portal and asserted the SPA actually mounts. That harness is the
+maintainer's tooling and is not published with the app, so the checks that read it
+moved out with it. Nothing here proves a portal still MOUNTS — only that every
+served bundle is rebuilt and every rebuilt bundle is served.
 
-Every list is parsed STRUCTURALLY — the shells through an HTML parser, the workflow
-through a YAML parser, the route list through ``ast`` — so a safe refactor
-(reordering, relabelling, reformatting) does not red this guard; only a real
-coverage change does.
+Both lists are parsed STRUCTURALLY — the shells through an HTML parser, the workflow
+through a YAML parser — so a safe refactor (reordering, relabelling, reformatting)
+does not red this guard; only a real coverage change does.
 """
 
-import ast
 import re
-import tokenize
 import unittest
 from html.parser import HTMLParser
 from pathlib import Path
-
-import yaml
 
 APP_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = APP_ROOT.parent
 WWW = APP_ROOT / "www"
 BUNDLES_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "portal-bundles.yml"
-SMOKE_SPEC = REPO_ROOT / "e2e" / "portal_smoke_spec.py"
 
 # A shell loads its SPA as /assets/apex/<bundle>/assets/index.js.
 BUNDLE_SRC = re.compile(r"^/assets/apex/([A-Za-z0-9_]+)/assets/index\.js(?:\?.*)?$")
@@ -81,48 +75,17 @@ def served_routes() -> dict[str, set[str]]:
 
 
 def guarded_bundles() -> set[str]:
-    """Bundle names the portal-bundles `bundle-guard` matrix rebuilds."""
+    """Bundle names the portal-bundles `bundle-guard` matrix rebuilds.
+
+    yaml is imported HERE, not at module scope: it is the only dependency in this file
+    and only this half needs it, so the served-route parser above stays importable
+    wherever PyYAML is not installed.
+    """
+    import yaml
+
     workflow = yaml.safe_load(BUNDLES_WORKFLOW.read_text(encoding="utf-8"))
     legs = workflow["jobs"]["bundle-guard"]["strategy"]["matrix"]["include"]
     return {leg["portal"] for leg in legs if leg.get("portal")}
-
-
-def _smoke_assignment():
-    """The module-level ``_PORTALS`` Assign node of the smoke spec."""
-    tree = ast.parse(SMOKE_SPEC.read_text(encoding="utf-8"))
-    for node in tree.body:
-        if not isinstance(node, ast.Assign):
-            continue
-        if any(isinstance(t, ast.Name) and t.id == "_PORTALS" for t in node.targets):
-            return node
-    return None
-
-
-def smoke_entries() -> list[tuple[str, str]]:
-    """The (route, label) pairs the e2e smoke spec opens."""
-    node = _smoke_assignment()
-    if node is None:
-        return []
-    return [tuple(entry) for entry in ast.literal_eval(node.value)]
-
-
-def smoke_exclusion_notes() -> str:
-    """Comment text written INSIDE the ``_PORTALS`` literal.
-
-    Read with ``tokenize`` rather than matched against source text, so the guard
-    checks that a held-out route is explained without dictating any wording.
-    """
-    node = _smoke_assignment()
-    if node is None:
-        return ""
-    notes = []
-    with SMOKE_SPEC.open("rb") as handle:
-        for token in tokenize.tokenize(handle.readline):
-            if token.type != tokenize.COMMENT:
-                continue
-            if node.lineno <= token.start[0] <= node.end_lineno:
-                notes.append(token.string)
-    return "\n".join(notes)
 
 
 class TestServedRouteParsing(unittest.TestCase):
@@ -147,13 +110,12 @@ class TestServedRouteParsing(unittest.TestCase):
 
 
 @unittest.skipUnless(
-    BUNDLES_WORKFLOW.exists() and SMOKE_SPEC.exists(),
-    "workflow/e2e sources are not present in this install",
+    BUNDLES_WORKFLOW.exists(),
+    "the workflow sources are not present in this install",
 )
 class TestPortalCoverageSetsAgree(unittest.TestCase):
-    def test_parsers_find_the_guard_and_smoke_sets(self):
+    def test_parsers_find_the_guard_set(self):
         self.assertTrue(guarded_bundles(), "bundle-guard matrix parse returned nothing")
-        self.assertTrue(smoke_entries(), "_PORTALS parse returned nothing")
 
     def test_every_served_bundle_is_rebuilt_by_the_bundle_guard(self):
         guarded = guarded_bundles()
@@ -177,49 +139,6 @@ class TestPortalCoverageSetsAgree(unittest.TestCase):
             [],
             "bundle-guard matrix leg(s) for bundles no www shell serves — drop the "
             f"leg or add the shell: {orphans}",
-        )
-
-    def test_every_served_route_is_smoked_or_documented(self):
-        smoked = {route for route, _ in smoke_entries()}
-        notes = smoke_exclusion_notes()
-        undocumented = [
-            route
-            for route in sorted(served_routes())
-            if route not in smoked and route not in notes
-        ]
-        self.assertEqual(
-            undocumented,
-            [],
-            "served route(s) neither smoked nor explained: add the route to "
-            "_PORTALS in e2e/portal_smoke_spec.py, or write why it is held out in "
-            f"a comment inside that list: {undocumented}",
-        )
-
-    def test_smoke_list_has_no_unserved_route(self):
-        served = served_routes()
-        strays = sorted({route for route, _ in smoke_entries()} - set(served))
-        self.assertEqual(
-            strays,
-            [],
-            "_PORTALS names route(s) no www shell serves — the smoke would open a "
-            f"404: {strays}",
-        )
-
-    def test_each_smoked_route_appears_once_with_a_distinct_label(self):
-        entries = smoke_entries()
-        routes = [route for route, _ in entries]
-        duplicates = sorted({r for r in routes if routes.count(r) > 1})
-        self.assertEqual(duplicates, [], f"route listed twice in _PORTALS: {duplicates}")
-
-        labels = [label for _, label in entries]
-        blank = [route for route, label in entries if not str(label).strip()]
-        self.assertEqual(blank, [], f"route(s) with an empty smoke label: {blank}")
-        shared = sorted({lb for lb in labels if labels.count(lb) > 1})
-        self.assertEqual(
-            shared,
-            [],
-            "two routes share one smoke label, so a failure line cannot say which "
-            f"portal broke: {shared}",
         )
 
 

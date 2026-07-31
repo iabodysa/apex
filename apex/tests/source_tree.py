@@ -54,8 +54,8 @@ def _git_tracked_py_files():
 
     CI grades a fresh clone, so a gitignored file exists only on a developer's
     disk. A guard that walks the filesystem judges it anyway and reds locally
-    while CI stays green -- the same asymmetry comment_audit, check_translations
-    and check_doctype_dates already avoid with this exact enumeration.
+    while CI stays green -- the same asymmetry the maintainer's own audit scripts
+    avoid with this exact enumeration.
     """
     try:
         out = subprocess.run(

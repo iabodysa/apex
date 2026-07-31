@@ -26,48 +26,21 @@ jobs:
         run: pip install ruff==0.15.14
 
       - name: Run ruff
-        # scripts/ is linted alongside the package because it holds the gates the rest of
-        # this lane runs — comment_audit, check_translations, check_doctype_dates. A ruff
-        # error in a gate is not a style nit: an unlinted gate that breaks takes every
-        # check it guards down with it, silently. Both paths were clean at 0.15.14 when
-        # scripts/ was added, so this widened the scope without moving the baseline.
-        #
-        # ONE root per invocation, chained, rather than `ruff check apex/ scripts/`. Handed
-        # two roots ruff honours .gitignore only sometimes: on a work tree carrying a
-        # gitignored apex/demo/*.py, the two-root form passed 5 of 20 runs with the cache
-        # wiped before each, while either root alone passed 20 of 20. CI cannot reproduce
-        # it — a fresh clone holds no ignored file to find — so the coin flip lands only on
-        # workstations, which run this lane's own text through scripts/run_guards.sh.
-        # Scope is unchanged, not merely similar: apex/ (1122 files) plus scripts/ (4) is
-        # the same 1126 the two-root form walked, so nothing was widened or dropped. The
-        # && matters — run_guards.sh lifts this line and executes it under a plain sh with
-        # no -e, where a newline between the two would let a red in apex/ pass unnoticed.
-        run: ruff check apex/ && ruff check scripts/
+        # ONE root, which is now the whole published Python tree. Handed two roots ruff
+        # honours .gitignore only sometimes: on a work tree carrying a gitignored
+        # apex/demo/*.py, the two-root form passed 5 of 20 runs with the cache wiped
+        # before each, while either root alone passed 20 of 20. CI could never reproduce
+        # it — a fresh clone holds no ignored file to find — so the coin flip landed on
+        # workstations. With a single root there is no second root to pair it with.
+        run: ruff check apex/
 
       - name: Shell syntax
-        # run_guards.sh is a gate too, and ruff cannot see it. These are all `#!/bin/sh`,
+        # The hooks are gates too, and ruff cannot see them. These are all `#!/bin/sh`,
         # so `sh -n` (dash on the runner) is the matching parser, not `bash -n`. A parse
         # check only — not shellcheck, which would be a rule set to adopt and argue over.
-        run: for f in scripts/run_guards.sh .githooks/*; do sh -n "$f" || exit 1; done
-
-      # Both gates below are stdlib-only Python: they enforce standards the local
-      # toolbox already checks, but that toolbox is not installable on a runner, so
-      # without an in-repo copy the standards silently rot between manual sweeps.
-      - name: Comment policy (why-not-what, no banners, no task ids)
-        run: python3 scripts/comment_audit.py apex
-
-      - name: Arabic translation coverage
-        # MISSING is a hard failure: an untranslated string ships as raw English to
-        # an Arabic user. STALE is judged against the recorded set in
-        # apex/translations/ar.stale-baseline.txt rather than a count: the extractor
-        # cannot read every live string, so zero stale is not reachable, but a count
-        # only says a threshold moved — it never says which row moved it. Against the
-        # set, a failure lists exactly the rows a change just stranded (normally the
-        # one label it renamed), and the message spells out the re-record command.
-        # No --max-stale: it defaults to zero newly stale, and a numeric knob here is
-        # the first thing a red lane tempts someone to raise.
-        run: |
-          python3 scripts/check_translations.py \
-            --package apex \
-            --lang ar \
-            --max-missing 0
+        #
+        # This is the one thing this lane can still say about the hooks. WHAT they
+        # enforce — the commit-metadata rule, the comment and translation audits — is
+        # maintainer tooling that no longer ships, so no runner can execute it; a parse
+        # error in a hook is still visible here, a rule regression behind it is not.
+        run: for f in .githooks/*; do sh -n "$f" || exit 1; done
