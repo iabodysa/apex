@@ -703,7 +703,9 @@ class TestHttpMethodEnforcement(unittest.TestCase):
             ),
         ):
             spent = [
-                f"  {rel}::{fn}" for rel, fn, _reason in entries
+                # " -> " and not "::": a bare double colon in any test file is read as
+                # an IPv6 seed by the throttle suite's cross-file prefix-freeness check.
+                f"  {rel} -> {fn}" for rel, fn, _reason in entries
                 if (rel, fn) not in unexempted
             ]
             with self.subTest(allowlist=label):

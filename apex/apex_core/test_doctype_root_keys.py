@@ -45,27 +45,39 @@ FRAPPE_DOCTYPE_JSON = os.path.join(
 # Concealment is search and link only, never access — see the reach and the zero-exposure
 # report audit in ``test_engine_ledgers_stay_out_of_search``.
 SEARCH_CONCEALED = frozenset({
+    "Boarding Scan Log",
+    "Driver Attendance",
+    "Fuel Daily Log",
+    "Operational Depreciation Snapshot",
+    "Safety Inspection Report",
+    "Scheduled Task Instance",
+    "Trip Boarding State",
+    "Trip Start Log",
+})
+
+# The fourteen ledgers that carried the flag until 2026-07-31 and no longer do.
+# The flag hides a DocType from search, but frappe drops it from ``can_read`` as well
+# for a read-without-write grant (frappe/utils/user.py:139-142, :181-183), and a
+# workspace link gates on can_read (desk/desktop.py:150) -- so concealing a record that
+# a workspace links COSTS THE LINK. Measured on the owner's own site: twelve links died
+# on Backend Engines, taking the Accommodation Engine and Safety Engine cards with them,
+# and two more died on Compliance and Rentals. Search tidiness is not worth a navigation
+# hole for the one persona those workspaces exist to serve. The eight above keep the flag
+# because no workspace links them.
+LINKED_SO_NOT_CONCEALED = frozenset({
     "Accommodation Ledger",
     "Accommodation Stock Ledger",
-    "Boarding Scan Log",
     "Cleaning Compliance Ledger",
-    "Driver Attendance",
     "Facility Asset Movement Ledger",
     "Fuel Consumption Ledger",
-    "Fuel Daily Log",
     "Maintenance Cost Ledger",
     "Movement Cost Recovery",
     "Movement Cost Transfer",
     "Occupancy Snapshot",
-    "Operational Depreciation Snapshot",
     "Rental Accrual Ledger",
     "Safety Finding Ledger",
-    "Safety Inspection Report",
-    "Scheduled Task Instance",
     "Trip Boarding Ledger",
-    "Trip Boarding State",
     "Trip Fulfilment Ledger",
-    "Trip Start Log",
     "Vehicle Utilisation Snapshot",
 })
 

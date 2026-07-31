@@ -245,7 +245,6 @@
    "write": 1
   }
  ],
- "read_only": 1,
  "row_format": "Dynamic",
  "search_fields": "reference_name, reference_doctype, from_project",
  "sort_field": "modified",

@@ -141,7 +141,6 @@
    "role": "System Manager"
   }
  ],
- "read_only": 1,
  "row_format": "Dynamic",
  "search_fields": "source_name, source_detail_no, company",
  "sort_field": "modified",

@@ -435,7 +435,9 @@ class TestSqlInterpolationGuard(unittest.TestCase):
         """
         unexempted = {(rel, fn) for rel, fn, _ln in _collect_violations(allowlist=[])}
         spent = [
-            f"  {rel}::{fn}" for rel, fn, _reason in SAFE_ALLOWLIST
+            # " -> " and not "::": a bare double colon in a test file is read as an IPv6
+            # seed by the throttle suite's cross-file prefix-freeness check.
+            f"  {rel} -> {fn}" for rel, fn, _reason in SAFE_ALLOWLIST
             if (rel, fn) not in unexempted
         ]
         self.assertEqual(
