@@ -307,13 +307,22 @@ def execute():
     """
     password = _demo_password()
     try:
-        # [#2oze4d]
+        # [#2oze4d] Each skip SAYS why. A seeder that returns silently reads as
+        # "the site is ready" to whoever ran it, and the operator only finds out
+        # when a login they were promised does not exist.
         if not frappe.conf.get("developer_mode"):
+            print("demo logins: skipped — developer_mode is off on this site.")
             return
-        if any(not frappe.db.exists("DocType", dt) for dt in _REQUIRED):
+        missing = [dt for dt in _REQUIRED if not frappe.db.exists("DocType", dt)]
+        if missing:
+            print(f"demo logins: skipped — these DocTypes are not installed: {missing}")
             return
         company = resolve_company_or_any()
         if not company:
+            print(
+                "demo logins: skipped — this site has no Company yet. Finish the setup "
+                "wizard (or create one), then run this seeder again."
+            )
             return
 
         _seed_supervisor(company, password)
