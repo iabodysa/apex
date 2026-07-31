@@ -6,7 +6,16 @@ A worker-first specialization of Accommodation Stock Balance: only Custody Artic
 rows with an employee set (i.e. in someone's custody, not building store) are
 counted. Balance = sum(signed qty) of non-cancelled rows up to the as-on date,
 grouped by employee + building + article — issue rows add, return rows reverse, so
-the net is the live outstanding holding. Value = balance * unit cost."""
+the net is the live outstanding holding. Value = balance * unit cost.
+
+WHO SEES THIS ESTATE-WIDE is not decided here. This report's ``roles`` table only clears
+``Report.is_permitted``; the reach comes from the ledger's DocPerm rows plus
+``HOUSING_UNSCOPED_ROLES``, under which Finance Manager and Internal Auditor already read
+``employee``, ``signed_qty`` and ``unit_cost`` for every building — the exact inputs of
+the per-person figures below. That grant was reviewed and kept on purpose; the reason,
+and the condition under which to revisit it, are recorded beside the rows themselves in
+``habitat/doctype/accommodation_stock_ledger/accommodation_stock_ledger.py``. Adding or
+removing a role here changes nothing about that."""
 
 import frappe
 from frappe import _

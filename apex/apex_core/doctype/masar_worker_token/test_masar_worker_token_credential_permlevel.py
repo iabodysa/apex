@@ -8,6 +8,11 @@ colocated test, not in the field descriptions -- so it was withdrawn. Its permle
 row is untouched: the housing role still keeps, creates and maintains the record, it
 just stops receiving the two credential columns.
 
+WHAT IT DOES NOT BUY: the record, not the credential. ``reshare_worker_link`` hands the
+RAW token to every issuer role via ``authorize_issuance``, which reads role and scope and
+never a permlevel -- deliberately, since re-sharing a link means handing it over. The
+colocated re-share test proves it, so nobody reads the row below as more than it is.
+
 A permlevel-1 row is NOT a duplicate of the permlevel-0 row for the same role.
 ``is_perm_applicable`` keeps only permlevel-0 rows (frappe/permissions.py:283-284), so
 the two rows answer different questions and removing one must not disturb the other.
@@ -41,11 +46,16 @@ Run under bench:
 
 from __future__ import annotations
 
+import inspect
 import json
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+
+from apex.apex_core.doctype.masar_worker_token import masar_worker_token
+from apex.apex_core.utils.portal_token_security import hash_token
 
 _TOKEN_JSON = Path(__file__).resolve().parent / "masar_worker_token.json"
 
@@ -184,6 +194,53 @@ class TestMasarWorkerTokenCredentialPermlevel(FrappeTestCase):
                 field.get("permlevel"),
                 1,
                 f"{fieldname} left permlevel 1 -- the row removal now conceals nothing",
+            )
+
+    def test_the_reshare_path_still_hands_the_raw_token_to_a_role_without_level_one(self):
+        """WHAT THE PERMLEVEL DOES NOT BUY, proven rather than asserted in prose.
+
+        The row above withholds the stored hash and ciphertext from the housing role.
+        It does NOT withhold the credential: ``reshare_worker_link`` returns a link
+        carrying the RAW token, because ``authorize_issuance`` gates that path on role
+        and scope and never reads a permlevel. Anyone tempted to read the permlevel row
+        as full credential protection should fail here first.
+
+        The token itself is never logged or asserted on directly -- only its hash is
+        compared, and the stored hash is re-read AFTER the call so the verdict holds on
+        both branches of ``recover_token`` (decrypt for an unscoped issuer, rotate for a
+        scoped one).
+        """
+        name = self._token()
+        housing = self._user_with_role(HOUSING_ROLE)
+        employee = frappe.db.get_value("Masar Worker Token", name, "employee")
+
+        frappe.set_user(housing)
+        link = masar_worker_token.reshare_worker_link(employee)
+        self.assertIsNotNone(link, "the issuer got no link at all -- the path changed")
+
+        raw = parse_qs(urlparse(link).query).get("w", [""])[0]
+        self.assertTrue(raw, "the link carries no token parameter")
+        self.assertEqual(
+            hash_token(raw),
+            frappe.db.get_value("Masar Worker Token", name, "token"),
+            f"{HOUSING_ROLE} received something that is not the live credential",
+        )
+
+    def test_the_reshare_docstring_still_names_that_exposure(self):
+        """The warning must survive a refactor, so assert it is there.
+
+        A reader who arrives at the permlevel row and stops looking draws the wrong
+        conclusion; the docstring on the re-share path is where they are told otherwise.
+        Keyed on the two load-bearing words rather than a whole sentence, so rewording
+        is free and DELETING the warning is not.
+        """
+        doc = (inspect.getdoc(masar_worker_token.reshare_worker_link) or "").lower()
+        for phrase in ("raw token", "permlevel"):
+            self.assertIn(
+                phrase,
+                doc,
+                "reshare_worker_link stopped documenting that every issuer role still "
+                f"obtains the raw token there (missing: {phrase!r})",
             )
 
     def test_the_level_zero_row_survived(self):

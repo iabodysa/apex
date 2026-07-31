@@ -6,7 +6,31 @@ Rows are posted only through the helpers below (never created manually); a blank
 employee means the stock sits unassigned in the building's store, a set employee
 means it is in that employee's custody. Reversals are negative mirror entries, and
 are refused outright when the mirror would drive a store or a custody holding
-negative — the stock has already moved on and must be unwound in order."""
+negative — the stock has already moved on and must be unwound in order.
+
+WHY THE OVERSIGHT ROLES READ EVERY BUILDING'S CUSTODY (owner decision, 2026-07-27)
+---------------------------------------------------------------------------------
+Read this before re-raising the estate-wide grant; it has been raised and settled.
+
+Finance Manager and Internal Auditor each hold a permlevel-0 row here granting read,
+report, export, print, email and share, and both are named in ``HOUSING_UNSCOPED_ROLES``
+(``habitat/permissions.py``), so ``accommodation_stock_ledger_query`` returns "" and
+neither role is row-filtered to a building. Because ``employee`` ("Employee (Custodian)"),
+``signed_qty`` and ``unit_cost`` sit at level 0, that is per-worker custody holdings with
+a per-person value, estate-wide and exportable — the same figures ``Custody Outstanding by
+Worker`` computes. This is KEPT DELIBERATELY: three matching grants across two records and
+two roles (both roles here, Finance Manager again on Occupancy Snapshot) is a design, not
+a slip, and oversight of custody value is the job these roles exist for. The scope decision
+lives in the DocPerm row and in ``HOUSING_UNSCOPED_ROLES`` — never in a report's roles
+table, which only clears ``Report.is_permitted``.
+
+What makes the decision REVIEWABLE rather than permanent: this record carries ZERO
+permission levels, so a level-0 read is every field. Under the field sensitivity model
+(``apex_core/utils/field_sensitivity.py``) it is a first-tier candidate — once the levels
+exist, this grant can be narrowed to the fields finance actually needs without touching
+either role's scope at all. The decision was taken against today's all-or-nothing shape,
+not against a considered one. ``test_accommodation_stock_ledger`` asserts the three grants
+and the flat level, so a change to either forces this paragraph to be revisited."""
 
 from __future__ import annotations
 

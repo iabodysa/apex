@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Guards for the default Issue SLA's Holiday List precondition.
+"""Guards for the two fresh-site preconditions of the default Issue SLA.
 
 ``Service Level Agreement.holiday_list`` is a REQUIRED core ERPNext Link, and no
 app provisions a Holiday List on a fresh site — not the ERPNext setup wizard, not
@@ -7,8 +7,13 @@ hrms — so ``_seed_sla`` bailed and the SLA the driver portal assumes was absen
 every new deployment. The seeder now provisions an empty fallback list, but only
 when the site has none, which is what makes it safe to re-run on a configured site.
 
+The SECOND precondition is ``Support Settings.track_service_level_agreement``, which
+ships defaulted to "0": ERPNext refuses an enabled Issue SLA while it is off, and this
+seeder's per-step savepoint would swallow that refusal into a log, leaving the SLA absent
+behind a green migrate. Only the ORDER proves it is handled, so that is what is asserted.
+
 Site-free: ``salis_issue_seed.frappe`` is replaced by an in-memory recorder. This
-proves the precondition and the write ORDER; a genuinely-new-site run is still owed.
+proves the preconditions and the write ORDER; a genuinely-new-site run is still owed.
 """
 
 import unittest
@@ -24,16 +29,23 @@ _FRESH_SITE_DOCTYPES = (_SLA, "Issue", "Issue Priority", "Support Settings", _HO
 
 
 class _FakeDoc:
-    def __init__(self, doctype, store):
+    def __init__(self, doctype, frappe_stub):
         self.doctype = doctype
         self.name = None
         self.tables = {}
-        self._store = store
+        self._frappe = frappe_stub
+        self._store = frappe_stub.db.records
+        # What Support Settings held at the moment of the insert, not afterwards --
+        # ERPNext's validate reads it DURING insert, so only the order proves anything.
+        self.tracking_at_insert = None
 
     def append(self, table, row):
         self.tables.setdefault(table, []).append(row)
 
     def insert(self, **_kwargs):
+        self.tracking_at_insert = self._frappe.db.get_single_value(
+            "Support Settings", "track_service_level_agreement"
+        )
         self.name = getattr(self, _AUTONAME[self.doctype])
         self._store.setdefault(self.doctype, {})[self.name] = self
 
@@ -102,7 +114,7 @@ class _FakeFrappe:
         self.defaults = _FakeDefaults(globals_ or {})
 
     def new_doc(self, doctype):
-        return _FakeDoc(doctype, self.db.records)
+        return _FakeDoc(doctype, self)
 
     def logger(self):
         return _NullLogger()
@@ -135,6 +147,23 @@ class TestFreshSiteGetsTheSla(unittest.TestCase):
         holiday_list = stub.db.records[_HOLIDAY_LIST][issue_seed._SLA_HOLIDAY_LIST]
         self.assertEqual(holiday_list.tables.get("holidays", []), [])
         self.assertLess(holiday_list.from_date, holiday_list.to_date)
+
+    def test_sla_tracking_is_switched_on_before_the_insert_not_after(self):
+        """The second fresh-site precondition, and the one the holiday list hid.
+
+        ``Support Settings.track_service_level_agreement`` ships defaulted to "0", and
+        ERPNext refuses an enabled Issue SLA while it is off
+        (service_level_agreement.py:139-150, read during insert). Set a line too late and
+        the throw is caught by this seeder's per-step savepoint, logged, and rolled back
+        -- so the SLA would be silently absent on a fresh site exactly as before, with a
+        green migrate. Asserting the FINAL value would miss that entirely; this asserts
+        what the toggle held at the moment of the insert.
+        """
+        stub = _seed(_FakeFrappe())
+        sla = stub.db.records[_SLA][issue_seed._SLA_NAME]
+        self.assertEqual(
+            sla.tracking_at_insert, 1, "the SLA was inserted while tracking was still off"
+        )
 
     def test_the_sla_is_the_default_and_covers_every_priority(self):
         stub = _seed(_FakeFrappe())

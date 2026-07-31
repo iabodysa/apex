@@ -334,7 +334,17 @@ def _worker_link(token: str) -> str:
 
 
 def reshare_worker_link(employee: str) -> str | None:
-    """Return a policy-authorized Worker link, rotating scoped re-shares."""
+    """Return a policy-authorized Worker link, rotating scoped re-shares.
+
+    PERMLEVEL IS NEVER CONSULTED ON THIS PATH, so it protects the stored record and
+    not the credential: every issuer role -- Accommodation Manager, HR User, Resident
+    Supervisor -- still obtains the RAW token here, because ``recover_token`` decrypts
+    ``token_enc`` (or mints a fresh one) and it is returned inside the link. The only
+    gate is ``authorize_issuance``, which checks role and project/building scope alone.
+    That is deliberate: re-sharing a link means handing over the credential. Withdrawing
+    a role's permlevel-1 row stops it reading the hash and ciphertext OFF THE RECORD and
+    nothing more -- see ``test_masar_worker_token_credential_permlevel``.
+    """
     scoped_issuer = authorize_issuance(WORKER, employee)
     name = frappe.db.get_value(
         "Masar Worker Token",
