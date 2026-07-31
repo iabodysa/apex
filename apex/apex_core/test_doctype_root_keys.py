@@ -55,15 +55,11 @@ SEARCH_CONCEALED = frozenset({
     "Trip Start Log",
 })
 
-# The fourteen ledgers that carried the flag until 2026-07-31 and no longer do.
-# The flag hides a DocType from search, but frappe drops it from ``can_read`` as well
-# for a read-without-write grant (frappe/utils/user.py:139-142, :181-183), and a
-# workspace link gates on can_read (desk/desktop.py:150) -- so concealing a record that
-# a workspace links COSTS THE LINK. Measured on the owner's own site: twelve links died
-# on Backend Engines, taking the Accommodation Engine and Safety Engine cards with them,
-# and two more died on Compliance and Rentals. Search tidiness is not worth a navigation
-# hole for the one persona those workspaces exist to serve. The eight above keep the flag
-# because no workspace links them.
+# Concealing a linked record COSTS THE LINK: frappe drops it from ``can_read`` too for a
+# read-without-write grant (frappe/utils/user.py:139-142, :181-183) and a workspace link
+# gates on can_read (desk/desktop.py:150). Measured live: 12 links plus the Accommodation
+# Engine and Safety Engine cards died on Backend Engines, 2 more on Compliance and
+# Rentals. These 14 therefore keep their links; the 8 above are linked by no workspace.
 LINKED_SO_NOT_CONCEALED = frozenset({
     "Accommodation Ledger",
     "Accommodation Stock Ledger",
