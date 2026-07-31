@@ -133,21 +133,24 @@ class TestFleetEmployeeNav(FrappeTestCase):
         )
 
     def test_nav_stays_reachable_and_rtl_safe_when_narrow(self):
-        blocks = [b for b in _narrow_media_blocks(self.css) if ".fleet-nav" in b]
-        self.assertTrue(
-            blocks,
-            "below the tablet breakpoint the shared shell hides .fleet-nav and this "
-            "page offers no other navigation -- index.css must restore it",
-        )
-        restored = "\n".join(blocks)
-        shown = []
+        """The nav must survive a narrow viewport — by the shell or by this page.
+
+        The shared shell used to hide it there, so this page carried a rule to put it
+        back. The shell now wraps it into a scrolling row instead, which is why the
+        override is gone: what matters is that nothing hides the nav, not which file
+        keeps it visible.
+        """
+        restored = "\n".join(b for b in _narrow_media_blocks(self.css) if ".fleet-nav" in b)
+        hidden = []
         for selector, body in re.findall(r"([^{}]*\.fleet-nav[^{}]*)\{([^{}]*)\}", restored):
             value = re.search(r"\bdisplay\s*:\s*([\w-]+)", body)
-            if value and value.group(1) != "none":
-                shown.append(selector.strip())
-        self.assertTrue(
-            shown,
-            "the narrow-viewport rule must show the nav, not keep it hidden",
+            if value and value.group(1) == "none":
+                hidden.append(selector.strip())
+        self.assertEqual(
+            hidden,
+            [],
+            "a narrow-viewport rule hides the nav and this page offers no other "
+            f"navigation: {hidden}",
         )
         physical = re.findall(r"\b(?:margin|padding|inset)?-?(?:left|right)\s*:", restored)
         self.assertEqual(
