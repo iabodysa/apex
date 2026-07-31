@@ -50,8 +50,11 @@ RENAMES = (
 
 def execute() -> None:
     for doctype, old, new, force in RENAMES:
-        old_exists = frappe.db.exists(doctype, old)
-        new_exists = frappe.db.exists(doctype, new)
+        # Dict form, not the positional one: exists(dt, dn) returns dn unqueried
+        # whenever dn equals dt (frappe/database/database.py:1259-1261), and both names
+        # here are data. The dict form is correct in both directions.
+        old_exists = frappe.db.exists(doctype, {"name": old})
+        new_exists = frappe.db.exists(doctype, {"name": new})
 
         if old_exists and new_exists:
             frappe.log_error(
