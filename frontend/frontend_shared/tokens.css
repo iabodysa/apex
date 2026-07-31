@@ -82,7 +82,12 @@
   /* Warning splits in two: ink and fill can never be the same value, because a
      hue dark enough to read as text is too dark to read as a background. */
   --warn: #8a5a10; /* INK only — 4.97:1 on --warn-bg */
-  --warn-fill: #c9851f; /* FILL only — carries #3a2708 ink at 4.65:1 */
+  --warn-fill: #c9851f; /* FILL only — carries --warn-fill-ink at 4.65:1 */
+  /* Ink ON a saturated warning fill. Unlike --danger-ink this is mode-INDEPENDENT
+     and so is declared once: --warn-fill is a mid-amber in BOTH modes (#c9851f /
+     #e0a02f), and this brown clears both (4.65:1 and 6.2:1). White never does —
+     it reaches 2.6:1 and 2.0:1, which is why a fill needs its own ink token. */
+  --warn-fill-ink: #3a2708;
   --warn-bg: #f7ead2;
   --danger: #a52d21; /* 5.39:1 on --danger-bg */
   --danger-bg: #f6dcd8;
@@ -130,6 +135,7 @@
   --c-success-bg: var(--ok-bg);
   --c-warning: var(--warn);
   --c-warning-fill: var(--warn-fill);
+  --c-warning-fill-ink: var(--warn-fill-ink);
   --c-warning-bg: var(--warn-bg);
   --c-danger: var(--danger);
   --c-danger-bg: var(--danger-bg);

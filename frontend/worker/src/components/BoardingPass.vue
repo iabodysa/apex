@@ -125,7 +125,7 @@ const pickupPoint = computed(() => {
   background: var(--c-surface);
   border: var(--border-width) solid var(--c-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg, var(--shadow));
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
 }
 
@@ -299,7 +299,7 @@ const pickupPoint = computed(() => {
   background: var(--c-surface);
   padding: 10px;
   border-radius: var(--radius);
-  box-shadow: var(--shadow-lg, 0 2px 10px rgba(0, 0, 0, 0.12));
+  box-shadow: var(--shadow-lg);
 }
 .bpass-validity {
   display: inline-flex;

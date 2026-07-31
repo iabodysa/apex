@@ -167,7 +167,7 @@ function statusPill(status) {
   gap: 6px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--c-muted, #6b7280);
+  color: var(--c-muted);
 }
 [dir="rtl"] .back-chevron {
   transform: scaleX(-1);
@@ -207,7 +207,7 @@ function statusPill(status) {
 }
 .timeline-dot-active {
   background: var(--c-primary);
-  color: var(--c-primary-ink, #fff);
+  color: var(--c-primary-ink);
 }
 
 .attach-tile {
@@ -219,7 +219,7 @@ function statusPill(status) {
   inline-size: 48px;
   block-size: 48px;
   object-fit: cover;
-  border-radius: var(--radius-sm, 8px);
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
 }
 .attach-icon {
@@ -229,7 +229,7 @@ function statusPill(status) {
   inline-size: 48px;
   block-size: 48px;
   flex-shrink: 0;
-  border-radius: var(--radius-sm, 8px);
+  border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--c-primary) 12%, transparent);
   color: var(--c-primary);
 }

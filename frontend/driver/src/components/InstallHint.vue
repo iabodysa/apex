@@ -44,10 +44,10 @@ function onInstall() {
 
 <style scoped>
 .install-hint {
-  border: var(--border-width, 1px) solid var(--c-primary, var(--brand-green));
+  border: var(--border-width) solid var(--c-primary);
 }
 .install-x {
-  color: var(--c-ink-soft, #777);
+  color: var(--c-ink-soft);
   align-self: flex-start;
   padding: 2px;
 }

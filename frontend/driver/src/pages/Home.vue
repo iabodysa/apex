@@ -276,10 +276,10 @@ const actions = [
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border-radius: var(--radius, 12px);
+  border-radius: var(--radius);
   font-size: 0.8125rem;
   font-weight: 600;
-  background: var(--c-warning-bg, #fef3c7);
-  color: var(--c-warning, #92400e);
+  background: var(--c-warning-bg);
+  color: var(--c-warning);
 }
 </style>

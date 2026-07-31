@@ -1,4 +1,16 @@
 // Copyright (c) 2026, AFMCO and contributors
+// No `colors` block. A Tailwind palette is a fourth copy of the brand that can
+// never follow light/dark, because a utility class emits a literal. Colour reaches
+// this portal through @shared/tokens.css only. The `ah` block that used to sit here
+// carried a sand (#ECE6D6) and a danger (#C0392B) that both disagreed with the token
+// file; no `ah-*` utility was referenced anywhere in worker/, driver/ or the shared
+// components.
+//
+// `sans` resolves the shared --font instead of restating it: Tailwind's preflight
+// sets font-family on <html> from this value, and the stack it held had dropped
+// Cairo — so `font-sans` could never reach the Cairo family this portal self-hosts
+// in src/index.css, and the document root and the body asked for different faces.
+// Resolving the token also keeps the family order a single decision in tokens.css.
 export default {
   // The merged Masar portal builds BOTH holder types from this one host, so Tailwind
   // must scan the driver screens and the shared components too — otherwise driver-only
@@ -15,19 +27,8 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {
-        ah: {
-          primary: "#00844E",
-          forest: "#072B1A",
-          accent: "#60D297",
-          sand: "#ECE6D6",
-          surface: "#F8F5EE",
-          warning: "#C9851F",
-          danger: "#C0392B",
-        },
-      },
       fontFamily: {
-        sans: ["Montserrat", "system-ui", "sans-serif"],
+        sans: "var(--font)",
       },
       borderRadius: { ah: "14px" },
     },

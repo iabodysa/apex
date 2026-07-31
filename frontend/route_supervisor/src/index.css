@@ -129,7 +129,8 @@ button { font-family: inherit; cursor: pointer; }
   padding: 9px 16px; border-radius: var(--radius-pill);
   border: var(--border-width) solid var(--c-border); background: var(--c-surface-2);
   color: var(--c-ink-soft); font-size: var(--fs-sm); font-weight: 700;
-  transition: all .15s;
+  /* The three properties :hover and .on actually move. */
+  transition: background-color .15s, border-color .15s, color .15s;
 }
 .tab:hover { border-color: var(--c-border-strong); }
 .tab.on { background: var(--c-primary); color: var(--c-primary-ink); border-color: var(--c-primary); }

@@ -129,15 +129,17 @@ function close() {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.45);
+  /* --c-scrim deepens in dark mode, where a 45% veil over a near-black ground
+     barely separates the sheet from the page under it. */
+  background: var(--c-scrim);
 }
 .sheet {
   width: 100%;
   max-width: 520px;
   max-height: 86vh;
   overflow-y: auto;
-  background: var(--c-surface, #fff);
-  color: var(--c-ink, #111);
+  background: var(--c-surface);
+  color: var(--c-ink);
   border-radius: 18px 18px 0 0;
   padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
 }
@@ -151,13 +153,13 @@ function close() {
   font-size: 20px;
   line-height: 1;
   padding: 6px 10px;
-  border-radius: var(--radius-pill, 999px);
-  background: var(--c-surface-2, #f1f1f1);
+  border-radius: var(--radius-pill);
+  background: var(--c-surface-2);
   color: inherit;
 }
 .sheet-hint {
   font-size: 0.8125rem;
-  color: var(--c-ink-soft, #555);
+  color: var(--c-ink-soft);
   margin-bottom: 12px;
 }
 .sheet-list {
@@ -171,10 +173,10 @@ function close() {
   justify-content: space-between;
   gap: 10px;
   padding: 10px 8px;
-  border-radius: var(--radius-sm, 10px);
+  border-radius: var(--radius-sm);
 }
 .sheet-row + .sheet-row {
-  border-top: 1px solid var(--c-border, rgba(0, 0, 0, 0.06));
+  border-top: 1px solid var(--c-border);
 }
 .sheet-check {
   display: flex;
@@ -187,7 +189,7 @@ function close() {
   width: 22px;
   height: 22px;
   flex-shrink: 0;
-  accent-color: var(--c-primary, #2563eb);
+  accent-color: var(--c-primary);
 }
 .sheet-actions {
   display: flex;

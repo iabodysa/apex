@@ -327,27 +327,35 @@ async function toggleStop(stop) {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border-radius: var(--radius, 12px);
+  border-radius: var(--radius);
   font-size: 0.8125rem;
   font-weight: 600;
-  background: var(--c-warning-bg, #fef3c7);
-  color: var(--c-warning, #92400e);
+  background: var(--c-warning-bg);
+  color: var(--c-warning);
 }
 .stop-check {
+  position: relative;
   width: 24px;
   height: 24px;
   display: grid;
   place-items: center;
-  border-radius: var(--radius-sm, 8px);
-  border: 2px solid var(--c-primary, #2563eb);
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--c-primary);
   background: transparent;
-  color: var(--c-primary, #2563eb);
+  color: var(--c-primary);
   transition: background 0.12s ease, color 0.12s ease;
 }
+/* The box stays 24px so the row keeps its density, but a driver marking a stop
+   in a parked cab needs the --tap-min floor: extend the hit area, not the paint. */
+.stop-check::after {
+  content: "";
+  position: absolute;
+  inset: calc((var(--tap-min) - 24px) / -2);
+}
 .stop-check.is-done {
-  background: var(--c-success, var(--brand-green));
-  border-color: var(--c-success, var(--brand-green));
-  color: #fff;
+  background: var(--c-success);
+  border-color: var(--c-success);
+  color: var(--c-primary-ink);
 }
 .stop-check:disabled {
   opacity: 0.6;

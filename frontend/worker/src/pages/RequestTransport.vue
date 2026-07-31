@@ -162,7 +162,7 @@ function submit() {
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border-radius: var(--radius, 12px);
+  border-radius: var(--radius);
   background: color-mix(in srgb, var(--c-ink) 4%, transparent);
 }
 </style>

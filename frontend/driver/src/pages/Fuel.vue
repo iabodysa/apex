@@ -171,18 +171,18 @@ function statusPill(status) {
 .quota-track {
   height: 8px;
   border-radius: 999px;
-  background: var(--c-border, rgba(0, 0, 0, 0.08));
+  background: var(--c-border);
   overflow: hidden;
 }
 .quota-fill {
   height: 100%;
   border-radius: 999px;
-  background: var(--c-primary, #2563eb);
+  background: var(--c-primary);
   transition: width 0.3s ease;
 }
 .fuel-note {
   padding: 12px;
-  border-radius: var(--radius, 12px);
-  background: color-mix(in srgb, var(--c-mint, #d1fae5) 25%, transparent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--c-mint) 25%, transparent);
 }
 </style>

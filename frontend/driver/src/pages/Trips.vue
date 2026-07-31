@@ -130,7 +130,7 @@
         <div class="relative w-10 h-10 shrink-0">
           <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
             <circle cx="18" cy="18" r="16" fill="none" class="stroke-gray-200" stroke-width="3"></circle>
-            <circle cx="18" cy="18" r="16" fill="none" class="stroke-primary transition-all duration-700 ease-out" stroke-width="3" stroke-dasharray="100.53" :stroke-dashoffset="100.53 - (((trip.boarded_count || 0) / trip.expected_count) * 100.53)" stroke-linecap="round"></circle>
+            <circle cx="18" cy="18" r="16" fill="none" class="stroke-primary transition-[stroke-dashoffset] duration-700 ease-out" stroke-width="3" stroke-dasharray="100.53" :stroke-dashoffset="100.53 - (((trip.boarded_count || 0) / trip.expected_count) * 100.53)" stroke-linecap="round"></circle>
           </svg>
           <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-700" dir="ltr">
             {{ Math.round(((trip.boarded_count || 0) / trip.expected_count) * 100) }}%
@@ -398,18 +398,18 @@ async function complete(trip) {
   gap: 4px;
   padding: 3px;
   border-radius: 999px;
-  background: var(--c-surface-2, #f1f1f1);
-  border: 1px solid var(--c-border, rgba(0, 0, 0, 0.08));
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-border);
 }
 .seg-btn {
   padding: 6px 16px;
   border-radius: 999px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--c-ink-soft, #555);
+  color: var(--c-ink-soft);
 }
 .seg-on {
-  background: var(--c-primary, #2563eb);
-  color: var(--c-primary-ink, #fff);
+  background: var(--c-primary);
+  color: var(--c-primary-ink);
 }
 </style>

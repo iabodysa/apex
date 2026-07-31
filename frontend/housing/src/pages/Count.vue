@@ -186,7 +186,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
+import { computed, reactive, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
@@ -200,14 +200,8 @@ const { t, dir } = useI18n();
 const showBrand = computed(() => window.portal_show_brand !== false);
 const brandLogo = computed(() => window.portal_logo || "");
 
-watch(
-  dir,
-  (d) => {
-    document.documentElement.setAttribute("dir", d);
-    document.documentElement.setAttribute("lang", d === "rtl" ? "ar" : "en");
-  },
-  { immediate: true },
-);
+// The <html dir>/<html lang> write lives in App.vue: it is shell state that has
+// to hold across a route change, not this screen's.
 
 // ---- selected building -------------------------------------------------
 const building = ref("");

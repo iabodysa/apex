@@ -496,6 +496,22 @@ body {
     border-color: var(--c-border-strong);
   }
 
+  /* "A new build is ready" bar. Was an inline style carrying a #fff literal, so
+     it could not follow the mode; --tap-min gives the reload action the
+     accessible floor it lacked as inline text. */
+  .update-banner {
+    background: var(--c-accent);
+    color: var(--c-primary-ink);
+    padding: 4px 12px;
+  }
+  .update-reload {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    padding-inline: 10px;
+    color: var(--c-primary-ink);
+  }
+
   /* [#1rmd0e] */
   .field-label {
     display: block;

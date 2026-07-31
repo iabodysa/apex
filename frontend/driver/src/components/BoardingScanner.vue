@@ -224,7 +224,7 @@ onBeforeUnmount(() => {
   font-size: 20px;
   line-height: 1;
   padding: 6px 10px;
-  border-radius: var(--radius-pill, 999px);
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
 }
@@ -268,9 +268,9 @@ onBeforeUnmount(() => {
   text-align: center;
   padding: 24px;
 }
-.scanner-result.is-valid { background: var(--c-success, var(--brand-green)); }
-.scanner-result.is-warn { background: var(--c-warning, #c9851f); }
-.scanner-result.is-err { background: var(--c-danger, #c0392b); }
+.scanner-result.is-valid { background: var(--c-success); }
+.scanner-result.is-warn { background: var(--c-warning); }
+.scanner-result.is-err { background: var(--c-danger); }
 .result-icon {
   width: 72px;
   height: 72px;

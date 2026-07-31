@@ -27,6 +27,7 @@ import {
   clipboardCheck,
   door,
   filter,
+  key,
   loader,
   mail,
   minus,
@@ -35,7 +36,9 @@ import {
   scale,
   search,
   send2,
+  shield,
   triangleAlert,
+  truck,
   x,
 } from "@shared/components/icons.js";
 
@@ -50,6 +53,7 @@ const ICONS = {
   "clipboard-check": clipboardCheck,
   "door": door,
   "filter": filter,
+  "key": key,
   "loader": loader,
   "mail": mail,
   "minus": minus,
@@ -58,7 +62,12 @@ const ICONS = {
   "scale": scale,
   "search": search,
   "send": send2,
+  // Delivery's three exit checkpoints: shield (clear a gate), key (confirm the
+  // on-site code), truck (in transit). All three were CALLED by Delivery.vue and
+  // absent from this map, so those call sites rendered an empty <svg>.
+  "shield-check": shield,
   "triangle-alert": triangleAlert,
+  "truck": truck,
   "x": x,
 };
 

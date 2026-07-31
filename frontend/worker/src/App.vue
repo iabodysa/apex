@@ -5,12 +5,11 @@
          reload to activate it; controllerchange then reloads into the new build. -->
     <div
       v-if="updateReady"
-      class="flex items-center justify-center gap-2 text-xs font-semibold"
-      style="background: var(--c-accent, var(--brand-green)); color: #fff; padding: 8px 12px"
+      class="update-banner flex items-center justify-center gap-2 text-xs font-semibold"
     >
       <Icon name="refresh" :size="14" />
       <span>{{ t("update.available") }}</span>
-      <button class="font-bold underline" style="padding-inline: 6px" @click="applyUpdate">
+      <button class="update-reload font-bold underline" @click="applyUpdate">
         {{ t("update.reload") }}
       </button>
     </div>

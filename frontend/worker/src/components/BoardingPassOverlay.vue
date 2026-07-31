@@ -112,8 +112,9 @@ const dragStyle = computed(() => ({
   justify-content: center;
   gap: 18px;
   padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
-  /* Dimmed, theme-aware backdrop over the whole viewport. */
-  background: color-mix(in srgb, var(--c-canvas) 86%, #000 38%);
+  /* Dimmed backdrop over the whole viewport. --c-scrim already carries the
+     mode-aware veil, so the ground no longer needs a #000 mixed into it. */
+  background: color-mix(in srgb, var(--c-canvas) 86%, var(--c-scrim));
   backdrop-filter: blur(6px);
   touch-action: none; /* the overlay owns the swipe gesture */
   overflow: hidden;
@@ -131,7 +132,7 @@ const dragStyle = computed(() => ({
   background: var(--c-surface);
   color: var(--c-ink);
   border: var(--border-width) solid var(--c-border);
-  box-shadow: var(--shadow-lg, 0 2px 10px rgba(0, 0, 0, 0.18));
+  box-shadow: var(--shadow-lg);
   cursor: pointer;
 }
 .bpass-overlay-x:active {

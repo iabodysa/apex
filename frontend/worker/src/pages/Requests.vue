@@ -302,7 +302,7 @@ function formatDate(c) {
   padding: 0;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--c-danger, #dc2626);
+  color: var(--c-danger);
   cursor: pointer;
 }
 .photo-preview {
@@ -315,7 +315,7 @@ function formatDate(c) {
   inline-size: 56px;
   block-size: 56px;
   object-fit: cover;
-  border-radius: var(--radius-sm, 8px);
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
 }
 </style>

@@ -75,39 +75,45 @@ const steps = computed(() => {
   flex-shrink: 0;
   font-size: 10px;
   font-weight: 700;
-  border: 2px solid var(--c-border-strong, #d1d5db);
-  background: var(--c-surface, #fff);
-  color: var(--c-muted, #9ca3af);
-  transition: all 0.3s ease;
+  border: 2px solid var(--c-border-strong);
+  background: var(--c-surface);
+  color: var(--c-muted);
+  /* Only these four ever change between the three step states. `all` also made
+     the browser diff every animatable property on each flip. */
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease;
   position: relative;
   z-index: 1;
 }
 
 .progress-step-done .progress-dot {
-  background: var(--c-success, var(--brand-green));
-  border-color: var(--c-success, var(--brand-green));
-  color: #fff;
+  background: var(--c-success);
+  border-color: var(--c-success);
+  color: var(--c-primary-ink);
 }
 
 .progress-step-active .progress-dot {
-  background: var(--c-primary, #2563eb);
-  border-color: var(--c-primary, #2563eb);
-  color: #fff;
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--c-primary, #2563eb) 20%, transparent);
+  background: var(--c-primary);
+  border-color: var(--c-primary);
+  color: var(--c-primary-ink);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--c-primary) 20%, transparent);
 }
 
 .progress-label {
   margin-top: 6px;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--c-muted, #9ca3af);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  color: var(--c-muted);
   text-align: center;
   white-space: nowrap;
 }
 
 .progress-step-done .progress-label,
 .progress-step-active .progress-label {
-  color: var(--c-ink, #1f2937);
+  color: var(--c-ink);
 }
 
 .progress-connector {
@@ -116,13 +122,13 @@ const steps = computed(() => {
   left: 50%;
   width: 100%;
   height: 3px;
-  background: var(--c-border-strong, #d1d5db);
+  background: var(--c-border-strong);
   z-index: 0;
   transition: background 0.4s ease;
 }
 
 .progress-connector-done {
-  background: var(--c-success, var(--brand-green));
+  background: var(--c-success);
 }
 
 [dir="rtl"] .progress-connector {

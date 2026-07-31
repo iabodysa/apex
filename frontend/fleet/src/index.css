@@ -195,18 +195,28 @@ body {
   font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
   border: var(--border-width) solid transparent; transition: filter 0.15s ease, transform 0.1s ease;
 }
-.emp-btn:active { transform: translateY(1px); }
+.emp-btn:active:not(:disabled) { transform: translateY(1px); }
+/* On the base class, so a variant cannot ship without one: a disabled control
+   that still presses and still lifts reads as a working one. */
+.emp-btn:disabled { opacity: 0.65; cursor: not-allowed; box-shadow: none; }
 .emp-btn-primary {
   background: var(--c-primary); color: var(--c-primary-ink);
   box-shadow: 0 6px 16px color-mix(in srgb, var(--c-primary) 34%, transparent);
 }
 .emp-btn-primary:hover:not(:disabled) { filter: brightness(1.05); }
-.emp-btn-primary:disabled { opacity: 0.65; cursor: default; }
 .emp-btn-ghost {
   background: transparent; color: var(--c-ink);
   border-color: var(--c-border-strong); box-shadow: none; margin-top: 9px;
 }
-.emp-btn-ghost:hover { background: color-mix(in srgb, var(--c-ink) 5%, transparent); }
+.emp-btn-ghost:hover:not(:disabled) { background: color-mix(in srgb, var(--c-ink) 5%, transparent); }
+
+/* Server rejection, held on the form. --c-danger on --c-danger-bg is 5.39:1. */
+.emp-form-error {
+  display: flex; align-items: flex-start; gap: 7px; margin-top: 10px;
+  padding: 10px 12px; border-radius: var(--radius);
+  background: var(--c-danger-bg); color: var(--c-danger);
+  font-size: var(--fs-sm); font-weight: var(--fw-semibold); line-height: 1.45;
+}
 
 /* ---------- toast ---------- */
 .toast {

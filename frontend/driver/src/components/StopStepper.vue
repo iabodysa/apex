@@ -52,16 +52,20 @@ defineProps({
   flex-shrink: 0;
   font-size: 11px;
   font-weight: 700;
-  border: 2px solid var(--c-border-strong, #d1d5db);
-  background: var(--c-surface, #fff);
-  color: var(--c-muted, #9ca3af);
-  transition: all 0.3s ease;
+  border: 2px solid var(--c-border-strong);
+  background: var(--c-surface);
+  color: var(--c-muted);
+  /* Only these three change on the one done/not-done flip this stepper has. */
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .stepper-dot-done {
-  background: var(--c-success, var(--brand-green));
-  border-color: var(--c-success, var(--brand-green));
-  color: #fff;
+  background: var(--c-success);
+  border-color: var(--c-success);
+  color: var(--c-primary-ink);
 }
 
 .stepper-line {
@@ -69,12 +73,12 @@ defineProps({
   min-width: 16px;
   height: 3px;
   border-radius: 2px;
-  background: var(--c-border-strong, #d1d5db);
+  background: var(--c-border-strong);
   transition: background 0.4s ease;
 }
 
 .stepper-line-done {
-  background: var(--c-success, var(--brand-green));
+  background: var(--c-success);
 }
 
 .stepper-num {

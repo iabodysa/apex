@@ -50,7 +50,7 @@ import { toasts, dismissToast } from "../toast";
   border-radius: var(--radius-pill);
   font-size: var(--fs-sm);
   font-weight: var(--fw-semibold);
-  box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.18));
+  box-shadow: var(--shadow-lg);
 }
 .toast-ok {
   background: var(--c-success);
@@ -58,7 +58,9 @@ import { toasts, dismissToast } from "../toast";
 }
 .toast-err {
   background: var(--c-danger);
-  color: #fff;
+  /* Mode-DEPENDENT: white clears the light red at 7.01:1 but only 2.45:1 on the
+     lighter dark-mode red, where forest ink reaches 7.77:1. */
+  color: var(--c-danger-ink);
 }
 .toast-enter-active,
 .toast-leave-active {

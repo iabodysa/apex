@@ -230,11 +230,11 @@ const unlinkedCtx = computed(() => {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border-radius: var(--radius, 12px);
+  border-radius: var(--radius);
   font-size: 0.8125rem;
   font-weight: 600;
-  background: var(--c-warning-bg, #fef3c7);
-  color: var(--c-warning, #92400e);
+  background: var(--c-warning-bg);
+  color: var(--c-warning);
 }
 .update-banner {
   display: flex;
@@ -244,13 +244,18 @@ const unlinkedCtx = computed(() => {
   padding: 8px 12px;
   font-size: 0.75rem;
   font-weight: 600;
-  background: var(--c-accent, var(--brand-green));
-  color: #fff;
+  background: var(--c-accent);
+  color: var(--c-primary-ink);
 }
+/* --tap-min: the accessible floor. It was inline text with 6px of side padding,
+   which no thumb reliably hits. */
 .update-reload {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
   font-weight: 700;
   text-decoration: underline;
-  padding-inline: 6px;
-  color: #fff;
+  padding-inline: 10px;
+  color: var(--c-primary-ink);
 }
 </style>

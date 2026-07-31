@@ -41,25 +41,21 @@
   --cyan:var(--c-info);--cyan-l:var(--c-info);--cyan-d:color-mix(in srgb,var(--c-info) 11%,transparent);
   --orange:var(--c-warning);--orange-l:var(--c-warning);--orange-d:color-mix(in srgb,var(--c-warning) 13%,transparent);
   --r:var(--radius-lg);--r2:var(--radius);--r3:var(--radius-sm);--r4:6px;
-  --shadow:var(--shadow-lg);
+  /* NOT --shadow. That name belongs to the shared layer, and redeclaring it on a
+     :root of equal specificity AFTER the @import silently handed --shadow-lg to
+     every consumer of var(--shadow) document-wide, shared components included.
+     A portal alias gets a portal-prefixed name. */
+  --fo-shadow:var(--shadow-lg);
 }
 html,body{min-height:100%}
 body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 
-/* [#j5eda9] */
-.topbar{
-  height:56px;background:#ffffff;border-bottom:1px solid var(--b1);box-shadow:0 1px 4px rgba(15,28,53,.06);
-  display:flex;align-items:center;padding:0 18px;gap:12px;position:relative;z-index:100;
-  flex-shrink:0;
-}
-.brand{display:flex;align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
-.brand-badge{
-  width:36px;height:36px;border-radius:10px;flex-shrink:0;
-  background:linear-gradient(135deg,#3b82f6,#8b5cf6);
-  display:flex;align-items:center;justify-content:center;font-size:17px;
-}
-.brand-name{font-size:15px;font-weight:700;color:var(--t1);letter-spacing:-.4px}
-.brand-ver{font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace}
+/* [#j5eda9] The .topbar / .brand / .brand-badge / .brand-name / .brand-ver rules
+   that used to sit here are gone. No template ever carried those classes — the
+   rendered bar is <header class="fleet-top"> from @shared/components/
+   FleetPageShell.vue, and the brand slot uses .fp-brandmark / .fp-brandword.
+   They were the portal's only hardcoded #ffffff bar (a permanent white strip had
+   anything ever used it in dark mode) and its only blue-to-violet gradient. */
 .search-bar{flex:1;max-width:400px;position:relative}
 .search-bar input{
   width:100%;padding:8px 14px 8px 38px;background:var(--bg3);border:1px solid var(--b1);
@@ -75,7 +71,7 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .sp{
   padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;
   font-family:'JetBrains Mono',monospace;cursor:pointer;border:1px solid transparent;
-  transition:all .15s;user-select:none;
+  transition:background-color .15s,border-color .15s,color .15s,filter .15s,transform .15s;user-select:none;
   appearance:none;-webkit-appearance:none;line-height:inherit;
 }
 .sp:hover{filter:brightness(1.2)}
@@ -86,22 +82,28 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .sp-stopped{background:var(--red-d);color:var(--red-l);border-color:rgba(244,63,94,.2)}
 .sp.active{filter:brightness(1.3);transform:scale(1.03)}
 .tb-actions{display:flex;gap:8px;flex-shrink:0}
+/* --tap-min: this board is driven on a tablet as well as a desktop, and 33px is
+   under the floor for every toolbar action on it. */
 .btn{
-  padding:7px 14px;border-radius:var(--r3);border:1px solid var(--b2);background:none;
+  padding:7px 14px;min-height:var(--tap-min);border-radius:var(--r3);border:1px solid var(--b2);background:none;
   color:var(--t2);cursor:pointer;font-family:inherit;font-size:12px;font-weight:500;
-  transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+  transition:background-color .15s,border-color .15s,color .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
 }
-.btn:hover{background:var(--s2);color:var(--t1);border-color:var(--b3)}
-.btn-blue{background:var(--blue);color:#fff;border-color:var(--blue)}
-.btn-blue:hover{background:var(--blue-l);color:var(--bg)}
-.btn-green{background:var(--green-d);color:var(--green-l);border-color:rgba(0,201,122,.25)}
-.btn-green:hover{background:rgba(0,201,122,.18)}
-.btn-red{background:var(--red-d);color:var(--red-l);border-color:rgba(244,63,94,.25)}
-.btn-red:hover{background:rgba(244,63,94,.18)}
-.btn-amber{background:var(--amber-d);color:var(--amber-l);border-color:rgba(245,158,11,.25)}
-.btn-amber:hover{background:rgba(245,158,11,.18)}
-.btn-purple{background:var(--purple-d);color:var(--purple-l);border-color:rgba(139,92,246,.25)}
-.btn-purple:hover{background:rgba(139,92,246,.18)}
+/* Assign-and-lock binds :disabled (VehiclePanel) and had no disabled styling at
+   all, so a locked action was pixel-identical to a live one. On the base class,
+   and every hover is gated, so no variant can reintroduce the gap. */
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:hover:not(:disabled){background:var(--s2);color:var(--t1);border-color:var(--b3)}
+.btn-blue{background:var(--blue);color:var(--c-primary-ink);border-color:var(--blue)}
+.btn-blue:hover:not(:disabled){background:var(--blue-l);color:var(--c-primary-ink)}
+.btn-green{background:var(--green-d);color:var(--green-l);border-color:color-mix(in srgb,var(--c-success) 25%,transparent)}
+.btn-green:hover:not(:disabled){background:color-mix(in srgb,var(--c-success) 18%,transparent)}
+.btn-red{background:var(--red-d);color:var(--red-l);border-color:color-mix(in srgb,var(--c-danger) 25%,transparent)}
+.btn-red:hover:not(:disabled){background:color-mix(in srgb,var(--c-danger) 18%,transparent)}
+.btn-amber{background:var(--amber-d);color:var(--amber-l);border-color:color-mix(in srgb,var(--c-warning) 25%,transparent)}
+.btn-amber:hover:not(:disabled){background:color-mix(in srgb,var(--c-warning) 18%,transparent)}
+.btn-purple{background:var(--purple-d);color:var(--purple-l);border-color:color-mix(in srgb,var(--purple) 25%,transparent)}
+.btn-purple:hover:not(:disabled){background:color-mix(in srgb,var(--purple) 18%,transparent)}
 
 /* [#fp-head] FleetPageShell header slots — brand + search + alerts + language,
    all sitting on the forest-green header, so they read light-on-dark. */
@@ -169,7 +171,7 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .fchips{display:flex;flex-wrap:wrap;gap:4px}
 .fchip{
   padding:3px 9px;border-radius:10px;font-size:11px;cursor:pointer;
-  border:1px solid var(--b2);color:var(--t3);transition:all .15s;background:none;font-family:inherit;
+  border:1px solid var(--b2);color:var(--t3);transition:background-color .15s,border-color .15s,color .15s;background:none;font-family:inherit;
 }
 .fchip.on{border-color:var(--blue);color:var(--blue-l);background:var(--blue-d)}
 .sep{height:1px;background:var(--b1)}
@@ -193,7 +195,7 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .view-tabs{display:flex;gap:1px;background:var(--bg3);border-radius:var(--r4);padding:2px}
 .vt{
   padding:5px 12px;border-radius:4px;border:none;background:none;
-  color:var(--t3);cursor:pointer;font-size:12px;font-family:inherit;transition:all .15s;
+  color:var(--t3);cursor:pointer;font-size:12px;font-family:inherit;transition:background-color .15s,border-color .15s,color .15s;
 }
 .vt.on{background:var(--s2);color:var(--t1)}
 .sort-row{display:flex;align-items:center;gap:8px}
@@ -211,7 +213,7 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
   display:flex;flex-direction:column;
 }
 .vcard{box-shadow:var(--shadow-sm)}
-.vcard:hover{border-color:var(--c-primary);transform:translateY(-2px);box-shadow:var(--shadow)}
+.vcard:hover{border-color:var(--c-primary);transform:translateY(-2px);box-shadow:var(--fo-shadow)}
 /* [#ty9n76] */
 .vcard::before{
   content:'';position:absolute;top:0;right:0;width:3px;height:100%;border-radius:0 var(--r) var(--r) 0;z-index:1;
@@ -247,7 +249,7 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .fuel-monthly{font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace}
 .fuel-rate-edit{
   padding:3px 9px;border-radius:5px;border:1px solid var(--amber);background:var(--amber-d);
-  color:var(--amber-l);cursor:pointer;font-size:10px;font-family:inherit;font-weight:600;transition:all .15s;
+  color:var(--amber-l);cursor:pointer;font-size:10px;font-family:inherit;font-weight:600;transition:background-color .15s,border-color .15s,color .15s;
 }
 .fuel-rate-edit:hover{background:var(--amber);color:#fff}
 /* [#2r037d] */
@@ -355,7 +357,7 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .ac{
   flex:1;padding:6px 4px;border-radius:6px;border:1px solid var(--b2);background:none;
   color:var(--t3);cursor:pointer;font-size:10px;font-family:inherit;font-weight:500;
-  transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:2px;
+  transition:background-color .15s,border-color .15s,color .15s;display:flex;flex-direction:column;align-items:center;gap:2px;
   line-height:1.2;
 }
 .ac .ac-ico{font-size:14px;display:block}
@@ -393,7 +395,7 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 
 /* [#i4lf08] */
 .panel-overlay{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;
+  display:none;position:fixed;inset:0;background:var(--c-scrim);z-index:200;
   backdrop-filter:blur(6px);
 }
 .panel-overlay.open{display:block}
@@ -410,7 +412,7 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .alert-bell{
   position:relative;width:38px;height:38px;border-radius:var(--r3);
   border:1px solid var(--b2);background:none;color:var(--t2);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background-color .15s,border-color .15s,color .15s;
 }
 .alert-bell:hover{color:var(--t1);border-color:var(--b3)}
 .alert-bell.active{color:var(--blue-l);border-color:var(--blue)}
@@ -451,14 +453,14 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .panel-close{
   width:32px;height:32px;border-radius:50%;border:1px solid var(--b1);
   background:var(--s1);color:var(--t2);cursor:pointer;font-size:15px;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background-color .15s,border-color .15s,color .15s;
 }
 .panel-close:hover{color:var(--t1);border-color:var(--b3)}
 .panel-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0}
 .ptab{
   padding:10px 16px;border:none;background:none;color:var(--t3);cursor:pointer;
   font-family:inherit;font-size:12px;font-weight:500;border-bottom:2px solid transparent;
-  transition:all .15s;
+  transition:background-color .15s,border-color .15s,color .15s;
 }
 .ptab.on{color:var(--blue-l);border-bottom-color:var(--blue)}
 .panel-body{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:18px}
@@ -486,7 +488,7 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .status-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .stpick{
   padding:11px 12px;border-radius:var(--r2);border:1px solid var(--b2);
-  background:var(--bg3);cursor:pointer;text-align:right;transition:all .2s;font-family:inherit;
+  background:var(--bg3);cursor:pointer;text-align:right;transition:background-color .2s,border-color .2s,color .2s;font-family:inherit;
 }
 .stpick .sp-ico{font-size:20px;display:block;margin-bottom:5px}
 .stpick .sp-lbl{font-size:12px;font-weight:600;display:block}
@@ -616,7 +618,7 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
   position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);
   background:var(--c-surface-2);border:1px solid var(--b2);border-radius:var(--r2);
   padding:10px 18px;font-size:13px;font-weight:500;opacity:0;
-  transition:all .3s;z-index:500;white-space:nowrap;
+  transition:background-color .3s,border-color .3s,color .3s,opacity .3s,transform .3s;z-index:500;white-space:nowrap;
   box-shadow:0 8px 32px rgba(0,0,0,.5);
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -734,7 +736,7 @@ tbody tr:hover{background:var(--s1)}
 /* [#ifx1q6] */
 .upload-zone{
   border:2px dashed var(--b2);border-radius:var(--r2);padding:14px;
-  text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);
+  text-align:center;cursor:pointer;transition:background-color .2s,border-color .2s,color .2s;background:var(--bg3);
   color:var(--t3);font-size:12px;position:relative;
 }
 .upload-zone:hover{border-color:var(--blue);background:var(--blue-d);color:var(--blue-l)}
@@ -773,7 +775,7 @@ tbody tr:hover{background:var(--s1)}
 
 /* [#n97hqf] */
 .cf-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;
+  position:fixed;inset:0;background:var(--c-scrim);z-index:1000;
   display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);
   animation:cfFadeIn .15s ease;
 }
@@ -803,8 +805,6 @@ tbody tr:hover{background:var(--s1)}
 
 /* [#sytotv] */
 .sidebar-header{position:sticky;top:0;z-index:6;background:var(--bg2)}
-/* [#ge75bc] */
-.topbar{position:sticky;top:0}
 
 /* [#an5vjn] */
 @keyframes fpDotPulse{
@@ -851,20 +851,43 @@ tbody tr:hover{background:var(--s1)}
   background:var(--s2);color:var(--t2);border:1px solid var(--b2);font-size:10px;
 }
 
-/* [#o432ip] */
+/* [#o432ip] 860px = shared --bp-wide (frontend_shared/tokens.css); keep in sync —
+   CSS @media conditions cannot read a custom property. This is where the filter
+   column folds away. It used to become a 340px stacked block here and only turn
+   into a drawer at 640px, which put a second full-width panel between the
+   supervisor and the board on every tablet. */
 @media(max-width:860px){
   html,body{overflow:auto}
-  .topbar{flex-wrap:wrap;height:auto;padding:10px 14px}
   .search-bar{max-width:none;order:3;flex:1 1 100%}
-  .status-pills{order:4;flex:1 1 100%;margin-right:0}
-  .layout{flex-direction:column;height:auto;overflow:visible}
-  .sidebar{
-    position:static;width:100%;max-height:340px;
-  }
   .main{overflow:visible}
   .cards-wrap,.table-wrap{overflow:visible}
   .cards-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
   .panel{width:100%;max-width:100%}
+
+  /* The filter column becomes a bottom sheet, and the control that opens it
+     appears in the same breath — the two have to move together or the filters
+     become unreachable. */
+  .fp-mobile-only{display:inline-flex}
+  .layout{display:block}
+  .fp-sheet-backdrop{
+    position:fixed;inset:0;background:var(--c-scrim);z-index:150;
+    backdrop-filter:blur(3px);
+  }
+  .sidebar{
+    position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;
+    max-height:82vh;border:none;border-top:1px solid var(--b1);
+    border-radius:16px 16px 0 0;box-shadow:var(--fo-shadow);
+    transform:translateY(100%);transition:transform .26s ease;
+    z-index:160;
+  }
+  .sidebar.fp-sheet-open{transform:translateY(0)}
+  .sidebar-header{position:relative;justify-content:space-between}
+  /* a grab-handle hint at the top of the sheet */
+  .sidebar-header::before{
+    content:'';position:absolute;top:5px;left:50%;transform:translateX(-50%);
+    width:36px;height:4px;border-radius:2px;background:var(--b3);
+  }
+  .fp-sheet-close{width:var(--tap-min);height:var(--tap-min)}
 }
 
 /* Mobile-only affordances (the Filters button, the sheet close, the backdrop)
@@ -881,12 +904,9 @@ tbody tr:hover{background:var(--s1)}
    panel / alert drawer promoted to full-screen routes. RTL-aware (the page is
    dir=rtl by default), so the sheet/panel use logical insets where they slide. */
 @media(max-width:640px){
-  .fp-mobile-only{display:inline-flex}
-
-  /* Compact top bar; search on its own row. */
-  .topbar{padding:8px 12px;gap:8px}
-  .brand-name{font-size:14px}
-  .search-bar{order:3;flex:1 1 100%;max-width:none}
+  /* The sheet, its backdrop and the Filters button are NOT here: they belong to
+     --bp-wide above, where the filter column folds. This block carries only what
+     is genuinely phone-shaped. */
 
   /* Status pills: a single non-wrapping row the user swipes through. */
   .status-pills{
@@ -901,30 +921,6 @@ tbody tr:hover{background:var(--s1)}
   .cards-grid{grid-template-columns:1fr}
   .table-wrap{overflow-x:auto}
   .main-header{flex-wrap:wrap;gap:8px}
-
-  /* Sidebar becomes a bottom sheet: hidden off-screen until toggled. */
-  .layout{display:block}
-  .fp-sheet-backdrop{
-    position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150;
-    backdrop-filter:blur(3px);
-  }
-  .sidebar{
-    position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;
-    max-height:82vh;border:none;border-top:1px solid var(--b1);
-    border-radius:16px 16px 0 0;box-shadow:0 -8px 30px rgba(15,28,53,.22);
-    transform:translateY(100%);transition:transform .26s ease;
-    z-index:160;
-  }
-  .sidebar.fp-sheet-open{transform:translateY(0)}
-  .sidebar-header{
-    position:relative;justify-content:space-between;
-    /* a grab-handle hint at the top of the sheet */
-  }
-  .sidebar-header::before{
-    content:'';position:absolute;top:5px;left:50%;transform:translateX(-50%);
-    width:36px;height:4px;border-radius:2px;background:var(--b3);
-  }
-  .fp-sheet-close{width:30px;height:30px}
 
   /* Detail panel + alert drawer: full-screen routes on a phone. */
   .panel,.alert-drawer{
@@ -941,20 +937,26 @@ tbody tr:hover{background:var(--s1)}
 /* [#t6dk0v] */
 @keyframes fpBoardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .cards-grid,.table-wrap{animation:fpBoardIn .3s ease both}
-/* [#5oklgt] */
+/* [#5oklgt] The ring itself comes from the ONE shared :focus-visible rule
+   (frontend_shared/tokens.css) — 3px at --c-focus. The local copy that used to
+   sit here matched the same elements at equal specificity but later in the
+   cascade, so it quietly downgraded every control in this portal to a 2px ring
+   in a different colour. Only the corner radius is portal business. */
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
-  outline:2px solid var(--blue);outline-offset:2px;border-radius:6px;
+  border-radius:6px;
 }
 /* [#808a82] */
 .cards-wrap,.table-wrap{scroll-behavior:smooth}
 /* [#jo1ti9] */
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
-}
+/* The blanket reduce-motion rule that used to sit here is deleted, not moved.
+   It duplicated frontend_shared/tokens.css at equal specificity but later in the
+   cascade, so it WON — and it carried no [data-motion="loop"] exemption, which
+   is the whole reason the shared rule collapses durations instead of removing
+   animations. The shared rule now applies; .fp-action-spin below still re-arms
+   the one busy indicator this portal spins. */
 /* [#lucide] Lucide inline-icon alignment. Emoji were swapped for <Icon> SVGs;
    these rules center the icon inside chips/badges/buttons and tint the standalone
    holders that no longer rely on font glyphs. Icons inherit currentColor. */
-.brand-badge{color:#fff}
 /* Standalone icon holders: render the SVG centered, no font-glyph descender. */
 .vc-sheet-icon,.empty-ic,.cf-icon,.stpick .sp-ico,.ac .ac-ico{
   display:inline-flex;align-items:center;justify-content:center;line-height:0;

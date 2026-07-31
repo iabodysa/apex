@@ -176,12 +176,14 @@ function choose(next) {
   background: var(--c-success);
 }
 .task-fail .task-status {
-  color: #fff;
+  color: var(--c-danger-ink);
   background: var(--c-danger);
 }
+/* --c-warning is the INK tier and was being used as a FILL. The fill tier is
+   --c-warning-fill, and it carries its own ink; white reaches only ~2.6:1 here. */
 .task-issue .task-status {
-  color: #fff;
-  background: var(--c-warning);
+  color: var(--c-warning-fill-ink);
+  background: var(--c-warning-fill);
 }
 .task-status-dot {
   height: 7px;
@@ -233,7 +235,7 @@ function choose(next) {
   min-height: 48px;
   border-radius: var(--radius);
   border: 1.5px solid var(--c-border-strong);
-  background: var(--c-surface-2, var(--c-surface));
+  background: var(--c-surface-2);
   color: var(--c-muted);
   cursor: pointer;
   transition:
@@ -253,12 +255,12 @@ function choose(next) {
 .tap-fail.tap-on {
   background: var(--c-danger);
   border-color: var(--c-danger);
-  color: #fff;
+  color: var(--c-danger-ink);
 }
 .tap-issue.tap-on {
-  background: var(--c-warning);
-  border-color: var(--c-warning);
-  color: #fff;
+  background: var(--c-warning-fill);
+  border-color: var(--c-warning-fill);
+  color: var(--c-warning-fill-ink);
 }
 .tap-note.tap-on {
   background: color-mix(in srgb, var(--c-ink) 88%, transparent);

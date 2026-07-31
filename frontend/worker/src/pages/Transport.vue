@@ -98,7 +98,7 @@
             </li>
             <li v-if="destination(trip)" class="flex items-start gap-3">
               <span class="avatar h-6 w-6 text-xs shrink-0"
-                    style="background: var(--c-accent, var(--c-primary)); color: var(--c-primary-ink); border-radius: var(--radius-sm)">
+                    style="background: var(--c-accent); color: var(--c-primary-ink); border-radius: var(--radius-sm)">
                 <Icon name="route" :size="13" class="rtl-flip" />
               </span>
               <div class="min-w-0">
@@ -396,10 +396,10 @@ function confirmBoarding(trip) {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border-radius: var(--radius, 12px);
+  border-radius: var(--radius);
   font-size: 0.8125rem;
   font-weight: 600;
-  background: var(--c-warning-bg, #fef3c7);
-  color: var(--c-warning, #92400e);
+  background: var(--c-warning-bg);
+  color: var(--c-warning);
 }
 </style>

@@ -27,7 +27,7 @@
 
 <script setup>
 import IconBase from "@shared/components/IconBase.vue";
-import { car, chevron, clipboardList, fuel, rotateCw } from "@shared/components/icons.js";
+import { car, chevron, clipboardList, fuel, rotateCw, triangleAlert } from "@shared/components/icons.js";
 
 // This portal's icon name -> shared geometry. Names unchanged, so no call site moves.
 const ICONS = {
@@ -36,6 +36,7 @@ const ICONS = {
   "clipboard-list": clipboardList,
   "fuel": fuel,
   "rotate-cw": rotateCw,
+  "triangle-alert": triangleAlert,
 };
 
 // Directional glyphs mirrored under [dir="rtl"] (unchanged from this portal's original).
