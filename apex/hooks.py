@@ -3,7 +3,11 @@
 app_name = "apex"
 app_title = "Apex"
 app_publisher = "AFMCO Support Services Co. Ltd"
-app_description = "Apex — workforce operations suite: Habitat (accommodation & facilities) and Salis (movement & fleet)."
+app_description = (
+    "Apex — workforce operations suite: Habitat (accommodation & facilities), "
+    "Salis (movement & fleet), Logistay (client housing services) and Apex Core "
+    "(shared kernel)."
+)
 app_email = "afm@afmcoltd.com"
 app_license = "MIT"
 
