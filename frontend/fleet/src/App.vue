@@ -23,7 +23,7 @@ import Icon from "./components/Icon.vue";
 // barrel resolves EVERY component it re-exports (incl. any portal-i18n-coupled one)
 // in this portal, which is what broke the A-041 builds. See components/index.js.
 import LangToggle from "@shared/components/LangToggle.vue";
-import ThemeToggle from "./components/ThemeToggle.vue";
+import ThemeToggle from "@shared/components/ThemeToggle.vue";
 import { useI18n } from "./i18n";
 import { useToast } from "@shared/useToast.js";
 import { useEmployee } from "./useEmployee.js";

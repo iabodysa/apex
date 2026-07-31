@@ -442,8 +442,11 @@ const messages = {
         draftSaved: "Saved as a draft",
         error: "Couldn't send the fuel request",
       },
-      theme: { label: "Theme", light: "Light", auto: "Auto", dark: "Dark" },
     },
+    // Top level, not under `emp`: the theme switch is the shared
+    // @shared/components/ThemeToggle.vue, and every portal that mounts it looks
+    // these four keys up at the same path.
+    theme: { label: "Theme", light: "Light", auto: "Auto", dark: "Dark" },
   },
   ar: {
     common: {
@@ -879,8 +882,8 @@ const messages = {
         draftSaved: "تم الحفظ كمسودّة",
         error: "تعذّر إرسال طلب الوقود",
       },
-      theme: { label: "السمة", light: "فاتح", auto: "تلقائي", dark: "داكن" },
     },
+    theme: { label: "السمة", light: "فاتح", auto: "تلقائي", dark: "داكن" },
   },
 };
 

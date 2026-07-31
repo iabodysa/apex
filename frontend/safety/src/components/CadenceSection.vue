@@ -76,12 +76,15 @@ const badgeClass = computed(() => "badge-" + props.block.cadence.toLowerCase());
 </script>
 
 <style scoped>
+/* --shadow-sm, not --shadow: three of these stack down a checklist column, and the
+   shared --shadow is a 24px lift meant for a single raised card. A hairline is what
+   separates stacked sections without turning the column into a pile. */
 .cadence {
   border-radius: var(--radius-lg);
   border: 1px solid var(--c-border);
   background: var(--c-surface);
   overflow: hidden;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 .cadence-head {
   display: flex;

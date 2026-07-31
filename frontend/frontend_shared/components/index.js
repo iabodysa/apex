@@ -21,9 +21,10 @@ export { default as MobileConsoleShell } from "./MobileConsoleShell.vue";
 export { default as TabletSupervisorShell } from "./TabletSupervisorShell.vue";
 
 // Existing shared presentational components. Brand/IconBase have no portal-local
-// dependency; LangToggle only needs `useI18n` from "@/i18n", which every portal
-// exports (unlike `resourceErrorMessage`), so all three are safe to barrel-export
-// unlike BuildingPicker above.
+// dependency; LangToggle and ThemeToggle only need `useI18n` from "@/i18n", which
+// every portal exports (unlike `resourceErrorMessage`), so all four are safe to
+// barrel-export unlike BuildingPicker above.
 export { default as Brand } from "./Brand.vue";
 export { default as IconBase } from "./IconBase.vue";
 export { default as LangToggle } from "./LangToggle.vue";
+export { default as ThemeToggle } from "./ThemeToggle.vue";

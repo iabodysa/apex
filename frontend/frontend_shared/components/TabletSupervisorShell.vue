@@ -261,7 +261,7 @@ const shellVars = computed(() => ({
     position: fixed;
     inset: 0;
     z-index: 30;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--c-scrim);
   }
 }
 @media (prefers-reduced-motion: reduce) {

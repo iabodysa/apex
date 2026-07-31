@@ -58,6 +58,23 @@ describe("MobileConsoleShell", () => {
     const w = mount(MobileConsoleShell, { slots: { default: "x" } });
     expect(w.find(".mc-nav").exists()).toBe(false);
   });
+
+  // The default is what safety and housing will inherit when they adopt the shell,
+  // and 520 is not a width any archetype-2 screen was designed at.
+  it("defaults the column to the 480px one-hand width", () => {
+    const w = mount(MobileConsoleShell, { slots: { default: "x" } });
+    expect(w.find(".mc-shell").attributes("style")).toContain("--mc-width: 480px");
+  });
+
+  // The width must arrive as a custom property, never as an inline max-width: an
+  // inline declaration out-ranks every stylesheet rule, so the tablet breakpoint
+  // could never widen the column. That is why the shipped shell had no media query.
+  it("hands the width to CSS as a custom property, not an inline max-width", () => {
+    const w = mount(MobileConsoleShell, { props: { maxWidth: 720 }, slots: { default: "x" } });
+    const style = w.find(".mc-shell").attributes("style");
+    expect(style).toContain("--mc-width: 720px");
+    expect(style).not.toMatch(/(^|;)\s*max-width:/);
+  });
 });
 
 describe("TabletSupervisorShell", () => {

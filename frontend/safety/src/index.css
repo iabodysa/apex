@@ -1,7 +1,17 @@
-/* Safety portal — AFMCO theme tokens (Growth Green / Deep Forest / Sand),
-   mirrored from worker_portal so the safety surface matches the rest of the
-   habitat portals. Components consume these CSS variables exclusively, so a
-   tenant can re-skin by swapping the token block. */
+/* Safety portal styles. The palette is NOT here: every colour, size, radius and
+   spacing value comes from the shared token layer, so this portal cannot drift
+   from the rest of the habitat surfaces and follows light/dark automatically.
+
+   The local `:root, [data-theme="afmco"]` block that used to sit at the top of
+   this file was the reason it could not: it re-declared the SEMANTIC --c-* tokens
+   in literal hex at the same specificity and later in the cascade, masking the
+   shared layer underneath it. Auto-dark switches PRIMITIVES, so a masked semantic
+   token never moved. Deleting it and unblocking auto-dark are one change, not two.
+
+   The four off-identity themes below (frappe, gemini, atelier, creative) are a
+   separate, owner-level question and are deliberately left standing. They are
+   opt-in `[data-theme]` values, not a mask of the default, and the shared
+   auto-dark allow-list cannot reach them. */
 
 /* Shared brand primitives (--brand-green) + breakpoint tokens — single source. */
 @import "@shared/tokens.css";
@@ -13,60 +23,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root,
-[data-theme="afmco"] {
-  --c-primary: var(--brand-green);
-  --c-primary-ink: #ffffff;
-  --c-ink: #072b1a;
-  --c-ink-soft: #355040;
-  --c-canvas: #ece6d6;
-  --c-surface: #f8f5ee;
-  --c-surface-2: #ffffff;
-  --c-accent: var(--brand-green);
-  --c-mint: #60d297;
-  --c-muted: #6f7e76;
-  --c-border: #ddd5c2;
-  --c-border-strong: #cabfa3;
-  --c-success: var(--brand-green);
-  --c-success-bg: #d9f0e3;
-  --c-warning: #c9851f;
-  --c-warning-bg: #f7ead2;
-  --c-danger: #c0392b;
-  --c-danger-bg: #f6dcd8;
-  --c-header-bg: #072b1a;
-  --c-header-ink: #f8f5ee;
-  --c-header-accent: #60d297;
-  --c-arc: rgba(96, 210, 151, 0.16);
-
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 18px;
-  --radius-pill: 999px;
-  --shadow: 0 1px 2px rgba(7, 43, 26, 0.04);
-  --shadow-lg: 0 10px 30px rgba(7, 43, 26, 0.1);
-  --border-width: 1px;
-
-  --font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --fs-display: 28px;
-  --fs-h1: 22px;
-  --fs-h2: 20px;
-  --fs-h3: 16px;
-  --fs-body: 14px;
-  --fs-sm: 13px;
-  --fs-xs: 11px;
-  --fw-heading: 800;
-  --fw-semibold: 600;
-  --fw-body: 500;
-
-  --sp-1: 4px;
-  --sp-2: 8px;
-  --sp-3: 12px;
-  --sp-4: 16px;
-  --sp-5: 20px;
-  --sp-6: 24px;
-  --sp-8: 32px;
-}
 
 /* Frappe Standard — neutral blue, lighter chrome (ported from the driver/worker
    portals so /safety renders identically when the Salis Portal Theme is set to
@@ -119,32 +75,10 @@
   box-shadow: var(--shadow);
 }
 
-[data-theme="dark"] {
-  --c-primary: #00a862;
-  --c-primary-ink: #04130c;
-  --c-ink: #e7efe9;
-  --c-ink-soft: #a6b6ac;
-  --c-canvas: #0f1714;
-  --c-surface: #15211b;
-  --c-surface-2: #1c2c24;
-  --c-accent: #60d297;
-  --c-mint: #60d297;
-  --c-muted: #7d8f84;
-  --c-border: #25362c;
-  --c-border-strong: #324a3c;
-  --c-success: #60d297;
-  --c-success-bg: rgba(96, 210, 151, 0.14);
-  --c-warning: #e0a02f;
-  --c-warning-bg: rgba(224, 160, 47, 0.16);
-  --c-danger: #ef6b5e;
-  --c-danger-bg: rgba(239, 107, 94, 0.16);
-  --c-header-bg: #0c130f;
-  --c-header-ink: #e7efe9;
-  --c-header-accent: #60d297;
-  --c-arc: rgba(96, 210, 151, 0.1);
-  --shadow: none;
-  --shadow-lg: none;
-}
+/* No local [data-theme="dark"] block: dark is one of the two identity themes and
+   the shared layer already switches every primitive under it. A local copy could
+   only drift from it — the deleted one had already reached a different ground
+   (#0f1714 against the shared #0b110e). */
 
 /* Gemini — glassmorphic neon (ported from the driver/worker portals so /safety
    renders identically when the Salis Portal Theme is set to "Gemini"). */
@@ -451,6 +385,18 @@ body {
     to {
       transform: rotate(360deg);
     }
+  }
+}
+
+/* The shared reduce-motion rule collapses every duration, which would leave the
+   busy indicator frozen mid-turn while the round is still submitting — a stopped
+   spinner reads as a failed control. Slow it to a non-vestibular turn instead.
+   Covers both the page spinner and the in-button one. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner,
+  .btn-spin {
+    animation-duration: 2.4s !important;
+    animation-iteration-count: infinite !important;
   }
 }
 

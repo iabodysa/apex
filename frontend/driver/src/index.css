@@ -162,11 +162,20 @@ body {
     min-height: 96px;
     resize: vertical;
   }
+  /* A pointer press should not draw a ring, so :focus keeps the border-colour
+     answer. The keyboard path is a different event and gets the shared 3px ring
+     back — a 1px border tint is not an indicator anyone tabbing can find. */
   .input:focus,
   .select:focus,
   .textarea:focus {
     outline: none;
     border-color: var(--c-primary);
+  }
+  .input:focus-visible,
+  .select:focus-visible,
+  .textarea:focus-visible {
+    outline: 3px solid var(--c-focus);
+    outline-offset: 2px;
   }
   .input::placeholder,
   .textarea::placeholder {
@@ -224,6 +233,16 @@ body {
     to {
       transform: rotate(360deg);
     }
+  }
+}
+
+/* The shared reduce-motion rule collapses every duration, which would leave this
+   frozen mid-turn while a trip is still being submitted — a stopped spinner reads
+   as a failed control. Slow it to a non-vestibular turn instead. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s !important;
+    animation-iteration-count: infinite !important;
   }
 }
 

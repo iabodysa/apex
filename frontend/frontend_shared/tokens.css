@@ -11,10 +11,6 @@
  * exposed in two modes — light (default) and dark. A portal can no longer pull a
  * divergent hue because there is no other palette to pull.
  *
- * Values are lifted verbatim from the owner-approved reference
- * (scratch/portal-archetypes-preview.html) so the shared layer IS the approved
- * look.
- *
  * Layering
  *   1. Raw brand PRIMITIVES  (--brand-green, --mint, --forest, --surface …)
  *      — the only things that change between light and dark.
@@ -23,34 +19,48 @@
  *      every semantic token follows automatically (no per-mode --c-* drift).
  *
  * Mode selection (RTL-first; direction is set by each portal on <html dir>):
- *   - default            → light
- *   - prefers-color-scheme: dark → dark (auto)
- *   - :root[data-theme="light"|"dark"] → explicit toggle wins both ways
- *   - [data-theme="afmco"] kept as a light alias for the legacy theme setting.
+ *   - default (no data-theme) → light
+ *   - data-theme="afmco"      → light; the DEFAULT-IDENTITY alias, so it takes
+ *                               auto-dark exactly like an absent attribute
+ *   - data-theme="light"      → light, pinned; never follows the OS
+ *   - data-theme="dark"       → dark, pinned; never follows the OS
+ *   - prefers-color-scheme: dark → dark, for the two identity themes only
  *
- * KNOWN GAP — auto-dark never reaches four portals, and the cause is here.
- * masar.html, driver.html, safety.html and housing.html all server-render
- * data-theme="{{ portal_theme or 'afmco' }}", so the attribute says "default
- * identity" rather than "stay light" — yet the dark block below excludes it, and
- * those four can never go dark however clean their own stylesheet is.
- * Dropping the :not([data-theme="afmco"]) clause is NOT sufficient on its own:
- * housing/src/index.css and safety/src/index.css still declare a full local --c-*
- * palette in literal hex while resolving --c-primary/--c-accent/--c-success from
- * the shared --brand-green primitive (and their cards from --shadow). Switching
- * the primitives alone would darken those three tokens and the elevation over
- * surfaces that stay light — a mixed palette, worse than the current all-light.
- * The two changes belong in one step: delete those two local palettes, then drop
- * the clause. Verify by opening all seven portals on a dark device.
+ * AUTO-DARK IS AN ALLOW-LIST, NOT A DENY-LIST. The dark @media block below names
+ * the identity themes it may repaint (absent attribute, "afmco") instead of
+ * excluding the ones it may not. That ordering matters: the four off-identity
+ * themes still shipped by safety/housing (frappe, atelier — light; gemini,
+ * creative — already dark) declare their own --c-* set, and atelier additionally
+ * resolves --c-primary from --brand-green. A deny-list would hand those two light
+ * themes dark primitives while their own surfaces stayed light — a mixed palette,
+ * which is worse than staying light. An allow-list cannot reach them at all.
+ * Retiring those four themes is a separate, owner-level decision.
  *
  * NOTE: CSS @media conditions cannot read custom properties, so the responsive
  * breakpoints below are the DOCUMENTED source of truth; a `@media (min-width:
  * 768px)` rule must cite --bp-tablet in a comment and keep the same pixel value.
+ *
+ * NOTE: light values are authored ONCE (the three light selectors share one
+ * block). The dark values are authored TWICE — the @media block and the explicit
+ * toggle cannot be merged into one rule — so `tokens.test.mjs` asserts the two
+ * dark blocks declare identical values and fails the build if they drift.
  * ===================================================================== */
 
+/* Light is the default AND the pinned "light" choice AND the legacy afmco alias:
+   one block, so a light value is corrected in exactly one place. Each selector
+   keeps its own specificity, so :root[data-theme="light"] (0,2,0) still outranks
+   the dark @media block below, while [data-theme="afmco"] (0,1,0) does not. */
 :root,
-[data-theme="afmco"] {
+[data-theme="afmco"],
+:root[data-theme="light"] {
+  /* Tells the engine which way the page reads, which is the only thing that moves
+     the parts CSS cannot reach: scrollbars, the canvas behind the document, native
+     select and date pickers, and form-control defaults. Without it a fully repainted
+     dark page still scrolls on a white bar. */
+  color-scheme: light;
+
   /* ---- Raw brand primitives — Growth Green identity, light mode ---- */
-  --brand-green: #00844e; /* primary / accent / success brand hue */
+  --brand-green: #00844e; /* primary fill; 4.53:1 under white ink */
   --brand-green-ink: #ffffff; /* readable ink ON the primary fill */
   --mint: #60d297; /* header accent / glow / gradient stop */
   --forest: #072b1a; /* deep forest ink + dark chrome */
@@ -61,23 +71,37 @@
   --surface-2: #ffffff; /* card / control */
   --ink: #072b1a;
   --ink-soft: #47584f;
-  --muted: #6f7e76;
-  --border: #ddd5c2;
+  --muted: #586962; /* 5.81 / 5.34 / 4.54:1 on the three grounds */
+  --border: #ddd5c2; /* decorative: card edge, divider */
   --border-strong: #cabfa3;
+  /* The edge that IDENTIFIES a control. --border and --border-strong are 1.14:1
+     and 1.68:1 and cannot carry that job; an input or outline button has nothing
+     but its edge, so it needs the 3:1 UI-component threshold. 3.84 / 3.52 / 3.00. */
+  --border-control: #8d8168;
 
-  --warn: #c9851f;
+  /* Warning splits in two: ink and fill can never be the same value, because a
+     hue dark enough to read as text is too dark to read as a background. */
+  --warn: #8a5a10; /* INK only — 4.97:1 on --warn-bg */
+  --warn-fill: #c9851f; /* FILL only — carries #3a2708 ink at 4.65:1 */
   --warn-bg: #f7ead2;
-  --danger: #c0392b;
+  --danger: #a52d21; /* 5.39:1 on --danger-bg */
   --danger-bg: #f6dcd8;
-  --ok: #00844e;
+  --danger-ink: #ffffff; /* on a saturated --danger fill: 7.01:1 */
+  --ok: #046b41; /* 5.50:1 on --ok-bg; deliberately darker than --brand-green */
   --ok-bg: #d9f0e3;
   --info: #1c6fa8;
   --info-bg: #dfeef7;
+  --accent-ink: #046b41; /* ink on a --c-primary tint (.pill-accent): 4.41:1 */
+  --focus: #046b41; /* the one ring: 6.59:1 on white, 5.15:1 on canvas */
 
   --header-bg: #072b1a;
   --header-ink: #f8f5ee;
   --header-accent: #60d297;
   --arc: rgba(96, 210, 151, 0.16); /* header supergraphic tint */
+  /* Veil behind a drawer or sheet. It is a colour, so it belongs here rather than
+     in a shell — and it has to deepen in dark mode, where a 40% veil over a
+     near-black ground barely separates the drawer from the page under it. */
+  --scrim: rgba(0, 0, 0, 0.4);
 
   /* device-chrome fills (device-frame demos / harness only) */
   --chrome: #cfc7b4;
@@ -91,6 +115,7 @@
   --c-primary: var(--brand-green);
   --c-primary-ink: var(--brand-green-ink);
   --c-accent: var(--brand-green);
+  --c-accent-ink: var(--accent-ink);
   --c-mint: var(--mint);
   --c-ink: var(--ink);
   --c-ink-soft: var(--ink-soft);
@@ -100,24 +125,28 @@
   --c-muted: var(--muted);
   --c-border: var(--border);
   --c-border-strong: var(--border-strong);
+  --c-border-control: var(--border-control);
   --c-success: var(--ok);
   --c-success-bg: var(--ok-bg);
   --c-warning: var(--warn);
+  --c-warning-fill: var(--warn-fill);
   --c-warning-bg: var(--warn-bg);
   --c-danger: var(--danger);
   --c-danger-bg: var(--danger-bg);
-  /* Ink ON a saturated danger fill. Mode-independent: white clears both the light
-     (#c0392b) and the dark (#ef6b5e) red, so it is declared once, not per mode. */
-  --c-danger-ink: #ffffff;
+  /* Ink ON a saturated danger fill. Mode-DEPENDENT: white clears the light red
+     (7.01:1) but only reaches 2.45:1 on the lighter dark red, where forest ink
+     reaches 7.77:1. It follows the mode like every other pair. */
+  --c-danger-ink: var(--danger-ink);
   --c-info: var(--info);
   --c-info-bg: var(--info-bg);
   /* The single ring colour every :focus-visible outline uses, so the keyboard path
      is one decision instead of one per portal. */
-  --c-focus: var(--brand-green);
+  --c-focus: var(--focus);
   --c-header-bg: var(--header-bg);
   --c-header-ink: var(--header-ink);
   --c-header-accent: var(--header-accent);
   --c-arc: var(--arc);
+  --c-scrim: var(--scrim);
 
   /* ---- Shape / elevation ---- */
   --radius-sm: 8px;
@@ -126,9 +155,23 @@
   --radius-pill: 999px;
   --border-width: 1px;
 
+  /* ---- Touch targets. Mode-independent, so declared once here. ----
+     lg  — a primary action a standing worker taps one-handed, and bottom-nav items
+     md  — an in-row control on a checklist or count screen
+     min — the accessible floor; nothing interactive may go below it */
+  --tap-lg: 52px;
+  --tap-md: 48px;
+  --tap-min: 44px;
+
   /* ---- Type ---- */
   --font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-num: "SF Mono", ui-monospace, "Menlo", monospace; /* tabular numerals */
+  /* Latin tokens only — plate, chassis, record id, confirmation code, phone.
+     System faces only, so it never puts a webfont on the critical path. */
+  --font-num: ui-monospace, "SF Mono", "Menlo", monospace;
+  /* Arabic-Indic digits (U+0660-0669) have NO glyph in any monospace face in the
+     stack above, so they fall out of it and lose tabular alignment entirely. Use
+     this instead, WITH `font-feature-settings: "tnum" 1`, and never .mono. */
+  --font-num-ar: var(--font);
   --fs-display: 28px;
   --fs-h1: 22px;
   --fs-h2: 20px;
@@ -136,6 +179,7 @@
   --fs-body: 14px;
   --fs-sm: 13px;
   --fs-xs: 11px;
+  --fs-2xs: 10px; /* table column headers, dense supervisor labels */
   --fw-heading: 800;
   --fw-semibold: 600;
   --fw-body: 500;
@@ -156,9 +200,17 @@
   --bp-desktop: 1024px; /* side-nav supervisor layout unlocks */
 }
 
-/* ---- Dark mode: re-declare ONLY the primitives; every --c-* follows ---- */
+/* ---- Dark mode: re-declare ONLY the primitives; every --c-* follows ----
+   Allow-list: the identity themes only. An absent attribute is the default
+   identity, and "afmco" is its named alias — the four portals that server-render
+   data-theme="{{ portal_theme or 'afmco' }}" say "default identity", not "stay
+   light", so they belong here. Any other value is an explicit theme choice and is
+   left alone. Keep in sync with :root[data-theme="dark"] below — tokens.test.mjs
+   fails the build if the two drift. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]):not([data-theme="afmco"]) {
+  :root:not([data-theme]),
+  :root[data-theme="afmco"] {
+    color-scheme: dark;
     --brand-green: #00a862;
     --brand-green-ink: #04130c;
     --mint: #60d297;
@@ -170,23 +222,29 @@
     --surface-2: #1c2c24;
     --ink: #e7efe9;
     --ink-soft: #b7c6bd;
-    --muted: #7d8f84;
+    --muted: #94a69a;
     --border: #25362c;
     --border-strong: #324a3c;
+    --border-control: #587c66;
 
     --warn: #e0a02f;
+    --warn-fill: #e0a02f;
     --warn-bg: rgba(224, 160, 47, 0.16);
-    --danger: #ef6b5e;
+    --danger: #f5867a;
     --danger-bg: rgba(239, 107, 94, 0.16);
+    --danger-ink: #04130c;
     --ok: #60d297;
     --ok-bg: rgba(96, 210, 151, 0.14);
-    --info: #60d297;
-    --info-bg: rgba(96, 210, 151, 0.1);
+    --info: #6cb0ef;
+    --info-bg: rgba(108, 176, 239, 0.14);
+    --accent-ink: #2fd38a;
+    --focus: #7ee3ad;
 
     --header-bg: #0c130f;
     --header-ink: #e7efe9;
     --header-accent: #60d297;
     --arc: rgba(96, 210, 151, 0.1);
+    --scrim: rgba(0, 0, 0, 0.62);
 
     --chrome: #1e2a23;
     --chrome-2: #26362c;
@@ -197,8 +255,10 @@
   }
 }
 
-/* ---- Explicit toggle wins in both directions ---- */
+/* ---- Explicit dark wins over the OS in both directions ----
+   Byte-identical to the @media block above; tokens.test.mjs enforces that. */
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --brand-green: #00a862;
   --brand-green-ink: #04130c;
   --mint: #60d297;
@@ -210,23 +270,29 @@
   --surface-2: #1c2c24;
   --ink: #e7efe9;
   --ink-soft: #b7c6bd;
-  --muted: #7d8f84;
+  --muted: #94a69a;
   --border: #25362c;
   --border-strong: #324a3c;
+  --border-control: #587c66;
 
   --warn: #e0a02f;
+  --warn-fill: #e0a02f;
   --warn-bg: rgba(224, 160, 47, 0.16);
-  --danger: #ef6b5e;
+  --danger: #f5867a;
   --danger-bg: rgba(239, 107, 94, 0.16);
+  --danger-ink: #04130c;
   --ok: #60d297;
   --ok-bg: rgba(96, 210, 151, 0.14);
-  --info: #60d297;
-  --info-bg: rgba(96, 210, 151, 0.1);
+  --info: #6cb0ef;
+  --info-bg: rgba(108, 176, 239, 0.14);
+  --accent-ink: #2fd38a;
+  --focus: #7ee3ad;
 
   --header-bg: #0c130f;
   --header-ink: #e7efe9;
   --header-accent: #60d297;
   --arc: rgba(96, 210, 151, 0.1);
+  --scrim: rgba(0, 0, 0, 0.62);
 
   --chrome: #1e2a23;
   --chrome-2: #26362c;
@@ -236,41 +302,39 @@
   --shadow-lg: 0 26px 60px rgba(0, 0, 0, 0.55);
 }
 
-/* Forcing light when the OS is dark just restores the default primitives. */
-:root[data-theme="light"] {
-  --brand-green: #00844e;
-  --brand-green-ink: #ffffff;
-  --mint: #60d297;
-  --forest: #072b1a;
-  --forest-soft: #355040;
+/* ---- The one keyboard path, written once ----
+   :focus-visible only, so it never chases a touch or a mouse press. 3px at 2px
+   offset measures the ring against the page ground rather than the control fill,
+   which is what keeps it visible on a filled primary button. A portal that needs
+   a different ring colour overrides --c-focus, never this rule. */
+:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
+}
 
-  --canvas: #e9e3d3;
-  --surface: #f8f5ee;
-  --surface-2: #ffffff;
-  --ink: #072b1a;
-  --ink-soft: #47584f;
-  --muted: #6f7e76;
-  --border: #ddd5c2;
-  --border-strong: #cabfa3;
-
-  --warn: #c9851f;
-  --warn-bg: #f7ead2;
-  --danger: #c0392b;
-  --danger-bg: #f6dcd8;
-  --ok: #00844e;
-  --ok-bg: #d9f0e3;
-  --info: #1c6fa8;
-  --info-bg: #dfeef7;
-
-  --header-bg: #072b1a;
-  --header-ink: #f8f5ee;
-  --header-accent: #60d297;
-  --arc: rgba(96, 210, 151, 0.16);
-
-  --chrome: #cfc7b4;
-  --chrome-2: #b9b09a;
-
-  --shadow-sm: 0 1px 2px rgba(7, 43, 26, 0.05);
-  --shadow: 0 8px 24px rgba(7, 43, 26, 0.1);
-  --shadow-lg: 0 26px 60px rgba(7, 43, 26, 0.16);
+/* ---- Motion is a product requirement, not a per-portal courtesy ----
+   Durations COLLAPSE rather than animations being removed, so an entrance whose
+   end state lives in `forwards` still lands on that end state instead of leaving
+   the element blank. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* One exception, and it is the reason this is a collapse and not a blanket
+     `animation: none`. A busy indicator stopped mid-turn reads as a broken
+     control, not as calm — the screen claims to be working while nothing moves.
+     Mark a genuine loading loop with data-motion="loop" and it slows to a
+     non-vestibular 2.4s turn instead of freezing. Pulses, shimmers, slides and
+     entrances carry no such marker and still collapse. */
+  [data-motion="loop"],
+  [data-motion="loop"]::before,
+  [data-motion="loop"]::after {
+    animation-duration: 2.4s !important;
+    animation-iteration-count: infinite !important;
+  }
 }
