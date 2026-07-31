@@ -35,6 +35,13 @@ WRITE_CALLS = {
     "set_value",
     "db_delete",
     "rename_doc",
+    # Two writers this AST scan cannot reach by name alone: `get_document_share_key`
+    # inserts a Document Share Key row through a doc method, and `notify_user_system`
+    # inserts a Notification Log from another module (the delegate hop below only
+    # resolves functions defined in the SAME file). Without them both endpoints read
+    # as non-writing, and their allowlist entries silently stopped guarding anything.
+    "get_document_share_key",
+    "notify_user_system",
 }
 
 # [#tnlcz2]
@@ -436,15 +443,19 @@ def _has_permission_call(func_node):
     return False
 
 
-def _collect_permission_violations():
+def _collect_permission_violations(allowlist=None):
     """Scan all Python files for whitelisted POST write endpoints that do not
     recheck permission (directly or via a one-hop module-level delegate) and are
     not in PERMISSION_RECHECK_ALLOWLIST.
 
+    ``allowlist=[]`` answers what the guard WOULD report with no exemptions, which
+    is how the liveness test reads every entry's effect in one scan.
+
     Returns a list of (rel_path, func_name, lineno).
     """
     violations = []
-    allow_keys = {(p, fn) for p, fn, _ in PERMISSION_RECHECK_ALLOWLIST}
+    entries = PERMISSION_RECHECK_ALLOWLIST if allowlist is None else allowlist
+    allow_keys = {(p, fn) for p, fn, _ in entries}
 
     for fpath in _python_files():
         rel = os.path.relpath(fpath, APP_ROOT)
@@ -499,10 +510,14 @@ def _collect_permission_violations():
     return violations
 
 
-def _collect_violations():
-    """Scan all Python files; return list of (rel_path, func_name, lineno)."""
+def _collect_violations(allowlist=None):
+    """Scan all Python files; return list of (rel_path, func_name, lineno).
+
+    ``allowlist=[]`` answers what the guard would report with no exemptions.
+    """
     violations = []
-    safe_keys = {(p, fn) for p, fn, _ in SAFE_ALLOWLIST}
+    entries = SAFE_ALLOWLIST if allowlist is None else allowlist
+    safe_keys = {(p, fn) for p, fn, _ in entries}
 
     for fpath in _python_files():
         rel = os.path.relpath(fpath, APP_ROOT)
@@ -644,6 +659,64 @@ class TestHttpMethodEnforcement(unittest.TestCase):
                     func_names,
                     f"SAFE_ALLOWLIST references function '{func_name}' in '{rel_path}' "
                     "but the function no longer exists.",
+                )
+
+    def test_every_allowlist_entry_is_load_bearing(self):
+        """No entry in either allowlist may outlive the finding it was written for.
+
+        An exemption is a WAIVER, and this is its expiry rule. The repo has no
+        time-based expiry and should not grow one: a date says nothing about
+        whether the risk is still there, so it either fires while the hazard is
+        live or lets it sit until the clock runs out. The checkable condition is
+        the cause, not the calendar — an entry expires the moment removing it
+        stops changing what the guard reports.
+
+        A spent entry here is worse than clutter, because it can be spent for two
+        opposite reasons. Either the endpoint stopped writing — in which case the
+        exemption is over — or the DETECTOR stopped seeing the write, in which
+        case the endpoint is unguarded and the entry is the only remaining record
+        that it ever needed guarding. Both once shipped: two endpoints whose
+        writes go through a doc method and a cross-module helper read as
+        non-writing here for months. So a failure is NOT automatically a delete.
+        Open the endpoint first, and only delete once you have confirmed it truly
+        no longer writes; if it does, teach the detector (see WRITE_CALLS) and
+        the entry becomes load-bearing again.
+
+        The siblings above prove the entries still POINT at real code; this proves
+        they still DO something. Reading it costs one extra scan per list, not one
+        per entry: an allowlist is a per-key filter, so what the guard reports with
+        no exemptions at all names every load-bearing entry at once.
+        """
+        for label, entries, unexempted in (
+            (
+                "SAFE_ALLOWLIST",
+                SAFE_ALLOWLIST,
+                {(r, f) for r, f, _ln in _collect_violations(allowlist=[])},
+            ),
+            (
+                "PERMISSION_RECHECK_ALLOWLIST",
+                PERMISSION_RECHECK_ALLOWLIST,
+                {
+                    (r, f)
+                    for r, f, _ln in _collect_permission_violations(allowlist=[])
+                },
+            ),
+        ):
+            spent = [
+                f"  {rel}::{fn}" for rel, fn, _reason in entries
+                if (rel, fn) not in unexempted
+            ]
+            with self.subTest(allowlist=label):
+                self.assertEqual(
+                    spent,
+                    [],
+                    f"{label} entr(ies) no longer suppress anything — the guard "
+                    "reports nothing for them even with the allowlist emptied:\n"
+                    + "\n".join(spent)
+                    + "\n\nRead the endpoint before deleting. If it genuinely no "
+                    "longer writes, delete the entry. If it still writes, this "
+                    "scan has gone blind to how — add that writer to WRITE_CALLS, "
+                    "because right now the endpoint is guarded by nothing.",
                 )
 
 

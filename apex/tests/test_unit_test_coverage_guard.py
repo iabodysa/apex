@@ -1422,7 +1422,14 @@ class TestDeclaredStandaloneModulesStayRunnable(unittest.TestCase):
             for dotted, result in zip(targets, pool.map(_probe_standalone_run, targets)):
                 if result.returncode != 0:
                     tail = result.stderr.strip().splitlines()
-                    broken[dotted] = tail[-1] if tail else f"exit {result.returncode}"
+                    # The last stderr line of a unittest run is its verdict banner
+                    # ("FAILED (errors=1)"), the same string for every cause — keep the
+                    # tail, like the leak probe does, so the report names the real error.
+                    broken[dotted] = (
+                        "\n      ".join(tail[-8:])
+                        if tail
+                        else f"exit {result.returncode}"
+                    )
 
         regressed = sorted(set(broken) - _STANDALONE_ROT_BASELINE)
         self.assertEqual(

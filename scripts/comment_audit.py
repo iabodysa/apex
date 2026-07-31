@@ -85,7 +85,7 @@ _BASELINE: dict[str, dict[str, int]] = {
     "www/test_www_no_external_cdn_assets.py": {"long-docstring": 1},
 }
 
-# The legacy volume that was deliberately NOT swept: 444 board ids in comments and
+# The legacy volume that was deliberately NOT swept: 443 board ids in comments and
 # docstrings over 189 files (re-measured 2026-07-31). Sweeping changes no
 # behaviour, conflicts with every open branch, and costs provenance a maintainer
 # uses; what it would buy is that a public reader stops meeting ids they can never
@@ -96,7 +96,7 @@ _BASELINE: dict[str, dict[str, int]] = {
 # up: a ceiling one above the count is one free id, and the gate's own slack note
 # is the standing instruction to close that gap.
 _KIND_CEILING: dict[str, int] = {
-    KIND_DOCSTRING_ID: 367,
+    KIND_DOCSTRING_ID: 366,
     KIND_COMMENT_ID: 77,
 }
 

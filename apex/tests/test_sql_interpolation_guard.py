@@ -38,7 +38,7 @@ Such a call is allowed only when ONE of the following holds:
      then f-string it" pattern.
 
   3. The enclosing function is named in ``SAFE_ALLOWLIST`` — a reviewed,
-     known-safe helper. Seeded with the three known-safe SQL helpers.
+     known-safe helper, kept only while it still suppresses a finding.
 
 If none holds, the call is a violation and this test fails, naming the file,
 line, and function so the author either parameterises the query (bind values
@@ -56,34 +56,14 @@ import unittest
 
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
+# An entry belongs here ONLY while it is load-bearing — while deleting it would make
+# `_collect_violations` report its call. A kept-past-its-cause entry is not inert: it is
+# checked BEFORE the rule-2 guard check below, so it would go on suppressing the call if
+# the guard the reviewer relied on were later removed. Four entries were dropped once
+# their cause was gone (three functions moved to `frappe.qb`; one is now covered by
+# rule 2's own `_IDENT.match` check). test_every_allowlist_entry_is_load_bearing enforces it.
 # [#o9meu1]
 SAFE_ALLOWLIST = [
-    (
-        "habitat/temporary_worker_engine.py",
-        "_repoint_party",
-        "Identity-correction UPDATE across party-bearing doctypes. The "
-        "interpolated `doctype`/`emp_field` are each validated with "
-        "`_IDENT.match(...)` (throws on a non-identifier) and existence-checked "
-        "against `table_exists` / `get_table_columns`; all row values are bound "
-        "via %(name)s parameters. Reached through temporary_worker_engine.link.",
-    ),
-    (
-        "apex_core/utils/workflow_utils.py",
-        "cleanup_orphaned_workflow_actions",
-        "Deletes orphaned Workflow Actions. The interpolated `dt` is an active "
-        "Workflow `document_type` confirmed via `table_exists`, and `sf` is "
-        "validated with `_IDENT.match(...)`; the doctype value is bound as "
-        "%(dt)s. No external input reaches the SQL text.",
-    ),
-    (
-        "apex_core/utils/ledger_index.py",
-        "_log_blocking_duplicates",
-        "Best-effort diagnostic that logs duplicate row groups blocking a "
-        "UNIQUE index. The interpolated `dt`/`cols` are an internally-supplied "
-        "DocType and backtick-quoted fieldnames from `add_unique_guarded`'s "
-        "own arguments (migration-time schema names, never request input); "
-        "the helper never raises. Reached through ledger_index.add_unique_guarded.",
-    ),
     (
         "apex_core/utils/ledger_index.py",
         "_index_exists",
@@ -115,16 +95,6 @@ SAFE_ALLOWLIST = [
         "Same as get_custody_value_in_employee_hands: interpolates "
         "`_building_condition()` whose values are all `frappe.db.escape()`-d "
         "building names from User Permission records, never raw request input.",
-    ),
-    (
-        "habitat/report/housing_cleaning_audit/housing_cleaning_audit.py",
-        "execute",
-        "Interpolates `{where}` into the SELECT SQL. `where` is assembled from "
-        "a list of literal SQL fragments and `%(param_name)s` placeholders only — "
-        "no user-supplied string is ever injected as SQL text. User values "
-        "(from_date, to_date, building) all go into the `params` dict and are "
-        "bound by the db driver. The IN-clause for building scope uses "
-        "`%(bld_N)s` placeholders whose keys are loop indices, not user data.",
     ),
 ]
 
@@ -308,9 +278,12 @@ def _enclosing_function(tree, target_node):
     return best
 
 
-def _collect_violations():
+def _collect_violations(allowlist=None):
+    """``allowlist=[]`` answers what the guard WOULD report with no exemptions —
+    which is how the liveness test below reads every entry's effect in one scan."""
     violations = []
-    safe_keys = {(p, fn) for p, fn, _ in SAFE_ALLOWLIST}
+    entries = SAFE_ALLOWLIST if allowlist is None else allowlist
+    safe_keys = {(p, fn) for p, fn, _ in entries}
 
     for fpath in _python_files():
         rel = os.path.relpath(fpath, APP_ROOT)
@@ -437,6 +410,45 @@ class TestSqlInterpolationGuard(unittest.TestCase):
                     f"SAFE_ALLOWLIST references '{func_name}' in '{rel_path}' "
                     "but the function no longer exists.",
                 )
+
+    def test_every_allowlist_entry_is_load_bearing(self):
+        """No SAFE_ALLOWLIST entry may outlive the finding it was written for.
+
+        An exemption is a WAIVER, and this is its expiry rule. The repo has no
+        time-based expiry and should not grow one: a date says nothing about
+        whether the risk is still there, so it either fires while the hazard is
+        live or lets it sit until the clock runs out. The checkable condition is
+        the cause, not the calendar — an entry expires the moment removing it
+        stops changing what the guard reports.
+
+        Letting a spent entry sit is not merely untidy. ``_collect_violations``
+        consults the allowlist BEFORE the rule-2 guard check, so an entry kept
+        past its cause is a live suppressor: the day someone drops the
+        ``_IDENT.match`` a reviewer relied on, the finding reopens under rule 2
+        — unless a forgotten waiver swallows it first, with no review and no
+        sign that anything changed.
+
+        The sibling above proves the entry still POINTS at real code; this proves
+        it still DOES something. Reading it costs one extra scan, not one per
+        entry: the allowlist is a per-key filter, so what the guard reports with
+        no exemptions at all names every load-bearing entry at once.
+        """
+        unexempted = {(rel, fn) for rel, fn, _ln in _collect_violations(allowlist=[])}
+        spent = [
+            f"  {rel}::{fn}" for rel, fn, _reason in SAFE_ALLOWLIST
+            if (rel, fn) not in unexempted
+        ]
+        self.assertEqual(
+            spent,
+            [],
+            "SAFE_ALLOWLIST entr(ies) no longer suppress anything — the guard "
+            "reports nothing for them even with the allowlist emptied:\n"
+            + "\n".join(spent)
+            + "\n\nDelete each one. Whatever made it necessary is gone (the SQL was "
+            "parameterised, moved to frappe.qb, or now passes the identifier-guard "
+            "rule on its own), and leaving it in place would silently re-suppress "
+            "the call if that protection were ever removed.",
+        )
 
 
 if __name__ == "__main__":
