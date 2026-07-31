@@ -88,6 +88,94 @@ class TestSalaryDeductionPolicy(FrappeTestCase):
         self.assertIsNone(off.get_type_rule("Damage"), "master switch off gates every type")
 
 
+class TestRecoveryAccountAgreement(FrappeTestCase):
+    """A Damage rule may not credit an account the advance never debited.
+
+    Payroll credits the salary component's OWN account when it recovers an employee
+    advance, so a component pointing elsewhere clears the deduction while the receivable
+    stays open. HRMS never checks this, and the failure is invisible: every document
+    reads as recovered.
+    """
+
+    def _component_with_account(self, account, company):
+        name = f"Apex Recovery Probe {frappe.generate_hash(length=12)}"
+        doc = frappe.get_doc(
+            {
+                "doctype": "Salary Component",
+                "salary_component": name,
+                "type": "Deduction",
+                "accounts": [{"company": company, "account": account}],
+            }
+        )
+        doc.insert(ignore_permissions=True)
+        self.addCleanup(frappe.delete_doc, "Salary Component", doc.name, force=True)
+        return doc.name
+
+    def _company_with_advance_account(self):
+        for company in frappe.get_all("Company", pluck="name"):
+            account = frappe.db.get_value("Company", company, "default_employee_advance_account")
+            if account:
+                return company, account
+        self.skipTest("no company on this site declares a default employee advance account")
+
+    def test_a_component_pointing_elsewhere_is_refused(self):
+        company, advance_account = self._company_with_advance_account()
+        other = frappe.db.get_value(
+            "Account",
+            {"company": company, "is_group": 0, "name": ["!=", advance_account]},
+            "name",
+        )
+        if not other:
+            self.skipTest("this site has no second account to disagree with")
+        component = self._component_with_account(other, company)
+        doc = _policy(
+            50,
+            {
+                "deduction_type": "Damage",
+                "enabled": 1,
+                "max_percent_of_salary": 5,
+                "salary_component": component,
+            },
+        )
+        with self.assertRaises(frappe.ValidationError):
+            doc.validate()
+
+    def test_the_matching_component_is_accepted(self):
+        company, advance_account = self._company_with_advance_account()
+        component = self._component_with_account(advance_account, company)
+        doc = _policy(
+            50,
+            {
+                "deduction_type": "Damage",
+                "enabled": 1,
+                "max_percent_of_salary": 5,
+                "salary_component": component,
+            },
+        )
+        doc.validate()
+
+    def test_a_disabled_rule_is_not_graded(self):
+        company, advance_account = self._company_with_advance_account()
+        other = frappe.db.get_value(
+            "Account",
+            {"company": company, "is_group": 0, "name": ["!=", advance_account]},
+            "name",
+        )
+        if not other:
+            self.skipTest("this site has no second account to disagree with")
+        component = self._component_with_account(other, company)
+        doc = _policy(
+            50,
+            {
+                "deduction_type": "Damage",
+                "enabled": 0,
+                "max_percent_of_salary": 5,
+                "salary_component": component,
+            },
+        )
+        doc.validate()
+
+
 class TestMoveDeductionPatch(FrappeTestCase):
     """The patch must carry an existing Habitat Settings damage value onto the Policy
     Damage rule and turn the global master switch ON (financial safety: an enabled

@@ -35,6 +35,44 @@ class SalaryDeductionPolicy(Document):
         self._guard_global_cap()
         self._guard_type_rules()
         self._guard_authorization()
+        self._guard_recovery_account_agreement()
+
+    def _guard_recovery_account_agreement(self):
+        """A Damage rule's component must credit the account the advance debited.
+
+        Recovering a damage advance through payroll credits the SALARY COMPONENT's own
+        account (hrms payroll_entry.py:452, tagged is_advance="Yes"), while the advance
+        payment debited the company's default employee advance account
+        (hrms employee_advance.py:259). HRMS throws only when the component account is
+        MISSING, never when it disagrees, so a mismatch leaves ``return_amount`` reading
+        fully recovered while the receivable never clears in the ledger.
+
+        Enforced here, at configuration, and never at recovery time: refusing mid-run
+        would silently stop a worker's wage recovery, which is worse than refusing a
+        save the operator is already looking at.
+        """
+        for row in self.type_rules or []:
+            if not row.enabled or row.deduction_type != "Damage":
+                continue
+            component = row.salary_component or self.default_salary_component
+            if not component:
+                continue
+            for account_row in frappe.get_all(
+                "Salary Component Account",
+                filters={"parent": component},
+                fields=["company", "account"],
+            ):
+                advance_account = frappe.db.get_value(
+                    "Company", account_row.company, "default_employee_advance_account"
+                )
+                if advance_account and account_row.account != advance_account:
+                    frappe.throw(
+                        _(
+                            "Salary Component {0} posts to {1} for company {2}, but employee "
+                            "advances are paid from {3}. Damage recovery would clear the "
+                            "deduction without clearing the advance. Point both at one account."
+                        ).format(component, account_row.account, account_row.company, advance_account)
+                    )
 
     def _guard_authorization(self):
         """An enabled Rent / Housing rule needs a recorded authorizer and document
