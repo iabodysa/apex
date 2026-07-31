@@ -51,6 +51,18 @@ module defines. www/fleet.py defines FLEET_ROLES and consults it only in its
 /fleet as role-gated. /fleet and /fleet-os differ in controller, bundle and
 gate, so swapping the two rows fails on all three.
 
+Two further anchors on that page are part of the same contract, because the row
+comparison alone is correct without being COMPLETE:
+
+- The sentence stating routing is pure `www/` convention with no route-rule or
+  page-renderer indirection. It is the PREMISE that makes reading `www/` a whole
+  account of the served routes; hooks.py is checked against it, so declaring a
+  route rule fails rather than quietly giving the table a route to miss.
+- Each portal row's API module and endpoint count, written `(N endpoints)` in
+  the row and `serves N` in the prose beneath. The count is derived by counting
+  module-level `@frappe.whitelist` functions, and the page states each one twice,
+  so the two halves disagreeing fails on its own.
+
 docs/training/README.md's opening states how many names `apex/modules.txt`
 declares and lists one bullet per module. It said FIVE, describing a SIM
 Operations module whose package no longer exists — true when written, false
@@ -97,6 +109,7 @@ TRAINING_DOC = os.path.join(REPO_ROOT, "docs", "training", "README.md")
 SETTINGS_DOC = os.path.join(REPO_ROOT, "docs", "training", "settings.md")
 WWW_ROOT = os.path.join(APP_ROOT, "www")
 MODULES_TXT = os.path.join(APP_ROOT, "modules.txt")
+HOOKS_PY = os.path.join(APP_ROOT, "hooks.py")
 
 # A Section 1 row: | **Label** | Module | Parent | `sequence_id` | Role, Role, ... |
 DOC_ROW = re.compile(r"^\|\s*\*\*(?P<label>[^*]+)\*\*\s*\|(?P<rest>.*)\|\s*$")
@@ -593,6 +606,23 @@ BACKING_CELL = re.compile(r"^`(?P<controller>[^`]+)`\s*·\s*`(?P<bundle>[^`]+)`$
 GUEST_MARKER = "Guest-accessible"
 SESSION_MARKER = "Guest redirect"
 
+# A portal's server-side API surface, stated as a backticked dotted module path
+# followed by its endpoint count. Two published shapes, one claim: "(N endpoints)"
+# inside a route row's gate cell, and "serves N" in the prose under the table.
+ENDPOINT_CLAIM = re.compile(
+    r"`(?P<module>" + APP_PKG + r"(?:\.[a-z0-9_]+)+)`\s*"
+    r"(?:\((?P<parenthesised>\d+) endpoints?\)|serves (?P<inline>\d+))"
+)
+
+# The sentence the whole route derivation rests on. Reading apex/www/ is a
+# COMPLETE account of the served routes only while it holds; a route rule in
+# hooks.py would serve a route no shell backs, and the scan would never see it.
+WWW_ONLY_CLAIM = (
+    "routing is pure `www/` file convention, with no `website_route_rules` "
+    "or `page_renderer` indirection"
+)
+ROUTING_INDIRECTION_HOOKS = ("website_route_rules", "page_renderer")
+
 ROUTE_COUNT = re.compile(r"serves \*\*(?P<count>[a-z]+)\*\* portal routes")
 SESSION_SENTENCE = re.compile(
     r"The \*\*(?P<count>[a-z]+)\*\* session-gated operator portals"
@@ -620,6 +650,22 @@ SETTINGS_MODULE_SENTENCE = re.compile(
 def _read(path):
     with open(path, encoding="utf-8") as fh:
         return fh.read()
+
+
+def _replace_once(case, path, old, new):
+    """Rewrite a MIRRORED document, asserting the pattern was there to replace.
+
+    Every falsifiability class below plants its drift this way, so it is one
+    helper: a plant whose pattern silently matched nothing would leave the
+    fixture unmodified and "prove" the guard green against an untouched file.
+    """
+    text = _read(path)
+    edited = text.replace(old, new, 1)
+    case.assertNotEqual(
+        edited, text, f"{os.path.basename(path)} no longer contains {old!r}"
+    )
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(edited)
 
 
 def _flat(text):
@@ -784,6 +830,75 @@ def documented_route_count(path):
     return _number(match.group("count")) if match else None
 
 
+def documented_endpoint_counts(path=README):
+    """{dotted module: {claimed counts}} for every endpoint claim in the README.
+
+    A set, not an int, on purpose: the README states each portal's endpoint count
+    TWICE — once in the route row's gate cell and once in the prose beneath — so
+    the two halves disagreeing is itself a defect this reports.
+    """
+    counts = {}
+    for match in ENDPOINT_CLAIM.finditer(_flat(_read(path))):
+        claimed = match.group("parenthesised") or match.group("inline")
+        counts.setdefault(match.group("module"), set()).add(int(claimed))
+    return counts
+
+
+def shipped_endpoint_count(module, repo_root=REPO_ROOT):
+    """How many module-level `@frappe.whitelist` functions `module` ships, or None.
+
+    Module level only: a whitelist nested inside another function is not a
+    reachable endpoint, so counting it would inflate the published number.
+    """
+    path = os.path.join(repo_root, *module.split(".")) + ".py"
+    if not os.path.isfile(path):
+        return None
+    total = 0
+    for node in ast.parse(_read(path)).body:
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        for decorator in node.decorator_list:
+            target = decorator.func if isinstance(decorator, ast.Call) else decorator
+            if getattr(target, "attr", None) == "whitelist":
+                total += 1
+                break
+    return total
+
+
+def endpoint_count_mismatches(documented, repo_root=REPO_ROOT):
+    """Every published endpoint count that is not the count the module ships."""
+    report = []
+    for module in sorted(documented):
+        claimed = documented[module]
+        shipped = shipped_endpoint_count(module, repo_root)
+        if shipped is None:
+            report.append(f"{module}: the README names it but no such module ships")
+        elif len(claimed) > 1:
+            report.append(
+                f"{module}: the README claims {sorted(claimed)} in different places; "
+                "the route row and the prose beneath it must state one number"
+            )
+        elif claimed != {shipped}:
+            report.append(
+                f"{module}: the README says {sorted(claimed)[0]} endpoints but the "
+                f"module whitelists {shipped}"
+            )
+    return report
+
+
+def hooks_routing_indirection(path=HOOKS_PY):
+    """The route-indirection hooks `hooks.py` assigns at module level, if any."""
+    declared = set()
+    for node in ast.parse(_read(path)).body:
+        targets = node.targets if isinstance(node, ast.Assign) else []
+        if isinstance(node, ast.AnnAssign):
+            targets = [node.target]
+        for target in targets:
+            if isinstance(target, ast.Name) and target.id in ROUTING_INDIRECTION_HOOKS:
+                declared.add(target.id)
+    return sorted(declared)
+
+
 def documented_session_gated(path=TRAINING_DOC):
     """(count, routes) from the training guide's session-gated portals note."""
     match = SESSION_SENTENCE.search(_flat(_read(path)))
@@ -885,6 +1000,48 @@ class TestPortalRouteDocParity(unittest.TestCase):
                     "the published portal-route count is not the number of served routes",
                 )
 
+    def test_the_readme_still_states_the_www_only_routing_claim(self):
+        """The anchor that makes the scan above COMPLETE, not merely correct.
+
+        Reading apex/www/ accounts for every served route only while the README's
+        no-indirection sentence is true. Delete or reword the sentence and the
+        derivation loses its stated premise, so the sentence is part of the
+        contract and is checked as one.
+        """
+        self.assertIn(
+            WWW_ONLY_CLAIM,
+            _flat(_read(README)),
+            "the README no longer states that routing is pure www/ file convention. "
+            "That sentence is the premise of the route table's derivation — restore "
+            f"it verbatim, or teach this guard the new routing source: {WWW_ONLY_CLAIM!r}",
+        )
+
+    def test_hooks_declares_no_routing_indirection(self):
+        """And the claim must be TRUE, or the table can omit a served route."""
+        declared = hooks_routing_indirection()
+        self.assertEqual(
+            declared,
+            [],
+            "hooks.py now declares route indirection, so apex/www/ is no longer the "
+            "whole routing story and the README's served-routes table can silently "
+            f"omit a route: {declared}",
+        )
+
+    def test_the_published_endpoint_counts_are_the_shipped_counts(self):
+        """Each portal row names its API module and how many endpoints it serves."""
+        documented = documented_endpoint_counts()
+        self.assertGreaterEqual(
+            len(documented), 2, "no endpoint claim parsed — the README pattern broke"
+        )
+        mismatches = endpoint_count_mismatches(documented)
+        self.assertEqual(
+            mismatches,
+            [],
+            "README.md misstates a portal's endpoint count. A claim reads as a "
+            "backticked dotted module path followed by `(N endpoints)` in the route "
+            f"row, or `serves N` in the prose beneath it: {mismatches}",
+        )
+
     def test_the_training_guide_names_the_session_gated_portals(self):
         """The guide's note is the other published list of the same routes."""
         count, named = documented_session_gated()
@@ -969,11 +1126,7 @@ class TestPortalRouteGuardIsFalsifiable(unittest.TestCase):
         return portal_route_mismatches(documented_portal_routes(self.readme), shipped)
 
     def _edit_readme(self, old, new):
-        text = _read(self.readme)
-        edited = text.replace(old, new, 1)
-        self.assertNotEqual(edited, text, f"README copy no longer contains {old!r}")
-        with open(self.readme, "w", encoding="utf-8") as fh:
-            fh.write(edited)
+        _replace_once(self, self.readme, old, new)
 
     def _plant_route(self, route, bundle="depot_portal"):
         """A shell that mounts a bundle plus its controller — a served portal route."""
@@ -1069,6 +1222,90 @@ class TestPortalRouteGuardIsFalsifiable(unittest.TestCase):
         self.assertEqual(controller_gate(gated), (True, ("FLEET_ROLES",), frozenset({"Fleet Manager"})))
 
 
+class TestEndpointCountGuardIsFalsifiable(unittest.TestCase):
+    """The endpoint check must report drift from EITHER side, and from itself.
+
+    Three ways the claim rots: the module gains an endpoint, the README's number
+    is edited, or its two statements of the same count fall out of step. All
+    three are proven against a temp mirror of the README and the api package.
+    """
+
+    MODULE = APP_PKG + ".salis.api.fleet_os"
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+        self.readme = os.path.join(self.tmp, "README.md")
+        shutil.copyfile(README, self.readme)
+        shutil.copytree(
+            os.path.join(APP_ROOT, "salis", "api"),
+            os.path.join(self.tmp, APP_PKG, "salis", "api"),
+        )
+
+    def _compare(self):
+        documented = documented_endpoint_counts(self.readme)
+        self.assertIn(self.MODULE, documented, "fixture README lost its endpoint claims")
+        return endpoint_count_mismatches(documented, self.tmp)
+
+    def _edit_readme(self, old, new):
+        _replace_once(self, self.readme, old, new)
+
+    def test_the_unmodified_copy_agrees(self):
+        self.assertEqual(self._compare(), [], "baseline fixture must start clean")
+        self.assertEqual(shipped_endpoint_count(self.MODULE, self.tmp), 13)
+
+    def test_a_new_endpoint_on_the_module_is_reported(self):
+        """The drift the guard exists for: the API grew, the published count did not."""
+        path = os.path.join(self.tmp, APP_PKG, "salis", "api", "fleet_os.py")
+        with open(path, "a", encoding="utf-8") as fh:
+            fh.write("\n\n@frappe.whitelist()\ndef impound_vehicle():\n    return None\n")
+
+        mismatches = self._compare()
+        self.assertEqual(len(mismatches), 1, f"new endpoint went unreported: {mismatches}")
+        self.assertIn("13 endpoints", mismatches[0])
+        self.assertIn("whitelists 14", mismatches[0])
+
+    def test_the_two_published_statements_disagreeing_is_reported(self):
+        """The README states each count twice; only one being edited is the defect
+        a single-site check would wave through."""
+        self._edit_readme("` (13 endpoints)", "` (14 endpoints)")
+        mismatches = self._compare()
+        self.assertEqual(len(mismatches), 1, f"internal disagreement unreported: {mismatches}")
+        self.assertIn("[13, 14]", mismatches[0])
+
+    def test_a_named_module_that_does_not_ship_is_reported(self):
+        self._edit_readme(APP_PKG + ".salis.api.fleet_employee`", APP_PKG + ".salis.api.ghost`")
+        mismatches = self._compare()
+        self.assertTrue(
+            any("ghost" in line and "no such module ships" in line for line in mismatches),
+            f"a phantom module went unreported: {mismatches}",
+        )
+
+    def test_a_nested_whitelist_is_not_counted_as_an_endpoint(self):
+        """Only a module-level function is reachable as an endpoint, so a decorated
+        inner function must not inflate the count the README has to match."""
+        path = os.path.join(self.tmp, APP_PKG, "salis", "api", "fleet_os.py")
+        with open(path, "a", encoding="utf-8") as fh:
+            fh.write(
+                "\n\ndef _wrapper():\n    @frappe.whitelist()\n"
+                "    def inner():\n        return None\n    return inner\n"
+            )
+        self.assertEqual(shipped_endpoint_count(self.MODULE, self.tmp), 13)
+        self.assertEqual(self._compare(), [])
+
+    def test_the_routing_premise_reader_sees_a_planted_route_rule(self):
+        """The hooks check must fire on a real assignment, not just on today's file."""
+        clean = os.path.join(self.tmp, "hooks_clean.py")
+        with open(clean, "w", encoding="utf-8") as fh:
+            fh.write('app_name = "apex"\nwebsite_context = {}\n')
+        self.assertEqual(hooks_routing_indirection(clean), [])
+
+        planted = os.path.join(self.tmp, "hooks_planted.py")
+        with open(planted, "w", encoding="utf-8") as fh:
+            fh.write('app_name = "apex"\nwebsite_route_rules = [{"from_route": "/x"}]\n')
+        self.assertEqual(hooks_routing_indirection(planted), ["website_route_rules"])
+
+
 class TestModuleDocGuardIsFalsifiable(unittest.TestCase):
     """The module comparison must report a modules.txt change the guide missed.
 
@@ -1102,11 +1339,7 @@ class TestModuleDocGuardIsFalsifiable(unittest.TestCase):
             fh.write(text.rstrip("\n") + "\n" + name + "\n")
 
     def _edit_guide(self, old, new):
-        text = _read(self.guide)
-        edited = text.replace(old, new, 1)
-        self.assertNotEqual(edited, text, f"guide copy no longer contains {old!r}")
-        with open(self.guide, "w", encoding="utf-8") as fh:
-            fh.write(edited)
+        _replace_once(self, self.guide, old, new)
 
     def _compare_settings(self):
         declared = declared_modules(self.modules)
@@ -1118,11 +1351,7 @@ class TestModuleDocGuardIsFalsifiable(unittest.TestCase):
         )
 
     def _edit_settings(self, old, new):
-        text = _read(self.settings)
-        edited = text.replace(old, new, 1)
-        self.assertNotEqual(edited, text, f"settings copy no longer contains {old!r}")
-        with open(self.settings, "w", encoding="utf-8") as fh:
-            fh.write(edited)
+        _replace_once(self, self.settings, old, new)
 
     def test_the_unmodified_copy_agrees(self):
         self.assertEqual(self._compare(), [], "baseline fixture must start clean")

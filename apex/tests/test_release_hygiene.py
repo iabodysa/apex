@@ -15,6 +15,9 @@ These lock in release-hygiene invariants that must not silently regress:
      documentation set (README.md and docs/) outside the localization homes.
   6. Every shipped line-oriented data file (translations, modules.txt,
      patches.txt) uses LF endings, so an edit diffs as the rows it changed.
+  7. No internal dev-process text (task id, TODO, FIXME, HACK, WIP, "by
+     terminal") reaches user-facing DocType metadata OR the published prose in
+     README.md and docs/ — both are surfaces an outsider reads.
 
 Run standalone:  python3 -m unittest apex.tests.test_release_hygiene -v
 """
@@ -25,8 +28,10 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import tokenize
 import types
 import unittest
@@ -79,6 +84,33 @@ SCANNED_SOURCE_EXTS = ("py", "json", "js", "html")
 # tree would disagree with CI's fresh checkout.
 PUBLISHED_DOCS_DIR = os.path.join(REPO_ROOT, "docs")
 PUBLISHED_README = os.path.join(REPO_ROOT, "README.md")
+
+
+def published_doc_files():
+    """Every TRACKED file under docs/, plus README.md — no extension filter, so
+    a published page cannot dodge a scan by not being Markdown.
+
+    Tracked, because "published" means what git ships. `docs/` also holds local
+    working notes that are gitignored and absent from a fresh checkout; judging
+    those makes the verdict depend on whose machine ran it.
+
+    One enumeration, shared: the Arabic scan and the internal-marker scan below
+    must agree on what "published" means, or a file exempt from one silently
+    becomes exempt from the other.
+    """
+    listed = subprocess.run(
+        ["git", "-C", REPO_ROOT, "ls-files", "-z", "--", "docs"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if listed.returncode != 0:
+        # No git (an sdist / tarball): fall back to the whole tree rather than
+        # an empty set, so the scan degrades loud instead of silently passing.
+        paths = glob.glob(os.path.join(PUBLISHED_DOCS_DIR, "**", "*"), recursive=True)
+        return [p for p in paths if os.path.isfile(p)] + [PUBLISHED_README]
+    tracked = [os.path.join(REPO_ROOT, rel) for rel in listed.stdout.split("\0") if rel]
+    return [p for p in tracked if os.path.isfile(p)] + [PUBLISHED_README]
 
 # [#oy1z45]
 LATIN_BRAND_SOURCES = {"AFMCO"}
@@ -677,36 +709,11 @@ class TestNoArabicInSource(unittest.TestCase):
                     paths.append(path)
         return paths
 
-    def _published_doc_files(self):
-        """Every TRACKED file under docs/, plus README.md — no extension filter, so
-        a published page cannot dodge the scan by not being Markdown.
-
-        Tracked, because "published" means what git ships. `docs/` also holds local
-        working notes that are gitignored and absent from a fresh checkout; judging
-        those makes the verdict depend on whose machine ran it, which is the exact
-        defect A-135 fixed in the comment gate.
-        """
-        listed = subprocess.run(
-            ["git", "-C", REPO_ROOT, "ls-files", "-z", "--", "docs"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        if listed.returncode != 0:
-            # No git (an sdist / tarball): fall back to the whole tree rather than
-            # an empty set, so the scan degrades loud instead of silently passing.
-            paths = glob.glob(os.path.join(PUBLISHED_DOCS_DIR, "**", "*"), recursive=True)
-            return [p for p in paths if os.path.isfile(p)] + [PUBLISHED_README]
-        tracked = [
-            os.path.join(REPO_ROOT, rel) for rel in listed.stdout.split("\0") if rel
-        ]
-        return [p for p in tracked if os.path.isfile(p)] + [PUBLISHED_README]
-
     def test_scan_reaches_html_and_published_docs(self):
         # Non-vacuity: a broken glob would green the scan below by finding nothing.
         rels = {
             os.path.relpath(p, REPO_ROOT)
-            for p in self._source_files() + self._published_doc_files()
+            for p in self._source_files() + published_doc_files()
         }
         for expected in (
             os.path.join("apex", "www", "fleet-os.html"),
@@ -735,7 +742,7 @@ class TestNoArabicInSource(unittest.TestCase):
     def test_no_arabic_in_published_code_or_metadata(self):
         """Keep Arabic in supported localization surfaces, not published source."""
         offenders = []
-        for path in self._source_files() + self._published_doc_files():
+        for path in self._source_files() + published_doc_files():
             try:
                 with open(path, encoding="utf-8") as fh:
                     text = fh.read()
@@ -758,6 +765,40 @@ INTERNAL_MARKERS = re.compile(
     re.IGNORECASE,
 )
 _METADATA_TEXT_KEYS = {"description", "label", "documentation", "options"}
+
+# Fenced code in a published page quotes real source, and real source is allowed
+# to carry a TODO. Only the PROSE around it is the published claim, so the scan
+# reads the page the way GitHub renders it minus the quoted code.
+_FENCE = re.compile(r"^\s*(```|~~~)")
+
+
+def marker_offenders(paths, root=REPO_ROOT):
+    """`relpath:line <marker>` for every published prose line carrying dev text.
+
+    Pure over its inputs so the falsifiability class can point it at a planted
+    file — proving the scan reports a leak must not require dirtying a real page.
+    """
+    offenders = []
+    for path in paths:
+        try:
+            with open(path, encoding="utf-8") as fh:
+                lines = fh.read().splitlines()
+        except (OSError, UnicodeDecodeError):
+            continue
+        rel = os.path.relpath(path, root)
+        fenced = False
+        for number, line in enumerate(lines, 1):
+            if _FENCE.match(line):
+                fenced = not fenced
+                continue
+            found = None if fenced else INTERNAL_MARKERS.search(line)
+            if found:
+                offenders.append(f"{rel}:{number} <{found.group(0)}>")
+        if fenced:
+            # An unclosed fence would exempt every line after it, which is a
+            # silent way to park anything at the end of a page.
+            offenders.append(f"{rel}: unclosed code fence — the scan cannot read past it")
+    return offenders
 
 
 class TestNotificationCompanionModule(unittest.TestCase):
@@ -817,6 +858,15 @@ class TestNotificationCompanionModule(unittest.TestCase):
 
 
 class TestNoInternalMarkersInMetadata(unittest.TestCase):
+    """Internal dev-process text must not reach EITHER published surface.
+
+    The scan below walked the app JSON only. Operators are not the only audience
+    the app publishes to: docs/ and README.md are what GitHub renders, they are
+    written by hand, and a leaked task id or a leftover TODO reads there exactly
+    as it would in a Select option. The same marker set now judges both, over the
+    one `published_doc_files()` enumeration the Arabic scan uses.
+    """
+
     def test_user_facing_metadata_has_no_dev_process_text(self):
         """DocType descriptions / labels / Select options must not carry internal
         dev-process text (a task id, a dev-terminal ref, a TODO, "by terminal", ...)
@@ -853,6 +903,89 @@ class TestNoInternalMarkersInMetadata(unittest.TestCase):
             [],
             f"internal dev-process text in user-facing metadata: {sorted(offenders)}",
         )
+
+    def test_the_published_doc_scan_is_non_vacuous(self):
+        """A broken `git ls-files` would green the scan below by reading nothing."""
+        rels = {os.path.relpath(p, REPO_ROOT) for p in published_doc_files()}
+        for expected in ("README.md", os.path.join("docs", "training", "README.md")):
+            self.assertIn(expected, rels, f"the marker scan no longer reaches {expected}")
+
+    def test_published_documentation_has_no_dev_process_text(self):
+        """README.md and docs/ are published prose, judged by the same markers."""
+        offenders = marker_offenders(published_doc_files())
+        self.assertEqual(
+            sorted(offenders),
+            [],
+            "internal dev-process text in published documentation. Rewrite the line "
+            "as an outcome a reader can act on, or move the note out of docs/ — a "
+            f"task id, TODO, FIXME, HACK or WIP is not a published claim: {sorted(offenders)}",
+        )
+
+
+class TestPublishedMarkerScanIsFalsifiable(unittest.TestCase):
+    """The doc scan must actually report a leak, and must not fire on quoted code.
+
+    Proven against planted files in a temp dir rather than by dirtying a real
+    page: a proof that mutates a published document is one failed revert away
+    from shipping the very text it is checking for.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+
+    def _plant(self, name, text):
+        path = os.path.join(self.tmp, name)
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        return path
+
+    def test_a_clean_page_reports_nothing(self):
+        page = self._plant("clean.md", "# Fleet\n\nThe board lists every vehicle.\n")
+        self.assertEqual(marker_offenders([page], self.tmp), [])
+
+    def test_a_leaked_marker_in_prose_is_reported(self):
+        page = self._plant("leaky.md", "# Fleet\n\nTODO: describe the handover flow.\n")
+        offenders = marker_offenders([page], self.tmp)
+        self.assertEqual(len(offenders), 1, f"leak went unreported: {offenders}")
+        self.assertIn("leaky.md:3", offenders[0])
+        self.assertIn("TODO", offenders[0])
+
+    def test_a_leaked_task_id_is_reported(self):
+        """One marker per planted line: `search` reports the leftmost, so a line
+        carrying two would prove only that the earlier one matched.
+
+        The id is assembled rather than written out because this very guard bans
+        board ids in an assertion message, and a fixture is not an exemption.
+        """
+        planted = "T-" + "552"
+        page = self._plant("task.md", f"The rewrite was delivered under {planted}.\n")
+        offenders = marker_offenders([page], self.tmp)
+        self.assertEqual(len(offenders), 1, f"task id went unreported: {offenders}")
+        self.assertIn(planted, offenders[0])
+
+    def test_a_marker_inside_a_fenced_code_block_is_not_reported(self):
+        """The lookalike: a page quoting source that legitimately carries a TODO.
+        Firing there would push authors to stop quoting real code."""
+        page = self._plant(
+            "quoted.md", "# Guide\n\n```python\n# TODO: handled upstream\n```\n\nDone.\n"
+        )
+        self.assertEqual(marker_offenders([page], self.tmp), [])
+
+    def test_an_unclosed_fence_is_reported_rather_than_exempting_the_tail(self):
+        """The fence exemption's own fail-open: leave the fence open and every
+        later line goes unread, so the omission is reported as the defect."""
+        page = self._plant("open.md", "# Guide\n\n```python\nx = 1\n\nTODO: later.\n")
+        offenders = marker_offenders([page], self.tmp)
+        self.assertEqual(len(offenders), 1, f"unclosed fence unreported: {offenders}")
+        self.assertIn("unclosed code fence", offenders[0])
+
+    def test_an_unreadable_file_does_not_crash_the_scan(self):
+        """docs/ ships images too; a binary must be skipped, not raise."""
+        path = os.path.join(self.tmp, "logo.png")
+        with open(path, "wb") as fh:
+            fh.write(b"\x89PNG\r\n\x1a\n\xff\xfe")
+        self.assertEqual(marker_offenders([path], self.tmp), [])
 
 
 class TestPrintFormatGuards(unittest.TestCase):
