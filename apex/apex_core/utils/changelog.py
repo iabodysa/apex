@@ -8,6 +8,12 @@ from frappe.utils import get_datetime
 # "What's New" popup and this bell feed now agree on the same 2.x floor.
 _RELEASES = [
     {
+        "title": "Apex 2.1.12 — The portals share one set of colours, one keyboard outline and one theme switch",
+        "app_name": "apex",
+        "link": "/app",
+        "creation": "2026-07-31 18:21:04",
+    },
+    {
         "title": "Apex 2.1.11 — Missing workspace links are back, and the damage register opens for the finance role that approves it",
         "app_name": "apex",
         "link": "/app",
