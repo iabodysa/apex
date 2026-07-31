@@ -31,7 +31,8 @@ Auditor, who holds the read, so only a hand-assembled solo finance user lacked i
 permlevel-1 row unlocks exactly one field while a level-0 read is the WHOLE record,
 resident identity included; and Finance Manager is unscoped, so the read spans every
 building. ``TestTheGrantedReadIsWhatWasDecided`` keeps that cost visible in the test
-instead of only in a decision note. The other four keep the overlay-only shape.
+instead of only in a decision note. The other four keep the overlay-only shape. On
+2026-07-31 that row also gained ``report`` -- ``TestTheReportGrantIsBothHalves`` holds it.
 
 MAINTENANCE REQUEST IS A SECOND EXCEPTION and is asserted separately below: it ships an
 ``All`` permlevel-0 row (read+create, if_owner), and every logged-in user holds ``All``
@@ -44,11 +45,13 @@ Run standalone:  python3 -m unittest apex.habitat.doctype.custody_damage_assessm
 
 from __future__ import annotations
 
+import ast
 import json
 import os
 import unittest
 
 _HABITAT_DOCTYPES = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_HABITAT = os.path.dirname(_HABITAT_DOCTYPES)
 
 # Every logged-in user carries these, so a "solo role" test must include them or it
 # understates access. frappe/permissions.py:520.
@@ -74,11 +77,65 @@ GRANTED = "custody_damage_assessment"
 # the decision is asserted, not just described: these carry who the damage is charged to.
 RESIDENT_IDENTITY = ("party_type", "party", "employee")
 
+# The report the 2026-07-31 grant exists for, and the fields it puts on screen. Held as
+# data so the "no new datum" claim is asserted against the shipped report, not described.
+REGISTER = "custody_damage_register"
+REGISTER_NAME = "Custody Damage Register"
+REGISTER_COLUMNS = (
+    "name",
+    "assessment_date",
+    "building",
+    "employee",
+    "total_estimated_replacement_cost",
+    "deduction_entry",
+)
+
 
 def load(slug: str) -> dict:
     path = os.path.join(_HABITAT_DOCTYPES, slug, f"{slug}.json")
     with open(path, encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def load_report(slug: str) -> dict:
+    path = os.path.join(_HABITAT, "report", slug, f"{slug}.json")
+    with open(path, encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def columns_in_report_source(slug: str) -> tuple:
+    """Fieldnames the shipped Script Report actually returns.
+
+    Parsed with ``ast`` rather than imported, because the report imports frappe and this
+    module must stay runnable with no bench. Binding to the source is what stops
+    REGISTER_COLUMNS under-covering a column added to the report later -- the recorded
+    justification for the 2026-07-31 grant is a claim about the FULL column set.
+    """
+    path = os.path.join(_HABITAT, "report", slug, f"{slug}.py")
+    with open(path, encoding="utf-8") as handle:
+        tree = ast.parse(handle.read())
+    found = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Dict):
+            continue
+        for key, value in zip(node.keys, node.values):
+            if isinstance(key, ast.Constant) and key.value == "fieldname":
+                if isinstance(value, ast.Constant):
+                    found.append(value.value)
+    return tuple(found)
+
+
+def report_lists_for(report: dict, roles: set) -> bool:
+    """Replay frappe/boot.py get_user_pages_or_reports for the roles-table half.
+
+    A report whose ``roles`` table is non-empty is returned only when one of its rows
+    names a role the session holds (boot.py:249-257); the "no role = allowed" branch
+    (:275-279) is never reached for such a report.
+    """
+    listed = {row.get("role") for row in report.get("roles") or [] if row.get("role")}
+    if not listed:
+        return True
+    return bool(listed & roles)
 
 
 def doc_access(meta: dict, roles: set, ptype: str) -> int:
@@ -253,14 +310,122 @@ class TestTheGrantedReadIsWhatWasDecided(unittest.TestCase):
                     "if it was renamed, rename it here too",
                 )
 
-        # A read and nothing more. Any of these turning 1 is a widening no one decided.
+        # A read, and after 2026-07-31 the report surface over it. Any OTHER right turning
+        # 1 is a widening no one decided. ``report`` is deliberately absent from this list
+        # and asserted positively in TestTheReportGrantIsBothHalves instead.
         for ptype in ("write", "create", "submit", "cancel", "delete", "export", "share"):
             with self.subTest(ptype=ptype):
                 self.assertEqual(
                     doc_access(meta, solo, ptype),
                     0,
-                    f"the grant widened to {ptype}; 2026-07-27 decided a read only",
+                    f"the grant widened to {ptype}; 2026-07-27 decided a read, and "
+                    "2026-07-31 added report and nothing else",
                 )
+
+
+class TestTheReportGrantIsBothHalves(unittest.TestCase):
+    """The 2026-07-31 decision: Finance Manager opens Custody Damage Register.
+
+    The 2026-07-27 read let a solo Finance Manager open one assessment from its
+    notification but not the register that totals them, because a report is gated TWICE:
+    ``frappe.has_permission(ref_doctype, "report")`` when it is opened
+    (``frappe/desk/query_report.py:47``), and its ``roles`` child table when it is listed
+    (``frappe/boot.py`` ``get_user_pages_or_reports``). Both halves are granted together
+    because either alone is a defect -- the DocPerm alone leaves the report invisible, and
+    the roles row alone is the live-link-that-throws ``report_role_guard`` refuses on save.
+
+    It is a SURFACE grant, not an access widening. Every register column is permlevel 0 and
+    opened by the 2026-07-27 read, except ``total_estimated_replacement_cost``, which is
+    permlevel 1 -- this role's OWN overlay field. Rows are unchanged too: Habitat oversight
+    is unscoped (``HOUSING_UNSCOPED_ROLES``), so the building filter returns the same rows
+    either way. Charter basis (``docs/training/README.md``, Roles at a glance): "Central
+    finance control; approves payments, reconciles costs" -- and this is a cost register
+    whose last column is the Additional Salary the damage is charged to.
+    """
+
+    def setUp(self):
+        self.meta = load(GRANTED)
+        self.report = load_report(REGISTER)
+        self.solo = {FINANCE} | AUTOMATIC_ROLES
+
+    def test_the_report_gate_on_the_source_docperm_passes(self):
+        """query_report.py:47 -- frappe.has_permission(ref_doctype, "report")."""
+        self.assertEqual(
+            doc_access(self.meta, self.solo, "report"),
+            1,
+            "the 2026-07-31 grant is gone: a solo Finance Manager opening "
+            f"{REGISTER_NAME} gets a PermissionError from query_report.py:47",
+        )
+
+    def test_the_report_is_listed_for_the_role(self):
+        """boot.py get_user_pages_or_reports -- the roles child table."""
+        self.assertTrue(
+            report_lists_for(self.report, self.solo),
+            f"{REGISTER_NAME} no longer names {FINANCE} in its roles table, so the "
+            "report never reaches the role's report list however the DocPerm reads",
+        )
+
+    def test_neither_half_alone_would_have_been_shippable(self):
+        """Negative control for both gates: drop one half at a time and the replay must
+        flip. If either assertion above passed with its half removed it proves nothing."""
+        without_report_flag = dict(self.meta)
+        without_report_flag["permissions"] = [
+            {k: (0 if k == "report" else v) for k, v in row.items()}
+            if row.get("role") == FINANCE and not int(row.get("permlevel", 0) or 0)
+            else row
+            for row in self.meta["permissions"]
+        ]
+        self.assertEqual(
+            doc_access(without_report_flag, self.solo, "report"),
+            0,
+            "the DocPerm replay reports `report` even with the flag cleared",
+        )
+
+        unlisted = dict(self.report)
+        unlisted["roles"] = [r for r in self.report["roles"] if r.get("role") != FINANCE]
+        self.assertFalse(
+            report_lists_for(unlisted, self.solo),
+            "the roles-table replay lists the report even with the role removed",
+        )
+        # And the report must still have SOME role, or the empty-table branch would be
+        # what made the negative control pass.
+        self.assertTrue(unlisted["roles"], "the roles table is empty; the control is vacuous")
+
+    def test_the_register_shows_no_field_the_role_could_not_already_open(self):
+        """Why this is a surface grant. Every column is either permlevel 0 -- opened by
+        the 2026-07-27 read -- or the permlevel-1 overlay field this role already holds.
+        ``name`` is the docname and carries no permlevel."""
+        visible = visible_fields(self.meta, self.solo)
+        by_name = {f["fieldname"]: f for f in self.meta["fields"]}
+        for column in REGISTER_COLUMNS:
+            with self.subTest(column=column):
+                if column == "name":
+                    continue
+                self.assertIn(column, by_name, f"{column} is no longer a field on {GRANTED}")
+                self.assertIn(
+                    column,
+                    visible,
+                    f"{column} is on {REGISTER_NAME} but is NOT readable by a solo "
+                    f"{FINANCE}. The 2026-07-31 grant was justified on the register "
+                    "exposing nothing new; that justification is now false",
+                )
+
+    def test_the_column_list_still_matches_the_shipped_report(self):
+        """Keeps the check above honest. A column added to the report but not here would
+        never be tested for readability, and the grant's justification would rot unseen."""
+        self.assertEqual(
+            columns_in_report_source(REGISTER),
+            REGISTER_COLUMNS,
+            f"{REGISTER_NAME} returns a different column set than REGISTER_COLUMNS "
+            "records. Update the tuple, then check the new column is readable by a solo "
+            f"{FINANCE} -- if it is not, the 2026-07-31 grant needs revisiting",
+        )
+
+    def test_the_money_column_is_the_overlay_field_and_not_a_second_grant(self):
+        """The one column that needed permlevel-1 access is the field the top of this
+        module is about, so the report grant leans on the existing overlay row."""
+        self.assertIn("total_estimated_replacement_cost", OVERLAY[GRANTED])
+        self.assertIn(1, permlevel_access(self.meta, self.solo, "read"))
 
 
 class TestMaintenanceRequestIsTheOtherExceptionOfTheFive(unittest.TestCase):

@@ -76,18 +76,6 @@ _FROZEN_HABITAT = (
     "remove, never grow."
 )
 
-_READ_GRANTED_WITHOUT_REPORT = (
-    "Not a coverage gap, and NOT one to close from this file. The 2026-07-27 decision "
-    "granted Finance Manager a permlevel-0 `read` on Custody Damage Assessment and "
-    "nothing else; the row ships `report: 0` on purpose. Naming the role on this "
-    "report's roles table would put a live Reports-card link in front of a user whose "
-    "DocPerm cannot pass frappe.has_permission(ref_doctype, 'report') "
-    "(frappe/desk/query_report.py:47) — a PermissionError on click, and exactly the "
-    "defect apex_core/utils/report_role_guard.py refuses at save time. Closing this "
-    "pair therefore means widening the grant to `report`, which is a second access "
-    "decision for the owner rather than a repair an agent can make here."
-)
-
 _ALL_ROLE_IF_OWNER = (
     "Maintenance Request grants `All` an if_owner-only read row, so a resident sees only "
     "the request they raised. `All` is held by every session, so naming it in a report's "
@@ -102,8 +90,11 @@ KNOWN_REPORT_ROLE_GAPS = {
         "Finance Manager": _FROZEN_HABITAT,
         "Internal Auditor": _FROZEN_HABITAT,
     },
+    # Finance Manager was frozen here while `report` was an open owner decision. It was
+    # ruled on 2026-07-31 and GRANTED, so the pair is closed rather than frozen; the
+    # decision and its cost live beside the DocPerm rows, in
+    # habitat/doctype/custody_damage_assessment/test_finance_manager_field_overlay.py.
     "Custody Damage Register": {
-        "Finance Manager": _READ_GRANTED_WITHOUT_REPORT,
         "Resident Supervisor": _FROZEN_HABITAT,
     },
     "Custody Outstanding by Worker": {
