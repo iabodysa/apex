@@ -519,6 +519,24 @@ def _discover(pattern: str) -> subprocess.CompletedProcess:
     )
 
 
+def _collected(pattern: str) -> int:
+    """How many tests the loader COLLECTS, which is what the floor grades.
+
+    Not the summary line: a class whose setUpClass raises SkipTest never reaches
+    it, so a shallow CI clone that cannot see a fixture's historical commit reads
+    as three cases lost rather than three cases skipped.
+    """
+    probe = (
+        "import unittest;"
+        f"print(unittest.defaultTestLoader.discover({str(SCRIPTS)!r},"
+        f" pattern={pattern!r}, top_level_dir={str(SCRIPTS)!r}).countTestCases())"
+    )
+    result = subprocess.run([sys.executable, "-c", probe],
+                            capture_output=True, text=True, env=GIT_ENV,
+                            cwd=tempfile.gettempdir())
+    return int(result.stdout.strip() or 0)
+
+
 @unittest.skipUnless(HAVE_GIT, "git is required by the fixture suites")
 @unittest.skipUnless(SCRIPTS.is_dir(), "scripts/ is not present in this install")
 class TestTheScriptsGateFixturesRun(unittest.TestCase):
@@ -556,13 +574,13 @@ class TestTheScriptsGateFixturesRun(unittest.TestCase):
         """The failure a green verdict cannot show: discovery that found nothing."""
         for name, floor in sorted(SCRIPT_FIXTURE_FLOORS.items()):
             with self.subTest(suite=name):
-                ran = self._ran(self.results[name])
+                found = _collected(name)
                 self.assertGreaterEqual(
-                    ran, floor,
-                    f"scripts/{name} ran {ran} tests against a floor of {floor}. "
-                    "Coverage was removed, or discovery stopped reaching the file; "
-                    "either way the gate is less proven than the last person to "
-                    "read this believed.",
+                    found, floor,
+                    f"scripts/{name} collected {found} tests against a floor of "
+                    f"{floor}. Coverage was removed, or discovery stopped reaching "
+                    "the file; either way the gate is less proven than the last "
+                    "person to read this believed.",
                 )
 
     def test_the_suite_table_lists_every_fixture_file_on_disk(self):
