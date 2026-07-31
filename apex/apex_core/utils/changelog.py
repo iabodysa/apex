@@ -8,6 +8,12 @@ from frappe.utils import get_datetime
 # "What's New" popup and this bell feed now agree on the same 2.x floor.
 _RELEASES = [
     {
+        "title": "Apex 2.1.9 — The integration guide stops asking browsers to hold a secret, and the whole codebase settles on one indentation style",
+        "app_name": "apex",
+        "link": "/app",
+        "creation": "2026-07-31 14:20:58",
+    },
+    {
         "title": "Apex 2.1.8 — The app now describes all four of its modules wherever it describes itself",
         "app_name": "apex",
         "link": "/app",
