@@ -22,7 +22,7 @@
   <div class="sal-head">
     <div>
       <h1>{{ _("Vehicle Incident Statement") }}</h1>
-      <div class="sal-sub">بيان بلاغ مركبة &bull; {{ doc.name }}</div>
+      <div class="sal-sub">بيان واقعة مركبة &bull; {{ doc.name }}</div>
     </div>
     <div style="text-align:right; font-size:11px; color:#666;">
       {{ frappe.db.get_single_value("Salis Settings", "default_company") or "" }}
@@ -33,11 +33,11 @@
     <tr>
       <td class="sal-lbl">Vehicle <span class="sal-ar">المركبة</span></td>
       <td>{{ doc.vehicle or "" }}</td>
-      <td class="sal-lbl">Incident Type <span class="sal-ar">نوع البلاغ</span></td>
+      <td class="sal-lbl">Incident Type <span class="sal-ar">نوع الواقعة</span></td>
       <td>{{ _(doc.incident_type) if doc.incident_type else "" }}</td>
     </tr>
     <tr>
-      <td class="sal-lbl">Incident Date <span class="sal-ar">تاريخ البلاغ</span></td>
+      <td class="sal-lbl">Incident Date <span class="sal-ar">تاريخ الواقعة</span></td>
       <td>{{ frappe.format(doc.incident_date, {"fieldtype": "Date"}) if doc.incident_date else "" }}</td>
       <td class="sal-lbl">Driver <span class="sal-ar">السائق</span></td>
       <td>{{ doc.driver or "—" }}</td>
