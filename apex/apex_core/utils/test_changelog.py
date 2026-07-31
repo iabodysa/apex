@@ -38,10 +38,37 @@ class TestChangelogFeed(unittest.TestCase):
         self.assertEqual(get_changelog_feed("2030-01-01 00:00:00"), [])
 
     def test_long_title_is_clipped_to_140_with_ellipsis(self):
-        items = get_changelog_feed("2000-01-01 00:00:00")
-        oldest = items[-1]  # the Apex 2.0.0 generational note, > 140 chars
-        self.assertEqual(len(oldest["title"]), 140)
-        self.assertTrue(oldest["title"].endswith("…"))
+        """Clipping belongs to the code, not to whichever release happens to sit
+        inside the cap. This read the LAST feed item and called it the long 2.0.0
+        note; once the shipped table outgrew ``_FEED_MAX`` that position held a
+        short recent release instead, so the assertion changed subject and reddened
+        without the clip ever breaking. Feed one title over the limit and one
+        exactly at it, so the boundary itself is proven."""
+        limit = changelog._FEED_TITLE_MAX
+        table = [
+            {
+                "title": "L" * (limit + 1),
+                "app_name": "apex",
+                "link": "/app",
+                "creation": "2026-01-02 00:00:00",
+            },
+            {
+                "title": "E" * limit,
+                "app_name": "apex",
+                "link": "/app",
+                "creation": "2026-01-01 00:00:00",
+            },
+        ]
+
+        with patch.object(changelog, "_RELEASES", table):
+            over, exact = changelog.get_changelog_feed("2000-01-01 00:00:00")
+
+        self.assertEqual(len(over["title"]), limit)
+        self.assertTrue(over["title"].endswith("…"))
+        self.assertEqual(exact["title"], table[1]["title"], "A title at the limit is untouched.")
+        # The shipped table must also obey the ceiling, whatever it grows to.
+        for item in get_changelog_feed("2000-01-01 00:00:00"):
+            self.assertLessEqual(len(item["title"]), limit)
 
     def test_items_carry_expected_keys(self):
         items = get_changelog_feed("2000-01-01 00:00:00")
@@ -50,11 +77,11 @@ class TestChangelogFeed(unittest.TestCase):
             self.assertIn(key, items[0])
 
     def test_feed_is_truncated_at_the_declared_cap(self):
-        """The shipped ``_RELEASES`` table is far shorter than ``_FEED_MAX``, so the
-        real feed can never reach the cap and an upper-bound assertion over it can
-        never fail. Swap in a synthetic table LONGER than the cap (newest first, the
-        same ordering the shipped table keeps) and prove the tail is actually dropped
-        rather than merely fitting."""
+        """An upper-bound assertion over the shipped table proves nothing about the
+        cap on its own: for most of this app's life the table was shorter than
+        ``_FEED_MAX`` and simply fitted. Swap in a synthetic table LONGER than the cap
+        (newest first, the same ordering the shipped table keeps) and prove the tail is
+        actually dropped."""
         cap = changelog._FEED_MAX
         overflow = 5
         oversized = [
