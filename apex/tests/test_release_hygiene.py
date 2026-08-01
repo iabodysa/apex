@@ -711,8 +711,8 @@ _FENCE = re.compile(r"^\s*(```|~~~)")
 def marker_offenders(paths, root=REPO_ROOT):
     """`relpath:line <marker>` for every published prose line carrying dev text.
 
-    Pure over its inputs so the falsifiability class can point it at a planted
-    file — proving the scan reports a leak must not require dirtying a real page.
+    Pure over its inputs so a caller can point it at any tree — checking the scan
+    reports a leak must not require dirtying a real page.
     """
     offenders = []
     for path in paths:

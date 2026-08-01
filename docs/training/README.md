@@ -26,18 +26,20 @@ _[screenshot: Apex desk — module cards for Habitat and Salis]_
 
 ---
 
-## How to read the permission tables
+## Where the permissions are
 
-Columns are the standard Frappe document rights: **Read**, **Write**, **Create**,
-**Submit**, **Cancel**, **Delete**. A blank cell (—) means the role does not hold
-that right.
+Every DocPerm row apex ships is listed once in the
+[permissions reference](../reference/permissions.md), generated from the shipped
+DocType JSON. Each page below links into it instead of repeating a matrix.
+
+The rights it names are the standard Frappe document rights:
 
 - **Submit** freezes a document as an official record.
 - **Cancel** reverses a submitted record (and its side effects).
 - **Delete** is reserved for cleanup of unsubmitted drafts.
 
-> **System Manager** always holds full rights on every DocType and is omitted
-> from the per-area tables to keep them focused on operational roles.
+> A DocPerm row is the widest a role can act. A workflow, a permlevel and the
+> row-scope rules below all narrow it further.
 
 ---
 

@@ -46,16 +46,10 @@ hold an elevated operational role are left enabled, and no account is ever
 deleted). Identity is the personal link token, resolved server-side on every call.
 
 The role still carries a minimal, **owner-only** document permission set, so a
-driver can never read another driver's rows even through the API. Every row below
-carries `if_owner`:
+driver can never read another driver's rows even through the API. Every one of its
+rows carries `if_owner`:
 
-| DocType | Driver |
-|---------|--------|
-| Salis Driver | Read |
-| Boarding Scan Log | Read |
-| Driver Attendance | Read, Create, Submit |
-| Driver Suspension | Read |
-| Trip Start Log | Read, Write, Create, Submit |
+The exact grants for these records are in the [permissions reference](../reference/permissions.md#salis), generated from the shipped DocPerm JSON.
 
 Those five are the whole grant. **Salis Vehicle** is not among them — the portal
 reads the bound vehicle on the driver's behalf after resolving the token.

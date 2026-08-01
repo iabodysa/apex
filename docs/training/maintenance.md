@@ -11,15 +11,7 @@ coverage.
 
 The **All** column is the built-in Frappe role every logged-in user holds.
 
-| DocType | Accommodation Manager | Resident Supervisor | Resident Request Coordinator | Maintenance Technician | All |
-|---------|----------------------|---------------------|------------------------------|------------------------|--------------------------|
-| **Maintenance Request** *(submittable)* | Read, Write, Create, Submit | Read, Write, Create, Submit | Read, Write, Create, Submit | Read | Read, Create *(own only)* |
-| **Maintenance Inspection Report** *(submittable)* | — | — | — | — | — |
-| **Maintenance Work Order** *(submittable)* | — | — | — | **Read, Write** | — |
-| Maintenance Material (master) | Read, Write, Create | — | — | **Read, Write, Create** | — |
-| Maintenance Material Template (master) | Read, Write, Create | — | — | **Read, Write, Create** | — |
-| **Subcontractor Service Contract** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | — | — | — | — |
-| **Subcontractor Service Order** *(submittable)* | Read, Write, Create, Submit | — | — | — | — |
+The exact grants for these records are in the [permissions reference](../reference/permissions.md#habitat), generated from the shipped DocPerm JSON.
 
 > **Universal intake:** any logged-in user can raise a **Maintenance Request** and sees only their own. The assigned technician also sees their ticket. Oversight roles see all.
 

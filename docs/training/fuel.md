@@ -9,13 +9,7 @@ deliberately split across the claim lifecycle.
 
 ## Permissions
 
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Finance Manager |
-|---------|---------------|-----------------------|------------------|-----------------|
-| **Fuel Quota** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read |
-| **Fuel Request** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read |
-| **Fuel Claim** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | Read, Write |
-| **Fuel Exception Case** *(workflow)* | Read, Write, Create, Submit, Cancel, Amend, Delete | Read, Write, Create | Read, Write, Create | Read |
-| Fuel Platform (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read |
+The exact grants for these records are in the [permissions reference](../reference/permissions.md#salis), generated from the shipped DocPerm JSON.
 
 > **Fuel Platform is not read-only for the project roles.** Both the Fleet Project
 > Manager and the Fleet Supervisor can create and edit a platform record; only the
@@ -74,4 +68,4 @@ _[screenshot: Fuel Console]_
 _[screenshot: Fuel Approval Console desk page]_
 
 > A **Fuel Approval Console** desk page accelerates claim review. See
-> [Settings & Desk Pages](settings.md#desk-pages).
+> [Settings & Desk Pages](settings.md#desk-pages-operational-consoles).

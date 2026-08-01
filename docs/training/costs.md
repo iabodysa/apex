@@ -9,12 +9,7 @@ depreciation.
 
 ## Permissions
 
-| DocType | Accommodation Manager | Finance Manager | Internal Auditor |
-|---------|----------------------|-----------------|------------------|
-| Utility Account (master) | Read, Write, Create | Read | — |
-| **Utility Bill Entry** *(submittable)* | Read, Write, Create, Submit | Read, Write, Create, Submit, Cancel | Read |
-| Operational Depreciation Policy (master) | — | — | — |
-| **Lease** *(submittable)* | Read, Write, Create, Submit | **Read, Write, Create, Submit, Cancel** | Read |
+The exact grants for these records are in the [permissions reference](../reference/permissions.md#habitat), generated from the shipped DocPerm JSON.
 
 > **Finance Manager is a full maker/checker on the Lease and Utility
 > Bill Entry** — Read, Write, Create, Submit, and Cancel (not read-only). The

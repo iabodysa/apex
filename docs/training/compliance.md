@@ -9,11 +9,7 @@ top of project scoping.
 
 ## Permissions
 
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Finance Manager |
-|---------|---------------|-----------------------|------------------|-----------------|
-| **Salis Payment Request** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | Read, Write, Submit, Cancel |
-| **Movement Cost Recovery** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | — | Read, Write, Create, Submit | Read, Write |
-| **Movement Cost Transfer** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | — | Read, Write |
+The exact grants for these records are in the [permissions reference](../reference/permissions.md#salis), generated from the shipped DocPerm JSON.
 
 > Note the **asymmetry**: Fleet PM holds **no** permission on Movement Cost
 > Recovery, and Fleet Supervisor holds **no** permission on Movement Cost Transfer.

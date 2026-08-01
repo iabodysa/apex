@@ -56,7 +56,7 @@ class TestDocReferencePaths(unittest.TestCase):
         """Guards the scanner itself: a regex that stops matching would pass vacuously."""
         cited = {reference[2] for reference in collect_references(APP_ROOT)}
         self.assertIn("docs/INTEGRATION.md", cited)
-        self.assertIn("docs/UPGRADE-APP-IDENTITY.md", cited)
+        self.assertIn("docs/administration/identity-upgrade.md", cited)
 
     def test_a_dead_reference_is_reported(self):
         # Split so this file does not itself cite the dead path the probe writes.

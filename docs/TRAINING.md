@@ -34,5 +34,9 @@ its DocTypes, roles and permissions, key fields, and typical workflow.
 > [Served portal routes](../README.md#served-portal-routes).
 
 > Screens are marked with `_[screenshot: ...]_` placeholders where an image should
-> be inserted. **System Manager** holds full rights on every DocType and is
-> omitted from the per-area permission tables.
+> be inserted.
+
+> Every DocPerm row apex ships, System Manager included, is listed once in the
+> [permissions reference](reference/permissions.md). It is generated from the
+> shipped DocType JSON, so the per-area pages link into it rather than restating
+> a matrix that can drift.

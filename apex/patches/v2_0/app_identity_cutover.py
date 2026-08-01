@@ -29,14 +29,14 @@ discovery is gated on the same broken list. ``get_all_patches`` iterates
 "patches.txt")`` (frappe/modules/patch_handler.py:89-102), so a pre-rename site
 never opens ``apex/patches.txt`` at all.
 
-``docs/UPGRADE-APP-IDENTITY.md`` is the runbook that drives these entry points.
+``docs/administration/identity-upgrade.md`` is the runbook that drives these entry points.
 
 UNREGISTERED-PATCH: a pre-rename site never reads apex/patches.txt at all, since
     frappe resolves patches per installed-app name and that name is still the
     dead package; registering this would reach only sites that are already
     canonical, sweeping every table of every healthy site to change nothing.
 COVERED-BY: a deliberate operator cutover inside a maintenance window, driven by
-    docs/UPGRADE-APP-IDENTITY.md; the pure planning helpers are exercised
+    docs/administration/identity-upgrade.md; the pure planning helpers are exercised
     off-bench by the colocated test_app_identity_cutover.py. Reaching them needs
     an invocation that skips the ``get_attr`` gate named above.
 """

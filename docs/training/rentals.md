@@ -8,11 +8,7 @@ Rented vehicles: registering offices, accruing cost, and settling.
 
 ## Permissions
 
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Finance Manager |
-|---------|---------------|-----------------------|------------------|-----------------|
-| Rental Office (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read |
-| **Rental Vehicle Movement** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | Read |
-| **Rental Settlement** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | — | Read, Write |
+The exact grants for these records are in the [permissions reference](../reference/permissions.md#salis), generated from the shipped DocPerm JSON.
 
 > **Internal Auditor** holds read-only oversight on all three records, and on the
 > derived **Rental Accrual Ledger**.

@@ -14,13 +14,7 @@ This page covers fleet masters, compliance, dispatch, and transport.
 
 ### Permissions
 
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver | Finance Manager | Internal Auditor |
-|---------|---------------|-----------------------|------------------|--------|-----------------|------------------|
-| **Salis Vehicle** | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | — | Read | Read |
-| **Salis Driver** | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read | Read | Read |
-| Vehicle Category (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | — | Read | Read |
-| **Salis Vehicle Compliance** *(child table)* | — | — | — | — | — | — |
-| **Driver Clearance** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | — | Read, Write, Create | — | Read | Read |
+The exact grants for these records are in the [permissions reference](../reference/permissions.md#salis), generated from the shipped DocPerm JSON.
 
 > **Salis Vehicle Compliance is a child table, not a standalone record.** It is
 > the grid behind *Compliance Documents* on **Salis Vehicle**, and its permissions
@@ -62,14 +56,7 @@ _[screenshot: Salis Vehicle record with compliance tab]_
 
 ### Permissions
 
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver |
-|---------|---------------|-----------------------|------------------|--------|
-| **Vehicle Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create | — |
-| **Transport Request** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create, Submit | — |
-| **Dispatch Trip** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
-| **Route Plan** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
-| **Passenger Manifest** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
-| **Issue** (field support) | — | — | — | — |
+The exact grants for these records are in the [permissions reference](../reference/permissions.md#salis), generated from the shipped DocPerm JSON.
 
 > **Salis Vehicle** and **Salis Driver** are **not submittable** DocTypes — there
 > is no Submit action on either. Create the record and save it. The shipped Salis

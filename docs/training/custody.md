@@ -8,15 +8,7 @@ Tracks articles and assets issued to residents/staff and their return or damage.
 
 ## Permissions
 
-| DocType | Accommodation Manager | Resident Supervisor | Cleaning Supervisor |
-|---------|----------------------|---------------------|---------------------|
-| Custody Article (master) | Read, Write, Create, Delete | Read, Write, Create | — |
-| Custody Asset Category (master) | — | — | — |
-| **Custody Issue** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend, Delete | Read, Write, Create | — |
-| **Custody Return** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend, Delete | Read, Write, Create | — |
-| **Custody Damage Assessment** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend, Delete | Read, Write, Create | — |
-| **Facility Asset Custody Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | — |
-| **Cleaning Log** *(submittable)* | Read, Write, Create | Read, Write, Create | Read, Write, Create, Submit |
+The exact grants for these records are in the [permissions reference](../reference/permissions.md#habitat), generated from the shipped DocPerm JSON.
 
 > Supervisors can **prepare** custody issues, returns, and damage assessments but
 > cannot **submit** them — the Accommodation Manager submits, keeping a single
@@ -88,4 +80,4 @@ _[screenshot: Custody Issue with item grid]_
 _[screenshot: Custody Kiosk desk page]_
 
 > A **Custody Kiosk** desk page provides a fast issue/return surface for the
-> front desk. See [Settings & Desk Pages](settings.md#desk-pages).
+> front desk. See [Settings & Desk Pages](settings.md#desk-pages-operational-consoles).

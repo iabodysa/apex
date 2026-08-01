@@ -7,7 +7,7 @@ against a real site is exercised here against fixtures instead.
 
 The site-touching entry points (diagnose / cutover) are deliberately not called;
 they only sequence the helpers below and are rehearsed on a scratch site per
-docs/UPGRADE-APP-IDENTITY.md.
+docs/administration/identity-upgrade.md.
 """
 
 import unittest

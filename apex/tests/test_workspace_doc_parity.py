@@ -454,22 +454,6 @@ def _read(path):
         return fh.read()
 
 
-def _replace_once(case, path, old, new):
-    """Rewrite a MIRRORED document, asserting the pattern was there to replace.
-
-    Every falsifiability class below plants its drift this way, so it is one
-    helper: a plant whose pattern silently matched nothing would leave the
-    fixture unmodified and "prove" the guard green against an untouched file.
-    """
-    text = _read(path)
-    edited = text.replace(old, new, 1)
-    case.assertNotEqual(
-        edited, text, f"{os.path.basename(path)} no longer contains {old!r}"
-    )
-    with open(path, "w", encoding="utf-8") as fh:
-        fh.write(edited)
-
-
 def _flat(text):
     """One-line view of a document, so a sentence check survives Markdown wrapping."""
     return re.sub(r"\s+", " ", text)

@@ -9,13 +9,7 @@ licenses.
 
 ## Permissions
 
-| DocType | Accommodation Manager | Resident Supervisor | Safety Officer |
-|---------|----------------------|---------------------|----------------|
-| Safety Task Catalog (master) | Read, Write, Create | Read | Read |
-| **Safety Inspection Report** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | Read, Write, Create |
-| **Safety Task Execution** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | Read, Write, Create |
-| **Safety Incident** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | Read, Write, Create |
-| **Building License** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read | Read, Write, Create |
+The exact grants for these records are in the [permissions reference](../reference/permissions.md#habitat), generated from the shipped DocPerm JSON.
 
 > The **Safety Officer** can raise and edit a **Building License** — it is not a
 > Manager-only record — but only the Accommodation Manager submits, cancels, or
@@ -73,4 +67,4 @@ _[screenshot: Safety Inspection Report findings grid]_
 _[screenshot: Safety Map desk page]_
 
 > A **Safety Map** desk page visualises building/task status. See
-> [Settings & Desk Pages](settings.md#desk-pages).
+> [Settings & Desk Pages](settings.md#desk-pages-operational-consoles).

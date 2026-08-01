@@ -26,7 +26,7 @@
 #       get_all_patches -> get_app_path(app, "patches.txt")), and a pre-rename site's
 #       name is still the dead package, so it never opens this file. Registering it
 #       would reach only already-canonical sites and sweep every table for nothing.
-#       Operator-invoked instead, per docs/UPGRADE-APP-IDENTITY.md.
+#       Operator-invoked instead, per docs/administration/identity-upgrade.md.
 
 # PERMANENT: delegates to the create-only City loader in seed_all, so a site installed
 # before a city was added to the shipped JSON still gets it.

@@ -1,39 +1,24 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""The permission tables in ``docs/training/*.md`` must match the shipped DocPerm JSON.
+"""``docs/reference/permissions.md`` must be exactly what the generator emits.
 
-Those tables were the largest unguarded published claim in the repo — around two hundred
-cells stating, per DocType and per role, exactly which rights an operator holds. Nothing
-read them, and they had rotted: six DocTypes were listed under names the app has not
-shipped for some time (``Accommodation Assignment`` for ``Housing Assignment``,
-``Habitat Safety Incident`` for ``Safety Incident``, and four more), a role column claimed
-rights the JSON grants to two different roles, and five rows described two DocTypes at
-once whose permissions are not in fact the same.
+The published permission matrices used to be hand-maintained, one per training page,
+and around two hundred cells stated per DocType and per role which rights an operator
+held. Nothing read them and they had rotted: six DocTypes were listed under names the
+app had not shipped for some time (``Accommodation Assignment`` for
+``Housing Assignment``, ``Habitat Safety Incident`` for ``Safety Incident``, and four
+more), a role column claimed rights the JSON grants to two different roles, and five
+rows described two DocTypes at once whose permissions are not in fact the same.
 
-This is the workspace-parity guard (``tests/test_workspace_doc_parity.py``) applied one
-layer down, and it checks two axes:
+The page is now derived from the same DocType JSON a site installs
+(``scripts/build_permissions_reference.py``), so a stale name or a wrong rights cell is
+not a defect that can be introduced. What is left to check is that the copy on disk is
+the copy the generator produces — a round trip, not a second implementation of the
+comparison. Three checks stand beside it and each covers a distinct way the round trip
+could pass while saying nothing:
 
-* NAME — every DocType a training table names must be shipped by apex, or be declared in
-  ``EXTERNAL_DOCTYPES`` with a reason. This axis is exact and has no baseline: a wrong
-  name makes the whole row meaningless, so there is nothing to freeze.
-* RIGHTS — for each cell that spells out a rights list, the documented set must equal the
-  permlevel-0 DocPerms the JSON grants that role. ``KNOWN_TABLE_DIVERGENCES`` freezes what
-  was already out of step when this guard landed, each with a reason; the assertion is
-  exact equality, so a NEW divergence fails and a CLOSED one fails until it is pruned.
-
-Deliberately NOT a whole-table rewrite to match the JSON. A frozen entry may well be the
-APP being wrong rather than the page — a master DocType whose only DocPerm row is System
-Manager, for instance — and silently editing the page to agree would launder a permission
-gap into documented behaviour. Freezing states the disagreement instead, and each entry
-names which side is wrong so that closing it is a decision rather than a silent edit to
-whichever file is easier to change. The baseline is empty as of A-184.
-
-Cells that do not spell out rights (``scoped``, ``Read (own)``, a child table's row) are
-listed in ``NON_SCHEMA_CELLS`` with a written reason. Declaring them is what keeps the
-skip honest: an undeclared prose cell fails ``test_every_cell_is_parseable_or_declared``
-rather than being silently dropped from the comparison.
-
-The parsers take their roots as arguments so the falsifiability class can point them at a
-temporary tree — proving a flipped cell is reported must not require editing shipped files.
+* the generator must still see the whole app, measured against an independent reader;
+* a lesson must not grow its own role matrix again, which is how the rot started;
+* the six retired DocType names must stay out of every published page, prose included.
 
 It sits in apex_core because the tables span every module (Habitat, Salis, Logistay) and
 the central apex/tests/ directory is closed to new modules (test_colocation_ratchet.py);
@@ -42,6 +27,7 @@ apex_core is the shared kernel, so a cross-module published-claim guard has a ho
 Run standalone:  python3 -m unittest apex.apex_core.test_training_doc_parity -v
 """
 
+import importlib.util
 import os
 import re
 import unittest
@@ -51,53 +37,41 @@ from apex.tests.training_charter import role_charters
 
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 REPO_ROOT = os.path.dirname(APP_ROOT)
+GENERATOR = os.path.join(REPO_ROOT, "scripts", "build_permissions_reference.py")
+PERMISSIONS_REFERENCE = os.path.join(REPO_ROOT, "docs", "reference", "permissions.md")
 TRAINING_DIR = os.path.join(REPO_ROOT, "docs", "training")
-
-# The rights the published tables actually spell out. Frappe stores more (report, export,
-# print, email, share); the tables never name those, so comparing them would fail on every
-# row over a claim the page does not make.
-DOCUMENTED_FLAGS = ("read", "write", "create", "submit", "cancel", "amend", "delete")
+PUBLISHED_DOCS = (REPO_ROOT, TRAINING_DIR, os.path.join(REPO_ROOT, "docs", "reference"))
 
 _TABLE_DIVIDER = re.compile(r"^\|[\s:\-|]+\|$")
-# A trailing "(master)" / "(submittable)" / "(workflow)" annotation on a DocType cell.
-_ANNOTATION = re.compile(
-    r"\((master|masters|submittable|workflow|child table|field support|native [^)]*)\)"
+
+# The DocType names the pages carried after the app had renamed them. Kept by name
+# because this is the incident the guard exists for; the generator cannot emit them,
+# so what these assert now is that no page reintroduces one in prose.
+RETIRED_DOCTYPE_NAMES = (
+    "Accommodation Assignment",
+    "Accommodation Checkout",
+    "Accommodation Resident Request",
+    "Accommodation Lease",
+    "Habitat Safety Incident",
+    "Salis Portal Theme",
 )
 
-EXTERNAL_DOCTYPES = {
-    "Issue": (
-        "native ERPNext DocType. Apex ships no JSON for it and the Driver role holds no "
-        "Issue DocPerm at all — the portal creates and reads the ticket on the driver's "
-        "behalf. Its rights cells are declared below for the same reason."
-    ),
-}
-
+# Roles that hold real DocPerms but are not Apex personas, so they have no charter row.
+# A lesson table headed by one of these is still a permission matrix.
 ROLE_HEADERS_OUTSIDE_THE_CHARTER = {
     "All": (
         "the built-in Frappe role every session holds. It is not an Apex persona, so it "
         "has no Roles at a glance row, but it does carry real DocPerms (the universal "
-        "Maintenance Request intake) and belongs in the table."
+        "Maintenance Request intake)."
     ),
     "Maintenance Manager": (
         "ERPNext-supplied role. docs/training/README.md states Apex grants it nothing, so "
-        "it has no charter row; the column is published empty to record exactly that."
+        "it has no charter row."
     ),
-}
-
-NON_SCHEMA_CELLS = {
-    "Read, Create (own only)": (
-        "the universal Maintenance Request intake. The rights are ordinary, but the "
-        "'own only' qualifier is an if_owner row filter, and a flag comparison cannot "
-        "express which ROWS come back; apex/habitat/permissions.py owns that side."
+    "System Manager": (
+        "the platform administrator role. It holds the widest DocPerm set in the app and "
+        "belongs in the generated reference, but it is not an operational persona."
     ),
-}
-
-KNOWN_TABLE_DIVERGENCES: dict[tuple[str, str, str], str] = {
-    # Frozen baseline of (file, DocType, role) -> why the page and the JSON disagree.
-    # Exact equality, so a NEW pair fails the build and a CLOSED pair fails until pruned.
-    # Drained: the last two entries were Salis Vehicle's submit and cancel DocPerm flags
-    # on a DocType that is not submittable. The baseline named the JSON as the wrong side,
-    # and the flags have now been dropped there, so the page and the DocPerms agree.
 }
 
 
@@ -147,150 +121,144 @@ UNGUARDED_PUBLISHED_CLASSES = (
 )
 
 
+def load_generator():
+    """Import ``scripts/build_permissions_reference.py`` by path.
+
+    ``scripts/`` is a directory of runnable tools, not an importable package, so the
+    guard reaches the one the operator runs rather than a copy of its logic.
+    """
+    spec = importlib.util.spec_from_file_location("build_permissions_reference", GENERATOR)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def _cell(text):
     return text.replace("*", "").strip()
 
 
 def _tables(path):
-    """Yield (line number of the header, header cells, data rows) for each pipe table."""
+    """Yield (line number of the header, header cells) for each pipe table."""
     with open(path, encoding="utf-8") as fh:
         lines = fh.read().splitlines()
-    index = 0
-    while index < len(lines):
-        divider = index + 1 < len(lines) and _TABLE_DIVIDER.match(lines[index + 1])
-        if not (lines[index].startswith("|") and divider):
-            index += 1
+    for index, line in enumerate(lines):
+        if not line.startswith("|"):
             continue
-        header = [_cell(c) for c in lines[index].strip().strip("|").split("|")]
-        rows, cursor = [], index + 2
-        while cursor < len(lines) and lines[cursor].startswith("|"):
-            rows.append((cursor + 1, [_cell(c) for c in lines[cursor].strip().strip("|").split("|")]))
-            cursor += 1
-        yield index + 1, header, rows
-        index = cursor
+        if index + 1 < len(lines) and _TABLE_DIVIDER.match(lines[index + 1]):
+            yield index + 1, [_cell(c) for c in line.strip().strip("|").split("|")]
 
 
-def _doctype_name(label):
-    """The DocType a first-column cell names, with its `(submittable)` style tag removed."""
-    return _ANNOTATION.sub("", label).strip()
-
-
-def documented_doctypes(root=TRAINING_DIR):
-    """{(file, DocType): first line it appears on} across every table keyed by DocType."""
-    found = {}
-    for name in sorted(os.listdir(root)):
-        if not name.endswith(".md"):
-            continue
-        for _header_line, header, rows in _tables(os.path.join(root, name)):
-            if not header or header[0] != "DocType":
-                continue
-            for lineno, row in rows:
-                found.setdefault((name, _doctype_name(row[0])), lineno)
-    return found
-
-
-def documented_cells(root=TRAINING_DIR, roles=None):
-    """{(file, DocType, role): cell text} for every table whose columns are all roles."""
+def lesson_role_matrices(root=TRAINING_DIR, roles=None):
+    """``file:line`` for every lesson table headed by DocType and then only roles."""
     known = set(roles if roles is not None else role_charters()) | set(
         ROLE_HEADERS_OUTSIDE_THE_CHARTER
     )
-    cells = {}
+    found = []
     for name in sorted(os.listdir(root)):
         if not name.endswith(".md"):
             continue
-        for _header_line, header, rows in _tables(os.path.join(root, name)):
-            if not header or header[0] != "DocType" or len(header) < 2:
+        for line, header in _tables(os.path.join(root, name)):
+            if len(header) < 2 or header[0] != "DocType":
                 continue
-            if not all(column in known for column in header[1:]):
-                continue
-            for _lineno, row in rows:
-                doctype = _doctype_name(row[0])
-                for role, text in zip(header[1:], row[1:]):
-                    cells[(name, doctype, role)] = text
-    return cells
-
-
-def granted_flags(data, role):
-    """The DOCUMENTED_FLAGS a role holds at permlevel 0, unioned over its rows."""
-    held = set()
-    for row in data.get("permissions") or []:
-        if row.get("role") == role and not row.get("permlevel"):
-            held |= {flag for flag in DOCUMENTED_FLAGS if row.get(flag)}
-    return held
-
-
-def parse_rights(text):
-    """The flag set a cell spells out, or None if it is not a rights list."""
-    if text == "—":
-        return frozenset()
-    tokens = [token.strip().lower() for token in text.split(",") if token.strip()]
-    if tokens and all(token in DOCUMENTED_FLAGS for token in tokens):
-        return frozenset(tokens)
-    return None
-
-
-def rights_divergences(cells, doctypes):
-    """{(file, DocType, role): (documented, granted)} for every cell that disagrees.
-
-    Pure over its inputs so the falsifiability class can drive it with planted data.
-    """
-    found = {}
-    for key, text in cells.items():
-        _name, doctype, role = key
-        documented = parse_rights(text)
-        if documented is None or doctype in EXTERNAL_DOCTYPES:
-            continue
-        data = doctypes.get(doctype)
-        if data is None:
-            continue
-        granted = granted_flags(data, role)
-        if documented != granted:
-            found[key] = (sorted(documented), sorted(granted))
+            if all(column in known for column in header[1:]):
+                found.append(f"{name}:{line}")
     return found
 
 
-class TestTrainingPermissionTablesParse(unittest.TestCase):
-    """Non-vacuity, and the declared-exception rules that keep the skips honest."""
+def published_pages():
+    """Every published Markdown page, so a prose check reaches all of them."""
+    pages = []
+    for directory in PUBLISHED_DOCS:
+        if not os.path.isdir(directory):
+            continue
+        for name in sorted(os.listdir(directory)):
+            if name.endswith(".md"):
+                pages.append(os.path.join(directory, name))
+    return pages
+
+
+class TestPermissionReferenceIsGenerated(unittest.TestCase):
+    """The round trip, and the three ways it could pass while proving nothing."""
 
     def setUp(self):
-        self.doctypes = shipped_doctypes()
-        self.cells = documented_cells()
+        self.generator = load_generator()
 
-    def test_both_sides_were_actually_parsed(self):
-        self.assertGreater(len(self.cells), 150, "training tables did not parse — scan broke")
-        self.assertGreater(len(self.doctypes), 50, "DocType JSON scan found nothing")
-        for landmark in ("Housing Assignment", "Salis Vehicle", "Cleaning Log"):
-            self.assertIn(landmark, self.doctypes)
-
-    def test_every_cell_is_parseable_or_declared(self):
-        """A cell that is neither a rights list nor a declared exception is unguarded."""
-        undeclared = sorted(
-            {
-                text
-                for key, text in self.cells.items()
-                if parse_rights(text) is None and text not in NON_SCHEMA_CELLS
-            }
-        )
+    def test_the_published_page_is_what_the_generator_emits(self):
+        with open(PERMISSIONS_REFERENCE, encoding="utf-8") as fh:
+            published = fh.read()
         self.assertEqual(
-            undeclared,
-            [],
-            "training permission cell(s) state something no DocPerm flag expresses and are "
-            "not declared in NON_SCHEMA_CELLS, so they silently escape this guard. Rewrite "
-            f"them as a rights list or declare them with a reason: {undeclared}",
+            published,
+            self.generator.render(),
+            "docs/reference/permissions.md is not what the shipped DocPerm JSON produces. "
+            "It is a generated page: rerun `python3 scripts/build_permissions_reference.py` "
+            "and commit the result rather than editing the page.",
         )
 
-    def test_declared_exceptions_all_carry_a_reason(self):
-        for mapping in (NON_SCHEMA_CELLS, EXTERNAL_DOCTYPES, ROLE_HEADERS_OUTSIDE_THE_CHARTER):
-            for key, reason in mapping.items():
-                with self.subTest(entry=key):
-                    self.assertTrue(reason and reason.strip(), f"'{key}' has no reason")
+    def test_the_generator_sees_every_shipped_doctype(self):
+        """An independent reader, so a broken walker cannot green the round trip."""
+        independent = shipped_doctypes()
+        emitted = {record["name"] for record in self.generator.shipped_doctypes()}
+        self.assertEqual(
+            sorted(set(independent) - emitted),
+            [],
+            "the permissions generator no longer reads every shipped DocType JSON",
+        )
+        self.assertGreater(len(emitted), 50, "DocType JSON scan found nothing")
+        for landmark in ("Housing Assignment", "Salis Vehicle", "Cleaning Log"):
+            self.assertIn(landmark, independent)
 
-    def test_declared_non_schema_cells_are_all_in_use(self):
-        """A declaration matching no cell is a stale skip that widens the guard for free."""
-        stale = sorted(set(NON_SCHEMA_CELLS) - set(self.cells.values()))
-        self.assertEqual(stale, [], f"NON_SCHEMA_CELLS entries match no published cell: {stale}")
+    def test_the_page_carries_the_docperm_rows_that_ship(self):
+        """Non-vacuity on the output: an empty render would round-trip against itself."""
+        rows = sum(len(record["rows"]) for record in self.generator.shipped_doctypes())
+        self.assertGreater(rows, 400, "the DocPerm scan collapsed")
+        with open(PERMISSIONS_REFERENCE, encoding="utf-8") as fh:
+            published = fh.read().splitlines()
+        emitted = [line for line in published if line.startswith("| ") and " | 0 | " in line]
+        self.assertGreater(len(emitted), 400, "the published page states almost no grants")
 
-    def test_the_remaining_unguarded_classes_stay_recorded(self):
+
+class TestLessonsDoNotRepeatThePermissionMatrices(unittest.TestCase):
+    """The matrices are centralised because a per-page copy is what rotted."""
+
+    def test_no_lesson_carries_a_role_matrix(self):
+        repeated = lesson_role_matrices()
+        self.assertEqual(
+            repeated,
+            [],
+            "a training lesson repeats a DocType/role permission matrix. Those are "
+            "generated into docs/reference/permissions.md; link to the module anchor "
+            f"instead so the page cannot drift from the JSON: {repeated}",
+        )
+
+    def test_the_lesson_scan_reads_the_pages(self):
+        """A broken listing would report no matrix because it saw no file."""
+        seen = [os.path.basename(p) for p in published_pages() if TRAINING_DIR in p]
+        for expected in ("custody.md", "safety.md", "settings.md"):
+            self.assertIn(expected, seen, "the lesson scan no longer reaches the guides")
+
+    def test_the_retired_doctype_names_stay_out_of_every_page(self):
+        """The original rot, asserted over prose as well as tables."""
+        offenders = []
+        for path in published_pages():
+            with open(path, encoding="utf-8") as fh:
+                for number, line in enumerate(fh, start=1):
+                    for stale in RETIRED_DOCTYPE_NAMES:
+                        if stale in line:
+                            offenders.append(f"{os.path.relpath(path, REPO_ROOT)}:{number} {stale}")
+        self.assertEqual(
+            offenders,
+            [],
+            f"published page names a DocType the app renamed: {offenders}",
+        )
+
+
+class TestTheRemainingUnguardedClassesStayRecorded(unittest.TestCase):
+    def test_declared_role_headers_all_carry_a_reason(self):
+        for role, reason in ROLE_HEADERS_OUTSIDE_THE_CHARTER.items():
+            with self.subTest(entry=role):
+                self.assertTrue(reason and reason.strip(), f"'{role}' has no reason")
+
+    def test_the_register_keeps_a_written_verdict(self):
         """The gaps this card chose not to close must keep a written verdict, not vanish.
 
         An unguarded published claim that nobody has written a decision about is how the
@@ -307,67 +275,6 @@ class TestTrainingPermissionTablesParse(unittest.TestCase):
                     verdict,
                     f"'{name}' does not state a WORTH A GUARD / NOT WORTH A GUARD verdict",
                 )
-
-
-class TestTrainingDocTypeNamesAreShipped(unittest.TestCase):
-    """The name axis: a table row about a DocType that does not exist teaches nothing."""
-
-    def test_every_documented_doctype_is_shipped_or_declared(self):
-        shipped = shipped_doctypes()
-        unknown = sorted(
-            f"{name}:{line} {doctype!r}"
-            for (name, doctype), line in documented_doctypes().items()
-            if doctype not in shipped and doctype not in EXTERNAL_DOCTYPES
-        )
-        self.assertEqual(
-            unknown,
-            [],
-            "docs/training names DocType(s) apex does not ship. Six had drifted this way "
-            "before the guard existed, each renamed in the app and left stale on the page. "
-            "Correct the name, or declare it in EXTERNAL_DOCTYPES if another app owns it: "
-            f"{unknown}",
-        )
-
-    def test_the_renamed_doctypes_stay_corrected(self):
-        """The specific rot this guard was written for, asserted by name."""
-        published = {doctype for _file, doctype in documented_doctypes()}
-        for stale in (
-            "Accommodation Assignment",
-            "Accommodation Checkout",
-            "Accommodation Resident Request",
-            "Accommodation Lease",
-            "Habitat Safety Incident",
-            "Salis Portal Theme",
-        ):
-            with self.subTest(name=stale):
-                self.assertNotIn(stale, published, f"{stale} is not a shipped DocType name")
-
-
-class TestTrainingRightsMatchTheDocPerms(unittest.TestCase):
-    """The rights axis, against the frozen baseline of what was already out of step."""
-
-    def test_no_new_divergence_between_the_page_and_the_json(self):
-        found = rights_divergences(documented_cells(), shipped_doctypes())
-        self.assertEqual(
-            sorted(found),
-            sorted(KNOWN_TABLE_DIVERGENCES),
-            "training permission table / DocPerm parity changed. A NEW entry means the "
-            "published rights and the shipped DocPerms disagree — fix whichever is wrong, "
-            "or freeze it with a written reason. A MISSING entry means a disagreement was "
-            "resolved and the baseline must shrink. Live diff: "
-            f"{ {k: v for k, v in found.items() if k not in KNOWN_TABLE_DIVERGENCES} }",
-        )
-
-    def test_every_frozen_divergence_carries_a_reason(self):
-        for key, reason in KNOWN_TABLE_DIVERGENCES.items():
-            with self.subTest(entry=key):
-                self.assertTrue(reason and reason.strip(), f"{key} has no documented reason")
-
-    def test_frozen_divergences_name_a_published_role(self):
-        """A baseline keyed on a role nobody publishes is one nobody will ever review."""
-        known = set(role_charters()) | set(ROLE_HEADERS_OUTSIDE_THE_CHARTER)
-        strays = sorted({role for _f, _d, role in KNOWN_TABLE_DIVERGENCES if role not in known})
-        self.assertEqual(strays, [], f"frozen entries name unpublished role(s): {strays}")
 
 
 if __name__ == "__main__":

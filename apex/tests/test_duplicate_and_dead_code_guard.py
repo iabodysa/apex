@@ -120,7 +120,7 @@ scope rather than the salis/ scope previously recorded against it.
      .html and the published docs, because at function granularity check 4's
      "any module holding a whitelist is exempt" shortcut is far too coarse —
      226 endpoints here are named only from Desk JS, and three patch entry
-     points are named only in docs/UPGRADE-APP-IDENTITY.md.
+     points are named only in docs/administration/identity-upgrade.md.
 
      Its ``_DEAD_FUNCTION_BASELINE`` seeded 8 pre-existing dead defs and is now
      EMPTY — each was deleted, not re-wired, so the check is an outright gate
@@ -919,7 +919,7 @@ def _wiring_text_files():
     Includes the published docs, which are a REAL wiring surface: three entry
     points in patches/v2_0/app_identity_cutover.py have no Python caller and
     exist only to be run as `bench --site <site> execute apex....<fn>` per
-    docs/UPGRADE-APP-IDENTITY.md. Drop docs from this universe and the guard
+    docs/administration/identity-upgrade.md. Drop docs from this universe and the guard
     reports live, documented operator commands as dead code.
     """
     paths = [PATCHES_TXT]
@@ -1086,7 +1086,7 @@ class TestDeadProductionFunctions(unittest.TestCase):
 
     def test_documented_bench_execute_entrypoints_are_reachable(self):
         # patches/v2_0/app_identity_cutover.py's three entry points have no
-        # Python caller; docs/UPGRADE-APP-IDENTITY.md is their only wiring.
+        # Python caller; docs/administration/identity-upgrade.md is their only wiring.
         names = _referenced_function_names()
         for fn_name in ("preview_registry", "diagnose", "cutover"):
             self.assertIn(fn_name, names, f"{fn_name} lost its docs reference")
@@ -1094,7 +1094,7 @@ class TestDeadProductionFunctions(unittest.TestCase):
         self.assertEqual(dead & {"preview_registry", "diagnose", "cutover"}, set())
 
     def test_docs_are_in_the_reference_universe(self):
-        upgrade_doc = os.path.join(REPO_ROOT, "docs", "UPGRADE-APP-IDENTITY.md")
+        upgrade_doc = os.path.join(REPO_ROOT, "docs", "administration", "identity-upgrade.md")
         self.assertTrue(os.path.exists(upgrade_doc), "fixture path drifted")
         self.assertIn(upgrade_doc, _wiring_text_files())
 

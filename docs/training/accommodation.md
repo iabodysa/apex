@@ -9,16 +9,7 @@ checkout, and resident-request records.
 
 ## Permissions
 
-| DocType | Accommodation Manager | Resident Supervisor | Resident Request Coordinator | Finance Manager |
-|---------|----------------------|---------------------|------------------------------|-----------------|
-| Site (master) | Read, Write, Create | — | — | — |
-| Building (master) | Read, Write, Create | Read | — | — |
-| Room (master) | Read, Write, Create | Read | — | — |
-| Bed (master) | Read, Write, Create | Read | — | — |
-| Facility Asset | Read, Write, Create | Read | — | — |
-| **Housing Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | — | — |
-| **Housing Checkout** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | — | — |
-| Resident Request | Read, Write, Create | Read, Write, Create | Read, Write, Create | — |
+The exact grants for these records are in the [permissions reference](../reference/permissions.md#habitat), generated from the shipped DocPerm JSON.
 
 > **Site is Manager-only.** Unlike Building, Room, and Bed, the **Site** master
 > grants the Resident Supervisor nothing — supervisors read the building
