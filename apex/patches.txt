@@ -58,11 +58,6 @@ apex.patches.v0_8.add_navbar_help_links
 # workspace. Source cannot prove no deployed site still holds the old route.
 apex.patches.v0_8.fix_navbar_command_center_route
 
-# PERMANENT: replay the dashboard seeders so a chart or card added after a site was
-# installed still appears on it.
-apex.patches.v0_9.seed_habitat_dashboard
-apex.patches.v0_9.seed_role_dashboards
-
 # PERMANENT: Salis role / settings / theme seeders. Each seeds a DISTINCT record set
 # and only fills blanks, so replaying on migrate can never clobber an admin's edit.
 apex.patches.v1_0.seed_salis_roles

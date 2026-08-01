@@ -425,12 +425,7 @@ class TestNoTestRolesShipped(unittest.TestCase):
         roles |= self._doctype_permission_roles()
         roles |= self._seed_list_roles()
         roles |= self._notification_json_roles()
-        roles |= self._literal_roles_in_files(
-            "hooks.py",
-            os.path.join(
-                "apex_core", "setup", "seeders", "habitat_dashboard_seed.py"
-            ),
-        )
+        roles |= self._literal_roles_in_files("hooks.py")
         return roles
 
     def test_detector_recognises_known_fixtures(self):
