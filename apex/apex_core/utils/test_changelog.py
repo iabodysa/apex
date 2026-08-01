@@ -31,7 +31,7 @@ class TestChangelogFeed(unittest.TestCase):
         since = "2026-07-24 00:00:00"
         expected = [r for r in changelog._RELEASES if r["creation"] > since]
         items = get_changelog_feed(since)
-        self.assertEqual(len(items), len(expected))
+        self.assertEqual(len(items), min(len(expected), changelog._FEED_MAX))
         self.assertEqual(items[0]["creation"], max(r["creation"] for r in expected))
 
     def test_future_since_returns_empty(self):
