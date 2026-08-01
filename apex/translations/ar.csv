@@ -4545,3 +4545,12 @@ Set a Landlord on lease {0} before raising a rent payment — a payment needs a 
 There is no submitted Purchase Invoice outstanding for {0} under this company. Raise and submit the landlord invoice first — a payment with no invoice behind it settles nothing.,ما فيه فاتورة شراء معتمدة ومستحقة لـ {0} في هذه الشركة. أصدر فاتورة المؤجّر واعتمدها أولًا — دفعة بلا فاتورة خلفها لا تسدّد شيئًا.
 Payment Target Mismatch,نوع مستند الدفع لا يطابق الإعداد
 "This site is configured to raise payments as {0}, but this action can only create a {1} allocated against the supplier's invoice. Raise this payment from a {2}, which builds the configured target, or set Target Payment DocType to {1} in Payment Routing Settings.",هذا الموقع مضبوط على إصدار المدفوعات كـ {0}، وهذا الإجراء لا ينشئ إلا {1} مخصّصة على فاتورة المورّد. أصدر هذه الدفعة من {2} الذي يبني النوع المضبوط، أو اضبط نوع مستند الدفع على {1} في إعدادات توجيه المدفوعات.
+Remove Demo Data,إزالة البيانات التجريبية
+Remove every record the demo build created? Nothing else on this site is touched.,هل تريد إزالة كل سجل أنشأه البناء التجريبي؟ لن يُمس أي شيء آخر في هذا الموقع.
+Removing demo data...,جارٍ إزالة البيانات التجريبية...
+Demo Data Removed,تمت إزالة البيانات التجريبية
+Demo Data Partly Removed,أُزيلت البيانات التجريبية جزئيًا
+Removed {0} demo records.,أُزيل {0} سجلًا تجريبيًا.
+Removed {0} demo records. {1} could not be removed and are listed below. The demo users are kept so you can run this again once they are cleared.,أُزيل {0} سجلًا تجريبيًا. تعذّرت إزالة {1} وهي مذكورة أدناه. أُبقي على المستخدمين التجريبيين لتتمكّن من إعادة التشغيل بعد معالجتها.
+This site has no Apex demo data to remove.,لا توجد بيانات تجريبية لـ Apex في هذا الموقع لإزالتها.
+{0} is not a demo DocType; the demo removal would never clear it.,{0} ليس نوع مستند تجريبي، فإزالة البيانات التجريبية لن تمسحه أبدًا.

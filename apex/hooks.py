@@ -76,7 +76,29 @@ app_include_js = ["masar_worker_link.bundle.js"]
 
 # [#dfjden]
 setup_wizard_requires = "assets/apex/js/apex_setup_wizard.js"
-setup_wizard_complete = "apex.apex_core.setup.setup_wizard.setup_wizard_complete"
+# Two completion hooks, as ERPNext splits its own (erpnext/hooks.py:55-56): the
+# demo build must be a separate step because it only ENQUEUES, and must not be
+# entangled with the settings the first hook writes.
+setup_wizard_complete = [
+    "apex.apex_core.setup.setup_wizard.setup_wizard_complete",
+    "apex.apex_core.setup.demo.setup_demo",
+]
+
+# Whether this site carries removable demo data — read by apex_settings.js to show
+# the removal action. Derived from the demo user, so it cannot drift.
+extend_bootinfo = ["apex.apex_core.setup.demo.boot_demo"]
+
+# Keep a Transaction Deletion Record from raw-deleting these submitted rows: it
+# frappe.db.deletes whatever it enumerates (erpnext .../transaction_deletion_record.py:393),
+# which would strand every reversal their on_cancel posts — the offsetting utility
+# ledger row, the released rental accrual stamps, the replayed SIM projection.
+# Mechanism copied from HRMS's own declaration (hrms/hooks.py:361-371).
+company_data_to_be_ignored = [
+    "Utility Bill Entry",
+    "Rental Settlement",
+    "Telecom Contract",
+    "SIM Custody Assignment",
+]
 
 
 # [#nc1irs]

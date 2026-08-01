@@ -119,6 +119,17 @@ apex.setup.slides_settings = [
 				default: 0,
 				description: __("Off by default. Requires legal/HR review."),
 			},
+			{ fieldname: "apex_demo_sb", fieldtype: "Section Break", label: __("Demo Data") },
+			{
+				// Not "setup_demo": ERPNext reads that exact fieldname and would build its own demo company.
+				fieldname: "apex_setup_demo",
+				label: __("Create demo data to explore Apex?"),
+				fieldtype: "Check",
+				default: 0,
+				description: __(
+					"Off by default — builds one sample accommodation site with rooms, beds, a resident and an open maintenance request. You can remove all of it later from Apex Settings."
+				),
+			},
 		],
 	},
 ];

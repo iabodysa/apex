@@ -70,6 +70,15 @@ PERMISSION_CALLS = {"has_permission", "check_permission"}
 # [#dha1uj]
 PERMISSION_RECHECK_ALLOWLIST = [
     (
+        "apex_core/setup/demo.py",
+        "clear_demo_data",
+        "Demo-data removal. Not a write to any one document, so there is no doc to "
+        "permission-check: it is role-gated by frappe.only_for('System Manager') and "
+        "then selects strictly on the dedicated demo user as record owner, refusing "
+        "outright when that user is absent. Same gate ERPNext puts on its own "
+        "clear_demo_data (erpnext/setup/demo.py:40).",
+    ),
+    (
         "habitat/web_form/accommodation_resident_request/accommodation_resident_request.py",
         "submit_resident_request",
         "Public QR intake. allow_guest; authorisation is the location token plus "
