@@ -8,13 +8,19 @@ from frappe.utils import get_datetime
 # "What's New" popup and this bell feed now agree on the same 2.x floor.
 _RELEASES = [
     {
+        "title": "Apex 2.1.23 — The setup wizard can now create demo data to explore Apex with, and Apex Settings can remove every record it created.",
+        "app_name": "apex",
+        "link": "/app",
+        "creation": "2026-08-01 16:49:10",
+    },
+    {
         "title": "Apex 2.1.22 — Documentation update.",
         "app_name": "apex",
         "link": "/app",
         "creation": "2026-08-01 12:36:17",
     },
     {
-        "title": "Apex 2.1.21 —Typing a transport request no longer disappears while the screen refreshes, safety verdicts survive a reload, photos are refused before upload if the server would reject them, and refusals now arrive in the language of the page.",
+        "title": "Apex 2.1.21 — Typing a transport request no longer disappears while the screen refreshes, safety verdicts survive a reload, photos are refused before upload if the server would reject them, and refusals now arrive in the language of the page.",
         "app_name": "apex",
         "link": "/app",
         "creation": "2026-08-01 09:06:38",
