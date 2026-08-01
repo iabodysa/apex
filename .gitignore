@@ -1,13 +1,38 @@
-.DS_Store
+# Three groups, one purpose each, in this order on purpose: git applies the LAST
+# matching pattern, so the publication allowlist has to sit below the denials it
+# inverts. Moving a group changes what a fresh clone contains.
+
+
+# ---- 1. Build residue -------------------------------------------------------
+# Written by a build, a test run, a package step or the OS. Never authored here.
+
 __pycache__/
 *.pyc
-**/.git/
 *.egg-info
-*.swp
-tags
+build/
+dist/
+# A wheel built outside dist/ needs its own rule: an unignored stray wheel joins any
+# tree mirrored with `git ls-files --cached --others --exclude-standard`, which a
+# fresh clone never holds.
+*.whl
 node_modules
+tags
 
-# Local working context (never commit).
+# macOS junk (also stripped by: apex.sh clean)
+.DS_Store
+._*
+.AppleDouble
+.Spotlight-V100
+.Trashes
+__MACOSX
+.fseventsd
+
+
+# ---- 2. Local developer files -----------------------------------------------
+# This working copy only. None of it is part of the app, and none of it ships.
+
+# Agent and bench tooling working directories. The owner's scanners live under
+# .claude/ by decision, so this one line already covers them.
 .claude/
 .agents/
 .codex/
@@ -15,59 +40,30 @@ node_modules
 .frappectl/
 .frappectl.toml
 skills-lock.json
+# Symlink to the bench control tool, which lives outside this checkout.
 ctl
 .ctl/
 .ctl.toml
 
+# A nested checkout — worktree or vendored clone — is never this repo's content.
+**/.git/
 
-# Internal project documents and source spreadsheets.
-docs/
-*.md
-!README.md
-# Frappe "Updated To A New Version" popup changelogs are shipped app files.
-!apex/change_log/v*/*.md
-# Public developer integration guide — ONLY this one file under docs/ is published
-# (docs/superpowers and all other docs/ content stay ignored).
-!docs/
-docs/*
-!docs/INTEGRATION.md
-!docs/TRAINING.md
-!docs/WORKSPACE-DESIGN.md
-# Public per-area training guide (index + one file per functional area)
-!docs/training/
-!docs/training/*.md
-# Operator runbooks: the pre-rename app-identity cutover path lives here.
-!docs/administration/
-!docs/administration/*.md
-# Generated and hand-maintained references the training pages link into.
-!docs/reference/
-!docs/reference/*.md
-# Public training screenshots: reviewed PNG/WebP only, one lesson folder deep.
-# Spelled out rather than "!docs/assets/", which would also publish a raw/ working
-# folder, a stray .psd, and docs/assets/brand/ — each verified ignored under this form.
-!docs/assets/
-docs/assets/*
-!docs/assets/training/
-docs/assets/training/*
-!docs/assets/training/*/
-docs/assets/training/*/*
-!docs/assets/training/*/*.png
-!docs/assets/training/*/*.webp
-
-# Local-only rich demo generator — Arabic sample data, bench-only, never published
+# Local-only rich demo generator: Arabic sample data, bench-only, never published.
 apex/demo/
 
-# Local/private office source files.
-*.xlsx
-*.xls
-*.xlsm
-*.csv
-*.numbers
-*.ods
+# Dead code archive.
+archive/
 
-# Translation CSV files are publishable because Arabic text belongs there.
-!apex/translations/
-!apex/translations/*.csv
+# Local-only scratch scripts and reports.
+scratch/
+*.command
+*.applescript
+flash_actions_report.json
+
+# Raw HTTP/curl response dumps — may capture live auth tokens.
+curl_output*.txt
+**/curl_output*.txt
+*.curl
 
 # Environment, secrets, and local runtime files.
 .env
@@ -78,34 +74,49 @@ apex/demo/
 *.key
 *.pem
 
-# Build and packaging outputs.
-# (*.egg-info is covered once, above.)
-build/
-dist/
-# A wheel built outside dist/ still has to be ignored: scripts/run_guards.sh
-# mirrors its CI tree from `git ls-files --cached --others --exclude-standard`,
-# which includes untracked-but-unignored files, so an unignored stray wheel
-# enters every local guard run while a fresh clone never holds it.
-*.whl
+# Editor swap files.
+*.swp
 
-# Dead code archive.
-archive/
 
-# Local-only scratch scripts and reports (never commit).
-scratch/
-*.command
-*.applescript
-flash_actions_report.json
+# ---- 3. Publication allowlist -----------------------------------------------
+# Documents and data files are denied by TYPE first and re-included one named path
+# at a time, so a new file under docs/ ships only when someone adds it here on
+# purpose. Every `!` below carries the reason it exists.
 
-# Raw HTTP/curl response dumps — may capture live auth tokens; never commit.
-curl_output*.txt
-**/curl_output*.txt
-*.curl
+# Private office source files — the app ships no spreadsheet.
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+*.numbers
+*.ods
+# Arabic belongs in the translation CSV, and only there, so it is the one .csv
+# that ships.
+!apex/translations/
+!apex/translations/*.csv
 
-# macOS junk (also stripped by: apex.sh clean)
-._*
-.AppleDouble
-.Spotlight-V100
-.Trashes
-__MACOSX
-.fseventsd
+# Internal notes and design documents are markdown, and docs/ is internal by
+# default; the published set is named one file at a time below.
+*.md
+docs/*
+# Deliberately NOT anchored to the repo root: matching README.md at every depth is
+# what keeps apex/change_log/README.md (the in-app changelog index) and the
+# frontend package READMEs shipping. Rewriting this as `!/README.md` drops them.
+!README.md
+# Frappe's "Updated To A New Version" popup reads these as shipped app files.
+!apex/change_log/v*/*.md
+# Public developer integration guide.
+!docs/INTEGRATION.md
+# Operator-facing training entry point, and the workspace layout reference it cites.
+!docs/TRAINING.md
+!docs/WORKSPACE-DESIGN.md
+# Public per-area training guide: index plus one file per functional area.
+!docs/training/
+!docs/training/*.md
+# Operator runbooks; the pre-rename app-identity cutover path lives here.
+!docs/administration/
+!docs/administration/*.md
+# References the training pages link into. permissions.md is generated from the
+# shipped DocPerm JSON, so it must ship with the code it describes.
+!docs/reference/
+!docs/reference/*.md
