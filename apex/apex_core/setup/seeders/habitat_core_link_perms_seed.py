@@ -53,7 +53,9 @@ def _grant_select(doctype: str) -> None:
     from frappe.permissions import add_permission, update_permission_property
 
     for role in HABITAT_LINK_ROLES:
-        if not frappe.db.exists("Role", role):
+        # Dict form: the positional spelling returns the name unqueried when it equals
+        # its own doctype, so it cannot prove existence in both directions.
+        if not frappe.db.exists("Role", {"name": role}):
             continue
         rows = frappe.get_all(
             "Custom DocPerm",
@@ -77,7 +79,7 @@ def seed_habitat_core_link_perms():
     rest of the migrate.
     """
     for doctype in CORE_LINK_MASTERS:
-        if not frappe.db.exists("DocType", doctype):
+        if not frappe.db.exists("DocType", {"name": doctype}):
             continue
         savepoint = "habitat_core_link_perms"
         frappe.db.savepoint(savepoint)
