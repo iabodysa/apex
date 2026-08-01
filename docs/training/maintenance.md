@@ -11,8 +11,6 @@ coverage.
 
 The **All** column is the built-in Frappe role every logged-in user holds.
 
-The exact grants for these records are in the [permissions reference](../reference/permissions.md#habitat), generated from the shipped DocPerm JSON.
-
 > **Universal intake:** any logged-in user can raise a **Maintenance Request** and sees only their own. The assigned technician also sees their ticket. Oversight roles see all.
 
 > **There is no Maintenance Manager role in Apex.** The maintenance material

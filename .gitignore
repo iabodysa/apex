@@ -116,7 +116,3 @@ docs/*
 # Operator runbooks; the pre-rename app-identity cutover path lives here.
 !docs/administration/
 !docs/administration/*.md
-# References the training pages link into. permissions.md is generated from the
-# shipped DocPerm JSON, so it must ship with the code it describes.
-!docs/reference/
-!docs/reference/*.md

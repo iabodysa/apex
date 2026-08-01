@@ -8,8 +8,6 @@ Tracks articles and assets issued to residents/staff and their return or damage.
 
 ## Permissions
 
-The exact grants for these records are in the [permissions reference](../reference/permissions.md#habitat), generated from the shipped DocPerm JSON.
-
 > Supervisors can **prepare** custody issues, returns, and damage assessments but
 > cannot **submit** them — the Accommodation Manager submits, keeping a single
 > point of accountability. **Facility Asset Custody Assignment is the exception:**

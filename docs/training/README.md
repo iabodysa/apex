@@ -29,7 +29,6 @@ _[screenshot: Apex desk — module cards for Habitat and Salis]_
 ## Where the permissions are
 
 Every DocPerm row apex ships is listed once in the
-[permissions reference](../reference/permissions.md), generated from the shipped
 DocType JSON. Each page below links into it instead of repeating a matrix.
 
 The rights it names are the standard Frappe document rights:

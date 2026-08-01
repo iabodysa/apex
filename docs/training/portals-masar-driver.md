@@ -49,8 +49,6 @@ The role still carries a minimal, **owner-only** document permission set, so a
 driver can never read another driver's rows even through the API. Every one of its
 rows carries `if_owner`:
 
-The exact grants for these records are in the [permissions reference](../reference/permissions.md#salis), generated from the shipped DocPerm JSON.
-
 Those five are the whole grant. **Salis Vehicle** is not among them — the portal
 reads the bound vehicle on the driver's behalf after resolving the token.
 

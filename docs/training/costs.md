@@ -9,8 +9,6 @@ depreciation.
 
 ## Permissions
 
-The exact grants for these records are in the [permissions reference](../reference/permissions.md#habitat), generated from the shipped DocPerm JSON.
-
 > **Finance Manager is a full maker/checker on the Lease and Utility
 > Bill Entry** — Read, Write, Create, Submit, and Cancel (not read-only). The
 > **Internal Auditor** holds read-only oversight across the Costs records —

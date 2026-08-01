@@ -9,8 +9,6 @@ licenses.
 
 ## Permissions
 
-The exact grants for these records are in the [permissions reference](../reference/permissions.md#habitat), generated from the shipped DocPerm JSON.
-
 > The **Safety Officer** can raise and edit a **Building License** — it is not a
 > Manager-only record — but only the Accommodation Manager submits, cancels, or
 > amends one.

@@ -9,8 +9,6 @@ deliberately split across the claim lifecycle.
 
 ## Permissions
 
-The exact grants for these records are in the [permissions reference](../reference/permissions.md#salis), generated from the shipped DocPerm JSON.
-
 > **Fuel Platform is not read-only for the project roles.** Both the Fleet Project
 > Manager and the Fleet Supervisor can create and edit a platform record; only the
 > Fleet Manager can delete one.

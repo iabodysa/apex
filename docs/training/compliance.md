@@ -9,8 +9,6 @@ top of project scoping.
 
 ## Permissions
 
-The exact grants for these records are in the [permissions reference](../reference/permissions.md#salis), generated from the shipped DocPerm JSON.
-
 > Note the **asymmetry**: Fleet PM holds **no** permission on Movement Cost
 > Recovery, and Fleet Supervisor holds **no** permission on Movement Cost Transfer.
 

@@ -8,8 +8,6 @@ Rented vehicles: registering offices, accruing cost, and settling.
 
 ## Permissions
 
-The exact grants for these records are in the [permissions reference](../reference/permissions.md#salis), generated from the shipped DocPerm JSON.
-
 > **Internal Auditor** holds read-only oversight on all three records, and on the
 > derived **Rental Accrual Ledger**.
 

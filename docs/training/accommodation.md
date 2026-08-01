@@ -9,8 +9,6 @@ checkout, and resident-request records.
 
 ## Permissions
 
-The exact grants for these records are in the [permissions reference](../reference/permissions.md#habitat), generated from the shipped DocPerm JSON.
-
 > **Site is Manager-only.** Unlike Building, Room, and Bed, the **Site** master
 > grants the Resident Supervisor nothing — supervisors read the building
 > hierarchy from Building downwards.

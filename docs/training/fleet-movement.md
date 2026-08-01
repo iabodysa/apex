@@ -14,8 +14,6 @@ This page covers fleet masters, compliance, dispatch, and transport.
 
 ### Permissions
 
-The exact grants for these records are in the [permissions reference](../reference/permissions.md#salis), generated from the shipped DocPerm JSON.
-
 > **Salis Vehicle Compliance is a child table, not a standalone record.** It is
 > the grid behind *Compliance Documents* on **Salis Vehicle**, and its permissions
 > list is empty — it grants no role anything on its own. Access to a compliance
@@ -55,8 +53,6 @@ _[screenshot: Salis Vehicle record with compliance tab]_
 ## Dispatch & Transport
 
 ### Permissions
-
-The exact grants for these records are in the [permissions reference](../reference/permissions.md#salis), generated from the shipped DocPerm JSON.
 
 > **Salis Vehicle** and **Salis Driver** are **not submittable** DocTypes — there
 > is no Submit action on either. Create the record and save it. The shipped Salis

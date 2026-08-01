@@ -37,6 +37,5 @@ its DocTypes, roles and permissions, key fields, and typical workflow.
 > be inserted.
 
 > Every DocPerm row apex ships, System Manager included, is listed once in the
-> [permissions reference](reference/permissions.md). It is generated from the
 > shipped DocType JSON, so the per-area pages link into it rather than restating
 > a matrix that can drift.
