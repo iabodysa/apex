@@ -36,8 +36,10 @@ A site **already running `apex`** is unaffected by all of this and needs nothing
 from this page. Section 1 tells you which case you are in.
 
 This runbook is kept, not withdrawn. The procedure below remains the intended
-path and becomes usable again once both blockers are fixed; Section 9 states
-what has to be true before this status changes.
+path and becomes usable again once both blockers are fixed **and** the sequence
+has been rehearsed against a genuinely pre-rename site. Section 9 states what has
+to be true before this status changes, including one prerequisite for that
+rehearsal that neither blocker covers.
 
 Perform it in a planned maintenance window when it is un-deferred. It is not an
 emergency procedure.
@@ -409,8 +411,10 @@ outcome. This section stays as the acceptance test for lifting the deferral.
   site whose hooks cannot be loaded, given that `bench clear-cache` fails there.
 
 **Then rehearse.** On a disposable bench, create a site and install the
-application at a release **before** the rename (the last version whose tree
-still contains an `apex_habitat/` directory):
+application as it was packaged **before** the rename — a source tree whose own
+package directory is `apex_habitat/` and carries the modules. Read
+[the pre-rename source this repository does not hold](#the-pre-rename-source-this-repository-does-not-hold)
+first: that tree is not in this history.
 
 ```bash
 bench new-site rehearsal.localhost
@@ -466,6 +470,68 @@ verbatim against `rehearsal.localhost`.
 11. Every command in Sections 1 through 6 exits `0` on its expected result, so
     the sequence can be followed under `set -e` without aborting on success.
 12. The desk loads and an application workspace opens.
+
+### The pre-rename source this repository does not hold
+
+This repository cannot supply the starting state the rehearsal begins from. Its
+first commit already carries the canonical `apex` package, and the
+`apex_habitat/` directory that exists from there until the bridge was retired
+holds four files — `__init__.py`, `bootstrap.py`, `hooks.py`, `modules.txt`. The
+`__init__.py` describes itself as a temporary compatibility package and the
+`hooks.py` declares a single `before_migrate` entry. That is the bridge which
+used to perform the cutover during migrate, not the application. Installing it
+yields a site carrying a shim beside `apex`, which is not a pre-rename site.
+
+```bash
+git rev-list --max-parents=0 HEAD            # the first commit already ships `apex`
+git show <retirement-commit>^:apex_habitat   # four files, not an application
+```
+
+So the rehearsal has a prerequisite beyond B1 and B2: a genuine pre-rename
+source, recovered from a deployment artifact of that era rather than from this
+history. Until one is in hand none of the observations above can be recorded,
+and closing B1 and B2 does not change that.
+
+### What has been verified, and what has not
+
+The steps that do not need the pre-rename state have been run end to end against
+a site whose identity is already `apex`, and behave as documented:
+
+| Step | Observed |
+| --- | --- |
+| 1 (a) | one `apex` line in `sites/apps.txt` — the "already canonical, stop" row |
+| 1 (b) | `["frappe", "erpnext", "hrms", "apex"]` |
+| 3 | `list-apps` prints a row naming `apex` and its version; exit `0` |
+| 4 `preview_registry` | prints the registry unchanged; exit `0` |
+| 5 `diagnose` | `registry_state` `canonical`, `installed_apps_legacy` `false`, `module_def_rows`, `installed_application_rows` and `legacy_method_rows` all `0`; exit `0` |
+| 5 `cutover` | `{"installed_apps": 0, "module_def": 0, "installed_application": 0, "dotted_paths": []}`; exit `0`. This is the all-zero return observation 6 asks for, but reached from an already-canonical site rather than from a completed cutover, so it shows the no-op path, not idempotence after a real write |
+
+Blocker B1's mechanism is confirmed without a pre-rename site, by invoking any
+dotted path whose leading name is an app present on the bench but absent from
+that site's installed apps — the condition `apex` is in before the cutover:
+
+```
+frappe.exceptions.AppNotInstalledError: App <name> is not installed
+During handling of the above exception, another exception occurred:
+NameError: name '<name>' is not defined
+```
+
+That is the pair Section 4 predicts. `bench execute` calls
+`frappe.get_attr(method)` and falls back to `eval` on any exception
+(`frappe/commands/utils.py:269,272`), so the second error is the fallback
+failing on a name the first never imported.
+
+Unverified, because each needs the site to be genuinely pre-rename: Section 4's
+registry repair and its cache drop, Section 5's first write, Section 6's migrate
+and patch replay, observations 1 to 5 and 7 to 12 above, and the part of
+observation 6 that has to follow a cutover which actually wrote.
+
+B2 need not be solved from nothing. The retired bridge dropped the cached
+registry itself, deleting the app-discovery cache keys — `app_hooks`,
+`installed_apps`, `all_apps`, `app_modules`, `installed_app_modules`,
+`module_app`, `module_installed_app` — and rebuilding the module map afterwards.
+That is one route to a supported cache drop, recorded as a starting point rather
+than as a decision.
 
 Record the observed output of each step. Any divergence is a defect in this
 runbook, not an operator error. Update the status block at the top of this page
