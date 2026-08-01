@@ -8,6 +8,12 @@ from frappe.utils import get_datetime
 # "What's New" popup and this bell feed now agree on the same 2.x floor.
 _RELEASES = [
     {
+        "title": "Apex 2.1.19 — Housing records can be created from the form again, portal dialogs keep the keyboard inside them, and a refused safety round now says why.",
+        "app_name": "apex",
+        "link": "/app",
+        "creation": "2026-08-01 05:39:15",
+    },
+    {
         "title": "Apex 2.1.18 — The personal worker link the demo seeder prints now opens the portal instead of failing.",
         "app_name": "apex",
         "link": "/app",
