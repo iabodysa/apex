@@ -125,10 +125,6 @@
               @note="onNote"
             />
 
-            <!-- role=alert: the refusal appears only in response to the submit tap,
-                 so it must be announced, not just painted above the button. -->
-            <p v-if="submitError" class="status-note status-err" role="alert">{{ submitError }}</p>
-
             <div class="submit-dock">
               <p class="submit-progress">
                 <span class="submit-dot" :class="{ 'submit-dot-ready': totalRated > 0 }"></span>
@@ -148,6 +144,15 @@
                   {{ t("submit.cta") }}
                 </template>
               </button>
+              <!-- role=alert: the refusal appears only in response to the submit tap,
+                   so it must be announced, not just painted. BELOW the button, never
+                   above it: this line is the only thing on the page that appears at the
+                   moment of the tap, and inserting it above pushed the button 93px down
+                   and out of the viewport — the control moved out from under the thumb
+                   that had just pressed it. -->
+              <p v-if="submitError" ref="submitErrEl" class="status-note status-err submit-err" role="alert">
+                {{ submitError }}
+              </p>
               <p class="submit-hint">{{ t("submit.hint") }}</p>
             </div>
           </div>
@@ -158,7 +163,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "./components/Icon.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
@@ -191,6 +196,7 @@ const building = ref("");
 const buildingLabel = ref("");
 const submitted = ref(null);
 const submitError = ref("");
+const submitErrEl = ref(null);
 
 // ratings: { [cadence]: { [taskName]: { verdict, notes } } }
 const ratings = reactive({});
@@ -333,6 +339,11 @@ async function doSubmit() {
     submitError.value = blocked
       ? t("errors.evidenceRequired", { task: blocked.task_title || blocked.name })
       : resourceErrorMessage(e, "errors.submitFailed");
+    // The dock sits at the foot of a checklist that can run past 9000px, so the
+    // line can render with its last rows below the fold. "nearest" moves the page
+    // by the minimum needed and does nothing when it is already fully visible.
+    await nextTick();
+    if (submitErrEl.value) submitErrEl.value.scrollIntoView({ block: "nearest" });
   }
 }
 
@@ -560,6 +571,10 @@ function resultIcon(r) {
   display: inline-grid;
   place-items: center;
   animation: spin 0.7s linear infinite;
+}
+.submit-err {
+  margin-top: 12px;
+  text-align: start;
 }
 .submit-hint {
   margin-top: 10px;
