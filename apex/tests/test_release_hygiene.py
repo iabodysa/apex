@@ -35,7 +35,7 @@ import unittest
 
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 REPO_ROOT = os.path.dirname(APP_ROOT)
-AR_CSV = os.path.join(APP_ROOT, "translations", "ar.csv")
+from apex.tests.source_tree import AR_CSV  # noqa: E402
 TRANSLATIONS_DIR = os.path.join(APP_ROOT, "translations")
 PATCHES_DIR = os.path.join(APP_ROOT, "patches")
 HOOKS_PY = os.path.join(APP_ROOT, "hooks.py")

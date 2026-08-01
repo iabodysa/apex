@@ -44,6 +44,8 @@ import subprocess
 import unittest
 from pathlib import Path
 
+from apex.tests.source_tree import CDN_HOSTS
+
 APP_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = APP_ROOT.parent
 PUBLIC_DIR = APP_ROOT / "public"
@@ -51,25 +53,6 @@ FRONTEND_DIR = REPO_ROOT / "frontend"
 
 # Built SPA output dirs, i.e. everything the vite factory writes with emptyOutDir.
 PORTAL_DIRS = sorted(p for p in PUBLIC_DIR.glob("*_portal") if p.is_dir())
-
-# Package/script CDNs and font CDNs. A bundle that needs one needs a vendored copy.
-CDN_HOSTS = (
-    "unpkg.com",
-    "unpkg.io",
-    "cdn.jsdelivr.net",
-    "jsdelivr.net",
-    "cdnjs.cloudflare.com",
-    "ajax.googleapis.com",
-    "code.jquery.com",
-    "stackpath.bootstrapcdn.com",
-    "maxcdn.bootstrapcdn.com",
-    "esm.sh",
-    "cdn.skypack.dev",
-    "fonts.googleapis.com",
-    "fonts.gstatic.com",
-    "use.typekit.net",
-    "fonts.bunny.net",
-)
 
 JINJA_HTML_DELIMS = ("{{", "}}", "{%", "%}", "{#", "#}")
 JINJA_STATEMENT_OPEN = "{%"
