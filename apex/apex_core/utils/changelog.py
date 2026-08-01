@@ -8,6 +8,12 @@ from frappe.utils import get_datetime
 # "What's New" popup and this bell feed now agree on the same 2.x floor.
 _RELEASES = [
     {
+        "title": "Apex 2.1.25 — Documentation update.",
+        "app_name": "apex",
+        "link": "/app",
+        "creation": "2026-08-01 21:19:15",
+    },
+    {
         "title": "Apex 2.1.24 — The setup wizard and the worker and driver link screens now read in Arabic instead of falling back to English.",
         "app_name": "apex",
         "link": "/app",
