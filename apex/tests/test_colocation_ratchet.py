@@ -47,9 +47,9 @@ A-197 closed the two ways that headroom could be BOUGHT rather than earned:
     now be the central file it names — if it drained it must be pruned, not
     re-resolved somewhere else — and no entry may name two homes at once.
 
-Genuinely app-wide guards (release hygiene, schema integrity, translation
-coverage, this file) have no single module to sit beside and stay central
-forever — they simply remain baseline entries that never drain. What is left is
+Genuinely app-wide guards (release hygiene, schema integrity, this file) have no
+single module to sit beside and stay central forever — they simply remain
+baseline entries that never drain. What is left is
 that set plus a handful of cross-module suites whose invariant spans two or more
 unrelated units, so no single directory is the honest home.
 
@@ -104,7 +104,6 @@ _BASELINE = frozenset(
         "test_schema_integrity.py",
         "test_sql_interpolation_guard.py",
         "test_submittable_controllers.py",
-        "test_translation_coverage.py",
         "test_unit_test_coverage_guard.py",
         "test_utils.py",
         "test_worker_party.py",
@@ -145,8 +144,8 @@ _CENTRAL_BY_NECESSITY = frozenset(
         # Ties the published workspace tables to the shipped workspace JSON; it sits
         # between docs/ and the app, and belongs to neither.
         "test_workspace_doc_parity.py",
-        # Scans every shipped DocType field description for a translation row.
-        "test_schema_description_translation.py",
+        # Scans every shipped DocType field description for a format placeholder.
+        "test_schema_description_placeholders.py",
         # [#a196c1] Reconciles every modules.txt line against every shipped record
         # and every module package at once; like the patches.txt guard above it
         # belongs to the root-level register, not to any one module. Admitted by
@@ -162,7 +161,8 @@ _CENTRAL_BY_NECESSITY = frozenset(
 # integer cannot be moved by padding. LOWER it in the same commit that drains an
 # entry — test_central_test_count_never_grows fails if it drifts above the sum.
 # 47 -> 46: test_repo_gates.py drained, it tested the toolbox, not the app.
-_CEILING = 46
+# 46 -> 45: test_translation_coverage.py drained, it graded the maintainer's policy.
+_CEILING = 45
 
 
 def _central_tests():

@@ -1451,7 +1451,6 @@ Expiring Vehicle Compliance,وثائق امتثال المركبات التي ت
 Expiry Date,تاريخ الانتهاء
 Expiry Date must be after the Issue Date.,يجب أن يكون تاريخ الانتهاء بعد تاريخ الإصدار.
 Export,تصدير
-Exported {0} vehicles,تمّ تصدير {0} مركبة
 Exterior,خارجي
 External Area,منطقة خارجية
 External Reference,مرجع خارجي
@@ -4554,3 +4553,45 @@ Removed {0} demo records.,أُزيل {0} سجلًا تجريبيًا.
 Removed {0} demo records. {1} could not be removed and are listed below. The demo users are kept so you can run this again once they are cleared.,أُزيل {0} سجلًا تجريبيًا. تعذّرت إزالة {1} وهي مذكورة أدناه. أُبقي على المستخدمين التجريبيين لتتمكّن من إعادة التشغيل بعد معالجتها.
 This site has no Apex demo data to remove.,لا توجد بيانات تجريبية لـ Apex في هذا الموقع لإزالتها.
 {0} is not a demo DocType; the demo removal would never clear it.,{0} ليس نوع مستند تجريبي، فإزالة البيانات التجريبية لن تمسحه أبدًا.
+Accounting,المحاسبة
+Anyone holding this link can view this worker's Masar app. Regenerate to revoke.,أي شخص يملك هذا الرابط يستطيع فتح تطبيق مسار لهذا العامل. أعد التوليد لإلغائه.
+Apex — Company and Accounting Defaults,أبيكس — الشركة والإعدادات المحاسبية الافتراضية
+Apex — Notifications and Operations,أبيكس — التنبيهات والتشغيل
+Apex — Salary Deductions,أبيكس — الخصومات من الراتب
+Copy link,نسخ الرابط
+Create demo data to explore Apex?,إنشاء بيانات تجريبية لاستكشاف أبيكس؟
+Deduct housing allowance from salary?,خصم بدل السكن من الراتب؟
+Default Payment Method,طريقة الدفع الافتراضية
+Default company for Habitat and Salis documents. Leave blank to set it per-module later.,الشركة الافتراضية لمستندات هابيتات وساليس. اتركه فارغًا لضبطه لكل وحدة لاحقًا.
+Default cost center for Salis fleet cost postings. Leave blank to set it later.,مركز التكلفة الافتراضي لترحيل تكاليف أسطول ساليس. اتركه فارغًا لضبطه لاحقًا.
+Demo Data,البيانات التجريبية
+Driver Portal Link,رابط بوابة السائق
+Enable approval routing for fleet transactions?,تفعيل توجيه الاعتماد لحركات الأسطول؟
+Enable email notifications?,تفعيل تنبيهات البريد الإلكتروني؟
+Enable operational notifications?,تفعيل التنبيهات التشغيلية؟
+Enable the driver self-service portal?,تفعيل بوابة الخدمة الذاتية للسائق؟
+Expires on {0},تنتهي صلاحيته في {0}
+Fleet Operations,تشغيل الأسطول
+Here is your personal Masar link: {0},هذا رابطك الشخصي في مسار: {0}
+Here is your personal driver link: {0},هذا رابطك الشخصي كسائق: {0}
+Link copied.,نُسخ الرابط.
+Masar Worker Link,رابط عامل مسار
+"Off by default — builds one sample accommodation site with rooms, beds, a resident and an open maintenance request. You can remove all of it later from Apex Settings.",معطّل افتراضيًا — ينشئ موقع سكن نموذجيًا واحدًا يحتوي على غرف وأسرّة ومقيم وطلب صيانة مفتوح. يمكنك إزالتها جميعًا لاحقًا من إعدادات أبيكس.
+Off by default — let drivers access the Salis self-service portal.,معطّل افتراضيًا — يسمح للسائقين بالدخول إلى بوابة الخدمة الذاتية في ساليس.
+Off by default — no automatic housing-allowance deduction. Requires legal/HR review.,معطّل افتراضيًا — لا خصم تلقائي لبدل السكن. يتطلّب مراجعة قانونية وموارد بشرية.
+"Off by default — operational memo only, no GL entries until you enable it.",معطّل افتراضيًا — مذكّرة تشغيلية فقط، بلا قيود في الأستاذ العام حتى تفعّله.
+Off by default — post expiry and overdue reminders as timeline comments on the source document.,معطّل افتراضيًا — ينشر تذكيرات الانتهاء والتأخّر كتعليقات في مسار المستند المصدر.
+Off by default — turn on only after the site's outgoing email (SMTP) is configured.,معطّل افتراضيًا — فعّله بعد ضبط البريد الصادر (SMTP) للموقع فقط.
+Off by default. Requires legal/HR review.,معطّل افتراضيًا. يتطلّب مراجعة قانونية وموارد بشرية.
+"On by default — route Salis assignments, transfers, and fuel requests through approval gates.",مفعّل افتراضيًا — يمرّر إسنادات ساليس والتحويلات وطلبات الوقود عبر بوابات الاعتماد.
+Payment Routing,توجيه المدفوعات
+Post accommodation and fleet costs to the General Ledger?,ترحيل تكاليف السكن والأسطول إلى الأستاذ العام؟
+Post custody-damage deductions to salary?,ترحيل خصومات تلف العهدة على الراتب؟
+QR rendering is unavailable on this site; share the link below.,تعذّر إنشاء رمز الاستجابة السريعة في هذا الموقع؛ شارك الرابط أدناه.
+Salary Deductions,الخصومات من الراتب
+Salary deductions are OFF by default and require legal/HR review before activation. You can configure them later in the Salary Deduction Policy.,الخصومات من الراتب معطّلة افتراضيًا وتتطلّب مراجعة قانونية وموارد بشرية قبل التفعيل. يمكنك ضبطها لاحقًا في سياسة الخصم من الراتب.
+Send via WhatsApp,الإرسال عبر واتساب
+"Set the default company, cost center, and payment routing Apex uses for Habitat and Salis. You can change all of these later in Habitat Settings, Salis Settings, and Payment Routing Settings.",اضبط الشركة ومركز التكلفة وتوجيه المدفوعات التي يستخدمها أبيكس لهابيتات وساليس. يمكنك تغييرها جميعًا لاحقًا في إعدادات هابيتات وإعدادات ساليس وإعدادات توجيه المدفوعات.
+The payment document the Pay action builds (sets the Payment Routing target). Leave blank to use the native Payment Request.,مستند الدفع الذي يبنيه إجراء الدفع (يضبط هدف توجيه المدفوعات). اتركه فارغًا لاستخدام طلب الدفع الأصلي.
+This barcode signs the driver in with no password. Anyone holding it enters as this driver until it expires or is revoked.,هذا الرمز يسجّل دخول السائق بلا كلمة مرور. أي شخص يملكه يدخل بصفته هذا السائق حتى تنتهي صلاحيته أو يُلغى.
+"Turn on email and operational notifications, the driver self-service portal, and approval routing. All of these can be changed later in Habitat Settings and Salis Settings.",فعّل تنبيهات البريد والتنبيهات التشغيلية وبوابة الخدمة الذاتية للسائق وتوجيه الاعتماد. يمكن تغييرها جميعًا لاحقًا في إعدادات هابيتات وإعدادات ساليس.
