@@ -213,6 +213,7 @@ const messages = {
       noTime: "—",
       photo: "Shift photo",
       photoAttached: "Photo attached",
+      photoType: "The photo must be a JPEG, PNG, or WebP image.",
     },
     trips: {
       title: "My Trips Today",
@@ -323,6 +324,7 @@ const messages = {
       attachment: "Photo",
       addPhoto: "Add a photo",
       photoAttached: "Photo attached",
+      photoType: "The photo must be a JPEG, PNG, or WebP image.",
       open: "Open ticket",
       detail: "Ticket",
       sla: "Service level",
@@ -560,6 +562,7 @@ const messages = {
       noTime: "—",
       photo: "صورة الوردية",
       photoAttached: "تم إرفاق الصورة",
+      photoType: "يجب أن تكون الصورة بصيغة JPEG أو PNG أو WebP.",
     },
     trips: {
       title: "رحلاتي اليوم",
@@ -670,6 +673,7 @@ const messages = {
       attachment: "صورة",
       addPhoto: "إضافة صورة",
       photoAttached: "تم إرفاق الصورة",
+      photoType: "يجب أن تكون الصورة بصيغة JPEG أو PNG أو WebP.",
       open: "فتح التذكرة",
       detail: "التذكرة",
       sla: "مستوى الخدمة",

@@ -41,7 +41,7 @@
           <div class="of-line">{{ ofLabel }}</div>
           <div class="trip-status">
             <span class="dot" :class="'st-' + (data.status || '').toLowerCase()" />
-            {{ t("boarding.tripStatus") }}: {{ data.status || t("common.none") }}
+            {{ t("boarding.tripStatus") }}: {{ tripStatusLabel }}
           </div>
           <p v-if="!data.boarding.has_manifest" class="hint">{{ t("boarding.noManifest") }}</p>
         </div>
@@ -93,6 +93,16 @@ const ofLabel = computed(() =>
     ? t("boarding.of", { boarded: data.value.boarding.boarded, expected: data.value.boarding.expected })
     : "",
 );
+// Dispatch Trip's stored Select value is English; an Arabic page must not print it
+// raw. A status the dictionary does not carry falls back to the value itself, never
+// to a visible key path.
+const tripStatusLabel = computed(() => {
+  const s = data.value && data.value.status;
+  if (!s) return t("common.none");
+  const key = "tripStatus." + s;
+  const label = t(key);
+  return label === key ? s : label;
+});
 const ringStyle = computed(() => {
   const p = data.value ? pct(data.value.boarding.boarded, data.value.boarding.expected) : 0;
   return { "--p": p + "%" };

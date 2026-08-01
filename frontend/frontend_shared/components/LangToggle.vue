@@ -1,6 +1,7 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Language selector: EN | ع. Flips the active portal language (and, via App.vue,
-     the document direction). Token-driven segmented control; works on any theme.
+<!-- Language selector: a two-option segmented control whose labels come from the
+     portal dictionary (`lang.en` / `lang.ar`). Flips the active portal language
+     (and, via App.vue, the document direction). Token-driven; works on any theme.
 
      Shared by the driver, housing and safety portals via
      @shared/components/LangToggle.vue. `useI18n` resolves through the `@` alias to

@@ -122,12 +122,13 @@
           <input
             id="ticket-photo"
             type="file"
-            accept="image/*"
+            :accept="PHOTO_ACCEPT"
             capture="environment"
             class="input"
             @change="onPhoto"
           />
-          <p v-if="photoName" class="mt-1 text-xs text-success">{{ t("tickets.photoAttached") }}: {{ photoName }}</p>
+          <p v-if="photoError" class="mt-1 text-xs text-danger">{{ photoError }}</p>
+          <p v-else-if="photoName" class="mt-1 text-xs text-success">{{ t("tickets.photoAttached") }}: {{ photoName }}</p>
         </div>
 
         <button class="btn btn-primary" :disabled="create.loading || uploading || !form.subject" @click="submit">
@@ -178,7 +179,8 @@ import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
 import { useI18n, ISSUE_CATEGORIES, ISSUE_PRIORITIES } from "../i18n";
 import { pushToast } from "../toast";
-import { readPhotoFile } from "../upload";
+import { readPhotoFile, UnsupportedPhotoType } from "../upload";
+import { PHOTO_ACCEPT } from "@shared/photoFile.js";
 import { isCurrentTicketRequest, mergeCommunicationPages } from "../ticketPagination";
 
 const { t, te } = useI18n();
@@ -192,6 +194,7 @@ const form = reactive({ category: "Vehicle", priority: "Medium", subject: "", de
 // Inline photo payload for the existing credential-scoped ticket POST.
 const photo = ref({ photo: null, photo_filename: null });
 const photoName = ref("");
+const photoError = ref("");
 const uploading = ref(false);
 
 const list = createResource({
@@ -205,6 +208,7 @@ const create = createResource({
     form.description = "";
     photo.value = { photo: null, photo_filename: null };
     photoName.value = "";
+    photoError.value = "";
     err.value = "";
     list.reload();
   },
@@ -214,13 +218,21 @@ const create = createResource({
 // Read the chosen image locally; the ticket POST creates its private attachment.
 async function onPhoto(e) {
   const file = e.target.files && e.target.files[0];
+  // Reset the input so re-picking the same file re-fires change after a refusal.
+  e.target.value = "";
   if (!file) return;
   uploading.value = true;
+  photoError.value = "";
   try {
     photo.value = await readPhotoFile(file);
     photoName.value = photo.value.photo ? file.name : "";
-  } catch (_e) {
-    pushToast(t("common.error"), "err");
+  } catch (err_) {
+    photo.value = { photo: null, photo_filename: null };
+    photoName.value = "";
+    // Name the accepted formats rather than a generic failure.
+    photoError.value =
+      err_ instanceof UnsupportedPhotoType ? t("tickets.photoType") : t("common.error");
+    pushToast(photoError.value, "err");
   } finally {
     uploading.value = false;
   }

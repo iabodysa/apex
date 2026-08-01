@@ -52,13 +52,14 @@
         <input
           id="att-photo"
           type="file"
-          accept="image/*"
+          :accept="PHOTO_ACCEPT"
           capture="environment"
           class="input"
           :disabled="loading || uploading"
           @change="onPhoto"
         />
         <p v-if="uploading" class="mt-1 text-xs text-muted">{{ t("common.loading") }}</p>
+        <p v-else-if="photoError" class="mt-1 text-xs text-danger">{{ photoError }}</p>
         <p v-else-if="photoName" class="mt-1 text-xs text-success">
           {{ t("attendance.photoAttached") }}: {{ photoName }}
         </p>
@@ -122,7 +123,8 @@ import Skeleton from "../components/Skeleton.vue";
 import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
 import { pushToast } from "../toast";
-import { readPhotoFile } from "../upload";
+import { readPhotoFile, UnsupportedPhotoType } from "../upload";
+import { PHOTO_ACCEPT } from "@shared/photoFile.js";
 
 const { t, fmtTime } = useI18n();
 
@@ -133,17 +135,26 @@ const loading = ref(false);
 // Optional shift photo included in the next credential-scoped attendance POST.
 const photo = ref({ photo: null, photo_filename: null });
 const photoName = ref("");
+const photoError = ref("");
 const uploading = ref(false);
 
 async function onPhoto(e) {
   const file = e.target.files && e.target.files[0];
+  // Reset the input so re-picking the same file re-fires change after a refusal.
+  e.target.value = "";
   if (!file) return;
   uploading.value = true;
+  photoError.value = "";
   try {
     photo.value = await readPhotoFile(file);
     photoName.value = photo.value.photo ? file.name : "";
-  } catch (_e) {
-    pushToast(t("common.error"), "err");
+  } catch (err) {
+    clearPhoto();
+    // Name the accepted formats: the operator can only act on a refusal that says
+    // what to pick instead.
+    photoError.value =
+      err instanceof UnsupportedPhotoType ? t("attendance.photoType") : t("common.error");
+    pushToast(photoError.value, "err");
   } finally {
     uploading.value = false;
   }
@@ -152,6 +163,7 @@ async function onPhoto(e) {
 function clearPhoto() {
   photo.value = { photo: null, photo_filename: null };
   photoName.value = "";
+  photoError.value = "";
 }
 
 // Single reactive source of truth for today's attendance. Seeded by the

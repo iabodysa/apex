@@ -1,0 +1,1 @@
+const o="image/jpeg,image/png,image/webp",s=[".jpg",".jpeg",".png",".webp"],a=["image/jpeg","image/png","image/webp"];function p(e){if(!e)return!1;const t=String(e.name||"").toLowerCase();if(!s.some(g=>t.endsWith(g)))return!1;const n=String(e.type||"").toLowerCase();return!n||a.includes(n)}export{o as P,p as i};

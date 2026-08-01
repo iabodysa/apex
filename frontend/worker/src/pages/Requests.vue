@@ -81,7 +81,7 @@
             {{ photo.dataUrl ? t("requests.photoChange") : t("requests.photoAdd") }}
             <input
               type="file"
-              accept="image/*"
+              :accept="PHOTO_ACCEPT"
               class="photo-input"
               @change="onPhoto"
             />
@@ -161,6 +161,7 @@ import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { TOKEN } from "../utils/token";
+import { PHOTO_ACCEPT, isAcceptedPhoto } from "@shared/photoFile.js";
 
 const { t, tEnum } = useI18n();
 
@@ -193,6 +194,13 @@ function onPhoto(e) {
   // reset the input so re-picking the same file re-fires change
   e.target.value = "";
   if (!file) return;
+  // `accept` is only a picker hint; refuse here so the operator is told WHICH
+  // formats the endpoint takes instead of getting a server refusal after upload.
+  if (!isAcceptedPhoto(file)) {
+    clearPhoto();
+    err.value = t("requests.photoType");
+    return;
+  }
   if (file.size > PHOTO_MAX_BYTES) {
     clearPhoto();
     err.value = t("requests.photoTooLarge");

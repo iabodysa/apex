@@ -114,6 +114,11 @@
             <div class="due-intro">
               <h2 class="section-title">{{ t("due.title") }}</h2>
               <p class="due-sub">{{ t("due.subtitle") }}</p>
+              <!-- Always rendered, never conditional: a note that appears on the first
+                   tap would reflow the list under the thumb that just tapped it. -->
+              <p class="draft-note">
+                <Icon name="shield" :size="13" /> {{ t("due.draftKept") }}
+              </p>
             </div>
 
             <CadenceSection
@@ -171,6 +176,7 @@ import BuildingPicker from "@shared/components/BuildingPicker.vue";
 import CadenceSection from "./components/CadenceSection.vue";
 import { useI18n, resourceErrorMessage } from "./i18n";
 import { connectSafetyRealtime } from "./realtime.js";
+import { makeCache } from "@shared/makeCache.js";
 
 const { t, tEnum, dir } = useI18n();
 
@@ -200,6 +206,31 @@ const submitErrEl = ref(null);
 
 // ratings: { [cadence]: { [taskName]: { verdict, notes } } }
 const ratings = reactive({});
+
+// A round can run to 53 taps before the single submit, and every tap paints as
+// "saved" (row fill, status badge, progress ring). Keep the staged verdicts in
+// local storage, keyed by building + round date, so a reload or a crash mid-round
+// does not silently discard them. Cleared the moment the round is submitted or
+// abandoned; a new day's key never resurrects yesterday's draft.
+const { cacheSet, cacheGet } = makeCache("apex_safety_draft_");
+const draftKey = () => building.value + "|" + today();
+
+function writeDraft() {
+  if (building.value) cacheSet(draftKey(), ratings);
+}
+function clearRatings() {
+  for (const k of Object.keys(ratings)) delete ratings[k];
+}
+function dropDraft() {
+  if (building.value) cacheSet(draftKey(), {});
+}
+function restoreDraft() {
+  const saved = cacheGet(draftKey());
+  if (!saved || !saved.data) return;
+  for (const [cadence, tasks] of Object.entries(saved.data)) {
+    if (tasks && typeof tasks === "object") ratings[cadence] = { ...tasks };
+  }
+}
 
 // ---- due cadences resource (the contract's get_due_cadences) -----------
 const dueRes = createResource({
@@ -247,16 +278,19 @@ function onBuildingSelected(name, label) {
   buildingLabel.value = label || name;
   submitted.value = null;
   submitError.value = "";
-  for (const k of Object.keys(ratings)) delete ratings[k];
+  clearRatings();
+  restoreDraft();
   dueRes.fetch();
 }
 
 function changeBuilding() {
+  // The draft stays on disk: switching buildings is navigation, not "discard my
+  // round", so coming back to this building restores what was already rated.
   building.value = "";
   buildingLabel.value = "";
   submitted.value = null;
   submitError.value = "";
-  for (const k of Object.keys(ratings)) delete ratings[k];
+  clearRatings();
 }
 
 function resetAll() {
@@ -264,7 +298,8 @@ function resetAll() {
   const b = building.value;
   submitted.value = null;
   submitError.value = "";
-  for (const k of Object.keys(ratings)) delete ratings[k];
+  dropDraft();
+  clearRatings();
   if (b) dueRes.fetch();
 }
 
@@ -272,12 +307,14 @@ function onRate(cadence, taskName, verdict) {
   if (!ratings[cadence]) ratings[cadence] = {};
   const cur = ratings[cadence][taskName] || { verdict: "", notes: "" };
   ratings[cadence][taskName] = { ...cur, verdict };
+  writeDraft();
 }
 
 function onNote(cadence, taskName, notes) {
   if (!ratings[cadence]) ratings[cadence] = {};
   const cur = ratings[cadence][taskName] || { verdict: "", notes: "" };
   ratings[cadence][taskName] = { ...cur, notes };
+  writeDraft();
 }
 
 function buildResults() {
@@ -334,6 +371,8 @@ async function doSubmit() {
       results: JSON.stringify(results),
     });
     submitted.value = res || submitRes.data || { ok: true, rounds: [], emailed: false };
+    // The round is on the server now; the staged copy would only resurrect it.
+    dropDraft();
   } catch (e) {
     const blocked = evidenceBlockedTask(results);
     submitError.value = blocked
@@ -537,6 +576,15 @@ function resultIcon(r) {
   margin-top: 4px;
   font-size: var(--fs-sm);
   color: var(--c-muted);
+}
+.draft-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--c-success);
 }
 
 /* ---- submit dock ----------------------------------------------------- */

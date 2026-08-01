@@ -10,6 +10,9 @@
    (www/driver.html + www/masar.html -> /assets/apex/vendor/montserrat-v31/), whose
    vendored variable face spans 400-800, so this bundle must never reach a font CDN. */
 
+/* Compiled by worker/tailwind.config.js, not a config beside this file: driver/ is
+   not a Vite root, its screens build INTO worker_portal, and that config's `content`
+   globs scan ../driver/src/** so nothing here is purged. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -37,15 +37,17 @@
       </div>
     </div>
 
-    <!-- Loading -->
-    <div v-else-if="ctx.loading" class="flex-1 grid place-items-center p-8">
+    <!-- Loading. `&& !worker` is load-bearing: createResource sets loading on EVERY
+         fetch, so a bare v-if unmounted the whole routed subtree on each 45s poll
+         tick and a half-typed form lost its local state. -->
+    <div v-else-if="ctx.loading && !worker" class="flex-1 grid place-items-center p-8">
       <div class="text-center">
         <div class="spinner mx-auto"></div>
         <p class="mt-3 text-sm text-muted">{{ t("common.loading") }}</p>
       </div>
     </div>
 
-    <!-- Resolved worker (مسار): shared Mobile-console archetype — sticky dark
+    <!-- Resolved worker (Masar): shared Mobile-console archetype — sticky dark
          header, single scrolling card column, sticky ≥52px bottom nav. -->
     <template v-else-if="worker">
       <MobileConsoleShell :title="workerName" :subtitle="greeting" :max-width="480">
@@ -113,7 +115,7 @@ import { TOKEN, hasToken } from "./utils/token";
 import { updateReady, applyUpdate, initPwaUpdates } from "./pwa";
 import { usePoll } from "@shared/usePoll.js";
 
-const { t, dir } = useI18n();
+const { t, dir, lang } = useI18n();
 
 // Server-driven enum labels (DocType Select options + ar.csv), fetched once and
 // registered into i18n so tEnum localizes without a hand-maintained JS map.
@@ -126,11 +128,16 @@ const enumLabels = createResource({
   onSuccess: (data) => setEnumLabels("ar", data),
 });
 
+// This portal offers five languages, so <html lang> must carry the CHOSEN one, not
+// ar/en derived from direction: it is what a screen reader announces and what
+// @shared/call reads to stamp `_lang` on every request, so a Hindi page asking for
+// English refusals was the same bug in two places. Watch `lang`, since ar -> ur
+// leaves `dir` unchanged and a dir-keyed watcher would never fire.
 watch(
-  dir,
-  (d) => {
-    document.documentElement.setAttribute("dir", d);
-    document.documentElement.setAttribute("lang", d === "rtl" ? "ar" : "en");
+  lang,
+  (l) => {
+    document.documentElement.setAttribute("dir", dir.value);
+    document.documentElement.setAttribute("lang", l);
   },
   { immediate: true },
 );

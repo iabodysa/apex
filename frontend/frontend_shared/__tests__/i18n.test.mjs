@@ -13,11 +13,14 @@ const messages = {
       sessionExpired: "Your session expired. Please refresh the page.",
     },
   },
+  // Marker strings, not real copy: this suite grades WHICH dictionary entry wins,
+  // and product Arabic lives in apex/translations/ar.csv and the portal
+  // dictionaries only.
   ar: {
     errors: {
-      loadError: "تعذّر تحميل هذا القسم.",
-      rateLimited: "طلبات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.",
-      sessionExpired: "انتهت صلاحية الجلسة. يرجى تحديث الصفحة.",
+      loadError: "[ar] load error",
+      rateLimited: "[ar] rate limited",
+      sessionExpired: "[ar] session expired",
     },
   },
 };
@@ -49,7 +52,7 @@ describe("resourceErrorMessage", () => {
       // arrives in the WRONG language for this portal — the fallback must win.
       const e = frappeError({
         excType: "ValidationError",
-        serverMessage: locale === "ar" ? "Vehicle already has a driver" : "المركبة لديها سائق",
+        serverMessage: locale === "ar" ? "Vehicle already has a driver" : "[ar] vehicle has a driver",
       });
       const msg = i18n.resourceErrorMessage(e, "errors.loadError");
       expect(msg).toBe(expected);

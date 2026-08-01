@@ -30,12 +30,21 @@ import { useEmployee } from "./useEmployee.js";
 
 const { t, lang, dir } = useI18n();
 
-// Keep <html dir/lang> in sync so native RTL applies page-wide.
+// Keep <html dir/lang> in sync so native RTL applies page-wide, and take the tab
+// title from the dictionary rather than a literal in the entry HTML — the shells
+// both render an English source string, and this is what makes it follow the toggle.
 watch(
   dir,
   (d) => {
     document.documentElement.setAttribute("dir", d);
     document.documentElement.setAttribute("lang", d === "rtl" ? "ar" : "en");
+  },
+  { immediate: true },
+);
+watch(
+  lang,
+  () => {
+    document.title = t("emp.brand") + " — " + t("emp.brandSub");
   },
   { immediate: true },
 );

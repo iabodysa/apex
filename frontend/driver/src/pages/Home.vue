@@ -234,6 +234,11 @@ const licenseBanner = computed(() => {
 
 // The full action grid, demoted under "More". Fuel/Support live under Profile >
 // My Requests; not duplicated here.
+//
+// Every tile holds ONE identity in both modes. --c-ink and --c-surface invert
+// between light and dark, so a tile painted with either swapped between near-black
+// and near-white by mode; the chrome pair (--c-header-bg / --c-header-ink) is dark-on-
+// light in both, which is what a fixed identity needs.
 const actions = [
   {
     to: "/attendance",
@@ -245,13 +250,13 @@ const actions = [
     to: "/trips",
     icon: "route",
     labelKey: "home.myTrips",
-    style: "background: var(--c-ink); color: var(--c-surface);",
+    style: "background: var(--c-header-bg); color: var(--c-header-ink);",
   },
   {
     to: "/route",
     icon: "route",
     labelKey: "home.myRoute",
-    style: "background: var(--c-mint); color: var(--c-ink);",
+    style: "background: var(--c-mint); color: var(--c-header-bg);",
   },
   {
     to: "/vehicle",

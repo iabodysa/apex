@@ -4,8 +4,8 @@
 // The backend (salis/api/masar.py) sends bare strings: dates as "YYYY-MM-DD",
 // clock times as "HH:MM:SS", and datetimes as "YYYY-MM-DD HH:MM:SS". We render
 // them with the native Intl.DateTimeFormat so an Arabic worker sees a localized
-// month and 12-hour time (e.g. "20 يونيو 2026" / "6:00 ص") and an English one
-// the equivalent ("20 Jun 2026" / "6:00 AM").
+// month and 12-hour time and an English one the equivalent ("20 Jun 2026" /
+// "6:00 AM"); the localized forms come from Intl, never from a literal here.
 //
 // Reactivity: these helpers read `lang.value` (the same reactive ref t() uses),
 // so a render that calls them re-runs when the user toggles the language.
@@ -58,21 +58,21 @@ function parse(value) {
 const DATE_OPTS = { day: "numeric", month: "short", year: "numeric" };
 const TIME_OPTS = { hour: "numeric", minute: "2-digit", hour12: true };
 
-// Localized date, e.g. "20 يونيو 2026" / "20 Jun 2026". "" for null/empty.
+// Localized date, e.g. "20 Jun 2026" under en. "" for null/empty.
 export function formatDate(value) {
   const d = parse(value);
   if (!d) return "";
   return new Intl.DateTimeFormat(localeFor(lang.value), DATE_OPTS).format(d);
 }
 
-// Localized 12-hour time, e.g. "6:00 ص" / "6:00 AM". "" for null/empty.
+// Localized 12-hour time, e.g. "6:00 AM" under en. "" for null/empty.
 export function formatTime(value) {
   const d = parse(value);
   if (!d) return "";
   return new Intl.DateTimeFormat(localeFor(lang.value), TIME_OPTS).format(d);
 }
 
-// Localized date + 12-hour time, e.g. "20 يونيو 2026، 6:00 ص". "" for null/empty.
+// Localized date + 12-hour time, e.g. "20 Jun 2026, 6:00 AM" under en. "" for null/empty.
 export function formatDateTime(value) {
   const d = parse(value);
   if (!d) return "";

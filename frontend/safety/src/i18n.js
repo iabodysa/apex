@@ -45,6 +45,7 @@ const messages = {
     due: {
       title: "Due today",
       subtitle: "Tap each task to mark it, then submit.",
+      draftKept: "Your marks are kept on this device until you submit.",
       rated: "rated",
       of: "of",
       tasksDone: "{done} / {total}",
@@ -147,6 +148,7 @@ const messages = {
     due: {
       title: "المستحق اليوم",
       subtitle: "اضغط على كل مهمة لتقييمها ثم أرسل.",
+      draftKept: "تُحفظ تقييماتك على هذا الجهاز حتى تقوم بالإرسال.",
       rated: "مُقيَّم",
       of: "من",
       tasksDone: "{done} / {total}",

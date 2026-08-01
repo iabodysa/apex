@@ -54,6 +54,73 @@ for holder_type Worker and `/driver` for holder_type Driver.
 | `makeCache.js` | Shared offline/data cache factory. |
 | `components/` | Shared presentational `.vue` components imported via `@shared/components/*` (e.g. `Brand.vue` — the AFMCO inline-SVG emblem/supergraphic, self-contained, token-driven), the two header controls (`LangToggle`, `ThemeToggle`) and the three page shells (`FleetPageShell`, `MobileConsoleShell`, `TabletSupervisorShell`). |
 | `tokens.css` | Shared design tokens (CSS custom properties) — the one Growth-Green source, plus the single `:focus-visible` ring and the `prefers-reduced-motion` duration collapse. |
+| `photoFile.js` | The client half of the photo contract: the accepted set (JPEG/PNG/WebP) written once, so the three pickers in two portals cannot drift from the server's byte check in `apex/salis/api/driver_portal/images.py`. |
+
+## Arabic has one home, and the dictionaries are a declared exception
+
+`apex/translations/ar.csv` is the **only** home for Arabic in the tracked tree. No
+label, Select option, `_()` source string, workspace name, comment, test fixture,
+entry-HTML `<title>` or doc line carries an Arabic literal.
+
+The **one declared exception** is the portal dictionaries — `frontend/*/src/i18n.js`
+— and it is **time-boxed, not a second home**: they stay only until they are
+GENERATED from `ar.csv` at build time. They exist because these portals ship
+deliberately WITHOUT Frappe's JS bundle so they run offline, and `window.__` reads
+`frappe._messages`, which arrives with that bundle. So the runtime lookup has to be
+local; the source string does not. Until the generator lands, an Arabic string added
+to a dictionary must be **verbatim from `ar.csv`** — copy the value, do not compose a
+new one.
+
+Sweep (run from the repo root; needs `rg`):
+
+```bash
+git ls-files -z | xargs -0 rg -l '[\x{0600}-\x{06FF}]' \
+  | grep -v '^apex/public/' \
+  | grep -v 'apex/translations/ar.csv' \
+  | grep -v 'src/i18n.js$' \
+  | grep -v 'frontend/worker/public/'
+```
+
+The four exclusions are the generated bundles, the one home, the declared exception,
+and binary assets (a `.woff2` carries Arabic glyph data, a `.png` its icon text).
+What the sweep is allowed to return is **the print templates and nothing else**: ten
+bilingual sheets (`apex/{habitat,salis}/print_format/*/*.html`, 138 Arabic lines).
+Accepted, not deferred — each prints English and Arabic side by side in its own
+markup, so `default_print_language: "en"` is load-bearing there, and
+`apex/habitat/print_format/test_print_format_language_pinning.py` fails the build if
+a template's Arabic and its pin disagree. Three `test_*.py` files also match: their
+only hit is the literal Unicode RANGE (U+0600-U+06FF) inside the scanners' own
+regex — the guard's alphabet, not content. Write ranges escaped, never as literal
+characters, or the rule text trips its own sweep.
+
+## Tailwind is opt-in per BUILD UNIT
+
+| Build unit (has `vite.config.js`) | `tailwind.config.js` | emits `@tailwind` |
+| --- | --- | --- |
+| `housing` `safety` `worker` | yes | yes |
+| `fleet` `fleet_os` `route_supervisor` | no | no |
+
+Both greps return the same set:
+
+```bash
+ls frontend/*/tailwind.config.js                         # housing safety worker
+rg -l '@tailwind|@apply' frontend/*/src/**.css           # driver housing safety worker
+```
+
+`driver/` is the one name that appears in the second list and not the first, and that
+is correct rather than drift: `driver/` is **not a build unit** — it has no
+`package.json`, `vite.config.js` or output dir, and its screens are compiled INTO
+`worker_portal` (see the layout above). `worker/tailwind.config.js` therefore owns
+driver's CSS, and its `content` globs scan `../driver/src/**` so driver-only utility
+classes are not purged. A `driver/tailwind.config.js` would never be read, because
+Tailwind resolves its config from the Vite root, which is always `worker/`.
+
+Why Tailwind stays rather than being removed everywhere: the four consumers use
+utility classes throughout their templates, so removing it is a rewrite of four
+portals' markup, not a config change. Why it is not added to the other three: they
+carry hand-written CSS and reference no utility class, so a config there would ship
+dead CSS. `tailwindcss` / `postcss` / `autoprefixer` stay in `frontend/package.json`
+(the one manifest) because three build units use them.
 
 ### The token layer is the whole appearance contract
 

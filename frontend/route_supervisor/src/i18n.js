@@ -83,6 +83,14 @@ const messages = {
       "Driver Rejected": "Rejected",
       Absent: "Absent",
     },
+    // Keyed by Dispatch Trip's stored Select values, so the boarding line never
+    // prints a raw enum inside a translated sentence.
+    tripStatus: {
+      Planned: "Planned",
+      Dispatched: "Dispatched",
+      Completed: "Completed",
+      Cancelled: "Cancelled",
+    },
     route: {
       title: "Route stops",
       subtitle: "The ordered stops of the plan",
@@ -187,6 +195,14 @@ const messages = {
       Pending: "بالانتظار",
       "Driver Rejected": "مرفوض",
       Absent: "غائب",
+    },
+    // Verbatim from apex/translations/ar.csv (the eventual generator source), so
+    // the mirror cannot drift from the translation layer.
+    tripStatus: {
+      Planned: "مخطط",
+      Dispatched: "تم التشغيل",
+      Completed: "مكتمل",
+      Cancelled: "مُلغى",
     },
     route: {
       title: "محطات المسار",

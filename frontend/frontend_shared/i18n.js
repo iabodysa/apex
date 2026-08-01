@@ -70,11 +70,12 @@ export function createI18n({
   const dir = computed(() => (rtlLangs.includes(lang.value) ? "rtl" : "ltr"));
 
   // Map a frappe-ui resource error to a short line in the language the user picked.
-  // The server sentence is deliberately never rendered: frappe.throw(_("…")) resolves
-  // against frappe.local.lang (site/User language), not this portal's toggle, so it can
-  // arrive in a language the user never chose — worker alone offers five. It also
-  // carries the request URL and the exception class in e.message. Localizing at source
-  // is the backend half of this fix and is deferred, so every path ends in translate().
+  // The server sentence is still never rendered HERE. @shared/call now stamps `_lang`
+  // on every request, so frappe.throw(_("…")) does resolve against the page's language
+  // — but only for the locales ar.csv covers, while worker offers five, and e.message
+  // still carries the request URL and the exception class. A portal that genuinely
+  // wants the server's own sentence reads e.messages[0] itself (fleet does); this
+  // helper is the safe default, so every path ends in translate().
   function resourceErrorMessage(e, fallbackKey = "errors.loadError") {
     if (!e) return translate(fallbackKey);
     const status = e.response?.status;
