@@ -13,6 +13,8 @@ never supplies a driver id. These route reads feed the worker view inside the
 existing /driver portal and have no GL or write side effects.
 """
 
+import os
+
 import frappe
 from frappe import _
 
@@ -476,7 +478,15 @@ WORKER_ISSUE_LOCATIONS = (
 WORKER_PREFERRED_LANGUAGES = ("English", "Arabic", "Urdu", "Hindi", "Bengali")
 
 # [#1kncdr]
-WORKER_PHOTO_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".heic", ".heif")
+# Keyed by the content type the bytes are PROVEN to carry, so the stored extension is
+# derived from the image rather than trusted from the caller's filename. The set is the
+# one the shared verifier can actually open; a container it cannot read is refused, not
+# renamed. GIF/HEIC were listed here before and were never verified.
+WORKER_PHOTO_EXTENSIONS = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+}
 WORKER_PHOTO_MAX_BYTES = 8 * 1024 * 1024
 
 
@@ -1191,30 +1201,34 @@ def get_worker_custody(token=None):
 def _attach_worker_photo(doc, photo, photo_filename):
     """Attach a guest-supplied request photo to ``doc`` and set ``doc.attachment``.
 
-    The image rides in as a base64 string (optionally a ``data:`` URI) on the same
-    token-scoped POST that created the request — there is NO separate guest upload
-    surface to harden. We validate the extension and decoded size ourselves, then
-    persist a PRIVATE File attached to the just-created request via the framework's
-    ``save_file`` (which re-checks the site max-file-size). The stored File path is
-    written back to the request's ``attachment`` field so the existing detail view
-    renders it. Returns silently on a blank/invalid photo — the field is optional,
-    so a bad image must never sink an otherwise valid request."""
+    The image rides in as a ``data:`` URI on the same token-scoped POST that created
+    the request — there is NO separate guest upload surface to harden. The BYTES are
+    what decides: the shared driver-portal verifier re-decodes them, opens the
+    container and matches its real format against the declared content type, so a
+    text file renamed ``.jpg`` is refused rather than stored. The extension written to
+    disk is then DERIVED from the verified format, never taken from the caller's
+    filename, so nothing can be laundered into an image name. A photo that fails
+    refuses the request instead of being dropped silently: storing a non-image under an
+    image name is worse than making the worker re-attach.
+
+    The File is PRIVATE and created through the framework's ``save_file`` (which
+    re-checks the site max-file-size); its path is written back to ``attachment`` so
+    the existing detail view renders it."""
     from frappe.utils.file_manager import save_file
+
+    from apex.salis.api.driver_portal.images import verified_image_type
 
     photo = (photo or "").strip()
     if not photo:
         return
 
-    fname = (photo_filename or "request-photo.jpg").strip() or "request-photo.jpg"
-    # [#609lpl]
-    fname = fname.replace("\\", "/").split("/")[-1]
-    if not fname.lower().endswith(WORKER_PHOTO_EXTENSIONS):
-        fname = f"{fname}.jpg"
+    content_type = verified_image_type(photo, max_bytes=WORKER_PHOTO_MAX_BYTES)
 
-    # [#artorm]
-    payload = photo.split(",", 1)[1] if photo.startswith("data:") and "," in photo else photo
-    if len(payload) * 3 / 4 > WORKER_PHOTO_MAX_BYTES:
-        frappe.throw(_("The attached photo is too large."))
+    stem = (photo_filename or "request-photo").strip() or "request-photo"
+    # [#609lpl]
+    stem = stem.replace("\\", "/").split("/")[-1]
+    stem = os.path.splitext(stem)[0] or "request-photo"
+    fname = f"{stem}{WORKER_PHOTO_EXTENSIONS[content_type]}"
 
     saved = save_file(
         fname,

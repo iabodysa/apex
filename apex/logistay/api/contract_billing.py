@@ -39,7 +39,7 @@ import datetime
 
 import frappe
 from frappe import _
-from frappe.utils import today
+from frappe.utils import getdate, today
 
 from apex.apex_core.utils import payable_allocation
 
@@ -153,6 +153,10 @@ def create_purchase_request(contract: str, billing_period: str):
         return _result(PURCHASE_REQUEST_DOCTYPE, existing, True)
 
     period_end = _period_end(billing_period)
+    # Billing a period that has already closed is the normal case, and ERPNext refuses a
+    # Material Request whose Reqd by Date precedes its Transaction Date.
+    raised_on = today()
+    needed_by = max(period_end, getdate(raised_on))
     uom = frappe.db.get_value("Item", contract_doc.service_item, "stock_uom") or "Nos"
     description = _("Telecom service — {0} — {1} ({2})").format(
         contract_doc.supplier, billing_period, contract_doc.name
@@ -160,15 +164,15 @@ def create_purchase_request(contract: str, billing_period: str):
     mr = frappe.new_doc(PURCHASE_REQUEST_DOCTYPE)
     mr.material_request_type = "Purchase"
     mr.company = contract_doc.company
-    mr.transaction_date = today()
-    mr.schedule_date = period_end
+    mr.transaction_date = raised_on
+    mr.schedule_date = needed_by
     mr.append(
         "items",
         {
             "item_code": contract_doc.service_item,
             "qty": 1,
             "uom": uom,
-            "schedule_date": period_end,
+            "schedule_date": needed_by,
             "description": description,
             "cost_center": contract_doc.cost_center,
             "project": contract_doc.project,

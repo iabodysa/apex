@@ -3471,6 +3471,7 @@ Set the monthly litre allowance for a vehicle so consumption can be reconciled.,
 Set the number of beds in each room. Use − / + to adjust.,حدد عدد الأسرّة في كل غرفة. استخدم − / + للتعديل.
 "Set the overall result of the round, then save.",حدّد النتيجة الإجمالية للجولة، ثم احفظ.
 Set to the session user on creation; read-only so the segregation-of-duties gate cannot be spoofed.,يُضبط إلى مستخدم الجلسة عند الإنشاء؛ وهو للقراءة فقط بحيث لا يمكن التحايل على بوابة الفصل بين المهام.
+"Set to the session user on creation; read-only so the segregation-of-duties gate cannot be spoofed. Authorization is refused to this person AND to whoever created the request, so a request you raise is authorized by another supervisor or by the fleet manager.",يُضبط إلى مستخدم الجلسة عند الإنشاء؛ وهو للقراءة فقط بحيث لا يمكن التحايل على بوابة الفصل بين المهام. يُرفض الاعتماد على هذا الشخص وعلى منشئ الطلب معًا، لذا يعتمد الطلب الذي ترفعه مشرف آخر أو مدير الأسطول.
 Set up telecom contracts and SIM cards.,إعداد عقود الاتصالات وشرائح الاتصال.
 Set when a subcontractor visit is created from this request,يُضبط عند إنشاء زيارة مقاول من هذا الطلب
 Set when a temporary top-up has been reverted (by the daily auto-revert job or manually). Allowed on submit so the scheduler can flip it.,يُضبط عند عكس تعبئة مؤقتة (بواسطة مهمة العكس التلقائي اليومية أو يدويًا). مسموح به عند الإرسال ليتمكن المجدول من تبديله.
@@ -3766,7 +3767,6 @@ The Route Supervisor this plan is assigned to for approval and live oversight. O
 "The Safety Round this execution belongs to, if recorded as part of a round.",جولةُ السلامة التي ينتمي إليها هذا التنفيذ، إن سُجِّل ضمن جولة.
 The Salis Driver this barcode token grants portal entry for. Set on a Driver-holder token; the driver enters by scanning the QR with no Frappe User.,سائق ساليس الذي يمنحه رمز الباركود هذا الدخول إلى البوابة. يُحدد للرمز الخاص بالسائق، ويدخل السائق بمسح رمز الاستجابة السريعة من دون حساب مستخدم في فرابي.
 The Trip Start Log this scan boarded onto (set only when a boarding row was created).,سجل بدء الرحلة الذي صعد عليه هذا المسح (يُضبط فقط عند إنشاء صف صعود).
-The attached photo is too large.,الصورة المرفقة كبيرة جداً.
 The browser PushSubscription endpoint URL the push service delivers to. Unique per device. Treat as a secret.,عنوان اشتراك الإشعارات في المتصفح الذي تسلّم إليه خدمة الإشعارات. فريد لكل جهاز. عامِله كمعلومة سرية.
 "The building code is locked: {0} room(s) already use it in their room numbers, and renaming it would orphan them. Delete the generated rooms first if the code must change.",رمز المبنى مقفل: {0} غرفة تستخدمه بالفعل في أرقام غرفها، وإعادة تسميته ستجعلها معزولة. احذف الغرف المولّدة أولًا إذا كان لا بد من تغيير الرمز.
 The building this asset was located in before its current location.,المبنى الذي كان هذا الأصل موجوداً فيه قبل موقعه الحالي.

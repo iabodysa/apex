@@ -26,7 +26,13 @@ condition + docstatus transition), not a mocked shortcut.
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
+from frappe.model.workflow import (
+    apply_workflow,
+    get_transitions,
+    get_workflow_name,
+    has_approval_access,
+    is_transition_condition_satisfied,
+)
 
 from apex.tests._helpers import _user
 from apex.tests.factories import make_project, make_vehicle
@@ -55,9 +61,12 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         cls.requester = _user("tr_req@example.com", "Fleet Project Manager")
         cls.supervisor = _user("tr_sup@example.com", "Fleet Supervisor")
         cls.manager = _user("tr_mgr@example.com", "Fleet Manager")
+        # A second supervisor, so a request one of them CREATES can be offered to the
+        # other — the contrast the owner-side gate is measured by.
+        cls.creator = _user("tr_creator_sup@example.com", "Fleet Supervisor")
         cls.project = make_project("TR Workflow Project")
         # [#l27h20]
-        for u in (cls.requester, cls.supervisor):
+        for u in (cls.requester, cls.supervisor, cls.creator):
             if not frappe.db.exists(
                 "User Permission",
                 {"user": u, "allow": "Project", "for_value": cls.project},
@@ -73,7 +82,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
     def tearDownClass(cls):
         # [#5aa0v7]
         frappe.set_user("Administrator")
-        for u in (cls.requester, cls.supervisor):
+        for u in (cls.requester, cls.supervisor, cls.creator):
             frappe.db.delete("User Permission",
                              {"user": u, "allow": "Project", "for_value": cls.project})
         if frappe.db.exists("Project", cls.project):
@@ -366,6 +375,59 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.docstatus, 0)
         self.assertEqual(tr.source_channel, "Web QR")
         self.assertTrue(tr.anonymous_tracking_code)
+
+    # The creator's trap: the shipped condition read `requested_by`, but the framework's
+    # own guard reads `doc.owner` (frappe/model/workflow.py:222), so a supervisor who
+    # named someone else as requester saw the condition pass and the action vanish
+    # anyway, with nothing on the form to explain it.
+
+    def _authorize_regional(self):
+        wf = frappe.get_doc("Workflow", WORKFLOW)
+        return next(t for t in wf.transitions if t.action == "Authorize (Regional)")
+
+    def test_creator_is_refused_by_the_condition_not_only_by_the_framework(self):
+        creator = self.creator
+        frappe.set_user(creator)
+        tr = frappe.get_doc({
+            "doctype": "Transport Request",
+            "service_line": "Administrative Trip",
+            "request_type": "Administrative Trip / Document Signing",
+            "destination": "Ministry Office",
+            "from_location": "HQ",
+            "to_location": "Ministry Office",
+            "project": self.project,
+            # The edit the form used to invite: a requester who is not the creator.
+            "requested_by": self.requester,
+            "source_channel": "Desk",
+            "status": "New",
+        }).insert(ignore_permissions=True)
+        self.assertEqual(tr.owner, creator)
+        self.assertNotEqual(tr.requested_by, creator)
+
+        apply_workflow(tr, "Validate")
+        tr.reload()
+
+        transition = self._authorize_regional()
+        # Both halves must now agree. Before, the first was True and the second False.
+        self.assertFalse(is_transition_condition_satisfied(transition, tr))
+        self.assertFalse(has_approval_access(creator, tr, transition))
+        self.assertNotIn("Authorize (Regional)", _actions(tr))
+
+        # And the intended approver — neither owner nor requester — still gets through.
+        frappe.set_user(self.supervisor)
+        self.assertTrue(is_transition_condition_satisfied(transition, tr))
+        self.assertIn("Authorize (Regional)", _actions(tr))
+        apply_workflow(tr, "Authorize (Regional)")
+        self.assertEqual(
+            frappe.db.get_value("Transport Request", tr.name, ["status", "docstatus"]),
+            ("Approved", 1),
+        )
+
+    def test_the_form_states_the_rule_it_enforces(self):
+        field = frappe.get_meta("Transport Request").get_field("requested_by")
+        self.assertTrue(field.read_only, "an editable Requested By promises what it cannot deliver")
+        self.assertTrue(field.description)
+        self.assertIn("Authorization is refused", field.description)
 
     # [#a085f4]
 

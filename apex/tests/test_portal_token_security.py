@@ -1016,6 +1016,39 @@ class TestPortalTokenSecurity(FrappeTestCase):
                     )
         self.assertEqual(save.call_count, 2)
 
+    def test_worker_photo_door_refuses_a_renamed_non_image(self):
+        """The Masar request photo used to be checked by EXTENSION only, and a filename
+        outside the allowed list was RENAMED to .jpg rather than refused — so a text file
+        was stored under an image name (measured: a 39-byte text file landed as .png,
+        .gif, .heic and .webp). Both doors now decide on the bytes."""
+        text = base64.b64encode(b"this is not an image, it is a text file").decode()
+        fake_jpeg = "data:image/jpeg;base64," + text
+        doc = frappe._dict(doctype="Resident Request", name="REQ-1")
+        with patch("frappe.utils.file_manager.save_file") as save:
+            for filename in ("not-an-image.txt", "notes.png", "notes.gif",
+                             "notes.heic", "notes.webp", "photo.jpg"):
+                with self.subTest(filename=filename), self.assertRaises(
+                    frappe.ValidationError
+                ):
+                    masar._attach_worker_photo(doc, fake_jpeg, filename)
+            # A container the verifier cannot open is refused, never renamed.
+            with self.assertRaises(frappe.ValidationError):
+                masar._attach_worker_photo(doc, text, "bare-base64.png")
+        save.assert_not_called()
+
+    def test_worker_photo_extension_comes_from_the_verified_bytes(self):
+        """A real PNG offered under a .jpeg name is stored as .png: the extension is
+        derived from what the bytes proved, so nothing can be laundered into a name."""
+        saved = frappe._dict(file_url="/private/files/evidence.png")
+        doc = MagicMock(name="resident_request")
+        doc.doctype = "Resident Request"
+        doc.name = "REQ-1"
+        with patch("frappe.utils.file_manager.save_file", return_value=saved) as save:
+            masar._attach_worker_photo(doc, _image_data_uri("PNG"), "camera roll/IMG_1.jpeg")
+        self.assertEqual(save.call_args.args[0], "IMG_1.png")
+        self.assertEqual(save.call_args.kwargs["is_private"], 1)
+        doc.db_set.assert_called_once_with("attachment", saved.file_url)
+
     def test_manual_boarding_rejects_non_list_non_scalar_and_over_cap_before_work(self):
         trip = frappe._dict(transport_request="TR-1")
         invalid_payloads = (

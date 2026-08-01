@@ -1,5 +1,10 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Private image attachments accepted by driver-token write endpoints."""
+"""Private image attachments accepted by the token-scoped portal write endpoints.
+
+``verified_image_type`` is the content check both doors share — the driver one here
+and the Masar worker request in ``salis/api/masar.py``. Each keeps its own filename
+policy and size ceiling; neither restates what the bytes have to prove.
+"""
 
 from __future__ import annotations
 
@@ -57,34 +62,29 @@ def _has_exact_container_end(decoded, image_format):
     return False
 
 
-def save_driver_image(photo, filename, doctype, name):
-    """Validate and save one private native File on an authorized new record."""
-    if not photo and not filename:
-        return None
-    if not isinstance(photo, str) or not isinstance(filename, str):
-        _invalid_photo(_("A photo and filename are required together."))
+def verified_image_type(photo, expected_type=None, max_bytes=None):
+    """Prove a base64 data URI really carries the image it declares, and name it.
 
-    if (
-        not filename
-        or filename != filename.strip()
-        or filename.startswith(".")
-        or filename != os.path.basename(filename)
-        or "/" in filename
-        or "\\" in filename
-        or any(ord(character) < 32 or ord(character) == 127 for character in filename)
-        or not _SAFE_FILENAME.fullmatch(filename)
-    ):
-        _invalid_photo(_("The photo filename is invalid."))
-    extension = os.path.splitext(filename)[1].lower()
-    expected_type = _IMAGE_TYPES.get(extension)
-    if not expected_type:
-        _invalid_photo(_("The photo must be a JPEG, PNG, or WebP image."))
+    Returns the verified content type. Refuses anything the BYTES do not support:
+    a declared type outside the accepted set, a payload that is not exact base64, a
+    size or dimension past the ceiling, a container PIL cannot open or whose format
+    disagrees with the declaration, and trailing bytes after a valid container.
+    ``expected_type`` pins the answer to one type when the caller already knows it
+    (the driver door derives it from the filename); left None, the declaration in
+    the URI is what gets verified — which is why a renamed non-image cannot pass.
+    ``max_bytes`` lets a door keep its own published size ceiling.
+    """
+    if not isinstance(photo, str):
+        _invalid_photo(_("The photo data is invalid."))
+    # Read at call time, so a door's own ceiling and the suite's patch both land.
+    max_bytes = max_bytes or MAX_IMAGE_BYTES
 
     match = _DATA_URI.fullmatch(photo)
-    if not match or match.group(1) != expected_type:
+    if not match or (expected_type and match.group(1) != expected_type):
         _invalid_photo(_("The photo data is invalid."))
+    content_type = match.group(1)
     encoded = match.group(2)
-    if len(encoded) > ((MAX_IMAGE_BYTES + 2) // 3) * 4:
+    if len(encoded) > ((max_bytes + 2) // 3) * 4:
         _invalid_photo(_("The photo is too large."))
     try:
         decoded = base64.b64decode(encoded, validate=True)
@@ -92,7 +92,7 @@ def save_driver_image(photo, filename, doctype, name):
         _invalid_photo(_("The photo data is invalid."))
     if not decoded or base64.b64encode(decoded).decode("ascii") != encoded:
         _invalid_photo(_("The photo data is invalid."))
-    if len(decoded) > MAX_IMAGE_BYTES:
+    if len(decoded) > max_bytes:
         _invalid_photo(_("The photo is too large."))
 
     try:
@@ -120,10 +120,38 @@ def save_driver_image(photo, filename, doctype, name):
     ):
         _invalid_photo(_("The photo data is invalid."))
     if (
-        image_format != _PIL_FORMATS[expected_type]
+        image_format != _PIL_FORMATS[content_type]
         or not _has_exact_container_end(decoded, image_format)
     ):
         _invalid_photo(_("The photo data is invalid."))
+
+    return content_type
+
+
+def save_driver_image(photo, filename, doctype, name):
+    """Validate and save one private native File on an authorized new record."""
+    if not photo and not filename:
+        return None
+    if not isinstance(photo, str) or not isinstance(filename, str):
+        _invalid_photo(_("A photo and filename are required together."))
+
+    if (
+        not filename
+        or filename != filename.strip()
+        or filename.startswith(".")
+        or filename != os.path.basename(filename)
+        or "/" in filename
+        or "\\" in filename
+        or any(ord(character) < 32 or ord(character) == 127 for character in filename)
+        or not _SAFE_FILENAME.fullmatch(filename)
+    ):
+        _invalid_photo(_("The photo filename is invalid."))
+    extension = os.path.splitext(filename)[1].lower()
+    expected_type = _IMAGE_TYPES.get(extension)
+    if not expected_type:
+        _invalid_photo(_("The photo must be a JPEG, PNG, or WebP image."))
+
+    verified_image_type(photo, expected_type)
 
     return save_file(
         filename,

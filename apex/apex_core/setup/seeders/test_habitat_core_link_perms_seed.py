@@ -23,6 +23,8 @@ from frappe.tests.utils import FrappeTestCase
 from apex.apex_core.setup.seeders.habitat_core_link_perms_seed import (
     CORE_LINK_MASTERS,
     HABITAT_LINK_ROLES,
+    SALIS_LINK_MASTERS,
+    SALIS_LINK_ROLES,
     seed_habitat_core_link_perms,
 )
 
@@ -68,6 +70,32 @@ class TestHabitatCoreLinkPerms(FrappeTestCase):
             [],
             "the picker grant widened past select:\n  " + "\n  ".join(widened),
         )
+
+    def test_the_salis_roles_can_resolve_project_and_gain_nothing_else(self):
+        """Salis anchors its movement documents on Project and scopes every list by a
+        Project User Permission, but no Salis role held a permlevel-0 rule on Project —
+        and permlevel 1 is discarded by get_role_permissions (frappe/permissions.py:284),
+        so the picker refused them. Floor and ceiling, same as the Habitat pair above."""
+        widened = []
+        for doctype in SALIS_LINK_MASTERS:
+            for role in SALIS_LINK_ROLES:
+                with self.subTest(doctype=doctype, role=role):
+                    rows = _rows(doctype, role)
+                    self.assertEqual(len(rows), 1, "expected exactly one level-0 rule")
+                    self.assertTrue(rows[0]["select"])
+                    for ptype in (*FORBIDDEN, "export"):
+                        if rows[0][ptype]:
+                            widened.append(f"{doctype}/{role}: {ptype}")
+        self.assertEqual(
+            widened, [], "the picker grant widened past select:\n  " + "\n  ".join(widened)
+        )
+
+    def test_the_platform_role_is_left_to_the_site_administrator(self):
+        """System Manager writes the same Project-anchored documents and is deliberately
+        not granted here — re-granting a core master to a platform role is a site
+        decision, the same line the Habitat set already draws."""
+        for doctype in SALIS_LINK_MASTERS:
+            self.assertEqual(_rows(doctype, "System Manager"), [])
 
     def test_select_is_what_the_permission_layer_reports(self):
         """The rule is only worth anything if ``get_role_permissions`` agrees — that is

@@ -93,7 +93,7 @@
    "next_state": "Approved",
    "allowed": "Fleet Supervisor",
    "allow_self_approval": 0,
-   "condition": "not doc.needs_operations and doc.requested_by != frappe.session.user"
+   "condition": "not doc.needs_operations and doc.owner != frappe.session.user and doc.requested_by != frappe.session.user"
   },
   {
    "doctype": "Workflow Transition",
@@ -102,7 +102,7 @@
    "next_state": "Approved",
    "allowed": "Fleet Manager",
    "allow_self_approval": 0,
-   "condition": "doc.requested_by != frappe.session.user"
+   "condition": "doc.owner != frappe.session.user and doc.requested_by != frappe.session.user"
   },
   {
    "doctype": "Workflow Transition",

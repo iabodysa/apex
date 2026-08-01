@@ -77,10 +77,12 @@
   },
   {
    "default": "__user",
+   "description": "Set to the session user on creation; read-only so the segregation-of-duties gate cannot be spoofed. Authorization is refused to this person AND to whoever created the request, so a request you raise is authorized by another supervisor or by the fleet manager.",
    "fieldname": "requested_by",
    "fieldtype": "Link",
    "label": "Requested By",
-   "options": "User"
+   "options": "User",
+   "read_only": 1
   },
   {
    "fetch_from": "requested_by.full_name",
