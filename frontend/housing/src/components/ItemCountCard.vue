@@ -1,9 +1,9 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- One inventory line: a numeric stepper that stages counted_quantity, a
-     condition Select, and an optional note. The variance shown is the
-     SERVER-DERIVED quantity_variance loaded with the row (read-only) — it is
-     never recomputed on the client, so the displayed figure always matches what
-     the Housing Inventory controller derived at the last save. -->
+     condition Select, and an optional note. The variance shown is derived live
+     from the STAGED count using the controller's own formula (counted minus
+     expected), so the three figures reconcile while the supervisor counts. The
+     server stays the single WRITER of quantity_variance; this only mirrors it. -->
 <template>
   <div class="item-card" :class="{ 'item-card-staged': staged }">
     <div class="item-head">
@@ -18,7 +18,7 @@
       <span class="pill" :class="conditionPill">{{ tEnum("condition", model.condition) }}</span>
     </div>
 
-    <!-- Expected / staged-counted / server variance, side by side. -->
+    <!-- Expected / staged-counted / live variance, side by side. -->
     <div class="item-figures">
       <div class="figure">
         <span class="figure-label">{{ t("card.expected") }}</span>
@@ -116,10 +116,15 @@ function onNote(value) {
   emit("note", value);
 }
 
-// Server-derived variance, rendered verbatim from the loaded row. A staged edit
-// does NOT recompute it — the figure reflects the last server save and is
-// refreshed when the row reloads after submit.
-const variance = computed(() => Number(props.row.quantity_variance || 0));
+// Mirrors housing_inventory.py before_save: counted minus expected. Reading the
+// staged count (not the row's stored quantity_variance) is what makes the figure
+// track the stepper — the stored field only moves on save, so it contradicted the
+// Counted figure beside it for the whole duration of a count. An untouched row's
+// model carries the row's saved counted_quantity, so this still renders exactly
+// the server's number until the supervisor edits.
+const variance = computed(
+  () => Number(props.model.counted_quantity || 0) - Number(props.row.expected_quantity || 0),
+);
 const varianceText = computed(() => {
   const v = variance.value;
   return v > 0 ? "+" + fmt(v) : fmt(v);

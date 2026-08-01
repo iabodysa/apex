@@ -49,28 +49,46 @@ watch(
 </script>
 
 <style>
+/* height, not min-height: a flex container left at height:auto still sizes to its
+   content, so the scroll column below would grow past the viewport and the bar
+   would go back to floating over the list. dvh first so an iOS toolbar sliding in
+   does not crop the bar; vh is the fallback for browsers without dvh. */
 .housing-app {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   width: 100%;
   flex-direction: column;
   background: var(--c-canvas);
 }
 
-/* Clears the fixed bar, plus the iOS home indicator the wrapper opts into with
-   viewport-fit=cover. Without it the last row of a list is unreachable. */
+/* The scroll column, so the bar below can hold layout space instead of floating
+   over it. `overflow-y:auto` is what makes this work: it resolves this flex
+   item's automatic minimum size to 0, so the shell stays viewport-height and the
+   list scrolls INSIDE this box. Same construction as the shared
+   MobileConsoleShell. */
 .housing-view {
   flex: 1;
-  padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Reaching the end of the column must not start dragging the page behind it. */
+  overscroll-behavior: contain;
 }
 
+/* Sticky, NOT fixed. A fixed bar is outside flow, so it covers whatever sits at
+   the viewport bottom at every scroll offset — on a short viewport that was the
+   first card's stepper, whose taps went to the nav link underneath. A padding
+   reserve on the scroll column cannot fix that: it only frees the document's
+   LAST row. As a flex sibling of the scroll column the bar occupies real space,
+   so no content is ever behind it. */
 .tabbar {
-  position: fixed;
+  position: sticky;
   inset-block-end: 0;
-  inset-inline: 0;
   z-index: 50;
   display: flex;
   margin-inline: auto;
+  width: 100%;
   max-width: var(--shell-max, 480px);
   background: var(--c-surface-2);
   border-top: 1px solid var(--c-border);
