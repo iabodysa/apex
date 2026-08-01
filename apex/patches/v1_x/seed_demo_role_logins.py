@@ -48,6 +48,9 @@ import os
 
 import frappe
 
+from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
+    issue_worker_link,
+)
 from apex.apex_core.utils.company import resolve_company_or_any
 
 # [#ma0k24] Operator-supplied, never shipped: a password literal in this file is
@@ -270,14 +273,16 @@ def _employee(full_name, company, user_id=None):
     return frappe.get_doc(doc).insert(ignore_permissions=True).name  # audit-ok
 
 
-def _worker_token(employee):
-    """Issue (or fetch) the employee's Masar token and return its value for the
-    login recipe. Masar resolves a worker by this token, not by login."""
-    from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
-        get_or_create_for_employee,
-    )
+def _worker_link(employee):
+    """Issue the employee's Masar link for the login recipe. Masar resolves a worker
+    by the token in this link, not by login.
 
-    return get_or_create_for_employee(employee).token
+    Read through the issuing API rather than off the record: the row stores the HASH
+    of the credential, so a recipe built from that field is a link the resolver can
+    never match. The API returns the finished URL with the raw token, which is also
+    why the URL shape is not spelled a second time here.
+    """
+    return issue_worker_link(employee)["link"]
 
 
 def _seed_supervisor(company, password):
@@ -295,7 +300,7 @@ def _seed_supervisor(company, password):
 def _seed_employee(company, password):
     user = _user(_EMP_USER, _EMP_NAME, (), password)
     emp = _employee(_EMP_NAME, company, user_id=user)
-    return _worker_token(emp)
+    return _worker_link(emp)
 
 
 def execute():
@@ -329,9 +334,9 @@ def execute():
         frappe.db.commit()
 
         # [#l837ss]
-        token = None
+        masar_link = None
         try:
-            token = _seed_employee(company, password)
+            masar_link = _seed_employee(company, password)
             frappe.db.commit()
         except Exception:
             frappe.db.rollback()
@@ -353,7 +358,7 @@ def execute():
             },
             "employee": {
                 "email": _EMP_USER,
-                "masar_link": f"{base}/masar?w={token}" if token else None,
+                "masar_link": masar_link,
             },
         }
     except Exception:

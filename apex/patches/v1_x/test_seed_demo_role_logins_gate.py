@@ -130,3 +130,28 @@ class TestSeedDemoRoleLoginsPassword(FrappeTestCase):
             f"{seed._PASSWORD_ENV} at runtime — a literal here ships a working "
             "login in public source.",
         )
+
+    def test_recipe_carries_the_issued_link_not_a_hand_built_one(self):
+        """The worker recipe must come from the issuing API.
+
+        ``MasarWorkerToken.token`` stores the HASH of the credential, never the
+        credential, so a recipe built from that field hands the operator a link the
+        resolver can never match: it hashes whatever arrives and compares it against
+        that same column. ``issue_worker_link`` is the one path that returns the raw
+        value, and it returns the finished URL with it — so the seeder must not
+        spell the URL a second time either.
+        """
+        issued = {
+            "token": "raw-credential-never-stored",
+            "link": "https://example.test/masar?w=raw-credential-never-stored",
+        }
+        with mock.patch.object(
+            seed, "issue_worker_link", return_value=issued
+        ) as issue:
+            link = seed._worker_link("HR-EMP-00001")
+
+        issue.assert_called_once_with("HR-EMP-00001")
+        self.assertEqual(link, issued["link"])
+        self.assertNotIn(
+            "token", link.split("?")[0], "The recipe must not rebuild the URL shape."
+        )
