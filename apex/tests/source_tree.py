@@ -26,6 +26,29 @@ APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 REPO_ROOT = os.path.dirname(APP_ROOT)
 AR_CSV = os.path.join(APP_ROOT, "translations", "ar.csv")
 
+# Package/script CDNs, then font CDNs; a page or bundle needing one needs a vendored copy.
+# One home because the shell scan and the bundle scan both read it, and two hand-kept
+# copies meant a host added to one left the other blind. gstatic is listed even though it
+# never appears in markup alone: a preconnect to it is how these shells warmed the
+# third-party connection.
+CDN_HOSTS = (
+    "unpkg.com",
+    "unpkg.io",
+    "cdn.jsdelivr.net",
+    "jsdelivr.net",
+    "cdnjs.cloudflare.com",
+    "ajax.googleapis.com",
+    "code.jquery.com",
+    "stackpath.bootstrapcdn.com",
+    "maxcdn.bootstrapcdn.com",
+    "esm.sh",
+    "cdn.skypack.dev",
+    "fonts.googleapis.com",
+    "fonts.gstatic.com",
+    "use.typekit.net",
+    "fonts.bunny.net",
+)
+
 
 def rel(path):
     """``path`` relative to the app root (``apex/``)."""

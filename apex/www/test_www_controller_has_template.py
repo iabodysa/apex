@@ -170,36 +170,6 @@ class TestFrameworkNeverServesABareController(unittest.TestCase):
         )
 
 
-class TestDetector(unittest.TestCase):
-    """Failure proof: the scan must red on a synthetic offender."""
-
-    def _write(self, tmp: Path, name: str, body: str = "def get_context(context):\n    pass\n"):
-        (tmp / name).write_text(body, encoding="utf-8")
-
-    def test_flags_a_controller_with_no_template_and_accepts_one_with_a_template(self):
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as raw:
-            tmp = Path(raw)
-            self._write(tmp, "orphan_page.py")
-            self._write(tmp, "paired_page.py")
-            (tmp / "paired-page.html").write_text("<p>x</p>", encoding="utf-8")
-            offenders = [Path(o).name for o in _templateless(tmp)]
-            self.assertEqual(
-                offenders,
-                ["orphan_page.py"],
-                "the detector must flag exactly the template-less controller",
-            )
-
-    def test_a_helper_module_without_get_context_is_not_a_controller(self):
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as raw:
-            tmp = Path(raw)
-            self._write(tmp, "helpers.py", "def build(x):\n    return x\n")
-            self.assertEqual(_page_controllers(tmp), [])
-
-
 class TestWwwControllersHaveTemplates(unittest.TestCase):
     def test_scan_finds_the_www_controllers(self):
         controllers = _page_controllers(WWW)

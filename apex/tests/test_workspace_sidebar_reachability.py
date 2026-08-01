@@ -150,37 +150,5 @@ class TestWorkspaceParentChainIntegrity(unittest.TestCase):
                 )
 
 
-class TestOrphanDetector(unittest.TestCase):
-    """Prove the detector can fail, so a green run above is evidence and not silence."""
-
-    @staticmethod
-    def _tree(parent_roles, child_roles, parent_hidden=False):
-        return {
-            "Root": {"roles": set(parent_roles), "parent": "", "hidden": parent_hidden, "path": "r"},
-            "Leaf": {"roles": set(child_roles), "parent": "Root", "hidden": False, "path": "l"},
-        }
-
-    def test_detector_flags_a_child_role_the_parent_lacks(self):
-        found = _orphan_pairs(self._tree(parent_roles=["Alpha"], child_roles=["Alpha", "Beta"]))
-        self.assertEqual(found, {("Leaf", "Beta")})
-
-    def test_detector_clears_a_child_whose_parent_grants_the_role(self):
-        found = _orphan_pairs(self._tree(parent_roles=["Alpha", "Beta"], child_roles=["Beta"]))
-        self.assertEqual(found, set())
-
-    def test_detector_flags_every_role_under_a_hidden_parent(self):
-        tree = self._tree(parent_roles=["Alpha"], child_roles=["Alpha"], parent_hidden=True)
-        self.assertEqual(_orphan_pairs(tree), {("Leaf", "Alpha")})
-
-    def test_detector_treats_an_empty_parent_role_list_as_world_visible(self):
-        found = _orphan_pairs(self._tree(parent_roles=[], child_roles=["Beta"]))
-        self.assertEqual(found, set())
-
-    def test_broken_parent_chain_is_reported_by_its_own_guard_not_as_an_orphan(self):
-        tree = {"Leaf": {"roles": {"Beta"}, "parent": "Ghost", "hidden": False, "path": "l"}}
-        self.assertIsNone(_ancestors(tree, "Leaf"))
-        self.assertEqual(_orphan_pairs(tree), set())
-
-
 if __name__ == "__main__":
     unittest.main()

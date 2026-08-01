@@ -59,33 +59,13 @@ import re
 import unittest
 from pathlib import Path
 
+from apex.tests.source_tree import CDN_HOSTS
+
 APP_ROOT = Path(__file__).resolve().parents[1]
 WWW_DIR = APP_ROOT / "www"
 PUBLIC_DIR = APP_ROOT / "public"
 REPO_ROOT = APP_ROOT.parent
 FRONTEND_DIR = REPO_ROOT / "frontend"
-
-# Package/script CDNs. A page that needs one of these needs a vendored copy instead.
-CDN_HOSTS = (
-    "unpkg.com",
-    "cdn.jsdelivr.net",
-    "jsdelivr.net",
-    "cdnjs.cloudflare.com",
-    "ajax.googleapis.com",
-    "code.jquery.com",
-    "stackpath.bootstrapcdn.com",
-    "maxcdn.bootstrapcdn.com",
-    "esm.sh",
-    "cdn.skypack.dev",
-    "unpkg.io",
-    # Font CDNs. gstatic never appears in markup on its own — it is what the
-    # googleapis stylesheet resolves to — but a preconnect to it is exactly how these
-    # shells used to warm the third-party connection, so both hosts are listed.
-    "fonts.googleapis.com",
-    "fonts.gstatic.com",
-    "use.typekit.net",
-    "fonts.bunny.net",
-)
 
 # src on a <script>, whether quoted with ' or ". Protocol-relative //host counts as
 # off-site too, which is why the scheme is optional in the URL test below.

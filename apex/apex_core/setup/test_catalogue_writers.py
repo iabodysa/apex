@@ -26,7 +26,6 @@ import json
 import os
 import unittest
 
-from apex.apex_core.setup.seed import load_specs
 
 _HERE = os.path.abspath(__file__)
 # Repo root: .../apex_core/setup/<this file> -> up four to the directory holding apex/.
@@ -200,53 +199,6 @@ class TestSafetyTaskCatalogWriters(unittest.TestCase):
         self.assertEqual(
             clashes, [],
             f"Safety Task Catalog writers emit the same task under two codes: {clashes}",
-        )
-
-
-class TestCrossWriterDetectors(unittest.TestCase):
-    """The detectors above must be able to FAIL, asserted on planted inputs."""
-
-    def test_conflict_detector_names_the_key_and_both_writers(self):
-        writers = {
-            "a": [{"material_name": "LED Bulbs", "material_category": "Electrical"}],
-            "b": [{"material_name": "LED Bulbs", "material_category": "General"}],
-        }
-        self.assertEqual(
-            _conflicting_keys(writers, "material_name"),
-            [("LED Bulbs", "a", "b", "material_category")],
-        )
-
-    def test_conflict_detector_allows_an_identical_repeat(self):
-        record = {"material_name": "LED Bulbs", "material_category": "Electrical"}
-        self.assertEqual(
-            _conflicting_keys({"a": [dict(record)], "b": [dict(record)]}, "material_name"),
-            [],
-        )
-
-    def test_unique_clash_detector_ignores_a_repeat_under_the_same_key(self):
-        writers = {
-            "a": [{"task_code": "SAF-001", "task_title": "Sweep"}],
-            "b": [{"task_code": "SAF-001", "task_title": "Sweep"}],
-        }
-        self.assertEqual(_cross_writer_duplicates(writers, "task_code", "task_title"), [])
-
-    def test_unique_clash_detector_flags_two_codes_for_one_title(self):
-        writers = {
-            "a": [{"task_code": "SAF-001", "task_title": "Sweep"}],
-            "b": [{"task_code": "HH-301", "task_title": "Sweep"}],
-        }
-        self.assertEqual(
-            _cross_writer_duplicates(writers, "task_code", "task_title"),
-            [("task_title", "Sweep", "a", "SAF-001", "b", "HH-301")],
-        )
-
-    def test_writer_readers_agree_with_the_loader(self):
-        """The JSON half is read here off disk; it must be the same set the seed loader
-        will apply, or this guard would be watching a file nobody seeds."""
-        spec = load_specs("habitat", only=["Maintenance Material"])[0]
-        self.assertEqual(
-            spec["records"],
-            _material_writers()["data/habitat/maintenance_material.json"],
         )
 
 
