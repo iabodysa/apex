@@ -851,6 +851,20 @@ tbody tr:hover{background:var(--s1)}
   background:var(--s2);color:var(--t2);border:1px solid var(--b2);font-size:10px;
 }
 
+/* Mobile-only affordances (the Filters button, the sheet close, the backdrop) are
+   hidden by default; the fold-away media query below reveals them. This block MUST
+   stay ABOVE that media query: a media query adds no specificity, so `display:none`
+   and the block's `display:inline-flex` tie at (0,1,0) and the LAST one in source
+   order wins. Sitting after the query, this rule silently re-hid the only control
+   that opens the filter sheet, leaving the sheet parked at translateY(100%) with no
+   way back on any tablet. */
+.fp-mobile-only{display:none}
+.fp-filters-btn{position:relative}
+.fp-filters-dot{
+  position:absolute;top:-3px;inset-inline-end:-3px;width:8px;height:8px;
+  border-radius:50%;background:var(--blue);border:2px solid var(--bg2);
+}
+
 /* [#o432ip] 860px = shared --bp-wide (frontend_shared/tokens.css); keep in sync —
    CSS @media conditions cannot read a custom property. This is where the filter
    column folds away. It used to become a 340px stacked block here and only turn
@@ -888,15 +902,6 @@ tbody tr:hover{background:var(--s1)}
     width:36px;height:4px;border-radius:2px;background:var(--b3);
   }
   .fp-sheet-close{width:var(--tap-min);height:var(--tap-min)}
-}
-
-/* Mobile-only affordances (the Filters button, the sheet close, the backdrop)
-   are hidden on wider viewports; the phone media query reveals them. */
-.fp-mobile-only{display:none}
-.fp-filters-btn{position:relative}
-.fp-filters-dot{
-  position:absolute;top:-3px;inset-inline-end:-3px;width:8px;height:8px;
-  border-radius:50%;background:var(--blue);border:2px solid var(--bg2);
 }
 
 /* [#fpmob1] Phone layout: a single-column board, a horizontally scrollable
