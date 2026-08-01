@@ -125,7 +125,9 @@
               @note="onNote"
             />
 
-            <p v-if="submitError" class="status-note status-err">{{ submitError }}</p>
+            <!-- role=alert: the refusal appears only in response to the submit tap,
+                 so it must be announced, not just painted above the button. -->
+            <p v-if="submitError" class="status-note status-err" role="alert">{{ submitError }}</p>
 
             <div class="submit-dock">
               <p class="submit-progress">
@@ -289,6 +291,25 @@ function buildResults() {
   return out;
 }
 
+// The server refuses a FAILED result on an evidence_required task that carries no
+// Evidence Photo. The portal already holds `evidence_required` per task (TaskRow
+// renders the chip from it), so it can name that rule in the operator's own language
+// instead of falling back to "couldn't submit" — the server sentence itself is never
+// rendered (it resolves against the site language, not this portal's toggle).
+const EVIDENCE_BLOCKING_STATUSES = new Set(["Not Done", "Poor"]);
+
+function evidenceBlockedTask(results) {
+  const byName = new Map();
+  for (const block of due.value) {
+    for (const task of block.tasks) byName.set(task.name, task);
+  }
+  const hit = results.find((r) => {
+    const task = byName.get(r.task);
+    return task && task.evidence_required && EVIDENCE_BLOCKING_STATUSES.has(r.execution_status);
+  });
+  return hit ? byName.get(hit.task) : null;
+}
+
 async function doSubmit() {
   submitError.value = "";
   const results = buildResults();
@@ -296,19 +317,23 @@ async function doSubmit() {
     submitError.value = t("submit.needOne");
     return;
   }
-  // createResource.submit() swallows failures into submitRes.error rather than
-  // re-throwing, so we branch on the resource's own error/data after awaiting —
-  // a try/catch here would never fire and could show success on a failed POST.
-  const res = await submitRes.submit({
-    building: building.value,
-    round_date: today(),
-    results: JSON.stringify(results),
-  });
-  if (submitRes.error) {
-    submitError.value = resourceErrorMessage(submitRes.error, "errors.submitFailed");
-    return;
+  // createResource.submit() RE-THROWS after recording the failure (frappe-ui
+  // resources.js handleError). Awaiting it without a catch rejected the click
+  // handler, so every line below — including the one that shows the refusal —
+  // was skipped and a rejected round looked identical to no round at all.
+  try {
+    const res = await submitRes.submit({
+      building: building.value,
+      round_date: today(),
+      results: JSON.stringify(results),
+    });
+    submitted.value = res || submitRes.data || { ok: true, rounds: [], emailed: false };
+  } catch (e) {
+    const blocked = evidenceBlockedTask(results);
+    submitError.value = blocked
+      ? t("errors.evidenceRequired", { task: blocked.task_title || blocked.name })
+      : resourceErrorMessage(e, "errors.submitFailed");
   }
-  submitted.value = res || submitRes.data || { ok: true, rounds: [], emailed: false };
 }
 
 // ---- realtime (socket push) --------------------------------------------

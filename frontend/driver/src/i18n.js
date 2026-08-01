@@ -348,6 +348,10 @@ const messages = {
     },
     errors: {
       loadFailed: "Couldn't load the portal",
+      invalidLink:
+        "This driver link is invalid or has been disabled. Please ask your supervisor for a new link.",
+      rateLimited: "Too many requests. Please wait a moment and try again.",
+      sessionExpired: "Your session expired. Please refresh the page.",
     },
   },
   ar: {
@@ -691,6 +695,10 @@ const messages = {
     },
     errors: {
       loadFailed: "تعذّر تحميل البوابة",
+      invalidLink:
+        "رابط السائق غير صالح أو تم تعطيله. يرجى طلب رابط جديد من مشرفك.",
+      rateLimited: "طلبات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.",
+      sessionExpired: "انتهت صلاحية الجلسة. يرجى تحديث الصفحة.",
     },
   },
 };
@@ -798,13 +806,13 @@ export const ISSUE_PRIORITIES = Object.keys(enums.en.issuePriority);
 // Shared translate / setLang / dir machinery; drivers default to Arabic (mirrors
 // worker_portal/safety_portal). translateEnum + the Intl formatters below stay
 // local — they read the factory's reactive `lang`.
-const { lang, dir, translate, setLang } = createI18n({
+const { lang, dir, translate, setLang, resourceErrorMessage } = createI18n({
   messages,
   storageKey: STORAGE_KEY,
   supported: SUPPORTED,
 });
 
-export { translate, setLang };
+export { translate, setLang, resourceErrorMessage };
 
 // BCP-47 locale for Intl, keyed to the active UI language. Arabic uses the
 // Saudi locale so dates/numbers shape consistently with the rest of the app.

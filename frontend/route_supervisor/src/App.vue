@@ -209,8 +209,8 @@
 
     <!-- Reject modal -->
     <div v-if="reject.open" class="overlay" @click.self="closeReject()">
-      <div class="modal">
-        <h3 class="modal-title">{{ t("approval.rejectTitle") }}</h3>
+      <div ref="rejectEl" class="modal" role="dialog" aria-modal="true" aria-labelledby="reject-title">
+        <h3 id="reject-title" class="modal-title">{{ t("approval.rejectTitle") }}</h3>
         <p class="modal-sub">{{ t("approval.rejectPrompt") }}</p>
         <textarea v-model="reject.reason" class="modal-input" rows="4" :placeholder="t('approval.rejectPlaceholder')" />
         <div class="modal-btns">
@@ -236,6 +236,7 @@ import LangToggle from "@shared/components/LangToggle.vue";
 import TabletSupervisorShell from "@shared/components/TabletSupervisorShell.vue";
 import { useToast } from "@shared/useToast.js";
 import { usePoll } from "@shared/usePoll.js";
+import { useOverlay } from "@shared/useOverlay.js";
 import BoardingPanel from "./components/BoardingPanel.vue";
 import RoutePanel from "./components/RoutePanel.vue";
 import DriverMap from "./components/DriverMap.vue";
@@ -260,6 +261,14 @@ const selectedName = ref(null);
 const tab = ref("approval");
 const busy = ref(false);
 const reject = ref({ open: false, reason: "" });
+const rejectEl = ref(null);
+// Same keyboard contract as the shell's drawer: focus enters the dialog, Tab cycles
+// inside it, Escape cancels and hands focus back to the Reject button.
+useOverlay({
+  active: () => reject.value.open,
+  container: rejectEl,
+  close: () => closeReject(),
+});
 // Shared toast: every call site below passes its type explicitly, so the shared
 // "green" default never reaches the `toast-*` class this portal styles.
 const { toast, showToast } = useToast();

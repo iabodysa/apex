@@ -103,6 +103,8 @@ const messages = {
       loadFailed: "Couldn't load safety rounds",
       loadError: "Couldn't load this section.",
       submitFailed: "Couldn't submit the round.",
+      evidenceRequired:
+        "“{task}” needs a photo before a failed result can be sent. Attach an Evidence Photo, or change the rating.",
       noBuilding: "Select a building to continue.",
       rateLimited: "Too many requests. Please wait a moment and try again.",
       sessionExpired: "Your session expired. Please refresh the page.",
@@ -203,6 +205,8 @@ const messages = {
       loadFailed: "تعذّر تحميل جولات السلامة",
       loadError: "تعذّر تحميل هذا القسم.",
       submitFailed: "تعذّر إرسال الجولة.",
+      evidenceRequired:
+        "«{task}» يحتاج صورة قبل إرسال نتيجة غير منجزة. أرفِق صورة إثبات أو غيّر التقييم.",
       noBuilding: "اختر مبنى للمتابعة.",
       rateLimited: "طلبات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.",
       sessionExpired: "انتهت صلاحية الجلسة. يرجى تحديث الصفحة.",

@@ -75,7 +75,7 @@
           <Icon name="alert" :size="26" />
         </div>
         <p class="font-bold mb-1">{{ t("errors.loadFailed") }}</p>
-        <p class="text-sm text-muted">{{ ctx.error.message || ctx.error }}</p>
+        <p class="text-sm text-muted">{{ errorMessage }}</p>
         <button class="btn btn-primary mt-4" style="width: auto; padding-inline: 24px" @click="ctx.reload()">
           {{ t("common.retry") }}
         </button>
@@ -100,7 +100,7 @@ import MobileConsoleShell from "@shared/components/MobileConsoleShell.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
 import Toast from "./components/Toast.vue";
 import InstallHint from "./components/InstallHint.vue";
-import { useI18n } from "./i18n";
+import { useI18n, resourceErrorMessage } from "./i18n";
 import { clearToasts } from "./toast";
 import { online } from "./cache";
 import { updateReady, applyUpdate, initPwaUpdates } from "./pwa-updates";
@@ -154,6 +154,12 @@ const ctx = createResource({
 const linkedDriver = computed(
   () => ctx.data && ctx.data.enabled && ctx.data.linked && ctx.data.driver,
 );
+
+// The bootstrap error was rendered raw, so a refused token put the request path and
+// the Python exception class on a driver's phone. Same treatment as the /masar shell:
+// map the failure to a short line in the language the driver actually picked — a real
+// refusal reads as "bad or disabled link", a transient one stays retry-able.
+const errorMessage = computed(() => resourceErrorMessage(ctx.error, "errors.invalidLink"));
 
 const firstName = computed(
   () => (ctx.data?.driver?.full_name || "").trim().split(/\s+/)[0] || "",
