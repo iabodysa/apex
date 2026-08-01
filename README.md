@@ -333,11 +333,14 @@ bench --site <site> migrate
 
 Apex requires Frappe, ERPNext, and HRMS v15, Python 3.10+, and MariaDB 10.6+. The first-install setup wizard captures the shared company, cost center, portal controls, and approval policies with conservative defaults.
 
+Any reverse proxy, load balancer, or CDN placed in front of the site must **overwrite** the `X-Forwarded-For` header rather than append to it. Frappe reads the first entry of that header as the caller's address, and every per-address limit in Apex keys on it, so an appending edge lets a caller choose its own rate-limit bucket and name any address as the source of a flood. [Reverse proxy prerequisite](docs/administration/reverse-proxy.md) states the requirement, shows the correct and incorrect proxy configuration, and gives the System Manager check that grades a running deployment against it.
+
 ## Documentation
 
 - [Training guide](docs/TRAINING.md)
 - [Integration guide](docs/INTEGRATION.md)
 - [Workspace design](docs/WORKSPACE-DESIGN.md)
+- [Reverse proxy prerequisite](docs/administration/reverse-proxy.md)
 
 ## License
 
