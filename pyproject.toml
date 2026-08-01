@@ -62,6 +62,16 @@ target-version = "py310"
 ignore = ["F722"]
 typing-modules = ["frappe.types.DF"]
 
+# extend-select, not select: the lint contract stays ruff's default set (lint.yml pins
+# 0.15.14 for exactly that reason) and this only adds to it.
+# W191 replaces the hand-written mixed-indentation guard. That guard refused W191 as "a
+# style vote, not a consistency check", which was true while the repo had not voted.
+# .editorconfig votes: indent_style = space. Once no file may indent with a tab at all,
+# no file can mix, so W191 is the stricter statement of the same invariant and it scores
+# zero on the tree today. Covers apex/ only, which is the root lint.yml hands ruff;
+# setup.py is the one tracked .py outside it.
+extend-select = ["W191"]
+
 # Package __init__.py files re-export their split submodules for back-compat
 # (the P-179/P-180 god-file splits); those imports are unused-by-design.
 [tool.ruff.lint.per-file-ignores]

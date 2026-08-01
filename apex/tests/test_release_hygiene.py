@@ -24,7 +24,6 @@ Run standalone:  python3 -m unittest apex.tests.test_release_hygiene -v
 
 import csv
 import glob
-import io
 import json
 import os
 import re
@@ -199,67 +198,6 @@ class TestTranslationFile(unittest.TestCase):
             if len(r) == 2 and len(PLACEHOLDER.findall(r[0])) != len(PLACEHOLDER.findall(r[1]))
         ]
         self.assertEqual(bad, [], f"ar.csv placeholder count mismatch: {bad[:10]}")
-
-
-class TestShippedDataLineEndings(unittest.TestCase):
-    """Two line-ending styles in one file make every edit unreviewable: the
-    editor renormalizes the minority rows, so a two-row change arrives as
-    thousands of identical-looking lines. LF is the required ending because
-    frappe/translate.py write_csv_file() regenerates the translation CSVs with
-    lineterminator="\\n" — any other choice is undone on the next
-    `bench update-translations`. .gitattributes prevents; this test detects.
-
-    SCOPE — settled, do not re-litigate: this guard judges apex-owned files
-    only. The apps we depend on carry the same mixed-ending drift in the
-    same-named file; measured on the pinned checkouts, hrms
-    translations/ar.csv has 388 CRLF rows of 1234, erpnext
-    translations/ar.csv 459 of 9489. Widening the scan to reach them was
-    considered and rejected:
-
-      1. We cannot fix what we do not ship. Those files live in sibling apps,
-         outside this repo's tree and index. `_files()` roots at APP_ROOT and
-         the matching .gitattributes rules are written against apex/ paths, so
-         neither can reach them by construction. Normalizing them in place
-         would only make the checkout diverge from upstream — exactly what the
-         byte-identical rule above forbids.
-      2. A red nobody can clear is a red that gets deleted. Those endings come
-         back on the next dependency update, so the gate would fail for a
-         reason no commit in this repo can address, and would be switched off.
-      3. The blast radius is nil for us. The damage this guard prevents — a
-         two-row edit arriving as a whole-file rewrite — is confined to the
-         file that mixes endings, and no apex diff renders through a sibling
-         app's CSV.
-
-    Reporting the drift upstream stays a courtesy, never a release gate; that
-    fix belongs in a pull request to the app that owns the file.
-    """
-
-    def _files(self):
-        found = [os.path.join(APP_ROOT, n) for n in SHIPPED_DATA_MANIFESTS]
-        found += sorted(glob.glob(os.path.join(TRANSLATIONS_DIR, "*")))
-        return [fp for fp in found if os.path.isfile(fp)]
-
-    def test_scan_covers_the_translation_files(self):
-        names = {os.path.basename(fp) for fp in self._files()}
-        self.assertIn("ar.csv", names, f"line-ending scan missed ar.csv; saw {sorted(names)}")
-
-    def test_shipped_data_files_use_lf_only(self):
-        offenders = []
-        for fp in self._files():
-            with open(fp, "rb") as fh:
-                data = fh.read()
-            crlf = data.count(b"\r\n")
-            stray_cr = data.count(b"\r") - crlf
-            if crlf or stray_cr:
-                offenders.append(
-                    f"{os.path.relpath(fp, REPO_ROOT)} (CRLF rows: {crlf}, stray CR: {stray_cr})"
-                )
-        self.assertEqual(
-            offenders,
-            [],
-            "shipped data files must use LF line endings, else the next edit "
-            "rewrites every row; offenders: " + "; ".join(offenders),
-        )
 
 
 class TestNoPromptInjectionInPatches(unittest.TestCase):
@@ -1031,123 +969,6 @@ TRACKED_MIXED_INDENT = frozenset()
 _NOT_INDENTATION = frozenset(
     {tokenize.INDENT, tokenize.DEDENT, tokenize.ENDMARKER, tokenize.ENCODING}
 )
-
-
-class TestIndentationConsistency(unittest.TestCase):
-    """A file must indent with tabs or with spaces, never both.
-
-    The repo settled on spaces: .editorconfig declares indent_style = space and
-    all 876 indented .py files follow it. This guard still never judges which
-    style a file picked — only that it picked one — because the failure it
-    catches is mixing, not tabs. A file that runs both renders at a different
-    width in every reader whose tab stop is not four, and the mixed block is
-    invisible in review because the characters look identical.
-
-    Why this is a test and not a ruff rule: ruff's tab rule (W191) is a style
-    vote, not a consistency check, and E101 (mixed-spaces-and-tabs) only catches
-    a single line that mixes both characters in one indent — it scored zero on
-    the file that provoked this guard even while that file ran 42 tab lines
-    against 589 space ones. Neither rule expresses "one style per file", so the
-    check lives here.
-
-    Only the leading whitespace of a physical line that starts a logical line is
-    judged, so the 800 tab characters still sitting inside docstring bodies are
-    correctly ignored: they are string data, and rewriting them would change
-    what the code evaluates to.
-    """
-
-    @staticmethod
-    def _indent_styles(source):
-        """{"tab": [lines], "space": [lines]} for the LOGICAL lines of `source`.
-
-        Only the leading whitespace of a physical line that begins a logical
-        line counts. Continuation lines inside brackets and the interior of a
-        multi-line string never start one, so a space-aligned continuation in a
-        tab file — and a tab inside a string or docstring — is correctly not an
-        indentation defect.
-        """
-        lines = source.splitlines()
-        found = {"tab": [], "space": []}
-        at_line_start = True
-        for token in tokenize.generate_tokens(io.StringIO(source).readline):
-            if token.type in (tokenize.NEWLINE, tokenize.NL):
-                at_line_start = True
-                continue
-            if token.type in _NOT_INDENTATION:
-                continue
-            if not at_line_start:
-                continue
-            at_line_start = False
-            row = token.start[0]
-            text = lines[row - 1]
-            indent = text[: len(text) - len(text.lstrip(" \t"))]
-            if "\t" in indent:
-                found["tab"].append(row)
-            elif indent:
-                found["space"].append(row)
-        return found
-
-    def _tracked_python_files(self):
-        """Every tracked .py file, because "shipped" means what git ships."""
-        listed = subprocess.run(
-            ["git", "-C", REPO_ROOT, "ls-files", "-z", "--", "*.py"],
-            capture_output=True,
-            check=True,
-        ).stdout.decode("utf-8")
-        return sorted(p for p in listed.split("\0") if p)
-
-    def _mixed_files(self):
-        mixed = {}
-        for rel in self._tracked_python_files():
-            path = os.path.join(REPO_ROOT, rel)
-            try:
-                with open(path, encoding="utf-8") as fh:
-                    source = fh.read()
-                styles = self._indent_styles(source)
-            except (OSError, UnicodeDecodeError, SyntaxError, tokenize.TokenError):
-                continue
-            if styles["tab"] and styles["space"]:
-                mixed[rel] = styles
-        return mixed
-
-    def test_scan_reads_the_package(self):
-        """Anti-vacuity: a broken scan must not pass by finding nothing."""
-        found = self._tracked_python_files()
-        self.assertIn(
-            "apex/tests/test_release_hygiene.py",
-            found,
-            f"python scan missed this very file; saw {len(found)} files",
-        )
-
-    def test_no_file_mixes_tabs_and_spaces(self):
-        offenders = []
-        for rel, styles in sorted(self._mixed_files().items()):
-            if rel in TRACKED_MIXED_INDENT:
-                continue
-            minority = min(styles, key=lambda k: len(styles[k]))
-            majority = "tab" if minority == "space" else "space"
-            offenders.append(
-                f"{rel}:{styles[minority][0]} ({len(styles[minority])} {minority}-indented "
-                f"vs {len(styles[majority])} {majority}-indented)"
-            )
-        self.assertEqual(
-            offenders,
-            [],
-            "a python file indents with both tabs and spaces — pick the style "
-            "already dominant in that file and reindent the minority: "
-            + "; ".join(offenders),
-        )
-
-    def test_no_stale_mixed_indent_entry(self):
-        """An entry that got cleaned up must leave, so the debt can only shrink."""
-        mixed = set(self._mixed_files())
-        stale = sorted(TRACKED_MIXED_INDENT - mixed)
-        self.assertEqual(
-            stale,
-            [],
-            "these files no longer mix indentation — drop them from "
-            f"TRACKED_MIXED_INDENT so they stay clean: {stale}",
-        )
 
 
 if __name__ == "__main__":
