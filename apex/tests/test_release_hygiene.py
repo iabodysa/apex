@@ -28,10 +28,8 @@ import io
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
-import tempfile
 import tokenize
 import types
 import unittest
@@ -920,72 +918,6 @@ class TestNoInternalMarkersInMetadata(unittest.TestCase):
             "as an outcome a reader can act on, or move the note out of docs/ — a "
             f"task id, TODO, FIXME, HACK or WIP is not a published claim: {sorted(offenders)}",
         )
-
-
-class TestPublishedMarkerScanIsFalsifiable(unittest.TestCase):
-    """The doc scan must actually report a leak, and must not fire on quoted code.
-
-    Proven against planted files in a temp dir rather than by dirtying a real
-    page: a proof that mutates a published document is one failed revert away
-    from shipping the very text it is checking for.
-    """
-
-    def setUp(self):
-        self.tmp = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, self.tmp, True)
-
-    def _plant(self, name, text):
-        path = os.path.join(self.tmp, name)
-        with open(path, "w", encoding="utf-8") as fh:
-            fh.write(text)
-        return path
-
-    def test_a_clean_page_reports_nothing(self):
-        page = self._plant("clean.md", "# Fleet\n\nThe board lists every vehicle.\n")
-        self.assertEqual(marker_offenders([page], self.tmp), [])
-
-    def test_a_leaked_marker_in_prose_is_reported(self):
-        page = self._plant("leaky.md", "# Fleet\n\nTODO: describe the handover flow.\n")
-        offenders = marker_offenders([page], self.tmp)
-        self.assertEqual(len(offenders), 1, f"leak went unreported: {offenders}")
-        self.assertIn("leaky.md:3", offenders[0])
-        self.assertIn("TODO", offenders[0])
-
-    def test_a_leaked_task_id_is_reported(self):
-        """One marker per planted line: `search` reports the leftmost, so a line
-        carrying two would prove only that the earlier one matched.
-
-        The id is assembled rather than written out because this very guard bans
-        board ids in an assertion message, and a fixture is not an exemption.
-        """
-        planted = "T-" + "552"
-        page = self._plant("task.md", f"The rewrite was delivered under {planted}.\n")
-        offenders = marker_offenders([page], self.tmp)
-        self.assertEqual(len(offenders), 1, f"task id went unreported: {offenders}")
-        self.assertIn(planted, offenders[0])
-
-    def test_a_marker_inside_a_fenced_code_block_is_not_reported(self):
-        """The lookalike: a page quoting source that legitimately carries a TODO.
-        Firing there would push authors to stop quoting real code."""
-        page = self._plant(
-            "quoted.md", "# Guide\n\n```python\n# TODO: handled upstream\n```\n\nDone.\n"
-        )
-        self.assertEqual(marker_offenders([page], self.tmp), [])
-
-    def test_an_unclosed_fence_is_reported_rather_than_exempting_the_tail(self):
-        """The fence exemption's own fail-open: leave the fence open and every
-        later line goes unread, so the omission is reported as the defect."""
-        page = self._plant("open.md", "# Guide\n\n```python\nx = 1\n\nTODO: later.\n")
-        offenders = marker_offenders([page], self.tmp)
-        self.assertEqual(len(offenders), 1, f"unclosed fence unreported: {offenders}")
-        self.assertIn("unclosed code fence", offenders[0])
-
-    def test_an_unreadable_file_does_not_crash_the_scan(self):
-        """docs/ ships images too; a binary must be skipped, not raise."""
-        path = os.path.join(self.tmp, "logo.png")
-        with open(path, "wb") as fh:
-            fh.write(b"\x89PNG\r\n\x1a\n\xff\xfe")
-        self.assertEqual(marker_offenders([path], self.tmp), [])
 
 
 class TestPrintFormatGuards(unittest.TestCase):

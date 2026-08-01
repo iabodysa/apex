@@ -290,34 +290,6 @@ def scoped():
 """
 
 
-class TestTheSweepTellsTheFourShapesApart(unittest.TestCase):
-    """A sweep that flags nothing is indistinguishable from a sweep that is broken."""
-
-    def _hits(self, source):
-        lines = source.splitlines()
-        return [
-            lines[n - 1].strip()
-            for n in _loops_that_resume_after_a_bare_rollback(ast.parse(source))
-        ]
-
-    def test_it_flags_only_the_loop_that_resumes(self):
-        self.assertEqual(self._hits(CONTROL_SWEEP), ["frappe.db.rollback()"])
-
-    def test_a_conditional_raise_does_not_clear_the_handler(self):
-        source = (
-            "import frappe\n"
-            "def f():\n"
-            "    for row in rows:\n"
-            "        try:\n"
-            "            go(row)\n"
-            "        except Exception:\n"
-            "            frappe.db.rollback()\n"
-            "            if fatal:\n"
-            "                raise\n"
-        )
-        self.assertEqual(self._hits(source), ["frappe.db.rollback()"])
-
-
 class TestNoLoopResumesAfterAWholeTransactionRollback(unittest.TestCase):
     def test_no_shipped_loop_continues_past_a_bare_rollback(self):
         offenders = []

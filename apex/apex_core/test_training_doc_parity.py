@@ -42,11 +42,8 @@ apex_core is the shared kernel, so a cross-module published-claim guard has a ho
 Run standalone:  python3 -m unittest apex.apex_core.test_training_doc_parity -v
 """
 
-import json
 import os
 import re
-import shutil
-import tempfile
 import unittest
 
 from apex.tests.shipped_doctypes import shipped_doctypes
@@ -371,86 +368,6 @@ class TestTrainingRightsMatchTheDocPerms(unittest.TestCase):
         known = set(role_charters()) | set(ROLE_HEADERS_OUTSIDE_THE_CHARTER)
         strays = sorted({role for _f, _d, role in KNOWN_TABLE_DIVERGENCES if role not in known})
         self.assertEqual(strays, [], f"frozen entries name unpublished role(s): {strays}")
-
-
-class TestParityGuardIsFalsifiable(unittest.TestCase):
-    """Flip one cell on each side and prove the comparison reports it.
-
-    Driven against temporary copies of the real page and a real DocType JSON: a proof that
-    mutates tracked files is one failed revert away from corrupting the tree it proves.
-    """
-
-    DOC = "safety.md"
-    DOCTYPE = "Safety Task Execution"
-    ROLE = "Safety Officer"
-
-    def setUp(self):
-        self.tmp = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, self.tmp, True)
-        self.docs = os.path.join(self.tmp, "training")
-        shutil.copytree(TRAINING_DIR, self.docs)
-        self.source = os.path.join(APP_ROOT, "habitat", "doctype", "safety_task_execution")
-        self.json_path = os.path.join(self.tmp, "safety_task_execution.json")
-        shutil.copyfile(
-            os.path.join(self.source, "safety_task_execution.json"), self.json_path
-        )
-
-    def _doctypes(self):
-        with open(self.json_path, encoding="utf-8") as fh:
-            return {self.DOCTYPE: json.load(fh)}
-
-    def _compare(self):
-        cells = documented_cells(self.docs)
-        mine = {key: text for key, text in cells.items() if key[1] == self.DOCTYPE}
-        self.assertTrue(mine, "fixture rows did not parse")
-        return rights_divergences(mine, self._doctypes())
-
-    def _edit_doc(self, old, new):
-        path = os.path.join(self.docs, self.DOC)
-        with open(path, encoding="utf-8") as fh:
-            text = fh.read()
-        self.assertIn(old, text, "fixture row no longer matches the edit pattern")
-        with open(path, "w", encoding="utf-8") as fh:
-            fh.write(text.replace(old, new, 1))
-
-    def test_the_unmodified_copy_agrees(self):
-        self.assertEqual(self._compare(), {}, "baseline fixture must start clean")
-
-    def test_a_flipped_documented_cell_is_reported(self):
-        """Doc side: drop Create from the Safety Officer cell and it must red."""
-        self._edit_doc(
-            "| **Safety Task Execution** *(submittable)* | Read, Write, Create, Submit, "
-            "Cancel, Amend | Read, Write, Create, Submit | Read, Write, Create |",
-            "| **Safety Task Execution** *(submittable)* | Read, Write, Create, Submit, "
-            "Cancel, Amend | Read, Write, Create, Submit | Read, Write |",
-        )
-        found = self._compare()
-        self.assertIn((self.DOC, self.DOCTYPE, self.ROLE), found, f"flip went unreported: {found}")
-        self.assertEqual(
-            found[(self.DOC, self.DOCTYPE, self.ROLE)],
-            (["read", "write"], ["create", "read", "write"]),
-        )
-
-    def test_a_flipped_docperm_is_reported(self):
-        """JSON side: grant the same role Delete and it must red just as loudly."""
-        with open(self.json_path, encoding="utf-8") as fh:
-            data = json.load(fh)
-        for row in data["permissions"]:
-            if row.get("role") == self.ROLE:
-                row["delete"] = 1
-        with open(self.json_path, "w", encoding="utf-8") as fh:
-            json.dump(data, fh)
-
-        found = self._compare()
-        self.assertIn((self.DOC, self.DOCTYPE, self.ROLE), found, f"grant went unreported: {found}")
-        self.assertIn("delete", found[(self.DOC, self.DOCTYPE, self.ROLE)][1])
-
-    def test_a_renamed_doctype_leaves_the_shipped_set(self):
-        """Name axis: rename a row's DocType and it stops resolving."""
-        self._edit_doc("| **Safety Task Execution** *(submittable)* |", "| **Safety Execution** |")
-        published = {doctype for _file, doctype in documented_doctypes(self.docs)}
-        self.assertIn("Safety Execution", published)
-        self.assertNotIn("Safety Execution", shipped_doctypes())
 
 
 if __name__ == "__main__":

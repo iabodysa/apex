@@ -385,31 +385,5 @@ class TestTheAppsOwnReportsStillSave(unittest.TestCase):
         self.assertEqual(phantom, [], "the baseline names report(s) this app no longer ships")
 
 
-class TestTheDetectorCanFail(unittest.TestCase):
-    """Proof 4 — reproduce the predicate with the check removed and watch it go blind."""
-
-    ROWS = [{"role": REPORT_ROLE, "read": 1}]
-
-    def test_the_check_present_refuses(self):
-        self.assertEqual(
-            report_role_guard.denied_roles(self.ROWS, 0, [REPORT_ROLE]), [REPORT_ROLE]
-        )
-
-    def test_removing_the_report_flag_check_lets_the_offender_through(self):
-        """The mutant: `report` no longer required — exactly the misreading disproved
-        earlier: DocPerm.report defaults to 1 in frappe's JSON, but import_file never
-        applies a field default, so an omitted flag really is 0."""
-        blind = {
-            row["role"]
-            for row in self.ROWS
-            if row.get("role") and not row.get("if_owner") and not int(row.get("permlevel") or 0)
-        }
-        self.assertEqual(
-            sorted({REPORT_ROLE} - blind),
-            [],
-            "the mutant still refuses, so this file is not proving the report clause",
-        )
-
-
 if __name__ == "__main__":
     unittest.main()

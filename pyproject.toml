@@ -22,6 +22,27 @@ Repository = "https://github.com/iabodysa/apex"
 # and no workflow invokes it — declaring it here would advertise a runner that does not
 # work. Use bench, or `bench --site test.localhost run-tests --module <dotted.path>`.
 
+# On-demand, not a CI lane: `mutmut run` answers "can this detector fail", which is
+# what the deleted *IsFalsifiable / TestTheDetectorCanFail classes each hand-wrote one
+# mutant for. Only the detectors that live in their own importable module are listed —
+# a detector written inside its own test module cannot be mutated apart from the test
+# that grades it. Install into a throwaway target dir, never the bench env: mutmut pulls
+# click 8.4 and coverage 7.x, and bench pins click 8.2.
+#   pip install --target=/tmp/mutlib mutmut
+#   PYTHONPATH=/tmp/mutlib:. python -m mutmut run
+[tool.mutmut]
+source_paths = [
+    "apex/apex_core/utils/report_role_guard.py",
+    "apex/apex_core/utils/field_sensitivity.py",
+    "apex/tests/workspace_reachability.py",
+]
+pytest_add_cli_args_test_selection = [
+    "apex/apex_core/utils/test_report_role_guard.py",
+    "apex/apex_core/utils/test_field_sensitivity.py",
+    "apex/tests/test_workspace_sidebar_reachability.py",
+]
+also_copy = ["apex", "docs", "frontend", "pyproject.toml", "setup.py", "README.md"]
+
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
