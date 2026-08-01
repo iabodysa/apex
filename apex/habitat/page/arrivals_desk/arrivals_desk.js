@@ -204,9 +204,13 @@ class ArrivalsDesk {
 		this.cardIssued = false; // any Masar arrival link issued this session
 		this.transportStarted = false; // a transport request was created this session
 		this.mrzOcrEnabled = false; // passport MRZ camera autofill (Habitat Settings flag)
-		frappe.db
-			.get_single_value('Habitat Settings', 'enable_passport_mrz_ocr')
-			.then((v) => (this.mrzOcrEnabled = !!v))
+		// Read through the desk's own accessor, never frappe.client.get_single_value:
+		// that needs read on the whole Habitat Settings Single, which this page's
+		// audience does not have, and the refusal opens a blocking dialog that no
+		// client-side .catch() can suppress.
+		frappe
+			.xcall('apex.habitat.api.arrivals_desk.get_intake_settings')
+			.then((r) => (this.mrzOcrEnabled = !!(r && r.enable_passport_mrz_ocr)))
 			.catch(() => {});
 		// [#frsjh3]
 		this.page.hide_form();

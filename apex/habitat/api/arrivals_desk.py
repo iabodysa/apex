@@ -101,6 +101,31 @@ def _assert_party_in_scope(party_type, party) -> None:
         return
 
 
+@frappe.whitelist()
+def get_intake_settings() -> dict:
+    """The Arrivals Desk feature flags, answered without exposing Habitat Settings.
+
+    The desk used to read ``enable_passport_mrz_ocr`` through
+    ``frappe.client.get_single_value``, which needs read on the whole Single. Habitat
+    Settings grants read to System Manager only, so the Resident Supervisor the page
+    is published to met a blocking permission dialog on every load — a client-side
+    ``.catch()`` cannot suppress it, because the dialog is raised by the transport,
+    not by the promise the caller holds.
+
+    Only the one boolean is returned, and only to a caller who could actually use the
+    passport register sheet it gates (the same ``Temporary Worker`` create right that
+    ``register_temporary_worker`` and ``parse_passport`` already enforce). Anyone else
+    is told the feature is off rather than refused, so the desk still renders.
+    """
+    if not frappe.has_permission(PARTY_TEMPORARY_WORKER, "create"):
+        return {"enable_passport_mrz_ocr": False}
+    return {
+        "enable_passport_mrz_ocr": bool(
+            frappe.db.get_single_value("Habitat Settings", "enable_passport_mrz_ocr")
+        )
+    }
+
+
 @frappe.whitelist(methods=["POST"])
 def send_masar_link_message(employee, phone=None) -> dict:
     """Send a worker their already-issued Masar link to their phone (WhatsApp/SMS).
