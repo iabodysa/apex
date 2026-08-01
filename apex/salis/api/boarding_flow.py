@@ -40,6 +40,10 @@ from apex.apex_core.doctype.salis_settings.salis_settings import (
 _MISBOARD_CACHE_PREFIX = "salis_misboard:"
 _MISBOARD_TTL_SECONDS = 30 * 60
 
+# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
+# rather than stacking one per row.
+_ROW_SAVEPOINT = "salis_boarding_auto_confirm_row"
+
 
 def _publish(event, dispatch_trip, payload):
     """Publish a boarding flow event to the Dispatch Trip room (P-032 pattern).
@@ -329,7 +333,8 @@ def auto_confirm_claimed_boardings():
     one Worker Claimed boarding-state row and applies the timeout to each.
 
     Registered in hooks scheduler_events (every few minutes). Idempotent and
-    cheap: a trip with no eligible claim is left untouched."""
+    cheap: a trip with no eligible claim is left untouched. Each trip is written
+    inside its own savepoint so one bad trip cannot cost the rest of the run."""
     trips = frappe.get_all(
         "Trip Boarding State",
         filters={"status": "Worker Claimed", "parenttype": "Dispatch Trip"},
@@ -338,12 +343,23 @@ def auto_confirm_claimed_boardings():
     )
     confirmed = 0
     for name in set(trips):
-        trip = frappe.get_doc("Dispatch Trip", name)
-        flipped = _apply_auto_confirm(trip)
-        if flipped:
-            trip.save(ignore_permissions=True)  # audit-ok: system tick, no user identity
-            confirmed += flipped
-            _publish("boarding_update", name, {"auto_confirmed": flipped})
+        # The run commits only below, so an escaping exception — which Frappe answers
+        # with a whole-transaction rollback (scheduled_job_type.py:155) — would discard
+        # every trip already confirmed and re-stall on the same row on the next tick.
+        frappe.db.savepoint(_ROW_SAVEPOINT)
+        try:
+            trip = frappe.get_doc("Dispatch Trip", name)
+            flipped = _apply_auto_confirm(trip)
+            if flipped:
+                trip.save(ignore_permissions=True)  # audit-ok: system tick, no user identity
+                confirmed += flipped
+                _publish("boarding_update", name, {"auto_confirmed": flipped})
+        except Exception:
+            frappe.db.rollback(save_point=_ROW_SAVEPOINT)
+            frappe.log_error(
+                message=frappe.get_traceback(),
+                title=f"Boarding auto-confirm failed for {name}"[:140],
+            )
     if confirmed:
         frappe.db.commit()
     return confirmed
