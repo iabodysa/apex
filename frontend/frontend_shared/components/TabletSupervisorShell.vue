@@ -34,7 +34,14 @@
     <!-- scrim behind the drawer on narrow widths -->
     <div v-if="drawerOpen" class="ts-scrim" @click="drawerOpen = false"></div>
 
-    <aside class="ts-nav" :class="{ 'ts-nav-open': drawerOpen }">
+    <aside
+      ref="navEl"
+      class="ts-nav"
+      :class="{ 'ts-nav-open': drawerOpen }"
+      :role="drawerIsModal ? 'dialog' : null"
+      :aria-modal="drawerIsModal ? 'true' : null"
+      :aria-label="drawerIsModal ? menuLabel : null"
+    >
       <div class="ts-brand"><slot name="brand" /></div>
       <nav class="ts-nav-list" @click="drawerOpen = false"><slot name="nav" /></nav>
     </aside>
@@ -67,7 +74,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onScopeDispose } from "vue";
+import { useOverlay } from "../useOverlay.js";
 
 const props = defineProps({
   title: { type: String, default: "" },
@@ -78,6 +86,35 @@ const props = defineProps({
 });
 
 const drawerOpen = ref(false);
+const navEl = ref(null);
+
+// Below --bp-desktop the side nav is a slide-in drawer over a scrim, i.e. a modal
+// surface; at or above it the same element is a static sidebar that must stay in the
+// normal tab order. The same 1023px the stylesheet switches on decides which, so the
+// two can never disagree. matchMedia is absent under jsdom (component tests), where
+// the drawer is simply never modal.
+const MODAL_QUERY = "(max-width: 1023px)";
+const narrow = ref(false);
+if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
+  const mq = window.matchMedia(MODAL_QUERY);
+  narrow.value = mq.matches;
+  const onChange = (e) => {
+    narrow.value = e.matches;
+    // Widening past the breakpoint turns the drawer back into a plain sidebar; leaving
+    // `drawerOpen` set would keep the scrim state around with nothing rendering it.
+    if (!e.matches) drawerOpen.value = false;
+  };
+  mq.addEventListener("change", onChange);
+  onScopeDispose(() => mq.removeEventListener("change", onChange));
+}
+
+const drawerIsModal = computed(() => drawerOpen.value && narrow.value);
+
+useOverlay({
+  active: drawerIsModal,
+  container: navEl,
+  close: () => (drawerOpen.value = false),
+});
 
 const shellVars = computed(() => ({
   "--ts-accent": props.accent,

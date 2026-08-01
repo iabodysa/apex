@@ -125,8 +125,6 @@
               @note="onNote"
             />
 
-            <p v-if="submitError" class="status-note status-err">{{ submitError }}</p>
-
             <div class="submit-dock">
               <p class="submit-progress">
                 <span class="submit-dot" :class="{ 'submit-dot-ready': totalRated > 0 }"></span>
@@ -146,6 +144,15 @@
                   {{ t("submit.cta") }}
                 </template>
               </button>
+              <!-- role=alert: the refusal appears only in response to the submit tap,
+                   so it must be announced, not just painted. BELOW the button, never
+                   above it: this line is the only thing on the page that appears at the
+                   moment of the tap, and inserting it above pushed the button 93px down
+                   and out of the viewport — the control moved out from under the thumb
+                   that had just pressed it. -->
+              <p v-if="submitError" ref="submitErrEl" class="status-note status-err submit-err" role="alert">
+                {{ submitError }}
+              </p>
               <p class="submit-hint">{{ t("submit.hint") }}</p>
             </div>
           </div>
@@ -156,7 +163,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "./components/Icon.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
@@ -189,6 +196,7 @@ const building = ref("");
 const buildingLabel = ref("");
 const submitted = ref(null);
 const submitError = ref("");
+const submitErrEl = ref(null);
 
 // ratings: { [cadence]: { [taskName]: { verdict, notes } } }
 const ratings = reactive({});
@@ -289,6 +297,25 @@ function buildResults() {
   return out;
 }
 
+// The server refuses a FAILED result on an evidence_required task that carries no
+// Evidence Photo. The portal already holds `evidence_required` per task (TaskRow
+// renders the chip from it), so it can name that rule in the operator's own language
+// instead of falling back to "couldn't submit" — the server sentence itself is never
+// rendered (it resolves against the site language, not this portal's toggle).
+const EVIDENCE_BLOCKING_STATUSES = new Set(["Not Done", "Poor"]);
+
+function evidenceBlockedTask(results) {
+  const byName = new Map();
+  for (const block of due.value) {
+    for (const task of block.tasks) byName.set(task.name, task);
+  }
+  const hit = results.find((r) => {
+    const task = byName.get(r.task);
+    return task && task.evidence_required && EVIDENCE_BLOCKING_STATUSES.has(r.execution_status);
+  });
+  return hit ? byName.get(hit.task) : null;
+}
+
 async function doSubmit() {
   submitError.value = "";
   const results = buildResults();
@@ -296,19 +323,28 @@ async function doSubmit() {
     submitError.value = t("submit.needOne");
     return;
   }
-  // createResource.submit() swallows failures into submitRes.error rather than
-  // re-throwing, so we branch on the resource's own error/data after awaiting —
-  // a try/catch here would never fire and could show success on a failed POST.
-  const res = await submitRes.submit({
-    building: building.value,
-    round_date: today(),
-    results: JSON.stringify(results),
-  });
-  if (submitRes.error) {
-    submitError.value = resourceErrorMessage(submitRes.error, "errors.submitFailed");
-    return;
+  // createResource.submit() RE-THROWS after recording the failure (frappe-ui
+  // resources.js handleError). Awaiting it without a catch rejected the click
+  // handler, so every line below — including the one that shows the refusal —
+  // was skipped and a rejected round looked identical to no round at all.
+  try {
+    const res = await submitRes.submit({
+      building: building.value,
+      round_date: today(),
+      results: JSON.stringify(results),
+    });
+    submitted.value = res || submitRes.data || { ok: true, rounds: [], emailed: false };
+  } catch (e) {
+    const blocked = evidenceBlockedTask(results);
+    submitError.value = blocked
+      ? t("errors.evidenceRequired", { task: blocked.task_title || blocked.name })
+      : resourceErrorMessage(e, "errors.submitFailed");
+    // The dock sits at the foot of a checklist that can run past 9000px, so the
+    // line can render with its last rows below the fold. "nearest" moves the page
+    // by the minimum needed and does nothing when it is already fully visible.
+    await nextTick();
+    if (submitErrEl.value) submitErrEl.value.scrollIntoView({ block: "nearest" });
   }
-  submitted.value = res || submitRes.data || { ok: true, rounds: [], emailed: false };
 }
 
 // ---- realtime (socket push) --------------------------------------------
@@ -535,6 +571,10 @@ function resultIcon(r) {
   display: inline-grid;
   place-items: center;
   animation: spin 0.7s linear infinite;
+}
+.submit-err {
+  margin-top: 12px;
+  text-align: start;
 }
 .submit-hint {
   margin-top: 10px;
