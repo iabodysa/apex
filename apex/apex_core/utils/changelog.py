@@ -8,6 +8,12 @@ from frappe.utils import get_datetime
 # "What's New" popup and this bell feed now agree on the same 2.x floor.
 _RELEASES = [
     {
+        "title": "Apex 2.1.21 — Typing a transport request no longer disappears while the screen refreshes, safety verdicts survive a reload, photos are refused before upload if the server would reject them, and refusals now arrive in the language of the page.",
+        "app_name": "apex",
+        "link": "/app",
+        "creation": "2026-08-01 09:06:38",
+    },
+    {
         "title": "Apex 2.1.20 — Transport request authorization now says who may approve, fleet roles can pick a project again, uploaded photos must really be images, and telecom billing works for a period that has already closed.",
         "app_name": "apex",
         "link": "/app",
