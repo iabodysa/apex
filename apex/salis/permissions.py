@@ -39,6 +39,16 @@ def _allowed_projects(user):
     return permission_scope.allowed_for(user, "Project", "apex_allowed_projects")
 
 
+def _allowed_projects_for(user, doctype):
+    """``_allowed_projects`` narrowed to the permissions that apply to ``doctype``.
+
+    A User Permission carrying ``applicable_for`` grants its project for that one
+    DocType; without this narrowing it would unlock every project-scoped DocType.
+    See ``permission_scope.for_doctype``.
+    """
+    return permission_scope.for_doctype(user, "Project", doctype, _allowed_projects(user))
+
+
 def _is_unscoped(user):
     """True when the user holds any oversight role that sees all projects."""
     return permission_scope.is_unscoped(user, UNSCOPED_ROLES)
@@ -72,7 +82,7 @@ def _project_supervisor(project):
     return None
 
 
-def _project_condition(user, column="`project`"):
+def _project_condition(user, column="`project`", doctype=None):
     """Build the SQL fragment restricting `column` to the allowed projects.
 
     Returns "" for unscoped users (no restriction). Returns "1=0" when the
@@ -82,12 +92,12 @@ def _project_condition(user, column="`project`"):
     namespace stay bound here.
     """
     return permission_scope.scope_condition(
-        user, _is_unscoped, _allowed_projects, column
+        user, _is_unscoped, _allowed_projects, column, allow="Project", doctype=doctype
     )
 
 
 # [#iecjvo]
-def report_project_scope(user=None):
+def report_project_scope(user=None, doctype=None):
     """Return ``(restrict, allowed_projects)`` for report-side project scoping.
 
     ``restrict`` is False for unscoped oversight roles (the report applies no extra
@@ -96,45 +106,45 @@ def report_project_scope(user=None):
     project, i.e. the report should return no rows). Thin wrapper over
     ``permission_scope.report_scope`` with this module's project resolvers.
     """
-    return permission_scope.report_scope(user, _is_unscoped, _allowed_projects)
+    return permission_scope.report_scope(user, _is_unscoped, _allowed_projects, allow="Project", doctype=doctype)
 
 
 # [#89nxdl]
 
-def vehicle_assignment_query(user=None):
-    return _project_condition(user)
+def vehicle_assignment_query(user=None, doctype=None):
+    return _project_condition(user, doctype=doctype)
 
 
-def fuel_request_query(user=None):
-    return _project_condition(user)
+def fuel_request_query(user=None, doctype=None):
+    return _project_condition(user, doctype=doctype)
 
 
-def transport_request_query(user=None):
-    return _project_condition(user)
+def transport_request_query(user=None, doctype=None):
+    return _project_condition(user, doctype=doctype)
 
 
-def route_plan_query(user=None):
-    return _project_condition(user)
+def route_plan_query(user=None, doctype=None):
+    return _project_condition(user, doctype=doctype)
 
 
-def support_ticket_query(user=None):
-    return _project_condition(user)
+def support_ticket_query(user=None, doctype=None):
+    return _project_condition(user, doctype=doctype)
 
 
-def fuel_claim_query(user=None):
-    return _project_condition(user)
+def fuel_claim_query(user=None, doctype=None):
+    return _project_condition(user, doctype=doctype)
 
 
-def fuel_quota_query(user=None):
-    return _project_condition(user)
+def fuel_quota_query(user=None, doctype=None):
+    return _project_condition(user, doctype=doctype)
 
 
-def fuel_exception_case_query(user=None):
-    return _project_condition(user)
+def fuel_exception_case_query(user=None, doctype=None):
+    return _project_condition(user, doctype=doctype)
 
 
-def salis_payment_request_query(user=None):
-    return _project_condition(user)
+def salis_payment_request_query(user=None, doctype=None):
+    return _project_condition(user, doctype=doctype)
 
 
 def _own_driver_trips_condition(user):
@@ -152,7 +162,7 @@ def _own_driver_trips_condition(user):
     )
 
 
-def dispatch_trip_query(user=None):
+def dispatch_trip_query(user=None, doctype=None):
     """Dispatch Trip has no own `project` field; it links to a Route Plan.
 
     Scope it through the parent Route Plan's project so the same project
@@ -171,7 +181,7 @@ def dispatch_trip_query(user=None):
 
     own = _own_driver_trips_condition(user)
 
-    projects = _allowed_projects(user)
+    projects = _allowed_projects_for(user, doctype)
     if not projects:
         # [#fdplqh]
         return own
@@ -185,7 +195,7 @@ def dispatch_trip_query(user=None):
     return "({in_scope} or {own})".format(in_scope=in_scope, own=own)
 
 
-def trip_start_log_query(user=None):
+def trip_start_log_query(user=None, doctype=None):
     """Trip Start Log has no own `project` field; it links to a Dispatch Trip,
     which in turn links to a Route Plan carrying the project.
 
@@ -207,7 +217,7 @@ def trip_start_log_query(user=None):
 
     own = "`owner` = {0}".format(frappe.db.escape(user))
 
-    projects = _allowed_projects(user)
+    projects = _allowed_projects_for(user, doctype)
     if not projects:
         # [#7eocrd]
         return own
@@ -221,17 +231,17 @@ def trip_start_log_query(user=None):
     return "({in_scope} or {own})".format(in_scope=in_scope, own=own)
 
 
-def salis_vehicle_query(user=None):
+def salis_vehicle_query(user=None, doctype=None):
     """Salis Vehicle carries a direct `project` Link, so it is scoped exactly like
     the other project-bearing master/transactional DocTypes: a scoped user sees
     only vehicles in their allowed projects; oversight roles see all. This closes
     the desk-list leak where a scoped Fleet Supervisor could enumerate every
     project's vehicles at /app/salis-vehicle (the Dispatch Board already filtered
     by project, but the standard list view did not)."""
-    return _project_condition(user)
+    return _project_condition(user, doctype=doctype)
 
 
-def salis_driver_query(user=None):
+def salis_driver_query(user=None, doctype=None):
     """Salis Driver carries a direct `project` Link, scoped like Salis Vehicle —
     with one addition: the Driver role reads its OWN profile via an ``if_owner``
     DocPerm. Frappe ANDs this query fragment with the ``owner = me`` clause it adds
@@ -248,7 +258,7 @@ def salis_driver_query(user=None):
 
     own = "`owner` = {0}".format(frappe.db.escape(user))
 
-    projects = _allowed_projects(user)
+    projects = _allowed_projects_for(user, doctype)
     if not projects:
         # [#5hk4nq]
         return own
@@ -257,7 +267,7 @@ def salis_driver_query(user=None):
     return "(`project` in ({values}) or {own})".format(values=escaped, own=own)
 
 
-def passenger_manifest_query(user=None):
+def passenger_manifest_query(user=None, doctype=None):
     """Passenger Manifest has no own `project` field; it links to a Route Plan
     (and a Dispatch Trip, which itself links to a Route Plan) that carries the
     project. Scope it through either link so the same project boundary applies as
@@ -273,7 +283,7 @@ def passenger_manifest_query(user=None):
     if _is_unscoped(user):
         return ""
 
-    projects = _allowed_projects(user)
+    projects = _allowed_projects_for(user, doctype)
     if not projects:
         return "1=0"
 
@@ -293,7 +303,7 @@ def passenger_manifest_query(user=None):
 # [#1hud7u]
 # [#dr1tz9]
 
-def _driver_chain_condition(user, column="`driver`", with_owner=False):
+def _driver_chain_condition(user, column="`driver`", with_owner=False, doctype=None):
     """SQL fragment scoping a `driver`-link column through Salis Driver's project.
 
     `column` is the back-quoted driver-link column on the target table (e.g.
@@ -309,7 +319,7 @@ def _driver_chain_condition(user, column="`driver`", with_owner=False):
 
     own = "`owner` = {0}".format(frappe.db.escape(user))
 
-    projects = _allowed_projects(user)
+    projects = _allowed_projects_for(user, doctype)
     if not projects:
         # [#dr0own]
         return own if with_owner else "1=0"
@@ -325,47 +335,47 @@ def _driver_chain_condition(user, column="`driver`", with_owner=False):
     return in_scope
 
 
-def driver_attendance_query(user=None):
+def driver_attendance_query(user=None, doctype=None):
     """Driver Attendance links a `driver` (Salis Driver carries the project) and
     grants the Driver role an `if_owner` read DocPerm, so scope project-OR-owner."""
-    return _driver_chain_condition(user, with_owner=True)
+    return _driver_chain_condition(user, with_owner=True, doctype=doctype)
 
 
-def driver_stop_query(user=None):
+def driver_stop_query(user=None, doctype=None):
     """Driver Suspension links a `driver`; the Driver role reads its own via if_owner."""
-    return _driver_chain_condition(user, with_owner=True)
+    return _driver_chain_condition(user, with_owner=True, doctype=doctype)
 
 
-def boarding_scan_log_query(user=None):
+def boarding_scan_log_query(user=None, doctype=None):
     """Boarding Scan Log links a `driver`; the Driver role reads its own via
     if_owner. (It also links a dispatch_trip, but `driver` is the durable tenant
     anchor present on every row.)"""
-    return _driver_chain_condition(user, with_owner=True)
+    return _driver_chain_condition(user, with_owner=True, doctype=doctype)
 
 
-def vehicle_damage_write_off_query(user=None):
+def vehicle_damage_write_off_query(user=None, doctype=None):
     """Vehicle Damage Write-Off links a `driver`; no Driver DocPerm, so pure
     project scope through Salis Driver."""
-    return _driver_chain_condition(user, with_owner=False)
+    return _driver_chain_condition(user, with_owner=False, doctype=doctype)
 
 
-def vehicle_incident_query(user=None):
+def vehicle_incident_query(user=None, doctype=None):
     """Vehicle Incident links a `driver`; no Driver DocPerm -> pure project scope."""
-    return _driver_chain_condition(user, with_owner=False)
+    return _driver_chain_condition(user, with_owner=False, doctype=doctype)
 
 
-def driver_clearance_query(user=None):
+def driver_clearance_query(user=None, doctype=None):
     """Driver Clearance links a `driver`; no Driver DocPerm -> pure project scope."""
-    return _driver_chain_condition(user, with_owner=False)
+    return _driver_chain_condition(user, with_owner=False, doctype=doctype)
 
 
-def vehicle_stop_query(user=None):
+def vehicle_stop_query(user=None, doctype=None):
     """Vehicle Suspension reaches its tenant through `related_driver` (not `driver`); no
     Driver DocPerm -> pure project scope through Salis Driver."""
-    return _driver_chain_condition(user, column="`related_driver`", with_owner=False)
+    return _driver_chain_condition(user, column="`related_driver`", with_owner=False, doctype=doctype)
 
 
-def movement_cost_transfer_query(user=None):
+def movement_cost_transfer_query(user=None, doctype=None):
     """Movement Cost Transfer carries TWO direct project Links (`from_project`,
     `to_project`) rather than a single `project`. A scoped user may see a transfer
     touching EITHER a from- or a to-project they are permitted for, so the fragment
@@ -376,7 +386,7 @@ def movement_cost_transfer_query(user=None):
     if _is_unscoped(user):
         return ""
 
-    projects = _allowed_projects(user)
+    projects = _allowed_projects_for(user, doctype)
     if not projects:
         return "1=0"
 
@@ -528,7 +538,7 @@ def scoped_has_permission(doc, ptype, user=None):
         # [#kmesp4]
         return False
 
-    if project not in _allowed_projects(user):
+    if project not in _allowed_projects_for(user, doc.doctype):
         return False
 
     return None
@@ -575,7 +585,7 @@ def _owner_or_project_has_permission(doc, user=None):
         return None
 
     project = _doc_project(doc)
-    if project and project in _allowed_projects(user):
+    if project and project in _allowed_projects_for(user, doc.doctype):
         return None
 
     if unsaved and _own_driver_basis(doc, user):
@@ -672,7 +682,7 @@ def dispatch_trip_has_permission(doc, ptype, user=None):
     if not project:
         return False
 
-    if project not in _allowed_projects(user):
+    if project not in _allowed_projects_for(user, doc.doctype):
         return False
 
     return None
@@ -754,7 +764,7 @@ def _driver_chain_has_permission(doc, user=None, driver_field="driver", with_own
         return None
 
     project = _driver_chain_project(doc, driver_field=driver_field)
-    if project and project in _allowed_projects(user):
+    if project and project in _allowed_projects_for(user, doc.doctype):
         return None
 
     if with_owner and unsaved and _own_driver_basis(doc, user, driver_field=driver_field):
@@ -830,7 +840,7 @@ def movement_cost_transfer_has_permission(doc, ptype, user=None):
         # [#dr5nul]
         return None
 
-    allowed = _allowed_projects(user)
+    allowed = _allowed_projects_for(user, doc.doctype)
     if (from_project and from_project in allowed) or (to_project and to_project in allowed):
         return None
     return False
@@ -838,7 +848,7 @@ def movement_cost_transfer_has_permission(doc, ptype, user=None):
 
 # [#9w8q9b]
 
-def operations_alert_query(user=None):
+def operations_alert_query(user=None, doctype=None):
     """List/report scope for Operations Alert via the vehicle's project.
 
     Returns "" (no restriction) for unscoped oversight roles. A scoped user is
@@ -850,7 +860,7 @@ def operations_alert_query(user=None):
     if _is_unscoped(user):
         return ""
 
-    projects = _allowed_projects(user)
+    projects = _allowed_projects_for(user, doctype)
     if not projects:
         return "1=0"
 
@@ -879,7 +889,7 @@ def operations_alert_has_permission(doc, ptype, user=None):
     if not project:
         return False
 
-    if project not in _allowed_projects(user):
+    if project not in _allowed_projects_for(user, doc.doctype):
         return False
 
     return None

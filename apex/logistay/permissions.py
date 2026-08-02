@@ -42,37 +42,50 @@ def _allowed_companies(user):
     return permission_scope.allowed_for(user, "Company", "apex_allowed_companies")
 
 
+def _allowed_companies_for(user, doctype):
+    """``_allowed_companies`` narrowed to the permissions that apply to ``doctype``.
+
+    See ``permission_scope.for_doctype``: a User Permission carrying
+    ``applicable_for`` grants its company for that one DocType only.
+    """
+    return permission_scope.for_doctype(user, "Company", doctype, _allowed_companies(user))
+
+
 def _is_unscoped(user):
     return permission_scope.is_unscoped(user, UNSCOPED_ROLES)
 
 
-def _company_condition(user, column="`company`"):
+def _company_condition(user, column="`company`", doctype=None):
     """SQL WHERE fragment confining ``column`` to the user's allowed companies.
 
     "" for oversight roles, "1=0" for a scoped user with no company (sees
     nothing), ``company in (...)`` otherwise.
     """
-    return permission_scope.scope_condition(user, _is_unscoped, _allowed_companies, column)
+    return permission_scope.scope_condition(
+        user, _is_unscoped, _allowed_companies, column, allow="Company", doctype=doctype
+    )
 
 
-def report_company_scope(user=None):
+def report_company_scope(user=None, doctype=None):
     """``(restrict, allowed_companies)`` for report-side company scoping."""
-    return permission_scope.report_scope(user, _is_unscoped, _allowed_companies)
+    return permission_scope.report_scope(
+        user, _is_unscoped, _allowed_companies, allow="Company", doctype=doctype
+    )
 
 
 # permission_query_conditions (list / report / link scoping)
 
 
-def telecom_contract_query(user=None):
-    return _company_condition(user)
+def telecom_contract_query(user=None, doctype=None):
+    return _company_condition(user, doctype=doctype)
 
 
-def sim_card_query(user=None):
-    return _company_condition(user)
+def sim_card_query(user=None, doctype=None):
+    return _company_condition(user, doctype=doctype)
 
 
-def sim_custody_assignment_query(user=None):
-    return _company_condition(user)
+def sim_custody_assignment_query(user=None, doctype=None):
+    return _company_condition(user, doctype=doctype)
 
 
 # has_permission (form / REST / direct-access scoping)
@@ -127,4 +140,4 @@ def company_scoped_has_permission(doc, ptype, user=None):
     company = _doc_company(doc)
     if not company:
         return False
-    return None if company in _allowed_companies(user) else False
+    return None if company in _allowed_companies_for(user, doc.doctype) else False

@@ -114,12 +114,22 @@ def _allowed_buildings(user):
     return permission_scope.allowed_for(user, "Building", "apex_allowed_buildings")
 
 
+def _allowed_buildings_for(user, doctype):
+    """``_allowed_buildings`` narrowed to the permissions that apply to ``doctype``.
+
+    A User Permission carrying ``applicable_for`` grants its building for that one
+    DocType; without this narrowing it would unlock every building-scoped DocType.
+    See ``permission_scope.for_doctype``.
+    """
+    return permission_scope.for_doctype(user, "Building", doctype, _allowed_buildings(user))
+
+
 def _building_is_unscoped(user):
     """True when the user is the Administrator or holds a building-oversight role."""
     return permission_scope.is_unscoped(user, HOUSING_UNSCOPED_ROLES)
 
 
-def _building_condition(user=None, column="`building`"):
+def _building_condition(user=None, column="`building`", doctype=None):
     """SQL WHERE fragment restricting ``column`` to the user's allowed buildings.
 
     "" for unscoped users (no restriction); "1=0" when the user is scoped but has
@@ -129,39 +139,39 @@ def _building_condition(user=None, column="`building`"):
     here.
     """
     return permission_scope.scope_condition(
-        user, _building_is_unscoped, _allowed_buildings, column
+        user, _building_is_unscoped, _allowed_buildings, column, allow="Building", doctype=doctype
     )
 
 
 # [#63ah2p]
-def accommodation_assignment_query(user=None):
-    return _building_condition(user)
+def accommodation_assignment_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def custody_issue_query(user=None):
-    return _building_condition(user)
+def custody_issue_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def cleaning_log_query(user=None):
-    return _building_condition(user)
+def cleaning_log_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def accommodation_building_query(user=None):
+def accommodation_building_query(user=None, doctype=None):
     # [#3n6e22]
-    return _building_condition(user, column="`name`")
+    return _building_condition(user, column="`name`", doctype=doctype)
 
 
 # [#q79rfw]
-def safety_round_query(user=None):
-    return _building_condition(user)
+def safety_round_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def safety_task_execution_query(user=None):
-    return _building_condition(user)
+def safety_task_execution_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def scheduled_task_instance_query(user=None):
-    return _building_condition(user)
+def scheduled_task_instance_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
 # Each of the remaining safety/cleaning records carries exactly ONE Building link of its
@@ -171,32 +181,32 @@ def scheduled_task_instance_query(user=None):
 # list: frappe's native match (db_query.py:1090) is `ifnull(building,'')='' or building in
 # (...)`, so an empty-building row stays visible and a scoped user holding NO Building
 # permission gets no condition at all. `_building_condition` closes both.
-def safety_incident_query(user=None):
-    return _building_condition(user)
+def safety_incident_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def safety_inspection_report_query(user=None):
-    return _building_condition(user)
+def safety_inspection_report_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def safety_finding_ledger_query(user=None):
-    return _building_condition(user)
+def safety_finding_ledger_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def cleaning_compliance_ledger_query(user=None):
-    return _building_condition(user)
+def cleaning_compliance_ledger_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
 # [#fya0cl]
-def accommodation_resident_request_query(user=None):
-    return _building_condition(user)
+def accommodation_resident_request_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def idle_resident_report_query(user=None):
-    return _building_condition(user)
+def idle_resident_report_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def housing_checkout_query(user=None):
+def housing_checkout_query(user=None, doctype=None):
     """Scope Housing Checkout to the user's buildings through its ``bed``.
 
     The DocType carries no ``building`` column, so ``_building_condition`` cannot serve
@@ -215,7 +225,7 @@ def housing_checkout_query(user=None):
     user = _resolve_user(user)
     if _building_is_unscoped(user):
         return ""
-    buildings = _allowed_buildings(user)
+    buildings = _allowed_buildings_for(user, doctype)
     if not buildings:
         return "1=0"
     escaped = ", ".join(frappe.db.escape(b) for b in buildings)
@@ -224,7 +234,7 @@ def housing_checkout_query(user=None):
     )
 
 
-def room_bed_transfer_query(user=None):
+def room_bed_transfer_query(user=None, doctype=None):
     """Scope Room Bed Transfer to the user's buildings through its ``assignment``.
 
     The DocType carries no ``building`` column, so ``_building_condition`` cannot
@@ -246,7 +256,7 @@ def room_bed_transfer_query(user=None):
     user = _resolve_user(user)
     if _building_is_unscoped(user):
         return ""
-    buildings = _allowed_buildings(user)
+    buildings = _allowed_buildings_for(user, doctype)
     if not buildings:
         return "1=0"
     escaped = ", ".join(frappe.db.escape(b) for b in buildings)
@@ -256,7 +266,7 @@ def room_bed_transfer_query(user=None):
     )
 
 
-def audit_remediation_plan_query(user=None):
+def audit_remediation_plan_query(user=None, doctype=None):
     """Scope Audit Remediation Plan to the user's buildings through its child scope.
 
     The plan carries NO ``building`` column at all — the estate it touches is the set
@@ -280,7 +290,7 @@ def audit_remediation_plan_query(user=None):
     user = _resolve_user(user)
     if _building_is_unscoped(user):
         return ""
-    buildings = _allowed_buildings(user)
+    buildings = _allowed_buildings_for(user, doctype)
     if not buildings:
         return "1=0"
     escaped = ", ".join(frappe.db.escape(b) for b in buildings)
@@ -320,7 +330,7 @@ def audit_remediation_plan_has_permission(doc, ptype, user=None):
     if not buildings:
         # [#1i4wio]
         return False
-    allowed = _allowed_buildings(user)
+    allowed = _allowed_buildings_for(user, doc.doctype)
     return None if any(b in allowed for b in buildings) else False
 
 
@@ -358,11 +368,11 @@ def housing_checkout_has_permission(doc, ptype, user=None):
     if not building:
         # [#1i4wio]
         return False
-    return None if building in _allowed_buildings(user) else False
+    return None if building in _allowed_buildings_for(user, doc.doctype) else False
 
 
 # [#lz1v52]
-def report_building_scope(user=None):
+def report_building_scope(user=None, doctype=None):
     """Return ``(restrict, allowed_buildings)`` for report-side building scoping.
 
     ``restrict`` is False for unscoped oversight roles (the report applies no extra
@@ -372,7 +382,7 @@ def report_building_scope(user=None):
     ``permission_scope.report_scope`` with this module's building resolvers.
     """
     return permission_scope.report_scope(
-        user, _building_is_unscoped, _allowed_buildings
+        user, _building_is_unscoped, _allowed_buildings, allow="Building", doctype=doctype
     )
 
 
@@ -456,69 +466,69 @@ def building_scoped_has_permission(doc, ptype, user=None):
     if not building:
         # [#1i4wio]
         return False
-    return None if building in _allowed_buildings(user) else False
+    return None if building in _allowed_buildings_for(user, doc.doctype) else False
 
 
 # [#qowz2x]
 
 # [#kl06xt]
-def facility_asset_custody_assignment_query(user=None):
-    return _building_condition(user)
+def facility_asset_custody_assignment_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def non_financial_depreciation_snapshot_query(user=None):
-    return _building_condition(user)
+def non_financial_depreciation_snapshot_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def custody_return_query(user=None):
-    return _building_condition(user)
+def custody_return_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def custody_damage_assessment_query(user=None):
-    return _building_condition(user)
+def custody_damage_assessment_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def facility_asset_movement_query(user=None):
+def facility_asset_movement_query(user=None, doctype=None):
     # [#53j3yv]
-    return _dual_building_condition(user)
+    return _dual_building_condition(user, doctype=doctype)
 
 
-def custody_acknowledgment_query(user=None):
-    return _building_condition(user)
+def custody_acknowledgment_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def custody_handover_query(user=None):
+def custody_handover_query(user=None, doctype=None):
     # [#dvbjlx]
-    return _dual_building_condition(user)
+    return _dual_building_condition(user, doctype=doctype)
 
 
-def material_transfer_query(user=None):
+def material_transfer_query(user=None, doctype=None):
     # [#d19wjd]
-    return _dual_building_condition(user)
+    return _dual_building_condition(user, doctype=doctype)
 
 
-def facility_asset_delivery_query(user=None):
+def facility_asset_delivery_query(user=None, doctype=None):
     # [#1grzir]
-    return _dual_building_condition(user)
+    return _dual_building_condition(user, doctype=doctype)
 
 
-def facility_asset_query(user=None):
-    return _building_condition(user)
+def facility_asset_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def housing_inventory_query(user=None):
-    return _building_condition(user)
+def housing_inventory_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def building_license_query(user=None):
-    return _building_condition(user)
+def building_license_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def maintenance_work_order_query(user=None):
-    return _building_condition(user)
+def maintenance_work_order_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def maintenance_inspection_report_query(user=None):
+def maintenance_inspection_report_query(user=None, doctype=None):
     """Scope Maintenance Inspection Report on its own stored ``building``.
 
     The column is populated on every stored row — ``reqd`` plus a ``fetch_from``
@@ -527,36 +537,36 @@ def maintenance_inspection_report_query(user=None):
     (``BUILDING_FETCH_ANCHOR``), because ``fetch_from`` has not run yet at that
     point; a row that reaches this fragment has already been written.
     """
-    return _building_condition(user)
+    return _building_condition(user, doctype=doctype)
 
 
 # [#qu5wvy]
-def accommodation_occupancy_snapshot_query(user=None):
-    return _building_condition(user)
+def accommodation_occupancy_snapshot_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def temporary_worker_query(user=None):
-    return _building_condition(user)
+def temporary_worker_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def arrival_batch_query(user=None):
-    return _building_condition(user)
+def arrival_batch_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def accommodation_room_query(user=None):
-    return _building_condition(user)
+def accommodation_room_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def accommodation_bed_query(user=None):
-    return _building_condition(user)
+def accommodation_bed_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
 # [#h91pnc]
-def accommodation_stock_ledger_query(user=None):
-    return _building_condition(user)
+def accommodation_stock_ledger_query(user=None, doctype=None):
+    return _building_condition(user, doctype=doctype)
 
 
-def _dual_building_condition(user=None):
+def _dual_building_condition(user=None, doctype=None):
     """WHERE fragment scoping a from_building/to_building doc to the user's estate.
 
     A single fragment (pqc hooks AND-join, so the OR must live inside one fragment):
@@ -566,7 +576,7 @@ def _dual_building_condition(user=None):
     user = _resolve_user(user)
     if _building_is_unscoped(user):
         return ""
-    buildings = _allowed_buildings(user)
+    buildings = _allowed_buildings_for(user, doctype)
     if not buildings:
         return "1=0"
     escaped = ", ".join(frappe.db.escape(b) for b in buildings)
@@ -587,7 +597,7 @@ def dual_building_scoped_has_permission(doc, ptype, user=None):
     if _building_is_unscoped(user):
         return None
 
-    allowed = _allowed_buildings(user)
+    allowed = _allowed_buildings_for(user, doc.doctype)
     endpoints = [
         getattr(doc, "from_building", None),
         getattr(doc, "to_building", None),
