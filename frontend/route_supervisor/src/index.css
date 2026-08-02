@@ -61,6 +61,14 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ─────────── work area: plan list + detail ─────────── */
 .work { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; align-items: start; }
+.back-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 10px;
+  border: 1px solid var(--c-border); background: var(--c-surface);
+  color: var(--c-ink); cursor: pointer; flex: none;
+}
+.back-btn:hover { background: var(--c-surface-2); }
+[dir="rtl"] .back-btn svg { transform: scaleX(-1); }
 @media (min-width: 1280px) {
   .work { grid-template-columns: 300px minmax(0, 1fr) 380px; }
   .live { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 12px; }

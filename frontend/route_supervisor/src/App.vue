@@ -90,7 +90,7 @@
 
     <div class="work">
       <!-- Plan list -->
-      <aside class="plans">
+      <aside v-if="showList" class="plans">
         <div class="plans-head">
           <h2 class="plans-title">{{ t("header.plans") }}</h2>
         </div>
@@ -130,7 +130,7 @@
       </aside>
 
       <!-- Detail -->
-      <section class="detail">
+      <section v-if="showDetail" class="detail">
         <div v-if="!selectedPlan" class="empty big">
           <Icon name="route" :size="40" :stroke-width="1.5" />
           <p>{{ t("list.empty") }}</p>
@@ -139,6 +139,9 @@
         <template v-else>
           <!-- Plan hero -->
           <div class="hero">
+            <button v-if="narrow" type="button" class="back-btn" :aria-label="t('nav.plans')" @click="backToList()">
+              <Icon name="chevron" :size="18" />
+            </button>
             <div class="hero-main">
               <h2 class="hero-title">{{ selectedPlan.route_name || selectedPlan.name }}</h2>
               <div class="hero-chips">
@@ -305,12 +308,26 @@ function barPct(b) {
 const TAB_KEYS = TABS.map((tb) => tb.key);
 
 const WIDE_QUERY = "(min-width: 1280px)";
+const NARROW_QUERY = "(max-width: 640px)";
 const wide = ref(typeof window !== "undefined" && window.matchMedia(WIDE_QUERY).matches);
+const narrow = ref(typeof window !== "undefined" && window.matchMedia(NARROW_QUERY).matches);
 let wideMedia = null;
+let narrowMedia = null;
 
 function onWidthChange(event) {
   wide.value = event.matches;
   if (wide.value && tab.value === "map") tab.value = TAB_KEYS[0];
+}
+
+function onNarrowChange(event) {
+  narrow.value = event.matches;
+}
+
+const showList = computed(() => !narrow.value || !selectedName.value);
+const showDetail = computed(() => !narrow.value || Boolean(selectedName.value));
+
+function backToList() {
+  selectedName.value = null;
 }
 
 const shownTabs = computed(() => (wide.value ? TABS.filter((tb) => tb.key !== "map") : TABS));
@@ -351,7 +368,7 @@ async function loadContext() {
     ctx.value = res;
     loadState.value = "ready";
     loadError.value = "";
-    if (!applyRoute() && !res.plans.find((p) => p.name === selectedName.value)) {
+    if (!applyRoute() && !narrow.value && !res.plans.find((p) => p.name === selectedName.value)) {
       selectedName.value = res.plans[0]?.name || null;
     }
   } catch (e) {
@@ -430,6 +447,9 @@ onMounted(() => {
   wideMedia = window.matchMedia(WIDE_QUERY);
   wideMedia.addEventListener("change", onWidthChange);
   onWidthChange(wideMedia);
+  narrowMedia = window.matchMedia(NARROW_QUERY);
+  narrowMedia.addEventListener("change", onNarrowChange);
+  onNarrowChange(narrowMedia);
   window.addEventListener("hashchange", applyRoute);
   window.addEventListener("popstate", applyRoute);
   stopRealtime = connectRouteSupervisorRealtime(() => {
@@ -438,6 +458,7 @@ onMounted(() => {
 });
 onUnmounted(() => {
   if (wideMedia) wideMedia.removeEventListener("change", onWidthChange);
+  if (narrowMedia) narrowMedia.removeEventListener("change", onNarrowChange);
   window.removeEventListener("hashchange", applyRoute);
   window.removeEventListener("popstate", applyRoute);
   if (stopRealtime) stopRealtime();
