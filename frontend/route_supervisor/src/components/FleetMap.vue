@@ -129,12 +129,21 @@ function drawRoutes() {
     const points = (row.stops || []).filter((stop) => stop.lat && stop.lng);
     if (points.length < 2) continue;
     wanted.add(row.route_plan);
-    const latlngs = points.map((stop) => [stop.lat, stop.lng]);
+    // The server hands back the road geometry when a router is configured; the straight
+    // line between stops is the fallback, not the intent.
+    const latlngs = (row.path && row.path.length > 1)
+      ? row.path
+      : points.map((stop) => [stop.lat, stop.lng]);
     const existing = routeLines.get(row.route_plan);
     if (existing) {
       existing.line.setLatLngs(latlngs);
     } else {
-      const line = L.polyline(latlngs, { weight: 3, opacity: 0.75, dashArray: "6 6" }).addTo(map);
+      const onRoad = Boolean(row.path && row.path.length > 1);
+      const line = L.polyline(latlngs, {
+        weight: onRoad ? 5 : 3,
+        opacity: onRoad ? 0.85 : 0.7,
+        dashArray: onRoad ? null : "6 6",
+      }).addTo(map);
       line.bindTooltip(row.route_name, { sticky: true });
       const pins = points.map((stop, index) =>
         L.circleMarker([stop.lat, stop.lng], { radius: 5, weight: 2, fillOpacity: 1 })

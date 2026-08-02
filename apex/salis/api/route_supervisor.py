@@ -30,6 +30,8 @@ for the expected headcount before the trip starts.
 from __future__ import annotations
 
 import frappe
+
+from apex.salis.utils.road_route import road_path
 from frappe import _
 
 # Roles allowed to open the supervisor portal at all. Row-level scope (below) narrows
@@ -514,6 +516,7 @@ def get_active_driver_positions():
             "route_plan": plan["name"],
             "route_name": plan.get("route_name") or plan["name"],
             "stops": stops,
+            "path": road_path([(stop["lat"], stop["lng"]) for stop in stops]),
             "project": plan.get("project"),
             "status": trip.get("status"),
             "driver": trip.get("driver"),
