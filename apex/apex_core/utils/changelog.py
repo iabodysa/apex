@@ -8,6 +8,12 @@ from frappe.utils import get_datetime
 # "What's New" popup and this bell feed now agree on the same 2.x floor.
 _RELEASES = [
     {
+        "title": "Apex 2.2.0 — The desk opens on a single Apex page that lists the portals, with five module workspaces beneath it instead of nine unrelated ones.",
+        "app_name": "apex",
+        "link": "/app",
+        "creation": "2026-08-02 11:02:58",
+    },
+    {
         "title": "Apex 2.1.26 — Safety task instructions no longer name a client or a client policy.",
         "app_name": "apex",
         "link": "/app",

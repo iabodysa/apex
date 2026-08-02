@@ -587,8 +587,5 @@ after_migrate = [
     "apex.patches.v1_x.reorder_root_workspace_creation.execute",
 ]
 
-# [#10mrjh]
-before_tests = "apex.tests.before_tests.before_tests"
-
 # [#susk3d]
 get_changelog_feed = "apex.apex_core.utils.changelog.get_changelog_feed"
