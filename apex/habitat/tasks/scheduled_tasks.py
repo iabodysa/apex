@@ -20,7 +20,7 @@ def daily_scheduled_task_instance_generator() -> None:
     an existing non-cancelled instance for the same (assignment, task_catalog, due_date)
     is skipped. Per-item error isolation; paginated 500/batch on assignments.
     """
-    from frappe.utils import today, get_first_day, getdate
+    from frappe.utils import today, get_first_day, get_first_day_of_week, getdate
 
     today_str = today()
     today_date = getdate(today_str)
@@ -31,9 +31,11 @@ def daily_scheduled_task_instance_generator() -> None:
         if freq == "Daily":
             return today_str
         if freq == "Weekly":
-            import datetime
-            week_start = today_date - datetime.timedelta(days=today_date.weekday())
-            return str(week_start)
+            # Python's weekday() is Monday-based; the site's week may not be. frappe reads
+            # System Settings first_day_of_the_week (data.py:69-70) and defaults to Sunday, so
+            # a hardcoded Monday puts the whole app one day out on any site keeping that
+            # default — invisible mid-week, wrong on the boundary day.
+            return str(get_first_day_of_week(today_date))
         if freq == "Monthly":
             return str(get_first_day(today_date))
         if freq == "Quarterly":

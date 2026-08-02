@@ -262,7 +262,7 @@ def weekly_safety_coverage_gate() -> None:
     Operations Alert and posts a system Notification to the Safety Officer. Per-row
     error isolation.
     """
-    from frappe.utils import today, getdate, add_days
+    from frappe.utils import get_first_day_of_week, get_last_day_of_week, getdate, today
 
     require_coverage = frappe.db.get_single_value(
         "Habitat Settings", "require_weekly_all_building_coverage"
@@ -273,8 +273,12 @@ def weekly_safety_coverage_gate() -> None:
         return
 
     today_date = getdate(today())
-    week_start = add_days(today_date, -today_date.weekday())  # [#sg57er]
-    week_end = add_days(week_start, 6)  # [#ezuovy]
+    # Python's weekday() is Monday-based; the site's week may not be. frappe reads System
+    # Settings first_day_of_the_week (data.py:69-70) and defaults to Sunday, so a hardcoded
+    # Monday shifts the whole window by a day: on the boundary day a covered building is
+    # reported uncovered, or an uncovered one passes the gate.
+    week_start = get_first_day_of_week(today_date)  # [#sg57er]
+    week_end = get_last_day_of_week(today_date)  # [#ezuovy]
     logger = frappe.logger()
     uncovered = 0
 
