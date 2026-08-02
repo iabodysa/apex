@@ -1584,7 +1584,6 @@ Field Map row {0}: Target Fieldname {1} is mapped more than once.,صف تعيي�
 "Fieldname on the TARGET payment DocType to populate (for example party, paid_amount, posting_date).",اسم الحقل في مستند الدفع المستهدف المراد تعبئته (مثل الطرف، المبلغ المدفوع، تاريخ الترحيل).
 Filter Assigned Work,رشّح العمل المسند
 Final Exit,خروج نهائي
-Finance,المالية
 Finance Approved By,اعتمده من المالية
 Finance Approved On,تاريخ اعتماد المالية
 Finance Decision,قرار المالية
@@ -2512,7 +2511,6 @@ On Leave,في إجازة
 On Submit,عند الاعتماد
 On-call Only,عند الطلب فقط
 On-Site Code,رمز الموقع
-On-Site Receipt,الاستلام في الموقع
 One document is created per contract and billing period (e.g. 2026-07).,يُنشأ مستند واحد لكل عقد وفترة فوترة (مثل 2026-07).
 "One immutable custody event (assign, transfer, return, suspend, reactivate, lost, terminated) for a SIM Card. The SIM's current state is projected from the latest submitted event.",حدث عهدة واحد غير قابل للتعديل (إسناد، نقل، إرجاع، تعليق، إعادة تفعيل، فقدان، إنهاء) لشريحة اتصال. تُشتق حالة الشريحة الحالية من آخر حدث مُعتمد.
 "One mapping row for the Payment Router. Sets target[target_fieldname] = static_value when Static is checked, otherwise to the value of source_fieldname on the Salis Payment Request.",صف مطابقة واحد لموجّه الدفع. يضبط الحقل الهدف على القيمة الثابتة عند تحديد خيار (ثابت)، وإلا فعلى قيمة الحقل المصدر في طلب الدفع في ساليس.
