@@ -298,9 +298,35 @@ function barPct(b) {
   return pct(b.boarded, b.expected);
 }
 
+const TAB_KEYS = TABS.map((tb) => tb.key);
+
+function routeFromLocation() {
+  const match = (window.location.hash || "").match(/^#\/plan\/([^/]+)(?:\/([a-z]+))?/);
+  if (!match) return null;
+  return {
+    name: decodeURIComponent(match[1]),
+    tab: TAB_KEYS.includes(match[2]) ? match[2] : TAB_KEYS[0],
+  };
+}
+
+function routeToLocation() {
+  const target = selectedName.value
+    ? `#/plan/${encodeURIComponent(selectedName.value)}/${tab.value}`
+    : "#/";
+  if (window.location.hash !== target) window.history.pushState(null, "", target);
+}
+
+function applyRoute() {
+  const route = routeFromLocation();
+  if (!route) return false;
+  if (plans.value.some((p) => p.name === route.name)) selectedName.value = route.name;
+  tab.value = route.tab;
+  return true;
+}
+
 function selectPlan(name) {
   selectedName.value = name;
-  tab.value = "approval";
+  tab.value = TAB_KEYS[0];
 }
 
 async function loadContext() {
@@ -310,8 +336,7 @@ async function loadContext() {
     ctx.value = res;
     loadState.value = "ready";
     loadError.value = "";
-    // Keep the current selection if it still exists; else select the first plan.
-    if (!res.plans.find((p) => p.name === selectedName.value)) {
+    if (!applyRoute() && !res.plans.find((p) => p.name === selectedName.value)) {
       selectedName.value = res.plans[0]?.name || null;
     }
   } catch (e) {
@@ -383,13 +408,19 @@ usePoll(() => {
   if (!busy.value && !reject.value.open) loadContext();
 }, POLL_MS);
 
+watch([selectedName, tab], routeToLocation);
+
 onMounted(() => {
   loadContext();
+  window.addEventListener("hashchange", applyRoute);
+  window.addEventListener("popstate", applyRoute);
   stopRealtime = connectRouteSupervisorRealtime(() => {
     if (!busy.value && !reject.value.open) loadContext();
   });
 });
 onUnmounted(() => {
+  window.removeEventListener("hashchange", applyRoute);
+  window.removeEventListener("popstate", applyRoute);
   if (stopRealtime) stopRealtime();
 });
 </script>
