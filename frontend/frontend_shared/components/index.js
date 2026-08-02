@@ -25,6 +25,7 @@ export { default as TabletSupervisorShell } from "./TabletSupervisorShell.vue";
 // every portal exports (unlike `resourceErrorMessage`), so all four are safe to
 // barrel-export unlike BuildingPicker above.
 export { default as Brand } from "./Brand.vue";
+export { default as EmptyState } from "./EmptyState.vue";
 export { default as IconBase } from "./IconBase.vue";
 export { default as LangToggle } from "./LangToggle.vue";
 export { default as ThemeToggle } from "./ThemeToggle.vue";

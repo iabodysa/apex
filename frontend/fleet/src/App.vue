@@ -22,6 +22,7 @@ import Icon from "./components/Icon.vue";
 // [#a281] Direct path, never the "@shared/components" barrel: a name-import from the
 // barrel resolves EVERY component it re-exports (incl. any portal-i18n-coupled one)
 // in this portal, which is what broke the A-041 builds. See components/index.js.
+import EmptyState from "@shared/components/EmptyState.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
 import ThemeToggle from "@shared/components/ThemeToggle.vue";
 import { useI18n } from "./i18n";
@@ -154,13 +155,20 @@ const greeting = computed(() => {
 });
 
 // Localized integer formatting: Arabic-Indic digits + separator under `ar`.
+// One numeral system on screen. Plain "ar-SA" renders Arabic-Indic digits, but every
+// count that reaches the page through a translation placeholder is a raw JS number and
+// stays Latin — so a single line read "الأحد، ٢ أغسطس · ... 0 رحلة", two systems in one
+// sentence. `-u-nu-latn` pins the Arabic locale to Latin digits, which is what the rest
+// of the product already shows.
+const AR_LOCALE = "ar-SA-u-nu-latn";
+
 function fmtInt(n) {
   if (n == null) return "—";
-  const grouped = new Intl.NumberFormat(lang.value === "ar" ? "ar-SA" : "en-US").format(n);
+  const grouped = new Intl.NumberFormat(lang.value === "ar" ? AR_LOCALE : "en-US").format(n);
   return grouped;
 }
 const todayLabel = computed(() =>
-  new Intl.DateTimeFormat(lang.value === "ar" ? "ar-SA" : "en-US", {
+  new Intl.DateTimeFormat(lang.value === "ar" ? AR_LOCALE : "en-US", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -263,7 +271,9 @@ async function onSubmit() {
               <Icon name="rotate-cw" :size="15" />{{ t("common.retry") }}
             </button>
           </div>
-          <p v-else-if="vehicle.empty" class="emp-empty">{{ t("emp.vehicle.empty") }}</p>
+          <EmptyState v-else-if="vehicle.empty" :title="t('emp.vehicle.empty')">
+            <template #icon><Icon name="car" :size="20" /></template>
+          </EmptyState>
           <template v-else>
             <div class="emp-vehicle-hero">
               <span class="emp-plate">{{ vehicle.plate }}</span>
@@ -307,7 +317,9 @@ async function onSubmit() {
               <Icon name="rotate-cw" :size="15" />{{ t("common.retry") }}
             </button>
           </div>
-          <p v-else-if="!trips.length" class="emp-empty">{{ t("emp.trips.empty") }}</p>
+          <EmptyState v-else-if="!trips.length" :title="t('emp.trips.empty')">
+            <template #icon><Icon name="clipboard-list" :size="20" /></template>
+          </EmptyState>
           <ul v-else class="emp-trips">
             <li v-for="trip in trips" :key="trip.id" class="emp-trip">
               <span class="emp-pill" :class="(tripMeta[trip.status] || tripMeta.planned).cls">
