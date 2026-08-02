@@ -63,6 +63,7 @@ import frappe
 from frappe.sessions import get_csrf_token
 from frappe.utils import cint
 
+from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.apex_core.utils.portal_bootstrap import guest_redirect
 
 # Roles that may open the supervisor portal (mirrors the API's PORTAL_ROLES).
@@ -94,6 +95,7 @@ def has_apps_screen_access() -> bool:
 
 def get_context(context):
     guest_redirect("/masar-supervisor")
+    render_in_arabic()
 
     context.no_cache = 1
     context.has_supervisor_role = bool(SUPERVISOR_ROLES & set(frappe.get_roles()))

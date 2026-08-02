@@ -41,46 +41,9 @@
     <div id="app"></div>
     <script type="module" src="/assets/apex/route_supervisor_portal/assets/index.js"></script>
     {%- else %}
-    <style>
-      body {
-        margin: 0;
-        font-family: "Cairo", sans-serif;
-        background: #0f1714;
-        color: #e7efe9;
-        display: flex;
-        min-height: 100vh;
-        align-items: center;
-        justify-content: center;
-      }
-      .sup-na {
-        max-width: 420px;
-        padding: 40px 28px;
-        text-align: center;
-        background: #15211b;
-        border: 1px solid #25362c;
-        border-radius: 16px;
-      }
-      .sup-na h1 { font-size: 18px; margin: 0 0 10px; }
-      .sup-na p { font-size: 13px; color: #7d8f84; line-height: 1.8; margin: 0 0 4px; }
-      .sup-na a {
-        display: inline-block;
-        margin-top: 20px;
-        padding: 9px 22px;
-        border-radius: 10px;
-        background: #00844e;
-        color: #fff;
-        text-decoration: none;
-        font-size: 13px;
-        font-weight: 600;
-      }
-    </style>
-    <div class="sup-na">
-      <h1>{{ _("Route supervisor portal") }}</h1>
-      <p>{{ _("This page is for route supervisors.") }}</p>
-      <p>{{ _("Your account does not have a role to access it.") }}</p>
-      <p>{{ _("Contact your system administrator to request access.") }}</p>
-      <a href="/app">{{ _("Back to the system") }}</a>
-    </div>
+    {%- set denied_title = _("Route supervisor portal") %}
+    {%- set denied_audience = _("This page is for route supervisors.") %}
+    {%- include "apex/templates/includes/portal_denied.html" %}
     {%- endif %}
   </body>
 </html>

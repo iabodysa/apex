@@ -1,0 +1,54 @@
+{#- The one access-denied screen every portal shows a user whose roles do not open it.
+
+    It was four copies — one per portal — which drifted: the fleet build painted its
+    button #2a6df4 while the others used the brand green, so the same screen carried two
+    palettes. The button now resolves --c-primary, the token the portals themselves use,
+    so a tenant accent override reaches this screen too and no portal can drift again.
+
+    Two values come from the page: `denied_title` names the portal, `denied_audience`
+    says who it is for. Both are translated by the caller. -#}
+<style>
+  body {
+    margin: 0;
+    font-family: "Cairo", sans-serif;
+    background: var(--c-bg, #0f1714);
+    color: var(--c-text, #e7efe9);
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+  }
+  .portal-na {
+    max-width: 420px;
+    padding: 40px 28px;
+    text-align: center;
+    background: var(--c-surface, #15211b);
+    border: 1px solid var(--c-border, #25362c);
+    border-radius: 16px;
+  }
+  .portal-na h1 { font-size: 18px; margin: 0 0 10px; }
+  .portal-na p {
+    font-size: 13px;
+    color: var(--c-text-muted, #7d8f84);
+    line-height: 1.8;
+    margin: 0 0 4px;
+  }
+  .portal-na a {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 9px 22px;
+    border-radius: 10px;
+    background: var(--c-primary, #00844e);
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+  }
+</style>
+<div class="portal-na">
+  <h1>{{ denied_title }}</h1>
+  <p>{{ denied_audience }}</p>
+  <p>{{ _("Your account does not have a role to access it.") }}</p>
+  <p>{{ _("Contact your system administrator to request access.") }}</p>
+  <a href="/app">{{ _("Back to the system") }}</a>
+</div>

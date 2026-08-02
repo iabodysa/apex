@@ -28,54 +28,9 @@
     <div id="app"></div>
     <script type="module" src="/assets/apex/housing_portal/assets/index.js"></script>
     {%- else %}
-    <style>
-      body {
-        margin: 0;
-        font-family: "Montserrat", sans-serif;
-        background: #0f1714;
-        color: #e7efe9;
-        display: flex;
-        min-height: 100vh;
-        align-items: center;
-        justify-content: center;
-      }
-      .housing-na {
-        max-width: 420px;
-        padding: 40px 28px;
-        text-align: center;
-        background: #15211b;
-        border: 1px solid #25362c;
-        border-radius: 18px;
-      }
-      .housing-na h1 {
-        font-size: 18px;
-        margin: 0 0 10px;
-      }
-      .housing-na p {
-        font-size: 13px;
-        color: #7d8f84;
-        line-height: 1.8;
-        margin: 0 0 4px;
-      }
-      .housing-na a {
-        display: inline-block;
-        margin-top: 20px;
-        padding: 9px 22px;
-        border-radius: 12px;
-        background: #00a862;
-        color: #04130c;
-        text-decoration: none;
-        font-size: 13px;
-        font-weight: 600;
-      }
-    </style>
-    <div class="housing-na">
-      <h1>{{ _("Housing portal") }}</h1>
-      <p>{{ _("This page is for the housing team.") }}</p>
-      <p>{{ _("Your account does not have a role to access it.") }}</p>
-      <p>{{ _("Contact your system administrator to request access.") }}</p>
-      <a href="/app">{{ _("Back to the system") }}</a>
-    </div>
+    {%- set denied_title = _("Housing portal") %}
+    {%- set denied_audience = _("This page is for the housing team.") %}
+    {%- include "apex/templates/includes/portal_denied.html" %}
     {%- endif %}
   </body>
 </html>
