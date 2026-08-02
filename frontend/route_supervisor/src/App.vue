@@ -51,6 +51,15 @@
         <span v-if="tb.key === 'approval' && pendingCount" class="nav-count">{{ pendingCount }}</span>
       </button>
 
+      <button
+        type="button"
+        :class="{ 'is-active': onFleetMap }"
+        @click="openFleetMap()"
+      >
+        <Icon name="pin" :size="17" />
+        <span>{{ t("fleetMap.title") }}</span>
+      </button>
+
       <span class="nav-label">{{ t("nav.account") }}</span>
       <span v-if="ctx" class="nav-user">
         <Icon name="user" :size="16" />
@@ -88,7 +97,11 @@
       </div>
     </template>
 
-    <div class="work">
+    <div v-if="onFleetMap" class="work work-single">
+      <FleetMap />
+    </div>
+
+    <div v-else class="work">
       <!-- Plan list -->
       <aside v-if="showList" class="plans">
         <div class="plans-head">
@@ -249,6 +262,7 @@ import { useOverlay } from "@shared/useOverlay.js";
 import BoardingPanel from "./components/BoardingPanel.vue";
 import RoutePanel from "./components/RoutePanel.vue";
 import DriverMap from "./components/DriverMap.vue";
+import FleetMap from "./components/FleetMap.vue";
 import { useI18n } from "./i18n";
 import { getSupervisorContext, approveRoutePlan, rejectRoutePlan } from "./api.js";
 import { connectRouteSupervisorRealtime } from "./realtime.js";
@@ -262,6 +276,18 @@ const TABS = [
   { key: "route", icon: "route" },
   { key: "map", icon: "pin" },
 ];
+
+const FLEET_MAP_ROUTE = "#/map";
+const onFleetMap = ref(false);
+
+function readFleetMapRoute() {
+  onFleetMap.value = (window.location.hash || "").startsWith(FLEET_MAP_ROUTE);
+}
+
+function openFleetMap() {
+  window.history.pushState(null, "", FLEET_MAP_ROUTE);
+  readFleetMapRoute();
+}
 
 const ctx = ref(null);
 const loadState = ref("loading");
@@ -359,6 +385,7 @@ function applyRoute() {
 }
 
 function selectPlan(name) {
+  onFleetMap.value = false;
   selectedName.value = name;
   tab.value = TAB_KEYS[0];
 }
@@ -452,6 +479,9 @@ onMounted(() => {
   narrowMedia = window.matchMedia(NARROW_QUERY);
   narrowMedia.addEventListener("change", onNarrowChange);
   onNarrowChange(narrowMedia);
+  readFleetMapRoute();
+  window.addEventListener("hashchange", readFleetMapRoute);
+  window.addEventListener("popstate", readFleetMapRoute);
   window.addEventListener("hashchange", applyRoute);
   window.addEventListener("popstate", applyRoute);
   stopRealtime = connectRouteSupervisorRealtime(() => {
@@ -461,6 +491,8 @@ onMounted(() => {
 onUnmounted(() => {
   if (wideMedia) wideMedia.removeEventListener("change", onWidthChange);
   if (narrowMedia) narrowMedia.removeEventListener("change", onNarrowChange);
+  window.removeEventListener("hashchange", readFleetMapRoute);
+  window.removeEventListener("popstate", readFleetMapRoute);
   window.removeEventListener("hashchange", applyRoute);
   window.removeEventListener("popstate", applyRoute);
   if (stopRealtime) stopRealtime();

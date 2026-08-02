@@ -19,6 +19,7 @@ export const getTripBoarding = (dispatch_trip) =>
   callApi("get_trip_boarding", { args: { dispatch_trip } });
 export const getTripDriverPosition = (dispatch_trip) =>
   callApi("get_trip_driver_position", { args: { dispatch_trip } });
+export const getActiveDriverPositions = () => callApi("get_active_driver_positions");
 export const approveRoutePlan = (name) =>
   callApi("approve_route_plan", { args: { name }, type: "POST" });
 export const rejectRoutePlan = (name, reason) =>

@@ -69,8 +69,12 @@ button { font-family: inherit; cursor: pointer; }
 }
 .back-btn:hover { background: var(--c-surface-2); }
 [dir="rtl"] .back-btn svg { transform: scaleX(-1); }
+.work-single { grid-template-columns: minmax(0, 1fr); min-height: 70vh; }
 @media (min-width: 1280px) {
   .work { grid-template-columns: 340px minmax(0, 1fr) 380px; }
+  /* The whole-fleet map is a destination of its own, so it keeps the full width
+     even where the plan screen has three columns. */
+  .work.work-single { grid-template-columns: minmax(0, 1fr); }
   .plan-list { gap: 6px; }
   .plan-card { padding: 9px 12px; gap: 6px; }
   .pc-meta { gap: 8px; font-size: 11.5px; }
