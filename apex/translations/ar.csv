@@ -683,6 +683,7 @@ Checked in: {0},تم التسكين: {0}
 Checked Out,تمت المغادرة
 Checked out: {0},تم إخلاء السكن: {0}
 Checking outstanding invoices…,جارٍ التحقق من الفواتير المستحقة…
+Checklist & Evidence,قائمة الفحص والأدلة
 Checklist Items,بنود قائمة الفحص
 Checklist lines must be a list.,يجب أن تكون سطور قائمة الفحص قائمةً.
 Checklist lines must be valid JSON.,يجب أن تكون بنود قائمة الفحص بصيغة JSON صحيحة.
@@ -870,6 +871,7 @@ confirmed,مؤكَّد
 Confirmed Receipt,تأكيد الاستلام
 Confirmed Receipt is the primary path. Choose Signature when the holder cannot type-confirm and signs instead.,تأكيد الاستلام هو المسار الأساسي. اختر التوقيع عندما يتعذّر على الحائز التأكيد كتابةً فيوقّع بدلاً من ذلك.
 Consent,الموافقة
+Consent & Approval Gate,الموافقة وبوابة الاعتماد
 Consent Signed On,تاريخ توقيع الموافقة
 Constant value written to the target field when Static is checked (for example a fixed payment_type or party_type).,قيمة ثابتة تُكتب في الحقل المستهدف عند تفعيل خيار ثابت (مثل نوع دفع أو نوع طرف محدد).
 Consumable Expired,مستهلك منتهي الصلاحية
@@ -1072,6 +1074,7 @@ Custodian Type,نوع حائز العهدة
 Custodian Type is required to {0} a SIM.,نوع حائز العهدة مطلوب لتنفيذ {0} على الشريحة.
 Custody,العهدة
 Custody & Asset Integration,تكامل العهدة والأصول
+Custody & Status,العهدة والحالة
 Custody Acknowledgment,إقرار استلام العهدة
 Custody Action,إجراء العهدة
 Custody and Costs,العهد والتكاليف
@@ -3704,6 +3707,7 @@ SIM Count,عدد الشرائح
 SIM Custody Assignment,حركة عهدة شريحة اتصال
 SIM Exceptions,استثناءات الشرائح
 SIMs,الشرائح
+SIMs & Billing,الشرائح والفوترة
 SIMs by Contract and Supplier,الشرائح حسب العقد والمورّد
 SIMs in Custody,الشرائح في العهدة
 "Single config that governs whether, and how, operational events (damage, rent, fuel, custody) may be deducted from a worker's salary. Default = NO deduction: the global switch is OFF and every per-type rule is disabled until explicitly activated after legal review.",إعداد واحد يحكم هل يمكن خصم الأحداث التشغيلية (تلف أو إيجار أو وقود أو عهدة) من راتب العامل وكيف. الافتراضي هو عدم الخصم: المفتاح العام موقوف وكل قاعدة نوع معطّلة حتى تُفعَّل صراحة بعد المراجعة القانونية.
@@ -3946,6 +3950,7 @@ Temporary Worker {0} does not exist.,العامل المؤقت {0} غير موج
 Temporary Worker {0}'s stay window expired on {1}.,انتهت مهلة إقامة العامل المؤقت {0} في {1}.
 Temporary Worker — use the Arrivals Desk to house this worker.,عامل مؤقت — استخدم مكتب الوصول لتسكين هذا العامل.
 Temporary workers board via the trip’s unregistered manifest.,ينضم العمال المؤقتون للرحلة عبر كشف غير المسجلين.
+Term & Status,المدة والحالة
 Terminate,إنهاء الخدمة
 Terminated,مُنهى
 Termination,إنهاء خدمة

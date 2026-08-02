@@ -133,6 +133,30 @@ If the native setup wizard was already completed, review the same choices in
 `Apex Settings`, `Habitat Settings`, `Salis Settings`,
 `Payment Routing Settings`, and `Salary Deduction Policy`.
 
+### Desk language
+
+Apex ships Arabic for every label it owns, but nothing switches the desk on your
+behalf. The desk follows `System Settings` → **Language**, which a fresh site sets
+to English; a single user can override it on their own User record. Set it once:
+
+```bash
+bench --site <site> execute frappe.client.set_value --kwargs \
+  "{'doctype': 'System Settings', 'name': 'System Settings', 'fieldname': 'language', 'value': 'ar'}"
+bench --site <site> clear-cache
+```
+
+Save the setting rather than writing the field directly — `System Settings`
+publishes the global default and clears the caches when it saves, and a raw write
+leaves the desk on the previous language.
+
+Two things stay English on purpose. Workspaces that belong to Frappe and ERPNext
+(Accounting, Buying, Selling, Stock, Assets, Manufacturing, Quality, Projects,
+Support, Users, Website, Payroll, CRM, Tools, Integrations, Build) carry their own
+translation files, and a row added here would override wording those apps ship
+for every site. Dashboard-chart labels print the stored value — `Active`,
+`Issued`, `Rent` — because the chart draws data, not labels; the same values read
+in Arabic everywhere they appear as a field.
+
 ## Verify the installation
 
 Run:
