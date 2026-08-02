@@ -1,7 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Safety Rounds portal served at /safety.
 
-A mobile-first supervisor surface for the Safety Checklist (T-289): pick a
+A mobile-first supervisor surface for the Safety Checklist: pick a
 building, see the cadences that are DUE now, tap each task Pass/Fail/Issue, then
 submit one round per cadence and email the manager. Like /fleet this is an
 admin-style portal, not a guest link, so it requires a logged-in user AND a

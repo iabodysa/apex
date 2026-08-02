@@ -12,7 +12,7 @@ UNSCOPED_ROLES = {
     "Internal Auditor",
     # [#m3bfwj]
     "Finance Manager",
-    # A-171: an oversight viewer, same shape as Internal Auditor. Its two Salis
+    # An oversight viewer, same shape as Internal Auditor. Its two Salis
     # Notifications alert it company-wide, so a project-scoped list would show
     # zero rows for the very vehicles it was just emailed about.
     "Government Relations Officer",
@@ -470,10 +470,10 @@ def _own_driver_basis(doc, user, driver_field="driver"):
     return False
 
 
-# A-250 — the DocTypes among the eleven this handler governs whose OWN model makes
+# The DocTypes among the eleven this handler governs whose OWN model makes
 # `project` mandatory, so no legitimate create can ever be project-less. Deliberately
 # a named set and not a blanket rule: a project-less create is a modelled business
-# state on the other ten (see the A-250 survey note on
+# state on the other ten (see the survey note on
 # ``_unanchored_create_is_denied``), and denying it there would blackout an ordinary
 # flow rather than close a leak.
 PROJECT_MANDATORY_ON_CREATE = frozenset({"Fuel Claim"})
@@ -482,12 +482,12 @@ PROJECT_MANDATORY_ON_CREATE = frozenset({"Fuel Claim"})
 def _unanchored_create_is_denied(doc):
     """True when ``doc`` is an UNSAVED row of a DocType that cannot be project-less.
 
-    A-250 — the same tautology A-233 closed, in the project-less branch below.
+    The same tautology the unsaved-row rule closes, in the project-less branch below.
     ``Document.insert`` stamps ``owner`` with the acting user (document.py:298) two
     statements before ``check_permission("create")`` (:300), so at the create check
     ``owner == user`` is always true: the ownership escape admitted EVERY project-less
     create. The discriminator is ``_is_unsaved`` (``__islocal``, document.py:295,
-    deleted at :338), reused from A-233 rather than a second mechanism, so this handler
+    deleted at :338), reused rather than given a second mechanism, so this handler
     stays deny-only and ptype-agnostic — what is distinguished is the document's storage
     state, not the action.
 
@@ -521,7 +521,7 @@ def scoped_has_permission(doc, ptype, user=None):
     Returns False to block, or None to defer to Frappe's default permission
     resolution (which keeps standard role-based checks intact).
 
-    A-250: on a project-less doc, ownership is still a valid basis for a row that
+    On a project-less doc, ownership is still a valid basis for a row that
     ALREADY EXISTS, but not for an unsaved row of a DocType whose model forbids a
     project-less record — see ``_unanchored_create_is_denied`` for why that is a named
     set rather than a rule over every DocType wired here.
@@ -558,7 +558,7 @@ def _owner_or_project_has_permission(doc, user=None):
     outside scope before any ownership test, which would block a Driver (who holds no
     Project User Permission) from opening their own project-tagged record.
 
-    A-233 — OWNERSHIP IS NOT AN ACCESS BASIS ON AN UNSAVED ROW. ``Document.insert``
+    OWNERSHIP IS NOT AN ACCESS BASIS ON AN UNSAVED ROW. ``Document.insert``
     stamps ``owner`` with the acting user (document.py:298) two statements before
     ``check_permission("create")`` (:300), so at the create check ``owner == user`` is a
     tautology: it records who is asking, not anything about the row. Testing it first
@@ -614,7 +614,7 @@ def salis_driver_has_permission(doc, ptype, user=None):
     project-BEARING doc outside scope, which would block a Driver (who holds no
     Project User Permission) from reading their own project-tagged row.
 
-    A-233: ownership is not a basis on an UNSAVED row (see
+    Ownership is not a basis on an UNSAVED row (see
     ``_owner_or_project_has_permission``), so a scoped user's create must carry a
     ``project`` they are permitted for. Salis Driver's ``project`` is optional and never
     fetched, so an empty one at the create check is a real choice by the creator, not the
@@ -642,7 +642,7 @@ def trip_start_log_has_permission(doc, ptype, user=None):
     denies a project-BEARING doc outside scope, which would block a Driver (who
     holds no Project User Permission) from opening their own project-tagged log.
 
-    A-233: ownership is not a basis on an UNSAVED row (see
+    Ownership is not a basis on an UNSAVED row (see
     ``_owner_or_project_has_permission``), so a create is decided by the mandatory
     ``dispatch_trip`` link instead — its Route Plan's project must be in scope, or the
     trip must be one dispatched to the acting user's own Salis Driver. That keeps the
@@ -702,7 +702,7 @@ def _driver_chain_project(doc, driver_field="driver"):
     Vehicle Incident / Vehicle Damage Write-Off / Vehicle Suspension, and
     ``dispatch_trip.driver`` on Boarding Scan Log. Without the vehicle fallback a scoped
     supervisor could not raise an incident on their own project's vehicle at all; without
-    the trip fallback, once ownership stopped rescuing an unsaved row (A-233), they could
+    the trip fallback, once ownership stopped rescuing an unsaved row, they could
     not record a boarding scan on their own project's trip either.
 
     Still a no-op for Driver Attendance and Driver Suspension: both make ``driver``
@@ -777,7 +777,7 @@ def _driver_chain_has_permission(doc, user=None, driver_field="driver", with_own
 def driver_attendance_has_permission(doc, ptype, user=None):
     """Mirror driver_attendance_query: project via driver, OR the Driver's own STORED row.
 
-    A-233: ownership is not a basis on an UNSAVED row (see
+    Ownership is not a basis on an UNSAVED row (see
     ``_driver_chain_has_permission``), so a create is decided by the mandatory ``driver``
     link — its project must be in scope, or it must be the acting user's own driver.
     """
@@ -787,7 +787,7 @@ def driver_attendance_has_permission(doc, ptype, user=None):
 def driver_stop_has_permission(doc, ptype, user=None):
     """Mirror driver_stop_query: project via driver, OR the Driver's own STORED row.
 
-    A-233: ownership is not a basis on an UNSAVED row (see
+    Ownership is not a basis on an UNSAVED row (see
     ``_driver_chain_has_permission``), so a create is decided by the mandatory ``driver``
     link — a scoped user can no longer suspend another project's driver.
     """
@@ -797,7 +797,7 @@ def driver_stop_has_permission(doc, ptype, user=None):
 def boarding_scan_log_has_permission(doc, ptype, user=None):
     """Mirror boarding_scan_log_query: project via driver, OR the Driver's own STORED row.
 
-    A-233: ownership is not a basis on an UNSAVED row (see
+    Ownership is not a basis on an UNSAVED row (see
     ``_driver_chain_has_permission``). ``driver`` here is fetched from
     ``dispatch_trip.driver`` and so is empty at the create check, which is why
     ``_driver_chain_project`` also resolves through ``dispatch_trip``; the scan must
@@ -926,7 +926,7 @@ def payment_sod_has_permission(doc, ptype, user=None):
     The document is denied if EITHER control denies. Returns False to block;
     otherwise returns None to defer to Frappe's default permission resolution.
 
-    A-233 — THE PTYPE GATE ON CONTROL 2 IS LOAD-BEARING, NOT A SHORTCUT. Both identities
+    THE PTYPE GATE ON CONTROL 2 IS LOAD-BEARING, NOT A SHORTCUT. Both identities
     control 2 compares against are unset or meaningless at the create check:
     ``requested_by`` is written in ``before_insert`` (document.py:303) and ``owner`` is
     stamped at :298, while ``check_permission("create")`` runs at :300. So on a create

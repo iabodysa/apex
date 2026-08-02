@@ -6,9 +6,9 @@ target is unconfigured.
 
 Boundary: this layer routes only - it posts no GL itself. ``enable_gl_posting``
 (Apex Settings) gates the auto-submit step, because a native payment posts its
-ledger from its own ``on_submit``; OFF leaves the routed doc in Draft. [T-151] the
-fuller rationale (config-time mapping vs get_mapped_doc, the GL mechanics) is in the
-commit that tightened this docstring.
+ledger from its own ``on_submit``; OFF leaves the routed doc in Draft. The fuller
+rationale (config-time mapping vs get_mapped_doc, the GL mechanics) is in the commit
+that tightened this docstring.
 """
 
 from __future__ import annotations
@@ -276,7 +276,7 @@ def route_payment(payment_request: str) -> str:
     Idempotent: returns the existing payment when already linked. Submit is gated on
     ``auto_submit_target`` + a submittable target + ``enable_gl_posting`` (submit is
     what posts the native doc's GL). The create uses ``ignore_permissions``, so the
-    caller's write/submit permission on the request is enforced just below. [T-151]
+    caller's write/submit permission on the request is enforced just below.
 
     Fail-closed: the target and the field map are re-validated here, immediately
     before the build, and the link stamp carries the created document's own doctype.

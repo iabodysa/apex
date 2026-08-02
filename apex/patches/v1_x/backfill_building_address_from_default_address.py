@@ -3,7 +3,7 @@
 legacy default native Address (linked via Dynamic Link) when the field is still empty.
 
 Earlier rows linked an Address to the building via Dynamic Link but never populated the
-``building_address`` Link field the controller now reads (get_site_address, T-144). This
+``building_address`` Link field the controller now reads (get_site_address). This
 resolves each building's default Address and writes it into the empty field.
 
 Idempotency guards:

@@ -3,7 +3,7 @@ import frappe
 
 
 def execute():
-    """Stamp a generous expiry on existing Masar Worker Token rows (T-629, ONE-TIME).
+    """Stamp a generous expiry on existing Masar Worker Token rows (ONE-TIME).
 
     The token now carries a TTL (``expires_on``); a leaked /masar link is no longer
     valid forever. Rows minted before the field existed have a NULL ``expires_on``,

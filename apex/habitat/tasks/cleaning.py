@@ -107,7 +107,7 @@ def auto_create_cleaning_logs() -> None:
     """Scheduled daily — create one draft Cleaning Log per active building that
     has a Housing Supervisor assigned, skipping buildings already logged today.
 
-    This is the T-554 spec-named entry point. The heavier variant that also
+    This is the spec-named entry point. The heavier variant that also
     pre-populates room_details rows is ``daily_cleaning_log_generator``
     (registered separately). This function targets buildings that have an
     assigned ``responsible_supervisor`` and creates a minimal log so

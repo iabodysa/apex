@@ -13,7 +13,7 @@ class ScheduledTaskInstance(Document):
 
 
 def on_doctype_update():
-    """Hard idempotency backstop for Scheduled Task Instance (Phase B, T-552).
+    """Hard idempotency backstop for Scheduled Task Instance.
 
     UNIQUE on ``(assignment, task_catalog, due_date, docstatus)``: one non-cancelled
     instance per (assignment, task_catalog, due_date). ``docstatus`` in the key lets a

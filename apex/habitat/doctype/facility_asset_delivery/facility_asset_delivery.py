@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Facility Asset Delivery controller (T-673) — delivers a tracked Facility Asset
+"""Facility Asset Delivery controller — delivers a tracked Facility Asset
 from a procurement intake store to an accommodation, gated behind a 3-exit
 transfer lock and an on-site code receipt.
 

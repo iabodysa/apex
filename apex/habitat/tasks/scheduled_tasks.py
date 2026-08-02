@@ -13,7 +13,7 @@ _ROW_SAVEPOINT = "scheduled_task_row"
 def daily_scheduled_task_instance_generator() -> None:
     """Generate Scheduled Task Instance records using the Assignment × Item pattern.
 
-    Phase B redesign (T-552): iterates active Scheduled Task Assignments, then for
+    Assignment-based design: iterates active Scheduled Task Assignments, then for
     each active template item row creates one Scheduled Task Instance per
     (assignment, task_catalog, due_date). The due_date is resolved from the item's
     frequency_override if set, or the template-level frequency otherwise. Idempotent:

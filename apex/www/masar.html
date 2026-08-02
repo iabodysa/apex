@@ -2,7 +2,7 @@
 <html lang="ar" data-theme="{{ portal_theme or 'afmco' }}">
   <head>
     <meta charset="utf-8" />
-    <!-- [T-660] no-referrer: the personal /masar?w=<token> link must never leak via
+    <!-- no-referrer: the personal /masar?w=<token> link must never leak via
          the Referer header to fonts/maps/any third party (it would carry the secret
          token in the URL before the server redirect strips it). Renderer-independent
          (the www template renderer does not propagate a header set in get_context). -->
@@ -28,7 +28,7 @@
       // Merged Masar portal: this /masar entry boots the WORKER screen set. The one
       // bundle (worker_portal) also serves /driver, which projects holder_type=Driver.
       window.holder_type = "Worker";
-      // [T-705] The raw personal token is NEVER inlined here. It rides in the
+      // The raw personal token is NEVER inlined here. It rides in the
       // httpOnly `masar_wt` cookie (set server-side from the one-time ?w= hit) and
       // is read by the worker endpoints server-side. The shell only learns whether
       // a link is present, so it can show the "no link" state without the secret.
@@ -41,7 +41,7 @@
     <div id="app"></div>
     <script type="module" src="/assets/apex/worker_portal/assets/index.js"></script>
     <script>
-      // [T-327] Register the Masar PWA service worker. The worker is served from
+      // Register the Masar PWA service worker. The worker is served from
       // the ROOT (/masar-sw.min.js) so its scope can cover /masar — a service
       // worker only controls URLs at or under its own path. It precaches the app
       // shell (HTML + built bundle + self-hosted fonts) and network-firsts the

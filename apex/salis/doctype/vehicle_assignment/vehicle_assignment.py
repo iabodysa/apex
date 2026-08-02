@@ -29,7 +29,7 @@ class VehicleAssignment(Document):
         self._enforce_rider_active()
 
     def _enforce_rider_active(self):
-        """T-119: block assigning a vehicle to a rider who is on leave / inactive.
+        """Block assigning a vehicle to a rider who is on leave / inactive.
 
         Source of truth is the rider's HRMS Employee status and any approved
         Leave Application covering the assignment start date (falls back to the

@@ -118,7 +118,7 @@ def get_pending_on_manifest(filters=None):
 
 @frappe.whitelist()
 def get_custody_value_in_employee_hands(filters=None):
-    """Value-at-risk: SAR currently held in employee custody. [T-277]
+    """Value-at-risk: SAR currently held in employee custody.
 
     Sums signed (qty * unit_cost) over non-cancelled Custody Article rows of
     the Accommodation Stock Ledger where an employee is set — issue rows add,

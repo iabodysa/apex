@@ -92,7 +92,7 @@ class FuelRequest(Document):
         self._stamp_approver()
 
     def _enforce_rider_active(self):
-        """T-119: block a new fuel request for a rider who is on leave / inactive.
+        """Block a new fuel request for a rider who is on leave / inactive.
 
 		Fuel is dispensed to the rider who holds the vehicle, so an offboarded /
 		on-leave rider must not draw new fuel. When such a rider still holds a

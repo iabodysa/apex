@@ -663,7 +663,7 @@ _EVENT_DRIVEN_FREQUENCIES = {"As Needed", "On Entry"}
 def _get_or_create_safety_template(catalog, template_freq):
     """The ONE reusable Scheduled Task Template for a Safety Task Catalog entry.
 
-    Building-independent (T-552 Phase B): a template is bound to buildings via
+    Building-independent: a template is bound to buildings via
     Scheduled Task Assignment, never an on-template building field (that column was
     dropped). Keyed on the immutable ``safety_task_catalog`` link so re-runs and other
     buildings' setups share ONE template per catalog task. Guarantees the catalog is an
@@ -705,7 +705,7 @@ def _get_or_create_safety_template(catalog, template_freq):
 
 @frappe.whitelist(methods=["POST"])
 def generate_safety_setup(building_name):
-    """Idempotent safety-setup generator on the assignment-based model (T-552 / A-076).
+    """Idempotent safety-setup generator on the assignment-based model.
 
     For each active Safety Task Catalog entry:
       1. If not applicable_to_all_buildings, add this building to the catalog's scope

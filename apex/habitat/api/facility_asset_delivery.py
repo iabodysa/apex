@@ -1,8 +1,8 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Whitelisted API for the Facility Asset Delivery 3-exit transfer lock and the
-on-site code receipt (T-673).
+on-site code receipt.
 
-THE 3-EXIT TRANSFER LOCK (the core of T-673): a submitted delivery sits in
+THE 3-EXIT TRANSFER LOCK, the core of this module: a submitted delivery sits in
 ``Pending Exits`` until THREE exit checkpoints pass IN ORDER, each by a distinct
 role. Only clearing the third exit opens the lock — status flips to ``Released``
 and the on-site code is issued. Until then the asset has NOT moved.

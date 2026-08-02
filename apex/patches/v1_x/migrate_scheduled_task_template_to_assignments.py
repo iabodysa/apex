@@ -2,7 +2,7 @@
 """ONE-TIME migration: create a Scheduled Task Assignment for every existing
 Scheduled Task Template that had a `building` field set.
 
-Background (T-552 Phase B): the old design stored one building per template
+Background: the old design stored one building per template
 (N×M templates). The new design uses a separate Scheduled Task Assignment DocType
 (template → building). This patch reads the legacy `building` column directly from
 the DB table and creates one Assignment per unique (template, building) pair.
