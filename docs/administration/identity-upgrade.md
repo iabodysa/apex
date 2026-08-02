@@ -5,29 +5,29 @@ to `apex`. A site installed **before** that rename stores the old name in four
 places, and none of them are updated by pulling new code. This runbook is the
 supported path for carrying such a site onto the current release.
 
-## Status: deferred — do not run Sections 4 to 6
+## Status: runnable — every section has been walked on a pre-rename site
 
-Set **31 July 2026**, after the whole sequence was walked end to end against a
-live pre-rename site. It could not be completed. Two defects stop it, and both
-are repeated in place at the step where you meet them.
+Set **3 August 2026**, after the whole sequence was run end to end against a
+disposable site put back into the pre-rename state: registry naming
+`apex_habitat`, `installed_apps` naming it, four `Module Def` rows, one
+`Installed Application` row and 36 stored dotted paths.
 
-| Blocker | Symptom | Where it stops you |
+Two defects used to stop it. Both are now answered in place, and the answer to
+each is a command you run rather than a fix you wait for.
+
+| Was blocking | Why it happened | What you run instead |
 | --- | --- | --- |
-| **B1 — the repair commands are refused on the site that needs them.** A `bench execute` of any `apex....` path is rejected before it runs, because the site does not yet list `apex` among its installed apps — the exact condition these commands exist to repair. | `AppNotInstalledError: App apex is not installed`, then `NameError: name 'apex' is not defined`, exit status `1`. On a site whose cache is cold it fails earlier still, while the command is starting up. | Sections 4, 5 and 6. Worst on `preview_registry`, whose whole purpose is to run **before** the registry is repaired, so it can never run at all. |
-| **B2 — repairing the registry file has no effect until the cached copy is dropped.** The contents of `sites/apps.txt` are cached in Redis. Rewriting the file changes nothing for any process that has already read it. | The site behaves as though the file were never edited, and Section 5's first write fails. `bench --site <site> clear-cache` does not help: clearing the cache loads every installed app's hooks, and one of them is the package that no longer exists, so the clear itself fails. | Section 4 (which never tells you to clear anything) into Section 5. |
-
-There is **no safe stopping point** between Sections 4 and 6: repairing the
-registry by hand leaves the site serving without the application, and Section 5
-cannot then complete the repair. Do not open the maintenance window.
+| **B1 — the repair commands were refused on the site that needs them.** `bench execute apex....` is rejected before it runs, because the site does not yet list `apex` among its installed apps — the exact condition these commands exist to repair. `AppNotInstalledError: App apex is not installed`, then `NameError: name 'apex' is not defined`, exit `1`. | `frappe.get_attr` refuses a dotted path whose leading name is missing from the site's installed apps. While the registry still names the dead package it is worse: `frappe.init` itself raises `ModuleNotFoundError: No module named 'apex_habitat'` from `setup_module_map`, so the command never starts. | The bench's own interpreter, importing the module directly. Section 4 needs no site at all, and Sections 5 and 6 import after `frappe.connect()`. Same code, without the gate. |
+| **B2 — repairing the registry file had no effect.** `sites/apps.txt` is cached in Redis, so rewriting it changed nothing for the next process, and `bench --site <site> clear-cache` could not help: clearing loads every installed app's hooks and dies on the dead one before it clears anything. | `get_installed_apps(_ensure_on_bench=True)` memoises the file under `all_apps`. | A direct Redis delete of the app-discovery keys for that one site, in Section 4. It touches no other site and loads no hooks. |
 
 | Section | Runnable today |
 | --- | --- |
 | 1 — Does this apply? | Yes. Reads two values, changes nothing. |
 | 2 — What breaks, and why | Reference only. |
 | 3 — Before you start | Yes. Ordinary backup. |
-| 4 — Repair the bench registry | **Blocked** (B1, B2). |
-| 5 — Repair the database identity | **Blocked** (B1). |
-| 6 — Migrate and verify | **Blocked** (depends on Section 5). |
+| 4 — Repair the bench registry | Yes. Preview needs no site; the cache drop follows it. |
+| 5 — Repair the database identity | Yes, through the bench interpreter. |
+| 6 — Migrate and verify | Yes, once Section 5 has run. |
 | 7 — Rollback | Yes. Unaffected. |
 | 8 — When to stop | Reference only. |
 | 9 — Exit criteria | Reference only. |
@@ -35,14 +35,7 @@ cannot then complete the repair. Do not open the maintenance window.
 A site **already running `apex`** is unaffected by all of this and needs nothing
 from this page. Section 1 tells you which case you are in.
 
-This runbook is kept, not withdrawn. The procedure below remains the intended
-path and becomes usable again once both blockers are fixed **and** the sequence
-has been rehearsed against a genuinely pre-rename site. Section 9 states what has
-to be true before this status changes, including one prerequisite for that
-rehearsal that neither blocker covers.
-
-Perform it in a planned maintenance window when it is un-deferred. It is not an
-emergency procedure.
+Perform it in a planned maintenance window. It is not an emergency procedure.
 
 Source line references below were read against Frappe `15.109.0`.
 
@@ -100,14 +93,14 @@ module that cannot be imported.
   `ImportError`. **Repairing `sites/apps.txt` is what brings the site back up**,
   and it is the first corrective step for that reason — but that read is cached
   in Redis under `all_apps` (`frappe/__init__.py:1562`), so the edited file is
-  not seen until the cached value is dropped. That is blocker **B2**.
-- **The repair commands themselves are refused.** `frappe.get_attr` rejects any
+  not seen until the cached value is dropped. Section 4 drops it.
+- **`bench execute` cannot carry the repair.** `frappe.get_attr` rejects any
   dotted path whose leading name is missing from the site's installed apps
   (`frappe/__init__.py:1742-1746`). On a pre-rename site `apex` is exactly such
-  a name, so every `bench execute apex....` below raises
-  `AppNotInstalledError` — including the one command meant to run first. That is
-  blocker **B1**, and it is why this runbook is deferred rather than merely
-  imperfect.
+  a name, so every `bench execute apex....` raises `AppNotInstalledError` —
+  including the one command meant to run first. Sections 4 and 5 import the
+  module through the bench's interpreter instead, which runs the same code
+  without that gate.
 - **Bench commands still run, noisily.** `get_app_commands` catches the
   `ModuleNotFoundError`, prints a traceback and returns no commands
   (`frappe/utils/bench_helper.py:72-84`). Expect an alarming traceback on every
@@ -158,10 +151,6 @@ a confirmation. `list-apps` reports the identity the site actually recorded.
 
 ## 4. Repair the bench registry (do this first)
 
-> **Blocked — B1 and B2.** `preview_registry` cannot run on a pre-rename site,
-> and the registry edit does not take effect once you make it. Read this
-> section; do not execute it.
-
 `sites/apps.txt` is a **bench-level** file shared by every site on the bench.
 Nothing in the application writes it — one site's upgrade must never re-point
 the registry out from under its neighbours. Edit it yourself.
@@ -170,17 +159,20 @@ First upgrade the application source to the current release by your normal
 deployment method, then:
 
 ```bash
-bench --site <site> execute apex.patches.v2_0.app_identity_cutover.preview_registry
+cd sites
+../env/bin/python -c "from apex.patches.v2_0.app_identity_cutover import rewrite_registry; \
+print(rewrite_registry(open('apps.txt', encoding='utf-8').read()), end='')"
 ```
 
-**This is the command B1 blocks hardest.** It exists to print the corrected file
-*before* the registry is repaired, which is precisely the state in which the
-site refuses to run it: it exits `1` with `AppNotInstalledError: App apex is not
-installed`, followed by `NameError: name 'apex' is not defined`. There is no
-flag or ordering that avoids this.
+**Do not reach for `bench execute` here.** It cannot start on a site whose
+registry still names the dead package: `frappe.init` builds the module map for
+every app in `sites/apps.txt` and raises `ModuleNotFoundError: No module named
+'apex_habitat'` before the command runs. The line above avoids frappe
+altogether — `rewrite_registry` reads the file and returns text, so it needs no
+site, no database and no hooks. It exits `0` and prints the corrected registry.
 
-The edit it would have printed is small enough to make by hand, and Section 1
-has already proved the file is unambiguous: **replace the single line reading
+Write what it printed, or make the same edit by hand — Section 1 has already
+proved the file is unambiguous: **replace the single line reading
 `apex_habitat` with `apex`, and change nothing else** — not the other lines, not
 their order, not the line endings, not a trailing newline. The result looks like:
 
@@ -194,8 +186,8 @@ apex
 If Section 1 showed anything other than exactly one `apex_habitat` line and no
 `apex` line, stop and go to [Section 8](#8-when-to-stop). Which line is
 authoritative is a judgement call, and guessing can detach a healthy sibling
-site on the same bench. (When B1 is fixed, `preview_registry` raises
-`IdentityCutoverError` for you in that case instead.)
+site on the same bench. `rewrite_registry` raises `IdentityCutoverError` naming
+the state it found rather than guessing which line to change.
 
 Confirm the result:
 
@@ -208,34 +200,71 @@ Expected: `1` then `0`. Keep the `|| true`: the second check reports its
 **expected** result by printing `0` and exiting `1`, so without it an operator
 running under `set -e` aborts at the moment the step succeeds.
 
-**Then the cached copy must be dropped, and this is where B2 stops you.** The
-edited file is not read again until the `all_apps` entry cached in Redis is
-invalidated. `bench --site <site> clear-cache` cannot do it: that command loads
-every installed app's hooks (`frappe/__init__.py:993`), and one of them is the
-package that no longer exists, so it fails with the same
-`Could not find app "apex_habitat":`. During the rehearsal the only thing
-observed to release the site was deleting the cached `all_apps` entry from Redis
-directly. That is a finding, not a supported step — a supported way to drop it
-is part of what Section 9 requires before this runbook is used.
+**Then drop the cached copy.** The edited file is not read again until the
+`all_apps` entry cached in Redis is invalidated, and until you do, every command
+still fails with `Could not find app "apex_habitat":` as though you had never
+touched the file. `bench --site <site> clear-cache` cannot do it: that command
+loads every installed app's hooks (`frappe/__init__.py:993`), and one of them is
+the package that no longer exists, so the clear itself fails.
 
-Once the registry is genuinely in effect, the site responds again with the
-application's own features unavailable, because its hooks do not load until
-Section 5 completes. That is expected — and it is also as far as this procedure
-currently gets.
+Delete the app-discovery keys for that one site instead. They are namespaced by
+its database name, so no other site on the bench is touched:
+
+```bash
+cd sites
+../env/bin/python - <<'PY'
+import json
+
+import redis
+
+SITE = "<site>"
+KEYS = ("all_apps", "app_hooks", "installed_apps", "app_modules",
+        "installed_app_modules", "module_app", "module_installed_app")
+
+common = json.load(open("common_site_config.json", encoding="utf-8"))
+config = json.load(open(f"{SITE}/site_config.json", encoding="utf-8"))
+client = redis.from_url(config.get("redis_cache") or common["redis_cache"])
+print("dropped:", [k for k in KEYS if client.delete(f'{config["db_name"]}|{k}'.encode())])
+PY
+```
+
+Confirm the registry is genuinely in effect:
+
+```bash
+bench --site <site> list-apps
+```
+
+It prints a row naming `apex` where the same command failed a moment earlier.
+The application's own features stay unavailable until Section 5 completes,
+because the database still records the old identity. That is expected.
 
 ---
 
 ## 5. Repair the database identity
 
-> **Blocked — B1.** Both commands in this section are refused on a pre-rename
-> site with `AppNotInstalledError: App apex is not installed`, exit `1`. The
-> database identity is what makes `apex` an installed app, so neither command can
-> reach the state that would let it run.
+Both commands here run through the bench's interpreter, not `bench execute`.
+`bench execute` resolves a dotted path with `frappe.get_attr`, which refuses any
+path whose leading name is missing from the site's installed apps — and the
+database still says `apex_habitat`, which is the thing being repaired. It fails
+with `AppNotInstalledError: App apex is not installed` and then `NameError: name
+'apex' is not defined`, exit `1`. Importing the module after `frappe.connect()`
+runs the same code without that gate, and commits explicitly.
 
 Confirm what remains:
 
 ```bash
-bench --site <site> execute apex.patches.v2_0.app_identity_cutover.diagnose
+cd sites
+../env/bin/python - <<'PY'
+import json
+
+import frappe
+
+frappe.init(site="<site>")
+frappe.connect()
+from apex.patches.v2_0.app_identity_cutover import diagnose
+
+print(json.dumps(diagnose(), indent=1, default=str))
+PY
 ```
 
 Expected output is a JSON object. On a pre-rename site, with the registry now
@@ -247,10 +276,10 @@ fixed:
   "registry_state": "canonical",
   "installed_apps": ["frappe", "erpnext", "hrms", "apex_habitat"],
   "installed_apps_legacy": true,
-  "module_def_rows": 5,
+  "module_def_rows": 4,
   "installed_application_rows": 1,
-  "legacy_method_rows": 0,
-  "sweepable_columns": 2841
+  "legacy_method_rows": 36,
+  "sweepable_columns": 13125
 }
 ```
 
@@ -262,25 +291,38 @@ command reports `next_step` and stops without touching the database.
 Now apply the repair:
 
 ```bash
-bench --site <site> execute apex.patches.v2_0.app_identity_cutover.cutover
+cd sites
+../env/bin/python - <<'PY'
+import json
+
+import frappe
+
+frappe.init(site="<site>")
+frappe.connect()
+from apex.patches.v2_0.app_identity_cutover import cutover
+
+result = cutover()
+frappe.db.commit()
+print(json.dumps(result, indent=1, default=str))
+PY
 ```
 
 `cutover` refuses to run unless the registry is already canonical. It rewrites
 the `installed_apps` global, `Module Def.app_name`, `Installed
 Application.app_name`, and every stored dotted `apex_habitat.` path. It counts
 each column before writing, so tables with nothing to change are never locked.
-`bench execute` commits when the command returns
-(`frappe/commands/utils.py:283-284`).
+The explicit `frappe.db.commit()` is what makes the repair durable — an
+interpreter session does not commit for you.
 
 Expected output — a JSON object; the `rows` figures are site-specific:
 
 ```json
 {
   "installed_apps": 1,
-  "module_def": 5,
+  "module_def": 4,
   "installed_application": 1,
   "dotted_paths": [
-    {"table": "tabNumber Card", "column": "method", "rows": 6}
+    {"table": "tabScheduled Job Type", "column": "method", "rows": 36}
   ]
 }
 ```
@@ -293,9 +335,8 @@ and an empty `dotted_paths`.
 
 ## 6. Migrate and verify
 
-> **Blocked.** This section depends on Section 5 having committed, which it
-> cannot. Read the patch-history warning below before it is un-deferred: it
-> changes how long the window has to be.
+This section depends on Section 5 having committed. Read the patch-history
+warning below before you start it: it changes how long the window has to be.
 
 ```bash
 bench --site <site> migrate
@@ -370,15 +411,13 @@ only route back.
 
 Stop and escalate rather than improvise if any of these hold:
 
-- The status at the top of this page still reads **deferred**. That is itself a
-  stop condition for Sections 4 to 6.
 - `sites/apps.txt` lists **both** `apex` and `apex_habitat`, or neither, or the
   same name twice. Which line is authoritative is a judgement call, and guessing
-  can detach a healthy sibling site on the same bench. (`preview_registry`
-  raises `IdentityCutoverError` here on purpose, once it can run at all.)
+  can detach a healthy sibling site on the same bench. `rewrite_registry` raises
+  `IdentityCutoverError` here on purpose.
 - The edited `sites/apps.txt` has visibly taken effect for some processes and
-  not others. That is blocker B2, and continuing past it writes to a database
-  the site is still reading through a stale registry.
+  not others. The cache drop in Section 4 was incomplete, and continuing past it
+  writes to a database the site is still reading through a stale registry.
 - `diagnose` reports `installed_apps_legacy: true` **after** a successful
   `cutover` run.
 - `bench migrate` still reports `Could not find app "apex_habitat"` after
@@ -399,19 +438,13 @@ clone cannot re-run them and this page is the only record that they exist. What 
 **not** proven is the operator sequence around them.
 
 On **31 July 2026** the full sequence was walked against a live pre-rename site
-and could not be completed. Blockers B1 and B2 at the top of this page are the
-outcome. This section stays as the acceptance test for lifting the deferral.
+and could not be completed; B1 and B2 were the outcome. On **3 August 2026** it
+was walked again, from the same starting state, and completed. What each command
+printed is recorded in the section it belongs to; the deviation from the
+rehearsal recipe below, and what that leaves unproven, is recorded at the end of
+this section.
 
-**Both blockers must be closed first.**
-
-- **B1** — a supported way to invoke `preview_registry`, `diagnose` and
-  `cutover` on a site that does not yet list `apex` among its installed apps.
-  Until then the entry points are unreachable at the only moment they are
-  needed.
-- **B2** — a supported way to make an edited `sites/apps.txt` take effect on a
-  site whose hooks cannot be loaded, given that `bench clear-cache` fails there.
-
-**Then rehearse.** On a disposable bench, create a site and install the
+**Rehearse before a real window.** On a disposable bench, create a site and install the
 application as it was packaged **before** the rename — a source tree whose own
 package directory is `apex_habitat/` and carries the modules. Read
 [the pre-rename source this repository does not hold](#the-pre-rename-source-this-repository-does-not-hold)
@@ -445,11 +478,12 @@ verbatim against `rehearsal.localhost`.
 1. Before Section 4, `bench --site rehearsal.localhost migrate` fails with
    `Could not find app "apex_habitat"`. This confirms the rehearsal really
    started from the broken state, rather than from an already-canonical site.
-2. `preview_registry` runs and prints the corrected registry text **on that
+2. `rewrite_registry` runs and prints the corrected registry text **on that
    still-broken site**, without an `AppNotInstalledError`. This is the direct
    test of B1; it is the observation that failed on 31 July 2026.
-3. After the registry is written, the site reads the new file without any step
-   outside this runbook. This is the direct test of B2; it also failed.
+3. After the registry is written and the cache keys are dropped, the site reads
+   the new file: `list-apps` prints `apex` where the same command failed a
+   moment earlier. This is the direct test of B2; it also failed in July.
 4. After Section 4 and before Section 5, `diagnose` returns `registry_state`
    `canonical` and a `next_step` key is **absent**.
 5. Section 5's `cutover` returns `installed_apps: 1` and a `dotted_paths` entry
@@ -472,6 +506,30 @@ verbatim against `rehearsal.localhost`.
     the sequence can be followed under `set -e` without aborting on success.
 12. The desk loads and an application workspace opens.
 
+**Count with `LOCATE`, not `LIKE`.** In SQL `LIKE`, `_` matches any single
+character, so `WHERE method LIKE 'apex_habitat%'` also matches every canonical
+`apex.habitat....` path and reports a repaired site as still broken. During the
+3 August rehearsal that check returned 16 rows, all of them already canonical.
+Use `WHERE LOCATE('apex_habitat.', method) > 0`, which is also what the sweep
+itself uses.
+
+### What the 3 August 2026 rehearsal covered, and what it did not
+
+The starting state was built by installing the current release on a disposable
+site and then writing the four stored legacy values directly: the bench registry
+line, the `installed_apps` global, four `Module Def` rows plus one `Installed
+Application` row, and 36 `Scheduled Job Type.method` paths. Observations 1
+through 11 held. Observation 12 was not taken — the rehearsal bench served no
+HTTP port.
+
+What that leaves unproven is the same thing
+[the pre-rename source](#the-pre-rename-source-this-repository-does-not-hold)
+section already names: the site never carried the `apex_habitat/` package
+itself, only the values such a site stores. Anything that would differ because
+the old *package* was installed — a table only it created, a fixture only it
+shipped — is outside what this rehearsal can show. The four stored places are
+what the runbook repairs, and those were genuinely legacy.
+
 ### The pre-rename source this repository does not hold
 
 This repository cannot supply the starting state the rehearsal begins from. Its
@@ -488,52 +546,30 @@ git rev-list --max-parents=0 HEAD            # the first commit already ships `a
 git show <retirement-commit>^:apex_habitat   # four files, not an application
 ```
 
-So the rehearsal has a prerequisite beyond B1 and B2: a genuine pre-rename
-source, recovered from a deployment artifact of that era rather than from this
-history. Until one is in hand none of the observations above can be recorded,
-and closing B1 and B2 does not change that.
+So a rehearsal that starts from the genuine old package needs a source recovered
+from a deployment artifact of that era. The 3 August rehearsal wrote the four
+stored legacy values instead, which is what the runbook repairs; the limits of
+that substitution are recorded at the end of Section 9.
 
-### What has been verified, and what has not
-
-The steps that do not need the pre-rename state have been run end to end against
-a site whose identity is already `apex`, and behave as documented:
+### What the sequence printed on 3 August 2026
 
 | Step | Observed |
 | --- | --- |
-| 1 (a) | one `apex` line in `sites/apps.txt` — the "already canonical, stop" row |
-| 1 (b) | `["frappe", "erpnext", "hrms", "apex"]` |
-| 3 | `list-apps` prints a row naming `apex` and its version; exit `0` |
-| 4 `preview_registry` | prints the registry unchanged; exit `0` |
-| 5 `diagnose` | `registry_state` `canonical`, `installed_apps_legacy` `false`, `module_def_rows`, `installed_application_rows` and `legacy_method_rows` all `0`; exit `0` |
-| 5 `cutover` | `{"installed_apps": 0, "module_def": 0, "installed_application": 0, "dotted_paths": []}`; exit `0`. This is the all-zero return observation 6 asks for, but reached from an already-canonical site rather than from a completed cutover, so it shows the no-op path, not idempotence after a real write |
+| Before 4 | `bench --site <site> execute apex....preview_registry` never starts: `ModuleNotFoundError: No module named 'apex_habitat'` raised from `frappe.init` through `setup_module_map`, because the registry still names the dead package |
+| 4 `rewrite_registry` | prints `frappe / hrms / apex / erpnext`; exit `0`, on that same still-broken site |
+| 4 after the edit, before the drop | `bench --site <site> list-apps` still fails with `Could not find app "apex_habitat"` — the cached `all_apps` |
+| 4 cache drop | `dropped: ['all_apps', 'app_modules']` |
+| 4 after the drop | `list-apps` prints `frappe 15.109.0`, `erpnext 15.109.3`, `hrms 15.60.3`, `apex 2.3.0`; exit `0` |
+| 5 via `bench execute` | still refused: `AppNotInstalledError: App apex is not installed`, then `NameError: name 'apex' is not defined` — the database identity is still legacy |
+| 5 `diagnose` | `registry_state` `canonical`, `installed_apps_legacy` `true`, `module_def_rows` 4, `installed_application_rows` 1, `legacy_method_rows` 36, `sweepable_columns` 13125; exit `0` |
+| 5 `cutover` | `{"installed_apps": 1, "module_def": 4, "installed_application": 1, "dotted_paths": [{"table": "tabScheduled Job Type", "column": "method", "rows": 36}]}`; exit `0` |
+| 5 `cutover` again | `{"installed_apps": 0, "module_def": 0, "installed_application": 0, "dotted_paths": []}` — idempotent after a real write |
+| 6 `migrate` | completes, no `apex_habitat` message |
+| after 6 | `installed_apps` reads `["frappe", "erpnext", "hrms", "apex"]`; 36 job methods canonical and none legacy by `LOCATE`; `tabPatch Log` untouched |
 
-Blocker B1's mechanism is confirmed without a pre-rename site, by invoking any
-dotted path whose leading name is an app present on the bench but absent from
-that site's installed apps — the condition `apex` is in before the cutover:
+`bench execute` calls `frappe.get_attr(method)` and falls back to `eval` on any
+exception (`frappe/commands/utils.py:269,272`), so the second error above is the
+fallback failing on a name the first never imported.
 
-```
-frappe.exceptions.AppNotInstalledError: App <name> is not installed
-During handling of the above exception, another exception occurred:
-NameError: name '<name>' is not defined
-```
-
-That is the pair Section 4 predicts. `bench execute` calls
-`frappe.get_attr(method)` and falls back to `eval` on any exception
-(`frappe/commands/utils.py:269,272`), so the second error is the fallback
-failing on a name the first never imported.
-
-Unverified, because each needs the site to be genuinely pre-rename: Section 4's
-registry repair and its cache drop, Section 5's first write, Section 6's migrate
-and patch replay, observations 1 to 5 and 7 to 12 above, and the part of
-observation 6 that has to follow a cutover which actually wrote.
-
-B2 need not be solved from nothing. The retired bridge dropped the cached
-registry itself, deleting the app-discovery cache keys — `app_hooks`,
-`installed_apps`, `all_apps`, `app_modules`, `installed_app_modules`,
-`module_app`, `module_installed_app` — and rebuilding the module map afterwards.
-That is one route to a supported cache drop, recorded as a starting point rather
-than as a decision.
-
-Record the observed output of each step. Any divergence is a defect in this
-runbook, not an operator error. Update the status block at the top of this page
-when, and only when, every observation above has been met.
+Record the observed output of each step on your own site. Any divergence is a
+defect in this runbook, not an operator error.
