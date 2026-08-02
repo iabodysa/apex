@@ -67,6 +67,7 @@ function _prompt_complete_trip(frm) {
 }
 
 frappe.listview_settings["Dispatch Trip"] = {
+	add_fields: ["status"],
 	get_indicator(doc) {
 		const colors = {
 			"Planned": "blue",

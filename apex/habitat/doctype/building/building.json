@@ -656,7 +656,7 @@
   {
    "group": "Safety",
    "link_doctype": "Safety Incident",
-   "link_fieldname": "accommodation_building"
+   "link_fieldname": "building"
   },
   {
    "group": "Custody",
@@ -684,7 +684,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-07-27 17:33:17.937518",
+ "modified": "2026-08-03 02:28:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Building",

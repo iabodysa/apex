@@ -55,6 +55,7 @@ function _flag_variance(frm) {
 }
 
 frappe.listview_settings["Fuel Claim"] = {
+	add_fields: ["status"],
 	get_indicator(doc) {
 		const colors = {
 			"Draft": "gray",

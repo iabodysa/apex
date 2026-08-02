@@ -26,6 +26,7 @@ function _update_mct_indicator(frm) {
 }
 
 frappe.listview_settings["Movement Cost Transfer"] = {
+	add_fields: ["status"],
 	get_indicator(doc) {
 		const colors = {
 			"Draft": "gray",

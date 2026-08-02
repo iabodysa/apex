@@ -138,6 +138,7 @@ function _check_license_expiry(frm) {
 }
 
 frappe.listview_settings["Salis Driver"] = {
+	add_fields: ["status"],
 	get_indicator(doc) {
 		const colors = {
 			"Active": "green",

@@ -46,6 +46,7 @@ function _show_context(frm) {
 }
 
 frappe.listview_settings["Vehicle Assignment"] = {
+	add_fields: ["status"],
 	get_indicator(doc) {
 		const colors = {
 			"Active": "green",

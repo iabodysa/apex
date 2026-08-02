@@ -54,6 +54,7 @@ function _check_high_volume(frm) {
 }
 
 frappe.listview_settings["Fuel Request"] = {
+	add_fields: ["status"],
 	get_indicator(doc) {
 		const colors = {
 			"Pending": "orange",

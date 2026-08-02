@@ -38,6 +38,7 @@ function _update_vehicle_indicator(frm) {
 }
 
 frappe.listview_settings["Salis Vehicle"] = {
+	add_fields: ["status"],
 	get_indicator(doc) {
 		const colors = {
 			"Active": "green",

@@ -24,6 +24,7 @@ function _update_clearance_indicator(frm) {
 }
 
 frappe.listview_settings["Driver Clearance"] = {
+	add_fields: ["status"],
 	get_indicator(doc) {
 		const colors = {
 			"Open": "orange",

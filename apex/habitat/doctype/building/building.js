@@ -151,7 +151,7 @@ function _renderBuildingDashboard(frm) {
 			frm.dashboard.add_indicator(__("Open Custody Issues: {0}", [m.open_custody]),
 				m.open_custody ? "orange" : "green");
 			if (m.labels && m.labels.length) {
-				frm.dashboard.add_chart({
+				frm.dashboard.render_graph({
 					title: __("Occupancy % Trend"),
 					type: "line",
 					data: {
