@@ -443,6 +443,79 @@ def get_trip_driver_position(dispatch_trip: str):
     }
 
 
+@frappe.whitelist()
+def get_active_driver_positions():
+    """Every live driver position across the plans the caller owns (read).
+
+    The single-trip endpoint answers "where is this plan's driver"; a supervisor watching
+    a yard needs "where is everyone", which is one query rather than one request per plan.
+    Row-scoped identically: the plans are the caller's own submitted Route Plans
+    (Administrator sees all), so this can never widen what the portal already shows.
+
+    Each entry carries the labels the map filters on — driver, vehicle, plan and project —
+    plus the same age and stale computation the single-trip reader applies, so a frozen
+    marker reads as frozen here too. A plan whose driver has never pushed a fix is
+    returned with ``has_position`` False rather than dropped, because the filter list must
+    still offer that driver."""
+    _require_portal_role()
+    user = frappe.session.user
+
+    filters = {"docstatus": 1}
+    if not _is_admin(user):
+        filters["route_supervisor"] = user
+
+    plans = frappe.get_all(
+        "Route Plan",
+        filters=filters,
+        fields=["name", "route_name", "project"],
+        limit_page_length=0,
+    )
+
+    now = frappe.utils.now_datetime()
+    out = []
+    for plan in plans:
+        trip_name = _active_trip_for_plan(plan["name"])
+        if not trip_name:
+            continue
+        trip = frappe.db.get_value(
+            "Dispatch Trip",
+            trip_name,
+            ["name", "status", "driver", "vehicle", "driver_lat", "driver_lng",
+             "driver_position_updated_at"],
+            as_dict=True,
+        )
+        if not trip:
+            continue
+
+        lat, lng = trip.get("driver_lat"), trip.get("driver_lng")
+        updated = trip.get("driver_position_updated_at")
+        age_seconds = stale = None
+        if updated:
+            age_seconds = int(frappe.utils.time_diff_in_seconds(now, updated))
+            stale = age_seconds > _POSITION_STALE_SECONDS
+
+        out.append({
+            "dispatch_trip": trip["name"],
+            "route_plan": plan["name"],
+            "route_name": plan.get("route_name") or plan["name"],
+            "project": plan.get("project"),
+            "status": trip.get("status"),
+            "driver": trip.get("driver"),
+            "driver_name": _driver_label(trip.get("driver")),
+            "vehicle": trip.get("vehicle"),
+            "plate": _vehicle_label(trip.get("vehicle")),
+            "has_position": bool(lat is not None and lng is not None and (lat or lng)),
+            "lat": lat,
+            "lng": lng,
+            "updated_at": frappe.utils.cstr(updated) if updated else None,
+            "age_seconds": age_seconds,
+            "stale": stale,
+        })
+
+    out.sort(key=lambda item: (not item["has_position"], item["driver_name"] or ""))
+    return out
+
+
 # ─────────────────────────────── write endpoints ───────────────────────────────
 
 def _resolve_owned_plan_doc(name: str):

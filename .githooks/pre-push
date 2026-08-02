@@ -56,13 +56,28 @@ check_commit() {
 
 # $1 is a git-log revision spec that may carry several words ("<sha> --not
 # --remotes=origin"), so it is deliberately left unquoted where git expands it.
+# A history rewrite re-presents EVERY commit as outgoing, so the message rules — written
+# later than most of that history — refuse commits nobody is authoring today.
+# APEX_HISTORY_REWRITE carries the operator's reason and skips the MESSAGE rules ONLY; the
+# secret scan and the content guards below still run over the same range, because those
+# grade what is about to become public rather than how an old sentence was worded.
+rewrite_reason=${APEX_HISTORY_REWRITE:-}
+
 scan_range() {
 	shas=$(git log --format=%H $1)
 
-	failed=0
-	for sha in $shas; do
-		check_commit "$sha" || failed=1
-	done
+	if [ -n "$rewrite_reason" ]; then
+		count=$(printf '%s\n' "$shas" | grep -c . || true)
+		echo "pre-push: HISTORY REWRITE - message rules skipped for $count commit(s)" >&2
+		echo "pre-push: reason: $rewrite_reason" >&2
+		echo "pre-push: the secret scan and the content guards still run on this range." >&2
+		failed=0
+	else
+		failed=0
+		for sha in $shas; do
+			check_commit "$sha" || failed=1
+		done
+	fi
 	[ "$failed" -eq 0 ] || return 1
 
 	# The scanners live behind the shared runner. This used to degrade to a WARNING when
