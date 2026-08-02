@@ -1,13 +1,14 @@
-# Copyright (c) 2026, AFMCO Support Services Co. Ltd
+# Copyright (c) 2026, AFMCO and contributors
 """Shared low-level primitives for tenant row-scoping.
 
-Habitat scopes on Building, Salis on Project, but the underlying mechanics are
-identical: resolve the acting user, decide whether an oversight role sees
-everything, read the user's allowed values from frappe's own User Permission
-resolver, narrow them to the doctype being queried, and turn that into a SQL WHERE
-fragment or a report-scope tuple. Those primitives live here ONCE;
-``apex.habitat.permissions`` and ``apex.salis.permissions`` keep thin wrappers that
-bind their own oversight-role set and ``allow`` doctype.
+Habitat scopes on Building, Salis on Project, Logistay on Company, but the
+underlying mechanics are identical: resolve the acting user, decide whether an
+oversight role sees everything, read the user's allowed values from frappe's own
+User Permission resolver, narrow them to the doctype being queried, and turn that
+into a SQL WHERE fragment or a report-scope tuple. Those primitives live here ONCE;
+``apex.habitat.permissions``, ``apex.salis.permissions`` and
+``apex.logistay.permissions`` keep thin wrappers that bind their own oversight-role
+set and ``allow`` doctype.
 
 What is deliberately NOT here: the per-doctype ``*_query`` / ``*_has_permission``
 wrappers and the scope-value resolution inside each ``has_permission`` (habitat's
@@ -56,8 +57,22 @@ def allowed_for(user, allow, cache_key):
     The values are returned UNFILTERED by ``applicable_for``. Filtering needs the
     target doctype, which this function does not receive — ``for_doctype()`` below
     applies it where the doctype is known.
+
+    ``hide_descendants`` on a row is never read here, and does not need to be: for a
+    nested-set ``allow`` doctype it has ALREADY decided, inside
+    ``get_user_permissions`` itself, which ``doc`` rows exist in ``rows`` below.
+    ``user_permission.py:130`` unconditionally adds the permitted node; ``:132-135``
+    — only when ``meta.is_nested_set()`` and ``not perm.hide_descendants`` — then
+    adds one further row per descendant from ``frappe.db.get_descendants``. So a
+    ``hide_descendants=1`` permission never had its descendants added in the first
+    place, and this function returning every row's ``doc`` verbatim already carries
+    that narrowing through untouched. Of apex's three scoped axes only ``Company``
+    is a tree (``frappe.get_meta("Company").is_tree`` / ``is_nested_set()`` are
+    True; Building and Project carry no ``lft``/``rgt``), so this only bites there —
+    verified against a real Company parent/child on a live site and pinned by
+    ``test_permission_scope_hide_descendants.py``.
     """
-    del cache_key  # the framework's Redis cache replaced the per-request one
+    del cache_key
     rows = frappe_permissions.get_user_permissions(user).get(allow) or []
     return [row.get("doc") for row in rows]
 
@@ -77,6 +92,12 @@ def for_doctype(user, allow, doctype, values):
     so a module that overrides its resolver keeps control of the scope and only the
     doctype restriction is applied on top. A value with no row at all is left
     untouched: nothing is known to restrict it.
+
+    ``hide_descendants`` survives this filter for free, for the same reason it
+    needs no code in ``allowed_for`` above: a descendant hidden by that flag was
+    never added to ``rows`` in the first place, so it cannot enter ``granted`` or
+    ``restricted`` here either, and it was already absent from ``values`` before
+    this function ran.
     """
     if not values or not doctype:
         return list(values)
