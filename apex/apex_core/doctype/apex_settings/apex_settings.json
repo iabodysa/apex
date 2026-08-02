@@ -5,10 +5,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "apex_settings_tab_finance",
   "apex_settings_sec_financial",
   "enable_gl_posting",
-  "apex_settings_tab_retention",
   "apex_settings_sec_retention",
   "snapshot_retention_days",
   "depreciation_snapshot_retention_days",
@@ -16,11 +14,6 @@
   "alert_retention_days"
  ],
  "fields": [
-  {
-   "fieldname": "apex_settings_tab_finance",
-   "fieldtype": "Tab Break",
-   "label": "Finance"
-  },
   {
    "fieldname": "apex_settings_sec_financial",
    "fieldtype": "Section Break",
@@ -32,11 +25,6 @@
    "fieldname": "enable_gl_posting",
    "fieldtype": "Check",
    "label": "Enable GL Entry Posting"
-  },
-  {
-   "fieldname": "apex_settings_tab_retention",
-   "fieldtype": "Tab Break",
-   "label": "Data Retention"
   },
   {
    "collapsible": 1,
@@ -76,7 +64,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-29 00:00:00.000000",
+ "modified": "2026-08-03 00:08:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Apex Settings",

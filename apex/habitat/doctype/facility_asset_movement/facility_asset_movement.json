@@ -38,7 +38,6 @@
   "facility_asset_movement_intercompany_col",
   "accounting_acknowledged",
   "accounting_acknowledged_by",
-  "facility_asset_movement_tab_system",
   "facility_asset_movement_sec_system",
   "naming_series",
   "facility_asset_movement_system_col",
@@ -61,11 +60,6 @@
    "fieldname": "facility_asset_movement_tab_approval",
    "fieldtype": "Tab Break",
    "label": "Approval"
-  },
-  {
-   "fieldname": "facility_asset_movement_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System"
   },
   {
    "fieldname": "facility_asset_movement_sec_cancellation",
@@ -290,7 +284,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-27 01:41:11.852479",
+ "modified": "2026-08-03 00:08:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Facility Asset Movement",

@@ -15,7 +15,6 @@
   "wash_request_sec_scheduling",
   "status",
   "wash_date",
-  "wash_request_tab_system",
   "wash_request_sec_system",
   "naming_series",
   "amended_from"
@@ -88,11 +87,7 @@
    "label": "Wash Date"
   },
   {
-   "fieldname": "wash_request_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System"
-  },
-  {
+   "collapsible": 1,
    "fieldname": "wash_request_sec_system",
    "fieldtype": "Section Break",
    "label": "System"
@@ -119,7 +114,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-08-03 00:08:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Wash Request",

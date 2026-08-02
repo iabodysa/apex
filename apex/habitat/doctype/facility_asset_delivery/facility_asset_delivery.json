@@ -36,7 +36,6 @@
   "exit3_receiving_cleared",
   "exit3_cleared_by",
   "exit3_cleared_on",
-  "fad_tab_receipt",
   "fad_sec_otp",
   "otp_hash",
   "otp_expires_at",
@@ -45,7 +44,6 @@
   "otp_verified_on",
   "fad_sec_remarks",
   "remarks",
-  "fad_tab_system",
   "fad_sec_system",
   "amended_from",
   "cancellation_reason"
@@ -261,11 +259,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "fad_tab_receipt",
-   "fieldtype": "Tab Break",
-   "label": "On-Site Receipt"
-  },
-  {
    "fieldname": "fad_sec_otp",
    "fieldtype": "Section Break",
    "hidden": 1,
@@ -332,11 +325,6 @@
    "label": "Remarks"
   },
   {
-   "fieldname": "fad_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System"
-  },
-  {
    "collapsible": 1,
    "fieldname": "fad_sec_system",
    "fieldtype": "Section Break",
@@ -361,7 +349,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-27 16:10:26.351481",
+ "modified": "2026-08-03 00:08:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Facility Asset Delivery",

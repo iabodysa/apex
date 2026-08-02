@@ -37,7 +37,6 @@
   "planned_daily_fuel",
   "vehicle_sec_notes",
   "notes",
-  "vehicle_tab_system",
   "vehicle_sec_system",
   "naming_series",
   "vehicle_sys_col",
@@ -223,11 +222,7 @@
    "label": "Notes"
   },
   {
-   "fieldname": "vehicle_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System"
-  },
-  {
+   "collapsible": 1,
    "fieldname": "vehicle_sec_system",
    "fieldtype": "Section Break",
    "label": "Identifiers"
@@ -355,7 +350,7 @@
    "link_fieldname": "vehicle"
   }
  ],
- "modified": "2026-07-26 06:00:46.878234",
+ "modified": "2026-08-03 00:08:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Vehicle",
