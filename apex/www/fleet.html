@@ -17,6 +17,7 @@
       // fleet.py). CSRF token signs the fuel-request POST; socket vars kept for
       // the shared portal bootstrap.
       window.csrf_token = {{ csrf_token | tojson }};
+      window.user_full_name = {{ (user_full_name or '') | tojson }};
       window.fleet_socket = {
         site_name: {{ site_name | tojson }},
         socketio_port: {{ socketio_port }},

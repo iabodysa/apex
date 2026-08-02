@@ -62,6 +62,7 @@ def get_context(context):
     # [#4h1dwk] Any logged-in user may view the employee page; per-user data
     # scoping is enforced server-side by the fleet_employee endpoints.
     context.can_view = 1
+    context.user_full_name = frappe.utils.get_fullname()
     context.csrf_token = get_csrf_token()
     # [#6xr27k]
     conf = frappe.get_site_config()

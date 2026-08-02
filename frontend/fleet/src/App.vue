@@ -144,7 +144,8 @@ onBeforeUnmount(() => {
   MANUAL_SCROLL_EVENTS.forEach((ev) => window.removeEventListener(ev, releasePin));
 });
 
-const avatarInitial = computed(() => Array.from(t("emp.brand"))[0] || "•");
+const userName = (typeof window !== "undefined" && window.user_full_name) || "";
+const avatarInitial = computed(() => Array.from(userName || t("emp.brand"))[0] || "•");
 
 // Time-of-day greeting.
 const greeting = computed(() => {
@@ -240,7 +241,7 @@ async function onSubmit() {
       <!-- variant="header" tints the control for the forest header bar, matching
            the sibling driver / safety / route_supervisor portals. -->
       <LangToggle variant="header" />
-      <span class="emp-avatar" :title="t('emp.brand')">{{ avatarInitial }}</span>
+      <span class="emp-avatar" :title="userName || t('emp.brand')" :aria-label="userName || t('emp.brand')">{{ avatarInitial }}</span>
     </template>
 
     <!-- Greeting subtitle is provided via the `subtitle` prop above; the shell
