@@ -8,6 +8,12 @@ from frappe.utils import get_datetime
 # "What's New" popup and this bell feed now agree on the same 2.x floor.
 _RELEASES = [
     {
+        "title": "Apex 2.2.4 — The fleet header says who you are, and a wide supervisor screen fits more of the day.",
+        "app_name": "apex",
+        "link": "/app",
+        "creation": "2026-08-02 18:57:34",
+    },
+    {
         "title": "Apex 2.2.3 — The route supervisor screen can be linked to, and it fits the device you open it on.",
         "app_name": "apex",
         "link": "/app",
