@@ -412,7 +412,6 @@ At least one item is required on a Custody Return.,يجب إدخال صنف وا
 At least one item is required on a Goods Receipt.,يلزم بند واحد على الأقل في استلام البضائع.
 At least one item is required on a Material Transfer.,يجب إدخال صنف واحد على الأقل في نقل المواد.
 At least one worker is required for an Inter-City Relocation.,يلزم عامل واحد على الأقل لعملية النقل بين المدن.
-Atelier,أتيليه
 Attach the internal authorization (management sign-off) approving this deduction type.,أرفق التفويض الداخلي (اعتماد الإدارة) الذي يقر نوع الحسم هذا.
 Attach the signed legal opinion / policy approving these deductions under KSA Labor Law.,أرفق الرأي القانوني / السياسة الموقّعة التي تعتمد هذه الخصومات بموجب نظام العمل السعودي.
 Attachment,مرفق
@@ -1044,7 +1043,6 @@ Creating QR…,جارٍ إنشاء رمز الاستجابة السريعة…
 Creating rooms and beds…,جارٍ إنشاء الغرف والأسرّة…
 Creating target document...,جارٍ إنشاء المستند المستهدف...
 Creating {0}…,جارٍ إنشاء {0}…
-Creative,إبداعي
 Credentials Delivered By,مُسلم بيانات الاعتماد
 Critical,حرج
 Critical Alert Aging Hours,مهلة معالجة التنبيه الحرج (بالساعات)
@@ -1651,7 +1649,6 @@ For Subcontractor or External Worker when Employee link is not available.,للم
 Forgotten Request,طلب منسي
 Formal accommodation/housing safety-incident record with severity and automatic management escalation.,سجل رسمي لحادث سلامة في السكن مع درجة الخطورة والتصعيد الإداري التلقائي.
 Formal lease contract holder for one building. Carries the rent payment schedule. The landlord is identified by the Lease's landlord field.,الجهة الحاملة لعقد الإيجار الرسمي لمبنى واحد. تحمل جدول دفعات الإيجار. يُحدَّد المؤجِّر عبر حقل المؤجِّر في العقد.
-Frappe Standard,Frappe القياسي
 Freelancer,مستقل
 Frequency,التكرار / الدورية
 Frequency Override,تجاوز التكرار
@@ -1739,7 +1736,6 @@ Gate Pass Reference,رقم تصريح البوابة
 Gateway API Key,مفتاح واجهة البوابة البرمجية
 Gateway Help,مساعدة البوابة
 Gateway URL,رابط البوابة
-Gemini,جيميني
 General,عام
 General Details,تفاصيل عامة
 Generate Payment,توليد الدفع
@@ -2866,7 +2862,7 @@ Portal credential re-shared for {0} {1},أُعيدت مشاركة تصريح د�
 Portal credential reissued for {0} {1},أُعيد إصدار تصريح دخول البوابة لـ {0} {1}
 Portal credential revoked for {0} {1},أُلغي تصريح دخول البوابة لـ {0} {1}
 Portal credential rotated for {0} {1},جُدِّد تصريح دخول البوابة لـ {0} {1}
-"Portal design theme: AFMCO (flat brand default), Atelier (premium editorial refinement of AFMCO), Creative (flagship deep-navy editorial with electric-azure accent), Frappe Standard (neutral), Dark (AFMCO dark mode), or Gemini (glassmorphic).",نمط تصميم البوابة: AFMCO وهو النمط المسطح الافتراضي للعلامة، أو أتيليه وهو تنقيح راقٍ لنمط AFMCO، أو إبداعي وهو النمط الرئيسي بالكحلي الغامق مع لمسة سماوية، أو نمط فرابي القياسي المحايد، أو داكن وهو الوضع الليلي لـ AFMCO، أو جيميني الزجاجي.
+"Portal design theme: AFMCO, the light brand default, or Dark. These are the two the token system implements.",نمط تصميم البوابة: AFMCO وهو النمط الفاتح الافتراضي للعلامة، أو الداكن. هذان هما النمطان اللذان ينفّذهما نظام الرموز.
 Portal token audience must be Worker or Driver.,يجب أن تكون فئة رمز البوابة عاملًا أو سائقًا.
 Portal token subject binding cannot be changed after issuance.,لا يمكن تغيير ارتباط صاحب رمز البوابة بعد إصداره.
 Portal token subject binding is invalid.,ارتباط صاحب رمز البوابة غير صالح.
@@ -4027,6 +4023,7 @@ The worker's consent signature is required before a cost recovery can be approve
 The worker's signed consent to the recovery. Required before the incident can be approved; KSA Labor Law requires the worker's consent for a wage deduction.,موافقة العامل الموقعة على الاسترداد. مطلوبة قبل اعتماد الحادثة؛ يوجب نظام العمل السعودي موافقة العامل على أي خصم من الأجر.
 The {0} date {1} is before SIM {2}'s last custody event on {3}. Record the retirement on or after that date.,تاريخ {0} وهو {1} أسبق من آخر حدث عهدة للشريحة {2} بتاريخ {3}. سجّل الإخراج من الخدمة في ذلك التاريخ أو بعده.
 The {0} DocType is not available on this site.,نوع المستند {0} غير متاح على هذا الموقع.
+The {0} theme was retired; this portal now uses {1}.,أُوقف نمط {0}؛ تستخدم هذه البوابة الآن {1}.
 Theft,سرقة
 Theft report {0} cancelled.,أُلغي بلاغ السرقة {0}.
 Theme,السمة

@@ -210,3 +210,8 @@ apex.patches.v2_1.refresh_integration_settings_help
 # installed before this release. The date suffix is what re-runs it: Patch Log matches the whole
 # line, so a site that already ran the four-workspace version would otherwise skip the rest.
 apex.patches.v2_1.drop_retired_workspaces #2026-08-02
+
+# The portal theme screen offered six names; the token system implements two. A site already
+# saved on one of the four retired names keeps that value until something rewrites it, and a
+# stored value outside the Select reaches the portal unchanged.
+apex.patches.v2_1.repoint_retired_portal_themes

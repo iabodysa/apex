@@ -32,17 +32,17 @@ _CSS_COLOR_RE = re.compile(
 # [#lbu7js]
 _BRAND_LOGO_RE = re.compile(r"^/files/[^\"'<>\s]+$")
 
-# [#no616m]
+# The two the token system actually implements. frontend_shared/tokens.css defines a light
+# block, whose default identity is the afmco alias, and a dark block — nothing else. Four more
+# names were offered here for years and every one of them rendered as the light default, so the
+# screen promised a choice the portals could not make.
 THEME_SLUGS = {
     "AFMCO": "afmco",
-    "Frappe Standard": "frappe",
     "Dark": "dark",
-    "Gemini": "gemini",
-    # [#psglhx]
-    "Atelier": "atelier",
-    # [#14ru3n]
-    "Creative": "creative",
 }
+# Retired names, kept only so a record saved under one can be recognised and repointed rather
+# than throwing on validate. Nothing reads them as a theme.
+RETIRED_THEMES = ("Frappe Standard", "Gemini", "Atelier", "Creative")
 
 DEFAULT_THEME = "AFMCO"
 DEFAULT_SLUG = "afmco"
@@ -50,6 +50,18 @@ DEFAULT_SLUG = "afmco"
 
 class DriverPortalTheme(Document):
     def validate(self):
+        # A site saved under one of the four retired names would otherwise be unable to save at
+        # all — the value is already stored, so throwing traps the operator on a screen whose
+        # only invalid field is one the app itself wrote. Repoint and say so.
+        if self.theme in RETIRED_THEMES:
+            frappe.msgprint(
+                _("The {0} theme was retired; this portal now uses {1}.").format(
+                    self.theme, DEFAULT_THEME
+                ),
+                indicator="orange",
+            )
+            self.theme = DEFAULT_THEME
+
         # [#5ec5in]
         if self.theme and self.theme not in THEME_SLUGS:
             frappe.throw(_("Invalid portal theme: {0}").format(self.theme))
