@@ -1,69 +1,126 @@
-# 5. Costs (Facilities & Utilities)
+# Costs and Leasing
 
-[← Back to index](README.md)
+[Back to training index](README.md)
 
-Utility bills, accommodation cost allocation, and operational (non-financial)
-depreciation.
+## Audience
 
----
+Accommodation Managers who prepare facility costs, Finance Managers who approve
+leases and payments, and Internal Auditors who review source-to-ledger history.
 
-## Permissions
+## Outcome
 
-> **Finance Manager is a full maker/checker on the Lease and Utility
-> Bill Entry** — Read, Write, Create, Submit, and Cancel (not read-only). The
-> **Internal Auditor** holds read-only oversight across the Costs records —
-> Lease, Accommodation Ledger, Utility Bill Entry, Occupancy Snapshot, and
-> Accommodation Stock Ledger.
+Approve a utility bill or lease through its Frappe Workflow, distinguish an
+operational memo from an accounting posting, and verify the source link.
 
-> **Operational Depreciation Policy is System Manager-only.** No operational role
-> holds any right on it — not the Accommodation Manager and not the Finance
-> Manager. Treat it as an install-time setting, changed only by an administrator.
+## Prerequisites
 
----
+- A non-production training site.
+- A training Company, Building, Supplier, and Cost Center.
+- Two Accommodation Manager training users for the Utility Bill approval
+  exercise because self-approval is blocked.
+- A Finance Manager training user for Lease approval.
+- The [cost and leasing permission reference](../reference/permissions.md#cost-and-leasing-permissions).
 
-## DocTypes in this area
+## Operating model
 
-### Utility Account (master)
-- **Purpose:** one record per utility provider/meter (electricity, water, etc.).
-- **Key fields:** account name, utility type, building/site link.
+Use Frappe Workflow for approval and ERPNext payment documents for payment.
+Apex keeps facility allocation in a separate no-GL operational ledger.
 
-### Utility Bill Entry *(submittable)*
-- **Purpose:** one invoice posting.
-- **Roles:** Manager enters; Finance Manager can also submit and **cancel** as the
-  cost-control owner.
-- **Key fields:** account, period, amount, building.
+| Record | Operational purpose |
+|---|---|
+| `Utility Account` | Provider account, meter, Building, average, and sharing rule. |
+| `Utility Bill Entry` | Billing period, readings, Building share, and approval. |
+| `Lease` | Landlord, term, billing cycle, rent, and payment schedule. |
+| `Accommodation Ledger` | System-written direct costs and resident allocations. |
+| `Operational Depreciation Policy` | Non-financial useful-life calculation rules. |
 
-### Lease *(submittable)*
-- **Purpose:** records a rented accommodation, its term, and rent schedule.
-- **Related:** **Rent Payment Schedule** is the child table behind the lease's
-  *Rent Payment Schedule* grid — one row per scheduled payment, carrying a due
-  date, an amount, and a status of Unpaid, Paid, or Overdue.
-- **No rent alerting ships.** Nothing reads or writes those rows automatically:
-  there is no rent-due job, notification, or alert. Someone must review the grid
-  and set each row's status by hand. The only lease automation is the **daily**
-  lease-expiry job, which flips a lease past its end date to *Expired*.
+## Utility bill flow
 
-### Operational Depreciation Policy
-- **Purpose:** drives **non-financial** depreciation snapshots for custody/assets.
-- **Note:** this is operational tracking, not a financial-ledger posting.
-- **Access:** System Manager only — see the permissions note above.
+1. Create one `Utility Account` per provider account or meter and Building.
+   Record the average monthly bill and variance threshold when they are known.
+2. Create a `Utility Bill Entry`. Billing periods for the same Company,
+   Building, and account cannot overlap.
+3. For a shared meter, enter the full invoice in **Total Invoice Amount** and
+   the Building percentage in **Cost Bearing**. The system computes
+   **Bill Amount**, consumed units, sharing note, and variance from average.
+4. Use the Frappe Workflow: **Submit for Approval**, then have a different
+   Accommodation Manager choose **Approve** or **Reject**. Approval submits the
+   document.
+5. Submission writes one direct `Accommodation Ledger` row for the Building's
+   share. It does not create a Payment Entry, Purchase Invoice, or General
+   Ledger Entry.
+6. Cancellation requires a reason and writes a negative reversal memo. Preserve
+   both rows.
 
----
+## Lease and payment flow
 
-## Basic workflow
+1. Create a `Lease` with Building, landlord, start and end dates, rent, billing
+   cycle, and first payment date. Overlapping leases for one Building are
+   blocked.
+2. Saving the draft builds the `Rent Payment Schedule`. If its driving values
+   change while still Draft, use **Regenerate Payment Schedule** and review every
+   replacement row.
+3. Use **Submit for Approval**. A Finance Manager approves or rejects; approval
+   submits the Lease.
+4. Do not use **Generate Payment** in production. It currently opens an unsaved
+   Payment Entry with no accounting reference allocation. Its `reference_no`
+   value is descriptive and does not allocate the Lease or a payable document.
+5. Finance uses the native payable path: create the Purchase Order first when
+   site policy requires it, approve the landlord's Purchase Invoice for the rent
+   period, then create a Payment Entry whose References table allocates the
+   amount to that Purchase Invoice.
+6. Maintain the schedule row status only from verified native invoice and
+   payment evidence. Lease approval and the incomplete button do not prove bank
+   or General Ledger posting.
+7. Lease-expiry Notifications ship enabled. The rent-due Notification ships
+   disabled because no automatic process confirms that a schedule row was paid.
+   See the [automation reference](../reference/automation.md).
 
-1. **Register accounts.** The Manager sets up each **Utility Account**.
-2. **Enter bills.** A **Utility Bill Entry** is created per invoice and
-   **Submitted**. Finance Manager can submit and **Cancel** entries.
-3. **Allocate.** A daily job (`daily_accommodation_cost_allocation`) fans one
-   idempotent job out per building and spreads the day's cost into the
-   **Accommodation Ledger**.
-4. **Track rent by hand.** Keep each **Rent Payment Schedule** row on the lease
-   up to date yourself — no job flags a payment as due or overdue.
+## Allocation and system-written boundaries
 
-_[screenshot: Utility Bill Entry form]_
-_[screenshot: Costs workspace]_
+The daily accommodation allocator reads active submitted
+`Housing Assignment` records and positive annual Building costs. It writes an
+idempotent resident-and-cost-type `Accommodation Ledger` row using Building
+capacity. A Temporary Worker without an Employee link is skipped until the
+linking process can backdate the missed rows.
 
-> Cost outputs (Accommodation Ledger, depreciation snapshots) are **derived**
-> records. Operators enter the source bills and leases; the system computes
-> allocations.
+A submitted Utility Bill writes its own direct billing-period memo. It does not
+update the Building's annual utility estimate.
+
+`Accommodation Ledger` is read-only to human roles and posts no GL entry.
+`Operational Depreciation Snapshot` is also non-financial and currently has no
+human Create permission; do not treat it as an operator input form.
+
+## Non-production exercise
+
+1. Create a training `Utility Account` with an average monthly bill.
+2. Create a bill for a unique training period with a total invoice of
+   `SAR 1,000` and a Building share of `60%`.
+3. Verify the computed Bill Amount is `SAR 600` and review the variance.
+4. Submit it for approval.
+5. Sign in as the second Accommodation Manager and approve it.
+6. Open `Accommodation Ledger` and find the one original row whose Source
+   DocType and Source Document point to the bill.
+7. Confirm that no payment or General Ledger document was created.
+
+## Verification
+
+The learner can show:
+
+- the approved source bill and its non-overlapping period;
+- the full invoice, percentage, computed share, and variance;
+- the source-linked operational ledger row;
+- the second-user approval history;
+- why approval is not evidence of payment or GL posting.
+
+## Cleanup and data safety
+
+An authorized user may cancel the training bill with a clear reason. Verify a
+reversal memo was added; never delete the original ledger row.
+
+Do not generate a payment against a real Supplier for practice. If the Lease
+exercise is used, do not use **Generate Payment**. Review only
+trainer-prepared native payable records or the documented flow. This does not
+validate the separate `Salis Payment Request` field map or authorize its
+**Create Payment** action. Never change a production payment-schedule row
+without verified payment evidence.

@@ -1,104 +1,142 @@
-# 10. Portals — Driver & Worker (Masar)
+# Driver and Worker Portals
 
-[← Back to index](README.md)
+[Back to training](README.md)
 
-Apex serves **seven** portal routes from six built bundles. Two of them are the
-mobile, self-service apps this page covers — `/driver` and `/masar` — reached by a
-personal link rather than a login. The other five are session- and role-gated
-operator surfaces: `/fleet` (employee self-service), `/fleet-os` (fleet supervisor
-board), `/housing`, `/safety`, and `/masar-supervisor` (route supervisor). Every
-route, its audience, and its authentication path are listed once in
-[Served portal routes](../../README.md#served-portal-routes).
+## Audience
 
-Both self-service apps are **multilingual** and **identity-scoped** — a worker or
-driver only ever sees their own records. Masar ships English, Arabic, Urdu, Hindi,
-and Bengali; the Driver portal ships English and Arabic. Each has an in-app
-language switcher, and Arabic and Urdu render right-to-left.
+Workers, drivers, supervisors who issue worker access links, and support staff
+who troubleshoot the mobile experience.
 
----
+## Outcome
 
-## Driver Portal — `/driver`
+Use the worker portal for one person, explain what the worker and driver
+experiences share, and protect every issued personal link.
 
-An identity-scoped mobile web app opened through a personal driver link. Each
-driver only ever sees and acts on **their own** records — the client never
-supplies a driver id; the server resolves it from the link credential.
+## Prerequisites
 
-### What a driver can do
+- A non-production training site.
+- One active Employee and one active Salis Driver created for training.
+- A trainer-issued worker access link. A driver link is optional until a
+  reviewed Desk issuance action is available.
+- A demo housing assignment, transport request, and driver trip where the
+  exercise needs them.
+- [Portal routes](../reference/routes-workspaces.md#served-portal-routes) and
+  [permissions](../reference/permissions.md).
 
-| Action | Behaviour |
-|--------|-----------|
-| **View profile** | Read their own Salis Driver record |
-| **View my vehicle** | Read the vehicle currently bound to them |
-| **Today's trips** | Read today's Dispatch Trips assigned to them |
-| **My route** | Read today's worker-route stops assigned to them |
-| **Check in / Check out** | Record and submit today's **Driver Attendance**, optionally with a photo |
-| **Submit fuel request** | Raise a **Fuel Request** for their bound vehicle |
-| **Raise support ticket** | File a native **Issue** (category, priority, subject, description) |
-| **My tickets** | Read their own **Issues** |
-| **Exit clearance** | View their own clearance state and request a short-lived certificate download link after clearance is issued |
+## One build, two experiences
 
-### Permissions
-Drivers do not sign in to the desk. The **Driver** role is provisioned with
-`desk_access = 0`, so the role opens no desk at all, and the barcode cutover
-disables the legacy driver Website User account once that driver has a live token
-(`apex/patches/v2_0/disable_driver_login_users_barcode_cutover.py`; accounts that
-hold an elevated operational role are left enabled, and no account is ever
-deleted). Identity is the personal link token, resolved server-side on every call.
+The Worker and Driver entry pages load the same built mobile package. The entry
+type selects either the worker screens or the driver screens:
 
-The role still carries a minimal, **owner-only** document permission set, so a
-driver can never read another driver's rows even through the API. Every one of its
-rows carries `if_owner`:
+- **Worker** opens the Masar experience.
+- **Driver** opens the driver experience.
 
-Those five are the whole grant. **Salis Vehicle** is not among them — the portal
-reads the bound vehicle on the driver's behalf after resolving the token.
+The shared package does not merge their authority. Worker and driver links are
+bound to different subject types, and each server call resolves that subject
+before reading or writing records. The browser does not choose an Employee or
+driver identifier.
 
-Field support tickets are native ERPNext **Issue** records (the old "Support
-Ticket" DocType was retired). The Driver role holds **no** Issue permission at
-all: the portal creates and reads the ticket on the driver's behalf, tagging it
-with a `custom_driver` link and refusing to return any Issue whose `custom_driver`
-is not the resolved driver. The portal is the only surface; the desk is not.
+A visible tab, route, or button is navigation only. The server still checks the
+personal identity, active status, record ownership, and applicable business
+state.
 
-### Notes for trainers
-- The personal driver link is the credential. Do not share it; reissue it if it
-  is exposed.
-- The driver must be linked to a vehicle for vehicle and fuel actions to resolve.
-- Clearance status is read-only in the portal. The certificate key is generated
-  only when the driver taps the download action and expires automatically.
-- Appearance follows the **Driver Portal Theme** (AFMCO / Frappe / Dark); no
-  configuration is needed for it to render with safe defaults.
+## Worker path
 
-_[screenshot: Driver Portal home — check-in, my vehicle, today's trips]_
-_[screenshot: Driver Portal — submit fuel request]_
+An active Employee can use Masar to:
 
----
+- view their profile and document-expiry notices;
+- view their current accommodation and custody;
+- view transport, route, boarding, and trip history;
+- request transport and confirm boarding where the trip state allows it;
+- raise and track resident requests, including an optional photo;
+- rate a completed trip; and
+- notify HR when the Iqama-expiry action is available.
 
-## Worker Portal (Masar) — `/masar`
+A Temporary Worker cannot receive a worker portal link. Complete the
+[Temporary Worker linking flow](contingent-workers.md) first.
 
-A worker self-service app for **housed and transported employees**. Workers are
-**not Frappe users** — identity is an unguessable personal **token**, resolved
-server-side, scoping every query to one Employee.
+## Driver path
 
-### How access works
-- A worker opens their **personal link** `/masar?w=<token>` on a phone.
-- The page is **guest-accessible by design** (no login redirect): the token, not a
-  login, identifies the worker.
-- Every worker endpoint scopes its query to that one Employee — a worker can only
-  ever see their own profile, accommodation, transport, and requests.
+An active Salis Driver can use the driver experience to:
 
-### What a worker can do
-- **Profile** — view their own employee profile.
-- **Accommodation** — see their current housing assignment.
-- **Transport** — see their transport/route information.
-- **Requests** — raise and track self-service requests.
+- view their profile, assigned vehicle, compliance dates, and clearance state;
+- check in and out, with an optional shift photo;
+- view, start, board, navigate, and complete assigned trips;
+- view route stops and report stop progress;
+- submit a fuel request and review their own requests;
+- raise, read, and reply to support tickets;
+- report a vehicle problem or request licence renewal when due; and
+- download a clearance certificate after clearance is issued.
 
-### Notes for trainers
-- The token link is **personal and unguessable** — treat it like a password; do
-  not share or post it.
-- Tokens are managed via the **Masar Worker Token** record (Apex Core).
-- Appearance reuses the **Driver Portal Theme** (theme + optional brand overrides).
+Actions remain limited to the driver resolved from the personal link. A driver
+cannot select another driver or trip outside that identity.
 
-_[screenshot: Masar worker home — profile, accommodation, transport]_
+## Issuing and supporting access
 
-> **Security note:** because Masar is guest-accessible by token, the link itself
-> is the credential. Issue tokens through the Masar Worker Token record and
-> re-issue (rotate) if a link is exposed.
+1. Confirm that the Employee is Active.
+2. Create a new **Masar Worker Token**.
+3. Set **Holder Type** to **Worker**, **Worker Type** to **Employee**, and
+   **Worker** to the intended Employee, then Save.
+4. Use whichever **Issue Link and QR** or **Rotate Link and QR** action is
+   displayed. Either action generates a fresh link and invalidates any previous
+   link. The label depends on whether the user's form can read the
+   permission-level-one token field, not on lifecycle state.
+5. **Enabled**, **Expires On**, and the credential fields are read-only. Do not
+   edit them or the database to change access.
+6. The current Desk UI has no reviewed driver-link issuance action. Do not work
+   around it with direct API calls or hand-built URLs.
+7. Share the worker link only through the approved private channel.
+8. Ask the person to open the link on their own device and confirm their name.
+9. If the link is exposed or the device changes hands, close the affected
+   session, generate a fresh link with the displayed action, and notify the site
+   administrator or security owner through your organization's
+   credential-incident procedure. Confirm that the old link is rejected and the
+   incident is recorded without the credential.
+10. If access must end, escalate to the site administrator. This release has no
+    reviewed Disable or Set Expiry action on the form; revocation follows the
+    approved administrative process.
+11. Do not copy links into tickets, screenshots, chat rooms, or training notes.
+
+Worker issuance can be restricted by Building. Use the
+[permissions reference](../reference/permissions.md) for the current role and
+row-scope rules.
+
+## Exercise
+
+1. Open the training worker link in a private browser window.
+2. Confirm the expected Employee name, accommodation, and next transport.
+3. Create one low-priority resident request with `TRAINING` in the subject.
+4. Confirm that driver-only actions are absent from the worker experience.
+
+When a later release provides reviewed Desk issuance, the trainer may extend
+the exercise:
+
+1. Open the training driver link in a new private window.
+2. Confirm the expected driver, vehicle, and assigned trip.
+3. Raise one `TRAINING` support ticket without starting or completing a trip.
+4. Verify that worker-only actions are absent from the driver experience.
+
+## Verification
+
+The learner can show that:
+
+- both entry paths use one visual foundation but different screen sets;
+- the displayed worker matches the issued link;
+- worker requests are stamped to the correct identity;
+- changing navigation does not change record authority; and
+- no personal link appears in notes, screenshots, or logs.
+
+When the optional driver exercise is available, also verify the displayed
+driver and the identity stamped on the support ticket.
+
+## Cleanup and data safety
+
+Use fictional training records only. Close the training request and any
+optional ticket through their normal lifecycle, close private browser sessions,
+then follow the pre-token baseline reset in
+[Trainer Setup and Reset](trainer-setup.md). The form has no reviewed Disable or
+Set Expiry action; escalate to the site administrator for approved revocation
+when access must end. If a link was exposed before reset, use the incident flow
+above. Do not test another person's link, copy a link between worker and driver
+entry paths, or use production attendance, boarding, fuel, or clearance actions
+for practice.

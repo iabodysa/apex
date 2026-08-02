@@ -1,73 +1,111 @@
-# 4. Maintenance
+# Maintenance Operations
 
-[← Back to index](README.md)
+[Back to training index](README.md)
 
-From a request, to an inspection, to a work order — plus subcontractor service
-coverage.
+## Audience
 
----
+Requesters, Resident Supervisors, Accommodation Managers, Maintenance
+Technicians, and System Managers who issue work orders.
 
-## Permissions
+## Outcome
 
-The **All** column is the built-in Frappe role every logged-in user holds.
+Turn a reported fault into a controlled work order, capture completion evidence,
+and understand which records are operational memos rather than purchasing or
+accounting documents.
 
-> **Universal intake:** any logged-in user can raise a **Maintenance Request** and sees only their own. The assigned technician also sees their ticket. Oversight roles see all.
+## Prerequisites
 
-> **There is no Maintenance Manager role in Apex.** The maintenance material
-> masters are held by the **Maintenance Technician** — Read, Write, Create —
-> alongside the Accommodation Manager. Do not look for a Maintenance Manager
-> when assigning material access.
+- A non-production training site.
+- A training Building and Room.
+- Separate training accounts for request handling, work-order issue, and
+  technician execution where practical.
+- The [maintenance permission reference](../reference/permissions.md#maintenance-permissions).
 
-> **Maintenance Inspection Report is System Manager-only.** Its permissions grant
-> no operational role anything, so an Accommodation Manager cannot open, create,
-> or submit one without an administrator role. Treat the inspection step as
-> administrator-run until that changes.
+## Operating model
 
-> **Subcontractor records are Accommodation Manager-only.** The Resident
-> Supervisor holds nothing on the service contract or the service order.
+Use the submitted Frappe documents as the audit trail. Desk buttons call the
+same controllers as the forms; they do not write status or cost directly.
 
----
+| Record | Operational purpose |
+|---|---|
+| `Maintenance Request` | Report, priority, location, assignment, and resolution. |
+| `Maintenance Work Order` | Planned work, technician action, evidence, and operational cost. |
+| `Maintenance Inspection Report` | Optional System Manager inspection linked to a facility asset or work order. |
+| `Maintenance Material Template` | Reusable draft procurement lines; it creates no purchase or stock transaction. |
+| `Maintenance Cost Ledger` | System-written cost row for each positive-cost procurement line. |
+| `Subcontractor Service Contract`, `Subcontractor Service Order` | External coverage and visit execution. |
 
-## DocTypes in this area
+## Operational flow
 
-### Maintenance Request *(submittable)*
-- **Purpose:** the entry point for any repair/maintenance need.
-- **Source:** raised by **any logged-in user** (universal intake), by a supervisor
-  or the **Resident Request Coordinator**, or by a resident via the request web form.
-- **Privacy:** a raiser sees only their own requests; the assigned technician also
-  sees the ticket assigned to them. Oversight roles see all.
-- **Key fields:** building/room, category, priority, description.
+1. Create a `Maintenance Request` with Building, Room, issue type, priority, and
+   description. Any signed-in user can create their own request; operational
+   roles triage and submit it. Setting **Assigned** requires an assignee, and
+   resolving or closing requires resolution notes.
+2. While the request is Draft, **Load Material Template** can append matching
+   procurement lines. Review the result: the action does not create a
+   `Material Request`, `Purchase Order`, stock entry, or accounting record.
+3. Submit the request with status **Open**. From it, choose **Create Work
+   Order**. Only an account with Work Order Create and Submit rights can finish
+   that step under the current permission model.
+4. On the draft `Maintenance Work Order`, enter the planned dates, work
+   description, assignee, and any procurement lines. Enter actual start and end
+   dates before submission if this record will be completed through the current
+   Desk controls.
+5. Submit the Work Order. Its status becomes **Planned** and the source request
+   becomes **In Progress**. A Maintenance Technician with write access can use
+   **Start Work**, attach the required completion photo, then use **Mark as
+   Completed**.
+6. Completion requires actual start and end dates plus the photo. It closes the
+   source request and, when procurement cost is positive, writes one aggregate
+   `Accommodation Ledger` memo plus one `Maintenance Cost Ledger` row per
+   positive-cost procurement line. These are operational records; completion
+   does not create a General Ledger Entry, Payment Entry, Purchase Invoice, or
+   salary record.
+7. For external work, use an approved `Subcontractor Service Contract`, then
+   submit a `Subcontractor Service Order`. Use **Start Work**, then the
+   controlled **Mark as Completed** or **Mark Missed** action.
+8. Review **Open Maintenance Requests** and **Maintenance Aging**. The daily
+   overdue thresholds and alert effects are listed in the
+   [automation reference](../reference/automation.md).
 
-### Maintenance Inspection Report *(submittable)*
-- **Purpose:** scopes the job and the materials needed.
-- **Roles:** System Manager only — no operational maintenance or housing role
-  holds any right on it.
-- **Key fields:** linked request, findings, material estimate.
+`Maintenance Inspection Report` is currently restricted to System Manager. It
+requires at least one finding and updates a linked `Facility Asset` inspection
+date when submitted.
 
-### Maintenance Work Order *(submittable)*
-- **Purpose:** the executable job issued against a request.
-- **Roles:** the **Maintenance Technician** is the work-order operator and holds
-  **Read/Write** out of the box — no setup is required to let field staff work
-  orders.
-- **Key fields:** request reference, assignee/subcontractor, materials, status.
+## Current boundary
 
-### Subcontractor Service Contract / Service Order
-- **Purpose:** records external service providers and the work assigned to them.
-- **Related:** Subcontractor Building Coverage maps providers to buildings.
+`Maintenance Work Order` completion requires actual start and end dates, but
+those fields are not editable after submission in the shipped form. Record them
+on the draft before submission until the execution flow is corrected.
 
-### Maintenance Material Template
-- **Purpose:** reusable bills of material for common jobs.
+## Non-production exercise
 
----
+1. Create a low-priority `Maintenance Request` for the training Room and submit
+   it as **Open**.
+2. With the authorized training account, use **Create Work Order**.
+3. Enter planned and actual dates, work description, and no procurement cost.
+4. Submit the Work Order.
+5. With the technician account, choose **Start Work**.
+6. Attach a non-sensitive training image and choose **Mark as Completed**.
+7. Verify the Work Order is **Completed** and the source request is **Closed**.
 
-## Basic workflow
+## Verification
 
-1. **Raise a request.** A supervisor (or a resident via the request web form)
-   creates a **Maintenance Request** and submits it.
-2. **Inspect.** A **Maintenance Inspection Report** scopes the job and material
-   needs. Only a System Manager can record one today.
-3. **Work order.** A **Maintenance Work Order** is issued against the request and
-   worked by the **Maintenance Technician** (who holds Read/Write on it). A daily
-   escalation job surfaces requests left open too long.
+The learner can show:
 
-_[screenshot: Maintenance Request lifecycle]_
+- the submitted request and its linked Work Order;
+- the transition from **Planned** to **In Progress** to **Completed**;
+- actual dates, completion photo, and timeline comments;
+- that a zero-cost exercise created no operational cost row;
+- why a material template is not a purchasing transaction.
+
+## Cleanup and data safety
+
+An authorized user may cancel the training Work Order with a reason. Cancellation
+reopens a source request that was **In Progress** or **Closed** and reverses any
+operational cost the Work Order posted. Cancel the request afterwards if the
+training scenario is no longer needed.
+
+Never delete an original `Accommodation Ledger` or `Maintenance Cost Ledger`
+row. Preserve its reversal. Do not use a live facility asset, production room,
+supplier contract, or real completion photo in training.
