@@ -119,6 +119,8 @@
                 <span v-if="p.project"><Icon name="badge" :size="12" /> {{ p.project }}</span>
                 <span v-if="p.shift"><Icon name="clock" :size="12" /> {{ t("shift." + p.shift) }}</span>
                 <span><Icon name="pin" :size="12" /> {{ t("list.stops", { n: p.total_stops }) }}</span>
+                <span v-if="wide && p.driver"><Icon name="user" :size="12" /> {{ p.driver }}</span>
+                <span v-if="wide && p.vehicle"><Icon name="truck" :size="12" /> {{ p.vehicle }}</span>
               </div>
               <div v-if="p.trip" class="pc-boarding">
                 <div class="pc-bar"><span :style="{ width: barPct(p.trip.boarding) + '%' }" /></div>

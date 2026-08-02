@@ -70,7 +70,11 @@ button { font-family: inherit; cursor: pointer; }
 .back-btn:hover { background: var(--c-surface-2); }
 [dir="rtl"] .back-btn svg { transform: scaleX(-1); }
 @media (min-width: 1280px) {
-  .work { grid-template-columns: 300px minmax(0, 1fr) 380px; }
+  .work { grid-template-columns: 340px minmax(0, 1fr) 380px; }
+  .plan-list { gap: 6px; }
+  .plan-card { padding: 9px 12px; gap: 6px; }
+  .pc-meta { gap: 8px; font-size: 11.5px; }
+  .pc-boarding { gap: 6px; }
   .live { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 12px; }
   .live .map-panel { min-height: 520px; }
 }
