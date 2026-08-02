@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Raise a Maintenance Request",
- "intro_text": "Log a facilities issue on the full form and follow the guided tour that walks you through opening a maintenance ticket.",
  "title": "Raise a Maintenance Request",
  "action": "Create Entry",
  "reference_document": "Maintenance Request",

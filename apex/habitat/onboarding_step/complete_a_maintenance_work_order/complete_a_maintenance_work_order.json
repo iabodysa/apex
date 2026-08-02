@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Complete a Maintenance Work Order",
- "intro_text": "Turn an approved maintenance request into a work order, record the parts and labour, and close it out.",
  "title": "Complete a Maintenance Work Order",
  "action": "Go to Page",
  "path": "List/Maintenance Work Order/List",

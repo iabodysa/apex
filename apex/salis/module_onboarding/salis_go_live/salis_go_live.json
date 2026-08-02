@@ -1,0 +1,62 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Salis Go-Live",
+ "title": "Salis Go-Live",
+ "module": "Salis",
+ "subtitle": "Register a vehicle and a driver, move workers from request to manifest, then settle what the movement cost.",
+ "success_message": "Salis is live. The Dispatch Board shows every trip; the manifest records who was on it.",
+ "is_complete": 0,
+ "modified": "2026-08-02 00:00:00.000000",
+ "allow_roles": [
+  {
+   "doctype": "Onboarding Permission",
+   "role": "Movement Supervisor"
+  },
+  {
+   "doctype": "Onboarding Permission",
+   "role": "Fleet Manager"
+  }
+ ],
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Register a Salis Vehicle"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Register a Salis Driver"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Raise a Transport Request"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Plan a Route"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Dispatch a Trip"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Record a Passenger Manifest"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Open the Dispatch Board"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Register a Vehicle Compliance Record"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Process a Rental Settlement"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Raise a Salis Payment Request"
+  }
+ ]
+}

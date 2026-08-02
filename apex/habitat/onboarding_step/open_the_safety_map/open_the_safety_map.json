@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Open the Safety Map",
- "intro_text": "The Safety Map is an interactive view of your buildings — rooms with open maintenance pulse, so you can spot where attention is needed at a glance.",
  "title": "Open the Safety Map",
  "action": "Go to Page",
  "path": "safety-map",

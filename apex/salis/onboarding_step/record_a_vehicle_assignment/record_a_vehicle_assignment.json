@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Record a Vehicle Assignment",
- "intro_text": "Assign a vehicle to a driver or project. This starts the movement lifecycle and links the vehicle usage and cost to who is responsible for it.",
  "title": "Record a Vehicle Assignment",
  "action": "Create Entry",
  "reference_document": "Vehicle Assignment",

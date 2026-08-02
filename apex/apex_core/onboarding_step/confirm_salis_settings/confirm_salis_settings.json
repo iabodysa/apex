@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Confirm Salis Settings",
- "intro_text": "Salis Settings holds the fleet defaults the movement module relies on — the default company and cost center for fleet postings, approval toggles, and the fuel-request approval threshold. Confirm these before drivers and vehicles start transacting.",
  "title": "Confirm Salis Settings",
  "action": "Update Settings",
  "reference_document": "Salis Settings",

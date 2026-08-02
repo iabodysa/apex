@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Report a Safety Incident",
- "intro_text": "Capture an incident with the guided Safety Incident form and save it for manager review.",
  "title": "Report a Safety Incident",
  "action": "Show Form Tour",
  "reference_document": "Safety Incident",

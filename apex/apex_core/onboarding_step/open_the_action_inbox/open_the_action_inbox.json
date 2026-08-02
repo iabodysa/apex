@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Open the Action Inbox",
- "intro_text": "The Action Inbox is the shared Apex Core desk that gathers everything pending your action across accommodation and fleet into one list. Open it to see how approvals and tasks from both modules surface in a single place.",
  "title": "Open the Action Inbox",
  "action": "Go to Page",
  "path": "action-inbox",

@@ -1,0 +1,62 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Housing and Safety Go-Live",
+ "title": "Housing and Safety Go-Live",
+ "module": "Habitat",
+ "subtitle": "Place your first resident, then raise and close the work their building needs.",
+ "success_message": "Housing and Safety is live. The Front Desk handles daily check-in and check-out; the Safety Map shows what is open on each building.",
+ "is_complete": 0,
+ "modified": "2026-08-02 00:00:00.000000",
+ "allow_roles": [
+  {
+   "doctype": "Onboarding Permission",
+   "role": "Resident Supervisor"
+  },
+  {
+   "doctype": "Onboarding Permission",
+   "role": "Safety Officer"
+  },
+  {
+   "doctype": "Onboarding Permission",
+   "role": "Maintenance Technician"
+  }
+ ],
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Open the Front Desk"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Record a Housing Assignment"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Raise a Maintenance Request"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Complete a Maintenance Work Order"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Review the Safety Task Catalog"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Open the Safety Map"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Record a Safety Round"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Report a Safety Incident"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Review the Active Resident Register"
+  }
+ ]
+}

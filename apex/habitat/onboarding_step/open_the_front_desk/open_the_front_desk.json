@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Open the Front Desk",
- "intro_text": "The Front Desk is the visual board for daily check-in and check-out. Open it to see occupancy at a glance and move residents in and out without hunting for forms.",
  "title": "Open the Front Desk",
  "action": "Go to Page",
  "path": "front-desk",

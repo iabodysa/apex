@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Record a Safety Round",
- "intro_text": "Inspect a building with the guided Safety Round form and save the result for manager review.",
  "title": "Record a Safety Round",
  "action": "Show Form Tour",
  "reference_document": "Safety Round",

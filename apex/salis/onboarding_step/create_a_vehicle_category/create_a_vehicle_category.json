@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Create a Vehicle Category",
- "intro_text": "Define a vehicle class (Sedan, Bus, Pickup, ...). Categories group the fleet for assignment, reporting, and cost analysis — set at least one before adding vehicles.",
  "title": "Create a Vehicle Category",
  "action": "Create Entry",
  "reference_document": "Vehicle Category",

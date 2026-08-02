@@ -215,7 +215,8 @@ apex.patches.v2_0.backfill_routed_payment_doctype
 # to carry an API secret. Must stay in [post_model_sync]: it reads the imported default.
 apex.patches.v2_1.refresh_integration_settings_help
 
-# Four workspaces left the app for the new Apex tree. A standard workspace that leaves is
-# not removed by migrate, so each old record survives and renders an empty sidebar entry on
-# every site installed before this release.
-apex.patches.v2_1.drop_retired_workspaces
+# Eight workspaces and seven onboardings left the app for the new Apex tree. A standard record
+# that leaves is not removed by migrate, so each one survives and keeps rendering on every site
+# installed before this release. The date suffix is what re-runs it: Patch Log matches the whole
+# line, so a site that already ran the four-workspace version would otherwise skip the rest.
+apex.patches.v2_1.drop_retired_workspaces #2026-08-02

@@ -3,9 +3,16 @@
  "name": "Apex Setup",
  "title": "Apex Setup",
  "module": "Apex Core",
- "subtitle": "Confirm the shared Apex settings that the Habitat and Salis modules build on.",
- "success_message": "Apex Core is configured. The accommodation and fleet modules now share these settings.",
+ "subtitle": "Confirm the shared settings that Habitat, Salis and Logistay all build on.",
+ "success_message": "Apex is configured. Each module now has its own go-live list.",
  "is_complete": 0,
+ "modified": "2026-08-02 00:00:00.000000",
+ "allow_roles": [
+  {
+   "doctype": "Onboarding Permission",
+   "role": "System Manager"
+  }
+ ],
  "steps": [
   {
    "doctype": "Onboarding Step Map",

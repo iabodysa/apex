@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Assess Damage",
- "intro_text": "When returned articles come back damaged, file a Custody Damage Assessment. It captures the damage and its cost so you can recover or write off the value.",
  "title": "Assess Damage",
  "action": "Create Entry",
  "reference_document": "Custody Damage Assessment",

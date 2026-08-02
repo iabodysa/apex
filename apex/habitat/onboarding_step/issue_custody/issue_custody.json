@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Issue Custody",
- "intro_text": "Record a custody issue on the full form and follow the guided tour that walks you through handing articles to a worker.",
  "title": "Issue Custody",
  "action": "Show Form Tour",
  "reference_document": "Custody Issue",

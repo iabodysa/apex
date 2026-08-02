@@ -9,6 +9,5 @@
  "action": "Go to Page",
  "path": "operations-control",
  "action_label": "Open Fleet Control",
- "description": "Open the live Fleet Control board to watch and act on every vehicle.",
- "intro_text": "Fleet Control is your live operations board: every vehicle's status, driver and open incidents on one screen. Filter by status, office or project and act on a vehicle without leaving the board."
+ "description": "Open the live Fleet Control board to watch and act on every vehicle."
 }

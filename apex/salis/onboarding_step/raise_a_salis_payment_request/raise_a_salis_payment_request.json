@@ -2,7 +2,6 @@
  "doctype": "Onboarding Step",
  "name": "Raise a Salis Payment Request",
  "title": "Raise a Salis Payment Request",
- "intro_text": "A Salis Payment Request converts a settled rental cost into a formal payment claim. Raise one against a processed Rental Settlement to complete the cost-recovery cycle.",
  "action": "Create Entry",
  "reference_document": "Salis Payment Request",
  "is_single": 0,

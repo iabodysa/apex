@@ -6,8 +6,6 @@
  "module": "Apex Core",
  "icon": "setting",
  "public": 1,
- "is_standard": 1,
- "is_default": 0,
  "is_hidden": 0,
  "sequence_id": 2.0,
  "parent_page": "Apex",
@@ -16,7 +14,7 @@
    "role": "System Manager"
   }
  ],
- "content": "[{\"id\": \"ApexCoreHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Apex Core</b></span>\", \"col\": 12}}, {\"id\": \"ApexCoreCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"id\": \"ApexCoreCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Fleet and Fuel Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement and Rental Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Assets and Maintenance Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard7\", \"type\": \"card\", \"data\": {\"card_name\": \"Scheduler\", \"col\": 4}}, {\"id\": \"ApexCoreCard8\", \"type\": \"card\", \"data\": {\"card_name\": \"Portal-Owned Records\", \"col\": 4}}]",
+ "content": "[{\"id\": \"ApexCoreHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Apex Core</b></span>\", \"col\": 12}}, {\"id\": \"onbAS\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Apex Setup\", \"col\": 12}}, {\"id\": \"ApexCoreCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"id\": \"ApexCoreCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Fleet and Fuel Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement and Rental Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Assets and Maintenance Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard7\", \"type\": \"card\", \"data\": {\"card_name\": \"Scheduler\", \"col\": 4}}, {\"id\": \"ApexCoreCard8\", \"type\": \"card\", \"data\": {\"card_name\": \"Portal-Owned Records\", \"col\": 4}}]",
  "shortcuts": [],
  "links": [
   {
@@ -328,5 +326,5 @@
  "number_cards": [],
  "quick_lists": [],
  "creation": "2020-01-01 00:00:00.000000",
- "modified": "2026-08-02 10:31:00.000000"
+ "modified": "2026-08-02 10:51:00.000000"
 }

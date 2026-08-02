@@ -1,0 +1,42 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Fleet Go-Live",
+ "title": "Fleet Go-Live",
+ "module": "Salis",
+ "subtitle": "Hand a vehicle over, set its fuel quota, and reconcile the first claim.",
+ "success_message": "Fleet is live. Fleet Control shows every vehicle's state, and fuel claims reconcile against the quota you set.",
+ "is_complete": 0,
+ "modified": "2026-08-02 00:00:00.000000",
+ "allow_roles": [
+  {
+   "doctype": "Onboarding Permission",
+   "role": "Fleet Manager"
+  }
+ ],
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Create a Vehicle Category"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Record a Vehicle Handover"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Create a Fuel Quota"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Raise a Fuel Request"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Process a Fuel Claim"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Open Fleet Control"
+  }
+ ]
+}

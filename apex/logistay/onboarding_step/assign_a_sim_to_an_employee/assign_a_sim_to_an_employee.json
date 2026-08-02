@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Assign a SIM to an Employee",
+ "title": "Assign a SIM to an Employee",
+ "action": "Create Entry",
+ "reference_document": "SIM Custody Assignment",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Hand a SIM to an employee and open its custody record.",
+ "action_label": "Create SIM Custody Assignment"
+}

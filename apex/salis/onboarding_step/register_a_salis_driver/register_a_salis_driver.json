@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Register a Salis Driver",
- "intro_text": "Add a driver with license details. Those details drive clearance and compliance checks, keeping the fleet road- and policy-legal.",
  "title": "Register a Salis Driver",
  "action": "Create Entry",
  "reference_document": "Salis Driver",

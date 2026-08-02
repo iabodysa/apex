@@ -92,8 +92,6 @@ Accommodation Cost Distribution,توزيع تكلفة السكن
 Accommodation Custody Item,بند عهدة السكن
 Accommodation Custody Return Item,بند إرجاع عهدة السكن
 Accommodation Engine,سجلات السكن الآلية
-Accommodation Go-Live,إطلاق تشغيل السكن
-Accommodation is live. Use the Front Desk for daily check-in/out.,تم تشغيل السكن. استخدم مكتب الاستقبال للدخول والمغادرة اليومية.
 Accommodation Ledger,دفتر تكاليف السكن
 Accommodation Ledger Summary,ملخص دفتر تكاليف السكن
 Accommodation Manager Dashboard,لوحة معلومات مدير السكن
@@ -158,6 +156,8 @@ Actual Start Date,تاريخ البداية الفعلي
 Actual Start Date is required to mark Completed.,تاريخ البداية الفعلي مطلوب للوسم كمكتمل.
 Actual Visit Date,تاريخ الزيارة الفعلي
 Add,إضافة
+Add a SIM Card,أضف شريحة اتصال
+Add a SIM card under the contract you just created.,أضف شريحة تحت العقد الذي أنشأته للتو.
 "Add any extra detail, then save to submit the request.",أضف أي تفاصيل إضافية، ثم احفظ لتقديم الطلب.
 Add at least one expected worker to the manifest.,أضف عاملاً واحداً متوقعاً على الأقل إلى البيان.
 Add at least one floor with rooms.,أضِف طابقاً واحداً على الأقل بغرف.
@@ -263,8 +263,8 @@ Apartment,شقة
 Apex,أبكس
 "Apex 2.0.4 — Guided first-time setup, ready accommodation supplies, and preserved Item Group organization",أبيكس 2.0.4 — إعداد أولي موجّه، وتجهيز مستلزمات السكن، والحفاظ على تنظيم مجموعات الأصناف
 Apex Core,نواة أبكس
-Apex Core is configured. The accommodation and fleet modules now share these settings.,تم تهيئة نواة أبيكس. تشترك الآن وحدتا السكن والأسطول في هذه الإعدادات.
 Apex Integration Settings,إعدادات تكامل أبيكس
+Apex is configured. Each module now has its own go-live list.,أبكس مُهيّأ. لكل وحدة الآن قائمة تشغيلها.
 Apex messaging gateway test message.,رسالة اختبار بوابة مراسلة Apex.
 "Apex runs accommodation, facilities and fleet operations. Field teams work in the portals below on their phones; supervisors and the back office work in the modules in the sidebar.",يدير أبكس عمليات الإسكان والمرافق والأسطول. تعمل الفرق الميدانية من البوابات أدناه على هواتفها، ويعمل المشرفون والإدارة من الوحدات في الشريط الجانبي.
 Apex Settings,إعدادات أبيكس
@@ -329,7 +329,6 @@ Arrival Date plus Window Days. Computed by the controller.,تاريخ الوصو
 Arrival Manifest,بيان الوصول
 Arrival Slip,قسيمة الوصول
 Arrivals Desk,استقبال القادمين
-Arrivals Desk (Screen),مكتب الوصول (شاشة إدخال)
 Arrivals Intake,استقبال الوافدين
 Arrivals Today,الوافدون اليوم
 Arrivals today,الوافدون اليوم
@@ -362,6 +361,7 @@ Assets and Maintenance Engine,محرك الأصول والصيانة
 Assets in Custody,الأصول في العهدة
 Assets Moved This Month,الأصول المنقولة هذا الشهر
 Assign,إسناد
+Assign a SIM to an Employee,أسنِد شريحة لموظف
 Assign a vehicle to a driver or project to start the movement lifecycle.,أسنِد مركبة إلى سائق أو مشروع لبدء دورة حياة الحركة.
 Assign an employee to a bed to start the accommodation lifecycle.,اربط الموظف بسرير لبدء دورة السكن.
 Assign the Bed,خصّص السرير
@@ -573,8 +573,8 @@ Branch Coverage,تغطية الفرع
 Branch Site,موقع الفرع
 Brand Logo,شعار العلامة التجارية
 Brand Logo must be an uploaded file (a /files/ path).,يجب أن يكون شعار العلامة التجارية ملفًا مرفوعًا (مسار /files/).
+"Build the article catalog, issue your first custody, and see what it costs.",ابنِ دليل الأصناف، اصرف أول عهدة، وشاهد تكلفتها.
 Build the catalog of issuable articles that the custody flow hands out.,ابنِ كتالوج المواد القابلة للصرف التي يصرفها مسار العهدة.
-Build your article catalog and issue your first custody at the kiosk.,ابنِ كتالوج المواد واصرف أول عهدة من الكشك.
 Building,المبنى
 Building (Store),المبنى (المستودع)
 Building A,المبنى أ
@@ -760,7 +760,6 @@ Cleaning Log Room Detail,تفاصيل غرف سجل التنظيف
 Cleaning Logs,سجلات التنظيف
 Cleaning Logs Recorded,سجلات النظافة المسجلة
 Cleaning Record,سجل التنظيف
-Cleaning Reports,تقارير النظافة
 Cleaning Staff Salary,رواتب عمالة النظافة
 Clear,مسح
 clear,صريح
@@ -825,10 +824,7 @@ Completion photo required to close this work order.,صورة الإنجاز مط
 Compliance,الامتثال
 Compliance %,نسبة الامتثال (%)
 Compliance & Expiry,الامتثال والانتهاء
-Compliance and Audit Reports,تقارير الالتزام والتدقيق
 Compliance and Licensing,الامتثال والتراخيص
-Compliance and Rentals Go-Live,إطلاق تشغيل الامتثال والإيجارات
-"Compliance and Rentals is live. Driver clearances, vehicle compliance, and rental settlements are tracked.",تم تشغيل الامتثال والإيجارات. يجري تتبّع إخلاء طرف السائقين وامتثال المركبات وتسويات الإيجار.
 Compliance at risk,الامتثال في خطر
 "Compliance document attached to a building (Balady, Civil Defence Certificate, Group Housing Permit, Lease Contract).",مستند امتثال مرتبط بمبنى (بلدي، شهادة الدفاع المدني، تصريح سكن جماعي، عقد إيجار).
 Compliance Documents,مستندات الامتثال
@@ -855,7 +851,6 @@ Configure a default Cash or Bank account on company {0} before raising a payment
 Configure required safety controls. Use 'Generate Safety Setup' button to create task templates.,"اضبط ضوابط السلامة المطلوبة. استخدم زر ""توليد إعداد السلامة"" لإنشاء قوالب المهام."
 Confirm,تأكيد
 Confirm Custody Cleared,أكّد تسليم العهدة
-"Confirm driver and vehicle compliance records, then settle your first rental cost.",أكّد سجلات امتثال السائقين والمركبات، ثم سوِّ أول تكلفة إيجار.
 Confirm Habitat Settings,اعتماد إعدادات هابيتات
 Confirm Handover,تأكيد التسليم
 Confirm On-Site Receipt,تأكيد الاستلام في الموقع
@@ -865,11 +860,10 @@ Confirm Source,مصدر التأكيد
 Confirm that all items have been verified before approving.,أكِّد التحقق من جميع البنود قبل الاعتماد.
 Confirm the default payment method and the deduction and GL-posting toggles.,اعتمد طريقة الدفع الافتراضية ومفاتيح الاستقطاع والقيد المحاسبي.
 "Confirm the fleet defaults: company, cost center, approvals, and the fuel-request threshold.",اعتمد القيم الافتراضية للأسطول: الشركة، ومركز التكلفة، والاعتمادات، وحد طلب الوقود.
-Confirm the shared Apex settings that the Habitat and Salis modules build on.,اعتمد إعدادات أبيكس المشتركة التي تبني عليها وحدتا هابيتات وسلس.
+"Confirm the shared settings that Habitat, Salis and Logistay all build on.",أكّد الإعدادات المشتركة التي تبني عليها هابيتات وسلس ولوجستي.
 Confirm the standardized safety tasks that drive scheduled work.,راجع مهام السلامة القياسية التي تنشئ العمل المجدول.
 Confirm the type of worker returning the articles.,أكّد نوع العامل الذي يُرجع الأصناف.
 Confirm Transfer,تأكيد النقل
-Confirm your safety catalog and log your first inspection.,اعتمد فهرس السلامة وسجّل أول تفتيش.
 Confirmation,التأكيد
 Confirmation Method,طريقة التأكيد
 Confirmed,مؤكَّد
@@ -937,7 +931,6 @@ Cost Sharing,تقاسم التكلفة
 Cost Summary,ملخص التكاليف
 Costing,احتساب التكلفة
 Costing & Mapping,احتساب التكلفة والربط
-Costs and Leasing,التكاليف وعقود الإيجار
 Costs and Settlement,التكاليف والتسوية
 Could not acknowledge the selected alerts.,تعذّر الإقرار بالتنبيهات المحددة.
 Could not advance the request. Please try again.,تعذّر متابعة الطلب. حاول مرة أخرى.
@@ -1033,6 +1026,9 @@ Create QR for all ({0}),إنشاء رمز QR للجميع ({0})
 Create Records,إنشاء السجلات
 Create Rental Settlement,إنشاء تسوية إيجار
 Create Route Plan,إنشاء خطة مسار
+Create SIM Card,إنشاء شريحة اتصال
+Create SIM Custody Assignment,إنشاء إسناد عهدة شريحة
+Create Telecom Contract,إنشاء عقد اتصالات
 Create the first route plan so trips can be dispatched against it.,أنشئ أول خطة مسار حتى يمكن تشغيل الرحلات وفقها.
 Create the payment document for this approved request?,هل تريد إنشاء مستند الدفعة لهذا الطلب المعتمد؟
 Create Vehicle Assignment,إنشاء إسناد مركبة
@@ -1081,6 +1077,9 @@ Custody,العهدة
 Custody & Asset Integration,تكامل العهدة والأصول
 Custody Acknowledgment,إقرار استلام العهدة
 Custody Action,إجراء العهدة
+Custody and Costs,العهد والتكاليف
+Custody and Costs Go-Live,تشغيل العهد والتكاليف
+Custody and Costs is live. The kiosk issues and returns articles; the reports show what each worker still holds and what the damage cost.,العهد والتكاليف تعمل. الكشك يصرف الأصناف ويستلمها، والتقارير تُظهر ما يحمله كل عامل وكم كلّف التلف.
 Custody Article,صنف العهدة
 Custody Asset Category,تصنيف أصول العهدة
 Custody Cleared,تم إخلاء طرف العهدة
@@ -1090,11 +1089,9 @@ Custody Damage Item,صنف العهدة التالف
 Custody Damage Register,سجل تلفيات العهد
 Custody deferred,أُجِّلت العهدة
 Custody Flow,مسار العهدة
-Custody Go-Live,تشغيل العهدة
 Custody Handover,تسليم العهدة
 Custody History,سجل العهدة
 Custody Integration Mode,نمط ربط العهدة
-Custody is live. Issue and return articles at the kiosk and assess any damage.,العهدة قيد التشغيل. اصرف المواد وأرجِعها من الكشك وقيّم أي ضرر.
 Custody Issue,صرف العهدة
 Custody Issue Item,بند صرف العهدة
 Custody Issue {0} is not held by the selected worker.,صرف العهدة {0} غير محتفظ به لدى العامل المحدد.
@@ -1106,7 +1103,6 @@ Custody items have been issued to you,تم تسليم عُهدة إليك
 Custody items on this issue are overdue for return,أصناف العهدة في هذا الصرف متأخرة عن الإرجاع
 Custody Items Pending Return,أصناف العهدة بانتظار الإرجاع
 Custody Kiosk,شاشة العهدة
-Custody Kiosk (Screen),كشك العهدة (شاشة إدخال)
 Custody Loss,فقدان عهدة
 Custody Outstanding by Worker,العهد غير المعادة حسب العامل
 Custody Return,إرجاع العهدة
@@ -1122,7 +1118,6 @@ Daily cleaning record per building with worker accountability and evidence contr
 Daily driver attendance record with check-in/out times and photographic evidence.,سجل حضور يومي للسائق مع أوقات الدخول والمغادرة وأدلة مصوّرة.
 "Daily fuel consumption log for a vehicle: odometer, litres, amount, and platform.",سجل استهلاك وقود يومي لمركبة: عداد المسافة واللترات والمبلغ والمنصة.
 Daily Open Operations Alerts: {0},تنبيهات العمليات المفتوحة اليومية: {0}
-Daily Operations,العمليات اليومية
 Daily Rate (SAR),السعر اليومي (ريال)
 Daily Rate cannot be negative.,لا يمكن أن يكون السعر اليومي سالباً.
 Daily Rate is required on a Receipt movement.,السعر اليومي مطلوب في حركة الاستلام.
@@ -1552,7 +1547,6 @@ F6,صيغة F6
 F7,صيغة F7
 F8,صيغة F8
 F9,صيغة F9
-Facilities and Assets,المرافق والأصول
 Facility Asset,أصل المنشأة
 Facility Asset Custody Assignment,تخصيص عهدة أصول المنشأة
 Facility Asset Delivery,تسليم أصل منشأة
@@ -1565,7 +1559,6 @@ Facility Assets,أصول المنشأة
 Facility Assets by Category,أصول المنشأة حسب التصنيف
 Facility Assets by Status,أصول المنشأة حسب الحالة
 Facility Assets Needing Attention,أصول المنشأة التي تتطلب متابعة
-"Facility assets, movements, and subcontractor work.",أصول المنشأة وحركاتها وأعمال مقاولي الباطن.
 Facility Custody Item,عهدة المنشأة
 Facility Item,عنصر منشأة
 Fail,غير مجتاز
@@ -1630,6 +1623,8 @@ Fleet and Fuel Engine,محرك الأسطول والوقود
 Fleet Control,التحكّم بالأسطول
 Fleet dashboard,لوحة الأسطول
 "Fleet driver master record: identity, project, supervisor, vehicle linkage, and compliance.",سجل أساسي لسائق الأسطول: الهوية والمشروع والمشرف وربط المركبة والامتثال.
+Fleet Go-Live,تشغيل الأسطول
+"Fleet is live. Fleet Control shows every vehicle's state, and fuel claims reconcile against the quota you set.",الأسطول يعمل. تحكّم الأسطول يُظهر حالة كل مركبة، ومطالبات الوقود تُطابَق بالحصة التي حدّدتها.
 Fleet Operations,تشغيل الأسطول
 Fleet OS,نظام إدارة الأسطول
 Fleet Payment Register,سجل المدفوعات
@@ -1677,7 +1672,6 @@ From Project and To Project must be different for a cost transfer.,يجب أن �
 From Room,من غرفة
 From Room does not match the asset's current location ({0}).,الغرفة المصدر لا تطابق الموقع الحالي للأصل ({0}).
 Front Desk,مكتب الاستقبال
-Front Desk (Screen),مكتب الاستقبال (شاشة إدخال)
 Frontend Base URL,العنوان الأساسي للواجهة الأمامية
 Frontend Base URL must start with http:// or https:// (for example https://salis-fleet.com).,يجب أن يبدأ رابط الواجهة الأمامية بـ http:// أو https:// (مثال: https://salis-fleet.com).
 Frontend Integration,تكامل الواجهة الأمامية
@@ -1704,7 +1698,6 @@ Fuel Exception Case,حالة استثناء وقود
 Fuel Exception Register,سجل استثناءات الوقود
 "Fuel gauge reading recorded at vehicle handover, from empty to full, used to compare fuel state at pickup and return of the rental vehicle.",قراءة مؤشر الوقود المسجّلة عند مناولة المركبة، من فارغ إلى ممتلئ، تُستخدم لمقارنة حالة الوقود عند استلام وإعادة المركبة المستأجرة.
 fuel grades,أنواع الوقود
-"Fuel is live. Quotas, requests, and claims now keep consumption and spend reconciled.",تم تشغيل الوقود. تحافظ الحصص والطلبات والمطالبات الآن على مطابقة الاستهلاك والإنفاق.
 Fuel Level,مستوى الوقود
 Fuel Litres Dispensed This Month,لترات الوقود المصروفة هذا الشهر
 Fuel Misuse,إساءة استخدام الوقود
@@ -1780,6 +1773,8 @@ Habitat,السكن والمرافق
 Habitat Internal / No Financial Posting,داخلي في Habitat / بدون ترحيل مالي
 Habitat Settings,إعدادات السكن
 Half,نصف
+Hand a SIM to an employee and open its custody record.,سلّم شريحة لموظف وافتح سجل عهدتها.
+"Hand a vehicle over, set its fuel quota, and reconcile the first claim.",سلّم مركبة، حدّد حصتها من الوقود، وطابِق أول مطالبة.
 Handed Over,تم التسليم
 Handed over from {0} to {1} via {2} (odometer {3}).,تم التسليم من {0} إلى {1} عبر {2} (عداد المسافة {3}).
 "Handling priority assigned to the finding for scheduling remediation, independent of severity, from low up to critical.",أولوية المعالجة المسندة للملحوظة لجدولة المعالجة، بمعزل عن درجة الخطورة، من منخفضة حتى حرجة.
@@ -1828,6 +1823,9 @@ Housed {0},تمّ إسكان {0}
 Housed {0} in a temporary bed,تمّ إسكان {0} في سرير مؤقّت
 Housing,السكن
 Housing Allowance Suspended,تعليق بدل السكن
+Housing and Safety,الإسكان والسلامة
+Housing and Safety Go-Live,تشغيل الإسكان والسلامة
+Housing and Safety is live. The Front Desk handles daily check-in and check-out; the Safety Map shows what is open on each building.,الإسكان والسلامة يعملان. مكتب الاستقبال يتولى الدخول والخروج اليومي، وخريطة السلامة تُظهر ما هو مفتوح على كل مبنى.
 Housing Assignment,تسكين
 Housing Checkout,إخلاء السكن
 Housing Checkout Clearance,إخلاء السكن
@@ -2095,7 +2093,7 @@ Lease Start Date,تاريخ بداية عقد الإيجار
 Lease {0} does not exist.,العقد {0} غير موجود.
 Lease {0} has no rent instalment due on {1}.,العقد {0} ما فيه قسط إيجار مستحق في {1}.
 Leases by Status,عقود السكن حسب الحالة
-Leasing,التأجير
+Leasing and Utilities,الإيجار والمرافق
 Leave,إجازة
 Leave blank for permanent,اتركه فارغاً للدائم
 Leave empty for building-level stock.,اتركه فارغاً إذا كان المخزون على مستوى المبنى.
@@ -2185,6 +2183,8 @@ Logged At,وقت التسجيل
 Logged to Asset Maintenance History,مُسجَّل في سجل صيانة الأصل
 Logging inspection…,جارٍ تسجيل التفتيش…
 Logistay,لوجيستاي
+Logistay Go-Live,تشغيل لوجستي
+"Logistay is live. Every SIM traces to a contract and a holder, which is what the exception reports read.",لوجستي يعمل. كل شريحة تعود إلى عقد وإلى حاملها، وهذا ما تقرأه تقارير الاستثناءات.
 Logistics Cleared,تم إخلاء اللوجستيات
 Logs,السجلات
 Lost,مفقود
@@ -2197,19 +2197,15 @@ Maintenance Cost Ledger,سجل تكاليف الصيانة
 Maintenance Cost Ledger rows are immutable and cannot be edited.,صفوف سجل تكاليف الصيانة غير قابلة للتغيير ولا يمكن تعديلها.
 Maintenance cost ledger. Maintained automatically by the system when a Maintenance Work Order is completed and not edited manually. One immutable row per procurement item.,سجل تكاليف الصيانة. يُحدَّث تلقائياً بواسطة النظام عند اكتمال أمر عمل صيانة، ولا يُحرَّر يدوياً. صف واحد غير قابل للتغيير لكل بند مشتريات.
 Maintenance Count,عدد مرات الصيانة
-Maintenance Daily Flow,سير العمل اليومي للصيانة
 Maintenance Dispatch,إرسال للصيانة
 Maintenance Findings,ملاحظات الصيانة
-Maintenance Flow,مسار الصيانة
 Maintenance Inspection Report,تقرير فحص الصيانة
-Maintenance is set up. Raise requests and close work orders from your daily page.,تم إعداد الصيانة. أنشئ الطلبات وأغلق أوامر العمل من صفحتك اليومية.
 Maintenance Material,مادة الصيانة
 Maintenance Material Template,قالب مواد الصيانة
 Maintenance Material Template Item,عنصر قالب مواد الصيانة
 Maintenance Overdue,صيانة متأخرة
 Maintenance Procurement Item,بند مشتريات الصيانة
 Maintenance Reflection,انعكاس الصيانة
-Maintenance Reports,تقارير الصيانة
 Maintenance Request,طلب صيانة
 Maintenance Requests by Priority,طلبات الصيانة حسب الأولوية
 Maintenance Requests by Status,طلبات الصيانة حسب الحالة
@@ -2241,8 +2237,6 @@ Marked Completed via controlled method.,تم الوسم كمكتمل عبر ال
 Marked Missed — work was not completed by the scheduled date.,مُصنَّف كفائت — لم يكتمل العمل في الموعد المحدد.
 Marking Completed...,جارٍ الوسم كمكتمل...
 Masar,مسار
-Masar Go-Live,إطلاق تشغيل مسار
-Masar is live. Use the Worker Route portal to manage transport requests and dispatch trips.,تم تشغيل مسار. استخدم بوابة مسار العامل لإدارة طلبات النقل وتشغيل الرحلات.
 Masar Supervisor,مشرف المسار
 Masar Worker,عامل مسار
 Masar Worker Link,رابط عامل مسار
@@ -2599,7 +2593,6 @@ Open the Action Inbox,افتح صندوق الإجراءات
 Open the custody issue list,فتح قائمة مشكلات العهدة
 Open the Dispatch Board,افتح لوحة التشغيل
 Open the Front Desk,افتح مكتب الاستقبال
-Open the front desk and place your first resident.,افتح مكتب الاستقبال وأسكِن أول مقيم.
 Open the incident record,فتح سجل الحادث
 Open the live Fleet Control board to watch and act on every vehicle.,افتح لوحة التحكّم الحيّة لمراقبة كل مركبة والتصرّف عليها.
 Open the maintenance request,فتح طلب الصيانة
@@ -2830,10 +2823,10 @@ Pickup latitude in decimal degrees. Set on housing buildings used as shuttle pic
 Pickup Longitude,خط طول نقطة الالتقاط
 Pickup longitude in decimal degrees. Set on housing buildings used as shuttle pickup stops so the worker's live ride ETA can be computed from the driver's GPS position.,خط طول نقطة الالتقاط بالدرجات العشرية. يُضبط على مباني السكن المستخدمة نقاطَ التقاط للنقل ليُحسب الوقت المتوقع لوصول رحلة العامل المباشر من موقع GPS للسائق.
 Pickup Point,نقطة الالتقاط
+"Place your first resident, then raise and close the work their building needs.",أسكِن أول مقيم، ثم افتح واغلق ما يحتاجه مبناه من أعمال.
 Placement,التسكين
 Plan,الباقة
 Plan a Route,تخطيط مسار
-"Plan your first route, dispatch a trip, and confirm the passenger manifest.",خطّط أول مسار، وشغّل رحلة، وأكّد كشف الركاب.
 Planned,مخطط
 Planned Daily Fuel (SAR),الوقود اليومي المخطط (ريال سعودي)
 Planned departure date for a temporary stay; supervisor is alerted as it approaches or if the worker is still checked in past it.,تاريخ المغادرة المخطط لإقامة مؤقتة؛ يُنبَّه المشرف عند اقترابه أو إذا ظل العامل مُسكَّنًا بعده.
@@ -2987,7 +2980,6 @@ Quota period in YYYY-MM format (e.g. 2026-05).,فترة الحصة بصيغة YY
 Quota-increase claim - requires Operations-tier approval and a Finance consult note.,طلب زيادة حصة الوقود — يستلزم موافقة مستوى العمليات وملاحظة استشارة مالية.
 Raise a Fuel Request,أنشئ طلب وقود
 Raise a Maintenance Request,رفع طلب صيانة
-Raise a maintenance request and complete your first work order.,أنشئ طلب صيانة وأكمل أول أمر عمل لك.
 Raise a Salis Payment Request,رفع طلب دفع سلس
 Raise a Transport Request,أنشئ طلب نقل
 Raise Fuel Request,إنشاء طلب وقود
@@ -3054,6 +3046,7 @@ Record a Housing Assignment,تسجيل تسكين
 Record a Passenger Manifest,تسجيل كشف ركاب
 Record a Safety Round,تسجيل جولة سلامة
 "Record a safety round as a draft, then send it to an authorized submitter for review and submission.",سجّل جولة سلامة كمسودة، ثم أرسلها إلى مخوّل بالتقديم للمراجعة والتقديم.
+"Record a telecom contract, add its SIM cards, and hand the first one to an employee.",سجّل عقد اتصالات، أضف شرائحه، وسلّم أولها لموظف.
 Record a Vehicle Assignment,سجّل إسناد مركبة
 Record a Vehicle Handover,تسجيل تسليم مركبة
 "Record a vehicle handover as a draft, then send it to an authorized submitter for review and submission.",سجّل تسليم مركبة كمسودة، ثم أرسلها إلى مخوّل بالتقديم للمراجعة والتقديم.
@@ -3064,6 +3057,7 @@ Record Completion Notes,سجّل ملاحظات الإنجاز
 Record damage and its cost for returned articles.,سجّل الضرر وتكلفته للمواد المُرجعة.
 Record Immediate Action,سجّل الإجراء الفوري
 Record returned articles against their source Custody Issue.,سجّل المواد المُرجعة مقابل سند صرف العهدة الأصلي.
+Record the contract your SIM cards are supplied under.,سجّل العقد الذي تُورَّد شرائحك تحته.
 Record the Odometer,سجّل قراءة العداد
 Record the passengers who boarded the dispatched trip to complete the movement lifecycle.,سجّل الركاب الذين صعدوا الرحلة المُشغَّلة لإتمام دورة حياة الحركة.
 Record the receiving driver and vehicle condition with the guided handover form.,سجّل السائق المستلم وحالة المركبة باستخدام نموذج التسليم الإرشادي.
@@ -3110,6 +3104,8 @@ Regenerate Payment Schedule,إعادة توليد جدول السداد
 Register,تسجيل
 Register a Salis Driver,سجّل سائق سلس
 Register a Salis Vehicle,سجّل مركبة سلس
+Register a Telecom Contract,سجّل عقد اتصالات
+"Register a vehicle and a driver, move workers from request to manifest, then settle what the movement cost.",سجّل مركبة وسائقًا، وانقل العمال من الطلب إلى كشف الركاب، ثم سوِّ تكلفة الحركة.
 Register a Vehicle Compliance Record,تسجيل سجل امتثال مركبة
 Register New Arrival (Passport),تسجيل وصول جديد (الجواز)
 Register new arrival by passport,تسجيل وصول جديد برقم الجواز
@@ -3266,7 +3262,6 @@ Resident Support Services,خدمات دعم المقيمين
 Resident Type,نوع المقيم
 "Resident's signature accepting the housing terms at check-in. A signature can be copied and reused, so only the front desk roles that capture it can see this field.",توقيع الساكن بالموافقة على شروط السكن عند تسجيل الدخول. التوقيع يمكن نسخه وإعادة استعماله، فلا يظهر هذا الحقل إلا لأدوار مكتب الاستقبال التي تلتقطه.
 "Resident's signature accepting the housing terms, captured on the tablet at check-in.",توقيع الساكن بالموافقة على شروط السكن، يُلتقط على اللوحي عند تسجيل الدخول.
-Residents and Rooms,الساكنون والغرف
 Residual Value (%),القيمة المتبقية (%)
 Residual Value (%) must be between 0 and 100.,يجب أن تكون القيمة المتبقية (٪) بين صفر ومئة.
 Resignation,استقالة
@@ -3361,7 +3356,6 @@ Room Number,رقم الغرفة
 Room Number Prefix,بادئة رقم الغرفة
 Room Numbering,ترقيم الغرف
 Room Setup,إعداد الغرف
-Room Setup (Screen),إعداد الغرف (شاشة إدخال)
 Room Setup — {0},إعداد الغرف — {0}
 Room Status,حالة الغرفة
 Room Status Breakdown,تفصيل حالة الغرف
@@ -3423,18 +3417,13 @@ Safety Inspection Report,تقرير فحص السلامة
 Safety Inspections,تفتيشات السلامة
 Safety Inspections Over Time,تفتيشات السلامة عبر الزمن
 Safety Inspections Recorded,فحوصات السلامة المسجلة
-Safety is set up. Scheduled tasks and inspections are active.,تم إعداد السلامة. المهام المجدولة والتفتيشات مفعّلة الآن.
 Safety Map,خريطة السلامة
-Safety Map (Board),خريطة السلامة (لوحة متابعة)
 Safety Officer,مسؤول السلامة
 Safety Open Findings,ملاحظات السلامة المفتوحة
-Safety Operations,عمليات السلامة
 Safety Overdue Grace Days,أيام سماح تأخر السلامة
 Safety Pre-Due Lead Days,أيام التنبيه المسبق للسلامة
 Safety Profile,ملف السلامة
-Safety Readiness,جاهزية السلامة
 Safety Report Recipient,مستلِم تقرير السلامة
-Safety Reports,تقارير السلامة
 Safety Round,جولة سلامة
 Safety Round Report,تقرير جولة السلامة
 Safety Round Report: {0} ({1}),تقرير جولة السلامة: {0} ({1})
@@ -3476,7 +3465,8 @@ Salis departure (relocation) transport raised for a Final Exit / End of Contract
 Salis Dispatch Board,لوحة تسيير الرحلات
 Salis Driver,سائق
 Salis Driver {0} does not exist.,سائق ساليس {0} غير موجود.
-Salis Fuel Setup,إعداد وقود سلس
+Salis Go-Live,تشغيل سلس
+Salis is live. The Dispatch Board shows every trip; the manifest records who was on it.,سلس يعمل. لوحة التسيير تُظهر كل رحلة، وكشف الركاب يسجّل من كان عليها.
 Salis Payment Request,طلب دفع
 Salis Rentals Costs Settlements Pending Approval,تسويات إيجار بانتظار الاعتماد
 Salis Representatives Fleet Vehicles Stopped,مركبات موقوفة
@@ -3613,7 +3603,6 @@ Service Line,خط الخدمة
 Service Order marked In Progress.,تم تحديد حالة أمر الخدمة كـ 'قيد التنفيذ'.
 Service Order marked Missed.,تم تحديد حالة أمر الخدمة كـ 'فائت'.
 Service Type,نوع الخدمة
-"Set a fuel quota, request fuel, and reconcile the claim.",حدد حصة وقود، واطلب الوقود، وطابق المطالبة.
 Set a Landlord on lease {0} before raising a rent payment — a payment needs a party to settle with.,حدّد المؤجّر في العقد {0} قبل إصدار دفعة إيجار — الدفعة تحتاج طرفًا تُسدَّد له.
 Set a Service Item on the contract before raising a purchase request.,عيّن صنف خدمة على العقد قبل إصدار طلب شراء.
 Set an Issue Type to make this finding actionable: on report submit it spawns a Maintenance Request of this type.,حدّد نوع مشكلة لجعل هذه النتيجة قابلة للتنفيذ: عند ترحيل التقرير يُنشئ طلب صيانة من هذا النوع.
@@ -4303,7 +4292,6 @@ User who authorized activating this deduction type (management sign-off).,الم
 Usually blank on arrival; populated when the Iqama is issued before the worker is linked to a permanent Employee.,يكون فارغًا عادةً عند الوصول؛ يُملأ عند إصدار الإقامة قبل ربط العامل بموظف دائم.
 Utilisation,الاستغلال
 Utilisation %,نسبة الاستغلال %
-Utilities,المرافق
 Utility Account,حساب الخدمات العامة
 "Utility account number per building (electricity, water, telecom). Links incoming bills to a building cost center.",رقم حساب المرافق لكل مبنى (كهرباء، ماء، اتصالات). يربط الفواتير الواردة بمركز تكلفة المبنى.
 Utility Bill Entry,تسجيل فاتورة الخدمات العامة

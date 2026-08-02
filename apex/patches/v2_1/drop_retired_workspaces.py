@@ -1,17 +1,31 @@
 import frappe
 
 # Backend Engines became Apex Core; Compliance and Rentals folded into Salis alongside the
-# short-lived Masar and Operations pages.
-RETIRED = ("Backend Engines", "Compliance and Rentals", "Masar", "Operations")
+# short-lived Masar and Operations pages; the four Habitat children became two.
+RETIRED_WORKSPACES = (
+    "Backend Engines", "Compliance and Rentals", "Masar", "Operations",
+    "Housing", "Safety", "Custody", "Costs and Leasing",
+)
+
+# Each of these was named after a workspace that no longer exists.
+RETIRED_ONBOARDINGS = (
+    "Accommodation Go-Live", "Safety Readiness", "Maintenance Daily Flow",
+    "Custody Go-Live", "Masar Go-Live", "Salis Fuel Setup",
+    "Compliance and Rentals Go-Live",
+)
 
 
 def execute():
-    """Remove the workspaces whose links moved elsewhere.
+    """Remove the workspaces and onboardings whose content moved elsewhere.
 
-    A standard workspace that leaves the app is not removed by migrate — the record stays behind
-    and keeps rendering an empty page in the sidebar, because sync only imports what it finds on
-    disk.
+    A standard record that leaves the app is not removed by migrate — it stays behind and keeps
+    rendering, because sync only imports what it finds on disk. A stale workspace shows an empty
+    page in the sidebar; a stale onboarding offers a checklist for a page that is gone.
     """
-    for name in RETIRED:
+    for name in RETIRED_WORKSPACES:
         if frappe.db.exists("Workspace", name):
             frappe.delete_doc("Workspace", name, force=True, ignore_permissions=True)
+
+    for name in RETIRED_ONBOARDINGS:
+        if frappe.db.exists("Module Onboarding", name):
+            frappe.delete_doc("Module Onboarding", name, force=True, ignore_permissions=True)

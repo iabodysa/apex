@@ -6,8 +6,6 @@
  "module": "Apex Core",
  "icon": "todo",
  "public": 1,
- "is_standard": 1,
- "is_default": 0,
  "is_hidden": 0,
  "sequence_id": 6.0,
  "parent_page": "Apex",
@@ -72,5 +70,5 @@
  "number_cards": [],
  "quick_lists": [],
  "creation": "2020-01-01 00:00:00.000000",
- "modified": "2026-08-02 10:31:00.000000"
+ "modified": "2026-08-02 10:51:00.000000"
 }

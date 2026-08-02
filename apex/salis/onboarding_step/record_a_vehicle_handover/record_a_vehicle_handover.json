@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Record a Vehicle Handover",
- "intro_text": "Record the receiving driver and vehicle condition with the guided handover form.",
  "title": "Record a Vehicle Handover",
  "action": "Show Form Tour",
  "reference_document": "Vehicle Handover",

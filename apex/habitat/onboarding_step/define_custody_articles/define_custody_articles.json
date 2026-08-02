@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Define Custody Articles",
- "intro_text": "Custody Articles are the issuable items catalog — linens, tools, electronics. Define them first so the kiosk and the issue/return flow have something to hand out.",
  "title": "Define Custody Articles",
  "action": "Create Entry",
  "reference_document": "Custody Article",

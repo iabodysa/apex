@@ -1,0 +1,34 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Logistay Go-Live",
+ "title": "Logistay Go-Live",
+ "module": "Logistay",
+ "subtitle": "Record a telecom contract, add its SIM cards, and hand the first one to an employee.",
+ "success_message": "Logistay is live. Every SIM traces to a contract and a holder, which is what the exception reports read.",
+ "is_complete": 0,
+ "modified": "2026-08-02 00:00:00.000000",
+ "allow_roles": [
+  {
+   "doctype": "Onboarding Permission",
+   "role": "SIM Operations User"
+  },
+  {
+   "doctype": "Onboarding Permission",
+   "role": "System Manager"
+  }
+ ],
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Register a Telecom Contract"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Add a SIM Card"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Assign a SIM to an Employee"
+  }
+ ]
+}

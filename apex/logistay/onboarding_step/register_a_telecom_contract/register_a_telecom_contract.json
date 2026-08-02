@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Register a Telecom Contract",
+ "title": "Register a Telecom Contract",
+ "action": "Create Entry",
+ "reference_document": "Telecom Contract",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Record the contract your SIM cards are supplied under.",
+ "action_label": "Create Telecom Contract"
+}

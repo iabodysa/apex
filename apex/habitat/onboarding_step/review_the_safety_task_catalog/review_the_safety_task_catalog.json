@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Review the Safety Task Catalog",
- "intro_text": "The Safety Task Catalog is the standardized list of recurring safety tasks. Review it so you know what scheduled work the system generates for each building.",
  "title": "Review the Safety Task Catalog",
  "action": "Go to Page",
  "path": "List/Safety Task Catalog",

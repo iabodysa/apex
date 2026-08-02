@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Process a Fuel Claim",
- "intro_text": "A Fuel Claim records what was actually fuelled and spent so it can be reconciled against the quota and the request. Process one to close the fuel cycle and keep consumption and spend accurate per vehicle.",
  "title": "Process a Fuel Claim",
  "action": "Create Entry",
  "reference_document": "Fuel Claim",

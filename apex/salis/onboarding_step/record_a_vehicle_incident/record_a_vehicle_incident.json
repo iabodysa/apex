@@ -9,6 +9,5 @@
  "action": "Create Entry",
  "reference_document": "Vehicle Incident",
  "action_label": "Create Vehicle Incident",
- "description": "Log an accident or theft against a vehicle.",
- "intro_text": "Log an accident or theft against a vehicle, with location, report number and evidence. A theft takes the vehicle out of service and clears its driver; open incidents stay on the Operations workspace until they are resolved."
+ "description": "Log an accident or theft against a vehicle."
 }

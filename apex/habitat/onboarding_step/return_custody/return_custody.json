@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Return Custody",
- "intro_text": "When a worker hands articles back, record a Custody Return against the original issue. It rolls the issue status forward and reverses the stock so balances stay accurate.",
  "title": "Return Custody",
  "action": "Create Entry",
  "reference_document": "Custody Return",

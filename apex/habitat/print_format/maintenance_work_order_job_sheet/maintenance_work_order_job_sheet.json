@@ -17,6 +17,5 @@
  "print_format_builder_beta": 0,
  "print_format_type": "Jinja",
  "raw_printing": 0,
- "show_empty_items": 0,
  "standard": "Yes"
 }

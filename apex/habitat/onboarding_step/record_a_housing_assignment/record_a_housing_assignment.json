@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Record a Housing Assignment",
- "intro_text": "Assign an employee to a bed. This event starts the accommodation lifecycle — it begins cost allocation, occupancy tracking, and the resident history.",
  "title": "Record a Housing Assignment",
  "action": "Create Entry",
  "reference_document": "Housing Assignment",

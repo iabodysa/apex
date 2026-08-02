@@ -2,7 +2,6 @@
  "doctype": "Onboarding Step",
  "name": "Dispatch a Trip",
  "title": "Dispatch a Trip",
- "intro_text": "A Dispatch Trip converts a scheduled route into a live trip: vehicle assigned, driver confirmed, departure time set. Dispatching activates the boarding QR and passenger manifest.",
  "action": "Create Entry",
  "reference_document": "Dispatch Trip",
  "is_single": 0,

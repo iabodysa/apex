@@ -1,7 +1,6 @@
 {
  "doctype": "Onboarding Step",
  "name": "Open the Dispatch Board",
- "intro_text": "The Dispatch Board is the visual planner for trips — assign vehicles to requests and see the day movements in one place.",
  "title": "Open the Dispatch Board",
  "action": "Go to Page",
  "path": "salis-dispatch-board",

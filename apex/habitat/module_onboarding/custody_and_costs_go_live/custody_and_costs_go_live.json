@@ -1,16 +1,20 @@
 {
  "doctype": "Module Onboarding",
- "name": "Custody Go-Live",
- "title": "Custody Go-Live",
+ "name": "Custody and Costs Go-Live",
+ "title": "Custody and Costs Go-Live",
  "module": "Habitat",
- "subtitle": "Build your article catalog and issue your first custody at the kiosk.",
- "success_message": "Custody is live. Issue and return articles at the kiosk and assess any damage.",
+ "subtitle": "Build the article catalog, issue your first custody, and see what it costs.",
+ "success_message": "Custody and Costs is live. The kiosk issues and returns articles; the reports show what each worker still holds and what the damage cost.",
  "is_complete": 0,
- "modified": "2026-07-19 12:00:00.000000",
+ "modified": "2026-08-02 00:00:00.000000",
  "allow_roles": [
   {
    "doctype": "Onboarding Permission",
-   "role": "Resident Supervisor"
+   "role": "Accommodation Manager"
+  },
+  {
+   "doctype": "Onboarding Permission",
+   "role": "Finance Manager"
   }
  ],
  "steps": [
