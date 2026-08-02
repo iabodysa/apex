@@ -17,8 +17,7 @@ change to the report could ever move it, and it had already drifted — the copy
 project-scope branch that OVERWRITES ``vehicle`` nor the DocType-existence
 short-circuit that returns before the query. Updating the copy would only have
 reset the clock on the same defect, so the copy is gone and the real function runs
-instead — the same correction ``tests/test_apps_screen_gate_wiring.py`` applied when
-it started EXECUTING hooks.py rather than reading its text.
+instead.
 
 Running the real ``execute()`` without a site means replacing the framework EDGES it
 touches — translation, session, ``frappe.db``, the project-scope helper, the query
