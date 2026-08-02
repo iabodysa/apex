@@ -155,10 +155,15 @@ async function load() {
     data.value = res;
     state.value = "ready";
     error.value = "";
-    if (res.has_position && hasLeaflet) {
+    // The map is built as soon as its canvas exists, NOT only when a fix arrives:
+    // the template already shows a "waiting for the first GPS fix" overlay over the
+    // map, and while the map was built lazily that overlay sat on a blank white box —
+    // Leaflet loaded, no container, no tile ever requested. The marker still waits for
+    // a real position, so nothing is ever drawn at 0,0.
+    if (hasLeaflet) {
       await nextTick();
       ensureMap();
-      updateMarker(res.lat, res.lng);
+      if (res.has_position) updateMarker(res.lat, res.lng);
     }
   } catch (e) {
     state.value = "error";
@@ -199,6 +204,7 @@ watch(
     if (a) {
       await load();
       await nextTick();
+      ensureMap();
       if (map) map.invalidateSize();
     }
   },
