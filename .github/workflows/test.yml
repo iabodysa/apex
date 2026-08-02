@@ -246,7 +246,9 @@ jobs:
         working-directory: frappe-bench/sites
         run: |
           ../env/bin/python - <<'PY'
+          import json
           import sys
+
           import frappe
 
           frappe.init(site="test.localhost")
@@ -267,5 +269,35 @@ jobs:
           if empty:
               sys.exit(f"workspaces that would render blank: {sorted(empty)}")
 
+          # The child tables above are what the sidebar needs; the `content` blocks are what
+          # the PAGE renders, and they are matched to those rows by label at render time. A
+          # block whose name matches no row is dropped silently, and a landing page with no
+          # text block at all renders as an empty card carrying nothing but Edit and New.
+          named_blocks = {
+              "shortcut": ("shortcut_name", "shortcuts"),
+              "card": ("card_name", "links"),
+              "chart": ("chart_name", "charts"),
+              "number_card": ("number_card_name", "number_cards"),
+              "quick_list": ("quick_list_name", "quick_lists"),
+          }
+
+          apex = frappe.get_doc("Workspace", "Apex")
+          if not [b for b in json.loads(apex.content or "[]") if b.get("type") in ("header", "paragraph")]:
+              sys.exit("the Apex landing page carries no text block and would render as an empty card")
+
+          dangling = []
+          for name in ["Apex", *roots]:
+              doc = frappe.get_doc("Workspace", name)
+              for block in json.loads(doc.content or "[]"):
+                  key, table = named_blocks.get(block.get("type"), (None, None))
+                  if not key:
+                      continue
+                  wanted = (block.get("data") or {}).get(key)
+                  if wanted not in {row.label for row in doc.get(table)}:
+                      dangling.append(f"{name}/{block['type']}:{wanted}")
+          if dangling:
+              sys.exit(f"workspace blocks naming nothing that exists: {dangling}")
+
           print(f"desk tree OK: {len(roots)} workspaces under Apex, none blank")
+          print(f"landing page OK: {len(json.loads(apex.content))} blocks, {len(apex.shortcuts)} portal links")
           PY
