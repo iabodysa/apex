@@ -183,7 +183,7 @@ def create_role_profiles():
             # [#7cx306]
             doc.unlock()
     # [#a036rp]
-    # A-036: native provisioning of the Salis field-worker Role Profile bundling
+    # Native provisioning of the Salis field-worker Role Profile bundling
     # the desk_access=0 Driver role (was a fixture, which re-fired Role Profile's
     # core on_update queue_action file lock on every worker-less migrate ->
     # DocumentLockedError). Same exists-guard + insert + unlock pattern as above:

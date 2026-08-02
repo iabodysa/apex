@@ -4,7 +4,7 @@
 Vacate transaction with a custody-clearance gate. Damage deduction posting is
 gated behind Habitat Settings and disabled by default.
 
-A-218 -- why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row.
+Why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row.
 It is a deliberate field overlay, not an omission: the role may read and set the
 deduction fields (``cost_center``, ``damage_deduction_amount``,
 ``additional_salary_deduction``) on a checkout that Accommodation Manager or Resident

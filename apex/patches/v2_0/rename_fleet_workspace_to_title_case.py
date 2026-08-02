@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Rename the Fleet Workspace row 'fleet' -> 'Fleet' BEFORE the JSON re-imports (A-126).
+"""Rename the Fleet Workspace row 'fleet' -> 'Fleet' BEFORE the JSON re-imports.
 
 The shipped salis/workspace/fleet/fleet.json carried ``name: "fleet"`` while its
 ``label``/``title`` were both "Fleet". That is three separate defects:

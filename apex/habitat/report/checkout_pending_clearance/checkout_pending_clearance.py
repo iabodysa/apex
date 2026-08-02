@@ -3,7 +3,7 @@
 
 """Checkout Pending Clearance — Script Report.
 
-Row scope (A-225). Every query below is ``frappe.get_all``, which forces the
+Row scope. Every query below is ``frappe.get_all``, which forces the
 ignore-permissions path, so the ``Housing Checkout`` row boundary registered in
 ``hooks.permission_query_conditions`` never reaches this SQL — a Script Report inherits
 nothing from it. ``Resident Supervisor`` is in the report's audience and is NOT in

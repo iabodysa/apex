@@ -656,7 +656,7 @@ _SAFETY_FREQ_MAP = {
 # value, so a periodic template would emit a fresh instance EVERY day. They are
 # intentionally EXCLUDED from scheduled-task generation and reported to the operator
 # (never silently swallowed by the closed Select); they need an event trigger (e.g.
-# On Entry on resident check-in), a separate mechanism. PRODUCT DECISION — see A-076.
+# On Entry on resident check-in), a separate mechanism. This is a product decision.
 _EVENT_DRIVEN_FREQUENCIES = {"As Needed", "On Entry"}
 
 

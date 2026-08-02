@@ -109,10 +109,10 @@ apex.patches.v1_x.move_deduction_to_salary_policy
 
 # The demo seeders that used to sit in v1_x are no longer shipped: demo data is not part
 # of the product, and a customer install has no use for a module that fabricates users and
-# trips. They were never wired here (A-070) — a normal `bench migrate` must never create
+# trips. They were never wired here — a normal `bench migrate` must never create
 # demo data — and they now live only in the maintainer's own tree.
 #
-# HISTORICAL (security, A-248), and STILL ACTIONABLE even though the module has left this
+# HISTORICAL (security), and STILL ACTIONABLE even though the module has left this
 # repository: seed_demo_role_logins once carried the demo login password as a source
 # literal, so every checkout shared one working password. The literal is gone from the tree
 # but REMAINS IN GIT HISTORY, so it must be treated as burned. Deleting the module does not

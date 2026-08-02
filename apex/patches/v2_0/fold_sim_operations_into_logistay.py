@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Fold the retired ``SIM Operations`` module into ``Logistay`` (A-098 / A-111).
+"""Fold the retired ``SIM Operations`` module into ``Logistay``.
 
 The SIM telecom source moved from ``apex/sim_operations/`` to ``apex/logistay/``, the
 module line is gone from modules.txt, and the standalone SIM Operations workspace was
@@ -30,7 +30,7 @@ duplicate. Fully guarded and idempotent — the module filter matches nothing an
 LOCATE-gated sweep rewrites nothing on a second migrate, and a fresh install (which
 never had the module) is a complete no-op.
 
-A-187 correction: that last clause was FALSE until A-187. The modules.txt line above was
+Correction: that last clause was FALSE until the ghost Module Def was dropped. The modules.txt line above was
 never actually dropped, so ``add_module_defs`` kept minting a ``SIM Operations`` Module
 Def on every fresh install while ``set_all_patches_as_completed`` logged this patch as
 done without running it. ``drop_ghost_sim_operations_module_def`` is the one-time repair

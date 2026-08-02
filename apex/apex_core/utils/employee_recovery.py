@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Employee cost recovery on the native HRMS Employee Advance chain (A-102).
+"""Employee cost recovery on the native HRMS Employee Advance chain.
 
 Native primitive, no bespoke DocType. An operational loss recovered from a worker
 is exactly what HRMS already models:

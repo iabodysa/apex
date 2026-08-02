@@ -18,7 +18,7 @@ def daily_building_license_expiry_check() -> None:
     """Flip Building License status to Expired / Expiring Soon on the transition edge.
 
     Operator alerting is owned by the native Notifications ``Habitat - Building
-    License Expiring Soon`` and ``Habitat - Building License Expired`` (P-204). This
+    License Expiring Soon`` and ``Habitat - Building License Expired``. This
     job carries ONLY the residual status flip those Notifications cannot perform:
     ``set_property_after_alert`` is a no-op on a submitted document whose ``status``
     field is not ``allow_on_submit`` (Building License is submitted), and it cannot

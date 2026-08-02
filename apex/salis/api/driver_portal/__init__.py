@@ -390,7 +390,7 @@ def _attach_stop_progress(stops, route_plan, dispatch_trip, driver):
 def mark_arrived(dispatch_trip, route_stop, arrived=1, sequence=None, stop_name=None):
     """Driver action: "I've arrived at this pickup stop" (write).
 
-	The explicit arrival signal P-046 surfaces to the workers waiting at that stop.
+	The explicit arrival signal surfaced to the workers waiting at that stop.
 	Reuses the SAME Trip Stop Progress rail ``mark_stop_progress`` writes (one row
 	per route stop, keyed on the stable ``route_stop`` row name) — arrival is a new
 	flag on that row, not a new record — so the driver's per-stop state stays in one
@@ -398,7 +398,7 @@ def mark_arrived(dispatch_trip, route_stop, arrived=1, sequence=None, stop_name=
 	(an open Trip Start Log must exist). Idempotent and reversible: ``arrived=0``
 	clears it; re-marking the same state is a no-op.
 
-	On arrival it publishes ``boarding_arrived`` to the Dispatch Trip room (the P-032
+	On arrival it publishes ``boarding_arrived`` to the Dispatch Trip room (the shared
 	after_commit pattern, via the boarding flow's shared ``_publish``) so socketed
 	clients refresh; the durable arrival state on the row is what the guest worker
 	poll (``worker_trip_boarding``) reads — the delivery path for the worker's Masar

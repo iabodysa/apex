@@ -36,7 +36,7 @@ SAFETY_ROLES = {
 
 
 def has_apps_screen_access() -> bool:
-    """Gate for the /apps app-selector tile (A-024) — same SAFETY_ROLES check
+    """Gate for the /apps app-selector tile — same SAFETY_ROLES check
     get_context() applies, so the tile never shows for a user the page itself
     would turn away. Wired as the has_permission of the "apex-safety" tile in
     hooks.py add_to_apps_screen."""

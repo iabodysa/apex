@@ -1,6 +1,6 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Stamp ``Salis Payment Request.linked_payment_doctype`` on rows written before it
-existed (A-278).
+existed.
 
 ``linked_payment_entry`` used to be ``Link -> Payment Entry`` while the Payment Router
 built whatever ``Payment Routing Settings.target_payment_doctype`` named — its own

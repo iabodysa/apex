@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Salis Driver Portal — boarding endpoints (split from the driver_portal god module in P-180). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
+"""Salis Driver Portal — boarding endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
 
 import frappe
 from frappe import _

@@ -223,7 +223,7 @@ class MasarWorkerToken(Document):
     def recover_token(self) -> str:
         """Recover the raw token from its encrypted copy (to re-share the SAME link).
         Falls back to a rotation only when no usable ciphertext exists (a legacy row
-        the P-104 migration has not reached, or a key mismatch)."""
+        the hashing migration has not reached, or a key mismatch)."""
         audience, subject = self._issuance_subject()
         if authorize_issuance(audience, subject):
             return self.regenerate()

@@ -1,9 +1,9 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Drop the dead Employee Deduction Acknowledgment (Mahdar Iqrar) scaffolding (A-102).
+"""Drop the dead Employee Deduction Acknowledgment (Mahdar Iqrar) scaffolding.
 
 The DocType modelled a KSA-Labor-Law wage-deduction consent record, but nothing ever
 read or enforced it: no controller consumed it and the Salary Deduction Policy
-"require acknowledgment" flags were never wired to it. A-102 removes the dead
+"require acknowledgment" flags were never wired to it. This patch removes the dead
 scaffolding and its approval Workflow. Incident-driven wage recovery is being rebuilt
 natively on HRMS Employee Advance / Additional Salary in a later increment.
 

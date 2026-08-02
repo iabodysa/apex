@@ -16,7 +16,7 @@ frappe.pages["fuel-approval-console"].on_page_load = function (wrapper) {
 // <style> (the removed fac-board-styles block). Colours are Desk colour-scale vars
 // (theme + dark-mode aware); spacing uses logical properties so the queue mirrors
 // correctly under RTL. Applied as inline style="" overlays since a Desk page ships
-// no CSS of its own (P-088).
+// no CSS of its own.
 const FAC_STYLE = {
 	board: "padding-block:4px 24px;padding-inline:2px;",
 	grid: "display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;",

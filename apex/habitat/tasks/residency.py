@@ -13,7 +13,7 @@ _ROW_SAVEPOINT = "residency_row"
 
 
 def lease_expiry_watchlist() -> None:
-    """Flip an expired Lease's status to Expired (residual of the P-204 refactor).
+    """Flip an expired Lease's status to Expired (residual of the notification refactor).
 
     Operator alerting for expiring and expired leases is owned by the native
     Notifications ``Habitat - Building Lease Expiring`` (Days Before, per Habitat

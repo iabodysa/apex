@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Make each module's ROOT workspace the deterministic breadcrumb target (P-108).
+"""Make each module's ROOT workspace the deterministic breadcrumb target.
 
 Desk breadcrumbs resolve a DocType's workspace as
 ``module_wise_workspaces[module][0]`` (frappe breadcrumbs.js), and that list is
@@ -10,9 +10,9 @@ that ships no ``creation`` value gets the import moment from ``db_insert``, and
 which is DIRECTORY order, not alphabetical — so which workspace lands first is
 arbitrary. Worse, every later JSON change re-imports via delete+insert,
 re-stamping ``creation = now()`` and dropping that workspace to LAST. Net effect:
-an arbitrary sub-workspace wins the module breadcrumb (follow-up to P-055).
+an arbitrary sub-workspace wins the module breadcrumb.
 
-SUPERSEDED for the modules that ship a pinned ``creation`` (A-286). A past
+SUPERSEDED for the modules that ship a pinned ``creation``. A past
 ``creation`` in the workspace JSON survives both install paths untouched
 (document.py set_user_and_timestamp skips the overwrite under in_install /
 in_patch / in_migrate), so the ordering is restored by the very re-import that

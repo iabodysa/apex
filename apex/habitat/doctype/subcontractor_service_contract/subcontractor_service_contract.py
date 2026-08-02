@@ -1,7 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Subcontractor Service Contract controller.
 
-A-218 -- why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row.
+Why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row.
 It is a deliberate field overlay, not an omission: the role may read and set the
 commercial terms (``rate_per_visit``, ``monthly_retainer``) on a contract that
 Accommodation Manager opens, and may not open, create, submit or cancel it. Document

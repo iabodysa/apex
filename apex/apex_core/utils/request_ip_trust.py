@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""The trust boundary under every per-address limit in this app, made checkable (A-242).
+"""The trust boundary under every per-address limit in this app, made checkable.
 
 ``frappe.local.request_ip`` is the bucket key for the portal bad-token throttle
 (portal_token_security), the boarding scan limiter (salis/api/boarding.py) and frappe's

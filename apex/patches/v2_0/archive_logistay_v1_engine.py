@@ -11,7 +11,7 @@ records those archived JSON/module files leave behind on a site that once had th
     DocType in module ``Logistay Governance`` (metadata rows + backing table dropped);
   * the orphaned Logistay engine surfaces (the ``Logistay`` workspace, the
     ``Timesheet Exception Workbench`` report, the ``TS Intake Source Workflow``);
-  * the P-192 payroll Custom Fields (module ``Logistay``) injected onto stock Salary
+  * the payroll Custom Fields (module ``Logistay``) injected onto stock Salary
     Slip / Additional Salary / Employee Deduction Acknowledgment / Salary Deduction
     Policy; and the ``Logistay Governance`` Module Def.
 
@@ -64,7 +64,7 @@ def execute() -> None:
     if frappe.db.exists("Workflow", "TS Intake Source Workflow"):
         frappe.db.delete("Workflow", {"name": "TS Intake Source Workflow"})
 
-    # P-192 payroll Custom Fields (module Logistay) on stock ERPNext / apex_core doctypes.
+    # Payroll Custom Fields (module Logistay) on stock ERPNext / apex_core doctypes.
     pay_fields = frappe.get_all(
         "Custom Field", filters={"module": "Logistay"}, fields=["name", "dt"]
     )

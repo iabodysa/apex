@@ -1,7 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Subcontractor Service Order controller.
 
-A-218 -- why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row.
+Why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row.
 It is a deliberate field overlay, not an omission: the role may read and set
 ``service_cost`` on an order that Accommodation Manager opens, and may not open,
 create, submit or cancel it. Document access is resolved from permlevel-0 rows only,

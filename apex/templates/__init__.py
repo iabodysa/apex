@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Jinja template package — AUDIT RECORD (A-105 clause 7.13).
+"""Jinja template package — AUDIT RECORD.
 
 The clause asks that this directory be "formally audited to ensure Jinja-injected
 components are cleanly integrated". Coverage existed by sink — a bootstrap test

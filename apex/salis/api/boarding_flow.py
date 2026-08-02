@@ -17,7 +17,7 @@ manifest or the Trip Start Log. The per-worker flow state lives in the
 ``Trip Boarding State`` child table on Dispatch Trip, populated from the trip's
 manifest the first time the trip starts (the first scan / self-confirm).
 
-Realtime rides the P-032 channel pattern: ``frappe.publish_realtime`` with
+Realtime rides the shared channel pattern: ``frappe.publish_realtime`` with
 ``doctype="Dispatch Trip"`` and ``after_commit=True`` (the socket server gates
 delivery on read permission; the SPA treats the payload as advisory and refetches).
 
@@ -46,7 +46,7 @@ _ROW_SAVEPOINT = "salis_boarding_auto_confirm_row"
 
 
 def _publish(event, dispatch_trip, payload):
-    """Publish a boarding flow event to the Dispatch Trip room (P-032 pattern).
+    """Publish a boarding flow event to the Dispatch Trip room.
 
     after_commit so subscribers read committed state; best-effort so a publish
     failure can never abort the calling write."""

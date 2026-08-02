@@ -737,7 +737,7 @@ def _driver_chain_has_permission(doc, user=None, driver_field="driver", with_own
     default resolution. Not folded into ``scoped_has_permission`` because that helper
     reads ``doc.project`` directly, which these indirect-tenant docs do not carry.
 
-    A-233 — OWNERSHIP IS NOT AN ACCESS BASIS ON AN UNSAVED ROW. ``Document.insert``
+    OWNERSHIP IS NOT AN ACCESS BASIS ON AN UNSAVED ROW. ``Document.insert``
     stamps ``owner`` with the acting user (document.py:298) two statements before
     ``check_permission("create")`` (:300), so at the create check ``owner == user`` is a
     tautology and the ``with_owner`` branch deferred EVERY create — a scoped user could

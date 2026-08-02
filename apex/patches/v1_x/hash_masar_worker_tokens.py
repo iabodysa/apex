@@ -9,7 +9,7 @@ def _looks_hashed(token: str) -> bool:
 
 
 def execute():
-    """Hash existing plaintext Masar Worker Token rows at rest (P-104, ONE-TIME).
+    """Hash existing plaintext Masar Worker Token rows at rest (ONE-TIME).
 
     Historically the ``token`` column held the RAW personal token in clear, so a
     direct row read handed out a working ``/masar`` link. The token now lives ONLY as

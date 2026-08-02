@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Remove the retired kernel landing Workspaces My Work + Launchpad (A-042).
+"""Remove the retired kernel landing Workspaces My Work + Launchpad.
 
 Workspace consolidation folded the Launchpad onboarding / settings / logs into the
 Habitat root, added the personal Action Inbox shortcut onto the Habitat + Salis roots,

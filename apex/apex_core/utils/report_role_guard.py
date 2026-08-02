@@ -1,12 +1,12 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-201 — refuse a Report role its ``ref_doctype`` cannot grant ``report``.
+"""Refuse a Report role its ``ref_doctype`` cannot grant ``report``.
 
 A Report's audience is its ``roles`` child table; the right to RUN it is
 ``frappe.has_permission(ref_doctype, "report")``, checked only when the report is
 opened (``frappe/desk/query_report.py:47``). Nothing reconciles the two:
 ``Workspace.is_item_allowed`` clears a Report link on the roles table alone, so a role
 that is named on the report but holds no ``report`` DocPerm on the ref gets a live
-workspace link that throws ``PermissionError`` on click. A-189/A-200 fixed 27 such links
+workspace link that throws ``PermissionError`` on click. An earlier sweep fixed 27 such links
 and ``salis/report/test_workspace_report_runnable.py`` keeps the shipped baseline empty.
 
 That guard reads JSON off disk, so it cannot see a Report created in the DATABASE. This

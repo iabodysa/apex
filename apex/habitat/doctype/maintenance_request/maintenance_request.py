@@ -1,7 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Maintenance Request controller.
 
-A-218 -- why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row, and
+Why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row, and
 why this DocType is the exception among the five that share the shape. It is a
 deliberate field overlay: the role may read and set ``cost_of_repair`` and
 ``cost_center`` on a request another role opens. Document access is resolved from
@@ -66,7 +66,7 @@ def make_work_order(source_name, target_doc=None):
 
     Fields on Maintenance Request that have NO matching fieldname on Maintenance
     Work Order (room, bed, priority) are therefore never referenced here, which
-    prevents the silent-drop data-loss described in P-082.
+    prevents the silent-drop data-loss described above.
     """
     frappe.has_permission("Maintenance Request", "read", doc=source_name, throw=True)
     from frappe.model.mapper import get_mapped_doc

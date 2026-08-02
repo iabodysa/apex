@@ -9,8 +9,8 @@ CURRENT user's OWN plans — a plan is "theirs" only when its ``route_supervisor
 is the session user. A supervisor can never read or act on another supervisor's plan
 (Administrator is the sole bypass, for seeding/verification).
 
-Approval model (added by A-025): Route Plan had no supervisor-approval concept — it is a
-Movement *fulfilment* record submitted by the planner (docstatus). A-025 adds a
+Approval model: Route Plan had no supervisor-approval concept — it is a
+Movement *fulfilment* record submitted by the planner (docstatus). This module adds a
 ``route_supervisor`` (User) assignment plus a ``supervisor_approval`` Select
 (Pending/Approved/Rejected) with audit stamps to Route Plan. The decision is NOT a
 parallel docstatus workflow: the plan stays submitted; approval is an operational sign-off

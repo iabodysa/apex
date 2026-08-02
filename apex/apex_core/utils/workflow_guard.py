@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Re-validate authorization on the native-submit / native-cancel workflow bypass (A-083).
+"""Re-validate authorization on the native-submit / native-cancel workflow bypass.
 
 A submittable DocType governed by an active Frappe Workflow must reach docstatus 1
 (submit) or 2 (cancel) ONLY through an authorized workflow transition, i.e.

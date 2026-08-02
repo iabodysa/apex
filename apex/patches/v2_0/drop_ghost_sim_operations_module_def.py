@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Delete the ghost ``SIM Operations`` Module Def that a fresh install minted (A-187).
+"""Delete the ghost ``SIM Operations`` Module Def that a fresh install minted.
 
 ``fold_sim_operations_into_logistay`` already drops this row — but only on a site that
 actually RUNS it. Two framework facts left a hole it can never reach:

@@ -24,7 +24,7 @@ so its controller MUST be ``masar_supervisor.py`` (underscore); a hyphenated
 ``masar-supervisor.py`` is never imported, ``get_context`` never runs, and the page falls
 through to the "no role" branch for EVERY user regardless of their actual roles.
 
-Map tile source — ACCEPTED THIRD-PARTY FETCH (A-175, 2026-07-25)
+Map tile source — ACCEPTED THIRD-PARTY FETCH (2026-07-25)
 The live driver map draws its background from tile.openstreetmap.org by default. That
 is a deliberate, recorded acceptance, not an oversight: self-hosting or rendering a tile
 pyramid is disproportionate for one supervisor panel, and the executable-code risk that
