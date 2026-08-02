@@ -208,7 +208,6 @@ Alert queue,قائمة التنبيهات
 Alert resolved,تمت معالجة التنبيه
 Alert Type,نوع التنبيه
 Alerts,تنبيهات
-Alerts and Incidents,التنبيهات والحوادث
 All,الكل
 All Assets Physically Verified,تم الجرد الفعلي لجميع الأصول
 All Assets Physically Verified must be checked before submitting the custody assignment.,"يجب تحديد ""تم التحقق الفعلي من جميع الأصول"" قبل تقديم تكليف العهدة."
@@ -828,7 +827,6 @@ Compliance %,نسبة الامتثال (%)
 Compliance & Expiry,الامتثال والانتهاء
 Compliance and Audit Reports,تقارير الالتزام والتدقيق
 Compliance and Licensing,الامتثال والتراخيص
-Compliance and Rentals,الامتثال والإيجارات
 Compliance and Rentals Go-Live,إطلاق تشغيل الامتثال والإيجارات
 "Compliance and Rentals is live. Driver clearances, vehicle compliance, and rental settlements are tracked.",تم تشغيل الامتثال والإيجارات. يجري تتبّع إخلاء طرف السائقين وامتثال المركبات وتسويات الإيجار.
 Compliance at risk,الامتثال في خطر
@@ -911,7 +909,6 @@ Contract-Derived References,مراجع مشتقة من العقد
 Contracted daily rental rate. Carried into the Rental Accrual Ledger memo for each in-service day.,سعر الإيجار اليومي المتعاقد عليه. يُنقل إلى مذكرة دفتر استحقاق الإيجار عن كل يوم في الخدمة.
 Contractor & Service,المقاول والخدمة
 Contractor / Temp ID,معرّف المتعاقد / المؤقت
-Control,التحكم
 Convert to Document,تحويل إلى مستند
 Converted from resident request {0},مُحوَّل من طلب مقيم {0}
 Copy link,نسخ الرابط
@@ -1335,7 +1332,6 @@ Driver license expired on {0}.,انتهت صلاحية رخصة السائق ف�
 Driver license has expired. Renew before assigning to trips.,انتهت صلاحية رخصة القيادة. يرجى التجديد قبل الإسناد للرحلات.
 Driver link revoked.,تم إلغاء رابط السائق.
 Driver Longitude,خط طول السائق
-Driver Operations,عمليات السائقين
 Driver Portal,بوابة السائق
 Driver portal is not enabled.,بوابة السائق غير مفعّلة.
 Driver Portal Link,رابط بوابة السائق
@@ -2159,6 +2155,7 @@ List the Returned Items,أدرج الأصناف المُرجعة
 "List the transport requests this trip serves, then save.",أدرج طلبات النقل التي تخدمها هذه الرحلة، ثم احفظ.
 Litres,اللترات
 Litres cannot be negative.,لا يمكن أن تكون اللترات سالبة.
+"Live boards: watch and act, not a form.",لوحات حيّة: راقب ونفّذ، لا نموذج إدخال.
 Live Driver Position,موقع السائق المباشر
 "Live fleet glance: vehicles by status, today's trips, driver availability and open transport requests.",نظرة حية على الأسطول: المركبات حسب الحالة ورحلات اليوم وتوفّر السائقين وطلبات النقل المفتوحة.
 "Live recording state of the building surveillance recorder, used to flag housing whose cameras are offline, not recording, or never installed for compliance follow-up.",حالة التسجيل الحيّة لمسجّل المراقبة في المبنى، تُستخدم للإشارة إلى السكن الذي تكون كاميراته غير متصلة أو غير مسجّلة أو غير مركّبة أصلًا لأغراض متابعة الامتثال.
@@ -2640,7 +2637,6 @@ Operational Status,الحالة التشغيلية
 Operations,العمليات
 Operations Alert,تنبيه تشغيلي
 Operations Control,التحكم بالعمليات
-Operations Control (Board),مركز العمليات (لوحة متابعة)
 Operations Director by default,مدير العمليات افتراضياً
 "Operations requester, carried from the linked Transport Request (Operations owns the request).",مقدّم طلب العمليات، منقول من طلب النقل المرتبط (العمليات تملك الطلب).
 Optional ERPNext Supplier FK for the landlord. Used to identify the payee for rent due reminders.,مرجع مورّد ERPNext اختياري للمالك. يُستخدم لتحديد المستفيد في تذكيرات استحقاق الإيجار.
@@ -3404,7 +3400,6 @@ Route supervisor portal,بوابة مشرف المسار
 Route Template,قالب مسار
 Route Type,نوع المسار
 Router,راوتر
-Routes,المسارات
 Routing,التوجيه
 Routing & Tracking,التوجيه والتتبع
 "Row {0}: Days, Daily Rate and Amount cannot be negative.",الصف {0}: عدد الأيام والسعر اليومي والمبلغ لا يمكن أن تكون سالبة.
@@ -3476,6 +3471,7 @@ Sales Taxes and Charges Template,قالب ضرائب ورسوم المبيعات
 Salis,سلس
 Salis Active Trips,رحلات نشطة
 Salis Compliance Drivers Licenses Expiring Soon,رخص السائقين قاربت الانتهاء
+Salis Control,تحكّم سلس
 Salis departure (relocation) transport raised for a Final Exit / End of Contract checkout.,نقل مغادرة (ترحيل) من ساليس تم إنشاؤه لإخلاء سكن لخروج نهائي / نهاية عقد.
 Salis Dispatch Board,لوحة تسيير الرحلات
 Salis Driver,سائق
@@ -4196,7 +4192,6 @@ Transfers responsibility of one or more Facility Assets to a supervisor.,ينق�
 Transform,التحويل
 Transport,النقل
 Transport Fulfilment SLA,اتفاقية مستوى خدمة تنفيذ النقل
-Transport Process,عملية النقل
 Transport Purpose,غرض النقل
 Transport Request,طلب نقل
 Transport Request Ad Hoc Passenger,راكب إضافي
@@ -4389,6 +4384,7 @@ Vehicle {0} was just assigned by {1}. Please review.,تم إسناد المرك�
 Vehicle {0} was not re-linked on cancel; it is no longer free.,لم تُعَد المركبة {0} إلى الربط عند الإلغاء؛ لم تعد متاحة.
 Vehicle: {0},المركبة: {0}
 Vehicles,المركبات
+Vehicles and Alerts,المركبات والتنبيهات
 Vehicles by Status,المركبات حسب الحالة
 Vehicles In Service,المركبات في الخدمة
 Vehicles Stopped,المركبات الموقوفة
@@ -4490,7 +4486,6 @@ Worker count fetched from the assigned request; feeds the trip capacity guard.,�
 Worker credential issuance requires an allowed Building.,يتطلب إصدار بيانات اعتماد العامل مبنى مسموحًا به.
 Worker Identity,هوية العامل
 Worker Manifest,كشف العمال
-Worker Movement,حركة العمال
 Worker Name,اسم العامل
 Worker Route (Masar),مسار العامل (مسار)
 Worker set: {0},تم تعيين العامل: {0}

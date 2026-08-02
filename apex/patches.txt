@@ -215,7 +215,7 @@ apex.patches.v2_0.backfill_routed_payment_doctype
 # to carry an API secret. Must stay in [post_model_sync]: it reads the imported default.
 apex.patches.v2_1.refresh_integration_settings_help
 
-# The Backend Engines workspace moved to Apex Core under the new Apex root. A standard
-# workspace that leaves the app is not removed by migrate, so the old record survives and
-# renders an empty sidebar entry on every site installed before this release.
-apex.patches.v2_1.drop_backend_engines_workspace
+# Four workspaces left the app for the new Apex tree. A standard workspace that leaves is
+# not removed by migrate, so each old record survives and renders an empty sidebar entry on
+# every site installed before this release.
+apex.patches.v2_1.drop_retired_workspaces
