@@ -5,6 +5,7 @@ The shipped notes start at 2.0.0; earlier releases are not carried forward.
 
 ## Latest
 
+- [2.2.1](v2/v2_2_1.md)
 - [2.2.0](v2/v2_2_0.md)
 - [2.1.26](v2/v2_1_26.md)
 - [2.1.25](v2/v2_1_25.md)
