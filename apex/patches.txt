@@ -203,3 +203,7 @@ apex.patches.v2_1.drop_retired_workspaces #2026-08-02
 # saved on one of the four retired names keeps that value until something rewrites it, and a
 # stored value outside the Select reaches the portal unchanged.
 apex.patches.v2_1.repoint_retired_portal_themes
+
+# Current SIM Custody only filtered SIM Card, which the list view does natively; the report left
+# the app and migrate does not remove a standard record whose file is gone.
+apex.patches.v2_1.drop_current_sim_custody_report

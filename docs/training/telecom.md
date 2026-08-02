@@ -117,8 +117,9 @@ Finance.
 4. Transfer it to the demo Project and confirm the Cost Center snapshot.
 5. Edit the mobile number on the same SIM Card.
 6. Return the SIM and confirm its current state is Available.
-7. Open **Current SIM Custody**, **Employees Holding Multiple SIMs**, and **SIM
-   Exceptions** to explain why the training rows do or do not appear.
+7. Open the **SIMs in Custody** shortcut on the Logistay workspace, then
+   **Employees Holding Multiple SIMs** and **SIM Exceptions**, to explain why the
+   training rows do or do not appear.
 
 ## Verification
 

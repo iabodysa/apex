@@ -20,8 +20,18 @@
    "role": "Administrator"
   }
  ],
- "content": "[{\"id\": \"LogistayHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Logistay</b></span>\", \"col\": 12}}, {\"id\": \"onbLG\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Logistay Go-Live\", \"col\": 12}}, {\"id\": \"LogistayCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Telecom\", \"col\": 4}}, {\"id\": \"LogistayCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Manpower\", \"col\": 4}}, {\"id\": \"LogistayCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
- "shortcuts": [],
+ "content": "[{\"id\": \"LogistayHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Logistay</b></span>\", \"col\": 12}}, {\"id\": \"onbLG\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Logistay Go-Live\", \"col\": 12}}, {\"id\": \"LogistayShort1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"SIMs in Custody\", \"col\": 4}}, {\"id\": \"LogistayCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Telecom\", \"col\": 4}}, {\"id\": \"LogistayCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Manpower\", \"col\": 4}}, {\"id\": \"LogistayCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "SIMs in Custody",
+   "link_to": "SIM Card",
+   "stats_filter": "[[\"SIM Card\",\"current_custodian_type\",\"!=\",\"Unassigned\"]]",
+   "color": "Blue",
+   "idx": 1
+  }
+ ],
  "links": [
   {
    "doctype": "Workspace Link",
@@ -86,20 +96,11 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Current SIM Custody",
-   "link_type": "Report",
-   "link_to": "Current SIM Custody",
-   "is_query_report": 1,
-   "idx": 9
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "SIM Exceptions",
    "link_type": "Report",
    "link_to": "SIM Exceptions",
    "is_query_report": 1,
-   "idx": 10
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
@@ -108,7 +109,7 @@
    "link_type": "Report",
    "link_to": "Employees Holding Multiple SIMs",
    "is_query_report": 1,
-   "idx": 11
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
@@ -117,7 +118,7 @@
    "link_type": "Report",
    "link_to": "SIMs by Contract and Supplier",
    "is_query_report": 1,
-   "idx": 12
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
@@ -126,7 +127,7 @@
    "link_type": "Report",
    "link_to": "Telecom Contract Expiry",
    "is_query_report": 1,
-   "idx": 13
+   "idx": 12
   },
   {
    "doctype": "Workspace Link",
@@ -135,12 +136,12 @@
    "link_type": "Report",
    "link_to": "Telecom Cost Allocation",
    "is_query_report": 1,
-   "idx": 14
+   "idx": 13
   }
  ],
  "charts": [],
  "number_cards": [],
  "quick_lists": [],
  "creation": "2020-01-01 00:00:00.000000",
- "modified": "2026-08-02 10:51:00.000000"
+ "modified": "2026-08-02 23:54:00.000000"
 }
