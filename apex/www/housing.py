@@ -55,9 +55,8 @@ def get_context(context):
     guest_redirect("/housing")
 
     context.no_cache = 1
+    apply_portal_appearance(context)
     context.has_housing_role = bool(HOUSING_ROLES & set(frappe.get_roles()))
     if context.has_housing_role:
         context.csrf_token = get_csrf_token()
-        # [#t0tojh]
-        apply_portal_appearance(context)
     return context

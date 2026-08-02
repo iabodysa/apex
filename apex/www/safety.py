@@ -49,11 +49,10 @@ def get_context(context):
     render_in_arabic()
 
     context.no_cache = 1
+    apply_portal_appearance(context)
     context.has_safety_role = bool(SAFETY_ROLES & set(frappe.get_roles()))
     if context.has_safety_role:
         context.csrf_token = get_csrf_token()
-        # [#t6z4ul]
-        apply_portal_appearance(context)
         # [#3ujvm8]
         conf = frappe.get_site_config()
         context.site_name = frappe.local.site

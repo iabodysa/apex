@@ -23,7 +23,7 @@ from frappe.sessions import get_csrf_token
 from frappe.utils import cint
 
 from apex.apex_core.utils.portal_language import render_in_arabic
-from apex.apex_core.utils.portal_bootstrap import guest_redirect
+from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance, guest_redirect
 
 # [#i6khen] Same role-set as the primary board — the backup gates identically.
 FLEET_ROLES = {
@@ -44,6 +44,8 @@ def has_apps_screen_access() -> bool:
 def get_context(context):
     # [#nyktq0]
     guest_redirect("/fleet-os")
+
+    apply_portal_appearance(context)
     render_in_arabic()
 
     context.no_cache = 1
