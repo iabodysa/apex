@@ -81,7 +81,7 @@ from apex.salis.web_form.vehicle_incident import vehicle_incident
 
 # The literal all five carried. Named so a reader can grep it to here, to
 # salis/api/test_rate_limit_identity.py (the 38 that went first), and to the budget in
-# tests/test_driver_portal_csrf.py, which now holds the count at zero across BOTH
+# salis/api/driver_portal/test_driver_portal_csrf.py, which now holds the count at zero across BOTH
 # populations. Nothing in this file asserts the string is present.
 LEGACY_FORM_DICT_KEY = "frappe.request.remote_addr"
 

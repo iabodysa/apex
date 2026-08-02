@@ -8,7 +8,7 @@ from pathlib import Path
 import unittest
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[4]
 DRIVER_PORTAL = ROOT / "apex" / "salis" / "api" / "driver_portal"
 BOARDING = ROOT / "apex" / "salis" / "api" / "boarding.py"
 BOARDING_FLOW = ROOT / "apex" / "salis" / "api" / "boarding_flow.py"

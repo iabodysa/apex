@@ -53,7 +53,7 @@ from apex.salis.api.driver_portal import (
 from apex.salis.api import driver_portal
 
 # The literal every one of these endpoints used to carry. Named so a reader can grep it
-# to this file and to the budget in tests/test_driver_portal_csrf.py, which holds it at
+# to this file and to the budget in salis/api/driver_portal/test_driver_portal_csrf.py, which holds it at
 # zero; nothing here asserts the string is present.
 LEGACY_FORM_DICT_KEY = "frappe.request.remote_addr"
 
