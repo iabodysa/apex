@@ -114,3 +114,11 @@ docs/*
 # Operator runbooks; the pre-rename app-identity cutover path lives here.
 !docs/administration/
 !docs/administration/*.md
+# Screenshots a lesson links, one directory per lesson, captured from synthetic rows.
+# Every parent has to be un-ignored first: git never descends into an ignored directory,
+# so a rule naming only the file matches nothing and the image can reach the repository
+# only by force-add.
+!docs/assets/
+!docs/assets/training/
+!docs/assets/training/*/
+!docs/assets/training/*/*.png
