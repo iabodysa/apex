@@ -27,7 +27,7 @@ import types
 import unittest
 from unittest import mock
 
-# [#idxstb] Same stubbing idiom as tests/test_worker_party.py: import the real
+# [#idxstb] Same stubbing idiom as apex_core/utils/test_worker_party.py: import the real
 # frappe when running under bench, otherwise stand up the minimum surface the
 # modules under test import at module scope, so this file is runnable standalone.
 if "frappe" not in sys.modules:

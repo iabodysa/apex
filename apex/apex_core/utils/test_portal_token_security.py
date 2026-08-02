@@ -173,7 +173,6 @@ class _as_user:
         self.previous_permissions = token_meta.permissions
         doctype_path = (
             Path(__file__).resolve().parents[1]
-            / "apex_core"
             / "doctype"
             / "masar_worker_token"
             / "masar_worker_token.json"
@@ -219,7 +218,6 @@ class TestPortalTokenSecurity(FrappeTestCase):
         self._original_permissions = token_meta.permissions
         doctype_path = (
             Path(__file__).resolve().parents[1]
-            / "apex_core"
             / "doctype"
             / "masar_worker_token"
             / "masar_worker_token.json"
@@ -849,7 +847,7 @@ class TestPortalTokenSecurity(FrappeTestCase):
 
     def test_shared_photo_helper_validates_and_saves_private_file(self):
         helper_path = (
-            Path(__file__).resolve().parents[1]
+            Path(__file__).resolve().parents[2]
             / "salis"
             / "api"
             / "driver_portal"
@@ -879,7 +877,7 @@ class TestPortalTokenSecurity(FrappeTestCase):
 
     def test_shared_photo_helper_rejects_malformed_wrong_type_and_oversize(self):
         helper_path = (
-            Path(__file__).resolve().parents[1]
+            Path(__file__).resolve().parents[2]
             / "salis"
             / "api"
             / "driver_portal"
@@ -1555,7 +1553,6 @@ class TestPortalTokenSecurity(FrappeTestCase):
     def test_party_type_is_conditionally_required_only_for_workers(self):
         doctype_path = (
             Path(__file__).resolve().parents[1]
-            / "apex_core"
             / "doctype"
             / "masar_worker_token"
             / "masar_worker_token.json"
@@ -2558,7 +2555,6 @@ class TestPortalTokenSecurity(FrappeTestCase):
     def test_metadata_grants_exact_fleet_issuer_docperms(self):
         doctype_path = (
             Path(__file__).resolve().parents[1]
-            / "apex_core"
             / "doctype"
             / "masar_worker_token"
             / "masar_worker_token.json"

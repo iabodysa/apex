@@ -59,7 +59,7 @@ LEGACY_FORM_DICT_KEY = "frappe.request.remote_addr"
 
 # The guest driver surface: the driver_portal package plus the driver half of
 # boarding_flow. salis/api/boarding.py is absent on purpose -- its two endpoints charge
-# in the body via rate_window.charge_window, which tests/test_front_desk_rate_limit.py
+# in the body via rate_window.charge_window, which apex_core/utils/test_front_desk_rate_limit.py
 # spends against a live bench.
 MODULES = (
     driver_portal,
@@ -92,7 +92,7 @@ _ABSENT = object()
 # subnet share one budget, and whichever runs second reds for a reason nowhere in its own
 # source. test_portal_token_throttle.TestThrottleAddressIsolation enforces it. The first
 # draft here used 203.0.113. and 198.51.100., both already owned by
-# tests/test_front_desk_rate_limit.py, and that guard caught it.
+# apex_core/utils/test_front_desk_rate_limit.py, and that guard caught it.
 ADDRESS_SUBNET = "2001:db8:4a71::"
 _STUB_IP = ADDRESS_SUBNET + "29"
 

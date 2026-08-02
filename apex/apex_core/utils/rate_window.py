@@ -24,7 +24,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
-# Public because tests/test_front_desk_rate_limit.py drives the script itself to prove
+# Public because apex_core/utils/test_front_desk_rate_limit.py drives the script itself to prove
 # 32 concurrent callers really do get 32 distinct values.
 INCR_AND_EXPIRE_SCRIPT = """
 local value = redis.call("INCR", KEYS[1])

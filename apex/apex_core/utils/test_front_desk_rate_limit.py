@@ -41,7 +41,7 @@ from apex.apex_core.utils.rate_limit_identity import canonical_command
 from apex.salis.api import boarding, driver_portal
 
 # Modules, never the metered functions themselves. A module-level ``from front_desk
-# import resolve_worker`` publishes apex.tests.test_front_desk_rate_limit.
+# import resolve_worker`` publishes apex.apex_core.utils.test_front_desk_rate_limit.
 # resolve_worker, which frappe resolves like any other dotted path
 # (handler.py:294-303 -> __init__.py:1748-1750) while the window is named after the
 # caller's spelling (rate_limiter.py:155) -- so the second name buys a second full

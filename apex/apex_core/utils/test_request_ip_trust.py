@@ -26,7 +26,7 @@ Addresses: this file owns ``REAL_SUBNET`` and mints every non-probe address from
 its literals stay prefix-free from the subnets other throttle tests reserve. The
 documentation-range values are derived from the module's own ``_DOCUMENTATION_NETWORKS``
 rather than written out, both to keep the ranges in one place and because ``203.0.113.``
-is already reserved by ``tests/test_front_desk_rate_limit.py``.
+is already reserved by ``apex_core/utils/test_front_desk_rate_limit.py``.
 """
 
 import contextlib

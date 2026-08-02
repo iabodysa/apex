@@ -10,7 +10,7 @@ Two things are locked in so they cannot silently regress:
      (back-fills either direction, clears employee for a Temporary Worker, and
      enforces an identity when asked).
 
-Run standalone:  python3 -m unittest apex.tests.test_worker_party -v
+Run standalone:  python3 -m unittest apex.apex_core.utils.test_worker_party -v
 """
 
 import json
@@ -19,7 +19,7 @@ import sys
 import types
 import unittest
 
-APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # [#eezzqo]
 DOCTYPE_SPECS = {

@@ -244,7 +244,7 @@ jobs:
 
       - name: Run portal token security tests
         working-directory: frappe-bench
-        run: bench --site test.localhost run-tests --module apex.tests.test_portal_token_security
+        run: bench --site test.localhost run-tests --module apex.apex_core.utils.test_portal_token_security
 
       - name: Run the full test suite
         working-directory: frappe-bench

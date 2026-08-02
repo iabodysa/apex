@@ -6,7 +6,7 @@ users through is an outage. These drive the REAL throttle and the REAL cache aga
 a constructed request, so they need no served site and no fixtures: the only thing
 stubbed is the token row lookup, which keeps the whole module DB-write-free.
 
-The counterpart integration coverage in ``apex/tests/test_portal_token_security.py``
+The counterpart integration coverage in ``test_portal_token_security.py`` beside this file
 exercises the same guard against real ``Masar Worker Token`` rows.
 
 TestThrottleAddressIsolation is the app-wide half (A-220): the window is keyed on
@@ -500,7 +500,7 @@ class TestThrottleAddressIsolation(unittest.TestCase):
         scan cannot go blind on exactly the pair it was written for."""
         scanned = _scan_test_addresses()
         for relpath in (
-            os.path.join("tests", "test_portal_token_security.py"),
+            os.path.join("apex_core", "utils", "test_portal_token_security.py"),
             os.path.join("apex_core", "utils", "test_portal_token_throttle.py"),
         ):
             self.assertIn(relpath, scanned, f"{relpath} left the scan — repair the glob")
