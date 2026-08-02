@@ -4,6 +4,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils.user import get_users_with_role
 from apex.apex_core.utils.party_link import sync_party_employee
 
 
@@ -38,12 +39,10 @@ def after_insert(doc, method=None):
     role = _DEPARTMENT_ROLE.get(doc.responsible_department)
     if not role:
         return
-    holders = frappe.get_all("Has Role", filters={"role": role, "parenttype": "User"}, pluck="parent")
-    assignees = [
-        user for user in holders
-        if user not in ("Administrator", "Guest")
-        and frappe.db.get_value("User", user, "enabled")
-    ]
+    # get_users_with_role resolves the role holders in ONE qb join, DISTINCT (a user
+    # holding the role through two Has Role rows is assigned once), already filtered to
+    # enabled users and already excluding the Administrator (frappe/utils/user.py:419-435).
+    assignees = [user for user in get_users_with_role(role) if user != "Guest"]
     if not assignees:
         return
     # [#foc6qa]
