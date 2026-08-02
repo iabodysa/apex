@@ -232,20 +232,40 @@ jobs:
           bench --site test.localhost install-app erpnext
           bench --site test.localhost install-app hrms
           bench --site test.localhost install-app apex
-          # The full suite creates far more than Frappe's default cap of 60 new
-          # Users per 60s, which raises "Throttled" in many setUpClass blocks.
-          # Write the cap as an INT directly into site_config (bench set-config
-          # would store a string and break Frappe's `int > limit` comparison).
-          python3 -c "import json, pathlib; p = pathlib.Path('sites/test.localhost/site_config.json'); c = json.loads(p.read_text()); c['throttle_user_limit'] = 100000; p.write_text(json.dumps(c, indent=1))"
 
-      - name: Migrate (apply seeds, workflows and patches)
+      - name: Migrate (apply fixtures, workflows and patches)
         working-directory: frappe-bench
         run: bench --site test.localhost migrate
 
-      - name: Run portal token security tests
-        working-directory: frappe-bench
-        run: bench --site test.localhost run-tests --module apex.apex_core.utils.test_portal_token_security
+      # The test suite is the maintainer's, not the app's, so a clone carries none and
+      # `run-tests` here would exit 0 having run nothing. This asserts what a fresh install
+      # is actually supposed to produce instead: the desk tree, and no broken link in it.
+      # Run through the interpreter, not `bench console`: the console is IPython and swallows a
+      # non-zero exit, so the one step meant to stop a false green would itself produce one.
+      - name: Assert the installed app is usable
+        working-directory: frappe-bench/sites
+        run: |
+          ../env/bin/python - <<'PY'
+          import sys
+          import frappe
 
-      - name: Run the full test suite
-        working-directory: frappe-bench
-        run: bench --site test.localhost run-tests --app apex
+          frappe.init(site="test.localhost")
+          frappe.connect()
+
+          # Only the SHAPE is checked here. A link to a DocType that does not exist cannot
+          # reach the database at all — Workspace Link is a Dynamic Link, so frappe raises
+          # LinkValidationError on save and migrate fails first. Parentage has no such guard:
+          # a workspace whose parent_page names nothing simply disappears from the sidebar.
+          roots = frappe.get_all("Workspace", filters={"parent_page": "Apex"}, pluck="name")
+          missing = {"Apex Core", "Salis", "Habitat", "Logistay", "My Tasks"} - set(roots)
+          if missing:
+              sys.exit(f"workspaces missing under the Apex root: {sorted(missing)}")
+
+          empty = [name for name in roots
+                   if not frappe.get_doc("Workspace", name).links
+                   and not frappe.get_doc("Workspace", name).shortcuts]
+          if empty:
+              sys.exit(f"workspaces that would render blank: {sorted(empty)}")
+
+          print(f"desk tree OK: {len(roots)} workspaces under Apex, none blank")
+          PY
