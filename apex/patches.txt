@@ -18,7 +18,7 @@
 #   documented exceptions may exist. Currently four, all recorded in this file:
 #     v1_0.seed_salis_operations_roles — execute() is an unconditional `return`, so
 #       registering it is indistinguishable from not registering it. The module stays
-#       on disk: salis/setup.py imports it and tests/test_release_hygiene.py reads it.
+#       on disk because salis/setup.py imports it.
 #     v1_x.seed_masar_demo_movement, v1_x.seed_demo_role_logins — demo seeders; see
 #       the A-070 note in [post_model_sync] below.
 #     v2_0.app_identity_cutover — the apex_habitat -> apex upgrade path. It CANNOT be

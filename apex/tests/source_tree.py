@@ -1,19 +1,12 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Source-tree and shipped-artifact queries shared by the static guards.
+"""Source-tree and shipped-artifact queries shared by the colocated tests.
 
-Frappe-free by construction: that is what lets the site-free guards import it, and
-costs the site-bound Arabic ones nothing to import it too.
+Frappe-free by construction, so a test that needs no site can import it without
+paying for one.
 
-test_duplicate_and_dead_code_guard.py and test_unit_test_coverage_guard.py each
-grew their own ``_production_py_files`` and ``_file_dotted_path``, so the widened
-copy-paste detector caught the guard family duplicating itself on its first day.
-One home instead: the two guards read each other's baselines, so their scan
-universes drifting apart would make one guard's verdict meaningless to the other.
-
-Deliberately NOT named ``test_*``: tests/test_no_cross_test_imports.py bans a test
-module importing a sibling test module, and a plain-named ``tests/`` helper is the
-sanctioned shape for shared test logic (the same reason factories.py and
-shipped_doctypes.py carry plain names).
+Deliberately NOT named ``test_*``: a plain-named ``tests/`` helper is the sanctioned
+shape for shared test logic (the same reason factories.py and shipped_doctypes.py
+carry plain names).
 """
 
 import ast
