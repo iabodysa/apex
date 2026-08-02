@@ -5,7 +5,12 @@
 #                    (Fresh installs never run patches; they seed via after_install.)
 #   STILL-REQUIRED = one-time rename / cleanup / backfill whose "every deployed site
 #                    has already run it" gate CANNOT be answered from source. Prune
-#                    only against a real tabPatch Log census, never on assumption.
+#                    against a real tabPatch Log census, or on an owner decision that
+#                    accepts the risk in writing — on 2026-08-02 four pre-v2 one-time
+#                    backfills went that way (scheduled-task template migration,
+#                    building address, assignment supervisor, deduction policy), with
+#                    the two Masar token patches deliberately kept because a site that
+#                    never ran them keeps a personal token readable and never-expiring.
 #   Every entry below carries its own reason.
 #   Earlier passes pruned 53 spent one-time patches (2026-06-03 and 2026-07-23).
 #
@@ -66,11 +71,6 @@ apex.patches.v1_x.seed_salis_communications
 # accommodation item resource without fixture sync — must stay replayable.
 apex.patches.v1_x.seed_accommodation_item_groups
 
-# STILL-REQUIRED (ONE-TIME): MUST stay in [pre_model_sync] — it reads the legacy
-# `building` column off tabScheduled Task Template that sync_all() drops on this same
-# migrate; in post_model_sync the backfill would silently no-op. Census unprovable here.
-apex.patches.v1_x.migrate_scheduled_task_template_to_assignments
-
 # STILL-REQUIRED (ONE-TIME): MUST stay in [pre_model_sync] — renames the Workspace
 # primary key 'fleet' -> 'Fleet' BEFORE sync_all() re-imports fleet.json. After the
 # sync, PostgreSQL already holds a duplicate row plus an orphan and MariaDB has
@@ -94,18 +94,6 @@ apex.patches.v2_0.rename_retired_habitat_record_names
 # STILL-REQUIRED: only-if-missing Web Form route safeguard for a v15 upgrade
 # (GitHub #97). Nothing in source proves every deployed site is already v15-correct.
 apex.patches.v1_x.ensure_web_form_route
-
-# STILL-REQUIRED (ONE-TIME): fills Building.building_address from the legacy default
-# Address link. Only historical rows need it and that census is not answerable here.
-apex.patches.v1_x.backfill_building_address_from_default_address
-
-# STILL-REQUIRED (ONE-TIME): fills Housing Assignment.responsible_supervisor on rows
-# saved before the fetch_from field existed, so checkout reminders reach the supervisor.
-apex.patches.v1_x.backfill_assignment_facility_supervisor
-
-# STILL-REQUIRED (ONE-TIME): moves the pre-policy damage / rent deduction values off the
-# orphaned Habitat Settings Singles rows. A missed site would silently drop a live gate.
-apex.patches.v1_x.move_deduction_to_salary_policy
 
 # The demo seeders that used to sit in v1_x are no longer shipped: demo data is not part
 # of the product, and a customer install has no use for a module that fabricates users and
