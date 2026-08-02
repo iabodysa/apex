@@ -26,7 +26,7 @@ on:
 # only after a security review that records why the new call site is safe.
 
 env:
-  BASELINE: 19
+  BASELINE: 18
   BYPASS_RE: 'ignore_permissions[[:space:]]*=[[:space:]]*True'
 
 jobs:
