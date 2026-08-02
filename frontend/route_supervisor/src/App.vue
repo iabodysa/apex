@@ -154,7 +154,7 @@
 
           <!-- Tabs -->
           <nav class="tabs" role="tablist">
-            <button v-for="tb in TABS" :key="tb.key" class="tab" :class="{ on: tab === tb.key }"
+            <button v-for="tb in shownTabs" :key="tb.key" class="tab" :class="{ on: tab === tb.key }"
                     role="tab" :aria-selected="tab === tb.key" @click="tab = tb.key">
               <Icon :name="tb.icon" :size="16" /> {{ t("tabs." + tb.key) }}
             </button>
@@ -201,10 +201,14 @@
             <!-- 3. Route -->
             <RoutePanel v-show="tab === 'route'" :planName="selectedPlan.name" />
             <!-- 4. Map -->
-            <DriverMap v-show="tab === 'map'" :tripName="selectedTrip" :active="tab === 'map'" />
+            <DriverMap v-if="!wide" v-show="tab === 'map'" :tripName="selectedTrip" :active="tab === 'map'" />
           </div>
         </template>
       </section>
+
+      <aside v-if="wide && selectedPlan" class="live">
+        <DriverMap :tripName="selectedTrip" :active="true" />
+      </aside>
     </div>
 
     <!-- Reject modal -->
@@ -299,6 +303,17 @@ function barPct(b) {
 }
 
 const TAB_KEYS = TABS.map((tb) => tb.key);
+
+const WIDE_QUERY = "(min-width: 1280px)";
+const wide = ref(typeof window !== "undefined" && window.matchMedia(WIDE_QUERY).matches);
+let wideMedia = null;
+
+function onWidthChange(event) {
+  wide.value = event.matches;
+  if (wide.value && tab.value === "map") tab.value = TAB_KEYS[0];
+}
+
+const shownTabs = computed(() => (wide.value ? TABS.filter((tb) => tb.key !== "map") : TABS));
 
 function routeFromLocation() {
   const match = (window.location.hash || "").match(/^#\/plan\/([^/]+)(?:\/([a-z]+))?/);
@@ -412,6 +427,9 @@ watch([selectedName, tab], routeToLocation);
 
 onMounted(() => {
   loadContext();
+  wideMedia = window.matchMedia(WIDE_QUERY);
+  wideMedia.addEventListener("change", onWidthChange);
+  onWidthChange(wideMedia);
   window.addEventListener("hashchange", applyRoute);
   window.addEventListener("popstate", applyRoute);
   stopRealtime = connectRouteSupervisorRealtime(() => {
@@ -419,6 +437,7 @@ onMounted(() => {
   });
 });
 onUnmounted(() => {
+  if (wideMedia) wideMedia.removeEventListener("change", onWidthChange);
   window.removeEventListener("hashchange", applyRoute);
   window.removeEventListener("popstate", applyRoute);
   if (stopRealtime) stopRealtime();

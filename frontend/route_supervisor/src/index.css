@@ -61,6 +61,11 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ─────────── work area: plan list + detail ─────────── */
 .work { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (min-width: 1280px) {
+  .work { grid-template-columns: 300px minmax(0, 1fr) 380px; }
+  .live { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 12px; }
+  .live .map-panel { min-height: 520px; }
+}
 /* --bp-wide (860px): the plan column folds above the detail. The shell's own side
    nav collapses separately at --bp-desktop − 1 (1023px) — two collapses, not one. */
 @media (max-width: 860px) {
