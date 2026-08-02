@@ -13,14 +13,7 @@
 #   its OWN docstring, with two labelled lines carrying real reasons:
 #       UNREGISTERED-PATCH: <why registering it would be wrong>
 #       COVERED-BY:         <what provides that state instead>
-#   tests/test_patch_registration_guard.py fails the build on any patch module that
-#   is neither registered below nor carries both markers, and caps how many such
-#   documented exceptions may exist. Currently four, all recorded in this file:
-#     v1_0.seed_salis_operations_roles — execute() is an unconditional `return`, so
-#       registering it is indistinguishable from not registering it. The module stays
-#       on disk because salis/setup.py imports it.
-#     v1_x.seed_masar_demo_movement, v1_x.seed_demo_role_logins — demo seeders; see
-#       the A-070 note in [post_model_sync] below.
+#   Currently one, recorded in this file:
 #     v2_0.app_identity_cutover — the apex_habitat -> apex upgrade path. It CANNOT be
 #       registered: frappe resolves patches per installed-app name (patch_handler.py
 #       get_all_patches -> get_app_path(app, "patches.txt")), and a pre-rename site's
@@ -114,33 +107,30 @@ apex.patches.v1_x.backfill_assignment_facility_supervisor
 # orphaned Habitat Settings Singles rows. A missed site would silently drop a live gate.
 apex.patches.v1_x.move_deduction_to_salary_policy
 
-# v1.x — demo seeders (seed_masar_demo_movement, seed_demo_role_logins) are
-# deliberately NOT wired here (A-070): a normal `bench migrate` must never create
-# demo data. The modules stay on disk for a manual, developer_mode-only run —
-# `bench --site <site> execute apex.patches.v1_x.seed_masar_demo_movement.execute`
-# and `apex.patches.v1_x.seed_demo_role_logins.execute`. Do NOT re-add either as
-# an active patches.txt entry: the demo-seed gate tests (tests/test_seed_*_gate.py)
-# fail if you do. Each module carries the UNREGISTERED-PATCH / COVERED-BY markers
-# the registration guard requires.
+# The demo seeders that used to sit in v1_x are no longer shipped: demo data is not part
+# of the product, and a customer install has no use for a module that fabricates users and
+# trips. They were never wired here (A-070) — a normal `bench migrate` must never create
+# demo data — and they now live only in the maintainer's own tree.
 #
-# HISTORICAL (security, A-248): seed_demo_role_logins used to carry the demo login
-# password as a source literal, so every checkout shared one working password. It now
-# requires APEX_DEMO_PASSWORD from the operator and refuses to run unset. The literal
-# is gone from the tree but REMAINS IN GIT HISTORY, so it must be treated as burned.
+# HISTORICAL (security, A-248), and STILL ACTIONABLE even though the module has left this
+# repository: seed_demo_role_logins once carried the demo login password as a source
+# literal, so every checkout shared one working password. The literal is gone from the tree
+# but REMAINS IN GIT HISTORY, so it must be treated as burned. Deleting the module does not
+# retire the accounts it may already have created.
 #
-# NOT ANSWERABLE FROM SOURCE: whether any real site ever created those two accounts.
-# The seeder only writes Users when developer_mode is on, and it has not been an active
-# entry here for the whole of this repository's history (A-070 un-wired it earlier still,
-# in history this repo no longer carries), so it can only have run by an explicit
-# bench execute or by a migrate predating that un-wiring.
+# NOT ANSWERABLE FROM SOURCE: whether any real site ever created those two accounts. The
+# seeder only wrote Users when developer_mode was on, and it was never an active entry
+# here, so it can only have run by an explicit bench execute or by a migrate predating
+# that un-wiring.
 #
 # OPERATOR ACTION, per site, in this order:
 #   1. tabPatch Log for apex.patches.v1_x.seed_demo_role_logins — a row means a migrate
 #      reached the module while it was still registered. It does NOT mean Users were
 #      created: the developer_mode gate may have returned first. Absence of a row is
 #      likewise not an all-clear, since a manual bench execute logs nothing.
-#   2. tabUser for the two demo emails named in the module — this is the decisive check.
-#      Present means the published password is live on that site: disable or reset.
+#   2. tabUser for supervisor.demo@example.com and employee.demo@example.com — this is the
+#      decisive check, and it is named here rather than in the module because the module is
+#      gone. Present means the published password is live on that site: disable or reset.
 # Until step 2 is done on a given site, those accounts are UNKNOWN, not safe.
 
 # STILL-REQUIRED (ONE-TIME): stamps an expiry on Masar Worker Token rows minted before

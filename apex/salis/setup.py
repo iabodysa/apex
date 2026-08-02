@@ -17,7 +17,6 @@ import frappe
 from apex.patches.v1_0 import (
     seed_salis_roles,
     seed_salis_authority_roles,
-    seed_salis_operations_roles,
     seed_salis_settings,
 )
 
@@ -27,7 +26,6 @@ def after_install():
     for step in (
         seed_salis_roles.execute,
         seed_salis_authority_roles.execute,
-        seed_salis_operations_roles.execute,
         seed_salis_settings.execute,
     ):
         try:

@@ -392,10 +392,11 @@ Stop and escalate rather than improvise if any of these hold:
 
 ## 9. Exit criteria: what must be true before this runbook is used
 
-The identity-rewriting logic is proven at the logic level: the planning
-functions are unit-tested against fixtures in
-`apex/patches/v2_0/test_app_identity_cutover.py`, which runs without a site, and
-those tests pass. What is **not** proven is the operator sequence around them.
+The identity-rewriting logic is proven at the logic level: the planning functions
+are covered by unit tests that run without a site, and those tests pass. They are
+part of the maintainer's own suite and do not ship with this repository, so a
+clone cannot re-run them and this page is the only record that they exist. What is
+**not** proven is the operator sequence around them.
 
 On **31 July 2026** the full sequence was walked against a live pre-rename site
 and could not be completed. Blockers B1 and B2 at the top of this page are the
