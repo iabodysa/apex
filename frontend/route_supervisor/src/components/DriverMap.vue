@@ -20,16 +20,16 @@
       </div>
     </header>
 
-    <div v-if="!tripName" class="empty">
-      <Icon name="truck" :size="34" :stroke-width="1.6" />
-      <p>{{ t("map.noTrip") }}</p>
-    </div>
+    <EmptyState v-if="!tripName" :title="t('map.noTrip')">
+      <template #icon><Icon name="truck" :size="20" :stroke-width="1.6" /></template>
+    </EmptyState>
 
-    <div v-else-if="state === 'error'" class="empty">
-      <Icon name="triangle-alert" :size="30" :stroke-width="1.6" />
-      <p>{{ error || t("map.loadError") }}</p>
-      <button class="soft-btn" @click="load()">{{ t("common.retry") }}</button>
-    </div>
+    <EmptyState v-else-if="state === 'error'" :title="error || t('map.loadError')">
+      <template #icon><Icon name="triangle-alert" :size="20" :stroke-width="1.6" /></template>
+      <template #action>
+        <button class="soft-btn" @click="load()">{{ t("common.retry") }}</button>
+      </template>
+    </EmptyState>
 
     <template v-else>
       <!-- Driver / vehicle strip -->
@@ -67,6 +67,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
+import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "../Icon.vue";
 import { useI18n } from "../i18n";
 import { getTripDriverPosition } from "../api.js";

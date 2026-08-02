@@ -11,18 +11,18 @@
       </div>
     </header>
 
-    <div v-if="state === 'error'" class="empty">
-      <Icon name="triangle-alert" :size="30" :stroke-width="1.6" />
-      <p>{{ error || t("route.loadError") }}</p>
-      <button class="soft-btn" @click="load()">{{ t("common.retry") }}</button>
-    </div>
+    <EmptyState v-if="state === 'error'" :title="error || t('route.loadError')">
+      <template #icon><Icon name="triangle-alert" :size="20" :stroke-width="1.6" /></template>
+      <template #action>
+        <button class="soft-btn" @click="load()">{{ t("common.retry") }}</button>
+      </template>
+    </EmptyState>
 
     <div v-else-if="state === 'loading' && !data" class="skeleton-bar" />
 
-    <div v-else-if="data && !data.stops.length" class="empty">
-      <Icon name="route" :size="30" :stroke-width="1.6" />
-      <p>{{ t("route.empty") }}</p>
-    </div>
+    <EmptyState v-else-if="data && !data.stops.length" :title="t('route.empty')">
+      <template #icon><Icon name="route" :size="20" :stroke-width="1.6" /></template>
+    </EmptyState>
 
     <ol v-else-if="data" class="timeline">
       <li v-for="(s, i) in data.stops" :key="i" class="tl-item">
@@ -50,6 +50,7 @@
 
 <script setup>
 import { ref, watch, onMounted } from "vue";
+import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "../Icon.vue";
 import { useI18n } from "../i18n";
 import { getRouteStops } from "../api.js";
