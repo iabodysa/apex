@@ -16,6 +16,9 @@ describe("components barrel", () => {
     // resolves everywhere. That is the admission test, not "it is shared".
     expect(Object.keys(barrel).sort()).toEqual([
       "Brand",
+      // EmptyState takes its text as props and imports nothing portal-local, so a
+      // name-import from this barrel still resolves in every portal.
+      "EmptyState",
       "FleetPageShell",
       "IconBase",
       "LangToggle",

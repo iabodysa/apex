@@ -46,19 +46,19 @@ defineProps({
   height: 44px;
   border-radius: 50%;
   background: var(--c-surface-2, rgba(127, 127, 127, 0.12));
-  color: var(--c-text-muted, #7d8f84);
+  color: var(--c-muted, #7d8f84);
 }
 .apex-empty-title {
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: var(--c-text, inherit);
+  color: var(--c-ink, inherit);
 }
 .apex-empty-hint {
   margin: 0;
   font-size: 12.5px;
   line-height: 1.7;
-  color: var(--c-text-muted, #7d8f84);
+  color: var(--c-muted, #7d8f84);
 }
 .apex-empty-action {
   margin-top: 4px;
