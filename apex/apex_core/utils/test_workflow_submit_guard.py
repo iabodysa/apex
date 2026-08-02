@@ -37,8 +37,6 @@ from frappe.client import submit as client_submit
 from frappe.model.workflow import apply_workflow
 from frappe.tests.utils import FrappeTestCase
 
-from apex.apex_core.setup.seeders.habitat_workflow_seed import seed_habitat_workflows
-from apex.apex_core.setup.seeders.salis_workflow_seed import seed_salis_workflows
 from apex.apex_core.utils.workflow_guard import before_submit as guard_before_submit
 from apex.tests._helpers import _user
 from apex.tests.factories import make_project
@@ -49,10 +47,8 @@ class TestWorkflowSubmitGuard(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        # Workflows are seeded on every migrate; seed here too (both idempotent) so the
-        # guard test is self-contained on an isolated site.
-        seed_salis_workflows()
-        seed_habitat_workflows()
+        # The workflows this guard runs against arrive with the app: they are fixtures,
+        # imported on install and on every migrate.
 
         cls.maker = _user("wfg_maker@example.com", "Fleet Project Manager")
         cls.finance = _user("wfg_fin@example.com", "Finance Manager")

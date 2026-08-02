@@ -133,5 +133,5 @@ class TestSeederDocstringReferences(unittest.TestCase):
 
     def test_a_live_reference_still_resolves(self):
         """The other half: real names must not be reported as stale."""
-        for token in ("salis_workflow_seed", "patches/v0_8/add_navbar_help_links.py"):
+        for token in ("salis_issue_seed", "patches/v0_8/add_navbar_help_links.py"):
             self.assertTrue(_resolves(token), token)

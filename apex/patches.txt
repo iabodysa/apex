@@ -69,10 +69,6 @@ apex.patches.v1_0.seed_salis_portal_theme
 # reason, so an installed site needs this replay to gain a newly shipped report.
 apex.patches.v1_x.seed_salis_communications
 
-# PERMANENT: Frappe never auto-imports a Workflow from a module folder, so this seed is
-# the only install path for the Salis workflow spine and its state/action masters.
-apex.patches.v1_x.seed_salis_workflows
-
 # PERMANENT: waits for ERPNext to create its native Item Group root, then loads the
 # accommodation item resource without fixture sync — must stay replayable.
 apex.patches.v1_x.seed_accommodation_item_groups

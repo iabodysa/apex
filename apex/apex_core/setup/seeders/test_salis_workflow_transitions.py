@@ -2,10 +2,9 @@
 """A-085 Findings 2 & 4 - new reversal / rework transitions on the Salis native
 Workflows.
 
-Asserted against the ACTIVE Workflow records: ``salis_workflow_seed`` re-applies
-each shipped definition (states + transitions) on every install/migrate through
-the shared ``workflow_seed_base.seed_one``, so a transition present on the live
-Workflow proves both the JSON edit and that the seed reconcile carried it:
+Asserted against the ACTIVE Workflow records. The definitions arrive as fixtures,
+imported on install and on every migrate, so a transition present on the live
+Workflow proves both the shipped edit and that the import carried it:
 
   * Vehicle Damage Write-Off: Approved -> Cancel -> Cancelled (Fleet Manager +
     System Manager), so an approved write-off can be reversed natively to the

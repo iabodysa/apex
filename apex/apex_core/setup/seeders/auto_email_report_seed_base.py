@@ -3,8 +3,7 @@
 
 Each module ships its own periodic-digest list (Habitat's accommodation/safety
 digests, Salis's movement/fleet digests) but the create-if-absent routine is one
-rule, so it lives here once and the module seeders keep only their report list —
-the same split ``workflow_seed_base`` uses for the Workflow seeders.
+rule, so it lives here once and the module seeders keep only their report list.
 
 Two fields are resolved at RUNTIME rather than declared as constants (the
 Administrator's email, and each report's ``report_type``), which is why this

@@ -1,5 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 # [#dvwfff]
+from apex.apex_core.setup.workflow_names import (
+    WORKFLOW_ACTIONS,
+    WORKFLOW_STATES,
+    WORKFLOWS,
+)
+
 app_name = "apex"
 app_title = "Apex"
 app_publisher = "AFMCO Support Services Co. Ltd"
@@ -528,6 +534,13 @@ fixtures = [
     # [#9e59wa]
     # Freelancer is a native accounting Party Type (the surviving lean-Logistay master).
     {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},
+    # Workflow is absent from frappe.model.sync.IMPORTABLE_DOCTYPES, so a module folder
+    # never imports one; import_fixtures does, on every migrate. States and actions are
+    # masters the definitions link to, and the fixtures directory is walked sorted(), so
+    # workflow_action_master.json and workflow_state.json land before workflow.json.
+    {"dt": "Workflow State", "filters": [["name", "in", list(WORKFLOW_STATES)]]},
+    {"dt": "Workflow Action Master", "filters": [["name", "in", list(WORKFLOW_ACTIONS)]]},
+    {"dt": "Workflow", "filters": [["name", "in", list(WORKFLOWS)]]},
 ]
 
 # [#6mioka]
@@ -540,10 +553,6 @@ after_install = [
     "apex.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",
     # [#917n9u]
     "apex.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
-    # [#zy072c]
-    "apex.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
-    # [#hbwf06]
-    "apex.apex_core.setup.seeders.habitat_workflow_seed.seed_habitat_workflows",
     # [#2oqhfm]
     "apex.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
     # Habitat roles need select on the core masters their own Link fields target.
@@ -565,10 +574,6 @@ after_migrate = [
     "apex.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",
     # [#puz3yc]
     "apex.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
-    # [#mv2xth]
-    "apex.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
-    # [#hbwf07]
-    "apex.apex_core.setup.seeders.habitat_workflow_seed.seed_habitat_workflows",
     # [#tk37r7]
     "apex.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
     # Replays the core-master select grants on an already-installed site.

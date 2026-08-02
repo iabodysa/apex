@@ -1,8 +1,10 @@
 [
  {
+  "account_type": "Payable",
+  "docstatus": 0,
   "doctype": "Party Type",
+  "modified": "2026-08-01 18:35:58.479185",
   "name": "Freelancer",
-  "party_type": "Freelancer",
-  "account_type": "Payable"
+  "party_type": "Freelancer"
  }
 ]

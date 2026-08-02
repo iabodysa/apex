@@ -138,9 +138,6 @@ _CENTRAL_BY_NECESSITY = frozenset(
         # Compares the served shells against the bundle-guard matrix; the invariant
         # lives between them, not in either one.
         "test_portal_route_coverage.py",
-        # Checks every role named in any workspace grant against every DocPerm in the
-        # app; the invariant spans both trees, so no single module owns it.
-        "test_workspace_role_docperm_guard.py",
         # Ties the published workspace tables to the shipped workspace JSON; it sits
         # between docs/ and the app, and belongs to neither.
         "test_workspace_doc_parity.py",
@@ -162,7 +159,7 @@ _CENTRAL_BY_NECESSITY = frozenset(
 # entry — test_central_test_count_never_grows fails if it drifts above the sum.
 # 47 -> 46: test_repo_gates.py drained, it tested the toolbox, not the app.
 # 46 -> 45: test_translation_coverage.py drained, it graded the maintainer's policy.
-_CEILING = 45
+_CEILING = 44
 
 
 def _central_tests():

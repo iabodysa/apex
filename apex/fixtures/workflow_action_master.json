@@ -1,0 +1,254 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:57:12.462197",
+  "name": "Approve",
+  "workflow_action_name": "Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:57:12.463041",
+  "name": "Reject",
+  "workflow_action_name": "Reject"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.008767",
+  "name": "Validate",
+  "workflow_action_name": "Validate"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.010455",
+  "name": "Authorize (Regional)",
+  "workflow_action_name": "Authorize (Regional)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.011256",
+  "name": "Authorize (Operations)",
+  "workflow_action_name": "Authorize (Operations)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.012057",
+  "name": "Schedule",
+  "workflow_action_name": "Schedule"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.013091",
+  "name": "Confirm Fulfilment",
+  "workflow_action_name": "Confirm Fulfilment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.014070",
+  "name": "Cancel",
+  "workflow_action_name": "Cancel"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.015659",
+  "name": "Reopen",
+  "workflow_action_name": "Reopen"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.070373",
+  "name": "Reconcile",
+  "workflow_action_name": "Reconcile"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.071272",
+  "name": "Dispute",
+  "workflow_action_name": "Dispute"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.072173",
+  "name": "Re-reconcile",
+  "workflow_action_name": "Re-reconcile"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.073901",
+  "name": "Mark Paid",
+  "workflow_action_name": "Mark Paid"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.100274",
+  "name": "Start Processing",
+  "workflow_action_name": "Start Processing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.100995",
+  "name": "Block",
+  "workflow_action_name": "Block"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.102262",
+  "name": "Clear",
+  "workflow_action_name": "Clear"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.127966",
+  "name": "Submit to Finance",
+  "workflow_action_name": "Submit to Finance"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.129507",
+  "name": "Approve (Finance)",
+  "workflow_action_name": "Approve (Finance)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.131612",
+  "name": "Revise",
+  "workflow_action_name": "Revise"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.158949",
+  "name": "Complete",
+  "workflow_action_name": "Complete"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.160391",
+  "name": "Mark Failed",
+  "workflow_action_name": "Mark Failed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.161887",
+  "name": "Revert",
+  "workflow_action_name": "Revert"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.193463",
+  "name": "Submit to Movement",
+  "workflow_action_name": "Submit to Movement"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.195860",
+  "name": "Re-submit",
+  "workflow_action_name": "Re-submit"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.197388",
+  "name": "Close",
+  "workflow_action_name": "Close"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.221311",
+  "name": "Start Investigation",
+  "workflow_action_name": "Start Investigation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.222710",
+  "name": "Request Evidence",
+  "workflow_action_name": "Request Evidence"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.223866",
+  "name": "Resume Investigation",
+  "workflow_action_name": "Resume Investigation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.225033",
+  "name": "Resolve",
+  "workflow_action_name": "Resolve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.256041",
+  "name": "Dispatch",
+  "workflow_action_name": "Dispatch"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.281963",
+  "name": "Acknowledge",
+  "workflow_action_name": "Acknowledge"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.287683",
+  "name": "Recover",
+  "workflow_action_name": "Recover"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.300978",
+  "name": "Waive",
+  "workflow_action_name": "Waive"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.331869",
+  "name": "Submit for Approval",
+  "workflow_action_name": "Submit for Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.334310",
+  "name": "Post (memo)",
+  "workflow_action_name": "Post (memo)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-02 00:59:10.363235",
+  "name": "Submit for Review",
+  "workflow_action_name": "Submit for Review"
+ }
+]
