@@ -67,7 +67,7 @@ def _is_staff(user=None):
 
 def _staff_links(user=None):
     """Useful desk destinations for an unlinked staff user, filtered to what
-	they may actually open. Each entry carries an English label and an /app URL;
+	they may actually open. Each entry carries a translated label and an /app URL;
 	links are included only when the user holds a required role or has read
 	permission on the underlying DocType. The mobile portal action endpoints stay
 	driver-scoped — these are navigation hints to the full desk, nothing more."""
@@ -77,21 +77,21 @@ def _staff_links(user=None):
 
     # [#9qndfi]
     if user == "Administrator" or roles & set(STAFF_ROLES):
-        links.append({"label": "Salis Workspace", "url": "/app/salis"})
+        links.append({"label": frappe._("Salis Workspace"), "url": "/app/salis"})
 
     # [#8ubj1y]
     dispatch_roles = {"System Manager", "Fleet Manager", "Fleet Project Manager", "Fleet Supervisor"}
     if user == "Administrator" or roles & dispatch_roles:
-        links.append({"label": "Dispatch Board", "url": "/app/salis-dispatch-board"})
+        links.append({"label": frappe._("Dispatch Board"), "url": "/app/salis-dispatch-board"})
 
     # [#cd8prs]
     if frappe.has_permission("Transport Request", "read", user=user):
-        links.append({"label": "Transport Requests", "url": "/app/transport-request"})
+        links.append({"label": frappe._("Transport Requests"), "url": "/app/transport-request"})
 
     # [#mpoxzg]
     fuel_roles = {"System Manager", "Fleet Manager", "Fleet Project Manager", "Finance Manager"}
     if user == "Administrator" or roles & fuel_roles:
-        links.append({"label": "Fuel Approval Console", "url": "/app/fuel-approval-console"})
+        links.append({"label": frappe._("Fuel Approval Console"), "url": "/app/fuel-approval-console"})
 
     return links
 

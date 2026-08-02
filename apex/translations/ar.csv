@@ -3472,6 +3472,7 @@ Salis Representatives Fleet Vehicles Stopped,مركبات موقوفة
 Salis Settings,إعدادات سلس
 Salis Vehicle,مركبة
 Salis Vehicle Compliance,امتثال المركبة
+Salis Workspace,مساحة عمل ساليس
 Same project,المشروع نفسه
 Same project as the selected worker,المشروع نفسه كالعامل المحدد
 Same-Company Relocation,نقل داخل نفس الشركة
@@ -4190,6 +4191,7 @@ Transport Request Ad Hoc Passenger,راكب إضافي
 Transport request submitted successfully.,تم تقديم طلب التنقل بنجاح.
 Transport Request Worker,عامل طلب النقل
 Transport Request {0} does not exist.,طلب النقل {0} غير موجود.
+Transport Requests,طلبات النقل
 Transport Requests by Service Line,طلبات النقل حسب خط الخدمة
 Transport requests the supervisor has assigned onto this trip. The trip manifest is the union of these requests' workers (plus any Route Plan request).,طلبات النقل التي أسندها المشرف إلى هذه الرحلة. كشف الرحلة هو اتحاد عمال هذه الطلبات (إضافة إلى أي طلب في خطة المسار).
 Transport SLA Breaches Open,مخالفات اتفاقية مستوى خدمة النقل المفتوحة
