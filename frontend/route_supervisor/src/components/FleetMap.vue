@@ -76,6 +76,7 @@ const planFilter = ref("");
 const mapEl = ref(null);
 let map = null;
 let markers = new Map();
+let routeLines = new Map();
 let timer = null;
 const POLL_MS = 15000;
 
@@ -121,6 +122,37 @@ function driverIcon(row) {
   });
 }
 
+function drawRoutes() {
+  if (!map) return;
+  const wanted = new Set();
+  for (const row of visible.value) {
+    const points = (row.stops || []).filter((stop) => stop.lat && stop.lng);
+    if (points.length < 2) continue;
+    wanted.add(row.route_plan);
+    const latlngs = points.map((stop) => [stop.lat, stop.lng]);
+    const existing = routeLines.get(row.route_plan);
+    if (existing) {
+      existing.line.setLatLngs(latlngs);
+    } else {
+      const line = L.polyline(latlngs, { weight: 3, opacity: 0.75, dashArray: "6 6" }).addTo(map);
+      line.bindTooltip(row.route_name, { sticky: true });
+      const pins = points.map((stop, index) =>
+        L.circleMarker([stop.lat, stop.lng], { radius: 5, weight: 2, fillOpacity: 1 })
+          .bindTooltip(`${index + 1}. ${stop.stop_name || ""}`, { direction: "top" })
+          .addTo(map),
+      );
+      routeLines.set(row.route_plan, { line, pins });
+    }
+  }
+  for (const [key, drawn] of routeLines) {
+    if (!wanted.has(key)) {
+      map.removeLayer(drawn.line);
+      drawn.pins.forEach((pin) => map.removeLayer(pin));
+      routeLines.delete(key);
+    }
+  }
+}
+
 function drawMarkers() {
   if (!map) return;
   const wanted = new Set();
@@ -143,9 +175,11 @@ function drawMarkers() {
       markers.delete(key);
     }
   }
-  const drawn = [...markers.values()];
+  drawRoutes();
+
+  const drawn = [...markers.values(), ...[...routeLines.values()].map((r) => r.line)];
   if (drawn.length > 1) map.fitBounds(L.featureGroup(drawn).getBounds().pad(0.2));
-  else if (drawn.length === 1) map.setView(drawn[0].getLatLng(), 13);
+  else if (drawn.length === 1) map.fitBounds(L.featureGroup(drawn).getBounds().pad(0.4));
 }
 
 async function load() {
@@ -177,6 +211,7 @@ onUnmounted(() => {
     map = null;
   }
   markers = new Map();
+  routeLines = new Map();
 });
 </script>
 

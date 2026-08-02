@@ -494,10 +494,26 @@ def get_active_driver_positions():
             age_seconds = int(frappe.utils.time_diff_in_seconds(now, updated))
             stale = age_seconds > _POSITION_STALE_SECONDS
 
+        stops = [
+            {
+                "stop_name": stop.get("stop_name"),
+                "lat": stop.get("latitude"),
+                "lng": stop.get("longitude"),
+            }
+            for stop in frappe.get_all(
+                "Route Stop",
+                filters={"parent": plan["name"], "parenttype": "Route Plan"},
+                fields=["stop_name", "latitude", "longitude", "idx"],
+                order_by="idx asc",
+            )
+            if stop.get("latitude") and stop.get("longitude")
+        ]
+
         out.append({
             "dispatch_trip": trip["name"],
             "route_plan": plan["name"],
             "route_name": plan.get("route_name") or plan["name"],
+            "stops": stops,
             "project": plan.get("project"),
             "status": trip.get("status"),
             "driver": trip.get("driver"),

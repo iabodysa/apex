@@ -8,7 +8,9 @@
   "accommodation_building",
   "location",
   "planned_time",
-  "passengers"
+  "passengers",
+  "latitude",
+  "longitude"
  ],
  "fields": [
   {
@@ -21,7 +23,7 @@
   },
   {
    "columns": 2,
-   "description": "Optional Habitat pickup \u2014 when set, this stop is a worker housing location (Habitat-Salis bridge).",
+   "description": "Optional Habitat pickup — when set, this stop is a worker housing location (Habitat-Salis bridge).",
    "fieldname": "accommodation_building",
    "fieldtype": "Link",
    "label": "Accommodation Building (Pickup)",
@@ -46,11 +48,24 @@
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Passengers"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "label": "Latitude",
+   "precision": "6",
+   "description": "Decimal degrees, as the fleet map plots the stop."
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "label": "Longitude",
+   "precision": "6"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-06-09 10:00:00.000000",
+ "modified": "2026-08-02 22:19:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Stop",
