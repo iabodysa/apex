@@ -9,7 +9,7 @@
  "is_standard": 1,
  "is_default": 0,
  "is_hidden": 0,
- "sequence_id": 4.0,
+ "sequence_id": 3.3,
  "parent_page": "Salis",
  "roles": [
   {
@@ -137,7 +137,7 @@
    "label": "Wash Request",
    "link_type": "DocType",
    "link_to": "Wash Request",
-   "idx": 5
+   "idx": 4
   },
   {
    "doctype": "Workspace Link",
@@ -145,13 +145,13 @@
    "label": "Vehicle Suspension",
    "link_type": "DocType",
    "link_to": "Vehicle Suspension",
-   "idx": 6
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Fuel",
-   "idx": 7
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
@@ -159,7 +159,7 @@
    "label": "Fuel Claim",
    "link_type": "DocType",
    "link_to": "Fuel Claim",
-   "idx": 10
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
@@ -167,13 +167,21 @@
    "label": "Fuel Exception Case",
    "link_type": "DocType",
    "link_to": "Fuel Exception Case",
-   "idx": 11
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Request",
+   "link_type": "DocType",
+   "link_to": "Fuel Request",
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Incidents and Recovery",
-   "idx": 12
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
@@ -181,7 +189,7 @@
    "label": "Vehicle Incident",
    "link_type": "DocType",
    "link_to": "Vehicle Incident",
-   "idx": 13
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
@@ -189,7 +197,7 @@
    "label": "Vehicle Damage Write-Off",
    "link_type": "DocType",
    "link_to": "Vehicle Damage Write-Off",
-   "idx": 14
+   "idx": 12
   },
   {
    "doctype": "Workspace Link",
@@ -197,14 +205,14 @@
    "label": "Operations Alert",
    "link_type": "DocType",
    "link_to": "Operations Alert",
-   "idx": 15
+   "idx": 13
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Reports",
    "description": "Reports: read-only. Open to view on screen or export.",
-   "idx": 16
+   "idx": 14
   },
   {
    "doctype": "Workspace Link",
@@ -212,7 +220,7 @@
    "label": "Fleet Register",
    "link_type": "Report",
    "link_to": "Fleet Register",
-   "idx": 17,
+   "idx": 15,
    "is_query_report": 1
   },
   {
@@ -221,7 +229,7 @@
    "label": "Vehicle Utilisation",
    "link_type": "Report",
    "link_to": "Vehicle Utilisation",
-   "idx": 18,
+   "idx": 16,
    "is_query_report": 1
   },
   {
@@ -230,7 +238,7 @@
    "label": "Fuel Claim Register",
    "link_type": "Report",
    "link_to": "Fuel Claim Register",
-   "idx": 19,
+   "idx": 17,
    "is_query_report": 1
   },
   {
@@ -239,7 +247,7 @@
    "label": "Fuel Reconciliation",
    "link_type": "Report",
    "link_to": "Fuel Reconciliation",
-   "idx": 20,
+   "idx": 18,
    "is_query_report": 1
   },
   {
@@ -248,7 +256,7 @@
    "label": "Fuel Spend by Vehicle",
    "link_type": "Report",
    "link_to": "Fuel Spend by Vehicle",
-   "idx": 21,
+   "idx": 19,
    "is_query_report": 1
   },
   {
@@ -257,7 +265,7 @@
    "label": "Fuel Consumption Summary",
    "link_type": "Report",
    "link_to": "Fuel Consumption Summary",
-   "idx": 23,
+   "idx": 20,
    "is_query_report": 1
   },
   {
@@ -266,7 +274,7 @@
    "label": "Fuel Exception Register",
    "link_type": "Report",
    "link_to": "Fuel Exception Register",
-   "idx": 24,
+   "idx": 21,
    "is_query_report": 1
   },
   {
@@ -275,7 +283,7 @@
    "label": "Driver Attendance Summary",
    "link_type": "Report",
    "link_to": "Driver Attendance Summary",
-   "idx": 25,
+   "idx": 22,
    "is_query_report": 1
   },
   {
@@ -283,7 +291,7 @@
    "type": "Card Break",
    "label": "Dashboards",
    "description": "Dashboards: live monitoring boards that refresh automatically.",
-   "idx": 26
+   "idx": 23
   },
   {
    "doctype": "Workspace Link",
@@ -291,7 +299,7 @@
    "label": "Fleet and Fuel Dashboard",
    "link_type": "Dashboard",
    "link_to": "Representatives Fleet Dashboard",
-   "idx": 27
+   "idx": 24
   },
   {
    "doctype": "Workspace Link",
@@ -299,14 +307,14 @@
    "label": "Fleet Supervisor Dashboard",
    "link_type": "Dashboard",
    "link_to": "Fleet Supervisor Dashboard",
-   "idx": 28
+   "idx": 25
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Master Data",
    "description": "Reference data: durable records you set up once, not daily work.",
-   "idx": 29
+   "idx": 26
   },
   {
    "doctype": "Workspace Link",
@@ -314,7 +322,7 @@
    "label": "Salis Vehicle",
    "link_type": "DocType",
    "link_to": "Salis Vehicle",
-   "idx": 30
+   "idx": 27
   },
   {
    "doctype": "Workspace Link",
@@ -322,7 +330,7 @@
    "label": "Salis Driver",
    "link_type": "DocType",
    "link_to": "Salis Driver",
-   "idx": 31
+   "idx": 28
   },
   {
    "doctype": "Workspace Link",
@@ -330,7 +338,7 @@
    "label": "Vehicle Category",
    "link_type": "DocType",
    "link_to": "Vehicle Category",
-   "idx": 32
+   "idx": 29
   },
   {
    "doctype": "Workspace Link",
@@ -338,7 +346,7 @@
    "label": "Wash Platform",
    "link_type": "DocType",
    "link_to": "Wash Platform",
-   "idx": 33
+   "idx": 30
   },
   {
    "doctype": "Workspace Link",
@@ -346,7 +354,7 @@
    "label": "Work Shift",
    "link_type": "DocType",
    "link_to": "Work Shift",
-   "idx": 34
+   "idx": 31
   },
   {
    "doctype": "Workspace Link",
@@ -354,7 +362,7 @@
    "label": "Fuel Quota",
    "link_type": "DocType",
    "link_to": "Fuel Quota",
-   "idx": 35
+   "idx": 32
   },
   {
    "doctype": "Workspace Link",
@@ -362,7 +370,7 @@
    "label": "Fuel Platform",
    "link_type": "DocType",
    "link_to": "Fuel Platform",
-   "idx": 36
+   "idx": 33
   },
   {
    "doctype": "Workspace Link",
@@ -370,7 +378,15 @@
    "label": "Rental Office",
    "link_type": "DocType",
    "link_to": "Rental Office",
-   "idx": 37
+   "idx": 34
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Handover Checklist Template",
+   "link_type": "DocType",
+   "link_to": "Vehicle Handover Checklist Template",
+   "idx": 35
   }
  ],
  "charts": [
@@ -426,5 +442,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-26 07:46:05.619580"
+ "modified": "2026-08-02 10:31:00.000000"
 }

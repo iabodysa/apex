@@ -74,11 +74,9 @@ Locale
 Log Inspection
 Log Inspection — {0}
 Logging inspection…
-Logistay
 Maintenance Technician
 Monitoring
 Must be Admin Manager
-My Work
 OFF
 OT
 POD

@@ -1,0 +1,332 @@
+{
+ "doctype": "Workspace",
+ "name": "Apex Core",
+ "label": "Apex Core",
+ "title": "Apex Core",
+ "module": "Apex Core",
+ "icon": "setting",
+ "public": 1,
+ "is_standard": 1,
+ "is_default": 0,
+ "is_hidden": 0,
+ "sequence_id": 2.0,
+ "parent_page": "Apex",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ],
+ "content": "[{\"id\": \"ApexCoreHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Apex Core</b></span>\", \"col\": 12}}, {\"id\": \"ApexCoreCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"id\": \"ApexCoreCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Fleet and Fuel Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement and Rental Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Assets and Maintenance Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety Engine\", \"col\": 4}}, {\"id\": \"ApexCoreCard7\", \"type\": \"card\", \"data\": {\"card_name\": \"Scheduler\", \"col\": 4}}, {\"id\": \"ApexCoreCard8\", \"type\": \"card\", \"data\": {\"card_name\": \"Portal-Owned Records\", \"col\": 4}}]",
+ "shortcuts": [],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Settings",
+   "description": "Configuration for the whole application.",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Apex Settings",
+   "link_type": "DocType",
+   "link_to": "Apex Settings",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Apex Integration Settings",
+   "link_type": "DocType",
+   "link_to": "Apex Integration Settings",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Habitat Settings",
+   "link_type": "DocType",
+   "link_to": "Habitat Settings",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Settings",
+   "link_type": "DocType",
+   "link_to": "Salis Settings",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Payment Routing Settings",
+   "link_type": "DocType",
+   "link_to": "Payment Routing Settings",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salary Deduction Policy",
+   "link_type": "DocType",
+   "link_to": "Salary Deduction Policy",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Driver Portal Theme",
+   "link_type": "DocType",
+   "link_to": "Driver Portal Theme",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Accommodation Engine",
+   "description": "System-written ledgers and snapshots. Read-only.",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Stock Ledger",
+   "link_type": "DocType",
+   "link_to": "Accommodation Stock Ledger",
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Ledger",
+   "link_type": "DocType",
+   "link_to": "Accommodation Ledger",
+   "idx": 11
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Occupancy Snapshot",
+   "link_type": "DocType",
+   "link_to": "Occupancy Snapshot",
+   "idx": 12
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Cleaning Compliance Ledger",
+   "link_type": "DocType",
+   "link_to": "Cleaning Compliance Ledger",
+   "idx": 13
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Fleet and Fuel Engine",
+   "description": "System-written ledgers and snapshots. Read-only.",
+   "idx": 14
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Consumption Ledger",
+   "link_type": "DocType",
+   "link_to": "Fuel Consumption Ledger",
+   "idx": 15
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Daily Log",
+   "link_type": "DocType",
+   "link_to": "Fuel Daily Log",
+   "idx": 16
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Utilisation Snapshot",
+   "link_type": "DocType",
+   "link_to": "Vehicle Utilisation Snapshot",
+   "idx": 17
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Movement and Rental Engine",
+   "description": "System-written ledgers and snapshots. Read-only.",
+   "idx": 18
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Rental Accrual Ledger",
+   "link_type": "DocType",
+   "link_to": "Rental Accrual Ledger",
+   "idx": 19
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Movement Cost Transfer",
+   "link_type": "DocType",
+   "link_to": "Movement Cost Transfer",
+   "idx": 20
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Movement Cost Recovery",
+   "link_type": "DocType",
+   "link_to": "Movement Cost Recovery",
+   "idx": 21
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Trip Fulfilment Ledger",
+   "link_type": "DocType",
+   "link_to": "Trip Fulfilment Ledger",
+   "idx": 22
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Trip Boarding Ledger",
+   "link_type": "DocType",
+   "link_to": "Trip Boarding Ledger",
+   "idx": 23
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Trip Start Log",
+   "link_type": "DocType",
+   "link_to": "Trip Start Log",
+   "idx": 24
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Assets and Maintenance Engine",
+   "description": "System-written ledgers and snapshots. Read-only.",
+   "idx": 25
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Facility Asset Movement Ledger",
+   "link_type": "DocType",
+   "link_to": "Facility Asset Movement Ledger",
+   "idx": 26
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Cost Ledger",
+   "link_type": "DocType",
+   "link_to": "Maintenance Cost Ledger",
+   "idx": 27
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Operational Depreciation Snapshot",
+   "link_type": "DocType",
+   "link_to": "Operational Depreciation Snapshot",
+   "idx": 28
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Safety Engine",
+   "description": "System-written ledgers and snapshots. Read-only.",
+   "idx": 29
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Finding Ledger",
+   "link_type": "DocType",
+   "link_to": "Safety Finding Ledger",
+   "idx": 30
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Scheduler",
+   "description": "Written by the scheduler, not by hand.",
+   "idx": 31
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Scheduled Task Instance",
+   "link_type": "DocType",
+   "link_to": "Scheduled Task Instance",
+   "idx": 32
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Portal-Owned Records",
+   "description": "Created and maintained by the portals. Never entered on the desk.",
+   "idx": 33
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Masar Worker Token",
+   "link_type": "DocType",
+   "link_to": "Masar Worker Token",
+   "idx": 34
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Housing Inventory",
+   "link_type": "DocType",
+   "link_to": "Housing Inventory",
+   "idx": 35
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Boarding Scan Log",
+   "link_type": "DocType",
+   "link_to": "Boarding Scan Log",
+   "idx": 36
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Custody Acknowledgment",
+   "link_type": "DocType",
+   "link_to": "Custody Acknowledgment",
+   "idx": 37
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Driver Push Subscription",
+   "link_type": "DocType",
+   "link_to": "Driver Push Subscription",
+   "idx": 38
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Transport Trip Rating",
+   "link_type": "DocType",
+   "link_to": "Transport Trip Rating",
+   "idx": 39
+  }
+ ],
+ "charts": [],
+ "number_cards": [],
+ "quick_lists": [],
+ "creation": "2020-01-01 00:00:00.000000",
+ "modified": "2026-08-02 10:31:00.000000"
+}

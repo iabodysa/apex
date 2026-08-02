@@ -24,7 +24,7 @@
  "is_default": 0,
  "sequence_id": 2.3,
  "parent_page": "Habitat",
- "content": "[{\"id\": \"cstHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"cstOnb0\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Custody Go-Live\", \"col\": 12}}, {\"id\": \"cstChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Custody Issues by Status\", \"col\": 12}}, {\"id\": \"GAJ58bRBht\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"cstScKiosk\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Kiosk\", \"col\": 3}}, {\"id\": \"h7rPQpwBDF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"Y3kWw6e9qD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"cstScGoodsReceipt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Goods Receipt\", \"col\": 3}}, {\"id\": \"cstScTelecom\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Telecom Control\", \"col\": 3}}, {\"id\": \"cstHdrMetrics\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"cstNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Items Pending Return\", \"col\": 3}}, {\"id\": \"cxppVYIyNb\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"cstNcOverdue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Returns\", \"col\": 3}}, {\"id\": \"h6sOtahi1Z\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"cstNcValue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Value in Employee Hands (SAR)\", \"col\": 3}}, {\"id\": \"cstNcSimTotal\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Total\", \"col\": 3}}, {\"id\": \"cstNcSimAssigned\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Assigned\", \"col\": 3}}, {\"id\": \"cstNcSimContracts\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Telecom Contracts\", \"col\": 3}}, {\"id\": \"secDaily\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Tasks</b></span>\", \"col\": 12}}, {\"id\": \"IxeVMDBiPa\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"xKUtrzTnmE\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"cstCardTelecom\", \"type\": \"card\", \"data\": {\"card_name\": \"Telecom\", \"col\": 4}}, {\"id\": \"secReports\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Reports</b></span>\", \"col\": 12}}, {\"id\": \"rRLLPGC6jF\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"secMasters\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"cstCardMasters\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
+ "content": "[{\"id\": \"cstHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"cstOnb0\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Custody Go-Live\", \"col\": 12}}, {\"id\": \"cstChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Custody Issues by Status\", \"col\": 12}}, {\"id\": \"GAJ58bRBht\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"cstScKiosk\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Kiosk\", \"col\": 3}}, {\"id\": \"h7rPQpwBDF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"Y3kWw6e9qD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"cstScGoodsReceipt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Goods Receipt\", \"col\": 3}}, {\"id\": \"cstScTelecom\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Telecom Control\", \"col\": 3}}, {\"id\": \"cstHdrMetrics\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"cstNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Items Pending Return\", \"col\": 3}}, {\"id\": \"cxppVYIyNb\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"cstNcOverdue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Returns\", \"col\": 3}}, {\"id\": \"h6sOtahi1Z\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"cstNcValue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Value in Employee Hands (SAR)\", \"col\": 3}}, {\"id\": \"cstNcSimTotal\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Total\", \"col\": 3}}, {\"id\": \"cstNcSimAssigned\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Assigned\", \"col\": 3}}, {\"id\": \"cstNcSimContracts\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Telecom Contracts\", \"col\": 3}}, {\"id\": \"secDaily\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Tasks</b></span>\", \"col\": 12}}, {\"id\": \"IxeVMDBiPa\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"xKUtrzTnmE\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"secReports\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Reports</b></span>\", \"col\": 12}}, {\"id\": \"rRLLPGC6jF\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"secMasters\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"cstCardMasters\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -152,10 +152,18 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Facility Asset Delivery",
+   "link_type": "DocType",
+   "link_to": "Facility Asset Delivery",
+   "idx": 12
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Reports",
    "description": "Reports: read-only. Open to view on screen or export.",
-   "idx": 12
+   "idx": 13
   },
   {
    "doctype": "Workspace Link",
@@ -163,7 +171,7 @@
    "label": "Custody Damage Register",
    "link_type": "Report",
    "link_to": "Custody Damage Register",
-   "idx": 13,
+   "idx": 14,
    "is_query_report": 1
   },
   {
@@ -172,7 +180,7 @@
    "label": "Operational Depreciation Aging",
    "link_type": "Report",
    "link_to": "Operational Depreciation Aging",
-   "idx": 14,
+   "idx": 15,
    "is_query_report": 1
   },
   {
@@ -181,7 +189,7 @@
    "label": "Intercompany Movement Register",
    "link_type": "Report",
    "link_to": "Intercompany Movement Register",
-   "idx": 15,
+   "idx": 16,
    "is_query_report": 1
   },
   {
@@ -190,7 +198,7 @@
    "label": "Accommodation Stock Balance",
    "link_type": "Report",
    "link_to": "Accommodation Stock Balance",
-   "idx": 16,
+   "idx": 17,
    "is_query_report": 1
   },
   {
@@ -199,7 +207,7 @@
    "label": "Custody Outstanding by Worker",
    "link_type": "Report",
    "link_to": "Custody Outstanding by Worker",
-   "idx": 17,
+   "idx": 18,
    "is_query_report": 1
   },
   {
@@ -209,7 +217,7 @@
    "link_type": "Report",
    "link_to": "Current SIM Custody",
    "is_query_report": 1,
-   "idx": 18
+   "idx": 19
   },
   {
    "doctype": "Workspace Link",
@@ -218,7 +226,7 @@
    "link_type": "Report",
    "link_to": "Employees Holding Multiple SIMs",
    "is_query_report": 1,
-   "idx": 19
+   "idx": 20
   },
   {
    "doctype": "Workspace Link",
@@ -227,7 +235,7 @@
    "link_type": "Report",
    "link_to": "SIMs by Contract and Supplier",
    "is_query_report": 1,
-   "idx": 20
+   "idx": 21
   },
   {
    "doctype": "Workspace Link",
@@ -236,7 +244,7 @@
    "link_type": "Report",
    "link_to": "Telecom Contract Expiry",
    "is_query_report": 1,
-   "idx": 21
+   "idx": 22
   },
   {
    "doctype": "Workspace Link",
@@ -245,7 +253,7 @@
    "link_type": "Report",
    "link_to": "Telecom Cost Allocation",
    "is_query_report": 1,
-   "idx": 22
+   "idx": 23
   },
   {
    "doctype": "Workspace Link",
@@ -254,13 +262,13 @@
    "link_type": "Report",
    "link_to": "SIM Exceptions",
    "is_query_report": 1,
-   "idx": 23
+   "idx": 24
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Master Data",
-   "idx": 24,
+   "idx": 25,
    "description": "Reference data: durable records you set up once, not daily work."
   },
   {
@@ -269,7 +277,7 @@
    "label": "Custody Article",
    "link_type": "DocType",
    "link_to": "Custody Article",
-   "idx": 25
+   "idx": 26
   },
   {
    "doctype": "Workspace Link",
@@ -277,7 +285,7 @@
    "label": "Custody Asset Category",
    "link_type": "DocType",
    "link_to": "Custody Asset Category",
-   "idx": 26
+   "idx": 27
   },
   {
    "doctype": "Workspace Link",
@@ -285,46 +293,15 @@
    "label": "Facility Asset",
    "link_type": "DocType",
    "link_to": "Facility Asset",
-   "idx": 27
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
-   "label": "Telecom",
-   "description": "Set up telecom contracts and SIM cards.",
    "idx": 28
   },
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Telecom Contract",
+   "label": "QR Location",
    "link_type": "DocType",
-   "link_to": "Telecom Contract",
+   "link_to": "QR Location",
    "idx": 29
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "SIM Card",
-   "link_type": "DocType",
-   "link_to": "SIM Card",
-   "idx": 30
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "SIM Custody Assignment",
-   "link_type": "DocType",
-   "link_to": "SIM Custody Assignment",
-   "idx": 31
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Telecom Control",
-   "link_type": "Page",
-   "link_to": "telecom-control",
-   "idx": 32
   }
  ],
  "charts": [
@@ -386,5 +363,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-25 04:51:05.634595"
+ "modified": "2026-08-02 10:31:00.000000"
 }

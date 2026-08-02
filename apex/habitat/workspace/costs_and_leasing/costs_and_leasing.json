@@ -198,6 +198,14 @@
    "link_type": "DocType",
    "link_to": "Subcontractor Service Contract",
    "idx": 18
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Operational Depreciation Policy",
+   "link_type": "DocType",
+   "link_to": "Operational Depreciation Policy",
+   "idx": 19
   }
  ],
  "charts": [
@@ -259,5 +267,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-10 08:15:21.997787"
+ "modified": "2026-08-02 10:31:00.000000"
 }

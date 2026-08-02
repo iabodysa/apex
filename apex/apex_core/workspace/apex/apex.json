@@ -1,0 +1,88 @@
+{
+ "doctype": "Workspace",
+ "name": "Apex",
+ "label": "Apex",
+ "title": "Apex",
+ "module": "Apex Core",
+ "icon": "grid",
+ "public": 1,
+ "is_standard": 1,
+ "is_default": 1,
+ "is_hidden": 0,
+ "sequence_id": 1.0,
+ "parent_page": "",
+ "roles": [],
+ "content": "[{\"id\": \"apexHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Apex</b></span>\", \"col\": 12}}, {\"id\": \"apexWelcome\", \"type\": \"paragraph\", \"data\": {\"text\": \"Apex runs accommodation, facilities and fleet operations. Field teams work in the portals below on their phones; supervisors and the back office work in the modules in the sidebar.\", \"col\": 12}}, {\"id\": \"apexHdrPortals\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Portals</b></span>\", \"col\": 12}}, {\"id\": \"apexPortal1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Masar\", \"col\": 3}}, {\"id\": \"apexPortal2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Masar Supervisor\", \"col\": 3}}, {\"id\": \"apexPortal3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Driver\", \"col\": 3}}, {\"id\": \"apexPortal4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"My Fleet\", \"col\": 3}}, {\"id\": \"apexPortal5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fleet OS\", \"col\": 3}}, {\"id\": \"apexPortal6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Portal\", \"col\": 3}}, {\"id\": \"apexPortal7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Inventory Count\", \"col\": 3}}, {\"id\": \"apexPortal8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Rounds\", \"col\": 3}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Masar",
+   "url": "/masar",
+   "color": "Blue",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Masar Supervisor",
+   "url": "/masar-supervisor",
+   "color": "Blue",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Salis Driver",
+   "url": "/driver",
+   "color": "Green",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "My Fleet",
+   "url": "/fleet",
+   "color": "Green",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Fleet OS",
+   "url": "/fleet-os",
+   "color": "Orange",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Housing Portal",
+   "url": "/housing",
+   "color": "Cyan",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Housing Inventory Count",
+   "url": "/housing-count",
+   "color": "Cyan",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Safety Rounds",
+   "url": "/safety",
+   "color": "Red",
+   "idx": 8
+  }
+ ],
+ "links": [],
+ "charts": [],
+ "number_cards": [],
+ "quick_lists": [],
+ "creation": "2020-01-01 00:00:00.000000",
+ "modified": "2026-08-02 10:31:00.000000"
+}

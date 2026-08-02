@@ -1,0 +1,76 @@
+{
+ "doctype": "Workspace",
+ "name": "My Tasks",
+ "label": "My Tasks",
+ "title": "My Tasks",
+ "module": "Apex Core",
+ "icon": "todo",
+ "public": 1,
+ "is_standard": 1,
+ "is_default": 0,
+ "is_hidden": 0,
+ "sequence_id": 6.0,
+ "parent_page": "Apex",
+ "roles": [],
+ "content": "[{\"id\": \"myTasksHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Tasks</b></span>\", \"col\": 12}}, {\"id\": \"myTasksSc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"ToDo\", \"col\": 3}}, {\"id\": \"myTasksSc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Workflow Action\", \"col\": 3}}, {\"id\": \"myTasksCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"My Work\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "ToDo",
+   "link_to": "ToDo",
+   "stats_filter": "{\"status\": \"Open\"}",
+   "format": "{} Open",
+   "color": "Blue",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Workflow Action",
+   "link_to": "Workflow Action",
+   "stats_filter": "{\"status\": \"Open\"}",
+   "format": "{} Pending",
+   "color": "Orange",
+   "idx": 2
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "My Work",
+   "description": "Everything waiting on you, from Frappe's own queues.",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "ToDo",
+   "link_type": "DocType",
+   "link_to": "ToDo",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Workflow Action",
+   "link_type": "DocType",
+   "link_to": "Workflow Action",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Notification Log",
+   "link_type": "DocType",
+   "link_to": "Notification Log",
+   "idx": 4
+  }
+ ],
+ "charts": [],
+ "number_cards": [],
+ "quick_lists": [],
+ "creation": "2020-01-01 00:00:00.000000",
+ "modified": "2026-08-02 10:31:00.000000"
+}

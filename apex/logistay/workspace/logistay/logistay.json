@@ -1,0 +1,148 @@
+{
+ "doctype": "Workspace",
+ "name": "Logistay",
+ "label": "Logistay",
+ "title": "Logistay",
+ "module": "Logistay",
+ "icon": "users",
+ "public": 1,
+ "is_standard": 1,
+ "is_default": 0,
+ "is_hidden": 0,
+ "sequence_id": 5.0,
+ "parent_page": "Apex",
+ "roles": [
+  {
+   "role": "SIM Operations User"
+  },
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Administrator"
+  }
+ ],
+ "content": "[{\"id\": \"LogistayHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Logistay</b></span>\", \"col\": 12}}, {\"id\": \"LogistayCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Telecom\", \"col\": 4}}, {\"id\": \"LogistayCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Manpower\", \"col\": 4}}, {\"id\": \"LogistayCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "shortcuts": [],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Telecom",
+   "description": "Input screen: open an item to create or edit records.",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "SIM Card",
+   "link_type": "DocType",
+   "link_to": "SIM Card",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "SIM Custody Assignment",
+   "link_type": "DocType",
+   "link_to": "SIM Custody Assignment",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Telecom Contract",
+   "link_type": "DocType",
+   "link_to": "Telecom Contract",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Manpower",
+   "description": "Reference data: durable records you set up once, not daily work.",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Freelancer",
+   "link_type": "DocType",
+   "link_to": "Freelancer",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Temporary Worker",
+   "link_type": "DocType",
+   "link_to": "Temporary Worker",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Reports",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Current SIM Custody",
+   "link_type": "Report",
+   "link_to": "Current SIM Custody",
+   "is_query_report": 1,
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "SIM Exceptions",
+   "link_type": "Report",
+   "link_to": "SIM Exceptions",
+   "is_query_report": 1,
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Employees Holding Multiple SIMs",
+   "link_type": "Report",
+   "link_to": "Employees Holding Multiple SIMs",
+   "is_query_report": 1,
+   "idx": 11
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "SIMs by Contract and Supplier",
+   "link_type": "Report",
+   "link_to": "SIMs by Contract and Supplier",
+   "is_query_report": 1,
+   "idx": 12
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Telecom Contract Expiry",
+   "link_type": "Report",
+   "link_to": "Telecom Contract Expiry",
+   "is_query_report": 1,
+   "idx": 13
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Telecom Cost Allocation",
+   "link_type": "Report",
+   "link_to": "Telecom Cost Allocation",
+   "is_query_report": 1,
+   "idx": 14
+  }
+ ],
+ "charts": [],
+ "number_cards": [],
+ "quick_lists": [],
+ "creation": "2020-01-01 00:00:00.000000",
+ "modified": "2026-08-02 10:31:00.000000"
+}
