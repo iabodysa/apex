@@ -1167,6 +1167,7 @@ Days to expiry at or below which a driver licence or vehicle compliance document
 Deactivate Bed,تعطيل السرير
 Deactivate Room,تعطيل الغرفة
 December,ديسمبر
+"Decimal degrees, as the fleet map plots the stop.",بالدرجات العشرية، كما ترسم خريطة الأسطول المحطة.
 Decision By,القرار بواسطة
 Decision On,تاريخ القرار
 Declining Balance,الرصيد المتناقص
@@ -2074,6 +2075,7 @@ Late,متأخر
 Latest,الأحدث
 "Latest driver GPS latitude, pushed by the driver portal while the trip is dispatched. Feeds the worker's live ride ETA. System-maintained.",أحدث خط عرض GPS للسائق، تدفعه بوابة السائق أثناء إرسال الرحلة. يغذّي الوقت المتوقع لوصول رحلة العامل المباشر. يُدار آليًا.
 "Latest driver GPS longitude, pushed by the driver portal while the trip is dispatched. Feeds the worker's live ride ETA. System-maintained.",أحدث خط طول GPS للسائق، تدفعه بوابة السائق أثناء إرسال الرحلة. يغذّي الوقت المتوقع لوصول رحلة العامل المباشر. يُدار آليًا.
+Latitude,خط العرض
 Launchpad,لوحة التطبيقات
 Laundry washing machine for worker accommodation. Durable appliance.,غسالة ملابس لسكن العمال. جهاز معمّر.
 Lead days for driver licence-expiry alerts; the effective window is the larger of this and Alert Lead Days.,أيام التنبيه المسبق لانتهاء رخصة السائق؛ النافذةُ الفعليّة هي الأكبر بين هذه و«أيام التنبيه المسبق».
@@ -2183,6 +2185,7 @@ Logistay Go-Live,تشغيل لوجستي
 "Logistay is live. Every SIM traces to a contract and a holder, which is what the exception reports read.",لوجستي يعمل. كل شريحة تعود إلى عقد وإلى حاملها، وهذا ما تقرأه تقارير الاستثناءات.
 Logistics Cleared,تم إخلاء اللوجستيات
 Logs,السجلات
+Longitude,خط الطول
 Lost,مفقود
 Low,منخفضة
 "Machine-written daily rental accrual memo, one row per in-service rented vehicle per day. Maintained automatically by the rental accrual engine; no human role may create, write, or delete rows. Posts NO GL.",مذكرة استحقاق إيجار يومية تُكتب آلياً، صف واحد لكل مركبة مستأجرة في الخدمة لكل يوم. يتولاها محرك استحقاق الإيجار تلقائياً، ولا يملك أي دور بشري إنشاء صفوفها أو تعديلها أو حذفها. ولا تقيّد محاسبياً.
