@@ -22,10 +22,18 @@ def execute():
     rendering, because sync only imports what it finds on disk. A stale workspace shows an empty
     page in the sidebar; a stale onboarding offers a checklist for a page that is gone.
     """
+    # The names are fixed tuples in this file, so nothing a caller passes can widen what is
+    # deleted, and every one of them is a record this app shipped itself.
     for name in RETIRED_WORKSPACES:
         if frappe.db.exists("Workspace", name):
-            frappe.delete_doc("Workspace", name, force=True, ignore_permissions=True)
+            frappe.delete_doc(
+                "Workspace", name, force=True,
+                ignore_permissions=True,  # audit-ok: removes this app's own shipped record
+            )
 
     for name in RETIRED_ONBOARDINGS:
         if frappe.db.exists("Module Onboarding", name):
-            frappe.delete_doc("Module Onboarding", name, force=True, ignore_permissions=True)
+            frappe.delete_doc(
+                "Module Onboarding", name, force=True,
+                ignore_permissions=True,  # audit-ok: removes this app's own shipped record
+            )
