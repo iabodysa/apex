@@ -53,6 +53,16 @@
 
       <button
         type="button"
+        :class="{ 'is-active': onQueue }"
+        @click="openQueue()"
+      >
+        <Icon name="circle-check" :size="17" />
+        <span>{{ t("queue.title") }}</span>
+        <span v-if="pendingCount" class="nav-count">{{ pendingCount }}</span>
+      </button>
+
+      <button
+        type="button"
         :class="{ 'is-active': onFleetMap }"
         @click="openFleetMap()"
       >
@@ -97,7 +107,17 @@
       </div>
     </template>
 
-    <div v-if="onFleetMap" class="work work-single">
+    <div v-if="onQueue" class="work work-single">
+      <ApprovalQueue
+        :plans="plans"
+        :busy="busy"
+        @open="selectPlan"
+        @approve="approvePlan"
+        @reject="rejectPlan"
+      />
+    </div>
+
+    <div v-else-if="onFleetMap" class="work work-single">
       <FleetMap />
     </div>
 
@@ -263,6 +283,7 @@ import BoardingPanel from "./components/BoardingPanel.vue";
 import RoutePanel from "./components/RoutePanel.vue";
 import DriverMap from "./components/DriverMap.vue";
 import FleetMap from "./components/FleetMap.vue";
+import ApprovalQueue from "./components/ApprovalQueue.vue";
 import { useI18n } from "./i18n";
 import { getSupervisorContext, approveRoutePlan, rejectRoutePlan } from "./api.js";
 import { connectRouteSupervisorRealtime } from "./realtime.js";
@@ -278,15 +299,34 @@ const TABS = [
 ];
 
 const FLEET_MAP_ROUTE = "#/map";
+const QUEUE_ROUTE = "#/approvals";
 const onFleetMap = ref(false);
+const onQueue = ref(false);
 
 function readFleetMapRoute() {
-  onFleetMap.value = (window.location.hash || "").startsWith(FLEET_MAP_ROUTE);
+  const hash = window.location.hash || "";
+  onFleetMap.value = hash.startsWith(FLEET_MAP_ROUTE);
+  onQueue.value = hash.startsWith(QUEUE_ROUTE);
 }
 
 function openFleetMap() {
   window.history.pushState(null, "", FLEET_MAP_ROUTE);
   readFleetMapRoute();
+}
+
+function openQueue() {
+  window.history.pushState(null, "", QUEUE_ROUTE);
+  readFleetMapRoute();
+}
+
+async function approvePlan(name) {
+  selectedName.value = name;
+  await approve();
+}
+
+function rejectPlan(name) {
+  selectedName.value = name;
+  openReject();
 }
 
 const ctx = ref(null);
@@ -386,6 +426,7 @@ function applyRoute() {
 
 function selectPlan(name) {
   onFleetMap.value = false;
+  onQueue.value = false;
   selectedName.value = name;
   tab.value = TAB_KEYS[0];
 }

@@ -99,6 +99,12 @@ const messages = {
       loadError: "Couldn't load the route.",
       housing: "Housing pickup",
     },
+    queue: {
+      title: "Waiting for your decision",
+      subtitle: "{n} plan(s) to approve or reject",
+      empty: "Nothing is waiting for you",
+      emptyHint: "A plan appears here the moment it is handed to you.",
+    },
     fleetMap: {
       title: "All drivers",
       subtitle: "{live} of {total} sharing a position right now",
@@ -223,6 +229,12 @@ const messages = {
       passengers: "{n} ركاب",
       loadError: "تعذّر تحميل المسار.",
       housing: "نقطة سكن",
+    },
+    queue: {
+      title: "بانتظار قرارك",
+      subtitle: "{n} خطة للاعتماد أو الرفض",
+      empty: "لا شيء ينتظرك",
+      emptyHint: "تظهر الخطة هنا بمجرّد أن تُسند إليك.",
     },
     fleetMap: {
       title: "كل السائقين",
