@@ -105,11 +105,9 @@ docs/*
 !README.md
 # Frappe's "Updated To A New Version" popup reads these as shipped app files.
 !apex/change_log/v*/*.md
-# Public developer integration guide.
-!docs/INTEGRATION.md
-# Operator-facing training entry point, and the workspace layout reference it cites.
-!docs/TRAINING.md
-!docs/WORKSPACE-DESIGN.md
+# The three flat pages these lines used to publish were replaced by the per-audience
+# structure below; naming a file that no longer exists publishes nothing and hides that the
+# real allowlist is the two directory globs.
 # Public per-area training guide: index plus one file per functional area.
 !docs/training/
 !docs/training/*.md
