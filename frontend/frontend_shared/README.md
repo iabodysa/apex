@@ -93,6 +93,43 @@ only hit is the literal Unicode RANGE (U+0600-U+06FF) inside the scanners' own
 regex — the guard's alphabet, not content. Write ranges escaped, never as literal
 characters, or the rule text trips its own sweep.
 
+## frappe-ui: the data layer, not the component library — decided 2026-08-03
+
+Measured across the seven portals and this shared layer, counting only imports in Apex source:
+
+| Imported from `frappe-ui` | Times |
+| --- | --- |
+| `createResource` | 25 |
+| `frappeRequest`, `setConfig` | 1 each, both in `call.js` |
+| `Button` | 3 |
+| `Dialog`, `Avatar` | 2 each |
+| `TextInput`, `TabButtons`, `Select`, `MonthPicker`, `FormControl`, `ErrorMessage` | 1 each |
+
+So the library is already load-bearing as a DATA layer and barely present as a UI one: twelve
+component imports against 68 single-file components. The decision follows the measurement.
+
+**Keep it for data.** `createResource` is how every portal reads, and the offline service
+worker is built around the POST shape those calls produce (`sw.template.js`). Replacing it
+would rewrite every portal and the cache layer to gain nothing a user could see.
+
+**Do not adopt its components.** Three reasons, in order of weight:
+
+1. Its components are Tailwind-styled. Three of six build units deliberately carry no Tailwind
+   at all (see the table below), and the portals' look comes from `tokens.css` — one palette,
+   two themes, contrast ratios recorded per value. Pulling in a second styling system is the
+   fragmentation this workspace spent its effort ending.
+2. The contract the portals must honour — 44px tap floor, RTL logical properties, the single
+   focus ring, the four component states — is written in `DESIGN.md` and enforced by the
+   shared shells. A third-party component satisfies none of it by default and each one would
+   need wrapping to comply, which is more work than the component saves.
+3. What the portals actually need that is not a plain element is Apex-specific and already
+   exists here: three page shells, `EmptyState`, `BuildingPicker`, `LangToggle`,
+   `ThemeToggle`, `Brand`, `IconBase`.
+
+**What this forbids.** Adding a new `frappe-ui` component import to a portal. If a screen
+needs something the shared layer lacks, it goes in `components/` here, built to `DESIGN.md`.
+The twelve existing imports stay until the screen around each is next rewritten.
+
 ## Tailwind is opt-in per BUILD UNIT
 
 | Build unit (has `vite.config.js`) | `tailwind.config.js` | emits `@tailwind` |

@@ -88,12 +88,20 @@ const shellVars = computed(() => ({
   font-family: var(--font);
   font-weight: var(--fw-body);
 }
-/* 768px = --bp-tablet (frontend_shared/tokens.css); keep in sync — CSS @media
-   conditions cannot read a custom property. Only a portal that opts in with
-   --shell-wide widens; the default stays the one-hand column at every width. */
+/* 768px = --bp-tablet, 1024px = --bp-desktop (frontend_shared/tokens.css); keep in sync —
+   CSS @media conditions cannot read a custom property. The column grows with the screen
+   instead of staying a phone strip in the middle of a monitor; DESIGN.md §3 carries the
+   widths. A portal that needs a different one still overrides with --shell-wide. */
 @media (min-width: 768px) {
   .mc-shell {
-    max-width: var(--shell-wide, var(--mc-width));
+    max-width: var(--shell-wide, 560px);
+  }
+}
+@media (min-width: 1024px) {
+  .mc-shell {
+    max-width: var(--shell-wide, 640px);
+    box-shadow: var(--shadow);
+    border-inline: 1px solid var(--c-border);
   }
 }
 

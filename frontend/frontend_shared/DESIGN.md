@@ -79,7 +79,10 @@ The archetype decides the grid. There are three, and every portal is exactly one
 
 ### Field worker — `/driver`, `/masar`, `/housing`, `/safety`
 
-One task at a time, standing, one hand, often offline. Shell: `MobileConsoleShell.vue`.
+One task at a time, standing, one hand, often offline. Shell: `MobileConsoleShell.vue` —
+used today by `/driver` and `/masar` only. `/housing` and `/safety` hand-roll the same
+skeleton, which is why a fix to the shell reaches two of the four; folding them onto it is
+part of the work this guide sets up.
 
 | Width | Frame | Layout |
 | --- | --- | --- |
