@@ -15,9 +15,7 @@ import frappe
 from frappe import _
 from frappe.utils import escape_html
 
-# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
-# rather than stacking one per recipient.
-_ROW_SAVEPOINT = "sim_alert_row"
+from apex.apex_core.utils.system_notify import notify_user_system
 
 
 def _sim_operations_users():
@@ -57,20 +55,4 @@ def assigned_suspended_or_lost_watch() -> None:
         f"{escape_html(s.mobile_number or s.name)} — {_(s.status)}" for s in sims[:50]
     )
     for user in users:
-        frappe.db.savepoint(_ROW_SAVEPOINT)
-        try:
-            frappe.get_doc(
-                {
-                    "doctype": "Notification Log",
-                    "for_user": user,
-                    "type": "Alert",
-                    "subject": subject,
-                    "email_content": body,
-                }
-            ).insert(ignore_permissions=True)  # audit-ok — system-raised in-app alert, no user session
-        except Exception:
-            frappe.db.rollback(save_point=_ROW_SAVEPOINT)
-            frappe.log_error(
-                title="SIM assigned-suspended digest delivery failed",
-                message=frappe.get_traceback(),
-            )
+        notify_user_system(user, subject, body)

@@ -20,6 +20,9 @@ insert the row directly instead.
 from __future__ import annotations
 
 import frappe
+from frappe.desk.doctype.notification_settings.notification_settings import (
+    is_notifications_enabled,
+)
 
 LOG_DOCTYPE = "Notification Log"
 
@@ -55,6 +58,11 @@ def notify_user_system(
     notifications. A different doc or subject stays a distinct alert.
     """
     if not user or not frappe.db.get_value("User", user, "enabled"):
+        return False
+    # `User.enabled` is the LOGIN flag, not the notification one. A user who turned
+    # notifications off in their own settings kept receiving every Apex alert, because
+    # nothing here read the switch that owns that answer.
+    if not is_notifications_enabled(user):
         return False
     body = message or subject
     clipped_subject = subject[:_SUBJECT_MAX]
