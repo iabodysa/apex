@@ -63,10 +63,6 @@ const ALLOWED = new Map([
     "PostCSS resolves its config from the package root, so each portal needs its own.",
   ],
   [
-    "housing:tailwind.config.js | safety:tailwind.config.js",
-    "Tailwind resolves its config from the package root, so each portal needs its own.",
-  ],
-  [
     "driver:.gitignore | worker:.gitignore",
     "git applies ignore rules per directory; the file must sit in the dir it governs.",
   ],
