@@ -193,7 +193,7 @@
                     <span v-if="trip.depart_time || trip.pickup_datetime"> · <bdi>{{ trip.depart_time ? formatTime(trip.depart_time) : formatDateTime(trip.pickup_datetime) }}</bdi></span>
                   </div>
                   <span v-if="trip.has_rated" class="text-success text-xs font-medium flex items-center gap-1">
-                    <Icon name="check" :size="14" /> Rated
+                    <Icon name="check" :size="14" /> {{ t("transport.rated") }}
                   </span>
                 </div>
               </div>

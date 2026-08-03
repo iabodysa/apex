@@ -1,6 +1,4 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Horizontal trip status progress bar: shows the trip lifecycle as coloured steps.
-     Used in the worker (Masar) Transport page for upcoming/active trips. -->
 <template>
   <div class="progress-bar" :dir="dir">
     <div
@@ -78,8 +76,6 @@ const steps = computed(() => {
   border: 2px solid var(--c-border-strong);
   background: var(--c-surface);
   color: var(--c-muted);
-  /* Only these four ever change between the three step states. `all` also made
-     the browser diff every animatable property on each flip. */
   transition:
     background-color 0.3s ease,
     border-color 0.3s ease,

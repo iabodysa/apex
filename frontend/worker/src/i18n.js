@@ -6,10 +6,8 @@ import { createI18n } from "@shared/i18n";
 const STORAGE_KEY = "masar_portal_lang";
 export const SUPPORTED = ["en", "ar", "ur", "hi", "bn"];
 
-// Right-to-left scripts among the supported languages (Arabic + Urdu).
 const RTL_LANGS = ["ar", "ur"];
 
-// Native endonym for each language, shown in the switcher.
 export const LANG_NAMES = {
   en: "English",
   ar: "العربية",
@@ -142,7 +140,6 @@ const messages = {
     tripProgress: {
       Planned: "Planned",
       Dispatched: "Dispatched",
-      Started: "En Route",
       Completed: "Arrived",
     },
     tripRating: {
@@ -183,6 +180,7 @@ const messages = {
       atPickupSending: "Confirming…",
       atPickupDone: "Boarding confirmed",
       atPickupFailed: "Couldn't confirm. Please try again.",
+      rated: "Rated",
     },
     boarding: {
       title: "Boarding pass",
@@ -451,7 +449,6 @@ const messages = {
     tripProgress: {
       Planned: "مخططة",
       Dispatched: "مرسلة",
-      Started: "في الطريق",
       Completed: "وصلت",
     },
     tripRating: {
@@ -492,6 +489,7 @@ const messages = {
       atPickupSending: "جارٍ التأكيد…",
       atPickupDone: "تم تأكيد الركوب",
       atPickupFailed: "تعذّر التأكيد. حاول مرة أخرى.",
+      rated: "تم التقييم",
     },
     boarding: {
       title: "بطاقة الركوب",
@@ -747,6 +745,24 @@ const messages = {
       empty: "آپ کے پاس کوئی تحویل نہیں۔",
       emptyHint: "آپ کو جاری کردہ اشیاء یہاں ظاہر ہوں گی۔",
     },
+    tripProgress: {
+      Planned: "طے شدہ",
+      Dispatched: "روانہ",
+      Completed: "پہنچ گئی",
+    },
+    tripRating: {
+      title: "اپنے سفر کی درجہ بندی کریں",
+      submit: "درجہ بندی بھیجیں",
+      success: "آپ کی درجہ بندی کا شکریہ!",
+      alreadyRated: "آپ اس سفر کی درجہ بندی پہلے کر چکے ہیں۔",
+      submitFailed: "درجہ بندی نہیں بھیجی جا سکی۔ دوبارہ کوشش کریں۔",
+      feedbackPlaceholder: "اپنے تجربے کے بارے میں بتائیں (اختیاری)",
+      star1: "بہت خراب",
+      star2: "خراب",
+      star3: "ٹھیک ٹھاک",
+      star4: "اچھا",
+      star5: "بہترین",
+    },
     transport: {
       title: "میرا نقل و حمل",
       pickup: "پک اپ",
@@ -772,6 +788,7 @@ const messages = {
       atPickupSending: "تصدیق ہو رہی ہے…",
       atPickupDone: "سوار ہونے کی تصدیق",
       atPickupFailed: "تصدیق نہیں ہو سکی۔ دوبارہ کوشش کریں۔",
+      rated: "درجہ بندی ہو گئی",
     },
     boarding: {
       title: "بورڈنگ پاس",
@@ -784,6 +801,31 @@ const messages = {
       validFor: "{h} گھنٹے کے لیے درست",
       none: "آج کے سفر کے لیے ابھی کوئی بورڈنگ پاس دستیاب نہیں۔",
       failed: "آپ کا بورڈنگ پاس لوڈ نہیں ہو سکا۔",
+      view: "بورڈنگ پاس دیکھیں",
+      swipeToClose: "بند کرنے کے لیے اوپر سوائپ کریں",
+      onBus: "میں بس میں ہوں",
+      onBusSending: "تصدیق ہو رہی ہے…",
+      departing: "گاڑی روانہ ہو رہی ہے",
+      departingIn: "{s} سیکنڈ میں روانگی",
+      departingNow: "ابھی روانہ ہو رہی ہے",
+      waitForMe: "۶۰ سیکنڈ انتظار کریں",
+      waitSending: "درخواست بھیجی جا رہی ہے…",
+      waitRemaining: "{max} میں سے {n} انتظار کی درخواستیں استعمال ہوئیں",
+      waitCountdown: "ڈرائیور سے انتظار کا کہا گیا — {s} سیکنڈ",
+      waitCapReached: "مزید انتظار کی درخواست باقی نہیں۔",
+      boardedTitle: "آپ سوار ہو گئے",
+      boardedHint: "ڈرائیور نے آپ کے سوار ہونے کی تصدیق کر دی۔ سفر بخیر۔",
+      absentTitle: "غیر حاضر درج",
+      absentHint: "اس سفر میں آپ کو غیر حاضر درج کیا گیا۔ اپنے سپروائزر سے رابطہ کریں۔",
+      wrongBusTitle: "یہ آپ کی بس نہیں",
+      wrongBusYourTrip: "آپ کا سفر {trip} ہے",
+      wrongBusYourDriver: "آپ کا ڈرائیور {name} ہے",
+      wrongBusRoute: "راستہ: {route}",
+      wrongBusHint: "اپنی مقررہ گاڑی پر جائیں۔ مدد چاہیے تو ڈرائیور کو کال یا پیغام کریں۔",
+      arrivedTitle: "آپ کا ڈرائیور آ گیا",
+      arrivedHint: "ڈرائیور آپ کے پک اپ پوائنٹ پر ہے۔ سوار ہونے کے لیے باہر آ جائیں۔",
+      stale: "بورڈنگ کی حالت پرانی ہے — دوبارہ کوشش جاری ہے۔",
+      staleHint: "بس میں ہونے کی تصدیق سے پہلے تازہ ہونے کا انتظار کریں۔",
     },
     reqTransport: {
       title: "نقل و حمل کی درخواست",
@@ -1000,6 +1042,24 @@ const messages = {
       empty: "आपके पास कोई अभिरक्षा सामान नहीं।",
       emptyHint: "आपको जारी की गई वस्तुएँ यहाँ दिखेंगी।",
     },
+    tripProgress: {
+      Planned: "निर्धारित",
+      Dispatched: "रवाना",
+      Completed: "पहुँच गई",
+    },
+    tripRating: {
+      title: "अपनी यात्रा को रेटिंग दें",
+      submit: "रेटिंग भेजें",
+      success: "आपकी रेटिंग के लिए धन्यवाद!",
+      alreadyRated: "आप इस यात्रा को पहले ही रेटिंग दे चुके हैं।",
+      submitFailed: "रेटिंग नहीं भेजी जा सकी। कृपया पुनः प्रयास करें।",
+      feedbackPlaceholder: "अपने अनुभव के बारे में बताएँ (वैकल्पिक)",
+      star1: "बहुत खराब",
+      star2: "खराब",
+      star3: "ठीक-ठाक",
+      star4: "अच्छा",
+      star5: "बहुत बढ़िया",
+    },
     transport: {
       title: "मेरा परिवहन",
       pickup: "पिकअप",
@@ -1025,6 +1085,7 @@ const messages = {
       atPickupSending: "पुष्टि हो रही है…",
       atPickupDone: "सवारी की पुष्टि",
       atPickupFailed: "पुष्टि नहीं हो सकी। पुनः प्रयास करें।",
+      rated: "रेटिंग दी गई",
     },
     boarding: {
       title: "बोर्डिंग पास",
@@ -1037,6 +1098,31 @@ const messages = {
       validFor: "{h} घंटे तक मान्य",
       none: "आज की यात्रा के लिए अभी कोई बोर्डिंग पास उपलब्ध नहीं।",
       failed: "आपका बोर्डिंग पास लोड नहीं हो सका।",
+      view: "बोर्डिंग पास देखें",
+      swipeToClose: "बंद करने के लिए ऊपर स्वाइप करें",
+      onBus: "मैं बस में हूँ",
+      onBusSending: "पुष्टि हो रही है…",
+      departing: "वाहन रवाना हो रहा है",
+      departingIn: "{s} सेकंड में रवाना",
+      departingNow: "अभी रवाना हो रहा है",
+      waitForMe: "60 सेकंड रुकें",
+      waitSending: "अनुरोध भेजा जा रहा है…",
+      waitRemaining: "{max} में से {n} प्रतीक्षा अनुरोध उपयोग हुए",
+      waitCountdown: "ड्राइवर से रुकने को कहा गया — {s} सेकंड",
+      waitCapReached: "और प्रतीक्षा अनुरोध उपलब्ध नहीं।",
+      boardedTitle: "आप सवार हैं",
+      boardedHint: "ड्राइवर ने आपके सवार होने की पुष्टि की। यात्रा शुभ हो।",
+      absentTitle: "अनुपस्थित दर्ज",
+      absentHint: "इस यात्रा में आपको अनुपस्थित दर्ज किया गया। अपने सुपरवाइज़र से संपर्क करें।",
+      wrongBusTitle: "यह आपकी बस नहीं है",
+      wrongBusYourTrip: "आपकी यात्रा {trip} है",
+      wrongBusYourDriver: "आपका ड्राइवर {name} है",
+      wrongBusRoute: "मार्ग: {route}",
+      wrongBusHint: "अपने निर्धारित वाहन पर जाएँ। मदद चाहिए तो ड्राइवर को कॉल या मैसेज करें।",
+      arrivedTitle: "आपका ड्राइवर आ गया",
+      arrivedHint: "ड्राइवर आपके पिकअप स्थान पर है। सवार होने के लिए बाहर आ जाएँ।",
+      stale: "बोर्डिंग स्थिति पुरानी है — फिर से कोशिश जारी है।",
+      staleHint: "बस में होने की पुष्टि से पहले ताज़ा होने का इंतज़ार करें।",
     },
     reqTransport: {
       title: "परिवहन अनुरोध",
@@ -1253,6 +1339,24 @@ const messages = {
       empty: "আপনার কোনো জিম্মা সামগ্রী নেই।",
       emptyHint: "আপনাকে দেওয়া সামগ্রী এখানে দেখা যাবে।",
     },
+    tripProgress: {
+      Planned: "নির্ধারিত",
+      Dispatched: "রওনা",
+      Completed: "পৌঁছেছে",
+    },
+    tripRating: {
+      title: "আপনার যাত্রার রেটিং দিন",
+      submit: "রেটিং পাঠান",
+      success: "আপনার রেটিংয়ের জন্য ধন্যবাদ!",
+      alreadyRated: "আপনি এই যাত্রার রেটিং আগেই দিয়েছেন।",
+      submitFailed: "রেটিং পাঠানো যায়নি। আবার চেষ্টা করুন।",
+      feedbackPlaceholder: "আপনার অভিজ্ঞতা জানান (ঐচ্ছিক)",
+      star1: "খুব খারাপ",
+      star2: "খারাপ",
+      star3: "মোটামুটি",
+      star4: "ভালো",
+      star5: "খুব ভালো",
+    },
     transport: {
       title: "আমার পরিবহন",
       pickup: "পিকআপ",
@@ -1278,6 +1382,7 @@ const messages = {
       atPickupSending: "নিশ্চিত করা হচ্ছে…",
       atPickupDone: "ওঠা নিশ্চিত",
       atPickupFailed: "নিশ্চিত করা যায়নি। আবার চেষ্টা করুন।",
+      rated: "রেটিং দেওয়া হয়েছে",
     },
     boarding: {
       title: "বোর্ডিং পাস",
@@ -1290,6 +1395,31 @@ const messages = {
       validFor: "{h} ঘণ্টা বৈধ",
       none: "আজকের যাত্রার জন্য এখনো কোনো বোর্ডিং পাস নেই।",
       failed: "আপনার বোর্ডিং পাস লোড করা যায়নি।",
+      view: "বোর্ডিং পাস দেখুন",
+      swipeToClose: "বন্ধ করতে উপরে সোয়াইপ করুন",
+      onBus: "আমি বাসে আছি",
+      onBusSending: "নিশ্চিত করা হচ্ছে…",
+      departing: "গাড়ি ছাড়ছে",
+      departingIn: "{s} সেকেন্ডে ছাড়বে",
+      departingNow: "এখনই ছাড়ছে",
+      waitForMe: "৬০ সেকেন্ড অপেক্ষা করুন",
+      waitSending: "অনুরোধ পাঠানো হচ্ছে…",
+      waitRemaining: "{max}টির মধ্যে {n}টি অপেক্ষার অনুরোধ ব্যবহৃত",
+      waitCountdown: "চালককে অপেক্ষা করতে বলা হয়েছে — {s} সেকেন্ড",
+      waitCapReached: "আর অপেক্ষার অনুরোধ করা যাবে না।",
+      boardedTitle: "আপনি বাসে উঠেছেন",
+      boardedHint: "চালক আপনার ওঠা নিশ্চিত করেছেন। যাত্রা শুভ হোক।",
+      absentTitle: "অনুপস্থিত হিসেবে চিহ্নিত",
+      absentHint: "এই যাত্রায় আপনাকে অনুপস্থিত ধরা হয়েছে। সুপারভাইজারের সঙ্গে যোগাযোগ করুন।",
+      wrongBusTitle: "এটি আপনার বাস নয়",
+      wrongBusYourTrip: "আপনার যাত্রা {trip}",
+      wrongBusYourDriver: "আপনার চালক {name}",
+      wrongBusRoute: "রুট: {route}",
+      wrongBusHint: "আপনার নির্ধারিত গাড়িতে যান। সাহায্য লাগলে চালককে কল বা মেসেজ করুন।",
+      arrivedTitle: "আপনার চালক এসেছেন",
+      arrivedHint: "চালক আপনার পিকআপ পয়েন্টে আছেন। ওঠার জন্য বেরিয়ে আসুন।",
+      stale: "বোর্ডিং অবস্থা পুরোনো — আবার চেষ্টা করা হচ্ছে।",
+      staleHint: "বাসে ওঠা নিশ্চিত করার আগে হালনাগাদ হওয়া পর্যন্ত অপেক্ষা করুন।",
     },
     reqTransport: {
       title: "পরিবহনের অনুরোধ",
@@ -1398,11 +1528,6 @@ const messages = {
   },
 };
 
-// Server enum labels keyed by language -> namespace -> { english_value: label }.
-// Single-sourced from the backend (DocType Select options + ar.csv) via
-// get_enum_labels and registered by the app shell at boot, so there is no
-// hand-maintained JS duplicate of the options to drift out of sync. English mode
-// needs no map (the label IS the stored English value).
 const enumLabels = ref({});
 
 export function setEnumLabels(lang_, labels) {
@@ -1412,14 +1537,10 @@ export function setEnumLabels(lang_, labels) {
 
 export function translateEnum(namespace, value) {
   if (value == null || value === "") return value;
-  // English mode (and any unmapped value) renders the stored English value as-is.
   const map = (enumLabels.value[lang.value] || {})[namespace];
   return (map && map[value]) || value;
 }
 
-// Shared translate / setLang / dir / resource-error machinery; workers default
-// to Arabic and RTL covers Arabic + Urdu. translateEnum + setEnumLabels stay
-// local (server-driven enum labels keyed off the factory's reactive `lang`).
 const { lang, dir, translate, setLang, resourceErrorMessage } = createI18n({
   messages,
   storageKey: STORAGE_KEY,

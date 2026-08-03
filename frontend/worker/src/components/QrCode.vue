@@ -29,7 +29,7 @@ const props = defineProps({
   size: { type: Number, default: 220 },
   // Quiet zone in modules (the spec requires 4 for reliable scanning).
   quiet: { type: Number, default: 4 },
-  label: { type: String, default: "QR code" },
+  label: { type: String, required: true },
   // When true, recolor the dark modules + light bg to the active theme (clamped
   // for scannability). When false, plain black-on-white (the safe default).
   themed: { type: Boolean, default: false },

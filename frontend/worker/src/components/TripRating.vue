@@ -1,5 +1,4 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Component for workers to rate their completed trips. -->
 <template>
   <div class="trip-rating card card-pad" :dir="dir">
     <div v-if="success" class="text-center py-4 space-y-2">
@@ -72,8 +71,6 @@ const errorMessage = ref("");
 
 const hasRated = ref(props.trip.has_rated || false);
 
-// Cookie-scoped write: the token is resolved server-side from the httpOnly
-// cookie, so only the rating payload is submitted (never a worker id).
 const ratingResource = createResource({
   url: "apex.salis.api.masar.submit_trip_rating",
   onSuccess: () => {
