@@ -374,9 +374,15 @@ const boardingFor = ref(null);
 const boardingError = ref("");
 const boarding = createResource({
   url: "apex.salis.api.masar.confirm_boarding",
-  onSuccess: () => {
-    confirmedTrips[boardingFor.value] = true;
-    boardingError.value = "";
+  // Nothing boardable today answers {"trip": null} — a 200 that wrote no boarding row and
+  // left the driver's manifest untouched. Flipping the card on the bare 200 told the
+  // worker the driver had been told they were waiting. A re-confirm is different: it
+  // carries dispatch_trip with created false, and that is a real confirmation.
+  onSuccess: (data) => {
+    const confirmed = !!(data && data.dispatch_trip);
+    confirmedTrips[boardingFor.value] = confirmed;
+    boardingError.value = confirmed ? "" : t("transport.atPickupFailed");
+    if (!confirmed) tr.reload();
   },
   onError: (e) => {
     boardingError.value = resourceErrorMessage(e, "transport.atPickupFailed");

@@ -332,9 +332,14 @@ const hrNotified = ref(false);
 const notifyHrError = ref("");
 const notifyHr = createResource({
   url: "apex.salis.api.masar.notify_hr_iqama_expiring",
-  onSuccess: () => {
-    hrNotified.value = true;
-    notifyHrError.value = "";
+  // The server re-reads the expiry and raises nothing outside its own window, answering
+  // {"notified": false} — a 200 that means NOBODY was told. Confirming on the bare 200
+  // told the worker HR had been informed. Reload the card too: the only way to reach
+  // this is a days_left the page has been holding since before HR changed it.
+  onSuccess: (data) => {
+    hrNotified.value = !!(data && data.notified);
+    notifyHrError.value = hrNotified.value ? "" : t("home.notifyHrFailed");
+    if (!hrNotified.value) home.reload();
   },
   onError: (e) => {
     notifyHrError.value = resourceErrorMessage(e, "home.notifyHrFailed");
