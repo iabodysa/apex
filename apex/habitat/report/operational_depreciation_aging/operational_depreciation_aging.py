@@ -154,13 +154,13 @@ def execute(filters=None):
 
         # [#baku41]
         if not original_cost and book_value:
-            status = "Data Error"
+            status = frappe._("Data Error")
         elif book_value > 0:
-            status = "Healthy"
+            status = frappe._("Healthy")
         elif book_value == 0:
-            status = "Fully Depreciated"
+            status = frappe._("Fully Depreciated")
         else:
-            status = "Over Budget"
+            status = frappe._("Over Budget")
 
         data.append(
             {

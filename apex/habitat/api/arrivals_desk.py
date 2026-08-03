@@ -904,12 +904,12 @@ def get_arrival_slip(party_type, party) -> dict:
 
 # [#25mjhm]
 HOUSING_TERMS = [
-    "Keep the accommodation and shared areas clean and tidy.",
-    "No unauthorised guests or visitors are allowed in the accommodation.",
-    "Report any damage, fault, or maintenance issue to the supervisor immediately.",
-    "Comply with all fire, safety, and security rules and posted instructions.",
-    "Do not tamper with fire alarms, smoke detectors, or safety equipment.",
-    "Hand back all issued custody items in good condition on checkout.",
+    frappe._lt("Keep the accommodation and shared areas clean and tidy."),
+    frappe._lt("No unauthorised guests or visitors are allowed in the accommodation."),
+    frappe._lt("Report any damage, fault, or maintenance issue to the supervisor immediately."),
+    frappe._lt("Comply with all fire, safety, and security rules and posted instructions."),
+    frappe._lt("Do not tamper with fire alarms, smoke detectors, or safety equipment."),
+    frappe._lt("Hand back all issued custody items in good condition on checkout."),
 ]
 
 
@@ -932,7 +932,7 @@ CHECKIN_SLIP_TEMPLATE = """
   <div style="margin-top:20px; border:1px solid #ccc; border-radius:6px; padding:14px 18px;">
     <div style="font-weight:bold; margin-bottom:8px; color:#1a1a2e;">{{ _("Housing Terms & Conditions") }}</div>
     <ol style="margin:0; padding-inline-start:18px; color:#1a1a2e; font-size:13px; line-height:1.6;">
-      {% for term in terms %}<li>{{ _(term) }}</li>{% endfor %}
+      {% for term in terms %}<li>{{ term }}</li>{% endfor %}
     </ol>
   </div>
 

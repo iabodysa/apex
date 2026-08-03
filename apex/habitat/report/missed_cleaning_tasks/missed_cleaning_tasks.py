@@ -111,10 +111,10 @@ def execute(filters=None):
 
     data = []
     for log in missed:
-        label = "Missed + Rework" if log.rework_required else "Missed"
+        label = frappe._("Missed + Rework") if log.rework_required else frappe._("Missed")
         data.append(build_row(log, label))
     for log in rework:
-        data.append(build_row(log, "Rework Required"))
+        data.append(build_row(log, frappe._("Rework Required")))
 
     data.sort(key=lambda r: (r["building"] or "", str(r["cleaning_date"] or "")))
 

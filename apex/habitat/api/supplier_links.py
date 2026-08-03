@@ -9,6 +9,8 @@ subcontracting, and cost-recovery links into it without dropping the native ones
 
 from __future__ import annotations
 
+import frappe
+
 
 def get_data(data=None):
     data = data or {}
@@ -22,14 +24,14 @@ def get_data(data=None):
         "Lease": "landlord",
     })
     data["transactions"].extend([
-        {"label": "Housing (Supplier-billed)",
+        {"label": frappe._("Housing (Supplier-billed)"),
          "items": ["Housing Assignment", "Lease"]},
-        {"label": "Subcontracting",
+        {"label": frappe._("Subcontracting"),
          "items": ["Subcontractor Service Contract", "Subcontractor Service Order"]},
-        {"label": "Cost Recovery",
+        {"label": frappe._("Cost Recovery"),
          "items": ["Accommodation Ledger"]},
         # [#6f1937]
-        {"label": "Fleet (Salis)",
+        {"label": frappe._("Fleet (Salis)"),
          "items": ["Rental Office"]},
     ])
     return data

@@ -831,6 +831,7 @@ Compliance Documents,مستندات الامتثال
 Compliance Status,حالة الامتثال
 Compliance Type,نوع الوثيقة
 Compliant,ملتزم
+"Comply with all fire, safety, and security rules and posted instructions.",الالتزام بجميع قواعد الحريق والسلامة والأمن والتعليمات المعلنة.
 Component,المكوّن
 Compound Block,بلوك مجمع
 Computed: Current Reading − Previous Reading,محسوب: القراءة الحالية − القراءة السابقة
@@ -923,6 +924,7 @@ Cost Center Snapshot,مركز التكلفة وقت الإجراء
 Cost of Repair,تكلفة الإصلاح
 Cost of Repair (SAR),تكلفة الإصلاح (ريال)
 Cost of Repair cannot be negative.,لا يمكن أن تكون تكلفة الإصلاح سالبة.
+Cost Recovery,استرداد التكاليف
 Cost Recovery Aging,أعمار استرداد التكاليف
 Cost Recovery Aging Backlog,متأخرات استرداد التكاليف
 Cost Recovery by Type,استرداد التكلفة حسب النوع
@@ -1140,6 +1142,7 @@ damages,الأضرار
 Dark,داكن
 Dashboards,اللوحات
 Dashboards: live monitoring boards that refresh automatically.,لوحات متابعة مباشرة تتحدث تلقائياً.
+Data Error,خطأ في البيانات
 Data Retention,الاحتفاظ بالبيانات
 Date,التاريخ
 Date from which this rule takes effect. A source event dated before this is not deducted. Used by recurring deductions such as Rent / Housing.,التاريخ الذي تسري منه هذه القاعدة. أي حدث مصدر بتاريخ سابق له لا يُحسم. تستخدمه الحسوم المتكررة مثل الإيجار / السكن.
@@ -1291,6 +1294,7 @@ Disputed Rental Settlements,تسويات الإيجار المتنازع علي�
 Disputed Utility Bills,فواتير الخدمات المعترض عليها
 District,الحي
 District / neighborhood.,الحي / المنطقة المجاورة.
+"Do not tamper with fire alarms, smoke detectors, or safety equipment.",عدم العبث بأجهزة إنذار الحريق أو كواشف الدخان أو معدات السلامة.
 DocType,نوع السجل
 Document,المستند
 Document No,رقم الوثيقة
@@ -1618,6 +1622,7 @@ Fixed monthly salary in SAR. No car and no allowances. Paid via a native ERPNext
 Flags a building that receives externally-purchased goods before they are handed over into custody.,يُعلِّم المبنى الذي يستلم البضائع المشتراة خارجياً قبل تسليمها إلى العهدة.
 Flags that this policy must be reviewed by Legal/HR against KSA Labor Law (wage-deduction articles) before activation. Kept ON by design as a standing reminder.,يشير إلى وجوب مراجعة هذه السياسة من قبل الشؤون القانونية/الموارد البشرية وفق نظام العمل السعودي (مواد خصم الأجور) قبل التفعيل. يبقى مفعّلًا بالتصميم كتذكير دائم.
 Fleet,الأسطول
+Fleet (Salis),الأسطول (ساليس)
 Fleet and Fuel Dashboard,لوحة الأسطول والوقود
 Fleet and Fuel Engine,محرك الأسطول والوقود
 Fleet Control,التحكّم بالأسطول
@@ -1730,6 +1735,7 @@ Full amount on the utility company's invoice (before sharing),المبلغ ال�
 Full Name,الاسم الكامل
 Full Rooms,الغرف الممتلئة
 Full: {0},ممتلئ: {0}
+Fully Depreciated,مستهلك بالكامل
 Furniture,أثاث
 Gas,غاز
 GATE,بوابة
@@ -1773,6 +1779,7 @@ Habitat Settings,إعدادات السكن
 Half,نصف
 Hand a SIM to an employee and open its custody record.,سلّم شريحة لموظف وافتح سجل عهدتها.
 "Hand a vehicle over, set its fuel quota, and reconcile the first claim.",سلّم مركبة، حدّد حصتها من الوقود، وطابِق أول مطالبة.
+Hand back all issued custody items in good condition on checkout.,إعادة جميع العهد المصروفة بحالة سليمة عند المغادرة.
 Handed Over,تم التسليم
 Handed over from {0} to {1} via {2} (odometer {3}).,تم التسليم من {0} إلى {1} عبر {2} (عداد المسافة {3}).
 "Handling priority assigned to the finding for scheduling remediation, independent of severity, from low up to critical.",أولوية المعالجة المسندة للملحوظة لجدولة المعالجة، بمعزل عن درجة الخطورة، من منخفضة حتى حرجة.
@@ -1795,6 +1802,7 @@ has ended,انتهى
 has expired,انتهت صلاحيته
 Has Timestamps,يحتوي طوابع زمنية
 Health and Hygiene,الصحة والنظافة العامة
+Healthy,سليم
 Held,محجوز
 held by,بحوزة
 Held: {0},بالعهدة: {0}
@@ -1820,6 +1828,7 @@ Housed,مُسكَن
 Housed {0},تمّ إسكان {0}
 Housed {0} in a temporary bed,تمّ إسكان {0} في سرير مؤقّت
 Housing,السكن
+Housing (Supplier-billed),السكن (على حساب المورّد)
 Housing Allowance Suspended,تعليق بدل السكن
 Housing and Safety,الإسكان والسلامة
 Housing and Safety Go-Live,تشغيل الإسكان والسلامة
@@ -2038,6 +2047,7 @@ January,يناير
 JSON,صيغة JSON
 July,يوليو
 June,يونيو
+Keep the accommodation and shared areas clean and tidy.,المحافظة على نظافة السكن والمناطق المشتركة وترتيبها.
 Key Metrics,المؤشرات الرئيسية
 Key Reports,التقارير المهمة
 "Kind of expense the payment request covers, such as fuel, rental, a fine, sponsorship fee, or maintenance, which drives approval routing and account coding.",نوع المصروف الذي يغطيه طلب الدفع، كالوقود أو الإيجار أو المخالفة أو رسم الكفالة أو الصيانة، ما يحرّك مسار الاعتماد وترميز الحساب.
@@ -2285,6 +2295,7 @@ Minutes a handover one-time password stays valid before it expires.,عدد ال�
 Minutes after a worker self-claims boarding before it is auto-confirmed (Boarded) when the driver neither confirms nor rejects; blank or zero uses the default.,عدد الدقائق بعد إعلان العامل صعوده ذاتيًا قبل تأكيده تلقائيًا (تم الصعود) عندما لا يؤكده السائق ولا يرفضه؛ وتُستخدم القيمة الافتراضية عند تركه فارغًا أو صفرًا.
 Mirrors the building's supervisor so notifications can target the specific facility owner.,يعكس مشرف المبنى لتوجيه الإشعارات إلى مالك المنشأة المحدد.
 Missed,فائت
+Missed + Rework,فائتة مع إعادة عمل
 Missed Cleaning,تنظيف مفقود
 Missed Cleaning Logs,سجلات التنظيف الفائتة
 Missed Cleaning Tasks,مهام النظافة الفائتة
@@ -2428,6 +2439,7 @@ No Salis Driver is linked to your account.,لا يوجد سائق سلس مرت�
 No SIM cards match these filters.,لا توجد شرائح مطابقة لهذه المرشّحات.
 No task executions recorded for this round.,لا توجد مهام منفذة مسجلة لهذه الجولة.
 No trips scheduled for today.,لا توجد رحلات مجدولة لليوم.
+No unauthorised guests or visitors are allowed in the accommodation.,لا يُسمح بدخول ضيوف أو زوّار غير مصرّح لهم إلى السكن.
 No vehicle is assigned to you. Ask your supervisor to assign one before requesting fuel.,لا توجد مركبة مسندة إليك. اطلب من مشرفك إسناد مركبة قبل طلب الوقود.
 No vehicles in scope.,لا توجد مركبات ضمن النطاق.
 No vehicles match the current filters.,لا مركبات تطابق المرشّحات الحالية.
@@ -2665,6 +2677,7 @@ Outstanding Fuel Exceptions,حالات استثناء وقود معلّقة
 Outstanding Qty,الكمية المتبقية
 Outstanding Recoveries,عمليات استرداد معلّقة
 Outstanding Value,القيمة المستحقة
+Over Budget,تجاوز الميزانية
 Over Threshold,تجاوز الحد
 Over-capacity,تجاوز السعة
 Over-Capacity Alert Threshold (%),حد تنبيه تجاوز الطاقة الاستيعابية (%)
@@ -3195,6 +3208,7 @@ Reply,الرد
 Report,تقرير
 Report a Safety Incident,الإبلاغ عن حادث سلامة
 "Report a safety incident as a draft, then send it to an authorized submitter for review and submission.",أبلغ عن حادث سلامة كمسودة، ثم أرسله إلى مخوّل بالتقديم للمراجعة والتقديم.
+"Report any damage, fault, or maintenance issue to the supervisor immediately.",إبلاغ المشرف فورًا بأي تلف أو عطل أو مشكلة صيانة.
 Report Incident,الإبلاغ عن حادثة
 reported,مُبلَّغ عنه
 Reported By,مُبلغ من قبل
@@ -3831,6 +3845,7 @@ Storage,مخزن
 Store & Custody,المستودع والعهدة
 Straight Line,القسط الثابت
 Structural,إنشائي
+Subcontracting,التعاقد من الباطن
 Subcontractor,مقاول من الباطن
 Subcontractor Building Coverage,تغطية مباني مقاول الباطن
 Subcontractor Dispatched,تم تكليف مقاول الباطن

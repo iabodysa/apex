@@ -6,11 +6,11 @@
  "subtitle": "Register a vehicle and a driver, move workers from request to manifest, then settle what the movement cost.",
  "success_message": "Salis is live. The Dispatch Board shows every trip; the manifest records who was on it.",
  "is_complete": 0,
- "modified": "2026-08-02 00:00:00.000000",
+ "modified": "2026-08-03 15:43:00.000000",
  "allow_roles": [
   {
    "doctype": "Onboarding Permission",
-   "role": "Movement Supervisor"
+   "role": "Fleet Supervisor"
   },
   {
    "doctype": "Onboarding Permission",
