@@ -101,7 +101,7 @@ import LangToggle from "@shared/components/LangToggle.vue";
 import Toast from "./components/Toast.vue";
 import InstallHint from "./components/InstallHint.vue";
 import TodaySkeleton from "./components/TodaySkeleton.vue";
-import LoadError from "./components/LoadError.vue";
+import LoadError from "@shared/components/LoadError.vue";
 import { useI18n, resourceErrorMessage } from "./i18n";
 import { clearToasts } from "./toast";
 import { online } from "./cache";

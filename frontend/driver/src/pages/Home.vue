@@ -49,7 +49,7 @@ import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { Button, createResource } from "frappe-ui";
 import TodaySkeleton from "../components/TodaySkeleton.vue";
-import LoadError from "../components/LoadError.vue";
+import LoadError from "@shared/components/LoadError.vue";
 import ShiftCard from "../components/ShiftCard.vue";
 import AlertsCard from "../components/AlertsCard.vue";
 import NextTripCard from "../components/NextTripCard.vue";

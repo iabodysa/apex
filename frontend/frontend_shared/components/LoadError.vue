@@ -3,7 +3,7 @@
   <div class="err">
     <Alert class="load-alert" theme="red" :title="title" :description="body" :dismissable="false" />
     <Button class="row-btn" variant="outline" :label="retryLabel" @click="$emit('retry')">
-      <template #prefix><Icon name="refresh" :size="16" /></template>
+      <template #prefix><IconBase :shape="refresh" name="refresh" :size="16" /></template>
     </Button>
   </div>
 </template>
@@ -11,7 +11,8 @@
 <script setup>
 import { computed } from "vue";
 import { Alert, Button } from "frappe-ui";
-import Icon from "./Icon.vue";
+import IconBase from "./IconBase.vue";
+import { refresh } from "./icons.js";
 
 const props = defineProps({
   title: { type: String, required: true },

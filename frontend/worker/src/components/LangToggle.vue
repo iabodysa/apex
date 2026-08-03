@@ -1,7 +1,4 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Language selector. With more than two supported languages it renders a compact
-     native <select> (works on every theme + screen reader); the value flips the
-     active portal language and, via App.vue, the document direction. -->
 <template>
   <div class="lang-toggle" :class="{ 'lang-toggle-header': variant === 'header' }">
     <Icon name="globe" :size="16" class="lang-globe shrink-0" aria-hidden="true" />
@@ -23,7 +20,6 @@ import { useI18n, SUPPORTED, LANG_NAMES } from "../i18n";
 const { t, lang, setLang } = useI18n();
 
 defineProps({
-  // "header" tints the control for the dark header bar (uses header tokens).
   variant: { type: String, default: "default" },
 });
 </script>
@@ -41,8 +37,11 @@ defineProps({
   color: var(--c-muted);
 }
 .lang-select {
-  /* >=44px hit target (WCAG 2.5.5 / iOS HIG). */
-  min-height: 38px;
+  /* --tap-min is the DESIGN.md §8 floor in BOTH dimensions. The comment above this
+     rule claimed the 44px target while the value under it was 38px — measured at
+     390px, this was the smallest control anywhere in the portal. */
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
   padding: 4px 6px;
   border: none;
   background: transparent;
@@ -59,7 +58,8 @@ defineProps({
   border-radius: var(--radius-sm);
 }
 
-/* Header variant: sits on the dark header bar — use header tokens so it reads. */
+/* The "header" variant sits on the dark header bar, so it takes the header tokens
+   rather than the page ones; every other surface uses the default. */
 .lang-toggle-header {
   background: color-mix(in srgb, var(--c-header-ink) 14%, transparent);
 }

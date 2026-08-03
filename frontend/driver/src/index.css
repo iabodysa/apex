@@ -740,6 +740,42 @@ body {
   }
 }
 
+/* List beside detail past --bp-desktop; one stacked column below it. The same two
+   names housing/src/index.css uses for the same archetype, so a screen moved between
+   the two portals keeps its markup. .hz-split above already carries the grid. */
+.hz-split-list,
+.hz-split-detail {
+  min-width: 0;
+}
+.hz-split-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+/* 1024px = --bp-desktop (frontend_shared/tokens.css); keep in sync. */
+@media (min-width: 1024px) {
+  /* Sticky, not a second scroller — the frame owns the only overflow (DESIGN.md §1). */
+  .hz-split-detail {
+    position: sticky;
+    top: 0;
+  }
+}
+
+/* The detail pane's own ground. The idle variant is dashed and unfilled so an empty
+   pane reads as "nothing chosen yet" rather than as a card that failed to load. */
+.pane {
+  padding: var(--sp-4);
+  border-radius: var(--radius);
+  border: var(--border-width) solid var(--c-border);
+  background: var(--c-surface-2);
+  box-shadow: var(--shadow-sm);
+}
+.pane-idle {
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+}
+
 /* The hot zone (DESIGN.md §2): the page's primary action, full width, --tap-lg,
    pinned to the bottom of the frame above the navbar so it never scrolls away.
    The negative margins cancel the shell's own 16px frame padding so the dock
@@ -810,4 +846,261 @@ body {
    portal does not bridge; --radius is the DESIGN.md §8 card radius. */
 .load-alert {
   border-radius: var(--radius);
+}
+
+/* Alert's own dismiss control is a bare <button> around a 16px glyph — 16x16 of
+   target. --tap-min is the floor in BOTH dimensions, icon-only included (§8). */
+.wait-alert button {
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+.wait-alert button:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+/* TabButtons at Apex size. The library builds its tabs from Buttons carrying
+   `!h-6.5` (26px) — desk density, half the 44px floor. That class is NOT bridged
+   below on purpose, so the buttons arrive with no height at all and these
+   min-heights are what governs; nothing is overridden and nothing is forked. */
+.trip-tabs {
+  align-self: start;
+}
+.trip-tabs > div {
+  border-radius: var(--radius-pill);
+  padding: var(--sp-1);
+  gap: var(--sp-1);
+}
+.trip-tabs button {
+  min-height: var(--tap-md);
+  min-width: var(--tap-min);
+  border-radius: var(--radius-pill);
+  padding-inline: var(--sp-4);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+}
+.trip-tabs button:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+/* Progress has no colour prop, so the boarded bar takes the Apex palette the only
+   way the component allows — through the class it was handed. The track keeps the
+   library's structure; only the two paint values arrive from tokens. */
+.board-bar [role="progressbar"] {
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--c-ink) 10%, transparent);
+}
+.board-bar [role="progressbar"] > div {
+  background: var(--c-primary);
+  transition: width 0.4s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .board-bar [role="progressbar"] > div {
+    transition: none;
+  }
+}
+
+/* Dialog's close control has the same 16px-glyph problem as Alert's. */
+.dialog-content button {
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+}
+
+/* ---------------------------------------------------------------------------
+   frappe-ui token bridge — the classes the SECOND wave of adopted components
+   carries (TabButtons, Progress, Dialog, and Button's hover/press/focus states).
+   Found by listing every class in the rendered DOM that no rule in the document
+   matched, not by reading the library's sources, so nothing here is speculative.
+
+   Four class names are deliberately ABSENT and must stay absent:
+     !h-6.5, !rounded-[9px]        — desk-density tab sizing; .trip-tabs above
+                                     supplies the Apex target instead.
+     focus-visible:ring-outline-gray-3
+     focus-visible:ring-outline-green-2
+                                   — per-theme ring colours. DESIGN.md §8 gives the
+                                     portal ONE focus ring, --c-focus, applied below.
+   --------------------------------------------------------------------------- */
+.min-h-7 {
+  min-height: 1.75rem;
+}
+.min-h-screen {
+  min-height: 100vh;
+}
+.h-2 {
+  height: 0.5rem;
+}
+.max-w-lg {
+  max-width: 32rem;
+}
+/* Load-bearing, not cosmetic: without it the "fixed" overlay keeps its static
+   position and the whole dialog lands one viewport BELOW the fold — measured at
+   390px, top resolved to 900px. */
+.inset-0 {
+  inset: 0;
+}
+/* The shell's own sticky header and bottom nav sit at z-index 20 and would paint
+   over a modal that declares none. Above them, below nothing else. */
+.dialog-overlay {
+  z-index: 30;
+}
+.rounded-xl {
+  border-radius: 0.75rem;
+}
+.shadow-xl {
+  box-shadow: var(--shadow-lg);
+}
+.gap-0\.5 {
+  gap: 0.125rem;
+}
+.p-px {
+  padding: 1px;
+}
+.my-8 {
+  margin-block: 2rem;
+}
+.pt-4 {
+  padding-top: 1rem;
+}
+.pt-5 {
+  padding-top: 1.25rem;
+}
+.pb-6 {
+  padding-bottom: 1.5rem;
+}
+.pb-7 {
+  padding-bottom: 1.75rem;
+}
+/* 640px is Tailwind's own `sm`, not an Apex breakpoint: it is the value the
+   library's markup was written against, repeated byte for byte. */
+@media (min-width: 640px) {
+  .sm\:px-6 {
+    padding-inline: 1.5rem;
+  }
+}
+.inline-block {
+  display: inline-block;
+}
+.align-middle {
+  vertical-align: middle;
+}
+.overflow-y-auto {
+  overflow-y: auto;
+}
+.leading-6 {
+  line-height: 1.5rem;
+}
+.rounded-md {
+  border-radius: 0.375rem;
+}
+.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+.bg-transparent {
+  background-color: transparent;
+}
+/* Logical, not `margin-left`: these two stack the library's own rows, and a
+   physical margin puts the gap on the wrong side of an Arabic screen (§9). */
+.space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  margin-inline-start: 0.5rem;
+}
+.space-y-\[10px\] > :not([hidden]) ~ :not([hidden]) {
+  margin-block-start: 10px;
+}
+
+/* Tailwind composes a ring from custom properties; these two reproduce just the
+   inset variant the library's tab strip asks for. */
+.ring-1.ring-inset {
+  box-shadow: inset 0 0 0 1px var(--tw-ring-color, var(--outline-gray-1));
+}
+.ring-outline-gray-1 {
+  --tw-ring-color: var(--outline-gray-1);
+}
+
+/* The dialog scrim. Mixed from --c-ink rather than a literal black so it dims the
+   same amount in both themes; the library's own `dark:` variant is keyed to a
+   Tailwind darkMode config this build does not run, so the dark value is attached
+   to the attribute Apex actually sets. */
+.bg-black-overlay-200 {
+  background-color: color-mix(in srgb, var(--c-ink) 40%, transparent);
+}
+[data-theme="dark"] .dark\:bg-black-overlay-700 {
+  background-color: color-mix(in srgb, #000 70%, transparent);
+}
+.bg-surface-modal {
+  background-color: var(--surface-modal);
+}
+
+/* Button press feedback. `green-700` / `green-800` are core-palette greens that no
+   preset variable resolves, so they are the one place the bridge cannot forward a
+   value — mixing --c-primary toward black keeps the press on the Apex palette and
+   inside both themes instead of pinning a second green to the screen. */
+.hover\:bg-green-700:hover {
+  background-color: color-mix(in srgb, var(--c-primary) 86%, black);
+}
+.active\:bg-green-800:active {
+  background-color: color-mix(in srgb, var(--c-primary) 74%, black);
+}
+.\!bg-surface-white {
+  background-color: var(--surface-white) !important;
+}
+.\!bg-transparent {
+  background-color: transparent !important;
+}
+.\!border-outline-gray-1 {
+  border-color: var(--outline-gray-1) !important;
+}
+.\!text-ink-gray-5 {
+  color: var(--ink-gray-5) !important;
+}
+.\!text-ink-gray-8 {
+  color: var(--ink-gray-8) !important;
+}
+.hover\:\!bg-surface-gray-3\/80:hover {
+  background-color: color-mix(in srgb, var(--surface-gray-3) 80%, transparent) !important;
+}
+.hover\:\!text-ink-gray-7:hover {
+  color: var(--ink-gray-7) !important;
+}
+
+.duration-150 {
+  transition-duration: 150ms;
+}
+.transition-\[transform\2c background-color\2c color\2c box-shadow\2c border-color\] {
+  transition-property: transform, background-color, color, box-shadow, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.ease-out {
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .motion-safe\:active\:scale-\[0\.98\]:active {
+    transform: scale(0.98);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .motion-reduce\:transform-none {
+    transform: none;
+  }
+  .motion-reduce\:transition-none {
+    transition-property: none;
+  }
+}
+
+/* One focus ring for the whole portal (§8). `focus:outline-none` clears the UA
+   ring the library asks to remove; the Apex ring is declared after it so a
+   keyboard user never ends up with neither. */
+.focus\:outline-none:focus,
+.focus-visible\:outline-none:focus-visible,
+.outline-none {
+  outline: none;
+}
+.focus-visible\:ring:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
 }

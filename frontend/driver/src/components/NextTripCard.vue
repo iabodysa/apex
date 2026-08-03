@@ -52,7 +52,7 @@
 import { computed } from "vue";
 import { Badge, Button } from "frappe-ui";
 import EmptyState from "@shared/components/EmptyState.vue";
-import Panel from "./Panel.vue";
+import Panel from "@shared/components/Panel.vue";
 import Icon from "./Icon.vue";
 import { useI18n } from "../i18n";
 

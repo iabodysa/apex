@@ -1,1 +1,1 @@
-.adhoc-row[data-v-e91f0c29]{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:var(--radius);background:color-mix(in srgb,var(--c-ink) 4%,transparent)}
+.stale-note[data-v-0c0f97ee]{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius);font-size:.8125rem;font-weight:600;background:var(--c-warning-bg);color:var(--c-warning)}

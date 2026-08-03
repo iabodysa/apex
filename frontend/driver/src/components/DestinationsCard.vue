@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import Panel from "./Panel.vue";
+import Panel from "@shared/components/Panel.vue";
 import Icon from "./Icon.vue";
 import { useI18n } from "../i18n";
 

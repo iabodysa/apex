@@ -81,6 +81,19 @@ const messages = {
       notifyHrSending: "Notifying…",
       notifyHrDone: "HR notified",
       notifyHrFailed: "Couldn't notify HR. Please try again.",
+      notifyHrWindow: "HR is notified only within {n} days of expiry.",
+      noRideHint: "Request one and the fleet team will schedule it.",
+      more: "More",
+      step: {
+        openRide: "Open my ride",
+        viewRide: "See my ride",
+        requestRide: "Request a ride",
+      },
+      stepHint: {
+        openRide: "Show your boarding pass at the door.",
+        viewRide: "Route, driver and departure time.",
+        requestRide: "Tell the fleet team where you need to go.",
+      },
     },
     contacts: {
       title: "My Contacts",
@@ -88,6 +101,7 @@ const messages = {
       todayDriver: "Today's driver",
       housingOffice: "Housing office",
       empty: "No contacts available right now.",
+      emptyHint: "Ask your supervisor to add them.",
     },
     profile: {
       title: "My Profile",
@@ -324,6 +338,7 @@ const messages = {
         "No worker link was provided. Open the personal link your supervisor shared with you.",
       rateLimited: "Too many requests. Please wait a moment and try again.",
       sessionExpired: "Your session expired. Please refresh the page.",
+      retryHint: "Check your connection and try again.",
     },
   },
   ar: {
@@ -390,6 +405,19 @@ const messages = {
       notifyHrSending: "جارٍ الإبلاغ…",
       notifyHrDone: "تم إبلاغ الموارد البشرية",
       notifyHrFailed: "تعذّر إبلاغ الموارد البشرية. حاول مرة أخرى.",
+      notifyHrWindow: "لا يتم إبلاغ الموارد البشرية إلا قبل {n} يوم من انتهاء الإقامة.",
+      noRideHint: "اطلب رحلة وسيقوم فريق الأسطول بجدولتها.",
+      more: "المزيد",
+      step: {
+        openRide: "افتح رحلتي",
+        viewRide: "عرض رحلتي",
+        requestRide: "اطلب رحلة",
+      },
+      stepHint: {
+        openRide: "اعرض بطاقة الصعود عند الباب.",
+        viewRide: "المسار والسائق ووقت الانطلاق.",
+        requestRide: "أخبر فريق الأسطول إلى أين تريد الذهاب.",
+      },
     },
     contacts: {
       title: "جهات الاتصال",
@@ -397,6 +425,7 @@ const messages = {
       todayDriver: "سائق اليوم",
       housingOffice: "مكتب الإسكان",
       empty: "لا توجد جهات اتصال متاحة حالياً.",
+      emptyHint: "اطلب من مشرفك إضافتها.",
     },
     profile: {
       title: "ملفي الشخصي",
@@ -633,6 +662,7 @@ const messages = {
         "لم يتم تقديم رابط العامل. افتح الرابط الشخصي الذي شاركه معك مشرفك.",
       rateLimited: "طلبات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.",
       sessionExpired: "انتهت صلاحية الجلسة. يرجى تحديث الصفحة.",
+      retryHint: "تحقق من اتصالك ثم حاول مرة أخرى.",
     },
   },
   ur: {
@@ -689,6 +719,19 @@ const messages = {
       notifyHrSending: "اطلاع دی جا رہی ہے…",
       notifyHrDone: "ایچ آر کو مطلع کر دیا",
       notifyHrFailed: "ایچ آر کو مطلع نہیں کر سکے۔ دوبارہ کوشش کریں۔",
+      notifyHrWindow: "ایچ آر کو اقامہ ختم ہونے سے {n} دن کے اندر ہی مطلع کیا جاتا ہے۔",
+      noRideHint: "سواری کی درخواست دیں، فلیٹ ٹیم شیڈول کر دے گی۔",
+      more: "مزید",
+      step: {
+        openRide: "میری سواری کھولیں",
+        viewRide: "میری سواری دیکھیں",
+        requestRide: "سواری کی درخواست",
+      },
+      stepHint: {
+        openRide: "دروازے پر اپنا بورڈنگ پاس دکھائیں۔",
+        viewRide: "راستہ، ڈرائیور اور روانگی کا وقت۔",
+        requestRide: "فلیٹ ٹیم کو بتائیں آپ کہاں جانا چاہتے ہیں۔",
+      },
     },
     contacts: {
       title: "میرے رابطے",
@@ -696,6 +739,7 @@ const messages = {
       todayDriver: "آج کا ڈرائیور",
       housingOffice: "ہاؤسنگ آفس",
       empty: "اس وقت کوئی رابطہ دستیاب نہیں۔",
+      emptyHint: "اپنے سپروائزر سے شامل کرنے کو کہیں۔",
     },
     profile: {
       title: "میرا پروفائل",
@@ -930,6 +974,7 @@ const messages = {
       noLink: "کوئی ورکر لنک فراہم نہیں کیا گیا۔ اپنے سپروائزر کا بھیجا ذاتی لنک کھولیں۔",
       rateLimited: "بہت زیادہ درخواستیں۔ تھوڑا انتظار کر کے دوبارہ کوشش کریں۔",
       sessionExpired: "آپ کا سیشن ختم ہو گیا۔ صفحہ ریفریش کریں۔",
+      retryHint: "اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔",
     },
   },
   hi: {
@@ -986,6 +1031,19 @@ const messages = {
       notifyHrSending: "सूचित किया जा रहा है…",
       notifyHrDone: "एचआर को सूचित किया",
       notifyHrFailed: "एचआर को सूचित नहीं कर सके। पुनः प्रयास करें।",
+      notifyHrWindow: "एचआर को इक़ामा समाप्ति के {n} दिन के भीतर ही सूचित किया जाता है।",
+      noRideHint: "सवारी का अनुरोध करें, फ़्लीट टीम उसे तय कर देगी।",
+      more: "अधिक",
+      step: {
+        openRide: "मेरी सवारी खोलें",
+        viewRide: "मेरी सवारी देखें",
+        requestRide: "सवारी का अनुरोध",
+      },
+      stepHint: {
+        openRide: "दरवाज़े पर अपना बोर्डिंग पास दिखाएँ।",
+        viewRide: "मार्ग, ड्राइवर और प्रस्थान समय।",
+        requestRide: "फ़्लीट टीम को बताएँ आपको कहाँ जाना है।",
+      },
     },
     contacts: {
       title: "मेरे संपर्क",
@@ -993,6 +1051,7 @@ const messages = {
       todayDriver: "आज का ड्राइवर",
       housingOffice: "आवास कार्यालय",
       empty: "अभी कोई संपर्क उपलब्ध नहीं।",
+      emptyHint: "अपने सुपरवाइज़र से जोड़ने को कहें।",
     },
     profile: {
       title: "मेरी प्रोफ़ाइल",
@@ -1227,6 +1286,7 @@ const messages = {
       noLink: "कोई वर्कर लिंक नहीं दिया गया। सुपरवाइज़र द्वारा भेजा निजी लिंक खोलें।",
       rateLimited: "बहुत अधिक अनुरोध। थोड़ा रुककर पुनः प्रयास करें।",
       sessionExpired: "आपका सत्र समाप्त हो गया। पृष्ठ रिफ़्रेश करें।",
+      retryHint: "अपना कनेक्शन जाँचें और फिर कोशिश करें।",
     },
   },
   bn: {
@@ -1283,6 +1343,19 @@ const messages = {
       notifyHrSending: "জানানো হচ্ছে…",
       notifyHrDone: "এইচআরকে জানানো হয়েছে",
       notifyHrFailed: "এইচআরকে জানানো যায়নি। আবার চেষ্টা করুন।",
+      notifyHrWindow: "ইকামা শেষ হওয়ার {n} দিনের মধ্যেই কেবল এইচআরকে জানানো হয়।",
+      noRideHint: "যাত্রার অনুরোধ করুন, ফ্লিট দল সেটি নির্ধারণ করবে।",
+      more: "আরও",
+      step: {
+        openRide: "আমার যাত্রা খুলুন",
+        viewRide: "আমার যাত্রা দেখুন",
+        requestRide: "যাত্রার অনুরোধ",
+      },
+      stepHint: {
+        openRide: "দরজায় আপনার বোর্ডিং পাস দেখান।",
+        viewRide: "পথ, চালক ও ছাড়ার সময়।",
+        requestRide: "ফ্লিট দলকে বলুন কোথায় যেতে চান।",
+      },
     },
     contacts: {
       title: "আমার যোগাযোগ",
@@ -1290,6 +1363,7 @@ const messages = {
       todayDriver: "আজকের চালক",
       housingOffice: "আবাসন অফিস",
       empty: "এই মুহূর্তে কোনো যোগাযোগ নেই।",
+      emptyHint: "আপনার সুপারভাইজারকে যোগ করতে বলুন।",
     },
     profile: {
       title: "আমার প্রোফাইল",
@@ -1524,6 +1598,7 @@ const messages = {
       noLink: "কোনো ওয়ার্কার লিঙ্ক দেওয়া হয়নি। সুপারভাইজারের পাঠানো ব্যক্তিগত লিঙ্ক খুলুন।",
       rateLimited: "অনেক বেশি অনুরোধ। একটু পরে আবার চেষ্টা করুন।",
       sessionExpired: "আপনার সেশন শেষ হয়েছে। পৃষ্ঠা রিফ্রেশ করুন।",
+      retryHint: "আপনার সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
     },
   },
 };
