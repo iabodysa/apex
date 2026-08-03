@@ -50,14 +50,14 @@ defineProps({
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 3px;
+  padding: var(--sp-1);
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--c-ink) 8%, transparent);
 }
 .lang-opt {
-  min-width: 44px;
-  min-height: 44px;
-  padding: 4px 10px;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  padding: var(--sp-1) var(--sp-3);
   border-radius: var(--radius-pill);
   font-size: var(--fs-sm);
   font-weight: var(--fw-semibold);

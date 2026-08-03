@@ -112,12 +112,12 @@ const shellVars = computed(() => ({
   z-index: 20;
   background: var(--c-header-bg);
   color: var(--c-header-ink);
-  padding: 14px 20px 16px;
+  padding: var(--sp-4) var(--sp-5);
 }
 .mc-head-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--sp-3);
 }
 .mc-greet {
   min-width: 0;
@@ -135,15 +135,15 @@ const shellVars = computed(() => ({
   margin-inline-start: auto;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-2);
 }
 /* Tinted from the header ink rather than a literal white, so the band keeps its
    8% lift when the header goes dark instead of staying a light-mode overlay. */
 .mc-progress {
-  margin-top: 14px;
+  margin-top: var(--sp-4);
   background: color-mix(in srgb, var(--c-header-ink) 8%, transparent);
   border-radius: var(--radius);
-  padding: 12px 14px;
+  padding: var(--sp-3) var(--sp-4);
 }
 
 /* ---- scroll column ---- */
@@ -154,10 +154,10 @@ const shellVars = computed(() => ({
   /* Reaching the end of the column must not start dragging the page behind it —
      one-handed scrolling overshoots constantly. */
   overscroll-behavior: contain;
-  padding: 16px;
+  padding: var(--sp-4);
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  gap: var(--sp-3);
 }
 
 /* ---- bottom nav ---- */
@@ -166,10 +166,10 @@ const shellVars = computed(() => ({
   bottom: 0;
   z-index: 20;
   display: flex;
-  gap: 4px;
+  gap: var(--sp-1);
   background: var(--c-surface-2);
   border-top: var(--border-width) solid var(--c-border);
-  padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px));
+  padding: var(--sp-2) var(--sp-2) calc(var(--sp-2) + env(safe-area-inset-bottom, 0px));
 }
 /* Each nav item becomes an equal-width --tap-lg target, whatever element it is. */
 .mc-nav :slotted(*) {
@@ -179,7 +179,7 @@ const shellVars = computed(() => ({
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: var(--sp-1);
   text-decoration: none;
   color: var(--c-muted);
   font-size: var(--fs-xs);
