@@ -429,6 +429,6 @@ class TelecomControl {
 					this._open_drawer(this.current_sim);
 				}
 			})
-			.finally(() => frappe.dom.unfreeze());
+			.always(() => frappe.dom.unfreeze());
 	}
 }

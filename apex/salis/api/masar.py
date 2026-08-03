@@ -915,12 +915,16 @@ def get_worker_transport(token=None):
             req.get("dispatch_trip") and not is_upcoming and req["dispatch_trip"] in rated_trips
         )
 
+        dispatch_trip = req.get("dispatch_trip") or _live_dispatch_trip(req["name"])
         trip = {
             "transport_request": req["name"],
             # [#rf9139]
-            "dispatch_trip": req.get("dispatch_trip") or _live_dispatch_trip(req["name"]),
+            "dispatch_trip": dispatch_trip,
             "request_type": req.get("request_type"),
             "status": req.get("status"),
+            "trip_status": frappe.db.get_value("Dispatch Trip", dispatch_trip, "status")
+            if dispatch_trip
+            else None,
             "pickup_point": req.get("pickup_point"),
             "pickup_datetime": pickup_datetime,
             "depart_time": depart_time,

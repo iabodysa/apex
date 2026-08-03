@@ -46,7 +46,7 @@
         </div>
 
         <!-- Trip progress bar (status stepper) -->
-        <TripProgressBar :status="trip.status" />
+        <TripProgressBar :status="trip.trip_status" />
 
         <!-- Vehicle + driver -->
         <div v-if="trip.vehicle || trip.driver" class="grid grid-cols-1 gap-3">
@@ -199,7 +199,7 @@
               </div>
             </div>
             
-            <div v-if="trip.status === 'Completed' && trip.dispatch_trip && !trip.has_rated" class="mt-2">
+            <div v-if="trip.status === 'Fulfilled' && trip.dispatch_trip && !trip.has_rated" class="mt-2">
               <TripRating :trip="trip" @rated="trip.has_rated = true" />
             </div>
           </li>

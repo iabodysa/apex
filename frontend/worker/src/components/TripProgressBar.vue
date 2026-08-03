@@ -35,7 +35,7 @@ const props = defineProps({
   status: { type: String, default: "" },
 });
 
-const STATUS_ORDER = ["Planned", "Dispatched", "Started", "Completed"];
+const STATUS_ORDER = ["Planned", "Dispatched", "Completed"];
 
 const steps = computed(() => {
   const currentIdx = STATUS_ORDER.indexOf(props.status);

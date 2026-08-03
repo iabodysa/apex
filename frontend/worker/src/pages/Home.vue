@@ -245,11 +245,10 @@ const rideEta = computed(() => {
   return m === null || m === undefined ? null : m;
 });
 
-// What we CAN show truthfully today: the trip's own status. "Dispatched" is the
-// stored Salis trip status meaning the driver has left, so the worker can trust
-// they're on the way. Keyed on the raw stored English value (status is server-
-// driven; tEnum localizes the badge separately).
-const rideEnRoute = computed(() => ride.value?.status === "Dispatched");
+// The RIDE's own status, not the request's: "Dispatched" is a Dispatch Trip state
+// meaning the driver has left, while the request beside it is still "Scheduled".
+// Keyed on the raw stored English value; tEnum localizes the badge separately.
+const rideEnRoute = computed(() => ride.value?.trip_status === "Dispatched");
 const alerts = computed(() => home.data?.profile_alerts || []);
 
 // The bed chip now reads as a real location: prefer the human building/room name,
