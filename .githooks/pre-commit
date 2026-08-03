@@ -16,6 +16,7 @@ set -u
 
 hookdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 gate="$hookdir/../.claude/tools/scripts/check_commit_metadata.py"
+claims="$HOME/AI_Brain/superpower/tools/claim_guard.py"
 
 ident_email() {
 	git var "$1" 2>/dev/null | sed -n 's/.*<\(.*\)>.*/\1/p'
@@ -41,5 +42,16 @@ if ! command -v python3 >/dev/null 2>&1; then
 	echo "pre-commit: python3 is required to run the commit metadata gate" >&2
 	exit 1
 fi
+
+# A path another session holds is refused BEFORE the metadata gate: a claim collision is
+# the cheaper answer and there is no point spending the identity check to reach it. Fails
+# closed like the gate above — a missing tool means the check did not run, which must not
+# read as permission. Only pre-commit carries this; a claim is about who may write now, and
+# by push time the write has already happened.
+if [ ! -f "$claims" ]; then
+	echo "pre-commit: $claims is missing, so the shared-path claim check DID NOT RUN" >&2
+	exit 1
+fi
+python3 "$claims" check --staged || exit 1
 
 exec python3 "$gate" email "$author" "$committer"
