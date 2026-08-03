@@ -141,7 +141,7 @@ class FuelApprovalConsole {
 			detail = "";
 		}
 		if (!detail && r && Array.isArray(r.exc)) detail = r.exc.join(" ");
-		return frappe.utils.strip_html(detail || "") || __("Could not load pending fuel requests.");
+		return strip_html(detail || "") || __("Could not load pending fuel requests.");
 	}
 
 	_render_loading() {

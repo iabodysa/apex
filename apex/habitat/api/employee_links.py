@@ -10,6 +10,8 @@ form loaded.
 
 from __future__ import annotations
 
+import frappe
+
 
 def get_data(data=None):
     data = data or {}
@@ -23,14 +25,14 @@ def get_data(data=None):
         # [#ofva29]
     })
     data["transactions"].extend([
-        {"label": "Accommodation",
+        {"label": frappe._("Accommodation"),
          "items": ["Housing Assignment", "Housing Checkout"]},
-        {"label": "Custody",
+        {"label": frappe._("Custody"),
          "items": ["Custody Issue", "Custody Return", "Custody Damage Assessment"]},
-        {"label": "Tasks",
+        {"label": frappe._("Tasks"),
          "items": ["Scheduled Task Instance"]},
         # [#9vzeew]
-        {"label": "Salis",
+        {"label": frappe._("Salis"),
          "items": ["Salis Driver", "Movement Cost Recovery"]},
     ])
     return data
