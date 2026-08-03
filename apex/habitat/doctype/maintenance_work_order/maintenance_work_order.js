@@ -30,11 +30,11 @@ frappe.ui.form.on("Maintenance Work Order", {
 			});
 		}
 
-		// [#hnxa95]
-		if (
-			(frm.doc.status === "Completed" || frm.doc.status === "Closed") &&
-			!frm.doc.completion_photo
-		) {
+		// The warning has to arrive while the photo can still be attached. "Closed" is not
+		// one of this Work Order's statuses, and by the time it reads "Completed" the photo
+		// is already on file — mark_completed refuses without one — so the pair only ever
+		// fired on a state that cannot exist, and the supervisor met the refusal instead.
+		if (frm.doc.status === "In Progress" && !frm.doc.completion_photo) {
 			frm.dashboard.add_comment(
 				__("Completion photo required to close this work order."),
 				"orange",
