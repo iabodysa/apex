@@ -27,7 +27,7 @@ defineProps([
           <div class="ph-tags">
             <span class="tag">{{ trim(panel.vehicle.fuel) || t("common.none") }}</span>
             <span class="tag">{{ trim(panel.vehicle.project) || t("panel.noProject") }}</span>
-            <span class="tag"><Icon name="pin" :size="11" /> {{ panel.vehicle.area }}</span>
+            <span class="tag"><Icon name="pin" :size="11" /> {{ trim(panel.vehicle.area) || t("common.none") }}</span>
             <span class="sbadge" :class="sb(panel.vehicle).cls" style="font-size:10px;display:inline-flex;gap:4px"><Icon :name="sb(panel.vehicle).ic" :size="11" />{{ sb(panel.vehicle).label }}</span>
           </div>
         </div>

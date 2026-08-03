@@ -295,6 +295,13 @@ export function useFleetActions({
       openStolenForm();
       return;
     }
+    // A stolen vehicle's state is held by its open Theft incident, not by the vehicle
+    // row, so a plain status write would be overruled on the next load. Recovery is the
+    // only way back to service, and it is what closing the incident means.
+    if (v.vehicle_status === "stolen") {
+      await recoverVehicle(plate);
+      return;
+    }
     const icons = { assigned: "lock", available: "circle-dot", workshop: "wrench", stopped: "circle-pause" };
     const ok = await cfShow(
       t("confirm.changeStatusTitle"),

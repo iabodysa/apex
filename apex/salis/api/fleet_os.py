@@ -75,8 +75,15 @@ _STOP_REASON_MAP = {
 }
 
 
-def _vehicle_status(status: str, has_driver: bool) -> str:
-    """Map a Salis Vehicle.status to the design's vehicle_status string."""
+def _vehicle_status(status: str, has_driver: bool, theft=None) -> str:
+    """Map a Salis Vehicle.status to the design's vehicle_status string.
+
+    Theft is not one of Salis Vehicle.status's four options — reporting one submits a
+    Theft Vehicle Incident and the controller flips the vehicle to "Stopped" — so the
+    board's stolen state has to come from the open incident, or it reads as an ordinary
+    stop and the board's stolen filter can never match a vehicle."""
+    if theft and theft.get("status") != "closed":
+        return "stolen"
     if status == "Active":
         return "assigned" if has_driver else "available"
     return _STATUS_MAP.get(status, "available")
@@ -188,6 +195,21 @@ def get_fleet_os():
         return out
 
     cat_fuel: dict[str, str] = _read(reader_errors, _("fuel grades"), _read_cat_fuel, {})
+
+    office_names = list({v.rental_office for v in vehicles if v.get("rental_office")})
+
+    def _read_office_city():
+        out: dict[str, str] = {}
+        if office_names:
+            for o in frappe.get_all(
+                "Rental Office",
+                filters={"name": ["in", office_names]},
+                fields=["name", "city"],
+            ):
+                out[o.name] = (o.city or "").strip().upper()
+        return out
+
+    office_city: dict[str, str] = _read(reader_errors, _("Rental Office"), _read_office_city, {})
 
     # [#ev30tz]
     driver_names = {v.current_driver for v in vehicles if v.get("current_driver")}
@@ -370,9 +392,11 @@ def get_fleet_os():
             "next_expiry_date": str(v.next_expiry_date or ""),
             "rental_office": v.rental_office or "",
             "sheet": _sheet_for(v.vehicle_category),
-            "area": "",  # [#6ptyey]
+            "area": office_city.get(v.rental_office or "", ""),
             "project": v.project or "",
-            "vehicle_status": _vehicle_status(v.status, bool(v.get("current_driver"))),
+            "vehicle_status": _vehicle_status(
+                v.status, bool(v.get("current_driver")), theft_by_vehicle.get(v.name)
+            ),
             # [#5hq10c]
             "workshop_notes": (ws.notes or "") if ws else "",
             "workshop_date": ws_date,

@@ -5,6 +5,7 @@ import Icon from "./Icon.vue";
 defineProps([
   "f", "counts", "countsLoading", "hasDateFilter", "dateInfo",
   "filtersSheetOpen", "closeFiltersSheet",
+  "projectOptions", "areaOptions", "officeOptions",
   "setSheet", "setFuel", "setDateType", "setQuickDate", "clearDateFilter", "resetFilters", "t",
 ]);
 </script>
@@ -30,29 +31,23 @@ defineProps([
         </div>
         <div class="fg">
           <div class="fl">{{ t("sidebar.project") }}</div>
-          <select class="fs" v-model="f.project">
+          <select class="fs" v-model="f.project" :disabled="!projectOptions.length">
             <option value="">{{ t("sidebar.all") }}</option>
-            <option>KEETA</option><option>KEEMART</option><option>SHIPMENT</option>
-            <option>NINJA</option><option>NOON</option><option>ARAMEX</option>
-            <option>STARLINKS</option>
-            <option>NINJA-DIEANA</option>
+            <option v-for="o in projectOptions" :key="o">{{ o }}</option>
           </select>
         </div>
         <div class="fg">
           <div class="fl">{{ t("sidebar.area") }}</div>
-          <select class="fs" v-model="f.area">
+          <select class="fs" v-model="f.area" :disabled="!areaOptions.length">
             <option value="">{{ t("sidebar.all") }}</option>
-            <option>RIYADH</option><option>JADAH</option><option>MAKA</option>
-            <option>DAMAM</option><option>TAIF</option><option>MAJMA</option>
-            <option>KHARJ</option><option>YANBU</option>
+            <option v-for="o in areaOptions" :key="o">{{ o }}</option>
           </select>
         </div>
         <div class="fg">
           <div class="fl">{{ t("sidebar.rentalOffice") }}</div>
-          <select class="fs" v-model="f.office">
+          <select class="fs" v-model="f.office" :disabled="!officeOptions.length">
             <option value="">{{ t("sidebar.all") }}</option>
-            <option>AFMCO</option><option>SAFI - T</option><option>SAFI - R</option>
-            <option>WASEL</option><option>TRAFEL</option>
+            <option v-for="o in officeOptions" :key="o">{{ o }}</option>
           </select>
         </div>
         <div class="fg">

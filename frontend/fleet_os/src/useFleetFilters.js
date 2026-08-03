@@ -2,7 +2,7 @@
 // All board filtering/sorting/view state: the filter model, the filtered+sorted
 // list (his applyFilters), the driver-centric grouping, the empty-state chips,
 // board density, and the mobile filter-sheet toggle.
-import { reactive, ref, computed } from "vue";
+import { reactive, ref, computed, watch } from "vue";
 
 export function useFleetFilters({ vehicles, fmt, t }) {
   const { expiryFlag, trim, statusKey, calcTotalDaysNum } = fmt;
@@ -36,13 +36,26 @@ export function useFleetFilters({ vehicles, fmt, t }) {
   function setTriage(kind) {
     triageFilter.value = triageFilter.value === kind ? "" : kind;
   }
+  // A header click has to move the sort KEY, not only its direction: the sorter reads
+  // f.sort, so setting sortCol alone left every column sorting by whatever the toolbar
+  // dropdown last chose, and clicking "Office" merely reversed the plates.
   function onSortCol(col) {
     if (sortCol.value === col) sortDir.value *= -1;
     else {
       sortCol.value = col;
       sortDir.value = 1;
     }
+    f.sort = col;
   }
+  watch(
+    () => f.sort,
+    (s) => {
+      if (s !== sortCol.value) {
+        sortCol.value = s;
+        sortDir.value = 1;
+      }
+    },
+  );
   function setQuickDate(days) {
     const to = new Date();
     const from = new Date();
@@ -136,11 +149,15 @@ export function useFleetFilters({ vehicles, fmt, t }) {
       return true;
     });
 
-    const sort = f.sort;
+    // The toolbar offers "status", which is the endpoint's `vehicle_status`; reading the
+    // toolbar value straight off the row compared undefined to undefined and left the
+    // order untouched.
+    const sort = f.sort === "status" ? "vehicle_status" : f.sort;
     list = list.slice().sort((a, b) => {
-      if (sort === "drivers_desc") return b.history.length - a.history.length;
+      if (sort === "drivers_desc")
+        return (b.history.length - a.history.length) * sortDir.value;
       if (sort === "duration_desc")
-        return calcTotalDaysNum(b) - calcTotalDaysNum(a);
+        return (calcTotalDaysNum(b) - calcTotalDaysNum(a)) * sortDir.value;
       const va = (a[sort] || "").toString();
       const vb = (b[sort] || "").toString();
       return va.localeCompare(vb, "ar") * sortDir.value;
@@ -176,6 +193,19 @@ export function useFleetFilters({ vehicles, fmt, t }) {
     }
     return groups;
   });
+
+  // Filter options come from the board, never from a literal list: a hard-coded option
+  // that no vehicle carries can only empty the board, and it goes on offering itself
+  // long after the value behind it is renamed or retired.
+  const optionsFrom = (key) =>
+    computed(() =>
+      Array.from(new Set((vehicles.value || []).map((v) => trim(v[key])).filter(Boolean))).sort(
+        (a, b) => a.localeCompare(b, "ar"),
+      ),
+    );
+  const projectOptions = optionsFrom("project");
+  const areaOptions = optionsFrom("area");
+  const officeOptions = optionsFrom("rental_office");
 
   const dateInfo = computed(() => {
     if (!hasDateFilter.value) return "";
@@ -238,6 +268,7 @@ export function useFleetFilters({ vehicles, fmt, t }) {
     setSP, setSheet, setFuel, setDateType, setView, setTriage, onSortCol,
     setQuickDate, clearDateFilter, resetFilters,
     hasDateFilter, anyFilterActive, filtered, driverGroups, dateInfo, activeFilterChips,
+    projectOptions, areaOptions, officeOptions,
     density, toggleDensity,
     filtersSheetOpen, toggleFiltersSheet, closeFiltersSheet,
   };

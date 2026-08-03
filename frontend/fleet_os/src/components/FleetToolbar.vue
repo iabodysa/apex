@@ -18,6 +18,10 @@ defineProps([
             <option value="plate">{{ t("main.sortBy", { field: t("main.sortPlate") }) }}</option>
             <option value="status">{{ t("main.sortBy", { field: t("main.sortStatus") }) }}</option>
             <option value="vehicle_type">{{ t("main.sortBy", { field: t("main.sortType") }) }}</option>
+            <option value="sheet">{{ t("main.sortBy", { field: t("table.colType") }) }}</option>
+            <option value="rental_office">{{ t("main.sortBy", { field: t("table.colOffice") }) }}</option>
+            <option value="project">{{ t("main.sortBy", { field: t("table.colProject") }) }}</option>
+            <option value="area">{{ t("main.sortBy", { field: t("table.colArea") }) }}</option>
             <option value="drivers_desc">{{ t("main.sortBy", { field: t("main.sortMostDrivers") }) }}</option>
             <option value="duration_desc">{{ t("main.sortBy", { field: t("main.sortLongestRunning") }) }}</option>
           </select>

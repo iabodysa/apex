@@ -95,6 +95,7 @@ const {
   setSP, setSheet, setFuel, setDateType, setView, setTriage, onSortCol,
   setQuickDate, clearDateFilter, resetFilters,
   hasDateFilter, anyFilterActive, filtered, driverGroups, dateInfo, activeFilterChips,
+  projectOptions, areaOptions, officeOptions,
   density, toggleDensity,
   filtersSheetOpen, toggleFiltersSheet, closeFiltersSheet,
 } = useFleetFilters({ vehicles, fmt, t });
@@ -234,6 +235,7 @@ onUnmounted(() => {
     <FleetSidebar
       :f="f" :counts="counts" :countsLoading="countsLoading" :hasDateFilter="hasDateFilter"
       :dateInfo="dateInfo" :filtersSheetOpen="filtersSheetOpen" :closeFiltersSheet="closeFiltersSheet"
+      :projectOptions="projectOptions" :areaOptions="areaOptions" :officeOptions="officeOptions"
       :setSheet="setSheet" :setFuel="setFuel" :setDateType="setDateType" :setQuickDate="setQuickDate"
       :clearDateFilter="clearDateFilter" :resetFilters="resetFilters" :t="t"
     />

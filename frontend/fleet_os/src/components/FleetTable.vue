@@ -19,12 +19,12 @@ defineProps([
               <th @click="onSortCol('plate')">{{ t("table.colPlate") }}</th>
               <th @click="onSortCol('vehicle_type')">{{ t("table.colVehicle") }}</th>
               <th @click="onSortCol('rental_office')">{{ t("table.colOffice") }}</th>
-              <th @click="onSortCol('vehicle_status')">{{ t("table.colStatus") }}</th>
+              <th @click="onSortCol('status')">{{ t("table.colStatus") }}</th>
               <th>{{ t("table.colCurrentDriver") }}</th>
               <th @click="onSortCol('project')">{{ t("table.colProject") }}</th>
               <th @click="onSortCol('area')">{{ t("table.colArea") }}</th>
-              <th>{{ t("table.colDriverCount") }}</th>
-              <th>{{ t("table.colRunningDays") }}</th>
+              <th @click="onSortCol('drivers_desc')">{{ t("table.colDriverCount") }}</th>
+              <th @click="onSortCol('duration_desc')">{{ t("table.colRunningDays") }}</th>
               <th>{{ t("table.colAction") }}</th>
             </tr>
           </thead>
