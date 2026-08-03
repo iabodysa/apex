@@ -149,7 +149,7 @@ import CountItemEditor from "../components/CountItemEditor.vue";
 import ListSkeleton from "../components/ListSkeleton.vue";
 import LoadError from "../components/LoadError.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
-import { useDesktop } from "../useBreakpoint";
+import { useDesktop } from "@shared/useBreakpoint.js";
 import { building, clearBuilding, countProgress, selectBuilding } from "../session";
 
 const { t } = useI18n();

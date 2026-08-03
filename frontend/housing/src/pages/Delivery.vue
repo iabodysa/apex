@@ -192,7 +192,7 @@ import DeliveryDetail from "../components/DeliveryDetail.vue";
 import ListSkeleton from "../components/ListSkeleton.vue";
 import LoadError from "../components/LoadError.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
-import { useDesktop } from "../useBreakpoint";
+import { useDesktop } from "@shared/useBreakpoint.js";
 import { nextExit } from "../gates";
 
 const { t } = useI18n();

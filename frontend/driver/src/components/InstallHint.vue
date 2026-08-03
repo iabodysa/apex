@@ -4,51 +4,64 @@
        hides entirely once the app runs standalone. Where the browser supports a
        programmatic prompt (Chrome/Android) an Install button fires it; otherwise a
        short manual instruction is shown (iOS Safari has no install API). -->
-  <div v-if="showInstallHint" class="card card-pad install-hint">
-    <div class="flex items-start gap-3">
-      <span class="avatar h-10 w-10 shrink-0" style="background: var(--c-primary); color: var(--c-primary-ink)">
-        <Icon name="download" :size="20" />
-      </span>
-      <div class="min-w-0 flex-1">
-        <p class="font-bold leading-tight">{{ t("install.title") }}</p>
-        <p class="text-sm text-muted mt-0.5">
-          {{ canPrompt ? t("install.body") : t("install.manual") }}
-        </p>
-        <div class="mt-3 flex items-center gap-2">
-          <button v-if="canPrompt" class="btn btn-primary" style="width: auto; padding-inline: 18px" @click="onInstall">
-            <Icon name="download" :size="18" /> {{ t("install.add") }}
-          </button>
-          <button class="btn btn-outline" style="width: auto; padding-inline: 16px" @click="dismissInstallHint">
-            {{ t("install.dismiss") }}
-          </button>
-        </div>
-      </div>
-      <button class="install-x" :aria-label="t('install.dismiss')" @click="dismissInstallHint">
-        <Icon name="x" :size="18" />
-      </button>
+  <div v-if="showInstallHint" class="install-hint">
+    <span class="install-mark"><Icon name="download" :size="20" /></span>
+    <p class="install-text">{{ canPrompt ? t("install.body") : t("install.manual") }}</p>
+    <div class="install-actions">
+      <Button
+        v-if="canPrompt"
+        class="row-btn"
+        variant="solid"
+        theme="green"
+        :label="t('install.add')"
+        @click="promptInstall"
+      />
+      <Button class="row-btn" variant="ghost" :label="t('install.dismiss')" @click="dismissInstallHint" />
     </div>
   </div>
 </template>
 
 <script setup>
+import { Button } from "frappe-ui";
 import Icon from "./Icon.vue";
 import { useI18n } from "../i18n";
 import { canPrompt, dismissInstallHint, promptInstall, showInstallHint } from "../pwa";
 
 const { t } = useI18n();
-
-function onInstall() {
-  promptInstall();
-}
 </script>
 
 <style scoped>
 .install-hint {
-  border: var(--border-width) solid var(--c-primary);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius);
+  border: var(--border-width) solid var(--c-border);
+  background: var(--c-surface);
 }
-.install-x {
+.install-mark {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  height: var(--sp-8);
+  width: var(--sp-8);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--c-primary) 10%, transparent);
+  color: var(--c-primary);
+}
+.install-text {
+  flex: 1;
+  min-width: 140px;
+  font-size: var(--fs-sm);
   color: var(--c-ink-soft);
-  align-self: flex-start;
-  padding: 2px;
+  line-height: 1.5;
+}
+.install-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-inline-start: auto;
 }
 </style>

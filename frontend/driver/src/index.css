@@ -17,6 +17,384 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------------------------------------------------------------------------
+   frappe-ui token bridge — variables.
+
+   frappe-ui's components are styled with its three semantic families, and its
+   tailwind preset resolves every one of them through a CSS variable —
+   `var(--surface-green-3, #hex)`. Re-declaring those variables in terms of the
+   Apex tokens is the supported way to give the library this product's palette:
+   the components keep their own structure, and colour still arrives from one
+   place. Declared after `@tailwind utilities` so it outranks any `:root` block
+   the preset emits into the base layer; the right-hand side is theme-agnostic
+   because the Apex tokens switch themselves. Same mapping as housing/src/index.css.
+   --------------------------------------------------------------------------- */
+:root,
+[data-theme="dark"] {
+  --surface-white: var(--c-surface-2);
+  --surface-gray-1: var(--c-surface);
+  --surface-gray-2: color-mix(in srgb, var(--c-ink) 6%, transparent);
+  --surface-gray-3: color-mix(in srgb, var(--c-ink) 10%, transparent);
+  --surface-gray-4: color-mix(in srgb, var(--c-ink) 16%, transparent);
+  --surface-gray-5: var(--c-ink-soft);
+  --surface-gray-6: var(--c-ink-soft);
+  --surface-gray-7: var(--c-ink);
+  --surface-modal: var(--c-surface-2);
+  --surface-cards: var(--c-surface-2);
+  --surface-menu-bar: var(--c-surface);
+  --surface-selected: color-mix(in srgb, var(--c-primary) 12%, transparent);
+  --surface-green-1: color-mix(in srgb, var(--c-success) 8%, transparent);
+  --surface-green-2: var(--c-success-bg);
+  --surface-green-3: var(--c-primary);
+  --surface-red-1: var(--c-danger-bg);
+  --surface-red-2: var(--c-danger-bg);
+  --surface-red-3: var(--c-danger);
+  --surface-red-4: var(--c-danger);
+  --surface-red-5: var(--c-danger);
+  --surface-red-6: var(--c-danger);
+  --surface-red-7: var(--c-danger);
+  --surface-amber-1: var(--c-warning-bg);
+  --surface-amber-2: var(--c-warning-bg);
+  --surface-amber-3: var(--c-warning);
+  --surface-blue-1: var(--c-info-bg);
+  --surface-blue-2: var(--c-info-bg);
+  --surface-blue-3: var(--c-info);
+
+  --ink-white: var(--c-primary-ink);
+  --ink-gray-1: var(--c-muted);
+  --ink-gray-2: var(--c-muted);
+  --ink-gray-3: var(--c-muted);
+  --ink-gray-4: var(--c-muted);
+  --ink-gray-5: var(--c-ink-soft);
+  --ink-gray-6: var(--c-ink-soft);
+  --ink-gray-7: var(--c-ink-soft);
+  --ink-gray-8: var(--c-ink);
+  --ink-gray-9: var(--c-ink);
+  --ink-green-1: var(--c-primary-ink);
+  --ink-green-2: var(--c-success);
+  --ink-green-3: var(--c-success);
+  --ink-red-1: var(--c-primary-ink);
+  --ink-red-2: var(--c-danger);
+  --ink-red-3: var(--c-danger);
+  --ink-red-4: var(--c-danger);
+  --ink-amber-1: var(--c-primary-ink);
+  --ink-amber-2: var(--c-warning);
+  --ink-amber-3: var(--c-warning);
+  --ink-blue-1: var(--c-primary-ink);
+  --ink-blue-2: var(--c-info);
+  --ink-blue-3: var(--c-info);
+  --ink-blue-link: var(--c-info);
+
+  --outline-white: var(--c-surface-2);
+  --outline-gray-1: var(--c-border);
+  --outline-gray-2: var(--c-border);
+  --outline-gray-3: var(--c-border-strong);
+  --outline-gray-4: var(--c-border-control);
+  --outline-gray-5: var(--c-border-control);
+  --outline-gray-modals: var(--c-border);
+  --outline-green-1: var(--c-primary);
+  --outline-green-2: var(--c-primary);
+  --outline-red-1: var(--c-danger);
+  --outline-red-2: var(--c-danger);
+  --outline-red-3: var(--c-danger);
+  --outline-amber-1: var(--c-warning);
+  --outline-amber-2: var(--c-warning);
+  --outline-blue-1: var(--c-info);
+  --outline-orange-1: var(--c-warning);
+}
+
+/* ---------------------------------------------------------------------------
+   frappe-ui token bridge — the utility classes the library's own markup carries.
+
+   housing/ does NOT need this block: housing is its own Vite root and its
+   tailwind.config.js loads `frappe-ui/tailwind`, whose plugin generates every
+   `bg-surface-*` / `text-ink-*` / `border-outline-*` utility. The driver screens
+   are not a Vite root — they compile through worker/tailwind.config.js, which
+   carries no preset and whose `content` globs deliberately never reach
+   node_modules. So Tailwind here emits NOTHING for a class that only ever appears
+   inside frappe-ui's own source, and an adopted component would render as unstyled
+   text. This block supplies exactly those class names, resolved through the same
+   variables the preset would have used, so the shipped bundle needs no build
+   change to render the library correctly.
+
+   Two rules keep it collision-free with the utilities worker/ already generates:
+   every declaration below either names a class the core Tailwind theme does not
+   have at all (`bg-surface-*`, `h-13`), or repeats a core value byte for byte
+   (`gap-2` is 0.5rem in both). The type scale and the radii are the one place the
+   preset and the core theme disagree, so they are absent here on purpose — Apex
+   sizing reaches each control through its own hook class further down, per
+   DESIGN.md §8. Adding the preset to worker/tailwind.config.js later would
+   therefore change nothing on screen.
+   --------------------------------------------------------------------------- */
+.bg-surface-white {
+  background-color: var(--surface-white);
+}
+.bg-surface-gray-1 {
+  background-color: var(--surface-gray-1);
+}
+.bg-surface-gray-2 {
+  background-color: var(--surface-gray-2);
+}
+.bg-surface-gray-7 {
+  background-color: var(--surface-gray-7);
+}
+.bg-surface-green-2 {
+  background-color: var(--surface-green-2);
+}
+.bg-surface-green-3 {
+  background-color: var(--surface-green-3);
+}
+.bg-surface-red-2 {
+  background-color: var(--surface-red-2);
+}
+.bg-surface-red-4 {
+  background-color: var(--surface-red-4);
+}
+.bg-surface-red-5 {
+  background-color: var(--surface-red-5);
+}
+.bg-surface-amber-1 {
+  background-color: var(--surface-amber-1);
+}
+.bg-surface-amber-2 {
+  background-color: var(--surface-amber-2);
+}
+.bg-surface-blue-2 {
+  background-color: var(--surface-blue-2);
+}
+.hover\:bg-surface-gray-3:hover {
+  background-color: var(--surface-gray-3);
+}
+.active\:bg-surface-gray-4:active {
+  background-color: var(--surface-gray-4);
+}
+
+.text-ink-white {
+  color: var(--ink-white);
+}
+.text-ink-gray-4 {
+  color: var(--ink-gray-4);
+}
+.text-ink-gray-5 {
+  color: var(--ink-gray-5);
+}
+.text-ink-gray-6 {
+  color: var(--ink-gray-6);
+}
+.text-ink-gray-8 {
+  color: var(--ink-gray-8);
+}
+.text-ink-gray-9 {
+  color: var(--ink-gray-9);
+}
+.text-ink-green-2 {
+  color: var(--ink-green-2);
+}
+.text-ink-green-3 {
+  color: var(--ink-green-3);
+}
+.text-ink-red-2 {
+  color: var(--ink-red-2);
+}
+.text-ink-red-3 {
+  color: var(--ink-red-3);
+}
+.text-ink-red-4 {
+  color: var(--ink-red-4);
+}
+.text-ink-amber-3 {
+  color: var(--ink-amber-3);
+}
+.text-ink-blue-2 {
+  color: var(--ink-blue-2);
+}
+.text-ink-blue-3 {
+  color: var(--ink-blue-3);
+}
+
+.border-outline-gray-1 {
+  border-color: var(--outline-gray-1);
+}
+.border-outline-gray-2 {
+  border-color: var(--outline-gray-2);
+}
+.border-outline-gray-3 {
+  border-color: var(--outline-gray-3);
+}
+.border-outline-green-2 {
+  border-color: var(--outline-green-2);
+}
+.border-outline-red-2 {
+  border-color: var(--outline-red-2);
+}
+.border-outline-amber-2 {
+  border-color: var(--outline-amber-2);
+}
+.hover\:border-outline-gray-3:hover,
+.active\:border-outline-gray-3:active {
+  border-color: var(--outline-gray-3);
+}
+
+/* Preset-only sizes. `h-13` is 52px — the same number --tap-lg carries — which is
+   why a `size="2xl"` Button already lands on the DESIGN.md §8 primary target. */
+.h-13 {
+  height: 3.25rem;
+}
+.w-13 {
+  width: 3.25rem;
+}
+.h-11\.5 {
+  height: 2.875rem;
+}
+.w-11\.5 {
+  width: 2.875rem;
+}
+.h-4\.5 {
+  height: 1.125rem;
+}
+.w-4\.5 {
+  width: 1.125rem;
+}
+
+/* Core-value repeats for the sizes frappe-ui's Button and Badge pick per `size`.
+   Without them a Badge has no horizontal padding at all and a one-glyph count pill
+   collapses to 6px wide — measured at 390px before these landed. */
+.h-3 {
+  height: 0.75rem;
+}
+.h-4 {
+  height: 1rem;
+}
+.h-5 {
+  height: 1.25rem;
+}
+.h-7 {
+  height: 1.75rem;
+}
+.h-8 {
+  height: 2rem;
+}
+.h-10 {
+  height: 2.5rem;
+}
+.w-3 {
+  width: 0.75rem;
+}
+.w-4 {
+  width: 1rem;
+}
+.w-7 {
+  width: 1.75rem;
+}
+.w-8 {
+  width: 2rem;
+}
+.w-10 {
+  width: 2.5rem;
+}
+.px-1\.5 {
+  padding-inline: 0.375rem;
+}
+.px-2 {
+  padding-inline: 0.5rem;
+}
+.px-2\.5 {
+  padding-inline: 0.625rem;
+}
+.px-3 {
+  padding-inline: 0.75rem;
+}
+.px-3\.5 {
+  padding-inline: 0.875rem;
+}
+.px-4 {
+  padding-inline: 1rem;
+}
+.py-1\.5 {
+  padding-block: 0.375rem;
+}
+.py-3\.5 {
+  padding-block: 0.875rem;
+}
+.grid {
+  display: grid;
+}
+
+/* Core-value repeats. Tailwind emits these only for class names it finds in the
+   scanned source, and frappe-ui's markup is never scanned; each value below is the
+   core Tailwind value, so a later preset or a scanned occurrence is a no-op. */
+.inline-flex {
+  display: inline-flex;
+}
+.items-center {
+  align-items: center;
+}
+.items-start {
+  align-items: flex-start;
+}
+.justify-center {
+  justify-content: center;
+}
+.gap-1 {
+  gap: 0.25rem;
+}
+.gap-2 {
+  gap: 0.5rem;
+}
+.gap-3 {
+  gap: 0.75rem;
+}
+.shrink-0 {
+  flex-shrink: 0;
+}
+.select-none {
+  user-select: none;
+}
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+.rounded-full {
+  border-radius: 9999px;
+}
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.transition-colors {
+  transition-property: color, background-color, border-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.max-h-4 {
+  max-height: 1rem;
+}
+.max-h-6 {
+  max-height: 1.5rem;
+}
+.max-w-xs {
+  max-width: 20rem;
+}
+.size-4 {
+  height: 1rem;
+  width: 1rem;
+}
+.col-span-2 {
+  grid-column: span 2 / span 2;
+}
+.grid-cols-\[auto_1fr_auto\] {
+  grid-template-columns: auto 1fr auto;
+}
+.opacity-25 {
+  opacity: 0.25;
+}
+.opacity-75 {
+  opacity: 0.75;
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 /* [#glw00i] */
 html,
 body {
@@ -315,4 +693,121 @@ body {
 .divider {
   height: var(--border-width);
   background: var(--c-border);
+}
+
+/* ---------------------------------------------------------------------------
+   Page anatomy (DESIGN.md §1–§3). These are layout, not controls, so they live
+   here rather than becoming components.
+
+   §3, field worker: the frame is a phone column below --bp-tablet, a reading
+   column to --bp-desktop, and a 1100px two-pane work area past it. The first two
+   are MobileConsoleShell's own defaults; only the desktop width is this portal's
+   to declare, and --shell-wide is the hook the shell exposes for exactly that.
+   1024px = --bp-desktop (frontend_shared/tokens.css); keep in sync — a CSS @media
+   condition cannot read a custom property.
+   --------------------------------------------------------------------------- */
+@media (min-width: 1024px) {
+  :root {
+    --shell-wide: 1100px;
+  }
+}
+
+/* Summary beside detail past --bp-desktop; one stacked column below it. */
+.hz-split {
+  display: grid;
+  gap: var(--sp-3);
+  align-items: start;
+}
+.hz-split-main,
+.hz-split-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+/* 1024px = --bp-desktop (frontend_shared/tokens.css); keep in sync. */
+@media (min-width: 1024px) {
+  .hz-split {
+    grid-template-columns: minmax(360px, 400px) minmax(0, 1fr);
+    gap: var(--sp-5);
+  }
+  /* Sticky, not a second scroller: DESIGN.md §1 gives the frame the only
+     overflow, and two nested scrollers is the defect that makes a screen feel
+     broken. The side column simply holds its place while the rest moves past it. */
+  .hz-split-side {
+    position: sticky;
+    top: 0;
+  }
+}
+
+/* The hot zone (DESIGN.md §2): the page's primary action, full width, --tap-lg,
+   pinned to the bottom of the frame above the navbar so it never scrolls away.
+   The negative margins cancel the shell's own 16px frame padding so the dock
+   spans the full column, and the bottom one lets it settle flush at the end of
+   the scroll instead of floating one gap above it. */
+.hz-dock {
+  position: sticky;
+  inset-block-end: calc(-1 * var(--sp-4));
+  z-index: 10;
+  margin-inline: calc(-1 * var(--sp-4));
+  margin-block-end: calc(-1 * var(--sp-4));
+  margin-block-start: auto;
+  padding: var(--sp-3) var(--sp-4) calc(var(--sp-3) + env(safe-area-inset-bottom, 0px));
+  background: var(--c-surface);
+  border-top: var(--border-width) solid var(--c-border);
+}
+.hz-dock-reason {
+  margin-top: var(--sp-2);
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--c-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Apex sizing on the library's controls (DESIGN.md §8: --tap-lg for a primary,
+   --tap-md for an ordinary control, --tap-min as the floor in BOTH dimensions,
+   and the --fs-* scale for type). frappe-ui ships its controls at desk density,
+   which is right for a desk and wrong for a gloved thumb in a truck cab. The
+   preset's own type scale and radii are deliberately not bridged above, so this
+   is where an adopted control gets its Apex size, its Apex radius and the one
+   --c-focus ring.
+
+   Unscoped on purpose: Button declares `inheritAttrs: false` and re-binds
+   `$attrs` itself, which drops the scoped-style attribute a page would need for
+   `:deep()` to reach it. The `class` prop always survives, so these hang off
+   class names this portal puts on the components.
+   --------------------------------------------------------------------------- */
+.dock-btn {
+  width: 100%;
+  min-height: var(--tap-lg);
+  border-radius: var(--radius);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semibold);
+}
+.row-btn {
+  min-height: var(--tap-md);
+  min-width: var(--tap-min);
+  border-radius: var(--radius);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  padding-inline: var(--sp-4);
+}
+.dock-btn:focus-visible,
+.row-btn:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
+}
+/* A Badge is read, never pressed, so it keeps the library's own compact height and
+   only takes the Apex type scale. shrink-0 because a badge sits at the end of a flex
+   row whose text is `flex: 1`, and a squeezed status pill drops its own label. */
+.tone-badge {
+  flex-shrink: 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.02em;
+}
+/* The library's Alert carries its own radius from the preset's scale, which this
+   portal does not bridge; --radius is the DESIGN.md §8 card radius. */
+.load-alert {
+  border-radius: var(--radius);
 }

@@ -20,7 +20,6 @@ const messages = {
       goToApp: "Go to the main app",
     },
     install: {
-      title: "Add to Home Screen",
       body: "Install Salis Driver for quick, full-screen access.",
       manual: "Tap Share, then “Add to Home Screen”.",
       add: "Install",
@@ -41,11 +40,6 @@ const messages = {
       english: "English",
       arabic: "العربية",
     },
-    greeting: {
-      morning: "Good morning",
-      afternoon: "Good afternoon",
-      evening: "Good evening",
-    },
     nav: {
       home: "Home",
       attendance: "Attend",
@@ -59,34 +53,47 @@ const messages = {
     home: {
       vehicle: "Vehicle",
       license: "License",
-      quickActions: "Quick actions",
       more: "More",
       attendance: "Attendance",
       myTrips: "My Trips",
-      requestFuel: "Request Fuel",
-      support: "Support",
       profile: "My Profile",
       myVehicle: "My Vehicle",
       myRoute: "My Route",
       today: "Today",
-      checkInNow: "Check in",
-      checkOutNow: "Check out",
-      doneForToday: "Done for today",
-      checkedInAt: "Checked in {time}",
       notCheckedIn: "Not checked in yet",
       nextTrip: "Next trip",
       noTripToday: "No trip scheduled today",
+      noTripTodayHint: "Nothing is dispatched to you yet — check your trip list.",
       depart: "Depart",
       return: "Return",
       viewTrip: "View trip",
+      needsAttention: "Needs attention",
+      badgeBlocking: "Blocking",
+      badgeSoon: "Soon",
+      loadingLabel: "Loading today",
       alertLicense: "License expires in {n} day(s)",
       alertLicenseExpired: "License expired",
       alertNoVehicle: "No vehicle assigned",
       alertClearance: "Open exit clearance",
+      step: {
+        checkIn: "Check in",
+        checkOut: "Check out",
+        openTrip: "Open next trip",
+        resumeTrip: "Resume trip",
+        done: "Done for today",
+      },
+      stepHint: {
+        checkIn: "Start your shift before your first trip",
+        checkOut: "No trip left today — close your shift",
+        openTrip: "See the stops before you depart",
+        resumeTrip: "The trip has started",
+        done: "You checked out, so there is nothing left to do",
+      },
     },
     notifications: {
       title: "Notifications",
       empty: "No new notifications",
+      emptyHint: "Trip, fuel and document updates land here.",
     },
     push: {
       title: "Background notifications",
@@ -350,6 +357,8 @@ const messages = {
     },
     errors: {
       loadFailed: "Couldn't load the portal",
+      todayFailed: "Couldn't load today's board",
+      retryHint: "The connection dropped. Try again.",
       invalidLink:
         "This driver link is invalid or has been disabled. Please ask your supervisor for a new link.",
       rateLimited: "Too many requests. Please wait a moment and try again.",
@@ -369,7 +378,6 @@ const messages = {
       goToApp: "الذهاب إلى التطبيق الرئيسي",
     },
     install: {
-      title: "إضافة إلى الشاشة الرئيسية",
       body: "ثبّت تطبيق سائق سالس للوصول السريع بملء الشاشة.",
       manual: "اضغط على مشاركة، ثم «إضافة إلى الشاشة الرئيسية».",
       add: "تثبيت",
@@ -390,11 +398,6 @@ const messages = {
       english: "English",
       arabic: "العربية",
     },
-    greeting: {
-      morning: "صباح الخير",
-      afternoon: "نهارك سعيد",
-      evening: "مساء الخير",
-    },
     nav: {
       home: "الرئيسية",
       attendance: "الحضور",
@@ -408,34 +411,47 @@ const messages = {
     home: {
       vehicle: "المركبة",
       license: "الرخصة",
-      quickActions: "إجراءات سريعة",
       more: "المزيد",
       attendance: "الحضور",
       myTrips: "رحلاتي",
-      requestFuel: "طلب وقود",
-      support: "الدعم",
       profile: "ملفي الشخصي",
       myVehicle: "مركبتي",
       myRoute: "مساري",
       today: "اليوم",
-      checkInNow: "تسجيل الدخول",
-      checkOutNow: "تسجيل الخروج",
-      doneForToday: "أنهيت يومك",
-      checkedInAt: "تم تسجيل الدخول {time}",
       notCheckedIn: "لم يتم تسجيل الدخول بعد",
       nextTrip: "الرحلة التالية",
       noTripToday: "لا توجد رحلة مجدولة اليوم",
+      noTripTodayHint: "لم تُسند إليك رحلة بعد — راجع قائمة رحلاتك.",
       depart: "المغادرة",
       return: "العودة",
       viewTrip: "عرض الرحلة",
+      needsAttention: "يحتاج انتباهك",
+      badgeBlocking: "مانع",
+      badgeSoon: "قريباً",
+      loadingLabel: "جارٍ تحميل يومك",
       alertLicense: "تنتهي الرخصة خلال {n} يوم",
       alertLicenseExpired: "انتهت الرخصة",
       alertNoVehicle: "لا توجد مركبة مُعيَّنة",
       alertClearance: "إخلاء طرف مفتوح",
+      step: {
+        checkIn: "تسجيل الدخول",
+        checkOut: "تسجيل الخروج",
+        openTrip: "فتح الرحلة التالية",
+        resumeTrip: "متابعة الرحلة",
+        done: "أنهيت يومك",
+      },
+      stepHint: {
+        checkIn: "ابدأ ورديتك قبل أول رحلة",
+        checkOut: "لا رحلة متبقية اليوم — أغلق ورديتك",
+        openTrip: "اطّلع على المحطات قبل المغادرة",
+        resumeTrip: "الرحلة قيد التنفيذ",
+        done: "سجّلت خروجك، فلا يتبقّى شيء",
+      },
     },
     notifications: {
       title: "الإشعارات",
       empty: "لا توجد إشعارات جديدة",
+      emptyHint: "تصلك هنا تحديثات الرحلات والوقود والوثائق.",
     },
     push: {
       title: "الإشعارات في الخلفية",
@@ -699,6 +715,8 @@ const messages = {
     },
     errors: {
       loadFailed: "تعذّر تحميل البوابة",
+      todayFailed: "تعذّر تحميل لوحة اليوم",
+      retryHint: "انقطع الاتصال. أعد المحاولة.",
       invalidLink:
         "رابط السائق غير صالح أو تم تعطيله. يرجى طلب رابط جديد من مشرفك.",
       rateLimited: "طلبات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.",
@@ -851,6 +869,17 @@ export function fmtDate(v) {
   return new Intl.DateTimeFormat(intlLocale(), { year: "numeric", month: "short", day: "numeric" }).format(d);
 }
 
+// The current day as the header's second line — weekday plus date, in the active
+// locale. Built from the LOCAL clock, never an ISO/UTC slice, which would name
+// yesterday for the three hours after midnight in +03.
+export function fmtTodayDate() {
+  return new Intl.DateTimeFormat(intlLocale(), {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date());
+}
+
 // Localize a stored server enum value; returns the raw value if the namespace or
 // key is unknown (so an unmapped option degrades to English, never blanks).
 export function translateEnum(namespace, value) {
@@ -866,6 +895,7 @@ export function useI18n() {
     n: fmtNumber,
     fmtTime,
     fmtDate,
+    fmtTodayDate,
     lang,
     dir,
     setLang,

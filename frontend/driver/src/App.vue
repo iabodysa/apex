@@ -9,18 +9,19 @@
       <button class="update-reload" @click="applyUpdate">{{ t("update.reload") }}</button>
     </div>
 
-    <!-- Loading -->
-    <div v-if="ctx.loading" class="flex-1 grid place-items-center p-8">
-      <div class="text-center">
-        <div class="spinner mx-auto"></div>
-        <p class="mt-3 text-sm text-muted">{{ t("common.loading") }}</p>
-      </div>
-    </div>
+    <MobileConsoleShell
+      v-if="ctx.loading"
+      :title="t('common.driverPortal')"
+      :subtitle="fmtTodayDate()"
+      :max-width="480"
+    >
+      <TodaySkeleton :label="t('common.loading')" />
+    </MobileConsoleShell>
 
     <!-- Linked driver: shared Mobile-console archetype (sticky dark header,
          single scrolling card column, sticky ≥52px bottom nav). -->
     <template v-else-if="linkedDriver">
-      <MobileConsoleShell :title="driverName" :subtitle="greeting" :max-width="480">
+      <MobileConsoleShell :title="driverName" :subtitle="fmtTodayDate()" :max-width="480">
         <!-- Header end: language toggle + driver avatar -->
         <template #header-actions>
           <LangToggle variant="header" />
@@ -66,21 +67,20 @@
     </template>
 
     <!-- A genuine server error: surface it. Never mis-render as "not linked". -->
-    <div v-else-if="ctx.error" class="flex-1 grid place-items-center p-8 text-center">
-      <div>
-        <div
-          class="avatar mx-auto mb-3 h-12 w-12"
-          style="background: var(--c-danger-bg); color: var(--c-danger)"
-        >
-          <Icon name="alert" :size="26" />
-        </div>
-        <p class="font-bold mb-1">{{ t("errors.loadFailed") }}</p>
-        <p class="text-sm text-muted">{{ errorMessage }}</p>
-        <button class="btn btn-primary mt-4" style="width: auto; padding-inline: 24px" @click="ctx.reload()">
-          {{ t("common.retry") }}
-        </button>
-      </div>
-    </div>
+    <MobileConsoleShell
+      v-else-if="ctx.error"
+      :title="t('common.driverPortal')"
+      :subtitle="fmtTodayDate()"
+      :max-width="480"
+    >
+      <LoadError
+        :title="t('errors.loadFailed')"
+        :detail="errorMessage"
+        :hint="t('errors.retryHint')"
+        :retry-label="t('common.retry')"
+        @retry="ctx.reload()"
+      />
+    </MobileConsoleShell>
 
     <!-- Everyone else (staff or non-staff): a useful screen, never a dead-end. -->
     <Unlinked v-else :ctx="unlinkedCtx" :show-brand="showBrand" :brand-logo="brandLogo" />
@@ -100,12 +100,14 @@ import MobileConsoleShell from "@shared/components/MobileConsoleShell.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
 import Toast from "./components/Toast.vue";
 import InstallHint from "./components/InstallHint.vue";
+import TodaySkeleton from "./components/TodaySkeleton.vue";
+import LoadError from "./components/LoadError.vue";
 import { useI18n, resourceErrorMessage } from "./i18n";
 import { clearToasts } from "./toast";
 import { online } from "./cache";
 import { updateReady, applyUpdate, initPwaUpdates } from "./pwa-updates";
 
-const { t, dir } = useI18n();
+const { t, dir, fmtTodayDate } = useI18n();
 
 // Watch the registered service worker for a new build and surface the reload
 // banner. Tear it down on unmount so its interval/listeners don't stack on an
@@ -174,14 +176,6 @@ const initial = computed(
 // active for its whole subtree (e.g. Trips stays lit on /trips/:id).
 const isTabActive = (tab) =>
   tab.to === "/" ? route.path === "/" : route.path === tab.to || route.path.startsWith(tab.to + "/");
-
-// Time-of-day greeting (purely cosmetic).
-const greeting = computed(() => {
-  const h = new Date().getHours();
-  if (h < 12) return t("greeting.morning");
-  if (h < 18) return t("greeting.afternoon");
-  return t("greeting.evening");
-});
 
 // Branding flags projected by the page template (www/driver.html). Default to
 // showing the brand; an explicit `false` hides it.
