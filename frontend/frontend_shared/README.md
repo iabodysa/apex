@@ -93,42 +93,36 @@ only hit is the literal Unicode RANGE (U+0600-U+06FF) inside the scanners' own
 regex — the guard's alphabet, not content. Write ranges escaped, never as literal
 characters, or the rule text trips its own sweep.
 
-## frappe-ui: the data layer, not the component library — decided 2026-08-03
+## frappe-ui is the toolkit, not a dependency to ration — owner rule, 2026-08-03
 
-Measured across the seven portals and this shared layer, counting only imports in Apex source:
+Use `frappe-ui` as it is, with its features. Its components, its calls, its styles and its
+shapes are what a portal is built from; it is a Vue library with an ordered component tree,
+and that tree is the structure these portals are meant to have.
 
-| Imported from `frappe-ui` | Times |
-| --- | --- |
-| `createResource` | 25 |
-| `frappeRequest`, `setConfig` | 1 each, both in `call.js` |
-| `Button` | 3 |
-| `Dialog`, `Avatar` | 2 each |
-| `TextInput`, `TabButtons`, `Select`, `MonthPicker`, `FormControl`, `ErrorMessage` | 1 each |
+The rule in one line: **reach for the library's component first, and hand-write only what it
+does not have.**
 
-So the library is already load-bearing as a DATA layer and barely present as a UI one: twelve
-component imports against 68 single-file components. The decision follows the measurement.
+- Controls come from `frappe-ui` — Button, Dialog, Select, Autocomplete, FormControl,
+  ErrorMessage, Badge, Avatar, ListView, Tabs, Switch, Checkbox, TextInput, Textarea,
+  DatePicker, Progress, Alert, Tooltip, Dropdown, Breadcrumbs, `toast`, and the chart
+  components. The workspace already resolves the package and `vite.base.js` already
+  registers its plugin, so there is nothing to set up.
+- Data comes from `createResource` / `createListResource` through `call.js`, which signs
+  every request with `frappeRequest`. That was already the practice.
+- The Apex tokens still decide colour, spacing and tap size. Pass them into a component's
+  class or slot rather than restyling it from scratch, and never fork a component to change
+  its look.
+- What stays local is what the library has no answer for: the three page shells, `Brand`,
+  `LangToggle`, `ThemeToggle`, `BuildingPicker`, `EmptyState`, and the offline layer
+  (`makeCache`, the service worker, `usePoll`).
+- A hand-rolled control that duplicates a library component is a defect, not a preference.
+  If you write one, the report says which library component you searched for and why it did
+  not fit.
 
-**Keep it for data.** `createResource` is how every portal reads, and the offline service
-worker is built around the POST shape those calls produce (`sw.template.js`). Replacing it
-would rewrite every portal and the cache layer to gain nothing a user could see.
-
-**Do not adopt its components.** Three reasons, in order of weight:
-
-1. Its components are Tailwind-styled. Three of six build units deliberately carry no Tailwind
-   at all (see the table below), and the portals' look comes from `tokens.css` — one palette,
-   two themes, contrast ratios recorded per value. Pulling in a second styling system is the
-   fragmentation this workspace spent its effort ending.
-2. The contract the portals must honour — 44px tap floor, RTL logical properties, the single
-   focus ring, the four component states — is written in `DESIGN.md` and enforced by the
-   shared shells. A third-party component satisfies none of it by default and each one would
-   need wrapping to comply, which is more work than the component saves.
-3. What the portals actually need that is not a plain element is Apex-specific and already
-   exists here: three page shells, `EmptyState`, `BuildingPicker`, `LangToggle`,
-   `ThemeToggle`, `Brand`, `IconBase`.
-
-**What this forbids.** Adding a new `frappe-ui` component import to a portal. If a screen
-needs something the shared layer lacks, it goes in `components/` here, built to `DESIGN.md`.
-The twelve existing imports stay until the screen around each is next rewritten.
+An earlier decision here said the opposite — keep frappe-ui for data, do not adopt its
+components — on the grounds that its Tailwind styling would fragment the token system. The
+owner overruled it: the library's own features are the point, and its look is configured
+through the tokens rather than avoided.
 
 ## Tailwind is opt-in per BUILD UNIT
 

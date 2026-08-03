@@ -137,9 +137,22 @@ Words are interface, and they follow the same rules everywhere.
   strings from `apex/translations/ar.csv`, and the two never mix. An English label on an
   Arabic screen is a defect, not a fallback.
 
+## 4b. Controls come from the library
+
+`frappe-ui` is the toolkit, not a dependency to ration. Every control a screen needs —
+button, dialog, select, autocomplete, form control, error message, badge, avatar, list view,
+tabs, switch, checkbox, text input, textarea, date picker, progress, alert, tooltip,
+dropdown, breadcrumbs, toast, chart — comes from it, with its own behaviour and its own
+structure. Its calls (`createResource`, `createListResource`) are how a screen reads.
+
+Hand-write a control only where the library has nothing that fits, and record which
+component you looked for. The tokens in §8 still decide colour, spacing and tap size: pass
+them into the component rather than restyling or forking it.
+
 ## 5. Icons
 
-- One set: `IconBase.vue` + `icons.js`. A portal that inlines an SVG has left the system.
+- One set: `IconBase.vue` + `icons.js` for Apex glyphs, and whatever `frappe-ui` already
+  draws for the controls it owns. A portal that inlines an SVG has left the system.
 - Three sizes only: 16 beside text, 20 in a control, 24 alone in a tap target.
 - `currentColor` always, so an icon inherits its context and both themes work with no second
   asset.
@@ -245,6 +258,7 @@ Arabic is the primary direction and English is the exception.
 6. Icons from `icons.js`, labelled unless the meaning is one of the four unambiguous ones.
 7. Make the route addressable and reload-safe.
 8. Check at 390, 834 and 1440, in both directions and both themes.
-9. Reach for what exists first: `EmptyState`, `Brand`, `LangToggle`, `ThemeToggle`,
-   `IconBase`, `BuildingPicker`, `useToast`, `useOverlay`, `usePoll`. A second copy of any of
-   them is what this guide exists to prevent.
+9. Reach for what exists first, in this order: a `frappe-ui` component, then the shared
+   layer here — `EmptyState`, `Brand`, `LangToggle`, `ThemeToggle`, `IconBase`,
+   `BuildingPicker`, `useToast`, `useOverlay`, `usePoll` — and only then your own. A
+   hand-rolled control that the library already ships is a defect.
