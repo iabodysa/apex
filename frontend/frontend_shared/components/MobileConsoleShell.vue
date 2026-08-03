@@ -78,8 +78,8 @@ const shellVars = computed(() => ({
 .mc-shell {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   margin: 0 auto;
   width: 100%;
   max-width: var(--mc-width);

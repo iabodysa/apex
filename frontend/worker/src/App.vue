@@ -117,16 +117,19 @@ import { usePoll } from "@shared/usePoll.js";
 
 const { t, dir, lang } = useI18n();
 
-// Server-driven enum labels (DocType Select options + ar.csv), fetched once and
-// registered into i18n so tEnum localizes without a hand-maintained JS map.
-// English needs none (the label is the stored value), so only Arabic is loaded.
 const enumLabels = createResource({
   url: "apex.salis.api.masar.get_enum_labels",
   method: "GET",
-  params: { lang: "ar" },
-  auto: true,
-  onSuccess: (data) => setEnumLabels("ar", data),
 });
+
+watch(
+  lang,
+  (l) => {
+    if (l === "en") return;
+    enumLabels.fetch({ lang: l }, { onSuccess: (data) => setEnumLabels(l, data) });
+  },
+  { immediate: true },
+);
 
 // This portal offers five languages, so <html lang> must carry the CHOSEN one, not
 // ar/en derived from direction: it is what a screen reader announces and what

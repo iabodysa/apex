@@ -34,9 +34,11 @@ body {
 /* [#5o3wjo] */
 @layer components {
   /* [#8gmhoh] */
+  /* The page canvas, never the column: MobileConsoleShell owns the column width and
+     widens it at --bp-tablet / --bp-desktop, so a cap here would freeze the portal at a
+     phone strip on every screen. */
   .app-shell {
-    @apply min-h-screen flex flex-col mx-auto w-full;
-    max-width: 480px;
+    @apply min-h-screen flex flex-col w-full;
     background: var(--c-canvas);
     color: var(--c-ink);
   }
