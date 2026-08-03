@@ -1,232 +1,198 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
-  <div class="app-shell" :dir="dir">
-    <!-- Header: dark forest bar with the brand arc supergraphic. -->
-    <header class="app-header">
-      <div class="hero-arc" aria-hidden="true">
-        <svg viewBox="0 0 200 200" fill="none" preserveAspectRatio="xMidYMid meet">
-          <path d="M70 10 A95 95 0 0 1 70 190" stroke="currentColor" stroke-width="26" stroke-linecap="round" fill="none" />
-          <path d="M120 35 A70 70 0 0 1 120 165" stroke="currentColor" stroke-width="26" stroke-linecap="round" fill="none" opacity="0.6" />
-        </svg>
+  <BuildingPicker v-if="!building" @select="onBuildingSelected" />
+
+  <ListSkeleton v-else-if="invRes.loading && !rows.length" :rows="6" :label="t('list.loadingLabel')" />
+
+  <LoadError
+    v-else-if="invRes.error"
+    :title="t('errors.loadFailed')"
+    :detail="invErrorMessage"
+    :hint="t('errors.retryHint')"
+    :retry-label="t('common.retry')"
+    @retry="invRes.reload()"
+  />
+
+  <EmptyState v-else-if="!rows.length" :title="t('empty.title')" :hint="t('empty.subtitle')">
+    <template #icon><Icon name="package" :size="24" /></template>
+    <template #action>
+      <Button size="xl" variant="outline" :label="t('empty.switch')" @click="onChangeBuilding" />
+    </template>
+  </EmptyState>
+
+  <template v-else>
+    <div class="hz-split">
+      <div class="hz-split-list">
+        <TabButtons
+          class="filter"
+          v-model="filter"
+          :buttons="[
+            { label: t('list.filterAll'), value: 'all' },
+            { label: t('list.filterNeedsCount'), value: 'needs' },
+          ]"
+        />
+
+        <EmptyState
+          v-if="!filteredGroups.length"
+          :title="t('list.filteredTitle')"
+          :hint="t('list.filteredHint')"
+        >
+          <template #icon><Icon name="check-circle" :size="24" /></template>
+          <template #action>
+            <Button size="xl" variant="outline" :label="t('list.clearFilter')" @click="filter = 'all'" />
+          </template>
+        </EmptyState>
+
+        <section v-for="g in filteredGroups" :key="g.key" class="room">
+          <h2 class="room-head">
+            <span class="room-mark"><Icon name="door" :size="16" /></span>
+            <span class="room-name">{{ g.label }}</span>
+            <span class="room-count">{{ t("list.count", { n: g.items.length }) }}</span>
+          </h2>
+          <CountItemRow
+            v-for="item in g.items"
+            :key="item.name"
+            :row="item"
+            :model="modelFor(item)"
+            :edited="!!touched[item.name]"
+            :open="selected === item.name"
+            @open="openItem(item.name)"
+          />
+        </section>
       </div>
-      <div class="header-inner">
-        <div class="header-bar">
-          <div v-if="showBrand" class="header-brand">
-            <img v-if="brandLogo" :src="brandLogo" alt="AFMCO" class="header-logo" />
-            <template v-else>
-              <span class="header-mark"><Icon name="package" :size="20" /></span>
-              <span class="header-word">{{ t("common.appName") }}</span>
-            </template>
-          </div>
-          <span v-else class="header-word">{{ t("common.appName") }}</span>
-          <LangToggle variant="header" />
+
+      <aside v-if="desktop" class="hz-split-detail">
+        <div v-if="selectedRow" class="pane">
+          <CountItemEditor
+            :row="selectedRow"
+            :model="modelFor(selectedRow)"
+            :conditions="conditions"
+            :room-label="roomLabelFor(selectedRow)"
+            @count="(v) => onCount(selectedRow, v)"
+            @condition="(v) => onCondition(selectedRow, v)"
+            @note="(v) => onNote(selectedRow, v)"
+          />
         </div>
-        <div class="greeting-block">
-          <p class="greeting-eyebrow">{{ t("greeting.eyebrow") }}</p>
-          <h1 class="greeting-title">{{ greeting }}</h1>
-          <button v-if="building" type="button" class="building-chip" @click="changeBuilding">
-            <Icon name="building" :size="14" />
-            <span class="building-chip-name">{{ buildingLabel }}</span>
-            <span class="building-chip-change">{{ t("common.change") }}</span>
-          </button>
+        <div v-else class="pane pane-idle">
+          <EmptyState :title="t('list.pickTitle')" :hint="t('list.pickHint')">
+            <template #icon><Icon name="box" :size="24" /></template>
+          </EmptyState>
         </div>
-      </div>
-    </header>
+      </aside>
+    </div>
 
-    <main class="app-main">
-      <!-- 1. No building chosen yet -> picker. -->
-      <BuildingPicker v-if="!building" @select="onBuildingSelected" />
+    <div class="hz-dock">
+      <ErrorMessage v-if="submitError" class="dock-error" :message="submitError" />
+      <Button
+        class="dock-btn"
+        size="2xl"
+        variant="solid"
+        theme="green"
+        :loading="submitRes.loading"
+        :loading-text="t('submit.sending')"
+        :disabled="touchedCount === 0"
+        :label="t('submit.cta')"
+        @click="doSubmit"
+      >
+        <template #prefix><Icon name="send" :size="20" /></template>
+      </Button>
+      <p class="dock-hint">
+        {{ touchedCount ? t("submit.ready", { n: touchedCount }) : t("submit.needOne") }}
+      </p>
+    </div>
 
-      <template v-else>
-        <!-- Loading the inventory. -->
-        <div v-if="invRes.loading" class="state-center">
-          <div class="spinner mx-auto"></div>
-          <p class="state-msg">{{ t("common.loading") }}</p>
-        </div>
-
-        <!-- Error + retry. -->
-        <div v-else-if="invRes.error" class="state-center">
-          <div class="state-icon state-icon-danger"><Icon name="triangle-alert" :size="24" /></div>
-          <p class="state-title">{{ t("errors.loadFailed") }}</p>
-          <p class="state-msg">{{ invErrorMessage }}</p>
-          <button class="btn btn-primary state-btn" @click="invRes.reload()">{{ t("common.retry") }}</button>
-        </div>
-
-        <Transition name="swap" mode="out-in">
-          <!-- Success: the count summary. -->
-          <div v-if="submitted" key="done" class="success">
-            <div class="success-burst">
-              <div class="success-ring"></div>
-              <div class="success-check"><Icon name="check" :size="40" /></div>
-            </div>
-            <h2 class="success-title">{{ t("success.title") }}</h2>
-            <p class="success-sub">{{ t("success.subtitle") }}</p>
-
-            <div class="emailed" :class="submitted.failed ? 'emailed-warn' : 'emailed-ok'">
-              <Icon name="clipboard-check" :size="16" />
-              <span v-if="submitted.failed">{{ t("success.partial", { ok: submitted.saved, failed: submitted.failed }) }}</span>
-              <span v-else>{{ t("success.saved", { n: submitted.saved }) }}</span>
-            </div>
-
-            <div v-if="summaryRows.length" class="results">
-              <p class="results-head">{{ t("success.results") }}</p>
-              <div
-                v-for="r in summaryRows"
-                :key="r.name"
-                class="summary-row"
-                :class="varianceRowClass(r.quantity_variance)"
-              >
-                <span class="summary-name">{{ r.item_name }}</span>
-                <span class="summary-badge">
-                  <Icon :name="varianceIcon(r.quantity_variance)" :size="14" />
-                  {{ varianceBadge(r.quantity_variance) }}
-                </span>
-              </div>
-            </div>
-
-            <button class="btn btn-outline success-again" @click="resetAll">
-              {{ t("success.another") }}
-            </button>
-          </div>
-
-          <!-- Empty: nothing to count. -->
-          <div v-else-if="rows.length === 0" key="empty" class="empty">
-            <div class="empty-burst">
-              <div class="empty-ring"></div>
-              <Icon name="package" :size="44" />
-            </div>
-            <h2 class="empty-title">{{ t("empty.title") }}</h2>
-            <p class="empty-sub">{{ t("empty.subtitle") }}</p>
-            <button class="btn btn-outline empty-switch" @click="changeBuilding">
-              {{ t("empty.switch") }}
-            </button>
-          </div>
-
-          <!-- Inventory list grouped by room. -->
-          <div v-else key="list" class="list">
-            <div class="list-intro">
-              <h2 class="section-title">{{ t("list.title") }}</h2>
-              <p class="list-sub">{{ t("list.subtitle") }}</p>
-            </div>
-
-            <!-- Needs-count / variance filter. -->
-            <div class="filter-bar" role="group">
-              <button
-                type="button"
-                class="filter-opt"
-                :class="{ 'filter-opt-active': filter === 'all' }"
-                @click="filter = 'all'"
-              >
-                {{ t("list.filterAll") }}
-              </button>
-              <button
-                type="button"
-                class="filter-opt"
-                :class="{ 'filter-opt-active': filter === 'needs' }"
-                @click="filter = 'needs'"
-              >
-                <Icon name="filter" :size="14" />
-                {{ t("list.filterNeedsCount") }}
-              </button>
-            </div>
-
-            <div v-if="!filteredGroups.length" class="state-center">
-              <p class="state-msg">{{ t("list.empty") }}</p>
-            </div>
-
-            <section v-for="g in filteredGroups" :key="g.key" class="room-group">
-              <header class="room-head">
-                <span class="room-mark"><Icon name="door" :size="16" /></span>
-                <span class="room-name">{{ g.label }}</span>
-                <span class="room-count">{{ t("list.count", { n: g.items.length }) }}</span>
-              </header>
-              <div class="room-items">
-                <ItemCountCard
-                  v-for="item in g.items"
-                  :key="item.name"
-                  :row="item"
-                  :model="staged[item.name] || baseModel(item)"
-                  :conditions="conditions"
-                  :staged="!!touched[item.name]"
-                  @count="(v) => onCount(item, v)"
-                  @condition="(v) => onCondition(item, v)"
-                  @note="(v) => onNote(item, v)"
-                />
-              </div>
-            </section>
-
-            <p v-if="submitError" class="status-note status-err">{{ submitError }}</p>
-
-            <div class="submit-dock">
-              <p class="submit-progress">
-                <span class="submit-dot" :class="{ 'submit-dot-ready': touchedCount > 0 }"></span>
-                {{ progressLabel }}
-              </p>
-              <button
-                class="btn btn-primary submit-btn"
-                :disabled="touchedCount === 0 || submitRes.loading"
-                @click="doSubmit"
-              >
-                <template v-if="submitRes.loading">
-                  <span class="btn-spin"><Icon name="loader" :size="18" /></span>
-                  {{ t("submit.sending") }}
-                </template>
-                <template v-else>
-                  <Icon name="send" :size="18" />
-                  {{ t("submit.cta") }}
-                </template>
-              </button>
-              <p class="submit-hint">{{ t("submit.hint") }}</p>
-            </div>
-          </div>
-        </Transition>
+    <Dialog
+      v-if="!desktop"
+      :modelValue="!!selectedRow"
+      :options="{
+        title: selectedRow ? t('card.title', { name: selectedRow.item_name }) : '',
+        size: 'lg',
+      }"
+      @update:modelValue="(open) => !open && closeItem()"
+    >
+      <template #body-content>
+        <CountItemEditor
+          v-if="selectedRow"
+          :row="selectedRow"
+          :model="modelFor(selectedRow)"
+          :conditions="conditions"
+          :room-label="roomLabelFor(selectedRow)"
+          :heading="false"
+          @count="(v) => onCount(selectedRow, v)"
+          @condition="(v) => onCondition(selectedRow, v)"
+          @note="(v) => onNote(selectedRow, v)"
+        />
       </template>
-    </main>
-  </div>
+      <template #actions>
+        <Button
+          class="dock-btn"
+          size="2xl"
+          variant="solid"
+          theme="green"
+          :label="t('common.done')"
+          @click="closeItem"
+        />
+      </template>
+    </Dialog>
+  </template>
 </template>
 
 <script setup>
-import { computed, reactive, ref } from "vue";
-import { createResource } from "frappe-ui";
-import Icon from "../components/Icon.vue";
-import LangToggle from "@shared/components/LangToggle.vue";
+import { computed, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { Button, Dialog, ErrorMessage, TabButtons, createResource, toast } from "frappe-ui";
 import BuildingPicker from "@shared/components/BuildingPicker.vue";
-import ItemCountCard from "../components/ItemCountCard.vue";
+import EmptyState from "@shared/components/EmptyState.vue";
+import Icon from "../components/Icon.vue";
+import CountItemRow from "../components/CountItemRow.vue";
+import CountItemEditor from "../components/CountItemEditor.vue";
+import ListSkeleton from "../components/ListSkeleton.vue";
+import LoadError from "../components/LoadError.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
+import { useDesktop } from "../useBreakpoint";
+import { building, clearBuilding, countProgress, selectBuilding } from "../session";
 
-const { t, dir } = useI18n();
+const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
+const desktop = useDesktop();
 
-// Branding flags projected by the page template (www/housing-count.html).
-const showBrand = computed(() => window.portal_show_brand !== false);
-const brandLogo = computed(() => window.portal_logo || "");
-
-// The <html dir>/<html lang> write lives in App.vue: it is shell state that has
-// to hold across a route change, not this screen's.
-
-// ---- selected building -------------------------------------------------
-const building = ref("");
-const buildingLabel = ref("");
-const submitted = ref(null);
 const submitError = ref("");
-const filter = ref("all");
 
-// staged[name] = { counted_quantity, condition, notes }; touched[name] = true.
 const staged = reactive({});
 const touched = reactive({});
 
-// ---- inventory resource ------------------------------------------------
 const invRes = createResource({
   url: "apex.habitat.api.housing_count.get_inventory_for_building",
   makeParams: () => ({ building: building.value }),
+});
+
+const submitRes = createResource({
+  url: "apex.habitat.api.housing_count.submit_counts",
 });
 
 const rows = computed(() => (invRes.data && invRes.data.items) || []);
 const conditions = computed(() => (invRes.data && invRes.data.conditions) || []);
 const invErrorMessage = computed(() => resourceErrorMessage(invRes.error, "errors.loadFailed"));
 
-// ---- submit resource ---------------------------------------------------
-const submitRes = createResource({
-  url: "apex.habitat.api.housing_count.submit_counts",
+const selected = computed(() => route.params.item || "");
+const selectedRow = computed(() => rows.value.find((r) => r.name === selected.value) || null);
+
+function openItem(name) {
+  router.push({ path: "/count/" + encodeURIComponent(name), query: route.query });
+}
+function closeItem() {
+  router.push({ path: "/count", query: route.query });
+}
+
+const filter = computed({
+  get: () => (route.query.filter === "needs" ? "needs" : "all"),
+  set: (value) => {
+    const query = { ...route.query };
+    if (value === "needs") query.filter = "needs";
+    else delete query.filter;
+    router.replace({ path: route.path, query });
+  },
 });
 
 function baseModel(item) {
@@ -236,26 +202,21 @@ function baseModel(item) {
     notes: item.notes || "",
   };
 }
+function modelFor(item) {
+  return staged[item.name] || baseModel(item);
+}
 
-// "Needs count / variance": never counted (no last_count_date) OR a non-zero
-// server variance. The variance is the server figure, never recomputed here.
 function needsCount(item) {
   if (!item.last_count_date) return true;
   return Number(item.quantity_variance || 0) !== 0;
 }
 
-// Group rows by room for the room-banded list; a room-less item falls into a
-// "no specific room" bucket sorted last.
 const grouped = computed(() => {
   const map = new Map();
   for (const item of rows.value) {
     const key = item.room || "__none__";
     if (!map.has(key)) {
-      map.set(key, {
-        key,
-        label: item.room_label || item.room || t("list.noRoom"),
-        items: [],
-      });
+      map.set(key, { key, label: item.room_label || item.room || t("list.noRoom"), items: [] });
     }
     map.get(key).items.push(item);
   }
@@ -273,34 +234,32 @@ const filteredGroups = computed(() => {
     .filter((g) => g.items.length);
 });
 
-const touchedCount = computed(() => Object.keys(touched).length);
-const progressLabel = computed(() => t("list.count", { n: touchedCount.value }));
+function roomLabelFor(item) {
+  return item.room_label || item.room || "";
+}
 
-// ---- flow handlers -----------------------------------------------------
+const touchedCount = computed(() => Object.keys(touched).length);
+
+watch(
+  [touchedCount, rows],
+  () => {
+    countProgress.value = { done: touchedCount.value, total: rows.value.length };
+  },
+  { immediate: true },
+);
+
 function onBuildingSelected(name, label) {
-  building.value = name;
-  buildingLabel.value = label || name;
-  submitted.value = null;
+  selectBuilding(name, label);
   submitError.value = "";
-  filter.value = "all";
   clearStaged();
   invRes.fetch();
 }
 
-function changeBuilding() {
-  building.value = "";
-  buildingLabel.value = "";
-  submitted.value = null;
-  submitError.value = "";
+function onChangeBuilding() {
+  clearBuilding();
   clearStaged();
-}
-
-function resetAll() {
-  const b = building.value;
-  submitted.value = null;
   submitError.value = "";
-  clearStaged();
-  if (b) invRes.fetch();
+  router.push("/count");
 }
 
 function clearStaged() {
@@ -346,7 +305,7 @@ async function doSubmit() {
     submitError.value = t("submit.needOne");
     return;
   }
-  const res = await submitRes.submit({
+  const result = await submitRes.submit({
     building: building.value,
     lines: JSON.stringify(lines),
   });
@@ -354,488 +313,71 @@ async function doSubmit() {
     submitError.value = resourceErrorMessage(submitRes.error, "errors.submitFailed");
     return;
   }
-  submitted.value = res || submitRes.data || { saved: 0, failed: 0, rows: [] };
+  const saved = (result && result.saved) || 0;
+  const failed = (result && result.failed) || 0;
+  toast.create({
+    type: failed ? "warning" : "success",
+    message: failed ? t("success.partial", { ok: saved, failed }) : t("success.saved", { n: saved }),
+  });
+  clearStaged();
+  closeItem();
+  invRes.reload();
 }
 
-// ---- success summary ---------------------------------------------------
-const summaryRows = computed(() => (submitted.value && submitted.value.rows) || []);
-
-function varianceRowClass(v) {
-  const n = Number(v || 0);
-  if (n < 0) return "summary-shortage";
-  if (n > 0) return "summary-surplus";
-  return "summary-balanced";
-}
-function varianceIcon(v) {
-  const n = Number(v || 0);
-  if (n < 0) return "triangle-alert";
-  if (n > 0) return "scale";
-  return "check";
-}
-function varianceBadge(v) {
-  const n = Number(v || 0);
-  const mag = Number.isInteger(n) ? Math.abs(n) : Math.abs(n).toFixed(2);
-  if (n < 0) return t("success.shortage") + " " + mag;
-  if (n > 0) return t("success.surplus") + " " + mag;
-  return t("success.balanced");
-}
-
-// ---- greeting ----------------------------------------------------------
-const greeting = computed(() => {
-  const h = new Date().getHours();
-  if (h < 12) return t("greeting.morning");
-  if (h < 18) return t("greeting.afternoon");
-  return t("greeting.evening");
-});
+watch(
+  building,
+  (name) => {
+    if (name) invRes.fetch();
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped>
-.app-main {
-  flex: 1;
-  padding: 18px 16px 40px;
+.filter {
+  align-self: start;
 }
 
-/* ---- header ---------------------------------------------------------- */
-.header-inner {
-  position: relative;
-  z-index: 1;
-  padding: 16px 16px 20px;
-}
-.header-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.header-brand {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
-}
-.header-mark {
-  display: grid;
-  place-items: center;
-  height: 32px;
-  width: 32px;
-  border-radius: var(--radius);
-  color: var(--c-header-bg);
-  background: var(--c-header-accent);
-  flex-shrink: 0;
-}
-.header-logo {
-  height: 28px;
-  width: auto;
-  max-width: 140px;
-  object-fit: contain;
-}
-.header-word {
-  font-size: var(--fs-h3);
-  font-weight: var(--fw-heading);
-  letter-spacing: -0.01em;
-  color: var(--c-header-ink);
-}
-.greeting-block {
-  margin-top: 14px;
-}
-.greeting-eyebrow {
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--c-header-accent);
-}
-.greeting-title {
-  font-size: var(--fs-h1);
-  font-weight: var(--fw-heading);
-  line-height: 1.15;
-  color: var(--c-header-ink);
-  margin-top: 2px;
-}
-.building-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-top: 12px;
-  padding: 7px 7px 7px 12px;
-  border-radius: var(--radius-pill);
-  border: none;
-  cursor: pointer;
-  background: color-mix(in srgb, var(--c-header-ink) 14%, transparent);
-  color: var(--c-header-ink);
-  max-width: 100%;
-}
-.building-chip-name {
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.building-chip-change {
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  padding: 3px 9px;
-  border-radius: var(--radius-pill);
-  background: var(--c-header-accent);
-  color: var(--c-header-bg);
-  flex-shrink: 0;
-}
-
-/* ---- generic states -------------------------------------------------- */
-.state-center {
-  text-align: center;
-  padding: 32px 16px;
-}
-.state-icon {
-  display: grid;
-  place-items: center;
-  height: 52px;
-  width: 52px;
-  margin: 0 auto 14px;
-  border-radius: var(--radius-lg);
-}
-.state-icon-danger {
-  color: var(--c-danger);
-  background: var(--c-danger-bg);
-}
-.state-title {
-  font-weight: var(--fw-heading);
-  font-size: var(--fs-h3);
-  color: var(--c-ink);
-}
-.state-msg {
-  margin-top: 6px;
-  font-size: var(--fs-sm);
-  color: var(--c-muted);
-}
-.state-btn {
-  width: auto;
-  padding-inline: 28px;
-  margin: 16px auto 0;
-}
-
-/* ---- list ------------------------------------------------------------ */
-.list {
+.room {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-}
-.list-intro {
-  padding: 0 2px;
-}
-.list-sub {
-  margin-top: 4px;
-  font-size: var(--fs-sm);
-  color: var(--c-muted);
-}
-.filter-bar {
-  display: flex;
-  gap: 8px;
-}
-.filter-opt {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 14px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--c-border-strong);
-  background: var(--c-surface);
-  color: var(--c-ink-soft);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-.filter-opt-active {
-  background: var(--c-primary);
-  color: var(--c-primary-ink);
-  border-color: var(--c-primary);
-}
-
-.room-group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px;
-  border-radius: var(--radius);
-  border: 1px solid var(--c-border);
-  background: color-mix(in srgb, var(--c-ink) 3%, transparent);
+  gap: var(--sp-2);
 }
 .room-head {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-2);
+  padding-inline: var(--sp-1);
 }
 .room-mark {
   display: grid;
   place-items: center;
-  height: 28px;
-  width: 28px;
-  border-radius: var(--radius-sm);
+  height: var(--sp-6);
+  width: var(--sp-6);
   flex-shrink: 0;
+  border-radius: var(--radius-sm);
   color: var(--c-ink-soft);
   background: color-mix(in srgb, var(--c-ink) 8%, transparent);
 }
 .room-name {
   flex: 1;
-  font-size: var(--fs-body);
+  min-width: 0;
+  font-size: var(--fs-h3);
   font-weight: var(--fw-heading);
   color: var(--c-ink);
 }
 .room-count {
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   color: var(--c-muted);
 }
-.room-items {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
 
-/* ---- submit dock ----------------------------------------------------- */
-.submit-dock {
-  margin-top: 4px;
+.dock-error {
+  margin-bottom: var(--sp-2);
+}
+.dock-hint {
+  margin-top: var(--sp-2);
   text-align: center;
-}
-.submit-progress {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-  color: var(--c-ink-soft);
-  margin-bottom: 12px;
-}
-.submit-dot {
-  height: 9px;
-  width: 9px;
-  border-radius: 999px;
-  background: var(--c-muted);
-  transition: background 0.25s ease;
-}
-.submit-dot-ready {
-  background: var(--c-success);
-  box-shadow: 0 0 0 4px var(--c-success-bg);
-}
-.submit-btn {
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--c-primary) 28%, transparent);
-}
-.btn-spin {
-  display: inline-grid;
-  place-items: center;
-  animation: spin 0.7s linear infinite;
-}
-.submit-hint {
-  margin-top: 10px;
-  font-size: var(--fs-xs);
-  color: var(--c-muted);
-}
-
-/* ---- success --------------------------------------------------------- */
-.success,
-.empty {
-  text-align: center;
-  padding: 16px 8px 8px;
-}
-.success-burst {
-  position: relative;
-  height: 96px;
-  width: 96px;
-  margin: 8px auto 18px;
-  display: grid;
-  place-items: center;
-}
-.success-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  background: var(--c-success-bg);
-  animation: pop 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.success-check {
-  position: relative;
-  display: grid;
-  place-items: center;
-  height: 64px;
-  width: 64px;
-  border-radius: 999px;
-  color: var(--c-primary-ink);
-  background: var(--c-success);
-  animation: pop 0.45s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.success-title {
-  font-size: var(--fs-h2);
-  font-weight: var(--fw-heading);
-  color: var(--c-ink);
-}
-.success-sub {
-  margin-top: 6px;
   font-size: var(--fs-sm);
   color: var(--c-muted);
-}
-.emailed {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-top: 16px;
-  padding: 9px 16px;
-  border-radius: var(--radius-pill);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-}
-.emailed-ok {
-  color: var(--c-success);
-  background: var(--c-success-bg);
-}
-.emailed-warn {
-  color: var(--c-warning);
-  background: var(--c-warning-bg);
-}
-.results {
-  margin-top: 22px;
-  text-align: start;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.results-head {
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--c-muted);
-  margin-bottom: 2px;
-}
-.summary-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 13px 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--c-border);
-  background: var(--c-surface);
-}
-.summary-name {
-  font-size: var(--fs-body);
-  font-weight: var(--fw-semibold);
-  color: var(--c-ink);
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.summary-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-heading);
-  padding: 5px 11px;
-  border-radius: var(--radius-pill);
-  flex-shrink: 0;
-}
-.summary-balanced .summary-badge {
-  color: var(--c-success);
-  background: var(--c-success-bg);
-}
-.summary-surplus .summary-badge {
-  color: var(--c-warning);
-  background: var(--c-warning-bg);
-}
-.summary-shortage .summary-badge {
-  color: var(--c-danger);
-  background: var(--c-danger-bg);
-}
-.success-again,
-.empty-switch {
-  width: auto;
-  padding-inline: 26px;
-  margin: 26px auto 0;
-}
-
-/* ---- empty ----------------------------------------------------------- */
-.empty {
-  padding-top: 40px;
-}
-.empty-burst {
-  position: relative;
-  display: grid;
-  place-items: center;
-  height: 104px;
-  width: 104px;
-  margin: 0 auto 20px;
-  color: var(--c-primary);
-}
-.empty-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--c-primary) 10%, transparent);
-}
-.empty-title {
-  font-size: var(--fs-h2);
-  font-weight: var(--fw-heading);
-  color: var(--c-ink);
-  line-height: 1.2;
-}
-.empty-sub {
-  margin-top: 8px;
-  font-size: var(--fs-sm);
-  color: var(--c-muted);
-  max-width: 280px;
-  margin-inline: auto;
-}
-
-/* ---- transitions ----------------------------------------------------- */
-.swap-enter-active,
-.swap-leave-active {
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease;
-}
-.swap-enter-from {
-  opacity: 0;
-  transform: translateY(8px);
-}
-.swap-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
-}
-
-@keyframes pop {
-  from {
-    opacity: 0;
-    transform: scale(0.4);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ---- tablet / iPad (≥768px) ----------------------------------------- */
-@media (min-width: 768px) {
-  .header-inner {
-    padding: 24px 28px 28px;
-  }
-  .app-main {
-    padding: 28px 28px 56px;
-  }
-  .greeting-title {
-    font-size: var(--fs-display);
-  }
-  .list {
-    gap: 18px;
-  }
-  .list-intro .section-title {
-    font-size: var(--fs-h1);
-  }
 }
 </style>

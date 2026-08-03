@@ -1,7 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// Mirrors safety_portal/src/i18n.js: a tiny EN/AR dictionary with the same
-// translate / setLang / dir / useI18n machinery and a shared resource-error
-// mapper. Arabic strings live here, which is allowed for *_portal bundles.
 import { createI18n } from "@shared/i18n";
 
 const STORAGE_KEY = "housing_portal_lang";
@@ -14,14 +11,17 @@ const messages = {
       retry: "Retry",
       none: "—",
       error: "Something went wrong.",
-      appName: "Inventory Count",
+      appName: "Housing",
       submit: "Submit",
       cancel: "Cancel",
       confirm: "Confirm",
       note: "Note",
       back: "Back",
       change: "Change",
+      changeBuilding: "Change building",
       refresh: "Refresh List",
+      close: "Close",
+      done: "Done",
     },
     lang: {
       label: "Language",
@@ -53,6 +53,16 @@ const messages = {
       countedToday: "Counted today",
       lastCount: "Last counted {date}",
       neverCounted: "Never counted",
+      progress: "{done} of {total} counted",
+      progressLabel: "Count progress",
+      openItem: "Open {name} to count it",
+      edited: "Edited",
+      pickTitle: "Nothing open",
+      pickHint: "Choose an item from the list to count it.",
+      filteredTitle: "Nothing needs a count",
+      filteredHint: "Every item here matches its expected quantity. Show all items to keep counting.",
+      clearFilter: "Show all items",
+      loadingLabel: "Loading the items",
     },
     card: {
       expected: "Expected",
@@ -63,12 +73,15 @@ const messages = {
       notePlaceholder: "Anything to note?",
       decrease: "Decrease",
       increase: "Increase",
+      countLabel: "Counted quantity",
+      title: "Count {name}",
     },
     submit: {
       cta: "Submit counts",
       sending: "Submitting…",
       hint: "Each counted item is saved and its variance recalculated.",
       needOne: "Count at least one item to submit.",
+      ready: "Ready to submit: {n}",
     },
     success: {
       title: "Counts submitted",
@@ -84,7 +97,7 @@ const messages = {
     },
     empty: {
       title: "Nothing to count here",
-      subtitle: "There are no inventory items for this building right now.",
+      subtitle: "This building has no inventory items yet — pick another building to start a count.",
       switch: "Check another building",
     },
     condition: {
@@ -130,6 +143,7 @@ const messages = {
       exit2: "Logistics / Dispatch",
       exit3: "Receiving Acceptance",
       exitStep: "Checkpoint {n} of 3",
+      allCleared: "All checkpoints cleared",
       trackLabel: "Exit checkpoints",
       gate: {
         cleared: "Cleared",
@@ -140,14 +154,27 @@ const messages = {
       clearing: "Clearing…",
       exitCleared: "Checkpoint cleared.",
       confirmed: "Receipt confirmed — asset delivered.",
+      count: "{n} awaiting you",
+      openDelivery: "Open delivery {name}",
+      pickTitle: "Nothing open",
+      pickHint: "Choose a delivery from the list to clear its checkpoint.",
+      loadingLabel: "Loading the deliveries",
+      confirmClearTitle: "Clear this checkpoint?",
+      confirmClearMessage:
+        "Clearing {label} cannot be undone, and the next checkpoint opens straight away.",
+      otpTitle: "Confirm receipt on site",
+      otpHint: "The code is on the delivery note that came with the asset.",
+      route: "Route",
     },
     errors: {
       loadFailed: "Couldn't load the inventory",
       loadError: "Couldn't load this section.",
+      deliveriesFailed: "Couldn't load the deliveries",
       submitFailed: "Couldn't submit the counts.",
       noBuilding: "Select a building to continue.",
       rateLimited: "Too many requests. Please wait a moment and try again.",
       sessionExpired: "Your session expired. Please refresh the page.",
+      retryHint: "Check the connection, then load the list again.",
     },
   },
   ar: {
@@ -156,14 +183,17 @@ const messages = {
       retry: "إعادة المحاولة",
       none: "—",
       error: "حدث خطأ ما.",
-      appName: "جرد المخزون",
+      appName: "السكن",
       submit: "إرسال",
       cancel: "إلغاء",
       confirm: "تأكيد",
       note: "ملاحظة",
       back: "رجوع",
       change: "تغيير",
+      changeBuilding: "تغيير المبنى",
       refresh: "تحديث القائمة",
+      close: "إغلاق",
+      done: "تم",
     },
     lang: {
       label: "اللغة",
@@ -191,10 +221,20 @@ const messages = {
       filterAll: "كل الأصناف",
       filterNeedsCount: "بحاجة للجرد / فرق",
       noRoom: "بدون غرفة محددة",
-      count: "{n} صنف",
+      count: "عدد الأصناف {n}",
       countedToday: "تم الجرد اليوم",
       lastCount: "آخر جرد {date}",
       neverCounted: "لم يُجرد بعد",
+      progress: "تم جرد {done} من {total}",
+      progressLabel: "تقدّم الجرد",
+      openItem: "افتح {name} لجرده",
+      edited: "معدّل",
+      pickTitle: "لم تفتح صنفاً",
+      pickHint: "اختر صنفاً من القائمة لتجرده.",
+      filteredTitle: "لا شيء بحاجة للجرد",
+      filteredHint: "كل صنف هنا مطابق للكمية المتوقعة. اعرض كل الأصناف لمتابعة الجرد.",
+      clearFilter: "اعرض كل الأصناف",
+      loadingLabel: "جارٍ تحميل الأصناف",
     },
     card: {
       expected: "المتوقع",
@@ -205,12 +245,15 @@ const messages = {
       notePlaceholder: "هل من ملاحظة؟",
       decrease: "إنقاص",
       increase: "زيادة",
+      countLabel: "الكمية المجرودة",
+      title: "جرد {name}",
     },
     submit: {
       cta: "إرسال الجرد",
       sending: "جارٍ الإرسال…",
       hint: "يُحفظ كل صنف مجرود ويُعاد احتساب الفرق.",
       needOne: "اجرد صنفاً واحداً على الأقل للإرسال.",
+      ready: "جاهز للإرسال: {n}",
     },
     success: {
       title: "تم إرسال الجرد",
@@ -226,7 +269,7 @@ const messages = {
     },
     empty: {
       title: "لا يوجد ما يُجرد هنا",
-      subtitle: "لا توجد أصناف مخزون لهذا المبنى حالياً.",
+      subtitle: "لا توجد أصناف مخزون في هذا المبنى بعد — اختر مبنى آخر لبدء الجرد.",
       switch: "افحص مبنى آخر",
     },
     condition: {
@@ -272,6 +315,7 @@ const messages = {
       exit2: "اللوجستيات / الإرسال",
       exit3: "قبول الاستلام",
       exitStep: "المرحلة {n} من 3",
+      allCleared: "اكتملت كل المراحل",
       trackLabel: "مراحل الخروج",
       gate: {
         cleared: "تم التخليص",
@@ -282,30 +326,36 @@ const messages = {
       clearing: "جارٍ التخليص…",
       exitCleared: "تم تخليص المرحلة.",
       confirmed: "تم تأكيد الاستلام — تم تسليم الأصل.",
+      count: "{n} بانتظارك",
+      openDelivery: "افتح عملية النقل {name}",
+      pickTitle: "لم تفتح عملية نقل",
+      pickHint: "اختر عملية نقل من القائمة لتخليص مرحلتها.",
+      loadingLabel: "جارٍ تحميل عمليات النقل",
+      confirmClearTitle: "هل تخلّص هذه المرحلة؟",
+      confirmClearMessage: "تخليص {label} لا يمكن التراجع عنه، وتُفتح المرحلة التالية فوراً.",
+      otpTitle: "تأكيد الاستلام في الموقع",
+      otpHint: "الرمز مدوّن في إشعار التسليم المرافق للأصل.",
+      route: "المسار",
     },
     errors: {
       loadFailed: "تعذّر تحميل المخزون",
       loadError: "تعذّر تحميل هذا القسم.",
+      deliveriesFailed: "تعذّر تحميل عمليات النقل",
       submitFailed: "تعذّر إرسال الجرد.",
       noBuilding: "اختر مبنى للمتابعة.",
       rateLimited: "طلبات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.",
       sessionExpired: "انتهت صلاحية الجلسة. يرجى تحديث الصفحة.",
+      retryHint: "تحقّق من الاتصال ثم أعد تحميل القائمة.",
     },
   },
 };
 
-// Server-driven enum display: a Select value the backend returns (condition,
-// category) is mapped here; an unmapped value renders verbatim, so no hand map
-// can silently diverge from the DocType's option set.
 export function translateEnum(namespace, value) {
   if (value == null || value === "") return value;
   const map = lookup(lang.value, namespace);
   return (map && map[value]) || value;
 }
 
-// Shared translate / setLang / dir / resource-error machinery. Supervisors on
-// site default to Arabic. translateEnum stays local (reads namespaces from the
-// messages dict via the factory's lookup).
 const { lang, dir, lookup, translate, setLang, resourceErrorMessage } = createI18n({
   messages,
   storageKey: STORAGE_KEY,

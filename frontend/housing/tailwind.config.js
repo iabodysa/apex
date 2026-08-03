@@ -1,15 +1,13 @@
 // Copyright (c) 2026, AFMCO and contributors
-// No `colors` block. A Tailwind palette is a fourth copy of the brand that can
-// never follow light/dark, because a utility class emits a literal. Colour reaches
-// this portal through @shared/tokens.css only. The `ah` block that used to sit here
-// held the pre-correction warning and danger hues and a sand that disagreed with the
-// token file; nothing in src/ ever referenced it.
-//
-// `sans` resolves the shared --font instead of restating it: Tailwind's preflight
-// sets font-family on <html> from this value, and the stack it held had dropped
-// Cairo, so the document root and the body were asking for different faces.
+import frappeUIPreset from "frappe-ui/tailwind";
+
+const FRAPPE_UI_SOURCES = "../node_modules/frappe-ui/src/" + "**/*.{vue,js,ts}";
+const PORTAL_SOURCES = "./src/" + "**/*.{vue,js}";
+const SHARED_COMPONENT_SOURCES = "../frontend_shared/components/" + "*.{vue,js}";
+
 export default {
-  content: ["./index.html", "./src/**/*.{vue,js}"],
+  presets: [frappeUIPreset],
+  content: ["./index.html", PORTAL_SOURCES, SHARED_COMPONENT_SOURCES, FRAPPE_UI_SOURCES],
   theme: {
     extend: {
       fontFamily: {

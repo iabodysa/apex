@@ -1,9 +1,4 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Thin per-portal icon wrapper. The SVG geometry lives once in
-     @shared/components/icons.js; this file just maps the names THIS portal uses to
-     their geometry and hands them to the shared IconBase renderer. Importing only
-     the names used keeps the built bundle to this portal's icon subset. Preserves
-     this portal's original baseline alignment and RTL mirror set. -->
 <template>
   <IconBase
     :shape="ICONS[name]"
@@ -18,7 +13,6 @@
 <script setup>
 import IconBase from "@shared/components/IconBase.vue";
 import {
-  arrowLeft,
   box,
   building,
   check,
@@ -26,25 +20,20 @@ import {
   circleCheck,
   clipboardCheck,
   door,
-  filter,
   key,
-  loader,
-  mail,
   minus,
   packageGlyph2,
   plus,
+  refresh,
   scale,
   search,
   send2,
   shield,
   triangleAlert,
   truck,
-  x,
 } from "@shared/components/icons.js";
 
-// This portal's icon name -> shared geometry. Names unchanged, so no call site moves.
 const ICONS = {
-  "arrow-left": arrowLeft,
   "box": box,
   "building": building,
   "check": check,
@@ -52,27 +41,20 @@ const ICONS = {
   "chevron": chevron,
   "clipboard-check": clipboardCheck,
   "door": door,
-  "filter": filter,
   "key": key,
-  "loader": loader,
-  "mail": mail,
   "minus": minus,
   "package": packageGlyph2,
   "plus": plus,
+  "refresh": refresh,
   "scale": scale,
   "search": search,
   "send": send2,
-  // Delivery's three exit checkpoints: shield (clear a gate), key (confirm the
-  // on-site code), truck (in transit). All three were CALLED by Delivery.vue and
-  // absent from this map, so those call sites rendered an empty <svg>.
   "shield-check": shield,
   "triangle-alert": triangleAlert,
   "truck": truck,
-  "x": x,
 };
 
-// Directional glyphs mirrored under [dir="rtl"] (unchanged from this portal's original).
-const MIRROR = ["chevron","arrow-left"];
+const MIRROR = ["chevron"];
 
 defineProps({
   name: { type: String, required: true },
