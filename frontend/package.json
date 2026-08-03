@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "test": "npm test -w frontend_shared && node worker/phone.test.mjs && node worker/qrColor.test.mjs"
+    "test": "npm test -w frontend_shared && node worker/phone.test.mjs && node worker/qrColor.test.mjs && node worker/pullToRefresh.test.mjs"
   },
   "dependencies": {
     "frappe-ui": "^0.1.0",

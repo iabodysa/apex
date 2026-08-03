@@ -26,6 +26,7 @@
         <TabButtons
           class="filter"
           v-model="filter"
+          :dir="dir"
           :buttons="[
             { label: t('list.filterAll'), value: 'all' },
             { label: t('list.filterNeedsCount'), value: 'needs' },
@@ -152,7 +153,7 @@ import { useI18n, resourceErrorMessage } from "../i18n";
 import { useDesktop } from "@shared/useBreakpoint.js";
 import { building, clearBuilding, countProgress, selectBuilding } from "../session";
 
-const { t } = useI18n();
+const { t, dir } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const desktop = useDesktop();

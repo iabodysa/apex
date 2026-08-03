@@ -30,37 +30,42 @@ defineProps({
 </script>
 
 <style scoped>
+/* Sizes come from the scale, never from a literal (DESIGN.md §8): a hint set at 12.5px
+   sat between --fs-sm and --fs-xs and belonged to neither, so the one empty state every
+   portal shares was the only text on screen off the type scale. The vertical padding is
+   the one deliberate exception — an empty block needs more air than --sp-6 and less than
+   --sp-8, and it is written as a sum of scale steps rather than a new number. */
 .apex-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 28px 16px;
+  gap: var(--sp-2);
+  padding: calc(var(--sp-6) + var(--sp-1)) var(--sp-4);
   text-align: center;
 }
 .apex-empty-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border-radius: var(--radius-pill);
   background: var(--c-surface-2, rgba(127, 127, 127, 0.12));
   color: var(--c-muted, #7d8f84);
 }
 .apex-empty-title {
   margin: 0;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
   color: var(--c-ink, inherit);
 }
 .apex-empty-hint {
   margin: 0;
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   line-height: 1.7;
   color: var(--c-muted, #7d8f84);
 }
 .apex-empty-action {
-  margin-top: 4px;
+  margin-top: var(--sp-1);
 }
 </style>

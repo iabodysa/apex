@@ -1,9 +1,13 @@
 // Copyright (c) 2026, AFMCO and contributors
-// Pull-to-refresh for window/body-scrolled pages (Home, Transport): the pages
-// scroll with the document, so a pull is armed only at the very top
-// (window.scrollY === 0) with a downward drag. onRefresh may return a Promise;
-// the indicator stays "refreshing" until it settles (a rejection must still
-// spring back, not hang).
+// Pull-to-refresh: a pull is armed only when the element the finger is on is already
+// scrolled to its top, and only for a downward drag. onRefresh may return a Promise; the
+// indicator stays "refreshing" until it settles (a rejection must still spring back, not
+// hang).
+//
+// The top is read from the ELEMENT that actually scrolls, never from window.scrollY. The
+// portal frame is one viewport tall and its column owns the overflow, so the document
+// never scrolls at all: window.scrollY is permanently 0, every touch armed a pull, and the
+// preventDefault below then blocked the column's own scrolling on every downward drag.
 import { onMounted, onUnmounted, ref } from "vue";
 
 // Past ~70px of pull, releasing triggers a refresh.
@@ -26,11 +30,33 @@ export function usePullToRefresh(onRefresh) {
   // Whether THIS touch sequence began at the top with a downward intent. Only
   // such a sequence may grow `distance`; a normal scroll is ignored.
   let pulling = false;
+  // The element the gesture would scroll, resolved once per sequence.
+  let scroller = null;
+
+  function scrollerFor(target) {
+    let node = target instanceof Element ? target : null;
+    while (node) {
+      const overflow = getComputedStyle(node).overflowY;
+      if (
+        (overflow === "auto" || overflow === "scroll") &&
+        node.scrollHeight > node.clientHeight
+      ) {
+        return node;
+      }
+      node = node.parentElement;
+    }
+    return null;
+  }
+
+  function scrollTop() {
+    return scroller ? scroller.scrollTop : window.scrollY;
+  }
 
   function onTouchStart(e) {
     // Never start a new pull while a refresh is still resolving, and only when
-    // the page is scrolled to the very top.
-    if (refreshing.value || window.scrollY > 0 || e.touches.length !== 1) {
+    // the scrolling element is at its very top.
+    scroller = scrollerFor(e.target);
+    if (refreshing.value || scrollTop() > 0 || e.touches.length !== 1) {
       pulling = false;
       return;
     }
@@ -43,9 +69,9 @@ export function usePullToRefresh(onRefresh) {
 
     const delta = e.touches[0].clientY - startY;
 
-    // Only a DOWNWARD drag is a pull. If the user scrolls up (or the page has
+    // Only a DOWNWARD drag is a pull. If the user scrolls up (or the column has
     // scrolled away from the top mid-gesture), abandon this pull.
-    if (delta <= 0 || window.scrollY > 0) {
+    if (delta <= 0 || scrollTop() > 0) {
       armed.value = false;
       distance.value = 0;
       pulling = false;
