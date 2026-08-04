@@ -294,10 +294,12 @@ Approval Status,حالة الاعتماد
 Approval workflow drives the first four states (Draft → Pending Approval → Approved / Rejected); the remaining states are the post-approval lifecycle of an approved lease.,يتحكم سير عمل الاعتماد في الحالات الأربع الأولى (مسودة ← بانتظار الاعتماد ← معتمد أو مرفوض)؛ أما الحالات المتبقية فهي دورة حياة عقد الإيجار بعد اعتماده.
 Approvals,الموافقات
 Approve,اعتماد
+Approve (Finance),اعتماد (المالية)
 Approve and Generate,اعتماد وتوليد
 Approve fuel request {0}?,اعتماد طلب الوقود {0}؟
 Approve Handover,اعتماد التسليم
 Approve or cancel this document through its workflow action; a direct submit or cancel is not allowed.,اعتمد هذا المستند أو ألغه من خلال إجراء سير العمل؛ الاعتماد أو الإلغاء المباشر غير مسموح به.
+Approve this route plan?,اعتماد خطة المسار؟
 Approved,معتمد
 Approved By,معتمد من
 Approved by Finance,معتمد من المالية
@@ -373,6 +375,7 @@ Assign the Technician,عيّن الفني
 Assign the Vehicle,عيّن المركبة
 Assign to me,إسناد إليّ
 Assign to me ({0}),إسناد إليّ ({0})
+Assign Transport Requests,إسناد طلبات النقل
 Assigned,مُسنَد
 Assigned Building,المبنى المخصص
 Assigned Driver,السائق المسند
@@ -393,6 +396,7 @@ Assigned Trip,الرحلة المُسندة
 Assigned Vehicle,المركبة المسندة
 Assigned without a cost center,مُسندة بدون مركز تكلفة
 Assignee,المُكلَّف
+Assigning transport requests...,جارٍ إسناد طلبات النقل...
 Assignment,الإسناد
 Assignment for catalog {0}: {1},الإسناد للكتالوج {0}: {1}
 Assignment Period,فترة الإسناد
@@ -440,6 +444,8 @@ Authorization,التفويض
 Authorization & Delivery,التفويض والتسليم
 Authorization Document,مستند التفويض
 Authorization Document is required to enable the Rent / Housing deduction rule.,مستند التفويض مطلوب لتفعيل قاعدة حسم الإيجار / السكن.
+Authorize (Operations),تفويض (العمليات)
+Authorize (Regional),تفويض (الإقليم)
 Authorized By,مفوض من قبل
 Authorized By (Record Only),المُخوِّل (للسجل فقط)
 Authorized By is required to enable the Rent / Housing deduction rule.,يلزم حقل «المعتمد من» لتفعيل قاعدة خصم الإيجار أو السكن.
@@ -537,6 +543,7 @@ Billing Period must look like 2026-07 (year and month).,يجب أن تكون ف�
 Billing Period To,فترة الفوترة إلى
 Billing Period To must be on or after Billing Period From.,يجب أن يكون تاريخ نهاية فترة الفوترة مساوياً لتاريخ البداية أو بعده.
 Billing Recipient Email,البريد الإلكتروني لمستلم الفاتورة
+Block,حظر
 Block Assignment On Expired Compliance,منع الإسناد عند انتهاء الامتثال
 Block vehicle assignment when the linked vehicle has expired compliance.,منع إسناد المركبة عند انتهاء صلاحية امتثال المركبة المرتبطة.
 Blocked,محظور
@@ -806,7 +813,6 @@ Company's share (%) of shared utility bills for this building. Agreed with the p
 Complaint,شكوى
 Complete,إكمال
 Complete a Maintenance Work Order,إكمال أمر عمل صيانة
-Complete Trip,إتمام الرحلة
 Complete Work Order,إكمال أمر العمل
 Completed,مكتمل
 Completed (timed),مكتملة (بأوقات مسجّلة)
@@ -852,6 +858,7 @@ Configure a default Cash or Bank account on company {0} before raising a payment
 Configure required safety controls. Use 'Generate Safety Setup' button to create task templates.,"اضبط ضوابط السلامة المطلوبة. استخدم زر ""توليد إعداد السلامة"" لإنشاء قوالب المهام."
 Confirm,تأكيد
 Confirm Custody Cleared,تأكيد إخلاء العهدة
+Confirm Fulfilment,تأكيد التنفيذ
 Confirm Habitat Settings,اعتماد إعدادات هابيتات
 Confirm Handover,تأكيد التسليم
 Confirm On-Site Receipt,تأكيد الاستلام في الموقع
@@ -940,6 +947,7 @@ Could not advance the request. Please try again.,تعذّر متابعة الط�
 Could not apply {0},تعذّر تطبيق {0}
 Could not approve the handover. Please try again.,تعذّر اعتماد التسليم. حاول مرة أخرى.
 Could not assign the selected alerts.,تعذّر إسناد التنبيهات المحددة.
+Could not assign the transport requests. Please try again.,تعذّر إسناد طلبات النقل. يرجى المحاولة مجدداً.
 Could not close the task,تعذّر إغلاق المهمة
 Could not complete the alert action.,تعذّر إكمال إجراء التنبيه.
 Could not complete the generation. Please try again.,تعذّر إتمام التوليد. يرجى المحاولة مجدداً.
@@ -980,8 +988,10 @@ Could not mark the transfer as received. Please try again.,تعذّر تحديد
 Could not mark the Work Order as Completed. Please try again.,تعذّر تغيير حالة أمر العمل إلى «مكتمل». يرجى المحاولة مجددًا.
 Could not post the reversal to the ledger. The cancellation was rejected.,تعذّر ترحيل القيد العكسي إلى الدفتر. تم رفض الإلغاء.
 Could not post the utility cost to the ledger. The bill was not submitted.,تعذّر تسجيل تكلفة الخدمات في الدفتر. لم تُعتمد الفاتورة.
+Could not raise the payment request. Please try again.,تعذّر رفع طلب الدفع. يرجى المحاولة مجدداً.
 Could not read the passport — enter the details manually.,تعذّرت قراءة الجواز — أدخل التفاصيل يدوياً.
 Could not read the payment settings. Please try again.,تعذّر قراءة إعدادات الدفع. يرجى المحاولة مجدداً.
+Could not record the decision. Please try again.,تعذّر تسجيل القرار. يرجى المحاولة مجدداً.
 Could not regenerate the code. Please try again.,تعذّر إعادة توليد الرمز. يرجى إعادة المحاولة.
 Could not regenerate the OTP. Please try again.,تعذّر إعادة توليد رمز التحقق. حاول مرة أخرى.
 Could not regenerate the payment schedule. Please try again.,تعذّر إعادة توليد جدول الدفعات. يرجى المحاولة مجدداً.
@@ -1288,6 +1298,7 @@ Dispatch Trips by Status,رحلات التسيير حسب الحالة
 Dispatched,تم التسيير
 Disposal/Scrap,إتلاف/خردة
 Disposition,التصرّف
+Dispute,اعتراض
 Disputed,محل نزاع
 Disputed or suspicious fuel-control case. Holds usage/GPS evidence and enforces non-raiser closure (segregation of duties).,حالة رقابة وقود متنازع عليها أو مشبوهة. تحفظ أدلة الاستخدام/نظام تحديد المواقع وتفرض أن يُغلقها شخص غير منشئها (الفصل بين المهام).
 Disputed Rental Settlements,تسويات الإيجار المتنازع عليها
@@ -1973,7 +1984,6 @@ Internal Transfer,نقل داخلي
 Internet,إنترنت
 Invalid code.,رمز غير صحيح.
 Invalid incident type.,نوع الحادث غير صالح.
-Invalid Odometer Reading,قراءة غير صحيحة لعداد المسافة
 Invalid or inactive location token.,رمز الموقع غير صالح أو غير مُفعّل.
 Invalid Payment Field Map,تعيين حقول دفع غير صالح
 Invalid Payment Target,هدف دفع غير صالح
@@ -2233,10 +2243,13 @@ Mapping rows applied in order. Each: target field = static value (when Static) e
 March,مارس
 Mark as Completed,وسم كمكتمل
 Mark Completed,تحديد كمكتمل
+Mark Failed,تحديد كفاشل
 Mark Lost,تسجيل كمفقودة
 Mark Missed,تسجيل المهمة كفائتة
+Mark Paid,تحديد كمدفوع
 Mark Ready,تعليم كجاهزة
 Mark Received,تأكيد الاستلام
+Mark this Service Order as Completed? Confirm the work was carried out.,تحديد حالة أمر الخدمة كـ 'مكتمل'؟ أكّد أنّ العمل تم تنفيذه.
 Mark this Service Order as In Progress?,هل تريد تحديد حالة أمر الخدمة هذا كـ 'قيد التنفيذ'؟
 Mark this Service Order as Missed? This indicates the scheduled work was not completed on time.,هل تريد تحديد حالة أمر الخدمة هذا كـ 'فائت'؟ يشير ذلك إلى عدم اكتمال العمل المجدول في الوقت المحدد.
 Mark this Task Instance as Completed?,تحديد هذه المهمة كمكتملة؟
@@ -2498,7 +2511,6 @@ October,أكتوبر
 Odometer,عداد المسافة
 Odometer cannot be negative.,لا يمكن أن تكون قراءة عداد المسافة سالبة.
 Odometer End,عداد المسافة (النهاية)
-Odometer end ({0}) cannot be less than odometer start ({1}).,قراءة العدّاد النهائيّة ({0}) لا يمكن أن تقلّ عن القراءة الابتدائيّة ({1}).
 Odometer Reading,قراءة عداد المسافة
 Odometer reading {0} cannot be lower than the vehicle's current {1}.,قراءة عداد المسافة {0} لا يمكن أن تكون أقل من القراءة الحالية للمركبة {1}.
 Odometer Start,عداد المسافة (البداية)
@@ -2745,6 +2757,7 @@ Payment,دفعة
 Payment Entry,قيد الدفع
 "Payment method saved. To enable salary deductions, set the authorizer and salary components on the Salary Deduction Policy first, then turn the rules on there.",حُفظت طريقة الدفع. لتفعيل خصومات الراتب، حدد المفوّض ومكوّنات الراتب في سياسة خصم الراتب أولًا، ثم فعّل القواعد فيها.
 Payment Request,طلب دفع
+Payment Request {0} is linked to this settlement.,تم ربط طلب الدفع {0} بهذه التسوية.
 Payment Request {0} raised for {1} SAR.,تم رفع طلب الدفع {0} بمبلغ {1} ريال.
 Payment Routing,توجيه المدفوعات
 Payment Routing Field Map,تعيين حقول توجيه الدفع
@@ -2885,6 +2898,7 @@ Portal token subject binding is invalid.,ارتباط صاحب رمز البوا
 Portal user who executed the movement — not the Employee on the source Facility Asset Movement.,مستخدم البوابة الذي نفّذ النقل — وليس الموظف المدوَّن في مستند نقل أصل المنشأة المصدر.
 Portal-Owned Records,سجلات تملكها البوابات
 Portals,البوابات
+Post (memo),قيد (مذكرة)
 Post accommodation and fleet costs to the General Ledger?,ترحيل تكاليف السكن والأسطول إلى دفتر الأستاذ العام؟
 Post custody-damage deductions to salary?,ترحيل خصومات تلف العهدة على الراتب؟
 Post-Work,بعد العمل
@@ -2992,6 +3006,7 @@ Quota period in YYYY-MM format (e.g. 2026-05).,فترة الحصة بصيغة YY
 Quota-increase claim - requires Operations-tier approval and a Finance consult note.,طلب زيادة حصة الوقود — يستلزم موافقة مستوى العمليات وملاحظة استشارة مالية.
 Raise a Fuel Request,أنشئ طلب وقود
 Raise a Maintenance Request,رفع طلب صيانة
+Raise a payment request for this settlement?,رفع طلب دفع لهذه التسوية؟
 Raise a Salis Payment Request,إنشاء طلب دفع ساليس
 Raise a Transport Request,أنشئ طلب نقل
 Raise Fuel Request,إنشاء طلب وقود
@@ -3006,12 +3021,15 @@ Raise {0},إصدار {0}
 Raised By,أُنشئ بواسطة
 Raised On,أُنشئ في
 Raising departure transport…,جارٍ إنشاء نقل المغادرة…
+Raising the payment request...,جارٍ رفع طلب الدفع...
 Rate how serious the incident is.,قيّم درجة خطورة الحادث.
 rated,تم التقييم
 Rating,التقييم
 Rating Details,تفاصيل التقييم
 Rating must be between 1 and 5.,يجب أن يكون التقييم بين ١ و٥.
 Re-inspection,إعادة فحص
+Re-reconcile,إعادة التسوية
+Re-submit,إعادة الإرسال
 Re: {0},بشأن: {0}
 Reactivate,إعادة تفعيل
 Read-only — managed by the Room Setup wizard.,للقراءة فقط — يُدار عبر معالج إعداد الغرف.
@@ -3050,6 +3068,7 @@ Recipient's signature and acknowledgment captured in person at the kiosk when th
 "Recipient's signature taken at handover time. A signature can be copied and reused, so only the custody desk roles that take it can see this field.",توقيع المستلم المسجل عند التسليم. يمكن نسخ التوقيع وإعادة استخدامه، لذلك لا يظهر هذا الحقل إلا لموظفي مكتب العهدة المسؤولين عن تسجيله.
 Recommended Action,الإجراء الموصى به
 "Recommended disposition for the damaged vehicle, whether to repair it, write it off, recover the cost from the driver, or file an insurance claim.",التصرّف الموصى به للمركبة المتضررة، سواء إصلاحها أو شطبها أو استرداد التكلفة من السائق أو رفع مطالبة تأمين.
+Reconcile,تسوية
 Reconcile the first rental office invoice against actual usage.,سوِّ أول فاتورة مكتب إيجار وفق الاستخدام الفعلي.
 Reconciled,تمت المطابقة
 Reconciliation,المطابقة
@@ -3077,11 +3096,13 @@ Record the Result,سجّل النتيجة
 Record when the incident happened.,سجّل وقت وقوع الحادث.
 "Recorded physical condition of the item at the moment it is issued, providing the baseline used to assess wear or damage when it is later returned.",حالة الصنف الفعلية وقت الصرف، وهي المرجع لتقييم الاستهلاك أو التلف عند إعادته.
 Recording,التسجيل
+Recording the decision...,جارٍ تسجيل القرار...
 Records,السجلات
 Records a vehicle stop event with reason and ownership context.,يسجّل حدث إيقاف مركبة مع السبب وسياق الملكية.
 Records damage on returned custody articles. A salary deduction is applied only when damage deduction is enabled in Habitat Settings.,يسجّل التلف في أصناف العهدة المرتجعة. ولا يُطبّق خصم من الراتب إلا عند تفعيل خصم التلف في إعدادات هابيتات.
 Records execution of a single safety task on a specific date for a specific building.,يسجّل تنفيذ مهمة سلامة واحدة في تاريخ محدد لمبنى محدد.
 Records the handover of a vehicle from one driver to another.,يسجّل تسليم مركبة من سائق إلى آخر.
+Recover,استرداد
 Recover Cost from Driver,استرداد التكلفة من السائق
 Recover from Driver,استرداد من السائق
 Recover From Employee,الاسترداد من الموظف
@@ -3226,6 +3247,7 @@ Representatives Transport Requests Open,طلبات نقل المندوبين ا�
 Request,طلب
 Request Date,تاريخ الطلب
 Request Details,تفاصيل الطلب
+Request Evidence,طلب مستند
 Request fuel for a vehicle to start the fuelling and reconciliation cycle.,اطلب وقوداً لمركبة لبدء دورة التزويد والتسوية.
 Request ID,رقم الطلب
 Request submitted successfully.,تم إرسال الطلب بنجاح.
@@ -3303,6 +3325,7 @@ Responsible Worker,العامل المسؤول
 Result,النتيجة
 Results must be a list.,يجب أن تكون النتائج قائمةً.
 Results must be valid JSON.,يجب أن تكون النتائج بصيغة JSON صحيحة.
+Resume Investigation,استئناف التحقيق
 Retention for daily occupancy and weekly vehicle-utilisation snapshots (days). Default 365.,مدة الاحتفاظ بلقطات الإشغال اليومية واستخدام المركبات الأسبوعية (أيام). الافتراضي 365.
 Retention for resolved Operations Alerts (days). Open and acknowledged alerts are never purged by age. Default 90.,مدة الاحتفاظ بتنبيهات العمليات المعالجة (بالأيام). لا تُحذف التنبيهات المفتوحة أو المؤكد الاطلاع عليها بسبب عمرها. الافتراضي 90 يومًا.
 Retention for submitted Non-Financial Depreciation Snapshots (days). Default 730.,مدة الاحتفاظ بلقطات الإهلاك غير المالي المعتمدة (أيام). الافتراضي 730.
@@ -3340,6 +3363,7 @@ Review the Active Resident Register,راجع سجل الساكنين الحال�
 Review the Safety Task Catalog,مراجعة دليل مهام السلامة
 "Review the shared integration switchboard: frontend URL, API version, and allowed origins.",راجع لوحة التكامل المشتركة: رابط الواجهة، وإصدار الواجهة البرمجية، والمصادر المسموح بها.
 Reviewed by,روجع بواسطة
+Revise,تعديل
 Revoke Portal Link,إلغاء رابط البوابة
 Revoked,مُلغى
 Revoking driver link…,جارٍ إلغاء رابط السائق…
@@ -3399,7 +3423,9 @@ Route,المسار
 Route Assignment,إسناد مسار
 Route Name,اسم المسار
 Route Plan,خطة المسار
+Route plan approved.,تم اعتماد خطة المسار.
 Route plan not found.,خطة المسار غير موجودة.
+Route plan rejected.,تم رفض خطة المسار.
 Route Stop,محطة المسار
 Route stop is not part of this trip.,محطة المسار ليست جزءًا من هذه الرحلة.
 Route Supervisor,مشرف المسار
@@ -3553,6 +3579,7 @@ Select a worker before returning.,اختر عاملاً قبل الإرجاع.
 Select a worker to load held custody.,اختر عاملًا لعرض العهدة التي بحوزته.
 Select all,تحديد الكل
 Select at least one passenger.,اختر راكباً واحداً على الأقل.
+Select at least one transport request.,اختر طلب نقل واحداً على الأقل.
 Select at least one vehicle.,اختر مركبة واحدة على الأقل.
 Select at least one worker to board.,اختر عاملًا واحدًا على الأقل للصعود.
 Select from the Habitat material catalog. Optional — use instead of or alongside ERPNext Item.,اختر من قائمة مواد هابيتات. الحقل اختياري، ويمكن استخدامه بدل صنف ERPNext أو معه.
@@ -3614,6 +3641,7 @@ Service Item,صنف الخدمة
 Service Level,مستوى الخدمة
 "Service life of a consumable issue (linens, mattresses). 0 = no expiry; a daily job alerts on held items older than this.",مدة استخدام المستهلكات المصروفة، مثل المفروشات والمراتب. القيمة 0 تعني بلا انتهاء، وتنبّه مهمة يومية على الأصناف المحتفظ بها بعد تجاوز هذه المدة.
 Service Line,خط الخدمة
+Service Order marked Completed.,تم تحديد حالة أمر الخدمة كـ 'مكتمل'.
 Service Order marked In Progress.,تم تحديد حالة أمر الخدمة كـ 'قيد التنفيذ'.
 Service Order marked Missed.,تم تحديد حالة أمر الخدمة كـ 'فائت'.
 Service Type,نوع الخدمة
@@ -3804,6 +3832,8 @@ Standard Unit Cost (SAR),تكلفة الوحدة القياسية (ريال)
 standing,دائم
 Start Date,تاريخ البدء
 Start Datetime,تاريخ ووقت البدء
+Start Investigation,بدء التحقيق
+Start Processing,بدء المعالجة
 Start Review,بدء المراجعة
 Start Task,بدء المهمة
 Start the trip before marking arrival.,ابدأ الرحلة قبل تسجيل الوصول.
@@ -3854,9 +3884,13 @@ Subcontractor Service Order,أمر خدمة مقاول الباطن
 Subcontractor Service Orders by Status,أوامر خدمة مقاول الباطن حسب الحالة
 Subcontractors,مقاولو الباطن
 Subject,الموضوع
+Submit for Approval,إرسال للاعتماد
+Submit for Review,إرسال للمراجعة
 Submit Manifest,اعتماد كشف الركاب
 Submit Request,إرسال الطلب
 Submit the settlement before raising a payment request.,اعتمد التسوية قبل إنشاء طلب دفع.
+Submit to Finance,إرسال إلى المالية
+Submit to Movement,إرسال إلى الحركة
 Submittable: formal work order derived from a Maintenance Request.,قابل للاعتماد: أمر عمل رسمي مشتق من طلب صيانة.
 Submittable: official on-site maintenance inspection record.,قابل للاعتماد: سجل تفتيش صيانة ميداني رسمي.
 Submittable: one execution of a Scheduled Task Template. Auto-generated by the daily scheduler job.,قابل للاعتماد: تنفيذ واحد لقالب مهمة مجدولة. يُنشأ آلياً بواسطة مهمة الجدولة اليومية.
@@ -4328,6 +4362,7 @@ Vacant Capacity Cost Trend (Monthly),اتجاه تكلفة السعة الشاغ
 Valid,ساري
 Valid From,صالح من
 Valid Until,صالح حتى
+Validate,تدقيق
 Validated,تم التحقق
 Validity,الصلاحية
 Validity Period,فترة الصلاحية
@@ -4419,6 +4454,7 @@ Voucher Type,نوع القسيمة
 Wait Count,عدد مرات الانتظار
 Wait Requests,طلبات الانتظار
 Waiting Evidence,بانتظار الإثباتات
+Waive,إسقاط
 Waived,مُعفى
 Walk each floor and set the type of every room.,امشِ في كل طابق وحدد نوع كل غرفة.
 Warning,تحذير
@@ -4598,6 +4634,7 @@ Your Work-Order Queue,قائمة أوامر العمل الخاصة بك
 {0} over capacity,{0} فوق السعة
 {0} over threshold,{0} يتجاوز الحدّ
 {0} payment rows generated.,تم إنشاء {0} من صفوف الدفعات.
+{0} request(s) assigned to this trip.,تم إسناد {0} طلب/طلبات إلى هذه الرحلة.
 {0} resolved,تمت معالجة {0}
 {0} room(s) have a planned capacity reduction pending confirmation.,لدى {0} غرفة تخفيض مخطط للسعة بانتظار التأكيد.
 "{0} rooms — {1} red, {2} amber",{0} غرفة — {1} حمراء، {2} كهرمانية
