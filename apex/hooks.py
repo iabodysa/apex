@@ -557,6 +557,7 @@ after_install = [
     "apex.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
     # Habitat roles need select on the core masters their own Link fields target.
     "apex.apex_core.setup.seeders.habitat_core_link_perms_seed.seed_habitat_core_link_perms",
+    "apex.apex_core.setup.seeders.module_profile_seed.seed_module_profiles",
     # [#r5fycj]
     "apex.patches.v1_x.reorder_root_workspace_creation.execute",
 ]
@@ -578,6 +579,7 @@ after_migrate = [
     "apex.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
     # Replays the core-master select grants on an already-installed site.
     "apex.apex_core.setup.seeders.habitat_core_link_perms_seed.seed_habitat_core_link_perms",
+    "apex.apex_core.setup.seeders.module_profile_seed.seed_module_profiles",
     # [#hi9721]
     "apex.patches.v1_0.seed_salis_settings.execute",
     # [#byftwb]
