@@ -4060,6 +4060,7 @@ This bed is out of service and cannot be assigned.,هذا السرير خارج 
 This building has no rooms yet.,لا توجد غرف في هذا المبنى بعد.
 This building has rooms but every bed is occupied — use Over-capacity,يحتوي هذا المبنى على غرف لكن جميع الأسرّة مشغولة — استخدم تجاوز السعة
 "This building's own address. If empty, the Accommodation Site's address is shown.",عنوانُ هذا المبنى الخاصّ. إن تُرِك فارغًا، يُعرَض عنوانُ موقع السكن.
+This bus has already left your stop. Ask for a pickup instead of confirming.,غادرت هذه الحافلة محطتك. اطلب رحلة بدل تأكيد الصعود.
 "This certificate covers movement-domain clearance only (vehicle, fuel chip, and custody). HR end-of-service and visa clearance are out of scope.",تغطي هذه الشهادة إخلاء طرف نطاق الحركة فقط (المركبة، شريحة الوقود، والعهدة). إخلاء طرف نهاية الخدمة والتأشيرة لدى الموارد البشرية خارج النطاق.
 This Custody Issue has no issued-to Employee; nothing to hand over.,لم يُحدد موظف مستلم في صرف العهدة هذا، لذلك لا يوجد ما يُسلّم.
 This driver had no live link.,لا يوجد رابط فعّال لهذا السائق.
@@ -4099,6 +4100,7 @@ This temporary top-up is past its revert due date ({0}) and has not been reverte
 This transfer can no longer be reversed: the resident is no longer in Bed {0}.,لم يعد بالإمكان التراجع عن هذا النقل: الساكن لم يعد في السرير {0}.
 This transfer needs an active (checked-in) assignment to move.,يتطلب هذا النقل تسكينًا نشطًا لم تنتهِ إقامته.
 This transfer was raised from Bed {0} but the resident is now in Bed {1}.,أُنشئ هذا النقل من السرير {0} لكن الساكن الآن في السرير {1}.
+This trip is already finished. Boarding can no longer be confirmed.,انتهت هذه الرحلة. لم يعد بالإمكان تأكيد الصعود.
 This vehicle has no open stop to release.,لا يوجد إيقاف مفتوح لهذه المركبة لإعادتها إلى الخدمة.
 This vehicle has no open workshop stop to return.,لا يوجد لهذه المركبة إيقاف ورشة مفتوح لإعادتها.
 This vehicle is under maintenance and should not be dispatched.,هذه المركبة تحت الصيانة ولا يجوز تسييرها.
@@ -4551,6 +4553,7 @@ You may only handle boarding for your own trips.,لا يمكنك إدارة ال
 You were not part of this trip's manifest.,لم تكن ضمن كشف ركاب هذه الرحلة.
 Your account does not have a role to access it.,لا يملك حسابك دورًا للوصول إليها.
 Your arrival manifest was submitted. The accommodation team will reconcile arrivals against it on the expected date.,تم اعتماد كشف الوصول. سيطابق فريق السكن حالات الوصول الفعلية معه في التاريخ المتوقع.
+Your bus has not reached your stop yet. Confirm boarding once it arrives.,لم تصل حافلتك إلى محطتك بعد. أكّد صعودك عند وصولها.
 Your driving licence is expiring soon — please start the renewal,رخصة قيادتك على وشك الانتهاء — يُرجى بدء التجديد
 Your exit clearance has been issued — you can download the certificate from the driver portal,تم إصدار إخلاء طرفك — يمكنك تنزيل الشهادة من بوابة السائق
 Your fuel request has been decided,تم البت في طلب الوقود الخاص بك

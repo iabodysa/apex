@@ -35,6 +35,7 @@ from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.apex_core.doctype.salis_settings.salis_settings import (
     get_boarding_setting,
 )
+from apex.salis.api import boarding_window
 
 # [#g5x09e]
 _MISBOARD_CACHE_PREFIX = "salis_misboard:"
@@ -228,53 +229,19 @@ def _read_misboard(worker):
 # [#pyibn1]
 
 
-def _worker_pickup_arrival(dispatch_trip, building):
-    """The "driver has arrived at your pickup" state for the worker on this trip, or None.
+def _worker_pickup_arrival(window):
+    """The "driver has arrived at your pickup" state for the worker, or None.
 
-    The driver records arrival on a Trip Stop Progress row (the existing per-stop
-    rail, ``arrived``/``arrived_at`` flag) keyed on the source Route Stop row. The
-    worker's OWN pickup stop is the route stop whose ``accommodation_building``
-    matches the worker's transport-request building (the same building-match the
-    Masar transport view uses to scope a worker to his own pickup). This resolves
-    that worker-scoped route stop, then reads its arrival flag off the trip's open
-    Trip Start Log. Returns ``{"arrived": True, "arrived_at": ...}`` only when the
-    driver has marked arrival at the worker's own stop; otherwise None (the client
-    shows nothing). Read-only — a guest worker has no socket, so the poll is the
-    delivery path for this signal."""
-    if not (dispatch_trip and building):
+    Reads the arrival off the already-resolved boarding window rather than
+    re-deriving it: ``boarding_window`` resolves the worker's own Route Stop from his
+    pickup building and reads the driver's ``arrived`` flag on that stop's Trip Stop
+    Progress row, which is the same join this signal has always used. Returns
+    ``{"arrived": True, "arrived_at": ...}`` only once the driver has marked arrival
+    at that stop; otherwise None (the client shows nothing). Read-only — a guest
+    worker has no socket, so the poll is the delivery path for this signal."""
+    if not (window and window.get("arrived")):
         return None
-    route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan")
-    if not route_plan:
-        return None
-    # [#gjawab]
-    route_stop = frappe.db.get_value(
-        "Route Stop",
-        {
-            "parent": route_plan,
-            "parenttype": "Route Plan",
-            "accommodation_building": building,
-        },
-        "name",
-    )
-    if not route_stop:
-        return None
-    log = frappe.db.get_value(
-        "Trip Start Log", {"dispatch_trip": dispatch_trip, "docstatus": 0}, "name"
-    )
-    if not log:
-        return None
-    row = frappe.db.get_value(
-        "Trip Stop Progress",
-        {"parent": log, "parenttype": "Trip Start Log", "route_stop": route_stop},
-        ["arrived", "arrived_at"],
-        as_dict=True,
-    )
-    if not row or not row.get("arrived"):
-        return None
-    return {
-        "arrived": True,
-        "arrived_at": frappe.utils.cstr(row.get("arrived_at")) if row.get("arrived_at") else None,
-    }
+    return {"arrived": True, "arrived_at": window.get("arrived_at")}
 
 
 # [#8xt8b2]
@@ -536,7 +503,13 @@ def worker_request_wait(token=None):
 def worker_claim_boarded(token=None):
     """Worker action: "I'm on board" self-confirm (write, token-scoped).
 
-    The worker's claim SELF-CONFIRMS — there is no per-worker driver-approval gate.
+    The worker's claim SELF-CONFIRMS — there is no per-worker driver-approval gate,
+    so the only thing standing between a tap and the gate manifest is the boarding
+    window: the claim is accepted only while ``boarding_window`` puts the worker's
+    OWN stop in ``at_stop``, and is refused with a named reason — before the trip is
+    locked and before any state or log is written — when the bus has not reached that
+    stop, has already left it, or the trip is over.
+
     Resolves the token to one Employee (sole identity source), finds their today's
     trip from their OWN manifest, records the boarding event (the SAME
     ``method=Worker`` Trip Boarding Event + shared get-or-create log
@@ -569,6 +542,9 @@ def worker_claim_boarded(token=None):
     if not resolved:
         return {"dispatch_trip": None, "status": None}
     dispatch_trip, request_name, stop_name, building = resolved
+
+    window = boarding_window.resolve(dispatch_trip, request_name, building)
+    boarding_window.refuse_unless_open(window)
 
     # Serialize concurrent claims for the same worker on the SAME Dispatch Trip row the
     # driver scan locks (salis/api/boarding.py): without it two simultaneous claims both
@@ -612,6 +588,7 @@ def worker_claim_boarded(token=None):
         "status": "Boarded",
         "confirm_source": "Worker",
         "reject_count": cint(target.reject_count),
+        "boarding_window": window,
     }
 
 
@@ -684,11 +661,13 @@ def worker_trip_boarding(token=None):
     Resolves the token to one Employee and returns their state on today's trip —
     status, the active notify_at + window (for the client countdown),
     wait_count/max, the poll cadence, any wrong_bus correction (the correct trip +
-    driver phone) held as a transient hint from a misboarded scan, and
+    driver phone) held as a transient hint from a misboarded scan,
     ``driver_arrived`` (the "your driver has arrived at your pickup" signal — set
     once the driver marks arrival at the worker's own pickup stop, else None; the
-    guest worker has no socket, so this poll is the delivery path). The driver phone
-    is returned only to the affected worker. Read-only.
+    guest worker has no socket, so this poll is the delivery path), and
+    ``boarding_window`` — the five-state verdict on his own stop, which is what tells
+    the screen whether to show a live confirm button, an ETA, or a missed-ride
+    request. The driver phone is returned only to the affected worker. Read-only.
 
     ``{"trip": None}`` with any pending misboard hint when the worker has no
     boardable trip on this bus; a worker not on the trip's boarding state gets a
@@ -707,9 +686,11 @@ def worker_trip_boarding(token=None):
             "trip": None,
             "poll_seconds": poll_seconds,
             "wrong_bus": misboard or None,
+            "boarding_window": boarding_window.resolve(None),
         }
     dispatch_trip = resolved[0]
     building = resolved[3]
+    window = boarding_window.resolve(dispatch_trip, resolved[1], building)
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     # [#lu2q5q]
@@ -737,7 +718,8 @@ def worker_trip_boarding(token=None):
             "poll_seconds": poll_seconds,
             "wrong_bus": misboard or None,
             # [#38t4w1]
-            "driver_arrived": _worker_pickup_arrival(dispatch_trip, building),
+            "driver_arrived": _worker_pickup_arrival(window),
+            "boarding_window": window,
         }
     )
     return state

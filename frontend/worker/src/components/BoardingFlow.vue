@@ -88,6 +88,7 @@
            (no driver approval); the worker goes straight to Boarded. If the driver
            later marks them not-boarded (an exception), the state resets to Pending
            and this button simply returns. -->
+      <BoardingWindow v-else-if="!canConfirm" :window="boardingWindow" />
       <button
         v-else
         class="btn btn-primary"
@@ -142,6 +143,7 @@
 import { computed, ref, onUnmounted, watch } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "./Icon.vue";
+import BoardingWindow from "./BoardingWindow.vue";
 import BoardingPassOverlay from "./BoardingPassOverlay.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { TOKEN } from "../utils/token";
@@ -175,6 +177,11 @@ const correctDriverPhone = computed(() => wrongBus.value?.correct_driver?.phone 
 // P-046: "your driver has arrived at your pickup" — set by the poll once the driver
 // marks arrival at this worker's own pickup stop. Null until then.
 const driverArrived = computed(() => !!props.boarding?.driver_arrived?.arrived);
+
+const boardingWindow = computed(() => props.boarding?.boarding_window || null);
+const canConfirm = computed(() =>
+  boardingWindow.value ? !!boardingWindow.value.can_confirm : true,
+);
 
 // Wait request: cap + counts. The flow allows it while the worker is still in a
 // boarding window (a trip exists and it isn't a terminal state).

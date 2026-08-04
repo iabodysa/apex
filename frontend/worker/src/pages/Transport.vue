@@ -142,23 +142,26 @@
           @refresh="boardingResource.reload().catch(() => {})"
         />
 
-        <!-- [T-323] "I'm at the pickup": simple self-confirm for the OTHER upcoming
-             trips (the active boarding flow above owns the soonest one). -->
-        <div v-else>
-          <button
-            v-if="!confirmedTrips[trip.transport_request]"
-            class="btn btn-primary"
-            style="width: auto; padding-inline: 18px"
-            :disabled="boarding.loading && boardingFor === trip.transport_request"
-            @click="confirmBoarding(trip)"
-          >
-            <Icon name="check" :size="18" />
-            {{ boarding.loading && boardingFor === trip.transport_request ? t("transport.atPickupSending") : t("transport.atPickup") }}
-          </button>
-          <p v-else class="status-ok flex items-center gap-2 text-sm">
-            <Icon name="check" :size="16" class="shrink-0" />
-            {{ t("transport.atPickupDone") }}
-          </p>
+        <!-- "I'm at the pickup": simple self-confirm for the OTHER upcoming trips
+             (the active boarding flow above owns the soonest one). -->
+        <div v-else class="space-y-2">
+          <BoardingWindow v-if="!canConfirm(trip)" :window="trip.boarding_window" />
+          <template v-else>
+            <button
+              v-if="!confirmedTrips[trip.transport_request]"
+              class="btn btn-primary"
+              style="width: auto; padding-inline: 18px"
+              :disabled="boarding.loading && boardingFor === trip.transport_request"
+              @click="confirmBoarding(trip)"
+            >
+              <Icon name="check" :size="18" />
+              {{ boarding.loading && boardingFor === trip.transport_request ? t("transport.atPickupSending") : t("transport.atPickup") }}
+            </button>
+            <p v-else class="status-ok flex items-center gap-2 text-sm">
+              <Icon name="check" :size="16" class="shrink-0" />
+              {{ t("transport.atPickupDone") }}
+            </p>
+          </template>
           <p v-if="boardingError && boardingFor === trip.transport_request" class="text-sm text-danger mt-1">{{ boardingError }}</p>
         </div>
       </section>
@@ -247,6 +250,7 @@ import TripProgressBar from "../components/TripProgressBar.vue";
 import TripRating from "../components/TripRating.vue";
 import PullIndicator from "../components/PullIndicator.vue";
 import BoardingFlow from "../components/BoardingFlow.vue";
+import BoardingWindow from "../components/BoardingWindow.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatTime, formatDateTime } from "../utils/datetime";
 import { TOKEN } from "../utils/token";
@@ -309,6 +313,11 @@ function destination(trip) {
   return last === myPickup(trip) ? null : last;
 }
 
+function canConfirm(trip) {
+  const w = trip.boarding_window;
+  return w ? !!w.can_confirm : true;
+}
+
 // Live boarding state for the soonest trip (the server's worker_trip_boarding
 // state machine). Drives the boarding flow component. Polled adaptively: fast
 // (poll_seconds, ~10s) while a boarding window is active, off otherwise — the
@@ -365,10 +374,10 @@ watch(
 );
 onUnmounted(stopBoardingPoll);
 
-// [T-323] worker boarding self-confirm. The server resolves the worker from the
-// token and writes the boarding event; this UI just records which trips the
-// worker has already confirmed so the card flips to a done state. Keyed by
-// transport_request so each card tracks its own state.
+// Worker boarding self-confirm. The server resolves the worker from the token and
+// writes the boarding event; this UI just records which trips the worker has
+// already confirmed so the card flips to a done state. Keyed by transport_request
+// so each card tracks its own state.
 const confirmedTrips = reactive({});
 const boardingFor = ref(null);
 const boardingError = ref("");

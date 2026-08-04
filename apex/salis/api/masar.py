@@ -26,6 +26,7 @@ from apex.apex_core.utils.portal_token_security import (
     resolve_portal_subject,
 )
 from apex.apex_core.utils.system_notify import notify_user_system
+from apex.salis.api import boarding_window
 from apex.salis.api.driver_portal import _require_enabled, _resolve_driver
 from apex.salis.utils import days_until as _days_until
 # [#55ldxu]
@@ -131,7 +132,7 @@ def _fmt_time(value):
 
 
 # [#hgsz8p]
-_FINISHED_TRIP_STATUSES = frozenset({"Completed", "Cancelled"})
+_FINISHED_TRIP_STATUSES = boarding_window.FINISHED_TRIP_STATUSES
 
 
 def _trip_date_window():
@@ -847,7 +848,12 @@ def get_worker_transport(token=None):
     ``upcoming`` and ``past`` so the Transport screen can never present a trip
     that already departed as if it were the next ride — Home and Transport stay
     in lock-step. ``trips`` is kept as an alias of ``upcoming`` for backward
-    compatibility with any caller that read the old flat list."""
+    compatibility with any caller that read the old flat list.
+
+    Each trip also carries its ``boarding_window`` — the five-state verdict on the
+    worker's OWN pickup stop (``boarding_window.resolve``) — so the screen renders
+    the state the ride is actually in instead of offering a confirm button the
+    server would refuse."""
     employee = _resolve_worker(token)
     requests = _worker_transport_requests(employee)
     now_dt = frappe.utils.now_datetime()
@@ -916,6 +922,12 @@ def get_worker_transport(token=None):
         )
 
         dispatch_trip = req.get("dispatch_trip") or _live_dispatch_trip(req["name"])
+        window = boarding_window.resolve(
+            dispatch_trip,
+            req["name"],
+            (my_pickup or {}).get("accommodation_building") or req.get("accommodation_building"),
+            now=now_dt,
+        )
         trip = {
             "transport_request": req["name"],
             # [#rf9139]
@@ -930,6 +942,7 @@ def get_worker_transport(token=None):
             "depart_time": depart_time,
             "is_upcoming": is_upcoming,
             "has_rated": bool(has_rated),
+            "boarding_window": window,
             "stops": stops,
             "my_pickup": my_pickup,
             "destination": destination,
@@ -1692,6 +1705,12 @@ def confirm_boarding(token=None, transport_request=None):
     trip's draft Trip Start Log — the SAME child table + get-or-create log the
     driver QR scan writes, so the two paths share one boarding manifest.
 
+    Gated on the worker's OWN stop, not on the calendar day: the confirm is accepted
+    only while ``boarding_window`` puts that stop in ``at_stop``, and is refused with
+    a named reason — before the trip is locked and before any log exists — when the
+    bus has not reached it, has already left it, or the trip is over. A refusal
+    writes nothing at all.
+
     Strictly token-scoped: the boarding row is always written for the resolved
     employee, and the optional ``transport_request`` can only narrow the worker's
     own trip set (an id they are not registered on does not match). Re-confirming
@@ -1701,8 +1720,8 @@ def confirm_boarding(token=None, transport_request=None):
     clean no-op (``{"trip": None}``). Posts no GL.
 
     Returns ``{"created": bool, "dispatch_trip": str|None, "trip_start_log":
-    str|None, "boarded_count": int|None}``; ``{"trip": None}`` when nothing is
-    boardable today."""
+    str|None, "boarded_count": int|None, "boarding_window": dict}``;
+    ``{"trip": None}`` when nothing is boardable today."""
     employee = _resolve_worker(token)
     transport_request = (transport_request or "").strip() or None
 
@@ -1710,6 +1729,9 @@ def confirm_boarding(token=None, transport_request=None):
     if not resolved:
         return {"trip": None, "created": False}
     dispatch_trip, request_name, stop_name, building = resolved
+
+    window = boarding_window.resolve(dispatch_trip, request_name, building)
+    boarding_window.refuse_unless_open(window)
 
     # Serialize concurrent confirms for the same worker on the SAME Dispatch Trip row the
     # driver scan locks (salis/api/boarding.py): without it two simultaneous confirms both
@@ -1726,6 +1748,7 @@ def confirm_boarding(token=None, transport_request=None):
             "transport_request": request_name,
             "trip_start_log": log.name,
             "boarded_count": log.boarded_count,
+            "boarding_window": window,
         }
 
     log.append(
@@ -1749,6 +1772,7 @@ def confirm_boarding(token=None, transport_request=None):
         "transport_request": request_name,
         "trip_start_log": log.name,
         "boarded_count": log.boarded_count,
+        "boarding_window": window,
     }
 
 
