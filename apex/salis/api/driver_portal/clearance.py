@@ -52,7 +52,6 @@ def my_clearance():
     if not row:
         return {"has_clearance": False}
 
-    # [#o19xxt]
     issued = row.get("docstatus") == 1 and row.get("status") == "Cleared"
     return {
         "has_clearance": True,

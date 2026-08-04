@@ -19,7 +19,6 @@ class SalisSettings(Document):
             frappe.throw(_("Fuel Request Approval Threshold cannot be negative."))
 
 
-# [#92zfgx]
 def get_salis_int(field: str, default: int) -> int:
     """Read an Int from the Salis Settings single, falling back to ``default``
     when the stored value is blank or zero (the new-Single-Int-stores-0 trap)."""
@@ -50,7 +49,6 @@ def get_salis_float(field: str, default: float) -> float:
         return default
 
 
-# [#c409u5]
 BOARDING_FLOW_DEFAULTS = {
     "boarding_notify_max_count": 3,
     "boarding_notify_window_seconds": 60,

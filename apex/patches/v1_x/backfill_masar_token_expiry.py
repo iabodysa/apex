@@ -32,7 +32,6 @@ def execute():
 
     expiry = _token_expiry()
     for name in names:
-        # [#9yh01d]
         frappe.db.set_value(
             "Masar Worker Token", name, "expires_on", expiry, update_modified=False
         )

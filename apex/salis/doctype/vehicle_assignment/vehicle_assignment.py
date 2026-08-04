@@ -91,7 +91,6 @@ class VehicleAssignment(Document):
         lock_vehicle(self.vehicle)
         lock_driver(self.driver)
 
-        # [#d4c2pq]
         clash = self._overlapping("vehicle", self.vehicle)
         if clash:
             frappe.throw(
@@ -120,7 +119,6 @@ class VehicleAssignment(Document):
         )
 
     def on_cancel(self):
-        # [#ti5qx9]
         if frappe.db.get_value("Salis Vehicle", self.vehicle, "current_driver") == self.driver:
             frappe.db.set_value("Salis Vehicle", self.vehicle, "current_driver", None)
         if frappe.db.get_value("Salis Driver", self.driver, "current_vehicle") == self.vehicle:

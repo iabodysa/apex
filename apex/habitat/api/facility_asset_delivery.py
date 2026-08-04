@@ -46,7 +46,6 @@ MAX_OTP_ATTEMPTS = 3
 LOCKOUT_MINUTES = 5
 ELEVATED_ROLE = "Accommodation Manager"
 
-# [#b7a6f6]
 EXIT_ROLES = {
     1: "Resident Supervisor",
     2: "Accommodation Manager",
@@ -90,7 +89,6 @@ def _pass_exit(delivery: str, n: int):
     if doc.get(flag):
         frappe.throw(_("Exit {0} has already been cleared.").format(n))
 
-    # [#4x07wr]
     for prior in range(1, n):
         if not doc.get(f"exit{prior}_{_exit_slug(prior)}_cleared"):
             frappe.throw(
@@ -108,7 +106,6 @@ def _pass_exit(delivery: str, n: int):
         }
     )
 
-    # [#o4ynfb]
     if n == 3:
         doc.db_set("status", "Released")
         code = generate_otp(doc)
@@ -164,7 +161,6 @@ def confirm_receipt(delivery: str, code: str):
             frappe.PermissionError,
         )
 
-    # [#dvauwo]
     locked = frappe.db.get_value(
         DELIVERY_DOCTYPE,
         doc.name,
@@ -189,7 +185,6 @@ def confirm_receipt(delivery: str, code: str):
     if locked.otp_hash and hmac.compare_digest(hash_otp(code or "", doc.name), locked.otp_hash):
         return _move_and_deliver(doc)
 
-    # [#6sybil]
     attempts = (locked.otp_attempts or 0) + 1
     if attempts >= MAX_OTP_ATTEMPTS:
         doc.db_set(

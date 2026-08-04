@@ -1,7 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// Guarded billing actions on a submitted Telecom Contract. Each button prompts for
-// the billing period and calls a POST-only whitelisted method that re-checks
-// everything server-side and returns the (existing or new) draft link.
 
 frappe.ui.form.on('Telecom Contract', {
 	setup(frm) {
@@ -25,8 +22,6 @@ frappe.ui.form.on('Telecom Contract', {
 			() => raise_billing_document(frm, 'create_purchase_request', __('Material Request')),
 			__('Billing'),
 		);
-		// Named after the DocType it creates: ERPNext has a SEPARATE Payment Order
-		// DocType, so the old "Payment Order" label named a different document.
 		frm.add_custom_button(
 			__('Raise Payment Entry'),
 			() => raise_payment_entry(frm),
@@ -75,10 +70,6 @@ function raise_billing_document(frm, method, label) {
 	);
 }
 
-// A payment needs a payable behind it. With no eligible Purchase Invoice there is
-// nothing to allocate against, so the dialog never opens — the operator is told
-// what finance must raise first instead of being handed a document that settles
-// nothing. The server repeats every check; this is the courtesy layer.
 function raise_payment_entry(frm) {
 	frappe.call({
 		method: 'apex.logistay.api.contract_billing.list_payable_invoices',
@@ -102,9 +93,6 @@ function raise_payment_entry(frm) {
 	});
 }
 
-// The settlement line is READ from the live Payment Entry every time the period
-// changes — it is derived server-side, never stored — so a payment cancelled in
-// Accounts shows here as reversed without anything writing a status back.
 function render_settlement(dialog, frm, period) {
 	const $wrapper = dialog.fields_dict.settlement_html.$wrapper;
 	if (!period) {

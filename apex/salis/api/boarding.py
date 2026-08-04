@@ -27,26 +27,15 @@ from apex.apex_core.utils.portal_token_security import (
 from apex.apex_core.utils.rate_window import charge_window
 from apex.salis.utils import get_driver_for_user, has_any_role
 
-# [#78ttpx]
 PASS_TTL_HOURS = 24
 SCAN_ACTOR_LIMIT = 60
 SCAN_UNRESOLVED_IP_LIMIT = 60
 SCAN_RATE_WINDOW_SECONDS = 60
 
-# The pass read's two ceilings. The ADDRESS one is the 120-per-minute this endpoint
-# has always advertised, on the same identity it has always used. The PEER one counts
-# the transport connection, which no caller can choose -- see _enforce_pass_read_rate_limit.
 PASS_ADDRESS_LIMIT = 120
-# Ten address-budgets. Behind a reverse proxy the peer is the EDGE, so every caller
-# shares this one window: it is sized as a bound on how far one connection may amplify
-# a forged address, not as a per-caller cadence. Twenty reads a second on a single
-# endpoint is far above the one-pass-per-scan the driver app issues, so an honest fleet
-# never reaches it; a deployment that does should raise this rather than drop it.
 PASS_PEER_LIMIT = 1200
 PASS_RATE_WINDOW_SECONDS = 60
 
-# Who may authorise a boarding scan. Deliberately NARROWER than the driver
-# portal's same-named tuple: Finance Manager reads fleet cost, never scans a rider on.
 STAFF_ROLES = (
     "Fleet Manager",
     "Fleet Project Manager",
@@ -115,7 +104,6 @@ def _is_staff(user: str | None = None) -> bool:
 
 
 def _driver_for_user(user: str | None = None) -> str | None:
-    # [#k39mos]
     return get_driver_for_user(user)
 
 
@@ -341,7 +329,6 @@ def _get_or_create_log(dispatch_trip: str) -> "frappe.model.document.Document":
         }
     )
     log.insert(ignore_permissions=True)  # audit-ok: trip authorised in _resolve_trip
-    # [#sao0g7]
     from apex.salis.api.boarding_flow import ensure_trip_boarding_state
 
     ensure_trip_boarding_state(dispatch_trip)
@@ -388,7 +375,6 @@ def _log_scan(
     return doc.name
 
 
-# [#8xubuw]
 @frappe.whitelist(allow_guest=True)
 def get_boarding_pass(dispatch_trip, worker):
     """Issue a signed QR boarding pass for ``worker`` on ``dispatch_trip`` (read).
@@ -424,7 +410,6 @@ def get_boarding_pass(dispatch_trip, worker):
     }
 
 
-# [#2ursve]
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
     """Validate a scanned QR boarding pass and log the boarding (write).
@@ -445,7 +430,6 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
     _enforce_scan_actor_rate_limit(actor)
     payload = _verify_token(pass_token)
 
-    # [#1k5149]
     if not payload:
         log_name = _log_scan(
             None, None, None, "Invalid Token", pass_token,
@@ -457,7 +441,6 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
     worker = payload.get("w")
     trip = _resolve_trip(dispatch_trip)
 
-    # [#e2nfr9]
     issued = get_datetime(payload.get("iat"))
     age_hours = time_diff_in_seconds(now_datetime(), issued) / 3600.0 if issued else None
     if age_hours is None or age_hours > PASS_TTL_HOURS:
@@ -467,7 +450,6 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
         )
         return {"result": "Expired", "scan_log": log_name}
 
-    # [#pcko54]
     if worker not in _trip_manifest_workers(trip.get("transport_request"), dispatch_trip):
         log_name = _log_scan(
             dispatch_trip, trip, worker, "Wrong Trip", pass_token,
@@ -480,12 +462,10 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
             return {"result": "Wrong Trip", "scan_log": log_name, **correction}
         return {"result": "Wrong Trip", "scan_log": log_name}
 
-    # [#epmjm6]
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
 
     log = _get_or_create_log(dispatch_trip)
 
-    # [#1s46p3]
     if _already_boarded(log, worker):
         log_name = _log_scan(
             dispatch_trip, trip, worker, "Duplicate", pass_token,
@@ -514,7 +494,6 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
         trip_start_log=log.name, boarding_created=1,
         accommodation_building=accommodation_building,
     )
-    # [#2ocamf]
     from apex.salis.api.boarding_flow import mark_boarded
 
     mark_boarded(dispatch_trip, worker)

@@ -16,6 +16,8 @@ Use this page to choose the shortest guide for the job.
 
 - [Installation](administration/installation.md) — install, configure, and
   verify Apex safely
+- [Reverse proxy prerequisite](administration/reverse-proxy.md) — the edge must
+  overwrite `X-Forwarded-For`, and how to grade a running deployment
 - [Workspace authoring](administration/workspace-authoring.md) — create and
   maintain task-focused Desk navigation
 - [Legacy identity upgrade](administration/identity-upgrade.md) — move a

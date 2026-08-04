@@ -28,6 +28,11 @@ that referenced the old key, which is how a site's own dashboard layout keeps wo
 Idempotent: a fresh install has no old row and each rename returns without a write. A
 site carrying BOTH keys is reported rather than merged, because merging destroys one of
 them and that is an owner decision.
+
+The fourth entry needs ``force``: Onboarding Step ships no ``allow_rename``, so
+``validate_rename`` refuses it outright (frappe/model/rename_doc.py:390-391) even though
+the record is app-shipped and its new key is the one the module onboarding now names.
+force skips ONLY that flag; the write permission check above it still applies.
 """
 
 from __future__ import annotations
@@ -35,10 +40,6 @@ from __future__ import annotations
 import frappe
 
 
-# The fourth entry needs force: Onboarding Step ships no ``allow_rename``, so
-# ``validate_rename`` refuses it outright (frappe/model/rename_doc.py:390-391) even though
-# the record is app-shipped and its new key is the one the module onboarding now names.
-# force skips ONLY that flag; the write permission check above it still applies.
 RENAMES = (
     ("Number Card", "Active Accommodation Assignments", "Active Housing Assignments", False),
     ("Number Card", "Pending Accommodation Checkouts", "Pending Housing Checkouts", False),
@@ -49,10 +50,14 @@ RENAMES = (
 
 
 def execute() -> None:
+    """Rename each stored record, reporting rather than merging a site that holds both.
+
+    Both probes use the DICT form, not the positional one: ``exists(dt, dn)`` returns
+    ``dn`` unqueried whenever ``dn`` equals ``dt``
+    (frappe/database/database.py:1259-1261), and both names here are data. The dict form
+    is correct in both directions.
+    """
     for doctype, old, new, force in RENAMES:
-        # Dict form, not the positional one: exists(dt, dn) returns dn unqueried
-        # whenever dn equals dt (frappe/database/database.py:1259-1261), and both names
-        # here are data. The dict form is correct in both directions.
         old_exists = frappe.db.exists(doctype, {"name": old})
         new_exists = frappe.db.exists(doctype, {"name": new})
 

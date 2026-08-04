@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#27qsq1]
 frappe.ui.form.on("Salis Driver", {
 	refresh(frm) {
 		frm.clear_custom_buttons();
@@ -22,12 +21,6 @@ frappe.ui.form.on("Salis Driver", {
 	},
 });
 
-// [#a267ds] The driver form is where a fleet operator already works, so the barcode
-// credential is issued and withdrawn from here rather than from the token record —
-// which is named by hash, carries no driver name, and is not a surface an operator
-// navigates to. Issue/Rotate are hidden for a non-Active driver because the server
-// refuses those outright; Revoke stays, since a driver who just went non-Active is
-// exactly who an operator needs to withdraw a live link from.
 function _portal_link_actions(frm) {
 	if (frm.is_new() || !frappe.model.can_write("Masar Worker Token")) {
 		return;

@@ -21,7 +21,6 @@ from frappe import _
 
 PARTY_EMPLOYEE = "Employee"
 PARTY_TEMPORARY_WORKER = "Temporary Worker"
-# [#qnlgbm]
 PARTY_TYPE_OPTIONS = f"{PARTY_EMPLOYEE}\n{PARTY_TEMPORARY_WORKER}"
 
 
@@ -47,7 +46,6 @@ def sync_party_employee(
         ``"employee"``; the custody doctypes use ``"issued_to_employee"`` /
         ``"returned_by_employee"``.
     """
-    # [#jolp3a]
     if derive_from and not doc.get("party"):
         parent = doc.get(derive_from)
         if parent:
@@ -56,21 +54,16 @@ def sync_party_employee(
             if row and row[0]:
                 doc.party_type, doc.party = row[0], row[1]
 
-    # [#dq7is9]
     if not doc.get("party_type") and doc.get(employee_field):
         doc.party_type = PARTY_EMPLOYEE
 
-    # [#70ucun]
     if doc.get("party_type") == PARTY_EMPLOYEE:
         if doc.get("party"):
             setattr(doc, employee_field, doc.party)
         elif doc.get(employee_field):
             doc.party = doc.get(employee_field)
     elif doc.get("party_type") == PARTY_TEMPORARY_WORKER:
-        # [#2jpjl3]
         setattr(doc, employee_field, None)
 
-    # [#pr7aug]
     if require_party and not doc.get("party") and not doc.get(employee_field):
-        # [#1p2u7t]
         frappe.throw(_("Resident / worker is required."), frappe.MandatoryError)

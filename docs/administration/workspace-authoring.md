@@ -40,8 +40,9 @@ to differ:
 6. Key Reports
 7. Master Data
 
-Put setup and durable reference data after daily work. Keep system-written
-ledgers and snapshots in the hidden Backend Engines workspace.
+Put setup and durable reference data after daily work. A system-written ledger
+or snapshot belongs under Key Reports, never under Daily Tasks: a workspace
+must not offer a create path into a record only the engine may write.
 
 ## Links and shortcuts
 
@@ -71,17 +72,14 @@ meaning appears in more than one workspace.
    assumptions.
 3. Add the standard Workspace JSON and its linked records.
 4. Add or update English source strings and Arabic translations.
-5. Update the canonical workspace or route reference when navigation changes.
-6. Run the documentation parity test.
-7. Migrate a disposable site and inspect the rendered Desk navigation.
+5. Migrate a disposable site and inspect the rendered Desk navigation.
 
-Run the focused parity test from the repository root:
+[Modules, workspaces, and routes](../reference/routes-workspaces.md) needs no
+step of its own: it is generated from the Workspace, Page and `www/` files
+themselves, so a workspace added, renamed or retired reaches it with the change
+rather than after it. Do not hand-edit that page.
 
-```bash
-python3 -m unittest apex.tests.test_workspace_doc_parity -v
-```
-
-Then apply standard records to a site:
+Apply the standard records to a site:
 
 ```bash
 bench --site <site> migrate

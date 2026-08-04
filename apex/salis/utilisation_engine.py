@@ -1,5 +1,4 @@
-# Copyright (c) 2026, AFMCO Support Services Co. Ltd and contributors
-# [#j03s5a]
+# Copyright (c) 2026, AFMCO and contributors
 
 """Vehicle Utilisation Snapshot engine.
 
@@ -41,7 +40,6 @@ def weekly_vehicle_utilisation_snapshot() -> None:
         if not vehicle_names:
             break
         for vehicle_name in vehicle_names:
-            # [#237dim]
             sp = "accrual_row"
             frappe.db.savepoint(sp)
             try:
@@ -51,7 +49,6 @@ def weekly_vehicle_utilisation_snapshot() -> None:
                 ):
                     continue
 
-                # [#lescxk]
                 trip_rows = frappe.get_all(
                     "Dispatch Trip",
                     filters={
@@ -64,7 +61,6 @@ def weekly_vehicle_utilisation_snapshot() -> None:
                 )
                 trips_count = len(trip_rows)
 
-                # [#r1atu4]
                 days_with_trip = len({getdate(r.trip_date) for r in trip_rows if r.trip_date})
                 idle_days = max(PERIOD_DAYS - days_with_trip, 0)
                 utilisation_pct = (

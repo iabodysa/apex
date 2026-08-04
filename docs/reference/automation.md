@@ -1,7 +1,10 @@
 # Scheduled Automation Reference
 
 This page lists every Apex callable registered in
-`scheduler_events` in `apex/hooks.py`.
+`scheduler_events` in `apex/hooks.py`. The list and its cadences are compared
+against that declaration before a release, so a job cannot run undocumented and
+a retired job cannot linger here. What each job does, and the condition that
+makes it a no-op, is written by hand.
 
 Scheduled frequency does not guarantee that a record will change. Each job
 first checks its source records and, where applicable, a setting or

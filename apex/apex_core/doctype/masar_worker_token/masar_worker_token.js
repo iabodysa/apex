@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#o4a9j5]
 frappe.ui.form.on("Masar Worker Token", {
 	refresh(frm) {
 		frm.clear_custom_buttons();
@@ -7,12 +6,6 @@ frappe.ui.form.on("Masar Worker Token", {
 			return;
 		}
 
-		// [#tokhash] The raw token is stored only as a hash, so it can never be
-		// re-displayed from the record. Issuing is ROTATE-ONLY: a fresh link + QR is
-		// minted and shown ONCE here; re-opening this action rotates (invalidating any
-		// previously shared link) rather than re-showing the old secret.
-		// `token` sits at permlevel 1 and reaches System Manager alone, so keying the
-		// rotation warning off it would hide that warning from every other desk role.
 		const has_link = Boolean(
 			frm.doc.token || frm.doc.last_generated_on || frm.doc.expires_on
 		);
@@ -41,8 +34,6 @@ frappe.ui.form.on("Masar Worker Token", {
 	},
 });
 
-// [#a267hb] A Driver row carries no employee, so the worker endpoint would have been
-// called with an undefined subject; route on holder_type instead of assuming Worker.
 function _show_link(frm, regenerate) {
 	const is_driver = frm.doc.holder_type === "Driver";
 	frappe.call({
@@ -61,7 +52,6 @@ function _show_link(frm, regenerate) {
 				return;
 			}
 			frm.reload_doc();
-			// [#f43ja4]
 			if (is_driver) {
 				apex.masar.show_driver_link_dialog(r.message);
 			} else {

@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 
@@ -21,7 +20,6 @@ def execute(filters=None):
         if date_condition is not None:
             log_filters["log_date"] = date_condition
 
-    # [#be5q0w]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:

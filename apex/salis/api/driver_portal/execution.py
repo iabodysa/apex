@@ -128,11 +128,9 @@ def push_driver_position(dispatch_trip, lat, lng):
 	amendment. No GL — this is an execution/telematics stamp only."""
     _require_enabled()
     driver = _resolve_driver()
-    # [#kwiw5t]
     _resolve_my_trip(dispatch_trip, driver)
     lat, lng = _validate_coords(lat, lng)
     now = frappe.utils.now_datetime()
-    # [#dlgijx]
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     trip.db_set(
         {"driver_lat": lat, "driver_lng": lng, "driver_position_updated_at": now},
@@ -176,11 +174,10 @@ def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_na
 	``ignore_permissions`` is set. No GL."""
     _require_enabled()
     driver = _resolve_driver()
-    trip = _resolve_my_trip(dispatch_trip, driver)  # [#t2dv4b]
+    trip = _resolve_my_trip(dispatch_trip, driver)
     stop = _resolve_trip_route_stop(trip, route_stop)
     log = _open_trip_log(dispatch_trip, driver)
     if not log:
-        # [#1dmfku]
         frappe.throw(_("Start the trip before marking stops."))
 
     done = frappe.utils.cint(done)

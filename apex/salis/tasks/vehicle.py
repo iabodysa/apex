@@ -13,9 +13,6 @@ from apex.salis.tasks.common import (
     _settings_int,
 )
 
-# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
-# rather than stacking one per row. Distinct from _raise_alert's own name, which
-# runs inside these loops.
 _ROW_SAVEPOINT = "salis_vehicle_row"
 
 
@@ -36,7 +33,6 @@ def idle_vehicle_watch() -> None:
     idle_days = _settings_int("idle_vehicle_days", 7)
     cutoff = add_days(today_str, -idle_days)
 
-    # [#r94w3h]
     try:
         DT = frappe.qb.DocType("Dispatch Trip")
         rows = (
@@ -74,7 +70,6 @@ def idle_vehicle_watch() -> None:
             try:
                 if v.name in vehicles_with_recent_trip:
                     continue
-                # [#q9q3e3]
                 msg = (f"idle_vehicle_watch: vehicle {v.name} has had no dispatch "
                        f"trip in the last {idle_days} days.")
                 logger.warning(msg)
@@ -155,7 +150,6 @@ def vehicle_utilization_summary() -> None:
     window_start = add_days(today_str, -7)
     logger = frappe.logger()
 
-    # [#gdp7wq]
     try:
         DT = frappe.qb.DocType("Dispatch Trip")
         distance_expr = Sum(
@@ -205,7 +199,6 @@ def vehicle_utilization_summary() -> None:
             try:
                 trip_count, distance = util_by_vehicle.get(v.name, (0, 0))
 
-                # [#rsz9o4]
                 logger.info(
                     f"vehicle_utilization_summary: {v.name} — {trip_count} trips, "
                     f"{distance} km over the last 7 days."

@@ -17,7 +17,6 @@ def load_template_into_doc(handover, template):
     Safe: only appends rows to handover_check_items. Never submits or mutates the vehicle.
     """
     doc = frappe.get_doc("Vehicle Handover", handover)
-    # [#i2x3i2]
     frappe.has_permission("Vehicle Handover", "write", doc=doc, throw=True)
 
     if doc.docstatus != 0:

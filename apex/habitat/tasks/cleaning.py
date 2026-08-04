@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import frappe
 
-# [#evsc2k]
 _CLEANING_SAVEPOINT = "cleaning_log_insert"
 
 
@@ -35,7 +34,6 @@ def daily_cleaning_log_generator() -> None:
     cleaning_date = today()
     logger = frappe.logger()
 
-    # [#exgi8j]
     already = {
         r["building"]
         for r in frappe.get_all(
@@ -46,7 +44,6 @@ def daily_cleaning_log_generator() -> None:
         if r["building"]
     }
 
-    # [#qqq6iv]
     rooms_by_building: dict[str, list[str]] = {}
     for r in frappe.get_all(
         "Room",
@@ -74,17 +71,14 @@ def daily_cleaning_log_generator() -> None:
                 continue
             rooms = rooms_by_building.get(building) or []
             if not rooms:
-                # [#p9768y]
                 continue
 
-            # [#k5xrmx]
             frappe.db.savepoint(_CLEANING_SAVEPOINT)
             try:
                 log = frappe.get_doc({
                     "doctype": "Cleaning Log",
                     "building": building,
                     "cleaning_date": cleaning_date,
-                    # [#thdaxn]
                     "room_details": [{"room": room} for room in rooms],
                 })
                 log.insert(ignore_permissions=True)  # audit-ok — scheduler-run daily cleaning record, no user session
@@ -121,7 +115,6 @@ def auto_create_cleaning_logs() -> None:
     cleaning_date = today()
     logger = frappe.logger()
 
-    # [#hsr1dx]
     buildings = frappe.get_all(
         "Building",
         filters={
@@ -139,7 +132,6 @@ def auto_create_cleaning_logs() -> None:
         ):
             continue
 
-        # [#burq2n]
         frappe.db.savepoint(_CLEANING_SAVEPOINT)
         try:
             log = frappe.get_doc({

@@ -26,41 +26,28 @@ from frappe.sessions import get_csrf_token
 from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance
 from apex.apex_core.utils.portal_token_security import WORKER, throttle_entry_token
 
-# [#irnnyn]
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 
-# [#rm62du]
 MASAR_TOKEN_COOKIE = "masar_wt"
-# [#j4v8cb]
 _COOKIE_MAX_AGE_SECONDS = 180 * 24 * 60 * 60
 
 
 def get_context(context):
-    # [#kqaxzl]
     context.no_cache = 1
 
-    # [#7j4iyc]
 
-    # [#4arwxd]
     context.csrf_token = get_csrf_token()
 
-    # [#4xli65]
     raw_token = frappe.form_dict.get("w") or ""
     valid_token = raw_token if _TOKEN_RE.match(raw_token) else ""
     if valid_token:
-        # Defense-in-depth: charge the shared per-IP bad-token throttle for a
-        # failed/unknown link before it is parked in the cookie; a valid link is
-        # never charged and the redirect still fires so the secret leaves the URL.
         throttle_entry_token(WORKER, valid_token)
         _set_token_cookie(valid_token)
-        # [#luoj26]
         frappe.local.flags.redirect_location = "/masar"
         raise frappe.Redirect
 
-    # [#cdgoup]
     context.masar_has_token = bool(_request_token_cookie())
 
-    # [#bsuwds]
     apply_portal_appearance(context)
     return context
 

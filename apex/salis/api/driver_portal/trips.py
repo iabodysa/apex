@@ -42,10 +42,10 @@ def my_trips_today():
         fields=["name", "route_plan", "vehicle", "transport_request", "depart_time", "return_time", "status"],
         order_by="depart_time asc",
     )
-    _attach_trip_maps(trips)  # [#c8i03i]
-    _label_trips(trips)  # [#jlry93]
-    _attach_trip_log_state(trips, driver)  # [#qu3kwf]
-    _attach_boarding_counts(trips, driver)  # [#d6x6zw]
+    _attach_trip_maps(trips)
+    _label_trips(trips)
+    _attach_trip_log_state(trips, driver)
+    _attach_boarding_counts(trips, driver)
     return trips
 
 
@@ -78,8 +78,8 @@ def my_trips_recent(days=30, limit=50):
         order_by="trip_date desc, depart_time desc",
         limit=limit,
     )
-    _attach_trip_maps(trips)  # [#c8i03i]
-    _label_trips(trips)  # [#jlry93]
+    _attach_trip_maps(trips)
+    _label_trips(trips)
     for t in trips:
         t["trip_date"] = frappe.utils.cstr(t["trip_date"]) if t.get("trip_date") else None
     return trips
@@ -152,19 +152,16 @@ def my_trip_route(dispatch_trip):
         ["name", "route_plan", "vehicle", "transport_request", "depart_time", "return_time", "status"],
         as_dict=True,
     )
-    # [#qg5cw1]
     if not trip:
         frappe.throw(_("Trip not found."), frappe.DoesNotExistError)
 
     from apex.salis.api import masar
 
     route_plan = trip.get("route_plan")
-    stops = masar._ordered_stops(route_plan)  # [#492z2y]
-    # [#ja9fyd]
+    stops = masar._ordered_stops(route_plan)
     _attach_stop_progress(stops, route_plan, trip["name"], driver)
 
-    # [#j3iz55]
-    workers = masar._registered_workers(trip.get("transport_request"))  # [#ba2aen]
+    workers = masar._registered_workers(trip.get("transport_request"))
     _enrich_workers_with_phone(workers)
 
     vehicle = trip.get("vehicle")
@@ -184,7 +181,6 @@ def my_trip_route(dispatch_trip):
         "return_time": masar._fmt_time(trip.get("return_time")),
         "status": trip.get("status"),
         "has_route_plan": bool(route_plan),
-        # [#mis85h]
         "started": bool(
             frappe.db.exists(
                 "Trip Start Log",

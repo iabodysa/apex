@@ -1,5 +1,3 @@
-{# Guard: building may be empty OR a dangling link to a deleted record — db.get_value
-   returns None on both, where get_doc would raise DoesNotExistError and abort the print. #}
 {% set building_name = frappe.db.get_value("Building", doc.building, "building_name") if doc.building else None %}
 <style>
   .room-label {
@@ -60,7 +58,6 @@
   {% endif %}
 </style>
 
-<!-- Fully translated: no pinned print language, so dir must follow the reader's. -->
 <div class="room-label" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
   <div class="building-name">{{ building_name or "" }}</div>
   <div class="room-number">{{ doc.room_number }}</div>

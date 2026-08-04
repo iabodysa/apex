@@ -40,7 +40,6 @@ class Freelancer(Document):
             frappe.throw(_("Monthly Salary must be greater than zero."))
 
     def _derive_status(self) -> None:
-        # [#qtiss4]
         if self.status == "Terminated":
             return
         if self.contract_end_date and getdate(self.contract_end_date) < getdate(nowdate()):
@@ -48,7 +47,6 @@ class Freelancer(Document):
 
 
 def on_doctype_update():
-    # [#g6y2jf]
     add_unique_guarded(
         "Freelancer",
         ["national_id_or_iqama"],

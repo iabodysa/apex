@@ -21,11 +21,8 @@ from apex.apex_core.doctype.apex_settings.apex_settings import gl_posting_enable
 
 SOURCE_DOCTYPE = "Salis Payment Request"
 
-# [#asggke]
 DEFAULT_TARGET_DOCTYPE = "Payment Request"
 
-# The link-type companion the router stamps beside the payment name, so the
-# Dynamic Link on the source can never name a DocType other than the one built.
 LINK_DOCTYPE_FIELD = "linked_payment_doctype"
 LINK_NAME_FIELD = "linked_payment_entry"
 
@@ -144,7 +141,6 @@ def validate_field_map(target_doctype, field_map) -> None:
     ``validate`` - a control that lived only in the controller would be bypassed.
     """
     target_meta = frappe.get_meta(target_doctype)
-    # get_valid_columns() is exactly the set that survives an insert.
     writable = set(target_meta.get_valid_columns())
     source_meta = frappe.get_meta(SOURCE_DOCTYPE)
     seen = set()
@@ -169,7 +165,6 @@ def validate_field_map(target_doctype, field_map) -> None:
                 title=_("Invalid Payment Field Map"),
             )
         if row.is_static:
-            # [#hju7o1]
             if (row.source_fieldname or "").strip():
                 frappe.throw(
                     _("Field Map row {0}: clear Source Fieldname on a Static row.").format(
@@ -193,7 +188,6 @@ def validate_field_map(target_doctype, field_map) -> None:
             )
 
 
-# [#qj7x3p]
 _FALLBACK_CURRENCY = "SAR"
 
 
@@ -260,7 +254,6 @@ def _apply_field_map(target, source, field_map) -> None:
     for row in field_map:
         target_field = (row.target_fieldname or "").strip()
         if not target_field:
-            # [#ked8f9]
             continue
         if row.is_static:
             value = row.static_value
@@ -286,11 +279,9 @@ def route_payment(payment_request: str) -> str:
     settings = frappe.get_single("Payment Routing Settings")
     target_doctype = get_target_doctype(settings)
 
-    # [#huthxu]
     frappe.db.get_value(SOURCE_DOCTYPE, payment_request, "name", for_update=True)
     source = frappe.get_doc(SOURCE_DOCTYPE, payment_request)
 
-    # [#t1cwmn]
     frappe.has_permission(SOURCE_DOCTYPE, "write", doc=source, throw=True)
     frappe.has_permission(SOURCE_DOCTYPE, "submit", doc=source, throw=True)
 
@@ -299,27 +290,20 @@ def route_payment(payment_request: str) -> str:
             _("This payment request is not finance-approved yet; it cannot be paid.")
         )
 
-    # [#qrnwir]
     if source.linked_payment_entry:
         return source.linked_payment_entry
 
-    # Fail closed at the build boundary, not only in the Single's validate: db_set,
-    # raw SQL and patches all write that config while skipping the controller.
     validate_target_doctype(target_doctype)
     validate_field_map(target_doctype, settings.field_map or [])
 
     target = frappe.new_doc(target_doctype)
     _apply_field_map(target, source, settings.field_map or [])
-    # [#5dt0v6]
     _ensure_target_currency(target, source)
     target.insert(ignore_permissions=True)
 
-    # [#92jq1c]
     if settings.auto_submit_target and target.meta.is_submittable and gl_posting_enabled():
         target.submit()
 
-    # [#rx80aq] Both halves of the Dynamic Link are stamped from the document that
-    # was actually created, so the stored type can never disagree with the value.
     source.db_set(
         {LINK_DOCTYPE_FIELD: target.doctype, LINK_NAME_FIELD: target.name}
     )

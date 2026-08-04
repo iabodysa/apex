@@ -35,7 +35,6 @@ class SafetyRound(Document):
         self._guard_duplicate()
 
     def _guard_duplicate(self):
-        # [#swjvq9]
         if self.is_reinspection:
             return
 
@@ -59,7 +58,6 @@ class SafetyRound(Document):
             )
 
     def before_submit(self):
-        # [#a269rt]
         self._guard_rated()
 
     def _guard_rated(self):
@@ -90,16 +88,12 @@ class SafetyRound(Document):
         )
 
     def on_submit(self):
-        # [#a269rt]
         self._ratify_executions()
         self.db_set("overall_result", self._derive_overall_result())
-        # [#rylc44]
         from apex.habitat.safety_engine import post_safety_findings
 
         post_safety_findings(self)
-        # [#a069cl]
         self._clear_building_scan_alerts()
-        # [#23qg97]
         self._publish_safety_update("submit")
 
     def _ratify_executions(self) -> int:
@@ -158,8 +152,6 @@ class SafetyRound(Document):
                 1,
                 update_modified=False,
             )
-            # The supervisor's copy shares this subject but was already cleared by the
-            # link write above, so `read: 0` leaves only the unlinked Safety Officer one.
             frappe.db.set_value(
                 "Notification Log",
                 {
@@ -172,18 +164,15 @@ class SafetyRound(Document):
                 update_modified=False,
             )
         except Exception:
-            # Cosmetic cleanup — swallow (no rollback here, which would abort the submit).
             frappe.log_error(
                 message=frappe.get_traceback(),
                 title=f"Safety Round alert clear failed for {self.building}"[:140],
             )
 
     def on_cancel(self):
-        # [#qgyftc]
         from apex.habitat.safety_engine import reverse_safety_findings
 
         reverse_safety_findings(self.name)
-        # [#c7t1n3]
         self._publish_safety_update("cancel")
 
     def _publish_safety_update(self, action: str) -> None:
@@ -201,7 +190,6 @@ class SafetyRound(Document):
         )
 
     def _derive_overall_result(self):
-        # [#a269rt]
         statuses = frappe.get_all(
             "Safety Task Execution",
             filters={"safety_round": self.name, "docstatus": 1},

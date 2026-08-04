@@ -46,7 +46,6 @@ class TelecomContract(Document):
             )
 
     def on_cancel(self):
-        # A cancelled contract is a terminated agreement.
         self.db_set("status", "Terminated")
 
 

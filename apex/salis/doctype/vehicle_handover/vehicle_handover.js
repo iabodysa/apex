@@ -9,7 +9,6 @@ frappe.ui.form.on("Vehicle Handover", {
 	},
 	refresh(frm) {
 		frm.clear_custom_buttons();
-		// Only show active templates in the picker.
 		frm.set_query("checklist_template", function () {
 			return { filters: { is_active: 1 } };
 		});

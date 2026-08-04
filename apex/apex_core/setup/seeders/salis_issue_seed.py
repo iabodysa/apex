@@ -40,37 +40,28 @@ portal's own i18n bundle).
 
 import frappe
 
-# [#ccwhup]
 _ISSUE_TYPES = ["Vehicle", "Fuel", "Attendance", "Salary", "Other"]
 
-# [#q58c53]
 _ISSUE_PRIORITIES = ["Low", "Medium", "High", "Urgent"]
 
-# [#oo72ut]
 _SLA_NAME = "Salis Support SLA"
 _SLA_PRIORITIES = [
-    # [#efpp6t]
     ("Urgent", 1 * 3600, 4 * 3600, 0),
     ("High", 2 * 3600, 8 * 3600, 0),
-    ("Medium", 4 * 3600, 24 * 3600, 1),  # [#ia2auv]
+    ("Medium", 4 * 3600, 24 * 3600, 1),
     ("Low", 8 * 3600, 72 * 3600, 0),
 ]
 
 _WORKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
-# Fallback Holiday List for the SLA's required Link, only used when the site has none.
 _SLA_HOLIDAY_LIST = "Apex Support 24x7"
 _SLA_HOLIDAY_WINDOW = ("2000-01-01", "2099-12-31")
 
-# [#99gs2t]
 _ISSUE_ROLE_PERMS = [
-    # [#97u1ia]
     ("Driver", {"read": 1, "create": 1, "if_owner": 1}),
-    # [#ntkavb]
     ("Fleet Manager", {"read": 1, "write": 1}),
     ("Fleet Supervisor", {"read": 1, "write": 1}),
     ("Fleet Project Manager", {"read": 1, "write": 1}),
-    # [#dj7crc]
     ("Finance Manager", {"read": 1}),
     ("Internal Auditor", {"read": 1}),
 ]
@@ -100,7 +91,6 @@ def _seed_issue_priorities():
 
 def _pick_holiday_list():
     """Return the site's own Holiday List to hang the SLA on, or None if it has none."""
-    # [#jdlc8a]
     company = frappe.defaults.get_global_default("company") or frappe.db.get_value(
         "Company", {}, "name"
     )
@@ -127,8 +117,6 @@ def _ensure_holiday_list():
         return None
     doc = frappe.new_doc("Holiday List")
     doc.holiday_list_name = _SLA_HOLIDAY_LIST
-    # Zero holiday rows IS the 24x7 window the SLA declares below, and the SLA clock
-    # reads only those rows — never from_date/to_date — so the window never expires.
     doc.from_date = _SLA_HOLIDAY_WINDOW[0]
     doc.to_date = _SLA_HOLIDAY_WINDOW[1]
     doc.insert(ignore_permissions=True)  # audit-ok — system SLA prerequisite
@@ -142,18 +130,15 @@ def _seed_sla():
         "Service Level Agreement", {"service_level": _SLA_NAME}
     ):
         return
-    # [#6zbcj0]
     if not frappe.db.exists("DocType", "Issue"):
         return
     holiday_list = _ensure_holiday_list()
     if not holiday_list:
-        # [#fyc1fs]
         frappe.logger().info(
             "apex issue_seed: skipped Salis Support SLA (no Holiday List on site)"
         )
         return
 
-    # [#lre6uh]
     if frappe.db.exists("DocType", "Support Settings"):
         if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
             frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
@@ -179,14 +164,12 @@ def _seed_sla():
             },
         )
 
-    # [#9ilbhd]
     for day in _WORKDAYS:
         doc.append(
             "support_and_resolution",
             {"workday": day, "start_time": "00:00:00", "end_time": "23:59:59"},
         )
 
-    # [#p3t740]
     for status in ("Resolved", "Closed"):
         doc.append("sla_fulfilled_on", {"status": status})
 
@@ -206,8 +189,7 @@ def _grant_issue_role_perms():
 
     for role, flags in _ISSUE_ROLE_PERMS:
         if not frappe.db.exists("Role", role):
-            continue  # [#2no7ve]
-        # [#dgslkb]
+            continue
         rows = frappe.get_all(
             "Custom DocPerm",
             filters={"parent": "Issue", "role": role, "permlevel": 0},
@@ -217,7 +199,6 @@ def _grant_issue_role_perms():
             frappe.delete_doc("Custom DocPerm", extra, ignore_permissions=True)
         if not rows:
             add_permission("Issue", role, ptype="read", permlevel=0)
-        # [#lesvpm]
         for ptype, value in flags.items():
             update_permission_property("Issue", role, 0, ptype, value)
 
@@ -226,7 +207,6 @@ def seed_salis_issue_masters():
     """Create the Salis Issue Types, Issue Priorities and one default SLA on
     Issue if absent. Idempotent + existence-guarded — safe to run on every
     install and migrate."""
-    # [#r6c6tk]
     for fn in (_seed_issue_types, _seed_issue_priorities, _seed_sla, _grant_issue_role_perms):
         sp = "salis_issue_seed"
         frappe.db.savepoint(sp)

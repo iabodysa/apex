@@ -31,7 +31,6 @@ class MaintenanceRequest(Document):
 
 
 def before_save(doc, method=None):
-    # [#51y4un]
     if doc.is_new() and not doc.reported_by:
         doc.reported_by = frappe.session.user
 
@@ -50,7 +49,6 @@ def _validate_status_rules(doc):
         frappe.throw(_("Assigned To is required when status is Assigned."))
     if status in ("Resolved", "Closed") and not doc.resolution_notes:
         frappe.throw(_("Resolution Notes are required to resolve or close a Maintenance Request."))
-    # [#nr3u0q]
     if flt(doc.cost_of_repair) < 0:
         frappe.throw(_("Cost of Repair cannot be negative."))
 
@@ -81,7 +79,6 @@ def make_work_order(source_name, target_doc=None):
         {
             "Maintenance Request": {
                 "doctype": "Maintenance Work Order",
-                # [#gxz157]
                 "field_no_map": ["status"],
             }
         },

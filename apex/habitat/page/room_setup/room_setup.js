@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#gr1kmo]
 
 frappe.pages["room-setup"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -15,8 +14,6 @@ const RS_ROOM_TYPES = [
 ];
 const RS_FLOOR_TYPES = ["Ground", "Middle", "Roof", "Basement"];
 
-// Desk pages ship no stylesheet — wizard layout is inline styles bound to native
-// Desk CSS variables (theme/dark-mode aware).
 const RS_STYLE = {
 	steps: "display:flex;flex-wrap:wrap;gap:8px;margin-block:var(--margin-sm,10px) var(--margin-lg,20px);",
 	step:
@@ -59,7 +56,7 @@ class RoomSetup {
 		this.page = page;
 		this.building = (frappe.get_route() || [])[1] || null;
 		this.stage = 1;
-		this.floors = []; // [{number, type, rooms_per_floor, def_type, def_beds, rooms:[{type,beds}]}]
+		this.floors = [];
 		this.$body = $('<div class="room-setup"></div>').appendTo(this.page.main);
 
 		if (!this.building) {
@@ -106,7 +103,6 @@ class RoomSetup {
 		});
 	}
 
-	// [#aw8tj4]
 	_stage_floors() {
 		const $wrap = $('<div class="rs-stage"></div>').attr("style", RS_STYLE.stage).appendTo(this.$body);
 		$('<p class="text-muted"></p>')
@@ -182,7 +178,6 @@ class RoomSetup {
 	}
 
 	_materialize_rooms() {
-		// [#mm9vce]
 		this.floors.forEach((f) => {
 			const n = Math.max(1, cint(f.rooms_per_floor) || 1);
 			const old = f.rooms || [];
@@ -193,7 +188,6 @@ class RoomSetup {
 		});
 	}
 
-	// [#pax34c]
 	_stage_types() {
 		const $wrap = $('<div class="rs-stage"></div>').attr("style", RS_STYLE.stage).appendTo(this.$body);
 		$('<p class="text-muted"></p>')
@@ -214,7 +208,6 @@ class RoomSetup {
 		);
 	}
 
-	// [#gnqe4p]
 	_stage_beds() {
 		const $wrap = $('<div class="rs-stage"></div>').attr("style", RS_STYLE.stage).appendTo(this.$body);
 		$('<p class="text-muted"></p>')
@@ -255,7 +248,6 @@ class RoomSetup {
 		});
 	}
 
-	// [#13u2dc]
 	_stage_review() {
 		const $wrap = $('<div class="rs-stage"></div>').attr("style", RS_STYLE.stage).appendTo(this.$body);
 		let rooms = 0, beds = 0;
@@ -288,7 +280,6 @@ class RoomSetup {
 	}
 
 	_orderedFloors() {
-		// [#7me1f7]
 		const PRI = { Basement: 0, Ground: 1, Middle: 2, Roof: 3 };
 		const pri = (t) => (t in PRI ? PRI[t] : 2);
 		const sorted = this.floors.slice().sort(

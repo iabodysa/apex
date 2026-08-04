@@ -5,10 +5,8 @@ from frappe.query_builder.functions import Coalesce, Count
 from pypika.functions import NullIf
 from apex.habitat.permissions import _building_condition, report_building_scope
 
-# [#eyjxdy]
 @frappe.whitelist()
 def get_compliance_percent(filters=None):
-    # [#qh57p2]
     frappe.has_permission("Scheduled Task Instance", "read", throw=True)
     total = frappe.db.count("Scheduled Task Instance", {"status": ["not in", ["Cancelled"]]})
     if not total:
@@ -31,13 +29,11 @@ def get_buildings_over_threshold(filters=None):
     would be told how many buildings are over capacity ACROSS the whole estate.
     """
     frappe.has_permission("Building", "read", throw=True)
-    # Here the estate axis is the Building's own name, not a `building` link.
     restrict, allowed = report_building_scope(frappe.session.user)
     if restrict and not allowed:
         return {"value": 0, "fieldtype": "Int"}
 
     Building = frappe.qb.DocType("Building")
-    # [#rccxmo]
     threshold = Coalesce(NullIf(Building.over_capacity_threshold_percent, 0), 120)
     query = (
         frappe.qb.from_(Building)
@@ -107,9 +103,6 @@ def get_pending_on_manifest(filters=None):
         {
             "today": today(),
             "unscoped": 0 if restrict else 1,
-            # Bound as a sequence so the query TEXT stays a literal (no
-            # interpolation). The unscoped placeholder row exists only because
-            # `IN ()` is a MariaDB syntax error; the flag above discards it.
             "buildings": tuple(allowed) if restrict else ("",),
         },
     )

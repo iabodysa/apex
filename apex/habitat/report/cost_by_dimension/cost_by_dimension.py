@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Cost by Dimension.
 
@@ -49,7 +48,6 @@ def get_data(filters):
             Count(ledger.name).as_("entries"),
             Sum(ledger.employee_daily_share).as_("total_cost"),
         )
-        # [#o1k1fi]
         .where(ledger.posting_mode == "Operational Memo")
         .where(ledger.reversal_of.isnull())
         .groupby(ledger.company, ledger.building, ledger.project)

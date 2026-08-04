@@ -57,15 +57,12 @@ from apex.salis.utils import (
 
 REQUEST_TYPES = ("Standard", "Top-up", "Chip")
 
-# [#eklmjo]
 VALID_STATUSES = ("Pending", "Approved", "Done", "Failed", "Reverted", "Cancelled")
 
 
 class FuelRequest(Document):
-    # [#8q3d7t]
 
     def before_insert(self):
-        # [#52mb5t]
         if not self.requested_by:
             self.requested_by = frappe.session.user
 
@@ -111,7 +108,6 @@ class FuelRequest(Document):
             frappe.throw(reason)
 
     def before_submit(self):
-        # [#g1h3oq]
         if self.request_type == "Standard":
             self._guard_quota_allowance()
         elif self.request_type == "Chip":
@@ -119,7 +115,6 @@ class FuelRequest(Document):
 
     def on_submit(self):
         if self.request_type == "Standard":
-            # [#psnx54]
             if self.status == "Done":
                 self._apply_quota_consumption()
         elif self.request_type == "Top-up":
@@ -152,7 +147,6 @@ class FuelRequest(Document):
         if self.request_type == "Standard" and self.status == "Done":
             self._apply_quota_consumption()
 
-        # [#suwuvv]
         if (
             self.request_type == "Top-up"
             and self.reverted
@@ -177,12 +171,10 @@ class FuelRequest(Document):
                 ),
             )
 
-        # [#cx0ks8]
         from apex.salis.fuel_engine import reverse_fuel_ledger
 
         reverse_fuel_ledger("Fuel Request", self.name)
 
-    # [#nnui1a]
 
     def _validate_standard(self):
         if (self.requested_litres or 0) <= 0:
@@ -203,7 +195,6 @@ class FuelRequest(Document):
                 _("A chip number is required to {0} a fuel chip.").format(_(self.action))
             )
 
-    # [#8omjd6]
 
     def _guard_initial_status(self):
         """A new request must be created at the initial state (Pending). Later
@@ -221,7 +212,6 @@ class FuelRequest(Document):
         if self.status == "Approved" and not self.approved_by:
             self.approved_by = frappe.session.user
 
-    # [#k58r6v]
 
     def _warn_overdue_temporary(self):
         if not self.is_temporary or self.reverted:
@@ -235,7 +225,6 @@ class FuelRequest(Document):
                 title=_("Temporary Top-up Not Reverted"),
             )
 
-    # [#kuicp1]
 
     def _guard_chip_cancellation(self):
         if self.action == "Cancel":
@@ -248,7 +237,6 @@ class FuelRequest(Document):
                     _("Owner acknowledgement is required to submit a fuel chip cancellation.")
                 )
 
-    # [#5u90n1]
 
     def _guard_quota_allowance(self, quota=None):
         """A Standard request draws down a monthly allocation, so the allocation

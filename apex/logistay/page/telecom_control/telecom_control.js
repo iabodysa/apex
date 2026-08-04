@@ -1,9 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// Telecom Control — a native Frappe Desk page (frappe.ui.make_app_page). It ships
-// NO stylesheet: every rule below is an inline style bound to a native Desk CSS
-// variable, so light/dark theming and RTL come from the framework. Data is read
-// from apex.logistay.api.telecom_control; custody actions POST to
-// apex.logistay.api.sim_actions and re-render only the affected pieces.
 
 frappe.pages['telecom-control'].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -42,10 +37,6 @@ const TC_STATUS_COLOR = {
 
 const TC_FILTER_KEY = 'telecom_control_filters';
 
-// Retirement actions and the statuses they may be raised from. This MIRRORS
-// ALLOWED_PRIOR_STATUS in sim_custody_assignment.py — the server re-checks the
-// transition under a row lock, so a stale button here fails cleanly rather than
-// retiring the wrong SIM. Terminated is absorbing: it appears in no "from" list.
 const TC_RETIRE_FROM = {
 	Lost: ['Available', 'Assigned', 'Suspended'],
 	Terminated: ['Available', 'Assigned', 'Suspended', 'Lost'],
@@ -62,7 +53,6 @@ class TelecomControl {
 		this.refresh();
 	}
 
-	// Persistence
 	_load_filters() {
 		try {
 			return JSON.parse(localStorage.getItem(TC_FILTER_KEY)) || {};
@@ -75,7 +65,6 @@ class TelecomControl {
 		localStorage.setItem(TC_FILTER_KEY, JSON.stringify(this.filters));
 	}
 
-	// Skeleton
 	_build_skeleton() {
 		this.$root = $('<div class="telecom-control"></div>').attr('style', TC_STYLE.root).appendTo(this.page.main);
 		this.$filters = $('<div class="tc-filters"></div>').attr('style', TC_STYLE.filters).appendTo(this.$root);
@@ -151,7 +140,6 @@ class TelecomControl {
 		this.refresh();
 	}
 
-	// Data
 	refresh() {
 		this._render_loading();
 		const args = { filters: this.filters };
@@ -175,7 +163,6 @@ class TelecomControl {
 			.then((r) => r && r.message);
 	}
 
-	// Render
 	_render_loading() {
 		this.$empty.text(__('Loading…')).show();
 	}
@@ -274,7 +261,6 @@ class TelecomControl {
 			.appendTo(this.$pager);
 	}
 
-	// Drawer + actions
 	_open_drawer(sim_card) {
 		this.current_sim = sim_card;
 		this.$drawer.empty().show();
@@ -372,12 +358,8 @@ class TelecomControl {
 			fields.push({ fieldname: 'project', label: __('Project'), fieldtype: 'Link', options: 'Project', depends_on: "eval:doc.custodian_type=='Project'" });
 		}
 		fields.push({ fieldname: 'assignment_date', label: __('Action Date'), fieldtype: 'Date', reqd: 1, default: frappe.datetime.get_today() });
-		// Retirement must say why. The server re-enforces this — the dialog only
-		// saves the user a round trip.
 		fields.push({ fieldname: 'reason', label: __('Reason'), fieldtype: 'Small Text', reqd: retiring ? 1 : 0 });
 
-		// "Lost" / "Terminated" are statuses, not commands — label the button with the
-		// verb the operator is performing.
 		const verb = { Lost: __('Mark Lost'), Terminated: __('Terminate') }[action] || __(action);
 		const dialog = new frappe.ui.Dialog({
 			title: __('{0} SIM {1}', [verb, detail.mobile_number || detail.name]),
@@ -423,7 +405,6 @@ class TelecomControl {
 			.call({ method: `apex.logistay.api.sim_actions.${method}`, args })
 			.then((r) => {
 				frappe.show_alert({ message: __('Done'), indicator: 'green' });
-				// Refresh cards + rows, and the open drawer, without a full page reload.
 				this.refresh();
 				if (this.current_sim) {
 					this._open_drawer(this.current_sim);

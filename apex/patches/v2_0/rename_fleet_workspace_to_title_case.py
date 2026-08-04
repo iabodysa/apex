@@ -41,14 +41,10 @@ NEW = "Fleet"
 
 
 def execute() -> None:
-    # get_value(doctype, key) returns the STORED name, so comparing it to OLD/NEW
-    # is an exact-case probe on both MariaDB (case-insensitive lookup) and
-    # PostgreSQL (case-sensitive lookup). A plain db.exists() cannot tell them apart.
     old_row = frappe.db.get_value("Workspace", OLD, "name")
     new_row = frappe.db.get_value("Workspace", NEW, "name")
 
     if old_row == OLD and new_row == NEW:
-        # Two distinct rows. Merging would destroy one; that is an owner decision.
         frappe.log_error(
             title="Fleet workspace duplicated by case",
             message=(
@@ -59,9 +55,6 @@ def execute() -> None:
     elif old_row == OLD:
         frappe.rename_doc("Workspace", OLD, NEW, force=True)
 
-    # parent_page stores the parent's TITLE, so a row still holding the old
-    # lowercase key never resolves to a parent and renders nowhere. Compare in
-    # Python: a MariaDB filter would match both cases and hide the real state.
     for row in frappe.get_all("Workspace", fields=["name", "parent_page"]):
         if row.parent_page == OLD:
             frappe.db.set_value(

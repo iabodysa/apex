@@ -5,6 +5,10 @@ Wired via override_doctype_dashboards in hooks.py. Supplier is an ERPNext
 doctype, so this is the only supported mechanism. Frappe passes the native
 Supplier dashboard (POs, invoices, payments) as `data`; we MERGE our housing,
 subcontracting, and cost-recovery links into it without dropping the native ones.
+
+The Salis (Movement) group is reference links only: the rental office is an ERPNext
+Supplier, and settlement routes through a Payment Request record. No GL Entry is posted
+from here.
 """
 
 from __future__ import annotations
@@ -17,7 +21,6 @@ def get_data(data=None):
     data.setdefault("transactions", [])
     data.setdefault("non_standard_fieldnames", {})
     data["fieldname"] = data.get("fieldname") or "supplier"
-    # [#job590]
     data["non_standard_fieldnames"].update({
         "Housing Assignment": "billed_to_supplier",
         "Accommodation Ledger": "billed_to_supplier",
@@ -30,7 +33,6 @@ def get_data(data=None):
          "items": ["Subcontractor Service Contract", "Subcontractor Service Order"]},
         {"label": frappe._("Cost Recovery"),
          "items": ["Accommodation Ledger"]},
-        # [#6f1937]
         {"label": frappe._("Fleet (Salis)"),
          "items": ["Rental Office"]},
     ])

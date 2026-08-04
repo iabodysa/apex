@@ -55,12 +55,8 @@ REGISTRY_LEGACY = "legacy"
 REGISTRY_AMBIGUOUS = "ambiguous"
 REGISTRY_ABSENT = "absent"
 
-# Frappe identifiers are word chars + spaces (`tabNumber Card`, `email_id`).
-# Re-checked at the SQL site because these are spliced in as backquoted names.
 _SAFE_IDENT = re.compile(r"[\w ]+")
 
-# Append-only audit trails: rewriting their history is churn, and Patch Log rows
-# legitimately carry the old dotted path as part of an already-applied patch name.
 SWEEP_SKIP_TABLES = frozenset(
     {
         "tabPatch Log",
@@ -202,9 +198,6 @@ def _frappe():
 
 
 def _registry_path(frappe):
-    # Resolved, because bench runs commands with the sites directory as cwd and
-    # sites_path is then "." - an operator told to rewrite "apps.txt" would look
-    # for it at the bench root, where there is no such file.
     return (Path(frappe.local.sites_path) / "apps.txt").resolve()
 
 
@@ -333,8 +326,6 @@ def _cutover_dotted_paths(frappe):
 
     rewritten = []
     for table, column in plan_sweep(_text_columns(frappe)):
-        # Re-assert the allowlist at the SQL site itself: information_schema is
-        # trusted, but no non-identifier may ever reach the backquoted names.
         if not (_SAFE_IDENT.fullmatch(table) and _SAFE_IDENT.fullmatch(column)):
             continue
         hits = frappe.db.sql(

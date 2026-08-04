@@ -1,5 +1,4 @@
-# Copyright (c) 2026, AFMCO Support Services Co. Ltd
-# [#a7e2jk]
+# Copyright (c) 2026, AFMCO and contributors
 
 import frappe
 
@@ -10,11 +9,7 @@ UNSCOPED_ROLES = {
     "System Manager",
     "Fleet Manager",
     "Internal Auditor",
-    # [#m3bfwj]
     "Finance Manager",
-    # An oversight viewer, same shape as Internal Auditor. Its two Salis
-    # Notifications alert it company-wide, so a project-scoped list would show
-    # zero rows for the very vehicles it was just emailed about.
     "Government Relations Officer",
 }
 
@@ -96,7 +91,6 @@ def _project_condition(user, column="`project`", doctype=None):
     )
 
 
-# [#iecjvo]
 def report_project_scope(user=None, doctype=None):
     """Return ``(restrict, allowed_projects)`` for report-side project scoping.
 
@@ -109,7 +103,6 @@ def report_project_scope(user=None, doctype=None):
     return permission_scope.report_scope(user, _is_unscoped, _allowed_projects, allow="Project", doctype=doctype)
 
 
-# [#89nxdl]
 
 def vehicle_assignment_query(user=None, doctype=None):
     return _project_condition(user, doctype=doctype)
@@ -183,7 +176,6 @@ def dispatch_trip_query(user=None, doctype=None):
 
     projects = _allowed_projects_for(user, doctype)
     if not projects:
-        # [#fdplqh]
         return own
 
     escaped = ", ".join(frappe.db.escape(p) for p in projects)
@@ -219,7 +211,6 @@ def trip_start_log_query(user=None, doctype=None):
 
     projects = _allowed_projects_for(user, doctype)
     if not projects:
-        # [#7eocrd]
         return own
 
     escaped = ", ".join(frappe.db.escape(p) for p in projects)
@@ -260,7 +251,6 @@ def salis_driver_query(user=None, doctype=None):
 
     projects = _allowed_projects_for(user, doctype)
     if not projects:
-        # [#5hk4nq]
         return own
 
     escaped = ", ".join(frappe.db.escape(p) for p in projects)
@@ -300,8 +290,6 @@ def passenger_manifest_query(user=None, doctype=None):
     )
 
 
-# [#1hud7u]
-# [#dr1tz9]
 
 def _driver_chain_condition(user, column="`driver`", with_owner=False, doctype=None):
     """SQL fragment scoping a `driver`-link column through Salis Driver's project.
@@ -321,7 +309,6 @@ def _driver_chain_condition(user, column="`driver`", with_owner=False, doctype=N
 
     projects = _allowed_projects_for(user, doctype)
     if not projects:
-        # [#dr0own]
         return own if with_owner else "1=0"
 
     escaped = ", ".join(frappe.db.escape(p) for p in projects)
@@ -394,7 +381,6 @@ def movement_cost_transfer_query(user=None, doctype=None):
     return "(`from_project` in ({v}) or `to_project` in ({v}))".format(v=escaped)
 
 
-# [#2huj0w]
 
 def _doc_project(doc):
     """Resolve the project a document belongs to, including the docs that reach
@@ -418,7 +404,6 @@ def _doc_project(doc):
     if doctype in ("Dispatch Trip", "Trip Start Log", "Passenger Manifest"):
         route_plan = getattr(doc, "route_plan", None)
         if not route_plan:
-            # [#qiimpb]
             dispatch_trip = getattr(doc, "dispatch_trip", None)
             if dispatch_trip:
                 route_plan = frappe.db.get_value(
@@ -470,12 +455,6 @@ def _own_driver_basis(doc, user, driver_field="driver"):
     return False
 
 
-# The DocTypes among the eleven this handler governs whose OWN model makes
-# `project` mandatory, so no legitimate create can ever be project-less. Deliberately
-# a named set and not a blanket rule: a project-less create is a modelled business
-# state on the other ten (see the survey note on
-# ``_unanchored_create_is_denied``), and denying it there would blackout an ordinary
-# flow rather than close a leak.
 PROJECT_MANDATORY_ON_CREATE = frozenset({"Fuel Claim"})
 
 
@@ -532,10 +511,8 @@ def scoped_has_permission(doc, ptype, user=None):
 
     project = _doc_project(doc)
     if not project:
-        # [#n18ea0]
         if getattr(doc, "owner", None) == user and not _unanchored_create_is_denied(doc):
             return None
-        # [#kmesp4]
         return False
 
     if project not in _allowed_projects_for(user, doc.doctype):
@@ -580,7 +557,6 @@ def _owner_or_project_has_permission(doc, user=None):
 
     unsaved = _is_unsaved(doc)
 
-    # [#jc6moa]
     if not unsaved and getattr(doc, "owner", None) == user:
         return None
 
@@ -591,7 +567,6 @@ def _owner_or_project_has_permission(doc, user=None):
     if unsaved and _own_driver_basis(doc, user):
         return None
 
-    # [#kk3lw5]
     return False
 
 
@@ -673,7 +648,6 @@ def dispatch_trip_has_permission(doc, ptype, user=None):
     if _is_unscoped(user):
         return None
 
-    # [#daxlu1]
     own_driver = get_driver_for_session_user(user)
     if own_driver and getattr(doc, "driver", None) == own_driver:
         return None
@@ -688,8 +662,6 @@ def dispatch_trip_has_permission(doc, ptype, user=None):
     return None
 
 
-# [#oyj21f]
-# [#dr2hpm]
 
 def _driver_chain_project(doc, driver_field="driver"):
     """Resolve a doc's project through its Salis Driver link, or None.
@@ -759,7 +731,6 @@ def _driver_chain_has_permission(doc, user=None, driver_field="driver", with_own
 
     unsaved = _is_unsaved(doc)
 
-    # [#dr3own]
     if with_owner and not unsaved and getattr(doc, "owner", None) == user:
         return None
 
@@ -770,7 +741,6 @@ def _driver_chain_has_permission(doc, user=None, driver_field="driver", with_own
     if with_owner and unsaved and _own_driver_basis(doc, user, driver_field=driver_field):
         return None
 
-    # [#dr4nul]
     return False
 
 
@@ -837,7 +807,6 @@ def movement_cost_transfer_has_permission(doc, ptype, user=None):
     from_project = getattr(doc, "from_project", None)
     to_project = getattr(doc, "to_project", None)
     if not from_project and not to_project:
-        # [#dr5nul]
         return None
 
     allowed = _allowed_projects_for(user, doc.doctype)
@@ -846,7 +815,6 @@ def movement_cost_transfer_has_permission(doc, ptype, user=None):
     return False
 
 
-# [#9w8q9b]
 
 def operations_alert_query(user=None, doctype=None):
     """List/report scope for Operations Alert via the vehicle's project.
@@ -895,9 +863,7 @@ def operations_alert_has_permission(doc, ptype, user=None):
     return None
 
 
-# [#m6o851]
 
-# [#6wflvq]
 FINANCE_EXCLUSIVE_STATES = {
     "Approved by Finance",
     "Paid",
@@ -940,11 +906,9 @@ def payment_sod_has_permission(doc, ptype, user=None):
     if getattr(doc, "doctype", None) != "Salis Payment Request":
         return None
 
-    # [#9u08t6]
     if scoped_has_permission(doc, ptype, user=user) is False:
         return False
 
-    # [#n6cjcu]
     if ptype not in ("submit", "write"):
         return None
 

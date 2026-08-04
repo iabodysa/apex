@@ -1,320 +1,658 @@
-# Permissions and Role Reference
-
-This page is the canonical public reference for Apex role charters and
-operational DocType permissions.
-
-DocPerm is one layer of access. Frappe workflows can limit available actions,
-and Apex row-scope hooks can limit which records a user sees. Workspace, page,
-or portal navigation never grants data rights. Do not assume that System
-Manager has full rights on every DocType; derive effective access from shipped
-DocPerm rows, workflow state, and row-scope rules.
-
-## Reading the matrices
-
-Cells list the standard document rights that the shipped permlevel-zero DocPerm
-rows grant: Read, Write, Create, Submit, Cancel, Amend, and Delete. An em dash
-means that the role has none of those rights. Report, Export, Print, Email, and
-Share are described in notes only when relevant.
-
-## Role charters
-
-| Role | Module | Typical user |
-|------|--------|--------------|
-| **Accommodation Manager** | Habitat | Owns housing, custody, safety, and license records |
-| **Resident Supervisor** | Habitat | On-site supervisor; raises and executes day-to-day records (building-scoped) |
-| **Maintenance Technician** | Habitat | Field technician; reads requests and works **Maintenance Work Orders** |
-| **Cleaning Supervisor** | Habitat | Records housekeeping on the **Cleaning Log** |
-| **Safety Officer** | Habitat | Field safety operator; records inspections, executions, and incidents |
-| **Resident Request Coordinator** | Habitat | Triages resident requests and raises/submits maintenance requests |
-| **Procurement Supervisor** | Habitat | Receives and hands over building stock without delete authority |
-| **Finance Manager** | Cross-module | Central finance control; approves payments and reconciles costs |
-| **Internal Auditor** | Cross-module | Read-only oversight where explicitly granted |
-| **Fleet Manager** | Salis | Owns the fleet; unscoped across all projects |
-| **Fleet Project Manager** | Salis | Manages vehicles/drivers for assigned projects only |
-| **Fleet Supervisor** | Salis | Field supervisor; creates operational records |
-| **Government Relations Officer** | Salis | Compliance notification recipient + Compliance workspace viewer (no record-edit rights). It holds Read, Report, and Export on five vehicle and driver compliance records and on three registers, and is granted on the **Salis** root as well as on **Compliance and Rentals** |
-| **Driver** | Salis | Field driver; uses the mobile Driver Portal only. The role has `desk_access = 0` and an owner-only permission set on five Salis DocTypes — it never opens the desk |
-| **SIM Operations User** | Logistay | Manages telecom contracts, SIM inventory, and SIM custody for permitted Companies |
-
-Maintenance Manager is supplied by ERPNext. Apex neither creates it nor grants
-it a DocPerm.
-
-## Row scope
-
-Fleet Project Managers and Fleet Supervisors see only permitted projects.
-Oversight roles (Fleet Manager, Finance Manager, Internal Auditor, Government Relations Officer) see all.
-Grant project access with a User Permission on Project.
-
-Resident Supervisors are scoped through User Permissions on Building.
-Accommodation Manager, Finance Manager, and Internal Auditor are unscoped for
-the Habitat building filter.
-
-SIM Operations Users are scoped through User Permissions on Company. System
-Manager, Finance Manager, and Internal Auditor are unscoped for the Logistay
-company filter.
-
-The built-in All role gives every signed-in user owner-scoped Maintenance
-Request intake. Assigned technicians can also see their tickets.
-
-## Accommodation permissions
-
-| DocType | Accommodation Manager | Resident Supervisor | Resident Request Coordinator | Finance Manager |
-|---------|----------------------|---------------------|------------------------------|-----------------|
-| Site (master) | Read, Write, Create | — | — | — |
-| Building (master) | Read, Write, Create | Read | — | — |
-| Room (master) | Read, Write, Create | Read | — | — |
-| Bed (master) | Read, Write, Create | Read | — | — |
-| Facility Asset | Read, Write, Create | Read | — | — |
-| **Housing Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | — | — |
-| **Housing Checkout** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | — | — |
-| **Room Bed Transfer** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | — | — | — |
-| Resident Request | Read, Write, Create | Read, Write, Create | Read, Write, Create | — |
-
-Site is manager-only. Resident Request Coordinator owns request triage.
-Accommodation Manager, Resident Supervisor, and Resident Request Coordinator
-hold Read and Write on the permlevel-one triage fields of Resident Request.
-Internal Auditor has Read, Report, and Export on Facility Asset.
-
-## Contingent worker permissions
-
-| DocType | Accommodation Manager | Resident Supervisor | Finance Manager | Internal Auditor |
-|---------|-----------------------|---------------------|-----------------|------------------|
-| Temporary Worker | Read, Write, Create | Read, Write, Create | — | Read |
-| Freelancer | Read, Write, Create, Delete | — | Read, Write, Create, Delete | Read |
-
-Temporary Worker is an accommodation intake record. HR creates the native
-Employee, but Apex grants no HR role on Temporary Worker or Freelancer.
-
-## Custody permissions
-
-| DocType | Accommodation Manager | Resident Supervisor | Cleaning Supervisor | Procurement Supervisor |
-|---------|-----------------------|---------------------|---------------------|------------------------|
-| Custody Article (master) | Read, Write, Create, Delete | Read, Write, Create | — | — |
-| Custody Asset Category (master) | — | — | — | — |
-| **Goods Receipt** *(submittable)* | Read | — | — | Read, Write, Create, Submit, Cancel, Amend |
-| **Custody Handover** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write | — | Read, Write, Create, Submit, Cancel, Amend |
-| **Custody Issue** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend, Delete | Read, Write, Create | — | — |
-| **Custody Return** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend, Delete | Read, Write, Create | — | — |
-| **Custody Damage Assessment** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend, Delete | Read, Write, Create | — | — |
-| **Facility Asset Custody Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | — | — |
-| **Facility Asset Movement** *(submittable)* | Read, Write, Submit, Cancel | Read, Write | — | — |
-| **Cleaning Log** *(submittable)* | Read, Write, Create | Read, Write, Create | Read, Write, Create, Submit | — |
-
-Procurement Supervisor receives and hands over building stock. Resident
-Supervisors prepare custody issues, returns, and damage assessments;
-Accommodation Manager submits them. Resident Supervisor can submit Facility
-Asset Custody Assignment. Cleaning Supervisor submits Cleaning Log. Custody
-Asset Category has no operational-role grant.
-
-Internal Auditor has Read, Report, and Export on Custody Issue, Custody Return,
-Custody Damage Assessment, Facility Asset Custody Assignment, Facility Asset
-Movement, and Cleaning Log. Finance Manager has Read on Facility Asset Movement.
-
-## Safety permissions
-
-| DocType | Accommodation Manager | Resident Supervisor | Safety Officer |
-|---------|----------------------|---------------------|----------------|
-| Safety Task Catalog (master) | Read, Write, Create | Read | Read |
-| **Safety Round** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | Read, Write, Create |
-| **Safety Inspection Report** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | Read, Write, Create |
-| **Safety Task Execution** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | Read, Write, Create |
-| **Safety Incident** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create, Submit | Read, Write, Create |
-| **Building License** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read | Read, Write, Create |
-| **Audit Remediation Plan** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | — | — |
-
-Safety Officer can prepare Building License; Accommodation Manager submits,
-cancels, and amends it. Internal Auditor has Read and Report on Safety Incident
-and read-only access to Audit Remediation Plan.
-
-## Maintenance permissions
-
-All is the built-in Frappe role held by every signed-in user.
-
-| DocType | Accommodation Manager | Resident Supervisor | Resident Request Coordinator | Maintenance Technician | All |
-|---------|----------------------|---------------------|------------------------------|------------------------|--------------------------|
-| **Maintenance Request** *(submittable)* | Read, Write, Create, Submit | Read, Write, Create, Submit | Read, Write, Create, Submit | Read | Read, Create *(own only)* |
-| **Maintenance Inspection Report** *(submittable)* | — | — | — | — | — |
-| **Maintenance Work Order** *(submittable)* | — | — | — | **Read, Write** | — |
-| Maintenance Material (master) | Read, Write, Create | — | — | **Read, Write, Create** | — |
-| Maintenance Material Template (master) | Read, Write, Create | — | — | **Read, Write, Create** | — |
-| **Subcontractor Service Contract** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | — | — | — | — |
-| **Subcontractor Service Order** *(submittable)* | Read, Write, Create, Submit | — | — | — | — |
-
-Maintenance Inspection Report has no operational-role grant. Accommodation
-Manager owns the subcontractor records. Maintenance Technician and
-Accommodation Manager maintain the material masters.
-
-## Cost and leasing permissions
-
-| DocType | Accommodation Manager | Finance Manager | Internal Auditor |
-|---------|----------------------|-----------------|------------------|
-| Utility Account (master) | Read, Write, Create | Read | — |
-| **Utility Bill Entry** *(submittable)* | Read, Write, Create, Submit | Read, Write, Create, Submit, Cancel | Read |
-| Operational Depreciation Policy (master) | — | — | — |
-| **Lease** *(submittable)* | Read, Write, Create, Submit | **Read, Write, Create, Submit, Cancel** | Read |
-| **Rent Payment Schedule** *(child table)* | — | — | — |
-
-Operational Depreciation Policy has no operational-role grant. Internal Auditor
-has read-only oversight across the related cost records.
-
-## Telecom permissions
-
-| DocType | SIM Operations User | Finance Manager | Internal Auditor | System Manager |
-|---------|---------------------|-----------------|------------------|----------------|
-| **Telecom Contract** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read | Read | Read, Write, Create, Submit, Cancel, Amend, Delete |
-| SIM Card (master) | Read, Write, Create | Read | Read | Read, Write, Create, Delete |
-| **SIM Custody Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Amend | Read | Read | Read, Write, Create, Submit, Cancel, Amend, Delete |
-
-SIM Operations User has Report, Export, and Print on all three records. Finance
-Manager and Internal Auditor have reporting and export access. Only System
-Manager has Delete; operational users preserve the contract and custody
-history.
-
-## Settings permissions
-
-These settings are Frappe Singles. A settings form affects the whole site.
-
-| DocType | System Manager | Accommodation Manager | Fleet Manager | Fleet Project Manager | Finance Manager | Internal Auditor |
-|---------|----------------|-----------------------|---------------|-----------------------|-----------------|------------------|
-| Apex Settings | Read, Write, Create, Delete | — | — | — | Read | — |
-| Habitat Settings | Read, Write, Create, Delete | — | — | — | — | — |
-| Salis Settings | Read, Write, Create, Delete | — | Read, Write, Create, Delete | — | Read | Read |
-| Apex Integration Settings | Read, Write, Create, Delete | Read | Read | — | — | — |
-| Payment Routing Settings | Read, Write, Create, Delete | — | — | — | Read | — |
-| Salary Deduction Policy | Read, Write, Create, Delete | — | — | — | Read, Write | Read |
-| Driver Portal Theme | Read, Write, Create, Delete | — | Read, Write, Create, Delete | Read | — | Read |
-
-Read access does not grant a settings change. Record the previous value and
-test changes on a non-production site.
-
-## Personal portal credential permissions
-
-HR User is supplied by HRMS.
-
-| DocType | System Manager | Accommodation Manager | Resident Supervisor | HR User | Fleet Manager | Fleet Project Manager | Fleet Supervisor |
-|---------|----------------|-----------------------|---------------------|---------|---------------|-----------------------|------------------|
-| Masar Worker Token | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read, Write, Create | Read, Write, Create | Read, Write, Create | Read, Write, Create |
-
-These DocPerms allow record handling only. Holder type, issuer action, row
-scope, expiry, rotation, and server-side token validation still apply.
-
-## System-written record permissions
-
-These records are engine output. Read them for traceability; do not create,
-edit, or delete them to repair an operational source record.
-
-### Habitat engines
-
-| DocType | System Manager | Accommodation Manager | Resident Supervisor | Safety Officer | Finance Manager | Internal Auditor |
-|---------|----------------|-----------------------|---------------------|----------------|-----------------|------------------|
-| Accommodation Ledger | Read | — | — | — | Read | Read |
-| Accommodation Stock Ledger | Read, Delete | Read | — | — | Read | Read |
-| Maintenance Cost Ledger | Read | Read | — | — | Read | Read |
-| Occupancy Snapshot | Read, Delete | Read | Read | — | Read | Read |
-| **Operational Depreciation Snapshot** *(submittable)* | Read, Write, Submit, Cancel, Delete | Read, Write, Submit, Cancel, Amend, Delete | Read, Write | — | Read | Read |
-| Safety Finding Ledger | Read | Read | — | Read | — | Read |
-
-Operational Depreciation Snapshot currently has broader DocPerms than the
-other engine records. Treat that as an application control boundary, not an
-instruction for manual correction.
-
-### Salis engines
-
-| DocType | System Manager | Fleet Manager | Finance Manager | Internal Auditor |
-|---------|----------------|---------------|-----------------|------------------|
-| Trip Fulfilment Ledger | Read | Read | Read | Read |
-| Fuel Consumption Ledger | Read | Read | Read | Read |
-| Rental Accrual Ledger | Read | Read | Read | Read |
-
-## Fleet master permissions
-
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver | Finance Manager | Internal Auditor |
-|---------|---------------|-----------------------|------------------|--------|-----------------|------------------|
-| **Salis Vehicle** | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | — | Read | Read |
-| **Salis Driver** | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read | Read | Read |
-| Vehicle Category (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | — | Read | Read |
-| **Salis Vehicle Compliance** *(child table)* | — | — | — | — | — | — |
-| **Driver Clearance** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | — | Read, Write, Create | — | Read | Read |
-
-Salis Vehicle Compliance is a child table and inherits access through its parent.
-Government Relations Officer has Read, Report, and Export on Salis Vehicle,
-Salis Driver, Driver Clearance, and Driver Suspension.
-
-## Vehicle control permissions
-
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Finance Manager | Internal Auditor | Government Relations Officer |
-|---------|---------------|-----------------------|------------------|-----------------|------------------|--------------------------------|
-| **Vehicle Suspension** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create | Read | Read | — |
-| **Driver Suspension** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read | Read | Read |
-| **Vehicle Incident** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | — | Read | Read |
-| **Vehicle Damage Write-Off** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | — | Read, Write, Create, Submit | Read | Read | — |
-| **Vehicle Handover** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create | Read | Read | — |
-
-Project scope applies to Fleet Project Manager and Fleet Supervisor. The
-Government Relations Officer grant is read-only and limited to the two rows
-shown.
-
-## Dispatch and transport permissions
-
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver |
-|---------|---------------|-----------------------|------------------|--------|
-| **Vehicle Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit, Cancel, Amend | Read, Write, Create | — |
-| **Transport Request** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create, Submit | — |
-| **Dispatch Trip** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
-| **Route Plan** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
-| **Passenger Manifest** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | — |
-| **Issue** (field support) | — | — | — | — |
-
-The Driver portal reads trip, manifest, and Issue data on the driver's behalf
-after resolving the personal token. Apex adds no Issue DocPerm.
-
-## Fuel permissions
-
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Finance Manager |
-|---------|---------------|-----------------------|------------------|-----------------|
-| **Fuel Quota** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read |
-| **Fuel Request** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create, Submit | Read, Write, Create | Read |
-| **Fuel Claim** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | Read, Write |
-| **Fuel Exception Case** *(workflow)* | Read, Write, Create, Submit, Cancel, Amend, Delete | Read, Write, Create | Read, Write, Create | Read |
-| Fuel Platform (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read |
-| Fuel Daily Log | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read, Write |
-
-Project scope applies to Fleet Project Manager and Fleet Supervisor. Internal
-Auditor has Read, Report, and Export on all records in this matrix.
-
-## Rental permissions
-
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Finance Manager |
-|---------|---------------|-----------------------|------------------|-----------------|
-| Rental Office (master) | Read, Write, Create, Delete | Read, Write, Create | Read, Write, Create | Read |
-| **Rental Vehicle Movement** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | Read |
-| **Rental Settlement** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | — | Read, Write |
-
-Internal Auditor has read-only oversight on these records and Rental Accrual
-Ledger.
-
-## Payment and approval permissions
-
-| DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Finance Manager |
-|---------|---------------|-----------------------|------------------|-----------------|
-| **Salis Payment Request** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | Read, Write, Create | Read, Write, Submit, Cancel |
-| **Movement Cost Recovery** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | — | Read, Write, Create, Submit | Read, Write |
-| **Movement Cost Transfer** *(workflow)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | — | Read, Write |
-
-Internal Auditor has read-only oversight on these records.
-
-## Driver permissions
-
-Driver has no Desk access. Each DocPerm row below carries `if_owner`; the
-personal-link portal applies additional server-side identity scope.
-
-| DocType | Driver |
-|---------|--------|
-| Salis Driver | Read |
-| Boarding Scan Log | Read |
-| Driver Attendance | Read, Create, Submit |
-| Driver Suspension | Read |
-| Trip Start Log | Read, Write, Create, Submit |
-
-Salis Vehicle and Issue are not part of the Driver grant. The portal reads or
-creates those records on the driver's behalf after resolving identity.
+# Permissions reference
+
+<!-- Generated from the DocPerm rows in the shipped DocType JSON. Do not edit by
+     hand; edit the DocType and regenerate. -->
+
+Every DocPerm row apex ships, one row per grant. This page is derived from the
+same JSON a site installs, so it cannot disagree with the running permissions.
+
+## DocPerm is not effective access
+
+A DocPerm row is the widest a role can act; three other layers narrow it.
+
+- A **Frappe Workflow** decides which transitions a role may make on a document
+  that is otherwise writable.
+- **Row scope** decides which records come back. Fleet Project Manager and Fleet
+  Supervisor are scoped by User Permission on Project; Resident Supervisor is
+  scoped by User Permission on Building. `apex/habitat/permissions.py` and the
+  Salis scope modules own that side.
+- **Permlevel** splits a document into field bands. A permlevel-1 row grants
+  nothing on the ordinary fields; it opens the fields tagged at that level.
+
+Workspace, desk page and portal navigation grant no data rights at all. A role
+that reaches a screen still resolves every record through the rows below.
+
+Who each role is written for is a judgement rather than a schema fact, so the
+role charters stay in [the training index](../training/README.md).
+
+## Two grants are not in this table
+
+Both are Custom DocPerm rows written at install and migrate time against core
+DocTypes apex does not own, so no shipped JSON carries them:
+
+- `apex/apex_core/setup/seeders/habitat_core_link_perms_seed.py` grants Habitat
+  roles `select` on Employee, Project and Cost Center so their own Link fields
+  and register reports resolve.
+- `apex/apex_core/setup/seeders/salis_issue_seed.py` does the same for Issue.
+
+## Reading a row
+
+**Document rights** and **Data rights** list only what the row actually grants;
+`—` means none of that group. **Level** is the permlevel — `0` is the
+document itself, a higher number is a field band. **Row filter** reads
+`Own records only` when the row carries `if_owner`.
+
+DocTypes that ship no DocPerm row of their own are listed under each module. A
+child table takes its access from the parent document it sits in.
+
+## Coverage
+
+| Measure | Count |
+| --- | --- |
+| DocTypes shipped | 153 |
+| DocTypes granting at least one role | 114 |
+| DocPerm rows | 545 |
+| Roles granted | 18 |
+
+## Roles
+
+| Role | DocTypes | DocPerm rows |
+| --- | --- | --- |
+| Accommodation Manager | 54 | 68 |
+| All | 1 | 1 |
+| Cleaning Supervisor | 2 | 2 |
+| Driver | 5 | 5 |
+| Finance Manager | 59 | 63 |
+| Fleet Manager | 47 | 51 |
+| Fleet Project Manager | 36 | 39 |
+| Fleet Supervisor | 36 | 39 |
+| Government Relations Officer | 5 | 5 |
+| HR User | 1 | 1 |
+| Internal Auditor | 72 | 75 |
+| Maintenance Technician | 4 | 4 |
+| Procurement Supervisor | 3 | 5 |
+| Resident Request Coordinator | 2 | 3 |
+| Resident Supervisor | 32 | 39 |
+| SIM Operations User | 3 | 3 |
+| Safety Officer | 7 | 7 |
+| System Manager | 114 | 135 |
+
+## Modules
+
+- [Apex Core](#apex-core)
+- [Habitat](#habitat)
+- [Logistay](#logistay)
+- [Salis](#salis)
+
+## Apex Core
+
+| DocType | Role | Level | Document rights | Data rights | Row filter |
+| --- | --- | --- | --- | --- | --- |
+| Apex Integration Settings | Accommodation Manager | 0 | Read | — | — |
+| Apex Integration Settings | Fleet Manager | 0 | Read | — | — |
+| Apex Integration Settings | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Apex Settings | Finance Manager | 0 | Read | — | — |
+| Apex Settings | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Habitat Settings | System Manager | 0 | Read, Write, Create, Delete | Print, Email, Share | — |
+| Masar Worker Token | Accommodation Manager | 0 | Read, Write, Create | Report, Print, Share | — |
+| Masar Worker Token | Fleet Manager | 0 | Read, Write, Create | Report, Print | — |
+| Masar Worker Token | Fleet Project Manager | 0 | Read, Write, Create | Report, Print | — |
+| Masar Worker Token | Fleet Supervisor | 0 | Read, Write, Create | Report, Print | — |
+| Masar Worker Token | HR User | 0 | Read, Write, Create | Report, Print | — |
+| Masar Worker Token | Resident Supervisor | 0 | Read, Write, Create | Report, Print | — |
+| Masar Worker Token | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Masar Worker Token | System Manager | 1 | Read, Write | — | — |
+| Operations Alert | Finance Manager | 0 | Read | Report | — |
+| Operations Alert | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Operations Alert | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Operations Alert | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Operations Alert | Internal Auditor | 0 | Read | Report, Export | — |
+| Operations Alert | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Payment Routing Settings | Finance Manager | 0 | Read | — | — |
+| Payment Routing Settings | System Manager | 0 | Read, Write, Create, Delete | Print, Email, Share | — |
+| Salary Deduction Policy | Finance Manager | 0 | Read, Write | — | — |
+| Salary Deduction Policy | Internal Auditor | 0 | Read | Report | — |
+| Salary Deduction Policy | System Manager | 0 | Read, Write, Create, Delete | Print, Email, Share | — |
+| Salis Settings | Finance Manager | 0 | Read | — | — |
+| Salis Settings | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Salis Settings | Internal Auditor | 0 | Read | Report, Export | — |
+| Salis Settings | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+
+No DocPerm row of its own: Payment Routing Field Map (child table), Salary Deduction Type Rule (child table).
+
+## Habitat
+
+| DocType | Role | Level | Document rights | Data rights | Row filter |
+| --- | --- | --- | --- | --- | --- |
+| Accommodation Ledger | Finance Manager | 0 | Read | Report | — |
+| Accommodation Ledger | Internal Auditor | 0 | Read | Report, Export | — |
+| Accommodation Ledger | System Manager | 0 | Read | Report | — |
+| Accommodation Stock Ledger | Accommodation Manager | 0 | Read | Report, Export, Print, Email, Share | — |
+| Accommodation Stock Ledger | Finance Manager | 0 | Read | Report, Export, Print, Email, Share | — |
+| Accommodation Stock Ledger | Internal Auditor | 0 | Read | Report, Export, Print, Email, Share | — |
+| Accommodation Stock Ledger | System Manager | 0 | Read, Delete | Report, Export, Print, Email, Share | — |
+| Arrival Batch | Accommodation Manager | 0 | Read, Write, Create, Delete | Report, Export, Share | — |
+| Arrival Batch | Internal Auditor | 0 | Read | Report, Export | — |
+| Arrival Batch | Resident Supervisor | 0 | Read, Write, Create | Report | — |
+| Arrival Batch | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Share | — |
+| Arrival Batch | Accommodation Manager | 1 | Read, Write | — | — |
+| Arrival Batch | Internal Auditor | 1 | Read | — | — |
+| Arrival Batch | Resident Supervisor | 1 | Read, Write | — | — |
+| Arrival Batch | System Manager | 1 | Read, Write | — | — |
+| Audit Remediation Plan (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | Report | — |
+| Audit Remediation Plan (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Audit Remediation Plan (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Bed | Accommodation Manager | 0 | Read, Write, Create | — | — |
+| Bed | Resident Supervisor | 0 | Read | — | — |
+| Bed | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Building | Accommodation Manager | 0 | Read, Write, Create | Report | — |
+| Building | Resident Supervisor | 0 | Read | Report | — |
+| Building | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Building License (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | — | — |
+| Building License (submittable) | Resident Supervisor | 0 | Read | — | — |
+| Building License (submittable) | Safety Officer | 0 | Read, Write, Create | — | — |
+| Building License (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Camera Access Grant (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | — | — |
+| Camera Access Grant (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| City | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Cleaning Compliance Ledger | Accommodation Manager | 0 | Read | Report, Export, Print, Email, Share | — |
+| Cleaning Compliance Ledger | Cleaning Supervisor | 0 | Read | Report, Export, Print, Email, Share | — |
+| Cleaning Compliance Ledger | Internal Auditor | 0 | Read | Report, Export, Print, Email, Share | — |
+| Cleaning Compliance Ledger | System Manager | 0 | Read, Delete | Report, Export, Print, Email, Share | — |
+| Cleaning Log (submittable) | Accommodation Manager | 0 | Read, Write, Create | Report | — |
+| Cleaning Log (submittable) | Cleaning Supervisor | 0 | Read, Write, Create, Submit | Report | — |
+| Cleaning Log (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Cleaning Log (submittable) | Resident Supervisor | 0 | Read, Write, Create | Report | — |
+| Cleaning Log (submittable) | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Custody Acknowledgment | Accommodation Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Custody Acknowledgment | Internal Auditor | 0 | Read | Report, Export | — |
+| Custody Acknowledgment | Resident Supervisor | 0 | Read, Write, Create | Report, Print | — |
+| Custody Acknowledgment | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Custody Acknowledgment | Accommodation Manager | 1 | Read, Write | — | — |
+| Custody Acknowledgment | Resident Supervisor | 1 | Read, Write | — | — |
+| Custody Acknowledgment | System Manager | 1 | Read, Write | — | — |
+| Custody Article | Accommodation Manager | 0 | Read, Write, Create, Delete | — | — |
+| Custody Article | Resident Supervisor | 0 | Read, Write, Create | — | — |
+| Custody Article | System Manager | 0 | Read, Write, Create, Delete | — | — |
+| Custody Asset Category | System Manager | 0 | Read, Write, Create, Delete | — | — |
+| Custody Damage Assessment (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report | — |
+| Custody Damage Assessment (submittable) | Finance Manager | 0 | Read | Report | — |
+| Custody Damage Assessment (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Custody Damage Assessment (submittable) | Resident Supervisor | 0 | Read, Write, Create | — | — |
+| Custody Damage Assessment (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report | — |
+| Custody Damage Assessment (submittable) | Accommodation Manager | 1 | Read, Write | — | — |
+| Custody Damage Assessment (submittable) | Finance Manager | 1 | Read, Write | — | — |
+| Custody Damage Assessment (submittable) | System Manager | 1 | Read, Write | — | — |
+| Custody Handover (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | Report, Print, Share | — |
+| Custody Handover (submittable) | Procurement Supervisor | 0 | Read, Write, Create, Submit, Cancel, Amend | Report, Print, Share | — |
+| Custody Handover (submittable) | Resident Supervisor | 0 | Read, Write | Report | — |
+| Custody Handover (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Custody Handover (submittable) | Accommodation Manager | 1 | Read | — | — |
+| Custody Handover (submittable) | Procurement Supervisor | 1 | Read | — | — |
+| Custody Handover (submittable) | System Manager | 1 | Read | — | — |
+| Custody Issue (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | — | — |
+| Custody Issue (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Custody Issue (submittable) | Resident Supervisor | 0 | Read, Write, Create | — | — |
+| Custody Issue (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | — | — |
+| Custody Issue (submittable) | Accommodation Manager | 1 | Read, Write | — | — |
+| Custody Issue (submittable) | Resident Supervisor | 1 | Read, Write | — | — |
+| Custody Issue (submittable) | System Manager | 1 | Read, Write | — | — |
+| Custody Return (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | — | — |
+| Custody Return (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Custody Return (submittable) | Resident Supervisor | 0 | Read, Write, Create | — | — |
+| Custody Return (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | — | — |
+| Facility Asset | Accommodation Manager | 0 | Read, Write, Create | — | — |
+| Facility Asset | Internal Auditor | 0 | Read | Report, Export | — |
+| Facility Asset | Resident Supervisor | 0 | Read | — | — |
+| Facility Asset | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Facility Asset Custody Assignment (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | — | — |
+| Facility Asset Custody Assignment (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Facility Asset Custody Assignment (submittable) | Resident Supervisor | 0 | Read, Write, Create, Submit | — | — |
+| Facility Asset Custody Assignment (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Facility Asset Custody Assignment (submittable) | Accommodation Manager | 1 | Read, Write | — | — |
+| Facility Asset Custody Assignment (submittable) | Resident Supervisor | 1 | Read, Write | — | — |
+| Facility Asset Custody Assignment (submittable) | System Manager | 1 | Read, Write | — | — |
+| Facility Asset Delivery (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | Report, Print, Share | — |
+| Facility Asset Delivery (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Facility Asset Delivery (submittable) | Procurement Supervisor | 0 | Read, Write, Create, Submit, Cancel, Amend | Report, Print, Share | — |
+| Facility Asset Delivery (submittable) | Resident Supervisor | 0 | Read, Write | Report | — |
+| Facility Asset Delivery (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Facility Asset Delivery (submittable) | Accommodation Manager | 1 | Read | — | — |
+| Facility Asset Delivery (submittable) | Procurement Supervisor | 1 | Read | — | — |
+| Facility Asset Delivery (submittable) | System Manager | 1 | Read | — | — |
+| Facility Asset Movement (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel | Report | — |
+| Facility Asset Movement (submittable) | Finance Manager | 0 | Read | Report | — |
+| Facility Asset Movement (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Facility Asset Movement (submittable) | Resident Supervisor | 0 | Read, Write, Create | — | — |
+| Facility Asset Movement (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report | — |
+| Facility Asset Movement Ledger | Accommodation Manager | 0 | Read | Report, Export | — |
+| Facility Asset Movement Ledger | Internal Auditor | 0 | Read | Report, Export | — |
+| Facility Asset Movement Ledger | System Manager | 0 | Read | — | — |
+| Goods Receipt (submittable) | Accommodation Manager | 0 | Read | Report | — |
+| Goods Receipt (submittable) | Procurement Supervisor | 0 | Read, Write, Create, Submit, Cancel, Amend | Report, Print, Share | — |
+| Goods Receipt (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Housing Assignment (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | Report | — |
+| Housing Assignment (submittable) | Internal Auditor | 0 | Read | Report | — |
+| Housing Assignment (submittable) | Resident Supervisor | 0 | Read, Write, Create, Submit | Report | — |
+| Housing Assignment (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Housing Assignment (submittable) | Accommodation Manager | 1 | Read, Write | — | — |
+| Housing Assignment (submittable) | Resident Supervisor | 1 | Read, Write | — | — |
+| Housing Assignment (submittable) | System Manager | 1 | Read, Write | — | — |
+| Housing Checkout (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | Report | — |
+| Housing Checkout (submittable) | Resident Supervisor | 0 | Read, Write, Create, Submit | Report | — |
+| Housing Checkout (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Housing Checkout (submittable) | Accommodation Manager | 1 | Read, Write | — | — |
+| Housing Checkout (submittable) | Finance Manager | 1 | Read, Write | — | — |
+| Housing Checkout (submittable) | System Manager | 1 | Read, Write | — | — |
+| Housing Inventory | Accommodation Manager | 0 | Read, Write, Create | Report | — |
+| Housing Inventory | Internal Auditor | 0 | Read | Report, Export | — |
+| Housing Inventory | Resident Supervisor | 0 | Read, Write | — | — |
+| Housing Inventory | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Idle Resident Report | Accommodation Manager | 0 | Read, Write, Create, Delete | Report | — |
+| Idle Resident Report | Resident Supervisor | 0 | Read, Write, Create | — | — |
+| Idle Resident Report | System Manager | 0 | Read, Write, Create, Delete | — | — |
+| Lease (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit | Report | — |
+| Lease (submittable) | Finance Manager | 0 | Read, Write, Create, Submit, Cancel | Report | — |
+| Lease (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Lease (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Print, Email, Share | — |
+| Maintenance Cost Ledger | Accommodation Manager | 0 | Read | Report, Export | — |
+| Maintenance Cost Ledger | Finance Manager | 0 | Read | Report, Export | — |
+| Maintenance Cost Ledger | Internal Auditor | 0 | Read | Report, Export | — |
+| Maintenance Cost Ledger | System Manager | 0 | Read | Report, Export | — |
+| Maintenance Inspection Report (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | — | — |
+| Maintenance Material | Accommodation Manager | 0 | Read, Write, Create | — | — |
+| Maintenance Material | Maintenance Technician | 0 | Read, Write, Create | — | — |
+| Maintenance Material | System Manager | 0 | Read, Write, Create, Delete | Print, Email, Share | — |
+| Maintenance Material Template | Accommodation Manager | 0 | Read, Write, Create | — | — |
+| Maintenance Material Template | Maintenance Technician | 0 | Read, Write, Create | — | — |
+| Maintenance Material Template | System Manager | 0 | Read, Write, Create, Delete | — | — |
+| Maintenance Request (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit | Report | — |
+| Maintenance Request (submittable) | All | 0 | Read, Create | — | Own records only |
+| Maintenance Request (submittable) | Maintenance Technician | 0 | Read | — | — |
+| Maintenance Request (submittable) | Resident Request Coordinator | 0 | Read, Write, Create, Submit | — | — |
+| Maintenance Request (submittable) | Resident Supervisor | 0 | Read, Write, Create, Submit | Report | — |
+| Maintenance Request (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Maintenance Request (submittable) | Accommodation Manager | 1 | Read, Write | — | — |
+| Maintenance Request (submittable) | Finance Manager | 1 | Read, Write | — | — |
+| Maintenance Request (submittable) | System Manager | 1 | Read, Write | — | — |
+| Maintenance Work Order (submittable) | Maintenance Technician | 0 | Read, Write | — | — |
+| Maintenance Work Order (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | — | — |
+| Material Transfer (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | Report | — |
+| Material Transfer (submittable) | Resident Supervisor | 0 | Read, Write, Create | — | — |
+| Material Transfer (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Occupancy Snapshot | Accommodation Manager | 0 | Read | Report, Export, Print, Email, Share | — |
+| Occupancy Snapshot | Finance Manager | 0 | Read | Report, Export, Print, Email, Share | — |
+| Occupancy Snapshot | Internal Auditor | 0 | Read | Report, Export, Print, Email, Share | — |
+| Occupancy Snapshot | Resident Supervisor | 0 | Read | Report, Export, Print, Email, Share | — |
+| Occupancy Snapshot | System Manager | 0 | Read, Delete | Report, Export, Print, Email, Share | — |
+| Operational Depreciation Policy | System Manager | 0 | Read, Write, Create, Delete | — | — |
+| Operational Depreciation Snapshot (submittable) | Accommodation Manager | 0 | Read, Write, Submit, Cancel, Amend, Delete | Report | — |
+| Operational Depreciation Snapshot (submittable) | Finance Manager | 0 | Read | Report | — |
+| Operational Depreciation Snapshot (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Operational Depreciation Snapshot (submittable) | Resident Supervisor | 0 | Read, Write | — | — |
+| Operational Depreciation Snapshot (submittable) | System Manager | 0 | Read, Write, Submit, Cancel, Delete | Report | — |
+| QR Location | Accommodation Manager | 0 | Read, Write, Create | — | — |
+| QR Location | System Manager | 0 | Read, Write, Create, Delete | — | — |
+| Resident Request | Accommodation Manager | 0 | Read, Write, Create | — | — |
+| Resident Request | Resident Request Coordinator | 0 | Read, Write, Create | — | — |
+| Resident Request | Resident Supervisor | 0 | Read, Write, Create | — | — |
+| Resident Request | System Manager | 0 | Read, Write, Create, Delete | — | — |
+| Resident Request | Accommodation Manager | 1 | Read, Write | — | — |
+| Resident Request | Resident Request Coordinator | 1 | Read, Write | — | — |
+| Resident Request | Resident Supervisor | 1 | Read, Write | — | — |
+| Resident Request | System Manager | 1 | Read, Write | — | — |
+| Room | Accommodation Manager | 0 | Read, Write, Create | — | — |
+| Room | Resident Supervisor | 0 | Read | — | — |
+| Room | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Room Bed Transfer (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | — | — |
+| Room Bed Transfer (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Safety Finding Ledger | Accommodation Manager | 0 | Read | Report, Export | — |
+| Safety Finding Ledger | Internal Auditor | 0 | Read | Report, Export | — |
+| Safety Finding Ledger | Safety Officer | 0 | Read | Report, Export | — |
+| Safety Finding Ledger | System Manager | 0 | Read | Report, Export | — |
+| Safety Incident (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | Report, Print, Email, Share | — |
+| Safety Incident (submittable) | Internal Auditor | 0 | Read | Report | — |
+| Safety Incident (submittable) | Resident Supervisor | 0 | Read, Write, Create, Submit | Report, Print | — |
+| Safety Incident (submittable) | Safety Officer | 0 | Read, Write, Create | — | — |
+| Safety Incident (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Safety Inspection Report (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | — | — |
+| Safety Inspection Report (submittable) | Resident Supervisor | 0 | Read, Write, Create, Submit | — | — |
+| Safety Inspection Report (submittable) | Safety Officer | 0 | Read, Write, Create | — | — |
+| Safety Inspection Report (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Safety Round (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | — | — |
+| Safety Round (submittable) | Resident Supervisor | 0 | Read, Write, Create, Submit | — | — |
+| Safety Round (submittable) | Safety Officer | 0 | Read, Write, Create | — | — |
+| Safety Round (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Safety Task Catalog | Accommodation Manager | 0 | Read, Write, Create | — | — |
+| Safety Task Catalog | Resident Supervisor | 0 | Read | — | — |
+| Safety Task Catalog | Safety Officer | 0 | Read | — | — |
+| Safety Task Catalog | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Safety Task Execution (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | Report | — |
+| Safety Task Execution (submittable) | Resident Supervisor | 0 | Read, Write, Create, Submit | Report | — |
+| Safety Task Execution (submittable) | Safety Officer | 0 | Read, Write, Create | Report | — |
+| Safety Task Execution (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Scheduled Task Assignment | Accommodation Manager | 0 | Read, Write, Create | — | — |
+| Scheduled Task Assignment | System Manager | 0 | Read, Write, Create, Delete | — | — |
+| Scheduled Task Instance (submittable) | System Manager | 0 | Read, Write, Submit, Cancel, Delete | — | — |
+| Scheduled Task Template | System Manager | 0 | Read, Write, Create, Delete | — | — |
+| Scheduled Task Template Item (child table) | System Manager | 0 | Read, Write, Create, Delete | — | — |
+| Site | Accommodation Manager | 0 | Read, Write, Create | — | — |
+| Site | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Subcontractor Service Contract (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | — | — |
+| Subcontractor Service Contract (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Subcontractor Service Contract (submittable) | Accommodation Manager | 1 | Read, Write | — | — |
+| Subcontractor Service Contract (submittable) | Finance Manager | 1 | Read, Write | — | — |
+| Subcontractor Service Contract (submittable) | System Manager | 1 | Read, Write | — | — |
+| Subcontractor Service Order (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit | — | — |
+| Subcontractor Service Order (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Subcontractor Service Order (submittable) | Accommodation Manager | 1 | Read, Write | — | — |
+| Subcontractor Service Order (submittable) | Finance Manager | 1 | Read, Write | — | — |
+| Subcontractor Service Order (submittable) | System Manager | 1 | Read, Write | — | — |
+| Utility Account | Accommodation Manager | 0 | Read, Write, Create | — | — |
+| Utility Account | Finance Manager | 0 | Read | — | — |
+| Utility Account | System Manager | 0 | Read, Write, Create, Delete | Print, Email, Share | — |
+| Utility Bill Entry (submittable) | Accommodation Manager | 0 | Read, Write, Create, Submit | Report | — |
+| Utility Bill Entry (submittable) | Finance Manager | 0 | Read, Write, Create, Submit, Cancel | Report | — |
+| Utility Bill Entry (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Utility Bill Entry (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Print, Email, Share | — |
+
+No DocPerm row of its own: Accommodation Custody Item (child table), Accommodation Custody Return Item (child table), Arrival Batch Worker (child table), Audit Remediation Building Scope (child table), Audit Remediation Item (child table), Camera Access Building Scope (child table), Cleaning Area Photo (child table), Cleaning Log Room Detail (child table), Custody Damage Item (child table), Custody Issue Item (child table), Custody Return Item (child table), Depreciation Snapshot Item (child table), Facility Custody Item (child table), Floor Plan (child table), Inspection Finding Item (child table), Linked Maintenance Request Item (child table), Maintenance Material Template Item (child table), Maintenance Procurement Item (child table), Material Transfer Item (child table), Rent Payment Schedule (child table), Safety Task Building Scope (child table), Subcontractor Building Coverage (child table).
+
+## Logistay
+
+| DocType | Role | Level | Document rights | Data rights | Row filter |
+| --- | --- | --- | --- | --- | --- |
+| Freelancer | Accommodation Manager | 0 | Read, Write, Delete | Report, Export, Print, Email, Share | — |
+| Freelancer | Finance Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Freelancer | Internal Auditor | 0 | Read | Report, Export | — |
+| Freelancer | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Freelancer | Finance Manager | 1 | Read, Write | — | — |
+| Freelancer | System Manager | 1 | Read, Write | — | — |
+| SIM Card | Finance Manager | 0 | Read | Report, Export, Print | — |
+| SIM Card | Internal Auditor | 0 | Read | Report, Export | — |
+| SIM Card | SIM Operations User | 0 | Read, Write, Create | Report, Export, Print | — |
+| SIM Card | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| SIM Custody Assignment (submittable) | Finance Manager | 0 | Read | Report, Export, Print | — |
+| SIM Custody Assignment (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| SIM Custody Assignment (submittable) | SIM Operations User | 0 | Read, Write, Create, Submit, Cancel, Amend | Report, Export, Print | — |
+| SIM Custody Assignment (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Telecom Contract (submittable) | Finance Manager | 0 | Read | Report, Export, Print | — |
+| Telecom Contract (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Telecom Contract (submittable) | SIM Operations User | 0 | Read, Write, Create, Submit, Cancel, Amend | Report, Export, Print | — |
+| Telecom Contract (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Temporary Worker | Accommodation Manager | 0 | Read, Write, Create | Report, Export, Print, Email, Share | — |
+| Temporary Worker | Internal Auditor | 0 | Read | Report, Export | — |
+| Temporary Worker | Resident Supervisor | 0 | Read, Write, Create | Report, Print | — |
+| Temporary Worker | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Temporary Worker | Accommodation Manager | 1 | Read, Write | — | — |
+| Temporary Worker | Internal Auditor | 1 | Read | — | — |
+| Temporary Worker | Resident Supervisor | 1 | Read, Write | — | — |
+| Temporary Worker | System Manager | 1 | Read, Write | — | — |
+
+No DocPerm row of its own: Telecom Billing Document (child table).
+
+## Salis
+
+| DocType | Role | Level | Document rights | Data rights | Row filter |
+| --- | --- | --- | --- | --- | --- |
+| Boarding Scan Log | Driver | 0 | Read | — | Own records only |
+| Boarding Scan Log | Finance Manager | 0 | Read | Report, Export, Print | — |
+| Boarding Scan Log | Fleet Manager | 0 | Read, Create, Delete | Report, Export, Print, Email, Share | — |
+| Boarding Scan Log | Fleet Project Manager | 0 | Read, Create | Report, Export, Print | — |
+| Boarding Scan Log | Fleet Supervisor | 0 | Read, Create | Report, Export, Print | — |
+| Boarding Scan Log | Internal Auditor | 0 | Read | Report, Export | — |
+| Boarding Scan Log | System Manager | 0 | Read, Create, Delete | Report, Export, Print, Email, Share | — |
+| Dispatch Trip (submittable) | Finance Manager | 0 | Read | — | — |
+| Dispatch Trip (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Dispatch Trip (submittable) | Fleet Project Manager | 0 | Read, Write, Create, Submit | — | — |
+| Dispatch Trip (submittable) | Fleet Supervisor | 0 | Read, Write, Create | — | — |
+| Dispatch Trip (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Dispatch Trip (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Driver Attendance (submittable) | Driver | 0 | Read, Create, Submit | — | Own records only |
+| Driver Attendance (submittable) | Finance Manager | 0 | Read | Report, Export, Print | — |
+| Driver Attendance (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Driver Attendance (submittable) | Fleet Project Manager | 0 | Read, Write, Create, Submit | Report, Export, Print, Email, Share | — |
+| Driver Attendance (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report, Export, Print, Email, Share | — |
+| Driver Attendance (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Driver Attendance (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Driver Clearance (submittable) | Finance Manager | 0 | Read | Report, Export | — |
+| Driver Clearance (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Driver Clearance (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Driver Clearance (submittable) | Government Relations Officer | 0 | Read | Report, Export | — |
+| Driver Clearance (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Driver Clearance (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Driver Portal Theme | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Driver Portal Theme | Fleet Project Manager | 0 | Read | — | — |
+| Driver Portal Theme | Internal Auditor | 0 | Read | Report, Export | — |
+| Driver Portal Theme | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Driver Push Subscription | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Driver Push Subscription | Fleet Project Manager | 0 | Read, Write, Create, Delete | Report | — |
+| Driver Push Subscription | Internal Auditor | 0 | Read | Report, Export | — |
+| Driver Push Subscription | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Driver Suspension (submittable) | Driver | 0 | Read | — | Own records only |
+| Driver Suspension (submittable) | Finance Manager | 0 | Read | Report, Export, Print | — |
+| Driver Suspension (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Driver Suspension (submittable) | Fleet Project Manager | 0 | Read, Write, Create, Submit | Report, Export, Print, Email, Share | — |
+| Driver Suspension (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report, Export, Print, Email, Share | — |
+| Driver Suspension (submittable) | Government Relations Officer | 0 | Read | Report, Export | — |
+| Driver Suspension (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Driver Suspension (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Fuel Claim (submittable) | Finance Manager | 0 | Read, Write | Report, Export | — |
+| Fuel Claim (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Fuel Claim (submittable) | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Fuel Claim (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Fuel Claim (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Fuel Claim (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Fuel Consumption Ledger | Finance Manager | 0 | Read | Report, Export | — |
+| Fuel Consumption Ledger | Fleet Manager | 0 | Read | Report, Export | — |
+| Fuel Consumption Ledger | Internal Auditor | 0 | Read | Report, Export | — |
+| Fuel Consumption Ledger | System Manager | 0 | Read | Report, Export | — |
+| Fuel Daily Log | Finance Manager | 0 | Read, Write | Report | — |
+| Fuel Daily Log | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Fuel Daily Log | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Fuel Daily Log | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Fuel Daily Log | Internal Auditor | 0 | Read | Report, Export | — |
+| Fuel Daily Log | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Fuel Exception Case (submittable) | Finance Manager | 0 | Read | Report, Export | — |
+| Fuel Exception Case (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Fuel Exception Case (submittable) | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Fuel Exception Case (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Fuel Exception Case (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Fuel Exception Case (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Fuel Platform | Finance Manager | 0 | Read | — | — |
+| Fuel Platform | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Fuel Platform | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Fuel Platform | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Fuel Platform | Internal Auditor | 0 | Read | Report, Export | — |
+| Fuel Platform | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Fuel Quota (submittable) | Finance Manager | 0 | Read | Report, Export | — |
+| Fuel Quota (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Fuel Quota (submittable) | Fleet Project Manager | 0 | Read, Write, Create, Submit | Report | — |
+| Fuel Quota (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Fuel Quota (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Fuel Quota (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Fuel Request (submittable) | Finance Manager | 0 | Read | Report, Export | — |
+| Fuel Request (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Fuel Request (submittable) | Fleet Project Manager | 0 | Read, Write, Create, Submit | Report | — |
+| Fuel Request (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Fuel Request (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Fuel Request (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Movement Cost Recovery (submittable) | Finance Manager | 0 | Read, Write | Report | — |
+| Movement Cost Recovery (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Movement Cost Recovery (submittable) | Fleet Supervisor | 0 | Read, Write, Create, Submit | Report | — |
+| Movement Cost Recovery (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Movement Cost Recovery (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Movement Cost Transfer (submittable) | Finance Manager | 0 | Read, Write | Report | — |
+| Movement Cost Transfer (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Movement Cost Transfer (submittable) | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Movement Cost Transfer (submittable) | Internal Auditor | 0 | Read | Report | — |
+| Movement Cost Transfer (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Passenger Manifest (submittable) | Finance Manager | 0 | Read | — | — |
+| Passenger Manifest (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Passenger Manifest (submittable) | Fleet Project Manager | 0 | Read, Write, Create, Submit | — | — |
+| Passenger Manifest (submittable) | Fleet Supervisor | 0 | Read, Write, Create | — | — |
+| Passenger Manifest (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Passenger Manifest (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Rental Accrual Ledger | Finance Manager | 0 | Read | Report, Export | — |
+| Rental Accrual Ledger | Fleet Manager | 0 | Read | Report, Export | — |
+| Rental Accrual Ledger | Internal Auditor | 0 | Read | Report, Export | — |
+| Rental Accrual Ledger | System Manager | 0 | Read | Report, Export | — |
+| Rental Office | Finance Manager | 0 | Read | — | — |
+| Rental Office | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Rental Office | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Rental Office | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Rental Office | Internal Auditor | 0 | Read | Report, Export | — |
+| Rental Office | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Rental Settlement (submittable) | Finance Manager | 0 | Read, Write | Report | — |
+| Rental Settlement (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Rental Settlement (submittable) | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Rental Settlement (submittable) | Internal Auditor | 0 | Read | Report | — |
+| Rental Settlement (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Rental Settlement (submittable) | Accommodation Manager | 1 | Read, Write | — | — |
+| Rental Settlement (submittable) | Finance Manager | 1 | Read, Write | — | — |
+| Rental Settlement (submittable) | System Manager | 1 | Read, Write | — | — |
+| Rental Vehicle Movement (submittable) | Finance Manager | 0 | Read | Report | — |
+| Rental Vehicle Movement (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Rental Vehicle Movement (submittable) | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Rental Vehicle Movement (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Rental Vehicle Movement (submittable) | Internal Auditor | 0 | Read | Report | — |
+| Rental Vehicle Movement (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Route Assignment | Finance Manager | 0 | Read | — | — |
+| Route Assignment | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Route Assignment | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Route Assignment | Fleet Supervisor | 0 | Read | Report | — |
+| Route Assignment | Internal Auditor | 0 | Read | Report, Export | — |
+| Route Assignment | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Route Plan (submittable) | Finance Manager | 0 | Read | — | — |
+| Route Plan (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Route Plan (submittable) | Fleet Project Manager | 0 | Read, Write, Create, Submit | — | — |
+| Route Plan (submittable) | Fleet Supervisor | 0 | Read, Write, Create | — | — |
+| Route Plan (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Route Plan (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Route Plan (submittable) | Finance Manager | 1 | Read | — | — |
+| Route Plan (submittable) | Fleet Manager | 1 | Read | — | — |
+| Route Plan (submittable) | Fleet Project Manager | 1 | Read | — | — |
+| Route Plan (submittable) | Fleet Supervisor | 1 | Read | — | — |
+| Route Plan (submittable) | Internal Auditor | 1 | Read | — | — |
+| Route Plan (submittable) | System Manager | 1 | Read | — | — |
+| Route Template | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Route Template | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Route Template | Fleet Supervisor | 0 | Read | Report | — |
+| Route Template | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Salis Driver | Driver | 0 | Read | — | Own records only |
+| Salis Driver | Finance Manager | 0 | Read | Report, Export, Print | — |
+| Salis Driver | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Salis Driver | Fleet Project Manager | 0 | Read, Write, Create | Report, Export, Print, Email, Share | — |
+| Salis Driver | Fleet Supervisor | 0 | Read, Write, Create | Report, Export, Print, Email, Share | — |
+| Salis Driver | Government Relations Officer | 0 | Read | Report, Export | — |
+| Salis Driver | Internal Auditor | 0 | Read | Report, Export | — |
+| Salis Driver | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Salis Driver | Fleet Manager | 1 | Read, Write | — | — |
+| Salis Driver | System Manager | 1 | Read, Write | — | — |
+| Salis Payment Request (submittable) | Finance Manager | 0 | Read, Write, Submit, Cancel | Report | — |
+| Salis Payment Request (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Salis Payment Request (submittable) | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Salis Payment Request (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Salis Payment Request (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Salis Payment Request (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Salis Vehicle | Finance Manager | 0 | Read | Report | — |
+| Salis Vehicle | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Salis Vehicle | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Salis Vehicle | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Salis Vehicle | Government Relations Officer | 0 | Read | Report, Export | — |
+| Salis Vehicle | Internal Auditor | 0 | Read | Report, Export | — |
+| Salis Vehicle | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Transport Request (submittable) | Finance Manager | 0 | Read | — | — |
+| Transport Request (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Transport Request (submittable) | Fleet Project Manager | 0 | Read, Write, Create, Submit | Report | — |
+| Transport Request (submittable) | Fleet Supervisor | 0 | Read, Write, Create, Submit | — | — |
+| Transport Request (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Transport Request (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Transport Request (submittable) | Fleet Manager | 1 | Read, Write | — | — |
+| Transport Request (submittable) | Fleet Project Manager | 1 | Read, Write | — | — |
+| Transport Request (submittable) | Fleet Supervisor | 1 | Read, Write | — | — |
+| Transport Request (submittable) | System Manager | 1 | Read, Write | — | — |
+| Transport Trip Rating | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Transport Trip Rating | Fleet Supervisor | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Transport Trip Rating | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Trip Boarding Ledger | Fleet Manager | 0 | Read | Report, Export | — |
+| Trip Boarding Ledger | Internal Auditor | 0 | Read | Report, Export | — |
+| Trip Boarding Ledger | System Manager | 0 | Read | Report, Export | — |
+| Trip Fulfilment Ledger | Finance Manager | 0 | Read | Report, Export | — |
+| Trip Fulfilment Ledger | Fleet Manager | 0 | Read | Report, Export | — |
+| Trip Fulfilment Ledger | Internal Auditor | 0 | Read | Report, Export | — |
+| Trip Fulfilment Ledger | System Manager | 0 | Read | Report, Export | — |
+| Trip Start Log (submittable) | Driver | 0 | Read, Write, Create, Submit | — | Own records only |
+| Trip Start Log (submittable) | Finance Manager | 0 | Read | — | — |
+| Trip Start Log (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Trip Start Log (submittable) | Fleet Project Manager | 0 | Read, Write, Create, Submit | — | — |
+| Trip Start Log (submittable) | Fleet Supervisor | 0 | Read, Write, Create, Submit | — | — |
+| Trip Start Log (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Trip Start Log (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Assignment (submittable) | Finance Manager | 0 | Read | Report | — |
+| Vehicle Assignment (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Assignment (submittable) | Fleet Project Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | Report | — |
+| Vehicle Assignment (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Vehicle Assignment (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Vehicle Assignment (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Category | Finance Manager | 0 | Read | — | — |
+| Vehicle Category | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Category | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Vehicle Category | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Vehicle Category | Internal Auditor | 0 | Read | Report, Export | — |
+| Vehicle Category | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Damage Write-Off (submittable) | Finance Manager | 0 | Read | Report, Export | — |
+| Vehicle Damage Write-Off (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Damage Write-Off (submittable) | Fleet Supervisor | 0 | Read, Write, Create, Submit | Report | — |
+| Vehicle Damage Write-Off (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Vehicle Damage Write-Off (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Handover (submittable) | Finance Manager | 0 | Read | Report | — |
+| Vehicle Handover (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Handover (submittable) | Fleet Project Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | Report | — |
+| Vehicle Handover (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Vehicle Handover (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Vehicle Handover (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Handover Checklist Template | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Handover Checklist Template | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Vehicle Handover Checklist Template | Fleet Supervisor | 0 | Read | Report | — |
+| Vehicle Handover Checklist Template | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Incident (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Incident (submittable) | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Vehicle Incident (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Vehicle Incident (submittable) | Government Relations Officer | 0 | Read | Report, Export | — |
+| Vehicle Incident (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Vehicle Incident (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Incident (submittable) | Fleet Manager | 1 | Read, Write | — | — |
+| Vehicle Incident (submittable) | Fleet Project Manager | 1 | Read, Write | — | — |
+| Vehicle Incident (submittable) | Fleet Supervisor | 1 | Read, Write | — | — |
+| Vehicle Incident (submittable) | System Manager | 1 | Read, Write | — | — |
+| Vehicle Suspension (submittable) | Finance Manager | 0 | Read | Report | — |
+| Vehicle Suspension (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Suspension (submittable) | Fleet Project Manager | 0 | Read, Write, Create, Submit, Cancel, Amend | Report | — |
+| Vehicle Suspension (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Vehicle Suspension (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Vehicle Suspension (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Amend, Delete | Report, Export, Print, Email, Share | — |
+| Vehicle Utilisation Snapshot | Finance Manager | 0 | Read | Report, Export | — |
+| Vehicle Utilisation Snapshot | Fleet Manager | 0 | Read | Report, Export | — |
+| Vehicle Utilisation Snapshot | Internal Auditor | 0 | Read | Report, Export | — |
+| Vehicle Utilisation Snapshot | System Manager | 0 | Read | Report, Export | — |
+| Wash Platform | Finance Manager | 0 | Read | — | — |
+| Wash Platform | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Wash Platform | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Wash Platform | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Wash Platform | Internal Auditor | 0 | Read | Report, Export | — |
+| Wash Platform | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Wash Request (submittable) | Finance Manager | 0 | Read | Report | — |
+| Wash Request (submittable) | Fleet Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Wash Request (submittable) | Fleet Project Manager | 0 | Read, Write, Create, Submit | Report | — |
+| Wash Request (submittable) | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
+| Wash Request (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
+| Wash Request (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report, Export, Print, Email, Share | — |
+| Work Shift | Finance Manager | 0 | Read | — | — |
+| Work Shift | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+| Work Shift | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
+| Work Shift | Fleet Supervisor | 0 | Read | Report | — |
+| Work Shift | Internal Auditor | 0 | Read | Report, Export | — |
+| Work Shift | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
+
+No DocPerm row of its own: Dispatch Trip Assigned Request (child table), Driver Attendance Image (child table), Passenger Manifest Item (child table), Rental Settlement Item (child table), Route Stop (child table), Salis Vehicle Compliance (child table), Transport Request Ad Hoc Passenger (child table), Transport Request Worker (child table), Trip Boarding Event (child table), Trip Boarding State (child table), Trip Stop Progress (child table), Vehicle Handover Checklist Template Item (child table), Vehicle Handover Item (child table), Work Shift Day (child table).

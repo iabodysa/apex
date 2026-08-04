@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Housing Cleaning Audit — Script Report.
 
@@ -47,14 +46,12 @@ def execute(filters=None):
 
     columns = _columns()
 
-    # [#cw4rp7]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     chosen_building = filters.get("building") or ""
     if restrict:
         if not allowed or (chosen_building and chosen_building not in allowed):
             return columns, []
 
-    # [#j2dug3]
     bld_filters = {"status": "Active"}
     if chosen_building:
         bld_filters["name"] = chosen_building
@@ -69,7 +66,6 @@ def execute(filters=None):
     if not all_buildings:
         return columns, []
 
-    # [#ggk11a]
     supervisor_ids = list({b.responsible_supervisor for b in all_buildings
                            if b.responsible_supervisor})
     supervisor_names: dict[str, str] = {}
@@ -87,7 +83,6 @@ def execute(filters=None):
     }
     building_names_set = set(building_supervisor)
 
-    # [#ppnkd7]
     cl = frappe.qb.DocType("Cleaning Log")
     query = (
         frappe.qb.from_(cl)
@@ -113,13 +108,11 @@ def execute(filters=None):
 
     rows = query.run(as_dict=True)
 
-    # [#or3x95]
     log_names = [r.name for r in rows]
     rooms_cleaned_map: dict[str, int] = {}
     photos_map: dict[str, int] = {}
 
     if log_names:
-        # [#p928ro]
         for rec in frappe.get_all(
             "Cleaning Compliance Ledger",
             filters={"cleaning_log": ["in", log_names], "cleaned": 1, "is_cancelled": 0},
@@ -128,7 +121,6 @@ def execute(filters=None):
         ):
             rooms_cleaned_map[rec.cleaning_log] = int(rec.cnt or 0)
 
-        # [#qf4vl9]
         cap = frappe.qb.DocType("Cleaning Area Photo")
         for rec in (
             frappe.qb.from_(cap)
@@ -138,7 +130,6 @@ def execute(filters=None):
         ).run(as_dict=True):
             photos_map[rec.parent] = int(rec.cnt or 0)
 
-    # [#nhcxoa]
     covered: set[tuple[str, str]] = set()
     data = []
 
@@ -156,7 +147,6 @@ def execute(filters=None):
         cleaning_date = row.cleaning_date
         covered.add((building, str(cleaning_date)))
 
-        # [#45lte6]
         submitted_at = row.modified.date() if (row.docstatus == 1 and row.modified) else None
 
         data.append({
@@ -169,7 +159,6 @@ def execute(filters=None):
             "photos_attached": photos_map.get(row.name, 0),
         })
 
-    # [#3j12re]
     current = date_from
     while current <= date_to:
         date_str = str(current)
@@ -186,7 +175,6 @@ def execute(filters=None):
                 })
         current = getdate(add_days(current, 1))
 
-    # [#h4kqml]
     data.sort(key=lambda r: (str(r["cleaning_date"] or ""), r["building"] or ""),
               reverse=False)
     data.sort(key=lambda r: str(r["cleaning_date"] or ""), reverse=True)

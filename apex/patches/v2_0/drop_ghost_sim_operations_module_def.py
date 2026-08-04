@@ -30,16 +30,10 @@ from __future__ import annotations
 
 import frappe
 
-# Reuse the fold's proven, already-tested steps rather than copy them: the two patches
-# must agree on what "nothing references it" means, and a fork would drift.
 from apex.patches.v2_0 import fold_sim_operations_into_logistay as fold
 
 
 def execute() -> None:
-    # Repoint first: deleting a Module Def a live record still names would leave a
-    # dangling Link. On the sites this patch exists for there is nothing to repoint.
     fold._repoint_module_stamps()
-    # db.delete, never delete_doc: Module Def.on_trash rewrites the app's modules.txt on
-    # disk and deletes the module folder when developer_mode is on.
     fold._drop_retired_module_def()
     frappe.db.commit()

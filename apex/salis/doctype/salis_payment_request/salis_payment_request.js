@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#go2egg]
 frappe.ui.form.on("Salis Payment Request", {
 	setup(frm) {
 		frm.set_query("vehicle", () => ({
@@ -28,7 +27,6 @@ frappe.ui.form.on("Salis Payment Request", {
 			return;
 		}
 
-		// [#7wcqvo]
 		frm.add_custom_button(__("Create Payment"), function () {
 			frappe.confirm(
 				__("Create the payment document for this approved request?"),
@@ -49,7 +47,6 @@ frappe.ui.form.on("Salis Payment Request", {
 								indicator: "green",
 							});
 							frm.reload_doc();
-							// [#k0abyf]
 							frappe.db
 								.get_single_value(
 									"Payment Routing Settings",

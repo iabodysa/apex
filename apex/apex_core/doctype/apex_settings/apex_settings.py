@@ -15,7 +15,6 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import cint
 
-# [#exc652]
 RETENTION_DEFAULTS = {
     "snapshot_retention_days": 365,
     "depreciation_snapshot_retention_days": 730,

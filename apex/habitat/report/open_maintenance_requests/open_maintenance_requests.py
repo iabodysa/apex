@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 
@@ -25,7 +24,6 @@ def execute(filters=None):
     if filters.get("cost_center"):
         query_filters["cost_center"] = filters["cost_center"]
 
-    # [#3ipjfs]
     restrict, scope_user = report_maintenance_request_scope()
     or_filters = (
         {"owner": scope_user, "assigned_to": scope_user} if restrict else None

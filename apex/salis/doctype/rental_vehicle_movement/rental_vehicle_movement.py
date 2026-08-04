@@ -56,7 +56,6 @@ class RentalVehicleMovement(Document):
                         self.vehicle
                     )
                 )
-            # [#28z6ul]
             if (
                 self.movement_type == "Return"
                 and self.movement_date
@@ -97,7 +96,6 @@ class RentalVehicleMovement(Document):
         return open_receipt_date
 
     def on_submit(self):
-        # [#3lgl85]
         add_timeline_note(
             "Salis Vehicle",
             self.vehicle,

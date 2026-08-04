@@ -60,7 +60,6 @@ def get_building_layout(building: str) -> dict:
     for room in rooms:
         room["room_color"] = _color(room)
 
-    # [#2bd4qb]
     floors_map = {}
     for room in rooms:
         floor_num = room.floor if room.floor is not None else 0
@@ -71,7 +70,6 @@ def get_building_layout(building: str) -> dict:
     floors = []
     for floor_num in sorted(floors_map.keys()):
         floor_rooms = floors_map[floor_num]
-        # [#800gs5]
         if floor_num == 0:
             floor_label = _("Ground Floor")
         elif floor_num < 0:
@@ -106,6 +104,14 @@ def get_building_layout(building: str) -> dict:
 
 @frappe.whitelist()
 def get_building_metrics(building: str) -> dict:
+    """Occupancy, maintenance and custody counters for one Building's form dashboard.
+
+    Consumed only by ``_renderBuildingDashboard`` in building.js, which calls
+    ``frm.dashboard.reset()`` before drawing these. ``reset()`` also hides the native
+    Connections area, so the client must call ``render_links()`` straight after it or
+    the linked-document groups (Rooms, Beds, Leases, Residents, ...) disappear from the
+    form.
+    """
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
     snaps = frappe.get_all(

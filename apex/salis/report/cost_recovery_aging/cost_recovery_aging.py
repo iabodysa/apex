@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Cost Recovery Aging - open movement cost-recovery exposure aged into buckets,
 derived from the Movement Cost Recovery document.

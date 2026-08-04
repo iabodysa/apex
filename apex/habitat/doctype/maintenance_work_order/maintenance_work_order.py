@@ -21,10 +21,8 @@ class MaintenanceWorkOrder(Document):
         source_doctype/source_name) and release the linked request back to Open.
         Open is the request's pre-Work-Order state; a request a human has since
         moved to a terminal Resolved/Cancelled is left untouched."""
-        # [#cczdtw]
         self._reverse_accommodation_memo()
 
-        # [#oks1ah]
         from apex.habitat.maintenance_engine import reverse_maintenance_cost
         reverse_maintenance_cost(self.name)
 
@@ -72,16 +70,18 @@ class MaintenanceWorkOrder(Document):
 
 
 def validate(doc, method=None):
+    """Draft-time field checks, including the draft half of the actual-date ordering rule.
+
+    ``validate`` cannot cover the after-submit half: ``run_before_save_methods``
+    dispatches ``before_update_after_submit`` there, never ``validate``
+    (frappe/model/document.py), so ``mark_completed`` re-checks the ordering itself.
+    """
     if doc.planned_end_date and doc.planned_start_date:
         if doc.planned_end_date < doc.planned_start_date:
             frappe.throw(_("Planned End Date must be on or after Planned Start Date."))
-    # The draft half of the actual-date ordering rule. validate() cannot cover the
-    # after-submit half: run_before_save_methods dispatches before_update_after_submit
-    # there, never validate (frappe/model/document.py), so mark_completed re-checks it.
     if doc.actual_end_date and doc.actual_start_date:
         if getdate(doc.actual_end_date) < getdate(doc.actual_start_date):
             frappe.throw(_("Actual End Date must be on or after Actual Start Date."))
-    # [#j3wyod]
     if doc.maintenance_request:
         dup = frappe.db.exists(
             "Maintenance Work Order",
@@ -95,7 +95,6 @@ def validate(doc, method=None):
             frappe.throw(
                 _("A Work Order already exists for this Maintenance Request: {0}").format(dup)
             )
-    # [#mq83a6]
     doc.total_procurement_cost = sum(
         flt(row.get("estimated_cost") or 0) for row in (doc.procurement_items or [])
     )
@@ -129,7 +128,6 @@ def start_work(work_order):
     and ``mark_completed`` its only writers once the Work Order is submitted.
     """
     doc = frappe.get_doc("Maintenance Work Order", work_order)
-    # [#eu1e7a]
     frappe.has_permission("Maintenance Work Order", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:
@@ -190,8 +188,6 @@ def mark_completed(
     if not doc.building:
         frappe.throw(_("Building is required to mark Completed."))
 
-    # Evidence is resolved and checked BEFORE the writes below, so a refusal costs
-    # the Work Order nothing at all — not even a write to undo.
     start_date = actual_start_date or doc.actual_start_date
     end_date = actual_end_date or doc.actual_end_date or today()
     photo = completion_photo or doc.completion_photo
@@ -205,13 +201,6 @@ def mark_completed(
     ledger_posted = False
     cost = flt(doc.total_procurement_cost)
 
-    # The completion writes below are deliberately unguarded. The frappe.db.rollback()
-    # that wrapped them discarded the WHOLE request transaction, not this Work Order's
-    # rows, so any failure here also destroyed what the caller wrote earlier in the same
-    # request — and the "No changes were saved" message hid the real refusal. Propagating
-    # aborts the completion and leaves Frappe's request-level rollback to unwind exactly
-    # what this request wrote. No savepoint replaces it: this method rethrows rather than
-    # continuing, so there is no partial completion to salvage.
     evidence = {
         "actual_start_date": start_date,
         "actual_end_date": end_date,
@@ -227,7 +216,6 @@ def mark_completed(
         if "status" in mr_status_field:
             frappe.db.set_value("Maintenance Request", doc.maintenance_request, "status", "Closed")
 
-    # [#hm35wu]
     from apex.habitat.doctype.housing_inventory.housing_inventory import reflect_completed_maintenance
     reflect_completed_maintenance(doc)
 
@@ -236,7 +224,6 @@ def mark_completed(
         {"source_doctype": "Maintenance Work Order", "source_name": doc.name},
     )
     if cost > 0 and not already_posted:
-        # [#c07kbo]
         frappe.get_doc({
             "doctype": "Accommodation Ledger",
             "posting_date": doc.actual_end_date or today(),
@@ -254,7 +241,6 @@ def mark_completed(
         }).insert(ignore_permissions=True)  # audit-ok — system ledger memo on completion, gated by Work Order write (above)
         ledger_posted = True
 
-    # [#n9hvl5]
     from apex.habitat.maintenance_engine import post_maintenance_cost
     post_maintenance_cost(doc)
 

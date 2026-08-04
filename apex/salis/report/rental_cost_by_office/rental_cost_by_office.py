@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Rental Cost by Office - accrued rental cost grouped by Rental Office, derived
 from the machine-written Rental Accrual Ledger (one row per in-service rented

@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#lhs0n9]
 frappe.ui.form.on("Resident Request", {
 	setup(frm) {
 		frm.set_query("room", () => ({
@@ -17,7 +16,6 @@ frappe.ui.form.on("Resident Request", {
 		frm.clear_custom_buttons();
 		_update_priority_indicator(frm);
 
-		// [#csgsrv]
 		const convertible = [
 			"Maintenance", "Water", "Electrical", "AC", "Plumbing",
 			"Cleaning", "Pest Control", "Facility Item", "Safety", "Custody",
@@ -59,7 +57,6 @@ frappe.ui.form.on("Resident Request", {
 			});
 		}
 
-		// [#hg0vmo]
 		if (open_target) {
 			frm.add_custom_button(__("Open Target Document"), function () {
 				frappe.set_route("Form", frm.doc.target_doctype, frm.doc.target_document);
@@ -81,9 +78,6 @@ function _update_priority_indicator(frm) {
 	}
 }
 
-// Phone-friendly triage list view: status colour-coding, a priority chip, a
-// one-tap status-advance button per row, and a bulk "Mark Triaged" action. The
-// allowed next state and its guards live server-side (advance_triage_status).
 const ARR_STATUS_COLORS = {
 	"New": "red",
 	"Triaged": "orange",
@@ -95,8 +89,6 @@ const ARR_STATUS_COLORS = {
 	"Closed": "darkgray",
 };
 
-// Mirrors _TRIAGE_NEXT in the controller — the only one-tap advances (targets
-// that need no extra field). Other states route to the form.
 const ARR_TRIAGE_NEXT = {
 	"New": "Triaged",
 	"Triaged": "In Progress",
@@ -181,8 +173,6 @@ frappe.listview_settings["Resident Request"] = {
 							return;
 						}
 						if (r.message.queued) {
-							// A large selection is triaged in the background; the list
-							// refresh below is optimistic (the job may still be running).
 							frappe.show_alert({
 								message: __("Triaging {0} requests in the background...", [r.message.total]),
 								indicator: "blue",

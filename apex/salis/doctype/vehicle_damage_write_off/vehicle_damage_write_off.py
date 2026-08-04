@@ -25,16 +25,13 @@ from frappe.utils import flt
 
 from apex.salis.utils import add_timeline_note
 
-# [#4xgl2m]
 _OPERATIONS_ROLES = {"Fleet Manager", "System Manager"}
 
 
 class VehicleDamageWriteOff(Document):
     def validate(self):
-        # [#83ntz1]
         if self.status and self.status != "Open" and not self.evidence:
             frappe.throw(_("Evidence is required before moving the write-off case beyond Open."))
-        # [#kh1fqw]
         if self.estimated_cost is not None and flt(self.estimated_cost) < 0:
             frappe.throw(_("Estimated cost cannot be negative."))
         self._derive_needs_operations()
@@ -83,21 +80,18 @@ class VehicleDamageWriteOff(Document):
             _("Damage write-off {0} cancelled.").format(self.name),
         )
 
-    # [#f9hua6]
 
     def _stamp_approver(self):
         if self.status == "Approved" and not self.approved_by:
             self.approved_by = frappe.session.user
 
     def _stamp_source_incident(self):
-        # [#oxkzun]
         if self.source_incident:
             frappe.db.set_value(
                 "Vehicle Incident", self.source_incident, "write_off_case", self.name
             )
 
     def _clear_source_incident(self):
-        # [#d04slv]
         if self.source_incident:
             frappe.db.set_value(
                 "Vehicle Incident", self.source_incident, "write_off_case", None

@@ -10,7 +10,6 @@ from apex.apex_core.setup.seeders.maintenance_material_template_seed import (
     seed_templates,
 )
 
-# [#1e17u4]
 
 ACCOMMODATION_ITEM_GROUPS = [
     "Accommodation Bedding",
@@ -22,18 +21,15 @@ ACCOMMODATION_ITEM_GROUPS = [
 
 def after_install():
     create_roles()
-    frappe.db.commit()  # [#93zbw7]
+    frappe.db.commit()
     create_role_profiles()
     create_accommodation_item_defaults(allow_deferred=True)
     create_custody_asset_categories()
     create_custody_articles()
     create_operational_depreciation_policies()
     create_safety_task_catalogs()
-    # Single call: seed_templates owns both Maintenance Material writers and runs
-    # them first, so the templates' REQUIRED child Links can never dangle here.
     seed_templates()
     seed_auto_email_reports()
-    # [#d3h8rl]
     frappe.clear_cache()
 
 
@@ -124,12 +120,6 @@ def _load_accommodation_item_records():
 
 
 def create_roles():
-    # (role_name, desk_access). Native-first provisioning of the app's Roles (the
-    # Role fixture was retired — it re-locked the Role Profile queue_action on every
-    # worker-less migrate). hooks.py lists this in after_install (via after_install
-    # above) AND directly in after_migrate, so the roles are durable on every migrate
-    # — unlike the Salis seed_salis_* roles, which salis.setup.after_install runs once
-    # at install and patches.txt then replays only on already-installed sites.
     roles = [
         ("Accommodation Manager", 1),
         ("Resident Supervisor", 1),
@@ -143,14 +133,8 @@ def create_roles():
         ("Operations Director", 1),
         ("Facilities Supervisor", 1),
         ("Procurement Supervisor", 1),
-        # SIM Operations business role (telecom / SIM custody operators).
         ("SIM Operations User", 1),
-        # Fleet approval role (Movement Cost Transfer / Vehicle Damage Write-Off
-        # workflows). Provisioned here too so the approver role is always present.
         ("Fleet Manager", 1),
-        # Field-worker role: NO desk access (native Website User isolation keeps the
-        # whole desk module list off a driver). Must exist before create_role_profiles
-        # builds the Salis Driver profile below.
         ("Driver", 0),
     ]
     for role_name, desk_access in roles:
@@ -163,11 +147,9 @@ def create_roles():
 
 def create_role_profiles():
     profiles = {
-        # [#gb52vh]
         "Habitat Accommodation Manager": ["Accommodation Manager"],
         "Habitat Resident Supervisor": ["Resident Supervisor"],
         "Habitat Finance Reviewer": ["Finance Manager", "Internal Auditor"],
-        # [#aeif1q]
         "Habitat Maintenance Technician": ["Maintenance Technician"],
         "Habitat Cleaning Supervisor": ["Cleaning Supervisor"],
         "Habitat Safety Officer": ["Safety Officer"],
@@ -180,14 +162,7 @@ def create_role_profiles():
             for role in roles:
                 doc.append("roles", {"role": role})
             doc.insert(ignore_permissions=True)
-            # [#7cx306]
             doc.unlock()
-    # [#a036rp]
-    # Native provisioning of the Salis field-worker Role Profile bundling
-    # the desk_access=0 Driver role (was a fixture, which re-fired Role Profile's
-    # core on_update queue_action file lock on every worker-less migrate ->
-    # DocumentLockedError). Same exists-guard + insert + unlock pattern as above:
-    # skipped when it already exists, so re-runs never re-lock the doc.
     if not frappe.db.exists("Role Profile", "Salis Driver"):
         doc = frappe.new_doc("Role Profile")
         doc.role_profile = "Salis Driver"
@@ -227,8 +202,6 @@ def create_custody_articles():
         {"article_name": "Padlock", "category": "Facility Keys", "is_returnable": 1},
     ]
     for article in articles:
-        # Filter, not a name probe: Custody Article autonames by naming_series, so a
-        # probe keyed on the name never matches and every run re-inserts all ten.
         if not frappe.db.exists("Custody Article", {"article_name": article["article_name"]}):
             doc = frappe.new_doc("Custody Article")
             doc.update(article)
@@ -236,7 +209,6 @@ def create_custody_articles():
 
 
 def create_operational_depreciation_policies():
-    # [#devsf7]
     policies = [
         {"policy_name": "Linen - 12 Months", "useful_life_years": 1},
         {"policy_name": "Keys and Cards - 24 Months", "useful_life_years": 2},
@@ -252,7 +224,6 @@ def create_operational_depreciation_policies():
 
 
 def create_safety_task_catalogs():
-    # [#saqivo]
     tasks = [
         {"task_code": "SAF-001", "task_title": "Daily Cleanliness Assessment", "department": "Health and Hygiene", "frequency": "Daily", "priority": "Medium", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Check common areas, corridors, and bathrooms for cleanliness."},
         {"task_code": "SAF-002", "task_title": "Daily Exit Obstruction Check", "department": "Fire Safety", "frequency": "Daily", "priority": "High", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Ensure all emergency exits and fire doors are clear of obstructions."},

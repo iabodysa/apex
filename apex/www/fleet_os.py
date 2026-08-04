@@ -25,7 +25,6 @@ from frappe.utils import cint
 from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance, guest_redirect
 
-# [#i6khen] Same role-set as the primary board — the backup gates identically.
 FLEET_ROLES = {
     "System Manager",
     "Fleet Manager",
@@ -42,24 +41,19 @@ def has_apps_screen_access() -> bool:
 
 
 def get_context(context):
-    # [#nyktq0]
     guest_redirect("/fleet-os")
 
     apply_portal_appearance(context)
     render_in_arabic()
 
     context.no_cache = 1
-    # [#4h1dwk]
     context.has_fleet_role = bool(FLEET_ROLES & set(frappe.get_roles()))
     if context.has_fleet_role:
-        # [#qowj7c]
         context.fleet_caps = {"driver_lens": context.has_fleet_role}
         context.csrf_token = get_csrf_token()
-        # [#6xr27k]
         conf = frappe.get_site_config()
         context.site_name = frappe.local.site
         context.socketio_port = cint(conf.get("socketio_port")) or 9000
         context.async_enabled = not cint(conf.get("disable_async"))
-        # [#eovfvf]
         context.dev_server = 1 if frappe.conf.developer_mode else 0
     return context

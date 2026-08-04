@@ -38,10 +38,8 @@ VALID_STATUSES = (
     "Cancelled",
 )
 
-# [#bjtprj]
 WORKER_MANIFEST_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
 
-# [#40xju0]
 SERVICE_LINE_REQUEST_TYPE = {
     "Site Transport": "Accommodation to Project Shuttle",
     "Inter-City Relocation": "Inter-City Relocation",
@@ -51,15 +49,12 @@ SERVICE_LINE_REQUEST_TYPE = {
 
 class TransportRequest(Document):
     def before_insert(self):
-        # [#2bwiwy]
         if self.get("website_field"):
             frappe.throw(_("Invalid submission."), frappe.PermissionError)
 
-        # [#gywh2z]
         if self.requested_by == "Guest":
             self.requested_by = None
 
-        # [#byh3b2]
         if not self.requested_by or frappe.session.user == "Guest":
             self.source_channel = "Web QR"
 
@@ -73,11 +68,9 @@ class TransportRequest(Document):
             self.status = "New"
 
     def validate(self):
-        # [#3wtym8]
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 
-        # [#pxwfd7]
         if self.service_line:
             implied = SERVICE_LINE_REQUEST_TYPE.get(self.service_line)
             if implied:
@@ -90,20 +83,16 @@ class TransportRequest(Document):
                         )
                     )
 
-        # [#702k8m]
         if self.service_line and self.service_line not in WORKER_MANIFEST_SERVICE_LINES:
             if self.accommodation_building:
                 frappe.throw(_("An Administrative Trip cannot be linked to labour accommodation."))
             if self.workers or []:
                 frappe.throw(_("An Administrative Trip cannot carry a worker manifest."))
 
-        # [#pclxko]
         self.worker_count = len(self.workers or [])
 
-        # [#dovve2]
         self._derive_trips_this_month()
 
-        # [#jr7qsi]
         self._derive_needs_operations()
 
         if self.request_type == "Accommodation to Project Shuttle":
@@ -153,7 +142,6 @@ class TransportRequest(Document):
         if self.name:
             filters.append(["Transport Request", "name", "!=", self.name])
         existing = frappe.get_all("Transport Request", filters=filters, limit=0)
-        # [#rvs6ow]
         self.trips_this_month = len(existing) + 1
 
     def _derive_needs_operations(self):
@@ -170,7 +158,6 @@ class TransportRequest(Document):
         worker_count = self.worker_count or 0
         trips = self.trips_this_month or 0
 
-        # [#98k4h5]
         ops_threshold = get_salis_int("passenger_count_ops_threshold", 20)
         admin_trip_threshold = get_salis_int("admin_trip_ops_threshold", 5)
 
@@ -180,4 +167,3 @@ class TransportRequest(Document):
             or (self.request_type == "Accommodation to Project Shuttle" and self.is_cross_region)
         ) else 0
 
-    # [#d6un3q]

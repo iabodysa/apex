@@ -25,13 +25,11 @@ class VehicleHandover(Document):
         if self.from_driver and self.to_driver and self.from_driver == self.to_driver:
             frappe.throw(_("To Driver must differ from From Driver."))
 
-        # [#ozxub5]
         if self.to_driver:
             reason = rider_block_reason(self.to_driver, self.handover_date)
             if reason:
                 frappe.throw(reason)
 
-        # [#kpyv78]
         if self.from_driver and rider_block_reason(self.from_driver, self.handover_date):
             raise_rider_clearance_task(
                 self.from_driver,
@@ -65,7 +63,6 @@ class VehicleHandover(Document):
             {"current_driver": self.to_driver, "odometer": self.odometer_reading},
         )
 
-        # [#qeo5c6]
         if self.from_driver and (
             frappe.db.get_value("Salis Driver", self.from_driver, "current_vehicle") == self.vehicle
         ):
@@ -79,7 +76,6 @@ class VehicleHandover(Document):
             _("Vehicle {0} handed over to driver {1}.").format(self.vehicle, self.to_driver),
         )
 
-        # [#nnfvse]
         if self.discrepancy_status == "Discrepancy":
             self.add_comment(
                 "Comment",
@@ -103,11 +99,9 @@ class VehicleHandover(Document):
     def on_cancel(self):
         lock_vehicle(self.vehicle)
 
-        # [#svbij5]
         if frappe.db.get_value("Salis Vehicle", self.vehicle, "current_driver") == self.to_driver:
             frappe.db.set_value("Salis Vehicle", self.vehicle, "current_driver", self.from_driver)
 
-            # [#40tghr]
             if self.to_driver and (
                 frappe.db.get_value("Salis Driver", self.to_driver, "current_vehicle") == self.vehicle
             ):

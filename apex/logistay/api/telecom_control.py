@@ -25,7 +25,6 @@ DEFAULT_EXPIRY_DAYS = 30
 MAX_EXPIRY_DAYS = 365
 TOP_N = 10
 
-# Filter keys a caller may pass, mapped to the SIM Card column they constrain.
 _SIM_FILTER_FIELDS = {
     "company": "company",
     "supplier": "supplier",
@@ -35,7 +34,6 @@ _SIM_FILTER_FIELDS = {
     "cost_center": "current_cost_center",
 }
 
-# The only SIM Card fields the page ever reads. No unrelated employee data.
 _SIM_ROW_FIELDS = [
     "name",
     "mobile_number",
@@ -93,7 +91,6 @@ def _apply_scope(filters, allowed):
         return filters, True
     if not allowed:
         return filters, False
-    # If the caller already filtered to a company, keep only in-scope choices.
     chosen = filters.get("company")
     if chosen:
         if chosen not in allowed:
@@ -115,7 +112,6 @@ def _grouped_counts(filters, group_field, limit=None):
     return [{"label": r.label or _("Unassigned"), "value": r.value} for r in rows]
 
 
-# Endpoints
 
 
 @frappe.whitelist()

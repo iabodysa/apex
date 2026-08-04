@@ -17,7 +17,6 @@ from frappe.model.document import Document
 
 
 class CleaningComplianceLedger(Document):
-    # [#gcg81b]
     def on_update(self):
         if not self.flags.in_insert and not frappe.flags.in_install:
             frappe.throw(
@@ -25,6 +24,5 @@ class CleaningComplianceLedger(Document):
             )
 
     def on_trash(self):
-        # [#3ebzoj]
         if "System Manager" not in frappe.get_roles(frappe.session.user):
             frappe.throw(_("Cleaning Compliance Ledger rows cannot be deleted."))

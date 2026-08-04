@@ -22,7 +22,6 @@ def get_data(data=None):
         "Custody Issue": "issued_to_employee",
         "Custody Return": "returned_by_employee",
         "Scheduled Task Instance": "assigned_to",
-        # [#ofva29]
     })
     data["transactions"].extend([
         {"label": frappe._("Accommodation"),
@@ -31,7 +30,6 @@ def get_data(data=None):
          "items": ["Custody Issue", "Custody Return", "Custody Damage Assessment"]},
         {"label": frappe._("Tasks"),
          "items": ["Scheduled Task Instance"]},
-        # [#9vzeew]
         {"label": frappe._("Salis"),
          "items": ["Salis Driver", "Movement Cost Recovery"]},
     ])

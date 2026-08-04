@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import frappe
 
-# [#j2foqi]
 _MODULE_COMPANY_FIELD = {
     "Habitat": ("Habitat Settings", "company"),
     "Salis": ("Salis Settings", "default_company"),
@@ -46,7 +45,6 @@ def resolve_company(module: str | None = None) -> str | None:
     return company or None
 
 
-# [#n1qrwf]
 
 
 def company_for_building(building: str | None, module: str = "Habitat") -> str | None:

@@ -25,7 +25,6 @@ from frappe.model.document import Document
 
 from apex.habitat.utils.finding_fanout import fan_out_findings
 
-# [#2amqm6]
 _FINDING_TABLES = ("safety_findings", "maintenance_findings")
 
 
@@ -52,10 +51,8 @@ class SafetyInspectionReport(Document):
             # audit-ok — reversing a draft side-effect this report created
             frappe.delete_doc("Maintenance Request", mr_name, ignore_permissions=True)  # audit-ok
         else:
-            # [#krxj5r]
             frappe.db.set_value("Maintenance Request", mr_name, "source_inspection", None)
 
-    # [#g5aqzg]
     def generate_maintenance_requests(self):
         """Fan out each actionable finding to one Maintenance Request and surface it.
 
@@ -71,10 +68,8 @@ class SafetyInspectionReport(Document):
 
         for table_fieldname in _FINDING_TABLES:
             rows = self.get(table_fieldname) or []
-            # [#1t1399]
             for mr_name in fan_out_findings(rows, self):
                 self._surface(mr_name)
-            # [#pe70sg]
             for finding in rows:
                 self._ensure_surfaced(finding.get("generated_maintenance_request"))
 

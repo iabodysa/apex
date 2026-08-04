@@ -66,7 +66,6 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
     vehicle = vehicle or frappe.db.get_value("Salis Driver", driver, "current_vehicle")
     if not vehicle:
         frappe.throw(_("No vehicle is assigned to you. Ask your supervisor to assign one before requesting fuel."))
-    # [#c6nmir]
     if not _vehicle_bound_to_driver(driver, vehicle):
         frappe.throw(
             _("That vehicle is not assigned to you. You can only request fuel for your own vehicle."),
@@ -80,8 +79,6 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
          "fuel_platform": fuel_platform, "requested_litres": frappe.utils.flt(litres),
          "request_date": request_date, "status": "Pending"}
     )
-    # The controller's own gate, called on the unsaved doc — reused rather than
-    # restated, so the portal can never drift from the refusal the desk enforces.
     doc._guard_quota_allowance()
     doc.insert(ignore_permissions=True)  # audit-ok — driver resolved server-side
     return {"name": doc.name}
@@ -112,7 +109,6 @@ def my_fuel_quota(vehicle=None):
 
     if not vehicle or not _vehicle_bound_to_driver(driver, vehicle):
         vehicle = _bound_vehicle(driver)
-    # [#7sx99k]
     from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_float
 
     threshold = get_salis_float("fuel_request_approval_threshold_litres", 0.0)

@@ -1,5 +1,9 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Salis Driver master controller."""
+"""Salis Driver master controller.
+
+``current_vehicle`` mirrors ``Vehicle.current_driver`` for quick reference only. Vehicle
+Assignment is the authoritative source of the driver<->vehicle pairing.
+"""
 
 from __future__ import annotations
 
@@ -10,7 +14,6 @@ from frappe.utils import getdate, today
 
 
 class SalisDriver(Document):
-    # [#72c9bb]
     def validate(self):
         if self.license_expiry and getdate(self.license_expiry) < getdate(today()):
             frappe.msgprint(

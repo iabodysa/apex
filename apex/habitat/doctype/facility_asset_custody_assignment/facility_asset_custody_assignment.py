@@ -10,15 +10,12 @@ from frappe.model.document import Document
 
 class FacilityAssetCustodyAssignment(Document):
     def before_submit(self):
-        # [#lrtqej]
         if not self.get("assets_in_custody"):
             frappe.throw(_("Asset table cannot be empty."))
-        # [#p31efh]
         if not self.all_assets_verified:
             frappe.throw(_("All Assets Physically Verified must be checked before submitting the custody assignment."))
 
     def on_submit(self):
-        # [#9jfwvg]
         for row in self.assets_in_custody:
             if not row.facility_asset:
                 continue
@@ -27,7 +24,6 @@ class FacilityAssetCustodyAssignment(Document):
             )
 
     def on_cancel(self):
-        # [#etcaoq]
         for row in self.assets_in_custody:
             if not row.facility_asset:
                 continue

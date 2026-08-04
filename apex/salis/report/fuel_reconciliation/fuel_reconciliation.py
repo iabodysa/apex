@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Fuel Reconciliation report.
 
@@ -33,7 +32,6 @@ def execute(filters=None):
     if filters.get("period_month"):
         ledger_filters["period_month"] = filters["period_month"]
 
-    # [#m9gboo]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:
@@ -49,7 +47,6 @@ def execute(filters=None):
         fields=["vehicle", "period_month", "litres", "amount"],
     )
 
-    # [#4u2q1y]
     groups = {}
     for row in rows:
         key = (row.vehicle or "", row.period_month or "")
@@ -67,7 +64,6 @@ def execute(filters=None):
         agg["total_litres"] += row.litres or 0
         agg["total_amount"] += row.amount or 0
 
-    # [#5824jx]
     quota_cache = {}
     for key, agg in groups.items():
         vehicle, period_month = key

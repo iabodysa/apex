@@ -31,13 +31,10 @@ from frappe.utils import now
 
 from apex.salis.utils import set_financial_defaults
 
-# [#72wj77]
 _FINANCE_ROLES = {"Finance Manager", "System Manager"}
 
-# [#h4c606]
 _FINANCE_GATED_STATUSES = {"Approved by Finance", "Paid"}
 
-# [#j18gl5]
 VALID_STATUSES = (
     "Draft",
     "Pending Finance",
@@ -52,36 +49,26 @@ class SalisPaymentRequest(Document):
     def before_insert(self):
         if not self.requested_by:
             self.requested_by = frappe.session.user
-        # An amendment is a NEW payable and must route its own payment. no_copy does
-        # NOT do this: the desk's amend copies every field (create_new.js applies
-        # no_copy only when NOT amending), and route_payment short-circuits on this
-        # link, so an inherited one hands Finance the cancelled original's payment.
         if self.amended_from:
             self.linked_payment_doctype = None
             self.linked_payment_entry = None
 
     def validate(self):
-        # [#3b4mlx]
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 
         if not self.requested_by:
             self.requested_by = frappe.session.user
         set_financial_defaults(self)
-        # [#lme2on]
         if (self.amount or 0) <= 0:
             frappe.throw(_("Amount must be greater than zero."))
-        # [#fyykgk]
         self._guard_finance_stamp()
         self._enforce_finance_gate()
 
-    # [#hbyegp]
 
-    # [#m88md8]
 
     def _old_status(self):
         previous = self.get_doc_before_save()
-        # [#mp8kt3]
         return (previous.status if previous else None) or "Draft"
 
     def _guard_finance_stamp(self):
@@ -122,7 +109,6 @@ class SalisPaymentRequest(Document):
                 _("You cannot approve or pay a Payment Request you raised; a different Finance approver is required.")
             )
 
-        # [#fykrtv]
         if not self.finance_approved_by:
             self.finance_approved_by = frappe.session.user
         if not self.finance_approved_on:

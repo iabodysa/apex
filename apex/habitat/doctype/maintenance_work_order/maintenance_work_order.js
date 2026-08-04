@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#l41jo9]
 frappe.ui.form.on("Maintenance Work Order", {
 	setup(frm) {
 		frm.set_query("subcontractor_service_order", () => ({
@@ -10,7 +9,6 @@ frappe.ui.form.on("Maintenance Work Order", {
 	},
 	refresh(frm) {
 		frm.clear_custom_buttons();
-		// [#j6atlg]
 		if (frm.doc.docstatus === 0 && frm.doc.issue_type) {
 			frm.add_custom_button(__("Load Material Template"), function() {
 				frappe.call({
@@ -37,10 +35,6 @@ frappe.ui.form.on("Maintenance Work Order", {
 			});
 		}
 
-		// The warning has to arrive while the photo can still be attached. "Closed" is not
-		// one of this Work Order's statuses, and by the time it reads "Completed" the photo
-		// is already on file — mark_completed refuses without one — so the pair only ever
-		// fired on a state that cannot exist, and the supervisor met the refusal instead.
 		if (frm.doc.status === "In Progress" && !frm.doc.completion_photo) {
 			frm.dashboard.add_comment(
 				__("Completion photo required to close this work order."),
@@ -81,9 +75,6 @@ frappe.ui.form.on("Maintenance Work Order", {
 				});
 			}
 
-			// The completion evidence is collected here and posted to the server
-			// method, because a submitted Work Order cannot be saved by the
-			// technician who works it — that save needs the submit permission.
 			if (frm.doc.status === "In Progress") {
 				frm.add_custom_button(__("Mark as Completed"), function () {
 					let dialog = new frappe.ui.Dialog({

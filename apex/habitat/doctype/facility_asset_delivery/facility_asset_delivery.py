@@ -41,7 +41,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import today
 
-# [#c3ra76]
 from apex.habitat.doctype.custody_handover.custody_handover import (
     generate_otp,
 )
@@ -54,7 +53,6 @@ from apex.habitat.asset_movement_engine import (
 )
 
 DELIVERY_DOCTYPE = "Facility Asset Delivery"
-# [#6cpx5d]
 LEDGER_SOURCE = "Facility Asset Delivery"
 
 
@@ -97,7 +95,6 @@ class FacilityAssetDelivery(Document):
         three exits pass (Released) and the receiving side confirms the code."""
         self.db_set("status", "Pending Exits")
         code = generate_otp(self)
-        # [#ciwilc]
         frappe.response["delivery_otp"] = code
 
     def on_cancel(self):
@@ -115,7 +112,6 @@ class FacilityAssetDelivery(Document):
         if self.status == "Delivered":
             origin = ledgered_origin(LEDGER_SOURCE, self.name)
             reverse_asset_movement(LEDGER_SOURCE, self.name)
-            # [#kv9ve6]
             if frappe.db.exists("Facility Asset", self.facility_asset):
                 count = frappe.db.get_value("Facility Asset", self.facility_asset, "movement_count") or 0
                 restored = {
@@ -125,18 +121,12 @@ class FacilityAssetDelivery(Document):
                 if origin:
                     restored["location_in_building"] = origin.from_location
                 frappe.db.set_value("Facility Asset", self.facility_asset, restored)
-                # previous_*/last_movement_date are move-time snapshots; leaving
-                # them behind makes the asset cite a delivery that no longer exists.
                 restore_asset_audit_trail(self.facility_asset)
         self.db_set("status", "Cancelled")
 
     def before_cancel(self):
         if not self.cancellation_reason:
             frappe.throw(_("Cancellation Reason is required before cancelling a delivery."))
-        # Only a Delivered delivery ever wrote a location. The room joins the
-        # comparison only when this delivery actually set one — with a blank
-        # to_location_in_building move_asset_on_delivery leaves the room untouched,
-        # so there is nothing of ours to have been superseded.
         if self.status == "Delivered":
             expected = {"building": self.to_building}
             if self.to_location_in_building:
@@ -166,7 +156,6 @@ def move_asset_on_delivery(doc) -> None:
     if not asset:
         return
     company = frappe.db.get_value("Building", doc.to_building, "company")
-    # [#6p6qd7]
     ledger_doc = frappe._dict(
         doctype=LEDGER_SOURCE,
         name=doc.name,

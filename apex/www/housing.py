@@ -34,7 +34,6 @@ from apex.apex_core.utils.portal_bootstrap import (
     guest_redirect,
 )
 
-# [#8p519c]
 HOUSING_ROLES = {
     "System Manager",
     "Accommodation Manager",

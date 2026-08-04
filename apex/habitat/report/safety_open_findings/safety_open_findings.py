@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 from frappe.utils import date_diff, today
@@ -22,14 +21,12 @@ def execute(filters=None):
         {"label": frappe._("Days Open"), "fieldname": "days_open", "fieldtype": "Int", "width": 90},
     ]
 
-    # [#ap3loz]
     query_filters = {"docstatus": 1, "execution_status": ["in", ["Poor", "Not Done"]]}
     if filters.get("building"):
         query_filters["building"] = filters["building"]
     if filters.get("priority"):
         query_filters["priority"] = filters["priority"]
 
-    # [#537g2t]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:
         chosen = query_filters.get("building")

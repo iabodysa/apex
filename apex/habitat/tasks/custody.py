@@ -8,9 +8,6 @@ from frappe import _
 from frappe.query_builder.functions import Coalesce, Sum
 from pypika.functions import Min
 
-# One savepoint per nesting level, distinct names: _raise_consumable_alert runs
-# INSIDE the expiry loop, so re-using the loop's name there would replace it
-# mid-iteration and silently destroy the row isolation.
 _ROW_SAVEPOINT = "custody_row"
 _ALERT_SAVEPOINT = "custody_alert"
 
@@ -88,7 +85,6 @@ def consumable_custody_expiry_watch() -> None:
 
     today_date = getdate(today())
     logger = frappe.logger("habitat.consumable_custody_expiry_watch")
-    # [#7gkzff]
     emp_ids = {r.employee for r in rows if r.employee}
     emp_names = (
         {
@@ -102,7 +98,6 @@ def consumable_custody_expiry_watch() -> None:
     )
     flagged = 0
     for r in rows:
-        # [#pjbauj]
         frappe.db.savepoint(_ROW_SAVEPOINT)
         try:
             if not r.first_held:
@@ -115,7 +110,6 @@ def consumable_custody_expiry_watch() -> None:
                 continue
             emp_name = emp_names.get(r.employee) or r.employee
             token = f"{r.employee}:{r.article}"
-            # [#p419mz]
             message = _(
                 "Consumable {0} held by {1} since {2} is {3} month(s) old, past its {4}-month lifespan."
             ).format(
@@ -173,7 +167,6 @@ def weekly_custody_digest() -> None:
     today_str = str(getdate(today()))
     month_start = str(getdate(today()).replace(day=1))
 
-    # [#deqqai]
     open_counts: dict[str, int] = defaultdict(int)
     overdue_counts: dict[str, int] = defaultdict(int)
     for issue in frappe.get_all(
@@ -184,11 +177,9 @@ def weekly_custody_digest() -> None:
         if not issue.building:
             continue
         open_counts[issue.building] += 1
-        # [#dt215a]
         if issue.expected_return_date and date_diff(today_str, issue.expected_return_date) > 0:
             overdue_counts[issue.building] += 1
 
-    # [#fjn5il]
     value_by_building: dict[str, float] = defaultdict(float)
     sle = frappe.qb.DocType("Accommodation Stock Ledger")
     for row in (
@@ -207,7 +198,6 @@ def weekly_custody_digest() -> None:
     ).run(as_dict=True):
         value_by_building[row.building] = flt(row.value)
 
-    # [#4oq81g]
     damage_mtd: dict[str, float] = defaultdict(float)
     cda = frappe.qb.DocType("Custody Damage Assessment")
     for row in (

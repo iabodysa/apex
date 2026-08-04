@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#t6qih1]
 
 frappe.ui.form.on("Movement Cost Transfer", {
 	setup(frm) {

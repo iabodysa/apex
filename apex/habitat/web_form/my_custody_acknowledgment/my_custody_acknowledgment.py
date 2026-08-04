@@ -12,7 +12,6 @@ import frappe
 
 
 def get_context(context):
-    # [#f4ttvt]
     context.no_cache = 1
 
     user = frappe.session.user
@@ -20,14 +19,12 @@ def get_context(context):
 
     my_issues = []
     if employee:
-        # [#h8kmbh]
         candidates = frappe.get_all(
             "Custody Issue",
             filters={"issued_to_employee": employee, "docstatus": 1, "status": "Issued"},
             fields=["name", "issue_date", "building"],
             order_by="issue_date desc",
         )
-        # [#138kj0]
         candidate_names = [ci.name for ci in candidates]
         acknowledged = (
             {
@@ -48,7 +45,6 @@ def get_context(context):
 
     context.my_custody_issues = my_issues
 
-    # [#e7gnzt]
     requested = frappe.form_dict.get("issue")
     own_issue = bool(requested) and frappe.db.get_value(
         "Custody Issue", requested, "issued_to_employee"

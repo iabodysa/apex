@@ -36,7 +36,6 @@ from apex.salis.tasks import ALERT_DOCTYPE, _resolve_alert, _settings_int
 OPEN_STATUSES = ["Open", "Acknowledged"]
 SEVERITIES = ["Info", "Warning", "Critical"]
 
-# [#f8coxa]
 AGING_SETTING = {"Critical": "alert_aging_critical_hours", "Warning": "alert_aging_warning_hours", "Info": "alert_aging_info_hours"}
 AGING_DEFAULT = {"Critical": 4, "Warning": 24, "Info": 72}
 
@@ -90,14 +89,12 @@ def get_open_alerts(project=None, severity=None, since=None):
     filters = {"status": ["in", OPEN_STATUSES]}
     if severity in SEVERITIES:
         filters["severity"] = severity
-    # [#gqwzml]
     or_filters = [
         ["Operations Alert", "snooze_until", "is", "not set"],
         ["Operations Alert", "snooze_until", "<=", now],
     ]
 
     if project and (unscoped or project in (projects or [])):
-        # [#jgk1ii]
         plates = frappe.get_all(
             "Salis Vehicle", filters={"project": project}, pluck="name", limit_page_length=0
         )
@@ -105,7 +102,6 @@ def get_open_alerts(project=None, severity=None, since=None):
     else:
         plates = _scoped_vehicles(unscoped, projects)
         if plates is not None:
-            # [#pfwuoi]
             filters["vehicle"] = ["in", plates or [None]]
 
     alerts = frappe.get_all(
@@ -120,10 +116,8 @@ def get_open_alerts(project=None, severity=None, since=None):
         limit_page_length=0,
     )
 
-    # [#8xvad5]
     vehicle_driver_titles(alerts)
 
-    # [#p1o2j6]
     for a in alerts:
         a["assignees"] = frappe.parse_json(a.get("_assign")) or []
     user = frappe.session.user
@@ -152,11 +146,9 @@ def get_open_alerts(project=None, severity=None, since=None):
         "projects": proj_opts,
         "severities": SEVERITIES,
         "unscoped": unscoped,
-        # [#44devs]
         "aging_hours": _aging_thresholds(),
         "server_now": str(now),
         "current_user": user,
-        # [#q46o9l]
         "resolved_since": _resolved_since(since, filters.get("vehicle")),
     }
 
@@ -215,7 +207,6 @@ def bulk_acknowledge_alerts(names):
             if acknowledge_alert(name).get("acknowledged"):
                 acknowledged.append(name)
         except frappe.PermissionError:
-            # [#g70vth]
             continue
     return {"ok": True, "acknowledged": acknowledged}
 
@@ -248,7 +239,6 @@ def unassign_alert(name, user=None):
     try:
         assign_to.remove(ALERT_DOCTYPE, name, target)
     except Exception:
-        # [#bjjeci]
         pass
     return {"ok": True, "name": name, "assignees": _assignees(name)}
 
@@ -278,7 +268,6 @@ def _assignees(name) -> list:
     return frappe.parse_json(frappe.db.get_value(ALERT_DOCTYPE, name, "_assign")) or []
 
 
-# [#e50812]
 SNOOZE_PRESETS = {"tomorrow": ("days", 1), "2d": ("days", 2), "1w": ("days", 7)}
 
 
@@ -389,7 +378,6 @@ def get_alert_median_resolve_days(filters=None):
     }
     if not unscoped:
         plates = _scoped_vehicles(unscoped, projects)
-        # [#9farr0]
         alert_filters["vehicle"] = ["in", plates or [None]]
 
     rows = frappe.get_all(

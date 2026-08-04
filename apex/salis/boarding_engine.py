@@ -34,7 +34,6 @@ from apex.apex_core.utils.company import company_for_trip
 
 LEDGER_DOCTYPE = "Trip Boarding Ledger"
 
-# [#kr4uph]
 TERMINAL_OUTCOMES = ("Boarded", "Absent")
 
 
@@ -145,13 +144,11 @@ def post_trip_boarding(dispatch_trip: str) -> int:
     for row in rows:
         if row.status not in TERMINAL_OUTCOMES or not row.employee:
             continue
-        # [#dzuxnf]
         sp = "boarding_row"
         frappe.db.savepoint(sp)
         try:
             if _ledger_exists(dispatch_trip, row.employee):
                 continue
-            # [#fknnny]
             boarded_at = (
                 row.worker_claim_at if row.status == "Boarded" else None
             )
@@ -234,7 +231,6 @@ def reverse_trip_boarding(dispatch_trip: str) -> int:
                 "reversal_of": row.name,
             }
         ).insert(ignore_permissions=True)  # audit-ok
-        # [#d4e60z]
         frappe.db.set_value(
             LEDGER_DOCTYPE, row.name, "is_cancelled", 1, update_modified=False
         )

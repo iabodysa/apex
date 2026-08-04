@@ -85,33 +85,20 @@ from frappe.utils import cint
 
 FORWARDED_HEADER = "X-Forwarded-For"
 
-# The address the runbook names, so both sides of the check quote one string. Any
-# documentation-range value works; this one is only the default the instructions use.
 PROBE_ADDRESS = "192.0.2.7"
 
-# Reserved for documentation and examples, so routable traffic never legitimately
-# carries one -- RFC 5737 (IPv4) and RFC 3849 (IPv6).
 _DOCUMENTATION_NETWORKS = tuple(
     ipaddress.ip_network(cidr)
     for cidr in ("192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24", "2001:db8::/32")
 )
 
-# The probe was sent and did not survive: the edge replaced it with the real peer.
 OVERWRITTEN = "overwritten"
-# The probe was sent, no entry carries it, and entries remain: the caller-facing hop
-# replaced the header and inner hops appended behind that replacement.
 OVERWRITTEN_THEN_APPENDED = "overwritten-then-appended"
-# The probe was sent and survived anywhere in the header: caller content reaches the app.
 FORGEABLE = "forgeable"
-# Two or more entries and no probe to tell which hop wrote the first one.
 APPENDED = "appended"
-# No header reached the app at all, so the edge's overwrite behaviour went unmeasured.
 NO_HEADER = "no-header"
-# Nothing separates an overwriting edge from a direct exposure in the observed shape.
 INCONCLUSIVE = "inconclusive"
 
-# Verdicts under which request_ip is not caller-choosable. Frozen vocabulary: the
-# deployer runbook quotes these strings, so a rename is a documentation change.
 PASSING_VERDICTS = (OVERWRITTEN, OVERWRITTEN_THEN_APPENDED)
 FAILING_VERDICTS = (FORGEABLE, APPENDED)
 

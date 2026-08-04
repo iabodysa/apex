@@ -61,7 +61,6 @@ def before_cancel(doc, method=None):
 
 
 def _compute_book_values(doc):
-    # [#nrea75]
     policy_cache: dict[str, "Document"] = {}
     for row in doc.items:
         if row.policy and row.policy not in policy_cache:
@@ -73,7 +72,7 @@ def _compute_book_values(doc):
         original = flt(row.original_cost)
         age = flt(row.age_years)
         policy = policy_cache.get(row.policy) if row.policy else None
-        if policy and flt(policy.useful_life_years) > 0:  # [#dt9fyv]
+        if policy and flt(policy.useful_life_years) > 0:
             life = flt(policy.useful_life_years)
             residual_pct = flt(policy.residual_value_pct) / 100
             residual = original * residual_pct

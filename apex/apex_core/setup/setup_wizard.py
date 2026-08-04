@@ -53,8 +53,6 @@ def apply_apex_setup(args=None):
     — Frappe commits after all setup stages succeed."""
     args = frappe._dict(args or {})
 
-    # Payment routing FIRST: it is the only step that can refuse, so refusing here
-    # leaves nothing half-applied for the operator to unpick.
     _apply_payment_routing(args)
     _apply_apex_settings(args)
     _apply_habitat_settings(args)
@@ -64,7 +62,6 @@ def apply_apex_setup(args=None):
 
 def _apply_apex_settings(args):
     """Apex Settings — the app-wide GL-posting finance gate (default OFF)."""
-    # [#gatccs]
     apex = frappe.get_single("Apex Settings")
     apex.enable_gl_posting = 1 if cint(args.get("apex_post_gl")) else 0
     apex.save(ignore_permissions=True)  # audit-ok
@@ -95,7 +92,6 @@ def _apply_salis_settings(args):
     if cost_center and frappe.db.exists("Cost Center", cost_center):
         salis.default_cost_center = cost_center
     salis.enable_driver_portal = 1 if cint(args.get("apex_enable_driver_portal")) else 0
-    # [#dmgivt]
     salis.enable_approvals = 1 if cint(args.get("apex_enable_approvals")) else 0
     salis.save(ignore_permissions=True)  # audit-ok
 
@@ -112,8 +108,6 @@ def _apply_payment_routing(args):
     payment_method = (args.get("apex_default_payment_method") or "").strip()
     if not payment_method:
         return
-    # [#55h4xa] Shared with the router and the Single's validate — one definition of
-    # a valid target, enforced at every write boundary.
     validate_target_doctype(payment_method)
     router = frappe.get_single("Payment Routing Settings")
     router.target_payment_doctype = payment_method
@@ -128,18 +122,15 @@ def _apply_deduction_policy(args):
     deduct_damage = bool(cint(args.get("apex_deduct_damage")))
     company = args.get("apex_default_company")
 
-    # [#bbeka8]
     policy = frappe.get_single("Salary Deduction Policy")
     if company and frappe.db.exists("Company", company):
         policy.company = company
-    # [#s458vc]
     policy.enable_salary_deductions = 1 if (deduct_housing or deduct_damage) else 0
     _set_rule_enabled(policy, "Rent", deduct_housing)
     _set_rule_enabled(policy, "Damage", deduct_damage)
     try:
         policy.save(ignore_permissions=True)  # audit-ok
     except frappe.ValidationError:
-        # [#44x8l9]
         frappe.clear_last_message()
         policy.reload()
         policy.enable_salary_deductions = 0

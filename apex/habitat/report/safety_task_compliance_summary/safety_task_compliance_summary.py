@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Safety Task Compliance Summary.
 
@@ -40,12 +39,10 @@ def execute(filters=None):
     expected = _expected_tasks(cadence, building)
     executions = _executions(cadence, building, date_from, date_to)
 
-    # [#rwkwrx]
     by_task = {}
     for ex in executions:
         by_task.setdefault(ex.task, []).append(ex)
 
-    # [#dwfsf0]
     task_names = list(expected.keys())
     for task in by_task:
         if task not in expected:
@@ -108,7 +105,6 @@ def _expected_tasks(cadence, building):
 
     base = {"is_active": 1, "frequency": cadence}
 
-    # [#exehiq]
     all_buildings = frappe.get_all(
         "Safety Task Catalog",
         filters={**base, "applicable_to_all_buildings": 1},
@@ -116,7 +112,6 @@ def _expected_tasks(cadence, building):
     )
     expected = {t.name: {"task_title": t.task_title} for t in all_buildings}
 
-    # [#bmc982]
     if building:
         scoped_parents = frappe.get_all(
             "Safety Task Building Scope",
@@ -145,7 +140,6 @@ def _executions(cadence, building, date_from, date_to):
     if cadence:
         query_filters["frequency"] = cadence
 
-    # [#8dhiu3]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:
         chosen = query_filters.get("building")

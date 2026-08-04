@@ -57,7 +57,6 @@ def execute():
         )
         roots = [r for r in rows if not r.parent_page]
         if len(roots) != 1:
-            # [#t42qlr]
             continue
         root = roots[0]
         siblings = [get_datetime(r.creation) for r in rows if r.name != root.name and r.creation]
@@ -65,7 +64,7 @@ def execute():
             continue
         earliest_sibling = min(siblings)
         if root.creation and get_datetime(root.creation) < earliest_sibling:
-            continue  # [#pmemh5]
+            continue
         frappe.db.set_value(
             "Workspace",
             root.name,
@@ -75,5 +74,4 @@ def execute():
         )
         changed = True
     if changed:
-        # [#6t867j]
         frappe.clear_cache()

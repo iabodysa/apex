@@ -38,7 +38,6 @@ import json
 import frappe
 from frappe import _
 
-# [#m8nh8w]
 _ITEM_FIELDS = [
     "name",
     "item_name",
@@ -54,7 +53,6 @@ _ITEM_FIELDS = [
     "last_count_date",
 ]
 
-# [#8ip76x]
 _WRITABLE = ("counted_quantity", "condition", "notes")
 
 
@@ -96,7 +94,6 @@ def get_inventory_for_building(building, room=None):
     if room:
         filters["room"] = room
 
-    # [#le8fuk]
     items = frappe.get_list(
         "Housing Inventory",
         filters=filters,
@@ -105,7 +102,6 @@ def get_inventory_for_building(building, room=None):
         limit_page_length=0,
     )
 
-    # [#80tm7s]
     room_names = sorted({it.room for it in items if it.room})
     labels = {}
     if room_names:
@@ -162,7 +158,6 @@ def submit_counts(building, lines):
         frappe.throw(_("A building is required to submit counts."))
 
     if isinstance(lines, str):
-        # [#2o10dh]
         try:
             lines = json.loads(lines)
         except ValueError:
@@ -183,16 +178,13 @@ def submit_counts(building, lines):
         savepoint = "housing_count_" + frappe.scrub(name)
         frappe.db.savepoint(savepoint)
         try:
-            # [#qwhtu5]
             doc = frappe.get_doc("Housing Inventory", name)
             if doc.building != building:
-                # [#1e8yav]
                 frappe.throw(
                     _("Item {0} does not belong to this building.").format(name),
                     frappe.PermissionError,
                 )
 
-            # [#f2430u]
             if line.get("counted_quantity") is not None:
                 doc.counted_quantity = frappe.utils.flt(line.get("counted_quantity"))
             if line.get("condition"):
@@ -200,7 +192,6 @@ def submit_counts(building, lines):
             if "notes" in line:
                 doc.notes = line.get("notes")
 
-            # [#eipi09]
             doc.save()
         except Exception as e:
             frappe.db.rollback(save_point=savepoint)

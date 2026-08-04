@@ -34,8 +34,6 @@ import frappe
 from apex.salis.utils.road_route import road_path
 from frappe import _
 
-# Roles allowed to open the supervisor portal at all. Row-level scope (below) narrows
-# every read to the caller's own assigned plans regardless of role.
 PORTAL_ROLES = (
     "Fleet Supervisor",
     "Fleet Project Manager",
@@ -43,12 +41,9 @@ PORTAL_ROLES = (
     "System Manager",
 )
 
-# A driver position older than this (seconds) is flagged stale so the map can dim the
-# marker instead of implying the bus is live where it last pinged.
 _POSITION_STALE_SECONDS = 120
 
 
-# ─────────────────────────────── identity / scope ───────────────────────────────
 
 def _require_portal_role():
     """403 unless the caller holds a supervisor/oversight role. Portal gate only —
@@ -128,11 +123,10 @@ def _owned_trip(dispatch_trip: str) -> dict:
     )
     if not trip:
         frappe.throw(_("Trip not found."), frappe.DoesNotExistError)
-    _owned_plan(trip.get("route_plan"))  # scope gate; raises if not owned
+    _owned_plan(trip.get("route_plan"))
     return trip
 
 
-# ─────────────────────────────── label helpers ───────────────────────────────
 
 def _driver_label(driver):
     if not driver:
@@ -152,7 +146,6 @@ def _active_trip_for_plan(route_plan):
     plan has spawned no trip yet. Read-only."""
     if not route_plan:
         return None
-    # Prefer a currently-dispatched trip (driver en route — the live case).
     name = frappe.db.get_value(
         "Dispatch Trip",
         {"route_plan": route_plan, "status": "Dispatched", "docstatus": ["<", 2]},
@@ -161,7 +154,6 @@ def _active_trip_for_plan(route_plan):
     )
     if name:
         return name
-    # Else today's trip, else the latest one.
     name = frappe.db.get_value(
         "Dispatch Trip",
         {"route_plan": route_plan, "trip_date": frappe.utils.today(), "docstatus": ["<", 2]},
@@ -246,7 +238,6 @@ def _pending_first(plans: list) -> list:
     return plans
 
 
-# ─────────────────────────────── read endpoints ───────────────────────────────
 
 @frappe.whitelist()
 def get_supervisor_context():
@@ -534,7 +525,6 @@ def get_active_driver_positions():
     return out
 
 
-# ─────────────────────────────── write endpoints ───────────────────────────────
 
 def _resolve_owned_plan_doc(name: str):
     """Load the Route Plan doc for a decision write, enforcing the same ownership +

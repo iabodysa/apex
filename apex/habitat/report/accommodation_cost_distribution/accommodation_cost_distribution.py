@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 from frappe.utils import flt
@@ -20,7 +19,6 @@ def execute(filters=None):
 
     filters = filters or {}
 
-    # [#30sq22]
     from_date = filters.get("from_date")
     to_date = filters.get("to_date")
     if not (from_date and to_date):
@@ -55,7 +53,6 @@ def execute(filters=None):
             "source_line_id",
         ],
         order_by="posting_date desc",
-        # [#c84p7n]
         limit_page_length=0,
     )
 

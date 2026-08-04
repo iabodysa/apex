@@ -10,8 +10,6 @@ from apex.salis.tasks.common import (
     _raise_alert,
 )
 
-# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
-# rather than stacking one per row. Distinct from _raise_alert's own name.
 _ROW_SAVEPOINT = "salis_attendance_row"
 
 
@@ -28,7 +26,6 @@ def missing_attendance_watch() -> None:
     today_str = today()
     logger = frappe.logger()
 
-    # [#hww2kb]
     try:
         DA = frappe.qb.DocType("Driver Attendance")
         rows = (
@@ -65,7 +62,6 @@ def missing_attendance_watch() -> None:
             try:
                 if d.name in drivers_with_attendance:
                     continue
-                # [#bces73]
                 who = d.name
                 msg = (f"missing_attendance_watch: no attendance recorded today for "
                        f"active driver {who}.")

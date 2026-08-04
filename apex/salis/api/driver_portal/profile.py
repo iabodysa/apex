@@ -40,7 +40,6 @@ def _employee_documents(employee):
         return []
     emp = frappe.get_cached_doc("Employee", employee)
     documents = []
-    # [#bakgm3]
     iqama_no = emp.get("iqama") or emp.get("iqama_no")
     iqama_expiry = emp.get("iqama_expiry") or emp.get("valid_upto")
     if iqama_no or iqama_expiry:
@@ -52,7 +51,6 @@ def _employee_documents(employee):
                 "days_left": _days_until(iqama_expiry),
             }
         )
-    # [#hch49w]
     passport_no = emp.get("passport_number")
     if passport_no:
         documents.append(
@@ -94,7 +92,6 @@ def get_driver_context():
     user = frappe.session.user
     driver = _find_driver()
     if not _portal_enabled():
-        # [#p6q8jd]
         staff = _is_staff(user)
         return {
             "enabled": False,
@@ -119,7 +116,6 @@ def get_driver_context():
         ["name", "full_name", "status", "current_vehicle", "license_expiry"],
         as_dict=True,
     )
-    # [#1grmf3]
     if d and d.get("license_expiry"):
         d["license_expiry"] = frappe.utils.cstr(d["license_expiry"])
     return {"enabled": True, "linked": True, "driver": d}
@@ -146,16 +142,13 @@ def get_driver_profile():
     ) or {}
     if d.get("license_expiry"):
         d["license_expiry"] = frappe.utils.cstr(d["license_expiry"])
-    # [#mlgvqm]
     if d.get("project"):
         d["project"] = _project_label(d["project"])
-    # [#1mupnp]
     d["documents"] = _employee_documents(d.get("employee"))
     return d
 
 
 
-# [#f1dc1a]
 _DRIVER_COMPLIANCE_TYPES = (
     "Registration (Istimara)",
     "Insurance",
@@ -176,6 +169,12 @@ def _vehicle_compliance(vehicle):
 	* ``expiry_date``      — ISO string (stringified so JSON serializes)
 	* ``days_to_expiry``   — signed int; negative = already expired
 	* ``state``            — ``expired`` | ``expiring`` (<= 30 days) | ``valid``
+
+	``_DRIVER_COMPLIANCE_TYPES`` is the compliance child rows a driver actually acts
+	on, in the order they should read on the card. "Operating Card" and "Other" are
+	deliberately omitted — a driver acts on the registration (istimara), insurance and
+	periodic inspection (fahes) expiries; the rest is back-office. The keys are the
+	stable Select option values on ``Salis Vehicle Compliance.compliance_type``.
 
 	The amber/red threshold (``expiring`` at <= 30 days) is computed server-side so
 	the SPA needs no date math and both portal languages render identically. Returns
@@ -231,7 +230,6 @@ def get_my_vehicle():
     vehicle = frappe.db.get_value("Salis Driver", driver, "current_vehicle")
     assignment = None
     if not vehicle:
-        # [#n00nxa]
         assignment = frappe.db.get_value(
             "Vehicle Assignment",
             {"driver": driver, "status": "Active"},
@@ -251,14 +249,11 @@ def get_my_vehicle():
         as_dict=True,
     ) or {}
 
-    # [#mlgvqm]
     if v.get("project"):
         v["project"] = _project_label(v["project"])
 
-    # [#drxwau]
     v["compliance"] = _vehicle_compliance(vehicle)
 
-    # [#kcrj1g]
     if assignment is None:
         assignment = frappe.db.get_value(
             "Vehicle Assignment",
@@ -271,6 +266,5 @@ def get_my_vehicle():
         if assignment and assignment.get("start_date")
         else None
     )
-    # [#gw6jyz]
     v["last_site_maps_url"] = _vehicle_last_site_maps_url(vehicle)
     return {"vehicle": v}

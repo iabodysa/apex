@@ -1,11 +1,9 @@
-# Copyright (c) 2026, AFMCO Support Services Co. Ltd
-# [#of2x05]
+# Copyright (c) 2026, AFMCO and contributors
 
 import frappe
 
 from apex.apex_core.utils import permission_scope
 
-# [#mirgwe]
 PRIVILEGED_ROLES = {
     "System Manager",
     "Accommodation Manager",
@@ -55,7 +53,6 @@ def maintenance_request_query(user=None):
     return "(`owner` = {0} or `assigned_to` = {0})".format(escaped)
 
 
-# [#f8guc4]
 def report_maintenance_request_scope(user=None):
     """Return ``(restrict, user)`` for report-side maintenance-request scoping.
 
@@ -91,7 +88,6 @@ def maintenance_request_has_permission(doc, ptype, user=None):
     return False
 
 
-# [#qyfpkv]
 HOUSING_UNSCOPED_ROLES = {
     "System Manager",
     "Accommodation Manager",
@@ -137,13 +133,19 @@ def _building_condition(user=None, column="`building`", doctype=None):
     logic to ``permission_scope.scope_condition``, injecting this module's own
     building resolvers so the Building oversight set + cache namespace stay bound
     here.
+
+    Every safety and cleaning record below carries exactly ONE Building link of its own,
+    so this shared fragment serves them with no anchor hop. They still need a fragment
+    even though a Building User Permission already narrows the list: frappe's native
+    match (db_query.py:1090) is ``ifnull(building,'')='' or building in (...)``, so an
+    empty-building row stays visible and a scoped user holding NO Building permission
+    gets no condition at all. This closes both.
     """
     return permission_scope.scope_condition(
         user, _building_is_unscoped, _allowed_buildings, column, allow="Building", doctype=doctype
     )
 
 
-# [#63ah2p]
 def accommodation_assignment_query(user=None, doctype=None):
     return _building_condition(user, doctype=doctype)
 
@@ -157,11 +159,9 @@ def cleaning_log_query(user=None, doctype=None):
 
 
 def accommodation_building_query(user=None, doctype=None):
-    # [#3n6e22]
     return _building_condition(user, column="`name`", doctype=doctype)
 
 
-# [#q79rfw]
 def safety_round_query(user=None, doctype=None):
     return _building_condition(user, doctype=doctype)
 
@@ -174,13 +174,6 @@ def scheduled_task_instance_query(user=None, doctype=None):
     return _building_condition(user, doctype=doctype)
 
 
-# Each of the remaining safety/cleaning records carries exactly ONE Building link of its
-# own, so the shared column fragment serves them with no anchor hop.
-#
-# They still need a fragment even though a Building User Permission already narrows the
-# list: frappe's native match (db_query.py:1090) is `ifnull(building,'')='' or building in
-# (...)`, so an empty-building row stays visible and a scoped user holding NO Building
-# permission gets no condition at all. `_building_condition` closes both.
 def safety_incident_query(user=None, doctype=None):
     return _building_condition(user, doctype=doctype)
 
@@ -197,7 +190,6 @@ def cleaning_compliance_ledger_query(user=None, doctype=None):
     return _building_condition(user, doctype=doctype)
 
 
-# [#fya0cl]
 def accommodation_resident_request_query(user=None, doctype=None):
     return _building_condition(user, doctype=doctype)
 
@@ -328,7 +320,6 @@ def audit_remediation_plan_has_permission(doc, ptype, user=None):
     ]
     buildings = [b for b in buildings if b]
     if not buildings:
-        # [#1i4wio]
         return False
     allowed = _allowed_buildings_for(user, doc.doctype)
     return None if any(b in allowed for b in buildings) else False
@@ -366,12 +357,10 @@ def housing_checkout_has_permission(doc, ptype, user=None):
         if assignment:
             building = frappe.db.get_value("Housing Assignment", assignment, "building")
     if not building:
-        # [#1i4wio]
         return False
     return None if building in _allowed_buildings_for(user, doc.doctype) else False
 
 
-# [#lz1v52]
 def report_building_scope(user=None, doctype=None):
     """Return ``(restrict, allowed_buildings)`` for report-side building scoping.
 
@@ -393,16 +382,12 @@ BUILDING_FETCH_ANCHOR = {
     "Custody Return": ("custody_issue", "Custody Issue"),
     "Housing Assignment": ("bed", "Bed"),
     "Housing Inventory": ("room", "Room"),
-    # `building` is fetch_from maintenance_work_order.building, so it is empty at the
-    # create check; the work order is the link the payload carries at that moment.
     "Maintenance Inspection Report": (
         "maintenance_work_order",
         "Maintenance Work Order",
     ),
     "Maintenance Work Order": ("maintenance_request", "Maintenance Request"),
     "Resident Request": ("bed", "Bed"),
-    # The transfer has no building of its own; its estate is the assignment's, and
-    # the controller's cross-building rejection keeps source and target identical.
     "Room Bed Transfer": ("assignment", "Housing Assignment"),
     "Scheduled Task Instance": ("assignment", "Scheduled Task Assignment"),
 }
@@ -464,14 +449,11 @@ def building_scoped_has_permission(doc, ptype, user=None):
     building = _doc_building(doc)
 
     if not building:
-        # [#1i4wio]
         return False
     return None if building in _allowed_buildings_for(user, doc.doctype) else False
 
 
-# [#qowz2x]
 
-# [#kl06xt]
 def facility_asset_custody_assignment_query(user=None, doctype=None):
     return _building_condition(user, doctype=doctype)
 
@@ -489,7 +471,6 @@ def custody_damage_assessment_query(user=None, doctype=None):
 
 
 def facility_asset_movement_query(user=None, doctype=None):
-    # [#53j3yv]
     return _dual_building_condition(user, doctype=doctype)
 
 
@@ -498,17 +479,14 @@ def custody_acknowledgment_query(user=None, doctype=None):
 
 
 def custody_handover_query(user=None, doctype=None):
-    # [#dvbjlx]
     return _dual_building_condition(user, doctype=doctype)
 
 
 def material_transfer_query(user=None, doctype=None):
-    # [#d19wjd]
     return _dual_building_condition(user, doctype=doctype)
 
 
 def facility_asset_delivery_query(user=None, doctype=None):
-    # [#1grzir]
     return _dual_building_condition(user, doctype=doctype)
 
 
@@ -540,7 +518,6 @@ def maintenance_inspection_report_query(user=None, doctype=None):
     return _building_condition(user, doctype=doctype)
 
 
-# [#qu5wvy]
 def accommodation_occupancy_snapshot_query(user=None, doctype=None):
     return _building_condition(user, doctype=doctype)
 
@@ -561,7 +538,6 @@ def accommodation_bed_query(user=None, doctype=None):
     return _building_condition(user, doctype=doctype)
 
 
-# [#h91pnc]
 def accommodation_stock_ledger_query(user=None, doctype=None):
     return _building_condition(user, doctype=doctype)
 
@@ -604,6 +580,5 @@ def dual_building_scoped_has_permission(doc, ptype, user=None):
     ]
     endpoints = [b for b in endpoints if b]
     if not endpoints:
-        # [#8w8orx]
         return False
     return None if any(b in allowed for b in endpoints) else False

@@ -21,7 +21,6 @@ def validate(doc, method=None):
     _validate_status_transition(doc)
 
 
-# [#s5jmv1]
 _DEPARTMENT_ROLE = {
     "HR": "HR Manager",
     "Operations": "Accommodation Manager",
@@ -33,22 +32,20 @@ def after_insert(doc, method=None):
     """Force accountability: put the new report in the responsible department's
     desk queue as ToDos (one per active role holder). Idempotent — assign_to.add
     skips any user that already has an Open ToDo for this document, and ToDo's
-    on_update handler maintains _assign automatically."""
+    on_update handler maintains _assign automatically.
+
+    ``get_users_with_role`` resolves the role holders in ONE qb join, DISTINCT (a user
+    holding the role through two Has Role rows is assigned once), already filtered to
+    enabled users and already excluding the Administrator
+    (frappe/utils/user.py:419-435)."""
     from frappe.desk.form import assign_to as _assign_to
 
     role = _DEPARTMENT_ROLE.get(doc.responsible_department)
     if not role:
         return
-    # get_users_with_role resolves the role holders in ONE qb join, DISTINCT (a user
-    # holding the role through two Has Role rows is assigned once), already filtered to
-    # enabled users and already excluding the Administrator (frappe/utils/user.py:419-435).
     assignees = [user for user in get_users_with_role(role) if user != "Guest"]
     if not assignees:
         return
-    # [#foc6qa]
-    # No permission kwarg: add()'s only check is a read recheck on this doc as its
-    # creator, which cannot fail here — every role with create also has read, and the
-    # building has_permission hook is deny-only and ptype-agnostic (create pass = read pass).
     _assign_to.add(
         {
             "doctype": doc.doctype,

@@ -87,7 +87,6 @@ def load_specs(module_dir, only=None, data_root=None):
             "doctype": raw["doctype"],
             "key": raw["key"],
             "create_only": raw.get("create_only", True),
-            # [#oheobt]
             "apply": raw.get("apply", True),
             "records": raw["records"],
             "__source__": fname,
@@ -178,8 +177,6 @@ def apply_spec(spec):
             continue
         unresolved = _unresolved_link(frappe, doctype, record)
         if unresolved:
-            # Name the target: a bare "a Link is missing" leaves the operator with
-            # nothing to fix, and this is the only trace a skipped record leaves.
             frappe.logger().warning(
                 f"seed: {doctype} '{value}' skipped — missing Link target {unresolved}"
             )
@@ -190,7 +187,6 @@ def apply_spec(spec):
         frappe.db.savepoint(savepoint)
         try:
             doc = frappe.get_doc({"doctype": doctype, **record})
-            # [#aurulp]
             doc.insert(ignore_permissions=True, ignore_if_duplicate=True)  # audit-ok
             created += 1
         except Exception:  # noqa: BLE001 — one bad record must not abort the batch
@@ -212,7 +208,7 @@ def seed(module_dir, only=None):
     totals = {"created": 0, "skipped": 0, "failed": 0}
     for spec in load_specs(module_dir, only=only):
         if not spec.get("apply", True):
-            continue  # [#kxzv90]
+            continue
         result = apply_spec(spec)
         for k in totals:
             totals[k] += result[k]
@@ -220,7 +216,6 @@ def seed(module_dir, only=None):
     return totals
 
 
-# [#jz830j]
 _MODULES = ("habitat", "salis")
 
 

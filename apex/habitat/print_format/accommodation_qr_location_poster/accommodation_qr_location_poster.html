@@ -36,12 +36,10 @@
         border-radius: 8px;
         margin-top: 20px;
         display: inline-block;
-        /* logical, not `left`: this block flips with the reader's language */
         text-align: start;
     }
 </style>
 
-<!-- Fully translated: no pinned print language, so dir must follow the reader's. -->
 <div class="qr-poster-container" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
     <div class="qr-poster-title">{{ _("Need Help? Scan to Report") }}</div>
     <div class="qr-poster-subtitle">{{ doc.poster_title or _("Resident Support Services") }}</div>

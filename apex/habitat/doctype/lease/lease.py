@@ -37,7 +37,6 @@ def validate(doc, method=None):
     if not (0 <= share <= 100):
         frappe.throw(_("Utility Cost Share must be between 0 and 100."))
 
-    # [#i29e7n]
     if doc.building and doc.lease_start_date and doc.lease_end_date:
         from apex.apex_core.utils.date_ranges import has_overlapping_record
         conflict = has_overlapping_record(
@@ -61,7 +60,6 @@ def validate(doc, method=None):
     )
 
 
-# [#bhb8ai]
 _SCHEDULE_DRIVER_FIELDS = ("rent_amount", "billing_cycle", "first_payment_date", "lease_end_date")
 
 
@@ -104,7 +102,6 @@ def _build_schedule(doc):
 def regenerate_schedule(name):
     """Force-rebuild the payment schedule (clears existing rows)."""
     doc = frappe.get_doc("Lease", name)
-    # [#eu1e7a]
     frappe.has_permission("Lease", "write", doc=doc, throw=True)
 
     if doc.docstatus != 0:
@@ -112,10 +109,5 @@ def regenerate_schedule(name):
     doc.payment_schedule = []
     _build_schedule(doc)
     doc.total_scheduled = sum(flt(r.amount) for r in doc.payment_schedule)
-    # save() is left unguarded on purpose. The frappe.db.rollback() that used to wrap
-    # it discarded the whole request transaction — every row the caller wrote before
-    # this endpoint ran, not just the lease — and reported a generic message in place
-    # of the validation error that actually refused the save. Propagating aborts the
-    # regeneration and leaves the request-level rollback to unwind only this request.
     doc.save()
     return len(doc.payment_schedule)

@@ -12,10 +12,8 @@ import frappe
 
 def execute():
     if not frappe.db.exists("DocType", "Habitat City"):
-        # [#1vr3sz]
         return
 
-    # [#jlgco6]
     if frappe.db.exists("DocType", "City"):
         return
 

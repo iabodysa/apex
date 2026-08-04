@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#co3q2w]
 
 function _injectFloorLayoutStyles() {
 	if (document.getElementById("apex-floor-layout-style")) return;
@@ -34,7 +33,6 @@ function _renderFloorLayout(frm) {
 	frappe.call({
 		method: "apex.habitat.api.building_dashboard.get_building_layout",
 		args: { building: frm.doc.name },
-		// Passive background render: fail silently rather than show the default error popup.
 		error: function () {},
 		callback: function (r) {
 			if (r.exc || !r.message) return;
@@ -45,7 +43,6 @@ function _renderFloorLayout(frm) {
 			var wrapper = frm.get_field("floor_layout_html").$wrapper;
 			wrapper.empty();
 
-			// [#i35f5h]
 			var s = data.summary;
 			var legendHtml = [
 				'<div class="apex-layout-summary">',
@@ -99,12 +96,9 @@ function _toggleFloorFields(frm) {
 }
 
 function _renderSiteAddress(frm) {
-	// [#5bdnvg]
 	const wrapper = frm.get_field("address_html").$wrapper;
 	wrapper.empty();
 
-	// Always ask the server: it resolves the building's own Address (Link or legacy
-	// Dynamic Link) then the Site, so a legacy own-address shows even with no Site set.
 	frappe.call({
 		method: "apex.habitat.doctype.building.building.get_site_address",
 		args: {
@@ -112,7 +106,6 @@ function _renderSiteAddress(frm) {
 			site: frm.doc.site,
 			building_address: frm.doc.building_address,
 		},
-		// Passive background render: fail silently rather than show the default error popup.
 		error: function () {},
 		callback: function (r) {
 			if (r.exc) return;
@@ -136,13 +129,11 @@ function _renderBuildingDashboard(frm) {
 	frappe.call({
 		method: "apex.habitat.api.building_dashboard.get_building_metrics",
 		args: { building: frm.doc.name },
-		// Passive background render: fail silently rather than show the default error popup.
 		error: function () {},
 		callback: function (r) {
 			if (r.exc || !r.message) return;
 			const m = r.message;
 			frm.dashboard.reset();
-			// [#384474]
 			frm.dashboard.render_links();
 			frm.dashboard.add_indicator(__("Active Occupants: {0}", [m.active_occupants]),
 				m.active_occupants ? "blue" : "gray");
@@ -177,18 +168,15 @@ frappe.ui.form.on("Building", {
 		_toggleFloorFields(frm);
 		_renderBuildingDashboard(frm);
 
-		// [#qeq1h4]
 		if (!frm.is_new()) {
 			_renderFloorLayout(frm);
 		}
 
-		// [#hyf59p]
 		frm.toggle_display("address_html", !frm.is_new());
 		if (!frm.is_new()) {
 			_renderSiteAddress(frm);
 		}
 
-		// [#msjhhk]
 		const colors = {
 			"Active": "green",
 			"Inactive": "grey",
@@ -199,7 +187,6 @@ frappe.ui.form.on("Building", {
 			frm.page.set_indicator(__(status), colors[status] || "blue");
 		}
 
-		// [#ob62bi]
 		if (!frm.is_new()) {
 			frm.add_custom_button(__("Setup Rooms"), function () {
 				frappe.set_route("room-setup", frm.doc.name);
@@ -235,7 +222,6 @@ frappe.ui.form.on("Building", {
 	},
 
 	site(frm) {
-		// [#t62uep]
 		if (!frm.is_new()) {
 			_renderSiteAddress(frm);
 		}
@@ -248,7 +234,6 @@ frappe.ui.form.on("Building", {
 	},
 
 	edit_room_setup_btn(frm) {
-		// [#249zyk]
 		frappe.set_route("room-setup", frm.doc.name);
 	},
 });

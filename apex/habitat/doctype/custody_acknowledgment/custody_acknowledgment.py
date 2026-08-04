@@ -17,14 +17,12 @@ from frappe.utils import now_datetime
 
 class CustodyAcknowledgment(Document):
     def validate(self):
-        # [#aceq6d]
         docstatus = frappe.db.get_value("Custody Issue", self.custody_issue, "docstatus")
         if docstatus != 1:
             frappe.throw(
                 _("Custody Issue {0} must be submitted before it can be acknowledged.").format(self.custody_issue)
             )
 
-        # [#6h51c5]
         if self.confirmation_method == "Signature":
             if not self.signature:
                 frappe.throw(

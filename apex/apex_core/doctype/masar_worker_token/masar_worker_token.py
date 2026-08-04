@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Masar Worker Token — personal access link for the worker self-service app.
 
 Each row binds ONE Employee to an unguessable random ``token``. The worker opens
@@ -42,7 +43,7 @@ from apex.apex_core.utils.portal_token_security import (
 )
 from apex.apex_core.utils.party_link import sync_party_employee
 
-TOKEN_BYTES = 24  # [#9dvf8n]
+TOKEN_BYTES = 24
 SUBJECT_BINDING_FIELDS = (
     "holder_type",
     "party_type",
@@ -52,12 +53,8 @@ SUBJECT_BINDING_FIELDS = (
 )
 _CREDENTIAL_REISSUE_GUARD = object()
 
-# Driver access-token cookie (barcode entry at /driver?d=<raw>). Distinct from the
-# worker cookie (masar_wt) so the two portals' credentials never cross-read; the
-# holder_type filter in the resolver is the second, authoritative guard.
 DRIVER_TOKEN_COOKIE = TOKEN_COOKIES[DRIVER]
 
-# [#9haukd]
 
 
 def _hash_token(raw: str) -> str:
@@ -70,7 +67,6 @@ def _decrypt_token(token_enc: str) -> str:
     """Recover the raw token from its stored Fernet ciphertext (site-key protected)."""
     return decrypt(token_enc)
 
-# [#7khxj6]
 TOKEN_TTL_DAYS = 180
 
 
@@ -83,10 +79,8 @@ def _new_token() -> str:
     """A fresh url-safe random raw token, whose HASH is unique across the doctype."""
     for _attempt in range(8):
         candidate = frappe.generate_hash(length=TOKEN_BYTES * 2)
-        # [#9at93o]
         if not frappe.db.exists("Masar Worker Token", {"token": _hash_token(candidate)}):
             return candidate
-    # [#s3grro]
     frappe.throw(_("Could not generate a unique worker token. Please try again."))
 
 
@@ -182,7 +176,6 @@ class MasarWorkerToken(Document):
         if not rotated:
             frappe.throw(_("Not permitted"), frappe.PermissionError)
 
-    # [#ojkvw4]
     def _mint(self) -> str:
         audience, subject = self._issuance_subject()
         authorize_issuance(audience, subject)
@@ -195,7 +188,6 @@ class MasarWorkerToken(Document):
         }
         self._credential_reissue_guard = _CREDENTIAL_REISSUE_GUARD
         self._plaintext_token = raw
-        # [#ag7geg]
         self.expires_on = _token_expiry()
         self.last_generated_on = frappe.utils.now_datetime()
         self.last_generated_by = frappe.session.user
@@ -235,9 +227,6 @@ class MasarWorkerToken(Document):
         return self.regenerate()
 
     def autoname(self):
-        # Controller autoname overrides the meta field:party rule (which cannot name a
-        # driver row — a driver has no party). Name a Driver token by its Salis Driver,
-        # a Worker token by its party (Employee), exactly as before for workers.
         if self.holder_type == DRIVER:
             if not self.driver:
                 frappe.throw(_("A Salis Driver is required for a driver access token."))
@@ -245,11 +234,8 @@ class MasarWorkerToken(Document):
         else:
             self.name = self.party
 
-    # [#pewmoc]
     def before_validate(self):
         self._validate_subject_binding_immutability()
-        # A Driver token binds a Salis Driver, not a worker party — skip the whole
-        # Employee/party sync + Temporary-Worker guard (those apply to workers only).
         if self.holder_type == DRIVER:
             if not self.driver:
                 frappe.throw(_("A Salis Driver is required for a driver access token."))
@@ -258,7 +244,6 @@ class MasarWorkerToken(Document):
             self._validate_disabled_credential_reactivation()
             return
         sync_party_employee(self, require_party=True)
-        # [#c8p9h6]
         self._reject_temporary_worker()
         validate_subject_binding(self, WORKER)
         authorize_issuance(WORKER, self.employee)
@@ -280,11 +265,9 @@ class MasarWorkerToken(Document):
         return missing
 
     def before_insert(self):
-        # [#6ldmk7]
         if self.holder_type != DRIVER:
             sync_party_employee(self)
             self._reject_temporary_worker()
-        # [#n4hnje]
         self._mint()
 
     def after_insert(self):
@@ -379,7 +362,6 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
     frappe.has_permission("Masar Worker Token", "write", throw=True)
     scoped_issuer = authorize_issuance(WORKER, employee)
     doc = get_or_create_for_employee(employee)
-    # [#bqs6iz]
     raw = _issue_token(doc, regenerate, scoped_issuer)
 
     link = _worker_link(raw)
@@ -387,12 +369,10 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
         "employee": doc.employee,
         "employee_name": doc.employee_name,
         "enabled": bool(doc.enabled),
-        # [#cqj0cx]
         "token": raw,
         "link": link,
         "qr": masar_qr_data_uri(link),
         "expires_on": frappe.utils.cstr(doc.expires_on) if doc.expires_on else None,
-        # [#p7spkl]
         "phone": frappe.db.get_value("Employee", doc.employee, "cell_number"),
     }
 
@@ -421,7 +401,6 @@ def batch_issue_worker_links(employees_json) -> list:
                 "qr": masar_qr_data_uri(link),
             }
         )
-    # [#n3vua5]
     emp_ids = [r["employee"] for r in out if r.get("employee")]
     phones = dict(
         frappe.get_all(
@@ -473,8 +452,6 @@ def _issue_token(
     elif scoped_issuer or frappe.utils.cint(regenerate) or not doc.token:
         action, raw = ROTATED, doc.regenerate()
     else:
-        # recover_token falls back to a rotation for a legacy row with no usable
-        # ciphertext, so the hash decides the label rather than the intent.
         previous = doc.token
         raw = doc.recover_token()
         doc.extend_expiry()
@@ -553,7 +530,6 @@ def issue_driver_link(driver: str, regenerate: int = 0) -> dict:
         "driver": doc.driver,
         "driver_name": frappe.db.get_value("Salis Driver", doc.driver, "full_name"),
         "enabled": bool(doc.enabled),
-        # [#cqj0cx] the ONE moment the raw token is returned; never persisted/logged.
         "token": raw,
         "link": link,
         "qr": masar_qr_data_uri(link),
@@ -665,7 +641,7 @@ def masar_qr_data_uri(text: str):
         import io
         from base64 import b64encode
 
-        import pyqrcode  # [#9xz9bo]
+        import pyqrcode
 
         q = pyqrcode.create(text)
         buf = io.BytesIO()

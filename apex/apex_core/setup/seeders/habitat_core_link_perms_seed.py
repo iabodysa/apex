@@ -30,30 +30,26 @@ erpnext or hrms upgrade. That is inherent to customising a core doctype's
 permissions and is the same trade this app already accepted for Issue in
 ``salis_issue_seed.py``.
 
+WHY SALIS NEEDS THE PROJECT ROW AT ALL. Salis anchors thirteen of its own DocTypes on
+Project, and a Project User Permission is the key ``apex.salis.permissions`` scopes every
+one of those lists by. That scoping reads the User Permission table directly, so it works
+with no DocPerm at all — but the Project PICKER on the forms that set the field does not:
+``validate_link`` refuses a caller holding neither read nor select (frappe/client.py:447),
+and Project ships only a permlevel-1 Desk User row, which ``get_role_permissions``
+discards (frappe/permissions.py:284).
+
 Idempotent and existence-guarded, and wired into after_install AND after_migrate so
 a fresh site and an upgraded one converge to the same rows.
 """
 
 import frappe
 
-# The core masters a Habitat document links to but does not own.
 CORE_LINK_MASTERS = ("Employee", "Project", "Cost Center")
 
-# The Habitat roles published on Housing Assignment and on its register report.
-# System Manager is deliberately absent: it is a platform role, and re-granting core
-# HR/accounting masters to it is a site administration decision, not this app's.
 HABITAT_LINK_ROLES = ("Accommodation Manager", "Resident Supervisor", "Internal Auditor")
 
-# Salis anchors thirteen of its own DocTypes on Project, and a Project User Permission
-# is the key `apex.salis.permissions` scopes every one of those lists by. That scoping
-# reads the User Permission table directly, so it works with no DocPerm at all — but the
-# Project PICKER on the forms that set the field does not: `validate_link` refuses a
-# caller holding neither read nor select (frappe/client.py:447), and Project ships only a
-# permlevel-1 Desk User row, which `get_role_permissions` discards (frappe/permissions.py:284).
 SALIS_LINK_MASTERS = ("Project",)
 
-# The Salis roles that create or write a Project-anchored Salis document. System Manager
-# writes them too and is excluded for the same reason as above.
 SALIS_LINK_ROLES = (
     "Fleet Manager",
     "Fleet Project Manager",
@@ -61,25 +57,26 @@ SALIS_LINK_ROLES = (
     "Finance Manager",
 )
 
-# (masters, roles) per module. One table so a third module adds a line, not a function.
 _GRANTS = (
     (CORE_LINK_MASTERS, HABITAT_LINK_ROLES),
     (SALIS_LINK_MASTERS, SALIS_LINK_ROLES),
 )
 
 
-# Custom DocPerm defaults read and export to 1 (``custom_docperm.json:81,170``), so a
-# row asked for with ptype="select" is born carrying BOTH — a silent widening past what
-# a Link picker needs. They are cleared explicitly on a row this seeder creates.
 _DEFAULTED_ON_A_NEW_ROW = ("read", "export")
 
 
 def _grant_select(doctype: str, roles) -> None:
+    """Give each role ``select`` on ``doctype``, and nothing wider.
+
+    ``_DEFAULTED_ON_A_NEW_ROW`` is cleared explicitly because Custom DocPerm defaults
+    read and export to 1 (``custom_docperm.json:81,170``), so a row asked for with
+    ptype="select" is born carrying BOTH — a silent widening past what a Link picker
+    needs.
+    """
     from frappe.permissions import add_permission, update_permission_property
 
     for role in roles:
-        # Dict form: the positional spelling returns the name unqueried when it equals
-        # its own doctype, so it cannot prove existence in both directions.
         if not frappe.db.exists("Role", {"name": role}):
             continue
         rows = frappe.get_all(
@@ -91,9 +88,6 @@ def _grant_select(doctype: str, roles) -> None:
             add_permission(doctype, role, ptype="select", permlevel=0)
             for ptype in _DEFAULTED_ON_A_NEW_ROW:
                 update_permission_property(doctype, role, 0, ptype, 0)
-        # An existing rule only GAINS select. Its other flags are left alone: they were
-        # set by a site administrator or another seeder, and this grant does not own
-        # them — re-zeroing them on every migrate would silently revoke that decision.
         update_permission_property(doctype, role, 0, "select", 1)
 
 

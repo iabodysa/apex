@@ -7,8 +7,6 @@ import frappe
 
 from apex.habitat.tasks.common import _notify_operational
 
-# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
-# rather than stacking one per row. Distinct from the notifier helpers' names.
 _ROW_SAVEPOINT = "residency_row"
 
 
@@ -27,9 +25,6 @@ def lease_expiry_watchlist() -> None:
 
     today_str = today()
 
-    # Keyed cursor, not an offset: the body flips status OUT of the very set this
-    # filters on, so rows behind an offset shift down into the range it just passed
-    # and are skipped. name is immutable, so a key cursor cannot lose a row.
     cursor = ""
     batch_size = 500
     while True:
@@ -85,7 +80,6 @@ def idle_resident_aging() -> None:
         if not reports:
             break
 
-        # [#makt0v]
         asgn_ids = {r.assignment for r in reports if r.assignment and r.reported_on}
         ledger_by_assignment: dict = {}
         if asgn_ids:

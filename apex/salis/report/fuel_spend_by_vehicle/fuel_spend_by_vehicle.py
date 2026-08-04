@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Fuel Spend by Vehicle - per-vehicle fuel litres and amount, derived from the
 system-written Fuel Consumption Ledger (which itself consolidates Fuel Daily Log
@@ -43,7 +42,6 @@ def execute(filters=None):
     if filters.get("period_month"):
         query_filters["period_month"] = filters["period_month"]
 
-    # [#m9gboo]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:

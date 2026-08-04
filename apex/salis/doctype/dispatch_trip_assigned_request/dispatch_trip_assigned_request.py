@@ -1,12 +1,9 @@
-# Copyright (c) 2026, AFMCO Support Services Co. Ltd and contributors
-# [#j03s5a]
+# Copyright (c) 2026, AFMCO and contributors
 
-# [#keeppb]
 from frappe.model.document import Document
 
 
 class DispatchTripAssignedRequest(Document):
-    # [#q6y9j5]
 
     from typing import TYPE_CHECKING
 
@@ -19,5 +16,4 @@ class DispatchTripAssignedRequest(Document):
         purpose: DF.Data | None
         requested_count: DF.Int
         transport_request: DF.Link
-    # [#g4leg3]
     pass

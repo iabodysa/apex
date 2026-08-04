@@ -66,7 +66,6 @@ from frappe.utils import cint
 from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance, guest_redirect
 
-# Roles that may open the supervisor portal (mirrors the API's PORTAL_ROLES).
 SUPERVISOR_ROLES = {
     "System Manager",
     "Fleet Manager",
@@ -79,7 +78,6 @@ def map_tile_override(conf) -> dict:
     """Site-config tile source, or empty to keep the component's OpenStreetMap default.
     Rejects anything that is not https:// or root-relative — see the module docstring."""
     url = str(conf.get("apex_map_tile_url") or "").strip()
-    # "//host/..." is protocol-relative, i.e. off-site, not root-relative.
     root_relative = url.startswith("/") and not url.startswith("//")
     if not (url.startswith("https://") or root_relative):
         return {"url": "", "attribution": ""}

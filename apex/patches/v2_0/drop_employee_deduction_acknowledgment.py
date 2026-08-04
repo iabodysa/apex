@@ -29,7 +29,6 @@ import frappe
 
 _DOCTYPE = "Employee Deduction Acknowledgment"
 _WORKFLOW = "Employee Deduction Acknowledgment Workflow"
-# Deliberately NOT prefixed "tab": an archive table must never look like a DocType.
 _ARCHIVE_TABLE = "archived_employee_deduction_acknowledgment_a102"
 
 
@@ -44,10 +43,7 @@ def _retire_table() -> None:
         frappe.db.sql_ddl(f"DROP TABLE IF EXISTS `tab{_DOCTYPE}`")
         return
 
-    # NB: frappe.db.table_exists() always prefixes "tab", so the archive table (which
-    # deliberately has no such prefix) has to be looked up in the raw table list.
     if _ARCHIVE_TABLE in frappe.db.get_tables(cached=False):
-        # An archive from an earlier run already holds the rows; nothing left to save.
         frappe.db.sql_ddl(f"DROP TABLE IF EXISTS `tab{_DOCTYPE}`")
         return
 

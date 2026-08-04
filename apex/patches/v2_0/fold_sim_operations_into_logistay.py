@@ -45,19 +45,13 @@ import frappe
 
 OLD_MODULE = "SIM Operations"
 NEW_MODULE = "Logistay"
-# Distinctive dotted prefix — only ever the dead module path, never the healthy new form.
 OLD_DOTTED = "apex.sim_operations."
 NEW_DOTTED = "apex.logistay."
 
-# Workspaces whose is_standard JSON was deleted when their content was folded elsewhere.
 _FOLDED_WORKSPACES = ("SIM Operations", "Masar")
 
-# Frappe table/column names are word chars + spaces only. Every identifier below comes
-# from information_schema (never request input), but the back-quoted names are still
-# `.fullmatch`-validated before reaching the SQL text.
 _SAFE_IDENT = re.compile(r"[\w ]+")
 
-# Append-only / audit tables: rewriting their historical blobs is pointless churn.
 _SWEEP_SKIP_TABLES = {
     "tabPatch Log",
     "tabVersion",
@@ -107,14 +101,12 @@ def _module_carriers() -> list[str]:
         },
         pluck="parent",
     )
-    # DocType itself stores `module` as a plain column on tabDocType.
     return sorted(set(carriers) | {"DocType"})
 
 
 def _repoint_module_stamps() -> None:
     """Restamp every record still claiming the retired module. Never deletes a row."""
     for doctype in _module_carriers():
-        # table_exists() prefixes "tab" itself; a Single / virtual DocType has no table.
         if not frappe.db.table_exists(doctype) or not frappe.db.has_column(doctype, "module"):
             continue
         if not frappe.db.exists(doctype, {"module": OLD_MODULE}):
@@ -152,11 +144,9 @@ def _rewrite_dotted_paths() -> None:
         table, column = col.table_name, col.column_name
         if table in _SWEEP_SKIP_TABLES:
             continue
-        # Defence-in-depth over the trusted information_schema source.
         if not (_SAFE_IDENT.fullmatch(table) and _SAFE_IDENT.fullmatch(column)):
             continue
         frappe.db.sql(
-            # identifiers come from information_schema and are `.fullmatch`-guarded above.
             f"UPDATE `{table}` "
             f"SET `{column}` = REPLACE(`{column}`, %s, %s) "
             f"WHERE LOCATE(%s, `{column}`) > 0",
@@ -203,8 +193,6 @@ def _drop_folded_workspaces() -> None:
     dropped = False
     for name in _FOLDED_WORKSPACES:
         if frappe.db.exists("Workspace", name):
-            # delete_doc cascades the child Link / Shortcut / Number Card / Chart rows
-            # and clears the desk workspace cache; a raw db.delete would orphan them.
             frappe.delete_doc("Workspace", name, ignore_permissions=True, force=True)  # audit-ok
             dropped = True
     if dropped:

@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 
@@ -22,14 +21,12 @@ def execute(filters=None):
             if filters.get(field):
                 query_filters[field] = filters[field]
 
-    # [#q0owts]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:
             return columns, []
         chosen = query_filters.get("project")
         if chosen and chosen not in allowed:
-            # [#k0ydtq]
             return columns, []
         if not chosen:
             query_filters["project"] = ["in", allowed]

@@ -33,7 +33,6 @@ from frappe.model.document import Document
 
 from apex.salis.utils import set_financial_defaults
 
-# [#6n814k]
 VALID_STATUSES = (
     "Draft",
     "Submitted to Movement",
@@ -46,7 +45,6 @@ VALID_STATUSES = (
 
 class FuelClaim(Document):
     def before_insert(self):
-        # [#lmqimg]
         if not self.requested_by:
             self.requested_by = frappe.session.user
 
@@ -57,16 +55,13 @@ class FuelClaim(Document):
             frappe.throw(_("Invalid status: {0}").format(self.status))
         if (self.claimed_litres or 0) <= 0:
             frappe.throw(_("Claimed Litres must be greater than zero."))
-        # [#a05dfs]
         if (self.claimed_amount or 0) < 0:
             frappe.throw(_("Claimed Amount cannot be negative."))
         set_financial_defaults(self)
         self._compute_consumption()
         self._guard_initial_status()
 
-    # [#a4g9yp]
 
-    # [#m88md8]
 
     def _compute_consumption(self):
         """Derive consumed litres from the Fuel Consumption Ledger and the

@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#ns38m9]
 
 frappe.pages['action-inbox'].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -10,9 +9,6 @@ frappe.pages['action-inbox'].on_page_load = function (wrapper) {
 	wrapper.action_inbox = new ActionInbox(page);
 };
 
-// Desk pages ship no stylesheet — structural layout is inline styles bound to
-// native Desk CSS variables (theme/dark-mode aware). Status colour stays on
-// native indicator-pills.
 const AI_STYLE = {
 	root: 'display:flex;flex-direction:column;gap:var(--margin-lg,20px);padding-block:var(--padding-md,15px);',
 	section: 'display:flex;flex-direction:column;gap:var(--margin-sm,10px);',
@@ -32,10 +28,8 @@ const AI_STYLE = {
 class ActionInbox {
 	constructor(page) {
 		this.page = page;
-		// [#9y9w2i]
 		this._build_skeleton();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
-		// [#4u0s03]
 		frappe.realtime.on('notification', frappe.utils.debounce(() => this.refresh(), 5000));
 		this.refresh();
 	}
@@ -54,7 +48,6 @@ class ActionInbox {
 		this.$notifsSection = this._section(__('Notifications'));
 		this.$notifs = this.$notifsSection.find('.ai-list');
 
-		// [#gqzws7]
 		this.$empty = $('<div class="ai-empty text-muted"></div>').attr('style', AI_STYLE.empty).appendTo(this.$root);
 		this._allSections = [
 			this.$approvalsSection, this.$tasksSection, this.$submittedSection,
@@ -64,7 +57,6 @@ class ActionInbox {
 
 	_section(title) {
 		const $s = $('<section class="ai-section"></section>').attr('style', AI_STYLE.section).appendTo(this.$root);
-		// Uppercasing + letter-spacing break Arabic shaping → drop both in RTL.
 		const head = frappe.utils.is_rtl()
 			? 'font-size:var(--text-md,14px);font-weight:600;color:var(--text-muted);'
 			: AI_STYLE.section_head;
@@ -81,7 +73,6 @@ class ActionInbox {
 			.catch(() => this._render_error());
 	}
 
-	// [#fltkjy]
 	_render(data) {
 		const awaiting = data.awaiting_action || {};
 		const workflow_actions = awaiting.workflow_actions || [];
@@ -130,7 +121,6 @@ class ActionInbox {
 			.appendTo(this.$empty);
 	}
 
-	// [#ml5epr]
 	_workflow_card(row) {
 		const $card = $('<div class="ai-card ai-card--workflow"></div>').attr('style', AI_STYLE.card).appendTo(this.$approvals);
 		const $head = $('<div class="ai-card-head"></div>').attr('style', AI_STYLE.card_head).appendTo($card);
@@ -195,7 +185,6 @@ class ActionInbox {
 			.finally(() => frappe.dom.unfreeze());
 	}
 
-	// [#jwf4jo]
 	_todo_card(row) {
 		const $card = $('<div class="ai-card ai-card--todo"></div>').attr('style', AI_STYLE.card).appendTo(this.$tasks);
 		const $head = $('<div class="ai-card-head"></div>').attr('style', AI_STYLE.card_head).appendTo($card);
@@ -245,7 +234,6 @@ class ActionInbox {
 			.finally(() => frappe.dom.unfreeze());
 	}
 
-	// [#sexmnv]
 	_doc_card($list, row, color) {
 		const $card = $('<div class="ai-card ai-card--doc"></div>').attr('style', AI_STYLE.card).appendTo($list);
 		const $head = $('<div class="ai-card-head"></div>').attr('style', AI_STYLE.card_head).appendTo($card);
@@ -262,7 +250,6 @@ class ActionInbox {
 		$('<span class="ai-card-state"></span>').text(__('Status: {0}', [row.status || ''])).appendTo($meta);
 	}
 
-	// [#7e345x]
 	_notification_card(row) {
 		const $card = $('<div class="ai-card ai-card--notif"></div>').attr('style', AI_STYLE.card).appendTo(this.$notifs);
 		const $head = $('<div class="ai-card-head"></div>').attr('style', AI_STYLE.card_head).appendTo($card);

@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#reao6e]
 
 frappe.ui.form.on("Fuel Claim", {
 	setup(frm) {

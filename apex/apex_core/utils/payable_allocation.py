@@ -24,14 +24,9 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-# The approved native payable a payment must settle. A Payment Entry is raised FROM
-# one of these, never on account.
 PAYABLE_SOURCE_DOCTYPE = "Purchase Invoice"
 PAYMENT_ENTRY_DOCTYPE = "Payment Entry"
 
-# Settlement states, in the order the operator sees them. Stored nowhere: each one is
-# read from the live Payment Entry, so cancelling the payment reverses the status with
-# no reversal code and nothing to drift out of step with the ledger.
 NOT_RAISED = "Not Raised"
 AWAITING_APPROVAL = "Awaiting Finance Approval"
 SETTLED = "Settled"
@@ -91,6 +86,11 @@ def load_eligible_payable(company: str, supplier: str, purchase_invoice: str | N
 
     Every condition is re-checked here rather than trusted from the picker: the caller
     is a browser and the eligible set can change between listing and paying.
+
+    The existence probe filters on ``name`` rather than using the positional form,
+    because ``frappe.db.exists(dt, dn)`` answers ``dn`` back WITHOUT querying when the
+    two are equal (database.py:1259). The literal string "Purchase Invoice" would
+    otherwise clear this gate and reach get_doc.
     """
     if not purchase_invoice:
         frappe.throw(
@@ -100,9 +100,6 @@ def load_eligible_payable(company: str, supplier: str, purchase_invoice: str | N
             ).format(_(PAYABLE_SOURCE_DOCTYPE)),
             title=_("Payable Source Required"),
         )
-    # The probe filters on ``name`` because the positional form answers the value back
-    # WITHOUT querying when it equals the DocType (database.py:1259) — the literal
-    # string "Purchase Invoice" would otherwise clear this gate and reach get_doc.
     if not frappe.db.exists(PAYABLE_SOURCE_DOCTYPE, {"name": purchase_invoice}):
         frappe.throw(
             _("{0} {1} does not exist.").format(_(PAYABLE_SOURCE_DOCTYPE), purchase_invoice)
@@ -179,9 +176,6 @@ def build_allocated_payment(company: str, supplier: str, purchase_invoice: str |
     require_money_source(company)
 
     payment = get_payment_entry(PAYABLE_SOURCE_DOCTYPE, invoice.name)
-    # Fail closed rather than hand back an on-account payment: if the native builder
-    # produced no allocation (the invoice was settled between the check and here), the
-    # document would settle nothing while looking like a rent or telecom payment.
     if allocated_total(payment) <= 0:
         frappe.throw(
             _("No amount could be allocated against {0} {1}. Refresh and try again.").format(

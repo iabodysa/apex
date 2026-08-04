@@ -38,7 +38,6 @@ class DriverAttendance(Document):
         if self.check_in and self.check_out:
             check_in = get_datetime(f"{self.attendance_date} {self.check_in}")
             check_out = get_datetime(f"{self.attendance_date} {self.check_out}")
-            # [#97vbp6]
             if check_out < check_in:
                 check_out = get_datetime(f"{add_days(self.attendance_date, 1)} {self.check_out}")
             seconds = time_diff_in_seconds(check_out, check_in)

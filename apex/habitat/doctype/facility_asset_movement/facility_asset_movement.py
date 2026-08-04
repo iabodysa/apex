@@ -22,7 +22,6 @@ class FacilityAssetMovement(Document):
 
 
 def validate(doc, method=None):
-    # [#mkyjak]
     _reconcile_origin(doc)
     _populate_company_fields(doc)
     _detect_intercompany(doc)
@@ -42,7 +41,6 @@ def on_submit(doc, method=None):
     on Facility Asset (its fields are ``building``/``location_in_building``), so the
     guarded ``updates`` dict stayed empty — every movement was a silent no-op and the
     audit fields (previous_*/movement_count/last_movement_date) never populated."""
-    # [#tlz09o]
     asset = frappe.db.get_value(
         "Facility Asset",
         doc.facility_asset,
@@ -51,9 +49,6 @@ def on_submit(doc, method=None):
     )
     if not asset:
         return
-    # Ledger the room the asset REALLY leaves, not the blank a non-Room origin leaves in
-    # the from_room Link: ledgering that blank erased where the asset came from, and
-    # on_cancel restored it onto the asset. Same shim move_asset_on_delivery uses.
     post_asset_movement(
         frappe._dict(
             doctype=doc.doctype,
@@ -67,7 +62,6 @@ def on_submit(doc, method=None):
             to_company=doc.to_company,
         )
     )
-    # [#7ufx25]
     frappe.db.set_value("Facility Asset", doc.facility_asset, {
         "previous_building": asset.building,
         "previous_location_in_building": asset.location_in_building,
@@ -90,7 +84,6 @@ def on_cancel(doc, method=None):
 
     Safe to restore the origin unconditionally because ``before_cancel`` has already
     refused any cancel whose asset no longer sits where this movement left it."""
-    # [#ts0anf]
     origin = ledgered_origin(doc.doctype, doc.name)
     reverse_asset_movement(doc.doctype, doc.name)
     if not frappe.db.exists("Facility Asset", doc.facility_asset):
@@ -101,16 +94,12 @@ def on_cancel(doc, method=None):
         "location_in_building": origin.from_location if origin else doc.from_room,
         "movement_count": max(0, count - 1),
     })
-    # previous_*/last_movement_date are on_submit snapshots; leaving them behind
-    # makes the asset read "at A, previously A" and cite a cancelled move's date.
     restore_asset_audit_trail(doc.facility_asset)
 
 
 def before_cancel(doc, method=None):
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is required before cancelling a Facility Asset Movement."))
-    # Fail before the docstatus flip: on_cancel restores from_* blindly, so an
-    # out-of-order cancel would clobber whatever moved the asset afterwards.
     ensure_asset_still_at(
         doc.facility_asset,
         building=doc.to_building,
@@ -138,12 +127,6 @@ def _reconcile_origin(doc):
         frappe.throw(
             _("From Building does not match the asset's current location ({0}).").format(asset.building)
         )
-    # [#bwngzw]
-    # from_room is a Link to Room while the asset's location_in_building is Data, so a
-    # room that is not a Room record cannot go in the Link and is narrowed away HERE
-    # ONLY -- it is not discarded. on_submit ledgers the asset's recorded room as the
-    # movement's origin and on_cancel reads it back, so an unrecognised room survives
-    # the move instead of being blanked out of the asset.
     asset_room = asset.location_in_building
     if asset_room and not frappe.db.exists("Room", asset_room):
         asset_room = None
@@ -175,9 +158,6 @@ def _validate_intercompany_gates(doc):
         frappe.throw(_("Release Approved By is required for intercompany asset movement."))
     if not doc.receiving_confirmed_by:
         frappe.throw(_("Receiving Confirmed By is required for intercompany asset movement."))
-    # Only the three permlevel-0 writers can satisfy this gate (System Manager,
-    # Accommodation Manager, Resident Supervisor); Finance Manager is read-only here, so
-    # the field label no longer claims "(Finance)". See the colocated acknowledgement test.
     if doc.movement_category == "Intercompany Permanent" and not doc.accounting_acknowledged:
         frappe.throw(
             _("Accounting Acknowledged is required before submitting a permanent intercompany transfer.")

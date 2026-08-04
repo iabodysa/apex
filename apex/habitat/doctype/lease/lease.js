@@ -1,7 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// Decision: option (b) adopted — company populated via frappe.defaults.get_global_default
-// on onload for new documents. Rationale: better UX; the validate()-time fallback in
-// accommodation_lease.py remains as a safety net for programmatic document creation.
 frappe.ui.form.on("Lease", {
 	setup(frm) {
 		frm.set_query("building", () => ({
@@ -50,9 +47,6 @@ frappe.ui.form.on("Lease", {
 
 		if (frm.doc.docstatus === 1 && frm.doc.status !== "Expired" && frm.doc.status !== "Terminated") {
 			frm.add_custom_button(__("Generate Payment"), function() {
-				// [#37puzh] Pick an OUTSTANDING (non-Paid) row: a manually checked
-				// row only if it is still unpaid, else the first non-Paid due row.
-				// Never re-pay a row already marked Paid.
 				const schedule = frm.doc.payment_schedule || [];
 				const checked = schedule.find(r => r.__checked);
 				const selected = (checked && checked.status !== "Paid")
@@ -66,13 +60,6 @@ frappe.ui.form.on("Lease", {
 					return;
 				}
 
-				// [#mrbtun] Which payment document this raises is decided SERVER-side and
-				// nowhere else. This button used to read the Payment Routing target and
-				// then choose among three hard-coded branches, so a deployment could
-				// configure one target and be handed another here. The server reads the
-				// configured target, refuses a mismatch by name, and builds the Payment
-				// Entry from the landlord's invoice — a browser-built one carried no
-				// references row and settled no invoice at all.
 				raise_rent_payment(frm, selected);
 			});
 		}
@@ -87,10 +74,6 @@ frappe.ui.form.on("Lease", {
 	},
 });
 
-// A rent payment needs a payable behind it. With no submitted landlord invoice
-// outstanding there is nothing to allocate against, so the dialog never opens and the
-// operator is told what finance must raise first — instead of being handed a payment
-// that looks like the rent and settles nothing. The server repeats every check.
 function raise_rent_payment(frm, selected) {
 	frappe.call({
 		method: "apex.habitat.doctype.lease.lease_payment.list_rent_payables",
@@ -114,9 +97,6 @@ function raise_rent_payment(frm, selected) {
 	});
 }
 
-// The settlement line is READ from the live Payment Entry each time the instalment
-// changes — derived server-side, never stored — so a payment cancelled in Accounts
-// shows here as reversed without anything writing a status back onto the lease.
 function _render_rent_settlement(dialog, frm, due_date) {
 	const $wrapper = dialog.fields_dict.settlement_html.$wrapper;
 	if (!due_date) {

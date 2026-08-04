@@ -11,14 +11,11 @@ from frappe import _
 
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 
-# [#95hxd8]
 from apex.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_url
 from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401  (re-exported)
 from apex.salis.utils import bound_vehicle, expiry_state, get_driver_for_user, has_any_role
 
 
-# [#g14lmr] Display/navigation hint only. Deliberately WIDER than boarding.py's
-# same-named tuple: Finance Manager sees the desk links but may not scan a rider on.
 STAFF_ROLES = (
     "Fleet Manager",
     "Fleet Project Manager",
@@ -75,20 +72,16 @@ def _staff_links(user=None):
     roles = set(frappe.get_roles(user))
     links = []
 
-    # [#9qndfi]
     if user == "Administrator" or roles & set(STAFF_ROLES):
         links.append({"label": frappe._("Salis Workspace"), "url": "/app/salis"})
 
-    # [#8ubj1y]
     dispatch_roles = {"System Manager", "Fleet Manager", "Fleet Project Manager", "Fleet Supervisor"}
     if user == "Administrator" or roles & dispatch_roles:
         links.append({"label": frappe._("Dispatch Board"), "url": "/app/salis-dispatch-board"})
 
-    # [#cd8prs]
     if frappe.has_permission("Transport Request", "read", user=user):
         links.append({"label": frappe._("Transport Requests"), "url": "/app/transport-request"})
 
-    # [#mpoxzg]
     fuel_roles = {"System Manager", "Fleet Manager", "Fleet Project Manager", "Finance Manager"}
     if user == "Administrator" or roles & fuel_roles:
         links.append({"label": frappe._("Fuel Approval Console"), "url": "/app/fuel-approval-console"})
@@ -145,7 +138,7 @@ def _route_first_stop_maps_url(route_plan):
         return None
     from apex.salis.api import masar
 
-    for stop in masar._ordered_stops(route_plan):  # [#492z2y]
+    for stop in masar._ordered_stops(route_plan):
         pickup = stop.get("pickup") or {}
         if pickup.get("google_maps_url"):
             return pickup["google_maps_url"]
@@ -213,7 +206,6 @@ def _attach_boarding_counts(trips, driver):
     boarded_by_trip = {
         row["dispatch_trip"]: frappe.utils.cint(row.get("boarded_count")) for row in logs
     }
-    # [#7hx8om]
     requests = {t.get("transport_request") for t in trips if t.get("transport_request")}
     expected_by_request = {}
     if requests:
@@ -408,11 +400,10 @@ def mark_arrived(dispatch_trip, route_stop, arrived=1, sequence=None, stop_name=
 
     _require_enabled()
     driver = _resolve_driver()
-    trip = _resolve_my_trip(dispatch_trip, driver)  # [#t2dv4b]
+    trip = _resolve_my_trip(dispatch_trip, driver)
     stop = _resolve_trip_route_stop(trip, route_stop)
     log = _open_trip_log(dispatch_trip, driver)
     if not log:
-        # [#cdwtmt]
         frappe.throw(_("Start the trip before marking arrival."))
 
     arrived = frappe.utils.cint(arrived)
@@ -436,7 +427,6 @@ def mark_arrived(dispatch_trip, route_stop, arrived=1, sequence=None, stop_name=
     log.flags.ignore_permissions = True  # audit-ok — driver resolved credential-first
     log.save()
 
-    # [#3zpvvl]
     if arrived:
         _publish("boarding_arrived", dispatch_trip, {"route_stop": route_stop})
 
@@ -469,7 +459,6 @@ def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
     if not web_push.is_configured():
         frappe.throw(_("Background notifications are not enabled."), frappe.PermissionError)
 
-    # [#1yrr5m]
     if not web_push.is_allowed_push_endpoint(endpoint):
         frappe.throw(_("This push subscription endpoint is not allowed."))
 
@@ -494,10 +483,6 @@ def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
         if existing
         else frappe.new_doc("Driver Push Subscription")
     )
-    # Drivers enter by barcode with no Frappe User (full cutover), so the session is
-    # Guest — the subscription is keyed on the resolved ``driver`` (endpoint is the
-    # unique row key). Stamp ``user`` only when a real logged-in user is present
-    # (a desk staff preview), never the meaningless "Guest".
     session_user = frappe.session.user
     doc.update(
         {
@@ -515,7 +500,6 @@ def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
     return {"name": doc.name}
 
 
-# [#s2ftfd]
 from apex.salis.api.driver_portal.profile import (  # noqa: E402
     get_driver_context,
     get_driver_profile,

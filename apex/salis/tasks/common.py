@@ -12,13 +12,8 @@ from apex.apex_core.utils.operations_alert import insert_operations_alert
 BATCH_SIZE = 500
 
 
-# [#661ibk]
 ALERT_DOCTYPE = "Operations Alert"
 
-# _raise_alert runs INSIDE the Salis scheduler loops, so its own recovery must be
-# scoped to a savepoint of its own: a bare rollback would discard the caller's whole
-# run AND destroy the per-row savepoint the caller set. Distinct from the loops'
-# names, which would otherwise be replaced mid-iteration.
 _ALERT_SAVEPOINT = "salis_alert"
 
 
@@ -48,7 +43,6 @@ def _resolve_project_supervisor(vehicle: str | None) -> str | None:
         project = frappe.db.get_value("Salis Vehicle", vehicle, "project")
         return _project_supervisor(project)
     except Exception:
-        # [#6uz2xe]
         frappe.log_error(title="Salis: resolve project supervisor failed")
         return None
 
@@ -60,7 +54,6 @@ def _vehicle_project(vehicle: str | None) -> str | None:
     try:
         return frappe.db.get_value("Salis Vehicle", vehicle, "project")
     except Exception:
-        # [#tn6dm7]
         frappe.log_error(title="Salis: resolve vehicle project failed")
         return None
 
@@ -101,7 +94,6 @@ def _raise_alert(
     """
     from frappe.utils import add_days, today
 
-    # [#k7ei2t]
     day = today()
     dedupe_filters = {
         "alert_type": alert_type,
@@ -125,10 +117,6 @@ def _raise_alert(
         )
         return None
 
-    # [#sqhguz] Insert via the shared helper: it applies ignore_permissions, resolves
-    # responsible_supervisor from the vehicle's project (same logic as the local
-    # _resolve_project_supervisor), clips the message to 2000, and rolls back/log_errors
-    # on failure — byte-for-byte the old inline block. A failed/None insert skips the rest.
     alert_name = insert_operations_alert(
         alert_type,
         severity,
@@ -139,10 +127,8 @@ def _raise_alert(
     if alert_name is None:
         return None
 
-    # [#oplihr]
     _publish_operations_alert(_vehicle_project(vehicle))
 
-    # [#gg8xk4]
     if source_doctype and source_name:
         frappe.db.savepoint(_ALERT_SAVEPOINT)
         try:
@@ -173,7 +159,6 @@ def _resolve_alert(alert_name: str, reason: str) -> bool:
     if current == "Resolved":
         return False
 
-    # [#r0ukij]
     frappe.db.set_value(
         ALERT_DOCTYPE,
         alert_name,
@@ -189,7 +174,6 @@ def _resolve_alert(alert_name: str, reason: str) -> bool:
             "Info", _("Auto-resolved: {0}").format(reason)
         )
     except Exception:
-        # [#qh1i7r]
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"Alert resolve comment failed for {alert_name}"[:140],

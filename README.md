@@ -169,35 +169,33 @@ The interface changes by role, but identity, authorization, workflow checks, and
 
 ```mermaid
 graph LR
-    HAB["Habitat<br/>module root"]:::hub_ws
-    SALIS["Salis<br/>module root"]:::sal_ws
-    BE["Backend Engines<br/>hidden · System Manager"]:::restricted
+    APEX["Apex<br/>root"]:::hub_ws
 
-    subgraph HAB_NAV ["Habitat children"]
-        HOUSING["Housing"]:::ws
-        SAFETY["Safety"]:::ws
-        CUSTODY["Custody"]:::ws
-        COSTS["Costs and Leasing"]:::ws
+    CORE["Apex Core"]:::ws
+    TASKS["My Tasks"]:::ws
+    LOG["Logistay"]:::log_ws
+
+    subgraph HAB_NAV ["Habitat"]
+        HAB["Habitat"]:::ws
+        HS["Housing and Safety"]:::ws
+        CC["Custody and Costs"]:::ws
     end
 
-    subgraph SAL_NAV ["Salis children"]
+    subgraph SAL_NAV ["Salis"]
+        SALIS["Salis"]:::sal_ws
         FLEET["Fleet"]:::sal_child
-        COMP["Compliance and Rentals"]:::sal_child
     end
 
-    LOG["Telecom Control<br/>Logistay Desk page"]:::log_ws
+    APEX --> CORE
+    APEX --> HAB
+    APEX --> SALIS
+    APEX --> LOG
+    APEX --> TASKS
 
-    HAB --> HOUSING
-    HAB --> SAFETY
-    HAB --> CUSTODY
-    HAB --> COSTS
-
+    HAB --> HS
+    HAB --> CC
     SALIS --> FLEET
-    SALIS --> COMP
 
-    CUSTODY --> LOG
-
-    classDef restricted fill:#f1f5f9,stroke:#475569,color:#334155,stroke-dasharray:4 3;
     classDef hub_ws     fill:#1d4ed8,stroke:#1d4ed8,color:#fff;
     classDef ws         fill:#dbeafe,stroke:#1e3a8a,color:#1e3a8a;
     classDef sal_ws     fill:#166534,stroke:#166534,color:#fff;
@@ -205,9 +203,9 @@ graph LR
     classDef log_ws     fill:#9a3412,stroke:#9a3412,color:#fff;
 ```
 
-Nine public workspaces ship as `is_standard` JSON under `apex/habitat/workspace/` and `apex/salis/workspace/`: two module roots — Habitat with four children and Salis with two — plus **Backend Engines**, a hidden root limited to System Manager because its ledgers and snapshots are system-written and read-only. The personal **Action Inbox** is a shortcut on both module roots, not a workspace of its own. See [Workspace design](docs/WORKSPACE-DESIGN.md) for the layout method these workspaces follow.
+Nine public workspaces ship as `is_standard` JSON, one directory per owning module under `apex/apex_core/workspace/`, `apex/habitat/workspace/`, `apex/salis/workspace/` and `apex/logistay/workspace/`. **Apex** is the single root; **Habitat** and **Salis** are domain roots that carry the screens beneath them. A module gets a workspace per screen an operator opens, not one per module, which is why Habitat has two children and Salis one. The personal **Action Inbox** is a shortcut on the module roots, not a workspace of its own. Every row above — parent, order and role gate — is listed in [modules, workspaces, and routes](docs/reference/routes-workspaces.md), which is generated from the Workspace JSON itself.
 
-Logistay ships no workspace of its own, by design. It **owns** the telecom model — `SIM Card`, `SIM Custody Assignment`, `Telecom Contract`, and `Telecom Billing Document`, together with six telecom reports, three number cards, and the **Telecom Control** Desk page, every one of them declaring `"module": "Logistay"`. The **Custody** workspace is their single navigation host: the telecom card, the Telecom Control shortcut, the three telecom number cards, and the six telecom reports all sit there beside the custody flow, and the `SIM Operations User` role is granted on that workspace so the gate travels with the surface. This split is deliberate and settled — a SIM in an employee's hands is a custody record, so it belongs next to the rest of the company property an employee holds, while the module that owns the data stays Logistay. Ownership and navigation are separate questions here, and they have separate answers.
+Logistay ships one workspace and **owns** the telecom model — `SIM Card`, `SIM Custody Assignment`, `Telecom Contract`, and `Telecom Billing Document`, together with its telecom reports, number cards, and the **Telecom Control** Desk page, every one of them declaring `"module": "Logistay"`. Custody is the second navigation host: the **Custody and Costs** workspace carries the Telecom Control shortcut beside the custody flow, and the `SIM Operations User` role is granted on both. This split is deliberate and settled — a SIM in an employee's hands is a custody record, so it belongs next to the rest of the company property an employee holds, while the module that owns the data stays Logistay. Ownership and navigation are separate questions here, and they have separate answers.
 
 ## Backend surfaces
 
@@ -268,7 +266,6 @@ Modern interfaces use a conventional source-build-route-test separation:
 frontend/      Vue and Vite source applications — one npm workspace
 apex/public/   compiled browser assets — one committed bundle per portal
 apex/www/      Frappe routes, page shells, and the authentication bootstrap
-e2e/           browser-level tests
 ```
 
 `frontend/` is a single npm workspace of seven packages — `fleet`, `fleet_os`, `frontend_shared`, `housing`, `route_supervisor`, `safety`, and `worker`. The driver screens are folded into `worker`: they keep their own source tree at `frontend/driver/src`, which declares no manifest and is not an eighth package — `worker` imports it and builds both service workers, so `ls frontend/` shows one more directory than the workspace list. `frontend/package.json` is the only manifest that declares dependencies and `frontend/package-lock.json` the only lockfile, so a framework version cannot drift between portals. `npm run build` rebuilds all six committed bundles under `apex/public/`. The shared runtime, the Vite config factory, and the portal `src/` skeleton are documented in [`frontend/frontend_shared/README.md`](frontend/frontend_shared/README.md).
@@ -303,20 +300,16 @@ Desk users work through native workspaces, forms, reports, and operator pages. M
 
 ### Keeping the route table honest
 
-The table above is a published description of a directory that changes whenever a portal is added, split, or retired. Three checks stand behind it, and they cover different things.
+The table above is a published description of a directory that changes whenever a portal is added, split, or retired, and it is written by hand — the audience and design notes in it are judgements, not facts a script can read off the tree.
 
-`apex/tests/test_workspace_doc_parity.py` derives the table itself, so nothing in it is maintained by hand. It reads every shell and controller under `apex/www/` and compares, row by row, the route, the controller module, the bundle the shell mounts, whether guests are redirected to login, and the exact role set the controller's `get_context()` applies. The route count in the sentence above is derived the same way. The comparison runs in both directions: a documented route that no longer ships and a shipped route this table omits both fail, and so does a role added to or dropped from a gate constant without the table following it.
-
-`apex/tests/test_portal_route_coverage.py` covers a different set. It parses the shells under `apex/www/`, the bundle-rebuild matrix in the Portal Bundles workflow, and the browser smoke list, and fails when those three disagree — so a served route can never ship a bundle that nothing rebuilds or nothing opens. `apex/tests/test_apps_screen_gate_wiring.py` closes the neighbouring gap: it resolves, per server module, the routes that actually reach it, and fails a module whose own docstring claims a route it does not serve.
-
-Because the gate column is derived, it carries a fixed shape: a gated row names its controller's role constant in backticks, followed immediately by a colon and the comma-separated role list, ending in a period. Prose may sit either side of that segment. A row with no such segment asserts the route applies no role gate at all, and reds if the controller applies one.
+The facts are published separately and are not hand-maintained. [Modules, workspaces, and routes](docs/reference/routes-workspaces.md) is generated from the shipped `modules.txt`, Workspace JSON, Page JSON and `www/` templates: the route, the controller module, the bundle its shell mounts, whether guests are redirected to login, and the exact role set the controller's `get_context()` applies. A shipped route the page omits, or a role added to or dropped from a gate constant, changes the generated file. Regenerating it must leave the tree unchanged; that check runs in the maintainer's local guard sweep, not in CI, so a clone carries the page but not the gate that keeps it current. When the two disagree, the generated page is the one to believe.
 
 ## Security and integrity
 
 - Roles, document permissions, ownership, building or project scope, and workflow state are enforced on the server.
 - Portal tokens are personal and purpose-scoped; they do not grant Desk roles or broader document access.
 - Submission and cancellation guards protect workflow-controlled records from bypass.
-- Machine-written ledgers and snapshots are read-only to users and isolated in Backend Engines.
+- Machine-written ledgers and snapshots are read-only to users; no workspace offers a create path into them.
 
 ## Localization
 
@@ -337,10 +330,15 @@ Any reverse proxy, load balancer, or CDN placed in front of the site must **over
 
 ## Documentation
 
-- [Training guide](docs/TRAINING.md)
-- [Integration guide](docs/INTEGRATION.md)
-- [Workspace design](docs/WORKSPACE-DESIGN.md)
+[docs/](docs/README.md) is the index; it routes by audience — operators and trainers, administrators, integrators, reference.
+
+- [Training guide](docs/training/README.md)
+- [Installation](docs/administration/installation.md)
+- [Integration guide](docs/administration/integration.md)
+- [Workspace authoring](docs/administration/workspace-authoring.md)
 - [Reverse proxy prerequisite](docs/administration/reverse-proxy.md)
+- [Modules, workspaces, and routes](docs/reference/routes-workspaces.md)
+- [Permissions and roles](docs/reference/permissions.md)
 
 ## License
 

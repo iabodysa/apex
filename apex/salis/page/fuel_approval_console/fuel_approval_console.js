@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#80d3f2]
 
 frappe.pages["fuel-approval-console"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -12,11 +11,6 @@ frappe.pages["fuel-approval-console"].on_page_load = function (wrapper) {
 	fac.setup();
 };
 
-// Board look restored on native Desk CSS variables — no stylesheet and no injected
-// <style> (the removed fac-board-styles block). Colours are Desk colour-scale vars
-// (theme + dark-mode aware); spacing uses logical properties so the queue mirrors
-// correctly under RTL. Applied as inline style="" overlays since a Desk page ships
-// no CSS of its own.
 const FAC_STYLE = {
 	board: "padding-block:4px 24px;padding-inline:2px;",
 	grid: "display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;",
@@ -35,7 +29,6 @@ const FAC_STYLE = {
 	error_detail: "font-size:0.85rem;margin-block-end:14px;overflow-wrap:anywhere;",
 	card:
 		"display:flex;flex-direction:column;gap:12px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--border-radius-lg);padding:16px;box-shadow:var(--shadow-sm);",
-	// Over-threshold accent: a coloured start-edge bar (logical, mirrors under RTL).
 	card_over: "border-inline-start:4px solid var(--red-500);",
 	card_head: "display:flex;align-items:flex-start;justify-content:space-between;gap:8px;",
 	card_identity: "min-inline-size:0;",
@@ -57,8 +50,6 @@ const FAC_STYLE = {
 		"font-family:var(--font-stack-mono);font-size:0.74rem;color:var(--text-muted);background:var(--control-bg);border-radius:6px;padding-block:2px;padding-inline:7px;",
 	actions: "display:flex;gap:8px;flex:none;",
 };
-// Uppercasing + letter-spacing distort Arabic letter-joining → apply that eyebrow
-// accent (flag chip + metric labels) only in LTR.
 function fac_upper() {
 	return frappe.utils.is_rtl() ? "" : "text-transform:uppercase;letter-spacing:0.03em;";
 }
@@ -70,8 +61,6 @@ class FuelApprovalConsole {
 	}
 
 	setup() {
-		// Desk page: no stylesheet. The board look is restored through the inline
-		// FAC_STYLE constants (native Desk CSS vars) — never a <style> injection.
 		this.$container = $('<div class="fac-board"></div>')
 			.attr("style", FAC_STYLE.board)
 			.appendTo(this.page.main);
@@ -99,14 +88,12 @@ class FuelApprovalConsole {
 	}
 
 	refresh() {
-		// [#mqjs64]
 		if (this._loading) return;
 		this._loading = true;
 		this._render_loading();
 		frappe.call({
 			method: "apex.salis.api.fuel_console.get_pending_fuel_requests",
 			args: { project: this.project || null },
-			// [#5q0uer]
 			callback: (r) => {
 				this._loading = false;
 				if (r.exc) {
@@ -123,7 +110,6 @@ class FuelApprovalConsole {
 	}
 
 	_error_text(r) {
-		// [#ajpm4h]
 		let detail = "";
 		try {
 			if (r && r._server_messages) {
@@ -148,8 +134,6 @@ class FuelApprovalConsole {
 		this.$container.empty();
 		const $grid = $('<div class="fac-grid"></div>').attr("style", FAC_STYLE.grid).appendTo(this.$container);
 		for (let i = 0; i < 6; i++) {
-			// Flat placeholder tile on the native --skeleton-bg Desk var (theme + dark
-			// aware); the removed shimmer @keyframes can't be reproduced without a sheet.
 			$('<div class="fac-card fac-skeleton fac-skel-card"></div>').attr("style", FAC_STYLE.skel).appendTo($grid);
 		}
 	}
@@ -173,7 +157,6 @@ class FuelApprovalConsole {
 	_render_cards(rows) {
 		this.$container.empty();
 
-		// [#6xlkub]
 		const sorted = rows
 			.slice()
 			.sort((a, b) => (b.over_threshold ? 1 : 0) - (a.over_threshold ? 1 : 0));
@@ -222,7 +205,6 @@ class FuelApprovalConsole {
 			FAC_STYLE.card + (row.over_threshold ? FAC_STYLE.card_over : "")
 		);
 
-		// [#9qgluq]
 		const $head = $('<div class="fac-card-head"></div>').attr("style", FAC_STYLE.card_head).appendTo($card);
 		const $identity = $('<div class="fac-card-identity"></div>').attr("style", FAC_STYLE.card_identity).appendTo($head);
 		$('<div class="fac-card-name"></div>')
@@ -240,9 +222,7 @@ class FuelApprovalConsole {
 				.appendTo($head);
 		}
 
-		// [#bjmntt]
 		const $metrics = $('<div class="fac-card-metrics"></div>').attr("style", FAC_STYLE.metrics).appendTo($card);
-		// [#p2hugt]
 		this._add_metric(
 			$metrics,
 			__("Litres"),
@@ -254,7 +234,6 @@ class FuelApprovalConsole {
 			frappe.format(row.amount, { fieldtype: "Currency" }, { inline: true })
 		);
 
-		// [#omhdwu]
 		const $body = $('<div class="fac-card-body"></div>').attr("style", FAC_STYLE.body).appendTo($card);
 		this._add_row($body, __("Project"), row.project || "—");
 		this._add_row($body, __("Platform"), row.fuel_platform || "—");
@@ -300,7 +279,6 @@ class FuelApprovalConsole {
 					freeze: true,
 					freeze_message: __("Approving…"),
 					callback: (r) => {
-						// [#jtyzu4]
 						if (r.exc || !r.message) return;
 						frappe.show_alert({
 							message: __("Approved: {0}", [r.message.name]),
@@ -346,7 +324,6 @@ class FuelApprovalConsole {
 					freeze: true,
 					freeze_message: __("Rejecting…"),
 					callback: (r) => {
-						// [#s1fa9i]
 						if (r.exc || !r.message) {
 							d.enable_primary_action();
 							return;

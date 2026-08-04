@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// Facility Asset Delivery — the 3-exit transfer lock + on-site code receipt.
 frappe.ui.form.on("Facility Asset Delivery", {
 	setup(frm) {
 		frm.set_query("facility_asset", () => ({
@@ -37,7 +36,6 @@ frappe.ui.form.on("Facility Asset Delivery", {
 				},
 			});
 
-		// The 3-exit lock: each exit unlocks the next, in order.
 		if (frm.doc.status === "Pending Exits") {
 			if (!frm.doc.exit1_security_cleared) {
 				frm.add_custom_button(__("Pass Exit 1 — Security"), () =>
@@ -62,7 +60,6 @@ frappe.ui.form.on("Facility Asset Delivery", {
 			}
 		}
 
-		// On-site code receipt: only once all 3 exits are passed (Released).
 		if (frm.doc.status === "Released") {
 			frm.add_custom_button(__("Confirm Receipt"), () => {
 				frappe.prompt(

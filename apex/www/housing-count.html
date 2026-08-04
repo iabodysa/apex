@@ -1,20 +1,4 @@
 <!DOCTYPE html>
-<!-- Redirect marker for the legacy /housing-count route. NOT a portal shell: it
-     mounts no SPA and loads no bundle, so the CDN guard's vendored-font rule does
-     not apply to it (test_www_no_external_cdn_assets.py scopes that rule to pages
-     carrying an #app mount plus a bundle script).
-
-     This file exists so the route RESOLVES. Frappe finds a www page by template
-     only — TemplatePage.get_index_path_options offers <route>, .html, .md and the
-     two /index forms, and can_render refuses any Python suffix — so without a
-     template here the sibling housing_count.py is never imported, its get_context
-     never runs, and /housing-count answers 404 instead of redirecting.
-
-     The body below is unreachable in normal operation: get_context raises
-     frappe.Redirect from update_context, which runs BEFORE setup_template_source,
-     so serve.py turns the request into a 301 to /housing#/count and this markup is
-     never rendered. It is kept as a working fallback for the day the controller is
-     removed or edited. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />

@@ -27,7 +27,6 @@ from frappe.model.document import Document
 
 class SafetyFindingLedger(Document):
     def on_update(self):
-        # [#41qjoa]
         if self.is_new():
             return
         if not self.flags.ignore_validate_update_after_submit and self.get_doc_before_save():
@@ -37,7 +36,6 @@ class SafetyFindingLedger(Document):
             )
 
     def on_trash(self):
-        # [#r4nmfj]
         if frappe.flags.in_install or frappe.flags.in_migrate:
             return
         frappe.throw(

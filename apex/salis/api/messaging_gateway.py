@@ -24,10 +24,8 @@ from apex.apex_core.utils.portal_token_security import (
     credential_delivery_destination,
 )
 
-# [#83v5lw]
 _SETTINGS = "Apex Integration Settings"
 
-# [#9b2f3r]
 _MAX_MESSAGE_LEN = 1000
 
 
@@ -42,7 +40,6 @@ def _gateway_config() -> dict | None:
     if not s.get("messaging_gateway_enabled"):
         return None
     url = (s.get("messaging_gateway_url") or "").strip()
-    # [#3uc5g2]
     api_key = s.get_password("messaging_gateway_api_key", raise_exception=False)
     if not url or not api_key:
         return None
@@ -94,7 +91,6 @@ def _post_to_gateway(cfg: dict, to: str, message: str, channel: str) -> dict:
         response = make_post_request(cfg["url"], headers=headers, json=payload)
         return {"sent": True, "channel": channel, "response": response}
     except Exception:
-        # [#e19ex1]
         frappe.log_error(title="Messaging gateway send failed")
         return {"sent": False, "channel": channel, "error": "gateway_error"}
 
@@ -112,18 +108,15 @@ def send_message(to: str, message: str, channel: str | None = None) -> dict:
 
     Credentials are read from Settings here, used for this call, and discarded;
     nothing is persisted or logged."""
-    # [#g186o4]
     try:
         cfg = _gateway_config()
     except Exception:
         frappe.log_error(title="Messaging gateway config read failed")
         return {"sent": False, "reason": "not_configured"}
     if not cfg:
-        # [#fvmqje]
         frappe.logger("messaging_gateway").info("send skipped: gateway not configured")
         return {"sent": False, "reason": "not_configured"}
 
-    # [#rtpvqi]
     try:
         phone = _normalize_phone(to)
         if not phone:

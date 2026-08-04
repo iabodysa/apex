@@ -14,7 +14,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now
 
-# [#6iwvbp]
 REQUIRED_AREAS = ("Bathrooms", "Kitchen", "Corridors")
 
 
@@ -24,13 +23,11 @@ class CleaningLog(Document):
         self._validate_area_evidence()
 
     def on_submit(self):
-        # [#1s2m8b]
         from apex.habitat.cleaning_engine import post_cleaning_compliance
 
         post_cleaning_compliance(self)
 
     def on_cancel(self):
-        # [#r2h75v]
         from apex.habitat.cleaning_engine import reverse_cleaning_compliance
 
         reverse_cleaning_compliance(self.name)

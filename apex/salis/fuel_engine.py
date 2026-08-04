@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Fuel engine for the Salis Movement module.
 
@@ -35,8 +34,6 @@ LEDGER_DOCTYPE = "Fuel Consumption Ledger"
 ALERT_DOCTYPE = "Operations Alert"
 BATCH_SIZE = 500
 
-# [#cz8o6i]
-# [#h0ikjm]
 OVERAGE_MARGIN = 0.05
 OVERAGE_MARGIN_DEFAULT_PERCENT = 5
 
@@ -100,7 +97,6 @@ def _insert_ledger_row(
     ).insert(ignore_permissions=True)  # audit-ok
 
 
-# [#k899r1]
 
 
 def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
@@ -126,7 +122,6 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
     """
     from frappe.utils import flt, now_datetime
 
-    # [#crdpay]
     originals = frappe.get_all(
         LEDGER_DOCTYPE,
         filters={
@@ -147,7 +142,6 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
 
     posted = 0
     for row in originals:
-        # [#aylfut]
         if frappe.db.exists(LEDGER_DOCTYPE, {"reversal_of": row.name}):
             continue
 
@@ -170,7 +164,6 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
     return posted
 
 
-# [#pq1azg]
 
 
 def accrue_fuel_consumption() -> None:
@@ -190,7 +183,6 @@ def accrue_fuel_consumption() -> None:
     yesterday_str = add_days(today_str, -1)
     logger = frappe.logger()
 
-    # [#oq5yrw]
     start = 0
     while True:
         logs = frappe.get_all(
@@ -204,7 +196,6 @@ def accrue_fuel_consumption() -> None:
             break
 
         for log in logs:
-            # [#p0ja2i]
             sp = "accrual_row"
             frappe.db.savepoint(sp)
             try:
@@ -231,8 +222,6 @@ def accrue_fuel_consumption() -> None:
 
         start += BATCH_SIZE
 
-    # [#hn7dnn]
-    # [#b85wxg]
     failed_names: set[str] = set()
     while True:
         filters = {
@@ -254,19 +243,16 @@ def accrue_fuel_consumption() -> None:
 
         progressed = False
         for req in requests:
-            # [#8xmm6h]
             sp = "accrual_row"
             frappe.db.savepoint(sp)
             try:
                 if not req.vehicle:
-                    # [#9zss72]
                     frappe.db.set_value(
                         "Fuel Request", req.name, "ledgered", 1, update_modified=False
                     )
                     progressed = True
                     continue
                 if _ledger_exists("Fuel Request", req.name):
-                    # [#e8gvyr]
                     frappe.db.set_value(
                         "Fuel Request", req.name, "ledgered", 1, update_modified=False
                     )
@@ -288,7 +274,6 @@ def accrue_fuel_consumption() -> None:
                 progressed = True
             except Exception:
                 frappe.db.rollback(save_point=sp)
-                # [#mtmmhw]
                 failed_names.add(req.name)
                 frappe.log_error(
                     message=frappe.get_traceback(),
@@ -296,13 +281,11 @@ def accrue_fuel_consumption() -> None:
                 )
 
         if not progressed:
-            # [#llc7jk]
             break
 
     logger.info("accrue_fuel_consumption: fuel consumption ledger updated.")
 
 
-# [#axtgzu]
 
 
 def _alert_already_raised(vehicle: str, period_month: str) -> bool:
@@ -367,7 +350,6 @@ def monthly_fuel_reconciliation() -> None:
             break
 
         for quota in quotas:
-            # [#gq48n8]
             sp = "accrual_row"
             frappe.db.savepoint(sp)
             try:

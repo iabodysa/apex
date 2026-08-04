@@ -55,7 +55,6 @@ def _manifest_for_board(transport_request):
         fields=["employee", "pickup_point"],
         order_by="idx asc",
     )
-    # [#cvb0id]
     emp_ids = [r["employee"] for r in rows if r.get("employee")]
     names = dict(
         frappe.get_all(
@@ -94,11 +93,10 @@ def manual_boarding_sheet(dispatch_trip):
     _require_enabled()
     from apex.salis.api import boarding
 
-    _resolve_driver()  # [#s4jmhw]
-    trip = boarding._resolve_trip(dispatch_trip)  # [#4tljfu]
+    _resolve_driver()
+    trip = boarding._resolve_trip(dispatch_trip)
 
     workers = _manifest_for_board(trip.get("transport_request"))
-    # [#er17go]
     log_name = frappe.db.get_value(
         "Trip Start Log", {"dispatch_trip": dispatch_trip, "docstatus": 0}, "name"
     )
@@ -144,23 +142,22 @@ def manual_board_workers(dispatch_trip, workers, stop_name=None, accommodation_b
     _require_enabled()
     from apex.salis.api import boarding
 
-    _resolve_driver()  # [#s4jmhw]
+    _resolve_driver()
     requested = _manual_worker_ids(workers)
-    trip = boarding._resolve_trip(dispatch_trip)  # [#4tljfu]
+    trip = boarding._resolve_trip(dispatch_trip)
 
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
-    manifest = boarding._trip_manifest_workers(trip.get("transport_request"))  # [#ba2aen]
-    log = boarding._get_or_create_log(dispatch_trip)  # [#clgkob]
+    manifest = boarding._trip_manifest_workers(trip.get("transport_request"))
+    log = boarding._get_or_create_log(dispatch_trip)
 
     boarded, skipped = [], []
     for worker in requested:
         if worker not in manifest:
-            # [#9ka9zn]
             _log_manual_scan(dispatch_trip, trip, worker, "Wrong Trip", log.name,
                               notes="Worker is not on this trip's manifest.")
             skipped.append({"worker": worker, "result": "Wrong Trip"})
             continue
-        if boarding._already_boarded(log, worker):  # [#gwg33g]
+        if boarding._already_boarded(log, worker):
             _log_manual_scan(dispatch_trip, trip, worker, "Duplicate", log.name,
                              notes="Worker already boarded this trip.")
             skipped.append({"worker": worker, "result": "Duplicate"})

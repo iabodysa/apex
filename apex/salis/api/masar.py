@@ -29,16 +29,12 @@ from apex.apex_core.utils.system_notify import notify_user_system
 from apex.salis.api import boarding_window
 from apex.salis.api.driver_portal import _require_enabled, _resolve_driver
 from apex.salis.utils import days_until as _days_until
-# [#55ldxu]
 from apex.salis.api.maps_links import _full_route_maps_url
 from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401  (re-exported)
 
-# [#6ddse8]
 WORKER_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
 
-# [#kta0hy]
 _EARTH_RADIUS_KM = 6371.0088
-# [#9inje9]
 _DEFAULT_FLEET_SPEED_KMPH = 40.0
 
 
@@ -102,7 +98,6 @@ def compute_ride_eta_minutes(dispatch_trip, pickup_building):
     )
     if not dest or dest.get("pickup_lat") is None or dest.get("pickup_lng") is None:
         return None
-    # [#1w40qu]
     if not (pos.get("driver_lat") or pos.get("driver_lng")):
         return None
     if not (dest.get("pickup_lat") or dest.get("pickup_lng")):
@@ -131,7 +126,6 @@ def _fmt_time(value):
         return frappe.utils.cstr(value)
 
 
-# [#hgsz8p]
 _FINISHED_TRIP_STATUSES = boarding_window.FINISHED_TRIP_STATUSES
 
 
@@ -195,7 +189,6 @@ def _today_worker_trips(driver):
     trips = _drop_finished_yesterday(trips)
     if not trips:
         return []
-    # [#popsyt]
     rp_ids = {t["route_plan"] for t in trips if not t.get("transport_request") and t.get("route_plan")}
     if rp_ids:
         rp_tr = {
@@ -237,7 +230,6 @@ def _registered_workers(transport_request):
         fields=["employee", "pickup_point", "notes"],
         order_by="idx asc",
     )
-    # [#c1mexk]
     emp_ids = {r["employee"] for r in rows if r.get("employee")}
     emp_names = (
         {
@@ -281,7 +273,6 @@ def _ordered_stops(route_plan):
         ],
         order_by="idx asc",
     )
-    # [#1f00x5]
     bldg_ids = {r["accommodation_building"] for r in rows if r.get("accommodation_building")}
     buildings = (
         {
@@ -418,7 +409,6 @@ def get_my_worker_route_summary() -> dict:
         stops = _ordered_stops(t.get("route_plan"))
         stop_count += len(stops)
         if next_pickup is None:
-            # [#jpju0q]
             for s in stops:
                 if s.get("accommodation_building") and s.get("pickup"):
                     pickup = s["pickup"]
@@ -443,12 +433,7 @@ def get_my_worker_route_summary() -> dict:
     }
 
 
-# [#74dyev]
-# [#sfc8jm]
-#   4. Mark each ignore_permissions write with an `# audit-ok` note stating the
-# [#3n7rv4]
 
-# [#r00mpe]
 WORKER_REQUEST_CATEGORIES = (
     "Maintenance",
     "Cleaning",
@@ -463,7 +448,6 @@ WORKER_REQUEST_CATEGORIES = (
     "Other",
 )
 
-# [#dux84r]
 WORKER_ISSUE_LOCATIONS = (
     "Room",
     "Bathroom",
@@ -475,14 +459,8 @@ WORKER_ISSUE_LOCATIONS = (
     "Other",
 )
 
-# [#sncoz9]
 WORKER_PREFERRED_LANGUAGES = ("English", "Arabic", "Urdu", "Hindi", "Bengali")
 
-# [#1kncdr]
-# Keyed by the content type the bytes are PROVEN to carry, so the stored extension is
-# derived from the image rather than trusted from the caller's filename. The set is the
-# one the shared verifier can actually open; a container it cannot read is refused, not
-# renamed. GIF/HEIC were listed here before and were never verified.
 WORKER_PHOTO_EXTENSIONS = {
     "image/jpeg": ".jpg",
     "image/png": ".png",
@@ -491,7 +469,6 @@ WORKER_PHOTO_EXTENSIONS = {
 WORKER_PHOTO_MAX_BYTES = 8 * 1024 * 1024
 
 
-# [#87hub4]
 MASAR_TOKEN_COOKIE = TOKEN_COOKIES[WORKER]
 
 
@@ -519,7 +496,6 @@ def _fmt_date(value):
     return frappe.utils.cstr(value) if value else None
 
 
-# [#tultqv]
 _ENUM_SOURCES = {
     "status": ("Employee", "status"),
     "stayType": ("Housing Assignment", "stay_type"),
@@ -563,7 +539,6 @@ def get_enum_labels(lang="ar"):
         labels = {}
         for opt in meta_field.options.split("\n"):
             opt = opt.strip()
-            # [#7r8jr6]
             if opt and translations.get(opt) and translations[opt] != opt:
                 labels[opt] = translations[opt]
         if labels:
@@ -584,7 +559,6 @@ def get_worker_context(token=None):
     emp = _employee_doc(employee)
 
     documents = []
-    # [#nvwidj]
     iqama_no = emp.get("iqama") or emp.get("iqama_no")
     iqama_expiry = emp.get("iqama_expiry") or emp.get("valid_upto")
     if iqama_no or iqama_expiry:
@@ -596,7 +570,6 @@ def get_worker_context(token=None):
                 "days_left": _days_until(iqama_expiry),
             }
         )
-    # [#p42hfv]
     passport_no = emp.get("passport_number")
     passport_expiry = emp.get("passport_expiry")
     if passport_no:
@@ -695,11 +668,9 @@ def get_worker_accommodation(token=None):
                     "name": frappe.utils.get_fullname(user) or user,
                     "phone": frappe.db.get_value("User", user, "mobile_no"),
                 }
-            # [#le3pcb]
             _addr = get_address_text("Site", b.get("site")) or get_address_text(
                 "Building", assignment["building"]
             )
-            # [#s4cggu]
             building = {
                 "name": b.get("name"),
                 "building_name": b.get("building_name"),
@@ -743,7 +714,6 @@ def get_worker_accommodation(token=None):
     }
 
 
-# [#77l2wp]
 def _is_upcoming_pickup(pickup_datetime, now_dt=None):
     """True when ``pickup_datetime`` (a backend string or datetime) is at or after
     ``now_dt`` (defaults to now). A missing pickup is treated as upcoming so a
@@ -757,7 +727,6 @@ def _is_upcoming_pickup(pickup_datetime, now_dt=None):
         return True
 
 
-# [#3pph3v]
 def _worker_pickup_stop(stops, my_building):
     """The worker's OWN pickup stop from the ordered route stops.
 
@@ -771,7 +740,6 @@ def _worker_pickup_stop(stops, my_building):
         for s in stops:
             if s.get("accommodation_building") == my_building:
                 return s
-    # [#5c8x93]
     for s in stops:
         if s.get("accommodation_building"):
             return s
@@ -857,11 +825,9 @@ def get_worker_transport(token=None):
     employee = _resolve_worker(token)
     requests = _worker_transport_requests(employee)
     now_dt = frappe.utils.now_datetime()
-    # [#dtcuvv]
     assignment = _active_assignment(employee)
     my_building = assignment.get("building") if assignment else None
 
-    # [#hnuxj1]
     vehicle_names = {r["assigned_vehicle"] for r in requests if r.get("assigned_vehicle")}
     driver_names = {r["assigned_driver"] for r in requests if r.get("assigned_driver")}
     trip_names = {r["dispatch_trip"] for r in requests if r.get("dispatch_trip")}
@@ -880,7 +846,6 @@ def get_worker_transport(token=None):
             filters={"name": ["in", list(driver_names)]},
             fields=["name", "full_name", "phone"],
         ):
-            # [#phubnp]
             driver_map[d["name"]] = {"full_name": d["full_name"], "phone": d["phone"]}
     depart_map = {}
     if trip_names:
@@ -913,10 +878,8 @@ def get_worker_transport(token=None):
         )
         is_upcoming = _is_upcoming_pickup(req.get("pickup_datetime"), now_dt)
         stops = _ordered_stops(req.get("route_plan"))
-        # [#73v959]
         my_pickup = _worker_pickup_stop(stops, my_building)
         destination = _route_destination_stop(stops, my_pickup)
-        # [#4li4u0]
         has_rated = bool(
             req.get("dispatch_trip") and not is_upcoming and req["dispatch_trip"] in rated_trips
         )
@@ -930,7 +893,6 @@ def get_worker_transport(token=None):
         )
         trip = {
             "transport_request": req["name"],
-            # [#rf9139]
             "dispatch_trip": dispatch_trip,
             "request_type": req.get("request_type"),
             "status": req.get("status"),
@@ -946,14 +908,12 @@ def get_worker_transport(token=None):
             "stops": stops,
             "my_pickup": my_pickup,
             "destination": destination,
-            # [#fpyvhu]
             "maps_route_url": _full_route_maps_url(stops),
             "vehicle": vehicle,
             "driver": driver,
         }
         (upcoming if is_upcoming else past).append(trip)
 
-    # [#g2nwgf]
     past.reverse()
     return {
         "date": frappe.utils.today(),
@@ -994,8 +954,6 @@ def list_worker_requests(token=None):
     return rows
 
 
-# [#t322rd]
-# [#afkogj]
 _RESIDENT_REQUEST_SETTLED_STATES = ("Resolved", "Rejected", "Closed")
 
 
@@ -1028,7 +986,6 @@ def _request_status_timeline(req):
             }
         )
     else:
-        # [#gdkpf5]
         if status and status != "New":
             timeline.append(
                 {
@@ -1069,7 +1026,6 @@ def get_worker_request_detail(token=None, name=None):
     if not name:
         frappe.throw(_("A request reference is required."), frappe.PermissionError)
 
-    # [#hua2eb]
     req = frappe.db.get_value(
         "Resident Request",
         {"name": name, "employee": employee},
@@ -1197,7 +1153,6 @@ def get_worker_custody(token=None):
             },
         )
         bucket["qty"] += flt(r.signed_qty)
-        # [#t7owl2]
         if flt(r.signed_qty) > 0:
             bucket["received_date"] = _fmt_date(r.posting_date)
             if r.voucher_type == "Custody Issue" and r.voucher_no:
@@ -1205,7 +1160,6 @@ def get_worker_custody(token=None):
 
     items = []
     for bucket in agg.values():
-        # [#lao4m9]
         if bucket["qty"] < 1e-9:
             continue
         bucket["issued_by"] = _custody_issued_by(bucket.pop("_issue_voucher"), bucket["building"])
@@ -1242,7 +1196,6 @@ def _attach_worker_photo(doc, photo, photo_filename):
     content_type = verified_image_type(photo, max_bytes=WORKER_PHOTO_MAX_BYTES)
 
     stem = (photo_filename or "request-photo").strip() or "request-photo"
-    # [#609lpl]
     stem = stem.replace("\\", "/").split("/")[-1]
     stem = os.path.splitext(stem)[0] or "request-photo"
     fname = f"{stem}{WORKER_PHOTO_EXTENSIONS[content_type]}"
@@ -1296,7 +1249,6 @@ def create_worker_request(
     if priority not in ("Low", "Medium", "High", "Critical"):
         priority = "Low"
 
-    # [#mt3f8m]
     issue_location = (issue_location or "").strip()
     if issue_location not in WORKER_ISSUE_LOCATIONS:
         issue_location = None
@@ -1310,7 +1262,6 @@ def create_worker_request(
         frappe.throw(_("Please describe your request."))
     description = body if not subject else (f"{subject}\n\n{body}" if body else subject)
 
-    # [#djhanf]
     assignment = _active_assignment(employee)
     building = room = bed = None
     if assignment:
@@ -1338,17 +1289,13 @@ def create_worker_request(
         }
     )
     doc.insert(ignore_permissions=True)  # audit-ok — employee resolved from token server-side
-    # [#aq6c4k]
     if photo:
         _attach_worker_photo(doc, photo, photo_filename)
     return {"name": doc.name, "status": doc.status}
 
 
-# [#hometdy]
-# [#keyejt]
 _DOCUMENT_ALERT_LEAD_DAYS = 60
 
-# [#348vlj]
 _RESIDENT_REQUEST_CLOSED_STATES = ("Resolved", "Rejected", "Closed")
 
 
@@ -1378,7 +1325,6 @@ def get_worker_home(token=None):
     Purely additive: it composes the existing token-scoped endpoints (each
     re-resolves the same token via ``_resolve_worker``) and changes none of
     them. Read-only, no commit, no GL."""
-    # [#6lefv1]
     _resolve_worker(token)
 
     profile = get_worker_context(token)
@@ -1388,17 +1334,14 @@ def get_worker_home(token=None):
         for d in documents
         if d.get("days_left") is not None and d["days_left"] <= _DOCUMENT_ALERT_LEAD_DAYS
     ]
-    # [#hv1hes]
     iqama_days_left = next(
         (d.get("days_left") for d in documents if d.get("type") == "iqama"),
         None,
     )
 
     transport = get_worker_transport(token)
-    # [#js5pkb]
     upcoming = transport.get("upcoming") or []
     next_ride = upcoming[0] if upcoming else None
-    # [#dyj7k3]
     if next_ride:
         next_ride = {
             **next_ride,
@@ -1407,7 +1350,6 @@ def get_worker_home(token=None):
             ),
         }
 
-    # [#e4b2n4]
     acc = get_worker_accommodation(token)
     bed = acc.get("bed")
     if bed:
@@ -1491,7 +1433,6 @@ def get_worker_contacts(token=None):
     }
 
 
-# [#l9ag3b]
 _IQAMA_NOTIFY_HR_LEAD_DAYS = 30
 
 
@@ -1530,13 +1471,11 @@ def notify_hr_iqama_expiring(token=None):
     employee = _resolve_worker(token)
     emp = _employee_doc(employee)
 
-    # [#ej5wro]
     iqama_no = emp.get("iqama") or emp.get("iqama_no")
     iqama_expiry = emp.get("iqama_expiry") or emp.get("valid_upto")
     days_left = _days_until(iqama_expiry)
 
     if days_left is None or days_left > _IQAMA_NOTIFY_HR_LEAD_DAYS:
-        # [#h4f4zz]
         return {"notified": False, "days_left": days_left, "recipients": 0}
 
     worker_name = emp.get("employee_name") or employee
@@ -1552,10 +1491,6 @@ def notify_hr_iqama_expiring(token=None):
         "{2} is expiring (expiry {3}, {4} day(s) left). Please action the renewal."
     ).format(worker_name, emp_no, iqama_no or _("on file"), _fmt_date(iqama_expiry), days_left)
 
-    # Route through the shared system-notify helper: it adds the enabled-user check +
-    # rollback/log_error that the raw loop lacked, so a DISABLED HR user is now skipped and
-    # one failed insert no longer aborts the rest. Subject clip (140) + type Alert + Employee
-    # link are identical to the old inline insert for an enabled recipient.
     recipients = _hr_notify_recipients()
     for user in recipients:
         notify_user_system(
@@ -1569,7 +1504,6 @@ def notify_hr_iqama_expiring(token=None):
     return {"notified": True, "days_left": days_left, "recipients": len(recipients)}
 
 
-# [#kmy4en]
 _WORKER_BOARDING_METHOD = "Worker"
 
 
@@ -1586,7 +1520,6 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
     own-set; an id the worker is not registered on simply does not match. Returns
     ``(dispatch_trip, transport_request, stop_name, accommodation_building)`` or
     None when the worker has no boardable trip today."""
-    # [#g58324]
     trips = frappe.get_all(
         "Dispatch Trip",
         filters={
@@ -1600,10 +1533,8 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
     if not trips:
         return None
 
-    # [#ft5pfw]
     trip_names = [t["name"] for t in trips]
 
-    # [#2pxml7]
     assigned_by_trip = {}
     for arow in frappe.get_all(
         "Dispatch Trip Assigned Request",
@@ -1613,7 +1544,6 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
     ):
         assigned_by_trip.setdefault(arow["parent"], []).append(arow["transport_request"])
 
-    # [#lilrjj]
     route_plan_names = [
         t["route_plan"] for t in trips if not t.get("transport_request") and t.get("route_plan")
     ]
@@ -1626,7 +1556,6 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
         ):
             route_plan_req[rp["name"]] = rp["transport_request"]
 
-    # [#1rvc0x]
     worker_pickup = {}
     for wrow in frappe.get_all(
         "Transport Request Worker",
@@ -1640,14 +1569,12 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
         req = t.get("transport_request")
         if not req and t.get("route_plan"):
             req = route_plan_req.get(t["route_plan"])
-        # [#3x0xvi]
         candidate_reqs = [req, *assigned_by_trip.get(t["name"], [])]
         if transport_request:
             candidate_reqs = [r for r in candidate_reqs if r == transport_request]
         for candidate in candidate_reqs:
             if not candidate:
                 continue
-            # [#6cszu6]
             if candidate not in worker_pickup:
                 continue
             building = frappe.db.get_value(
@@ -1677,7 +1604,6 @@ def _get_or_create_trip_log(dispatch_trip):
         }
     )
     log.insert(ignore_permissions=True)  # audit-ok — trip resolved from token's own manifest
-    # [#18h8rg]
     from apex.salis.api.boarding_flow import ensure_trip_boarding_state
 
     ensure_trip_boarding_state(dispatch_trip)
@@ -1733,14 +1659,10 @@ def confirm_boarding(token=None, transport_request=None):
     window = boarding_window.resolve(dispatch_trip, request_name, building)
     boarding_window.refuse_unless_open(window)
 
-    # Serialize concurrent confirms for the same worker on the SAME Dispatch Trip row the
-    # driver scan locks (salis/api/boarding.py): without it two simultaneous confirms both
-    # read no open log / no boarding row and each writes one, double-boarding the worker.
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
 
     log = _get_or_create_trip_log(dispatch_trip)
 
-    # [#f3nr8r]
     if _already_boarded(log, employee):
         return {
             "created": False,
@@ -1762,7 +1684,6 @@ def confirm_boarding(token=None, transport_request=None):
         },
     )
     log.save(ignore_permissions=True)  # audit-ok — worker + trip resolved from token server-side
-    # [#qoy1v1]
     from apex.salis.api.boarding_flow import mark_boarded
 
     mark_boarded(dispatch_trip, employee)
@@ -1801,7 +1722,6 @@ def get_worker_boarding_pass(token=None, transport_request=None):
         return {"pass": None}
     dispatch_trip, request_name, stop_name, building = resolved
 
-    # [#ny5hpd]
     route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan") or frappe.db.get_value(
         "Transport Request", request_name, "route_plan"
     )
@@ -1834,7 +1754,6 @@ def get_worker_boarding_pass(token=None, transport_request=None):
     }
 
 
-# [#q39fbh]
 def _clean_adhoc_passengers(passengers):
     """Validate + normalize the client's ad-hoc passenger rows. Returns a list of
     clean dicts ready to append to the request's ``adhoc_passengers`` table; throws
@@ -1867,7 +1786,6 @@ def _clean_adhoc_passengers(passengers):
     return rows
 
 
-# [#6nk520]
 _WORKER_TRANSPORT_SERVICE_REQUEST_TYPE = {
     "Site Transport": "Accommodation to Project Shuttle",
     "Inter-City Relocation": "Inter-City Relocation",
@@ -1925,7 +1843,6 @@ def create_worker_transport_request(
 
     adhoc_rows = _clean_adhoc_passengers(adhoc_passengers)
 
-    # [#fyh5gw]
     assignment = _active_assignment(employee)
     building = assignment.get("building") if assignment else None
     project = assignment.get("project") if assignment else None
@@ -2012,11 +1929,9 @@ def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=Non
     if rating < 1 or rating > 5:
         frappe.throw(_("Rating must be between 1 and 5."))
 
-    # [#ilh5tr]
     if not _worker_was_on_trip(employee, dispatch_trip):
         frappe.throw(_("You were not part of this trip's manifest."), frappe.PermissionError)
 
-    # [#tejynz]
     existing = frappe.db.exists(
         "Transport Trip Rating",
         {"employee": employee, "dispatch_trip": dispatch_trip}

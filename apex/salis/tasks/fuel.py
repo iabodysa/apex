@@ -14,12 +14,8 @@ from apex.salis.tasks.common import (
     _settings_int,
 )
 
-# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
-# rather than stacking one per row. Distinct from _raise_alert's own name.
 _ROW_SAVEPOINT = "salis_fuel_row"
 
-# resolve_excessive_topup_alerts runs on a Fuel Request save, not in a job, so its
-# recovery must not reach past its own work into the user's transaction.
 _RESOLVE_SAVEPOINT = "salis_topup_resolve"
 
 
@@ -42,9 +38,6 @@ def unreverted_topup_watch() -> None:
     today_str = today()
     logger = frappe.logger()
 
-    # Keyed cursor, not an offset: the body sets reverted=1 and status=Reverted, both
-    # filtered on here, so rows behind an offset shift down into the range it just
-    # passed and are skipped. name is immutable, so a key cursor cannot lose a row.
     cursor = ""
     while True:
         topups = frappe.get_all(
@@ -67,7 +60,6 @@ def unreverted_topup_watch() -> None:
         for t in topups:
             frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
-                # [#6vxo7i]
                 doc = frappe.get_doc("Fuel Request", t.name)
                 doc.reverted = 1
                 doc.status = "Reverted"
@@ -79,7 +71,6 @@ def unreverted_topup_watch() -> None:
                     ),
                 )
 
-                # [#n5yd9u]
                 msg = (f"unreverted_topup_watch: temporary top-up {t.name} "
                        f"({t.topup_litres} L) was due to be reverted on "
                        f"{t.revert_due_date}; it has now been auto-reverted.")

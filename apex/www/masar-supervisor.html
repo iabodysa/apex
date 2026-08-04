@@ -4,28 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#072b1a" />
-    <!-- Cairo is served from the app's own assets, never a font CDN: this page is
-         authenticated, so a Google Fonts link leaks one third-party hit per page load
-         (and the preconnect it needs opens the connection before the stylesheet is even
-         requested). The vendored copy keeps Google's own font-display: swap and
-         unicode-range, so first paint and per-subset loading are unchanged. -->
     <link rel="stylesheet" href="/assets/apex/vendor/cairo-v31/cairo.css" />
     <title>{{ _("Masar Supervisor") }}</title>
     {%- if has_supervisor_role %}
-    <!-- Leaflet is served from the app's own assets, never a CDN: this page is
-         authenticated, so a mutable third-party script here would execute with the
-         supervisor's session. Version and provenance are pinned by the `leaflet` entry
-         in frontend/package.json + package-lock.json; the copy under public/vendor/ is
-         that exact published dist. It must stay a classic (parser-blocking) script so
-         window.L exists before the deferred SPA module reads it. -->
     <link rel="stylesheet" href="/assets/apex/vendor/leaflet-1.9.4/leaflet.css" />
     <script src="/assets/apex/vendor/leaflet-1.9.4/leaflet.js"></script>
     <link rel="stylesheet" href="/assets/apex/route_supervisor_portal/assets/index.css" />
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
-      // Tile source override from site_config (apex_map_tile_url). Empty by default:
-      // the map then uses its own OpenStreetMap default, the acceptance recorded in
-      // masar_supervisor.py. A contracted source needs no code change, only this key.
       window.apex_map_tiles = {{ map_tiles | tojson }};
       window.masar_sup_socket = {
         site_name: {{ site_name | tojson }},

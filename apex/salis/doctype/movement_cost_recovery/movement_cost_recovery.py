@@ -29,7 +29,6 @@ from frappe.utils import flt
 
 from apex.salis.utils import set_financial_defaults
 
-# [#kj6uap]
 _OPERATIONS_ROLES = {"Fleet Manager", "System Manager"}
 
 
@@ -40,7 +39,6 @@ class MovementCostRecovery(Document):
             frappe.throw(_("Amount must be greater than zero."))
         if self.status == "Approved" and not self.basis_evidence:
             frappe.throw(_("Basis / Evidence is required before a recovery can be Approved."))
-        # [#4pwtt6]
         if self.status in ("Approved", "Recovered") and not self.acknowledgement_received:
             frappe.throw(_("Acknowledgement Received must be set before a recovery can be {0}.").format(_(self.status)))
         self._derive_needs_operations()
@@ -68,4 +66,3 @@ class MovementCostRecovery(Document):
                 )
             )
 
-    # [#m7rmjl]

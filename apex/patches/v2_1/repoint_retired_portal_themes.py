@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 import frappe
 
 from apex.salis.doctype.driver_portal_theme.driver_portal_theme import (

@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#ifaia4]
 frappe.ui.form.on("Maintenance Request", {
 	setup(frm) {
 		frm.set_query("building", () => ({
@@ -56,7 +55,6 @@ frappe.ui.form.on("Maintenance Request", {
 			});
 		}
 
-		// [#j6atlg]
 		if (frm.doc.docstatus === 0 && frm.doc.issue_type) {
 			frm.add_custom_button(__("Load Material Template"), function() {
 				frappe.call({
@@ -97,7 +95,6 @@ function _update_priority_indicator(frm) {
 		frm.page.set_indicator(__("High Priority"), "orange");
 	}
 
-	// [#rdl40n]
 	const SLA_DAYS = { Critical: 1, High: 3, Medium: 7, Low: 14 };
 	if (frm.doc.creation && frm.doc.status === "Open") {
 		const sla = SLA_DAYS[frm.doc.priority] || 14;

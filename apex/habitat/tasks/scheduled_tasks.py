@@ -5,8 +5,6 @@ from __future__ import annotations
 
 import frappe
 
-# Constant name, re-issued per template item: MariaDB replaces a same-named
-# savepoint rather than stacking one per row.
 _ROW_SAVEPOINT = "scheduled_task_row"
 
 
@@ -27,14 +25,17 @@ def daily_scheduled_task_instance_generator() -> None:
     logger = frappe.logger()
 
     def _period_key(freq: str) -> str:
-        """Return the canonical due_date string for the given frequency."""
+        """Return the canonical due_date string for the given frequency.
+
+        Weekly uses frappe's ``get_first_day_of_week``, never ``date.weekday()``:
+        Python's ``weekday()`` is Monday-based and the site's week may not be. frappe
+        reads System Settings ``first_day_of_the_week`` (data.py:69-70) and defaults to
+        Sunday, so a hardcoded Monday puts the whole app one day out on any site keeping
+        that default — invisible mid-week, wrong on the boundary day.
+        """
         if freq == "Daily":
             return today_str
         if freq == "Weekly":
-            # Python's weekday() is Monday-based; the site's week may not be. frappe reads
-            # System Settings first_day_of_the_week (data.py:69-70) and defaults to Sunday, so
-            # a hardcoded Monday puts the whole app one day out on any site keeping that
-            # default — invisible mid-week, wrong on the boundary day.
             return str(get_first_day_of_week(today_date))
         if freq == "Monthly":
             return str(get_first_day(today_date))
@@ -66,18 +67,15 @@ def daily_scheduled_task_instance_generator() -> None:
                 filters={"parent": assignment.template, "is_active": 1},
                 fields=["task_catalog", "frequency_override", "title"],
             )
-            # [#b49szm]
             template_frequency = (
                 frappe.db.get_value("Scheduled Task Template", assignment.template, "frequency")
                 or "Monthly"
             )
             for item in items:
-                # [#cxb0x6]
                 frequency = item.frequency_override or template_frequency
 
                 due_date = _period_key(frequency)
 
-                # [#decyo7]
                 if frappe.db.exists(
                     "Scheduled Task Instance",
                     {

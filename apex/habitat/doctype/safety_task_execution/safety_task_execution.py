@@ -21,10 +21,8 @@ from frappe.model.document import Document
 
 from apex.habitat.utils.finding_fanout import fan_out_findings, is_actionable
 
-# [#f1ge3a]
 _SECURITY_CATEGORY = "security"
 
-# [#6qlbpt]
 _REPAIR_NEEDED_STATUSES = ("Poor", "Not Done")
 
 
@@ -33,7 +31,6 @@ class SafetyTaskExecution(Document):
         self._enforce_evidence()
 
     def on_submit(self):
-        # [#gugnzs]
         fan_out_findings(self.findings, self)
         self._escalate_failed_execution()
 
@@ -51,7 +48,6 @@ class SafetyTaskExecution(Document):
             return
         room = self._scope_room()
         if not room:
-            # [#jz2ktt]
             return
         mr = frappe.new_doc("Maintenance Request")
         mr.building = self.building
@@ -65,7 +61,6 @@ class SafetyTaskExecution(Document):
         mr.status = "Open"
         mr.source_execution = self.name
         mr.insert(ignore_permissions=True)  # audit-ok
-        # [#ixanq1]
         self.db_set("linked_maintenance_request", mr.name)
 
     def _has_linked_request(self) -> bool:
@@ -103,7 +98,7 @@ class SafetyTaskExecution(Document):
              without an Evidence Photo.
         """
         if self.evidence_photo:
-            return  # [#kmn9ln]
+            return
 
         if self._failed_requires_evidence():
             frappe.throw(

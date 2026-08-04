@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Fuel Claim Register report.
 
@@ -37,7 +36,6 @@ def execute(filters=None):
     if filters.get("status"):
         query_filters["status"] = filters["status"]
 
-    # [#kms45i]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         chosen = query_filters.get("project")

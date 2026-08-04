@@ -67,25 +67,35 @@ def rate_limit(
     window's name. Import this instead of the framework's in every Apex endpoint;
     apex_core/utils/test_submit_rate_limit_identity.py fails the build if one goes
     back to the framework's directly.
+
+    Leave ``key`` unset on a public endpoint. ``key`` is a form_dict lookup
+    (rate_limiter.py:143) any caller can set from the query string, buying a private
+    window per value; ``ip_based`` (default True) is what actually keys the window to
+    the address (rate_limiter.py:110,141,147-150).
     """
 
     def decorator(fn):
         command = canonical_command(fn)
-        # Charge through the framework's own decorator so the identity, the window
-        # length, the method gate and the 429 are never re-derived here. It wraps a
-        # no-op rather than ``fn``: the framework's wrapper CALLS what it wraps
-        # (rate_limiter.py:168), and letting it call the endpoint would hold the
-        # substituted cmd in place for the whole request body instead of the charge.
         charge = _frappe_rate_limit(
             key=key, limit=limit, seconds=seconds, methods=methods, ip_based=ip_based
         )(lambda: None)
 
         @wraps(fn)
         def wrapper(*args, **kwargs):
+            """Charge the window under the canonical command, then run the endpoint.
+
+            The charge goes through the framework's own decorator so the identity, the
+            window length, the method gate and the 429 are never re-derived here. It
+            wraps a no-op rather than ``fn``: the framework's wrapper CALLS what it
+            wraps (rate_limiter.py:168), and letting it call the endpoint would hold
+            the substituted cmd in place for the whole request body instead of the
+            charge alone.
+
+            No request means no traffic to meter and no cmd to substitute -- the
+            framework's own first gate (rate_limiter.py:134) would pass this through
+            anyway, so console and job callers touch no global.
+            """
             form_dict = getattr(frappe.local, "form_dict", None)
-            # No request means no traffic to meter and no cmd to substitute -- the
-            # framework's own first gate (rate_limiter.py:134) would pass this through
-            # anyway, so console and job callers touch no global.
             if form_dict is None or not getattr(frappe.local, "request", None):
                 charge()
                 return fn(*args, **kwargs)

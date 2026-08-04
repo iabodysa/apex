@@ -1,9 +1,7 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#a5yn69]
 frappe.ui.form.on("Building License", {
 	refresh(frm) {
 		frm.clear_custom_buttons();
-		// [#cplw07]
 		if (frm.doc.docstatus === 0 && !frm.is_new()) {
 			frm.add_custom_button(__("Renew License"), () => {
 				const d = new frappe.ui.Dialog({

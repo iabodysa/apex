@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#53o1xx]
 frappe.ui.form.on("Vehicle Assignment", {
 	refresh(frm) {
 		frm.clear_custom_buttons();

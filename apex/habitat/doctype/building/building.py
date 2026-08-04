@@ -42,7 +42,6 @@ def get_site_address(building_name, site=None, building_address=None):
     if building_address:
         frappe.has_permission("Address", "read", doc=building_address, throw=True)
         return get_address_text_by_name(building_address)
-    # [#og970b]
     own = get_address_text("Building", building_name)
     if own:
         return own
@@ -144,7 +143,6 @@ def _derive_total_capacity(building_name):
     )
 
 
-# [#pgvbei]
 def _building_supervisor_permissions(user, building):
     return frappe.get_all(
         "User Permission",
@@ -176,7 +174,6 @@ def on_update(doc, method=None):
         ).insert(ignore_permissions=True)  # audit-ok — system permission sync, gated by building write
 
 
-# [#6f8o1f]
 _ROLLUP_TRIGGER_FIELDS = (
     "annual_rent",
     "annual_electricity",
@@ -196,7 +193,6 @@ def _recompute_capacity_and_cost(doc):
     see). Cheap: one count() + arithmetic — safe to run on every save."""
     apply_active_lease(doc)
 
-    # [#c25afp]
     _capacity_count = _derive_total_capacity(doc.name)
     if _capacity_count is not None:
         doc.total_capacity = _capacity_count
@@ -230,14 +226,12 @@ def _recompute_occupancy_and_structure(doc):
     if doc.total_capacity:
         doc.occupancy_percent = (doc.current_occupants / doc.total_capacity) * 100
 
-    # [#cowl53]
     doc.total_rooms = frappe.db.count("Room", {"building": doc.name})
     _floor_values = frappe.db.get_all(
         "Room", filters={"building": doc.name}, pluck="floor", distinct=True
     )
     doc.total_floors = len([f for f in _floor_values if f is not None])
 
-    # [#np7si9]
     doc.cctv_camera_count = frappe.db.count(
         "Facility Asset",
         {
@@ -248,7 +242,6 @@ def _recompute_occupancy_and_structure(doc):
     )
 
 
-# [#p1ayc0]
 _ANNUAL_COST_FIELDS = (
     "annual_rent",
     "annual_electricity",
@@ -274,14 +267,11 @@ def before_save(doc, method=None):
         from apex.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
         doc.company = get_default_company()
 
-    # [#805gvb]
     _recompute_capacity_and_cost(doc)
 
-    # [#sdxweu]
     if doc.is_new() or any(doc.has_value_changed(f) for f in _ROLLUP_TRIGGER_FIELDS):
         _recompute_occupancy_and_structure(doc)
 
-    # [#c9s718]
     if doc.floor_plan and doc.setup_status == "Draft":
         doc.setup_status = "Rooms Planned"
 
@@ -498,7 +488,6 @@ def _process_floor_row(row, abbreviation, building_name, allow_create,
 
     if count <= 0:
         return
-    # [#k8dzcj]
     if gen_beds and capacity <= 0:
         frappe.throw(
             _("Beds per Room must be greater than 0 when Auto-Generate Beds is enabled. Floor {0}, type {1}.").format(floor_num, rtype)
@@ -542,7 +531,6 @@ def _finalize_building_stats(building_name, stats):
     _floor_values = frappe.db.get_all(
         "Room", filters={"building": building_name}, pluck="floor", distinct=True
     )
-    # [#bcpp7m]
     _capacity_count = _derive_total_capacity(building_name)
     frappe.db.set_value("Building", building_name, {
         "setup_status": "Rooms Generated",
@@ -575,7 +563,6 @@ def _build_generation_result(stats):
     }
 
     if needs_confirmation:
-        # [#hynb42]
         msg = _("The floor plan adds {0} new room(s) and {1} new bed(s) that are not yet created. Existing rooms updated: {2}. Confirm to create the new rooms and beds.").format(stats.pending_new_rooms, stats.pending_new_beds, stats.updated_rooms)
         if stats.pending_capacity_reductions:
             msg += " " + _("{0} room(s) have a planned capacity reduction pending confirmation.").format(stats.pending_capacity_reductions)
@@ -612,7 +599,6 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
     needs_confirmation flag. Never deletes existing records.
     """
     doc = frappe.get_doc("Building", building_name)
-    # [#eu1e7a]
     frappe.has_permission("Building", "write", doc=doc, throw=True)
 
     abbreviation = (doc.abbreviation or "").strip() or doc.building_name[:4].upper().strip()
@@ -622,7 +608,6 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
 
     confirm_new_rooms = int(confirm_new_rooms or 0)
     confirm_capacity_reduction = int(confirm_capacity_reduction or 0)
-    # [#4qhyuv]
     is_first_generation = len(existing_room_map) == 0
     allow_create = is_first_generation or bool(confirm_new_rooms)
 
@@ -637,12 +622,6 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
     return _build_generation_result(stats)
 
 
-# Safety Task Catalog frequency -> Scheduled Task Template frequency. The daily
-# generator (habitat/tasks/scheduled_tasks._period_key) understands ONLY these five
-# calendar periods; the catalog spells the yearly one "Annual" while the template
-# Select is "Annually", so this both normalizes the spelling and pins every value to
-# one the scheduler can turn into a due_date. No Select extension is needed (all five
-# already exist on the template), so no is_standard JSON changes.
 _SAFETY_FREQ_MAP = {
     "Daily": "Daily",
     "Weekly": "Weekly",
@@ -651,12 +630,6 @@ _SAFETY_FREQ_MAP = {
     "Annual": "Annually",
 }
 
-# Event-driven catalog frequencies have NO calendar period. Extending the template
-# Select with them is wrong: _period_key falls through to "today" for any non-calendar
-# value, so a periodic template would emit a fresh instance EVERY day. They are
-# intentionally EXCLUDED from scheduled-task generation and reported to the operator
-# (never silently swallowed by the closed Select); they need an event trigger (e.g.
-# On Entry on resident check-in), a separate mechanism. This is a product decision.
 _EVENT_DRIVEN_FREQUENCIES = {"As Needed", "On Entry"}
 
 
@@ -671,7 +644,6 @@ def _get_or_create_safety_template(catalog, template_freq):
     lacking them (e.g. one carried over from the pre-redesign model) would silently
     generate nothing. Returns ``(template_name, created)``.
     """
-    # Oldest-first so reuse is deterministic if legacy N×M templates share a catalog.
     existing = frappe.db.get_value(
         "Scheduled Task Template", {"safety_task_catalog": catalog.name}, "name",
         order_by="creation asc",
@@ -691,8 +663,6 @@ def _get_or_create_safety_template(catalog, template_freq):
     title = catalog.task_title or catalog.task_code or catalog.name
     tmpl = frappe.get_doc({
         "doctype": "Scheduled Task Template",
-        # task_code (unique, reqd) leads so the name stays unique even if the title is
-        # truncated at 140.
         "template_name": f"Safety [{catalog.task_code}] {title}"[:140],
         "task_type": "Safety",
         "frequency": template_freq,
@@ -727,7 +697,6 @@ def generate_safety_setup(building_name):
     Building License records are NOT created — they need a real license_number; the
     summary lists the recommended types for the operator to create manually.
     """
-    # [#5fc1fk]
     frappe.has_permission("Building", "write", doc=building_name, throw=True)
 
     catalogs = frappe.get_all(
@@ -749,7 +718,6 @@ def generate_safety_setup(building_name):
     catalog_failures = []
 
     for catalog in catalogs:
-        # [#shlhjr] Scope the task to this building (independent of its frequency).
         if not catalog.applicable_to_all_buildings:
             scope_exists = frappe.db.exists(
                 "Safety Task Building Scope",
@@ -762,7 +730,6 @@ def generate_safety_setup(building_name):
                     scope.parenttype = "Safety Task Catalog"
                     scope.parentfield = "applicable_buildings"
                     scope.building = building_name
-                    # [#mx2kmt]
                     scope.insert(ignore_permissions=True)  # audit-ok — gated by Accommodation Building write (above); generator-only cross-doctype op
                     created_scopes += 1
                 except Exception as exc:
@@ -772,14 +739,12 @@ def generate_safety_setup(building_name):
             else:
                 skipped_scopes += 1
 
-        # Event-driven tasks have no calendar period — record, do not schedule.
         if catalog.frequency in _EVENT_DRIVEN_FREQUENCIES:
             event_driven_excluded.append(catalog.task_code or catalog.name)
             continue
 
         template_freq = _SAFETY_FREQ_MAP.get(catalog.frequency)
         if not template_freq:
-            # Fail loudly rather than let the closed template Select swallow the value.
             frappe.throw(
                 _('Safety Task Catalog {0} has frequency "{1}", which has no scheduling '
                   "equivalent. Set a supported catalog frequency (Daily, Weekly, Monthly, "
@@ -789,7 +754,6 @@ def generate_safety_setup(building_name):
                 title=_("Unmapped Safety Frequency"),
             )
 
-        # [#czmvar] Reusable template (per catalog) + assignment (per building).
         try:
             tmpl_name, tmpl_created = _get_or_create_safety_template(catalog, template_freq)
             if tmpl_created:
@@ -802,7 +766,6 @@ def generate_safety_setup(building_name):
             )
             continue
 
-        # [#18qll3]
         if frappe.db.exists(
             "Scheduled Task Assignment",
             {"template": tmpl_name, "building": building_name},
@@ -828,7 +791,6 @@ def generate_safety_setup(building_name):
         "safety_setup_generated_on": today(),
         "safety_setup_generated_by": frappe.session.user,
     })
-    # [#shn7rw]
 
     summary = {
         "created_templates": created_templates,
@@ -868,7 +830,6 @@ def generate_safety_setup(building_name):
 @frappe.whitelist(methods=["POST"])
 def update_room_inventory(room_name, readiness_status, inventory_notes=None):
     """Allow supervisor to record room readiness without opening full form."""
-    # [#6s3c91]
     if not frappe.has_permission("Room", "write", doc=room_name):
         frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -884,5 +845,4 @@ def update_room_inventory(room_name, readiness_status, inventory_notes=None):
         updates["inventory_notes"] = inventory_notes
 
     frappe.db.set_value("Room", room_name, updates)
-    # [#4dqukg]
     return {"ok": True}

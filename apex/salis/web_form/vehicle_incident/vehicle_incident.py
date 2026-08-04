@@ -10,9 +10,6 @@ def get_context(context):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-# No `key`: it was a form_dict lookup (rate_limiter.py:143) any caller could set from
-# the query string, buying a private window per value. `ip_based` (default True) is
-# what actually keys this window to the address (rate_limiter.py:110,141,147-150).
 @rate_limit(limit=5, seconds=60)
 def submit_vehicle_incident(
     incident_type,
@@ -37,15 +34,12 @@ def submit_vehicle_incident(
     disposition fields for a Guest author, so this endpoint only has to bound the
     free-text inputs and reject spam.
     """
-    # [#nm8m2k]
     if website_field:
         return {"name": None}
 
-    # [#res70n]
     if incident_type not in ("Accident", "Theft"):
         frappe.throw(_("Invalid incident type."))
 
-    # [#s9t9ql]
     if len(description or "") > 4000:
         frappe.throw(_("Description is too long. Please keep it under 4000 characters."))
 
@@ -61,5 +55,4 @@ def submit_vehicle_incident(
         "status": "Open",
     })
     doc.insert(ignore_permissions=True)  # audit-ok — guest web-form intake, rate-limited + honeypot-guarded; draft only
-    # [#jwr9pv]
     return {"name": doc.name}

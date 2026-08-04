@@ -70,7 +70,7 @@ def validate(doc, method=None):
     sync_party_employee(doc, derive_from="assignment")
 
     if not doc.to_bed or not doc.to_room:
-        return  # [#h7vrny]
+        return
 
     bed_status = frappe.db.get_value("Bed", doc.to_bed, "status")
     if bed_status == "Out of Service":
@@ -78,21 +78,14 @@ def validate(doc, method=None):
     elif bed_status == "Occupied":
         frappe.throw(_("Target bed is already occupied."))
 
-    # [#fylvr5]
     bed_room = frappe.db.get_value("Bed", doc.to_bed, "room")
     if bed_room is not None and bed_room != doc.to_room:
         frappe.throw(_("Target Bed {0} does not belong to Room {1}").format(doc.to_bed, doc.to_room))
 
-    # [#hgjgqn]
     to_building = frappe.db.get_value("Room", doc.to_room, "building")
     if not to_building:
         frappe.throw(_("Target Room {0} is not associated with any Building.").format(doc.to_room))
 
-    # The single cross-building rule. Same wording the Transfer Board used to raise
-    # on its own, so the operator sees no change and the string stays translated.
-    # An assignment carrying NO building is not blocked here — it has no estate to
-    # leave, the move stamps one, and a building-scoped user cannot reach it anyway
-    # (building_scoped_has_permission resolves None and denies).
     from_building = _source_building(doc)
     if from_building and from_building != to_building:
         frappe.throw(
@@ -101,13 +94,6 @@ def validate(doc, method=None):
 
 
 def before_submit(doc, method=None):
-    # [#lfwp8g]
-    # Locked, not merely read: the assignment row is what serialises every move of
-    # ONE resident, so two transfers racing to move the same person cannot both see
-    # him in from_bed and leave him occupying two beds. The lock is held for the rest
-    # of the transaction, which is why on_submit below needs no second check. Locking
-    # the assignment BEFORE the bed keeps one global order and cannot deadlock with
-    # the target-bed lock.
     asg = frappe.db.get_value(
         "Housing Assignment",
         doc.assignment,
@@ -118,8 +104,6 @@ def before_submit(doc, method=None):
     if not asg or asg.docstatus != 1 or asg.check_out_date:
         frappe.throw(_("This transfer needs an active (checked-in) assignment to move."))
 
-    # from_bed is frozen at draft save. If the resident has moved since, freeing it
-    # would release a bed that is no longer theirs and strand the one they now hold.
     if asg.bed != doc.from_bed:
         frappe.throw(
             _("This transfer was raised from Bed {0} but the resident is now in Bed {1}.").format(
@@ -129,12 +113,10 @@ def before_submit(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    # The OLD spatial position, read before the re-point below moves it.
     asg = frappe.db.get_value(
         "Housing Assignment", doc.assignment, ["room", "building"], as_dict=True
     )
 
-    # [#hzjmc4]
     locked_status = frappe.db.get_value("Bed", doc.to_bed, "status", for_update=True)
     if locked_status == "Out of Service":
         frappe.throw(_("Target Bed {0} is Out of Service.").format(doc.to_bed))
@@ -149,8 +131,6 @@ def on_submit(doc, method=None):
     assignment.db_set("room", doc.to_room)
     assignment.db_set("building", to_building)
 
-    # db_set skips validate(), so nothing else recomputes the spatial counters.
-    # Both endpoints, and after the re-point, or one side is counted twice.
     recalculate_spatial(asg.room, asg.building)
     recalculate_spatial(doc.to_room, to_building)
 
@@ -182,7 +162,6 @@ def before_cancel(doc, method=None):
 
 
 def on_cancel(doc, method=None):
-    # [#l362nf]
     from_room = frappe.db.get_value("Bed", doc.from_bed, "room")
     from_building = (
         frappe.db.get_value("Room", from_room, "building") if from_room else None
@@ -192,7 +171,6 @@ def on_cancel(doc, method=None):
     frappe.db.set_value("Bed", doc.to_bed, "status", "Available")
     frappe.db.set_value("Bed", doc.from_bed, "status", "Occupied")
 
-    # [#egcusl]
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)
     assignment.db_set("bed", doc.from_bed)
     assignment.db_set("room", from_room)

@@ -12,7 +12,6 @@ from frappe.model.document import Document
 
 class DriverPushSubscription(Document):
     def before_save(self):
-        # [#ancvsc]
         if not self.user and self.driver:
             employee = frappe.db.get_value("Salis Driver", self.driver, "employee")
             if employee:

@@ -53,13 +53,10 @@ from frappe.utils import (
     nowdate,
 )
 
-# [#2qr2m0]
 _SCOPE_BASE = {"is_active": 1}
 
-# [#ia8mpd]
 _CADENCE_ORDER = ["Daily", "Weekly", "Monthly", "Quarterly", "Annual"]
 
-# [#jvdv48]
 _TASK_FIELDS = [
     "name",
     "task_code",
@@ -103,7 +100,6 @@ def get_tasks_for_cadence(building, cadence):
         frappe.throw(_("A cadence is required to build the checklist."))
     if not building:
         frappe.throw(_("A building is required to build the checklist."))
-    # [#xh0530]
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
     return {
@@ -124,7 +120,6 @@ def _scoped_tasks(building, cadence):
     """
     base = {**_SCOPE_BASE, "frequency": cadence}
 
-    # [#31v73y]
     tasks = {}
     for t in frappe.get_all(
         "Safety Task Catalog",
@@ -133,7 +128,6 @@ def _scoped_tasks(building, cadence):
     ):
         tasks[t.name] = t
 
-    # [#qq7jmr]
     scoped_parents = frappe.get_all(
         "Safety Task Building Scope",
         filters={"parenttype": "Safety Task Catalog", "building": building},
@@ -181,7 +175,6 @@ def _current_period(cadence, on_date=None):
         return day, day, "Today"
 
     if cadence == "Weekly":
-        # [#1ogbzb]
         start = day - datetime.timedelta(days=day.weekday())
         end = start + datetime.timedelta(days=6)
         return start, end, "This week"
@@ -189,7 +182,6 @@ def _current_period(cadence, on_date=None):
     if cadence == "Monthly":
         start = getdate(get_first_day(day))
         end = getdate(get_last_day(day))
-        # [#qz4tl5]
         return start, end, start.strftime("%B %Y")
 
     if cadence == "Quarterly":
@@ -258,7 +250,6 @@ def get_due_cadences(building):
 
     if not building:
         frappe.throw(_("A building is required to compute due cadences."))
-    # [#mrarf4]
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
     due = []
@@ -267,7 +258,6 @@ def get_due_cadences(building):
             continue
         tasks = _scoped_tasks(building, cadence)
         if not tasks:
-            # [#hew5mv]
             continue
         _start, _end, period_label = _current_period(cadence)
         due.append(
@@ -316,7 +306,6 @@ def submit_round(building, cadence, round_date, lines, is_reinspection=0):
         dict ``{"ok": True, "safety_round": <docname>, "overall_result": <str>,
         "count": <int executions>}``.
     """
-    # [#kfzxpy]
     frappe.has_permission("Safety Task Execution", "submit", throw=True)
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
@@ -324,13 +313,11 @@ def submit_round(building, cadence, round_date, lines, is_reinspection=0):
         frappe.throw(_("A building is required to submit a round."))
     if not cadence:
         frappe.throw(_("A cadence is required to submit a round."))
-    # [#dmzr86]
     if cadence not in _CADENCE_ORDER:
         frappe.throw(_("Unknown cadence: {0}").format(cadence))
     if not round_date:
         frappe.throw(_("A round date is required to submit a round."))
 
-    # [#ranys3]
     if isinstance(lines, str):
         try:
             lines = json.loads(lines)
@@ -373,12 +360,14 @@ def _create_round(building, cadence, round_date, lines, is_reinspection):
 
     Returns ``(round_doc, count)`` — the SUBMITTED round document (caller may
     ``reload()`` to read derived fields) and the number of executions created.
+
+    The savepoint name carries the cadence so it is distinct per cadence: nesting
+    ``submit_due_rounds``' outer savepoint and these inner ones must never collide on
+    the same identifier.
     """
-    # [#2f11fa]
     savepoint = f"safety_checklist_round_{frappe.scrub(cadence)}"
     frappe.db.savepoint(savepoint)
     try:
-        # [#9gynfq]
         round_doc = frappe.get_doc(
             {
                 "doctype": "Safety Round",
@@ -414,7 +403,6 @@ def _create_round(building, cadence, round_date, lines, is_reinspection):
             ste.submit()
             count += 1
 
-        # [#bwac6z]
         round_doc.submit()
     except Exception:
         frappe.db.rollback(save_point=savepoint)
@@ -425,7 +413,6 @@ def _create_round(building, cadence, round_date, lines, is_reinspection):
     return round_doc, count
 
 
-# [#3uaqou]
 _REPORT_ROLE = "Accommodation Manager"
 
 
@@ -468,13 +455,11 @@ def submit_due_rounds(building, round_date, results):
 
     if not building:
         frappe.throw(_("A building is required to submit rounds."))
-    # [#sx7kz2]
     frappe.has_permission("Building", "read", doc=building, throw=True)
     if not round_date:
         frappe.throw(_("A round date is required to submit rounds."))
 
     if isinstance(results, str):
-        # [#2o10dh]
         try:
             results = json.loads(results)
         except ValueError:
@@ -482,7 +467,6 @@ def submit_due_rounds(building, round_date, results):
     if not isinstance(results, list):
         frappe.throw(_("Results must be a list."))
 
-    # [#q7aewr]
     by_cadence: dict[str, list] = {}
     for line in results:
         cadence = line.get("cadence")
@@ -495,7 +479,6 @@ def submit_due_rounds(building, round_date, results):
     if not by_cadence:
         frappe.throw(_("No result lines to submit."))
 
-    # [#c8yyrm]
     outer = "safety_checklist_submit_due_rounds"
     frappe.db.savepoint(outer)
     rounds = []
@@ -523,7 +506,6 @@ def submit_due_rounds(building, round_date, results):
     else:
         frappe.db.release_savepoint(outer)
 
-    # [#1zurym]
     emailed = _email_round_report(building, round_date, rounds)
 
     return {"ok": True, "rounds": rounds, "count": total, "emailed": emailed}
@@ -547,7 +529,6 @@ def _report_recipients():
             "Habitat Settings", "safety_report_recipient"
         )
     except Exception:
-        # [#5mm1qq]
         configured = None
     if configured:
         return [configured]
@@ -575,7 +556,6 @@ def _round_report_html(building, round_date, rounds):
 
     sections = []
     for r in rounds:
-        # [#qzmx9b]
         issues = frappe.get_all(
             "Safety Task Execution",
             filters={

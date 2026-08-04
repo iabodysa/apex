@@ -13,7 +13,6 @@ class ResidentRequest(Document):
     pass
 
 
-# [#56rign]
 _CATEGORY_TARGET = {
     "Maintenance": "Maintenance Request",
     "Water": "Maintenance Request",
@@ -27,7 +26,6 @@ _CATEGORY_TARGET = {
     "Custody": "Custody Issue",
 }
 
-# [#k8sj0e]
 _CATEGORY_TO_ISSUE_TYPE = {
     "Maintenance": "Other",
     "Water": "Plumbing",
@@ -42,7 +40,6 @@ _CATEGORY_TO_ISSUE_TYPE = {
 
 
 def before_insert(doc, method=None):
-    # [#dpfma0]
     if not doc.anonymous_tracking_code:
         doc.anonymous_tracking_code = frappe.generate_hash(length=8).upper()
 
@@ -59,7 +56,6 @@ def before_insert(doc, method=None):
 def validate(doc, method=None):
     _populate_location_from_token(doc)
     sync_party_employee(doc)
-    # [#merae4]
     if doc.location_token and not doc.building:
         frappe.throw(_("Invalid or inactive location token."))
 
@@ -169,11 +165,9 @@ def _apply_priority_rules(doc):
         "security",
     )
 
-    # [#hnmm79]
     def _matches(term):
         return re.search(r"\b" + re.escape(term) + r"\b", text) is not None
 
-    # [#1yjpt4]
     _AC_PATTERN = re.compile(r"\ba[/\-]?c\b|air.?condi", re.IGNORECASE)
 
     def _is_ac_request():
@@ -185,7 +179,6 @@ def _apply_priority_rules(doc):
         doc.priority = "High"
 
 
-# [#eqz12c]
 
 
 @frappe.whitelist(methods=["POST"])
@@ -201,7 +194,6 @@ def convert_request(source_name):
 
     source = frappe.get_doc("Resident Request", source_name)
 
-    # [#cw0q8i]
     if source.target_doctype and source.target_document:
         if frappe.db.exists(source.target_doctype, source.target_document):
             return {
@@ -240,7 +232,6 @@ def _link_target_to_request(source, target_doctype, target_name):
     server-side without re-running the request's own validate/on_update mid-flow,
     and without a timestamp-mismatch race."""
     updates = {"target_doctype": target_doctype, "target_document": target_name}
-    # [#6u3aq4]
     if source.status in (None, "", "New", "Triaged", "Assigned"):
         updates["status"] = "In Progress"
     frappe.db.set_value("Resident Request", source.name, updates)
@@ -269,7 +260,6 @@ def _build_safety_incident(source):
     target.incident_datetime = frappe.utils.now_datetime()
     target.building = source.building
     target.specific_location = source.issue_location
-    # [#qblrl5]
     _severity_map = {"Critical": "Critical", "High": "High", "Medium": "Medium", "Low": "Low"}
     target.severity = _severity_map.get(source.priority, "Medium")
     target.description = source.description or _("Converted from resident request {0}").format(source.name)
@@ -288,7 +278,6 @@ def _build_custody_issue(source):
     return target
 
 
-# [#c4lz3y]
 _TRIAGE_NEXT = {
     "New": "Triaged",
     "Triaged": "In Progress",
@@ -322,7 +311,6 @@ def advance_triage_status(name, to_status):
     return {"name": doc.name, "status": doc.status, "changed": True}
 
 
-# [#pxf8ls]
 BULK_TRIAGE_SYNC_LIMIT = 50
 
 
@@ -343,7 +331,6 @@ def bulk_triage(names):
     names = names or []
 
     if len(names) > BULK_TRIAGE_SYNC_LIMIT:
-        # [#puiz3v]
         frappe.enqueue(
             "apex.habitat.doctype.resident_request.resident_request._bulk_triage_job",
             queue="short",

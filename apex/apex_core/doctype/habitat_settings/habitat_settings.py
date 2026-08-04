@@ -19,7 +19,6 @@ def before_save(doc, method=None):
     if "System Manager" not in frappe.get_roles(frappe.session.user):
         frappe.throw("Only System Manager can modify Habitat Settings.")
 
-    # [#1ntmqc]
 
     roles = frappe.get_roles(frappe.session.user)
     doc.last_modified_by_role = roles[0] if roles else ""

@@ -59,14 +59,12 @@ def _publish_fleet_update(plate: str | None = None, action: str | None = None) -
     )
 
 
-# [#mqc6q1]
 _STATUS_MAP = {
     "Stopped": "stopped",
     "Under Maintenance": "workshop",
     "Released": "stopped",
 }
 
-# [#90ru7b]
 _STOP_REASON_MAP = {
     "maintenance": "Maintenance",
     "rental return": "Rental Return",
@@ -95,7 +93,6 @@ def _sheet_for(category: str | None) -> str:
     if not category:
         return "CAR"
     upper = category.upper()
-    # [#8m3t6n]
     if any(tok in upper for tok in ("MOTOR", "BIKE", "SCOOTER", "\u062f\u0628\u0627\u0628", "\u062f\u0631\u0627\u062c")):
         return "MOTORCYCLE"
     return "CAR"
@@ -144,7 +141,6 @@ def _resolve_plate(plate: str, ptype: str = "write") -> str:
     return name
 
 
-# [#tnn6ln]
 @frappe.whitelist()
 def get_fleet_os():
     """Return the full fleet in the design's exact shape (a ``vehicles`` list).
@@ -160,11 +156,9 @@ def get_fleet_os():
     its own active filters).
     """
     frappe.has_permission("Salis Vehicle", "read", throw=True)
-    # [#8178ig]
     show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
     reader_errors: list = []
     _unscoped, _projects, base_filters = scope_filter()
-    # [#hhf1zi]
     if base_filters is None:
         return {"vehicles": [], "reason": "scope_empty", "reader_errors": []}
 
@@ -180,7 +174,6 @@ def get_fleet_os():
     if not vehicles:
         return {"vehicles": [], "reason": "data_empty", "reader_errors": []}
 
-    # [#f8i05f]
     cat_names = list({v.vehicle_category for v in vehicles if v.get("vehicle_category")})
 
     def _read_cat_fuel():
@@ -211,10 +204,8 @@ def get_fleet_os():
 
     office_city: dict[str, str] = _read(reader_errors, _("Rental Office"), _read_office_city, {})
 
-    # [#ev30tz]
     driver_names = {v.current_driver for v in vehicles if v.get("current_driver")}
 
-    # [#nfkzsx]
     plates = [v.name for v in vehicles]
     assignments = _read(
         reader_errors, _("assignments"),
@@ -248,7 +239,6 @@ def get_fleet_os():
     history_by_vehicle: dict[str, list] = {}
     for a in assignments:
         d = drivers.get(a.driver) or {}
-        # [#cpmrad]
         is_active = a.status == "Active" and a.docstatus == 1 and not a.end_date
         history_by_vehicle.setdefault(a.vehicle, []).append({
             "driver_id": ((d.get("driver_id") or a.driver or "") if show_pii else ""),
@@ -266,7 +256,6 @@ def get_fleet_os():
             "branch_deliver": "",
         })
 
-    # [#jv6v1h]
     def _read_incidents():
         incidents = frappe.get_all(
             "Vehicle Incident",
@@ -293,7 +282,6 @@ def get_fleet_os():
                 "has_evidence": bool(inc.evidence),
             }
             if inc.incident_type == "Theft":
-                # [#ifni6b]
                 cur = theft.get(inc.vehicle)
                 if cur is None or (cur.get("status") == "closed" and row["status"] != "closed"):
                     theft[inc.vehicle] = row
@@ -321,7 +309,6 @@ def get_fleet_os():
             damages.setdefault(w.vehicle, []).append({
                 "case": w.name,
                 "date": str(getdate(w.creation) if w.creation else ""),
-                # [#g2qq8l]
                 "status": "completed" if w.status in ("Approved", "Closed") else (w.status or "").lower(),
                 "cost": w.estimated_cost or 0,
                 "estimated_cost": w.estimated_cost or 0,
@@ -333,7 +320,6 @@ def get_fleet_os():
 
     damages_by_vehicle: dict[str, list] = _read(reader_errors, _("damages"), _read_write_offs, {})
 
-    # [#kw45gl]
     def _read_workshop():
         from apex.salis.tasks import _overstay_stops
 
@@ -349,7 +335,6 @@ def get_fleet_os():
             order_by="stop_date asc",
             limit_page_length=0,
         )
-        # [#t3ij7f]
         by_vehicle: dict[str, dict] = {}
         for s in stops:
             by_vehicle.setdefault(s.vehicle, s)
@@ -364,7 +349,6 @@ def get_fleet_os():
     for v in vehicles:
         cd = None
         if v.get("current_driver"):
-            # [#8sgfo9]
             hist = history_by_vehicle.get(v.name, [])
             active = next((h for h in hist if h.get("status") == "Active" and not h.get("date_deliver")), None)
             if active:
@@ -384,10 +368,8 @@ def get_fleet_os():
             "plate": v.plate_number or v.name,
             "vehicle_type": v.vehicle_category or "",
             "fuel": cat_fuel.get(v.vehicle_category, ""),
-            # [#8ufs9k]
             "planned_fuel_grade": v.planned_fuel_grade or "",
             "planned_daily_fuel": v.planned_daily_fuel or 0,
-            # [#gkm63j]
             "compliance_status": v.compliance_status or "",
             "next_expiry_date": str(v.next_expiry_date or ""),
             "rental_office": v.rental_office or "",
@@ -397,14 +379,12 @@ def get_fleet_os():
             "vehicle_status": _vehicle_status(
                 v.status, bool(v.get("current_driver")), theft_by_vehicle.get(v.name)
             ),
-            # [#5hq10c]
             "workshop_notes": (ws.notes or "") if ws else "",
             "workshop_date": ws_date,
             "days_in_workshop": (date_diff(today(), ws.stop_date) if ws and ws.stop_date else 0),
             "workshop_overstay": v.name in workshop_overstay,
             "current_driver": cd,
             "history": history_by_vehicle.get(v.name, []),
-            # [#a3imrv]
             "damages": damages_by_vehicle.get(v.name, []),
             "accidents": accidents_by_vehicle.get(v.name, []),
             "stolen_info": theft_by_vehicle.get(v.name),
@@ -443,7 +423,6 @@ def search_drivers(q=None, limit=20):
     term = (q or "").strip()
     if term:
         like = f"%{term}%"
-        # [#615vqu]
         or_filters = {"full_name": ["like", like]}
         if show_pii:
             or_filters["driver_id"] = ["like", like]
@@ -458,7 +437,6 @@ def search_drivers(q=None, limit=20):
     )
 
     if not unscoped:
-        # [#r5nk98]
         veh_names = {r.current_vehicle for r in rows if r.get("current_vehicle")}
         permitted_veh = set()
         if veh_names:
@@ -587,12 +565,10 @@ def get_vehicle_timeline(plate):
             "message": al.message or "",
         })
 
-    # [#y71wmv]
     events.sort(key=lambda e: e.get("date") or "", reverse=True)
     return {"events": events}
 
 
-# [#76c7tt]
 @frappe.whitelist(methods=["POST"])
 def reassign(plate, driver_id, date=None):
     """Assign a driver to a vehicle by creating a submitted Vehicle Assignment.
@@ -602,22 +578,23 @@ def reassign(plate, driver_id, date=None):
     Vehicle Assignment controller handles the link side; we also set the
     vehicle's current_driver and the driver's current_vehicle so the live state
     matches immediately (the assignment alone does not mutate those).
+
+    The fallback probe is name-filtered, not positional: the positional
+    ``frappe.db.exists(dt, dn)`` answers "Salis Driver" back unqueried
+    (database.py:1259), which cleared the not-found refusal below for that literal
+    string.
     """
     vehicle = _resolve_plate(plate)
     if not driver_id:
         frappe.throw(_("Driver is required."))
 
     driver = frappe.db.get_value("Salis Driver", {"driver_id": driver_id}, "name")
-    # Name-filtered: the positional probe answers "Salis Driver" back unqueried
-    # (database.py:1259), clearing the refusal below for that literal string.
     if not driver and frappe.db.exists("Salis Driver", {"name": driver_id}):
         driver = driver_id
     if not driver:
         frappe.throw(_("Driver {0} not found.").format(driver_id))
-    # [#cs6rw5]
     frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
 
-    # [#3jq52k]
     assignment = reassign_vehicle_driver(vehicle, driver, date)
     _publish_fleet_update(plate, "reassign")
     return {"ok": True, "assignment": assignment}
@@ -644,15 +621,12 @@ def create_handover(plate, driver_id, date=None, odometer=None, checklist_templa
         frappe.throw(_("Driver is required."))
 
     to_driver = frappe.db.get_value("Salis Driver", {"driver_id": driver_id}, "name")
-    # Name-filtered as in reassign: the unqueried "Salis Driver" answer cleared this
-    # refusal and reached the handover insert as a dangling to_driver link.
     if not to_driver and frappe.db.exists("Salis Driver", {"name": driver_id}):
         to_driver = driver_id
     if not to_driver:
         frappe.throw(_("Driver {0} not found.").format(driver_id))
     frappe.has_permission("Vehicle Handover", "create", throw=True)
 
-    # [#7obpbm]
     prev = frappe.get_all(
         "Vehicle Assignment",
         filters={"vehicle": vehicle, "status": "Ended", "driver": ["!=", to_driver]},
@@ -662,7 +636,6 @@ def create_handover(plate, driver_id, date=None, odometer=None, checklist_templa
     )
     from_driver = prev[0].driver if prev else None
 
-    # [#5ntp6r]
     if not from_driver:
         return {"ok": True, "handover": None, "skipped": "no_prior_driver"}
 
@@ -681,8 +654,6 @@ def create_handover(plate, driver_id, date=None, odometer=None, checklist_templa
             pass
     doc.insert()
 
-    # Name-filtered: an unknown template is meant to be ignored, but the positional
-    # probe cleared this guard for the literal DocType and hard-failed the loader.
     if checklist_template and frappe.db.exists(
         "Vehicle Handover Checklist Template", {"name": checklist_template}
     ):
@@ -718,9 +689,8 @@ def stop_vehicle(plate, reason=None):
         "notes": (reason or ""),
     })
     doc.insert()
-    doc.submit()  # [#mx3ts3]
+    doc.submit()
 
-    # [#q5vodj]
     if current_driver:
         for r in frappe.get_all(
             "Vehicle Assignment",
@@ -753,7 +723,7 @@ def report_theft(plate, location=None, report_number=None):
         "description": _("Reported stolen from the Fleet OS dashboard."),
     })
     doc.insert()
-    doc.submit()  # [#taa8d4]
+    doc.submit()
     _publish_fleet_update(plate, "theft")
     return {"ok": True, "incident": doc.name}
 
@@ -789,9 +759,8 @@ def workshop_in(plate, expected_return=None, notes=None):
         "notes": note,
     })
     doc.insert()
-    doc.submit()  # [#q94ufk]
+    doc.submit()
 
-    # [#nsn8wg]
     frappe.db.set_value("Salis Vehicle", vehicle, "status", "Under Maintenance")
     _publish_fleet_update(plate, "workshop_in")
     return {"ok": True, "stop": doc.name}
@@ -821,9 +790,7 @@ def workshop_out(plate):
     if not stop:
         frappe.throw(_("This vehicle has no open workshop stop to return."))
 
-    # [#f77fmu]
     close_open_stop(stop.name)
-    # [#22cv6z]
     if frappe.db.get_value("Salis Vehicle", vehicle, "status") == "Under Maintenance":
         frappe.db.set_value("Salis Vehicle", vehicle, "status", stop.previous_status or "Active")
     _publish_fleet_update(plate, "workshop_out")
@@ -856,7 +823,6 @@ def _bulk_apply(plates, action) -> dict:
     """
     results = []
     for plate in _coerce_plates(plates):
-        # [#9ecrgo]
         sp = "sp" + frappe.generate_hash(length=10)
         frappe.db.savepoint(sp)
         try:
@@ -878,7 +844,6 @@ def _bulk_apply(plates, action) -> dict:
 @frappe.whitelist(methods=["POST"])
 def bulk_stop_vehicles(plates, reason=None):
     """Stop several vehicles at once, reusing stop_vehicle per plate."""
-    # [#bopf1d]
     frappe.has_permission("Salis Vehicle", "write", throw=True)
     return _bulk_apply(plates, lambda p: stop_vehicle(p, reason=reason))
 
@@ -886,7 +851,6 @@ def bulk_stop_vehicles(plates, reason=None):
 @frappe.whitelist(methods=["POST"])
 def bulk_workshop_in(plates, expected_return=None, notes=None):
     """Send several vehicles to the workshop at once, reusing workshop_in per plate."""
-    # [#bopf1d]
     frappe.has_permission("Salis Vehicle", "write", throw=True)
     return _bulk_apply(plates, lambda p: workshop_in(p, expected_return=expected_return, notes=notes))
 
@@ -917,7 +881,6 @@ def recover(plate):
         _publish_fleet_update(plate, "recover")
         return {"ok": True}
 
-    # [#67gbhm]
     if incident.previous_driver and not frappe.db.get_value(
         "Salis Vehicle", vehicle, "current_driver"
     ):

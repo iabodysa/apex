@@ -66,7 +66,6 @@ def _assert_source_availability(doc):
     for row in doc.items:
         needed[(row.item_type, row.item)] = needed.get((row.item_type, row.item), 0) + flt(row.qty)
     for (item_type, item), qty in needed.items():
-        # [#bamx4m]
         available = get_store_balance(item_type, item, doc.from_building, for_update=True)
         if qty > available:
             frappe.throw(
@@ -144,7 +143,6 @@ def _notify_finance_on_cost_center_shift(doc):
     if not recipients:
         return
 
-    # [#d5vtlw]
     from apex.apex_core.utils.email_gate import email_enabled
     if not email_enabled():
         frappe.logger().info(

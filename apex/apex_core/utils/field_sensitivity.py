@@ -49,8 +49,6 @@ import re
 LEVEL_OPERATIONAL = 0
 LEVEL_PERSONAL = 1
 
-# Layout fields hold no value and can never be sensitive. Frappe itself skips them when it
-# restores level fields (`display_fieldtypes`, frappe/model/base_document.py:1270).
 DISPLAY_FIELDTYPES = frozenset(
     {"Section Break", "Column Break", "Tab Break", "HTML", "Heading", "Fold", "Button", "Image"}
 )
@@ -64,9 +62,6 @@ PERSONAL_CONTACT = re.compile(r"mobile|phone|whatsapp|personal_email|contact_num
 PER_PERSON_PAY = re.compile(r"salary|wage|basic_pay|gross_pay|net_pay|stipend|deduction_amount")
 FREE_TEXT = re.compile(r"notes|remarks|comment|description|reason")
 
-# A person master names its subject with one of these as its OWN field. `employee_name` is
-# absent on purpose: it is almost always a `fetch_from` display of a Link to someone the
-# record merely references, which would make every operational record a person master.
 PERSON_NAME = re.compile(r"^(full_name|worker_name|resident_name|driver_name|holder_name)$")
 
 CATEGORIES = ("signature", "government_id", "personal_contact", "per_person_pay", "free_text")
@@ -96,6 +91,10 @@ def categorise(field, *, person_master):
 
     ``person_master`` gates the three contextual categories; the two absolute ones ignore
     it. Order matters only in that the absolute categories are tried first.
+
+    ``DISPLAY_FIELDTYPES`` returns None first because a layout field holds no value and
+    can never be sensitive. Frappe itself skips exactly that set when it restores level
+    fields (``display_fieldtypes``, frappe/model/base_document.py:1270).
     """
     fieldname = field.get("fieldname") or ""
     fieldtype = field.get("fieldtype") or ""

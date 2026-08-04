@@ -25,8 +25,6 @@ from frappe.email.doctype.notification.notification import Notification
 
 class ApexNotification(Notification):
     def send_notification_by_channel(self, doc, context):
-        # Deliver the in-app System Notification first so the bell always works,
-        # independent of Email/Slack/SMS transport availability.
         system_path = self.channel == "System Notification" or self.send_system_notification
         system_sent = False
         if system_path:
@@ -36,7 +34,6 @@ class ApexNotification(Notification):
             except Exception:
                 self.log_error("Failed to send Notification")
 
-        # The System Notification channel has no separate transport step.
         if self.channel == "System Notification":
             return
 
@@ -48,9 +45,6 @@ class ApexNotification(Notification):
             elif self.channel == "SMS":
                 self.send_sms(doc, context)
         except Exception:
-            # A missing outgoing Email Account (or any transport failure) must
-            # NOT surface as a hard error when the in-app System Notification
-            # already delivered — that bell is the resilient fallback path.
             if system_sent:
                 return
             self.log_error("Failed to send Notification")

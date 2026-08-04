@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 from frappe.utils import getdate, today
@@ -19,13 +18,6 @@ def execute(filters=None):
         {"label": frappe._("Overdue"), "fieldname": "overdue", "fieldtype": "Data", "width": 90},
     ]
 
-    # Audit Remediation Plan became row-scoped on its child buildings table, and a
-    # Script Report inherits nothing from permission_query_conditions: query_report.py
-    # checks `report` on the ref once, then runs this module, whose frappe.get_all
-    # forces ignore_permissions. The rows below are CHILD rows carrying no building of
-    # their own, so the visible plan set is resolved first from the same scope table the
-    # fragment subqueries, and the child query confined to it. A plan naming no building
-    # resolves into no plan and stays hidden: fail closed, exactly like the fragment.
     item_filters = {"parenttype": "Audit Remediation Plan"}
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:

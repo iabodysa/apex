@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Vehicle Utilisation - per-vehicle roll-up of trips, idle days and average
 utilisation, derived from the system-written Vehicle Utilisation Snapshot.
@@ -42,7 +41,6 @@ def execute(filters=None):
     if date_condition is not None:
         query_filters["snapshot_date"] = date_condition
 
-    # [#c8co3d]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:

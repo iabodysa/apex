@@ -55,7 +55,6 @@ class CustodyHandover(Document):
         self._post_ship_leg()
         self.db_set("status", "Pending Receipt")
         code = generate_otp(self)
-        # [#eyepzh]
         frappe.response["handover_otp"] = code
 
     def before_cancel(self):
@@ -84,7 +83,6 @@ class CustodyHandover(Document):
         for row in self.items:
             needed[(row.item_type, row.item)] = needed.get((row.item_type, row.item), 0) + flt(row.qty)
         for (item_type, item), qty in needed.items():
-            # [#6jql9g]
             available = get_store_balance(item_type, item, self.from_building, for_update=True)
             if qty > available:
                 frappe.throw(

@@ -54,7 +54,6 @@ def get_data(filters):
     if filters.get("building"):
         conditions["building"] = filters["building"]
 
-    # [#a79h7o]
     user = frappe.session.user
     if not permissions._building_is_unscoped(user):
         allowed = permissions._allowed_buildings(user)

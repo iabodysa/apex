@@ -67,7 +67,6 @@ def perform_custody_action(
     if action not in _VALID_ACTIONS:
         frappe.throw(_("Unknown custody action: {0}").format(action))
     sim = _load_sim(sim_card)
-    # Read scope on the SIM the action targets (company-scoped has_permission).
     sim.check_permission("read")
 
     doc = frappe.get_doc(
@@ -103,7 +102,6 @@ def edit_mobile_number(sim_card, mobile_number):
         frappe.throw(_("Enter a valid mobile number."))
     sim = _load_sim(sim_card)
     sim.check_permission("write")
-    # Lock the row so a concurrent edit / custody action cannot interleave.
     frappe.db.get_value("SIM Card", sim.name, "name", for_update=True)
     sim.reload()
     sim.mobile_number = mobile_number
@@ -134,8 +132,6 @@ def move_to_contract(sim_card, telecom_contract):
     )
     if target.docstatus != 1:
         frappe.throw(_("A SIM can only move to a submitted contract."))
-    # Fail closed on a cross-company move: a SIM stays within its own company so its
-    # company-scoped permission never diverges from the contract it belongs to.
     if target.company != sim.company:
         frappe.throw(_("A SIM can only move to a contract within its own company."))
 

@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 
@@ -20,7 +19,6 @@ def execute(filters=None):
     if filters and filters.get("building"):
         query_filters["building"] = filters["building"]
 
-    # [#537g2t]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:
         if not allowed:

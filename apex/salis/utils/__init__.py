@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#2ksmt5]
 
 import frappe
 from frappe import _
@@ -207,7 +206,6 @@ def close_open_stop(stop_name, return_date=None):
     frappe.get_doc("Vehicle Suspension", stop_name).cancel()
 
 
-# [#tqf298]
 _TR_STATE_DOCSTATUS = {
     "New": 0,
     "Validated": 0,
@@ -218,11 +216,8 @@ _TR_STATE_DOCSTATUS = {
     "Cancelled": 2,
 }
 
-# [#6jujlr]
 _TR_TERMINAL = {"Fulfilled", "Cancelled"}
 
-# Distinct from habitat's notify savepoint: both can be live in one request, and a
-# shared name would let one helper's rollback destroy the other's mark.
 _CLEARANCE_SAVEPOINT = "apex_salis_rider_clearance"
 
 
@@ -256,7 +251,6 @@ def drive_transport_request(tr_name, action, target_state, extra_fields=None):
     if current == target_state:
         return current
 
-    # [#75w6jt]
     try:
         from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
@@ -269,19 +263,16 @@ def drive_transport_request(tr_name, action, target_state, extra_fields=None):
                     frappe.db.set_value("Transport Request", tr_name, extra_fields)
                 return target_state
     except Exception:
-        # [#4epfxd]
         frappe.log_error(
             frappe.get_traceback(), "Salis: workflow drive fell back to direct write"
         )
 
-    # [#lls5rg]
     values = {"status": target_state}
     if extra_fields:
         values.update(extra_fields)
 
     target_docstatus = _TR_STATE_DOCSTATUS.get(target_state)
     if target_docstatus is not None:
-        # [#daqwvk]
         values["docstatus"] = target_docstatus
 
     frappe.db.set_value("Transport Request", tr_name, values)
@@ -330,12 +321,9 @@ def revert_transport_request(tr_name, from_state, to_state, dispatch_trip=None, 
     return to_state
 
 
-# [#pbj851]
 
-# [#kdkk0c]
 INACTIVE_EMPLOYEE_STATUSES = ("Inactive", "Left", "Suspended")
 
-# [#9kwn9b]
 BLOCKING_DRIVER_STATUSES = ("Stopped", "On Leave", "Released")
 
 
@@ -370,7 +358,6 @@ def rider_block_reason(driver, on_date=None):
 
     label = drv.full_name or driver
 
-    # [#2xlsof]
     if drv.employee:
         emp_status = frappe.db.get_value("Employee", drv.employee, "status")
         if emp_status in INACTIVE_EMPLOYEE_STATUSES:
@@ -378,14 +365,12 @@ def rider_block_reason(driver, on_date=None):
                 label, _(emp_status)
             )
 
-        # [#dnxa0n]
         leave = _approved_leave_on(drv.employee, on_date)
         if leave:
             return _(
                 "Rider {0} is on approved leave ({1}) covering {2} and cannot receive a vehicle or fuel."
             ).format(label, leave, on_date)
 
-    # [#2gphk9]
     if drv.status in BLOCKING_DRIVER_STATUSES:
         return _("Rider {0} is marked {1} and cannot receive a vehicle or fuel.").format(
             label, _(drv.status)
@@ -417,7 +402,6 @@ def _approved_leave_on(employee, on_date):
             limit=1,
         )
     except Exception:
-        # [#ififlm]
         return None
     return rows[0] if rows else None
 
@@ -449,12 +433,8 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
     if not driver:
         return []
 
-    # The docstring's "can never abort the guarded transaction" promise needs a SAVEPOINT:
-    # a bare frappe.db.rollback() discards the caller's whole transaction, including the
-    # rejection this follow-up task is meant to accompany.
     frappe.db.savepoint(_CLEARANCE_SAVEPOINT)
     try:
-        # [#q5qqgf]
         existing = frappe.get_all(
             "ToDo",
             filters={
@@ -466,7 +446,6 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
         )
 
         assignees = _clearance_assignees(driver)
-        # [#70vv14]
         assignees = [u for u in assignees if u not in existing]
         if not assignees:
             return []
@@ -493,7 +472,6 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
             ).insert(ignore_permissions=True)  # audit-ok
             created.append(todo.name)
 
-        # [#lg7hm5]
         if source_doctype and source_name:
             add_timeline_note(source_doctype, source_name, description)
 
@@ -512,7 +490,6 @@ def _clearance_assignees(driver):
 	Guest and disabled users are filtered out."""
     candidates = []
 
-    # [#saojkk]
     assignment_sup = frappe.get_all(
         "Vehicle Assignment",
         filters={"driver": driver, "docstatus": 1, "status": "Active"},
@@ -523,12 +500,10 @@ def _clearance_assignees(driver):
     if assignment_sup and assignment_sup[0].supervisor:
         candidates.append(assignment_sup[0].supervisor)
 
-    # [#5x4vod]
     driver_sup = frappe.db.get_value("Salis Driver", driver, "supervisor")
     if driver_sup:
         candidates.append(driver_sup)
 
-    # [#fsf12q]
     if not candidates:
         candidates = frappe.get_all(
             "Has Role",
@@ -536,7 +511,6 @@ def _clearance_assignees(driver):
             pluck="parent",
         )
 
-    # [#ep9yz7]
     seen = []
     for user in candidates:
         if (
@@ -564,7 +538,6 @@ def add_timeline_note(doctype, name, message):
     try:
         frappe.get_doc(doctype, name).add_comment("Info", message)
     except frappe.DoesNotExistError:
-        # [#j2mvqv]
         return
     except Exception:
         frappe.log_error(frappe.get_traceback(), "Salis: timeline note failed")

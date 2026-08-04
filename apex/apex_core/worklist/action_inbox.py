@@ -25,7 +25,6 @@ from frappe.model.workflow import get_workflow_name, get_workflow_state_field
 @frappe.whitelist()
 def get_pending_actions() -> dict:
     """Return ``{workflow_actions, todos}`` awaiting the current user's action."""
-    # [#6j7h3j]
     workflow_actions = frappe.get_list(
         "Workflow Action",
         filters={"status": "Open"},
@@ -37,7 +36,6 @@ def get_pending_actions() -> dict:
     for wa in workflow_actions:
         wa["source"] = "workflow"
 
-    # [#nzn8cw]
     todos = frappe.get_list(
         "ToDo",
         filters={
@@ -91,7 +89,6 @@ def _drop_stale(rows: list) -> list:
 
     kept: list = []
     for doctype, group in by_doctype.items():
-        # [#6vdo8h]
         if not frappe.db.exists("DocType", doctype):
             frappe.logger().info(
                 f"action_inbox: dropped {len(group)} Open action(s) for missing DocType {doctype!r}"
@@ -101,7 +98,7 @@ def _drop_stale(rows: list) -> list:
             workflow = get_workflow_name(doctype)
             state_field = get_workflow_state_field(workflow) if workflow else None
             if not state_field:
-                kept.extend(group)  # [#o4elq9]
+                kept.extend(group)
                 continue
             names = [r["reference_name"] for r in group]
             live = {

@@ -73,6 +73,9 @@ report's audience from Custom Role FIRST (frappe/boot.py:222-233) and then EXCLU
 report from the roles-table query (:254), so one Custom Role row replaces a report's whole
 audience without the Report doc ever being saved — this hook never sees it. That is a
 separate DocType and a separate card.
+
+``_ALWAYS_PERMITTED`` holds Administrator alone: it short-circuits every permission
+check (frappe/permissions.py:107), so it is never the role that loses access.
 """
 
 from __future__ import annotations
@@ -81,14 +84,8 @@ import frappe
 
 _APP = "apex"
 
-# Administrator short-circuits every permission check (frappe/permissions.py:107), so it
-# is never the role that loses access.
 _ALWAYS_PERMITTED = frozenset({"Administrator"})
 
-# A module constant, like workflow_guard._MESSAGE; the translation extractor resolves one
-# passed through _(), so this text is gated like any literal msgid. Deliberately a plain
-# str: _() runs at call time inside the request, where the lang is already the reader's,
-# and _lt() would return a lazy proxy with no .format for the two placeholders.
 _MESSAGE = (
     "{0} does not grant {1} the Report permission, so a user holding only {1} sees this "
     "report and gets a PermissionError on opening it. Either grant report on {0} to {1} "
@@ -97,8 +94,6 @@ _MESSAGE = (
 
 _TITLE = "Report Role Cannot Run This Report"
 
-# A migrate must never abort on data this hook did not create. in_import alone would not
-# be enough: sync_fixtures imports with data_import=True, which leaves validate ON.
 _MIGRATION_FLAGS = ("in_migrate", "in_install", "in_patch", "in_import")
 
 
@@ -165,8 +160,6 @@ def validate(doc, method=None):
     if added and not _in_migration():
         frappe.throw(_message(ref, added), title=_TITLE)
 
-    # Pre-existing rows, or any offender during a migrate: say so and let the save
-    # through, so neither an unrelated edit nor a migrate is blocked by old data.
     frappe.msgprint(_message(ref, offenders), title=_TITLE, indicator="orange")
 
 

@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#7ffkxk]
 
 frappe.pages['arrivals-desk'].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -10,12 +9,6 @@ frappe.pages['arrivals-desk'].on_page_load = function (wrapper) {
 	wrapper.arrivals_desk = new ArrivalsDesk(page);
 };
 
-// Arrivals Desk look restored on native Desk CSS variables — a Desk page ships no
-// stylesheet, so the removed arrivals_desk.css is re-expressed as inline style=""
-// overlays bound to Desk vars (theme + dark-mode aware) with logical properties so
-// the 3-pane desk mirrors correctly under RTL. No <style> injection.
-// Bed status palette (free/occupied/blocked/out-of-service) aliases the Desk
-// colour-scale vars — the same key Front Desk / Transfer Board use.
 const AX_BED_PALETTE = {
 	green: "background:var(--green-100);color:var(--green-700);border-color:var(--green-500);cursor:pointer;",
 	red: "background:var(--red-100);color:var(--red-700);border-color:var(--red-500);cursor:pointer;",
@@ -165,8 +158,6 @@ const AX_STYLE = {
 	qr_img: "inline-size:120px;block-size:120px;",
 	qr_link: "display:block;font-size:var(--text-xs);word-break:break-all;margin-block-start:4px;",
 };
-// Progress stepper: the step index (was a CSS counter) is rendered as a real node,
-// and the state colours are inlined since no stylesheet keys the state classes.
 const AX_STEP = {
 	base:
 		"appearance:none;display:inline-flex;align-items:center;gap:6px;padding-block:4px;padding-inline:6px 10px;border-radius:14px;border:1px solid var(--border-color);background:var(--card-bg);font-size:var(--text-sm);color:var(--text-muted);",
@@ -181,7 +172,6 @@ const AX_STEP_NUM = {
 	now: "background:var(--primary);color:var(--text-on-blue);",
 	todo: "background:var(--gray-100);color:var(--gray-600);",
 };
-// One bed's full inline style: base geometry + status palette + optional temp/busy.
 function ax_bed_style(color, opts) {
 	opts = opts || {};
 	return (
@@ -198,21 +188,16 @@ class ArrivalsDesk {
 		this.building = null;
 		this.project = null;
 		this.grid = null;
-		this.active = null; // the worker currently being processed (party_type + party)
-		this.cart = []; // workers housed in this arrival session (right zone)
-		this.custodyIssued = false; // any custody handed over this session
-		this.cardIssued = false; // any Masar arrival link issued this session
-		this.transportStarted = false; // a transport request was created this session
-		this.mrzOcrEnabled = false; // passport MRZ camera autofill (Habitat Settings flag)
-		// Read through the desk's own accessor, never frappe.client.get_single_value:
-		// that needs read on the whole Habitat Settings Single, which this page's
-		// audience does not have, and the refusal opens a blocking dialog that no
-		// client-side .catch() can suppress.
+		this.active = null;
+		this.cart = [];
+		this.custodyIssued = false;
+		this.cardIssued = false;
+		this.transportStarted = false;
+		this.mrzOcrEnabled = false;
 		frappe
 			.xcall('apex.habitat.api.arrivals_desk.get_intake_settings')
 			.then((r) => (this.mrzOcrEnabled = !!(r && r.enable_passport_mrz_ocr)))
 			.catch(() => {});
-		// [#frsjh3]
 		this.page.hide_form();
 		this._build_skeleton();
 		this._setup_anchor();
@@ -223,36 +208,28 @@ class ArrivalsDesk {
 
 	_build_skeleton() {
 		this.$root = $('<div class="arrivals-desk"></div>').attr('style', AX_STYLE.root).appendTo(this.page.main);
-		// Read-only telemetry strip (Arrivals today / Pending on manifest), building-agnostic.
 		this._build_strip();
-		// [#b5ku2i]
 		this.$body = $('<div class="ax-body"></div>').attr('style', AX_STYLE.body).appendTo(this.$root);
 
-		// [#nzjhbw]
 		this.$intake = $('<aside class="ax-zone ax-zone-intake"></aside>')
 			.attr('style', AX_STYLE.zone + AX_STYLE.zone_intake)
 			.appendTo(this.$body);
-		// Sticky zone header so the "who is arriving?" question stays pinned on scroll.
 		$('<div class="ax-zone-head"></div>').attr('style', AX_STYLE.zone_head).text(__('Who is arriving?')).appendTo(this.$intake);
 
-		// [#awqamr]
 		this.$floorZone = $('<section class="ax-zone ax-zone-floor"></section>')
 			.attr('style', AX_STYLE.zone + AX_STYLE.zone_floor)
 			.appendTo(this.$body);
-		// The Floor's sticky header is the building + capacity anchor.
 		this.$anchor = $('<div class="ax-anchor ax-zone-head"></div>')
 			.attr('style', AX_STYLE.zone_head + AX_STYLE.anchor)
 			.appendTo(this.$floorZone);
 		this.$capacity = $('<div class="ax-capacity"></div>').attr('style', AX_STYLE.capacity).appendTo(this.$anchor);
-		this.$stages = $('<div class="ax-stages"></div>').attr('style', AX_STYLE.stages).appendTo(this.$anchor); // 5-stage progress pills
+		this.$stages = $('<div class="ax-stages"></div>').attr('style', AX_STYLE.stages).appendTo(this.$anchor);
 		this.$floor = $('<div class="ax-floor"></div>').attr('style', AX_STYLE.floor).appendTo(this.$floorZone);
-		// [#8gi0rj]
 		this.$floor.on('click', '.ax-bed', (e) => this._on_bed_click(e));
 		this.$floor.on('click', '.ax-room-oc', (e) => {
 			e.stopPropagation();
 			this._house_over_capacity($(e.currentTarget).attr('data-room'));
 		});
-		// [#r0hc0o]
 		this.$floor.on('keydown', '.ax-bed--green, .ax-bed--red', (e) => {
 			if (e.key === 'Enter' || e.key === ' ') {
 				e.preventDefault();
@@ -260,11 +237,9 @@ class ArrivalsDesk {
 			}
 		});
 
-		// [#mo583e]
 		this.$actions = $('<aside class="ax-zone ax-zone-actions"></aside>')
 			.attr('style', AX_STYLE.zone + AX_STYLE.zone_actions)
 			.appendTo(this.$body);
-		// Sticky zone header naming the right-hand "this session" work area.
 		$('<div class="ax-zone-head"></div>').attr('style', AX_STYLE.zone_head).text(__('This session')).appendTo(this.$actions);
 
 		this._build_intake();
@@ -282,13 +257,8 @@ class ArrivalsDesk {
 	}
 
 	_load_strip() {
-		// Read-only counts from the shared Custom Number Card methods; failures
-		// leave the dash placeholder rather than breaking the desk.
-		// Render a plain integer via .text(): frappe.format(Int) returns a
-		// <div>-wrapped string, which .text() would show as literal markup.
 		const set = (key, val) =>
 			this.$strip.find(`[data-stat="${key}"]`).text(cint(val) || 0);
-		// Cards return the {value, ...df} Number Card contract; read .value.
 		const num = (r) => (r && typeof r === 'object' ? r.value : r);
 		frappe
 			.xcall('apex.habitat.api.dashboard.get_arrivals_today')
@@ -301,7 +271,6 @@ class ArrivalsDesk {
 	}
 
 	_setup_anchor() {
-		// [#r86sw8]
 		const $bWrap = $('<div class="ax-anchor-field"></div>').attr('style', AX_STYLE.anchor_field).prependTo(this.$anchor);
 		const $pWrap = $('<div class="ax-anchor-field"></div>').attr('style', AX_STYLE.anchor_field).insertAfter($bWrap);
 
@@ -312,8 +281,6 @@ class ArrivalsDesk {
 				options: 'Building',
 				label: __('Building'),
 				placeholder: __('Pick a building…'),
-				// Offer only buildings that still have an available bed (server-scoped,
-				// same free-bed rule as the board) — never a full building.
 				get_query: () => ({
 					query: 'apex.habitat.api.arrivals_desk.buildings_with_capacity',
 				}),
@@ -324,7 +291,6 @@ class ArrivalsDesk {
 		});
 		this.building_field.refresh();
 
-		// [#401r0k]
 		this.project_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Link',
@@ -339,7 +305,6 @@ class ArrivalsDesk {
 		});
 		this.project_field.refresh();
 
-		// [#omdu8q]
 		if (this.building_field.$input) {
 			this.building_field.$input.on('change awesomplete-selectcomplete', () => this._on_building_change());
 		}
@@ -352,12 +317,11 @@ class ArrivalsDesk {
 		const val = this.building_field.get_value();
 		if (val && val !== this.building) {
 			this.building = val;
-			this.catalog = null; // reload the custody catalog for the new building's store
+			this.catalog = null;
 			this.refresh();
 			this._load_catalog();
-			this._load_manifest(); // manifest is building-scoped
+			this._load_manifest();
 		} else if (!val && this.building) {
-			// [#df9hzt]
 			this.building = null;
 			this.grid = null;
 			this.catalog = null;
@@ -370,7 +334,6 @@ class ArrivalsDesk {
 
 	_on_project_change() {
 		this.project = this.project_field.get_value() || null;
-		// Re-tint rooms for the newly selected project (uses the cached grid; no refetch).
 		if (this.grid) this._render_grid(this.grid);
 	}
 
@@ -385,7 +348,7 @@ class ArrivalsDesk {
 				args: { building: this.building },
 			})
 			.then((r) => {
-				if (this.building !== requested) return; // stale: a newer building was picked
+				if (this.building !== requested) return;
 				this.grid = r.message;
 				this._render_grid(this.grid);
 			})
@@ -395,9 +358,7 @@ class ArrivalsDesk {
 			});
 	}
 
-	// [#3005gs]
 	_build_intake() {
-		// Note: do NOT empty $intake — it carries the sticky zone header from _build_skeleton.
 		const $search = $('<div class="ax-search"></div>').appendTo(this.$intake);
 		this.$search_input = $(
 			`<input type="search" class="ax-search-input form-control form-control-sm" style="${AX_STYLE.search_input}" placeholder="${__(
@@ -405,18 +366,16 @@ class ArrivalsDesk {
 			)}" />`
 		).appendTo($search);
 		this.$results = $('<div class="ax-results"></div>').attr('style', AX_STYLE.results).appendTo($search);
-		// Today's expected-arrivals manifest (from Arrival Batch), below the search.
 		this.$manifest = $('<div class="ax-manifest"></div>').attr('style', AX_STYLE.manifest).appendTo(this.$intake);
 		this.$active = $('<div class="ax-active"></div>').attr('style', AX_STYLE.active).appendTo(this.$intake);
 		this.$cart = $('<div class="ax-cart"></div>').attr('style', AX_STYLE.cart).appendTo(this.$actions);
-		this.$deck = $('<div class="ax-deck"></div>').appendTo(this.$actions); // stage deck
+		this.$deck = $('<div class="ax-deck"></div>').appendTo(this.$actions);
 		this.$search_input.on('input', frappe.utils.debounce(() => this._search(), 250));
 		this._render_results(null);
 		this._render_cart();
 		this._load_manifest();
 	}
 
-	// Pull today's expected arrivals for the picked building (refreshed with the grid).
 	_load_manifest() {
 		if (!this.$manifest) return;
 		frappe
@@ -431,12 +390,11 @@ class ArrivalsDesk {
 	_render_manifest(data) {
 		this.$manifest.empty();
 		const workers = (data && data.workers) || [];
-		if (!workers.length) return; // no manifest for today → keep the intake clean
+		if (!workers.length) return;
 		$('<div class="ax-manifest-title"></div>')
 			.attr('style', AX_STYLE.manifest_title)
 			.text(__("Today's expected arrivals ({0})", [data.total]))
 			.appendTo(this.$manifest);
-		// Running tally: how many of the manifest have arrived vs still pending.
 		$('<div class="ax-manifest-tally text-muted"></div>')
 			.attr('style', AX_STYLE.manifest_tally)
 			.text(__('{0} of {1} arrived, {2} pending', [data.arrived, data.total, data.pending]))
@@ -449,7 +407,6 @@ class ArrivalsDesk {
 		const $row = $(`<div class="ax-manifest-row${w.arrived ? ' ax-manifest-row--done' : ''}" tabindex="0" role="button"></div>`)
 			.attr('style', AX_STYLE.manifest_row + (w.arrived ? AX_STYLE.manifest_row_done : ''))
 			.appendTo($list);
-		// Tick colour: green when the manifest line has arrived, muted while pending.
 		$('<span class="ax-manifest-tick"></span>')
 			.attr('style', AX_STYLE.manifest_tick + (w.arrived ? 'color:var(--green-700);' : 'color:var(--text-muted);'))
 			.text(w.arrived ? '✓' : '○')
@@ -471,8 +428,6 @@ class ArrivalsDesk {
 		});
 	}
 
-	// Tapping a manifest row: an already-matched worker is preselected; an
-	// unmatched one pre-fills the passport register modal with the manifest data.
 	_pick_manifest(w) {
 		if (w.temporary_worker) {
 			this._select_worker({
@@ -488,26 +443,23 @@ class ArrivalsDesk {
 			nationality: w.nationality,
 			labour_supplier: w.labour_supplier,
 			project: w.project,
-			batch_row: w.row, // link back so this manifest line ticks on register
+			batch_row: w.row,
 		});
 	}
 
 	_search() {
 		const txt = (this.$search_input.val() || '').trim();
 		this._searched = true;
-		this._render_search_skeleton(); // ghost rows while the lookup is in flight
+		this._render_search_skeleton();
 		frappe
 			.call({
 				method: 'apex.habitat.api.arrivals_desk.search_arrivals_workers',
 				args: { building: this.building, txt },
 			})
 			.then((r) => this._render_results(r.message || []))
-			// A rejected search is its own state (retry), never a silent "zero matches".
 			.catch(() => this._render_search_error());
 	}
 
-	// Three ghost rows so an in-flight search reads as loading, not as empty.
-	// Flat placeholder rows on the native --skeleton-bg Desk var (theme + dark aware).
 	_render_search_skeleton() {
 		this.$results.html(
 			`<div class="ax-results-skeleton" aria-hidden="true" style="${AX_STYLE.results_skeleton}">` +
@@ -516,7 +468,6 @@ class ArrivalsDesk {
 		);
 	}
 
-	// Distinct error state: a rejection is visually different from zero matches.
 	_render_search_error() {
 		this.$results.empty();
 		const $row = $('<div class="ax-results-error"></div>').attr('style', AX_STYLE.results_error).appendTo(this.$results);
@@ -536,7 +487,6 @@ class ArrivalsDesk {
 		if (rows && rows.length) {
 			rows.forEach((row) => this._result_row(row));
 		} else {
-			// null = first run (no search yet) → guidance; [] after a search → no match.
 			const msg = this._searched
 				? __('No registered workers match. Register a new arrival below.')
 				: __('Search a name or passport, or register a new arrival');
@@ -545,7 +495,6 @@ class ArrivalsDesk {
 		this._append_register_row();
 	}
 
-	// [#2tv16z]
 	_append_register_row() {
 		$('<button class="btn btn-default btn-sm ax-register-row"></button>')
 			.attr('style', AX_STYLE.register_row)
@@ -566,7 +515,6 @@ class ArrivalsDesk {
 				`${this._expiry_chip(row)}</div>`
 		).appendTo(this.$results);
 		const pick = () => {
-			// Re-apply the base/active inline styles since no stylesheet keys `--active`.
 			this.$results.find('.ax-result').removeClass('ax-result--active').attr('style', AX_STYLE.result);
 			$row.addClass('ax-result--active').attr('style', AX_STYLE.result + AX_STYLE.result_active);
 			this._select_worker(row);
@@ -596,7 +544,6 @@ class ArrivalsDesk {
 			.catch(() => this._render_active_card_error(row));
 	}
 
-	// Failure branch keeps the existing message but adds a Retry that re-fires the fetch.
 	_render_active_card_error(row) {
 		const $card = $('<div class="ax-active-card ax-active-card--err"></div>')
 			.attr('style', AX_STYLE.active_card)
@@ -608,8 +555,6 @@ class ArrivalsDesk {
 			.appendTo($card);
 	}
 
-	// Amber "window ends" / red "expired" chip from the server-computed
-	// expiry_days (negative = lapsed). Returns '' for an Employee or no window.
 	_expiry_chip(item) {
 		const d = item && item.expiry_days;
 		if (d === null || d === undefined) return '';
@@ -647,12 +592,10 @@ class ArrivalsDesk {
 	}
 
 	_open_register_modal(prefill) {
-		// prefill (optional) seeds the form from a tapped Arrival Batch manifest row.
 		const pf = prefill || {};
 		const d = new frappe.ui.Dialog({
 			title: __('Register New Arrival (Passport)'),
 			fields: [
-				// Passport MRZ camera autofill (feature-flagged); manual entry stays below.
 				{ fieldname: 'mrz_scan', fieldtype: 'HTML' },
 				{ fieldname: 'worker_name', label: __('Worker Name'), fieldtype: 'Data', reqd: 1, default: pf.worker_name },
 				{ fieldname: 'passport_number', label: __('Passport Number'), fieldtype: 'Data', reqd: 1, default: pf.passport_number },
@@ -682,7 +625,6 @@ class ArrivalsDesk {
 			primary_action: (values) => {
 				frappe.call({
 					method: 'apex.habitat.api.arrivals_desk.register_temporary_worker',
-					// carry the manifest row (if any) so its line ticks on register
 					args: { ...values, batch_row: pf.batch_row || null },
 					freeze: true,
 					freeze_message: __('Registering…'),
@@ -690,27 +632,22 @@ class ArrivalsDesk {
 						if (r.exc || !r.message) return;
 						d.hide();
 						frappe.show_alert({ message: __('Registered: {0}', [r.message.label]), indicator: 'green' });
-						this._select_worker(r.message); // make the new arrival active
-						this._search(); // refresh the result list
-						this._load_manifest(); // tick the just-registered manifest line
+						this._select_worker(r.message);
+						this._search();
+						this._load_manifest();
 					},
 				});
 			},
 		});
-		// Tag the modal so the mobile breakpoint can present it as a full-screen sheet.
 		d.$wrapper.addClass('ax-register-modal');
 		d.show();
 		if (this.mrzOcrEnabled) this._render_mrz_scan(d);
 	}
 
-	// [#mrzscan] Camera capture -> MRZ parse -> pre-fill. Only mounted when the
-	// Habitat Settings flag is on; manual entry below always remains the fallback.
 	_render_mrz_scan(d) {
 		const $wrap = $(d.get_field('mrz_scan').wrapper);
 		$wrap.empty();
 		const $box = $('<div class="ax-mrz-scan"></div>').appendTo($wrap);
-		// A capture-capable file input opens the rear camera on mobile; on desktop
-		// it is a normal file picker — same path, no separate getUserMedia plumbing.
 		const $input = $('<input type="file" accept="image/*" capture="environment" class="ax-mrz-input" />').appendTo($box);
 		$('<button class="btn btn-sm btn-default ax-mrz-btn"></button>')
 			.text(__('Scan passport (MRZ)'))
@@ -748,15 +685,13 @@ class ArrivalsDesk {
 		});
 	}
 
-	// [#2gxwhl]
 	_on_bed_click(e) {
 		const $bed = $(e.currentTarget);
-		// A red/occupied bed opens checkout so Arrivals can also turn a bed over.
 		if ($bed.hasClass('ax-bed--red')) {
 			this._open_check_out($bed.attr('data-bed'), $bed);
 			return;
 		}
-		if (!$bed.hasClass('ax-bed--green')) return; // amber/grey are not actionable here
+		if (!$bed.hasClass('ax-bed--green')) return;
 		if (!this.active) {
 			frappe.show_alert({ message: __('Pick a worker first.'), indicator: 'orange' });
 			return;
@@ -768,7 +703,6 @@ class ArrivalsDesk {
 		this._house_in_bed($bed.attr('data-bed'), $bed);
 	}
 
-	// Find the occupant payload for a bed from the in-memory grid model.
 	_bed_occupant(bed) {
 		let found = null;
 		(this.grid && this.grid.floors ? this.grid.floors : []).forEach((floor) =>
@@ -781,9 +715,6 @@ class ArrivalsDesk {
 		return found;
 	}
 
-	// Checkout from the Arrivals floor, mirroring Front Desk: a resident WITH custody
-	// goes straight to the full Accommodation Checkout form; otherwise quick_check_out
-	// (the existing write path — no new endpoint) does a one-click checkout.
 	_open_check_out(bed, $bed) {
 		const occupant = this._bed_occupant(bed) || {};
 		if (occupant.has_custody) {
@@ -838,7 +769,6 @@ class ArrivalsDesk {
 			primary_action_label: __('Check Out'),
 			primary_action: (values) => {
 				d.hide();
-				// The bed under checkout is occupied (red); dim it while the write runs.
 				if ($bed && $bed.length) $bed.addClass('ax-bed--busy').attr('style', ax_bed_style('red', { busy: true }));
 				frappe.call({
 					method: 'apex.habitat.api.front_desk.quick_check_out',
@@ -874,9 +804,6 @@ class ArrivalsDesk {
 		d.show();
 	}
 
-	// Capture the resident's housing-terms acceptance signature on the tablet before
-	// housing. Signing is optional (Skip still houses) so the deck never blocks when
-	// no pad input is taken. Mirrors the native Signature dialog used at custody handover.
 	_capture_terms_signature(worker, on_done) {
 		const dialog = new frappe.ui.Dialog({
 			title: __('Housing Terms — {0}', [worker.label || worker.party]),
@@ -903,7 +830,6 @@ class ArrivalsDesk {
 	}
 
 	_house_in_bed(bed, $bed) {
-		// Capture terms acceptance first, then run the existing housing write path.
 		this._capture_terms_signature(this.active, (terms_signature) =>
 			this._do_house_in_bed(bed, $bed, terms_signature)
 		);
@@ -911,8 +837,6 @@ class ArrivalsDesk {
 
 	_do_house_in_bed(bed, $bed, terms_signature) {
 		const worker = this.active;
-		// Optimistic: the clicked bed turns red with a per-bed spinner immediately —
-		// no full-screen freeze + grid refetch. Reconciled from the reply, rolled back on exc.
 		if ($bed && $bed.length) {
 			$bed.removeClass('ax-bed--green')
 				.addClass('ax-bed--red ax-bed--busy')
@@ -942,9 +866,8 @@ class ArrivalsDesk {
 					rollback();
 					return;
 				}
-				if ($bed && $bed.length) $bed.removeClass('ax-bed--busy').attr('style', ax_bed_style('red')); // reconciled: stays red
+				if ($bed && $bed.length) $bed.removeClass('ax-bed--busy').attr('style', ax_bed_style('red'));
 				frappe.show_alert({ message: __('Housed {0}', [worker.label]), indicator: 'green' });
-				// [#dvlqkx]
 				const dupe = this.cart.some(
 					(c) => c.party === worker.party && c.party_type === worker.party_type
 				);
@@ -952,16 +875,12 @@ class ArrivalsDesk {
 				this.active = null;
 				this.$active.empty();
 				this._render_cart();
-				// Reconcile counts/capacity/stages from the LOCAL grid model — no grid
-				// refetch (which would skeleton-reload the whole floor under the user).
 				this._reconcile_housed_bed(bed, worker, $bed);
 			},
 			error: () => rollback(),
 		});
 	}
 
-	// Mutate the in-memory grid for a just-housed bed and re-render only the
-	// capacity meter + stepper — the floor DOM (with the now-red bed) is untouched.
 	_reconcile_housed_bed(bed, worker, $bed) {
 		if (!this.grid) return;
 		const s = this.grid.summary || (this.grid.summary = {});
@@ -977,13 +896,12 @@ class ArrivalsDesk {
 				})
 			)
 		);
-		// Surface the occupant name in the existing bed without a full grid repaint.
 		if ($bed && $bed.length && !$bed.find('.ax-bed-occupant').length) {
 			$('<span class="ax-bed-occupant"></span>').attr('style', AX_STYLE.bed_occupant).text(worker.label || '').appendTo($bed);
 		}
 		this._render_capacity(this.grid);
 		this._render_stages();
-		this._load_manifest(); // a housed arrival may tick its manifest line
+		this._load_manifest();
 	}
 
 	_house_over_capacity(room) {
@@ -996,7 +914,6 @@ class ArrivalsDesk {
 			return;
 		}
 		const worker = this.active;
-		// [#jw9kx4]
 		frappe.confirm(__('Room is full. House {0} in a temporary over-capacity bed?', [worker.label]), () => {
 			frappe.call({
 				method: 'apex.habitat.api.arrivals_desk.house_over_capacity',
@@ -1029,7 +946,7 @@ class ArrivalsDesk {
 	}
 
 	_render_cart() {
-		this._render_deck(); // the stage deck depends on the cart; refresh it alongside
+		this._render_deck();
 		this.$cart.empty();
 		if (!this.cart.length) return;
 		$('<div class="ax-cart-title"></div>')
@@ -1047,7 +964,6 @@ class ArrivalsDesk {
 				)
 				.appendTo($list);
 			$('<div class="ax-cart-dots"></div>').attr('style', AX_STYLE.cart_dots).html(dots.html).appendTo($item);
-			// [#smadir]
 			$('<button class="btn btn-xs btn-link ax-cart-checkin"></button>')
 				.text(__('Check-in slip'))
 				.on('click', () => this._print_checkin(c))
@@ -1055,17 +971,14 @@ class ArrivalsDesk {
 		});
 	}
 
-	// Per-worker completion dots from existing client state. Custody/Card apply only
-	// to an Employee (a Temporary Worker defers both), so its pack is Housed+Transport.
 	_cart_dots(c) {
 		const is_emp = c.party_type === 'Employee';
-		const housed = true; // in the cart means already housed this session
-		const custody = is_emp ? !!c._custody_issue : null; // null = not applicable
+		const housed = true;
+		const custody = is_emp ? !!c._custody_issue : null;
 		const card = is_emp ? !!c._card_done : null;
 		const transport = !!this.transportStarted;
 		const DOT_STYLE = { on: AX_STYLE.cart_dot_on, off: AX_STYLE.cart_dot_off, na: AX_STYLE.cart_dot_na };
 		const dot = (label, state) => {
-			// state: true=done, false=pending, null=not applicable (shows an en-dash)
 			const mark = state === null ? '–' : state ? '✓' : '–';
 			const cls = state === null ? 'na' : state ? 'on' : 'off';
 			return `<span class="ax-cart-dot ax-cart-dot--${cls}" style="${DOT_STYLE[cls]}">${frappe.utils.escape_html(label)} ${mark}</span>`;
@@ -1075,12 +988,10 @@ class ArrivalsDesk {
 			dot(__('Custody'), custody) +
 			dot(__('Card'), card) +
 			dot(__('Transport'), transport);
-		// Complete = every APPLICABLE step done (null steps are not required).
 		const complete = housed && (custody !== false) && (card !== false) && transport;
 		return { html, complete };
 	}
 
-	// [#33np9k]
 	_render_deck() {
 		this.$deck.empty();
 		this._render_stages();
@@ -1089,7 +1000,6 @@ class ArrivalsDesk {
 		const $cust = $('<section class="ax-deck-sec" data-stage-target="custody"></section>').attr('style', AX_STYLE.deck_sec).appendTo(this.$deck);
 		$('<header class="ax-deck-head"></header>').attr('style', AX_STYLE.deck_head).text(__('Custody Handover')).appendTo($cust);
 		if (this.catalogError) {
-			// Catalog load failed → inline retry, not an empty store with broken selects.
 			const $err = $('<div class="ax-catalog-error"></div>').attr('style', AX_STYLE.catalog_error).appendTo($cust);
 			$('<span></span>').text(__("Couldn't load custody store — retry")).appendTo($err);
 			$('<button class="btn btn-xs btn-default ax-catalog-retry"></button>')
@@ -1099,12 +1009,10 @@ class ArrivalsDesk {
 		}
 		const $list = $('<div class="ax-deck-list"></div>').attr('style', AX_STYLE.deck_list).appendTo($cust);
 		this.cart.forEach((c) => this._custody_row($list, c));
-		// [#gk3q62]
 		const $card = $('<section class="ax-deck-sec" data-stage-target="card"></section>').attr('style', AX_STYLE.deck_sec).appendTo(this.$deck);
 		$('<header class="ax-deck-head"></header>').attr('style', AX_STYLE.deck_head).text(__('Arrival Card')).appendTo($card);
 		const $clist = $('<div class="ax-deck-list"></div>').attr('style', AX_STYLE.deck_list).appendTo($card);
 		this.cart.forEach((c) => this._card_row($clist, c));
-		// [#co0grg]
 		const pendingQr = this.cart.filter((c) => c.party_type === 'Employee' && !c._card_done);
 		if (pendingQr.length) {
 			$('<button class="btn btn-sm btn-default ax-qr-all"></button>')
@@ -1113,7 +1021,6 @@ class ArrivalsDesk {
 				.on('click', () => this._issue_group_qr())
 				.appendTo($card);
 		}
-		// [#q1rgj9]
 		$('<button class="btn btn-sm btn-default ax-cards-all"></button>')
 			.text(__('Print arrival cards ({0})', [this.cart.length]))
 			.on('click', () => this._print_all_cards())
@@ -1124,7 +1031,6 @@ class ArrivalsDesk {
 	}
 
 	_load_catalog() {
-		// [#ln7hst]
 		this.catalog = [];
 		this.catalogError = false;
 		if (!this.building) return;
@@ -1136,17 +1042,15 @@ class ArrivalsDesk {
 			.then((r) => {
 				this.catalog = (r.message && r.message.articles) || [];
 				this.catalogError = false;
-				if (this.cart.length) this._render_deck(); // refill the selects now the catalog is in
+				if (this.cart.length) this._render_deck();
 			})
 			.catch(() => {
-				// Surface a retry affordance in the deck instead of a silent empty <select>.
 				this.catalog = [];
 				this.catalogError = true;
 				if (this.cart.length) this._render_deck();
 			});
 	}
 
-	// Reload the custody store on demand (catalog-load failure recovery).
 	_retry_catalog() {
 		this.catalog = null;
 		this.catalogError = false;
@@ -1157,7 +1061,6 @@ class ArrivalsDesk {
 		const $row = $('<div class="ax-deck-row"></div>').attr('style', AX_STYLE.deck_row).appendTo($list);
 		$('<span class="ax-deck-name"></span>').attr('style', AX_STYLE.deck_name).text(c.label || c.party).appendTo($row);
 		if (c.party_type === 'Temporary Worker') {
-			// [#fkt5z4]
 			$('<span class="indicator-pill no-indicator-dot orange"></span>')
 				.text(__('Custody deferred'))
 				.appendTo($row);
@@ -1165,7 +1068,6 @@ class ArrivalsDesk {
 		}
 		if (c._custody_issue) {
 			$('<span class="indicator-pill no-indicator-dot green"></span>').text(__('Issued')).appendTo($row);
-			// [#98wano]
 			$('<button class="btn btn-xs btn-link ax-deck-handover"></button>')
 				.text(__('Print handover'))
 				.on('click', () => this._print_custody(c))
@@ -1178,9 +1080,8 @@ class ArrivalsDesk {
 			.appendTo($row);
 	}
 
-	// [#ta7hge]
 	_custody_cart($row, c) {
-		if ($row.find('.ax-custody-cart').length) return; // already open
+		if ($row.find('.ax-custody-cart').length) return;
 		$row.find('.ax-deck-btn').remove();
 		c._custody_lines = c._custody_lines || [];
 		const $panel = $('<div class="ax-custody-cart"></div>').attr('style', AX_STYLE.custody_cart).appendTo($row);
@@ -1245,7 +1146,7 @@ class ArrivalsDesk {
 			frappe.call({
 				method: 'apex.habitat.api.custody_kiosk.issue_cart',
 				args: {
-					employee: c.party, // an Employee party — issue_cart posts to his ledger
+					employee: c.party,
 					building: this.building,
 					items_json: JSON.stringify(c._custody_lines.map((l) => ({ article: l.article, qty: l.qty }))),
 				},
@@ -1253,7 +1154,7 @@ class ArrivalsDesk {
 				freeze_message: __('Issuing custody…'),
 				callback: (r) => {
 					if (r.exc || !r.message) return;
-					c._custody_issue = r.message.custody_issue; // kept for the handover print (later)
+					c._custody_issue = r.message.custody_issue;
 					this.custodyIssued = true;
 					frappe.show_alert({ message: __('Custody issued to {0}', [c.label]), indicator: 'green' });
 					this._render_stages();
@@ -1272,7 +1173,6 @@ class ArrivalsDesk {
 				$('<span class="indicator-pill no-indicator-dot green"></span>').text(__('QR issued')).appendTo($row);
 			}
 		} else {
-			// [#1jl7r0]
 			$('<span class="indicator-pill no-indicator-dot orange"></span>')
 				.text(__('Link after registration'))
 				.appendTo($row);
@@ -1283,12 +1183,9 @@ class ArrivalsDesk {
 			.appendTo($row);
 	}
 
-	// [#bw83vt]
 	_issue_group_qr() {
 		const targets = this.cart.filter((c) => c.party_type === 'Employee' && !c._card_done);
 		if (!targets.length) return;
-		// Per-row pending state instead of a full-screen freeze: each QR row shows a
-		// spinner now, then flips to its done (QR + link) state on the reply.
 		targets.forEach((c) => (c._card_pending = true));
 		this._render_qr_block();
 		frappe.call({
@@ -1304,7 +1201,7 @@ class ArrivalsDesk {
 					const c = this.cart.find((x) => x.party_type === 'Employee' && x.party === m.employee);
 					if (c) {
 						c._card_done = true;
-						c._card_qr = m; // {link, qr, phone} — rendered inline, never in a dialog
+						c._card_qr = m;
 					}
 				});
 				this.cardIssued = true;
@@ -1330,7 +1227,6 @@ class ArrivalsDesk {
 				const $item = $('<div class="ax-qr-item"></div>').attr('style', AX_STYLE.qr_item).appendTo(this.$qrBlock);
 				$('<div class="ax-qr-name"></div>').attr('style', AX_STYLE.qr_name).text(c.label || c.party).appendTo($item);
 				if (c._card_pending) {
-					// Pending: a spinner + label, not nothing-until-it-appears.
 					$('<div class="ax-qr-pending"></div>')
 						.attr('style', AX_STYLE.qr_pending)
 						.html(`<span class="ax-qr-spinner" aria-hidden="true" style="${AX_STYLE.qr_spinner}"></span>`)
@@ -1340,12 +1236,9 @@ class ArrivalsDesk {
 				}
 				const m = c._card_qr;
 				if (m.qr) $('<img class="ax-qr-img" alt="QR" />').attr('style', AX_STYLE.qr_img).attr('src', m.qr).appendTo($item);
-				// isolate the LTR Masar URL so it keeps order inside the RTL deck
 				const $link = $('<a class="ax-qr-link" target="_blank" rel="noopener"></a>').attr('style', AX_STYLE.qr_link).attr('href', m.link);
 				$('<bdi></bdi>').text(m.link).appendTo($link);
 				$link.appendTo($item);
-				// Per-worker: push the link to the worker's phone via the gateway. The
-				// gateway may be unconfigured (owner wires it) — handled as a no-op below.
 				if (m.phone) {
 					$('<button class="btn btn-xs btn-default ax-qr-send"></button>')
 						.text(__('Send via WhatsApp/SMS'))
@@ -1367,7 +1260,6 @@ class ArrivalsDesk {
 					$btn.text(__('Sent ✓'));
 					frappe.show_alert({ message: __('Link sent to {0}', [c.label || c.party]), indicator: 'green' });
 				} else if (res.gateway_configured === false) {
-					// Owner has not wired a provider yet — say so, do not look broken.
 					$btn.prop('disabled', false).text(__('Send via WhatsApp/SMS'));
 					frappe.show_alert({
 						message: __('Messaging gateway is not configured yet (Apex Integration Settings).'),
@@ -1382,7 +1274,6 @@ class ArrivalsDesk {
 		});
 	}
 
-	// [#9szus4]
 	_open_print(title, html) {
 		const w = window.open('', '_blank');
 		if (!w) {
@@ -1408,7 +1299,6 @@ class ArrivalsDesk {
 		});
 	}
 
-	// [#2f9r49]
 	_print_checkin(c) {
 		frappe.call({
 			method: 'apex.habitat.api.arrivals_desk.get_checkin_slip',
@@ -1420,7 +1310,6 @@ class ArrivalsDesk {
 		});
 	}
 
-	// [#1b6a7h]
 	_print_custody(c) {
 		if (!c._custody_issue) {
 			frappe.show_alert({ message: __('Issue custody first'), indicator: 'orange' });
@@ -1436,7 +1325,6 @@ class ArrivalsDesk {
 		});
 	}
 
-	// [#6fkydb]
 	_print_all_cards() {
 		if (!this.cart.length) return;
 		const calls = this.cart.map((c) =>
@@ -1446,7 +1334,6 @@ class ArrivalsDesk {
 			})
 		);
 		frappe.dom.freeze(__('Building arrival cards…'));
-		// [#lkskns]
 		Promise.all(calls)
 			.then((results) => {
 				const html = (results || [])
@@ -1473,7 +1360,6 @@ class ArrivalsDesk {
 		tws.forEach((c) => {
 			const $row = $('<div class="ax-deck-row"></div>').attr('style', AX_STYLE.deck_row).appendTo($tlist);
 			$('<span class="ax-deck-name"></span>').attr('style', AX_STYLE.deck_name).text(c.label || c.party).appendTo($row);
-			// [#3b4x9r]
 			$('<span class="indicator-pill no-indicator-dot orange"></span>')
 				.text(__('Unregistered manifest'))
 				.appendTo($row);
@@ -1503,7 +1389,6 @@ class ArrivalsDesk {
 		}
 		this.transportStarted = true;
 		this._render_stages();
-		// [#3z6pcn]
 		frappe.new_doc('Transport Request', {
 			service_line: 'Site Transport',
 			request_type: 'Accommodation to Project Shuttle',
@@ -1513,7 +1398,6 @@ class ArrivalsDesk {
 		});
 	}
 
-	// [#fltkjy]
 	_render_capacity(grid) {
 		if (!grid) {
 			this.$capacity.empty();
@@ -1523,9 +1407,6 @@ class ArrivalsDesk {
 		const free = s.available || 0;
 		const occupied = s.occupied || 0;
 		const total = s.total_beds || 0;
-		// One occupancy meter instead of three loose numbers: green fill = free,
-		// red = occupied, dashed = over-capacity (occupied beyond physical total).
-		// Widths are shares of the running denominator so every segment stays visible.
 		const over = Math.max(0, occupied - total);
 		const physOcc = occupied - over;
 		const denom = total + over || 1;
@@ -1552,8 +1433,6 @@ class ArrivalsDesk {
 				.css('width', `${Math.round((over / denom) * 100)}%`)
 				.appendTo($meter);
 		}
-		// The legend colour key was a CSS ::before swatch — render it as a real node
-		// (a coloured square) since a Desk page carries no stylesheet.
 		const legend = (variant, swatch, label) => {
 			const $l = $(`<div class="ax-cap-legend ax-cap-legend--${variant}"></div>`)
 				.attr('style', AX_STYLE.cap_legend)
@@ -1569,7 +1448,6 @@ class ArrivalsDesk {
 
 	_render_stages() {
 		const housed = this.cart.length > 0;
-		// [#r6fpkn]
 		const chips = [
 			['building', __('Building'), !!this.building],
 			['housed', __('Housed'), housed],
@@ -1578,9 +1456,6 @@ class ArrivalsDesk {
 			['transport', __('Transport'), this.transportStarted],
 		];
 		const firstTodo = chips.findIndex(([, , done]) => !done);
-		// Numbered stepper. The step index (formerly a CSS counter ::before) is drawn
-		// as a real numbered badge, and the state colours are inlined since there is
-		// no stylesheet to key the ax-step--done/now/todo classes off of.
 		this.$stages.empty().attr('role', 'list');
 		chips.forEach(([k, label, done], i) => {
 			const state = done ? 'done' : i === firstTodo ? 'now' : 'todo';
@@ -1592,7 +1467,6 @@ class ArrivalsDesk {
 				.text(i + 1)
 				.appendTo($step);
 			$('<span class="ax-step-label"></span>').text(label).appendTo($step);
-			// A completed step jumps to its Actions-deck section so the stepper navigates.
 			if (done) {
 				$step.on('click', () => this._scroll_to_stage(k));
 			} else {
@@ -1602,7 +1476,6 @@ class ArrivalsDesk {
 		});
 	}
 
-	// Scroll the deck section for a completed stage into view (no JS dep — native).
 	_scroll_to_stage(stage) {
 		const el = this.$deck && this.$deck.find(`[data-stage-target="${stage}"]`).get(0);
 		if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1613,7 +1486,6 @@ class ArrivalsDesk {
 		this._render_stages();
 		const summary = (grid && grid.summary) || {};
 		if (!grid || !(grid.floors || []).length) {
-			// Two distinct empty states: rooms with beds all taken vs no rooms yet.
 			const msg =
 				summary.total_beds > 0
 					? __('This building has rooms but every bed is occupied — use Over-capacity')
@@ -1633,7 +1505,6 @@ class ArrivalsDesk {
 				})
 				.join('')
 		);
-		// Beds render but none are free → tell the user to use Over-capacity (no generic blank).
 		if (summary.total_beds > 0 && !summary.available) {
 			$('<div class="ax-floor-banner"></div>')
 				.attr('style', AX_STYLE.floor_banner)
@@ -1643,23 +1514,18 @@ class ArrivalsDesk {
 	}
 
 	_room_html(room) {
-		// Pass the room readiness so an amber bed can name its blocker (server-driven).
 		const beds = (room.beds || []).map((bed) => this._bed_html(bed, room.readiness_status)).join('');
 		const occ = `${room.current_occupancy || 0}/${room.bed_capacity || 0}`;
-		// Tint/badge a room that already holds the selected worker's project (server-driven
-		// dominant_project; read-only — no client recompute).
 		const sameProject = !!(this.project && room.dominant_project && room.dominant_project === this.project);
 		const projClass = sameProject ? ' ax-room--same-project' : '';
 		const roomStyle = AX_STYLE.room + (sameProject ? AX_STYLE.room_same_project : '');
 		const projBadge = sameProject
 			? `<span class="ax-room-proj" style="${AX_STYLE.room_proj}" title="${__('Same project as the selected worker')}">${__('Same project')}</span>`
 			: '';
-		// [#b9r9iq]
 		const readiness =
 			room.readiness_status && room.readiness_status !== 'Ready' && room.readiness_status !== 'Unknown'
 				? ` · ${frappe.utils.escape_html(__(room.readiness_status))}`
 				: '';
-		// [#ga6klw]
 		const has_free = (room.beds || []).some((b) => b.bed_color === 'green');
 		const oc = has_free
 			? ''
@@ -1674,9 +1540,8 @@ class ArrivalsDesk {
 	}
 
 	_bed_html(bed, readiness_status) {
-		const color = bed.bed_color || 'grey'; // server-computed; never recomputed here
-		const temp = bed.is_temporary ? ' ax-bed--temp' : ''; // virtual over-capacity bed
-		// Green (house) and red (check out) beds are both actionable and keyboard-reachable.
+		const color = bed.bed_color || 'grey';
+		const temp = bed.is_temporary ? ' ax-bed--temp' : '';
 		const a11y = color === 'green' || color === 'red' ? ' tabindex="0" role="button"' : '';
 		const name = bed.occupant ? bed.occupant.employee_name || bed.occupant.employee || '' : '';
 		const occupant = bed.occupant
@@ -1688,16 +1553,13 @@ class ArrivalsDesk {
 			bed.occupant && bed.occupant.has_custody
 				? `<span class="ax-bed-badge" style="${AX_STYLE.bed_badge}" title="${__('Has custody')}">●</span>`
 				: '';
-		// Amber beds name the readiness blocker (room-level) instead of leaving it implicit.
 		const blocker =
 			color === 'amber' && readiness_status && readiness_status !== 'Ready' && readiness_status !== 'Unknown'
 				? `<span class="ax-bed-blocker" style="${AX_STYLE.bed_blocker}">${frappe.utils.escape_html(__(readiness_status))}</span>`
 				: '';
-		// Explicit Temp chip on over-capacity beds, not just the dashed border.
 		const tempChip = bed.is_temporary
 			? `<span class="ax-bed-chip ax-bed-chip--temp" style="${AX_STYLE.bed_chip + AX_STYLE.bed_chip_temp}">${__('Temp')}</span>`
 			: '';
-		// Bed status palette inlined by colour (green/red/amber/grey) + optional temp.
 		const bedStyle = ax_bed_style(color, { temp: !!bed.is_temporary });
 		return (
 			`<div class="ax-bed ax-bed--${color}${temp}" style="${bedStyle}" data-bed="${frappe.utils.escape_html(bed.bed || '')}"${a11y} ` +
@@ -1712,7 +1574,6 @@ class ArrivalsDesk {
 	}
 
 	_render_loading() {
-		// Flat placeholder rooms on the native --skeleton-bg Desk var (theme + dark aware).
 		this.$floor.html(
 			`<div class="ax-skeleton" style="${AX_STYLE.skeleton}">${`<div class="ax-skeleton-room" style="${AX_STYLE.skeleton_room}"></div>`.repeat(
 				6

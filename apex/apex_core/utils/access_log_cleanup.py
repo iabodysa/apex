@@ -40,12 +40,8 @@ from frappe.utils import cint
 
 DOCTYPE = "Access Log"
 
-# The three columns that can hold an unbounded body. Access Log has no child
-# table, so deleting the parent row leaves nothing orphaned.
 PAYLOAD_FIELDS = ("page", "columns", "filters")
 
-# Keys an audit record may expose: the record name and byte counts only. No
-# payload body, no user, no timestamp.
 AUDIT_FIELDS = ("name", "page_bytes", "columns_bytes", "filters_bytes", "payload_bytes")
 
 _SIZE_FIELDS = AUDIT_FIELDS[1:]
@@ -62,10 +58,6 @@ _PAYLOAD_BYTES = (
     "+ COALESCE(OCTET_LENGTH(`filters`), 0)"
 )
 
-# Selects sizes only - the payload columns are measured inside the database and
-# never transferred into this process. Strictly ``>`` so a row sitting exactly on
-# the threshold is preserved. Biggest rows first, so a bounded run reclaims the
-# most space it can.
 SCAN_SQL = f"""
     SELECT
         `name`,
@@ -121,10 +113,6 @@ def purge_oversized_access_logs(dry_run: bool = False) -> dict:
     max_batches = _setting("apex_access_log_purge_max_batches")
     budget = batch_size * max_batches
 
-    # One scan for the whole run. Measuring a column is not index-friendly, so
-    # this WHERE clause costs a table scan; re-scanning per batch would pay that
-    # cost once per batch. Fetching one row beyond the budget distinguishes
-    # "budget exactly filled" from "more rows are still oversized".
     candidates = _scan(threshold, budget + 1)
     truncated = len(candidates) > budget
     candidates = candidates[:budget]
@@ -136,17 +124,11 @@ def purge_oversized_access_logs(dry_run: bool = False) -> dict:
     try:
         for start in range(0, len(candidates), batch_size):
             batch = candidates[start : start + batch_size]
-            # Delete by primary key only: the rows were already identified, so the
-            # statement never re-reads a payload. Access Log has no child table,
-            # and frappe.db.delete does not cascade, so nothing is orphaned.
             frappe.db.delete(DOCTYPE, {"name": ("in", [row["name"] for row in batch])})
             deleted += len(batch)
             freed_bytes += sum(row["payload_bytes"] for row in batch)
             batches += 1
     except Exception:
-        # No commit has happened, so rolling back discards every batch of this run
-        # rather than leaving a partial purge behind. Re-raised so the scheduler
-        # records the failure instead of reporting a clean run.
         frappe.db.rollback()
         frappe.log_error(
             title="Access Log oversized payload purge failed",

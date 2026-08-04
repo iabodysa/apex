@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#iupr5r]
 
 frappe.pages["transfer-board"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -12,23 +11,16 @@ frappe.pages["transfer-board"].on_page_load = function (wrapper) {
 	tb.setup();
 };
 
-// Map the server-computed bed_color name onto a NATIVE Frappe indicator color so
-// the status pill renders without any custom CSS (Desk pages ship no stylesheet).
-// Frappe has no "amber"/"grey" indicator -> use the native "orange"/"gray".
 function tb_indicator_color(bed_color) {
 	return { green: "green", red: "red", amber: "orange", grey: "gray" }[bed_color] || "gray";
 }
 
-// Shared bed-status colour key (free/occupied/not-ready/out-of-service), aliasing
-// the native Desk colour-scale vars so the cards are theme/dark-mode aware with no
-// bespoke hex and no stylesheet. Same vocabulary as the front desk bed board.
 const TB_BED_PALETTE = {
 	green: "background:var(--green-100);border-color:var(--green-500);color:var(--green-700);",
 	red: "background:var(--red-100);border-color:var(--red-500);color:var(--red-700);",
 	amber: "background:var(--yellow-100);border-color:var(--orange-500);color:var(--orange-700);cursor:not-allowed;",
 	grey: "background:var(--gray-100);border-color:var(--gray-400);color:var(--gray-600);cursor:not-allowed;",
 };
-// Desk pages ship no stylesheet — layout is inline styles bound to Desk CSS vars.
 const TB_STYLE = {
 	help: "margin-block:var(--margin-sm,10px);font-size:var(--text-sm,12px);",
 	split: "display:flex;flex-wrap:wrap;gap:var(--margin-md,15px);align-items:flex-start;",
@@ -57,12 +49,10 @@ const TB_STYLE = {
 class TransferBoard {
 	constructor(page) {
 		this.page = page;
-		// [#o6pgsl]
 		this.panes = {
 			left: { building: null, data: null, $grid: null, field: null },
 			right: { building: null, data: null, $grid: null, field: null },
 		};
-		// [#nlmawh]
 		this.selected_source = null;
 	}
 
@@ -131,12 +121,10 @@ class TransferBoard {
 	refresh(side) {
 		const pane = this.panes[side];
 		if (!pane.building) return;
-		// [#m1brxr]
 		this._render_loading(pane.$grid);
 		frappe.call({
 			method: "apex.habitat.api.front_desk.get_building_grid",
 			args: { building: pane.building },
-			// [#i2n0q1]
 			callback: (r) => {
 				if (r.exc || !r.message) {
 					this._render_error(side);
@@ -163,7 +151,6 @@ class TransferBoard {
 			.css("margin-block-end", "var(--margin-sm, 10px)")
 			.text(__("Loading board…"))
 			.appendTo($wrap);
-		// [#aik87z] Placeholder blocks tinted with the native --skeleton-bg token — Desk ships no .skeleton-block rule, back it inline (no CSS file).
 		const $sk = $('<div class="tb-skeleton"></div>').css({ display: "flex", "flex-direction": "column", gap: "8px" }).appendTo($wrap);
 		for (let i = 0; i < 3; i++) {
 			$('<div class="skeleton-block"></div>').css({ height: "48px", background: "var(--skeleton-bg)", "border-radius": "8px" }).appendTo($sk);
@@ -231,7 +218,6 @@ class TransferBoard {
 		const is_available = bed.bed_color === "green";
 
 		const $card = $(`<div class="tb-bed" tabindex="0" role="button"></div>`);
-		// Base geometry + the bed-status colour key overlaid (free/occupied/etc.).
 		$card.attr("style", TB_STYLE.bed + (TB_BED_PALETTE[bed.bed_color] || ""));
 		$card.data("ctx", { side, bed, room, building });
 
@@ -242,7 +228,6 @@ class TransferBoard {
 		else if (bed.bed_color === "red") badge = __("Occupied");
 		else if (bed.bed_color === "amber") badge = __("Room not ready");
 		else badge = __("Out of Service");
-		// Native Frappe status pill — color-coded with no custom CSS.
 		$(`<span class="tb-bed-badge indicator-pill ${tb_indicator_color(bed.bed_color)}"></span>`)
 			.text(badge)
 			.appendTo($card);
@@ -254,8 +239,6 @@ class TransferBoard {
 				.appendTo($card);
 		}
 
-		// [#lenych] draggable attr drives the drag; "invisible" is a native utility
-		// (ships with Frappe) used as the dim-while-dragging cue — no custom CSS.
 		if (is_occupied) {
 			$card.attr("draggable", "true");
 			$card.on("dragstart", (e) => {
@@ -267,8 +250,6 @@ class TransferBoard {
 			$card.on("dragend", () => $card.removeClass("invisible"));
 		}
 
-		// [#fy14ez] "active" marks the hovered drop target with a primary-coloured ring
-		// (inline Desk var; Desk pages ship no stylesheet for an .active rule).
 		if (is_available) {
 			$card.on("dragover", (e) => {
 				e.preventDefault();
@@ -286,7 +267,6 @@ class TransferBoard {
 			});
 		}
 
-		// [#ok7fjp]
 		const handler = () => this._on_bed_tap(side, bed, room, building, $card);
 		$card.on("click", handler);
 		$card.on("keydown", (e) => {
@@ -303,7 +283,6 @@ class TransferBoard {
 		const is_occupied = bed.bed_color === "red" && bed.occupant;
 		const is_available = bed.bed_color === "green";
 
-		// [#3gx4tq]
 		if (!this.selected_source) {
 			if (!is_occupied) {
 				if (is_available) {
@@ -316,7 +295,6 @@ class TransferBoard {
 			}
 			this.selected_source = { side, bed, room, building };
 			this._clear_selection_highlight();
-			// Highlight the picked source with a primary ring (inline Desk var).
 			$card.addClass("active").css("box-shadow", "0 0 0 2px var(--primary)");
 			frappe.show_alert({
 				message: __("Now tap an available bed to transfer the resident."),
@@ -325,14 +303,12 @@ class TransferBoard {
 			return;
 		}
 
-		// [#dx0k8p]
 		if (this.selected_source.bed.bed === bed.bed) {
 			this.selected_source = null;
 			this._clear_selection_highlight();
 			return;
 		}
 
-		// [#ghi62y]
 		if (!is_available) {
 			frappe.show_alert({
 				message: __("Drop target must be an available bed."),
@@ -352,7 +328,6 @@ class TransferBoard {
 	}
 
 	_begin_transfer(source_bed, target_bed_card, target_building) {
-		// [#9ehbrc]
 		const source_ctx = this._find_bed(source_bed);
 		const occupant_label = source_ctx && source_ctx.bed.occupant
 			? source_ctx.bed.occupant.employee_name || source_ctx.bed.occupant.employee
@@ -394,7 +369,6 @@ class TransferBoard {
 					freeze: true,
 					freeze_message: __("Transferring…"),
 					callback: (r) => {
-						// [#amcl7a]
 						if (r.exc || !r.message || !r.message.transfer) {
 							return;
 						}
@@ -403,11 +377,9 @@ class TransferBoard {
 							message: __("Transferred: {0}", [r.message.transfer]),
 							indicator: "green",
 						});
-						// [#o24v7l]
 						this.refresh_all();
 					},
 					error: () => {
-						// [#qx40uo]
 						frappe.show_alert({
 							message: __("Transfer failed. Please try again."),
 							indicator: "red",
@@ -419,7 +391,6 @@ class TransferBoard {
 		d.show();
 	}
 
-	// [#hhva0k]
 	_find_bed(bed_name) {
 		let found = null;
 		this.$root.find(".tb-bed").each(function () {

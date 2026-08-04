@@ -1,8 +1,6 @@
 // Copyright (c) 2026, AFMCO and contributors
 frappe.ui.form.on("Apex Settings", {
 	refresh(frm) {
-		// frappe.boot.apex_demo_data is set by the extend_bootinfo hook and tracks the
-		// demo user, so the action appears only while there is demo data to remove.
 		if (!frappe.boot.apex_demo_data) {
 			return;
 		}

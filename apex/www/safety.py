@@ -28,7 +28,6 @@ from apex.apex_core.utils.portal_bootstrap import (
     guest_redirect,
 )
 
-# [#pzzvqb]
 SAFETY_ROLES = {
     "System Manager",
     "Accommodation Manager",
@@ -53,11 +52,9 @@ def get_context(context):
     context.has_safety_role = bool(SAFETY_ROLES & set(frappe.get_roles()))
     if context.has_safety_role:
         context.csrf_token = get_csrf_token()
-        # [#3ujvm8]
         conf = frappe.get_site_config()
         context.site_name = frappe.local.site
         context.socketio_port = cint(conf.get("socketio_port")) or 9000
         context.async_enabled = not cint(conf.get("disable_async"))
-        # [#eovfvf]
         context.dev_server = 1 if frappe.conf.developer_mode else 0
     return context

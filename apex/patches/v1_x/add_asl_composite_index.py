@@ -19,7 +19,6 @@ def execute():
     if not frappe.db.exists("DocType", "Accommodation Stock Ledger"):
         return
 
-    # [#asl9cx]
     from apex.apex_core.utils.ledger_index import add_index_guarded
 
     add_index_guarded(

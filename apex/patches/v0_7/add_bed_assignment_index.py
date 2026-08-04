@@ -22,10 +22,6 @@ def execute():
     if not frappe.db.exists("DocType", "Housing Assignment"):
         return
 
-    # [#44ssmk] [#cfszw1] Delegate to the controller declaration — one source for
-    # the index names and column sets, so this patch and the fresh-install path
-    # cannot drift apart. `bed` is a Link (varchar 140), so the helper's
-    # full-column index is the same index the old `(bed`(140))` DDL created.
     from apex.habitat.doctype.housing_assignment import housing_assignment
 
     housing_assignment.on_doctype_update()

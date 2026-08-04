@@ -17,13 +17,11 @@ from frappe import _
 from frappe.model.document import Document
 
 
-# [#7nku4t]
 _MAX_EXPECTED_WORKERS = 500
 
 
 class ArrivalBatch(Document):
     def validate(self) -> None:
-        # [#eyhjls]
         self.expected_count = len(self.expected_workers or [])
         if not self.expected_count:
             frappe.throw(_("Add at least one expected worker to the manifest."))
@@ -35,7 +33,6 @@ class ArrivalBatch(Document):
 
     @property
     def pending_arrival_count(self) -> int:
-        # [#jyfszg]
         housed = frappe.db.count(
             "Housing Assignment",
             {

@@ -144,8 +144,6 @@ def create_rent_payment(lease: str, due_date: str, purchase_invoice: str | None 
     lease_doc = _load_eligible_lease(lease)
     payable_allocation.require_target(payable_allocation.PAYMENT_ENTRY_DOCTYPE)
 
-    # Serialize concurrent calls for the same lease: without the lock two clicks both
-    # clear the probe below and one instalment ends up with two payments.
     frappe.db.get_value(LEASE_DOCTYPE, lease_doc.name, "name", for_update=True)
     lease_doc.reload()
     row = _instalment(lease_doc, due_date)

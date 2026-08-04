@@ -37,13 +37,8 @@ import frappe
 
 ALERT_DOCTYPE = "Operations Alert"
 
-# [#qqv12a]
 _MESSAGE_MAX = 2000
 
-# Every fixed scheduler loop calls this helper, so a bare frappe.db.rollback() here would
-# undo the whole run each caller just learned to protect — one failed alert discarding
-# every row already written. Own savepoint, distinct from the notify and clearance marks
-# because more than one can be live in a single request.
 _SAVEPOINT = "apex_operations_alert"
 
 

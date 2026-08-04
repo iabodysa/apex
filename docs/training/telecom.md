@@ -75,15 +75,16 @@ the supported cancel or amend lifecycle; do not edit projected fields.
 1. Create and submit the Telecom Contract.
 2. Create each SIM Card under that contract.
 3. With a SIM Operations User or System Manager account, open **Telecom
-   Control** from the Custody workspace.
+   Control** from the Custody and Costs workspace.
 4. Filter by Company, Supplier, contract, Project, Cost Center, or state.
 5. Open a SIM drawer and use the action allowed by its current state.
 6. Review the resulting custody history and current projection.
 7. Use the telecom reports to review current custody, multiple-SIM holders,
    contract distribution, expiry, cost allocation, and exceptions.
 
-Telecom records belong to **Logistay**. They are exposed through the existing
-Custody workspace and Telecom Control page; there is no separate SIM module.
+Telecom records belong to **Logistay**, which ships its own workspace. They are
+also exposed through the Custody and Costs workspace and the Telecom Control
+page; there is no separate SIM module.
 Page access and visible buttons remain subject to the
 [telecom permission reference](../reference/permissions.md#telecom-permissions).
 Finance Manager has read-only contract access and no Telecom Control Page role;

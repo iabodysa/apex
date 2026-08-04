@@ -5,6 +5,15 @@ The Assignment record IS the check-in and the active occupancy stay. It carries
 both check_in_date and check_out_date; Accommodation Checkout closes it.
 
 Payroll effects are gated behind the Salary Deduction Policy and disabled by default.
+
+The Building / Room / Bed triple is validated HERE, on save, and deliberately carries no
+change handler in housing_assignment.js. fetch_from already ties the three upward
+(room <- bed.room, building <- room.building), so clearing a child when its parent
+changes closed a loop: form.js:294 re-validates the Link on every model write, and the
+Room control's validate("") writes "" into its fetch target ``building`` (link.js:762) --
+the value the user had just picked. set_query in the client script still narrows
+downward; the mismatch refusals below are the other half, and adding a client-side
+change handler to "help" would reintroduce the loop.
 """
 
 from __future__ import annotations
@@ -33,11 +42,8 @@ def on_doctype_update():
     SELECT ... FOR UPDATE), never a DB constraint."""
     from apex.apex_core.utils.ledger_index import add_index_guarded
 
-    # [#hb3fq9]
     add_index_guarded("Housing Assignment", ["bed"], "idx_asgn_bed")
 
-    # [#kx0m7d] serves the active-occupancy check in validate()/on_submit()/on_cancel()
-    # ({"bed": ..., "docstatus": 1, "check_out_date": ["is", "not set"]})
     add_index_guarded(
         "Housing Assignment",
         ["bed", "docstatus", "check_out_date"],
@@ -109,18 +115,16 @@ def validate(doc, method=None):
     sync_party_employee(doc, require_party=True)
 
     if not doc.building or not frappe.db.exists("Building", doc.building):
-        return  # [#61pl64]
+        return
 
     building = frappe.get_doc("Building", doc.building)
 
-    # [#qwgdi0]
     if not doc.project:
         frappe.throw(_("Project is required."))
 
     if not doc.cost_center:
         doc.cost_center = building.default_cost_center
     if not doc.cost_center and building.company:
-        # [#nid8zr]
         doc.cost_center = frappe.get_cached_value("Company", building.company, "cost_center")
     if not doc.cost_center:
         frappe.throw(
@@ -129,14 +133,12 @@ def validate(doc, method=None):
             )
         )
 
-    # [#6nmh1l]
     if doc.stay_type == "Temporary":
         if not doc.expected_checkout_date:
             frappe.throw(_("Expected check-out date is required for temporary stays."))
         if doc.check_in_date and doc.expected_checkout_date < doc.check_in_date:
             frappe.throw(_("Expected check-out date cannot be earlier than the check-in date."))
 
-    # [#ie52i1]
     if doc.employee:
         active_asg = frappe.db.get_value(
             "Housing Assignment",
@@ -155,7 +157,6 @@ def validate(doc, method=None):
                 )
             )
     elif doc.party and doc.party_type:
-        # [#oa0g50]
         dup = frappe.db.get_value(
             "Housing Assignment",
             {
@@ -176,12 +177,10 @@ def validate(doc, method=None):
 
     _flag_temporary_worker_past_expiry(doc)
 
-    # [#p7c6qr]
     bed_room = frappe.db.get_value("Bed", doc.bed, "room")
     if bed_room != doc.room:
         frappe.throw(_("Selected Bed {0} does not belong to Room {1}").format(doc.bed, doc.room))
 
-    # [#jcdpm8]
     room = frappe.db.get_value(
         "Room", doc.room, ["building", "readiness_status"], as_dict=True
     )
@@ -190,7 +189,6 @@ def validate(doc, method=None):
             _("Selected Room {0} does not belong to Building {1}").format(doc.room, doc.building)
         )
 
-    # [#agde2c]
     if room.readiness_status in ["Needs Repair", "Needs Cleaning", "Out of Service"]:
         frappe.throw(
             _("Room {0} is currently '{1}' and cannot be assigned to an employee.").format(
@@ -198,7 +196,6 @@ def validate(doc, method=None):
             )
         )
 
-    # [#lxozz0]
     bed_status = frappe.db.get_value("Bed", doc.bed, "status")
     if bed_status == "Out of Service":
         frappe.throw(_("Selected Bed {0} is Out of Service").format(doc.bed))
@@ -247,7 +244,6 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    # [#el1zj2]
     Bed = frappe.qb.DocType("Bed")
     (
         frappe.qb.from_(Bed)
@@ -274,17 +270,9 @@ def on_submit(doc, method=None):
                 )
             )
 
-    # No try/except around the occupancy writes. frappe.db.rollback() discards the
-    # WHOLE request transaction, not this assignment's rows, so it also destroyed
-    # anything the caller wrote earlier in the same request, and then swapped the
-    # real error for a generic one. Letting the exception propagate aborts the
-    # submit and leaves Frappe's own request-level rollback to unwind exactly what
-    # this request wrote. No savepoint replaces it: nothing here continues past a
-    # failure, so there is no partial work to salvage.
     frappe.db.set_value("Bed", doc.bed, "status", "Occupied")
     recalculate_spatial(doc.room, doc.building)
 
-    # [#7ezsfj]
     rent_rule = get_policy().get_type_rule("Rent")
     activation = rent_rule.activation_date if rent_rule else None
     if rent_rule and (not activation or doc.check_in_date >= activation):

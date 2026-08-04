@@ -42,22 +42,25 @@ def _read(csv_dir, name):
 
 
 def run(csv_dir=None):
+    """Import the fleet master CSVs, skipping rows a master already holds.
+
+    Every existence probe uses the DICT form. Both masters autoname by their name
+    field, so the CSV value IS the row name; probed positionally,
+    ``frappe.db.exists(dt, dn)`` answers the value back without querying when it equals
+    the DocType (database.py:1259), so a category named "Vehicle Category" read as
+    already-imported and its row was dropped without a count or a log. The dict form
+    always queries, and the field-autoname keeps it duplicate-safe: the inserted row
+    bears this name.
+    """
     csv_dir = csv_dir or os.path.join(
         frappe.get_app_path("apex"), "..", "scratch", "data_dumps", "etl_out"
     )
     csv_dir = os.path.abspath(csv_dir)
     out = {"csv_dir": csv_dir}
 
-    # [#1iltlx]
     made = 0
     for r in _read(csv_dir, "vehicle_category.csv"):
         cn = (r.get("category_name") or "").strip()
-        # Name-filtered: both masters autoname by their name field, so the CSV value
-        # IS the row name. Probed positionally, frappe.db.exists answers the value
-        # back without querying when it equals the DocType (database.py:1259), so a
-        # category named "Vehicle Category" read as already-imported and its row was
-        # dropped without a count or a log. The dict form always queries, and the
-        # field-autoname keeps it duplicate-safe: the inserted row bears this name.
         if cn and not frappe.db.exists("Vehicle Category", {"name": cn}):
             try:
                 frappe.get_doc({"doctype": "Vehicle Category", "category_name": cn,
@@ -68,7 +71,6 @@ def run(csv_dir=None):
                 pass
     out["categories_new"] = made
 
-    # [#aywlvk]
     made = 0
     for r in _read(csv_dir, "rental_office.csv"):
         on = (r.get("office_name") or "").strip()
@@ -81,7 +83,6 @@ def run(csv_dir=None):
                 pass
     out["offices_new"] = made
 
-    # [#98tx2n]
     proj = {}
     for r in _read(csv_dir, "project.csv"):
         pn = (r.get("project_name") or "").strip()
@@ -96,7 +97,6 @@ def run(csv_dir=None):
         proj[pn] = name
     out["projects"] = len(proj)
 
-    # [#qf4l9a]
     drv = {}
     for r in _read(csv_dir, "salis_driver.csv"):
         did = (r.get("driver_id") or "").strip()
@@ -127,7 +127,6 @@ def run(csv_dir=None):
         drv[did] = name
     out["drivers"] = len(drv)
 
-    # [#nb5cey]
     veh = {}
     for r in _read(csv_dir, "salis_vehicle.csv"):
         plate = (r.get("plate_number") or "").strip()
@@ -162,7 +161,6 @@ def run(csv_dir=None):
         veh[plate] = name
     out["vehicles"] = len(veh)
 
-    # [#m31j10]
     mirrored = 0
     for r in _read(csv_dir, "salis_vehicle_current_driver_patch.csv"):
         vn = veh.get((r.get("plate_number") or "").strip())
@@ -173,7 +171,6 @@ def run(csv_dir=None):
             mirrored += 1
     out["mirrored"] = mirrored
 
-    # [#d3sykg]
     loaded = skipped = 0
     for r in _read(csv_dir, "vehicle_assignment_clean.csv"):
         vn = veh.get((r.get("vehicle") or "").strip())
@@ -189,7 +186,7 @@ def run(csv_dir=None):
                 "end_date": (r.get("end_date") or "").strip() or None,
                 "status": (r.get("status") or "Ended").strip(),
             })
-            a.flags.ignore_validate = True  # [#fbx2ud]
+            a.flags.ignore_validate = True
             a.insert(ignore_permissions=True)  # audit-ok: admin bulk migration loader
             loaded += 1
         except Exception:

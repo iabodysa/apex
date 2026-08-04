@@ -181,7 +181,6 @@ def driver_check_in(photo=None, photo_filename=None):
     driver = _resolve_driver()
     doc = _today_attendance(driver)
     doc.check_in = frappe.utils.nowtime()
-    # [#9ywqrd]
     doc.check_out = None
     doc.worked_hours = 0
     for _field in ("check_out", "worked_hours"):
@@ -211,12 +210,10 @@ def driver_check_out(photo=None, photo_filename=None):
     driver = _resolve_driver()
     doc = _today_attendance(driver)
     now = frappe.utils.nowtime()
-    # [#p0le20]
     if doc.check_in and not _is_after(doc.attendance_date, doc.check_in, now):
         frappe.throw(
             _("You can't check out at or before your check-in time. Try again in a moment.")
         )
-    # [#4rq5ag]
     if not doc.check_in:
         doc.check_in = None
         if "check_in" not in doc.dont_update_if_missing:

@@ -29,9 +29,6 @@ from apex.salis.utils import (
     period_quota,
 )
 
-# Salis Vehicle status -> the frontend's status-pill vocabulary (statusMeta in
-# App.vue). "Active" reads as "assigned" here because the vehicle is, by
-# construction, the one bound to the caller.
 _VEHICLE_STATUS_KEY = {
     "Active": "assigned",
     "Under Maintenance": "workshop",
@@ -39,14 +36,12 @@ _VEHICLE_STATUS_KEY = {
     "Released": "stopped",
 }
 
-# Dispatch Trip status -> the frontend's trip-pill vocabulary (tripMeta in App.vue).
 _TRIP_STATUS_KEY = {
     "Planned": "planned",
     "Dispatched": "inProgress",
     "Completed": "completed",
 }
 
-# The compliance document type that carries the vehicle's registration expiry.
 _REGISTRATION_TYPE = "Registration (Istimara)"
 
 
@@ -227,8 +222,6 @@ def submit_fuel_request(litres, vehicle=None, fuel_grade=None, station=None, not
     if litres <= 0:
         frappe.throw(_("Enter how many litres you need."))
 
-    # The shared resolver, called rather than restated, so the two employee-facing
-    # fuel doors can never bind a request to different rows.
     request_date = frappe.utils.today()
     quota = period_quota(vehicle, request_date[:7], ["name"])
     doc = frappe.get_doc(
@@ -244,15 +237,9 @@ def submit_fuel_request(litres, vehicle=None, fuel_grade=None, station=None, not
             "status": "Pending",
         }
     )
-    # The controller's own gate, called on the unsaved doc — reused rather than
-    # restated, so /fleet can never drift from the refusal the desk enforces.
     doc._guard_quota_allowance()
-    # Driver resolved server-side from session identity; the employee holds no
-    # create DocPerm on Fuel Request (staff/oversight DocType).
     doc.insert(ignore_permissions=True)  # audit-ok
 
-    # fuel_grade / notes have no Fuel Request field — keep them on the timeline so
-    # nothing the employee typed is silently lost.
     extras = []
     if fuel_grade:
         extras.append(_("Requested grade: {0}").format(fuel_grade))

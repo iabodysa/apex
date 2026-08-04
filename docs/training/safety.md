@@ -88,8 +88,8 @@ Portal access and its exact role gate are listed in the
   whose catalog requires evidence will reject the portal submission; use Desk.
 - The portal allows a partially rated list. Operators must rate every displayed
   task before submitting.
-- The Safety workspace still links to deprecated `Safety Inspection Report`.
-  Ignore that entry for new work and use `Safety Round`.
+- `Safety Inspection Report` is deprecated and no workspace links it. Use
+  `Safety Round` for new work.
 
 ## Non-production exercise
 

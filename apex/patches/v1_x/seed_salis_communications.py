@@ -18,7 +18,6 @@ def execute():
     try:
         seed_salis_auto_email_reports()
     except Exception:
-        # [#r786tj]
         frappe.db.rollback()
         frappe.log_error(
             title="seed_salis_communications failed: seed_salis_auto_email_reports",

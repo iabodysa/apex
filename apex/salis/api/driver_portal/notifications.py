@@ -52,7 +52,7 @@ def get_my_notifications(limit=20):
 	no commit; never raises for a driver with no notifications (returns an empty list).
 	"""
     _require_enabled()
-    driver = _resolve_driver()  # [#jdlt6t]
+    driver = _resolve_driver()
     driver_user = frappe.db.get_value("Salis Driver", driver, "driver_user")
     if not driver_user or driver_user == "Guest":
         return []
@@ -86,7 +86,6 @@ def get_my_notifications(limit=20):
     for r in rows:
         r["read"] = bool(r.get("read"))
         r["creation"] = frappe.utils.cstr(r["creation"]) if r.get("creation") else None
-        # [#gd3a17]
         r["body"] = frappe.utils.strip_html_tags(r.get("email_content") or "").strip() or None
         r.pop("email_content", None)
         r.pop("document_type", None)

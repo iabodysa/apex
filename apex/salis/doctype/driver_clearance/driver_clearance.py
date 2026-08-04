@@ -28,13 +28,10 @@ from frappe.model.document import Document
 
 from apex.salis.utils import add_timeline_note, lock_driver
 
-# [#1z6n9u]
 _CLOSED_FUEL_EXCEPTION_STATUSES = ("Resolved", "Rejected", "Closed")
 
-# [#ldcrsl]
 _CLOSED_RECOVERY_STATUSES = ("Recovered", "Waived", "Rejected", "Cancelled")
 
-# [#osp3hr]
 VALID_STATUSES = ("Open", "In Progress", "Cleared", "Blocked", "Cancelled")
 
 
@@ -51,11 +48,9 @@ class DriverClearance(Document):
             self._release_driver()
 
     def on_cancel(self):
-        # [#71tnxd]
         if self.status == "Cleared":
             self._restore_driver()
 
-    # [#m88md8]
 
     def _capture_assigned_vehicle(self):
         """Snapshot the driver's current vehicle for reference (read-only field)."""

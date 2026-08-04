@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#l7bpkl]
 
 frappe.pages["safety-map"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -12,9 +11,6 @@ frappe.pages["safety-map"].on_page_load = function (wrapper) {
 	sm.setup();
 };
 
-// Desk pages ship no stylesheet — layout is inline styles bound to native Desk
-// CSS variables (theme/dark-mode aware). The signal colour keys (red danger /
-// amber warning / green clear) alias the Desk colour-scale vars.
 const SM_SIGNAL = {
 	red: "background:var(--red-100);border-color:var(--red-500);color:var(--red-700);",
 	amber: "background:var(--yellow-100);border-color:var(--orange-500);color:var(--orange-700);",
@@ -120,7 +116,6 @@ class SafetyMap {
 	_render_loading() {
 		this.$container.empty();
 		const $skel = $('<div class="sm-skeleton" aria-busy="true"></div>').appendTo(this.$container);
-		// Placeholder blocks tinted with the native --skeleton-bg token — Desk ships no .skeleton-block rule, back it inline (no CSS file).
 		$('<div class="skeleton-block"></div>')
 			.css({ height: "20px", "margin-block": "var(--margin-sm, 10px)", background: "var(--skeleton-bg)", "border-radius": "6px" })
 			.appendTo($skel);
@@ -180,7 +175,6 @@ class SafetyMap {
 			return;
 		}
 
-		// Uppercasing + letter-spacing break Arabic shaping → drop both in RTL.
 		const floor_head = frappe.utils.is_rtl()
 			? "font-size:var(--text-md,14px);font-weight:600;color:var(--text-muted);margin-block-end:var(--margin-sm,10px);"
 			: "font-size:var(--text-md,14px);font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-block-end:var(--margin-sm,10px);";
@@ -194,7 +188,6 @@ class SafetyMap {
 				this._render_room_tile(room).appendTo($grid);
 			});
 
-			// [#fk2nxe]
 			if (floor.common_zone) {
 				this._render_zone_tile(floor).appendTo($grid);
 			}
@@ -205,11 +198,8 @@ class SafetyMap {
 		const $tile = $(
 			`<div class="sm-room sm-room--${room.signal}" tabindex="0" role="button"></div>`
 		);
-		// Base geometry + the signal colour key (danger/warning/clear) overlaid.
 		$tile.attr("style", SM_STYLE.tile_base + (SM_SIGNAL[room.signal] || ""));
 
-		// [#r0gsu1] An open red/amber signal gets a static ring (no keyframe pulse —
-		// Desk pages ship no stylesheet for @keyframes) to draw the eye.
 		if (room.signal === "red" || room.signal === "amber") {
 			$tile.css("box-shadow", "0 0 0 2px " + (room.signal === "red" ? "var(--red-500)" : "var(--orange-500)"));
 		}
@@ -259,10 +249,6 @@ class SafetyMap {
 		return $tile;
 	}
 
-	// The map is READ-ONLY. A tile used to open a dialog that created AND submitted
-	// a Safety Inspection Report in one call — a deprecated record, written past the
-	// Safety Round maker-checker gate. It now routes to a draft Safety Round for the
-	// building, so the finding is recorded where a checker has to ratify it.
 	_open_safety_round() {
 		if (!this.building) return;
 		frappe.new_doc("Safety Round", { building: this.building });

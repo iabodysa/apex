@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import re
 
-# Everything that is not a digit or a leading plus is layout noise.
 _MSISDN_STRIP = re.compile(r"[^\d+]")
 _NON_ALNUM = re.compile(r"[^0-9A-Za-z]")
 
@@ -31,7 +30,6 @@ def normalize_msisdn(value: str | None) -> str | None:
     cleaned = _MSISDN_STRIP.sub("", str(value)).strip()
     if not cleaned:
         return None
-    # Keep only a leading plus; internal plus signs are noise.
     has_prefix = cleaned.startswith("+")
     digits = cleaned.replace("+", "")
     if not digits:

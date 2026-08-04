@@ -40,7 +40,6 @@ def get_data(filters):
     if filters.get("employee"):
         conditions["employee"] = filters["employee"]
 
-    # [#a79h7o]
     user = frappe.session.user
     if not permissions._building_is_unscoped(user):
         allowed = permissions._allowed_buildings(user)
@@ -59,7 +58,6 @@ def get_data(filters):
                 "signed_qty", "unit_cost"],
     )
 
-    # [#p7co0q]
     agg = {}
     for r in rows:
         key = (r.building, r.employee or "", r.item_type, r.item)

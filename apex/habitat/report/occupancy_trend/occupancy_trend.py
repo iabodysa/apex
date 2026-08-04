@@ -37,7 +37,6 @@ def _fetch_rows(filters):
     if filters.get("building"):
         conditions["building"] = filters["building"]
 
-    # [#537g2t]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:
         chosen = conditions.get("building")

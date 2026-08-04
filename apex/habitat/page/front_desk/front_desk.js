@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#khaxgw]
 
 frappe.pages["front-desk"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -12,51 +11,35 @@ frappe.pages["front-desk"].on_page_load = function (wrapper) {
 	fd.setup();
 };
 
-// Persists the last building a multi-building user opened, so the board reopens
-// where they left off instead of cold.
 const LAST_BUILDING_KEY = "fd:last-building";
 
-// Locale-consistent digit grouping via the framework formatter — never
-// hand-concatenate a raw number. format_number (not the Int formatter, which
-// skips grouping) applies the system number format; precision 0 keeps it whole.
 function fd_int(n) {
 	return format_number(cint(n), null, 0);
 }
 
-// A "used/total" bed fraction, each side locale-formatted; the caller wraps it in
-// an LTR/bdi isolate so it does not reverse beside Arabic text.
 function fd_fraction(used, total) {
 	return `${fd_int(used)}/${fd_int(total)}`;
 }
 
-// A whole-number percent rendered with the locale's grouping + an isolated sign.
 function fd_percent(pct) {
 	return `${fd_int(pct)}%`;
 }
 
-// Map the server-computed bed_color name onto a NATIVE Frappe indicator color so
-// the status pill renders without any custom CSS (Desk pages ship no stylesheet).
-// Frappe has no "amber"/"grey" indicator -> use the native "orange"/"gray".
 function fd_indicator_color(bed_color) {
 	return { green: "green", red: "red", amber: "orange", grey: "gray" }[bed_color] || "gray";
 }
 
-// Bed-status colour key (free / occupied / not-ready / out-of-service), aliasing
-// the native Desk colour-scale vars — theme & dark-mode aware, no bespoke hex. A
-// Desk page ships no stylesheet, so the key is applied as an inline style overlay.
 const FD_BED_PALETTE = {
 	green: "background:var(--green-100);border-color:var(--green-500);color:var(--green-700);",
 	red: "background:var(--red-100);border-color:var(--red-500);color:var(--red-700);",
 	amber: "background:var(--yellow-100);border-color:var(--orange-500);color:var(--orange-700);cursor:not-allowed;",
 	grey: "background:var(--gray-100);border-color:var(--gray-400);color:var(--gray-600);cursor:not-allowed;",
 };
-// Left-edge pressure bar for the building chips (free/near-full/full).
 const FD_PRESSURE_BORDER = {
 	green: "var(--green-500)",
 	amber: "var(--orange-500)",
 	red: "var(--red-500)",
 };
-// Structural layout, all bound to native Desk CSS vars (with px fallbacks).
 const FD_STYLE = {
 	board: "padding-block:8px 32px;padding-inline:4px;",
 	empty: "padding-block:48px;padding-inline:16px;text-align:center;font-size:15px;",
@@ -112,7 +95,6 @@ class FrontDesk {
 	constructor(page) {
 		this.page = page;
 		this.building = null;
-		// Client-side board filters toggled from the legend (no server round-trip).
 		this.filters = {
 			only_available: false,
 			hide_out_of_service: false,
@@ -141,9 +123,6 @@ class FrontDesk {
 		}, "refresh");
 	}
 
-	// Scope-aware chip strip from list_supervisor_buildings(): one chip per
-	// allowed building, color-weighted by free-bed pressure. The chip is the
-	// primary building selector (replaces the cold Link field).
 	_load_buildings() {
 		this.$strip.empty();
 		const $loading = $('<div class="fd-buildings-loading text-muted"></div>')
@@ -153,8 +132,6 @@ class FrontDesk {
 		frappe.call({
 			method: "apex.habitat.api.front_desk.list_supervisor_buildings",
 			error_handlers: {
-				// A role without the building read grant is refused at the gate;
-				// surface the permission-gap copy, not a generic failure or retry.
 				PermissionError: () => {
 					permission_denied = true;
 					$loading.remove();
@@ -193,8 +170,6 @@ class FrontDesk {
 			.appendTo($err);
 	}
 
-	// Distinct from a connection error: the caller is allowed to use the desk but
-	// has no building assigned, so retry won't help — point them at an admin.
 	_render_strip_permission_gap() {
 		this.$strip.empty();
 		$('<div class="fd-buildings-empty text-muted"></div>')
@@ -202,9 +177,6 @@ class FrontDesk {
 			.appendTo(this.$strip);
 	}
 
-	// Free-bed-pressure color: red when full/over, amber when near-full, green
-	// when beds are free. Derived client-side from the server counts; the bed
-	// board's own colors stay server-computed.
 	_building_pressure(b) {
 		if ((b.available || 0) <= 0) return "red";
 		if ((b.occupancy_pct || 0) >= 85) return "amber";
@@ -224,9 +196,6 @@ class FrontDesk {
 		this._auto_select_building();
 	}
 
-	// Land the operator straight on a loaded board with no Link interaction: a
-	// single allowed building (or the server's auto hint) opens immediately; a
-	// multi-building user reopens their last board if it is still in scope.
 	_auto_select_building() {
 		if (this.building) return;
 		const only = this.buildings.length === 1 || this.buildings.some((b) => b.auto);
@@ -253,7 +222,6 @@ class FrontDesk {
 		const $chip = $(
 			`<button class="fd-building-chip fd-building-chip--${pressure}${selected}" type="button"></button>`
 		).appendTo($row);
-		// Geometry + a colour-keyed left pressure bar + the selected outline, inline.
 		$chip.attr(
 			"style",
 			FD_STYLE.chip +
@@ -266,8 +234,6 @@ class FrontDesk {
 			.attr("style", FD_STYLE.chip_name)
 			.text(b.building_title || b.building)
 			.appendTo($chip);
-		// bdi LTR-isolates the locale-grouped fraction so it cannot reverse beside
-		// an Arabic building name.
 		$('<bdi class="fd-building-chip-counts" dir="ltr"></bdi>')
 			.attr("style", FD_STYLE.chip_counts)
 			.text(fd_fraction(b.available, b.total_beds))
@@ -275,9 +241,6 @@ class FrontDesk {
 		$chip.on("click", () => this._select_building(b.building));
 	}
 
-	// An empty building list has two meanings — a scoped supervisor with no
-	// assigned building (a permission gap) vs no Active building existing at all.
-	// The server tells them apart so the copy can be actionable, not generic.
 	_render_buildings_empty() {
 		this.$strip.empty();
 		const $empty = $('<div class="fd-buildings-empty text-muted"></div>')
@@ -304,7 +267,6 @@ class FrontDesk {
 		try {
 			localStorage.setItem(LAST_BUILDING_KEY, building);
 		} catch (e) {
-			// Private-mode / storage-disabled: persistence is best-effort.
 		}
 		this._render_buildings();
 		this.refresh();
@@ -314,10 +276,6 @@ class FrontDesk {
 		if (!this.building) return;
 		const requested = this.building;
 		this._render_loading();
-		// Typed permission failure: PermissionError carries exc_type, so the
-		// framework's per-request error_handlers hook is the reliable place to
-		// surface it (the generic error: callback gets no xhr on a 403). A retry
-		// won't help, so no Retry button — and we suppress the generic message.
 		let permission_denied = false;
 		frappe.call({
 			method: "apex.habitat.api.front_desk.get_building_grid",
@@ -334,7 +292,6 @@ class FrontDesk {
 				},
 			},
 			callback: (r) => {
-				// [#ojympt]
 				if (requested !== this.building) return;
 				if (r.exc || !r.message) {
 					this._render_error(__("Could not load the board for this building."));
@@ -366,7 +323,6 @@ class FrontDesk {
 			.css("margin-block-end", "12px")
 			.text(__("Loading board…"))
 			.appendTo($wrap);
-		// Placeholder blocks tinted with the native --skeleton-bg token — Desk ships no .skeleton-block rule, back it inline (no CSS file).
 		const $skeleton = $('<div class="fd-skeleton-rooms"></div>').attr("style", FD_STYLE.rooms).appendTo($wrap);
 		for (let i = 0; i < 6; i++) {
 			$('<div class="skeleton-block"></div>')
@@ -391,7 +347,6 @@ class FrontDesk {
 	_render_grid(data) {
 		this.$container.empty();
 
-		// [#pmav3l]
 		this._render_summary_bar(data);
 
 		this._render_legend();
@@ -401,7 +356,6 @@ class FrontDesk {
 			return;
 		}
 
-		// Uppercasing + letter-spacing break Arabic shaping → drop both in RTL.
 		const floor_head = frappe.utils.is_rtl()
 			? "font-size:var(--text-md,14px);font-weight:600;color:var(--text-muted);margin-block-end:10px;"
 			: "font-size:var(--text-md,14px);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);margin-block-end:10px;";
@@ -421,13 +375,9 @@ class FrontDesk {
 					.attr("data-needs-readiness", needs_readiness ? "1" : "0")
 					.appendTo($rooms);
 				const $rh = $('<div class="fd-room-header"></div>').attr("style", FD_STYLE.room_header).appendTo($room);
-				// The room label keeps the word translatable but bdi-isolates the room
-				// code so the alphanumeric code is not reversed in an RTL locale.
 				const $rn = $('<span class="fd-room-number"></span>').attr("style", FD_STYLE.room_number).appendTo($rh);
 				$rn.append(document.createTextNode(`${__("Room")} `));
 				$('<bdi dir="ltr"></bdi>').text(room.room_number || room.room).appendTo($rn);
-				// Room type stays in document direction; the occupancy fraction is
-				// LTR-isolated and locale-formatted.
 				const $rm = $('<span class="fd-room-meta"></span>').attr("style", FD_STYLE.room_meta).appendTo($rh);
 				const room_type = __(room.room_type || "");
 				if (room_type) {
@@ -437,7 +387,6 @@ class FrontDesk {
 					.text(fd_fraction(room.current_occupancy, room.bed_capacity))
 					.appendTo($rm);
 
-				// [#mark-ready] Offer a one-tap "Mark Ready" only on not-ready rooms.
 				if (needs_readiness) {
 					$('<button class="btn btn-xs btn-default fd-room-ready"></button>')
 						.text(__("Mark Ready"))
@@ -457,10 +406,6 @@ class FrontDesk {
 		this._apply_filters();
 	}
 
-	// A position:sticky portfolio header: the building title, four mini-stats from
-	// the existing summary, and a thin occupancy meter. Presentational only — it
-	// reuses the grid's summary counts (no extra server call) and stays pinned
-	// while the operator scrolls floors.
 	_render_summary_bar(data) {
 		const s = data.summary || {};
 		const total = cint(s.total_beds);
@@ -479,7 +424,6 @@ class FrontDesk {
 		this._render_open_requests_badge($head, data.building);
 
 		const $stats = $('<div class="fd-summary-stats"></div>').attr("style", FD_STYLE.summary_stats).appendTo($bar);
-		// Per-stat left bar keyed to the bed palette.
 		const STAT_BORDER = { green: "var(--green-500)", red: "var(--red-500)", amber: "var(--orange-500)", grey: "var(--gray-400)" };
 		const stat = (key, label, value, tone) => {
 			const $stat = $(`<div class="fd-summary-stat fd-summary-stat--${tone}"></div>`)
@@ -512,9 +456,6 @@ class FrontDesk {
 			.appendTo($meter);
 	}
 
-	// A legend that doubles as client-side filters. The color swatches name what
-	// each bed color means; three toggles narrow the board without a round-trip
-	// (filtering is purely show/hide over the already-loaded grid).
 	_render_legend() {
 		const $legend = $('<div class="fd-legend"></div>').attr("style", FD_STYLE.legend).appendTo(this.$container);
 
@@ -527,7 +468,6 @@ class FrontDesk {
 		const $key = $('<div class="fd-legend-key"></div>').attr("style", FD_STYLE.legend_key).appendTo($legend);
 		swatches.forEach(([color, label]) => {
 			const $item = $('<span class="fd-legend-item"></span>').attr("style", FD_STYLE.legend_item).appendTo($key);
-			// Native indicator dot — same color vocabulary as the bed pills, no custom CSS.
 			$(`<span class="fd-legend-dot indicator ${fd_indicator_color(color)}"></span>`).appendTo(
 				$item
 			);
@@ -559,8 +499,6 @@ class FrontDesk {
 		});
 	}
 
-	// Apply the active legend filters by hiding non-matching beds, then collapsing
-	// rooms/floors left with no visible bed. Pure client-side show/hide.
 	_apply_filters() {
 		const f = this.filters;
 		this.$container.find(".fd-bed").each((_i, el) => {
@@ -569,7 +507,6 @@ class FrontDesk {
 			let show = true;
 			if (f.only_available && color !== "green") show = false;
 			if (f.hide_out_of_service && color === "grey") show = false;
-			// Native Bootstrap display utility (ships with Frappe) — no custom CSS.
 			$bed.toggleClass("d-none", !show);
 		});
 		this.$container.find(".fd-room").each((_i, el) => {
@@ -579,7 +516,6 @@ class FrontDesk {
 			const readiness_ok = !f.only_needs_readiness || needs_readiness;
 			$room.toggleClass("d-none", !(has_visible_bed && readiness_ok));
 		});
-		// Collapse a floor whose every room is hidden.
 		this.$container.find(".fd-floor").each((_i, el) => {
 			const $floor = $(el);
 			const has_visible_room = $floor.find(".fd-room:not(.d-none)").length > 0;
@@ -588,9 +524,6 @@ class FrontDesk {
 	}
 
 	_render_open_requests_badge($summary, building) {
-		// Async so the board paints without waiting; the badge clicks through to
-		// the Resident Request list filtered to this building + open statuses
-		// (statuses come from the server so the filter can't drift).
 		const requested = building;
 		frappe.call({
 			method: "apex.habitat.api.front_desk.building_open_requests",
@@ -613,17 +546,13 @@ class FrontDesk {
 					})
 					.appendTo($summary);
 			},
-			// Best-effort background badge: a failure must not nag the operator.
 			error: () => {},
 		});
 	}
 
 	_render_bed_card(bed, room, building) {
 		const $card = $(`<div class="fd-bed" tabindex="0" role="button"></div>`);
-		// Base geometry + the bed-status colour key overlaid (free/occupied/etc.).
 		$card.attr("style", FD_STYLE.bed + (FD_BED_PALETTE[bed.bed_color] || ""));
-		// The bed code is a naming-series-style token; isolate it LTR so it renders
-		// left-to-right on its own line, even on an RTL board beside an Arabic name.
 		$('<bdi class="fd-bed-code" dir="ltr"></bdi>').attr("style", FD_STYLE.bed_code).text(bed.bed_code || bed.bed).appendTo($card);
 
 		let badge = "";
@@ -631,7 +560,6 @@ class FrontDesk {
 		else if (bed.bed_color === "red") badge = __("Occupied");
 		else if (bed.bed_color === "amber") badge = __("Room not ready");
 		else badge = __("Out of Service");
-		// Native Frappe status pill — color-coded with no custom CSS.
 		$(`<span class="fd-bed-badge indicator-pill ${fd_indicator_color(bed.bed_color)}"></span>`)
 			.attr("style", FD_STYLE.bed_badge)
 			.text(badge)
@@ -655,11 +583,8 @@ class FrontDesk {
 		return $card;
 	}
 
-	// Mark/unmark a bed card busy during a check-in/out round-trip so the operator
-	// sees the clicked bed is working before the board refresh repaints it.
 	_set_bed_updating($card, busy) {
 		if (!$card) return;
-		// aria-busy is the native busy signal; no custom busy-state CSS exists.
 		$card.attr("aria-busy", busy ? "true" : null);
 	}
 
@@ -730,9 +655,6 @@ class FrontDesk {
 									$status.html(`<div class="text-muted">${frappe.utils.escape_html(m.message || __("No worker matched."))}</div>`);
 									return;
 								}
-								// One-tap prefill: an Employee match fills the link (firing its
-								// photo onchange); a Temporary Worker has no Employee link, so we
-								// only surface the identity and route housing to Arrivals Desk.
 								if (m.employee) {
 									d.set_value("employee", m.employee);
 								}
@@ -763,7 +685,6 @@ class FrontDesk {
 							photo.$wrapper.html("");
 							return;
 						}
-						// [#rwp9u0]
 						frappe.call({
 							method: "apex.habitat.api.front_desk.get_employee_card",
 							args: { employee: emp },
@@ -843,7 +764,6 @@ class FrontDesk {
 	_open_check_out_dialog(bed, room, building, $card) {
 		const occupant = bed.occupant || {};
 
-		// [#rukrv3]
 		if (occupant.has_custody) {
 			const d = new frappe.ui.Dialog({
 				title: __("Quick Check-out"),

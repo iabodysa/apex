@@ -120,7 +120,6 @@ class DispatchTrip(Document):
         ]
         if not request_names:
             return
-        # [#d77fjl]
         try:
             current_by_name = {
                 r["name"]: r
@@ -190,7 +189,6 @@ class DispatchTrip(Document):
             )
 
     def _validate_odometer(self):
-        # [#h411he]
         start_set = bool(self.odometer_start)
         end_set = bool(self.odometer_end)
         if start_set != end_set:
@@ -272,7 +270,6 @@ class DispatchTrip(Document):
             )
             or 0
         )
-        # [#dtn16g]
         has_timestamps = 1 if (self.return_time and self.depart_time) else 0
         ledger = frappe.new_doc("Trip Fulfilment Ledger")
         ledger.update(
@@ -298,7 +295,6 @@ class DispatchTrip(Document):
         Trip Fulfilment Ledger. Odometer is monotonic and is intentionally not
         rolled back."""
         if self.transport_request:
-            # [#obmit8]
             revert_transport_request(
                 self.transport_request,
                 from_state="Fulfilled",
@@ -319,14 +315,11 @@ class DispatchTrip(Document):
             frappe.delete_doc(
                 "Trip Fulfilment Ledger", row, ignore_permissions=True, force=True  # audit-ok
             )
-        # [#js4w8o]
         from apex.salis.boarding_engine import reverse_trip_boarding
 
         reverse_trip_boarding(self.name)
-        # [#r7e254]
 
 
-# [#nyiuhd]
 ASSIGNMENT_ROLES = ("Fleet Manager", "Fleet Project Manager", "Fleet Supervisor", "System Manager")
 
 
@@ -363,7 +356,6 @@ def assign_requests_to_trip(dispatch_trip, transport_requests):
         )
 
     existing = {row.transport_request for row in (trip.assigned_requests or [])}
-    # [#91zjnv]
     to_check = {r for r in transport_requests if r and r not in existing}
     valid = (
         set(

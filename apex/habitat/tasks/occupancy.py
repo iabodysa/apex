@@ -7,8 +7,6 @@ import calendar
 import frappe
 from frappe.query_builder.functions import Count
 
-# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
-# rather than stacking one per row. The loops here never nest.
 _ROW_SAVEPOINT = "occupancy_row"
 
 
@@ -20,7 +18,6 @@ def weekly_occupancy_sync() -> None:
     """
     batch_size = 500
 
-    # [#d7yd9d]
     HA = frappe.qb.DocType("Housing Assignment")
     active_by_room = {
         r["room"]: int(r["n"] or 0)
@@ -77,7 +74,6 @@ def weekly_occupancy_sync() -> None:
 
     frappe.logger().info("weekly_occupancy_sync: room occupancy counters refreshed.")
 
-    # [#qm5tz5]
     Room = frappe.qb.DocType("Room")
     rooms_per_building = {
         r["building"]: int(r["n"] or 0)
@@ -116,7 +112,6 @@ def weekly_occupancy_sync() -> None:
             try:
                 total_rooms = rooms_per_building.get(building.name, 0)
                 if not total_rooms:
-                    # [#qtpe2y]
                     continue
 
                 active = active_by_building.get(building.name, 0)
@@ -159,7 +154,6 @@ def daily_occupancy_snapshot() -> None:
     year = int(snapshot_date[:4])
     days_in_year = 366 if calendar.isleap(year) else 365
 
-    # [#tt1y1j]
     already = {
         r["building"]
         for r in frappe.get_all(
@@ -170,7 +164,6 @@ def daily_occupancy_snapshot() -> None:
         if r["building"]
     }
 
-    # [#90367k]
     Room = frappe.qb.DocType("Room")
     rooms_by_building: dict = {}
     for r in (
@@ -183,7 +176,6 @@ def daily_occupancy_snapshot() -> None:
         bucket[r["status"]] = int(r["n"] or 0)
         bucket["_total"] += int(r["n"] or 0)
 
-    # [#6kydth]
     HA = frappe.qb.DocType("Housing Assignment")
     active_by_building = {
         r["building"]: int(r["n"] or 0)
@@ -197,7 +189,6 @@ def daily_occupancy_snapshot() -> None:
         ).run(as_dict=True)
     }
 
-    # [#im8xs8]
     building_meta = {
         b["name"]: b
         for b in frappe.get_all(

@@ -26,19 +26,17 @@ import frappe
 
 _SETTINGS = "Salis Settings"
 
-# [#l0bnlf]
 _MAX_BODY_LEN = 300
 
-# [#ecky1c]
 _PUSH_HOST_EXACT = frozenset(
     {
-        "fcm.googleapis.com",  # [#knx5s8]
-        "updates.push.services.mozilla.com",  # [#osjzpl]
+        "fcm.googleapis.com",
+        "updates.push.services.mozilla.com",
     }
 )
 _PUSH_HOST_SUFFIX = (
-    ".push.apple.com",  # [#e3sq9j]
-    ".notify.windows.com",  # [#kq7se8]
+    ".push.apple.com",
+    ".notify.windows.com",
 )
 
 
@@ -58,7 +56,6 @@ def is_allowed_push_endpoint(endpoint: str | None) -> bool:
     if parts.scheme != "https" or not parts.hostname:
         return False
     host = parts.hostname.lower()
-    # [#jkyc9w]
     try:
         ipaddress.ip_address(host)
         return False
@@ -80,7 +77,6 @@ def _vapid_config() -> dict | None:
     if not s.get("enable_web_push"):
         return None
     public_key = (s.get("web_push_vapid_public_key") or "").strip()
-    # [#icjpjh]
     private_key = s.get_password("web_push_vapid_private_key", raise_exception=False)
     if not public_key or not private_key:
         return None
@@ -130,7 +126,6 @@ def _deliver(cfg: dict, subscription: dict, payload: str) -> bool:
 	means the browser dropped the subscription, so the stale row is disabled. Any other
 	transport error is logged (title only — never the payload, endpoint, or key) and
 	swallowed, so one dead device never breaks a fan-out."""
-    # [#2y51ef]
     if not is_allowed_push_endpoint(subscription.get("endpoint")):
         frappe.db.set_value("Driver Push Subscription", subscription["name"], "enabled", 0)
         frappe.logger("web_push").info("send skipped: endpoint host not allowlisted")
@@ -139,7 +134,6 @@ def _deliver(cfg: dict, subscription: dict, payload: str) -> bool:
     try:
         from pywebpush import WebPushException, webpush
     except ImportError:
-        # [#t9xrdb]
         frappe.logger("web_push").info("send skipped: pywebpush not installed")
         return False
 
@@ -161,7 +155,6 @@ def _deliver(cfg: dict, subscription: dict, payload: str) -> bool:
     except WebPushException as exc:
         status = getattr(getattr(exc, "response", None), "status_code", None)
         if status in (404, 410):
-            # [#huwrxc]
             frappe.db.set_value("Driver Push Subscription", subscription["name"], "enabled", 0)
         else:
             frappe.log_error(title="Web push delivery failed")
@@ -183,18 +176,15 @@ def send_to_driver(driver: str, title: str, body: str, url: str | None = None) -
 
 	``url`` is an in-app path (e.g. ``/driver?tab=trips``) the SW opens when the driver
 	taps the notification. Secrets are read here, used, and discarded."""
-    # [#8gwi5x]
     try:
         cfg = _vapid_config()
     except Exception:
         frappe.log_error(title="Web push config read failed")
         return {"sent": 0, "reason": "not_configured"}
     if not cfg:
-        # [#2ry16q]
         frappe.logger("web_push").info("send skipped: web push not configured")
         return {"sent": 0, "reason": "not_configured"}
 
-    # [#jbir2h]
     try:
         subs = _active_subscriptions(driver)
         if not subs:

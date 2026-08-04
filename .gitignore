@@ -114,9 +114,20 @@ docs/*
 # Public per-area training guide: index plus one file per functional area.
 !docs/training/
 !docs/training/*.md
+# The refresher lessons and the per-role tracks the index links. Both were tracked
+# already but matched no `!` line, so a new page in either sub-directory could reach the
+# repository only by force-add — the allowlist has to name the depth it publishes.
+!docs/training/lessons/
+!docs/training/lessons/*.md
+!docs/training/tracks/
+!docs/training/tracks/*.md
 # Operator runbooks; the pre-rename app-identity cutover path lives here.
 !docs/administration/
 !docs/administration/*.md
+# Canonical inventories the other pages link instead of copying. Two of them are
+# generated from the shipped JSON, so a hand edit here is overwritten, not merged.
+!docs/reference/
+!docs/reference/*.md
 # Screenshots a lesson links, one directory per lesson, captured from synthetic rows.
 # Every parent has to be un-ignored first: git never descends into an ignored directory,
 # so a rule naming only the file matches nothing and the image can reach the repository

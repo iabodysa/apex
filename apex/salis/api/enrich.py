@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import frappe
 
-# [#3jhrrm]
 VEHICLE_PLATE_KEY = "vehicle_plate"
 DRIVER_NAME_KEY = "driver_name"
 

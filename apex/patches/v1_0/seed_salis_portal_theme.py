@@ -17,14 +17,12 @@ DEFAULTS = {
 
 def execute():
     try:
-        # [#4xotau]
         if not frappe.db.exists("DocType", "Driver Portal Theme"):
             return
 
         settings = frappe.get_single("Driver Portal Theme")
         changed = False
 
-        # [#762qa4]
         for field, value in DEFAULTS.items():
             if settings.meta.has_field(field) and not settings.get(field):
                 settings.set(field, value)
@@ -34,7 +32,6 @@ def execute():
             settings.save(ignore_permissions=True)  # audit-ok
             frappe.db.commit()
     except Exception:
-        # [#r786tj]
         frappe.db.rollback()
         frappe.log_error(
             title="seed_salis_portal_theme failed",

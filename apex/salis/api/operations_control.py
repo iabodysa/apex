@@ -22,10 +22,8 @@ from apex.salis.utils import close_open_stop, lock_vehicle, reassign_vehicle_dri
 
 VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
 
-# [#di1yr8]
 COMPLIANCE_AT_RISK = ("Expiring Soon", "Expired")
 
-# [#rnk82v]
 COMPLIANCE_FILTERS = ("Compliant", "Expiring Soon", "Expired")
 
 
@@ -47,7 +45,6 @@ def _empty(offices=None, projects=None, unscoped=False, stopped_over_days=14):
         "offices": offices or [],
         "projects": projects or [],
         "statuses": VEHICLE_STATUSES,
-        # [#82uaal]
         "unscoped": unscoped,
     }
 
@@ -72,7 +69,6 @@ def get_fleet(status=None, rental_office=None, project=None, search=None, compli
         if unscoped
         else list(projects or [])
     )
-    # [#a6weh4]
     if base_filters is None:
         return _empty(offices, proj_opts, unscoped, stopped_over_days)
 
@@ -131,7 +127,6 @@ def get_fleet(status=None, rental_office=None, project=None, search=None, compli
         if v.get("compliance_status") in COMPLIANCE_AT_RISK:
             summary["compliance_at_risk"] += 1
 
-    # [#9c31st]
     from apex.salis.tasks import _overstay_stops
 
     on_board = {v.name for v in vehicles}
@@ -181,7 +176,6 @@ def get_vehicle_detail(vehicle):
     return {"vehicle": v, "incidents": incidents, "assignments": assignments}
 
 
-# [#lmvwwr]
 TIMELINE_PER_SOURCE = 20
 TIMELINE_LIMIT = 40
 
@@ -198,12 +192,14 @@ def get_vehicle_timeline(vehicle):
     own history). Bounded per source and overall, N+1-free (no per-row queries). Each
     row is a normalised ``{kind, date, ...}`` event; ``date`` is ISO so the client sorts
     and renders without reparsing per source.
+
+    The existence probe is name-filtered, not positional: the positional
+    ``frappe.db.exists(dt, dn)`` answers the value back unqueried when it equals the
+    DocType (database.py:1259), and Administrator short-circuits the permission check
+    above it (permissions.py:107) — so the literal "Salis Vehicle" reached here,
+    cleared this gate and returned an empty feed as a success.
     """
     frappe.has_permission("Salis Vehicle", "read", doc=vehicle, throw=True)
-    # Name-filtered: the positional probe answers the value back unqueried when it
-    # equals the DocType (database.py:1259). Administrator short-circuits the
-    # permission check above (permissions.py:107), so the literal "Salis Vehicle"
-    # reached here, cleared this gate and returned an empty feed as a success.
     if not frappe.db.exists("Salis Vehicle", {"name": vehicle}):
         frappe.throw(_("Vehicle not found."))
 
@@ -257,7 +253,6 @@ def get_vehicle_timeline(vehicle):
             "status": r.status,
         })
 
-    # [#55rf3l]
     for r in frappe.get_all(
         "Operations Alert",
         filters={"vehicle": vehicle, "status": "Resolved", "resolved_on": ["is", "set"]},
@@ -274,7 +269,6 @@ def get_vehicle_timeline(vehicle):
             "message": r.message,
         })
 
-    # [#33mqrv]
     events.sort(key=lambda e: e["date"] or "", reverse=True)
     return {"vehicle": vehicle, "events": events[:TIMELINE_LIMIT]}
 
@@ -307,7 +301,6 @@ def release_vehicle(vehicle, return_date=None):
     if not stop:
         frappe.throw(_("This vehicle has no open stop to release."))
 
-    # [#inqm7p]
     close_open_stop(stop, return_date)
     return {"ok": True, "stop": stop}
 
@@ -332,12 +325,9 @@ def reassign_driver(vehicle, driver, start_date=None):
     if not driver:
         frappe.throw(_("Driver is required."))
     frappe.has_permission("Salis Vehicle", "write", doc=vehicle, throw=True)
-    # Name-filtered: the literal "Salis Driver" cleared the positional probe and hit
-    # the permission check below, replacing this refusal with a framework 404.
     if not frappe.db.exists("Salis Driver", {"name": driver}):
         frappe.throw(_("Driver {0} not found.").format(driver))
     frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
 
-    # [#6isxga]
     assignment = reassign_vehicle_driver(vehicle, driver, start_date, reject_same_driver=True)
     return {"ok": True, "assignment": assignment}

@@ -74,24 +74,15 @@ def _enforce(doc, target_docstatus: int) -> None:
     state to a state whose ``doc_status`` equals ``target_docstatus`` — mirroring
     ``apply_workflow``'s gate. Otherwise raise ``frappe.PermissionError``."""
     if not get_workflow_name(doc.doctype):
-        # No active workflow -> ordinary submittable, not governed. Leave it alone.
         return
 
     workflow = get_workflow(doc.doctype)
     current_state = doc.get(workflow.workflow_state_field)
     state_row = next((s for s in workflow.states if s.state == current_state), None)
 
-    # Fast path: apply_workflow already advanced the state field to a target-docstatus
-    # state before this save -> its role/condition/self-approval gates ran. Allow.
     if state_row is not None and cint(state_row.doc_status) == target_docstatus:
         return
 
-    # Authorized bare transition: allow only if the current user has an authorized
-    # transition from the current state to a target-docstatus state. get_transitions
-    # filters by role + condition; has_approval_access enforces the self-approval gate.
-    # An unset current state has no such transition (apply_workflow always lands a real
-    # state first), so refuse it outright rather than let get_transitions raise a
-    # less-clear WorkflowStateError.
     if current_state:
         user = frappe.session.user
         target_states = {
@@ -111,8 +102,6 @@ def before_submit(doc, method=None):
 
 
 def before_cancel(doc, method=None):
-    # When the workflow has no reachable cancel transition, Frappe itself sanctions
-    # the native Cancel button (can_cancel_document -> True); do not block that path.
     if not get_workflow_name(doc.doctype) or can_cancel_document(doc.doctype):
         return
     _enforce(doc, 2)

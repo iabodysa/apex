@@ -25,12 +25,10 @@ class RoutePlan(Document):
         self._default_operations_requester()
 
     def on_submit(self):
-        # [#hi89yj]
         self.db_set("movement_planner", frappe.session.user)
         self._mark_request_scheduled()
 
     def on_cancel(self):
-        # [#p5mqbj]
         if not self.transport_request:
             return
         revert_transport_request(
@@ -64,10 +62,6 @@ class RoutePlan(Document):
             },
             update_modified=False,
         )
-        # The supervisor portal polled every 45s because nothing told it a decision had
-        # landed. Both endpoints funnel through this one writer, so publishing here can
-        # never cover approve and miss reject. after_commit so a rolled-back decision is
-        # never announced; doctype-scoped so only Route Plan subscribers wake.
         frappe.publish_realtime(
             "route_plan_decision",
             {"name": self.name, "approval": decision},

@@ -24,8 +24,6 @@ from frappe.utils import cint
 
 from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance, guest_redirect
 
-# [#i6khen] Read only by the retained-unused helper below; /fleet itself gates on
-# nothing, so no runtime path consults this set.
 FLEET_ROLES = {
     "System Manager",
     "Fleet Manager",
@@ -55,21 +53,16 @@ def has_apps_screen_access() -> bool:
 
 
 def get_context(context):
-    # [#nyktq0]
     guest_redirect("/fleet")
 
     apply_portal_appearance(context)
     context.no_cache = 1
-    # [#4h1dwk] Any logged-in user may view the employee page; per-user data
-    # scoping is enforced server-side by the fleet_employee endpoints.
     context.can_view = 1
     context.user_full_name = frappe.utils.get_fullname()
     context.csrf_token = get_csrf_token()
-    # [#6xr27k]
     conf = frappe.get_site_config()
     context.site_name = frappe.local.site
     context.socketio_port = cint(conf.get("socketio_port")) or 9000
     context.async_enabled = not cint(conf.get("disable_async"))
-    # [#eovfvf]
     context.dev_server = 1 if frappe.conf.developer_mode else 0
     return context

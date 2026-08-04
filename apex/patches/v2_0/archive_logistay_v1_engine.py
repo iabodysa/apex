@@ -26,7 +26,6 @@ from __future__ import annotations
 
 import frappe
 
-# The lean-Logistay masters that MUST survive. Never delete these.
 SURVIVORS = {"Freelancer", "Temporary Worker"}
 
 
@@ -46,7 +45,6 @@ def _drop_doctype(dt: str) -> None:
 
 
 def execute() -> None:
-    # DocTypes: everything in the two v1 modules, minus the survivors.
     old = [
         d for d in frappe.get_all("DocType", filters={"module": "Logistay"}, pluck="name")
         if d not in SURVIVORS
@@ -55,7 +53,6 @@ def execute() -> None:
     for dt in old:
         _drop_doctype(dt)
 
-    # Orphaned engine surfaces.
     if frappe.db.exists("Workspace", "Logistay"):
         frappe.db.delete("Workspace", {"name": "Logistay"})
         frappe.clear_cache()
@@ -64,7 +61,6 @@ def execute() -> None:
     if frappe.db.exists("Workflow", "TS Intake Source Workflow"):
         frappe.db.delete("Workflow", {"name": "TS Intake Source Workflow"})
 
-    # Payroll Custom Fields (module Logistay) on stock ERPNext / apex_core doctypes.
     pay_fields = frappe.get_all(
         "Custom Field", filters={"module": "Logistay"}, fields=["name", "dt"]
     )
@@ -74,7 +70,6 @@ def execute() -> None:
         for dt in touched:
             frappe.clear_cache(doctype=dt)
 
-    # The Logistay Governance Module Def itself (Logistay stays).
     if frappe.db.exists("Module Def", "Logistay Governance"):
         frappe.db.delete("Module Def", {"name": "Logistay Governance"})
 

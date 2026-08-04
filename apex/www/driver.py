@@ -24,10 +24,8 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
 from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance
 from apex.apex_core.utils.portal_token_security import DRIVER, throttle_entry_token
 
-# Same charset guard as the worker entry (www/masar.py): url-safe token only.
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 
-# Match the driver token TTL (180d) so the entry cookie outlives a single session.
 _COOKIE_MAX_AGE_SECONDS = 180 * 24 * 60 * 60
 
 
@@ -35,20 +33,14 @@ def get_context(context):
     context.no_cache = 1
     context.csrf_token = get_csrf_token()
 
-    # Barcode entry: validate ?d=<raw>, store it httpOnly, then redirect to the
-    # clean /driver so the raw token is stripped from the URL/history.
     raw_token = frappe.form_dict.get("d") or ""
     valid_token = raw_token if _TOKEN_RE.match(raw_token) else ""
     if valid_token:
-        # Defense-in-depth: charge the shared per-IP bad-token throttle for a
-        # failed/unknown link before it is parked in the cookie; a valid link is
-        # never charged and the redirect still fires so the secret leaves the URL.
         throttle_entry_token(DRIVER, valid_token)
         _set_token_cookie(valid_token)
         frappe.local.flags.redirect_location = "/driver"
         raise frappe.Redirect
 
-    # Realtime config for the driver SPA (unchanged from the previous shell).
     conf = frappe.get_site_config()
     context.site_name = frappe.local.site
     context.socketio_port = cint(conf.get("socketio_port")) or 9000

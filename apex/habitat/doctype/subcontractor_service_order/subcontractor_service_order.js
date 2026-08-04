@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#jb13ri]
 frappe.ui.form.on("Subcontractor Service Order", {
 	setup(frm) {
 		frm.set_query("building", () => ({

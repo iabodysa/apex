@@ -92,7 +92,6 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
         order_by="article_name asc",
     )
 
-    # [#q1odkg]
     balances: dict[str, float] = {}
     if building:
         frappe.has_permission("Building", "read", doc=building, throw=True)
@@ -186,7 +185,6 @@ def _resolve_worker_scan(code: str, party_type: str | None) -> dict | None:
         if not frappe.has_permission(pt, "read"):
             continue
         if _row_exists(pt, code):
-            # [#34wx4m]
             title_field = frappe.get_meta(pt).get_title_field()
             party_name = frappe.db.get_value(pt, code, title_field)
             return {
@@ -316,7 +314,6 @@ def issue_cart(
     frappe.has_permission("Custody Issue", "create", throw=True)
     frappe.has_permission("Custody Issue", "submit", throw=True)
 
-    # [#dzclax]
     if not party and employee:
         party_type, party = PARTY_EMPLOYEE, employee
     party_type, party = _normalize_party(party_type, party)
@@ -354,7 +351,6 @@ def issue_cart(
     return {"custody_issue": doc.name}
 
 
-# [#rtcz4r]
 _OPEN_ISSUE_STATUSES = ("Issued", "Partially Returned")
 
 
@@ -399,7 +395,6 @@ def _open_party_custody(party_type: str, party: str) -> list[dict]:
         "status": ["in", _OPEN_ISSUE_STATUSES],
     }
 
-    # [#hiy523]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:
         if not allowed:
@@ -418,7 +413,6 @@ def _open_party_custody(party_type: str, party: str) -> list[dict]:
     issue_names = [i.name for i in issues]
     issue_meta = {i.name: i for i in issues}
 
-    # [#5aq8wd]
     issued: dict[str, dict[str, float]] = {}
     issue_item_rows = frappe.get_all(
         "Custody Issue Item",
@@ -431,7 +425,6 @@ def _open_party_custody(party_type: str, party: str) -> list[dict]:
             issued[row.parent].get(row.article, 0.0) + flt(row.qty)
         )
 
-    # [#qb3m1n]
     returned: dict[str, dict[str, float]] = {}
     submitted_returns = frappe.get_all(
         "Custody Return",
@@ -452,7 +445,6 @@ def _open_party_custody(party_type: str, party: str) -> list[dict]:
                 returned[issue_name].get(row.article, 0.0) + flt(row.qty)
             )
 
-    # [#7uv0lc]
     article_names = {a for per in issued.values() for a in per}
     name_map: dict[str, dict] = {}
     if article_names:
@@ -557,7 +549,6 @@ def return_cart(party_type: str, party: str, items_json: str) -> dict:
     if not isinstance(items, list) or not items:
         frappe.throw(_("Add at least one item to the cart before returning."))
 
-    # [#m9c2pk]
     grouped: dict[str, list[dict]] = {}
     for line in items:
         line = line or {}
@@ -574,7 +565,6 @@ def return_cart(party_type: str, party: str, items_json: str) -> dict:
             {"article": article, "qty": int(qty)}
         )
 
-    # [#k4r0tn]
     issue_party = frappe.get_all(
         "Custody Issue",
         filters={"name": ["in", list(grouped.keys())]},

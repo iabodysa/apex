@@ -35,6 +35,7 @@ boundary is enforced on the individual document, not just a blanket write grant.
 The approve/reject mutations run through ``doc.save()``, so the change is
 captured natively by Version (track_changes is enabled on Fuel Request) plus the
 automatic timeline comment.
+
 """
 
 from __future__ import annotations
@@ -65,7 +66,6 @@ def _drive_fuel_action(doc, action: str) -> None:
         apply_workflow(doc, action)
         return
 
-    # [#g5awmf]
     if doc.get("requested_by") == frappe.session.user:
         frappe.throw(
             _("You cannot {0} a fuel request you raised yourself (segregation of duties).").format(
@@ -111,6 +111,15 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
     Fuel Requests in their permitted projects. The ``project`` argument can only
     NARROW that scope (it is intersected with the permitted set), never widen it.
 
+    THE CLIENT CONTRACT this endpoint exists to keep, in
+    ``salis/page/fuel_approval_console``: a standard Frappe page built from
+    ``frappe.ui.Page`` primitives and a native ``frappe.ui.Dialog`` — no SPA, no Vue or
+    React, no external library. This reader is its ONLY read, and every write routes
+    through ``approve_fuel_request`` / ``reject_fuel_request``. The server is the source
+    of truth: after any write the page re-fetches this queue rather than mutating the
+    DOM optimistically, and it renders through ``.text()`` / ``textContent`` only, never
+    ``innerHTML`` with unescaped data.
+
     Args:
         project: Optional Project docname to narrow the queue to a single
             project. Intersected with the caller's permitted scope — an
@@ -123,7 +132,6 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
 
     unscoped, projects = _permitted_projects()
 
-    # [#li9kuz]
     if project:
         if unscoped:
             projects = [project]
@@ -131,10 +139,8 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
         elif project in (projects or []):
             projects = [project]
         else:
-            # [#5unc6e]
             return []
 
-    # [#mv655w]
     if not unscoped and not projects:
         return []
 
@@ -163,7 +169,6 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
     if not rows:
         return []
 
-    # [#9esmfn]
     vehicle_driver_titles(rows)
 
     threshold = _approval_threshold()
@@ -228,7 +233,6 @@ def approve_fuel_request(name: str) -> dict:
 
     _drive_fuel_action(doc, "Approve")
 
-    # [#rlur7z]
     return {"name": doc.name, "status": doc.status}
 
 
@@ -270,5 +274,4 @@ def reject_fuel_request(name: str, reason: str | None = None) -> dict:
     if reason:
         doc.add_comment("Comment", _("Rejected: {0}").format(reason))
 
-    # [#6u3gy4]
     return {"name": doc.name, "status": doc.status}

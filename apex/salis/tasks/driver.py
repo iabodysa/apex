@@ -11,8 +11,6 @@ from apex.salis.tasks.common import (
     _settings_int,
 )
 
-# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
-# rather than stacking one per row. Distinct from _raise_alert's own name.
 _ROW_SAVEPOINT = "salis_driver_row"
 
 
@@ -27,7 +25,6 @@ def driver_license_expiry_watch() -> None:
 
     today_str = today()
     logger = frappe.logger()
-    # [#5iz5cq]
     LICENSE_MIN_LEAD_DAYS = 30
     license_lead = _settings_int("license_alert_lead_days", LICENSE_MIN_LEAD_DAYS)
     lead_days = max(license_lead, _settings_int("alert_lead_days", 7), LICENSE_MIN_LEAD_DAYS)
@@ -48,7 +45,6 @@ def driver_license_expiry_watch() -> None:
             frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 days = date_diff(d.license_expiry, today_str)
-                # [#bces73]
                 who = d.name
                 if days < 0:
                     msg = (f"driver_license_expiry_watch: driver {who} licence expired "

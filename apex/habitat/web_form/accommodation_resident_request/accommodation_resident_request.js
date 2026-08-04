@@ -18,7 +18,6 @@ frappe.web_form.after_save = function (doc) {
 	box.className = "alert alert-success mt-4";
 	box.style.fontSize = "15px";
 
-	// [#75o6w6]
 	var heading = document.createElement("strong");
 	heading.textContent = __("Request submitted successfully.");
 
@@ -28,7 +27,6 @@ frappe.web_form.after_save = function (doc) {
 
 	var codeEl = document.createElement("code");
 	codeEl.style.cssText = "font-size:17px;letter-spacing:3px;font-weight:bold;margin-top:5px;display:inline-block;";
-	// [#bn436t]
 	codeEl.textContent = frappe.utils.escape_html(code);
 
 	var br2 = document.createElement("br");

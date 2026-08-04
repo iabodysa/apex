@@ -48,7 +48,6 @@ PURCHASE_REQUEST_DOCTYPE = "Material Request"
 PAYMENT_ENTRY_DOCTYPE = payable_allocation.PAYMENT_ENTRY_DOCTYPE
 
 
-# Shared guards
 
 
 def _load_eligible_contract(contract: str):
@@ -64,7 +63,6 @@ def _load_eligible_contract(contract: str):
     if not contract or not frappe.db.exists("Telecom Contract", {"name": contract}):
         frappe.throw(_("Telecom Contract {0} does not exist.").format(contract))
     doc = frappe.get_doc("Telecom Contract", contract)
-    # Company-scoped read permission (has_permission hook enforces company scope).
     doc.check_permission("read")
     if doc.docstatus != 1:
         frappe.throw(_("Billing documents can only be raised from a submitted contract."))
@@ -119,8 +117,6 @@ def _record_link(contract_doc, billing_period, document_type, document_name, amo
             "created_on": frappe.utils.now_datetime(),
         },
     )
-    # billing_documents is allow_on_submit; only this log row changes on the
-    # submitted contract, so skip the after-submit field-change validation.
     contract_doc.flags.ignore_validate_update_after_submit = True
     contract_doc.save(ignore_permissions=True)  # audit-ok — append-only billing log
 
@@ -129,7 +125,6 @@ def _result(document_type, document_name, existing):
     return {"document_type": document_type, "document_name": document_name, "existing": existing}
 
 
-# Purchase request (Material Request)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -144,7 +139,6 @@ def create_purchase_request(contract: str, billing_period: str):
             _("Set a Service Item on the contract before raising a purchase request.")
         )
 
-    # Serialize concurrent calls for the same contract so duplicates cannot race.
     frappe.db.get_value("Telecom Contract", contract_doc.name, "name", for_update=True)
     contract_doc.reload()
 
@@ -153,8 +147,6 @@ def create_purchase_request(contract: str, billing_period: str):
         return _result(PURCHASE_REQUEST_DOCTYPE, existing, True)
 
     period_end = _period_end(billing_period)
-    # Billing a period that has already closed is the normal case, and ERPNext refuses a
-    # Material Request whose Reqd by Date precedes its Transaction Date.
     raised_on = today()
     needed_by = max(period_end, getdate(raised_on))
     uom = frappe.db.get_value("Item", contract_doc.service_item, "stock_uom") or "Nos"
@@ -192,7 +184,6 @@ def create_purchase_request(contract: str, billing_period: str):
     return _result(PURCHASE_REQUEST_DOCTYPE, mr.name, False)
 
 
-# Payment (native Payment Entry allocated against a Purchase Invoice)
 
 
 @frappe.whitelist()
@@ -246,7 +237,6 @@ def create_payment_entry(contract: str, billing_period: str, purchase_invoice: s
     return _result(PAYMENT_ENTRY_DOCTYPE, pe.name, False)
 
 
-# Derived settlement status
 
 
 @frappe.whitelist()
@@ -268,7 +258,6 @@ def get_billing_status(contract: str, billing_period: str):
     return status
 
 
-# Letting Accounts cancel a payment the billing log cites
 
 
 def allow_cancel_despite_billing_log(doc, method=None):

@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 from collections import defaultdict
 
@@ -19,7 +18,6 @@ def execute(filters=None):
     columns = _columns()
     buildings = _get_buildings(building_filter)
     if not buildings:
-        # [#2tz8oq]
         if _is_scope_gap(building_filter):
             return columns, [], _no_scope_message()
         return columns, []
@@ -86,7 +84,6 @@ def _columns():
 def _get_buildings(building_filter):
     f = {"status": "Active"}
 
-    # [#sj87q2]
     if not permissions._building_is_unscoped(frappe.session.user):
         allowed = permissions._allowed_buildings(frappe.session.user)
         if building_filter:
@@ -185,6 +182,12 @@ def _safety_inspections(building_names, date_from, date_to):
 
 
 def _maintenance(building_names):
+    """Open and closed Maintenance Request counts per building.
+
+    Maintenance Request states are Open/Assigned/In Progress/Resolved/Closed/Reopened.
+    Assigned and Reopened are active work too and are counted as open — they previously
+    fell through both branches, undercounting ``open_maintenance``.
+    """
     result = defaultdict(lambda: {"open": 0, "closed": 0})
     rows = frappe.get_all(
         "Maintenance Request",
@@ -192,7 +195,6 @@ def _maintenance(building_names):
         fields=["building", "status"],
     )
     for r in rows:
-        # [#470524]
         if r.status in ("Open", "In Progress", "Assigned", "Reopened"):
             result[r.building]["open"] += 1
         elif r.status in ("Resolved", "Closed"):

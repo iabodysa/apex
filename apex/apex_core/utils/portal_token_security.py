@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Shared authorization boundary for worker and driver portal bearer tokens."""
 
 from __future__ import annotations
@@ -43,16 +44,9 @@ _TOKEN_SUBJECT_FIELDS = {
     DRIVER: "driver",
 }
 
-# Defense-in-depth: cap blind portal-token guessing at 10 failed attempts per IP per
-# 60s. Only FAILED resolutions are charged (see _reject_invalid_token), so a valid
-# link never counts and a working holder is never blocked, even behind an office NAT.
 BAD_TOKEN_ATTEMPTS_PER_MINUTE = 10
 BAD_TOKEN_WINDOW_SECONDS = 60
 
-# ONE window per address, spent across EVERY portal entry -- the advertised budget,
-# not 10 per endpoint. frappe's @rate_limit cannot express that: it welds
-# form_dict.cmd into its key (rate_limiter.py:155), so each guest endpoint would
-# carry a private 10 and the real per-IP ceiling would be ~50x the stated one.
 BAD_TOKEN_WINDOW_KEY = "rl:apex-portal-bad-token:{0}"
 
 
@@ -61,6 +55,12 @@ def _throttle_bad_token_attempt() -> None:
     (N+1)th raises RateLimitExceededError (HTTP 429). A caller with no request or no
     remote address cannot be attributed to an address, so it is a no-op there --
     console, scheduled-job and test callers are never throttled.
+
+    The budget is ONE window per address, spent across EVERY portal entry -- the
+    advertised number, not BAD_TOKEN_ATTEMPTS_PER_MINUTE per endpoint. frappe's
+    @rate_limit cannot express that: it welds form_dict.cmd into its key
+    (rate_limiter.py:155), so each guest endpoint would carry a private budget and the
+    real per-address ceiling would be tens of times the stated one.
 
     The counting itself is the shared atomic window, NOT rate_limiter.py's
     read-then-write: this throttle exists to make a parallel flood visible, and the
@@ -153,8 +153,6 @@ def validate_subject_binding(
 
 
 def _reject_invalid_token() -> None:
-    # Charge the per-IP throttle before failing closed, so a flood of guesses from
-    # one IP is cut off (429) while a single bad link still returns the ordinary 403.
     _throttle_bad_token_attempt()
     frappe.throw(
         _("This portal access token is invalid or inactive."),
@@ -327,8 +325,6 @@ def log_credential_event(
             "link_doctype": _SUBJECT_DOCTYPES[audience],
             "link_name": subject,
         }
-    # Nobody holds create on Activity Log by design — an audit row must not be
-    # writable by the issuer it names. Content is fixed here and carries no secret.
     ).insert(ignore_permissions=True, ignore_links=True).name  # audit-ok
 
 
@@ -349,9 +345,6 @@ def revoke_subject_tokens(audience: str, subject: str) -> int:
             0,
             update_modified=False,
         )
-        # [#a267au] Every revocation path lands here -- desk action, clearance
-        # submit, suspension, employee/driver status change -- so one call covers
-        # them all rather than four that can drift apart.
         log_credential_event(audience, subject, REVOKED, row.name)
         disabled += 1
     return disabled

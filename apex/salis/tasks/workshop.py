@@ -11,8 +11,6 @@ from apex.salis.tasks.common import (
     _settings_int,
 )
 
-# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
-# rather than stacking one per row. Distinct from _raise_alert's own name.
 _ROW_SAVEPOINT = "salis_workshop_row"
 
 
@@ -36,13 +34,11 @@ def _overstay_stops() -> list:
         filters={
             "stop_reason": "Maintenance",
             "docstatus": 1,
-            # [#5f9ajm]
             "return_date": ["is", "not set"],
             "stop_date": ["<=", cutoff],
         },
         fields=["name", "vehicle", "stop_date"],
     )
-    # [#4nmmng]
     vehicle_ids = {r.vehicle for r in rows if r.vehicle}
     statuses = (
         {
@@ -102,7 +98,6 @@ def get_workshop_overstay_count(filters=None) -> dict:
     """
     from apex.salis.api.dispatch_board import _permitted_projects
 
-    # [#goe0en]
     frappe.has_permission("Salis Vehicle", "read", throw=True)
     vehicles = {r.vehicle for r in _overstay_stops()}
     if not vehicles:

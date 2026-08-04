@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Idle Resident Detection — housed workers whose work has ended.
 
@@ -19,9 +18,7 @@ from frappe.utils import date_diff, today
 
 from apex.habitat import permissions
 
-# [#kbzrzp]
 ENDED_PROJECT_STATUSES = ("Completed", "Cancelled")
-# [#d3ahsh]
 OPEN_REPORT_STATUSES = ("Open", "Acknowledged")
 
 
@@ -52,7 +49,6 @@ def _columns():
 def _get_data(filters):
     query_filters = {"docstatus": 1, "check_out_date": ["is", "not set"]}
 
-    # [#cxlwka]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:
         if filters.get("building"):
@@ -84,7 +80,6 @@ def _get_data(filters):
     data = []
     for asg in assignments:
         status = project_status.get(asg.project) if asg.project else None
-        # [#3909gv]
         if asg.project and status not in ENDED_PROJECT_STATUSES:
             continue
         if wanted_status and (status or "") != wanted_status:

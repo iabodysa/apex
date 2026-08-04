@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Daily Cleaning Compliance.
 
@@ -49,7 +48,6 @@ def execute(filters=None):
         {"label": frappe._("Scheduled Task"), "fieldname": "scheduled_task_instance", "fieldtype": "Link", "options": "Scheduled Task Instance", "width": 140},
     ]
 
-    # [#bjploo]
     ledger_filters = {
         "posting_date": ["between", [str(date_from), str(date_to)]],
         "is_cancelled": 0,
@@ -57,7 +55,6 @@ def execute(filters=None):
     if filters.get("building"):
         ledger_filters["building"] = filters["building"]
 
-    # [#6bg47z]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     chosen = ledger_filters.get("building")
     if restrict:
@@ -73,7 +70,6 @@ def execute(filters=None):
         limit_page_length=0,
     )
 
-    # [#sb89vt]
     from collections import defaultdict
     log_total = defaultdict(int)
     log_cleaned = defaultdict(int)
@@ -83,14 +79,12 @@ def execute(filters=None):
         log_total[log] += 1
         if row.cleaned:
             log_cleaned[log] += 1
-        # [#wjrplx]
         log_meta.setdefault(log, {"building": row.building, "cleaning_date": row.posting_date})
 
     log_names = list(log_total.keys())
     if not log_names:
         return columns, []
 
-    # [#6nzn05]
     enrich = {}
     log_meta_rows = frappe.get_all(
         "Cleaning Log",

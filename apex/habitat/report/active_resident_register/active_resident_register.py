@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 
@@ -27,7 +26,6 @@ def execute(filters=None):
     if filters.get("project"):
         query_filters["project"] = filters["project"]
 
-    # [#b52yr6]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:
         if not allowed:

@@ -11,9 +11,7 @@ from frappe.utils import flt
 
 class OperationalDepreciationPolicy(Document):
     def validate(self):
-        # [#aubbvz]
         if self.useful_life_years is not None and flt(self.useful_life_years) <= 0:
             frappe.throw(_("Useful Life (Years) must be greater than zero."))
-        # [#389n9j]
         if not 0 <= flt(self.residual_value_pct) <= 100:
             frappe.throw(_("Residual Value (%) must be between 0 and 100."))

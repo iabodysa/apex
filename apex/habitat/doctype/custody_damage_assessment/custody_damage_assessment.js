@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#3h8kmi]
 const DEDUCTION_STATUS_COLORS = {
 	"Not Created": "gray",
 	Draft: "orange",
@@ -17,7 +16,6 @@ frappe.ui.form.on("Custody Damage Assessment", {
 		}));
 	},
 	refresh(frm) {
-		// [#g123bl]
 		if (frm.is_new()) {
 			return;
 		}

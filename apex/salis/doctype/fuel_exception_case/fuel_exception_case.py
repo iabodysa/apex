@@ -33,7 +33,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-# [#26k8q4]
 VALID_STATUSES = (
     "Open",
     "Under Investigation",
@@ -43,7 +42,6 @@ VALID_STATUSES = (
     "Closed",
 )
 
-# [#i41sti]
 _CLOSING_STATUSES = {"Resolved", "Closed"}
 
 
@@ -53,7 +51,6 @@ class FuelExceptionCase(Document):
 
     def validate(self):
         self._default_reporter()
-        # [#97d5be]
         if flt(self.amount_recovered) < 0:
             frappe.throw(_("Amount recovered cannot be negative."))
         if self.status and self.status not in VALID_STATUSES:
@@ -61,9 +58,7 @@ class FuelExceptionCase(Document):
         self._guard_initial_status()
         self._enforce_closure_controls()
 
-    # [#hk8b8a]
 
-    # [#m88md8]
 
     def _default_reporter(self):
         """Default the raiser to the current session user when blank."""

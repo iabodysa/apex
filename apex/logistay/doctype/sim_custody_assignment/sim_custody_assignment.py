@@ -29,15 +29,10 @@ from apex.logistay.utils.cost_center import (
     resolve_project_cost_center,
 )
 
-# Actions that take a custodian (employee or project); the rest take none.
 CUSTODIAN_ACTIONS = ("Assign", "Transfer")
 
-# Retirement actions. Each one both ends custody and names the SIM's terminal
-# status — the action name IS the resulting status, so no second mapping can drift.
 TERMINAL_ACTIONS = ("Lost", "Terminated")
 
-# The SIM status that must hold immediately BEFORE each action is applied.
-# Terminated appears in no allowed-prior list, so it absorbs: nothing follows it.
 ALLOWED_PRIOR_STATUS = {
     "Assign": ("Available",),
     "Transfer": ("Assigned",),
@@ -69,7 +64,6 @@ class SIMCustodyAssignment(Document):
         self._enforce_company_compatibility()
         self._snapshot_cost_centers()
         if self.sim_card:
-            # Friendly early guard; the authoritative one runs under lock at submit.
             self._check_prior_status(frappe.db.get_value("SIM Card", self.sim_card, "status"))
 
     def _validate_custodian_inputs(self):
@@ -80,13 +74,11 @@ class SIMCustodyAssignment(Document):
                 frappe.throw(_("Select the Employee receiving the SIM."))
             if self.custodian_type == "Project" and not self.project:
                 frappe.throw(_("Select the Project receiving the SIM."))
-            # Keep only the field matching the chosen custodian type.
             if self.custodian_type == "Employee":
                 self.project = None
             else:
                 self.employee = None
         else:
-            # Return / Suspend / Reactivate / Lost / Terminated carry no custodian input.
             self.custodian_type = None
             self.employee = None
             self.project = None
@@ -185,7 +177,6 @@ class SIMCustodyAssignment(Document):
             )
 
     def before_submit(self):
-        # Immutable snapshot of the custody state this event supersedes.
         prior = (
             frappe.db.get_value(
                 "SIM Card",
@@ -200,9 +191,6 @@ class SIMCustodyAssignment(Document):
         self.previous_project = prior.get("current_project")
 
     def on_submit(self):
-        # Lock the SIM row for the whole transaction, read the prior status UNDER
-        # the lock, and re-check the transition. This is the race-safe guarantee of
-        # exactly one active custody per SIM (a concurrent action blocks here).
         locked_status = frappe.db.get_value(
             "SIM Card", self.sim_card, "status", for_update=True
         )
@@ -210,8 +198,6 @@ class SIMCustodyAssignment(Document):
         rebuild_sim_projection(self.sim_card)
 
     def on_cancel(self):
-        # Roll the SIM back by replaying the remaining submitted events (this one is
-        # now cancelled and excluded).
         frappe.db.get_value("SIM Card", self.sim_card, "status", for_update=True)
         rebuild_sim_projection(self.sim_card)
 
@@ -233,9 +219,6 @@ def _apply_event(state, event):
     elif action == "Return":
         state.update(dict(_INITIAL_STATE))
     elif action in TERMINAL_ACTIONS:
-        # Retirement closes the active custody and parks the SIM in its terminal
-        # status. The custodian is cleared here, never deleted: this event's own
-        # previous_* fields keep who held the SIM when it was retired.
         state.update(dict(_INITIAL_STATE))
         state["status"] = action
     elif action == "Suspend":

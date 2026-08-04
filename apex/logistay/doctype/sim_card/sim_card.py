@@ -16,7 +16,6 @@ from frappe.model.document import Document
 
 from apex.logistay.utils.normalize import normalize_iccid, normalize_msisdn
 
-# Custody projection fields owned by the custody engine, cleared together.
 _PROJECTION_FIELDS = (
     "status",
     "current_custodian_type",

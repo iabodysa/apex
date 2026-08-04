@@ -15,7 +15,6 @@ from apex.salis.api.driver_portal import (
 )
 
 
-# [#jdcim7]
 _OPEN_CLEARANCE_STATUSES = ("Open", "In Progress", "Blocked")
 
 
@@ -41,7 +40,7 @@ def _next_trip_today(driver):
     if not trips:
         return None
     trip = trips[0]
-    _attach_trip_maps([trip])  # [#c8i03i]
+    _attach_trip_maps([trip])
     _label_trips([trip])
     log = frappe.db.get_value(
         "Trip Start Log",

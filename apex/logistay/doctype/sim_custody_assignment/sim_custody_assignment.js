@@ -1,6 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// Scope the SIM, employee and project pickers to the acting company so a custody
-// event cannot be built across companies.
 
 frappe.ui.form.on('SIM Custody Assignment', {
 	setup(frm) {

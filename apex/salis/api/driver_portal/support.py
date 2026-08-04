@@ -123,7 +123,14 @@ def _create_support_ticket(
     photo=None,
     photo_filename=None,
 ):
-    """Create one Issue after the public endpoint resolves its driver authority."""
+    """Create one Issue after the public endpoint resolves its driver authority.
+
+    The Issue Type and Issue Priority probes are name-filtered, not positional: both
+    values come straight from the caller, and the positional
+    ``frappe.db.exists(dt, dn)`` answers them back unqueried when they equal the
+    DocType (database.py:1259). The literal "Issue Type"/"Issue Priority" then became a
+    dangling link on insert and lost the ticket, instead of being dropped here.
+    """
     subject = _support_text(subject, "Subject", SUPPORT_SUBJECT_MAX_LENGTH)
     description = _support_text(
         description,
@@ -140,11 +147,6 @@ def _create_support_ticket(
         "description": description,
         "status": "Open",
     }
-    # [#3u8b90]
-    # Name-filtered: both values come straight from the caller, and the positional
-    # probe answers them back unqueried when they equal the DocType
-    # (database.py:1259) — the literal "Issue Type"/"Issue Priority" then became a
-    # dangling link on insert and lost the ticket instead of being dropped here.
     if category and frappe.db.exists("Issue Type", {"name": category}):
         data["issue_type"] = category
     if priority and frappe.db.exists("Issue Priority", {"name": priority}):
@@ -214,7 +216,6 @@ def get_ticket(name, communication_offset=0, communication_limit=COMMUNICATION_P
     for f in ("creation", "response_by", "resolution_by", "first_responded_on", "resolution_date"):
         if issue.get(f):
             issue[f] = frappe.utils.cstr(issue[f])
-    # [#7wn25s]
     communication_offset, communication_limit = _communication_window(
         communication_offset,
         communication_limit,
@@ -241,7 +242,6 @@ def get_ticket(name, communication_offset=0, communication_limit=COMMUNICATION_P
             frappe.utils.cstr(c["communication_date"]) if c.get("communication_date") else None
         )
         c["creation"] = frappe.utils.cstr(c["creation"]) if c.get("creation") else None
-        # [#plxvhk]
         c["content"] = frappe.utils.strip_html_tags(c.get("content") or "").strip() or None
     issue["communications"] = comms
     issue["communication_has_more"] = has_more
@@ -283,7 +283,6 @@ def reply_to_ticket(name, message):
         }
     )
     comm.insert(ignore_permissions=True)  # audit-ok — Issue resolved server-side to this driver
-    # [#6v8hml]
     if issue.get("status") in ("Resolved", "Closed"):
         frappe.db.set_value("Issue", name, "status", "Open")
     return {"name": comm.name}
@@ -304,7 +303,6 @@ def report_vehicle_problem(subject, description, priority=None):
     driver = _resolve_driver()
     vehicle = _bound_vehicle(driver)
     plate = frappe.db.get_value("Salis Vehicle", vehicle, "plate_number") if vehicle else None
-    # [#cad16i]
     body = description or ""
     if plate or vehicle:
         body = f"{body}\n\n" + _("Vehicle: {0}").format(plate or vehicle)

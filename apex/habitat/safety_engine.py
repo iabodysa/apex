@@ -29,7 +29,6 @@ from apex.apex_core.utils.company import company_for_building
 LEDGER_DOCTYPE = "Safety Finding Ledger"
 EXECUTION_DOCTYPE = "Safety Task Execution"
 
-# [#1uirb9]
 _RESOLVED_STATUS = "Resolved"
 
 
@@ -112,7 +111,6 @@ def post_safety_findings(safety_round) -> int:
 
     posted = 0
     for execution_name in executions:
-        # [#mmwff1]
         findings = frappe.get_all(
             "Inspection Finding Item",
             filters={"parent": execution_name, "parenttype": EXECUTION_DOCTYPE},

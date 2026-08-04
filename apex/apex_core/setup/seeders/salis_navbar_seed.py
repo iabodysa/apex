@@ -21,7 +21,6 @@ Routes are verified against the shipped artifacts:
 
 import frappe
 
-# [#730brf]
 _LINKS = [
     {"item_label": "Apex Salis — Movement and Fleet", "item_type": "Route", "route": "/app/salis"},
     {"item_label": "Apex Salis — Dispatch Board", "item_type": "Route", "route": "/app/salis-dispatch-board"},
@@ -50,7 +49,6 @@ def seed_salis_navbar_help_links():
             settings.save(ignore_permissions=True)  # audit-ok
             frappe.db.commit()
     except Exception:
-        # [#71i1ga]
         frappe.log_error(
             title="seed_salis_navbar_help_links failed",
             message=frappe.get_traceback(),

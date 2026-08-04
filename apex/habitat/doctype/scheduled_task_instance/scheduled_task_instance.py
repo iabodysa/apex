@@ -26,13 +26,12 @@ def on_doctype_update():
     """
     from apex.apex_core.utils.ledger_index import add_unique_guarded
 
-    # [#p5hn9h]
     try:
         frappe.db.sql(
             "ALTER TABLE `tabScheduled Task Instance` DROP INDEX `unique_sti_template_due_status`"
         )
     except Exception:
-        pass  # [#3gy0zc]
+        pass
 
     add_unique_guarded(
         "Scheduled Task Instance",
@@ -47,7 +46,6 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    # [#k7123c]
     if doc.status not in ("In Progress", "Completed", "Cancelled"):
         doc.db_set("status", "Open")
 
@@ -61,7 +59,6 @@ def before_cancel(doc, method=None):
 def start_task(task_instance):
     """Transition Scheduled Task Instance from Open to In Progress."""
     doc = frappe.get_doc("Scheduled Task Instance", task_instance)
-    # [#eu1e7a]
     frappe.has_permission("Scheduled Task Instance", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:

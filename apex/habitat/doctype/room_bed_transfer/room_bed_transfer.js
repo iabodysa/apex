@@ -1,11 +1,9 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#dcpq47]
 frappe.ui.form.on("Room Bed Transfer", {
 	setup: function(frm) {
-		// [#jhvhmd]
 		frm.set_query("to_bed", function() {
 			if (!frm.doc.to_room) {
-				return {}; // will return nothing or all if standard, but depends_on hides it anyway
+				return {};
 			}
 			return {
 				filters: {
@@ -17,11 +15,9 @@ frappe.ui.form.on("Room Bed Transfer", {
 	},
 	
 	refresh(frm) {
-		// [#g123bl]
 	},
 
 	to_room(frm) {
-		// [#qvjsr0]
 		frm.set_value("to_bed", "");
 	}
 });

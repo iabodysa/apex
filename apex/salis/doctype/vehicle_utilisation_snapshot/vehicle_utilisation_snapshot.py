@@ -1,5 +1,4 @@
-# Copyright (c) 2026, AFMCO Support Services Co. Ltd and contributors
-# [#j03s5a]
+# Copyright (c) 2026, AFMCO and contributors
 
 import frappe
 from frappe.model.document import Document

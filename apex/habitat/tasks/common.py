@@ -5,9 +5,6 @@ from __future__ import annotations
 
 import frappe
 
-# Called per row from scheduler loops, so recovery must be row-scoped. A bare
-# frappe.db.rollback() would discard the caller's whole run AND destroy the
-# per-row savepoint it set, leaving a later rollback to hit MariaDB 1305.
 _SAVEPOINT = "apex_notify_operational"
 
 

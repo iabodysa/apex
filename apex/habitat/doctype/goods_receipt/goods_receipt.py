@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO Support Services Co. Ltd and contributors
+# Copyright (c) 2026, AFMCO and contributors
 
 """Goods Receipt controller — books externally-purchased goods INTO a
 procurement intake store via the Accommodation Stock Ledger. This is the first leg of

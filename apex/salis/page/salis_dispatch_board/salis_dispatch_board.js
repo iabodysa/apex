@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#mxen9j]
 
 frappe.pages["salis-dispatch-board"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -12,7 +11,6 @@ frappe.pages["salis-dispatch-board"].on_page_load = function (wrapper) {
 	board.setup();
 };
 
-// [#lgvk46]
 const VEHICLE_STATUS_COLOR = {
 	Active: "green",
 	Stopped: "orange",
@@ -29,9 +27,6 @@ const TRIP_STATUS_COLOR = {
 	Other: "grey",
 };
 
-// Desk pages ship no stylesheet, so structural layout is expressed as inline
-// styles bound to native Desk CSS variables (theme-aware, dark-mode-safe). Colour
-// keying stays on native indicator-pills; these only carry geometry/spacing.
 const SDB_STYLE = {
 	panes:
 		"display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--margin-md,15px);margin-block-start:var(--margin-md,15px);",
@@ -116,11 +111,8 @@ class SalisDispatchBoard {
 		});
 	}
 
-	// [#oi0x2w]
 	_show_loading() {
 		this.$panes.empty();
-		// Placeholder blocks tinted with the native --skeleton-bg token; Desk
-		// ships no .skeleton-block rule, so back it inline (no CSS file).
 		for (let i = 0; i < 4; i++) {
 			const $pane = $('<div class="sdb-pane"></div>').attr("style", SDB_STYLE.pane).appendTo(this.$panes);
 			$('<div class="skeleton-block"></div>')
@@ -133,7 +125,6 @@ class SalisDispatchBoard {
 		}
 	}
 
-	// [#nv07zv]
 	_show_error() {
 		this.$panes.empty();
 		const $err = $('<div class="sdb-error"></div>')
@@ -163,7 +154,6 @@ class SalisDispatchBoard {
 		this._render_requests_pane(data.transport_requests || {});
 	}
 
-	// [#byqetp]
 
 	_make_pane(title, count_text) {
 		const $pane = $('<div class="sdb-pane"></div>').attr("style", SDB_STYLE.pane).appendTo(this.$panes);
@@ -184,7 +174,6 @@ class SalisDispatchBoard {
 	}
 
 	_indicator(label, color) {
-		// [#5l4ux5]
 		const $span = $(`<span class="indicator-pill ${color || "grey"}"></span>`);
 		$('<span></span>').text(label).appendTo($span);
 		return $span;
@@ -200,7 +189,6 @@ class SalisDispatchBoard {
 		return $r;
 	}
 
-	// [#5uyhsp]
 
 	_render_vehicles_pane(pane) {
 		const $body = this._make_pane(
@@ -241,7 +229,6 @@ class SalisDispatchBoard {
 		});
 	}
 
-	// [#6oc75f]
 
 	_render_trips_pane(pane) {
 		const $body = this._make_pane(
@@ -283,7 +270,6 @@ class SalisDispatchBoard {
 		});
 	}
 
-	// [#78g7r8]
 
 	_render_drivers_pane(pane) {
 		const active = pane.active_total || 0;
@@ -333,7 +319,6 @@ class SalisDispatchBoard {
 		});
 	}
 
-	// [#npsjp4]
 
 	_render_requests_pane(pane) {
 		const $body = this._make_pane(

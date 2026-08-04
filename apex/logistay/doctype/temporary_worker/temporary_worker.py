@@ -28,9 +28,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days
 
-# [#di1y0q]
 DEFAULT_WINDOW_DAYS = 30
-# [#huqfyq]
 MAX_WINDOW_DAYS = 90
 
 

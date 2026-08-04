@@ -6,8 +6,6 @@ from __future__ import annotations
 import calendar
 import frappe
 
-# Building annual-cost field per Accommodation Ledger ledger_type. Single source
-# of truth shared by the daily allocator and the back-dating path.
 _COST_TYPE_MAPPING = {
     "Rent": "annual_rent",
     "Electricity": "annual_electricity",
@@ -17,8 +15,6 @@ _COST_TYPE_MAPPING = {
     "Other": "annual_other_expenses",
 }
 
-# Constant name, re-issued per (assignment, ledger_type): MariaDB replaces a
-# same-named savepoint rather than stacking one per row.
 _ROW_SAVEPOINT = "cost_row"
 
 
@@ -49,10 +45,8 @@ def _post_accommodation_ledger_row(
     """
     from frappe.utils import flt
 
-    # [#pqghnl]
     daily_share = flt(flt(annual_cost / days_in_year, 5) / capacity, 5)
 
-    # [#4g0jys]
     if frappe.db.exists(
         "Accommodation Ledger",
         {
@@ -134,14 +128,12 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
     year = int(posting_date[:4])
     days_in_year = 366 if calendar.isleap(year) else 365
 
-    # [#3r52d7]
     if not frappe.db.exists("Building", building):
         logger.warning(
             f"allocate_building_accommodation_cost: Building {building} not found. Skipping."
         )
         return
     building_doc = frappe.get_doc("Building", building)
-    # [#el5lmg]
     from apex.habitat.doctype.building.building import apply_active_lease
     apply_active_lease(building_doc)
     capacity = flt(building_doc.total_capacity)
@@ -196,9 +188,9 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
                         days_in_year=days_in_year,
                     )
                 except frappe.exceptions.DuplicateEntryError:
-                    frappe.db.rollback(save_point=_ROW_SAVEPOINT)  # [#g4zbzv]
+                    frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 except Exception as e:
-                    frappe.db.rollback(save_point=_ROW_SAVEPOINT)  # [#9hso8i]
+                    frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                     logger.error(
                         f"allocate_building_accommodation_cost: Failed to insert ledger row for assignment {asgn.name}, cost {ledger_type}: {e}"
                     )
@@ -236,7 +228,7 @@ def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
     except frappe.DoesNotExistError:
         return 0
     from apex.habitat.doctype.building.building import apply_active_lease
-    apply_active_lease(building)  # [#ijk615]
+    apply_active_lease(building)
     capacity = flt(building.total_capacity)
     if capacity <= 0:
         return 0

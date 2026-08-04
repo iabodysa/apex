@@ -21,11 +21,9 @@ per-supplier identity to key a budget on; today it is anonymous by design.
 import frappe
 from frappe import _
 
-# [#8g8lrm]
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.habitat.doctype.arrival_batch.arrival_batch import _MAX_EXPECTED_WORKERS
 
-# [#g4hzd4]
 _ALLOWED_WORKER_FIELDS = ("worker_name", "passport_number", "nationality")
 
 
@@ -34,9 +32,6 @@ def get_context(context):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-# No `key`: it was a form_dict lookup (rate_limiter.py:143) any caller could set from
-# the query string, buying a private window per value. `ip_based` (default True) is
-# what actually keys this window to the address (rate_limiter.py:110,141,147-150).
 @rate_limit(limit=5, seconds=60)
 def submit_arrival_manifest(
     building,
@@ -57,7 +52,6 @@ def submit_arrival_manifest(
       fields are copied, and the row count is capped, so a guest cannot post an
       unbounded table or pre-set the read-only "Arrived As" link.
     """
-    # [#2pdod8]
     if website_field:
         return {"name": None}
 
@@ -65,13 +59,11 @@ def submit_arrival_manifest(
         expected_workers = frappe.parse_json(expected_workers)
     expected_workers = expected_workers or []
 
-    # [#r2d5pb]
     if len(expected_workers) > _MAX_EXPECTED_WORKERS:
         frappe.throw(
             _("A manifest can list at most {0} expected workers.").format(_MAX_EXPECTED_WORKERS)
         )
 
-    # [#1zodbv]
     rows = [
         {field: row.get(field) for field in _ALLOWED_WORKER_FIELDS if row.get(field)}
         for row in expected_workers
@@ -87,5 +79,4 @@ def submit_arrival_manifest(
         "expected_workers": rows,
     })
     doc.insert(ignore_permissions=True)  # audit-ok — guest web-form intake, rate-limited + honeypot-guarded; field-allowlisted
-    # [#jwr9pv]
     return {"name": doc.name}

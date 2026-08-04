@@ -10,9 +10,6 @@ def get_context(context):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-# No `key`: it was a form_dict lookup (rate_limiter.py:143) any caller could set from
-# the query string, buying a private window per value. `ip_based` (default True) is
-# what actually keys this window to the address (rate_limiter.py:110,141,147-150).
 @rate_limit(limit=5, seconds=60)
 def submit_resident_request(
     location_token,
@@ -33,23 +30,19 @@ def submit_resident_request(
       existing QR forms and external callers.
     - ``website_field`` is a honeypot; any non-empty value is rejected.
     """
-    # [#q0bt8w]
     if website_field:
         return {"name": None, "tracking_code": None}
 
-    # [#oskg6d]
     if len(description or "") > 2000:
         frappe.throw(_("Description is too long. Please keep it under 2000 characters."))
 
-    # [#nxrqsg]
     doc = frappe.get_doc({
         "doctype": "Resident Request",
         "location_token": location_token,
-        "request_category": request_type,   # [#nnkung]
+        "request_category": request_type,
         "description": description,
-        "mobile_number": contact_number,    # [#kitufc]
+        "mobile_number": contact_number,
         "source_channel": "QR Web Form",
     })
     doc.insert(ignore_permissions=True)  # audit-ok — guest QR web-form intake, rate-limited + honeypot-guarded
-    # [#jwr9pv]
     return {"name": doc.name, "tracking_code": doc.anonymous_tracking_code}

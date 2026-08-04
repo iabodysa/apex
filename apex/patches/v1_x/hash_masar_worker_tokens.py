@@ -31,10 +31,8 @@ def execute():
     )
     for row in rows:
         token = (row.token or "").strip()
-        # [#hh2tlz]
         if not token or _looks_hashed(token):
             continue
-        # [#njj81m]
         from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
             _hash_token,
         )

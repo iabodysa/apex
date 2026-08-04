@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#947sr9]
 frappe.ui.form.on("Salis Vehicle", {
 	setup(frm) {
 		frm.set_query("project", () => ({

@@ -12,7 +12,6 @@ deployment role.
 | `frontend/` | Vue and Vite source, shared runtime, one dependency manifest, and one lockfile |
 | `apex/public/` | Compiled browser bundles served as Frappe assets |
 | `apex/www/` | Jinja shells, Python route controllers, and generated root-scope service workers |
-| `e2e/` | Browser-level journeys across the served application |
 
 This is one delivery pipeline, not four competing implementations. Business
 validation and authorization remain in Python controllers and DocTypes; Vue

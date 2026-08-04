@@ -31,7 +31,6 @@ from frappe.model.document import Document
 class MovementCostTransfer(Document):
     def validate(self):
         self._set_company_default()
-        # [#nyun3y]
         if (self.amount or 0) <= 0:
             frappe.throw(_("Amount must be greater than zero."))
         self._validate_distinct_targets()
@@ -47,9 +46,7 @@ class MovementCostTransfer(Document):
 
             self.company = get_default_company()
 
-    # [#7eplyn]
 
-    # [#m88md8]
 
     def _validate_distinct_targets(self):
         """A transfer must move cost between two different projects, and between

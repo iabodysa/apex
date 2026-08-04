@@ -26,12 +26,8 @@ from frappe.desk.doctype.notification_settings.notification_settings import (
 
 LOG_DOCTYPE = "Notification Log"
 
-# [#f5xz9g]
 _SUBJECT_MAX = 140
 
-# Every caller loops this per user, so recovery must be row-scoped. A bare
-# frappe.db.rollback() would discard the caller's whole run AND destroy the
-# per-row savepoint it set, leaving a later rollback to hit MariaDB 1305.
 _SAVEPOINT = "apex_system_notify"
 
 
@@ -59,9 +55,6 @@ def notify_user_system(
     """
     if not user or not frappe.db.get_value("User", user, "enabled"):
         return False
-    # `User.enabled` is the LOGIN flag, not the notification one. A user who turned
-    # notifications off in their own settings kept receiving every Apex alert, because
-    # nothing here read the switch that owns that answer.
     if not is_notifications_enabled(user):
         return False
     body = message or subject
@@ -78,9 +71,6 @@ def notify_user_system(
         payload["document_name"] = document_name
     frappe.db.savepoint(_SAVEPOINT)
     try:
-        # [#a069dd] Skip a duplicate UNREAD alert so a re-running job (e.g. the daily zero-rounds
-        # scan) can't stack bell notifications: key on the source doc link, else the subject —
-        # a different building/subject stays distinct. Cleared on read or on resolve.
         dedup_filter = {"for_user": user, "type": "Alert", "read": 0}
         if document_type and document_name:
             dedup_filter["document_type"] = document_type

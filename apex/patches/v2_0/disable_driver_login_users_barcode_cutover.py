@@ -28,4 +28,4 @@ def execute():
         disabled += int(_disable_legacy_driver_user(driver))
 
     if disabled:
-        frappe.db.commit()  # patch context — persist the cutover
+        frappe.db.commit()

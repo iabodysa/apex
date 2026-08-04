@@ -12,9 +12,6 @@ from apex.habitat.tasks.common import (
     _notify_user_system,
 )
 
-# One savepoint per nesting level, distinct names: a helper re-using the loop's name
-# would REPLACE it mid-iteration and silently destroy the row isolation. Re-issued
-# each iteration — MariaDB replaces a same-named savepoint rather than stacking.
 _ROW_SAVEPOINT = "safety_row"
 _ALERT_SAVEPOINT = "safety_alert_dedupe"
 
@@ -61,8 +58,6 @@ def _raise_safety_alert(alert_type: str, severity: str, message: str, dedupe_tok
         )
         return None
 
-    # Insert via the shared helper (ignore_permissions + message clip + rollback/log_error)
-    # — a safety alert carries no vehicle/driver. Returns the new name, or None on failure.
     return insert_operations_alert(alert_type, severity, message)
 
 
@@ -110,10 +105,6 @@ def daily_safety_task_compliance_scan() -> None:
     total_overdue = 0
     escalated = 0
 
-    # [#4qriyf] Keyed cursor, not an offset: this pass flips status OUT of the very
-    # set it filters on, so rows behind an offset shift down into the range it just
-    # passed and are skipped. The building passes below keep their offset — their
-    # filters are stable, nothing in those loops writes Building.status.
     cursor = ""
     batch_size = 500
     while True:
@@ -136,7 +127,6 @@ def daily_safety_task_compliance_scan() -> None:
                     "Scheduled Task Instance", inst.name,
                     f"Scheduled task {inst.name} ({inst.template}) is overdue (was due {inst.due_date}).",
                 )
-                # [#i4yjwa]
                 priority = _instance_priority(inst.template)
                 if priority in ("High", "Critical"):
                     msg = (
@@ -173,7 +163,6 @@ def daily_safety_task_compliance_scan() -> None:
     else:
         logger.info("daily_safety_task_compliance_scan: No overdue instances found.")
 
-    # [#r2zv02]
     ZERO_ROUNDS_WINDOW_DAYS = 7
     window_start = str(getdate(add_days(today(), -ZERO_ROUNDS_WINDOW_DAYS)))
     no_rounds = 0
@@ -205,7 +194,6 @@ def daily_safety_task_compliance_scan() -> None:
                     continue
                 label = b.building_name or b.name
                 token = f"zero-rounds::{b.name}"
-                # [#mpm9mc]
                 msg = (
                     f"daily_safety_task_compliance_scan [{token}]: building {label} has no "
                     f"submitted Safety Round in the last {ZERO_ROUNDS_WINDOW_DAYS} days."
@@ -216,17 +204,11 @@ def daily_safety_task_compliance_scan() -> None:
                     message=msg,
                     dedupe_token=token,
                 )
-                # No Building link on the role alert: Safety Officer holds no read on
-                # Building, and Building carries the whole permlevel-0 Financials tab
-                # (rent, billing model, expense breakdown), so granting one to deliver a
-                # coverage reminder would hand the safety persona every building's cost
-                # model. The subject names the building, which is all the alert needs.
                 _notify_role_system(
                     "Safety Officer",
                     subject=zero_rounds_alert_subject(label),
                     message=msg,
                 )
-                # [#76la3e]
                 _notify_operational("Building", b.name, msg)
                 _notify_user_system(
                     b.responsible_supervisor,
@@ -261,6 +243,12 @@ def weekly_safety_coverage_gate() -> None:
     Weekly-cadence Safety Round dated within the current ISO week raises an idempotent
     Operations Alert and posts a system Notification to the Safety Officer. Per-row
     error isolation.
+
+    The week boundary comes from frappe, never from ``date.weekday()``: Python's
+    ``weekday()`` is Monday-based and the site's week may not be. frappe reads System
+    Settings ``first_day_of_the_week`` (data.py:69-70) and defaults to Sunday, so a
+    hardcoded Monday shifts the whole window by a day — on the boundary day a covered
+    building is reported uncovered, or an uncovered one passes the gate.
     """
     from frappe.utils import get_first_day_of_week, get_last_day_of_week, getdate, today
 
@@ -273,12 +261,8 @@ def weekly_safety_coverage_gate() -> None:
         return
 
     today_date = getdate(today())
-    # Python's weekday() is Monday-based; the site's week may not be. frappe reads System
-    # Settings first_day_of_the_week (data.py:69-70) and defaults to Sunday, so a hardcoded
-    # Monday shifts the whole window by a day: on the boundary day a covered building is
-    # reported uncovered, or an uncovered one passes the gate.
-    week_start = get_first_day_of_week(today_date)  # [#sg57er]
-    week_end = get_last_day_of_week(today_date)  # [#ezuovy]
+    week_start = get_first_day_of_week(today_date)
+    week_end = get_last_day_of_week(today_date)
     logger = frappe.logger()
     uncovered = 0
 
@@ -355,9 +339,6 @@ def audit_remediation_deadline_watch() -> None:
     logger = frappe.logger()
     flagged = 0
 
-    # Keyed cursor, not an offset: the body flips overall_status to Overdue, which is
-    # excluded by this very filter, so rows behind an offset shift down into the range
-    # it just passed and are skipped.
     cursor = ""
     batch_size = 500
     while True:
@@ -389,20 +370,12 @@ def audit_remediation_deadline_watch() -> None:
                 )
                 logger.warning(msg)
                 _notify_operational("Audit Remediation Plan", plan.name, msg)
-                # [#mzdqnr]
                 if plan.internal_owner:
                     _notify_user_system(
                         plan.internal_owner,
                         f"Audit remediation overdue: {plan.name}",
                         msg,
                     )
-                # Accommodation Manager, not Operations Director: that role holds no
-                # DocPerm anywhere in apex, so its members are alerted about a plan none
-                # of them can open. Accommodation Manager holds the permlevel-0,
-                # non-if_owner read AND the write/submit that closes the plan, so the
-                # alert now reaches someone who can both read it and act on it. The
-                # individual escalation is unchanged: the plan's internal_owner (the
-                # Operations Director by default) still gets the per-user alert above.
                 _notify_role_system(
                     "Accommodation Manager",
                     subject=f"Audit remediation overdue: {plan.name}",

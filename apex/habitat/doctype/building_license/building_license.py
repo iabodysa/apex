@@ -15,7 +15,6 @@ class BuildingLicense(Document):
         self._stamp_renewal_date()
 
     def _validate_dates(self) -> None:
-        # [#lebvtq]
         if self.issue_date and self.expiry_date and getdate(self.expiry_date) <= getdate(self.issue_date):
             frappe.throw(_("Expiry Date must be after the Issue Date."))
 
@@ -37,7 +36,6 @@ class BuildingLicense(Document):
             return
 
         if self.is_new():
-            # [#nkhxjc]
             amended_from = getattr(self, "amended_from", None)
             previous_expiry = (
                 frappe.db.get_value("Building License", amended_from, "expiry_date")
@@ -84,5 +82,4 @@ def renew(name: str, new_expiry_date: str | None = None, extend_days: int | None
     doc.last_renewal_date = today()
     doc.status = "Active"
     doc.save()
-    # [#b5yz1g]
     return {"name": doc.name, "expiry_date": str(new_expiry), "last_renewal_date": doc.last_renewal_date}

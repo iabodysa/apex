@@ -167,12 +167,6 @@ Run backend tests only on a disposable test site:
 bench --site <test-site> run-tests --app apex
 ```
 
-Run repository guards from the Apex checkout:
-
-```bash
-scripts/run_guards.sh tree
-```
-
 Run the current frontend unit checks and build all six portal packages from
 `frontend/`:
 

@@ -16,8 +16,6 @@ from apex.salis.tasks.common import (
     _vehicle_project,
 )
 
-# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
-# rather than stacking one per row. Distinct from _raise_alert's own name.
 _ROW_SAVEPOINT = "salis_alerts_row"
 
 
@@ -44,7 +42,6 @@ def daily_open_alerts_digest() -> None:
 
     logger = frappe.logger()
 
-    # [#20guid]
     if not email_enabled():
         logger.info("daily_open_alerts_digest: email disabled (Habitat Settings); skipped.")
         return
@@ -153,7 +150,6 @@ def reconcile_operations_alerts() -> None:
     logger = frappe.logger()
     resolved_count = 0
 
-    # [#dh8hm0]
     idle_days = _settings_int("idle_vehicle_days", 7)
     lead_days = _settings_int("alert_lead_days", 30)
     license_lead = max(
@@ -165,7 +161,6 @@ def reconcile_operations_alerts() -> None:
     idle_cutoff = add_days(today_str, -idle_days)
     pending_cutoff = add_days(today_str, -pending_max_days)
 
-    # [#e2kiah]
     DT = frappe.qb.DocType("Dispatch Trip")
     vehicles_with_recent_trip = {
         r["vehicle"]
@@ -180,7 +175,6 @@ def reconcile_operations_alerts() -> None:
         ).run(as_dict=True)
     }
 
-    # [#ckt0ba]
     horizon = add_days(today_str, lead_days)
     SVC = frappe.qb.DocType("Salis Vehicle Compliance")
     vehicles_with_open_compliance = {
@@ -194,7 +188,6 @@ def reconcile_operations_alerts() -> None:
         ).run(as_dict=True)
     }
 
-    # [#2yh1kv]
     FR = frappe.qb.DocType("Fuel Request")
     overdue_request_vehicles = set()
     overdue_request_drivers = set()
@@ -210,7 +203,6 @@ def reconcile_operations_alerts() -> None:
         if r["driver"]:
             overdue_request_drivers.add(r["driver"])
 
-    # [#4oiqbl]
     excessive_topup_vehicles = {
         r["vehicle"]
         for r in (
@@ -258,9 +250,6 @@ def reconcile_operations_alerts() -> None:
     def _driver_active(driver: str | None) -> bool:
         return bool(driver) and frappe.db.get_value("Salis Driver", driver, "status") == "Active"
 
-    # [#dkxfl4] Keyed cursor, not an offset: _resolve_alert flips status to Resolved,
-    # dropping the row out of the very set this filters on, so rows behind an offset
-    # shift down into the range it just passed and are skipped for the day.
     resolved_projects: set[str | None] = set()
     cursor = ""
     while True:
@@ -319,7 +308,6 @@ def reconcile_operations_alerts() -> None:
                             clear, reason = True, "attendance has since been recorded"
 
                 elif atype == "Excessive Topup":
-                    # [#1hftuh]
                     if a.vehicle and a.vehicle not in excessive_topup_vehicles:
                         clear, reason = True, "no fuel overage or unreverted top-up remains for the vehicle"
 
@@ -335,7 +323,6 @@ def reconcile_operations_alerts() -> None:
 
         cursor = alerts[-1].name
 
-    # [#470qkc]
     for project in resolved_projects:
         _publish_operations_alert(project)
 

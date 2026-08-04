@@ -10,9 +10,6 @@ def get_context(context):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-# No `key`: it was a form_dict lookup (rate_limiter.py:143) any caller could set from
-# the query string, buying a private window per value. `ip_based` (default True) is
-# what actually keys this window to the address (rate_limiter.py:110,141,147-150).
 @rate_limit(limit=5, seconds=60)
 def submit_transport_request(
     from_location,
@@ -35,15 +32,12 @@ def submit_transport_request(
     The controller (``before_insert``) tags ``source_channel='Web QR'`` and
     generates the ``anonymous_tracking_code`` for guest submissions.
     """
-    # [#hodie9]
     if website_field:
         return {"name": None, "tracking_code": None}
 
-    # [#erdpdq]
     if len(purpose or "") > 2000:
         frappe.throw(_("Purpose is too long. Please keep it under 2000 characters."))
 
-    # [#e5r9og]
     try:
         count = int(passenger_count)
     except (TypeError, ValueError):
@@ -53,7 +47,6 @@ def submit_transport_request(
     elif count > 50:
         count = 50
 
-    # [#mes56r]
     doc = frappe.get_doc({
         "doctype": "Transport Request",
         "service_line": "Administrative Trip",
@@ -71,5 +64,4 @@ def submit_transport_request(
         "status": "New",
     })
     doc.insert(ignore_permissions=True)  # audit-ok
-    # [#jwr9pv]
     return {"name": doc.name, "tracking_code": doc.anonymous_tracking_code}

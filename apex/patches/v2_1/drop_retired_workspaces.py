@@ -1,13 +1,11 @@
+# Copyright (c) 2026, AFMCO and contributors
 import frappe
 
-# Backend Engines became Apex Core; Compliance and Rentals folded into Salis alongside the
-# short-lived Masar and Operations pages; the four Habitat children became two.
 RETIRED_WORKSPACES = (
     "Backend Engines", "Compliance and Rentals", "Masar", "Operations",
     "Housing", "Safety", "Custody", "Costs and Leasing",
 )
 
-# Each of these was named after a workspace that no longer exists.
 RETIRED_ONBOARDINGS = (
     "Accommodation Go-Live", "Safety Readiness", "Maintenance Daily Flow",
     "Custody Go-Live", "Masar Go-Live", "Salis Fuel Setup",
@@ -22,8 +20,6 @@ def execute():
     rendering, because sync only imports what it finds on disk. A stale workspace shows an empty
     page in the sidebar; a stale onboarding offers a checklist for a page that is gone.
     """
-    # The names are fixed tuples in this file, so nothing a caller passes can widen what is
-    # deleted, and every one of them is a record this app shipped itself.
     for name in RETIRED_WORKSPACES:
         if frappe.db.exists("Workspace", name):
             frappe.delete_doc(

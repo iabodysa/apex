@@ -1,5 +1,3 @@
-{# default_print_language is pinned to "en" by design: this sheet prints English and Arabic
-   side by side itself, so an Arabic render turns the _() halves into a second Arabic copy. #}
 <style>
   .ah-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
   .ah-doc h1 { font-size: 18px; margin: 0; }
@@ -19,7 +17,6 @@
   .ah-foot { margin-top: 24px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
 </style>
 
-<!-- dir follows the print language: rtl for Arabic, ltr otherwise -->
 <div class="ah-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
   <div class="ah-head">
     <div>

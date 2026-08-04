@@ -27,7 +27,6 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
-# [#g7h0bl]
 _STE_DOCTYPE = "Safety Task Execution"
 _SIR_DOCTYPE = "Safety Inspection Report"
 
@@ -58,7 +57,6 @@ def fan_out_findings(findings_rows, source_doc) -> list[str]:
         if _already_linked(finding):
             continue
         mr_name = _spawn_request(finding, source_doc)
-        # [#m8nkyx]
         finding.db_set("generated_maintenance_request", mr_name)
         created.append(mr_name)
     return created
@@ -80,7 +78,6 @@ def _spawn_request(finding, source_doc) -> str:
     mr.reported_by = _reported_by(source_doc)
     mr.status = "Open"
     _stamp_source(mr, source_doc)
-    # [#ivpfs7]
     mr.insert(ignore_permissions=True)  # audit-ok
     return mr.name
 

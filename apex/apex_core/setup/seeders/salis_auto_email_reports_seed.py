@@ -25,7 +25,6 @@ the master toggle being OFF by default is upheld here without extra logic.
 from apex.apex_core.setup.seeders.auto_email_report_seed_base import seed_auto_email_reports_for
 
 _REPORTS = [
-    # [#84lsci]
     {"report": "Fleet Register", "frequency": "Daily"},
     {"report": "Fuel Reconciliation", "frequency": "Monthly"},
     {"report": "Cost Recovery Aging", "frequency": "Weekly"},

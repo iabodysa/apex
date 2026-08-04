@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 from frappe.utils import flt
@@ -20,7 +19,6 @@ def execute(filters=None):
         {"label": frappe._("Source"), "fieldname": "source_name", "fieldtype": "Data", "width": 140},
     ]
 
-    # [#dxz4xr]
     from_date = filters.get("from_date")
     to_date = filters.get("to_date")
     if not (from_date and to_date):
@@ -47,7 +45,6 @@ def execute(filters=None):
             "total_site_cost", "employee_daily_share", "source_doctype", "source_name",
         ],
         order_by="building asc, ledger_type asc, allocation_period_start desc",
-        # [#c84p7n]
         limit_page_length=0,
     )
 

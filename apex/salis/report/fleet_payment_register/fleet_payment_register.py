@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 
@@ -30,7 +29,6 @@ def execute(filters=None):
         if date_condition is not None:
             query_filters["creation"] = date_condition
 
-    # [#l9orr2]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         chosen = query_filters.get("project")

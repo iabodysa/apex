@@ -1,12 +1,9 @@
-# Copyright (c) 2026, AFMCO Support Services Co. Ltd and contributors
-# [#j03s5a]
+# Copyright (c) 2026, AFMCO and contributors
 
-# [#keeppb]
 from frappe.model.document import Document
 
 
 class TransportTripRating(Document):
-    # [#q6y9j5]
 
     from typing import TYPE_CHECKING
 
@@ -19,5 +16,4 @@ class TransportTripRating(Document):
         naming_series: DF.Literal["TTR-.####"]
         rating: DF.Rating
         transport_request: DF.Link | None
-    # [#g4leg3]
     pass

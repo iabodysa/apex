@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 from frappe.utils import getdate, today, date_diff
@@ -32,7 +31,6 @@ def execute(filters=None):
         else:
             row_filters["expiry_date"] = ["<=", filters["to_date"]]
 
-    # [#kldwyx]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:
@@ -55,7 +53,6 @@ def execute(filters=None):
         order_by="expiry_date asc",
     )
 
-    # [#a9dmm3]
     vehicle_names = list({r["parent"] for r in rows if r.get("parent")})
     plate_map = {}
     if vehicle_names:

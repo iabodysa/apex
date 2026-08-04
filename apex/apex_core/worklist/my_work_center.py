@@ -38,7 +38,6 @@ from frappe.utils import add_to_date, now_datetime
 
 from apex.apex_core.worklist.action_inbox import get_pending_actions
 
-# [#eq6kr7]
 WORKLIST_REGISTRY: dict[str, dict] = {
     "Maintenance Request": {
         "active": ["Open", "Assigned", "In Progress", "Reopened"],
@@ -89,11 +88,6 @@ def _mine(doctype: str, states: list[str], *, recent: bool = False) -> list[dict
     error (one bad source must not break the whole worklist)."""
     if not frappe.db.exists("DocType", doctype):
         return []
-    # Silent read gate: get_list's internal has_permission check msgprints a
-    # "does not have doctype access" denial (server-log flood) for every registry
-    # doctype the user can't read. These universal My Work cards scan the whole
-    # registry, so a low-privilege user (e.g. Driver) floods on load. frappe's
-    # has_permission defaults throw=False (never msgprints); skip inaccessible ones.
     if not frappe.has_permission(doctype, "read"):
         return []
     filters: dict = {"owner": frappe.session.user, "status": ["in", states]}
@@ -137,10 +131,8 @@ def get_my_work() -> dict:
       summary            dict  — {needs_action: int, assigned: int, mentions: int,
                                    notifications: int}
     """
-    # [#mc2zat]
-    needs_action = get_pending_actions()  # [#3xiq2n]
+    needs_action = get_pending_actions()
 
-    # [#hz0pz2]
     notifications = frappe.get_list(
         "Notification Log",
         filters={"for_user": frappe.session.user},
@@ -149,13 +141,10 @@ def get_my_work() -> dict:
         limit_page_length=50,
     )
 
-    # [#c9j4h5]
     mentions: list = []
 
-    # [#7s7qv1]
     field_references: list = []
 
-    # [#2q405h]
     workflow_actions = needs_action.get("workflow_actions", [])
     todos = needs_action.get("todos", [])
     summary = {

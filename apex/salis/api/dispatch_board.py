@@ -40,11 +40,9 @@ from frappe.utils import today
 from apex.salis.api.enrich import vehicle_driver_titles
 from apex.salis.permissions import _allowed_projects, _is_unscoped
 
-# [#1f7jod]
 VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
 TRIP_STATUSES = ["Planned", "Dispatched", "Completed", "Cancelled"]
 
-# [#n0q8c1]
 CLOSED_REQUEST_STATUSES = {"Scheduled", "Fulfilled", "Rejected", "Cancelled"}
 
 
@@ -105,12 +103,10 @@ def get_dispatch_board(project: str | None = None) -> dict:
           * ``transport_requests``: ``{"open": [...], "open_count"}``.
     """
     frappe.has_permission("Salis Vehicle", "read", throw=True)
-    # [#nfdgou]
     frappe.has_permission("Dispatch Trip", "read", throw=True)
 
     unscoped, projects = _permitted_projects()
 
-    # [#li9kuz]
     if project:
         if unscoped:
             projects = [project]
@@ -118,10 +114,8 @@ def get_dispatch_board(project: str | None = None) -> dict:
         elif project in (projects or []):
             projects = [project]
         else:
-            # [#qltiv4]
             projects = []
 
-    # [#rn48et]
     if not unscoped and not projects:
         return _empty_board(unscoped, projects, project)
 
@@ -242,7 +236,7 @@ def _trips_today_pane(unscoped, projects) -> dict:
         limit_page_length=0,
     )
 
-    vehicle_driver_titles(rows)  # [#jttthb]
+    vehicle_driver_titles(rows)
     for r in rows:
         r["depart_time"] = str(r["depart_time"]) if r.get("depart_time") else None
         r["return_time"] = str(r["return_time"]) if r.get("return_time") else None
@@ -267,10 +261,8 @@ def _drivers_pane(unscoped, projects) -> dict:
     """
     driver_filters = _project_filter(unscoped, projects)
     driver_filters["status"] = "Active"
-    # [#2xijms]
     show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
 
-    # [#f1zzle]
     driver_fields = ["name", "full_name", "status", "project", "current_vehicle"]
     if show_pii:
         driver_fields.append("phone")
@@ -293,7 +285,6 @@ def _drivers_pane(unscoped, projects) -> dict:
 
     driver_names = [d.name for d in drivers]
 
-    # [#7h631j]
     assigned_today = set(
         frappe.get_all(
             "Dispatch Trip",

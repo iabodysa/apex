@@ -87,13 +87,11 @@ def _assert_party_in_scope(party_type, party) -> None:
         return
 
     if party_type == PARTY_EMPLOYEE:
-        # [#cgbs6q]
         building = frappe.db.get_value(
             "Housing Assignment",
             {"party_type": PARTY_EMPLOYEE, "party": party, "docstatus": 1, "check_out_date": ["is", "not set"]},
             "building",
         )
-        # [#6n8swy]
         if building and building not in allowed:
             raise frappe.PermissionError(
                 _("You are not permitted to access this worker's record.")
@@ -187,7 +185,6 @@ def send_masar_link_message(employee, phone=None) -> dict:
 @frappe.whitelist()
 def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     """Party-aware arrival snapshot for one worker (Employee or Temporary Worker)."""
-    # [#e74n5x]
     if not party and employee:
         party_type, party = PARTY_EMPLOYEE, employee
     if not (party_type and party):
@@ -196,7 +193,6 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     tw_expiry = None
     if party_type == PARTY_EMPLOYEE:
         frappe.has_permission("Employee", "read", throw=True)
-        # [#f5nles]
         _assert_party_in_scope(party_type, party)
         info = frappe.db.get_value("Employee", party, ["employee_name", "image"], as_dict=True) or {}
         if not info:
@@ -204,7 +200,6 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         worker_name, image = info.get("employee_name"), info.get("image")
     elif party_type == PARTY_TEMPORARY_WORKER:
         frappe.has_permission("Temporary Worker", "read", throw=True)
-        # [#ruz85o]
         _assert_party_in_scope(party_type, party)
         info = frappe.db.get_value(
             "Temporary Worker", party, ["worker_name", "expiry_date"], as_dict=True
@@ -216,7 +211,6 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     else:
         frappe.throw(_("Unknown party type: {0}").format(party_type))
 
-    # [#e8oxzs]
     assignment = (
         frappe.db.get_value(
             "Housing Assignment",
@@ -231,7 +225,6 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         frappe.db.get_value("Bed", current_bed, "bed_code") if current_bed else None
     )
 
-    # [#rx0tdj]
     custody_count = 0
     if party_type == PARTY_EMPLOYEE:
         rows = frappe.get_all(
@@ -252,15 +245,14 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     return {
         "party_type": party_type,
         "party": party,
-        "employee": party if party_type == PARTY_EMPLOYEE else None,  # [#nzy15g]
-        "employee_name": worker_name,  # [#nzy15g]
+        "employee": party if party_type == PARTY_EMPLOYEE else None,
+        "employee_name": worker_name,
         "worker_name": worker_name,
         "image": image,
         "project": assignment.get("project"),
         "current_building": assignment.get("building"),
         "current_bed": current_bed,
         "current_bed_code": current_bed_code,
-        # [#g5e2pw]
         "check_in_date": (
             frappe.utils.formatdate(assignment.get("check_in_date")) if assignment.get("check_in_date") else None
         ),
@@ -269,7 +261,6 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         "has_custody": bool(custody_count),
         "masar_enabled": masar_enabled,
         "masar_status": "issued" if masar_enabled else "pending",
-        # [#ja3ebn]
         "expiry_date": frappe.utils.formatdate(tw_expiry) if tw_expiry else None,
         "expiry_days": _expiry_days(tw_expiry),
     }
@@ -283,12 +274,10 @@ def search_arrivals_workers(building=None, txt=None) -> list:
     txt = (txt or "").strip()
     results = []
 
-    # [#6pz7eg]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict and not allowed:
         return []
 
-    # [#2quqbr]
     housed_filters = {"docstatus": 1, "check_out_date": ["is", "not set"]}
     if restrict:
         housed_filters["building"] = ["in", allowed]
@@ -300,9 +289,6 @@ def search_arrivals_workers(building=None, txt=None) -> list:
     housed_emp = {h.employee for h in housed if h.employee}
     housed_tw = {h.party for h in housed if h.party_type == "Temporary Worker" and h.party}
 
-    # Employee carries no building of its own, so the search below is estate-wide.
-    # Without this, an Employee housed OUTSIDE the caller's estate is missing from
-    # the scope-restricted housed_emp above and is therefore offered to them.
     blocked_emp = set()
     if restrict:
         blocked = frappe.get_all(
@@ -339,7 +325,6 @@ def search_arrivals_workers(building=None, txt=None) -> list:
         ]
 
     if frappe.has_permission("Temporary Worker", "read"):
-        # [#3oe33l]
         tw_filters = {"status": "Active"}
         if restrict:
             tw_filters["building"] = ["in", allowed]
@@ -365,7 +350,6 @@ def search_arrivals_workers(building=None, txt=None) -> list:
                 "party": t.name,
                 "label": t.worker_name or t.name,
                 "sub": _("Passport {0}").format(t.passport_number or "—"),
-                # [#jhxoxg]
                 "expiry_date": frappe.utils.formatdate(t.expiry_date) if t.expiry_date else None,
                 "expiry_days": _expiry_days(t.expiry_date),
             }
@@ -416,7 +400,6 @@ def register_temporary_worker(
         "party_type": PARTY_TEMPORARY_WORKER,
         "party": doc.name,
         "label": doc.worker_name,
-        # [#9k12b4]
         "expiry_date": frappe.utils.formatdate(doc.expiry_date) if doc.expiry_date else None,
     }
 
@@ -435,9 +418,7 @@ def _link_manifest_row(batch_row, temporary_worker) -> None:
     frappe.db.set_value("Arrival Batch Worker", batch_row, "temporary_worker", temporary_worker)
 
 
-# [#rszi33]
 
-# [#dxrehx]
 _MRZ_NATIONALITY = {
     "IND": "Indian",
     "PAK": "Pakistani",
@@ -472,7 +453,6 @@ def _mrz_yymmdd_to_date(value: str, is_expiry: bool) -> str | None:
     if not (1 <= mm <= 12 and 1 <= dd <= 31):
         return None
     current_yy = frappe.utils.now_datetime().year % 100
-    # [#okrnm3]
     if is_expiry:
         century = 2000
     else:
@@ -495,7 +475,6 @@ def parse_mrz_text(text: str) -> dict:
     only the keys that parsed (plus ``raw_lines`` for debugging)."""
     import re
 
-    # [#jh0mbl]
     lines = [
         re.sub(r"[^A-Z0-9<]", "", ln.strip().upper())
         for ln in (text or "").splitlines()
@@ -508,7 +487,6 @@ def parse_mrz_text(text: str) -> dict:
 
     line1, line2 = mrz_lines[0], mrz_lines[1]
 
-    # [#i2cp1h]
     name_part = line1
     m = re.match(r"^P[A-Z<]([A-Z]{3})(.*)$", line1)
     if m:
@@ -522,7 +500,6 @@ def parse_mrz_text(text: str) -> dict:
         if full:
             out["worker_name"] = full
 
-    # [#172und]
     passport_no = line2[:9].replace("<", "").strip()
     if passport_no:
         out["passport_number"] = passport_no
@@ -555,13 +532,12 @@ def _ocr_image_to_text(image: str) -> str | None:
         return None
 
     try:
-        import pytesseract  # [#6we9zm]
+        import pytesseract
         from PIL import Image
 
         img = Image.open(io.BytesIO(raw))
         return pytesseract.image_to_string(img)
     except Exception:
-        # [#lsfl7q]
         return None
 
 
@@ -589,7 +565,6 @@ def parse_passport(image) -> dict:
 
     text = _ocr_image_to_text(image)
     if text is None:
-        # [#86mcou]
         return {"ok": False, "reason": "ocr_unavailable"}
 
     fields = parse_mrz_text(text)
@@ -667,7 +642,6 @@ def get_arrival_summary(date=None, building=None) -> dict:
     )
     housed_count = len(arrivals)
 
-    # [#4iwwhx]
     tw_parties = [a.party for a in arrivals if a.party_type == PARTY_TEMPORARY_WORKER and a.party]
     tw_supplier = {}
     if tw_parties:
@@ -708,7 +682,6 @@ def get_arrival_summary(date=None, building=None) -> dict:
         reverse=True,
     )
 
-    # [#5oi5cn]
     bed_ids = [a.bed for a in arrivals if a.bed]
     over_capacity_count = 0
     if bed_ids:
@@ -716,7 +689,6 @@ def get_arrival_summary(date=None, building=None) -> dict:
             "Bed", {"name": ["in", list(set(bed_ids))], "is_temporary": 1}
         )
 
-    # [#745sq1]
     manifest_completion_pct = None
     manifest_expected = None
     if frappe.db.exists("DocType", "Arrival Batch"):
@@ -784,7 +756,6 @@ def get_expected_arrivals(date=None, building=None) -> dict:
                     "building": b.building if b else None,
                     "labour_supplier": b.labour_supplier if b else None,
                     "project": b.project if b else None,
-                    # [#hjqs63]
                     "arrived": bool(r.temporary_worker),
                     "temporary_worker": r.temporary_worker,
                 }
@@ -801,7 +772,6 @@ def get_expected_arrivals(date=None, building=None) -> dict:
     }
 
 
-# [#6vab3q]
 
 
 def _company_name() -> str:
@@ -887,7 +857,6 @@ def get_arrival_slip(party_type, party) -> dict:
             ctx["qr"] = masar_qr_data_uri(link)
     elif party_type == PARTY_TEMPORARY_WORKER:
         frappe.has_permission("Temporary Worker", "read", throw=True)
-        # [#86baov]
         _assert_party_in_scope(party_type, party)
         tw = (
             frappe.db.get_value(
@@ -902,7 +871,6 @@ def get_arrival_slip(party_type, party) -> dict:
     return {"html": frappe.render_template(ARRIVAL_SLIP_TEMPLATE, ctx), "title": ctx["worker_name"]}
 
 
-# [#25mjhm]
 HOUSING_TERMS = [
     frappe._lt("Keep the accommodation and shared areas clean and tidy."),
     frappe._lt("No unauthorised guests or visitors are allowed in the accommodation."),
@@ -971,7 +939,6 @@ def get_checkin_slip(party_type, party) -> dict:
     card = get_arrival_card(party_type=party_type, party=party)
     building = card.get("current_building")
     if building:
-        # [#t07zu3]
         frappe.has_permission("Building", "read", doc=building, throw=True)
     bldg = (
         frappe.db.get_value("Building", building, ["city"], as_dict=True)
@@ -1070,7 +1037,6 @@ def get_custody_handover_slip(custody_issue) -> dict:
         or doc.issued_to_employee
     )
 
-    # [#7oz3gh]
     article_ids = list({row.article for row in doc.items if row.article})
     masters = {}
     if article_ids:
@@ -1140,7 +1106,6 @@ def buildings_with_capacity(doctype, txt, searchfield, start, page_len, filters)
         return []
     building_names = [b.name for b in buildings]
 
-    # [#e1ys9n]
     Bed = frappe.qb.DocType("Bed")
     Room = frappe.qb.DocType("Room")
     bed_rows = (

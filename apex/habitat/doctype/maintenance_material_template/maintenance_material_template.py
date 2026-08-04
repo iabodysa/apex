@@ -20,7 +20,6 @@ def load_template_into_doc(doctype, docname, issue_type):
         frappe.throw(_("Template loading is only supported for Maintenance Request and Maintenance Work Order."))
 
     doc = frappe.get_doc(doctype, docname)
-    # [#eu1e7a]
     frappe.has_permission(doctype, "write", doc=doc, throw=True)
 
     templates = frappe.get_all(
@@ -50,10 +49,5 @@ def load_template_into_doc(doctype, docname, issue_type):
 
     if rows_added:
         doc.requires_procurement = 1
-    # save() is left unguarded on purpose. The frappe.db.rollback() that used to wrap
-    # it discarded the whole request transaction — every row the caller wrote before
-    # this endpoint ran, not just the appended template rows — and hid the real
-    # refusal behind a generic message. Propagating aborts the load and leaves the
-    # request-level rollback to unwind only what this request wrote.
     doc.save()
     return {"rows_added": rows_added, "template": template.name}

@@ -27,6 +27,10 @@ reversal — deleting a Housing Assignment without it strands its Bed on
 "Occupied"), and it takes a savepoint per record so one stubborn row leaves the
 rest of the clear standing and is REPORTED as residue instead of silently
 rolling everything back.
+
+``DEMO_ARG`` is the wizard's own field, deliberately NOT ERPNext's ``setup_demo``: that
+fieldname is read by erpnext/setup/setup_wizard/setup_wizard.py:68, so sharing it would
+build an entire ERPNext demo company off one tick of the Apex box.
 """
 
 from __future__ import annotations
@@ -38,19 +42,12 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, today
 
-# The wizard arg. Deliberately NOT ERPNext's "setup_demo": that fieldname is read
-# by erpnext/setup/setup_wizard/setup_wizard.py:68, so sharing it would build an
-# entire ERPNext demo company off one tick of the Apex box.
 DEMO_ARG = "apex_setup_demo"
 
-# The owner key. Every demo row carries this in `owner`; the removal selects on it.
 DEMO_OWNER = "demo.manager@apex.example"
-# A scoped persona so the operator can also see the demo through a supervisor's
-# eyes. Carries the User Permission the removal has to clear.
 DEMO_SUPERVISOR = "demo.supervisor@apex.example"
 DEMO_USERS = (DEMO_OWNER, DEMO_SUPERVISOR)
 
-# Build order. The removal walks this reversed, which is reverse dependency order.
 DEMO_DOCTYPES = (
     "Project",
     "Site",
@@ -89,15 +86,21 @@ def boot_demo(bootinfo):
 
 
 def build_demo_data():
-    """Build the demo scenario as the demo user. Background job — never inline."""
+    """Build the demo scenario as the demo user. Background job — never inline.
+
+    From ``set_user(DEMO_OWNER)`` on, every insert stamps ``owner = DEMO_OWNER``
+    (frappe/model/document.py:601-605), which is the whole removal key.
+
+    Nothing commits here: ``execute_job`` commits a job that returns and rolls back one
+    that raises (frappe/utils/background_jobs.py:248-257), so a half-built demo can
+    never survive.
+    """
     if frappe.db.exists("User", DEMO_OWNER):
-        return  # one demo per site; a second build would collide on every name
+        return
 
     _create_demo_users()
     previous_user = frappe.session.user
     try:
-        # From here every insert stamps owner = DEMO_OWNER
-        # (frappe/model/document.py:601-605), which is the whole removal key.
         frappe.set_user(DEMO_OWNER)
         context = {}
         for _doctype, step in _BUILD_STEPS:
@@ -106,10 +109,7 @@ def build_demo_data():
         frappe.set_user(previous_user)
 
     _scope_supervisor(context.get("building"))
-    # No commit: execute_job commits a job that returns and rolls back one that
-    # raises (frappe/utils/background_jobs.py:248-257), so a half-built demo can
-    # never survive.
-    frappe.cache.delete_keys("bootinfo")  # so the removal action appears at once
+    frappe.cache.delete_keys("bootinfo")
 
 
 @frappe.whitelist()
@@ -120,14 +120,10 @@ def clear_demo_data():
     hidden: a row that refuses to go leaves the rest of the clear standing."""
     frappe.only_for("System Manager")
     if not frappe.db.exists("User", DEMO_OWNER):
-        # Refuse rather than sweep: without the owner key there is no safe filter.
         frappe.throw(_("This site has no Apex demo data to remove."))
 
     deleted = 0
     residue = []
-    # User Permissions first. Each one LINKS to a demo record, so it is a leaf in
-    # the dependency order even though the user holding it is deleted last — left
-    # until then it blocks its own Building, and the Building blocks the Site.
     deleted, residue = _remove_user_permissions(deleted, residue)
     for doctype in reversed(DEMO_DOCTYPES):
         for name in frappe.get_all(doctype, filters={"owner": DEMO_OWNER}, pluck="name"):
@@ -137,10 +133,6 @@ def clear_demo_data():
             else:
                 deleted += 1
 
-    # Bank the sweep before touching the users. Deleting a User cascades into its
-    # Contact, and a failure there can abort the whole transaction — savepoints
-    # included — which would silently undo every delete above. That is the one
-    # outcome this clear must never produce.
     frappe.db.commit()  # audit-ok — bounds the blast radius of the user deletion
     deleted, residue = _remove_demo_users(deleted, residue)
 
@@ -162,14 +154,12 @@ def _remove_one(doctype, name):
     try:
         doc = frappe.get_doc(doctype, name)
         if doc.docstatus == 1:
-            # Cancel so on_cancel reverses what on_submit wrote; a raw delete
-            # would strand the reversal (and delete_doc refuses it anyway).
             doc.cancel()
         frappe.delete_doc(
             doctype,
             name,
             ignore_permissions=True,  # audit-ok — System-Manager-gated demo clear
-            delete_permanently=True,  # no Deleted Document archive of demo rows
+            delete_permanently=True,
         )
     except Exception as exc:
         _release(save_point, undo=True)
@@ -215,16 +205,17 @@ def _remove_demo_users(deleted, residue):
     Skipped entirely while any record survives: the demo user IS the removal key,
     so dropping it on top of residue would leave the site holding demo data that
     nothing can select any more. Keeping the user keeps the boot flag set and the
-    action re-runnable once the blocker is cleared."""
+    action re-runnable once the blocker is cleared.
+
+    Frappe attaches a Contact to every User it creates, from a background job
+    (frappe/core/doctype/user/user.py:235-241). The Contact names are read BEFORE the
+    users are deleted, because ``User.on_trash`` nulls the very link that query reads
+    (user.py:539-540) — which is also why the user goes first: that unlink means the
+    Contact can never block the deletion, and deleting the Contact in the same
+    transaction is what makes the unlink raise ER_CHECKREAD."""
     if residue:
         return deleted, residue
 
-    # Frappe attaches a Contact to every User it creates, from a background job
-    # (frappe/core/doctype/user/user.py:235-241). Note the names before deleting
-    # the users, because User.on_trash nulls the very link this query reads
-    # (user.py:539-540) — which is also why the user goes first: that unlink means
-    # the Contact can never block the deletion, and deleting the Contact in the
-    # same transaction is what makes the unlink raise ER_CHECKREAD.
     contacts = [
         name
         for user in DEMO_USERS
@@ -448,8 +439,6 @@ def _build_maintenance_request(context):
     ).name
 
 
-# Every step declares the DocType it creates, so the colocated test can prove the
-# build and the removal cover the same set rather than trusting they do.
 _BUILD_STEPS = (
     ("Project", _build_project),
     ("Site", _build_site),

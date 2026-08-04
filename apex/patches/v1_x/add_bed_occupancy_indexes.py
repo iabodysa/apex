@@ -23,12 +23,6 @@ index; revisit only against a real per-site ``SHOW INDEX`` census.
 """
 
 def execute():
-    # [#bd7qm2] This patch exists for its REGISTRATION, not for a body of its own:
-    # v0_7 is already logged complete on every site, so it can never run again,
-    # while this module has never been seen by any Patch Log and therefore will.
-    # The work itself is v0_7's, which in turn delegates to the controller
-    # declaration — one source for the index names and column sets, so the
-    # fresh-install path and both patch paths cannot drift apart.
     from apex.patches.v0_7 import add_bed_assignment_index
 
     add_bed_assignment_index.execute()

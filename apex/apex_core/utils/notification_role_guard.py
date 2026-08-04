@@ -46,19 +46,11 @@ module's two constraints: never throw while ``in_migrate``/``in_install``/``in_p
 
 from __future__ import annotations
 
-# Administrator short-circuits every permission check (frappe/permissions.py:107-109).
 ALWAYS_PERMITTED = frozenset({"Administrator"})
 
-# The predicate, one named clause per row test. Kept as a mapping rather than inlined
-# into a comprehension so the colocated test can re-derive the predicate with a single
-# clause DROPPED BY NAME and prove that clause load-bearing. A hand-written weakened
-# copy in the test would be a second implementation free to drift from this one; this
-# way the weakened variant still runs these exact clause bodies.
 _CLAUSES = {
     "read": lambda row: bool(row.get("read")),
-    # frappe/permissions.py:283-284 — a row above permlevel 0 never grants the DocType.
     "permlevel_0": lambda row: not int(row.get("permlevel") or 0),
-    # frappe/permissions.py:297-307 — an owner-scoped grant answers only for the owner.
     "not_if_owner": lambda row: not row.get("if_owner"),
 }
 
@@ -76,6 +68,14 @@ def roles_that_can_open(permissions, istable, *, clauses=CLAUSE_NAMES):
     A child table returns the empty set without reading the table at all: no role
     can open one, because ``has_permission`` needs a ``parent_doctype`` a
     Notification never supplies (frappe/permissions.py:120-121, :785-790).
+
+    Why each clause in ``_CLAUSES`` is there: ``permlevel_0`` because a row above
+    permlevel 0 never grants the DocType, it only widens FIELD access
+    (frappe/permissions.py:283-284); ``not_if_owner`` because an owner-scoped grant
+    answers only for the owner (frappe/permissions.py:297-307), and a notification's
+    recipient is rarely the record's owner. ``ALWAYS_PERMITTED`` holds Administrator
+    alone, which short-circuits every permission check
+    (frappe/permissions.py:107-109) and so can never be the role that loses access.
     """
     if istable:
         return set()

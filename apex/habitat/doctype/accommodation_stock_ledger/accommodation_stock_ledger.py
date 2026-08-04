@@ -1,5 +1,4 @@
-# Copyright (c) 2026, AFMCO Support Services Co. Ltd and contributors
-# [#j03s5a]
+# Copyright (c) 2026, AFMCO and contributors
 """Accommodation Stock Ledger — read-only, system-written quantity ledger for the
 decentralized internal-store engine. Each Accommodation Building is its own store.
 Rows are posted only through the helpers below (never created manually); a blank
@@ -49,7 +48,6 @@ def on_doctype_update():
     stock-balance access path (active rows of an item type for an employee). Added
     here — not only via a patch — so fresh installs, which mark patches complete
     without running them, also get it. Runs on app sync + every migrate; idempotent."""
-    # [#asl9cx]
     from apex.apex_core.utils.ledger_index import add_index_guarded
 
     add_index_guarded(
@@ -59,7 +57,6 @@ def on_doctype_update():
     )
 
 
-# [#swxhdr]
 _MASTER_FIELDS = {
     "Custody Article": ("article_name", "unit_of_measure", "standard_unit_cost"),
     "Maintenance Material": ("material_name", "default_uom", "estimated_unit_cost"),
@@ -149,7 +146,6 @@ def _assert_reversal_keeps_stock_positive(rows) -> None:
     before writing any mirror row, so a blocked cancel leaves the ledger untouched."""
     drained: dict[tuple, float] = {}
     for r in rows:
-        # A mirror posts -signed_qty, so a positive original DRAINS its bucket.
         key = (r.item_type, r.item, r.building, r.employee or None)
         drained[key] = drained.get(key, 0.0) + flt(r.signed_qty)
     for (item_type, item, building, employee), qty in drained.items():
@@ -158,8 +154,6 @@ def _assert_reversal_keeps_stock_positive(rows) -> None:
         available = get_store_balance(item_type, item, building, employee, for_update=True)
         if flt(qty) <= available:
             continue
-        # Two whole sentences rather than an interpolated fragment: Arabic word
-        # order will not survive a translated clause dropped into a template.
         if employee:
             frappe.throw(
                 _(
@@ -219,7 +213,6 @@ def reverse_stock_entries(voucher_type: str, voucher_no: str) -> None:
             from_building=r.from_building, to_building=r.to_building,
             reversal_of=r.name, remarks="Reversal",
         )
-        # [#4eui8g]
         frappe.db.set_value("Accommodation Stock Ledger", r.name, "is_cancelled", 1)
         frappe.db.set_value("Accommodation Stock Ledger", rev, "is_cancelled", 1)
 

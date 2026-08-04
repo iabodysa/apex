@@ -28,7 +28,6 @@ import frappe
 
 from apex.logistay.utils.normalize import normalize_msisdn
 
-# Legacy site DocTypes this migration knows how to read (first that exists wins).
 SOURCE_CANDIDATES = [
     "SIM Card Management",
     "SIM Management",
@@ -38,7 +37,6 @@ SOURCE_CANDIDATES = [
     "Mobile SIM",
 ]
 
-# Logical field -> ordered synonyms to probe on the source DocType.
 FIELD_SYNONYMS = {
     "mobile": ["mobile_number", "mobile_no", "mobile", "phone", "phone_number", "number", "msisdn", "sim_number", "line_number"],
     "iccid": ["iccid", "icc_id", "sim_serial", "serial_number", "serial"],
@@ -77,9 +75,6 @@ def _classify(row, fmap):
     mobile = normalize_msisdn(raw_mobile)
     if not mobile:
         return "rejected", None, None, None
-    # Never invent a company: a missing source column (fmap["company"] is None) or an
-    # empty value leaves company falsy -> the row falls to "ambiguous" (quarantined for
-    # review) via the gate below, instead of being attributed to an arbitrary Company.
     company = row.get(fmap["company"]) if fmap["company"] else None
     supplier = row.get(fmap["supplier"]) if fmap["supplier"] else None
     if supplier and not frappe.db.exists("Supplier", supplier):
@@ -111,8 +106,6 @@ def dry_run():
     fmap, buckets = _scan()
     summary = {
         "source_doctype": buckets["source"],
-        # Surface the resolved logical->source column map so an operator can verify
-        # each column resolved to the intended source column before a real run.
         "field_map": fmap,
         "source": sum(len(buckets[k]) for k in ("migratable", "ambiguous", "rejected")),
         "migratable": len(buckets["migratable"]),
@@ -203,15 +196,10 @@ def _migrate_row(entry, fmap):
 def execute():
     fmap, buckets = _scan()
     if not buckets["source"]:
-        return  # No legacy DocType on this site — fresh install / already retired.
+        return
 
     migrated = skipped = 0
     for entry in buckets["migratable"]:
-        # Isolate each row in its own savepoint so a later row's failure discards ONLY
-        # its own writes (rollback to the savepoint), never the whole transaction — a
-        # bare frappe.db.rollback() here would destroy every earlier migrated row while
-        # the counter/freeze gate below still fired on a phantom count. Counters are
-        # bumped only in the else branch, so a failed (rolled-back) row is never counted.
         frappe.db.savepoint("sim_row")
         try:
             result = _migrate_row(entry, fmap)
@@ -231,8 +219,6 @@ def execute():
             % (len(buckets["ambiguous"]), [r["name"] for r in buckets["ambiguous"]])
         )
 
-    # Freeze the legacy screen until reconciliation is accepted (idempotent):
-    # set the source DocType record's own read_only flag.
     if migrated:
         try:
             frappe.db.set_value("DocType", buckets["source"], "read_only", 1)

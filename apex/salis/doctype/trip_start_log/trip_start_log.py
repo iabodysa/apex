@@ -111,7 +111,6 @@ class TripStartLog(Document):
                             "Boarding row #{0}: an unregistered worker needs a name or a contractor/temp id."
                         ).format(row.idx)
                     )
-                # [#9cqrk6]
                 key = (row.contractor_id or row.worker_name or "").strip().casefold()
                 if key:
                     if key in seen_unregistered:

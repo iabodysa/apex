@@ -47,14 +47,9 @@ from apex.apex_core.doctype.salary_deduction_policy.salary_deduction_policy impo
     get_policy,
 )
 
-# [#a102sf] Customization fields on the HRMS Employee Advance (see
-# apex_core/custom/employee_advance.json) — the reverse link back to the operational
-# document that caused the recovery.
 SOURCE_DOCTYPE_FIELD = "custom_source_doctype"
 SOURCE_DOCNAME_FIELD = "custom_source_document"
 
-# [#a102os] A submitted advance still carrying a balance to recover. "Returned" and
-# "Claimed" are terminal; "Cancelled" is docstatus 2.
 OPEN_ADVANCE_STATUSES = ("Unpaid", "Paid", "Partly Claimed and Returned")
 
 
@@ -98,15 +93,16 @@ def raise_recovery_advance(
     site is not configured for employee advances yet (no company, no Employee
     Advance account); the operational document must still be submittable on a site
     whose Accounts setup is incomplete.
+
+    The advance account is checked to be of type Receivable before the Employee Advance
+    is built: HRMS requires a Receivable advance account and throws on submit, so
+    catching it here degrades to a logged warning instead of a failed submit.
     """
     logger = frappe.logger()
     amount = flt(amount)
     if not (employee and amount > 0):
         return None
 
-    # [#a102sl] Without the source Customization there is no way to guarantee "maps
-    # once", and an untraceable receivable is worse than none — so refuse rather than
-    # risk raising a second advance for the same loss on the next submit.
     if not _source_link_available():
         logger.warning(
             f"employee_recovery: {source_doctype} {source_name} — the Employee Advance source "
@@ -134,9 +130,6 @@ def raise_recovery_advance(
         )
         return None
 
-    # [#a102ac] HRMS requires a Receivable advance account and throws on submit
-    # otherwise; check first so a misconfigured account degrades to "no recovery
-    # raised" instead of blocking the operational document.
     if frappe.db.get_value("Account", advance_account, "account_type") != "Receivable":
         logger.warning(
             f"employee_recovery: {source_doctype} {source_name} — advance account {advance_account} "
@@ -155,8 +148,6 @@ def raise_recovery_advance(
             "advance_account": advance_account,
             "currency": frappe.db.get_value("Company", company, "default_currency"),
             "exchange_rate": 1,
-            # [#a102rs] Marks the advance as recovered from salary, which is what
-            # enables HRMS's own return-through-Additional-Salary path.
             "repay_unclaimed_amount_from_salary": 1,
             SOURCE_DOCTYPE_FIELD: source_doctype,
             SOURCE_DOCNAME_FIELD: source_name,
@@ -210,7 +201,6 @@ def _scheduled_deductions(employee: str, start: str, end: str) -> float:
     total = 0.0
     for row in rows:
         if row.is_recurring:
-            # [#a102rc] A recurring row only claims the period it actually spans.
             if not (row.from_date and row.to_date):
                 continue
             if getdate(row.from_date) > getdate(end) or getdate(row.to_date) < getdate(end):
@@ -240,7 +230,6 @@ def _agreed_installment(source_doctype: str | None, source_name: str | None) -> 
     ``installment_amount`` field participates without touching this module."""
     if not (source_doctype and source_name):
         return 0.0
-    # A retired source DocType leaves the Dynamic Link dangling; get_meta would throw.
     if not frappe.db.exists("DocType", source_doctype):
         return 0.0
     if not frappe.get_meta(source_doctype).has_field("installment_amount"):
@@ -303,8 +292,6 @@ def compute_recovery_installment(advance: str, payroll_date: str | None = None) 
     if wage <= 0:
         return 0.0
 
-    # [#a102cp] Lowest of the per-type cap, the policy-wide cap and the statutory
-    # ceiling — a mis-set policy can only ever narrow the deduction, never widen it.
     cap_percent = min(
         flt(rule.max_percent_of_salary),
         flt(policy.global_max_percent_of_salary) or KSA_MAX_TOTAL_DEDUCTION_PERCENT,
@@ -374,8 +361,6 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
     period_start = get_first_day(payroll_date)
     period_end = get_last_day(payroll_date)
 
-    # [#a102ds] Duplicate-safe: one installment per advance per pay period, counting
-    # drafts, so a re-run (scheduler retry, manual click) is a no-op.
     if frappe.db.exists(
         "Additional Salary",
         {
@@ -411,10 +396,7 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
             "salary_component": component,
             "amount": amount,
             "payroll_date": payroll_date,
-            # [#a102ow] An installment ADDS a deduction; it must never overwrite a
-            # salary-structure row (HRMS's own advance-return helper does the same).
             "overwrite_salary_structure_amount": 0,
-            # [#a102rl] The source link HRMS itself keys the recovered balance on.
             "ref_doctype": "Employee Advance",
             "ref_docname": advance,
         }

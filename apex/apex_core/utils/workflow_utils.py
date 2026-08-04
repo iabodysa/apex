@@ -20,7 +20,6 @@ import re
 import frappe
 from frappe.desk.notifications import clear_doctype_notifications
 
-# [#oiusu1]
 _IDENT = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 
@@ -42,7 +41,6 @@ def cleanup_orphaned_workflow_actions():
         if not (dt and sf) or not _IDENT.match(sf) or not frappe.db.table_exists(dt):
             continue
         try:
-            # [#poqki5]
             frappe.db.sql(
                 f"""DELETE wa FROM `tabWorkflow Action` wa
                     INNER JOIN `tab{dt}` doc ON doc.name = wa.reference_name
@@ -50,7 +48,6 @@ def cleanup_orphaned_workflow_actions():
                       AND doc.`{sf}` IS NOT NULL AND doc.`{sf}` != wa.workflow_state""",
                 {"dt": dt},
             )
-            # [#s0si3a]
             WA = frappe.qb.DocType("Workflow Action")
             DocTbl = frappe.qb.DocType(dt)
             (
@@ -65,7 +62,6 @@ def cleanup_orphaned_workflow_actions():
             frappe.db.rollback()
             frappe.log_error(title=f"cleanup_orphaned_workflow_actions: {dt}")
 
-    # [#cnc0js]
     open_doctypes = frappe.get_all(
         "Workflow Action", filters={"status": "Open"}, pluck="reference_doctype", distinct=True
     )
@@ -79,5 +75,4 @@ def cleanup_orphaned_workflow_actions():
             frappe.db.rollback()
             frappe.log_error(title=f"cleanup_orphaned_workflow_actions (missing DocType): {dt}")
 
-    # [#9pcutj]
     clear_doctype_notifications("Workflow Action")

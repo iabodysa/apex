@@ -19,7 +19,6 @@ import frappe
 
 from apex.apex_core.utils import permission_scope
 
-# Roles that see every company's SIM records (no company confinement).
 UNSCOPED_ROLES = {
     "System Manager",
     "Finance Manager",
@@ -73,7 +72,6 @@ def report_company_scope(user=None, doctype=None):
     )
 
 
-# permission_query_conditions (list / report / link scoping)
 
 
 def telecom_contract_query(user=None, doctype=None):
@@ -88,7 +86,6 @@ def sim_custody_assignment_query(user=None, doctype=None):
     return _company_condition(user, doctype=doctype)
 
 
-# has_permission (form / REST / direct-access scoping)
 
 
 COMPANY_FETCH_ANCHOR = {

@@ -37,12 +37,9 @@ from apex.apex_core.doctype.salis_settings.salis_settings import (
 )
 from apex.salis.api import boarding_window
 
-# [#g5x09e]
 _MISBOARD_CACHE_PREFIX = "salis_misboard:"
 _MISBOARD_TTL_SECONDS = 30 * 60
 
-# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
-# rather than stacking one per row.
 _ROW_SAVEPOINT = "salis_boarding_auto_confirm_row"
 
 
@@ -62,7 +59,6 @@ def _publish(event, dispatch_trip, payload):
         pass
 
 
-# [#kxse2v]
 
 
 def _request_workers(transport_request):
@@ -135,7 +131,6 @@ def ensure_trip_boarding_state(dispatch_trip, transport_request=None):
         )
         added += 1
     if added:
-        # [#4f5v0t]
         trip.save(ignore_permissions=True)  # audit-ok
     return added
 
@@ -157,11 +152,9 @@ def mark_boarded(dispatch_trip, employee, source="Scan"):
             changed = True
     if changed:
         trip.save(ignore_permissions=True)  # audit-ok: boarding path authorised the trip
-        # [#bufed4]
         frappe.cache.delete_value(_MISBOARD_CACHE_PREFIX + employee)
 
 
-# [#fymzpx]
 
 
 def _driver_contact(dispatch_trip):
@@ -192,7 +185,6 @@ def build_wrong_bus_result(scanned_trip, worker):
         return None
     correct_trip, transport_request, stop_name, building = resolved
     if correct_trip == scanned_trip:
-        # [#a9j2hc]
         return None
 
     correct_driver = _driver_contact(correct_trip)
@@ -204,7 +196,6 @@ def build_wrong_bus_result(scanned_trip, worker):
         "route": route_plan,
         "transport_request": transport_request,
     }
-    # [#7pj0hr]
     frappe.cache.set_value(
         _MISBOARD_CACHE_PREFIX + worker,
         {
@@ -226,7 +217,6 @@ def _read_misboard(worker):
     return frappe.cache.get_value(_MISBOARD_CACHE_PREFIX + worker)
 
 
-# [#pyibn1]
 
 
 def _worker_pickup_arrival(window):
@@ -244,7 +234,6 @@ def _worker_pickup_arrival(window):
     return {"arrived": True, "arrived_at": window.get("arrived_at")}
 
 
-# [#8xt8b2]
 
 
 def _trip_start_dt(dispatch_trip):
@@ -268,7 +257,6 @@ def _grace_elapsed(dispatch_trip):
     return time_diff_in_seconds(now_datetime(), start) >= grace * 60
 
 
-# [#72emxa]
 
 
 def _apply_auto_confirm(trip):
@@ -301,7 +289,12 @@ def auto_confirm_claimed_boardings():
 
     Registered in hooks scheduler_events (every few minutes). Idempotent and
     cheap: a trip with no eligible claim is left untouched. Each trip is written
-    inside its own savepoint so one bad trip cannot cost the rest of the run."""
+    inside its own savepoint so one bad trip cannot cost the rest of the run.
+
+    The per-trip failure is swallowed rather than raised: the run commits only at the
+    end, so an escaping exception — which Frappe answers with a whole-transaction
+    rollback (scheduled_job_type.py:155) — would discard every trip already confirmed
+    and re-stall on the same row on the next tick."""
     trips = frappe.get_all(
         "Trip Boarding State",
         filters={"status": "Worker Claimed", "parenttype": "Dispatch Trip"},
@@ -310,9 +303,6 @@ def auto_confirm_claimed_boardings():
     )
     confirmed = 0
     for name in set(trips):
-        # The run commits only below, so an escaping exception — which Frappe answers
-        # with a whole-transaction rollback (scheduled_job_type.py:155) — would discard
-        # every trip already confirmed and re-stall on the same row on the next tick.
         frappe.db.savepoint(_ROW_SAVEPOINT)
         try:
             trip = frappe.get_doc("Dispatch Trip", name)
@@ -332,7 +322,6 @@ def auto_confirm_claimed_boardings():
     return confirmed
 
 
-# [#eykptf]
 
 
 def _resolve_trip_for_driver(dispatch_trip):
@@ -383,7 +372,6 @@ def get_trip_boarding(dispatch_trip):
     notify_window = get_boarding_setting("boarding_notify_window_seconds")
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
-    # [#jkz9fh]
     if _apply_auto_confirm(trip):
         trip.save(ignore_permissions=True)  # audit-ok: system timeout, read-time confirm
 
@@ -424,7 +412,6 @@ def notify_remaining_passengers(dispatch_trip):
         if row.status != "Pending":
             continue
         row.notify_at = now
-        # [#fbciqt]
         if grace_ok and cint(row.notify_count) < max_count:
             row.notify_count = cint(row.notify_count) + 1
         changed = True
@@ -546,9 +533,6 @@ def worker_claim_boarded(token=None):
     window = boarding_window.resolve(dispatch_trip, request_name, building)
     boarding_window.refuse_unless_open(window)
 
-    # Serialize concurrent claims for the same worker on the SAME Dispatch Trip row the
-    # driver scan locks (salis/api/boarding.py): without it two simultaneous claims both
-    # read no open log / no boarding row and each writes one, double-boarding the worker.
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
 
     ensure_trip_boarding_state(dispatch_trip)
@@ -557,7 +541,6 @@ def worker_claim_boarded(token=None):
     if target is None:
         return {"dispatch_trip": dispatch_trip, "status": None}
 
-    # [#gkl1pw]
     log = _get_or_create_trip_log(dispatch_trip)
     if not _already_boarded(log, employee):
         log.append(
@@ -572,7 +555,6 @@ def worker_claim_boarded(token=None):
         )
         log.save(ignore_permissions=True)  # audit-ok: worker + trip resolved from token
 
-    # [#nd5ry5]
     if target.status != "Boarded":
         target.worker_claim_at = now_datetime()
         trip.save(ignore_permissions=True)  # audit-ok: worker + trip resolved from token
@@ -693,7 +675,6 @@ def worker_trip_boarding(token=None):
     window = boarding_window.resolve(dispatch_trip, resolved[1], building)
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
-    # [#lu2q5q]
     if _apply_auto_confirm(trip):
         trip.save(ignore_permissions=True)  # audit-ok: system timeout, read-time confirm
     row = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
@@ -717,7 +698,6 @@ def worker_trip_boarding(token=None):
             "wait_window_seconds": get_boarding_setting("worker_wait_request_seconds"),
             "poll_seconds": poll_seconds,
             "wrong_bus": misboard or None,
-            # [#38t4w1]
             "driver_arrived": _worker_pickup_arrival(window),
             "boarding_window": window,
         }
@@ -745,7 +725,6 @@ def depart_and_finalize(dispatch_trip):
     grace_ok = _grace_elapsed(dispatch_trip)
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
-    # [#n5fxtw]
     changed = bool(_apply_auto_confirm(trip))
     boarded = absent = pending = claimed = 0
     for row in trip.boarding_state or []:
@@ -756,10 +735,8 @@ def depart_and_finalize(dispatch_trip):
             absent += 1
             continue
         if row.status == "Worker Claimed":
-            # [#7wuzuo]
             claimed += 1
             continue
-        # [#ryp6x4]
         if grace_ok and cint(row.notify_count) >= max_count:
             row.status = "Absent"
             absent += 1
@@ -771,7 +748,6 @@ def depart_and_finalize(dispatch_trip):
 
     _close_trip_log(dispatch_trip)
 
-    # [#skehl2]
     try:
         from apex.salis.boarding_engine import post_trip_boarding
 

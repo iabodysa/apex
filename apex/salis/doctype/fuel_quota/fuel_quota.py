@@ -18,15 +18,10 @@ from apex.salis.utils import lock_vehicle
 class FuelQuota(Document):
     def validate(self):
         self._guard_duplicate()
-        # [#eortzg]
         if flt(self.monthly_litres) <= 0:
             frappe.throw(_("Monthly litres must be greater than zero."))
         monthly = self.monthly_litres or 0
         consumed = self.consumed_litres or 0
-        # Overrun by a fuel draw is now REFUSED at the source (Fuel Request's
-        # quota-allowance gate), so this can only be reached by a direct edit that
-        # lowers the allocation below what is already consumed — stays advisory so
-        # the operator can still open the record and correct it.
         if monthly and consumed > monthly:
             frappe.msgprint(
                 _("Consumed litres ({0}) exceed the monthly quota ({1}).").format(
@@ -42,7 +37,6 @@ class FuelQuota(Document):
 		cancelled quota can be re-issued and an amendment of this same doc passes."""
         if not (self.vehicle and self.period_month):
             return
-        # [#5gtjsg]
         lock_vehicle(self.vehicle)
         dup = frappe.db.exists(
             "Fuel Quota",
@@ -82,4 +76,3 @@ def on_doctype_update():
         ["vehicle", "period_month", "docstatus"],
         constraint_name="uq_fuel_quota_vehicle_period",
     )
-    # [#qzsfcl]

@@ -2,22 +2,11 @@
 <html lang="ar" data-theme="{{ portal_theme or 'afmco' }}">
   <head>
     <meta charset="utf-8" />
-    <!-- no-referrer: the personal /masar?w=<token> link must never leak via
-         the Referer header to fonts/maps/any third party (it would carry the secret
-         token in the URL before the server redirect strips it). Renderer-independent
-         (the www template renderer does not propagate a header set in get_context). -->
     <meta name="referrer" content="no-referrer" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#00844E" />
     <link rel="manifest" href="/assets/apex/worker_portal/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/assets/apex/worker_portal/icons/masar-icon-192.png" />
-    <!-- Latin UI face (Montserrat) + Arabic UI face (Cairo). Masar defaults to
-         Arabic, so an Arabic-capable webfont must load or RTL text falls back to
-         the device default and reads inconsistently next to the Latin chrome.
-         Both come from the app's own assets, never a font CDN: the no-referrer meta
-         above hides this token-bearing URL from a third party but does not stop the
-         request itself. The copies keep Google's font-display: swap and unicode-range,
-         so first paint is unchanged. -->
     <link rel="stylesheet" href="/assets/apex/vendor/montserrat-v31/montserrat.css" />
     <link rel="stylesheet" href="/assets/apex/vendor/cairo-v31/cairo.css" />
     <link rel="stylesheet" href="/assets/apex/worker_portal/assets/index.css" />
@@ -25,13 +14,7 @@
     <title>{{ _("Masar") }}</title>
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
-      // Merged Masar portal: this /masar entry boots the WORKER screen set. The one
-      // bundle (worker_portal) also serves /driver, which projects holder_type=Driver.
       window.holder_type = "Worker";
-      // The raw personal token is NEVER inlined here. It rides in the
-      // httpOnly `masar_wt` cookie (set server-side from the one-time ?w= hit) and
-      // is read by the worker endpoints server-side. The shell only learns whether
-      // a link is present, so it can show the "no link" state without the secret.
       window.masar_has_token = {{ "true" if masar_has_token else "false" }};
       window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
       window.portal_logo = {{ (portal_logo or '') | tojson }};
@@ -41,12 +24,6 @@
     <div id="app"></div>
     <script type="module" src="/assets/apex/worker_portal/assets/index.js"></script>
     <script>
-      // Register the Masar PWA service worker. The worker is served from
-      // the ROOT (/masar-sw.min.js) so its scope can cover /masar — a service
-      // worker only controls URLs at or under its own path. It precaches the app
-      // shell (HTML + built bundle + self-hosted fonts) and network-firsts the
-      // worker data API, so an offline reload still boots the SPA under the
-      // existing offline banner.
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
           navigator.serviceWorker

@@ -79,7 +79,6 @@ def transfer_occupant(source_bed, target_bed, transfer_date=None, reason=None):
     if source_bed == target_bed:
         frappe.throw(_("Source and target beds must be different."))
 
-    # [#m9v043]
     assignment = frappe.db.get_value(
         "Housing Assignment",
         {"bed": source_bed, "docstatus": 1, "check_out_date": ["is", "not set"]},
@@ -88,7 +87,6 @@ def transfer_occupant(source_bed, target_bed, transfer_date=None, reason=None):
     if not assignment:
         frappe.throw(_("Source bed has no active resident to transfer."))
 
-    # [#njtyxo]
     target_room, target_building = frappe.db.get_value(
         "Bed", target_bed, ["room", "building"]
     )

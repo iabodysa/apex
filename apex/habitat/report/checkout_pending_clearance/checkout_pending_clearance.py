@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Checkout Pending Clearance — Script Report.
 
@@ -49,7 +48,6 @@ def execute(filters=None):
 
     query_filters = {"docstatus": 1}
     if listed:
-        # Housing Checkout has no building column, so narrow it by its in-scope beds.
         in_scope_beds = frappe.get_all(
             "Bed", filters={"building": ["in", listed]}, pluck="name"
         )
@@ -67,7 +65,6 @@ def execute(filters=None):
     if not checkouts:
         return columns, []
 
-    # [#c1vjzi]
     all_beds = list({co.bed for co in checkouts if co.bed})
     bed_building_map = {}
     if all_beds:
@@ -80,7 +77,6 @@ def execute(filters=None):
 
     all_employees = list({co.employee for co in checkouts if co.employee})
 
-    # [#3wwr48]
     emp_name_map = {}
     if all_employees:
         emp_name_map = {
@@ -92,7 +88,6 @@ def execute(filters=None):
             )
         }
 
-    # [#7kb61x]
     issue_count_map = {}
     if all_employees:
         issue_filters = {"issued_to_employee": ["in", all_employees], "docstatus": 1}
@@ -106,7 +101,6 @@ def execute(filters=None):
         )
         issue_count_map = {r.issued_to_employee: r.issue_count for r in issue_rows}
 
-    # [#5jlugb]
     damage_map = {}
     if all_employees:
         damage_filters = {"employee": ["in", all_employees], "docstatus": 1}
@@ -118,7 +112,6 @@ def execute(filters=None):
             fields=["employee", "name"],
             order_by="name asc",
         )
-        # [#5kjdyq]
         for dr in damage_rows:
             if dr.employee not in damage_map:
                 damage_map[dr.employee] = dr.name
@@ -131,7 +124,6 @@ def execute(filters=None):
         damage = damage_map.get(co.employee, "") if co.employee else ""
         days_since = date_diff(today_str, co.checkout_date) if co.checkout_date else 0
 
-        # [#nlghie]
         if not co.custody_cleared or open_issues or damage:
             data.append({
                 "name": co.name,

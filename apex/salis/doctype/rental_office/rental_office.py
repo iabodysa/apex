@@ -10,7 +10,6 @@ from frappe.model.document import Document
 
 class RentalOffice(Document):
     def onload(self):
-        # [#9g78bh]
         from frappe.contacts.address_and_contact import load_address_and_contact
 
         load_address_and_contact(self)

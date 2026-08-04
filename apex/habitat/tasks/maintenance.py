@@ -7,9 +7,6 @@ import frappe
 
 from apex.apex_core.utils.operations_alert import insert_operations_alert
 
-# One savepoint per nesting level, distinct names: _raise_maintenance_alert runs
-# INSIDE the escalation loop, so re-using the loop's name there would replace it
-# mid-iteration and silently destroy the row isolation.
 _ROW_SAVEPOINT = "maintenance_row"
 _ALERT_SAVEPOINT = "maintenance_alert"
 
@@ -30,9 +27,6 @@ def daily_building_license_expiry_check() -> None:
 
     today_str = today()
 
-    # [#bz69zh] Keyed cursor, not an offset: the body flips status OUT of the very
-    # set this filters on, so rows behind an offset shift down into the range it just
-    # passed and are skipped. name is immutable, so a key cursor cannot lose a row.
     cursor = ""
     batch_size = 500
     while True:
@@ -93,7 +87,7 @@ def _raise_maintenance_alert(
     """
     from frappe.utils import today
 
-    alert_type = "Maintenance Overdue"  # [#ihzt5o]
+    alert_type = "Maintenance Overdue"
     severity = "Critical" if priority == "Critical" else "Warning"
     message = (
         f"open_maintenance_escalation: Maintenance Request {req_name} "
@@ -102,7 +96,6 @@ def _raise_maintenance_alert(
         f"(threshold: {threshold_hours} hours)."
     )[:2000]
 
-    # [#glisou]
     frappe.db.savepoint(_ALERT_SAVEPOINT)
     try:
         today_str = today()
@@ -124,13 +117,9 @@ def _raise_maintenance_alert(
         )
         return
 
-    # [#rx9vmh] Insert via the shared helper (ignore_permissions + message clip +
-    # rollback/log_error) — a maintenance alert carries no vehicle/driver. A failed/None
-    # insert skips the timeline comment below, exactly as the old try/except return did.
     if insert_operations_alert(alert_type, severity, message) is None:
         return
 
-    # [#q02x8v]
     frappe.db.savepoint(_ALERT_SAVEPOINT)
     try:
         frappe.get_doc("Maintenance Request", req_name).add_comment("Comment", message)
@@ -155,7 +144,6 @@ def open_maintenance_escalation() -> None:
     now = now_datetime()
     logger = frappe.logger()
 
-    # [#6x8ro4]
     thresholds = {
         "Critical": 24,
         "High": 72,
@@ -163,7 +151,6 @@ def open_maintenance_escalation() -> None:
         "Low": 336
     }
 
-    # [#bz0n3e]
     start = 0
     batch_size = 500
     while True:
@@ -182,7 +169,7 @@ def open_maintenance_escalation() -> None:
 
         for req in open_requests:
             frappe.db.savepoint(_ROW_SAVEPOINT)
-            try:  # [#jrhqtd]
+            try:
                 priority = req.priority or "Medium"
                 threshold_hours = thresholds.get(priority, 168)
 

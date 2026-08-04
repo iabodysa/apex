@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 
@@ -22,11 +21,6 @@ def execute(filters=None):
         if date_condition is not None:
             attendance_filters["attendance_date"] = date_condition
 
-    # [#qc3e9v]
-    # The scope is project-OR-owner, matching the wired `driver_attendance_query`
-    # (`salis/permissions.py`, with_owner=True): the Driver role reads Driver Attendance
-    # through an `if_owner` DocPerm, so a Driver holding no Project User Permission must
-    # still see their own rows rather than an empty report.
     or_filters = None
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:

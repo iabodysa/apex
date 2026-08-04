@@ -76,7 +76,6 @@ def verified_image_type(photo, expected_type=None, max_bytes=None):
     """
     if not isinstance(photo, str):
         _invalid_photo(_("The photo data is invalid."))
-    # Read at call time, so a door's own ceiling and the suite's patch both land.
     max_bytes = max_bytes or MAX_IMAGE_BYTES
 
     match = _DATA_URI.fullmatch(photo)

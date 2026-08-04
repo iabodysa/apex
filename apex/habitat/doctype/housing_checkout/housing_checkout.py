@@ -27,20 +27,18 @@ from frappe.utils import getdate
 from apex.habitat.doctype.housing_assignment.housing_assignment import recalculate_spatial
 from apex.apex_core.utils.party_link import sync_party_employee
 
-# [#o8jo9s]
 DEPARTURE_REASONS = ("Final Exit", "End of Contract")
 
 
 class HousingCheckout(Document):
     def before_submit(self):
-        # [#ldruez]
         before_submit(self)
 
 
 def validate(doc, method=None):
     sync_party_employee(doc, derive_from="assignment")
     if not doc.assignment or not frappe.db.exists("Housing Assignment", doc.assignment):
-        return  # [#ghdnph]
+        return
 
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)
 
@@ -221,14 +219,12 @@ def resolve_damage_assessment_building(assignment, bed):
 
 
 def on_submit(doc, method=None):
-    # [#gn7wq6]
     already = frappe.db.get_value(
         "Housing Assignment", doc.assignment, "check_out_date", for_update=True
     )
     if already:
         frappe.throw(_("This assignment was already checked out on {0}.").format(already))
 
-    # [#qwaafd]
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)
     assignment.db_set("check_out_date", doc.checkout_date)
     assignment.add_comment("Comment", _("Check-out processed via {0} on {1}").format(doc.name, doc.checkout_date))
@@ -237,7 +233,6 @@ def on_submit(doc, method=None):
     frappe.db.set_value("Room", assignment.room, "readiness_status", "Needs Cleaning")
     recalculate_spatial(assignment.room, assignment.building)
 
-    # [#dyqylo]
     if doc.custody_return_items:
         has_damage = any(item.return_status in ("Damaged", "Lost") for item in doc.custody_return_items)
 
@@ -248,7 +243,6 @@ def on_submit(doc, method=None):
                 "employee": doc.employee,
                 "assessment_date": doc.checkout_date,
                 "building": building,
-                # [#he8cmw]
                 "source_checkout": doc.name,
                 "remarks": _("Auto-generated from Housing Checkout {0}. Review replacement costs and submit.").format(doc.name),
             })

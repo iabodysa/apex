@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 
@@ -37,7 +36,6 @@ def execute(filters=None):
     if filters.get("accounting_acknowledged") is not None:
         query_filters["accounting_acknowledged"] = filters["accounting_acknowledged"]
 
-    # [#tl7e4n]
     or_filters = None
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:

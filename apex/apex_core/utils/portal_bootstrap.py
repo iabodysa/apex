@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#pb1bza]
 
 """Shared bootstrap for the www portal host pages.
 

@@ -30,13 +30,10 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, now, today
 
-# [#nn9apu]
 _OPEN_MAINTENANCE_STATUSES = ["Open", "Assigned", "In Progress", "Reopened"]
 
-# [#egi9xg]
 _RED_PRIORITIES = {"High", "Critical"}
 
-# [#k991sg]
 _DAMAGE_RECENCY_DAYS = 14
 
 
@@ -82,14 +79,12 @@ def get_safety_map(building):
         frappe.db.get_value("Building", building, "building_name") or building
     )
 
-    # [#nl1hpu]
     rooms = frappe.get_all(
         "Room",
         filters={"building": building},
         fields=["name", "room_number", "floor", "room_type", "status", "readiness_status"],
     )
 
-    # [#fhl4fp]
     maint_rows = frappe.get_all(
         "Maintenance Request",
         filters={
@@ -108,7 +103,6 @@ def get_safety_map(building):
         if m.priority in _RED_PRIORITIES:
             agg["has_red"] = True
 
-    # [#koufoz]
     cutoff = add_days(today(), -_DAMAGE_RECENCY_DAYS)
     recent_damage_count = frappe.db.count(
         "Custody Damage Assessment",
@@ -120,7 +114,6 @@ def get_safety_map(building):
     )
     has_recent_damage = bool(recent_damage_count)
 
-    # [#lmkkjm]
     summary = {"total_rooms": 0, "red": 0, "amber": 0, "green": 0}
     floors_acc: dict = {}
 

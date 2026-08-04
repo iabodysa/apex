@@ -39,8 +39,6 @@ from apex.apex_core.payment_router import (
     SOURCE_DOCTYPE,
 )
 
-# The field's historical declared type. Kept explicitly: on a site that really did set
-# the reference by hand, "Payment Entry" is the correct answer and nothing else knows it.
 LEGACY_TARGET_DOCTYPE = "Payment Entry"
 
 
@@ -76,7 +74,6 @@ def _held_payment_names(candidates: list[str], rows: list[dict]) -> dict[str, se
     """
     payments = sorted({(row[LINK_NAME_FIELD] or "").strip() for row in rows} - {""})
     if not payments:
-        # An empty ORM ``in`` filter is not worth relying on, and there is nothing to ask.
         return {doctype: set() for doctype in candidates}
     return {
         doctype: {
@@ -90,9 +87,14 @@ def _held_payment_names(candidates: list[str], rows: list[dict]) -> dict[str, se
 
 
 def execute() -> None:
-    # Only the untyped side is filtered in SQL (["in", [None, ""]] is the ORM form that
-    # matches NULL); the "has a payment name" half is applied in Python, because a
-    # negated NULL filter is the one the ORM does not reliably express.
+    """Backfill the routed payment DocType on rows that never carried one.
+
+    The ``dt == payment`` guard below reproduces the Single short-circuit in
+    ``frappe.db.exists``, which returns the name without reading the table when the two
+    are equal (frappe/database/database.py:1259-1261). A payment named after its own
+    candidate matched before; drop the guard and such a row would stop being ambiguous
+    and silently start resolving to whatever else matched.
+    """
     rows = frappe.get_all(
         SOURCE_DOCTYPE,
         filters={LINK_DOCTYPE_FIELD: ["in", [None, ""]]},
@@ -108,11 +110,6 @@ def execute() -> None:
         payment = (row[LINK_NAME_FIELD] or "").strip()
         if not payment:
             continue
-        # ``dt == payment`` reproduces the Single short-circuit in ``frappe.db.exists``,
-        # which returns the name without reading the table when the two are equal
-        # (frappe/database/database.py:1259-1261). A payment named after its own
-        # candidate matched before; drop this and such a row would stop being ambiguous
-        # and silently start resolving to whatever else matched.
         matches = [
             dt
             for dt in candidates
@@ -126,7 +123,6 @@ def execute() -> None:
         )
 
     if unresolved:
-        # Surfaced, not guessed: an operator has to say which document these name.
         frappe.log_error(
             title="Apex: unresolved routed payment links",
             message=(

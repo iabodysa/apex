@@ -19,17 +19,12 @@ from frappe import _
 
 from apex.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER
 
-# [#tutwiu]
 _IDENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_ ]*$")
 
-# Constant name, re-issued each iteration: MariaDB replaces a same-named savepoint
-# rather than stacking one per row.
 _ROW_SAVEPOINT = "temporary_worker_row"
 
-# Page size, module-level so the paging itself is testable without seeding a full page.
 _BATCH_SIZE = 500
 
-# [#g9r6ee]
 PARTY_DOCTYPES = {
     "Housing Assignment": "employee",
     "Housing Checkout": "employee",
@@ -62,7 +57,6 @@ def link_temporary_workers() -> None:
     from frappe.utils import today
 
     today_str = today()
-    # [#5nnjxa]
     cursor = ""
     while True:
         workers = frappe.get_all(
@@ -75,9 +69,6 @@ def link_temporary_workers() -> None:
         if not workers:
             break
         for tw in workers:
-            # [#s7axbr] The loop CONTINUES past a failure, so the rollback must be
-            # row-scoped: a bare frappe.db.rollback() discards the whole transaction,
-            # i.e. every worker already linked in this run (as in salis/fuel_engine.py).
             frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 employee = _match_employee(tw)
@@ -91,7 +82,6 @@ def link_temporary_workers() -> None:
                     message=frappe.get_traceback(),
                     title=f"Temporary Worker link failed for {tw.name}"[:140],
                 )
-        # Strictly increasing (the filter is ">"), so the walk always terminates.
         cursor = workers[-1].name
 
 
@@ -134,12 +124,10 @@ def _link(tw, employee: str) -> None:
     """Link a Temporary Worker to an Employee: re-point party across docs, back-date the
     skipped accommodation cost, then stamp the link and mark Linked."""
     from frappe.utils import now_datetime
-    # [#1ouyds]
     from apex.habitat.tasks import backdate_assignment_cost
 
     _repoint_party(tw.name, employee)
 
-    # [#28clra]
     for asg in frappe.get_all(
         "Housing Assignment",
         filters={"employee": employee, "docstatus": 1, "check_out_date": ["is", "not set"]},
@@ -161,7 +149,6 @@ def _link(tw, employee: str) -> None:
             ),
         )
     except Exception:
-        # [#l55n57]
         frappe.log_error(frappe.get_traceback(), "Temporary Worker link: comment failed")
 
 

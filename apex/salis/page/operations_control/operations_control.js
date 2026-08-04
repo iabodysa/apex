@@ -1,5 +1,4 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#odtona]
 
 frappe.pages["operations-control"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -17,33 +16,24 @@ const STATUS_COLOR = {
 	Released: "gray",
 };
 
-// Compliance states that warrant a card flag, with the indicator colour.
 const COMPLIANCE_FLAG = { "Expiring Soon": "orange", Expired: "red" };
 
-// Open-alert severities, most-severe first — drives the strip order, the card
-// corner badge colour, and the risk sort weighting.
 const SEVERITY_ORDER = ["Critical", "Warning", "Info"];
 const SEVERITY_RANK = { Critical: 3, Warning: 2, Info: 1 };
 
-// Persisted-filter key for frappe.ui.users_settings (per-page supervisor scope).
 const SETTINGS_KEY = "operations-control";
-// Filters that round-trip through the route / saved settings.
 const ROUTE_FILTERS = ["status", "rental_office", "project", "search", "compliance"];
 
-// Snooze windows offered inline; the server resolves the actual deadline.
 const SNOOZE_PRESETS = [
 	["tomorrow", "Tomorrow"],
 	["2d", "In 2 days"],
 	["1w", "In a week"],
 ];
 
-// 'N days' / '1 day', localised, for embedding in the expiry phrase.
 function _days_label(n) {
 	return n === 1 ? __("1 day") : __("{0} days", [n]);
 }
 
-// Relative phrase for the next-expiry date: 'expires in N days' (future) or
-// 'expired N days ago' (past), localised via __().
 function _expiry_phrase(date) {
 	if (!date) return "";
 	const days = frappe.datetime.get_day_diff(date, frappe.datetime.get_today());
@@ -51,18 +41,12 @@ function _expiry_phrase(date) {
 	return __("expired {0} ago", [_days_label(-days)]);
 }
 
-// Isolate an LTR token (plate, odometer, date, VEH-* id) inside RTL text so its
-// digits/latin chars don't reorder. escape_html guards the value as we go to HTML.
 function _bdi(value) {
 	return `<bdi>${frappe.utils.escape_html(value == null ? "" : String(value))}</bdi>`;
 }
 
-// Status-accent + severity colour keys, aliasing the native Desk colour-scale vars
-// (theme/dark-mode aware, no bespoke hex). Desk pages ship no stylesheet, so the
-// keys are applied as inline-style overlays.
 const FC_ACCENT = { green: "var(--green-500)", orange: "var(--orange-500)", red: "var(--red-500)", gray: "var(--gray-400)" };
 const FC_SEV_COLOR = { Critical: "var(--red-500)", Warning: "var(--orange-500)", Info: "var(--blue-500)" };
-// Layout, all bound to native Desk CSS vars (with px fallbacks where useful).
 const FC = {
 	progress: "height:3px;margin-block-end:8px;border-radius:3px;overflow:hidden;background:transparent;",
 	progress_on: "background:var(--gray-200);",
@@ -137,22 +121,15 @@ class FleetControl {
 		this.page = page;
 		this.data = { vehicles: [], summary: null, offices: [], projects: [], statuses: [], unscoped: false };
 		this.filters = { status: "", rental_office: "", project: "", search: "", compliance: "" };
-		// Off-board view filters: sort key, active severity facet, ownership facet.
 		this.sort = "risk";
 		this.severity_filter = "";
-		// Ownership facet over the alert queue: '' (all) / 'mine' / 'unowned'.
 		this.ownership_filter = "";
-		// Per-vehicle open alerts + strip summary, refreshed alongside the fleet.
 		this.alerts = [];
 		this.alerts_by_vehicle = {};
 		this.alert_summary = { total: 0, by_severity: {}, mine: 0, unowned: 0 };
-		// Per-severity aging cutoffs (hours) + the authoritative server clock; the
-		// browser time is never trusted for the open-too-long cue.
 		this.aging_hours = {};
 		this.server_now = null;
 		this.current_user = frappe.session.user;
-		// Last time this user opened the board (persisted), for the 'since you last
-		// looked' delta banner; captured on first load, then advanced on refresh.
 		this.last_seen = null;
 		this.resolved_since = 0;
 		this.view = "cards";
@@ -165,15 +142,11 @@ class FleetControl {
 			.attr("dir", frappe.utils.is_rtl() ? "rtl" : "ltr")
 			.appendTo(this.page.main);
 		this.$progress = $('<div class="fc-progress"></div>').attr("style", FC.progress).appendTo(this.$root);
-		// One-line 'since you last looked' delta banner (calm/absent when nothing changed).
 		this.$banner = $('<div class="fc-since-banner"></div>').css("display", "none").appendTo(this.$root);
-		// Single merged counter row: status/incidents/compliance facets + severity facets.
 		this.$summary = $('<div class="fc-summary"></div>').attr("style", FC.summary).appendTo(this.$root);
 		this.$controls = $('<div class="fc-controls"></div>').attr("style", FC.controls).appendTo(this.$root);
 		this.$body = $('<div class="fc-body"></div>').attr("style", FC.body).appendTo(this.$root);
 		this.$grid = $('<div class="fc-grid"></div>').attr("style", FC.grid).appendTo(this.$body);
-		// Drawer is hidden until a vehicle is opened (inline display toggle — no CSS
-		// width-transition rule, which a Desk page can't ship).
 		this.$drawer = $('<div class="fc-drawer"></div>').css("display", "none").appendTo(this.$body);
 
 		this.page.set_primary_action(__("Refresh"), () => this.refresh(), "refresh");
@@ -183,15 +156,12 @@ class FleetControl {
 		this._build_controls();
 		this._render_skeleton();
 		this._subscribe_realtime();
-		// Wait for the async saved-scope fetch (if any) so the first load opens to
-		// the restored filters, then sync the controls to them.
 		this.ready.then(() => {
 			this._sync_controls();
 			this.refresh();
 		});
 	}
 
-	// Push the (possibly route/settings-restored) filter values back onto the inputs.
 	_sync_controls() {
 		if (this.$status) this.$status.val(this.filters.status || "");
 		if (this.$office) this.$office.val(this.filters.rental_office || "");
@@ -200,9 +170,6 @@ class FleetControl {
 		if (this.$search) this.$search.val(this.filters.search || "");
 	}
 
-	// Live-patch the strip/queue when the scheduler raises/resolves an alert on a
-	// project in view, so the board never goes stale without a manual Refresh.
-	// Server side (publish_realtime in salis/tasks.py) is the integrator's to add.
 	_subscribe_realtime() {
 		const reload = frappe.utils.debounce(() => this._refresh_alerts(), 1500);
 		frappe.realtime.on("operations_alert", (data) => {
@@ -217,7 +184,6 @@ class FleetControl {
 		this.$status = this._select(__("Status"), () => this._on_filter());
 		this.$office = this._select(__("Rental Office"), () => this._on_filter());
 		this.$project = this._select(__("Project"), () => this._on_filter());
-		// Compliance facet (Compliant/Expiring/Expired) — applied server-side by get_fleet.
 		this.$compliance = this._select(__("Compliance"), () => this._on_filter());
 		this._fill_select(this.$compliance, ["Compliant", "Expiring Soon", "Expired"], this.filters.compliance);
 		this.$search = $(
@@ -231,8 +197,6 @@ class FleetControl {
 				this.refresh();
 			}, 350)
 		);
-		// Sort control: risk-desc is the primary, default order; plate-asc is the
-		// secondary alternative (demoted — it is listed after, and marked as such).
 		this.$sort = this._select(__("Sort"), () => {
 			this.sort = this.$sort.val() || "risk";
 			this._render();
@@ -243,7 +207,6 @@ class FleetControl {
 			.text(__("Plate"))
 			.appendTo(this.$sort);
 		this.$sort.val(this.sort);
-		// Live '{n} vehicles' count, right-aligned in the filter bar.
 		this.$count = $('<span class="fc-result-count"></span>').attr("style", FC.result_count).appendTo(this.$controls);
 	}
 
@@ -273,10 +236,6 @@ class FleetControl {
 		this.refresh();
 	}
 
-	// Restore the active filter set on load. The URL route_options win (a shared /
-	// bookmarked link reopens identically). Otherwise this user's saved per-page
-	// scope is fetched async and applied so a supervisor reopens to their own
-	// project; the fetch resolves before the first refresh via this.ready.
 	_restore_filters() {
 		const opts = frappe.route_options || {};
 		let from_route = false;
@@ -287,13 +246,10 @@ class FleetControl {
 			}
 		});
 		frappe.route_options = null;
-		// Always fetch the saved settings blob: it carries this user's last_seen for
-		// the delta banner, and (when not opened from a route) their saved scope.
 		this.ready = frappe.model.user_settings
 			.get(SETTINGS_KEY)
 			.then((s) => {
 				const blob = s || {};
-				// last_seen is the prior visit; capture it before this load advances it.
 				this.last_seen = blob.last_seen || null;
 				const saved = blob.filters;
 				if (!from_route && saved)
@@ -302,21 +258,16 @@ class FleetControl {
 			.catch(() => {});
 	}
 
-	// Stamp 'now' as this user's last-seen marker (persisted) once the first alert
-	// set has rendered, so the next visit's banner measures from this moment.
 	_mark_seen() {
 		if (this._seen_marked) return;
 		this._seen_marked = true;
 		frappe.model.user_settings.save(SETTINGS_KEY, "last_seen", frappe.datetime.now_datetime());
 	}
 
-	// Persist the active filters two ways: into the page route (shareable URL,
-	// survives refresh) and into this user's per-page settings (their own scope).
 	_persist_filters() {
 		const active = {};
 		ROUTE_FILTERS.forEach((k) => { if (this.filters[k]) active[k] = this.filters[k]; });
 		frappe.model.user_settings.save(SETTINGS_KEY, "filters", active);
-		// Reflect the filters in the URL so a refresh / shared link reopens identically.
 		const route = frappe.get_route() || [];
 		const qs = frappe.utils.make_query_string(active);
 		frappe.router.push_state("/" + ["app", route[1] || "operations-control"].join("/") + qs);
@@ -330,7 +281,6 @@ class FleetControl {
 			method: "apex.salis.api.operations_control.get_fleet",
 			args: { ...this.filters },
 			callback: (r) => {
-				// A 200 with no payload is still a failure here: surface it, don't blank-swallow.
 				if (!r || !r.message) {
 					this._render_board_error(() => this.refresh());
 					return;
@@ -347,10 +297,6 @@ class FleetControl {
 		});
 	}
 
-	// Pull the open-alert queue for the current project scope: one call feeds the
-	// merged counter row, the per-card corner badge and the alert queue view, plus
-	// the aging thresholds, server clock and ownership counts. Keeps the alert axis
-	// a single source. A failure leaves the alerts empty (the board still loads).
 	_refresh_alerts() {
 		frappe.call({
 			method: "apex.salis.api.operations_alerts.get_open_alerts",
@@ -368,13 +314,9 @@ class FleetControl {
 					if (!a.vehicle) return;
 					(this.alerts_by_vehicle[a.vehicle] = this.alerts_by_vehicle[a.vehicle] || []).push(a);
 				});
-				// Rebuild the merged counter row so the severity/ownership facets reflect
-				// the fresh alert set alongside the fleet chips.
 				this._render_summary();
 				this._render_since_banner();
-				// Re-render so card badges / the queue reflect the fresh alert set.
 				this._render();
-				// Mark this visit only after the first render, then advance last_seen.
 				this._mark_seen();
 			},
 			error: () => {
@@ -386,10 +328,6 @@ class FleetControl {
 		});
 	}
 
-	// One-line 'since you last looked' delta: alerts newly raised (still open) +
-	// alerts resolved (server-counted) since the user's prior visit. Calm/absent
-	// when nothing changed or there is no prior visit (first ever load). New
-	// arrivals are measured by raised_on against the persisted last_seen.
 	_render_since_banner() {
 		this.$banner.empty().css("display", "none");
 		const since = this.last_seen;
@@ -398,7 +336,6 @@ class FleetControl {
 		const new_critical = raised.filter((a) => a.severity === "Critical").length;
 		const new_total = raised.length;
 		const resolved = this.resolved_since || 0;
-		// Nothing changed since last visit → stay calm and render nothing.
 		if (!new_total && !resolved) return;
 		this.$banner.attr("style", FC.banner_on);
 		const hhmm = since.slice(11, 16);
@@ -415,15 +352,12 @@ class FleetControl {
 			.appendTo(this.$banner);
 	}
 
-	// Hours an alert has been open, measured from raised_on against the SERVER clock
-	// (never the browser's), or null when undatable.
 	_alert_age_hours(a) {
 		if (!a.raised_on || !this.server_now) return null;
 		const ms = frappe.datetime.str_to_obj(this.server_now) - frappe.datetime.str_to_obj(a.raised_on);
 		return ms > 0 ? ms / 3600000 : 0;
 	}
 
-	// True when an alert has been open past its per-severity aging threshold.
 	_alert_is_aging(a) {
 		const limit = this.aging_hours[a.severity];
 		if (!limit) return false;
@@ -431,7 +365,6 @@ class FleetControl {
 		return age != null && age >= limit;
 	}
 
-	// Highest open severity for a vehicle (Critical > Warning > Info), or null.
 	_vehicle_top_severity(name) {
 		const list = this.alerts_by_vehicle[name];
 		if (!list || !list.length) return null;
@@ -442,7 +375,6 @@ class FleetControl {
 		return best;
 	}
 
-	// Render an error panel (with the server message) + Retry into a target element.
 	_render_error($target, retry, r) {
 		$target.empty();
 		const $panel = $('<div class="fc-error"></div>').attr("style", FC.error).appendTo($target);
@@ -453,7 +385,6 @@ class FleetControl {
 		$btn.on("click", () => retry());
 	}
 
-	// Best-effort human message from a failed frappe.call response. Rendered via .text() so it is auto-escaped.
 	_error_text(r) {
 		const raw = r && r._server_messages;
 		if (raw) {
@@ -463,29 +394,22 @@ class FleetControl {
 				const msg = obj && obj.message ? obj.message : first;
 				if (msg) return String(msg).replace(/<[^>]*>/g, "").trim();
 			} catch (e) {
-				// fall through to the generic message
 			}
 		}
 		return __("Could not load fleet data. Please try again.");
 	}
 
-	// Full-board error state: clears the summary skeleton/chips too.
 	_render_board_error(retry, r) {
 		this.$summary.empty();
 		this.$grid.empty();
 		this._render_error(this.$grid, retry, r);
 	}
 
-	// Disable Refresh + show the top progress bar while a fetch is in flight (no blank screen, no double-click).
 	_set_loading(active) {
-		// Indeterminate sweep needs a keyframe; a Desk page ships none, so the
-		// progress bar is a simple tinted track shown only while a fetch is in flight.
 		this.$progress.attr("style", FC.progress + (active ? FC.progress_on : ""));
 		if (this.page.btn_primary) this.page.btn_primary.prop("disabled", active);
 	}
 
-	// Placeholder chips + cards shown on first load, before get_fleet returns.
-	// Placeholder blocks tinted with the native --skeleton-bg token — Desk ships no .skeleton-block rule, back it inline (no CSS file).
 	_render_skeleton() {
 		this.$summary.empty();
 		for (let i = 0; i < 4; i++) {
@@ -497,9 +421,6 @@ class FleetControl {
 		}
 	}
 
-	// Severity + ownership facets, appended to the merged counter row. Each is a
-	// one-click filter over the alert queue; the active one is outlined. Called
-	// only from _render_summary so the strip and the chips live in one row.
 	_render_severity_counters() {
 		const sev = (this.alert_summary && this.alert_summary.by_severity) || {};
 		const total = (this.alert_summary && this.alert_summary.total) || 0;
@@ -530,12 +451,10 @@ class FleetControl {
 				this._render();
 			});
 		});
-		// Ownership facets: Mine / Unowned over the alert queue (native _assign).
 		this._ownership_counter("mine", __("Mine"), this.alert_summary.mine || 0);
 		this._ownership_counter("unowned", __("Unowned"), this.alert_summary.unowned || 0);
 	}
 
-	// One ownership facet button (Mine / Unowned) for the merged counter row.
 	_ownership_counter(key, label, n) {
 		const active = this.ownership_filter === key;
 		const $b = $('<button type="button" class="fc-sev-counter fc-own-counter"></button>')
@@ -551,12 +470,9 @@ class FleetControl {
 		});
 	}
 
-	// ONE merged counter row: status/incident/compliance chips THEN severity +
-	// ownership facets. Every counter is a one-click facet, not a static number.
 	_render_summary() {
 		this.$summary.empty();
 		const s = this.data.summary || { by_status: {}, total: 0, open_incidents: 0 };
-		// Map the chip colour class onto the top-accent colour (no stylesheet to key it).
 		const CHIP_ACCENT = {
 			"fc-chip-total": "var(--gray-600)", "fc-chip-green": "var(--green-500)",
 			"fc-chip-orange": "var(--orange-500)", "fc-chip-red": "var(--red-500)", "fc-chip-gray": "var(--gray-400)",
@@ -599,37 +515,30 @@ class FleetControl {
 			this.filters.compliance === "Expired" || this.filters.compliance === "Expiring Soon"
 		);
 		chip(__("Stopped > {0} days", [s.stopped_over_days || 0]), s.stopped_over_n || 0, "fc-chip-orange");
-		// Append the alert severity + ownership facets into the SAME row.
 		this._render_severity_counters();
 	}
 
-	// Chip → filter toggles. Each flips its facet and refetches.
 	_toggle_status(st) {
 		this.filters.status = this.filters.status === st ? "" : st;
 		this._sync_controls();
 		this.refresh();
 	}
 	_toggle_compliance_risk() {
-		// Cycle the compliance facet between 'at risk' (Expired) and off.
 		const on = this.filters.compliance === "Expired" || this.filters.compliance === "Expiring Soon";
 		this.filters.compliance = on ? "" : "Expired";
 		this._sync_controls();
 		this.refresh();
 	}
-	// Open-incidents is a client-side card narrowing (no server param).
 	_toggle_incidents() {
 		this._incidents_only = !this._incidents_only;
 		this._render();
 	}
 
-	// Cycle a named view: clicking the same button returns to cards.
 	toggle_view(target) {
 		this.view = this.view === target ? "cards" : target;
 		this._render();
 	}
 
-	// Order the cards: risk-desc (open critical alerts → expired compliance →
-	// Stopped → rest) by default, or plate-asc when the sort control is switched.
 	_sort_vehicles(vehicles) {
 		if (this.sort === "plate") {
 			return vehicles.slice().sort((a, b) =>
@@ -651,7 +560,6 @@ class FleetControl {
 		return vehicles.slice().sort((a, b) => risk(b) - risk(a));
 	}
 
-	// Apply the client-side card facets (open-incidents, active severity).
 	_visible_vehicles() {
 		let list = this.data.vehicles || [];
 		if (this._incidents_only) list = list.filter((v) => v.open_incidents);
@@ -661,14 +569,12 @@ class FleetControl {
 	}
 
 	_render() {
-		// The alert-queue view replaces the card/table grid entirely.
 		if (this.view === "queue") {
 			this._update_count(this.alerts.length, true);
 			this._render_queue();
 			return;
 		}
 		this.$grid.empty();
-		// Table mode is a block, not a grid; flip the container display inline.
 		this.$grid.toggleClass("fc-grid-table", this.view === "table");
 		this.$grid.css("display", this.view === "table" ? "block" : "grid");
 		const vehicles = this._visible_vehicles();
@@ -681,14 +587,11 @@ class FleetControl {
 		else vehicles.forEach((v) => this._render_card(v));
 	}
 
-	// Live count in the filter bar: '{n} vehicles' (or alerts in the queue view).
 	_update_count(n, is_alerts) {
 		if (!this.$count) return;
 		this.$count.text(is_alerts ? __("{0} alerts", [n]) : __("{0} vehicles", [n]));
 	}
 
-	// Two distinct zero-row states: a scope gap (scoped user with no fleet project)
-	// vs an over-filtered no-match. unscoped guards an empty-project oversight user.
 	_render_empty() {
 		if (!this.data.unscoped && (this.data.projects || []).length === 0) {
 			const $e = $('<div class="fc-empty fc-empty-scope"></div>').attr("style", FC.empty_scope).appendTo(this.$grid);
@@ -704,7 +607,6 @@ class FleetControl {
 		}
 		const $e = $('<div class="fc-empty fc-empty-filtered text-muted"></div>').attr("style", FC.empty).appendTo(this.$grid);
 		$('<div></div>').text(__("No vehicles match the current filters.")).appendTo($e);
-		// Escape hatch out of an over-filtered board: reset every filter + refetch.
 		const $clear = $('<button class="btn btn-sm btn-default fc-clear-filters"></button>')
 			.css("margin-block-start", "12px")
 			.text(__("Clear filters"))
@@ -712,7 +614,6 @@ class FleetControl {
 		$clear.on("click", () => this._clear_filters());
 	}
 
-	// Reset all filters (status/office/project/search) and reload the board.
 	_clear_filters() {
 		this.filters = { status: "", rental_office: "", project: "", search: "" };
 		if (this.$status) this.$status.val("");
@@ -728,8 +629,6 @@ class FleetControl {
 			.addClass("fc-accent-" + color)
 			.attr("style", FC.card + `border-inline-start-color:${FC_ACCENT[color] || "var(--gray-400)"};`);
 		$c.on("click", () => this.open_detail(v));
-		// Top-corner severity badge when the vehicle has open alerts, coloured by the
-		// highest open severity (Critical red > Warning orange > Info blue).
 		const top_sev = this._vehicle_top_severity(v.name);
 		if (top_sev) {
 			const n = (this.alerts_by_vehicle[v.name] || []).length;
@@ -741,19 +640,15 @@ class FleetControl {
 				.appendTo($c);
 		}
 		const $head = $('<div class="fc-card-head"></div>').attr("style", FC.card_head).appendTo($c);
-		// Plate / VEH-* id is LTR: <bdi> keeps it from reversing inside an RTL card.
 		$('<div class="fc-plate"></div>').attr("style", FC.plate).html(_bdi(v.plate_number || v.name)).appendTo($head);
 		$('<span class="indicator-pill"></span>').addClass(color).text(__(v.status || "")).appendTo($head);
 		const $meta = $('<div class="fc-card-meta"></div>').attr("style", FC.card_meta).appendTo($c);
 		$('<div></div>').text(v.vehicle_category || __("No category")).appendTo($meta);
-		// Office·project as separate nodes — a middot separator joined inline so it
-		// can't strand between LTR/RTL tokens (no pseudo-element rule on a Desk page).
 		const $op = $('<div class="text-muted fc-sep-dot"></div>').attr("style", FC.sep_dot).appendTo($meta);
 		const parts = [v.rental_office, v.project].filter(Boolean);
 		if (!parts.length) $('<span></span>').text("—").appendTo($op);
 		else parts.forEach((p) => $("<span></span>").text(p).appendTo($op));
 		const $foot = $('<div class="fc-card-foot"></div>').attr("style", FC.card_foot).appendTo($c);
-		// Driver: an icon node + a text node, not an emoji glued onto the string.
 		const $driver = $('<div class="fc-driver"></div>').attr("style", FC.driver).appendTo($foot);
 		$('<span class="fc-driver-icon"></span>')
 			.attr("style", FC.driver_icon)
@@ -796,7 +691,6 @@ class FleetControl {
 		});
 	}
 
-	// Apply the queue's client-side facets (active severity + ownership) to an alert.
 	_alert_matches_facets(a) {
 		if (this.severity_filter && a.severity !== this.severity_filter) return false;
 		if (this.ownership_filter === "mine" && !(a.assignees || []).includes(this.current_user))
@@ -805,8 +699,6 @@ class FleetControl {
 		return true;
 	}
 
-	// Alert-queue view: open Operations Alerts, severity-sorted, with inline
-	// Acknowledge/Resolve/Assign/Snooze and checkbox multi-select + bulk actions.
 	_render_queue() {
 		this.$grid.empty().removeClass("fc-grid-table").css("display", "block");
 		const sorted = (this.alerts || [])
@@ -822,7 +714,6 @@ class FleetControl {
 				.appendTo($e);
 			return;
 		}
-		// Bulk bar: select-all + acknowledge / assign-to-me / snooze the selection.
 		const $bulk = $('<div class="fc-queue-bulk"></div>').attr("style", FC.queue_bulk).appendTo(this.$grid);
 		const $all = $('<input type="checkbox">')
 			.on("change", () => {
@@ -861,7 +752,6 @@ class FleetControl {
 			.toggleClass("fc-queue-aging", aging)
 			.attr("style", FC.queue_row + `border-inline-start-color:${FC_SEV_COLOR[a.severity] || "var(--gray-400)"};` + (aging ? FC.queue_aging : ""))
 			.appendTo($wrap);
-		// Any row can be selected for assign/snooze; acknowledge skips non-Open server-side.
 		$('<input type="checkbox" class="fc-queue-pick">')
 			.prop("checked", this.selected_alerts.has(a.name))
 			.on("change", (e) => {
@@ -872,22 +762,18 @@ class FleetControl {
 			.appendTo($row);
 		const $main = $('<div class="fc-queue-main"></div>').attr("style", FC.queue_main).appendTo($row);
 		$('<div class="fc-queue-msg"></div>').attr("style", FC.queue_msg).text(a.message || __(a.alert_type || "")).appendTo($main);
-		// Meta line: plate · type · age · status · owner, gap-separated (RTL-safe).
 		const $meta = $('<div class="fc-queue-meta fc-sep-dot"></div>').attr("style", FC.queue_meta + FC.sep_dot).appendTo($main);
 		if (a.vehicle_plate) $('<span></span>').html(_bdi(a.vehicle_plate)).appendTo($meta);
 		$('<span></span>').text(__(a.alert_type || "")).appendTo($meta);
 		if (a.raised_on)
 			$('<span></span>').text(frappe.datetime.comment_when(a.raised_on)).appendTo($meta);
 		$('<span></span>').text(__(a.status || "")).appendTo($meta);
-		// Owner chip: who holds this alert (native _assign), or 'Unowned'.
 		const owners = a.assignee_names || [];
 		$('<span class="fc-queue-owner"></span>')
 			.attr("style", owners.length ? FC.queue_owner : FC.unowned)
 			.text(owners.length ? owners.join(", ") : __("Unowned"))
 			.toggleClass("fc-unowned", !owners.length)
 			.appendTo($meta);
-		// Aging cue: open past its per-severity threshold. An Acknowledged-but-stale
-		// row is called out distinctly (it was seen but is sitting unresolved).
 		if (aging) {
 			$('<span class="fc-queue-aging-pill"></span>')
 				.attr("style", FC.queue_aging_pill)
@@ -897,9 +783,6 @@ class FleetControl {
 		this._alert_actions(a, $('<div class="fc-queue-actions"></div>').attr("style", FC.queue_actions).appendTo($row));
 	}
 
-	// Inline Acknowledge (Open only) + Resolve + ownership (claim/release) + Snooze
-	// buttons shared by the queue and the drawer; all call the permission-gated
-	// server API and refresh the alert set.
 	_alert_actions(a, $into) {
 		if (a.status === "Open") {
 			$('<button class="btn btn-xs btn-default"></button>')
@@ -910,7 +793,6 @@ class FleetControl {
 				})
 				.appendTo($into);
 		}
-		// Ownership: claim (assign to me) when unheld by me, else release.
 		const mine = (a.assignees || []).includes(this.current_user);
 		$('<button class="btn btn-xs btn-default"></button>')
 			.text(mine ? __("Release") : __("Assign to me"))
@@ -923,7 +805,6 @@ class FleetControl {
 				);
 			})
 			.appendTo($into);
-		// Snooze: a small menu of preset windows + a custom datetime.
 		this._snooze_button(a, $into);
 		$('<button class="btn btn-xs btn-default"></button>')
 			.text(__("Resolve"))
@@ -934,7 +815,6 @@ class FleetControl {
 			.appendTo($into);
 	}
 
-	// Snooze control: a dropdown of preset windows plus a 'Custom…' datetime prompt.
 	_snooze_button(a, $into) {
 		const $wrap = $('<span class="fc-snooze dropdown"></span>').appendTo($into);
 		$('<button class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown"></button>')
@@ -965,7 +845,6 @@ class FleetControl {
 			.appendTo($menu);
 	}
 
-	// Prompt for an explicit snooze-until datetime, then stamp it server-side.
 	_snooze_custom(a) {
 		frappe.prompt(
 			[{ fieldname: "until", fieldtype: "Datetime", label: __("Snooze until"), reqd: 1 }],
@@ -976,7 +855,6 @@ class FleetControl {
 		);
 	}
 
-	// Single-alert action (acknowledge/resolve), then re-pull the alert set.
 	_alert_action(method, args, ok_msg) {
 		frappe.call({
 			method: "apex.salis.api.operations_alerts." + method,
@@ -991,9 +869,6 @@ class FleetControl {
 		});
 	}
 
-	// Bulk-acknowledge the selected open alerts in one server call. The endpoint
-	// re-checks write permission per alert server-side, so a row the user may not
-	// act on is skipped rather than trusted from the client.
 	_bulk_acknowledge() {
 		const names = Array.from(this.selected_alerts);
 		if (!names.length) return;
@@ -1010,8 +885,6 @@ class FleetControl {
 		});
 	}
 
-	// Bulk-assign the selected alerts to the caller in one call (native _assign);
-	// the endpoint re-checks write permission per alert server-side.
 	_bulk_assign() {
 		const names = Array.from(this.selected_alerts);
 		if (!names.length) return;
@@ -1028,7 +901,6 @@ class FleetControl {
 		});
 	}
 
-	// Bulk-snooze the selected alerts: prompt once for the window, then apply to all.
 	_bulk_snooze() {
 		const names = Array.from(this.selected_alerts);
 		if (!names.length) return;
@@ -1057,22 +929,16 @@ class FleetControl {
 		const $close = $('<button class="btn btn-xs btn-default fc-close"></button>').text(__("Close"));
 		$close.on("click", () => this.$drawer.removeClass("fc-open").css("display", "none"));
 		const $head = $('<div class="fc-drawer-head"></div>').attr("style", FC.drawer_head).appendTo(this.$drawer);
-		// Plate / VEH-* id is LTR: <bdi> isolates it inside the RTL drawer header.
 		$('<div class="fc-drawer-title"></div>').attr("style", FC.drawer_title).html(_bdi(v.plate_number || v.name)).appendTo($head);
 		$close.appendTo($head);
-		// Drawer actions are grouped by intent: open the record, then operate on this
-		// vehicle (reassign / release), then create related records last.
 		const $open = $('<a class="btn btn-xs btn-primary fc-form-link"></a>').text(__("Open Vehicle"));
 		$open.attr("href", "/app/salis-vehicle/" + encodeURIComponent(v.name)).appendTo($head);
 
-		// Reassign driver: a guided driver pick that ends the current assignment and
-		// starts a new one server-side, instead of opening a blank Vehicle Assignment.
 		const $reassign = $('<button class="btn btn-xs btn-default fc-action"></button>').text(
 			__("Reassign driver")
 		);
 		$reassign.on("click", () => this.reassign_driver(v, $reassign));
 		$reassign.appendTo($head);
-		// Release back to service: closes the open Vehicle Suspension natively (server side).
 		if (v.status === "Stopped") {
 			const $rel = $('<button class="btn btn-xs btn-default fc-action fc-release"></button>').text(
 				__("Release vehicle")
@@ -1080,7 +946,6 @@ class FleetControl {
 			$rel.on("click", () => this.release_vehicle(v, $rel));
 			$rel.appendTo($head);
 		}
-		// [#kv4vij]
 		["Vehicle Assignment", "Vehicle Suspension", "Vehicle Incident"].forEach((doctype) => {
 			const $a = $('<button class="btn btn-xs btn-default fc-action"></button>').text("+ " + __(doctype));
 			$a.on("click", () => {
@@ -1089,14 +954,11 @@ class FleetControl {
 			});
 			$a.appendTo($head);
 		});
-		// Open alerts for this vehicle pinned at the top of the drawer, each with
-		// inline Acknowledge/Resolve (server-side permission-gated).
 		this._render_drawer_alerts(v);
 		const $body = $('<div class="fc-drawer-body"></div>').appendTo(this.$drawer);
 		this._load_detail(v, $body);
 	}
 
-	// Render the vehicle's open Operations Alerts at the top of the drawer.
 	_render_drawer_alerts(v) {
 		const list = (this.alerts_by_vehicle[v.name] || [])
 			.slice()
@@ -1117,7 +979,6 @@ class FleetControl {
 		});
 	}
 
-	// Fetch the drawer detail; surface failures (incl. empty payload) with a Retry instead of leaving 'Loading…'.
 	_load_detail(v, $body) {
 		$body.empty().addClass("text-muted").text(__("Loading…"));
 		frappe.call({
@@ -1130,7 +991,6 @@ class FleetControl {
 				}
 				$body.empty().removeClass("text-muted");
 				this._detail_fields($body, r.message.vehicle);
-				// Master fields render immediately; the consolidated history loads under them.
 				this._load_timeline(v, $body);
 			},
 			error: (r) =>
@@ -1138,8 +998,6 @@ class FleetControl {
 		});
 	}
 
-	// One consolidated, date-sorted feed (incidents · stops · assignments · resolved
-	// alerts) replacing the old separate Recent-Incidents / Recent-Assignments lists.
 	_load_timeline(v, $body) {
 		const $section = $('<div class="fc-drawer-timeline"></div>').appendTo($body);
 		$('<div class="fc-drawer-sub"></div>').attr("style", FC.drawer_sub).text(__("Timeline")).appendTo($section);
@@ -1164,9 +1022,6 @@ class FleetControl {
 		});
 	}
 
-	// Render one normalised timeline event. Each event kind contributes its own
-	// dot-separated nodes; the leading label says what KIND of event this is so the
-	// merged feed stays legible. Dates/ids are LTR (<bdi>) inside the RTL drawer.
 	_timeline_row(e, $li) {
 		$li.addClass("fc-sep-dot").attr("style", FC.sep_dot);
 		const KIND = { incident: "Incident", stop: "Stop", assignment: "Assignment", alert: "Alert" };
@@ -1188,8 +1043,6 @@ class FleetControl {
 	}
 
 	_detail_fields($body, d) {
-		// 3rd tuple flags an LTR value (odometer number / date) → wrapped in <bdi>
-		// so digits don't reverse inside the RTL detail list.
 		const rows = [
 			["Status", d.status], ["Category", d.vehicle_category], ["Driver", d.current_driver_name],
 			["Office", d.rental_office], ["Project", d.project], ["Ownership", d.ownership],
@@ -1207,7 +1060,6 @@ class FleetControl {
 		});
 	}
 
-	// Confirm, then close the vehicle's open stop on the server and refresh the board.
 	release_vehicle(v, $btn) {
 		frappe.confirm(__("Release {0} back to service?", [v.plate_number || v.name]), () => {
 			$btn.prop("disabled", true);
@@ -1226,8 +1078,6 @@ class FleetControl {
 		});
 	}
 
-	// Guided reassign: pick a Salis Driver, then end the current assignment and
-	// start a new one server-side (no blank Vehicle Assignment form).
 	reassign_driver(v, $btn) {
 		frappe.prompt(
 			[

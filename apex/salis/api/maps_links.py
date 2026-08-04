@@ -12,10 +12,9 @@ from urllib.parse import quote
 
 
 _COORD = r"(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)"
-# [#r56274]
 _PLACE_COORD_PATTERNS = (
-    r"[?&](?:q|query|destination)=" + _COORD,  # [#9sde22]
-    r"!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)",  # [#63wuhk]
+    r"[?&](?:q|query|destination)=" + _COORD,
+    r"!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)",
 )
 
 
@@ -33,16 +32,13 @@ def _stop_waypoint(stop):
     nothing navigable, so it is skipped rather than breaking the chain."""
     pickup = stop.get("pickup") or {}
     url = pickup.get("google_maps_url") or ""
-    # [#guy5tc]
     for pat in _PLACE_COORD_PATTERNS:
         m = re.search(pat, url)
         if m:
             return f"{m.group(1)},{m.group(2)}"
-    # [#3rqtkf]
     m = re.search(r"[?&]q=([^&]+)", url)
     if m:
         return m.group(1)
-    # [#dm62no]
     if "@" not in url and "/dir/" not in url:
         m = re.search(rf"[?&=/]{_COORD}", url)
         if m:
@@ -68,7 +64,6 @@ def _full_route_maps_url(stops):
     if len(points) < 2:
         return None
     destination = points[-1]
-    # [#5h5u9d]
     waypoints = points[:-1][:9]
     url = "https://www.google.com/maps/dir/?api=1&destination=" + destination
     if waypoints:

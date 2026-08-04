@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 """Duplicate-safe composite UNIQUE index helper for the machine-written Habitat
 ledgers/snapshots.
@@ -157,8 +156,6 @@ def add_index_guarded(doctype: str, fields: list[str], index_name: str) -> bool:
     framework already maintains is never duplicated; best-effort on DDL error
     (logs and returns ``False`` rather than aborting migrate).
     """
-    # [#idxeqv] name OR equivalent column set; the post-DDL check below stays
-    # name-only, since there we must confirm the index we just asked for.
     if _index_exists(doctype, index_name, fields):
         return True
 
@@ -170,12 +167,6 @@ def add_index_guarded(doctype: str, fields: list[str], index_name: str) -> bool:
             )
         )
     except Exception:
-        # [#ddlspt] No rollback here, of either kind. ALTER TABLE implicitly commits in
-        # MariaDB whether it succeeds or fails, so by the time this runs the caller's
-        # work is already committed and every open savepoint is released. A bare
-        # rollback would undo nothing while still resetting the caller's commit hooks;
-        # a savepoint rollback would raise 1305 SAVEPOINT ... does not exist, uncaught,
-        # and abort the migrate this helper exists to survive.
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"Index add failed: {index_name}"[:140],
@@ -191,6 +182,12 @@ def add_unique_guarded(doctype: str, fields: list[str], constraint_name: str) ->
     Returns ``True`` if the constraint exists (already or newly created), or
     ``False`` if it could not be created (e.g. duplicate data) — in which case
     the blocking duplicate groups are logged and migration continues.
+
+    The failure path neither rolls back nor takes a savepoint. ``frappe.db.add_unique``
+    commits before it runs its ALTER TABLE (frappe/database/mariadb/database.py:447), so
+    the caller's work is committed and its savepoints released before this can ever be
+    reached. See the twin note in ``add_index_guarded`` for why neither rollback form
+    belongs here.
     """
     if _constraint_exists(doctype, constraint_name):
         return True
@@ -198,12 +195,7 @@ def add_unique_guarded(doctype: str, fields: list[str], constraint_name: str) ->
     try:
         frappe.db.add_unique(doctype, fields, constraint_name=constraint_name)
     except Exception:
-        # [#ddlspt] frappe.db.add_unique commits before it runs its ALTER TABLE
-        # (frappe/database/mariadb/database.py:447), so the caller's work is committed
-        # and its savepoints released before this can ever be reached. See the twin
-        # note in add_index_guarded for why neither rollback form belongs here.
         _log_blocking_duplicates(doctype, fields, constraint_name)
         return False
 
-    # [#ouxvnt]
     return _constraint_exists(doctype, constraint_name)

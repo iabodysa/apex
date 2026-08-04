@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Remove the obsolete Worker default from otherwise exact Driver token rows."""
 
 import frappe

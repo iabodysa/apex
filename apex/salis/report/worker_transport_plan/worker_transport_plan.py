@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 
@@ -22,7 +21,6 @@ def execute(filters=None):
         {"label": frappe._("Driver"), "fieldname": "assigned_driver", "fieldtype": "Link", "options": "Salis Driver", "width": 160},
     ]
 
-    # [#2uljoq]
     query_filters = {"service_line": ["in", ["Site Transport", "Inter-City Relocation"]]}
 
     for field in ("request_type", "status"):
@@ -38,7 +36,6 @@ def execute(filters=None):
     elif to_date:
         query_filters["pickup_datetime"] = ["<=", to_date]
 
-    # [#g44sc2]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:

@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#j03s5a]
 
 import frappe
 from frappe.utils import add_days, date_diff, getdate, today
@@ -26,7 +25,6 @@ def execute(filters=None):
         {"label": frappe._("Days Since"), "fieldname": "days_since", "fieldtype": "Int", "width": 90},
     ]
 
-    # [#8a7ehf]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     chosen = filters.get("building")
     if restrict:
@@ -45,7 +43,6 @@ def execute(filters=None):
         "missed_cleaning": ["in", [1, "Yes"]],
     })
 
-    # [#komjl9]
     missed = frappe.get_all(
         "Cleaning Log",
         filters=query_filters,
@@ -58,7 +55,6 @@ def execute(filters=None):
         order_by="cleaning_date desc",
     )
 
-    # [#eoq5v8]
     rework_filters = apply_building_scope({
         "cleaning_date": ["between", [str(date_from), str(date_to)]],
         "rework_required": ["in", [1, "Yes"]],
@@ -79,7 +75,6 @@ def execute(filters=None):
 
     today_str = today()
 
-    # [#4f0bon]
     all_logs = list(missed) + list(rework)
     all_cleaner_employees = list({log.cleaner_employee for log in all_logs if log.cleaner_employee})
     employee_name_map = {}

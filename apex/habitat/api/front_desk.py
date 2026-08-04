@@ -66,7 +66,6 @@ def get_building_grid(building: str) -> dict:
 
     building_title = frappe.db.get_value("Building", building, "building_name") or building
 
-    # [#nl1hpu]
     rooms = frappe.get_all(
         "Room",
         filters={"building": building},
@@ -83,7 +82,6 @@ def get_building_grid(building: str) -> dict:
     )
     rooms_by_name = {r.name: r for r in rooms}
 
-    # [#hm7m0e]
     Bed = frappe.qb.DocType("Bed")
     Room = frappe.qb.DocType("Room")
     bed_rows = (
@@ -105,7 +103,6 @@ def get_building_grid(building: str) -> dict:
         .run(as_dict=True)
     )
 
-    # [#3pej3p]
     assignments = frappe.get_all(
         "Housing Assignment",
         filters={
@@ -117,7 +114,6 @@ def get_building_grid(building: str) -> dict:
     )
     assignments_by_bed = {a.bed: a for a in assignments}
 
-    # [#5i2m4q]
     tw_names: dict[str, str] = {}
     tw_parties = {a.party for a in assignments if a.party_type == "Temporary Worker" and a.party}
     if tw_parties:
@@ -126,7 +122,6 @@ def get_building_grid(building: str) -> dict:
         ):
             tw_names[row.name] = row.worker_name
 
-    # [#cxv258]
     custody_parents: set[str] = set()
     assignment_names = [a.name for a in assignments]
     if assignment_names:
@@ -141,7 +136,6 @@ def get_building_grid(building: str) -> dict:
         )
         custody_parents = {c.parent for c in custody_rows}
 
-    # [#og2iza]
     bed_to_room = {b.bed: b.room for b in bed_rows}
     room_project_tally: dict[str, dict[str, int]] = {}
     for asg in assignments:
@@ -156,7 +150,6 @@ def get_building_grid(building: str) -> dict:
         room_name: max(tally, key=tally.get) for room_name, tally in room_project_tally.items()
     }
 
-    # [#ikbfoc]
     summary = {"total_beds": 0, "available": 0, "occupied": 0, "blocked": 0, "out_of_service": 0}
     rooms_acc: dict[str, dict] = {}
 
@@ -176,7 +169,6 @@ def get_building_grid(building: str) -> dict:
         if color == "red":
             asg = assignments_by_bed.get(bed.bed)
             if asg:
-                # [#l1k03s]
                 occupant_name = (
                     asg.employee_name
                     or (tw_names.get(asg.party) if asg.party_type == "Temporary Worker" else None)
@@ -220,10 +212,9 @@ def get_building_grid(building: str) -> dict:
             }
         rooms_acc[room_name]["beds"].append(bed_payload)
 
-    # [#tdh4h2]
     floors_acc: dict = {}
     for room in rooms_acc.values():
-        key = room.pop("_floor")  # [#ewlx1f]
+        key = room.pop("_floor")
         floors_acc.setdefault(key, []).append(room)
 
     def _floor_label(n: int) -> str:
@@ -310,7 +301,6 @@ def list_supervisor_buildings() -> list[dict]:
         list of ``{building, building_title, total_beds, available, occupied,
         blocked, oos, occupancy_pct}`` sorted by building title.
     """
-    # [#f7vwnm]
     from apex.habitat import permissions
 
     f = {"status": "Active"}
@@ -327,7 +317,6 @@ def list_supervisor_buildings() -> list[dict]:
         return []
     building_names = [b.name for b in buildings]
 
-    # [#5iswu5]
     Bed = frappe.qb.DocType("Bed")
     Room = frappe.qb.DocType("Room")
     bed_rows = (
@@ -363,7 +352,6 @@ def list_supervisor_buildings() -> list[dict]:
         else:
             bucket["oos"] += 1
 
-    # [#ci16xg]
     auto = len(buildings) == 1
     result = []
     for b in buildings:
@@ -386,7 +374,6 @@ def list_supervisor_buildings() -> list[dict]:
     return result
 
 
-# [#12c5c2]
 _RESIDENT_REQUEST_CLOSED = ("Resolved", "Rejected", "Closed")
 
 
@@ -434,7 +421,6 @@ def get_employee_card(employee):
     from apex.habitat.api.arrivals_desk import _assert_party_in_scope
 
     frappe.has_permission("Employee", "read", throw=True)
-    # [#e1rssy]
     _assert_party_in_scope("Employee", employee)
     vals = frappe.db.get_value("Employee", employee, ["employee_name", "image"], as_dict=True) or {}
     return {"employee_name": vals.get("employee_name"), "image": vals.get("image")}
@@ -464,11 +450,7 @@ def _has_active_assignment(party_type: str, party: str, employee: str | None) ->
     return bool(frappe.db.exists("Housing Assignment", filters))
 
 
-# [#ry9ai3]
 @frappe.whitelist()
-# No `key`: it was a form_dict lookup (rate_limiter.py:143) any caller could set from
-# the query string, buying a private window per value. `ip_based` (default True) is
-# what actually keys this window to the address (rate_limiter.py:110,141,147-150).
 @rate_limit(limit=60, seconds=60)
 def resolve_worker(identifier: str) -> dict:
     """Resolve a scanned identifier to one worker for the Front Desk check-in dialog.
@@ -505,7 +487,6 @@ def resolve_worker(identifier: str) -> dict:
 
     party_type = party = employee = employee_name = image = None
 
-    # [#5uwr3p]
     from apex.apex_core.doctype.masar_worker_token.masar_worker_token import _hash_token
 
     token_row = frappe.db.get_value(
@@ -520,7 +501,6 @@ def resolve_worker(identifier: str) -> dict:
         employee = token_row.employee
         employee_name = token_row.employee_name
 
-    # [#ounuyt]
     if not party:
         iqama_field = _employee_iqama_field()
         if iqama_field:
@@ -547,12 +527,9 @@ def resolve_worker(identifier: str) -> dict:
     if not party:
         return {"found": False, "message": _("No worker matches {0}.").format(identifier)}
 
-    # [#7a2hxg]
     if party_type == "Temporary Worker":
         frappe.has_permission("Temporary Worker", "read", throw=True)
 
-    # A scanned identifier is CLIENT-SUPPLIED, so an out-of-estate Iqama or token
-    # would otherwise return another building's worker identity to a scoped user.
     from apex.habitat.api.arrivals_desk import _assert_party_in_scope
 
     _assert_party_in_scope(party_type, party)
@@ -637,7 +614,6 @@ def quick_check_in(bed, employee=None, project=None, check_in_date=None,
     frappe.has_permission("Housing Assignment", "create", throw=True)
     frappe.has_permission("Housing Assignment", "submit", throw=True)
 
-    # [#r8vwzx]
     if not party and employee:
         party_type, party = "Employee", employee
 
@@ -713,7 +689,6 @@ def quick_check_out(bed, checkout_date=None, checkout_reason=None, room_conditio
     if not assignment:
         frappe.throw(_("No active assignment found for bed {0}.").format(bed))
 
-    # [#f8dq4j]
     has_custody = bool(
         frappe.db.exists(
             "Accommodation Custody Item",

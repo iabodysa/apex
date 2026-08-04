@@ -68,7 +68,6 @@ def confirm_handover(handover: str, otp: str):
             frappe.PermissionError,
         )
 
-    # [#cyqoms]
     locked = frappe.db.get_value(
         VOUCHER_TYPE, doc.name,
         ["status", "otp_attempts", "otp_locked_until", "otp_expires_at", "otp_hash"],
@@ -91,7 +90,6 @@ def confirm_handover(handover: str, otp: str):
         frappe.throw(_("Review and approve the handover before confirming receipt."))
 
     if not otp_required:
-        # [#9niymh]
         if locked.status != "Approved":
             frappe.throw(_("Review and approve the handover before confirming receipt."))
         return _post_receive_and_confirm(doc)
@@ -99,7 +97,6 @@ def confirm_handover(handover: str, otp: str):
     if locked.otp_hash and hmac.compare_digest(hash_otp(otp or "", doc.name), locked.otp_hash):
         return _post_receive_and_confirm(doc)
 
-    # [#hn42cc]
     attempts = (locked.otp_attempts or 0) + 1
     if attempts >= MAX_OTP_ATTEMPTS:
         doc.db_set({
@@ -135,7 +132,6 @@ def _post_receive_and_confirm(doc):
     from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
         post_stock_entry,
     )
-    # [#b0o476]
     if _receive_leg_posted(doc):
         return doc.name
     now = now_datetime()

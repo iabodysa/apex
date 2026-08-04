@@ -54,13 +54,11 @@ def validate(doc, method=None):
         if doc.billing_period_to < doc.billing_period_from:
             frappe.throw(_("Billing Period To must be on or after Billing Period From."))
 
-    # [#luwwrt]
     if doc.utility_account and doc.billing_period_from and doc.billing_period_to:
         from apex.apex_core.utils.date_ranges import has_overlapping_record
         overlap = has_overlapping_record(
             "Utility Bill Entry",
             {
-                # [#p1ktdw]
                 "company": doc.company,
                 "building": doc.building,
                 "utility_account": doc.utility_account,
@@ -82,7 +80,6 @@ def validate(doc, method=None):
     _compute_sharing(doc)
     _compute_variance(doc)
 
-    # [#laxlx5]
     if flt(doc.total_bill_amount) < 0 or flt(doc.bill_amount) < 0:
         frappe.throw(_("Bill amounts cannot be negative."))
 
@@ -127,7 +124,6 @@ def before_cancel(doc, method=None):
 def _compute_meter_readings(doc) -> None:
     prev = flt(doc.meter_reading_previous)
     curr = flt(doc.meter_reading_current)
-    # [#n9guyx]
     if curr and prev and curr < prev:
         frappe.throw(_("Current Meter Reading cannot be lower than the Previous Meter Reading."))
     if curr and prev and curr >= prev:
@@ -174,7 +170,6 @@ def _post_ledger_row(doc) -> None:
     Uses bill_amount (the building's actual share after bearing calculation).
     The bill_share_note provides the audit trail for shared-meter cases.
     """
-    # [#k2wetb]
     if _live_ledger_row(doc.name):
         return
 

@@ -27,9 +27,6 @@ from frappe.utils import flt, getdate, today
 from apex.apex_core.utils.employee_recovery import raise_recovery_advance
 from apex.salis.utils import add_timeline_note, lock_vehicle
 
-# [#a102rf] Recovery decision fields — never accepted from the public intake form.
-# Mapped to the value a public report must land on, so the Check clears to 0 rather
-# than to NULL.
 _RECOVERY_INTAKE_RESET = {
     "recover_from_driver": 0,
     "recovery_employee": None,
@@ -43,10 +40,8 @@ _RECOVERY_INTAKE_RESET = {
 
 class VehicleIncident(Document):
     def validate(self):
-        # [#cuwq5w]
         if self.incident_date and getdate(self.incident_date) > getdate(today()):
             frappe.throw(_("Incident date cannot be in the future."))
-        # [#82nrhv]
         if flt(self.estimated_cost) < 0:
             frappe.throw(_("Estimated cost cannot be negative."))
         self._guard_public_intake()
@@ -65,7 +60,6 @@ class VehicleIncident(Document):
                 self.set(field, None)
             return
 
-        # [#a102sd] Stamp the consent date the first time a signature is recorded.
         if self.worker_signature and not self.signed_on:
             self.signed_on = today()
         elif not self.worker_signature:
@@ -78,24 +72,19 @@ class VehicleIncident(Document):
         if flt(self.installment_amount) > flt(self.recovery_amount):
             frappe.throw(_("Agreed Installment cannot exceed the Amount to Recover."))
 
-        # [#a102cg] docstatus 1 is reached through validate() on the submit that
-        # approves the recovery — the last point at which consent can still be required.
         if self.docstatus == 1 and not self.worker_signature:
             frappe.throw(
                 _("The worker's consent signature is required before a cost recovery can be approved.")
             )
 
     def _guard_public_intake(self):
-        # [#pt70xv]
         if self.is_new() and frappe.session.user == "Guest":
-            # [#mwj4rl]
             self.status = "Open"
             for field in ("write_off_case", "previous_status", "previous_driver"):
                 self.set(field, None)
             for field, blank in _RECOVERY_INTAKE_RESET.items():
                 self.set(field, blank)
 
-        # [#gytrj6]
         for field, limit in (("description", 4000), ("location", 280), ("report_number", 140), ("reported_by", 140)):
             value = self.get(field)
             if value and len(value) > limit:
@@ -103,20 +92,17 @@ class VehicleIncident(Document):
 
     def on_submit(self):
         self._raise_recovery_advance()
-        # [#2gzgc9]
         if self.incident_type != "Theft":
             return
 
         lock_vehicle(self.vehicle)
 
-        # [#d721f6]
         prev_status, prev_driver = frappe.db.get_value(
             "Salis Vehicle", self.vehicle, ["status", "current_driver"]
         )
         self.db_set("previous_status", prev_status)
         self.db_set("previous_driver", prev_driver)
 
-        # [#558p5y]
         frappe.db.set_value(
             "Salis Vehicle",
             self.vehicle,
@@ -218,7 +204,6 @@ class VehicleIncident(Document):
 
         lock_vehicle(self.vehicle)
 
-        # [#pq10av]
         if self.previous_driver and not frappe.db.get_value(
             "Salis Vehicle", self.vehicle, "current_driver"
         ):
@@ -229,7 +214,6 @@ class VehicleIncident(Document):
                 "Salis Driver", self.previous_driver, "current_vehicle", self.vehicle
             )
 
-        # [#nbueah]
         another_stop_in_force = frappe.db.exists(
             "Vehicle Suspension", {"vehicle": self.vehicle, "docstatus": 1}
         )
