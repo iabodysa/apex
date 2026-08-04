@@ -4,6 +4,18 @@
 // everything server-side and returns the (existing or new) draft link.
 
 frappe.ui.form.on('Telecom Contract', {
+	setup(frm) {
+		frm.set_query("cost_center", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+		frm.set_query("project", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		if (frm.doc.docstatus !== 1) {
 			return;

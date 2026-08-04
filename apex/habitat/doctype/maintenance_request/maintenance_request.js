@@ -1,6 +1,48 @@
 // Copyright (c) 2026, AFMCO and contributors
 // [#ifaia4]
 frappe.ui.form.on("Maintenance Request", {
+	setup(frm) {
+		frm.set_query("building", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+		frm.set_query("room", () => ({
+			filters: {
+				...(frm.doc.building ? { building: frm.doc.building } : {}),
+			},
+		}));
+		frm.set_query("bed", () => ({
+			filters: {
+				...(frm.doc.room ? { room: frm.doc.room } : {}),
+			},
+		}));
+		frm.set_query("related_facility_asset", () => ({
+			filters: {
+				...(frm.doc.building ? { building: frm.doc.building } : {}),
+			},
+		}));
+		frm.set_query("target_asset", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+		frm.set_query("cost_center", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+		frm.set_query("subcontractor_service_order", () => ({
+			filters: {
+				...(frm.doc.building ? { building: frm.doc.building } : {}),
+			},
+		}));
+		frm.set_query("source_execution", () => ({
+			filters: {
+				...(frm.doc.building ? { building: frm.doc.building } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		frm.clear_custom_buttons();
 		_update_priority_indicator(frm);

@@ -3,6 +3,13 @@
 const FUEL_HIGH_LITRES_THRESHOLD = 200;
 
 frappe.ui.form.on("Fuel Request", {
+	setup(frm) {
+		frm.set_query("fuel_quota", () => ({
+			filters: {
+				...(frm.doc.vehicle ? { vehicle: frm.doc.vehicle } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		frm.clear_custom_buttons();
 		_update_fuel_indicator(frm);

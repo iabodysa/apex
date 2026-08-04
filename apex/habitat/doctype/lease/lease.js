@@ -3,6 +3,13 @@
 // on onload for new documents. Rationale: better UX; the validate()-time fallback in
 // accommodation_lease.py remains as a safety net for programmatic document creation.
 frappe.ui.form.on("Lease", {
+	setup(frm) {
+		frm.set_query("building", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+	},
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.company) {
 			frm.set_value("company", frappe.defaults.get_global_default("company"));

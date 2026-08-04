@@ -2,6 +2,29 @@
 // [#t6qih1]
 
 frappe.ui.form.on("Movement Cost Transfer", {
+	setup(frm) {
+		frm.set_query("from_project", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+		frm.set_query("to_project", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+				...(frm.doc.from_project ? { name: ["!=", frm.doc.from_project] } : {}),
+			},
+		}));
+		frm.set_query("from_cost_center", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+		frm.set_query("to_cost_center", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		_update_mct_indicator(frm);
 	},

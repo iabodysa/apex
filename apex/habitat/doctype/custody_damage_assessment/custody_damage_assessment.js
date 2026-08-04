@@ -9,6 +9,13 @@ const DEDUCTION_STATUS_COLORS = {
 };
 
 frappe.ui.form.on("Custody Damage Assessment", {
+	setup(frm) {
+		frm.set_query("custody_return", () => ({
+			filters: {
+				...(frm.doc.building ? { building: frm.doc.building } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		// [#g123bl]
 		if (frm.is_new()) {

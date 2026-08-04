@@ -1,6 +1,18 @@
 // Copyright (c) 2026, AFMCO and contributors
 // [#lhs0n9]
 frappe.ui.form.on("Resident Request", {
+	setup(frm) {
+		frm.set_query("room", () => ({
+			filters: {
+				...(frm.doc.building ? { building: frm.doc.building } : {}),
+			},
+		}));
+		frm.set_query("bed", () => ({
+			filters: {
+				...(frm.doc.room ? { room: frm.doc.room } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		frm.clear_custom_buttons();
 		_update_priority_indicator(frm);

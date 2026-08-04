@@ -1,7 +1,10 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#piuxig]
 frappe.ui.form.on("Facility Asset Custody Assignment", {
-	refresh(frm) {
-		// [#g123bl]
-	}
+	setup(frm) {
+		frm.set_query("facility_asset", "assets_in_custody", () => ({
+			filters: {
+				...(frm.doc.building ? { building: frm.doc.building } : {}),
+			},
+		}));
+	},
 });

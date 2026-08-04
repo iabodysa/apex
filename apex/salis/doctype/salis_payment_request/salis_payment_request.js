@@ -1,6 +1,23 @@
 // Copyright (c) 2026, AFMCO and contributors
 // [#go2egg]
 frappe.ui.form.on("Salis Payment Request", {
+	setup(frm) {
+		frm.set_query("vehicle", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+		frm.set_query("project", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+		frm.set_query("cost_center", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		frm.clear_custom_buttons();
 		const finance_approved =

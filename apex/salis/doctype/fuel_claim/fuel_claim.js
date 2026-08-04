@@ -2,6 +2,18 @@
 // [#reao6e]
 
 frappe.ui.form.on("Fuel Claim", {
+	setup(frm) {
+		frm.set_query("fuel_quota", () => ({
+			filters: {
+				...(frm.doc.vehicle ? { vehicle: frm.doc.vehicle } : {}),
+			},
+		}));
+		frm.set_query("cost_center", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		_update_claim_indicator(frm);
 		_flag_variance(frm);

@@ -1,5 +1,12 @@
 // Copyright (c) 2026, AFMCO and contributors
 frappe.ui.form.on("Vehicle Handover", {
+	setup(frm) {
+		frm.set_query("to_driver", () => ({
+			filters: {
+				...(frm.doc.from_driver ? { name: ["!=", frm.doc.from_driver] } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		frm.clear_custom_buttons();
 		// Only show active templates in the picker.

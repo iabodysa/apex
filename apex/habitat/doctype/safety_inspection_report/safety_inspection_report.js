@@ -1,7 +1,15 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#phkaa5]
 frappe.ui.form.on("Safety Inspection Report", {
-	refresh(frm) {
-		// [#g123bl]
-	}
+	setup(frm) {
+		frm.set_query("room", "safety_findings", () => ({
+			filters: {
+				...(frm.doc.building ? { building: frm.doc.building } : {}),
+			},
+		}));
+		frm.set_query("room", "maintenance_findings", () => ({
+			filters: {
+				...(frm.doc.building ? { building: frm.doc.building } : {}),
+			},
+		}));
+	},
 });

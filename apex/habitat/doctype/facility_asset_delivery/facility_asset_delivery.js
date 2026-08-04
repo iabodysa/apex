@@ -1,6 +1,18 @@
 // Copyright (c) 2026, AFMCO and contributors
 // Facility Asset Delivery — the 3-exit transfer lock + on-site code receipt.
 frappe.ui.form.on("Facility Asset Delivery", {
+	setup(frm) {
+		frm.set_query("facility_asset", () => ({
+			filters: {
+				...(frm.doc.from_building ? { building: frm.doc.from_building } : {}),
+			},
+		}));
+		frm.set_query("to_building", () => ({
+			filters: {
+				...(frm.doc.from_building ? { name: ["!=", frm.doc.from_building] } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		frm.clear_custom_buttons();
 		if (frm.doc.docstatus !== 1) {

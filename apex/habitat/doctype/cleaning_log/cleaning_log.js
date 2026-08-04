@@ -1,7 +1,15 @@
 // Copyright (c) 2026, AFMCO and contributors
-// [#r66giq]
 frappe.ui.form.on("Cleaning Log", {
-	refresh(frm) {
-		// [#g123bl]
-	}
+	setup(frm) {
+		frm.set_query("subcontractor_service_order", () => ({
+			filters: {
+				...(frm.doc.building ? { building: frm.doc.building } : {}),
+			},
+		}));
+		frm.set_query("room", "room_details", () => ({
+			filters: {
+				...(frm.doc.building ? { building: frm.doc.building } : {}),
+			},
+		}));
+	},
 });

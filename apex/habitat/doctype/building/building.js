@@ -165,6 +165,13 @@ function _renderBuildingDashboard(frm) {
 }
 
 frappe.ui.form.on("Building", {
+	setup(frm) {
+		frm.set_query("default_cost_center", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		frm.clear_custom_buttons();
 		_toggleFloorFields(frm);

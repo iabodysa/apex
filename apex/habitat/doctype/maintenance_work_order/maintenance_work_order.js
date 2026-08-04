@@ -1,6 +1,13 @@
 // Copyright (c) 2026, AFMCO and contributors
 // [#l41jo9]
 frappe.ui.form.on("Maintenance Work Order", {
+	setup(frm) {
+		frm.set_query("subcontractor_service_order", () => ({
+			filters: {
+				...(frm.doc.building ? { building: frm.doc.building } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		frm.clear_custom_buttons();
 		// [#j6atlg]

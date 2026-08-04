@@ -1,6 +1,19 @@
 // Copyright (c) 2026, AFMCO and contributors
 // [#jb13ri]
 frappe.ui.form.on("Subcontractor Service Order", {
+	setup(frm) {
+		frm.set_query("building", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+			},
+		}));
+		frm.set_query("linked_purchase_invoice", () => ({
+			filters: {
+				...(frm.doc.company ? { company: frm.doc.company } : {}),
+				...(frm.doc.supplier ? { supplier: frm.doc.supplier } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		frm.clear_custom_buttons();
 		if (frm.doc.docstatus === 1) {

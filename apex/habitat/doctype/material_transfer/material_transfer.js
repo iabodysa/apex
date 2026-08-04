@@ -2,6 +2,13 @@
 // [#hezt05]
 
 frappe.ui.form.on("Material Transfer", {
+	setup(frm) {
+		frm.set_query("to_building", () => ({
+			filters: {
+				...(frm.doc.from_building ? { name: ["!=", frm.doc.from_building] } : {}),
+			},
+		}));
+	},
 	refresh(frm) {
 		frm.clear_custom_buttons();
 		if (frm.doc.docstatus === 1 && frm.doc.status === "In Transit") {
