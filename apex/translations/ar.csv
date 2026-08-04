@@ -3988,7 +3988,7 @@ The Dispatch Trip the scanned pass was issued against.,رحلة التسيير �
 The driver this device subscription belongs to.,السائق الذي يخصه اشتراك هذا الجهاز.
 "The driver's current assigned vehicle, captured for reference.",المركبة المسندة حالياً للسائق، مسجّلة للمرجع.
 "The driver's login user, mirrored from the linked driver. Drives the driver-facing notification.",مستخدم دخول السائق، منقول من السائق المرتبط، ويُستخدم لإرسال الإشعار إليه.
-"The driver's portal/login user, mirrored from the linked Employee. Drives driver-facing notifications.",مستخدم بوابة السائق ودخوله، منقول من الموظف المرتبط، ويُستخدم لإرسال إشعارات السائق.
+"NOT a login — drivers open the portal with a personal barcode link. Mirrored from the Employee and kept only so desk Notification rules can name a User and support tickets have an author. Empty is normal.",ليس حساب دخول — يفتح السائق البوابة برابط الباركود الخاص به. يُنقل من الموظف المرتبط ويُحتفظ به فقط لتتمكن قواعد الإشعارات في سطح المكتب من تحديد مستخدم، ولتكون لتذاكر الدعم جهة منشئة. وتركه فارغاً أمر طبيعي.
 The Employee Advance raised for this incident. One incident raises at most one advance; the company payment and the wage installments both run on it.,سلفة الموظف المُنشأة لهذه الحادثة. تُنشئ الحادثة سلفة واحدة على الأكثر؛ ويجري عليها سداد الشركة وأقساط الخصم من الأجر.
 The floor plan adds {0} new room(s) and {1} new bed(s) that are not yet created. Existing rooms updated: {2}. Confirm to create the new rooms and beds.,يضيف مخطط الطابق {0} غرفة جديدة و{1} سرير جديد لم تُنشأ بعد. الغرف الموجودة المحدّثة: {2}. أكّد لإنشاء الغرف والأسرّة الجديدة.
 The GPS position is outside the valid coordinate range.,موقع GPS خارج نطاق الإحداثيات الصحيح.

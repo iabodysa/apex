@@ -22,6 +22,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex.salis.utils import get_driver_for_user
+
 
 class TripStartLog(Document):
     def validate(self):
@@ -32,21 +34,38 @@ class TripStartLog(Document):
         self._check_driver_ownership()
 
     def _check_driver_ownership(self):
-        """Prevent a Salis Driver from writing another driver's Trip Start Log.
+        """Prevent one driver from writing another driver's Trip Start Log.
 
-        A user who holds the Driver role and is linked to a Salis Driver record
-        may only save TSLs whose ``driver`` field matches their own record.
-        Administrators and non-driver users (Fleet Manager, Supervisor, etc.)
-        are unrestricted.
+        WHO the caller is comes from ``salis.utils.get_driver_for_user`` — the app's
+        single driver resolver — never from a ``driver_user`` lookup on
+        ``frappe.session.user``. Since the barcode cutover a driver has no Frappe
+        User at all: identity arrives as a hashed bearer token and the session is
+        Guest, so a session-User lookup resolved nothing for every real driver and
+        this guard passed everything through. The resolver reads the presented
+        driver credential first and only falls back to the signed-in
+        User -> Employee -> Salis Driver link when the request carries no
+        credential, so the portal endpoints and this guard can never disagree about
+        who is calling.
+
+        A presented credential cannot yield an unresolved driver: the resolver
+        passes ``required=True``, so an invalid, blank, expired or non-Active one
+        raises PermissionError inside ``resolve_portal_subject`` instead of
+        returning None. The permissive branch below is therefore unreachable from
+        any request that presents a driver credential.
+
+        Resolving to no driver means the caller is not a driver, and that is the
+        only thing it can mean: a desk user (Fleet Manager, Fleet Supervisor,
+        Administrator), a scheduled job, a patch or a ``bench migrate``, none of
+        which carry a request or a driver-linked User. All of those stay
+        unrestricted — this guard scopes a driver to their own record and is not
+        the DocPerm that decides who may touch the DocType. The worker (Masar) and
+        supervisor portals also save this log via their own token audiences; those
+        present no DRIVER credential, so they too keep passing.
         """
         if frappe.session.user == "Administrator":
             return
-        # [#t95um9]
-        driver = frappe.db.get_value(
-            "Salis Driver", {"driver_user": frappe.session.user}, "name"
-        )
+        driver = get_driver_for_user()
         if not driver:
-            # [#gz8d7y]
             return
         if self.driver and self.driver != driver:
             frappe.throw(

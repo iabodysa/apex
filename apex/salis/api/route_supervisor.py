@@ -120,7 +120,6 @@ def _owned_trip(dispatch_trip: str) -> dict:
             "trip_date",
             "vehicle",
             "driver",
-            "driver_user",
             "driver_lat",
             "driver_lng",
             "driver_position_updated_at",
