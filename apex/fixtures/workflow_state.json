@@ -5,7 +5,7 @@
   "icon": "question-sign",
   "modified": "2026-08-02 00:57:12.455074",
   "name": "Pending",
-  "style": "",
+  "style": "Warning",
   "workflow_state_name": "Pending"
  },
  {
@@ -266,7 +266,7 @@
   "icon": "",
   "modified": "2026-08-02 00:59:10.278531",
   "name": "Acknowledged",
-  "style": "",
+  "style": "Primary",
   "workflow_state_name": "Acknowledged"
  },
  {
@@ -275,7 +275,7 @@
   "icon": "",
   "modified": "2026-08-02 00:59:10.279554",
   "name": "Recovered",
-  "style": "",
+  "style": "Success",
   "workflow_state_name": "Recovered"
  },
  {
@@ -284,7 +284,7 @@
   "icon": "",
   "modified": "2026-08-02 00:59:10.280395",
   "name": "Waived",
-  "style": "",
+  "style": "Warning",
   "workflow_state_name": "Waived"
  },
  {
@@ -293,7 +293,7 @@
   "icon": "",
   "modified": "2026-08-02 00:59:10.329658",
   "name": "Pending Approval",
-  "style": "",
+  "style": "Warning",
   "workflow_state_name": "Pending Approval"
  },
  {
@@ -302,7 +302,7 @@
   "icon": "",
   "modified": "2026-08-02 00:59:10.330709",
   "name": "Posted (memo)",
-  "style": "",
+  "style": "Primary",
   "workflow_state_name": "Posted (memo)"
  },
  {
@@ -311,7 +311,7 @@
   "icon": "",
   "modified": "2026-08-02 00:59:10.361770",
   "name": "Under Review",
-  "style": "",
+  "style": "Primary",
   "workflow_state_name": "Under Review"
  },
  {
