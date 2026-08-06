@@ -37,6 +37,11 @@ from apex.apex_core.utils.portal_token_security import (
 )
 from apex.habitat import permissions
 from apex.habitat.utils import arrival_slips, occupancy
+from apex.habitat.utils.arrival_slips import (
+    ARRIVAL_SLIP_TEMPLATE,
+    CHECKIN_SLIP_TEMPLATE,
+    CUSTODY_HANDOVER_SLIP_TEMPLATE,
+)
 from apex.habitat.utils.housing_scope import active_building_scope
 
 
