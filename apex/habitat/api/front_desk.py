@@ -13,8 +13,8 @@ locking, or ledger logic of its own:
   bed lock, occupancy recompute, housing-allowance gate, and custody-clearance
   gate all stay in place).
 
-Active-occupancy semantics throughout: ``docstatus == 1`` AND
-``check_out_date`` is not set.
+Active-occupancy semantics, the bed colour rule and the bed mix come from
+``habitat.utils.occupancy``, shared with the Arrivals Desk.
 """
 
 from __future__ import annotations
@@ -24,27 +24,171 @@ from frappe import _
 from frappe.utils import now, today
 
 from apex.apex_core.utils.rate_limit_identity import rate_limit
+from apex.habitat.utils import occupancy
+from apex.habitat.utils.housing_scope import active_building_scope
 
 
-def _bed_color(bed_status: str, condition: str, readiness_status: str) -> str:
-    """Resolve the Front Desk bed color. First matching rule wins (top-down).
+def _floor_label(n: int) -> str:
+    """Human floor name from a floor number: 0 is the ground floor, negatives are
+    basements counted downwards."""
+    if n == 0:
+        return _("Ground Floor")
+    if n < 0:
+        return _("Basement {0}").format(abs(n))
+    return _("Floor {0}").format(n)
 
-    1. Out of Service / Scrapped  -> grey  (disabled)
-    2. Occupied                   -> red   (active occupant)
-    3. Available + room Ready/Unknown            -> green (clickable)
-    4. Available + room not ready (cleaning/repair/oos) -> amber (warning)
-    5. fallback                   -> grey
-    """
-    if bed_status == "Out of Service" or condition == "Scrapped":
-        return "grey"
-    if bed_status == "Occupied":
-        return "red"
-    if bed_status == "Available":
-        if readiness_status in ("Ready", "Unknown"):
-            return "green"
-        if readiness_status in ("Needs Cleaning", "Needs Repair", "Out of Service"):
-            return "amber"
-    return "grey"
+
+def _grid_bed_rows(building: str) -> list:
+    """Every bed in one building with the room facts the board draws it from, in ONE
+    join rather than a lookup per bed."""
+    Bed = frappe.qb.DocType("Bed")
+    Room = frappe.qb.DocType("Room")
+    return (
+        frappe.qb.from_(Bed)
+        .left_join(Room)
+        .on(Bed.room == Room.name)
+        .select(
+            Bed.name.as_("bed"),
+            Bed.bed_code,
+            Bed.room,
+            Bed.status.as_("bed_status"),
+            Bed.condition,
+            Bed.is_temporary,
+            Room.floor.as_("room_floor"),
+            Room.room_type.as_("room_type"),
+            Room.readiness_status.as_("readiness_status"),
+        )
+        .where(Bed.building == building)
+        .run(as_dict=True)
+    )
+
+
+def _temporary_worker_names(assignments) -> dict:
+    """Display names for the Temporary Worker occupants, in one query or none."""
+    tw_parties = {a.party for a in assignments if a.party_type == "Temporary Worker" and a.party}
+    if not tw_parties:
+        return {}
+    rows = frappe.get_all(
+        "Temporary Worker", filters={"name": ["in", list(tw_parties)]},
+        fields=["name", "worker_name"]
+    )
+    return {row.name: row.worker_name for row in rows}
+
+
+def _assignments_holding_custody(assignment_names) -> set:
+    """Which of these assignments still carry custody items, in one query or none."""
+    if not assignment_names:
+        return set()
+    custody_rows = frappe.get_all(
+        "Accommodation Custody Item",
+        filters={
+            "parenttype": "Housing Assignment",
+            "parent": ["in", assignment_names],
+        },
+        fields=["parent"],
+        distinct=True,
+    )
+    return {c.parent for c in custody_rows}
+
+
+def _dominant_project_by_room(assignments, bed_to_room) -> dict:
+    """The project most of a room's occupants belong to, so the board can colour a
+    room by crew. Ties resolve to whichever project ``max`` sees first."""
+    room_project_tally: dict[str, dict[str, int]] = {}
+    for asg in assignments:
+        if not asg.project:
+            continue
+        room_name = bed_to_room.get(asg.bed)
+        if not room_name:
+            continue
+        room_project_tally.setdefault(room_name, {})
+        room_project_tally[room_name][asg.project] = room_project_tally[room_name].get(asg.project, 0) + 1
+    return {
+        room_name: max(tally, key=tally.get) for room_name, tally in room_project_tally.items()
+    }
+
+
+def _occupant_payload(asg, tw_names, custody_parents) -> dict:
+    """The occupant block on a red bed. A Temporary Worker has no ``employee_name``,
+    so his own worker name stands in; the party id is the last resort."""
+    occupant_name = (
+        asg.employee_name
+        or (tw_names.get(asg.party) if asg.party_type == "Temporary Worker" else None)
+        or asg.party
+    )
+    return {
+        "assignment": asg.name,
+        "employee": asg.employee,
+        "employee_name": occupant_name,
+        "party_type": asg.party_type,
+        "party": asg.party,
+        "project": asg.project,
+        "check_in_date": str(asg.check_in_date) if asg.check_in_date else None,
+        "has_custody": asg.name in custody_parents,
+    }
+
+
+def _bed_payload(bed, color, occupant) -> dict:
+    """One bed as the board draws it. ``bed_color`` is server-computed; the client
+    must not recompute it."""
+    return {
+        "bed": bed.bed,
+        "bed_code": bed.bed_code,
+        "bed_status": bed.bed_status,
+        "condition": bed.condition,
+        "is_temporary": bed.is_temporary,
+        "bed_color": color,
+        "occupant": occupant,
+    }
+
+
+def _room_shell(bed, room_meta, dominant_project) -> dict:
+    """The room a bed sits in, before its beds are attached. Room facts come from the
+    Room record where there is one; the bed's own joined columns stand in when the
+    room row is missing, so an orphaned bed still renders."""
+    return {
+        "room": bed.room,
+        "room_number": room_meta.room_number if room_meta else bed.room,
+        "room_type": bed.room_type,
+        "readiness_status": bed.readiness_status,
+        "room_status": room_meta.status if room_meta else None,
+        "bed_capacity": room_meta.bed_capacity if room_meta else None,
+        "current_occupancy": room_meta.current_occupancy if room_meta else None,
+        "dominant_project": dominant_project,
+        "_floor": bed.room_floor,
+        "beds": [],
+    }
+
+
+def _rooms_into_floors(rooms_acc) -> list:
+    """Group the accumulated rooms into ordered floors. Rooms whose floor is unset
+    land in a trailing Unassigned Floor rather than being dropped."""
+    floors_acc: dict = {}
+    for room in rooms_acc.values():
+        key = room.pop("_floor")
+        floors_acc.setdefault(key, []).append(room)
+
+    floors = []
+    numbered = sorted((k for k in floors_acc if k is not None))
+    for floor in numbered:
+        rooms_list = sorted(floors_acc[floor], key=lambda r: str(r.get("room_number") or ""))
+        floors.append(
+            {
+                "floor": floor,
+                "floor_label": _floor_label(floor),
+                "rooms": rooms_list,
+            }
+        )
+    if None in floors_acc:
+        rooms_list = sorted(floors_acc[None], key=lambda r: str(r.get("room_number") or ""))
+        floors.append(
+            {
+                "floor": 0,
+                "floor_label": _("Unassigned Floor"),
+                "rooms": rooms_list,
+            }
+        )
+    return floors
 
 
 @frappe.whitelist()
@@ -53,7 +197,7 @@ def get_building_grid(building: str) -> dict:
 
     Reads only. Permission-gated on the building. Built from a BOUNDED set of
     bulk queries (no per-bed or per-room round trips). Each bed gets a
-    server-computed ``bed_color`` (see ``_bed_color``); the client must not
+    server-computed ``bed_color`` (see ``occupancy.bed_color``); the client must not
     recompute color.
 
     Args:
@@ -82,175 +226,47 @@ def get_building_grid(building: str) -> dict:
     )
     rooms_by_name = {r.name: r for r in rooms}
 
-    Bed = frappe.qb.DocType("Bed")
-    Room = frappe.qb.DocType("Room")
-    bed_rows = (
-        frappe.qb.from_(Bed)
-        .left_join(Room)
-        .on(Bed.room == Room.name)
-        .select(
-            Bed.name.as_("bed"),
-            Bed.bed_code,
-            Bed.room,
-            Bed.status.as_("bed_status"),
-            Bed.condition,
-            Bed.is_temporary,
-            Room.floor.as_("room_floor"),
-            Room.room_type.as_("room_type"),
-            Room.readiness_status.as_("readiness_status"),
-        )
-        .where(Bed.building == building)
-        .run(as_dict=True)
-    )
+    bed_rows = _grid_bed_rows(building)
 
     assignments = frappe.get_all(
         "Housing Assignment",
-        filters={
-            "building": building,
-            "docstatus": 1,
-            "check_out_date": ["is", "not set"],
-        },
+        filters=occupancy.active_assignment_filters(building=building),
         fields=["name", "bed", "employee", "employee_name", "party_type", "party", "project", "check_in_date"],
     )
     assignments_by_bed = {a.bed: a for a in assignments}
 
-    tw_names: dict[str, str] = {}
-    tw_parties = {a.party for a in assignments if a.party_type == "Temporary Worker" and a.party}
-    if tw_parties:
-        for row in frappe.get_all(
-            "Temporary Worker", filters={"name": ["in", list(tw_parties)]}, fields=["name", "worker_name"]
-        ):
-            tw_names[row.name] = row.worker_name
-
-    custody_parents: set[str] = set()
-    assignment_names = [a.name for a in assignments]
-    if assignment_names:
-        custody_rows = frappe.get_all(
-            "Accommodation Custody Item",
-            filters={
-                "parenttype": "Housing Assignment",
-                "parent": ["in", assignment_names],
-            },
-            fields=["parent"],
-            distinct=True,
-        )
-        custody_parents = {c.parent for c in custody_rows}
+    tw_names = _temporary_worker_names(assignments)
+    custody_parents = _assignments_holding_custody([a.name for a in assignments])
 
     bed_to_room = {b.bed: b.room for b in bed_rows}
-    room_project_tally: dict[str, dict[str, int]] = {}
-    for asg in assignments:
-        if not asg.project:
-            continue
-        room_name = bed_to_room.get(asg.bed)
-        if not room_name:
-            continue
-        room_project_tally.setdefault(room_name, {})
-        room_project_tally[room_name][asg.project] = room_project_tally[room_name].get(asg.project, 0) + 1
-    dominant_project_by_room = {
-        room_name: max(tally, key=tally.get) for room_name, tally in room_project_tally.items()
-    }
+    dominant_project_by_room = _dominant_project_by_room(assignments, bed_to_room)
 
-    summary = {"total_beds": 0, "available": 0, "occupied": 0, "blocked": 0, "out_of_service": 0}
+    summary = occupancy.empty_bed_mix()
     rooms_acc: dict[str, dict] = {}
 
     for bed in bed_rows:
-        color = _bed_color(bed.bed_status, bed.condition, bed.readiness_status)
-        summary["total_beds"] += 1
-        if color == "green":
-            summary["available"] += 1
-        elif color == "red":
-            summary["occupied"] += 1
-        elif color == "amber":
-            summary["blocked"] += 1
-        else:
-            summary["out_of_service"] += 1
+        color = occupancy.bed_color(bed.bed_status, bed.condition, bed.readiness_status)
+        occupancy.tally_bed(summary, color)
 
         occupant = None
         if color == "red":
             asg = assignments_by_bed.get(bed.bed)
             if asg:
-                occupant_name = (
-                    asg.employee_name
-                    or (tw_names.get(asg.party) if asg.party_type == "Temporary Worker" else None)
-                    or asg.party
-                )
-                occupant = {
-                    "assignment": asg.name,
-                    "employee": asg.employee,
-                    "employee_name": occupant_name,
-                    "party_type": asg.party_type,
-                    "party": asg.party,
-                    "project": asg.project,
-                    "check_in_date": str(asg.check_in_date) if asg.check_in_date else None,
-                    "has_custody": asg.name in custody_parents,
-                }
-
-        bed_payload = {
-            "bed": bed.bed,
-            "bed_code": bed.bed_code,
-            "bed_status": bed.bed_status,
-            "condition": bed.condition,
-            "is_temporary": bed.is_temporary,
-            "bed_color": color,
-            "occupant": occupant,
-        }
+                occupant = _occupant_payload(asg, tw_names, custody_parents)
 
         room_name = bed.room
         if room_name not in rooms_acc:
-            room_meta = rooms_by_name.get(room_name)
-            rooms_acc[room_name] = {
-                "room": room_name,
-                "room_number": room_meta.room_number if room_meta else room_name,
-                "room_type": bed.room_type,
-                "readiness_status": bed.readiness_status,
-                "room_status": room_meta.status if room_meta else None,
-                "bed_capacity": room_meta.bed_capacity if room_meta else None,
-                "current_occupancy": room_meta.current_occupancy if room_meta else None,
-                "dominant_project": dominant_project_by_room.get(room_name),
-                "_floor": bed.room_floor,
-                "beds": [],
-            }
-        rooms_acc[room_name]["beds"].append(bed_payload)
-
-    floors_acc: dict = {}
-    for room in rooms_acc.values():
-        key = room.pop("_floor")
-        floors_acc.setdefault(key, []).append(room)
-
-    def _floor_label(n: int) -> str:
-        if n == 0:
-            return _("Ground Floor")
-        if n < 0:
-            return _("Basement {0}").format(abs(n))
-        return _("Floor {0}").format(n)
-
-    floors = []
-    numbered = sorted((k for k in floors_acc if k is not None))
-    for floor in numbered:
-        rooms_list = sorted(floors_acc[floor], key=lambda r: str(r.get("room_number") or ""))
-        floors.append(
-            {
-                "floor": floor,
-                "floor_label": _floor_label(floor),
-                "rooms": rooms_list,
-            }
-        )
-    if None in floors_acc:
-        rooms_list = sorted(floors_acc[None], key=lambda r: str(r.get("room_number") or ""))
-        floors.append(
-            {
-                "floor": 0,
-                "floor_label": _("Unassigned Floor"),
-                "rooms": rooms_list,
-            }
-        )
+            rooms_acc[room_name] = _room_shell(
+                bed, rooms_by_name.get(room_name), dominant_project_by_room.get(room_name)
+            )
+        rooms_acc[room_name]["beds"].append(_bed_payload(bed, color, occupant))
 
     return {
         "building": building,
         "building_title": building_title,
         "generated_on": now(),
         "summary": summary,
-        "floors": floors,
+        "floors": _rooms_into_floors(rooms_acc),
     }
 
 
@@ -270,16 +286,13 @@ def get_buildings_scope_state() -> dict:
         oversight role); ``active_buildings`` is the count of Active buildings in
         scope.
     """
-    from apex.habitat import permissions
-
-    is_scoped = not permissions._building_is_unscoped(frappe.session.user)
-    f = {"status": "Active"}
-    if is_scoped:
-        allowed = permissions._allowed_buildings(frappe.session.user)
-        if not allowed:
-            return {"is_scoped": True, "active_buildings": 0}
-        f["name"] = ["in", allowed]
-    return {"is_scoped": is_scoped, "active_buildings": frappe.db.count("Building", f)}
+    scope = active_building_scope(frappe.session.user)
+    if scope.filters is None:
+        return {"is_scoped": True, "active_buildings": 0}
+    return {
+        "is_scoped": scope.is_scoped,
+        "active_buildings": frappe.db.count("Building", scope.filters),
+    }
 
 
 @frappe.whitelist()
@@ -294,63 +307,25 @@ def list_supervisor_buildings() -> list[dict]:
     The bed mix is computed from a BOUNDED set of queries regardless of building
     count — one Active-building query, then ONE bed/room aggregate across all the
     in-scope buildings (no per-building round trip). Each building's counts come
-    from the same ``_bed_color`` rules as ``get_building_grid``; the client must
-    not recompute color.
+    from the same ``occupancy.bed_color`` rules as ``get_building_grid``; the client
+    must not recompute color.
 
     Returns:
         list of ``{building, building_title, total_beds, available, occupied,
         blocked, oos, occupancy_pct}`` sorted by building title.
     """
-    from apex.habitat import permissions
-
-    f = {"status": "Active"}
-    if not permissions._building_is_unscoped(frappe.session.user):
-        allowed = permissions._allowed_buildings(frappe.session.user)
-        if not allowed:
-            return []
-        f["name"] = ["in", allowed]
+    scope = active_building_scope(frappe.session.user)
+    if scope.filters is None:
+        return []
 
     buildings = frappe.get_all(
-        "Building", filters=f, fields=["name", "building_name"]
+        "Building", filters=scope.filters, fields=["name", "building_name"]
     )
     if not buildings:
         return []
     building_names = [b.name for b in buildings]
 
-    Bed = frappe.qb.DocType("Bed")
-    Room = frappe.qb.DocType("Room")
-    bed_rows = (
-        frappe.qb.from_(Bed)
-        .left_join(Room)
-        .on(Bed.room == Room.name)
-        .select(
-            Bed.building,
-            Bed.status.as_("bed_status"),
-            Bed.condition,
-            Room.readiness_status,
-        )
-        .where(Bed.building.isin(building_names))
-        .run(as_dict=True)
-    )
-
-    mix = {
-        name: {"total_beds": 0, "available": 0, "occupied": 0, "blocked": 0, "oos": 0}
-        for name in building_names
-    }
-    for bed in bed_rows:
-        bucket = mix.get(bed.building)
-        if bucket is None:
-            continue
-        color = _bed_color(bed.bed_status, bed.condition, bed.readiness_status)
-        bucket["total_beds"] += 1
-        if color == "green":
-            bucket["available"] += 1
-        elif color == "red":
-            bucket["occupied"] += 1
-        elif color == "amber":
-            bucket["blocked"] += 1
-        else:
-            bucket["oos"] += 1
+    mix = occupancy.bed_mix(occupancy.bed_mix_rows(building_names), building_names)
 
     auto = len(buildings) == 1
     result = []
@@ -365,7 +340,7 @@ def list_supervisor_buildings() -> list[dict]:
                 "available": m["available"],
                 "occupied": m["occupied"],
                 "blocked": m["blocked"],
-                "oos": m["oos"],
+                "oos": m["out_of_service"],
                 "occupancy_pct": round(m["occupied"] / total * 100) if total else 0,
                 "auto": auto,
             }
@@ -441,13 +416,61 @@ def _has_active_assignment(party_type: str, party: str, employee: str | None) ->
     """True if the worker holds a live bed: a submitted Accommodation Assignment
     with no check-out date. Matches on the Employee link when known (the assignment
     is Employee-keyed once linked) else on the party_type/party pair."""
-    filters = {"docstatus": 1, "check_out_date": ["is", "not set"]}
+    filters = occupancy.active_assignment_filters()
     if employee:
         filters["employee"] = employee
     else:
         filters["party_type"] = party_type
         filters["party"] = party
     return bool(frappe.db.exists("Housing Assignment", filters))
+
+
+def _match_masar_token(identifier):
+    """``(party_type, party, employee, employee_name)`` for a scanned personal Masar
+    link, or None. The raw token is never stored, so the lookup is on its hash."""
+    from apex.apex_core.doctype.masar_worker_token.masar_worker_token import _hash_token
+
+    row = frappe.db.get_value(
+        "Masar Worker Token",
+        {"token": _hash_token(identifier), "enabled": 1},
+        ["party_type", "party", "employee", "employee_name"],
+        as_dict=True,
+    )
+    if not row:
+        return None
+    return row.party_type, row.party, row.employee, row.employee_name
+
+
+def _match_employee_iqama(identifier):
+    """``(party_type, party, employee, employee_name)`` for an Iqama on a working
+    Employee, or None. Returns None outright when this HR setup exposes no Iqama
+    field at all."""
+    iqama_field = _employee_iqama_field()
+    if not iqama_field:
+        return None
+    emp = frappe.db.get_value(
+        "Employee",
+        {iqama_field: identifier, "status": ["not in", ("Inactive", "Left")]},
+        ["name", "employee_name"],
+        as_dict=True,
+    )
+    if not emp:
+        return None
+    return "Employee", emp.name, emp.name, emp.employee_name
+
+
+def _match_temporary_worker_iqama(identifier):
+    """``(party_type, party, employee, employee_name)`` for an Iqama on a Temporary
+    Worker, or None. Surfaces his linked permanent Employee when one exists."""
+    tw = frappe.db.get_value(
+        "Temporary Worker",
+        {"iqama_number": identifier},
+        ["name", "worker_name", "linked_employee"],
+        as_dict=True,
+    )
+    if not tw:
+        return None
+    return "Temporary Worker", tw.name, tw.linked_employee or None, tw.worker_name
 
 
 @frappe.whitelist()
@@ -485,47 +508,16 @@ def resolve_worker(identifier: str) -> dict:
     if not identifier:
         return {"found": False, "message": _("Enter or scan an Iqama number or worker link.")}
 
-    party_type = party = employee = employee_name = image = None
-
-    from apex.apex_core.doctype.masar_worker_token.masar_worker_token import _hash_token
-
-    token_row = frappe.db.get_value(
-        "Masar Worker Token",
-        {"token": _hash_token(identifier), "enabled": 1},
-        ["party_type", "party", "employee", "employee_name"],
-        as_dict=True,
+    match = (
+        _match_masar_token(identifier)
+        or _match_employee_iqama(identifier)
+        or _match_temporary_worker_iqama(identifier)
     )
-    if token_row:
-        party_type = token_row.party_type
-        party = token_row.party
-        employee = token_row.employee
-        employee_name = token_row.employee_name
-
-    if not party:
-        iqama_field = _employee_iqama_field()
-        if iqama_field:
-            emp = frappe.db.get_value(
-                "Employee",
-                {iqama_field: identifier, "status": ["not in", ("Inactive", "Left")]},
-                ["name", "employee_name"],
-                as_dict=True,
-            )
-            if emp:
-                party_type, party, employee, employee_name = "Employee", emp.name, emp.name, emp.employee_name
-
-    if not party:
-        tw = frappe.db.get_value(
-            "Temporary Worker",
-            {"iqama_number": identifier},
-            ["name", "worker_name", "linked_employee"],
-            as_dict=True,
-        )
-        if tw:
-            party_type, party, employee_name = "Temporary Worker", tw.name, tw.worker_name
-            employee = tw.linked_employee or None
-
-    if not party:
+    if not match:
         return {"found": False, "message": _("No worker matches {0}.").format(identifier)}
+
+    party_type, party, employee, employee_name = match
+    image = None
 
     if party_type == "Temporary Worker":
         frappe.has_permission("Temporary Worker", "read", throw=True)
@@ -683,7 +675,7 @@ def quick_check_out(bed, checkout_date=None, checkout_reason=None, room_conditio
 
     assignment = frappe.db.get_value(
         "Housing Assignment",
-        {"bed": bed, "docstatus": 1, "check_out_date": ["is", "not set"]},
+        occupancy.active_assignment_filters(bed=bed),
         "name",
     )
     if not assignment:

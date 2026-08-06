@@ -16,6 +16,9 @@ module adds:
 - ``register_temporary_worker`` — register a passport-only new arrival. A housing
   supervisor may create a Temporary Worker but NEVER an Employee (the doctype is
   hard-coded; Employee creation is HRMS-gated and unreachable here).
+
+The printed slips live in ``habitat.utils.arrival_slips``; the occupancy and bed
+rules in ``habitat.utils.occupancy``.
 """
 
 from __future__ import annotations
@@ -27,14 +30,14 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     masar_qr_data_uri,
     reshare_worker_link,
 )
+from apex.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER
 from apex.apex_core.utils.portal_token_security import (
     WORKER,
     credential_delivery_destination,
 )
 from apex.habitat import permissions
-
-PARTY_EMPLOYEE = "Employee"
-PARTY_TEMPORARY_WORKER = "Temporary Worker"
+from apex.habitat.utils import arrival_slips, occupancy
+from apex.habitat.utils.housing_scope import active_building_scope
 
 
 def _expiry_days(expiry_date) -> int | None:
@@ -89,7 +92,7 @@ def _assert_party_in_scope(party_type, party) -> None:
     if party_type == PARTY_EMPLOYEE:
         building = frappe.db.get_value(
             "Housing Assignment",
-            {"party_type": PARTY_EMPLOYEE, "party": party, "docstatus": 1, "check_out_date": ["is", "not set"]},
+            occupancy.active_assignment_filters(party_type=PARTY_EMPLOYEE, party=party),
             "building",
         )
         if building and building not in allowed:
@@ -182,6 +185,54 @@ def send_masar_link_message(employee, phone=None) -> dict:
         raise
 
 
+def _arrival_identity(party_type, party):
+    """``(worker_name, image, expiry_date)`` for one party, permission- and
+    scope-gated before any identity leaves the server. Only a Temporary Worker has
+    an expiry; only an Employee has a photo."""
+    if party_type == PARTY_EMPLOYEE:
+        frappe.has_permission("Employee", "read", throw=True)
+        _assert_party_in_scope(party_type, party)
+        info = frappe.db.get_value("Employee", party, ["employee_name", "image"], as_dict=True) or {}
+        if not info:
+            frappe.throw(_("Employee {0} does not exist.").format(party))
+        return info.get("employee_name"), info.get("image"), None
+
+    if party_type == PARTY_TEMPORARY_WORKER:
+        frappe.has_permission("Temporary Worker", "read", throw=True)
+        _assert_party_in_scope(party_type, party)
+        info = frappe.db.get_value(
+            "Temporary Worker", party, ["worker_name", "expiry_date"], as_dict=True
+        ) or {}
+        if not info:
+            frappe.throw(_("Temporary Worker {0} does not exist.").format(party))
+        return info.get("worker_name"), None, info.get("expiry_date")
+
+    frappe.throw(_("Unknown party type: {0}").format(party_type))
+
+
+def _custody_balance(party) -> int:
+    """Net custody articles still on a worker: issues less returns, cancelled rows
+    excluded."""
+    rows = frappe.get_all(
+        "Accommodation Stock Ledger",
+        filters={"item_type": "Custody Article", "employee": party, "is_cancelled": 0},
+        fields=["signed_qty"],
+    )
+    return int(sum(int(r.signed_qty or 0) for r in rows))
+
+
+def _masar_is_enabled(party_type, party) -> bool:
+    """True only when the worker holds a token AND it is still enabled."""
+    token = (
+        frappe.db.get_value(
+            "Masar Worker Token", {"party_type": party_type, "party": party},
+            ["token", "enabled"], as_dict=True
+        )
+        or {}
+    )
+    return bool(token.get("token")) and bool(token.get("enabled"))
+
+
 @frappe.whitelist()
 def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     """Party-aware arrival snapshot for one worker (Employee or Temporary Worker)."""
@@ -190,31 +241,12 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     if not (party_type and party):
         frappe.throw(_("party_type and party are required."))
 
-    tw_expiry = None
-    if party_type == PARTY_EMPLOYEE:
-        frappe.has_permission("Employee", "read", throw=True)
-        _assert_party_in_scope(party_type, party)
-        info = frappe.db.get_value("Employee", party, ["employee_name", "image"], as_dict=True) or {}
-        if not info:
-            frappe.throw(_("Employee {0} does not exist.").format(party))
-        worker_name, image = info.get("employee_name"), info.get("image")
-    elif party_type == PARTY_TEMPORARY_WORKER:
-        frappe.has_permission("Temporary Worker", "read", throw=True)
-        _assert_party_in_scope(party_type, party)
-        info = frappe.db.get_value(
-            "Temporary Worker", party, ["worker_name", "expiry_date"], as_dict=True
-        ) or {}
-        if not info:
-            frappe.throw(_("Temporary Worker {0} does not exist.").format(party))
-        worker_name, image = info.get("worker_name"), None
-        tw_expiry = info.get("expiry_date")
-    else:
-        frappe.throw(_("Unknown party type: {0}").format(party_type))
+    worker_name, image, tw_expiry = _arrival_identity(party_type, party)
 
     assignment = (
         frappe.db.get_value(
             "Housing Assignment",
-            {"party_type": party_type, "party": party, "docstatus": 1, "check_out_date": ["is", "not set"]},
+            occupancy.active_assignment_filters(party_type=party_type, party=party),
             ["name", "project", "building", "bed", "check_in_date"],
             as_dict=True,
         )
@@ -225,22 +257,8 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         frappe.db.get_value("Bed", current_bed, "bed_code") if current_bed else None
     )
 
-    custody_count = 0
-    if party_type == PARTY_EMPLOYEE:
-        rows = frappe.get_all(
-            "Accommodation Stock Ledger",
-            filters={"item_type": "Custody Article", "employee": party, "is_cancelled": 0},
-            fields=["signed_qty"],
-        )
-        custody_count = int(sum(int(r.signed_qty or 0) for r in rows))
-
-    token = (
-        frappe.db.get_value(
-            "Masar Worker Token", {"party_type": party_type, "party": party}, ["token", "enabled"], as_dict=True
-        )
-        or {}
-    )
-    masar_enabled = bool(token.get("token")) and bool(token.get("enabled"))
+    custody_count = _custody_balance(party) if party_type == PARTY_EMPLOYEE else 0
+    masar_enabled = _masar_is_enabled(party_type, party)
 
     return {
         "party_type": party_type,
@@ -266,6 +284,93 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     }
 
 
+def _already_housed_parties(restrict, allowed):
+    """``(employee_ids, temporary_worker_ids)`` already holding a live bed, so the
+    search never offers a worker who is already in one."""
+    housed_filters = occupancy.active_assignment_filters()
+    if restrict:
+        housed_filters["building"] = ["in", allowed]
+    housed = frappe.get_all(
+        "Housing Assignment",
+        filters=housed_filters,
+        fields=["party_type", "party", "employee"],
+    )
+    housed_emp = {h.employee for h in housed if h.employee}
+    housed_tw = {h.party for h in housed if h.party_type == "Temporary Worker" and h.party}
+    return housed_emp, housed_tw
+
+
+def _employees_housed_elsewhere(allowed) -> set:
+    """Employees living in a building outside the caller's estate. They are already
+    housed, and naming them here would leak an out-of-estate worker."""
+    blocked = frappe.get_all(
+        "Housing Assignment",
+        filters=occupancy.active_assignment_filters(building=["not in", allowed]),
+        fields=["employee"],
+    )
+    return {b.employee for b in blocked if b.employee}
+
+
+def _employee_matches(txt, housed_emp, blocked_emp) -> list:
+    """Active Employees matching the typed text who are not already housed."""
+    emps = frappe.get_all(
+        "Employee",
+        filters={"status": "Active"},
+        or_filters=(
+            [["employee_name", "like", f"%{txt}%"], ["name", "like", f"%{txt}%"]] if txt else None
+        ),
+        fields=["name", "employee_name", "designation"],
+        order_by="employee_name asc",
+        limit_page_length=15,
+    )
+    return [
+        {
+            "party_type": PARTY_EMPLOYEE,
+            "party": e.name,
+            "label": e.employee_name or e.name,
+            "sub": e.designation or e.name,
+        }
+        for e in emps
+        if e.name not in housed_emp and e.name not in blocked_emp
+    ]
+
+
+def _temporary_worker_matches(txt, restrict, allowed, housed_tw) -> list:
+    """Active Temporary Workers matching the typed text (name, passport or id) who
+    are not already housed, most recently touched first."""
+    tw_filters = {"status": "Active"}
+    if restrict:
+        tw_filters["building"] = ["in", allowed]
+    tws = frappe.get_all(
+        "Temporary Worker",
+        filters=tw_filters,
+        or_filters=(
+            [
+                ["worker_name", "like", f"%{txt}%"],
+                ["passport_number", "like", f"%{txt}%"],
+                ["name", "like", f"%{txt}%"],
+            ]
+            if txt
+            else None
+        ),
+        fields=["name", "worker_name", "passport_number", "expiry_date"],
+        order_by="modified desc",
+        limit_page_length=15,
+    )
+    return [
+        {
+            "party_type": PARTY_TEMPORARY_WORKER,
+            "party": t.name,
+            "label": t.worker_name or t.name,
+            "sub": _("Passport {0}").format(t.passport_number or "—"),
+            "expiry_date": frappe.utils.formatdate(t.expiry_date) if t.expiry_date else None,
+            "expiry_days": _expiry_days(t.expiry_date),
+        }
+        for t in tws
+        if t.name not in housed_tw
+    ]
+
+
 @frappe.whitelist()
 def search_arrivals_workers(building=None, txt=None) -> list:
     """Combined worker lookup for the desk: registered Employees first, then active
@@ -278,84 +383,14 @@ def search_arrivals_workers(building=None, txt=None) -> list:
     if restrict and not allowed:
         return []
 
-    housed_filters = {"docstatus": 1, "check_out_date": ["is", "not set"]}
-    if restrict:
-        housed_filters["building"] = ["in", allowed]
-    housed = frappe.get_all(
-        "Housing Assignment",
-        filters=housed_filters,
-        fields=["party_type", "party", "employee"],
-    )
-    housed_emp = {h.employee for h in housed if h.employee}
-    housed_tw = {h.party for h in housed if h.party_type == "Temporary Worker" and h.party}
-
-    blocked_emp = set()
-    if restrict:
-        blocked = frappe.get_all(
-            "Housing Assignment",
-            filters={
-                "docstatus": 1,
-                "check_out_date": ["is", "not set"],
-                "building": ["not in", allowed],
-            },
-            fields=["employee"],
-        )
-        blocked_emp = {b.employee for b in blocked if b.employee}
+    housed_emp, housed_tw = _already_housed_parties(restrict, allowed)
+    blocked_emp = _employees_housed_elsewhere(allowed) if restrict else set()
 
     if frappe.has_permission("Employee", "read"):
-        emps = frappe.get_all(
-            "Employee",
-            filters={"status": "Active"},
-            or_filters=(
-                [["employee_name", "like", f"%{txt}%"], ["name", "like", f"%{txt}%"]] if txt else None
-            ),
-            fields=["name", "employee_name", "designation"],
-            order_by="employee_name asc",
-            limit_page_length=15,
-        )
-        results += [
-            {
-                "party_type": PARTY_EMPLOYEE,
-                "party": e.name,
-                "label": e.employee_name or e.name,
-                "sub": e.designation or e.name,
-            }
-            for e in emps
-            if e.name not in housed_emp and e.name not in blocked_emp
-        ]
+        results += _employee_matches(txt, housed_emp, blocked_emp)
 
     if frappe.has_permission("Temporary Worker", "read"):
-        tw_filters = {"status": "Active"}
-        if restrict:
-            tw_filters["building"] = ["in", allowed]
-        tws = frappe.get_all(
-            "Temporary Worker",
-            filters=tw_filters,
-            or_filters=(
-                [
-                    ["worker_name", "like", f"%{txt}%"],
-                    ["passport_number", "like", f"%{txt}%"],
-                    ["name", "like", f"%{txt}%"],
-                ]
-                if txt
-                else None
-            ),
-            fields=["name", "worker_name", "passport_number", "expiry_date"],
-            order_by="modified desc",
-            limit_page_length=15,
-        )
-        results += [
-            {
-                "party_type": PARTY_TEMPORARY_WORKER,
-                "party": t.name,
-                "label": t.worker_name or t.name,
-                "sub": _("Passport {0}").format(t.passport_number or "—"),
-                "expiry_date": frappe.utils.formatdate(t.expiry_date) if t.expiry_date else None,
-                "expiry_days": _expiry_days(t.expiry_date),
-            }
-            for t in tws
-            if t.name not in housed_tw
-        ]
+        results += _temporary_worker_matches(txt, restrict, allowed, housed_tw)
 
     return results
 
@@ -618,6 +653,80 @@ def house_over_capacity(room, party_type, party, project, check_in_date=None) ->
     return {**result, "is_temporary": True, "bed_code": bed.bed_code}
 
 
+def _arrival_supplier(arrival, tw_supplier):
+    """Who supplied this arrival: a Temporary Worker's own labour supplier, or the
+    supplier an externally-billed Employee is charged to. Neither means direct hire."""
+    if arrival.party_type == PARTY_TEMPORARY_WORKER:
+        return tw_supplier.get(arrival.party)
+    if arrival.is_external_supplier:
+        return arrival.billed_to_supplier
+    return None
+
+
+def _supplier_breakdown(arrivals) -> list:
+    """Today's arrivals counted per supplier, biggest first, each named. Two bounded
+    lookups regardless of how many arrivals there are."""
+    tw_parties = [a.party for a in arrivals if a.party_type == PARTY_TEMPORARY_WORKER and a.party]
+    tw_supplier = {}
+    if tw_parties:
+        for row in frappe.get_all(
+            "Temporary Worker",
+            filters={"name": ["in", list(set(tw_parties))]},
+            fields=["name", "labour_supplier"],
+        ):
+            tw_supplier[row.name] = row.labour_supplier
+
+    counts: dict[str | None, int] = {}
+    for a in arrivals:
+        sup = _arrival_supplier(a, tw_supplier)
+        counts[sup] = counts.get(sup, 0) + 1
+
+    sup_ids = [s for s in counts if s]
+    sup_names = {}
+    if sup_ids:
+        for row in frappe.get_all(
+            "Supplier", filters={"name": ["in", sup_ids]}, fields=["name", "supplier_name"]
+        ):
+            sup_names[row.name] = row.supplier_name
+
+    return sorted(
+        (
+            {
+                "supplier": s,
+                "supplier_name": sup_names.get(s) if s else _("Direct / Company"),
+                "count": c,
+            }
+            for s, c in counts.items()
+        ),
+        key=lambda r: r["count"],
+        reverse=True,
+    )
+
+
+def _over_capacity_count(bed_ids) -> int:
+    """How many of today's placements went onto a virtual over-capacity bed."""
+    if not bed_ids:
+        return 0
+    return frappe.db.count("Bed", {"name": ["in", list(set(bed_ids))], "is_temporary": 1})
+
+
+def _manifest_progress(date, building, housed_count):
+    """``(expected, completion_pct)`` against the day's Arrival Batch manifests.
+    Both are None when no manifest DocType is installed; the percentage is None when
+    nothing was expected, since 0/0 is not 0%."""
+    if not frappe.db.exists("DocType", "Arrival Batch"):
+        return None, None
+    batch_filters = {"expected_date": date}
+    if building:
+        batch_filters["building"] = building
+    expected = 0
+    for b in frappe.get_all("Arrival Batch", filters=batch_filters, fields=["expected_count"]):
+        expected += int(b.get("expected_count") or 0)
+    if not expected:
+        return expected, None
+    return expected, round(min(housed_count, expected) / expected * 100, 1)
+
+
 @frappe.whitelist()
 def get_arrival_summary(date=None, building=None) -> dict:
     """Read-only arrival telemetry for a manager strip / daily ops view.
@@ -642,65 +751,9 @@ def get_arrival_summary(date=None, building=None) -> dict:
     )
     housed_count = len(arrivals)
 
-    tw_parties = [a.party for a in arrivals if a.party_type == PARTY_TEMPORARY_WORKER and a.party]
-    tw_supplier = {}
-    if tw_parties:
-        for row in frappe.get_all(
-            "Temporary Worker",
-            filters={"name": ["in", list(set(tw_parties))]},
-            fields=["name", "labour_supplier"],
-        ):
-            tw_supplier[row.name] = row.labour_supplier
-
-    counts: dict[str | None, int] = {}
-    for a in arrivals:
-        if a.party_type == PARTY_TEMPORARY_WORKER:
-            sup = tw_supplier.get(a.party)
-        elif a.is_external_supplier:
-            sup = a.billed_to_supplier
-        else:
-            sup = None
-        counts[sup] = counts.get(sup, 0) + 1
-
-    sup_ids = [s for s in counts if s]
-    sup_names = {}
-    if sup_ids:
-        for row in frappe.get_all(
-            "Supplier", filters={"name": ["in", sup_ids]}, fields=["name", "supplier_name"]
-        ):
-            sup_names[row.name] = row.supplier_name
-    by_supplier = sorted(
-        (
-            {
-                "supplier": s,
-                "supplier_name": sup_names.get(s) if s else _("Direct / Company"),
-                "count": c,
-            }
-            for s, c in counts.items()
-        ),
-        key=lambda r: r["count"],
-        reverse=True,
-    )
-
-    bed_ids = [a.bed for a in arrivals if a.bed]
-    over_capacity_count = 0
-    if bed_ids:
-        over_capacity_count = frappe.db.count(
-            "Bed", {"name": ["in", list(set(bed_ids))], "is_temporary": 1}
-        )
-
-    manifest_completion_pct = None
-    manifest_expected = None
-    if frappe.db.exists("DocType", "Arrival Batch"):
-        batch_filters = {"expected_date": date}
-        if building:
-            batch_filters["building"] = building
-        expected = 0
-        for b in frappe.get_all("Arrival Batch", filters=batch_filters, fields=["expected_count"]):
-            expected += int(b.get("expected_count") or 0)
-        manifest_expected = expected
-        if expected:
-            manifest_completion_pct = round(min(housed_count, expected) / expected * 100, 1)
+    by_supplier = _supplier_breakdown(arrivals)
+    over_capacity_count = _over_capacity_count([a.bed for a in arrivals if a.bed])
+    manifest_expected, manifest_completion_pct = _manifest_progress(date, building, housed_count)
 
     return {
         "date": date,
@@ -772,54 +825,6 @@ def get_expected_arrivals(date=None, building=None) -> dict:
     }
 
 
-
-
-def _company_name() -> str:
-    """The operating company for slip headers, via the shared Habitat resolver
-    (explicit Habitat Settings company -> user default -> global default)."""
-    from apex.apex_core.utils.company import resolve_company
-
-    return resolve_company("Habitat") or ""
-
-
-def _slip_dir() -> str:
-    """Text direction for a printed slip, from the boot/user language (rtl for ar*)."""
-    lang = (frappe.local.lang or "en").lower()
-    return "rtl" if lang.startswith("ar") else "ltr"
-
-
-def _party_type_label(party_type) -> str:
-    """Translatable label for a raw party-type doctype name."""
-    if party_type == PARTY_EMPLOYEE:
-        return _("Employee")
-    if party_type == PARTY_TEMPORARY_WORKER:
-        return _("Temporary Worker")
-    return party_type or ""
-
-
-ARRIVAL_SLIP_TEMPLATE = """
-<div class="ax-slip" dir="{{ dir }}" lang="{{ lang }}" style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 24px auto;
-            border: 1px solid #ccc; border-radius: 8px; padding: 24px; color:#1a1a2e;">
-  <h2 style="color:#1a1a2e; margin:0 0 4px;">{{ _("Arrival Slip") }}</h2>
-  <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company | e }} &middot; {{ today | e }}</div>
-  <table style="width:100%; font-size:14px; border-collapse:collapse;">
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Worker") }}</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name | e }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Type") }}</td><td style="padding:4px 0;">{{ party_type_label | e }}</td></tr>
-    {% if designation %}<tr><td style="padding:4px 0; color:#555;">{{ _("Designation") }}</td><td style="padding:4px 0;">{{ designation | e }}</td></tr>{% endif %}
-    {% if passport_number %}<tr><td style="padding:4px 0; color:#555;">{{ _("Passport") }}</td><td style="padding:4px 0;">{{ passport_number | e }}</td></tr>{% endif %}
-    {% if iqama_number %}<tr><td style="padding:4px 0; color:#555;">{{ _("Iqama") }}</td><td style="padding:4px 0;">{{ iqama_number | e }}</td></tr>{% endif %}
-    {% if nationality %}<tr><td style="padding:4px 0; color:#555;">{{ _("Nationality") }}</td><td style="padding:4px 0;">{{ nationality | e }}</td></tr>{% endif %}
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Building") }}</td><td style="padding:4px 0;">{{ building | e }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Bed") }}</td><td style="padding:4px 0; font-weight:bold;">{{ bed | e }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Project") }}</td><td style="padding:4px 0;">{{ project | e }}</td></tr>
-    {% if check_in_date %}<tr><td style="padding:4px 0; color:#555;">{{ _("Check-in") }}</td><td style="padding:4px 0;">{{ check_in_date | e }}</td></tr>{% endif %}
-  </table>
-  {% if qr %}<div style="margin-top:16px;"><img src="{{ qr }}" style="width:120px;height:120px"></div>{% endif %}
-  <style>@media print { body { margin:0; } .ax-slip { border:none; margin:0; max-width:none; } }</style>
-</div>
-"""
-
-
 @frappe.whitelist(methods=["POST"])
 def get_arrival_slip(party_type, party) -> dict:
     """Render the on-demand arrival slip (HTML) for a housed worker. Reuses the
@@ -830,24 +835,20 @@ def get_arrival_slip(party_type, party) -> dict:
     plus his designation; a Temporary Worker gets his passport / Iqama / nationality
     instead (and no QR — his Masar link issues only once he is registered)."""
     card = get_arrival_card(party_type=party_type, party=party)
-    ctx = {
-        "worker_name": card.get("worker_name") or card.get("party"),
-        "party_type": party_type,
-        "party_type_label": _party_type_label(party_type),
-        "dir": _slip_dir(),
-        "lang": frappe.local.lang or "en",
+    ctx = arrival_slips.slip_context(
+        card.get("worker_name") or card.get("party"), party_type
+    )
+    ctx.update({
         "building": card.get("current_building") or "",
         "bed": card.get("current_bed_code") or card.get("current_bed") or "",
         "project": card.get("project") or "",
         "check_in_date": card.get("check_in_date") or "",
-        "company": _company_name(),
-        "today": frappe.utils.formatdate(frappe.utils.today()),
         "designation": None,
         "passport_number": None,
         "iqama_number": None,
         "nationality": None,
         "qr": None,
-    }
+    })
 
     if party_type == PARTY_EMPLOYEE:
         ctx["designation"] = frappe.db.get_value("Employee", party, "designation")
@@ -868,63 +869,10 @@ def get_arrival_slip(party_type, party) -> dict:
         ctx["iqama_number"] = tw.get("iqama_number")
         ctx["nationality"] = tw.get("nationality")
 
-    return {"html": frappe.render_template(ARRIVAL_SLIP_TEMPLATE, ctx), "title": ctx["worker_name"]}
-
-
-HOUSING_TERMS = [
-    frappe._lt("Keep the accommodation and shared areas clean and tidy."),
-    frappe._lt("No unauthorised guests or visitors are allowed in the accommodation."),
-    frappe._lt("Report any damage, fault, or maintenance issue to the supervisor immediately."),
-    frappe._lt("Comply with all fire, safety, and security rules and posted instructions."),
-    frappe._lt("Do not tamper with fire alarms, smoke detectors, or safety equipment."),
-    frappe._lt("Hand back all issued custody items in good condition on checkout."),
-]
-
-
-CHECKIN_SLIP_TEMPLATE = """
-<div class="ax-slip" dir="{{ dir }}" lang="{{ lang }}" style="font-family: Arial, Helvetica, sans-serif; max-width: 560px; margin: 24px auto;
-            border: 1px solid #ccc; border-radius: 8px; padding: 24px; color:#1a1a2e;">
-  <h2 style="color:#1a1a2e; margin:0 0 4px;">{{ _("Accommodation Check-in") }}</h2>
-  <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company | e }} &middot; {{ today | e }}</div>
-  <table style="width:100%; font-size:14px; border-collapse:collapse;">
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Worker") }}</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name | e }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Type") }}</td><td style="padding:4px 0;">{{ party_type_label | e }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Building") }}</td><td style="padding:4px 0;">{{ building | e }}</td></tr>
-    {% if address %}<tr><td style="padding:4px 0; color:#555;">{{ _("Address") }}</td><td style="padding:4px 0;">{{ address | e }}</td></tr>{% endif %}
-    {% if city %}<tr><td style="padding:4px 0; color:#555;">{{ _("City") }}</td><td style="padding:4px 0;">{{ city | e }}</td></tr>{% endif %}
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Bed") }}</td><td style="padding:4px 0; font-weight:bold;">{{ bed | e }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Project") }}</td><td style="padding:4px 0;">{{ project | e }}</td></tr>
-    {% if check_in_date %}<tr><td style="padding:4px 0; color:#555;">{{ _("Check-in") }}</td><td style="padding:4px 0;">{{ check_in_date | e }}</td></tr>{% endif %}
-  </table>
-
-  <div style="margin-top:20px; border:1px solid #ccc; border-radius:6px; padding:14px 18px;">
-    <div style="font-weight:bold; margin-bottom:8px; color:#1a1a2e;">{{ _("Housing Terms & Conditions") }}</div>
-    <ol style="margin:0; padding-inline-start:18px; color:#1a1a2e; font-size:13px; line-height:1.6;">
-      {% for term in terms %}<li>{{ term }}</li>{% endfor %}
-    </ol>
-  </div>
-
-  <div style="margin-top:16px; font-size:13px; color:#1a1a2e;">
-    {{ _("I have read and accept these terms and conditions.") }}
-  </div>
-
-  <table style="width:100%; margin-top:28px; font-size:13px; border-collapse:collapse;">
-    <tr>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Worker signature") }}</td>
-      <td style="width:4%;"></td>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Date") }}</td>
-    </tr>
-  </table>
-  <table style="width:100%; margin-top:28px; font-size:13px; border-collapse:collapse;">
-    <tr>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Supervisor signature") }}</td>
-      <td style="width:4%;"></td>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Date") }}</td>
-    </tr>
-  </table>
-  <style>@media print { body { margin:0; } .ax-slip { border:none; margin:0; max-width:none; } }</style>
-</div>
-"""
+    return {
+        "html": frappe.render_template(arrival_slips.ARRIVAL_SLIP_TEMPLATE, ctx),
+        "title": ctx["worker_name"],
+    }
 
 
 @frappe.whitelist()
@@ -945,98 +893,30 @@ def get_checkin_slip(party_type, party) -> dict:
         if building
         else None
     ) or {}
-    ctx = {
-        "worker_name": card.get("worker_name") or card.get("party"),
-        "party_type": party_type,
-        "party_type_label": _party_type_label(party_type),
-        "dir": _slip_dir(),
-        "lang": frappe.local.lang or "en",
+    address = get_address_text("Building", building)
+
+    ctx = arrival_slips.slip_context(
+        card.get("worker_name") or card.get("party"), party_type
+    )
+    ctx.update({
         "building": building or "",
-        "address": get_address_text("Building", building),
+        "address": address,
         "city": bldg.get("city") or "",
         "bed": card.get("current_bed_code") or card.get("current_bed") or "",
         "project": card.get("project") or "",
         "check_in_date": card.get("check_in_date") or "",
-        "company": _company_name(),
-        "today": frappe.utils.formatdate(frappe.utils.today()),
-        "terms": HOUSING_TERMS,
+        "terms": arrival_slips.HOUSING_TERMS,
+    })
+    return {
+        "html": frappe.render_template(arrival_slips.CHECKIN_SLIP_TEMPLATE, ctx),
+        "title": ctx["worker_name"],
     }
-    return {"html": frappe.render_template(CHECKIN_SLIP_TEMPLATE, ctx), "title": ctx["worker_name"]}
 
 
-CUSTODY_HANDOVER_SLIP_TEMPLATE = """
-<div class="ax-slip" dir="{{ dir }}" lang="{{ lang }}" style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: 24px auto;
-            border: 1px solid #ccc; border-radius: 8px; padding: 24px; color:#1a1a2e;">
-  <h2 style="color:#1a1a2e; margin:0 0 4px;">{{ _("Custody Handover") }}</h2>
-  <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company | e }} &middot; {{ today | e }}</div>
-  <table style="width:100%; font-size:14px; border-collapse:collapse;">
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Issued to") }}</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name | e }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Reference") }}</td><td style="padding:4px 0;">{{ custody_issue | e }}</td></tr>
-    {% if building %}<tr><td style="padding:4px 0; color:#555;">{{ _("Building") }}</td><td style="padding:4px 0;">{{ building | e }}</td></tr>{% endif %}
-    {% if issue_date %}<tr><td style="padding:4px 0; color:#555;">{{ _("Issue date") }}</td><td style="padding:4px 0;">{{ issue_date | e }}</td></tr>{% endif %}
-  </table>
-
-  <table style="width:100%; margin-top:18px; font-size:13px; border-collapse:collapse;">
-    <thead>
-      <tr style="border-bottom:1px solid #555; text-align:start;">
-        <th style="padding:6px 4px; width:8%;">#</th>
-        <th style="padding:6px 4px;">{{ _("Article") }}</th>
-        <th style="padding:6px 4px; width:14%; text-align:end;">{{ _("Qty") }}</th>
-        {% if show_uom %}<th style="padding:6px 4px; width:18%;">{{ _("UOM") }}</th>{% endif %}
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in items %}
-      <tr style="border-bottom:1px solid #ccc;">
-        <td style="padding:6px 4px;">{{ loop.index }}</td>
-        <td style="padding:6px 4px;">{{ row.article_name | e }}</td>
-        <td style="padding:6px 4px; text-align:end;">{{ row.qty }}</td>
-        {% if show_uom %}<td style="padding:6px 4px;">{{ row.uom | e }}</td>{% endif %}
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <div style="margin-top:16px; font-size:13px; color:#1a1a2e;">
-    {{ _("I acknowledge that I have received the above items in good condition.") }}
-  </div>
-
-  <table style="width:100%; margin-top:28px; font-size:13px; border-collapse:collapse;">
-    <tr>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Worker signature") }}</td>
-      <td style="width:4%;"></td>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Date") }}</td>
-    </tr>
-  </table>
-  <table style="width:100%; margin-top:28px; font-size:13px; border-collapse:collapse;">
-    <tr>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Supervisor signature") }}</td>
-      <td style="width:4%;"></td>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Date") }}</td>
-    </tr>
-  </table>
-  <style>@media print { body { margin:0; } .ax-slip { border:none; margin:0; max-width:none; } }</style>
-</div>
-"""
-
-
-@frappe.whitelist()
-def get_custody_handover_slip(custody_issue) -> dict:
-    """Render the custody-handover acknowledgment slip (HTML) for a Custody Issue:
-    a line-item table (article, qty, UOM), an acknowledgment line, and worker /
-    supervisor signature lines. Permission-gated on read of the specific Custody
-    Issue. The desk opens the HTML in a print window."""
-    frappe.has_permission("Custody Issue", "read", doc=custody_issue, throw=True)
-    doc = frappe.get_doc("Custody Issue", custody_issue)
-    if not doc.issued_to_employee:
-        frappe.throw(_("This Custody Issue has no issued-to Employee; nothing to hand over."))
-
-    worker_name = (
-        frappe.db.get_value("Employee", doc.issued_to_employee, "employee_name")
-        or doc.issued_to_name
-        or doc.issued_to_employee
-    )
-
+def _custody_slip_items(doc):
+    """``(items, show_uom)`` for the handover table. Article names and UOMs come
+    from the master in ONE lookup; a line keeps its own captured name when the
+    master has none, and the UOM column is dropped when no line carries one."""
     article_ids = list({row.article for row in doc.items if row.article})
     masters = {}
     if article_ids:
@@ -1057,21 +937,40 @@ def get_custody_handover_slip(custody_issue) -> dict:
                 "uom": m.get("unit_of_measure") or "",
             }
         )
-    show_uom = any(it["uom"] for it in items)
+    return items, any(it["uom"] for it in items)
 
-    ctx = {
-        "worker_name": worker_name,
+
+@frappe.whitelist()
+def get_custody_handover_slip(custody_issue) -> dict:
+    """Render the custody-handover acknowledgment slip (HTML) for a Custody Issue:
+    a line-item table (article, qty, UOM), an acknowledgment line, and worker /
+    supervisor signature lines. Permission-gated on read of the specific Custody
+    Issue. The desk opens the HTML in a print window."""
+    frappe.has_permission("Custody Issue", "read", doc=custody_issue, throw=True)
+    doc = frappe.get_doc("Custody Issue", custody_issue)
+    if not doc.issued_to_employee:
+        frappe.throw(_("This Custody Issue has no issued-to Employee; nothing to hand over."))
+
+    worker_name = (
+        frappe.db.get_value("Employee", doc.issued_to_employee, "employee_name")
+        or doc.issued_to_name
+        or doc.issued_to_employee
+    )
+
+    items, show_uom = _custody_slip_items(doc)
+
+    ctx = arrival_slips.slip_context(worker_name)
+    ctx.update({
         "custody_issue": doc.name,
-        "dir": _slip_dir(),
-        "lang": frappe.local.lang or "en",
         "building": doc.building or "",
         "issue_date": frappe.utils.formatdate(doc.issue_date) if doc.issue_date else "",
-        "company": _company_name(),
-        "today": frappe.utils.formatdate(frappe.utils.today()),
         "items": items,
         "show_uom": show_uom,
+    })
+    return {
+        "html": frappe.render_template(arrival_slips.CUSTODY_HANDOVER_SLIP_TEMPLATE, ctx),
+        "title": worker_name,
     }
-    return {"html": frappe.render_template(CUSTODY_HANDOVER_SLIP_TEMPLATE, ctx), "title": worker_name}
 
 
 @frappe.whitelist()
@@ -1084,18 +983,15 @@ def buildings_with_capacity(doctype, txt, searchfield, start, page_len, filters)
     full building. Scope mirrors ``front_desk.list_supervisor_buildings``: an
     unscoped oversight role sees every Active building, a building-scoped user only
     their User-Permission buildings, a scoped user with none sees nothing. Free-bed
-    availability is computed from the same ``_bed_color`` rules as the board (one
-    bounded bed/room aggregate, not a per-building round trip), so a building is
+    availability is computed from the same ``occupancy.bed_color`` rules as the board
+    (one bounded bed/room aggregate, not a per-building round trip), so a building is
     offered only when its green-bed count is > 0.
     """
-    from apex.habitat.api.front_desk import _bed_color
+    scope = active_building_scope(frappe.session.user)
+    if scope.filters is None:
+        return []
 
-    f = {"status": "Active"}
-    if not permissions._building_is_unscoped(frappe.session.user):
-        allowed = permissions._allowed_buildings(frappe.session.user)
-        if not allowed:
-            return []
-        f["name"] = ["in", allowed]
+    f = dict(scope.filters)
     if txt:
         f["building_name"] = ["like", f"%{txt}%"]
 
@@ -1106,25 +1002,12 @@ def buildings_with_capacity(doctype, txt, searchfield, start, page_len, filters)
         return []
     building_names = [b.name for b in buildings]
 
-    Bed = frappe.qb.DocType("Bed")
-    Room = frappe.qb.DocType("Room")
-    bed_rows = (
-        frappe.qb.from_(Bed)
-        .left_join(Room)
-        .on(Bed.room == Room.name)
-        .select(Bed.building, Bed.status.as_("bed_status"), Bed.condition, Room.readiness_status)
-        .where(Bed.building.isin(building_names))
-        .run(as_dict=True)
-    )
-    available = {name: 0 for name in building_names}
-    for bed in bed_rows:
-        if bed.building in available and _bed_color(bed.bed_status, bed.condition, bed.readiness_status) == "green":
-            available[bed.building] += 1
+    mix = occupancy.bed_mix(occupancy.bed_mix_rows(building_names), building_names)
 
     rows = [
         (b.name, b.building_name or b.name)
         for b in buildings
-        if available.get(b.name, 0) > 0
+        if mix[b.name]["available"] > 0
     ]
     rows.sort(key=lambda r: str(r[1]))
     return rows[start : start + page_len] if page_len else rows
