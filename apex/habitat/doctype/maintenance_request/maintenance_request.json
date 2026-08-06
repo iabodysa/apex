@@ -454,6 +454,7 @@
  ],
  "row_format": "Dynamic",
  "search_fields": "issue_type, target_asset_name, company",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [

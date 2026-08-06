@@ -37,8 +37,6 @@ import frappe
 
 ALERT_DOCTYPE = "Operations Alert"
 
-_MESSAGE_MAX = 2000
-
 _SAVEPOINT = "apex_operations_alert"
 
 
@@ -92,7 +90,7 @@ def insert_operations_alert(
                 "vehicle": vehicle,
                 "driver": driver,
                 "responsible_supervisor": _project_supervisor_for_vehicle(vehicle),
-                "message": (message or "")[:_MESSAGE_MAX],
+                "message": message or "",
             }
         )
         alert.insert(ignore_permissions=True)  # audit-ok — scheduler-run alert
