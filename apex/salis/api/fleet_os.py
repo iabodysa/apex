@@ -6,19 +6,18 @@ dashboard. The page is a faithful copy of the supervisor's own design; this
 module replaces the design's embedded JSON with LIVE Salis data and routes its
 operations to the real DocTypes.
 
+This module is the endpoint surface: every whitelisted method the dashboard calls
+lives here under the dotted path its bundle already holds. The board READ — which
+fields make a vehicle, how a driver appears on a card, how an incident becomes a
+stolen flag — lives in :mod:`apex.salis.api.fleet_os_board`, so changing what the
+screen shows is one edit in one file.
+
 Route trace (NOT ``/fleet`` — that is the unrelated employee self-service page,
 whose bundle calls ``apex.salis.api.fleet_employee`` only): hooks.py tile
 "apex-fleet-os" -> ``/fleet-os`` -> ``www/fleet-os.html`` ->
 ``/assets/apex/fleet_os_portal/assets/index.js``, built from ``frontend/fleet_os``
 (``vite.config.js`` name="fleet_os_portal"), whose ``useFleetBoard`` /
 ``useFleetActions`` / ``useDriverAssignment`` composables call this module.
-
-Contract: :func:`get_fleet_os` returns a ``vehicles`` list whose item / history
-shape matches exactly what the page's render code reads (``v.plate``,
-``v.history``, ``v.current_driver``, ``h.date_receive`` …), so the design's
-render functions run unchanged. The reader is N+1-free: bounded ``get_all``
-queries (vehicles, the drivers they reference, all assignments, all incidents,
-all damage write-offs) plus the Vehicle Category lookup, then grouped in Python.
 
 Every endpoint is permission-gated on ``Salis Vehicle`` and project-scoped
 server-side through the SAME ``_permitted_projects`` resolver the dispatch
@@ -32,10 +31,10 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
-from frappe.utils import date_diff, getdate, today
+from frappe.utils import getdate, today
 
 from apex.salis.api.dispatch_board import _permitted_projects
-from apex.salis.api.fleet_reader import scope_filter, scoped_vehicles
+from apex.salis.api.fleet_os_board import build_board, driver_pii_visible
 from apex.salis.utils import (
     add_timeline_note,
     close_open_stop,
@@ -59,62 +58,12 @@ def _publish_fleet_update(plate: str | None = None, action: str | None = None) -
     )
 
 
-_STATUS_MAP = {
-    "Stopped": "stopped",
-    "Under Maintenance": "workshop",
-    "Released": "stopped",
-}
-
 _STOP_REASON_MAP = {
     "maintenance": "Maintenance",
     "rental return": "Rental Return",
     "rental": "Rental Return",
     "return": "Rental Return",
 }
-
-
-def _vehicle_status(status: str, has_driver: bool, theft=None) -> str:
-    """Map a Salis Vehicle.status to the design's vehicle_status string.
-
-    Theft is not one of Salis Vehicle.status's four options — reporting one submits a
-    Theft Vehicle Incident and the controller flips the vehicle to "Stopped" — so the
-    board's stolen state has to come from the open incident, or it reads as an ordinary
-    stop and the board's stolen filter can never match a vehicle."""
-    if theft and theft.get("status") != "closed":
-        return "stolen"
-    if status == "Active":
-        return "assigned" if has_driver else "available"
-    return _STATUS_MAP.get(status, "available")
-
-
-def _sheet_for(category: str | None) -> str:
-    """Best-effort CAR / MOTORCYCLE bucket for the design's type filter,
-    derived from the category name (the design only has these two chips)."""
-    if not category:
-        return "CAR"
-    upper = category.upper()
-    if any(tok in upper for tok in ("MOTOR", "BIKE", "SCOOTER", "\u062f\u0628\u0627\u0628", "\u062f\u0631\u0627\u062c")):
-        return "MOTORCYCLE"
-    return "CAR"
-
-
-def _read(reader_errors: list, reader: str, fn, default):
-    """Run one secondary reader, isolating its failure from the board.
-
-    The vehicle set is fatal (no board without it); every enrichment reader
-    (drivers, assignments, incidents, write-offs, category fuel) is best-effort —
-    a failure in one returns ``default`` and is recorded in ``reader_errors`` so
-    the page can show a dismissible inline notice instead of a blank screen.
-    """
-    try:
-        return fn()
-    except Exception:
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title=f"Fleet OS reader failed: {reader}"[:140],
-        )
-        reader_errors.append({"reader": reader, "error": _("Could not load {0}.").format(_(reader))})
-        return default
 
 
 def _resolve_plate(plate: str, ptype: str = "write") -> str:
@@ -141,6 +90,26 @@ def _resolve_plate(plate: str, ptype: str = "write") -> str:
     return name
 
 
+def _resolve_driver_id(driver_id: str) -> str:
+    """Resolve the dashboard's EXTERNAL fleet identifier (Salis Driver.driver_id)
+    to a Salis Driver name, refusing anything that resolves to nothing.
+
+    Both the reassign and the handover draft carry the same identifier from the
+    same picker, so both resolve it the same way or one of them accepts a driver
+    the other refuses. The fallback probe is name-filtered, not positional: the
+    positional ``frappe.db.exists(dt, dn)`` answers "Salis Driver" back unqueried
+    (database.py:1259), which cleared the not-found refusal below for that literal
+    string."""
+    if not driver_id:
+        frappe.throw(_("Driver is required."))
+    driver = frappe.db.get_value("Salis Driver", {"driver_id": driver_id}, "name")
+    if not driver and frappe.db.exists("Salis Driver", {"name": driver_id}):
+        driver = driver_id
+    if not driver:
+        frappe.throw(_("Driver {0} not found.").format(driver_id))
+    return driver
+
+
 @frappe.whitelist()
 def get_fleet_os():
     """Return the full fleet in the design's exact shape (a ``vehicles`` list).
@@ -156,242 +125,7 @@ def get_fleet_os():
     its own active filters).
     """
     frappe.has_permission("Salis Vehicle", "read", throw=True)
-    show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
-    reader_errors: list = []
-    _unscoped, _projects, base_filters = scope_filter()
-    if base_filters is None:
-        return {"vehicles": [], "reason": "scope_empty", "reader_errors": []}
-
-    vehicles = scoped_vehicles(
-        fields=[
-            "name", "plate_number", "vehicle_category", "status",
-            "rental_office", "project", "current_driver",
-            "planned_fuel_grade", "planned_daily_fuel",
-            "compliance_status", "next_expiry_date",
-        ],
-        base_filters=base_filters,
-    )
-    if not vehicles:
-        return {"vehicles": [], "reason": "data_empty", "reader_errors": []}
-
-    cat_names = list({v.vehicle_category for v in vehicles if v.get("vehicle_category")})
-
-    def _read_cat_fuel():
-        out: dict[str, str] = {}
-        if cat_names:
-            for c in frappe.get_all(
-                "Vehicle Category",
-                filters={"name": ["in", cat_names]},
-                fields=["name", "default_fuel_type"],
-            ):
-                out[c.name] = (c.default_fuel_type or "").upper()
-        return out
-
-    cat_fuel: dict[str, str] = _read(reader_errors, _("fuel grades"), _read_cat_fuel, {})
-
-    office_names = list({v.rental_office for v in vehicles if v.get("rental_office")})
-
-    def _read_office_city():
-        out: dict[str, str] = {}
-        if office_names:
-            for o in frappe.get_all(
-                "Rental Office",
-                filters={"name": ["in", office_names]},
-                fields=["name", "city"],
-            ):
-                out[o.name] = (o.city or "").strip().upper()
-        return out
-
-    office_city: dict[str, str] = _read(reader_errors, _("Rental Office"), _read_office_city, {})
-
-    driver_names = {v.current_driver for v in vehicles if v.get("current_driver")}
-
-    plates = [v.name for v in vehicles]
-    assignments = _read(
-        reader_errors, _("assignments"),
-        lambda: frappe.get_all(
-            "Vehicle Assignment",
-            filters={"vehicle": ["in", plates]},
-            fields=["vehicle", "driver", "project", "start_date", "end_date", "status", "docstatus"],
-            order_by="start_date asc",
-            limit_page_length=0,
-        ),
-        [],
-    )
-    for a in assignments:
-        if a.get("driver"):
-            driver_names.add(a.driver)
-
-    def _read_drivers():
-        out: dict[str, dict] = {}
-        if driver_names:
-            for d in frappe.get_all(
-                "Salis Driver",
-                filters={"name": ["in", list(driver_names)]},
-                fields=["name", "full_name", "driver_id", "phone"],
-                limit_page_length=0,
-            ):
-                out[d.name] = d
-        return out
-
-    drivers: dict[str, dict] = _read(reader_errors, _("drivers"), _read_drivers, {})
-
-    history_by_vehicle: dict[str, list] = {}
-    for a in assignments:
-        d = drivers.get(a.driver) or {}
-        is_active = a.status == "Active" and a.docstatus == 1 and not a.end_date
-        history_by_vehicle.setdefault(a.vehicle, []).append({
-            "driver_id": ((d.get("driver_id") or a.driver or "") if show_pii else ""),
-            "name_en": (d.get("full_name") or ""),
-            "name_ar": "",
-            "mobile": ((d.get("phone") or "") if show_pii else ""),
-            "date_receive": str(a.start_date or ""),
-            "date_deliver": str(a.end_date or ""),
-            "status": "Active" if is_active else "Stopped",
-            "project": (a.project or ""),
-            "area": "",
-            "reason": "",
-            "notes": "",
-            "branch_receive": "",
-            "branch_deliver": "",
-        })
-
-    def _read_incidents():
-        incidents = frappe.get_all(
-            "Vehicle Incident",
-            filters={"vehicle": ["in", plates], "docstatus": 1},
-            fields=[
-                "vehicle", "incident_type", "incident_date", "location",
-                "report_number", "status", "estimated_cost", "description", "evidence",
-            ],
-            order_by="incident_date desc",
-            limit_page_length=0,
-        )
-        accidents: dict[str, list] = {}
-        theft: dict[str, dict] = {}
-        for inc in incidents:
-            row = {
-                "type": inc.incident_type or "",
-                "date": str(inc.incident_date or ""),
-                "location": inc.location or "",
-                "report_number": inc.report_number or "",
-                "status": "closed" if inc.status == "Closed" else (inc.status or "").lower(),
-                "cost": inc.estimated_cost or 0,
-                "estimated_cost": inc.estimated_cost or 0,
-                "description": inc.description or "",
-                "has_evidence": bool(inc.evidence),
-            }
-            if inc.incident_type == "Theft":
-                cur = theft.get(inc.vehicle)
-                if cur is None or (cur.get("status") == "closed" and row["status"] != "closed"):
-                    theft[inc.vehicle] = row
-            else:
-                accidents.setdefault(inc.vehicle, []).append(row)
-        return accidents, theft
-
-    accidents_by_vehicle, theft_by_vehicle = _read(
-        reader_errors, _("incidents"), _read_incidents, ({}, {})
-    )
-
-    def _read_write_offs():
-        write_offs = frappe.get_all(
-            "Vehicle Damage Write-Off",
-            filters={"vehicle": ["in", plates], "docstatus": 1},
-            fields=[
-                "name", "vehicle", "creation", "status", "estimated_cost",
-                "damage_description", "recommended_action", "evidence",
-            ],
-            order_by="creation desc",
-            limit_page_length=0,
-        )
-        damages: dict[str, list] = {}
-        for w in write_offs:
-            damages.setdefault(w.vehicle, []).append({
-                "case": w.name,
-                "date": str(getdate(w.creation) if w.creation else ""),
-                "status": "completed" if w.status in ("Approved", "Closed") else (w.status or "").lower(),
-                "cost": w.estimated_cost or 0,
-                "estimated_cost": w.estimated_cost or 0,
-                "recommended_action": w.recommended_action or "",
-                "description": w.damage_description or "",
-                "has_evidence": bool(w.evidence),
-            })
-        return damages
-
-    damages_by_vehicle: dict[str, list] = _read(reader_errors, _("damages"), _read_write_offs, {})
-
-    def _read_workshop():
-        from apex.salis.tasks import _overstay_stops
-
-        stops = frappe.get_all(
-            "Vehicle Suspension",
-            filters={
-                "vehicle": ["in", plates],
-                "stop_reason": "Maintenance",
-                "docstatus": 1,
-                "return_date": ["is", "not set"],
-            },
-            fields=["vehicle", "stop_date", "notes"],
-            order_by="stop_date asc",
-            limit_page_length=0,
-        )
-        by_vehicle: dict[str, dict] = {}
-        for s in stops:
-            by_vehicle.setdefault(s.vehicle, s)
-        overstay = {r.vehicle for r in _overstay_stops()}
-        return by_vehicle, overstay
-
-    workshop_by_vehicle, workshop_overstay = _read(
-        reader_errors, _("workshop status"), _read_workshop, ({}, set())
-    )
-
-    out = []
-    for v in vehicles:
-        cd = None
-        if v.get("current_driver"):
-            hist = history_by_vehicle.get(v.name, [])
-            active = next((h for h in hist if h.get("status") == "Active" and not h.get("date_deliver")), None)
-            if active:
-                cd = dict(active)
-            else:
-                d = drivers.get(v.current_driver) or {}
-                cd = {
-                    "driver_id": ((d.get("driver_id") or v.current_driver or "") if show_pii else ""),
-                    "name_en": (d.get("full_name") or ""), "name_ar": "",
-                    "mobile": ((d.get("phone") or "") if show_pii else ""), "date_receive": "", "date_deliver": "",
-                    "status": "Active", "project": (v.project or ""), "area": "",
-                    "reason": "", "notes": "", "branch_receive": "", "branch_deliver": "",
-                }
-        ws = workshop_by_vehicle.get(v.name)
-        ws_date = str(ws.stop_date) if ws and ws.stop_date else ""
-        out.append({
-            "plate": v.plate_number or v.name,
-            "vehicle_type": v.vehicle_category or "",
-            "fuel": cat_fuel.get(v.vehicle_category, ""),
-            "planned_fuel_grade": v.planned_fuel_grade or "",
-            "planned_daily_fuel": v.planned_daily_fuel or 0,
-            "compliance_status": v.compliance_status or "",
-            "next_expiry_date": str(v.next_expiry_date or ""),
-            "rental_office": v.rental_office or "",
-            "sheet": _sheet_for(v.vehicle_category),
-            "area": office_city.get(v.rental_office or "", ""),
-            "project": v.project or "",
-            "vehicle_status": _vehicle_status(
-                v.status, bool(v.get("current_driver")), theft_by_vehicle.get(v.name)
-            ),
-            "workshop_notes": (ws.notes or "") if ws else "",
-            "workshop_date": ws_date,
-            "days_in_workshop": (date_diff(today(), ws.stop_date) if ws and ws.stop_date else 0),
-            "workshop_overstay": v.name in workshop_overstay,
-            "current_driver": cd,
-            "history": history_by_vehicle.get(v.name, []),
-            "damages": damages_by_vehicle.get(v.name, []),
-            "accidents": accidents_by_vehicle.get(v.name, []),
-            "stolen_info": theft_by_vehicle.get(v.name),
-            "notes": "",
-        })
-
-    return {"vehicles": out, "reason": None, "reader_errors": reader_errors}
+    return build_board()
 
 
 @frappe.whitelist()
@@ -408,7 +142,7 @@ def search_drivers(q=None, limit=20):
     typo can no longer silently mis-assign a vehicle.
     """
     frappe.has_permission("Salis Driver", "read", throw=True)
-    show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
+    show_pii = driver_pii_visible()
     unscoped, projects = _permitted_projects()
     if not unscoped and not projects:
         return []
@@ -491,7 +225,7 @@ def get_vehicle_timeline(plate):
     without it. N+1-free: one bounded ``get_all`` per source, merged in Python.
     """
     vehicle = _resolve_plate(plate, ptype="read")
-    show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
+    show_pii = driver_pii_visible()
 
     events: list[dict] = []
 
@@ -574,25 +308,13 @@ def reassign(plate, driver_id, date=None):
     """Assign a driver to a vehicle by creating a submitted Vehicle Assignment.
 
     ``driver_id`` is the EXTERNAL fleet identifier (Salis Driver.driver_id), as
-    the dashboard carries it; we resolve it to the Salis Driver name. The
-    Vehicle Assignment controller handles the link side; we also set the
-    vehicle's current_driver and the driver's current_vehicle so the live state
-    matches immediately (the assignment alone does not mutate those).
-
-    The fallback probe is name-filtered, not positional: the positional
-    ``frappe.db.exists(dt, dn)`` answers "Salis Driver" back unqueried
-    (database.py:1259), which cleared the not-found refusal below for that literal
-    string.
+    the dashboard carries it; ``_resolve_driver_id`` resolves it to the Salis
+    Driver name. The Vehicle Assignment controller handles the link side; we also
+    set the vehicle's current_driver and the driver's current_vehicle so the live
+    state matches immediately (the assignment alone does not mutate those).
     """
     vehicle = _resolve_plate(plate)
-    if not driver_id:
-        frappe.throw(_("Driver is required."))
-
-    driver = frappe.db.get_value("Salis Driver", {"driver_id": driver_id}, "name")
-    if not driver and frappe.db.exists("Salis Driver", {"name": driver_id}):
-        driver = driver_id
-    if not driver:
-        frappe.throw(_("Driver {0} not found.").format(driver_id))
+    driver = _resolve_driver_id(driver_id)
     frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
 
     assignment = reassign_vehicle_driver(vehicle, driver, date)
@@ -610,21 +332,16 @@ def create_handover(plate, driver_id, date=None, odometer=None, checklist_templa
     the controller requires signed evidence before submit, so a manager later
     attaches it and submits via Desk (where the checklist UI + print format live).
 
-    ``to_driver`` is the just-assigned driver; ``from_driver`` is the previous
-    driver, read from the most recent Ended assignment reassign left behind. With
-    no prior driver (a first-ever assignment) there is no custody to transfer, so
-    no handover is drafted — the caller shows that as a benign notice.
-    A checklist template, when given, is loaded via the existing template loader.
+    ``to_driver`` is the just-assigned driver, resolved through the SAME
+    ``_resolve_driver_id`` reassign used so the two cannot disagree about which
+    driver the identifier names; ``from_driver`` is the previous driver, read from
+    the most recent Ended assignment reassign left behind. With no prior driver (a
+    first-ever assignment) there is no custody to transfer, so no handover is
+    drafted — the caller shows that as a benign notice. A checklist template, when
+    given, is loaded via the existing template loader.
     """
     vehicle = _resolve_plate(plate)
-    if not driver_id:
-        frappe.throw(_("Driver is required."))
-
-    to_driver = frappe.db.get_value("Salis Driver", {"driver_id": driver_id}, "name")
-    if not to_driver and frappe.db.exists("Salis Driver", {"name": driver_id}):
-        to_driver = driver_id
-    if not to_driver:
-        frappe.throw(_("Driver {0} not found.").format(driver_id))
+    to_driver = _resolve_driver_id(driver_id)
     frappe.has_permission("Vehicle Handover", "create", throw=True)
 
     prev = frappe.get_all(
