@@ -1,4 +1,45 @@
 # Copyright (c) 2026, AFMCO and contributors
+"""Building row-scoping for Habitat.
+
+Every scoped Habitat DocType is confined to the estate it belongs to. The estate is
+reached one of five ways, and WHICH WAY IS A PROPERTY OF THE DOCTYPE, not of a
+function:
+
+    column   the doc stores the estate itself (``building``, or ``name`` on Building)
+    dual     the doc has two endpoints (``from_building`` / ``to_building``)
+    hop      the estate is one link away (Housing Checkout -> Bed -> building)
+    child    the estate is a row set in a child table (Audit Remediation Plan)
+    owner    not a building axis at all (Maintenance Request: owner / assignee)
+
+``BUILDING_SCOPE`` maps DocType to that property. ``building_scope_query`` reads the
+table and emits the list fragment; ``building_scoped_has_permission`` reads the SAME
+table and answers the form / REST / submit check, so the two can never disagree about
+what is in scope. Frappe hands the DocType to both hooks, so one registration each in
+``hooks.py`` covers every DocType.
+
+Adding a scoped DocType is a row in ``BUILDING_SCOPE`` plus its two ``hooks.py``
+entries. It is deliberately not a new function: the previous shape carried one
+hand-written function per DocType, and threading a single new argument through them
+(commit 7bd58d09, the ``applicable_for`` narrowing) had to edit all thirty-four.
+
+Two invariants hold on every path and are the reason the edge cases look asymmetric:
+
+* "" (no restriction at all) for the Administrator and the ``HOUSING_UNSCOPED_ROLES``
+  oversight roles; "1=0" (matches nothing) for a scoped user holding no building.
+  Never the other way round — inverted, it blacks out oversight and leaks every
+  estate to a supervisor.
+* Fail closed. A doc whose estate cannot be resolved is DENIED, never deferred.
+
+``_allowed_buildings``, ``_building_is_unscoped`` and ``_building_condition`` stay
+module-level functions: ``apex.habitat.api`` and the Habitat reports import those
+three names directly, and the scoped-permission suite stubs the first two.
+
+The block at the foot of this file is COMPATIBILITY ONLY. Those wrappers hold no rule
+— each forwards to the dispatcher with its own ``scope_for`` — and ``hooks.py`` does
+not route through them. They exist because callers outside this module resolve a
+fragment by FUNCTION NAME; a wrapper is the whole cost of keeping such a caller
+working, and none of them has to be edited when the rule changes.
+"""
 
 import frappe
 
@@ -10,6 +51,15 @@ PRIVILEGED_ROLES = {
     "Resident Supervisor",
     "Resident Request Coordinator",
 }
+
+HOUSING_UNSCOPED_ROLES = {
+    "System Manager",
+    "Accommodation Manager",
+    "Internal Auditor",
+    "Finance Manager",
+}
+
+BUILDING = "building"
 
 
 def _resolve_user(user=None):
@@ -27,85 +77,15 @@ def _is_privileged(user):
     return bool(set(frappe.get_roles(user)) & PRIVILEGED_ROLES)
 
 
-def maintenance_request_query(user=None):
-    """Owner-scope the Maintenance Request list/report view.
-
-    Returns "" (no restriction) for the Administrator and privileged oversight
-    roles. Returns "1=0" for Guest, who must see nothing. For every other user
-    the fragment confines the view to the tickets they raised (``owner``) or
-    were assigned (``assigned_to``).
-
-    NOTE on the ``if_owner`` interaction: when a user's ONLY read on Maintenance
-    Request is the universal "All" role's ``if_owner`` DocPerm, Frappe AND-s its
-    own ``owner = me`` match onto this fragment, so their LIST view collapses to
-    owner-only. The ``assigned_to`` branch therefore surfaces assigned rows in the
-    list only for users who also hold a plain (non-``if_owner``) read — i.e. the
-    operational roles such as Maintenance Technician (the realistic assignee).
-    Any assignee can still OPEN an assigned ticket via ``has_permission`` below.
-    """
-    user = _resolve_user(user)
-    if user == "Guest":
-        return "1=0"
-    if _is_privileged(user):
-        return ""
-
-    escaped = frappe.db.escape(user)
-    return "(`owner` = {0} or `assigned_to` = {0})".format(escaped)
-
-
-def report_maintenance_request_scope(user=None):
-    """Return ``(restrict, user)`` for report-side maintenance-request scoping.
-
-    ``restrict`` is False for the Administrator and privileged oversight roles (the
-    report applies no extra filter — they see every ticket). When True the report must
-    confine its rows to ``owner == user OR assigned_to == user`` (e.g. via get_all's
-    ``or_filters``), matching the owner/assignee fragment in maintenance_request_query.
-    """
-    user = _resolve_user(user)
-    if _is_privileged(user):
-        return False, user
-    return True, user
-
-
-def maintenance_request_has_permission(doc, ptype, user=None):
-    """Confine individual Maintenance Request access to its owner/assignee.
-
-    Mirrors ``maintenance_request_query`` for the form view / REST resource /
-    link reads. Returns None to defer to Frappe's default permission resolution
-    for the Administrator and privileged oversight roles (so their DocPerms
-    govern, unwidened). For every other user it returns True only when the user
-    raised the ticket (``owner``) or is its ``assigned_to`` technician, and False
-    otherwise — never exposing a ticket the user neither raised nor was assigned.
-    """
-    user = _resolve_user(user)
-    if _is_privileged(user):
-        return None
-
-    if getattr(doc, "owner", None) == user:
-        return True
-    if getattr(doc, "assigned_to", None) == user:
-        return True
-    return False
-
-
-HOUSING_UNSCOPED_ROLES = {
-    "System Manager",
-    "Accommodation Manager",
-    "Internal Auditor",
-    "Finance Manager",
-}
-
-
 def _allowed_buildings(user):
     """Building names the user has an explicit User Permission for (request-cached).
 
-    Thin wrapper over ``permission_scope.allowed_for`` binding the Building
-    ``allow`` doctype and the ``apex_allowed_buildings`` cache namespace. That
-    namespace is DISTINCT from Salis' ``apex_allowed_projects`` so a Building scope
-    and a Project scope can never collide in ``frappe.local.cache`` for the same
-    user in one request. See ``permission_scope.allowed_for`` for the
-    request-cache + no-cross-user-bleed invariant. Kept as a module-level function
-    because the scoped permission test-suite stubs this name directly.
+    Thin wrapper over ``permission_scope.allowed_for`` binding the Building ``allow``
+    doctype and the ``apex_allowed_buildings`` cache namespace. That namespace is
+    DISTINCT from Salis' ``apex_allowed_projects`` and Logistay's
+    ``apex_allowed_companies`` so two scopes can never collide in
+    ``frappe.local.cache`` for the same user in one request. Kept as a module-level
+    function because the scoped permission test-suite stubs this name directly.
     """
     return permission_scope.allowed_for(user, "Building", "apex_allowed_buildings")
 
@@ -128,252 +108,95 @@ def _building_is_unscoped(user):
 def _building_condition(user=None, column="`building`", doctype=None):
     """SQL WHERE fragment restricting ``column`` to the user's allowed buildings.
 
-    "" for unscoped users (no restriction); "1=0" when the user is scoped but has
-    no allowed buildings (so they see nothing). Delegates the shared fragment
-    logic to ``permission_scope.scope_condition``, injecting this module's own
-    building resolvers so the Building oversight set + cache namespace stay bound
-    here.
+    "" for unscoped users (no restriction); "1=0" when the user is scoped but has no
+    allowed buildings (so they see nothing). Retained as a public name because
+    ``apex.habitat.api.dashboard`` composes it into its own aggregate SQL, where there
+    is no DocType-scoped hook to read the strategy table.
 
-    Every safety and cleaning record below carries exactly ONE Building link of its own,
-    so this shared fragment serves them with no anchor hop. They still need a fragment
-    even though a Building User Permission already narrows the list: frappe's native
-    match (db_query.py:1090) is ``ifnull(building,'')='' or building in (...)``, so an
-    empty-building row stays visible and a scoped user holding NO Building permission
-    gets no condition at all. This closes both.
+    Records still need a fragment even though a Building User Permission already
+    narrows the list: frappe's native match (db_query.py:1090) is
+    ``ifnull(building,'')='' or building in (...)``, so an empty-building row stays
+    visible and a scoped user holding NO Building permission gets no condition at all.
+    This closes both.
     """
     return permission_scope.scope_condition(
         user, _building_is_unscoped, _allowed_buildings, column, allow="Building", doctype=doctype
     )
 
 
-def accommodation_assignment_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
+def _column(field):
+    """Estate stored on the doc itself."""
+    return ("column", {"field": field})
 
 
-def custody_issue_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
+def _dual(first, second):
+    """Estate at either of two endpoints."""
+    return ("dual", {"first": first, "second": second})
 
 
-def cleaning_log_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
+def _hop(field, doctype, stored=False):
+    """Estate one link away, reached through ``field`` -> ``doctype``.``building``.
 
-
-def accommodation_building_query(user=None, doctype=None):
-    return _building_condition(user, column="`name`", doctype=doctype)
-
-
-def safety_round_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def safety_task_execution_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def scheduled_task_instance_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def safety_incident_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def safety_inspection_report_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def safety_finding_ledger_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def cleaning_compliance_ledger_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def accommodation_resident_request_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def idle_resident_report_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def housing_checkout_query(user=None, doctype=None):
-    """Scope Housing Checkout to the user's buildings through its ``bed``.
-
-    The DocType carries no ``building`` column, so ``_building_condition`` cannot serve
-    it: the estate is one hop away as ``bed`` -> ``Bed.building``. The fragment is
-    therefore a subquery on ``tabBed``, the shape ``salis.permissions.dispatch_trip_query``
-    uses to reach a Route Plan's project.
-
-    Renders the two edge cases exactly like every sibling housing fragment: "" (no
-    restriction at all) for the Administrator and the oversight roles in
-    ``HOUSING_UNSCOPED_ROLES``, and "1=0" (matches nothing) for a scoped user holding no
-    building — never the other way round, which would blackout oversight and leak to a
-    supervisor. A checkout whose ``bed`` is NULL matches no subquery row and so stays
-    hidden from a scoped user: fail closed. Stored rows always carry one, because ``bed``
-    is fetched from ``assignment.bed`` and Housing Assignment makes ``bed`` mandatory.
+    ``stored`` says whether a ``building`` ATTRIBUTE on the doc itself is an accepted
+    estate, tried ahead of the link. NEITHER hop DocType has a ``building`` column, so
+    on a stored row the attribute is always empty and the flag is inert; it exists
+    because it is not inert on an UNSAVED doc, where a caller can put any key in the
+    payload and ``frappe.get_doc`` makes it an attribute. Room Bed Transfer accepted
+    such an attribute before this table existed and still does; Housing Checkout never
+    did, and must not start — accepting one would let a caller name their own estate
+    and be granted on it.
     """
-    user = _resolve_user(user)
-    if _building_is_unscoped(user):
-        return ""
-    buildings = _allowed_buildings_for(user, doctype)
-    if not buildings:
-        return "1=0"
-    escaped = ", ".join(frappe.db.escape(b) for b in buildings)
-    return "`bed` in (select `name` from `tabBed` where `building` in ({values}))".format(
-        values=escaped
-    )
+    return ("hop", {"field": field, "doctype": doctype, "stored": stored})
 
 
-def room_bed_transfer_query(user=None, doctype=None):
-    """Scope Room Bed Transfer to the user's buildings through its ``assignment``.
-
-    The DocType carries no ``building`` column, so ``_building_condition`` cannot
-    serve it: the estate is one hop away as ``assignment`` ->
-    ``Housing Assignment.building``, the same subquery shape
-    ``housing_checkout_query`` uses for its ``bed`` hop.
-
-    One anchor is enough BECAUSE the controller rejects a cross-building move: the
-    source and target buildings of a valid transfer are the same building, so the
-    assignment's estate is the whole estate the record touches. Were that rule ever
-    relaxed, this fragment would have to widen to both endpoints (the
-    ``_dual_building_condition`` shape) or it would leak.
-
-    Renders the two edge cases exactly like every sibling housing fragment: "" for
-    the Administrator and the oversight roles, "1=0" for a scoped user holding no
-    building. A transfer whose ``assignment`` is somehow unset matches no subquery
-    row and stays hidden: fail closed.
-    """
-    user = _resolve_user(user)
-    if _building_is_unscoped(user):
-        return ""
-    buildings = _allowed_buildings_for(user, doctype)
-    if not buildings:
-        return "1=0"
-    escaped = ", ".join(frappe.db.escape(b) for b in buildings)
-    return (
-        "`assignment` in (select `name` from `tabHousing Assignment` "
-        "where `building` in ({values}))".format(values=escaped)
-    )
+def _child(child_doctype, parent_doctype):
+    """Estate held as a row set in a child table."""
+    return ("child", {"child": child_doctype, "parent": parent_doctype})
 
 
-def audit_remediation_plan_query(user=None, doctype=None):
-    """Scope Audit Remediation Plan to the user's buildings through its child scope.
-
-    The plan carries NO ``building`` column at all — the estate it touches is the set
-    of buildings listed in its ``buildings_in_scope`` child table — so neither
-    ``_building_condition`` nor the single-hop shape serves it. The fragment is a
-    subquery on ``tabAudit Remediation Building Scope`` keyed on ``parent``, the same
-    shape ``housing_checkout_query`` uses for its bed hop, widened from one link to a
-    row set: a plan matches when ANY building it names is one of the user's.
-
-    Because the plan has no Building Link of its own, frappe's native User Permission
-    match (db_query.py:1079) emits NOTHING for this DocType — a Building User
-    Permission alone leaves every plan visible. This fragment is the only row scope
-    there is here, not a tightening of a native one.
-
-    Renders the two edge cases exactly like every sibling housing fragment: "" (no
-    restriction) for the Administrator and the oversight roles in
-    ``HOUSING_UNSCOPED_ROLES``, and "1=0" for a scoped user holding no building. A plan
-    whose scope table is EMPTY names no building, matches no subquery row, and so stays
-    hidden from a scoped user while oversight still sees it: fail closed.
-    """
-    user = _resolve_user(user)
-    if _building_is_unscoped(user):
-        return ""
-    buildings = _allowed_buildings_for(user, doctype)
-    if not buildings:
-        return "1=0"
-    escaped = ", ".join(frappe.db.escape(b) for b in buildings)
-    return (
-        "`name` in (select `parent` from `tabAudit Remediation Building Scope` "
-        "where `parenttype` = 'Audit Remediation Plan' and `building` in ({values}))"
-        .format(values=escaped)
-    )
+def _quote(field):
+    """Backtick-quote one column name. The only place this module writes a quote."""
+    return "`{0}`".format(field)
 
 
-def audit_remediation_plan_has_permission(doc, ptype, user=None):
-    """Deny a scoped user acting on a plan that names none of their buildings.
-
-    ``building_scoped_has_permission`` cannot be reused: it resolves the estate from
-    ``doc.building``, a field this DocType does not have, so it would read None for
-    every plan and return False — blacking out a scoped supervisor's OWN plans too. A
-    guard that denies the role it is meant to bound reviews as correct and is not.
-
-    So this mirrors ``audit_remediation_plan_query``'s hop instead, reading the child
-    rows directly. No create-path anchor is owed: child tables arrive with the payload
-    and are built in ``Document.__init__``, so unlike a ``fetch_from`` field the scope
-    rows ARE populated when ``check_permission("create")`` runs at document.py:300.
-
-    Deny-only and ptype-agnostic, like its siblings: returns None to defer to the
-    DocPerms, False to block every action including submit. A plan naming no building
-    at all is denied rather than deferred — fail closed, matching the fragment.
-    """
-    user = _resolve_user(user)
-    if _building_is_unscoped(user):
-        return None
-
-    buildings = [
-        getattr(row, "building", None)
-        for row in (getattr(doc, "buildings_in_scope", None) or [])
-    ]
-    buildings = [b for b in buildings if b]
-    if not buildings:
-        return False
-    allowed = _allowed_buildings_for(user, doc.doctype)
-    return None if any(b in allowed for b in buildings) else False
-
-
-def housing_checkout_has_permission(doc, ptype, user=None):
-    """Deny a scoped user acting on a checkout outside their buildings.
-
-    ``building_scoped_has_permission`` cannot be reused here. It resolves the estate from
-    ``doc.building``, a field Housing Checkout does not have, so it would read None for
-    every checkout and return False — denying a building-scoped supervisor their OWN
-    building's records too. A guard that blacks out the role it is meant to bound reviews
-    as correct and is not.
-
-    So this mirrors ``housing_checkout_query``'s hop instead: ``bed`` -> ``Bed.building``.
-    It falls back to ``assignment`` -> ``Housing Assignment.building`` because
-    ``Document.insert`` runs ``check_permission("create")`` (document.py:300) BEFORE
-    ``_validate_links()`` (:302) applies ``fetch_from``, so on a server-side create ``bed``
-    is not populated yet while the mandatory ``assignment`` always is. Without the
-    fallback a scoped supervisor could not create a checkout at all.
-
-    Deny-only and ptype-agnostic, like its siblings: returns None to defer to the
-    DocPerms, False to block every action including submit.
-    """
-    user = _resolve_user(user)
-    if _building_is_unscoped(user):
-        return None
-
-    building = None
-    bed = getattr(doc, "bed", None)
-    if bed:
-        building = frappe.db.get_value("Bed", bed, "building")
-    if not building:
-        assignment = getattr(doc, "assignment", None)
-        if assignment:
-            building = frappe.db.get_value("Housing Assignment", assignment, "building")
-    if not building:
-        return False
-    return None if building in _allowed_buildings_for(user, doc.doctype) else False
-
-
-def report_building_scope(user=None, doctype=None):
-    """Return ``(restrict, allowed_buildings)`` for report-side building scoping.
-
-    ``restrict`` is False for unscoped oversight roles (the report applies no extra
-    filter — they see everything). When True the report must confine its rows to
-    ``allowed_buildings`` (an empty list means a scoped user with no permitted
-    building, i.e. the report should return no rows). Thin wrapper over
-    ``permission_scope.report_scope`` with this module's building resolvers.
-    """
-    return permission_scope.report_scope(
-        user, _building_is_unscoped, _allowed_buildings, allow="Building", doctype=doctype
-    )
-
+BUILDING_SCOPE = {
+    "Building": _column("name"),
+    "Housing Assignment": _column(BUILDING),
+    "Custody Issue": _column(BUILDING),
+    "Cleaning Log": _column(BUILDING),
+    "Safety Round": _column(BUILDING),
+    "Safety Task Execution": _column(BUILDING),
+    "Scheduled Task Instance": _column(BUILDING),
+    "Safety Incident": _column(BUILDING),
+    "Safety Inspection Report": _column(BUILDING),
+    "Safety Finding Ledger": _column(BUILDING),
+    "Cleaning Compliance Ledger": _column(BUILDING),
+    "Resident Request": _column(BUILDING),
+    "Idle Resident Report": _column(BUILDING),
+    "Facility Asset Custody Assignment": _column(BUILDING),
+    "Operational Depreciation Snapshot": _column(BUILDING),
+    "Custody Return": _column(BUILDING),
+    "Custody Damage Assessment": _column(BUILDING),
+    "Custody Acknowledgment": _column(BUILDING),
+    "Facility Asset": _column(BUILDING),
+    "Housing Inventory": _column(BUILDING),
+    "Building License": _column(BUILDING),
+    "Maintenance Work Order": _column(BUILDING),
+    "Maintenance Inspection Report": _column(BUILDING),
+    "Occupancy Snapshot": _column(BUILDING),
+    "Temporary Worker": _column(BUILDING),
+    "Arrival Batch": _column(BUILDING),
+    "Room": _column(BUILDING),
+    "Bed": _column(BUILDING),
+    "Accommodation Stock Ledger": _column(BUILDING),
+    "Facility Asset Movement": _dual("from_building", "to_building"),
+    "Custody Handover": _dual("from_building", "to_building"),
+    "Material Transfer": _dual("from_building", "to_building"),
+    "Facility Asset Delivery": _dual("from_building", "to_building"),
+    "Housing Checkout": _hop("bed", "Bed"),
+    "Room Bed Transfer": _hop("assignment", "Housing Assignment", stored=True),
+    "Audit Remediation Plan": _child("Audit Remediation Building Scope", "Audit Remediation Plan"),
+}
 
 BUILDING_FETCH_ANCHOR = {
     "Bed": ("room", "Room"),
@@ -381,11 +204,9 @@ BUILDING_FETCH_ANCHOR = {
     "Custody Damage Assessment": ("custody_return", "Custody Return"),
     "Custody Return": ("custody_issue", "Custody Issue"),
     "Housing Assignment": ("bed", "Bed"),
+    "Housing Checkout": ("assignment", "Housing Assignment"),
     "Housing Inventory": ("room", "Room"),
-    "Maintenance Inspection Report": (
-        "maintenance_work_order",
-        "Maintenance Work Order",
-    ),
+    "Maintenance Inspection Report": ("maintenance_work_order", "Maintenance Work Order"),
     "Maintenance Work Order": ("maintenance_request", "Maintenance Request"),
     "Resident Request": ("bed", "Bed"),
     "Room Bed Transfer": ("assignment", "Housing Assignment"),
@@ -393,32 +214,111 @@ BUILDING_FETCH_ANCHOR = {
 }
 
 
-def _doc_building(doc):
-    """Resolve the estate a Habitat doc belongs to, or None.
+def _render_column(spec, escaped):
+    """``building in (...)`` — the estate stored on the row."""
+    return "{column} in ({values})".format(column=_quote(spec["field"]), values=escaped)
 
-    ``Document.insert`` runs ``check_permission("create")`` (document.py:300) BEFORE
-    ``_validate_links()`` (:302) applies ``fetch_from``, so on a server-side create every
-    ``building`` in ``BUILDING_FETCH_ANCHOR`` is still EMPTY at the create check. Reading
-    it alone would deny a scoped supervisor the creation of records in their OWN estate.
-    Each entry therefore names the link that is populated at that moment — the doc's own
-    parent link, which the payload always carries and which is never itself fetched — and
-    the estate is re-read from THAT document.
+
+def _render_dual(spec, escaped):
+    """Either endpoint in scope.
+
+    The OR lives INSIDE this one fragment on purpose. Frappe AND-joins the fragments
+    returned by separate ``permission_query_conditions`` hooks (``" and ".join`` at
+    ``frappe/model/db_query.py:1137``), so splitting the OR across two fragments would
+    silently become an AND and hide every cross-building row.
+    """
+    return "({first} in ({values}) or {second} in ({values}))".format(
+        first=_quote(spec["first"]), second=_quote(spec["second"]), values=escaped
+    )
+
+
+def _render_hop(spec, escaped):
+    """The estate one link away, as a subquery on the linked DocType."""
+    return "{column} in (select `name` from `tab{doctype}` where `building` in ({values}))".format(
+        column=_quote(spec["field"]), doctype=spec["doctype"], values=escaped
+    )
+
+
+def _render_child(spec, escaped):
+    """A row matches when ANY building named in its child table is the user's."""
+    return (
+        "`name` in (select `parent` from `tab{child}` "
+        "where `parenttype` = {parent} and `building` in ({values}))".format(
+            child=spec["child"], parent=frappe.db.escape(spec["parent"]), values=escaped
+        )
+    )
+
+
+FRAGMENTS = {
+    "column": _render_column,
+    "dual": _render_dual,
+    "hop": _render_hop,
+    "child": _render_child,
+}
+
+
+def _fragment(kind, spec, values):
+    """Render one scope strategy against the user's allowed buildings.
+
+    ``values`` is non-empty — the caller has already answered the unscoped and
+    no-building cases, so every renderer emits a real restriction. An unrecognised
+    kind renders "1=0" rather than falling through to no restriction: an unknown
+    strategy must fail CLOSED.
+    """
+    render = FRAGMENTS.get(kind)
+    if not render:
+        return "1=0"
+    return render(spec, ", ".join(frappe.db.escape(value) for value in values))
+
+
+def building_scope_query(user=None, doctype=None, scope_for=None):
+    """WHERE fragment scoping ``doctype``'s list/report view to the user's estate.
+
+    Registered in ``hooks.py`` for every building-scoped Habitat DocType. Frappe hands
+    the DocType to the hook — ``frappe.call(frappe.get_attr(method), self.user,
+    doctype=self.doctype)``, ``frappe/model/db_query.py:1129`` — and the strategy comes
+    from ``BUILDING_SCOPE``.
+
+    ``doctype`` MUST stay in this signature: ``frappe.call`` drops any keyword the
+    callee does not declare, so a signature without it would receive no DocType,
+    silently skip the ``applicable_for`` narrowing in ``_allowed_buildings_for``, and
+    widen every scope on the tenant axis.
+
+    ``scope_for`` is never passed by frappe. It exists for the named compatibility
+    wrappers at the foot of this module, which must select their own DocType's strategy
+    while leaving ``doctype`` — the ``applicable_for`` narrowing key — exactly as their
+    caller supplied it.
+
+    An unknown DocType falls back to the plain ``building`` column, which is what the
+    hand-written per-DocType functions did (all of them delegated to
+    ``_building_condition``) and the shape 29 of the 36 scoped DocTypes use.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return ""
+
+    buildings = _allowed_buildings_for(user, doctype)
+    if not buildings:
+        return "1=0"
+
+    kind, spec = BUILDING_SCOPE.get(scope_for or doctype) or _column(BUILDING)
+    return _fragment(kind, spec, buildings)
+
+
+def _estate_from_anchor(doc, doctype):
+    """Re-read the estate from the doc's own parent link.
+
+    ``Document.insert`` runs ``check_permission("create")`` (``document.py:300``)
+    BEFORE ``_validate_links()`` (``:302``) applies ``fetch_from``, so at the create
+    check every fetched ``building`` is still EMPTY. Reading it alone would deny a
+    scoped supervisor the creation of records in their OWN estate. Each anchor names a
+    link the payload always carries and that is never itself fetched, and the estate is
+    re-read from THAT document.
 
     Marking ``building`` ``reqd`` does not help: mandatory fields are enforced in
-    ``_validate()`` (:310), long after the permission check. The anchor must be a real
-    link on the doc, not a promise about the fetched field.
-
-    Returns None when nothing resolves, so the caller still fails CLOSED — a doc whose
-    estate cannot be established is denied, never deferred.
+    ``_validate()`` (``:310``), long after the permission check. The anchor must be a
+    real link on the doc, not a promise about the fetched field.
     """
-    doctype = getattr(doc, "doctype", None)
-    if doctype == "Building":
-        return getattr(doc, "name", None)
-
-    building = getattr(doc, "building", None)
-    if building:
-        return building
-
     anchor = BUILDING_FETCH_ANCHOR.get(doctype)
     if not anchor:
         return None
@@ -429,156 +329,279 @@ def _doc_building(doc):
     return frappe.db.get_value(parent_doctype, parent, "building")
 
 
+def _estates_column(doc, spec):
+    """The estate stored on the row — ``name`` on Building, ``building`` elsewhere."""
+    stored = getattr(doc, spec["field"], None)
+    return [stored] if stored else []
+
+
+def _estates_dual(doc, spec):
+    """Both endpoints; the caller treats the doc as in scope when EITHER is the user's."""
+    endpoints = (getattr(doc, spec["first"], None), getattr(doc, spec["second"], None))
+    return [value for value in endpoints if value]
+
+
+def _estates_child(doc, spec):
+    """Every building named in the child table."""
+    rows = getattr(doc, "buildings_in_scope", None) or []
+    return [value for value in (getattr(row, "building", None) for row in rows) if value]
+
+
+def _estates_hop(doc, spec):
+    """The hop link the fragment subqueries through, so form and list agree.
+
+    Load-bearing for Housing Checkout: the fragment reaches its estate through ``bed``,
+    so the form check must prefer ``bed`` too, or a stored row whose ``bed`` and
+    ``assignment`` disagree would be readable in the list and denied on the form.
+    ``spec["stored"]`` is why the doc's own ``building`` attribute is consulted first
+    for Room Bed Transfer and never for Housing Checkout — see ``_hop``.
+    """
+    if spec["stored"]:
+        stored = getattr(doc, BUILDING, None)
+        if stored:
+            return [stored]
+    link = getattr(doc, spec["field"], None)
+    if not link:
+        return []
+    hopped = frappe.db.get_value(spec["doctype"], link, BUILDING)
+    return [hopped] if hopped else []
+
+
+ESTATES = {
+    "column": _estates_column,
+    "dual": _estates_dual,
+    "hop": _estates_hop,
+    "child": _estates_child,
+}
+
+ANCHORED_KINDS = ("column", "hop")
+
+
+def _doc_estates(doc):
+    """Every building this doc touches, as a list; empty when none resolves.
+
+    Mirrors the strategy the list fragment used for the same DocType, so the form view
+    can never disagree with the list view about what is in scope.
+
+    Only ``column`` and ``hop`` fall back to ``BUILDING_FETCH_ANCHOR``, and that
+    restriction is deliberate. ``child`` rows arrive with the payload and are built in
+    ``Document.__init__``, so unlike a ``fetch_from`` field they ARE populated when
+    ``check_permission("create")`` runs; ``dual``'s two endpoints are direct,
+    never-fetched links. Neither is ever empty for the ordering reason the anchor
+    exists to answer, so neither may borrow another DocType's estate.
+    """
+    doctype = getattr(doc, "doctype", None)
+    kind, spec = BUILDING_SCOPE.get(doctype) or _column(BUILDING)
+
+    estates = ESTATES[kind](doc, spec)
+    if estates or kind not in ANCHORED_KINDS:
+        return estates
+
+    anchor = _estate_from_anchor(doc, doctype)
+    return [anchor] if anchor else []
+
+
 def building_scoped_has_permission(doc, ptype, user=None):
-    """Deny a building-scoped user acting on a doc outside their buildings.
+    """Deny a building-scoped user acting on a doc outside their estate.
 
-    Returns None to defer to Frappe's default resolution (unscoped users / in-scope
-    docs — keeps DocPerms intact), or False to block. The Building doc
-    is scoped on its own name; the transactions are scoped on their `building` field,
-    falling back to the anchor link in ``BUILDING_FETCH_ANCHOR`` when that field is a
-    ``fetch_from`` not yet applied at the create check.
+    Returns None to defer to Frappe's default resolution — unscoped users and in-scope
+    docs, so the DocPerms govern unwidened — or False to block. It NEVER returns True,
+    so it can only narrow.
 
-    Deny-only + ptype-agnostic: it never branches on ``ptype``, so an out-of-building
-    doc is blocked for every action including ``submit`` — a scoped user can neither
-    read nor submit another estate's record.
+    Deny-only and ptype-agnostic: it never branches on ``ptype``, so an out-of-estate
+    doc is blocked for every action including ``submit``. A doc whose estate cannot be
+    resolved at all is DENIED rather than deferred — fail closed, matching the
+    fragment, which hides the same row from the list.
     """
     user = _resolve_user(user)
     if _building_is_unscoped(user):
         return None
 
-    building = _doc_building(doc)
-
-    if not building:
+    estates = _doc_estates(doc)
+    if not estates:
         return False
-    return None if building in _allowed_buildings_for(user, doc.doctype) else False
+
+    allowed = _allowed_buildings_for(user, doc.doctype)
+    return None if any(estate in allowed for estate in estates) else False
 
 
+def report_building_scope(user=None, doctype=None):
+    """Return ``(restrict, allowed_buildings)`` for report-side building scoping.
 
-def facility_asset_custody_assignment_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def non_financial_depreciation_snapshot_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def custody_return_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def custody_damage_assessment_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def facility_asset_movement_query(user=None, doctype=None):
-    return _dual_building_condition(user, doctype=doctype)
-
-
-def custody_acknowledgment_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def custody_handover_query(user=None, doctype=None):
-    return _dual_building_condition(user, doctype=doctype)
-
-
-def material_transfer_query(user=None, doctype=None):
-    return _dual_building_condition(user, doctype=doctype)
-
-
-def facility_asset_delivery_query(user=None, doctype=None):
-    return _dual_building_condition(user, doctype=doctype)
-
-
-def facility_asset_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def housing_inventory_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def building_license_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def maintenance_work_order_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def maintenance_inspection_report_query(user=None, doctype=None):
-    """Scope Maintenance Inspection Report on its own stored ``building``.
-
-    The column is populated on every stored row — ``reqd`` plus a ``fetch_from``
-    on ``maintenance_work_order.building`` — so the shared column fragment serves
-    the LIST view with no hop. Only the CREATE check needs the work-order anchor
-    (``BUILDING_FETCH_ANCHOR``), because ``fetch_from`` has not run yet at that
-    point; a row that reaches this fragment has already been written.
+    ``restrict`` is False for unscoped oversight roles (the report applies no extra
+    filter — they see everything). When True the report must confine its rows to
+    ``allowed_buildings``; an empty list means a scoped user with no permitted
+    building, i.e. the report should return no rows.
     """
-    return _building_condition(user, doctype=doctype)
-
-
-def accommodation_occupancy_snapshot_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def temporary_worker_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def arrival_batch_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def accommodation_room_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def accommodation_bed_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def accommodation_stock_ledger_query(user=None, doctype=None):
-    return _building_condition(user, doctype=doctype)
-
-
-def _dual_building_condition(user=None, doctype=None):
-    """WHERE fragment scoping a from_building/to_building doc to the user's estate.
-
-    A single fragment (pqc hooks AND-join, so the OR must live inside one fragment):
-    matches a row when EITHER endpoint is one of the user's allowed buildings. "" for
-    unscoped users; "1=0" when the user is scoped but has no allowed buildings.
-    """
-    user = _resolve_user(user)
-    if _building_is_unscoped(user):
-        return ""
-    buildings = _allowed_buildings_for(user, doctype)
-    if not buildings:
-        return "1=0"
-    escaped = ", ".join(frappe.db.escape(b) for b in buildings)
-    return "(`from_building` in ({values}) or `to_building` in ({values}))".format(
-        values=escaped
+    return permission_scope.report_scope(
+        user, _building_is_unscoped, _allowed_buildings, allow="Building", doctype=doctype
     )
 
 
-def dual_building_scoped_has_permission(doc, ptype, user=None):
-    """Deny a scoped user acting on a from/to_building doc outside their estate.
+def maintenance_request_query(user=None, doctype=None):
+    """Owner-scope the Maintenance Request list/report view.
 
-    Mirrors ``_dual_building_condition`` for the form view / REST / submit. Returns
-    None to defer (unscoped users / in-scope docs — DocPerms intact), or False to
-    block. In scope when EITHER endpoint is the user's building; a cross-building doc
-    (neither endpoint in scope) is denied for every action including submit.
+    Maintenance Request is NOT on the building axis — a ticket belongs to the person
+    who raised it and the technician it went to — so it is absent from
+    ``BUILDING_SCOPE`` and keeps its own fragment and its own ``hooks.py`` entry.
+
+    Returns "" (no restriction) for the Administrator and the privileged oversight
+    roles. Returns "1=0" for Guest, who must see nothing. For every other user the
+    fragment confines the view to the tickets they raised (``owner``) or were assigned
+    (``assigned_to``).
+
+    NOTE on the ``if_owner`` interaction: when a user's ONLY read on Maintenance
+    Request is the universal "All" role's ``if_owner`` DocPerm, Frappe AND-s its own
+    ``owner = me`` match onto this fragment, so their LIST view collapses to
+    owner-only. The ``assigned_to`` branch therefore surfaces assigned rows in the list
+    only for users who also hold a plain (non-``if_owner``) read — the operational
+    roles such as Maintenance Technician, the realistic assignee. Any assignee can
+    still OPEN an assigned ticket via ``maintenance_request_has_permission``.
     """
     user = _resolve_user(user)
-    if _building_is_unscoped(user):
+    if user == "Guest":
+        return "1=0"
+    if _is_privileged(user):
+        return ""
+
+    escaped = frappe.db.escape(user)
+    return "(`owner` = {0} or `assigned_to` = {0})".format(escaped)
+
+
+def maintenance_request_has_permission(doc, ptype, user=None):
+    """Confine individual Maintenance Request access to its owner/assignee.
+
+    Mirrors ``maintenance_request_query`` for the form view, REST resource and link
+    reads. Returns None to defer to Frappe's default permission resolution for the
+    Administrator and the privileged oversight roles, so their DocPerms govern
+    unwidened. For every other user it returns True only when the user raised the
+    ticket (``owner``) or is its ``assigned_to`` technician, and False otherwise —
+    never exposing a ticket the user neither raised nor was assigned.
+
+    This is the ONE handler in this module that returns True: the owner/assignee basis
+    is an independent grant, not a narrowing of the building axis.
+    """
+    user = _resolve_user(user)
+    if _is_privileged(user):
         return None
 
-    allowed = _allowed_buildings_for(user, doc.doctype)
-    endpoints = [
-        getattr(doc, "from_building", None),
-        getattr(doc, "to_building", None),
-    ]
-    endpoints = [b for b in endpoints if b]
-    if not endpoints:
-        return False
-    return None if any(b in allowed for b in endpoints) else False
+    if getattr(doc, "owner", None) == user:
+        return True
+    if getattr(doc, "assigned_to", None) == user:
+        return True
+    return False
+
+
+def report_maintenance_request_scope(user=None):
+    """Return ``(restrict, user)`` for report-side maintenance-request scoping.
+
+    ``restrict`` is False for the Administrator and the privileged oversight roles (the
+    report applies no extra filter — they see every ticket). When True the report must
+    confine its rows to ``owner == user OR assigned_to == user`` (e.g. via get_all's
+    ``or_filters``), matching the owner/assignee fragment in
+    ``maintenance_request_query``.
+    """
+    user = _resolve_user(user)
+    if _is_privileged(user):
+        return False, user
+    return True, user
+
+
+def accommodation_assignment_query(user=None, doctype=None):
+    """Housing Assignment list fragment. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Housing Assignment")
+
+
+def accommodation_building_query(user=None, doctype=None):
+    """Building list fragment, scoped on ``name``. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Building")
+
+
+def audit_remediation_plan_query(user=None, doctype=None):
+    """Audit Remediation Plan list fragment, via its child scope. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Audit Remediation Plan")
+
+
+def cleaning_compliance_ledger_query(user=None, doctype=None):
+    """Cleaning Compliance Ledger list fragment. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Cleaning Compliance Ledger")
+
+
+def cleaning_log_query(user=None, doctype=None):
+    """Cleaning Log list fragment. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Cleaning Log")
+
+
+def facility_asset_query(user=None, doctype=None):
+    """Facility Asset list fragment. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Facility Asset")
+
+
+def housing_checkout_query(user=None, doctype=None):
+    """Housing Checkout list fragment, via its ``bed`` hop. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Housing Checkout")
+
+
+def maintenance_inspection_report_query(user=None, doctype=None):
+    """Maintenance Inspection Report list fragment. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Maintenance Inspection Report")
+
+
+def material_transfer_query(user=None, doctype=None):
+    """Material Transfer list fragment, from/to endpoints. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Material Transfer")
+
+
+def room_bed_transfer_query(user=None, doctype=None):
+    """Room Bed Transfer list fragment, via its ``assignment`` hop. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Room Bed Transfer")
+
+
+def safety_finding_ledger_query(user=None, doctype=None):
+    """Safety Finding Ledger list fragment. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Safety Finding Ledger")
+
+
+def safety_incident_query(user=None, doctype=None):
+    """Safety Incident list fragment. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Safety Incident")
+
+
+def safety_inspection_report_query(user=None, doctype=None):
+    """Safety Inspection Report list fragment. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Safety Inspection Report")
+
+
+def safety_round_query(user=None, doctype=None):
+    """Safety Round list fragment. Compatibility name."""
+    return building_scope_query(user, doctype, scope_for="Safety Round")
+
+
+def dual_building_scoped_has_permission(doc, ptype, user=None):
+    """``building_scoped_has_permission`` under its from/to_building name.
+
+    The ``dual`` strategy now comes from ``BUILDING_SCOPE``, so the rule is shared and
+    this name only keeps existing callers resolving. Compatibility name.
+    """
+    return building_scoped_has_permission(doc, ptype, user)
+
+
+def housing_checkout_has_permission(doc, ptype, user=None):
+    """``building_scoped_has_permission`` under its Housing Checkout name.
+
+    Housing Checkout has no ``building`` column: the estate comes from the ``hop``
+    strategy's ``bed`` -> ``Bed.building``, falling back to the
+    ``BUILDING_FETCH_ANCHOR`` entry ``assignment`` -> ``Housing Assignment.building``
+    because ``bed`` is itself fetched from ``assignment.bed`` and so is unpopulated at
+    the create check. Compatibility name.
+    """
+    return building_scoped_has_permission(doc, ptype, user)
+
+
+def audit_remediation_plan_has_permission(doc, ptype, user=None):
+    """``building_scoped_has_permission`` under its Audit Remediation Plan name.
+
+    The ``child`` strategy reads ``buildings_in_scope``; a plan naming no building at
+    all resolves no estate and is denied rather than deferred. Compatibility name.
+    """
+    return building_scoped_has_permission(doc, ptype, user)
