@@ -91,7 +91,6 @@ Accommodation Cost by Type,تكلفة الإسكان حسب النوع
 Accommodation Cost Distribution,توزيع تكلفة السكن
 Accommodation Custody Item,بند عهدة السكن
 Accommodation Custody Return Item,بند إرجاع عهدة السكن
-Accommodation Engine,سجلات السكن الآلية
 Accommodation Ledger,سجل تكاليف السكن
 Accommodation Ledger Summary,ملخص سجل تكاليف السكن
 Accommodation Manager Dashboard,لوحة معلومات مدير السكن
@@ -359,7 +358,6 @@ Asset Movements Over Time,حركة الأصول عبر الزمن
 Asset Name,اسم الأصل
 Asset Reference,مرجع الأصل
 Asset table cannot be empty.,لا يمكن أن يكون جدول الأصول فارغاً.
-Assets and Maintenance Engine,محرك الأصول والصيانة
 Assets in Custody,الأصول في العهدة
 Assets Moved This Month,الأصول المنقولة هذا الشهر
 Assign,إسناد
@@ -1049,7 +1047,6 @@ Create Vehicle Category,إنشاء فئة مركبات
 Create Vehicle Incident,إنشاء بلاغ مركبة
 Create Vehicle Suspension,إنشاء إيقاف مركبة
 Create Work Order,إنشاء أمر عمل
-Created and maintained by the portals. Never entered on the desk.,تنشئها البوابات وتديرها، ولا تُدخل من سطح المكتب مطلقًا.
 Created On,تاريخ الإنشاء
 Created {0} {1},أُنشئ {0} {1}
 Creating payment...,جارٍ إنشاء الدفعة...
@@ -1635,7 +1632,6 @@ Flags that this policy must be reviewed by Legal/HR against KSA Labor Law (wage-
 Fleet,الأسطول
 Fleet (Salis),الأسطول (ساليس)
 Fleet and Fuel Dashboard,لوحة الأسطول والوقود
-Fleet and Fuel Engine,محرك الأسطول والوقود
 Fleet Control,مركز التحكم بالأسطول
 Fleet dashboard,لوحة الأسطول
 "Fleet driver master record: identity, project, supervisor, vehicle linkage, and compliance.",سجل أساسي لسائق الأسطول: الهوية والمشروع والمشرف وربط المركبة والامتثال.
@@ -2349,7 +2345,6 @@ Move {0} from {1} to {2}?,نقل {0} من {1} إلى {2}؟
 Moved By,نقله
 Moved By (Employee),نُقل بواسطة (الموظف)
 Movement,حركة
-Movement and Rental Engine,محرك الحركة والإيجار
 Movement Audit,تدقيق الحركة
 Movement Category,تصنيف الحركة
 Movement Context,سياق الحركة
@@ -2896,7 +2891,6 @@ Portal token audience must be Worker or Driver.,يجب أن تكون فئة رم
 Portal token subject binding cannot be changed after issuance.,لا يمكن تغيير ارتباط صاحب رمز البوابة بعد إصداره.
 Portal token subject binding is invalid.,ارتباط صاحب رمز البوابة غير صالح.
 Portal user who executed the movement — not the Employee on the source Facility Asset Movement.,مستخدم البوابة الذي نفّذ النقل — وليس الموظف المدوَّن في مستند نقل أصل المنشأة المصدر.
-Portal-Owned Records,سجلات تملكها البوابات
 Portals,البوابات
 Post (memo),قيد (مذكرة)
 Post accommodation and fleet costs to the General Ledger?,ترحيل تكاليف السكن والأسطول إلى دفتر الأستاذ العام؟
@@ -3444,7 +3438,6 @@ Rule,القاعدة
 Rule Applied,القاعدة المُطبَّقة
 Safety,السلامة
 Safety Checklist,قائمة فحص السلامة
-Safety Engine,منظومة السلامة
 Safety Equipment,معدات سلامة
 Safety Finding Ledger,سجل ملاحظات السلامة
 Safety Finding Ledger rows are immutable and cannot be edited.,صفوف سجل ملاحظات السلامة غير قابلة للتغيير ولا يمكن تعديلها.
@@ -3938,7 +3931,6 @@ System,النظام
 System Details,تفاصيل النظام
 System Info,معلومات النظام
 System logs: read-only diagnostics.,سجلات النظام: تشخيصات للقراءة فقط.
-System-written ledgers and snapshots. Read-only.,دفاتر ولقطات يكتبها النظام. للقراءة فقط.
 "System-written, read-only periodic snapshot of vehicle utilisation over a trailing window. Never hand-entered; derived from completed Dispatch Trips.",لقطة دورية للقراءة فقط يكتبها النظام لاستخدام المركبات عبر نافذة زمنية متحركة. لا تُدخل يدوياً؛ وتُشتق من رحلات التسيير المكتملة.
 tabular,جدولي
 Take a vehicle out of service by recording a Vehicle Suspension.,أخرِج مركبة من الخدمة بتسجيل إيقاف مركبة.
@@ -4564,7 +4556,6 @@ workshop status,حالة الورشة
 Write-Off,شطب
 Write-Off Case,قضية الشطب
 Write-Off Operations Threshold (SAR),حد صلاحية العمليات للشطب (ريال)
-"Written by the scheduler, not by hand.",تكتبها المهمة المجدولة تلقائيًا ولا تُدخل يدويًا.
 Written Off,مشطوب
 Written record of who authorized this request outside the system. Nothing in the app reads this field and a grant submits whether it is filled in or left empty.,سجل يوضح من اعتمد هذا الطلب خارج النظام. لا يستخدم التطبيق هذا الحقل، ويمكن اعتماد منح الصلاحية سواء عُبئ أو تُرك فارغًا.
 Wrong Trip,رحلة خاطئة

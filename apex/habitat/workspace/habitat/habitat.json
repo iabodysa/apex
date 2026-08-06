@@ -44,7 +44,7 @@
    "role": "Administrator"
   }
  ],
- "content": "[{\"id\": \"habHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Habitat</b></span>\", \"col\": 12}}, {\"id\": \"habChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Occupancy Percent Trend\", \"col\": 12}}, {\"id\": \"habHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"habScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Assignment\", \"col\": 3}}, {\"id\": \"habScMaint\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"habScCustody\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"habScBuilding\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building\", \"col\": 3}}, {\"id\": \"habScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 3}}, {\"id\": \"habHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"habNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Occupancy Percent\", \"col\": 3}}, {\"id\": \"habNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"habNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"secDaily\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Tasks</b></span>\", \"col\": 12}}, {\"id\": \"habCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation\", \"col\": 4}}, {\"id\": \"habCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Operations\", \"col\": 4}}, {\"id\": \"secMasters\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"mdCard_MasterData\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}, {\"id\": \"secSetup\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup</b></span>\", \"col\": 12}}, {\"id\": \"habCardSetup\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}, {\"id\": \"habCardLogs\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 4}}]",
+ "content": "[{\"id\": \"habHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Habitat</b></span>\", \"col\": 12}}, {\"id\": \"habHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"habScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Assignment\", \"col\": 3}}, {\"id\": \"habScMaint\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"habScCustody\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"habScBuilding\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building\", \"col\": 3}}, {\"id\": \"habScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 3}}, {\"id\": \"habHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"habNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Occupancy Percent\", \"col\": 3}}, {\"id\": \"habNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"habNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"secSetup\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup</b></span>\", \"col\": 12}}, {\"id\": \"habCardSetup\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}, {\"id\": \"habCardLogs\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -91,141 +91,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
-   "label": "Accommodation",
-   "description": "Input screen: open an item to create or edit records.",
-   "idx": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Housing Assignment",
-   "link_type": "DocType",
-   "link_to": "Housing Assignment",
-   "idx": 2
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
-   "label": "Operations",
-   "idx": 3
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Maintenance Request",
-   "link_type": "DocType",
-   "link_to": "Maintenance Request",
-   "idx": 4
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Custody Issue",
-   "link_type": "DocType",
-   "link_to": "Custody Issue",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Cleaning Log",
-   "link_type": "DocType",
-   "link_to": "Cleaning Log",
-   "idx": 6
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Safety Round",
-   "link_type": "DocType",
-   "link_to": "Safety Round",
-   "idx": 7
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "SIM Custody Assignment",
-   "link_type": "DocType",
-   "link_to": "SIM Custody Assignment",
-   "idx": 8
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
-   "label": "Master Data",
-   "description": "Reference data: durable records you set up once, not daily work.",
-   "idx": 9
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Building",
-   "link_type": "DocType",
-   "link_to": "Building",
-   "idx": 10
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "City",
-   "link_type": "DocType",
-   "link_to": "City",
-   "idx": 11
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
    "label": "Setup",
-   "idx": 12,
+   "idx": 1,
    "description": "Configuration and access: settings, users and roles."
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Habitat Settings",
-   "link_type": "DocType",
-   "link_to": "Habitat Settings",
-   "idx": 13
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Salis Settings",
-   "link_type": "DocType",
-   "link_to": "Salis Settings",
-   "idx": 14
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Apex Settings",
-   "link_type": "DocType",
-   "link_to": "Apex Settings",
-   "idx": 15
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Apex Integration Settings",
-   "link_type": "DocType",
-   "link_to": "Apex Integration Settings",
-   "idx": 16
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Payment Routing Settings",
-   "link_type": "DocType",
-   "link_to": "Payment Routing Settings",
-   "idx": 17
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Salary Deduction Policy",
-   "link_type": "DocType",
-   "link_to": "Salary Deduction Policy",
-   "idx": 18
   },
   {
    "doctype": "Workspace Link",
@@ -233,7 +101,7 @@
    "label": "User",
    "link_type": "DocType",
    "link_to": "User",
-   "idx": 19
+   "idx": 2
   },
   {
    "doctype": "Workspace Link",
@@ -241,7 +109,7 @@
    "label": "Role",
    "link_type": "DocType",
    "link_to": "Role",
-   "idx": 20
+   "idx": 3
   },
   {
    "doctype": "Workspace Link",
@@ -249,13 +117,13 @@
    "label": "Role Profile",
    "link_type": "DocType",
    "link_to": "Role Profile",
-   "idx": 21
+   "idx": 4
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Logs",
-   "idx": 22,
+   "idx": 5,
    "description": "System logs: read-only diagnostics."
   },
   {
@@ -264,7 +132,7 @@
    "label": "Error Log",
    "link_type": "DocType",
    "link_to": "Error Log",
-   "idx": 23
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
@@ -272,17 +140,10 @@
    "label": "Scheduled Job Log",
    "link_type": "DocType",
    "link_to": "Scheduled Job Log",
-   "idx": 24
+   "idx": 7
   }
  ],
- "charts": [
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Occupancy Percent Trend",
-   "label": "Occupancy Percent Trend",
-   "idx": 1
-  }
- ],
+ "charts": [],
  "number_cards": [
   {
    "doctype": "Workspace Number Card",
@@ -305,5 +166,5 @@
  ],
  "quick_lists": [],
  "creation": "2020-01-01 00:00:00.000000",
- "modified": "2026-08-02 10:51:00.000000"
+ "modified": "2026-08-06 22:51:00.000000"
 }
