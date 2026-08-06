@@ -1,1 +1,2 @@
+// Copyright (c) 2026, AFMCO and contributors
 import{i as n}from"./photoFile.js";class a extends Error{}function p(e){return e?n(e)?new Promise((r,t)=>{const o=new FileReader;o.onload=()=>r({photo:String(o.result||""),photo_filename:e.name}),o.onerror=()=>t(o.error||new Error("Unable to read photo.")),o.readAsDataURL(e)}):Promise.reject(new a("Unsupported photo type.")):Promise.resolve({photo:null,photo_filename:null})}export{a as U,p as r};

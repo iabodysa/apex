@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 from setuptools import setup, find_packages
 
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 import{u as $,s as at,q as ct,v as Fe,x as lt,y as F,z as ut,A as Ke,j as L,i as ft,g as ht,B as he}from"./index.js";/*!
  * vue-router v4.6.4
  * (c) 2025 Eduardo San Martin Morote

@@ -1,1 +1,2 @@
+// Copyright (c) 2026, AFMCO and contributors
 import{u as o}from"./i18n.js";import{o as a,c as s,t as n,u as r}from"./index.js";const c={class:"text-muted text-sm"},u={__name:"LoadingState",props:{label:{type:String,default:""}},setup(t){const{t:e}=o();return(l,m)=>(a(),s("div",c,n(t.label||r(e)("common.loading")),1))}};export{u as _};
