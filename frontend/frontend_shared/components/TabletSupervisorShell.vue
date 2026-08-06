@@ -139,7 +139,7 @@ const shellVars = computed(() => ({
   width: var(--ts-nav-w);
   background: var(--c-header-bg);
   color: var(--c-header-ink);
-  padding: 20px 16px;
+  padding: var(--sp-5) var(--sp-4);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -148,7 +148,7 @@ const shellVars = computed(() => ({
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 4px 6px 18px;
+  padding: var(--sp-1) 6px 18px;
   font-weight: var(--fw-heading);
 }
 .ts-nav-list {
@@ -161,7 +161,7 @@ const shellVars = computed(() => ({
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 10px 12px;
+  padding: 10px var(--sp-3);
   border-radius: var(--radius-sm);
   text-decoration: none;
   color: color-mix(in srgb, var(--c-header-ink) 80%, transparent);
@@ -204,7 +204,7 @@ const shellVars = computed(() => ({
   font-weight: var(--fw-heading);
   letter-spacing: 0.1em;
   opacity: 0.5;
-  margin: 14px 8px 4px;
+  margin: 14px var(--sp-2) var(--sp-1);
 }
 
 /* ---- main ---- */
@@ -219,7 +219,7 @@ const shellVars = computed(() => ({
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 16px clamp(16px, 3vw, 24px);
+  padding: var(--sp-4) clamp(var(--sp-4), 3vw, var(--sp-6));
   border-bottom: var(--border-width) solid var(--c-border);
 }
 .ts-menu {
@@ -259,7 +259,7 @@ const shellVars = computed(() => ({
 .ts-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 18px clamp(16px, 3vw, 24px) 28px;
+  padding: 18px clamp(var(--sp-4), 3vw, var(--sp-6)) 28px;
 }
 
 /* ---- KPI row: responsive auto-fit tile grid ---- */

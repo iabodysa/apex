@@ -92,8 +92,8 @@ const cssWidth = computed(() =>
   z-index: 20;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px clamp(16px, 4vw, 32px);
+  gap: var(--sp-3);
+  padding: 14px clamp(var(--sp-4), 4vw, var(--sp-8));
   background: var(--c-header-bg);
   color: var(--c-header-ink);
 }
@@ -107,12 +107,12 @@ const cssWidth = computed(() =>
   margin-inline-start: auto;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--sp-1);
 }
 .fleet-actions {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-2);
 }
 /* If there is no nav, the actions cluster takes the auto margin instead. */
 .fleet-nav:empty + .fleet-actions {
@@ -129,7 +129,7 @@ const cssWidth = computed(() =>
   font-size: var(--fs-sm);
   color: color-mix(in srgb, var(--c-header-ink) 78%, transparent);
   text-decoration: none;
-  padding: 7px 12px;
+  padding: 7px var(--sp-3);
   border-radius: var(--radius-sm);
   white-space: nowrap;
   transition: background 0.15s ease, color 0.15s ease;
@@ -159,7 +159,7 @@ const cssWidth = computed(() =>
 /* ---- body ---- */
 .fleet-body {
   margin: 0 auto;
-  padding: clamp(20px, 4vw, 34px) clamp(16px, 4vw, 32px) 80px;
+  padding: clamp(var(--sp-5), 4vw, 34px) clamp(var(--sp-4), 4vw, var(--sp-8)) 80px;
 }
 .fleet-heading {
   margin-bottom: 22px;
@@ -178,7 +178,7 @@ const cssWidth = computed(() =>
 }
 .fleet-footer {
   margin-top: 48px;
-  padding: 22px 24px;
+  padding: 22px var(--sp-6);
   background: var(--c-surface-2);
   border: var(--border-width) solid var(--c-border);
   border-radius: var(--radius-lg);
@@ -193,7 +193,7 @@ const cssWidth = computed(() =>
 @media (max-width: 767px) {
   .fleet-top {
     flex-wrap: wrap;
-    row-gap: 8px;
+    row-gap: var(--sp-2);
   }
   .fleet-nav {
     order: 3;

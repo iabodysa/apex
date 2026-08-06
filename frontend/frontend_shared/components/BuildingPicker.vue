@@ -101,18 +101,18 @@ const filtered = computed(() => {
 .picker {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--sp-4);
 }
 .picker-hero {
   text-align: center;
-  padding-top: 8px;
+  padding-top: var(--sp-2);
 }
 .picker-mark {
   display: grid;
   place-items: center;
   height: 56px;
   width: 56px;
-  margin: 0 auto 12px;
+  margin: 0 auto var(--sp-3);
   border-radius: var(--radius-lg);
   color: var(--c-primary);
   background: color-mix(in srgb, var(--c-primary) 12%, transparent);
@@ -123,26 +123,26 @@ const filtered = computed(() => {
   color: var(--c-ink);
 }
 .picker-sub {
-  margin-top: 4px;
+  margin-top: var(--sp-1);
   font-size: var(--fs-sm);
   color: var(--c-muted);
 }
 .picker-loading,
 .picker-empty {
   text-align: center;
-  padding: 24px 0;
+  padding: var(--sp-6) 0;
   color: var(--c-muted);
 }
 .picker-empty p {
-  margin-top: 8px;
+  margin-top: var(--sp-2);
   font-size: var(--fs-sm);
 }
 
 .search-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 12px;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-3);
   border: 1px solid var(--c-border-strong);
   border-radius: var(--radius);
   background: var(--c-surface);
@@ -152,7 +152,7 @@ const filtered = computed(() => {
   flex: 1;
   border: none;
   background: transparent;
-  padding: 12px 0;
+  padding: var(--sp-3) 0;
   font-family: var(--font);
   font-size: var(--fs-body);
   color: var(--c-ink);
@@ -164,12 +164,12 @@ const filtered = computed(() => {
 .b-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--sp-2);
 }
 .b-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--sp-3);
   width: 100%;
   padding: 14px;
   border-radius: var(--radius);
@@ -219,10 +219,10 @@ const filtered = computed(() => {
   .b-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: var(--sp-3);
   }
   .b-item {
-    padding: 16px;
+    padding: var(--sp-4);
   }
   .picker-title {
     font-size: var(--fs-h1);

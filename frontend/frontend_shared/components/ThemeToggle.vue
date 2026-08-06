@@ -106,7 +106,7 @@ onMounted(() => {
   /* --tap-min: the accessible touch target the shared LangToggle beside it uses.
      This control sits on the same worker-facing header, so it may not be smaller. */
   min-height: var(--tap-min);
-  padding: 4px 10px;
+  padding: var(--sp-1) 10px;
   border: none;
   border-radius: var(--radius-pill);
   font-family: inherit;
