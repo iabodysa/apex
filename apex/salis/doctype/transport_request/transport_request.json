@@ -337,6 +337,8 @@
    "read_only": 1
   },
   {
+   "fetch_from": "assigned_driver.current_vehicle",
+   "fetch_if_empty": 1,
    "fieldname": "assigned_vehicle",
    "fieldtype": "Link",
    "label": "Assigned Vehicle",
@@ -453,7 +455,7 @@
    "link_fieldname": "transport_request"
   }
  ],
- "modified": "2026-07-27 16:05:31.414754",
+ "modified": "2026-08-06 22:39:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",

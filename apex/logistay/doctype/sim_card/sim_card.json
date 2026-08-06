@@ -6,6 +6,7 @@
  "istable": 0,
  "engine": "InnoDB",
  "is_submittable": 0,
+ "show_title_field_in_link": 1,
  "track_changes": 1,
  "autoname": "naming_series:",
  "naming_rule": "By \"Naming Series\" field",
@@ -314,5 +315,5 @@
    "idx": 4
   }
  ],
- "modified": "2026-07-25 04:51:30.324102"
+ "modified": "2026-08-06 22:39:00.000000"
 }
