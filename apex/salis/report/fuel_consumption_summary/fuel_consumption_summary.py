@@ -1,9 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 
 from apex.apex_core.utils.report_helpers import date_range_condition, scoped_names
 from apex.salis import permissions
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
@@ -45,4 +47,10 @@ def execute(filters=None):
 
     data = sorted(summary.values(), key=lambda row: row["vehicle"])
 
-    return columns, data
+    summary = [
+        count_card(_("Vehicles"), data),
+        total_card(_("Total Litres"), data, "total_litres"),
+        total_card(_("Total Amount"), data, "total_amount", "Currency"),
+        total_card(_("Fuel Logs"), data, "log_count", "Int"),
+    ]
+    return columns, data, None, None, summary

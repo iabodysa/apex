@@ -1,9 +1,12 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
+from frappe.utils import flt
 
 from apex.apex_core.utils.report_helpers import date_range_condition, scoped_names
 from apex.salis import permissions
+from apex.apex_core.utils.report_summary import count_card, percent_card, total_card
 
 
 def execute(filters=None):
@@ -56,4 +59,12 @@ def execute(filters=None):
     )
     for row in rows:
         row["missing_count"] = max((row.get("expected_count") or 0) - (row.get("boarded_count") or 0), 0)
-    return columns, rows
+    expected = sum(flt(r.get("expected_count")) for r in rows)
+    boarded = sum(flt(r.get("boarded_count")) for r in rows)
+    summary = [
+        count_card(_("Trips"), rows),
+        total_card(_("Expected"), rows, "expected_count", "Int"),
+        total_card(_("Missing"), rows, "missing_count", "Int", indicator="Red"),
+        percent_card(_("Boarded"), boarded, expected),
+    ]
+    return columns, rows, None, None, summary

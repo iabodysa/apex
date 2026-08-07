@@ -1,9 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 from frappe.utils import date_diff, today
 
 from apex.habitat import permissions
+from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
@@ -60,4 +62,9 @@ def execute(filters=None):
             "days_open": days_open,
         })
 
-    return columns, data
+    summary = [
+        count_card(_("Open Findings"), data),
+        count_card(_("Open Over 30 Days"), data, lambda r: (r.get("days_open") or 0) > 30, "Red"),
+        count_card(_("Open Over 7 Days"), data, lambda r: (r.get("days_open") or 0) > 7, "Orange"),
+    ]
+    return columns, data, None, None, summary

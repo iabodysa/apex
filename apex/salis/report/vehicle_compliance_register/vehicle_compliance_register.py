@@ -1,10 +1,12 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 from frappe.utils import getdate, today, date_diff
 
 from apex.apex_core.utils.report_helpers import scoped_names
 from apex.salis import permissions
+from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
@@ -81,4 +83,14 @@ def execute(filters=None):
             }
         )
 
-    return columns, data
+    summary = [
+        count_card(_("Vehicles"), data),
+        count_card(_("Expired"), data, lambda r: (r.get("days_to_expiry") or 0) < 0, "Red"),
+        count_card(
+            _("Expiring in 30 Days"),
+            data,
+            lambda r: 0 <= (r.get("days_to_expiry") or 0) <= 30,
+            "Orange",
+        ),
+    ]
+    return columns, data, None, None, summary

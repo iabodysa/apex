@@ -141,14 +141,20 @@ Buildings,المباني
 Claims,المطالبات
 Contracts,العقود
 Expiring in 30 Days,تنتهي خلال 30 يوماً
+Fuel Logs,سجلات الوقود
 Idle Share,نسبة التعطّل
 Leases Watched,العقود المتابَعة
 Monthly Rent at Risk,الإيجار الشهري المعرّض
+Open Findings,الملاحظات المفتوحة
+Open Over 30 Days,مفتوحة أكثر من 30 يوماً
+Open Over 7 Days,مفتوحة أكثر من 7 أيام
 Open Recoveries,الاستردادات المفتوحة
 Open Requests,الطلبات المفتوحة
 Over 90 Days,أكثر من 90 يوماً
 Past SLA,تجاوز المدة المتفق عليها
 Positions,المواضع
+Recovered Share,نسبة المسترد
+Recoveries,الاستردادات
 Repair Cost,تكلفة الإصلاح
 Residents,الساكنون
 Rows,الصفوف
