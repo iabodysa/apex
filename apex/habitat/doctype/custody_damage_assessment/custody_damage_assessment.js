@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 const DEDUCTION_STATUS_COLORS = {
 	"Not Created": "gray",
 	Draft: "orange",

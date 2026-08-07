@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.ui.form.on("Salis Vehicle", {
 	setup(frm) {
 		frm.set_query("project", () => ({
@@ -42,16 +42,3 @@ function _update_vehicle_indicator(frm) {
 		frm.page.set_indicator(__(frm.doc.status), colors[frm.doc.status] || "blue");
 	}
 }
-
-frappe.listview_settings["Salis Vehicle"] = {
-	add_fields: ["status"],
-	get_indicator(doc) {
-		const colors = {
-			"Active": "green",
-			"Stopped": "red",
-			"Under Maintenance": "orange",
-			"Released": "grey",
-		};
-		return [__(doc.status), colors[doc.status] || "blue", "status,=," + doc.status];
-	},
-};

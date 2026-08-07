@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.ui.form.on("Vehicle Handover", {
 	setup(frm) {
 		frm.set_query("to_driver", () => ({

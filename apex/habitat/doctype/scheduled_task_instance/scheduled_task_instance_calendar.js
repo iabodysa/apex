@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.views.calendar["Scheduled Task Instance"] = {
 	field_map: {
 		start: "due_date",

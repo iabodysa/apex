@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 
 frappe.listview_settings["Audit Remediation Plan"] = {
 	add_fields: ["overall_status"],

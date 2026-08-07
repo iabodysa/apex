@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.ui.form.on("Dispatch Trip", {
 	refresh(frm) {
 		frm.clear_custom_buttons();
@@ -84,16 +84,3 @@ function _prompt_assign_requests(frm) {
 		__("Assign")
 	);
 }
-
-frappe.listview_settings["Dispatch Trip"] = {
-	add_fields: ["status"],
-	get_indicator(doc) {
-		const colors = {
-			"Planned": "blue",
-			"Dispatched": "orange",
-			"Completed": "green",
-			"Cancelled": "red",
-		};
-		return [__(doc.status), colors[doc.status] || "blue", "status,=," + doc.status];
-	},
-};

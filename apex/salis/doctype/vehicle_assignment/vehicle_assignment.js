@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.ui.form.on("Vehicle Assignment", {
 	refresh(frm) {
 		frm.clear_custom_buttons();
@@ -43,14 +43,3 @@ function _show_context(frm) {
 		);
 	}
 }
-
-frappe.listview_settings["Vehicle Assignment"] = {
-	add_fields: ["status"],
-	get_indicator(doc) {
-		const colors = {
-			"Active": "green",
-			"Ended": "grey",
-		};
-		return [__(doc.status), colors[doc.status] || "blue", "status,=," + doc.status];
-	},
-};

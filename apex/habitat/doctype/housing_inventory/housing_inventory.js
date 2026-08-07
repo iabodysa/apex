@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.ui.form.on("Housing Inventory", {
 	setup(frm) {
 		frm.set_query("room", () => ({

@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 
 frappe.ui.form.on("Movement Cost Transfer", {
 	setup(frm) {
@@ -46,18 +46,3 @@ function _update_mct_indicator(frm) {
 		frm.page.set_indicator(__(frm.doc.status), colors[frm.doc.status] || "blue");
 	}
 }
-
-frappe.listview_settings["Movement Cost Transfer"] = {
-	add_fields: ["status"],
-	get_indicator(doc) {
-		const colors = {
-			"Draft": "gray",
-			"Pending Approval": "orange",
-			"Approved": "blue",
-			"Posted (memo)": "green",
-			"Rejected": "red",
-			"Cancelled": "red",
-		};
-		return [__(doc.status), colors[doc.status] || "blue", "status,=," + doc.status];
-	},
-};

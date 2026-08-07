@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.ui.form.on("Salis Driver", {
 	refresh(frm) {
 		frm.clear_custom_buttons();
@@ -129,16 +129,3 @@ function _check_license_expiry(frm) {
 		);
 	}
 }
-
-frappe.listview_settings["Salis Driver"] = {
-	add_fields: ["status"],
-	get_indicator(doc) {
-		const colors = {
-			"Active": "green",
-			"Stopped": "red",
-			"On Leave": "orange",
-			"Released": "grey",
-		};
-		return [__(doc.status), colors[doc.status] || "blue", "status,=," + doc.status];
-	},
-};

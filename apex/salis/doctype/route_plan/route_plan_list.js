@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 
 frappe.listview_settings["Route Plan"] = {
 	add_fields: ["shift"],

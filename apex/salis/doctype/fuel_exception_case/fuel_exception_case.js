@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.ui.form.on("Fuel Exception Case", {
 	setup(frm) {
 		frm.set_query("fuel_request", () => ({

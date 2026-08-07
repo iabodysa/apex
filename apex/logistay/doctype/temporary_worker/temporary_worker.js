@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.ui.form.on("Temporary Worker", {
 	window_days(frm) {
 		if (frm.doc.arrival_date && frm.doc.window_days) {

@@ -1,32 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-
-function _injectFloorLayoutStyles() {
-	if (document.getElementById("apex-floor-layout-style")) return;
-	var style = document.createElement("style");
-	style.id = "apex-floor-layout-style";
-	style.textContent = [
-		".apex-floor-section { margin-bottom: 18px; }",
-		".apex-floor-label { font-weight: 600; font-size: 13px; margin-bottom: 8px; color: #555; }",
-		".apex-room-grid { display: flex; flex-wrap: wrap; gap: 6px; }",
-		".apex-room-tile {",
-		"  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;",
-		"  width: 72px; min-height: 48px; border-radius: 5px; cursor: pointer;",
-		"  font-size: 11px; font-weight: 600; color: #fff; padding: 4px 3px; text-align: center;",
-		"  border: 1px solid rgba(0,0,0,0.10); box-shadow: 0 1px 2px rgba(0,0,0,0.08);",
-		"  transition: opacity 0.15s;",
-		"}",
-		".apex-room-tile:hover { opacity: 0.85; }",
-		".apex-room-tile.color-green  { background: #4caf50; }",
-		".apex-room-tile.color-orange { background: #ff9800; }",
-		".apex-room-tile.color-red    { background: #f44336; }",
-		".apex-room-tile.color-grey   { background: #9e9e9e; }",
-		".apex-room-occ { font-size: 10px; font-weight: 400; margin-top: 2px; opacity: 0.92; }",
-		".apex-layout-summary { display: flex; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }",
-		".apex-legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #555; }",
-		".apex-legend-dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }",
-	].join("\n");
-	document.head.appendChild(style);
-}
+// Copyright (c) 2026, afmcoltd
 
 function _renderFloorLayout(frm) {
 	if (frm.is_new()) return;
@@ -38,21 +10,19 @@ function _renderFloorLayout(frm) {
 			if (r.exc || !r.message) return;
 			var data = r.message;
 
-			_injectFloorLayoutStyles();
-
 			var wrapper = frm.get_field("floor_layout_html").$wrapper;
 			wrapper.empty();
 
 			var s = data.summary;
 			var legendHtml = [
 				'<div class="apex-layout-summary">',
-				'<div class="apex-legend-item"><span class="apex-legend-dot" style="background:#4caf50"></span>',
+				'<div class="apex-legend-item"><span class="apex-legend-dot color-green"></span>',
 				__("Available: {0}", [s.available]), '</div>',
-				'<div class="apex-legend-item"><span class="apex-legend-dot" style="background:#ff9800"></span>',
+				'<div class="apex-legend-item"><span class="apex-legend-dot color-orange"></span>',
 				__("Partial / Attention: {0}", [s.partial]), '</div>',
-				'<div class="apex-legend-item"><span class="apex-legend-dot" style="background:#f44336"></span>',
+				'<div class="apex-legend-item"><span class="apex-legend-dot color-red"></span>',
 				__("Full: {0}", [s.full]), '</div>',
-				'<div class="apex-legend-item"><span class="apex-legend-dot" style="background:#9e9e9e"></span>',
+				'<div class="apex-legend-item"><span class="apex-legend-dot color-grey"></span>',
 				__("Maintenance: {0}", [s.maintenance]), '</div>',
 				'</div>',
 			].join("");

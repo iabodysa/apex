@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.ui.form.on("Site", {
 	refresh(frm) {
 		frm.toggle_display("address_html", !frm.is_new());

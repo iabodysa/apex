@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.ui.form.on("Room Bed Transfer", {
 	setup: function(frm) {
 		frm.set_query("to_bed", function() {
@@ -13,7 +13,7 @@ frappe.ui.form.on("Room Bed Transfer", {
 			};
 		});
 	},
-	
+
 	refresh(frm) {
 	},
 

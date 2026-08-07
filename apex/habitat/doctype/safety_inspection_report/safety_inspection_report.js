@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.ui.form.on("Safety Inspection Report", {
 	setup(frm) {
 		frm.set_query("room", "safety_findings", () => ({
