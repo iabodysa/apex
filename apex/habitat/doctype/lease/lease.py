@@ -8,6 +8,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_months, flt, getdate
 
+from apex.apex_core.utils.vat import apply_vat
+
 _CYCLE_MONTHS = {
     "Monthly": 1,
     "Quarterly": 3,
@@ -53,6 +55,8 @@ def validate(doc, method=None):
             frappe.throw(
                 _("An overlapping lease already exists for this building: {0}").format(conflict)
             )
+
+    apply_vat(doc, doc.rent_amount)
 
     _maybe_build_schedule(doc)
 

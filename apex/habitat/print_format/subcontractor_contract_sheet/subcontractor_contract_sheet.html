@@ -81,6 +81,10 @@
        {"ar": _("Monthly Retainer (SAR)"), "en": "Monthly retainer", "value": doc.monthly_retainer, "fmt": "Currency"}],
       [{"ar": _("Retainer Value Over Twelve Months"), "en": "Retainer x 12 months", "value": annual_retainer, "fmt": "Currency"},
        {"ar": _("Prepared By"), "en": "Prepared by", "value": prepared_by}],
+      [{"ar": _("VAT Rate"), "en": "VAT rate", "value": doc.tax_rate, "fmt": "Percent"},
+       {"ar": _("VAT on the Billed Amount"), "en": "VAT on the billed amount", "value": doc.tax_amount, "fmt": "Currency"}],
+      [{"ar": _("Billed Amount Including VAT"), "en": "Billed amount incl. VAT", "value": doc.grand_total, "fmt": "Currency"},
+       {"ar": _("Currency of the Contract"), "en": "Currency", "value": doc_currency}],
   ]) }}
 
   {{ ax.amount_words(annual_retainer, doc_currency) }}

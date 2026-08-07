@@ -14,12 +14,15 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, today
 
+from apex.apex_core.utils.vat import apply_vat
+
 
 class TelecomContract(Document):
     def validate(self):
         """Validates the contract dates and syncs the derived status."""
         self._validate_dates()
         self._sync_status()
+        apply_vat(self, self.recurring_amount)
 
     def _validate_dates(self):
         """Blocks a contract end date earlier than its start date."""

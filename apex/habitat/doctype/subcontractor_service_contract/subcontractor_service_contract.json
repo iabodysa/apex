@@ -191,6 +191,53 @@
    "label": "Covered Buildings",
    "options": "Subcontractor Building Coverage",
    "idx": 23
+  },
+  {
+   "fieldname": "subcontractor_service_contract_sec_tax",
+   "fieldtype": "Section Break",
+   "label": "VAT"
+  },
+  {
+   "fieldname": "tax_rate",
+   "fieldtype": "Percent",
+   "label": "VAT Rate",
+   "default": "15",
+   "description": "Zero for a counterparty outside the VAT scope."
+  },
+  {
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "label": "VAT Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "subcontractor_service_contract_tax_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Total Including VAT",
+   "read_only": 1,
+   "bold": 1
+  },
+  {
+   "fieldname": "subcontractor_service_contract_sec_terms",
+   "fieldtype": "Section Break",
+   "label": "Terms and Conditions",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "tc_name",
+   "fieldtype": "Link",
+   "label": "Terms",
+   "options": "Terms and Conditions",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Text Editor",
+   "label": "Terms and Conditions"
   }
  ],
  "links": [
@@ -274,10 +321,18 @@
   "rate_per_visit",
   "subcontractor_service_contract_commercial_col",
   "monthly_retainer",
+  "subcontractor_service_contract_sec_tax",
+  "tax_rate",
+  "tax_amount",
+  "subcontractor_service_contract_tax_col",
+  "grand_total",
+  "subcontractor_service_contract_sec_terms",
+  "tc_name",
+  "terms",
   "subcontractor_service_contract_sec_document",
   "attached_contract",
   "subcontractor_service_contract_sec_table_covered_buildings",
   "covered_buildings"
  ],
- "modified": "2026-07-24 03:53:04.208692"
+ "modified": "2026-08-08 01:11:00.000000"
 }

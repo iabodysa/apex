@@ -18,7 +18,9 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate
+from frappe.utils import flt, getdate
+
+from apex.apex_core.utils.vat import apply_vat
 
 
 class SubcontractorServiceContract(Document):
@@ -27,3 +29,5 @@ class SubcontractorServiceContract(Document):
         if self.contract_start_date and self.contract_end_date:
             if getdate(self.contract_end_date) < getdate(self.contract_start_date):
                 frappe.throw(_("Contract End cannot be before Contract Start."))
+
+        apply_vat(self, flt(self.monthly_retainer) or flt(self.rate_per_visit))

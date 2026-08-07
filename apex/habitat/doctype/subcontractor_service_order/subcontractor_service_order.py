@@ -20,16 +20,20 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, nowdate
 
+from apex.apex_core.utils.vat import apply_vat
+
 
 class SubcontractorServiceOrder(Document):
     pass
 
 
 def before_save(doc, method=None):
-    """Defaults the order's company to the Habitat Settings default company when none is set."""
+    """Defaults the order's company and restates its cost with VAT."""
     if not doc.company:
         from apex.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
         doc.company = get_default_company()
+
+    apply_vat(doc, doc.service_cost)
 
 
 @frappe.whitelist(methods=["POST"])

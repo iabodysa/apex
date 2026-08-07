@@ -51,11 +51,19 @@
   "cost_center",
   "project",
   "service_item",
+  "telecom_contract_sec_tax",
+  "tax_rate",
+  "tax_amount",
+  "telecom_contract_tax_col",
+  "grand_total",
   "sims_tab",
   "sim_count_sec",
   "sim_count",
   "generated_docs_sec",
   "billing_documents",
+  "telecom_contract_sec_terms",
+  "tc_name",
+  "terms",
   "notes_sec",
   "notes",
   "system_sec",
@@ -307,6 +315,53 @@
    "no_copy": 1,
    "print_hide": 1,
    "idx": 28
+  },
+  {
+   "fieldname": "telecom_contract_sec_tax",
+   "fieldtype": "Section Break",
+   "label": "VAT"
+  },
+  {
+   "fieldname": "tax_rate",
+   "fieldtype": "Percent",
+   "label": "VAT Rate",
+   "default": "15",
+   "description": "Zero for a counterparty outside the VAT scope."
+  },
+  {
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "label": "VAT Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "telecom_contract_tax_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Total Including VAT",
+   "read_only": 1,
+   "bold": 1
+  },
+  {
+   "fieldname": "telecom_contract_sec_terms",
+   "fieldtype": "Section Break",
+   "label": "Terms and Conditions",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "tc_name",
+   "fieldtype": "Link",
+   "label": "Terms",
+   "options": "Terms and Conditions",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Text Editor",
+   "label": "Terms and Conditions"
   }
  ],
  "permissions": [
@@ -366,5 +421,5 @@
    "link_fieldname": "telecom_contract"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000"
+ "modified": "2026-08-08 01:11:00.000000"
 }

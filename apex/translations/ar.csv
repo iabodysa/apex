@@ -252,6 +252,7 @@ Amount,المبلغ
 Amount (SAR),المبلغ (ريال)
 Amount Deducted,المبلغ المخصوم
 Amount Payable,المبلغ المستحق
+Amount Payable Including VAT,المبلغ المستحق شامل الضريبة
 Amount Recovered,المبلغ المُسترد
 Amount Recovered (SAR),المبلغ المسترد (ريال)
 Amount claimed by the rental office.,المبلغ المطالب به من مكتب التأجير.
@@ -569,9 +570,11 @@ Bill Identity,هوية الفاتورة
 Bill PDF,الفاتورة بصيغة PDF
 Bill a rental office for its vehicles and print the statement.,أنشئ فاتورة لمكتب التأجير عن مركباته واطبع الكشف.
 Bill amounts cannot be negative.,لا يمكن أن تكون مبالغ الفاتورة سالبة.
+Billed Amount Including VAT,المبلغ المفوتر شامل الضريبة
 Billed By,الجهة المطالِبة
 Billed To Supplier,المورّد المفوتر عليه
 Billing,الفوترة
+Billing Account No.,رقم حساب الفوترة
 Billing Account Number,رقم حساب الفوترة
 Billing Cycle,دورة الفوترة
 Billing Documents,مستندات الفوترة
@@ -3393,6 +3396,7 @@ Recovery Details,تفاصيل الاسترداد
 Recovery Type,نوع الاسترداد
 "Recurrence interval used to generate task instances from this template, from daily through annually.",فترة التكرار المستخدمة لإنشاء سجلات تنفيذ المهام من هذا القالب، من يومي إلى سنوي.
 Recurring Amount,المبلغ الدوري
+Recurring Amount Including VAT,المبلغ الدوري شامل الضريبة
 Recurring Amount per Billing Cycle,المبلغ الدوري لكل دورة فوترة
 Recurring Billing,الفوترة الدورية
 Reference,المرجع
@@ -3478,6 +3482,7 @@ Rent Payment Schedule,جدول سداد الإيجارات
 Rent payment generated for building: {0} under lease {1},أُنشئت دفعة الإيجار للمبنى: {0} ضمن عقد الإيجار {1}
 Rent payments can only be raised from a submitted lease.,دفعات الإيجار تُصدر من عقد معتمد فقط.
 Rent per Billing Cycle,الإيجار لكل دفعة
+Rent per Cycle Including VAT,الإيجار لكل دفعة شامل الضريبة
 Rental,إيجار
 Rental Accrual Ledger,سجل استحقاق الإيجار
 Rental Accrual This Month,استحقاق الإيجار لهذا الشهر
@@ -4355,6 +4360,7 @@ Term & Status,المدة والحالة
 Terminate,إنهاء الخدمة
 Terminated,مُنهى
 Termination,إنهاء خدمة
+Terms,الشروط
 Terms Accepted On,تاريخ قبول الشروط
 Terms Signature,توقيع الموافقة
 Terms and Conditions,الشروط والأحكام
@@ -4585,6 +4591,7 @@ Total Cost,التكلفة الإجمالية
 Total Deduction Amount,إجمالي مبلغ الخصم
 Total Estimated Replacement Cost (SAR),إجمالي تكلفة الاستبدال التقديرية (ريال)
 Total Floors,إجمالي الطوابق
+Total Including VAT,الإجمالي شامل الضريبة
 Total Invoice Amount (SAR),إجمالي مبلغ الفاتورة (ريال)
 Total Litres,إجمالي اللترات
 Total Movements Recorded,إجمالي الحركات المسجلة
@@ -4757,6 +4764,12 @@ VAPID Subject,موضوع VAPID
 VAPID public key (base64url). Handed to the browser to subscribe; safe to expose.,مفتاح VAPID العام (base64url). يُرسل إلى المتصفح للاشتراك ويمكن عرضه بأمان.
 VAT,ضريبة القيمة المضافة
 VAT / Tax Registration No.,الرقم الضريبي
+VAT Amount,مبلغ ضريبة القيمة المضافة
+VAT Rate,نسبة ضريبة القيمة المضافة
+VAT on the Amount Payable,الضريبة على المبلغ المستحق
+VAT on the Billed Amount,الضريبة على المبلغ المفوتر
+VAT on the Rent Cycle,الضريبة على دفعة الإيجار
+VAT per Billing Cycle,الضريبة لكل دورة فوترة
 Vacant Capacity Cost Trend (Monthly),اتجاه تكلفة السعة الشاغرة (شهري)
 Valid,ساري
 Valid From,صالح من
@@ -5012,6 +5025,7 @@ Your licence isn't due for renewal yet.,رخصتك لا تستحق التجدي�
 Your request has been submitted. Save your tracking code shown below to follow up with your supervisor.,تم تقديم طلبك. احفظ رمز التتبع أدناه للمتابعة مع مشرفك.
 Your tracking code:,رمز المتابعة الخاص بك:
 Your transport request was submitted. Save your tracking code to follow up with your supervisor.,تم تقديم طلب النقل. احفظ رمز التتبع للمتابعة مع مشرفك.
+Zero for a counterparty outside the VAT scope.,صفر إذا كان الطرف الآخر خارج نطاق الضريبة.
 active,نشط
 aggregated,مُجمَّع
 allowances,بدلات

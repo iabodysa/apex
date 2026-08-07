@@ -67,6 +67,10 @@
        {"ar": _("Project Charged"), "en": "Project", "value": doc.project}],
       [{"ar": _("Service Item Billed Against"), "en": "Service item", "value": doc.service_item},
        {"ar": _("Prepared By"), "en": "Prepared by", "value": prepared_by}],
+      [{"ar": _("VAT Rate"), "en": "VAT rate", "value": doc.tax_rate, "fmt": "Percent"},
+       {"ar": _("VAT per Billing Cycle"), "en": "VAT per cycle", "value": doc.tax_amount, "fmt": "Currency"}],
+      [{"ar": _("Recurring Amount Including VAT"), "en": "Recurring incl. VAT", "value": doc.grand_total, "fmt": "Currency"},
+       {"ar": _("Billing Account No."), "en": "Billing account", "value": doc.account_number}],
   ]) }}
 
   {{ ax.amount_words(annual_value, doc_currency) }}
