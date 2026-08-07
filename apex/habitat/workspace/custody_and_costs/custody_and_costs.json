@@ -244,15 +244,6 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Custody Damage Register",
-   "link_type": "Report",
-   "link_to": "Custody Damage Register",
-   "idx": 20,
-   "is_query_report": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Accommodation Stock Balance",
    "link_type": "Report",
    "link_to": "Accommodation Stock Balance",
@@ -510,5 +501,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-08-07 17:49:00.000000"
+ "modified": "2026-08-07 18:00:00.000000"
 }

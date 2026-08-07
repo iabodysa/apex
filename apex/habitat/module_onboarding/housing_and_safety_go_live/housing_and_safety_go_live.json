@@ -6,7 +6,7 @@
  "subtitle": "Place your first resident, then raise and close the work their building needs.",
  "success_message": "Housing and Safety is live. The Front Desk handles daily check-in and check-out; the Safety Map shows what is open on each building.",
  "is_complete": 0,
- "modified": "2026-08-02 00:00:00.000000",
+ "modified": "2026-08-07 18:00:00.000000",
  "allow_roles": [
   {
    "doctype": "Onboarding Permission",
@@ -56,7 +56,7 @@
   },
   {
    "doctype": "Onboarding Step Map",
-   "step": "Review the Active Resident Register"
+   "step": "Review the Housing Assignment List"
   }
  ]
 }

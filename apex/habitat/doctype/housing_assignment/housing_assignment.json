@@ -140,6 +140,7 @@
   {
    "fieldname": "bed",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Bed",
    "options": "Bed",
    "reqd": 1,
@@ -207,6 +208,7 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Project",
    "options": "Project",
@@ -215,6 +217,7 @@
   {
    "fieldname": "cost_center",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Cost Center",
    "options": "Cost Center",
    "fetch_from": "building.default_cost_center",
@@ -375,7 +378,7 @@
    "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-07-26 09:03:55.752811",
+ "modified": "2026-08-07 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Assignment",

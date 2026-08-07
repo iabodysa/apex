@@ -2,10 +2,10 @@
 """Seed native Frappe Auto Email Reports that email an existing Salis Script Report
 on a schedule. These are the periodic movement/fleet operational digests:
 
-- Fleet Register              — Daily   (Fleet Managers — fleet-status snapshot)
+- Vehicle Assignment Register — Daily   (Fleet Managers — fleet-status snapshot)
 - Fuel Reconciliation         — Monthly (Finance / Fleet Manager)
 - Cost Recovery Aging         — Weekly  (Finance — chase open recoveries)
-- Transport Fulfilment SLA    — Weekly  (Fleet Manager — service-level watch)
+- Worker Transport Plan       — Weekly  (Fleet Manager — service-level watch)
 - Vehicle Compliance Register — Monthly (Government Relations — renewals)
 
 Mirrors ``habitat_auto_email_reports_seed.py``. An Auto Email Report must name a
@@ -25,10 +25,10 @@ the master toggle being OFF by default is upheld here without extra logic.
 from apex.apex_core.setup.seeders.auto_email_report_seed_base import seed_auto_email_reports_for
 
 _REPORTS = [
-    {"report": "Fleet Register", "frequency": "Daily"},
+    {"report": "Vehicle Assignment Register", "frequency": "Daily"},
     {"report": "Fuel Reconciliation", "frequency": "Monthly"},
     {"report": "Cost Recovery Aging", "frequency": "Weekly"},
-    {"report": "Transport Fulfilment SLA", "frequency": "Weekly"},
+    {"report": "Worker Transport Plan", "frequency": "Weekly"},
     {"report": "Vehicle Compliance Register", "frequency": "Monthly"},
 ]
 

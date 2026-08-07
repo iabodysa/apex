@@ -3,9 +3,9 @@
 schedule. These are the periodic operational digests:
 
 - Supplier Cost Recovery  — Monthly (Finance)
-- Occupancy Trend         — Weekly  (Accommodation Manager)
-- Open Maintenance Requests — Weekly (fills the gap that escalation only logs)
-- Safety Task Execution Log  — Weekly (Resident Supervisor)
+- Accommodation Occupancy Summary — Weekly (Accommodation Manager)
+- Maintenance Aging       — Weekly (fills the gap that escalation only logs)
+- Safety Open Findings    — Weekly (Resident Supervisor)
 
 An Auto Email Report must name a real recipient; the customer's users/emails are
 unknown at install, so each is created **disabled** with Administrator as the
@@ -23,9 +23,9 @@ from apex.apex_core.setup.seeders.auto_email_report_seed_base import seed_auto_e
 
 _REPORTS = [
     {"report": "Supplier Cost Recovery", "frequency": "Monthly"},
-    {"report": "Occupancy Trend", "frequency": "Weekly"},
-    {"report": "Open Maintenance Requests", "frequency": "Weekly"},
-    {"report": "Safety Task Execution Log", "frequency": "Weekly"},
+    {"report": "Accommodation Occupancy Summary", "frequency": "Weekly"},
+    {"report": "Maintenance Aging", "frequency": "Weekly"},
+    {"report": "Safety Open Findings", "frequency": "Weekly"},
 ]
 
 

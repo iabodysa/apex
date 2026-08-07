@@ -98,6 +98,7 @@
    "default": "Owned",
    "fieldname": "ownership",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Ownership",
    "options": "Owned\nRented"
@@ -144,6 +145,7 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Project",
    "options": "Project"
   },
@@ -154,6 +156,7 @@
   {
    "fieldname": "current_driver",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Current Driver",
    "options": "Salis Driver"
@@ -350,7 +353,7 @@
    "link_fieldname": "vehicle"
   }
  ],
- "modified": "2026-08-06 22:39:00.000000",
+ "modified": "2026-08-07 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Vehicle",

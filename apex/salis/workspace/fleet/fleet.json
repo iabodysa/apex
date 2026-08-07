@@ -207,15 +207,6 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Fleet Register",
-   "link_type": "Report",
-   "link_to": "Fleet Register",
-   "idx": 14,
-   "is_query_report": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Vehicle Utilisation",
    "link_type": "Report",
    "link_to": "Vehicle Utilisation",
@@ -408,5 +399,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-08-06 22:51:00.000000"
+ "modified": "2026-08-07 18:00:00.000000"
 }

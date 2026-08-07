@@ -114,15 +114,6 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "SIMs by Contract and Supplier",
-   "link_type": "Report",
-   "link_to": "SIMs by Contract and Supplier",
-   "is_query_report": 1,
-   "idx": 11
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Telecom Contract Expiry",
    "link_type": "Report",
    "link_to": "Telecom Contract Expiry",
@@ -143,5 +134,5 @@
  "number_cards": [],
  "quick_lists": [],
  "creation": "2020-01-01 00:00:00.000000",
- "modified": "2026-08-02 23:54:00.000000"
+ "modified": "2026-08-07 18:00:00.000000"
 }

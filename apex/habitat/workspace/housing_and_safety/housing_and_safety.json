@@ -339,15 +339,6 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Active Resident Register",
-   "link_type": "Report",
-   "link_to": "Active Resident Register",
-   "idx": 29,
-   "is_query_report": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Accommodation Occupancy Summary",
    "link_type": "Report",
    "link_to": "Accommodation Occupancy Summary",
@@ -680,5 +671,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-08-07 17:49:00.000000"
+ "modified": "2026-08-07 18:00:00.000000"
 }

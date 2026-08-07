@@ -137,7 +137,6 @@ Activation Date,تاريخ التفعيل
 Active,نشط
 Against Issue,مقابل صرف
 Aged Over 60 Days,أقدم من 60 يوماً
-Assessments,التقييمات
 Average Cost per Litre,متوسط تكلفة اللتر
 Blocked by Outstanding Items,موقوف بسبب مستحقات قائمة
 Buildings,المباني
@@ -152,7 +151,6 @@ Days Held,أيام الحيازة
 Days Overdue,أيام التأخير
 Days Waiting,أيام الانتظار
 Employees,الموظفون
-Estimated Replacement Cost,تكلفة الاستبدال التقديرية
 Expected Return,الإرجاع المتوقّع
 Expiring in 30 Days,تنتهي خلال 30 يوماً
 Fuel Logs,سجلات الوقود
@@ -187,6 +185,7 @@ Returned By,أرجعه
 Returned Lines,بنود الإرجاع
 Returned in Good Order,أُرجع بحالة جيدة
 Returns,عمليات الإرجاع
+Review the Housing Assignment List,راجع قائمة التسكين
 Rows,الصفوف
 SIMs Covered,الشرائح المشمولة
 SIMs Held,الشرائح المحتفَظ بها
@@ -195,6 +194,7 @@ Still Held,لا تزال بالحيازة
 Taken,مُستلَم
 Trips Fulfilled,الرحلات المنفَّذة
 Unassigned Only,غير المسندة فقط
+View Housing Assignment list,عرض قائمة التسكين
 Waiting Over a Week,انتظار أكثر من أسبوع
 active,نشط
 Active CCTV Cameras,كاميرات المراقبة المفعّلة
@@ -205,7 +205,6 @@ Active Leases,عقود الإيجار النشطة
 Active Occupants,الشاغلون الحاليون
 Active Occupants: {0},الشاغلون الحاليون: {0}
 Active Rentals,عقود الإيجار النشطة
-Active Resident Register,سجل الساكنين الحاليين
 Active Residents,الساكنون الحاليون
 Active Vehicle Assignments,إسنادات المركبات النشطة
 Active Vehicles,المركبات النشطة
@@ -1163,7 +1162,6 @@ Custody Cleared,تم إخلاء طرف العهدة
 Custody Damage Assessment,تقييم تلفيات العهدة
 Custody Damage Assessments,تقييمات تلفيات العهدة
 Custody Damage Item,صنف العهدة التالف
-Custody Damage Register,سجل تلفيات العهدة
 Custody deferred,أُجِّلت العهدة
 Custody Flow,مسار العهدة
 Custody Handover,تسليم العهدة
@@ -1253,7 +1251,6 @@ Declining Balance,الرصيد المتناقص
 Deduct housing allowance from salary?,خصم بدل السكن من الراتب؟
 Deduction,الخصم
 Deduction Amount (SAR),مبلغ الخصم (ريال)
-Deduction Entry,قيد الخصم
 Deduction Type,نوع الخصم
 Deduction Type Rules,قواعد نوع الخصم
 Deduction type {0} is enabled but has no Salary Component (and no default is set).,نوع الخصم {0} مفعّل لكن دون مكون راتب (ولا يوجد إعداد افتراضي).
@@ -1537,7 +1534,6 @@ Error Log,سجل الأخطاء
 Escalated Maintenance Requests,طلبات الصيانة المصعدة
 Estimated Accommodation Cost Bleed (SAR),التكلفة المقدّرة لهدر السكن (ريال)
 Estimated accommodation cost from the memo ledger only (not salary). Populated by the aging job.,تكلفة الإسكان التقديرية من سجل المذكرات فقط (وليس الراتب). تُعبّأ بواسطة مهمة التقادم.
-Estimated Cost,التكلفة التقديرية
 Estimated Cost (SAR),التكلفة التقديرية (ريال)
 Estimated cost cannot be negative.,لا يمكن أن تكون التكلفة التقديرية سالبة.
 Estimated Replacement Cost (SAR),تكلفة الاستبدال التقديرية (ريال)
@@ -1708,7 +1704,6 @@ Fleet Go-Live,تشغيل الأسطول
 Fleet Operations,تشغيل الأسطول
 Fleet OS,نظام إدارة الأسطول
 Fleet Payment Register,سجل المدفوعات
-Fleet Register,سجل الأسطول
 Fleet Supervisor,مشرف الأسطول
 Fleet Supervisor Dashboard,لوحة معلومات مشرف الأسطول
 Fleet Supervisor Dashboard (Dashboard),لوحة مشرف الأسطول (لوحة معلومات)
@@ -3422,7 +3417,6 @@ Review Apex Integration Settings,مراجعة إعدادات تكامل أبكس
 "Review every alert this site can send. Each one has its own on/off switch and, where it warns ahead of a date, its own number of days. Turn off what your team does not need and set the timing on the rest. The list also holds the alerts that came with Frappe and ERPNext, so sort by Module to see only yours.","راجع كل تنبيه يستطيع هذا الموقع إرساله. لكلٍّ مفتاح تشغيل وإيقاف خاص به، ولِما ينبّه قبل موعدٍ عددُ أيامه الخاص. أطفئ ما لا يحتاجه فريقك واضبط توقيت الباقي. تضمّ القائمة أيضًا التنبيهات التي جاءت مع فرابيه وإي آر بي نكست، فرتّبها حسب الوحدة لترى تنبيهاتك وحدها."
 Review Integration Settings,مراجعة إعدادات التكامل
 "Review stage of the damage write-off case, from open and under review to approved or rejected, then closed or cancelled.",مرحلة مراجعة حالة شطب التلف، من مفتوح وقيد المراجعة إلى معتمد أو مرفوض، ثم مغلق أو ملغى.
-Review the Active Resident Register,راجع سجل الساكنين الحاليين
 Review the Safety Task Catalog,مراجعة دليل مهام السلامة
 "Review the shared integration switchboard: frontend URL, API version, and allowed origins.",راجع لوحة التكامل المشتركة: رابط الواجهة، وإصدار الواجهة البرمجية، والمصادر المسموح بها.
 Reviewed by,روجع بواسطة
@@ -3813,7 +3807,6 @@ SIM Custody Assignment,إسناد عهدة شريحة اتصال
 SIM Exceptions,استثناءات الشرائح
 SIMs,الشرائح
 SIMs & Billing,الشرائح والفوترة
-SIMs by Contract and Supplier,الشرائح حسب العقد والمورّد
 SIMs in Custody,الشرائح في العهدة
 "Single config that governs whether, and how, operational events (damage, rent, fuel, custody) may be deducted from a worker's salary. Default = NO deduction: the global switch is OFF and every per-type rule is disabled until explicitly activated after legal review.",إعداد واحد يحكم هل يمكن خصم الأحداث التشغيلية (تلف أو إيجار أو وقود أو عهدة) من راتب العامل وكيف. الافتراضي هو عدم الخصم: المفتاح العام موقوف وكل قاعدة نوع معطّلة حتى تُفعَّل صراحة بعد المراجعة القانونية.
 Single configuration record controlling the look and feel of the Salis Driver Portal (the mobile web app at /driver).,سجل إعدادات واحد يتحكم في مظهر بوابة سائق ساليس، وهي تطبيق الويب للجوال على /driver.
@@ -4504,7 +4497,6 @@ Verified by Client,تم التحقق من قِبل العميل
 Version,الإصدار
 Version of the documented API contract the frontend is built against. Additive changes are safe; breaking changes increment this value and require a notice to integrators.,إصدار عقد API الموثق الذي بُنيت عليه الواجهة. الإضافات متوافقة، أما التغييرات غير المتوافقة فترفع هذه القيمة وتتطلب إشعار جهات التكامل.
 "Vertical position of the floor within the building, used for occupancy planning and to apply safety rules that differ for basement, ground, middle, and roof levels.",الموضع الرأسي للطابق داخل المبنى، يُستخدم لتخطيط الإشغال ولتطبيق قواعد السلامة التي تختلف بين القبو والأرضي والأوسط والسطح.
-View Active Resident Register,عرض سجل الساكنين الحاليين
 View Safety Task Catalog list,عرض قائمة دليل مهام السلامة
 View the interactive safety map; rooms with open maintenance pulse.,اعرض خريطة السلامة التفاعلية؛ وتومض الغرف التي لديها طلبات صيانة مفتوحة.
 Villa,فيلا

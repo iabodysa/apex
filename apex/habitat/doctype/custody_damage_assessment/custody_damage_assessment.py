@@ -12,14 +12,15 @@ reaches every building.
 
 That row now also carries ``report``, ruled on 2026-07-31, because the 2026-07-27 grant
 did not finish its own job: the solo Finance Manager it was made for could open one
-assessment from a notification but not ``Custody Damage Register``, the register that
-totals them. ``report`` is the narrowest right that fixes that -- it gates only the
-report surface (``frappe/desk/query_report.py:47``) and carries no row and no field with
-it. The register reads exactly two things: permlevel-0 columns the 2026-07-27 read
-already opened, and ``total_estimated_replacement_cost``, which is permlevel 1 and so is
-already this role's own overlay field. Habitat oversight is unscoped
-(``HOUSING_UNSCOPED_ROLES``, ``habitat/permissions.py``), so the report's building filter
-returns the same rows to this role either way. Nothing on the register is a datum the
+assessment from a notification but not the register view that totals them (the Custody
+Damage Register report then; since its 2026-08-07 retirement, the list's report view
+over these same columns). ``report`` is the narrowest right that fixes that -- it gates
+only the report surface (``frappe/desk/query_report.py:47``) and carries no row and no
+field with it. That surface reads exactly two things: permlevel-0 columns the
+2026-07-27 read already opened, and ``total_estimated_replacement_cost``, which is
+permlevel 1 and so is already this role's own overlay field. Habitat oversight is
+unscoped (``HOUSING_UNSCOPED_ROLES``, ``habitat/permissions.py``), so building scoping
+returns the same rows to this role either way. Nothing on that surface is a datum the
 role could not already reach on the form, which is why it is a surface grant and not an
 access widening. Every other flag on the row is still an explicit 0: no write, no export,
 no share. Proof, cost, and framework citations are in
