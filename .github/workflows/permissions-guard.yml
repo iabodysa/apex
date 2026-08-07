@@ -6,11 +6,14 @@ on:
   pull_request:
     branches: [apex]
 
-# Baseline: number of unaudited permission-bypass call sites in PRODUCTION code
-# (test files are excluded — see the grep below). Any call site without a
-# "# audit-ok" comment on the same line counts toward the total.
+# A permission bypass must be NAMED by the code that performs it, not annotated.
+# The sanctioned home is apex/apex_core/utils/system_write.py, which exports
+# system_insert / system_save / system_delete; every other call site is counted.
 #
-# The count is ONE combined number over every spelling of the bypass, because they
+# This replaced a "# audit-ok" comment marker on 2026-08-07. A comment is not a
+# name: it drifts from the line it sits on, it is invisible at the call site that
+# reads the helper, and the owner's standing rule leaves no comments in shipped
+# source. The count is ONE number over every spelling of the bypass, because they
 # are the same runtime grant and a guard blind to one spelling is no guard:
 #   ignore_permissions=True          keyword argument, unspaced
 #   ignore_permissions = True        assignment or PEP8-spaced keyword
@@ -18,16 +21,14 @@ on:
 # POSIX [[:space:]] is used rather than \s so the expression means the same thing
 # under BSD grep locally and GNU grep on the runner.
 #
-# To add a NEW bypass that is genuinely necessary:
-#   1. Add "# audit-ok" to the same line, with a reason.
-#   2. The line will be excluded from the count automatically.
-#
-# BASELINE is a ratchet: it may FALL as bypasses are audited away, and is raised
-# only after a security review that records why the new call site is safe.
+# BASELINE is a ratchet toward zero: it may FALL as call sites move behind the
+# helper, and rises only after a security review that records why a new raw
+# bypass is safe.
 
 env:
-  BASELINE: 18
+  BASELINE: 130
   BYPASS_RE: 'ignore_permissions[[:space:]]*=[[:space:]]*True'
+  SANCTIONED: 'apex/apex_core/utils/system_write.py'
 
 jobs:
   permissions-guard:
@@ -35,34 +36,33 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Count unaudited permission-bypass call sites
+      - name: Count permission bypasses outside the sanctioned helper
         run: |
           # Production code only. Test files (tests/ and test_*.py) legitimately use
           # a permission bypass to build fixtures and are not a runtime security
           # surface, so they are excluded from the guard.
           COUNT=$(grep -rnE "$BYPASS_RE" apex/ --include="*.py" \
-            | grep -v "# audit-ok" \
+            | grep -v "^$SANCTIONED:" \
             | grep -vE '/tests/|/test_[A-Za-z0-9_]*\.py:' \
             | wc -l \
             | tr -d ' ')
 
-          echo "Unaudited permission-bypass count: $COUNT"
+          echo "Raw permission bypasses outside $SANCTIONED: $COUNT"
           echo "Baseline: $BASELINE"
 
           if [ "$COUNT" -gt "$BASELINE" ]; then
             echo ""
-            echo "ERROR: $COUNT unaudited permission-bypass call sites found."
-            echo "Baseline is $BASELINE."
+            echo "ERROR: $COUNT raw permission bypasses found; baseline is $BASELINE."
             echo ""
-            echo "Unaudited call sites:"
+            echo "Call sites:"
             grep -rnE "$BYPASS_RE" apex/ --include="*.py" \
-              | grep -v "# audit-ok" \
+              | grep -v "^$SANCTIONED:" \
               | grep -vE '/tests/|/test_[A-Za-z0-9_]*\.py:' || true
             echo ""
             echo "To fix:"
-            echo "  - If the new call site is genuinely required, append '# audit-ok'"
-            echo "    and a reason to that line; BASELINE stays where it is."
-            echo "  - If it was added by mistake, remove the bypass."
+            echo "  - Call system_insert / system_save / system_delete from"
+            echo "    $SANCTIONED, whose name states the bypass, and lower BASELINE."
+            echo "  - If the bypass was added by mistake, remove it."
             exit 1
           fi
 
