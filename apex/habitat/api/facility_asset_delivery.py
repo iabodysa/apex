@@ -42,9 +42,11 @@ from apex.habitat.doctype.facility_asset_delivery.facility_asset_delivery import
     move_asset_on_delivery,
 )
 
-MAX_OTP_ATTEMPTS = 3
-LOCKOUT_MINUTES = 5
-ELEVATED_ROLE = "Accommodation Manager"
+from apex.habitat.utils.otp_policy import (
+    ELEVATED_ROLE,
+    LOCKOUT_MINUTES,
+    MAX_OTP_ATTEMPTS,
+)
 
 EXIT_ROLES = {
     1: "Resident Supervisor",

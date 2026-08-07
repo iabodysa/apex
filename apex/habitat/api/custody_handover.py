@@ -22,9 +22,11 @@ from apex.habitat.doctype.custody_handover.custody_handover import (
     hash_otp,
 )
 
-MAX_OTP_ATTEMPTS = 3
-LOCKOUT_MINUTES = 5
-ELEVATED_ROLE = "Accommodation Manager"
+from apex.habitat.utils.otp_policy import (
+    ELEVATED_ROLE,
+    LOCKOUT_MINUTES,
+    MAX_OTP_ATTEMPTS,
+)
 
 
 def _get_submitted(handover: str):

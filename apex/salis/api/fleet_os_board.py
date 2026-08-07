@@ -23,6 +23,8 @@ permlevel-1 PII gate are applied here, on the read — never left to the client.
 
 from __future__ import annotations
 
+import re
+
 import frappe
 from frappe import _
 from frappe.utils import date_diff, getdate, today
@@ -69,15 +71,27 @@ def _vehicle_status(status: str, has_driver: bool, theft=None) -> str:
     return _STATUS_MAP.get(status, "available")
 
 
+_MOTORCYCLE_TOKENS = ("MOTOR", "BIKE", "SCOOTER", "\u062f\u0628\u0627\u0628", "\u062f\u0631\u0627\u062c")
+
+_MOTORCYCLE_PATTERN = re.compile(
+    r"|".join(r"\b" + re.escape(token) + r"\w*" for token in _MOTORCYCLE_TOKENS),
+    re.IGNORECASE,
+)
+
+
 def _sheet_for(category: str | None) -> str:
     """Best-effort CAR / MOTORCYCLE bucket for the design's type filter,
-    derived from the category name (the design only has these two chips)."""
+    derived from the category name (the design only has these two chips).
+
+    The tokens are matched at a WORD BOUNDARY, not as bare substrings. Vehicle
+    Category.category_name is a free Data field an admin types, so a bare substring test
+    lets an unrelated category carrying one of these letters inside a longer word land in
+    the wrong bucket \u2014 the same shape as the a/c-matched-jacket defect this repo already
+    fixed in resident_request.py. The trailing \\w* keeps the plural and the compound
+    ('MOTORBIKES', '\u062f\u0631\u0627\u062c\u0627\u062a') matching, which a bare \\b...\\b would have dropped."""
     if not category:
         return "CAR"
-    upper = category.upper()
-    if any(tok in upper for tok in ("MOTOR", "BIKE", "SCOOTER", "\u062f\u0628\u0627\u0628", "\u062f\u0631\u0627\u062c")):
-        return "MOTORCYCLE"
-    return "CAR"
+    return "MOTORCYCLE" if _MOTORCYCLE_PATTERN.search(category) else "CAR"
 
 
 def _driver_card(driver, driver_row, show_pii, date_receive="", date_deliver="",
