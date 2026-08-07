@@ -134,9 +134,6 @@ const messages = {
     },
     time: { sec: "{n}s", min: "{n}m", hour: "{n}h" },
     errors: {
-      loadError: "Something went wrong.",
-      rateLimited: "Too many requests — please wait a moment.",
-      sessionExpired: "Your session expired — please reload the page.",
     },
   },
   ar: {
@@ -265,9 +262,6 @@ const messages = {
     },
     time: { sec: "{n} ث", min: "{n} د", hour: "{n} س" },
     errors: {
-      loadError: "حدث خطأ ما.",
-      rateLimited: "طلبات كثيرة — انتظر لحظة من فضلك.",
-      sessionExpired: "انتهت الجلسة — أعد تحميل الصفحة.",
     },
   },
 };

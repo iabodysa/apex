@@ -13,7 +13,6 @@ const messages = {
       retry: "Retry",
       notAssigned: "Not assigned",
       none: "—",
-      error: "Error",
       back: "Back",
       driverPortal: "Driver Portal",
       staff: "Staff",
@@ -389,10 +388,10 @@ const messages = {
     errors: {
       loadFailed: "Couldn't load the portal",
       todayFailed: "Couldn't load today's board",
-      retryHint: "The connection dropped. Try again.",
       invalidLink:
         "This driver link is invalid or has been disabled. Please ask your supervisor for a new link.",
       rateLimited: "Too many requests. Please wait a moment and try again.",
+      retryHint: "Check your connection and try again.",
       sessionExpired: "Your session expired. Please refresh the page.",
       tripsFailed: "Couldn't load your trips",
     },
@@ -403,7 +402,6 @@ const messages = {
       retry: "إعادة المحاولة",
       notAssigned: "غير مُعيَّن",
       none: "—",
-      error: "خطأ",
       back: "رجوع",
       driverPortal: "بوابة السائق",
       staff: "موظف",
@@ -779,10 +777,10 @@ const messages = {
     errors: {
       loadFailed: "تعذّر تحميل البوابة",
       todayFailed: "تعذّر تحميل لوحة اليوم",
-      retryHint: "انقطع الاتصال. أعد المحاولة.",
       invalidLink:
         "رابط السائق غير صالح أو تم تعطيله. يرجى طلب رابط جديد من مشرفك.",
       rateLimited: "طلبات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.",
+      retryHint: "تحقق من اتصالك ثم حاول مرة أخرى.",
       sessionExpired: "انتهت صلاحية الجلسة. يرجى تحديث الصفحة.",
       tripsFailed: "تعذّر تحميل رحلاتك",
     },

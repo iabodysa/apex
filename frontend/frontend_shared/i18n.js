@@ -11,6 +11,8 @@
 // (`lang`, `lookup`, `interpolate`).
 import { computed, ref } from "vue";
 
+import { SHARED_MESSAGES } from "./sharedMessages.js";
+
 // config:
 //   messages     — { [locale]: nested-object } dictionary (required)
 //   storageKey   — localStorage key for the persisted language (required)
@@ -36,9 +38,21 @@ export function createI18n({
 
   const lang = ref(detectInitial());
 
-  // Resolve a dotted key ("errors.loadFailed") against one locale's messages.
+  // Resolve a dotted key ("errors.loadFailed") against one locale's messages, falling
+  // through to SHARED_MESSAGES when the portal does not define it.
+  //
+  // The order is deliberate: the PORTAL wins. A portal that needs its own wording keeps
+  // it by defining the key, and a portal that has nothing special to say about the
+  // connection or the session omits it and inherits one sentence the whole product
+  // agrees on. Reversing this would flatten the keys that are supposed to differ.
+  function resolve(source, locale, key) {
+    return key.split(".").reduce((o, part) => (o == null ? undefined : o[part]), source[locale]);
+  }
+
   function lookup(locale, key) {
-    return key.split(".").reduce((o, part) => (o == null ? undefined : o[part]), messages[locale]);
+    const own = resolve(messages, locale, key);
+    if (own != null) return own;
+    return resolve(SHARED_MESSAGES, locale, key);
   }
 
   // Fill {name} placeholders from params; leaves unknown placeholders intact.
