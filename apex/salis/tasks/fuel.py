@@ -11,7 +11,6 @@ from apex.salis.tasks.common import (
     BATCH_SIZE,
     _raise_alert,
     _resolve_alert,
-    _settings_int,
 )
 
 _ROW_SAVEPOINT = "salis_fuel_row"
@@ -88,54 +87,6 @@ def unreverted_topup_watch() -> None:
         cursor = topups[-1].name
 
 
-def overdue_fuel_request_watch() -> None:
-    """Flag fuel requests stuck in Pending past ``fuel_pending_max_days``.
-
-    Reads submitted Fuel Request ``{status: Pending}`` whose ``request_date`` is
-    older than ``fuel_pending_max_days`` (Salis Settings; default 2) and raises
-    a Warning "Forgotten Request" alert per row.
-    """
-    from frappe.utils import add_days, date_diff, today
-
-    today_str = today()
-    logger = frappe.logger()
-    max_days = _settings_int("fuel_pending_max_days", 2)
-    cutoff = add_days(today_str, -max_days)
-
-    start = 0
-    while True:
-        requests = frappe.get_all(
-            "Fuel Request",
-            filters={
-                "status": "Pending",
-                "docstatus": 1,
-                "request_date": ["<", cutoff],
-            },
-            fields=["name", "vehicle", "driver", "request_date"],
-            limit_start=start,
-            limit_page_length=BATCH_SIZE,
-        )
-        if not requests:
-            break
-
-        for r in requests:
-            frappe.db.savepoint(_ROW_SAVEPOINT)
-            try:
-                age = date_diff(today_str, r.request_date) if r.request_date else 0
-                msg = (f"overdue_fuel_request_watch: fuel request {r.name} has been "
-                       f"Pending for {age} days (since {r.request_date}).")
-                logger.warning(msg)
-                _raise_alert("Forgotten Request", "Warning", msg,
-                             "Fuel Request", r.name,
-                             vehicle=r.vehicle, driver=r.driver)
-            except Exception:
-                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
-                frappe.log_error(
-                    message=frappe.get_traceback(),
-                    title=f"Overdue fuel request watch failed for {r.name}"[:140],
-                )
-
-        start += BATCH_SIZE
 
 
 def resolve_excessive_topup_alerts(vehicle: str | None, reason: str) -> int:

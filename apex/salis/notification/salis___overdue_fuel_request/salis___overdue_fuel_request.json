@@ -1,13 +1,13 @@
 {
  "attach_print": 0,
- "channel": "Email",
+ "channel": "System Notification",
  "condition": "doc.docstatus == 1 and doc.status == 'Pending'",
  "date_changed": "request_date",
  "days_in_advance": 2,
  "docstatus": 0,
  "doctype": "Notification",
  "document_type": "Fuel Request",
- "enabled": 0,
+ "enabled": 1,
  "event": "Days After",
  "idx": 0,
  "is_standard": 1,
@@ -23,8 +23,8 @@
    "receiver_by_role": "Fleet Supervisor"
   }
  ],
- "send_system_notification": 0,
+ "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "Fuel Request Awaiting Approval: {{ doc.name }}",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-08-07 08:07:00.000000"
 }

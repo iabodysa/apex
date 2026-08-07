@@ -277,7 +277,6 @@ scheduler_events = {
         "apex.habitat.temporary_worker_engine.link_temporary_workers",
         "apex.salis.tasks.vehicle.idle_vehicle_watch",
         "apex.salis.tasks.fuel.unreverted_topup_watch",
-        "apex.salis.tasks.fuel.overdue_fuel_request_watch",
         "apex.salis.tasks.attendance.missing_attendance_watch",
         "apex.salis.tasks.vehicle.vehicle_compliance_expiry_watch",
         "apex.salis.tasks.workshop.workshop_overstay_watch",

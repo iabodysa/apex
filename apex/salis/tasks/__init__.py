@@ -24,7 +24,6 @@ from apex.salis.tasks.vehicle import (
     vehicle_utilization_summary,
 )
 from apex.salis.tasks.fuel import (
-    overdue_fuel_request_watch,
     resolve_excessive_topup_alerts,
     unreverted_topup_watch,
 )
@@ -55,7 +54,6 @@ __all__ = [
     "get_workshop_overstay_count",
     "idle_vehicle_watch",
     "missing_attendance_watch",
-    "overdue_fuel_request_watch",
     "reconcile_operations_alerts",
     "resolve_excessive_topup_alerts",
     "unreverted_topup_watch",

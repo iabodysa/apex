@@ -24,11 +24,11 @@ idempotency key.
 
 | Cadence | Apex Core | Habitat | Salis | Logistay | Total |
 |---------|-----------|---------|-------|----------|-------|
-| Daily | 1 | 12 | 10 | 1 | 24 |
+| Daily | 1 | 12 | 9 | 1 | 23 |
 | Weekly | 0 | 3 | 2 | 0 | 5 |
 | Monthly | 1 | 0 | 2 | 0 | 3 |
 | Cron | 1 | 0 | 1 | 0 | 2 |
-| **Total** | **3** | **15** | **15** | **1** | **34** |
+| **Total** | **3** | **15** | **14** | **1** | **33** |
 
 ## Daily jobs
 
@@ -48,7 +48,6 @@ idempotency key.
 | `apex.habitat.temporary_worker_engine.link_temporary_workers` | Update, Create, Notify | Matches an active **Temporary Worker** to an active Employee by passport, repoints supported housing and custody party links, backdates missed accommodation-cost rows, and marks the worker Linked. Unmatched workers past their window are marked Expired and HR users are notified in-app. | A link requires a matching passport. Expiry notification uses HR Manager users, falling back to System Manager users. |
 | `apex.salis.tasks.vehicle.idle_vehicle_watch` | Check, Create | Creates an Info Operations Alert for an active vehicle with no submitted Dispatched or Completed trip in the recent window. | Uses `idle_vehicle_days`, default 7. One Open Idle Vehicle alert per vehicle per day is retained. |
 | `apex.salis.tasks.fuel.unreverted_topup_watch` | Update, Create, Notify | Changes an overdue temporary **Fuel Request** top-up to Reverted, adds a timeline comment, and creates a Critical Operations Alert. | Applies to unreverted Approved or Done top-ups whose revert due date has passed. |
-| `apex.salis.tasks.fuel.overdue_fuel_request_watch` | Check, Create | Creates a Warning Operations Alert for a submitted Pending Fuel Request older than the allowed age. | Uses `fuel_pending_max_days`, default 2. |
 | `apex.salis.tasks.attendance.missing_attendance_watch` | Check, Create | Creates an Info Operations Alert for each active driver with no submitted **Driver Attendance** today. | The alert uses the existing Supervisor Delay type and is deduplicated by driver and day. |
 | `apex.salis.tasks.vehicle.vehicle_compliance_expiry_watch` | Check, Create | Scans **Salis Vehicle Compliance** rows up to the configured horizon and creates Critical alerts for expired items or Warning alerts for approaching dates. | Uses `alert_lead_days`, default 30. The shared alert key permits one Open License Expiry alert per vehicle per day, even when several compliance rows qualify. |
 | `apex.salis.tasks.workshop.workshop_overstay_watch` | Check, Create | Creates a Warning Operations Alert for a vehicle still Stopped or Under Maintenance with an open submitted maintenance suspension past the threshold. | Uses `workshop_overstay_days`, default 14. |
