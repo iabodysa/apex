@@ -1,7 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Test fixture standing in for a portal's src/i18n.js (resolved via the `@` alias in
-// vitest.config). Gives the shared components a real reactive `lang` + a spy-able
-// setLang so LangToggle/BuildingPicker can be mounted in isolation.
+// Copyright (c) 2026, afmcoltd
 import { ref } from "vue";
 
 export const lang = ref("en");
@@ -12,7 +9,6 @@ export function setLang(next) {
   dir.value = next === "ar" ? "rtl" : "ltr";
 }
 
-// Echoes the key so assertions can match on the i18n key without a dictionary.
 export function useI18n() {
   return {
     t: (key) => key,

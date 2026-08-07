@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Render a portal page in the language the page itself declares.
 
 `_()` translates into `frappe.local.lang`, which frappe resolves from the SESSION user

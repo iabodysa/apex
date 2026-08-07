@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Data-driven seed loader (Apex Habitat).
 
 A single, minimal, create-only loader that replaces the hand-written
@@ -107,16 +107,6 @@ def _record_key_value(spec, record):
 def _exists(frappe, doctype, key, value):
     """True only when a real row already carries this natural key.
 
-    ``frappe.db.exists(dt, dn)`` returns ``dn`` WITHOUT touching the database when
-    ``dn`` equals ``dt`` (database.py:1259, the deliberate "a Single always exists"
-    short-circuit). Every spec keyed on ``name`` therefore read a record named after
-    its own DocType as already-seeded and suppressed it on every install — the guard
-    silently lost a real row instead of admitting a ghost.
-
-    The value is NOT rejected outright: a row that genuinely is named after its
-    DocType must still count as present, or create-only would re-insert it. It is
-    routed to the dict-filter form instead, a documented call shape (database.py:1256)
-    that always queries and so answers correctly in both directions.
     """
     if key == "name" and value != doctype:
         return bool(frappe.db.exists(doctype, value))
@@ -130,10 +120,6 @@ def _unresolved_link(frappe, doctype, record):
     (Frappe's own ``_validate_links`` checks children), so a record whose rows
     dangle must be refused here rather than raising mid-batch.
 
-    Both probes filter on ``name`` rather than passing the value positionally: the
-    positional form short-circuits when the value equals the target DocType
-    (database.py:1259), which passed a dangling link off as resolved and turned a
-    named skip into a bare insert failure downstream.
     """
     meta = frappe.get_meta(doctype)
     for field in meta.get("fields", {"fieldtype": "Link"}):
@@ -189,7 +175,7 @@ def apply_spec(spec):
             doc = frappe.get_doc({"doctype": doctype, **record})
             doc.insert(ignore_permissions=True, ignore_if_duplicate=True)  # audit-ok
             created += 1
-        except Exception:  # noqa: BLE001 — one bad record must not abort the batch
+        except Exception:  # noqa: BLE001
             frappe.db.rollback(save_point=savepoint)
             frappe.log_error(title=f"seed: failed to create {doctype} '{value}'")
             failed += 1

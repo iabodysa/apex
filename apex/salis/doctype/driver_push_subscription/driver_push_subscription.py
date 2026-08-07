@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Driver Push Subscription — a driver device's Web Push registration.
 
 One row per (driver, browser endpoint). Created on the driver's opt-in via the
@@ -12,6 +12,7 @@ from frappe.model.document import Document
 
 class DriverPushSubscription(Document):
     def before_save(self):
+        """Fills the subscription's user from the driver's linked employee when it is not already set."""
         if not self.user and self.driver:
             employee = frappe.db.get_value("Salis Driver", self.driver, "employee")
             if employee:

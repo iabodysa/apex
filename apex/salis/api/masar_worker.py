@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Masar worker identity and the worker's own records.
 
 The fail-closed boundary every worker endpoint funnels through — a presented
@@ -65,6 +65,7 @@ def _employee_doc(employee):
 
 
 def _fmt_date(value):
+    """Returns the value as a string, or None when it is blank."""
     return frappe.utils.cstr(value) if value else None
 
 

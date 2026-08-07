@@ -1,10 +1,5 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <!-- Manual-boarding fallback sheet. Shown when a pass can't be scanned: lists the
-       trip's manifest workers with a tick per worker; confirming marks the ticked
-       workers aboard via manual_board_workers (writes a Trip Boarding Event + a
-       Manual Boarding Scan Log row). Already-aboard workers show as boarded and
-       can't be re-selected. -->
   <div class="sheet-overlay" role="dialog" aria-modal="true" @click.self="close">
     <div class="sheet">
       <div class="sheet-bar">
@@ -70,13 +65,10 @@ import { pushToast } from "../toast";
 const { t } = useI18n();
 
 const props = defineProps({
-  // The Dispatch Trip whose manifest is boarded manually.
   trip: { type: String, required: true },
 });
-// `boarded` after a successful manual board so the parent can refresh its card.
 const emit = defineEmits(["close", "boarded"]);
 
-// Ticked-but-not-yet-submitted worker ids (a Set so toggling is O(1)).
 const selected = ref(new Set());
 const busy = ref(false);
 
@@ -110,7 +102,7 @@ async function confirm() {
     pushToast(t("manual.boarded", { n }), "ok");
     selected.value = new Set();
     emit("boarded", res);
-    sheet.reload(); // re-paint the aboard ticks from the server
+    sheet.reload();
   } finally {
     busy.value = false;
   }
@@ -129,8 +121,6 @@ function close() {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  /* --c-scrim deepens in dark mode, where a 45% veil over a near-black ground
-     barely separates the sheet from the page under it. */
   background: var(--c-scrim);
 }
 .sheet {

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 import frappe
 from frappe import _
@@ -9,6 +9,7 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
+    """Returns approved and active leases with days-to-expiry and rent-at-risk cards, nearest first."""
     filters = filters or {}
 
     columns = [

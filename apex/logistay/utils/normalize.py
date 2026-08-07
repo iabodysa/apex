@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Normalization helpers for SIM identifiers.
 
 The mobile number stays editable in place on SIM Card, so its uniqueness cannot

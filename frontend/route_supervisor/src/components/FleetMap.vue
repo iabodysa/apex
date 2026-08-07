@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <section class="fleet-map">
     <header class="fm-bar">
@@ -129,8 +129,6 @@ function drawRoutes() {
     const points = (row.stops || []).filter((stop) => stop.lat && stop.lng);
     if (points.length < 2) continue;
     wanted.add(row.route_plan);
-    // The server hands back the road geometry when a router is configured; the straight
-    // line between stops is the fallback, not the intent.
     const latlngs = (row.path && row.path.length > 1)
       ? row.path
       : points.map((stop) => [stop.lat, stop.lng]);
@@ -282,8 +280,6 @@ onUnmounted(() => {
   border: 1px solid var(--c-border);
 }
 .fm-overlay-state {
-  /* Centering is a physical fact, not a reading-direction one: inset-inline-start flips
-     under RTL while the translate does not, which pushed the panel off the canvas. */
   position: absolute;
   left: 50%;
   top: 40%;

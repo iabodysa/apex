@@ -1,23 +1,5 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Apex hook declarations. Three of these carry a framework fact worth keeping.
-
-``add_to_apps_screen`` is one tile per www/ portal shell. Each admin-style portal points
-its ``has_permission`` at a ``has_apps_screen_access()`` sitting beside that page's own
-role-set, so the /apps gate cannot drift from the page's real check; driver, masar and
-/fleet are ungated by design. The key convention is "apex-" + route slug, and the key is
-render-time only (frappe/apps.py:43 returns the installed app name, not this one).
-
-``setup_wizard_complete`` carries TWO completion hooks, as ERPNext splits its own
-(erpnext/hooks.py:55-56): the demo build must be a separate step because it only
-ENQUEUES, and must not be entangled with the settings the first hook writes.
-
-The ledger DocTypes excluded under ``ignore_links_on_delete``/the deletion-record
-declaration are kept out of a Transaction Deletion Record's reach on purpose: it
-``frappe.db.delete``s whatever it enumerates
-(erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:393),
-which would strand every reversal their ``on_cancel`` posts — the offsetting utility
-ledger row, the released rental accrual stamps, the replayed SIM projection. The
-mechanism is copied from HRMS's own declaration (hrms/hooks.py:361-371).
 
 ``default_log_clearing_doctypes`` lists only non-financial, submittable point-in-time
 snapshots; the retention windows cap their growth. ``clear_old_logs`` purges submitted
@@ -110,7 +92,6 @@ company_data_to_be_ignored = [
     "Telecom Contract",
     "SIM Custody Assignment",
 ]
-
 
 
 override_doctype_class = {

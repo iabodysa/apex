@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Shared authorization boundary for worker and driver portal bearer tokens."""
 
 from __future__ import annotations
@@ -56,25 +56,10 @@ def _throttle_bad_token_attempt() -> None:
     remote address cannot be attributed to an address, so it is a no-op there --
     console, scheduled-job and test callers are never throttled.
 
-    The budget is ONE window per address, spent across EVERY portal entry -- the
-    advertised number, not BAD_TOKEN_ATTEMPTS_PER_MINUTE per endpoint. frappe's
-    @rate_limit cannot express that: it welds form_dict.cmd into its key
-    (rate_limiter.py:155), so each guest endpoint would carry a private budget and the
-    real per-address ceiling would be tens of times the stated one.
-
     The counting itself is the shared atomic window, NOT rate_limiter.py's
     read-then-write: this throttle exists to make a parallel flood visible, and the
     framework's shape goes quiet under exactly that load (see rate_window).
-
-    CEILING, so nobody over-trusts this: the address is only as honest as the edge.
-    frappe takes request_ip from the first X-Forwarded-For entry with no trusted-proxy
-    check (auth.py:65-66), so a caller that forges a fresh XFF per request buys a fresh
-    window every time and walks straight through. Deployments must have the reverse
-    proxy OVERWRITE X-Forwarded-For rather than append to it, and that requirement is
-    now CHECKABLE rather than merely stated: apex_core.utils.request_ip_trust grades a
-    live deployment from one authenticated request. This is a speed bump on
-    unsophisticated guessing, not the control that makes the token safe -- 192 bits of
-    entropy is."""
+    """
     if not getattr(frappe.local, "request", None):
         return
     ip = getattr(frappe.local, "request_ip", None)
@@ -89,6 +74,7 @@ def _throttle_bad_token_attempt() -> None:
 
 
 def _require_audience(audience: str) -> None:
+    """Blocks an audience value that is neither Worker nor Driver."""
     if audience not in TOKEN_COOKIES:
         frappe.throw(
             _("Portal token audience must be Worker or Driver."),
@@ -153,6 +139,7 @@ def validate_subject_binding(
 
 
 def _reject_invalid_token() -> None:
+    """Throttles the failed attempt and raises a permission error for an invalid or inactive token."""
     _throttle_bad_token_attempt()
     frappe.throw(
         _("This portal access token is invalid or inactive."),
@@ -223,6 +210,7 @@ def throttle_entry_token(audience: str, raw: str) -> None:
 
 
 def _deny_issuance(audience: str) -> None:
+    """Raises a permission error naming the audience whose portal credential issuance is denied."""
     frappe.throw(
         _("You are not permitted to issue {0} portal credentials.").format(
             audience

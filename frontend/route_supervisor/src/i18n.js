@@ -1,7 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Mirrors the fleet/driver portals: an EN/AR dictionary with a reactive translate /
-// setLang / dir layer built on @shared/i18n. Arabic strings live here — allowed for
-// *_portal bundles; component code carries stable English keys only, never inline Arabic.
+// Copyright (c) 2026, afmcoltd
 import { createI18n } from "@shared/i18n";
 
 const STORAGE_KEY = "masar_supervisor_lang";
@@ -83,8 +80,6 @@ const messages = {
       "Driver Rejected": "Rejected",
       Absent: "Absent",
     },
-    // Keyed by Dispatch Trip's stored Select values, so the boarding line never
-    // prints a raw enum inside a translated sentence.
     tripStatus: {
       Planned: "Planned",
       Dispatched: "Dispatched",
@@ -211,8 +206,6 @@ const messages = {
       "Driver Rejected": "مرفوض",
       Absent: "غائب",
     },
-    // Verbatim from apex/translations/ar.csv (the eventual generator source), so
-    // the mirror cannot drift from the translation layer.
     tripStatus: {
       Planned: "مخطط",
       Dispatched: "تم التشغيل",

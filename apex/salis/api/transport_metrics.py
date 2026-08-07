@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 import frappe
 from frappe.utils import get_first_day, today
 
@@ -7,6 +7,7 @@ from apex.salis import permissions
 
 @frappe.whitelist()
 def get_transport_requests_served_pct(filters=None):
+    """Returns the percentage of this month's transport requests that got a trip, scoped by project."""
     frappe.has_permission("Transport Request", "read", throw=True)
     tr_filters = {"pickup_datetime": [">=", str(get_first_day(today()))]}
     restrict, allowed = permissions.report_project_scope(frappe.session.user)

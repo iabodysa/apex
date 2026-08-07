@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Vehicle Suspension controller.
 
 Stops a vehicle, capturing its prior status into previous_status so the effect
@@ -16,16 +16,19 @@ from apex.salis.utils import add_timeline_note, lock_vehicle
 
 class VehicleSuspension(Document):
     def validate(self):
+        """Defaults the ownership-at-stop snapshot from the vehicle's current ownership."""
         if self.vehicle and not self.ownership_at_stop:
             self.ownership_at_stop = frappe.db.get_value("Salis Vehicle", self.vehicle, "ownership")
 
     def before_submit(self):
+        """Requires evidence before an Accident or Violation stop can be submitted."""
         if self.stop_reason in ("Accident", "Violation") and not self.evidence:
             frappe.throw(
                 _("Evidence is required to submit a stop with reason {0}.").format(_(self.stop_reason))
             )
 
     def on_submit(self):
+        """Stops the vehicle and records its prior status for a later revert on cancel."""
         lock_vehicle(self.vehicle)
 
         self.db_set("previous_status", frappe.db.get_value("Salis Vehicle", self.vehicle, "status"))
@@ -40,6 +43,7 @@ class VehicleSuspension(Document):
         )
 
     def on_cancel(self):
+        """Restores the vehicle's prior status when no other stop is still in force."""
         lock_vehicle(self.vehicle)
 
         another_stop_in_force = frappe.db.exists(

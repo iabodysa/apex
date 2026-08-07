@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Unified Action Inbox — aggregation read API (Apex Core).
 
 A single "pending my action" feed: the documents awaiting THIS user's workflow

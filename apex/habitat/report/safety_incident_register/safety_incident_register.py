@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Safety Incident Register — what happened in each building, how serious it was, and
 whether it is closed.
@@ -23,6 +23,7 @@ HIGH_SEVERITIES = ("High", "Severe", "Critical")
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for submitted safety incidents in scope."""
     filters = filters or {}
     columns = _columns()
 
@@ -76,6 +77,7 @@ def _summary(data):
 
 
 def _columns():
+    """Returns the column definitions for the safety incident register."""
     return [
         {"label": _("Incident"), "fieldname": "name", "fieldtype": "Link", "options": "Safety Incident", "width": 160},
         {"label": _("Incident Date and Time"), "fieldname": "incident_datetime", "fieldtype": "Datetime", "width": 165},

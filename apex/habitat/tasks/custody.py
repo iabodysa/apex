@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Scheduled tasks for the Habitat module (split by domain)."""
 
 from __future__ import annotations

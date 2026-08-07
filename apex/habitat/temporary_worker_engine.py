@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Daily linking of Temporary Workers to real Employees (Batch 5 of the arrival redesign).
 
 A worker arrives on a passport and is held on a Temporary Worker record. When HR later

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Maintenance Inspection Report controller."""
 
 from __future__ import annotations
@@ -45,10 +45,12 @@ class MaintenanceInspectionReport(Document):
 
 
 def validate(doc, method=None):
+    """Blocks saving a Maintenance Inspection Report that records no findings."""
     if not doc.findings:
         frappe.throw(_("At least one finding is required on a Maintenance Inspection Report."))
 
 
 def before_cancel(doc, method=None):
+    """Blocks cancelling a Maintenance Inspection Report without a stated cancellation reason."""
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is required before cancelling a Maintenance Inspection Report."))

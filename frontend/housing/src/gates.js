@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 export const EXIT_FLAG = {
   1: "exit1_security_cleared",
   2: "exit2_logistics_cleared",

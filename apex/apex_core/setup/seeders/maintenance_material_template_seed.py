@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Seed the Maintenance Material catalogue and its default Templates, in that order.
 
 ``TEMPLATE_SEEDS`` child rows are REQUIRED Links onto Maintenance Material, so a

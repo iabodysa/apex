@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Apex Integration Settings controller.
 
 Single DocType that documents and surfaces how an external frontend integrates
@@ -17,6 +17,7 @@ from frappe.model.document import Document
 
 class ApexIntegrationSettings(Document):
     def validate(self):
+        """Validates that a non-blank Frontend Base URL starts with http:// or https://."""
         self._validate_frontend_base_url()
 
     def _validate_frontend_base_url(self):

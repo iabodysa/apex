@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Driver Portal — boarding endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
 
 import frappe
@@ -79,7 +79,6 @@ def _manifest_for_board(transport_request):
     return out
 
 
-
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def manual_boarding_sheet(dispatch_trip):
@@ -121,7 +120,6 @@ def manual_boarding_sheet(dispatch_trip):
         "boarded_count": sum(1 for w in workers if w["boarded"]),
         "expected_count": len(workers),
     }
-
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -175,7 +173,7 @@ def manual_board_workers(dispatch_trip, workers, stop_name=None, accommodation_b
         boarded.append(worker)
 
     if boarded:
-        log.save(ignore_permissions=True)  # audit-ok — driver resolved server-side, own trip
+        log.save(ignore_permissions=True)  # audit-ok
         for worker in boarded:
             _log_manual_scan(dispatch_trip, trip, worker, "Valid", log.name,
                              boarding_created=1, accommodation_building=accommodation_building)
@@ -186,7 +184,6 @@ def manual_board_workers(dispatch_trip, workers, stop_name=None, accommodation_b
         "skipped": skipped,
         "boarded_count": log.boarded_count,
     }
-
 
 
 def _log_manual_scan(dispatch_trip, trip, worker, result, trip_start_log,
@@ -212,5 +209,5 @@ def _log_manual_scan(dispatch_trip, trip, worker, result, trip_start_log,
             "boarding_event_created": frappe.utils.cint(boarding_created),
         }
     )
-    doc.insert(ignore_permissions=True)  # audit-ok — manual board attempt is always recorded
+    doc.insert(ignore_permissions=True)  # audit-ok
     return doc.name

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Size-based cleanup for oversized Frappe ``Access Log`` payload rows.
 
 Why this is not covered by the native primitive
@@ -88,6 +88,7 @@ def _sanitized_record(row: dict) -> dict:
 
 
 def _scan(threshold: int, limit: int) -> list[dict]:
+    """Returns sanitized Access Log rows whose payload exceeds the byte threshold, largest first."""
     rows = frappe.db.sql(SCAN_SQL, {"threshold": threshold, "limit": limit}, as_dict=True)
     return [_sanitized_record(row) for row in rows or []]
 

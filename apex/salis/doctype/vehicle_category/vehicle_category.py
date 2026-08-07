@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Vehicle Category controller."""
 
 from __future__ import annotations
@@ -10,6 +10,7 @@ from frappe.model.document import Document
 
 class VehicleCategory(Document):
     def validate(self):
+        """Requires a non-blank category name, trimmed of surrounding whitespace."""
         if self.category_name:
             self.category_name = self.category_name.strip()
         if not self.category_name:

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Material Transfer controller — moves Custody Article / Maintenance
 Material stock between two building stores via the Accommodation Stock Ledger.
 
@@ -33,6 +33,7 @@ class MaterialTransfer(Document):
 
 
 def validate(doc, method=None):
+    """Blocks a Material Transfer with no items, matching source/destination, or a non-positive qty."""
     if not doc.items:
         frappe.throw(_("At least one item is required on a Material Transfer."))
     if doc.from_building and doc.to_building and doc.from_building == doc.to_building:
@@ -171,6 +172,7 @@ def _notify_finance_on_cost_center_shift(doc):
 
 
 def _role_emails(role):
+    """Returns the email addresses of every user holding the given role."""
     from frappe.utils.user import get_users_with_role
 
     users = get_users_with_role(role)

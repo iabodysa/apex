@@ -1,13 +1,9 @@
-// Copyright (c) 2026, AFMCO and contributors
-// All board filtering/sorting/view state: the filter model, the filtered+sorted
-// list (his applyFilters), the driver-centric grouping, the empty-state chips,
-// board density, and the mobile filter-sheet toggle.
+// Copyright (c) 2026, afmcoltd
 import { reactive, ref, computed, watch } from "vue";
 
 export function useFleetFilters({ vehicles, fmt, t }) {
   const { expiryFlag, trim, statusKey, calcTotalDaysNum } = fmt;
 
-  // Filter model (mirrors his applyFilters inputs).
   const f = reactive({
     search: "",
     status: "",
@@ -22,11 +18,9 @@ export function useFleetFilters({ vehicles, fmt, t }) {
     sort: "plate",
     view: "cards",
   });
-  // Table column sort (his sortCol toggling).
   const sortCol = ref("plate");
   const sortDir = ref(1);
-  // The two triage pills are opt-in client filters layered on the base list.
-  const triageFilter = ref(""); // "" | incidents | expiring
+  const triageFilter = ref("");
 
   const setSP = (s) => (f.status = s);
   const setSheet = (v) => (f.sheet = v);
@@ -36,9 +30,6 @@ export function useFleetFilters({ vehicles, fmt, t }) {
   function setTriage(kind) {
     triageFilter.value = triageFilter.value === kind ? "" : kind;
   }
-  // A header click has to move the sort KEY, not only its direction: the sorter reads
-  // f.sort, so setting sortCol alone left every column sorting by whatever the toolbar
-  // dropdown last chose, and clicking "Office" merely reversed the plates.
   function onSortCol(col) {
     if (sortCol.value === col) sortDir.value *= -1;
     else {
@@ -99,7 +90,6 @@ export function useFleetFilters({ vehicles, fmt, t }) {
       )
   );
 
-  // The filtered + sorted list — a faithful port of his applyFilters body.
   const filtered = computed(() => {
     const q = f.search.toLowerCase();
     let list = vehicles.value.filter((v) => {
@@ -149,9 +139,6 @@ export function useFleetFilters({ vehicles, fmt, t }) {
       return true;
     });
 
-    // The toolbar offers "status", which is the endpoint's `vehicle_status`; reading the
-    // toolbar value straight off the row compared undefined to undefined and left the
-    // order untouched.
     const sort = f.sort === "status" ? "vehicle_status" : f.sort;
     list = list.slice().sort((a, b) => {
       if (sort === "drivers_desc")
@@ -165,8 +152,6 @@ export function useFleetFilters({ vehicles, fmt, t }) {
     return list;
   });
 
-  // Driver-centric grouping — a read-only reorganization of the SAME filtered
-  // vehicles into per-driver groups (adds no data the board doesn't already hold).
   const driverGroups = computed(() => {
     const byDriver = new Map();
     const unassigned = [];
@@ -194,9 +179,6 @@ export function useFleetFilters({ vehicles, fmt, t }) {
     return groups;
   });
 
-  // Filter options come from the board, never from a literal list: a hard-coded option
-  // that no vehicle carries can only empty the board, and it goes on offering itself
-  // long after the value behind it is renamed or retired.
   const optionsFrom = (key) =>
     computed(() =>
       Array.from(new Set((vehicles.value || []).map((v) => trim(v[key])).filter(Boolean))).sort(
@@ -218,7 +200,6 @@ export function useFleetFilters({ vehicles, fmt, t }) {
     });
   });
 
-  // Enriched empty-state chips describing which filters are active.
   const activeFilterChips = computed(() => {
     const c = [];
     if (f.search) c.push(t("chip.search", { v: f.search }));
@@ -233,14 +214,12 @@ export function useFleetFilters({ vehicles, fmt, t }) {
     return c;
   });
 
-  // Board density (compact tightens card rows), persisted per user.
   const DENSITY_KEY = "fleet_portal_density";
   function initDensity() {
     try {
       const saved = localStorage.getItem(DENSITY_KEY);
       if (saved === "compact" || saved === "comfortable") return saved;
     } catch (e) {
-      /* storage blocked */
     }
     return "comfortable";
   }
@@ -250,11 +229,9 @@ export function useFleetFilters({ vehicles, fmt, t }) {
     try {
       localStorage.setItem(DENSITY_KEY, density.value);
     } catch (e) {
-      /* storage blocked */
     }
   }
 
-  // Mobile filter sheet (the sidebar becomes a bottom sheet on phones).
   const filtersSheetOpen = ref(false);
   function toggleFiltersSheet() {
     filtersSheetOpen.value = !filtersSheetOpen.value;

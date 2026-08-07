@@ -1,16 +1,14 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
     <h2 class="section-title">{{ t("requests.title") }}</h2>
 
-    <!-- Raise a request -->
     <section class="card card-pad space-y-3">
       <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("requests.new") }}</h3>
 
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="field-label">{{ t("requests.category") }}</label>
-          <!-- option VALUES stay English (sent to the API); only labels translate. -->
           <select v-model="form.category" class="select">
             <option value="Maintenance">{{ t("requests.catMaintenance") }}</option>
             <option value="Cleaning">{{ t("requests.catCleaning") }}</option>
@@ -39,7 +37,6 @@
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="field-label">{{ t("requests.issueLocation") }}</label>
-          <!-- option VALUES stay English (sent to the API); only labels translate. -->
           <select v-model="form.issue_location" class="select">
             <option value="">{{ t("requests.issueLocationNone") }}</option>
             <option value="Room">{{ t("requests.locRoom") }}</option>
@@ -70,9 +67,6 @@
         <textarea v-model="form.body" :placeholder="t('requests.descriptionPlaceholder')" class="textarea"></textarea>
       </div>
 
-      <!-- Photo (optional): read client-side to a data-URL and POSTed as base64 on
-           the same token-scoped create call; the server persists it as a private
-           File on the new request. No separate guest upload surface. -->
       <div>
         <label class="field-label">{{ t("requests.photo") }}</label>
         <div class="photo-row">
@@ -103,7 +97,6 @@
       <p v-if="err" class="status-note status-err">{{ err }}</p>
     </section>
 
-    <!-- My requests -->
     <section v-if="list.data && list.data.length" class="space-y-3">
       <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("requests.mine") }}</h3>
       <router-link
@@ -129,9 +122,6 @@
       </router-link>
     </section>
 
-    <!-- Error loading the worker's request list: a revoked/disabled token
-         (PermissionError) or server failure must surface, not read as "no
-         requests yet". The new-request form above stays usable. -->
     <div v-else-if="list.error" class="card card-pad text-center">
       <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
       <p class="text-sm text-muted">{{ listErrorMessage }}</p>
@@ -140,8 +130,6 @@
       </button>
     </div>
 
-    <!-- List still loading: skeleton cards in place of the request rows. The
-         new-request form above stays interactive throughout. -->
     <section v-else-if="list.loading" class="space-y-3">
       <Skeleton :lines="2" />
       <Skeleton :lines="2" />
@@ -171,14 +159,11 @@ const form = reactive({
   category: "Maintenance",
   priority: "Low",
   issue_location: "",
-  preferred_language: "Arabic", // workers default to Arabic (see i18n detectInitial)
+  preferred_language: "Arabic",
   subject: "",
   body: "",
 });
 
-// Selected photo, read client-side to a data-URL (base64). Sent on the same
-// token-scoped create call; the server persists it as a private File. 8 MB cap
-// mirrors the server WORKER_PHOTO_MAX_BYTES guard.
 const PHOTO_MAX_BYTES = 8 * 1024 * 1024;
 const photo = reactive({ dataUrl: "", name: "" });
 
@@ -191,11 +176,8 @@ function clearPhoto() {
 
 function onPhoto(e) {
   const file = e.target.files && e.target.files[0];
-  // reset the input so re-picking the same file re-fires change
   e.target.value = "";
   if (!file) return;
-  // `accept` is only a picker hint; refuse here so the operator is told WHICH
-  // formats the endpoint takes instead of getting a server refusal after upload.
   if (!isAcceptedPhoto(file)) {
     clearPhoto();
     err.value = t("requests.photoType");
@@ -271,15 +253,10 @@ function formatDate(c) {
 </script>
 
 <style scoped>
-/* The row chevron points toward the detail; flip it under RTL. No other
-   direction-specific rules (T-297) — the rest is logical-property layout. */
 [dir="rtl"] .row-chevron {
   transform: scaleX(-1);
 }
 
-/* Photo picker — logical-property layout only, so it mirrors under RTL with no
-   direction-specific rule (T-297). The native file input is visually hidden but
-   stays the click target inside its styled label. */
 .photo-row {
   display: flex;
   align-items: center;

@@ -1,20 +1,6 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <script setup>
-/*
- * Fleet OS supervisor board — a thin shell that composes the board's concerns
- * (data, filters, selection, panel, alerts, actions) from src/use*.js and lays
- * out the presentational components in src/components/. The original ~1900-line
- * god component was split here with zero behavior change; each concern now lives
- * in its own cohesive composable/component.
- *
- * The live-sync lifecycle (poll + realtime) is orchestrated in THIS shell because
- * its pause guard must read confirm/panel/selection/action state — genuine
- * top-level wiring that can't live inside any one composable without a cycle.
- */
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
-// Direct-path import (documented + supported): the @shared/components barrel also
-// re-exports BuildingPicker, which needs a portal i18n export the Fleet portal
-// doesn't provide, so importing the shell file directly keeps the bundle clean.
 import FleetPageShell from "@shared/components/FleetPageShell.vue";
 import { connectFleetRealtime } from "./realtime.js";
 import Icon from "./components/Icon.vue";
@@ -43,36 +29,28 @@ const { t, lang, dir } = useI18n();
 
 useDocumentLanguage(lang, dir);
 
-// Display formatters (single source: pure helpers + t-bound ones).
 const fmt = useFleetFormat(t);
 
-// Board data model (vehicles + counts + triage).
 const board = useFleetBoard({ expiryFlag: fmt.expiryFlag });
 const {
   vehicles, loadState, loadError, reloadStale, isScopeEmpty,
   counts, countsLoading, triage, loadFleet,
 } = board;
 
-// Toast + promise-based confirm.
 const { toast, showToast } = useToast();
 const { cf, cfShow, cfDo } = useConfirm(t);
 
-// Detail drawer.
 const { panel, subForm, openPanel, closePanel, setPTab, tabDmg, tabAcc } = useVehiclePanel(vehicles);
-// Cancel-buttons close the open sub-form (a ref write kept out of child templates).
 function closeSubForm() {
   subForm.value = null;
 }
 
-// Operations alerts (bell + drawer).
 const {
   alerts, alertTotal, alertsState, alertsOpen,
   loadAlerts, toggleAlerts, closeAlerts,
   sevClass, sevLabel, alertVehicleOnBoard, openAlertTarget,
 } = useAlerts({ vehicles, t, openPanel });
 
-// Background re-pull wrapper: board fetch + re-point the open panel to the fresh
-// row (or close it if the vehicle left the scoped list).
 async function reloadFleet() {
   await board.reloadFleet();
   if (panel.open && panel.plate) {
@@ -82,7 +60,6 @@ async function reloadFleet() {
   }
 }
 
-// Filters / sort / view + derived lists.
 const {
   f, triageFilter,
   setSP, setSheet, setFuel, setDateType, setView, setTriage, onSortCol,
@@ -93,20 +70,17 @@ const {
   filtersSheetOpen, toggleFiltersSheet, closeFiltersSheet,
 } = useFleetFilters({ vehicles, fmt, t });
 
-// Multi-select (bulk actions).
 const {
   selectMode, selected, selectedCount, isSelected,
   toggleSelect, clearSelection, toggleSelectMode,
   allVisibleSelected, toggleSelectAll,
 } = useSelection(filtered);
 
-// Assign/reassign flow (driver picker + optional handover).
 const {
   rf, dp, onDriverQuery, pickDriver,
   openReassignForm, openNewDriverForm, submitReassign,
 } = useDriverAssignment({ panel, subForm, showToast, cfShow, reloadFleet, t });
 
-// Status / quick / bulk actions.
 const {
   busyPlates, isBusy,
   sf, openStopForm, confirmStop,
@@ -120,14 +94,9 @@ const {
   selected, clearSelection, openReassignForm, t,
 });
 
-// Driver-centric lens: shown only when the server grants the capability flag.
 const caps = (typeof window !== "undefined" && window.fleet_caps) || {};
 const canDriverLens = computed(() => caps.driver_lens === true);
 
-// ═══════════ LIVE SYNC (poll + realtime) ═══════════
-// Paused while the tab is hidden, the first load hasn't landed, or the user is
-// mid-interaction (a write in flight, a sub-form/confirm open, or a selection
-// active) so a tick can't clobber their state.
 const POLL_MS = 30000;
 let pollTimer = null;
 const pollPaused = computed(
@@ -153,8 +122,6 @@ function stopPoll() {
     pollTimer = null;
   }
 }
-// Realtime socket push, ahead of the poll. A push that lands mid-interaction is
-// deferred via a pending flag, then flushed the moment the user is free.
 let stopRealtime = () => {};
 const realtimePending = ref(false);
 async function onRealtimeUpdate() {
@@ -169,11 +136,10 @@ async function onRealtimeUpdate() {
 watch(pollPaused, (paused) => {
   if (!paused && realtimePending.value && !document.hidden) onRealtimeUpdate();
 });
-// Re-sync immediately when the tab regains focus, then keep polling.
 function onVisibility() {
   if (document.hidden) return;
   if (!pollPaused.value) reloadFleet();
-  else realtimePending.value = true; // flush the missed update once free
+  else realtimePending.value = true;
 }
 onMounted(() => {
   loadFleet();
@@ -207,7 +173,6 @@ onUnmounted(() => {
       <LangToggle />
     </template>
 
-    <!-- STATUS / KPI / TRIAGE PILLS (shimmer until the first load resolves) -->
     <div class="fp-pills-bar">
       <template v-if="countsLoading">
         <span v-for="n in 6" :key="n" class="sp fp-kpi-skel"></span>
@@ -240,7 +205,6 @@ onUnmounted(() => {
         :toggleSelectMode="toggleSelectMode" :setView="setView" :toggleDensity="toggleDensity" :t="t"
       />
 
-      <!-- BULK ACTION BAR: kept in the shell (bulkNote is a bare ref v-model) -->
       <div v-if="selectMode && selectedCount" class="fp-bulk-bar">
         <span class="fp-bulk-count">{{ t("bulk.selected", { n: selectedCount }) }}</span>
         <input class="fp-bulk-note fs" v-model="bulkNote" :placeholder="t('stopForm.notesPlaceholder')" />
@@ -251,21 +215,18 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- STALE (background refresh failed; the last good board is still shown) -->
       <div v-if="loadState === 'ready' && reloadStale" class="fp-error-banner" style="border-color:var(--amber);background:color-mix(in srgb,var(--amber) 12%,transparent)">
         <span style="color:var(--amber)"><Icon name="triangle-alert" :size="20" /></span>
         <span class="fp-err-msg">{{ t("main.staleData") }}</span>
         <button class="btn btn-amber" @click="reloadFleet">{{ t("common.retry") }}</button>
       </div>
 
-      <!-- ERROR (persistent banner + retry) -->
       <div v-if="loadState === 'error'" class="fp-error-banner">
         <span style="color:var(--red-l)"><Icon name="triangle-alert" :size="20" /></span>
         <span class="fp-err-msg">{{ loadError }}</span>
         <button class="btn btn-red" @click="loadFleet">{{ t("common.retry") }}</button>
       </div>
 
-      <!-- LOADING (skeleton) -->
       <div v-else-if="loadState === 'loading'" class="cards-wrap">
         <div class="cards-grid">
           <div class="fp-skel-card" v-for="n in 8" :key="n">
@@ -329,10 +290,8 @@ onUnmounted(() => {
     :openStolenForm="openStolenForm" :recoverVehicle="recoverVehicle" :t="t"
   />
 
-  <!-- TOAST -->
   <div class="toast" :class="[toast.show ? 'show' : '', 'toast-' + toast.type]">{{ toast.msg }}</div>
 
-  <!-- CUSTOM CONFIRM MODAL -->
   <div v-if="cf.open" class="cf-overlay" @click.self="cfDo(false)">
     <div class="cf-box">
       <div class="cf-icon"><Icon :name="cf.icon" :size="36" :stroke-width="1.75" /></div>

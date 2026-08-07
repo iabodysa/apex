@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Vehicle controller."""
 
 from __future__ import annotations
@@ -15,6 +15,7 @@ _STATUS_RANK = {"Compliant": 0, "Expiring Soon": 1, "Expired": 2}
 
 class SalisVehicle(Document):
     def validate(self):
+        """Defaults the company, normalizes the plate number, and recomputes the compliance status."""
         self._set_company_default()
         self._set_plate_normalized()
         self._set_compliance_status()
@@ -30,12 +31,14 @@ class SalisVehicle(Document):
             self.company = get_default_company()
 
     def _set_plate_normalized(self):
+        """Sets the normalized plate number from the raw plate number, or clears it when blank."""
         if self.plate_number:
             self.plate_normalized = normalize_plate(self.plate_number)
         else:
             self.plate_normalized = None
 
     def _set_compliance_status(self):
+        """Derives the vehicle's worst compliance state and nearest expiry from its compliance rows."""
         rows = self.get("compliance_documents") or []
         if not rows:
             self.compliance_status = "Not Tracked"
@@ -94,6 +97,7 @@ class SalisVehicle(Document):
 
     @staticmethod
     def _get_alert_lead_days():
+        """Returns the configured number of lead days before an expiry counts as Expiring Soon."""
         from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
 
         return get_salis_int("alert_lead_days", DEFAULT_ALERT_LEAD_DAYS)

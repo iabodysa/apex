@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Company row-scoping for SIM Operations.
 
 Habitat scopes on Building and Salis on Project; SIM Operations scopes on **Company**.
@@ -98,12 +98,6 @@ def company_scope_query(user=None, doctype=None):
 
     Registered in ``hooks.py`` for every company-scoped DocType. "" for oversight
     roles, "1=0" for a scoped user with no company, ``company in (...)`` otherwise.
-
-    ``doctype`` MUST stay in this signature: Frappe passes it —
-    ``frappe.call(frappe.get_attr(method), self.user, doctype=self.doctype)``,
-    ``frappe/model/db_query.py:1129`` — and ``frappe.call`` drops any keyword the
-    callee does not declare, so a signature without it would silently skip the
-    ``applicable_for`` narrowing and widen every scope on the tenant axis.
     """
     return permission_scope.scope_condition(
         user, _is_unscoped, _allowed_companies, "`company`", allow="Company", doctype=doctype
@@ -113,15 +107,8 @@ def company_scope_query(user=None, doctype=None):
 def _doc_company(doc):
     """Resolve the company a SIM record belongs to, or None.
 
-    ``company`` is ``fetch_from`` on both child records (``telecom_contract.company`` /
-    ``sim_card.company``), and ``Document.insert`` runs ``check_permission("create")``
-    (document.py:300) BEFORE ``_validate_links()`` (:302) applies ``fetch_from`` — so
-    at the create check it is EMPTY and reading it alone would deny a scoped SIM
-    Operations User the creation of a card in their OWN company. Each anchor in
-    ``COMPANY_SCOPE`` is the mandatory, never-fetched parent link the payload always
-    carries; the company is re-read from it.
-
     Returns None when nothing resolves, so the caller still fails CLOSED.
+
     """
     company = getattr(doc, COMPANY, None)
     if company:

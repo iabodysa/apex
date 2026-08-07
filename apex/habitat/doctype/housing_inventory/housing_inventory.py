@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Housing Inventory controller."""
 
 from __future__ import annotations
@@ -10,6 +10,7 @@ from frappe.utils import flt, getdate
 
 class HousingInventory(Document):
     def before_save(self):
+        """Recomputes the quantity variance and stamps last_count_date when the counted quantity changes."""
         self.quantity_variance = flt(self.counted_quantity) - flt(self.expected_quantity)
         if self.counted_quantity is not None and (
             self.last_count_date is None or self.has_value_changed("counted_quantity")

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Seed Salis (movement/fleet) quick links into the desk navbar Help dropdown.
 
 Mirrors the Habitat pattern (``patches/v0_8/add_navbar_help_links.py``): Navbar

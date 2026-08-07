@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Payment Router - build the configured target payment from a finance-approved
 Salis Payment Request via the Payment Routing Settings field map (config-time, no
 hard-coded per-DocType branches); defaults to the native Payment Request when the

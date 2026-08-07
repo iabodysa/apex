@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Trip Fulfilment Ledger controller.
 
 Read-only, machine-written audit memo. One row is inserted per completed
@@ -16,6 +16,7 @@ from frappe.model.document import Document
 
 class TripFulfilmentLedger(Document):
     def validate(self):
+        """Blocks any edit to an already-persisted Trip Fulfilment Ledger row."""
         self._enforce_single_write_immutability()
 
     def _enforce_single_write_immutability(self):

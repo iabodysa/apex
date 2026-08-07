@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Cleaning Log controller.
 
 The mandatory-evidence gate is the Document.before_submit class method (Frappe
@@ -19,15 +19,18 @@ REQUIRED_AREAS = ("Bathrooms", "Kitchen", "Corridors")
 
 class CleaningLog(Document):
     def before_submit(self):
+        """Stamps missing photo evidence fields then blocks submission when a required area lacks proof."""
         self._stamp_area_evidence()
         self._validate_area_evidence()
 
     def on_submit(self):
+        """Posts the cleaning log's room results to the Cleaning Compliance Ledger."""
         from apex.habitat.cleaning_engine import post_cleaning_compliance
 
         post_cleaning_compliance(self)
 
     def on_cancel(self):
+        """Reverses the cleaning log's posted Cleaning Compliance Ledger entries."""
         from apex.habitat.cleaning_engine import reverse_cleaning_compliance
 
         reverse_cleaning_compliance(self.name)

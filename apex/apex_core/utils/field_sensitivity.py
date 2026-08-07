@@ -1,48 +1,5 @@
-# Copyright (c) 2026, AFMCO and contributors
-"""THE FIELD SENSITIVITY MODEL. Read this before you set a `permlevel`.
-
-Frappe already ships per-field sensitivity via DocField ``permlevel`` plus a per-level
-DocPerm row, but the app was not using it. Measured across the shipped tree (reproduced
-by ``test_field_sensitivity.TestTheModelMatchesTheShippedTree``): 153 DocTypes, 24 with a
-field above level 0, 21 with a DocPerm row above level 0 -- 129 entirely level 0, so any
-role that can read one of those records reads EVERY field on it. This model classifies
-by KIND of data, so a field that does not exist yet is already classified.
-LEVELS -- 0 OPERATIONAL (default): facts about the WORK -- location, state, timing,
-links between operational records; withholding these breaks the coordination the record
-is FOR, and importance alone is not sensitivity. 1 PERSONAL OR FINANCIAL: the field
-identifies, values, or is unbounded prose about a natural person -- harms a PERSON, not
-an operation. 2 DOES NOT EXIST, DELIBERATELY: only worth its DocPerm rows once some role
-needs one level-1 kind and not the other; today Finance Manager on Freelancer holds one
-row covering both the government ID and the salary, so a second level buys nothing yet.
-CATEGORIES -- two ABSOLUTE, sensitive wherever they appear: (1) SIGNATURE, fieldtype
-``Signature``, biometric-adjacent and the raw material for forgery; (2) GOVERNMENT ID,
-national ID/iqama/passport/civil ID/border number on a text field. Three are CONTEXTUAL,
-sensitive only on a person master (``is_person_master``: a record whose own subject IS a
-person, carrying that person's name or government ID as its OWN field, not merely a Link
-to one): (3) PERSONAL CONTACT, mobile/phone/whatsapp/personal email/contact number; (4)
-PER-PERSON PAY, a Currency named salary/wage/basic-gross-net pay/stipend/deduction -- a
-policy ceiling like ``global_max_percent_of_salary`` is a rule, not a person's pay, and
-stays level 0, why this category requires ``Currency`` and not the word "salary"; (5)
-FREE-TEXT ABOUT A PERSON, notes/remarks/description/reason/resolution on a person
-master -- unbounded prose cannot be classified in advance.
-LIMITS -- ``permlevel`` is enforced in the DOCUMENT and DESK-VIEW layers only. ENFORCED
-on load (``frappe/model/document.py:754-781``) and on save, which RESTORES the stored
-value instead of blanking it (``frappe/model/base_document.py:1288,1291``); on the Desk
-list/report column (``frappe/desk/reportview.py:126-128``,
-``frappe/model/db_query.py:270`` -> ``:668``); and on print
-(``frappe/www/printview.py:542-548``). NOT ENFORCED in a Notification -- neither
-``frappe/email/doctype/notification/notification.py`` nor
-``frappe/core/doctype/communication/email.py`` checks permlevel, so a template mails a
-level-1 field to whoever the recipient rule names. NOT ENFORCED under
-``frappe.get_all`` -- ``db_query.py:683-684`` returns early on ``ignore_permissions``,
-always set by ``frappe.get_all`` (``frappe/__init__.py:2050``); every Script Report here
-reads with ``get_all``, so raising a field is not a defence against a report -- grep the
-report tree for it. ``frappe.db.sql``/``frappe.qb`` never reach the filter at all. NOT
-ENFORCED for category 5 outside person masters -- sensitivity depends on what an
-operator typed, which no static rule reads; that is a human reviewer's call there.
-So: raising a field controls the FORM and the DESK LIST, not a Script Report, and never
-controls what a report already selected.
-"""
+# Copyright (c) 2026, afmcoltd
+"""THE FIELD SENSITIVITY MODEL. Read this before you set a `permlevel`."""
 
 import re
 
@@ -92,9 +49,6 @@ def categorise(field, *, person_master):
     ``person_master`` gates the three contextual categories; the two absolute ones ignore
     it. Order matters only in that the absolute categories are tried first.
 
-    ``DISPLAY_FIELDTYPES`` returns None first because a layout field holds no value and
-    can never be sensitive. Frappe itself skips exactly that set when it restores level
-    fields (``display_fieldtypes``, frappe/model/base_document.py:1270).
     """
     fieldname = field.get("fieldname") or ""
     fieldtype = field.get("fieldtype") or ""

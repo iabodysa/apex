@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """SIM Custody Assignment controller — the SIM custody engine.
 
 Each submitted SIM Custody Assignment is one immutable custody event (Assign,
@@ -56,6 +56,7 @@ _INITIAL_STATE = {
 
 class SIMCustodyAssignment(Document):
     def validate(self):
+        """Runs custodian, retirement, company, cost-center, and prior-status checks before saving."""
         if self.sim_card and not self.company:
             self.company = frappe.db.get_value("SIM Card", self.sim_card, "company")
         self._validate_custodian_inputs()
@@ -67,6 +68,7 @@ class SIMCustodyAssignment(Document):
             self._check_prior_status(frappe.db.get_value("SIM Card", self.sim_card, "status"))
 
     def _validate_custodian_inputs(self):
+        """Requires a custodian type and matching employee or project on an Assign or Transfer action."""
         if self.action in CUSTODIAN_ACTIONS:
             if not self.custodian_type:
                 frappe.throw(_("Custodian Type is required to {0} a SIM.").format(self.action))
@@ -84,13 +86,7 @@ class SIMCustodyAssignment(Document):
             self.project = None
 
     def _require_retirement_reason(self):
-        """Retiring a SIM must say why, on the server.
-
-        The ``mandatory_depends_on`` on the Reason field is a CLIENT-side hint only:
-        Frappe's mandatory check reads ``reqd`` alone
-        (frappe/model/base_document.py:775 filters ``{"reqd": ("=", 1)}``), so an API
-        or script call would otherwise retire a SIM with no reason recorded.
-        """
+        """Retiring a SIM must say why, on the server."""
         if self.action in TERMINAL_ACTIONS and not (self.reason or "").strip():
             frappe.throw(
                 _("A Reason is required to record SIM {0} as {1}.").format(
@@ -165,6 +161,7 @@ class SIMCustodyAssignment(Document):
             self.cost_center = None
 
     def _check_prior_status(self, status):
+        """Blocks the action unless the SIM's current status is one it is allowed to start from."""
         allowed = ALLOWED_PRIOR_STATUS.get(self.action, ())
         if status not in allowed:
             frappe.throw(
@@ -177,6 +174,7 @@ class SIMCustodyAssignment(Document):
             )
 
     def before_submit(self):
+        """Snapshots the SIM's previous custodian before this event overwrites the projection."""
         prior = (
             frappe.db.get_value(
                 "SIM Card",
@@ -191,6 +189,7 @@ class SIMCustodyAssignment(Document):
         self.previous_project = prior.get("current_project")
 
     def on_submit(self):
+        """Rechecks the SIM's locked status, then rebuilds its custody projection."""
         locked_status = frappe.db.get_value(
             "SIM Card", self.sim_card, "status", for_update=True
         )
@@ -198,11 +197,13 @@ class SIMCustodyAssignment(Document):
         rebuild_sim_projection(self.sim_card)
 
     def on_cancel(self):
+        """Rebuilds the SIM's custody projection after this event is cancelled."""
         frappe.db.get_value("SIM Card", self.sim_card, "status", for_update=True)
         rebuild_sim_projection(self.sim_card)
 
 
 def _apply_event(state, event):
+    """Folds one custody event into the running projection state."""
     action = event.get("action")
     if action in CUSTODIAN_ACTIONS:
         state.update(

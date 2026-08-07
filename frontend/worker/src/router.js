@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 import { createRouter, createWebHashHistory } from "vue-router";
 
 const routes = [
@@ -10,14 +10,12 @@ const routes = [
   { path: "/custody", name: "custody", component: () => import("./pages/Custody.vue") },
   { path: "/requests", name: "requests", component: () => import("./pages/Requests.vue") },
   { path: "/requests/:name", name: "request-detail", component: () => import("./pages/RequestDetail.vue") },
-  // [#a7w9tx]
   { path: "/:pathMatch(.*)*", redirect: "/" },
 ];
 
 export default createRouter({
   history: createWebHashHistory(),
   routes,
-  // [#dy6jiy]
   scrollBehavior(to, from, savedPosition) {
     return savedPosition || { top: 0 };
   },

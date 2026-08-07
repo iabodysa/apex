@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Inspection Finding Item child DocType controller."""
 
 from __future__ import annotations

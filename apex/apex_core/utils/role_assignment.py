@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Put a document in a role's desk queue, and take it back out when it is settled.
 
 Frappe already owns this: an assignment IS a ToDo, ``_assign`` on the document is
@@ -6,12 +6,6 @@ maintained by ToDo's own handlers, and the desk renders the queue, the sidebar c
 the notification without anything written here. A scheduled job that inserts its own
 alert row instead builds a second inbox the user has to learn — and, the part that
 actually hurt, one that nothing ever empties.
-
-THE MODEL IS ONE ASSIGNMENT PER (DOCUMENT, USER), and it is the framework's, not a
-choice made here. ``assign_to.add`` (frappe/desk/form/assign_to.py) SKIPS a user who
-already holds an open ToDo for that document — silently, creating nothing. So two jobs
-watching the same document cannot hold separate queues on it, and a per-job reconcile
-would have each closing the other's work with the outcome decided by run order.
 
 What follows from that is :func:`reconcile_role_queue`'s contract: the caller passes the
 documents that still need attention FOR ANY REASON, not the ones its own pass flagged.

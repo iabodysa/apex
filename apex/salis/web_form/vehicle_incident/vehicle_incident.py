@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 import frappe
 from frappe import _
 
@@ -6,6 +6,7 @@ from apex.apex_core.utils.rate_limit_identity import rate_limit
 
 
 def get_context(context):
+    """Disables page caching for the Vehicle Incident web form."""
     context.no_cache = 1
 
 
@@ -54,5 +55,5 @@ def submit_vehicle_incident(
         "reported_by": reported_by,
         "status": "Open",
     })
-    doc.insert(ignore_permissions=True)  # audit-ok — guest web-form intake, rate-limited + honeypot-guarded; draft only
+    doc.insert(ignore_permissions=True)  # audit-ok
     return {"name": doc.name}

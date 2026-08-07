@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 from __future__ import annotations
 
 import frappe
@@ -13,6 +13,7 @@ class IdleResidentReport(Document):
 
 
 def validate(doc, method=None):
+    """Syncs the linked employee, defaults reported_by, and enforces the status transition rules."""
     sync_party_employee(doc, require_party=True)
 
     if not doc.reported_by:
@@ -33,11 +34,7 @@ def after_insert(doc, method=None):
     desk queue as ToDos (one per active role holder). Idempotent — assign_to.add
     skips any user that already has an Open ToDo for this document, and ToDo's
     on_update handler maintains _assign automatically.
-
-    ``get_users_with_role`` resolves the role holders in ONE qb join, DISTINCT (a user
-    holding the role through two Has Role rows is assigned once), already filtered to
-    enabled users and already excluding the Administrator
-    (frappe/utils/user.py:419-435)."""
+    """
     from frappe.desk.form import assign_to as _assign_to
 
     role = _DEPARTMENT_ROLE.get(doc.responsible_department)

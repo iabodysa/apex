@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Vehicle Handover controller.
 
 Transfers a vehicle from one driver to another, updating the vehicle's
@@ -22,6 +22,7 @@ from apex.salis.utils import (
 
 class VehicleHandover(Document):
     def validate(self):
+        """Validates the two drivers differ, the incoming rider is active, and the odometer only rises."""
         if self.from_driver and self.to_driver and self.from_driver == self.to_driver:
             frappe.throw(_("To Driver must differ from From Driver."))
 
@@ -48,6 +49,7 @@ class VehicleHandover(Document):
                 )
 
     def before_submit(self):
+        """Requires signed evidence, and discrepancy notes when a discrepancy is recorded."""
         if not self.signed_evidence:
             frappe.throw(_("Signed handover evidence is required before submitting."))
 
@@ -55,6 +57,7 @@ class VehicleHandover(Document):
             frappe.throw(_("Discrepancy notes are required when the discrepancy status is Discrepancy."))
 
     def on_submit(self):
+        """Moves the vehicle's current driver and odometer to the new driver and reading."""
         lock_vehicle(self.vehicle)
 
         frappe.db.set_value(
@@ -97,6 +100,7 @@ class VehicleHandover(Document):
         )
 
     def on_cancel(self):
+        """Restores the vehicle's current driver back to the outgoing driver."""
         lock_vehicle(self.vehicle)
 
         if frappe.db.get_value("Salis Vehicle", self.vehicle, "current_driver") == self.to_driver:

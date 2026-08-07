@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Safety engine for the Habitat module.
 
 Posts the Safety Finding Ledger: an immutable, system-written record of every

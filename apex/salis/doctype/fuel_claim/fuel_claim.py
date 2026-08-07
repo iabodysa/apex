@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Fuel Claim controller.
 
 Submittable Movement fuel claim and reconciliation against a Fuel Quota.
@@ -45,10 +45,12 @@ VALID_STATUSES = (
 
 class FuelClaim(Document):
     def before_insert(self):
+        """Defaults the requester to the current session user when not already set."""
         if not self.requested_by:
             self.requested_by = frappe.session.user
 
     def validate(self):
+        """Validates the claimed amounts and recomputes consumption against the fuel ledger."""
         if not self.requested_by:
             self.requested_by = frappe.session.user
         if self.status and self.status not in VALID_STATUSES:
@@ -60,7 +62,6 @@ class FuelClaim(Document):
         set_financial_defaults(self)
         self._compute_consumption()
         self._guard_initial_status()
-
 
 
     def _compute_consumption(self):

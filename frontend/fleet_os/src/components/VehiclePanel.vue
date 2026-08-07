@@ -1,5 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Right-hand detail drawer: 6 tabs + the reassign/stop/stolen sub-forms. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <script setup>
 import Icon from "./Icon.vue";
 defineProps([
@@ -13,9 +12,7 @@ defineProps([
 </script>
 
 <template>
-  <!-- PANEL (right drawer) -->
   <transition name="fp-overlay">
-    <!-- Backdrop only duplicates the labelled close button, so it is hidden from AT. -->
     <div v-if="panel.open" class="panel-overlay open" aria-hidden="true" @click.self="closePanel"></div>
   </transition>
   <transition name="fp-panel">
@@ -31,7 +28,6 @@ defineProps([
             <span class="sbadge" :class="sb(panel.vehicle).cls" style="font-size:10px;display:inline-flex;gap:4px"><Icon :name="sb(panel.vehicle).ic" :size="11" />{{ sb(panel.vehicle).label }}</span>
           </div>
         </div>
-        <!-- Icon-only: IconBase marks its svg aria-hidden, so the name must come from aria-label. -->
         <button class="panel-close" :aria-label="t('panel.close')" @click="closePanel"><Icon name="x" :size="18" /></button>
       </div>
       <div class="panel-tabs" style="flex-wrap:wrap">
@@ -43,7 +39,6 @@ defineProps([
         <button class="ptab" :class="{ on: panel.tab === 5 }" @click="setPTab(5)"><Icon name="clipboard-list" :size="14" /> {{ t("panel.log") }}</button>
       </div>
       <div class="panel-body">
-        <!-- TAB 0: OVERVIEW -->
         <div v-if="panel.tab === 0" class="pb on">
           <div class="psect-title"><Icon name="chart-column" :size="14" /> {{ t("panel.vehicleStats") }}</div>
           <div class="pstats">
@@ -63,7 +58,6 @@ defineProps([
             <div class="kv"><div class="kv-l">{{ t("panel.project") }}</div><div class="kv-v">{{ trim(panel.vehicle.project) || t("common.none") }}</div></div>
             <div class="kv"><div class="kv-l">{{ t("panel.vehicleStatus") }}</div><div class="kv-v">{{ sb(panel.vehicle).label }}</div></div>
           </div>
-          <!-- Fuel plan: demoted from the card to the detail panel -->
           <div class="psect-title"><Icon name="fuel" :size="14" /> {{ t("panel.fuelPlan") }}</div>
           <div class="vc-fuel-row" style="border-radius:var(--r2);border:1px solid var(--b1)">
             <div>
@@ -96,7 +90,6 @@ defineProps([
           </template>
         </div>
 
-        <!-- TAB 1: DRIVER -->
         <div v-else-if="panel.tab === 1" class="pb on">
           <template v-if="panel.vehicle.current_driver">
             <div class="alert alert-green"><Icon name="lock" :size="15" /> {{ t("driverTab.lockedFor", { name: panel.vehicle.current_driver.name_ar || panel.vehicle.current_driver.name_en }) }}</div>
@@ -116,7 +109,6 @@ defineProps([
               <button class="btn btn-red" style="flex:1" @click="openStopForm"><Icon name="circle-pause" :size="15" /> {{ t("driverTab.stopAndLock") }}</button>
               <button class="btn btn-green" style="flex:1" @click="openReassignForm"><Icon name="rotate-cw" :size="15" /> {{ t("driverTab.reassignNew") }}</button>
             </div>
-            <!-- Stop sub-form -->
             <div v-if="subForm === 'stop'" style="margin-top:14px;border:1px solid color-mix(in srgb,var(--c-danger) 20%,transparent);border-radius:var(--r2);padding:14px;background:var(--red-d)">
               <div class="psect-title" style="color:var(--red-l)"><Icon name="circle-pause" :size="14" /> {{ t("stopForm.title") }}</div>
               <div class="form-grid" style="margin-bottom:10px">
@@ -148,7 +140,6 @@ defineProps([
                 <button class="btn btn-red" @click="confirmStop"><Icon name="circle-pause" :size="15" /> {{ t("stopForm.confirm") }}</button>
               </div>
             </div>
-            <!-- Reassign sub-form -->
             <div v-if="subForm === 'reassign'" style="margin-top:14px;border:1px solid color-mix(in srgb,var(--c-success) 20%,transparent);border-radius:var(--r2);padding:14px;background:var(--green-d)">
               <div class="psect-title" style="color:var(--green-l)"><Icon name="rotate-cw" :size="14" /> {{ t("reassignForm.title") }}</div>
               <div class="alert alert-amber" style="margin-bottom:12px"><Icon name="triangle-alert" :size="15" /> {{ t("reassignForm.autoLockHint", { name: panel.vehicle.current_driver.name_ar || panel.vehicle.current_driver.name_en || t("common.none") }) }}</div>
@@ -225,7 +216,6 @@ defineProps([
           </template>
         </div>
 
-        <!-- TAB 2: STATUS -->
         <div v-else-if="panel.tab === 2" class="pb on">
           <div class="psect-title">{{ t("statusTab.title") }}</div>
           <div class="status-grid">
@@ -272,7 +262,6 @@ defineProps([
           </template>
         </div>
 
-        <!-- TAB 3: DAMAGES (live API has none → empty state) -->
         <div v-else-if="panel.tab === 3" class="pb on">
           <div class="psect-title"><Icon name="hammer" :size="14" /> {{ t("damages.title") }}</div>
           <div v-if="!(panel.vehicle.damages || []).length" class="empty"><div class="empty-ic"><Icon name="hammer" :size="42" :stroke-width="1.5" /></div><div>{{ t("damages.empty") }}</div></div>
@@ -290,7 +279,6 @@ defineProps([
           </div>
         </div>
 
-        <!-- TAB 4: ACCIDENTS (live API has none → empty state) -->
         <div v-else-if="panel.tab === 4" class="pb on">
           <div class="psect-title"><Icon name="crash" :size="14" /> {{ t("accidents.title") }}</div>
           <div v-if="!(panel.vehicle.accidents || []).length" class="empty"><div class="empty-ic"><Icon name="crash" :size="42" :stroke-width="1.5" /></div><div>{{ t("accidents.empty") }}</div></div>
@@ -307,7 +295,6 @@ defineProps([
           </div>
         </div>
 
-        <!-- TAB 5: LOG -->
         <div v-else-if="panel.tab === 5" class="pb on">
           <div v-if="!panel.vehicle.history.length" class="empty"><div class="empty-ic"><Icon name="clipboard-list" :size="42" :stroke-width="1.5" /></div><div>{{ t("logTab.empty") }}</div></div>
           <template v-else>

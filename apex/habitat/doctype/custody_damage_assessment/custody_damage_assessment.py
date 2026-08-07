@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Custody Damage Assessment controller.
 
 Why Finance Manager holds TWO rows here. The permlevel-1 row is a field overlay: it
@@ -8,18 +8,6 @@ field access is resolved separately and unions every permlevel across the user's
 The permlevel-0 ``read`` beside it is a separate grant, so a Finance Manager holding no
 other role can open the record the ``Custody Damage Assessment Created`` notification
 emails them. It is unscoped, so it reaches every building.
-
-That row also carries ``report``, so the solo Finance Manager can reach the list's
-report view that totals assessments, not only the one opened from a notification.
-``report`` is the narrowest right that does it -- it gates only the report surface
-(``frappe/desk/query_report.py:47``) and carries no row and no field with it. That
-surface reads exactly two things: permlevel-0 columns the read already opened, and
-``total_estimated_replacement_cost``, which is permlevel 1 and so is already this role's
-own overlay field. Habitat oversight is unscoped (``HOUSING_UNSCOPED_ROLES``,
-``habitat/permissions.py``), so building scoping returns the same rows to this role
-either way. Nothing on that surface is a datum the role could not already reach on the
-form, which is why it is a surface grant and not an access widening. Every other flag on
-the row is still an explicit 0: no write, no export, no share.
 """
 
 from __future__ import annotations
@@ -66,6 +54,7 @@ def get_deduction_status(assessment):
 
 
 def validate(doc, method=None):
+    """Syncs the party-employee link, requires a damaged item, and totals the replacement cost."""
     sync_party_employee(doc)
     if not doc.items:
         frappe.throw(_("At least one damaged item is required."))
@@ -75,6 +64,7 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
+    """Creates a capped draft salary deduction for the employee and links it to the source checkout."""
     if doc.deduction_entry:
         return
     rule = get_damage_rule()
@@ -142,6 +132,7 @@ def on_submit(doc, method=None):
 
 
 def before_cancel(doc, method=None):
+    """Blocks cancellation while the linked Additional Salary deduction is still submitted."""
     if doc.deduction_entry:
         deduction_docstatus = frappe.db.get_value(
             "Additional Salary", doc.deduction_entry, "docstatus"
@@ -168,7 +159,7 @@ def on_cancel(doc, method=None):
 
     if frappe.db.get_value("Additional Salary", doc.deduction_entry, "docstatus") == 0:
         entry = doc.deduction_entry
-        frappe.delete_doc("Additional Salary", entry, force=True, ignore_permissions=True)  # audit-ok: undoes the entry on_submit created under the same bypass; the caller already holds cancel on this assessment
+        frappe.delete_doc("Additional Salary", entry, force=True, ignore_permissions=True)  # audit-ok
 
     if doc.source_checkout:
         frappe.db.set_value(
@@ -180,4 +171,3 @@ def on_cancel(doc, method=None):
     frappe.db.set_value(
         "Custody Damage Assessment", doc.name, "deduction_entry", None
     )
-

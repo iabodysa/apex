@@ -1,12 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Live driver map. Polls get_trip_driver_position (the driver-portal telematics stamped
-     on the Dispatch Trip) and moves a marker on an OpenStreetMap/Leaflet map. Degrades
-     gracefully at every failure boundary: no trip -> prompt; no GPS fix yet -> a waiting
-     state (never a marker at 0,0); Leaflet unavailable -> a plain coordinate readout;
-     tile host unreachable -> the marker and every other panel stay, over a blank canvas
-     with a note. A stale fix dims the marker so a frozen position never reads as live.
-     The tile source is a recorded, accepted third-party fetch and is overridable per
-     deployment via window.apex_map_tiles — the full decision is in www/masar_supervisor.py. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <section class="panel map-panel">
     <header class="panel-head">
@@ -32,14 +24,12 @@
     </EmptyState>
 
     <template v-else>
-      <!-- Driver / vehicle strip -->
       <div v-if="data" class="map-info">
         <span><Icon name="user" :size="14" /> {{ t("map.driver") }}: <b>{{ data.driver_name || t("common.none") }}</b></span>
         <span><Icon name="truck" :size="14" /> {{ t("map.vehicle") }}: <b>{{ data.plate || t("common.none") }}</b></span>
         <span v-if="data.has_position" class="upd"><Icon name="clock" :size="13" /> {{ t("map.updated", { age: age }) }}</span>
       </div>
 
-      <!-- Map (Leaflet available) -->
       <div v-if="hasLeaflet" class="map-wrap">
         <div ref="mapEl" class="map-canvas" :class="{ dim: data && data.stale }" />
         <p v-if="tilesDown" class="tile-note">{{ t("map.tilesUnavailable") }}</p>
@@ -50,7 +40,6 @@
         </div>
       </div>
 
-      <!-- Leaflet unavailable: coordinate fallback -->
       <div v-else class="map-fallback">
         <p class="fb-note">{{ t("map.unavailable") }}</p>
         <div v-if="data && data.has_position" class="fb-coords">
@@ -92,12 +81,9 @@ let marker = null;
 let timer = null;
 const POLL_MS = 10000;
 
-// Default view (Riyadh) until the first fix lands.
 const DEFAULT_CENTER = [24.7136, 46.6753];
 const DEFAULT_ZOOM = 11;
 
-// Accepted default tile source; a deployment overrides it in site_config.json, which
-// the page shell projects here. See www/masar_supervisor.py for the decision record.
 const DEFAULT_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const DEFAULT_TILE_ATTRIBUTION = "© OpenStreetMap";
 const tileConfig = (typeof window !== "undefined" && window.apex_map_tiles) || {};
@@ -112,9 +98,6 @@ function ensureMap() {
     DEFAULT_CENTER,
     DEFAULT_ZOOM,
   );
-  // tileerror only says the background failed. The marker lives in its own Leaflet
-  // pane and every other panel is independent, so the tab stays usable — say so
-  // rather than leaving the reader staring at a silent empty box.
   L.tileLayer(TILE_URL, { maxZoom: 19, attribution: TILE_ATTRIBUTION })
     .on("tileerror", () => {
       tilesDown.value = true;
@@ -156,11 +139,6 @@ async function load() {
     data.value = res;
     state.value = "ready";
     error.value = "";
-    // The map is built as soon as its canvas exists, NOT only when a fix arrives:
-    // the template already shows a "waiting for the first GPS fix" overlay over the
-    // map, and while the map was built lazily that overlay sat on a blank white box —
-    // Leaflet loaded, no container, no tile ever requested. The marker still waits for
-    // a real position, so nothing is ever drawn at 0,0.
     if (hasLeaflet) {
       await nextTick();
       ensureMap();
@@ -198,7 +176,6 @@ watch(
     load();
   },
 );
-// Leaflet mis-sizes when its container was hidden (inactive tab); fix on activation.
 watch(
   () => props.active,
   async (a) => {

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Driver Suspension controller.
 
 Stops a driver, optionally releasing the linked vehicle. Prior driver status is
@@ -16,6 +16,7 @@ from apex.salis.utils import add_timeline_note, lock_vehicle, lock_driver
 
 class DriverSuspension(Document):
     def validate(self):
+        """Requires a vehicle to release, defaulting it from the driver's current vehicle when unset."""
         if self.release_vehicle:
             if not self.related_vehicle and self.driver:
                 self.related_vehicle = frappe.db.get_value(
@@ -25,12 +26,14 @@ class DriverSuspension(Document):
                 frappe.throw(_("Select the vehicle to release."))
 
     def before_submit(self):
+        """Requires evidence before a stop for Violation or Termination can be submitted."""
         if self.stop_reason in ("Violation", "Termination") and not self.evidence:
             frappe.throw(
                 _("Evidence is required to submit a stop with reason {0}.").format(_(self.stop_reason))
             )
 
     def on_submit(self):
+        """Stops the driver, records their prior status, and releases the vehicle when requested."""
         lock_driver(self.driver)
 
         self.db_set("previous_status", frappe.db.get_value("Salis Driver", self.driver, "status"))
@@ -55,6 +58,7 @@ class DriverSuspension(Document):
         )
 
     def on_cancel(self):
+        """Restores the driver's prior status and re-links the released vehicle if it is still free."""
         lock_driver(self.driver)
 
         another_stop_in_force = frappe.db.exists(

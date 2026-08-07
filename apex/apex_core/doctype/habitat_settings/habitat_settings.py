@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Habitat Settings controller.
 
 Single DocType holding global integration toggles. All defaults are
@@ -16,6 +16,7 @@ class HabitatSettings(Document):
 
 
 def before_save(doc, method=None):
+    """Blocks a non-System Manager from saving and stamps the editor's top role on the document."""
     if "System Manager" not in frappe.get_roles(frappe.session.user):
         frappe.throw("Only System Manager can modify Habitat Settings.")
 

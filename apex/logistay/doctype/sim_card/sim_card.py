@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """SIM Card controller.
 
 The mobile number is human-editable, so uniqueness is enforced on a derived,
@@ -29,12 +29,14 @@ _PROJECTION_FIELDS = (
 
 class SIMCard(Document):
     def validate(self):
+        """Normalizes identifiers, matches company to the contract, and enforces unique mobile and ICCID."""
         self._normalize_identifiers()
         self._enforce_company_matches_contract()
         self._enforce_unique_mobile()
         self._enforce_unique_iccid()
 
     def _normalize_identifiers(self):
+        """Derives the normalized mobile number and ICCID keys used for uniqueness checks."""
         self.mobile_number_normalized = normalize_msisdn(self.mobile_number)
         if not self.mobile_number_normalized:
             frappe.throw(_("Mobile Number must contain at least one digit."))
@@ -59,6 +61,7 @@ class SIMCard(Document):
             )
 
     def _enforce_unique_mobile(self):
+        """Blocks saving when another SIM Card already holds the same normalized mobile number."""
         clash = frappe.db.get_value(
             "SIM Card",
             {
@@ -74,6 +77,7 @@ class SIMCard(Document):
             )
 
     def _enforce_unique_iccid(self):
+        """Blocks saving when another SIM Card already holds the same normalized ICCID."""
         if not self.iccid_normalized:
             return
         clash = frappe.db.get_value(
@@ -89,12 +93,15 @@ class SIMCard(Document):
             )
 
     def after_insert(self):
+        """Refreshes the linked telecom contract's SIM count after a new SIM Card is inserted."""
         self._refresh_contract_counts()
 
     def on_update(self):
+        """Refreshes the current and, on a contract move, the previous contract's SIM count."""
         self._refresh_contract_counts()
 
     def on_trash(self):
+        """Refreshes the linked telecom contract's SIM count after the SIM Card is deleted."""
         self._refresh_contract_counts()
 
     def _refresh_contract_counts(self):

@@ -1,17 +1,6 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Accommodation Occupancy Summary — one counted row per building.
-
-WHY ``ref_doctype`` IS ``Housing Assignment`` WHILE THE QUERIES READ Building + Room.
-The mismatch is real and deliberate, not an oversight. The figure this report exists to
-publish IS a Housing Assignment aggregate: ``Building.current_occupants`` is written by
-``frappe.db.count("Housing Assignment", {building, docstatus 1, check_out_date not
-set})`` (habitat/doctype/building/building.py:226-229), and ``occupancy_percent``,
-``available_capacity`` and the Full/Partial/Available room split are all derived from
-that same count. Reading the pre-counted column instead of re-counting the assignments
-is a query optimisation; it does not change whose records the numbers are made of. So
-the DocPerm that gates the report is the DocPerm over the records it reports on, which
-is what ``ref_doctype`` is for.
 
 The gate is not the row boundary, and is not relied on as one. Every Building row is put
 through ``permissions.report_building_scope`` below, and the Room query is confined to
@@ -32,6 +21,7 @@ from apex.apex_core.utils.report_summary import count_card, percent_card, total_
 
 
 def execute(filters=None):
+    """Returns one row per building with resident counts and room status split, scoped by permission."""
     columns = [
         {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 200},
         {"label": frappe._("Active Residents"), "fieldname": "active_residents", "fieldtype": "Int", "width": 130},

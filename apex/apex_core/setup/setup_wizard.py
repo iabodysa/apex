@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Apex first-install Setup Wizard integration (native Frappe setup wizard).
 
 On a fresh site, Frappe's setup wizard renders extra "Apex Configuration" slides
@@ -22,12 +22,6 @@ Skip-safe is NOT fail-open: a payment target the operator actually named but tha
 cannot build a payment stops setup with an actionable message rather than being
 dropped, because a dropped choice leaves the router pointing somewhere the
 operator never picked.
-
-The sibling `setup_wizard_stages` hook is deliberately NOT declared and this module
-deliberately exposes no stage builder for it. Frappe concatenates BOTH hook families
-into one run (frappe/desk/page/setup_wizard/setup_wizard.py:36 adds get_stages_hooks
-+ get_setup_complete_hooks), so a stage that called apply_apex_setup would apply the
-whole configuration a second time on the same wizard submission.
 """
 
 import frappe

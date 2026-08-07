@@ -1,15 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// [#shared-icons]
-// Single source of truth for every portal's inline-SVG icon geometry (lucide
-// paths). Each export is the ordered child-element list for one glyph, consumed by
-// @shared/components/IconBase.vue. Portals import ONLY the names they use (named
-// exports keep tree-shaking intact, so a portal bundles only its own subset), then
-// map their local icon name -> the geometry in a thin src/components/Icon.vue.
-//
-// Where two portals drew the SAME name with DIFFERENT geometry (e.g. a filled vs
-// outline calendar), each variant kept its own export (numeric suffix) so no
-// portal's appearance changed when the geometry was centralised. GENERATED — do
-// not hand-edit; regenerate from the portal Icon.vue sources.
+// Copyright (c) 2026, afmcoltd
 export const alert = [
   { tag: "path", attrs: { "d": "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" } },
   { tag: "path", attrs: { "d": "M12 9v4" } },

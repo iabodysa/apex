@@ -1,7 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Mirrors driver_portal/src/i18n.js: an EN/AR dictionary with a reactive
-// translate / setLang / dir / useI18n layer. Arabic strings live here, which is
-// allowed for *_portal bundles; code carries stable English keys only.
+// Copyright (c) 2026, afmcoltd
 import { createI18n } from "@shared/i18n";
 
 const STORAGE_KEY = "fleet_portal_lang";
@@ -60,8 +57,6 @@ const messages = {
     brand: {
       name: "Fleet OS",
     },
-    // Shared resource-error copy: the wording the other five portals already use,
-    // so one failure reads the same everywhere.
     errors: {
       loadError: "Couldn't load this section.",
       actionError: "The action could not be completed.",
@@ -808,7 +803,6 @@ const messages = {
   },
 };
 
-// supervisor board defaults to Arabic (mirrors driver/safety portals)
 const { lang, dir, translate, setLang, resourceErrorMessage } = createI18n({
   messages,
   storageKey: STORAGE_KEY,

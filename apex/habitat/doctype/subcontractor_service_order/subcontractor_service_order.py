@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Subcontractor Service Order controller.
 
 Why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row.
@@ -26,6 +26,7 @@ class SubcontractorServiceOrder(Document):
 
 
 def before_save(doc, method=None):
+    """Defaults the order's company to the Habitat Settings default company when none is set."""
     if not doc.company:
         from apex.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
         doc.company = get_default_company()
@@ -61,18 +62,7 @@ def mark_completed(
     Controlled completion gate mirroring start_work / mark_missed: only a submitted
     order that is In Progress may be marked Completed, so the terminal state is
     reached through a guarded chokepoint rather than a free-form status edit.
-
-    The four evidence fields travel with this method for the reason
-    ``maintenance_work_order.mark_completed`` records: they are filled once the order
-    is SUBMITTED and In Progress, none is ``allow_on_submit``, and widening them would
-    not be enough anyway — saving a submitted document is ``update_after_submit``,
-    which Frappe gates on the SUBMIT permission
-    (``frappe/model/document.py:905-906``), while the supervisor doing the visit holds
-    write. Granting submit to reach a notes box would also hand them authority to
-    submit and cancel the order they are executing. ``db_set`` is therefore their only
-    writer at docstatus 1; permission is re-checked above because ``db_set`` goes
-    straight to the database. Each field is written only when supplied, so a caller
-    that passes none behaves exactly as before."""
+    """
     doc = frappe.get_doc("Subcontractor Service Order", service_order)
     frappe.has_permission("Subcontractor Service Order", "write", doc=doc, throw=True)
 

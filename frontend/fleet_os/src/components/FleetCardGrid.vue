@@ -1,5 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Card view of the filtered fleet (empty-state, selection, per-status actions). -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <script setup>
 import Icon from "./Icon.vue";
 defineProps([
@@ -40,7 +39,6 @@ defineProps([
                 <span class="vc-fuel-badge">{{ trim(v.fuel) || "—" }}</span>
               </div>
             </div>
-            <!-- Card lead: state → driver → exception flags (fuel demoted to the panel) -->
             <div class="vc-status-bar">
               <span class="sbadge" :class="sb(v).cls"><Icon :name="sb(v).ic" :size="13" />{{ sb(v).label }}</span>
               <span v-if="v.vehicle_status === 'workshop' && v.workshop_date" style="font-size:10px;color:var(--orange-l);font-family:'JetBrains Mono',monospace;display:inline-flex;align-items:center;gap:3px"><Icon name="calendar" :size="11" /> <bdi>{{ v.workshop_date }}</bdi></span>
@@ -59,7 +57,6 @@ defineProps([
               <template v-else-if="v.vehicle_status === 'workshop'"><Icon name="wrench" :size="14" /> {{ t("card.inMaintenance") }}</template>
               <template v-else><Icon name="circle-pause" :size="14" /> {{ t("card.outOfService") }}</template>
             </div>
-            <!-- Compliance flag: shows only for near (<=7d) / expired vehicles, never for compliant -->
             <div
               v-if="expiryFlag(v).show"
               class="vc-expiry-stripe"
@@ -75,7 +72,6 @@ defineProps([
               <span v-if="(v.damages || []).length" style="font-size:10px;padding:2px 7px;background:var(--red-d);color:var(--red-l);border-radius:6px;border:1px solid color-mix(in srgb,var(--c-danger) 20%,transparent);display:inline-flex;align-items:center;gap:3px"><Icon name="hammer" :size="11" /> {{ t("card.damageCount", { n: v.damages.length }) }}</span>
               <span v-if="(v.accidents || []).length" style="font-size:10px;padding:2px 7px;background:var(--amber-d);color:var(--amber-l);border-radius:6px;border:1px solid color-mix(in srgb,var(--c-warning) 20%,transparent);display:inline-flex;align-items:center;gap:3px"><Icon name="crash" :size="11" /> {{ t("card.accidentCount", { n: v.accidents.length }) }}</span>
             </div>
-            <!-- Demoted context: vehicle type + office/project/area below the lead -->
             <div class="vc-meta vc-meta-demoted">
               <div class="vc-type">{{ v.vehicle_type || "—" }}</div>
               <div class="vc-office"><Icon name="building" :size="12" /> {{ v.rental_office }} &middot; {{ trim(v.project) || "—" }} &middot; <Icon name="pin" :size="12" /> {{ v.area }}</div>

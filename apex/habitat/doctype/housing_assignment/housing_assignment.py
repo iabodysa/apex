@@ -1,19 +1,10 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Accommodation Assignment controller.
 
 The Assignment record IS the check-in and the active occupancy stay. It carries
 both check_in_date and check_out_date; Accommodation Checkout closes it.
 
 Payroll effects are gated behind the Salary Deduction Policy and disabled by default.
-
-The Building / Room / Bed triple is validated HERE, on save, and deliberately carries no
-change handler in housing_assignment.js. fetch_from already ties the three upward
-(room <- bed.room, building <- room.building), so clearing a child when its parent
-changes closed a loop: form.js:294 re-validates the Link on every model write, and the
-Room control's validate("") writes "" into its fetch target ``building`` (link.js:762) --
-the value the user had just picked. set_query in the client script still narrows
-downward; the mismatch refusals below are the other half, and adding a client-side
-change handler to "help" would reintroduce the loop.
 """
 
 from __future__ import annotations
@@ -76,6 +67,7 @@ def _flag_temporary_worker_past_expiry(doc) -> None:
 
 
 def recalculate_room_occupancy(room_name: str) -> None:
+    """Recounts a room's active assignments and updates its occupancy count and status accordingly."""
     if not room_name:
         return
     room = frappe.get_doc("Room", room_name)
@@ -90,6 +82,7 @@ def recalculate_room_occupancy(room_name: str) -> None:
 
 
 def recalculate_building_occupancy(building_name: str) -> None:
+    """Recounts a building's active occupants and updates its occupant count and occupancy percentage."""
     if not building_name:
         return
     building = frappe.get_doc("Building", building_name)
@@ -103,11 +96,13 @@ def recalculate_building_occupancy(building_name: str) -> None:
 
 
 def recalculate_spatial(room_name: str, building_name: str) -> None:
+    """Refreshes both the room's and the building's occupancy figures after a bed change."""
     recalculate_room_occupancy(room_name)
     recalculate_building_occupancy(building_name)
 
 
 def validate(doc, method=None):
+    """Derives the cost center and blocks duplicate occupancy, bed/room mismatches, and over-capacity."""
     sync_party_employee(doc, require_party=True)
 
     if not doc.building or not frappe.db.exists("Building", doc.building):
@@ -240,6 +235,7 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
+    """Occupies the bed, refreshes occupancy, and suspends the allowance under the Rent policy."""
     Bed = frappe.qb.DocType("Bed")
     (
         frappe.qb.from_(Bed)
@@ -286,6 +282,7 @@ def on_submit(doc, method=None):
 
 
 def on_cancel(doc, method=None):
+    """Frees the bed if no other active assignment holds it and refreshes occupancy counts."""
     active_on_bed = frappe.db.count(
         "Housing Assignment",
         {

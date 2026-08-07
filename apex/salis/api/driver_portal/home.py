@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Driver Portal — home endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
 
 import frappe
@@ -16,7 +16,6 @@ from apex.salis.api.driver_portal import (
 
 
 _OPEN_CLEARANCE_STATUSES = ("Open", "In Progress", "Blocked")
-
 
 
 def _next_trip_today(driver):
@@ -54,7 +53,6 @@ def _next_trip_today(driver):
         frappe.utils.cstr(log["start_datetime"]) if log and log.get("start_datetime") else None
     )
     return trip
-
 
 
 @frappe.whitelist(allow_guest=True)

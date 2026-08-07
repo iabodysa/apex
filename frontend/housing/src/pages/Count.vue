@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <BuildingPicker v-if="!building" @select="onBuildingSelected" />
 

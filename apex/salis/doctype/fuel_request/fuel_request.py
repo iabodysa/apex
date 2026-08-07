@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Fuel Request controller (unified).
 
 A single submittable fuel request whose ``request_type`` selects one of three
@@ -63,10 +63,12 @@ VALID_STATUSES = ("Pending", "Approved", "Done", "Failed", "Reverted", "Cancelle
 class FuelRequest(Document):
 
     def before_insert(self):
+        """Defaults the requester to the current session user when not already set."""
         if not self.requested_by:
             self.requested_by = frappe.session.user
 
     def validate(self):
+        """Runs the per-type field checks and blocks a request from a rider who is inactive."""
         if not self.request_type:
             self.request_type = "Standard"
         if self.request_type not in REQUEST_TYPES:
@@ -108,12 +110,14 @@ class FuelRequest(Document):
             frappe.throw(reason)
 
     def before_submit(self):
+        """Blocks submission when a Standard draw exceeds the quota, or a Chip cancel lacks evidence."""
         if self.request_type == "Standard":
             self._guard_quota_allowance()
         elif self.request_type == "Chip":
             self._guard_chip_cancellation()
 
     def on_submit(self):
+        """Posts quota consumption for a Standard request, or logs a vehicle timeline note for the rest."""
         if self.request_type == "Standard":
             if self.status == "Done":
                 self._apply_quota_consumption()
@@ -148,6 +152,7 @@ class FuelRequest(Document):
             self._apply_quota_consumption()
 
     def on_cancel(self):
+        """Reverses posted quota consumption and the request's fuel ledger entry."""
         if self.request_type == "Standard":
             self._reverse_quota_consumption()
         elif self.request_type == "Top-up":
@@ -165,10 +170,12 @@ class FuelRequest(Document):
 
 
     def _validate_standard(self):
+        """Requires the requested litres to be greater than zero."""
         if (self.requested_litres or 0) <= 0:
             frappe.throw(_("Requested Litres must be greater than zero."))
 
     def _validate_topup(self):
+        """Requires positive top-up litres and a revert date for a temporary top-up."""
         if (self.topup_litres or 0) <= 0:
             frappe.throw(_("Top-up Litres must be greater than zero."))
         if self.is_temporary and not self.revert_due_date:
@@ -176,6 +183,7 @@ class FuelRequest(Document):
         self._warn_overdue_temporary()
 
     def _validate_chip(self):
+        """Requires a chip action, and a chip number when replacing or cancelling a chip."""
         if not self.action:
             frappe.throw(_("A chip action (Issue / Replace / Cancel) is required."))
         if self.action in ("Replace", "Cancel") and not self.chip_number:
@@ -197,11 +205,13 @@ class FuelRequest(Document):
             )
 
     def _stamp_approver(self):
+        """Stamps the current user as approver when the status is set to Approved."""
         if self.status == "Approved" and not self.approved_by:
             self.approved_by = frappe.session.user
 
 
     def _warn_overdue_temporary(self):
+        """Warns when a temporary top-up is past its revert due date and has not been reverted."""
         if not self.is_temporary or self.reverted:
             return
         if self.revert_due_date and getdate(self.revert_due_date) < getdate(nowdate()):
@@ -215,6 +225,7 @@ class FuelRequest(Document):
 
 
     def _guard_chip_cancellation(self):
+        """Requires inactivity evidence and owner acknowledgement before a chip cancel submits."""
         if self.action == "Cancel":
             if not self.inactivity_evidence:
                 frappe.throw(

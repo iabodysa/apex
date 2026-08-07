@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Accommodation Stock Ledger — read-only, system-written quantity ledger for the
 decentralized internal-store engine. Each Accommodation Building is its own store.
 Rows are posted only through the helpers below (never created manually); a blank
@@ -64,6 +64,7 @@ _MASTER_FIELDS = {
 
 
 def _resolve_item(item_type: str, item: str):
+    """Looks up an item's display name, unit of measure and standard cost from its master doctype."""
     fields = _MASTER_FIELDS.get(item_type)
     if not fields:
         return (item, "", 0.0)
@@ -183,16 +184,9 @@ def _live_rows(voucher_type: str, voucher_no: str):
 def assert_reversal_allowed(voucher_type: str, voucher_no: str) -> None:
     """REFUSAL half of a stock voucher's cancel — call from ``before_cancel``.
 
-    Frappe runs before_cancel from run_before_save_methods() BEFORE db_update()
-    stamps docstatus 2 (frappe/model/document.py:414 vs :428), while on_cancel runs
-    after it from run_post_save_methods() (:431). A refusal raised from on_cancel
-    therefore leaves docstatus 2 written in the open transaction, so everything that
-    reads the voucher later in the same request sees it as cancelled and only the
-    request-level rollback undoes it. Raised from here nothing is written at all:
-    this function only reads, so a throw leaves the ledger AND the voucher untouched.
-
     The RESTORATION half (writing the mirror rows) stays in reverse_stock_entries,
-    which on_cancel still runs."""
+    which on_cancel still runs.
+    """
     _assert_reversal_keeps_stock_positive(_live_rows(voucher_type, voucher_no))
 
 

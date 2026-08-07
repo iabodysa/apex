@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Vehicle Handover Register — which vehicle changed hands, between whom, and whether
 the handover is clean.
@@ -21,6 +21,7 @@ from apex.salis import permissions
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for the Vehicle Handover Register report."""
     filters = filters or {}
     columns = _columns()
 
@@ -111,6 +112,7 @@ def _summary(data):
 
 
 def _columns():
+    """Returns the column definitions for the Vehicle Handover Register report."""
     return [
         {"label": _("Handover"), "fieldname": "name", "fieldtype": "Link", "options": "Vehicle Handover", "width": 150},
         {"label": _("Handover Date"), "fieldname": "handover_date", "fieldtype": "Date", "width": 115},

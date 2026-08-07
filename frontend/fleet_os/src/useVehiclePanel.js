@@ -1,13 +1,9 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Right-hand detail drawer state: which vehicle is open, the active tab, and the
-// open sub-form (reassign | stop | stolen). `subForm` is shared with the action
-// composables (they open/close it) and read by the poll guard so a tick can't
-// clobber an open form.
+// Copyright (c) 2026, afmcoltd
 import { reactive, ref, computed } from "vue";
 
 export function useVehiclePanel(vehicles) {
   const panel = reactive({ open: false, plate: "", tab: 0, vehicle: null });
-  const subForm = ref(null); // null | reassign | stop | stolen
+  const subForm = ref(null);
 
   function openPanel(plate, tab = 0) {
     const v = vehicles.value.find((x) => x.plate === plate);

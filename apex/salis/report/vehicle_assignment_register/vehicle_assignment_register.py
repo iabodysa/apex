@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Vehicle Assignment Register — who holds which vehicle, and who held it before.
 
@@ -31,6 +31,7 @@ LIVE_STATUS = "Active"
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for the Vehicle Assignment Register report."""
     filters = filters or {}
     columns = _columns(filters)
 
@@ -98,6 +99,7 @@ def _summary(data):
 
 
 def _columns(filters):
+    """Returns the column definitions for the Vehicle Assignment Register, adding history columns."""
     columns = [
         {"label": _("Assignment"), "fieldname": "name", "fieldtype": "Link", "options": "Vehicle Assignment", "width": 150},
         {"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Salis Vehicle", "width": 150},

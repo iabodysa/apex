@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Payment Request controller.
 
 Enforces the finance boundary: every payable item routes
@@ -47,6 +47,7 @@ VALID_STATUSES = (
 
 class SalisPaymentRequest(Document):
     def before_insert(self):
+        """Defaults the requester and clears any carried-over payment reference on an amendment."""
         if not self.requested_by:
             self.requested_by = frappe.session.user
         if self.amended_from:
@@ -54,6 +55,7 @@ class SalisPaymentRequest(Document):
             self.linked_payment_entry = None
 
     def validate(self):
+        """Validates the amount and enforces the finance-only approval gate and approver stamp."""
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 
@@ -66,8 +68,8 @@ class SalisPaymentRequest(Document):
         self._enforce_finance_gate()
 
 
-
     def _old_status(self):
+        """Returns the document's status before this save, defaulting to Draft."""
         previous = self.get_doc_before_save()
         return (previous.status if previous else None) or "Draft"
 

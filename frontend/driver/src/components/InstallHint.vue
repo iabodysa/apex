@@ -1,9 +1,5 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <!-- First-visit "Add to Home Screen" hint. Shows once (dismissal persisted), and
-       hides entirely once the app runs standalone. Where the browser supports a
-       programmatic prompt (Chrome/Android) an Install button fires it; otherwise a
-       short manual instruction is shown (iOS Safari has no install API). -->
   <div v-if="showInstallHint" class="install-hint">
     <span class="install-mark"><Icon name="download" :size="20" /></span>
     <p class="install-text">{{ canPrompt ? t("install.body") : t("install.manual") }}</p>

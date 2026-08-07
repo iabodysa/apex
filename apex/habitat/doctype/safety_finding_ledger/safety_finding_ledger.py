@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Safety Finding Ledger controller.
 
 Read-only, machine-written immutable audit memo. One row is posted per finding
@@ -27,6 +27,7 @@ from frappe.model.document import Document
 
 class SafetyFindingLedger(Document):
     def on_update(self):
+        """Blocks editing a Safety Finding Ledger row after it has already been inserted."""
         if self.is_new():
             return
         if not self.flags.ignore_validate_update_after_submit and self.get_doc_before_save():
@@ -36,6 +37,7 @@ class SafetyFindingLedger(Document):
             )
 
     def on_trash(self):
+        """Blocks deleting a Safety Finding Ledger row outside install/migrate; cancel the round instead."""
         if frappe.flags.in_install or frappe.flags.in_migrate:
             return
         frappe.throw(

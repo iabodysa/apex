@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";

@@ -1,15 +1,7 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <script setup>
-/*
- * HOME — my vehicle. The greeting band is the shell heading (App.vue); this
- * page shows the vehicle hero card (plate · model · status pill) with its
- * compliance facts (odometer, registration expiry), a two-row upcoming-trips
- * PREVIEW that links to the real /trips page, and a call-to-action card that
- * leads to the /fuel page.
- */
 import { computed } from "vue";
 import Icon from "../components/Icon.vue";
-// [#a281] Direct path, never the "@shared/components" barrel (see App.vue).
 import EmptyState from "@shared/components/EmptyState.vue";
 import { useI18n } from "../i18n";
 import { useEmployee } from "../useEmployee.js";
@@ -18,18 +10,14 @@ import { metaFor } from "../tripMeta.js";
 const { t, lang } = useI18n();
 const { vehicle, trips, loading, loadError, reload } = useEmployee();
 
-// The preview shows the two most recent rows; the full list lives at /trips.
 const tripPreview = computed(() => trips.value.slice(0, 2));
 
-// Localized integer formatting: Arabic locale pinned to Latin digits
-// (`-u-nu-latn`) so one numeral system is on screen — matches App.vue.
 const AR_LOCALE = "ar-SA-u-nu-latn";
 function fmtInt(n) {
   if (n == null) return "—";
   return new Intl.NumberFormat(lang.value === "ar" ? AR_LOCALE : "en-US").format(n);
 }
 
-// Vehicle status → pill class + label (reuses the board's status vocabulary).
 const statusMeta = {
   available: { cls: "pill-ok", key: "statusShort.available" },
   assigned: { cls: "pill-ok", key: "statusShort.assigned" },
@@ -43,7 +31,6 @@ const vehicleStatus = computed(() => statusMeta[vehicle.status] || statusMeta.av
 <template>
   <div class="emp-grid">
     <div class="emp-col">
-      <!-- MY VEHICLE -->
       <section class="emp-card reveal d1">
         <header class="emp-card-head">
           <span class="emp-ic"><Icon name="car" :size="17" /></span>
@@ -54,11 +41,6 @@ const vehicleStatus = computed(() => statusMeta[vehicle.status] || statusMeta.av
         </header>
 
         <p v-if="loading" class="emp-empty">{{ t("emp.loading") }}</p>
-        <!-- [#emp-fail] Failure BEFORE the empty state. `vehicle.empty` starts true and
-             a broken load never clears it, so without this branch a failed request
-             rendered as "no vehicle is assigned to you" — a driver WITH a vehicle was
-             told they had none. Also gated on `empty` so a vehicle that did load still
-             shows when only a sibling request failed. -->
         <div v-else-if="loadError && vehicle.empty" class="emp-fail">
           <p>{{ t("emp.loadError") }}</p>
           <button type="button" class="emp-btn emp-btn-ghost emp-retry" @click="reload">
@@ -93,7 +75,6 @@ const vehicleStatus = computed(() => statusMeta[vehicle.status] || statusMeta.av
         </template>
       </section>
 
-      <!-- MY TRIPS — two-row preview; the full list is the /trips page. -->
       <section class="emp-card reveal d2">
         <header class="emp-card-head">
           <span class="emp-ic"><Icon name="clipboard-list" :size="17" /></span>
@@ -104,7 +85,6 @@ const vehicleStatus = computed(() => statusMeta[vehicle.status] || statusMeta.av
         </header>
 
         <p v-if="loading" class="emp-empty">{{ t("emp.loading") }}</p>
-        <!-- Same [#emp-fail] rule: "the trips request broke" is not "you have no trips". -->
         <div v-else-if="loadError && !trips.length" class="emp-fail">
           <p>{{ t("emp.loadError") }}</p>
           <button type="button" class="emp-btn emp-btn-ghost emp-retry" @click="reload">
@@ -138,7 +118,6 @@ const vehicleStatus = computed(() => statusMeta[vehicle.status] || statusMeta.av
       </section>
     </div>
 
-    <!-- FUEL — call to action into the real /fuel page. -->
     <section class="emp-card reveal d3">
       <header class="emp-card-head">
         <span class="emp-ic"><Icon name="fuel" :size="17" /></span>

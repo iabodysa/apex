@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 import frappe
 from frappe import _
@@ -9,6 +9,7 @@ from apex.habitat import permissions
 
 
 def execute(filters=None):
+    """Returns intercompany Facility Asset Movements scoped by permission with acknowledgement counts."""
     filters = filters or {}
 
     columns = [

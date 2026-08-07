@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Trip Start Log controller.
 
 Execution record for a worker-transport trip (the Workers division of Salis,
@@ -27,6 +27,7 @@ from apex.salis.utils import get_driver_for_user
 
 class TripStartLog(Document):
     def validate(self):
+        """Backfills trip context, validates boarding, derives counts, and checks driver ownership."""
         self._resolve_trip_context()
         self._validate_boarding_rows()
         self._derive_counts()

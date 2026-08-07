@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Supplier form-dashboard links for Apex Habitat.
 
 Wired via override_doctype_dashboards in hooks.py. Supplier is an ERPNext
@@ -17,6 +17,7 @@ import frappe
 
 
 def get_data(data=None):
+    """Merges housing, subcontracting and cost-recovery links into the native Supplier dashboard."""
     data = data or {}
     data.setdefault("transactions", [])
     data.setdefault("non_standard_fieldnames", {})

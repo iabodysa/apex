@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="sk" role="status" :aria-label="label">
     <div v-for="n in rows" :key="n" class="sk-row">

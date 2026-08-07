@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Trip Stop Progress — child row of Trip Start Log.
 
 One row per route stop the driver works through: its sequence, name, the source

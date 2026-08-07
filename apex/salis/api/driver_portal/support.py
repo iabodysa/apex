@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Driver Portal — support endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
 
 import frappe
@@ -33,6 +33,7 @@ def _support_text(value, label, maximum):
 
 
 def _communication_window(offset, limit):
+    """Clamps the requested offset and page size for paging a ticket's conversation."""
     offset = max(frappe.utils.cint(offset), 0)
     limit = min(
         max(frappe.utils.cint(limit) or COMMUNICATION_PAGE_DEFAULT, 1),
@@ -76,7 +77,6 @@ def my_support_tickets():
         limit=50,
     )
     return rows
-
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -125,11 +125,6 @@ def _create_support_ticket(
 ):
     """Create one Issue after the public endpoint resolves its driver authority.
 
-    The Issue Type and Issue Priority probes are name-filtered, not positional: both
-    values come straight from the caller, and the positional
-    ``frappe.db.exists(dt, dn)`` answers them back unqueried when they equal the
-    DocType (database.py:1259). The literal "Issue Type"/"Issue Priority" then became a
-    dangling link on insert and lost the ticket, instead of being dropped here.
     """
     subject = _support_text(subject, "Subject", SUPPORT_SUBJECT_MAX_LENGTH)
     description = _support_text(
@@ -154,12 +149,11 @@ def _create_support_ticket(
     if project:
         data["project"] = project
     doc = frappe.get_doc(data)
-    doc.insert(ignore_permissions=True)  # audit-ok — driver resolved server-side
+    doc.insert(ignore_permissions=True)  # audit-ok
     from apex.salis.api.driver_portal.images import save_driver_image
 
     save_driver_image(photo, photo_filename, doc.doctype, doc.name)
     return {"name": doc.name}
-
 
 
 def _driver_issue(name, driver):
@@ -194,7 +188,6 @@ def _driver_issue(name, driver):
     for fieldname in optional_sla_fields:
         issue.setdefault(fieldname, None)
     return issue
-
 
 
 @frappe.whitelist(allow_guest=True)
@@ -251,7 +244,6 @@ def get_ticket(name, communication_offset=0, communication_limit=COMMUNICATION_P
     return issue
 
 
-
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def reply_to_ticket(name, message):
@@ -282,11 +274,10 @@ def reply_to_ticket(name, message):
             "content": message,
         }
     )
-    comm.insert(ignore_permissions=True)  # audit-ok — Issue resolved server-side to this driver
+    comm.insert(ignore_permissions=True)  # audit-ok
     if issue.get("status") in ("Resolved", "Closed"):
         frappe.db.set_value("Issue", name, "status", "Open")
     return {"name": comm.name}
-
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -313,7 +304,6 @@ def report_vehicle_problem(subject, description, priority=None):
         subject,
         body,
     )
-
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])

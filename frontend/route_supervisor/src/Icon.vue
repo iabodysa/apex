@@ -1,7 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Thin per-portal icon wrapper: maps the names THIS portal uses to their shared
-     geometry (@shared/components/icons.js) and hands them to IconBase. Importing only the
-     used names keeps the bundle to this portal's icon subset. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <IconBase :shape="ICONS[name]" :name="name" :size="size" :stroke-width="strokeWidth"
             :align="true" :mirror="MIRROR" />
@@ -57,7 +54,6 @@ const ICONS = {
   sparkles,
 };
 
-// Directional glyphs mirrored under [dir="rtl"].
 const MIRROR = ["chevron", "arrow-left"];
 
 defineProps({

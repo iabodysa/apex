@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
     <h2 class="section-title">{{ t("vehicle.title") }}</h2>
@@ -8,7 +8,6 @@
     <ErrorState v-else-if="vehicle.error" :message="t('errors.loadFailed')" @retry="vehicle.reload()" />
 
     <template v-else-if="v">
-      <!-- Identity card: plate + live operational status -->
       <section class="card card-pad">
         <div class="flex items-center gap-3">
           <span
@@ -48,8 +47,6 @@
         </dl>
       </section>
 
-      <!-- Documents & expiry: registration / insurance / inspection, each with
-           an amber (<=30d) / red (expired) warning. Server computes the state. -->
       <section v-if="compliance.length" class="card card-pad">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
           {{ t("vehicle.compliance") }}
@@ -76,7 +73,6 @@
         </dl>
       </section>
 
-      <!-- Assignment: where the vehicle belongs + since when -->
       <section v-if="v.project || v.assignment_start || v.last_site_maps_url" class="card card-pad">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
           {{ t("home.myVehicle") }}
@@ -92,7 +88,6 @@
             <dt class="text-muted">{{ t("vehicle.assignmentStart") }}</dt>
             <dd class="ms-auto font-semibold"><bdi>{{ v.assignment_start }}</bdi></dd>
           </div>
-          <!-- Last-known site (derived from the latest trip route): one-tap Maps. -->
           <div v-if="v.last_site_maps_url" class="flex items-center gap-2">
             <Icon name="map-pin" :size="18" class="text-primary shrink-0" />
             <dt class="text-muted">{{ t("vehicle.lastSite") }}</dt>
@@ -108,7 +103,6 @@
         </dl>
       </section>
 
-      <!-- Report a problem with the bound vehicle (creates a Vehicle Issue). -->
       <section class="card card-pad space-y-3">
         <button v-if="!reporting" class="btn btn-outline" @click="reporting = true">
           <Icon name="alert" :size="18" /> {{ t("vehicle.reportProblem") }}
@@ -155,7 +149,6 @@ const vehicle = createResource({
   auto: true,
 });
 
-// Report-a-problem: a Vehicle Issue prefilled server-side with the bound vehicle.
 const reporting = ref(false);
 const problem = ref("");
 const report = createResource({
@@ -174,8 +167,6 @@ function submitProblem() {
 
 const v = computed(() => vehicle.data?.vehicle || null);
 
-// Odometer is an Int that defaults to 0; treat a real reading (> 0) as present
-// and a bare 0 as "not recorded" so the row is omitted rather than showing 0 km.
 const odometer = computed(() => {
   const o = v.value?.odometer;
   return o != null && o > 0 ? o.toLocaleString("en-US") : null;
@@ -195,7 +186,6 @@ const statusPill = computed(() => {
   return "pill-neutral";
 });
 
-// Map a compliance_type Select value to its localized label.
 const COMPLIANCE_LABELS = {
   "Registration (Istimara)": "vehicle.registration",
   Insurance: "vehicle.insurance",
@@ -206,8 +196,6 @@ function complianceLabel(type) {
   return key ? t(key) : type;
 }
 
-// Server gives us state ("expired" | "expiring" | "valid") + signed days_to_expiry,
-// so the SPA does no date math (no timezone drift, identical in both languages).
 function expiryColor(doc) {
   if (doc.state === "expired") return "text-danger";
   if (doc.state === "expiring") return "text-warning";

@@ -1,10 +1,8 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
     <h2 class="section-title">{{ t("fuel.title") }}</h2>
 
-    <!-- This month's quota for the driver's bound vehicle. Server computes the
-         remaining litres, so no client math; omitted entirely when no quota. -->
     <section v-if="quotaRow" class="card card-pad">
       <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
         {{ t("fuel.quota") }}
@@ -32,10 +30,7 @@
       </div>
     </section>
 
-    <!-- Request fuel -->
     <section class="card card-pad space-y-4">
-      <!-- What this request is: a Standard (quota-consuming) request, plus the
-           approval-threshold note so the driver knows when approval kicks in. -->
       <div class="fuel-note">
         <p class="font-semibold leading-tight">{{ t("fuel.typeStandard") }}</p>
         <p class="text-sm text-muted mt-0.5">{{ t("fuel.typeStandardHint") }}</p>
@@ -60,7 +55,6 @@
       </button>
     </section>
 
-    <!-- My fuel-request history (identity-scoped read) -->
     <section class="space-y-3">
       <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("fuel.history") }}</h3>
 
@@ -123,7 +117,7 @@ const req = createResource({
   onSuccess: (r) => {
     pushToast(t("fuel.submitted", { name: r.name }), "ok");
     litres.value = null;
-    history.reload(); // new request shows in history without a manual refresh
+    history.reload();
     quota.reload();
   },
   onError: (e) => { pushToast(e.messages?.[0] || t("common.error"), "err"); },
@@ -135,29 +129,22 @@ function submit() {
 
 const quotaRow = computed(() => (quota.data?.has_quota ? quota.data : null));
 
-// Approval-threshold copy: server returns the Salis Settings litre threshold on
-// the quota read (present even with no quota). 0/blank means no threshold, so the
-// note is omitted. Litres are locale-shaped to match the rest of the screen.
 const thresholdNote = computed(() => {
   const lt = quota.data?.approval_threshold_litres;
   if (!lt || Number(lt) <= 0) return null;
   return t("fuel.approvalThreshold", { litres: litreText(lt) });
 });
 
-// Quota bar fill: consumed as a % of the monthly allowance, clamped to [0,100]
-// so an over-consumed quota still renders a full (not overflowing) bar.
 const usedPct = computed(() => {
   const q = quotaRow.value;
   if (!q || !q.monthly_litres) return 0;
   return Math.min(100, Math.max(0, (q.consumed_litres / q.monthly_litres) * 100));
 });
 
-// Litres localized for digit shaping (Intl, active-locale keyed); unit translated.
 function litreText(v) {
   return `${n(Number(v || 0), { maximumFractionDigits: 1 })} ${t("fuel.litreUnit")}`;
 }
 
-// Map a Fuel Request status to a status pill (purely cosmetic).
 function statusPill(status) {
   const s = (status || "").toLowerCase();
   if (s === "approved" || s === "done") return "pill-success";

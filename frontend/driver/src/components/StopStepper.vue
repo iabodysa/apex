@@ -1,16 +1,12 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Horizontal stop-progress stepper: a row of numbered dots connected by lines,
-     coloring completed stops green. Used on the per-trip Route drill-in. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="stepper" :dir="dir">
     <template v-for="(stop, i) in stops" :key="i">
-      <!-- Connecting line (not before the first dot) -->
       <div
         v-if="i > 0"
         class="stepper-line"
         :class="stop.done ? 'stepper-line-done' : ''"
       ></div>
-      <!-- Stop dot -->
       <div
         class="stepper-dot"
         :class="stop.done ? 'stepper-dot-done' : ''"
@@ -55,7 +51,6 @@ defineProps({
   border: 2px solid var(--c-border-strong);
   background: var(--c-surface);
   color: var(--c-muted);
-  /* Only these three change on the one done/not-done flip this stepper has. */
   transition:
     background-color 0.3s ease,
     border-color 0.3s ease,

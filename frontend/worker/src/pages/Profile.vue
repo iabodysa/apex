@@ -1,10 +1,9 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
     <h2 class="section-title">{{ t("profile.title") }}</h2>
 
     <template v-if="p && p.employee">
-      <!-- Identity card -->
       <section class="card card-pad">
         <div class="flex items-center gap-3">
           <span
@@ -34,7 +33,6 @@
         </dl>
       </section>
 
-      <!-- Documents with expiry warnings -->
       <section v-if="p.documents && p.documents.length" class="space-y-3">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("profile.documents") }}</h3>
         <div v-for="doc in p.documents" :key="doc.type" class="card card-pad">
@@ -58,7 +56,6 @@
         </div>
       </section>
 
-      <!-- Secondary sections moved out of the bottom bar: reachable from here. -->
       <section class="space-y-3">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("profile.more") }}</h3>
         <div class="card">
@@ -77,7 +74,6 @@
         </div>
       </section>
 
-      <!-- Request a data change → opens the Requests tab. -->
       <router-link to="/requests" class="btn btn-outline" style="text-decoration: none">
         <Icon name="plus" :size="18" /> {{ t("profile.requestChange") }}
       </router-link>
@@ -110,20 +106,16 @@ const { t, tEnum } = useI18n();
 const props = defineProps({ ctx: { type: Object, required: true } });
 const p = computed(() => props.ctx);
 
-// Secondary destinations lifted out of the bottom bar; same nav labels/icons.
 const moreLinks = [
   { to: "/accommodation", icon: "building", labelKey: "nav.accommodation" },
   { to: "/custody", icon: "briefcase", labelKey: "nav.custody" },
   { to: "/requests", icon: "message", labelKey: "nav.requests" },
 ];
 
-// Tiny inline label/value row to keep the template tidy.
 const Row = (rprops) =>
   h("div", { class: "flex items-center gap-2" }, [
     h(Icon, { name: rprops.icon, size: 18, class: "text-primary shrink-0" }),
     h("dt", { class: "text-muted" }, rprops.label),
-    // <bdi> isolates Latin/numeric values (employee no., joined date, phone)
-    // inside the RTL row; a no-op for Arabic/text values. [T-313]
     h("dd", { class: "ms-auto font-semibold" }, h("bdi", null, rprops.value || t("common.none"))),
   ]);
 

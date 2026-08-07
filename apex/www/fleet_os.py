@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Fleet OS supervisor board — preserved BACKUP served at /fleet-os.
 
 This is the untouched supervisor dashboard that used to live at /fleet. When
@@ -41,6 +41,7 @@ def has_apps_screen_access() -> bool:
 
 
 def get_context(context):
+    """Redirects guests to login and bootstraps the fleet supervisor board, gated on a fleet role."""
     guest_redirect("/fleet-os")
 
     apply_portal_appearance(context)

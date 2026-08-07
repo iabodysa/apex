@@ -1,7 +1,5 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <!-- Transient toast stack: fixed above the tab bar, auto-dismissing. Lives once
-       in App.vue; pages push via pushToast(). aria-live so it's announced. -->
   <div class="toast-host" aria-live="polite" aria-atomic="true">
     <transition-group name="toast">
       <div
@@ -57,8 +55,6 @@ import { toasts, dismissToast } from "../toast";
 }
 .toast-err {
   background: var(--c-danger);
-  /* Mode-DEPENDENT: white clears the light red at 7.01:1 but only 2.45:1 on the
-     lighter dark-mode red, where forest ink reaches 7.77:1. */
   color: var(--c-danger-ink);
 }
 .toast-enter-active,

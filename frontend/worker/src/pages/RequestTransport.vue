@@ -1,9 +1,8 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
     <h2 class="section-title">{{ t("reqTransport.title") }}</h2>
 
-    <!-- Success state: the request was created; offer to view the worker's trips. -->
     <div v-if="submitted" class="card card-pad text-center space-y-3">
       <div class="avatar mx-auto h-12 w-12" style="background: var(--c-mint); color: var(--c-ink)">
         <Icon name="check" :size="26" />
@@ -50,9 +49,6 @@
         </div>
       </section>
 
-      <!-- Ad-hoc (unregistered) co-passengers. Each row is a name + ID (+ optional
-           expiry/nationality/phone); kept distinct from registered workers (the
-           worker themself is always added server-side). -->
       <section class="card card-pad space-y-3">
         <div class="flex items-center gap-2">
           <Icon name="user" :size="18" class="text-primary shrink-0" />
@@ -132,8 +128,6 @@ const create = createResource({
   },
 });
 
-// Only send ad-hoc rows the worker actually filled (a name + ID); blank rows are
-// dropped client-side so an empty extra row never trips the server validation.
 const passengersToSend = computed(() =>
   form.adhoc_passengers.filter((p) => (p.full_name || "").trim() && (p.id_number || "").trim()),
 );

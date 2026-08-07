@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Building row-scoping for Habitat.
 
 Every scoped Habitat DocType is confined to the estate it belongs to. The estate is
@@ -113,11 +113,6 @@ def _building_condition(user=None, column="`building`", doctype=None):
     ``apex.habitat.api.dashboard`` composes it into its own aggregate SQL, where there
     is no DocType-scoped hook to read the strategy table.
 
-    Records still need a fragment even though a Building User Permission already
-    narrows the list: frappe's native match (db_query.py:1090) is
-    ``ifnull(building,'')='' or building in (...)``, so an empty-building row stays
-    visible and a scoped user holding NO Building permission gets no condition at all.
-    This closes both.
     """
     return permission_scope.scope_condition(
         user, _building_is_unscoped, _allowed_buildings, column, allow="Building", doctype=doctype
@@ -218,10 +213,6 @@ def _render_column(spec, escaped):
 def _render_dual(spec, escaped):
     """Either endpoint in scope.
 
-    The OR lives INSIDE this one fragment on purpose. Frappe AND-joins the fragments
-    returned by separate ``permission_query_conditions`` hooks (``" and ".join`` at
-    ``frappe/model/db_query.py:1137``), so splitting the OR across two fragments would
-    silently become an AND and hide every cross-building row.
     """
     return "({first} in ({values}) or {second} in ({values}))".format(
         first=_quote(spec["first"]), second=_quote(spec["second"]), values=escaped
@@ -270,11 +261,6 @@ def _fragment(kind, spec, values):
 def building_scope_query(user=None, doctype=None, scope_for=None):
     """WHERE fragment scoping ``doctype``'s list/report view to the user's estate.
 
-    Registered in ``hooks.py`` for every building-scoped Habitat DocType. Frappe hands
-    the DocType to the hook — ``frappe.call(frappe.get_attr(method), self.user,
-    doctype=self.doctype)``, ``frappe/model/db_query.py:1129`` — and the strategy comes
-    from ``BUILDING_SCOPE``.
-
     ``doctype`` MUST stay in this signature: ``frappe.call`` drops any keyword the
     callee does not declare, so a signature without it would receive no DocType,
     silently skip the ``applicable_for`` narrowing in ``_allowed_buildings_for``, and
@@ -288,6 +274,7 @@ def building_scope_query(user=None, doctype=None, scope_for=None):
     An unknown DocType falls back to the plain ``building`` column, which is what the
     hand-written per-DocType functions did (all of them delegated to
     ``_building_condition``) and the shape 29 of the 36 scoped DocTypes use.
+
     """
     user = _resolve_user(user)
     if _building_is_unscoped(user):
@@ -304,16 +291,10 @@ def building_scope_query(user=None, doctype=None, scope_for=None):
 def _estate_from_anchor(doc, doctype):
     """Re-read the estate from the doc's own parent link.
 
-    ``Document.insert`` runs ``check_permission("create")`` (``document.py:300``)
-    BEFORE ``_validate_links()`` (``:302``) applies ``fetch_from``, so at the create
-    check every fetched ``building`` is still EMPTY. Reading it alone would deny a
-    scoped supervisor the creation of records in their OWN estate. Each anchor names a
-    link the payload always carries and that is never itself fetched, and the estate is
-    re-read from THAT document.
-
     Marking ``building`` ``reqd`` does not help: mandatory fields are enforced in
     ``_validate()`` (``:310``), long after the permission check. The anchor must be a
     real link on the doc, not a promise about the fetched field.
+
     """
     anchor = BUILDING_FETCH_ANCHOR.get(doctype)
     if not anchor:

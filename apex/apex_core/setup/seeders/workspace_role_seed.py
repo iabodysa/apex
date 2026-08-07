@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 import frappe
 
 ALWAYS_PUBLIC = {"Home"}
@@ -6,6 +6,7 @@ EXCLUDED_ROLES = {"All", "Guest", "Employee", "Administrator", "Desk User"}
 
 
 def seed_workspace_roles():
+    """Restricts each roleless public Workspace to the roles that can read its linked doctypes."""
     for ws_name in frappe.get_all("Workspace", filters={"public": 1}, pluck="name"):
         if ws_name in ALWAYS_PUBLIC:
             continue
@@ -47,5 +48,5 @@ def seed_workspace_roles():
             continue
         for role in sorted(roles):
             ws.append("roles", {"role": role})
-        ws.flags.ignore_permissions = True  # audit-ok — install/migrate seeder restricting stock workspace visibility
+        ws.flags.ignore_permissions = True  # audit-ok
         ws.save()

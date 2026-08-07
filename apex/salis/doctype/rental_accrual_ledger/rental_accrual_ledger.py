@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Rental Accrual Ledger controller.
 
 Read-only, machine-written daily rental memo. No DocPerm grants create/write/

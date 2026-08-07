@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Driver Portal — fuel endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
 
 import frappe
@@ -18,6 +18,7 @@ FUEL_REQUEST_MAX_LIMIT = 50
 
 
 def _bounded_request_limit(value):
+    """Clamps a requested fuel-history page size to the default and maximum limits."""
     parsed = frappe.utils.cint(value)
     if parsed <= 0:
         return FUEL_REQUEST_DEFAULT_LIMIT
@@ -41,7 +42,6 @@ def _vehicle_bound_to_driver(driver, vehicle):
             {"driver": driver, "vehicle": vehicle, "status": "Active"},
         )
     )
-
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -80,9 +80,8 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
          "request_date": request_date, "status": "Pending"}
     )
     doc._guard_quota_allowance()
-    doc.insert(ignore_permissions=True)  # audit-ok — driver resolved server-side
+    doc.insert(ignore_permissions=True)  # audit-ok
     return {"name": doc.name}
-
 
 
 @frappe.whitelist(allow_guest=True)
@@ -142,7 +141,6 @@ def my_fuel_quota(vehicle=None):
         "status": row.get("status"),
         "approval_threshold_litres": threshold,
     }
-
 
 
 @frappe.whitelist(allow_guest=True)

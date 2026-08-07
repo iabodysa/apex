@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Driver Portal — attendance endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
 
 import frappe
@@ -32,8 +32,8 @@ def _attendance_state(doc):
     }
 
 
-
 def _today_attendance(driver):
+    """Returns the driver's existing attendance record for today, or a new unsaved one."""
     name = frappe.db.get_value(
         "Driver Attendance",
         {"driver": driver, "attendance_date": frappe.utils.today(), "docstatus": ["<", 2]},
@@ -45,7 +45,6 @@ def _today_attendance(driver):
         {"doctype": "Driver Attendance", "driver": driver,
          "attendance_date": frappe.utils.today(), "status": "Present"}
     )
-
 
 
 @frappe.whitelist(allow_guest=True)
@@ -61,7 +60,6 @@ def get_today_attendance():
     return _today_attendance_state(driver)
 
 
-
 def _month_bounds(month=None):
     """(first_day, last_day) for ``month`` (``YYYY-MM``), defaulting to this month.
 
@@ -74,7 +72,6 @@ def _month_bounds(month=None):
         except Exception:
             pass
     return frappe.utils.get_first_day(anchor), frappe.utils.get_last_day(anchor)
-
 
 
 @frappe.whitelist(allow_guest=True)
@@ -110,7 +107,6 @@ def my_attendance(month=None):
     return {"month": frappe.utils.cstr(start)[:7], "rows": rows}
 
 
-
 def _persist_attendance(doc):
     """Persist a get-or-created Driver Attendance as a SUBMITTED presence record.
 
@@ -130,7 +126,7 @@ def _persist_attendance(doc):
 	  are ``allow_on_submit`` on the DocType, so ``save`` persists them with no
 	  amendment.
 	"""
-    doc.flags.ignore_permissions = True  # audit-ok — driver resolved credential-first
+    doc.flags.ignore_permissions = True  # audit-ok
     if doc.docstatus == 0:
         doc.insert()
         doc.submit()
@@ -154,9 +150,8 @@ def _attach_attendance_photo(doc, photo, photo_filename):
         "images",
         {"image": file_doc.file_url, "captured_at": frappe.utils.now_datetime()},
     )
-    doc.flags.ignore_permissions = True  # audit-ok — driver resolved from credential
+    doc.flags.ignore_permissions = True  # audit-ok
     doc.save()
-
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -193,7 +188,6 @@ def driver_check_in(photo=None, photo_filename=None):
     return _attendance_state(doc)
 
 
-
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def driver_check_out(photo=None, photo_filename=None):
@@ -224,7 +218,6 @@ def driver_check_out(photo=None, photo_filename=None):
     _persist_attendance(doc)
     _attach_attendance_photo(doc, photo, photo_filename)
     return _attendance_state(doc)
-
 
 
 def _is_after(attendance_date, earlier_time, later_time):

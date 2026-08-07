@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 import frappe
 from frappe import _
@@ -13,6 +13,7 @@ _SLA_DAYS = {"Critical": 1, "High": 3, "Medium": 7, "Low": 14}
 
 
 def execute(filters=None):
+    """Returns open maintenance requests with age, SLA and breach status, sorted by breach, priority."""
     filters = filters or {}
 
     columns = [

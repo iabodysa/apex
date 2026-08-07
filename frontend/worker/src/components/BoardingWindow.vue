@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div v-if="state && state !== 'at_stop'" class="bwin" :class="'bwin-' + state">
     <div class="bwin-head">

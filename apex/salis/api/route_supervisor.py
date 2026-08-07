@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Masar Route Supervisor portal API — the whitelisted, permission-scoped backend for
 the /masar-supervisor SPA.
 
@@ -43,10 +43,6 @@ PORTAL_ROLES = (
 
 _POSITION_STALE_SECONDS = 120
 
-# How many plans in ONE board request may pay for a live router call. road_route caps a
-# single call at six seconds, so an uncapped loop makes the supervisor wait that many
-# times over on a cold cache. Three is one warm-up per screen; the rest fill in on the
-# next poll once their routes are cached.
 ROUTER_CALLS_PER_REQUEST = 3
 
 PLAN_DISPLAY_LIMIT = 50
@@ -65,7 +61,6 @@ _TRIP_FIELDS = [
 ]
 
 
-
 def _require_portal_role():
     """403 unless the caller holds a supervisor/oversight role. Portal gate only —
     it does not grant access to any specific plan; ``_owned_plan`` does that."""
@@ -77,6 +72,7 @@ def _require_portal_role():
 
 
 def _is_admin(user=None):
+    """Returns True when the given or current session user is the Administrator."""
     return (user or frappe.session.user) == "Administrator"
 
 
@@ -148,14 +144,15 @@ def _owned_trip(dispatch_trip: str) -> dict:
     return trip
 
 
-
 def _driver_label(driver):
+    """Returns the driver's display name, or None when no driver is given."""
     if not driver:
         return None
     return frappe.db.get_value("Salis Driver", driver, "full_name") or driver
 
 
 def _vehicle_label(vehicle):
+    """Returns the vehicle's plate number, or None when no vehicle is given."""
     if not vehicle:
         return None
     return frappe.db.get_value("Salis Vehicle", vehicle, "plate_number") or vehicle
@@ -342,7 +339,6 @@ def _pending_first(plans: list) -> list:
     exactly as it does in the payload."""
     plans.sort(key=lambda p: (p.get("supervisor_approval") or "Pending") != "Pending")
     return plans
-
 
 
 @frappe.whitelist()
@@ -585,10 +581,6 @@ def get_active_driver_positions():
 
     now = frappe.utils.now_datetime()
     out = []
-    # Each cache miss is one call to a public router with a six-second ceiling, made
-    # while the supervisor waits for this board. A warm route costs nothing, so the
-    # budget is spent on misses only; past it the remaining plans are served cached-only
-    # and the map draws the straight line it already draws when the router is down.
     router_budget = ROUTER_CALLS_PER_REQUEST
     for plan in plans:
         trip = trips_by_plan.get(plan["name"])
@@ -646,17 +638,12 @@ def get_active_driver_positions():
     return out
 
 
-
 def _resolve_owned_plan_doc(name: str):
     """Load the Route Plan doc for a decision write, enforcing the same ownership +
     lifecycle preconditions for both approve and reject: the caller must be the assigned
     supervisor (Administrator bypass), the plan must be submitted, and no decision may
     have been recorded yet (idempotent — a decided plan cannot be re-decided).
-
-    The existence probe filters on ``name``: the positional form answers the value
-    back without querying when it equals the DocType (database.py:1259), so the
-    literal "Route Plan" cleared the not-found throw and fell through to the
-    ownership branch — a supervisor-mismatch error, or a bare 404 for an admin."""
+    """
     user = frappe.session.user
     supervisor = frappe.db.get_value("Route Plan", name, "route_supervisor")
     if supervisor is None and not frappe.db.exists("Route Plan", {"name": name}):
@@ -675,6 +662,7 @@ def _resolve_owned_plan_doc(name: str):
 
 
 def _decision_result(doc) -> dict:
+    """Returns the plan's approval decision fields as a plain dict for the API response."""
     return {
         "name": doc.name,
         "approval": doc.supervisor_approval,

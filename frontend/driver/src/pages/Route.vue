@@ -1,10 +1,9 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
     <h2 class="section-title">{{ singleTrip ? t("route.tripTitle") : t("route.title") }}</h2>
     <p v-if="!singleTrip" class="-mt-2 text-sm text-soft">{{ t("route.subtitle") }}</p>
 
-    <!-- Single-trip drill-in (from a "My Trips" card): /route/:trip -->
     <template v-if="singleTrip">
       <Skeleton v-if="tripRoute.loading && !tripData" :rows="2" />
 
@@ -27,9 +26,7 @@
             </span>
           </div>
 
-          <!-- Trip with a route plan: render its ordered stops (the trip road) -->
           <div v-if="tripData.has_route_plan && tripData.stops && tripData.stops.length">
-            <!-- Horizontal progress stepper -->
             <StopStepper :stops="tripData.stops" />
             <div class="flex items-center justify-between">
               <div class="field-label">{{ t("route.stops") }}</div>
@@ -44,8 +41,6 @@
                 class="flex items-start gap-3"
                 :class="{ 'opacity-60': stop.done }"
               >
-                <!-- A started trip lets the driver tick each stop done; the box
-                     persists server-side (mark_stop_progress) and reflects on reload. -->
                 <button
                   v-if="tripData.started && stop.route_stop"
                   class="stop-check shrink-0"
@@ -87,7 +82,6 @@
               </li>
             </ol>
 
-            <!-- One-tap navigation chaining every stop as ordered waypoints. -->
             <a
               v-if="tripData.maps_route_url"
               :href="tripData.maps_route_url"
@@ -100,7 +94,6 @@
             </a>
           </div>
 
-          <!-- Registered worker manifest with a one-tap call. -->
           <div v-if="tripData.workers && tripData.workers.length">
             <div class="field-label">{{ t("route.workers") }}</div>
             <ul class="space-y-1">
@@ -124,7 +117,6 @@
             </ul>
           </div>
 
-          <!-- No route plan for this trip: explicit state, distinct from "no trips today" -->
           <div v-else class="text-center py-4">
             <div
               class="avatar mx-auto mb-2 h-11 w-11"
@@ -141,7 +133,6 @@
       <EmptyState v-else :title="t('route.empty')" />
     </template>
 
-    <!-- All-trips worker route: /route -->
     <template v-else>
       <Skeleton v-if="route.loading && !routeData" :rows="3" />
 
@@ -164,7 +155,6 @@
             </span>
           </div>
 
-          <!-- Ordered stops (the trip road) -->
           <div v-if="trip.stops && trip.stops.length">
             <div class="field-label">{{ t("route.stops") }}</div>
             <ol class="space-y-2">
@@ -203,7 +193,6 @@
             </ol>
           </div>
 
-          <!-- One-tap navigation chaining every stop as ordered waypoints. -->
           <a
             v-if="trip.maps_route_url"
             :href="trip.maps_route_url"
@@ -215,7 +204,6 @@
             <Icon name="map-pin" :size="16" /> {{ t("trips.fullRoute") }}
           </a>
 
-          <!-- Registered worker manifest with a one-tap call. -->
           <div v-if="trip.workers && trip.workers.length">
             <div class="field-label">{{ t("route.workers") }}</div>
             <ul class="space-y-1">
@@ -259,17 +247,14 @@ import { pushToast } from "../toast";
 
 const { t } = useI18n();
 
-// `trip` route param (from /route/:trip) — present only on a per-trip drill-in.
 const props = defineProps({ trip: { type: String, default: null } });
 const singleTrip = computed(() => !!props.trip);
 
-// All-trips worker route (unchanged) — only fetched when there's no :trip param.
 const route = createResource({
   url: "apex.salis.api.driver_portal.my_worker_route_today",
   auto: !singleTrip.value,
 });
 
-// Single trip's own ordered route — identity-scoped server-side to this driver.
 const tripRoute = createResource({
   url: "apex.salis.api.driver_portal.my_trip_route",
   makeParams: () => ({ dispatch_trip: props.trip }),
@@ -279,9 +264,6 @@ const tripRoute = createResource({
 const routeData = computed(() => route.data || null);
 const tripData = computed(() => tripRoute.data || null);
 
-// --- Per-stop progress: a started trip lets the driver tick each stop done. The
-// state is persisted on the trip's Trip Start Log and re-rendered from the server on
-// reload; `stopBusy` holds the in-flight route_stop so its box disables (single tap).
 const doneCount = computed(
   () => (tripData.value?.stops || []).filter((s) => s.done).length,
 );
@@ -296,7 +278,6 @@ async function toggleStop(stop) {
   if (!stop.route_stop || stopBusy.value) return;
   stopBusy.value = stop.route_stop;
   const next = !stop.done;
-  // Optimistic flip so the tick feels instant; reconciled from the server response.
   stop.done = next;
   try {
     const res = await stopProgress.submit({
@@ -306,7 +287,6 @@ async function toggleStop(stop) {
       sequence: stop.sequence,
       stop_name: stop.stop_name,
     });
-    // Reconcile every stop from the authoritative server map (keyed on route_stop).
     const map = res?.stop_progress || {};
     for (const s of tripData.value?.stops || []) {
       const st = map[s.route_stop];
@@ -314,7 +294,7 @@ async function toggleStop(stop) {
       s.done_at = st ? st.done_at : null;
     }
   } catch (e) {
-    stop.done = !next; // revert the optimistic flip on failure
+    stop.done = !next;
   } finally {
     stopBusy.value = null;
   }
@@ -345,8 +325,6 @@ async function toggleStop(stop) {
   color: var(--c-primary);
   transition: background 0.12s ease, color 0.12s ease;
 }
-/* The box stays 24px so the row keeps its density, but a driver marking a stop
-   in a parked cab needs the --tap-min floor: extend the hit area, not the paint. */
 .stop-check::after {
   content: "";
   position: absolute;

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Trip Boarding Event — child row of Trip Start Log.
 
 One row per worker boarding the trip: either a registered worker (Employee) or

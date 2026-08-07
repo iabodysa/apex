@@ -1,8 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Full-viewport boarding-pass overlay (requirement A). Teleported to <body> so it
-     escapes any section/card and covers the whole screen; dismissed by an X button
-     OR a swipe-UP gesture. Theme-adaptive (var tokens) and RTL-safe (logical props).
-     Renders the themed BoardingPass ticket centered on a dimmed backdrop. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <Teleport to="body">
     <Transition name="bpass-overlay">
@@ -17,12 +13,10 @@
         @touchmove.passive="onTouchMove"
         @touchend="onTouchEnd"
       >
-        <!-- Close affordance: explicit X (top, follows the writing direction). -->
         <button class="bpass-overlay-x" :aria-label="t('common.close')" @click="close">
           <Icon name="x" :size="22" />
         </button>
 
-        <!-- The ticket itself, lifted by the live swipe offset so the drag feels real. -->
         <div
           class="bpass-overlay-body"
           :style="dragStyle"
@@ -30,7 +24,6 @@
           <BoardingPass :pass="pass" :trip="trip" />
         </div>
 
-        <!-- Swipe-up hint: a grab handle + caption so the gesture is discoverable. -->
         <div class="bpass-overlay-hint" aria-hidden="true">
           <span class="bpass-overlay-handle"></span>
           <span class="bpass-overlay-hint-text">
@@ -62,12 +55,9 @@ function close() {
   emit("close");
 }
 
-// Swipe-UP to dismiss. Track the vertical delta; only an upward drag past the
-// threshold closes. Live `dragY` lifts the ticket so the gesture feels physical;
-// a short upward drag springs back (dragY resets on touchend if under threshold).
-const THRESHOLD = 70; // px of upward travel to dismiss
+const THRESHOLD = 70;
 const startY = ref(0);
-const dragY = ref(0); // negative while dragging up
+const dragY = ref(0);
 const dragging = ref(false);
 
 function onTouchStart(e) {
@@ -78,7 +68,6 @@ function onTouchStart(e) {
 function onTouchMove(e) {
   if (!dragging.value || !e.touches || !e.touches.length) return;
   const dy = e.touches[0].clientY - startY.value;
-  // Only follow upward movement; ignore downward so the page can't be pulled.
   dragY.value = Math.min(0, dy);
 }
 function onTouchEnd() {
@@ -88,12 +77,10 @@ function onTouchEnd() {
     dragY.value = 0;
     close();
   } else {
-    dragY.value = 0; // spring back
+    dragY.value = 0;
   }
 }
 
-// While actively dragging, follow the finger 1:1 with no transition; on release
-// the spring-back animates. Fade the ticket as it travels toward dismissal.
 const dragStyle = computed(() => ({
   transform: `translateY(${dragY.value}px)`,
   opacity: String(Math.max(0.4, 1 + dragY.value / 260)),
@@ -112,11 +99,9 @@ const dragStyle = computed(() => ({
   justify-content: center;
   gap: 18px;
   padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
-  /* Dimmed backdrop over the whole viewport. --c-scrim already carries the
-     mode-aware veil, so the ground no longer needs a #000 mixed into it. */
   background: color-mix(in srgb, var(--c-canvas) 86%, var(--c-scrim));
   backdrop-filter: blur(6px);
-  touch-action: none; /* the overlay owns the swipe gesture */
+  touch-action: none;
   overflow: hidden;
 }
 
@@ -172,12 +157,10 @@ const dragStyle = computed(() => ({
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
-/* The chevron icon points right by default; rotate it to point UP for the hint. */
 .bpass-overlay-chevup {
   transform: rotate(-90deg);
 }
 
-/* Enter/leave: fade + a small upward settle. */
 .bpass-overlay-enter-active,
 .bpass-overlay-leave-active {
   transition: opacity 0.22s ease;

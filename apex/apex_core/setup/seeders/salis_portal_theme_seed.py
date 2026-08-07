@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Seed Driver Portal Theme defaults. Install-safe, idempotent, blank-fields-only.
 
 This lived in ``patches/v1_0/seed_salis_portal_theme.py`` and nothing else re-created it:
@@ -33,5 +33,5 @@ def seed_salis_portal_theme():
             settings.set(field, value)
             filled.append(field)
     if filled:
-        settings.save(ignore_permissions=True)  # audit-ok: install-time seed, no user session
+        settings.save(ignore_permissions=True)  # audit-ok
     return filled

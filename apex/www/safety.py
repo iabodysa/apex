@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Safety Rounds portal served at /safety.
 
 A mobile-first supervisor surface for the Safety Checklist: pick a
@@ -45,6 +45,7 @@ def has_apps_screen_access() -> bool:
 
 
 def get_context(context):
+    """Redirects guests to login and bootstraps the safety rounds portal, gated on a safety role."""
     guest_redirect("/safety")
     render_in_arabic()
 

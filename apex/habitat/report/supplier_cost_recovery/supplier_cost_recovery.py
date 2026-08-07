@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Supplier Cost Recovery — monthly aggregation of external-supplier accommodation
 costs from the Accommodation Ledger, with an operational markup applied dynamically
 from Habitat Settings.
@@ -17,6 +17,7 @@ from apex.apex_core.utils.report_summary import card, total_card
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for monthly supplier accommodation cost recovery."""
     filters = filters or {}
     data = get_data(filters)
     summary = [
@@ -29,6 +30,7 @@ def execute(filters=None):
 
 
 def get_columns():
+    """Returns the column definitions for the supplier cost recovery report."""
     return [
         {"label": _("Supplier"), "fieldname": "billed_to_supplier", "fieldtype": "Link", "options": "Supplier", "width": 180},
         {"label": _("Employee"), "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 160},
@@ -41,6 +43,7 @@ def get_columns():
 
 
 def get_data(filters):
+    """Returns monthly per-supplier accommodation cost rows with markup applied from Habitat Settings."""
     today = getdate()
     month = int(filters.get("month") or today.month)
     year = int(filters.get("year") or today.year)

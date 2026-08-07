@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Habitat Safety Incident controller.
 
 Formal accommodation/housing safety-incident record. Management escalation for
@@ -19,6 +19,7 @@ from frappe.model.document import Document
 
 class SafetyIncident(Document):
     def validate(self):
+        """Defaults reported_by, blocks negative casualties, and requires notes to close the incident."""
         if not self.reported_by:
             self.reported_by = frappe.session.user
 

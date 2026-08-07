@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Which Active buildings the caller may see, derived once.
 
 Three read endpoints — the Front Desk portfolio, its empty-state explainer, and the

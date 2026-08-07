@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
     <h2 class="section-title">{{ t("profile.title") }}</h2>
@@ -8,7 +8,6 @@
     <ErrorState v-else-if="profile.error" :message="t('errors.loadFailed')" @retry="profile.reload()" />
 
     <template v-else-if="profile.data && profile.data.name">
-      <!-- Identity card -->
       <section class="card card-pad">
         <div class="flex items-center gap-3">
           <span
@@ -51,7 +50,6 @@
         </dl>
       </section>
 
-      <!-- License card (reuses the expiry colour/warning logic) -->
       <section v-if="profile.data.license_number || profile.data.license_expiry" class="card card-pad">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
           {{ t("home.license") }}
@@ -72,7 +70,6 @@
           </div>
         </dl>
 
-        <!-- Renewal action surfaces only when the licence is near/over expiry. -->
         <button
           v-if="licenseDue"
           class="btn btn-outline mt-3"
@@ -83,8 +80,6 @@
         </button>
       </section>
 
-      <!-- Identity documents: Iqama / passport expiry from the linked Employee
-           (server reads them defensively; omitted when none are on file). -->
       <section v-if="documents.length" class="card card-pad">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
           {{ t("profile.documents") }}
@@ -109,7 +104,6 @@
         </dl>
       </section>
 
-      <!-- Exit clearance: state + blocking items, with the certificate PDF when issued. -->
       <section v-if="clearanceRow" class="card card-pad">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
           {{ t("clearance.title") }}
@@ -148,9 +142,6 @@
         </button>
       </section>
 
-      <!-- More: the secondary screens that left the bottom bar (Home dashboard,
-           Route, Vehicle, Attendance) nest here so the two primary tabs stay
-           Trips + Profile while every screen is one tap away. -->
       <div class="space-y-2">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted">
           {{ t("profile.more") }}
@@ -168,9 +159,6 @@
         </router-link>
       </div>
 
-      <!-- My Requests: secondary actions reachable from the profile rather
-           than the bottom tab bar (fuel request + support tickets). Each row
-           is a tappable mini-card, matching the Unlinked screen's link rows. -->
       <div class="space-y-2">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted">
           {{ t("profile.myRequests") }}
@@ -187,7 +175,6 @@
         </router-link>
       </div>
 
-      <!-- Language selector lives on the profile too (besides the header). -->
       <section class="card card-pad">
         <div class="flex items-center gap-2">
           <Icon name="globe" :size="18" class="text-primary shrink-0" />
@@ -196,8 +183,6 @@
         </div>
       </section>
 
-      <!-- Background push opt-in: shown only when the device supports push AND the
-           owner enabled+configured VAPID (canOfferPush). Hidden otherwise. -->
       <section v-if="canOfferPush" class="card card-pad">
         <div class="flex items-center gap-2">
           <Icon name="bell" :size="18" class="text-primary shrink-0" />
@@ -245,8 +230,6 @@ import {
 
 const { t } = useI18n();
 
-// The secondary screens nested under Profile now that the bottom bar is just
-// Trips + Profile. Each routes to an existing page; labels reuse the home.* keys.
 const moreLinks = [
   { to: "/", icon: "home", labelKey: "profile.dashboard" },
   { to: "/route", icon: "route", labelKey: "home.myRoute" },
@@ -254,8 +237,6 @@ const moreLinks = [
   { to: "/attendance", icon: "calendar", labelKey: "home.attendance" },
 ];
 
-// Load push config + any existing subscription when the profile opens, so the
-// toggle reflects the real state (and stays hidden when push is unconfigured).
 onMounted(initPush);
 
 async function togglePush() {
@@ -269,8 +250,6 @@ const profile = createResource({
   auto: true,
 });
 
-// Exit-clearance GET is state-only. A finite print key is requested only from the
-// explicit click handler below, never while Profile loads.
 const clearance = createResource({
   url: "apex.salis.api.driver_portal.my_clearance",
   auto: true,
@@ -288,7 +267,6 @@ function downloadClearanceCertificate() {
   certificate.submit();
 }
 
-// Identity-document expiries (Iqama/passport) from the linked Employee.
 const documents = computed(() => profile.data?.documents || []);
 
 const initial = computed(
@@ -303,7 +281,6 @@ const statusPill = computed(() => {
   return "pill-neutral";
 });
 
-// Days-until-expiry → colour + hint (mirrors Home.vue's license logic).
 const daysToExpiry = computed(() => {
   const v = profile.data?.license_expiry;
   if (!v) return null;
@@ -330,8 +307,6 @@ const licenseHint = computed(() => {
   return "";
 });
 
-// Renewal action shows only when the licence is within 30 days or expired —
-// the same window the server enforces on request_license_renewal.
 const licenseDue = computed(() => {
   const d = daysToExpiry.value;
   return d !== null && d <= 30;
@@ -345,8 +320,6 @@ function requestRenewal() {
   renewal.submit();
 }
 
-// Document expiry → colour/icon/hint (same near/over-expiry vocabulary as the
-// licence + vehicle compliance; server gives signed days_left).
 function docLabel(type) {
   return type === "iqama" ? t("profile.iqama") : t("profile.passport");
 }

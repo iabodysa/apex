@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Facility Asset Movement Ledger controller.
 
 Read-only, machine-written audit memo. One row is posted per submitted Facility
@@ -17,6 +17,7 @@ from frappe.model.document import Document
 
 class FacilityAssetMovementLedger(Document):
     def validate(self):
+        """Blocks any update to an already-persisted ledger row, allowing only the initial insert."""
         self._enforce_single_write_immutability()
 
     def _enforce_single_write_immutability(self):

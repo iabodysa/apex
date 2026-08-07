@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Custody Acknowledgment controller.
 
 Records a holder's receipt confirmation for a Custody Issue. Written from the
@@ -17,6 +17,7 @@ from frappe.utils import now_datetime
 
 class CustodyAcknowledgment(Document):
     def validate(self):
+        """Requires a submitted Custody Issue and a signature or confirmed receipt, then stamps the time."""
         docstatus = frappe.db.get_value("Custody Issue", self.custody_issue, "docstatus")
         if docstatus != 1:
             frappe.throw(

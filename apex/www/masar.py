@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Masar — worker self-service app shell (Vue SPA served at /masar).
 
 Masar is the worker's mobile self-service app: a transported and housed Employee
@@ -33,6 +33,7 @@ _COOKIE_MAX_AGE_SECONDS = 180 * 24 * 60 * 60
 
 
 def get_context(context):
+    """Validates a worker token in the URL, cookies it and redirects, or bootstraps the guest SPA."""
     context.no_cache = 1
 
 

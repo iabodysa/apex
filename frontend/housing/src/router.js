@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 import { createRouter, createWebHashHistory } from "vue-router";
 import Count from "./pages/Count.vue";
 import Delivery from "./pages/Delivery.vue";

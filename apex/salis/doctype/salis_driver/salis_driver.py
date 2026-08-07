@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Driver master controller.
 
 ``current_vehicle`` mirrors ``Vehicle.current_driver`` for quick reference only. Vehicle
@@ -15,6 +15,7 @@ from frappe.utils import getdate, today
 
 class SalisDriver(Document):
     def validate(self):
+        """Warns when the driver's licence has already expired."""
         if self.license_expiry and getdate(self.license_expiry) < getdate(today()):
             frappe.msgprint(
                 _("Driver license expired on {0}.").format(self.license_expiry),

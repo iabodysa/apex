@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Goods Receipt Register — what entered each building store, from whom, and whether
 it reached handover.
@@ -20,6 +20,7 @@ from apex.habitat import permissions
 
 
 def execute(filters=None):
+    """Returns the columns, line rows and summary cards for the Goods Receipt Register report."""
     filters = filters or {}
     columns = _columns()
 
@@ -94,6 +95,7 @@ def execute(filters=None):
 
 
 def _summary(data):
+    """Builds summary cards for receipt line count, receipt count and percent handed over."""
     receipts = {r.get("name") for r in data if r.get("name")}
     awaiting = [r for r in data if r.get("status") == "Received"]
     handed = len(data) - len(awaiting)
@@ -106,6 +108,7 @@ def _summary(data):
 
 
 def _columns():
+    """Returns the column definitions for the Goods Receipt Register report."""
     return [
         {"label": _("Receipt"), "fieldname": "name", "fieldtype": "Link", "options": "Goods Receipt", "width": 170},
         {"label": _("Receipt Date"), "fieldname": "receipt_date", "fieldtype": "Date", "width": 110},

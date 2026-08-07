@@ -1,34 +1,25 @@
-// Copyright (c) 2026, AFMCO and contributors
-// [#t52r33]
+// Copyright (c) 2026, afmcoltd
 
 frappe.provide("apex.masar");
 
-// [#qzid91]
 apex.masar.normalise_phone = function (raw) {
 	if (!raw) {
 		return null;
 	}
-	// [#nm152f]
 	let digits = String(raw).replace(/[^0-9]/g, "");
 	if (!digits) {
 		return null;
 	}
 	if (digits.startsWith("00")) {
-		// [#h49qyu]
 		digits = digits.slice(2);
 	} else if (digits.startsWith("0")) {
-		// [#1l11t8]
 		digits = "966" + digits.slice(1);
 	} else if (digits.length === 9 && digits.startsWith("5")) {
-		// [#h5btug]
 		digits = "966" + digits;
 	}
-	// [#dlfqwg]
 	return digits.length >= 11 ? digits : null;
 };
 
-// [#2rwa52] One dialog for both audiences: it shows a bearer credential exactly
-// once, so the warning text and the expiry line must not drift between them.
 apex.masar.show_portal_link_dialog = function (m, opts) {
 	opts = opts || {};
 	const qr = m.qr
@@ -44,8 +35,6 @@ apex.masar.show_portal_link_dialog = function (m, opts) {
 		</p>`
 		: "";
 
-	// [#a267ex] The holder is told WHEN it dies, not just that it can be revoked —
-	// an operator who cannot see the expiry cannot notice one that never arrives.
 	const expiry = m.expires_on
 		? `<p style="font-size:11px">
 			${__("Expires on {0}", [frappe.datetime.str_to_user(m.expires_on)])}
@@ -75,7 +64,6 @@ apex.masar.show_portal_link_dialog = function (m, opts) {
 		});
 	}
 
-	// [#54fm8q]
 	const phone = apex.masar.normalise_phone(m.phone);
 	if (phone) {
 		d.set_primary_action(__("Send via WhatsApp"), () => {

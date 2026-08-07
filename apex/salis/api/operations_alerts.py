@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Operations-queue action API (read the open queue + act on its rows), for the
 operations-control board and the /fleet-os alert drawer.
 

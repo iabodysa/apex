@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Payment Routing Settings controller.
 
 Single configuration record for the Payment Router. It defines, per deployment:

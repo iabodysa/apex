@@ -1,5 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Driver-centric lens: the same filtered vehicles grouped by current driver. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <script setup>
 import Icon from "./Icon.vue";
 defineProps([

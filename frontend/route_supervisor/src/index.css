@@ -1,17 +1,4 @@
-/* Copyright (c) 2026, AFMCO and contributors */
-/* Masar Route Supervisor portal — archetype 3, review tier.
- *
- * ZERO local palette. This file used to re-declare the whole --c-* vocabulary after
- * importing the shared one, including four names (--c-ok/--c-warn/--c-bad/--c-claim)
- * that existed in no other portal and a --c-claim blue that belonged to no brand.
- * Every semantic colour now comes from @shared/tokens.css under the shared names, so
- * the portal follows the one palette in both modes and its auto-dark is the shared
- * auto-dark. The chrome (side nav, top bar, KPI row, drawer collapse) lives in
- * @shared/components/TabletSupervisorShell.vue; what remains here is the work area.
- *
- * The wrapper (apex/www/masar-supervisor.html) vendors Cairo only, so the shared
- * --font's Montserrat-first order resolves to Cairo here with no visual change.
- * RTL is the default document direction; logical properties keep it correct both ways. */
+/* Copyright (c) 2026, afmcoltd */
 
 @import "@shared/tokens.css";
 
@@ -27,7 +14,6 @@ body {
 }
 button { font-family: inherit; cursor: pointer; }
 
-/* ─────────── side-nav slot content (styled by the shell's :slotted rules) ─────────── */
 .brand-mark {
   width: 34px; height: 34px; border-radius: var(--radius); flex: none;
   display: grid; place-items: center;
@@ -50,7 +36,6 @@ button { font-family: inherit; cursor: pointer; }
   font-size: var(--fs-sm); font-weight: var(--fw-semibold);
 }
 
-/* ─────────── KPI tiles (the shell owns the grid) ─────────── */
 .kpi {
   display: flex; flex-direction: column; gap: 4px;
   padding: 13px 15px; border-radius: var(--radius);
@@ -59,7 +44,6 @@ button { font-family: inherit; cursor: pointer; }
 .kpi-label { font-size: var(--fs-xs); font-weight: var(--fw-heading); color: var(--c-muted); text-transform: uppercase; letter-spacing: .06em; }
 .kpi-num { font-size: 24px; font-weight: var(--fw-heading); font-variant-numeric: tabular-nums; }
 
-/* ─────────── work area: plan list + detail ─────────── */
 .work { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; align-items: start; }
 .back-btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -72,8 +56,6 @@ button { font-family: inherit; cursor: pointer; }
 .work-single { grid-template-columns: minmax(0, 1fr); min-height: 70vh; }
 @media (min-width: 1280px) {
   .work { grid-template-columns: 340px minmax(0, 1fr) 380px; }
-  /* The whole-fleet map is a destination of its own, so it keeps the full width
-     even where the plan screen has three columns. */
   .work.work-single { grid-template-columns: minmax(0, 1fr); }
   .plan-list { gap: 6px; }
   .plan-card { padding: 9px 12px; gap: 6px; }
@@ -82,14 +64,11 @@ button { font-family: inherit; cursor: pointer; }
   .live { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 12px; }
   .live .map-panel { min-height: 520px; }
 }
-/* --bp-wide (860px): the plan column folds above the detail. The shell's own side
-   nav collapses separately at --bp-desktop − 1 (1023px) — two collapses, not one. */
 @media (max-width: 860px) {
   .work { grid-template-columns: minmax(0, 1fr); }
   .plans { max-height: 42vh; }
 }
 
-/* ─────────── plan list ─────────── */
 .plans {
   border: var(--border-width) solid var(--c-border);
   border-radius: var(--radius-lg);
@@ -117,7 +96,6 @@ button { font-family: inherit; cursor: pointer; }
 .pc-bar span { display: block; height: 100%; background: var(--c-primary); border-radius: var(--radius-pill); transition: width .4s; }
 .pc-bnum { font-size: var(--fs-xs); font-weight: 700; color: var(--c-ink-soft); font-variant-numeric: tabular-nums; }
 
-/* ─────────── badges ─────────── */
 .badge {
   display: inline-flex; align-items: center; padding: 3px 10px;
   border-radius: var(--radius-pill); font-size: var(--fs-xs); font-weight: 700; white-space: nowrap;
@@ -127,7 +105,6 @@ button { font-family: inherit; cursor: pointer; }
 .bd-approved { background: var(--c-success-bg); color: var(--c-success); }
 .bd-rejected { background: var(--c-danger-bg); color: var(--c-danger); }
 
-/* ─────────── detail column ─────────── */
 .detail { min-width: 0; }
 
 .hero {
@@ -150,13 +127,11 @@ button { font-family: inherit; cursor: pointer; }
   padding: 9px 16px; border-radius: var(--radius-pill);
   border: var(--border-width) solid var(--c-border); background: var(--c-surface-2);
   color: var(--c-ink-soft); font-size: var(--fs-sm); font-weight: 700;
-  /* The three properties :hover and .on actually move. */
   transition: background-color .15s, border-color .15s, color .15s;
 }
 .tab:hover { border-color: var(--c-border-strong); }
 .tab.on { background: var(--c-primary); color: var(--c-primary-ink); border-color: var(--c-primary); }
 
-/* ─────────── panels ─────────── */
 .panel {
   background: var(--c-surface-2); border: var(--border-width) solid var(--c-border);
   border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm);
@@ -165,7 +140,6 @@ button { font-family: inherit; cursor: pointer; }
 .panel-title { margin: 0; font-size: var(--fs-h3); font-weight: var(--fw-heading); }
 .panel-sub { margin: 3px 0 0; color: var(--c-muted); font-size: var(--fs-sm); }
 
-/* approval */
 .approval-body { display: flex; flex-direction: column; gap: 16px; }
 .status-block {
   display: flex; align-items: center; gap: 14px; padding: 16px 18px;
@@ -182,7 +156,6 @@ button { font-family: inherit; cursor: pointer; }
 .reason-box p { margin: 6px 0 0; }
 .approve-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
-/* buttons */
 .primary-btn, .danger-btn, .soft-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 48px; padding: 12px 22px; border-radius: var(--radius);
@@ -200,7 +173,6 @@ button { font-family: inherit; cursor: pointer; }
 }
 .ghost-btn:hover { border-color: var(--c-border-strong); }
 
-/* ─────────── boarding ─────────── */
 .boarding-body { display: flex; flex-direction: column; gap: 20px; }
 .progress-hero { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
 .ring {
@@ -249,7 +221,6 @@ button { font-family: inherit; cursor: pointer; }
 .w-wait { background: var(--c-border); color: var(--c-ink-soft); }
 .w-bad { background: var(--c-danger-bg); color: var(--c-danger); }
 
-/* ─────────── route timeline ─────────── */
 .timeline { list-style: none; margin: 0; padding: 0; position: relative; }
 .tl-item { display: flex; gap: 14px; padding-bottom: 16px; position: relative; }
 .tl-item::before {
@@ -275,7 +246,6 @@ button { font-family: inherit; cursor: pointer; }
 }
 .tl-housing:hover { text-decoration: underline; }
 
-/* ─────────── map ─────────── */
 .map-panel { display: flex; flex-direction: column; }
 .live-badge {
   display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: var(--radius-pill);
@@ -291,8 +261,6 @@ button { font-family: inherit; cursor: pointer; }
 .map-wrap { position: relative; border-radius: var(--radius); overflow: hidden; border: var(--border-width) solid var(--c-border); }
 .map-canvas { height: 440px; width: 100%; background: var(--c-surface); transition: filter .3s; }
 .map-canvas.dim { filter: grayscale(0.4) opacity(0.75); }
-/* Tile-failure note. Sits above the canvas but below .map-overlay's z-index so a
-   missing GPS fix still wins, and never covers the driver marker. */
 .tile-note {
   position: absolute; inset-block-start: 10px; inset-inline: 10px; margin: 0;
   padding: 7px 12px; border-radius: var(--radius-sm); z-index: 450; text-align: center;
@@ -311,7 +279,6 @@ button { font-family: inherit; cursor: pointer; }
 .fb-coords { font-weight: 700; font-size: var(--fs-h3); font-variant-numeric: tabular-nums; }
 .fb-coords span { display: inline-flex; align-items: center; gap: 8px; }
 
-/* Leaflet live driver marker (global — divIcon html is injected outside scoped styles). */
 .driver-marker { position: relative; }
 .driver-marker .dm-core {
   position: absolute; inset: 0; display: grid; place-items: center; font-size: var(--fs-h2); z-index: 2;
@@ -322,7 +289,6 @@ button { font-family: inherit; cursor: pointer; }
 }
 @keyframes dmpulse { 0% { transform: scale(0.6); opacity: .5; } 100% { transform: scale(1.9); opacity: 0; } }
 
-/* ─────────── shared states ─────────── */
 .empty {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
   padding: 44px 20px; text-align: center; color: var(--c-muted);
@@ -335,8 +301,6 @@ button { font-family: inherit; cursor: pointer; }
 .plan-skel { display: flex; flex-direction: column; }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-/* Reduce Motion is a product requirement, not a nicety: the shimmer, the live dot
-   and the marker pulse all repeat forever, so they stop rather than fade. */
 @media (prefers-reduced-motion: reduce) {
   .skeleton-bar, .skeleton-card, .live-dot, .driver-marker .dm-pulse,
   .pc-bar span, .plan-card, .tab, .primary-btn, .danger-btn, .soft-btn {
@@ -345,7 +309,6 @@ button { font-family: inherit; cursor: pointer; }
   }
 }
 
-/* ─────────── modal + toast ─────────── */
 .overlay { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 20px; background: color-mix(in srgb, var(--forest) 55%, transparent); }
 .modal { width: 100%; max-width: 440px; background: var(--c-surface-2); border-radius: var(--radius-lg); padding: 22px; box-shadow: var(--shadow-lg); }
 .modal-title { margin: 0 0 6px; font-size: var(--fs-h3); font-weight: var(--fw-heading); }
@@ -363,5 +326,4 @@ button { font-family: inherit; cursor: pointer; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .toast-ok { background: var(--c-success); color: var(--c-primary-ink); }
 .toast-bad { background: var(--c-danger); color: var(--c-danger-ink); }
-/* RTL: translateX sign is handled by the browser for inset-inline; keep centering robust. */
 [dir="rtl"] .toast { inset-inline-start: 50%; }

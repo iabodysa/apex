@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Custody Return Register — what came back, and in what condition.
 
@@ -27,6 +27,7 @@ CHARGEABLE_CONDITIONS = ("Damaged", "Lost")
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for submitted custody return item lines."""
     filters = filters or {}
     columns = _columns()
 
@@ -111,6 +112,7 @@ def _summary(data):
 
 
 def _columns():
+    """Returns the column definitions for the custody return register."""
     return [
         {"label": _("Return"), "fieldname": "name", "fieldtype": "Link", "options": "Custody Return", "width": 170},
         {"label": _("Return Date"), "fieldname": "return_date", "fieldtype": "Date", "width": 110},

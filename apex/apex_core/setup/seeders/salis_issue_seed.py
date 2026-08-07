@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Seed the native ERPNext Issue masters that back the Salis (movement/fleet)
 support-ticket experience after Support Ticket was retired in favour of Issue +
 SLA.
@@ -68,24 +68,26 @@ _ISSUE_ROLE_PERMS = [
 
 
 def _seed_issue_types():
+    """Creates each missing Issue Type master used by the Salis driver portal."""
     if not frappe.db.exists("DocType", "Issue Type"):
         return
     for name in _ISSUE_TYPES:
         if frappe.db.exists("Issue Type", name):
             continue
         frappe.get_doc({"doctype": "Issue Type", "name": name}).insert(
-            ignore_permissions=True  # audit-ok — system master seed
+            ignore_permissions=True  # audit-ok
         )
 
 
 def _seed_issue_priorities():
+    """Creates each missing Issue Priority master used by the Salis driver portal."""
     if not frappe.db.exists("DocType", "Issue Priority"):
         return
     for name in _ISSUE_PRIORITIES:
         if frappe.db.exists("Issue Priority", name):
             continue
         frappe.get_doc({"doctype": "Issue Priority", "name": name}).insert(
-            ignore_permissions=True  # audit-ok — system master seed
+            ignore_permissions=True  # audit-ok
         )
 
 
@@ -119,11 +121,12 @@ def _ensure_holiday_list():
     doc.holiday_list_name = _SLA_HOLIDAY_LIST
     doc.from_date = _SLA_HOLIDAY_WINDOW[0]
     doc.to_date = _SLA_HOLIDAY_WINDOW[1]
-    doc.insert(ignore_permissions=True)  # audit-ok — system SLA prerequisite
+    doc.insert(ignore_permissions=True)  # audit-ok
     return doc.name
 
 
 def _seed_sla():
+    """Creates the default Salis Support SLA on Issue with per-priority response and resolve targets."""
     if not frappe.db.exists("DocType", "Service Level Agreement"):
         return
     if frappe.db.exists("Service Level Agreement", {"name": _SLA_NAME}) or frappe.db.exists(
@@ -173,7 +176,7 @@ def _seed_sla():
     for status in ("Resolved", "Closed"):
         doc.append("sla_fulfilled_on", {"status": status})
 
-    doc.insert(ignore_permissions=True)  # audit-ok — system SLA seed
+    doc.insert(ignore_permissions=True)  # audit-ok
 
 
 def _grant_issue_role_perms():

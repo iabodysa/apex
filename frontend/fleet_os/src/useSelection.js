@@ -1,7 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Opt-in multi-select for bulk actions. Cards stay click-to-open by default; a
-// toolbar toggle enters selection mode, and picked plates drive the bulk bar +
-// the two bulk endpoints. Select-all spans only the currently filtered list.
+// Copyright (c) 2026, afmcoltd
 import { ref, computed } from "vue";
 
 export function useSelection(filtered) {

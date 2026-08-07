@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Safety Round controller.
 
 A Safety Round is the periodic safety pass over one building for a given cadence
@@ -32,9 +32,11 @@ from frappe.model.document import Document
 
 class SafetyRound(Document):
     def validate(self):
+        """Runs the duplicate-round guard when a Safety Round is saved."""
         self._guard_duplicate()
 
     def _guard_duplicate(self):
+        """Blocks a Safety Round duplicating an existing one for the same building, date and cadence."""
         if self.is_reinspection:
             return
 
@@ -58,6 +60,7 @@ class SafetyRound(Document):
             )
 
     def before_submit(self):
+        """Runs the no-rated-task guard before a Safety Round can be submitted."""
         self._guard_rated()
 
     def _guard_rated(self):
@@ -88,6 +91,7 @@ class SafetyRound(Document):
         )
 
     def on_submit(self):
+        """Submits draft executions, stores the derived overall result, and posts safety findings."""
         self._ratify_executions()
         self.db_set("overall_result", self._derive_overall_result())
         from apex.habitat.safety_engine import post_safety_findings
@@ -170,6 +174,7 @@ class SafetyRound(Document):
             )
 
     def on_cancel(self):
+        """Reverses this round's posted safety findings and publishes a cancel update to the portal."""
         from apex.habitat.safety_engine import reverse_safety_findings
 
         reverse_safety_findings(self.name)
@@ -190,6 +195,7 @@ class SafetyRound(Document):
         )
 
     def _derive_overall_result(self):
+        """Derives Fail, Needs Attention or Pass from the round's task execution statuses."""
         statuses = frappe.get_all(
             "Safety Task Execution",
             filters={"safety_round": self.name, "docstatus": 1},

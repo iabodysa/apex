@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Submitted telecom contracts expiring within a window, company-scoped."""
 
 import frappe
@@ -10,6 +10,7 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
+    """Lists submitted Telecom Contracts expiring within the given day window, with days remaining."""
     filters = filters or {}
     columns = [
         {"label": frappe._("Contract"), "fieldname": "name", "fieldtype": "Link", "options": "Telecom Contract", "width": 180},

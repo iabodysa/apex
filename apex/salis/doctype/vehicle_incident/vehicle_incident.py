@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Vehicle Incident controller.
 
 Records a fleet incident event - an accident or a theft - against a vehicle.
@@ -40,6 +40,7 @@ _RECOVERY_INTAKE_RESET = {
 
 class VehicleIncident(Document):
     def validate(self):
+        """Validates the incident date and cost, and enforces public-intake and cost-recovery guards."""
         if self.incident_date and getdate(self.incident_date) > getdate(today()):
             frappe.throw(_("Incident date cannot be in the future."))
         if flt(self.estimated_cost) < 0:
@@ -78,6 +79,7 @@ class VehicleIncident(Document):
             )
 
     def _guard_public_intake(self):
+        """Resets privileged fields on a new guest-submitted incident and caps free-text field lengths."""
         if self.is_new() and frappe.session.user == "Guest":
             self.status = "Open"
             for field in ("write_off_case", "previous_status", "previous_driver"):
@@ -91,6 +93,7 @@ class VehicleIncident(Document):
                 frappe.throw(_("{0} is too long.").format(_(self.meta.get_label(field))))
 
     def on_submit(self):
+        """Raises the recovery advance and, for a theft, stops the vehicle and clears its driver."""
         self._raise_recovery_advance()
         if self.incident_type != "Theft":
             return
@@ -165,17 +168,9 @@ class VehicleIncident(Document):
         decision, so the cancel is refused instead of silently unwinding a posted
         balance.
 
-        Here and not in on_cancel: Frappe dispatches before_cancel from
-        run_before_save_methods() (frappe/model/document.py:414), writes the row with
-        db_update() (:428) and only then dispatches on_cancel from
-        run_post_save_methods() (:431). Thrown from on_cancel, this refusal leaves
-        docstatus 2 already stamped in the open transaction, so everything reading
-        the incident later in the request sees a refused cancel as cancelled and only
-        the request-level rollback undoes it. This method only reads, so a throw
-        leaves the incident AND the advance untouched.
-
         A Document method with no hooks.py entry: Frappe composes the class method
         ahead of the app-wide workflow_guard.before_cancel handler.
+
         """
         state = self._live_recovery_advance()
         if state and (flt(state.paid_amount) or flt(state.return_amount)):
@@ -198,6 +193,7 @@ class VehicleIncident(Document):
             frappe.get_doc("Employee Advance", state.name).cancel()
 
     def on_cancel(self):
+        """Reverses the recovery advance and, for a theft, restores the vehicle's prior driver and status."""
         self._release_recovery_advance()
         if self.incident_type != "Theft":
             return

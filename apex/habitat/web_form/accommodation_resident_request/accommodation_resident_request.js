@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.web_form.after_load = function () {
 	var token = frappe.utils.get_url_arg("token");
 	if (token) {

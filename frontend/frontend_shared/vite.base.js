@@ -1,18 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-//
-// Single Vite config factory for every portal SPA. The five SPA source trees
-// live at repo-root frontend/<portal>/ (hrms pattern); this shared factory sits
-// beside them at frontend/frontend_shared/. Each portal's vite.config.js is a
-// <=15-line call to createPortalConfig(), passing only what actually differs
-// between portals (its dirname, package name, and — for the two PWAs — the
-// service-worker filename). Everything else (frappe-ui + vue plugins, the dev
-// proxy, the @/@shared aliases, the vue/frappe-ui dedupe, the stable un-hashed
-// output names) is defined ONCE here so the five configs cannot drift.
-//
-// Source lives under frontend/<portal>/ but the built bundle MUST still land in
-// the Python package at apex/public/<portal>_portal/ so Frappe serves it at the
-// unchanged /assets/apex/<portal>_portal/ URL. Hence the ../../apex/... hops
-// below reach back out of frontend/ into the apex package.
+// Copyright (c) 2026, afmcoltd
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import frappeui from "frappe-ui/vite";
@@ -22,16 +8,6 @@ import { SW_PARAMS } from "./sw.params.js";
 import { completeAssetTreeBuildId } from "./sw.build-id.js";
 import { renderServiceWorker } from "./sw.template.js";
 
-// After each build, (re)generate each portal service worker from the single
-// sw.template.js + its per-portal params, stamping the BUILD marker with a hash of
-// the complete freshly emitted asset tree. Both www/*-sw.min.js are single-sourced
-// this way: the whole file is emitted here, never hand-edited. The SW is served at the root so
-// its scope can cover the portal path, hence it lives outside this app's outDir and
-// is written in place. Changing these bytes per build (via the hash) is what makes
-// the browser detect an updated worker -> the SPA shows its reload banner. Defined
-// once here; only an output tree serving PWAs opts in with `serviceWorkers`.
-// The emitted bytes are byte-reconstructable — `node sw.generate.js --check` (the
-// portal-tests CI job) verifies committed == render(params, committed-build).
 function stampServiceWorkers({ dirname, name, serviceWorkers }) {
   const assetTree = path.resolve(dirname, "../../apex/public/" + name);
   return {
@@ -54,15 +30,6 @@ function stampServiceWorkers({ dirname, name, serviceWorkers }) {
   };
 }
 
-// The built index.html is a Vite artifact, not a mount point: every portal is mounted
-// by its permission-checked www route (www/<portal>.html), which hardcodes the stable
-// assets/index.{js,css} names. But outDir lands under apex/public/, which Frappe serves
-// wholesale at /assets/** with no session and no role check, so whatever Vite emits at
-// index.html is world-readable. Emitting the SPA shell there published a second,
-// ungated mount point AND shipped frappe-ui's `{% for key in boot %}` template as
-// literal text. Replace the whole document with an inert stub instead: no Jinja, no
-// #app, no module script. `post` runs after every tag-injecting hook, so nothing a
-// plugin adds can survive; `apply: "build"` keeps `vite dev` serving the real entry.
 const INERT_INDEX_HTML = `<!doctype html>
 <html lang="en">
   <head>
@@ -87,14 +54,7 @@ function inertIndexHtml() {
   };
 }
 
-// createPortalConfig({ dirname, name, serviceWorkers? }) -> a Vite config identical for all
-// portals except base/outDir (derived from `name`) and the optional SW stamp.
-//   dirname : the portal's __dirname (its vite.config.js sits at frontend/<portal>/)
-//   name    : the portal package dir, e.g. "driver_portal" (drives base + outDir)
-//   serviceWorkers : optional SW_PARAMS keys stamped from this complete output tree
 export function createPortalConfig({ dirname, name, serviceWorkers }) {
-  // jinjaBootData: false — that frappe-ui plugin assumes the built index.html is itself
-  // rendered by Frappe; here it is a static asset, so the loop could only ship unrendered.
   const plugins = [frappeui({ jinjaBootData: false }), vue(), inertIndexHtml()];
   if (serviceWorkers) {
     plugins.push(stampServiceWorkers({ dirname, name, serviceWorkers }));
@@ -102,8 +62,6 @@ export function createPortalConfig({ dirname, name, serviceWorkers }) {
   return defineConfig({
     plugins,
     base: "/assets/apex/" + name + "/",
-    // Dev-only: proxy API/asset calls to the local Frappe bench so `vite dev` can
-    // reach the backend. No effect on the production build.
     server: {
       proxy: {
         "/api": "http://localhost:8000",
@@ -116,10 +74,6 @@ export function createPortalConfig({ dirname, name, serviceWorkers }) {
         "@": path.resolve(dirname, "src"),
         "@shared": path.resolve(dirname, "../frontend_shared"),
       },
-      // frontend_shared/ AND the folded-in driver screens (the merged Masar portal
-      // builds frontend/driver/src from the worker host) live outside the building
-      // portal's root and have no node_modules, so their bare imports (frappe-ui, vue,
-      // vue-router, socket.io-client) must resolve to the building portal's copy.
       dedupe: ["vue", "vue-router", "frappe-ui", "socket.io-client"],
     },
     build: {

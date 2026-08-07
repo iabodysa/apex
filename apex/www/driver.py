@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Driver portal — mobile SPA shell served at /driver.
 
 Drivers are NOT Frappe users (full barcode cutover): a driver opens their PERSONAL
@@ -30,6 +30,7 @@ _COOKIE_MAX_AGE_SECONDS = 180 * 24 * 60 * 60
 
 
 def get_context(context):
+    """Validates a driver token in the URL, cookies it and redirects, or bootstraps the guest SPA."""
     context.no_cache = 1
     context.csrf_token = get_csrf_token()
 

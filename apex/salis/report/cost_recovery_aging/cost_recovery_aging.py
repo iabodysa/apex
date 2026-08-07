@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Cost Recovery Aging - open movement cost-recovery exposure aged into buckets,
 derived from the Movement Cost Recovery document.
@@ -23,6 +23,7 @@ OPEN_STATUSES = ("Open", "Acknowledged", "Approved")
 
 
 def _bucket(days):
+    """Returns which aging bucket a recovery falls into based on its days elapsed."""
     if days <= 30:
         return "b_0_30"
     if days <= 60:
@@ -33,6 +34,7 @@ def _bucket(days):
 
 
 def execute(filters=None):
+    """Returns the columns, aged rows, chart and summary cards for the Cost Recovery Aging report."""
     filters = filters or {}
 
     columns = [
@@ -122,8 +124,6 @@ def execute(filters=None):
         totals["amount"] += amount
         data.append(row)
 
-    # Built BEFORE the totals row joins `data`: that row carries the column sums, so a
-    # summary counting it would report one recovery too many and double every amount.
     summary = [
         count_card(_("Open Recoveries"), data),
         total_card(_("Outstanding"), data, "amount", "Currency"),

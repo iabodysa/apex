@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <component :is="framed ? Panel : 'div'" :title="framed ? t('trips.detailTitle') : undefined">
     <div class="detail-head">

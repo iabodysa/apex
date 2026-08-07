@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 import frappe
 from frappe.utils import flt
@@ -7,6 +7,7 @@ from apex.apex_core.utils.report_summary import card, count_card, total_card
 
 
 def execute(filters=None):
+    """Returns submitted utility bills ranked by variance from average, with amount summary cards."""
     columns = [
         {"label": frappe._("Bill"), "fieldname": "name", "fieldtype": "Link", "options": "Utility Bill Entry", "width": 150},
         {"label": frappe._("Utility Account"), "fieldname": "utility_account", "fieldtype": "Link", "options": "Utility Account", "width": 150},

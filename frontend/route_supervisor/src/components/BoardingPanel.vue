@@ -1,8 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Live boarding for the selected plan's trip. Self-fetches get_trip_boarding
-     and polls it while the tab is active, so the boarded/expected progress and per-worker
-     pills fill in as the driver boards passengers. Degrades to a clear "no trip yet" or
-     "boarding not started" state — never a bare 0/0. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <section class="panel">
     <header class="panel-head">
@@ -29,7 +25,6 @@
     <div v-else-if="state === 'loading' && !data" class="skeleton-bar" />
 
     <div v-else-if="data" class="boarding-body">
-      <!-- Progress ring + counts -->
       <div class="progress-hero">
         <div class="ring" :style="ringStyle" role="img" :aria-label="ofLabel">
           <div class="ring-inner">
@@ -47,7 +42,6 @@
         </div>
       </div>
 
-      <!-- Breakdown chips -->
       <div class="chips">
         <div class="chip chip-ok"><b>{{ data.boarding.boarded }}</b>{{ t("boarding.boarded") }}</div>
         <div class="chip chip-claim"><b>{{ data.boarding.claimed }}</b>{{ t("boarding.claimed") }}</div>
@@ -55,7 +49,6 @@
         <div class="chip chip-bad"><b>{{ data.boarding.absent + data.boarding.rejected }}</b>{{ t("boarding.absent") }}</div>
       </div>
 
-      <!-- Per-worker list -->
       <div v-if="data.workers.length" class="worker-list">
         <h3 class="mini-title">{{ t("boarding.workers") }}</h3>
         <ul>
@@ -95,9 +88,6 @@ const ofLabel = computed(() =>
     ? t("boarding.of", { boarded: data.value.boarding.boarded, expected: data.value.boarding.expected })
     : "",
 );
-// Dispatch Trip's stored Select value is English; an Arabic page must not print it
-// raw. A status the dictionary does not carry falls back to the value itself, never
-// to a visible key path.
 const tripStatusLabel = computed(() => {
   const s = data.value && data.value.status;
   if (!s) return t("common.none");

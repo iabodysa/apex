@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Raising the rent for one lease instalment as a payment that settles a real payable.
 
 The Generate Payment button used to build a Payment Entry in the browser and copy the
@@ -53,10 +53,6 @@ def _load_eligible_lease(lease: str):
     the browser puts it on the one path all three endpoints share, where a direct call
     to the API cannot step around it.
 
-    ``lease`` arrives from a whitelisted endpoint, so the existence probe filters on
-    ``name``: the positional form answers the value back without querying when it equals
-    the DocType (database.py:1259), letting the literal string "Lease" clear this gate
-    and reach ``get_doc`` — a bare framework 404 in place of the named refusal below.
     """
     require_configured_target(payable_allocation.PAYMENT_ENTRY_DOCTYPE)
     if not lease or not frappe.db.exists(LEASE_DOCTYPE, {"name": lease}):
@@ -161,11 +157,12 @@ def create_rent_payment(lease: str, due_date: str, purchase_invoice: str | None 
     payment.remarks = _("Rent for {0} — instalment due {1} ({2}), settling {3}.").format(
         lease_doc.building, getdate(row.due_date), lease_doc.name, invoice.name
     )
-    payment.insert(ignore_permissions=True)  # audit-ok — create-permission enforced above
+    payment.insert(ignore_permissions=True)  # audit-ok
     return _result(payment.name, False)
 
 
 def _result(document_name, existing):
+    """Builds the response dict naming the Payment Entry document and whether it already existed."""
     return {
         "document_type": payable_allocation.PAYMENT_ENTRY_DOCTYPE,
         "document_name": document_name,

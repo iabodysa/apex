@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Front Desk visual bed board API.
 
 A thin presentation + orchestration layer over the existing Accommodation

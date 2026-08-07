@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Vehicle Utilisation - per-vehicle roll-up of trips, idle days and average
 utilisation, derived from the system-written Vehicle Utilisation Snapshot.
@@ -22,6 +22,7 @@ from apex.apex_core.utils.report_summary import count_card, percent_card, total_
 
 
 def execute(filters=None):
+    """Returns the columns, per-vehicle utilisation totals and summary cards for the report."""
     filters = filters or {}
 
     columns = [

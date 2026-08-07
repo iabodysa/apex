@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <Panel :title="t('contacts.title')">
     <ul v-if="people.length" class="person-rows">

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Fuel Exception Case controller.
 
 Submittable control record for disputed or suspicious fuel-control cases.
@@ -47,9 +47,11 @@ _CLOSING_STATUSES = {"Resolved", "Closed"}
 
 class FuelExceptionCase(Document):
     def before_insert(self):
+        """Defaults the reporter to the current session user when not already set."""
         self._default_reporter()
 
     def validate(self):
+        """Validates the recovered amount and enforces the initial status and closure controls."""
         self._default_reporter()
         if flt(self.amount_recovered) < 0:
             frappe.throw(_("Amount recovered cannot be negative."))
@@ -57,7 +59,6 @@ class FuelExceptionCase(Document):
             frappe.throw(_("Invalid status: {0}").format(self.status))
         self._guard_initial_status()
         self._enforce_closure_controls()
-
 
 
     def _default_reporter(self):

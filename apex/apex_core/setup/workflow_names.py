@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """The Workflow records this app ships, named so the fixtures hook can select them.
 
 Workflow is absent from ``frappe.model.sync.IMPORTABLE_DOCTYPES``, so a module folder

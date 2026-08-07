@@ -1,36 +1,9 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Setup-wizard demo data — one coherent accommodation scenario, and its removal.
-
-The last Apex wizard slide carries a demo checkbox. Ticking it does not build
-anything inline: ``setup_demo`` only ENQUEUES the build with
-``enqueue_after_commit=True`` (frappe/utils/background_jobs.py:168 defers the
-enqueue onto ``frappe.db.after_commit``), so nothing is queued unless setup
-commits and a failing demo can never fail setup. The Company the scenario needs
-already exists by then because ERPNext creates it in a ``setup_wizard_stages``
-hook and Frappe concatenates stages BEFORE completion hooks
-(frappe/desk/page/setup_wizard/setup_wizard.py:36).
 
 The scenario is built by a DEDICATED DEMO USER, so ``owner`` is the removal key:
 every row the build creates is selected back by that one column and nothing else.
 No name pattern, no date window, no "everything in this DocType".
-
-``DEMO_DOCTYPES`` is the single ordered list both halves read — the build walks it
-forward, the removal walks it reversed (ERPNext clears its own demo masters the
-same way, erpnext/setup/demo.py:190). ``_create`` refuses a DocType absent from
-that list, so the build cannot leave behind a row the removal would never reach.
-
-The removal is the risky half and is written as such: System-Manager-only, it
-refuses outright when the demo user is absent rather than sweeping broadly, it
-CANCELS a submitted row before deleting it (frappe/model/delete_doc.py:252 refuses
-a submitted record outright, and cancelling is what fires the ``on_cancel``
-reversal — deleting a Housing Assignment without it strands its Bed on
-"Occupied"), and it takes a savepoint per record so one stubborn row leaves the
-rest of the clear standing and is REPORTED as residue instead of silently
-rolling everything back.
-
-``DEMO_ARG`` is the wizard's own field, deliberately NOT ERPNext's ``setup_demo``: that
-fieldname is read by erpnext/setup/setup_wizard/setup_wizard.py:68, so sharing it would
-build an entire ERPNext demo company off one tick of the Apex box.
 """
 
 from __future__ import annotations
@@ -95,9 +68,7 @@ _DEMO_ROOMS = ("DEMO-101", "DEMO-102")
 
 
 def setup_demo(args=None):
-    """`setup_wizard_complete` hook — queue the demo build if the operator asked.
-
-    Mirrors erpnext/setup/setup_wizard/setup_wizard.py:67-69."""
+    """`setup_wizard_complete` hook — queue the demo build if the operator asked."""
     args = frappe._dict(args or {})
     if not args.get(DEMO_ARG):
         return
@@ -115,15 +86,7 @@ def boot_demo(bootinfo):
 
 
 def build_demo_data():
-    """Build the demo scenario as the demo user. Background job — never inline.
-
-    From ``set_user(DEMO_OWNER)`` on, every insert stamps ``owner = DEMO_OWNER``
-    (frappe/model/document.py:601-605), which is the whole removal key.
-
-    Nothing commits here: ``execute_job`` commits a job that returns and rolls back one
-    that raises (frappe/utils/background_jobs.py:248-257), so a half-built demo can
-    never survive.
-    """
+    """Build the demo scenario as the demo user. Background job — never inline."""
     if frappe.db.exists("User", DEMO_OWNER):
         return
 
@@ -164,7 +127,7 @@ def clear_demo_data():
             else:
                 deleted += 1
 
-    frappe.db.commit()  # audit-ok — bounds the blast radius of the user deletion
+    frappe.db.commit()  # audit-ok
     deleted, residue = _remove_demo_users(deleted, residue)
 
     frappe.cache.delete_keys("bootinfo")
@@ -176,10 +139,7 @@ def _remove_one(doctype, name):
     """Cancel-then-delete one record inside its own savepoint.
 
     Returns None on success, or the error text of a record that survived.
-
-    The savepoint is driven directly rather than through frappe.db.savepoint's
-    context manager (frappe/database/database.py:1537): that wrapper swallows the
-    exception, and the exception text IS the residue report."""
+    """
     save_point = "".join(random.sample(string.ascii_lowercase, 10))
     frappe.db.savepoint(save_point)
     try:
@@ -193,7 +153,7 @@ def _remove_one(doctype, name):
         frappe.delete_doc(
             doctype,
             name,
-            ignore_permissions=True,  # audit-ok — System-Manager-gated demo clear
+            ignore_permissions=True,  # audit-ok
             delete_permanently=True,
         )
     except Exception as exc:
@@ -241,13 +201,7 @@ def _remove_demo_users(deleted, residue):
     so dropping it on top of residue would leave the site holding demo data that
     nothing can select any more. Keeping the user keeps the boot flag set and the
     action re-runnable once the blocker is cleared.
-
-    Frappe attaches a Contact to every User it creates, from a background job
-    (frappe/core/doctype/user/user.py:235-241). The Contact names are read BEFORE the
-    users are deleted, because ``User.on_trash`` nulls the very link that query reads
-    (user.py:539-540) — which is also why the user goes first: that unlink means the
-    Contact can never block the deletion, and deleting the Contact in the same
-    transaction is what makes the unlink raise ER_CHECKREAD."""
+    """
     if residue:
         return deleted, residue
 
@@ -265,7 +219,7 @@ def _remove_demo_users(deleted, residue):
             residue.append({"doctype": "User", "name": user, "error": error})
         else:
             deleted += 1
-    frappe.db.commit()  # audit-ok — a fresh snapshot for the contacts just unlinked
+    frappe.db.commit()  # audit-ok
 
     for contact in contacts:
         if not frappe.db.exists("Contact", {"name": contact}):
@@ -279,6 +233,7 @@ def _remove_demo_users(deleted, residue):
 
 
 def _report(deleted, residue):
+    """Shows a success message when nothing is left, or lists residue rows on partial removal."""
     if not residue:
         frappe.msgprint(
             _("Removed {0} demo records.").format(deleted),
@@ -318,7 +273,7 @@ def _create_demo_users():
                 "first_name": full_name,
                 "send_welcome_email": 0,
             }
-        ).insert(ignore_permissions=True)  # audit-ok — first-run demo provisioning
+        ).insert(ignore_permissions=True)  # audit-ok
         installed = [
             role for role in roles if frappe.db.exists("Role", {"name": role})
         ]
@@ -338,7 +293,7 @@ def _scope_supervisor(building):
             "allow": "Building",
             "for_value": building,
         }
-    ).insert(ignore_permissions=True)  # audit-ok — first-run demo provisioning
+    ).insert(ignore_permissions=True)  # audit-ok
 
 
 def _create(doctype, payload):
@@ -350,15 +305,17 @@ def _create(doctype, payload):
             )
         )
     doc = frappe.get_doc(dict(payload, doctype=doctype))
-    doc.insert(ignore_permissions=True)  # audit-ok — first-run demo provisioning
+    doc.insert(ignore_permissions=True)  # audit-ok
     return doc
 
 
 def _company():
+    """Returns the global default company, or any existing company as a fallback."""
     return frappe.defaults.get_global_default("company") or frappe.db.get_value("Company", {})
 
 
 def _walk_workflow(doctype, name, actions):
+    """Applies a sequence of workflow actions to a document while impersonating the demo approver."""
     from frappe.model.workflow import apply_workflow
 
     previous_user = frappe.session.user
@@ -372,6 +329,7 @@ def _walk_workflow(doctype, name, actions):
 
 
 def _build_partner_company(context):
+    """Creates the demo partner Company, reusing the real company's currency and country."""
     context["company"] = _company()
     currency = (
         frappe.db.get_value("Company", context["company"], "default_currency")
@@ -397,6 +355,7 @@ def _build_partner_company(context):
 
 
 def _build_supplier(context):
+    """Creates the demo accommodation Supplier record."""
     group = frappe.db.get_value(
         "Supplier Group", {"name": "All Supplier Groups"}
     ) or frappe.db.get_value("Supplier Group", {})
@@ -407,6 +366,7 @@ def _build_supplier(context):
 
 
 def _build_project(context):
+    """Creates the demo active Project and a demo completed Project."""
     context["project"] = _create(
         "Project", {"project_name": _DEMO_PROJECT, "company": context["company"]}
     ).name
@@ -421,12 +381,14 @@ def _build_project(context):
 
 
 def _build_site(context):
+    """Creates the demo housing Site."""
     context["site"] = _create(
         "Site", {"site_name": _DEMO_SITE, "status": "Active"}
     ).name
 
 
 def _build_building(context):
+    """Creates the demo building and its partner-company counterpart building."""
     company = context["company"]
     payload = {
         "building_name": _DEMO_BUILDING,
@@ -462,6 +424,7 @@ def _build_building(context):
 
 
 def _build_rooms(context):
+    """Creates the two demo rooms inside the demo building."""
     context["rooms"] = [
         _create(
             "Room",
@@ -480,6 +443,7 @@ def _build_rooms(context):
 
 
 def _build_beds(context):
+    """Creates two demo beds for each demo room."""
     context["beds"] = [
         _create(
             "Bed",
@@ -497,6 +461,7 @@ def _build_beds(context):
 
 
 def _build_employee(context):
+    """Creates the demo resident, supplier-worker, and leaver Employee records."""
     context["employees"] = [
         _create(
             "Employee",
@@ -515,12 +480,14 @@ def _build_employee(context):
 
 
 def _build_custody_category(context):
+    """Creates the demo Custody Asset Category."""
     context["custody_category"] = _create(
         "Custody Asset Category", {"category_name": _DEMO_CATEGORY}
     ).name
 
 
 def _build_custody_article(context):
+    """Creates the demo Custody Article under the demo category."""
     context["article"] = _create(
         "Custody Article",
         {"article_name": _DEMO_ARTICLE, "category": context["custody_category"]},
@@ -528,6 +495,7 @@ def _build_custody_article(context):
 
 
 def _build_utility_account(context):
+    """Creates the demo electricity Utility Account for the demo building."""
     context["utility_account"] = _create(
         "Utility Account",
         {
@@ -540,6 +508,7 @@ def _build_utility_account(context):
 
 
 def _build_facility_asset(context):
+    """Creates the demo CCTV Facility Asset for the demo building."""
     context["facility_asset"] = _create(
         "Facility Asset",
         {
@@ -553,18 +522,21 @@ def _build_facility_asset(context):
 
 
 def _build_driver(context):
+    """Creates the demo Salis Driver."""
     context["driver"] = _create(
         "Salis Driver", {"full_name": "Demo Driver", "status": "Active"}
     ).name
 
 
 def _build_vehicle(context):
+    """Creates the demo Salis Vehicle."""
     context["vehicle"] = _create(
         "Salis Vehicle", {"plate_number": "DEMO-1234", "status": "Active"}
     ).name
 
 
 def _build_telecom_contract(context):
+    """Creates the demo Telecom Contract for the demo supplier."""
     context["telecom_contract"] = _create(
         "Telecom Contract",
         {
@@ -580,6 +552,7 @@ def _build_telecom_contract(context):
 
 
 def _build_sim_cards(context):
+    """Creates two assigned SIM Cards and one suspended SIM Card for the demo employee."""
     holder = context["employee"]
     context["sim_cards"] = [
         _create(
@@ -663,6 +636,7 @@ def _build_assignment(context):
 
 
 def _build_maintenance_request(context):
+    """Creates the demo open Maintenance Request for an air conditioning issue."""
     context["maintenance_request"] = _create(
         "Maintenance Request",
         {
@@ -679,6 +653,7 @@ def _build_maintenance_request(context):
 
 
 def _build_cleaning_log(context):
+    """Creates the demo Cleaning Log with one room cleaned and one skipped."""
     context["cleaning_log"] = _create(
         "Cleaning Log",
         {
@@ -699,6 +674,7 @@ def _build_cleaning_log(context):
 
 
 def _build_lease(context):
+    """Creates the demo Lease and drives it through Submit for Approval and Approve."""
     lease = _create(
         "Lease",
         {
@@ -716,6 +692,7 @@ def _build_lease(context):
 
 
 def _build_utility_bill(context):
+    """Creates the demo Utility Bill Entry and drives it through Submit for Approval and Approve."""
     bill = _create(
         "Utility Bill Entry",
         {
@@ -735,6 +712,7 @@ def _build_utility_bill(context):
 
 
 def _build_damage_assessment(context):
+    """Creates the demo Custody Damage Assessment for a damaged mattress."""
     context["damage_assessment"] = _create(
         "Custody Damage Assessment",
         {
@@ -755,6 +733,7 @@ def _build_damage_assessment(context):
 
 
 def _build_audit_plan(context):
+    """Creates the demo Audit Remediation Plan with two open findings."""
     context["audit_plan"] = _create(
         "Audit Remediation Plan",
         {
@@ -781,6 +760,7 @@ def _build_audit_plan(context):
 
 
 def _build_asset_movement(context):
+    """Creates the demo intercompany Facility Asset Movement between the demo buildings."""
     context["asset_movement"] = _create(
         "Facility Asset Movement",
         {
@@ -796,6 +776,7 @@ def _build_asset_movement(context):
 
 
 def _build_depreciation_snapshot(context):
+    """Creates and submits the demo Operational Depreciation Snapshot."""
     snapshot = _create(
         "Operational Depreciation Snapshot",
         {
@@ -815,6 +796,7 @@ def _build_depreciation_snapshot(context):
 
 
 def _build_checkout(context):
+    """Creates and submits the demo Housing Checkout with one damaged custody item."""
     checkout = _create(
         "Housing Checkout",
         {
@@ -835,6 +817,7 @@ def _build_checkout(context):
 
 
 def _build_driver_attendance(context):
+    """Creates the demo present Driver Attendance record."""
     context["driver_attendance"] = _create(
         "Driver Attendance",
         {
@@ -847,6 +830,7 @@ def _build_driver_attendance(context):
 
 
 def _build_driver_clearance(context):
+    """Creates the demo open Driver Clearance record."""
     context["driver_clearance"] = _create(
         "Driver Clearance",
         {
@@ -858,12 +842,14 @@ def _build_driver_clearance(context):
 
 
 def _build_vehicle_snapshots(context):
+    """Runs the weekly vehicle utilisation snapshot job to populate demo data."""
     from apex.salis.utilisation_engine import weekly_vehicle_utilisation_snapshot
 
     weekly_vehicle_utilisation_snapshot()
 
 
 def _build_accommodation_ledger(context):
+    """Allocates today's accommodation cost for the demo building."""
     from apex.habitat.tasks.cost import allocate_building_accommodation_cost
 
     allocate_building_accommodation_cost(context["building"], today())

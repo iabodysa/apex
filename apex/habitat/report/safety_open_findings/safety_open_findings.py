@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 import frappe
 from frappe import _
@@ -9,6 +9,7 @@ from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
+    """Returns the rows and summary cards for open Poor/Not Done safety findings, aged by days open."""
     filters = filters or {}
 
     columns = [

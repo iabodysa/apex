@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Vehicle Assignment controller.
 
 The submitted Vehicle Assignment is the authoritative vehicle<->driver pairing.
@@ -23,6 +23,7 @@ from apex.salis.utils import (
 
 class VehicleAssignment(Document):
     def validate(self):
+        """Validates dates, blocks an overlapping assignment, checks compliance and rider status."""
         self._validate_dates()
         self._validate_no_overlap()
         enforce_vehicle_compliance(self)
@@ -43,6 +44,7 @@ class VehicleAssignment(Document):
             frappe.throw(reason)
 
     def _validate_dates(self):
+        """Requires the end date to be no earlier than the start date."""
         if self.start_date and self.end_date and self.end_date < self.start_date:
             frappe.throw(_("End Date cannot be earlier than Start Date."))
 
@@ -76,6 +78,7 @@ class VehicleAssignment(Document):
         return None
 
     def _validate_no_overlap(self):
+        """Blocks the assignment when its vehicle or driver already has an overlapping active one."""
         clash = self._overlapping("vehicle", self.vehicle)
         if clash:
             frappe.throw(
@@ -88,6 +91,7 @@ class VehicleAssignment(Document):
             )
 
     def on_submit(self):
+        """Links the vehicle and driver as each other's current pairing and rechecks for a race overlap."""
         lock_vehicle(self.vehicle)
         lock_driver(self.driver)
 
@@ -119,6 +123,7 @@ class VehicleAssignment(Document):
         )
 
     def on_cancel(self):
+        """Clears the vehicle-driver pairing this assignment set, if it is still in place."""
         if frappe.db.get_value("Salis Vehicle", self.vehicle, "current_driver") == self.driver:
             frappe.db.set_value("Salis Vehicle", self.vehicle, "current_driver", None)
         if frappe.db.get_value("Salis Driver", self.driver, "current_vehicle") == self.vehicle:

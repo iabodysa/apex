@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Accommodation Lease controller."""
 
 from __future__ import annotations
@@ -21,6 +21,7 @@ class Lease(Document):
 
 
 def validate(doc, method=None):
+    """Blocks a bad lease date, an out-of-range utility share, or an overlapping building lease."""
     if not doc.company:
         from apex.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
         doc.company = get_default_company()

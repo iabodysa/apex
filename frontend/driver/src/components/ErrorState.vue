@@ -1,7 +1,5 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <!-- Shared error state. Mirrors App.vue's bootstrap-error block: alert
-       avatar + message + a retry button that emits `retry`. -->
   <div class="card card-pad text-center">
     <div
       class="avatar mx-auto mb-3 h-12 w-12"
@@ -27,7 +25,6 @@ import { useI18n } from "../i18n";
 const { t } = useI18n();
 
 defineProps({
-  // Caller-provided error message. Falls back to the shared errors.loadFailed.
   message: { type: String, default: "" },
 });
 

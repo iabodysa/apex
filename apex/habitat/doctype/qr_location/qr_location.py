@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 from __future__ import annotations
 
 import frappe
@@ -11,6 +11,7 @@ class QRLocation(Document):
 
 
 def before_save(doc, method=None):
+    """Generates a location token if missing and rebuilds the public QR request URL from it."""
     if not doc.location_token:
         doc.location_token = frappe.generate_hash(length=10)
 

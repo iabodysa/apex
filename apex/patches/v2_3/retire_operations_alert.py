@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 import frappe
 from frappe.utils import now_datetime
 
@@ -12,6 +12,7 @@ READER_RECORDS = [
 
 
 def execute():
+    """Resolves open Operations Alert records, deletes its readers, and drops the retired DocType."""
     if frappe.db.table_exists("Operations Alert"):
         frappe.db.sql(
             """update `tabOperations Alert`

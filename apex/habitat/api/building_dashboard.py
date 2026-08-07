@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """On-form dashboard metrics for the Building form.
 
 Frappe's form `get_data()` only renders the links/transactions section; the
@@ -45,6 +45,7 @@ def get_building_layout(building: str) -> dict:
     _NEEDS_ATTENTION = {"Needs Cleaning", "Needs Repair"}
 
     def _color(room):
+        """Picks the dashboard tile colour for a room from its status and readiness flags."""
         s = (room.status or "").strip()
         r = (room.readiness_status or "").strip()
         if s in ("Under Maintenance", "Out of Service"):

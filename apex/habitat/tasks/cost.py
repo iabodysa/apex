@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Scheduled tasks for the Habitat module (split by domain)."""
 
 from __future__ import annotations
@@ -78,7 +78,7 @@ def _post_accommodation_ledger_row(
         "allocation_basis": "Capacity",
         "allocation_period_start": posting_date,
         "allocation_period_end": posting_date,
-    }).insert(ignore_permissions=True)  # audit-ok — scheduler/back-dated cost allocation, no user session
+    }).insert(ignore_permissions=True)  # audit-ok
 
 
 def daily_accommodation_cost_allocation() -> None:

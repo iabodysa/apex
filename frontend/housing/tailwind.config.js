@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 import frappeUIPreset from "frappe-ui/tailwind";
 
 const FRAPPE_UI_SOURCES = "../node_modules/frappe-ui/src/" + "**/*.{vue,js,ts}";

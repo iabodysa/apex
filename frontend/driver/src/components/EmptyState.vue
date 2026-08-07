@@ -1,7 +1,5 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <!-- Shared empty state. Mirrors the existing card/card-pad/text-center
-       empty blocks. All user-facing text is passed IN by the caller. -->
   <div class="card card-pad text-center">
     <div
       v-if="icon"
@@ -19,9 +17,7 @@
 import Icon from "./Icon.vue";
 
 defineProps({
-  // Optional Icon name (e.g. "route", "truck"); omit for a text-only empty.
   icon: { type: String, default: "" },
-  // Caller-provided strings — the component hardcodes no copy.
   title: { type: String, default: "" },
   hint: { type: String, default: "" },
 });

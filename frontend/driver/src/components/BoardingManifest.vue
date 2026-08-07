@@ -1,16 +1,5 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <!-- Boarding manifest panel for a STARTED trip. Lists each Trip Boarding State
-       worker with a status pill. A worker's "I'm on the bus" claim self-confirms
-       (no per-worker driver approval); the driver intervenes only for an exception
-       — a "Not boarded" override on a Boarded row (driver_mark_not_boarded) reverses
-       a mistaken/wrong-bus self-confirm. "Notify remaining" nudges the still-Pending
-       workers (notify_remaining_passengers); before grace it's a soft ping, so
-       the label reflects that. "Depart & finalize" closes the manifest
-       (depart_and_finalize) and shows the boarded/absent/pending summary. Boarding
-       realtime (boarding_update / wait_request / boarding_confirmed / boarding_unmarked)
-       refetches so a worker's self-confirm or wait surfaces live; socket errors are
-       swallowed in realtime.js so the manual fetch always carries the manifest. -->
   <div class="sheet-overlay" role="dialog" aria-modal="true" @click.self="close">
     <div class="sheet">
       <div class="sheet-bar">
@@ -22,7 +11,6 @@
 
       <p class="sheet-hint">{{ t("manifest.hint") }}</p>
 
-      <!-- Inline Boarding Actions -->
       <div v-if="!summary" class="flex flex-wrap items-center gap-2 mb-4">
         <button class="btn btn-accent flex-1" @click="emit('open-scan')">
           <Icon name="qr" :size="16" /> {{ t("trips.scanBoarding", "Scan Boarding") }}
@@ -32,7 +20,6 @@
         </button>
       </div>
 
-      <!-- Departure summary replaces the list once finalized. -->
       <div v-if="summary" class="depart-summary">
         <Icon name="badge" :size="16" class="shrink-0" />
         <span>{{ t("manifest.departSummary", summary) }}</span>
@@ -47,14 +34,12 @@
             <div class="min-w-0 flex items-center gap-2">
               <Icon name="user" :size="14" class="text-primary shrink-0" />
               <span class="font-semibold truncate"><bdi>{{ w.employee }}</bdi></span>
-              <!-- A worker asking to wait shows a small badge with the count. -->
               <span v-if="w.wait_count" class="pill pill-warning shrink-0">
                 <Icon name="alert" :size="12" /> {{ t("manifest.remaining", { n: w.wait_count }) }}
               </span>
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <span class="pill shrink-0" :class="pillClass(w.status)">{{ te("boardingStatus", w.status) }}</span>
-              <!-- Exception override: a worker self-confirmed but isn't really aboard. -->
               <button
                 v-if="w.status === BOARDING.BOARDED"
                 class="mini-btn mini-no"
@@ -69,8 +54,6 @@
         </ul>
         <EmptyState v-else :title="t('manifest.empty')" />
 
-        <!-- Notify reflects whether grace has elapsed: a soft ping before, a
-             counted reminder after (n of max). -->
         <div v-if="hasPending" class="notify-row">
           <button class="btn btn-outline" :disabled="acting" @click="notify">
             <Icon name="alert" :size="16" />
@@ -109,16 +92,10 @@ import { connectDriverRealtime } from "../realtime.js";
 const { t, te } = useI18n();
 
 const props = defineProps({
-  // The started Dispatch Trip whose boarding manifest is managed.
   trip: { type: String, required: true },
 });
-// `finalized` after a successful depart so the parent can refresh its trip card.
 const emit = defineEmits(["close", "finalized", "open-scan", "open-manual"]);
 
-// Read on open / after every action via the pure-read get_trip_boarding (same
-// shape, no side effects) — viewing the manifest must never bump a worker's
-// notify_count. The explicit "Notify remaining" button is the only path that
-// calls the write endpoint notify_remaining_passengers (see notify() below).
 const panel = createResource({
   url: "apex.salis.api.boarding_flow.get_trip_boarding",
   params: { dispatch_trip: props.trip },
@@ -130,8 +107,6 @@ const workers = computed(() => data.value?.workers || []);
 const notifyMaxCount = computed(() => data.value?.notify_max_count || 0);
 const graceElapsed = computed(() => !!data.value?.grace_elapsed);
 const hasPending = computed(() => workers.value.some((w) => w.status === "Pending"));
-// The highest notify_count among pending workers = how many counted reminders
-// have gone out this trip (they're nudged together, so they share the count).
 const maxNotifySent = computed(() =>
   workers.value.reduce((m, w) => Math.max(m, w.notify_count || 0), 0),
 );
@@ -147,8 +122,6 @@ const reminderStyle = computed(() => {
   return {};
 });
 
-// `busy` holds the in-flight employee (per-row confirm/reject disable);
-// `acting` guards the panel-level actions (notify / depart) against double taps.
 const busy = ref(null);
 const acting = ref(false);
 const summary = ref(null);
@@ -160,8 +133,6 @@ function pillClass(status) {
   return "pill-accent";
 }
 
-// Exception override only: reverse a worker's self-confirm (wrong bus / mistaken
-// tap). There is no per-worker approval — a claim self-confirms server-side.
 const notBoardedRes = createResource({
   url: "apex.salis.api.boarding_flow.driver_mark_not_boarded",
   onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),
@@ -173,7 +144,7 @@ async function markNotBoarded(w) {
   try {
     await notBoardedRes.submit({ dispatch_trip: props.trip, employee: w.employee });
     pushToast(t("manifest.unmarked"), "ok");
-    panel.reload(); // re-read the authoritative per-worker state
+    panel.reload();
   } finally {
     busy.value = null;
   }
@@ -188,8 +159,6 @@ async function notify() {
   if (acting.value) return;
   acting.value = true;
   try {
-    // The explicit nudge: the only write to notify_count. Re-read after so the
-    // panel repaints the updated counts (notify returns the fresh state itself).
     const res = await notifyRes.submit({ dispatch_trip: props.trip });
     pushToast(res?.grace_elapsed ? t("manifest.notifyDone") : t("manifest.notifySoftDone"), "ok");
     panel.reload();
@@ -214,16 +183,12 @@ async function depart() {
       pending: res?.pending || 0,
     };
     emit("finalized", res);
-    panel.reload(); // repaint the final statuses behind the summary
+    panel.reload();
   } finally {
     acting.value = false;
   }
 }
 
-// ── Realtime (boarding events on the Dispatch Trip room) ──
-// A worker's wait/self-confirm or any boarding state change for THIS trip refetches
-// the manifest so the pills repaint without a tap. wait_request / boarding_confirmed
-// also toast so the driver notices an off-screen ask or a worker boarding.
 let stopRealtime = () => {};
 function onBoarding(event, payload) {
   if (payload.dispatch_trip && payload.dispatch_trip !== props.trip) return;
@@ -242,8 +207,6 @@ function onBoarding(event, payload) {
   panel.reload();
 }
 onMounted(() => {
-  // Pass a no-op trip handler (the manifest doesn't drive the trips list) plus the
-  // boarding handler; realtime.js swallows every socket failure.
   stopRealtime = connectDriverRealtime(() => {}, onBoarding);
 });
 onUnmounted(() => {
@@ -263,8 +226,6 @@ function close() {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  /* --c-scrim deepens in dark mode, where a 45% veil over a near-black ground
-     barely separates the sheet from the page under it. */
   background: var(--c-scrim);
 }
 .sheet {
@@ -333,8 +294,6 @@ function close() {
   border-radius: var(--radius-sm);
   flex-shrink: 0;
 }
-/* Board / skip on a moving bus. Keep the 30px chip, extend the hit area to
-   --tap-min so a mis-tap does not mark the wrong passenger. */
 .mini-btn::after {
   content: "";
   position: absolute;

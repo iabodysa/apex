@@ -1,3 +1,2 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Reports for the Habitat module."""
-

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Fuel Spend by Vehicle - per-vehicle fuel litres and amount, derived from the
 system-written Fuel Consumption Ledger (which itself consolidates Fuel Daily Log
@@ -22,6 +22,7 @@ from apex.apex_core.utils.report_summary import card, count_card, total_card
 
 
 def execute(filters=None):
+    """Returns the columns, per-vehicle fuel spend rows, chart and summary cards for the report."""
     filters = filters or {}
 
     columns = [

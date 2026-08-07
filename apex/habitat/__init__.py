@@ -1,7 +1,6 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """
 Habitat module.
 
 This is the single functional module for the Apex Habitat app.
 """
-

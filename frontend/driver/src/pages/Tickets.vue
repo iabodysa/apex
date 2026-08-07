@@ -1,7 +1,6 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
-    <!-- DETAIL: one ticket's SLA + conversation + reply (back returns to the list). -->
     <template v-if="selected">
       <button class="btn btn-outline" style="width: auto; padding-inline: 16px" @click="closeDetail">
         <Icon name="chevron" :size="18" /> {{ t("common.back") }}
@@ -24,7 +23,6 @@
           </div>
           <p v-if="detailData.description" class="mt-3 text-sm whitespace-pre-line">{{ detailData.description }}</p>
 
-          <!-- Native SLA clock (response/resolution targets + when each was met). -->
           <dl class="mt-4 space-y-2 text-xs">
             <div v-if="detailData.response_by" class="flex items-center gap-2">
               <Icon name="calendar" :size="14" class="text-primary shrink-0" />
@@ -49,7 +47,6 @@
           </dl>
         </section>
 
-        <!-- Conversation: native Communications, oldest first. -->
         <section class="space-y-3">
           <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("tickets.conversation") }}</h3>
           <p v-if="!communications.length" class="text-sm text-muted">
@@ -72,7 +69,6 @@
           </button>
         </section>
 
-        <!-- Reply control (adds a native Communication; reopens a closed ticket). -->
         <section class="card card-pad space-y-3">
           <label class="field-label">{{ t("tickets.reply") }}</label>
           <textarea v-model="replyText" :placeholder="t('tickets.replyPlaceholder')" class="textarea"></textarea>
@@ -83,18 +79,15 @@
       </template>
     </template>
 
-    <!-- LIST + raise (default view). -->
     <template v-else>
       <h2 class="section-title">{{ t("tickets.title") }}</h2>
 
-      <!-- Raise a ticket -->
       <section class="card card-pad space-y-3">
         <p class="text-sm text-soft">{{ t("tickets.hint") }}</p>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="field-label">{{ t("tickets.category") }}</label>
-            <!-- option VALUES stay English (sent to the API); only labels translate. -->
             <select v-model="form.category" class="select">
               <option v-for="c in categories" :key="c" :value="c">{{ te("issueCategory", c) }}</option>
             </select>
@@ -116,7 +109,6 @@
           <textarea v-model="form.description" :placeholder="t('tickets.descriptionPlaceholder')" class="textarea"></textarea>
         </div>
 
-        <!-- Optional photo: read locally and attached by the ticket POST. -->
         <div>
           <label class="field-label" for="ticket-photo">{{ t("tickets.attachment") }}</label>
           <input
@@ -137,7 +129,6 @@
         <p v-if="err" class="text-sm text-danger">{{ err }}</p>
       </section>
 
-      <!-- My tickets -->
       <section class="space-y-3">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("tickets.myTickets") }}</h3>
 
@@ -191,7 +182,6 @@ const priorities = ISSUE_PRIORITIES;
 const err = ref("");
 const form = reactive({ category: "Vehicle", priority: "Medium", subject: "", description: "" });
 
-// Inline photo payload for the existing credential-scoped ticket POST.
 const photo = ref({ photo: null, photo_filename: null });
 const photoName = ref("");
 const photoError = ref("");
@@ -215,10 +205,8 @@ const create = createResource({
   onError: (e) => { err.value = e.messages?.[0] || t("common.error"); },
 });
 
-// Read the chosen image locally; the ticket POST creates its private attachment.
 async function onPhoto(e) {
   const file = e.target.files && e.target.files[0];
-  // Reset the input so re-picking the same file re-fires change after a refusal.
   e.target.value = "";
   if (!file) return;
   uploading.value = true;
@@ -229,7 +217,6 @@ async function onPhoto(e) {
   } catch (err_) {
     photo.value = { photo: null, photo_filename: null };
     photoName.value = "";
-    // Name the accepted formats rather than a generic failure.
     photoError.value =
       err_ instanceof UnsupportedPhotoType ? t("tickets.photoType") : t("common.error");
     pushToast(photoError.value, "err");
@@ -242,7 +229,6 @@ function submit() {
   create.submit({ ...form, ...photo.value });
 }
 
-// --- Ticket detail (get_ticket) + reply (reply_to_ticket). ---
 const selected = ref(null);
 const replyText = ref("");
 const communications = ref([]);
@@ -350,7 +336,7 @@ function closeDetail() {
   selected.value = null;
   detailLoading.value = false;
   resetDetailState();
-  list.reload(); // a reply may have reopened a ticket; refresh the list status
+  list.reload();
 }
 
 const reply = createResource({
@@ -378,7 +364,6 @@ function submitReply() {
   );
 }
 
-// Map ticket status to a status pill (purely cosmetic).
 function statusPill(status) {
   const s = (status || "").toLowerCase();
   if (s === "resolved" || s === "closed") return "pill-success";

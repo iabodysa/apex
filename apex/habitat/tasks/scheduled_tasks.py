@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Scheduled tasks for the Habitat module (split by domain)."""
 
 from __future__ import annotations
@@ -27,11 +27,6 @@ def daily_scheduled_task_instance_generator() -> None:
     def _period_key(freq: str) -> str:
         """Return the canonical due_date string for the given frequency.
 
-        Weekly uses frappe's ``get_first_day_of_week``, never ``date.weekday()``:
-        Python's ``weekday()`` is Monday-based and the site's week may not be. frappe
-        reads System Settings ``first_day_of_the_week`` (data.py:69-70) and defaults to
-        Sunday, so a hardcoded Monday puts the whole app one day out on any site keeping
-        that default — invisible mid-week, wrong on the boundary day.
         """
         if freq == "Daily":
             return today_str
@@ -108,7 +103,7 @@ def daily_scheduled_task_instance_generator() -> None:
                         "due_date": due_date,
                         "status": "Open",
                     })
-                    instance.insert(ignore_permissions=True)  # audit-ok — scheduler-run task generation
+                    instance.insert(ignore_permissions=True)  # audit-ok
                     created += 1
                     logger.info(
                         "daily_scheduled_task_instance_generator: created %s "

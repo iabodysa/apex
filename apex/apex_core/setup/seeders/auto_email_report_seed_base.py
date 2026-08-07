@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Shared engine for the per-module Auto Email Report seeders.
 
 Each module ships its own periodic-digest list (Habitat's accommodation/safety

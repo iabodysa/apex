@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Movement Cost Transfer controller.
 
 Inter-project cost-transfer control for Movement costs.
@@ -30,6 +30,7 @@ from frappe.model.document import Document
 
 class MovementCostTransfer(Document):
     def validate(self):
+        """Defaults the company, validates the amount, and requires distinct source and target projects."""
         self._set_company_default()
         if (self.amount or 0) <= 0:
             frappe.throw(_("Amount must be greater than zero."))
@@ -45,7 +46,6 @@ class MovementCostTransfer(Document):
             )
 
             self.company = get_default_company()
-
 
 
     def _validate_distinct_targets(self):
@@ -66,5 +66,6 @@ class MovementCostTransfer(Document):
             )
 
     def _stamp_approver(self):
+        """Stamps the current user as approver when the status is set to Approved."""
         if self.status == "Approved" and not self.approved_by:
             self.approved_by = frappe.session.user

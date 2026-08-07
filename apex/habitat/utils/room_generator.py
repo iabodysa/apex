@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """The floor-plan room/bed generator.
 
 The generator turns a building's floor_plan rows into Accommodation Room and Bed
@@ -26,6 +26,7 @@ class GenerationStats:
     running counts fold in one place; the summary is built from it at the end."""
 
     def __init__(self):
+        """Initializes the zeroed room and bed counters accumulated across one generation run."""
         self.created_rooms = 0
         self.updated_rooms = 0
         self.skipped_rooms = 0

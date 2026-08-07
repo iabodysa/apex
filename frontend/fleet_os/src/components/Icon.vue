@@ -1,9 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Thin per-portal icon wrapper. The SVG geometry lives once in
-     @shared/components/icons.js; this file just maps the names THIS portal uses to
-     their geometry and hands them to the shared IconBase renderer. Importing only
-     the names used keeps the built bundle to this portal's icon subset. Preserves
-     this portal's original baseline alignment and RTL mirror set. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <IconBase
     :shape="ICONS[name]"
@@ -54,7 +49,6 @@ import {
   x,
 } from "@shared/components/icons.js";
 
-// This portal's icon name -> shared geometry. Names unchanged, so no call site moves.
 const ICONS = {
   "banknote": banknote,
   "bell": bell,
@@ -92,7 +86,6 @@ const ICONS = {
   "x": x,
 };
 
-// Directional glyphs mirrored under [dir="rtl"] (unchanged from this portal's original).
 const MIRROR = ["chevron"];
 
 defineProps({

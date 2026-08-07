@@ -1,15 +1,5 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """The rate-limit window named after the HANDLER, not after the caller's spelling.
-
-frappe resolves a request in two independent steps that never compare notes. The
-handler comes from an attribute lookup on the module the ``cmd`` string names
-(handler.py:294-303 -> __init__.py:1748-1750), and the whitelist check keys on the
-function OBJECT that lookup returned (__init__.py:872). The window, meanwhile, is
-named from the raw request field: ``rl:{form_dict.cmd}:{identity}``
-(rate_limiter.py:155). So the ceiling is per SPELLING. A caller who knows two dotted
-paths to one function is admitted twice over -- measured, not inferred:
-``submit_resident_request`` has a 5/minute ceiling and admitted 10, and
-``driver_portal.submit_fuel_request`` has 10/minute and admitted 20.
 
 Two spellings are not an accident to be tidied away. 32 of the 35 live pairs come
 from the driver portal package re-exporting its own submodules
@@ -18,11 +8,6 @@ from the driver portal package re-exporting its own submodules
 one -- so BOTH names are production and neither can be deleted. Deduplicating the
 names would also only hold until the next re-export; naming the window after the
 resolved function holds by construction.
-
-The canonical name is ``{fn.__module__}.{fn.__name__}`` -- the DEFINING path, which
-is the same identity frappe itself prints when it refuses a call (__init__.py:872).
-It is intrinsic to the object, so a re-export added tomorrow folds into the existing
-window with no list to maintain and nothing to remember.
 
 Everything else stays frappe's. The identity (``<ip>`` or ``<ip>:<form field>``), the
 window length, the TTL-once behaviour, the 429 and its message all come from the
@@ -68,13 +53,10 @@ def rate_limit(
     apex_core/utils/test_submit_rate_limit_identity.py fails the build if one goes
     back to the framework's directly.
 
-    Leave ``key`` unset on a public endpoint. ``key`` is a form_dict lookup
-    (rate_limiter.py:143) any caller can set from the query string, buying a private
-    window per value; ``ip_based`` (default True) is what actually keys the window to
-    the address (rate_limiter.py:110,141,147-150).
     """
 
     def decorator(fn):
+        """Returns a wrapper that charges the rate-limit window under the function's own canonical name."""
         command = canonical_command(fn)
         charge = _frappe_rate_limit(
             key=key, limit=limit, seconds=seconds, methods=methods, ip_based=ip_based
@@ -84,16 +66,6 @@ def rate_limit(
         def wrapper(*args, **kwargs):
             """Charge the window under the canonical command, then run the endpoint.
 
-            The charge goes through the framework's own decorator so the identity, the
-            window length, the method gate and the 429 are never re-derived here. It
-            wraps a no-op rather than ``fn``: the framework's wrapper CALLS what it
-            wraps (rate_limiter.py:168), and letting it call the endpoint would hold
-            the substituted cmd in place for the whole request body instead of the
-            charge alone.
-
-            No request means no traffic to meter and no cmd to substitute -- the
-            framework's own first gate (rate_limiter.py:134) would pass this through
-            anyway, so console and job callers touch no global.
             """
             form_dict = getattr(frappe.local, "form_dict", None)
             if form_dict is None or not getattr(frappe.local, "request", None):

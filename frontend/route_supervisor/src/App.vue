@@ -1,26 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!--
-  Masar Route Supervisor portal — ARCHETYPE 3, review tier.
-
-  Mounts the shared @shared/components/TabletSupervisorShell.vue rather than a
-  hand-rolled header + grid. That shell was written for this archetype and then
-  had no consumer at all, so the one tablet supervisor console in the tree carried
-  its own answer to drawer collapse, side-nav states and top-bar spacing. Adopting
-  it was chosen over deleting it because deleting removes the archetype from the
-  system entirely, and this portal is the smallest of the two archetype-3 consoles
-  (one screen, four tabs) — the cheapest place to prove the shell fits. The shell
-  now owns the chrome; this file owns only the work area.
-
-  Side nav = the four capabilities around a selected Route Plan; the detail keeps
-  its own tab strip because the nav is a drawer below --bp-desktop and the strip is
-  what remains reachable there.
-    1. Approve / reject the plan assigned to this supervisor (native backend decision).
-    2. Track boarding live per trip (BoardingPanel).
-    3. Follow the ordered route stops (RoutePanel).
-    4. Track the driver live on a map (DriverMap).
-  The plan list is row-scoped server-side to the caller's own assigned plans; this
-  shell only ever renders what get_supervisor_context returns.
--->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <TabletSupervisorShell
     :dir="dir"
@@ -87,8 +65,6 @@
       >
         <Icon name="refresh" :size="16" />
       </button>
-      <!-- Default variant, not "header": title-actions sits on the light top bar,
-           where the header-tinted ink would read cream-on-cream. -->
       <LangToggle />
     </template>
 
@@ -122,7 +98,6 @@
     </div>
 
     <div v-else class="work">
-      <!-- Plan list -->
       <aside v-if="showList" class="plans">
         <div class="plans-head">
           <h2 class="plans-title">{{ t("header.plans") }}</h2>
@@ -164,7 +139,6 @@
         </ul>
       </aside>
 
-      <!-- Detail -->
       <section v-if="showDetail" class="detail">
         <div v-if="!selectedPlan" class="empty big">
           <Icon name="route" :size="40" :stroke-width="1.5" />
@@ -172,7 +146,6 @@
         </div>
 
         <template v-else>
-          <!-- Plan hero -->
           <div class="hero">
             <button v-if="narrow" type="button" class="back-btn" :aria-label="t('nav.plans')" @click="backToList()">
               <Icon name="chevron" :size="18" />
@@ -190,7 +163,6 @@
             <span class="badge lg" :class="'bd-' + selectedPlan.approval.toLowerCase()">{{ t("approval." + selectedPlan.approval) }}</span>
           </div>
 
-          <!-- Tabs -->
           <nav class="tabs" role="tablist">
             <button v-for="tb in shownTabs" :key="tb.key" class="tab" :class="{ on: tab === tb.key }"
                     role="tab" :aria-selected="tab === tb.key" @click="tab = tb.key">
@@ -198,9 +170,7 @@
             </button>
           </nav>
 
-          <!-- Panels -->
           <div class="panel-area">
-            <!-- 1. Approval -->
             <section v-show="tab === 'approval'" class="panel">
               <header class="panel-head">
                 <div>
@@ -234,11 +204,8 @@
               </div>
             </section>
 
-            <!-- 2. Boarding -->
             <BoardingPanel v-show="tab === 'boarding'" :tripName="selectedTrip" :active="tab === 'boarding'" />
-            <!-- 3. Route -->
             <RoutePanel v-show="tab === 'route'" :planName="selectedPlan.name" />
-            <!-- 4. Map -->
             <DriverMap v-if="!wide" v-show="tab === 'map'" :tripName="selectedTrip" :active="tab === 'map'" />
           </div>
         </template>
@@ -249,7 +216,6 @@
       </aside>
     </div>
 
-    <!-- Reject modal -->
     <div v-if="reject.open" class="overlay" @click.self="closeReject()">
       <div ref="rejectEl" class="modal" role="dialog" aria-modal="true" aria-labelledby="reject-title">
         <h3 id="reject-title" class="modal-title">{{ t("approval.rejectTitle") }}</h3>
@@ -264,7 +230,6 @@
       </div>
     </div>
 
-    <!-- Toast -->
     <div class="toast" :class="[toast.show ? 'show' : '', 'toast-' + toast.type]">{{ toast.msg }}</div>
   </TabletSupervisorShell>
 </template>
@@ -273,8 +238,6 @@
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import Icon from "./Icon.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
-// Direct path, not the barrel: the barrel drags every shared component into this
-// bundle (frontend_shared/components/index.js records why that matters).
 import TabletSupervisorShell from "@shared/components/TabletSupervisorShell.vue";
 import { useToast } from "@shared/useToast.js";
 import { usePoll } from "@shared/usePoll.js";
@@ -338,15 +301,11 @@ const tab = ref("approval");
 const busy = ref(false);
 const reject = ref({ open: false, reason: "" });
 const rejectEl = ref(null);
-// Same keyboard contract as the shell's drawer: focus enters the dialog, Tab cycles
-// inside it, Escape cancels and hands focus back to the Reject button.
 useOverlay({
   active: () => reject.value.open,
   container: rejectEl,
   close: () => closeReject(),
 });
-// Shared toast: every call site below passes its type explicitly, so the shared
-// "green" default never reaches the `toast-*` class this portal styles.
 const { toast, showToast } = useToast();
 let stopRealtime = null;
 const POLL_MS = 45000;
@@ -358,8 +317,6 @@ const selectedPlan = computed(() => plans.value.find((p) => p.name === selectedN
 const selectedTrip = computed(() => selectedPlan.value?.trip?.name || null);
 const selectedBoarding = computed(() => selectedPlan.value?.trip?.boarding || null);
 
-// Top-bar subtitle. Only the two counts the endpoint actually returns — the KPI row
-// beside it carries no metric the backend does not already compute.
 const summary = computed(() => t("header.summary", { p: pendingCount.value, t: totalCount.value }));
 
 const statusHint = computed(() => {
@@ -490,15 +447,6 @@ async function confirmReject() {
 
 useDocumentLanguage(lang, dir);
 
-// The server now announces a decision (RoutePlan.set_supervisor_decision), so the
-// socket carries the update instantly instead of the supervisor waiting out a 45s
-// window. The interval stays as the fallback the shared factory's swallow-everything
-// contract requires: if the socket never connects, the portal must still refresh.
-//
-// Shared poll, not a local setInterval: this screen is where route and boarding
-// plans get approved or rejected, so a supervisor returning from another tab must
-// not be shown a snapshot up to a full interval old. usePoll stops the timer while
-// the tab is hidden and refetches the moment it comes back.
 usePoll(() => {
   if (!busy.value && !reject.value.open) loadContext();
 }, POLL_MS);

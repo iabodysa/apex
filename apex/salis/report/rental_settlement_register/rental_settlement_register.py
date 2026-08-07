@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 import frappe
 from frappe import _
@@ -9,6 +9,7 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
+    """Returns the columns, rows, chart and summary cards for the Rental Settlement Register report."""
     columns = [
         {"label": frappe._("Settlement"), "fieldname": "name", "fieldtype": "Link", "options": "Rental Settlement", "width": 180},
         {"label": frappe._("Rental Office"), "fieldname": "rental_office", "fieldtype": "Link", "options": "Rental Office", "width": 180},

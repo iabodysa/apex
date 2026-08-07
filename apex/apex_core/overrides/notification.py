@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """App-layer override of the core Notification channel dispatch.
 
 Registered via ``override_doctype_class`` in ``hooks.py`` (NOT a core
@@ -25,6 +25,7 @@ from frappe.email.doctype.notification.notification import Notification
 
 class ApexNotification(Notification):
     def send_notification_by_channel(self, doc, context):
+        """Sends the in-app notification first, swallowing a later channel failure once it landed."""
         system_path = self.channel == "System Notification" or self.send_system_notification
         system_sent = False
         if system_path:

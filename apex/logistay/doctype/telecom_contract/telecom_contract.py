@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Telecom Contract controller.
 
 A submitted Telecom Contract is the authoritative, in-force agreement with one
@@ -17,10 +17,12 @@ from frappe.utils import getdate, today
 
 class TelecomContract(Document):
     def validate(self):
+        """Validates the contract dates and syncs the derived status."""
         self._validate_dates()
         self._sync_status()
 
     def _validate_dates(self):
+        """Blocks a contract end date earlier than its start date."""
         if (
             self.contract_start_date
             and self.contract_end_date
@@ -46,6 +48,7 @@ class TelecomContract(Document):
             )
 
     def on_cancel(self):
+        """Sets status to Terminated when the contract is cancelled."""
         self.db_set("status", "Terminated")
 
 

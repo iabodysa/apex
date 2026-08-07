@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Unified Housing portal served at /housing.
 
 One mobile-first admin surface for TWO housing flows: the periodic Housing
@@ -51,6 +51,7 @@ def has_apps_screen_access() -> bool:
 
 
 def get_context(context):
+    """Redirects guests to login and bootstraps the housing portal context, gated on a housing role."""
     guest_redirect("/housing")
 
     context.no_cache = 1

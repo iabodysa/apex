@@ -1,15 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-//
-// Standalone generator for the two portal service workers. Renders each
-// apex/www/<sw>.min.js from sw.template.js + sw.params.js. Both workers use the
-// same deterministic hash of the complete emitted worker_portal asset tree.
-//
-//   node frontend/frontend_shared/sw.generate.js          # --check (default): verify
-//                                                          # committed bytes == render
-//   node frontend/frontend_shared/sw.generate.js --write   # rewrite the two www files
-//
-// --check exits non-zero if any committed file is NOT byte-reconstructable, which
-// is exactly the invariant the CI bundle-guard depends on.
+// Copyright (c) 2026, afmcoltd
 
 import fs from "fs";
 import path from "path";
@@ -46,7 +35,6 @@ export function generate({ write } = {}) {
   return allOk;
 }
 
-// Run only when invoked directly (not when imported by a test).
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const write = process.argv.includes("--write");
   const ok = generate({ write });

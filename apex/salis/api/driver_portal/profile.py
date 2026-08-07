@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Driver Portal — profile endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
 
 import frappe
@@ -20,8 +20,8 @@ from apex.salis.utils import expiry_state
 
 
 def _fmt_date(value):
+    """Returns the value as a string, or None when it is blank."""
     return frappe.utils.cstr(value) if value else None
-
 
 
 def _employee_documents(employee):
@@ -32,10 +32,7 @@ def _employee_documents(employee):
 	surfaces as None rather than erroring. Returns a list of ``{type, number, expiry,
 	days_left}`` entries (only for documents on file), the same shape the Masar
 	profile consumes — so the SPA reuses one renderer. Read-only.
-
-	The probe filters on ``name`` so a row named after its DocType is answered from
-	the database, not from the positional short-circuit (database.py:1259) that
-	would send the literal "Employee" on to ``get_cached_doc`` and raise."""
+    """
     if not employee or not frappe.db.exists("Employee", {"name": employee}):
         return []
     emp = frappe.get_cached_doc("Employee", employee)
@@ -64,7 +61,6 @@ def _employee_documents(employee):
     return documents
 
 
-
 def _project_label(code):
     """Resolve a Project link id (e.g. ``PROJ-0038``) to its display name.
 
@@ -75,7 +71,6 @@ def _project_label(code):
     if not code:
         return code
     return frappe.db.get_value("Project", code, "project_name") or code
-
 
 
 @frappe.whitelist(allow_guest=True)
@@ -121,7 +116,6 @@ def get_driver_context():
     return {"enabled": True, "linked": True, "driver": d}
 
 
-
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def get_driver_profile():
@@ -148,13 +142,11 @@ def get_driver_profile():
     return d
 
 
-
 _DRIVER_COMPLIANCE_TYPES = (
     "Registration (Istimara)",
     "Insurance",
     "Periodic Inspection",
 )
-
 
 
 def _vehicle_compliance(vehicle):
@@ -202,7 +194,6 @@ def _vehicle_compliance(vehicle):
             }
         )
     return out
-
 
 
 @frappe.whitelist(allow_guest=True)

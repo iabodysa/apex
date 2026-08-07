@@ -1,7 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// The assign/reassign-a-driver flow: the sub-form model, the server-backed driver
-// picker (so reassign can never receive a free-typed id), and the optional
-// Vehicle Handover capture. Assignment succeeds independently of the handover.
+// Copyright (c) 2026, afmcoltd
 import { reactive } from "vue";
 import { call } from "./api.js";
 import { today, trim } from "./fleetHelpers.js";
@@ -10,15 +7,10 @@ import { resourceErrorMessage } from "./i18n.js";
 const POST = (m) => "apex.salis.api.fleet_os." + m;
 
 export function useDriverAssignment({ panel, subForm, showToast, cfShow, reloadFleet, t }) {
-  // Reassign sub-form model. driverName = the canonical Salis Driver id sent to
-  // reassign; date is the only other field sent. captureHandover (+ odometer /
-  // checklistTemplate / conditionNotes) drive the OPTIONAL handover capture.
   const rf = reactive({
     driverName: "", driverLabel: "", date: today(),
     captureHandover: false, odometer: null, checklistTemplate: "", conditionNotes: "",
   });
-  // Driver picker: query → results from search_drivers, with the chosen driver
-  // pinned so reassign can never receive a free-typed (mis-resolvable) id.
   const dp = reactive({ query: "", results: [], open: false, loading: false });
   let dpTimer = null;
 
@@ -42,7 +34,6 @@ export function useDriverAssignment({ panel, subForm, showToast, cfShow, reloadF
     }
   }
   function onDriverQuery() {
-    // Picking a driver clears the pinned selection until a new one is chosen.
     rf.driverName = "";
     rf.driverLabel = "";
     clearTimeout(dpTimer);
@@ -58,8 +49,6 @@ export function useDriverAssignment({ panel, subForm, showToast, cfShow, reloadF
     resetReassign();
     subForm.value = "reassign";
   }
-  // New driver create-or-assign: open the native Salis Driver Web Form in a new
-  // tab (keeps the create path fully native — Web Form perms).
   function openNewDriverForm() {
     window.open("/salis-driver", "_blank", "noopener");
   }
@@ -84,8 +73,6 @@ export function useDriverAssignment({ panel, subForm, showToast, cfShow, reloadF
         args: { plate: v.plate, driver_id: rf.driverName, date: rf.date || today() },
       });
       showToast(t("toast.reassigned", { name: rf.driverLabel, plate: v.plate }), "green");
-      // Optional handover: best-effort AFTER the assignment commits. A handover
-      // failure is surfaced but never undoes the reassign (the capture is optional).
       if (rf.captureHandover) {
         try {
           const res = await call(POST("create_handover"), {

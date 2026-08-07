@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 import frappe
 from frappe.utils import add_days, flt, today
 from frappe.query_builder.functions import Coalesce, Count
@@ -7,6 +7,7 @@ from apex.habitat.permissions import _building_condition, report_building_scope
 
 @frappe.whitelist()
 def get_compliance_percent(filters=None):
+    """Returns the percentage of non-cancelled Scheduled Task Instances marked Completed."""
     frappe.has_permission("Scheduled Task Instance", "read", throw=True)
     total = frappe.db.count("Scheduled Task Instance", {"status": ["not in", ["Cancelled"]]})
     if not total:
@@ -162,6 +163,7 @@ def get_top_custody_holders_by_value(limit: int = 10) -> list[dict]:
 
 @frappe.whitelist()
 def get_cleaning_compliance_today(filters=None):
+    """Returns today's percentage of Cleaning Log room rows marked cleaned for the user's buildings."""
     frappe.has_permission("Cleaning Log", "read", throw=True)
     log_filters = {"cleaning_date": today(), "docstatus": ["<", 2]}
     restrict, allowed = report_building_scope(frappe.session.user)
@@ -182,6 +184,7 @@ def get_cleaning_compliance_today(filters=None):
 
 @frappe.whitelist()
 def get_safety_tasks_done_week(filters=None):
+    """Returns the past week's percentage of Safety Task Executions not rated Poor or Not Done."""
     frappe.has_permission("Safety Task Execution", "read", throw=True)
     query_filters = {"docstatus": 1, "execution_date": [">=", add_days(today(), -7)]}
     restrict, allowed = report_building_scope(frappe.session.user)

@@ -1,13 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- One checklist task as a fast-tap row. Three big targets — Pass (green check),
-     Fail (red x), Issue (amber triangle) — plus a pencil that expands an inline
-     note. The whole row tints to the chosen verdict; a tap scales the button
-     (tactile feedback). Unrated rows read as neutral with a dashed status dot.
-
-     Verdict -> execution_status mapping is OWNED here and surfaced via the
-     `rate` event so App.vue builds the submit payload from one source:
-        pass  -> "Good"      fail -> "Not Done"      issue -> "Poor"
--->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="task" :class="stateClass">
     <div class="task-main">
@@ -97,7 +88,6 @@ import { useI18n } from "../i18n";
 
 const props = defineProps({
   task: { type: Object, required: true },
-  // current verdict: "" | "pass" | "fail" | "issue"
   verdict: { type: String, default: "" },
   notes: { type: String, default: "" },
 });
@@ -108,8 +98,6 @@ const { t, tEnum } = useI18n();
 const noteOpen = ref(false);
 const hasNote = computed(() => !!(props.notes && props.notes.trim()));
 
-// task_title is the English source string; Arabic is served by the translation
-// layer. One title field, translated — no parallel English column.
 const title = computed(() => props.task.task_title || props.task.name);
 
 const priorityLabel = computed(() => tEnum("priority", props.task.priority));
@@ -126,7 +114,6 @@ const priorityPill = computed(() => {
 
 const stateClass = computed(() => (props.verdict ? "task-" + props.verdict : ""));
 
-// Tapping the active verdict again clears it (toggle); otherwise set it.
 function choose(next) {
   emit("rate", props.verdict === next ? "" : next);
 }
@@ -180,8 +167,6 @@ function choose(next) {
   color: var(--c-danger-ink);
   background: var(--c-danger);
 }
-/* --c-warning is the INK tier and was being used as a FILL. The fill tier is
-   --c-warning-fill, and it carries its own ink; white reaches only ~2.6:1 here. */
 .task-issue .task-status {
   color: var(--c-warning-fill-ink);
   background: var(--c-warning-fill);
@@ -309,7 +294,6 @@ function choose(next) {
   line-height: 1.5;
 }
 
-/* Inline note slide/fade. */
 .note-enter-active,
 .note-leave-active {
   transition:

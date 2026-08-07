@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Guarded billing actions on a submitted Telecom Contract.
 
 Two POST-only actions turn an in-force contract into draft procurement/finance
@@ -48,17 +48,9 @@ PURCHASE_REQUEST_DOCTYPE = "Material Request"
 PAYMENT_ENTRY_DOCTYPE = payable_allocation.PAYMENT_ENTRY_DOCTYPE
 
 
-
-
 def _load_eligible_contract(contract: str):
     """Return the submitted Telecom Contract the caller may read, or throw.
 
-    ``contract`` arrives from a whitelisted endpoint, so the existence probe filters
-    on ``name``: the positional form answers the value back without querying when it
-    equals the DocType (database.py:1259), letting the literal string "Telecom
-    Contract" clear this gate and reach ``get_doc`` — which raises a bare framework
-    404 instead of the named refusal below. Permission checking is unaffected; what
-    the short-circuit costs is this function's own message.
     """
     if not contract or not frappe.db.exists("Telecom Contract", {"name": contract}):
         frappe.throw(_("Telecom Contract {0} does not exist.").format(contract))
@@ -89,13 +81,6 @@ def _period_end(billing_period: str):
 def _existing_link(contract_doc, billing_period: str, document_type: str):
     """Return an already-recorded draft for this (period, type) if it still exists.
 
-    The probe filters on ``name`` rather than passing the recorded value positionally:
-    ``frappe.db.exists(dt, dn)`` answers ``dn`` back WITHOUT touching the database when
-    the two are equal (database.py:1259), so a logged name of "Payment Entry" would be
-    reported as a live draft on the strength of the string alone. The Dynamic Link on
-    the billing row makes that pair hard to persist today, so this is the guard
-    refusing to depend on a neighbouring layer for its own correctness rather than a
-    live defect — duplicate-safety is this function's whole job.
     """
     for row in contract_doc.billing_documents or []:
         if row.billing_period == billing_period and row.document_type == document_type:
@@ -118,13 +103,12 @@ def _record_link(contract_doc, billing_period, document_type, document_name, amo
         },
     )
     contract_doc.flags.ignore_validate_update_after_submit = True
-    contract_doc.save(ignore_permissions=True)  # audit-ok — append-only billing log
+    contract_doc.save(ignore_permissions=True)  # audit-ok
 
 
 def _result(document_type, document_name, existing):
+    """Builds the standard document_type, document_name, and existing response for a billing action."""
     return {"document_type": document_type, "document_name": document_name, "existing": existing}
-
-
 
 
 @frappe.whitelist(methods=["POST"])
@@ -171,7 +155,7 @@ def create_purchase_request(contract: str, billing_period: str):
         },
     )
     mr.set_missing_values()
-    mr.insert(ignore_permissions=True)  # audit-ok — create-permission enforced above
+    mr.insert(ignore_permissions=True)  # audit-ok
 
     _record_link(
         contract_doc,
@@ -182,8 +166,6 @@ def create_purchase_request(contract: str, billing_period: str):
         contract_doc.currency,
     )
     return _result(PURCHASE_REQUEST_DOCTYPE, mr.name, False)
-
-
 
 
 @frappe.whitelist()
@@ -224,7 +206,7 @@ def create_payment_entry(contract: str, billing_period: str, purchase_invoice: s
     pe.remarks = _("Telecom {0} — billing period {1} ({2}), settling {3}.").format(
         contract_doc.supplier, billing_period, contract_doc.name, invoice.name
     )
-    pe.insert(ignore_permissions=True)  # audit-ok — create-permission enforced above
+    pe.insert(ignore_permissions=True)  # audit-ok
 
     _record_link(
         contract_doc,
@@ -235,8 +217,6 @@ def create_payment_entry(contract: str, billing_period: str, purchase_invoice: s
         pe.paid_to_account_currency or contract_doc.currency,
     )
     return _result(PAYMENT_ENTRY_DOCTYPE, pe.name, False)
-
-
 
 
 @frappe.whitelist()
@@ -258,27 +238,9 @@ def get_billing_status(contract: str, billing_period: str):
     return status
 
 
-
-
 def allow_cancel_despite_billing_log(doc, method=None):
     """Stop the contract's billing log from vetoing a Payment Entry cancellation.
 
-    The billing table's ``document_name`` is a Dynamic Link, so a SUBMITTED contract
-    citing a payment makes ``check_no_back_links_exist`` raise LinkExistsError and
-    Accounts can never cancel (delete_doc.py:396-404). Telecom operations only RECORD
-    which payment settled a period; they do not own its lifecycle, and an operational
-    record must not veto the accounting ledger.
-
-    The native release valve is the doc-level ``ignore_linked_doctypes`` read at
-    delete_doc.py:403, which is guarded by ``method == "Cancel"`` — so DELETING a cited
-    payment stays blocked and the billing row can never point at nothing. That
-    method guard is why this is used instead of the ``ignore_links_on_delete`` hook,
-    whose branches (delete_doc.py:277 and :402) carry no such condition and would also
-    unblock deleting the contract's Supplier, Company, Cost Center, Project and Item.
-
-    ERPNext sets this same attribute for its own ledgers in ``PaymentEntry.on_cancel``,
-    which runs before this handler and before the link check (document.py:1185-1186);
-    appending rather than assigning is what keeps those ledger entries intact.
     """
     existing = tuple(doc.get("ignore_linked_doctypes") or ())
     if CONTRACT_DOCTYPE not in existing:

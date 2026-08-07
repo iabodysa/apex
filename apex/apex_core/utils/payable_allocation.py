@@ -1,15 +1,5 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Payment Entries that settle a real payable, shared by every surface that raises one.
-
-A Payment Entry with no ``references`` row is an ON-ACCOUNT payment in ERPNext: it
-debits the supplier's payable in aggregate and settles no particular bill, so no
-invoice's ``outstanding_amount`` moves and nothing reconciles. Presenting that as "the
-bill is paid" is a claim the ledger does not support. The native primitive for settling
-a payable is ``erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry``,
-which builds the Payment Entry FROM the invoice and fills the ``references`` child table
-with the allocation (payment_entry.py:3008). This module only chooses and guards the
-source invoice — identically for a telecom contract and for a building lease, which is
-why it lives in the shared kernel instead of once per module.
 
 Boundary: nothing here inserts, submits, or posts GL. Each caller keeps what only it
 knows — which contract or lease is eligible, what identifies one billing period, and how
@@ -87,10 +77,6 @@ def load_eligible_payable(company: str, supplier: str, purchase_invoice: str | N
     Every condition is re-checked here rather than trusted from the picker: the caller
     is a browser and the eligible set can change between listing and paying.
 
-    The existence probe filters on ``name`` rather than using the positional form,
-    because ``frappe.db.exists(dt, dn)`` answers ``dn`` back WITHOUT querying when the
-    two are equal (database.py:1259). The literal string "Purchase Invoice" would
-    otherwise clear this gate and reach get_doc.
     """
     if not purchase_invoice:
         frappe.throw(
@@ -137,11 +123,6 @@ def load_eligible_payable(company: str, supplier: str, purchase_invoice: str | N
 def require_money_source(company: str) -> None:
     """Fail closed unless the company has a default Cash or Bank account.
 
-    ``get_payment_entry`` resolves this itself via ``get_bank_cash_account``
-    (payment_entry.py:3226) but does NOT guard the miss: with neither account it
-    dereferences ``bank.account`` on a None and raises AttributeError
-    (payment_entry.py:2940). Checking first turns that crash into a message naming what
-    finance must configure.
     """
     from erpnext.accounts.doctype.payment_entry.payment_entry import (
         get_default_bank_cash_account,
@@ -159,6 +140,7 @@ def require_money_source(company: str) -> None:
 
 
 def allocated_total(payment) -> float:
+    """Returns the sum of allocated amounts across a Payment Entry's reference rows."""
     return sum(flt(row.allocated_amount) for row in (payment.references or []))
 
 

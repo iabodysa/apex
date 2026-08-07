@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Accommodation Building controller.
 
 Top-level spatial entity. Auto-sums annual cost and recomputes occupancy, and hosts
@@ -16,7 +16,7 @@ from frappe.model.document import Document
 from frappe.utils import flt, today
 
 from apex.habitat.utils import building_rollup, occupancy, room_generator, safety_setup
-from apex.habitat.utils.room_generator import room_number as _room_number  # noqa: F401  (re-exported)
+from apex.habitat.utils.room_generator import room_number as _room_number  # noqa: F401
 
 
 class Building(Document):
@@ -99,6 +99,7 @@ def apply_active_lease(doc):
 
 
 def _building_supervisor_permissions(user, building):
+    """Returns the names of the User Permission rows granting a user access to a given building."""
     return frappe.get_all(
         "User Permission",
         filters={"user": user, "allow": "Building", "for_value": building},
@@ -117,7 +118,7 @@ def on_update(doc, method=None):
         return
     if old_sup:
         for perm in _building_supervisor_permissions(old_sup, doc.name):
-            frappe.delete_doc("User Permission", perm, ignore_permissions=True)  # audit-ok — system permission sync
+            frappe.delete_doc("User Permission", perm, ignore_permissions=True)  # audit-ok
     if new_sup and not _building_supervisor_permissions(new_sup, doc.name):
         frappe.get_doc(
             {
@@ -126,7 +127,7 @@ def on_update(doc, method=None):
                 "allow": "Building",
                 "for_value": doc.name,
             }
-        ).insert(ignore_permissions=True)  # audit-ok — system permission sync, gated by building write
+        ).insert(ignore_permissions=True)  # audit-ok
 
 
 def _recompute_capacity_and_cost(doc):
@@ -172,6 +173,7 @@ def _recompute_occupancy_and_structure(doc):
 
 
 def _guard_non_negative_costs(doc):
+    """Blocks the save when any annual cost field on the building is negative."""
     for field in building_rollup.ANNUAL_COST_FIELDS:
         if flt(doc.get(field)) < 0:
             frappe.throw(
@@ -180,6 +182,7 @@ def _guard_non_negative_costs(doc):
 
 
 def before_save(doc, method=None):
+    """Guards abbreviation lock and costs, defaults company, and recomputes capacity and occupancy."""
     _guard_abbreviation_lock(doc)
     _guard_non_negative_costs(doc)
     if not doc.company:

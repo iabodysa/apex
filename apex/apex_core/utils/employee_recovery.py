@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Employee cost recovery on the native HRMS Employee Advance chain.
 
 Native primitive, no bespoke DocType. An operational loss recovered from a worker
@@ -153,9 +153,7 @@ def raise_recovery_advance(
             SOURCE_DOCNAME_FIELD: source_name,
         }
     )
-    # audit-ok: system-raised receivable. Authority was already enforced upstream by
-    # the submit permission on the source document (which also carries the worker's
-    # signed consent); a fleet approver is not expected to hold HR create rights.
+    # audit-ok
     advance.insert(ignore_permissions=True)  # audit-ok
     advance.submit()
     logger.info(
@@ -401,8 +399,7 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
             "ref_docname": advance,
         }
     )
-    # audit-ok: the caller's Additional Salary create right is checked explicitly at
-    # the top of this function; the scheduler path runs as Administrator.
+    # audit-ok
     installment.insert(ignore_permissions=True)  # audit-ok
     frappe.logger().info(
         f"employee_recovery: installment {installment.name} ({amount}) queued against advance {advance}."

@@ -1,11 +1,5 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Pure, framework-free helpers for the Fleet OS board — no Vue reactivity and no
-// i18n (t). The t-bound display formatters live in useFleetFormat.js; anything
-// that is a plain data/date/string transform belongs here so it stays testable
-// and shareable across the composables.
+// Copyright (c) 2026, afmcoltd
 
-// Status badge meta (his SB map): static class + icon; the label is resolved
-// reactively via t() in useFleetFormat (follows the language toggle).
 export const SB = {
   assigned: { cls: "sb-assigned", ic: "lock" },
   available: { cls: "sb-available", ic: "circle-dot" },
@@ -14,11 +8,9 @@ export const SB = {
   stolen: { cls: "sb-stolen", ic: "shield-alert" },
 };
 
-// Compliance flag window: flag a vehicle whose next document expires within N days.
 export const EXPIRY_FLAG_DAYS = 7;
 
 export const statusKey = (s) => (SB[s] ? s : "stopped");
-// Sheet-type icon name (car vs motorcycle).
 export const icon = (v) => (v.sheet === "CAR" ? "car" : "bike");
 export const initials = (d) => (d ? (d.name_ar || d.name_en || "") : "").slice(0, 2);
 export const trim = (x) => (x || "").toString().trim();
@@ -43,16 +35,12 @@ export function calcActiveDaysNum(v) {
   }, 0);
 }
 
-// Merged timeline (his buildHistoryPanel — driver spells only; the event log
-// was a client-only construct, so this renders the live assignment history).
 export function historyItems(v) {
   return v.history
     .map((h) => ({ d: h, date: h.date_receive || "0000" }))
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-// Normalize a fetched vehicle to the shape his render code reads (defends the
-// client-only fields the live API leaves empty/null).
 export function normalize(v) {
   if (!Array.isArray(v.damages)) v.damages = [];
   if (!Array.isArray(v.accidents)) v.accidents = [];

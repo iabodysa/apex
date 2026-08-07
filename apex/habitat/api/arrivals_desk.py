@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Arrivals Desk read + lookup API (party-aware).
 
 A presentation/lookup layer for the unified worker-arrival desk page. The page's
@@ -38,9 +38,9 @@ from apex.apex_core.utils.portal_token_security import (
 from apex.habitat import permissions
 from apex.habitat.utils import arrival_slips, occupancy
 from apex.habitat.utils.arrival_slips import (
-    ARRIVAL_SLIP_TEMPLATE,  # noqa: F401  (re-exported)
-    CHECKIN_SLIP_TEMPLATE,  # noqa: F401  (re-exported)
-    CUSTODY_HANDOVER_SLIP_TEMPLATE,  # noqa: F401  (re-exported)
+    ARRIVAL_SLIP_TEMPLATE,  # noqa: F401
+    CHECKIN_SLIP_TEMPLATE,  # noqa: F401
+    CUSTODY_HANDOVER_SLIP_TEMPLATE,  # noqa: F401
 )
 from apex.habitat.utils.housing_scope import active_building_scope
 
@@ -456,7 +456,6 @@ def _link_manifest_row(batch_row, temporary_worker) -> None:
     if not frappe.has_permission("Arrival Batch", "write", doc=parent):
         return
     frappe.db.set_value("Arrival Batch Worker", batch_row, "temporary_worker", temporary_worker)
-
 
 
 _MRZ_NATIONALITY = {

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Fuel Daily Log controller.
 
 Non-submittable daily fuel consumption record. Light validation; an audit entry
@@ -17,12 +17,14 @@ from apex.salis.utils import add_timeline_note
 
 class FuelDailyLog(Document):
     def validate(self):
+        """Rejects a negative litres or odometer reading."""
         if self.litres is not None and self.litres < 0:
             frappe.throw(_("Litres cannot be negative."))
         if self.odometer is not None and self.odometer < 0:
             frappe.throw(_("Odometer cannot be negative."))
 
     def after_insert(self):
+        """Adds a vehicle timeline note recording the logged litres and amount."""
         add_timeline_note(
             "Salis Vehicle",
             self.vehicle,
@@ -32,6 +34,7 @@ class FuelDailyLog(Document):
         )
 
     def on_trash(self):
+        """Reverses this log's entry from the fuel consumption ledger when the row is deleted."""
         from apex.salis.fuel_engine import reverse_fuel_ledger
 
         reverse_fuel_ledger("Fuel Daily Log", self.name)

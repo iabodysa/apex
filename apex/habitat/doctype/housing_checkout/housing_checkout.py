@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Accommodation Checkout controller.
 
 Vacate transaction with a custody-clearance gate. Damage deduction posting is
@@ -32,10 +32,12 @@ DEPARTURE_REASONS = ("Final Exit", "End of Contract")
 
 class HousingCheckout(Document):
     def before_submit(self):
+        """Blocks submission while the resident still holds custody not Returned, Lost, or Damaged."""
         before_submit(self)
 
 
 def validate(doc, method=None):
+    """Blocks an invalid or duplicate checkout and autofills its employee, bed, and custody rows."""
     sync_party_employee(doc, derive_from="assignment")
     if not doc.assignment or not frappe.db.exists("Housing Assignment", doc.assignment):
         return
@@ -220,6 +222,7 @@ def resolve_damage_assessment_building(assignment, bed):
 
 
 def on_submit(doc, method=None):
+    """Closes the assignment, frees the bed, and drafts a damage assessment for lost/damaged custody."""
     already = frappe.db.get_value(
         "Housing Assignment", doc.assignment, "check_out_date", for_update=True
     )
@@ -255,7 +258,7 @@ def on_submit(doc, method=None):
                         "estimated_replacement_cost": 0,
                     })
             try:
-                damage_doc.insert(ignore_permissions=True)  # audit-ok — post-submit side effect, no user session
+                damage_doc.insert(ignore_permissions=True)  # audit-ok
                 doc.add_comment("Comment", _("Draft Damage Assessment created: {0}. Please review and submit.").format(damage_doc.name))
             except Exception:
                 frappe.log_error(
@@ -275,16 +278,18 @@ def _cancel_orphan_damage_assessment(doc):
         filters={"source_checkout": doc.name, "docstatus": 0},
         pluck="name",
     ):
-        # audit-ok — reversing a draft side-effect this checkout created
+        # audit-ok
         frappe.delete_doc("Custody Damage Assessment", cda, ignore_permissions=True)  # audit-ok
 
 
 def before_cancel(doc, method=None):
+    """Blocks cancellation when no Cancellation Reason has been given."""
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is mandatory."))
 
 
 def on_cancel(doc, method=None):
+    """Cancels the draft damage assessment it created and reopens the assignment and bed it closed."""
     _cancel_orphan_damage_assessment(doc)
 
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)
@@ -366,7 +371,7 @@ def create_departure_transport(checkout):
 
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)
     request = _build_departure_transport(doc, assignment)
-    request.insert(ignore_permissions=True)  # audit-ok — cross-module hand-off on the supervisor's behalf
+    request.insert(ignore_permissions=True)  # audit-ok
 
     doc.db_set("departure_transport_request", request.name)
     doc.add_comment("Comment", _("Departure Transport Request raised: {0}").format(request.name))

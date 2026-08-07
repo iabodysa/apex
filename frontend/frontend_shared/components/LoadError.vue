@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="err">
     <Alert class="load-alert" theme="red" :title="title" :description="body" :dismissable="false" />

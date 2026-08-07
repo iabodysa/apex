@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Subcontractor Service Contract controller.
 
 Why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row.
@@ -23,6 +23,7 @@ from frappe.utils import getdate
 
 class SubcontractorServiceContract(Document):
     def validate(self):
+        """Blocks saving when the Contract End date falls before the Contract Start date."""
         if self.contract_start_date and self.contract_end_date:
             if getdate(self.contract_end_date) < getdate(self.contract_start_date):
                 frappe.throw(_("Contract End cannot be before Contract Start."))

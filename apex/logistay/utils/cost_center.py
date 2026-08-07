@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Cost-center resolution for SIM custody snapshots.
 
 The employee payroll cost center follows the native HRMS rule (the same

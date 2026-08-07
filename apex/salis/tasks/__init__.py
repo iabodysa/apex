@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """tasks package.
 
 Split into per-domain submodules. This __init__ re-exports every job and

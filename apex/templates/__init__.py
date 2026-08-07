@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Jinja template package — AUDIT RECORD.
 
 The clause asks that this directory be "formally audited to ensure Jinja-injected
@@ -32,15 +32,6 @@ WHAT INCLUDES IT — four shells, and exactly the four that supply its variable:
   include to sit in and it is unconditional. Both shapes are correct for their
   page; neither leaks a style to a viewer who cannot see the portal.
 
-THE INTEGRATION INVARIANT — producer and consumer match one-for-one:
-
-  ``apex_core/utils/portal_bootstrap.apply_portal_appearance`` is the only writer
-  of ``context.portal_accent``. Its callers are ``www/driver.py:60``,
-  ``www/housing.py:62``, ``www/masar.py:64`` and ``www/safety.py:54`` — the same
-  four pages, no more and no fewer. No shell includes the partial without its
-  controller supplying the value, and no controller projects the value into a
-  shell that never renders it. That bidirectional match is the audit's core claim.
-
 NO LAYOUT LEAKS ACROSS ARCHETYPES — the eight ``www`` shells split three ways:
 
   themed portals (4)    driver, housing, masar, safety — carry
@@ -66,16 +57,4 @@ VERDICT — CLEANLY INTEGRATED. One partial, one producer, four consumers, an ex
 producer/consumer match, an attribute-scoped effect, and guarded empty output when
 unconfigured. No orphan template, no shell including a partial it cannot feed, no
 cross-archetype bleed, no dead directory except the two package markers.
-
-The one genuine risk here is interpolation, not layout: the ``www`` renderer runs
-with autoescape OFF, so ``{{ portal_accent }}`` lands inside a ``<style>`` block
-unescaped. That is handled at the source rather than the sink —
-``driver_portal_theme.py:58-59`` rejects any ``accent_color`` that fails
-``_CSS_COLOR_RE`` on save — which is the correct guard, because CSS does not
-decode HTML entities and escaping at render would not help.
-
-STANDING GUARDS — this record is checked, not merely asserted:
-``apex_core/utils/test_portal_bootstrap.py:26`` pins the four appearance keys with
-``portal_accent`` among them, and ``www/test_www_controller_has_template.py``
-fails any ``www`` controller that has no template beside it.
 """

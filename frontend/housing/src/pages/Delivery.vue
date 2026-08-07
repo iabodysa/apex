@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <ListSkeleton
     v-if="deliveriesRes.loading && !deliveries.length"
@@ -215,8 +215,6 @@ const confirmOpen = ref(false);
 const otpOpen = ref(false);
 const otpCode = ref("");
 
-// One filter set, used by the list and by the count, so the badge can never describe a
-// different question than the rows below it.
 const PENDING_FILTERS = [["status", "in", ["Pending Exits", "Released"]]];
 
 const deliveriesRes = createResource({
@@ -234,20 +232,12 @@ const deliveriesRes = createResource({
       "exit2_logistics_cleared",
       "exit3_receiving_cleared",
     ],
-    // OLDEST FIRST. This is a work queue: the delivery that has waited longest is the
-    // one someone must act on, and `modified desc` put it last — so on a busy day it
-    // fell off the end of the page and became invisible precisely because it was
-    // overdue. Sorting on creation costs a filesort here, since the DocType's
-    // sort_field is `modified`, and 50 rows is a price worth paying to show the right
-    // row first.
     order_by: "creation asc",
     limit_page_length: 50,
   },
   auto: true,
 });
 
-// The badge is a real count, not the length of the page. `deliveries.length` stops at
-// the fetch limit, so a queue of 60 read as 50 and the number quietly became a cap.
 const deliveryCountRes = createResource({
   url: "frappe.client.get_count",
   params: { doctype: "Facility Asset Delivery", filters: PENDING_FILTERS },
@@ -261,8 +251,6 @@ const deliveryCount = computed(() => {
 });
 const hasMoreThanShown = computed(() => deliveryCount.value > deliveries.value.length);
 
-// The badge and the rows answer the same question, so they refresh together. Reloading
-// only the list left the count describing the queue as it was before the action.
 function reloadDeliveries() {
   deliveryCountRes.reload();
   return deliveriesRes.reload();

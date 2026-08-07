@@ -1,7 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Display formatters that need i18n (t). Bundles the pure helpers with the
-// t-bound ones into ONE `fmt` object so App.vue and the presentational
-// components have a single formatting source (call sites stay `sb(v)` etc.).
+// Copyright (c) 2026, afmcoltd
 import {
   SB,
   EXPIRY_FLAG_DAYS,
@@ -16,12 +13,10 @@ import {
 } from "./fleetHelpers.js";
 
 export function useFleetFormat(t) {
-  // Status badge (static class/icon from SB + reactively-translated label).
   const sb = (v) => {
     const k = statusKey(v.vehicle_status);
     return { ...SB[k], label: t("status." + k) };
   };
-  // Table short label for a status.
   const sl = (s) => t("statusShort." + statusKey(s));
 
   function calcDur(from, to) {
@@ -34,11 +29,8 @@ export function useFleetFormat(t) {
     return t("duration.days", { n: days });
   }
 
-  // Fuel display values. Prefers the vehicle's real planned-fuel plan
-  // (planned_fuel_grade + planned_daily_fuel off Salis Vehicle); falls back
-  // to the category fuel type only to pick a sensible grade label.
   function fuelView(v) {
-    const planned = trim(v.planned_fuel_grade); // "Petrol 91" | "Petrol 95" | "Diesel" | ""
+    const planned = trim(v.planned_fuel_grade);
     const catType = trim(v.fuel).toUpperCase();
     const isDiesel = planned ? /diesel/i.test(planned) : catType === "DESIL" || catType === "DIESEL";
     const is95 = /95/.test(planned);
@@ -58,10 +50,6 @@ export function useFleetFormat(t) {
     };
   }
 
-  // Compliance flag for the card. Flags a vehicle whose next compliance document
-  // expires within 7 days (or is already expired); a Compliant vehicle with a far
-  // expiry is never flagged. The read-only compliance_status is honoured as a
-  // backstop so a flag still shows when the server marked it but the date is missing.
   function expiryFlag(v) {
     const status = trim(v.compliance_status);
     const dateStr = trim(v.next_expiry_date);
@@ -75,7 +63,6 @@ export function useFleetFormat(t) {
     }
     const expired = status === "Expired" || days !== null && days < 0;
     const nearExpiry = days !== null && days >= 0 && days <= EXPIRY_FLAG_DAYS;
-    // Never flag a Compliant vehicle unless the date itself is genuinely near.
     const flaggedByStatus = status === "Expired" || status === "Expiring Soon";
     const show = expired || nearExpiry || (flaggedByStatus && days === null);
     return {
@@ -93,10 +80,8 @@ export function useFleetFormat(t) {
   }
 
   return {
-    // pure passthrough (single formatting source for the template)
     statusKey, icon, initials, trim, today,
     calcTotalDaysNum, calcActiveDaysNum, historyItems,
-    // t-bound
     sb, sl, calcDur, fuelView, expiryFlag,
   };
 }

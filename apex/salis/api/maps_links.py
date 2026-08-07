@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Shared Google-Maps deep-link builders for the worker (masar) and driver routes.
 
 Pure, no DB. Both the worker trip view (masar) and the driver portal must open the

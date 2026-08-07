@@ -1,15 +1,10 @@
-// Copyright (c) 2026, AFMCO and contributors
-// [#5runtp]
+// Copyright (c) 2026, afmcoltd
 frappe.provide("apex.setup");
 
 frappe.setup.on("before_load", function () {
 	apex.setup.slides_settings.map(frappe.setup.add_slide);
 });
 
-// Three grouped Apex slides cover every re-engineered Single. Every field is
-// skip-safe: leaving a Link blank or a toggle at its pre-filled value keeps the
-// Single's own default (see apex_core/setup/setup_wizard.py). The fieldnames here
-// are the wizard args the server reads on setup completion.
 apex.setup.slides_settings = [
 	{
 		name: "apex_defaults",
@@ -45,10 +40,6 @@ apex.setup.slides_settings = [
 			{
 				fieldname: "apex_default_payment_method",
 				label: __("Default Payment Method"),
-				// A Link (not a hard-coded Select) so the operator can only name a
-				// DocType this site actually has — the old list offered the optional
-				// Expense Request Afmco, and picking it on a site without that app
-				// was silently dropped and every payment built as something else.
 				fieldtype: "Link",
 				options: "DocType",
 				get_query: () => ({ filters: { issingle: 0, istable: 0 } }),
@@ -121,7 +112,6 @@ apex.setup.slides_settings = [
 			},
 			{ fieldname: "apex_demo_sb", fieldtype: "Section Break", label: __("Demo Data") },
 			{
-				// Not "setup_demo": ERPNext reads that exact fieldname and would build its own demo company.
 				fieldname: "apex_setup_demo",
 				label: __("Create demo data to explore Apex?"),
 				fieldtype: "Check",

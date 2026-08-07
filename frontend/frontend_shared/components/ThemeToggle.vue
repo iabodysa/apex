@@ -1,21 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Light / Auto / Dark switch, shared by every portal.
-
-     Writes data-theme onto <html>; the shared tokens.css explicit-toggle rules
-     win over prefers-color-scheme in both directions, so a pinned choice sticks.
-     Sits on the forest header, so it reads light-on-dark next to LangToggle.
-
-     "AUTO" RESTORES THE SERVER'S VALUE — IT DOES NOT REMOVE THE ATTRIBUTE.
-     Four wrappers server-render data-theme="{{ portal_theme or 'afmco' }}", so a
-     toggle that removed the attribute would silently discard an administrator's
-     theme the first time a worker tapped Auto, and it could never be recovered
-     without a reload. Restoring the rendered value is also what makes Auto mean
-     auto: "afmco" is the default-identity alias and the shared auto-dark
-     allow-list follows the OS through it exactly like an absent attribute.
-
-     `useI18n` resolves through the `@` alias to whichever portal bundles this
-     file — the only portal-local import, which is what keeps it barrel-safe.
-     Portals supply `theme.label`, `theme.light`, `theme.auto`, `theme.dark`. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="theme-toggle" role="group" :aria-label="t('theme.label')">
     <button
@@ -29,8 +12,6 @@
       @click="setMode(m)"
     >
       <IconBase :shape="ICONS[m]" :size="13" :align="true" />
-      <!-- Hidden below --bp-phone, where the glyph is all that is left. The label
-           above carries the same string, so the button never loses its name. -->
       <span>{{ t("theme." + m) }}</span>
     </button>
   </div>
@@ -48,8 +29,6 @@ const STORAGE_KEY = "apex_theme";
 const MODES = ["light", "auto", "dark"];
 const ICONS = { light: circleDot, auto: settings, dark: circleCheck };
 
-// Read at module scope, before any click can write: this is the wrapper's value,
-// not one this control produced.
 const SERVER_THEME =
   typeof document === "undefined" ? null : document.documentElement.getAttribute("data-theme");
 
@@ -68,7 +47,6 @@ function setMode(m) {
   try {
     localStorage.setItem(STORAGE_KEY, m);
   } catch (e) {
-    /* private-mode / storage disabled — the in-memory choice still applies */
   }
 }
 
@@ -77,7 +55,6 @@ onMounted(() => {
   try {
     saved = localStorage.getItem(STORAGE_KEY) || "auto";
   } catch (e) {
-    /* ignore */
   }
   if (!MODES.includes(saved)) saved = "auto";
   mode.value = saved;
@@ -86,9 +63,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Padding is 2px, not the shared LangToggle's 3px, because this group also carries a
-   1px border: 2+1 per side matches the switcher's 3, so at the same --tap-min option
-   height the two header controls come out exactly the same height. */
 .theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -103,8 +77,6 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  /* --tap-min: the accessible touch target the shared LangToggle beside it uses.
-     This control sits on the same worker-facing header, so it may not be smaller. */
   min-height: var(--tap-min);
   padding: var(--sp-1) 10px;
   border: none;
@@ -124,8 +96,6 @@ onMounted(() => {
   background: var(--c-header-accent);
   color: var(--c-header-bg);
 }
-/* The shared ring is tuned against the page ground; on forest chrome the header
-   accent is the one that stays visible. */
 .theme-opt:focus-visible {
   outline: 3px solid var(--c-header-accent);
   outline-offset: 2px;
@@ -134,9 +104,6 @@ onMounted(() => {
   opacity: 0.45;
   cursor: default;
 }
-/* On phones the label hides, leaving just the glyph — which would shrink the button
-   below the touch target on the axis the label was holding open. 480px = --bp-phone
-   (frontend_shared/tokens.css); keep in sync. */
 @media (max-width: 480px) {
   .theme-opt span {
     display: none;

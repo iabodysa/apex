@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Whitelisted API for the Facility Asset Delivery 3-exit transfer lock and the
 on-site code receipt.
 
@@ -56,6 +56,7 @@ EXIT_ROLES = {
 
 
 def _get_submitted(delivery: str):
+    """Returns the submitted Facility Asset Delivery, or blocks the action if it is not submitted."""
     doc = frappe.get_doc(DELIVERY_DOCTYPE, delivery)
     if doc.docstatus != 1:
         frappe.throw(_("Only a submitted delivery can be actioned."))
@@ -116,6 +117,7 @@ def _pass_exit(delivery: str, n: int):
 
 
 def _exit_slug(n: int) -> str:
+    """Returns the slug name (security, logistics or receiving) for a given exit checkpoint number."""
     return {1: "security", 2: "logistics", 3: "receiving"}[n]
 
 

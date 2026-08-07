@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Portal Theme controller.
 
 Single DocType that drives the look and feel of the Salis Driver Portal (the
@@ -42,6 +42,7 @@ DEFAULT_SLUG = "afmco"
 
 class DriverPortalTheme(Document):
     def validate(self):
+        """Resets a retired theme to the default and validates the accent colour and brand logo values."""
         if self.theme in RETIRED_THEMES:
             frappe.msgprint(
                 _("The {0} theme was retired; this portal now uses {1}.").format(

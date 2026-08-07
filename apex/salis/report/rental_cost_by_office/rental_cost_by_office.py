@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Rental Cost by Office - accrued rental cost grouped by Rental Office, derived
 from the machine-written Rental Accrual Ledger (one row per in-service rented
@@ -22,6 +22,7 @@ from apex.apex_core.utils.report_summary import percent_card, total_card
 
 
 def execute(filters=None):
+    """Returns the columns, per-office accrued rental totals and summary cards for the report."""
     filters = filters or {}
 
     columns = [

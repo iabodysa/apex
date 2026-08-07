@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """What a building's derived capacity and cost figures are computed FROM.
 
 The arithmetic here takes plain numbers and returns numbers, so the rent

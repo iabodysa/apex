@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Duplicate-safe composite UNIQUE index helper for the machine-written Habitat
 ledgers/snapshots.
@@ -85,12 +85,6 @@ def _log_blocking_duplicates(doctype: str, fields: list[str], constraint_name: s
 
 def _column_set_indexed(doctype: str, fields: list[str]) -> bool:
     """True if ANY index on the table spans exactly this ordered column set.
-
-    Frappe maintains its own single-column index for a ``search_index: 1`` field
-    under a name no caller here would guess — the bare column name when the table
-    is created (``frappe/database/schema.py``) or ``<column>_index`` when the
-    column is indexed by a later alter (``frappe/database/mariadb/schema.py``) —
-    so a name-only probe misses it and a genuine duplicate index gets created.
 
     EXACT ordered equality, never leading-prefix coverage: Frappe's own
     ``get_column_index`` discards composite keys (it drops any key that has a
@@ -183,11 +177,6 @@ def add_unique_guarded(doctype: str, fields: list[str], constraint_name: str) ->
     ``False`` if it could not be created (e.g. duplicate data) — in which case
     the blocking duplicate groups are logged and migration continues.
 
-    The failure path neither rolls back nor takes a savepoint. ``frappe.db.add_unique``
-    commits before it runs its ALTER TABLE (frappe/database/mariadb/database.py:447), so
-    the caller's work is committed and its savepoints released before this can ever be
-    reached. See the twin note in ``add_index_guarded`` for why neither rollback form
-    belongs here.
     """
     if _constraint_exists(doctype, constraint_name):
         return True

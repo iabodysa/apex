@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Cleaning Compliance Ledger controller.
 
@@ -18,11 +18,13 @@ from frappe.model.document import Document
 
 class CleaningComplianceLedger(Document):
     def on_update(self):
+        """Blocks any edit to an existing Cleaning Compliance Ledger row outside of insert or install."""
         if not self.flags.in_insert and not frappe.flags.in_install:
             frappe.throw(
                 _("Cleaning Compliance Ledger rows are immutable and cannot be edited.")
             )
 
     def on_trash(self):
+        """Blocks deleting a Cleaning Compliance Ledger row unless the user holds System Manager."""
         if "System Manager" not in frappe.get_roles(frappe.session.user):
             frappe.throw(_("Cleaning Compliance Ledger rows cannot be deleted."))

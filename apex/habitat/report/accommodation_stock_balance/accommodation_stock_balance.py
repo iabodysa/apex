@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Accommodation Stock Balance — current on-hand quantity per building store and
 per employee custody, derived from the read-only Accommodation Stock Ledger.
 Balance = sum(qty) of non-cancelled rows up to the as-on date, grouped by
@@ -13,6 +13,7 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for the Accommodation Stock Balance report."""
     filters = filters or {}
     data = get_data(filters)
     summary = [
@@ -24,6 +25,7 @@ def execute(filters=None):
 
 
 def get_columns():
+    """Returns the column definitions for the Accommodation Stock Balance report."""
     return [
         {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 180},
         {"label": _("Holder"), "fieldname": "holder", "fieldtype": "Data", "width": 120},
@@ -39,6 +41,7 @@ def get_columns():
 
 
 def get_data(filters):
+    """Aggregates live ledger rows into balance qty and value totals per building, holder and item."""
     conditions = {"is_cancelled": 0, "posting_date": ["<=", filters.get("as_on_date") or today()]}
     if filters.get("building"):
         conditions["building"] = filters["building"]

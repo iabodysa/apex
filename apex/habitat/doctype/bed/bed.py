@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Accommodation Bed controller. Smallest atomic spatial unit."""
 
 from __future__ import annotations

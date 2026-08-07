@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Read API behind the Telecom Control Desk Page.
 
 Every endpoint is read-only, role-gated (``read`` permission on the underlying
@@ -53,6 +53,7 @@ _SIM_ROW_FIELDS = [
 
 
 def _clamp(value, low, high, default):
+    """Clamps a value to the given integer range, falling back to a default when it is not numeric."""
     try:
         value = int(value)
     except (TypeError, ValueError):
@@ -101,6 +102,7 @@ def _apply_scope(filters, allowed):
 
 
 def _grouped_counts(filters, group_field, limit=None):
+    """Returns SIM Card counts grouped by one field as label and value rows, unassigned labeled."""
     rows = frappe.get_all(
         "SIM Card",
         filters=filters,
@@ -112,10 +114,9 @@ def _grouped_counts(filters, group_field, limit=None):
     return [{"label": r.label or _("Unassigned"), "value": r.value} for r in rows]
 
 
-
-
 @frappe.whitelist()
 def get_summary_cards(filters=None):
+    """Returns SIM and active-contract summary counts and monthly commitment for the control desk."""
     frappe.has_permission("SIM Card", "read", throw=True)
     allowed = _company_scope()
     sim_filters, access = _apply_scope(_sanitize_filters(filters), allowed)
@@ -163,6 +164,7 @@ def get_summary_cards(filters=None):
 
 @frappe.whitelist()
 def get_charts(filters=None):
+    """Returns SIM Card counts grouped by status, supplier, project, and cost center for the charts."""
     frappe.has_permission("SIM Card", "read", throw=True)
     allowed = _company_scope()
     sim_filters, access = _apply_scope(_sanitize_filters(filters), allowed)
@@ -178,6 +180,7 @@ def get_charts(filters=None):
 
 @frappe.whitelist()
 def get_sim_rows(filters=None, page=1, page_size=DEFAULT_PAGE_SIZE):
+    """Returns a paged, filtered, company-scoped list of SIM Cards with custodian names attached."""
     frappe.has_permission("SIM Card", "read", throw=True)
     allowed = _company_scope()
     sim_filters, access = _apply_scope(_sanitize_filters(filters), allowed)
@@ -219,6 +222,7 @@ def _attach_custodian_names(rows):
 
 @frappe.whitelist()
 def get_contract_expiry(filters=None, within_days=DEFAULT_EXPIRY_DAYS):
+    """Returns active or expired Telecom Contracts ending within the given day window."""
     frappe.has_permission("Telecom Contract", "read", throw=True)
     allowed = _company_scope()
     within_days = _clamp(within_days, 1, MAX_EXPIRY_DAYS, DEFAULT_EXPIRY_DAYS)
@@ -298,12 +302,6 @@ def get_sim_detail(sim_card):
     document permission are enforced by loading the doc through the permission
     layer; unrelated employee fields are never returned.
 
-    ``sim_card`` arrives from a whitelisted endpoint, so the existence probe filters
-    on ``name``: the positional form answers the value back without querying when it
-    equals the DocType (database.py:1259), letting the literal string "SIM Card"
-    clear this gate and reach ``get_doc`` — a bare framework 404 in place of the named
-    refusal below. ``check_permission`` still runs on whatever loads, so what the
-    short-circuit costs is this module's own message, not the permission check.
     """
     if not sim_card or not frappe.db.exists("SIM Card", {"name": sim_card}):
         frappe.throw(_("SIM Card {0} does not exist.").format(sim_card))
@@ -338,6 +336,7 @@ def get_sim_detail(sim_card):
 
 
 def _attach_history_names(history):
+    """Resolves and attaches each custody history row's employee display name in one query."""
     employee_ids = {r.employee for r in history if r.get("employee")}
     names = {}
     if employee_ids:

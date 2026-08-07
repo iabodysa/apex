@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """The printable slips the Arrivals Desk hands a worker, and the header they share.
 
 Three slips carry the same masthead — worker, company, date, text direction and

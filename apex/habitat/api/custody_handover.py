@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Whitelisted API for the OTP-confirmed Custody Handover.
 
 Confirmation is fail-closed: lockout, then expiry, then the review-and-approve
@@ -30,6 +30,7 @@ from apex.habitat.utils.otp_policy import (
 
 
 def _get_submitted(handover: str):
+    """Loads the named custody handover and blocks the action unless it has been submitted."""
     doc = frappe.get_doc(VOUCHER_TYPE, handover)
     if doc.docstatus != 1:
         frappe.throw(_("Only a submitted handover can be actioned."))
@@ -50,6 +51,7 @@ def _require_receiving_side(doc):
 
 
 def _otp_required() -> bool:
+    """Returns whether Habitat Settings currently requires an OTP to confirm a handover."""
     return bool(frappe.db.get_single_value("Habitat Settings", "require_handover_otp"))
 
 
@@ -160,16 +162,6 @@ def approve_handover(handover: str, all_items_verified=None):
     """Move a handover from Under Review to Approved. Every line must have been
     physically checked (all_items_verified) first.
 
-    The verification travels with this call rather than being read from a field the
-    approver could have set. ``all_items_verified`` is not ``allow_on_submit``, and
-    widening it would not help: saving a submitted document is
-    ``update_after_submit``, which Frappe gates on the SUBMIT permission
-    (``frappe/model/document.py:905-906``), while the receiving side holds write. So
-    before this parameter existed the box was reachable only in DRAFT — by the
-    SENDING side, pre-attesting a physical check the RECEIVER had not yet made.
-    Passing it here records the attestation against the party
-    ``_require_receiving_side`` just authenticated, at the moment they approve. A
-    handover whose box was already ticked still approves unchanged.
     """
     doc = _get_submitted(handover)
     _require_receiving_side(doc)

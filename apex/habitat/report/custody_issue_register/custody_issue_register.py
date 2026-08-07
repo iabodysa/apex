@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Custody Issue Register — what was issued, to whom, and whether it came back.
 
@@ -31,6 +31,7 @@ RETURNED_STATUSES = ("Returned",)
 
 
 def execute(filters=None):
+    """Returns the rows and cards for the custody issue register, flagging overdue/unsigned issues."""
     filters = filters or {}
     columns = _columns()
 
@@ -99,6 +100,7 @@ def _summary(data):
 
 
 def _columns():
+    """Returns the column definitions for the custody issue register."""
     return [
         {"label": _("Issue"), "fieldname": "name", "fieldtype": "Link", "options": "Custody Issue", "width": 170},
         {"label": _("Issue Date"), "fieldname": "issue_date", "fieldtype": "Date", "width": 110},

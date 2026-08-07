@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Validation for the Saudi National Address custom fields on the native Address."""
 
 import re
@@ -10,6 +10,7 @@ SHORT_ADDRESS_PATTERN = re.compile(r"^[A-Za-z]{4}\d{4}$")
 
 
 def validate(doc, method=None):
+    """Enforces the short address, building number and secondary number formats on an Address."""
     short = (doc.get("short_address") or "").strip()
     if short:
         doc.short_address = short.upper()

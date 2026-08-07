@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Building License controller."""
 
 from __future__ import annotations
@@ -11,10 +11,12 @@ from frappe.utils import add_days, getdate, today
 
 class BuildingLicense(Document):
     def validate(self) -> None:
+        """Validates the license dates and stamps the renewal date when the expiry moved forward."""
         self._validate_dates()
         self._stamp_renewal_date()
 
     def _validate_dates(self) -> None:
+        """Blocks saving when the expiry date does not fall after the issue date."""
         if self.issue_date and self.expiry_date and getdate(self.expiry_date) <= getdate(self.issue_date):
             frappe.throw(_("Expiry Date must be after the Issue Date."))
 

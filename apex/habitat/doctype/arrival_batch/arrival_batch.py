@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Arrival Batch controller.
 
 A pre-arrival manifest: the workers a labour supplier expects to deliver to a
@@ -22,6 +22,7 @@ _MAX_EXPECTED_WORKERS = 500
 
 class ArrivalBatch(Document):
     def validate(self) -> None:
+        """Blocks an empty or over-500 worker manifest and sets expected_count and the batch title."""
         self.expected_count = len(self.expected_workers or [])
         if not self.expected_count:
             frappe.throw(_("Add at least one expected worker to the manifest."))
@@ -33,6 +34,7 @@ class ArrivalBatch(Document):
 
     @property
     def pending_arrival_count(self) -> int:
+        """Returns how many expected workers still lack a submitted Housing Assignment for the date."""
         housed = frappe.db.count(
             "Housing Assignment",
             {

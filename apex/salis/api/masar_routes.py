@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Masar route, trip and stop reading — the shared trip domain.
 
 One home for the question "what does a worker trip look like": the date window a

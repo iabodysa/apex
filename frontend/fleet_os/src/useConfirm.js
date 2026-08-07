@@ -1,7 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Promise-based confirm modal (his cfShow) — an await-able replacement for
-// window.confirm so an action can `if (!(await cfShow(...))) return`. `icon` is a
-// Lucide icon name rendered by <Icon> in the modal.
+// Copyright (c) 2026, afmcoltd
 import { reactive } from "vue";
 
 export function useConfirm(t) {

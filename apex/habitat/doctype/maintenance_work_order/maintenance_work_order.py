@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Maintenance Work Order controller."""
 
 from __future__ import annotations
@@ -66,16 +66,11 @@ class MaintenanceWorkOrder(Document):
             "source_name": self.name,
             "allocation_basis": "Direct",
             "reversal_of": original.name,
-        }).insert(ignore_permissions=True)  # audit-ok — system ledger reversal this Work Order posted
+        }).insert(ignore_permissions=True)  # audit-ok
 
 
 def validate(doc, method=None):
-    """Draft-time field checks, including the draft half of the actual-date ordering rule.
-
-    ``validate`` cannot cover the after-submit half: ``run_before_save_methods``
-    dispatches ``before_update_after_submit`` there, never ``validate``
-    (frappe/model/document.py), so ``mark_completed`` re-checks the ordering itself.
-    """
+    """Draft-time field checks, including the draft half of the actual-date ordering rule."""
     if doc.planned_end_date and doc.planned_start_date:
         if doc.planned_end_date < doc.planned_start_date:
             frappe.throw(_("Planned End Date must be on or after Planned Start Date."))
@@ -103,6 +98,7 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
+    """Marks the work order Planned and advances its linked Maintenance Request to In Progress."""
     doc.db_set("status", "Planned")
     if frappe.db.exists("DocType", "Maintenance Request") and doc.maintenance_request:
         mr = frappe.get_doc("Maintenance Request", doc.maintenance_request)
@@ -113,6 +109,7 @@ def on_submit(doc, method=None):
 
 
 def before_cancel(doc, method=None):
+    """Blocks cancellation unless a Cancellation Reason has been provided."""
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is required before cancelling a Maintenance Work Order."))
 
@@ -153,19 +150,6 @@ def mark_completed(
 ):
     """Record the technician's completion evidence and transition to Completed.
 
-    Why the evidence travels through this method instead of the form. Saving a
-    submitted document is ``update_after_submit``, and Frappe gates that on the
-    SUBMIT permission, not write (``frappe/model/document.py`` set_docstatus). The
-    Maintenance Technician holds write WITHOUT submit by design, so no field on a
-    submitted Work Order is reachable from the form for the person doing the work —
-    not even ``completion_photo``, whose Desk attach control issues
-    ``frm.save("Update")`` once docstatus is 1. Widening the DocPerm to reach those
-    fields would also hand the executing technician authority to submit and cancel
-    the very Work Order they are working, which is the separation this DocType keeps.
-    A Frappe Workflow transition is no better: it moves a state field and carries no
-    payload, so it cannot capture two dates and a photo, and it still routes through
-    save.
-
     So the date fields stay non-allow_on_submit and this method is their only writer
     at docstatus 1. It re-checks write itself because ``db_set`` goes straight to the
     database, skipping both the permission check and validate(), and it enforces the
@@ -173,6 +157,7 @@ def mark_completed(
 
     The transition posts a one-time operational memo row. No GL Entry, Payment Entry,
     Purchase Invoice, or salary document is created.
+
     """
     doc = frappe.get_doc("Maintenance Work Order", work_order)
     frappe.has_permission("Maintenance Work Order", "write", doc=doc, throw=True)
@@ -238,7 +223,7 @@ def mark_completed(
             "allocation_basis": "Direct",
             "allocation_period_start": doc.actual_start_date,
             "allocation_period_end": doc.actual_end_date,
-        }).insert(ignore_permissions=True)  # audit-ok — system ledger memo on completion, gated by Work Order write (above)
+        }).insert(ignore_permissions=True)  # audit-ok
         ledger_posted = True
 
     from apex.habitat.maintenance_engine import post_maintenance_cost

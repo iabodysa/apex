@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Shared company resolver.
 
 One defaulting chain for the company applied to a transaction when it is not set
@@ -43,8 +43,6 @@ def resolve_company(module: str | None = None) -> str | None:
     if not company:
         company = frappe.defaults.get_global_default("company")
     return company or None
-
-
 
 
 def company_for_building(building: str | None, module: str = "Habitat") -> str | None:

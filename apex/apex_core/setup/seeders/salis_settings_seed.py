@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Seed Salis Settings defaults. Install-safe, idempotent, blank-fields-only.
 
 This lived in ``patches/v1_0/seed_salis_settings.py``, which ``salis/setup.py`` imported
@@ -67,7 +67,7 @@ def seed_salis_settings():
                 filled.append("default_cost_center")
 
         if filled:
-            settings.save(ignore_permissions=True)  # audit-ok: install-time seed, no user session
+            settings.save(ignore_permissions=True)  # audit-ok
             frappe.db.commit()
         return filled
     except Exception:

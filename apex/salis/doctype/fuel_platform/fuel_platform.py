@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Fuel Platform controller."""
 
 from __future__ import annotations
@@ -10,6 +10,7 @@ from frappe.model.document import Document
 
 class FuelPlatform(Document):
     def validate(self):
+        """Requires a non-blank platform name, trimmed of surrounding whitespace."""
         if self.platform_name:
             self.platform_name = self.platform_name.strip()
         if not self.platform_name:

@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="flex-1 flex flex-col px-6 py-7 mx-auto w-full" style="max-width: 480px">
     <header class="mb-6 flex items-center gap-2">
@@ -19,7 +19,6 @@
       <div class="ms-auto"><LangToggle /></div>
     </header>
 
-    <!-- STAFF: signed-in desk operator with no driver profile. Not an error. -->
     <section v-if="ctx.is_staff" class="space-y-5">
       <div class="card card-pad">
         <div class="flex items-center gap-3">
@@ -57,7 +56,6 @@
       </div>
     </section>
 
-    <!-- NON-STAFF, NON-DRIVER: friendly explainer + way out. -->
     <section v-else class="space-y-5">
       <div class="card card-pad text-center">
         <span

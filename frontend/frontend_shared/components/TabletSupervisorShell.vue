@@ -1,37 +1,6 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- =====================================================================
-     ARCHETYPE 3 — Tablet supervisor console (safety / housing / route).
-     A denser command surface: a dark side nav (brand + grouped links), a top
-     bar (page title + search/actions), a KPI-tile row, and a main content
-     region the portal fills with a live table / map / approval panel. Matches
-     the approved reference (screen 3).
-
-     One shared style for all three supervisor domains; differentiate only by a
-     subtle per-domain accent — pass `accent` (any color / token) to tint the
-     active nav item, the brand, and focus states without forking the layout.
-
-     Consumes ONLY shared --c-* tokens. RTL-first. Responsive: the side nav is
-     fixed at ≥1024px (--bp-desktop) and collapses to a slide-in drawer with a
-     menu button below that — the shell owns the drawer state, portals just fill
-     the `nav` slot.
-
-     SLOTS
-       brand   — top of the side nav (mark + wordmark).
-       nav     — side-nav links/groups (portal supplies <a>/<button>, section
-                 labels via class `nav-label`). Add `is-active` to the current.
-       title-actions — end of the top bar (search, avatar, filters).
-       kpis    — KPI tiles. The shell wraps them in a responsive auto-fit grid;
-                 the portal supplies the tiles. Omit to hide the row.
-       default — main content (table, map, approvals…).
-
-     PROPS
-       title / subtitle — top-bar heading text (slot `title-actions` for the end).
-       accent  — per-domain accent color/token (default: --c-primary).
-       navWidth — side-nav width at desktop (default 220px).
-     ===================================================================== -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="ts-shell" :style="shellVars">
-    <!-- scrim behind the drawer on narrow widths -->
     <div v-if="drawerOpen" class="ts-scrim" @click="drawerOpen = false"></div>
 
     <aside
@@ -88,11 +57,6 @@ const props = defineProps({
 const drawerOpen = ref(false);
 const navEl = ref(null);
 
-// Below --bp-desktop the side nav is a slide-in drawer over a scrim, i.e. a modal
-// surface; at or above it the same element is a static sidebar that must stay in the
-// normal tab order. The same 1023px the stylesheet switches on decides which, so the
-// two can never disagree. matchMedia is absent under jsdom (component tests), where
-// the drawer is simply never modal.
 const MODAL_QUERY = "(max-width: 1023px)";
 const narrow = ref(false);
 if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
@@ -100,8 +64,6 @@ if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
   narrow.value = mq.matches;
   const onChange = (e) => {
     narrow.value = e.matches;
-    // Widening past the breakpoint turns the drawer back into a plain sidebar; leaving
-    // `drawerOpen` set would keep the scrim state around with nothing rendering it.
     if (!e.matches) drawerOpen.value = false;
   };
   mq.addEventListener("change", onChange);
@@ -133,7 +95,6 @@ const shellVars = computed(() => ({
   font-weight: var(--fw-body);
 }
 
-/* ---- side nav ---- */
 .ts-nav {
   flex: 0 0 var(--ts-nav-w);
   width: var(--ts-nav-w);
@@ -185,9 +146,6 @@ const shellVars = computed(() => ({
   color: var(--c-header-ink);
   font-weight: var(--fw-heading);
 }
-/* Disabled and focus are two of the eight mandatory component states; a nav item
-   that cannot act until a record is selected must say so rather than silently
-   no-op, and the keyboard path needs a visible ring on the dark ground. */
 .ts-nav-list :slotted(a[aria-disabled="true"]),
 .ts-nav-list :slotted(button:disabled) {
   opacity: 0.45;
@@ -207,7 +165,6 @@ const shellVars = computed(() => ({
   margin: 14px var(--sp-2) var(--sp-1);
 }
 
-/* ---- main ---- */
 .ts-main {
   flex: 1;
   display: flex;
@@ -262,7 +219,6 @@ const shellVars = computed(() => ({
   padding: 18px clamp(var(--sp-4), 3vw, var(--sp-6)) 28px;
 }
 
-/* ---- KPI row: responsive auto-fit tile grid ---- */
 .ts-kpis {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -270,7 +226,6 @@ const shellVars = computed(() => ({
   margin-bottom: 18px;
 }
 
-/* ---- responsive: below --bp-desktop (1024px) the side nav is a drawer ---- */
 .ts-scrim {
   display: none;
 }

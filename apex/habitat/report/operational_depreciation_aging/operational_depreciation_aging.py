@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 import frappe
 
@@ -7,6 +7,7 @@ from apex.habitat import permissions
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for the operational depreciation aging register."""
     columns = [
         {
             "label": frappe._("Snapshot"),
@@ -172,6 +173,7 @@ def execute(filters=None):
 
 
 def _summary(data):
+    """Returns summary cards for asset count, original cost, book value, and fully-depreciated count."""
     return [
         count_card(frappe._("Assets"), data),
         total_card(frappe._("Original Cost"), data, "original_cost", "Currency"),

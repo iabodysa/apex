@@ -1,12 +1,8 @@
-// Copyright (c) 2026, AFMCO and contributors
-// The supervisor portal's method-call layer is the cross-portal @shared/call wrapper
-// (frappe-ui's frappeRequest, CSRF-signed from window.csrf_token). Re-exported here so
-// call sites import from a stable local path.
+// Copyright (c) 2026, afmcoltd
 import { call } from "@shared/call";
 
 export { call };
 
-// The canonical dotted path to the whitelisted backend module.
 export const API = "apex.salis.api.route_supervisor";
 
 function callApi(method, opts = {}) {

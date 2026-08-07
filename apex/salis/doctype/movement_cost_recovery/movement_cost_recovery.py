@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Movement Cost Recovery controller.
 
 Movement-domain control to recover losses (vehicle damage, fuel misuse,
@@ -34,6 +34,7 @@ _OPERATIONS_ROLES = {"Fleet Manager", "System Manager"}
 
 class MovementCostRecovery(Document):
     def validate(self):
+        """Validates the amount and evidence, and derives whether Operations-tier approval is required."""
         set_financial_defaults(self)
         if (self.amount or 0) <= 0:
             frappe.throw(_("Amount must be greater than zero."))
@@ -65,4 +66,3 @@ class MovementCostRecovery(Document):
                     "This recovery reaches the Operations threshold and can only be approved by Operations-tier authority (Fleet Manager)."
                 )
             )
-

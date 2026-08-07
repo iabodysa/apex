@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="trip-rating card card-pad" :dir="dir">
     <div v-if="success" class="text-center py-4 space-y-2">
@@ -11,7 +11,7 @@
     </div>
     <form v-else @submit.prevent="submitRating" class="space-y-4">
       <h3 class="font-bold leading-tight">{{ t("tripRating.title") }}</h3>
-      
+
       <div class="flex items-center justify-between gap-1">
         <button
           v-for="star in 5"

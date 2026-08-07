@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Missed Cleaning Tasks — cleaning logs marked missed or needing rework.
 
@@ -22,6 +22,7 @@ from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for the Missed Cleaning Tasks report."""
     filters = filters or {}
 
     date_from = getdate(filters.get("date_from") or add_days(today(), -30))
@@ -47,6 +48,7 @@ def execute(filters=None):
             return columns, []
 
     def apply_building_scope(qf):
+        """Adds the building filter to a query based on the chosen building or the caller's scope."""
         if chosen:
             qf["building"] = chosen
         elif restrict:
@@ -104,6 +106,7 @@ def execute(filters=None):
         employee_name_map = {e.name: e.employee_name for e in emp_rows}
 
     def build_row(log, issue_label):
+        """Builds one report row from a Cleaning Log with the cleaner's name and days since resolved."""
         cleaner_label = log.cleaner_name or ""
         if log.cleaner_employee:
             cleaner_label = employee_name_map.get(log.cleaner_employee) or log.cleaner_employee

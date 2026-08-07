@@ -1,10 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Single source for BOTH portal service workers (driver + masar): renderServiceWorker(p)
-// returns the full text of one www/*-sw.min.js from a per-portal params object (see
-// sw.params.js). The two SWs share 100% of their caching LOGIC; only behavioural diffs
-// (fonts, enablePush, cacheVersion, endpoints, build hash) are parameterized — each
-// explained inline where used. Output is byte-reconstructable: same params + `build`
-// reproduce the committed bytes exactly (see sw.generate.js --check).
+// Copyright (c) 2026, afmcoltd
 
 export function renderServiceWorker(p) {
   const hasFonts = Array.isArray(p.fonts) && p.fonts.length > 0;

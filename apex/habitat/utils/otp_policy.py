@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """The OTP lockout policy, in one place.
 
 Two handover flows ask a recipient for a one-time code — Custody Handover and Facility

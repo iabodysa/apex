@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Passenger Manifest Register — who was on which vehicle, and who never boarded.
 
@@ -20,6 +20,7 @@ from apex.salis import permissions
 
 
 def execute(filters=None):
+    """Returns the columns, per-passenger rows and summary cards for the Passenger Manifest Register."""
     filters = filters or {}
     columns = _columns()
 
@@ -98,6 +99,7 @@ def _summary(data):
 
 
 def _columns():
+    """Returns the column definitions for the Passenger Manifest Register report."""
     return [
         {"label": _("Manifest"), "fieldname": "name", "fieldtype": "Link", "options": "Passenger Manifest", "width": 150},
         {"label": _("Dispatch Date"), "fieldname": "dispatch_date", "fieldtype": "Date", "width": 115},

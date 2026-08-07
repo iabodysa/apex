@@ -1,6 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Trip status → pill class + label key. One vocabulary for the home preview
-// and the /trips page, so the same status can never wear two colours.
+// Copyright (c) 2026, afmcoltd
 export const tripMeta = {
   planned: { cls: "pill-warn", key: "emp.trips.planned" },
   inProgress: { cls: "pill-ok", key: "emp.trips.inProgress" },

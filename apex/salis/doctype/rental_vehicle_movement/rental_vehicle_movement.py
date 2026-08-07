@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Rental Vehicle Movement controller.
 
 Captures the Receipt/Return lifecycle of a rented vehicle from a Rental Office.
@@ -22,6 +22,7 @@ from apex.salis.utils import add_timeline_note
 
 class RentalVehicleMovement(Document):
     def validate(self):
+        """Validates the vehicle is rented, the daily rate, and the Receipt/Return sequence."""
         if self.vehicle:
             ownership = frappe.db.get_value("Salis Vehicle", self.vehicle, "ownership")
             if ownership != "Rented":
@@ -96,6 +97,7 @@ class RentalVehicleMovement(Document):
         return open_receipt_date
 
     def on_submit(self):
+        """Adds a vehicle timeline note recording the rental receipt or return."""
         add_timeline_note(
             "Salis Vehicle",
             self.vehicle,
@@ -105,6 +107,7 @@ class RentalVehicleMovement(Document):
         )
 
     def on_cancel(self):
+        """Adds a vehicle timeline note recording that the rental movement was cancelled."""
         add_timeline_note(
             "Salis Vehicle",
             self.vehicle,

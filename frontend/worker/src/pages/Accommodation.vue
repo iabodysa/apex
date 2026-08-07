@@ -1,9 +1,8 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
     <h2 class="section-title">{{ t("accommodation.title") }}</h2>
 
-    <!-- Stale note when rendering the last-known cached snapshot offline. -->
     <div v-if="isStale" class="stale-note">
       <Icon name="alert" :size="14" class="shrink-0" />
       <span>{{ t("common.stale") }}</span>
@@ -14,9 +13,6 @@
       <Skeleton :lines="4" />
     </template>
 
-    <!-- Error with NO cached fallback: an invalid/disabled token (PermissionError)
-         or a server failure must NOT masquerade as a benign "no assignment" empty
-         state. With a cached snapshot we render it (labelled stale) instead. -->
     <div v-else-if="acc.error && !ad" class="card card-pad text-center">
       <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
       <p class="text-sm text-muted">{{ errorMessage }}</p>
@@ -26,7 +22,6 @@
     </div>
 
     <template v-else-if="ad && ad.assignment">
-      <!-- Building / room / bed -->
       <section class="card card-pad space-y-4">
         <div class="flex items-center gap-3">
           <span class="avatar h-11 w-11" style="background: color-mix(in srgb, var(--c-primary) 12%, transparent); color: var(--c-primary)">
@@ -69,7 +64,6 @@
         </a>
       </section>
 
-      <!-- In-charge contact -->
       <section v-if="building?.in_charge" class="card card-pad">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">{{ t("accommodation.inCharge") }}</h3>
         <div class="flex items-center gap-3">
@@ -91,7 +85,6 @@
         </div>
       </section>
 
-      <!-- Notices -->
       <section v-if="ad.assignment.notes" class="card card-pad">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-2">{{ t("accommodation.notes") }}</h3>
         <p class="text-sm text-soft whitespace-pre-line">{{ ad.assignment.notes }}</p>
@@ -122,8 +115,6 @@ import { cacheGet, cacheSet } from "../utils/cache";
 
 const { t, tEnum } = useI18n();
 
-// Cache the last good accommodation read so an offline drop renders it
-// stale-but-labelled instead of an error (mirrors the driver portal pattern).
 const CACHE_KEY = "get_worker_accommodation";
 const staleAcc = ref(null);
 const acc = createResource({
@@ -142,7 +133,6 @@ const acc = createResource({
 
 const errorMessage = computed(() => resourceErrorMessage(acc.error));
 
-// Live data when present; otherwise the cached snapshot (offline). ad drives the UI.
 const ad = computed(() => acc.data || staleAcc.value?.data || null);
 const isStale = computed(() => !acc.data && !!staleAcc.value);
 
@@ -166,8 +156,6 @@ const Row = (rprops) =>
   h("div", { class: "flex items-center gap-2" }, [
     h(Icon, { name: rprops.icon, size: 18, class: "text-primary shrink-0" }),
     h("dt", { class: "text-muted" }, rprops.label),
-    // <bdi> isolates Latin/numeric values (dates, occupancy) inside the RTL row;
-    // a no-op for Arabic/text values. [T-313]
     h("dd", { class: "ms-auto font-semibold" }, h("bdi", null, rprops.value || t("common.none"))),
   ]);
 </script>

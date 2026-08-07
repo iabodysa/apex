@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Billing math shared by the read API and the cost-allocation report."""
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Temporary Worker controller.
 
 A Temporary Worker is an unregistered worker who has arrived on a passport
@@ -34,10 +34,12 @@ MAX_WINDOW_DAYS = 90
 
 class TemporaryWorker(Document):
     def validate(self) -> None:
+        """Validates the temporary window length and computes the expiry date from it."""
         self._validate_window_days()
         self._compute_expiry_date()
 
     def _validate_window_days(self) -> None:
+        """Defaults and bounds the window days between one and the maximum allowed."""
         if not self.window_days:
             self.window_days = DEFAULT_WINDOW_DAYS
         if self.window_days < 1:
@@ -48,5 +50,6 @@ class TemporaryWorker(Document):
             )
 
     def _compute_expiry_date(self) -> None:
+        """Sets the expiry date to the arrival date plus the window days."""
         if self.arrival_date:
             self.expiry_date = add_days(self.arrival_date, self.window_days)

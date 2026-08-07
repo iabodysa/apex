@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Goods Receipt controller — books externally-purchased goods INTO a
 procurement intake store via the Accommodation Stock Ledger. This is the first leg of
@@ -22,6 +22,7 @@ VOUCHER_TYPE = "Goods Receipt"
 
 class GoodsReceipt(Document):
     def validate(self):
+        """Requires items with positive qty and confirms the intake building is a procurement store."""
         if not self.items:
             frappe.throw(_("At least one item is required on a Goods Receipt."))
         if self.intake_building and not frappe.db.get_value(

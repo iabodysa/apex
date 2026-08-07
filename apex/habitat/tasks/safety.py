@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Scheduled tasks for the Habitat module (split by domain)."""
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ SAFETY_ROLE = "Safety Officer"
 
 
 def _has_round(building, filters):
+    """Returns whether a submitted Safety Round exists for the building matching the given filters."""
     return bool(frappe.db.exists("Safety Round", {"docstatus": 1, "building": building, **filters}))
 
 
@@ -56,8 +57,6 @@ def buildings_needing_safety_attention():
         for b in frappe.get_all("Building", filters={"status": "Active"}, pluck="name")
         if _no_recent_round(b) or _uncovered_this_week(b)
     }
-
-
 
 
 def zero_rounds_alert_subject(label: str) -> str:
@@ -257,11 +256,6 @@ def weekly_safety_coverage_gate() -> None:
     has that assignment closed on the next run. Per-row
     error isolation.
 
-    The week boundary comes from frappe, never from ``date.weekday()``: Python's
-    ``weekday()`` is Monday-based and the site's week may not be. frappe reads System
-    Settings ``first_day_of_the_week`` (data.py:69-70) and defaults to Sunday, so a
-    hardcoded Monday shifts the whole window by a day — on the boundary day a covered
-    building is reported uncovered, or an uncovered one passes the gate.
     """
     from frappe.utils import get_first_day_of_week, get_last_day_of_week, getdate, today
 

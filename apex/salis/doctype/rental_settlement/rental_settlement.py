@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Rental Settlement controller.
 
 Monthly reconciliation of a Rental Office's claim against accrued rental days.
@@ -55,10 +55,12 @@ SETTLED_STATUSES = ("Approved", "Paid")
 
 class RentalSettlement(Document):
     def before_insert(self):
+        """Defaults the requester to the current session user when not already set."""
         if not self.requested_by:
             self.requested_by = frappe.session.user
 
     def validate(self):
+        """Recomputes accrued and variance totals against the linked rental accrual ledger."""
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 
@@ -74,10 +76,6 @@ class RentalSettlement(Document):
         accrued = 0.0
         for row in self.vehicles:
             computed = flt(row.days) * flt(row.daily_rate)
-            # ABSENCE, not falsity. A blank Currency arrives as None and a typed 0
-            # arrives as 0, so `if not row.amount` could not tell "the operator left it
-            # for us to compute" from "the operator says this vehicle owes nothing" —
-            # and it overwrote the second with days x rate on every save.
             if row.amount is None:
                 row.amount = computed
             if flt(row.days) < 0 or flt(row.daily_rate) < 0 or flt(row.amount) < 0:
@@ -91,11 +89,6 @@ class RentalSettlement(Document):
         ledger_total = linked_accrued_total(self.rental_office, self.period_month)
         self.ledger_accrued_total = flt(ledger_total)
 
-        # A settlement that lists vehicles totalling zero HAS a total, and it is zero.
-        # Substituting the ledger there made `ledger_variance` come out as 0 and the
-        # document reported a perfect match against a claim of nothing. The fallback is
-        # for the one case it was meant for — no rows at all — and it is recorded, so a
-        # reader can see the figure did not come from the rows in front of them.
         self.accrued_from_ledger = 0
         if self.vehicles:
             self.accrued_total = flt(accrued)
@@ -113,12 +106,15 @@ class RentalSettlement(Document):
 
 
     def on_submit(self):
+        """Stamps this settlement onto its matching rental accrual ledger rows once settled."""
         self._sync_accrual_stamp()
 
     def on_update_after_submit(self):
+        """Re-stamps the accrual ledger rows as the settlement moves through its settled states."""
         self._sync_accrual_stamp()
 
     def on_cancel(self):
+        """Releases this settlement's stamped rental accrual ledger rows so they can be re-settled."""
         from apex.salis.rental_engine import release_settlement
 
         release_settlement(self.name)

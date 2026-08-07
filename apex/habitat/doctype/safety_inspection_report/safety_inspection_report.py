@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Safety Inspection Report controller.
 
 On submit, the report fans out: each ACTIONABLE finding (one carrying an
@@ -30,6 +30,7 @@ _FINDING_TABLES = ("safety_findings", "maintenance_findings")
 
 class SafetyInspectionReport(Document):
     def on_submit(self):
+        """Fans out each actionable finding into a Maintenance Request when the report is submitted."""
         self.generate_maintenance_requests()
 
     def on_cancel(self):
@@ -44,11 +45,12 @@ class SafetyInspectionReport(Document):
                 self._reverse_generated_request(finding.get("generated_maintenance_request"))
 
     def _reverse_generated_request(self, mr_name: str):
+        """Deletes a still-draft generated Maintenance Request or clears its source-inspection link."""
         if not mr_name or not frappe.db.exists("Maintenance Request", mr_name):
             return
         docstatus = frappe.db.get_value("Maintenance Request", mr_name, "docstatus")
         if docstatus == 0:
-            # audit-ok — reversing a draft side-effect this report created
+            # audit-ok
             frappe.delete_doc("Maintenance Request", mr_name, ignore_permissions=True)  # audit-ok
         else:
             frappe.db.set_value("Maintenance Request", mr_name, "source_inspection", None)

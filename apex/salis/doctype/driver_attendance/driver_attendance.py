@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Driver Attendance controller."""
 
 from __future__ import annotations
@@ -11,6 +11,7 @@ from frappe.utils import add_days, get_datetime, time_diff_in_seconds
 
 class DriverAttendance(Document):
     def validate(self):
+        """Blocks a duplicate same-day attendance row and recomputes the worked hours."""
         self._guard_duplicate()
         self._compute_worked_hours()
 
@@ -35,6 +36,7 @@ class DriverAttendance(Document):
             )
 
     def _compute_worked_hours(self):
+        """Computes worked hours from check-in to check-out, rolling to next day if checkout precedes it."""
         if self.check_in and self.check_out:
             check_in = get_datetime(f"{self.attendance_date} {self.check_in}")
             check_out = get_datetime(f"{self.attendance_date} {self.check_out}")

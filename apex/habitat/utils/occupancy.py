@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Occupancy primitives shared by the housing desks and the Building controller.
 
 Active occupancy has ONE definition here — a submitted Housing Assignment whose

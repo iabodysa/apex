@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Accommodation Ledger controller.
 
 Hidden, machine-written cost allocation ledger. No DocPerm grants write/create
@@ -18,6 +18,7 @@ class AccommodationLedger(Document):
 
 
 def before_save(doc, method=None):
+    """Syncs the ledger row's party fields to the linked employee before saving."""
     sync_party_employee(doc)
 
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Road geometry for a list of stops, so a route reads as a drive rather than a chord.
 
 A straight line between two gates crosses whatever lies between them; a supervisor
@@ -28,25 +28,24 @@ import frappe
 DEFAULT_ROUTER = "https://routing.openstreetmap.de/routed-car"
 CACHE_KEY = "apex_road_route"
 
-# A drawn route between fixed points does not change, so a hit is worth keeping for a
-# week. A FAILURE is not worth keeping at all beyond a moment: the router is a public
-# service reached over the internet, and its outages are transient. These are two
-# different lifetimes and they were previously one — see _remember below.
 CACHE_TTL_SECONDS = 7 * 24 * 60 * 60
 FAILURE_TTL_SECONDS = 5 * 60
 REQUEST_TIMEOUT = 6
 
 
 def _router_base():
+    """Returns the configured OSRM routing server base URL, or the public default."""
     configured = frappe.conf.get("apex_routing_url", DEFAULT_ROUTER)
     return (configured or "").rstrip("/")
 
 
 def _fingerprint(points):
+    """Returns a stable hash of a stop-point list, used as its cache identity."""
     return hashlib.sha1(json.dumps(points, sort_keys=True).encode("utf-8")).hexdigest()
 
 
 def _cache_key(points):
+    """Returns the cache key under which a stop-point list's routed path is stored."""
     return f"{CACHE_KEY}:{_fingerprint(points)}"
 
 

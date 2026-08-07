@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """The in-app release feed, read from the notes that ship with the release.
 
 The notes under ``change_log/`` are the only source: a release is described once, and
@@ -10,10 +10,6 @@ hides an HTML comment: ``<!-- released: YYYY-MM-DD HH:MM:SS -->`` (the moment th
 reports, so the bell's "since you last looked" filter keeps working across a clone, where
 a file's own mtime is only its checkout time), and an optional ``<!-- link: /driver -->``
 for a release whose feed item should open somewhere other than the desk.
-
-The version comes from the filename, exactly as frappe reads its own notes
-(``frappe/utils/change_log.py:73-81``), and the title is the note's heading plus its
-subtitle line.
 """
 
 import os
@@ -39,6 +35,7 @@ def _subtitle(body):
 
 
 def _release_from_note(path, version):
+    """Builds a release feed entry from one change-log note's release timestamp, link, and subtitle."""
     body = frappe.read_file(path) or ""
     released = _RELEASED_AT.search(body)
     if not released:
@@ -78,6 +75,7 @@ _FEED_MAX = 20
 
 
 def _clip_title(title):
+    """Truncates a title to the feed's maximum length, appending an ellipsis when it is cut."""
     title = title.strip()
     if len(title) <= _FEED_TITLE_MAX:
         return title

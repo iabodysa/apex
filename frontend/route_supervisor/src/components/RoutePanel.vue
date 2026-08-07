@@ -1,7 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- The ordered stops of the selected plan as a vertical timeline. Self-fetches
-     get_route_stops (the same _ordered_stops the driver/worker apps use), so sequence,
-     planned times, expected passengers and Habitat housing pickups match everywhere. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <section class="panel">
     <header class="panel-head">

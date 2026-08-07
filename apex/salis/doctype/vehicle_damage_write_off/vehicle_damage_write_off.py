@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Vehicle Damage Write-Off controller.
 
 Submittable damage write-off case raised from a Vehicle Handover discrepancy.
@@ -30,6 +30,7 @@ _OPERATIONS_ROLES = {"Fleet Manager", "System Manager"}
 
 class VehicleDamageWriteOff(Document):
     def validate(self):
+        """Requires evidence past Open, validates the cost, and derives the Operations approval gate."""
         if self.status and self.status != "Open" and not self.evidence:
             frappe.throw(_("Evidence is required before moving the write-off case beyond Open."))
         if self.estimated_cost is not None and flt(self.estimated_cost) < 0:
@@ -63,6 +64,7 @@ class VehicleDamageWriteOff(Document):
             )
 
     def on_submit(self):
+        """Links this case back onto its source incident and logs a vehicle timeline note."""
         self._stamp_source_incident()
         add_timeline_note(
             "Salis Vehicle",
@@ -73,6 +75,7 @@ class VehicleDamageWriteOff(Document):
         )
 
     def on_cancel(self):
+        """Clears this case's link from its source incident and logs a vehicle timeline note."""
         self._clear_source_incident()
         add_timeline_note(
             "Salis Vehicle",
@@ -82,16 +85,19 @@ class VehicleDamageWriteOff(Document):
 
 
     def _stamp_approver(self):
+        """Stamps the current user as approver when the status is set to Approved."""
         if self.status == "Approved" and not self.approved_by:
             self.approved_by = frappe.session.user
 
     def _stamp_source_incident(self):
+        """Sets the source Vehicle Incident's write-off case link to this document."""
         if self.source_incident:
             frappe.db.set_value(
                 "Vehicle Incident", self.source_incident, "write_off_case", self.name
             )
 
     def _clear_source_incident(self):
+        """Clears the source Vehicle Incident's write-off case link."""
         if self.source_incident:
             frappe.db.set_value(
                 "Vehicle Incident", self.source_incident, "write_off_case", None

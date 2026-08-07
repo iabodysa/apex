@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Housing Inventory count API.
 
 The testable backend for the count surface inside the housing portal
@@ -55,10 +55,6 @@ _ITEM_FIELDS = [
 
 _WRITABLE = ("counted_quantity", "condition", "notes")
 
-# Each line costs a get_doc, a full save (so validate and every hook) and a reload, all
-# inside the one request the operator is waiting on. The cost is linear in the lines
-# sent and the payload arrives from a client, so the ceiling has to be stated here
-# rather than assumed from how the screen happens to batch today.
 COUNT_LINE_LIMIT = 200
 
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Safety Task Execution controller.
 
 A live execution captures findings observed in the field. On submit it fans out
@@ -28,13 +28,16 @@ _REPAIR_NEEDED_STATUSES = ("Poor", "Not Done")
 
 class SafetyTaskExecution(Document):
     def validate(self):
+        """Blocks submission when required photo evidence for a failed or security finding is missing."""
         self._enforce_evidence()
 
     def on_submit(self):
+        """Fans findings out into Maintenance Requests and raises a summary ticket for a failed execution."""
         fan_out_findings(self.findings, self)
         self._escalate_failed_execution()
 
     def on_cancel(self):
+        """Closes any untouched, still-Open Maintenance Requests this execution raised."""
         self._retract_untouched_requests()
 
     def _retract_untouched_requests(self) -> None:

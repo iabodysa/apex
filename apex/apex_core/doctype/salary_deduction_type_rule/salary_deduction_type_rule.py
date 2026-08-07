@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salary Deduction Type Rule (child table).
 
 One row per operational deduction type (Damage / Rent / Fuel / Custody) on the

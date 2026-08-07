@@ -1,16 +1,13 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
     <h2 class="section-title">{{ t("attendance.title") }}</h2>
 
-    <!-- Initial load: spinner until the first state arrives. -->
     <LoadingState v-if="today.loading && !state.exists" :label="t('common.loading')" />
 
-    <!-- Load failure: an explicit, retryable error state for the on-load fetch. -->
     <ErrorState v-else-if="today.error" :message="err || t('errors.loadFailed')" @retry="today.reload()" />
 
     <template v-else>
-    <!-- Today's attendance state (fetched on load, updated reactively after each tap). -->
     <section class="card card-pad space-y-4">
       <div class="flex items-center justify-between gap-3">
         <div class="min-w-0">
@@ -41,12 +38,9 @@
       </div>
     </section>
 
-    <!-- Actions: each button reflects the current state — no blind re-submit. -->
     <section class="card card-pad space-y-3">
       <p class="text-sm text-soft">{{ t("attendance.hint") }}</p>
 
-      <!-- Optional shift photo: read locally and attached by the attendance POST.
-           Hidden once the shift is done. -->
       <div v-if="!state.checked_out">
         <label class="field-label" for="att-photo">{{ t("attendance.photo") }}</label>
         <input
@@ -83,10 +77,8 @@
       </button>
       <p v-if="state.checked_out" class="status-note status-ok">{{ t("attendance.doneForToday") }}</p>
     </section>
-    <!-- doneForToday above is a persistent shift-state note, not transient feedback. -->
 
 
-    <!-- This month's history: a compact day list with status pill + stamped times. -->
     <section class="card card-pad space-y-3">
       <p class="text-sm font-semibold text-soft">{{ t("attendance.history") }}</p>
       <Skeleton v-if="history.loading" :rows="3" />
@@ -129,11 +121,9 @@ import { PHOTO_ACCEPT } from "@shared/photoFile.js";
 
 const { t, fmtTime } = useI18n();
 
-// On-load fetch error only; action feedback goes through transient toasts.
 const err = ref("");
 const loading = ref(false);
 
-// Optional shift photo included in the next credential-scoped attendance POST.
 const photo = ref({ photo: null, photo_filename: null });
 const photoName = ref("");
 const photoError = ref("");
@@ -141,7 +131,6 @@ const uploading = ref(false);
 
 async function onPhoto(e) {
   const file = e.target.files && e.target.files[0];
-  // Reset the input so re-picking the same file re-fires change after a refusal.
   e.target.value = "";
   if (!file) return;
   uploading.value = true;
@@ -151,8 +140,6 @@ async function onPhoto(e) {
     photoName.value = photo.value.photo ? file.name : "";
   } catch (err) {
     clearPhoto();
-    // Name the accepted formats: the operator can only act on a refusal that says
-    // what to pick instead.
     photoError.value =
       err instanceof UnsupportedPhotoType ? t("attendance.photoType") : t("common.error");
     pushToast(photoError.value, "err");
@@ -167,9 +154,6 @@ function clearPhoto() {
   photoError.value = "";
 }
 
-// Single reactive source of truth for today's attendance. Seeded by the
-// on-load fetch, then mutated in place by each check-in/out response so the
-// page reflects the new state immediately (reactive, no full reload).
 const state = reactive({
   exists: false,
   checked_in: false,
@@ -191,7 +175,6 @@ function apply(s) {
   state.worked_hours = s.worked_hours ?? null;
 }
 
-// ON LOAD: fetch today's attendance state for the signed-in driver.
 const today = createResource({
   url: "apex.salis.api.driver_portal.get_today_attendance",
   auto: true,
@@ -199,11 +182,6 @@ const today = createResource({
   onError: (e) => { err.value = e.messages?.[0] || t("errors.loadFailed"); },
 });
 
-// In-flight guard: while either action is submitting, `loading` is true so BOTH
-// buttons are disabled. Without it a stray double-tap on a phone could fire
-// check-out the instant check-in's response enabled it, stamping check_out a few
-// ms after check_in (a zero-length "full day"). The guard makes a single tap a
-// single action; the backend also refuses a check_out at/before check_in.
 const checkin = createResource({
   url: "apex.salis.api.driver_portal.driver_check_in",
   onSuccess: (r) => { apply(r); clearPhoto(); pushToast(t("attendance.checkInDone"), "ok"); history.reload(); },
@@ -215,8 +193,6 @@ const checkout = createResource({
   onError: (e) => { pushToast(e.messages?.[0] || t("common.error"), "err"); },
 });
 
-// Guarded submitters: set `loading` for the whole request so no second tap (on
-// either button) can fire while one is in flight.
 async function doCheckIn() {
   if (loading.value || uploading.value || state.checked_in) return;
   loading.value = true;
@@ -227,7 +203,6 @@ async function doCheckIn() {
   }
 }
 async function doCheckOut() {
-  // Only act on a real prior check-in, and never when already checked out.
   if (loading.value || uploading.value || !state.checked_in || state.checked_out) return;
   loading.value = true;
   try {
@@ -243,15 +218,12 @@ function timeToMinutes(v) {
   return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
 }
 
-// Headline line: not checked in / checked in at HH:MM / checked out at HH:MM.
 const stateLabel = computed(() => {
   if (state.checked_out && state.check_out) return t("attendance.checkedOutAt", { time: fmtTime(state.check_out) });
   if (state.checked_in && state.check_in) return t("attendance.checkedInAt", { time: fmtTime(state.check_in) });
   return t("attendance.notCheckedIn");
 });
 
-// Server attendance status -> localized label / pill colour. One source for both
-// the today card and the month history list, so the two never drift.
 function rowStatusLabel(status) {
   switch (status) {
     case ATTENDANCE.PRESENT: return t("attendance.statusPresent");
@@ -268,7 +240,6 @@ function rowPill(status) {
   return "pill-success";
 }
 
-// Today's headline status label/pill (falls back to the open-shift state).
 const statusLabel = computed(() =>
   state.status ? rowStatusLabel(state.status) : (state.checked_in ? t("attendance.statusPresent") : t("common.none"))
 );
@@ -277,16 +248,12 @@ const statePill = computed(() => {
   return state.checked_in ? "pill-success" : "pill-neutral";
 });
 
-// This month's attendance history for the signed-in driver (read, on load).
 const history = createResource({
   url: "apex.salis.api.driver_portal.my_attendance",
   auto: true,
 });
 const rows = computed(() => history.data?.rows ?? []);
 
-// Computed hours present. Prefer the server's worked_hours (set once both
-// stamps exist); otherwise derive from check-in -> check-out, or check-in ->
-// now while the shift is still open.
 const hoursPresent = computed(() => {
   if (state.worked_hours != null && state.worked_hours !== 0) {
     return Number(state.worked_hours).toFixed(2);

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Utility Bill Entry controller.
 
 On submit: calculates variance from the Utility Account average, posts a
@@ -35,17 +35,12 @@ from frappe.utils import flt, fmt_money, today
 
 class UtilityBillEntry(Document):
     def on_cancel(self):
-        """RESTORATION half of the cancel: post the offsetting ledger row.
-
-        A Document method rather than a module function like the rest of this
-        controller, because Frappe dispatches it from the class (run_method at
-        frappe/model/document.py:1005) with no hooks.py doc_events entry to
-        add — this DocType registers none for on_cancel.
-        """
+        """RESTORATION half of the cancel: post the offsetting ledger row."""
         _post_reversal_row(self)
 
 
 def validate(doc, method=None):
+    """Defaults the company, validates the period, computes readings and variance, blocks negatives."""
     if not doc.company:
         from apex.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
         doc.company = get_default_company()
@@ -102,12 +97,6 @@ def on_submit(doc, method=None):
 def before_cancel(doc, method=None):
     """REFUSAL half of the cancel — reads only, writes nothing.
 
-    Frappe dispatches before_cancel from run_before_save_methods()
-    (frappe/model/document.py:414), strictly before db_update() stamps
-    docstatus 2 (:428) and before on_cancel runs from run_post_save_methods()
-    (:431). Every reason to refuse a cancel belongs here, where a throw leaves
-    the bill and the ledger untouched.
-
     The offsetting ledger row is the RESTORATION half and is posted from
     UtilityBillEntry.on_cancel. Written here it would outlive any later refusal
     in the same cancel — a second before_cancel handler, or the
@@ -116,12 +105,14 @@ def before_cancel(doc, method=None):
     completed. Refusing costs nothing to restore either way: the mirror is a
     memo row, so unlike a stock reversal there is no physical precondition to
     pre-check, and the missing reason is the whole refusal set.
+
     """
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is mandatory."))
 
 
 def _compute_meter_readings(doc) -> None:
+    """Derives consumed units from the readings and blocks a current reading below the previous one."""
     prev = flt(doc.meter_reading_previous)
     curr = flt(doc.meter_reading_current)
     if curr and prev and curr < prev:
@@ -151,6 +142,7 @@ def _compute_sharing(doc) -> None:
 
 
 def _compute_variance(doc) -> None:
+    """Computes the bill's percentage variance against the utility account's average monthly bill."""
     if not doc.utility_account or not frappe.db.exists("Utility Account", doc.utility_account):
         doc.variance_from_avg_pct = 0.0
         return

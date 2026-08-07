@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Fleet employee self-service API — backs the /fleet employee page (my vehicle,
 my recent trips, fuel request).
 
@@ -249,3 +249,70 @@ def submit_fuel_request(litres, vehicle=None, fuel_grade=None, station=None, not
         add_timeline_note("Fuel Request", doc.name, " · ".join(extras))
 
     return {"name": doc.name}
+
+
+_FUEL_STATUS_KEY = {
+    "Pending": "pending",
+    "Approved": "approved",
+    "Done": "completed",
+    "Failed": "failed",
+    "Reverted": "failed",
+    "Cancelled": "cancelled",
+}
+
+
+@frappe.whitelist()
+def get_my_fuel_requests(days=90, limit=30):
+    """The session user's own fuel requests, newest first (read).
+
+    Identity-scoped exactly as its siblings are: the driver comes from
+    ``frappe.session.user``, never from a client-supplied id and never from a
+    portal cookie, so an employee sees only what they raised. Returns ``[]`` for a
+    user who is not a driver, so the page renders its empty state rather than a
+    permission error. Read-only, no commit."""
+    driver = get_driver_for_session_user(frappe.session.user)
+    if not driver:
+        return []
+
+    since = frappe.utils.add_days(frappe.utils.today(), -(frappe.utils.cint(days) or 90))
+    rows = frappe.get_all(
+        "Fuel Request",
+        filters={
+            "driver": driver,
+            "request_date": [">=", since],
+            "docstatus": ["<", 2],
+        },
+        fields=[
+            "name", "request_date", "request_type", "vehicle", "fuel_platform",
+            "requested_litres", "amount", "status",
+        ],
+        order_by="request_date desc, creation desc",
+        limit=frappe.utils.cint(limit) or 30,
+    )
+
+    plates = {}
+    vehicles = {r["vehicle"] for r in rows if r.get("vehicle")}
+    if vehicles:
+        plates = {
+            v["name"]: v["plate_number"]
+            for v in frappe.get_all(
+                "Salis Vehicle",
+                filters={"name": ["in", list(vehicles)]},
+                fields=["name", "plate_number"],
+            )
+        }
+
+    return [
+        {
+            "name": r["name"],
+            "date": r["request_date"],
+            "type": r["request_type"],
+            "vehicle": plates.get(r["vehicle"], r["vehicle"]),
+            "station": r["fuel_platform"],
+            "litres": r["requested_litres"],
+            "amount": r["amount"],
+            "status": r["status"],
+            "statusKey": _FUEL_STATUS_KEY.get(r["status"], "pending"),
+        }
+        for r in rows
+    ]

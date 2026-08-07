@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Outbound WhatsApp / SMS gateway sender (settings-driven, provider-agnostic).
 
 Pushes short worker-facing messages — a personal Masar link, a ride departure,

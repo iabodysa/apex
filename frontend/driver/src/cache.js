@@ -1,7 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Driver payloads are credential-scoped and must never survive an identity
-// change. Purge every legacy persistent entry on module boot; only connectivity
-// state remains in memory.
+// Copyright (c) 2026, afmcoltd
 import { ref } from "vue";
 import { purgeDriverPayloadStorage } from "@shared/driverStorage";
 

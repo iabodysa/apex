@@ -1,8 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Renders a scannable QR for `value` as crisp SVG (no canvas blur at any size).
-     Used for the worker's boarding pass; the encoder is dependency-free (qrcode.js).
-     Colors follow the active theme (via qrColor.js) but are contrast-clamped so the
-     code always stays scannable — verified by a round-trip jsQR decode test. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <svg
     v-if="matrix"
@@ -27,20 +23,13 @@ import { qrColors } from "../utils/qrColor";
 const props = defineProps({
   value: { type: String, required: true },
   size: { type: Number, default: 220 },
-  // Quiet zone in modules (the spec requires 4 for reliable scanning).
   quiet: { type: Number, default: 4 },
   label: { type: String, required: true },
-  // When true, recolor the dark modules + light bg to the active theme (clamped
-  // for scannability). When false, plain black-on-white (the safe default).
   themed: { type: Boolean, default: false },
-  // CSS custom-property names to read the theme's dark/light source colors from.
   darkVar: { type: String, default: "--c-ink" },
   lightVar: { type: String, default: "--c-surface" },
 });
 
-// Re-resolve the theme colors when the theme attribute or language (RTL) flips.
-// A MutationObserver on <html data-theme/dir> is the honest trigger: themes are
-// applied by a server-set attribute, not a Vue ref this component owns.
 const themeTick = ref(0);
 let observer = null;
 onMounted(() => {
@@ -53,10 +42,8 @@ onMounted(() => {
 });
 onUnmounted(() => observer && observer.disconnect());
 
-// Resolve {dark, light} from the active theme's computed CSS vars, contrast-clamped.
-// Non-themed (or SSR/no-DOM) renders fall back to plain black-on-white.
 const colors = computed(() => {
-  themeTick.value; // dependency: recompute when the theme attribute mutates
+  themeTick.value;
   if (!props.themed || typeof window === "undefined") return { dark: "#000000", light: "#ffffff" };
   const cs = getComputedStyle(document.documentElement);
   const inkColor = cs.getPropertyValue(props.darkVar).trim();
@@ -64,8 +51,6 @@ const colors = computed(() => {
   return qrColors(inkColor, surfaceColor);
 });
 
-// Encode once per value; a malformed/oversized payload yields null (the parent
-// shows a fallback rather than a broken image).
 const matrix = computed(() => {
   try {
     return encodeQr(props.value);
@@ -76,7 +61,6 @@ const matrix = computed(() => {
 
 const dim = computed(() => (matrix.value ? matrix.value.size + props.quiet * 2 : 0));
 
-// One SVG <path> of all dark modules (far fewer DOM nodes than one <rect> each).
 const path = computed(() => {
   if (!matrix.value) return "";
   const { size, modules } = matrix.value;

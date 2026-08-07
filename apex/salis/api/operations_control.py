@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Fleet Control board API (read-only fleet view with details, for the
 ``operations-control`` desk page).
 
@@ -27,6 +27,7 @@ COMPLIANCE_FILTERS = ("Compliant", "Expiring Soon", "Expired")
 
 
 def _empty_summary(stopped_over_days):
+    """Returns a zeroed fleet summary shape with every vehicle status count at zero."""
     return {
         "total": 0,
         "by_status": {s: 0 for s in VEHICLE_STATUSES},
@@ -38,6 +39,7 @@ def _empty_summary(stopped_over_days):
 
 
 def _empty(offices=None, projects=None, unscoped=False, stopped_over_days=14):
+    """Returns an empty fleet board payload for a caller with no permitted project scope."""
     return {
         "vehicles": [],
         "summary": _empty_summary(stopped_over_days),
@@ -192,11 +194,6 @@ def get_vehicle_timeline(vehicle):
     row is a normalised ``{kind, date, ...}`` event; ``date`` is ISO so the client sorts
     and renders without reparsing per source.
 
-    The existence probe is name-filtered, not positional: the positional
-    ``frappe.db.exists(dt, dn)`` answers the value back unqueried when it equals the
-    DocType (database.py:1259), and Administrator short-circuits the permission check
-    above it (permissions.py:107) — so the literal "Salis Vehicle" reached here,
-    cleared this gate and returned an empty feed as a success.
     """
     frappe.has_permission("Salis Vehicle", "read", doc=vehicle, throw=True)
     if not frappe.db.exists("Salis Vehicle", {"name": vehicle}):

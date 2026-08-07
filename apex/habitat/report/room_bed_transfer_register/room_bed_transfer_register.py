@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Room Bed Transfer Register — who moved, from which bed to which bed, and when.
 
@@ -21,6 +21,7 @@ from apex.habitat import permissions
 
 
 def execute(filters=None):
+    """Returns submitted Room Bed Transfers with building, scoped by permission, with summary cards."""
     filters = filters or {}
     columns = _columns()
 
@@ -95,6 +96,7 @@ def _summary(data):
 
 
 def _columns():
+    """Returns the column definitions for the room bed transfer register."""
     return [
         {"label": _("Transfer"), "fieldname": "name", "fieldtype": "Link", "options": "Room Bed Transfer", "width": 160},
         {"label": _("Transfer Date"), "fieldname": "transfer_date", "fieldtype": "Date", "width": 115},

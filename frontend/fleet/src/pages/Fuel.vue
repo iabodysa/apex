@@ -1,14 +1,5 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <script setup>
-/*
- * FUEL — the fuel-request form as its own page. The page title and hint are
- * the shell heading (App.vue), so the card carries only the form.
- *
- * No request-history list here YET: apex.salis.api.fleet_employee exposes no
- * employee-scoped fuel-request read (driver_portal.fuel.my_fuel_requests is
- * the credential-first barcode surface, gated on the driver-portal flag, so it
- * is not this session portal's endpoint). The list ships when the backend does.
- */
 import { ref } from "vue";
 import Icon from "../components/Icon.vue";
 import { useI18n } from "../i18n";
@@ -20,8 +11,6 @@ const { toast, showToast } = useToast();
 const { fuelGrades, stations, form, submitting, loading, loadError, reload, submitFuelRequest } =
   useEmployee();
 
-// The server's rejection reason names the limit that was exceeded, so it is held
-// on the form until the next attempt rather than only flashed in a toast.
 const formError = ref("");
 
 async function onSubmit() {
@@ -42,10 +31,6 @@ async function onSubmit() {
   <div class="emp-narrow">
     <section class="emp-card reveal d1">
       <p v-if="loading" class="emp-empty">{{ t("emp.loading") }}</p>
-      <!-- Same [#emp-fail] rule as the home cards: a broken stations load must
-           not render a silently empty select. Gated on the list being empty, so
-           stations that did load keep the form usable when only a sibling
-           request failed. -->
       <div v-else-if="loadError && !stations.length" class="emp-fail">
         <p>{{ t("emp.loadError") }}</p>
         <button type="button" class="emp-btn emp-btn-ghost emp-retry" @click="reload">
@@ -92,18 +77,11 @@ async function onSubmit() {
           ></textarea>
         </div>
 
-        <!-- The rejection reason names a limit the employee has to act on, so it
-             stays on the form next to the field that caused it. The toast alone
-             took it away after three seconds. -->
         <p v-if="formError" id="ff-error" class="emp-form-error" role="alert">
           <Icon name="triangle-alert" :size="15" />
           {{ formError }}
         </p>
 
-        <!-- No "Save as draft" here. The control that used to sit below this one
-             raised a "Saved as a draft" toast and made no call at all, so a
-             request the employee believed was kept was silently discarded. A
-             draft needs somewhere to be stored before it can be offered. -->
         <button
           type="submit"
           class="emp-btn emp-btn-primary"
@@ -117,6 +95,5 @@ async function onSubmit() {
     </section>
   </div>
 
-  <!-- TOAST -->
   <div class="toast" :class="[toast.show ? 'show' : '', 'toast-' + toast.type]">{{ toast.msg }}</div>
 </template>

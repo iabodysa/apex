@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Rental accrual engine for the Salis fleet module.
 
 Background engine — never hand-entered. Mirrors the Habitat daily cost
@@ -149,8 +149,6 @@ def daily_rental_accrual() -> None:
     logger.info("daily_rental_accrual: rental accrual memos written.")
 
 
-
-
 def _period_bounds(period_month: str) -> tuple[str, str] | None:
     """Return (first_day, last_day) as YYYY-MM-DD for a "YYYY-MM" period string,
     or None when the period is blank/unparseable. The accrual rows carry a full
@@ -266,8 +264,6 @@ def release_settlement(settlement: str) -> int:
         update_modified=False,
     )
     return len(names)
-
-
 
 
 def monthly_rental_reconciliation() -> None:

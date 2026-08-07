@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis boarding/departure flow — driver "remaining passengers" notify, worker
 "please wait" request + self-confirm boarding, the worker boarding poll, and the
 depart/finalize close.
@@ -57,8 +57,6 @@ def _publish(event, dispatch_trip, payload):
         )
     except Exception:
         pass
-
-
 
 
 def _request_workers(transport_request):
@@ -151,10 +149,8 @@ def mark_boarded(dispatch_trip, employee, source="Scan"):
             row.confirm_source = source
             changed = True
     if changed:
-        trip.save(ignore_permissions=True)  # audit-ok: boarding path authorised the trip
+        trip.save(ignore_permissions=True)  # audit-ok
         frappe.cache.delete_value(_MISBOARD_CACHE_PREFIX + employee)
-
-
 
 
 def _driver_contact(dispatch_trip):
@@ -217,8 +213,6 @@ def _read_misboard(worker):
     return frappe.cache.get_value(_MISBOARD_CACHE_PREFIX + worker)
 
 
-
-
 def _worker_pickup_arrival(window):
     """The "driver has arrived at your pickup" state for the worker, or None.
 
@@ -232,8 +226,6 @@ def _worker_pickup_arrival(window):
     if not (window and window.get("arrived")):
         return None
     return {"arrived": True, "arrived_at": window.get("arrived_at")}
-
-
 
 
 def _trip_start_dt(dispatch_trip):
@@ -255,8 +247,6 @@ def _grace_elapsed(dispatch_trip):
         return False
     grace = get_boarding_setting("boarding_grace_minutes")
     return time_diff_in_seconds(now_datetime(), start) >= grace * 60
-
-
 
 
 def _auto_confirm_cutoff():
@@ -301,11 +291,7 @@ def auto_confirm_claimed_boardings():
     Registered in hooks scheduler_events (every few minutes). Idempotent and
     cheap: a trip with no eligible claim is left untouched. Each trip is written
     inside its own savepoint so one bad trip cannot cost the rest of the run.
-
-    The per-trip failure is swallowed rather than raised: the run commits only at the
-    end, so an escaping exception — which Frappe answers with a whole-transaction
-    rollback (scheduled_job_type.py:155) — would discard every trip already confirmed
-    and re-stall on the same row on the next tick."""
+    """
     trips = frappe.get_all(
         "Trip Boarding State",
         filters={
@@ -323,7 +309,7 @@ def auto_confirm_claimed_boardings():
             trip = frappe.get_doc("Dispatch Trip", name)
             flipped = _apply_auto_confirm(trip)
             if flipped:
-                trip.save(ignore_permissions=True)  # audit-ok: system tick, no user identity
+                trip.save(ignore_permissions=True)  # audit-ok
                 confirmed += flipped
                 _publish("boarding_update", name, {"auto_confirmed": flipped})
         except Exception:
@@ -335,8 +321,6 @@ def auto_confirm_claimed_boardings():
     if confirmed:
         frappe.db.commit()
     return confirmed
-
-
 
 
 def _resolve_trip_for_driver(dispatch_trip):
@@ -388,7 +372,7 @@ def get_trip_boarding(dispatch_trip):
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     if _apply_auto_confirm(trip):
-        trip.save(ignore_permissions=True)  # audit-ok: system timeout, read-time confirm
+        trip.save(ignore_permissions=True)  # audit-ok
 
     return {
         "dispatch_trip": dispatch_trip,
@@ -431,7 +415,7 @@ def notify_remaining_passengers(dispatch_trip):
             row.notify_count = cint(row.notify_count) + 1
         changed = True
     if changed:
-        trip.save(ignore_permissions=True)  # audit-ok: driver authorised on the trip
+        trip.save(ignore_permissions=True)  # audit-ok
 
     _publish("boarding_update", dispatch_trip, {"max_count": max_count, "window": window})
 
@@ -479,7 +463,7 @@ def worker_request_wait(token=None):
     if cint(target.wait_count) < max_count:
         target.wait_count = cint(target.wait_count) + 1
     target.wait_at = now_datetime()
-    trip.save(ignore_permissions=True)  # audit-ok: worker + trip resolved from token
+    trip.save(ignore_permissions=True)  # audit-ok
 
     wait_count = cint(target.wait_count)
     _publish(
@@ -568,11 +552,11 @@ def worker_claim_boarded(token=None):
                 "method": "Worker",
             },
         )
-        log.save(ignore_permissions=True)  # audit-ok: worker + trip resolved from token
+        log.save(ignore_permissions=True)  # audit-ok
 
     if target.status != "Boarded":
         target.worker_claim_at = now_datetime()
-        trip.save(ignore_permissions=True)  # audit-ok: worker + trip resolved from token
+        trip.save(ignore_permissions=True)  # audit-ok
     mark_boarded(dispatch_trip, employee, source="Worker")
 
     _publish(
@@ -607,7 +591,7 @@ def _remove_boarding_event(dispatch_trip, employee):
     if len(kept) == len(log.boarding_events or []):
         return
     log.set("boarding_events", kept)
-    log.save(ignore_permissions=True)  # audit-ok: driver authorised on the trip
+    log.save(ignore_permissions=True)  # audit-ok
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -635,7 +619,7 @@ def driver_mark_not_boarded(dispatch_trip, employee):
     target.confirm_source = None
     target.worker_claim_at = None
     target.reject_count = cint(target.reject_count) + 1
-    trip.save(ignore_permissions=True)  # audit-ok: driver authorised on the trip
+    trip.save(ignore_permissions=True)  # audit-ok
     _publish(
         "boarding_unmarked",
         dispatch_trip,
@@ -691,7 +675,7 @@ def worker_trip_boarding(token=None):
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     if _apply_auto_confirm(trip):
-        trip.save(ignore_permissions=True)  # audit-ok: system timeout, read-time confirm
+        trip.save(ignore_permissions=True)  # audit-ok
     row = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     state = (
         _state_payload(row, window)
@@ -759,7 +743,7 @@ def depart_and_finalize(dispatch_trip):
         else:
             pending += 1
     if changed:
-        trip.save(ignore_permissions=True)  # audit-ok: driver authorised on the trip
+        trip.save(ignore_permissions=True)  # audit-ok
 
     _close_trip_log(dispatch_trip)
 
@@ -801,4 +785,4 @@ def _close_trip_log(dispatch_trip):
     log.status = "Completed"
     if not log.end_datetime:
         log.end_datetime = now_datetime()
-    log.save(ignore_permissions=True)  # audit-ok: driver authorised on the trip
+    log.save(ignore_permissions=True)  # audit-ok

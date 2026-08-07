@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Maintenance Material Template controller."""
 import frappe
 from frappe import _

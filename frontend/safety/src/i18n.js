@@ -1,7 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Mirrors worker_portal/src/i18n.js: a tiny EN/AR dictionary with the same
-// translate / setLang / dir / useI18n machinery and a shared resource-error
-// mapper. Arabic strings live here, which is allowed for *_portal bundles.
+// Copyright (c) 2026, afmcoltd
 import { createI18n } from "@shared/i18n";
 
 const STORAGE_KEY = "safety_portal_lang";
@@ -216,18 +213,12 @@ const messages = {
   },
 };
 
-// Server-driven enum display: the period_label the backend returns for Monthly /
-// Quarterly / Annual ("June 2026", "Q2 2026", "2026") is rendered verbatim, so
-// no hand-maintained month/quarter map can drift from it.
 export function translateEnum(namespace, value) {
   if (value == null || value === "") return value;
   const map = lookup(lang.value, namespace);
   return (map && map[value]) || value;
 }
 
-// Shared translate / setLang / dir / resource-error machinery. Supervisors on
-// site default to Arabic. translateEnum stays local (reads namespaces from the
-// messages dict via the factory's lookup).
 const { lang, dir, lookup, translate, setLang, resourceErrorMessage } = createI18n({
   messages,
   storageKey: STORAGE_KEY,

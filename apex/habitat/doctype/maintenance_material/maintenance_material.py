@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Maintenance Material controller (flat catalog).
 
 Deliberately NOT a NestedSet. `material_category` already carries the only

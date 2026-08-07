@@ -1,7 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Real pages, mirroring the worker/driver portals' router idiom: hash history
-// (the /fleet www route serves one HTML shell, so no server-side route is
-// needed) and a catch-all redirect home.
+// Copyright (c) 2026, afmcoltd
 import { createRouter, createWebHashHistory } from "vue-router";
 
 const routes = [

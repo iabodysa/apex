@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="sk" role="status" :aria-label="label">
     <div class="sk-card">
@@ -40,9 +40,6 @@ defineProps({
 </script>
 
 <style scoped>
-/* The shape the content will take, so nothing moves after it is drawn
-   (DESIGN.md §6). The shimmer itself is the global .sk-block rule in index.css,
-   which carries no [dir=rtl] selector on purpose. */
 .sk {
   display: flex;
   flex-direction: column;

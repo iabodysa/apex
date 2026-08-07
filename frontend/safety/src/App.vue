@@ -1,7 +1,6 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="app-shell" :dir="dir">
-    <!-- Header: dark forest bar with the brand arc supergraphic. -->
     <header class="app-header">
       <div class="hero-arc" aria-hidden="true">
         <svg viewBox="0 0 200 200" fill="none" preserveAspectRatio="xMidYMid meet">
@@ -11,8 +10,6 @@
       </div>
       <div class="header-inner">
         <div class="header-bar">
-          <!-- Brand lockup. A tenant logo (Salis Portal Theme → Brand Logo) wins
-               over the default shield mark; show_brand=false hides it entirely. -->
           <div v-if="showBrand" class="header-brand">
             <img
               v-if="brandLogo"
@@ -41,18 +38,14 @@
     </header>
 
     <main class="app-main">
-      <!-- 1. No building chosen yet -> picker. -->
       <BuildingPicker v-if="!building" @select="onBuildingSelected" />
 
-      <!-- 2. Building chosen: load / show due cadences. -->
       <template v-else>
-        <!-- Loading the due set. -->
         <div v-if="dueRes.loading" class="state-center">
           <div class="spinner mx-auto"></div>
           <p class="state-msg">{{ t("common.loading") }}</p>
         </div>
 
-        <!-- Error + retry. -->
         <div v-else-if="dueRes.error" class="state-center">
           <div class="state-icon state-icon-danger"><Icon name="triangle-alert" :size="24" /></div>
           <p class="state-title">{{ t("errors.loadFailed") }}</p>
@@ -60,7 +53,6 @@
           <button class="btn btn-primary state-btn" @click="dueRes.reload()">{{ t("common.retry") }}</button>
         </div>
 
-        <!-- Success state after a submit. -->
         <Transition name="swap" mode="out-in">
           <div v-if="submitted" key="done" class="success">
             <div class="success-burst">
@@ -96,7 +88,6 @@
             </button>
           </div>
 
-          <!-- Empty: nothing due. -->
           <div v-else-if="due.length === 0" key="empty" class="empty">
             <div class="empty-burst">
               <div class="empty-ring"></div>
@@ -109,13 +100,10 @@
             </button>
           </div>
 
-          <!-- Due rounds: the working checklist. -->
           <div v-else key="due" class="due">
             <div class="due-intro">
               <h2 class="section-title">{{ t("due.title") }}</h2>
               <p class="due-sub">{{ t("due.subtitle") }}</p>
-              <!-- Always rendered, never conditional: a note that appears on the first
-                   tap would reflow the list under the thumb that just tapped it. -->
               <p class="draft-note">
                 <Icon name="shield" :size="13" /> {{ t("due.draftKept") }}
               </p>
@@ -149,12 +137,6 @@
                   {{ t("submit.cta") }}
                 </template>
               </button>
-              <!-- role=alert: the refusal appears only in response to the submit tap,
-                   so it must be announced, not just painted. BELOW the button, never
-                   above it: this line is the only thing on the page that appears at the
-                   moment of the tap, and inserting it above pushed the button 93px down
-                   and out of the viewport — the control moved out from under the thumb
-                   that had just pressed it. -->
               <p v-if="submitError" ref="submitErrEl" class="status-note status-err submit-err" role="alert">
                 {{ submitError }}
               </p>
@@ -181,30 +163,19 @@ import { makeCache } from "@shared/makeCache.js";
 
 const { t, tEnum, lang, dir } = useI18n();
 
-// Branding flags projected by the page template (www/safety.html). Default to
-// showing the brand; an explicit `false` hides it, and a tenant logo overrides
-// the default mark. The active theme itself is applied server-side via the
-// <html data-theme> attribute, exactly like /driver and /masar.
 const showBrand = computed(() => window.portal_show_brand !== false);
 const brandLogo = computed(() => window.portal_logo || "");
 
 useDocumentLanguage(lang, dir);
 
-// ---- selected building -------------------------------------------------
 const building = ref("");
 const buildingLabel = ref("");
 const submitted = ref(null);
 const submitError = ref("");
 const submitErrEl = ref(null);
 
-// ratings: { [cadence]: { [taskName]: { verdict, notes } } }
 const ratings = reactive({});
 
-// A round can run to 53 taps before the single submit, and every tap paints as
-// "saved" (row fill, status badge, progress ring). Keep the staged verdicts in
-// local storage, keyed by building + round date, so a reload or a crash mid-round
-// does not silently discard them. Cleared the moment the round is submitted or
-// abandoned; a new day's key never resurrects yesterday's draft.
 const { cacheSet, cacheGet } = makeCache("apex_safety_draft_");
 const draftKey = () => building.value + "|" + today();
 
@@ -225,7 +196,6 @@ function restoreDraft() {
   }
 }
 
-// ---- due cadences resource (the contract's get_due_cadences) -----------
 const dueRes = createResource({
   url: "apex.habitat.api.safety_checklist.get_due_cadences",
   makeParams: () => ({ building: building.value }),
@@ -234,13 +204,10 @@ const dueRes = createResource({
 const due = computed(() => (dueRes.data && dueRes.data.due) || []);
 const dueErrorMessage = computed(() => resourceErrorMessage(dueRes.error, "errors.loadFailed"));
 
-// ---- submit resource (the contract's submit_due_rounds) ----------------
 const submitRes = createResource({
   url: "apex.habitat.api.safety_checklist.submit_due_rounds",
 });
 
-// Verdict -> execution_status, mirroring TaskRow's mapping owner:
-//   pass -> Good   fail -> Not Done   issue -> Poor
 const STATUS = { pass: "Good", fail: "Not Done", issue: "Poor" };
 
 const totalRated = computed(() => {
@@ -265,7 +232,6 @@ const today = () => {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 };
 
-// ---- flow handlers -----------------------------------------------------
 function onBuildingSelected(name, label) {
   building.value = name;
   buildingLabel.value = label || name;
@@ -277,8 +243,6 @@ function onBuildingSelected(name, label) {
 }
 
 function changeBuilding() {
-  // The draft stays on disk: switching buildings is navigation, not "discard my
-  // round", so coming back to this building restores what was already rated.
   building.value = "";
   buildingLabel.value = "";
   submitted.value = null;
@@ -287,7 +251,6 @@ function changeBuilding() {
 }
 
 function resetAll() {
-  // After a submit, re-fetch the same building so it reflects what is now closed.
   const b = building.value;
   submitted.value = null;
   submitError.value = "";
@@ -315,7 +278,7 @@ function buildResults() {
   for (const cadence of Object.keys(ratings)) {
     for (const task of Object.keys(ratings[cadence])) {
       const r = ratings[cadence][task];
-      if (!r.verdict) continue; // unrated tasks are not submitted
+      if (!r.verdict) continue;
       out.push({
         task,
         cadence,
@@ -327,11 +290,6 @@ function buildResults() {
   return out;
 }
 
-// The server refuses a FAILED result on an evidence_required task that carries no
-// Evidence Photo. The portal already holds `evidence_required` per task (TaskRow
-// renders the chip from it), so it can name that rule in the operator's own language
-// instead of falling back to "couldn't submit" — the server sentence itself is never
-// rendered (it resolves against the site language, not this portal's toggle).
 const EVIDENCE_BLOCKING_STATUSES = new Set(["Not Done", "Poor"]);
 
 function evidenceBlockedTask(results) {
@@ -353,10 +311,6 @@ async function doSubmit() {
     submitError.value = t("submit.needOne");
     return;
   }
-  // createResource.submit() RE-THROWS after recording the failure (frappe-ui
-  // resources.js handleError). Awaiting it without a catch rejected the click
-  // handler, so every line below — including the one that shows the refusal —
-  // was skipped and a rejected round looked identical to no round at all.
   try {
     const res = await submitRes.submit({
       building: building.value,
@@ -364,29 +318,17 @@ async function doSubmit() {
       results: JSON.stringify(results),
     });
     submitted.value = res || submitRes.data || { ok: true, rounds: [], emailed: false };
-    // The round is on the server now; the staged copy would only resurrect it.
     dropDraft();
   } catch (e) {
     const blocked = evidenceBlockedTask(results);
     submitError.value = blocked
       ? t("errors.evidenceRequired", { task: blocked.task_title || blocked.name })
       : resourceErrorMessage(e, "errors.submitFailed");
-    // The dock sits at the foot of a checklist that can run past 9000px, so the
-    // line can render with its last rows below the fold. "nearest" moves the page
-    // by the minimum needed and does nothing when it is already fully visible.
     await nextTick();
     if (submitErrEl.value) submitErrEl.value.scrollIntoView({ block: "nearest" });
   }
 }
 
-// ---- realtime (socket push) --------------------------------------------
-// When a Safety Round is submitted/cancelled elsewhere, the DUE set for this
-// building changes, so refetch it immediately instead of waiting for a manual
-// reload. Guarded: only refetch when a building is selected, the tab is visible,
-// and the user is not mid-flow (no unrated ratings staged and not on the success
-// screen) so realtime never wipes an in-progress checklist. A push that lands
-// mid-flow is deferred and flushed once the user resets. Failure paths in the
-// socket layer are swallowed there; this is the refresh path only.
 let stopRealtime = () => {};
 const realtimePending = ref(false);
 const midFlow = computed(() => submitted.value !== null || totalRated.value > 0);
@@ -398,7 +340,6 @@ function onRealtimeUpdate() {
   realtimePending.value = false;
   dueRes.fetch();
 }
-// Once the user clears the in-progress flow, flush any update that arrived meanwhile.
 watch(midFlow, (active) => {
   if (!active && realtimePending.value && !document.hidden) onRealtimeUpdate();
 });
@@ -410,7 +351,6 @@ onUnmounted(() => {
   stopRealtime();
 });
 
-// ---- greeting + result styling -----------------------------------------
 const greeting = computed(() => {
   const h = new Date().getHours();
   if (h < 12) return t("greeting.morning");
@@ -436,7 +376,6 @@ function resultIcon(r) {
   padding: 18px 16px 40px;
 }
 
-/* ---- header ---------------------------------------------------------- */
 .header-inner {
   position: relative;
   z-index: 1;
@@ -529,7 +468,6 @@ function resultIcon(r) {
   flex-shrink: 0;
 }
 
-/* ---- generic states -------------------------------------------------- */
 .state-center {
   text-align: center;
   padding: 40px 16px;
@@ -562,7 +500,6 @@ function resultIcon(r) {
   margin: 16px auto 0;
 }
 
-/* ---- due list -------------------------------------------------------- */
 .due {
   display: flex;
   flex-direction: column;
@@ -586,7 +523,6 @@ function resultIcon(r) {
   color: var(--c-success);
 }
 
-/* ---- submit dock ----------------------------------------------------- */
 .submit-dock {
   margin-top: 4px;
   text-align: center;
@@ -629,7 +565,6 @@ function resultIcon(r) {
   color: var(--c-muted);
 }
 
-/* ---- success --------------------------------------------------------- */
 .success,
 .empty {
   text-align: center;
@@ -747,7 +682,6 @@ function resultIcon(r) {
   margin: 26px auto 0;
 }
 
-/* ---- empty ----------------------------------------------------------- */
 .empty {
   padding-top: 40px;
 }
@@ -780,7 +714,6 @@ function resultIcon(r) {
   margin-inline: auto;
 }
 
-/* ---- transitions ----------------------------------------------------- */
 .swap-enter-active,
 .swap-leave-active {
   transition:
@@ -812,11 +745,6 @@ function resultIcon(r) {
   }
 }
 
-/* ---- tablet / iPad (≥768px) -----------------------------------------
-   The base layout is a phone column (capped by .app-shell in index.css).
-   On a wider viewport the shell widens to a comfortable centered column,
-   so give the header and content more breathing room and scale the
-   greeting up so the page doesn't look lost on an iPad. */
 @media (min-width: 768px) {
   .header-inner {
     padding: 24px 28px 28px;

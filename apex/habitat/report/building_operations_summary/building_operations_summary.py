@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 from collections import defaultdict
 
@@ -11,6 +11,7 @@ from apex.apex_core.utils.report_summary import count_card, percent_card, total_
 
 
 def execute(filters=None):
+    """Returns the per-building operations summary rows and summary cards for the selected date range."""
     filters = filters or {}
 
     date_from = getdate(filters.get("period_from") or add_days(today(), -7))
@@ -70,6 +71,7 @@ def execute(filters=None):
 
 
 def _columns():
+    """Returns the column definitions for the building operations summary report."""
     return [
         {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link",
          "options": "Building", "width": 180},
@@ -94,6 +96,7 @@ def _columns():
 
 
 def _get_buildings(building_filter):
+    """Returns active buildings restricted to the user's permitted buildings and any building filter."""
     f = {"status": "Active"}
 
     if not permissions._building_is_unscoped(frappe.session.user):
@@ -125,6 +128,7 @@ def _is_scope_gap(building_filter):
 
 
 def _no_scope_message():
+    """Returns the message shown when a scoped user has no building permission at all."""
     return frappe._(
         "No active buildings are in your scope. Ask an Accommodation Manager to grant you"
         " a building permission, then reopen this report."
@@ -132,6 +136,7 @@ def _no_scope_message():
 
 
 def _occupancy(building_names):
+    """Returns each building's total and occupied bed counts."""
     result = defaultdict(lambda: {"total": 0, "occupied": 0})
 
     beds = frappe.get_all("Bed", filters={"building": ["in", building_names]},
@@ -145,6 +150,7 @@ def _occupancy(building_names):
 
 
 def _cleaning(building_names, date_from, date_to):
+    """Returns each building's cleaning log totals, split into compliant and missed, for the window."""
     result = defaultdict(lambda: {"total": 0, "compliant": 0, "missed": 0})
 
     logs = frappe.get_all(
@@ -215,6 +221,7 @@ def _maintenance(building_names):
 
 
 def _resident_requests(building_names):
+    """Returns each building's count of open or triaged requests, mapped through QR location tokens."""
     result = defaultdict(int)
     tokens = frappe.get_all(
         "QR Location",

@@ -1,34 +1,12 @@
-/* [#8wb1ff] */
+/* Copyright (c) 2026, afmcoltd */
 
-/* Shared brand primitives (--brand-green) + full --c-* token vocabulary +
-   light/dark modes — the SINGLE source of truth. No local palette lives here:
-   the portal consumes tokens only, so the retired per-portal drift (afmco /
-   frappe / dark / gemini / atelier / creative copies) is gone. */
 @import "@shared/tokens.css";
 
-/* No font @import here. Montserrat is declared once by the hosting shells
-   (www/driver.html + www/masar.html -> /assets/apex/vendor/montserrat-v31/), whose
-   vendored variable face spans 400-800, so this bundle must never reach a font CDN. */
 
-/* Compiled by worker/tailwind.config.js, not a config beside this file: driver/ is
-   not a Vite root, its screens build INTO worker_portal, and that config's `content`
-   globs scan ../driver/src/** so nothing here is purged. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ---------------------------------------------------------------------------
-   frappe-ui token bridge — variables.
-
-   frappe-ui's components are styled with its three semantic families, and its
-   tailwind preset resolves every one of them through a CSS variable —
-   `var(--surface-green-3, #hex)`. Re-declaring those variables in terms of the
-   Apex tokens is the supported way to give the library this product's palette:
-   the components keep their own structure, and colour still arrives from one
-   place. Declared after `@tailwind utilities` so it outranks any `:root` block
-   the preset emits into the base layer; the right-hand side is theme-agnostic
-   because the Apex tokens switch themselves. Same mapping as housing/src/index.css.
-   --------------------------------------------------------------------------- */
 :root,
 [data-theme="dark"] {
   --surface-white: var(--c-surface-2);
@@ -103,29 +81,6 @@
   --outline-orange-1: var(--c-warning);
 }
 
-/* ---------------------------------------------------------------------------
-   frappe-ui token bridge — the utility classes the library's own markup carries.
-
-   housing/ does NOT need this block: housing is its own Vite root and its
-   tailwind.config.js loads `frappe-ui/tailwind`, whose plugin generates every
-   `bg-surface-*` / `text-ink-*` / `border-outline-*` utility. The driver screens
-   are not a Vite root — they compile through worker/tailwind.config.js, which
-   carries no preset and whose `content` globs deliberately never reach
-   node_modules. So Tailwind here emits NOTHING for a class that only ever appears
-   inside frappe-ui's own source, and an adopted component would render as unstyled
-   text. This block supplies exactly those class names, resolved through the same
-   variables the preset would have used, so the shipped bundle needs no build
-   change to render the library correctly.
-
-   Two rules keep it collision-free with the utilities worker/ already generates:
-   every declaration below either names a class the core Tailwind theme does not
-   have at all (`bg-surface-*`, `h-13`), or repeats a core value byte for byte
-   (`gap-2` is 0.5rem in both). The type scale and the radii are the one place the
-   preset and the core theme disagree, so they are absent here on purpose — Apex
-   sizing reaches each control through its own hook class further down, per
-   DESIGN.md §8. Adding the preset to worker/tailwind.config.js later would
-   therefore change nothing on screen.
-   --------------------------------------------------------------------------- */
 .bg-surface-white {
   background-color: var(--surface-white);
 }
@@ -235,8 +190,6 @@
   border-color: var(--outline-gray-3);
 }
 
-/* Preset-only sizes. `h-13` is 52px — the same number --tap-lg carries — which is
-   why a `size="2xl"` Button already lands on the DESIGN.md §8 primary target. */
 .h-13 {
   height: 3.25rem;
 }
@@ -256,9 +209,6 @@
   width: 1.125rem;
 }
 
-/* Core-value repeats for the sizes frappe-ui's Button and Badge pick per `size`.
-   Without them a Badge has no horizontal padding at all and a one-glyph count pill
-   collapses to 6px wide — measured at 390px before these landed. */
 .h-3 {
   height: 0.75rem;
 }
@@ -320,9 +270,6 @@
   display: grid;
 }
 
-/* Core-value repeats. Tailwind emits these only for class names it finds in the
-   scanned source, and frappe-ui's markup is never scanned; each value below is the
-   core Tailwind value, so a later preset or a scanned occurrence is a no-op. */
 .inline-flex {
   display: inline-flex;
 }
@@ -395,7 +342,6 @@
   animation: spin 1s linear infinite;
 }
 
-/* [#glw00i] */
 html,
 body {
   background: var(--c-canvas);
@@ -409,19 +355,13 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* [#5o3wjo] */
 @layer components {
-  /* [#8gmhoh] */
-  /* The page canvas, never the column: MobileConsoleShell owns the column width and
-     widens it at --bp-tablet / --bp-desktop, so a cap here would freeze the portal at a
-     phone strip on every screen. */
   .app-shell {
     @apply min-h-screen flex flex-col w-full;
     background: var(--c-canvas);
     color: var(--c-ink);
   }
 
-  /* [#fxjcal] */
   .card {
     background: var(--c-surface);
     border: var(--border-width) solid var(--c-border);
@@ -431,13 +371,11 @@ body {
   .card-pad {
     padding: var(--sp-4);
   }
-  /* accent for the single most-urgent Home item */
   .card-primary {
     border-inline-start: 3px solid var(--c-primary);
     background: color-mix(in srgb, var(--c-primary) 5%, var(--c-surface));
   }
 
-  /* [#31inr0] */
   .pill {
     display: inline-flex;
     align-items: center;
@@ -470,7 +408,6 @@ body {
     color: var(--c-ink);
   }
 
-  /* [#d0qr37] */
   .btn {
     display: inline-flex;
     align-items: center;
@@ -533,7 +470,6 @@ body {
     border-color: var(--c-border-strong);
   }
 
-  /* [#1rmd0e] */
   .field-label {
     display: block;
     font-size: var(--fs-sm);
@@ -559,9 +495,6 @@ body {
     min-height: 96px;
     resize: vertical;
   }
-  /* A pointer press should not draw a ring, so :focus keeps the border-colour
-     answer. The keyboard path is a different event and gets the shared 3px ring
-     back — a 1px border tint is not an indicator anyone tabbing can find. */
   .input:focus,
   .select:focus,
   .textarea:focus {
@@ -579,7 +512,6 @@ body {
     color: var(--c-muted);
   }
 
-  /* [#3hvnzd] */
   .stat {
     background: var(--c-surface);
     border: var(--border-width) solid var(--c-border);
@@ -600,7 +532,6 @@ body {
     line-height: 1.15;
   }
 
-  /* [#rn4lw2] */
   .section-title {
     font-size: var(--fs-h2);
     font-weight: var(--fw-heading);
@@ -608,7 +539,6 @@ body {
     letter-spacing: -0.01em;
   }
 
-  /* [#ei3i1l] */
   .avatar {
     display: grid;
     place-items: center;
@@ -617,7 +547,6 @@ body {
     flex-shrink: 0;
   }
 
-  /* [#bro4cs] */
   .spinner {
     height: 32px;
     width: 32px;
@@ -633,9 +562,6 @@ body {
   }
 }
 
-/* The shared reduce-motion rule collapses every duration, which would leave this
-   frozen mid-turn while a trip is still being submitted — a stopped spinner reads
-   as a failed control. Slow it to a non-vestibular turn instead. */
 @media (prefers-reduced-motion: reduce) {
   .spinner {
     animation-duration: 2.4s !important;
@@ -643,8 +569,6 @@ body {
   }
 }
 
-/* [#66a3tb] Quick-action tile — richer surface + hairline so the "More" grid
-   reads as tappable cards, matching the console reference. */
 .quick-action {
   display: flex;
   flex-direction: column;
@@ -666,7 +590,6 @@ body {
   }
 }
 
-/* [#6suoq3] */
 .status-note {
   text-align: center;
   font-size: var(--fs-sm);
@@ -683,14 +606,10 @@ body {
   background: var(--c-danger-bg);
 }
 
-/* RTL: horizontally mirror direction-bearing icons (chevron / route / nav
-   arrows) so they point the correct way. GLOBAL (plain class) on purpose — a
-   [dir=rtl] rule inside a scoped block can mirror the whole page. */
 [dir="rtl"] .rtl-flip {
   transform: scaleX(-1);
 }
 
-/* [#85x56s] */
 .text-muted {
   color: var(--c-muted);
 }
@@ -714,24 +633,12 @@ body {
   background: var(--c-border);
 }
 
-/* ---------------------------------------------------------------------------
-   Page anatomy (DESIGN.md §1–§3). These are layout, not controls, so they live
-   here rather than becoming components.
-
-   §3, field worker: the frame is a phone column below --bp-tablet, a reading
-   column to --bp-desktop, and a 1100px two-pane work area past it. The first two
-   are MobileConsoleShell's own defaults; only the desktop width is this portal's
-   to declare, and --shell-wide is the hook the shell exposes for exactly that.
-   1024px = --bp-desktop (frontend_shared/tokens.css); keep in sync — a CSS @media
-   condition cannot read a custom property.
-   --------------------------------------------------------------------------- */
 @media (min-width: 1024px) {
   :root {
     --shell-wide: 1100px;
   }
 }
 
-/* Summary beside detail past --bp-desktop; one stacked column below it. */
 .hz-split {
   display: grid;
   gap: var(--sp-3);
@@ -744,24 +651,17 @@ body {
   gap: var(--sp-3);
   min-width: 0;
 }
-/* 1024px = --bp-desktop (frontend_shared/tokens.css); keep in sync. */
 @media (min-width: 1024px) {
   .hz-split {
     grid-template-columns: minmax(360px, 400px) minmax(0, 1fr);
     gap: var(--sp-5);
   }
-  /* Sticky, not a second scroller: DESIGN.md §1 gives the frame the only
-     overflow, and two nested scrollers is the defect that makes a screen feel
-     broken. The side column simply holds its place while the rest moves past it. */
   .hz-split-side {
     position: sticky;
     top: 0;
   }
 }
 
-/* List beside detail past --bp-desktop; one stacked column below it. The same two
-   names housing/src/index.css uses for the same archetype, so a screen moved between
-   the two portals keeps its markup. .hz-split above already carries the grid. */
 .hz-split-list,
 .hz-split-detail {
   min-width: 0;
@@ -771,17 +671,13 @@ body {
   flex-direction: column;
   gap: var(--sp-3);
 }
-/* 1024px = --bp-desktop (frontend_shared/tokens.css); keep in sync. */
 @media (min-width: 1024px) {
-  /* Sticky, not a second scroller — the frame owns the only overflow (DESIGN.md §1). */
   .hz-split-detail {
     position: sticky;
     top: 0;
   }
 }
 
-/* The detail pane's own ground. The idle variant is dashed and unfilled so an empty
-   pane reads as "nothing chosen yet" rather than as a card that failed to load. */
 .pane {
   padding: var(--sp-4);
   border-radius: var(--radius);
@@ -795,11 +691,6 @@ body {
   box-shadow: none;
 }
 
-/* The hot zone (DESIGN.md §2): the page's primary action, full width, --tap-lg,
-   pinned to the bottom of the frame above the navbar so it never scrolls away.
-   The negative margins cancel the shell's own 16px frame padding so the dock
-   spans the full column, and the bottom one lets it settle flush at the end of
-   the scroll instead of floating one gap above it. */
 .hz-dock {
   position: sticky;
   inset-block-end: calc(-1 * var(--sp-4));
@@ -818,20 +709,6 @@ body {
   color: var(--c-muted);
 }
 
-/* ---------------------------------------------------------------------------
-   Apex sizing on the library's controls (DESIGN.md §8: --tap-lg for a primary,
-   --tap-md for an ordinary control, --tap-min as the floor in BOTH dimensions,
-   and the --fs-* scale for type). frappe-ui ships its controls at desk density,
-   which is right for a desk and wrong for a gloved thumb in a truck cab. The
-   preset's own type scale and radii are deliberately not bridged above, so this
-   is where an adopted control gets its Apex size, its Apex radius and the one
-   --c-focus ring.
-
-   Unscoped on purpose: Button declares `inheritAttrs: false` and re-binds
-   `$attrs` itself, which drops the scoped-style attribute a page would need for
-   `:deep()` to reach it. The `class` prop always survives, so these hang off
-   class names this portal puts on the components.
-   --------------------------------------------------------------------------- */
 .dock-btn {
   width: 100%;
   min-height: var(--tap-lg);
@@ -852,23 +729,16 @@ body {
   outline: 3px solid var(--c-focus);
   outline-offset: 2px;
 }
-/* A Badge is read, never pressed, so it keeps the library's own compact height and
-   only takes the Apex type scale. shrink-0 because a badge sits at the end of a flex
-   row whose text is `flex: 1`, and a squeezed status pill drops its own label. */
 .tone-badge {
   flex-shrink: 0;
   font-size: var(--fs-sm);
   font-weight: var(--fw-semibold);
   letter-spacing: 0.02em;
 }
-/* The library's Alert carries its own radius from the preset's scale, which this
-   portal does not bridge; --radius is the DESIGN.md §8 card radius. */
 .load-alert {
   border-radius: var(--radius);
 }
 
-/* Alert's own dismiss control is a bare <button> around a 16px glyph — 16x16 of
-   target. --tap-min is the floor in BOTH dimensions, icon-only included (§8). */
 .wait-alert button {
   min-height: var(--tap-min);
   min-width: var(--tap-min);
@@ -882,10 +752,6 @@ body {
   outline-offset: 2px;
 }
 
-/* TabButtons at Apex size. The library builds its tabs from Buttons carrying
-   `!h-6.5` (26px) — desk density, half the 44px floor. That class is NOT bridged
-   below on purpose, so the buttons arrive with no height at all and these
-   min-heights are what governs; nothing is overridden and nothing is forked. */
 .trip-tabs {
   align-self: start;
 }
@@ -907,9 +773,6 @@ body {
   outline-offset: 2px;
 }
 
-/* Progress has no colour prop, so the boarded bar takes the Apex palette the only
-   way the component allows — through the class it was handed. The track keeps the
-   library's structure; only the two paint values arrive from tokens. */
 .board-bar [role="progressbar"] {
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--c-ink) 10%, transparent);
@@ -924,26 +787,11 @@ body {
   }
 }
 
-/* Dialog's close control has the same 16px-glyph problem as Alert's. */
 .dialog-content button {
   min-height: var(--tap-min);
   min-width: var(--tap-min);
 }
 
-/* ---------------------------------------------------------------------------
-   frappe-ui token bridge — the classes the SECOND wave of adopted components
-   carries (TabButtons, Progress, Dialog, and Button's hover/press/focus states).
-   Found by listing every class in the rendered DOM that no rule in the document
-   matched, not by reading the library's sources, so nothing here is speculative.
-
-   Four class names are deliberately ABSENT and must stay absent:
-     !h-6.5, !rounded-[9px]        — desk-density tab sizing; .trip-tabs above
-                                     supplies the Apex target instead.
-     focus-visible:ring-outline-gray-3
-     focus-visible:ring-outline-green-2
-                                   — per-theme ring colours. DESIGN.md §8 gives the
-                                     portal ONE focus ring, --c-focus, applied below.
-   --------------------------------------------------------------------------- */
 .min-h-7 {
   min-height: 1.75rem;
 }
@@ -956,14 +804,9 @@ body {
 .max-w-lg {
   max-width: 32rem;
 }
-/* Load-bearing, not cosmetic: without it the "fixed" overlay keeps its static
-   position and the whole dialog lands one viewport BELOW the fold — measured at
-   390px, top resolved to 900px. */
 .inset-0 {
   inset: 0;
 }
-/* The shell's own sticky header and bottom nav sit at z-index 20 and would paint
-   over a modal that declares none. Above them, below nothing else. */
 .dialog-overlay {
   z-index: 30;
 }
@@ -994,8 +837,6 @@ body {
 .pb-7 {
   padding-bottom: 1.75rem;
 }
-/* 640px is Tailwind's own `sm`, not an Apex breakpoint: it is the value the
-   library's markup was written against, repeated byte for byte. */
 @media (min-width: 640px) {
   .sm\:px-6 {
     padding-inline: 1.5rem;
@@ -1022,8 +863,6 @@ body {
 .bg-transparent {
   background-color: transparent;
 }
-/* Logical, not `margin-left`: these two stack the library's own rows, and a
-   physical margin puts the gap on the wrong side of an Arabic screen (§9). */
 .space-x-2 > :not([hidden]) ~ :not([hidden]) {
   margin-inline-start: 0.5rem;
 }
@@ -1031,8 +870,6 @@ body {
   margin-block-start: 10px;
 }
 
-/* Tailwind composes a ring from custom properties; these two reproduce just the
-   inset variant the library's tab strip asks for. */
 .ring-1.ring-inset {
   box-shadow: inset 0 0 0 1px var(--tw-ring-color, var(--outline-gray-1));
 }
@@ -1040,10 +877,6 @@ body {
   --tw-ring-color: var(--outline-gray-1);
 }
 
-/* The dialog scrim. Mixed from --c-ink rather than a literal black so it dims the
-   same amount in both themes; the library's own `dark:` variant is keyed to a
-   Tailwind darkMode config this build does not run, so the dark value is attached
-   to the attribute Apex actually sets. */
 .bg-black-overlay-200 {
   background-color: color-mix(in srgb, var(--c-ink) 40%, transparent);
 }
@@ -1054,10 +887,6 @@ body {
   background-color: var(--surface-modal);
 }
 
-/* Button press feedback. `green-700` / `green-800` are core-palette greens that no
-   preset variable resolves, so they are the one place the bridge cannot forward a
-   value — mixing --c-primary toward black keeps the press on the Apex palette and
-   inside both themes instead of pinning a second green to the screen. */
 .hover\:bg-green-700:hover {
   background-color: color-mix(in srgb, var(--c-primary) 86%, black);
 }
@@ -1111,9 +940,6 @@ body {
   }
 }
 
-/* One focus ring for the whole portal (§8). `focus:outline-none` clears the UA
-   ring the library asks to remove; the Apex ring is declared after it so a
-   keyboard user never ends up with neither. */
 .focus\:outline-none:focus,
 .focus-visible\:outline-none:focus-visible,
 .outline-none {

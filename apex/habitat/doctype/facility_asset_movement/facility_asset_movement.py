@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Facility Asset Movement controller."""
 
 from __future__ import annotations
@@ -22,6 +22,7 @@ class FacilityAssetMovement(Document):
 
 
 def validate(doc, method=None):
+    """Reconciles origin, sets company fields, flags intercompany moves, and blocks bad transfers."""
     _reconcile_origin(doc)
     _populate_company_fields(doc)
     _detect_intercompany(doc)
@@ -98,6 +99,7 @@ def on_cancel(doc, method=None):
 
 
 def before_cancel(doc, method=None):
+    """Blocks cancelling without a reason or if the asset has moved from this movement's destination."""
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is required before cancelling a Facility Asset Movement."))
     ensure_asset_still_at(
@@ -139,6 +141,7 @@ def _reconcile_origin(doc):
 
 
 def _populate_company_fields(doc):
+    """Fills in blank from/to company fields from each building's own company."""
     if doc.from_building and not doc.from_company:
         doc.from_company = frappe.db.get_value("Building", doc.from_building, "company") or None
     if doc.to_building and not doc.to_company:
@@ -146,6 +149,7 @@ def _populate_company_fields(doc):
 
 
 def _detect_intercompany(doc):
+    """Sets is_intercompany to 1 when the from and to companies differ, otherwise clears it to 0."""
     if doc.from_company and doc.to_company and doc.from_company != doc.to_company:
         doc.is_intercompany = 1
     else:

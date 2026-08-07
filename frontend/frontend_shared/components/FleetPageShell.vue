@@ -1,39 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- =====================================================================
-     ARCHETYPE 1 — Employee page (fleet).
-     A calm, roomy single-purpose web page: a dark forest top bar (brand +
-     nav + actions), a greeting band, then a centered content column the
-     portal fills with cards/forms. Density is deliberately low — an employee
-     opens this once a fortnight to perform one action.
-
-     Consumes ONLY shared --c-* tokens (see @shared/tokens.css) — no color is
-     hard-coded — so it recolours with light/dark and stays on-brand. RTL-first:
-     all edges use logical properties, so it mirrors under <html dir="rtl">.
-
-     THE TOP NAV BELOW --bp-tablet IS THE SHELL'S ANSWER, NOT THE PORTAL'S.
-     It used to be `display: none`, which is only correct for a portal that has
-     somewhere else to put its destinations. Fleet has no router and no second
-     nav, so it was overriding the shell with a three-part selector to win the
-     specificity fight and put the row back. One archetype cannot have two
-     answers to one question: the nav now wraps onto its own full-width scrolling
-     row inside the sticky bar, and a portal that genuinely wants it gone hides
-     its own slot content.
-
-     SLOTS
-       brand    — brand mark + wordmark on the header (start side).
-       nav      — top nav links (e.g. <a>Home</a> …).
-       actions  — header end side (avatar, lang/theme toggles).
-       heading  — greeting band. Or use the `title`/`subtitle` props for the
-                  default markup; the slot fully overrides it.
-       default  — page content. The portal drops its own grid/cards here; the
-                  shell only provides the centered max-width column + padding.
-       footer   — optional full-width note under the content.
-
-     PROPS
-       title    — big greeting line (used only if `heading` slot is empty).
-       subtitle — muted line under the greeting.
-       maxWidth — content column width (default 1180px).
-     ===================================================================== -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="fleet-shell">
     <header class="fleet-top">
@@ -85,7 +50,6 @@ const cssWidth = computed(() =>
   font-weight: var(--fw-body);
 }
 
-/* ---- top bar ---- */
 .fleet-top {
   position: sticky;
   top: 0;
@@ -114,14 +78,10 @@ const cssWidth = computed(() =>
   align-items: center;
   gap: var(--sp-2);
 }
-/* If there is no nav, the actions cluster takes the auto margin instead. */
 .fleet-nav:empty + .fleet-actions {
   margin-inline-start: auto;
 }
 
-/* Portal nav links inherit these without extra markup. --tap-min, not padding
-   alone: at --fs-sm the padded box lands near 31px, and this same row is what a
-   phone gets after the wrap below. */
 .fleet-nav :slotted(a) {
   display: inline-flex;
   align-items: center;
@@ -144,8 +104,6 @@ const cssWidth = computed(() =>
   color: var(--c-header-ink);
   font-weight: var(--fw-semibold);
 }
-/* Two of the eight mandatory states. The ring is the header accent because the
-   shared --c-focus is tuned against the page ground, not against forest chrome. */
 .fleet-nav :slotted(a[aria-disabled="true"]) {
   opacity: 0.45;
   cursor: default;
@@ -156,7 +114,6 @@ const cssWidth = computed(() =>
   outline-offset: 2px;
 }
 
-/* ---- body ---- */
 .fleet-body {
   margin: 0 auto;
   padding: clamp(var(--sp-5), 4vw, 34px) clamp(var(--sp-4), 4vw, var(--sp-8)) 80px;
@@ -185,11 +142,6 @@ const cssWidth = computed(() =>
   box-shadow: var(--shadow-sm);
 }
 
-/* 767px = --bp-tablet (frontend_shared/tokens.css) minus 1; keep in sync — CSS
-   @media conditions cannot read a custom property. Below the tablet width the
-   nav wraps to its own full-width row under brand + actions and scrolls inline
-   rather than squeezing the brand out of the bar. `order` moves the row without
-   touching slot order, so the DOM sequence a screen reader follows is unchanged. */
 @media (max-width: 767px) {
   .fleet-top {
     flex-wrap: wrap;

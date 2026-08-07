@@ -1,9 +1,5 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <!-- Full-screen camera boarding-pass scanner. Opens the rear camera, decodes the
-       worker's QR with the native BarcodeDetector, and POSTs the token to
-       scan_boarding_pass; the server returns the validation result. Degrades to a
-       clear message (no crash) where the camera or BarcodeDetector is unavailable. -->
   <div class="scanner-overlay" role="dialog" aria-modal="true">
     <div class="scanner-bar">
       <span class="font-bold">{{ t("boarding.title") }}</span>
@@ -12,12 +8,10 @@
       </button>
     </div>
 
-    <!-- Live viewfinder -->
     <div class="scanner-stage">
       <video ref="video" class="scanner-video" playsinline muted></video>
       <div v-if="phase === 'scanning'" class="scanner-reticle" aria-hidden="true"></div>
 
-      <!-- Status / error states over the stage -->
       <div v-if="phase === 'starting'" class="scanner-note">
         <div class="spinner"></div>
         <p>{{ t("boarding.starting") }}</p>
@@ -26,7 +20,6 @@
         <p>{{ errorMsg }}</p>
       </div>
 
-      <!-- Result panel after a scan -->
       <div v-else-if="phase === 'result'" class="scanner-result" :class="resultClass">
         <div class="result-icon"><Icon :name="resultIcon" :size="40" /></div>
         <p class="result-title">{{ t(resultTitleKey) }}</p>
@@ -53,16 +46,13 @@ import { useI18n } from "../i18n";
 
 const { t } = useI18n();
 
-// Emits `boarded` after a Valid scan so the parent can refresh the trip card.
 const emit = defineEmits(["close", "boarded"]);
 const props = defineProps({
-  // Optional stop/building context recorded against the boarding event.
   stopName: { type: String, default: null },
   accommodationBuilding: { type: String, default: null },
 });
 
 const video = ref(null);
-// starting | scanning | result | error
 const phase = ref("starting");
 const errorMsg = ref("");
 const lastResult = ref(null);
@@ -71,14 +61,12 @@ let stream = null;
 let detector = null;
 let rafId = null;
 let stopped = false;
-// Guards against a double-POST while one scan is in flight.
 let busy = false;
 
 const scan = createResource({
   url: "apex.salis.api.boarding.scan_boarding_pass",
 });
 
-// --- Result presentation, keyed on the server's result string. ---
 const RESULTS = {
   Valid: { class: "is-valid", icon: "badge", title: "boarding.resultValid", hint: "boarding.validHint" },
   Duplicate: { class: "is-warn", icon: "alert", title: "boarding.resultDuplicate", hint: "boarding.duplicateHint" },
@@ -126,7 +114,6 @@ async function start() {
   }
 }
 
-// Per-frame detect loop. On the first decoded QR we stop scanning and submit it.
 async function loop() {
   if (stopped || phase.value !== "scanning" || !video.value) return;
   try {
@@ -137,7 +124,6 @@ async function loop() {
       return;
     }
   } catch (e) {
-    // A transient decode error on a frame is non-fatal — keep scanning.
   }
   rafId = requestAnimationFrame(loop);
 }
@@ -161,14 +147,12 @@ async function submit(token) {
   }
 }
 
-// Re-arm the camera loop for the next worker after showing a result.
 async function rescan() {
   lastResult.value = null;
   if (!stream) return start();
   try {
     await video.value.play();
   } catch (e) {
-    // ignore — play() can reject if the element isn't ready; loop() re-checks
   }
   phase.value = "scanning";
   loop();
@@ -180,7 +164,6 @@ function pauseCamera() {
   try {
     video.value && video.value.pause();
   } catch (e) {
-    // ignore
   }
 }
 

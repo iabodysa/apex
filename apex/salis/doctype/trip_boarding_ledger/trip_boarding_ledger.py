@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Trip Boarding Ledger controller.
 
 Read-only, machine-written audit memo. One row is inserted per worker's final
@@ -17,6 +17,7 @@ from frappe.model.document import Document
 
 class TripBoardingLedger(Document):
     def validate(self):
+        """Blocks any edit to an already-persisted Trip Boarding Ledger row."""
         self._enforce_single_write_immutability()
 
     def _enforce_single_write_immutability(self):

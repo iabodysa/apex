@@ -1,10 +1,5 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """The number strip at the top of a query report.
-
-`frappe.desk.query_report` reads a fifth return value from `execute` and renders each
-entry as a card above the table (`query_report.py:87`). Every Apex report returned two
-values, so that strip was empty on all of them and a reader had to add the column up
-themselves to learn anything the rows did not already say.
 
 The figures are built here rather than in each report so the shape cannot drift across
 fifty-two of them, and so a summary reads the SAME rows the table shows — a strip

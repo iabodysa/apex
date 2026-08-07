@@ -1,11 +1,9 @@
-// Copyright (c) 2026, AFMCO and contributors
-// [#7qn779]
+// Copyright (c) 2026, afmcoltd
 import { createI18n } from "@shared/i18n";
 
 const STORAGE_KEY = "salis_portal_lang";
 export const SUPPORTED = ["en", "ar"];
 
-// [#f0vfv7]
 const messages = {
   en: {
     common: {
@@ -787,11 +785,6 @@ const messages = {
   },
 };
 
-// Server enum values (Select options / Issue masters) per namespace -> localized label.
-// Stored values stay English for the API round-trip; only the label localizes, and
-// translateEnum falls back to the raw value (a new option renders English in Arabic).
-// test_driver_portal _enum_coverage locks each namespace to its live source options so
-// drift fails the build. Keys are the exact stored values.
 const enums = {
   en: {
     tripStatus: {
@@ -881,15 +874,9 @@ const enums = {
   },
 };
 
-// The ordered option values per ticket-form dropdown, single-sourced from `enums`
-// so the form, the rendered list, and the coverage test never drift apart.
 export const ISSUE_CATEGORIES = Object.keys(enums.en.issueCategory);
 export const ISSUE_PRIORITIES = Object.keys(enums.en.issuePriority);
 
-// [#o7zbpi]
-// Shared translate / setLang / dir machinery; drivers default to Arabic (mirrors
-// worker_portal/safety_portal). translateEnum + the Intl formatters below stay
-// local — they read the factory's reactive `lang`.
 const { lang, dir, translate, setLang, resourceErrorMessage } = createI18n({
   messages,
   storageKey: STORAGE_KEY,
@@ -898,22 +885,16 @@ const { lang, dir, translate, setLang, resourceErrorMessage } = createI18n({
 
 export { translate, setLang, resourceErrorMessage };
 
-// BCP-47 locale for Intl, keyed to the active UI language. Arabic uses the
-// Saudi locale so dates/numbers shape consistently with the rest of the app.
 const INTL_LOCALE = { ar: "ar-SA", en: "en-US" };
 function intlLocale() {
   return INTL_LOCALE[lang.value] || "en-US";
 }
 
-// Locale-aware integer formatting (Intl.NumberFormat). Non-numeric input is
-// returned untouched so a server label never breaks the render.
 export function fmtNumber(n, opts) {
   if (n == null || n === "" || isNaN(Number(n))) return n;
   return new Intl.NumberFormat(intlLocale(), opts).format(Number(n));
 }
 
-// "HH:MM[:SS]" (Frappe Time) -> locale-aware short time. Falls back to the raw
-// value when it can't be parsed, so a malformed time never blanks the field.
 export function fmtTime(v) {
   if (!v) return "";
   const m = String(v).match(/(\d{1,2}):(\d{2})/);
@@ -923,7 +904,6 @@ export function fmtTime(v) {
   return new Intl.DateTimeFormat(intlLocale(), { hour: "2-digit", minute: "2-digit" }).format(d);
 }
 
-// "YYYY-MM-DD" -> locale-aware medium date. Returns the raw value on a parse miss.
 export function fmtDate(v) {
   if (!v) return "";
   const d = new Date(String(v) + "T00:00:00");
@@ -931,9 +911,6 @@ export function fmtDate(v) {
   return new Intl.DateTimeFormat(intlLocale(), { year: "numeric", month: "short", day: "numeric" }).format(d);
 }
 
-// The current day as the header's second line — weekday plus date, in the active
-// locale. Built from the LOCAL clock, never an ISO/UTC slice, which would name
-// yesterday for the three hours after midnight in +03.
 export function fmtTodayDate() {
   return new Intl.DateTimeFormat(intlLocale(), {
     weekday: "long",
@@ -942,8 +919,6 @@ export function fmtTodayDate() {
   }).format(new Date());
 }
 
-// Localize a stored server enum value; returns the raw value if the namespace or
-// key is unknown (so an unmapped option degrades to English, never blanks).
 export function translateEnum(namespace, value) {
   if (value == null || value === "") return value;
   const ns = (enums[lang.value] || {})[namespace] || (enums.en || {})[namespace];

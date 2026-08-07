@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Driver Portal identity-scoped APIs for the mobile SPA at ``/driver``.
 
 Every endpoint resolves a presented driver credential before using the legacy
@@ -12,7 +12,7 @@ from frappe import _
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 
 from apex.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_url
-from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401  (re-exported)
+from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401
 from apex.salis.utils import bound_vehicle, expiry_state, get_driver_for_user, has_any_role
 
 
@@ -25,6 +25,7 @@ STAFF_ROLES = (
 )
 
 def _portal_enabled():
+    """Returns True when the driver portal is enabled in Salis Settings."""
     return bool(frappe.db.get_single_value("Salis Settings", "enable_driver_portal"))
 
 def _license_warn_days():
@@ -55,6 +56,7 @@ def _resolve_driver(user=None):
     return driver
 
 def _require_enabled():
+    """Blocks the request with a permission error when the driver portal is disabled."""
     if not _portal_enabled():
         frappe.throw(_("Driver portal is not enabled."), frappe.PermissionError)
 
@@ -89,6 +91,7 @@ def _staff_links(user=None):
     return links
 
 def _user_full_name(user=None):
+    """Returns the display full name for the given user, or the current session user."""
     user = user or frappe.session.user
     return frappe.utils.get_fullname(user) or user
 
@@ -97,6 +100,7 @@ def _label_trips(trips):
 	route_name, Salis Vehicle.plate_number) so the driver's cards read names."""
 
     def labels(doctype, names, field):
+        """Returns a map of document name to the given field's value for the given names."""
         if not names:
             return {}
         rows = frappe.get_all(
@@ -424,7 +428,7 @@ def mark_arrived(dispatch_trip, route_stop, arrived=1, sequence=None, stop_name=
                 "arrived_at": frappe.utils.now_datetime() if arrived else None,
             },
         )
-    log.flags.ignore_permissions = True  # audit-ok — driver resolved credential-first
+    log.flags.ignore_permissions = True  # audit-ok
     log.save()
 
     if arrived:
@@ -496,7 +500,7 @@ def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
             "last_seen": frappe.utils.now_datetime(),
         }
     )
-    doc.save(ignore_permissions=True)  # audit-ok — driver resolved from credential
+    doc.save(ignore_permissions=True)  # audit-ok
     return {"name": doc.name}
 
 

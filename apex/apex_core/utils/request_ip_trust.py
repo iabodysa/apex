@@ -1,18 +1,10 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """The trust boundary under every per-address limit in this app, made checkable.
 
 ``frappe.local.request_ip`` is the bucket key for the portal bad-token throttle
 (portal_token_security), the boarding scan limiter (salis/api/boarding.py) and frappe's
 own ``@rate_limit(ip_based=True)``. frappe fills it from the FIRST ``X-Forwarded-For``
-entry with no trusted-proxy check at all::
-
-    def set_request_ip(self):
-        if frappe.get_request_header("X-Forwarded-For"):
-            frappe.local.request_ip = (frappe.get_request_header("X-Forwarded-For").split(",", 1)[0]).strip()
-        elif frappe.get_request_header("REMOTE_ADDR"):
-            frappe.local.request_ip = frappe.get_request_header("REMOTE_ADDR")
-        ...
-    -- frappe/auth.py:64-75 (v15.109.0)
+entry with no trusted-proxy check at all.
 
 Nothing in that chain asks who set the header. A caller that forges a fresh value per
 request lands in a fresh window every time and walks through all three limiters, and can
@@ -20,28 +12,9 @@ equally pin the blame for a flood on any address it names. The safety is entirel
 deployment-side: the reverse proxy must OVERWRITE the header with the real peer, never
 append the client's claim to it.
 
-frappe's only ``ProxyFix`` (app.py:500) does NOT close this. It is bound to ``serve()``,
-the dev server, behind an opt-in ``proxy``/``USE_PROXY`` flag, so no production WSGI path
-receives it -- and even where it runs it is dead for this purpose, because it rewrites
-``request.remote_addr`` while ``set_request_ip`` reads the raw header first and never
-reaches the ``remote_addr`` branch beneath it. There is no trusted-proxy setting to set:
-frappe 15.109.0 carries no such key anywhere.
-
 So the requirement cannot be enforced from inside the app; it can only be MEASURED
 against a running deployment. That is what this module is: a deterministic verdict a
 deployer gets from one authenticated request, not a warning in a log nobody opens.
-
-The precise boundary, because the sentence above is easy to over-read. What no app code
-can do is make the proxy overwrite the header -- that half is a deployment instruction
-and nothing else. What app code COULD do is stop depending on it: ``HTTPRequest()`` runs
-at app.py:206 and the ``before_request`` hooks at app.py:208-209, so a hook is free to
-overwrite ``frappe.local.request_ip`` after ``set_request_ip`` chose it. That is a real
-seam, and it is deliberately not taken here. Choosing the right entry needs the hop count
-and the peer set of the deployment, which only the operator knows; guessing is the very
-thing that makes header trust forgeable, and a wrong guess collapses every client onto
-the proxy's own address. So it is configuration plus a behaviour change for every
-deployment, not a hardening detail, and it belongs to a decision rather than to this
-check.
 
 The probe is what makes it decisive, and it takes TWO channels to work. The deployer
 sends a documentation-range address (RFC 5737 / RFC 3849) in ``X-Forwarded-For`` -- a

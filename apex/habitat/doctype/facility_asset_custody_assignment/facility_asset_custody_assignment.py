@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Facility Asset Custody Assignment controller."""
 
 from __future__ import annotations
@@ -10,12 +10,14 @@ from frappe.model.document import Document
 
 class FacilityAssetCustodyAssignment(Document):
     def before_submit(self):
+        """Blocks submission when the asset table is empty or not all assets are marked verified."""
         if not self.get("assets_in_custody"):
             frappe.throw(_("Asset table cannot be empty."))
         if not self.all_assets_verified:
             frappe.throw(_("All Assets Physically Verified must be checked before submitting the custody assignment."))
 
     def on_submit(self):
+        """Sets each listed Facility Asset's responsible supervisor to this assignment's supervisor."""
         for row in self.assets_in_custody:
             if not row.facility_asset:
                 continue
@@ -24,6 +26,7 @@ class FacilityAssetCustodyAssignment(Document):
             )
 
     def on_cancel(self):
+        """Reverts each asset's responsible supervisor to the prior submitted assignment's holder, if any."""
         for row in self.assets_in_custody:
             if not row.facility_asset:
                 continue

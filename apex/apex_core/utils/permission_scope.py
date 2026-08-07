@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Shared low-level primitives for tenant row-scoping.
 
 Habitat scopes on Building, Salis on Project, Logistay on Company, but the
@@ -58,19 +58,6 @@ def allowed_for(user, allow, cache_key):
     target doctype, which this function does not receive — ``for_doctype()`` below
     applies it where the doctype is known.
 
-    ``hide_descendants`` on a row is never read here, and does not need to be: for a
-    nested-set ``allow`` doctype it has ALREADY decided, inside
-    ``get_user_permissions`` itself, which ``doc`` rows exist in ``rows`` below.
-    ``user_permission.py:130`` unconditionally adds the permitted node; ``:132-135``
-    — only when ``meta.is_nested_set()`` and ``not perm.hide_descendants`` — then
-    adds one further row per descendant from ``frappe.db.get_descendants``. So a
-    ``hide_descendants=1`` permission never had its descendants added in the first
-    place, and this function returning every row's ``doc`` verbatim already carries
-    that narrowing through untouched. Of apex's three scoped axes only ``Company``
-    is a tree (``frappe.get_meta("Company").is_tree`` / ``is_nested_set()`` are
-    True; Building and Project carry no ``lft``/``rgt``), so this only bites there —
-    verified against a real Company parent/child on a live site and pinned by
-    ``test_permission_scope_hide_descendants.py``.
     """
     del cache_key
     rows = frappe_permissions.get_user_permissions(user).get(allow) or []
@@ -79,14 +66,6 @@ def allowed_for(user, allow, cache_key):
 
 def for_doctype(user, allow, doctype, values):
     """Drop values whose User Permission rows ALL name a DIFFERENT doctype.
-
-    A User Permission carrying ``applicable_for`` restricts that permission to one
-    doctype; frappe applies it exactly this way when it builds its own match
-    conditions (``frappe/model/db_query.py:1095-1109``): a row with no
-    ``applicable_for`` counts for every doctype, a row naming this doctype counts
-    for it, and a row naming another doctype counts for nothing here. Without this,
-    a Building permission granted for Safety Round alone would also unlock every
-    other Building-scoped doctype for that user.
 
     ``values`` (rather than a re-read) is what the caller's own resolver returned,
     so a module that overrides its resolver keeps control of the scope and only the
@@ -98,6 +77,7 @@ def for_doctype(user, allow, doctype, values):
     never added to ``rows`` in the first place, so it cannot enter ``granted`` or
     ``restricted`` here either, and it was already absent from ``values`` before
     this function ran.
+
     """
     if not values or not doctype:
         return list(values)
@@ -126,11 +106,6 @@ def scope_condition(user, is_unscoped_fn, allowed_fn, column, allow=None, doctyp
     namespace stay bound in that module, and so those module-level resolvers remain
     the single override/stub point the scoped permission test-suite drives.
 
-    ``allow`` + ``doctype`` narrow the resolved values to the permissions that apply
-    to the doctype being queried (see ``for_doctype``). Frappe hands the doctype to
-    every ``permission_query_conditions`` hook that declares the argument
-    (``frappe/model/db_query.py:1130``), so the caller has it; when it is absent the
-    values are used as resolved.
     """
     user = resolve_user(user)
     if is_unscoped_fn(user):

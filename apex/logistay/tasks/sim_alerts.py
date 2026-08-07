@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Scheduled SIM alerts.
 
 Complements the two event Notifications (contract expiry via Days Before, a SIM

@@ -1,9 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Every write action on the board that isn't the assign/reassign flow: the
-// stop/stolen sub-forms, the quick card actions, the status-picker transitions,
-// and the bulk endpoints. Each card action is guarded against double-submit via
-// per-plate busy tracking. Depends on the panel, confirm, toast, selection, and
-// (for status → assign) the driver-assignment flow, all injected.
+// Copyright (c) 2026, afmcoltd
 import { reactive, ref } from "vue";
 import { call } from "./api.js";
 import { today, trim, statusKey } from "./fleetHelpers.js";
@@ -16,8 +11,6 @@ export function useFleetActions({
   showToast, cfShow, reloadFleet,
   selected, clearSelection, openReassignForm, t,
 }) {
-  // In-flight direct-POST card actions, keyed by plate. While a plate is busy its
-  // card buttons disable + show a spinner so a slow POST can't be double-fired.
   const busyPlates = ref(new Set());
   const isBusy = (plate) => busyPlates.value.has(plate);
   function setBusy(plate, on) {
@@ -35,8 +28,6 @@ export function useFleetActions({
     }
   }
 
-  // Stop sub-form model. nextStatus is the post-stop status: optionally chain
-  // workshop_in / recover so the live state matches.
   const sf = reactive({ date: today(), branch: "", reason: "", notes: "", nextStatus: "available" });
   function openStopForm() {
     Object.assign(sf, { date: today(), branch: "", reason: "", notes: "", nextStatus: "available" });
@@ -78,8 +69,6 @@ export function useFleetActions({
     }
   }
 
-  // Stolen sub-form model → report_theft (the live endpoint takes location +
-  // report_number; date/reporter/description mirror his form but aren't sent).
   const stf = reactive({ date: today(), police: "", location: "", reporter: "", desc: "", notes: "" });
   function openStolenForm() {
     Object.assign(stf, { date: today(), police: "", location: "", reporter: "", desc: "", notes: "" });
@@ -109,7 +98,6 @@ export function useFleetActions({
     }
   }
 
-  // Quick card actions (his quickStop / quickReassign / sendWorkshop / …).
   function quickStop(plate, goWorkshop = false) {
     openPanel(plate, 1);
     openStopForm();
@@ -212,9 +200,6 @@ export function useFleetActions({
     openStolenForm();
   }
 
-  // ── Bulk actions → bulk endpoints ──
-  // One free-text note feeds the matching arg (reason for stop / notes for
-  // workshop), mirroring the single-vehicle reason/notes inputs.
   const bulkNote = ref("");
   const selectedPlates = () => Array.from(selected.value);
   function showBulkSummary(res) {
@@ -271,7 +256,6 @@ export function useFleetActions({
     }
   }
 
-  // Status-picker grid in the panel Status tab → routes to the right endpoint.
   async function changeStatus(plate, newStatus) {
     const v = vehicles.value.find((x) => x.plate === plate);
     if (!v) return;
@@ -295,9 +279,6 @@ export function useFleetActions({
       openStolenForm();
       return;
     }
-    // A stolen vehicle's state is held by its open Theft incident, not by the vehicle
-    // row, so a plain status write would be overruled on the next load. Recovery is the
-    // only way back to service, and it is what closing the incident means.
     if (v.vehicle_status === "stolen") {
       await recoverVehicle(plate);
       return;

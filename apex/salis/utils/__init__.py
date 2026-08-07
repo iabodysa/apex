@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 import frappe
 from frappe import _
@@ -319,7 +319,6 @@ def revert_transport_request(tr_name, from_state, to_state, dispatch_trip=None, 
         _("Status reverted from {0} to {1}.").format(from_state, to_state),
     )
     return to_state
-
 
 
 INACTIVE_EMPLOYEE_STATUSES = ("Inactive", "Left", "Suspended")

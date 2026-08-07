@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Party identity helpers for the arrival redesign (``party_type``/``party`` Dynamic Link).
 
 The housed-worker doctypes — Accommodation Assignment / Checkout, Room Bed Transfer,

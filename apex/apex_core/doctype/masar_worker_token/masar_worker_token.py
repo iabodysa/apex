@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Masar Worker Token — personal access link for the worker self-service app.
 
 Each row binds ONE Employee to an unguessable random ``token``. The worker opens
@@ -56,7 +56,6 @@ _CREDENTIAL_REISSUE_GUARD = object()
 DRIVER_TOKEN_COOKIE = TOKEN_COOKIES[DRIVER]
 
 
-
 def _hash_token(raw: str) -> str:
     """The at-rest form of a raw token: its SHA-256 hex digest (what ``token`` stores
     and what every resolver filters by)."""
@@ -86,6 +85,7 @@ def _new_token() -> str:
 
 class MasarWorkerToken(Document):
     def _issuance_subject(self) -> tuple[str, str | None]:
+        """Returns the issuance audience and its bound subject, the driver or the employee."""
         audience = DRIVER if self.holder_type == DRIVER else WORKER
         return audience, self.driver if audience == DRIVER else self.employee
 
@@ -107,6 +107,7 @@ class MasarWorkerToken(Document):
         super()._sync_autoname_field()
 
     def _reject_temporary_worker(self) -> None:
+        """Blocks issuing a worker token to a party still on Temporary Worker status."""
         if self.party_type == "Temporary Worker":
             frappe.throw(
                 _(
@@ -177,6 +178,7 @@ class MasarWorkerToken(Document):
             frappe.throw(_("Not permitted"), frappe.PermissionError)
 
     def _mint(self) -> str:
+        """Generates a fresh raw token, stages its hash and encrypted copy, and resets the expiry."""
         audience, subject = self._issuance_subject()
         authorize_issuance(audience, subject)
         raw = _new_token()
@@ -227,6 +229,7 @@ class MasarWorkerToken(Document):
         return self.regenerate()
 
     def autoname(self):
+        """Names the record after the bound driver for a Driver token, otherwise after the party."""
         if self.holder_type == DRIVER:
             if not self.driver:
                 frappe.throw(_("A Salis Driver is required for a driver access token."))
@@ -235,6 +238,7 @@ class MasarWorkerToken(Document):
             self.name = self.party
 
     def before_validate(self):
+        """Enforces binding immutability, a required driver or employee, and issuance authorization."""
         self._validate_subject_binding_immutability()
         if self.holder_type == DRIVER:
             if not self.driver:
@@ -265,12 +269,14 @@ class MasarWorkerToken(Document):
         return missing
 
     def before_insert(self):
+        """Syncs the linked party, rejects temporary workers, and mints the token before insert."""
         if self.holder_type != DRIVER:
             sync_party_employee(self)
             self._reject_temporary_worker()
         self._mint()
 
     def after_insert(self):
+        """Persists the freshly minted token's hash and ciphertext after the row is inserted."""
         self._persist_pending_token_fields()
 
     def regenerate(self):

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Private image attachments accepted by the token-scoped portal write endpoints.
 
 ``verified_image_type`` is the content check both doors share — the driver one here
@@ -43,6 +43,7 @@ _PIL_FORMATS = {
 
 
 def _invalid_photo(message):
+    """Raises a validation error carrying the given message for a rejected photo."""
     frappe.throw(message, frappe.ValidationError)
 
 

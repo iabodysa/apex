@@ -1,7 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Operations-alert bell + drawer. The bell badge shows the scoped open-alert
-// total; the drawer lists the rows. A row deep-links to its vehicle's panel when
-// the plate is on the board, else opens the Operations Alert in Desk.
+// Copyright (c) 2026, afmcoltd
 import { ref } from "vue";
 import { call } from "./api.js";
 
@@ -10,7 +7,7 @@ const ALERTS_GET = "apex.salis.api.operations_alerts.get_open_alerts";
 export function useAlerts({ vehicles, t, openPanel }) {
   const alerts = ref([]);
   const alertTotal = ref(0);
-  const alertsState = ref("idle"); // idle | loading | ready | error
+  const alertsState = ref("idle");
   const alertsOpen = ref(false);
 
   async function loadAlerts() {
@@ -35,8 +32,6 @@ export function useAlerts({ vehicles, t, openPanel }) {
     s === "Critical" ? "alert-red" : s === "Info" ? "alert-green" : "alert-amber";
   const sevLabel = (s) => t("alerts.sev" + (s || "Warning"));
 
-  // A row links to its vehicle's drawer if the plate is on the board; otherwise
-  // to the Operations Alert record in Desk.
   function alertVehicleOnBoard(a) {
     if (!a.vehicle_plate) return null;
     return vehicles.value.find((x) => x.plate === a.vehicle_plate) || null;

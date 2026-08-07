@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Non-Financial Depreciation Snapshot controller."""
 
 from __future__ import annotations
@@ -49,6 +49,7 @@ class OperationalDepreciationSnapshot(Document):
 
 
 def validate(doc, method=None):
+    """Requires at least one asset line, computes each row's book value, and totals them."""
     if not doc.items:
         frappe.throw(_("At least one asset line is required."))
     _compute_book_values(doc)
@@ -56,11 +57,13 @@ def validate(doc, method=None):
 
 
 def before_cancel(doc, method=None):
+    """Blocks cancellation when no Cancellation Reason has been given."""
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is required before cancelling a Depreciation Snapshot."))
 
 
 def _compute_book_values(doc):
+    """Computes each row's book value from its policy's method, useful life, and residual percent."""
     policy_cache: dict[str, "Document"] = {}
     for row in doc.items:
         if row.policy and row.policy not in policy_cache:

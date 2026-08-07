@@ -1,28 +1,9 @@
-// Copyright (c) 2026, AFMCO and contributors
-//
-// Employee self-service data layer for the /fleet pages (my vehicle · my trips
-// · fuel request). Wired to the identity-scoped backend in
-// apex.salis.api.fleet_employee — every endpoint resolves the session user to
-// their own Salis Driver server-side, so this only ever shows the caller's own
-// vehicle / trips and can only submit fuel for the caller's own vehicle.
-//
-// A user with no fleet vehicle (an ordinary office employee) gets a clean empty
-// state, never an error: get_my_vehicle -> {vehicle:null}, get_my_recent_trips
-// -> [], and submitting fuel throws a friendly "no vehicle assigned" message.
-//
-// Module-level singleton, not a per-component factory: the Home and Fuel PAGES
-// both read this state, and routing between them must neither refetch the
-// vehicle nor drop a half-typed fuel form. The first useEmployee() call starts
-// the load; reload() re-runs it (the retry button).
+// Copyright (c) 2026, afmcoltd
 import { reactive, ref } from "vue";
 import { call } from "./api.js";
 
 const API = "apex.salis.api.fleet_employee";
 
-// ── my assigned vehicle ────────────────────────────────────────────────
-// Shape mirrors the get_my_vehicle() row. `empty` drives the card's empty
-// state (no fleet vehicle bound to this user). status ∈ available|assigned|
-// workshop|stopped so the status pill reuses the board's semantics.
 const vehicle = reactive({
   empty: true,
   name: null,
@@ -34,11 +15,8 @@ const vehicle = reactive({
   registrationExpiry: null,
 });
 
-// ── my recent trips (the home PREVIEW window: backend defaults) ────────
 const trips = ref([]);
 
-// ── Fuel request form ──────────────────────────────────────────────────
-// Grades reuse the existing i18n dictionary; stations load from the backend.
 const fuelGrades = ["petrol91", "petrol95", "diesel"];
 const stations = ref([]);
 const form = reactive({
@@ -75,9 +53,6 @@ async function loadTrips() {
   trips.value = (await call(`${API}.get_my_recent_trips`)) || [];
 }
 
-// The /trips page's FULL list. Same identity-scoped endpoint, wider window —
-// get_my_recent_trips already takes (days, limit) server-side; the preview
-// simply never passed them. Returns rows; the page owns its own state.
 export function fetchTrips({ days = 90, limit = 100 } = {}) {
   return call(`${API}.get_my_recent_trips`, { args: { days, limit } }).then((rows) => rows || []);
 }
@@ -100,8 +75,6 @@ async function load() {
   }
 }
 
-// Send the fuel request for supervisor approval. Resolves { ok, name } on
-// success; rejects (so the caller can surface the server's message) on error.
 async function submitFuelRequest() {
   if (submitting.value) return { ok: false };
   submitting.value = true;

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Custody Kiosk — POS-style custody issue + return API.
 
 A thin presentation + orchestration layer over the existing Custody Issue and
@@ -45,16 +45,6 @@ from apex.habitat import permissions
 def _row_exists(doctype: str, name: str) -> bool:
     """True only when a REAL row of ``doctype`` is named ``name``.
 
-    Every existence gate in this module routes through here, on one idiom: the DICT
-    filter. ``frappe.db.exists(dt, dn)`` returns ``dn`` WITHOUT touching the database
-    when ``dn`` equals ``dt`` (frappe/database/database.py:1259 — the deliberate "a
-    Single always exists" short-circuit), and a kiosk scanner is semi-trusted input,
-    so the literal token ``Employee`` would clear the gate on a site with zero such
-    rows. Filtering on ``name`` (database.py:1253-1257) cannot short-circuit and is
-    correct in BOTH directions — rejecting the self-named token instead would only
-    trade that false positive for a false negative, refusing a row that really is
-    named after its DocType. The caller's ordinary not-found path handles the refusal,
-    so a self-named token and an absent docname stay indistinguishable.
     """
     return bool(frappe.db.exists(doctype, {"name": name}))
 

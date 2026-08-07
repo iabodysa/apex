@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Idle Resident Detection — housed workers whose work has ended.
 
@@ -24,6 +24,7 @@ OPEN_REPORT_STATUSES = ("Open", "Acknowledged")
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for housed employees whose project has ended."""
     filters = filters or {}
     columns = _columns()
     data = _get_data(filters)
@@ -41,6 +42,7 @@ def execute(filters=None):
 
 
 def _columns():
+    """Returns the column definitions for the idle resident detection report."""
     return [
         {"label": _("Assignment"), "fieldname": "name", "fieldtype": "Link", "options": "Housing Assignment", "width": 150},
         {"label": _("Employee"), "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 140},
@@ -58,6 +60,7 @@ def _columns():
 
 
 def _get_data(filters):
+    """Returns idle-resident rows from active assignments with an ended or missing project."""
     query_filters = {"docstatus": 1, "check_out_date": ["is", "not set"]}
 
     restrict, allowed = permissions.report_building_scope(frappe.session.user)

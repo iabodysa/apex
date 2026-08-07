@@ -1,16 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Loading placeholder: shimmer blocks shaped like the real content, shown while
-     a token-scoped resource is in flight (replaces a bare "Loading..." line).
-
-       variant="card"  (default) a card-shaped block: an avatar + title line, then
-                       `lines` body lines (last one short). Wrapped in .card.card-pad.
-       variant="stats" a row of `lines` stat tiles (mirrors the .stat grids).
-       variant="lines" just the shimmer lines, no card chrome.
-
-     All shimmer comes from the global .sk-* rules in index.css — the animation is a
-     moving background-position sweep, so it is RTL-safe with NO direction-keyed
-     selector (avoids the scoped [dir=rtl] pitfall, T-297). aria-hidden: a purely
-     decorative placeholder, not announced. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div v-if="variant === 'stats'" class="grid gap-3" :class="`grid-cols-${lines}`" aria-hidden="true">
     <div v-for="n in lines" :key="n" class="stat">
@@ -39,9 +27,7 @@
 
 <script setup>
 defineProps({
-  // "card" (default) | "stats" | "lines"
   variant: { type: String, default: "card" },
-  // card: number of body lines; stats: number of tiles; lines: number of lines.
   lines: { type: Number, default: 3 },
 });
 </script>

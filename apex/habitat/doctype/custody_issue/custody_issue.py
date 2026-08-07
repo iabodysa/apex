@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Custody Issue controller."""
 
 from __future__ import annotations
@@ -15,6 +15,7 @@ class CustodyIssue(Document):
 
 
 def validate(doc, method=None):
+    """Syncs holder user, requires positive-qty items, checks serials, and defaults return date."""
     sync_party_employee(doc, employee_field="issued_to_employee")
     _set_holder_user(doc)
     if not doc.items:
@@ -78,6 +79,7 @@ def _set_expected_return_date(doc):
 
 
 def on_submit(doc, method=None):
+    """Blocks submission when store stock is short, marks the issue Issued, and posts custody stock."""
     _assert_source_availability(doc)
     doc.db_set("status", "Issued")
     _post_custody_stock(doc)
@@ -151,8 +153,8 @@ def before_cancel(doc, method=None):
 
 
 def on_cancel(doc, method=None):
+    """Reverses the posted custody stock movement and marks the Custody Issue cancelled."""
     from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
         reverse_and_mark_cancelled,
     )
     reverse_and_mark_cancelled(doc, "Custody Issue")
-

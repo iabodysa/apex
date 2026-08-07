@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Custody Handover controller — the OTP-confirmed move of
 externally-purchased goods from the procurement intake store into a receiving
 accommodation supervisor's building store, via the Accommodation Stock Ledger.
@@ -31,6 +31,7 @@ VOUCHER_TYPE = "Custody Handover"
 
 class CustodyHandover(Document):
     def validate(self):
+        """Blocks handovers with no items, same building, same supervisor, or non-positive quantities."""
         if not self.items:
             frappe.throw(_("At least one item is required on a Custody Handover."))
         if self.from_building and self.to_building and self.from_building == self.to_building:

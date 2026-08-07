@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Custody Return controller."""
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ class CustodyReturn(Document):
 
 
 def validate(doc, method=None):
+    """Blocks a return with no items, a non-positive qty, bad serials, or qty over what was issued."""
     sync_party_employee(doc, employee_field="returned_by_employee")
     if not doc.items:
         frappe.throw(_("At least one item is required on a Custody Return."))
@@ -111,6 +112,7 @@ def _issue_return_progress(issue, exclude=None):
 
 
 def on_submit(doc, method=None):
+    """Updates the linked Custody Issue's return status and posts the return into the stock ledger."""
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
     if issue.docstatus == 1:
         try:
@@ -167,6 +169,7 @@ def before_cancel(doc, method=None):
 
 
 def on_cancel(doc, method=None):
+    """Recomputes the linked Custody Issue's return status and reverses its stock ledger entries."""
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
     try:
         status = _issue_return_progress(issue, exclude=doc.name)
@@ -196,6 +199,7 @@ def make_damage_assessment(source_name, target_doc=None):
     from frappe.utils import nowdate
 
     def set_missing_values(source, target):
+        """Stamps the new Custody Damage Assessment's source return link and today's assessment date."""
         target.custody_return = source.name
         target.assessment_date = nowdate()
 
@@ -220,4 +224,3 @@ def make_damage_assessment(source_name, target_doc=None):
         target_doc,
         set_missing_values,
     )
-

@@ -1,30 +1,12 @@
-/* Housing portal styles. The palette is NOT here: every colour, size, radius and
-   spacing value comes from the shared token layer, so this portal cannot drift
-   from the rest of the habitat surfaces and follows light/dark automatically. */
+/* Copyright (c) 2026, afmcoltd */
 
-/* Shared brand primitives (--brand-green) + breakpoint tokens — single source. */
 @import "@shared/tokens.css";
 
-/* No font @import here. Montserrat + Cairo are declared once by the hosting shell
-   (www/housing.html -> /assets/apex/vendor/{montserrat-v31,cairo-v31}/), whose vendored
-   variable faces span 400-800, so this bundle must never reach a font CDN. */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ---------------------------------------------------------------------------
-   frappe-ui token bridge.
-
-   frappe-ui's components are styled with its three semantic families, and its
-   tailwind preset resolves every one of them through a CSS variable —
-   `var(--surface-green-3, #hex)`. Re-declaring those variables in terms of the
-   Apex tokens is therefore the supported way to give the library this product's
-   palette: the components keep their own structure, and colour still arrives from
-   one place. Declared after `@tailwind utilities` so it outranks the preset's own
-   `:root` / `[data-theme="dark"]` blocks, which the base layer emits first; the
-   right-hand side is theme-agnostic because the Apex tokens switch themselves.
-   --------------------------------------------------------------------------- */
 :root,
 [data-theme="dark"] {
   --surface-white: var(--c-surface-2);
@@ -99,12 +81,6 @@
   --outline-orange-1: var(--c-warning);
 }
 
-/* DESIGN.md §3, field worker: the frame is a phone column below --bp-tablet, a
-   reading column to --bp-desktop, and a 1100px two-pane work area past it. The
-   first two are the shell's own defaults; only the desktop width is this portal's
-   to declare, and --shell-wide is the hook the shell exposes for exactly that.
-   1024px = --bp-desktop (frontend_shared/tokens.css); keep in sync — a CSS @media
-   condition cannot read a custom property. */
 @media (min-width: 1024px) {
   :root {
     --shell-wide: 1100px;
@@ -124,12 +100,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* ---------------------------------------------------------------------------
-   Layout primitives. These are page anatomy (DESIGN.md §1-§3), not controls, so
-   they stay here rather than becoming components.
-   --------------------------------------------------------------------------- */
 
-/* List beside detail past --bp-desktop; one stacked column below it. */
 .hz-split {
   display: grid;
   gap: var(--sp-4);
@@ -144,15 +115,11 @@ body {
 .hz-split-detail {
   min-width: 0;
 }
-/* 1024px = --bp-desktop (frontend_shared/tokens.css); keep in sync. */
 @media (min-width: 1024px) {
   .hz-split {
     grid-template-columns: minmax(360px, 400px) minmax(0, 1fr);
     gap: var(--sp-5);
   }
-  /* Sticky, not a second scroller: DESIGN.md §1 gives the frame the only
-     overflow, and two nested scrollers is the defect that makes a screen feel
-     broken. The detail simply holds its place while the list moves past it. */
   .hz-split-detail {
     position: sticky;
     top: 0;
@@ -172,11 +139,6 @@ body {
   box-shadow: none;
 }
 
-/* The hot zone (DESIGN.md §2): the page's primary action, full width, --tap-lg,
-   pinned to the bottom of the frame above the navbar so it never scrolls away.
-   The negative margins cancel the shell's own 16px frame padding so the dock
-   spans the full column, and the bottom one lets it settle flush at the end of
-   the scroll instead of floating one gap above it. */
 .hz-dock {
   position: sticky;
   inset-block-end: calc(-1 * var(--sp-4));
@@ -192,17 +154,6 @@ body {
   min-height: var(--tap-lg);
 }
 
-/* ---------------------------------------------------------------------------
-   Tap floors and type sizes on the library's controls (DESIGN.md §8: --tap-lg for
-   a primary, --tap-md for an ordinary control, --tap-min as the floor in both
-   dimensions). frappe-ui ships its controls at desk density, which is right for a
-   desk and wrong for a thumb in a store room.
-
-   Unscoped on purpose: Button and FormControl both declare `inheritAttrs: false`
-   and re-bind `$attrs` themselves, which drops the scoped-style attribute a page
-   would need for `:deep()` to reach them. The `class` prop always survives, so
-   these hang off class names this portal puts on the components.
-   --------------------------------------------------------------------------- */
 .filter button {
   min-height: var(--tap-md);
   font-size: var(--fs-body);
@@ -224,9 +175,6 @@ body {
   font-weight: var(--fw-semibold);
   color: var(--c-muted);
 }
-/* The library's Select is a listbox, not a native <select>, so its control is the
-   combobox trigger button — and an inline-flex trigger shrinks to its longest
-   option unless it is told to fill the field. */
 .editor-field [role="combobox"],
 .editor-field textarea {
   width: 100%;
@@ -237,10 +185,6 @@ body {
 .sheet-actions button {
   width: 100%;
 }
-/* A dialog is the whole screen's business, so it has to clear the shell's sticky
-   chrome: the header, the navbar and the hot-zone dock are all positioned with a
-   z-index, and the library's overlay ships with none, so without this the sheet
-   opens UNDER the furniture. `.dialog-overlay` is the hook the library puts on it. */
 .dialog-overlay {
   z-index: 100;
 }
@@ -255,10 +199,6 @@ body {
   text-indent: 0.28em;
 }
 
-/* ---------------------------------------------------------------------------
-   Utilities still used by the shared components this portal mounts
-   (BuildingPicker's spinner and error note).
-   --------------------------------------------------------------------------- */
 .spinner {
   height: var(--sp-8);
   width: var(--sp-8);
@@ -272,9 +212,6 @@ body {
     transform: rotate(360deg);
   }
 }
-/* The shared reduce-motion rule collapses every duration, which would leave the
-   busy indicator frozen mid-turn while a read is still running — a stopped
-   spinner reads as a failed control. Slow it to a non-vestibular turn instead. */
 @media (prefers-reduced-motion: reduce) {
   .spinner {
     animation-duration: 2.4s !important;
@@ -298,15 +235,11 @@ body {
   margin-inline: auto;
 }
 
-/* Latin tokens only — record id, serial, confirmation code. Arabic-Indic digits
-   have no glyph in any monospace face, so they must never carry this class. */
 .mono {
   font-family: var(--font-num);
   font-feature-settings: "tnum" 1;
 }
 
-/* Reachable by a screen reader, invisible on screen. Used for the state word on
-   each exit gate, which the track otherwise conveys only by colour. */
 .sr-only {
   position: absolute;
   height: 1px;

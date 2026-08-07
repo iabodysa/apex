@@ -1,46 +1,12 @@
-/* Safety portal styles. The palette is NOT here: every colour, size, radius and
-   spacing value comes from the shared token layer, so this portal cannot drift
-   from the rest of the habitat surfaces and follows light/dark automatically.
+/* Copyright (c) 2026, afmcoltd */
 
-   The local `:root, [data-theme="afmco"]` block that used to sit at the top of
-   this file was the reason it could not: it re-declared the SEMANTIC --c-* tokens
-   in literal hex at the same specificity and later in the cascade, masking the
-   shared layer underneath it. Auto-dark switches PRIMITIVES, so a masked semantic
-   token never moved. Deleting it and unblocking auto-dark are one change, not two.
-
-   The four off-identity themes below (frappe, gemini, atelier, creative) are a
-   separate, owner-level question and are deliberately left standing. They are
-   opt-in `[data-theme]` values, not a mask of the default, and the shared
-   auto-dark allow-list cannot reach them. */
-
-/* Shared brand primitives (--brand-green) + breakpoint tokens — single source. */
 @import "@shared/tokens.css";
 
-/* No font @import here. Montserrat + Cairo are declared once by the hosting shell
-   (www/safety.html -> /assets/apex/vendor/{montserrat-v31,cairo-v31}/), whose vendored
-   variable faces span 400-800, so this bundle must never reach a font CDN. */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Frappe Standard — neutral blue, lighter chrome (ported from the driver/worker
-   portals so /safety renders identically when the Salis Portal Theme is set to
-   "Frappe Standard"). */
-
-/* On Frappe Standard the header bar is light, so drop the dark-bar supergraphic
-   that only reads on the forest/dark chromes. */
-
-/* No local [data-theme="dark"] block: dark is one of the two identity themes and
-   the shared layer already switches every primitive under it. A local copy could
-   only drift from it — the deleted one had already reached a different ground
-   (#0f1714 against the shared #0b110e). */
-
-/* Gemini — glassmorphic neon (ported from the driver/worker portals so /safety
-   renders identically when the Salis Portal Theme is set to "Gemini"). */
-
-/* Frosted-glass surfaces + the neon submit gradient, matching the other portals
-   so the Gemini chrome is consistent across /driver, /masar and /safety. */
 
 @keyframes geminiGlow {
   0% {
@@ -54,22 +20,6 @@
   }
 }
 
-/* Atelier — premium editorial refinement of the AFMCO identity (ported from the
-   driver/worker portals so /safety renders identically when the Salis Portal
-   Theme is set to "Atelier"). Same brand palette, elevated finish. Keeps Cairo
-   for the RTL Arabic surface. */
-
-/* Gold-leaf hairline under the header — understated luxury, not a new colour. */
-
-/* Creative ("Nocturne") — flagship distinctive-yet-professional theme (ported
-   from the driver/worker portals so /safety renders identically when the Salis
-   Portal Theme is set to "Creative"). A cool deep-navy editorial chrome with an
-   electric-azure primary and a warm amber accent — distinct from "dark" (forest
-   green) and "gemini" (purple glass). No animation, no glass, no glow. High
-   luminance separation keeps every text/control pair WCAG AA+. Keeps Cairo for
-   the RTL Arabic surface. Token-only re-skin. */
-
-/* Azure header hairline — the signature creative accent line. */
 
 html,
 body {
@@ -90,11 +40,6 @@ body {
     background: var(--c-canvas);
     color: var(--c-ink);
   }
-  /* On iPad / tablet the phone-width column looks lost in the viewport. Widen
-     the centered shell to a comfortable reading column (≈720px). The shell is
-     mx-auto, so it stays centered with sand/canvas gutters either side. */
-  /* 768px = shared --bp-tablet (frontend_shared/tokens.css); keep in sync —
-     CSS @media conditions cannot read a custom property. */
   @media (min-width: 768px) {
     .app-shell {
       max-width: 720px;
@@ -227,10 +172,6 @@ body {
   }
 }
 
-/* The shared reduce-motion rule collapses every duration, which would leave the
-   busy indicator frozen mid-turn while the round is still submitting — a stopped
-   spinner reads as a failed control. Slow it to a non-vestibular turn instead.
-   Covers both the page spinner and the in-button one. */
 @media (prefers-reduced-motion: reduce) {
   .spinner,
   .btn-spin {

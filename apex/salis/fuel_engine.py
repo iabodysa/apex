@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Fuel engine for the Salis Movement module.
 
@@ -95,8 +95,6 @@ def _insert_ledger_row(
     ).insert(ignore_permissions=True)  # audit-ok
 
 
-
-
 def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
     """Reverse the ledgered consumption for a corrected/cancelled fuel source.
 
@@ -160,8 +158,6 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
         posted += 1
 
     return posted
-
-
 
 
 def accrue_fuel_consumption() -> None:
@@ -282,8 +278,6 @@ def accrue_fuel_consumption() -> None:
             break
 
     logger.info("accrue_fuel_consumption: fuel consumption ledger updated.")
-
-
 
 
 def monthly_fuel_reconciliation() -> None:

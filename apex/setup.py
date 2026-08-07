@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 import json
 
 import frappe
@@ -21,6 +21,7 @@ ACCOMMODATION_ITEM_GROUPS = [
 ]
 
 def after_install():
+    """Runs the after-install seed: roles, profiles, item defaults, custody masters, and policies."""
     create_roles()
     frappe.db.commit()
     create_role_profiles()
@@ -57,6 +58,7 @@ def create_accommodation_item_defaults(*, allow_deferred=False):
 
 
 def _get_item_group_root():
+    """Returns the single root Item Group, or None when ERPNext has not created one yet."""
     roots = frappe.get_all(
         "Item Group",
         filters={"parent_item_group": ["is", "not set"]},
@@ -112,6 +114,7 @@ def create_accommodation_items():
 
 
 def _load_accommodation_item_records():
+    """Loads the bundled accommodation Item records from their JSON fixture file."""
     data_path = frappe.get_app_path(
         "apex",
         "apex_core",
@@ -123,6 +126,7 @@ def _load_accommodation_item_records():
 
 
 def create_roles():
+    """Creates each standing Apex role that does not already exist."""
     roles = [
         ("Accommodation Manager", 1),
         ("Resident Supervisor", 1),
@@ -149,6 +153,7 @@ def create_roles():
 
 
 def create_role_profiles():
+    """Creates the standing Habitat and Salis Role Profiles that bundle roles for onboarding."""
     profiles = {
         "Habitat Accommodation Manager": ["Accommodation Manager"],
         "Habitat Resident Supervisor": ["Resident Supervisor"],
@@ -175,6 +180,7 @@ def create_role_profiles():
 
 
 def create_custody_asset_categories():
+    """Creates each standing Custody Asset Category that does not already exist."""
     categories = [
         "Bedding & Linen",
         "Room Access",
@@ -192,6 +198,7 @@ def create_custody_asset_categories():
 
 
 def create_custody_articles():
+    """Creates each standing returnable Custody Article under its category."""
     articles = [
         {"article_name": "Room Key", "category": "Room Access", "is_returnable": 1},
         {"article_name": "Gate Access Card", "category": "Room Access", "is_returnable": 1},
@@ -212,6 +219,7 @@ def create_custody_articles():
 
 
 def create_operational_depreciation_policies():
+    """Creates each standing Operational Depreciation Policy with its useful life."""
     policies = [
         {"policy_name": "Linen - 12 Months", "useful_life_years": 1},
         {"policy_name": "Keys and Cards - 24 Months", "useful_life_years": 2},
@@ -227,6 +235,7 @@ def create_operational_depreciation_policies():
 
 
 def create_safety_task_catalogs():
+    """Creates each standing Safety Task Catalog entry covering the buildings' recurring checks."""
     tasks = [
         {"task_code": "SAF-001", "task_title": "Daily Cleanliness Assessment", "department": "Health and Hygiene", "frequency": "Daily", "priority": "Medium", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Check common areas, corridors, and bathrooms for cleanliness."},
         {"task_code": "SAF-002", "task_title": "Daily Exit Obstruction Check", "department": "Fire Safety", "frequency": "Daily", "priority": "High", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Ensure all emergency exits and fire doors are clear of obstructions."},

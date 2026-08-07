@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Transport Request controller.
 
 Transitions are owned by the native **Transport Request Workflow** (see
@@ -49,6 +49,7 @@ SERVICE_LINE_REQUEST_TYPE = {
 
 class TransportRequest(Document):
     def before_insert(self):
+        """Rejects a honeypot-filled submission and sets the source channel for a guest request."""
         if self.get("website_field"):
             frappe.throw(_("Invalid submission."), frappe.PermissionError)
 
@@ -68,6 +69,7 @@ class TransportRequest(Document):
             self.status = "New"
 
     def validate(self):
+        """Cross-checks the request type against the transport type and requires the type's fields."""
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 
@@ -166,4 +168,3 @@ class TransportRequest(Document):
             or (self.request_type == "Administrative Trip / Document Signing" and trips > admin_trip_threshold)
             or (self.request_type == "Accommodation to Project Shuttle" and self.is_cross_region)
         ) else 0
-

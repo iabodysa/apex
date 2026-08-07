@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Driver Clearance controller.
 
 Movement-domain exit clearance for a driver. Confirms the driver has returned
@@ -37,6 +37,7 @@ VALID_STATUSES = ("Open", "In Progress", "Cleared", "Blocked", "Cancelled")
 
 class DriverClearance(Document):
     def validate(self):
+        """Recomputes the driver's open fuel-exception and recovery counts and blocks marking Cleared."""
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
         self._capture_assigned_vehicle()
@@ -44,10 +45,12 @@ class DriverClearance(Document):
         self._guard_cleared_status()
 
     def on_submit(self):
+        """Releases the driver to Released status and clears their vehicle when submitted as Cleared."""
         if self.status == "Cleared":
             self._release_driver()
 
     def on_cancel(self):
+        """Restores a Released driver back to Active when a Cleared clearance is cancelled."""
         if self.status == "Cleared":
             self._restore_driver()
 

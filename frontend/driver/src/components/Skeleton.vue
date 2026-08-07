@@ -1,7 +1,5 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <!-- Shimmer placeholder rows shown while a list loads, instead of a bare
-       loading line. `rows` controls how many card-shaped placeholders render. -->
   <div class="space-y-3" aria-hidden="true">
     <div v-for="i in rows" :key="i" class="card card-pad skel-row">
       <div class="skel-line skel-w-60"></div>
@@ -12,7 +10,6 @@
 
 <script setup>
 defineProps({
-  // Number of placeholder rows (2-3 reads as "a short list is loading").
   rows: { type: Number, default: 3 },
 });
 </script>

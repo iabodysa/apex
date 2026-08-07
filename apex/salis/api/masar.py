@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Masar (Worker Movement) portal endpoints.
 
 Masar is the **Workers division of Salis** — the worker-transport experience on
@@ -35,10 +35,10 @@ from apex.salis.api import boarding_window
 from apex.salis.api.driver_portal import _require_enabled, _resolve_driver
 from apex.salis.utils import days_until as _days_until
 from apex.salis.api.maps_links import _full_route_maps_url
-from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401  (re-exported)
+from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401
 from apex.salis.api.masar_routes import (
-    WORKER_SERVICE_LINES,  # noqa: F401  (re-exported)
-    _drop_finished_yesterday,  # noqa: F401  (re-exported)
+    WORKER_SERVICE_LINES,  # noqa: F401
+    _drop_finished_yesterday,  # noqa: F401
     _fmt_time,
     _is_upcoming_pickup,
     _ordered_stops,
@@ -52,7 +52,7 @@ from apex.salis.api.masar_routes import (
     compute_ride_eta_minutes,
 )
 from apex.salis.api.masar_worker import (
-    MASAR_TOKEN_COOKIE,  # noqa: F401  (re-exported)
+    MASAR_TOKEN_COOKIE,  # noqa: F401
     _active_assignment,
     _attach_worker_photo,
     _building_in_charge,
@@ -66,7 +66,7 @@ from apex.salis.api.masar_worker import (
     _request_status_timeline,
     _resolve_worker,
     _today_driver,
-    _token_from_request,  # noqa: F401  (re-exported)
+    _token_from_request,  # noqa: F401
     _worker_documents,
 )
 
@@ -786,7 +786,7 @@ def create_worker_request(
             "status": "New",
         }
     )
-    doc.insert(ignore_permissions=True)  # audit-ok — employee resolved from token server-side
+    doc.insert(ignore_permissions=True)  # audit-ok
     if photo:
         _attach_worker_photo(doc, photo, photo_filename)
     return {"name": doc.name, "status": doc.status}
@@ -980,7 +980,7 @@ def _get_or_create_trip_log(dispatch_trip):
             "start_datetime": frappe.utils.now_datetime(),
         }
     )
-    log.insert(ignore_permissions=True)  # audit-ok — trip resolved from token's own manifest
+    log.insert(ignore_permissions=True)  # audit-ok
     from apex.salis.api.boarding_flow import ensure_trip_boarding_state
 
     ensure_trip_boarding_state(dispatch_trip)
@@ -1060,7 +1060,7 @@ def confirm_boarding(token=None, transport_request=None):
             "method": _WORKER_BOARDING_METHOD,
         },
     )
-    log.save(ignore_permissions=True)  # audit-ok — worker + trip resolved from token server-side
+    log.save(ignore_permissions=True)  # audit-ok
     from apex.salis.api.boarding_flow import mark_boarded
 
     mark_boarded(dispatch_trip, employee)
@@ -1211,7 +1211,7 @@ def create_worker_transport_request(
             "adhoc_passengers": adhoc_rows,
         }
     )
-    doc.insert(ignore_permissions=True)  # audit-ok — worker resolved from token server-side
+    doc.insert(ignore_permissions=True)  # audit-ok
     return {"name": doc.name, "status": doc.status, "adhoc_count": len(adhoc_rows)}
 
 

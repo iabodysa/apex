@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 
 const LEGACY_DRIVER_PAYLOAD_PREFIX = "salis_portal_cache:";
 
@@ -12,6 +12,5 @@ export function purgeDriverPayloadStorage(storage) {
     }
     for (const key of doomed) storage.removeItem(key);
   } catch (e) {
-    // Storage can be blocked in private mode. Driver data never depends on it.
   }
 }

@@ -1,22 +1,9 @@
-/* [#lqy2ce] Shared design system is the single source of truth: Growth-Green
-   brand, full --c-* vocabulary, light + dark. The old standalone blue/purple
-   palette that used to live here is retired. */
+/* Copyright (c) 2026, afmcoltd */
 @import "@shared/tokens.css";
 
-/* No font @import here. Cairo + JetBrains Mono are declared once by the hosting
-   shell (www/fleet-os.html -> /assets/apex/vendor/{cairo-v31,jetbrains-mono-v24}/),
-   so this bundle must never reach a font CDN. Repointing the @import at that
-   vendored path is not an option: postcss-import reads a leading-slash @import as
-   a filesystem path and the build ENOENTs. */
 
-/* [#30acrv] */
 *{box-sizing:border-box;margin:0;padding:0}
 
-/* [#87xbno] Board palette bridge — the board + its components still reference
-   these short local names (--bg/--blue/--t1 …); each now DERIVES from a shared
-   token, so the whole Fleet OS board recolours to the brand and inherits dark
-   mode for free. No hand-picked hex survives except the two status accents that
-   are semantic (purple = stolen, cyan = available) rather than brand drift. */
 :root{
   --bg:var(--c-canvas);
   --bg2:var(--c-surface-2);
@@ -31,31 +18,19 @@
   --t2:var(--c-ink-soft);
   --t3:var(--c-muted);
   --t4:color-mix(in srgb,var(--c-muted) 62%,transparent);
-  /* brand primary — was blue, now Growth-Green */
   --blue:var(--c-primary);--blue-l:var(--c-primary);--blue-d:color-mix(in srgb,var(--c-primary) 10%,transparent);
   --green:var(--c-success);--green-l:var(--c-success);--green-d:color-mix(in srgb,var(--c-success) 13%,transparent);
   --red:var(--c-danger);--red-l:var(--c-danger);--red-d:color-mix(in srgb,var(--c-danger) 11%,transparent);
   --amber:var(--c-warning);--amber-l:var(--c-warning);--amber-d:color-mix(in srgb,var(--c-warning) 13%,transparent);
-  /* semantic status accents (kept distinct, harmonised toward the brand) */
   --purple:#7c5cff;--purple-l:#6d4ae0;--purple-d:color-mix(in srgb,#7c5cff 11%,transparent);
   --cyan:var(--c-info);--cyan-l:var(--c-info);--cyan-d:color-mix(in srgb,var(--c-info) 11%,transparent);
   --orange:var(--c-warning);--orange-l:var(--c-warning);--orange-d:color-mix(in srgb,var(--c-warning) 13%,transparent);
   --r:var(--radius-lg);--r2:var(--radius);--r3:var(--radius-sm);--r4:6px;
-  /* NOT --shadow. That name belongs to the shared layer, and redeclaring it on a
-     :root of equal specificity AFTER the @import silently handed --shadow-lg to
-     every consumer of var(--shadow) document-wide, shared components included.
-     A portal alias gets a portal-prefixed name. */
   --fo-shadow:var(--shadow-lg);
 }
 html,body{min-height:100%}
 body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 
-/* [#j5eda9] The .topbar / .brand / .brand-badge / .brand-name / .brand-ver rules
-   that used to sit here are gone. No template ever carried those classes — the
-   rendered bar is <header class="fleet-top"> from @shared/components/
-   FleetPageShell.vue, and the brand slot uses .fp-brandmark / .fp-brandword.
-   They were the portal's only hardcoded #ffffff bar (a permanent white strip had
-   anything ever used it in dark mode) and its only blue-to-violet gradient. */
 .search-bar{flex:1;max-width:400px;position:relative}
 .search-bar input{
   width:100%;padding-block:8px;padding-inline:38px 14px;background:var(--bg3);border:1px solid var(--b1);
@@ -65,9 +40,6 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .search-bar input:focus{border-color:var(--blue)}
 .search-bar .si{position:absolute;inset-inline-start:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;pointer-events:none}
 .status-pills{display:flex;gap:6px;margin-inline-start:auto;flex-wrap:wrap}
-/* The status/triage pills are real <button>s (keyboard-reachable); the shimmer
-   placeholders reuse the class as <span>. The appearance reset keeps both looking
-   identical to the pre-button styling. Focus ring comes from the global rule. */
 .sp{
   padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;
   font-family:'JetBrains Mono',monospace;cursor:pointer;border:1px solid transparent;
@@ -82,16 +54,11 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .sp-stopped{background:var(--red-d);color:var(--red-l);border-color:color-mix(in srgb,var(--c-danger) 20%,transparent)}
 .sp.active{filter:brightness(1.3);transform:scale(1.03)}
 .tb-actions{display:flex;gap:8px;flex-shrink:0}
-/* --tap-min: this board is driven on a tablet as well as a desktop, and 33px is
-   under the floor for every toolbar action on it. */
 .btn{
   padding:7px 14px;min-height:var(--tap-min);border-radius:var(--r3);border:1px solid var(--b2);background:none;
   color:var(--t2);cursor:pointer;font-family:inherit;font-size:12px;font-weight:500;
   transition:background-color .15s,border-color .15s,color .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
 }
-/* Assign-and-lock binds :disabled (VehiclePanel) and had no disabled styling at
-   all, so a locked action was pixel-identical to a live one. On the base class,
-   and every hover is gated, so no variant can reintroduce the gap. */
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn:hover:not(:disabled){background:var(--s2);color:var(--t1);border-color:var(--b3)}
 .btn-blue{background:var(--blue);color:var(--c-primary-ink);border-color:var(--blue)}
@@ -105,8 +72,6 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .btn-purple{background:var(--purple-d);color:var(--purple-l);border-color:color-mix(in srgb,var(--purple) 25%,transparent)}
 .btn-purple:hover:not(:disabled){background:color-mix(in srgb,var(--purple) 18%,transparent)}
 
-/* [#fp-head] FleetPageShell header slots — brand + search + alerts + language,
-   all sitting on the forest-green header, so they read light-on-dark. */
 .fp-brandmark{
   width:34px;height:34px;border-radius:10px;flex-shrink:0;
   display:inline-flex;align-items:center;justify-content:center;
@@ -136,17 +101,13 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .fleet-actions .lang-opt{color:color-mix(in srgb,var(--c-header-ink) 72%,transparent)}
 .fleet-actions .lang-opt-active{background:var(--c-header-accent);color:var(--forest)}
 
-/* [#fp-pills] Status / KPI / triage pills, promoted to a strip above the board. */
 .fp-pills-bar{
   display:flex;align-items:center;gap:6px;flex-wrap:wrap;
   margin:0 2px 16px;
 }
 
-/* [#jsktbz] The board flows inside the shared FleetPageShell page column (normal
-   document flow, the page scrolls) rather than a fixed 100vh app frame. */
 .layout{display:flex;align-items:flex-start;gap:18px}
 
-/* [#sg86ga] Filter/stats rail — now a sticky rounded panel beside the board. */
 .sidebar{
   width:264px;flex-shrink:0;background:var(--bg2);
   border:1px solid var(--b1);border-radius:var(--r2);box-shadow:var(--shadow-sm);
@@ -183,7 +144,6 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .stat-mini-n{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
 .stat-mini-l{font-size:9px;color:var(--t3);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
 
-/* [#ilyxe7] Board surface — a rounded sheet holding the toolbar + card/table view. */
 .main{
   flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;
   background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);box-shadow:var(--shadow-sm);
@@ -201,11 +161,9 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .sort-row{display:flex;align-items:center;gap:8px}
 .rcount{font-size:12px;color:var(--t3)}
 
-/* [#7dieqi] */
 .cards-wrap{padding:16px}
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
 
-/* [#h7zl00] */
 .vcard{
   background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);
   position:relative;overflow:hidden;cursor:pointer;
@@ -214,7 +172,6 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 }
 .vcard{box-shadow:var(--shadow-sm)}
 .vcard:hover{border-color:var(--c-primary);transform:translateY(-2px);box-shadow:var(--fo-shadow)}
-/* [#ty9n76] */
 .vcard::before{
   content:'';position:absolute;top:0;inset-inline-start:0;width:3px;height:100%;border-start-start-radius:var(--r);border-end-start-radius:var(--r);z-index:1;
 }
@@ -222,7 +179,6 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .vcard.vs-available::before{background:var(--cyan)}
 .vcard.vs-workshop::before{background:var(--orange)}
 .vcard.vs-stopped::before{background:var(--t4)}
-/* [#qpf1l7] */
 .vc-top{padding:13px 14px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .vc-plate{
   font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;letter-spacing:2px;
@@ -232,7 +188,6 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .vc-icon-area{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .vc-sheet-icon{font-size:24px;line-height:1}
 .vc-fuel-badge{font-size:9px;padding:1px 6px;border-radius:8px;background:var(--bg3);color:var(--t3);border:1px solid var(--b1);font-weight:500;font-family:'JetBrains Mono',monospace}
-/* [#jd5oxi] */
 .vc-fuel-row{
   padding:9px 14px;border-top:1px solid var(--b1);
   display:flex;align-items:center;justify-content:space-between;gap:8px;
@@ -252,7 +207,6 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
   color:var(--amber-l);cursor:pointer;font-size:10px;font-family:inherit;font-weight:600;transition:background-color .15s,border-color .15s,color .15s;
 }
 .fuel-rate-edit:hover{background:var(--c-warning-fill);color:var(--c-warning-fill-ink)}
-/* [#2r037d] */
 .fuel-modal{
   position:fixed;inset:0;background:var(--c-scrim);z-index:300;
   display:flex;align-items:center;justify-content:center;
@@ -272,7 +226,6 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 }
 .fuel-field input:focus,.fuel-field select:focus{border-color:var(--amber);box-shadow:0 0 0 3px color-mix(in srgb,var(--c-warning) 10%,transparent)}
 .fuel-field select option{background:var(--bg2)}
-/* [#thb234] */
 .fuel-sar-grid{
   display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
   margin-bottom:14px;
@@ -293,12 +246,10 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .fpr-item strong{display:block;font-size:12px;color:var(--t1);font-family:'JetBrains Mono',monospace;margin-bottom:2px}
 .fpr-item.active-grade{color:var(--amber-l)}
 .fpr-item.active-grade strong{color:var(--amber-l)}
-/* [#gu7xts] */
 .vcard.vs-stolen::before{background:var(--purple)}
 .sb-stolen{background:var(--purple-d);color:var(--purple-l);border:1px solid color-mix(in srgb,var(--purple) 20%,transparent)}
 .sb-stolen .dot{background:var(--purple)}
 .vc-meta{padding:0 14px 10px;display:flex;flex-direction:column;gap:3px}
-/* Demoted context block (type/office) now sits below the lead, so it carries its own divider + top padding. */
 .vc-meta-demoted{padding:8px 14px;border-top:1px solid var(--b1)}
 .vc-type{font-size:13px;font-weight:600;color:var(--t1)}
 .vc-office{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:6px}
@@ -319,7 +270,6 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
 .sb-workshop .dot{background:var(--orange)}
 .sb-stopped{background:var(--s1);color:var(--t3);border:1px solid var(--b1)}
 .sb-stopped .dot{background:var(--t4)}
-/* [#bf482k] */
 .vc-driver{
   padding:8px 14px;border-top:1px solid var(--b1);
   display:flex;align-items:center;gap:9px;
@@ -338,18 +288,15 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
   padding:8px 14px;border-top:1px solid var(--b1);
   font-size:11px;color:var(--t3);display:flex;align-items:center;gap:6px;
 }
-/* [#1irt7s] */
 .vc-workshop-stripe{
   padding:5px 14px;background:var(--orange-d);
   font-size:10px;color:var(--orange-l);border-top:1px solid color-mix(in srgb,var(--c-warning) 15%,transparent);
   display:flex;align-items:center;gap:5px;
 }
-/* [#azmcxc] */
 .vc-dur{padding:6px 14px;border-top:1px solid var(--b1)}
 .dur-bar{height:4px;background:var(--b1);border-radius:2px;overflow:hidden;margin-top:4px}
 .dur-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),var(--blue))}
 .dur-label{display:flex;justify-content:space-between;font-size:9px;color:var(--t3);font-family:'JetBrains Mono',monospace}
-/* [#gk24h8] */
 .vc-actions{
   padding:9px 12px;border-top:1px solid var(--b1);
   display:flex;gap:5px;background:var(--s1);
@@ -379,7 +326,6 @@ body{font-family:'Cairo',sans-serif;color:var(--c-ink);font-size:14px}
   color:var(--purple-l);font-size:8px;font-weight:700;
 }
 
-/* [#pi56yu] */
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;white-space:nowrap}
 thead th{
@@ -393,7 +339,6 @@ tbody tr:hover{background:var(--s1)}
 tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflow:hidden;text-overflow:ellipsis}
 .mono{font-family:'JetBrains Mono',monospace}
 
-/* [#i4lf08] */
 .panel-overlay{
   display:none;position:fixed;inset:0;background:var(--c-scrim);z-index:200;
   backdrop-filter:blur(6px);
@@ -407,8 +352,6 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 }
 @keyframes panelIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
 
-/* Alert bell (topbar) + the open-alerts drawer. The drawer opens from the side
-   nearest the bell (the inline-end edge), so it slides in from the right. */
 .alert-bell{
   position:relative;width:38px;height:38px;border-radius:var(--r3);
   border:1px solid var(--b2);background:none;color:var(--t2);cursor:pointer;
@@ -466,7 +409,6 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .panel-body{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:18px}
 .pb{display:none}.pb.on{display:flex;flex-direction:column;gap:18px}
 
-/* [#kf4zq3] */
 .psect-title{
   font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;
   display:flex;align-items:center;gap:8px;
@@ -476,7 +418,6 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .kv{background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r3);padding:9px 11px}
 .kv-l{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
 .kv-v{font-size:13px;color:var(--t1);font-weight:500;word-break:break-all}
-/* [#cg9niz] */
 .pstats{display:flex;gap:8px}
 .pstat{
   flex:1;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r3);
@@ -484,7 +425,6 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 }
 .pstat-n{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
 .pstat-l{font-size:9px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
-/* [#deruo0] */
 .status-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .stpick{
   padding:11px 12px;border-radius:var(--r2);border:1px solid var(--b2);
@@ -501,7 +441,6 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .stpick.cur-available .sp-lbl{color:var(--cyan-l)}
 .stpick.cur-workshop .sp-lbl{color:var(--orange-l)}
 .stpick.cur-stopped .sp-lbl{color:var(--red-l)}
-/* [#pozonc] */
 .cur-driver-card{
   background:linear-gradient(135deg,var(--green-d),var(--blue-d));
   border:1px solid color-mix(in srgb,var(--c-success) 20%,transparent);border-radius:var(--r2);padding:14px;
@@ -526,7 +465,6 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
   color:var(--green-l);border:1px solid color-mix(in srgb,var(--c-success) 20%,transparent);
   font-size:10px;font-weight:600;flex-shrink:0;
 }
-/* [#iy3xwi] */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ff{display:flex;flex-direction:column;gap:5px}
 .fl{font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
@@ -545,8 +483,6 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
   background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r4);
   box-shadow:var(--shadow);
 }
-/* Driver-picker rows are <button>s inside the <li>, so a keyboard user can Tab to
-   a result and pick it; the reset keeps the row looking like plain list text. */
 .dp-opt{
   display:flex;align-items:center;gap:8px;flex-wrap:wrap;
   padding:8px 10px;border-radius:var(--r4);cursor:pointer;font-size:13px;
@@ -565,14 +501,12 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .ho-toggle{display:flex;align-items:center;gap:7px;margin-top:12px;font-size:12px;color:var(--t2);cursor:pointer}
 .ho-box{margin-top:10px;border:1px solid var(--b1);border-radius:var(--r3);padding:12px;background:var(--bg2)}
 .ho-hint{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--t3)}
-/* [#ol2qds] */
 .alert{border-radius:var(--r3);padding:12px 14px;font-size:12px;line-height:1.5;border:1px solid}
 .alert-amber{background:var(--amber-d);border-color:color-mix(in srgb,var(--c-warning) 25%,transparent);color:var(--amber-l)}
 .alert-red{background:var(--red-d);border-color:color-mix(in srgb,var(--c-danger) 25%,transparent);color:var(--red-l)}
 .alert-green{background:var(--green-d);border-color:color-mix(in srgb,var(--c-success) 25%,transparent);color:var(--green-l)}
 .alert-orange{background:var(--orange-d);border-color:color-mix(in srgb,var(--c-warning) 25%,transparent);color:var(--orange-l)}
 
-/* [#ofrio2] */
 .tl{display:flex;flex-direction:column}
 .tl-item{display:flex;gap:12px;padding:12px 0;position:relative}
 .tl-item:not(:last-child)::after{
@@ -613,7 +547,6 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
   border-start-start-radius:4px;border-end-start-radius:4px;font-size:11px;color:var(--blue-l);
 }
 
-/* [#lj3ohg] */
 .toast{
   position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);
   background:var(--c-surface-2);border:1px solid var(--b2);border-radius:var(--r2);
@@ -625,17 +558,13 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .toast-green{color:var(--green-l);border-color:color-mix(in srgb,var(--c-success) 25%,transparent);background:var(--c-success-bg)}
 .toast-amber{color:var(--amber-l);border-color:color-mix(in srgb,var(--c-warning) 25%,transparent);background:var(--c-warning-bg)}
 .toast-red{color:var(--red-l);border-color:color-mix(in srgb,var(--c-danger) 25%,transparent);background:var(--c-danger-bg)}
-/* [#q287el] */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
-/* [#cvi67m] */
 .empty{text-align:center;padding:60px 20px;color:var(--t3)}
 .empty-ic{font-size:42px;margin-bottom:10px}
-/* [#qx66xy] */
 .ws-form{background:var(--orange-d);border:1px solid color-mix(in srgb,var(--c-warning) 20%,transparent);border-radius:var(--r2);padding:14px;display:flex;flex-direction:column;gap:10px}
 
-/* [#rqayke] */
 .office-card{
   background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r2);
   display:flex;align-items:stretch;overflow:hidden;cursor:pointer;
@@ -658,18 +587,14 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
   background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r2);
   padding:16px;margin-top:12px;
 }
-/* [#a7ga9g] */
 tbody tr:hover{background:var(--s1)}
-/* [#hlqto2] */
 .fi,.fsel,.fta,.fs{background:var(--c-surface-2);color:var(--t1)}
 .fi:focus,.fsel:focus,.fta:focus,.fs:focus{background:var(--c-surface-2)}
 
-/* [#mf81py] */
 .sb-stolen .dot{background:var(--purple);box-shadow:0 0 5px var(--purple)}
 .sp-stolen{background:var(--purple-d);color:var(--purple-l);border-color:color-mix(in srgb,var(--purple) 20%,transparent)}
 .ti-stolen{background:var(--purple-d);border-color:color-mix(in srgb,var(--purple) 30%,transparent)}
 
-/* [#arhpmx] */
 .incident-card{
   border:1px solid var(--b1);border-radius:var(--r2);overflow:hidden;margin-bottom:8px;
 }
@@ -706,7 +631,6 @@ tbody tr:hover{background:var(--s1)}
   font-size:10px;color:var(--purple-l);border-top:1px solid color-mix(in srgb,var(--purple) 15%,transparent);
   display:flex;align-items:center;gap:5px;
 }
-/* Compliance expiry flag (near <=7d / expired); never rendered for compliant. */
 .vc-expiry-stripe{
   padding:5px 14px;font-size:10px;font-weight:600;
   display:flex;align-items:center;gap:5px;border-top:1px solid var(--b1);
@@ -714,7 +638,6 @@ tbody tr:hover{background:var(--s1)}
 .vc-expiry-soon{background:var(--amber-d);color:var(--amber-l);border-top-color:color-mix(in srgb,var(--c-warning) 20%,transparent)}
 .vc-expiry-expired{background:var(--red-d);color:var(--red-l);border-top-color:color-mix(in srgb,var(--c-danger) 20%,transparent)}
 .vc-expiry-date{font-family:'JetBrains Mono',monospace;opacity:.85;margin-inline-start:auto}
-/* [#chnj0n] */
 .email-cfg-modal{
   position:fixed;inset:0;background:var(--c-scrim);z-index:600;
   display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);
@@ -724,7 +647,6 @@ tbody tr:hover{background:var(--s1)}
   box-shadow:var(--shadow-lg);
 }
 .email-cfg-title{font-size:15px;font-weight:700;color:var(--t1);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-/* [#fcaa62] */
 .folder-status{display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600}
 .fs-ok{background:color-mix(in srgb,var(--c-success) 12%,transparent);color:var(--green-l);border:1px solid color-mix(in srgb,var(--c-success) 25%,transparent)}
 .fs-none{background:color-mix(in srgb,var(--c-muted) 12%,transparent);color:var(--t3);border:1px solid color-mix(in srgb,var(--c-muted) 20%,transparent)}
@@ -733,7 +655,6 @@ tbody tr:hover{background:var(--s1)}
   min-width:16px;height:16px;border-radius:50%;background:var(--red-l);color:var(--c-danger-ink);
   font-size:9px;font-weight:700;margin-inline-start:3px;
 }
-/* [#ifx1q6] */
 .upload-zone{
   border:2px dashed var(--b2);border-radius:var(--r2);padding:14px;
   text-align:center;cursor:pointer;transition:background-color .2s,border-color .2s,color .2s;background:var(--bg3);
@@ -767,13 +688,11 @@ tbody tr:hover{background:var(--s1)}
 .driver-photo-label{padding:5px 10px;background:var(--bg3);font-size:10px;font-weight:600;color:var(--t2);border-bottom:1px solid var(--b1)}
 .driver-photo-box img{width:100%;max-height:130px;object-fit:contain;display:block;cursor:pointer}
 .driver-photo-empty{height:90px;display:flex;align-items:center;justify-content:center;color:var(--t4);font-size:11px}
-/* [#phbgjn] */
 .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out}
 .lightbox img{max-width:92vw;max-height:88vh;border-radius:8px;box-shadow:0 8px 40px #000}
 .lightbox-close{position:fixed;top:16px;inset-inline-end:16px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:22px;width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
 
-/* [#n97hqf] */
 .cf-overlay{
   position:fixed;inset:0;background:var(--c-scrim);z-index:1000;
   display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);
@@ -792,21 +711,15 @@ tbody tr:hover{background:var(--s1)}
 .cf-msg{font-size:12px;color:var(--t3);line-height:1.75;margin-bottom:22px;white-space:pre-wrap}
 .cf-btns{display:flex;gap:10px;justify-content:center}
 .cf-btns .btn{min-width:120px;justify-content:center;font-size:13px;padding:9px 20px;border-radius:8px}
-/* [#t0oedg] */
 .wa-preview{
   background:var(--c-success-bg);border:1px solid color-mix(in srgb,var(--c-success) 30%,transparent);border-radius:10px;
   padding:12px 14px;font-size:11.5px;line-height:2;direction:rtl;
   color:var(--c-success);white-space:pre-wrap;margin-bottom:14px;max-height:200px;overflow-y:auto;
 }
-/* [#6zc3ab] */
 
 
-/* [#756ms0] */
-
-/* [#sytotv] */
 .sidebar-header{position:sticky;top:0;z-index:6;background:var(--bg2)}
 
-/* [#an5vjn] */
 @keyframes fpDotPulse{
   0%{box-shadow:0 0 0 0 currentColor;opacity:1}
   70%{box-shadow:0 0 0 5px rgba(0,0,0,0);opacity:.85}
@@ -814,15 +727,12 @@ tbody tr:hover{background:var(--s1)}
 }
 .sb-assigned .dot,.sb-available .dot,.sb-stolen .dot{animation:fpDotPulse 1.8s ease-out infinite}
 
-/* [#7eolgy] */
 .fp-panel-enter-active,.fp-panel-leave-active{transition:transform .24s ease}
 .fp-panel-enter-from,.fp-panel-leave-to{transform:translateX(-100%)}
 .fp-overlay-enter-active,.fp-overlay-leave-active{transition:opacity .24s ease}
 .fp-overlay-enter-from,.fp-overlay-leave-to{opacity:0}
-/* [#jockh7] */
 .fp-panel-enter-active .panel,.fp-panel-leave-active .panel{animation:none}
 
-/* [#pp5zrn] */
 @keyframes fpShimmer{0%{background-position:-300px 0}100%{background-position:300px 0}}
 .fp-skel-card{
   background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);
@@ -837,27 +747,18 @@ tbody tr:hover{background:var(--s1)}
   height:12px;border-radius:6px;background:var(--s2);margin:14px;
 }
 
-/* [#l1utnt] */
 .fp-error-banner{
   margin:14px;padding:14px 16px;border-radius:var(--r2);
   background:var(--red-d);border:1px solid color-mix(in srgb,var(--c-danger) 25%,transparent);color:var(--red-l);
   display:flex;align-items:center;gap:12px;font-size:13px;
 }
 .fp-error-banner .fp-err-msg{flex:1;line-height:1.5;word-break:break-word}
-/* [#mru11y] */
 .fp-empty-filters{font-size:11px;color:var(--t3);margin:10px 0 16px;line-height:1.7}
 .fp-empty-filters .fp-chip{
   display:inline-block;margin:2px;padding:2px 9px;border-radius:10px;
   background:var(--s2);color:var(--t2);border:1px solid var(--b2);font-size:10px;
 }
 
-/* Mobile-only affordances (the Filters button, the sheet close, the backdrop) are
-   hidden by default; the fold-away media query below reveals them. This block MUST
-   stay ABOVE that media query: a media query adds no specificity, so `display:none`
-   and the block's `display:inline-flex` tie at (0,1,0) and the LAST one in source
-   order wins. Sitting after the query, this rule silently re-hid the only control
-   that opens the filter sheet, leaving the sheet parked at translateY(100%) with no
-   way back on any tablet. */
 .fp-mobile-only{display:none}
 .fp-filters-btn{position:relative}
 .fp-filters-dot{
@@ -865,11 +766,6 @@ tbody tr:hover{background:var(--s1)}
   border-radius:50%;background:var(--blue);border:2px solid var(--bg2);
 }
 
-/* [#o432ip] 860px = shared --bp-wide (frontend_shared/tokens.css); keep in sync —
-   CSS @media conditions cannot read a custom property. This is where the filter
-   column folds away. It used to become a 340px stacked block here and only turn
-   into a drawer at 640px, which put a second full-width panel between the
-   supervisor and the board on every tablet. */
 @media(max-width:860px){
   html,body{overflow:auto}
   .search-bar{max-width:none;order:3;flex:1 1 100%}
@@ -878,9 +774,6 @@ tbody tr:hover{background:var(--s1)}
   .cards-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
   .panel{width:100%;max-width:100%}
 
-  /* The filter column becomes a bottom sheet, and the control that opens it
-     appears in the same breath — the two have to move together or the filters
-     become unreachable. */
   .fp-mobile-only{display:inline-flex}
   .layout{display:block}
   .fp-sheet-backdrop{
@@ -896,7 +789,6 @@ tbody tr:hover{background:var(--s1)}
   }
   .sidebar.fp-sheet-open{transform:translateY(0)}
   .sidebar-header{position:relative;justify-content:space-between}
-  /* a grab-handle hint at the top of the sheet */
   .sidebar-header::before{
     content:'';position:absolute;top:5px;left:50%;transform:translateX(-50%);
     width:36px;height:4px;border-radius:2px;background:var(--b3);
@@ -904,16 +796,8 @@ tbody tr:hover{background:var(--s1)}
   .fp-sheet-close{width:var(--tap-min);height:var(--tap-min)}
 }
 
-/* [#fpmob1] Phone layout: a single-column board, a horizontally scrollable
-   status-pill row, the filters/stats sidebar as a bottom sheet, and the detail
-   panel / alert drawer promoted to full-screen routes. RTL-aware (the page is
-   dir=rtl by default), so the sheet/panel use logical insets where they slide. */
 @media(max-width:640px){
-  /* The sheet, its backdrop and the Filters button are NOT here: they belong to
-     --bp-wide above, where the filter column folds. This block carries only what
-     is genuinely phone-shaped. */
 
-  /* Status pills: a single non-wrapping row the user swipes through. */
   .status-pills{
     order:4;flex:1 1 100%;flex-wrap:nowrap;overflow-x:auto;margin-inline-start:0;
     -webkit-overflow-scrolling:touch;scrollbar-width:none;
@@ -922,12 +806,10 @@ tbody tr:hover{background:var(--s1)}
   .status-pills::-webkit-scrollbar{display:none}
   .status-pills .sp{flex:0 0 auto;scroll-snap-align:start}
 
-  /* Cards stack to one column; table scrolls horizontally. */
   .cards-grid{grid-template-columns:1fr}
   .table-wrap{overflow-x:auto}
   .main-header{flex-wrap:wrap;gap:8px}
 
-  /* Detail panel + alert drawer: full-screen routes on a phone. */
   .panel,.alert-drawer{
     width:100vw;max-width:100vw;inset:0;border:none;border-radius:0;
   }
@@ -935,44 +817,23 @@ tbody tr:hover{background:var(--s1)}
   .panel-tabs::-webkit-scrollbar{display:none}
   .panel-tabs .ptab{flex:0 0 auto}
 
-  /* Roomier tap targets for the in-card action buttons. */
   .ac{padding:7px 9px}
 }
 
-/* [#t6dk0v] */
 @keyframes fpBoardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .cards-grid,.table-wrap{animation:fpBoardIn .3s ease both}
-/* [#5oklgt] The ring itself comes from the ONE shared :focus-visible rule
-   (frontend_shared/tokens.css) — 3px at --c-focus. The local copy that used to
-   sit here matched the same elements at equal specificity but later in the
-   cascade, so it quietly downgraded every control in this portal to a 2px ring
-   in a different colour. Only the corner radius is portal business. */
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
   border-radius:6px;
 }
-/* [#808a82] */
 .cards-wrap,.table-wrap{scroll-behavior:smooth}
-/* [#jo1ti9] */
-/* The blanket reduce-motion rule that used to sit here is deleted, not moved.
-   It duplicated frontend_shared/tokens.css at equal specificity but later in the
-   cascade, so it WON — and it carried no [data-motion="loop"] exemption, which
-   is the whole reason the shared rule collapses durations instead of removing
-   animations. The shared rule now applies; .fp-action-spin below still re-arms
-   the one busy indicator this portal spins. */
-/* [#lucide] Lucide inline-icon alignment. Emoji were swapped for <Icon> SVGs;
-   these rules center the icon inside chips/badges/buttons and tint the standalone
-   holders that no longer rely on font glyphs. Icons inherit currentColor. */
-/* Standalone icon holders: render the SVG centered, no font-glyph descender. */
 .vc-sheet-icon,.empty-ic,.cf-icon,.stpick .sp-ico,.ac .ac-ico{
   display:inline-flex;align-items:center;justify-content:center;line-height:0;
 }
 .empty-ic{color:var(--t4)}
-/* Small chips/badges that hold icon + text inline. */
 .incident-badge,.cdc-chip,.lock-pill,.tag,.tl-status{
   display:inline-flex;align-items:center;gap:4px;
 }
 
-/* Multi-select bulk-action bar + selection affordances. */
 .fp-bulk-bar{
   display:flex;align-items:center;gap:12px;flex-wrap:wrap;
   padding:9px 16px;background:var(--blue-d);border-bottom:1px solid var(--b1);flex-shrink:0;
@@ -984,12 +845,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .vcard.fp-sel{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-d)}
 tr.fp-sel{background:var(--blue-d)}
 
-/* Triage pills (open incidents / expiring soon) — icon+count, click to filter. */
 .sp-triage-incident,.sp-triage-expiry{display:inline-flex;align-items:center;gap:4px}
 .sp-triage-incident{background:var(--amber-d);color:var(--amber-l);border-color:color-mix(in srgb,var(--c-warning) 25%,transparent)}
 .sp-triage-expiry{background:var(--red-d);color:var(--red-l);border-color:color-mix(in srgb,var(--c-danger) 25%,transparent)}
 
-/* KPI / quick-stat loading shimmer — placeholder chips that don't render 0. */
 .fp-kpi-skel{
   width:74px;height:23px;border-radius:20px;border-color:transparent;
   background:var(--s2);background-image:linear-gradient(90deg,transparent,color-mix(in srgb,var(--c-ink) 6%,transparent),transparent);
@@ -1001,7 +860,6 @@ tr.fp-sel{background:var(--blue-d)}
   background-size:300px 100%;animation:fpShimmer 1.2s infinite;
 }
 
-/* Compact density — tightens card rows so a large fleet fits on one screen. */
 .cards-grid.fp-compact{grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:8px}
 .cards-grid.fp-compact .vc-meta{padding:0 12px 6px}
 .cards-grid.fp-compact .vc-fuel-row{padding:5px 12px}
@@ -1010,7 +868,6 @@ tr.fp-sel{background:var(--blue-d)}
 .cards-grid.fp-compact .ac{padding:4px 3px;font-size:9px}
 .cards-grid.fp-compact .vc-dur{padding:5px 12px}
 
-/* In-flight card action: dim + lock buttons, show a spinner (prevents double-submit). */
 .ac:disabled{opacity:.3;cursor:default;pointer-events:none}
 .vc-actions.fp-actions-busy{position:relative}
 .vc-actions.fp-actions-busy .ac{opacity:.35}
@@ -1021,16 +878,10 @@ tr.fp-sel{background:var(--blue-d)}
 }
 .vcard.fp-busy{opacity:.92}
 @keyframes fpSpin{to{transform:rotate(360deg)}}
-/* The shared reduce-motion rule collapses every duration, which would leave this
-   frozen mid-turn while a reassignment is still in flight — a stopped spinner
-   reads as a failed control. Slow it to a non-vestibular turn instead. */
 @media (prefers-reduced-motion: reduce){
   .fp-action-spin{animation-duration:2.4s!important;animation-iteration-count:infinite!important}
 }
 
-/* Driver-centric lens: per-driver groups of the same scoped vehicles. Reuses the
-   board tokens so it stays theme-consistent; flex rows are logical-flow so RTL
-   mirrors automatically (the page is dir="rtl"). */
 .fp-lens{display:flex;flex-direction:column;gap:14px;max-width:760px;margin:0 auto}
 .fp-lens-group{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);overflow:hidden}
 .fp-lens-head{
@@ -1055,8 +906,6 @@ tr.fp-sel{background:var(--blue-d)}
 .fp-lens-row:hover{background:var(--s1)}
 .fp-lens-plate{font-weight:700;letter-spacing:1px;flex-shrink:0}
 
-/* [#a3gaps] Archetype-3 gap audit. Hover feedback for the interactive controls
-   that had none, gated so a touch tap never leaves a sticky hover behind. */
 @media (hover:hover){
   .vt:hover:not(.on){color:var(--t1)}
   .ptab:hover:not(.on){color:var(--t1)}
@@ -1067,9 +916,6 @@ tr.fp-sel{background:var(--blue-d)}
   .pdf-del:hover{filter:brightness(1.25)}
   .oc-edit-ico:hover{color:var(--t1)}
 }
-/* 44px floor (--tap-min) for the board's compact controls: the visual box keeps
-   its density, a transform-centred pseudo-element carries the hit area. Physical
-   left/top are correct here — they pair with translate, which never flips. */
 .panel-close,.fuel-rate-edit,.ph-del,.pdf-del,.lightbox-close,.alert-bell,
 .fchip,.vt,.ptab,.sp,.ac,.dp-newlink{position:relative}
 .panel-close::after,.fuel-rate-edit::after,.ph-del::after,.pdf-del::after,

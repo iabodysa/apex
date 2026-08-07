@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 import frappe
 from frappe import _
@@ -10,6 +10,7 @@ from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for the Vehicle Compliance Register report."""
     filters = filters or {}
 
     columns = [

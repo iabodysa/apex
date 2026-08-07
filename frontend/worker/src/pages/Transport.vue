@@ -1,13 +1,10 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
-    <!-- [T-320] pull-to-refresh indicator (page scrolls with the window) -->
     <PullIndicator :distance="ptr.distance.value" :refreshing="ptr.refreshing.value" :threshold="ptr.THRESHOLD" />
 
     <h2 class="section-title">{{ t("transport.title") }}</h2>
 
-    <!-- Stale note: shown only when the live read failed and we render the
-         last-known cached snapshot (offline). -->
     <div v-if="isStale" class="stale-note">
       <Icon name="alert" :size="14" class="shrink-0" />
       <span>{{ t("common.stale") }}</span>
@@ -18,9 +15,6 @@
       <Skeleton :lines="3" />
     </template>
 
-    <!-- Error with NO cached fallback: a revoked/disabled token (PermissionError)
-         or a server failure must surface, not show as a benign empty state. When a
-         cached snapshot exists we render it (labelled stale) instead. -->
     <div v-else-if="tr.error && !td" class="card card-pad text-center">
       <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
       <p class="text-sm text-muted">{{ errorMessage }}</p>
@@ -30,7 +24,6 @@
     </div>
 
     <template v-else-if="upcoming.length || past.length">
-      <!-- Upcoming trips: the only ones Home's "next ride" can ever point at. -->
       <section v-for="trip in upcoming" :key="trip.transport_request" class="card card-pad space-y-3">
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0">
@@ -45,10 +38,8 @@
           <span v-if="trip.status" class="pill pill-accent shrink-0">{{ tEnum("transportStatus", trip.status) }}</span>
         </div>
 
-        <!-- Trip progress bar (status stepper) -->
         <TripProgressBar :status="trip.trip_status" />
 
-        <!-- Vehicle + driver -->
         <div v-if="trip.vehicle || trip.driver" class="grid grid-cols-1 gap-3">
           <div v-if="trip.vehicle" class="flex items-center gap-2 text-sm">
             <Icon name="truck" :size="18" class="text-primary shrink-0" />
@@ -73,9 +64,6 @@
           </div>
         </div>
 
-        <!-- The worker's OWN two points: where the shuttle collects HIM (his
-             building) and where it is going (the route's drop-off). A worker is not
-             the driver, so other buildings' housing pickups are never shown. -->
         <div v-if="myPickup(trip) || destination(trip)">
           <div class="field-label">{{ t("transport.yourTrip") }}</div>
           <ol class="space-y-2">
@@ -114,9 +102,6 @@
           </ol>
         </div>
 
-        <!-- Full-route deep link: opens Google Maps with every ordered stop chained
-             as waypoints (the same route the driver navigates). Shown only when the
-             backend resolved two-plus navigable stops into a directions URL. -->
         <a
           v-if="trip.maps_route_url"
           :href="trip.maps_route_url"
@@ -128,12 +113,8 @@
           <Icon name="route" :size="18" class="rtl-flip" /> {{ t("transport.openRoute") }}
         </a>
 
-        <!-- No planned route yet: an explicit state so the trip card is never a bare/inert card. -->
         <div v-else-if="!myPickup(trip) && !destination(trip)" class="text-sm text-muted">{{ t("transport.noRoutePlanned") }}</div>
 
-        <!-- Live boarding flow for the soonest upcoming trip (the one being boarded
-             next): on-the-bus claim, departing countdown, wait request, rejection
-             re-claim, wrong-bus correction, and the full-screen boarding pass. -->
         <BoardingFlow
           v-if="trip === upcoming[0]"
           :trip="trip"
@@ -142,8 +123,6 @@
           @refresh="boardingResource.reload().catch(() => {})"
         />
 
-        <!-- "I'm at the pickup": simple self-confirm for the OTHER upcoming trips
-             (the active boarding flow above owns the soonest one). -->
         <div v-else class="space-y-2">
           <BoardingWindow v-if="!canConfirm(trip)" :window="trip.boarding_window" />
           <template v-else>
@@ -166,15 +145,11 @@
         </div>
       </section>
 
-      <!-- No upcoming trip, but past ones exist: say so explicitly so the screen
-           agrees with Home ("No upcoming ride") instead of looking broken. -->
       <div v-if="!upcoming.length" class="card card-pad text-center">
         <p class="text-sm text-muted">{{ t("transport.empty") }}</p>
         <p class="text-xs text-muted mt-1">{{ t("transport.emptyHint") }}</p>
       </div>
 
-      <!-- Past trips: a compact, de-emphasised history so a departed trip is
-           never mistaken for the next ride. Collapsed by default. -->
       <section v-if="past.length" class="card card-pad space-y-3">
         <button class="flex w-full items-center gap-2" @click="showPast = !showPast">
           <Icon name="clock" :size="18" class="text-muted shrink-0" />
@@ -201,7 +176,7 @@
                 </div>
               </div>
             </div>
-            
+
             <div v-if="trip.status === REQUEST.FULFILLED && trip.dispatch_trip && !trip.has_rated" class="mt-2">
               <TripRating :trip="trip" @rated="trip.has_rated = true" />
             </div>
@@ -209,7 +184,6 @@
         </ul>
       </section>
 
-      <!-- Worker-initiated transport request + report a transport issue. -->
       <router-link to="/request-transport" class="btn btn-primary" style="text-decoration: none">
         <Icon name="route" :size="18" class="rtl-flip" /> {{ t("transport.requestNew") }}
       </router-link>
@@ -219,8 +193,6 @@
     </template>
 
     <div v-else class="space-y-3">
-      <!-- Wrong-bus correction can arrive even with no upcoming trip (the worker
-           scanned a vehicle that isn't theirs) — surface it before the empty copy. -->
       <BoardingFlow
         v-if="hasWrongBus"
         :trip="null"
@@ -232,7 +204,6 @@
           <p class="text-sm text-muted">{{ t("transport.empty") }}</p>
           <p class="text-xs text-muted mt-1">{{ t("transport.emptyHint") }}</p>
         </div>
-        <!-- Even with no trip, the worker can request one. -->
         <router-link to="/request-transport" class="btn btn-primary" style="text-decoration: none">
           <Icon name="route" :size="18" class="rtl-flip" /> {{ t("transport.requestNew") }}
         </router-link>
@@ -261,8 +232,6 @@ import { cacheGet, cacheSet } from "../utils/cache";
 
 const { t, tEnum } = useI18n();
 
-// Last good payload cached so a network drop renders stale-but-labelled data
-// instead of an empty/error screen (mirrors the driver portal pattern).
 const CACHE_KEY = "get_worker_transport";
 const staleTr = ref(null);
 const tr = createResource({
@@ -279,28 +248,17 @@ const tr = createResource({
   },
 });
 
-// [T-320] pull down at the top to refresh upcoming trips. reload() returns the
-// fetch promise, so the spinner keeps spinning until the data lands.
 const ptr = usePullToRefresh(() => tr.reload());
 
 const errorMessage = computed(() => resourceErrorMessage(tr.error));
 
-// Live data when present; otherwise the cached snapshot (offline). td drives the UI.
 const td = computed(() => tr.data || staleTr.value?.data || null);
-// True while showing cached data because the live read failed — drives the label.
 const isStale = computed(() => !tr.data && !!staleTr.value);
 
-// [T-537] upcoming vs past — the backend splits on the same now_datetime() pivot
-// Home uses, so the trip Home shows as "next ride" is exactly upcoming[0].
-// (Older payloads only had a flat `trips`; fall back to it as the upcoming list.)
 const upcoming = computed(() => td.value?.upcoming || td.value?.trips || []);
 const past = computed(() => td.value?.past || []);
 const showPast = ref(false);
 
-// A worker is not the driver: he sees only HIS pickup + the route destination,
-// both scoped server-side. For an older cached payload that only carried the flat
-// `stops` list, fall back to the first housing pickup / the last stop so a stale
-// render still shows two sane points instead of the whole driver route.
 function myPickup(trip) {
   if (trip.my_pickup) return trip.my_pickup;
   const stops = trip.stops || [];
@@ -319,13 +277,6 @@ function canConfirm(trip) {
   return w ? !!w.can_confirm : true;
 }
 
-// Live boarding state for the soonest trip (the server's worker_trip_boarding
-// state machine). Drives the boarding flow component. Polled adaptively: fast
-// (poll_seconds, ~10s) while a boarding window is active, off otherwise — the
-// app-shell's slow ~45s poll already refreshes the trip list for idle workers.
-// frappe-ui keeps the PREVIOUS payload when a reload fails, so without this flag a
-// worker on weak signal would keep seeing a live-looking claim button and countdown
-// built on a snapshot that may be minutes old.
 const boardingStale = ref(false);
 const boardingResource = createResource({
   url: "apex.salis.api.boarding_flow.worker_trip_boarding",
@@ -340,17 +291,12 @@ const boardingResource = createResource({
 });
 const boardingState = computed(() => boardingResource.data || null);
 
-// An "active boarding window" = a trip exists and isn't a terminal state. While
-// active, poll every poll_seconds; revert to no fast-poll when idle/Boarded.
 const boardingActive = computed(() => {
   const b = boardingState.value;
   return !!(b && b.dispatch_trip && !BOARDING_SETTLED.includes(b.status));
 });
 const pollSeconds = computed(() => boardingState.value?.poll_seconds || 10);
 
-// The wrong-bus correction is the one server key the markup still read raw. Named here
-// beside the other derived flags so the template asks a question about the screen rather
-// than about the payload, and a rename on the server lands in one place.
 const hasWrongBus = computed(() => !!boardingState.value?.wrong_bus);
 
 let boardingTimer = null;
@@ -363,13 +309,9 @@ function stopBoardingPoll() {
 function startBoardingPoll(seconds) {
   stopBoardingPoll();
   boardingTimer = setInterval(() => {
-    // frappe-ui's handleError rethrows even with an onError, so absorb the rejection
-    // here — onError has already flagged the board stale.
     if (!document.hidden) boardingResource.reload().catch(() => {});
   }, seconds * 1000);
 }
-// Arm/disarm the fast poll as the window opens/closes; re-arm if the cadence
-// changes. The hidden-tab guard in the tick keeps a backgrounded tab quiet.
 watch(
   [boardingActive, pollSeconds],
   ([active, secs]) => {
@@ -380,19 +322,11 @@ watch(
 );
 onUnmounted(stopBoardingPoll);
 
-// Worker boarding self-confirm. The server resolves the worker from the token and
-// writes the boarding event; this UI just records which trips the worker has
-// already confirmed so the card flips to a done state. Keyed by transport_request
-// so each card tracks its own state.
 const confirmedTrips = reactive({});
 const boardingFor = ref(null);
 const boardingError = ref("");
 const boarding = createResource({
   url: "apex.salis.api.masar.confirm_boarding",
-  // Nothing boardable today answers {"trip": null} — a 200 that wrote no boarding row and
-  // left the driver's manifest untouched. Flipping the card on the bare 200 told the
-  // worker the driver had been told they were waiting. A re-confirm is different: it
-  // carries dispatch_trip with created false, and that is a real confirmation.
   onSuccess: (data) => {
     const confirmed = !!(data && data.dispatch_trip);
     confirmedTrips[boardingFor.value] = confirmed;

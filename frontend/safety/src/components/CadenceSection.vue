@@ -1,8 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- One DUE cadence rendered as a card: a sticky-feeling header carrying the
-     cadence name, the server-supplied period_label, and an animated progress
-     ring ("rated X / total"), over the stack of fast-tap task rows. The header
-     collapses/expands the rows so a long multi-cadence list stays scannable. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <section class="cadence">
     <button type="button" class="cadence-head" @click="open = !open">
@@ -46,7 +42,6 @@ import { useI18n } from "../i18n";
 
 const props = defineProps({
   block: { type: Object, required: true },
-  // { [taskName]: { verdict, notes } } for this cadence's tasks
   ratings: { type: Object, default: () => ({}) },
 });
 
@@ -59,7 +54,6 @@ const ratedCount = computed(
   () => props.block.tasks.filter((t) => (props.ratings[t.name] || {}).verdict).length,
 );
 
-// A small visual signature per cadence so the sections read as distinct.
 const badgeIcon = computed(() => {
   switch (props.block.cadence) {
     case "Daily":
@@ -76,9 +70,6 @@ const badgeClass = computed(() => "badge-" + props.block.cadence.toLowerCase());
 </script>
 
 <style scoped>
-/* --shadow-sm, not --shadow: three of these stack down a checklist column, and the
-   shared --shadow is a 24px lift meant for a single raised card. A hairline is what
-   separates stacked sections without turning the column into a pile. */
 .cadence {
   border-radius: var(--radius-lg);
   border: 1px solid var(--c-border);
@@ -151,8 +142,6 @@ const badgeClass = computed(() => "badge-" + props.block.cadence.toLowerCase());
 .cadence-chevron-open {
   transform: rotate(90deg);
 }
-/* Whole selector inside one :global() so the chevron class survives
-   minification; a split :global([dir=rtl]) .class collapses to a bare flip. */
 :global([dir="rtl"] .cadence-chevron) {
   transform: scaleX(-1);
 }

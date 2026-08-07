@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Boarding Scan Log — append-only audit row for one QR boarding-pass scan.
 
 Each row records a single scan-validate attempt against a Dispatch Trip's QR
@@ -23,6 +23,7 @@ from frappe.model.document import Document
 
 class BoardingScanLog(Document):
     def before_insert(self):
+        """Stamps the scan timestamp when it is not already set before the row is inserted."""
         if not self.scanned_at:
             self.scanned_at = frappe.utils.now_datetime()
 

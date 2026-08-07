@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Checkout Pending Clearance — Script Report.
 
@@ -26,6 +26,7 @@ from apex.habitat import permissions
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for checkouts with unresolved custody clearance."""
     filters = filters or {}
 
     columns = [

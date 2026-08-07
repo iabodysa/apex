@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Driver Portal — clearance endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
 
 import frappe
@@ -25,6 +25,7 @@ _CLEARANCE_FIELDS = [
 
 
 def _latest_clearance(driver):
+    """Returns the driver's most recent non-cancelled Driver Clearance record."""
     return frappe.db.get_value(
         "Driver Clearance",
         {"driver": driver, "docstatus": ["<", 2]},

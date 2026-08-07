@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Assignment-queue reader for the operations board, the /fleet-os drawer and the
 vehicle timelines.
 

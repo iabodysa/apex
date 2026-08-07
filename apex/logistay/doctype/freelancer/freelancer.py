@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Freelancer controller.
 
 A Freelancer is a short-term contract worker on a fixed monthly salary
@@ -25,21 +25,25 @@ from apex.apex_core.utils.ledger_index import add_unique_guarded
 
 class Freelancer(Document):
     def validate(self) -> None:
+        """Validates the contract window and salary, then derives status from the contract end date."""
         self._validate_contract_window()
         self._validate_salary()
         self._derive_status()
 
     def _validate_contract_window(self) -> None:
+        """Blocks a contract end date that is not after the contract start date."""
         if not (self.contract_start_date and self.contract_end_date):
             return
         if getdate(self.contract_end_date) <= getdate(self.contract_start_date):
             frappe.throw(_("Contract End Date must be after Contract Start Date."))
 
     def _validate_salary(self) -> None:
+        """Blocks a monthly salary that is zero or negative."""
         if not self.monthly_salary or self.monthly_salary <= 0:
             frappe.throw(_("Monthly Salary must be greater than zero."))
 
     def _derive_status(self) -> None:
+        """Marks status Expired once the contract end date has passed, unless already Terminated."""
         if self.status == "Terminated":
             return
         if self.contract_end_date and getdate(self.contract_end_date) < getdate(nowdate()):
@@ -47,6 +51,7 @@ class Freelancer(Document):
 
 
 def on_doctype_update():
+    """Adds a unique database constraint on the national ID or Iqama number field."""
     add_unique_guarded(
         "Freelancer",
         ["national_id_or_iqama"],

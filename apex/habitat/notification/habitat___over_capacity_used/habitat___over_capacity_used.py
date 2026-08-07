@@ -1,3 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 def get_context(context):
+    """Leaves the over-capacity-used notification's context unchanged; no extra data is added."""
     pass

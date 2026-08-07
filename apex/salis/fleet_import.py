@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """One-command fleet data importer.
 
 Loads the CSVs produced by the local, git-ignored parser (``scratch/data_dumps/etl_out/``)
@@ -34,6 +34,7 @@ from apex.salis.utils import normalize_plate
 
 
 def _read(csv_dir, name):
+    """Reads a CSV file from the import directory into a list of row dicts, or an empty list."""
     path = os.path.join(csv_dir, name)
     if not os.path.exists(path):
         return []
@@ -44,13 +45,6 @@ def _read(csv_dir, name):
 def run(csv_dir=None):
     """Import the fleet master CSVs, skipping rows a master already holds.
 
-    Every existence probe uses the DICT form. Both masters autoname by their name
-    field, so the CSV value IS the row name; probed positionally,
-    ``frappe.db.exists(dt, dn)`` answers the value back without querying when it equals
-    the DocType (database.py:1259), so a category named "Vehicle Category" read as
-    already-imported and its row was dropped without a count or a log. The dict form
-    always queries, and the field-autoname keeps it duplicate-safe: the inserted row
-    bears this name.
     """
     csv_dir = csv_dir or os.path.join(
         frappe.get_app_path("apex"), "..", "scratch", "data_dumps", "etl_out"
@@ -65,7 +59,7 @@ def run(csv_dir=None):
             try:
                 frappe.get_doc({"doctype": "Vehicle Category", "category_name": cn,
                                 "default_fuel_type": (r.get("default_fuel_type") or "").strip() or None}
-                               ).insert(ignore_permissions=True)  # audit-ok: admin bulk migration loader
+                               ).insert(ignore_permissions=True)  # audit-ok
                 made += 1
             except Exception:
                 pass
@@ -77,7 +71,7 @@ def run(csv_dir=None):
         if on and not frappe.db.exists("Rental Office", {"name": on}):
             try:
                 frappe.get_doc({"doctype": "Rental Office", "office_name": on,
-                                "status": (r.get("status") or "Active").strip()}).insert(ignore_permissions=True)  # audit-ok: admin bulk migration loader
+                                "status": (r.get("status") or "Active").strip()}).insert(ignore_permissions=True)  # audit-ok
                 made += 1
             except Exception:
                 pass
@@ -91,7 +85,7 @@ def run(csv_dir=None):
         name = frappe.db.get_value("Project", {"project_name": pn}, "name")
         if not name:
             try:
-                name = frappe.get_doc({"doctype": "Project", "project_name": pn}).insert(ignore_permissions=True).name  # audit-ok: admin bulk migration loader
+                name = frappe.get_doc({"doctype": "Project", "project_name": pn}).insert(ignore_permissions=True).name  # audit-ok
             except Exception:
                 continue
         proj[pn] = name
@@ -121,7 +115,7 @@ def run(csv_dir=None):
                     "phone": (r.get("phone") or "").strip() or None,
                     "status": (r.get("status") or "Active").strip(),
                     "project": proj.get((r.get("project") or "").strip()),
-                }).insert(ignore_permissions=True).name  # audit-ok: admin bulk migration loader
+                }).insert(ignore_permissions=True).name  # audit-ok
             except Exception:
                 continue
         drv[did] = name
@@ -155,7 +149,7 @@ def run(csv_dir=None):
                     "rental_office": (r.get("rental_office") or "").strip() or None,
                     "project": proj.get((r.get("project") or "").strip()),
                     "status": (r.get("status") or "Active").strip(),
-                }).insert(ignore_permissions=True).name  # audit-ok: admin bulk migration loader
+                }).insert(ignore_permissions=True).name  # audit-ok
             except Exception:
                 continue
         veh[plate] = name
@@ -187,7 +181,7 @@ def run(csv_dir=None):
                 "status": (r.get("status") or "Ended").strip(),
             })
             a.flags.ignore_validate = True
-            a.insert(ignore_permissions=True)  # audit-ok: admin bulk migration loader
+            a.insert(ignore_permissions=True)  # audit-ok
             loaded += 1
         except Exception:
             skipped += 1

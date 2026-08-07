@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Rental Office controller.
 
 THE OWN FIELDS ARE THE ADDRESS. ``city``, ``contact_person`` and ``phone`` on this
@@ -28,6 +28,7 @@ from frappe.model.document import Document
 
 class RentalOffice(Document):
     def validate(self):
+        """Requires a non-blank office name, trimmed of surrounding whitespace."""
         if self.office_name:
             self.office_name = self.office_name.strip()
         if not self.office_name:

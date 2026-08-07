@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """The worker's boarding window — when a self-confirm is evidence, and when it is a lie.
 
 A worker tapping "I'm on the bus" is only evidence if the bus is at HIS stop when he
@@ -177,17 +177,7 @@ def _bus_is_past(rows, own_stop):
 
 
 def _window_anchor(trip, own_stop):
-    """The instant the window opens from, before the grace is taken off it.
-
-    The EARLIER of the worker's own stop's planned time and the trip's departure
-    time, both read on the trip's own date. Earlier, and deliberately so: Frappe
-    stamps EVERY unset Time field with the clock at creation
-    (``frappe/model/create_new.py:149-150``), so a route stop or a trip that nobody
-    timed still carries whatever hour its record happened to be made in. Anchoring on
-    the earlier of the two means such a value can only ever open the window sooner —
-    never lock a real worker out of a real bus at the hour a planner happened to type
-    the route. What protects the manifest at the other end is not the clock but the
-    driver's own marks. None when neither time is on file."""
+    """The instant the window opens from, before the grace is taken off it."""
     trip_date = trip.get("trip_date")
     if not trip_date:
         return None

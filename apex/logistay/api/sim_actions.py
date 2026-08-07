@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """POST-only custody + edit actions behind the Telecom Control page.
 
 Each action re-checks permission and state ON THE SERVER — the page's button
@@ -33,12 +33,6 @@ _VALID_ACTIONS = (
 def _load_sim(sim_card):
     """Return the SIM Card named ``sim_card``, or throw this module's own refusal.
 
-    ``sim_card`` arrives from a whitelisted endpoint, so the existence probe filters
-    on ``name``: the positional form answers the value back without querying when it
-    equals the DocType (database.py:1259), letting the literal string "SIM Card"
-    clear this gate and reach ``get_doc`` — which raises a bare framework 404 instead
-    of the named refusal below. Permission checking is unaffected (``check_permission``
-    still runs at every call site); what the short-circuit costs is this message.
     """
     if not sim_card or not frappe.db.exists("SIM Card", {"name": sim_card}):
         frappe.throw(_("SIM Card {0} does not exist.").format(sim_card))

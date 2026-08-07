@@ -1,8 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Animated SVG progress ring: the "rated X / total" indicator on each cadence
-     header. The stroke-dashoffset transitions, so the ring sweeps closed as the
-     supervisor taps tasks. Colour shifts from accent (in progress) to success
-     (complete). Pure SVG + CSS — no chart dependency. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="ring" :style="{ width: size + 'px', height: size + 'px' }">
     <svg :width="size" :height="size" :viewBox="`0 0 ${size} ${size}`" class="ring-svg">
@@ -60,12 +56,9 @@ const offset = computed(() => {
   place-items: center;
   flex-shrink: 0;
 }
-/* Start the sweep at 12 o'clock. */
 .ring-svg {
   transform: rotate(-90deg);
 }
-/* Whole selector inside one :global() so .ring-svg survives minification;
-   a split :global([dir=rtl]) .ring-svg collapses to a bare content-flip. */
 :global([dir="rtl"] .ring-svg) {
   transform: rotate(-90deg) scaleX(-1);
 }

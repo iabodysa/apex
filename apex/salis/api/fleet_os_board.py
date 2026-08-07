@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """The /fleet-os board payload — the fleet read, and the shape the page renders.
 
 ``fleet_os.get_fleet_os`` is one whitelisted call over one screen of data, and

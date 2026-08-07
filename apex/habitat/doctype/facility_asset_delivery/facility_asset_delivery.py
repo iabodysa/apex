@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Facility Asset Delivery controller — delivers a tracked Facility Asset
 from a procurement intake store to an accommodation, gated behind a 3-exit
 transfer lock and an on-site code receipt.
@@ -58,6 +58,7 @@ LEDGER_SOURCE = "Facility Asset Delivery"
 
 class FacilityAssetDelivery(Document):
     def validate(self):
+        """Blocks a delivery missing an asset, sharing source/destination, or initiator/receiver."""
         if not self.facility_asset:
             frappe.throw(_("A Facility Asset is required on a delivery."))
         if self.from_building and self.to_building and self.from_building == self.to_building:
@@ -125,6 +126,7 @@ class FacilityAssetDelivery(Document):
         self.db_set("status", "Cancelled")
 
     def before_cancel(self):
+        """Requires a cancellation reason and confirms a delivered asset has not since moved elsewhere."""
         if not self.cancellation_reason:
             frappe.throw(_("Cancellation Reason is required before cancelling a delivery."))
         if self.status == "Delivered":

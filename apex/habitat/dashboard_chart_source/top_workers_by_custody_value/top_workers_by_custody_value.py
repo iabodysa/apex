@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Top Workers by Custody Value — chart source over the Accommodation Stock Ledger.
 
 Reuses the canonical outstanding-custody-value definition (net signed
@@ -28,6 +28,7 @@ def get(
     time_interval=None,
     heatmap_year=None,
 ):
+    """Returns a bar-chart dataset of the top ten employees by outstanding custody value."""
     frappe.has_permission("Accommodation Stock Ledger", "read", throw=True)
     rows = get_top_custody_holders_by_value(limit=10)
     if not rows:

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Driver Portal — notifications endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
 
 import frappe
@@ -20,6 +20,7 @@ _MAX_NOTIFICATION_CANDIDATES = 250
 
 
 def _owns_notification_reference(driver, document_type, document_name):
+    """Returns True when the notification's referenced document actually belongs to this driver."""
     if not document_name:
         return False
     if document_type == "Salis Driver":
@@ -93,7 +94,6 @@ def get_my_notifications(limit=20):
     return rows
 
 
-
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def get_push_config():
@@ -124,7 +124,6 @@ def get_push_config():
             )
         ),
     }
-
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])

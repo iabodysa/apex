@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 import frappe
 from frappe.utils import flt
@@ -7,6 +7,7 @@ from apex.apex_core.utils.report_summary import card, count_card, total_card
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for accommodation ledger entries in a date range."""
     columns = [
         {"label": frappe._("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 110},
         {"label": frappe._("Employee"), "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 160},

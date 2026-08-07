@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis driver passenger-boarding — QR boarding pass + scan-validate.
 
 The pass token is HMAC-signed (per-site key) so it cannot be forged client-side
@@ -51,14 +51,17 @@ def _secret() -> bytes:
 
 
 def _sign(body: bytes) -> str:
+    """Computes the HMAC-SHA256 signature of the given bytes using the site's boarding secret."""
     return hmac.new(_secret(), body, hashlib.sha256).hexdigest()
 
 
 def _b64e(raw: bytes) -> str:
+    """Encodes bytes as unpadded URL-safe base64 text."""
     return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
 
 
 def _b64d(txt: str) -> bytes:
+    """Decodes unpadded URL-safe base64 text back into bytes."""
     pad = "=" * (-len(txt) % 4)
     return base64.urlsafe_b64decode(txt + pad)
 
@@ -104,6 +107,7 @@ def _is_staff(user: str | None = None) -> bool:
 
 
 def _driver_for_user(user: str | None = None) -> str | None:
+    """Returns the Salis Driver linked to the given user, or None."""
     return get_driver_for_user(user)
 
 
@@ -136,15 +140,6 @@ def _charge_request_window(
 ) -> None:
     """Charge this request against one named window.
 
-    ``rl:<cmd>:<scope>:<identity>`` keeps every window here readable beside the
-    framework's own ``rl:<cmd>:<identity>`` (rate_limiter.py:155), with a scope
-    segment because one endpoint in this module charges more than one bucket.
-    ``endpoint`` names the window when the route set no ``cmd``, so a direct call
-    never lands in an unnamed bucket shared with the next one.
-
-    No request means no traffic to meter, so console and job callers are never
-    charged -- the same first guard the framework's decorator applies
-    (rate_limiter.py:134).
     """
     if not getattr(frappe.local, "request", None):
         return
@@ -196,15 +191,10 @@ def _enforce_scan_unresolved_ip_rate_limit() -> None:
 def _transport_peer() -> str | None:
     """The address the CONNECTION came from -- the one a caller cannot choose.
 
-    werkzeug fills it from the WSGI environ's ``REMOTE_ADDR``
-    (werkzeug/wrappers/request.py:127), so it is what the socket reported and no
-    request header can move it. ``frappe.local.request_ip`` can: frappe takes it
-    from the FIRST ``X-Forwarded-For`` entry with no trusted-proxy check at all
-    (auth.py:64-75), which is what apex_core.utils.request_ip_trust exists to grade.
-
     Behind a reverse proxy this is the EDGE, not the caller, so it identifies one
     connection rather than one person -- which is exactly why it carries its own far
     looser ceiling instead of the per-address one.
+
     """
     return getattr(getattr(frappe.local, "request", None), "remote_addr", None)
 
@@ -219,19 +209,10 @@ def _enforce_pass_read_rate_limit() -> None:
     window per request and the ceiling never arrives. The peer window is the one that
     does not move under it.
 
-    This is what the decorator's ``key="frappe.request.remote_addr"`` was reaching for
-    and could not have. ``key`` is a FORM_DICT LOOKUP, ``frappe.form_dict.get(key, "")``
-    (rate_limiter.py:143), so the string named a request FIELD, never the attribute it
-    reads like. No caller sends a field by that name, the lookup returned "", and the
-    identity became ``<ip>:`` (rate_limiter.py:147-148) -- the plain address the string
-    was written to improve on. Worse, form_dict is built from the query string and body
-    (app.py:302-314), so a caller who DID send that field bought a private window per
-    value and left the limit behind entirely. Dropping the key closes that: every value
-    now counts in one address window.
-
     An identity that is absent declines to charge rather than pooling every such caller
     into a bucket named after nothing -- the same call the sibling scan limiter makes,
     because a shared bucket is not a ceiling, it is a way for one caller to 429 the rest.
+
     """
     for scope, identity, limit in (
         ("pass-address", getattr(frappe.local, "request_ip", None), PASS_ADDRESS_LIMIT),
@@ -328,7 +309,7 @@ def _get_or_create_log(dispatch_trip: str) -> "frappe.model.document.Document":
             "start_datetime": now_datetime(),
         }
     )
-    log.insert(ignore_permissions=True)  # audit-ok: trip authorised in _resolve_trip
+    log.insert(ignore_permissions=True)  # audit-ok
     from apex.salis.api.boarding_flow import ensure_trip_boarding_state
 
     ensure_trip_boarding_state(dispatch_trip)
@@ -336,6 +317,7 @@ def _get_or_create_log(dispatch_trip: str) -> "frappe.model.document.Document":
 
 
 def _already_boarded(log, worker: str) -> bool:
+    """Returns True when the worker already has a registered boarding event on this log."""
     return any(
         (row.worker == worker and not row.is_unregistered)
         for row in (log.boarding_events or [])
@@ -371,7 +353,7 @@ def _log_scan(
             "notes": notes,
         }
     )
-    doc.insert(ignore_permissions=True)  # audit-ok: scan attempt is always recorded
+    doc.insert(ignore_permissions=True)  # audit-ok
     return doc.name
 
 
@@ -487,7 +469,7 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
             "method": "QR",
         },
     )
-    log.save(ignore_permissions=True)  # audit-ok: trip authorised in _resolve_trip
+    log.save(ignore_permissions=True)  # audit-ok
 
     scan_log = _log_scan(
         dispatch_trip, trip, worker, "Valid", pass_token,

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Resident Request Register — the open queue, and how long it has been waiting.
 
@@ -31,6 +31,7 @@ AGEING_DAYS = 7
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for the open resident request queue and wait times."""
     filters = filters or {}
     columns = _columns()
 
@@ -101,6 +102,7 @@ def _summary(data):
 
 
 def _columns():
+    """Returns the column definitions for the resident request register."""
     return [
         {"label": _("Request"), "fieldname": "name", "fieldtype": "Link", "options": "Resident Request", "width": 170},
         {"label": _("Raised On"), "fieldname": "raised_on", "fieldtype": "Date", "width": 110},

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Fuel Quota controller.
 
 Submittable monthly fuel allocation. Consumption is posted by Fuel Request;
@@ -17,6 +17,7 @@ from apex.salis.utils import lock_vehicle
 
 class FuelQuota(Document):
     def validate(self):
+        """Blocks a duplicate live quota for the vehicle and period, and flags an over-consumed quota."""
         self._guard_duplicate()
         if flt(self.monthly_litres) <= 0:
             frappe.throw(_("Monthly litres must be greater than zero."))

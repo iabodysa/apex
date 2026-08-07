@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 import { ref, watch } from "vue";
 
 const STORAGE_KEY = "housing_portal_building";

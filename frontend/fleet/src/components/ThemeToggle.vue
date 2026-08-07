@@ -1,8 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Light / Auto / Dark switch. Writes data-theme onto <html> (the shared
-     tokens.css explicit-toggle rules win over prefers-color-scheme in both
-     directions) and persists the choice. "auto" removes the attribute so the OS
-     preference drives. Sits on the forest header, so it reads light-on-dark. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="emp-theme" role="group" :aria-label="t('emp.theme.label')">
     <button
@@ -42,7 +38,6 @@ function setMode(m) {
   try {
     localStorage.setItem(STORAGE_KEY, m);
   } catch (e) {
-    /* private-mode / storage disabled — the in-memory choice still applies */
   }
 }
 onMounted(() => {
@@ -50,7 +45,6 @@ onMounted(() => {
   try {
     saved = localStorage.getItem(STORAGE_KEY) || "auto";
   } catch (e) {
-    /* ignore */
   }
   if (!modes.includes(saved)) saved = "auto";
   mode.value = saved;
@@ -59,9 +53,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Padding is 2px, not the shared LangToggle's 3px, because this group also carries a
-   1px border: 2+1 per side matches the switcher's 3, so at the same 44px option height
-   the two header controls come out exactly the same height. */
 .emp-theme {
   display: inline-flex;
   align-items: center;
@@ -76,8 +67,6 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  /* 44px — the accessible touch target the shared LangToggle beside it uses. This
-     control sits on the same worker-facing header, so it may not be the smaller one. */
   min-height: 44px;
   padding: 4px 10px;
   border: none;
@@ -95,8 +84,6 @@ onMounted(() => {
   background: var(--c-header-accent);
   color: var(--forest);
 }
-/* On phones the label hides, leaving just the glyph — which would shrink the button
-   below the 44px touch target on the axis the label was holding open. */
 @media (max-width: 480px) {
   .emp-theme-opt span {
     display: none;

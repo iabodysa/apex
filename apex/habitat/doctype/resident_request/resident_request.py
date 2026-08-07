@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 from __future__ import annotations
 
 import re
@@ -40,6 +40,7 @@ _CATEGORY_TO_ISSUE_TYPE = {
 
 
 def before_insert(doc, method=None):
+    """Generates a tracking code, defaults channel and status, resolves location, sets priority."""
     if not doc.anonymous_tracking_code:
         doc.anonymous_tracking_code = frappe.generate_hash(length=8).upper()
 
@@ -54,6 +55,7 @@ def before_insert(doc, method=None):
 
 
 def validate(doc, method=None):
+    """Resolves the location token, syncs the employee, blocks a bad token, and checks status rules."""
     _populate_location_from_token(doc)
     sync_party_employee(doc)
     if doc.location_token and not doc.building:
@@ -129,6 +131,7 @@ def _validate_status_transition(doc):
 
 
 def _populate_location_from_token(doc):
+    """Sets the accommodation site, building and room from the active QR Location matching the token."""
     if not doc.location_token:
         return
 
@@ -147,6 +150,7 @@ def _populate_location_from_token(doc):
 
 
 def _apply_priority_rules(doc):
+    """Sets priority to Critical for hazard keywords, or to High for AC and other urgent keywords."""
     text = f"{doc.request_category or ''} {doc.description or ''}".lower()
 
     critical_terms = (
@@ -166,19 +170,19 @@ def _apply_priority_rules(doc):
     )
 
     def _matches(term):
+        """Returns whether a term appears as a whole word in the combined category and description text."""
         return re.search(r"\b" + re.escape(term) + r"\b", text) is not None
 
     _AC_PATTERN = re.compile(r"\ba[/\-]?c\b|air.?condi", re.IGNORECASE)
 
     def _is_ac_request():
+        """Returns whether the combined category and description text matches an air-conditioning pattern."""
         return bool(_AC_PATTERN.search(text))
 
     if any(_matches(term) for term in critical_terms):
         doc.priority = "Critical"
     elif (_is_ac_request() or any(_matches(term) for term in high_terms)) and doc.priority in (None, "", "Low", "Medium"):
         doc.priority = "High"
-
-
 
 
 @frappe.whitelist(methods=["POST"])
@@ -238,6 +242,7 @@ def _link_target_to_request(source, target_doctype, target_name):
 
 
 def _common_location(source, target):
+    """Copies the building, room and bed from the source request onto the new target document."""
     target.building = source.building
     target.room = source.room
     if source.bed:
@@ -245,6 +250,7 @@ def _common_location(source, target):
 
 
 def _build_maintenance_request(source):
+    """Builds an unsaved Maintenance Request from the request's location, category and description."""
     target = frappe.new_doc("Maintenance Request")
     _common_location(source, target)
     target.issue_type = _CATEGORY_TO_ISSUE_TYPE.get(source.request_category, "Other")
@@ -256,6 +262,7 @@ def _build_maintenance_request(source):
 
 
 def _build_safety_incident(source):
+    """Builds an unsaved Safety Incident from the request's location, severity and description."""
     target = frappe.new_doc("Safety Incident")
     target.incident_datetime = frappe.utils.now_datetime()
     target.building = source.building
@@ -268,6 +275,7 @@ def _build_safety_incident(source):
 
 
 def _build_custody_issue(source):
+    """Builds an unsaved Custody Issue from the resident request's building, party and description."""
     target = frappe.new_doc("Custody Issue")
     target.issue_date = frappe.utils.today()
     target.building = source.building

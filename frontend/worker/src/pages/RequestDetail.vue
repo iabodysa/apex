@@ -1,8 +1,6 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
-    <!-- Back link: a logical-property layout (no dir-specific CSS) so it mirrors
-         correctly under RTL via the chevron's transform alone. -->
     <router-link to="/requests" class="back-link" style="text-decoration: none">
       <Icon name="chevron" :size="18" class="back-chevron" />
       <span>{{ t("requests.back") }}</span>
@@ -12,8 +10,6 @@
 
     <div v-if="detail.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
 
-    <!-- Error: a revoked/disabled token or a foreign request (PermissionError)
-         and a server failure both surface here — never a blank page. -->
     <div v-else-if="detail.error" class="card card-pad text-center">
       <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
       <p class="text-sm text-muted">{{ errorMessage }}</p>
@@ -23,7 +19,6 @@
     </div>
 
     <template v-else-if="data">
-      <!-- Header: category + status + reference -->
       <section class="card card-pad space-y-2">
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0">
@@ -43,9 +38,6 @@
         </div>
       </section>
 
-      <!-- Status timeline: created -> current/closed. Mirrors the ordered-stop
-           dot rail used elsewhere; the connector is a logical border so it
-           renders identically under RTL. -->
       <section v-if="data.timeline && data.timeline.length" class="card card-pad space-y-3">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("requests.timeline") }}</h3>
         <ol class="timeline">
@@ -64,7 +56,6 @@
         </ol>
       </section>
 
-      <!-- Description + notes -->
       <section class="card card-pad space-y-4">
         <div v-if="data.description">
           <div class="field-label">{{ t("requests.details") }}</div>
@@ -86,7 +77,6 @@
         </div>
       </section>
 
-      <!-- Attachment thumbnail / link -->
       <section v-if="data.attachment" class="card card-pad space-y-2">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("requests.attachment") }}</h3>
         <a :href="data.attachment" target="_blank" rel="noopener" class="attach-tile" style="text-decoration: none">
@@ -121,8 +111,6 @@ const route = useRoute();
 
 const detail = createResource({
   url: "apex.salis.api.masar.get_worker_request_detail",
-  // The name comes from the route; the server re-resolves the token and only
-  // returns it when it belongs to this worker, so the client name is never trusted.
   makeParams: () => ({ token: TOKEN, name: route.params.name }),
   auto: true,
 });
@@ -159,8 +147,6 @@ function statusPill(status) {
 </script>
 
 <style scoped>
-/* Logical-property layout only — no [dir=rtl] selectors (T-297). The back
-   chevron is the one direction-aware glyph; it flips with the document dir. */
 .back-link {
   display: inline-flex;
   align-items: center;
@@ -191,8 +177,6 @@ function statusPill(status) {
   gap: 12px;
   position: relative;
 }
-/* The vertical connector uses a logical inset, so it sits on the dot rail in
-   both LTR and RTL without a direction-specific rule. */
 .timeline-row:not(:last-child) .timeline-dot::after {
   content: "";
   position: absolute;

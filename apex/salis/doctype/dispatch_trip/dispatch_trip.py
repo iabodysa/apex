@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Dispatch Trip controller.
 
 The FINAL status DocType on the Salis Workflow Spine. Status transitions are
@@ -47,6 +47,7 @@ from apex.salis.utils import (
 
 class DispatchTrip(Document):
     def validate(self):
+        """Runs readiness, odometer, timing, compliance and capacity checks before a trip is saved."""
         self._resolve_transport_request()
         self._guard_initial_status()
         self._validate_odometer()
@@ -85,6 +86,7 @@ class DispatchTrip(Document):
             )
 
     def on_update(self):
+        """Notifies subscribed driver portals of the trip change and flags its assigned requests as taken."""
         self._publish_driver_update()
         self._mark_assigned_requests()
 
@@ -148,6 +150,7 @@ class DispatchTrip(Document):
                 continue
 
     def before_submit(self):
+        """Blocks submission until the trip has a route, vehicle, driver, date and an assigned request."""
         self._enforce_dispatch_readiness()
 
     def _enforce_dispatch_readiness(self):
@@ -189,6 +192,7 @@ class DispatchTrip(Document):
             )
 
     def _validate_odometer(self):
+        """Requires odometer start and end to be set together, with end not less than start."""
         start_set = bool(self.odometer_start)
         end_set = bool(self.odometer_end)
         if start_set != end_set:
@@ -224,6 +228,7 @@ class DispatchTrip(Document):
             frappe.throw(_("Return Time cannot be earlier than Depart Time."))
 
     def on_submit(self):
+        """Advances the vehicle's odometer and fulfils the linked transport request once a trip completes."""
         if self.status == "Completed" and self.odometer_end and self.vehicle:
             lock_vehicle(self.vehicle)
             current = frappe.db.get_value("Salis Vehicle", self.vehicle, "odometer") or 0

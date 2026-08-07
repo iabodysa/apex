@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """In-app system notification helper — the one place that writes a Notification Log row.
 
@@ -79,7 +79,7 @@ def notify_user_system(
             dedup_filter["subject"] = clipped_subject
         if frappe.db.exists(LOG_DOCTYPE, dedup_filter):
             return False
-        frappe.get_doc(payload).insert(ignore_permissions=True)  # audit-ok — scheduler-run system alert
+        frappe.get_doc(payload).insert(ignore_permissions=True)  # audit-ok
         return True
     except Exception:
         frappe.db.rollback(save_point=_SAVEPOINT)

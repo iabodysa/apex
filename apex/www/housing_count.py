@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Legacy Housing Inventory count portal served at /housing-count.
 Now redirects to the unified /housing SPA.
 
@@ -10,5 +10,6 @@ comment, and www/test_www_controller_has_template.py for the guard that holds it
 import frappe
 
 def get_context(context):
+    """Redirects the legacy housing-count route to the unified housing portal's count view."""
     frappe.local.flags.redirect_location = "/housing#/count"
     raise frappe.Redirect

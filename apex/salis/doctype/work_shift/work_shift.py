@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Work Shift controller.
 
 Master record for a named operational shift within a project.
@@ -22,6 +22,7 @@ from frappe.model.document import Document
 
 class WorkShift(Document):
     def validate(self):
+        """Runs the shift-time ordering check when the shift is saved."""
         self._validate_shift_times()
 
     def _validate_shift_times(self):

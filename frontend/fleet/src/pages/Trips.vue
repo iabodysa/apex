@@ -1,19 +1,7 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <script setup>
-/*
- * TRIPS — the full list behind the home page's two-row preview. Same
- * identity-scoped get_my_recent_trips endpoint, wider window (the endpoint
- * already takes days/limit server-side; the preview never passed them). The
- * page owns its own load state: the singleton's preview stays untouched, and
- * retry here re-fetches only this list.
- *
- * The empty state is a legitimate outcome, not a defect: a session user who is
- * no Salis Driver (an ordinary office employee) gets [] from the backend by
- * design and reads the same "no recent trips" copy the preview uses.
- */
 import { ref, onMounted } from "vue";
 import Icon from "../components/Icon.vue";
-// [#a281] Direct path, never the "@shared/components" barrel (see App.vue).
 import EmptyState from "@shared/components/EmptyState.vue";
 import { useI18n } from "../i18n";
 import { fetchTrips } from "../useEmployee.js";
@@ -38,7 +26,6 @@ async function load() {
 }
 onMounted(load);
 
-// Same Latin-digit pinning as App.vue / Home.vue: one numeral system on screen.
 const AR_LOCALE = "ar-SA-u-nu-latn";
 function fmtInt(n) {
   if (n == null) return "—";
@@ -48,12 +35,8 @@ function fmtInt(n) {
 
 <template>
   <div class="emp-narrow">
-    <!-- The page title + hint are the shell heading (App.vue), so the card
-         carries only the list. -->
     <section class="emp-card reveal d1">
       <p v-if="loading" class="emp-empty">{{ t("emp.loading") }}</p>
-      <!-- [#emp-fail] Failure BEFORE the empty state: "the trips request broke"
-           is not "you have no trips". -->
       <div v-else-if="loadError" class="emp-fail">
         <p>{{ t("emp.loadError") }}</p>
         <button type="button" class="emp-btn emp-btn-ghost emp-retry" @click="load">

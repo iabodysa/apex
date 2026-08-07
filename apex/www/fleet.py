@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Fleet employee self-service page served at /fleet.
 
 This is the EMPLOYEE page (my vehicle · fuel request · my recent trips), open to
@@ -53,6 +53,7 @@ def has_apps_screen_access() -> bool:
 
 
 def get_context(context):
+    """Redirects guests to login and bootstraps the fleet self-service page for any logged-in user."""
     guest_redirect("/fleet")
 
     apply_portal_appearance(context)

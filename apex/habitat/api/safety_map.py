@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Safety Map API.
 
 A READ-ONLY presentation layer over Room, Maintenance Request and Custody Damage

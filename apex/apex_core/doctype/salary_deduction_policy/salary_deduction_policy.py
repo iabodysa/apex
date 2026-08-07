@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salary Deduction Policy (Single).
 
 Governs whether, and how, operational events (damage, rent, fuel, custody) may be
@@ -31,6 +31,7 @@ KSA_MAX_TOTAL_DEDUCTION_PERCENT = 50.0
 
 class SalaryDeductionPolicy(Document):
     def validate(self):
+        """Runs the global cap, per-type rule, authorization, and recovery-account guards."""
         self._guard_global_cap()
         self._guard_type_rules()
         self._guard_authorization()
@@ -39,16 +40,10 @@ class SalaryDeductionPolicy(Document):
     def _guard_recovery_account_agreement(self):
         """A Damage rule's component must credit the account the advance debited.
 
-        Recovering a damage advance through payroll credits the SALARY COMPONENT's own
-        account (hrms payroll_entry.py:452, tagged is_advance="Yes"), while the advance
-        payment debited the company's default employee advance account
-        (hrms employee_advance.py:259). HRMS throws only when the component account is
-        MISSING, never when it disagrees, so a mismatch leaves ``return_amount`` reading
-        fully recovered while the receivable never clears in the ledger.
-
         Enforced here, at configuration, and never at recovery time: refusing mid-run
         would silently stop a worker's wage recovery, which is worse than refusing a
         save the operator is already looking at.
+
         """
         for row in self.type_rules or []:
             if not row.enabled or row.deduction_type != "Damage":

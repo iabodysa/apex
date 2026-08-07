@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 import { onUnmounted, ref } from "vue";
 
 export function useMediaQuery(query) {
@@ -15,8 +15,6 @@ export function useMediaQuery(query) {
   return matches;
 }
 
-// 1024px is --bp-desktop (frontend_shared/tokens.css); a CSS @media condition cannot read a
-// custom property, so the two are kept in sync by hand and DESIGN.md §3 carries the widths.
 export function useDesktop() {
   return useMediaQuery("(min-width: 1024px)");
 }

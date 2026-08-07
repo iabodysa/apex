@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Fleet OS supervisor dashboard API (read + live operations).
 
 Backs the ``/fleet-os`` www page, which is the fleet supervisor's single-screen
@@ -71,11 +71,7 @@ def _resolve_plate(plate: str, ptype: str = "write") -> str:
     permission-checked. Matches plate_number, then plate_normalized, then name.
     Raises if not found or not permitted. ``ptype`` is "write" for the action
     endpoints (the default) and "read" for read-only ones (the timeline).
-
-    The name probe filters on ``name`` rather than passing the plate positionally:
-    the positional form returns the value unqueried when it equals the DocType
-    (database.py:1259), so a caller posting the literal "Salis Vehicle" skipped the
-    named refusal below and got a bare framework 404 from the permission check."""
+    """
     if not plate:
         frappe.throw(_("Plate is required."))
     name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
@@ -93,13 +89,7 @@ def _resolve_plate(plate: str, ptype: str = "write") -> str:
 def _resolve_driver_id(driver_id: str) -> str:
     """Resolve the dashboard's EXTERNAL fleet identifier (Salis Driver.driver_id)
     to a Salis Driver name, refusing anything that resolves to nothing.
-
-    Both the reassign and the handover draft carry the same identifier from the
-    same picker, so both resolve it the same way or one of them accepts a driver
-    the other refuses. The fallback probe is name-filtered, not positional: the
-    positional ``frappe.db.exists(dt, dn)`` answers "Salis Driver" back unqueried
-    (database.py:1259), which cleared the not-found refusal below for that literal
-    string."""
+    """
     if not driver_id:
         frappe.throw(_("Driver is required."))
     driver = frappe.db.get_value("Salis Driver", {"driver_id": driver_id}, "name")

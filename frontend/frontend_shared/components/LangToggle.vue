@@ -1,14 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Language selector: a two-option segmented control whose labels come from the
-     portal dictionary (`lang.en` / `lang.ar`). Flips the active portal language
-     (and, via App.vue, the document direction). Token-driven; works on any theme.
-
-     Shared by the driver, housing and safety portals via
-     @shared/components/LangToggle.vue. `useI18n` resolves through the `@` alias to
-     whichever portal bundles this file, so the toggle carries no portal-specific
-     import while each portal keeps its own strings. The fleet portal (its own
-     "Fleet OS" token vocabulary) and the worker portal (a >2-language <select>)
-     keep their own local LangToggle — their shapes genuinely differ. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="lang-toggle" :class="{ 'lang-toggle-header': variant === 'header' }" role="group" :aria-label="t('lang.label')">
     <button
@@ -40,7 +30,6 @@ import { useI18n } from "@/i18n";
 const { t, lang, setLang } = useI18n();
 
 defineProps({
-  // "header" tints the control for the dark header bar (uses header tokens).
   variant: { type: String, default: "default" },
 });
 </script>

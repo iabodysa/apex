@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <section class="queue">
     <header class="queue-head">
@@ -103,7 +103,6 @@ const pending = computed(() => props.plans.filter((plan) => plan.approval === "P
   font-weight: 600;
   transition: color 0.15s;
 }
-/* Gated so a touch tap never leaves a sticky hover behind. */
 @media (hover: hover) {
   .queue-open:hover .qr-name {
     color: var(--c-primary);

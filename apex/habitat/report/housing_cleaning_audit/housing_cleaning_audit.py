@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Housing Cleaning Audit — Script Report.
 
@@ -39,6 +39,7 @@ from apex.habitat import permissions
 
 
 def execute(filters=None):
+    """Returns the rows and summary cards for the audit, with synthetic rows for missed building-days."""
     filters = filters or {}
 
     date_from = getdate(filters.get("from_date") or today())
@@ -136,6 +137,7 @@ def execute(filters=None):
     data = []
 
     def _derive_status(row) -> str:
+        """Derives a log's status as Missed, Rework Required, Completed, or Pending from its flags."""
         if row.missed_cleaning:
             return "Missed"
         if row.rework_required:
@@ -197,6 +199,7 @@ def execute(filters=None):
 
 
 def _columns():
+    """Returns the column definitions for the housing cleaning audit report."""
     return [
         {
             "label": frappe._("Date"),

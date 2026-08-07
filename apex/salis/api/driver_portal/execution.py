@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Driver Portal — execution endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
 
 import frappe
@@ -36,7 +36,6 @@ def _trip_log_state(driver, dispatch_trip):
     }
 
 
-
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def start_my_trip(dispatch_trip):
@@ -69,9 +68,8 @@ def start_my_trip(dispatch_trip):
                 "start_datetime": frappe.utils.now_datetime(),
             }
         )
-        doc.insert(ignore_permissions=True)  # audit-ok — driver resolved server-side
+        doc.insert(ignore_permissions=True)  # audit-ok
     return _trip_log_state(driver, dispatch_trip)
-
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -107,10 +105,9 @@ def complete_my_trip(dispatch_trip):
     doc.status = "Completed"
     if not doc.end_datetime:
         doc.end_datetime = frappe.utils.now_datetime()
-    doc.flags.ignore_permissions = True  # audit-ok — driver resolved credential-first
+    doc.flags.ignore_permissions = True  # audit-ok
     doc.save() if not doc.is_new() else doc.insert()
     return _trip_log_state(driver, dispatch_trip)
-
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -144,7 +141,6 @@ def push_driver_position(dispatch_trip, lat, lng):
     }
 
 
-
 def _validate_coords(lat, lng):
     """Coerce ``lat``/``lng`` to floats and assert they are in valid WGS-84 ranges
 	(lat -90..90, lng -180..180). A client-supplied position that is non-numeric or
@@ -157,7 +153,6 @@ def _validate_coords(lat, lng):
     if not (-90.0 <= lat <= 90.0) or not (-180.0 <= lng <= 180.0):
         frappe.throw(_("The GPS position is outside the valid coordinate range."))
     return lat, lng
-
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -198,7 +193,7 @@ def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_na
                 "done_at": frappe.utils.now_datetime() if done else None,
             },
         )
-    log.flags.ignore_permissions = True  # audit-ok — driver resolved credential-first
+    log.flags.ignore_permissions = True  # audit-ok
     log.save()
     return {
         "route_stop": route_stop,

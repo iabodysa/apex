@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Masar Route Supervisor portal — served at /masar-supervisor.
 
 The route supervisor is the person who dispatches buses: they approve the Route Plan
@@ -92,6 +92,7 @@ def has_apps_screen_access() -> bool:
 
 
 def get_context(context):
+    """Redirects guests to login and bootstraps the route supervisor portal, gated on a role."""
     guest_redirect("/masar-supervisor")
 
     apply_portal_appearance(context)

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Global email kill-switch for the Apex app.
 
@@ -19,12 +19,6 @@ share one policy, and the difference matters:
 * Frappe **Notification** records do not follow that rule. 23 of the 36 records this
   app ships carry ``enabled: 1``; 13 ship disabled. What keeps a fresh install quiet
   is the toggle above, not the record metadata.
-
-The shipped value is a FIRST-INSTALL default and nothing more.
-``frappe/modules/import_file.py:33`` lists ``"Notification": ["enabled"]`` in
-``ignore_values``, so once the record exists on a site an app update never writes that
-field again — whatever the administrator chose is permanent, and shipping a different
-default in a later version reaches new sites only.
 
 This is intentionally a tiny, dependency-light helper so it can be imported from
 controllers, scheduler tasks, or seeders without pulling in heavier modules.
@@ -58,11 +52,6 @@ def mailable(users) -> list[str]:
     ``frappe.sendmail`` honours neither, and ``frappe.db.get_value("User", u,
     "enabled")`` is the LOGIN flag, so a user who is perfectly able to log in and has
     switched their own email notifications off still passes it.
-
-    The per-user answer is frappe's own — ``is_email_notifications_enabled``
-    (``frappe/desk/doctype/notification_settings/notification_settings.py:47``), which
-    reads ``Notification Settings.enable_email_notifications`` and defaults to allowed
-    when a user has no settings row yet, so an untouched account is not silenced.
 
     Administrator and Guest are dropped: neither is a person who chose anything.
     """

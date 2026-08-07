@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 # -*- coding: utf-8 -*-
 
 from frappe.model.document import Document
@@ -6,6 +6,7 @@ from frappe.model.document import Document
 
 class Site(Document):
     def onload(self):
+        """Loads the site's linked addresses and contacts into the document on open."""
         from frappe.contacts.address_and_contact import load_address_and_contact
 
         load_address_and_contact(self)

@@ -1,7 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// Mirrors driver_portal/src/i18n.js: an EN/AR dictionary with a reactive
-// translate / setLang / dir / useI18n layer. Arabic strings live here, which is
-// allowed for *_portal bundles; code carries stable English keys only.
+// Copyright (c) 2026, afmcoltd
 import { createI18n } from "@shared/i18n";
 
 const STORAGE_KEY = "fleet_portal_lang";
@@ -442,9 +439,6 @@ const messages = {
         error: "Couldn't send the fuel request",
       },
     },
-    // Top level, not under `emp`: the theme switch is the shared
-    // @shared/components/ThemeToggle.vue, and every portal that mounts it looks
-    // these four keys up at the same path.
     theme: { label: "Theme", light: "Light", auto: "Auto", dark: "Dark" },
   },
   ar: {
@@ -885,7 +879,6 @@ const messages = {
   },
 };
 
-// supervisor board defaults to Arabic (mirrors driver/safety portals)
 const { lang, dir, translate, setLang } = createI18n({
   messages,
   storageKey: STORAGE_KEY,

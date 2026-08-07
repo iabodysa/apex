@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, afmcoltd
 frappe.ui.form.on("Apex Settings", {
 	refresh(frm) {
 		if (!frappe.boot.apex_demo_data) {

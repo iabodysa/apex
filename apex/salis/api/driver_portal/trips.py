@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Driver Portal — trips endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
 
 import frappe
@@ -24,6 +24,7 @@ RECENT_TRIP_MAX_LIMIT = 100
 
 
 def _bounded_positive(value, default, maximum):
+    """Clamps a requested positive value to a default and a maximum."""
     parsed = frappe.utils.cint(value)
     if parsed <= 0:
         return default
@@ -47,7 +48,6 @@ def my_trips_today():
     _attach_trip_log_state(trips, driver)
     _attach_boarding_counts(trips, driver)
     return trips
-
 
 
 @frappe.whitelist(allow_guest=True)
@@ -85,7 +85,6 @@ def my_trips_recent(days=30, limit=50):
     return trips
 
 
-
 def _worker_phone(employee):
     """The worker's contact number for a one-tap call, or None. Reads the Employee's
     ``cell_number`` (the manifest's call target); a missing number simply omits the
@@ -95,14 +94,12 @@ def _worker_phone(employee):
     return frappe.db.get_value("Employee", employee, "cell_number") or None
 
 
-
 def _enrich_workers_with_phone(workers):
     """Stamp each manifest worker dict with a ``phone`` for the tel: call action.
     Mutates in place. One get per employee (the manifests are small)."""
     for w in workers or []:
         if "phone" not in w:
             w["phone"] = _worker_phone(w.get("employee"))
-
 
 
 @frappe.whitelist(allow_guest=True)
@@ -123,7 +120,6 @@ def my_worker_route_today():
         _enrich_workers_with_phone(trip.get("workers"))
         trip["maps_route_url"] = _full_route_maps_url(trip.get("route_plan"))
     return data
-
 
 
 @frappe.whitelist(allow_guest=True)

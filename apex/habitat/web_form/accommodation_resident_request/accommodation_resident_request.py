@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 import frappe
 from frappe import _
 
@@ -6,6 +6,7 @@ from apex.apex_core.utils.rate_limit_identity import rate_limit
 
 
 def get_context(context):
+    """Disables caching on the resident request web form so every visit renders fresh."""
     context.no_cache = 1
 
 
@@ -44,5 +45,5 @@ def submit_resident_request(
         "mobile_number": contact_number,
         "source_channel": "QR Web Form",
     })
-    doc.insert(ignore_permissions=True)  # audit-ok — guest QR web-form intake, rate-limited + honeypot-guarded
+    doc.insert(ignore_permissions=True)  # audit-ok
     return {"name": doc.name, "tracking_code": doc.anonymous_tracking_code}

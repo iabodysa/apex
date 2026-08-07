@@ -1,5 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Operations-alert drawer: the scoped open-alert queue with deep links. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <script setup>
 import Icon from "./Icon.vue";
 defineProps([
@@ -9,9 +8,7 @@ defineProps([
 </script>
 
 <template>
-  <!-- ALERT DRAWER -->
   <transition name="fp-overlay">
-    <!-- Backdrop only duplicates the labelled close button, so it is hidden from AT. -->
     <div v-if="alertsOpen" class="panel-overlay open" aria-hidden="true" @click.self="closeAlerts"></div>
   </transition>
   <transition name="fp-panel">
@@ -21,7 +18,6 @@ defineProps([
           <div class="ph-plate"><Icon name="bell" :size="18" /> {{ t("alerts.title") }}</div>
           <div class="ph-sub">{{ alertTotal }}</div>
         </div>
-        <!-- Icon-only: IconBase marks its svg aria-hidden, so the name must come from aria-label. -->
         <button class="panel-close" :aria-label="t('alerts.close')" @click="closeAlerts"><Icon name="x" :size="18" /></button>
       </div>
       <div class="panel-body">

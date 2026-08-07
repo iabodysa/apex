@@ -1,5 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Dense table view (sortable columns, selection, row → detail panel). -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <script setup>
 import Icon from "./Icon.vue";
 defineProps([

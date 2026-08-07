@@ -1,5 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Filters + quick-stats column (a bottom sheet on phones). -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <script setup>
 import Icon from "./Icon.vue";
 defineProps([
@@ -11,13 +10,10 @@ defineProps([
 </script>
 
 <template>
-    <!-- Mobile filter-sheet backdrop (inert on desktop — the sheet CSS is phone-only) -->
     <div v-if="filtersSheetOpen" class="fp-sheet-backdrop fp-mobile-only" aria-hidden="true" @click="closeFiltersSheet"></div>
-    <!-- SIDEBAR (a bottom sheet on phones, a fixed column on wider viewports) -->
     <div class="sidebar" :class="{ 'fp-sheet-open': filtersSheetOpen }">
       <div class="sidebar-header">
         <span class="sidebar-title"><Icon name="funnel" :size="13" /> {{ t("sidebar.filtersAndStats") }}</span>
-        <!-- Icon-only: IconBase marks its svg aria-hidden, so the name must come from aria-label. -->
         <button class="panel-close fp-sheet-close fp-mobile-only" :aria-label="t('sidebar.close')" @click="closeFiltersSheet"><Icon name="x" :size="16" /></button>
       </div>
       <div class="sidebar-scroll">

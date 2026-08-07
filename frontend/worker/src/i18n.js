@@ -1,5 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
-// [#h991b9]
+// Copyright (c) 2026, afmcoltd
 import { ref } from "vue";
 import { createI18n } from "@shared/i18n";
 

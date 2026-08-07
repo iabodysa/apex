@@ -1,13 +1,5 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Public Arrival Manifest intake, and what bounds ONE call of it.
-
-The rate limit bounds how many calls arrive; two other bounds decide how much a
-single admitted call can insert. Rows are capped by the controller's own ceiling,
-imported below rather than restated, because two copies of one number are two
-numbers as soon as either is edited. Row WIDTH needs nothing here: every field a
-guest may write is Data or Link, and frappe refuses a value past the column's
-varchar width before insert (base_document.py:1000-1005), so an admitted call is
-bounded in bytes as well as in rows.
 
 NO AGGREGATE DAILY CAP -- decided, not overlooked. Keyed on the address, a daily
 budget is spent by exactly the rotating proxy pool that already walks past the
@@ -28,6 +20,7 @@ _ALLOWED_WORKER_FIELDS = ("worker_name", "passport_number", "nationality")
 
 
 def get_context(context):
+    """Disables caching for the public Arrival Manifest web form page."""
     context.no_cache = 1
 
 
@@ -78,5 +71,5 @@ def submit_arrival_manifest(
         "project": project,
         "expected_workers": rows,
     })
-    doc.insert(ignore_permissions=True)  # audit-ok — guest web-form intake, rate-limited + honeypot-guarded; field-allowlisted
+    doc.insert(ignore_permissions=True)  # audit-ok
     return {"name": doc.name}

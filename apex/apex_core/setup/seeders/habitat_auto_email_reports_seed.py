@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Seed native Frappe Auto Email Reports that email an existing Script Report on a
 schedule. These are the periodic operational digests:
 

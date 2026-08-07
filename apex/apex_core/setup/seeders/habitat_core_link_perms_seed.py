@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Picker-level access to the core masters this app's own documents link to.
 
 Apex ships its own roles, so nothing in erpnext or hrms names them. That left the
@@ -6,37 +6,12 @@ roles that OWN Housing Assignment unable to resolve three of its own Link fields
 Resident (Dynamic Link -> Employee), Project (mandatory) and Cost Center (fetched
 from the Building) — and, for the same reason, left every Salis role unable to resolve
 the Project field its own movement documents are anchored on. Two surfaces failed on it,
-in ways that did not look related:
-
-  * ``frappe.client.validate_link`` refuses a caller with neither read nor select on
-    the target (``frappe/client.py:447``), and the Desk Link control routes every
-    selection through it, so picking a Resident or a Project on the form silently
-    left the field empty.
-  * ``frappe.desk.query_report.run`` asks ``build_match_conditions`` for every Link
-    column that carries a value, which raises ``No permission to read {0}``
-    (``frappe/model/db_query.py:1014``). The since-retired Active Resident Register report therefore ran clean
-    on an empty site and returned 403 as soon as one row existed.
+in ways that did not look related.
 
 SELECT, NOT READ. ``select`` is exactly what a Link picker and a report's match
 conditions consume (both accept ``select or read``); it does not open the Employee
 form, its list, or a report over it. Granting ``read`` to reach a picker would hand
 these roles every Employee record instead.
-
-BLAST RADIUS. ``add_permission`` calls ``setup_custom_perms``
-(``frappe/permissions.py:645``), which on the FIRST custom row for a doctype copies
-that doctype's shipped DocPerms into Custom DocPerm. From then on the site's
-Employee / Project / Cost Center permissions are site-local and no longer track an
-erpnext or hrms upgrade. That is inherent to customising a core doctype's
-permissions and is the same trade this app already accepted for Issue in
-``salis_issue_seed.py``.
-
-WHY SALIS NEEDS THE PROJECT ROW AT ALL. Salis anchors thirteen of its own DocTypes on
-Project, and a Project User Permission is the key ``apex.salis.permissions`` scopes every
-one of those lists by. That scoping reads the User Permission table directly, so it works
-with no DocPerm at all — but the Project PICKER on the forms that set the field does not:
-``validate_link`` refuses a caller holding neither read nor select (frappe/client.py:447),
-and Project ships only a permlevel-1 Desk User row, which ``get_role_permissions``
-discards (frappe/permissions.py:284).
 
 Idempotent and existence-guarded, and wired into after_install AND after_migrate so
 a fresh site and an upgraded one converge to the same rows.

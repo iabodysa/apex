@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 import frappe
 from frappe import _
@@ -10,6 +10,7 @@ from apex.habitat import permissions
 
 
 def execute(filters=None):
+    """Returns the columns, rows and summary cards for the audit remediation status register."""
     filters = filters or {}
     columns = [
         {"label": frappe._("Remediation Plan"), "fieldname": "plan", "fieldtype": "Link", "options": "Audit Remediation Plan", "width": 150},

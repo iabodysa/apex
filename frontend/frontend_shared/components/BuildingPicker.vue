@@ -1,14 +1,4 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Building resolver/selector shared by the housing and safety portals. Loads the
-     buildings the signed-in user may read (standard frappe.client.get_list, role-
-     and permission-scoped on the server) and lets them pick one. If the account is
-     scoped to a single building it is auto-selected, so the common case is one tap
-     to start.
-
-     Shared via @shared/components/BuildingPicker.vue. i18n (`useI18n`,
-     `resourceErrorMessage`) and the portal-local `Icon` resolve through the `@`
-     alias to whichever portal bundles this file, so the component carries no
-     portal-specific wiring while each portal keeps its own strings + icon set. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="picker">
     <div class="picker-hero">
@@ -59,20 +49,13 @@ const { t } = useI18n();
 const error = ref("");
 const q = ref("");
 
-// frappe-ui list resource over the same role-/permission-scoped get_list the
-// portals used — returns the identical { name, building_name } rows, with CSRF
-// handled by frappeRequest (configured in main.js).
 const buildingsRes = createListResource({
   doctype: "Building",
   fields: ["name", "building_name"],
   orderBy: "building_name asc",
-  // createListResource has NO "all rows" sentinel: pageLength 0/undefined falls
-  // back to its default of 20. The old fetch used limit_page_length:0 (all), so we
-  // set a ceiling well above any realistic building count to preserve "show all".
   pageLength: 99999,
   auto: true,
   onSuccess: (rows) => {
-    // Scoped to exactly one building -> auto-select; one tap becomes zero.
     if (Array.isArray(rows) && rows.length === 1) {
       const only = rows[0];
       emit("select", only.name, only.building_name || only.name);
@@ -84,8 +67,6 @@ const buildingsRes = createListResource({
 });
 
 const buildings = computed(() => buildingsRes.data || []);
-// createListResource exposes loading on its inner `.list` resource, not on the
-// top-level object — read it there so the spinner state is preserved.
 const loading = computed(() => buildingsRes.list.loading);
 
 const filtered = computed(() => {
@@ -211,10 +192,6 @@ const filtered = computed(() => {
   flex-shrink: 0;
 }
 
-/* ---- tablet / iPad (≥768px) ----------------------------------------
-   Lay the building list out as a comfortable 2-column grid instead of a
-   single tall column, and give the hero a little more presence. The phone
-   layout (single column) is untouched below this breakpoint. */
 @media (min-width: 768px) {
   .b-list {
     display: grid;

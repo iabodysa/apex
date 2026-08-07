@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Salis Settings controller."""
 
 from __future__ import annotations
@@ -10,6 +10,7 @@ from frappe.model.document import Document
 
 class SalisSettings(Document):
     def validate(self):
+        """Blocks a negative alert lead days value or fuel request approval threshold."""
         if self.alert_lead_days is not None and self.alert_lead_days < 0:
             frappe.throw(_("Alert Lead Days cannot be negative."))
         if (

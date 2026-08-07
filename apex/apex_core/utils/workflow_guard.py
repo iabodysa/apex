@@ -1,17 +1,11 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Re-validate authorization on the native-submit / native-cancel workflow bypass.
 
 A submittable DocType governed by an active Frappe Workflow must reach docstatus 1
 (submit) or 2 (cancel) ONLY through an authorized workflow transition, i.e.
 ``frappe.model.workflow.apply_workflow`` — which enforces the transition's role,
 condition and self-approval gates. A *bare* ``doc.submit()`` / ``frappe.client.submit``
-(or ``doc.cancel()``) skips all of that:
-
-* ``set_workflow_state_on_action`` (frappe/model/workflow.py) force-jumps the state
-  field to the FIRST state matching the new docstatus with NO role / condition /
-  self-approval check, and
-* ``validate_workflow`` only checks a transition when the state field actually
-  CHANGED — which a bare submit never does.
+(or ``doc.cancel()``) skips all of that.
 
 So any user holding the DocType's native ``submit`` DocPerm could otherwise force
 "Approved" (docstatus 1) on a financial / payroll / legal record, and even the
@@ -98,10 +92,12 @@ def _enforce(doc, target_docstatus: int) -> None:
 
 
 def before_submit(doc, method=None):
+    """Blocks a bare submit that bypasses the document's authorized workflow transition."""
     _enforce(doc, 1)
 
 
 def before_cancel(doc, method=None):
+    """Blocks a bare cancel that bypasses the document's authorized workflow transition."""
     if not get_workflow_name(doc.doctype) or can_cancel_document(doc.doctype):
         return
     _enforce(doc, 2)

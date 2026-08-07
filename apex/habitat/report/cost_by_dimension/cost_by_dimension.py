@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Cost by Dimension.
 
@@ -22,6 +22,7 @@ from apex.apex_core.utils.report_summary import card, total_card
 
 
 def execute(filters=None):
+    """Returns the columns, rows and cards for cost aggregated by company, building and project."""
     filters = frappe._dict(filters or {})
     columns = get_columns()
     data = get_data(filters)
@@ -34,6 +35,7 @@ def execute(filters=None):
 
 
 def get_columns():
+    """Returns the column definitions for the cost-by-dimension report."""
     return [
         {"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 200},
         {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 200},
@@ -44,6 +46,7 @@ def get_columns():
 
 
 def get_data(filters):
+    """Sums non-reversal ledger cost by company, building and project, per the given filters."""
     ledger = frappe.qb.DocType("Accommodation Ledger")
 
     query = (

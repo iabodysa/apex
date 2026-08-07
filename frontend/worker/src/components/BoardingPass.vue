@@ -1,12 +1,6 @@
-<!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- A real boarding-pass / ticket card for the worker's signed QR. Two stubs split
-     by a perforated divider: an INFO stub (brand band + holder + labelled trip
-     fields) and a QR stub on a clean white card. All colors are theme tokens so
-     the pass adapts to afmco / frappe / dark; the QR keeps its own white bg +
-     quiet zone (non-negotiable for scanning) regardless of theme. -->
+<!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="bpass">
-    <!-- Accent header band: brand mark + "Boarding Pass" title. -->
     <div class="bpass-band">
       <div class="bpass-band-arc" aria-hidden="true"><Brand mode="arc" /></div>
       <div class="bpass-band-inner">
@@ -18,7 +12,6 @@
       </div>
     </div>
 
-    <!-- Holder + labelled trip fields. -->
     <div class="bpass-info">
       <div class="bpass-holder">
         <span class="bpass-avatar" aria-hidden="true">{{ holderInitial }}</span>
@@ -44,14 +37,12 @@
       </div>
     </div>
 
-    <!-- Perforated divider: a dashed line with a notch cut into each edge. -->
     <div class="bpass-perf" aria-hidden="true">
       <span class="bpass-notch bpass-notch-start"></span>
       <span class="bpass-dash"></span>
       <span class="bpass-notch bpass-notch-end"></span>
     </div>
 
-    <!-- QR stub: the scannable code on its own clean white card. -->
     <div class="bpass-stub">
       <p class="bpass-hint">{{ t("boarding.hint") }}</p>
       <div class="bpass-qr">
@@ -75,11 +66,7 @@ import { useI18n } from "../i18n";
 const { t, tEnum } = useI18n();
 
 const props = defineProps({
-  // The boarding-pass payload: qr_payload, holder_name, expires_in_hours,
-  // destination_label (the route drop-off) and pickup_label (the worker's own
-  // building) — both worker-scoped server-side, NOT the generic pickup_point.
   pass: { type: Object, required: true },
-  // The trip this pass is for, for the labelled ticket fields (route/time/pickup).
   trip: { type: Object, default: null },
 });
 
@@ -87,9 +74,6 @@ const holderInitial = computed(
   () => (props.pass.holder_name || "?").trim().charAt(0).toUpperCase() || "?",
 );
 
-// Destination = the route's actual drop-off (the server resolves it to the final
-// stop's location/name), NOT the worker's own pickup. Falls back to the worker's
-// trip destination stop, then the localized trip type, then the request id.
 const routeLabel = computed(() => {
   if (props.pass.destination_label) return props.pass.destination_label;
   const dest = props.trip?.destination;
@@ -102,9 +86,6 @@ const routeLabel = computed(() => {
 
 const departTime = computed(() => props.trip?.depart_time || "");
 
-// Pickup point = the worker's OWN building/stop (server-resolved), not the generic
-// per-request pickup_point. Falls back to the trip's my_pickup building, then the
-// request's pickup_point as a last resort.
 const pickupPoint = computed(() => {
   if (props.pass.pickup_label) return props.pass.pickup_label;
   const mp = props.trip?.my_pickup;
@@ -117,8 +98,6 @@ const pickupPoint = computed(() => {
 
 <style scoped>
 .bpass {
-  /* The ticket: a rounded surface card with an accent band on top. overflow-hidden
-     keeps the band's rounded top corners clean; max-width keeps it phone-sized. */
   width: 100%;
   max-width: 340px;
   margin-inline: auto;
@@ -129,7 +108,6 @@ const pickupPoint = computed(() => {
   overflow: hidden;
 }
 
-/* Accent header band. */
 .bpass-band {
   position: relative;
   background: var(--c-primary);
@@ -181,7 +159,6 @@ const pickupPoint = computed(() => {
   white-space: nowrap;
 }
 
-/* Info stub. */
 .bpass-info {
   padding: 16px 18px 14px;
 }
@@ -217,7 +194,6 @@ const pickupPoint = computed(() => {
   white-space: nowrap;
 }
 
-/* Labelled ticket fields — wrap so nothing overflows on a narrow phone. */
 .bpass-fields {
   display: flex;
   flex-wrap: wrap;
@@ -248,7 +224,6 @@ const pickupPoint = computed(() => {
   overflow-wrap: anywhere;
 }
 
-/* Perforated divider between the info and the QR stub. */
 .bpass-perf {
   position: relative;
   display: flex;
@@ -265,7 +240,6 @@ const pickupPoint = computed(() => {
   height: 22px;
   width: 22px;
   border-radius: var(--radius-pill);
-  /* Cut a circle out of each edge by painting the page canvas color over it. */
   background: var(--c-canvas);
   border: var(--border-width) solid var(--c-border);
   top: 50%;
@@ -278,7 +252,6 @@ const pickupPoint = computed(() => {
   inset-inline-end: -12px;
 }
 
-/* QR stub. */
 .bpass-stub {
   display: flex;
   flex-direction: column;
@@ -293,9 +266,6 @@ const pickupPoint = computed(() => {
   margin: 0;
 }
 .bpass-qr {
-  /* Frame follows the theme surface; the QR itself carries its own contrast-clamped
-     light bg + 4-module quiet zone (QrCode.vue), so the code stays scannable on any
-     theme (verified by a round-trip jsQR decode) while matching the ticket. */
   background: var(--c-surface);
   padding: 10px;
   border-radius: var(--radius);

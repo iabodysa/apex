@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 
 """Fuel Reconciliation report.
 
@@ -18,6 +18,7 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
+    """Returns the columns, per-vehicle-period rows, chart and summary cards for fuel reconciliation."""
     filters = filters or {}
 
     columns = [

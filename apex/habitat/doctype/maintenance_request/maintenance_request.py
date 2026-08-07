@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO and contributors
+# Copyright (c) 2026, afmcoltd
 """Maintenance Request controller.
 
 Why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row, and
@@ -31,6 +31,7 @@ class MaintenanceRequest(Document):
 
 
 def before_save(doc, method=None):
+    """Defaults reported_by and company on a new request, then enforces the status transition rules."""
     if doc.is_new() and not doc.reported_by:
         doc.reported_by = frappe.session.user
 
@@ -44,6 +45,7 @@ def before_save(doc, method=None):
 
 
 def _validate_status_rules(doc):
+    """Blocks an Assigned status with no assignee, a closed request with no notes, or negative cost."""
     status = doc.status or "Open"
     if status == "Assigned" and not doc.assigned_to:
         frappe.throw(_("Assigned To is required when status is Assigned."))
@@ -70,6 +72,7 @@ def make_work_order(source_name, target_doc=None):
     from frappe.model.mapper import get_mapped_doc
 
     def set_missing_values(source, target):
+        """Sets the mapped Work Order's source request link and status to Planned."""
         target.maintenance_request = source.name
         target.status = "Planned"
 
