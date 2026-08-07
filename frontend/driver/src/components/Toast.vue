@@ -27,8 +27,7 @@ import { toasts, dismissToast } from "../toast";
 <style scoped>
 .toast-host {
   position: fixed;
-  left: 0;
-  right: 0;
+  inset-inline: 0;
   bottom: calc(72px + env(safe-area-inset-bottom));
   z-index: 40;
   margin: 0 auto;

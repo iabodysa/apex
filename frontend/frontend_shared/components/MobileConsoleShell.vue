@@ -192,6 +192,13 @@ const shellVars = computed(() => ({
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
+@media (hover: hover) {
+  .mc-nav :slotted(a:hover:not(.is-active)),
+  .mc-nav :slotted(button:hover:not(:disabled):not(.is-active)) {
+    color: var(--c-ink-soft);
+    background: color-mix(in srgb, var(--c-ink) 6%, transparent);
+  }
+}
 /* The active state cannot be carried by the tint. A tint deep enough to clear 3:1
    against the bar drags the 11px label down with it — at 34% the label measures
    2.94:1, worse than the 4.03:1 it had at 13%. So the tint stays light and the

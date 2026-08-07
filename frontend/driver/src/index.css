@@ -494,6 +494,20 @@ body {
   .btn:active {
     transform: scale(0.98);
   }
+  @media (hover: hover) {
+    .btn-primary:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--c-primary) 86%, black);
+    }
+    .btn-dark:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--c-ink) 86%, black);
+    }
+    .btn-accent:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--c-mint) 86%, black);
+    }
+    .btn-outline:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--c-ink) 6%, transparent);
+    }
+  }
   .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -645,6 +659,11 @@ body {
 }
 .quick-action:active {
   transform: scale(0.97);
+}
+@media (hover: hover) {
+  .quick-action:hover {
+    box-shadow: var(--shadow-lg);
+  }
 }
 
 /* [#6suoq3] */
