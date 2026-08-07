@@ -15,7 +15,6 @@ from apex.habitat.tasks.common import (
 )
 from apex.habitat.tasks.safety import (
     _instance_priority,
-    _raise_safety_alert,
     audit_remediation_deadline_watch,
     daily_safety_task_compliance_scan,
     weekly_safety_coverage_gate,
@@ -58,7 +57,6 @@ __all__ = [
     "_notify_user_system",
     "_raise_consumable_alert",
     "_raise_maintenance_alert",
-    "_raise_safety_alert",
     "allocate_building_accommodation_cost",
     "audit_remediation_deadline_watch",
     "auto_create_cleaning_logs",

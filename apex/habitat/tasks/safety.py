@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import frappe
 
-from apex.apex_core.utils.operations_alert import insert_operations_alert
+from apex.apex_core.utils.role_assignment import assign_role, reconcile_role_queue
 from apex.habitat.tasks.common import (
     _notify_operational,
     _notify_role_system,
@@ -13,7 +13,51 @@ from apex.habitat.tasks.common import (
 )
 
 _ROW_SAVEPOINT = "safety_row"
-_ALERT_SAVEPOINT = "safety_alert_dedupe"
+
+ZERO_ROUNDS_WINDOW_DAYS = 7
+
+SAFETY_ROLE = "Safety Officer"
+
+
+def _has_round(building, filters):
+    return bool(frappe.db.exists("Safety Round", {"docstatus": 1, "building": building, **filters}))
+
+
+def _no_recent_round(building):
+    """No submitted Safety Round of ANY cadence in the trailing window."""
+    from frappe.utils import add_days, getdate, today
+
+    since = str(getdate(add_days(today(), -ZERO_ROUNDS_WINDOW_DAYS)))
+    return not _has_round(building, {"round_date": [">=", since]})
+
+
+def _uncovered_this_week(building):
+    """No submitted Weekly-cadence Safety Round dated inside the current site week."""
+    from frappe.utils import get_first_day_of_week, get_last_day_of_week, getdate, today
+
+    today_date = getdate(today())
+    span = [str(get_first_day_of_week(today_date)), str(get_last_day_of_week(today_date))]
+    return not _has_round(building, {"cadence": "Weekly", "round_date": ["between", span]})
+
+
+def buildings_needing_safety_attention():
+    """Every ACTIVE building failing EITHER safety condition.
+
+    Both jobs reconcile the Building queue against THIS, never against their own pass.
+    The framework gives a document one assignment rather than one per reason
+    (``assign_to.add`` skips a user who already holds an open ToDo for it), so a job that
+    settled only what its own scan found would close the other job's work and the queue
+    would depend on which ran last. The two conditions are independent — a building can
+    have a Daily round today and no Weekly round this week — so the union is computed,
+    never inferred from one.
+    """
+    return {
+        b
+        for b in frappe.get_all("Building", filters={"status": "Active"}, pluck="name")
+        if _no_recent_round(b) or _uncovered_this_week(b)
+    }
+
+
 
 
 def zero_rounds_alert_subject(label: str) -> str:
@@ -24,41 +68,6 @@ def zero_rounds_alert_subject(label: str) -> str:
     cleared by SUBJECT. Producer and clearer must not drift, hence one owner here.
     """
     return f"No recent safety round: {label}"
-
-
-def _raise_safety_alert(alert_type: str, severity: str, message: str, dedupe_token: str) -> str | None:
-    """Insert an Operations Alert for a safety obligation breach (idempotent).
-
-    Mirrors _raise_maintenance_alert: existence-guarded on
-    ``(alert_type, status=Open, message LIKE %dedupe_token%, raised_on=today)`` so a
-    daily job never spams a duplicate. ``alert_type``/``severity`` MUST be valid
-    Operations Alert Select options (the DocType's option set is closed). Returns the
-    new alert name, or None when a duplicate was skipped or the insert failed.
-    """
-    from frappe.utils import today
-
-    today_str = today()
-    frappe.db.savepoint(_ALERT_SAVEPOINT)
-    try:
-        if frappe.db.exists(
-            "Operations Alert",
-            {
-                "alert_type": alert_type,
-                "status": "Open",
-                "message": ["like", f"%{dedupe_token}%"],
-                "raised_on": ["between", [f"{today_str} 00:00:00", f"{today_str} 23:59:59"]],
-            },
-        ):
-            return None
-    except Exception:
-        frappe.db.rollback(save_point=_ALERT_SAVEPOINT)
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title=f"Safety alert dedupe check failed ({dedupe_token})"[:140],
-        )
-        return None
-
-    return insert_operations_alert(alert_type, severity, message)
 
 
 def _instance_priority(template: str | None) -> str:
@@ -104,6 +113,7 @@ def daily_safety_task_compliance_scan() -> None:
 
     total_overdue = 0
     escalated = 0
+    queued_instances: list[str] = []
 
     cursor = ""
     batch_size = 500
@@ -133,14 +143,16 @@ def daily_safety_task_compliance_scan() -> None:
                         f"daily_safety_task_compliance_scan: {priority}-priority scheduled task "
                         f"{inst.name} ({inst.template}) is overdue (was due {inst.due_date})."
                     )
-                    _raise_safety_alert(
-                        alert_type="Maintenance Overdue",
-                        severity="Critical" if priority == "Critical" else "Warning",
-                        message=msg,
-                        dedupe_token=inst.name,
+                    assign_role(
+                        "Scheduled Task Instance",
+                        inst.name,
+                        SAFETY_ROLE,
+                        description=msg,
+                        priority="High" if priority == "Critical" else "Medium",
                     )
+                    queued_instances.append(inst.name)
                     _notify_role_system(
-                        "Safety Officer",
+                        SAFETY_ROLE,
                         subject=f"Overdue {priority} safety task: {inst.name}",
                         message=msg,
                     )
@@ -163,7 +175,8 @@ def daily_safety_task_compliance_scan() -> None:
     else:
         logger.info("daily_safety_task_compliance_scan: No overdue instances found.")
 
-    ZERO_ROUNDS_WINDOW_DAYS = 7
+    reconcile_role_queue("Scheduled Task Instance", queued_instances)
+
     window_start = str(getdate(add_days(today(), -ZERO_ROUNDS_WINDOW_DAYS)))
     no_rounds = 0
 
@@ -198,14 +211,9 @@ def daily_safety_task_compliance_scan() -> None:
                     f"daily_safety_task_compliance_scan [{token}]: building {label} has no "
                     f"submitted Safety Round in the last {ZERO_ROUNDS_WINDOW_DAYS} days."
                 )
-                _raise_safety_alert(
-                    alert_type="Supervisor Delay",
-                    severity="Warning",
-                    message=msg,
-                    dedupe_token=token,
-                )
+                assign_role("Building", b.name, SAFETY_ROLE, description=msg)
                 _notify_role_system(
-                    "Safety Officer",
+                    SAFETY_ROLE,
                     subject=zero_rounds_alert_subject(label),
                     message=msg,
                 )
@@ -226,6 +234,8 @@ def daily_safety_task_compliance_scan() -> None:
                 )
 
         start += batch_size
+
+    reconcile_role_queue("Building", buildings_needing_safety_attention())
 
     logger.info(
         f"daily_safety_task_compliance_scan: {no_rounds} active building(s) with no recent safety round."
@@ -299,14 +309,9 @@ def weekly_safety_coverage_gate() -> None:
                     f"Weekly Safety Round for the week of {week_start} — {week_end}."
                 )
                 logger.warning(msg)
-                _raise_safety_alert(
-                    alert_type="Supervisor Delay",
-                    severity="Warning",
-                    message=msg,
-                    dedupe_token=b.name,
-                )
+                assign_role("Building", b.name, SAFETY_ROLE, description=msg)
                 _notify_role_system(
-                    "Safety Officer",
+                    SAFETY_ROLE,
                     subject=f"Building not covered by a weekly safety round: {label}",
                     message=msg,
                 )
@@ -319,6 +324,8 @@ def weekly_safety_coverage_gate() -> None:
                 )
 
         start += batch_size
+
+    reconcile_role_queue("Building", buildings_needing_safety_attention())
 
     logger.info(f"weekly_safety_coverage_gate: {uncovered} active building(s) uncovered this week.")
 
