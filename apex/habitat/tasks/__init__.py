@@ -30,7 +30,6 @@ from apex.habitat.tasks.cost import (
     daily_accommodation_cost_allocation,
 )
 from apex.habitat.tasks.maintenance import (
-    _raise_maintenance_alert,
     daily_building_license_expiry_check,
     open_maintenance_escalation,
 )
@@ -56,7 +55,6 @@ __all__ = [
     "_notify_role_system",
     "_notify_user_system",
     "_raise_consumable_alert",
-    "_raise_maintenance_alert",
     "allocate_building_accommodation_cost",
     "audit_remediation_deadline_watch",
     "auto_create_cleaning_logs",

@@ -5,10 +5,9 @@ from __future__ import annotations
 
 import frappe
 
-from apex.apex_core.utils.operations_alert import insert_operations_alert
+from apex.apex_core.utils.role_assignment import assign_role, reconcile_role_queue
 
 _ROW_SAVEPOINT = "maintenance_row"
-_ALERT_SAVEPOINT = "maintenance_alert"
 
 
 def daily_building_license_expiry_check() -> None:
@@ -70,63 +69,39 @@ def daily_building_license_expiry_check() -> None:
         cursor = licenses[-1].name
 
 
-def _raise_maintenance_alert(
-    req_name: str,
-    priority: str,
-    elapsed_hours: float,
-    threshold_hours: int,
-    issue_type: str,
-    status: str,
-) -> None:
-    """Insert an Operations Alert for an overdue Maintenance Request (idempotent).
+MAINTENANCE_ROLE = "Accommodation Manager"
 
-    ONE OPEN ALERT PER REQUEST, not one per request per day. The guard used to also
-    require ``raised_on`` to fall inside today, so a request left open raised a fresh
-    row every morning — and ``Maintenance Overdue`` has no branch in
-    ``reconcile_operations_alerts``, while ``OperationsAlert.clear_old_logs`` deletes
-    only Resolved rows. A request open for a year therefore left 365 rows that nothing
-    could resolve and retention could not touch. An alert that is still Open is still
-    saying the same thing, so re-raising it says nothing new.
 
-    Both the insert and the optional timeline comment are individually guarded so a
-    failure rolls back and logs but never aborts the calling loop.
+def _queue_overdue_request(req_name, priority, elapsed_hours, threshold_hours, issue_type, status):
+    """Put an overdue Maintenance Request in the queue of the role that can close it.
+
+    This replaces an Operations Alert row whose only link to its subject was the record
+    name inside the message text, deduped with a leading-wildcard LIKE that used no index
+    and collided whenever a name appeared in an unrelated alert. A native assignment IS
+    the link: the ToDo carries reference_type and reference_name, so the same document is
+    never queued twice and finding it is an indexed lookup.
+
+    Accommodation Manager is the audience because the technician role holds read only on
+    this DocType — a queue addressed to someone who cannot act on the record is the
+    second inbox this move exists to remove.
     """
-    alert_type = "Maintenance Overdue"
-    severity = "Critical" if priority == "Critical" else "Warning"
     message = (
-        f"open_maintenance_escalation: Maintenance Request {req_name} "
-        f"({issue_type}, status: {status}) is overdue. "
+        f"Maintenance Request {req_name} ({issue_type}, status: {status}) is overdue. "
         f"Priority: {priority}, hours open: {elapsed_hours:.1f} "
         f"(threshold: {threshold_hours} hours)."
     )[:2000]
-
-    frappe.db.savepoint(_ALERT_SAVEPOINT)
-    try:
-        if frappe.db.exists(
-            "Operations Alert",
-            {
-                "alert_type": alert_type,
-                "status": "Open",
-                "message": ["like", f"%{req_name}%"],
-            },
-        ):
-            return
-    except Exception:
-        frappe.db.rollback(save_point=_ALERT_SAVEPOINT)
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title=f"Maintenance alert dedupe check failed ({req_name})"[:140],
-        )
-        return
-
-    if insert_operations_alert(alert_type, severity, message) is None:
-        return
-
-    frappe.db.savepoint(_ALERT_SAVEPOINT)
+    assign_role(
+        "Maintenance Request",
+        req_name,
+        MAINTENANCE_ROLE,
+        description=message,
+        priority="High" if priority in ("Critical", "High") else "Medium",
+    )
+    frappe.db.savepoint(_ROW_SAVEPOINT)
     try:
         frappe.get_doc("Maintenance Request", req_name).add_comment("Comment", message)
     except Exception:
-        frappe.db.rollback(save_point=_ALERT_SAVEPOINT)
+        frappe.db.rollback(save_point=_ROW_SAVEPOINT)
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"Maintenance alert comment failed for {req_name}"[:140],
@@ -138,8 +113,9 @@ def open_maintenance_escalation() -> None:
 
     Checks open requests (docstatus != 2, status in ('Open', 'Assigned', 'In Progress', 'Reopened'))
     and logs escalations based on priority and elapsed time.
-    Also inserts an Operations Alert for each overdue ticket (idempotent — one
-    Open alert per request per day; see _raise_maintenance_alert).
+    Each overdue ticket is ASSIGNED to the role that can close it, and the queue is
+    reconciled at the end of the pass, so a request that is no longer overdue has its
+    assignment closed instead of leaving a row nothing could resolve.
     """
     from frappe.utils import now_datetime, get_datetime
 
@@ -152,6 +128,8 @@ def open_maintenance_escalation() -> None:
         "Medium": 168,
         "Low": 336
     }
+
+    still_overdue: list[str] = []
 
     start = 0
     batch_size = 500
@@ -183,7 +161,7 @@ def open_maintenance_escalation() -> None:
                         f"Maintenance Request {req.name} ({req.issue_type}, status: {req.status}) "
                         f"is overdue! Priority: {priority}, hours open: {elapsed_hours:.1f} (threshold: {threshold_hours} hours)."
                     )
-                    _raise_maintenance_alert(
+                    _queue_overdue_request(
                         req_name=req.name,
                         priority=priority,
                         elapsed_hours=elapsed_hours,
@@ -191,6 +169,7 @@ def open_maintenance_escalation() -> None:
                         issue_type=req.issue_type or "",
                         status=req.status or "",
                     )
+                    still_overdue.append(req.name)
             except Exception:
                 frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
@@ -200,3 +179,5 @@ def open_maintenance_escalation() -> None:
                 continue
 
         start += batch_size
+
+    reconcile_role_queue("Maintenance Request", still_overdue)
