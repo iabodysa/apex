@@ -113,7 +113,7 @@
        {"ar": _("Employee Advance"), "en": "Advance reference", "value": doc.recovery_advance}],
   ]) }}
   {{ ax.amount_words(doc.recovery_amount, cur) }}
-  {%- if doc.worker_signature %}
+  {%- if doc.worker_signature and doc.worker_signature.startswith("data:") %}
   <div style="border:1px solid #ddd5c2;border-radius:5px;padding:8px 10px;margin-bottom:12px">
     <span class="lbl">{{ _("Worker Consent Signature") }}<span class="en">Worker consent signature</span></span>
     <img src="{{ doc.worker_signature }}" style="max-height:70px;display:block;margin-top:5px">

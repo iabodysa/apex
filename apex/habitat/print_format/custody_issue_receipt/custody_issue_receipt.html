@@ -84,7 +84,7 @@
 
   {{ ax.declaration(_("I have received the articles listed above in the quantities and the condition shown. I undertake to keep them in my care and to hand them back in the same condition on or before the return date shown. I accept that anything lost or damaged through my negligence is assessed and deducted from my dues under company policy.")) }}
 
-  {%- if doc.signature %}
+  {%- if doc.signature and doc.signature.startswith("data:") %}
   <div class="ax-note">
     <span class="lbl">{{ _("Electronic Acknowledgement") }}<span class="en">Electronic acknowledgement</span></span>
     <img src="{{ doc.signature }}" alt="" style="max-height:54px;max-width:220px;display:block;margin:4px 0">
