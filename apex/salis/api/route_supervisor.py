@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import frappe
 
-from apex.salis.utils.road_route import road_path
+from apex.salis.utils.road_route import is_cached, road_path
 from frappe import _
 
 PORTAL_ROLES = (
@@ -42,6 +42,12 @@ PORTAL_ROLES = (
 )
 
 _POSITION_STALE_SECONDS = 120
+
+# How many plans in ONE board request may pay for a live router call. road_route caps a
+# single call at six seconds, so an uncapped loop makes the supervisor wait that many
+# times over on a cold cache. Three is one warm-up per screen; the rest fill in on the
+# next poll once their routes are cached.
+ROUTER_CALLS_PER_REQUEST = 3
 
 
 
@@ -465,6 +471,11 @@ def get_active_driver_positions():
 
     now = frappe.utils.now_datetime()
     out = []
+    # Each cache miss is one call to a public router with a six-second ceiling, made
+    # while the supervisor waits for this board. A warm route costs nothing, so the
+    # budget is spent on misses only; past it the remaining plans are served cached-only
+    # and the map draws the straight line it already draws when the router is down.
+    router_budget = ROUTER_CALLS_PER_REQUEST
     for plan in plans:
         trip_name = _active_trip_for_plan(plan["name"])
         if not trip_name:
@@ -501,12 +512,18 @@ def get_active_driver_positions():
             if stop.get("latitude") and stop.get("longitude")
         ]
 
+        coordinates = [(stop["lat"], stop["lng"]) for stop in stops]
+        warm = is_cached(coordinates)
+        path = road_path(coordinates, cached_only=not warm and router_budget <= 0)
+        if not warm:
+            router_budget -= 1
+
         out.append({
             "dispatch_trip": trip["name"],
             "route_plan": plan["name"],
             "route_name": plan.get("route_name") or plan["name"],
             "stops": stops,
-            "path": road_path([(stop["lat"], stop["lng"]) for stop in stops]),
+            "path": path,
             "project": plan.get("project"),
             "status": trip.get("status"),
             "driver": trip.get("driver"),

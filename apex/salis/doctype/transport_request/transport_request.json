@@ -327,7 +327,8 @@
    "label": "Status",
    "options": "New\nValidated\nApproved\nScheduled\nFulfilled\nRejected\nCancelled",
    "read_only": 1,
-   "no_copy": 1
+   "no_copy": 1,
+   "search_index": 1
   },
   {
    "fieldname": "route_plan",
@@ -455,7 +456,7 @@
    "link_fieldname": "transport_request"
   }
  ],
- "modified": "2026-08-07 05:38:00.000000",
+ "modified": "2026-08-07 06:37:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",

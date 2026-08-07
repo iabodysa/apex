@@ -55,7 +55,8 @@
    "fieldname": "route_plan",
    "fieldtype": "Link",
    "label": "Route Plan",
-   "options": "Route Plan"
+   "options": "Route Plan",
+   "search_index": 1
   },
   {
    "fetch_from": "route_plan.transport_request",
@@ -64,7 +65,8 @@
    "fieldtype": "Link",
    "label": "Transport Request",
    "options": "Transport Request",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fetch_from": "route_plan.route_assignment",
@@ -104,7 +106,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Planned\nDispatched\nCompleted\nCancelled",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "dispatch_trip_sec_assigned_requests",
@@ -292,7 +295,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-08-07 05:38:00.000000",
+ "modified": "2026-08-07 06:37:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",

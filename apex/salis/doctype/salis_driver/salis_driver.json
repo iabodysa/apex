@@ -102,7 +102,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Active\nStopped\nOn Leave\nReleased"
+   "options": "Active\nStopped\nOn Leave\nReleased",
+   "search_index": 1
   },
   {
    "fieldname": "project",
@@ -254,7 +255,7 @@
    "link_fieldname": "driver"
   }
  ],
- "modified": "2026-08-06 22:39:00.000000",
+ "modified": "2026-08-07 06:37:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Driver",

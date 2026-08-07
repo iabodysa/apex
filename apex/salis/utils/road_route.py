@@ -50,6 +50,17 @@ def _cache_key(points):
     return f"{CACHE_KEY}:{_fingerprint(points)}"
 
 
+def is_cached(points):
+    """Whether ``points`` can be answered without touching the network.
+
+    A caller drawing many routes uses this to spend its router budget on the ones that
+    would actually call out — a warm route costs nothing and must not consume it.
+    """
+    if not points or len(points) < 2:
+        return True
+    return frappe.cache.get_value(_cache_key(points)) is not None
+
+
 def _remember(points, path, ttl):
     """Store a routing answer under its own expiring key.
 
@@ -62,13 +73,20 @@ def _remember(points, path, ttl):
     frappe.cache.set_value(_cache_key(points), path, expires_in_sec=ttl)
 
 
-def road_path(points):
+def road_path(points, cached_only=False):
     """Return the drive through ``points`` as [[lat, lng], ...], or None.
 
     ``points`` is the ordered stop list as (lat, lng) pairs. None means "no geometry" for
     every reason a caller cannot act on differently — routing switched off, fewer than two
     stops, the router unreachable, a malformed answer — and the map then draws the line it
     would have drawn anyway.
+
+    ``cached_only`` answers from the cache or returns None without touching the network.
+    A caller drawing MANY routes in one request needs it: each miss is a call to a public
+    router with a ``REQUEST_TIMEOUT``-second ceiling, and a loop over plans turns that
+    ceiling into a multiple of itself while a person waits. Spending a bounded budget on
+    misses and serving the rest cached-only degrades the tail to straight lines, which is
+    the same thing the caller already renders when the router is unreachable.
     """
     base = _router_base()
     if not base or not points or len(points) < 2:
@@ -77,6 +95,8 @@ def road_path(points):
     cached = frappe.cache.get_value(_cache_key(points))
     if cached is not None:
         return cached or None
+    if cached_only:
+        return None
 
     coordinates = ";".join(f"{lng},{lat}" for lat, lng in points)
     url = f"{base}/route/v1/driving/{quote(coordinates)}?overview=full&geometries=geojson"
