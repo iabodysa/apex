@@ -55,7 +55,7 @@
 <div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
   {{ ax.watermark(doc) }}
 
-  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
+  {{ ax.doc_head() }}
 
   {{ ax.doc_title(doc, _("Safety Round Report"), "Safety Round Report",
                   ((_("Overall Result") ~ ": " ~ _(doc.overall_result)) if doc.overall_result else "")

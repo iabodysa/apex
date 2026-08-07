@@ -37,7 +37,7 @@
 <div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
   {{ ax.watermark(doc) }}
 
-  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
+  {{ ax.doc_head() }}
 
   {{ ax.doc_title(doc, _("Vehicle Handover Receipt"), "Vehicle Handover Receipt",
                   (_("Handover Date") ~ ": " ~ frappe.format_date(doc.handover_date)) if doc.handover_date else "") }}
