@@ -1,9 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 from frappe.utils import date_diff, today
 
 from apex.habitat.permissions import report_maintenance_request_scope
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 _PRIORITY_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
@@ -74,7 +76,17 @@ def execute(filters=None):
 
     data.sort(key=lambda r: (-(r["sla_breached"]), _PRIORITY_ORDER.get(r["priority"], 99), -r["age_days"]))
 
-    return columns, data, None, _build_chart(data)
+    summary = [
+        count_card(_("Open Requests"), data),
+        count_card(
+            _("Past SLA"),
+            data,
+            lambda r: (r.get("age_days") or 0) > (r.get("sla_days") or 0) > 0,
+            "Red",
+        ),
+        total_card(_("Repair Cost"), data, "cost_of_repair", "Currency"),
+    ]
+    return columns, data, None, _build_chart(data), summary
 
 
 def _build_chart(data):

@@ -18,11 +18,30 @@ stable posted fact this report exists to protect.
 """
 
 import frappe
+from frappe import _
+from frappe.utils import flt
 from frappe.utils import getdate, today, add_days
 
 from apex.habitat import permissions
+from apex.apex_core.utils.report_summary import count_card, percent_card
 
 LEDGER_DOCTYPE = "Cleaning Compliance Ledger"
+
+
+def _summary(data):
+    """The strip, built for ANY result including none.
+
+    An empty report returns zeroed figures rather than a blank strip: 0 tells the reader
+    the query ran and found nothing, while an empty area reads as a broken page.
+    """
+    cleaned = sum(flt(r.get("rooms_cleaned")) for r in data)
+    total = sum(flt(r.get("rooms_total")) for r in data)
+    return [
+        count_card(_("Cleaning Logs"), data),
+        percent_card(_("Rooms Cleaned"), cleaned, total),
+        count_card(_("Missed"), data, lambda r: r.get("missed_cleaning"), "Red"),
+        count_card(_("Rework Required"), data, lambda r: r.get("rework_required"), "Orange"),
+    ]
 
 
 def execute(filters=None):
@@ -59,7 +78,7 @@ def execute(filters=None):
     chosen = ledger_filters.get("building")
     if restrict:
         if not allowed or (chosen and chosen not in allowed):
-            return columns, []
+            return columns, [], None, None, _summary([])
         if not chosen:
             ledger_filters["building"] = ["in", allowed]
 
@@ -83,7 +102,7 @@ def execute(filters=None):
 
     log_names = list(log_total.keys())
     if not log_names:
-        return columns, []
+        return columns, [], None, None, _summary([])
 
     enrich = {}
     log_meta_rows = frappe.get_all(
@@ -139,4 +158,4 @@ def execute(filters=None):
 
     data.sort(key=lambda r: (str(r["cleaning_date"] or ""), r["building"] or ""), reverse=True)
 
-    return columns, data
+    return columns, data, None, None, _summary(data)

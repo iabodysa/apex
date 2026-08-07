@@ -139,6 +139,7 @@ Aged Over 60 Days,أقدم من 60 يوماً
 Average Cost per Litre,متوسط تكلفة اللتر
 Buildings,المباني
 Claims,المطالبات
+Contracts,العقود
 Expiring in 30 Days,تنتهي خلال 30 يوماً
 Idle Share,نسبة التعطّل
 Leases Watched,العقود المتابَعة
@@ -146,8 +147,12 @@ Monthly Rent at Risk,الإيجار الشهري المعرّض
 Open Recoveries,الاستردادات المفتوحة
 Open Requests,الطلبات المفتوحة
 Over 90 Days,أكثر من 90 يوماً
+Past SLA,تجاوز المدة المتفق عليها
+Positions,المواضع
+Repair Cost,تكلفة الإصلاح
 Residents,الساكنون
 Rows,الصفوف
+SIMs Covered,الشرائح المشمولة
 Settled Share,نسبة المسوّى
 Trips Fulfilled,الرحلات المنفَّذة
 active,نشط

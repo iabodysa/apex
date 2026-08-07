@@ -9,11 +9,18 @@ from frappe import _
 from frappe.utils import flt, today
 
 from apex.habitat import permissions
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
     filters = filters or {}
-    return get_columns(), get_data(filters)
+    data = get_data(filters)
+    summary = [
+        count_card(_("Positions"), data),
+        total_card(_("Balance Qty"), data, "balance_qty"),
+        total_card(_("Value"), data, "value_sar", "Currency"),
+    ]
+    return get_columns(), data, None, None, summary
 
 
 def get_columns():

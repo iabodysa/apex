@@ -2,9 +2,11 @@
 """Submitted telecom contracts expiring within a window, company-scoped."""
 
 import frappe
+from frappe import _
 from frappe.utils import add_days, date_diff, today
 
 from apex.logistay import permissions
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
@@ -58,4 +60,10 @@ def execute(filters=None):
         row["days_to_expiry"] = (
             date_diff(row.contract_end_date, today()) if row.contract_end_date else None
         )
-    return columns, data
+    summary = [
+        count_card(_("Contracts"), data),
+        count_card(_("Expired"), data, lambda r: (r.get("days_to_expiry") or 0) < 0, "Red"),
+        total_card(_("SIMs Covered"), data, "sim_count", "Int"),
+        total_card(_("Recurring Amount"), data, "recurring_amount", "Currency"),
+    ]
+    return columns, data, None, None, summary
