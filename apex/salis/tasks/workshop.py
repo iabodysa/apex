@@ -7,7 +7,8 @@ import frappe
 from frappe import _
 
 from apex.salis.tasks.common import (
-    _raise_alert,
+    _queue_document,
+    _reconcile_queue,
     _settings_int,
 )
 
@@ -60,11 +61,16 @@ def _overstay_stops() -> list:
 def workshop_overstay_watch() -> None:
     """Flag vehicles in the workshop longer than ``workshop_overstay_days``.
 
-    Raises one "Maintenance Overdue" Operations Alert per overstaying vehicle
-    (see ``_overstay_stops`` for the rule), deduped daily by ``_raise_alert``.
+    Each overstaying stop (see ``_overstay_stops`` for the rule) is ASSIGNED to the
+    Fleet Supervisor queue — the Vehicle Suspension is the document the supervisor
+    closes to release the vehicle — and the queue is reconciled at the end of the
+    pass, so a stop that is no longer overstaying has its assignment closed instead
+    of leaving a row nothing could resolve. This job is the only queuer of Vehicle
+    Suspension, so its own findings are the reconcile union.
     """
     days = _settings_int("workshop_overstay_days", 14)
     logger = frappe.logger()
+    still_overstaying: list[str] = []
     for r in _overstay_stops():
         frappe.db.savepoint(_ROW_SAVEPOINT)
         try:
@@ -75,16 +81,18 @@ def workshop_overstay_watch() -> None:
                 f"workshop_overstay_watch: vehicle {r.vehicle} in workshop since "
                 f"{r.stop_date} (over {days} days)."
             )
-            _raise_alert(
-                "Maintenance Overdue", "Warning", msg,
-                source_doctype="Vehicle Suspension", source_name=r.name, vehicle=r.vehicle,
+            _queue_document(
+                "Vehicle Suspension", r.name, "Warning", msg, vehicle=r.vehicle,
             )
+            still_overstaying.append(r.name)
         except Exception:
             frappe.db.rollback(save_point=_ROW_SAVEPOINT)
             frappe.log_error(
                 message=frappe.get_traceback(),
                 title=f"Workshop overstay watch failed for {r.name}"[:140],
             )
+
+    _reconcile_queue("Vehicle Suspension", still_overstaying)
 
 
 @frappe.whitelist()

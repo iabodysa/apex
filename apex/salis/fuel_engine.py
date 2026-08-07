@@ -13,13 +13,13 @@ Two scheduled jobs:
   Idempotent on ``(source_type, source_name)``.
 * ``monthly_fuel_reconciliation`` (monthly) — for each active Fuel Quota of the
   period, sums ledgered consumption for that vehicle+period against the quota's
-  monthly litres; if consumption exceeds the quota beyond a tolerance margin it
-  raises an "Excessive Topup" Operations Alert referencing the vehicle.
-  Idempotent per vehicle+period+month.
+  monthly litres; if consumption exceeds the quota beyond a tolerance margin the
+  breached Fuel Quota is ASSIGNED to the Fleet Supervisor queue. Idempotent by the
+  framework's own rule (one open assignment per quota+holder); the queue drains in
+  ``reconcile_operations_alerts`` once the breach clears.
 
-No GL is written. The Operations Alert insert goes through the apex_core
-``insert_operations_alert`` helper (a leaf util) rather than importing
-``salis.tasks`` — no coupling, one place writes the record.
+No GL is written. The queue helper is imported inside the job so module load keeps
+no ``salis.tasks`` coupling.
 """
 
 from __future__ import annotations
@@ -28,10 +28,8 @@ import frappe
 from frappe.query_builder.functions import Coalesce, Sum
 
 from apex.apex_core.utils.company import company_for_vehicle
-from apex.apex_core.utils.operations_alert import insert_operations_alert
 
 LEDGER_DOCTYPE = "Fuel Consumption Ledger"
-ALERT_DOCTYPE = "Operations Alert"
 BATCH_SIZE = 500
 
 OVERAGE_MARGIN = 0.05
@@ -288,47 +286,22 @@ def accrue_fuel_consumption() -> None:
 
 
 
-def _alert_already_raised(vehicle: str, period_month: str) -> bool:
-    """True if an Excessive Topup alert was already raised for this vehicle in the
-    month of ``period_month``. Idempotency key = (alert_type, vehicle, raised_on
-    within that month). The previous implementation also matched the period inside
-    the (translated) message text, which was fragile; the raised-on month window
-    plus vehicle already identifies the alert uniquely for a given period.
-    """
-    from frappe.utils import get_first_day, get_last_day, getdate
-
-    try:
-        month_anchor = getdate(period_month + "-01")
-    except Exception:
-        return False
-
-    start = f"{get_first_day(month_anchor)} 00:00:00"
-    end = f"{get_last_day(month_anchor)} 23:59:59"
-    return bool(
-        frappe.db.exists(
-            ALERT_DOCTYPE,
-            {
-                "alert_type": "Excessive Topup",
-                "vehicle": vehicle,
-                "raised_on": ["between", [start, end]],
-            },
-        )
-    )
-
-
 def monthly_fuel_reconciliation() -> None:
     """Reconcile each active Fuel Quota's allocation against ledgered consumption.
 
     For the current period (this month, YYYY-MM), every active Fuel Quota is
     compared with the summed Fuel Consumption Ledger litres for the same
     vehicle+period. If consumption exceeds ``monthly_litres`` by more than the
-    ``OVERAGE_MARGIN`` tolerance, an "Excessive Topup" Operations Alert is raised
-    referencing the vehicle. Idempotent per vehicle+period within the month.
+    ``OVERAGE_MARGIN`` tolerance, the breached Fuel Quota — the document whose
+    allocation the supervisor must revisit — is ASSIGNED to the Fleet Supervisor
+    queue. Idempotent by the framework's assignment dedupe; the queue drains in
+    ``reconcile_operations_alerts`` once the breach clears.
 
-    Per-row try/except isolates failures; no commit inside the loop. The alert
-    insert goes through the apex_core helper (a leaf util, no salis.tasks coupling).
+    Per-row try/except isolates failures; no commit inside the loop.
     """
     from frappe.utils import flt, today
+
+    from apex.salis.tasks.common import _queue_document
 
     period_month = _period_month(today())
     logger = frappe.logger()
@@ -370,9 +343,6 @@ def monthly_fuel_reconciliation() -> None:
                 if quota_litres <= 0 or consumed <= threshold:
                     continue
 
-                if _alert_already_raised(quota.vehicle, period_month):
-                    continue
-
                 overage = consumed - quota_litres
                 message = frappe._(
                     "Fuel consumption {0} L for vehicle {1} in period {2} exceeds the "
@@ -386,12 +356,8 @@ def monthly_fuel_reconciliation() -> None:
                     quota.name,
                 )
 
-                insert_operations_alert(
-                    alert_type="Excessive Topup",
-                    severity="Critical",
-                    message=message,
-                    vehicle=quota.vehicle,
-                    driver=quota.driver,
+                _queue_document(
+                    "Fuel Quota", quota.name, "Critical", message, vehicle=quota.vehicle,
                 )
             except Exception:
                 frappe.db.rollback(save_point=sp)

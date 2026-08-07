@@ -7,7 +7,7 @@ import frappe
 
 from apex.salis.tasks.common import (
     BATCH_SIZE,
-    _raise_alert,
+    _queue_document,
 )
 
 _ROW_SAVEPOINT = "salis_attendance_row"
@@ -17,9 +17,11 @@ def missing_attendance_watch() -> None:
     """Flag active drivers with no Driver Attendance recorded today.
 
     For each Salis Driver ``{status: Active}`` checks for a submitted Driver
-    Attendance for today. If none exists, raises an Info "Supervisor Delay"
-    alert (the Operations Alert DocType has no dedicated "Attendance Gap"
-    option, so the nearest existing option is reused).
+    Attendance for today. If none exists the driver is ASSIGNED to the Fleet
+    Supervisor queue — the Salis Driver is the document the supervisor chases,
+    since the gap is the absence of an attendance record. The Salis Driver queue
+    is reconciled centrally in ``reconcile_operations_alerts`` (it drains once
+    attendance lands or the driver is no longer Active).
     """
     from frappe.utils import today
 
@@ -66,8 +68,7 @@ def missing_attendance_watch() -> None:
                 msg = (f"missing_attendance_watch: no attendance recorded today for "
                        f"active driver {who}.")
                 logger.warning(msg)
-                _raise_alert("Supervisor Delay", "Info", msg,
-                             "Salis Driver", d.name, driver=d.name)
+                _queue_document("Salis Driver", d.name, "Info", msg)
             except Exception:
                 frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(

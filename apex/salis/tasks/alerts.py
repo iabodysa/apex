@@ -11,6 +11,7 @@ from apex.salis.tasks.common import (
     ALERT_DOCTYPE,
     BATCH_SIZE,
     _publish_operations_alert,
+    _reconcile_queue,
     _resolve_alert,
     _settings_int,
     _vehicle_project,
@@ -142,6 +143,16 @@ def reconcile_operations_alerts() -> None:
     Idempotent (already-Resolved rows are skipped by the status filter; a re-run
     resolves nothing new once conditions are stable) and never aborts: each alert
     is handled in its own try/except with rollback-before-log.
+
+    THIS PASS ALSO DRAINS THE ASSIGNMENT QUEUES that replaced the Salis alert
+    writers. It is the single reconcile point for the three DocTypes that more
+    than one job (or none of its own) can queue — Salis Vehicle (idle watches +
+    compliance watch), Salis Driver (attendance watch) and Fuel Quota (the
+    monthly fuel reconciliation) — because reconcile_role_queue's contract needs
+    the UNION of every condition per DocType, and a per-writer reconcile would
+    close the other writers' work. Vehicle Suspension and Rental Office reconcile
+    inside their sole writer jobs. The legacy alert rows above keep draining here
+    until the DocType retires.
     """
     from frappe.utils import add_days, getdate, today
 
@@ -220,6 +231,7 @@ def reconcile_operations_alerts() -> None:
     }
     from apex.salis.fuel_engine import _period_month, get_overage_margin
 
+    breached_quotas: set[str] = set()
     overage_margin = get_overage_margin()
     period_month = _period_month(today_str)
     Q = frappe.qb.DocType("Fuel Quota")
@@ -229,6 +241,7 @@ def reconcile_operations_alerts() -> None:
         .left_join(L)
         .on((L.vehicle == Q.vehicle) & (L.period_month == Q.period_month))
         .select(
+            Q.name.as_("quota_name"),
             Q.vehicle.as_("vehicle"),
             Q.monthly_litres.as_("quota"),
             Coalesce(Sum(L.litres), 0).as_("consumed"),
@@ -243,6 +256,7 @@ def reconcile_operations_alerts() -> None:
         consumed = float(r["consumed"] or 0)
         if quota > 0 and consumed > quota * (1 + overage_margin):
             excessive_topup_vehicles.add(r["vehicle"])
+            breached_quotas.add(r["quota_name"])
 
     resolved_projects: set[str | None] = set()
     cursor = ""
@@ -357,7 +371,44 @@ def reconcile_operations_alerts() -> None:
     for project in resolved_projects:
         _publish_operations_alert(project)
 
+    active_vehicles = set(
+        frappe.get_all("Salis Vehicle", filters={"status": "Active"}, pluck="name")
+    )
+    vehicle_keep = (active_vehicles - vehicles_with_recent_trip) | (
+        vehicles_with_open_compliance & active_vehicles
+    )
+
+    active_drivers = set(
+        frappe.get_all("Salis Driver", filters={"status": "Active"}, pluck="name")
+    )
+    attended_today = {
+        r["driver"]
+        for r in frappe.get_all(
+            "Driver Attendance",
+            filters={"attendance_date": today_str, "docstatus": 1},
+            fields=["driver"],
+        )
+        if r["driver"]
+    }
+    driver_keep = active_drivers - attended_today
+
+    drained = 0
+    for doctype, keep in (
+        ("Salis Vehicle", vehicle_keep),
+        ("Salis Driver", driver_keep),
+        ("Fuel Quota", breached_quotas),
+    ):
+        frappe.db.savepoint(_ROW_SAVEPOINT)
+        try:
+            drained += _reconcile_queue(doctype, keep)
+        except Exception:
+            frappe.db.rollback(save_point=_ROW_SAVEPOINT)
+            frappe.log_error(
+                message=frappe.get_traceback(),
+                title=f"Queue reconciliation failed for {doctype}"[:140],
+            )
+
     logger.info(
-        f"reconcile_operations_alerts: resolved {resolved_count} alert(s) whose "
-        f"condition has cleared."
+        f"reconcile_operations_alerts: resolved {resolved_count} alert(s) and "
+        f"drained {drained} assignment(s) whose condition has cleared."
     )

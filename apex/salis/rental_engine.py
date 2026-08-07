@@ -16,9 +16,11 @@ fuel engine's reconciliation idiom (``fuel_engine``):
   rental_office + period are stamped settled (``stamp_settlement`` →
   ``frappe.db.set_value``; the ledger grants no human write role, so the bypass
   is correct). Cancelling the settlement releases them again.
-* ``monthly_rental_reconciliation`` (monthly) flags any Rental Office that still
-  has unsettled accrual rows for the just-closed period with an Operations
-  Alert — exactly as ``monthly_fuel_reconciliation`` flags over-quota vehicles.
+* ``monthly_rental_reconciliation`` (monthly) ASSIGNS any Rental Office that still
+  has unsettled accrual rows for the just-closed period to the Fleet Supervisor
+  queue — exactly as ``monthly_fuel_reconciliation`` queues over-quota Fuel
+  Quotas — and reconciles that queue at the end of the pass so a settled office
+  drains on the next run.
 
 Scheduler hooks:
     apex.salis.rental_engine.daily_rental_accrual           (daily)
@@ -31,10 +33,7 @@ import frappe
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import flt, today
 
-from apex.apex_core.utils.operations_alert import insert_operations_alert
-
 LEDGER_DOCTYPE = "Rental Accrual Ledger"
-ALERT_DOCTYPE = "Operations Alert"
 BATCH_SIZE = 500
 
 
@@ -271,46 +270,25 @@ def release_settlement(settlement: str) -> int:
 
 
 
-def _rental_alert_already_raised(rental_office: str, period_month: str) -> bool:
-    """True if an Unsettled-Rental alert was already raised for this office+period.
-
-    Idempotency key = (alert_type, the office AND period stamped in the message).
-    Operations Alert has no rental_office / period link field, so both are encoded
-    in the message (``... period <YYYY-MM> ... (office <name>)``) and matched
-    there. Unlike the fuel engine's raised-on-month-window guard, a raised-on
-    window is deliberately NOT used: this job reconciles the CLOSED (previous)
-    month but raises the alert in the CURRENT month, so a period-month window
-    would never contain its own alert and the job would duplicate every run. The
-    office+period pair in the message is itself the unique key.
-    """
-    period = str(period_month).strip()[:7]
-    return bool(
-        frappe.db.exists(
-            ALERT_DOCTYPE,
-            {
-                "alert_type": "Unsettled Rental",
-                "message": ["like", f"%period {period}%(office {rental_office})%"],
-            },
-        )
-    )
-
-
 def monthly_rental_reconciliation() -> None:
     """Flag rental offices with unsettled accrual rows for the closed period.
 
     Mirrors ``fuel_engine.monthly_fuel_reconciliation``: for the period that has
     just closed (last month, YYYY-MM), every Rental Office that still has
     ORIGINAL Rental Accrual Ledger rows with ``settled = 0`` — i.e. no submitted
-    Rental Settlement has claimed that office's accrued days — raises an
-    "Unsettled Rental" Operations Alert carrying the outstanding amount.
-    Idempotent per office+period within the month (``_rental_alert_already_raised``).
+    Rental Settlement has claimed that office's accrued days — is ASSIGNED to the
+    Fleet Supervisor queue, the assignment carrying the outstanding amount.
+    Idempotent by the framework's assignment dedupe. This job is the only queuer
+    of Rental Office, so its own findings are the reconcile union: an office that
+    settles drains from the queue on the next monthly pass.
 
     Reconciliation only — posts no GL and stamps nothing (stamping is the
     settlement's job, via :func:`stamp_settlement`). Per-row try/except isolates
-    failures; no commit inside the loop. The alert insert goes through the
-    apex_core helper (a leaf util, no salis.tasks coupling), like the fuel engine.
+    failures; no commit inside the loop.
     """
     from frappe.utils import add_months, get_first_day, get_last_day, getdate
+
+    from apex.salis.tasks.common import _queue_document, _reconcile_queue
 
     closed_anchor = getdate(add_months(getdate(today()), -1))
     period_month = str(closed_anchor)[:7]
@@ -329,14 +307,13 @@ def monthly_rental_reconciliation() -> None:
         .groupby(RAL.rental_office)
     ).run(as_dict=True)
 
+    still_unsettled: list[str] = []
     for row in rows:
         rental_office = row.rental_office
         sp = "accrual_row"
         frappe.db.savepoint(sp)
         try:
             if not rental_office:
-                continue
-            if _rental_alert_already_raised(rental_office, period_month):
                 continue
 
             outstanding = flt(row.outstanding)
@@ -346,16 +323,15 @@ def monthly_rental_reconciliation() -> None:
                 "(office {0})"
             ).format(rental_office, period_month, round(outstanding, 2))
 
-            insert_operations_alert(
-                alert_type="Unsettled Rental",
-                severity="Warning",
-                message=message,
-            )
+            _queue_document("Rental Office", rental_office, "Warning", message)
+            still_unsettled.append(rental_office)
         except Exception:
             frappe.db.rollback(save_point=sp)
             frappe.log_error(
                 message=frappe.get_traceback(),
                 title=f"Rental reconciliation failed for office {rental_office}"[:140],
             )
+
+    _reconcile_queue("Rental Office", still_unsettled)
 
     logger.info("monthly_rental_reconciliation: unsettled rental accrual flagged.")

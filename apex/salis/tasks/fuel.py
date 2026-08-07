@@ -9,7 +9,7 @@ from frappe import _
 from apex.salis.tasks.common import (
     ALERT_DOCTYPE,
     BATCH_SIZE,
-    _raise_alert,
+    _notify_fleet_role,
     _resolve_alert,
 )
 
@@ -26,7 +26,9 @@ def unreverted_topup_watch() -> None:
     status in [Approved, Done], revert_due_date: < today}``. For each overdue
     row it loads the document, sets ``reverted = 1`` and ``status = Reverted``,
     saves it (the change is captured natively by Version / track_changes), and
-    still raises a Critical "Excessive Topup" alert.
+    NOTIFIES the Fleet Supervisors. Notify, not assign: the job has already fixed
+    the condition it found, so this is a notice of an action taken — an assignment
+    would be born settled and the next reconcile pass would close it unread.
 
     Each row is guarded in its own ``try/except`` (rollback + log) so one
     failure never aborts the batch. No ``commit()`` inside the loop — the
@@ -74,9 +76,12 @@ def unreverted_topup_watch() -> None:
                        f"({t.topup_litres} L) was due to be reverted on "
                        f"{t.revert_due_date}; it has now been auto-reverted.")
                 logger.warning(msg)
-                _raise_alert("Excessive Topup", "Critical", msg,
-                             "Fuel Request", t.name,
-                             vehicle=t.vehicle, driver=t.driver)
+                _notify_fleet_role(
+                    _("Overdue temporary top-up {0} was auto-reverted").format(t.name),
+                    msg,
+                    document_type="Fuel Request",
+                    document_name=t.name,
+                )
             except Exception:
                 frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(

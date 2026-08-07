@@ -9,7 +9,7 @@ from pypika import Case
 
 from apex.salis.tasks.common import (
     BATCH_SIZE,
-    _raise_alert,
+    _queue_document,
     _settings_int,
 )
 
@@ -73,8 +73,7 @@ def idle_vehicle_watch() -> None:
                 msg = (f"idle_vehicle_watch: vehicle {v.name} has had no dispatch "
                        f"trip in the last {idle_days} days.")
                 logger.warning(msg)
-                _raise_alert("Idle Vehicle", "Info", msg,
-                             "Salis Vehicle", v.name, vehicle=v.name)
+                _queue_document("Salis Vehicle", v.name, "Info", msg, vehicle=v.name)
             except Exception:
                 frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
@@ -89,10 +88,12 @@ def vehicle_compliance_expiry_watch() -> None:
     """Alert on vehicle compliance documents at or past their expiry window.
 
     Reads Salis Vehicle Compliance child rows whose ``expiry_date`` is within
-    ``alert_lead_days`` (Salis Settings; default 30) of today. For each row
-    raises a "License Expiry" alert referencing the parent vehicle and
-    compliance type — Critical if already expired, otherwise Warning. Per-row
-    de-dup is handled by ``_raise_alert`` (one Open alert per vehicle+type+day).
+    ``alert_lead_days`` (Salis Settings; default 30) of today. For each row the
+    parent vehicle is ASSIGNED to the Fleet Supervisor queue — Critical (High
+    priority) if already expired, otherwise Warning. De-dup is the framework's
+    (one open assignment per vehicle+holder); the shared Salis Vehicle queue is
+    reconciled centrally in ``reconcile_operations_alerts`` because the idle
+    watches queue the same DocType and a per-job reconcile would close their work.
     """
     from frappe.utils import add_days, getdate, today
 
@@ -123,8 +124,7 @@ def vehicle_compliance_expiry_watch() -> None:
                 msg = (f"vehicle_compliance_expiry_watch: vehicle {c.parent} "
                        f"{c.compliance_type} compliance {state} {c.expiry_date}.")
                 logger.warning(msg)
-                _raise_alert("License Expiry", severity, msg,
-                             "Salis Vehicle", c.parent, vehicle=c.parent)
+                _queue_document("Salis Vehicle", c.parent, severity, msg, vehicle=c.parent)
             except Exception:
                 frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
@@ -140,9 +140,10 @@ def vehicle_utilization_summary() -> None:
 
     For each Active vehicle, aggregates the count of Dispatch Trips and the
     distance (sum of ``odometer_end - odometer_start``) over the last 7 days and
-    logs the result. Vehicles with zero trips additionally get an Info
-    "Idle Vehicle" alert as a weekly recap (the actionable output, idempotent per
-    day via the alert dedupe).
+    logs the result. Vehicles with zero trips are additionally ASSIGNED to the
+    Fleet Supervisor queue as a weekly recap (the actionable output; the framework
+    skips a vehicle already queued, and the shared Salis Vehicle queue reconciles
+    centrally in ``reconcile_operations_alerts``).
     """
     from frappe.utils import add_days, today
 
@@ -207,8 +208,7 @@ def vehicle_utilization_summary() -> None:
                 if trip_count == 0:
                     msg = (f"vehicle_utilization_summary: vehicle {v.name} logged no "
                            f"dispatch trips in the last 7 days.")
-                    _raise_alert("Idle Vehicle", "Info", msg,
-                                 "Salis Vehicle", v.name, vehicle=v.name)
+                    _queue_document("Salis Vehicle", v.name, "Info", msg, vehicle=v.name)
             except Exception:
                 frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(

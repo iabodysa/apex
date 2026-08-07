@@ -183,8 +183,9 @@ TIMELINE_LIMIT = 40
 def get_vehicle_timeline(vehicle):
     """Return one vehicle's consolidated operational history as a single date-sorted feed.
 
-    Unions four event sources into one timeline — Vehicle Incident, Vehicle Suspension,
-    Vehicle Assignment and *resolved* Operations Alert — so the drawer shows the whole
+    Unions the event sources into one timeline — Vehicle Incident, Vehicle Suspension,
+    Vehicle Assignment, *resolved* Operations Alert (legacy, still draining) and the
+    drained Fleet Supervisor assignment queue that replaced it — so the drawer shows the whole
     operational story of a vehicle in one place instead of three disconnected lists.
     Permission- and scope-gated identically to ``get_vehicle_detail``: read access to
     the vehicle is the single chokepoint (once you may read the vehicle you may read its
@@ -262,6 +263,18 @@ def get_vehicle_timeline(vehicle):
         events.append({
             "kind": "alert",
             "date": str(r.resolved_on) if r.resolved_on else None,
+            "name": r.name,
+            "alert_type": r.alert_type,
+            "severity": r.severity,
+            "message": r.message,
+        })
+
+    from apex.salis.api.assignment_queue import queue_events_for_vehicle
+
+    for r in queue_events_for_vehicle(vehicle, ("Closed",), TIMELINE_PER_SOURCE):
+        events.append({
+            "kind": "alert",
+            "date": str(r.closed_on) if r.closed_on else None,
             "name": r.name,
             "alert_type": r.alert_type,
             "severity": r.severity,

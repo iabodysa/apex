@@ -218,8 +218,9 @@ def get_status_meta():
 def get_vehicle_timeline(plate):
     """Merged per-vehicle audit timeline for the /fleet-os panel Log tab.
 
-    One descending feed of the vehicle's assignments, stops, incidents and
-    Operations Alerts. Read-permission- and project-scope-gated through the SAME
+    One descending feed of the vehicle's assignments, stops, incidents, legacy
+    Operations Alerts (still draining) and the Fleet Supervisor queue entries
+    that replaced them. Read-permission- and project-scope-gated through the SAME
     ``_resolve_plate`` resolver the actions use (in read mode), and the
     permlevel-1 PII gate blanks the driver id on assignment rows for a role
     without it. N+1-free: one bounded ``get_all`` per source, merged in Python.
@@ -297,6 +298,20 @@ def get_vehicle_timeline(plate):
             "severity": al.severity or "",
             "status": al.status or "",
             "message": al.message or "",
+        })
+
+    from apex.salis.api.assignment_queue import queue_events_for_vehicle
+
+    for q in queue_events_for_vehicle(vehicle, ("Open", "Overdue", "Closed"), 100):
+        events.append({
+            "kind": "alert",
+            "date": str(q.raised_on or ""),
+            "title": _(q.alert_type),
+            "ref_doctype": q.reference_type,
+            "ref_name": q.reference_name,
+            "severity": q.severity or "",
+            "status": q.status or "",
+            "message": q.message or "",
         })
 
     events.sort(key=lambda e: e.get("date") or "", reverse=True)

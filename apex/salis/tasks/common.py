@@ -6,7 +6,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
-from apex.apex_core.utils.operations_alert import insert_operations_alert
+from apex.apex_core.utils.role_assignment import assign_role, reconcile_role_queue
 
 
 BATCH_SIZE = 500
@@ -15,6 +15,19 @@ BATCH_SIZE = 500
 ALERT_DOCTYPE = "Operations Alert"
 
 _ALERT_SAVEPOINT = "salis_alert"
+
+FLEET_ROLE = "Fleet Supervisor"
+
+QUEUE_DOCTYPES = (
+    "Vehicle Suspension",
+    "Salis Vehicle",
+    "Salis Driver",
+    "Fuel Quota",
+    "Rental Office",
+)
+
+SEVERITY_TO_PRIORITY = {"Critical": "High", "Warning": "Medium", "Info": "Low"}
+PRIORITY_TO_SEVERITY = {"High": "Critical", "Medium": "Warning", "Low": "Info"}
 
 
 def _settings_int(fieldname: str, default: int) -> int:
@@ -69,78 +82,85 @@ def _publish_operations_alert(project: str | None = None) -> None:
         pass
 
 
-def _raise_alert(
-    alert_type: str,
+def _queue_document(
+    doctype: str,
+    name: str,
     severity: str,
     message: str,
-    source_doctype: str | None = None,
-    source_name: str | None = None,
     vehicle: str | None = None,
-    driver: str | None = None,
-) -> str | None:
-    """Insert an Operations Alert and post a timeline comment on the source doc.
+) -> None:
+    """Put a document that needs fleet attention in the Fleet Supervisor queue.
 
-    Idempotent: skips if an Open alert of the same ``alert_type`` for the same
-    vehicle/driver already exists today (idempotency key =
-    ``(alert_type, vehicle or driver, date(raised_on))``). This prevents the
-    daily jobs from spamming duplicate alerts on every run.
-
-    Both the insert and the timeline comment are wrapped so a notify failure rolls
-    back to this helper's OWN savepoint and logs, leaving the calling loop's rows and
-    its own per-row savepoint intact.
-
-    Returns the new alert name, or ``None`` if a duplicate was skipped or the
-    insert failed.
+    This replaces an Operations Alert row whose only durable link to its subject was
+    a vehicle/driver Link pair plus the record name inside the message text. A native
+    assignment IS the link: the ToDo carries reference_type and reference_name, so
+    the same document is never queued twice (``assign_to.add`` skips a holder who
+    already has an open ToDo for it) and the old per-day dedupe window disappears
+    with the row. Severity survives as the ToDo priority so the board can still rank
+    the queue. The realtime publish is kept — the operations board listens for it.
     """
-    from frappe.utils import add_days, today
-
-    day = today()
-    dedupe_filters = {
-        "alert_type": alert_type,
-        "status": "Open",
-        "raised_on": ["between", [f"{day} 00:00:00", f"{add_days(day, 1)} 00:00:00"]],
-    }
-    if vehicle:
-        dedupe_filters["vehicle"] = vehicle
-    elif driver:
-        dedupe_filters["driver"] = driver
-
+    assign_role(
+        doctype,
+        name,
+        FLEET_ROLE,
+        description=message[:2000],
+        priority=SEVERITY_TO_PRIORITY.get(severity, "Medium"),
+    )
+    _publish_operations_alert(_vehicle_project(vehicle))
     frappe.db.savepoint(_ALERT_SAVEPOINT)
     try:
-        if frappe.db.exists(ALERT_DOCTYPE, dedupe_filters):
-            return None
+        frappe.get_doc(doctype, name).add_comment("Comment", message)
     except Exception:
         frappe.db.rollback(save_point=_ALERT_SAVEPOINT)
         frappe.log_error(
             message=frappe.get_traceback(),
-            title=f"Salis alert dedupe check failed ({alert_type})"[:140],
+            title=f"Salis queue comment failed for {name}"[:140],
         )
-        return None
 
-    alert_name = insert_operations_alert(
-        alert_type,
-        severity,
-        message,
-        vehicle=vehicle,
-        driver=driver,
-    )
-    if alert_name is None:
-        return None
 
-    _publish_operations_alert(_vehicle_project(vehicle))
+def _notify_fleet_role(
+    subject: str,
+    message: str | None = None,
+    *,
+    document_type: str | None = None,
+    document_name: str | None = None,
+) -> None:
+    """Post an in-app (system) Notification Log of type Alert to every enabled
+    Fleet Supervisor.
 
-    if source_doctype and source_name:
-        frappe.db.savepoint(_ALERT_SAVEPOINT)
-        try:
-            frappe.get_doc(source_doctype, source_name).add_comment("Comment", message)
-        except Exception:
-            frappe.db.rollback(save_point=_ALERT_SAVEPOINT)
-            frappe.log_error(
-                message=frappe.get_traceback(),
-                title=f"Salis alert comment failed for {source_name}"[:140],
-            )
+    Mirrors habitat.tasks.common._notify_role_system: the notify half of the
+    Operations Alert replacement, for a condition that is a completed event or a
+    balance rather than pending work a queue could hold open. Per-user delivery via
+    the shared system_notify helper (the single Notification Log writer), which
+    dedupes on the source doc link per user. No recipients = no-op.
+    """
+    from frappe.utils.user import get_users_with_role
 
-    return alert_name
+    from apex.apex_core.utils.system_notify import notify_user_system
+
+    for user in get_users_with_role(FLEET_ROLE) or []:
+        notify_user_system(
+            user,
+            subject,
+            message,
+            document_type=document_type,
+            document_name=document_name,
+        )
+
+
+def _reconcile_queue(doctype: str, still_needing_attention) -> int:
+    """Drain the Fleet Supervisor queue for ``doctype`` — the half an alert row
+    never had.
+
+    ``still_needing_attention`` must be the UNION across every job that queues this
+    DocType (reconcile_role_queue's contract): a document is queued while any
+    condition holds and settled only when none does. Publishes the board-refresh
+    signal only when something actually drained.
+    """
+    cleared = reconcile_role_queue(doctype, still_needing_attention)
+    if cleared:
+        _publish_operations_alert(None)
+    return cleared
 
 
 def _resolve_alert(alert_name: str, reason: str) -> bool:

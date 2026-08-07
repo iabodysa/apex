@@ -198,12 +198,14 @@ Open Requests,الطلبات المفتوحة
 Over 7 Days,أكثر من 7 أيام
 Over 90 Days,أكثر من 90 يوماً
 Overdue Only,المتأخرة فقط
+Overdue temporary top-up {0} was auto-reverted,التزويد المؤقت المتأخر {0} عُكس تلقائياً
 Passenger Manifest Register,سجل كشوف الركاب
 Past SLA,تجاوز المدة المتفق عليها
 Payments,المدفوعات
 Pending Checkouts,مغادرات معلقة
 Plans,الخطط
 Positions,المواضع
+Queue resolved: {0},صُفّي الطابور: {0}
 Receipt Lines,بنود الاستلام
 Receipts,الاستلامات
 Recovered Share,نسبة المسترد
