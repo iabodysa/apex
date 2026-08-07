@@ -886,6 +886,7 @@ Consent Signed On,تاريخ توقيع الموافقة
 Constant value written to the target field when Static is checked (for example a fixed payment_type or party_type).,قيمة ثابتة تُكتب في الحقل المستهدف عند تفعيل خيار ثابت (مثل نوع دفع أو نوع طرف محدد).
 Consumable Expired,مستهلك منتهي الصلاحية
 Consumable Lifespan (Months),العمر الافتراضي للمستهلك (بالأشهر)
+"Consumable past its lifespan: {0}",انتهى العمر الافتراضي لمستهلك: {0}
 "Consumable {0} held by {1} since {2} is {3} month(s) old, past its {4}-month lifespan.",المستهلك {0} بحوزة {1} منذ {2} وعمره {3} شهرًا، متجاوزًا عمره الافتراضي البالغ {4} شهرًا.
 Consumed Litres,اللترات المستهلكة
 Consumed litres ({0}) exceed the monthly quota ({1}).,اللترات المستهلكة ({0}) تتجاوز الحصة الشهرية ({1}).

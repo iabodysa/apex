@@ -20,7 +20,6 @@ from apex.habitat.tasks.safety import (
     weekly_safety_coverage_gate,
 )
 from apex.habitat.tasks.custody import (
-    _raise_consumable_alert,
     consumable_custody_expiry_watch,
     weekly_custody_digest,
 )
@@ -54,7 +53,6 @@ __all__ = [
     "_notify_operational",
     "_notify_role_system",
     "_notify_user_system",
-    "_raise_consumable_alert",
     "allocate_building_accommodation_cost",
     "audit_remediation_deadline_watch",
     "auto_create_cleaning_logs",

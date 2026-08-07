@@ -8,45 +8,12 @@ from frappe import _
 from frappe.query_builder.functions import Coalesce, Sum
 from pypika.functions import Min
 
+from apex.habitat.tasks.common import _notify_role_system
+
 _ROW_SAVEPOINT = "custody_row"
-_ALERT_SAVEPOINT = "custody_alert"
 
 
-def _raise_consumable_alert(message: str, dedupe_token: str) -> str | None:
-    """Raise a Consumable Expired Operations Alert (idempotent), via the shared helper.
-
-    Existence-guarded on ``(alert_type=Consumable Expired, status=Open,
-    message LIKE %dedupe_token%)`` — ONE OPEN ALERT PER HELD POSITION, not one per
-    position per day. The guard used to also require ``raised_on`` inside today, so a
-    position that stayed over-age raised a fresh row every morning, and
-    ``Consumable Expired`` has no branch in ``reconcile_operations_alerts`` while
-    retention deletes only Resolved rows — so those rows were permanent. The insert
-    itself goes through ``insert_operations_alert`` (the one place that writes the
-    record). Returns the new alert name, or None when a duplicate was skipped or the
-    insert failed.
-    """
-    from apex.apex_core.utils.operations_alert import insert_operations_alert
-
-    frappe.db.savepoint(_ALERT_SAVEPOINT)
-    try:
-        if frappe.db.exists(
-            "Operations Alert",
-            {
-                "alert_type": "Consumable Expired",
-                "status": "Open",
-                "message": ["like", f"%{dedupe_token}%"],
-            },
-        ):
-            return None
-    except Exception:
-        frappe.db.rollback(save_point=_ALERT_SAVEPOINT)
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title=f"Consumable alert dedupe check failed ({dedupe_token})"[:140],
-        )
-        return None
-
-    return insert_operations_alert("Consumable Expired", "Warning", message)
+CUSTODY_ROLE = "Resident Supervisor"
 
 
 def consumable_custody_expiry_watch() -> None:
@@ -115,8 +82,12 @@ def consumable_custody_expiry_watch() -> None:
             ).format(
                 r.article_name or r.article, emp_name, r.first_held, age_months, int(r.lifespan or 0)
             ) + f" [{token}]"
-            if _raise_consumable_alert(message, dedupe_token=token):
-                flagged += 1
+            _notify_role_system(
+                CUSTODY_ROLE,
+                subject=_("Consumable past its lifespan: {0}").format(token),
+                message=message,
+            )
+            flagged += 1
         except Exception:
             frappe.db.rollback(save_point=_ROW_SAVEPOINT)
             logger.error(
