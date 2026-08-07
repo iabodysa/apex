@@ -32,6 +32,7 @@ SAFETY_ROLES = {
     "System Manager",
     "Accommodation Manager",
     "Resident Supervisor",
+    "Safety Officer",
 }
 
 

@@ -91,7 +91,7 @@ controller is that name with hyphens turned into underscores.
 | `/housing` | Accommodation operators | Guest redirect, then `HOUSING_ROLES`: Accommodation Manager, Procurement Supervisor, Resident Supervisor, System Manager. | `apex/www/housing.py` · `housing_portal` |
 | `/masar-supervisor` | Route supervisors | Guest redirect, then `SUPERVISOR_ROLES`: Fleet Manager, Fleet Project Manager, Fleet Supervisor, System Manager. | `apex/www/masar_supervisor.py` · `route_supervisor_portal` |
 | `/masar` | Workers | Guest-accessible personal token; identity is resolved server-side. | `apex/www/masar.py` · `worker_portal` |
-| `/safety` | Safety supervisors | Guest redirect, then `SAFETY_ROLES`: Accommodation Manager, Resident Supervisor, System Manager. | `apex/www/safety.py` · `safety_portal` |
+| `/safety` | Safety supervisors | Guest redirect, then `SAFETY_ROLES`: Accommodation Manager, Resident Supervisor, Safety Officer, System Manager. | `apex/www/safety.py` · `safety_portal` |
 
 The route gate is only the entry check. Each API must enforce document
 permission and row scope independently.
