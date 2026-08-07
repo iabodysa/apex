@@ -35,12 +35,15 @@ on:
 # Administrator, and inserts one Letter Head built from the configured Company. It
 # reads no request input and never runs inside a web request, so the bypass grants
 # nothing an install does not already have. Every one of the eight sibling seeders
-# in that folder inserts the same way. The sanctioned helper the SANCTIONED path
-# names does not exist yet -- writing it, and moving all 131 sites behind it, is
-# the open card A-422.
+# in that folder inserts the same way.
+#
+# 131 -> 94 the same day: the sanctioned helper now EXISTS at the SANCTIONED path and
+# exports system_insert / system_save / system_delete, and the installer, the demo
+# estate, the seeders, the notification helper and the logistay billing API moved
+# behind it. What remains is salis 54 and habitat 35, which are card A-422.
 
 env:
-  BASELINE: 131
+  BASELINE: 94
   BYPASS_RE: 'ignore_permissions["'']?[[:space:]]*[=:][[:space:]]*(True|1)'
   SANCTIONED: 'apex/apex_core/utils/system_write.py'
 
