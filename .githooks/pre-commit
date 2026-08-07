@@ -15,8 +15,9 @@
 set -u
 
 hookdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-gate="$hookdir/../.claude/tools/scripts/check_commit_metadata.py"
-claims="$HOME/AI_Brain/superpower/tools/claim_guard.py"
+. "$hookdir/_suite"
+gate=$(suite_tool ".claude/tools/scripts/check_commit_metadata.py" "check_commit_metadata.py")
+claims=$(suite_tool ".claude/tools/scripts/claim_guard.py" "claim_guard.py")
 
 ident_email() {
 	git var "$1" 2>/dev/null | sed -n 's/.*<\(.*\)>.*/\1/p'
@@ -34,8 +35,9 @@ else
 fi
 
 # Fail closed, for the same reason commit-msg does.
-if [ ! -f "$gate" ]; then
-	echo "pre-commit: $gate is missing, so the commit metadata gate DID NOT RUN" >&2
+if [ -z "$gate" ]; then
+	echo "pre-commit: the commit metadata gate DID NOT RUN, so this commit is refused." >&2
+	suite_missing
 	exit 1
 fi
 if ! command -v python3 >/dev/null 2>&1; then
@@ -48,8 +50,9 @@ fi
 # closed like the gate above — a missing tool means the check did not run, which must not
 # read as permission. Only pre-commit carries this; a claim is about who may write now, and
 # by push time the write has already happened.
-if [ ! -f "$claims" ]; then
-	echo "pre-commit: $claims is missing, so the shared-path claim check DID NOT RUN" >&2
+if [ -z "$claims" ]; then
+	echo "pre-commit: the shared-path claim check DID NOT RUN, so this commit is refused." >&2
+	suite_missing
 	exit 1
 fi
 python3 "$claims" check --staged || exit 1

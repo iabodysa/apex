@@ -1,0 +1,49 @@
+# Shared by the hooks: find a maintainer tool that is not published with the app.
+#
+# Sourced, never executed. Two hooks needed the same lookup and had two copies of it,
+# one of which hardcoded $HOME — so the answer differed depending on which hook asked.
+#
+# The order is deliberate. A project that ships its own copy of a gate wins, because
+# that copy is the one its CI would run. Otherwise the skill suite provides it: the
+# suite is installed on the machine rather than cloned with the repository, which is the
+# whole reason this lookup exists — .claude/ is gitignored, so a fresh clone has no
+# .claude/tools/ at all and every hook that resolved only there refused every commit.
+#
+# `ctl` on PATH is how the suite is found, rather than $HOME/AI_Brain, so a suite
+# installed anywhere still resolves.
+
+# suite_tool <relative-path-in-project> <basename-in-suite>
+# Prints the first path that exists, or nothing. Never exits: the caller decides what a
+# missing tool means, and every caller here fails closed.
+suite_tool() {
+	_project=$1
+	_suite_name=$2
+
+	_hookdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+	if [ -f "$_hookdir/../$_project" ]; then
+		printf '%s\n' "$_hookdir/../$_project"
+		return 0
+	fi
+
+	_ctl=$(command -v ctl 2>/dev/null || true)
+	[ -n "$_ctl" ] || return 0
+
+	_real=$(readlink "$_ctl" 2>/dev/null || printf '%s' "$_ctl")
+	case "$_real" in
+	/*) ;;
+	*) _real=$(CDPATH= cd -- "$(dirname -- "$_ctl")" && cd -- "$(dirname -- "$_real")" && pwd)/$(basename -- "$_real") ;;
+	esac
+	_suite=$(CDPATH= cd -- "$(dirname -- "$_real")/.." 2>/dev/null && pwd) || return 0
+	[ -f "$_suite/tools/$_suite_name" ] && printf '%s\n' "$_suite/tools/$_suite_name"
+	return 0
+}
+
+# Why a tool could not be found, in words a fresh clone can act on.
+suite_missing() {
+	echo "  Looked in this clone at .claude/tools/ (gitignored, so a fresh clone will" >&2
+	echo "  not have it) and then beside 'ctl' on PATH." >&2
+	if ! command -v ctl >/dev/null 2>&1; then
+		echo "  'ctl' is not on PATH: install the skill suite, or run" >&2
+		echo "  'git config --unset core.hooksPath' if you do not want these gates." >&2
+	fi
+}

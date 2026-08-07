@@ -4,21 +4,27 @@
 # Install (one line, from the repo root):
 #     git config core.hooksPath .githooks
 #
-# The rule is NOT written here. .claude/tools/scripts/check_commit_metadata.py is its one
-# definition. That file is the maintainer's own tooling and is not published with the
-# app, so no CI lane can run it any more: this hook and pre-push are now the ONLY place
-# the rule is enforced, which is why both fail closed rather than warn.
+# The rule is NOT written here. check_commit_metadata.py is its one definition, and it
+# is the maintainer's tooling rather than part of the published app — so no CI lane can
+# run it, and this hook is the only place it is enforced. That is why it fails closed.
+#
+# WHERE THE GATE COMES FROM, and why there are two places to look. It used to be
+# resolved only at ../.claude/tools/scripts/, which .gitignore excludes — so a fresh
+# clone that followed the install line above got a hook that refused EVERY commit,
+# because the file it needed had never been cloned. The gate now also ships in the skill
+# suite, which is installed on the machine rather than in the repository, and `ctl` on
+# PATH is how that suite is found. Repo copy first, so a project that ships its own gate
+# still wins; suite copy second; and if neither is present the refusal says which.
 set -u
 
-# Resolved against this hook, not against the work tree: core.hooksPath may point at
-# another clone's .githooks, and then the work tree has no copy of the gate to run.
-hookdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-gate="$hookdir/../.claude/tools/scripts/check_commit_metadata.py"
+. "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/_suite"
+gate=$(suite_tool ".claude/tools/scripts/check_commit_metadata.py" "check_commit_metadata.py")
 
 # Fail closed. A missing gate or a missing interpreter must refuse the commit, never
 # wave it through: a guard that silently stops running is worse than no guard.
-if [ ! -f "$gate" ]; then
-	echo "commit-msg: $gate is missing, so the commit metadata gate DID NOT RUN" >&2
+if [ -z "$gate" ]; then
+	echo "commit-msg: the commit metadata gate DID NOT RUN, so this commit is refused." >&2
+	suite_missing
 	exit 1
 fi
 if ! command -v python3 >/dev/null 2>&1; then
