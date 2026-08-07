@@ -71,6 +71,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { BOARDING } from "@shared/statusVocabularies";
 import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "../Icon.vue";
 import { useI18n } from "../i18n";
@@ -113,9 +114,9 @@ function pillClass(status) {
   return (
     {
       Boarded: "w-ok",
-      "Worker Claimed": "w-claim",
+      [BOARDING.WORKER_CLAIMED]: "w-claim",
       Pending: "w-wait",
-      "Driver Rejected": "w-bad",
+      [BOARDING.DRIVER_REJECTED]: "w-bad",
       Absent: "w-bad",
     }[status] || "w-wait"
   );

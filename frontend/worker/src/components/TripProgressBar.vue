@@ -25,6 +25,7 @@
 
 <script setup>
 import { computed } from "vue";
+import { TRIP, TRIP_PROGRESS_ORDER } from "@shared/statusVocabularies";
 import { useI18n } from "../i18n";
 
 const { t, dir } = useI18n();
@@ -33,7 +34,7 @@ const props = defineProps({
   status: { type: String, default: "" },
 });
 
-const STATUS_ORDER = ["Planned", "Dispatched", "Completed"];
+const STATUS_ORDER = TRIP_PROGRESS_ORDER;
 
 const steps = computed(() => {
   const currentIdx = STATUS_ORDER.indexOf(props.status);
@@ -41,7 +42,7 @@ const steps = computed(() => {
     key,
     label: t(`tripProgress.${key}`),
     reached: i <= currentIdx,
-    active: i === currentIdx && key !== "Completed",
+    active: i === currentIdx && key !== TRIP.COMPLETED,
   }));
 });
 </script>

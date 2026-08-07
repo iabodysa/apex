@@ -202,7 +202,7 @@
               </div>
             </div>
             
-            <div v-if="trip.status === 'Fulfilled' && trip.dispatch_trip && !trip.has_rated" class="mt-2">
+            <div v-if="trip.status === REQUEST.FULFILLED && trip.dispatch_trip && !trip.has_rated" class="mt-2">
               <TripRating :trip="trip" @rated="trip.has_rated = true" />
             </div>
           </li>
@@ -243,6 +243,7 @@
 
 <script setup>
 import { computed, reactive, ref, watch, onUnmounted } from "vue";
+import { BOARDING_SETTLED, REQUEST } from "@shared/statusVocabularies";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
@@ -343,7 +344,7 @@ const boardingState = computed(() => boardingResource.data || null);
 // active, poll every poll_seconds; revert to no fast-poll when idle/Boarded.
 const boardingActive = computed(() => {
   const b = boardingState.value;
-  return !!(b && b.dispatch_trip && !["Boarded", "Absent"].includes(b.status));
+  return !!(b && b.dispatch_trip && !BOARDING_SETTLED.includes(b.status));
 });
 const pollSeconds = computed(() => boardingState.value?.poll_seconds || 10);
 

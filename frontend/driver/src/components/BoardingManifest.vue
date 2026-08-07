@@ -56,7 +56,7 @@
               <span class="pill shrink-0" :class="pillClass(w.status)">{{ te("boardingStatus", w.status) }}</span>
               <!-- Exception override: a worker self-confirmed but isn't really aboard. -->
               <button
-                v-if="w.status === 'Boarded'"
+                v-if="w.status === BOARDING.BOARDED"
                 class="mini-btn mini-no"
                 :disabled="busy === w.employee"
                 :aria-label="t('manifest.notBoarded')"
@@ -97,6 +97,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { createResource } from "frappe-ui";
+import { BOARDING, BOARDING_REFUSED } from "@shared/statusVocabularies";
 import Icon from "./Icon.vue";
 import Skeleton from "./Skeleton.vue";
 import EmptyState from "./EmptyState.vue";
@@ -153,9 +154,9 @@ const acting = ref(false);
 const summary = ref(null);
 
 function pillClass(status) {
-  if (status === "Boarded") return "pill-success";
-  if (status === "Absent" || status === "Driver Rejected") return "pill-danger";
-  if (status === "Worker Claimed") return "pill-warning";
+  if (status === BOARDING.BOARDED) return "pill-success";
+  if (BOARDING_REFUSED.includes(status)) return "pill-danger";
+  if (status === BOARDING.WORKER_CLAIMED) return "pill-warning";
   return "pill-accent";
 }
 

@@ -74,6 +74,7 @@
 
 <script setup>
 import { computed, onUnmounted, ref } from "vue";
+import { TRIP } from "@shared/statusVocabularies";
 import { useRouter } from "vue-router";
 import { Button, createResource } from "frappe-ui";
 import HomeSkeleton from "../components/HomeSkeleton.vue";
@@ -149,7 +150,7 @@ const relativeHint = computed(() => {
 const step = computed(() => {
   const r = ride.value;
   if (!r) return { key: "requestRide", icon: "plus", to: "/request-transport" };
-  if (r.trip_status === "Dispatched") return { key: "openRide", icon: "badge", to: "/transport" };
+  if (r.trip_status === TRIP.DISPATCHED) return { key: "openRide", icon: "badge", to: "/transport" };
   return { key: "viewRide", icon: "route", to: "/transport" };
 });
 

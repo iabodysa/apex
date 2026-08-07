@@ -47,7 +47,7 @@
 
       <!-- DRIVER ARRIVED: the driver marked arrival at this worker's pickup stop.
            A green, reassuring band shown while the worker is still boarding. -->
-      <div v-if="driverArrived && !['Boarded', 'Absent'].includes(status)" class="bflow-panel bflow-arrived">
+      <div v-if="driverArrived && !BOARDING_SETTLED.includes(status)" class="bflow-panel bflow-arrived">
         <div class="bflow-panel-head">
           <Icon name="bus" :size="20" class="shrink-0 rtl-flip" />
           <span class="bflow-panel-title">{{ t("boarding.arrivedTitle") }}</span>
@@ -69,14 +69,14 @@
 
       <!-- STATUS-DRIVEN body. -->
       <!-- Boarded / Absent: terminal states, no actions. -->
-      <div v-if="status === 'Boarded'" class="bflow-status bflow-ok">
+      <div v-if="status === BOARDING.BOARDED" class="bflow-status bflow-ok">
         <Icon name="check" :size="18" class="shrink-0" />
         <div>
           <p class="bflow-strong">{{ t("boarding.boardedTitle") }}</p>
           <p class="bflow-muted">{{ t("boarding.boardedHint") }}</p>
         </div>
       </div>
-      <div v-else-if="status === 'Absent'" class="bflow-status bflow-danger">
+      <div v-else-if="status === BOARDING.ABSENT" class="bflow-status bflow-danger">
         <Icon name="alert" :size="18" class="shrink-0" />
         <div>
           <p class="bflow-strong">{{ t("boarding.absentTitle") }}</p>
@@ -141,6 +141,7 @@
 
 <script setup>
 import { computed, ref, onUnmounted, watch } from "vue";
+import { BOARDING, BOARDING_SETTLED } from "@shared/statusVocabularies";
 import { createResource } from "frappe-ui";
 import Icon from "./Icon.vue";
 import BoardingWindow from "./BoardingWindow.vue";
@@ -189,7 +190,7 @@ const waitCount = ref(props.boarding?.wait_count || 0);
 const waitMax = computed(() => props.boarding?.wait_max || 0);
 const waitCapReached = computed(() => waitMax.value > 0 && waitCount.value >= waitMax.value);
 const canRequestWait = computed(
-  () => hasTrip.value && !["Boarded", "Absent"].includes(status.value),
+  () => hasTrip.value && !BOARDING_SETTLED.includes(status.value),
 );
 
 // Keep the local wait counter in sync when the polled snapshot advances.

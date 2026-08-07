@@ -66,6 +66,7 @@
 
 <script setup>
 import { computed } from "vue";
+import { TRIP } from "@shared/statusVocabularies";
 import { Badge, Button } from "frappe-ui";
 import EmptyState from "@shared/components/EmptyState.vue";
 import Panel from "@shared/components/Panel.vue";
@@ -95,7 +96,7 @@ const etaMinutes = computed(() => {
   return m === null || m === undefined ? null : m;
 });
 
-const enRoute = computed(() => props.ride?.trip_status === "Dispatched");
+const enRoute = computed(() => props.ride?.trip_status === TRIP.DISPATCHED);
 
 const statusTheme = computed(() => (enRoute.value ? "green" : "blue"));
 </script>

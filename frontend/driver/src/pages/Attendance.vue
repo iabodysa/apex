@@ -116,6 +116,7 @@
 
 <script setup>
 import { computed, reactive, ref } from "vue";
+import { ATTENDANCE } from "@shared/statusVocabularies";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import LoadingState from "../components/LoadingState.vue";
@@ -253,17 +254,17 @@ const stateLabel = computed(() => {
 // the today card and the month history list, so the two never drift.
 function rowStatusLabel(status) {
   switch (status) {
-    case "Present": return t("attendance.statusPresent");
-    case "Late": return t("attendance.statusLate");
-    case "Absent": return t("attendance.statusAbsent");
-    case "On Leave": return t("attendance.statusOnLeave");
+    case ATTENDANCE.PRESENT: return t("attendance.statusPresent");
+    case ATTENDANCE.LATE: return t("attendance.statusLate");
+    case ATTENDANCE.ABSENT: return t("attendance.statusAbsent");
+    case ATTENDANCE.ON_LEAVE: return t("attendance.statusOnLeave");
     default: return t("common.none");
   }
 }
 function rowPill(status) {
-  if (status === "Absent") return "pill-danger";
-  if (status === "Late") return "pill-warning";
-  if (status === "On Leave") return "pill-neutral";
+  if (status === ATTENDANCE.ABSENT) return "pill-danger";
+  if (status === ATTENDANCE.LATE) return "pill-warning";
+  if (status === ATTENDANCE.ON_LEAVE) return "pill-neutral";
   return "pill-success";
 }
 
