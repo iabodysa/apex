@@ -49,6 +49,21 @@ _POSITION_STALE_SECONDS = 120
 # next poll once their routes are cached.
 ROUTER_CALLS_PER_REQUEST = 3
 
+PLAN_DISPLAY_LIMIT = 50
+
+_TRIP_FIELDS = [
+    "name",
+    "route_plan",
+    "status",
+    "trip_date",
+    "transport_request",
+    "driver",
+    "vehicle",
+    "driver_lat",
+    "driver_lng",
+    "driver_position_updated_at",
+]
+
 
 
 def _require_portal_role():
@@ -146,34 +161,32 @@ def _vehicle_label(vehicle):
     return frappe.db.get_value("Salis Vehicle", vehicle, "plate_number") or vehicle
 
 
-def _active_trip_for_plan(route_plan):
-    """The most relevant Dispatch Trip for a plan for the supervisor's dashboard: a
-    live/today trip first (Dispatched, then today's), else the latest. None when the
-    plan has spawned no trip yet. Read-only."""
-    if not route_plan:
-        return None
-    name = frappe.db.get_value(
-        "Dispatch Trip",
-        {"route_plan": route_plan, "status": "Dispatched", "docstatus": ["<", 2]},
-        "name",
-        order_by="trip_date desc, creation desc",
+def _active_trips_by_plan(plan_names: list) -> dict:
+    """The most relevant Dispatch Trip per plan for the supervisor's dashboard — a
+    live/today trip first (Dispatched, then today's), else the latest — resolved for
+    ALL plans in three batched queries instead of three probes per plan. A plan that
+    has spawned no trip yet is simply absent from the map. Read-only."""
+    chosen = {}
+    remaining = [p for p in plan_names if p]
+    probes = (
+        {"status": "Dispatched"},
+        {"trip_date": frappe.utils.today()},
+        {},
     )
-    if name:
-        return name
-    name = frappe.db.get_value(
-        "Dispatch Trip",
-        {"route_plan": route_plan, "trip_date": frappe.utils.today(), "docstatus": ["<", 2]},
-        "name",
-        order_by="creation desc",
-    )
-    if name:
-        return name
-    return frappe.db.get_value(
-        "Dispatch Trip",
-        {"route_plan": route_plan, "docstatus": ["<", 2]},
-        "name",
-        order_by="trip_date desc, creation desc",
-    )
+    for extra in probes:
+        if not remaining:
+            break
+        filters = {"route_plan": ["in", remaining], "docstatus": ["<", 2]}
+        filters.update(extra)
+        for trip in frappe.get_all(
+            "Dispatch Trip",
+            filters=filters,
+            fields=_TRIP_FIELDS,
+            order_by="trip_date desc, creation desc",
+        ):
+            chosen.setdefault(trip["route_plan"], trip)
+        remaining = [p for p in remaining if p not in chosen]
+    return chosen
 
 
 def _manifest_expected(trip: dict) -> int:
@@ -231,6 +244,93 @@ def _boarding_summary(dispatch_trip: str, trip: dict | None = None) -> dict:
     }
 
 
+def _boarding_summaries(trips: list) -> dict:
+    """``_boarding_summary`` for many trips at once: one child-table read over every
+    trip, plus one Transport Request and one Route Stop read shared by the trips whose
+    boarding has not started, instead of one to three queries per trip. Same keys and
+    same manifest fallback per trip as the single-trip reader. Read-only."""
+    states_by_trip = {}
+    names = [t["name"] for t in trips]
+    if names:
+        for row in frappe.get_all(
+            "Trip Boarding State",
+            filters={"parent": ["in", names], "parenttype": "Dispatch Trip"},
+            fields=["parent", "status"],
+            order_by="idx asc",
+        ):
+            states_by_trip.setdefault(row["parent"], []).append(row)
+
+    bare = [t for t in trips if not states_by_trip.get(t["name"])]
+    worker_counts = {}
+    requests = sorted({t["transport_request"] for t in bare if t.get("transport_request")})
+    if requests:
+        for row in frappe.get_all(
+            "Transport Request",
+            filters={"name": ["in", requests]},
+            fields=["name", "worker_count"],
+        ):
+            worker_counts[row["name"]] = frappe.utils.cint(row.get("worker_count"))
+
+    plan_totals = {}
+    fallback_plans = sorted(
+        {
+            t["route_plan"]
+            for t in bare
+            if t.get("route_plan") and not worker_counts.get(t.get("transport_request"))
+        }
+    )
+    if fallback_plans:
+        for row in frappe.get_all(
+            "Route Stop",
+            filters={"parent": ["in", fallback_plans], "parenttype": "Route Plan"},
+            fields=["parent", "passengers"],
+        ):
+            plan_totals[row["parent"]] = plan_totals.get(row["parent"], 0) + frappe.utils.cint(
+                row.get("passengers")
+            )
+
+    out = {}
+    for t in trips:
+        states = states_by_trip.get(t["name"], [])
+        counts = {"Boarded": 0, "Worker Claimed": 0, "Pending": 0, "Driver Rejected": 0, "Absent": 0}
+        for s in states:
+            st = s.get("status") or "Pending"
+            counts[st] = counts.get(st, 0) + 1
+        if states:
+            expected = len(states)
+        else:
+            expected = (
+                worker_counts.get(t.get("transport_request"))
+                or plan_totals.get(t.get("route_plan"))
+                or 0
+            )
+        out[t["name"]] = {
+            "boarded": counts.get("Boarded", 0),
+            "expected": expected,
+            "claimed": counts.get("Worker Claimed", 0),
+            "pending": counts.get("Pending", 0),
+            "rejected": counts.get("Driver Rejected", 0),
+            "absent": counts.get("Absent", 0),
+            "has_manifest": bool(states),
+        }
+    return out
+
+
+def _label_map(doctype: str, label_field: str, names: list) -> dict:
+    """id -> human label for every distinct id in ``names``, one query per doctype
+    instead of one ``get_value`` per row; a missing master falls back to its id via
+    ``dict.get(key, key)`` at the call site."""
+    ids = sorted({n for n in names if n})
+    if not ids:
+        return {}
+    return {
+        row["name"]: row.get(label_field) or row["name"]
+        for row in frappe.get_all(
+            doctype, filters={"name": ["in", ids]}, fields=["name", label_field]
+        )
+    }
+
+
 def _pending_first(plans: list) -> list:
     """Order plans Pending-first, keeping the query's ``modified desc`` inside each group.
 
@@ -249,8 +349,9 @@ def _pending_first(plans: list) -> list:
 def get_supervisor_context():
     """One composite payload for the supervisor portal (read).
 
-    Returns the caller's identity plus every Route Plan assigned to them (submitted
-    plans — a draft plan is not yet handed to a supervisor), Pending decisions first, each
+    Returns the caller's identity plus the Route Plans assigned to them (submitted
+    plans — a draft plan is not yet handed to a supervisor — capped at the
+    ``PLAN_DISPLAY_LIMIT`` most recently modified), Pending decisions first, each
     enriched with human driver/vehicle labels and its most-relevant Dispatch Trip's live
     boarding summary + whether a live driver position exists. Strictly row-scoped: only
     plans where ``route_supervisor`` == the session user (Administrator sees all, for
@@ -282,28 +383,25 @@ def get_supervisor_context():
             "modified",
         ],
         order_by="modified desc",
-        limit_page_length=0,
+        limit_page_length=PLAN_DISPLAY_LIMIT,
     )
     plans = _pending_first(plans)
 
+    trips_by_plan = _active_trips_by_plan([p["name"] for p in plans])
+    summaries = _boarding_summaries(list(trips_by_plan.values()))
+    driver_labels = _label_map("Salis Driver", "full_name", [p.get("driver") for p in plans])
+    vehicle_labels = _label_map("Salis Vehicle", "plate_number", [p.get("vehicle") for p in plans])
+
     out = []
     for p in plans:
-        trip_name = _active_trip_for_plan(p["name"])
+        t = trips_by_plan.get(p["name"])
         trip_block = None
-        if trip_name:
-            t = frappe.db.get_value(
-                "Dispatch Trip",
-                trip_name,
-                ["name", "status", "trip_date", "route_plan", "transport_request",
-                 "driver_lat", "driver_lng", "driver_position_updated_at"],
-                as_dict=True,
-            )
-            summary = _boarding_summary(trip_name, t)
+        if t:
             trip_block = {
                 "name": t["name"],
                 "status": t.get("status"),
                 "trip_date": frappe.utils.cstr(t.get("trip_date")) if t.get("trip_date") else None,
-                "boarding": summary,
+                "boarding": summaries[t["name"]],
                 "has_position": t.get("driver_lat") is not None and t.get("driver_lng") is not None,
             }
         out.append(
@@ -312,8 +410,8 @@ def get_supervisor_context():
                 "route_name": p.get("route_name"),
                 "project": p.get("project"),
                 "shift": p.get("shift"),
-                "driver": _driver_label(p.get("driver")),
-                "vehicle": _vehicle_label(p.get("vehicle")),
+                "driver": driver_labels.get(p.get("driver"), p.get("driver")) if p.get("driver") else None,
+                "vehicle": vehicle_labels.get(p.get("vehicle"), p.get("vehicle")) if p.get("vehicle") else None,
                 "total_stops": frappe.utils.cint(p.get("total_stops")),
                 "approval": p.get("supervisor_approval") or "Pending",
                 "decided_on": frappe.utils.cstr(p.get("supervisor_action_on"))
@@ -466,8 +564,24 @@ def get_active_driver_positions():
         "Route Plan",
         filters=filters,
         fields=["name", "route_name", "project"],
-        limit_page_length=0,
+        order_by="modified desc",
+        limit_page_length=PLAN_DISPLAY_LIMIT,
     )
+
+    trips_by_plan = _active_trips_by_plan([p["name"] for p in plans])
+    trips = list(trips_by_plan.values())
+    driver_labels = _label_map("Salis Driver", "full_name", [t.get("driver") for t in trips])
+    vehicle_labels = _label_map("Salis Vehicle", "plate_number", [t.get("vehicle") for t in trips])
+
+    stops_by_plan = {}
+    if trips_by_plan:
+        for stop in frappe.get_all(
+            "Route Stop",
+            filters={"parent": ["in", list(trips_by_plan)], "parenttype": "Route Plan"},
+            fields=["parent", "stop_name", "latitude", "longitude", "idx"],
+            order_by="idx asc",
+        ):
+            stops_by_plan.setdefault(stop["parent"], []).append(stop)
 
     now = frappe.utils.now_datetime()
     out = []
@@ -477,16 +591,7 @@ def get_active_driver_positions():
     # and the map draws the straight line it already draws when the router is down.
     router_budget = ROUTER_CALLS_PER_REQUEST
     for plan in plans:
-        trip_name = _active_trip_for_plan(plan["name"])
-        if not trip_name:
-            continue
-        trip = frappe.db.get_value(
-            "Dispatch Trip",
-            trip_name,
-            ["name", "status", "driver", "vehicle", "driver_lat", "driver_lng",
-             "driver_position_updated_at"],
-            as_dict=True,
-        )
+        trip = trips_by_plan.get(plan["name"])
         if not trip:
             continue
 
@@ -503,12 +608,7 @@ def get_active_driver_positions():
                 "lat": stop.get("latitude"),
                 "lng": stop.get("longitude"),
             }
-            for stop in frappe.get_all(
-                "Route Stop",
-                filters={"parent": plan["name"], "parenttype": "Route Plan"},
-                fields=["stop_name", "latitude", "longitude", "idx"],
-                order_by="idx asc",
-            )
+            for stop in stops_by_plan.get(plan["name"], [])
             if stop.get("latitude") and stop.get("longitude")
         ]
 
@@ -527,9 +627,13 @@ def get_active_driver_positions():
             "project": plan.get("project"),
             "status": trip.get("status"),
             "driver": trip.get("driver"),
-            "driver_name": _driver_label(trip.get("driver")),
+            "driver_name": driver_labels.get(trip.get("driver"), trip.get("driver"))
+            if trip.get("driver")
+            else None,
             "vehicle": trip.get("vehicle"),
-            "plate": _vehicle_label(trip.get("vehicle")),
+            "plate": vehicle_labels.get(trip.get("vehicle"), trip.get("vehicle"))
+            if trip.get("vehicle")
+            else None,
             "has_position": bool(lat is not None and lng is not None and (lat or lng)),
             "lat": lat,
             "lng": lng,
