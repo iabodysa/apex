@@ -1,5 +1,18 @@
 # Copyright (c) 2026, AFMCO and contributors
 
+"""Missed Cleaning Tasks — cleaning logs marked missed or needing rework.
+
+Reads the Cleaning Log directly, unlike Daily Cleaning Compliance, which reads the
+immutable Cleaning Compliance Ledger that only exists once a log is SUBMITTED. The two are
+not in conflict and neither filter is wrong: they answer from different sides of the
+submit step, so a deployment that never submits a log sees rows here and nothing there.
+
+A CANCELLED log is excluded from both queries. It had no docstatus filter at all, so a log
+someone cancelled would still be reported as a missed cleaning — sending a supervisor after
+a record that was withdrawn. Drafts are deliberately kept: on a site where the submit step
+is not used, excluding them would empty the report rather than correct it.
+"""
+
 import frappe
 from frappe import _
 from frappe.utils import add_days, date_diff, getdate, today
@@ -43,6 +56,7 @@ def execute(filters=None):
     query_filters = apply_building_scope({
         "cleaning_date": ["between", [str(date_from), str(date_to)]],
         "missed_cleaning": ["in", [1, "Yes"]],
+        "docstatus": ["!=", 2],
     })
 
     missed = frappe.get_all(
@@ -61,6 +75,7 @@ def execute(filters=None):
         "cleaning_date": ["between", [str(date_from), str(date_to)]],
         "rework_required": ["in", [1, "Yes"]],
         "missed_cleaning": ["in", [0, "No"]],
+        "docstatus": ["!=", 2],
     })
 
     rework = frappe.get_all(
