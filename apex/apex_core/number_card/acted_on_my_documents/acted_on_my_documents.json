@@ -1,0 +1,12 @@
+{
+ "doctype": "Number Card",
+ "document_type": "ToDo",
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Acted On My Documents",
+ "method": "apex.apex_core.worklist.my_work_center.get_activity_on_my_documents_count",
+ "module": "Apex Core",
+ "modified": "2026-08-07 21:17:00.000000",
+ "name": "Acted On My Documents",
+ "type": "Custom"
+}

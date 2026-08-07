@@ -10,26 +10,66 @@
  "sequence_id": 6.0,
  "parent_page": "Apex",
  "roles": [],
- "content": "[{\"id\": \"myTasksHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Tasks</b></span>\", \"col\": 12}}, {\"id\": \"myTasksSc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"ToDo\", \"col\": 3}}, {\"id\": \"myTasksSc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Workflow Action\", \"col\": 3}}, {\"id\": \"myTasksCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"My Work\", \"col\": 4}}]",
+ "content": "[{\"id\": \"myTasksHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Tasks</b></span>\", \"col\": 12}}, {\"id\": \"myTasksSc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 4}}, {\"id\": \"myTasksSc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Awaiting My Approval\", \"col\": 4}}, {\"id\": \"myTasksNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 3}}, {\"id\": \"myTasksNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Acted On My Documents\", \"col\": 3}}, {\"id\": \"myTasksNc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unread Notifications\", \"col\": 3}}, {\"id\": \"myTasksNc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 3}}, {\"id\": \"myTasksQl1\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"My Open Tasks\", \"col\": 4}}, {\"id\": \"myTasksQl2\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"My Unread Notifications\", \"col\": 4}}, {\"id\": \"myTasksCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"My Work\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "ToDo",
-   "link_to": "ToDo",
-   "stats_filter": "{\"status\": \"Open\"}",
-   "format": "{} Open",
+   "type": "Page",
+   "label": "Action Inbox",
+   "link_to": "action-inbox",
    "color": "Blue",
    "idx": 1
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
-   "label": "Workflow Action",
+   "label": "Awaiting My Approval",
    "link_to": "Workflow Action",
    "stats_filter": "{\"status\": \"Open\"}",
-   "format": "{} Pending",
+   "format": "{} Awaiting Me",
    "color": "Orange",
+   "idx": 2
+  }
+ ],
+ "number_cards": [
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Pending My Action",
+   "label": "Pending My Action",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Acted On My Documents",
+   "label": "Acted On My Documents",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Unread Notifications",
+   "label": "Unread Notifications",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Submitted By Me",
+   "label": "Submitted By Me",
+   "idx": 4
+  }
+ ],
+ "quick_lists": [
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "ToDo",
+   "label": "My Open Tasks",
+   "quick_list_filter": "{\"status\":[\"=\",\"Open\"],\"allocated_to\":[\"=\",frappe.session.user]}",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "Notification Log",
+   "label": "My Unread Notifications",
+   "quick_list_filter": "{\"read\":[\"=\",0]}",
    "idx": 2
   }
  ],
@@ -44,10 +84,18 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
+   "label": "Action Inbox",
+   "link_type": "Page",
+   "link_to": "action-inbox",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "ToDo",
    "link_type": "DocType",
    "link_to": "ToDo",
-   "idx": 2
+   "idx": 3
   },
   {
    "doctype": "Workspace Link",
@@ -55,7 +103,7 @@
    "label": "Workflow Action",
    "link_type": "DocType",
    "link_to": "Workflow Action",
-   "idx": 3
+   "idx": 4
   },
   {
    "doctype": "Workspace Link",
@@ -63,12 +111,11 @@
    "label": "Notification Log",
    "link_type": "DocType",
    "link_to": "Notification Log",
-   "idx": 4
+   "idx": 5
   }
  ],
  "charts": [],
- "number_cards": [],
- "quick_lists": [],
+ "custom_blocks": [],
  "creation": "2020-01-01 00:00:08.000000",
- "modified": "2026-08-07 20:53:00.000000"
+ "modified": "2026-08-07 21:17:00.000000"
 }

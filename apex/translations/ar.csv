@@ -124,6 +124,8 @@ Acknowledged By (Employee),أقر بالاستلام (الموظف)
 Acknowledged On,تاريخ الإقرار
 Acknowledgement Received,تم استلام الإقرار
 Acknowledgement Received must be set before a recovery can be {0}.,يجب تحديد «تم استلام الإقرار» قبل تغيير حالة الاسترداد إلى {0}.
+Acted on by {0},نفّذ الإجراء {0}
+Acted On My Documents,جرى إجراء على مستنداتي
 Action,الإجراء
 Action Date,تاريخ الإجراء
 Action failed. Please review and try again.,فشل الإجراء. يرجى المراجعة وإعادة المحاولة.
@@ -143,6 +145,7 @@ Auditor,المدقق
 Average Cost per Litre,متوسط تكلفة اللتر
 Awaiting Acknowledgement,بانتظار الإقرار
 Awaiting Handover,بانتظار التسليم
+Awaiting My Approval,بانتظار اعتمادي
 Bills,الفواتير
 Blocked by Outstanding Items,موقوف بسبب مستحقات قائمة
 Boarding Events Created,أحداث الصعود المُنشأة
@@ -190,6 +193,8 @@ Missed Over 7 Days,فائتة أكثر من 7 أيام
 Missed Tasks,المهام الفائتة
 Monthly Rent at Risk,الإيجار الشهري المعرّض
 Movements,الحركات
+My Open Tasks,مهامي المفتوحة
+My Unread Notifications,إشعاراتي غير المقروءة
 Not Acknowledged,بلا توقيع
 Not Boarded Only,غير الصاعدين فقط
 Open Discrepancies,فروقات مفتوحة
@@ -242,6 +247,7 @@ Temporary Worker Transfers,نقل العمال المؤقتين
 Transfers,التنقلات
 Transport Requests Served %,نسبة طلبات النقل المخدومة %
 Unassigned Only,غير المسندة فقط
+Unread Notifications,إشعارات غير مقروءة
 Unsigned,غير موقَّع
 Unsigned Only,غير الموقَّعة فقط
 Vehicle Assignment Register,سجل إسناد المركبات

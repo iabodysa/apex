@@ -41,6 +41,8 @@ class ActionInbox {
 		this.$approvals = this.$approvalsSection.find('.ai-list');
 		this.$tasksSection = this._section(__('Assigned Tasks'));
 		this.$tasks = this.$tasksSection.find('.ai-list');
+		this.$actedSection = this._section(__('Acted On My Documents'));
+		this.$acted = this.$actedSection.find('.ai-list');
 		this.$submittedSection = this._section(__('My Open Submissions'));
 		this.$submitted = this.$submittedSection.find('.ai-list');
 		this.$closedSection = this._section(__('Closed in the Last 48h'));
@@ -50,8 +52,8 @@ class ActionInbox {
 
 		this.$empty = $('<div class="ai-empty text-muted"></div>').attr('style', AI_STYLE.empty).appendTo(this.$root);
 		this._allSections = [
-			this.$approvalsSection, this.$tasksSection, this.$submittedSection,
-			this.$closedSection, this.$notifsSection,
+			this.$approvalsSection, this.$tasksSection, this.$actedSection,
+			this.$submittedSection, this.$closedSection, this.$notifsSection,
 		];
 	}
 
@@ -77,19 +79,24 @@ class ActionInbox {
 		const awaiting = data.awaiting_action || {};
 		const workflow_actions = awaiting.workflow_actions || [];
 		const todos = awaiting.todos || [];
+		const acted = data.acted_on_my_documents || [];
 		const submitted = data.my_open_submitted || [];
 		const closed = data.my_recent_closed || [];
 		const notifs = data.my_notifications || [];
 
-		[this.$approvals, this.$tasks, this.$submitted, this.$closed, this.$notifs].forEach(($l) => $l.empty());
+		[this.$approvals, this.$tasks, this.$acted, this.$submitted, this.$closed, this.$notifs].forEach(($l) =>
+			$l.empty()
+		);
 
 		this.$approvalsSection.toggle(workflow_actions.length > 0);
 		this.$tasksSection.toggle(todos.length > 0);
+		this.$actedSection.toggle(acted.length > 0);
 		this.$submittedSection.toggle(submitted.length > 0);
 		this.$closedSection.toggle(closed.length > 0);
 		this.$notifsSection.toggle(notifs.length > 0);
 
-		const anything = workflow_actions.length || todos.length || submitted.length || closed.length || notifs.length;
+		const anything =
+			workflow_actions.length || todos.length || acted.length || submitted.length || closed.length || notifs.length;
 		if (!anything) {
 			this.$empty.text(__('Nothing on your work center right now.')).show();
 			return;
@@ -98,6 +105,7 @@ class ActionInbox {
 
 		workflow_actions.forEach((row) => this._workflow_card(row));
 		todos.forEach((row) => this._todo_card(row));
+		acted.forEach((row) => this._acted_card(row));
 		submitted.forEach((row) => this._doc_card(this.$submitted, row, 'green'));
 		closed.forEach((row) => this._doc_card(this.$closed, row, 'gray'));
 		notifs.forEach((row) => this._notification_card(row));
@@ -248,6 +256,29 @@ class ActionInbox {
 			.appendTo($head);
 		const $meta = $('<div class="ai-card-meta text-muted"></div>').attr('style', AI_STYLE.card_meta).appendTo($card);
 		$('<span class="ai-card-state"></span>').text(__('Status: {0}', [row.status || ''])).appendTo($meta);
+	}
+
+	_acted_card(row) {
+		const $card = $('<div class="ai-card ai-card--acted"></div>').attr('style', AI_STYLE.card).appendTo(this.$acted);
+		const $head = $('<div class="ai-card-head"></div>').attr('style', AI_STYLE.card_head).appendTo($card);
+		$('<span class="indicator-pill no-indicator-dot purple"></span>').text(__(row.doctype || '')).appendTo($head);
+		$('<a class="ai-card-link" href="#"></a>')
+			.attr('style', AI_STYLE.card_link)
+			.text(row.name || '')
+			.on('click', (e) => {
+				e.preventDefault();
+				frappe.set_route('Form', row.doctype, row.name);
+			})
+			.appendTo($head);
+
+		const $meta = $('<div class="ai-card-meta text-muted"></div>').attr('style', AI_STYLE.card_meta).appendTo($card);
+		if (row.status) {
+			$('<span class="ai-card-state"></span>').text(__('Status: {0}', [__(row.status)])).appendTo($meta);
+		}
+		$('<span class="ai-card-actor"></span>').text(__('Acted on by {0}', [row.actor || ''])).appendTo($meta);
+		if (row.modified) {
+			$('<span class="ai-card-when"></span>').text(frappe.datetime.prettyDate(row.modified)).appendTo($meta);
+		}
 	}
 
 	_notification_card(row) {
