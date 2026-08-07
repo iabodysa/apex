@@ -20,6 +20,7 @@
   "rental_settlement_totals_col2",
   "accrued_total",
   "ledger_accrued_total",
+  "accrued_from_ledger",
   "rental_settlement_totals_col3",
   "variance",
   "ledger_variance",
@@ -128,6 +129,13 @@
    "read_only": 1
   },
   {
+   "fieldname": "accrued_from_ledger",
+   "fieldtype": "Check",
+   "label": "Accrued Total Taken From Ledger",
+   "read_only": 1,
+   "description": "Set when this settlement lists no vehicles, so the accrued total came from the rental accrual ledger instead of from rows on this document."
+  },
+  {
    "fieldname": "rental_settlement_totals_col3",
    "fieldtype": "Column Break"
   },
@@ -218,7 +226,7 @@
    "link_fieldname": "rental_settlement"
   }
  ],
- "modified": "2026-08-07 05:38:00.000000",
+ "modified": "2026-08-07 08:41:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Rental Settlement",

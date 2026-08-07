@@ -109,6 +109,7 @@ Accrual,الاستحقاق
 Accrual Date,تاريخ الاستحقاق
 Accrual Rows,أسطر الاستحقاق
 Accrued Total,إجمالي المستحق
+Accrued Total Taken From Ledger,إجمالي المستحق مأخوذ من السجل
 Accrued Total (SAR),إجمالي المستحق (ريال)
 Accrued Total minus Ledger Accrued Total — non-zero means the entered vehicle lines disagree with the accrual ledger.,إجمالي الاستحقاق مطروحًا منه إجمالي الاستحقاق من السجل — تعني القيمة غير الصفرية أن بنود المركبات المدخلة لا تطابق سجل استحقاق الإيجار.
 Accrued total. Sum of the vehicle line amounts when lines are entered; otherwise derived from the linked Rental Accrual Ledger.,إجمالي الاستحقاق. مجموع مبالغ بنود المركبات عند إدخال البنود؛ وإلا فيُشتق من سجل استحقاق الإيجار المرتبط.
@@ -3657,6 +3658,7 @@ Set how urgent the repair is.,حدّد مدى إلحاح الإصلاح.
 "Set ON only after Legal/HR has reviewed the caps, the consent flow, and the per-type rules against current KSA Labor Law.",فعّل هذا فقط بعد أن تراجع الإدارة القانونية/الموارد البشرية الحدود القصوى ومسار الموافقة وقواعد كل نوع وفقًا لنظام العمل السعودي الحالي.
 Set on the reversal row posted when the source movement is cancelled. The original row is preserved for audit.,يُحدد في صف العكس المرحل عند إلغاء الحركة الأصلية. ويُحتفظ بالصف الأصلي للتدقيق.
 Set only when the request concerns a specific bed.,يُحدَّد فقط عندما يخص الطلب سريرًا معيّنًا.
+"Set when this settlement lists no vehicles, so the accrued total came from the rental accrual ledger instead of from rows on this document.","يُفعَّل حين لا تُدرج هذه التسوية أي مركبة، فيؤخذ إجمالي المستحق من سجل استحقاق الإيجار بدلًا من بنود هذا المستند."
 Set the Cadence,حدّد تكرار الجولة
 Set the Check-in Date,حدّد تاريخ التسكين
 Set the Checkout Date,حدّد تاريخ المغادرة

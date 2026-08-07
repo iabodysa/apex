@@ -74,7 +74,11 @@ class RentalSettlement(Document):
         accrued = 0.0
         for row in self.vehicles:
             computed = flt(row.days) * flt(row.daily_rate)
-            if not row.amount:
+            # ABSENCE, not falsity. A blank Currency arrives as None and a typed 0
+            # arrives as 0, so `if not row.amount` could not tell "the operator left it
+            # for us to compute" from "the operator says this vehicle owes nothing" —
+            # and it overwrote the second with days x rate on every save.
+            if row.amount is None:
                 row.amount = computed
             if flt(row.days) < 0 or flt(row.daily_rate) < 0 or flt(row.amount) < 0:
                 frappe.throw(
@@ -87,10 +91,17 @@ class RentalSettlement(Document):
         ledger_total = linked_accrued_total(self.rental_office, self.period_month)
         self.ledger_accrued_total = flt(ledger_total)
 
-        if accrued:
+        # A settlement that lists vehicles totalling zero HAS a total, and it is zero.
+        # Substituting the ledger there made `ledger_variance` come out as 0 and the
+        # document reported a perfect match against a claim of nothing. The fallback is
+        # for the one case it was meant for — no rows at all — and it is recorded, so a
+        # reader can see the figure did not come from the rows in front of them.
+        self.accrued_from_ledger = 0
+        if self.vehicles:
             self.accrued_total = flt(accrued)
         else:
             self.accrued_total = flt(ledger_total)
+            self.accrued_from_ledger = 1
 
         self.ledger_variance = flt(self.accrued_total) - flt(ledger_total)
         self.variance = flt(self.claimed_total) - flt(self.accrued_total)
