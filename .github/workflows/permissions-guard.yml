@@ -18,8 +18,13 @@ on:
 #   ignore_permissions=True          keyword argument, unspaced
 #   ignore_permissions = True        assignment or PEP8-spaced keyword
 #   doc.flags.ignore_permissions = True / frappe.flags.ignore_permissions = True
+#   {"ignore_permissions": True}     dict key, as passed to get_doc/insert kwargs
+#   ignore_permissions=1             a truthy that is not the literal True
 # POSIX [[:space:]] is used rather than \s so the expression means the same thing
-# under BSD grep locally and GNU grep on the runner.
+# under BSD grep locally and GNU grep on the runner. The last two spellings match
+# nothing in apex today; they are counted anyway, because a ratchet that reaches
+# zero while a spelling stays uncountable reads as clean for the one reason nobody
+# checks.
 #
 # BASELINE is a ratchet toward zero: it may FALL as call sites move behind the
 # helper, and rises only after a security review that records why a new raw
@@ -27,7 +32,7 @@ on:
 
 env:
   BASELINE: 130
-  BYPASS_RE: 'ignore_permissions[[:space:]]*=[[:space:]]*True'
+  BYPASS_RE: 'ignore_permissions["'']?[[:space:]]*[=:][[:space:]]*(True|1)'
   SANCTIONED: 'apex/apex_core/utils/system_write.py'
 
 jobs:
