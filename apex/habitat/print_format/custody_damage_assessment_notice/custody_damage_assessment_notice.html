@@ -1,96 +1,105 @@
-<style>
-  .ah-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
-  .ah-doc h1 { font-size: 18px; margin: 0; }
-  .ah-doc .ah-sub { color: #666; font-size: 12px; margin-top: 2px; }
-  .ah-head { border-bottom: 3px solid #8a1a1a; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ah-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ah-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
-  .ah-meta .ah-lbl { background: #f8f4f4; font-weight: bold; width: 22%; }
-  .ah-items { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-  .ah-items th { background: #8a1a1a; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ah-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
-  .ah-items tr:nth-child(even) td { background: #faf6f6; }
-  .ah-total { text-align: right; font-size: 14px; font-weight: bold; margin-bottom: 16px; }
-  .ah-ar { color: #555; font-size: 10px; }
-  .ah-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
-  .ah-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
-  .ah-foot { margin-top: 20px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ah-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div style="margin-bottom:10px">{{ letter_head }}</div>
-{% endif %}
-  <div class="ah-head">
-    <div>
-      <h1>Custody Damage / Deduction Notice</h1>
-      <div class="ah-sub">إشعار تلف عهدة وخصم &bull; {{ doc.name }}</div>
-    </div>
-    <div style="text-align:right; font-size:11px; color:#666;">
-      {{ frappe.db.get_single_value("Habitat Settings", "company") or "" }}
-    </div>
-  </div>
+{%- set building = frappe.db.get_value("Building", doc.building,
+      ["building_name", "company", "responsible_supervisor"], as_dict=True) or {} -%}
+{%- set assessor = frappe.get_fullname(building.get("responsible_supervisor")) if building.get("responsible_supervisor") else None -%}
+{%- set emp_id = doc.employee or (doc.party if doc.party_type == "Employee" else None) -%}
+{%- set emp = (frappe.db.get_value("Employee", emp_id,
+      ["employee_name", "employee_number", "designation", "department", "company"], as_dict=True) or {}) if emp_id else {} -%}
+{%- set tmp = (frappe.db.get_value("Temporary Worker", doc.party,
+      ["worker_name", "iqama_number", "labour_supplier"], as_dict=True) or {}) if (doc.party_type == "Temporary Worker" and doc.party) else {} -%}
+{%- set liable = emp.get("employee_name") or tmp.get("worker_name") or doc.party -%}
+{%- set company = building.get("company") or emp.get("company") -%}
+{%- set currency = (frappe.db.get_value("Company", company, "default_currency") if company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set ret = (frappe.db.get_value("Custody Return", doc.custody_return,
+      ["return_date", "custody_issue"], as_dict=True) or {}) if doc.custody_return else {} -%}
+{%- set ded = (frappe.db.get_value("Additional Salary", doc.deduction_entry,
+      ["salary_component", "amount", "payroll_date", "currency", "docstatus"], as_dict=True) or {}) if doc.deduction_entry else {} -%}
 
-  <table class="ah-meta">
-    <tr>
-      <td class="ah-lbl">Date <span class="ah-ar">التاريخ</span></td>
-      <td>{{ frappe.format(doc.assessment_date, {"fieldtype": "Date"}) }}</td>
-      <td class="ah-lbl">Building <span class="ah-ar">المبنى</span></td>
-      <td>{{ doc.building or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ah-lbl">Employee <span class="ah-ar">الموظف</span></td>
-      <td>{{ doc.employee or "" }}</td>
-      <td class="ah-lbl">Against Return <span class="ah-ar">مقابل إرجاع</span></td>
-      <td>{{ doc.custody_return or "" }}</td>
-    </tr>
-  </table>
+{%- set rows = [] -%}
+{%- for it in doc.items -%}
+  {%- set art = (frappe.db.get_value("Custody Article", it.article,
+        ["article_name", "unit_of_measure"], as_dict=True) or {}) if it.article else {} -%}
+  {%- set _ = rows.append({
+        "article": it.article,
+        "article_name": art.get("article_name"),
+        "serial_no": it.serial_no or "—",
+        "damage_description": it.damage_description,
+        "cost": it.estimated_replacement_cost}) -%}
+{%- endfor -%}
+{%- set total_cost = doc.total_estimated_replacement_cost or (doc.items | sum(attribute="estimated_replacement_cost") if doc.items else 0) -%}
 
-  <table class="ah-items">
-    <thead>
-      <tr>
-        <th style="width:5%;">#</th>
-        <th>{{ _("Article") }}</th>
-        <th>{{ _("Damage Description") }}</th>
-        <th style="width:18%;">{{ _("Serial No") }}</th>
-        <th style="width:20%;">{{ _("Replacement Cost (SAR)") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in doc.items %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ row.article or "" }}</td>
-        <td>{{ row.damage_description or "" }}</td>
-        <td>{{ row.serial_no or "—" }}</td>
-        <td>{{ frappe.format(row.estimated_replacement_cost, {"fieldtype": "Currency"}) }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
 
-  <div class="ah-total">
-    Total Estimated Replacement Cost <span class="ah-ar">إجمالي تكلفة الاستبدال المقدّرة</span>:
-    {{ frappe.format(doc.total_estimated_replacement_cost, {"fieldtype": "Currency"}) }}
-  </div>
+  {{ ax.doc_head() }}
 
-  {% if doc.deduction_entry %}
-  <div style="margin-bottom:12px; font-size:11px;">
-    Linked salary deduction <span class="ah-ar">خصم الراتب المرتبط</span>: <b>{{ doc.deduction_entry }}</b>
-  </div>
-  {% endif %}
+  {{ ax.doc_title(doc, _("Custody Damage and Deduction Notice"), "Custody Damage and Deduction Notice",
+                  (_("Status") ~ ": " ~ _(doc.status)) if doc.status else "") }}
 
-  <table class="ah-sign">
-    <tr>
-      <td>Assessed by (Supervisor)<br><span class="ah-ar">قيّمها (المشرف)</span></td>
-      <td style="text-align:right;">Acknowledged by (Employee)<br><span class="ah-ar">أقرّ بها (الموظف)</span></td>
-    </tr>
-  </table>
+  {{ ax.party_block([
+      {"role_ar": _("Notice served on"), "role_en": "Liable worker",
+       "name": liable,
+       "lines": [
+         (_("Worker Type") ~ ": " ~ _(doc.party_type)) if doc.party_type else None,
+         (_("Employee Number") ~ ": " ~ emp.get("employee_number")) if emp.get("employee_number") else None,
+         (_("Designation") ~ ": " ~ emp.get("designation")) if emp.get("designation") else None,
+         (_("Department") ~ ": " ~ emp.get("department")) if emp.get("department") else None,
+         (_("Iqama Number") ~ ": " ~ tmp.get("iqama_number")) if tmp.get("iqama_number") else None,
+         (_("Labour Supplier") ~ ": " ~ tmp.get("labour_supplier")) if tmp.get("labour_supplier") else None,
+       ]},
+      {"role_ar": _("Assessed by"), "role_en": "Assessing store",
+       "name": building.get("building_name") or doc.building,
+       "lines": [
+         (_("Storekeeper") ~ ": " ~ assessor) if assessor else None,
+         (_("Company") ~ ": " ~ company) if company else None,
+         get_address_text("Building", doc.building) or None,
+       ]},
+  ]) }}
 
-  <div class="ah-foot">
-    The employee acknowledges the assessed damage and the associated deduction, if any.
-    يقرّ الموظف بالتلف المقيَّم وبالخصم المرتبط إن وُجد.
-    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
-  </div>
+  {{ ax.field_grid([
+      [{"ar": _("Assessment Date"), "en": "Assessed on", "value": doc.assessment_date, "fmt": "Date"},
+       {"ar": _("Status"), "en": "Status", "value": doc.status, "tr": True}],
+      [{"ar": _("Against Custody Return"), "en": "Arising from return", "value": doc.custody_return},
+       {"ar": _("Return Date"), "en": "Returned on", "value": ret.get("return_date"), "fmt": "Date"}],
+      [{"ar": _("Original Custody Issue"), "en": "Original issue", "value": ret.get("custody_issue")},
+       {"ar": _("Arising from Checkout"), "en": "Housing checkout", "value": doc.source_checkout}],
+  ]) }}
+
+  {{ ax.line_table(
+      [{"ar": _("Article Code"), "en": "Code", "key": "article", "width": "14%"},
+       {"ar": _("Article"), "en": "Description", "key": "article_name", "width": "20%"},
+       {"ar": _("Serial No"), "en": "Serial", "key": "serial_no", "width": "13%"},
+       {"ar": _("Damage Found"), "en": "Damage found", "key": "damage_description"},
+       {"ar": _("Replacement Cost"), "en": "Replacement cost", "key": "cost", "num": True, "width": "16%", "fmt": "Currency"}],
+      rows,
+      totals=[frappe.format_value(total_cost, {"fieldtype": "Currency"})],
+      empty_text=_("No damaged articles are listed on this assessment")) }}
+
+  {{ ax.amount_words(total_cost, currency) }}
+
+  {%- if doc.deduction_entry %}
+  {{ ax.field_grid([
+      [{"ar": _("Payroll Deduction Entry"), "en": "Deduction entry", "value": doc.deduction_entry},
+       {"ar": _("Salary Component"), "en": "Salary component", "value": ded.get("salary_component")}],
+      [{"ar": _("Amount Deducted"), "en": "Amount deducted", "value": ded.get("amount"), "fmt": "Currency"},
+       {"ar": _("Payroll Date"), "en": "Payroll date", "value": ded.get("payroll_date"), "fmt": "Date"}],
+  ]) }}
+  {%- else %}
+  {{ ax.note_block(_("No payroll deduction has been raised against this assessment yet.")) }}
+  {%- endif %}
+
+  {{ ax.note_block(doc.remarks) }}
+
+  {{ ax.photo_slots(3, _("Attach a photograph of the damage")) }}
+
+  {{ ax.declaration(_("The worker named above is notified of the damage listed and of its estimated replacement value. The worker may object to this assessment in writing to the storekeeper before it is approved. Once approved, the amount shown is recovered through payroll under company policy. Signing below records that this notice was served and read, not that its value is agreed.")) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Assessed by"), "en": "Storekeeper", "name": assessor},
+      {"ar": _("Notice received by"), "en": "Liable worker", "name": liable},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

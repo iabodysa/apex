@@ -1,79 +1,157 @@
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 <style>
-  .ah-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
-  .ah-doc h1 { font-size: 18px; margin: 0; }
-  .ah-doc .ah-sub { color: #666; font-size: 12px; margin-top: 2px; }
-  .ah-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ah-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ah-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
-  .ah-meta .ah-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
-  .ah-clear { display: inline-block; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 12px; }
-  .ah-yes { background: #dcfce7; color: #166534; border: 1px solid #166534; }
-  .ah-no { background: #fee2e2; color: #991b1b; border: 1px solid #991b1b; }
-  .ah-ar { color: #555; font-size: 10px; }
-  .ah-sign { width: 100%; margin-top: 32px; border-collapse: collapse; }
-  .ah-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
-  .ah-foot { margin-top: 24px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
+  .ax-verdict { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+                border-radius: 6px; padding: 10px 14px; margin-bottom: 12px; border: 1.5px solid; }
+  .ax-verdict .word { font-size: 19px; font-weight: 800; letter-spacing: .01em; }
+  .ax-verdict .word .en { display: block; font-size: 8.5px; font-weight: 400; letter-spacing: .08em; }
+  .ax-verdict .why { font-size: 10px; line-height: 1.7; text-align: end; }
+  .ax-verdict.ok { border-color: #00844e; background: #f0f7f3; color: #05502f; }
+  .ax-verdict.hold { border-color: #b23b2e; background: #fdf3f1; color: #7d2418; }
 </style>
 
-<div class="ah-doc">
-{% if not no_letterhead and letter_head %}
-  <div style="margin-bottom:10px">{{ letter_head }}</div>
-{% endif %}
-  <div class="ah-head">
-    <div>
-      <h1>{{ _("Housing Checkout Clearance") }}</h1>
-      <div class="ah-sub">إخلاء السكن &bull; {{ doc.name }}</div>
+{%- set asg = (frappe.db.get_value("Housing Assignment", doc.assignment,
+      ["check_in_date", "building", "room", "party_type", "employee_name", "project", "stay_type", "responsible_supervisor"],
+      as_dict=True) or {}) if doc.assignment else {} -%}
+{%- set building = (frappe.db.get_value("Building", asg.get("building"),
+      ["building_name", "company", "site", "city"], as_dict=True) or {}) if asg.get("building") else {} -%}
+{%- set supervisor = frappe.get_fullname(asg.get("responsible_supervisor")) if asg.get("responsible_supervisor") else None -%}
+{%- set room = (frappe.db.get_value("Room", asg.get("room"), ["room_number", "floor"], as_dict=True) or {}) if asg.get("room") else {} -%}
+{%- set bed = (frappe.db.get_value("Bed", doc.bed, "bed_code")) if doc.bed else None -%}
+{%- set emp = (frappe.db.get_value("Employee", doc.employee,
+      ["employee_name", "employee_number", "designation", "department", "company"], as_dict=True) or {}) if doc.employee else {} -%}
+{%- set tmp = (frappe.db.get_value("Temporary Worker", doc.party,
+      ["worker_name", "iqama_number", "labour_supplier"], as_dict=True) or {}) if (doc.party_type == "Temporary Worker" and doc.party) else {} -%}
+{%- set resident = emp.get("employee_name") or tmp.get("worker_name") or asg.get("employee_name") or doc.party -%}
+{%- set company = building.get("company") or emp.get("company") -%}
+{%- set currency = (frappe.db.get_value("Company", company, "default_currency") if company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set nights = frappe.utils.date_diff(doc.checkout_date, asg.get("check_in_date")) if (doc.checkout_date and asg.get("check_in_date")) else None -%}
+
+{%- set rows = [] -%}
+{%- set shortfall = [] -%}
+{%- for it in doc.custody_return_items -%}
+  {%- set art = (frappe.db.get_value("Custody Article", it.article, "article_name")) if it.article else None -%}
+  {%- set _ = rows.append({
+        "article": it.article,
+        "article_name": art,
+        "quantity_issued": it.quantity_issued,
+        "quantity_returned": it.quantity_returned,
+        "gap": (it.quantity_issued or 0) - (it.quantity_returned or 0),
+        "return_status": it.return_status,
+        "deduction_amount": it.deduction_amount}) -%}
+  {%- if it.return_status in ("Lost", "Damaged") or ((it.quantity_issued or 0) - (it.quantity_returned or 0)) > 0 -%}
+    {%- set _ = shortfall.append(it.article) -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- set total_issued = doc.custody_return_items | sum(attribute="quantity_issued") if doc.custody_return_items else 0 -%}
+{%- set total_returned = doc.custody_return_items | sum(attribute="quantity_returned") if doc.custody_return_items else 0 -%}
+{%- set total_deduction = doc.damage_deduction_amount or (doc.custody_return_items | sum(attribute="deduction_amount") if doc.custody_return_items else 0) -%}
+{%- set settled = (not total_deduction) or doc.additional_salary_deduction -%}
+{%- set cleared = doc.custody_cleared and settled and not shortfall -%}
+
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
+
+  {{ ax.doc_head() }}
+
+  {{ ax.doc_title(doc, _("Housing Checkout Clearance"), "Housing Checkout Clearance",
+                  (_("Reason") ~ ": " ~ _(doc.checkout_reason)) if doc.checkout_reason else "") }}
+
+  <div class="ax-verdict {{ 'ok' if cleared else 'hold' }}">
+    <div class="word">
+      {{ _("Cleared") if cleared else _("Not Cleared") }}
+      <span class="en">{{ "CLEARED" if cleared else "NOT CLEARED" }}</span>
     </div>
-    <div style="text-align:right; font-size:11px; color:#666;">
-      {{ frappe.db.get_single_value("Habitat Settings", "company") or "" }}
+    <div class="why">
+      {%- if cleared %}
+      {{ _("All housing custody is accounted for and nothing is outstanding against this resident.") }}
+      {%- else %}
+      {%- if not doc.custody_cleared %}{{ _("Housing custody is not yet marked as fully cleared.") }}<br>{% endif %}
+      {%- if shortfall %}{{ _("{0} custody line(s) came back short, lost or damaged.").format(shortfall | length) }}<br>{% endif %}
+      {%- if total_deduction and not doc.additional_salary_deduction %}{{ _("A deduction is due and no payroll entry has been raised yet.") }}{% endif %}
+      {%- endif %}
     </div>
   </div>
 
-  <table class="ah-meta">
-    <tr>
-      <td class="ah-lbl">Employee <span class="ah-ar">الموظف</span></td>
-      <td>{{ doc.employee or "" }}</td>
-      <td class="ah-lbl">Bed <span class="ah-ar">السرير</span></td>
-      <td>{{ doc.bed or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ah-lbl">Checkout Date <span class="ah-ar">تاريخ المغادرة</span></td>
-      <td>{{ frappe.format(doc.checkout_date, {"fieldtype": "Date"}) }}</td>
-      <td class="ah-lbl">Reason <span class="ah-ar">السبب</span></td>
-      <td>{{ doc.checkout_reason or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ah-lbl">Assignment <span class="ah-ar">التسكين</span></td>
-      <td>{{ doc.assignment or "" }}</td>
-      <td class="ah-lbl">Custody Cleared <span class="ah-ar">إخلاء العهدة</span></td>
-      <td>
-        {% if doc.custody_cleared %}<span class="ah-clear ah-yes">CLEARED / مُخلاة</span>
-        {% else %}<span class="ah-clear ah-no">NOT CLEARED / غير مُخلاة</span>{% endif %}
-      </td>
-    </tr>
-    {% if doc.damage_deduction_amount %}
-    <tr>
-      <td class="ah-lbl">Damage Deduction <span class="ah-ar">خصم التلف</span></td>
-      <td>{{ frappe.format(doc.damage_deduction_amount, {"fieldtype": "Currency"}) }}</td>
-      <td class="ah-lbl">Salary Entry <span class="ah-ar">قيد الراتب</span></td>
-      <td>{{ doc.additional_salary_deduction or "—" }}</td>
-    </tr>
-    {% endif %}
-  </table>
+  {{ ax.party_block([
+      {"role_ar": _("Departing Resident"), "role_en": "Departing resident",
+       "name": resident,
+       "lines": [
+         (_("Resident Type") ~ ": " ~ _(doc.party_type)) if doc.party_type else None,
+         (_("Employee Number") ~ ": " ~ emp.get("employee_number")) if emp.get("employee_number") else None,
+         (_("Designation") ~ ": " ~ emp.get("designation")) if emp.get("designation") else None,
+         (_("Iqama Number") ~ ": " ~ tmp.get("iqama_number")) if tmp.get("iqama_number") else None,
+         (_("Labour Supplier") ~ ": " ~ tmp.get("labour_supplier")) if tmp.get("labour_supplier") else None,
+       ]},
+      {"role_ar": _("Accommodation Provider"), "role_en": "Accommodation provider",
+       "name": building.get("building_name") or asg.get("building"),
+       "lines": [
+         (_("Responsible Facility Supervisor") ~ ": " ~ supervisor) if supervisor else None,
+         (_("Site") ~ ": " ~ building.get("site")) if building.get("site") else None,
+         get_address_text("Building", asg.get("building")) or None,
+         (_("Company") ~ ": " ~ company) if company else None,
+       ]},
+  ]) }}
 
-  {% if doc.damage_notes %}<div style="margin-bottom:12px;"><b>Damage Notes <span class="ah-ar">ملاحظات التلف</span>:</b> {{ doc.damage_notes }}</div>{% endif %}
+  {{ ax.field_grid([
+      [{"ar": _("Checkout Date"), "en": "Checkout date", "value": doc.checkout_date, "fmt": "Date"},
+       {"ar": _("Checkout Reason"), "en": "Reason", "value": doc.checkout_reason, "tr": True}],
+      [{"ar": _("Against Housing Assignment"), "en": "Authorising assignment", "value": doc.assignment},
+       {"ar": _("Check-in Date"), "en": "Check-in date", "value": asg.get("check_in_date"), "fmt": "Date"}],
+      [{"ar": _("Nights Stayed"), "en": "Nights stayed", "value": nights},
+       {"ar": _("Stay Type"), "en": "Stay type", "value": asg.get("stay_type"), "tr": True}],
+      [{"ar": _("Room"), "en": "Room", "value": room.get("room_number") or asg.get("room")},
+       {"ar": _("Bed Released"), "en": "Bed released", "value": bed or doc.bed}],
+      [{"ar": _("Project"), "en": "Project", "value": asg.get("project")},
+       {"ar": _("Cost Center"), "en": "Cost center", "value": doc.cost_center}],
+  ]) }}
 
-  <table class="ah-sign">
-    <tr>
-      <td>Cleared by (Supervisor)<br><span class="ah-ar">أخلى طرفه (المشرف)</span></td>
-      <td style="text-align:right;">Employee<br><span class="ah-ar">الموظف</span></td>
-    </tr>
-  </table>
+  {{ ax.line_table(
+      [{"ar": _("Article Code"), "en": "Code", "key": "article", "width": "14%"},
+       {"ar": _("Custody Article"), "en": "Description", "key": "article_name"},
+       {"ar": _("Quantity Issued"), "en": "Issued", "key": "quantity_issued", "num": True, "width": "9%", "fmt": "Int"},
+       {"ar": _("Quantity Returned"), "en": "Returned", "key": "quantity_returned", "num": True, "width": "9%", "fmt": "Int"},
+       {"ar": _("Shortfall"), "en": "Short", "key": "gap", "num": True, "width": "8%", "fmt": "Int"},
+       {"ar": _("Return Status"), "en": "Status", "key": "return_status", "width": "12%", "tr": True},
+       {"ar": _("Deduction"), "en": "Deduction", "key": "deduction_amount", "num": True, "width": "14%", "fmt": "Currency"}],
+      rows,
+      totals=[frappe.format_value(total_issued, {"fieldtype": "Int"}),
+              frappe.format_value(total_returned, {"fieldtype": "Int"}),
+              frappe.format_value((total_issued or 0) - (total_returned or 0), {"fieldtype": "Int"}),
+              "",
+              frappe.format_value(total_deduction, {"fieldtype": "Currency"})],
+      empty_text=_("No housing custody was held against this assignment")) }}
 
-  <div class="ah-foot">
-    This slip certifies the resident's checkout and custody clearance status on the date shown.
-    تشهد هذه الوثيقة بمغادرة الساكن وحالة إخلاء عهدته في التاريخ الموضّح.
-    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
-  </div>
+  {{ ax.amount_words(total_deduction, currency) }}
+
+  {{ ax.check_list([
+      {"ar": _("All housing custody returned"), "en": "Custody cleared",
+       "state": ("ok" if doc.custody_cleared else "bad"),
+       "note": (_("Confirmed by the facility supervisor") if doc.custody_cleared else _("Still open on the resident's account"))},
+      {"ar": _("Room condition photographed at checkout"), "en": "Room condition on file",
+       "state": ("ok" if doc.room_condition_snapshot else "na"),
+       "note": (_("Photograph stored against this checkout") if doc.room_condition_snapshot else _("No checkout photograph on file"))},
+      {"ar": _("Amount due for loss or damage"), "en": "Amount due",
+       "state": ("bad" if total_deduction else "ok"),
+       "note": (frappe.format_value(total_deduction, {"fieldtype": "Currency"}) if total_deduction else _("Nothing due"))},
+      {"ar": _("Payroll deduction raised"), "en": "Deduction entry raised",
+       "state": ("ok" if doc.additional_salary_deduction else ("bad" if total_deduction else "na")),
+       "note": (doc.additional_salary_deduction if doc.additional_salary_deduction else _("No payroll entry raised"))},
+      {"ar": _("Departure transport arranged"), "en": "Departure transport",
+       "state": ("ok" if doc.departure_transport_request else "na"),
+       "note": (doc.departure_transport_request if doc.departure_transport_request else _("No transport requested"))},
+  ]) }}
+
+  {{ ax.note_block(doc.damage_notes) }}
+
+  {{ ax.note_block(doc.cancellation_reason) }}
+
+  {{ ax.declaration(_("This certificate records that the resident named above left the bed shown on the checkout date. It is a final clearance only where the box above reads Cleared: all housing custody accounted for and any amount due settled or raised on payroll. Where it reads Not Cleared, the open items listed remain on the resident's account and this paper does not release them.")) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Cleared by"), "en": "Responsible Facility Supervisor", "name": supervisor},
+      {"ar": _("Departing Resident"), "en": "Departing resident", "name": resident},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

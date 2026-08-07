@@ -1,90 +1,78 @@
-<style>
-  .ax-doc { font-family: Arial, sans-serif; color: #14332a; font-size: 12px; }
-  .ax-doc h1 { font-size: 18px; margin: 0; color: #14332a; }
-  .ax-sub { color: #4a5e55; font-size: 11px; margin-top: 2px; }
-  .ax-head { border-bottom: 3px solid #00844e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ax-recipient { font-size: 11px; color: #14332a; background: #eef6f1;
-                  border: 1px solid #00844e; border-radius: 3px; padding: 4px 10px; }
-  .ax-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ax-meta td { padding: 4px 8px; border: 1px solid #d9e4de; vertical-align: top; }
-  .ax-meta .ax-lbl { background: #f1f7f3; font-weight: bold; width: 22%; color: #14332a; }
-  .ax-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .ax-items th { background: #00844e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ax-items td { padding: 6px 8px; border: 1px solid #d9e4de; }
-  .ax-items tr:nth-child(even) td { background: #f6faf7; }
-  .ax-block { border: 1px solid #d9e4de; padding: 8px; margin-bottom: 12px; }
-  .ax-block .ax-blk-lbl { font-weight: bold; color: #00844e; margin-bottom: 4px; }
-  .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
-  .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
-  .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
-  .ax-letterhead { margin-bottom: 10px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div class="ax-letterhead">{{ letter_head }}</div>
-{% endif %}
-  <div class="ax-head">
-    <div>
-      <h1>{{ _("Custody Handover") }}</h1>
-      <div class="ax-sub">{{ doc.name }} &bull; {{ doc.get_formatted("handover_date") or "" }}</div>
-    </div>
-    <div class="ax-recipient">{{ _("Recipient") }}: {{ _("Receiving Supervisor") }}</div>
-  </div>
+{%- set src = frappe.db.get_value("Building", doc.from_building,
+      ["building_name", "company", "site"], as_dict=True) or {} -%}
+{%- set dst = frappe.db.get_value("Building", doc.to_building,
+      ["building_name", "company", "site"], as_dict=True) or {} -%}
+{%- set sender = frappe.get_fullname(doc.procurement_supervisor) if doc.procurement_supervisor else None -%}
+{%- set receiver = frappe.get_fullname(doc.receiving_supervisor) if doc.receiving_supervisor else None -%}
+{%- set total_qty = doc.items | sum(attribute="qty") if doc.items else 0 -%}
+{%- set confirmed = doc.status in ("Confirmed", "Approved") -%}
 
-  <table class="ax-meta">
-    <tr>
-      <td class="ax-lbl">{{ _("Handover Date") }}</td>
-      <td>{{ doc.get_formatted("handover_date") or "" }}</td>
-      <td class="ax-lbl">{{ _("Status") }}</td>
-      <td>{{ _(doc.status) if doc.status else "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("From Building") }}</td>
-      <td>{{ doc.from_building or "" }}</td>
-      <td class="ax-lbl">{{ _("To Building") }}</td>
-      <td>{{ doc.to_building or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Procurement Supervisor") }}</td>
-      <td>{{ doc.procurement_supervisor or "" }}</td>
-      <td class="ax-lbl">{{ _("Receiving Supervisor") }}</td>
-      <td>{{ doc.receiving_supervisor or "" }}</td>
-    </tr>
-  </table>
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
 
-  <table class="ax-items">
-    <thead>
-      <tr>
-        <th style="width:5%;">#</th>
-        <th style="width:16%;">{{ _("Item Type") }}</th>
-        <th>{{ _("Item Name") }}</th>
-        <th style="width:10%;">{{ _("Qty") }}</th>
-        <th style="width:12%;">{{ _("UOM") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in doc.items %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ _(row.item_type) if row.item_type else "" }}</td>
-        <td>{{ row.item_name or row.item or "" }}</td>
-        <td>{{ row.get_formatted("qty") }}</td>
-        <td>{{ row.uom or "" }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  {{ ax.doc_head() }}
 
-  {% if doc.otp_verified_on %}<div class="ax-block"><div class="ax-blk-lbl">{{ _("Acknowledged On") }}</div>{{ doc.get_formatted("otp_verified_on") }}</div>{% endif %}
+  {{ ax.doc_title(doc, _("Custody Handover Note"), "Custody Handover Note",
+                  (_("Status") ~ ": " ~ _(doc.status)) if doc.status else "") }}
 
-  <table class="ax-sign">
-    <tr>
-      <td>{{ _("Procurement Supervisor") }}<br>{{ _("Signature") }}</td>
-      <td>{{ _("Receiving Supervisor") }}<br>{{ _("Signature") }}</td>
-    </tr>
-  </table>
+  {{ ax.party_block([
+      {"role_ar": _("Handed over from"), "role_en": "Releasing store",
+       "name": src.get("building_name") or doc.from_building,
+       "lines": [
+         (_("Procurement Supervisor") ~ ": " ~ sender) if sender else None,
+         (_("Company") ~ ": " ~ src.get("company")) if src.get("company") else None,
+         get_address_text("Building", doc.from_building) or None,
+       ]},
+      {"role_ar": _("Handed over to"), "role_en": "Receiving store",
+       "name": dst.get("building_name") or doc.to_building,
+       "lines": [
+         (_("Receiving Supervisor") ~ ": " ~ receiver) if receiver else None,
+         (_("Company") ~ ": " ~ dst.get("company")) if dst.get("company") else None,
+         get_address_text("Building", doc.to_building) or None,
+       ]},
+  ]) }}
 
-  <div class="ax-foot">{{ doc.name }}</div>
+  {{ ax.field_grid([
+      [{"ar": _("Handover Date"), "en": "Handover date", "value": doc.handover_date, "fmt": "Date"},
+       {"ar": _("Status"), "en": "Status", "value": doc.status, "tr": True}],
+      [{"ar": _("Item Lines"), "en": "Lines", "value": doc.items | length},
+       {"ar": _("Total Quantity"), "en": "Total qty", "value": total_qty, "fmt": "Float"}],
+      [{"ar": _("Receipt Confirmed On"), "en": "Confirmed on", "value": doc.otp_verified_on, "fmt": "Datetime"},
+       {"ar": _("Intercompany Move"), "en": "Across companies",
+        "value": (_("Yes") if (src.get("company") and dst.get("company") and src.get("company") != dst.get("company")) else _("No"))}],
+  ]) }}
+
+  {{ ax.line_table(
+      [{"ar": _("Item Type"), "en": "Type", "key": "item_type", "width": "16%", "tr": True},
+       {"ar": _("Item Code"), "en": "Code", "key": "item", "width": "17%"},
+       {"ar": _("Item Name"), "en": "Description", "key": "item_name"},
+       {"ar": _("Quantity"), "en": "Qty", "key": "qty", "num": True, "width": "11%", "fmt": "Float"},
+       {"ar": _("Unit"), "en": "UOM", "key": "uom", "width": "11%"}],
+      doc.items,
+      totals=[frappe.format_value(total_qty, {"fieldtype": "Float"}), ""],
+      empty_text=_("No items are listed on this handover")) }}
+
+  {{ ax.check_list([
+      {"ar": _("Receiving supervisor counted every line"), "en": "All items verified",
+       "state": ("ok" if doc.all_items_verified else "bad"),
+       "note": (_("Counted against the lines above") if doc.all_items_verified else _("Not yet counted on receipt"))},
+      {"ar": _("Receipt confirmed by one-time code"), "en": "One-time code confirmed",
+       "state": ("ok" if doc.otp_verified_on else "na"),
+       "note": (frappe.format_value(doc.otp_verified_on, {"fieldtype": "Datetime"}) if doc.otp_verified_on else _("Awaiting confirmation by the receiving supervisor"))},
+      {"ar": _("Handover closed"), "en": "Handover closed",
+       "state": ("ok" if confirmed else "na"),
+       "note": (_(doc.status) if doc.status else "")},
+  ]) }}
+
+  {{ ax.declaration(_("The receiving supervisor confirms taking the items listed above into the receiving building store in the quantities shown. Responsibility for this stock, and for any shortage found later, passes to the receiving store from the handover date. The releasing store is discharged only for the quantities confirmed above.")) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Handed over by"), "en": "Procurement Supervisor", "name": sender},
+      {"ar": _("Received by"), "en": "Receiving Supervisor", "name": receiver},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

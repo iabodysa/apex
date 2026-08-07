@@ -1,86 +1,131 @@
-<style>
-  .ah-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
-  .ah-doc h1 { font-size: 18px; margin: 0; }
-  .ah-doc .ah-sub { color: #666; font-size: 12px; margin-top: 2px; }
-  .ah-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ah-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ah-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
-  .ah-meta .ah-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
-  .ah-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .ah-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ah-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
-  .ah-items tr:nth-child(even) td { background: #f8f8fb; }
-  .ah-ar { color: #555; font-size: 10px; }
-  .ah-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
-  .ah-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
-  .ah-foot { margin-top: 24px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ah-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div style="margin-bottom:10px">{{ letter_head }}</div>
-{% endif %}
-  <div class="ah-head">
-    <div>
-      <h1>Custody Return Receipt</h1>
-      <div class="ah-sub">إيصال إرجاع عهدة &bull; {{ doc.name }}</div>
-    </div>
-    <div style="text-align:right; font-size:11px; color:#666;">
-      {{ frappe.db.get_single_value("Habitat Settings", "company") or "" }}
-    </div>
-  </div>
+{%- set issue = (frappe.get_doc("Custody Issue", doc.custody_issue)
+      if doc.custody_issue and frappe.db.exists("Custody Issue", doc.custody_issue) else None) -%}
+{%- set building = frappe.db.get_value("Building", doc.building,
+      ["building_name", "company", "responsible_supervisor"], as_dict=True) or {} -%}
+{%- set keeper = frappe.get_fullname(building.get("responsible_supervisor")) if building.get("responsible_supervisor") else None -%}
+{%- set emp_id = doc.returned_by_employee or (doc.party if doc.party_type == "Employee" else None) -%}
+{%- set emp = (frappe.db.get_value("Employee", emp_id,
+      ["employee_name", "employee_number", "designation", "department"], as_dict=True) or {}) if emp_id else {} -%}
+{%- set tmp = (frappe.db.get_value("Temporary Worker", doc.party,
+      ["worker_name", "iqama_number", "labour_supplier"], as_dict=True) or {}) if (doc.party_type == "Temporary Worker" and doc.party) else {} -%}
+{%- set holder = emp.get("employee_name") or tmp.get("worker_name") or (issue.issued_to_name if issue else None) or doc.party -%}
 
-  <table class="ah-meta">
-    <tr>
-      <td class="ah-lbl">Date <span class="ah-ar">التاريخ</span></td>
-      <td>{{ frappe.format(doc.return_date, {"fieldtype": "Date"}) }}</td>
-      <td class="ah-lbl">Building <span class="ah-ar">المبنى</span></td>
-      <td>{{ doc.building or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ah-lbl">Against Issue <span class="ah-ar">مقابل صرف</span></td>
-      <td>{{ doc.custody_issue or "" }}</td>
-      <td class="ah-lbl">Returned By <span class="ah-ar">أرجعها</span></td>
-      <td>{{ doc.returned_by_employee or "" }}</td>
-    </tr>
-  </table>
+{%- set returned = {} -%}
+{%- for r in doc.items -%}
+  {%- set _ = returned.update({(r.article or "") ~ "|" ~ (r.serial_no or ""): r}) -%}
+{%- endfor -%}
 
-  <table class="ah-items">
-    <thead>
-      <tr>
-        <th style="width:5%;">#</th>
-        <th>{{ _("Article") }}</th>
-        <th style="width:10%;">{{ _("Qty") }}</th>
-        <th style="width:22%;">{{ _("Serial No") }}</th>
-        <th style="width:18%;">{{ _("Condition") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in doc.items %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ row.article or "" }}</td>
-        <td>{{ row.qty }}</td>
-        <td>{{ row.serial_no or "—" }}</td>
-        <td>{{ row.condition_on_return or "" }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+{%- set rows = [] -%}
+{%- set matched = [] -%}
+{%- set open_lines = [] -%}
+{%- set flagged = [] -%}
+{%- if issue -%}
+  {%- for it in issue.items -%}
+    {%- set key = (it.article or "") ~ "|" ~ (it.serial_no or "") -%}
+    {%- set back = returned.get(key) -%}
+    {%- if back -%}{%- set _ = matched.append(key) -%}{%- endif -%}
+    {%- set _ = rows.append({
+          "article": it.article,
+          "article_name": it.article_name,
+          "serial_no": it.serial_no or "—",
+          "issued_qty": it.qty,
+          "returned_qty": (back.qty if back else 0),
+          "outstanding": (it.qty or 0) - (back.qty if back else 0),
+          "condition": (back.condition_on_return if back else None)}) -%}
+    {%- if not back or ((it.qty or 0) - (back.qty or 0)) > 0 -%}{%- set _ = open_lines.append(it.article) -%}{%- endif -%}
+    {%- if back and back.condition_on_return in ("Damaged", "Lost") -%}{%- set _ = flagged.append(back) -%}{%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+{%- for r in doc.items -%}
+  {%- set key = (r.article or "") ~ "|" ~ (r.serial_no or "") -%}
+  {%- if key not in matched -%}
+    {%- set art = (frappe.db.get_value("Custody Article", r.article, "article_name")) if r.article else None -%}
+    {%- set _ = rows.append({
+          "article": r.article,
+          "article_name": art,
+          "serial_no": r.serial_no or "—",
+          "issued_qty": None,
+          "returned_qty": r.qty,
+          "outstanding": None,
+          "condition": r.condition_on_return}) -%}
+    {%- if r.condition_on_return in ("Damaged", "Lost") -%}{%- set _ = flagged.append(r) -%}{%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
 
-  {% if doc.remarks %}<div style="margin-bottom:12px;"><b>Remarks <span class="ah-ar">ملاحظات</span>:</b> {{ doc.remarks }}</div>{% endif %}
+{%- set total_issued = (issue.items | sum(attribute="qty")) if (issue and issue.items) else 0 -%}
+{%- set total_returned = doc.items | sum(attribute="qty") if doc.items else 0 -%}
+{%- set total_outstanding = (total_issued - total_returned) if issue else None -%}
+{%- set days_held = frappe.utils.date_diff(doc.return_date, issue.issue_date) if (issue and doc.return_date and issue.issue_date) else None -%}
 
-  <table class="ah-sign">
-    <tr>
-      <td>Returned by (Employee)<br><span class="ah-ar">أرجعها (الموظف)</span></td>
-      <td style="text-align:right;">Received by (Supervisor)<br><span class="ah-ar">استلمها (المشرف)</span></td>
-    </tr>
-  </table>
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
 
-  <div class="ah-foot">
-    The supervisor confirms the listed items were returned in the stated condition.
-    يؤكّد المشرف إرجاع الأصناف المذكورة بحالتها الموضّحة.
-    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
-  </div>
+  {{ ax.doc_head() }}
+
+  {{ ax.doc_title(doc, _("Custody Return Receipt"), "Custody Return Receipt",
+                  (_("Against Issue") ~ ": " ~ doc.custody_issue) if doc.custody_issue else "") }}
+
+  {{ ax.party_block([
+      {"role_ar": _("Returned by"), "role_en": "Returned by",
+       "name": holder,
+       "lines": [
+         (_("Worker Type") ~ ": " ~ _(doc.party_type)) if doc.party_type else None,
+         (_("Employee Number") ~ ": " ~ emp.get("employee_number")) if emp.get("employee_number") else None,
+         (_("Designation") ~ ": " ~ emp.get("designation")) if emp.get("designation") else None,
+         (_("Iqama Number") ~ ": " ~ tmp.get("iqama_number")) if tmp.get("iqama_number") else None,
+       ]},
+      {"role_ar": _("Receiving Store"), "role_en": "Receiving store",
+       "name": building.get("building_name") or doc.building,
+       "lines": [
+         (_("Storekeeper") ~ ": " ~ keeper) if keeper else None,
+         (_("Company") ~ ": " ~ building.get("company")) if building.get("company") else None,
+         get_address_text("Building", doc.building) or None,
+       ]},
+  ]) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Return Date"), "en": "Return date", "value": doc.return_date, "fmt": "Date"},
+       {"ar": _("Against Custody Issue"), "en": "Authorising issue", "value": doc.custody_issue}],
+      [{"ar": _("Issue Date"), "en": "Issued on", "value": (issue.issue_date if issue else None), "fmt": "Date"},
+       {"ar": _("Expected Return Date"), "en": "Was due on", "value": (issue.expected_return_date if issue else None), "fmt": "Date"}],
+      [{"ar": _("Days Held"), "en": "Days held", "value": days_held},
+       {"ar": _("Issue Status"), "en": "Issue status", "value": (issue.status if issue else None), "tr": True}],
+  ]) }}
+
+  {{ ax.line_table(
+      [{"ar": _("Article Code"), "en": "Code", "key": "article", "width": "14%"},
+       {"ar": _("Article"), "en": "Description", "key": "article_name"},
+       {"ar": _("Serial No"), "en": "Serial", "key": "serial_no", "width": "14%"},
+       {"ar": _("Quantity Issued"), "en": "Issued", "key": "issued_qty", "num": True, "width": "9%", "fmt": "Int"},
+       {"ar": _("Returned Now"), "en": "Returned", "key": "returned_qty", "num": True, "width": "9%", "fmt": "Int"},
+       {"ar": _("Still Outstanding"), "en": "Outstanding", "key": "outstanding", "num": True, "width": "10%", "fmt": "Int"},
+       {"ar": _("Condition on Return"), "en": "Condition in", "key": "condition", "width": "13%", "tr": True}],
+      rows,
+      totals=[(frappe.format_value(total_issued, {"fieldtype": "Int"}) if issue else "—"),
+              frappe.format_value(total_returned, {"fieldtype": "Int"}),
+              (frappe.format_value(total_outstanding, {"fieldtype": "Int"}) if issue else "—"), ""],
+      empty_text=_("No articles are listed on this return")) }}
+
+  {{ ax.check_list([
+      {"ar": _("All issued articles are back"), "en": "Issue fully returned",
+       "state": ("bad" if open_lines else "ok"),
+       "note": (_("{0} article line(s) still outstanding").format(open_lines | length) if open_lines else _("Nothing outstanding against this issue"))},
+      {"ar": _("Every article came back sound"), "en": "No damage or loss",
+       "state": ("bad" if flagged else "ok"),
+       "note": (_("{0} article line(s) marked Damaged or Lost").format(flagged | length) if flagged else _("No article was marked Damaged or Lost"))},
+  ]) }}
+
+  {{ ax.note_block(doc.remarks) }}
+
+  {{ ax.declaration(_("The storekeeper confirms receiving the articles shown as Returned Now, in the condition recorded against each line. Any line marked Damaged or Lost, and any quantity still outstanding, stays on the holder's account and is settled through a custody damage assessment. This receipt clears the holder only for what is recorded as returned and sound.")) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Returned by"), "en": "Custody holder", "name": holder},
+      {"ar": _("Received by"), "en": "Storekeeper", "name": keeper},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

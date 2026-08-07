@@ -1,79 +1,86 @@
-{% set building_name = frappe.db.get_value("Building", doc.building, "building_name") if doc.building else None %}
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 <style>
-  .room-label {
-    width: 10cm;
-    height: 6cm;
-    border: 3px solid #1a1a2e;
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    page-break-after: always;
-    box-sizing: border-box;
-  }
-  .room-label .building-name {
-    font-size: 11px;
-    color: #555;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-  }
-  .room-label .room-number {
-    font-size: 52px;
-    font-weight: bold;
-    color: #1a1a2e;
-    line-height: 1.1;
-    margin: 4px 0;
-  }
-  .room-label .room-meta {
-    font-size: 11px;
-    color: #333;
-    margin-top: 4px;
-  }
-  .room-label .room-type-badge {
-    display: inline-block;
-    background: #eef;
-    border: 1px solid #99c;
-    border-radius: 4px;
-    padding: 1px 8px;
-    font-size: 10px;
-    margin-top: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .room-label .footer-note {
-    font-size: 9px;
-    color: #888;
-    margin-top: 8px;
-    border-top: 1px solid #eee;
-    padding-top: 4px;
-  }
-  {% if doc.readiness_status and doc.readiness_status != "Ready" %}
-  .room-label .readiness-warning {
-    font-size: 10px;
-    color: #c00;
-    font-weight: bold;
-    margin-top: 4px;
-  }
-  {% endif %}
+  .ax-label { width: 10cm; min-height: 7cm; box-sizing: border-box; border: 2.5px solid #00844e;
+              border-radius: 8px; padding: 10px 12px; page-break-after: always;
+              display: flex; flex-direction: column; }
+  .ax-label .site { font-size: 10px; color: #47584f; letter-spacing: .04em; }
+  .ax-label .bld { font-size: 14px; font-weight: 800; color: #072b1a; line-height: 1.3; }
+  .ax-label .hero { display: flex; align-items: center; gap: 12px; margin: 6px 0 4px; }
+  .ax-label .num { font-size: 62px; font-weight: 800; color: #072b1a; line-height: 1;
+                   font-variant-numeric: tabular-nums; }
+  .ax-label .num .cap { display: block; font-size: 10px; font-weight: 700; color: #6f7e76;
+                        letter-spacing: .06em; }
+  .ax-label .qr { margin-inline-start: auto; text-align: center; }
+  .ax-label .qr img { width: 78px; height: 78px; }
+  .ax-label .qr span { display: block; font-size: 7px; color: #6f7e76; margin-top: 2px; }
+  .ax-chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0; }
+  .ax-chip { border: 1px solid #ddd5c2; border-radius: 4px; padding: 2px 7px; font-size: 9.5px; color: #14332a; }
+  .ax-chip b { font-size: 11px; color: #072b1a; }
+  .ax-chip .en { color: #9aa8a1; font-size: 7px; }
+  .ax-band { border-radius: 4px; padding: 4px 8px; font-size: 10.5px; font-weight: 700; margin: 4px 0; }
+  .ax-band.ready { background: #f0f7f3; color: #05502f; border: 1px solid #00844e; }
+  .ax-band.warn { background: #fdf3f1; color: #7d2418; border: 1px solid #b23b2e; }
+  .ax-beds { font-size: 9.5px; color: #47584f; line-height: 1.7; margin-top: 2px; }
+  .ax-beds b { color: #072b1a; }
+  .ax-label .foot { margin-top: auto; padding-top: 5px; border-top: 1px solid #ddd5c2;
+                    font-size: 8.5px; color: #6f7e76; line-height: 1.6; }
 </style>
 
-<div class="room-label" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div style="margin-bottom:10px">{{ letter_head }}</div>
-{% endif %}
-  <div class="building-name">{{ building_name or "" }}</div>
-  <div class="room-number">{{ doc.room_number }}</div>
-  <div class="room-meta">
-    {% if doc.floor %}{{ _("Floor {0}").format(doc.floor) }} &nbsp;|&nbsp; {% endif %}
-    {{ _("Capacity: {0} bed").format(doc.bed_capacity) if doc.bed_capacity == 1 else _("Capacity: {0} beds").format(doc.bed_capacity) }}
-  </div>
-  <div class="room-type-badge">{{ doc.room_type }}</div>
-  {% if doc.readiness_status and doc.readiness_status != "Ready" and doc.readiness_status != "Unknown" %}
-  <div class="readiness-warning">&#9888; {{ doc.readiness_status }}</div>
-  {% endif %}
-  <div class="footer-note">
-    {{ _("For emergencies contact your supervisor directly.") }}
-    <br>Apex Habitat &bull; {{ frappe.utils.today() }}
+{%- set building = frappe.db.get_value("Building", doc.building,
+      ["building_name", "site", "city", "responsible_supervisor"], as_dict=True) or {} -%}
+{%- set supervisor = frappe.get_fullname(building.get("responsible_supervisor")) if building.get("responsible_supervisor") else None -%}
+{%- set beds = frappe.get_all("Bed", filters={"room": doc.name}, fields=["bed_code", "status", "condition"], order_by="bed_code asc") if doc.name else [] -%}
+{%- set free = beds | selectattr("status", "equalto", "Available") | list -%}
+{%- set qr = doc_verify_qr(doc.doctype, doc.name) -%}
+{%- set ready = doc.readiness_status in ("Ready", "Unknown", None, "") -%}
+
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  <div class="ax-label">
+    <div class="site">
+      {{ building.get("site") or "" }}{% if building.get("city") %} · {{ building.get("city") }}{% endif %}
+    </div>
+    <div class="bld">{{ building.get("building_name") or doc.building or "" }}</div>
+
+    <div class="hero">
+      <div class="num">
+        <span class="cap">{{ _("Room") }} · ROOM</span>
+        {{ doc.room_number or "—" }}
+      </div>
+      {%- if qr %}
+      <div class="qr">
+        <img src="{{ qr }}" alt="{{ doc.name }}">
+        <span>{{ _("Scan for the room record") }}</span>
+      </div>
+      {%- endif %}
+    </div>
+
+    <div class="ax-chips">
+      <div class="ax-chip">{{ _("Floor") }} <span class="en">Floor</span> <b>{{ doc.floor if doc.floor is not none else "—" }}</b></div>
+      <div class="ax-chip">{{ _("Beds") }} <span class="en">Beds</span> <b>{{ doc.bed_capacity or 0 }}</b></div>
+      <div class="ax-chip">{{ _("Occupied") }} <span class="en">Occupied</span> <b>{{ doc.current_occupancy or 0 }}</b></div>
+      <div class="ax-chip">{{ _("Free") }} <span class="en">Free</span> <b>{{ free | length }}</b></div>
+      <div class="ax-chip">{{ _("Room Type") }} <span class="en">Type</span> <b>{{ _(doc.room_type) if doc.room_type else "—" }}</b></div>
+    </div>
+
+    <div class="ax-band {{ 'ready' if ready else 'warn' }}">
+      {{ _("Status") }}: {{ _(doc.status) if doc.status else "—" }}
+      {%- if doc.readiness_status and doc.readiness_status != "Unknown" %} · {{ _(doc.readiness_status) }}{% endif %}
+      {%- if not ready %} — {{ _("Do not place a resident in this room until it is cleared.") }}{% endif %}
+    </div>
+
+    {%- if beds %}
+    <div class="ax-beds">
+      <b>{{ _("Beds in this room") }}:</b>
+      {%- for b in beds %} {{ b.bed_code }} ({{ _(b.status) }}){% if not loop.last %} ·{% endif %}{% endfor %}
+    </div>
+    {%- endif %}
+
+    <div class="foot">
+      {%- if supervisor %}{{ _("Facility Supervisor") }}: {{ supervisor }} · {% endif -%}
+      {{ _("Report any fault to your facility supervisor. In an emergency call him directly.") }}<br>
+      {%- if doc.last_inventory_date %}{{ _("Last inventory") }}: {{ frappe.format_date(doc.last_inventory_date) }} · {% endif -%}
+      {{ doc.name }}
+    </div>
   </div>
 </div>

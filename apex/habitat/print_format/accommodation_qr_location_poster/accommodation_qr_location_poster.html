@@ -1,66 +1,113 @@
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 <style>
-    .qr-poster-container {
-        text-align: center;
-        padding: 40px;
-        border: 4px solid #1a202c;
-        border-radius: 12px;
-        margin: 20px auto;
-        max-width: 800px;
-        font-family: sans-serif;
-    }
-    .qr-poster-title {
-        font-size: 32px;
-        font-weight: bold;
-        color: #1a202c;
-        margin-bottom: 10px;
-    }
-    .qr-poster-subtitle {
-        font-size: 20px;
-        color: #4a5568;
-        margin-bottom: 40px;
-    }
-    .qr-code-image {
-        width: 300px;
-        height: 300px;
-    }
-    .qr-poster-footer {
-        font-size: 16px;
-        color: #718096;
-        margin-top: 30px;
-        border-top: 1px solid #e2e8f0;
-        padding-top: 20px;
-    }
-    .location-details {
-        background: #f7fafc;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 20px;
-        display: inline-block;
-        text-align: start;
-    }
+  .ax-poster { max-width: 19cm; margin: 0 auto; text-align: center; }
+  .ax-poster .head { font-size: 34px; font-weight: 800; color: #072b1a; line-height: 1.25; margin-top: 6px; }
+  .ax-poster .head .en { display: block; font-size: 13px; font-weight: 400; color: #6f7e76; letter-spacing: .06em; }
+  .ax-poster .sub { font-size: 15px; color: #47584f; margin: 6px 0 14px; }
+  .ax-where { border: 2px solid #00844e; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+              display: flex; justify-content: center; gap: 26px; flex-wrap: wrap; }
+  .ax-where div { text-align: center; }
+  .ax-where .k { font-size: 9.5px; color: #6f7e76; font-weight: 700; letter-spacing: .04em; }
+  .ax-where .k .en { display: block; font-size: 7.5px; color: #9aa8a1; font-weight: 400; }
+  .ax-where .v { font-size: 20px; font-weight: 800; color: #072b1a; line-height: 1.3; }
+  .ax-scan { border: 2px dashed #cdbb8a; border-radius: 10px; background: #fdfaf1;
+             padding: 16px; margin-bottom: 14px; }
+  .ax-scan img { width: 260px; height: 260px; }
+  .ax-code { font-family: "Courier New", monospace; font-size: 40px; font-weight: 700;
+             letter-spacing: .18em; color: #072b1a; word-break: break-all; }
+  .ax-code-k { font-size: 11px; color: #6f7e76; font-weight: 700; margin-bottom: 4px; }
+  .ax-url { font-size: 12px; color: #47584f; margin-top: 8px; word-break: break-all; }
+  .ax-steps { display: flex; gap: 10px; margin-bottom: 14px; }
+  .ax-step { flex: 1; border: 1px solid #ddd5c2; border-radius: 6px; padding: 9px 10px; text-align: start; }
+  .ax-step .n { display: inline-block; width: 19px; height: 19px; border-radius: 50%; background: #00844e;
+                color: #fff; font-size: 11px; font-weight: 700; text-align: center; line-height: 19px; }
+  .ax-step .t { font-size: 12px; color: #14332a; margin-top: 5px; line-height: 1.6; }
+  .ax-step .t .en { display: block; font-size: 8.5px; color: #9aa8a1; }
+  .ax-stop { border: 2px solid #b23b2e; background: #fdf3f1; color: #7d2418; border-radius: 8px;
+             padding: 10px 14px; font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+  .ax-off { border: 2px solid #b23b2e; background: #fdf3f1; color: #7d2418; border-radius: 6px;
+            padding: 8px 12px; font-size: 13px; font-weight: 700; margin-bottom: 12px; }
 </style>
 
-<div class="qr-poster-container" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div style="margin-bottom:10px">{{ letter_head }}</div>
-{% endif %}
-    <div class="qr-poster-title">{{ _("Need Help? Scan to Report") }}</div>
-    <div class="qr-poster-subtitle">{{ doc.poster_title or _("Resident Support Services") }}</div>
+{%- set building = frappe.db.get_value("Building", doc.building,
+      ["building_name", "site", "city", "responsible_supervisor"], as_dict=True) or {} -%}
+{%- set supervisor = frappe.get_fullname(building.get("responsible_supervisor")) if building.get("responsible_supervisor") else None -%}
+{%- set room = (frappe.db.get_value("Room", doc.room, "room_number")) if doc.room else None -%}
+{%- set site = frappe.db.get_value("Site", doc.accommodation_site, "site_name") if doc.accommodation_site else building.get("site") -%}
+{%- set qr = qr_data_uri(doc.public_url) if (qr_data_uri is defined and doc.public_url) else None -%}
 
-    <div class="qr-code-wrapper">
-        <img src="/api/method/frappe.utils.print_format.report_print?type=qr&data={{ doc.public_url | urlencode }}" class="qr-code-image" />
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.doc_head() }}
+
+  <div class="ax-poster">
+    <div class="head">
+      {{ _("Report a problem in your accommodation") }}
+      <span class="en">Report a problem in your accommodation</span>
+    </div>
+    <div class="sub">{{ doc.poster_title or _("Resident support") }}</div>
+
+    {%- if not doc.get("is_active") %}
+    <div class="ax-off">{{ _("This poster is out of service. Speak to your facility supervisor instead.") }}</div>
+    {%- endif %}
+
+    <div class="ax-where">
+      {%- if site %}
+      <div>
+        <div class="k">{{ _("Site") }}<span class="en">Site</span></div>
+        <div class="v">{{ site }}</div>
+      </div>
+      {%- endif %}
+      <div>
+        <div class="k">{{ _("Building") }}<span class="en">Building</span></div>
+        <div class="v">{{ building.get("building_name") or doc.building or "—" }}</div>
+      </div>
+      <div>
+        <div class="k">{{ _("Room") }}<span class="en">Room</span></div>
+        <div class="v">{{ room or doc.room or _("Common area") }}</div>
+      </div>
     </div>
 
-    <div class="location-details">
-        <strong>{{ _("Location Reference") }}:</strong><br>
-        {{ _("Site") }}: {{ doc.accommodation_site or _("N/A") }}<br>
-        {{ _("Building") }}: {{ doc.building or _("N/A") }}<br>
-        {{ _("Room") }}: {{ doc.room or _("N/A") }}<br>
-        {{ _("Ref") }}: {{ doc.name }}
+    <div class="ax-scan">
+      {%- if qr %}
+      <img src="{{ qr }}" alt="{{ doc.name }}">
+      <div class="ax-url">{{ doc.public_url }}</div>
+      {%- else %}
+      <div class="ax-code-k">{{ _("Location Code") }} · LOCATION CODE</div>
+      <div class="ax-code">{{ doc.location_token or doc.name or "—" }}</div>
+      {%- if doc.public_url %}<div class="ax-url">{{ doc.public_url }}</div>{% endif %}
+      {%- endif %}
     </div>
 
-    <div class="qr-poster-footer">
-        {{ _("Point your phone camera at the QR code to open the request form.") }}<br>
-        {{ _("For life or safety emergencies, contact the accommodation supervisor directly.") }}
+    <div class="ax-steps">
+      <div class="ax-step">
+        <span class="n">1</span>
+        <div class="t">{{ _("Open the request page on your phone.") }}<span class="en">Open the request page</span></div>
+      </div>
+      <div class="ax-step">
+        <span class="n">2</span>
+        <div class="t">{{ _("Say what is wrong and where it is.") }}<span class="en">Describe the problem</span></div>
+      </div>
+      <div class="ax-step">
+        <span class="n">3</span>
+        <div class="t">{{ _("Send it. The supervisor sees it at once.") }}<span class="en">Send it</span></div>
+      </div>
     </div>
+
+    <div class="ax-stop">
+      {{ _("Fire, injury or anything dangerous: do not use this code. Call your facility supervisor now.") }}
+      {%- if supervisor %}<br>{{ _("Facility Supervisor") }}: {{ supervisor }}{% endif %}
+    </div>
+
+    {{ ax.note_block(doc.notes) }}
+
+    <div class="ax-foot">
+      <div></div>
+      <div style="text-align:end">
+        {{ _(doc.doctype) }} · {{ doc.name or "" }}<br>
+        {%- if doc.last_printed_on %}{{ _("Last printed") }}: {{ frappe.format_value(doc.last_printed_on, {"fieldtype": "Datetime"}) }}<br>{% endif -%}
+        {{ _("System-generated document from Apex") }}
+      </div>
+    </div>
+  </div>
 </div>

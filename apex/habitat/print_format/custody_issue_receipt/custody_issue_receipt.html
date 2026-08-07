@@ -1,90 +1,101 @@
-<style>
-  .ah-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
-  .ah-doc h1 { font-size: 18px; margin: 0; }
-  .ah-doc .ah-sub { color: #666; font-size: 12px; margin-top: 2px; }
-  .ah-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ah-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ah-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
-  .ah-meta .ah-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
-  .ah-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .ah-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ah-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
-  .ah-items tr:nth-child(even) td { background: #f8f8fb; }
-  .ah-ar { color: #555; font-size: 10px; }
-  .ah-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
-  .ah-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
-  .ah-foot { margin-top: 24px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ah-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div style="margin-bottom:10px">{{ letter_head }}</div>
-{% endif %}
-  <div class="ah-head">
-    <div>
-      <h1>Custody Issue Receipt</h1>
-      <div class="ah-sub">إيصال صرف عهدة &bull; {{ doc.name }}</div>
-    </div>
-    <div style="text-align:right; font-size:11px; color:#666;">
-      {{ frappe.db.get_single_value("Habitat Settings", "company") or "" }}
-    </div>
+{%- set building = frappe.db.get_value("Building", doc.building,
+      ["building_name", "company", "site", "responsible_supervisor"], as_dict=True) or {} -%}
+{%- set keeper = frappe.get_fullname(building.get("responsible_supervisor")) if building.get("responsible_supervisor") else None -%}
+{%- set emp_id = doc.issued_to_employee or (doc.party if doc.party_type == "Employee" else None) -%}
+{%- set emp = (frappe.db.get_value("Employee", emp_id,
+      ["employee_name", "employee_number", "designation", "department", "cell_number"], as_dict=True) or {}) if emp_id else {} -%}
+{%- set tmp = (frappe.db.get_value("Temporary Worker", doc.party,
+      ["worker_name", "iqama_number", "passport_number", "labour_supplier"], as_dict=True) or {}) if (doc.party_type == "Temporary Worker" and doc.party) else {} -%}
+{%- set holder = doc.issued_to_name or emp.get("employee_name") or tmp.get("worker_name") or doc.party -%}
+
+{%- set rows = [] -%}
+{%- set serial_missing = [] -%}
+{%- for it in doc.items -%}
+  {%- set art = (frappe.db.get_value("Custody Article", it.article,
+        ["article_name", "unit_of_measure", "is_serialized"], as_dict=True) or {}) if it.article else {} -%}
+  {%- set _ = rows.append({
+        "article": it.article,
+        "article_name": it.article_name or art.get("article_name"),
+        "serial_no": it.serial_no or "—",
+        "qty": it.qty,
+        "uom": art.get("unit_of_measure"),
+        "condition_on_issue": it.condition_on_issue}) -%}
+  {%- if art.get("is_serialized") and not it.serial_no -%}{%- set _ = serial_missing.append(it.article) -%}{%- endif -%}
+{%- endfor -%}
+{%- set total_qty = doc.items | sum(attribute="qty") if doc.items else 0 -%}
+
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
+
+  {{ ax.doc_head() }}
+
+  {{ ax.doc_title(doc, _("Custody Issue Receipt"), "Custody Issue Receipt",
+                  (_("Status") ~ ": " ~ _(doc.status)) if doc.status else "") }}
+
+  {{ ax.party_block([
+      {"role_ar": _("Issuing Store"), "role_en": "Issuing store",
+       "name": building.get("building_name") or doc.building,
+       "lines": [
+         (_("Storekeeper") ~ ": " ~ keeper) if keeper else None,
+         (_("Company") ~ ": " ~ building.get("company")) if building.get("company") else None,
+         get_address_text("Building", doc.building) or None,
+       ]},
+      {"role_ar": _("Custody Holder"), "role_en": "Custody holder",
+       "name": holder,
+       "lines": [
+         (_("Worker Type") ~ ": " ~ _(doc.party_type)) if doc.party_type else None,
+         (_("Employee Number") ~ ": " ~ emp.get("employee_number")) if emp.get("employee_number") else None,
+         (_("Designation") ~ ": " ~ emp.get("designation")) if emp.get("designation") else None,
+         (_("Department") ~ ": " ~ emp.get("department")) if emp.get("department") else None,
+         (_("Iqama Number") ~ ": " ~ tmp.get("iqama_number")) if tmp.get("iqama_number") else None,
+         (_("Labour Supplier") ~ ": " ~ tmp.get("labour_supplier")) if tmp.get("labour_supplier") else None,
+         (_("Mobile") ~ ": " ~ emp.get("cell_number")) if emp.get("cell_number") else None,
+       ]},
+  ]) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Issue Date"), "en": "Issue date", "value": doc.issue_date, "fmt": "Date"},
+       {"ar": _("Expected Return Date"), "en": "Due back on", "value": doc.expected_return_date, "fmt": "Date"}],
+      [{"ar": _("Building"), "en": "Building", "value": building.get("building_name") or doc.building},
+       {"ar": _("Worker Type"), "en": "Worker type", "value": doc.party_type, "tr": True}],
+      [{"ar": _("Articles Issued"), "en": "Article lines", "value": doc.items | length},
+       {"ar": _("Total Quantity"), "en": "Total qty", "value": total_qty, "fmt": "Float"}],
+  ]) }}
+
+  {{ ax.line_table(
+      [{"ar": _("Article Code"), "en": "Code", "key": "article", "width": "15%"},
+       {"ar": _("Article"), "en": "Description", "key": "article_name"},
+       {"ar": _("Serial No"), "en": "Serial", "key": "serial_no", "width": "17%"},
+       {"ar": _("Quantity"), "en": "Qty", "key": "qty", "num": True, "width": "9%", "fmt": "Int"},
+       {"ar": _("Unit"), "en": "UOM", "key": "uom", "width": "10%"},
+       {"ar": _("Condition on Issue"), "en": "Condition out", "key": "condition_on_issue", "width": "14%", "tr": True}],
+      rows,
+      totals=[frappe.format_value(total_qty, {"fieldtype": "Int"}), "", ""],
+      empty_text=_("No articles are listed on this issue")) }}
+
+  {{ ax.note_block(doc.remarks) }}
+
+  {%- if serial_missing %}
+  {{ ax.note_block(_("Serialised articles issued without a serial number") ~ ": " ~ (serial_missing | join(", "))) }}
+  {%- endif %}
+
+  {{ ax.declaration(_("I have received the articles listed above in the quantities and the condition shown. I undertake to keep them in my care and to hand them back in the same condition on or before the return date shown. I accept that anything lost or damaged through my negligence is assessed and deducted from my dues under company policy.")) }}
+
+  {%- if doc.signature %}
+  <div class="ax-note">
+    <span class="lbl">{{ _("Electronic Acknowledgement") }}<span class="en">Electronic acknowledgement</span></span>
+    <img src="{{ doc.signature }}" alt="" style="max-height:54px;max-width:220px;display:block;margin:4px 0">
+    {%- if doc.acknowledged_on %}{{ _("Acknowledged on") }}: {{ frappe.format_value(doc.acknowledged_on, {"fieldtype": "Datetime"}) }}{% endif %}
   </div>
+  {%- endif %}
 
-  <table class="ah-meta">
-    <tr>
-      <td class="ah-lbl">Date <span class="ah-ar">التاريخ</span></td>
-      <td>{{ frappe.format(doc.issue_date, {"fieldtype": "Date"}) }}</td>
-      <td class="ah-lbl">Building <span class="ah-ar">المبنى</span></td>
-      <td>{{ doc.building or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ah-lbl">Issued To <span class="ah-ar">صُرفت إلى</span></td>
-      <td colspan="3">{{ doc.issued_to_name or doc.issued_to_employee or "" }}</td>
-    </tr>
-  </table>
+  {{ ax.sign_block([
+      {"ar": _("Issued by"), "en": "Storekeeper", "name": keeper},
+      {"ar": _("Received by"), "en": "Custody holder", "name": holder},
+  ]) }}
 
-  <table class="ah-items">
-    <thead>
-      <tr>
-        <th style="width:5%;">#</th>
-        <th>{{ _("Article") }}</th>
-        <th style="width:10%;">{{ _("Qty") }}</th>
-        <th style="width:22%;">{{ _("Serial No") }}</th>
-        <th style="width:18%;">{{ _("Condition") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in doc.items %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ row.article_name or row.article or "" }}</td>
-        <td>{{ row.qty }}</td>
-        <td>{{ row.serial_no or "—" }}</td>
-        <td>{{ row.condition_on_issue or "" }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  {% if doc.remarks %}<div style="margin-bottom:12px;"><b>Remarks <span class="ah-ar">ملاحظات</span>:</b> {{ doc.remarks }}</div>{% endif %}
-
-  <table class="ah-sign">
-    <tr>
-      <td>Issued by (Supervisor)<br><span class="ah-ar">صرفها (المشرف)</span></td>
-      <td style="text-align:right;">
-        Received by (Employee)<br><span class="ah-ar">استلمها (الموظف)</span>
-        {% if doc.signature %}
-        <br><img src="{{ doc.signature }}" alt="signature" style="max-height:60px; max-width:220px; margin-top:6px;" />
-        {% if doc.acknowledged_on %}<br><span class="ah-ar">{{ frappe.format(doc.acknowledged_on, {"fieldtype": "Datetime"}) }}</span>{% endif %}
-        {% endif %}
-      </td>
-    </tr>
-  </table>
-
-  <div class="ah-foot">
-    The recipient acknowledges receiving the listed items in the stated condition.
-    يقرّ المستلم باستلام الأصناف المذكورة بحالتها الموضّحة.
-    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
-  </div>
+  {{ ax.doc_footer(doc) }}
 </div>

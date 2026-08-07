@@ -1,104 +1,130 @@
-<style>
-  .ax-doc { font-family: Arial, sans-serif; color: #14332a; font-size: 12px; }
-  .ax-doc h1 { font-size: 18px; margin: 0; color: #14332a; }
-  .ax-sub { color: #4a5e55; font-size: 11px; margin-top: 2px; }
-  .ax-head { border-bottom: 3px solid #00844e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ax-recipient { font-size: 11px; color: #14332a; background: #eef6f1;
-                  border: 1px solid #00844e; border-radius: 3px; padding: 4px 10px; }
-  .ax-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ax-meta td { padding: 4px 8px; border: 1px solid #d9e4de; vertical-align: top; }
-  .ax-meta .ax-lbl { background: #f1f7f3; font-weight: bold; width: 22%; color: #14332a; }
-  .ax-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .ax-items th { background: #00844e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ax-items td { padding: 6px 8px; border: 1px solid #d9e4de; }
-  .ax-items tr:nth-child(even) td { background: #f6faf7; }
-  .ax-block { border: 1px solid #d9e4de; padding: 8px; margin-bottom: 12px; }
-  .ax-block .ax-blk-lbl { font-weight: bold; color: #00844e; margin-bottom: 4px; }
-  .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
-  .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
-  .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
-  .ax-letterhead { margin-bottom: 10px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div class="ax-letterhead">{{ letter_head }}</div>
-{% endif %}
-  <div class="ax-head">
-    <div>
-      <h1>{{ _("Housing Assignment") }}</h1>
-      <div class="ax-sub">{{ doc.name }} &bull; {{ doc.get_formatted("check_in_date") or "" }}</div>
-    </div>
-    <div class="ax-recipient">{{ _("Recipient") }}: {{ _("Resident") }}</div>
+{%- set building = frappe.db.get_value("Building", doc.building,
+      ["building_name", "company", "site", "city", "district", "accommodation_type"], as_dict=True) or {} -%}
+{%- set supervisor = frappe.get_fullname(doc.responsible_supervisor) if doc.responsible_supervisor else None -%}
+{%- set room = (frappe.db.get_value("Room", doc.room,
+      ["room_number", "floor", "room_type", "bed_capacity"], as_dict=True) or {}) if doc.room else {} -%}
+{%- set bed = (frappe.db.get_value("Bed", doc.bed, ["bed_code", "is_temporary"], as_dict=True) or {}) if doc.bed else {} -%}
+{%- set emp = (frappe.db.get_value("Employee", doc.employee,
+      ["employee_name", "employee_number", "designation", "department", "cell_number", "date_of_joining"], as_dict=True) or {}) if doc.employee else {} -%}
+{%- set tmp = (frappe.db.get_value("Temporary Worker", doc.party,
+      ["worker_name", "iqama_number", "passport_number", "nationality", "labour_supplier"], as_dict=True) or {}) if (doc.party_type == "Temporary Worker" and doc.party) else {} -%}
+{%- set resident = doc.employee_name or emp.get("employee_name") or tmp.get("worker_name") or doc.party -%}
+{%- set nights = frappe.utils.date_diff(doc.expected_checkout_date, doc.check_in_date) if (doc.expected_checkout_date and doc.check_in_date) else None -%}
+
+{%- set rows = [] -%}
+{%- for it in doc.custody_items -%}
+  {%- set art = (frappe.db.get_value("Custody Article", it.article,
+        ["article_name", "unit_of_measure"], as_dict=True) or {}) if it.article else {} -%}
+  {%- set _ = rows.append({
+        "article": it.article,
+        "article_name": art.get("article_name"),
+        "serial_no": it.serial_no or "—",
+        "quantity": it.quantity,
+        "uom": art.get("unit_of_measure"),
+        "condition_at_checkin": it.condition_at_checkin,
+        "status": it.status}) -%}
+{%- endfor -%}
+{%- set total_items = doc.custody_items | sum(attribute="quantity") if doc.custody_items else 0 -%}
+
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
+
+  {{ ax.doc_head() }}
+
+  {{ ax.doc_title(doc, _("Housing Assignment Form"), "Housing Assignment Form",
+                  (_("Bed") ~ ": " ~ (bed.get("bed_code") or doc.bed)) if doc.bed else "") }}
+
+  {{ ax.party_block([
+      {"role_ar": _("Resident"), "role_en": "Resident",
+       "name": resident,
+       "lines": [
+         (_("Resident Type") ~ ": " ~ _(doc.party_type)) if doc.party_type else None,
+         (_("Employee Number") ~ ": " ~ emp.get("employee_number")) if emp.get("employee_number") else None,
+         (_("Designation") ~ ": " ~ emp.get("designation")) if emp.get("designation") else None,
+         (_("Department") ~ ": " ~ emp.get("department")) if emp.get("department") else None,
+         (_("Nationality") ~ ": " ~ tmp.get("nationality")) if tmp.get("nationality") else None,
+         (_("Iqama Number") ~ ": " ~ tmp.get("iqama_number")) if tmp.get("iqama_number") else None,
+         (_("Labour Supplier") ~ ": " ~ tmp.get("labour_supplier")) if tmp.get("labour_supplier") else None,
+         (_("Mobile") ~ ": " ~ emp.get("cell_number")) if emp.get("cell_number") else None,
+       ]},
+      {"role_ar": _("Accommodation Provider"), "role_en": "Accommodation provider",
+       "name": building.get("building_name") or doc.building,
+       "lines": [
+         (_("Responsible Facility Supervisor") ~ ": " ~ supervisor) if supervisor else None,
+         (_("Site") ~ ": " ~ building.get("site")) if building.get("site") else None,
+         (_("City") ~ ": " ~ building.get("city")) if building.get("city") else None,
+         get_address_text("Building", doc.building) or None,
+         (_("Company") ~ ": " ~ building.get("company")) if building.get("company") else None,
+       ]},
+  ]) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Room"), "en": "Room", "value": room.get("room_number") or doc.room},
+       {"ar": _("Bed"), "en": "Bed", "value": bed.get("bed_code") or doc.bed}],
+      [{"ar": _("Floor"), "en": "Floor", "value": room.get("floor"), "fmt": "Int"},
+       {"ar": _("Room Type"), "en": "Room type", "value": room.get("room_type"), "tr": True}],
+      [{"ar": _("Check-in Date"), "en": "Check-in", "value": doc.check_in_date, "fmt": "Date"},
+       {"ar": _("Expected Check-out Date"), "en": "Expected check-out", "value": doc.expected_checkout_date, "fmt": "Date"}],
+      [{"ar": _("Assignment Type"), "en": "Assignment type", "value": doc.assignment_type, "tr": True},
+       {"ar": _("Stay Type"), "en": "Stay type", "value": doc.stay_type, "tr": True}],
+      [{"ar": _("Planned Nights"), "en": "Planned nights", "value": nights},
+       {"ar": _("Moved from Building"), "en": "Previous building", "value": doc.previous_building}],
+      [{"ar": _("Project"), "en": "Project", "value": doc.project},
+       {"ar": _("Cost Center"), "en": "Cost center", "value": doc.cost_center}],
+  ]) }}
+
+  {%- if doc.is_external_supplier %}
+  {{ ax.field_grid([
+      [{"ar": _("External Supplier Worker"), "en": "Supplier-provided worker", "value": _("Yes")},
+       {"ar": _("Billed To Supplier"), "en": "Billed to supplier", "value": doc.billed_to_supplier}],
+  ]) }}
+  {%- endif %}
+
+  {{ ax.line_table(
+      [{"ar": _("Article Code"), "en": "Code", "key": "article", "width": "14%"},
+       {"ar": _("Custody Article"), "en": "Description", "key": "article_name"},
+       {"ar": _("Serial No"), "en": "Serial", "key": "serial_no", "width": "15%"},
+       {"ar": _("Quantity Issued"), "en": "Qty", "key": "quantity", "num": True, "width": "9%", "fmt": "Int"},
+       {"ar": _("Unit"), "en": "UOM", "key": "uom", "width": "9%"},
+       {"ar": _("Condition at Check-in"), "en": "Condition in", "key": "condition_at_checkin", "width": "14%", "tr": True},
+       {"ar": _("Status"), "en": "Status", "key": "status", "width": "11%", "tr": True}],
+      rows,
+      totals=[frappe.format_value(total_items, {"fieldtype": "Int"}), "", "", ""],
+      empty_text=_("No housing custody items were issued with this bed")) }}
+
+  {{ ax.check_list([
+      {"ar": _("Room condition photographed at check-in"), "en": "Room condition on file",
+       "state": ("ok" if doc.room_condition_snapshot else "na"),
+       "note": (_("Photograph stored against this assignment") if doc.room_condition_snapshot else _("No check-in photograph on file"))},
+      {"ar": _("Resident accepted the housing terms"), "en": "Terms accepted",
+       "state": ("ok" if doc.terms_accepted_on else "na"),
+       "note": (frappe.format_value(doc.terms_accepted_on, {"fieldtype": "Datetime"}) if doc.terms_accepted_on else _("Signed on paper below"))},
+      {"ar": _("Bed is an over-capacity temporary bed"), "en": "Temporary bed",
+       "state": ("bad" if bed.get("is_temporary") else "ok"),
+       "note": (_("Added above the room's planned capacity") if bed.get("is_temporary") else _("Within the room's planned capacity"))},
+  ]) }}
+
+  {{ ax.note_block(doc.notes) }}
+
+  {{ ax.terms_block(doc) }}
+
+  {{ ax.declaration(_("I confirm that I have taken the room and bed shown above, together with the housing custody items listed, in the condition recorded. I undertake to keep the room and its contents in good order, to follow the housing rules of this building, to inform the facility supervisor before I leave, and to hand back every custody item on checkout. I accept that loss or damage caused by my negligence is assessed and recovered under company policy.")) }}
+
+  {%- if doc.terms_signature %}
+  <div class="ax-note">
+    <span class="lbl">{{ _("Electronic Acknowledgement") }}<span class="en">Electronic acknowledgement</span></span>
+    <img src="{{ doc.terms_signature }}" alt="" style="max-height:54px;max-width:220px;display:block;margin:4px 0">
+    {%- if doc.terms_accepted_on %}{{ _("Accepted on") }}: {{ frappe.format_value(doc.terms_accepted_on, {"fieldtype": "Datetime"}) }}{% endif %}
   </div>
+  {%- endif %}
 
-  <table class="ax-meta">
-    <tr>
-      <td class="ax-lbl">{{ _("Resident Type") }}</td>
-      <td>{{ _(doc.party_type) if doc.party_type else "" }}</td>
-      <td class="ax-lbl">{{ _("Resident") }}</td>
-      <td>{{ doc.employee_name or doc.party or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Building") }}</td>
-      <td>{{ doc.building or "" }}</td>
-      <td class="ax-lbl">{{ _("Room") }}</td>
-      <td>{{ doc.room or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Bed") }}</td>
-      <td>{{ doc.bed or "" }}</td>
-      <td class="ax-lbl">{{ _("Assignment Type") }}</td>
-      <td>{{ _(doc.assignment_type) if doc.assignment_type else "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Stay Type") }}</td>
-      <td>{{ _(doc.stay_type) if doc.stay_type else "" }}</td>
-      <td class="ax-lbl">{{ _("Responsible Facility Supervisor") }}</td>
-      <td>{{ doc.responsible_supervisor or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Check-in Date") }}</td>
-      <td>{{ doc.get_formatted("check_in_date") or "" }}</td>
-      <td class="ax-lbl">{{ _("Expected Check-out Date") }}</td>
-      <td>{{ doc.get_formatted("expected_checkout_date") or "" }}</td>
-    </tr>
-  </table>
+  {{ ax.sign_block([
+      {"ar": _("Resident"), "en": "Resident", "name": resident},
+      {"ar": _("Housing Supervisor"), "en": "Responsible Facility Supervisor", "name": supervisor},
+  ]) }}
 
-  <div class="ax-blk-lbl">{{ _("Issued Custody Items") }}</div>
-
-  <table class="ax-items">
-    <thead>
-      <tr>
-        <th style="width:5%;">#</th>
-        <th>{{ _("Custody Article") }}</th>
-        <th style="width:14%;">{{ _("Quantity Issued") }}</th>
-        <th style="width:20%;">{{ _("Condition at Check-in") }}</th>
-        <th style="width:20%;">{{ _("Serial No.") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in doc.custody_items %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ row.article or "" }}</td>
-        <td>{{ row.quantity or "" }}</td>
-        <td>{{ _(row.condition_at_checkin) if row.condition_at_checkin else "" }}</td>
-        <td>{{ row.serial_no or "" }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  {% if doc.notes %}<div class="ax-block"><div class="ax-blk-lbl">{{ _("Notes") }}</div>{{ doc.notes }}</div>{% endif %}
-
-  <table class="ax-sign">
-    <tr>
-      <td>{{ _("Resident") }}{% if doc.terms_signature %}<br><img src="{{ doc.terms_signature }}" alt="" style="max-height:60px; max-width:220px; margin-top:6px;">{% endif %}{% if doc.terms_accepted_on %}<br>{{ doc.get_formatted("terms_accepted_on") }}{% endif %}<br>{{ _("Signature") }}</td>
-      <td>{{ _("Supervisor") }}<br>{{ _("Signature") }}</td>
-    </tr>
-  </table>
-
-  <div class="ax-foot">{{ doc.name }}</div>
+  {{ ax.doc_footer(doc) }}
 </div>
