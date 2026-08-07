@@ -3,6 +3,7 @@ import frappe
 
 from apex.apex_core.utils.addresses import get_address_text
 from apex.apex_core.utils.company import resolve_company
+from apex.apex_core.utils.system_write import system_insert
 
 LETTER_HEAD_NAME = "Apex"
 
@@ -61,7 +62,7 @@ def seed_letter_head():
         return
 
     identity = _company_identity(company)
-    frappe.get_doc(
+    system_insert(frappe.get_doc(
         {
             "doctype": "Letter Head",
             "letter_head_name": LETTER_HEAD_NAME,
@@ -72,7 +73,7 @@ def seed_letter_head():
             "is_default": 1,
             "disabled": 0,
         }
-    ).insert(ignore_permissions=True)
+    ))
 
     if not frappe.db.get_value("Company", company, "default_letter_head"):
         frappe.db.set_value("Company", company, "default_letter_head", LETTER_HEAD_NAME)

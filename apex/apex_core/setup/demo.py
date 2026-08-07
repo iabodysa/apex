@@ -15,7 +15,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, today
 
-from apex.apex_core.utils.system_write import system_insert
+from apex.apex_core.utils.system_write import system_delete, system_insert
 
 DEMO_ARG = "apex_setup_demo"
 
@@ -152,12 +152,7 @@ def _remove_one(doctype, name):
             ):
                 doc.cancellation_reason = "Apex demo data removal"
             doc.cancel()
-        frappe.delete_doc(
-            doctype,
-            name,
-            ignore_permissions=True,
-            delete_permanently=True,
-        )
+        system_delete(doctype, name, delete_permanently=True)
     except Exception as exc:
         _release(save_point, undo=True)
         frappe.clear_last_message()
@@ -268,14 +263,14 @@ def _create_demo_users():
     ):
         if frappe.db.exists("User", {"name": email}):
             continue
-        user = frappe.get_doc(
+        user = system_insert(frappe.get_doc(
             {
                 "doctype": "User",
                 "email": email,
                 "first_name": full_name,
                 "send_welcome_email": 0,
             }
-        ).insert(ignore_permissions=True)
+        ))
         installed = [
             role for role in roles if frappe.db.exists("Role", {"name": role})
         ]
@@ -288,14 +283,14 @@ def _scope_supervisor(building):
     building-scoped role reads (apex/habitat/permissions.py)."""
     if not building:
         return
-    frappe.get_doc(
+    system_insert(frappe.get_doc(
         {
             "doctype": "User Permission",
             "user": DEMO_SUPERVISOR,
             "allow": "Building",
             "for_value": building,
         }
-    ).insert(ignore_permissions=True)
+    ))
 
 
 def _create(doctype, payload):

@@ -28,11 +28,13 @@ def system_save(doc):
     return doc.save(ignore_permissions=True)
 
 
-def system_delete(doctype, name, force=False, ignore_missing=True):
+def system_delete(doctype, name, force=False, ignore_missing=True, delete_permanently=False):
     """Delete a document the system itself owns, past the acting user's permissions.
 
     ``ignore_missing`` defaults True because the callers are cleanups and re-runnable
     installers, for which an already-absent record is success, not an error.
+    ``delete_permanently`` skips the Deleted Document tombstone, which only a wipe of
+    the app's own demo estate should ask for.
     """
     return frappe.delete_doc(
         doctype,
@@ -40,4 +42,5 @@ def system_delete(doctype, name, force=False, ignore_missing=True):
         force=force,
         ignore_permissions=True,
         ignore_missing=ignore_missing,
+        delete_permanently=delete_permanently,
     )

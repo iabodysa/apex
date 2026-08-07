@@ -24,6 +24,8 @@ from frappe.desk.doctype.notification_settings.notification_settings import (
     is_notifications_enabled,
 )
 
+from apex.apex_core.utils.system_write import system_insert
+
 LOG_DOCTYPE = "Notification Log"
 
 _SUBJECT_MAX = 140
@@ -79,7 +81,7 @@ def notify_user_system(
             dedup_filter["subject"] = clipped_subject
         if frappe.db.exists(LOG_DOCTYPE, dedup_filter):
             return False
-        frappe.get_doc(payload).insert(ignore_permissions=True)
+        system_insert(frappe.get_doc(payload))
         return True
     except Exception:
         frappe.db.rollback(save_point=_SAVEPOINT)

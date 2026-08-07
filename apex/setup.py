@@ -11,6 +11,7 @@ from apex.apex_core.setup.seeders.maintenance_material_template_seed import (
 )
 from apex.apex_core.setup.seeders.letter_head_seed import seed_letter_head
 from apex.apex_core.setup.seeders.workspace_role_seed import seed_workspace_roles
+from apex.apex_core.utils.system_write import system_insert, system_save
 
 
 ACCOMMODATION_ITEM_GROUPS = [
@@ -96,16 +97,16 @@ def create_accommodation_item_groups(item_group_root):
         if exists:
             doc = frappe.get_doc("Item Group", group)
             doc.parent_item_group = item_group_root
-            doc.save(ignore_permissions=True)
+            system_save(doc)
         else:
-            frappe.get_doc(
+            system_insert(frappe.get_doc(
                 {
                     "doctype": "Item Group",
                     "item_group_name": group,
                     "parent_item_group": item_group_root,
                     "is_group": 0,
                 }
-            ).insert(ignore_permissions=True)
+            ))
 
 
 def create_accommodation_items():
@@ -113,7 +114,7 @@ def create_accommodation_items():
     for record in _load_accommodation_item_records():
         if frappe.db.exists("Item", record["item_code"]):
             continue
-        frappe.get_doc(record).insert(ignore_permissions=True)
+        system_insert(frappe.get_doc(record))
 
 
 def _load_accommodation_item_records():
@@ -152,7 +153,7 @@ def create_roles():
             doc = frappe.new_doc("Role")
             doc.role_name = role_name
             doc.desk_access = desk_access
-            doc.insert(ignore_permissions=True)
+            system_insert(doc)
 
 
 def create_role_profiles():
@@ -172,13 +173,13 @@ def create_role_profiles():
             doc.role_profile = profile_name
             for role in roles:
                 doc.append("roles", {"role": role})
-            doc.insert(ignore_permissions=True)
+            system_insert(doc)
             doc.unlock()
     if not frappe.db.exists("Role Profile", "Salis Driver"):
         doc = frappe.new_doc("Role Profile")
         doc.role_profile = "Salis Driver"
         doc.append("roles", {"role": "Driver"})
-        doc.insert(ignore_permissions=True)
+        system_insert(doc)
         doc.unlock()
 
 
@@ -197,7 +198,7 @@ def create_custody_asset_categories():
         if not frappe.db.exists("Custody Asset Category", category_name):
             doc = frappe.new_doc("Custody Asset Category")
             doc.category_name = category_name
-            doc.insert(ignore_permissions=True)
+            system_insert(doc)
 
 
 def create_custody_articles():
@@ -218,7 +219,7 @@ def create_custody_articles():
         if not frappe.db.exists("Custody Article", {"article_name": article["article_name"]}):
             doc = frappe.new_doc("Custody Article")
             doc.update(article)
-            doc.insert(ignore_permissions=True)
+            system_insert(doc)
 
 
 def create_operational_depreciation_policies():
@@ -234,7 +235,7 @@ def create_operational_depreciation_policies():
         if not frappe.db.exists("Operational Depreciation Policy", policy["policy_name"]):
             doc = frappe.new_doc("Operational Depreciation Policy")
             doc.update(policy)
-            doc.insert(ignore_permissions=True)
+            system_insert(doc)
 
 
 def create_safety_task_catalogs():
@@ -255,4 +256,4 @@ def create_safety_task_catalogs():
         if not frappe.db.exists("Safety Task Catalog", {"task_code": task["task_code"]}):
             doc = frappe.new_doc("Safety Task Catalog")
             doc.update(task)
-            doc.insert(ignore_permissions=True)
+            system_insert(doc)
