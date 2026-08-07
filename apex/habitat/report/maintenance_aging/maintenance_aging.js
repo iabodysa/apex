@@ -14,6 +14,12 @@ frappe.query_reports["Maintenance Aging"] = {
 			options: ["", "Critical", "High", "Medium", "Low"].join("\n"),
 		},
 		{
+			fieldname: "status",
+			label: __("Status"),
+			fieldtype: "Select",
+			options: ["", "Open", "Assigned", "In Progress", "Reopened"].join("\n"),
+		},
+		{
 			fieldname: "company",
 			label: __("Company"),
 			fieldtype: "Link",

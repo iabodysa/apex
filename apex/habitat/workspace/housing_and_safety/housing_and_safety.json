@@ -393,15 +393,6 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Open Maintenance Requests",
-   "link_type": "Report",
-   "link_to": "Open Maintenance Requests",
-   "idx": 35,
-   "is_query_report": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Maintenance Aging",
    "link_type": "Report",
    "link_to": "Maintenance Aging",
@@ -424,15 +415,6 @@
    "link_type": "Report",
    "link_to": "Safety Task Compliance Summary",
    "idx": 38,
-   "is_query_report": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Safety Task Execution Log",
-   "link_type": "Report",
-   "link_to": "Safety Task Execution Log",
-   "idx": 39,
    "is_query_report": 1
   },
   {
@@ -698,5 +680,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-08-06 22:51:00.000000"
+ "modified": "2026-08-07 17:49:00.000000"
 }

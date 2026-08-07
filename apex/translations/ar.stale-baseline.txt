@@ -12,7 +12,6 @@ Apex 2.0.4 — Guided first-time setup, ready accommodation supplies, and preser
 Approval Status
 Approved On
 At
-Attendance
 Audience
 Audit
 Authority

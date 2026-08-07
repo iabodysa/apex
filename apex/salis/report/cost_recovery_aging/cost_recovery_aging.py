@@ -41,6 +41,8 @@ def execute(filters=None):
         {"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 150},
         {"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Salis Vehicle", "width": 140},
         {"label": _("Driver"), "fieldname": "driver", "fieldtype": "Link", "options": "Salis Driver", "width": 140},
+        {"label": _("Employee"), "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 140},
+        {"label": _("Payment Request"), "fieldname": "payment_request", "fieldtype": "Link", "options": "Salis Payment Request", "width": 160},
         {"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 120},
         {"label": _("Request Date"), "fieldname": "request_date", "fieldtype": "Date", "width": 120},
         {"label": _("Age (Days)"), "fieldname": "age_days", "fieldtype": "Int", "width": 100},
@@ -66,7 +68,7 @@ def execute(filters=None):
     records = frappe.get_all(
         "Movement Cost Recovery",
         filters=query_filters,
-        fields=["name", "recovery_type", "company", "vehicle", "driver", "status", "request_date", "amount"],
+        fields=["name", "recovery_type", "company", "vehicle", "driver", "employee", "payment_request", "status", "request_date", "amount"],
         order_by="request_date asc",
     )
 
@@ -79,6 +81,8 @@ def execute(filters=None):
         "company": "",
         "vehicle": "",
         "driver": "",
+        "employee": "",
+        "payment_request": "",
         "status": "",
         "request_date": None,
         "age_days": None,
@@ -101,6 +105,8 @@ def execute(filters=None):
             "company": rec.get("company"),
             "vehicle": rec.get("vehicle"),
             "driver": rec.get("driver"),
+            "employee": rec.get("employee"),
+            "payment_request": rec.get("payment_request"),
             "status": rec.get("status"),
             "request_date": request_date,
             "age_days": age,

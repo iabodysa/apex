@@ -349,15 +349,6 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Movement Cost Recovery Register",
-   "link_type": "Report",
-   "link_to": "Movement Cost Recovery Register",
-   "idx": 30,
-   "is_query_report": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Cost Recovery Aging",
    "link_type": "Report",
    "link_to": "Cost Recovery Aging",
@@ -384,9 +375,27 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Boarding Scan Register",
+   "link_type": "Report",
+   "link_to": "Boarding Scan Register",
+   "is_query_report": 1,
+   "idx": 34
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Trip Start Register",
+   "link_type": "Report",
+   "link_to": "Trip Start Register",
+   "is_query_report": 1,
+   "idx": 35
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Dashboards",
-   "idx": 34
+   "idx": 36
   },
   {
    "doctype": "Workspace Link",
@@ -394,7 +403,7 @@
    "label": "Workers Transport Dashboard",
    "link_type": "Dashboard",
    "link_to": "Workers Transport Dashboard",
-   "idx": 35
+   "idx": 37
   },
   {
    "doctype": "Workspace Link",
@@ -402,13 +411,13 @@
    "label": "Movement Operations Dashboard",
    "link_type": "Dashboard",
    "link_to": "Movement Operations Dashboard",
-   "idx": 36
+   "idx": 38
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Master Data",
-   "idx": 37,
+   "idx": 39,
    "description": "Reference data: durable records you set up once, not daily work."
   },
   {
@@ -417,7 +426,7 @@
    "label": "Salis Driver",
    "link_type": "DocType",
    "link_to": "Salis Driver",
-   "idx": 38
+   "idx": 40
   },
   {
    "doctype": "Workspace Link",
@@ -425,7 +434,7 @@
    "label": "Route Template",
    "link_type": "DocType",
    "link_to": "Route Template",
-   "idx": 39
+   "idx": 41
   },
   {
    "doctype": "Workspace Link",
@@ -433,7 +442,7 @@
    "label": "Route Assignment",
    "link_type": "DocType",
    "link_to": "Route Assignment",
-   "idx": 40
+   "idx": 42
   },
   {
    "doctype": "Workspace Link",
@@ -441,7 +450,7 @@
    "label": "Salis Settings",
    "link_type": "DocType",
    "link_to": "Salis Settings",
-   "idx": 41
+   "idx": 43
   },
   {
    "doctype": "Workspace Link",
@@ -449,7 +458,7 @@
    "label": "Driver Portal Theme",
    "link_type": "DocType",
    "link_to": "Driver Portal Theme",
-   "idx": 42
+   "idx": 44
   }
  ],
  "charts": [],
@@ -535,5 +544,5 @@
  ],
  "quick_lists": [],
  "creation": "2020-01-01 00:00:00.000000",
- "modified": "2026-08-06 22:51:00.000000"
+ "modified": "2026-08-07 17:49:00.000000"
 }

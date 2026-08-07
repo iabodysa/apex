@@ -23,7 +23,11 @@ def execute(filters=None):
         {"label": frappe._("Days Open"), "fieldname": "days_open", "fieldtype": "Int", "width": 90},
     ]
 
-    query_filters = {"docstatus": 1, "execution_status": ["in", ["Poor", "Not Done"]]}
+    query_filters = {"docstatus": 1}
+    if filters.get("execution_status"):
+        query_filters["execution_status"] = filters["execution_status"]
+    else:
+        query_filters["execution_status"] = ["in", ["Poor", "Not Done"]]
     if filters.get("building"):
         query_filters["building"] = filters["building"]
     if filters.get("priority"):

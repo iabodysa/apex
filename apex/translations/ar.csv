@@ -631,6 +631,7 @@ Boarding row #{0}: this worker has already boarded on this trip.,صف الركو
 Boarding row #{0}: worker {1} has already boarded on this trip.,صف الركوب رقم {0}: العامل {1} ركب في هذه الرحلة من قبل.
 Boarding Scan Log,سجل مسح الصعود
 Boarding Scan Log rows are append-only and cannot be edited.,لا يمكن تعديل صفوف سجل مسح الصعود بعد إضافتها.
+Boarding Scan Register,سجل مسح الصعود
 Boarding State,حالة الصعود
 "Boarding state of a worker for the trip, tracking whether boarding is pending, the worker claimed a seat, actually boarded, was rejected by the driver, or was absent.",حالة صعود العامل للرحلة، تتابع ما إذا كان الصعود قيد الانتظار، أو حجز العامل مقعدًا، أو صعد فعليًا، أو رفضه السائق، أو تغيّب.
 Boards and Dashboards,لوحات المتابعة ولوحات المعلومات
@@ -1180,7 +1181,6 @@ Custody items on this issue are overdue for return,أصناف العهدة في 
 Custody Items Pending Return,أصناف العهدة بانتظار الإرجاع
 Custody Kiosk,شاشة العهدة
 Custody Loss,فقدان عهدة
-Custody Outstanding by Worker,العهد غير المعادة حسب العامل
 Custody Return,إرجاع العهدة
 Custody Return Item,بند إرجاع العهدة
 Custody Return Items,بنود إرجاع العهدة
@@ -2418,7 +2418,6 @@ Movement Category,تصنيف الحركة
 Movement Context,سياق الحركة
 Movement Cost Recovery,استرداد تكلفة حركة
 Movement Cost Recovery amounts at or above this value (SAR) require Operations-tier authority; lower amounts require at least Regional-tier.,مبالغ استرداد تكلفة الحركة التي تبلغ هذه القيمة (ريال) أو تتجاوزها تتطلب صلاحية مستوى العمليات؛ وما دونها يتطلب المستوى الإقليمي على الأقل.
-Movement Cost Recovery Register,سجل استرداد تكاليف الحركة
 Movement Cost Summary,ملخص تكاليف الحركة
 Movement Cost Transfer,تحويل تكلفة حركة
 Movement Date,تاريخ الحركة
@@ -2752,9 +2751,7 @@ Outcome,النتيجة
 Outcome of validating the scanned pass token.,نتيجة التحقق من رمز التصريح الممسوح.
 Outstanding,مستحق
 Outstanding Fuel Exceptions,حالات استثناء وقود معلّقة
-Outstanding Qty,الكمية المتبقية
 Outstanding Recoveries,عمليات استرداد معلّقة
-Outstanding Value,القيمة المستحقة
 Over Budget,تجاوز الميزانية
 Over Threshold,تجاوز الحد
 Over-capacity,تجاوز السعة
@@ -3314,7 +3311,6 @@ Request Date,تاريخ الطلب
 Request Details,تفاصيل الطلب
 Request Evidence,طلب مستند
 Request fuel for a vehicle to start the fuelling and reconciliation cycle.,اطلب وقوداً لمركبة لبدء دورة التزويد والتسوية.
-Request ID,رقم الطلب
 Request submitted successfully.,تم إرسال الطلب بنجاح.
 Request Type,نوع الطلب
 Request Type {0} is not valid for the {1} transport type.,نوع الطلب {0} غير صالح لنوع النقل {1}.
@@ -3550,7 +3546,6 @@ Safety Task Catalog,دليل مهام السلامة
 "Safety Task Catalog {0} has frequency ""{1}"", which has no scheduling equivalent. Set a supported catalog frequency (Daily, Weekly, Monthly, Quarterly, Annual) or map it before generating.",فهرس مهام السلامة {0} تكراره «{1}»، ولا يقابله جدول زمني. حدد تكرارًا مدعومًا (يومي، أسبوعي، شهري، ربع سنوي، سنوي) أو اربطه قبل الإنشاء.
 Safety Task Compliance Summary,ملخص الالتزام بمهام السلامة
 Safety Task Execution,تنفيذ مهمة السلامة
-Safety Task Execution Log,سجل تنفيذ مهام السلامة
 Safety Task Executions by Result,تنفيذات مهام السلامة حسب النتيجة
 Salary Component,مكوّن الراتب
 Salary Component {0} must be of type Deduction (deduction type {1}).,يجب أن يكون مكون الراتب {0} من نوع خصم (نوع الخصم {1}).
@@ -4344,6 +4339,7 @@ Trip not found or not permitted.,الرحلة غير موجودة أو غير م
 Trip not found.,الرحلة غير موجودة.
 Trip Purpose,غرض الرحلة
 Trip Start Log,سجل بدء الرحلة
+Trip Start Register,سجل بدء الرحلات
 Trip Stop Progress,تقدم محطة الرحلة
 Trip Subject,موضوع الرحلة
 Trip {0} completed; odometer {1}.,اكتملت الرحلة {0}؛ عداد المسافة {1}.

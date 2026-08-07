@@ -19,6 +19,7 @@ def execute(filters=None):
         {"label": frappe._("Request"), "fieldname": "name", "fieldtype": "Link", "options": "Maintenance Request", "width": 150},
         {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 150},
         {"label": frappe._("Issue Type"), "fieldname": "issue_type", "fieldtype": "Data", "width": 130},
+        {"label": frappe._("Description"), "fieldname": "description", "fieldtype": "Small Text", "width": 240},
         {"label": frappe._("Priority"), "fieldname": "priority", "fieldtype": "Data", "width": 90},
         {"label": frappe._("Status"), "fieldname": "status", "fieldtype": "Data", "width": 110},
         {"label": frappe._("Assigned To"), "fieldname": "assigned_to", "fieldtype": "Link", "options": "User", "width": 140},
@@ -29,7 +30,10 @@ def execute(filters=None):
     ]
 
     open_statuses = ["Open", "Assigned", "In Progress", "Reopened"]
-    query_filters = {"status": ["in", open_statuses]}
+    if filters.get("status"):
+        query_filters = {"status": filters["status"]}
+    else:
+        query_filters = {"status": ["in", open_statuses]}
     if filters.get("building"):
         query_filters["building"] = filters["building"]
     if filters.get("priority"):
@@ -49,8 +53,8 @@ def execute(filters=None):
         filters=query_filters,
         or_filters=or_filters,
         fields=[
-            "name", "building", "issue_type", "priority", "status",
-            "assigned_to", "cost_of_repair", "creation",
+            "name", "building", "issue_type", "issue_description as description",
+            "priority", "status", "assigned_to", "cost_of_repair", "creation",
         ],
         order_by="creation asc",
     )
@@ -65,6 +69,7 @@ def execute(filters=None):
             "name": row.name,
             "building": row.building,
             "issue_type": row.issue_type or "",
+            "description": row.description or "",
             "priority": row.priority or "",
             "status": row.status,
             "assigned_to": row.assigned_to or "",
