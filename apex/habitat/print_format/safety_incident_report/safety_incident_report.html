@@ -77,6 +77,13 @@
   {{ ax.note_block(doc.resolution_notes, _("Corrective Action and Closure")) }}
 
   {{ ax.field_grid([
+      [{"ar": _("Injured Person"), "en": "Injured person", "value": doc.injured_person},
+       {"ar": _("Witness"), "en": "Witness", "value": doc.witness_name}],
+      [{"ar": _("Regulator or Insurer Reference"), "en": "Notified reference", "value": doc.regulator_reference},
+       {"ar": _("Root Cause"), "en": "Root cause", "value": doc.root_cause}],
+  ]) }}
+
+  {{ ax.field_grid([
       [{"ar": _("Corrective Action Owner"), "en": "Owner responsible",
         "value": frappe.get_fullname(doc.corrective_action_owner) if doc.corrective_action_owner else None},
        {"ar": _("Corrective Action Due"), "en": "Due", "value": doc.corrective_action_due, "fmt": "Date"}],

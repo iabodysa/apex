@@ -16,6 +16,10 @@
   "is_reinspection",
   "overall_result",
   "reviewed_by",
+  "round_start_time",
+  "round_end_time",
+  "next_round_due",
+  "result_comment",
   "safety_round_sec_system",
   "naming_series",
   "amended_from"
@@ -117,6 +121,27 @@
    "fieldtype": "Link",
    "label": "Reviewed By",
    "options": "User"
+  },
+  {
+   "fieldname": "round_start_time",
+   "fieldtype": "Time",
+   "label": "Round Started"
+  },
+  {
+   "fieldname": "round_end_time",
+   "fieldtype": "Time",
+   "label": "Round Ended"
+  },
+  {
+   "fieldname": "next_round_due",
+   "fieldtype": "Date",
+   "label": "Next Round Due"
+  },
+  {
+   "fieldname": "result_comment",
+   "fieldtype": "Small Text",
+   "label": "Reason for the Result",
+   "description": "Why the round landed on this result; a Fail with no reason cannot be acted on."
   }
  ],
  "is_submittable": 1,
@@ -132,7 +157,7 @@
    "link_fieldname": "safety_round"
   }
  ],
- "modified": "2026-08-08 01:18:00.000000",
+ "modified": "2026-08-08 02:20:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Round",

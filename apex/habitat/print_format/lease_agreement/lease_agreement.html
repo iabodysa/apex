@@ -69,10 +69,12 @@
        {"ar": _("Utility Cost Share Borne by Tenant"), "en": "Tenant utility share", "value": doc.company_share_pct, "fmt": "Percent"}],
       [{"ar": _("Number of Instalments"), "en": "Instalments", "value": rows | length, "fmt": "Int"},
        {"ar": _("Total Scheduled Amount (SAR)"), "en": "Total scheduled on record", "value": doc.total_scheduled, "fmt": "Currency"}],
+      [{"ar": _("Security Deposit"), "en": "Security deposit", "value": doc.security_deposit, "fmt": "Currency"},
+       {"ar": _("Currency of the Contract"), "en": "Currency", "value": doc_currency}],
       [{"ar": _("VAT Rate"), "en": "VAT rate", "value": doc.tax_rate, "fmt": "Percent"},
        {"ar": _("VAT on the Rent Cycle"), "en": "VAT per cycle", "value": doc.tax_amount, "fmt": "Currency"}],
       [{"ar": _("Rent per Cycle Including VAT"), "en": "Rent per cycle incl. VAT", "value": doc.grand_total, "fmt": "Currency"},
-       {"ar": _("Currency of the Contract"), "en": "Currency", "value": doc_currency}],
+       {"ar": _("Landlord Signatory"), "en": "Landlord signatory", "value": doc.landlord_signatory}],
   ]) }}
 
   {{ ax.line_table(
@@ -103,8 +105,10 @@
   ]) }}
 
   {{ ax.sign_block([
-      {"ar": _("Lessor (Landlord)"), "en": "Lessor / Landlord", "name": landlord.get("supplier_name") or doc.landlord},
-      {"ar": _("Lessee (Tenant)"), "en": "Authorised representative of the tenant", "name": company.get("company_name") or doc.company},
+      {"ar": _("Lessor (Landlord)"), "en": "Lessor / Landlord",
+       "name": doc.landlord_signatory or landlord.get("supplier_name") or doc.landlord},
+      {"ar": _("Lessee (Tenant)"), "en": "Authorised representative of the tenant",
+       "name": doc.tenant_signatory or company.get("company_name") or doc.company},
   ]) }}
 
   {{ ax.doc_footer(doc) }}

@@ -25,6 +25,9 @@
   "accommodation_lease_rent_col",
   "first_payment_date",
   "company_share_pct",
+  "security_deposit",
+  "landlord_signatory",
+  "tenant_signatory",
   "accommodation_lease_sec_tax",
   "tax_rate",
   "tax_amount",
@@ -275,11 +278,28 @@
    "fieldname": "terms",
    "fieldtype": "Text Editor",
    "label": "Terms and Conditions"
+  },
+  {
+   "fieldname": "security_deposit",
+   "fieldtype": "Currency",
+   "label": "Security Deposit",
+   "description": "Held by the landlord and refundable at the end of the term."
+  },
+  {
+   "fieldname": "landlord_signatory",
+   "fieldtype": "Data",
+   "label": "Landlord Signatory",
+   "description": "The person who signs for the landlord; the Supplier is an entity, not a signature."
+  },
+  {
+   "fieldname": "tenant_signatory",
+   "fieldtype": "Data",
+   "label": "Tenant Signatory"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-08 01:11:00.000000",
+ "modified": "2026-08-08 02:20:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Lease",

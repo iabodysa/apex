@@ -2003,6 +2003,7 @@ Has custody,لديه عهدة
 Health and Hygiene,الصحة والنظافة العامة
 Healthy,سليم
 Held,محجوز
+Held by the landlord and refundable at the end of the term.,يحتفظ به المالك ويُرد في نهاية المدة.
 Held: {0},بالعهدة: {0}
 "Hello {0},",مرحباً {0}،
 "Hello,",مرحباً،
@@ -2133,6 +2134,7 @@ Indicates the resolved request has been recorded in the asset's maintenance hist
 Info Alert Aging Hours,مهلة معالجة التنبيه المعلوماتي (بالساعات)
 Information,معلومات
 Initiated By,بدأه
+Injured Person,المصاب
 Injuries,الإصابات
 Injuries Recorded at the Scene,الإصابات المسجّلة في الموقع
 Injury,إصابة
@@ -2298,6 +2300,7 @@ Labour Hours,ساعات العمل
 Labour Supplier,مورّد العمالة
 Landlord,المؤجّر
 Landlord Contract Reference,رقم عقد المالك
+Landlord Signatory,الموقّع عن المالك
 Landlord-issued contract number or file reference.,رقم العقد أو مرجع الملف الصادر من المؤجر.
 "Language the resident prefers for updates and responses on this request, so notifications and handling can be routed to staff who can communicate with the worker.",اللغة التي يفضّلها الساكن للتحديثات والردود على هذا الطلب، ليتسنى توجيه الإشعارات والمعالجة إلى الموظفين القادرين على التواصل مع العامل.
 Large Worker Moves Pending Escalation,تنقلات العمالة الكبيرة بانتظار التصعيد
@@ -2663,6 +2666,7 @@ New Salis Driver,سائق ساليس جديد
 New driver,السائق الجديد
 Next,التالي
 Next Expiry Date,تاريخ الانتهاء القادم
+Next Round Due,موعد الجولة القادمة
 Next: Approve,التالي: الاعتماد
 Next: Beds,التالي: الأسرّة
 Next: Room Types,التالي: أنواع الغرف
@@ -2786,6 +2790,7 @@ Nothing on your work center right now.,لا يوجد ما يحتاج متابع�
 Nothing outstanding against this issue,لا يوجد متبقٍ على هذا الصرف
 Nothing to assess,لا يوجد ما يُقيَّم
 Notice Acknowledged On,تاريخ الإقرار بالإشعار
+Notice Period (Days),مدة الإشعار (أيام)
 Notice received by,استلم الإشعار
 Notice served on,موجّه إلى
 Notification,إشعار
@@ -3313,6 +3318,7 @@ Provenance,المصدر
 "Provenance: the scheduled task instance this cleaning fulfils, if generated from the schedule.",المصدر: سجل المهمة المجدولة التي ينفذها هذا التنظيف، إذا أُنشئ من الجدول.
 Provide either a new expiry date or the number of days to extend.,أدخل إمّا تاريخ انتهاء جديدًا أو عدد أيام التمديد.
 Provider,مزود الخدمة
+Provider Contact,جهة الاتصال لدى المزوّد
 Provider Contract Reference,رقم العقد لدى المزوّد
 Public URL,الرابط العام
 "Public base URL of the external frontend that consumes this backend, for example https://salis-fleet.com.",الرابط الأساسي العام للواجهة الأمامية الخارجية التي تستخدم هذا الخادم، مثل https://salis-fleet.com.
@@ -3395,6 +3401,7 @@ Reason,السبب
 Reason Category,سبب عدم التشغيل
 Reason Recorded,السبب المسجّل
 Reason Required,السبب مطلوب
+Reason for the Result,سبب النتيجة
 "Reason the driver is being stopped from operating, whether due to a violation, leave, termination, transfer, or another cause.",سبب إيقاف السائق عن العمل، سواء بسبب مخالفة أو إجازة أو إنهاء خدمة أو نقل أو سبب آخر.
 "Reason the supervisor rejected the plan, captured on rejection.",سبب رفض المشرف للمخطّط، يُسجَّل عند الرفض.
 "Reason the vehicle is being taken out of service, whether an accident, maintenance, violation, rental return, or another cause.",سبب إخراج المركبة من الخدمة، سواء حادث أو صيانة أو مخالفة أو إعادة مركبة مستأجرة أو سبب آخر.
@@ -3521,6 +3528,7 @@ Registered worker (Employee) who boarded. Leave blank and tick 'Unregistered' fo
 Registered: {0},مُسجَّل: {0}
 Registering…,جارٍ التسجيل…
 Registration (Istimara),الاستمارة
+Regulator or Insurer Reference,مرجع الجهة الرقابية أو التأمين
 Reimbursement,تعويض
 Reject,رفض
 Reject Count,عدد مرات الرفض
@@ -3566,6 +3574,7 @@ Renew License,تجديد الرخصة
 Renewal Cost Estimate (SAR),تكلفة التجديد التقديرية (ريال)
 Renewal Lead Days,مهلة التجديد بالأيام
 Renewal Management,إدارة التجديد
+Renews Automatically,يتجدد تلقائيًا
 Rent,الإيجار
 Rent & Billing,الإيجار والفوترة
 Rent (SAR),الإيجار (ريال)
@@ -3816,11 +3825,14 @@ Rooms and Bed Capacity,عدد الغرف والأسرّة
 Rooms and beds created.,تم إنشاء الغرف والأسرّة.
 Rooms needing readiness,الغرف التي تحتاج إلى تجهيز
 Rooms on Floor,عدد الغرف في الطابق
+Root Cause,السبب الجذري
 Rotate Link and QR,تجديد الرابط ورمز QR
 Rotate Portal Link,تجديد رابط البوابة
 Rotating issues a NEW barcode and stops the previous one working. Continue?,التجديد يصدر باركود جديدًا ويوقف الباركود السابق. هل تريد المتابعة؟
 Round,جولة
 Round Date,تاريخ الجولة
+Round Ended,نهاية الجولة
+Round Started,بداية الجولة
 Route,المسار
 Route Assignment,إسناد مسار
 Route Name,اسم المسار
@@ -3998,6 +4010,7 @@ Seconds a worker's 'please wait' request is held active (drives the client count
 Seconds the worker has to respond after each driver notification (drives the client countdown). A blank or zero value falls back to the built-in default.,عدد الثواني المتاحة للعامل للرد بعد كل إشعار من السائق (يحرك العد التنازلي في الواجهة). القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج.
 "Secret API key/token for the gateway, sent as an Authorization: Bearer header. Stored encrypted; never echoed back to the client.",مفتاح أو رمز API السري للبوابة، ويُرسل في ترويسة Authorization: Bearer. يُخزن مشفرًا ولا يُعرض للعميل مرة أخرى.
 Security,أمن
+Security Deposit,مبلغ التأمين
 Security Gate Cleared,تم اجتياز بوابة الأمن
 See who is currently housed across your buildings.,اطّلع على الساكنين حاليًا في مبانيك.
 "Select 'Building' if leasing an entire building, or 'Apartment' if leasing a single unit.",اختر 'مبنى' إذا كان العقد لعمارة كاملة، أو 'شقة' إذا كان العقد لوحدة مستقلة.
@@ -4189,7 +4202,9 @@ Sign-off,الاعتماد
 Signature,توقيع
 Signature (fallback),التوقيع (خيار بديل)
 Signed,موقَّع
+Signed Contract,العقد الموقّع
 Signed Contract Document on File,نسخة العقد الموقّعة محفوظة
+Signed Contract on File,العقد الموقّع مرفق
 Signed Evidence,إثبات موقّع
 Signed Evidence File,ملف الإثبات الموقّع
 Signed Evidence on File,الإثبات الموقّع المرفق
@@ -4490,6 +4505,7 @@ Temporary Worker {0} does not exist.,العامل المؤقت {0} غير موج
 Temporary Worker {0}'s stay window expired on {1}.,انتهت مهلة إقامة العامل المؤقت {0} في {1}.
 Temporary Worker — use the Arrivals Desk to house this worker.,عامل مؤقت — استخدم مكتب الوصول لتسكين هذا العامل.
 Temporary workers board via the trip’s unregistered manifest.,ينضم العمال المؤقتون للرحلة عبر كشف الركاب غير المسجلين.
+Tenant Signatory,الموقّع عن المستأجر
 Term & Status,المدة والحالة
 Terminate,إنهاء الخدمة
 Terminated,مُنهى
@@ -4568,6 +4584,7 @@ The manifest worker this boarding state tracks.,العامل في كشف الر�
 The messaging gateway is not enabled or is missing its URL/API key. Configure it in Apex Integration Settings first.,بوابة المراسلة غير مفعّلة أو ينقصها الرابط أو مفتاح الواجهة البرمجية. اضبطها أولًا في إعدادات تكامل أبكس.
 The new expiry date must be later than the current expiry date.,يجب أن يكون تاريخ الانتهاء الجديد لاحقًا لتاريخ الانتهاء الحالي.
 The notice carries an approving officer,الإشعار عليه مسؤول معتمد
+The notification number given by whoever was told outside the company.,رقم البلاغ الذي أعطته الجهة التي أُبلغت خارج الشركة.
 The number listed fits the seats in the vehicle,عدد المذكورين يناسب مقاعد المركبة
 The on-site code has expired. Ask the initiator to regenerate it.,انتهت صلاحية رمز الموقع. اطلب من المُبادر إعادة توليده.
 The one-time password has expired. Ask the procurement supervisor to regenerate it.,انتهت صلاحية رمز التحقق لمرة واحدة. اطلب من مشرف المشتريات إعادة توليده.
@@ -4577,6 +4594,7 @@ The originating child row index (Inspection Finding Item idx) within the source 
 The originating operational document this advance recovers.,المستند التشغيلي الأصلي الذي أُنشئت هذه السلفة لاسترداد قيمته.
 "The payment DocType the Create Payment action builds (for example Payment Entry, Payment Order, or a client's custom payment DocType). Leave blank to use the native Payment Request, the default target. A Single settings record or a child table is refused: neither can be created as a standalone payment.",نوع مستند الدفع الذي ينشئه إجراء «إنشاء دفعة»، مثل قيد دفع أو أمر دفع أو مستند دفع مخصص. اتركه فارغًا لاستخدام طلب الدفع القياسي، وهو الخيار الافتراضي. لا يمكن اختيار سجل إعدادات مفرد أو جدول فرعي لأنهما لا يُنشآن كدفعة مستقلة.
 The payment document the Pay action builds (sets the Payment Routing target). Leave blank to use the native Payment Request.,مستند الدفع الذي ينشئه إجراء «الدفع» ويحدد وجهة توجيه المدفوعات. اتركه فارغًا لاستخدام طلب الدفع القياسي.
+"The person who signs for the landlord; the Supplier is an entity, not a signature.",الشخص الذي يوقّع نيابة عن المالك؛ فالمورّد جهة لا توقيع.
 The photo data is invalid.,بيانات الصورة غير صالحة.
 The photo dimensions are too large.,أبعاد الصورة كبيرة جداً.
 The photo filename is invalid.,اسم ملف الصورة غير صالح.
@@ -5088,6 +5106,7 @@ What do you need help with?,ما الذي تحتاج المساعدة فيه؟
 What happened?,ماذا حدث؟
 What the Company Loses and Where the Vehicle Goes,ما تخسره الشركة وإلى أين تذهب المركبة
 What the Station Actually Dispensed,ما صرفته المحطة فعلاً
+What the contractor is being asked to do; visit_notes is written after the visit.,ما هو مطلوب من المقاول تنفيذه؛ أما ملاحظات الزيارة فتُكتب بعدها.
 What the worker disputes; the notice preserves his right to object before approval.,ما يعترض عليه العامل؛ الإشعار يحفظ حقه في الاعتراض قبل الاعتماد.
 What the wreck or the salvaged parts are still worth.,ما تساويه الحطام أو القطع المستخرجة.
 What this bed costs the project each month; defaults once from the building's monthly cost per bed.,ما يكلّف هذا السرير المشروع شهرياً؛ يؤخذ مرة واحدة من تكلفة السرير الشهرية في المبنى.
@@ -5128,6 +5147,7 @@ Who must clear the finding; without a name the action belongs to nobody.,من ي
 "Why a resident is idle and not deployed to work, such as a new hire awaiting assignment, a return from leave, or a legal or HR hold, used to target follow-up.",سبب بقاء الساكن دون تكليف عمل، مثل موظف جديد بانتظار الإسناد أو عائد من إجازة أو متوقف لأسباب قانونية أو لدى الموارد البشرية. يُستخدم لتوجيه المتابعة.
 "Why the driver is being cleared from the fleet, separating a voluntary resignation or end of assignment from a transfer or termination, which affects settlement handling.",سبب إخلاء طرف السائق من الأسطول، يفصل الاستقالة الطوعية أو انتهاء الإسناد عن النقل أو إنهاء الخدمة، ما يؤثر في معالجة التسوية.
 "Why the resident is leaving the accommodation, separating a permanent departure such as final exit or absconding from a move that keeps the worker in the workforce such as an internal or project transfer.",سبب مغادرة الساكن للسكن، ويفصل المغادرة النهائية مثل الخروج النهائي أو الهروب من العمل، عن النقل الذي يبقي العامل على رأس العمل مثل النقل الداخلي أو النقل بين المشاريع.
+Why the round landed on this result; a Fail with no reason cannot be acted on.,لماذا خرجت الجولة بهذه النتيجة؛ فالرسوب بلا سبب لا يمكن معالجته.
 Window,المهلة
 Window Days,مدة المهلة (أيام)
 Window Days cannot exceed {0} days.,لا يمكن أن تتجاوز المهلة {0} يومًا.
@@ -5144,6 +5164,8 @@ Work Description,وصف العمل
 Work Order marked Completed.,تغيرت حالة أمر العمل إلى مكتمل.
 Work Order marked In Progress.,تغيرت حالة أمر العمل إلى «قيد التنفيذ».
 Work Ordered By,جهة إصدار الأمر
+Work Scope,نطاق العمل
+Work Scope Ordered,نطاق العمل المطلوب
 Work Shift,وردية عمل
 Work Shift Day,يوم وردية العمل
 Work started — status set to In Progress.,بدأ العمل — الحالة: قيد التنفيذ.

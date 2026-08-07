@@ -79,6 +79,8 @@
       totals=[frappe.format_value(doc.service_cost, {"fieldtype": "Currency"})],
       empty_text=_("No service has been ordered on this sheet yet")) }}
 
+  {{ ax.note_block(doc.work_scope, _("Work Scope Ordered")) }}
+
   {{ ax.field_grid([
       [{"ar": _("VAT Rate"), "en": "VAT rate", "value": doc.tax_rate, "fmt": "Percent"},
        {"ar": _("VAT on the Amount Payable"), "en": "VAT payable", "value": doc.tax_amount, "fmt": "Currency"}],

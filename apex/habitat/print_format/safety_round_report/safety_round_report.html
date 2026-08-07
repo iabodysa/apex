@@ -121,6 +121,13 @@
 
   {{ ax.declaration(_("The inspector declares that every task listed above was checked on site on the round date, that the result written against each task is what was actually seen, and that every fault found is written in the findings table with the person who must clear it and the date it is due. A task not listed here was not checked on this round.")) }}
 
+  {{ ax.field_grid([
+      [{"ar": _("Round Started"), "en": "Started", "value": doc.round_start_time},
+       {"ar": _("Round Ended"), "en": "Ended", "value": doc.round_end_time}],
+      [{"ar": _("Next Round Due"), "en": "Next round due", "value": doc.next_round_due, "fmt": "Date"},
+       {"ar": _("Reason for the Result"), "en": "Reason", "value": doc.result_comment}],
+  ]) }}
+
   {{ ax.sign_block([
       {"ar": _("Inspected By"), "en": "Inspected by", "name": inspector},
       {"ar": _("Site Supervisor"), "en": "Site supervisor", "name": site_supervisor},

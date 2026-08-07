@@ -20,6 +20,10 @@
   "immediate_action_taken",
   "habitat_safety_incident_report_col",
   "casualties",
+  "injured_person",
+  "witness_name",
+  "root_cause",
+  "regulator_reference",
   "reported_by",
   "habitat_safety_incident_sec_resolution",
   "resolution_notes",
@@ -193,11 +197,32 @@
    "fieldtype": "Date",
    "label": "Closed On",
    "read_only": 1
+  },
+  {
+   "fieldname": "injured_person",
+   "fieldtype": "Data",
+   "label": "Injured Person"
+  },
+  {
+   "fieldname": "witness_name",
+   "fieldtype": "Data",
+   "label": "Witness"
+  },
+  {
+   "fieldname": "root_cause",
+   "fieldtype": "Small Text",
+   "label": "Root Cause"
+  },
+  {
+   "fieldname": "regulator_reference",
+   "fieldtype": "Data",
+   "label": "Regulator or Insurer Reference",
+   "description": "The notification number given by whoever was told outside the company."
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-08 01:18:00.000000",
+ "modified": "2026-08-08 02:20:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Incident",

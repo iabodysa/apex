@@ -10,6 +10,7 @@
   "subcontractor_service_order_sec_overview",
   "building",
   "scheduled_date",
+  "work_scope",
   "actual_visit_date",
   "subcontractor_service_order_overview_col",
   "contract",
@@ -271,6 +272,12 @@
    "fieldtype": "Datetime",
    "label": "Confirmed On",
    "read_only": 1
+  },
+  {
+   "fieldname": "work_scope",
+   "fieldtype": "Small Text",
+   "label": "Work Scope",
+   "description": "What the contractor is being asked to do; visit_notes is written after the visit."
   }
  ],
  "is_submittable": 1,
@@ -291,7 +298,7 @@
    "link_fieldname": "subcontractor_service_order"
   }
  ],
- "modified": "2026-08-08 01:18:00.000000",
+ "modified": "2026-08-08 02:20:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Subcontractor Service Order",

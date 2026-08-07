@@ -43,6 +43,10 @@
   "status",
   "contract_start_date",
   "contract_end_date",
+  "auto_renews",
+  "notice_period_days",
+  "provider_contact",
+  "attached_contract",
   "billing_sec",
   "billing_frequency",
   "recurring_amount",
@@ -362,6 +366,26 @@
    "fieldname": "terms",
    "fieldtype": "Text Editor",
    "label": "Terms and Conditions"
+  },
+  {
+   "fieldname": "auto_renews",
+   "fieldtype": "Check",
+   "label": "Renews Automatically"
+  },
+  {
+   "fieldname": "notice_period_days",
+   "fieldtype": "Int",
+   "label": "Notice Period (Days)"
+  },
+  {
+   "fieldname": "provider_contact",
+   "fieldtype": "Data",
+   "label": "Provider Contact"
+  },
+  {
+   "fieldname": "attached_contract",
+   "fieldtype": "Attach",
+   "label": "Signed Contract"
   }
  ],
  "permissions": [
@@ -421,5 +445,5 @@
    "link_fieldname": "telecom_contract"
   }
  ],
- "modified": "2026-08-08 01:11:00.000000"
+ "modified": "2026-08-08 02:20:00.000000"
 }
