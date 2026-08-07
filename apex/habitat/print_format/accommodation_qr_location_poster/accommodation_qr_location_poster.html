@@ -41,6 +41,9 @@
 </style>
 
 <div class="qr-poster-container" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+{% if not no_letterhead and letter_head %}
+  <div style="margin-bottom:10px">{{ letter_head }}</div>
+{% endif %}
     <div class="qr-poster-title">{{ _("Need Help? Scan to Report") }}</div>
     <div class="qr-poster-subtitle">{{ doc.poster_title or _("Resident Support Services") }}</div>
 

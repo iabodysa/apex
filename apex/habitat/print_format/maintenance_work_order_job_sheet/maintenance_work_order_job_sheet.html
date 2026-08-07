@@ -20,6 +20,9 @@
 </style>
 
 <div class="ah-doc">
+{% if not no_letterhead and letter_head %}
+  <div style="margin-bottom:10px">{{ letter_head }}</div>
+{% endif %}
   <div class="ah-head">
     <div>
       <h1>Maintenance Work Order</h1>

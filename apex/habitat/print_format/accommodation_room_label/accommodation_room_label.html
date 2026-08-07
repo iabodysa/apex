@@ -59,6 +59,9 @@
 </style>
 
 <div class="room-label" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+{% if not no_letterhead and letter_head %}
+  <div style="margin-bottom:10px">{{ letter_head }}</div>
+{% endif %}
   <div class="building-name">{{ building_name or "" }}</div>
   <div class="room-number">{{ doc.room_number }}</div>
   <div class="room-meta">

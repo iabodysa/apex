@@ -18,9 +18,13 @@
   .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
   .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
   .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
+  .ax-letterhead { margin-bottom: 10px; }
 </style>
 
 <div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+{% if not no_letterhead and letter_head %}
+  <div class="ax-letterhead">{{ letter_head }}</div>
+{% endif %}
   <div class="ax-head">
     <div>
       <h1>{{ _("Passenger Manifest") }}</h1>

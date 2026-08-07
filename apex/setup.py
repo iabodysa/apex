@@ -9,6 +9,7 @@ from apex.apex_core.setup.seeders.habitat_auto_email_reports_seed import seed_au
 from apex.apex_core.setup.seeders.maintenance_material_template_seed import (
     seed_templates,
 )
+from apex.apex_core.setup.seeders.letter_head_seed import seed_letter_head
 from apex.apex_core.setup.seeders.workspace_role_seed import seed_workspace_roles
 
 
@@ -33,12 +34,14 @@ def after_install():
     seed_templates()
     seed_auto_email_reports()
     seed_workspace_roles()
+    seed_letter_head()
     frappe.clear_cache()
 
 
 def after_migrate():
     """Recover item defaults on configured sites without blocking incomplete sites."""
     seed_workspace_roles()
+    seed_letter_head()
     return create_accommodation_item_defaults(allow_deferred=True)
 
 
