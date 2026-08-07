@@ -30,6 +30,8 @@
 {%- set building = frappe.db.get_value("Building", doc.building,
       ["building_name", "site", "city", "responsible_supervisor"], as_dict=True) or {} -%}
 {%- set supervisor = frappe.get_fullname(building.get("responsible_supervisor")) if building.get("responsible_supervisor") else None -%}
+{%- set contact = (frappe.db.get_value("User", building.get("responsible_supervisor"), ["mobile_no", "phone"], as_dict=True) or {}) if building.get("responsible_supervisor") else {} -%}
+{%- set supervisor_phone = contact.get("mobile_no") or contact.get("phone") -%}
 {%- set beds = frappe.get_all("Bed", filters={"room": doc.name}, fields=["bed_code", "status", "condition"], order_by="bed_code asc") if doc.name else [] -%}
 {%- set free = beds | selectattr("status", "equalto", "Available") | list -%}
 {%- set qr = doc_verify_qr(doc.doctype, doc.name) -%}
@@ -77,7 +79,7 @@
     {%- endif %}
 
     <div class="foot">
-      {%- if supervisor %}{{ _("Facility Supervisor") }}: {{ supervisor }} · {% endif -%}
+      {%- if supervisor %}{{ _("Facility Supervisor") }}: {{ supervisor }}{% if supervisor_phone %} · {{ supervisor_phone }}{% endif %} · {% endif -%}
       {{ _("Report any fault to your facility supervisor. In an emergency call him directly.") }}<br>
       {%- if doc.last_inventory_date %}{{ _("Last inventory") }}: {{ frappe.format_date(doc.last_inventory_date) }} · {% endif -%}
       {{ doc.name }}

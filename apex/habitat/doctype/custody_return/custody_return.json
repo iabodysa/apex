@@ -136,14 +136,14 @@
   }
  ],
  "is_submittable": 1,
-"links": [
+ "links": [
   {
    "group": "Custody",
    "link_doctype": "Custody Damage Assessment",
    "link_fieldname": "custody_return"
   }
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-08-08 01:40:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Return",

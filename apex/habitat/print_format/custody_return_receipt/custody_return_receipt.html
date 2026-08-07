@@ -13,9 +13,14 @@
       ["worker_name", "iqama_number", "labour_supplier"], as_dict=True) or {}) if (doc.party_type == "Temporary Worker" and doc.party) else {} -%}
 {%- set holder = emp.get("employee_name") or tmp.get("worker_name") or (issue.issued_to_name if issue else None) or doc.party -%}
 
-{%- set returned = {} -%}
+{%- set by_line = {} -%}
+{%- set by_key = {} -%}
 {%- for r in doc.items -%}
-  {%- set _ = returned.update({(r.article or "") ~ "|" ~ (r.serial_no or ""): r}) -%}
+  {%- if r.custody_issue_item -%}
+    {%- set _ = by_line.update({r.custody_issue_item: r}) -%}
+  {%- else -%}
+    {%- set _ = by_key.update({(r.article or "") ~ "|" ~ (r.serial_no or ""): r}) -%}
+  {%- endif -%}
 {%- endfor -%}
 
 {%- set rows = [] -%}
@@ -24,9 +29,8 @@
 {%- set flagged = [] -%}
 {%- if issue -%}
   {%- for it in issue.items -%}
-    {%- set key = (it.article or "") ~ "|" ~ (it.serial_no or "") -%}
-    {%- set back = returned.get(key) -%}
-    {%- if back -%}{%- set _ = matched.append(key) -%}{%- endif -%}
+    {%- set back = by_line.get(it.name) or by_key.get((it.article or "") ~ "|" ~ (it.serial_no or "")) -%}
+    {%- if back -%}{%- set _ = matched.append(back.name) -%}{%- endif -%}
     {%- set _ = rows.append({
           "article": it.article,
           "article_name": it.article_name,
@@ -34,14 +38,14 @@
           "issued_qty": it.qty,
           "returned_qty": (back.qty if back else 0),
           "outstanding": (it.qty or 0) - (back.qty if back else 0),
-          "condition": (back.condition_on_return if back else None)}) -%}
+          "condition": (back.condition_on_return if back else None),
+          "damage_note": (back.damage_note if back else None)}) -%}
     {%- if not back or ((it.qty or 0) - (back.qty or 0)) > 0 -%}{%- set _ = open_lines.append(it.article) -%}{%- endif -%}
     {%- if back and back.condition_on_return in ("Damaged", "Lost") -%}{%- set _ = flagged.append(back) -%}{%- endif -%}
   {%- endfor -%}
 {%- endif -%}
 {%- for r in doc.items -%}
-  {%- set key = (r.article or "") ~ "|" ~ (r.serial_no or "") -%}
-  {%- if key not in matched -%}
+  {%- if r.name not in matched -%}
     {%- set art = (frappe.db.get_value("Custody Article", r.article, "article_name")) if r.article else None -%}
     {%- set _ = rows.append({
           "article": r.article,
@@ -50,10 +54,17 @@
           "issued_qty": None,
           "returned_qty": r.qty,
           "outstanding": None,
-          "condition": r.condition_on_return}) -%}
+          "condition": r.condition_on_return,
+          "damage_note": r.damage_note}) -%}
     {%- if r.condition_on_return in ("Damaged", "Lost") -%}{%- set _ = flagged.append(r) -%}{%- endif -%}
   {%- endif -%}
 {%- endfor -%}
+{%- set reconciled = doc.items | selectattr("custody_issue_item") | list | length if doc.items else 0 -%}
+{%- set assessments = frappe.get_all("Custody Damage Assessment",
+      filters={"custody_return": doc.name, "docstatus": ["<", 2]},
+      fields=["name", "status", "total_estimated_replacement_cost"],
+      order_by="creation asc") if doc.name else [] -%}
+{%- set assessed_total = assessments | sum(attribute="total_estimated_replacement_cost") if assessments else 0 -%}
 
 {%- set total_issued = (issue.items | sum(attribute="qty")) if (issue and issue.items) else 0 -%}
 {%- set total_returned = doc.items | sum(attribute="qty") if doc.items else 0 -%}
@@ -93,20 +104,24 @@
        {"ar": _("Expected Return Date"), "en": "Was due on", "value": (issue.expected_return_date if issue else None), "fmt": "Date"}],
       [{"ar": _("Days Held"), "en": "Days held", "value": days_held},
        {"ar": _("Issue Status"), "en": "Issue status", "value": (issue.status if issue else None), "tr": True}],
+      [{"ar": _("Lines Matched to an Issue Line"), "en": "Lines matched on record", "value": reconciled, "fmt": "Int"},
+       {"ar": _("Damage Assessment Raised"), "en": "Damage assessment",
+        "value": (assessments | map(attribute="name") | join(", ")) if assessments else None}],
   ]) }}
 
   {{ ax.line_table(
-      [{"ar": _("Article Code"), "en": "Code", "key": "article", "width": "14%"},
+      [{"ar": _("Article Code"), "en": "Code", "key": "article", "width": "12%"},
        {"ar": _("Article"), "en": "Description", "key": "article_name"},
-       {"ar": _("Serial No"), "en": "Serial", "key": "serial_no", "width": "14%"},
-       {"ar": _("Quantity Issued"), "en": "Issued", "key": "issued_qty", "num": True, "width": "9%", "fmt": "Int"},
-       {"ar": _("Returned Now"), "en": "Returned", "key": "returned_qty", "num": True, "width": "9%", "fmt": "Int"},
-       {"ar": _("Still Outstanding"), "en": "Outstanding", "key": "outstanding", "num": True, "width": "10%", "fmt": "Int"},
-       {"ar": _("Condition on Return"), "en": "Condition in", "key": "condition", "width": "13%", "tr": True}],
+       {"ar": _("Serial No"), "en": "Serial", "key": "serial_no", "width": "12%"},
+       {"ar": _("Quantity Issued"), "en": "Issued", "key": "issued_qty", "num": True, "width": "8%", "fmt": "Int"},
+       {"ar": _("Returned Now"), "en": "Returned", "key": "returned_qty", "num": True, "width": "8%", "fmt": "Int"},
+       {"ar": _("Still Outstanding"), "en": "Outstanding", "key": "outstanding", "num": True, "width": "9%", "fmt": "Int"},
+       {"ar": _("Condition on Return"), "en": "Condition in", "key": "condition", "width": "11%", "tr": True},
+       {"ar": _("Damage or Loss Note"), "en": "Damage note", "key": "damage_note", "width": "16%"}],
       rows,
       totals=[(frappe.format_value(total_issued, {"fieldtype": "Int"}) if issue else "—"),
               frappe.format_value(total_returned, {"fieldtype": "Int"}),
-              (frappe.format_value(total_outstanding, {"fieldtype": "Int"}) if issue else "—"), ""],
+              (frappe.format_value(total_outstanding, {"fieldtype": "Int"}) if issue else "—"), "", ""],
       empty_text=_("No articles are listed on this return")) }}
 
   {{ ax.check_list([
@@ -116,6 +131,9 @@
       {"ar": _("Every article came back sound"), "en": "No damage or loss",
        "state": ("bad" if flagged else "ok"),
        "note": (_("{0} article line(s) marked Damaged or Lost").format(flagged | length) if flagged else _("No article was marked Damaged or Lost"))},
+      {"ar": _("Damage assessed and priced"), "en": "Damage assessed",
+       "state": ("ok" if assessments else ("bad" if flagged else "na")),
+       "note": (_("Assessed at {0}").format(frappe.format_value(assessed_total, {"fieldtype": "Currency"})) if assessments else (_("Damage was recorded but no assessment has been raised") if flagged else _("Nothing to assess")))},
   ]) }}
 
   {{ ax.note_block(doc.remarks) }}

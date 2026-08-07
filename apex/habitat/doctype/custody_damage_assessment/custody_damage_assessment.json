@@ -24,6 +24,16 @@
   "total_estimated_replacement_cost",
   "custody_damage_assessment_sec_large_text",
   "remarks",
+  "custody_damage_assessment_sec_service",
+  "acknowledged_on",
+  "objection_note",
+  "custody_damage_assessment_service_col",
+  "worker_signature",
+  "custody_damage_assessment_sec_signoff",
+  "assessed_by",
+  "custody_damage_assessment_signoff_col",
+  "approved_by",
+  "approved_on",
   "custody_damage_assessment_sec_system",
   "naming_series",
   "deduction_entry",
@@ -152,6 +162,65 @@
    "label": "Remarks"
   },
   {
+   "fieldname": "custody_damage_assessment_sec_service",
+   "fieldtype": "Section Break",
+   "label": "Service and Objection"
+  },
+  {
+   "fieldname": "acknowledged_on",
+   "fieldtype": "Datetime",
+   "label": "Acknowledged On",
+   "read_only": 1,
+   "description": "Stamped when the worker's signature is first recorded."
+  },
+  {
+   "fieldname": "objection_note",
+   "fieldtype": "Small Text",
+   "label": "Objection Raised by the Worker",
+   "description": "What the worker disputes; the notice preserves his right to object before approval."
+  },
+  {
+   "fieldname": "custody_damage_assessment_service_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "worker_signature",
+   "fieldtype": "Signature",
+   "label": "Worker Signature",
+   "description": "Signing records that the notice was served and read, not that its value is agreed."
+  },
+  {
+   "fieldname": "custody_damage_assessment_sec_signoff",
+   "fieldtype": "Section Break",
+   "label": "Sign-off"
+  },
+  {
+   "fieldname": "assessed_by",
+   "fieldtype": "Link",
+   "label": "Assessed By",
+   "options": "User",
+   "read_only": 1,
+   "description": "Stamped when the assessment leaves Draft; the person who valued the damage."
+  },
+  {
+   "fieldname": "custody_damage_assessment_signoff_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User",
+   "read_only": 1,
+   "description": "Stamped when the status reaches Approved; the person who authorised the deduction."
+  },
+  {
+   "fieldname": "approved_on",
+   "fieldtype": "Date",
+   "label": "Approved On",
+   "read_only": 1
+  },
+  {
    "fieldname": "custody_damage_assessment_sec_system",
    "fieldtype": "Section Break",
    "label": "System",
@@ -194,7 +263,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-07 18:00:00.000000",
+ "modified": "2026-08-08 01:40:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Damage Assessment",

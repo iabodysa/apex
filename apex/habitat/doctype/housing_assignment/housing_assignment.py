@@ -101,8 +101,19 @@ def recalculate_spatial(room_name: str, building_name: str) -> None:
     recalculate_building_occupancy(building_name)
 
 
+def _snapshot_agreed_rate(doc, building):
+    """Fill the agreed monthly rate from the building's cost per bed, the first time only.
+
+    A form charged to a project has to state what the bed costs, and a later re-costing of
+    the building must not silently re-price a stay the resident has already signed for. Only
+    a blank rate is filled, so an operator override survives every subsequent save.
+    """
+    if not doc.agreed_monthly_rate:
+        doc.agreed_monthly_rate = building.monthly_cost_per_capacity or 0
+
+
 def validate(doc, method=None):
-    """Derives the cost center and blocks duplicate occupancy, bed/room mismatches, and over-capacity."""
+    """Derives the cost center and rate, and blocks duplicate occupancy, mismatches, and over-capacity."""
     sync_party_employee(doc, require_party=True)
 
     if not doc.building or not frappe.db.exists("Building", doc.building):
@@ -123,6 +134,8 @@ def validate(doc, method=None):
                 doc.building
             )
         )
+
+    _snapshot_agreed_rate(doc, building)
 
     if doc.stay_type == "Temporary":
         if not doc.expected_checkout_date:

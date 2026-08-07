@@ -24,7 +24,21 @@ def validate(doc, method=None):
         if (row.qty or 0) <= 0:
             frappe.throw(_("Row {0}: Qty must be greater than zero.").format(row.idx))
     validate_serialized_rows(doc)
+    _snapshot_unit_values(doc)
     _set_expected_return_date(doc)
+
+
+def _snapshot_unit_values(doc):
+    """Freeze each line's unit value from the article master the first time it is written.
+
+    The worker signs the receipt against the value printed beside each article, so a later
+    edit to the article's standard cost must not move what he signed. Only a blank value is
+    filled, which leaves an operator override and every already-issued line untouched.
+    """
+    for row in doc.items:
+        if row.unit_value or not row.article:
+            continue
+        row.unit_value = frappe.db.get_value("Custody Article", row.article, "standard_unit_cost") or 0
 
 
 def _set_holder_user(doc):
@@ -81,6 +95,7 @@ def _set_expected_return_date(doc):
 def on_submit(doc, method=None):
     """Blocks submission when store stock is short, marks the issue Issued, and posts custody stock."""
     _assert_source_availability(doc)
+    doc.db_set("issued_by", frappe.session.user)
     doc.db_set("status", "Issued")
     _post_custody_stock(doc)
 
@@ -153,8 +168,9 @@ def before_cancel(doc, method=None):
 
 
 def on_cancel(doc, method=None):
-    """Reverses the posted custody stock movement and marks the Custody Issue cancelled."""
+    """Reverses the posted custody stock movement, unnames the issuer, and marks the issue cancelled."""
     from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
         reverse_and_mark_cancelled,
     )
+    doc.db_set("issued_by", None)
     reverse_and_mark_cancelled(doc, "Custody Issue")

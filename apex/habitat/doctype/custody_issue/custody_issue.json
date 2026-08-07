@@ -28,6 +28,8 @@
   "acknowledged_on",
   "custody_issue_handover_col",
   "signature",
+  "custody_issue_handover_col2",
+  "issued_by",
   "custody_issue_sec_system",
   "status",
   "custody_issue_system_col1",
@@ -176,6 +178,18 @@
    "read_only": 1
   },
   {
+   "fieldname": "custody_issue_handover_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "issued_by",
+   "fieldtype": "Link",
+   "label": "Issued By",
+   "options": "User",
+   "read_only": 1,
+   "description": "Stamped when the issue is submitted; the storekeeper who handed the articles over."
+  },
+  {
    "collapsible": 1,
    "fieldname": "custody_issue_sec_system",
    "fieldtype": "Section Break",
@@ -232,7 +246,7 @@
    "link_fieldname": "custody_issue"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-08 01:40:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Issue",

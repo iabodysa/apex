@@ -12,7 +12,8 @@
   "article_name",
   "qty",
   "serial_no",
-  "condition_on_issue"
+  "condition_on_issue",
+  "unit_value"
  ],
  "fields": [
   {
@@ -61,8 +62,15 @@
    "options": "New\nGood\nFair\nPoor",
    "default": "Good",
    "idx": 5
+  },
+  {
+   "fieldname": "unit_value",
+   "fieldtype": "Currency",
+   "label": "Unit Value (SAR)",
+   "read_only": 1,
+   "description": "The article's standard cost frozen at issue; a later change to the master does not move it."
   }
  ],
  "permissions": [],
- "modified": "2026-06-09 10:00:00.000000"
+ "modified": "2026-08-08 01:40:00.000000"
 }

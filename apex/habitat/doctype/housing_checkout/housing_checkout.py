@@ -221,13 +221,28 @@ def resolve_damage_assessment_building(assignment, bed):
     )
 
 
+def _stamp_clearance(doc, clear=False):
+    """Name the person who inspected and released the resident, and unname him on cancel.
+
+    The clearance certificate used to sign off as the building's standing supervisor, who
+    may never have seen the room. Both fields are read-only and written here, and a
+    cancelled checkout drops them so no withdrawn paper keeps a signatory.
+    """
+    doc.db_set({
+        "cleared_by": None if clear else frappe.session.user,
+        "cleared_on": None if clear else frappe.utils.nowdate(),
+    })
+
+
 def on_submit(doc, method=None):
-    """Closes the assignment, frees the bed, and drafts a damage assessment for lost/damaged custody."""
+    """Closes the assignment, frees the bed, stamps the clearance, and drafts any damage assessment."""
     already = frappe.db.get_value(
         "Housing Assignment", doc.assignment, "check_out_date", for_update=True
     )
     if already:
         frappe.throw(_("This assignment was already checked out on {0}.").format(already))
+
+    _stamp_clearance(doc)
 
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)
     assignment.db_set("check_out_date", doc.checkout_date)
@@ -288,7 +303,8 @@ def before_cancel(doc, method=None):
 
 
 def on_cancel(doc, method=None):
-    """Cancels the draft damage assessment it created and reopens the assignment and bed it closed."""
+    """Drops the clearance sign-off, cancels the draft damage assessment, and reopens the stay."""
+    _stamp_clearance(doc, clear=True)
     _cancel_orphan_damage_assessment(doc)
 
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)

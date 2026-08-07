@@ -3,7 +3,9 @@
 
 {%- set building = frappe.db.get_value("Building", doc.building,
       ["building_name", "company", "responsible_supervisor"], as_dict=True) or {} -%}
-{%- set assessor = frappe.get_fullname(building.get("responsible_supervisor")) if building.get("responsible_supervisor") else None -%}
+{%- set keeper = frappe.get_fullname(building.get("responsible_supervisor")) if building.get("responsible_supervisor") else None -%}
+{%- set assessor = frappe.get_fullname(doc.assessed_by) if doc.assessed_by else keeper -%}
+{%- set approver = frappe.get_fullname(doc.approved_by) if doc.approved_by else None -%}
 {%- set emp_id = doc.employee or (doc.party if doc.party_type == "Employee" else None) -%}
 {%- set emp = (frappe.db.get_value("Employee", emp_id,
       ["employee_name", "employee_number", "designation", "department", "company"], as_dict=True) or {}) if emp_id else {} -%}
@@ -65,6 +67,10 @@
        {"ar": _("Return Date"), "en": "Returned on", "value": ret.get("return_date"), "fmt": "Date"}],
       [{"ar": _("Original Custody Issue"), "en": "Original issue", "value": ret.get("custody_issue")},
        {"ar": _("Arising from Checkout"), "en": "Housing checkout", "value": doc.source_checkout}],
+      [{"ar": _("Assessed By"), "en": "Assessed by", "value": assessor},
+       {"ar": _("Approved By"), "en": "Approved by", "value": approver}],
+      [{"ar": _("Approved On"), "en": "Approved on", "value": doc.approved_on, "fmt": "Date"},
+       {"ar": _("Notice Acknowledged On"), "en": "Acknowledged on", "value": doc.acknowledged_on, "fmt": "Datetime"}],
   ]) }}
 
   {{ ax.line_table(
@@ -92,12 +98,23 @@
 
   {{ ax.note_block(doc.remarks) }}
 
+  {{ ax.note_block(doc.objection_note, _("Objection Raised by the Worker")) }}
+
   {{ ax.photo_slots(3, _("Attach a photograph of the damage")) }}
 
-  {{ ax.declaration(_("The worker named above is notified of the damage listed and of its estimated replacement value. The worker may object to this assessment in writing to the storekeeper before it is approved. Once approved, the amount shown is recovered through payroll under company policy. Signing below records that this notice was served and read, not that its value is agreed.")) }}
+  {{ ax.declaration(_("The worker named above is notified of the damage listed and of its estimated replacement value. The worker may object to this assessment in writing to the storekeeper before it is approved; any objection recorded is printed above. Once approved by the person named above, the amount shown is recovered through payroll under company policy. Signing below records that this notice was served and read, not that its value is agreed.")) }}
+
+  {%- if doc.worker_signature and doc.worker_signature.startswith("data:") %}
+  <div class="ax-note">
+    <span class="lbl">{{ _("Electronic Acknowledgement") }}<span class="en">Electronic acknowledgement</span></span>
+    <img src="{{ doc.worker_signature }}" alt="" style="max-height:54px;max-width:220px;display:block;margin:4px 0">
+    {%- if doc.acknowledged_on %}{{ _("Acknowledged on") }}: {{ frappe.format_value(doc.acknowledged_on, {"fieldtype": "Datetime"}) }}{% endif %}
+  </div>
+  {%- endif %}
 
   {{ ax.sign_block([
       {"ar": _("Assessed by"), "en": "Storekeeper", "name": assessor},
+      {"ar": _("Approved by"), "en": "Approving manager", "name": approver},
       {"ar": _("Notice received by"), "en": "Liable worker", "name": liable},
   ]) }}
 

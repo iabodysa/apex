@@ -11,7 +11,9 @@
   "article",
   "qty",
   "condition_on_return",
-  "serial_no"
+  "serial_no",
+  "damage_note",
+  "custody_issue_item"
  ],
  "fields": [
   {
@@ -52,8 +54,25 @@
    "label": "Serial No",
    "idx": 4,
    "in_list_view": 1
+  },
+  {
+   "fieldname": "damage_note",
+   "fieldtype": "Data",
+   "label": "Damage or Loss Note",
+   "description": "What was wrong with this line, in the storekeeper's words."
+  },
+  {
+   "fieldname": "custody_issue_item",
+   "fieldtype": "Data",
+   "label": "Custody Issue Item",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1,
+   "description": "The issue line this return answers, resolved on save instead of re-matched at print time."
   }
  ],
  "permissions": [],
- "modified": "2026-06-09 10:00:00.000000"
+ "modified": "2026-08-08 01:40:00.000000"
 }

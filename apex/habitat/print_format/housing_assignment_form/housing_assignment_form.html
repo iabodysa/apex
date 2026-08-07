@@ -13,6 +13,7 @@
       ["worker_name", "iqama_number", "passport_number", "nationality", "labour_supplier"], as_dict=True) or {}) if (doc.party_type == "Temporary Worker" and doc.party) else {} -%}
 {%- set resident = doc.employee_name or emp.get("employee_name") or tmp.get("worker_name") or doc.party -%}
 {%- set nights = frappe.utils.date_diff(doc.expected_checkout_date, doc.check_in_date) if (doc.expected_checkout_date and doc.check_in_date) else None -%}
+{%- set stay_cost = ((doc.agreed_monthly_rate or 0) * nights / 30.0) if (nights and doc.agreed_monthly_rate) else None -%}
 
 {%- set rows = [] -%}
 {%- for it in doc.custody_items -%}
@@ -74,6 +75,8 @@
        {"ar": _("Moved from Building"), "en": "Previous building", "value": doc.previous_building}],
       [{"ar": _("Project"), "en": "Project", "value": doc.project},
        {"ar": _("Cost Center"), "en": "Cost center", "value": doc.cost_center}],
+      [{"ar": _("Agreed Monthly Rate (SAR)"), "en": "Agreed monthly rate", "value": doc.agreed_monthly_rate, "fmt": "Currency"},
+       {"ar": _("Cost of the Planned Stay"), "en": "Cost of planned stay", "value": stay_cost, "fmt": "Currency"}],
   ]) }}
 
   {%- if doc.is_external_supplier %}
@@ -102,6 +105,9 @@
       {"ar": _("Resident accepted the housing terms"), "en": "Terms accepted",
        "state": ("ok" if doc.terms_accepted_on else "na"),
        "note": (frappe.format_value(doc.terms_accepted_on, {"fieldtype": "Datetime"}) if doc.terms_accepted_on else _("Signed on paper below"))},
+      {"ar": _("The terms he accepted are printed on this form"), "en": "Terms on record",
+       "state": ("ok" if (doc.terms or doc.tc_name) else "bad"),
+       "note": (doc.tc_name or _("Printed in full below")) if (doc.terms or doc.tc_name) else _("No housing terms are attached to this assignment")},
       {"ar": _("Bed is an over-capacity temporary bed"), "en": "Temporary bed",
        "state": ("bad" if bed.get("is_temporary") else "ok"),
        "note": (_("Added above the room's planned capacity") if bed.get("is_temporary") else _("Within the room's planned capacity"))},

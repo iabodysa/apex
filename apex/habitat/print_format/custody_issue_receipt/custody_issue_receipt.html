@@ -10,6 +10,8 @@
 {%- set tmp = (frappe.db.get_value("Temporary Worker", doc.party,
       ["worker_name", "iqama_number", "passport_number", "labour_supplier"], as_dict=True) or {}) if (doc.party_type == "Temporary Worker" and doc.party) else {} -%}
 {%- set holder = doc.issued_to_name or emp.get("employee_name") or tmp.get("worker_name") or doc.party -%}
+{%- set issuer = frappe.get_fullname(doc.issued_by) if doc.issued_by else keeper -%}
+{%- set currency = (frappe.db.get_value("Company", building.get("company"), "default_currency") if building.get("company") else None) or frappe.db.get_default("currency") or "SAR" -%}
 
 {%- set rows = [] -%}
 {%- set serial_missing = [] -%}
@@ -22,10 +24,13 @@
         "serial_no": it.serial_no or "—",
         "qty": it.qty,
         "uom": art.get("unit_of_measure"),
-        "condition_on_issue": it.condition_on_issue}) -%}
+        "condition_on_issue": it.condition_on_issue,
+        "unit_value": it.unit_value,
+        "line_value": (it.qty or 0) * (it.unit_value or 0)}) -%}
   {%- if art.get("is_serialized") and not it.serial_no -%}{%- set _ = serial_missing.append(it.article) -%}{%- endif -%}
 {%- endfor -%}
 {%- set total_qty = doc.items | sum(attribute="qty") if doc.items else 0 -%}
+{%- set total_value = rows | sum(attribute="line_value") if rows else 0 -%}
 
 <div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
   {{ ax.watermark(doc) }}
@@ -63,18 +68,25 @@
        {"ar": _("Worker Type"), "en": "Worker type", "value": doc.party_type, "tr": True}],
       [{"ar": _("Articles Issued"), "en": "Article lines", "value": doc.items | length},
        {"ar": _("Total Quantity"), "en": "Total qty", "value": total_qty, "fmt": "Float"}],
+      [{"ar": _("Issued By"), "en": "Issued by", "value": issuer},
+       {"ar": _("Value Signed For"), "en": "Value signed for", "value": total_value, "fmt": "Currency"}],
   ]) }}
 
   {{ ax.line_table(
-      [{"ar": _("Article Code"), "en": "Code", "key": "article", "width": "15%"},
+      [{"ar": _("Article Code"), "en": "Code", "key": "article", "width": "13%"},
        {"ar": _("Article"), "en": "Description", "key": "article_name"},
-       {"ar": _("Serial No"), "en": "Serial", "key": "serial_no", "width": "17%"},
-       {"ar": _("Quantity"), "en": "Qty", "key": "qty", "num": True, "width": "9%", "fmt": "Int"},
-       {"ar": _("Unit"), "en": "UOM", "key": "uom", "width": "10%"},
-       {"ar": _("Condition on Issue"), "en": "Condition out", "key": "condition_on_issue", "width": "14%", "tr": True}],
+       {"ar": _("Serial No"), "en": "Serial", "key": "serial_no", "width": "14%"},
+       {"ar": _("Quantity"), "en": "Qty", "key": "qty", "num": True, "width": "8%", "fmt": "Int"},
+       {"ar": _("Unit"), "en": "UOM", "key": "uom", "width": "9%"},
+       {"ar": _("Condition on Issue"), "en": "Condition out", "key": "condition_on_issue", "width": "12%", "tr": True},
+       {"ar": _("Unit Value at Issue"), "en": "Unit value", "key": "unit_value", "num": True, "width": "12%", "fmt": "Currency"},
+       {"ar": _("Line Value"), "en": "Line value", "key": "line_value", "num": True, "width": "12%", "fmt": "Currency"}],
       rows,
-      totals=[frappe.format_value(total_qty, {"fieldtype": "Int"}), "", ""],
+      totals=[frappe.format_value(total_qty, {"fieldtype": "Int"}), "", "", "",
+              frappe.format_value(total_value, {"fieldtype": "Currency"})],
       empty_text=_("No articles are listed on this issue")) }}
+
+  {{ ax.amount_words(total_value, currency) }}
 
   {{ ax.note_block(doc.remarks) }}
 
@@ -82,7 +94,7 @@
   {{ ax.note_block(_("Serialised articles issued without a serial number") ~ ": " ~ (serial_missing | join(", "))) }}
   {%- endif %}
 
-  {{ ax.declaration(_("I have received the articles listed above in the quantities and the condition shown. I undertake to keep them in my care and to hand them back in the same condition on or before the return date shown. I accept that anything lost or damaged through my negligence is assessed and deducted from my dues under company policy.")) }}
+  {{ ax.declaration(_("I have received the articles listed above in the quantities, the condition and the values shown. I undertake to keep them in my care and to hand them back in the same condition on or before the return date shown. I accept that anything lost or damaged through my negligence is assessed against the values recorded here and deducted from my dues under company policy.")) }}
 
   {%- if doc.signature and doc.signature.startswith("data:") %}
   <div class="ax-note">
@@ -93,7 +105,7 @@
   {%- endif %}
 
   {{ ax.sign_block([
-      {"ar": _("Issued by"), "en": "Storekeeper", "name": keeper},
+      {"ar": _("Issued by"), "en": "Storekeeper", "name": issuer},
       {"ar": _("Received by"), "en": "Custody holder", "name": holder},
   ]) }}
 

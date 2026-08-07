@@ -20,6 +20,11 @@
   "accommodation_checkout_sec_table_custody_return_items",
   "custody_return_items",
   "custody_cleared",
+  "room_cleared",
+  "accommodation_checkout_sec_clearance",
+  "cleared_by",
+  "accommodation_checkout_clearance_col",
+  "cleared_on",
   "accommodation_checkout_sec_notes_evidence",
   "room_condition_snapshot",
   "accommodation_checkout_tab_financials",
@@ -89,6 +94,35 @@
    "fieldtype": "Check",
    "in_standard_filter": 1,
    "label": "All Custody Cleared"
+  },
+  {
+   "fieldname": "room_cleared",
+   "fieldtype": "Check",
+   "label": "Room and Fittings Cleared",
+   "description": "Tick only after the room and its fittings were inspected and accepted; custody alone is not a full clearance."
+  },
+  {
+   "fieldname": "accommodation_checkout_sec_clearance",
+   "fieldtype": "Section Break",
+   "label": "Clearance Sign-off"
+  },
+  {
+   "fieldname": "cleared_by",
+   "fieldtype": "Link",
+   "label": "Cleared By",
+   "options": "User",
+   "read_only": 1,
+   "description": "Stamped when the checkout is submitted; the person who inspected, not the building's standing supervisor."
+  },
+  {
+   "fieldname": "accommodation_checkout_clearance_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cleared_on",
+   "fieldtype": "Date",
+   "label": "Cleared On",
+   "read_only": 1
   },
   {
    "fieldname": "accommodation_checkout_sec_resident",
@@ -273,7 +307,7 @@
    "link_fieldname": "source_checkout"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-08 01:40:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Checkout",

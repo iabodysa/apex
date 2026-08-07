@@ -7,6 +7,7 @@
   .ax-verdict .word .en { display: block; font-size: 8.5px; font-weight: 400; letter-spacing: .08em; }
   .ax-verdict .why { font-size: 10px; line-height: 1.7; text-align: end; }
   .ax-verdict.ok { border-color: #00844e; background: #f0f7f3; color: #05502f; }
+  .ax-verdict.part { border-color: #b8862b; background: #fdfaf1; color: #6d4e10; }
   .ax-verdict.hold { border-color: #b23b2e; background: #fdf3f1; color: #7d2418; }
 </style>
 
@@ -16,6 +17,7 @@
 {%- set building = (frappe.db.get_value("Building", asg.get("building"),
       ["building_name", "company", "site", "city"], as_dict=True) or {}) if asg.get("building") else {} -%}
 {%- set supervisor = frappe.get_fullname(asg.get("responsible_supervisor")) if asg.get("responsible_supervisor") else None -%}
+{%- set inspector = frappe.get_fullname(doc.cleared_by) if doc.cleared_by else None -%}
 {%- set room = (frappe.db.get_value("Room", asg.get("room"), ["room_number", "floor"], as_dict=True) or {}) if asg.get("room") else {} -%}
 {%- set bed = (frappe.db.get_value("Bed", doc.bed, "bed_code")) if doc.bed else None -%}
 {%- set emp = (frappe.db.get_value("Employee", doc.employee,
@@ -34,6 +36,7 @@
   {%- set _ = rows.append({
         "article": it.article,
         "article_name": art,
+        "serial_no": it.serial_no or "—",
         "quantity_issued": it.quantity_issued,
         "quantity_returned": it.quantity_returned,
         "gap": (it.quantity_issued or 0) - (it.quantity_returned or 0),
@@ -47,7 +50,9 @@
 {%- set total_returned = doc.custody_return_items | sum(attribute="quantity_returned") if doc.custody_return_items else 0 -%}
 {%- set total_deduction = doc.damage_deduction_amount or (doc.custody_return_items | sum(attribute="deduction_amount") if doc.custody_return_items else 0) -%}
 {%- set settled = (not total_deduction) or doc.additional_salary_deduction -%}
-{%- set cleared = doc.custody_cleared and settled and not shortfall -%}
+{%- set custody_ok = doc.custody_cleared and settled and not shortfall -%}
+{%- set cleared = custody_ok and doc.room_cleared -%}
+{%- set custody_only = custody_ok and not doc.room_cleared -%}
 
 <div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
   {{ ax.watermark(doc) }}
@@ -57,18 +62,21 @@
   {{ ax.doc_title(doc, _("Housing Checkout Clearance"), "Housing Checkout Clearance",
                   (_("Reason") ~ ": " ~ _(doc.checkout_reason)) if doc.checkout_reason else "") }}
 
-  <div class="ax-verdict {{ 'ok' if cleared else 'hold' }}">
+  <div class="ax-verdict {{ 'ok' if cleared else ('part' if custody_only else 'hold') }}">
     <div class="word">
-      {{ _("Cleared") if cleared else _("Not Cleared") }}
-      <span class="en">{{ "CLEARED" if cleared else "NOT CLEARED" }}</span>
+      {{ _("Cleared") if cleared else (_("Custody Cleared Only") if custody_only else _("Not Cleared")) }}
+      <span class="en">{{ "CLEARED" if cleared else ("CUSTODY ONLY" if custody_only else "NOT CLEARED") }}</span>
     </div>
     <div class="why">
       {%- if cleared %}
-      {{ _("All housing custody is accounted for and nothing is outstanding against this resident.") }}
+      {{ _("Housing custody is accounted for, the room was inspected and accepted, and nothing is outstanding against this resident.") }}
+      {%- elif custody_only %}
+      {{ _("Housing custody is accounted for, but the room and its fittings have not been inspected and accepted. This paper releases the custody only.") }}
       {%- else %}
       {%- if not doc.custody_cleared %}{{ _("Housing custody is not yet marked as fully cleared.") }}<br>{% endif %}
       {%- if shortfall %}{{ _("{0} custody line(s) came back short, lost or damaged.").format(shortfall | length) }}<br>{% endif %}
-      {%- if total_deduction and not doc.additional_salary_deduction %}{{ _("A deduction is due and no payroll entry has been raised yet.") }}{% endif %}
+      {%- if total_deduction and not doc.additional_salary_deduction %}{{ _("A deduction is due and no payroll entry has been raised yet.") }}<br>{% endif %}
+      {%- if not doc.room_cleared %}{{ _("The room and its fittings have not been inspected and accepted.") }}{% endif %}
       {%- endif %}
     </div>
   </div>
@@ -104,16 +112,19 @@
        {"ar": _("Bed Released"), "en": "Bed released", "value": bed or doc.bed}],
       [{"ar": _("Project"), "en": "Project", "value": asg.get("project")},
        {"ar": _("Cost Center"), "en": "Cost center", "value": doc.cost_center}],
+      [{"ar": _("Cleared By"), "en": "Inspected and cleared by", "value": inspector or supervisor},
+       {"ar": _("Cleared On"), "en": "Cleared on", "value": doc.cleared_on, "fmt": "Date"}],
   ]) }}
 
   {{ ax.line_table(
-      [{"ar": _("Article Code"), "en": "Code", "key": "article", "width": "14%"},
+      [{"ar": _("Article Code"), "en": "Code", "key": "article", "width": "12%"},
        {"ar": _("Custody Article"), "en": "Description", "key": "article_name"},
-       {"ar": _("Quantity Issued"), "en": "Issued", "key": "quantity_issued", "num": True, "width": "9%", "fmt": "Int"},
-       {"ar": _("Quantity Returned"), "en": "Returned", "key": "quantity_returned", "num": True, "width": "9%", "fmt": "Int"},
-       {"ar": _("Shortfall"), "en": "Short", "key": "gap", "num": True, "width": "8%", "fmt": "Int"},
-       {"ar": _("Return Status"), "en": "Status", "key": "return_status", "width": "12%", "tr": True},
-       {"ar": _("Deduction"), "en": "Deduction", "key": "deduction_amount", "num": True, "width": "14%", "fmt": "Currency"}],
+       {"ar": _("Serial No"), "en": "Serial", "key": "serial_no", "width": "13%"},
+       {"ar": _("Quantity Issued"), "en": "Issued", "key": "quantity_issued", "num": True, "width": "8%", "fmt": "Int"},
+       {"ar": _("Quantity Returned"), "en": "Returned", "key": "quantity_returned", "num": True, "width": "8%", "fmt": "Int"},
+       {"ar": _("Shortfall"), "en": "Short", "key": "gap", "num": True, "width": "7%", "fmt": "Int"},
+       {"ar": _("Return Status"), "en": "Status", "key": "return_status", "width": "11%", "tr": True},
+       {"ar": _("Deduction"), "en": "Deduction", "key": "deduction_amount", "num": True, "width": "13%", "fmt": "Currency"}],
       rows,
       totals=[frappe.format_value(total_issued, {"fieldtype": "Int"}),
               frappe.format_value(total_returned, {"fieldtype": "Int"}),
@@ -128,6 +139,9 @@
       {"ar": _("All housing custody returned"), "en": "Custody cleared",
        "state": ("ok" if doc.custody_cleared else "bad"),
        "note": (_("Confirmed by the facility supervisor") if doc.custody_cleared else _("Still open on the resident's account"))},
+      {"ar": _("Room and fittings inspected and accepted"), "en": "Room cleared",
+       "state": ("ok" if doc.room_cleared else "bad"),
+       "note": (_("Inspected and accepted at checkout") if doc.room_cleared else _("Not inspected; this clearance covers custody only"))},
       {"ar": _("Room condition photographed at checkout"), "en": "Room condition on file",
        "state": ("ok" if doc.room_condition_snapshot else "na"),
        "note": (_("Photograph stored against this checkout") if doc.room_condition_snapshot else _("No checkout photograph on file"))},
@@ -146,10 +160,10 @@
 
   {{ ax.note_block(doc.cancellation_reason) }}
 
-  {{ ax.declaration(_("This certificate records that the resident named above left the bed shown on the checkout date. It is a final clearance only where the box above reads Cleared: all housing custody accounted for and any amount due settled or raised on payroll. Where it reads Not Cleared, the open items listed remain on the resident's account and this paper does not release them.")) }}
+  {{ ax.declaration(_("This certificate records that the resident named above left the bed shown on the checkout date. It is a final clearance only where the box above reads Cleared: all housing custody accounted for, the room inspected and accepted, and any amount due settled or raised on payroll. Where it reads Custody Cleared Only, it releases the custody and nothing else. Where it reads Not Cleared, the open items listed remain on the resident's account and this paper does not release them.")) }}
 
   {{ ax.sign_block([
-      {"ar": _("Cleared by"), "en": "Responsible Facility Supervisor", "name": supervisor},
+      {"ar": _("Cleared by"), "en": "Inspected and cleared by", "name": inspector or supervisor},
       {"ar": _("Departing Resident"), "en": "Departing resident", "name": resident},
   ]) }}
 

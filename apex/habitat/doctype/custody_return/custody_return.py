@@ -24,7 +24,42 @@ def validate(doc, method=None):
         if (row.qty or 0) <= 0:
             frappe.throw(_("Row {0}: Qty must be greater than zero.").format(row.idx))
     validate_serialized_rows(doc)
+    _link_issue_lines(doc)
     _validate_return_quantities(doc)
+
+
+def _link_issue_lines(doc):
+    """Resolve every return line to the issue line it answers, once, on save.
+
+    Without it the receipt re-matches article and serial each time it prints, so the
+    reconciliation the paper shows depends on when it was printed rather than on what was
+    agreed. A serial identifies its line outright; an unserialised article resolves only
+    while exactly one issue line carries it, because a guess is worse than a blank. A line
+    that resolves to nothing is cleared, so re-pointing a return never leaves a stale
+    reference behind.
+    """
+    issue_rows = frappe.get_all(
+        "Custody Issue Item",
+        filters={"parent": doc.custody_issue, "parenttype": "Custody Issue"},
+        fields=["name", "article", "serial_no"],
+    ) if doc.custody_issue else []
+
+    by_serial = {
+        (row.article, (row.serial_no or "").strip()): row.name
+        for row in issue_rows
+        if (row.serial_no or "").strip()
+    }
+    by_article = {}
+    for row in issue_rows:
+        by_article.setdefault(row.article, []).append(row.name)
+
+    for row in doc.items:
+        serial = (row.serial_no or "").strip()
+        match = by_serial.get((row.article, serial)) if serial else None
+        if not match:
+            candidates = by_article.get(row.article) or []
+            match = candidates[0] if len(candidates) == 1 else None
+        row.custody_issue_item = match
 
 
 def _validate_return_quantities(doc):
@@ -217,7 +252,11 @@ def make_damage_assessment(source_name, target_doc=None):
             },
             "Custody Return Item": {
                 "doctype": "Custody Damage Item",
-                "field_map": {"article": "article", "serial_no": "serial_no"},
+                "field_map": {
+                    "article": "article",
+                    "serial_no": "serial_no",
+                    "damage_note": "damage_description",
+                },
                 "condition": lambda row: row.condition_on_return in _DAMAGED_CONDITIONS,
             },
         },

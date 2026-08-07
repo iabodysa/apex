@@ -46,13 +46,15 @@
   ]) }}
 
   {{ ax.line_table(
-      [{"ar": _("Item Type"), "en": "Type", "key": "item_type", "width": "16%", "tr": True},
-       {"ar": _("Item Code"), "en": "Code", "key": "item", "width": "17%"},
+      [{"ar": _("Item Type"), "en": "Type", "key": "item_type", "width": "13%", "tr": True},
+       {"ar": _("Item Code"), "en": "Code", "key": "item", "width": "14%"},
        {"ar": _("Item Name"), "en": "Description", "key": "item_name"},
-       {"ar": _("Quantity"), "en": "Qty", "key": "qty", "num": True, "width": "11%", "fmt": "Float"},
-       {"ar": _("Unit"), "en": "UOM", "key": "uom", "width": "11%"}],
+       {"ar": _("Quantity"), "en": "Qty", "key": "qty", "num": True, "width": "9%", "fmt": "Float"},
+       {"ar": _("Unit"), "en": "UOM", "key": "uom", "width": "9%"},
+       {"ar": _("Condition"), "en": "Condition", "key": "condition_on_transfer", "width": "11%", "tr": True},
+       {"ar": _("Shortage or Damage Note"), "en": "Shortage / damage", "key": "shortage_note", "width": "16%"}],
       doc.items,
-      totals=[frappe.format_value(total_qty, {"fieldtype": "Float"}), ""],
+      totals=[frappe.format_value(total_qty, {"fieldtype": "Float"}), "", "", ""],
       empty_text=_("No items are listed on this handover")) }}
 
   {{ ax.check_list([
@@ -66,6 +68,8 @@
        "state": ("ok" if confirmed else "na"),
        "note": (_(doc.status) if doc.status else "")},
   ]) }}
+
+  {{ ax.note_block(doc.remarks, _("Remarks")) }}
 
   {{ ax.declaration(_("The receiving supervisor confirms taking the items listed above into the receiving building store in the quantities shown. Responsibility for this stock, and for any shortage found later, passes to the receiving store from the handover date. The releasing store is discharged only for the quantities confirmed above.")) }}
 

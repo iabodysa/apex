@@ -33,6 +33,8 @@
 {%- set building = frappe.db.get_value("Building", doc.building,
       ["building_name", "site", "city", "responsible_supervisor"], as_dict=True) or {} -%}
 {%- set supervisor = frappe.get_fullname(building.get("responsible_supervisor")) if building.get("responsible_supervisor") else None -%}
+{%- set contact = (frappe.db.get_value("User", building.get("responsible_supervisor"), ["mobile_no", "phone"], as_dict=True) or {}) if building.get("responsible_supervisor") else {} -%}
+{%- set supervisor_phone = contact.get("mobile_no") or contact.get("phone") -%}
 {%- set room = (frappe.db.get_value("Room", doc.room, "room_number")) if doc.room else None -%}
 {%- set site = frappe.db.get_value("Site", doc.accommodation_site, "site_name") if doc.accommodation_site else building.get("site") -%}
 {%- set qr = qr_data_uri(doc.public_url) if (qr_data_uri is defined and doc.public_url) else None -%}
@@ -96,7 +98,7 @@
 
     <div class="ax-stop">
       {{ _("Fire, injury or anything dangerous: do not use this code. Call your facility supervisor now.") }}
-      {%- if supervisor %}<br>{{ _("Facility Supervisor") }}: {{ supervisor }}{% endif %}
+      {%- if supervisor %}<br>{{ _("Facility Supervisor") }}: {{ supervisor }}{% if supervisor_phone %} · {{ supervisor_phone }}{% endif %}{% endif %}
     </div>
 
     {{ ax.note_block(doc.notes) }}

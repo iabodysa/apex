@@ -10,7 +10,6 @@ AR
 Actor
 After
 Apex 2.0.4 — Guided first-time setup, ready accommodation supplies, and preserved Item Group organization
-Approved On
 At
 Audience
 Audit
@@ -107,7 +106,6 @@ Timesheet Exception Workbench
 Timesheet Period
 Tools
 Transform
-VAT
 Verdict
 Version
 active

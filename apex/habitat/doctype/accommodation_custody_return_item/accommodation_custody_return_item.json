@@ -10,6 +10,7 @@
  "sort_order": "DESC",
  "field_order": [
   "article",
+  "serial_no",
   "quantity_issued",
   "quantity_returned",
   "return_status",
@@ -25,6 +26,12 @@
    "reqd": 1,
    "in_list_view": 1,
    "idx": 1
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Data",
+   "label": "Serial No",
+   "description": "Which physical unit came back, for a serialised article."
   },
   {
    "doctype": "DocField",
@@ -64,5 +71,5 @@
   }
  ],
  "permissions": [],
- "modified": "2026-06-09 10:00:00.000000"
+ "modified": "2026-08-08 01:40:00.000000"
 }

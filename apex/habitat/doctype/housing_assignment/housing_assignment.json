@@ -28,6 +28,7 @@
   "accommodation_assignment_sec_billing",
   "project",
   "cost_center",
+  "agreed_monthly_rate",
   "accommodation_assignment_billing_col",
   "is_external_supplier",
   "billed_to_supplier",
@@ -37,6 +38,9 @@
   "terms_accepted_on",
   "accommodation_assignment_terms_col",
   "terms_signature",
+  "accommodation_assignment_sec_terms_text",
+  "tc_name",
+  "terms",
   "accommodation_assignment_sec_table_custody_items",
   "custody_items",
   "accommodation_assignment_sec_large_text",
@@ -224,6 +228,12 @@
    "fetch_if_empty": 1
   },
   {
+   "fieldname": "agreed_monthly_rate",
+   "fieldtype": "Currency",
+   "label": "Agreed Monthly Rate (SAR)",
+   "description": "What this bed costs the project each month; defaults once from the building's monthly cost per bed."
+  },
+  {
    "fieldname": "accommodation_assignment_billing_col",
    "fieldtype": "Column Break"
   },
@@ -280,6 +290,24 @@
    "label": "Terms Signature",
    "permlevel": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_sec_terms_text",
+   "fieldtype": "Section Break",
+   "label": "Terms and Conditions",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "tc_name",
+   "fieldtype": "Link",
+   "label": "Terms",
+   "options": "Terms and Conditions",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Text Editor",
+   "label": "Terms and Conditions"
   },
   {
    "fieldname": "accommodation_assignment_sec_table_custody_items",
@@ -383,7 +411,7 @@
    "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-08 01:40:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Assignment",
