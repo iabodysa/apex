@@ -388,6 +388,50 @@ def get_worker_accommodation(token=None):
     }
 
 
+def _live_trips_by_request(request_names, status_map):
+    """The dispatched trip for each request that has no stored link yet, in ONE read.
+
+    ``Transport Request.dispatch_trip`` is stamped only at fulfilment, so during the
+    en-route window — the exact moment a worker opens the screen — the link is empty
+    and the trip has to be resolved from the trip's own back-link. Resolving it per
+    row is one query per request; resolving the whole set is one query total, and the
+    status rides along in the same read so those rows cost nothing extra either.
+
+    ``status_map`` is filled in place for the trips found here, so a caller holding
+    both maps can answer every row's status without another read.
+    """
+    live = {}
+    if not request_names:
+        return live
+    for dt in frappe.get_all(
+        "Dispatch Trip",
+        filters={
+            "transport_request": ["in", request_names],
+            "status": "Dispatched",
+            "docstatus": ["<", 2],
+        },
+        fields=["name", "transport_request", "status"],
+    ):
+        live[dt["transport_request"]] = dt["name"]
+        status_map[dt["name"]] = dt["status"]
+    return live
+
+
+def _trip_status(dispatch_trip, status_map):
+    """The Dispatch Trip status, taken from the batches the caller already fetched.
+
+    Membership is tested rather than truthiness because a trip with a null status is
+    in the batch and must not be re-read. A trip absent from both batches is a row
+    neither read covers, and it falls back to a single read rather than reporting a
+    status the endpoint never established.
+    """
+    if not dispatch_trip:
+        return None
+    if dispatch_trip in status_map:
+        return status_map[dispatch_trip]
+    return frappe.db.get_value("Dispatch Trip", dispatch_trip, "status")
+
+
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_transport(token=None):
@@ -436,13 +480,18 @@ def get_worker_transport(token=None):
         ):
             driver_map[d["name"]] = {"full_name": d["full_name"], "phone": d["phone"]}
     depart_map = {}
+    status_map = {}
     if trip_names:
         for dt in frappe.get_all(
             "Dispatch Trip",
             filters={"name": ["in", list(trip_names)]},
-            fields=["name", "depart_time"],
+            fields=["name", "depart_time", "status"],
         ):
             depart_map[dt["name"]] = dt["depart_time"]
+            status_map[dt["name"]] = dt["status"]
+    live_map = _live_trips_by_request(
+        [r["name"] for r in requests if not r.get("dispatch_trip")], status_map
+    )
     rated_trips = set()
     if trip_names:
         rated_trips = set(
@@ -472,7 +521,7 @@ def get_worker_transport(token=None):
             req.get("dispatch_trip") and not is_upcoming and req["dispatch_trip"] in rated_trips
         )
 
-        dispatch_trip = req.get("dispatch_trip") or _live_dispatch_trip(req["name"])
+        dispatch_trip = req.get("dispatch_trip") or live_map.get(req["name"])
         window = boarding_window.resolve(
             dispatch_trip,
             req["name"],
@@ -484,9 +533,7 @@ def get_worker_transport(token=None):
             "dispatch_trip": dispatch_trip,
             "request_type": req.get("request_type"),
             "status": req.get("status"),
-            "trip_status": frappe.db.get_value("Dispatch Trip", dispatch_trip, "status")
-            if dispatch_trip
-            else None,
+            "trip_status": _trip_status(dispatch_trip, status_map),
             "pickup_point": req.get("pickup_point"),
             "pickup_datetime": pickup_datetime,
             "depart_time": depart_time,
