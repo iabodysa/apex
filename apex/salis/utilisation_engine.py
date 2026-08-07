@@ -12,6 +12,8 @@ Reports and KPIs derive from the snapshots.
 import frappe
 from frappe.utils import add_days, getdate, today
 
+from apex.apex_core.utils.system_write import system_insert
+
 PERIOD_DAYS = 7
 
 
@@ -76,7 +78,7 @@ def weekly_vehicle_utilisation_snapshot() -> None:
                     round(days_with_trip / PERIOD_DAYS * 100, 2) if PERIOD_DAYS else 0.0
                 )
 
-                frappe.get_doc(
+                system_insert(frappe.get_doc(
                     {
                         "doctype": "Vehicle Utilisation Snapshot",
                         "snapshot_date": snapshot_date,
@@ -86,7 +88,7 @@ def weekly_vehicle_utilisation_snapshot() -> None:
                         "idle_days": idle_days,
                         "utilisation_pct": utilisation_pct,
                     }
-                ).insert(ignore_permissions=True)
+                ))
             except Exception:
                 frappe.db.rollback(save_point=sp)
                 frappe.log_error(

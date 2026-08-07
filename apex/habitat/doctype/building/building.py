@@ -18,6 +18,8 @@ from frappe.utils import flt, today
 from apex.habitat.utils import building_rollup, occupancy, room_generator, safety_setup
 from apex.habitat.utils.room_generator import room_number as _room_number  # noqa: F401
 
+from apex.apex_core.utils.system_write import system_insert
+
 
 class Building(Document):
     pass
@@ -120,14 +122,14 @@ def on_update(doc, method=None):
         for perm in _building_supervisor_permissions(old_sup, doc.name):
             frappe.delete_doc("User Permission", perm, ignore_permissions=True)
     if new_sup and not _building_supervisor_permissions(new_sup, doc.name):
-        frappe.get_doc(
+        system_insert(frappe.get_doc(
             {
                 "doctype": "User Permission",
                 "user": new_sup,
                 "allow": "Building",
                 "for_value": doc.name,
             }
-        ).insert(ignore_permissions=True)
+        ))
 
 
 def _recompute_capacity_and_cost(doc):

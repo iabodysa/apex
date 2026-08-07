@@ -11,6 +11,8 @@ from apex.salis.tasks.common import (
     _notify_fleet_role,
 )
 
+from apex.apex_core.utils.system_write import system_save
+
 _ROW_SAVEPOINT = "salis_fuel_row"
 
 
@@ -60,7 +62,7 @@ def unreverted_topup_watch() -> None:
                 doc = frappe.get_doc("Fuel Request", t.name)
                 doc.reverted = 1
                 doc.status = "Reverted"
-                doc.save(ignore_permissions=True)
+                system_save(doc)
                 doc.add_comment(
                     "Info",
                     _("Auto-reverted: overdue temporary top-up (was due {0}).").format(

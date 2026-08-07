@@ -33,6 +33,8 @@ import frappe
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import flt, today
 
+from apex.apex_core.utils.system_write import system_insert
+
 LEDGER_DOCTYPE = "Rental Accrual Ledger"
 BATCH_SIZE = 500
 
@@ -123,7 +125,7 @@ def daily_rental_accrual() -> None:
 
                 company = vehicle_row.company or _default_company
 
-                frappe.get_doc(
+                system_insert(frappe.get_doc(
                     {
                         "doctype": "Rental Accrual Ledger",
                         "vehicle": vehicle,
@@ -136,7 +138,7 @@ def daily_rental_accrual() -> None:
                         "source_doctype": source_doctype,
                         "source_name": source_name,
                     }
-                ).insert(ignore_permissions=True)
+                ))
             except Exception:
                 frappe.db.rollback(save_point=sp)
                 frappe.log_error(

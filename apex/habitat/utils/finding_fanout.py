@@ -27,6 +27,8 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.system_write import system_insert
+
 _STE_DOCTYPE = "Safety Task Execution"
 _SIR_DOCTYPE = "Safety Inspection Report"
 
@@ -78,7 +80,7 @@ def _spawn_request(finding, source_doc) -> str:
     mr.reported_by = _reported_by(source_doc)
     mr.status = "Open"
     _stamp_source(mr, source_doc)
-    mr.insert(ignore_permissions=True)
+    system_insert(mr)
     return mr.name
 
 

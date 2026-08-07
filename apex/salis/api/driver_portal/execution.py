@@ -14,6 +14,8 @@ from apex.salis.api.driver_portal import (
     _stop_progress_map,
 )
 
+from apex.apex_core.utils.system_write import system_insert
+
 
 def _trip_log_state(driver, dispatch_trip):
     """The driver's Trip Start Log state for a trip as the portal's display shape.
@@ -68,7 +70,7 @@ def start_my_trip(dispatch_trip):
                 "start_datetime": frappe.utils.now_datetime(),
             }
         )
-        doc.insert(ignore_permissions=True)
+        system_insert(doc)
     return _trip_log_state(driver, dispatch_trip)
 
 

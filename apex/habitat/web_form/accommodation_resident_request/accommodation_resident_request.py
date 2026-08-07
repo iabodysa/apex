@@ -4,6 +4,8 @@ from frappe import _
 
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 
+from apex.apex_core.utils.system_write import system_insert
+
 
 def get_context(context):
     """Disables caching on the resident request web form so every visit renders fresh."""
@@ -45,5 +47,5 @@ def submit_resident_request(
         "mobile_number": contact_number,
         "source_channel": "QR Web Form",
     })
-    doc.insert(ignore_permissions=True)
+    system_insert(doc)
     return {"name": doc.name, "tracking_code": doc.anonymous_tracking_code}

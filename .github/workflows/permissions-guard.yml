@@ -34,17 +34,21 @@ on:
 # Review: the call runs only from after_install / after_migrate, which execute as
 # Administrator, and inserts one Letter Head built from the configured Company. It
 # reads no request input and never runs inside a web request, so the bypass grants
-# nothing an install does not already have. Every one of the eight sibling seeders
-# in that folder inserts the same way.
+# nothing an install does not already have.
 #
-# 131 -> 94 the same day: the sanctioned helper now EXISTS at the SANCTIONED path and
-# exports system_insert / system_save / system_delete, and the installer, the demo
-# estate, the seeders, the notification helper and the logistay billing API moved
-# behind it. What remains is salis 54 and habitat 35, which are card A-422.
+# THE COUNT NOW INCLUDES BOTH SPELLINGS, measured 2026-08-08 and corrected the same
+# hour. Moving 105 sites behind system_insert / system_save / system_delete dropped
+# the raw count 131 -> 26 while granting exactly the same thing 131 times: 26 raw +
+# 105 named = 131, the number we started with. A guard that counted only the raw
+# spelling would have reported a 80% reduction for a rename. That is the very defect
+# the paragraph above warns about -- a count blind to one spelling is no count -- so
+# the guard now counts the named calls too and the baseline is the honest total.
+# It falls only when a call site stops bypassing permissions, not when it is renamed.
 
 env:
-  BASELINE: 94
+  BASELINE: 131
   BYPASS_RE: 'ignore_permissions["'']?[[:space:]]*[=:][[:space:]]*(True|1)'
+  NAMED_RE: '(system_insert|system_save|system_delete)[[:space:]]*\('
   SANCTIONED: 'apex/apex_core/utils/system_write.py'
 
 jobs:
@@ -58,26 +62,32 @@ jobs:
           # Production code only. Test files (tests/ and test_*.py) legitimately use
           # a permission bypass to build fixtures and are not a runtime security
           # surface, so they are excluded from the guard.
-          COUNT=$(grep -rnE "$BYPASS_RE" apex/ --include="*.py" \
-            | grep -v "^$SANCTIONED:" \
-            | grep -vE '/tests/|/test_[A-Za-z0-9_]*\.py:' \
-            | wc -l \
-            | tr -d ' ')
+          sites() {
+            grep -rnE "$1" apex/ --include="*.py" \
+              | grep -v "^$SANCTIONED:" \
+              | grep -v 'import system_' \
+              | grep -vE '/tests/|/test_[A-Za-z0-9_]*\.py:' || true
+          }
 
-          echo "Raw permission bypasses outside $SANCTIONED: $COUNT"
+          RAW=$(sites "$BYPASS_RE" | wc -l | tr -d ' ')
+          NAMED=$(sites "$NAMED_RE" | wc -l | tr -d ' ')
+          COUNT=$((RAW + NAMED))
+
+          echo "Raw spelling (ignore_permissions=):   $RAW"
+          echo "Named spelling (system_* helpers):    $NAMED"
+          echo "Permission bypasses outside $SANCTIONED: $COUNT"
           echo "Baseline: $BASELINE"
 
           if [ "$COUNT" -gt "$BASELINE" ]; then
             echo ""
-            echo "ERROR: $COUNT raw permission bypasses found; baseline is $BASELINE."
+            echo "ERROR: $COUNT permission bypasses found; baseline is $BASELINE."
             echo ""
             echo "Call sites:"
-            grep -rnE "$BYPASS_RE" apex/ --include="*.py" \
-              | grep -v "^$SANCTIONED:" \
-              | grep -vE '/tests/|/test_[A-Za-z0-9_]*\.py:' || true
+            sites "$BYPASS_RE"
+            sites "$NAMED_RE"
             echo ""
             echo "To fix:"
-            echo "  - Call system_insert / system_save / system_delete from"
+            echo "  - Remove the bypass, or make the write go through permissions."
             echo "    $SANCTIONED, whose name states the bypass, and lower BASELINE."
             echo "  - If the bypass was added by mistake, remove it."
             exit 1

@@ -70,6 +70,8 @@ from apex.salis.api.masar_worker import (
     _worker_documents,
 )
 
+from apex.apex_core.utils.system_write import system_insert, system_save
+
 
 @frappe.whitelist()
 def get_my_worker_route_today():
@@ -786,7 +788,7 @@ def create_worker_request(
             "status": "New",
         }
     )
-    doc.insert(ignore_permissions=True)
+    system_insert(doc)
     if photo:
         _attach_worker_photo(doc, photo, photo_filename)
     return {"name": doc.name, "status": doc.status}
@@ -980,7 +982,7 @@ def _get_or_create_trip_log(dispatch_trip):
             "start_datetime": frappe.utils.now_datetime(),
         }
     )
-    log.insert(ignore_permissions=True)
+    system_insert(log)
     from apex.salis.api.boarding_flow import ensure_trip_boarding_state
 
     ensure_trip_boarding_state(dispatch_trip)
@@ -1060,7 +1062,7 @@ def confirm_boarding(token=None, transport_request=None):
             "method": _WORKER_BOARDING_METHOD,
         },
     )
-    log.save(ignore_permissions=True)
+    system_save(log)
     from apex.salis.api.boarding_flow import mark_boarded
 
     mark_boarded(dispatch_trip, employee)
@@ -1211,7 +1213,7 @@ def create_worker_transport_request(
             "adhoc_passengers": adhoc_rows,
         }
     )
-    doc.insert(ignore_permissions=True)
+    system_insert(doc)
     return {"name": doc.name, "status": doc.status, "adhoc_count": len(adhoc_rows)}
 
 
@@ -1292,5 +1294,5 @@ def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=Non
         "transport_request": transport_request,
         "feedback": (feedback or "").strip()[:2000]
     })
-    doc.insert(ignore_permissions=True)
+    system_insert(doc)
     return {"status": "success", "name": doc.name}

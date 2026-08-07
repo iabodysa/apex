@@ -4,6 +4,8 @@ from frappe import _
 
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 
+from apex.apex_core.utils.system_write import system_insert
+
 
 def get_context(context):
     """Disables page caching for the Vehicle Incident web form."""
@@ -55,5 +57,5 @@ def submit_vehicle_incident(
         "reported_by": reported_by,
         "status": "Open",
     })
-    doc.insert(ignore_permissions=True)
+    system_insert(doc)
     return {"name": doc.name}

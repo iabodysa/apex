@@ -16,6 +16,8 @@ from frappe import _
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.habitat.doctype.arrival_batch.arrival_batch import _MAX_EXPECTED_WORKERS
 
+from apex.apex_core.utils.system_write import system_insert
+
 _ALLOWED_WORKER_FIELDS = ("worker_name", "passport_number", "nationality")
 
 
@@ -71,5 +73,5 @@ def submit_arrival_manifest(
         "project": project,
         "expected_workers": rows,
     })
-    doc.insert(ignore_permissions=True)
+    system_insert(doc)
     return {"name": doc.name}

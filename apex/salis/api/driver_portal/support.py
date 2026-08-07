@@ -12,6 +12,8 @@ from apex.salis.api.driver_portal import (
     _license_countdown,
 )
 
+from apex.apex_core.utils.system_write import system_insert
+
 
 SUPPORT_SUBJECT_MAX_LENGTH = 140
 SUPPORT_DESCRIPTION_MAX_LENGTH = 10_000
@@ -149,7 +151,7 @@ def _create_support_ticket(
     if project:
         data["project"] = project
     doc = frappe.get_doc(data)
-    doc.insert(ignore_permissions=True)
+    system_insert(doc)
     from apex.salis.api.driver_portal.images import save_driver_image
 
     save_driver_image(photo, photo_filename, doc.doctype, doc.name)
@@ -274,7 +276,7 @@ def reply_to_ticket(name, message):
             "content": message,
         }
     )
-    comm.insert(ignore_permissions=True)
+    system_insert(comm)
     if issue.get("status") in ("Resolved", "Closed"):
         frappe.db.set_value("Issue", name, "status", "Open")
     return {"name": comm.name}

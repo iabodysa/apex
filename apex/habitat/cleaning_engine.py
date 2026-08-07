@@ -26,6 +26,8 @@ from frappe.utils import cint, now_datetime
 
 from apex.apex_core.utils.company import company_for_building
 
+from apex.apex_core.utils.system_write import system_insert
+
 LEDGER_DOCTYPE = "Cleaning Compliance Ledger"
 SOURCE_DOCTYPE = "Cleaning Log"
 
@@ -83,7 +85,7 @@ def _insert_ledger_row(
             "reversal_of": reversal_of,
         }
     )
-    doc.insert(ignore_permissions=True)
+    system_insert(doc)
     return doc.name
 
 

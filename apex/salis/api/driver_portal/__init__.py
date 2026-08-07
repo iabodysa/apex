@@ -7,6 +7,8 @@ supplies a driver id.
 """
 
 import frappe
+
+from apex.apex_core.utils.system_write import system_save
 from frappe import _
 
 from apex.apex_core.utils.rate_limit_identity import rate_limit
@@ -500,7 +502,7 @@ def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
             "last_seen": frappe.utils.now_datetime(),
         }
     )
-    doc.save(ignore_permissions=True)
+    system_save(doc)
     return {"name": doc.name}
 
 
@@ -556,3 +558,4 @@ from apex.salis.api.driver_portal.notifications import (  # noqa: E402
 from apex.salis.api.driver_portal.home import (  # noqa: E402
     get_my_today,
 )
+

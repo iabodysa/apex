@@ -44,6 +44,8 @@ from apex.salis.utils import (
     revert_transport_request,
 )
 
+from apex.apex_core.utils.system_write import system_insert
+
 
 class DispatchTrip(Document):
     def validate(self):
@@ -292,7 +294,7 @@ class DispatchTrip(Document):
                 "source_name": self.name,
             }
         )
-        ledger.insert(ignore_permissions=True)
+        system_insert(ledger)
 
     def on_cancel(self):
         """Reverse the on_submit fulfilment effects so a cancelled trip does not
