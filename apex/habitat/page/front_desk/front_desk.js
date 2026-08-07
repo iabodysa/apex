@@ -728,7 +728,7 @@ class FrontDesk {
 					fieldtype: "Attach Image",
 				},
 			],
-			primary_action_label: __("Check In"),
+			primary_action_label: __("Check In Resident"),
 			primary_action: (values) => {
 				d.hide();
 				this._set_bed_updating($card, true);
