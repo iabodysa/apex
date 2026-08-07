@@ -19,6 +19,8 @@ about the master toggle itself.
 
 import frappe
 
+from apex.apex_core.utils.system_write import system_insert
+
 
 def seed_auto_email_reports_for(reports):
     """Create each ``{"report", "frequency"}`` entry as a disabled Auto Email Report
@@ -47,5 +49,5 @@ def seed_auto_email_reports_for(reports):
             "data_modified_till": 0,
             "no_of_rows": 100,
         })
-        doc.insert(ignore_permissions=True)
+        system_insert(doc)
     frappe.db.commit()

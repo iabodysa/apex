@@ -14,6 +14,8 @@ replace. Hiding a module someone needs hides the product, the worse failure.
 
 import frappe
 
+from apex.apex_core.utils.system_write import system_insert
+
 APEX_MODULES = ("Apex Core", "Habitat", "Logistay", "Salis")
 
 EMPLOYMENT_MODULES = ("HR", "Payroll")
@@ -76,7 +78,7 @@ def seed_module_profiles():
             doc.module_profile_name = profile_name
             for module in blocked_modules_for(profile_name):
                 doc.append("block_modules", {"module": module})
-            doc.insert(ignore_permissions=True)
+            system_insert(doc)
             doc.unlock()
         except Exception:
             frappe.db.rollback(save_point=savepoint)

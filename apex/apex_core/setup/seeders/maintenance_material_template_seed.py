@@ -16,6 +16,7 @@ drifting apart, and ``test_material_template_order.py`` keeps this order.
 import frappe
 
 from apex.apex_core.setup.seed import seed
+from apex.apex_core.utils.system_write import system_insert
 from apex.habitat.doctype.maintenance_material.maintenance_material_catalog import (
     seed_catalog,
 )
@@ -128,5 +129,5 @@ def seed_templates():
                 for item in tpl["items"]
             ],
         })
-        doc.insert(ignore_permissions=True)
+        system_insert(doc)
     frappe.db.commit()

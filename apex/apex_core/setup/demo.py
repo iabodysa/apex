@@ -15,6 +15,8 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, today
 
+from apex.apex_core.utils.system_write import system_insert
+
 DEMO_ARG = "apex_setup_demo"
 
 DEMO_OWNER = "demo.manager@apex.example"
@@ -305,7 +307,7 @@ def _create(doctype, payload):
             )
         )
     doc = frappe.get_doc(dict(payload, doctype=doctype))
-    doc.insert(ignore_permissions=True)
+    system_insert(doc)
     return doc
 
 

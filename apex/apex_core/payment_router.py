@@ -17,6 +17,8 @@ from frappe.model import default_fields
 
 from apex.apex_core.doctype.apex_settings.apex_settings import gl_posting_enabled
 
+from apex.apex_core.utils.system_write import system_insert
+
 SOURCE_DOCTYPE = "Salis Payment Request"
 
 DEFAULT_TARGET_DOCTYPE = "Payment Request"
@@ -297,7 +299,7 @@ def route_payment(payment_request: str) -> str:
     target = frappe.new_doc(target_doctype)
     _apply_field_map(target, source, settings.field_map or [])
     _ensure_target_currency(target, source)
-    target.insert(ignore_permissions=True)
+    system_insert(target)
 
     if settings.auto_submit_target and target.meta.is_submittable and gl_posting_enabled():
         target.submit()

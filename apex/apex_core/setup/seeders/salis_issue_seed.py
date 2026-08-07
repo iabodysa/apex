@@ -40,6 +40,8 @@ portal's own i18n bundle).
 
 import frappe
 
+from apex.apex_core.utils.system_write import system_insert
+
 _ISSUE_TYPES = ["Vehicle", "Fuel", "Attendance", "Salary", "Other"]
 
 _ISSUE_PRIORITIES = ["Low", "Medium", "High", "Urgent"]
@@ -121,7 +123,7 @@ def _ensure_holiday_list():
     doc.holiday_list_name = _SLA_HOLIDAY_LIST
     doc.from_date = _SLA_HOLIDAY_WINDOW[0]
     doc.to_date = _SLA_HOLIDAY_WINDOW[1]
-    doc.insert(ignore_permissions=True)
+    system_insert(doc)
     return doc.name
 
 
@@ -176,7 +178,7 @@ def _seed_sla():
     for status in ("Resolved", "Closed"):
         doc.append("sla_fulfilled_on", {"status": status})
 
-    doc.insert(ignore_permissions=True)
+    system_insert(doc)
 
 
 def _grant_issue_role_perms():

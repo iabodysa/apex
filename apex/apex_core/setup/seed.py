@@ -39,6 +39,8 @@ that actually write.
 import json
 import os
 
+from apex.apex_core.utils.system_write import system_insert
+
 DATA_ROOT = os.path.join(os.path.dirname(__file__), "data")
 
 _REQUIRED_KEYS = ("doctype", "key", "records")
@@ -173,7 +175,7 @@ def apply_spec(spec):
         frappe.db.savepoint(savepoint)
         try:
             doc = frappe.get_doc({"doctype": doctype, **record})
-            doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
+            system_insert(doc, ignore_if_duplicate=True)
             created += 1
         except Exception:  # noqa: BLE001
             frappe.db.rollback(save_point=savepoint)
