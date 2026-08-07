@@ -28,7 +28,7 @@ source terms while clarifying their practical business meaning.
 | **Operational memo** | A non-GL operational amount retained for allocation, reconciliation, or reporting. It is not an accounting posting. |
 | **Ledger** | An append-oriented operational trace. In Apex, a ledger name does not imply an ERPNext General Ledger entry. |
 | **Snapshot** | A point-in-time record kept because later master-data changes would make the old state impossible to reconstruct exactly. |
-| **Operations Alert** | A system-created anomaly record for fleet, maintenance, rental, licence, fuel, supervisor, or custody follow-up. |
+| **Assignment queue** | The open native ToDo assignments a watcher job places on a source document for the role that can act, and closes again when the condition clears. |
 | **Salary Deduction Policy** | The shared switch and per-type rules that gate automated wage-recovery installments. The shipped rules are inactive until configured. |
 
 ## Habitat terms

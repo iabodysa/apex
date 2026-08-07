@@ -20,8 +20,6 @@ Use this page to choose the shortest guide for the job.
   overwrite `X-Forwarded-For`, and how to grade a running deployment
 - [Workspace authoring](administration/workspace-authoring.md) — create and
   maintain task-focused Desk navigation
-- [Legacy identity upgrade](administration/identity-upgrade.md) — move a
-  pre-rename site from `apex_habitat` to `apex`
 - [Frontend architecture](administration/frontend-architecture.md) — build and
   serve the first-party portals
 

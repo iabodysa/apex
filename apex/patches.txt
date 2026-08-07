@@ -5,15 +5,10 @@
 # from the DocType JSON and its data from the after_install seeders in
 # apex_core/setup/seeders/.
 #
-# Two modules stay on disk, deliberately unregistered:
+# One module stays on disk, deliberately unregistered:
 #   v1_x.reorder_root_workspace_creation — wired into after_install AND after_migrate,
 #     so it runs every migrate rather than once; registering it here would be a second
 #     path to the same call.
-#   v2_0.app_identity_cutover — the apex_habitat -> apex rename. It CANNOT be registered:
-#     frappe resolves patches per installed-app name (patch_handler.get_all_patches ->
-#     get_app_path(app, "patches.txt")), and a pre-rename site is still called by the dead
-#     package, so it would never open this file. Operator-invoked, per
-#     docs/administration/identity-upgrade.md.
 #
 # BEFORE ADDING ONE, ask what a fresh install would do without it. If the answer is
 # "nothing, the JSON or a seeder already covers it", it is not a patch.

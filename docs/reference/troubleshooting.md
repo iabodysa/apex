@@ -89,8 +89,9 @@ build or clear caches as an unreviewed production experiment.
 3. Check Scheduled Job Log and Error Log at the expected cadence.
 4. Check the job's qualifying records and gate. A clean no-op is normal when no
    record qualifies.
-5. Check its idempotency key. An existing ledger row, snapshot, alert, or draft
-   installment may be the intended reason no second record was created.
+5. Check its idempotency key. An existing ledger row, snapshot, open
+   assignment, or draft installment may be the intended reason no second
+   record was created.
 
 Do not manually trigger a production job until its current behavior,
 idempotency, affected record count, and maintenance window have been reviewed.
@@ -103,7 +104,7 @@ idempotency, affected record count, and maintenance window have been reviewed.
 - Occupancy Snapshot skips a Building with no rooms or an existing snapshot for
   that date.
 - Cleaning generation skips an existing non-cancelled Building and date pair.
-- Weekly custody and daily operations-alert emails stop when
+- The weekly custody digest email stops when
   `Habitat Settings.enable_email_notifications` is off.
 - Monthly employee recovery stops when the Damage rule is inactive, the
   Employee Advance source fields are unavailable, no paid balance remains, no
@@ -117,7 +118,8 @@ idempotency, affected record count, and maintenance window have been reviewed.
 
 Separate the channels:
 
-- **Operations Alert** is an Apex operational record.
+- An **assignment** is a native ToDo on the source document, shown in the
+  assignee's desk queue.
 - **Notification Log** is an in-app Frappe notification.
 - **Email Queue** is the outbound email path.
 - A timeline comment is attached to the source document.
@@ -131,19 +133,21 @@ An in-app notification can exist even when email transport is unavailable.
 Conversely, some scheduled jobs intentionally update status without sending a
 notice. The [automation reference](automation.md) identifies each channel.
 
-## Operations Alert stays open
+## An assignment stays open
 
-The daily reconciliation auto-resolves only these alert types:
+Watcher jobs queue work as native ToDo assignments on the source document and
+close them again when the condition clears. The drain point differs by DocType:
 
-- Idle Vehicle
-- License Expiry
-- Forgotten Request
-- Supervisor Delay
-- Excessive Topup
+- **Salis Vehicle**, **Salis Driver**, and **Fuel Quota** drain in the daily
+  `reconcile_operations_alerts` pass, and only when no watcher's condition
+  still holds for that document.
+- **Maintenance Request**, **Vehicle Suspension**, **Building**, **Scheduled
+  Task Instance**, and **Rental Office** drain inside their own writer jobs,
+  so an assignment persists until that job's next pass — monthly for Rental
+  Office.
 
-Maintenance Overdue, Unsettled Rental, and Consumable Expired are not resolved
-by that job. Confirm the alert type and its source condition before treating an
-open alert as scheduler failure.
+Confirm the source condition and the owning job's cadence before treating an
+open assignment as scheduler failure.
 
 ## Housing totals or cost history looks wrong
 

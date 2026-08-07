@@ -25,7 +25,7 @@ and distinguish configuration, navigation, permission, and automation.
 Use the narrowest setting that owns the behavior:
 
 - **Apex Settings** controls the General Ledger posting gate and retention
-  windows for snapshots and resolved alerts.
+  windows for snapshots.
 - **Habitat Settings** controls accommodation defaults, custody integration,
   safety thresholds, notifications, handover controls, housing contact details,
   and optional passport scanning.
