@@ -126,8 +126,8 @@ const dragStyle = computed(() => ({
   inset-inline-end: 16px;
   display: grid;
   place-items: center;
-  height: 42px;
-  width: 42px;
+  height: var(--tap-min);
+  width: var(--tap-min);
   border-radius: var(--radius-pill);
   background: var(--c-surface);
   color: var(--c-ink);
@@ -137,6 +137,11 @@ const dragStyle = computed(() => ({
 }
 .bpass-overlay-x:active {
   transform: scale(0.94);
+}
+@media (hover: hover) {
+  .bpass-overlay-x:hover {
+    background: color-mix(in srgb, var(--c-ink) 6%, var(--c-surface));
+  }
 }
 
 .bpass-overlay-body {

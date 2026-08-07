@@ -305,13 +305,23 @@ function formatDate(c) {
   border: 0;
 }
 .photo-remove {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
   background: none;
   border: 0;
-  padding: 0;
+  padding-block: 0;
+  padding-inline: 4px;
+  margin-inline: -4px;
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--c-danger);
   cursor: pointer;
+}
+@media (hover: hover) {
+  .photo-remove:hover {
+    text-decoration: underline;
+  }
 }
 .photo-preview {
   display: flex;

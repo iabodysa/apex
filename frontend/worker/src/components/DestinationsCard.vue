@@ -60,6 +60,11 @@ const destinations = computed(() => [
 .dest-row:first-child {
   border-top: none;
 }
+@media (hover: hover) {
+  .dest-row:hover {
+    background: color-mix(in srgb, var(--c-ink) 6%, transparent);
+  }
+}
 .dest-row:focus-visible {
   outline: 3px solid var(--c-focus);
   outline-offset: -3px;

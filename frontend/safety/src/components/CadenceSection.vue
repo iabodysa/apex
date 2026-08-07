@@ -97,6 +97,11 @@ const badgeClass = computed(() => "badge-" + props.block.cadence.toLowerCase());
   cursor: pointer;
   text-align: start;
 }
+@media (hover: hover) {
+  .cadence-head:hover {
+    background: color-mix(in srgb, var(--c-ink) 4%, transparent);
+  }
+}
 .cadence-badge {
   display: grid;
   place-items: center;

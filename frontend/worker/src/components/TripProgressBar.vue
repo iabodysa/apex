@@ -116,7 +116,7 @@ const steps = computed(() => {
 .progress-connector {
   position: absolute;
   top: 12px;
-  left: 50%;
+  inset-inline-start: 50%;
   width: 100%;
   height: 3px;
   background: var(--c-border-strong);
@@ -126,11 +126,6 @@ const steps = computed(() => {
 
 .progress-connector-done {
   background: var(--c-success);
-}
-
-[dir="rtl"] .progress-connector {
-  left: auto;
-  right: 50%;
 }
 
 .progress-pulse {

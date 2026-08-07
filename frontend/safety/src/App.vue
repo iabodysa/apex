@@ -498,13 +498,19 @@ function resultIcon(r) {
   align-items: center;
   gap: 7px;
   margin-top: 12px;
-  padding: 7px 7px 7px 12px;
+  padding: 7px;
+  padding-inline-start: 12px;
   border-radius: var(--radius-pill);
   border: none;
   cursor: pointer;
   background: color-mix(in srgb, var(--c-header-ink) 14%, transparent);
   color: var(--c-header-ink);
   max-width: 100%;
+}
+@media (hover: hover) {
+  .building-chip:hover {
+    background: color-mix(in srgb, var(--c-header-ink) 22%, transparent);
+  }
 }
 .building-chip-name {
   font-size: var(--fs-sm);

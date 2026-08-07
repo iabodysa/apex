@@ -137,7 +137,8 @@ function choose(next) {
   border-radius: var(--radius);
   border: 1px solid var(--c-border);
   background: var(--c-surface);
-  padding: 12px 12px 12px 14px;
+  padding: 12px;
+  padding-inline-start: 14px;
   transition:
     border-color 0.2s ease,
     background 0.2s ease;
@@ -247,6 +248,12 @@ function choose(next) {
 .tap:active {
   transform: scale(0.92);
 }
+@media (hover: hover) {
+  .tap:hover:not(.tap-on) {
+    background: color-mix(in srgb, var(--c-ink) 6%, var(--c-surface-2));
+    color: var(--c-ink-soft);
+  }
+}
 .tap-pass.tap-on {
   background: var(--c-success);
   border-color: var(--c-success);
@@ -287,6 +294,10 @@ function choose(next) {
 .note-input:focus {
   outline: none;
   border-color: var(--c-primary);
+}
+.note-input:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
 }
 .note-input::placeholder {
   color: var(--c-muted);

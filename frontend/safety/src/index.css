@@ -118,7 +118,7 @@ body {
   }
   .hero-arc svg {
     position: absolute;
-    right: -28px;
+    inset-inline-end: -28px;
     top: 50%;
     transform: translateY(-50%);
     height: 150%;
@@ -126,8 +126,6 @@ body {
     color: var(--c-arc);
   }
   [dir="rtl"] .hero-arc svg {
-    right: auto;
-    left: -28px;
     transform: translateY(-50%) scaleX(-1);
   }
 
@@ -181,6 +179,14 @@ body {
   }
   .btn:active {
     transform: scale(0.98);
+  }
+  @media (hover: hover) {
+    .btn-primary:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--c-primary) 86%, black);
+    }
+    .btn-outline:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--c-ink) 6%, transparent);
+    }
   }
   .btn:disabled {
     opacity: 0.5;

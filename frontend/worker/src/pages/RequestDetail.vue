@@ -165,9 +165,17 @@ function statusPill(status) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: var(--tap-min);
+  padding-inline: 4px;
+  margin-inline: -4px;
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--c-muted);
+}
+@media (hover: hover) {
+  .back-link:hover {
+    color: var(--c-ink);
+  }
 }
 [dir="rtl"] .back-chevron {
   transform: scaleX(-1);

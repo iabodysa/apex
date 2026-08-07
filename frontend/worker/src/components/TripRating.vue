@@ -18,7 +18,7 @@
           :key="star"
           type="button"
           class="rating-star"
-          :class="rating >= star ? 'text-orange-400' : 'text-gray-200'"
+          :class="rating >= star ? 'star-on' : 'star-off'"
           @click="setRating(star)"
           :aria-label="t('tripRating.star' + star)"
         >
@@ -111,6 +111,17 @@ function submitRating() {
 }
 .rating-star:active {
   transform: scale(0.9);
+}
+@media (hover: hover) {
+  .rating-star:hover {
+    transform: scale(1.08);
+  }
+}
+.star-on {
+  color: var(--c-warning-fill);
+}
+.star-off {
+  color: var(--c-border-strong);
 }
 .rating-star:focus-visible {
   outline: 2px solid var(--c-primary);
