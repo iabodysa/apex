@@ -668,7 +668,7 @@ def get_worker_custody(token=None):
 
     Resolves the token to one Employee and returns their live custody holding,
     derived from the read-only Accommodation Stock Ledger — the same net-balance
-    source as the ``Custody Outstanding by Worker`` report, not a Custody Issue
+    source as the ``Accommodation Stock Balance`` report, not a Custody Issue
     replay. Balance per (building, article) is the signed sum of non-cancelled
     custody-article ledger rows for THIS employee (issues add, returns reverse),
     so the net is what is still out. A worker who moved buildings still sees

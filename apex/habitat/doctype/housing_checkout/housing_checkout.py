@@ -155,9 +155,10 @@ def _outstanding_custody_for_employee(employee):
     from the canonical Accommodation Stock Ledger balance (issue rows add, return
     rows reverse). Returns {article: qty} for positive balances only.
 
-    This is the same definition the Custody Outstanding by Worker report and the
-    value-at-risk Number Card use; it is reused here rather than re-derived so the
-    checkout cannot drift to a second, conflicting notion of 'outstanding'."""
+    This is the same definition the Accommodation Stock Balance report's employee
+    custody view and the value-at-risk Number Card use; it is reused here rather
+    than re-derived so the checkout cannot drift to a second, conflicting notion
+    of 'outstanding'."""
     outstanding = {}
     if not employee:
         return outstanding

@@ -19,4 +19,4 @@
 # "nothing, the JSON or a seeder already covers it", it is not a patch.
 
 [post_model_sync]
-apex.patches.v2_3.retire_replaced_reports
+apex.patches.v2_3.retire_replaced_reports #2026-08-07

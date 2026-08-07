@@ -20,8 +20,11 @@ RETIRED_REPORTS = [
 
 
 def execute():
+    for aer in frappe.get_all(
+        "Auto Email Report", filters={"report": ["in", RETIRED_REPORTS]}, pluck="name"
+    ):
+        frappe.delete_doc("Auto Email Report", aer, ignore_missing=True, force=True)
     for name in RETIRED_REPORTS:
-        frappe.delete_doc("Auto Email Report", name, ignore_missing=True, force=True)
         frappe.delete_doc("Report", name, ignore_missing=True, force=True)
     frappe.delete_doc(
         "Onboarding Step", "Review the Active Resident Register", ignore_missing=True, force=True

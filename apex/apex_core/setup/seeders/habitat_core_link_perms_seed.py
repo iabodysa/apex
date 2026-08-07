@@ -14,7 +14,7 @@ in ways that did not look related:
     left the field empty.
   * ``frappe.desk.query_report.run`` asks ``build_match_conditions`` for every Link
     column that carries a value, which raises ``No permission to read {0}``
-    (``frappe/model/db_query.py:1014``). Active Resident Register therefore ran clean
+    (``frappe/model/db_query.py:1014``). The since-retired Active Resident Register report therefore ran clean
     on an empty site and returned 403 as soon as one row existed.
 
 SELECT, NOT READ. ``select`` is exactly what a Link picker and a report's match
