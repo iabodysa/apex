@@ -167,7 +167,7 @@
    "label": "Financial Reference"
   },
   {
-   "description": "Owning company; defaulted from Salis Settings. Reference only \u2014 posts no GL.",
+   "description": "Owning company; defaulted from Salis Settings. Reference only — posts no GL.",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -180,7 +180,7 @@
   },
   {
    "depends_on": "eval:doc.company",
-   "description": "Cost center for grouping; defaults from Salis Settings. Reference only \u2014 no GL.",
+   "description": "Cost center for grouping; defaults from Salis Settings. Reference only — no GL.",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -227,7 +227,7 @@
  "icon": "fa fa-tint",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-24 03:53:04.208692",
+ "modified": "2026-08-07 05:38:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Claim",
@@ -294,32 +294,7 @@
  "search_fields": "vehicle, project, driver",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [
-  {
-   "color": "Gray",
-   "title": "Draft"
-  },
-  {
-   "color": "Orange",
-   "title": "Submitted to Movement"
-  },
-  {
-   "color": "Blue",
-   "title": "Reconciled"
-  },
-  {
-   "color": "Green",
-   "title": "Approved"
-  },
-  {
-   "color": "Red",
-   "title": "Disputed"
-  },
-  {
-   "color": "Green",
-   "title": "Closed"
-  }
- ],
+ "states": [],
  "title_field": "vehicle",
  "track_changes": 1
 }

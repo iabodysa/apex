@@ -271,7 +271,7 @@
    "link_fieldname": "payment_request"
   }
  ],
- "modified": "2026-07-27 02:29:07.605145",
+ "modified": "2026-08-07 05:38:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Payment Request",
@@ -339,32 +339,7 @@
  "search_fields": "expense_type, reference_name, reference_doctype",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [
-  {
-   "color": "Blue",
-   "title": "Draft"
-  },
-  {
-   "color": "Orange",
-   "title": "Pending Finance"
-  },
-  {
-   "color": "Blue",
-   "title": "Approved by Finance"
-  },
-  {
-   "color": "Green",
-   "title": "Paid"
-  },
-  {
-   "color": "Red",
-   "title": "Rejected"
-  },
-  {
-   "color": "Red",
-   "title": "Cancelled"
-  }
- ],
+ "states": [],
  "title_field": "expense_type",
  "track_changes": 1
 }

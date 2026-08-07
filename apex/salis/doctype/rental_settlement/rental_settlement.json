@@ -179,7 +179,7 @@
    "reqd": 1
   },
   {
-   "description": "Owning company; defaulted from Salis Settings. Reference only \u2014 posts no GL.",
+   "description": "Owning company; defaulted from Salis Settings. Reference only — posts no GL.",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -218,7 +218,7 @@
    "link_fieldname": "rental_settlement"
   }
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-08-07 05:38:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Rental Settlement",
@@ -294,31 +294,6 @@
  "search_fields": "company, period_month, status",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [
-  {
-   "color": "Blue",
-   "title": "Draft"
-  },
-  {
-   "color": "Orange",
-   "title": "Reconciled"
-  },
-  {
-   "color": "Blue",
-   "title": "Approved"
-  },
-  {
-   "color": "Green",
-   "title": "Paid"
-  },
-  {
-   "color": "Red",
-   "title": "Disputed"
-  },
-  {
-   "color": "Red",
-   "title": "Cancelled"
-  }
- ],
+ "states": [],
  "track_changes": 1
 }

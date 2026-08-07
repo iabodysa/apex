@@ -153,7 +153,7 @@
    "label": "Cost Attribution"
   },
   {
-   "description": "Owning company; defaulted from Salis Settings. Reference only \u2014 posts no GL.",
+   "description": "Owning company; defaulted from Salis Settings. Reference only — posts no GL.",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -165,7 +165,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Cost center for grouping; defaults from Salis Settings. Reference only \u2014 no GL.",
+   "description": "Cost center for grouping; defaults from Salis Settings. Reference only — no GL.",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -232,7 +232,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-27 07:05:37.081061",
+ "modified": "2026-08-07 05:38:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Movement Cost Recovery",
@@ -293,32 +293,7 @@
  "search_fields": "recovery_type, reference_name, reference_doctype",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [
-  {
-   "color": "Blue",
-   "title": "Open"
-  },
-  {
-   "color": "Orange",
-   "title": "Acknowledged"
-  },
-  {
-   "color": "Blue",
-   "title": "Approved"
-  },
-  {
-   "color": "Green",
-   "title": "Recovered"
-  },
-  {
-   "color": "Gray",
-   "title": "Waived"
-  },
-  {
-   "color": "Red",
-   "title": "Rejected"
-  }
- ],
+ "states": [],
  "title_field": "recovery_type",
  "track_changes": 1
 }

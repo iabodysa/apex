@@ -455,7 +455,7 @@
    "link_fieldname": "transport_request"
   }
  ],
- "modified": "2026-08-06 22:39:00.000000",
+ "modified": "2026-08-07 05:38:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",
@@ -545,35 +545,6 @@
  "search_fields": "requester_name, mobile_number, anonymous_tracking_code",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [
-  {
-   "color": "Blue",
-   "title": "New"
-  },
-  {
-   "color": "Blue",
-   "title": "Validated"
-  },
-  {
-   "color": "Blue",
-   "title": "Approved"
-  },
-  {
-   "color": "Orange",
-   "title": "Scheduled"
-  },
-  {
-   "color": "Green",
-   "title": "Fulfilled"
-  },
-  {
-   "color": "Red",
-   "title": "Rejected"
-  },
-  {
-   "color": "Red",
-   "title": "Cancelled"
-  }
- ],
+ "states": [],
  "track_changes": 1
 }

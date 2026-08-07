@@ -174,7 +174,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-25 20:51:08.765027",
+ "modified": "2026-08-07 05:38:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Driver Clearance",
@@ -239,28 +239,7 @@
  "search_fields": "driver, assigned_vehicle, driver_user",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [
-  {
-   "color": "Blue",
-   "title": "Open"
-  },
-  {
-   "color": "Orange",
-   "title": "In Progress"
-  },
-  {
-   "color": "Green",
-   "title": "Cleared"
-  },
-  {
-   "color": "Red",
-   "title": "Blocked"
-  },
-  {
-   "color": "Red",
-   "title": "Cancelled"
-  }
- ],
+ "states": [],
  "title_field": "driver",
  "track_changes": 1
 }
