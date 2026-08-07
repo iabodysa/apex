@@ -8,8 +8,10 @@ reconciliation variance, by project / vehicle / period / status.
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 from apex.salis import permissions
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
@@ -60,4 +62,15 @@ def execute(filters=None):
         order_by="period_month desc, vehicle asc",
     )
 
-    return columns, data
+    summary = [
+        count_card(_("Claims"), data),
+        total_card(_("Claimed Litres"), data, "claimed_litres"),
+        total_card(_("Consumed Litres"), data, "consumed_litres"),
+        total_card(
+            _("Variance (L)"),
+            data,
+            "variance_litres",
+            indicator="Red" if sum(flt(r.get("variance_litres")) for r in data) < 0 else "Green",
+        ),
+    ]
+    return columns, data, None, None, summary

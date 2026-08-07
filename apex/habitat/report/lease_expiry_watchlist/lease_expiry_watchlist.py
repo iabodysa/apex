@@ -1,9 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 from frappe.utils import date_diff, today, flt
 
 from apex.apex_core.utils.report_helpers import date_range_condition
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
@@ -45,4 +47,15 @@ def execute(filters=None):
             ),
             "rent_amount": flt(lease.get("rent_amount")),
         })
-    return columns, data
+    summary = [
+        count_card(_("Leases Watched"), data),
+        count_card(_("Expired"), data, lambda r: (r.get("days_to_expiry") or 0) < 0, "Red"),
+        count_card(
+            _("Expiring in 30 Days"),
+            data,
+            lambda r: 0 <= (r.get("days_to_expiry") or 0) <= 30,
+            "Orange",
+        ),
+        total_card(_("Monthly Rent at Risk"), data, "rent_amount", "Currency"),
+    ]
+    return columns, data, None, None, summary

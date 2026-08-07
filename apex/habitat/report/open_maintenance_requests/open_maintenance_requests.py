@@ -1,8 +1,10 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 
 from apex.habitat.permissions import report_maintenance_request_scope
+from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
@@ -43,4 +45,10 @@ def execute(filters=None):
         ],
         order_by="creation asc",
     )
-    return columns, data
+    summary = [
+        count_card(_("Open Requests"), data),
+        count_card(_("Critical"), data, lambda r: r.get("priority") == "Critical", "Red"),
+        count_card(_("High"), data, lambda r: r.get("priority") == "High", "Orange"),
+        count_card(_("Unassigned"), data, lambda r: r.get("status") == "Open", "Blue"),
+    ]
+    return columns, data, None, None, summary
