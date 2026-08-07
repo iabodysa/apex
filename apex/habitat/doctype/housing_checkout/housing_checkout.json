@@ -266,8 +266,14 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2026-07-26 09:03:55.752811",
+ "links": [
+  {
+   "group": "Custody",
+   "link_doctype": "Custody Damage Assessment",
+   "link_fieldname": "source_checkout"
+  }
+ ],
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Checkout",

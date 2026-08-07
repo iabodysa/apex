@@ -682,9 +682,189 @@
    "group": "Utilities",
    "link_doctype": "Utility Bill Entry",
    "link_fieldname": "building"
+  },
+  {
+   "group": "Residents",
+   "link_doctype": "Arrival Batch",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Residents",
+   "link_doctype": "Idle Resident Report",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Contracts",
+   "is_child_table": 1,
+   "link_doctype": "Subcontractor Building Coverage",
+   "link_fieldname": "building",
+   "parent_doctype": "Subcontractor Service Contract",
+   "table_fieldname": "covered_buildings"
+  },
+  {
+   "group": "Custody",
+   "link_doctype": "Custody Acknowledgment",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Custody",
+   "link_doctype": "Custody Return",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Custody",
+   "link_doctype": "Custody Damage Assessment",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Custody",
+   "link_doctype": "Custody Handover",
+   "link_fieldname": "to_building"
+  },
+  {
+   "group": "Stores",
+   "link_doctype": "Goods Receipt",
+   "link_fieldname": "intake_building"
+  },
+  {
+   "group": "Stores",
+   "link_doctype": "Material Transfer",
+   "link_fieldname": "to_building"
+  },
+  {
+   "group": "Stores",
+   "link_doctype": "Accommodation Stock Ledger",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Maintenance and Facilities",
+   "link_doctype": "Maintenance Cost Ledger",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Maintenance and Facilities",
+   "link_doctype": "Maintenance Inspection Report",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Maintenance and Facilities",
+   "link_doctype": "Housing Inventory",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Maintenance and Facilities",
+   "link_doctype": "Facility Asset Delivery",
+   "link_fieldname": "to_building"
+  },
+  {
+   "group": "Maintenance and Facilities",
+   "link_doctype": "Facility Asset Movement",
+   "link_fieldname": "to_building"
+  },
+  {
+   "group": "Maintenance and Facilities",
+   "link_doctype": "Facility Asset Movement Ledger",
+   "link_fieldname": "to_building"
+  },
+  {
+   "group": "Safety",
+   "link_doctype": "Safety Inspection Report",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Safety",
+   "link_doctype": "Safety Task Execution",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Safety",
+   "link_doctype": "Safety Finding Ledger",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Safety",
+   "link_doctype": "Scheduled Task Assignment",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Safety",
+   "link_doctype": "Scheduled Task Instance",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Safety",
+   "is_child_table": 1,
+   "link_doctype": "Camera Access Building Scope",
+   "link_fieldname": "building",
+   "parent_doctype": "Camera Access Grant",
+   "table_fieldname": "buildings_scope"
+  },
+  {
+   "group": "Safety",
+   "is_child_table": 1,
+   "link_doctype": "Safety Task Building Scope",
+   "link_fieldname": "building",
+   "parent_doctype": "Safety Task Catalog",
+   "table_fieldname": "applicable_buildings"
+  },
+  {
+   "group": "Compliance",
+   "is_child_table": 1,
+   "link_doctype": "Audit Remediation Building Scope",
+   "link_fieldname": "building",
+   "parent_doctype": "Audit Remediation Plan",
+   "table_fieldname": "buildings_in_scope"
+  },
+  {
+   "group": "Cleaning",
+   "link_doctype": "Cleaning Compliance Ledger",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Ledgers",
+   "link_doctype": "Accommodation Ledger",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Snapshots",
+   "link_doctype": "Occupancy Snapshot",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Snapshots",
+   "link_doctype": "Operational Depreciation Snapshot",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Transport Request",
+   "link_fieldname": "accommodation_building"
+  },
+  {
+   "group": "Movement",
+   "is_child_table": 1,
+   "link_doctype": "Route Stop",
+   "link_fieldname": "accommodation_building",
+   "parent_doctype": "Route Plan",
+   "table_fieldname": "stops"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Trip Boarding Ledger",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Boarding Scan Log",
+   "link_fieldname": "accommodation_building"
+  },
+  {
+   "group": "QR",
+   "link_doctype": "QR Location",
+   "link_fieldname": "building"
   }
  ],
- "modified": "2026-08-03 02:28:00.000000",
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Building",

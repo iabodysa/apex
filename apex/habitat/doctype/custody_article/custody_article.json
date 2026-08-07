@@ -161,6 +161,14 @@
    "link_fieldname": "article",
    "parent_doctype": "Housing Checkout",
    "table_fieldname": "custody_return_items"
+  },
+  {
+   "group": "Snapshots",
+   "is_child_table": 1,
+   "link_doctype": "Depreciation Snapshot Item",
+   "link_fieldname": "article",
+   "parent_doctype": "Operational Depreciation Snapshot",
+   "table_fieldname": "items"
   }
  ],
  "permissions": [
@@ -209,6 +217,6 @@
   "custody_article_sec_system",
   "naming_series"
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-08-07 20:24:00.000000",
  "search_fields": "article_name, consumable_lifespan_months"
 }

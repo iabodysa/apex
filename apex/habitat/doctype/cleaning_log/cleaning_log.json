@@ -247,8 +247,14 @@
  ],
  "in_create": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2026-08-06 22:39:00.000000",
+ "links": [
+  {
+   "group": "Ledgers",
+   "link_doctype": "Cleaning Compliance Ledger",
+   "link_fieldname": "cleaning_log"
+  }
+ ],
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Cleaning Log",

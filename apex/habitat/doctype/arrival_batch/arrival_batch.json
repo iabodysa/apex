@@ -198,5 +198,12 @@
    "idx": 8
   }
  ],
- "modified": "2026-08-06 22:39:00.000000"
+ "links": [
+  {
+   "group": "Workers",
+   "link_doctype": "Temporary Worker",
+   "link_fieldname": "arrival_batch"
+  }
+ ],
+ "modified": "2026-08-07 20:24:00.000000"
 }

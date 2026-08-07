@@ -278,6 +278,26 @@
    "group": "Maintenance",
    "link_doctype": "Maintenance Request",
    "link_fieldname": "related_facility_asset"
+  },
+  {
+   "group": "Custody",
+   "link_doctype": "Facility Asset Delivery",
+   "link_fieldname": "facility_asset"
+  },
+  {
+   "group": "Custody",
+   "link_doctype": "Facility Asset Movement Ledger",
+   "link_fieldname": "facility_asset"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Inspection Report",
+   "link_fieldname": "facility_asset"
+  },
+  {
+   "group": "Accommodation",
+   "link_doctype": "Housing Inventory",
+   "link_fieldname": "facility_asset"
   }
  ],
  "permissions": [
@@ -349,5 +369,5 @@
   "movement_count",
   "last_movement_date"
  ],
- "modified": "2026-08-07 05:23:00.000000"
+ "modified": "2026-08-07 20:24:00.000000"
 }

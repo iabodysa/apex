@@ -359,5 +359,12 @@
    "idx": 4
   }
  ],
- "modified": "2026-08-07 05:23:00.000000"
+ "links": [
+  {
+   "group": "SIM Cards",
+   "link_doctype": "SIM Card",
+   "link_fieldname": "telecom_contract"
+  }
+ ],
+ "modified": "2026-08-07 20:24:00.000000"
 }

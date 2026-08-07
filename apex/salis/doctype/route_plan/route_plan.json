@@ -255,9 +255,14 @@
    "group": "Operations",
    "link_doctype": "Trip Start Log",
    "link_fieldname": "route_plan"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Trip Fulfilment Ledger",
+   "link_fieldname": "route_plan"
   }
  ],
- "modified": "2026-07-12 00:13:46.755746",
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Plan",

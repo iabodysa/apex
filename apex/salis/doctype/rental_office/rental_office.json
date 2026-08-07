@@ -101,9 +101,14 @@
    "group": "Costs",
    "link_doctype": "Salis Payment Request",
    "link_fieldname": "rental_office"
+  },
+  {
+   "group": "Rental",
+   "link_doctype": "Rental Accrual Ledger",
+   "link_fieldname": "rental_office"
   }
  ],
- "modified": "2026-08-07 06:10:00.000000",
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Rental Office",

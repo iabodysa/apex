@@ -376,9 +376,14 @@
    "group": "Reports",
    "link_doctype": "Idle Resident Report",
    "link_fieldname": "assignment"
+  },
+  {
+   "group": "Ledgers",
+   "link_doctype": "Accommodation Ledger",
+   "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-08-07 18:00:00.000000",
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Assignment",

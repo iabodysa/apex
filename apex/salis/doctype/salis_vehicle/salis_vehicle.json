@@ -171,6 +171,8 @@
    "description": "Rolled-up regulatory compliance state of the vehicle across its documents, flagging vehicles that are compliant, approaching expiry, expired, or not tracked.",
    "fieldname": "compliance_status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Compliance Status",
    "options": "Compliant\nExpiring Soon\nExpired\nNot Tracked",
    "read_only": 1
@@ -180,8 +182,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "<b>Derived from the Compliance Documents rows below — it stays empty, and the compliance alert stays silent, until at least one document with an expiry date is entered.</b>",
    "fieldname": "next_expiry_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Next Expiry Date",
    "read_only": 1
   },
@@ -351,9 +356,57 @@
    "group": "Costs",
    "link_doctype": "Movement Cost Recovery",
    "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Incident",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Driver Clearance",
+   "link_fieldname": "assigned_vehicle"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Trip Fulfilment Ledger",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Trip Start Log",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Consumption Ledger",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Rental",
+   "link_doctype": "Rental Accrual Ledger",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Rental",
+   "is_child_table": 1,
+   "link_doctype": "Rental Settlement Item",
+   "link_fieldname": "vehicle",
+   "parent_doctype": "Rental Settlement",
+   "table_fieldname": "vehicles"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Salis Payment Request",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Snapshots",
+   "link_doctype": "Vehicle Utilisation Snapshot",
+   "link_fieldname": "vehicle"
   }
  ],
- "modified": "2026-08-07 18:00:00.000000",
+ "modified": "2026-08-07 20:25:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Vehicle",

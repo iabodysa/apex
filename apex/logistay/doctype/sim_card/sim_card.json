@@ -341,5 +341,12 @@
    "idx": 4
   }
  ],
- "modified": "2026-08-07 18:00:00.000000"
+ "links": [
+  {
+   "group": "Custody",
+   "link_doctype": "SIM Custody Assignment",
+   "link_fieldname": "sim_card"
+  }
+ ],
+ "modified": "2026-08-07 20:24:00.000000"
 }

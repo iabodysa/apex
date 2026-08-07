@@ -146,9 +146,14 @@
    "group": "Scheduling",
    "link_doctype": "Scheduled Task Template",
    "link_fieldname": "safety_task_catalog"
+  },
+  {
+   "group": "Scheduling",
+   "link_doctype": "Scheduled Task Instance",
+   "link_fieldname": "task_catalog"
   }
  ],
- "modified": "2026-08-06 22:39:00.000000",
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Task Catalog",

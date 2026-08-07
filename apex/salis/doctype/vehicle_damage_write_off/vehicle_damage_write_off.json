@@ -205,8 +205,14 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2026-07-24 03:53:04.208692",
+ "links": [
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Incident",
+   "link_fieldname": "write_off_case"
+  }
+ ],
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Damage Write-Off",

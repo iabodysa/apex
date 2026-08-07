@@ -179,9 +179,11 @@ Idle Share,نسبة التعطّل
 Incidents,الحوادث
 Include Ended Assignments,تضمين الإسنادات المنتهية
 Include Settled Requests,تضمين الطلبات المنتهية
+Inventory,المخزون
 Issued To,صُرف إلى
 Issues,عمليات الصرف
 Leases Watched,العقود المتابَعة
+Ledgers,الدفاتر
 Manifest,كشف الركاب
 Manifests,كشوف الركاب
 Missed Over 7 Days,فائتة أكثر من 7 أيام
@@ -232,6 +234,7 @@ SIMs Covered,الشرائح المشمولة
 SIMs Held,الشرائح المحتفَظ بها
 Settled Share,نسبة المسوّى
 Still Held,لا تزال بالحيازة
+Stores,المستودعات
 Suppliers,الموردون
 Suspended or Lost,موقوفة أو مفقودة
 Taken,مُستلَم

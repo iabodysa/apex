@@ -199,8 +199,14 @@
  ],
  "in_create": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2026-07-27 07:05:37.081061",
+ "links": [
+  {
+   "group": "Operations",
+   "link_doctype": "Boarding Scan Log",
+   "link_fieldname": "trip_start_log"
+  }
+ ],
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Trip Start Log",

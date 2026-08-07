@@ -293,9 +293,29 @@
    "group": "Operations",
    "link_doctype": "Trip Start Log",
    "link_fieldname": "dispatch_trip"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Boarding Scan Log",
+   "link_fieldname": "dispatch_trip"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Trip Boarding Ledger",
+   "link_fieldname": "dispatch_trip"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Trip Fulfilment Ledger",
+   "link_fieldname": "dispatch_trip"
+  },
+  {
+   "group": "Feedback",
+   "link_doctype": "Transport Trip Rating",
+   "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-08-07 06:37:00.000000",
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",

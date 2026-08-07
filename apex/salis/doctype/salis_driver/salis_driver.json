@@ -146,8 +146,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "<b>The licence-expiry alert reads this date and stays silent while it is empty. Fill it for every active driver.</b>",
    "fieldname": "license_expiry",
    "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "License Expiry"
   },
   {
@@ -253,9 +256,54 @@
    "group": "Costs",
    "link_doctype": "Movement Cost Recovery",
    "link_fieldname": "driver"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Handover",
+   "link_fieldname": "to_driver"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Incident",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Suspension",
+   "link_fieldname": "related_driver"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Trip Fulfilment Ledger",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Trip Start Log",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Boarding Scan Log",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Consumption Ledger",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Quota",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Salis Payment Request",
+   "link_fieldname": "driver"
   }
  ],
- "modified": "2026-08-07 06:37:00.000000",
+ "modified": "2026-08-07 20:25:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Driver",

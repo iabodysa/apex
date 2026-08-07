@@ -123,6 +123,11 @@
    "link_fieldname": "material",
    "parent_doctype": "Maintenance Work Order",
    "table_fieldname": "procurement_items"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Maintenance Cost Ledger",
+   "link_fieldname": "material"
   }
  ],
  "permissions": [
@@ -169,5 +174,5 @@
   "maintenance_material_sec_notes",
   "notes"
  ],
- "modified": "2026-07-10 09:22:42.696478"
+ "modified": "2026-08-07 20:24:00.000000"
 }

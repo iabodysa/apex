@@ -118,9 +118,14 @@
    "group": "Safety",
    "link_doctype": "Safety Task Execution",
    "link_fieldname": "safety_round"
+  },
+  {
+   "group": "Safety",
+   "link_doctype": "Safety Finding Ledger",
+   "link_fieldname": "safety_round"
   }
  ],
- "modified": "2026-08-06 22:39:00.000000",
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Round",

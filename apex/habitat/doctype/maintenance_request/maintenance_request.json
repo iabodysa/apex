@@ -377,9 +377,30 @@
    "group": "Safety",
    "link_doctype": "Safety Task Execution",
    "link_fieldname": "linked_maintenance_request"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Maintenance Cost Ledger",
+   "link_fieldname": "maintenance_request"
+  },
+  {
+   "group": "Maintenance",
+   "is_child_table": 1,
+   "link_doctype": "Inspection Finding Item",
+   "link_fieldname": "generated_maintenance_request",
+   "parent_doctype": "Maintenance Inspection Report",
+   "table_fieldname": "findings"
+  },
+  {
+   "group": "Safety",
+   "is_child_table": 1,
+   "link_doctype": "Linked Maintenance Request Item",
+   "link_fieldname": "maintenance_request",
+   "parent_doctype": "Safety Inspection Report",
+   "table_fieldname": "linked_maintenance_requests"
   }
  ],
- "modified": "2026-07-27 17:33:17.937518",
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Request",

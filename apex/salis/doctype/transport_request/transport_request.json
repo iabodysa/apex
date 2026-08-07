@@ -454,9 +454,29 @@
    "group": "Operations",
    "link_doctype": "Trip Start Log",
    "link_fieldname": "transport_request"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Boarding Scan Log",
+   "link_fieldname": "transport_request"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Trip Fulfilment Ledger",
+   "link_fieldname": "transport_request"
+  },
+  {
+   "group": "Feedback",
+   "link_doctype": "Transport Trip Rating",
+   "link_fieldname": "transport_request"
+  },
+  {
+   "group": "Accommodation",
+   "link_doctype": "Housing Checkout",
+   "link_fieldname": "departure_transport_request"
   }
  ],
- "modified": "2026-08-07 06:37:00.000000",
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",

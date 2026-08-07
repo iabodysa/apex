@@ -192,9 +192,53 @@
    "group": "QR",
    "link_doctype": "QR Location",
    "link_fieldname": "room"
+  },
+  {
+   "group": "Beds",
+   "link_doctype": "Room Bed Transfer",
+   "link_fieldname": "to_room"
+  },
+  {
+   "group": "Cleaning",
+   "link_doctype": "Cleaning Compliance Ledger",
+   "link_fieldname": "room"
+  },
+  {
+   "group": "Inventory",
+   "link_doctype": "Housing Inventory",
+   "link_fieldname": "room"
+  },
+  {
+   "group": "Inventory",
+   "link_doctype": "Facility Asset Movement",
+   "link_fieldname": "to_room"
+  },
+  {
+   "group": "Maintenance",
+   "is_child_table": 1,
+   "link_doctype": "Inspection Finding Item",
+   "link_fieldname": "room",
+   "parent_doctype": "Maintenance Inspection Report",
+   "table_fieldname": "findings"
+  },
+  {
+   "group": "Safety",
+   "is_child_table": 1,
+   "link_doctype": "Inspection Finding Item",
+   "link_fieldname": "room",
+   "parent_doctype": "Safety Inspection Report",
+   "table_fieldname": "safety_findings"
+  },
+  {
+   "group": "Safety",
+   "is_child_table": 1,
+   "link_doctype": "Inspection Finding Item",
+   "link_fieldname": "room",
+   "parent_doctype": "Safety Task Execution",
+   "table_fieldname": "findings"
   }
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-08-07 20:24:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Room",
