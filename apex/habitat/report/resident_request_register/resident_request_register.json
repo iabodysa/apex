@@ -1,0 +1,23 @@
+{
+ "doctype": "Report",
+ "name": "Resident Request Register",
+ "report_name": "Resident Request Register",
+ "ref_doctype": "Resident Request",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "Resident Request Coordinator"
+  },
+  {
+   "role": "Internal Auditor"
+  }
+ ]
+}

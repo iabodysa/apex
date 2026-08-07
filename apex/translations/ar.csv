@@ -146,13 +146,16 @@ Cost Centres,مراكز التكلفة
 Currently Held,بحوزته حالياً
 Days Held,أيام الحيازة
 Days Overdue,أيام التأخير
+Days Waiting,أيام الانتظار
 Employees,الموظفون
 Estimated Replacement Cost,تكلفة الاستبدال التقديرية
 Expected Return,الإرجاع المتوقّع
 Expiring in 30 Days,تنتهي خلال 30 يوماً
 Fuel Logs,سجلات الوقود
+High or Critical,عالية أو حرجة
 Idle Share,نسبة التعطّل
 Include Ended Assignments,تضمين الإسنادات المنتهية
+Include Settled Requests,تضمين الطلبات المنتهية
 Issued To,صُرف إلى
 Issues,عمليات الصرف
 Leases Watched,العقود المتابَعة
@@ -174,13 +177,17 @@ Positions,المواضع
 Recovered Share,نسبة المسترد
 Recoveries,الاستردادات
 Repair Cost,تكلفة الإصلاح
+Requests,الطلبات
 Residents,الساكنون
 Rows,الصفوف
 SIMs Covered,الشرائح المشمولة
 SIMs Held,الشرائح المحتفَظ بها
 Settled Share,نسبة المسوّى
 Still Held,لا تزال بالحيازة
+Taken,مُستلَم
 Trips Fulfilled,الرحلات المنفَّذة
+Unassigned Only,غير المسندة فقط
+Waiting Over a Week,انتظار أكثر من أسبوع
 active,نشط
 Active CCTV Cameras,كاميرات المراقبة المفعّلة
 Active Contracts,العقود النشطة
