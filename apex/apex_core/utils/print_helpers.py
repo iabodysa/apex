@@ -4,6 +4,15 @@ import frappe
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import masar_qr_data_uri
 
 
+def qr_data_uri(text: str):
+    """QR data-URI for any text a printed page must carry — a public URL, a code, a token.
+
+    Separate from :func:`doc_verify_qr` because a poster a worker scans must reach a
+    public route, not a desk record that asks him to log in.
+    """
+    return masar_qr_data_uri(text) if text else None
+
+
 def doc_verify_qr(doctype: str, name: str):
     """QR data-URI pointing at the document's own desk record, for print verification.
 

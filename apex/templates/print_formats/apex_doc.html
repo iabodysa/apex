@@ -80,6 +80,12 @@
   {%- endif -%}
 {%- endmacro -%}
 
+{%- macro doc_head() -%}
+<div {% if print_settings and print_settings.repeat_header_footer %}id="header-html" class="hidden-pdf"{% endif %}>
+  {%- if not no_letterhead and letter_head %}{{ letter_head }}{% endif -%}
+</div>
+{%- endmacro -%}
+
 {%- macro doc_title(doc, title_ar, title_en, extra_ident="") -%}
 <div class="ax-title">
   <h1>{{ title_ar }}{% if title_en != title_ar %}<span class="en">{{ title_en }}</span>{% endif %}</h1>
@@ -153,7 +159,7 @@
 {%- if amount %}
 <div class="ax-words">
   {{ _lbl(_("Amount in words"), "Amount in words") }}
-  <div>{{ frappe.utils.money_in_words(amount, currency or frappe.defaults.get_global_default("currency")) }}</div>
+  <div>{{ frappe.utils.money_in_words(amount, currency or frappe.db.get_default("currency") or frappe.db.get_single_value("Global Defaults", "default_currency")) }}</div>
 </div>
 {%- endif -%}
 {%- endmacro -%}
@@ -223,5 +229,15 @@
     {{ _(doc.doctype) }} · {{ doc.name }}<br>
     {{ _("System-generated document from Apex") }}
   </div>
+</div>
+<div {% if print_settings and print_settings.repeat_header_footer %}id="footer-html" class="visible-pdf"{% endif %}>
+  {%- if not no_letterhead and footer %}
+  <div class="letter-head-footer">{{ footer }}</div>
+  {%- endif %}
+  {%- if print_settings and print_settings.repeat_header_footer %}
+  <p class="text-center small page-number visible-pdf">
+    {{ _("Page {0} of {1}").format('<span class="page"></span>', '<span class="topage"></span>') }}
+  </p>
+  {%- endif %}
 </div>
 {%- endmacro -%}

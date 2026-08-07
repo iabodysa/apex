@@ -35,6 +35,7 @@ A cleared driver clearance is required.,يلزم وجود مخالصة سائق 
 A code can only be regenerated once the delivery is Released.,لا يمكن إعادة إنشاء الرمز إلا بعد اجتياز عملية التسليم جميع نقاط الخروج.
 A completion photo is required before closing a Maintenance Work Order.,يجب إرفاق صورة إنجاز قبل إغلاق أمر عمل الصيانة.
 A custody damage assessment has been submitted and may create a salary deduction,تم اعتماد تقييم تلف العهدة وقد يترتب عليه خصم من الراتب
+A deduction is due and no payroll entry has been raised yet.,يوجد مبلغ مستحق ولم يُسجَّل خصم على الراتب حتى الآن.
 A device is active until the driver opts out or the browser endpoint stops accepting pushes.,يبقى الجهاز نشطًا حتى يلغي السائق الاشتراك أو يتوقف عنوان المتصفح عن استقبال الإشعارات.
 A driver clearance is blocked and must be resolved before the driver is redeployed,تم تعليق إخلاء طرف السائق ويجب معالجته قبل إعادة تكليفه.
 "A driver's Web Push subscription: the browser PushSubscription endpoint and keys captured on opt-in, used to deliver background push to that driver's device. One row per device/endpoint.",اشتراك السائق في الإشعارات الفورية: عنوان الاشتراك في المتصفح ومفاتيحه تُلتقط عند الموافقة، وتُستخدم لإرسال الإشعارات في الخلفية إلى جهاز السائق. صف واحد لكل جهاز أو عنوان.
@@ -52,6 +53,7 @@ A new Dispatch Trip must start as Planned; {0} is reached through the workflow.,
 A new maintenance request awaits triage,طلب صيانة جديد بانتظار الفرز
 A new resident request has been received and awaits triage,تم استلام طلب ساكن جديد وهو بانتظار الفرز
 A payment request can only be raised on an Approved settlement (current status: {0}).,لا يمكن إنشاء طلب دفع إلا على تسوية معتمدة (الحالة الحالية: {0}).
+A payment request has been raised for this statement,صدر طلب دفع لهذا الكشف
 "A periodic safety round over a building for a given cadence. Groups the building's Safety Task Execution rows for that round and, on submit, derives an overall result from their statuses. Supersedes the legacy Safety Inspection Report.",جولة سلامة دورية على مبنى وفق تكرار الجولة المحدد. تجمع سجلات تنفيذ مهام السلامة للمبنى في تلك الجولة، وتستخرج النتيجة العامة من حالاتها عند الاعتماد. وتحل محل تقرير فحص السلامة السابق.
 A photo and filename are required together.,يجب إرفاق الصورة واسم ملفها معاً.
 A portal access token is required.,يلزم وجود رمز وصول إلى البوابة.
@@ -64,9 +66,11 @@ A round date is required to submit a round.,يلزم تاريخ جولة لاع�
 A round date is required to submit rounds.,يلزم تاريخ الجولة لاعتماد الجولات.
 A row here may be a whole building or a single leased unit — name it as the property is known operationally.,السجل هنا قد يكون مبنى كاملاً أو وحدة مستأجرة واحدة — سمِّه بالاسم المتداول للعقار في التشغيل.
 A severe or critical safety incident has been reported and requires immediate management attention,تم الإبلاغ عن حادث سلامة جسيم أو حرج ويتطلب اهتمامًا فوريًا من الإدارة
+A source record ties this notice to a handover or an incident,الإشعار مربوط بتسليم أو بحادث
 A submitted Housing Checkout already exists for this assignment: {0},يوجد بالفعل إخلاء سكن معتمد لهذا التسكين: {0}
 A telecom service agreement with one supplier that governs one or more SIM Cards and drives recurring billing.,اتفاقية خدمة اتصالات مع مورّد واحد، تنظم شريحة أو أكثر وتحدد فوترتها الدورية.
 A temporary top-up requires a revert due date.,تتطلب التعبئة المؤقتة تحديد موعد للعودة إلى الوضع السابق.
+A temporary voucher that has to be reverted,أمر مؤقت لازم يرجع
 A trip has been scheduled,تمت جدولة رحلة
 A valid GPS position (latitude and longitude) is required.,يلزم موقع GPS صحيح (خط العرض وخط الطول).
 A vehicle compliance document is expiring soon — please start renewal,وثيقة امتثال مركبة على وشك الانتهاء — يُرجى بدء التجديد
@@ -85,6 +89,7 @@ Absent,غائب
 Accent Color,لون التمييز
 Accent Color must be a valid CSS colour.,يجب أن يكون لون التمييز لون CSS صالحًا.
 Accept & House,قبول وإسكان
+Accepted on,تم القبول في
 Access Identity,بيانات الصلاحية
 Access Level,مستوى الصلاحية
 Accident,حادث
@@ -99,6 +104,7 @@ Accommodation Ledger,سجل تكاليف السكن
 Accommodation Ledger Summary,ملخص سجل تكاليف السكن
 Accommodation Manager Dashboard,لوحة معلومات مدير السكن
 Accommodation Occupancy Summary,ملخص الإشغال
+Accommodation Provider,جهة السكن
 Accommodation Stock Balance,رصيد مخزون السكن
 Accommodation Stock Ledger,سجل مخزون السكن
 Accommodation Type,نوع السكن
@@ -117,6 +123,8 @@ Accrued Total,إجمالي المستحق
 Accrued Total (SAR),إجمالي المستحق (ريال)
 Accrued Total Taken From Ledger,إجمالي المستحق مأخوذ من السجل
 Accrued Total minus Ledger Accrued Total — non-zero means the entered vehicle lines disagree with the accrual ledger.,إجمالي الاستحقاق مطروحًا منه إجمالي الاستحقاق من السجل — تعني القيمة غير الصفرية أن بنود المركبات المدخلة لا تطابق سجل استحقاق الإيجار.
+Accrued by the Company,المستحق عندنا
+Accrued in the Rental Ledger,المستحق في سجل الإيجار
 Accrued total. Sum of the vehicle line amounts when lines are entered; otherwise derived from the linked Rental Accrual Ledger.,إجمالي الاستحقاق. مجموع مبالغ بنود المركبات عند إدخال البنود؛ وإلا فيُشتق من سجل استحقاق الإيجار المرتبط.
 Acknowledge,تأكيد الاطلاع
 Acknowledge receipt,تأكيد الاستلام
@@ -125,6 +133,7 @@ Acknowledged,تم الإقرار
 Acknowledged By,أقرّ به
 Acknowledged By (Employee),أقر بالاستلام (الموظف)
 Acknowledged On,تاريخ الإقرار
+Acknowledged on,تم الإقرار في
 Acknowledgement Received,تم استلام الإقرار
 Acknowledgement Received must be set before a recovery can be {0}.,يجب تحديد «تم استلام الإقرار» قبل تغيير حالة الاسترداد إلى {0}.
 Acted On My Documents,جرى إجراء على مستنداتي
@@ -132,6 +141,7 @@ Acted on by {0},نفّذ الإجراء {0}
 Action,الإجراء
 Action Date,تاريخ الإجراء
 Action Inbox,إجراءاتي
+Action Taken on the Spot,الإجراء المتخذ في حينه
 Action failed. Please review and try again.,فشل الإجراء. يرجى المراجعة وإعادة المحاولة.
 Activate,تفعيل
 Activate Bed,تفعيل السرير
@@ -152,8 +162,10 @@ Active Residents,الساكنون الحاليون
 Active Vehicle Assignments,إسنادات المركبات النشطة
 Active Vehicles,المركبات النشطة
 Active Vehicles by Category,المركبات النشطة حسب الفئة
+Active cameras,الكاميرات العاملة
 Actor,المُنفِّذ
 Actors,الأطراف
+Actual Duration (Days),المدة الفعلية (أيام)
 Actual End Date,تاريخ النهاية الفعلي
 Actual End Date must be on or after Actual Start Date.,يجب أن يكون تاريخ النهاية الفعلي بعد تاريخ البداية الفعلي أو مساوياً له.
 Actual Occupancy,الإشغال الفعلي
@@ -177,6 +189,7 @@ Add the Items,أضف الأصناف
 "Add the first driver, including license details used for clearance and dispatch.",أضف أول سائق، متضمناً بيانات الرخصة المستخدمة لإخلاء الطرف والتسيير.
 Add the first vehicle compliance record so expiry alerts are active.,أضف أول سجل امتثال للمركبة حتى تُفعَّل تنبيهات انتهاء الصلاحية.
 "Add the first vehicle to the fleet so it can be assigned, fuelled, and dispatched.",أضف أول مركبة إلى الأسطول ليتسنى إسنادها وتزويدها بالوقود وتسييرها.
+Added above the room's planned capacity,سرير زائد عن الطاقة المخططة للغرفة
 Added to return: {0},أُضيف إلى الإرجاع: {0}
 Added: {0},تمت الإضافة: {0}
 Additional (Unregistered) Passengers,ركاب غير مسجلين
@@ -195,6 +208,9 @@ Advance this request to {0},نقل هذا الطلب إلى {0}
 After,بعد
 "After the job, note what was done, then save.",بعد إنجاز العمل، دوّن ما تم تنفيذه، ثم احفظ.
 After this moment the personal link stops resolving (an expired link is refused). Regenerate to issue a fresh link with a new expiry.,بعد هذه اللحظة يتوقف الرابط الشخصي عن العمل (يُرفض الرابط المنتهي). أعد التوليد لإصدار رابط جديد بمدة صلاحية جديدة.
+Against Custody Issue,مقابل صرف عهدة
+Against Custody Return,مقابل إرجاع عهدة
+Against Housing Assignment,مقابل تسكين
 Against Issue,مقابل صرف
 Age,العمر
 Age (Days),العمر (أيام)
@@ -217,6 +233,9 @@ All Assets Physically Verified must be checked before submitting the custody ass
 All Custody Cleared,تم إخلاء طرف جميع العهد
 All Items Verified,تم التحقق من جميع البنود
 All clear — no open alerts,لا توجد تنبيهات مفتوحة
+All housing custody is accounted for and nothing is outstanding against this resident.,كل عهدة السكن مسلَّمة ولا يوجد شيء متبقٍ على الساكن.
+All housing custody returned,إرجاع كامل عهدة السكن
+All issued articles are back,إرجاع كل الأصناف المصروفة
 All three exit checkpoints must be cleared before confirming receipt.,يجب إخلاء نقاط الخروج الثلاث جميعها قبل تأكيد الاستلام.
 Allocation,تخصيص
 Allocation Audit,تدقيق التوزيع
@@ -227,15 +246,20 @@ Allow Over-Capacity,السماح بتجاوز الطاقة الاستيعابي�
 Allow drivers to access the self-service portal.,السماح للسائقين بالوصول إلى بوابة الخدمة الذاتية.
 Allow pop-ups to print the slip.,اسمح بالنوافذ المنبثقة لطباعة القسيمة.
 Allowed Origins,المصادر المسموح بها
+Allowed margin,الهامش المسموح
 Amended From,مُعدّل من
 Amount,المبلغ
 Amount (SAR),المبلغ (ريال)
+Amount Deducted,المبلغ المخصوم
+Amount Payable,المبلغ المستحق
 Amount Recovered,المبلغ المُسترد
 Amount Recovered (SAR),المبلغ المسترد (ريال)
 Amount claimed by the rental office.,المبلغ المطالب به من مكتب التأجير.
+Amount due for loss or damage,مبلغ مستحق عن فقد أو تلف
 Amount in words,المبلغ كتابةً
 Amount must be greater than zero.,يجب أن يكون المبلغ أكبر من صفر.
 Amount recovered cannot be negative.,لا يمكن أن يكون المبلغ المسترد سالبًا.
+Amount to Recover,المبلغ المطلوب استرداده
 Amount to Recover (SAR),المبلغ المطلوب استرداده (ريال)
 Amount to Recover cannot exceed the estimated cost.,لا يمكن أن يتجاوز المبلغ المطلوب استرداده التكلفة التقديرية.
 Amount to Recover must be greater than zero.,يجب أن يكون المبلغ المطلوب استرداده أكبر من صفر.
@@ -321,6 +345,7 @@ Area,المنطقة
 Area Photo Evidence,إثبات صور المناطق
 Area evidence for {0} is required before submit.,يلزم إثبات المنطقة لـ {0} قبل الاعتماد.
 "Area {0} must have a Cleaned photo, or be marked Not Cleaned / N/A with a note.",يجب أن تحتوي المنطقة {0} على صورة (تم التنظيف)، أو أن تُعلَّم (لم يُنظَّف / لا ينطبق) مع ملاحظة.
+Arising from Checkout,ناتج عن إخلاء سكن
 Arrange Departure Transport,ترتيب نقل المغادرة
 Arrival,وصول
 Arrival Batch,دفعة وصول
@@ -341,13 +366,17 @@ Arrived As,وصل بصفة
 Arrived At,وقت الوصول
 Arrived this session ({0}),وصلوا في هذه الجلسة ({0})
 Article,الصنف
+Article Code,رمز الصنف
 Article Details,تفاصيل الصنف
 Article Name,اسم الصنف
 "Article {0} was not issued on Custody Issue {1}, so it cannot be returned.",الصنف {0} لم يُصرف في صرف العهدة {1}، لذا لا يمكن إرجاعه.
+Articles Issued,الأصناف المصروفة
 Article…,الصنف…
 As Needed,عند الحاجة
 As On Date,حتى تاريخ
 Assess Damage,تقييم الضرر
+Assessed By,قدّر التلف
+Assessed by,قيّمها
 "Assessed seriousness of the incident, driving escalation and response urgency from minor low-severity events up to critical incidents needing immediate action.",درجة خطورة الحادث المقدّرة، تحرّك التصعيد وسرعة الاستجابة من الأحداث البسيطة منخفضة الخطورة حتى الحوادث الحرجة التي تتطلب إجراءً فوريًا.
 Assessment,التقييم
 Assessment Date,تاريخ التقييم
@@ -417,7 +446,11 @@ At least one item is required on a Custody Return.,يجب إدخال صنف وا
 At least one item is required on a Goods Receipt.,يلزم بند واحد على الأقل في استلام البضائع.
 At least one item is required on a Material Transfer.,يجب إدخال صنف واحد على الأقل في نقل المواد.
 At least one worker is required for an Inter-City Relocation.,يلزم عامل واحد على الأقل لعملية النقل بين المدن.
+Attach a photograph of the damage,أرفق صورة للتلف
 Attach photographic evidence,أرفق صورة كدليل
+Attach photographic evidence of the round,أرفق صور الجولة
+Attach photographic evidence of the scene,أرفق صور موقع الحادثة
+Attach photographic evidence of the work before and after,أرفق صور العمل قبل وبعد
 Attach the internal authorization (management sign-off) approving this deduction type.,أرفق التفويض الداخلي (اعتماد الإدارة) الذي يقر نوع الحسم هذا.
 Attach the signed legal opinion / policy approving these deductions under KSA Labor Law.,أرفق الرأي القانوني / السياسة الموقّعة التي تعتمد هذه الخصومات بموجب نظام العمل السعودي.
 Attachment,مرفق
@@ -439,10 +472,13 @@ Audit Remediation Item,بند معالجة التدقيق
 Audit Remediation Plan,خطة معالجة التدقيق
 Audit Remediation Plans by Status,خطط معالجة التدقيق حسب الحالة
 Audit Remediation Status,حالة معالجة التدقيق
-Auditor,المدقق
 August,أغسطس
 Auth Secret,المفتاح السري للمصادقة
+Authorising Contract,العقد المخوِّل
+Authorising Officer,المسؤول المعتمد
+Authorising Request,الطلب المخوِّل
 Authority,الصلاحية
+Authority Gate,بوابة الاعتماد
 Authorization,التفويض
 Authorization & Delivery,التفويض والتسليم
 Authorization Document,مستند التفويض
@@ -487,6 +523,7 @@ Awaiting Acknowledgement,بانتظار الإقرار
 Awaiting Approval,بانتظار الاعتماد
 Awaiting Handover,بانتظار التسليم
 Awaiting My Approval,بانتظار اعتمادي
+Awaiting confirmation by the receiving supervisor,بانتظار تأكيد المشرف المستلم
 Awareness and Training,التوعية والتدريب
 Back,رجوع
 Back to the system,العودة إلى النظام
@@ -505,7 +542,9 @@ Bathrooms,دورات المياه
 Bed,سرير
 Bed Capacity,الطاقة الاستيعابية (أسرّة)
 Bed Code,رمز السرير
+Bed Released,السرير المُخلى
 Bed capacity per room exceeds maximum of 50. Floor {0}: {1} beds configured.,سعة الأسرّة لكل غرفة تتجاوز الحد الأقصى 50. الطابق {0}: تم تهيئة {1} سرير.
+Bed is an over-capacity temporary bed,السرير مؤقت وزائد عن الطاقة
 "Bed mosquito net. Consumable, routinely purchased per site.",ناموسية سرير. صنف استهلاكي يُشترى دورياً لكل موقع.
 Bed sheet / linen set for worker accommodation. Consumable bedding item.,شرشف / طقم مفروشات لسكن العمال. صنف مفروشات استهلاكي.
 Bed {0} is not linked to a room and building.,السرير {0} غير مرتبط بغرفة ومبنى.
@@ -518,6 +557,7 @@ Beds,الأسرّة
 Beds Out of Service,الأسرّة خارج الخدمة
 Beds by Building,الأسرّة حسب المبنى
 Beds by Status,الأسرّة حسب الحالة
+Beds in this room,أسرّة هذه الغرفة
 Beds per Room,عدد الأسرّة لكل غرفة
 "Beds per Room must be greater than 0 when Auto-Generate Beds is enabled. Floor {0}, type {1}.",يجب أن يكون عدد الأسرّة لكل غرفة أكبر من 0 عند تفعيل التوليد التلقائي للأسرّة. الطابق {0}، النوع {1}.
 Before,قبل
@@ -529,6 +569,7 @@ Bill Identity,هوية الفاتورة
 Bill PDF,الفاتورة بصيغة PDF
 Bill a rental office for its vehicles and print the statement.,أنشئ فاتورة لمكتب التأجير عن مركباته واطبع الكشف.
 Bill amounts cannot be negative.,لا يمكن أن تكون مبالغ الفاتورة سالبة.
+Billed By,الجهة المطالِبة
 Billed To Supplier,المورّد المفوتر عليه
 Billing,الفوترة
 Billing Account Number,رقم حساب الفوترة
@@ -542,6 +583,7 @@ Billing Period To,فترة الفوترة إلى
 Billing Period To must be on or after Billing Period From.,يجب أن يكون تاريخ نهاية فترة الفوترة مساوياً لتاريخ البداية أو بعده.
 Billing Period and Amount,فترة ومبلغ الفوترة
 Billing Period must look like 2026-07 (year and month).,يجب أن تكون فترة الفوترة بصيغة 2026-07 (السنة والشهر).
+Billing Raised Against This Contract,الفوترة الصادرة على هذا العقد
 Billing Recipient Email,البريد الإلكتروني لمستلم الفاتورة
 Billing and Variance,الفوترة والفرق
 Billing documents can only be raised from a submitted contract.,لا يمكن إصدار مستندات الفوترة إلا من عقد مُعتمد.
@@ -581,6 +623,7 @@ Book Value,القيمة الدفترية
 Book Value (SAR),القيمة الدفترية (ريال)
 Bookkeeping,مسك الدفاتر
 Both a source bed and a target bed are required.,يلزم تحديد سرير المصدر وسرير الوجهة معاً.
+"Both sides agree that the vehicles above were on rent for the days shown at the rates shown in this period, that the amount settled is the claimed total after the difference is dealt with, and that nothing else is due to the rental office for this period.",الطرفان متفقان أن المركبات أعلاه كانت على الإيجار بالأيام والأسعار المذكورة في هذه الفترة، وأن المبلغ المسدد هو المطالب به بعد معالجة الفرق، وأنه ما بقي لمكتب التأجير أي مستحق عن هذه الفترة.
 Branch Coverage,تغطية الفرع
 Branch Site,موقع الفرع
 Brand Logo,شعار العلامة التجارية
@@ -597,6 +640,7 @@ Building License,رخصة المبنى
 Building Licenses by Status,رخص المباني حسب الحالة
 Building Number,رقم المبنى
 Building Operations Summary,ملخص عمليات المبنى
+Building Specific Rate,سعر خاص بالمبنى
 Building Store,مخزن المبنى
 Building and Project are required for an Accommodation to Project Shuttle.,المبنى والمشروع مطلوبان لرحلة النقل من السكن إلى المشروع.
 Building arrival cards…,جارٍ إنشاء بطاقات الوصول…
@@ -606,6 +650,7 @@ Building safety inspection.,تفتيش سلامة المبنى.
 Building {0} is not flagged as a Procurement Intake Store.,المبنى {0} غير مُعلَّم كمخزن استلام مشتريات.
 "Building-level fixed asset: CCTV camera, DVR/NVR, hard disk, router, switch, generator. Custody is on the supervisor, not on an employee.",أصل ثابت على مستوى المبنى: كاميرا مراقبة، مسجّل DVR/NVR، قرص صلب، موجّه، مبدّل، مولّد. العهدة على المشرف وليست على موظف.
 Buildings,المباني
+Buildings Covered,المباني المشمولة
 Buildings Granted,المباني المصرح بها
 Buildings In Scope,المباني ضمن النطاق
 Buildings Over Occupancy Threshold,المباني المتجاوزة لحد الإشغال
@@ -653,8 +698,7 @@ Capacity Denominator,أساس احتساب السعة
 Capacity Policies,سياسات السعة
 Capacity and Occupancy,السعة والإشغال
 Capacity reductions blocked ({0} room(s) have occupied surplus beds):,تعذر خفض السعة لأن {0} غرفة تضم أسرّة زائدة مشغولة:
-Capacity: {0} bed,السعة: {0} سرير
-Capacity: {0} beds,السعة: {0} أسرّة
+Capital Item,أصل رأسمالي
 Caps (KSA Labor Law),الحدود القصوى (نظام العمل السعودي)
 Caption,التعليق
 "Capture a movement need so it can be validated, scheduled, and dispatched.",سجّل حاجة حركة ليتسنى التحقق منها وجدولتها وتسييرها.
@@ -663,11 +707,15 @@ Captured At,وقت الالتقاط
 Captured By,ملتقط الصورة
 Card,بطاقة
 Cards / Table,بطاقات وجدول
+Carried By,يحمله
+Carried Out By (Technician),نفّذه (الفنّي)
+Carrying Vehicle,المركبة الناقلة
 Cart,السلة
 Cart is empty.,السلة فارغة.
 Case,حالة
 Case Closed,تم إغلاق الحالة
 Case Details,تفاصيل الحالة
+Case Status,حالة القضية
 Casualties,الإصابات
 Casualties cannot be negative.,لا يمكن أن تكون الإصابات سالبة.
 Catalog master for individual issuable articles.,السجل الرئيسي لدليل الأصناف القابلة للصرف.
@@ -682,6 +730,7 @@ Certificate File,ملف الشهادة
 Change,التغيير
 Charge per billing period. Used as the draft Payment Order amount.,الرسم لكل فترة فوترة. يُستخدم كمبلغ لمسودة أمر الدفع.
 Chargeable,قابل للتحميل
+Charged To,تُحمّل على
 Check In,تسكين
 Check Item,بند الفحص
 Check Out,مغادرة
@@ -737,19 +786,26 @@ City,المدينة
 City Name,اسم المدينة
 Civil Defence Certificate,شهادة الدفاع المدني
 Claim,المطالبة
+Claim Against Our Own Accrual,المطالبة مقابل المستحق عندنا
+Claim Identification,بيانات المطالبة
+Claim Status,حالة المطالبة
 Claim period in YYYY-MM format (e.g. 2026-05).,فترة المطالبة بصيغة YYYY-MM (مثال: 2026-05).
 Claimed Amount (SAR),المبلغ المطالب به (ريال)
 Claimed Amount cannot be negative.,لا يمكن أن يكون المبلغ المُطالب به سالبًا.
+Claimed By,المشروع المطالِب
 Claimed Litres,اللترات المطالب بها
 Claimed Litres must be greater than zero.,يجب أن تكون اللترات المطالب بها أكبر من صفر.
 Claimed Total,إجمالي المطالب به
 Claimed Total (SAR),إجمالي المطالب به (ريال)
 Claimed Total and Accrued Total cannot be negative.,لا يمكن أن يكون الإجمالي المُطالب به وإجمالي الاستحقاق سالبين.
 Claimed Total minus Accrued Total.,إجمالي المطالب به ناقص إجمالي المستحق.
+Claimed by the Office,مطالبة المكتب
 Claimed litres minus consumed litres. Positive = claim exceeds recorded consumption.,اللترات المطالب بها مطروحًا منها اللترات المستهلكة. القيمة الموجبة = المطالبة تتجاوز الاستهلاك المسجَّل.
+Claimed on this voucher,المطالب به في هذا السند
 Claims,المطالبات
 Classification,التصنيف
 "Classification of fleet vehicles (e.g., Sedan, Pickup, Bus).",تصنيف مركبات الأسطول (مثل سيدان أو بيك أب أو حافلة).
+Classification of the Incident,تصنيف الحادثة
 "Classifies the operational anomaly that triggered this alert so it routes to the right owner: idle assets, stalled or forgotten requests, supervisor delays, abnormal fuel top-ups, lapsing licenses, overdue maintenance, unsettled rentals, or expired consumables.",يصنّف الخلل التشغيلي الذي أطلق هذا التنبيه ليصل إلى المسؤول الصحيح: أصول متوقفة، أو طلبات متعثرة أو منسية، أو تأخر المشرفين، أو تعبئة وقود غير طبيعية، أو رخص على وشك الانتهاء، أو صيانة متأخرة، أو إيجارات غير مسوّاة، أو مستهلكات منتهية.
 Classifies why this trip is requested; the transport supervisor reads it when assigning requests onto a trip.,يصنّف سبب طلب هذه الرحلة؛ يطّلع عليه مشرف النقل عند إسناد الطلبات إلى الرحلة.
 Classify the Incident,صنّف الحادث
@@ -781,8 +837,9 @@ Cleaning compliance ledger. One immutable row per cleaned room is posted automat
 Clear,مسح
 Clear filters,مسح المرشّحات
 Clearance,إخلاء طرف
+Clearance Checks,فحوصات إخلاء الطرف
 Clearance Reason,سبب إخلاء الطرف
-Clearance is blocked. Outstanding movement-domain items remain open.,إخلاء الطرف موقوف. لا تزال هناك بنود حركة مفتوحة لم تُسوَّ.
+Clearance Status,حالة إخلاء الطرف
 Clearance is blocked. The following must be resolved first: {0}.,إخلاء الطرف محظور. يجب معالجة ما يلي أولًا: {0}.
 Clearance required: rider {0} is on leave/inactive but still holds vehicle {1}. Recover the vehicle and custody.,إخلاءٌ مطلوب: السائق {0} في إجازة/غير نشط لكنّه ما يزال يحوز المركبة {1}. استردّ المركبة والعهدة.
 Clearance {0} cancelled; driver restored to Active.,أُلغي إخلاء الطرف {0} وأُعيد السائق إلى حالة «نشط».
@@ -790,8 +847,10 @@ Cleared,تم إخلاء الطرف
 Cleared By,تم الإخلاء بواسطة
 Cleared On,تاريخ الإخلاء
 Cleared and released via {0} (reason {1}; vehicle {2}).,تم إخلاء طرف السائق وفك ارتباط المركبة بموجب {0} (السبب {1}؛ المركبة {2}).
+Cleared by,أخلى الطرف
 Click a free bed to house him.,انقر على سرير شاغر لإسكانه.
 Client,العميل
+Client (Company),العميل (الشركة)
 Client Audit Reference / Ticket,رقم مرجع/تذكرة تدقيق العميل
 Client Code,رمز العميل
 Client Point of Contact,مسؤول التواصل لدى العميل
@@ -813,8 +872,10 @@ Code Verified On,تاريخ التحقق من الرمز
 Combined ceiling for all deduction types per pay period; KSA Labor Law Art. 91 caps this at 50%.,السقف المجمّع لجميع أنواع الخصومات في كل فترة رواتب؛ يحدّده نظام العمل السعودي المادة 91 بحد أقصى 50%.
 Commercial Terms,الشروط التجارية
 Common Area,منطقة مشتركة
+Common area,منطقة مشتركة
 Company,الشركة
 Company & Currency,الشركة والعملة
+Company custody items have been returned,سلّم عهدة الشركة
 Company whose payroll these deductions post against. Falls back to Habitat Settings company when blank.,الشركة التي تُرحّل هذه الخصومات على مسير رواتبها. تعود افتراضيًا إلى الشركة المحددة في إعدادات هابيتات عند تركها فارغة.
 Company's share (%) of shared utility bills for this building. Agreed with the property management office. Does not affect rent.,حصة الشركة (٪) من فواتير المرافق المشتركة لهذا المبنى. متفق عليها مع مكتب إدارة العقار. لا تؤثر على الإيجار.
 Complaint,شكوى
@@ -847,6 +908,7 @@ Compound Block,بلوك مجمع
 Computed: Current Reading − Previous Reading,محسوب: القراءة الحالية − القراءة السابقة
 Condemnation,إتلاف
 Condition,الحالة
+Condition Inspection,فحص الحالة
 Condition Notes,ملاحظات الحالة
 Condition at Check-in,الحالة عند التسكين
 Condition at Handover,الحالة عند التسليم
@@ -881,16 +943,19 @@ Confirmation Method,طريقة التأكيد
 Confirmed,مؤكَّد
 Confirmed Receipt,تأكيد الاستلام
 Confirmed Receipt is the primary path. Choose Signature when the holder cannot type-confirm and signs instead.,الأصل تأكيد الاستلام. استخدم التوقيع إذا تعذّر على المستلم تأكيده كتابةً.
+Confirmed by the facility supervisor,مؤكَّد من مشرف المنشأة
 Consent,الموافقة
 Consent & Approval Gate,الموافقة وبوابة الاعتماد
 Consent Signed On,تاريخ توقيع الموافقة
 Constant value written to the target field when Static is checked (for example a fixed payment_type or party_type).,قيمة ثابتة تُكتب في الحقل المستهدف عند تفعيل خيار ثابت (مثل نوع دفع أو نوع طرف محدد).
+Consumable,مادة مستهلكة
 Consumable Lifespan (Months),العمر الافتراضي للمستهلك (بالأشهر)
 Consumable past its lifespan: {0},انتهى العمر الافتراضي لمستهلك: {0}
 "Consumable {0} held by {1} since {2} is {3} month(s) old, past its {4}-month lifespan.",المستهلك {0} بحوزة {1} منذ {2} وعمره {3} شهرًا، متجاوزًا عمره الافتراضي البالغ {4} شهرًا.
 Consumed Litres,اللترات المستهلكة
 Consumed litres ({0}) exceed the monthly quota ({1}).,اللترات المستهلكة ({0}) تتجاوز الحصة الشهرية ({1}).
 Consumed {0} L via Fuel Request {1}.,تم استهلاك {0} لتر عبر طلب الوقود {1}.
+Consuming Vehicle,المركبة المستهلكة
 Consumption,الاستهلاك
 Consumption (kWh / m³),الاستهلاك (كيلوواط ساعي / متر مكعب)
 Consumption period in YYYY-MM format (e.g. 2026-05).,فترة الاستهلاك بصيغة YYYY-MM (مثال: 2026-05).
@@ -908,17 +973,23 @@ Contract End Date,تاريخ نهاية العقد
 Contract End Date cannot be earlier than Contract Start Date.,لا يمكن أن يكون تاريخ نهاية العقد أقدم من تاريخ بدايته.
 Contract End Date must be after Contract Start Date.,يجب أن يكون تاريخ نهاية العقد بعد تاريخ بدايته.
 Contract End cannot be before Contract Start.,لا يمكن أن يكون تاريخ انتهاء العقد قبل تاريخ بدايته.
+Contract Period,مدة العقد
+Contract Rate Per Visit,سعر الزيارة بالعقد
 Contract Start,بداية العقد
 Contract Start Date,تاريخ بداية العقد
+Contract Status,حالة العقد
 Contract Term,مدة العقد
 Contract-Derived References,مراجع مشتقة من العقد
+Contracted Service,الخدمة المتعاقد عليها
 Contracted daily rental rate. Carried into the Rental Accrual Ledger memo for each in-service day.,سعر الإيجار اليومي المتعاقد عليه. يُنقل إلى سجل استحقاق الإيجار عن كل يوم في الخدمة.
 Contractor & Service,المقاول والخدمة
 Contractor / Temp ID,معرّف المتعاقد / المؤقت
+Contractor Technician,فنّي المقاول
 Contracts,العقود
 Convert to Document,تحويل إلى مستند
 Converted from resident request {0},مُحوَّل من طلب ساكن {0}
 Copy link,نسخ الرابط
+Corrective Action and Closure,الإجراء التصحيحي والإغلاق
 Corridors,الممرات
 Cost,التكلفة
 Cost Allocation,توزيع التكلفة
@@ -926,6 +997,7 @@ Cost Attribution,تحميل التكلفة
 Cost Bearing (%),نسبة تحمّل التكلفة (٪)
 Cost Bleeding (SAR),هدر التكلفة (ريال)
 Cost Center,مركز التكلفة
+Cost Center Charged,مركز التكلفة المحمّل
 Cost Center Snapshot,مركز التكلفة وقت الإجراء
 Cost Center is required. Please set it or configure a default Cost Center on Building {0}.,مركز التكلفة مطلوب. يُرجى تعيينه أو تهيئة مركز تكلفة افتراضي على المبنى {0}.
 Cost Centres,مراكز التكلفة
@@ -935,6 +1007,7 @@ Cost Recovery Aging Backlog,متأخرات استرداد التكاليف
 Cost Recovery Operations Threshold (SAR),حد تصعيد استرداد التكاليف إلى العمليات (ريال)
 Cost Recovery by Type,استرداد التكلفة حسب النوع
 Cost Recovery from Driver,استرداد التكلفة من السائق
+Cost Recovery from the Driver,تحصيل التكلفة من السائق
 Cost Sharing,تقاسم التكلفة
 Cost Summary,ملخص التكاليف
 Cost by Dimension,التكلفة حسب البُعد
@@ -1021,10 +1094,13 @@ Count of open Fuel Exception Case records for this driver. Must be zero to clear
 Count of open Movement Cost Recovery records for this driver. Must be zero to clear.,عدد سجلات استرداد تكلفة الحركة المفتوحة لهذا السائق. يجب أن يكون صفراً لإخلاء الطرف.
 "Countable housing item held at a building/room location (furniture, appliance, linen, kitchenware). One row per stocked article line; the periodic inventory count reconciles expected vs counted quantity. Tracked facility fixed assets stay in Facility Asset; this links to one optionally.",صنف سكني قابل للعد محفوظ في موقع مبنى أو غرفة (أثاث أو جهاز أو مفروشات أو أدوات مطبخ). صف واحد لكل بند مخزون؛ والجرد الدوري يطابق الكمية المتوقعة مع المعدودة. أما الأصول الثابتة المتتبعة فتبقى في أصول المرافق، ويرتبط بها هذا الصنف اختيارياً.
 Counted Quantity,الكمية المجرودة
+Counted against the lines above,تم العد مقابل السطور أعلاه
 Counted minus expected; negative means a shortage.,المعدود ناقص المتوقع؛ القيمة السالبة تعني عجزًا.
 Country,الدولة
 Counts must be a list.,يجب أن تكون الأعداد قائمة.
 Counts must be valid JSON.,يجب أن تكون الأعداد بصيغة JSON صحيحة.
+Cover in Force on the Vehicle,التغطية السارية على المركبة
+Covered Building,المبنى المشمول
 Covered Buildings,المباني المشمولة
 Create,إنشاء
 Create Custody Article,إنشاء صنف عهدة
@@ -1068,6 +1144,7 @@ Cross-Project Needs Approval,النقل بين المشاريع يتطلب مو�
 Cross-building moves are not supported here. Use Check-out and a new Check-in.,لا يمكن النقل بين المباني من هنا. استخدم مغادرة السكن ثم تسكينًا جديدًا.
 Cross-cost-center material transfer: {0},نقل مواد بين مراكز تكلفة مختلفة: {0}
 Currency,العملة
+Currency of the Contract,عملة العقد
 Current Assignment,الإسناد الحالي
 Current Cost Center,مركز التكلفة الحالي
 Current Driver,السائق الحالي
@@ -1093,17 +1170,22 @@ Custody & Status,العهدة والحالة
 Custody Acknowledgment,إقرار استلام العهدة
 Custody Action,إجراء العهدة
 Custody Article,صنف العهدة
+Custody Article Lines,بنود أصناف العهدة
 Custody Asset Category,تصنيف أصول العهدة
 Custody Cleared,تم إخلاء طرف العهدة
 Custody Damage Assessment,تقييم تلفيات العهدة
 Custody Damage Assessments,تقييمات تلفيات العهدة
 Custody Damage Item,صنف العهدة التالف
+Custody Damage and Deduction Notice,إشعار تلف عهدة وخصم
 Custody Flow,مسار العهدة
 Custody Handover,تسليم العهدة
+Custody Handover Note,إشعار تسليم عهدة
 Custody History,سجل العهدة
+Custody Holder,حائز العهدة
 Custody Integration Mode,نمط ربط العهدة
 Custody Issue,صرف العهدة
 Custody Issue Item,بند صرف العهدة
+Custody Issue Receipt,إيصال صرف عهدة
 Custody Issue Register,سجل صرف العهد
 Custody Issue {0} is not held by the selected worker.,العامل المحدد ليس مستلم العهدة في عملية الصرف {0}.
 Custody Issue {0} must be submitted before it can be acknowledged.,يجب اعتماد صرف العهدة {0} قبل التمكّن من الإقرار باستلامه.
@@ -1116,6 +1198,7 @@ Custody Not Cleared,عهدة غير مُخلاة
 Custody Return,إرجاع العهدة
 Custody Return Item,بند إرجاع العهدة
 Custody Return Items,بنود إرجاع العهدة
+Custody Return Receipt,إيصال إرجاع عهدة
 Custody Return Register,سجل إرجاع العهد
 Custody Returned,تم إرجاع العهدة
 Custody Value (SAR),قيمة العهدة (ريال)
@@ -1131,6 +1214,7 @@ Custom…,مخصص…
 DVR/NVR,جهاز التسجيل DVR/NVR
 DVR/NVR Status,حالة جهاز التسجيل DVR/NVR
 Daily,يومي
+Daily Rate,السعر اليومي
 Daily Rate (SAR),السعر اليومي (ريال)
 Daily Rate cannot be negative.,لا يمكن أن يكون السعر اليومي سالباً.
 Daily Rate is required on a Receipt movement.,السعر اليومي مطلوب في حركة الاستلام.
@@ -1146,7 +1230,9 @@ Damage Cost by Building,تكلفة الأضرار حسب المبنى
 Damage Deduction,خصم الضرر
 Damage Deduction Amount (SAR),مبلغ خصم التلفيات (ريال)
 Damage Description,وصف التلفيات
+Damage Found,التلف الموجود
 Damage Notes,ملاحظات الضرر
+Damage evidence is attached to the case,مرفق دليل على التلف
 Damage write-off {0} cancelled.,أُلغي شطب الأضرار {0}.
 Damage write-off {0} submitted (estimated {1} SAR).,اعتُمد شطب الأضرار {0} (القيمة التقديرية {1} ريال).
 Damaged,تالف
@@ -1172,6 +1258,7 @@ Days Held,أيام الحيازة
 Days Housed,مدة السكن (بالأيام)
 Days Idle,أيام عدم التشغيل
 Days Open,مدة بقاء السجل مفتوحًا (بالأيام)
+Days Open Since the Incident,عدد الأيام منذ الحادثة
 Days Overdue,أيام التأخير
 Days Since,عدد الأيام منذ
 Days Since Checkout,أيام منذ المغادرة
@@ -1183,6 +1270,7 @@ Days before a building lease end date to flag it on the watchlist.,عدد الأ
 Days before a safety task's due date to send a pre-due reminder.,عدد الأيام قبل تاريخ استحقاق مهمة السلامة لإرسال تذكير مسبق.
 Days before a temporary stay's expected check-out date to flag it on the supervisor's watchlist.,عدد الأيام قبل تاريخ المغادرة المتوقع لإقامة مؤقتة لإدراجها في قائمة متابعة المشرف.
 Days before expiry to trigger renewal alert,عدد الأيام قبل الانتهاء لإطلاق تنبيه التجديد
+Days in Transit,أيام النقل
 "Days the worker may remain on a passport-only basis. Standard 30, extendable to a maximum of 90.",عدد الأيام التي يجوز للعامل البقاء فيها بالاعتماد على جواز السفر فقط. القياسي 30، قابل للتمديد إلى حد أقصى 90.
 Days to Expiry,الأيام المتبقية للانتهاء
 Days to expiry at or below which a driver licence or vehicle compliance document is flagged 'expiring' (amber) in the driver portal; blank or zero uses the built-in default.,عدد الأيام المتبقية حتى الانتهاء؛ عند بلوغها أو النزول عنها تظهر رخصة السائق أو وثيقة امتثال المركبة بحالة «قرب الانتهاء» باللون الكهرماني في بوابة السائق. إذا تُرك الحقل فارغًا أو كانت قيمته صفرًا، تُستخدم القيمة الافتراضية للنظام.
@@ -1242,11 +1330,14 @@ Demo Data,البيانات التجريبية
 Demo Data Partly Removed,أُزيلت البيانات التجريبية جزئيًا
 Demo Data Removed,تمت إزالة البيانات التجريبية
 Depart Time,وقت المغادرة
+Departing Driver,السائق المغادر
+Departing Resident,الساكن المغادر
 Department,القسم
 Departure Transport Request,طلب نقل المغادرة
 Departure Transport Request raised: {0},تم إنشاء طلب نقل المغادرة: {0}
 Departure Transport Request {0} raised.,تم إنشاء طلب نقل المغادرة {0}.
 Departure transport applies only to a Final Exit or End of Contract checkout.,نقل المغادرة ينطبق فقط على إخلاء سكن لخروج نهائي أو نهاية عقد.
+Departure transport arranged,ترتيب نقل المغادرة
 Departure transport can only be raised for a submitted checkout.,لا يمكن إنشاء نقل المغادرة إلا لإخلاء سكن معتمد.
 Departure transport for {0} ({1}). Raised from Housing Checkout {2}.,نقل مغادرة لـ {0} ({1}). تم إنشاؤه من إخلاء السكن {2}.
 Deployed,مشغّل
@@ -1282,6 +1373,10 @@ Details,التفاصيل
 "Detergent and cleaning supplies. Consumable, routinely purchased per site.",منظفات ومستلزمات تنظيف. صنف استهلاكي يُشترى دورياً لكل موقع.
 Device,الجهاز
 Diesel,ديزل
+Difference,الفرق
+Difference Against the Contract Rate,الفرق عن سعر العقد
+Difference Against the Ledger,الفرق مقابل السجل
+Difference between claimed and consumed,الفرق بين المطالب والمستهلك
 Direct,مباشر
 Direct / Company,مباشر / الشركة
 Direct Allocation,توزيع مباشر
@@ -1302,6 +1397,12 @@ Dispatch readiness: {0} is required before submitting.,جاهزية التسيي
 Dispatch the first trip to put a vehicle and driver on the road.,سيّر أول رحلة لإطلاق مركبة وسائق على الطريق.
 Dispatch trip,رحلة التسيير
 Dispatched,تم التسيير
+Dispatched to Contractor,أُحيل إلى مقاول
+Dispatching Store,المستودع المرسِل
+Dispatching Store Supervisor,مشرف المستودع المرسِل
+Dispense To,يُصرف لـ
+Dispensed By,صرفه
+Dispensing Party,جهة الصرف
 Disposal/Scrap,إتلاف/خردة
 Disposition,التصرّف
 Dispute,اعتراض
@@ -1309,13 +1410,17 @@ Disputed,محل نزاع
 Disputed Rental Settlements,تسويات الإيجار المتنازع عليها
 Disputed Utility Bills,فواتير الخدمات المعترض عليها
 Disputed or suspicious fuel-control case. Holds usage/GPS evidence and enforces non-raiser closure (segregation of duties).,حالة رقابة وقود متنازع عليها أو مشبوهة. تحفظ أدلة الاستخدام/نظام تحديد المواقع وتفرض أن يُغلقها شخص غير منشئها (الفصل بين المهام).
+Distance Run,المسافة المقطوعة
 District,الحي
 District / neighborhood.,الحي / المنطقة المجاورة.
+Do not place a resident in this room until it is cleared.,لا تسكّن أحدًا في هذه الغرفة قبل تجهيزها.
 "Do not tamper with fire alarms, smoke detectors, or safety equipment.",عدم العبث بأجهزة إنذار الحريق أو كواشف الدخان أو معدات السلامة.
 DocType,نوع المستند
 Document,المستند
 Document No,رقم الوثيقة
 Document Number,رقم المستند
+Document Reference,رقم المستند
+Document State,حالة المستند
 Document Type,نوع المستند
 Documentation,التوثيق
 "Domain of the inspection finding, routing it to safety, maintenance, or hygiene handling, or general when it does not fit a specific domain.",مجال ملاحظة التفتيش، ويوجهها إلى السلامة أو الصيانة أو النظافة، أو إلى المجال العام إذا لم تنطبق عليها فئة محددة.
@@ -1327,6 +1432,7 @@ Draft Damage Assessment created: {0}. Please review and submit.,أُنشئت م�
 "Draft purchase requests and payment orders raised from this contract, one set per billing period.",مسودات طلبات الشراء وأوامر الدفع المُصدَرة من هذا العقد، مجموعة واحدة لكل فترة فوترة.
 Draft {0} ready: {1},مسودة {0} جاهزة: {1}
 Drag an occupied bed onto an empty bed to transfer the resident.,اسحب سريراً مشغولاً إلى سرير فارغ لنقل الساكن.
+Drawn against the quota so far,المسحوب من الحصة حتى الآن
 Drinking-water cooler / dispenser. Required corrective item from client safety audits.,مبرّد / موزّع مياه شرب. صنف تصحيحي مطلوب من تدقيقات سلامة العميل.
 Driver,سائق
 Driver Attendance,حضور السائق
@@ -1345,17 +1451,21 @@ Driver Portal Link,رابط بوابة السائق
 Driver Portal Theme,مظهر بوابة السائق
 Driver Position Updated At,وقت آخر تحديث لموقع السائق
 Driver Push Subscription,اشتراك إشعارات السائق
+Driver Record Status,حالة سجل السائق
 Driver Rejected,مرفوض من السائق
 Driver Suspension,إيقاف سائق
 Driver User,مستخدم السائق
 Driver Web Push,إشعارات الويب للسائق
 Driver assigned,تم إسناد سائق
+Driver at the Wheel,السائق وقت الحادث
 Driver created. Return to the fleet board and search the driver to assign a vehicle.,تم إنشاء السائق. ارجع إلى لوحة الأسطول وابحث عن السائق لإسناد مركبة.
 Driver credential issuance requires an allowed Project.,يتطلب إصدار بيانات اعتماد السائق مشروعًا مسموحًا به.
+Driver in Custody at the Time,السائق الذي كانت بعهدته
 Driver is required.,السائق مطلوب.
 Driver license expired on {0}.,انتهت صلاحية رخصة السائق في {0}.
 Driver license has expired. Renew before assigning to trips.,انتهت صلاحية رخصة القيادة. يرجى التجديد قبل الإسناد للرحلات.
 Driver link revoked.,تم إلغاء رابط السائق.
+Driver on Duty,السائق المناوب
 Driver portal is not enabled.,بوابة السائق غير مفعّلة.
 Driver reassigned,تمت إعادة إسناد السائق
 "Driver stop record (violation, leave, termination, or transfer). May release the linked vehicle.",سجل إيقاف سائق بسبب مخالفة أو إجازة أو إنهاء خدمة أو نقل، وقد يفك ارتباط المركبة بالسائق.
@@ -1404,6 +1514,7 @@ Electric water heater for accommodation bathrooms. Durable appliance.,سخان �
 Electrical,كهرباء
 Electrical Fixture,تجهيزات كهربائية
 Electricity,كهرباء
+Electronic Acknowledgement,إقرار إلكتروني
 Email,البريد الإلكتروني
 Email address where the e-bill arrives.,البريد الإلكتروني الذي تصل إليه الفاتورة الإلكترونية.
 "Email that receives the Safety Round report when a safety checklist round is submitted. If empty, the report goes to the Accommodation Manager(s).",البريد الإلكتروني الذي يستقبل تقرير جولة السلامة عند اعتماد الجولة. إذا تُرك فارغًا، يُرسل التقرير إلى مديري السكن.
@@ -1419,6 +1530,7 @@ Employee Custody,عهدة الموظف
 Employee Daily Share,الحصة اليومية للموظف
 Employee Daily Share (SAR),حصة الموظف اليومية (ريال)
 Employee Name,اسم الموظف
+Employee Number,الرقم الوظيفي
 Employee Responsible,الموظف المسؤول
 Employee Transfers,نقل الموظفين
 Employee the cost is recovered from. Fetched from the driver's employee record.,الموظف الذي تُسترد منه التكلفة. يُجلب من سجل موظف السائق.
@@ -1428,6 +1540,7 @@ Employee {0} appears more than once in the passenger list.,الموظف {0} يظ
 Employee {0} does not exist.,الموظف {0} غير موجود.
 Employees,الموظفون
 Employees Holding Multiple SIMs,الموظفون الذين لديهم أكثر من شريحة اتصال
+Employment Record,بيانات التوظيف
 Empty,فارغ
 Enable Approvals,تفعيل الموافقات
 Enable Driver Portal,تفعيل بوابة السائق
@@ -1467,16 +1580,22 @@ Enter the current odometer reading.,أدخل قراءة العداد الحال�
 Enter the planned departure time.,أدخل وقت المغادرة المخطط.
 Entity,الكيان
 Entrance,المدخل
+Equipment Concerned,الجهاز المعني
 Error Log,سجل الأخطاء
 Escalated Maintenance Requests,طلبات الصيانة المصعدة
 Estimated Accommodation Cost Bleed (SAR),التكلفة المقدّرة لهدر السكن (ريال)
+Estimated Cost,التكلفة التقديرية
 Estimated Cost (SAR),التكلفة التقديرية (ريال)
+Estimated Cost of Damage,التكلفة التقديرية للتلف
 Estimated Replacement Cost (SAR),تكلفة الاستبدال التقديرية (ريال)
 Estimated Unit Cost (SAR),التكلفة التقديرية للوحدة (ريال)
 Estimated accommodation cost from the memo ledger only (not salary). Populated by the aging job.,تكلفة الإسكان التقديرية من سجل المذكرات فقط (وليس الراتب). تُعبّأ بواسطة مهمة التقادم.
 Estimated cost cannot be negative.,لا يمكن أن تكون التكلفة التقديرية سالبة.
+Estimated cost is inside the fleet limit,التكلفة داخل حد الأسطول
 Estimated value,القيمة التقديرية
 Evening,مسائي
+Every article came back sound,كل الأصناف رجعت سليمة
+Every listed passenger boarded,كل راكب في الكشف صعد
 "Everything waiting on you, from Frappe's own queues.",كل ما ينتظر إجراءك في قوائم انتظار فرابي.
 Evidence,الأدلة
 Evidence & Follow-up,الأدلة والمتابعة
@@ -1489,6 +1608,8 @@ Evidence Submitted,تم تقديم الإثبات
 Evidence is required before moving the write-off case beyond Open.,الأدلة مطلوبة قبل نقل حالة الشطب إلى ما بعد «مفتوح».
 Evidence is required to submit a stop with reason {0}.,يلزم إثبات لاعتماد إيقاف بالسبب {0}.
 Evidence required before resolving,الإثبات مطلوب قبل المعالجة
+Exact Location,الموقع بالتحديد
+Exact Location at the Site,الموقع بالتحديد داخل المبنى
 Excellent,ممتاز
 Exception,الاستثناء
 Exception Type,نوع الاستثناء
@@ -1529,6 +1650,7 @@ Expense Request Afmco DocType is not installed.,نوع المستند Expense Re
 Expense Type,نوع المصروف
 Expired,منتهي
 Expired Licenses,الرخص المنتهية
+Expires,ينتهي في
 Expires On,ينتهي في
 Expires on {0},تنتهي صلاحيته في {0}
 Expiring Soon,ينتهي قريباً
@@ -1542,10 +1664,12 @@ Export,تصدير
 Exterior,خارجي
 External Area,منطقة خارجية
 External Reference,مرجع خارجي
+External Supplier Worker,عامل من مورّد خارجي
 External Worker,عامل خارجي
 External fleet identifier used as the data-import key (unique).,معرّف الأسطول الخارجي المستخدم كمفتاح لاستيراد البيانات (فريد).
 External purchasing system PO or invoice number.,رقم أمر الشراء أو الفاتورة في نظام المشتريات الخارجي.
 External rental office that supplies rented vehicles to the fleet.,مكتب تأجير خارجي يزوّد الأسطول بالمركبات المستأجرة.
+Extra litres on top of the standing quota,لترات زيادة فوق الحصة الثابتة
 F1,صيغة F1
 F10,صيغة F10
 F2,صيغة F2
@@ -1569,6 +1693,7 @@ Facility Assets by Category,أصول المنشأة حسب التصنيف
 Facility Assets by Status,أصول المنشأة حسب الحالة
 Facility Custody Item,عهدة المنشأة
 Facility Item,عنصر منشأة
+Facility Supervisor,مشرف المنشأة
 "Facility asset movement ledger. Immutable audit row posted automatically by the system when a Facility Asset Movement is submitted; never edited manually. Each move from->to is one row, so the asset's relocation history is queryable rather than overwritten in place.",سجل حركة أصول المرافق. صف تدقيق ثابت يُقيَّد آلياً عند اعتماد حركة أصل مرفق، ولا يُعدَّل يدوياً. وكل نقل من موقع إلى آخر صف مستقل، فيبقى تاريخ تنقل الأصل قابلاً للاستعلام بدل أن يُطمس بالتحديث.
 Fail,غير مجتاز
 Failed,فاشل
@@ -1597,6 +1722,7 @@ Field Map row {0}: clear Source Fieldname on a Static row.,صف تعيين ال�
 "Fieldname on the TARGET payment DocType to populate (for example party, paid_amount, posting_date).",اسم الحقل في مستند الدفع المستهدف المراد تعبئته (مثل الطرف، المبلغ المدفوع، تاريخ الترحيل).
 Filter Assigned Work,رشّح العمل المسند
 Final Exit,خروج نهائي
+Finance,المالية
 Finance Approved By,مَن اعتمده من المالية
 Finance Approved On,تاريخ اعتماد المالية
 Finance Decision,قرار المالية
@@ -1612,14 +1738,18 @@ Finding,الملاحظة
 Finding & Action,الملاحظة والإجراء
 Finding Description,وصف الملاحظة
 Findings,الملاحظات
+Findings Raised and Who Must Clear Them,الملاحظات المرصودة ومن يجب أن يعالجها
+Findings Still Open,ملاحظات ما زالت مفتوحة
 Findings by Severity,الملاحظات حسب درجة الخطورة
 Fine / Violation,مخالفة
 Fire,حريق
 Fire Alarm Panel,لوحة إنذار الحريق
 Fire Alarm Panel Present,لوحة إنذار الحريق موجودة
+Fire Alarm Panel at the Site,لوحة إنذار الحريق في الموقع
 Fire Equipment Service,صيانة معدات الحريق
 Fire Extinguisher,طفاية حريق
 Fire Safety,السلامة من الحريق
+"Fire, injury or anything dangerous: do not use this code. Call your facility supervisor now.",حريق أو إصابة أو أي خطر: لا تستخدم هذا الرمز. اتصل بمشرف المنشأة فورًا.
 First Aid Kit,صندوق الإسعافات الأولية
 First Aid Kit Required,حقيبة الإسعافات الأولية مطلوبة
 First Payment Date,تاريخ أول دفعة
@@ -1632,6 +1762,8 @@ Fleet,الأسطول
 Fleet (Salis),الأسطول (ساليس)
 Fleet Control,مركز التحكم بالأسطول
 Fleet Go-Live,تشغيل الأسطول
+Fleet Manager,مدير الأسطول
+Fleet Movement,حركة الأسطول
 Fleet OS,نظام إدارة الأسطول
 Fleet Operations,تشغيل الأسطول
 Fleet Payment Register,سجل المدفوعات
@@ -1654,11 +1786,10 @@ Floor {0},الطابق {0}
 Floor {0} — {1},الطابق {0} — {1}
 Floors,الطوابق
 For Subcontractor or External Worker when Employee link is not available.,للمقاول من الباطن أو العامل الخارجي عند عدم توفّر ارتباط الموظف.
-For emergencies contact your supervisor directly.,للطوارئ تواصل مع مشرفك مباشرة.
 For example: Camera-Laundry-Room.,مثال: Camera-Laundry-Room.
-"For life or safety emergencies, contact the accommodation supervisor directly.",في حالات الطوارئ المتعلقة بالحياة أو السلامة، تواصل مع مشرف السكن مباشرة.
 Formal accommodation/housing safety-incident record with severity and automatic management escalation.,سجل رسمي لحادث سلامة في السكن مع درجة الخطورة والتصعيد الإداري التلقائي.
 Formal lease contract holder for one building. Carries the rent payment schedule. The landlord is identified by the Lease's landlord field.,سجل عقد إيجار رسمي لمبنى واحد، ويتضمن جدول دفعات الإيجار. يُحدَّد المؤجّر في حقل المؤجّر بالعقد.
+Free,شاغر
 Freelancer,مستقل
 Frequency,التكرار
 Frequency Override,تكرار مخصص
@@ -1685,6 +1816,7 @@ Frontend Integration,تكامل الواجهة الأمامية
 Fuel,وقود
 Fuel Account,حساب الوقود
 Fuel Approval Console,اعتماد طلبات الوقود
+Fuel Chip,شريحة الوقود
 Fuel Chip Returned,تم إرجاع شريحة الوقود
 Fuel Claim,مطالبة وقود
 Fuel Claim Register,سجل مطالبات الوقود
@@ -1698,6 +1830,7 @@ Fuel Cost by Platform,تكلفة الوقود حسب المنصة
 Fuel Daily Log,السجل اليومي للوقود
 Fuel Exception Case,حالة استثناء وقود
 Fuel Exception Register,سجل استثناءات الوقود
+Fuel Grade,نوع الوقود
 Fuel Level,مستوى الوقود
 Fuel Litres Dispensed This Month,لترات الوقود المصروفة هذا الشهر
 Fuel Misuse,إساءة استخدام الوقود
@@ -1712,11 +1845,13 @@ Fuel Request,طلب وقود
 Fuel Request Approval Threshold (L),حد اعتماد طلب الوقود (لتر)
 Fuel Request Approval Threshold cannot be negative.,لا يمكن أن يكون حد اعتماد طلب الوقود سالباً.
 Fuel Request Pending Max Days,الحد الأقصى لأيام انتظار طلب الوقود
+Fuel Request Voucher,أمر صرف وقود
 Fuel Request {0} is not pending (current status: {1}).,طلب الوقود {0} ليس قيد الانتظار (الحالة الحالية: {1}).
 Fuel Requests Approved This Month,طلبات الوقود المعتمدة هذا الشهر
 Fuel Requests by Status,طلبات الوقود حسب الحالة
 Fuel Spend by Vehicle,إنفاق الوقود حسب المركبة
 Fuel chip {0} via request {1} (chip {2}).,شريحة وقود {0} عبر الطلب {1} (الشريحة {2}).
+Fuel claimed for the period,الوقود المطالب به عن الفترة
 Fuel consumption {0} L for vehicle {1} in period {2} exceeds the monthly quota of {3} L by {4} L (quota {5}).,استهلاك الوقود {0} لتر للمركبة {1} في الفترة {2} يتجاوز الحصة الشهرية البالغة {3} لتر بمقدار {4} لتر (الحصة {5}).
 "Fuel daily log {0}: {1} L, {2} SAR.",سجل الوقود اليومي {0}: {1} لتر، {2} ريال.
 "Fuel gauge reading recorded at vehicle handover, from empty to full, used to compare fuel state at pickup and return of the rental vehicle.",قراءة مؤشر الوقود المسجلة عند تسليم المركبة، من فارغ إلى ممتلئ، وتُستخدم لمقارنة مستوى الوقود عند استلام المركبة المستأجرة وإعادتها.
@@ -1785,7 +1920,11 @@ Hand a SIM to an employee and open its custody record.,سلّم شريحة لم�
 "Hand a vehicle over, set its fuel quota, and reconcile the first claim.",سلّم مركبة، حدّد حصتها من الوقود، وطابِق أول مطالبة.
 Hand back all issued custody items in good condition on checkout.,أعد جميع أصناف العهدة المصروفة بحالة سليمة عند المغادرة.
 Handed Over,تم التسليم
+Handed Over By,سلّمها
+Handed over by,سلّمها
+Handed over from,من مستودع
 Handed over from {0} to {1} via {2} (odometer {3}).,تم التسليم من {0} إلى {1} عبر {2} (عداد المسافة {3}).
+Handed over to,إلى مستودع
 "Handling priority assigned to the finding for scheduling remediation, independent of severity, from low up to critical.",أولوية متابعة الملاحظة عند جدولة المعالجة، وهي مستقلة عن درجة الخطورة وتتدرج من منخفضة إلى حرجة.
 "Handling stage of the resident request from intake to closure, tracking triage, assignment, active work, an evidence hold, and the final resolved, rejected, or closed outcome.",مرحلة معالجة طلب الساكن من الاستلام حتى الإغلاق، وتشمل الفرز والإسناد والعمل الجاري والتعليق بانتظار الأدلة، ثم المعالجة أو الرفض أو الإغلاق.
 "Handling stage of the transport request from intake through validation, approval, and scheduling to fulfilment, or a rejected or cancelled outcome.",مرحلة معالجة طلب النقل من الاستلام مرورًا بالتحقق والاعتماد والجدولة حتى التنفيذ، أو نتيجة مرفوضة أو ملغاة.
@@ -1796,6 +1935,7 @@ Handover Date,تاريخ التسليم
 Handover Details,تفاصيل التسليم
 Handover OTP Validity (Minutes),صلاحية رمز التحقق للتسليم (بالدقائق)
 Handover Sign-Off,اعتماد التسليم
+Handover closed,إغلاق التسليم
 Handover {0} can no longer be rejected.,لم يعد بالإمكان رفض التسليم {0}.
 Handover {0} cancelled.,أُلغي التسليم {0}.
 Handover {0} is closed; a new code cannot be issued.,التسليم {0} مغلق؛ لا يمكن إصدار رمز جديد.
@@ -1835,6 +1975,7 @@ Housing,السكن
 Housing (Supplier-billed),السكن (على حساب المورّد)
 Housing Allowance Suspended,تعليق بدل السكن
 Housing Assignment,تسكين
+Housing Assignment Form,نموذج تسكين
 Housing Checkout,إخلاء السكن
 Housing Checkout Clearance,إخلاء طرف السكن
 Housing Cleaning Audit,تدقيق نظافة السكن
@@ -1851,6 +1992,7 @@ Housing Terms — {0},شروط السكن — {0}
 Housing and Safety,الإسكان والسلامة
 Housing and Safety Go-Live,تشغيل الإسكان والسلامة
 Housing and Safety is live. The Front Desk handles daily check-in and check-out; the Safety Map shows what is open on each building.,الإسكان والسلامة قيد التشغيل. يتولى مكتب الاستقبال التسكين والمغادرة يوميًا، وتعرض خريطة السلامة الحالات المفتوحة في كل مبنى.
+Housing custody is not yet marked as fully cleared.,عهدة السكن لم تُعتمد كمُخلاة بالكامل.
 Housing office contact number shown to workers on the Masar home My Contacts card.,رقم تواصل مكتب السكن الظاهر للعمّال في بطاقة جهات اتصالي بالصفحة الرئيسية لمسار.
 Housing over capacity…,جارٍ التسكين فوق السعة…
 Housing pickup for this boarding (Habitat-Salis bridge).,نقطة الصعود من السكن لهذه الرحلة (تكامل هابيتات وساليس).
@@ -1872,13 +2014,16 @@ How often rent payments are scheduled. Amount per installment is calculated auto
 "How the boarding was captured: QR (driver scan), Manual (driver entry), or Worker (worker self-confirm via the Masar portal).",طريقة تسجيل الصعود: رمز QR (مسح السائق)، أو يدوي (إدخال السائق)، أو العامل (تأكيد العامل بنفسه عبر بوابة مسار).
 "How the boarding was confirmed: the worker's self-confirm, a QR scan, manual driver entry, the driver, or auto-confirmed after the worker-claim timeout (legacy).",كيف تم تأكيد الصعود: تأكيد العامل لنفسه، أو مسح رمز الاستجابة السريعة، أو إدخال يدوي من السائق، أو السائق، أو تأكيد تلقائي بعد انتهاء مهلة مطالبة العامل (قديم).
 "How the idle-resident case was closed out, recording whether the worker was deployed, checked out, transferred, or the case was otherwise closed.",طريقة إغلاق حالة الساكن غير المشغّل، وتوضح ما إذا أُسند العامل إلى عمل أو غادر السكن أو نُقل أو أُغلقت الحالة لسبب آخر.
+Human Resources,الموارد البشرية
 Hygiene,النظافة
 I Confirm Receipt,أؤكّد الاستلام
 I acknowledge that I have received the above items in good condition.,أقر بأنني استلمت الأصناف المذكورة أعلاه بحالة جيدة.
 I am a,أنا
 I confirm I have received the custody items listed on this Custody Issue.,أؤكّد استلامي أصناف العهدة المدرجة في صرف العهدة هذا.
 I confirm I have received these items,أؤكّد استلامي هذه الأصناف
+"I confirm that I have taken the room and bed shown above, together with the housing custody items listed, in the condition recorded. I undertake to keep the room and its contents in good order, to follow the housing rules of this building, to inform the facility supervisor before I leave, and to hand back every custody item on checkout. I accept that loss or damage caused by my negligence is assessed and recovered under company policy.",أقر بأني استلمت الغرفة والسرير الموضحين أعلاه ومعهما أصناف عهدة السكن المذكورة بالحالة المسجلة. وألتزم بالمحافظة على الغرفة ومحتوياتها، وبأنظمة السكن في هذا المبنى، وبإبلاغ مشرف المنشأة قبل مغادرتي، وبإرجاع كل صنف عهدة عند إخلاء السكن. وأقبل أن يُقيَّم أي فقد أو تلف بسببي ويُسترد وفق سياسة الشركة.
 I have read and accept these terms and conditions.,قرأت هذه الشروط والأحكام وأوافق عليها.
+I have received the articles listed above in the quantities and the condition shown. I undertake to keep them in my care and to hand them back in the same condition on or before the return date shown. I accept that anything lost or damaged through my negligence is assessed and deducted from my dues under company policy.,استلمت الأصناف المذكورة أعلاه بالكميات والحالة الموضحة. وألتزم بالمحافظة عليها وإرجاعها بالحالة نفسها في تاريخ الإرجاع الموضح أو قبله. وأقبل أن يُقيَّم أي فقد أو تلف بسبب إهمالي ويُخصم من مستحقاتي وفق سياسة الشركة.
 ICCID,الرقم التسلسلي للشريحة (ICCID)
 ICCID (Normalized),ICCID (مُوحّد)
 ICCID {0} is already registered on SIM {1}.,الـ ICCID {0} مُسجّل مسبقاً على الشريحة {1}.
@@ -1931,8 +2076,11 @@ Initiated By,بدأه
 Injury,إصابة
 Input screen: open an item to create or edit records.,شاشة إدخال: افتح عنصراً لإنشاء السجلات أو تعديلها.
 Inspect a building with the guided Safety Round form and save the result for manager review.,افحص مبنى باستخدام نموذج جولة السلامة الإرشادي واحفظ النتيجة لمراجعة المدير.
-Inspected by (Supervisor),تم التفتيش بواسطة (المشرف)
+Inspected By,فحصه
+Inspected and Accepted By (Supervisor),عاينه وقبله (المشرف)
+Inspecting Entity,الجهة الفاحصة
 Inspection,تفتيش
+Inspection Cadence,دورية الجولة
 Inspection Date,تاريخ الفحص
 Inspection Finding Item,بند ملاحظة الفحص
 Inspection Type,نوع الفحص
@@ -1941,7 +2089,11 @@ Inspector,المفتّش
 Inspector (Employee),الفاحص (الموظف)
 Installation Date,تاريخ التركيب
 Installments,أقساط
+Instalment Amount,قيمة الدفعة
 Instalment Due Date,تاريخ استحقاق القسط
+Instalment per Pay Period,القسط في كل دورة رواتب
+Instalments Settled to Date,المسدد حتى تاريخه
+Instalments Still Due,المتبقي غير المسدد
 Insurance,التأمين
 Insurance Claim,مطالبة تأمين
 Insurance Policy,بوليصة التأمين
@@ -1956,6 +2108,7 @@ Inter-City Relocations This Month,عمليات النقل بين المدن هذ
 Inter-City Requests This Month,طلبات النقل بين المدن هذا الشهر
 Inter-project cost-transfer control for Movement costs. Records reallocation of a Movement cost from one project/cost center to another. The Posted (memo) status is an operational memo only - no GL or Journal Entry is written.,ضبط تحويل التكاليف بين المشاريع لتكاليف الحركة. يسجل إعادة توزيع تكلفة حركة من مشروع أو مركز تكلفة إلى آخر. وحالة (مقيَّد كمذكرة) تشغيلية فقط، ولا يُكتب معها قيد محاسبي ولا قيد يومية.
 Intercompany Approval,اعتماد النقل بين الشركات
+Intercompany Move,نقل بين شركتين
 Intercompany Movement Register,سجل الحركات بين الشركات
 Intercompany Moves Pending Acknowledgement,نقل بين الشركات بانتظار الاستلام
 Intercompany Permanent,نقل دائم بين الشركات
@@ -1990,6 +2143,7 @@ Inventory Completed,اكتمل الجرد
 Inventory Count,جرد المخزون
 Inventory In Progress,الجرد جارٍ
 Inventory Notes,ملاحظات الجرد
+Investigation Status,حالة التحقيق
 "Investigation stage of the fuel exception, tracking whether it is open, under investigation, awaiting evidence, resolved, rejected, or closed.",مرحلة التحقيق في استثناء الوقود، وتوضح ما إذا كانت الحالة مفتوحة أو قيد التحقيق أو بانتظار الأدلة أو تمت معالجتها أو رُفضت أو أُغلقت.
 Invoice,فاتورة
 Iqama,الإقامة
@@ -2013,6 +2167,7 @@ Issue Description,وصف العطل
 Issue Link and QR,إصدار الرابط ورمز QR
 Issue Location,موقع المشكلة
 Issue Masar Link,إصدار رابط مسار
+Issue Status,حالة الصرف
 Issue Type,نوع العطل
 Issue all ({0}),صرف الجميع ({0})
 "Issue articles to a worker as a draft, then send it to an authorized submitter for review and submission.",اصرف الأصناف للعامل كمسودة، ثم أرسلها إلى مستخدم مخوّل لمراجعتها واعتمادها.
@@ -2024,16 +2179,19 @@ Issue date,تاريخ الصرف
 Issue or return mode,وضع الصرف أو الإرجاع
 Issue: {0},الصرف: {0}
 Issued,مصروف
+Issued By,أصدره
 Issued Custody Items,العهد المصروفة
 Issued To,صُرف إلى
 Issued To (Employee),المصروف للموظف
 Issued To (Free Text),صُرفت لـ (نص حر)
 Issued To (User),صُرفت إلى (المستخدم)
+Issued by,صرفها
 Issued to,صُرف إلى
 Issued to {0}: {1},صُرف إلى {0}: {1}
 Issues,عمليات الصرف
 "Issues observed during this execution. On submit, each actionable finding (Issue Type + Room, not Resolved) spawns one Maintenance Request.",الملاحظات المسجلة أثناء هذا التنفيذ. عند الاعتماد، تُنشئ كل ملاحظة قابلة للمعالجة (نوع العطل + الغرفة، لم تُعالج) طلب صيانة واحدًا.
 Issuing Authority,جهة الإصدار
+Issuing Store,المستودع الصارف
 Issuing custody…,جارٍ إصدار العهدة…
 Issuing driver link…,جارٍ إصدار رابط السائق…
 Issuing worker link…,جارٍ إصدار رابط العامل…
@@ -2041,13 +2199,18 @@ Issuing…,جارٍ الإصدار…
 Item,صنف
 Item Code,رمز الصنف
 Item Description,وصف الصنف / البند
+Item Lines,عدد السطور
 Item Name,اسم الصنف
 Item Type,نوع الصنف
 Item placed on the draft purchase request (Material Request) line. Required before a purchase request can be raised.,الصنف المُدرَج في بند مسودة طلب الشراء (طلب المواد). مطلوب قبل إصدار طلب شراء.
 Item {0} does not belong to this building.,الصنف {0} لا يتبع هذا المبنى.
 Items,الأصناف
+Items Checked,بنود مفحوصة
+Items Faulty,بنود فيها خلل
+Items Sound,بنود سليمة
 JSON,صيغة JSON
 January,يناير
+Joined,باشر العمل
 July,يوليو
 June,يونيو
 KSA Labor Law Note,ملاحظة نظام العمل السعودي
@@ -2065,6 +2228,7 @@ Kitchen gas cooker / stove for accommodation. Durable kitchenware.,موقد / ط
 Kitchenware,أدوات مطبخ
 Labour Supplier,مورّد العمالة
 Landlord,المؤجّر
+Landlord Contract Reference,رقم عقد المالك
 Landlord-issued contract number or file reference.,رقم العقد أو مرجع الملف الصادر من المؤجر.
 "Language the resident prefers for updates and responses on this request, so notifications and handling can be routed to staff who can communicate with the worker.",اللغة التي يفضّلها الساكن للتحديثات والردود على هذا الطلب، ليتسنى توجيه الإشعارات والمعالجة إلى الموظفين القادرين على التواصل مع العامل.
 Large Worker Moves Pending Escalation,تنقلات العمالة الكبيرة بانتظار التصعيد
@@ -2083,6 +2247,9 @@ Last Printed On,آخر طباعة في
 Last Renewed On,تاريخ آخر تجديد
 Last Seen,آخر ظهور
 Last Wait Request At,آخر طلب انتظار في
+Last Working Day,آخر يوم عمل
+Last inventory,آخر جرد
+Last printed,آخر طباعة
 Late,متأخر
 Latest,الأحدث
 "Latest driver GPS latitude, pushed by the driver portal while the trip is dispatched. Feeds the worker's live ride ETA. System-maintained.",أحدث خط عرض لموقع السائق، وترسله بوابة السائق أثناء تسيير الرحلة لحساب وقت وصول رحلة العامل. يحدّثه النظام تلقائيًا.
@@ -2093,15 +2260,18 @@ Laundry washing machine for worker accommodation. Durable appliance.,غسالة 
 Lead days for driver licence-expiry alerts; the effective window is the larger of this and Alert Lead Days.,عدد أيام التنبيه المسبق لانتهاء رخصة السائق؛ تُعتمد المدة الأطول بين هذه القيمة و«أيام التنبيه المسبق».
 Lease,عقد الإيجار
 Lease / Contract Reference,مرجع عقد الإيجار
+Lease Agreement,عقد إيجار
 Lease Contract,عقد الإيجار
 Lease End Date,تاريخ نهاية عقد الإيجار
 Lease End Date must be after Lease Start Date.,يجب أن يكون تاريخ نهاية عقد الإيجار بعد تاريخ بداية العقد.
 Lease Expiry Lead Days,أيام التنبيه قبل انتهاء الإيجار
 Lease Expiry Watchlist,قائمة مراقبة انتهاء عقود الإيجار
 Lease Start Date,تاريخ بداية عقد الإيجار
+Lease Term,مدة الإيجار
 Lease payment reference: {0},مرجع دفعة الإيجار: {0}
 Lease {0} does not exist.,العقد {0} غير موجود.
 Lease {0} has no rent instalment due on {1}.,لا يتضمن العقد {0} قسط إيجار مستحقًا في {1}.
+Leased Property,العقار المؤجر
 Leases Watched,العقود المتابَعة
 Leases by Status,عقود الإيجار حسب الحالة
 Leasing and Utilities,الإيجار والمرافق
@@ -2115,6 +2285,8 @@ Ledger Rows,صفوف السجل
 Ledger Type,نوع السجل
 Ledger Variance (SAR),فرق السجل (ريال)
 Ledgered,مُسجّل
+Left after this voucher is dispensed,المتبقي بعد صرف هذا الأمر
+Left on the quota before this voucher,المتبقي من الحصة قبل هذا الأمر
 Legal,الشؤون القانونية
 Legal Case,قضية قانونية
 Legal Reference Document,المستند القانوني المرجعي
@@ -2123,6 +2295,10 @@ Legal Review Completed,اكتملت المراجعة القانونية
 Legal Review Date,تاريخ المراجعة القانونية
 Legal Review Required,المراجعة القانونية مطلوبة
 Legal Reviewed By,راجعه قانونيًا
+Lessee (Tenant),المستأجر
+Lessor (Landlord),المؤجر (المالك)
+Licence Expiry,انتهاء الرخصة
+Licence Number,رقم الرخصة
 License & Compliance,الرخصة والامتثال
 License Alert Lead Days,أيام تنبيه انتهاء الرخصة
 License Expired,الرخصة منتهية
@@ -2142,6 +2318,8 @@ Lifecycle,دورة الحياة
 "Lifecycle stage of the material transfer between locations, from an unsent draft to goods in transit, confirmed receipt at destination, or a cancelled transfer.",مرحلة دورة حياة تحويل المواد بين المواقع، من مسودة غير مرسلة إلى بضاعة قيد النقل، أو استلام مؤكد في الوجهة، أو تحويل ملغى.
 Lightweight Habitat-owned catalog of maintenance materials. Not linked to ERPNext Stock/Item unless explicitly mapped.,فهرس مبسّط لمواد الصيانة تابع لهابيتات. غير مرتبط بمخزون/أصناف ERPNext ما لم يُربط صراحةً.
 Line Count,عدد البنود
+Line State,حالة الشريحة
+Lines,مجموع البنود
 Link after registration,الربط بعد التسجيل
 Link copied.,نُسخ الرابط.
 Link sent to {0},تم إرسال الرابط إلى {0}
@@ -2164,6 +2342,7 @@ Linked to Employee {0} (passport match); housing/custody re-pointed and cost bac
 List the Returned Items,أدرج الأصناف المُرجعة
 "List the transport requests this trip serves, then save.",أدرج طلبات النقل التي تخدمها هذه الرحلة، ثم احفظ.
 Litres,اللترات
+Litres authorised for dispensing,اللترات المصرّح بصرفها
 Litres cannot be negative.,لا يمكن أن تكون اللترات سالبة.
 Live Driver Position,موقع السائق لحظيًا
 Live View + Playback,بث مباشر + إعادة تشغيل
@@ -2182,7 +2361,7 @@ Loading…,جارٍ التحميل…
 Locale,الإعدادات المحلية
 Location,الموقع
 Location & Custody,الموقع والعهدة
-Location Reference,مرجع الموقع
+Location Code,رمز الموقع
 Location Token,رمز الموقع
 Locations,المواقع
 Log,سجل
@@ -2213,6 +2392,7 @@ Maintenance Dispatch,إرسال للصيانة
 Maintenance Findings,ملاحظات الصيانة
 Maintenance Inspection Report,تقرير فحص الصيانة
 Maintenance Material,مادة الصيانة
+Maintenance Material Lines,بنود مواد الصيانة
 Maintenance Material Template,قالب مواد الصيانة
 Maintenance Material Template Item,عنصر قالب مواد الصيانة
 Maintenance Procurement Item,بند مشتريات الصيانة
@@ -2271,11 +2451,14 @@ Master: recurring task template that drives automatic Scheduled Task Instance ge
 "Master: useful life and write-down schedule for custody article categories. Operational only, no GL.",سجل أساسي: العمر الإنتاجي وجدول خفض القيمة لفئات أصناف العهدة. للاستخدام التشغيلي فقط، دون قيود محاسبية.
 Material,المادة
 Material Details,تفاصيل المادة
+Material Lines,عدد بنود المواد
 Material Name,اسم المادة
 Material Request,طلب مواد
 Material Transfer,نقل مواد السكن
 Material Transfer Item,بند نقل مواد السكن
+Material Transfer Note,سند نقل مواد
 Material Transfer {0} moved stock from {1} (cost center {2}) to {3} (cost center {4}). This is a memo only — no GL Entry was posted. Please record the cross-charge if required.,نقل المواد {0} حرّك المخزون من {1} (مركز التكلفة {2}) إلى {3} (مركز التكلفة {4}). هذا قيد مذكرة فقط — لم يُرحّل أي قيد دفتر أستاذ عام. يُرجى تسجيل التحميل المتبادل عند الحاجة.
+Material or Part,المادة أو القطعة
 Materials required for the repair.,المواد المطلوبة للإصلاح.
 Max % of Salary,الحد الأقصى للخصم من الراتب (%)
 Maximum 'please wait' requests a worker may send the driver per trip. A blank or zero value falls back to the built-in default.,"الحد الأقصى لطلبات ""يرجى الانتظار"" التي يمكن للعامل إرسالها إلى السائق في كل رحلة. القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج."
@@ -2288,6 +2471,7 @@ Messaging gateway is not configured yet (Apex Integration Settings).,لم تُض
 Meter Number,رقم العدّاد
 Meter Readings,قراءات العداد
 Meter and Sharing,العدّاد والمشاركة
+Metered as actually consumed,المستهلك فعليًا بالعداد
 Method,الطريقة
 "Method used to spread a shared building cost onto residents or projects: by bed capacity, by actual occupancy, by a manual split, or charged directly without allocation.",الطريقة المستخدمة لتوزيع تكلفة مبنى مشتركة على الساكنين أو المشاريع: حسب سعة الأسرّة، أو حسب الإشغال الفعلي، أو بتقسيم يدوي، أو تحميلها مباشرة دون توزيع.
 Middle,الأوسط
@@ -2309,6 +2493,7 @@ Missing,مفقود
 Missing Dispatch Trip reference.,مرجع رحلة التسيير مفقود.
 Missing ICCID,ICCID مفقود
 Mixed,مختلط
+Mobile,الجوال
 Mobile Number,رقم الجوال
 Mobile Number (Normalized),رقم الجوال (مُوحّد)
 Mobile Number (Optional),رقم الجوال (اختياري)
@@ -2330,6 +2515,7 @@ Monthly Salary (SAR),الراتب الشهري (ريال)
 Monthly Salary must be greater than zero.,يجب أن يكون الراتب الشهري أكبر من صفر.
 Monthly fuel quota allocated to a vehicle/driver on a project. Tracks allocated vs consumed litres.,حصة وقود شهرية مخصّصة لمركبة/سائق في مشروع. تتتبّع اللترات المخصّصة مقابل المستهلكة.
 Monthly litres must be greater than zero.,يجب أن تكون اللترات الشهرية أكبر من صفر.
+Monthly quota for this vehicle,الحصة الشهرية لهذه المركبة
 Monthly reconciliation of a Rental Office claim against accrued rental days. Computes accrued_total from the vehicle lines and the variance against the claimed amount. On submit it may raise a finance-exclusive Salis Payment Request (expense_type Rental). Posts NO GL.,تسوية شهرية لمطالبة مكتب التأجير مقابل أيام الإيجار المستحقة. تحسب الإجمالي المستحق من سطور المركبات والفرق مقابل المبلغ المطالب به. وقد تنشئ عند الاعتماد طلب دفع في ساليس خاصاً بالمالية (نوع المصروف إيجار). ولا تقيّد محاسبياً.
 Morning,صباحي
 Move,نقل
@@ -2338,9 +2524,11 @@ Move to {0},النقل إلى {0}
 Move {0} from {1} to {2}?,نقل {0} من {1} إلى {2}؟
 Moved By,نقله
 Moved By (Employee),نُقل بواسطة (الموظف)
+Moved from Building,منقول من مبنى
 Movement,حركة
 Movement Audit,تدقيق الحركة
 Movement Category,تصنيف الحركة
+Movement Checks,فحوصات الحركة
 Movement Context,سياق الحركة
 Movement Cost Recovery,استرداد تكلفة حركة
 Movement Cost Recovery amounts at or above this value (SAR) require Operations-tier authority; lower amounts require at least Regional-tier.,مبالغ استرداد تكلفة الحركة التي تبلغ هذه القيمة (ريال) أو تتجاوزها تتطلب صلاحية مستوى العمليات؛ وما دونها يتطلب المستوى الإقليمي على الأقل.
@@ -2375,9 +2563,9 @@ National ID,رقم الهوية الوطنية
 National ID / Iqama,الهوية الوطنية / الإقامة
 National ID or Iqama number. PII — readable only by privileged roles (permlevel 1). Set once at creation; a DB-level unique index blocks duplicates.,رقم الهوية الوطنية أو الإقامة. بيانات شخصية — لا يقرؤها إلا أصحاب الصلاحيات المميزة (مستوى الصلاحية 1). يُحدد مرة واحدة عند الإنشاء؛ ويمنع فهرس فريد على مستوى قاعدة البيانات التكرار.
 Nationality,الجنسية
+Nature,النوع
 "Nature of the fuel anomaly under investigation, from over-consumption and GPS mismatches to duplicate claims, suspected fraud, or quota disputes, driving the investigation path.",طبيعة استثناء الوقود قيد التحقيق، مثل الاستهلاك الزائد أو عدم تطابق GPS أو تكرار المطالبات أو الاشتباه بالاحتيال أو نزاع الحصة، وهي ما يحدد مسار التحقيق.
 "Nature of the resident request, which determines the responsible team and workflow; ranges from physical issues such as maintenance, cleaning, and utilities to administrative items such as custody, reimbursement, complaints, and suggestions.",طبيعة طلب الساكن، وهي التي تحدد الفريق المسؤول ومسار العمل؛ وتتراوح بين المشكلات الميدانية مثل الصيانة والنظافة والخدمات، والبنود الإدارية مثل العهدة والتعويض والشكاوى والمقترحات.
-Need Help? Scan to Report,تحتاج مساعدة؟ امسح للإبلاغ
 Needs Attention,تتطلب متابعة
 Needs Cleaning,يحتاج تنظيفاً
 Needs Improvement,يحتاج تحسيناً
@@ -2401,13 +2589,16 @@ Next: Approve,التالي: الاعتماد
 Next: Beds,التالي: الأسرّة
 Next: Room Types,التالي: أنواع الغرف
 Night,ليلي
+Nights Stayed,ليالي الإقامة
 No,لا
 No Active Assignment,لا يوجد تسكين نشط
 No Outstanding Invoice,لا توجد فاتورة مستحقة
 No Project,لا يوجد مشروع
 No Rated Safety Task,لا توجد مهمة سلامة مُقيَّمة
 No SIM cards match these filters.,لا توجد شرائح مطابقة لهذه المرشّحات.
+No SIM line is registered against this contract yet,لا توجد شريحة مسجّلة على هذا العقد حتى الآن
 No Salis Driver is linked to your account.,لا يوجد سائق ساليس مرتبط بحسابك.
+"No action has been decided on this notice yet, and nothing may be scrapped, repaired or charged until an authorising officer signs it.",ما تقرر إجراء على هذا الإشعار إلى الآن، وما يُشطب ولا يُصلح ولا يُحمّل شيء حتى يوقّعه مسؤول معتمد.
 No actions available.,لا توجد إجراءات متاحة.
 No active Safety Task Catalog entries found. Run the app setup first.,لا توجد بنود نشطة في دليل مهام السلامة. شغّل إعداد التطبيق أولًا.
 No active accommodation assignment when raised — needs housing triage.,عند إنشاء الطلب، لم يكن للعامل تسكين نشط؛ ويحتاج الطلب إلى مراجعة فريق السكن.
@@ -2417,35 +2608,64 @@ No active buildings exist yet.,لا توجد مبانٍ نشطة بعد.
 No active template found for issue type: {0},لا يوجد قالب نشط لنوع البلاغ: {0}
 No alerts match the current filters.,لا توجد تنبيهات مطابقة للمرشحات الحالية.
 No amount could be allocated against {0} {1}. Refresh and try again.,تعذّر تخصيص أي مبلغ مقابل {0} {1}. حدّث الصفحة وحاول مرة أخرى.
+No article was marked Damaged or Lost,لا يوجد صنف مؤشر كتالف أو مفقود
+No articles are listed on this issue,لا توجد أصناف في هذا الصرف
+No articles are listed on this return,لا توجد أصناف في هذا الإرجاع
 No articles found.,لا توجد أصناف.
 No available drivers.,لا يوجد سائقون متاحون.
 No beds found for this building.,لا توجد أسرّة لهذا المبنى.
+No billing document has been raised against this contract yet,لم يصدر أي مستند فوترة على هذا العقد حتى الآن
+No buildings are covered by this contract yet — no visit may be invoiced against it,لا يوجد مبنى مشمول بهذا العقد حتى الآن — ولا يجوز فوترة أي زيارة عليه
 No buildings to show.,لا توجد مبانٍ لعرضها.
 No category,بلا فئة
+No check-in photograph on file,لا توجد صورة عند التسكين
+No checkout photograph on file,لا توجد صورة عند المغادرة
+No cost recovery is left open against him,ما عليه تحصيل تكلفة مفتوح
 No count lines to submit.,لا توجد بنود جرد لاعتمادها.
+No damage description was recorded.,ما سُجّل وصف للتلف.
+No damaged articles are listed on this assessment,لا توجد أصناف تالفة في هذا التقييم
 No data,لا توجد بيانات
+No description was recorded.,ما سُجّل وصف.
+No detail was recorded.,ما سُجّلت تفاصيل.
 No drivers assigned today.,لا يوجد سائقون مسندون اليوم.
+No finding was raised on this round,لم تُرصد أي ملاحظة في هذه الجولة
 "No fleet vehicle is assigned to you, so you cannot request fuel.",لا توجد مركبة أسطول مسندة إليك، لذلك لا يمكنك طلب الوقود.
 No floor plan defined. Add floor rows before generating.,لم يُحدد مخطط للطوابق. أضف صفوف الطوابق قبل الإنشاء.
+No fuel exception is left open against him,ما عليه استثناء وقود مفتوح
+No housing custody items were issued with this bed,لم تُصرف أصناف عهدة مع هذا السرير
+No housing custody was held against this assignment,لا توجد عهدة سكن على هذا التسكين
 No image was captured.,لم يتم التقاط أي صورة.
+No inspection checklist was recorded on this handover,ما سُجّل كشف فحص على هذا التسليم
+No insurance or registration document is recorded for this vehicle,ما في تأمين ولا استمارة مسجّلة لهذه المركبة
 No issues recorded.,لا ملاحظات مسجّلة.
+No items are listed on this handover,لا توجد أصناف في هذا التسليم
 No lines on this document,لا توجد بنود في هذا المستند
+No materials or parts are drawn against this work order,لا توجد مواد أو قطع مصروفة على أمر العمل هذا
 No open safety or maintenance signals for this building.,لا توجد تنبيهات سلامة أو صيانة قائمة لهذا المبنى.
 No open transport requests.,لا توجد طلبات نقل مفتوحة.
+No passenger is listed on this manifest,ما في ركاب في هذا الكشف
 No payment raised for this instalment yet.,لم تُنشأ دفعة لهذا القسط بعد.
 No payment raised for this period yet.,لم تُنشأ دفعة لهذه الفترة بعد.
 "No payment target is set and no default could be resolved, so no payment can be created.",لم يُحدَّد هدف للدفع ولم يتوفّر بديل افتراضي، لذلك لا يمكن إنشاء أي دفع.
+No payroll deduction has been raised against this assessment yet.,لم يُسجَّل خصم على الراتب مقابل هذا التقييم حتى الآن.
+No payroll entry raised,لم يُسجَّل خصم على الراتب
 No pending fuel requests for this project.,لا توجد طلبات وقود معلّقة لهذا المشروع.
 No pending fuel requests. The queue is clear.,لا توجد طلبات وقود معلّقة. القائمة خالية.
 No photo on file,لا توجد صورة
 No project yet,لا يوجد مشروع بعد
+No quantity has been entered on this voucher,ما أُدخلت كمية على هذا الأمر
 No registered workers match. Register a new arrival below.,لا يوجد عمال مسجّلون مطابقون. سجّل وصولاً جديداً أدناه.
+No registration or insurance document is recorded for this vehicle,ما في استمارة ولا تأمين مسجّل لهذه المركبة
+No rent instalments have been scheduled on this lease yet,لا توجد دفعات إيجار مجدولة على هذا العقد حتى الآن
 No result lines to submit.,لا سطور نتائج لاعتمادها.
 No rooms found for this building.,لا توجد غرف لهذا المبنى.
-No task executions recorded for this round.,لا توجد مهام منفذة مسجلة لهذه الجولة.
+No safety task was executed against this round — the round proves nothing until at least one task is recorded,لم تُنفَّذ أي مهمة سلامة على هذه الجولة — ولا تثبت الجولة شيئًا حتى تُسجَّل مهمة واحدة على الأقل
+No service has been ordered on this sheet yet,لم تُطلب أي خدمة على هذا الأمر حتى الآن
+No transport requested,لا يوجد طلب نقل
 No trips scheduled for today.,لا توجد رحلات مجدولة لليوم.
 No unauthorised guests or visitors are allowed in the accommodation.,لا يُسمح بدخول ضيوف أو زوّار غير مصرّح لهم إلى السكن.
 No vehicle is assigned to you. Ask your supervisor to assign one before requesting fuel.,لا توجد مركبة مسندة إليك. اطلب من مشرفك إسناد مركبة قبل طلب الوقود.
+No vehicle line is listed on this statement,ما في مركبات في هذا الكشف
 No vehicles in scope.,لا توجد مركبات ضمن النطاق.
 No vehicles match the current filters.,لا مركبات تطابق المرشّحات الحالية.
 No worker matched.,لا يوجد عامل مطابق.
@@ -2455,15 +2675,19 @@ None.,لا شيء.
 Normalized Keys,المفاتيح المُوحّدة
 "Normalized plate (spaces removed, uppercased). Set automatically.",لوحة منسَّقة (دون مسافات وبأحرف كبيرة). تُضبط تلقائياً.
 Not Acknowledged,بلا توقيع
+Not Boarded,ما صعد
 Not Boarded Only,غير الصاعدين فقط
 Not Checked,لم يُفحص
 Not Cleaned,لم يُنظَّف
+Not Cleared,لم يُخلَ الطرف
 Not Done,غير منجز
 Not Found,غير موجود
 Not Installed,غير مثبت
+Not Recorded,غير مسجّل
 Not Recording,لا يسجل
 Not Tracked,غير متتبَّع
 Not permitted,غير مسموح
+Not yet counted on receipt,لم يُعد عند الاستلام
 Note,ملاحظة
 Note the Condition,دوّن الحالة
 "Note the immediate action taken, then save.",دوّن الإجراء الفوري المتخذ، ثم احفظ.
@@ -2471,13 +2695,21 @@ Note: {0},ملاحظة: {0}
 Notes,ملاحظات
 Notes & Evidence,الملاحظات والأدلة
 Notes & Image,الملاحظات والصورة
+Nothing due,لا يوجد مبلغ مستحق
+Nothing has been claimed on this voucher,ما في مطالبة على هذا السند
+"Nothing is left against this driver in the fleet. Everything he held has been returned and no fuel exception or cost recovery is open, so the company releases him and his final settlement may be paid.",ما بقي على هذا السائق شيء في الأسطول. رجّع كل ما كان بعهدته، وما عليه استثناء وقود ولا تحصيل مفتوح، فتخلي الشركة طرفه ويُصرف مستحقه النهائي.
 Nothing on your work center right now.,لا يوجد ما يحتاج متابعتك حاليًا.
+Nothing outstanding against this issue,لا يوجد متبقٍ على هذا الصرف
+Notice received by,استلم الإشعار
+Notice served on,موجّه إلى
 Notification,إشعار
 Notifications,الإشعارات
 Notify Count,عدد الإشعارات
 Notify Finance on Liability Transfer,إشعار المالية عند نقل الالتزام
 November,نوفمبر
 Now tap an available bed to transfer the resident.,الآن انقر على سرير متاح لنقل الساكن.
+Number of Instalments,عدد الأقساط
+Number of Lines,عدد الشرائح
 Number of Passengers,عدد الركاب
 Number of SIM Cards linked to this contract.,عدد الشرائح المرتبطة بهذا العقد.
 Number of completed maintenance work orders reflected onto this item.,عدد أوامر عمل الصيانة المكتملة والمسجلة لهذا الصنف.
@@ -2502,6 +2734,7 @@ Occupancy % Trend,اتجاه نسبة الإشغال
 Occupancy Percent Trend,اتجاه نسبة الإشغال
 Occupancy Snapshot,لقطة الإشغال
 Occupancy Status,حالة الإشغال
+Occupants at the Site,عدد الساكنين في الموقع
 Occupied,مشغول
 Occupied Beds,الأسرّة المشغولة
 October,أكتوبر
@@ -2509,7 +2742,10 @@ Odometer,عداد المسافة
 Odometer End,عداد المسافة (النهاية)
 Odometer Reading,قراءة عداد المسافة
 Odometer Start,عداد المسافة (البداية)
+Odometer at Handover,العداد وقت التسليم
 Odometer cannot be negative.,لا يمكن أن تكون قراءة عداد المسافة سالبة.
+Odometer on File,العداد المسجّل
+Odometer on Return,العداد عند الإرجاع
 Odometer reading {0} cannot be lower than the vehicle's current {1}.,قراءة عداد المسافة {0} لا يمكن أن تكون أقل من القراءة الحالية للمركبة {1}.
 "Odometer start and end must be set together, or both left empty.",يجب إدخال قراءتي عداد المسافة في البداية والنهاية معًا، أو تركهما فارغتين.
 "Off by default — builds one sample accommodation site with rooms, beds, a resident and an open maintenance request. You can remove all of it later from Apex Settings.",معطّل افتراضيًا — ينشئ موقع سكن تجريبيًا يضم غرفًا وأسرّة وساكنًا وطلب صيانة مفتوحًا. يمكنك إزالة هذه البيانات لاحقًا من إعدادات أبكس.
@@ -2627,6 +2863,7 @@ Open the custody issue list,فتح قائمة عمليات صرف العهدة
 Open the incident record,فتح سجل الحادث
 Open the live Fleet Control board to watch and act on every vehicle.,افتح لوحة مركز التحكم بالأسطول المباشرة لمتابعة كل مركبة واتخاذ الإجراء المناسب.
 Open the maintenance request,فتح طلب الصيانة
+Open the request page on your phone.,افتح صفحة الطلب من جوالك.
 Open the unified inbox that gathers everything pending your action across modules.,افتح الصندوق الموحد الذي يجمع كل ما ينتظر إجراءك عبر الوحدات.
 Open the visual Dispatch Board to plan trips and assign vehicles to requests.,افتح لوحة التسيير المرئية لتخطيط الرحلات وإسناد المركبات للطلبات.
 Open the visual Front Desk board to check residents in and out.,افتح لوحة مكتب الاستقبال المرئية لتسجيل دخول الساكنين ومغادرتهم.
@@ -2651,8 +2888,11 @@ Operational source of the deduction. Damage = custody damage assessment; Rent = 
 "Operational state of the facility asset, distinguishing working units from faulty or in-repair ones and from assets that were replaced, scrapped, or put into storage.",الحالة التشغيلية لأصل المرفق، تميّز الوحدات العاملة عن المعطلة أو تحت الإصلاح وعن الأصول التي استُبدلت أو أُتلفت أو أُودعت في المخزن.
 "Operational state of the vehicle, distinguishing an active vehicle from one stopped or under maintenance, or released from the fleet.",الحالة التشغيلية للمركبة، وتميز المركبة النشطة عن المتوقفة أو الخاضعة للصيانة أو المستبعدة من الأسطول.
 Operations,العمليات
+Operations Authority,صلاحية العمليات
 Operations Control,التحكم بالعمليات
 Operations Director by default,مدير العمليات افتراضياً
+Operations Manager,مدير العمليات
+Operations authority is required on this case,القضية تحتاج صلاحية العمليات
 "Operations requester, carried from the linked Transport Request (Operations owns the request).",مقدم الطلب من العمليات، ويُنقل من طلب النقل المرتبط لأن الطلب تابع لفريق العمليات.
 Optional ERPNext Supplier FK for the landlord. Used to identify the payee for rent due reminders.,مرجع مورّد ERPNext اختياري للمالك. يُستخدم لتحديد المستفيد في تذكيرات استحقاق الإيجار.
 "Optional Habitat pickup — when set, this stop is a worker housing location (Habitat-Salis bridge).",نقطة صعود اختيارية في هابيتات؛ وعند تحديدها تكون هذه المحطة موقعًا لسكن العمال ضمن تكامل هابيتات مع ساليس.
@@ -2666,11 +2906,14 @@ Optional photo of the bed/room condition at checkout (handover evidence).,صور
 Optional primary accent colour override. Leave blank to use the theme default.,لون تمييز أساسي اختياري بدل اللون الافتراضي. اتركه فارغًا لاستخدام اللون الافتراضي للسمة.
 Optional sender id / from number the gateway should send as (when the provider requires it). Sent as sender_id in the request body.,معرّف مُرسِل / رقم إرسال اختياري ترسل البوابة باسمه (عندما يتطلّب المزوّد ذلك). يُرسَل بوصفه sender_id في جسم الطلب.
 Optional: the specific Facility Asset this inspection covers. On submit its Last Inspected Date is stamped with the Inspection Date.,اختياري: أصل المنشأة المحدد الذي يشمله هذا الفحص. عند الاعتماد، يُحدّث «تاريخ آخر فحص» بتاريخ الفحص.
+Order Issued By (Client),صدر الأمر من (العميل)
+Order Issued To (Contractor),صدر الأمر إلى (المقاول)
 Ordered position of this stop on the trip's route (mirrors the Route Stop sequence).,ترتيب هذه المحطة في مسار الرحلة، وهو مطابق لتسلسل محطات المسار.
 Origin,المصدر
 Origin Building,مبنى الانطلاق
 Original Cost,التكلفة الأصلية
 Original Cost (SAR),التكلفة الأصلية (ريال)
+Original Custody Issue,صرف العهدة الأصلي
 Other,أخرى
 Out of Service,خارج الخدمة
 Out of service,خارج الخدمة
@@ -2703,6 +2946,7 @@ Overhead Absorption,تحميل المصاريف غير المباشرة
 Overview,نظرة عامة
 Owned,مملوكة
 Owner Acknowledged,إقرار المالك
+Owner Responsible,المسؤول عن المعالجة
 Owner Role,دور المسؤول
 Owner User,المستخدم المالك
 Owner acknowledgement is required to submit a fuel chip cancellation.,إقرار المالك مطلوب لاعتماد إلغاء شريحة الوقود.
@@ -2715,6 +2959,7 @@ Owning company. SIM records are visible only to users scoped to this company.,ا
 Owning company; defaulted from Salis Settings. Reference only — posts no GL.,الشركة المالكة؛ تُؤخذ افتراضيًا من إعدادات ساليس. للمرجعية فقط — لا تُنشئ قيدًا محاسبيًا.
 P256DH Key,مفتاح P256DH
 POD,إثبات التسليم
+Page {0} of {1},صفحة {0} من {1}
 Page {0} of {1} · {2} SIMs,صفحة {0} من {1} · {2} شريحة
 Paid,مدفوع
 Partial / Attention: {0},جزئي أو يحتاج متابعة: {0}
@@ -2735,6 +2980,7 @@ Passenger Count Operations Threshold,حد عمليات عدد الركاب
 Passenger Manifest,كشف الركاب
 Passenger Manifest Item,بند كشف الركاب
 Passenger Manifest Register,سجل كشوف الركاب
+Passenger Manifest Sheet,كشف ركاب
 Passenger Manifests Today,كشوف الركاب اليوم
 Passenger Name,اسم الراكب
 Passenger counts above this number require Operations-tier authority.,أعداد الركاب التي تتجاوز هذا الرقم تتطلب صلاحية مستوى العمليات.
@@ -2766,6 +3012,8 @@ Payment schedule will be generated automatically on first save.,سيُنشأ ج�
 Payment {0} created.,أُنشئت الدفعة {0}.
 Payments,المدفوعات
 Payroll Date,تاريخ مسير الرواتب
+Payroll Deduction Entry,قيد الخصم على الراتب
+Payroll deduction raised,تسجيل الخصم على الراتب
 Pending,قيد الانتظار
 Pending Approval,بانتظار الاعتماد
 Pending Approvals,الاعتمادات المعلّقة
@@ -2801,6 +3049,8 @@ Periodic Inspection,الفحص الدوري
 Permanent,دائم
 Personal Access Token,رمز الوصول الشخصي
 Personal wardrobe / lockable storage cabinet for worker. Durable furnishing.,خزانة شخصية للملابس أو التخزين، قابلة للقفل ومخصصة للعامل. من الأثاث الدائم.
+Persons Carried,الركاب المنقولون
+Persons Hurt,عدد المصابين
 Pest Control,مكافحة الحشرات والآفات
 Pest Control Required,مكافحة الآفات مطلوبة
 Petrol,بنزين
@@ -2810,6 +3060,10 @@ Phone,الهاتف
 Photo,صورة
 Photo Evidence Required,يلزم إثبات بالصورة
 Photo evidence that maintenance work was completed. Required before closing.,دليل مصوّر على اكتمال أعمال الصيانة. مطلوب قبل الإغلاق.
+Photograph stored against this assignment,الصورة محفوظة على هذا التسكين
+Photograph stored against this checkout,الصورة محفوظة على هذا الإخلاء
+Photographic Evidence,صور تثبت الحالة
+Photographic Evidence on File,يوجد إثبات بالصور
 Photographic evidence captured for a driver attendance record.,دليل مصوّر يُلتقط لسجل حضور سائق.
 Photos Attached,الصور المرفقة
 Physical Location,الموقع الفعلي
@@ -2845,10 +3099,13 @@ Placement,التسكين
 Plan,الباقة
 Plan a Route,تخطيط مسار
 Planned,مخطط
+Planned Daily Fuel,الوقود اليومي المخطط
 Planned Daily Fuel (SAR),الوقود اليومي المخطط (ريال سعودي)
+Planned Duration (Days),المدة المخططة (أيام)
 Planned End Date,تاريخ النهاية المخطط له
 Planned End Date must be on or after Planned Start Date.,يجب أن يكون تاريخ النهاية المخطط له بعد تاريخ البداية أو مساوياً له.
 Planned Fuel Grade,درجة الوقود المخطّطة
+Planned Nights,الليالي المخططة
 Planned Start Date,تاريخ البداية المخطط له
 Planned Time,الوقت المخطط
 Planned departure date for a temporary stay; supervisor is alerted as it approaches or if the worker is still checked in past it.,تاريخ المغادرة المخطط لإقامة مؤقتة؛ يُنبَّه المشرف عند اقترابه أو إذا ظل العامل مُسكَّنًا بعده.
@@ -2871,7 +3128,6 @@ Please review renewal or termination.,يُرجى مراجعة التجديد أ�
 Please start renewal.,يُرجى بدء التجديد.
 "Please tick the receipt confirmation, or choose Signature and sign instead.",يرجى تحديد خانة تأكيد الاستلام، أو اختر التوقيع ووقّع بدلاً من ذلك.
 Plumbing,سباكة
-Point your phone camera at the QR code to open the request form.,وجّه كاميرا هاتفك نحو رمز الاستجابة السريعة لفتح نموذج الطلب.
 Police Report Number,رقم بلاغ الشرطة
 Police report PDF or a photo of the scene.,ملف بلاغ الشرطة أو صورة لموقع الحادث.
 Policy,السياسة
@@ -2889,6 +3145,7 @@ Portal token subject binding cannot be changed after issuance.,لا يمكن ت�
 Portal token subject binding is invalid.,ارتباط صاحب رمز البوابة غير صالح.
 Portal user who executed the movement — not the Employee on the source Facility Asset Movement.,مستخدم البوابة الذي نفّذ النقل — وليس الموظف المدوَّن في مستند نقل أصل المنشأة المصدر.
 Portals,البوابات
+Position of the Quota,وضع الحصة
 Positions,المواضع
 Post (memo),قيد (مذكرة)
 Post accommodation and fleet costs to the General Ledger?,ترحيل تكاليف السكن والأسطول إلى دفتر الأستاذ العام؟
@@ -2909,6 +3166,7 @@ Pre-filled — please verify.,تمت التعبئة المسبقة — يرجى 
 Preferred Language,اللغة المفضّلة
 Preferred channel passed to the gateway. The gateway provider decides actual delivery; this is the channel hint sent in the request payload.,القناة المفضّلة المُمرّرة إلى البوابة. مزوّد البوابة هو من يقرّر التسليم الفعلي؛ هذا تلميح للقناة يُرسَل ضمن حمولة الطلب.
 Prefix added before the room number (e.g. 'A' gives A101). Leave blank for numeric only.,"بادئة تُضاف قبل رقم الغرفة (مثال: ""A"" ينتج A101). اتركها فارغة للأرقام فقط."
+Prepared By,أعدّه
 Present,حاضر
 Previous,السابق
 Previous Building,المبنى السابق
@@ -2929,6 +3187,7 @@ Print handover,طباعة سند التسليم
 Print slip,طباعة القسيمة
 Printed by,طُبع بواسطة
 Priority,الأولوية
+Priority of the Request,أولوية الطلب
 Priority: {0},الأولوية: {0}
 Process Fuel Claim,معالجة مطالبة وقود
 Process a Fuel Claim,معالجة مطالبة وقود
@@ -2948,6 +3207,7 @@ Procurement intake store the asset leaves.,مخزن استلام المشتري�
 "Progress of a single audit finding through remediation, tracking work start, evidence submission, and whether the client verified or rejected the fix.",تقدم معالجة ملاحظة تدقيق واحدة، من بدء العمل وتقديم الأدلة إلى تحقق العميل من الإصلاح أو رفضه.
 "Progress of the driver clearance process, tracking whether checks are open or in progress, fully cleared, blocked by an outstanding item, or cancelled.",تقدم إجراءات إخلاء طرف السائق، وتوضح ما إذا كانت الفحوص مفتوحة أو قيد التنفيذ أو مكتملة، أو متوقفة بسبب بند عالق، أو ملغاة.
 Project,المشروع
+Project Charged,المشروع المحمّل
 Project Cost Center,مركز تكلفة المشروع
 Project Status,حالة المشروع
 Project Transfer,تحويل المشروع
@@ -2955,13 +3215,16 @@ Project is required.,المشروع مطلوب.
 Projected from the custody engine; not edited directly.,مُشتقّة من محرّك العهدة؛ لا تُعدَّل مباشرة.
 Proof of Handover,إثبات التسليم
 Property / Unit Name,اسم العقار / الوحدة
+Property Address,عنوان العقار
 Provenance,المصدر
 "Provenance: the scheduled task instance this cleaning fulfils, if generated from the schedule.",المصدر: سجل المهمة المجدولة التي ينفذها هذا التنظيف، إذا أُنشئ من الجدول.
 Provide either a new expiry date or the number of days to extend.,أدخل إمّا تاريخ انتهاء جديدًا أو عدد أيام التمديد.
 Provider,مزود الخدمة
+Provider Contract Reference,رقم العقد لدى المزوّد
 Public URL,الرابط العام
 "Public base URL of the external frontend that consumes this backend, for example https://salis-fleet.com.",الرابط الأساسي العام للواجهة الأمامية الخارجية التي تستخدم هذا الخادم، مثل https://salis-fleet.com.
 Purchase Invoice,فاتورة المشتريات
+Purchase Invoice Raised,فاتورة الشراء الصادرة
 Purpose,الغرض
 Purpose / Notes,الغرض / ملاحظات
 Purpose is too long. Please keep it under 2000 characters.,الغرض طويل جداً. يرجى إبقاؤه أقل من 2000 حرف.
@@ -2977,6 +3240,8 @@ Qty Returned,الكمية المعادة
 "Quality rating recorded when the safety task was carried out, from excellent down to poor, or Not Done when the task was skipped, feeding compliance scoring.",تقييم جودة تنفيذ مهمة السلامة، من ممتاز إلى ضعيف، أو «لم يُنفذ» عند عدم تنفيذ المهمة، ويُستخدم في احتساب الامتثال.
 Quantity,الكمية
 Quantity Issued,الكمية المصروفة
+Quantity Returned,الكمية المرتجعة
+Quantity Transferred,الكمية المنقولة
 Quantity Variance,فرق الكمية
 Quantity physically counted at the last inventory count.,الكمية المعدودة فعليًا في آخر جرد للمخزون.
 Quantity the records say should be present.,الكمية التي تشير السجلات إلى وجوب توفرها.
@@ -2987,14 +3252,15 @@ Queue row {0} not found (it may have already drained).,صف الطابور {0} �
 Quick Actions,إجراءات سريعة
 Quick Check-in,تسكين سريع
 Quick Check-out,مغادرة سريعة
+Quota,الحصة
 Quota & Status,الحصة والحالة
 Quota Applied,تم تطبيق الحصة
 Quota Dispute,نزاع حصة
 Quota Exceeded,تجاوز الحصة
 Quota Identity,بيانات الحصة
-Quota Increase,زيادة الحصة
 Quota Increase Claim,مطالبة زيادة الحصة
 Quota Litres,لترات الحصة
+Quota increase claimed for the period,زيادة حصة مطالب بها عن الفترة
 Quota period in YYYY-MM format (e.g. 2026-05).,فترة الحصة بصيغة YYYY-MM (مثال: 2026-05).
 Quota-increase claim - requires Operations-tier approval and a Finance consult note.,طلب زيادة حصة الوقود — يستلزم موافقة مستوى العمليات وملاحظة استشارة مالية.
 Raise Fuel Request,إنشاء طلب وقود
@@ -3015,6 +3281,8 @@ Raised By,أُنشئ بواسطة
 Raised On,أُنشئ في
 Raising departure transport…,جارٍ إنشاء نقل المغادرة…
 Raising the payment request...,جارٍ رفع طلب الدفع...
+Rate Basis,أساس السعر
+Rate Per Visit,سعر الزيارة
 Rate how serious the incident is.,قيّم درجة خطورة الحادث.
 Rating,التقييم
 Rating Details,تفاصيل التقييم
@@ -3031,6 +3299,7 @@ Ready,جاهز
 Reallocation,إعادة تخصيص
 Reason,السبب
 Reason Category,سبب عدم التشغيل
+Reason Recorded,السبب المسجّل
 Reason Required,السبب مطلوب
 "Reason the driver is being stopped from operating, whether due to a violation, leave, termination, transfer, or another cause.",سبب إيقاف السائق عن العمل، سواء بسبب مخالفة أو إجازة أو إنهاء خدمة أو نقل أو سبب آخر.
 "Reason the supervisor rejected the plan, captured on rejection.",سبب رفض المشرف للمخطّط، يُسجَّل عند الرفض.
@@ -3038,21 +3307,28 @@ Reason Required,السبب مطلوب
 Reassign,إعادة الإسناد
 Reassign driver,إعادة إسناد السائق
 Receipt,استلام
+Receipt Confirmed On,تاريخ تأكيد الاستلام
 Receipt Date,تاريخ الاستلام
 Receipt Lines,بنود الاستلام
+Receipt confirmed by one-time code,تأكيد الاستلام برمز لمرة واحدة
 Receipt/Return lifecycle for a rented vehicle. A Receipt with no later Return marks the vehicle as in-service; the Rental Accrual Ledger engine queries these to post daily rental memos. Posts NO GL.,دورة استلام وإرجاع المركبة المستأجرة. الاستلام بلا إرجاع لاحق يعني أن المركبة في الخدمة؛ ومحرك سجل استحقاق الإيجار يستعلم عنها ليقيّد المذكرات اليومية. ولا تقيّد محاسبياً.
 Receipts,الاستلامات
 Receive Transfer,استلام النقل
 Received,مُستلَم
+Received By,استلمه
+Received By (Requester),استلمه (مقدّم الطلب)
 Received Date,تاريخ الاستلام
 Received by,الجهة المستلِمة
 Receiving Accepted,تم قبول الاستلام
 Receiving Confirmed,تم تأكيد الاستلام
 Receiving Confirmed By,مؤكد الاستلام
 Receiving Confirmed By is required for intercompany asset movement.,يلزم حقل «مؤكد الاستلام» لنقل الأصول بين الشركات.
+Receiving Store,المستودع المستلِم
+Receiving Store Supervisor,مشرف المستودع المستلِم
 Receiving Supervisor,المشرف المستلم
 Receiving accommodation supervisor's building store that the goods land in.,مخزن المبنى الذي يشرف عليه مشرف السكن المستلم وتصل إليه البضائع.
 Receiving accommodation the asset is delivered to.,السكن المستلِم الذي يُسلّم إليه الأصل.
+Receiving supervisor counted every line,المشرف المستلم عدّ كل سطر
 Recent Error Logs,سجلات الأخطاء الأخيرة
 Recent damage assessments: {0},تقييمات التلف الأخيرة: {0}
 Recipient,المستلم
@@ -3065,7 +3341,9 @@ Recommended Action,الإجراء الموصى به
 Reconcile,تسوية
 Reconcile the first rental office invoice against actual usage.,سوِّ أول فاتورة مكتب إيجار وفق الاستخدام الفعلي.
 Reconciled,تمت المطابقة
+Reconciled By,طابقها
 Reconciliation,المطابقة
+Reconciliation Against the Quota,المطابقة مع الحصة
 "Reconciliation stage of the fuel claim, from draft and submission to the movement team through reconciliation and approval to closure, or held when disputed.",مرحلة مطابقة مطالبة الوقود، من المسودة وإرسالها إلى فريق الحركة، ثم المطابقة والاعتماد حتى الإغلاق، أو تعليقها عند الاعتراض.
 Record Any Damage Deduction,سجّل أي خصم للأضرار
 Record Completion Notes,سجّل ملاحظات الإنجاز
@@ -3088,7 +3366,10 @@ Record the contract your SIM cards are supplied under.,سجّل العقد ال�
 Record the passengers who boarded the dispatched trip to complete the movement lifecycle.,سجّل الركاب الذين صعدوا الرحلة المُسيَّرة لإتمام دورة حياة الحركة.
 Record the receiving driver and vehicle condition with the guided handover form.,سجّل السائق المستلم وحالة المركبة باستخدام نموذج التسليم الإرشادي.
 Record when the incident happened.,سجّل وقت وقوع الحادث.
+Recorded as installed,مسجّل كمركّب
+Recorded as not installed,مسجّل كغير مركّب
 "Recorded physical condition of the item at the moment it is issued, providing the baseline used to assess wear or damage when it is later returned.",حالة الصنف الفعلية وقت الصرف، وهي المرجع لتقييم الاستهلاك أو التلف عند إعادته.
+Recorder State on the Building File,حالة المسجّل في ملف المبنى
 Recording,التسجيل
 Recording the decision...,جارٍ تسجيل القرار...
 Records,السجلات
@@ -3112,8 +3393,8 @@ Recovery Details,تفاصيل الاسترداد
 Recovery Type,نوع الاسترداد
 "Recurrence interval used to generate task instances from this template, from daily through annually.",فترة التكرار المستخدمة لإنشاء سجلات تنفيذ المهام من هذا القالب، من يومي إلى سنوي.
 Recurring Amount,المبلغ الدوري
+Recurring Amount per Billing Cycle,المبلغ الدوري لكل دورة فوترة
 Recurring Billing,الفوترة الدورية
-Ref,مرجع
 Reference,المرجع
 Reference Document Type,نوع مستند المرجع
 Reference Name,اسم المرجع
@@ -3162,12 +3443,14 @@ Release,إلغاء الإسناد
 Release Approved,اعتماد إخراج الأصل
 Release Approved By,معتمد إخراج الأصل
 Release Approved By is required for intercompany asset movement.,يلزم تحديد معتمد إخراج الأصل في حركة الأصول بين الشركات.
+Release Checks,فحوصات الاعتماد
 Release Vehicle,فك ارتباط المركبة بالسائق
 Release vehicle,إعادة المركبة للخدمة
 Release {0} back to service?,إعادة {0} إلى الخدمة؟
 Released,تم الإخلاء
 Released By,أعادها للخدمة
 Released On,تاريخ الإعادة للخدمة
+Releasing Party,الجهة المخلية
 Remark,ملاحظة
 Remarks,ملاحظات
 Remarks (Optional),ملاحظات (اختياري)
@@ -3194,6 +3477,7 @@ Rent Payment Schedule,جدول سداد الإيجارات
 "Rent for {0} — instalment due {1} ({2}), settling {3}.",إيجار {0} — قسط مستحق في {1} ({2})، تسديد {3}.
 Rent payment generated for building: {0} under lease {1},أُنشئت دفعة الإيجار للمبنى: {0} ضمن عقد الإيجار {1}
 Rent payments can only be raised from a submitted lease.,دفعات الإيجار تُصدر من عقد معتمد فقط.
+Rent per Billing Cycle,الإيجار لكل دفعة
 Rental,إيجار
 Rental Accrual Ledger,سجل استحقاق الإيجار
 Rental Accrual This Month,استحقاق الإيجار لهذا الشهر
@@ -3201,7 +3485,9 @@ Rental Accrual Trend,اتجاه استحقاق الإيجار
 Rental Accrual by Office,استحقاق الإيجار حسب المكتب
 Rental Cost This Month,تكلفة الإيجار هذا الشهر
 Rental Cost by Office,تكلفة الإيجار حسب المكتب
+Rental Ledger,سجل الإيجار
 Rental Office,مكتب التأجير
+Rental Office Representative,ممثل مكتب التأجير
 Rental Return,إرجاع مركبة مستأجرة
 Rental Settlement,تسوية الإيجار
 Rental Settlement Item,بند تسوية الإيجار
@@ -3219,20 +3505,24 @@ Repair,إصلاح
 Repair Cost,تكلفة الإصلاح
 Replace,استبدال
 Replaced,مُستبدَل
-Replacement Cost (SAR),تكلفة الاستبدال (ريال)
+Replacement Cost,تكلفة الاستبدال
 Reply,الرد
 Report,تقرير
 Report Incident,الإبلاغ عن حادثة
 Report a Safety Incident,الإبلاغ عن حادث سلامة
+Report a problem in your accommodation,بلّغ عن مشكلة في سكنك
 "Report a safety incident as a draft, then send it to an authorized submitter for review and submission.",سجّل حادث سلامة كمسودة، ثم أرسله إلى مستخدم مخول لمراجعته واعتماده.
 "Report any damage, fault, or maintenance issue to the supervisor immediately.",إبلاغ المشرف فورًا بأي تلف أو عطل أو مشكلة صيانة.
+Report any fault to your facility supervisor. In an emergency call him directly.,بلّغ مشرف المنشأة بأي عطل. وفي الطوارئ اتصل به مباشرة.
 Reported By,المبلّغ
 Reported By (Optional),المبلّغ (اختياري)
+Reported Fault,العطل المبلّغ عنه
 Reported On,تاريخ الإبلاغ
 Reported during checkout ({0}),تم الإبلاغ عنه أثناء المغادرة ({0})
 Reported stolen from the Fleet OS dashboard.,أُبلغ عن السرقة من لوحة نظام إدارة الأسطول.
 Reported stolen via {0}.,أُبلغ عن سرقتها عبر {0}.
 Reporter & Resident,المبلِّغ والساكن
+Reporting Entity,الجهة المبلِّغة
 Reports,التقارير
 Reports: read-only. Open to view on screen or export.,تقارير: للعرض فقط. تُفتح للاطلاع على الشاشة أو التصدير.
 Representative,المندوب
@@ -3284,9 +3574,10 @@ Resident Request,طلب ساكن
 Resident Request Register,سجل طلبات الساكنين
 Resident Supervisor,مشرف الساكنين
 Resident Supervisor Dashboard,لوحة معلومات مشرف الساكنين
-Resident Support Services,خدمات دعم الساكنين
 Resident Type,نوع الساكن
+Resident accepted the housing terms,الساكن وافق على شروط السكن
 Resident request assigned for follow-up: {0},تم إسناد طلب الساكن للمتابعة: {0}
+Resident support,خدمة الساكنين
 "Resident's signature accepting the housing terms at check-in. A signature can be copied and reused, so only the front desk roles that capture it can see this field.",توقيع الساكن بالموافقة على شروط السكن عند التسكين. يمكن نسخ التوقيع وإعادة استخدامه، لذلك لا يظهر هذا الحقل إلا لموظفي الاستقبال المسؤولين عن تسجيله.
 "Resident's signature accepting the housing terms, captured on the tablet at check-in.",توقيع الساكن بالموافقة على شروط السكن، ويُسجل عبر الجهاز اللوحي عند التسكين.
 Residents,الساكنون
@@ -3318,6 +3609,7 @@ Result,النتيجة
 Results must be a list.,يجب أن تكون النتائج قائمةً.
 Results must be valid JSON.,يجب أن تكون النتائج بصيغة JSON صحيحة.
 Resume Investigation,استئناف التحقيق
+Retainer Value Over Twelve Months,قيمة الاشتراك على اثني عشر شهرًا
 Retention for daily occupancy and weekly vehicle-utilisation snapshots (days). Default 365.,مدة الاحتفاظ بلقطات الإشغال اليومية واستخدام المركبات الأسبوعية (أيام). الافتراضي 365.
 Retention for submitted Non-Financial Depreciation Snapshots (days). Default 730.,مدة الاحتفاظ بلقطات الإهلاك غير المالي المعتمدة (أيام). الافتراضي 730.
 Retry,إعادة المحاولة
@@ -3338,6 +3630,8 @@ Returned By,أرجعه
 Returned By (Employee),الموظف الذي أعادها
 Returned Items,الأصناف المعادة
 Returned Lines,بنود الإرجاع
+Returned Now,المرتجع الآن
+Returned by,أرجعها
 Returned from Leave,عائد من إجازة
 Returned from {0}: {1},تم الإرجاع من {0}: {1}
 Returned in Good Order,أُرجع بحالة جيدة
@@ -3348,6 +3642,7 @@ Reversal Of,عكس قيد
 Reversal Status,حالة العكس
 Reversed {0} L from Fuel Request {1}.,تم عكس {0} لتر من طلب الوقود {1}.
 Revert Due Date,موعد العودة إلى الوضع السابق
+Revert by,يرجع قبل
 Reverted,أُعيدت إلى الوضع السابق
 Review Alerts,مراجعة التنبيهات
 Review Apex Integration Settings,مراجعة إعدادات تكامل أبكس
@@ -3358,7 +3653,8 @@ Review and approve the handover before confirming receipt.,راجع التسلي
 Review the Housing Assignment List,راجع قائمة التسكين
 Review the Safety Task Catalog,مراجعة دليل مهام السلامة
 "Review the shared integration switchboard: frontend URL, API version, and allowed origins.",راجع لوحة التكامل المشتركة: رابط الواجهة، وإصدار الواجهة البرمجية، والمصادر المسموح بها.
-Reviewed by,روجع بواسطة
+Reviewed By (Management),راجعه (الإدارة)
+Reviewed By (Safety Management),راجعه (إدارة السلامة)
 Revise,تعديل
 Revoke Portal Link,إلغاء رابط البوابة
 Revoked,مُلغى
@@ -3370,6 +3666,7 @@ Rider {0} is on approved leave ({1}) covering {2} and cannot receive a vehicle o
 Rider {0} is {1} in their Employee record and cannot receive a vehicle or fuel.,الراكب {0} حالته {1} في سجل الموظف الخاص به ولا يمكنه استلام مركبة أو وقود.
 Riders who are not registered Employees on the manifest above (e.g. a guest or a not-yet-onboarded worker).,الركاب غير المسجلين كموظفين في كشف الركاب أعلاه (مثل ضيف أو عامل لم يُسجَّل بعد).
 Risk (default),الخطورة (افتراضي)
+Road Legality of the Vehicle,نظامية المركبة على الطريق
 Role,الدور
 Role Profile,ملف الأدوار
 Role that may approve a deduction of this type. Recorded for reference; nothing enforces it.,الدور الذي يجوز له اعتماد خصم من هذا النوع. مسجَّل للعلم فقط، ولا شيء يفرضه.
@@ -3392,6 +3689,8 @@ Room Type,نوع الغرفة
 Room Types,أنواع الغرف
 Room and Bed Generation,إنشاء الغرف والأسرّة
 "Room and bed counts are managed by the Room Setup wizard. Click to add, change, or remove rooms / beds.",تُدار أعداد الغرف والأسرّة عبر معالج إعداد الغرف. اضغط لإضافة أو تغيير أو إزالة الغرف/الأسرّة.
+Room condition photographed at check-in,تصوير حالة الغرفة عند التسكين
+Room condition photographed at checkout,تصوير حالة الغرفة عند المغادرة
 Room is full. House {0} in a temporary over-capacity bed?,الغرفة ممتلئة. هل تُسكِن {0} في سرير مؤقّت يتجاوز السعة؟
 Room marked ready.,تم تعليم الغرفة كجاهزة.
 Room not ready,الغرفة غير جاهزة
@@ -3407,6 +3706,7 @@ Rooms Generated,تم توليد الغرف
 Rooms Generated On,تاريخ توليد الغرف
 Rooms Needing Readiness,غرف بحاجة إلى تجهيز
 Rooms Planned,الغرف المخطط لها
+Rooms and Bed Capacity,عدد الغرف والأسرّة
 Rooms and beds created.,تم إنشاء الغرف والأسرّة.
 Rooms needing readiness,الغرف التي تحتاج إلى تجهيز
 Rooms on Floor,عدد الغرف في الطابق
@@ -3423,6 +3723,7 @@ Route Stop,محطة المسار
 Route Supervisor,مشرف المسار
 Route Template,قالب مسار
 Route Type,نوع المسار
+Route Under Movement,المسار المشغّل
 Route plan approved.,تم اعتماد خطة المسار.
 Route plan not found.,خطة المسار غير موجودة.
 Route plan rejected.,تم رفض خطة المسار.
@@ -3447,6 +3748,8 @@ SIM Cards,شرائح الاتصال
 SIM Count,عدد الشرائح
 SIM Custody Assignment,إسناد عهدة شريحة اتصال
 SIM Exceptions,استثناءات الشرائح
+SIM Lines Covered,عدد الشرائح المشمولة
+SIM Lines Held Under This Contract,الشرائح المسجّلة على هذا العقد
 SIM company {0} must match its contract's company {1}.,شركة الشريحة {0} يجب أن تطابق شركة عقدها {1}.
 SIMs,الشرائح
 SIMs & Billing,الشرائح والفوترة
@@ -3466,6 +3769,7 @@ Safety Finding Ledger rows cannot be deleted. Cancel the Safety Round to post a 
 Safety Findings,ملاحظات السلامة
 Safety Incident,حادثة سلامة
 Safety Incident Register,سجل حوادث السلامة
+Safety Incident Report,تقرير حادثة سلامة
 Safety Inspection Report,تقرير فحص السلامة
 Safety Inspections,فحوص السلامة
 Safety Inspections Over Time,فحوص السلامة عبر الزمن
@@ -3476,6 +3780,7 @@ Safety Open Findings,ملاحظات السلامة المفتوحة
 Safety Overdue Grace Days,أيام سماح تأخر السلامة
 Safety Pre-Due Lead Days,أيام التنبيه المسبق للسلامة
 Safety Profile,ملف السلامة
+Safety Provisions on Record at This Site,تجهيزات السلامة المسجّلة في هذا الموقع
 Safety Report Recipient,مستلِم تقرير السلامة
 Safety Round,جولة سلامة
 Safety Round Report,تقرير جولة السلامة
@@ -3537,10 +3842,12 @@ Saudi National Address,العنوان الوطني السعودي
 Saudi Post (SPL) National Address. Pincode above is the 5-digit Postal Code; City and Street use the standard address fields.,العنوان الوطني للبريد السعودي. الرمز البريدي أعلاه هو الرمز البريدي المكوّن من خمسة أرقام؛ وتستخدم المدينة والشارع حقول العنوان القياسية.
 Save,حفظ
 Save this code to follow up with your supervisor.,احتفظ بهذا الرمز للمتابعة مع مشرفك.
+Say what is wrong and where it is.,اكتب ما هي المشكلة وأين مكانها.
 Scan,مسح
 Scan Iqama / Worker Link,امسح الإقامة / رابط العامل
 Scan a worker badge or an article barcode,امسح بطاقة العامل أو الرمز الشريطي للصنف
 Scan failed — enter the details manually.,فشل المسح — أدخل التفاصيل يدوياً.
+Scan for the room record,امسح الرمز لفتح سجل الغرفة
 "Scan or type an Iqama number or personal link, then press Enter to identify the worker.",امسح أو اكتب رقم إقامة أو رابطاً شخصياً، ثم اضغط Enter لتحديد هوية العامل.
 Scan passport (MRZ),مسح الجواز (المنطقة المقروءة آلياً)
 Scanned At,وقت المسح
@@ -3565,6 +3872,7 @@ Scheduling,الجدولة
 Scope,النطاق
 Scope and Authorization,النطاق والتفويض
 Scope for catalog {0}: {1},النطاق للكتالوج {0}: {1}
+Scope of Work to be Carried Out,نطاق العمل المطلوب تنفيذه
 Scrapped,مشطوب
 "Search a name or passport, or register a new arrival",ابحث باسم أو جواز سفر، أو سجّل وصولاً جديداً
 Search articles,ابحث عن الأصناف
@@ -3573,6 +3881,7 @@ Search failed. Please retry.,فشل البحث. يرجى إعادة المحاو
 Search plate or category,ابحث بلوحة أو فئة
 Search worker name or passport…,البحث باسم العامل أو جواز السفر…
 Seat Capacity,سعة المقاعد
+Seats,المقاعد
 Secondary Number,الرقم الإضافي
 Seconds a worker's 'please wait' request is held active (drives the client countdown). A blank or zero value falls back to the built-in default.,"عدد الثواني التي يظل فيها طلب ""يرجى الانتظار"" للعامل نشطًا (يحرك العد التنازلي في الواجهة). القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج."
 Seconds the worker has to respond after each driver notification (drives the client countdown). A blank or zero value falls back to the built-in default.,عدد الثواني المتاحة للعامل للرد بعد كل إشعار من السائق (يحرك العد التنازلي في الواجهة). القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج.
@@ -3634,6 +3943,7 @@ Selected Room {0} does not belong to Building {1},الغرفة المحددة {0
 Semi-Annual,نصف سنوي
 Send a memo-only notification to Finance when a Material Transfer moves stock between buildings on different cost centers. No GL Entry is posted.,أرسل إشعارًا للعلم إلى المالية عند نقل مواد بين مبنيين يتبعان مركزي تكلفة مختلفين. لا يُرحل أي قيد محاسبي.
 "Send background push notifications (trip assigned, fuel approved) to opted-in driver devices; needs the VAPID keys below plus pywebpush on the server, else a safe no-op.",إرسال إشعارات الدفع في الخلفية (إسناد رحلة، اعتماد وقود) إلى أجهزة السائقين المشتركين؛ يتطلب مفاتيح VAPID أدناه وحزمة pywebpush على الخادم، وإلا فلا يُنفَّذ أي إجراء بأمان.
+Send it. The supervisor sees it at once.,أرسل الطلب. يصل للمشرف مباشرة.
 Send via WhatsApp,الإرسال عبر واتساب
 Send via WhatsApp/SMS,إرسال عبر واتساب/رسالة نصية
 Sender ID / From Number,معرّف المُرسِل / رقم الإرسال
@@ -3644,6 +3954,7 @@ Sequence,التسلسل
 Serial No,الرقم التسلسلي
 Serial No.,الرقم التسلسلي
 Serial Number,الرقم التسلسلي
+Serialised articles issued without a serial number,أصناف مسلسلة صُرفت بدون رقم تسلسلي
 Series,التسلسل
 "Server-derived Delegation-of-Authority flag: when set, only Operations-tier authorization is allowed. Read by workflow; cannot be hand-set.",مؤشر تفويض الصلاحية مشتق من الخادم: عند تعيينه، يُسمح فقط باعتماد على مستوى العمليات. يُقرأ بواسطة سير العمل؛ لا يمكن تعيينه يدويًا.
 Server-derived: submitted Administrative Trips this month for the project (incl. this one).,مشتق من الخادم: الرحلات الإدارية المعتمدة هذا الشهر للمشروع (متضمناً هذه الرحلة).
@@ -3652,13 +3963,16 @@ Service,الخدمة
 Service Contract,عقد الخدمة
 Service Cost (SAR),تكلفة الخدمة (ريال)
 Service Item,صنف الخدمة
+Service Item Billed Against,صنف الخدمة المفوتر عليه
 Service Level,مستوى الخدمة
 Service Line,خط الخدمة
 Service Order marked Completed.,تم تحديد حالة أمر الخدمة كـ 'مكتمل'.
 Service Order marked In Progress.,تم تحديد حالة أمر الخدمة كـ 'قيد التنفيذ'.
 Service Order marked Missed.,تم تحديد حالة أمر الخدمة كـ 'فائت'.
+Service Provider (Contractor),مقدّم الخدمة (المقاول)
 Service Type,نوع الخدمة
 "Service life of a consumable issue (linens, mattresses). 0 = no expiry; a daily job alerts on held items older than this.",مدة استخدام المستهلكات المصروفة، مثل المفروشات والمراتب. القيمة 0 تعني بلا انتهاء، وتنبّه مهمة يومية على الأصناف المحتفظ بها بعد تجاوز هذه المدة.
+Service of Work,الخدمة المطلوبة
 "Set ON only after Legal/HR has reviewed the caps, the consent flow, and the per-type rules against current KSA Labor Law.",فعّل هذا فقط بعد أن تراجع الإدارة القانونية/الموارد البشرية الحدود القصوى ومسار الموافقة وقواعد كل نوع وفقًا لنظام العمل السعودي الحالي.
 Set a Landlord on lease {0} before raising a rent payment — a payment needs a party to settle with.,حدّد المؤجّر في العقد {0} قبل إصدار دفعة إيجار — الدفعة تحتاج طرفًا تُسدَّد له.
 Set a Service Item on the contract before raising a purchase request.,عيّن صنف خدمة على العقد قبل إصدار طلب شراء.
@@ -3718,8 +4032,10 @@ Set when this scan appended a boarding row to the Trip Start Log (a Valid first 
 "Set when this settlement lists no vehicles, so the accrued total came from the rental accrual ledger instead of from rows on this document.",يُفعَّل حين لا تُدرج هذه التسوية أي مركبة، فيؤخذ إجمالي المستحق من سجل استحقاق الإيجار بدلًا من بنود هذا المستند.
 Set when this write-off was escalated from a Vehicle Incident.,يُضبط عند تصعيد هذا الشطب من بلاغ مركبة.
 Settled,تمت التسوية
+Settled By,الجهة المسوّية
 Settled Share,نسبة المسوّى
 Settlement,التسوية
+Settlement State,حالة السداد
 "Settlement period, e.g. 2026-05.",فترة التسوية، مثال: 2026-05.
 "Settlement stage of the rental period, from draft through reconciliation and approval to payment, or held as disputed or cancelled.",مرحلة تسوية فترة الإيجار، من المسودة ثم المطابقة والاعتماد حتى السداد، أو تعليقها بسبب نزاع أو إلغائها.
 Settlements,التسويات
@@ -3729,6 +4045,7 @@ Setup Rooms,إعداد الغرف
 Setup Status,حالة الإعداد
 Severe,شديدة
 Severity,الخطورة
+Severity Rating,درجة الخطورة
 Sewage Tank Suction,نزح خزان الصرف الصحي
 Share the on-site code with the receiving supervisor.,شارك رمز الموقع مع المشرف المستلِم.
 Share this code with the receiving supervisor: {0},شارك هذا الرمز مع المشرف المستلم: {0}
@@ -3745,6 +4062,7 @@ Short Address,العنوان المختصر
 Short Address must be 4 letters followed by 4 digits (e.g. RCTB4359).,يجب أن يتكون العنوان المختصر من أربعة أحرف يتبعها أربعة أرقام (مثال: RCTB4359).
 Short code used to prefix generated room numbers.,رمز مختصر يُستخدم كبادئة لأرقام الغرف المُنشأة.
 Short-term contract worker on a monthly salary with no car or allowances. Recorded in accounting as a party for native Payment Entry. Employee-lite; distinct from the housing Temporary Worker.,عامل بعقد قصير وراتب شهري دون سيارة أو بدلات. يُسجل محاسبيًا كطرف في قيد الدفع القياسي. سجل موظف مبسط يختلف عن العامل المؤقت في السكن.
+Shortfall,النقص
 Show AFMCO brand mark and wordmark in the portal header.,إظهار علامة وشعار AFMCO النصي في رأس البوابة.
 Show Brand,إظهار العلامة التجارية
 Show Portal Link,عرض رابط البوابة
@@ -3755,9 +4073,11 @@ Sign to acknowledge receipt,وقّع للإقرار بالاستلام
 Signature,توقيع
 Signature (fallback),التوقيع (خيار بديل)
 Signed,موقَّع
+Signed Contract Document on File,نسخة العقد الموقّعة محفوظة
 Signed Evidence,إثبات موقّع
 Signed Qty,الكمية الموجبة أو السالبة
 Signed handover evidence is required before submitting.,إثبات تسليم موقّع مطلوب قبل الاعتماد.
+Signed on paper below,التوقيع على الورق أدناه
 "Single config that governs whether, and how, operational events (damage, rent, fuel, custody) may be deducted from a worker's salary. Default = NO deduction: the global switch is OFF and every per-type rule is disabled until explicitly activated after legal review.",إعداد واحد يحكم هل يمكن خصم الأحداث التشغيلية (تلف أو إيجار أو وقود أو عهدة) من راتب العامل وكيف. الافتراضي هو عدم الخصم: المفتاح العام موقوف وكل قاعدة نوع معطّلة حتى تُفعَّل صراحة بعد المراجعة القانونية.
 Single configuration record controlling the look and feel of the Salis Driver Portal (the mobile web app at /driver).,سجل إعدادات واحد يتحكم في مظهر بوابة سائق ساليس، وهي تطبيق الويب للجوال على /driver.
 "Single configuration record describing how an external frontend integrates with this Frappe backend over HTTP. This DocType documents and surfaces the integration; the real linking uses native Frappe tools (User API Access, OAuth Client, Webhook).",سجل إعداد واحد يوضح تكامل واجهة خارجية مع خادم Frappe عبر HTTP. يعرض هذا المستند إعدادات التكامل، أما الربط الفعلي فيستخدم أدوات Frappe القياسية (User API Access وOAuth Client وWebhook).
@@ -3766,16 +4086,24 @@ Single mattress for worker accommodation bed. Routinely purchased bedding item.,
 Single monthly utility bill linked to a Utility Account. Posts to Accommodation Ledger on submit.,فاتورة مرافق شهرية مرتبطة بحساب مرافق. تُرحّل إلى سجل تكاليف السكن عند الاعتماد.
 "Single service visit, such as one pest control visit or one sewage tank suction.",زيارة خدمة واحدة، مثل مكافحة الآفات أو نزح خزان الصرف الصحي.
 Site,الموقع
+Site Address,عنوان الموقع
 Site Code,رمز الموقع
+Site Gate,بوابة الموقع
+Site Inspected,الموقع المفحوص
 Site Name,اسم الموقع
+Site Safety Supervisor,مشرف السلامة في الموقع
+Site Supervisor,مشرف الموقع
 Site Token,رمز الموقع
 Site Transport,نقل العمال للموقع
+Site Where the Incident Occurred,موقع وقوع الحادثة
+Site of Work,موقع العمل
 "Site-key-encrypted (Fernet) copy of the raw token, kept only so the desk can re-share the SAME link (QR / WhatsApp) without rotating. Useless without the site encryption key.",نسخة من الرمز الأصلي مشفرة بمفتاح الموقع (Fernet)، وتُحفظ فقط ليتمكن المكتب من إعادة مشاركة الرابط نفسه عبر QR أو واتساب دون تجديده. لا يمكن استخدامها دون مفتاح تشفير الموقع.
 Skip,تخطّي
 Skip Reason,سبب التخطّي
 Skipped,تم التخطّي
 Smoke Detector,كاشف دخان
 Smoke Detectors Present,كاشفات الدخان موجودة
+Smoke Detectors at the Site,كواشف الدخان في الموقع
 Snapshot,لقطة
 Snapshot Date,تاريخ اللقطة
 Snapshot Retention (Days),مدة الاحتفاظ باللقطات (أيام)
@@ -3825,6 +4153,7 @@ Stamped when a Maintenance Work Order for the linked asset is completed.,يُخ�
 Stamped when the consent signature is first recorded.,يُسجَّل عند تدوين توقيع الموافقة لأول مرة.
 Stand / wall electric fan for accommodation ventilation. Durable appliance.,مروحة كهربائية أرضية / جدارية لتهوية السكن. جهاز معمّر.
 Standard,قياسي
+Standard Contract Rate,السعر القياسي بالعقد
 Standard Rate Per Visit (SAR),أجرة الزيارة القياسية (ريال)
 Standard Unit Cost (SAR),تكلفة الوحدة القياسية (ريال)
 "Standard: quota consumption + ledger posting. Top-up: add litres, optionally temporary. Chip: issue/replace/cancel a fuel chip.",قياسي: استهلاك الحصة والتسجيل في سجل استهلاك الوقود. تعبئة: إضافة لترات ويمكن أن تكون مؤقتة. شريحة: إصدار شريحة وقود أو استبدالها أو إلغاؤها.
@@ -3847,6 +4176,9 @@ Starting Room Number,بداية ترقيم الغرف
 State why the resident is checking out.,بيّن سبب مغادرة الساكن.
 State why the trip is needed.,وضّح سبب الحاجة إلى الرحلة.
 State: {0},الحالة: {0}
+Statement Identification,بيانات الكشف
+Statement Status,حالة الكشف
+Statement of What Happened,وصف ما حصل
 Static,ثابت
 Static Value,القيمة الثابتة
 Status,الحالة
@@ -3857,6 +4189,8 @@ Stay Details,تفاصيل الإقامة
 Stay Type,نوع الإقامة
 Sticker Requested,تم طلب الملصق
 Still Held,لا تزال بالحيازة
+Still Outstanding,المتبقي
+Still open on the resident's account,ما زالت مفتوحة على الساكن
 Stock Entry,حركة المخزون
 Stop,محطة
 Stop Date,تاريخ الإيقاف
@@ -3872,6 +4206,8 @@ Stopped via {0}: {1}.,تم الإيقاف عبر {0}: {1}.
 Stops,المحطات
 Storage,مخزن
 Store & Custody,المستودع والعهدة
+Store Supervisor,مشرف المستودع
+Storekeeper,أمين المستودع
 Straight Line,القسط الثابت
 Structural,إنشائي
 Subcontracting,التعاقد من الباطن
@@ -3900,6 +4236,7 @@ Submittable: records the return of custody articles against a prior Custody Issu
 Submitted At,وقت الاعتماد
 Submitted By Me,المعتمدة منّي
 Submitted to Movement,مُرسل إلى الحركة
+Subscriber (Company),المشترك (الشركة)
 Subscription,الاشتراك
 Suggestion,اقتراح
 Sum of Fuel Consumption Ledger litres for this vehicle and period. Computed by the system.,مجموع لترات سجل استهلاك الوقود لهذه المركبة والفترة. يحتسبه النظام.
@@ -3929,6 +4266,7 @@ Supplier-Billed Cost This Month,التكلفة المفوترة من المور�
 Suppliers,الموردون
 Supporting evidence for the loss and its valuation. Required before the recovery can be Approved.,أدلة داعمة للخسارة وتقييمها. مطلوبة قبل أن يتسنى اعتماد الاسترداد.
 Surveillance,المراقبة
+Surveillance Cameras at the Site,كاميرات المراقبة في الموقع
 Suspected Fraud,اشتباه احتيال
 Suspend,تعليق
 Suspended,موقوفة
@@ -3969,8 +4307,15 @@ Task closed,أُغلقت المهمة
 Task completed.,اكتملت المهمة.
 Task started — status set to In Progress.,بدأت المهمة — الحالة: قيد التنفيذ.
 Tasks,المهام
+Tasks Checked,المهام المفحوصة
+Tasks Checked on This Round,المهام المفحوصة في هذه الجولة
 Tasks Completed This Month,المهام المكتملة هذا الشهر
 Tasks Due Today,المهام المستحقة اليوم
+Tasks Not Carried Out,مهام لم تُنفَّذ
+Tasks Rated Average,مهام بتقدير متوسط
+Tasks Rated Good or Better,مهام بتقدير جيد فأعلى
+Tasks Rated Poor,مهام بتقدير رديء
+Tasks with Photographic Evidence on File,مهام لها إثبات بالصور
 Tax ID,الرقم الضريبي
 Technician Notes,ملاحظات الفني
 Telecom,اتصالات
@@ -3980,6 +4325,8 @@ Telecom Contract Expiry,انتهاء عقود الاتصالات
 Telecom Contract {0} does not exist.,عقد الاتصالات {0} غير موجود.
 Telecom Control,عمليات الاتصالات
 Telecom Cost Allocation,توزيع تكاليف الاتصالات
+Telecom Service Contract,عقد خدمة اتصالات
+Telecom Service Provider,مزوّد خدمة الاتصالات
 Telecom Supplier,مورّد الاتصالات
 Telecom contract expires soon,عقد اتصالات على وشك الانتهاء
 Telecom service — {0} — {1} ({2}),خدمة اتصالات — {0} — {1} ({2})
@@ -4018,30 +4365,55 @@ The Dispatch Trip the scanned pass was issued against.,رحلة التسيير �
 "The DocType of the routed payment. Stamped by the Payment Router from the document it actually created, so the link below always resolves against the right table.",نوع مستند الدفع الموجه. يسجله موجه الدفع من المستند الذي أنشأه فعليًا، لذلك يشير الرابط أدناه دائمًا إلى الجدول الصحيح.
 The Employee Advance raised for this incident. One incident raises at most one advance; the company payment and the wage installments both run on it.,سلفة الموظف المُنشأة لهذه الحادثة. تُنشئ الحادثة سلفة واحدة على الأكثر؛ ويجري عليها سداد الشركة وأقساط الخصم من الأجر.
 The GPS position is outside the valid coordinate range.,موقع GPS خارج نطاق الإحداثيات الصحيح.
+The Incident,الحادث
 The Route Supervisor this plan is assigned to for approval and live oversight. Only this user may approve or reject the plan from the Masar supervisor portal.,مشرف المسار المسندة إليه هذه الخطة للاعتماد والمتابعة المباشرة. هذا المستخدم وحده يمكنه اعتماد الخطة أو رفضها من بوابة مشرف مسار.
 "The Safety Round this execution belongs to, if recorded as part of a round.",جولةُ السلامة التي ينتمي إليها هذا التنفيذ، إن سُجِّل ضمن جولة.
 The Salis Driver this barcode token grants portal entry for. Set on a Driver-holder token; the driver enters by scanning the QR with no Frappe User.,سائق ساليس الذي يمنحه رمز الباركود هذا دخول البوابة. يُحدد للرمز الخاص بالسائق، ويدخل السائق بمسح رمز الاستجابة السريعة دون حساب مستخدم في فرابي.
 The Trip Start Log this scan boarded onto (set only when a boarding row was created).,سجل بدء الرحلة الذي أضاف إليه هذا المسح عملية الصعود. يُحدد فقط عند إنشاء صف صعود.
+"The accrual was taken from the rental ledger, not typed by hand",المستحق مأخوذ من سجل الإيجار، ما هو مدخل يدوي
+The assigned vehicle has been returned,رجّع المركبة المسندة له
 The browser PushSubscription endpoint URL the push service delivers to. Unique per device. Treat as a secret.,رابط نقطة اشتراك المتصفح التي ترسل إليها خدمة الإشعارات. يختلف لكل جهاز ويجب التعامل معه كمعلومة سرية.
 "The building code is locked: {0} room(s) already use it in their room numbers, and renaming it would orphan them. Delete the generated rooms first if the code must change.",رمز المبنى مقفل لأن {0} غرفة تستخدمه في أرقامها، وتغييره سيفصلها عن المبنى. احذف الغرف المولدة أولًا إذا كان تغيير الرمز ضروريًا.
 The building this asset was located in before its current location.,المبنى الذي كان هذا الأصل موجوداً فيه قبل موقعه الحالي.
+The checks above are complete but the clearance has not been signed off yet. This paper does not release the driver until the clearance status reads Cleared.,الفحوصات أعلاه مكتملة لكن إخلاء الطرف ما اعتُمد بعد. هذه الورقة ما تخلي طرف السائق حتى تصير حالة إخلاء الطرف مخلى الطرف.
+The claim carries a cost centre to charge,المطالبة عليها مركز تكلفة
+The claim has been reconciled against the movement record,المطالبة مطابقة مع سجل الحركة
+The claim matches what the company accrued for the month,المطالبة تطابق المستحق عندنا عن الشهر
+The claim sits inside the monthly quota,المطالبة داخل الحصة الشهرية
+"The claiming party certifies that the litres above were drawn by this vehicle in the period stated, that the amount is due and has not been claimed before, and that it is charged to the cost centre named on this voucher.",الجهة المطالِبة تقر أن اللترات أعلاه سحبتها هذه المركبة في الفترة المذكورة، وأن المبلغ مستحق وما طولب به من قبل، وأنه يُحمّل على مركز التكلفة المذكور في هذا السند.
 The closer must differ from the person who raised the case.,يجب أن يختلف من يُغلق الحالة عمّن رفعها.
+"The contractor carries out the service named above at the buildings listed, at the stated rates, within the response limit shown. The contractor invoices only against a Subcontractor Service Order issued under this contract and confirmed by the site supervisor. No visit outside the covered buildings, and no rate other than the rates above, is payable under this contract.",ينفّذ المقاول الخدمة المذكورة أعلاه في المباني المدرجة، بالأسعار المبيّنة، وخلال مهلة الاستجابة الموضحة. ولا يفوتر المقاول إلا على أمر خدمة صادر بموجب هذا العقد ومؤكَّد من مشرف الموقع. ولا تُدفع أي زيارة خارج المباني المشمولة، ولا أي سعر غير الأسعار أعلاه.
+"The contractor certifies that the service above was carried out at the site on the actual visit date shown, and invoices only the amount payable stated here against this order. The site supervisor confirms the work was received. Any amount not stated on this order is not payable.",يقر المقاول بأن الخدمة أعلاه نُفّذت في الموقع بتاريخ الزيارة الفعلي المبيّن، ولا يفوتر إلا المبلغ المستحق المذكور هنا على هذا الأمر. ويؤكد مشرف الموقع استلام العمل. وأي مبلغ غير مذكور في هذا الأمر غير مستحق الدفع.
 "The current driver's login user, mirrored from the assigned driver. Drives the driver-facing compliance notification.",مستخدم دخول السائق الحالي، منقول من السائق المسند. ويُستخدم لإرسال إشعار الامتثال إلى السائق.
 The current link cannot be shown again. Rotating issues a NEW link and QR and invalidates the previous one. Continue?,لا يمكن عرض الرابط الحالي مرة أخرى. سيؤدي التجديد إلى إصدار رابط ورمز QR جديدين وإلغاء السابق. هل تريد المتابعة؟
+"The damage described above is beyond economic repair. The vehicle or the damaged parts are taken out of service on this notice, and their remaining value is written off and is not recoverable.",التلف الموصوف أعلاه ما يستحق الإصلاح. تخرج المركبة أو القطع التالفة من الخدمة بهذا الإشعار، وتُشطب قيمتها المتبقية وما تُسترد.
+"The damage described above is charged to the driver named on this notice, and the amount shown is recovered from him under a separate signed consent.",التلف الموصوف أعلاه يُحمّل على السائق المذكور في هذا الإشعار، ويُسترد منه المبلغ المبين بموافقة موقّعة منفصلة.
+"The damage described above is passed to the insurer as a claim on the policy in force, and the company keeps the right to the balance the insurer does not settle.",التلف الموصوف أعلاه يُرفع لشركة التأمين كمطالبة على الوثيقة السارية، وتحتفظ الشركة بحقها في الباقي الذي ما يغطيه التأمين.
+"The damage described above is repairable. This notice authorises repair up to the estimated cost shown, and any excess needs a fresh authority.",التلف الموصوف أعلاه قابل للإصلاح. هذا الإشعار يصرّح بالإصلاح في حدود التكلفة التقديرية المبينة، وأي زيادة تحتاج اعتماد جديد.
 "The device/browser user agent captured at opt-in, to help an operator recognise a stale device.",بيانات المتصفح والجهاز المسجلة عند تفعيل الإشعارات، وتساعد المشغل على معرفة الأجهزة غير المستخدمة.
+The difference against metered consumption is inside the allowed margin,الفرق مع المستهلك بالعداد داخل الهامش المسموح
+"The dispatching store confirms it handed over the quantities listed above and released them from its own stock. The receiving store confirms it took them into custody in the stated quantities and in usable condition, and carries them from the received date onward. Anything short, damaged or missing must be written on this note before it is signed.",يقر المستودع المرسِل بأنه سلّم الكميات المذكورة أعلاه وأخرجها من رصيده. ويقر المستودع المستلِم بأنه استلمها بالكميات المذكورة وبحالة صالحة للاستعمال، ويتحمّلها من تاريخ الاستلام. وأي نقص أو تلف أو فقد يُكتب على هذا السند قبل التوقيع عليه.
+"The driver confirms that only the persons listed on this sheet travelled with him on this trip, that each one boarded and left at the point written against his name, and that he carried nobody else.",يقر السائق أن الأشخاص المذكورين في هذا الكشف هم وحدهم من ركبوا معه في هذه الرحلة، وأن كل واحد صعد ونزل في النقطة المكتوبة أمام اسمه، وأنه ما نقل أحدًا غيرهم.
+The driver licence is valid on the trip date,رخصة السائق سارية في تاريخ الرحلة
+"The driver states that what is written above is a true account of the incident, and that he did not leave the site before the competent authority attended or the report was raised.",يقر السائق أن ما كُتب أعلاه وصف صحيح للحادث، وأنه ما غادر الموقع قبل حضور الجهة المختصة أو رفع المحضر.
 The driver this device subscription belongs to.,السائق الذي يخصه اشتراك هذا الجهاز.
 "The driver's current assigned vehicle, captured for reference.",المركبة المسندة حالياً للسائق، مسجّلة للمرجع.
 "The driver's login user, mirrored from the linked driver. Drives the driver-facing notification.",مستخدم دخول السائق، منقول من السائق المرتبط، ويُستخدم لإرسال الإشعار إليه.
+"The employee agrees that the amount above is deducted from his pay in the instalments shown, until the whole amount is settled.",يوافق الموظف على خصم المبلغ أعلاه من راتبه بالأقساط المبينة حتى يُسدد كامل المبلغ.
 The floor plan adds {0} new room(s) and {1} new bed(s) that are not yet created. Existing rooms updated: {2}. Confirm to create the new rooms and beds.,يضيف مخطط الطابق {0} غرفة جديدة و{1} سرير جديد لم تُنشأ بعد. الغرف الموجودة المحدّثة: {2}. أكّد لإنشاء الغرف والأسرّة الجديدة.
-The incoming driver acknowledges receiving the vehicle in the condition recorded above.,يقر السائق المستلم باستلام المركبة بالحالة المسجَّلة أعلاه.
+The fuel chip has been returned,سلّم شريحة الوقود
+"The incoming driver confirms he received the vehicle described above in the condition written on this receipt, and holds it together with its fuel chip, its fines and any damage, from the handover date until he returns it by a receipt of the same kind.",يقر السائق المستلم أنه استلم المركبة الموصوفة أعلاه بالحالة المكتوبة في هذا الإيصال، وأنها بعهدته هي وشريحة وقودها ومخالفاتها وأي تلف يصيبها، من تاريخ التسليم حتى يرجعها بإيصال مثله.
 The initiator and the receiving supervisor must be different people.,يجب أن يكون المُبادر والمشرف المستلِم شخصين مختلفين.
 The initiator who shipped the asset cannot confirm its own receipt.,لا يمكن للمُبادر الذي شحن الأصل تأكيد استلامه بنفسه.
+"The inspector declares that every task listed above was checked on site on the round date, that the result written against each task is what was actually seen, and that every fault found is written in the findings table with the person who must clear it and the date it is due. A task not listed here was not checked on this round.",يقر المفتّش بأن كل مهمة مدرجة أعلاه فُحصت في الموقع بتاريخ الجولة، وأن النتيجة المكتوبة أمام كل مهمة هي ما شوهد فعلًا، وأن كل خلل وُجد مكتوب في جدول الملاحظات ومعه من يجب أن يعالجه وتاريخ استحقاقه. وأي مهمة غير مدرجة هنا لم تُفحص في هذه الجولة.
 The lease for,عقد إيجار
 The linked Custody Issue {0} must be submitted before returning.,يجب اعتماد صرف العهدة المرتبط {0} قبل الإرجاع.
 The login the subscription was created under (the driver's session user).,الحساب الذي أُنشئ الاشتراك تحته (مستخدم جلسة السائق).
 The manifest worker this boarding state tracks.,العامل في كشف الركاب الذي تتبعه حالة الصعود هذه.
 The messaging gateway is not enabled or is missing its URL/API key. Configure it in Apex Integration Settings first.,بوابة المراسلة غير مفعّلة أو ينقصها الرابط أو مفتاح الواجهة البرمجية. اضبطها أولًا في إعدادات تكامل أبكس.
 The new expiry date must be later than the current expiry date.,يجب أن يكون تاريخ الانتهاء الجديد لاحقًا لتاريخ الانتهاء الحالي.
+The notice carries an approving officer,الإشعار عليه مسؤول معتمد
+The number listed fits the seats in the vehicle,عدد المذكورين يناسب مقاعد المركبة
 The on-site code has expired. Ask the initiator to regenerate it.,انتهت صلاحية رمز الموقع. اطلب من المُبادر إعادة توليده.
 The one-time password has expired. Ask the procurement supervisor to regenerate it.,انتهت صلاحية رمز التحقق لمرة واحدة. اطلب من مشرف المشتريات إعادة توليده.
 "The operational source DocType whose submission may raise this deduction (for example Custody Damage Assessment, Accommodation Checkout). Recorded for reference; no controller reads it.",نوع المستند التشغيلي الذي قد يرفع هذا الخصم عند اعتماده (مثل تقييم تلفيات العهدة، أو إخلاء السكن). مسجَّل للعلم فقط، ولا يقرأه أي متحكّم.
@@ -4060,11 +4432,18 @@ The pickup date and time is not valid.,تاريخ ووقت الصعود غير �
 The procurement supervisor and the receiving supervisor must be different people.,يجب أن يكون مشرف المشتريات والمشرف المستلم شخصين مختلفين.
 The procurement supervisor who shipped the goods cannot confirm their own receipt.,لا يمكن لمشرف المشتريات الذي شحن البضائع تأكيد استلامها بنفسه.
 "The property's landlord, modeled as a Supplier. Auto-filled from the active lease when set there.",مالك/مؤجّر العقار، ممثَّلاً كمورّد. يُعبّأ تلقائياً من العقد الفعّال عند ضبطه هناك.
+"The provider supplies the service on the billing account shown above for the contract period, and bills only the recurring amount stated, on the stated frequency, to that account. The subscriber pays only what is billed against this account and this contract reference. Any change to the amount, the frequency or the number of lines takes effect only after both parties sign a written amendment.",يقدّم المزوّد الخدمة على حساب الفوترة المبيّن أعلاه طوال مدة العقد، ولا يفوتر إلا المبلغ الدوري المذكور، بالدورية المذكورة، على ذلك الحساب. ولا يدفع المشترك إلا ما يُفوتر على هذا الحساب وهذا الرقم المرجعي. وأي تغيير في المبلغ أو الدورية أو عدد الشرائح لا يسري إلا بعد ملحق مكتوب يوقّعه الطرفان.
+The quantity fits inside what is left on the quota,الكمية داخل المتبقي من الحصة
+The quota behind this voucher is still open,الحصة خلف هذا الأمر ما زالت مفتوحة
 The receiving party confirms the items above were delivered in the stated quantities and taken into the building store.,تُقرّ الجهة المستلِمة بأن الأصناف المذكورة أعلاه سُلّمت بالكميات المبينة وأُدخلت إلى مستودع المبنى.
+"The receiving supervisor confirms taking the items listed above into the receiving building store in the quantities shown. Responsibility for this stock, and for any shortage found later, passes to the receiving store from the handover date. The releasing store is discharged only for the quantities confirmed above.",يقر المشرف المستلم باستلام الأصناف المذكورة أعلاه في مستودع المبنى المستلم بالكميات الموضحة. وتنتقل مسؤولية هذه العهدة، وأي نقص يظهر لاحقًا، إلى المستودع المستلم من تاريخ التسليم. ولا تبرأ ذمة المستودع المسلِّم إلا بالكميات المؤكدة أعلاه.
+"The reporter declares that the account above is a true and complete record of what happened, to the best of their knowledge, and that nothing material has been left out. This report is issued as the company's own record of the incident and may be relied on by an inspector, an auditor or an insurer.",يقر المبلِّغ بأن ما ورد أعلاه وصف صحيح وكامل لما حصل بحسب علمه، وأنه لم يُغفل شيئًا جوهريًا. ويصدر هذا التقرير كسجل الشركة الرسمي للحادثة، ويجوز لمفتّش أو مدقّق أو شركة تأمين الاعتماد عليه.
 The requested phone does not match the subject's stored phone.,رقم الهاتف المطلوب لا يطابق رقم الهاتف المحفوظ لصاحب الرمز.
+The route plan behind this sheet is approved,خطة المسار خلف هذا الكشف معتمدة
 The route stop name (mirrors the Route Stop on the trip's route).,اسم محطة المسار (يعكس محطة المسار على مسار الرحلة).
 The route stop where this worker boarded (mirrors the Route Stop name on the trip's route).,محطة المسار التي صعد منها هذا العامل (تطابق اسم محطة المسار في مسار الرحلة).
 The source Route Stop child row name — the stable identity used to match a stop across reloads.,اسم صف محطة المسار الفرعي المصدر — الهوية الثابتة المستخدمة لمطابقة محطة عبر عمليات إعادة التحميل.
+"The storekeeper confirms receiving the articles shown as Returned Now, in the condition recorded against each line. Any line marked Damaged or Lost, and any quantity still outstanding, stays on the holder's account and is settled through a custody damage assessment. This receipt clears the holder only for what is recorded as returned and sound.",يقر أمين المستودع باستلام الأصناف الموضحة في عمود «المرتجع الآن» بالحالة المسجلة أمام كل سطر. وأي سطر مؤشر كتالف أو مفقود، وأي كمية ما زالت متبقية، تبقى على حساب حائز العهدة وتُسوّى عبر تقييم تلفيات العهدة. ولا يبرئ هذا الإيصال ذمة الحائز إلا عما سُجّل مرتجعًا وسليمًا.
 The submitted Custody Issue whose receipt is being acknowledged.,صرف العهدة المعتمد الذي يجري الإقرار باستلامه.
 The submitted landlord invoice this payment settles.,فاتورة المؤجّر المعتمدة التي تسددها هذه الدفعة.
 The submitted supplier invoice this payment settles.,فاتورة المورّد المعتمدة التي يسددها هذا الدفع.
@@ -4072,13 +4451,18 @@ The subscription's auth secret (client auth token for payload encryption).,ال�
 The subscription's p256dh public key (client key for payload encryption).,المفتاح العام p256dh للاشتراك (مفتاح العميل لتشفير الحمولة).
 The supervisor user who recorded the approval decision.,المستخدم المشرف الذي سجّل قرار الاعتماد.
 "The supervisor's own signature accepting custody of these assets. A signature can be copied and reused, so only the custody desk roles can see this field.",توقيع المشرف بقبول عهدة هذه الأصول. يمكن نسخ التوقيع وإعادة استخدامه، لذلك لا يظهر هذا الحقل إلا لموظفي مكتب العهدة.
+"The technician certifies that the scope of work above was carried out at the site named, on the actual dates shown, and that the materials listed were the materials consumed. The supervisor certifies that the work was inspected on site and accepted. Work not written on this sheet was not ordered and is not accepted.",يقر الفنّي بأن نطاق العمل أعلاه نُفّذ في الموقع المذكور بالتواريخ الفعلية المبيّنة، وأن المواد المدرجة هي المواد التي استُهلكت. ويقر المشرف بأنه عاين العمل في الموقع وقبله. وأي عمل غير مكتوب في هذه الورقة لم يُطلب ولا يُقبل.
 The telecom operator (e.g. the STC / Mobily / Zain Supplier record).,مشغّل الاتصالات (مثل سجل مورّد STC أو Mobily أو Zain).
+The tenant undertakes to pay every instalment listed above on its due date for the whole lease term. The landlord confirms handover of the property described above in a condition fit for use and undertakes to keep it so for the same term. Any amount outside this schedule is not due under this lease unless both parties sign a written amendment.,يلتزم المستأجر بدفع كل دفعة مذكورة أعلاه في تاريخ استحقاقها طوال مدة العقد. ويقر المالك بتسليم العقار الموصوف أعلاه صالحًا للاستعمال، ويلتزم ببقائه كذلك طوال المدة نفسها. وأي مبلغ خارج هذا الجدول غير مستحق بموجب هذا العقد إلا بملحق مكتوب يوقّعه الطرفان.
 The tracked facility asset being delivered.,أصل المنشأة المتتبَّع الجاري تسليمه.
 The user the camera access is granted for (not the requester).,المستخدم الذي تُمنح له صلاحية الكاميرا (وليس مقدّم الطلب).
 The user who raised this case. Set automatically.,المستخدم الذي أنشأ هذه الحالة. يُضبط آلياً.
 The user who resolved or closed the case. Must differ from Reported By (segregation of duties).,المستخدم الذي عالج الحالة أو أغلقها. يجب أن يختلف عن المُبلِّغ (الفصل بين المهام).
 The vehicle has been taken out of service.,تم إخراج المركبة من الخدمة.
+The vehicle lines add up to the claimed total,بنود المركبات تساوي إجمالي المطالبة
 "The vehicle's project supervisor, resolved when the alert is raised; drives the Critical-alert notification.",مشرف مشروع المركبة، ويُحدد عند إنشاء التنبيه ويُستخدم لإرسال إشعار التنبيه الحرج.
+The voucher carries an approving officer,الأمر عليه مسؤول معتمد
+"The worker named above is notified of the damage listed and of its estimated replacement value. The worker may object to this assessment in writing to the storekeeper before it is approved. Once approved, the amount shown is recovered through payroll under company policy. Signing below records that this notice was served and read, not that its value is agreed.",تم إشعار العامل المذكور أعلاه بالتلف المبيّن وبقيمة الاستبدال التقديرية. وللعامل الاعتراض على هذا التقييم كتابةً لدى أمين المستودع قبل اعتماده. وبعد الاعتماد يُسترد المبلغ الموضح عبر مسير الرواتب وفق سياسة الشركة. والتوقيع أدناه يثبت تسلّم هذا الإشعار وقراءته، ولا يعني الموافقة على قيمته.
 The worker the scanned pass identifies (registered Employee).,العامل الذي تحدده البطاقة الممسوحة (موظف مسجل).
 The worker's consent signature is required before a cost recovery can be approved.,توقيع موافقة العامل مطلوب قبل اعتماد استرداد التكلفة.
 The worker's signed consent to the recovery. Required before the incident can be approved; KSA Labor Law requires the worker's consent for a wage deduction.,موافقة العامل الموقعة على الاسترداد. مطلوبة قبل اعتماد الحادثة؛ يوجب نظام العمل السعودي موافقة العامل على أي خصم من الأجر.
@@ -4090,6 +4474,7 @@ Theft report {0} cancelled.,أُلغي بلاغ السرقة {0}.
 Theme,السمة
 There is no submitted Purchase Invoice outstanding for {0} under this company. Raise and submit the landlord invoice first — a payment with no invoice behind it settles nothing.,لا توجد فاتورة شراء معتمدة ومستحقة لـ {0} في هذه الشركة. أنشئ فاتورة المؤجر واعتمدها أولًا؛ فلا يمكن تسوية دفعة دون فاتورة مرتبطة بها.
 There is no submitted Purchase Invoice outstanding for {0} under this company. Raise and submit the supplier invoice first — a payment with no invoice behind it settles nothing.,لا توجد فاتورة شراء معتمدة ومستحقة للمورد {0} في هذه الشركة. أنشئ فاتورة المورد واعتمدها أولًا؛ فلا تسدد الدفعة شيئًا ما لم ترتبط بفاتورة.
+There is nothing to reconcile on this voucher,ما في شيء يُطابق على هذا السند
 This Custody Issue has no issued-to Employee; nothing to hand over.,لم يُحدد موظف مستلم في صرف العهدة هذا، لذلك لا يوجد ما يُسلّم.
 This Maintenance Work Order is already Completed.,أمر عمل الصيانة هذا مكتمل بالفعل.
 This arrival manifest has not been fully reconciled — workers are still unhoused after the expected date,لم تتم مطابقة كشف الوصول بالكامل؛ فما زال بعض العمال دون سكن بعد التاريخ المتوقع.
@@ -4101,11 +4486,12 @@ This building has no rooms yet.,لا توجد غرف في هذا المبنى ب
 This building has rooms but every bed is occupied — use Over-capacity,يحتوي هذا المبنى على غرف لكن جميع الأسرّة مشغولة — استخدم تجاوز السعة
 "This building's own address. If empty, the Accommodation Site's address is shown.",عنوانُ هذا المبنى الخاصّ. إن تُرِك فارغًا، يُعرَض عنوانُ موقع السكن.
 This bus has already left your stop. Ask for a pickup instead of confirming.,غادرت هذه الحافلة محطتك. اطلب رحلة بدل تأكيد الصعود.
-"This certificate covers movement-domain clearance only (vehicle, fuel chip, and custody). HR end-of-service and visa clearance are out of scope.",تغطي هذه الشهادة إخلاء طرف نطاق الحركة فقط (المركبة، شريحة الوقود، والعهدة). إخلاء طرف نهاية الخدمة والتأشيرة لدى الموارد البشرية خارج النطاق.
+"This certificate records that the resident named above left the bed shown on the checkout date. It is a final clearance only where the box above reads Cleared: all housing custody accounted for and any amount due settled or raised on payroll. Where it reads Not Cleared, the open items listed remain on the resident's account and this paper does not release them.",تشهد هذه الوثيقة بأن الساكن المذكور أعلاه غادر السرير الموضح في تاريخ المغادرة. ولا تُعد إخلاء طرف نهائيًا إلا إذا كان المربع أعلاه يقرأ «تم إخلاء الطرف»: كل عهدة السكن مسلَّمة وأي مبلغ مستحق سُدّد أو سُجّل على الراتب. وإذا كان يقرأ «لم يُخلَ الطرف» فالبنود المفتوحة المذكورة تبقى على حساب الساكن ولا تبرئه هذه الورقة منها.
 This driver had no live link.,لا يوجد رابط فعّال لهذا السائق.
-This driver has been cleared on all movement-domain items listed below.,تم إخلاء طرف هذا السائق من جميع بنود نطاق الحركة المدرجة أدناه.
+"This driver is not cleared. The items marked Faulty above are still open against him, and his final settlement is held until each one is closed and this certificate is re-issued.",هذا السائق ما أُخلي طرفه. البنود المؤشر عليها بخلل أعلاه ما زالت عليه، ويُوقف مستحقه النهائي حتى تُقفل كل واحدة وتُصدر هذه الشهادة من جديد.
 This ends the current custody and retires the SIM. The SIM and its history are kept; the action can be undone by cancelling the custody record.,ينهي هذا الإجراء العهدة الحالية ويُخرج الشريحة من الخدمة. تبقى الشريحة وسجلها محفوظين، ويمكن التراجع بإلغاء سجل العهدة.
 This fuel request has been pending approval for too long,ظل طلب الوقود هذا بانتظار الاعتماد لفترة طويلة جدًا
+"This is a temporary voucher. The vehicle goes back to its standing quota on the revert date shown above, and any litre drawn after that date is an exception.",هذا أمر مؤقت. ترجع المركبة لحصتها الثابتة في تاريخ الرجوع المبين أعلاه، وأي لتر يُسحب بعد هذا التاريخ يُعد استثناء.
 "This license is submitted. Amend it (Cancel, then Amend) with the new expiry date to renew.",هذه الرخصة معتمدة. لتجديدها، ألغها ثم عدلها وأدخل تاريخ الانتهاء الجديد.
 This page is for route supervisors.,هذه الصفحة مخصصة لمشرفي المسارات.
 This page is for the fleet team.,هذه الصفحة مخصّصة لفريق الأسطول.
@@ -4115,12 +4501,12 @@ This payment request is not finance-approved yet; it cannot be paid.,طلب ال
 This plan has already been {0}.,تم {0} هذه الخطة مسبقاً.
 This portal access token is invalid or inactive.,رمز الوصول إلى البوابة غير صالح أو غير نشط.
 This portal is for route supervisors.,هذه البوابة مخصصة لمشرفي المسارات.
+This poster is out of service. Speak to your facility supervisor instead.,هذا الملصق غير مفعّل. راجع مشرف المنشأة مباشرة.
 This push subscription belongs to another driver.,اشتراك الإشعارات هذا يخص سائقاً آخر.
 This push subscription endpoint is not allowed.,نقطة اشتراك الإشعارات هذه غير مسموح بها.
 This queue contains the maintenance work orders you are allowed to see.,تحتوي هذه القائمة على أوامر عمل الصيانة المسموح لك برؤيتها.
 This receipt carries no item lines,لا توجد أصناف في هذا الاستلام
 This recovery reaches the Operations threshold and can only be approved by Operations-tier authority (Fleet Manager).,يبلغ هذا الاسترداد حد العمليات، ولا يعتمده إلا صاحب صلاحية على مستوى العمليات (مدير الأسطول).
-This report records the safety tasks executed during the round and their outcomes.,يوثّق هذا التقرير مهام السلامة المنفذة خلال الجولة ونتائجها.
 This request is not available or does not belong to you.,هذا الطلب غير متاح أو لا يخصك.
 "This request of {0} L exceeds the {1} L left on Fuel Quota {2} ({3} of {4} L already consumed). Reduce the request, or raise a Top-up request to dispense more fuel this period.",كمية الطلب {0} لتر تتجاوز المتبقي في حصة الوقود {2} وهو {1} لتر (استُهلك {3} من {4} لتر). قلل الكمية أو أنشئ طلب تعبئة إضافية لصرف مزيد من الوقود خلال هذه الفترة.
 This resident has custody items. Opening the full Checkout form to clear custody.,لدى هذا الساكن أصناف عهدة. سيتم فتح نموذج المغادرة الكامل لإخلاء العهدة.
@@ -4131,19 +4517,19 @@ This route plan is not assigned to you.,خطة المسار هذه غير مُس
 This session,هذه الجلسة
 This site has no Apex demo data to remove.,لا توجد في هذا الموقع بيانات تجريبية لأبكس لإزالتها.
 "This site is configured to raise payments as {0}, but this action can only create a {1} allocated against the supplier's invoice. Raise this payment from a {2}, which builds the configured target, or set Target Payment DocType to {1} in Payment Routing Settings.",هذا الموقع مضبوط على إصدار المدفوعات كـ {0}، وهذا الإجراء لا ينشئ إلا {1} مخصّصة على فاتورة المورّد. أصدر هذه الدفعة من {2} الذي يبني النوع المضبوط، أو اضبط نوع مستند الدفع على {1} في إعدادات توجيه المدفوعات.
-This statement reconciles the rental office claim against accrued rental days. It does not post to the general ledger; any payment is raised through a separate Salis Payment Request.,يطابق هذا الكشف مطالبة مكتب التأجير مع أيام الإيجار المستحقة. ولا يقيّد في دفتر الأستاذ العام؛ وأي دفع يُنشأ عبر طلب دفع مستقل في ساليس.
-This statement records a fleet incident (accident or theft) against the vehicle. It does not post to the general ledger; any recovery or write-off is handled separately.,يسجل هذا البيان حادث أسطول (اصطدام أو سرقة) على المركبة. لا يُرحّل إلى دفتر الأستاذ العام؛ ويُعالَج أي استرداد أو شطب على حدة.
 This temporary stay is ending soon — please arrange check-out,هذه الإقامة المؤقتة على وشك الانتهاء — يُرجى ترتيب المغادرة
 This temporary stay is overdue for check-out — the worker is still checked in,تجاوزت هذه الإقامة المؤقتة موعد المغادرة، وما زال العامل مقيمًا.
 This temporary top-up is past its revert due date ({0}) and has not been reverted.,تجاوزت هذه التعبئة الإضافية المؤقتة موعد عودتها إلى الوضع السابق ({0})، ولم تُعد بعد.
 This transfer can no longer be reversed: the resident is no longer in Bed {0}.,لم يعد بالإمكان التراجع عن هذا النقل: الساكن لم يعد في السرير {0}.
 This transfer needs an active (checked-in) assignment to move.,يتطلب هذا النقل تسكينًا نشطًا لم تنتهِ إقامته.
+This transfer note carries no item lines — nothing has moved between the two stores,هذا السند لا يحمل أي بند — لم ينتقل شيء بين المستودعين
 This transfer was raised from Bed {0} but the resident is now in Bed {1}.,أُنشئ هذا النقل من السرير {0} لكن الساكن الآن في السرير {1}.
 This trip is already finished. Boarding can no longer be confirmed.,انتهت هذه الرحلة. لم يعد بالإمكان تأكيد الصعود.
 This vehicle has no open stop to release.,لا يوجد إيقاف مفتوح لهذه المركبة لإعادتها إلى الخدمة.
 This vehicle has no open workshop stop to return.,لا يوجد لهذه المركبة إيقاف ورشة مفتوح لإعادتها.
 This vehicle is under maintenance and should not be dispatched.,هذه المركبة تحت الصيانة ولا يجوز تسييرها.
-This voucher reconciles the claimed fuel against consumption recorded in the Fuel Consumption Ledger. It does not post to the general ledger.,يسوّي هذا السند الوقود المطالب به مع الاستهلاك المسجّل في سجل استهلاك الوقود. ولا يُرحّل أي قيد إلى دفتر الأستاذ العام.
+"This voucher authorises the dispensing party to give the quantity written above to this vehicle only, on the chip or the account named on it, and no more. Anything dispensed beyond it is not payable by the company.",هذا الأمر يصرّح لجهة الصرف بتعبئة الكمية المكتوبة أعلاه لهذه المركبة فقط، على الشريحة أو الحساب المذكور فيه، وما زاد عن ذلك ما تدفعه الشركة.
+This voucher is not tied to a monthly quota,هذا الأمر غير مربوط بحصة شهرية
 This will clear and rebuild the entire payment schedule. Continue?,سيؤدي هذا إلى حذف جدول الدفعات وإعادة بنائه بالكامل. هل تريد المتابعة؟
 This worker already holds an active bed.,هذا العامل يشغل بالفعل سريراً نشطاً.
 This worker does not hold: {0},هذا العامل لا يحمل: {0}
@@ -4205,7 +4591,9 @@ Total Movements Recorded,إجمالي الحركات المسجلة
 Total Occupancy %,إجمالي نسبة الإشغال (%)
 Total Occupancy Percent,نسبة الإشغال
 Total Procurement Cost (SAR),إجمالي تكلفة المشتريات (ريال)
+Total Quantity,إجمالي الكمية
 Total Recovered,إجمالي المسترد
+Total Rented Days,إجمالي أيام الإيجار
 Total Rooms,إجمالي الغرف
 Total SIMs,إجمالي الشرائح
 Total Scheduled Amount (SAR),إجمالي المبلغ المجدول (ريال)
@@ -4269,9 +4657,11 @@ Trip Execution,تنفيذ الرحلة
 Trip Fulfilment Ledger,سجل تنفيذ الرحلات
 Trip Fulfilment Ledger is a posted audit record and cannot be edited.,سجل تنفيذ الرحلة هو سجل تدقيق مرحَّل ولا يمكن تعديله.
 Trip Fulfilment Over Time,تنفيذ الرحلات بمرور الوقت
+Trip Identification,بيانات الرحلة
 Trip Purpose,غرض الرحلة
 Trip Start Log,سجل بدء الرحلة
 Trip Start Register,سجل بدء الرحلات
+Trip Status,حالة الرحلة
 Trip Stop Progress,تقدم محطة الرحلة
 Trip Subject,موضوع الرحلة
 Trip boarding ledger. One immutable row per worker's final boarding outcome on a finalized Dispatch Trip. Maintained automatically by the system; never edited manually.,سجل صعود الرحلة. صف ثابت لكل عامل يوثق نتيجة صعوده النهائية في رحلة تسيير مكتملة. يديره النظام تلقائيًا ولا يُعدل يدويًا.
@@ -4300,6 +4690,7 @@ URL,الرابط
 Unassigned,غير مُسنَد
 Unassigned Floor,طابق غير محدد
 Unassigned Only,غير المسندة فقط
+Under Contract,بموجب العقد
 Under Investigation,قيد التحقيق
 Under Maintenance,تحت الصيانة
 Under Renewal,تحت التجديد
@@ -4353,6 +4744,7 @@ Utility Bill Entry,تسجيل فاتورة الخدمات العامة
 Utility Bills Under Review,فواتير الخدمات تحت المراجعة
 Utility Bills by Status,فواتير الخدمات حسب الحالة
 Utility Cost Share (%),نسبة تحمل تكاليف المرافق (%)
+Utility Cost Share Borne by Tenant,نسبة الخدمات على المستأجر
 Utility Cost Share must be between 0 and 100.,يجب أن تكون نسبة تحمل تكاليف المرافق بين 0 و 100.
 Utility Type,نوع المرفق الخدمي
 Utility Variance,تقرير انحراف استهلاك الخدمات
@@ -4364,6 +4756,7 @@ VAPID Subject,موضوع VAPID
 "VAPID private key. Secret — stored encrypted, never exposed to the client.",مفتاح VAPID الخاص. سري — يُخزَّن مشفّرًا ولا يُكشف للعميل أبدًا.
 VAPID public key (base64url). Handed to the browser to subscribe; safe to expose.,مفتاح VAPID العام (base64url). يُرسل إلى المتصفح للاشتراك ويمكن عرضه بأمان.
 VAT,ضريبة القيمة المضافة
+VAT / Tax Registration No.,الرقم الضريبي
 Vacant Capacity Cost Trend (Monthly),اتجاه تكلفة السعة الشاغرة (شهري)
 Valid,ساري
 Valid From,صالح من
@@ -4374,6 +4767,7 @@ Validity,الصلاحية
 Validity Period,فترة الصلاحية
 "Validity state of the license, flagging documents that are active, approaching expiry, already expired, in renewal, or revoked so compliance gaps are visible.",حالة سريان الرخصة، تشير إلى الوثائق السارية أو المقتربة من انتهاء الصلاحية أو المنتهية بالفعل أو قيد التجديد أو الملغاة ليتسنى إبراز فجوات الامتثال.
 Value,القيمة
+Value Over Twelve Months,القيمة على اثني عشر شهرًا
 Value in hands,القيمة في العهدة
 Variance,الفرق
 Variance (L),الفرق (لتر)
@@ -4390,10 +4784,12 @@ Vehicle Activations,تفعيلات المركبات
 Vehicle Assignment,إسناد مركبة
 Vehicle Assignment Register,سجل إسناد المركبات
 Vehicle Category,فئة المركبة
+Vehicle Code,رمز المركبة
 Vehicle Compliance Register,سجل امتثال المركبات
 Vehicle Custody,عهدة المركبة
 Vehicle Damage,أضرار مركبة
 Vehicle Damage Write-Off,شطب أضرار مركبة
+Vehicle Damage Write-Off Notice,إشعار شطب تلفيات مركبة
 Vehicle Damage Write-Off cases at or above this estimated cost (SAR) require Operations-tier authority; lower-value cases require at least Regional-tier.,حالات شطب تلف المركبات التي تبلغ هذه التكلفة التقديرية (ريال) أو تتجاوزها تتطلب صلاحية مستوى العمليات؛ والحالات الأقل قيمة تتطلب المستوى الإقليمي على الأقل.
 Vehicle Handover,تسليم مركبة
 Vehicle Handover Checklist Template,قالب قائمة فحص تسليم المركبة
@@ -4401,10 +4797,15 @@ Vehicle Handover Checklist Template Item,بند فحص التسليم
 Vehicle Handover Item,بند تسليم المركبة
 Vehicle Handover Receipt,إيصال تسليم المركبة
 Vehicle Handover Register,سجل تسليم المركبات
+Vehicle Held For,المركبة باسم
+Vehicle Identification,بيانات المركبة
 Vehicle Incident,واقعة مركبة
 Vehicle Incident Statement,بيان بلاغ مركبة
+Vehicle Owner of Record,مالك المركبة المسجّل
 Vehicle Returned,تم إرجاع المركبة
+Vehicle Status,حالة المركبة
 Vehicle Suspension,إيقاف مركبة
+Vehicle Under Assessment,المركبة تحت التقييم
 Vehicle Utilisation,استخدام المركبات
 Vehicle Utilisation Snapshot,لقطة استخدام المركبة
 Vehicle and Driver,المركبة والسائق
@@ -4431,11 +4832,13 @@ Vehicle {0} was just assigned by {1}. Please review.,تم إسناد المرك�
 Vehicle {0} was not re-linked on cancel; it is no longer free.,لم يُعد ربط المركبة {0} عند الإلغاء لأنها لم تعد متاحة.
 Vehicle: {0},المركبة: {0}
 Vehicles,المركبات
+Vehicles Charged in This Period,المركبات المحتسبة في هذه الفترة
 Vehicles In Service,المركبات في الخدمة
 Vehicles Stopped,المركبات الموقوفة
 Vehicles Tracked,المركبات المتتبَّعة
 Vehicles Under Maintenance,المركبات تحت الصيانة
 Vehicles by Status,المركبات حسب الحالة
+Vehicles on Rent,المركبات على الإيجار
 Verdict,النتيجة
 Verified by Client,تم التحقق من قِبل العميل
 Version,الإصدار
@@ -4449,7 +4852,9 @@ Violation,مخالفة
 Virtual over-capacity bed created by the Arrivals Desk when a room is full but building headroom still allows another worker.,سرير افتراضي يتجاوز السعة يُنشئه مكتب الوصول عندما تكون الغرفة ممتلئة بينما لا تزال سعة المبنى تتسع لعامل آخر.
 Visit,الزيارة
 Voucher Detail No,رقم تفصيل القسيمة
+Voucher Identification,بيانات الأمر
 Voucher No,رقم القسيمة
+Voucher Status,حالة الأمر
 Voucher Type,نوع القسيمة
 Wait Count,عدد مرات الانتظار
 Wait Requests,طلبات الانتظار
@@ -4477,6 +4882,10 @@ Weekly,أسبوعي
 Weekly Custody Digest,ملخص العهدة الأسبوعي
 Weekly custody summary for your building(s):,ملخص العهدة الأسبوعي لمبانيك:
 "Weekly on-site safety field inspection. On submit, each actionable finding (one with an Issue Type and Room, not yet resolved) automatically spawns a Maintenance Request, surfaced in the Generated Maintenance Requests table. (Deprecated: superseded by Safety Round + the Safety Open Findings report.)",تفتيش سلامة ميداني أسبوعي في الموقع. عند الاعتماد تنشئ كل ملاحظة قابلة للتنفيذ (لها نوع عطل وغرفة ولم تُعالج بعد) طلب صيانة آلياً، ويظهر في جدول طلبات الصيانة المولّدة. (متوقف: حل محله جولة السلامة وتقرير ملاحظات السلامة المفتوحة.)
+What Happened,ماذا حصل
+What He Was Holding,ما كان بعهدته
+What Is Being Claimed,المطالب به
+What This Voucher Authorises,ما يصرّح به هذا الأمر
 What do you need help with?,ما الذي تحتاج المساعدة فيه؟
 What happened?,ماذا حدث؟
 WhatsApp,واتساب
@@ -4500,6 +4909,7 @@ When this device last refreshed or confirmed its subscription.,وقت آخر ت�
 "When unchecked, the worker's personal Masar link stops resolving.",عند إلغاء التفعيل، يتوقف رابط مسار العامل الشخصي عن العمل.
 "Where inside or around the accommodation the reported issue is located, helping staff locate the problem and group recurring faults by area.",موقع المشكلة المُبلّغ عنها داخل السكن أو حوله، يساعد الموظفين على تحديد موضع المشكلة وتجميع الأعطال المتكررة حسب المنطقة.
 Where is the issue?,أين المشكلة؟
+Where the Damage Came From,مصدر التلف
 Which lifecycle event on the source document raises the deduction.,أي حدث في دورة حياة المستند المصدر يُنشئ الخصم.
 "Which part of the accommodation this cleaning evidence photo covers, so before-and-after proof can be checked per area during cleaning audits.",الجزء من السكن الذي تغطيه صورة دليل التنظيف هذه، ليتسنى فحص إثبات ما قبل وما بعد لكل منطقة أثناء تدقيقات التنظيف.
 "Which subject this access token grants entry for: a housed/transported Worker (Masar) or a fleet Driver (barcode entry, no Frappe User).",الفئة التي يمنحها رمز الدخول صلاحية الوصول: عامل سكن أو نقل عبر مسار، أو سائق أسطول يدخل بالباركود دون حساب مستخدم في Frappe.
@@ -4515,11 +4925,14 @@ Window ends in {0}d,تنتهي المهلة خلال {0} يوم
 Window expired {0}d ago,انتهت المهلة منذ {0} يوم
 Within Days,خلال (أيام)
 Within SLA,ضمن اتفاقية مستوى الخدمة
+Within the room's planned capacity,ضمن الطاقة المخططة للغرفة
 Without Idle Report,بدون تقرير خمول
 Witness,الشاهد
+Work Assigned To,المكلَّف بالعمل
 Work Description,وصف العمل
 Work Order marked Completed.,تغيرت حالة أمر العمل إلى مكتمل.
 Work Order marked In Progress.,تغيرت حالة أمر العمل إلى «قيد التنفيذ».
+Work Ordered By,جهة إصدار الأمر
 Work Shift,وردية عمل
 Work Shift Day,يوم وردية العمل
 Work started — status set to In Progress.,بدأ العمل — الحالة: قيد التنفيذ.
@@ -4613,6 +5026,7 @@ client,عميل
 confirmed,مؤكَّد
 currency,العملة
 damages,الأضرار
+days,يوم
 delivery,تسليم
 draft,مسودة
 driver,السائق
@@ -4635,8 +5049,10 @@ has ended,انتهى
 has expired,انتهت صلاحيته
 held by,بحوزة
 incidents,البلاغات
+km,كم
 matched,مطابق
 mixed,مختلط
+months,شهر
 n/a,غير متاح
 none,لا شيء
 normalized,موحّد
@@ -4676,10 +5092,13 @@ workshop status,حالة الورشة
 {0} active,{0} نشط
 {0} alerts,{0} تنبيه
 {0} applied,تم تنفيذ {0}
+{0} article line(s) marked Damaged or Lost,{0} سطر مؤشر كتالف أو مفقود
+{0} article line(s) still outstanding,{0} سطر ما زال متبقيًا
 {0} assigned,تم إسناد {0}
 {0} awaiting approval,{0} بانتظار الاعتماد
 {0} cannot be negative.,لا يمكن أن يكون {0} سالبًا.
 {0} check item(s) loaded from template {1},تم تحميل {0} بند فحص من القالب {1}
+"{0} custody line(s) came back short, lost or damaged.",{0} سطر عهدة رجع ناقصًا أو مفقودًا أو تالفًا.
 {0} day(s),{0} يوم
 {0} days,{0} أيام
 "{0} does not grant {1} the Report permission, so a user holding only {1} sees this report and gets a PermissionError on opening it. Either grant report on {0} to {1} in a permlevel-0 row that is not if_owner, or remove {1} from this report's Roles.",{0} لا يمنح الدور {1} صلاحية التقرير، لذلك أي مستخدم لا يحمل سوى {1} يرى هذا التقرير ويظهر له خطأ صلاحيات عند فتحه. إما أن تمنح الدور {1} صلاحية التقرير على {0} في صف بمستوى صلاحية صفر غير مقيّد بالمالك، وإما أن تحذف {1} من أدوار هذا التقرير.

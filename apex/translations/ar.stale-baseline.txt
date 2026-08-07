@@ -10,7 +10,6 @@ AR
 Actor
 After
 Apex 2.0.4 — Guided first-time setup, ready accommodation supplies, and preserved Item Group organization
-Approval Status
 Approved On
 At
 Audience
@@ -40,7 +39,6 @@ Could not update bed occupancy. The assignment was not submitted.
 Could not verify the Expense Request Afmco DocType. Please try again.
 Create Records
 Day
-Deduction
 Detail
 EN
 Effective To
@@ -59,7 +57,6 @@ F8
 F9
 Field
 Finding Description
-Fleet Supervisor
 Fleet Supervisor Dashboard (Dashboard)
 GATE
 Held
@@ -84,7 +81,6 @@ POD
 Party
 Party Type
 Payload
-Payroll Date
 Pricing
 Provenance
 Record the receiving driver and vehicle condition with the guided handover form.

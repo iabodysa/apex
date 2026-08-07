@@ -6,7 +6,16 @@ EXCLUDED_ROLES = {"All", "Guest", "Employee", "Administrator", "Desk User"}
 
 
 def seed_workspace_roles():
-    """Restricts each roleless public Workspace to the roles that can read its linked doctypes."""
+    """Restricts each roleless public Workspace to the roles that can read its linked doctypes.
+
+    Runs from ``after_install`` as well as ``after_migrate``, and at install time a
+    Workspace can legitimately reference a Number Card that does not exist yet:
+    ``sync.IMPORTABLE_DOCTYPES`` carries no ``number_card`` entry, so an app's cards
+    are created by ``sync_dashboards`` during migrate, which has not run yet. Saving
+    the record would then fail link validation on rows this function never touched
+    and abort the whole install, so links are skipped the way ``import_file`` skips
+    them for the same reason.
+    """
     for ws_name in frappe.get_all("Workspace", filters={"public": 1}, pluck="name"):
         if ws_name in ALWAYS_PUBLIC:
             continue
@@ -49,4 +58,5 @@ def seed_workspace_roles():
         for role in sorted(roles):
             ws.append("roles", {"role": role})
         ws.flags.ignore_permissions = True
+        ws.flags.ignore_links = True
         ws.save()
