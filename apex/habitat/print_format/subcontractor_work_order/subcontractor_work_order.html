@@ -81,6 +81,18 @@
 
   {{ ax.note_block(doc.work_scope, _("Work Scope Ordered")) }}
 
+  {%- if doc.service_items %}
+  {{ ax.line_table(
+      [{"ar": _("Description"), "en": "Description", "key": "description"},
+       {"ar": _("Quantity"), "en": "Qty", "key": "qty", "num": True, "width": "12%", "fmt": "Float"},
+       {"ar": _("Unit Rate"), "en": "Unit rate", "key": "rate", "num": True, "width": "18%", "fmt": "Currency"},
+       {"ar": _("Amount"), "en": "Amount", "key": "amount", "num": True, "width": "18%", "fmt": "Currency"}],
+      doc.service_items,
+      totals=[frappe.format_value(doc.service_cost, {"fieldtype": "Currency"})]) }}
+  {%- else %}
+  {{ ax.note_block(_("Flat call-off rate against the contract; this order carries no priced lines.")) }}
+  {%- endif %}
+
   {{ ax.field_grid([
       [{"ar": _("VAT Rate"), "en": "VAT rate", "value": doc.tax_rate, "fmt": "Percent"},
        {"ar": _("VAT on the Amount Payable"), "en": "VAT payable", "value": doc.tax_amount, "fmt": "Currency"}],

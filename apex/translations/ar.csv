@@ -1808,6 +1808,7 @@ Fixed Asset (Capex),أصل ثابت (مصروفات رأسمالية)
 Fixed monthly salary in SAR. No car and no allowances. Paid via a native ERPNext Payment Entry against this freelance as a party. Pay is personal so only Finance and System Manager can see this column.,أجر شهري ثابت بالريال السعودي، بلا سيارة أو بدلات. يُدفع عبر مستند Payment Entry القياسي في ERPNext لهذا المستقل بصفته طرفًا. الأجر بيانات شخصية، لذلك لا يظهر هذا العمود إلا لمدير المالية ومدير النظام.
 Flags a building that receives externally-purchased goods before they are handed over into custody.,يحدّد المبنى الذي يستلم البضائع المشتراة خارجيًا قبل تسليمها إلى العهدة.
 Flags that this policy must be reviewed by Legal/HR against KSA Labor Law (wage-deduction articles) before activation. Kept ON by design as a standing reminder.,يشير إلى وجوب مراجعة هذه السياسة من قبل الشؤون القانونية/الموارد البشرية وفق نظام العمل السعودي (مواد خصم الأجور) قبل التفعيل. يبقى مفعّلًا بالتصميم كتذكير دائم.
+Flat call-off rate against the contract; this order carries no priced lines.,سعر مقطوع للزيارة بموجب العقد؛ هذا الأمر لا يحمل بنودًا مسعّرة.
 Fleet,الأسطول
 Fleet (Salis),الأسطول (ساليس)
 Fleet Control,مركز التحكم بالأسطول
@@ -2351,6 +2352,7 @@ Leases by Status,عقود الإيجار حسب الحالة
 Leasing and Utilities,الإيجار والمرافق
 Leave,إجازة
 Leave blank for permanent,اتركه فارغاً للدائم
+Leave empty for a flat call-off; any line here becomes the service cost.,اتركه فارغًا للزيارة بسعر مقطوع؛ وأي بند هنا يصبح هو تكلفة الخدمة.
 Leave empty for building-level stock.,اتركه فارغاً إذا كان المخزون على مستوى المبنى.
 Ledger Accrued Total (SAR),إجمالي الاستحقاق من السجل (ريال)
 Ledger Entries,قيود السجل
@@ -3281,6 +3283,7 @@ Previous Repairs,الإصلاحات السابقة
 Previous Repairs Confirmed,تم تأكيد الإصلاحات السابقة
 Previous Status,الحالة السابقة
 Previous Vehicle Status,حالة المركبة السابقة
+Priced Lines,البنود المسعّرة
 Pricing,التسعير
 Print arrival cards ({0}),طباعة بطاقات الوصول ({0})
 Print handover,طباعة سند التسليم
@@ -4094,6 +4097,7 @@ Service Item,صنف الخدمة
 Service Item Billed Against,صنف الخدمة المفوتر عليه
 Service Level,مستوى الخدمة
 Service Line,خط الخدمة
+Service Lines,بنود الخدمة
 Service Order marked Completed.,تم تحديد حالة أمر الخدمة كـ 'مكتمل'.
 Service Order marked In Progress.,تم تحديد حالة أمر الخدمة كـ 'قيد التنفيذ'.
 Service Order marked Missed.,تم تحديد حالة أمر الخدمة كـ 'فائت'.
@@ -4367,6 +4371,7 @@ Subcontractor Building Coverage,تغطية مباني مقاول الباطن
 Subcontractor Dispatched,تم تكليف مقاول الباطن
 Subcontractor Service Contract,عقد خدمة مقاول الباطن
 Subcontractor Service Order,أمر خدمة مقاول الباطن
+Subcontractor Service Order Item,بند أمر خدمة مقاول
 Subcontractor Service Orders by Status,أوامر خدمة مقاول الباطن حسب الحالة
 Subcontractors,مقاولو الباطن
 Subject,الموضوع
@@ -4908,6 +4913,7 @@ Unit Cost,تكلفة الوحدة
 Unit Cost (SAR),تكلفة الوحدة (ريال)
 Unit Price per Litre,سعر اللتر
 Unit Price per Litre (SAR),سعر اللتر (ريال)
+Unit Rate,سعر الوحدة
 Unit Value (SAR),قيمة الوحدة (ريال)
 Unit Value at Issue,قيمة الوحدة عند الصرف
 Unit of Measure,وحدة القياس

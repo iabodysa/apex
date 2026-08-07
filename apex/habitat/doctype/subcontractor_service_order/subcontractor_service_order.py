@@ -18,7 +18,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, nowdate
+from frappe.utils import cint, flt, nowdate
 
 from apex.apex_core.utils.vat import apply_vat
 
@@ -33,8 +33,28 @@ def before_save(doc, method=None):
         from apex.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
         doc.company = get_default_company()
 
+    _price_from_lines(doc)
     apply_vat(doc, doc.service_cost)
     _stamp_confirmation(doc)
+
+
+def _price_from_lines(doc):
+    """Amount each line, and let the lines set the service cost when there are any.
+
+    An order with no lines is a flat call-off against the contract rate, and
+    ``service_cost`` stays what Finance typed — that permlevel-1 grant is the field
+    overlay this controller's own header describes, and deriving unconditionally
+    would take it away. The moment a line exists the total is arithmetic, not an
+    opinion, so the typed figure gives way to it.
+    """
+    rows = doc.get("service_items") or []
+    if not rows:
+        return
+    total = 0.0
+    for row in rows:
+        row.amount = flt(flt(row.qty) * flt(row.rate), doc.precision("service_cost"))
+        total += row.amount
+    doc.service_cost = flt(total, doc.precision("service_cost"))
 
 
 def _stamp_confirmation(doc):

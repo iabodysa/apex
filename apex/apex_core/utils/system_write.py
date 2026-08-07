@@ -2,7 +2,7 @@
 import frappe
 
 
-def system_insert(doc, ignore_if_duplicate=False, ignore_mandatory=False, ignore_links=False):
+def system_insert(doc, ignore_if_duplicate=False, ignore_mandatory=None, ignore_links=None):
     """Insert a document the system itself owns, past the acting user's permissions.
 
     The bypass lives behind this NAME so a reader of the call site sees what is being
@@ -11,6 +11,12 @@ def system_insert(doc, ignore_if_duplicate=False, ignore_mandatory=False, ignore
     to make: a seeder, an installer, a scheduled job, a controller acting for the system
     rather than for whoever happened to trigger it. A write that should be refused when
     the user lacks permission must NOT come through here.
+
+    ``ignore_mandatory`` and ``ignore_links`` default to None, not False, because
+    ``Document.insert`` reads None as "keep whatever flag the caller already set"
+    (``frappe/model/document.py:285-292``). Passing False unconditionally would silently
+    destroy a ``doc.flags.ignore_links = True`` set before the call — a wrapper is only
+    worth having if it is never worse than the primitive it hides.
     """
     return doc.insert(
         ignore_permissions=True,

@@ -21,6 +21,8 @@
   "confirmed_on",
   "completion_photo",
   "subcontractor_service_order_sec_cost",
+  "subcontractor_service_order_sec_lines",
+  "service_items",
   "service_cost",
   "subcontractor_service_order_cost_col",
   "cost_center",
@@ -278,6 +280,18 @@
    "fieldtype": "Small Text",
    "label": "Work Scope",
    "description": "What the contractor is being asked to do; visit_notes is written after the visit."
+  },
+  {
+   "fieldname": "subcontractor_service_order_sec_lines",
+   "fieldtype": "Section Break",
+   "label": "Priced Lines"
+  },
+  {
+   "fieldname": "service_items",
+   "fieldtype": "Table",
+   "label": "Service Lines",
+   "options": "Subcontractor Service Order Item",
+   "description": "Leave empty for a flat call-off; any line here becomes the service cost."
   }
  ],
  "is_submittable": 1,
@@ -298,7 +312,7 @@
    "link_fieldname": "subcontractor_service_order"
   }
  ],
- "modified": "2026-08-08 02:20:00.000000",
+ "modified": "2026-08-08 02:30:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Subcontractor Service Order",
