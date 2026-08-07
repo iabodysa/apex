@@ -137,15 +137,21 @@ Activation Date,تاريخ التفعيل
 Active,نشط
 Against Issue,مقابل صرف
 Aged Over 60 Days,أقدم من 60 يوماً
+Assets,الأصول
 Average Cost per Litre,متوسط تكلفة اللتر
+Awaiting Acknowledgement,بانتظار الإقرار
+Bills,الفواتير
 Blocked by Outstanding Items,موقوف بسبب مستحقات قائمة
+Boarding Events Created,أحداث الصعود المُنشأة
 Buildings,المباني
 Chargeable,قابل للتحميل
 Claims,المطالبات
 Cleaning Compliance Today %,نسبة الالتزام بالنظافة اليوم %
+Cleaning Days,أيام التنظيف
 Contracts,العقود
 Cost Centres,مراكز التكلفة
 Currently Held,بحوزته حالياً
+Custody Not Cleared,عهدة غير مُخلاة
 Damaged or Lost,تالف أو مفقود
 Damaged or Lost Only,التالف أو المفقود فقط
 Days Held,أيام الحيازة
@@ -154,7 +160,11 @@ Days Waiting,أيام الانتظار
 Employees,الموظفون
 Expected Return,الإرجاع المتوقّع
 Expiring in 30 Days,تنتهي خلال 30 يوماً
+Expiry From Date,تاريخ الانتهاء من
+Expiry To Date,تاريخ الانتهاء إلى
+Failed Scans,عمليات مسح فاشلة
 High or Critical,عالية أو حرجة
+Highest Variance %,أعلى نسبة انحراف %
 Idle Share,نسبة التعطّل
 Include Ended Assignments,تضمين الإسنادات المنتهية
 Include Settled Requests,تضمين الطلبات المنتهية
@@ -164,16 +174,19 @@ Leases Watched,العقود المتابَعة
 Missed Over 7 Days,فائتة أكثر من 7 أيام
 Missed Tasks,المهام الفائتة
 Monthly Rent at Risk,الإيجار الشهري المعرّض
+Movements,الحركات
 Not Acknowledged,بلا توقيع
 Open Findings,الملاحظات المفتوحة
 Open Over 30 Days,مفتوحة أكثر من 30 يوماً
 Open Over 7 Days,مفتوحة أكثر من 7 أيام
 Open Recoveries,الاستردادات المفتوحة
 Open Requests,الطلبات المفتوحة
+Over 7 Days,أكثر من 7 أيام
 Over 90 Days,أكثر من 90 يوماً
 Overdue Only,المتأخرة فقط
 Past SLA,تجاوز المدة المتفق عليها
 Payments,المدفوعات
+Pending Checkouts,مغادرات معلقة
 Plans,الخطط
 Positions,المواضع
 Recovered Share,نسبة المسترد
@@ -188,10 +201,14 @@ Returns,عمليات الإرجاع
 Review the Housing Assignment List,راجع قائمة التسكين
 Rows,الصفوف
 Safety Tasks Done This Week %,نسبة مهام السلامة المنجزة هذا الأسبوع %
+Scans,عمليات المسح
+Settlements,التسويات
 SIMs Covered,الشرائح المشمولة
 SIMs Held,الشرائح المحتفَظ بها
 Settled Share,نسبة المسوّى
 Still Held,لا تزال بالحيازة
+Suppliers,الموردون
+Suspended or Lost,موقوفة أو مفقودة
 Taken,مُستلَم
 Transport Requests Served %,نسبة طلبات النقل المخدومة %
 Unassigned Only,غير المسندة فقط
@@ -4538,7 +4555,9 @@ Window Days cannot exceed {0} days.,لا يمكن أن تتجاوز المهلة
 Window Days must be at least 1 day.,يجب ألا تقل المهلة عن يوم واحد.
 Window ends in {0}d,تنتهي المهلة خلال {0} يوم
 Window expired {0}d ago,انتهت المهلة منذ {0} يوم
+Within Days,خلال (أيام)
 Within SLA,ضمن اتفاقية مستوى الخدمة
+Without Idle Report,بدون تقرير خمول
 Witness,الشاهد
 Work Description,وصف العمل
 Work Order marked Completed.,تغيرت حالة أمر العمل إلى مكتمل.

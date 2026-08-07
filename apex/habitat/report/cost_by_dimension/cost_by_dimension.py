@@ -18,12 +18,19 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum, Count
 
+from apex.apex_core.utils.report_summary import card, total_card
+
 
 def execute(filters=None):
     filters = frappe._dict(filters or {})
     columns = get_columns()
     data = get_data(filters)
-    return columns, data
+    summary = [
+        total_card(_("Ledger Entries"), data, "entries", "Int"),
+        total_card(_("Total Cost"), data, "total_cost", "Currency"),
+        card(_("Buildings"), len({r.get("building") for r in data if r.get("building")}), "Int"),
+    ]
+    return columns, data, None, None, summary
 
 
 def get_columns():

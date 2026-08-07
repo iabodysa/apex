@@ -1,12 +1,16 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 from frappe.utils import getdate, today
 
+from apex.apex_core.utils.report_helpers import date_range_condition
+from apex.apex_core.utils.report_summary import count_card
 from apex.habitat import permissions
 
 
 def execute(filters=None):
+    filters = filters or {}
     columns = [
         {"label": frappe._("Remediation Plan"), "fieldname": "plan", "fieldtype": "Link", "options": "Audit Remediation Plan", "width": 150},
         {"label": frappe._("Remediation Action"), "fieldname": "remediation_action", "fieldtype": "Small Text", "width": 260},
@@ -19,6 +23,11 @@ def execute(filters=None):
     ]
 
     item_filters = {"parenttype": "Audit Remediation Plan"}
+    if filters.get("status"):
+        item_filters["status"] = filters["status"]
+    due_condition = date_range_condition(filters, "due_date")
+    if due_condition is not None:
+        item_filters["due_date"] = due_condition
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:
         if not allowed:
@@ -62,4 +71,15 @@ def execute(filters=None):
         )
         row["overdue"] = "Yes" if is_overdue else "No"
         data.append(row)
-    return columns, data
+
+    summary = [
+        count_card(_("Actions"), data),
+        count_card(_("Overdue"), data, lambda r: r.get("overdue") == "Yes", "Red"),
+        count_card(
+            _("Verified by Client"),
+            data,
+            lambda r: r.get("status") == "Verified by Client",
+            "Green",
+        ),
+    ]
+    return columns, data, None, None, summary

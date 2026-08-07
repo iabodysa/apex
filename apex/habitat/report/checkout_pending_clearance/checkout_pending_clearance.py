@@ -18,8 +18,10 @@ the name were the actual disclosure, not just the checkout row.
 """
 
 import frappe
+from frappe import _
 from frappe.utils import date_diff, today
 
+from apex.apex_core.utils.report_summary import count_card, total_card
 from apex.habitat import permissions
 
 
@@ -61,9 +63,6 @@ def execute(filters=None):
         fields=["name", "employee", "bed", "checkout_date", "custody_cleared"],
         order_by="checkout_date desc",
     )
-
-    if not checkouts:
-        return columns, []
 
     all_beds = list({co.bed for co in checkouts if co.bed})
     bed_building_map = {}
@@ -137,4 +136,10 @@ def execute(filters=None):
                 "days_since": days_since,
             })
 
-    return columns, data
+    summary = [
+        count_card(_("Pending Checkouts"), data),
+        count_card(_("Custody Not Cleared"), data, lambda r: not r.get("custody_cleared"), "Red"),
+        total_card(_("Open Custody Issues"), data, "open_custody_issues", "Int"),
+        count_card(_("Over 7 Days"), data, lambda r: (r.get("days_since") or 0) > 7, "Orange"),
+    ]
+    return columns, data, None, None, summary

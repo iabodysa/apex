@@ -1,8 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
+from frappe.utils import flt
 
 from apex.apex_core.utils.report_helpers import date_range_condition
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
@@ -41,7 +44,14 @@ def execute(filters=None):
         order_by="creation desc",
     )
 
-    return columns, data, None, _build_chart(data)
+    has_variance = any(flt(r.get("variance")) for r in data)
+    summary = [
+        count_card(_("Settlements"), data),
+        total_card(_("Accrued Total"), data, "accrued_total", "Currency"),
+        total_card(_("Claimed Total"), data, "claimed_total", "Currency"),
+        total_card(_("Variance"), data, "variance", "Currency", indicator="Red" if has_variance else "Green"),
+    ]
+    return columns, data, None, _build_chart(data), summary
 
 
 def _build_chart(data):

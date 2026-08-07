@@ -1,8 +1,10 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 
 from apex.apex_core.utils.report_helpers import date_range_condition
+from apex.apex_core.utils.report_summary import count_card
 from apex.habitat import permissions
 
 
@@ -33,8 +35,11 @@ def execute(filters=None):
     date_condition = date_range_condition(filters, "movement_date")
     if date_condition is not None:
         query_filters["movement_date"] = date_condition
-    if filters.get("accounting_acknowledged") is not None:
-        query_filters["accounting_acknowledged"] = filters["accounting_acknowledged"]
+    ack = filters.get("accounting_acknowledged")
+    if ack in ("Yes", "No"):
+        query_filters["accounting_acknowledged"] = 1 if ack == "Yes" else 0
+    elif ack is not None:
+        query_filters["accounting_acknowledged"] = ack
 
     or_filters = None
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
@@ -75,4 +80,14 @@ def execute(filters=None):
             "status": status,
         })
 
-    return columns, data
+    summary = [
+        count_card(_("Movements"), data),
+        count_card(
+            _("Awaiting Acknowledgement"),
+            data,
+            lambda r: r.get("status") == "Submitted" and not r.get("accounting_acknowledged"),
+            "Orange",
+        ),
+        count_card(_("Draft"), data, lambda r: r.get("status") == "Draft"),
+    ]
+    return columns, data, None, None, summary

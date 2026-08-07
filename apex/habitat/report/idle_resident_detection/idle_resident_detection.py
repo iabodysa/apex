@@ -16,6 +16,7 @@ import frappe
 from frappe import _
 from frappe.utils import date_diff, today
 
+from apex.apex_core.utils.report_summary import count_card
 from apex.habitat import permissions
 
 ENDED_PROJECT_STATUSES = ("Completed", "Cancelled")
@@ -26,7 +27,17 @@ def execute(filters=None):
     filters = filters or {}
     columns = _columns()
     data = _get_data(filters)
-    return columns, data
+    summary = [
+        count_card(_("Idle Residents"), data),
+        count_card(
+            _("Without Idle Report"),
+            data,
+            lambda r: not r.get("existing_idle_report"),
+            "Red",
+        ),
+        count_card(_("No Project"), data, lambda r: not r.get("project"), "Orange"),
+    ]
+    return columns, data, None, None, summary
 
 
 def _columns():

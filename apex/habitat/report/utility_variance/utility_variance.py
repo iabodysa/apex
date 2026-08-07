@@ -3,6 +3,8 @@
 import frappe
 from frappe.utils import flt
 
+from apex.apex_core.utils.report_summary import card, count_card, total_card
+
 
 def execute(filters=None):
     columns = [
@@ -52,7 +54,18 @@ def execute(filters=None):
             "variance_from_avg_pct": flt(row.get("variance_from_avg_pct")),
             "status": row.status,
         })
-    return columns, data, None, _build_chart(data)
+
+    summary = [
+        count_card(frappe._("Bills"), data),
+        total_card(frappe._("Amount"), data, "bill_amount", "Currency"),
+        card(
+            frappe._("Highest Variance %"),
+            max((flt(r.get("variance_from_avg_pct")) for r in data), key=abs, default=0.0),
+            "Percent",
+            "Orange",
+        ),
+    ]
+    return columns, data, None, _build_chart(data), summary
 
 
 def _build_chart(data):

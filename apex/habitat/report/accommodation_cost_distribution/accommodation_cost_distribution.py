@@ -3,6 +3,8 @@
 import frappe
 from frappe.utils import flt
 
+from apex.apex_core.utils.report_summary import card, count_card, total_card
+
 
 def execute(filters=None):
     columns = [
@@ -69,4 +71,11 @@ def execute(filters=None):
             "source_name": row.source_name,
             "source_line_id": row.source_line_id,
         })
-    return columns, data
+
+    summary = [
+        count_card(frappe._("Ledger Entries"), data),
+        total_card(frappe._("Amount"), data, "amount", "Currency"),
+        card(frappe._("Employees"), len({r["employee"] for r in data if r.get("employee")}), "Int"),
+        card(frappe._("Buildings"), len({r["building"] for r in data if r.get("building")}), "Int"),
+    ]
+    return columns, data, None, None, summary

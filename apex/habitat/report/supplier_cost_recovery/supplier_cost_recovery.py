@@ -13,10 +13,19 @@ import frappe
 from frappe import _
 from frappe.utils import flt, getdate
 
+from apex.apex_core.utils.report_summary import card, total_card
+
 
 def execute(filters=None):
     filters = filters or {}
-    return get_columns(), get_data(filters)
+    data = get_data(filters)
+    summary = [
+        card(_("Suppliers"), len({r["billed_to_supplier"] for r in data if r.get("billed_to_supplier")}), "Int"),
+        total_card(_("Base Accommodation Cost"), data, "base_cost", "Currency"),
+        total_card(_("Operational Markup"), data, "markup", "Currency"),
+        total_card(_("Total Deduction Amount"), data, "total_deduction", "Currency"),
+    ]
+    return get_columns(), data, None, None, summary
 
 
 def get_columns():

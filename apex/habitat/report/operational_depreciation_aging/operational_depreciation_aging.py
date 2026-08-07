@@ -2,6 +2,7 @@
 
 import frappe
 
+from apex.apex_core.utils.report_summary import count_card, total_card
 from apex.habitat import permissions
 
 
@@ -106,7 +107,7 @@ def execute(filters=None):
     )
 
     if not snapshots:
-        return columns, []
+        return columns, [], None, None, _summary([])
 
     snapshot_names = [s["name"] for s in snapshots]
 
@@ -120,7 +121,7 @@ def execute(filters=None):
     )
 
     if not child_rows:
-        return columns, []
+        return columns, [], None, None, _summary([])
 
     unique_articles = list({row["article"] for row in child_rows if row.get("article")})
     article_category_map = {}
@@ -167,4 +168,18 @@ def execute(filters=None):
             }
         )
 
-    return columns, data
+    return columns, data, None, None, _summary(data)
+
+
+def _summary(data):
+    return [
+        count_card(frappe._("Assets"), data),
+        total_card(frappe._("Original Cost"), data, "original_cost", "Currency"),
+        total_card(frappe._("Book Value"), data, "book_value", "Currency"),
+        count_card(
+            frappe._("Fully Depreciated"),
+            data,
+            lambda r: r.get("status") == frappe._("Fully Depreciated"),
+            "Orange",
+        ),
+    ]

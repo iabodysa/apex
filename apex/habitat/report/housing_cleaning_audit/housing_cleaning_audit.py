@@ -29,10 +29,12 @@ Permission: Housing Supervisor users see only their own building(s).
 """
 
 import frappe
+from frappe import _
 from frappe.query_builder.functions import Count
 from frappe.utils import add_days, getdate, today
 from pypika import Order
 
+from apex.apex_core.utils.report_summary import count_card, percent_card
 from apex.habitat import permissions
 
 
@@ -179,7 +181,19 @@ def execute(filters=None):
               reverse=False)
     data.sort(key=lambda r: str(r["cleaning_date"] or ""), reverse=True)
 
-    return columns, data
+    missed_count = len([r for r in data if r.get("status") == "Missed"])
+    summary = [
+        count_card(_("Cleaning Days"), data),
+        count_card(_("Missed"), data, lambda r: r.get("status") == "Missed", "Red"),
+        count_card(
+            _("Rework Required"),
+            data,
+            lambda r: r.get("status") == "Rework Required",
+            "Orange",
+        ),
+        percent_card(_("Compliance"), len(data) - missed_count, len(data)),
+    ]
+    return columns, data, None, None, summary
 
 
 def _columns():

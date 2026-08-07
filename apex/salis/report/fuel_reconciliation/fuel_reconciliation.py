@@ -67,21 +67,24 @@ def execute(filters=None):
         agg["total_litres"] += row.litres or 0
         agg["total_amount"] += row.amount or 0
 
-    quota_cache = {}
+    quota_keys = [key for key in groups if key[0] and key[1]]
+    quota_map = {}
+    if quota_keys:
+        for quota in frappe.get_all(
+            "Fuel Quota",
+            filters={
+                "vehicle": ["in", list({key[0] for key in quota_keys})],
+                "period_month": ["in", list({key[1] for key in quota_keys})],
+            },
+            fields=["vehicle", "period_month", "monthly_litres"],
+        ):
+            quota_map[(quota.vehicle, quota.period_month)] = quota.monthly_litres or 0.0
+
     for key, agg in groups.items():
         vehicle, period_month = key
         if not vehicle or not period_month:
             continue
-        if key not in quota_cache:
-            quota_cache[key] = (
-                frappe.db.get_value(
-                    "Fuel Quota",
-                    {"vehicle": vehicle, "period_month": period_month},
-                    "monthly_litres",
-                )
-                or 0.0
-            )
-        agg["quota_litres"] = quota_cache[key]
+        agg["quota_litres"] = quota_map.get(key, 0.0)
         agg["variance"] = (agg["quota_litres"] or 0.0) - agg["total_litres"]
 
     data = sorted(groups.values(), key=lambda r: (r["vehicle"], r["period_month"]))

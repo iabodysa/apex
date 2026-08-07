@@ -3,8 +3,10 @@
 cost center, or missing an ICCID), company-scoped."""
 
 import frappe
+from frappe import _
 
 from apex.logistay import permissions
+from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
@@ -61,6 +63,12 @@ def execute(filters=None):
                     "exception": ", ".join(issues),
                     "telecom_contract": row.telecom_contract,
                     "supplier": row.supplier,
+                    "iccid": row.iccid,
                 }
             )
-    return columns, data
+    summary = [
+        count_card(_("Exceptions"), data),
+        count_card(_("Suspended or Lost"), data, lambda r: r.get("status") in ("Suspended", "Lost"), "Red"),
+        count_card(_("Missing ICCID"), data, lambda r: not r.get("iccid"), "Orange"),
+    ]
+    return columns, data, None, None, summary

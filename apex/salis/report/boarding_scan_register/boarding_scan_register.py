@@ -1,9 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 
 from apex.apex_core.utils.report_helpers import date_range_condition, scoped_names
 from apex.salis import permissions
+from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
@@ -51,4 +53,10 @@ def execute(filters=None):
         order_by="scanned_at desc",
         limit_page_length=0,
     )
-    return columns, rows
+    summary = [
+        count_card(_("Scans"), rows),
+        count_card(_("Valid"), rows, lambda r: r.get("result") == "Valid", "Green"),
+        count_card(_("Failed Scans"), rows, lambda r: r.get("result") != "Valid", "Red"),
+        count_card(_("Boarding Events Created"), rows, lambda r: r.get("boarding_event_created")),
+    ]
+    return columns, rows, None, None, summary
