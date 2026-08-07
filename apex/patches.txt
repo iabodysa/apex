@@ -26,47 +26,6 @@
 #       would reach only already-canonical sites and sweep every table for nothing.
 #       Operator-invoked instead, per docs/administration/identity-upgrade.md.
 
-# PERMANENT: delegates to the create-only City loader in seed_all, so a site installed
-# before a city was added to the shipped JSON still gets it.
-apex.patches.v0_6.add_city_doctype
-
-# STILL-REQUIRED: renames the legacy `Habitat City` DocType. Nothing in source proves
-# every deployed site has already migrated off that name.
-apex.patches.v0_7.rename_habitat_city_to_city
-
-# STILL-REQUIRED: historical creator of the Housing Assignment.bed lookup indexes, kept
-# for the sites that genuinely ran it. It is logged complete-without-running on every
-# site installed since it was registered — v1_x.add_bed_occupancy_indexes is the entry
-# that actually reaches those.
-apex.patches.v0_7.add_bed_assignment_index
-
-# PERMANENT: replays the maintenance material + template seeder, so a site installed
-# before a template existed can still load it on a Maintenance Request.
-apex.patches.v0_8.seed_missing_material_templates
-
-# PERMANENT: Auto Email Reports carry runtime recipient fields, so they stay a seeder
-# rather than is_standard JSON; this is how a newly added report reaches older sites.
-apex.patches.v0_8.seed_auto_email_reports
-
-# PERMANENT: Navbar Settings is a global Single — shipping it as a fixture would
-# overwrite the customer's navbar every migrate, so this append-only patch is the path.
-apex.patches.v0_8.add_navbar_help_links
-
-# STILL-REQUIRED: repairs the stored navbar route left behind by the pre-rename
-# workspace. Source cannot prove no deployed site still holds the old route.
-apex.patches.v0_8.fix_navbar_command_center_route
-
-# PERMANENT: Salis role / settings / theme seeders. Each seeds a DISTINCT record set
-# and only fills blanks, so replaying on migrate can never clobber an admin's edit.
-
-# PERMANENT: the Salis Auto Email Reports stay a seeder for the same runtime-recipient
-# reason, so an installed site needs this replay to gain a newly shipped report.
-apex.patches.v1_x.seed_salis_communications
-
-# PERMANENT: waits for ERPNext to create its native Item Group root, then loads the
-# accommodation item resource without fixture sync — must stay replayable.
-apex.patches.v1_x.seed_accommodation_item_groups
-
 # STILL-REQUIRED (ONE-TIME): MUST stay in [pre_model_sync] — renames the Workspace
 # primary key 'fleet' -> 'Fleet' BEFORE sync_all() re-imports fleet.json. After the
 # sync, PostgreSQL already holds a duplicate row plus an orphan and MariaDB has
@@ -85,11 +44,6 @@ apex.patches.v2_0.rename_checkout_clearance_print_format
 # so renaming after the sync would leave the retired key orphaned beside the new one; the
 # Workflow is never imported at all, so nothing but this patch can move its row.
 apex.patches.v2_0.rename_retired_habitat_record_names
-
-[post_model_sync]
-# STILL-REQUIRED: only-if-missing Web Form route safeguard for a v15 upgrade
-# (GitHub #97). Nothing in source proves every deployed site is already v15-correct.
-apex.patches.v1_x.ensure_web_form_route
 
 # The demo seeders that used to sit in v1_x are no longer shipped: demo data is not part
 # of the product, and a customer install has no use for a module that fabricates users and
@@ -116,54 +70,6 @@ apex.patches.v1_x.ensure_web_form_route
 #      decisive check, and it is named here rather than in the module because the module is
 #      gone. Present means the published password is live on that site: disable or reset.
 # Until step 2 is done on a given site, those accounts are UNKNOWN, not safe.
-
-# STILL-REQUIRED (ONE-TIME): stamps an expiry on Masar Worker Token rows minted before
-# the TTL field existed — the resolver still treats a NULL expiry as never-expiring.
-apex.patches.v1_x.backfill_masar_token_expiry
-
-# STILL-REQUIRED (ONE-TIME, security): hashes any still-plaintext Masar Worker Token
-# row. Skipping a site leaves a usable personal token readable in the clear.
-apex.patches.v1_x.hash_masar_worker_tokens
-
-# STILL-REQUIRED: adds the ASL composite index on an already-installed site. The
-# controller's on_doctype_update only fires when that DocType JSON actually re-imports,
-# so an unchanged site would otherwise never gain the index.
-apex.patches.v1_x.add_asl_composite_index
-
-# PERMANENT: makes each module's ROOT workspace win the Desk breadcrumb, and self-heals
-# after any re-import re-stamps `creation`. Also wired into after_install/after_migrate;
-# this entry keeps the fix inside the tracked migrate phase.
-apex.patches.v1_x.reorder_root_workspace_creation
-
-# STILL-REQUIRED (ONE-TIME): removes the orphaned DB records left by the archived v1
-# Logistay engine — migrate is import-only and never reconciles a deleted JSON.
-apex.patches.v2_0.archive_logistay_v1_engine
-
-# STILL-REQUIRED (ONE-TIME): disables the legacy driver login Users behind the barcode
-# cutover. Skipping a site leaves the retired password path open for those drivers.
-apex.patches.v2_0.disable_driver_login_users_barcode_cutover
-
-# STILL-REQUIRED (ONE-TIME): clears the obsolete Worker party default off exact Driver
-# token rows so the resolver reads one unambiguous binding.
-apex.patches.v2_0.normalize_legacy_driver_token_bindings
-
-# STILL-REQUIRED (ONE-TIME): migrates legacy site-level SIM records into Logistay.
-# Reads an unknown legacy source defensively and quarantines ambiguous rows.
-apex.patches.v2_0.migrate_sim_card_management
-
-# STILL-REQUIRED (ONE-TIME): removes the orphaned Employee Deduction Acknowledgment
-# metadata row and Workflow its deleted is_standard JSON leaves behind — recovery now
-# runs natively on Employee Advance. Drops the table only when empty, else archives it.
-apex.patches.v2_0.drop_employee_deduction_acknowledgment
-
-# STILL-REQUIRED (ONE-TIME): repoints records still stamped module "SIM Operations" and
-# stored apex.sim_operations.* dotted paths at Logistay after the fold, then deletes the two
-# folded Workspace rows and the dead Module Def. Repoint-only — no SIM record is dropped.
-apex.patches.v2_0.fold_sim_operations_into_logistay
-
-# STILL-REQUIRED (ONE-TIME): deletes the retired My Work / Launchpad Workspace rows and
-# unpins any User whose default_workspace still points at one.
-apex.patches.v2_0.remove_kernel_landing_workspaces
 
 # STILL-REQUIRED: adds the two Housing Assignment bed-occupancy indexes on an
 # already-installed site. Its controller on_doctype_update only fires when that DocType
