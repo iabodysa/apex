@@ -476,4 +476,12 @@ after_migrate = [
     "apex.setup.create_role_profiles",
 ]
 
+jinja = {
+    "methods": [
+        "apex.apex_core.utils.addresses.get_address_text",
+        "apex.apex_core.utils.addresses.get_address_text_by_name",
+        "apex.apex_core.utils.print_helpers.doc_verify_qr",
+    ],
+}
+
 get_changelog_feed = "apex.apex_core.utils.changelog.get_changelog_feed"

@@ -1,0 +1,227 @@
+{%- macro doc_styles() -%}
+<style>
+  .ax { font-family: "SF Arabic", "Geeza Pro", Tahoma, Arial, sans-serif; color: #14332a; font-size: 11.5px; }
+  .ax .lbl { font-size: 9px; color: #6f7e76; font-weight: 700; letter-spacing: .02em; }
+  .ax .lbl .en { display: block; font-size: 7.5px; color: #9aa8a1; font-weight: 400; letter-spacing: 0; }
+  .ax .val { font-size: 11.5px; color: #14332a; }
+  .ax-title { display: flex; justify-content: space-between; align-items: flex-end;
+              border-bottom: 2.5px solid #00844e; padding-bottom: 7px; margin: 8px 0 12px; }
+  .ax-title h1 { margin: 0; font-size: 17px; font-weight: 800; color: #072b1a; }
+  .ax-title h1 .en { display: block; font-size: 9.5px; font-weight: 400; color: #6f7e76; letter-spacing: .04em; }
+  .ax-ident { text-align: end; font-size: 10px; color: #47584f; line-height: 1.7; }
+  .ax-ident b { font-size: 12px; color: #072b1a; letter-spacing: .04em; }
+  .ax-parties { display: flex; gap: 10px; margin-bottom: 12px; }
+  .ax-party { flex: 1; border: 1px solid #ddd5c2; border-radius: 5px; padding: 8px 10px; }
+  .ax-party .who { font-size: 12px; font-weight: 700; color: #072b1a; margin: 2px 0; }
+  .ax-party .meta { font-size: 9.5px; color: #47584f; line-height: 1.6; }
+  table.ax-grid { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  table.ax-grid td { border: 1px solid #ddd5c2; padding: 5px 8px; vertical-align: top; }
+  table.ax-grid td.k { background: #f4f7f5; width: 17%; }
+  table.ax-lines { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+  table.ax-lines th { background: #00844e; color: #fff; font-size: 9.5px; font-weight: 700;
+                      padding: 6px 8px; text-align: start; }
+  table.ax-lines th .en { display: block; font-size: 7.5px; font-weight: 400; opacity: .85; }
+  table.ax-lines td { border-bottom: 1px solid #e6ece9; padding: 6px 8px; }
+  table.ax-lines tr:nth-child(even) td { background: #f8faf9; }
+  table.ax-lines .num { text-align: end; font-variant-numeric: tabular-nums; }
+  table.ax-lines tr.total td { background: #f0f5f2; font-weight: 700; border-top: 1.5px solid #00844e; }
+  .ax-words { border: 1px solid #ddd5c2; border-radius: 5px; background: #f8faf9;
+              padding: 7px 10px; font-size: 10.5px; margin-bottom: 12px; }
+  .ax-none { border: 1px dashed #cabfa3; border-radius: 5px; padding: 14px; text-align: center;
+             color: #6f7e76; font-size: 10px; }
+  .ax-note { border: 1px solid #ddd5c2; border-inline-start: 3px solid #00844e; border-radius: 4px;
+             padding: 7px 10px; font-size: 10px; color: #47584f; margin-bottom: 12px; line-height: 1.7; }
+  .ax-decl { border: 1px solid #cdbb8a; background: #fdfaf1; border-radius: 5px;
+             padding: 9px 11px; font-size: 10.5px; color: #4a3f22; margin-bottom: 12px; line-height: 1.8; }
+  table.ax-check { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  table.ax-check td { border-bottom: 1px solid #e6ece9; padding: 5px 8px; font-size: 10.5px; }
+  table.ax-check td.res { width: 76px; text-align: center; font-weight: 700; font-size: 9.5px; }
+  table.ax-check td.ok { color: #00844e; }
+  table.ax-check td.bad { color: #b23b2e; }
+  table.ax-check td.na { color: #9aa8a1; }
+  .ax-photos { display: flex; gap: 8px; margin-bottom: 12px; }
+  .ax-photo { flex: 1; height: 96px; border: 1px dashed #cabfa3; border-radius: 5px;
+              display: flex; align-items: center; justify-content: center;
+              color: #b9b09a; font-size: 9px; text-align: center; }
+  .ax-signs { display: flex; gap: 10px; margin-top: 16px; }
+  .ax-sign { flex: 1; border-top: 1px solid #cabfa3; padding-top: 6px; }
+  .ax-sign .role { font-size: 10px; font-weight: 700; color: #072b1a; }
+  .ax-sign .role .en { font-weight: 400; color: #9aa8a1; font-size: 7.5px; }
+  .ax-sign .line { font-size: 9px; color: #6f7e76; margin-top: 6px; }
+  .ax-stamp { width: 108px; border: 1px dashed #cabfa3; border-radius: 5px; height: 74px;
+              display: flex; align-items: center; justify-content: center; color: #b9b09a; font-size: 9px; }
+  .ax-foot { margin-top: 14px; padding-top: 7px; border-top: 1px solid #ddd5c2;
+             display: flex; justify-content: space-between; align-items: center;
+             font-size: 8.5px; color: #6f7e76; }
+  .ax-foot img { width: 58px; height: 58px; }
+  .ax-mark { position: fixed; top: 42%; inset-inline-start: 22%; font-size: 76px; font-weight: 800;
+             color: rgba(192, 57, 43, .11); transform: rotate(-24deg); letter-spacing: .06em; z-index: 0; }
+  @media print { .ax-lines tr, .ax-check tr, .ax-sign, .ax-party { page-break-inside: avoid; } }
+</style>
+{%- endmacro -%}
+
+{%- macro _fmt(value, kind, tr=False) -%}
+{%- if value is none or value == "" -%}—
+{%- elif kind -%}{{ frappe.format_value(value, {"fieldtype": kind}) }}
+{%- elif tr -%}{{ _(value) }}
+{%- else -%}{{ value }}
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro _lbl(ar, en) -%}
+<span class="lbl">{{ ar }}{% if en and en != ar %}<span class="en">{{ en }}</span>{% endif %}</span>
+{%- endmacro -%}
+
+{%- macro watermark(doc) -%}
+  {%- if doc.docstatus == 0 -%}
+    <div class="ax-mark">{{ _("Draft") }}</div>
+  {%- elif doc.docstatus == 2 -%}
+    <div class="ax-mark">{{ _("Cancelled") }}</div>
+  {%- endif -%}
+{%- endmacro -%}
+
+{%- macro doc_title(doc, title_ar, title_en, extra_ident="") -%}
+<div class="ax-title">
+  <h1>{{ title_ar }}{% if title_en != title_ar %}<span class="en">{{ title_en }}</span>{% endif %}</h1>
+  <div class="ax-ident">
+    <b>{{ doc.name }}</b><br>
+    {{ frappe.format_date(doc.get("posting_date") or doc.get("transaction_date") or doc.creation) }}
+    {%- if extra_ident %}<br>{{ extra_ident }}{% endif %}
+  </div>
+</div>
+{%- endmacro -%}
+
+{%- macro party_block(parties) -%}
+<div class="ax-parties">
+  {%- for p in parties %}
+  <div class="ax-party">
+    {{ _lbl(p.role_ar, p.role_en) }}
+    <div class="who">{{ p.name or "—" }}</div>
+    {%- if p.lines %}<div class="meta">{% for line in p.lines %}{% if line %}{{ line }}<br>{% endif %}{% endfor %}</div>{% endif %}
+  </div>
+  {%- endfor %}
+</div>
+{%- endmacro -%}
+
+{%- macro field_grid(rows) -%}
+<table class="ax-grid">
+  {%- for row in rows %}
+  <tr>
+    {%- for cell in row %}
+    <td class="k">{{ _lbl(cell.ar, cell.en) }}</td>
+    <td class="val">{{ _fmt(cell.value, cell.get("fmt"), cell.get("tr")) }}</td>
+    {%- endfor %}
+  </tr>
+  {%- endfor %}
+</table>
+{%- endmacro -%}
+
+{%- macro line_table(columns, rows, totals=None, empty_text=None) -%}
+{%- if rows -%}
+<table class="ax-lines">
+  <thead>
+    <tr>
+      <th style="width:26px">#</th>
+      {%- for c in columns %}
+      <th{% if c.num %} class="num"{% endif %}{% if c.width %} style="width:{{ c.width }}"{% endif %}>{{ c.ar }}{% if c.en and c.en != c.ar %}<span class="en">{{ c.en }}</span>{% endif %}</th>
+      {%- endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {%- for r in rows %}
+    <tr>
+      <td class="num">{{ loop.index }}</td>
+      {%- for c in columns %}
+      <td{% if c.num %} class="num"{% endif %}>{{ _fmt(r.get(c.key), c.get("fmt"), c.get("tr")) }}</td>
+      {%- endfor %}
+    </tr>
+    {%- endfor %}
+    {%- if totals %}
+    <tr class="total">
+      <td colspan="{{ 1 + (columns | length) - (totals | length) }}">{{ _("Total") }}</td>
+      {%- for t in totals %}<td class="num">{{ t }}</td>{% endfor %}
+    </tr>
+    {%- endif %}
+  </tbody>
+</table>
+{%- else -%}
+<div class="ax-none">{{ empty_text or _("No lines on this document") }}</div>
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro amount_words(amount, currency=None) -%}
+{%- if amount %}
+<div class="ax-words">
+  {{ _lbl(_("Amount in words"), "Amount in words") }}
+  <div>{{ frappe.utils.money_in_words(amount, currency or frappe.defaults.get_global_default("currency")) }}</div>
+</div>
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro check_list(items) -%}
+{%- if items %}
+<table class="ax-check">
+  {%- for it in items %}
+  <tr>
+    <td>{{ it.ar }}{% if it.en and it.en != it.ar %} <span class="lbl"><span class="en" style="display:inline">{{ it.en }}</span></span>{% endif %}</td>
+    <td class="res {{ 'ok' if it.state == 'ok' else ('bad' if it.state == 'bad' else 'na') }}">
+      {{ _("Sound") if it.state == "ok" else (_("Faulty") if it.state == "bad" else _("Not Checked")) }}
+    </td>
+    <td>{{ it.note or "" }}</td>
+  </tr>
+  {%- endfor %}
+</table>
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro photo_slots(count=3, caption=None) -%}
+<div class="ax-photos">
+  {%- for i in range(count) %}
+  <div class="ax-photo">{{ caption or _("Attach photographic evidence") }}</div>
+  {%- endfor %}
+</div>
+{%- endmacro -%}
+
+{%- macro note_block(text, label=None) -%}
+{%- if text %}<div class="ax-note">{% if label %}{{ _lbl(label, "") }}{% endif %}{{ text }}</div>{% endif -%}
+{%- endmacro -%}
+
+{%- macro declaration(text) -%}
+{%- if text %}<div class="ax-decl">{{ text }}</div>{% endif -%}
+{%- endmacro -%}
+
+{%- macro terms_block(doc) -%}
+{%- set tc = doc.get("terms") or (frappe.db.get_value("Terms and Conditions", doc.get("tc_name"), "terms") if doc.get("tc_name") else None) -%}
+{%- if tc %}<div class="ax-note">{{ _lbl(_("Terms and Conditions"), "Terms and Conditions") }}{{ tc }}</div>{% endif -%}
+{%- endmacro -%}
+
+{%- macro sign_block(signatories, stamp=True) -%}
+<div class="ax-signs">
+  {%- for s in signatories %}
+  <div class="ax-sign">
+    <div class="role">{{ s.ar }}{% if s.en and s.en != s.ar %}<span class="en"> · {{ s.en }}</span>{% endif %}</div>
+    <div class="line">{{ _("Name") }}: {{ s.name or "________________" }}</div>
+    <div class="line">{{ _("Signature") }}: ________________</div>
+    <div class="line">{{ _("Date") }}: ________________</div>
+  </div>
+  {%- endfor %}
+  {%- if stamp %}
+  <div class="ax-sign" style="flex:0 0 auto;border:0;padding-top:0">
+    <div class="ax-stamp">{{ _("Stamp") }}</div>
+  </div>
+  {%- endif %}
+</div>
+{%- endmacro -%}
+
+{%- macro doc_footer(doc, qr=True) -%}
+{%- set uri = doc_verify_qr(doc.doctype, doc.name) if qr else None -%}
+<div class="ax-foot">
+  <div>{% if uri %}<img src="{{ uri }}" alt="{{ doc.name }}">{% endif %}</div>
+  <div style="text-align:end">
+    {{ _("Printed by") }}: {{ frappe.get_fullname(frappe.session.user) }} ·
+    {{ frappe.format_date(frappe.utils.nowdate()) }}<br>
+    {{ _(doc.doctype) }} · {{ doc.name }}<br>
+    {{ _("System-generated document from Apex") }}
+  </div>
+</div>
+{%- endmacro -%}
