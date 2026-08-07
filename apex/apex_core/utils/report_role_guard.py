@@ -1,10 +1,11 @@
 # Copyright (c) 2026, afmcoltd
 """Refuse a Report role its ``ref_doctype`` cannot grant ``report``.
 
-That guard reads JSON off disk, so it cannot see a Report created in the DATABASE. This
-hook is the runtime half. It is not a second copy of the static scan: the static scan
-asks "does the app SHIP a broken link", this one asks "is this SAVE about to create a
-broken audience", and only the second one sees a site-local report.
+Frappe's own ``Report.set_doctype_roles`` (``core/doctype/report/report.py:107``) only
+DEFAULTS the roles from the ref DocType's permlevel-0 rows and never checks the
+``report`` right, so a role that may read the DocType but not report on it still lands
+in the audience. This hook refuses that on save, including for a Report created in the
+database rather than shipped in the app.
 """
 
 from __future__ import annotations

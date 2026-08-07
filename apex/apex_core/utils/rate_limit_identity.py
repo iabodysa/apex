@@ -49,10 +49,8 @@ def rate_limit(
     """Drop-in for ``frappe.rate_limiter.rate_limit`` that ignores the caller's spelling.
 
     Same arguments, same meaning, same enforcement -- the only difference is the
-    window's name. Import this instead of the framework's in every Apex endpoint;
-    apex_core/utils/test_submit_rate_limit_identity.py fails the build if one goes
-    back to the framework's directly.
-
+    window's name. Import this instead of the framework's in every Apex endpoint, so
+    two spellings of the same action share one window instead of one each.
     """
 
     def decorator(fn):
