@@ -222,7 +222,7 @@
       <!-- Wrong-bus correction can arrive even with no upcoming trip (the worker
            scanned a vehicle that isn't theirs) — surface it before the empty copy. -->
       <BoardingFlow
-        v-if="boardingState && boardingState.wrong_bus"
+        v-if="hasWrongBus"
         :trip="null"
         :boarding="boardingState"
         :stale="boardingStale"
@@ -347,6 +347,11 @@ const boardingActive = computed(() => {
   return !!(b && b.dispatch_trip && !BOARDING_SETTLED.includes(b.status));
 });
 const pollSeconds = computed(() => boardingState.value?.poll_seconds || 10);
+
+// The wrong-bus correction is the one server key the markup still read raw. Named here
+// beside the other derived flags so the template asks a question about the screen rather
+// than about the payload, and a rename on the server lands in one place.
+const hasWrongBus = computed(() => !!boardingState.value?.wrong_bus);
 
 let boardingTimer = null;
 function stopBoardingPoll() {
