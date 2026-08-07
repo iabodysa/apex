@@ -50,12 +50,6 @@ const ALLOWED = new Map([
     "A one-line re-export of @shared/call. The implementation is already " +
       "single-sourced; merging would delete a module specifier, not duplicated logic.",
   ],
-  [
-    "fleet:src/main.js | fleet_os:src/main.js",
-    "Each portal's Vite entry (rollupOptions.input -> <portal>/index.html -> " +
-      "/src/main.js). Its ./App.vue and ./index.css resolve to DIFFERENT files per " +
-      "portal, so a single shared entry would merge the two portals into one bundle.",
-  ],
   // --- Pre-existing groups outside A-281's scope, kept because the tooling
   // --- requires a file at that exact path in each package.
   [

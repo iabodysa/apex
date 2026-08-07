@@ -42,37 +42,20 @@ body {
   font-weight: var(--fw-heading); font-size: 14px;
 }
 
-/* ---------- section navigation ([#emp-nav]) ----------
-   The header nav items are real in-page anchors, so the SCROLL is native: the
-   browser handles it, it needs no script, and it self-disables under
-   prefers-reduced-motion. --emp-nav-offset is the sticky-header clearance the
-   scrolled-to card must keep; it also mirrors the IntersectionObserver
-   rootMargin in App.vue. Logical properties only, so it mirrors under RTL. */
-:root { --emp-nav-offset: 82px; }
-@media (prefers-reduced-motion: no-preference) {
-  html { scroll-behavior: smooth; }
-}
-.emp-card { scroll-margin-block-start: var(--emp-nav-offset); }
-/* :target is the arrival marker — the guaranteed visible change even at desktop,
-   where the fuel card shares the grid's top row and so barely moves. */
-.emp-card:target {
-  border-color: var(--c-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 20%, transparent), var(--shadow-sm);
-}
-
 /* ---------- layout ---------- */
 .emp-grid {
   display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px;
   align-items: start;
 }
 .emp-col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+/* Single-card page column (the /fuel form): comfortable form width, centered. */
+.emp-narrow { max-width: 560px; margin-inline: auto; }
 
 /* ---------- card ---------- */
 .emp-card {
   background: var(--c-surface-2); border: var(--border-width) solid var(--c-border);
   border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm);
 }
-.emp-form-card { position: sticky; top: 90px; }
 .emp-card-head { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 16px; }
 .emp-ic {
   width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
@@ -217,6 +200,7 @@ body {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; min-height: var(--tap-min); padding: 13px 18px; border-radius: 11px; margin-top: 6px;
   font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+  text-decoration: none;
   border: var(--border-width) solid transparent; transition: filter 0.15s ease, transform 0.1s ease;
 }
 .emp-btn:active:not(:disabled) { transform: translateY(1px); }
@@ -274,14 +258,6 @@ body {
 /* ---------- responsive (768px = --bp-tablet) ---------- */
 @media (max-width: 860px) {
   .emp-grid { grid-template-columns: 1fr; }
-  .emp-form-card { position: static; }
-}
-/* Below --bp-tablet the shared shell wraps its own top nav onto a full-width
-   scrolling row, so the specificity fight this page used to pick with it is gone.
-   All that is left here is the consequence: the sticky header is two rows tall,
-   so anchored cards need the larger scroll clearance. */
-@media (max-width: 767px) {
-  :root { --emp-nav-offset: 122px; }
 }
 @media (max-width: 460px) {
   .emp-vehicle-hero { flex-wrap: wrap; }

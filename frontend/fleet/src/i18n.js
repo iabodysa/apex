@@ -425,6 +425,7 @@ const messages = {
         inProgress: "In progress",
         completed: "Completed",
         distance: "{n} km",
+        viewAll: "View all trips",
       },
       fuel: {
         title: "Fuel request",
@@ -863,6 +864,7 @@ const messages = {
         inProgress: "جارية",
         completed: "مكتملة",
         distance: "{n} كم",
+        viewAll: "عرض كل الرحلات",
       },
       fuel: {
         title: "طلب وقود",

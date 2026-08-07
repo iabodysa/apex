@@ -49,9 +49,9 @@ child table takes its access from the parent document it sits in.
 
 | Measure | Count |
 | --- | --- |
-| DocTypes shipped | 153 |
-| DocTypes granting at least one role | 114 |
-| DocPerm rows | 546 |
+| DocTypes shipped | 152 |
+| DocTypes granting at least one role | 113 |
+| DocPerm rows | 540 |
 | Roles granted | 18 |
 
 ## Roles
@@ -62,20 +62,20 @@ child table takes its access from the parent document it sits in.
 | All | 1 | 1 |
 | Cleaning Supervisor | 2 | 2 |
 | Driver | 5 | 5 |
-| Finance Manager | 59 | 64 |
-| Fleet Manager | 47 | 51 |
-| Fleet Project Manager | 36 | 39 |
-| Fleet Supervisor | 36 | 39 |
+| Finance Manager | 58 | 63 |
+| Fleet Manager | 46 | 50 |
+| Fleet Project Manager | 35 | 38 |
+| Fleet Supervisor | 35 | 38 |
 | Government Relations Officer | 5 | 5 |
 | HR User | 1 | 1 |
-| Internal Auditor | 72 | 75 |
+| Internal Auditor | 71 | 74 |
 | Maintenance Technician | 4 | 4 |
 | Procurement Supervisor | 3 | 5 |
 | Resident Request Coordinator | 2 | 3 |
 | Resident Supervisor | 32 | 39 |
 | SIM Operations User | 3 | 3 |
 | Safety Officer | 7 | 7 |
-| System Manager | 114 | 135 |
+| System Manager | 113 | 134 |
 
 ## Modules
 
@@ -102,12 +102,6 @@ child table takes its access from the parent document it sits in.
 | Masar Worker Token | Resident Supervisor | 0 | Read, Write, Create | Report, Print | — |
 | Masar Worker Token | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
 | Masar Worker Token | System Manager | 1 | Read, Write | — | — |
-| Operations Alert | Finance Manager | 0 | Read | Report | — |
-| Operations Alert | Fleet Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
-| Operations Alert | Fleet Project Manager | 0 | Read, Write, Create | Report | — |
-| Operations Alert | Fleet Supervisor | 0 | Read, Write, Create | Report | — |
-| Operations Alert | Internal Auditor | 0 | Read | Report, Export | — |
-| Operations Alert | System Manager | 0 | Read, Write, Create, Delete | Report, Export, Print, Email, Share | — |
 | Payment Routing Settings | Finance Manager | 0 | Read | — | — |
 | Payment Routing Settings | System Manager | 0 | Read, Write, Create, Delete | Print, Email, Share | — |
 | Salary Deduction Policy | Finance Manager | 0 | Read, Write | — | — |
