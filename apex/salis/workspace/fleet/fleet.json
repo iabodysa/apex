@@ -216,6 +216,24 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
+   "label": "Vehicle Handover Register",
+   "link_type": "Report",
+   "link_to": "Vehicle Handover Register",
+   "idx": 41,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Passenger Manifest Register",
+   "link_type": "Report",
+   "link_to": "Passenger Manifest Register",
+   "idx": 42,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Vehicle Utilisation",
    "link_type": "Report",
    "link_to": "Vehicle Utilisation",
@@ -399,5 +417,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-08-07 18:59:00.000000"
+ "modified": "2026-08-07 19:14:00.000000"
 }

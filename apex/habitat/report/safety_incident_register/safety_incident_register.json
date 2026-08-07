@@ -1,0 +1,23 @@
+{
+ "doctype": "Report",
+ "name": "Safety Incident Register",
+ "report_name": "Safety Incident Register",
+ "ref_doctype": "Safety Incident",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "Safety Officer"
+  },
+  {
+   "role": "Internal Auditor"
+  }
+ ]
+}

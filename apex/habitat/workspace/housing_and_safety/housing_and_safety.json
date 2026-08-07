@@ -348,6 +348,24 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
+   "label": "Room Bed Transfer Register",
+   "link_type": "Report",
+   "link_to": "Room Bed Transfer Register",
+   "idx": 46,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Incident Register",
+   "link_type": "Report",
+   "link_to": "Safety Incident Register",
+   "idx": 47,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Accommodation Occupancy Summary",
    "link_type": "Report",
    "link_to": "Accommodation Occupancy Summary",
@@ -665,5 +683,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-08-07 18:59:00.000000"
+ "modified": "2026-08-07 19:14:00.000000"
 }

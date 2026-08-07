@@ -144,6 +144,7 @@ Awaiting Handover,بانتظار التسليم
 Bills,الفواتير
 Blocked by Outstanding Items,موقوف بسبب مستحقات قائمة
 Boarding Events Created,أحداث الصعود المُنشأة
+Boarding Rate,معدل الصعود
 Buildings,المباني
 Chargeable,قابل للتحميل
 Claims,المطالبات
@@ -160,26 +161,35 @@ Damaged or Lost Only,التالف أو المفقود فقط
 Days Held,أيام الحيازة
 Days Overdue,أيام التأخير
 Days Waiting,أيام الانتظار
+Employee Transfers,نقل الموظفين
 Employees,الموظفون
 Expected Return,الإرجاع المتوقّع
 Expiring in 30 Days,تنتهي خلال 30 يوماً
 Expiry From Date,تاريخ الانتهاء من
 Expiry To Date,تاريخ الانتهاء إلى
+Failed Checks,فحوصات فاشلة
 Failed Scans,عمليات مسح فاشلة
 Goods Receipt Register,سجل استلام البضائع
+Handovers,التسليمات
 High or Critical,عالية أو حرجة
+High Severity,خطورة عالية
 Highest Variance %,أعلى نسبة انحراف %
 Idle Share,نسبة التعطّل
+Incidents,الحوادث
 Include Ended Assignments,تضمين الإسنادات المنتهية
 Include Settled Requests,تضمين الطلبات المنتهية
 Issued To,صُرف إلى
 Issues,عمليات الصرف
 Leases Watched,العقود المتابَعة
+Manifest,كشف الركاب
+Manifests,كشوف الركاب
 Missed Over 7 Days,فائتة أكثر من 7 أيام
 Missed Tasks,المهام الفائتة
 Monthly Rent at Risk,الإيجار الشهري المعرّض
 Movements,الحركات
 Not Acknowledged,بلا توقيع
+Not Boarded Only,غير الصاعدين فقط
+Open Discrepancies,فروقات مفتوحة
 Open Findings,الملاحظات المفتوحة
 Open Over 30 Days,مفتوحة أكثر من 30 يوماً
 Open Over 7 Days,مفتوحة أكثر من 7 أيام
@@ -188,6 +198,7 @@ Open Requests,الطلبات المفتوحة
 Over 7 Days,أكثر من 7 أيام
 Over 90 Days,أكثر من 90 يوماً
 Overdue Only,المتأخرة فقط
+Passenger Manifest Register,سجل كشوف الركاب
 Past SLA,تجاوز المدة المتفق عليها
 Payments,المدفوعات
 Pending Checkouts,مغادرات معلقة
@@ -201,15 +212,19 @@ Repair Cost,تكلفة الإصلاح
 Requests,الطلبات
 Resident Request Register,سجل طلبات الساكنين
 Residents,الساكنون
+Residents Moved,الساكنون المنقولون
 Returned By,أرجعه
 Returned Lines,بنود الإرجاع
 Returned in Good Order,أُرجع بحالة جيدة
 Returns,عمليات الإرجاع
 Review the Housing Assignment List,راجع قائمة التسكين
+Room Bed Transfer Register,سجل نقل الغرف والأسرّة
 Rows,الصفوف
+Safety Incident Register,سجل حوادث السلامة
 Safety Tasks Done This Week %,نسبة مهام السلامة المنجزة هذا الأسبوع %
 Scans,عمليات المسح
 Settlements,التسويات
+Signed,موقَّع
 SIMs Covered,الشرائح المشمولة
 SIMs Held,الشرائح المحتفَظ بها
 Settled Share,نسبة المسوّى
@@ -217,9 +232,14 @@ Still Held,لا تزال بالحيازة
 Suppliers,الموردون
 Suspended or Lost,موقوفة أو مفقودة
 Taken,مُستلَم
+Temporary Worker Transfers,نقل العمال المؤقتين
+Transfers,التنقلات
 Transport Requests Served %,نسبة طلبات النقل المخدومة %
 Unassigned Only,غير المسندة فقط
+Unsigned,غير موقَّع
+Unsigned Only,غير الموقَّعة فقط
 Vehicle Assignment Register,سجل إسناد المركبات
+Vehicle Handover Register,سجل تسليم المركبات
 View Housing Assignment list,عرض قائمة التسكين
 Waiting Over a Week,انتظار أكثر من أسبوع
 active,نشط
