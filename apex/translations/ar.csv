@@ -1307,6 +1307,7 @@ Days before a building lease end date to flag it on the watchlist.,عدد الأ
 Days before a safety task's due date to send a pre-due reminder.,عدد الأيام قبل تاريخ استحقاق مهمة السلامة لإرسال تذكير مسبق.
 Days before a temporary stay's expected check-out date to flag it on the supervisor's watchlist.,عدد الأيام قبل تاريخ المغادرة المتوقع لإقامة مؤقتة لإدراجها في قائمة متابعة المشرف.
 Days before expiry to trigger renewal alert,عدد الأيام قبل الانتهاء لإطلاق تنبيه التجديد
+Days from an accepted visit to payment falling due.,عدد الأيام من قبول الزيارة حتى استحقاق السداد.
 Days in Transit,أيام النقل
 "Days the worker may remain on a passport-only basis. Standard 30, extendable to a maximum of 90.",عدد الأيام التي يجوز للعامل البقاء فيها بالاعتماد على جواز السفر فقط. القياسي 30، قابل للتمديد إلى حد أقصى 90.
 Days to Expiry,الأيام المتبقية للانتهاء
@@ -3100,6 +3101,7 @@ Payment Routing Field Map,تعيين حقول توجيه الدفع
 Payment Routing Settings,إعدادات توجيه الدفع
 Payment Schedule,جدول الدفع
 Payment Target Mismatch,نوع مستند الدفع لا يطابق الإعداد
+Payment Terms (Days),مهلة السداد (أيام)
 "Payment method saved. To enable salary deductions, set the authorizer and salary components on the Salary Deduction Policy first, then turn the rules on there.",حُفظت طريقة الدفع. لتفعيل خصومات الراتب، حدد المفوّض ومكوّنات الراتب في سياسة خصم الراتب أولًا، ثم فعّل القواعد فيها.
 Payment schedule can only be regenerated on a Draft lease.,لا يمكن إعادة إنشاء جدول الدفع إلا لعقد إيجار في حالة «مسودة».
 Payment schedule will be generated automatically on first save.,سيُنشأ جدول الدفعات تلقائيًا عند الحفظ لأول مرة.
@@ -3111,6 +3113,7 @@ Payments,المدفوعات
 Payroll Date,تاريخ مسير الرواتب
 Payroll Deduction Entry,قيد الخصم على الراتب
 Payroll deduction raised,تسجيل الخصم على الراتب
+Penalty and Termination,الغرامة والإنهاء
 Pending,قيد الانتظار
 Pending Approval,بانتظار الاعتماد
 Pending Approvals,الاعتمادات المعلّقة
@@ -4549,6 +4552,7 @@ The closer must differ from the person who raised the case.,يجب أن يختل
 The contracting buyer; on a multi-company bench this is the party the contract binds.,الجهة المشترية في العقد؛ ومع أكثر من شركة على النظام هي الطرف الذي يلزمه العقد.
 "The contractor carries out the service named above at the buildings listed, at the stated rates, within the response limit shown. The contractor invoices only against a Subcontractor Service Order issued under this contract and confirmed by the site supervisor. No visit outside the covered buildings, and no rate other than the rates above, is payable under this contract.",ينفّذ المقاول الخدمة المذكورة أعلاه في المباني المدرجة، بالأسعار المبيّنة، وخلال مهلة الاستجابة الموضحة. ولا يفوتر المقاول إلا على أمر خدمة صادر بموجب هذا العقد ومؤكَّد من مشرف الموقع. ولا تُدفع أي زيارة خارج المباني المشمولة، ولا أي سعر غير الأسعار أعلاه.
 "The contractor certifies that the service above was carried out at the site on the actual visit date shown, and invoices only the amount payable stated here against this order. The site supervisor confirms the work was received. Any amount not stated on this order is not payable.",يقر المقاول بأن الخدمة أعلاه نُفّذت في الموقع بتاريخ الزيارة الفعلي المبيّن، ولا يفوتر إلا المبلغ المستحق المذكور هنا على هذا الأمر. ويؤكد مشرف الموقع استلام العمل. وأي مبلغ غير مذكور في هذا الأمر غير مستحق الدفع.
+"The contractor's own number for this agreement, so an invoice can be matched to it.",رقم المقاول الخاص بهذا الاتفاق، حتى تُطابق الفاتورة عليه.
 "The current driver's login user, mirrored from the assigned driver. Drives the driver-facing compliance notification.",مستخدم دخول السائق الحالي، منقول من السائق المسند. ويُستخدم لإرسال إشعار الامتثال إلى السائق.
 The current link cannot be shown again. Rotating issues a NEW link and QR and invalidates the previous one. Continue?,لا يمكن عرض الرابط الحالي مرة أخرى. سيؤدي التجديد إلى إصدار رابط ورمز QR جديدين وإلغاء السابق. هل تريد المتابعة؟
 "The damage described above is beyond economic repair. The vehicle or the damaged parts are taken out of service on this notice, and their remaining value is written off and is not recoverable.",التلف الموصوف أعلاه ما يستحق الإصلاح. تخرج المركبة أو القطع التالفة من الخدمة بهذا الإشعار، وتُشطب قيمتها المتبقية وما تُسترد.

@@ -251,6 +251,23 @@
    "fieldtype": "Link",
    "label": "Currency",
    "options": "Currency"
+  },
+  {
+   "fieldname": "provider_contract_reference",
+   "fieldtype": "Data",
+   "label": "Provider Contract Reference",
+   "description": "The contractor's own number for this agreement, so an invoice can be matched to it."
+  },
+  {
+   "fieldname": "payment_terms_days",
+   "fieldtype": "Int",
+   "label": "Payment Terms (Days)",
+   "description": "Days from an accepted visit to payment falling due."
+  },
+  {
+   "fieldname": "penalty_clause",
+   "fieldtype": "Small Text",
+   "label": "Penalty and Termination"
   }
  ],
  "links": [
@@ -320,6 +337,9 @@
   "supplier",
   "company",
   "currency",
+  "provider_contract_reference",
+  "payment_terms_days",
+  "penalty_clause",
   "naming_series",
   "subcontractor_service_contract_overview_col",
   "service_type",
@@ -349,5 +369,5 @@
   "subcontractor_service_contract_sec_table_covered_buildings",
   "covered_buildings"
  ],
- "modified": "2026-08-08 01:18:00.000000"
+ "modified": "2026-08-08 02:23:00.000000"
 }
