@@ -1,95 +1,127 @@
-<style>
-  .sal-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
-  .sal-doc h1 { font-size: 18px; margin: 0; }
-  .sal-doc .sal-sub { color: #666; font-size: 12px; margin-top: 2px; }
-  .sal-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
-              display: flex; justify-content: space-between; align-items: flex-start; }
-  .sal-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .sal-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
-  .sal-meta .sal-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
-  .sal-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .sal-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: left; }
-  .sal-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
-  .sal-items tr:nth-child(even) td { background: #f8f8fb; }
-  .sal-ar { color: #555; font-size: 10px; }
-  .sal-pos { color: #b00020; font-weight: bold; }
-  .sal-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
-  .sal-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
-  .sal-foot { margin-top: 24px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="sal-doc">
-{% if not no_letterhead and letter_head %}
-  <div style="margin-bottom:10px">{{ letter_head }}</div>
-{% endif %}
-  <div class="sal-head">
-    <div>
-      <h1>{{ _("Fuel Claim Voucher") }}</h1>
-      <div class="sal-sub">سند مطالبة وقود &bull; {{ doc.name }}</div>
-    </div>
-    <div style="text-align:right; font-size:11px; color:#666;">
-      {{ frappe.db.get_single_value("Salis Settings", "default_company") or "" }}
-    </div>
-  </div>
+{%- macro sec(ar, en) -%}
+<div class="lbl" style="margin:16px 0 5px;font-size:10px">{{ ar }}<span class="en">{{ en }}</span></div>
+{%- endmacro -%}
 
-  <table class="sal-meta">
-    <tr>
-      <td class="sal-lbl">Project <span class="sal-ar">المشروع</span></td>
-      <td>{{ doc.project or "" }}</td>
-      <td class="sal-lbl">Period <span class="sal-ar">الفترة</span></td>
-      <td>{{ doc.period_month or "" }}</td>
-    </tr>
-    <tr>
-      <td class="sal-lbl">Vehicle <span class="sal-ar">المركبة</span></td>
-      <td>{{ doc.vehicle or "" }}</td>
-      <td class="sal-lbl">Driver <span class="sal-ar">السائق</span></td>
-      <td>{{ doc.driver or "—" }}</td>
-    </tr>
-    <tr>
-      <td class="sal-lbl">Fuel Quota <span class="sal-ar">حصة الوقود</span></td>
-      <td>{{ doc.fuel_quota or "—" }}</td>
-      <td class="sal-lbl">Status <span class="sal-ar">الحالة</span></td>
-      <td>{{ doc.status or "" }}{% if doc.is_increase %} &bull; {{ _("Quota Increase") }}{% endif %}</td>
-    </tr>
-  </table>
+{%- set veh = (frappe.db.get_value("Salis Vehicle", doc.vehicle,
+      ["plate_number", "vehicle_category", "ownership", "rental_office", "company", "project",
+       "planned_fuel_grade", "planned_daily_fuel"], as_dict=True) if doc.vehicle else None) or _dict() -%}
+{%- set drv = (frappe.db.get_value("Salis Driver", doc.driver,
+      ["full_name", "national_id", "driver_id", "phone", "supervisor"],
+      as_dict=True) if doc.driver else None) or _dict() -%}
+{%- set quota = (frappe.db.get_value("Fuel Quota", doc.fuel_quota,
+      ["period_month", "monthly_litres", "monthly_amount", "consumed_litres", "status"],
+      as_dict=True) if doc.fuel_quota else None) or _dict() -%}
+{%- set company = doc.company or veh.company -%}
+{%- set cur = (frappe.db.get_value("Company", company, "default_currency") if company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set requester = frappe.get_fullname(doc.requested_by) if doc.requested_by else None -%}
+{%- set supervisor = frappe.get_fullname(drv.supervisor) if drv.supervisor else None -%}
 
-  <table class="sal-items">
-    <thead>
-      <tr>
-        <th>Measure <span class="sal-ar">البند</span></th>
-        <th style="width:30%;">Value <span class="sal-ar">القيمة</span></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Claimed Litres <span class="sal-ar">اللترات المُطالَب بها</span></td>
-        <td>{{ frappe.format(doc.claimed_litres or 0, {"fieldtype": "Float"}) }}</td>
-      </tr>
-      <tr>
-        <td>Consumed Litres (system) <span class="sal-ar">اللترات المُستهلَكة (النظام)</span></td>
-        <td>{{ frappe.format(doc.consumed_litres or 0, {"fieldtype": "Float"}) }}</td>
-      </tr>
-      <tr>
-        <td>Variance (L) <span class="sal-ar">الفرق (لتر)</span></td>
-        <td>{% if (doc.variance_litres or 0) > 0 %}<span class="sal-pos">{{ frappe.format(doc.variance_litres, {"fieldtype": "Float"}) }}</span>{% else %}{{ frappe.format(doc.variance_litres or 0, {"fieldtype": "Float"}) }}{% endif %}</td>
-      </tr>
-      <tr>
-        <td>Claimed Amount <span class="sal-ar">المبلغ المُطالَب به</span></td>
-        <td>{{ frappe.format(doc.claimed_amount, {"fieldtype": "Currency"}) }}</td>
-      </tr>
-    </tbody>
-  </table>
+{%- set claimed = frappe.utils.flt(doc.claimed_litres) -%}
+{%- set consumed = frappe.utils.flt(doc.consumed_litres) -%}
+{%- set variance = frappe.utils.flt(doc.variance_litres) -%}
+{%- set margin = frappe.utils.cint(frappe.db.get_single_value("Salis Settings", "fuel_overage_margin_percent")) -%}
+{%- set allowed = consumed * margin / 100.0 -%}
 
-  <table class="sal-sign">
-    <tr>
-      <td>Prepared by (Supervisor)<br><span class="sal-ar">أعدّها (المشرف)</span></td>
-      <td style="text-align:right;">Approved by (Operations)<br><span class="sal-ar">اعتمدها (العمليات)</span></td>
-    </tr>
-  </table>
+{%- set lines = [{"desc": (_("Quota increase claimed for the period") if doc.is_increase
+                           else _("Fuel claimed for the period")),
+                  "litres": claimed, "amount": doc.claimed_amount}] -%}
 
-  <div class="sal-foot">
-    {{ _("This voucher reconciles the claimed fuel against consumption recorded in the Fuel Consumption Ledger. It does not post to the general ledger.") }}
-    يُسوّي هذا السند الوقود المُطالَب به مقابل الاستهلاك المُسجّل في سجل استهلاك الوقود.
-    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
-  </div>
+{%- set recon = [] -%}
+{%- if doc.fuel_quota -%}
+  {%- set _x = recon.append({"desc": _("Monthly quota for this vehicle"), "litres": quota.monthly_litres, "amount": quota.monthly_amount}) -%}
+{%- endif -%}
+{%- set _x = recon.append({"desc": _("Claimed on this voucher"), "litres": claimed, "amount": doc.claimed_amount}) -%}
+{%- set _x = recon.append({"desc": _("Metered as actually consumed"), "litres": consumed, "amount": None}) -%}
+{%- set _x = recon.append({"desc": _("Difference between claimed and consumed"), "litres": variance, "amount": None}) -%}
+
+{%- set gate = [
+  {"ar": _("The claim sits inside the monthly quota"), "en": "Inside the quota",
+   "state": ("na" if not doc.fuel_quota else ("ok" if claimed <= frappe.utils.flt(quota.monthly_litres) else "bad")),
+   "note": (_("Quota") ~ ": " ~ frappe.format_value(quota.monthly_litres, {"fieldtype": "Float"})) if doc.fuel_quota else None},
+  {"ar": _("The difference against metered consumption is inside the allowed margin"), "en": "Within the margin",
+   "state": ("na" if not consumed else ("ok" if (variance if variance >= 0 else -variance) <= allowed else "bad")),
+   "note": (_("Allowed margin") ~ ": " ~ margin | string ~ "%") if margin else None},
+  {"ar": _("The claim has been reconciled against the movement record"), "en": "Reconciled",
+   "state": ("bad" if doc.status == "Disputed" else ("ok" if doc.status in ("Reconciled", "Approved", "Closed") else "na")),
+   "note": _(doc.status) if doc.status else None},
+  {"ar": _("The claim carries a cost centre to charge"), "en": "Cost centre set",
+   "state": "ok" if doc.cost_center else "bad", "note": doc.cost_center},
+] -%}
+
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
+
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
+
+  {{ ax.doc_title(doc, _("Fuel Claim Voucher"), "Fuel Claim Voucher",
+                  (doc.period_month or "") ~ " · " ~ _(doc.status or "")) }}
+
+  {{ ax.party_block([
+      {"role_ar": _("Claimed By"), "role_en": "Claiming project",
+       "name": doc.project,
+       "lines": [
+         (_("Requested By") ~ ": " ~ requester) if requester else None,
+         (_("Fleet Supervisor") ~ ": " ~ supervisor) if supervisor else None,
+         (_("Period") ~ ": " ~ doc.period_month) if doc.period_month else None,
+       ]},
+      {"role_ar": _("Charged To"), "role_en": "Charged to",
+       "name": company,
+       "lines": [
+         (_("Cost Center") ~ ": " ~ doc.cost_center) if doc.cost_center else None,
+         (_("Fuel Quota") ~ ": " ~ doc.fuel_quota) if doc.fuel_quota else None,
+       ]},
+      {"role_ar": _("Consuming Vehicle"), "role_en": "Consuming vehicle",
+       "name": veh.plate_number or doc.vehicle,
+       "lines": [
+         (_("Vehicle Category") ~ ": " ~ veh.vehicle_category) if veh.vehicle_category else None,
+         (_("Fuel Grade") ~ ": " ~ _(veh.planned_fuel_grade)) if veh.planned_fuel_grade else None,
+         (_("Driver") ~ ": " ~ (drv.full_name or doc.driver)) if (drv.full_name or doc.driver) else None,
+       ]},
+  ]) }}
+
+  {{ sec(_("Claim Identification"), "Claim identification") }}
+  {{ ax.field_grid([
+      [{"ar": _("Period"), "en": "Period", "value": doc.period_month},
+       {"ar": _("Claim Status"), "en": "Claim status", "value": doc.status, "tr": True}],
+      [{"ar": _("Plate Number"), "en": "Plate", "value": veh.plate_number},
+       {"ar": _("Vehicle Code"), "en": "Vehicle code", "value": doc.vehicle}],
+      [{"ar": _("Quota Increase Claim"), "en": "Quota increase",
+        "value": _("Yes") if doc.is_increase else _("No")},
+       {"ar": _("Planned Daily Fuel"), "en": "Planned daily fuel", "value": veh.planned_daily_fuel, "fmt": "Currency"}],
+  ]) }}
+
+  {{ sec(_("What Is Being Claimed"), "Claim line") }}
+  {{ ax.line_table(
+      [{"ar": _("Description"), "en": "Description", "key": "desc"},
+       {"ar": _("Litres"), "en": "Litres", "key": "litres", "num": True, "width": "18%", "fmt": "Float"},
+       {"ar": _("Amount"), "en": "Amount", "key": "amount", "num": True, "width": "22%", "fmt": "Currency"}],
+      lines,
+      totals=[frappe.format_value(claimed, {"fieldtype": "Float"}),
+              frappe.format_value(doc.claimed_amount, {"fieldtype": "Currency"})],
+      empty_text=_("Nothing has been claimed on this voucher")) }}
+  {{ ax.amount_words(doc.claimed_amount, cur) }}
+
+  {{ sec(_("Reconciliation Against the Quota"), "Reconciliation") }}
+  {{ ax.line_table(
+      [{"ar": _("Description"), "en": "Description", "key": "desc"},
+       {"ar": _("Litres"), "en": "Litres", "key": "litres", "num": True, "width": "18%", "fmt": "Float"},
+       {"ar": _("Amount"), "en": "Amount", "key": "amount", "num": True, "width": "22%", "fmt": "Currency"}],
+      recon,
+      empty_text=_("There is nothing to reconcile on this voucher")) }}
+
+  {{ sec(_("Release Checks"), "Release checks") }}
+  {{ ax.check_list(gate) }}
+
+  {{ ax.declaration(_("The claiming party certifies that the litres above were drawn by this vehicle in the period stated, that the amount is due and has not been claimed before, and that it is charged to the cost centre named on this voucher.")) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Requested By"), "en": "Requested by", "name": requester},
+      {"ar": _("Reconciled By"), "en": "Movement", "name": None},
+      {"ar": _("Approved By"), "en": "Finance", "name": None},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

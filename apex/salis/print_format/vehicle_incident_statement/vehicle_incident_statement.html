@@ -1,85 +1,134 @@
-<style>
-  .sal-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
-  .sal-doc h1 { font-size: 18px; margin: 0; }
-  .sal-doc .sal-sub { color: #666; font-size: 12px; margin-top: 2px; }
-  .sal-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
-              display: flex; justify-content: space-between; align-items: flex-start; }
-  .sal-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .sal-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
-  .sal-meta .sal-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
-  .sal-ar { color: #555; font-size: 10px; }
-  .sal-block { border: 1px solid #e2e2ea; padding: 8px 10px; margin-bottom: 14px; }
-  .sal-block .sal-bt { font-weight: bold; margin-bottom: 4px; }
-  .sal-pos { color: #b00020; font-weight: bold; }
-  .sal-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
-  .sal-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
-  .sal-foot { margin-top: 20px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="sal-doc">
-{% if not no_letterhead and letter_head %}
-  <div style="margin-bottom:10px">{{ letter_head }}</div>
-{% endif %}
-  <div class="sal-head">
-    <div>
-      <h1>{{ _("Vehicle Incident Statement") }}</h1>
-      <div class="sal-sub">بيان واقعة مركبة &bull; {{ doc.name }}</div>
-    </div>
-    <div style="text-align:right; font-size:11px; color:#666;">
-      {{ frappe.db.get_single_value("Salis Settings", "default_company") or "" }}
-    </div>
+{%- macro sec(ar, en) -%}
+<div class="lbl" style="margin:16px 0 5px;font-size:10px">{{ ar }}<span class="en">{{ en }}</span></div>
+{%- endmacro -%}
+
+{%- set veh = (frappe.db.get_value("Salis Vehicle", doc.vehicle,
+      ["plate_number", "vehicle_category", "ownership", "rental_office", "company", "project", "odometer"],
+      as_dict=True) if doc.vehicle else None) or _dict() -%}
+{%- set drv = (frappe.db.get_value("Salis Driver", doc.driver,
+      ["full_name", "national_id", "driver_id", "phone", "license_number", "license_expiry", "supervisor", "employee"],
+      as_dict=True) if doc.driver else None) or _dict() -%}
+{%- set vdoc = frappe.get_doc("Salis Vehicle", doc.vehicle) if doc.vehicle else None -%}
+{%- set supervisor = frappe.get_fullname(drv.supervisor) if drv.supervisor else None -%}
+{%- set cur = (frappe.db.get_value("Company", veh.company, "default_currency") if veh.company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set emp_name = frappe.db.get_value("Employee", doc.recovery_employee, "employee_name") if doc.recovery_employee else None -%}
+
+{%- set cover = [] -%}
+{%- if vdoc -%}
+  {%- for c in vdoc.compliance_documents -%}
+    {%- if c.compliance_type in ("Registration (Istimara)", "Insurance", "Operating Card") -%}
+      {%- set _x = cover.append({"ctype": c.compliance_type, "docno": c.document_number,
+            "expiry": c.expiry_date, "cstate": c.status}) -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- set instalments = ((doc.recovery_amount / doc.installment_amount) | round(0, "ceil") | int)
+                      if (doc.recovery_amount and doc.installment_amount) else None -%}
+
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
+
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
+
+  {{ ax.doc_title(doc, _("Vehicle Incident Statement"), "Vehicle Incident Statement",
+                  _(doc.incident_type or "") ~ " · " ~ _(doc.status or "")) }}
+
+  {{ ax.party_block([
+      {"role_ar": _("Driver at the Wheel"), "role_en": "Driver involved",
+       "name": drv.full_name or doc.driver,
+       "lines": [
+         (_("National ID") ~ ": " ~ drv.national_id) if drv.national_id else None,
+         (_("Licence Number") ~ ": " ~ drv.license_number) if drv.license_number else None,
+         (_("Licence Expiry") ~ ": " ~ frappe.format_date(drv.license_expiry)) if drv.license_expiry else None,
+         (_("Phone") ~ ": " ~ drv.phone) if drv.phone else None,
+       ]},
+      {"role_ar": _("Vehicle Owner of Record"), "role_en": "Owner of record",
+       "name": veh.rental_office or veh.company,
+       "lines": [
+         (_("Ownership") ~ ": " ~ _(veh.ownership)) if veh.ownership else None,
+         (_("Company") ~ ": " ~ veh.company) if veh.company else None,
+         (_("Project") ~ ": " ~ veh.project) if veh.project else None,
+       ]},
+      {"role_ar": _("Reported By"), "role_en": "Reported by",
+       "name": doc.reported_by,
+       "lines": [
+         (_("Fleet Supervisor") ~ ": " ~ supervisor) if supervisor else None,
+         (_("Write-Off Case") ~ ": " ~ doc.write_off_case) if doc.write_off_case else None,
+       ]},
+  ]) }}
+
+  {{ sec(_("The Incident"), "The incident") }}
+  {{ ax.field_grid([
+      [{"ar": _("Incident Type"), "en": "Type", "value": doc.incident_type, "tr": True},
+       {"ar": _("Incident Date"), "en": "Date", "value": doc.incident_date, "fmt": "Date"}],
+      [{"ar": _("Location"), "en": "Location", "value": doc.location},
+       {"ar": _("Police Report Number"), "en": "Police report no.", "value": doc.report_number}],
+      [{"ar": _("Fault / Liable Party"), "en": "Fault", "value": doc.fault},
+       {"ar": _("Case Status"), "en": "Case status", "value": doc.status, "tr": True}],
+  ]) }}
+
+  {{ sec(_("Vehicle Identification"), "Vehicle identification") }}
+  {{ ax.field_grid([
+      [{"ar": _("Plate Number"), "en": "Plate", "value": veh.plate_number},
+       {"ar": _("Vehicle Code"), "en": "Vehicle code", "value": doc.vehicle}],
+      [{"ar": _("Vehicle Category"), "en": "Category", "value": veh.vehicle_category},
+       {"ar": _("Odometer on File"), "en": "Odometer on file", "value": veh.odometer, "fmt": "Int"}],
+  ]) }}
+
+  {{ sec(_("Cover in Force on the Vehicle"), "Cover in force") }}
+  {{ ax.line_table(
+      [{"ar": _("Document"), "en": "Document", "key": "ctype", "width": "30%", "tr": True},
+       {"ar": _("Number"), "en": "Number", "key": "docno", "width": "26%"},
+       {"ar": _("Expires"), "en": "Expires", "key": "expiry", "width": "22%", "fmt": "Date"},
+       {"ar": _("State"), "en": "State", "key": "cstate", "tr": True}],
+      cover,
+      empty_text=_("No insurance or registration document is recorded for this vehicle")) }}
+
+  {{ sec(_("Statement of What Happened"), "Statement") }}
+  {{ ax.note_block(doc.description or _("No description was recorded.")) }}
+  {{ ax.note_block((_("Damaged Parts") ~ ": " ~ doc.damaged_parts) if doc.damaged_parts else None) }}
+
+  {{ ax.field_grid([[
+      {"ar": _("Estimated Cost of Damage"), "en": "Estimated cost", "value": doc.estimated_cost, "fmt": "Currency"},
+      {"ar": _("Recover from Driver"), "en": "Recover from driver",
+       "value": _("Yes") if doc.recover_from_driver else _("No")},
+  ]]) }}
+  {{ ax.amount_words(doc.estimated_cost, cur) }}
+
+  {{ sec(_("Photographic Evidence"), "Photographic evidence") }}
+  {{ ax.photo_slots(3) }}
+
+  {%- if doc.recover_from_driver %}
+  {{ sec(_("Cost Recovery from the Driver"), "Cost recovery") }}
+  {{ ax.field_grid([
+      [{"ar": _("Employee"), "en": "Employee", "value": emp_name or doc.recovery_employee},
+       {"ar": _("Amount to Recover"), "en": "Amount to recover", "value": doc.recovery_amount, "fmt": "Currency"}],
+      [{"ar": _("Instalment per Pay Period"), "en": "Instalment", "value": doc.installment_amount, "fmt": "Currency"},
+       {"ar": _("Number of Instalments"), "en": "Instalments", "value": instalments, "fmt": "Int"}],
+      [{"ar": _("Consent Signed On"), "en": "Consent signed on", "value": doc.signed_on, "fmt": "Date"},
+       {"ar": _("Employee Advance"), "en": "Advance reference", "value": doc.recovery_advance}],
+  ]) }}
+  {{ ax.amount_words(doc.recovery_amount, cur) }}
+  {%- if doc.worker_signature %}
+  <div style="border:1px solid #ddd5c2;border-radius:5px;padding:8px 10px;margin-bottom:12px">
+    <span class="lbl">{{ _("Worker Consent Signature") }}<span class="en">Worker consent signature</span></span>
+    <img src="{{ doc.worker_signature }}" style="max-height:70px;display:block;margin-top:5px">
   </div>
+  {%- endif %}
+  {{ ax.declaration(_("The employee agrees that the amount above is deducted from his pay in the instalments shown, until the whole amount is settled.")) }}
+  {%- endif %}
 
-  <table class="sal-meta">
-    <tr>
-      <td class="sal-lbl">Vehicle <span class="sal-ar">المركبة</span></td>
-      <td>{{ doc.vehicle or "" }}</td>
-      <td class="sal-lbl">Incident Type <span class="sal-ar">نوع الواقعة</span></td>
-      <td>{{ _(doc.incident_type) if doc.incident_type else "" }}</td>
-    </tr>
-    <tr>
-      <td class="sal-lbl">Incident Date <span class="sal-ar">تاريخ الواقعة</span></td>
-      <td>{{ frappe.format(doc.incident_date, {"fieldtype": "Date"}) if doc.incident_date else "" }}</td>
-      <td class="sal-lbl">Driver <span class="sal-ar">السائق</span></td>
-      <td>{{ doc.driver or "—" }}</td>
-    </tr>
-    <tr>
-      <td class="sal-lbl">Location <span class="sal-ar">الموقع</span></td>
-      <td>{{ doc.location or "—" }}</td>
-      <td class="sal-lbl">Police Report No. <span class="sal-ar">رقم بلاغ الشرطة</span></td>
-      <td>{{ doc.report_number or "—" }}</td>
-    </tr>
-    <tr>
-      <td class="sal-lbl">Status <span class="sal-ar">الحالة</span></td>
-      <td>{{ _(doc.status) if doc.status else "" }}</td>
-      <td class="sal-lbl">Estimated Cost <span class="sal-ar">التكلفة التقديرية</span></td>
-      <td>{{ frappe.format(doc.estimated_cost, {"fieldtype": "Currency"}) if doc.estimated_cost else "—" }}</td>
-    </tr>
-    {% if doc.incident_type == "Accident" %}
-    <tr>
-      <td class="sal-lbl">Fault / Liable Party <span class="sal-ar">الطرف المسؤول</span></td>
-      <td>{{ doc.fault or "—" }}</td>
-      <td class="sal-lbl">Damaged Parts <span class="sal-ar">الأجزاء المتضررة</span></td>
-      <td>{{ doc.damaged_parts or "—" }}</td>
-    </tr>
-    {% endif %}
-  </table>
+  {{ ax.declaration(_("The driver states that what is written above is a true account of the incident, and that he did not leave the site before the competent authority attended or the report was raised.")) }}
 
-  <div class="sal-block">
-    <div class="sal-bt">Description <span class="sal-ar">الوصف</span></div>
-    <div>{{ doc.description or "" }}</div>
-  </div>
+  {{ ax.sign_block([
+      {"ar": _("Driver at the Wheel"), "en": "Driver", "name": drv.full_name or doc.driver},
+      {"ar": _("Fleet Supervisor"), "en": "Fleet supervisor", "name": supervisor or doc.reported_by},
+      {"ar": _("Operations Manager"), "en": "Operations", "name": None},
+  ]) }}
 
-  <table class="sal-sign">
-    <tr>
-      <td>Reported by <br><span class="sal-ar">سجّله</span></td>
-      <td style="text-align:right;">Reviewed by (Operations) <br><span class="sal-ar">راجعه (العمليات)</span></td>
-    </tr>
-  </table>
-
-  <div class="sal-foot">
-    {{ _("This statement records a fleet incident (accident or theft) against the vehicle. It does not post to the general ledger; any recovery or write-off is handled separately.") }}
-    يسجّل هذا البيان بلاغ حادث أو سرقة على المركبة، ولا يُرحَّل إلى دفتر الأستاذ العام.
-    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
-  </div>
+  {{ ax.doc_footer(doc) }}
 </div>

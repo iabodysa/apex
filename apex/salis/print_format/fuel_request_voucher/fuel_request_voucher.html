@@ -1,83 +1,147 @@
-<style>
-  .ax-doc { font-family: Arial, sans-serif; color: #14332a; font-size: 12px; }
-  .ax-doc h1 { font-size: 18px; margin: 0; color: #14332a; }
-  .ax-sub { color: #4a5e55; font-size: 11px; margin-top: 2px; }
-  .ax-head { border-bottom: 3px solid #00844e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ax-recipient { font-size: 11px; color: #14332a; background: #eef6f1;
-                  border: 1px solid #00844e; border-radius: 3px; padding: 4px 10px; }
-  .ax-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ax-meta td { padding: 4px 8px; border: 1px solid #d9e4de; vertical-align: top; }
-  .ax-meta .ax-lbl { background: #f1f7f3; font-weight: bold; width: 22%; color: #14332a; }
-  .ax-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .ax-items th { background: #00844e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ax-items td { padding: 6px 8px; border: 1px solid #d9e4de; }
-  .ax-items tr:nth-child(even) td { background: #f6faf7; }
-  .ax-block { border: 1px solid #d9e4de; padding: 8px; margin-bottom: 12px; }
-  .ax-block .ax-blk-lbl { font-weight: bold; color: #00844e; margin-bottom: 4px; }
-  .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
-  .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
-  .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
-  .ax-letterhead { margin-bottom: 10px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div class="ax-letterhead">{{ letter_head }}</div>
-{% endif %}
-  <div class="ax-head">
-    <div>
-      <h1>{{ _("Fuel Request") }}</h1>
-      <div class="ax-sub">{{ doc.name }} &bull; {{ doc.get_formatted("request_date") or "" }}</div>
-    </div>
-    <div class="ax-recipient">{{ _("Recipient") }}: {{ _("Driver") }}</div>
-  </div>
+{%- macro sec(ar, en) -%}
+<div class="lbl" style="margin:16px 0 5px;font-size:10px">{{ ar }}<span class="en">{{ en }}</span></div>
+{%- endmacro -%}
 
-  <table class="ax-meta">
-    <tr>
-      <td class="ax-lbl">{{ _("Request Type") }}</td>
-      <td>{{ _(doc.request_type) if doc.request_type else "" }}</td>
-      <td class="ax-lbl">{{ _("Request Date") }}</td>
-      <td>{{ doc.get_formatted("request_date") or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Vehicle") }}</td>
-      <td>{{ doc.vehicle or "" }}</td>
-      <td class="ax-lbl">{{ _("Driver") }}</td>
-      <td>{{ doc.driver or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Project") }}</td>
-      <td>{{ doc.project or "" }}</td>
-      <td class="ax-lbl">{{ _("Fuel Platform") }}</td>
-      <td>{{ doc.fuel_platform or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Requested Litres") }}</td>
-      <td>{{ doc.get_formatted("requested_litres") or "" }}</td>
-      <td class="ax-lbl">{{ _("Top-up Litres") }}</td>
-      <td>{{ doc.get_formatted("topup_litres") or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Amount (SAR)") }}</td>
-      <td>{{ doc.get_formatted("amount") or "" }}</td>
-      <td class="ax-lbl">{{ _("Chip Number") }}</td>
-      <td>{{ doc.chip_number or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Requested By") }}</td>
-      <td>{{ doc.requested_by or "" }}</td>
-      <td class="ax-lbl">{{ _("Approved By") }}</td>
-      <td>{{ doc.approved_by or "" }}</td>
-    </tr>
-  </table>
+{%- set veh = (frappe.db.get_value("Salis Vehicle", doc.vehicle,
+      ["plate_number", "vehicle_category", "ownership", "rental_office", "company", "project",
+       "planned_fuel_grade", "planned_daily_fuel", "odometer", "status"],
+      as_dict=True) if doc.vehicle else None) or _dict() -%}
+{%- set drv = (frappe.db.get_value("Salis Driver", doc.driver,
+      ["full_name", "national_id", "driver_id", "phone", "license_number", "supervisor"],
+      as_dict=True) if doc.driver else None) or _dict() -%}
+{%- set quota = (frappe.db.get_value("Fuel Quota", doc.fuel_quota,
+      ["period_month", "monthly_litres", "monthly_amount", "consumed_litres", "status"],
+      as_dict=True) if doc.fuel_quota else None) or _dict() -%}
+{%- set plat = (frappe.db.get_value("Fuel Platform", doc.fuel_platform,
+      ["platform_name", "provider", "status"], as_dict=True) if doc.fuel_platform else None) or _dict() -%}
+{%- set cur = (frappe.db.get_value("Company", veh.company, "default_currency") if veh.company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set approver = frappe.get_fullname(doc.approved_by) if doc.approved_by else None -%}
+{%- set requester = frappe.get_fullname(doc.requested_by) if doc.requested_by else None -%}
 
-  <table class="ax-sign">
-    <tr>
-      <td>{{ _("Driver") }}<br>{{ _("Signature") }}</td>
-      <td>{{ _("Approved By") }}{% if doc.approved_by %}<br>{{ doc.approved_by }}{% endif %}<br>{{ _("Signature") }}</td>
-    </tr>
-  </table>
+{%- set base = frappe.utils.flt(doc.requested_litres) -%}
+{%- set topup = frappe.utils.flt(doc.topup_litres) -%}
+{%- set total_litres = base + topup -%}
+{%- set remaining = frappe.utils.flt(quota.monthly_litres) - frappe.utils.flt(quota.consumed_litres) -%}
 
-  <div class="ax-foot">{{ doc.name }}</div>
+{%- set lines = [] -%}
+{%- if base or not topup -%}
+  {%- set _x = lines.append({"desc": _("Litres authorised for dispensing"), "litres": base, "amount": doc.amount}) -%}
+{%- endif -%}
+{%- if topup -%}
+  {%- set _x = lines.append({"desc": _("Extra litres on top of the standing quota"), "litres": topup, "amount": None}) -%}
+{%- endif -%}
+
+{%- set quota_lines = [] -%}
+{%- if doc.fuel_quota -%}
+  {%- set _x = quota_lines.append({"desc": _("Monthly quota for this vehicle"), "litres": quota.monthly_litres, "amount": quota.monthly_amount}) -%}
+  {%- set _x = quota_lines.append({"desc": _("Drawn against the quota so far"), "litres": quota.consumed_litres, "amount": None}) -%}
+  {%- set _x = quota_lines.append({"desc": _("Left on the quota before this voucher"), "litres": remaining, "amount": None}) -%}
+  {%- set _x = quota_lines.append({"desc": _("Left after this voucher is dispensed"), "litres": remaining - total_litres, "amount": None}) -%}
+{%- endif -%}
+
+{%- set gate = [
+  {"ar": _("The voucher carries an approving officer"), "en": "Approved",
+   "state": "ok" if doc.approved_by else "bad", "note": approver},
+  {"ar": _("The quota behind this voucher is still open"), "en": "Quota open",
+   "state": ("na" if not doc.fuel_quota else ("ok" if quota.status == "Active" else "bad")),
+   "note": _(quota.status) if quota.status else None},
+  {"ar": _("The quantity fits inside what is left on the quota"), "en": "Fits the quota",
+   "state": ("na" if not doc.fuel_quota else ("ok" if total_litres <= remaining else "bad")),
+   "note": (_("Left") ~ ": " ~ frappe.format_value(remaining, {"fieldtype": "Float"})) if doc.fuel_quota else None},
+  {"ar": _("A temporary voucher that has to be reverted"), "en": "Temporary voucher",
+   "state": ("na" if not doc.is_temporary else ("ok" if doc.reverted else "bad")),
+   "note": (_("Revert by") ~ ": " ~ frappe.format_date(doc.revert_due_date)) if doc.revert_due_date else None},
+] -%}
+
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
+
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
+
+  {{ ax.doc_title(doc, _("Fuel Request Voucher"), "Fuel Request Voucher",
+                  _(doc.request_type or "") ~ " · " ~ _(doc.status or "")) }}
+
+  {{ ax.party_block([
+      {"role_ar": _("Dispense To"), "role_en": "Beneficiary vehicle",
+       "name": veh.plate_number or doc.vehicle,
+       "lines": [
+         (_("Vehicle Category") ~ ": " ~ veh.vehicle_category) if veh.vehicle_category else None,
+         (_("Fuel Grade") ~ ": " ~ _(veh.planned_fuel_grade)) if veh.planned_fuel_grade else None,
+         (_("Chip Number") ~ ": " ~ doc.chip_number) if doc.chip_number else None,
+       ]},
+      {"role_ar": _("Carried By"), "role_en": "Driver",
+       "name": drv.full_name or doc.driver,
+       "lines": [
+         (_("National ID") ~ ": " ~ drv.national_id) if drv.national_id else None,
+         (_("Licence Number") ~ ": " ~ drv.license_number) if drv.license_number else None,
+         (_("Phone") ~ ": " ~ drv.phone) if drv.phone else None,
+       ]},
+      {"role_ar": _("Dispensing Party"), "role_en": "Fuel platform",
+       "name": plat.platform_name or doc.fuel_platform,
+       "lines": [
+         (_("Provider") ~ ": " ~ plat.provider) if plat.provider else None,
+         (_("Project") ~ ": " ~ (doc.project or veh.project)) if (doc.project or veh.project) else None,
+         (_("Approved By") ~ ": " ~ approver) if approver else None,
+       ]},
+  ]) }}
+
+  {{ sec(_("Voucher Identification"), "Voucher identification") }}
+  {{ ax.field_grid([
+      [{"ar": _("Request Type"), "en": "Request type", "value": doc.request_type, "tr": True},
+       {"ar": _("Request Date"), "en": "Request date", "value": doc.request_date, "fmt": "Date"}],
+      [{"ar": _("Plate Number"), "en": "Plate", "value": veh.plate_number},
+       {"ar": _("Vehicle Code"), "en": "Vehicle code", "value": doc.vehicle}],
+      [{"ar": _("Fuel Quota"), "en": "Quota reference", "value": doc.fuel_quota},
+       {"ar": _("Period"), "en": "Period", "value": quota.period_month}],
+      [{"ar": _("Voucher Status"), "en": "Voucher status", "value": doc.status, "tr": True},
+       {"ar": _("Requested By"), "en": "Requested by", "value": requester}],
+  ]) }}
+
+  {{ sec(_("What This Voucher Authorises"), "Authorised quantity") }}
+  {{ ax.line_table(
+      [{"ar": _("Description"), "en": "Description", "key": "desc"},
+       {"ar": _("Litres"), "en": "Litres", "key": "litres", "num": True, "width": "18%", "fmt": "Float"},
+       {"ar": _("Amount"), "en": "Amount", "key": "amount", "num": True, "width": "22%", "fmt": "Currency"}],
+      lines,
+      totals=[frappe.format_value(total_litres, {"fieldtype": "Float"}),
+              frappe.format_value(doc.amount, {"fieldtype": "Currency"})],
+      empty_text=_("No quantity has been entered on this voucher")) }}
+  {{ ax.amount_words(doc.amount, cur) }}
+
+  {%- if doc.chip_number or doc.request_type == "Chip" %}
+  {{ sec(_("Fuel Chip"), "Fuel chip") }}
+  {{ ax.field_grid([[
+      {"ar": _("Chip Number"), "en": "Chip number", "value": doc.chip_number},
+      {"ar": _("Chip Action"), "en": "Chip action", "value": doc.action, "tr": True},
+  ]]) }}
+  {%- endif %}
+
+  {{ sec(_("Position of the Quota"), "Quota position") }}
+  {{ ax.line_table(
+      [{"ar": _("Description"), "en": "Description", "key": "desc"},
+       {"ar": _("Litres"), "en": "Litres", "key": "litres", "num": True, "width": "18%", "fmt": "Float"},
+       {"ar": _("Amount"), "en": "Amount", "key": "amount", "num": True, "width": "22%", "fmt": "Currency"}],
+      quota_lines,
+      empty_text=_("This voucher is not tied to a monthly quota")) }}
+
+  {{ sec(_("Release Checks"), "Release checks") }}
+  {{ ax.check_list(gate) }}
+
+  {%- if doc.is_temporary and not doc.reverted %}
+  {{ ax.note_block(_("This is a temporary voucher. The vehicle goes back to its standing quota on the revert date shown above, and any litre drawn after that date is an exception.")) }}
+  {%- endif %}
+
+  {{ ax.declaration(_("This voucher authorises the dispensing party to give the quantity written above to this vehicle only, on the chip or the account named on it, and no more. Anything dispensed beyond it is not payable by the company.")) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Requested By"), "en": "Requested by", "name": requester},
+      {"ar": _("Approved By"), "en": "Approved by", "name": approver},
+      {"ar": _("Received By"), "en": "Driver receiving", "name": drv.full_name or doc.driver},
+      {"ar": _("Dispensed By"), "en": "Station attendant", "name": None},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

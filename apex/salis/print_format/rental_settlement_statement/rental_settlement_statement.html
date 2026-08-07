@@ -1,105 +1,114 @@
-<style>
-  .sal-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
-  .sal-doc h1 { font-size: 18px; margin: 0; }
-  .sal-doc .sal-sub { color: #666; font-size: 12px; margin-top: 2px; }
-  .sal-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
-              display: flex; justify-content: space-between; align-items: flex-start; }
-  .sal-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .sal-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
-  .sal-meta .sal-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
-  .sal-items { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-  .sal-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: left; }
-  .sal-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
-  .sal-items tr:nth-child(even) td { background: #f8f8fb; }
-  .sal-num { text-align: right; }
-  .sal-totals { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .sal-totals td { padding: 5px 8px; font-size: 12px; }
-  .sal-totals .sal-tl { text-align: right; width: 78%; }
-  .sal-totals .sal-tv { text-align: right; font-weight: bold; border-top: 1px solid #d8d8e0; }
-  .sal-ar { color: #555; font-size: 10px; }
-  .sal-pos { color: #b00020; font-weight: bold; }
-  .sal-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
-  .sal-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
-  .sal-foot { margin-top: 20px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="sal-doc">
-{% if not no_letterhead and letter_head %}
-  <div style="margin-bottom:10px">{{ letter_head }}</div>
-{% endif %}
-  <div class="sal-head">
-    <div>
-      <h1>{{ _("Rental Settlement Statement") }}</h1>
-      <div class="sal-sub">كشف تسوية إيجار &bull; {{ doc.name }}</div>
-    </div>
-    <div style="text-align:right; font-size:11px; color:#666;">
-      {{ frappe.db.get_single_value("Salis Settings", "default_company") or "" }}
-    </div>
-  </div>
+{%- macro sec(ar, en) -%}
+<div class="lbl" style="margin:16px 0 5px;font-size:10px">{{ ar }}<span class="en">{{ en }}</span></div>
+{%- endmacro -%}
 
-  <table class="sal-meta">
-    <tr>
-      <td class="sal-lbl">Rental Office <span class="sal-ar">مكتب التأجير</span></td>
-      <td>{{ doc.rental_office or "" }}</td>
-      <td class="sal-lbl">Period <span class="sal-ar">الفترة</span></td>
-      <td>{{ doc.period_month or "" }}</td>
-    </tr>
-    <tr>
-      <td class="sal-lbl">Status <span class="sal-ar">الحالة</span></td>
-      <td>{{ doc.status or "" }}</td>
-      <td class="sal-lbl">Payment Request <span class="sal-ar">طلب الدفع</span></td>
-      <td>{{ doc.payment_request or "—" }}</td>
-    </tr>
-  </table>
+{%- set office = (frappe.db.get_value("Rental Office", doc.rental_office,
+      ["office_name", "supplier", "city", "status", "contact_person", "phone"],
+      as_dict=True) if doc.rental_office else None) or _dict() -%}
+{%- set cur = (frappe.db.get_value("Company", doc.company, "default_currency") if doc.company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set requester = frappe.get_fullname(doc.requested_by) if doc.requested_by else None -%}
+{%- set office_address = get_address_text("Supplier", office.supplier) if office.supplier else "" -%}
 
-  <table class="sal-items">
-    <thead>
-      <tr>
-        <th style="width:5%;">#</th>
-        <th>Vehicle <span class="sal-ar">المركبة</span></th>
-        <th style="width:14%;">Days <span class="sal-ar">الأيام</span></th>
-        <th style="width:20%;">Daily Rate <span class="sal-ar">السعر اليومي</span></th>
-        <th style="width:22%;">Amount <span class="sal-ar">المبلغ</span></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in doc.vehicles %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ row.vehicle or "" }}</td>
-        <td class="sal-num">{{ row.days or 0 }}</td>
-        <td class="sal-num">{{ frappe.format(row.daily_rate, {"fieldtype": "Currency"}) }}</td>
-        <td class="sal-num">{{ frappe.format(row.amount, {"fieldtype": "Currency"}) }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+{%- set rows = [] -%}
+{%- for v in (doc.vehicles or []) -%}
+  {%- set veh = (frappe.db.get_value("Salis Vehicle", v.vehicle,
+        ["plate_number", "vehicle_category"], as_dict=True) if v.vehicle else None) or _dict() -%}
+  {%- set _x = rows.append({"plate": veh.plate_number or v.vehicle, "code": v.vehicle,
+        "category": veh.vehicle_category, "days": v.days, "rate": v.daily_rate, "amount": v.amount}) -%}
+{%- endfor -%}
+{%- set lines_days = (doc.vehicles | sum(attribute="days")) if doc.vehicles else 0 -%}
+{%- set lines_amount = (doc.vehicles | sum(attribute="amount")) if doc.vehicles else 0 -%}
 
-  <table class="sal-totals">
-    <tr>
-      <td class="sal-tl">Accrued Total <span class="sal-ar">إجمالي المُستحَق</span></td>
-      <td class="sal-tv">{{ frappe.format(doc.accrued_total, {"fieldtype": "Currency"}) }}</td>
-    </tr>
-    <tr>
-      <td class="sal-tl">Claimed Total <span class="sal-ar">إجمالي المُطالَب به</span></td>
-      <td class="sal-tv">{{ frappe.format(doc.claimed_total, {"fieldtype": "Currency"}) }}</td>
-    </tr>
-    <tr>
-      <td class="sal-tl">Variance <span class="sal-ar">الفرق</span></td>
-      <td class="sal-tv">{% if (doc.variance or 0) != 0 %}<span class="sal-pos">{{ frappe.format(doc.variance, {"fieldtype": "Currency"}) }}</span>{% else %}{{ frappe.format(doc.variance, {"fieldtype": "Currency"}) }}{% endif %}</td>
-    </tr>
-  </table>
+{%- set claimed = frappe.utils.flt(doc.claimed_total) -%}
+{%- set accrued = frappe.utils.flt(doc.accrued_total) -%}
+{%- set variance = frappe.utils.flt(doc.variance) -%}
+{%- set line_gap = lines_amount - claimed -%}
 
-  <table class="sal-sign">
-    <tr>
-      <td>Reconciled by (Fleet)<br><span class="sal-ar">سوّاها (الأسطول)</span></td>
-      <td style="text-align:right;">Approved by (Operations)<br><span class="sal-ar">اعتمدها (العمليات)</span></td>
-    </tr>
-  </table>
+{%- set gate = [
+  {"ar": _("The vehicle lines add up to the claimed total"), "en": "Lines match the claim",
+   "state": ("na" if not rows else ("ok" if (line_gap if line_gap >= 0 else -line_gap) < 0.005 else "bad")),
+   "note": (_("Lines") ~ ": " ~ frappe.format_value(lines_amount, {"fieldtype": "Currency"})) if rows else None},
+  {"ar": _("The claim matches what the company accrued for the month"), "en": "Claim matches accrual",
+   "state": ("na" if not accrued else ("ok" if (variance if variance >= 0 else -variance) < 0.005 else "bad")),
+   "note": (_("Variance") ~ ": " ~ frappe.format_value(doc.variance, {"fieldtype": "Currency"})) if accrued else None},
+  {"ar": _("The accrual was taken from the rental ledger, not typed by hand"), "en": "Accrual from the ledger",
+   "state": "ok" if doc.accrued_from_ledger else "bad",
+   "note": (_("Rental Ledger") ~ ": " ~ frappe.format_value(doc.ledger_accrued_total, {"fieldtype": "Currency"})) if doc.ledger_accrued_total else None},
+  {"ar": _("A payment request has been raised for this statement"), "en": "Payment request raised",
+   "state": "ok" if doc.payment_request else "na", "note": doc.payment_request},
+] -%}
 
-  <div class="sal-foot">
-    {{ _("This statement reconciles the rental office claim against accrued rental days. It does not post to the general ledger; any payment is raised through a separate Salis Payment Request.") }}
-    يُسوّي هذا الكشف مطالبة مكتب التأجير مقابل أيام الإيجار المُستحَقة، ولا يُرحَّل إلى دفتر الأستاذ العام.
-    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
-  </div>
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
+
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
+
+  {{ ax.doc_title(doc, _("Rental Settlement Statement"), "Rental Settlement Statement",
+                  (doc.period_month or "") ~ " · " ~ _(doc.status or "")) }}
+
+  {{ ax.party_block([
+      {"role_ar": _("Billed By"), "role_en": "Rental office",
+       "name": office.office_name or doc.rental_office,
+       "lines": [
+         (_("Supplier") ~ ": " ~ office.supplier) if office.supplier else None,
+         (_("Contact Person") ~ ": " ~ office.contact_person) if office.contact_person else None,
+         (_("Phone") ~ ": " ~ office.phone) if office.phone else None,
+         office_address or ((_("City") ~ ": " ~ office.city) if office.city else None),
+       ]},
+      {"role_ar": _("Settled By"), "role_en": "Settling company",
+       "name": doc.company,
+       "lines": [
+         (_("Period") ~ ": " ~ doc.period_month) if doc.period_month else None,
+         (_("Requested By") ~ ": " ~ requester) if requester else None,
+         (_("Payment Request") ~ ": " ~ doc.payment_request) if doc.payment_request else None,
+       ]},
+  ]) }}
+
+  {{ sec(_("Statement Identification"), "Statement identification") }}
+  {{ ax.field_grid([
+      [{"ar": _("Period"), "en": "Period", "value": doc.period_month},
+       {"ar": _("Statement Status"), "en": "Statement status", "value": doc.status, "tr": True}],
+      [{"ar": _("Vehicles on Rent"), "en": "Vehicles", "value": rows | length, "fmt": "Int"},
+       {"ar": _("Total Rented Days"), "en": "Rented days", "value": lines_days, "fmt": "Int"}],
+  ]) }}
+
+  {{ sec(_("Vehicles Charged in This Period"), "Vehicles charged") }}
+  {{ ax.line_table(
+      [{"ar": _("Plate Number"), "en": "Plate", "key": "plate", "width": "17%"},
+       {"ar": _("Vehicle Code"), "en": "Vehicle code", "key": "code", "width": "15%"},
+       {"ar": _("Vehicle Category"), "en": "Category", "key": "category"},
+       {"ar": _("Days"), "en": "Days", "key": "days", "num": True, "width": "9%", "fmt": "Int"},
+       {"ar": _("Daily Rate"), "en": "Daily rate", "key": "rate", "num": True, "width": "16%", "fmt": "Currency"},
+       {"ar": _("Amount"), "en": "Amount", "key": "amount", "num": True, "width": "18%", "fmt": "Currency"}],
+      rows,
+      totals=[frappe.format_value(lines_days, {"fieldtype": "Int"}), "",
+              frappe.format_value(lines_amount, {"fieldtype": "Currency"})],
+      empty_text=_("No vehicle line is listed on this statement")) }}
+  {{ ax.amount_words(doc.claimed_total, cur) }}
+
+  {{ sec(_("Claim Against Our Own Accrual"), "Reconciliation") }}
+  {{ ax.field_grid([
+      [{"ar": _("Claimed by the Office"), "en": "Claimed", "value": doc.claimed_total, "fmt": "Currency"},
+       {"ar": _("Accrued by the Company"), "en": "Accrued", "value": doc.accrued_total, "fmt": "Currency"}],
+      [{"ar": _("Accrued in the Rental Ledger"), "en": "Ledger accrued", "value": doc.ledger_accrued_total, "fmt": "Currency"},
+       {"ar": _("Difference"), "en": "Variance", "value": doc.variance, "fmt": "Currency"}],
+      [{"ar": _("Difference Against the Ledger"), "en": "Ledger variance", "value": doc.ledger_variance, "fmt": "Currency"},
+       {"ar": _("Payment Request"), "en": "Payment request", "value": doc.payment_request}],
+  ]) }}
+
+  {{ sec(_("Release Checks"), "Release checks") }}
+  {{ ax.check_list(gate) }}
+
+  {{ ax.declaration(_("Both sides agree that the vehicles above were on rent for the days shown at the rates shown in this period, that the amount settled is the claimed total after the difference is dealt with, and that nothing else is due to the rental office for this period.")) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Rental Office Representative"), "en": "Rental office", "name": office.contact_person},
+      {"ar": _("Fleet Movement"), "en": "Fleet movement", "name": requester},
+      {"ar": _("Finance"), "en": "Finance", "name": None},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

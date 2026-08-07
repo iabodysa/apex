@@ -1,101 +1,119 @@
-<style>
-  .sal-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
-  .sal-doc h1 { font-size: 18px; margin: 0; }
-  .sal-doc .sal-sub { color: #666; font-size: 12px; margin-top: 2px; }
-  .sal-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
-              display: flex; justify-content: space-between; align-items: flex-start; }
-  .sal-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .sal-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
-  .sal-meta .sal-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
-  .sal-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .sal-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: left; }
-  .sal-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
-  .sal-items tr:nth-child(even) td { background: #f8f8fb; }
-  .sal-ar { color: #555; font-size: 10px; }
-  .sal-flag { font-weight: bold; }
-  .sal-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
-  .sal-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
-  .sal-foot { margin-top: 24px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="sal-doc">
-{% if not no_letterhead and letter_head %}
-  <div style="margin-bottom:10px">{{ letter_head }}</div>
-{% endif %}
-  <div class="sal-head">
-    <div>
-      <h1>{{ _("Vehicle Handover Receipt") }}</h1>
-      <div class="sal-sub">إيصال تسليم مركبة &bull; {{ doc.name }}</div>
-    </div>
-    <div style="text-align:right; font-size:11px; color:#666;">
-      {{ frappe.db.get_single_value("Salis Settings", "default_company") or "" }}
-    </div>
-  </div>
+{%- macro sec(ar, en) -%}
+<div class="lbl" style="margin:16px 0 5px;font-size:10px">{{ ar }}<span class="en">{{ en }}</span></div>
+{%- endmacro -%}
 
-  <table class="sal-meta">
-    <tr>
-      <td class="sal-lbl">Vehicle <span class="sal-ar">المركبة</span></td>
-      <td>{{ doc.vehicle or "" }}</td>
-      <td class="sal-lbl">Handover Date <span class="sal-ar">تاريخ التسليم</span></td>
-      <td>{{ frappe.format(doc.handover_date, {"fieldtype": "Date"}) }}</td>
-    </tr>
-    <tr>
-      <td class="sal-lbl">From Driver <span class="sal-ar">من السائق</span></td>
-      <td>{{ doc.from_driver or "—" }}</td>
-      <td class="sal-lbl">To Driver <span class="sal-ar">إلى السائق</span></td>
-      <td>{{ doc.to_driver or "" }}</td>
-    </tr>
-    <tr>
-      <td class="sal-lbl">Odometer <span class="sal-ar">عداد المسافة</span></td>
-      <td>{{ doc.odometer_reading or 0 }}</td>
-      <td class="sal-lbl">Discrepancy <span class="sal-ar">الفروقات</span></td>
-      <td>{{ doc.discrepancy_status or "" }}</td>
-    </tr>
-  </table>
+{%- set DRV = ["full_name", "national_id", "driver_id", "phone", "license_number", "license_expiry", "supervisor", "project"] -%}
+{%- set veh = (frappe.db.get_value("Salis Vehicle", doc.vehicle,
+      ["plate_number", "vehicle_category", "ownership", "rental_office", "company", "project",
+       "odometer", "status", "planned_fuel_grade"], as_dict=True) if doc.vehicle else None) or _dict() -%}
+{%- set frm = (frappe.db.get_value("Salis Driver", doc.from_driver, DRV, as_dict=True) if doc.from_driver else None) or _dict() -%}
+{%- set tod = (frappe.db.get_value("Salis Driver", doc.to_driver, DRV, as_dict=True) if doc.to_driver else None) or _dict() -%}
+{%- set vdoc = frappe.get_doc("Salis Vehicle", doc.vehicle) if doc.vehicle else None -%}
+{%- set supervisor = frappe.get_fullname(tod.supervisor) if tod.supervisor else None -%}
 
-  {% if doc.condition_notes %}
-  <div style="margin-bottom:14px;">
-    <b>Condition Notes <span class="sal-ar">ملاحظات الحالة</span>:</b> {{ doc.condition_notes }}
-  </div>
-  {% endif %}
+{%- set items = doc.handover_check_items or [] -%}
+{%- set passed = items | selectattr("ok") | list -%}
+{%- set failed = items | rejectattr("ok") | list -%}
+{%- set checks = [] -%}
+{%- for row in items -%}
+  {%- set _x = checks.append({"ar": _(row.check_item or ""), "en": row.check_item,
+        "state": "ok" if row.ok else "bad", "note": row.remark}) -%}
+{%- endfor -%}
 
-  <table class="sal-items">
-    <thead>
-      <tr>
-        <th style="width:5%;">#</th>
-        <th>Check Item <span class="sal-ar">بند الفحص</span></th>
-        <th style="width:12%;">OK <span class="sal-ar">سليم</span></th>
-        <th style="width:40%;">Remark <span class="sal-ar">ملاحظة</span></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in doc.handover_check_items %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ row.check_item or "" }}</td>
-        <td>{% if row.ok %}&#10003;{% else %}&#10007;{% endif %}</td>
-        <td>{{ row.remark or "" }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+{%- set compliance = [] -%}
+{%- if vdoc -%}
+  {%- for c in vdoc.compliance_documents -%}
+    {%- set _x = compliance.append({"ctype": c.compliance_type, "docno": c.document_number,
+          "issued": c.issue_date, "expiry": c.expiry_date, "cstate": c.status}) -%}
+  {%- endfor -%}
+{%- endif -%}
 
-  {% if doc.discrepancy_status and doc.discrepancy_status != "Clean" and doc.discrepancy_notes %}
-  <div style="margin-bottom:12px;">
-    <b class="sal-flag">Discrepancy Notes <span class="sal-ar">ملاحظات الفروقات</span>:</b> {{ doc.discrepancy_notes }}
-  </div>
-  {% endif %}
+{%- set odo = (frappe.format_value(doc.odometer_reading, {"fieldtype": "Int"}) ~ " " ~ _("km")) if doc.odometer_reading else None -%}
+{%- set clean = doc.discrepancy_status == "Clean" -%}
 
-  <table class="sal-sign">
-    <tr>
-      <td>Handed over by (Outgoing Driver)<br><span class="sal-ar">سلّمها (السائق المُسلِّم)</span></td>
-      <td style="text-align:right;">Received by (Incoming Driver)<br><span class="sal-ar">استلمها (السائق المُستلِم)</span></td>
-    </tr>
-  </table>
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
 
-  <div class="sal-foot">
-    {{ _("The incoming driver acknowledges receiving the vehicle in the condition recorded above.") }}
-    يقرّ السائق المُستلِم باستلام المركبة بالحالة المُسجّلة أعلاه.
-    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
-  </div>
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
+
+  {{ ax.doc_title(doc, _("Vehicle Handover Receipt"), "Vehicle Handover Receipt",
+                  (_("Handover Date") ~ ": " ~ frappe.format_date(doc.handover_date)) if doc.handover_date else "") }}
+
+  {{ ax.party_block([
+      {"role_ar": _("Handed Over By"), "role_en": "Outgoing driver",
+       "name": frm.full_name or doc.from_driver,
+       "lines": [
+         (_("National ID") ~ ": " ~ frm.national_id) if frm.national_id else None,
+         (_("Licence Number") ~ ": " ~ frm.license_number) if frm.license_number else None,
+         (_("Phone") ~ ": " ~ frm.phone) if frm.phone else None,
+       ]},
+      {"role_ar": _("Received By"), "role_en": "Incoming driver",
+       "name": tod.full_name or doc.to_driver,
+       "lines": [
+         (_("National ID") ~ ": " ~ tod.national_id) if tod.national_id else None,
+         (_("Licence Number") ~ ": " ~ tod.license_number) if tod.license_number else None,
+         (_("Licence Expiry") ~ ": " ~ frappe.format_date(tod.license_expiry)) if tod.license_expiry else None,
+         (_("Phone") ~ ": " ~ tod.phone) if tod.phone else None,
+       ]},
+      {"role_ar": _("Vehicle Held For"), "role_en": "Operator of record",
+       "name": veh.company,
+       "lines": [
+         (_("Project") ~ ": " ~ veh.project) if veh.project else None,
+         (_("Rental Office") ~ ": " ~ veh.rental_office) if veh.rental_office else None,
+         (_("Fleet Supervisor") ~ ": " ~ supervisor) if supervisor else None,
+       ]},
+  ]) }}
+
+  {{ sec(_("Vehicle Identification"), "Vehicle identification") }}
+  {{ ax.field_grid([
+      [{"ar": _("Plate Number"), "en": "Plate", "value": veh.plate_number},
+       {"ar": _("Vehicle Code"), "en": "Vehicle code", "value": doc.vehicle}],
+      [{"ar": _("Vehicle Category"), "en": "Category", "value": veh.vehicle_category},
+       {"ar": _("Ownership"), "en": "Ownership", "value": veh.ownership, "tr": True}],
+      [{"ar": _("Odometer at Handover"), "en": "Odometer", "value": odo},
+       {"ar": _("Fuel Grade"), "en": "Fuel grade", "value": veh.planned_fuel_grade, "tr": True}],
+      [{"ar": _("Handover Date"), "en": "Handover date", "value": doc.handover_date, "fmt": "Date"},
+       {"ar": _("Vehicle Status"), "en": "Vehicle status", "value": veh.status, "tr": True}],
+  ]) }}
+
+  {{ sec(_("Condition Inspection"), "Condition inspection") }}
+  {%- if checks %}
+  {{ ax.check_list(checks) }}
+  {{ ax.field_grid([[
+      {"ar": _("Items Checked"), "en": "Checked", "value": items | length, "fmt": "Int"},
+      {"ar": _("Items Sound"), "en": "Sound", "value": passed | length, "fmt": "Int"},
+      {"ar": _("Items Faulty"), "en": "Faulty", "value": failed | length, "fmt": "Int"},
+  ]]) }}
+  {%- else %}
+  <div class="ax-none">{{ _("No inspection checklist was recorded on this handover") }}</div>
+  {%- endif %}
+
+  {{ sec(_("Road Legality of the Vehicle"), "Road legality") }}
+  {{ ax.line_table(
+      [{"ar": _("Document"), "en": "Document", "key": "ctype", "width": "26%", "tr": True},
+       {"ar": _("Number"), "en": "Number", "key": "docno", "width": "20%"},
+       {"ar": _("Issued"), "en": "Issued", "key": "issued", "width": "18%", "fmt": "Date"},
+       {"ar": _("Expires"), "en": "Expires", "key": "expiry", "width": "18%", "fmt": "Date"},
+       {"ar": _("State"), "en": "State", "key": "cstate", "tr": True}],
+      compliance,
+      empty_text=_("No registration or insurance document is recorded for this vehicle")) }}
+
+  {{ ax.note_block(doc.condition_notes) }}
+
+  {%- if not clean %}
+  {{ ax.note_block((_("Discrepancy") ~ " (" ~ _(doc.discrepancy_status or "") ~ "): " ~ (doc.discrepancy_notes or _("No detail was recorded.")))) }}
+  {%- endif %}
+
+  {{ ax.declaration(_("The incoming driver confirms he received the vehicle described above in the condition written on this receipt, and holds it together with its fuel chip, its fines and any damage, from the handover date until he returns it by a receipt of the same kind.")) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Handed Over By"), "en": "Outgoing driver", "name": frm.full_name or doc.from_driver},
+      {"ar": _("Received By"), "en": "Incoming driver", "name": tod.full_name or doc.to_driver},
+      {"ar": _("Fleet Supervisor"), "en": "Fleet supervisor", "name": supervisor},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

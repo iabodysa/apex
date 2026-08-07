@@ -1,88 +1,129 @@
-<style>
-  .ax-doc { font-family: Arial, sans-serif; color: #14332a; font-size: 12px; }
-  .ax-doc h1 { font-size: 18px; margin: 0; color: #14332a; }
-  .ax-sub { color: #4a5e55; font-size: 11px; margin-top: 2px; }
-  .ax-head { border-bottom: 3px solid #00844e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ax-recipient { font-size: 11px; color: #14332a; background: #eef6f1;
-                  border: 1px solid #00844e; border-radius: 3px; padding: 4px 10px; }
-  .ax-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ax-meta td { padding: 4px 8px; border: 1px solid #d9e4de; vertical-align: top; }
-  .ax-meta .ax-lbl { background: #f1f7f3; font-weight: bold; width: 22%; color: #14332a; }
-  .ax-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .ax-items th { background: #00844e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ax-items td { padding: 6px 8px; border: 1px solid #d9e4de; }
-  .ax-items tr:nth-child(even) td { background: #f6faf7; }
-  .ax-block { border: 1px solid #d9e4de; padding: 8px; margin-bottom: 12px; }
-  .ax-block .ax-blk-lbl { font-weight: bold; color: #00844e; margin-bottom: 4px; }
-  .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
-  .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
-  .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
-  .ax-letterhead { margin-bottom: 10px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div class="ax-letterhead">{{ letter_head }}</div>
-{% endif %}
-  <div class="ax-head">
-    <div>
-      <h1>{{ _("Passenger Manifest") }}</h1>
-      <div class="ax-sub">{{ doc.name }} &bull; {{ doc.get_formatted("dispatch_date") or "" }}</div>
-    </div>
-    <div class="ax-recipient">{{ _("Recipient") }}: {{ _("Driver") }}</div>
-  </div>
+{%- macro sec(ar, en) -%}
+<div class="lbl" style="margin:16px 0 5px;font-size:10px">{{ ar }}<span class="en">{{ en }}</span></div>
+{%- endmacro -%}
 
-  <table class="ax-meta">
-    <tr>
-      <td class="ax-lbl">{{ _("Dispatch Date") }}</td>
-      <td>{{ doc.get_formatted("dispatch_date") or "" }}</td>
-      <td class="ax-lbl">{{ _("Route Plan") }}</td>
-      <td>{{ doc.route_plan or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Vehicle") }}</td>
-      <td>{{ doc.vehicle or "" }}</td>
-      <td class="ax-lbl">{{ _("Driver") }}</td>
-      <td>{{ doc.driver or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Dispatch Trip") }}</td>
-      <td>{{ doc.dispatch_trip or "" }}</td>
-      <td class="ax-lbl">{{ _("Passenger Count") }}</td>
-      <td>{{ doc.passenger_count or "" }}</td>
-    </tr>
-  </table>
+{%- set veh = (frappe.db.get_value("Salis Vehicle", doc.vehicle,
+      ["plate_number", "vehicle_category", "seat_capacity", "company", "project", "status"],
+      as_dict=True) if doc.vehicle else None) or _dict() -%}
+{%- set drv = (frappe.db.get_value("Salis Driver", doc.driver,
+      ["full_name", "national_id", "phone", "license_number", "license_expiry", "supervisor"],
+      as_dict=True) if doc.driver else None) or _dict() -%}
+{%- set plan = (frappe.db.get_value("Route Plan", doc.route_plan,
+      ["route_name", "shift", "total_stops", "project", "route_supervisor", "supervisor_approval"],
+      as_dict=True) if doc.route_plan else None) or _dict() -%}
+{%- set trip = (frappe.db.get_value("Dispatch Trip", doc.dispatch_trip,
+      ["trip_date", "status", "depart_time", "return_time", "odometer_start", "odometer_end", "shift_name"],
+      as_dict=True) if doc.dispatch_trip else None) or _dict() -%}
+{%- set route_sup = frappe.get_fullname(plan.route_supervisor) if plan.route_supervisor else None -%}
+{%- set seats = frappe.utils.cint(veh.seat_capacity) -%}
 
-  <table class="ax-items">
-    <thead>
-      <tr>
-        <th style="width:5%;">#</th>
-        <th>{{ _("Passenger Name") }}</th>
-        <th style="width:22%;">{{ _("Pickup") }}</th>
-        <th style="width:22%;">{{ _("Dropoff") }}</th>
-        <th style="width:10%;">{{ _("Boarded") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in doc.passengers %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ row.passenger_name or row.employee or "" }}</td>
-        <td>{{ row.pickup or "" }}</td>
-        <td>{{ row.dropoff or "" }}</td>
-        <td>{{ _("Yes") if row.boarded else _("No") }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+{%- set pax = [] -%}
+{%- for p in (doc.passengers or []) -%}
+  {%- set e = (frappe.db.get_value("Employee", p.employee, ["employee_name", "employee_number", "cell_number"], as_dict=True) if p.employee else None) or _dict() -%}
+  {%- set _x = pax.append({
+      "empno": e.employee_number or p.employee,
+      "pname": p.passenger_name or e.employee_name,
+      "phone": e.cell_number,
+      "pickup": p.pickup,
+      "dropoff": p.dropoff,
+      "boarded": _("Boarded") if p.boarded else _("Not Boarded"),
+      "sign": "____________"}) -%}
+{%- endfor -%}
 
-  <table class="ax-sign">
-    <tr>
-      <td>{{ _("Driver") }}<br>{{ _("Signature") }}</td>
-      <td>{{ _("Supervisor") }}<br>{{ _("Signature") }}</td>
-    </tr>
-  </table>
+{%- set on_board = doc.passengers | selectattr("boarded") | list | length if doc.passengers else 0 -%}
+{%- set listed = doc.passengers | length if doc.passengers else 0 -%}
+{%- set distance = (frappe.utils.cint(trip.odometer_end) - frappe.utils.cint(trip.odometer_start))
+                   if (trip.odometer_start and trip.odometer_end) else None -%}
+{%- set licence_days = frappe.utils.date_diff(drv.license_expiry, doc.dispatch_date)
+                       if (drv.license_expiry and doc.dispatch_date) else None -%}
 
-  <div class="ax-foot">{{ doc.name }}</div>
+{%- set gate = [
+  {"ar": _("The number listed fits the seats in the vehicle"), "en": "Inside seat capacity",
+   "state": ("na" if not seats else ("ok" if listed <= seats else "bad")),
+   "note": (_("Seats") ~ ": " ~ seats | string) if seats else None},
+  {"ar": _("Every listed passenger boarded"), "en": "All boarded",
+   "state": ("na" if not listed else ("ok" if on_board == listed else "bad")),
+   "note": on_board | string ~ " / " ~ listed | string},
+  {"ar": _("The driver licence is valid on the trip date"), "en": "Licence valid on the day",
+   "state": ("na" if licence_days is none else ("ok" if licence_days >= 0 else "bad")),
+   "note": (_("Licence Expiry") ~ ": " ~ frappe.format_date(drv.license_expiry)) if drv.license_expiry else None},
+  {"ar": _("The route plan behind this sheet is approved"), "en": "Route plan approved",
+   "state": ("na" if not doc.route_plan else ("ok" if plan.supervisor_approval == "Approved" else "bad")),
+   "note": _(plan.supervisor_approval) if plan.supervisor_approval else None},
+] -%}
+
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
+
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
+
+  {{ ax.doc_title(doc, _("Passenger Manifest Sheet"), "Passenger Manifest Sheet",
+                  (frappe.format_date(doc.dispatch_date) if doc.dispatch_date else "")
+                  ~ (" · " ~ _(plan.shift) if plan.shift else "")) }}
+
+  {{ ax.party_block([
+      {"role_ar": _("Carrying Vehicle"), "role_en": "Carrying vehicle",
+       "name": veh.plate_number or doc.vehicle,
+       "lines": [
+         (_("Vehicle Category") ~ ": " ~ veh.vehicle_category) if veh.vehicle_category else None,
+         (_("Seat Capacity") ~ ": " ~ seats | string) if seats else None,
+         (_("Project") ~ ": " ~ (plan.project or veh.project)) if (plan.project or veh.project) else None,
+       ]},
+      {"role_ar": _("Driver on Duty"), "role_en": "Driver on duty",
+       "name": drv.full_name or doc.driver,
+       "lines": [
+         (_("National ID") ~ ": " ~ drv.national_id) if drv.national_id else None,
+         (_("Licence Number") ~ ": " ~ drv.license_number) if drv.license_number else None,
+         (_("Phone") ~ ": " ~ drv.phone) if drv.phone else None,
+       ]},
+      {"role_ar": _("Route Under Movement"), "role_en": "Route",
+       "name": plan.route_name or doc.route_plan,
+       "lines": [
+         (_("Shift") ~ ": " ~ _(plan.shift)) if plan.shift else None,
+         (_("Total Stops") ~ ": " ~ plan.total_stops | string) if plan.total_stops else None,
+         (_("Route Supervisor") ~ ": " ~ route_sup) if route_sup else None,
+       ]},
+  ]) }}
+
+  {{ sec(_("Trip Identification"), "Trip identification") }}
+  {{ ax.field_grid([
+      [{"ar": _("Dispatch Date"), "en": "Dispatch date", "value": doc.dispatch_date, "fmt": "Date"},
+       {"ar": _("Dispatch Trip"), "en": "Trip reference", "value": doc.dispatch_trip}],
+      [{"ar": _("Depart Time"), "en": "Depart", "value": trip.depart_time, "fmt": "Time"},
+       {"ar": _("Return Time"), "en": "Return", "value": trip.return_time, "fmt": "Time"}],
+      [{"ar": _("Odometer Start"), "en": "Odometer start", "value": trip.odometer_start, "fmt": "Int"},
+       {"ar": _("Odometer End"), "en": "Odometer end", "value": trip.odometer_end, "fmt": "Int"}],
+      [{"ar": _("Distance Run"), "en": "Distance",
+        "value": (distance | string ~ " " ~ _("km")) if distance else None},
+       {"ar": _("Trip Status"), "en": "Trip status", "value": trip.status, "tr": True}],
+  ]) }}
+
+  {{ sec(_("Persons Carried"), "Persons carried") }}
+  {{ ax.line_table(
+      [{"ar": _("Employee Number"), "en": "Employee no.", "key": "empno", "width": "12%"},
+       {"ar": _("Passenger Name"), "en": "Name", "key": "pname", "width": "24%"},
+       {"ar": _("Phone"), "en": "Phone", "key": "phone", "width": "12%"},
+       {"ar": _("Pickup"), "en": "Pickup", "key": "pickup"},
+       {"ar": _("Drop-off"), "en": "Drop-off", "key": "dropoff"},
+       {"ar": _("Boarding"), "en": "Boarding", "key": "boarded", "width": "11%"},
+       {"ar": _("Signature"), "en": "Signature", "key": "sign", "width": "13%"}],
+      pax,
+      totals=[on_board | string ~ " / " ~ listed | string, ""],
+      empty_text=_("No passenger is listed on this manifest")) }}
+
+  {{ sec(_("Movement Checks"), "Movement checks") }}
+  {{ ax.check_list(gate) }}
+
+  {{ ax.declaration(_("The driver confirms that only the persons listed on this sheet travelled with him on this trip, that each one boarded and left at the point written against his name, and that he carried nobody else.")) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Driver on Duty"), "en": "Driver", "name": drv.full_name or doc.driver},
+      {"ar": _("Route Supervisor"), "en": "Route supervisor", "name": route_sup},
+      {"ar": _("Site Gate"), "en": "Site gate", "name": None},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

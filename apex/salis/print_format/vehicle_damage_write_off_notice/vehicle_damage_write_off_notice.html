@@ -1,75 +1,122 @@
-<style>
-  .ax-doc { font-family: Arial, sans-serif; color: #14332a; font-size: 12px; }
-  .ax-doc h1 { font-size: 18px; margin: 0; color: #14332a; }
-  .ax-sub { color: #4a5e55; font-size: 11px; margin-top: 2px; }
-  .ax-head { border-bottom: 3px solid #00844e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ax-recipient { font-size: 11px; color: #14332a; background: #eef6f1;
-                  border: 1px solid #00844e; border-radius: 3px; padding: 4px 10px; }
-  .ax-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ax-meta td { padding: 4px 8px; border: 1px solid #d9e4de; vertical-align: top; }
-  .ax-meta .ax-lbl { background: #f1f7f3; font-weight: bold; width: 22%; color: #14332a; }
-  .ax-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .ax-items th { background: #00844e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ax-items td { padding: 6px 8px; border: 1px solid #d9e4de; }
-  .ax-items tr:nth-child(even) td { background: #f6faf7; }
-  .ax-block { border: 1px solid #d9e4de; padding: 8px; margin-bottom: 12px; }
-  .ax-block .ax-blk-lbl { font-weight: bold; color: #00844e; margin-bottom: 4px; }
-  .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
-  .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
-  .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
-  .ax-letterhead { margin-bottom: 10px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div class="ax-letterhead">{{ letter_head }}</div>
-{% endif %}
-  <div class="ax-head">
-    <div>
-      <h1>{{ _("Vehicle Damage Write-Off") }}</h1>
-      <div class="ax-sub">{{ doc.name }} &bull; {{ doc.get_formatted("creation") or "" }}</div>
-    </div>
-    <div class="ax-recipient">{{ _("Recipient") }}: {{ _("Driver") }}</div>
-  </div>
+{%- macro sec(ar, en) -%}
+<div class="lbl" style="margin:16px 0 5px;font-size:10px">{{ ar }}<span class="en">{{ en }}</span></div>
+{%- endmacro -%}
 
-  <table class="ax-meta">
-    <tr>
-      <td class="ax-lbl">{{ _("Vehicle") }}</td>
-      <td>{{ doc.vehicle or "" }}</td>
-      <td class="ax-lbl">{{ _("Driver") }}</td>
-      <td>{{ doc.driver or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Source Handover") }}</td>
-      <td>{{ doc.source_handover or "" }}</td>
-      <td class="ax-lbl">{{ _("Source Incident") }}</td>
-      <td>{{ doc.source_incident or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Recommended Action") }}</td>
-      <td>{{ _(doc.recommended_action) if doc.recommended_action else "" }}</td>
-      <td class="ax-lbl">{{ _("Estimated Cost (SAR)") }}</td>
-      <td>{{ doc.get_formatted("estimated_cost") or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Reported By") }}</td>
-      <td>{{ doc.reported_by or "" }}</td>
-      <td class="ax-lbl">{{ _("Status") }}</td>
-      <td>{{ _(doc.status) if doc.status else "" }}</td>
-    </tr>
-  </table>
+{%- set veh = (frappe.db.get_value("Salis Vehicle", doc.vehicle,
+      ["plate_number", "vehicle_category", "ownership", "rental_office", "company", "project",
+       "odometer", "status"], as_dict=True) if doc.vehicle else None) or _dict() -%}
+{%- set drv = (frappe.db.get_value("Salis Driver", doc.driver,
+      ["full_name", "national_id", "license_number", "phone", "supervisor"],
+      as_dict=True) if doc.driver else None) or _dict() -%}
+{%- set inc = (frappe.db.get_value("Vehicle Incident", doc.source_incident,
+      ["incident_type", "incident_date", "location", "report_number", "fault"],
+      as_dict=True) if doc.source_incident else None) or _dict() -%}
+{%- set hnd = (frappe.db.get_value("Vehicle Handover", doc.source_handover,
+      ["handover_date", "odometer_reading", "discrepancy_status"],
+      as_dict=True) if doc.source_handover else None) or _dict() -%}
+{%- set cur = (frappe.db.get_value("Company", veh.company, "default_currency") if veh.company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set approver = frappe.get_fullname(doc.approved_by) if doc.approved_by else None -%}
+{%- set supervisor = frappe.get_fullname(drv.supervisor) if drv.supervisor else None -%}
+{%- set threshold = frappe.db.get_single_value("Salis Settings", "writeoff_ops_threshold") or 0 -%}
+{%- set cost = frappe.utils.flt(doc.estimated_cost) -%}
 
-  {% if doc.damage_description %}<div class="ax-block"><div class="ax-blk-lbl">{{ _("Damage Description") }}</div>{{ doc.damage_description }}</div>{% endif %}
+{%- set gate = [
+  {"ar": _("Damage evidence is attached to the case"), "en": "Evidence attached",
+   "state": "ok" if doc.evidence else "bad", "note": None},
+  {"ar": _("A source record ties this notice to a handover or an incident"), "en": "Source record present",
+   "state": "ok" if (doc.source_handover or doc.source_incident) else "bad",
+   "note": doc.source_incident or doc.source_handover},
+  {"ar": _("Estimated cost is inside the fleet limit"), "en": "Within fleet limit",
+   "state": ("na" if not threshold else ("bad" if cost > threshold else "ok")),
+   "note": (_("Limit") ~ ": " ~ frappe.format_value(threshold, {"fieldtype": "Currency"})) if threshold else None},
+  {"ar": _("Operations authority is required on this case"), "en": "Operations authority required",
+   "state": "bad" if doc.needs_operations else "na", "note": None},
+  {"ar": _("The notice carries an approving officer"), "en": "Approved",
+   "state": "ok" if doc.approved_by else "bad", "note": approver},
+] -%}
 
-  {% if doc.damaged_parts %}<div class="ax-block"><div class="ax-blk-lbl">{{ _("Damaged Parts") }}</div>{{ doc.damaged_parts }}</div>{% endif %}
+{%- set decl = {
+  "Write-Off": _("The damage described above is beyond economic repair. The vehicle or the damaged parts are taken out of service on this notice, and their remaining value is written off and is not recoverable."),
+  "Repair": _("The damage described above is repairable. This notice authorises repair up to the estimated cost shown, and any excess needs a fresh authority."),
+  "Recover from Driver": _("The damage described above is charged to the driver named on this notice, and the amount shown is recovered from him under a separate signed consent."),
+  "Insurance Claim": _("The damage described above is passed to the insurer as a claim on the policy in force, and the company keeps the right to the balance the insurer does not settle."),
+} -%}
 
-  <table class="ax-sign">
-    <tr>
-      <td>{{ _("Driver") }}<br>{{ _("Signature") }}</td>
-      <td>{{ _("Approved By") }}{% if doc.approved_by %}<br>{{ doc.approved_by }}{% endif %}<br>{{ _("Signature") }}</td>
-    </tr>
-  </table>
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
 
-  <div class="ax-foot">{{ doc.name }}</div>
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
+
+  {{ ax.doc_title(doc, _("Vehicle Damage Write-Off Notice"), "Vehicle Damage Write-Off Notice",
+                  _(doc.recommended_action or "") ~ " · " ~ _(doc.status or "")) }}
+
+  {{ ax.party_block([
+      {"role_ar": _("Vehicle Under Assessment"), "role_en": "Vehicle assessed",
+       "name": veh.plate_number or doc.vehicle,
+       "lines": [
+         (_("Vehicle Category") ~ ": " ~ veh.vehicle_category) if veh.vehicle_category else None,
+         (_("Ownership") ~ ": " ~ _(veh.ownership)) if veh.ownership else None,
+         (_("Rental Office") ~ ": " ~ veh.rental_office) if veh.rental_office else None,
+       ]},
+      {"role_ar": _("Driver in Custody at the Time"), "role_en": "Driver in custody",
+       "name": drv.full_name or doc.driver,
+       "lines": [
+         (_("National ID") ~ ": " ~ drv.national_id) if drv.national_id else None,
+         (_("Licence Number") ~ ": " ~ drv.license_number) if drv.license_number else None,
+         (_("Fleet Supervisor") ~ ": " ~ supervisor) if supervisor else None,
+       ]},
+      {"role_ar": _("Authorising Officer"), "role_en": "Authorising officer",
+       "name": approver,
+       "lines": [
+         (_("Company") ~ ": " ~ veh.company) if veh.company else None,
+         (_("Project") ~ ": " ~ veh.project) if veh.project else None,
+         (_("Reported By") ~ ": " ~ doc.reported_by) if doc.reported_by else None,
+       ]},
+  ]) }}
+
+  {{ sec(_("Vehicle Identification"), "Vehicle identification") }}
+  {{ ax.field_grid([
+      [{"ar": _("Plate Number"), "en": "Plate", "value": veh.plate_number},
+       {"ar": _("Vehicle Code"), "en": "Vehicle code", "value": doc.vehicle}],
+      [{"ar": _("Odometer on File"), "en": "Odometer on file", "value": veh.odometer, "fmt": "Int"},
+       {"ar": _("Vehicle Status"), "en": "Vehicle status", "value": veh.status, "tr": True}],
+  ]) }}
+
+  {{ sec(_("Where the Damage Came From"), "Source of the case") }}
+  {{ ax.field_grid([
+      [{"ar": _("Source Incident"), "en": "Source incident", "value": doc.source_incident},
+       {"ar": _("Incident Date"), "en": "Incident date", "value": inc.incident_date, "fmt": "Date"}],
+      [{"ar": _("Police Report Number"), "en": "Police report no.", "value": inc.report_number},
+       {"ar": _("Fault / Liable Party"), "en": "Fault", "value": inc.fault}],
+      [{"ar": _("Source Handover"), "en": "Source handover", "value": doc.source_handover},
+       {"ar": _("Handover Date"), "en": "Handover date", "value": hnd.handover_date, "fmt": "Date"}],
+  ]) }}
+
+  {{ sec(_("Assessment"), "Assessment") }}
+  {{ ax.note_block(doc.damage_description or _("No damage description was recorded.")) }}
+  {{ ax.note_block((_("Damaged Parts") ~ ": " ~ doc.damaged_parts) if doc.damaged_parts else None) }}
+  {{ ax.field_grid([[
+      {"ar": _("Recommended Action"), "en": "Recommended action", "value": doc.recommended_action, "tr": True},
+      {"ar": _("Estimated Cost of Damage"), "en": "Estimated cost", "value": doc.estimated_cost, "fmt": "Currency"},
+  ]]) }}
+  {{ ax.amount_words(doc.estimated_cost, cur) }}
+
+  {{ sec(_("Authority Gate"), "Authority gate") }}
+  {{ ax.check_list(gate) }}
+
+  {{ sec(_("Photographic Evidence"), "Photographic evidence") }}
+  {{ ax.photo_slots(3) }}
+
+  {{ ax.declaration(decl.get(doc.recommended_action) or _("No action has been decided on this notice yet, and nothing may be scrapped, repaired or charged until an authorising officer signs it.")) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Assessed By"), "en": "Assessor", "name": doc.reported_by},
+      {"ar": _("Fleet Manager"), "en": "Fleet manager", "name": supervisor},
+      {"ar": _("Operations Authority"), "en": "Operations authority", "name": approver},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>
