@@ -1,0 +1,26 @@
+{
+ "doctype": "Report",
+ "name": "Goods Receipt Register",
+ "report_name": "Goods Receipt Register",
+ "ref_doctype": "Goods Receipt",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "Procurement Supervisor"
+  },
+  {
+   "role": "Finance Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  }
+ ]
+}

@@ -244,6 +244,33 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
+   "label": "Custody Issue Register",
+   "link_type": "Report",
+   "link_to": "Custody Issue Register",
+   "idx": 41,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Custody Return Register",
+   "link_type": "Report",
+   "link_to": "Custody Return Register",
+   "idx": 42,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Goods Receipt Register",
+   "link_type": "Report",
+   "link_to": "Goods Receipt Register",
+   "idx": 43,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Accommodation Stock Balance",
    "link_type": "Report",
    "link_to": "Accommodation Stock Balance",
@@ -501,5 +528,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-08-07 18:00:00.000000"
+ "modified": "2026-08-07 18:59:00.000000"
 }

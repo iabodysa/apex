@@ -140,6 +140,7 @@ Aged Over 60 Days,أقدم من 60 يوماً
 Assets,الأصول
 Average Cost per Litre,متوسط تكلفة اللتر
 Awaiting Acknowledgement,بانتظار الإقرار
+Awaiting Handover,بانتظار التسليم
 Bills,الفواتير
 Blocked by Outstanding Items,موقوف بسبب مستحقات قائمة
 Boarding Events Created,أحداث الصعود المُنشأة
@@ -151,7 +152,9 @@ Cleaning Days,أيام التنظيف
 Contracts,العقود
 Cost Centres,مراكز التكلفة
 Currently Held,بحوزته حالياً
+Custody Issue Register,سجل صرف العهد
 Custody Not Cleared,عهدة غير مُخلاة
+Custody Return Register,سجل إرجاع العهد
 Damaged or Lost,تالف أو مفقود
 Damaged or Lost Only,التالف أو المفقود فقط
 Days Held,أيام الحيازة
@@ -163,6 +166,7 @@ Expiring in 30 Days,تنتهي خلال 30 يوماً
 Expiry From Date,تاريخ الانتهاء من
 Expiry To Date,تاريخ الانتهاء إلى
 Failed Scans,عمليات مسح فاشلة
+Goods Receipt Register,سجل استلام البضائع
 High or Critical,عالية أو حرجة
 Highest Variance %,أعلى نسبة انحراف %
 Idle Share,نسبة التعطّل
@@ -189,10 +193,13 @@ Payments,المدفوعات
 Pending Checkouts,مغادرات معلقة
 Plans,الخطط
 Positions,المواضع
+Receipt Lines,بنود الاستلام
+Receipts,الاستلامات
 Recovered Share,نسبة المسترد
 Recoveries,الاستردادات
 Repair Cost,تكلفة الإصلاح
 Requests,الطلبات
+Resident Request Register,سجل طلبات الساكنين
 Residents,الساكنون
 Returned By,أرجعه
 Returned Lines,بنود الإرجاع
@@ -212,6 +219,7 @@ Suspended or Lost,موقوفة أو مفقودة
 Taken,مُستلَم
 Transport Requests Served %,نسبة طلبات النقل المخدومة %
 Unassigned Only,غير المسندة فقط
+Vehicle Assignment Register,سجل إسناد المركبات
 View Housing Assignment list,عرض قائمة التسكين
 Waiting Over a Week,انتظار أكثر من أسبوع
 active,نشط
