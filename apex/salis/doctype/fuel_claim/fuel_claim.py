@@ -30,8 +30,13 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt, nowdate
 
 from apex.salis.utils import set_financial_defaults
+
+_RECONCILED_STATUSES = ("Reconciled", "Approved", "Closed")
+
+_APPROVED_STATUSES = ("Approved", "Closed")
 
 VALID_STATUSES = (
     "Draft",
@@ -61,7 +66,45 @@ class FuelClaim(Document):
             frappe.throw(_("Claimed Amount cannot be negative."))
         set_financial_defaults(self)
         self._compute_consumption()
+        self._compute_unit_price()
+        self._stamp_reconciliation()
         self._guard_initial_status()
+
+    def _compute_unit_price(self):
+        """Derive what the fuel cost per litre from the two numbers the claim already carries.
+
+        Finance checks a fuel claim against the pump price of the month, and a total
+        beside a quantity does not state that price. The field is read-only and
+        recomputed on every save so it can never disagree with its own arithmetic, and it
+        falls back to zero when the litres are missing rather than carrying a stale rate.
+        """
+        litres = flt(self.claimed_litres)
+        self.unit_price_per_litre = (
+            flt(flt(self.claimed_amount) / litres, self.precision("unit_price_per_litre"))
+            if litres
+            else 0
+        )
+
+    def _stamp_reconciliation(self):
+        """Record when the claim was reconciled and who approved it, and clear both when it falls back.
+
+        The voucher carries two signature lines that nothing on the record filled: the
+        movement team who reconciled it and the finance officer who approved it. Both
+        stamps go on as those states are reached and come off the moment the claim drops
+        back to the movement team or is disputed, so a voucher never prints an approval
+        the record no longer holds.
+        """
+        if self.status in _RECONCILED_STATUSES:
+            if not self.reconciled_on:
+                self.reconciled_on = nowdate()
+        else:
+            self.reconciled_on = None
+
+        if self.status in _APPROVED_STATUSES:
+            if not self.approved_by:
+                self.approved_by = frappe.session.user
+        else:
+            self.approved_by = None
 
 
     def _compute_consumption(self):

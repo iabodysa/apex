@@ -29,6 +29,9 @@
 {%- set instalments = ((doc.recovery_amount / doc.installment_amount) | round(0, "ceil") | int)
                       if (doc.recovery_amount and doc.installment_amount) else None -%}
 
+{%- set odo_incident = (frappe.format_value(doc.odometer_at_incident, {"fieldtype": "Int"}) ~ " " ~ _("km"))
+                       if doc.odometer_at_incident else None -%}
+
 <div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
   {{ ax.watermark(doc) }}
 
@@ -67,9 +70,18 @@
        {"ar": _("Incident Date"), "en": "Date", "value": doc.incident_date, "fmt": "Date"}],
       [{"ar": _("Location"), "en": "Location", "value": doc.location},
        {"ar": _("Police Report Number"), "en": "Police report no.", "value": doc.report_number}],
+      [{"ar": _("Incident Time"), "en": "Time", "value": doc.incident_time, "fmt": "Time"},
+       {"ar": _("Odometer at the Incident"), "en": "Odometer at incident", "value": odo_incident}],
       [{"ar": _("Fault / Liable Party"), "en": "Fault", "value": doc.fault},
        {"ar": _("Case Status"), "en": "Case status", "value": doc.status, "tr": True}],
+      [{"ar": _("Injuries"), "en": "Injuries", "value": doc.injuries, "tr": True},
+       {"ar": _("Insurance Policy Number"), "en": "Policy no.", "value": doc.policy_number}],
+      [{"ar": _("Insurance Claim Number"), "en": "Claim no.", "value": doc.insurance_claim_number},
+       {"ar": _("Third Party Involved"), "en": "Third party",
+        "value": _("Yes") if doc.third_party_involved else _("No")}],
   ]) }}
+
+  {{ ax.note_block(doc.injury_details, _("Injuries Recorded at the Scene")) }}
 
   {{ sec(_("Vehicle Identification"), "Vehicle identification") }}
   {{ ax.field_grid([
@@ -87,6 +99,18 @@
        {"ar": _("State"), "en": "State", "key": "cstate", "tr": True}],
       cover,
       empty_text=_("No insurance or registration document is recorded for this vehicle")) }}
+
+  {{ sec(_("The Other Party"), "The other party") }}
+  {%- if doc.third_party_involved %}
+  {{ ax.field_grid([
+      [{"ar": _("Third Party Plate Number"), "en": "Other plate", "value": doc.third_party_plate},
+       {"ar": _("Third Party Driver"), "en": "Other driver", "value": doc.third_party_driver}],
+      [{"ar": _("Third Party Insurer"), "en": "Other insurer", "value": doc.third_party_insurer},
+       {"ar": _("Third Party Policy Number"), "en": "Other policy no.", "value": doc.third_party_policy}],
+  ]) }}
+  {%- else %}
+  <div class="ax-none">{{ _("No other vehicle and no other person were part of this incident") }}</div>
+  {%- endif %}
 
   {{ sec(_("Statement of What Happened"), "Statement") }}
   {{ ax.note_block(doc.description or _("No description was recorded.")) }}

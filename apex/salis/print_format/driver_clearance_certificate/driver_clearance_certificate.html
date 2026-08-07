@@ -18,7 +18,18 @@
 {%- set supervisor = frappe.get_fullname(drv.supervisor) if drv.supervisor else None -%}
 {%- set fuel_open = frappe.utils.cint(doc.outstanding_fuel_exceptions) -%}
 {%- set rec_open = frappe.utils.cint(doc.outstanding_recoveries) -%}
+{%- set rec_amount = frappe.utils.flt(doc.outstanding_recovery_amount) -%}
 {%- set cleared = doc.status == "Cleared" -%}
+{%- set cur = (frappe.db.get_value("Company", emp.company, "default_currency") if emp.company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set custody = doc.returned_items or [] -%}
+{%- set custody_back = custody | selectattr("returned") | list | length -%}
+
+{%- set custody_rows = [] -%}
+{%- for row in custody -%}
+  {%- set _x = custody_rows.append({"item_description": row.item_description, "quantity": row.quantity,
+        "back": _("Returned") if row.returned else _("Not Returned"),
+        "item_condition": row.item_condition, "remark": row.remark}) -%}
+{%- endfor -%}
 
 {%- set checks = [
   {"ar": _("The assigned vehicle has been returned"), "en": "Vehicle returned",
@@ -27,13 +38,15 @@
   {"ar": _("The fuel chip has been returned"), "en": "Fuel chip returned",
    "state": "ok" if doc.fuel_chip_returned else "bad", "note": None},
   {"ar": _("Company custody items have been returned"), "en": "Custody returned",
-   "state": "ok" if doc.custody_returned else "bad", "note": None},
+   "state": "ok" if doc.custody_returned else "bad",
+   "note": (custody_back | string ~ " / " ~ custody | length | string) if custody else None},
   {"ar": _("No fuel exception is left open against him"), "en": "No open fuel exceptions",
    "state": "ok" if fuel_open == 0 else "bad",
    "note": (_("Open") ~ ": " ~ fuel_open | string) if fuel_open else None},
   {"ar": _("No cost recovery is left open against him"), "en": "No open recoveries",
    "state": "ok" if rec_open == 0 else "bad",
-   "note": (_("Open") ~ ": " ~ rec_open | string) if rec_open else None},
+   "note": (frappe.format_value(rec_amount, {"fieldtype": "Currency"}) ~ " · "
+            ~ _("Open") ~ ": " ~ rec_open | string) if rec_open else None},
 ] -%}
 
 {%- set blockers = checks | rejectattr("state", "equalto", "ok") | list -%}
@@ -44,7 +57,8 @@
   {{ ax.doc_head() }}
 
   {{ ax.doc_title(doc, _("Driver Clearance Certificate"), "Driver Clearance Certificate",
-                  _(doc.clearance_reason or "") ~ " · " ~ _(doc.status or "")) }}
+                  _(doc.clearance_reason or "") ~ " · " ~ _(doc.status or "")
+                  ~ ((" · " ~ frappe.format_date(doc.clearance_date)) if doc.clearance_date else "")) }}
 
   {{ ax.party_block([
       {"role_ar": _("Departing Driver"), "role_en": "Departing driver",
@@ -79,12 +93,31 @@
        {"ar": _("Vehicle Category"), "en": "Category", "value": veh.vehicle_category}],
       [{"ar": _("Ownership"), "en": "Ownership", "value": veh.ownership, "tr": True},
        {"ar": _("Rental Office"), "en": "Rental office", "value": veh.rental_office}],
-      [{"ar": _("Odometer on Return"), "en": "Odometer on file", "value": veh.odometer, "fmt": "Int"},
+      [{"ar": _("Final Odometer on Return"), "en": "Final odometer", "value": doc.final_odometer, "fmt": "Int"},
        {"ar": _("Driver Record Status"), "en": "Driver status", "value": drv.status, "tr": True}],
+      [{"ar": _("Clearance Date"), "en": "Cleared on", "value": doc.clearance_date, "fmt": "Date"},
+       {"ar": _("Effective Last Working Day"), "en": "Last working day", "value": doc.last_working_day, "fmt": "Date"}],
+      [{"ar": _("Money Still Open Against Him"), "en": "Amount to withhold",
+        "value": doc.outstanding_recovery_amount, "fmt": "Currency"},
+       {"ar": _("Odometer on File"), "en": "Odometer on file", "value": veh.odometer, "fmt": "Int"}],
   ]) }}
 
   {{ sec(_("Clearance Checks"), "Clearance checks") }}
   {{ ax.check_list(checks) }}
+
+  {{ sec(_("Custody Items He Held"), "Custody items held") }}
+  {{ ax.line_table(
+      [{"ar": _("Item"), "en": "Item", "key": "item_description"},
+       {"ar": _("Quantity"), "en": "Qty", "key": "quantity", "num": True, "width": "10%", "fmt": "Int"},
+       {"ar": _("Returned"), "en": "Returned", "key": "back", "width": "12%"},
+       {"ar": _("Condition"), "en": "Condition", "key": "item_condition", "width": "14%", "tr": True},
+       {"ar": _("Remark"), "en": "Remark", "key": "remark", "width": "22%"}],
+      custody_rows,
+      empty_text=_("No custody item is itemised on this clearance")) }}
+
+  {%- if rec_amount %}
+  {{ ax.amount_words(rec_amount, cur) }}
+  {%- endif %}
 
   {{ ax.note_block(doc.notes) }}
 
@@ -92,6 +125,9 @@
   {{ ax.declaration(_("Nothing is left against this driver in the fleet. Everything he held has been returned and no fuel exception or cost recovery is open, so the company releases him and his final settlement may be paid.")) }}
   {%- elif blockers %}
   {{ ax.declaration(_("This driver is not cleared. The items marked Faulty above are still open against him, and his final settlement is held until each one is closed and this certificate is re-issued.")) }}
+  {%- if rec_amount %}
+  {{ ax.declaration(_("Human resources withholds {0} from the final settlement, which is the money still open against him on this date.").format(frappe.format_value(rec_amount, {"fieldtype": "Currency"}))) }}
+  {%- endif %}
   {%- else %}
   {{ ax.declaration(_("The checks above are complete but the clearance has not been signed off yet. This paper does not release the driver until the clearance status reads Cleared.")) }}
   {%- endif %}

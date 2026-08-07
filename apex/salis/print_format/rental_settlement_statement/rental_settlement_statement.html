@@ -10,14 +10,21 @@
       as_dict=True) if doc.rental_office else None) or _dict() -%}
 {%- set cur = (frappe.db.get_value("Company", doc.company, "default_currency") if doc.company else None) or frappe.db.get_default("currency") or "SAR" -%}
 {%- set requester = frappe.get_fullname(doc.requested_by) if doc.requested_by else None -%}
+{%- set approver = frappe.get_fullname(doc.approved_by) if doc.approved_by else None -%}
 {%- set office_address = get_address_text("Supplier", office.supplier) if office.supplier else "" -%}
+{%- set company = (frappe.db.get_value("Company", doc.company,
+      ["company_name", "tax_id"], as_dict=True) or {}) if doc.company else {} -%}
+{%- set supplier = (frappe.db.get_value("Supplier", office.supplier,
+      ["supplier_name", "tax_id"], as_dict=True) or {}) if office.supplier else {} -%}
 
 {%- set rows = [] -%}
 {%- for v in (doc.vehicles or []) -%}
   {%- set veh = (frappe.db.get_value("Salis Vehicle", v.vehicle,
         ["plate_number", "vehicle_category"], as_dict=True) if v.vehicle else None) or _dict() -%}
   {%- set _x = rows.append({"plate": veh.plate_number or v.vehicle, "code": v.vehicle,
-        "category": veh.vehicle_category, "days": v.days, "rate": v.daily_rate, "amount": v.amount}) -%}
+        "category": veh.vehicle_category, "contract": v.contract_reference,
+        "start": v.rental_start_date, "end": v.rental_end_date,
+        "days": v.days, "rate": v.daily_rate, "amount": v.amount}) -%}
 {%- endfor -%}
 {%- set lines_days = (doc.vehicles | sum(attribute="days")) if doc.vehicles else 0 -%}
 {%- set lines_amount = (doc.vehicles | sum(attribute="amount")) if doc.vehicles else 0 -%}
@@ -39,6 +46,12 @@
    "note": (_("Rental Ledger") ~ ": " ~ frappe.format_value(doc.ledger_accrued_total, {"fieldtype": "Currency"})) if doc.ledger_accrued_total else None},
   {"ar": _("A payment request has been raised for this statement"), "en": "Payment request raised",
    "state": "ok" if doc.payment_request else "na", "note": doc.payment_request},
+  {"ar": _("The rental office states its VAT registration number"), "en": "Supplier VAT number on record",
+   "state": "ok" if supplier.get("tax_id") else "bad", "note": supplier.get("tax_id")},
+  {"ar": _("The statement names the supplier invoice it settles"), "en": "Supplier invoice on record",
+   "state": "ok" if doc.supplier_invoice_number else "bad", "note": doc.supplier_invoice_number},
+  {"ar": _("The statement carries an approving officer"), "en": "Approved",
+   "state": "ok" if doc.approved_by else "bad", "note": approver},
 ] -%}
 
 <div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
@@ -54,13 +67,15 @@
        "name": office.office_name or doc.rental_office,
        "lines": [
          (_("Supplier") ~ ": " ~ office.supplier) if office.supplier else None,
+         (_("VAT / Tax Registration No.") ~ ": " ~ supplier.tax_id) if supplier.get("tax_id") else None,
          (_("Contact Person") ~ ": " ~ office.contact_person) if office.contact_person else None,
          (_("Phone") ~ ": " ~ office.phone) if office.phone else None,
          office_address or ((_("City") ~ ": " ~ office.city) if office.city else None),
        ]},
       {"role_ar": _("Settled By"), "role_en": "Settling company",
-       "name": doc.company,
+       "name": company.get("company_name") or doc.company,
        "lines": [
+         (_("VAT / Tax Registration No.") ~ ": " ~ company.tax_id) if company.get("tax_id") else None,
          (_("Period") ~ ": " ~ doc.period_month) if doc.period_month else None,
          (_("Requested By") ~ ": " ~ requester) if requester else None,
          (_("Payment Request") ~ ": " ~ doc.payment_request) if doc.payment_request else None,
@@ -73,21 +88,38 @@
        {"ar": _("Statement Status"), "en": "Statement status", "value": doc.status, "tr": True}],
       [{"ar": _("Vehicles on Rent"), "en": "Vehicles", "value": rows | length, "fmt": "Int"},
        {"ar": _("Total Rented Days"), "en": "Rented days", "value": lines_days, "fmt": "Int"}],
+      [{"ar": _("Supplier Invoice Number"), "en": "Supplier invoice no.", "value": doc.supplier_invoice_number},
+       {"ar": _("Supplier Invoice Date"), "en": "Invoice date", "value": doc.supplier_invoice_date, "fmt": "Date"}],
+      [{"ar": _("Payment Due Date"), "en": "Payment due", "value": doc.payment_due_date, "fmt": "Date"},
+       {"ar": _("Approved By"), "en": "Approved by", "value": approver}],
   ]) }}
 
   {{ sec(_("Vehicles Charged in This Period"), "Vehicles charged") }}
   {{ ax.line_table(
-      [{"ar": _("Plate Number"), "en": "Plate", "key": "plate", "width": "17%"},
-       {"ar": _("Vehicle Code"), "en": "Vehicle code", "key": "code", "width": "15%"},
+      [{"ar": _("Plate Number"), "en": "Plate", "key": "plate", "width": "12%"},
+       {"ar": _("Vehicle Code"), "en": "Vehicle code", "key": "code", "width": "11%"},
        {"ar": _("Vehicle Category"), "en": "Category", "key": "category"},
-       {"ar": _("Days"), "en": "Days", "key": "days", "num": True, "width": "9%", "fmt": "Int"},
-       {"ar": _("Daily Rate"), "en": "Daily rate", "key": "rate", "num": True, "width": "16%", "fmt": "Currency"},
-       {"ar": _("Amount"), "en": "Amount", "key": "amount", "num": True, "width": "18%", "fmt": "Currency"}],
+       {"ar": _("Contract Reference"), "en": "Contract", "key": "contract", "width": "12%"},
+       {"ar": _("Rental Start"), "en": "From", "key": "start", "width": "10%", "fmt": "Date"},
+       {"ar": _("Rental End"), "en": "To", "key": "end", "width": "10%", "fmt": "Date"},
+       {"ar": _("Days"), "en": "Days", "key": "days", "num": True, "width": "6%", "fmt": "Int"},
+       {"ar": _("Daily Rate"), "en": "Daily rate", "key": "rate", "num": True, "width": "12%", "fmt": "Currency"},
+       {"ar": _("Amount"), "en": "Amount", "key": "amount", "num": True, "width": "13%", "fmt": "Currency"}],
       rows,
       totals=[frappe.format_value(lines_days, {"fieldtype": "Int"}), "",
               frappe.format_value(lines_amount, {"fieldtype": "Currency"})],
       empty_text=_("No vehicle line is listed on this statement")) }}
-  {{ ax.amount_words(doc.claimed_total, cur) }}
+
+  {{ sec(_("Value Added Tax"), "VAT") }}
+  {{ ax.field_grid([
+      [{"ar": _("Amount Before VAT"), "en": "Net amount", "value": doc.claimed_total, "fmt": "Currency"},
+       {"ar": _("VAT Rate"), "en": "VAT rate", "value": doc.tax_rate, "fmt": "Percent"}],
+      [{"ar": _("VAT Amount"), "en": "VAT amount", "value": doc.tax_amount, "fmt": "Currency"},
+       {"ar": _("Total Including VAT"), "en": "Total incl. VAT", "value": doc.grand_total, "fmt": "Currency"}],
+      [{"ar": _("Supplier VAT Registration Number"), "en": "Supplier VAT no.", "value": supplier.get("tax_id")},
+       {"ar": _("Company VAT Registration Number"), "en": "Company VAT no.", "value": company.get("tax_id")}],
+  ]) }}
+  {{ ax.amount_words(doc.grand_total or doc.claimed_total, cur) }}
 
   {{ sec(_("Claim Against Our Own Accrual"), "Reconciliation") }}
   {{ ax.field_grid([
@@ -102,12 +134,14 @@
   {{ sec(_("Release Checks"), "Release checks") }}
   {{ ax.check_list(gate) }}
 
-  {{ ax.declaration(_("Both sides agree that the vehicles above were on rent for the days shown at the rates shown in this period, that the amount settled is the claimed total after the difference is dealt with, and that nothing else is due to the rental office for this period.")) }}
+  {{ ax.terms_block(doc) }}
+
+  {{ ax.declaration(_("Both sides agree that the vehicles above were on rent for the days shown at the rates shown in this period, that the amount settled is the claimed total plus the VAT stated on it after the difference is dealt with, and that nothing else is due to the rental office for this period.")) }}
 
   {{ ax.sign_block([
       {"ar": _("Rental Office Representative"), "en": "Rental office", "name": office.contact_person},
       {"ar": _("Fleet Movement"), "en": "Fleet movement", "name": requester},
-      {"ar": _("Finance"), "en": "Finance", "name": None},
+      {"ar": _("Finance"), "en": "Finance", "name": approver},
   ]) }}
 
   {{ ax.doc_footer(doc) }}

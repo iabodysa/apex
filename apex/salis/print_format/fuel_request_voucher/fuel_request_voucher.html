@@ -24,6 +24,10 @@
 {%- set base = frappe.utils.flt(doc.requested_litres) -%}
 {%- set topup = frappe.utils.flt(doc.topup_litres) -%}
 {%- set total_litres = base + topup -%}
+{%- set grade = doc.fuel_grade or veh.planned_fuel_grade -%}
+{%- set dispensed = frappe.utils.flt(doc.dispensed_litres) -%}
+{%- set expired = (frappe.utils.getdate(doc.voucher_valid_until) < frappe.utils.getdate(frappe.utils.nowdate()))
+                  if doc.voucher_valid_until else False -%}
 {%- set remaining = frappe.utils.flt(quota.monthly_litres) - frappe.utils.flt(quota.consumed_litres) -%}
 
 {%- set lines = [] -%}
@@ -54,6 +58,12 @@
   {"ar": _("A temporary voucher that has to be reverted"), "en": "Temporary voucher",
    "state": ("na" if not doc.is_temporary else ("ok" if doc.reverted else "bad")),
    "note": (_("Revert by") ~ ": " ~ frappe.format_date(doc.revert_due_date)) if doc.revert_due_date else None},
+  {"ar": _("The voucher is still inside its validity"), "en": "Still valid",
+   "state": ("na" if not doc.voucher_valid_until else ("bad" if expired else "ok")),
+   "note": (_("Valid Until") ~ ": " ~ frappe.format_date(doc.voucher_valid_until)) if doc.voucher_valid_until else None},
+  {"ar": _("The station recorded what it actually dispensed"), "en": "Dispense recorded",
+   "state": "ok" if dispensed else "bad",
+   "note": (frappe.format_value(dispensed, {"fieldtype": "Float"}) ~ " " ~ _("Litres")) if dispensed else None},
 ] -%}
 
 <div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
@@ -69,7 +79,7 @@
        "name": veh.plate_number or doc.vehicle,
        "lines": [
          (_("Vehicle Category") ~ ": " ~ veh.vehicle_category) if veh.vehicle_category else None,
-         (_("Fuel Grade") ~ ": " ~ _(veh.planned_fuel_grade)) if veh.planned_fuel_grade else None,
+         (_("Fuel Grade") ~ ": " ~ _(grade)) if grade else None,
          (_("Chip Number") ~ ": " ~ doc.chip_number) if doc.chip_number else None,
        ]},
       {"role_ar": _("Carried By"), "role_en": "Driver",
@@ -98,6 +108,10 @@
        {"ar": _("Period"), "en": "Period", "value": quota.period_month}],
       [{"ar": _("Voucher Status"), "en": "Voucher status", "value": doc.status, "tr": True},
        {"ar": _("Requested By"), "en": "Requested by", "value": requester}],
+      [{"ar": _("Fuel Grade Authorised"), "en": "Fuel grade", "value": grade, "tr": True},
+       {"ar": _("Valid From"), "en": "Valid from", "value": doc.voucher_valid_from, "fmt": "Date"}],
+      [{"ar": _("Valid Until"), "en": "Valid until", "value": doc.voucher_valid_until, "fmt": "Date"},
+       {"ar": _("Chip Number"), "en": "Chip number", "value": doc.chip_number}],
   ]) }}
 
   {{ sec(_("What This Voucher Authorises"), "Authorised quantity") }}
@@ -127,6 +141,17 @@
       quota_lines,
       empty_text=_("This voucher is not tied to a monthly quota")) }}
 
+  {{ sec(_("What the Station Actually Dispensed"), "Dispense record") }}
+  {{ ax.field_grid([
+      [{"ar": _("Dispensing Station"), "en": "Station", "value": doc.dispense_station},
+       {"ar": _("Dispensed On"), "en": "Dispensed on", "value": doc.dispensed_on, "fmt": "Datetime"}],
+      [{"ar": _("Litres Actually Dispensed"), "en": "Litres dispensed", "value": doc.dispensed_litres, "fmt": "Float"},
+       {"ar": _("Odometer at the Fill"), "en": "Odometer at fill", "value": doc.odometer_at_fill, "fmt": "Int"}],
+      [{"ar": _("Difference Against What Was Authorised"), "en": "Difference",
+        "value": (dispensed - total_litres) if dispensed else None, "fmt": "Float"},
+       {"ar": _("Fuel Grade Authorised"), "en": "Fuel grade", "value": grade, "tr": True}],
+  ]) }}
+
   {{ sec(_("Release Checks"), "Release checks") }}
   {{ ax.check_list(gate) }}
 
@@ -134,13 +159,19 @@
   {{ ax.note_block(_("This is a temporary voucher. The vehicle goes back to its standing quota on the revert date shown above, and any litre drawn after that date is an exception.")) }}
   {%- endif %}
 
-  {{ ax.declaration(_("This voucher authorises the dispensing party to give the quantity written above to this vehicle only, on the chip or the account named on it, and no more. Anything dispensed beyond it is not payable by the company.")) }}
+  {%- if expired %}
+  {{ ax.note_block(_("This voucher has passed its validity date. Nothing dispensed on it after that day is payable by the company.")) }}
+  {%- endif %}
+
+  {{ ax.declaration(_("This voucher authorises the dispensing party to give the quantity and the grade written above to this vehicle only, on the chip or the account named on it, inside the validity dates shown, and no more. Anything dispensed beyond it is not payable by the company.")) }}
+
+  {{ ax.declaration(_("The station attendant states that he dispensed the litres written in the dispense record above, of the grade shown, into this vehicle at the odometer reading he entered.")) }}
 
   {{ ax.sign_block([
       {"ar": _("Requested By"), "en": "Requested by", "name": requester},
       {"ar": _("Approved By"), "en": "Approved by", "name": approver},
       {"ar": _("Received By"), "en": "Driver receiving", "name": drv.full_name or doc.driver},
-      {"ar": _("Dispensed By"), "en": "Station attendant", "name": None},
+      {"ar": _("Dispensed By"), "en": "Station attendant", "name": doc.dispense_station},
   ]) }}
 
   {{ ax.doc_footer(doc) }}

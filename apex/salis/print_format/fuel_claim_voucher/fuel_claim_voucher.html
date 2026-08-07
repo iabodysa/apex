@@ -18,6 +18,7 @@
 {%- set cur = (frappe.db.get_value("Company", company, "default_currency") if company else None) or frappe.db.get_default("currency") or "SAR" -%}
 {%- set requester = frappe.get_fullname(doc.requested_by) if doc.requested_by else None -%}
 {%- set supervisor = frappe.get_fullname(drv.supervisor) if drv.supervisor else None -%}
+{%- set approver = frappe.get_fullname(doc.approved_by) if doc.approved_by else None -%}
 
 {%- set claimed = frappe.utils.flt(doc.claimed_litres) -%}
 {%- set consumed = frappe.utils.flt(doc.consumed_litres) -%}
@@ -49,6 +50,12 @@
    "note": _(doc.status) if doc.status else None},
   {"ar": _("The claim carries a cost centre to charge"), "en": "Cost centre set",
    "state": "ok" if doc.cost_center else "bad", "note": doc.cost_center},
+  {"ar": _("The claim names the supplier invoice behind it"), "en": "Supplier invoice on record",
+   "state": "ok" if doc.supplier_invoice_number else "bad", "note": doc.supplier_invoice_number},
+  {"ar": _("The claim carries an approving officer"), "en": "Approved",
+   "state": "ok" if doc.approved_by else "bad", "note": approver},
+  {"ar": _("The claim has been paid and carries its payment reference"), "en": "Payment referenced",
+   "state": "ok" if doc.payment_reference else "na", "note": doc.payment_reference},
 ] -%}
 
 <div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
@@ -91,6 +98,12 @@
       [{"ar": _("Quota Increase Claim"), "en": "Quota increase",
         "value": _("Yes") if doc.is_increase else _("No")},
        {"ar": _("Planned Daily Fuel"), "en": "Planned daily fuel", "value": veh.planned_daily_fuel, "fmt": "Currency"}],
+      [{"ar": _("Supplier Invoice Number"), "en": "Supplier invoice no.", "value": doc.supplier_invoice_number},
+       {"ar": _("Supplier Invoice Date"), "en": "Invoice date", "value": doc.supplier_invoice_date, "fmt": "Date"}],
+      [{"ar": _("Unit Price per Litre"), "en": "Price per litre", "value": doc.unit_price_per_litre, "fmt": "Currency"},
+       {"ar": _("Payment Reference"), "en": "Payment reference", "value": doc.payment_reference}],
+      [{"ar": _("Reconciled On"), "en": "Reconciled on", "value": doc.reconciled_on, "fmt": "Date"},
+       {"ar": _("Approved By"), "en": "Approved by", "value": approver}],
   ]) }}
 
   {{ sec(_("What Is Being Claimed"), "Claim line") }}
@@ -119,8 +132,8 @@
 
   {{ ax.sign_block([
       {"ar": _("Requested By"), "en": "Requested by", "name": requester},
-      {"ar": _("Reconciled By"), "en": "Movement", "name": None},
-      {"ar": _("Approved By"), "en": "Finance", "name": None},
+      {"ar": _("Reconciled By"), "en": "Movement", "name": supervisor},
+      {"ar": _("Approved By"), "en": "Finance", "name": approver},
   ]) }}
 
   {{ ax.doc_footer(doc) }}

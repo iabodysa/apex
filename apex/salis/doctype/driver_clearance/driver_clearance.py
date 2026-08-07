@@ -25,6 +25,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt, nowdate
 
 from apex.salis.utils import add_timeline_note, lock_driver
 
@@ -43,6 +44,7 @@ class DriverClearance(Document):
         self._capture_assigned_vehicle()
         self._compute_outstanding()
         self._guard_cleared_status()
+        self._stamp_clearance_date()
 
     def on_submit(self):
         """Releases the driver to Released status and clears their vehicle when submitted as Cleared."""
@@ -70,6 +72,42 @@ class DriverClearance(Document):
         self.outstanding_recoveries = self._count_open(
             "Movement Cost Recovery", _CLOSED_RECOVERY_STATUSES
         )
+        self.outstanding_recovery_amount = self._sum_open_recoveries()
+
+    def _sum_open_recoveries(self):
+        """The money still open against the driver, not the number of cases.
+
+        HR withholds a sum from a final settlement, and a count of three open cases does
+        not say whether to hold ten riyals or ten thousand. Returns zero when the driver
+        is unset or the recovery DocType is not on the site, so the certificate reads
+        nothing owed rather than refusing to print.
+        """
+        if not self.driver or not frappe.db.exists("DocType", "Movement Cost Recovery"):
+            return 0
+        rows = frappe.get_all(
+            "Movement Cost Recovery",
+            filters={
+                "driver": self.driver,
+                "docstatus": ["!=", 2],
+                "status": ["not in", list(_CLOSED_RECOVERY_STATUSES)],
+            },
+            fields=["amount"],
+        )
+        return sum(flt(row.amount) for row in rows)
+
+    def _stamp_clearance_date(self):
+        """Record the day the clearance was granted, and clear it if the clearance is withdrawn.
+
+        A certificate that releases a final settlement must say when it was granted; HR
+        pays against a date, not against a status. The stamp goes on the moment the
+        clearance reads Cleared and comes off the moment it does not, so a blocked or
+        reopened clearance never prints a release date it no longer has.
+        """
+        if self.status == "Cleared":
+            if not self.clearance_date:
+                self.clearance_date = nowdate()
+            return
+        self.clearance_date = None
 
     def _count_open(self, doctype, closed_statuses):
         """Count records of ``doctype`` for this driver whose status is not in

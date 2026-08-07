@@ -47,6 +47,26 @@ class VehicleIncident(Document):
             frappe.throw(_("Estimated cost cannot be negative."))
         self._guard_public_intake()
         self._guard_cost_recovery()
+        self._sync_third_party()
+
+    def _sync_third_party(self):
+        """Keep the third-party block and its flag telling the same story.
+
+        The statement goes to an insurer, so a plate or a policy left over from a
+        correction would name a party who was never in the accident. The flag is the
+        switch: while it is on the four fields stand, and the moment it comes off they
+        are emptied, so the printed block appears only while the record actually holds
+        a third party.
+        """
+        if self.third_party_involved:
+            return
+        for field in (
+            "third_party_plate",
+            "third_party_driver",
+            "third_party_insurer",
+            "third_party_policy",
+        ):
+            self.set(field, None)
 
     def _guard_cost_recovery(self):
         """Consent gate on the wage-recovery decision.
@@ -87,7 +107,19 @@ class VehicleIncident(Document):
             for field, blank in _RECOVERY_INTAKE_RESET.items():
                 self.set(field, blank)
 
-        for field, limit in (("description", 4000), ("location", 280), ("report_number", 140), ("reported_by", 140)):
+        for field, limit in (
+            ("description", 4000),
+            ("location", 280),
+            ("report_number", 140),
+            ("reported_by", 140),
+            ("injury_details", 1000),
+            ("policy_number", 140),
+            ("insurance_claim_number", 140),
+            ("third_party_plate", 40),
+            ("third_party_driver", 140),
+            ("third_party_insurer", 140),
+            ("third_party_policy", 140),
+        ):
             value = self.get(field)
             if value and len(value) > limit:
                 frappe.throw(_("{0} is too long.").format(_(self.meta.get_label(field))))

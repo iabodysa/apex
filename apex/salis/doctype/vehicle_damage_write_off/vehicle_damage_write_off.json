@@ -21,6 +21,13 @@
   "recommended_action",
   "vwo_assessment_col",
   "estimated_cost",
+  "vwo_sec_valuation",
+  "book_value",
+  "salvage_value",
+  "vwo_valuation_col",
+  "disposal_route",
+  "repair_quotation_reference",
+  "insurance_claim_number",
   "vwo_sec_evidence",
   "evidence",
   "vwo_sec_disposition",
@@ -28,6 +35,7 @@
   "needs_operations",
   "vwo_disposition_col",
   "approved_by",
+  "approved_on",
   "vwo_sec_system",
   "naming_series",
   "amended_from"
@@ -130,6 +138,49 @@
    "label": "Estimated Cost (SAR)"
   },
   {
+   "fieldname": "vwo_sec_valuation",
+   "fieldtype": "Section Break",
+   "label": "Valuation and Disposal"
+  },
+  {
+   "description": "Carrying value of the vehicle or the damaged part before this notice.",
+   "fieldname": "book_value",
+   "fieldtype": "Currency",
+   "label": "Book Value (SAR)"
+  },
+  {
+   "description": "What the wreck or the salvaged parts are still worth.",
+   "fieldname": "salvage_value",
+   "fieldtype": "Currency",
+   "label": "Salvage Value (SAR)"
+  },
+  {
+   "fieldname": "vwo_valuation_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.recommended_action=='Write-Off'",
+   "description": "Where the written-off vehicle or part goes once it leaves service.",
+   "fieldname": "disposal_route",
+   "fieldtype": "Select",
+   "label": "Disposal Route",
+   "options": "\nScrap Yard\nAuction\nReturn to Lessor\nInsurer Takes the Wreck\nKept for Parts"
+  },
+  {
+   "depends_on": "eval:doc.recommended_action=='Repair'",
+   "description": "The workshop quotation the estimated cost was taken from.",
+   "fieldname": "repair_quotation_reference",
+   "fieldtype": "Data",
+   "label": "Repair Quotation Reference"
+  },
+  {
+   "depends_on": "eval:doc.recommended_action=='Insurance Claim'",
+   "description": "The claim raised with the insurer for this damage.",
+   "fieldname": "insurance_claim_number",
+   "fieldtype": "Data",
+   "label": "Insurance Claim Number"
+  },
+  {
    "fieldname": "vwo_sec_evidence",
    "fieldtype": "Section Break",
    "label": "Evidence"
@@ -179,6 +230,14 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.status=='Approved'||doc.status=='Closed'",
+   "description": "Stamped when the case is approved and cleared when the approval is withdrawn.",
+   "fieldname": "approved_on",
+   "fieldtype": "Datetime",
+   "label": "Approved On",
+   "read_only": 1
+  },
+  {
    "fieldname": "vwo_sec_system",
    "fieldtype": "Section Break",
    "label": "System",
@@ -212,7 +271,7 @@
    "link_fieldname": "write_off_case"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-08 01:42:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Damage Write-Off",

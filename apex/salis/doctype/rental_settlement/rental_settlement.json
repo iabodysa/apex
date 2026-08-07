@@ -24,8 +24,25 @@
   "rental_settlement_totals_col3",
   "variance",
   "ledger_variance",
+  "rental_settlement_sec_tax",
+  "tax_rate",
+  "tax_amount",
+  "rental_settlement_tax_col",
+  "grand_total",
+  "rental_settlement_sec_invoice",
+  "supplier_invoice_number",
+  "supplier_invoice_date",
+  "rental_settlement_invoice_col",
+  "payment_due_date",
+  "rental_settlement_sec_terms",
+  "tc_name",
+  "terms",
   "rental_settlement_sec_payment",
   "payment_request",
+  "rental_settlement_sec_approval",
+  "approved_by",
+  "rental_settlement_approval_col",
+  "approved_on",
   "rental_settlement_sec_system",
   "naming_series",
   "company",
@@ -156,6 +173,83 @@
    "read_only": 1
   },
   {
+   "fieldname": "rental_settlement_sec_tax",
+   "fieldtype": "Section Break",
+   "label": "VAT",
+   "permlevel": 1
+  },
+  {
+   "default": "15",
+   "description": "Zero for a rental office outside the VAT scope.",
+   "fieldname": "tax_rate",
+   "fieldtype": "Percent",
+   "label": "VAT Rate",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "label": "VAT Amount (SAR)",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rental_settlement_tax_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Total Including VAT (SAR)",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rental_settlement_sec_invoice",
+   "fieldtype": "Section Break",
+   "label": "Supplier Invoice and Terms"
+  },
+  {
+   "description": "The rental office's invoice this statement settles.",
+   "fieldname": "supplier_invoice_number",
+   "fieldtype": "Data",
+   "label": "Supplier Invoice Number"
+  },
+  {
+   "fieldname": "supplier_invoice_date",
+   "fieldtype": "Date",
+   "label": "Supplier Invoice Date"
+  },
+  {
+   "fieldname": "rental_settlement_invoice_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The day the settled amount falls due to the rental office.",
+   "fieldname": "payment_due_date",
+   "fieldtype": "Date",
+   "label": "Payment Due Date"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "rental_settlement_sec_terms",
+   "fieldtype": "Section Break",
+   "label": "Terms and Conditions"
+  },
+  {
+   "fieldname": "tc_name",
+   "fieldtype": "Link",
+   "label": "Terms",
+   "options": "Terms and Conditions",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Text Editor",
+   "label": "Terms and Conditions"
+  },
+  {
    "fieldname": "rental_settlement_sec_payment",
    "fieldtype": "Section Break",
    "label": "Payment",
@@ -169,6 +263,30 @@
    "label": "Payment Request",
    "options": "Salis Payment Request",
    "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rental_settlement_sec_approval",
+   "fieldtype": "Section Break",
+   "label": "Approval"
+  },
+  {
+   "description": "Stamped when the settlement is approved and cleared when the approval is withdrawn.",
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rental_settlement_approval_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Stamped with the approval and cleared with it.",
+   "fieldname": "approved_on",
+   "fieldtype": "Datetime",
+   "label": "Approved On",
    "read_only": 1
   },
   {
@@ -226,7 +344,7 @@
    "link_fieldname": "rental_settlement"
   }
  ],
- "modified": "2026-08-07 08:41:00.000000",
+ "modified": "2026-08-08 01:42:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Rental Settlement",

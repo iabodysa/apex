@@ -13,7 +13,14 @@
   "to_driver",
   "vehicle_handover_main_col",
   "handover_date",
+  "handover_time",
   "odometer_reading",
+  "fuel_level",
+  "handover_location",
+  "vehicle_handover_sec_parties",
+  "fleet_officer",
+  "vehicle_handover_parties_col",
+  "witness_name",
   "vehicle_handover_sec_condition",
   "condition_notes",
   "vehicle_handover_sec_checklist",
@@ -77,10 +84,51 @@
    "reqd": 1
   },
   {
+   "description": "Clock time the vehicle changed hands. Defaults to the time the receipt is raised, so two handovers on the same day can be ordered.",
+   "fieldname": "handover_time",
+   "fieldtype": "Time",
+   "label": "Handover Time"
+  },
+  {
    "default": "0",
    "fieldname": "odometer_reading",
    "fieldtype": "Int",
    "label": "Odometer Reading"
+  },
+  {
+   "description": "Gauge reading at the moment of handover, so a driver is not charged for fuel he never received.",
+   "fieldname": "fuel_level",
+   "fieldtype": "Select",
+   "label": "Fuel Level at Handover",
+   "options": "\nEmpty\nQuarter\nHalf\nThree Quarters\nFull"
+  },
+  {
+   "description": "Where the vehicle physically changed hands.",
+   "fieldname": "handover_location",
+   "fieldtype": "Data",
+   "label": "Handover Location"
+  },
+  {
+   "fieldname": "vehicle_handover_sec_parties",
+   "fieldtype": "Section Break",
+   "label": "Attending Parties"
+  },
+  {
+   "description": "The fleet officer who attended the handover and signs it. Names the third signature instead of guessing it from the incoming driver's supervisor.",
+   "fieldname": "fleet_officer",
+   "fieldtype": "Link",
+   "label": "Fleet Officer",
+   "options": "User"
+  },
+  {
+   "fieldname": "vehicle_handover_parties_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Anyone else present who can attest to the condition written on this receipt.",
+   "fieldname": "witness_name",
+   "fieldtype": "Data",
+   "label": "Witness"
   },
   {
    "collapsible": 1,
@@ -161,14 +209,14 @@
   }
  ],
  "is_submittable": 1,
-"links": [
+ "links": [
   {
    "group": "Fleet",
    "link_doctype": "Vehicle Damage Write-Off",
    "link_fieldname": "source_handover"
   }
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-08-08 01:42:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Handover",

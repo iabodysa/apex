@@ -10,6 +10,8 @@
   "driver_clearance_sec_overview",
   "driver",
   "clearance_reason",
+  "clearance_date",
+  "last_working_day",
   "assigned_vehicle",
   "driver_user",
   "driver_clearance_overview_col",
@@ -19,9 +21,13 @@
   "vehicle_returned",
   "fuel_chip_returned",
   "custody_returned",
+  "final_odometer",
   "driver_clearance_returns_col",
   "outstanding_fuel_exceptions",
   "outstanding_recoveries",
+  "outstanding_recovery_amount",
+  "driver_clearance_sec_custody",
+  "returned_items",
   "driver_clearance_sec_notes",
   "notes",
   "amended_from"
@@ -55,6 +61,19 @@
    "in_standard_filter": 1,
    "label": "Clearance Reason",
    "options": "Resignation\nTransfer\nTermination\nEnd of Assignment"
+  },
+  {
+   "description": "Stamped the day the clearance reaches Cleared, and cleared again if the clearance is withdrawn.",
+   "fieldname": "clearance_date",
+   "fieldtype": "Date",
+   "label": "Clearance Date",
+   "read_only": 1
+  },
+  {
+   "description": "The last day the driver actually worked. HR settles from this date, not from the day the paper was signed.",
+   "fieldname": "last_working_day",
+   "fieldtype": "Date",
+   "label": "Effective Last Working Day"
   },
   {
    "depends_on": "eval:doc.driver",
@@ -130,6 +149,13 @@
    "read_only_depends_on": "eval:doc.status=='Cleared'||doc.status=='Cancelled'"
   },
   {
+   "default": "0",
+   "description": "Reading on the vehicle when the driver handed it back.",
+   "fieldname": "final_odometer",
+   "fieldtype": "Int",
+   "label": "Final Odometer on Return"
+  },
+  {
    "fieldname": "driver_clearance_returns_col",
    "fieldtype": "Column Break"
   },
@@ -152,6 +178,14 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "description": "Sum of the open Movement Cost Recovery amounts for this driver, so HR withholds the right money instead of a count of cases.",
+   "fieldname": "outstanding_recovery_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Recovery Amount (SAR)",
+   "read_only": 1
+  },
+  {
    "fieldname": "driver_clearance_sec_notes",
    "fieldtype": "Section Break",
    "label": "Notes"
@@ -160,6 +194,18 @@
    "fieldname": "notes",
    "fieldtype": "Small Text",
    "label": "Notes"
+  },
+  {
+   "fieldname": "driver_clearance_sec_custody",
+   "fieldtype": "Section Break",
+   "label": "Custody Items Returned"
+  },
+  {
+   "description": "Every company item the driver held, line by line. The single Custody Returned check says nothing about what came back or in what state.",
+   "fieldname": "returned_items",
+   "fieldtype": "Table",
+   "label": "Custody Items Returned",
+   "options": "Driver Clearance Item"
   },
   {
    "fieldname": "amended_from",
@@ -174,7 +220,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-07 05:38:00.000000",
+ "modified": "2026-08-08 01:42:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Driver Clearance",

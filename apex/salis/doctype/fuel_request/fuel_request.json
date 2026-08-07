@@ -23,12 +23,17 @@
   "fuel_quota",
   "fuel_request_sec_fuel_account_col1",
   "fuel_platform",
+  "fuel_grade",
   "fuel_request_sec_amounts",
   "requested_litres",
   "fuel_request_sec_amounts_col1",
   "topup_litres",
   "fuel_request_sec_amounts_col2",
   "amount",
+  "fuel_request_sec_validity",
+  "voucher_valid_from",
+  "fuel_request_sec_validity_col1",
+  "voucher_valid_until",
   "fuel_request_sec_temporary",
   "is_temporary",
   "fuel_request_sec_temporary_col1",
@@ -42,6 +47,12 @@
   "fuel_request_sec_chip",
   "inactivity_evidence",
   "owner_acknowledged",
+  "fuel_request_sec_dispense",
+  "dispense_station",
+  "dispensed_litres",
+  "fuel_request_sec_dispense_col1",
+  "dispensed_on",
+  "odometer_at_fill",
   "__tab_1",
   "fuel_request_sec_actors",
   "requested_by",
@@ -173,6 +184,15 @@
    "options": "Fuel Platform"
   },
   {
+   "description": "The grade this voucher authorises. Defaults from the vehicle; the station may not dispense another.",
+   "fetch_from": "vehicle.planned_fuel_grade",
+   "fetch_if_empty": 1,
+   "fieldname": "fuel_grade",
+   "fieldtype": "Select",
+   "label": "Fuel Grade",
+   "options": "\nPetrol 91\nPetrol 95\nDiesel"
+  },
+  {
    "fieldname": "fuel_request_sec_amounts",
    "fieldtype": "Section Break",
    "label": "Amounts",
@@ -203,6 +223,26 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "label": "Amount (SAR)"
+  },
+  {
+   "fieldname": "fuel_request_sec_validity",
+   "fieldtype": "Section Break",
+   "label": "Voucher Validity"
+  },
+  {
+   "fieldname": "voucher_valid_from",
+   "fieldtype": "Date",
+   "label": "Valid From"
+  },
+  {
+   "fieldname": "fuel_request_sec_validity_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "After this day the voucher is dead, and nothing drawn on it is payable by the company.",
+   "fieldname": "voucher_valid_until",
+   "fieldtype": "Date",
+   "label": "Valid Until"
   },
   {
    "fieldname": "fuel_request_sec_temporary",
@@ -284,6 +324,43 @@
    "fieldname": "owner_acknowledged",
    "fieldtype": "Check",
    "label": "Owner Acknowledged"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "fuel_request_sec_dispense",
+   "fieldtype": "Section Break",
+   "label": "Dispense Record"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "The station that actually dispensed the fuel. Filled after the voucher is approved, which is what binds the attendant's signature.",
+   "fieldname": "dispense_station",
+   "fieldtype": "Data",
+   "label": "Dispensing Station"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Litres the pump actually delivered, which may differ from what the voucher authorised.",
+   "fieldname": "dispensed_litres",
+   "fieldtype": "Float",
+   "label": "Litres Actually Dispensed"
+  },
+  {
+   "fieldname": "fuel_request_sec_dispense_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dispensed_on",
+   "fieldtype": "Datetime",
+   "label": "Dispensed On"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Dashboard reading at the pump, which ties the litres to the distance run.",
+   "fieldname": "odometer_at_fill",
+   "fieldtype": "Int",
+   "label": "Odometer at the Fill"
   },
   {
    "fieldname": "__tab_1",
@@ -397,7 +474,7 @@
    "link_fieldname": "fuel_request"
   }
  ],
- "modified": "2026-07-24 03:53:04.208692",
+ "modified": "2026-08-08 01:42:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Request",

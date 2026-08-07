@@ -21,15 +21,23 @@
   "fuel_claim_sec_amounts",
   "claimed_litres",
   "claimed_amount",
+  "unit_price_per_litre",
   "fuel_claim_amounts_col",
   "consumed_litres",
   "variance_litres",
+  "fuel_claim_sec_invoice",
+  "supplier_invoice_number",
+  "supplier_invoice_date",
+  "fuel_claim_invoice_col",
+  "payment_reference",
   "fuel_claim_sec_financial",
   "company",
   "fuel_claim_financial_col",
   "cost_center",
   "fuel_claim_sec_system",
   "requested_by",
+  "approved_by",
+  "reconciled_on",
   "naming_series",
   "fuel_claim_system_col",
   "amended_from"
@@ -144,6 +152,13 @@
    "read_only_depends_on": "eval:doc.docstatus==1"
   },
   {
+   "description": "Claimed amount divided by claimed litres. Finance checks a claim against the pump price, which a total and a quantity alone do not state.",
+   "fieldname": "unit_price_per_litre",
+   "fieldtype": "Currency",
+   "label": "Unit Price per Litre (SAR)",
+   "read_only": 1
+  },
+  {
    "fieldname": "fuel_claim_amounts_col",
    "fieldtype": "Column Break"
   },
@@ -160,6 +175,33 @@
    "fieldtype": "Float",
    "label": "Variance (L)",
    "read_only": 1
+  },
+  {
+   "fieldname": "fuel_claim_sec_invoice",
+   "fieldtype": "Section Break",
+   "label": "Supplier Invoice and Payment"
+  },
+  {
+   "description": "The fuel supplier's invoice this claim settles.",
+   "fieldname": "supplier_invoice_number",
+   "fieldtype": "Data",
+   "label": "Supplier Invoice Number"
+  },
+  {
+   "fieldname": "supplier_invoice_date",
+   "fieldtype": "Date",
+   "label": "Supplier Invoice Date"
+  },
+  {
+   "fieldname": "fuel_claim_invoice_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "The transfer or cheque that paid this claim. Filled after the claim is closed.",
+   "fieldname": "payment_reference",
+   "fieldtype": "Data",
+   "label": "Payment Reference"
   },
   {
    "fieldname": "fuel_claim_sec_financial",
@@ -201,6 +243,21 @@
    "read_only": 1
   },
   {
+   "description": "Stamped when the claim is approved and cleared when the approval is withdrawn.",
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "description": "Stamped the day the claim is reconciled against the movement record, and cleared if it goes back to the movement team.",
+   "fieldname": "reconciled_on",
+   "fieldtype": "Date",
+   "label": "Reconciled On",
+   "read_only": 1
+  },
+  {
    "default": "FCM-.######",
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -227,7 +284,7 @@
  "icon": "fa fa-tint",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-07 05:38:00.000000",
+ "modified": "2026-08-08 01:42:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Claim",

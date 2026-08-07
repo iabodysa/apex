@@ -22,6 +22,7 @@
 {%- set supervisor = frappe.get_fullname(drv.supervisor) if drv.supervisor else None -%}
 {%- set threshold = frappe.db.get_single_value("Salis Settings", "writeoff_ops_threshold") or 0 -%}
 {%- set cost = frappe.utils.flt(doc.estimated_cost) -%}
+{%- set net_loss = frappe.utils.flt(doc.book_value) - frappe.utils.flt(doc.salvage_value) -%}
 
 {%- set gate = [
   {"ar": _("Damage evidence is attached to the case"), "en": "Evidence attached",
@@ -36,6 +37,9 @@
    "state": "bad" if doc.needs_operations else "na", "note": None},
   {"ar": _("The notice carries an approving officer"), "en": "Approved",
    "state": "ok" if doc.approved_by else "bad", "note": approver},
+  {"ar": _("The approval carries the moment it was given"), "en": "Approval timestamped",
+   "state": "ok" if doc.approved_on else "bad",
+   "note": frappe.format_value(doc.approved_on, {"fieldtype": "Datetime"}) if doc.approved_on else None},
 ] -%}
 
 {%- set decl = {
@@ -72,7 +76,7 @@
        "name": approver,
        "lines": [
          (_("Company") ~ ": " ~ veh.company) if veh.company else None,
-         (_("Project") ~ ": " ~ veh.project) if veh.project else None,
+         (_("Approved On") ~ ": " ~ frappe.format_value(doc.approved_on, {"fieldtype": "Datetime"})) if doc.approved_on else None,
          (_("Reported By") ~ ": " ~ doc.reported_by) if doc.reported_by else None,
        ]},
   ]) }}
@@ -103,6 +107,16 @@
       {"ar": _("Estimated Cost of Damage"), "en": "Estimated cost", "value": doc.estimated_cost, "fmt": "Currency"},
   ]]) }}
   {{ ax.amount_words(doc.estimated_cost, cur) }}
+
+  {{ sec(_("What the Company Loses and Where the Vehicle Goes"), "Valuation and disposal") }}
+  {{ ax.field_grid([
+      [{"ar": _("Book Value"), "en": "Book value", "value": doc.book_value, "fmt": "Currency"},
+       {"ar": _("Salvage Value"), "en": "Salvage value", "value": doc.salvage_value, "fmt": "Currency"}],
+      [{"ar": _("Net Loss After Salvage"), "en": "Net loss", "value": net_loss, "fmt": "Currency"},
+       {"ar": _("Disposal Route"), "en": "Disposal route", "value": doc.disposal_route, "tr": True}],
+      [{"ar": _("Repair Quotation Reference"), "en": "Repair quotation", "value": doc.repair_quotation_reference},
+       {"ar": _("Insurance Claim Number"), "en": "Claim no.", "value": doc.insurance_claim_number}],
+  ]) }}
 
   {{ sec(_("Authority Gate"), "Authority gate") }}
   {{ ax.check_list(gate) }}

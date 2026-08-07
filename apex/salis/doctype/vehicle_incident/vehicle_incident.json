@@ -11,19 +11,34 @@
   "incident_type",
   "vehicle",
   "incident_date",
+  "incident_time",
   "vi_incident_col",
   "driver",
   "location",
   "report_number",
+  "odometer_at_incident",
   "vi_sec_details",
   "description",
   "fault",
   "damaged_parts",
+  "injuries",
+  "injury_details",
   "vi_details_col",
   "estimated_cost",
   "reported_by",
   "vi_sec_evidence",
   "evidence",
+  "vi_sec_insurance",
+  "policy_number",
+  "vi_insurance_col",
+  "insurance_claim_number",
+  "vi_sec_third_party",
+  "third_party_involved",
+  "third_party_plate",
+  "third_party_driver",
+  "vi_third_party_col",
+  "third_party_insurer",
+  "third_party_policy",
   "vi_sec_disposition",
   "status",
   "vi_disposition_col",
@@ -81,6 +96,12 @@
    "reqd": 1
   },
   {
+   "description": "Clock time of the incident. A police report and an insurer both ask for it, and it orders two incidents on the same day.",
+   "fieldname": "incident_time",
+   "fieldtype": "Time",
+   "label": "Incident Time"
+  },
+  {
    "fieldname": "vi_incident_col",
    "fieldtype": "Column Break"
   },
@@ -103,6 +124,12 @@
    "fieldname": "report_number",
    "fieldtype": "Data",
    "label": "Police Report Number"
+  },
+  {
+   "description": "Dashboard reading when the incident happened, which fixes the vehicle's mileage at the moment of loss.",
+   "fieldname": "odometer_at_incident",
+   "fieldtype": "Int",
+   "label": "Odometer at the Incident"
   },
   {
    "fieldname": "vi_sec_details",
@@ -128,6 +155,20 @@
    "label": "Damaged Parts"
   },
   {
+   "depends_on": "eval:doc.incident_type=='Accident'",
+   "description": "Whether anybody was hurt. An insurer treats a bodily-injury accident under a different cover.",
+   "fieldname": "injuries",
+   "fieldtype": "Select",
+   "label": "Injuries",
+   "options": "\nNo Injuries\nMinor Injuries\nSerious Injuries\nFatality"
+  },
+  {
+   "depends_on": "eval:doc.injuries && doc.injuries!='No Injuries'",
+   "fieldname": "injury_details",
+   "fieldtype": "Small Text",
+   "label": "Injury Details"
+  },
+  {
    "fieldname": "vi_details_col",
    "fieldtype": "Column Break"
   },
@@ -151,6 +192,67 @@
    "fieldname": "evidence",
    "fieldtype": "Attach",
    "label": "Evidence"
+  },
+  {
+   "fieldname": "vi_sec_insurance",
+   "fieldtype": "Section Break",
+   "label": "Insurance"
+  },
+  {
+   "description": "The policy in force on our vehicle on the day of the incident.",
+   "fieldname": "policy_number",
+   "fieldtype": "Data",
+   "label": "Insurance Policy Number"
+  },
+  {
+   "fieldname": "vi_insurance_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The claim the insurer opened against this incident.",
+   "fieldname": "insurance_claim_number",
+   "fieldtype": "Data",
+   "label": "Insurance Claim Number"
+  },
+  {
+   "fieldname": "vi_sec_third_party",
+   "fieldtype": "Section Break",
+   "label": "Third Party"
+  },
+  {
+   "default": "0",
+   "description": "Set when another vehicle or another person was part of the incident.",
+   "fieldname": "third_party_involved",
+   "fieldtype": "Check",
+   "label": "Third Party Involved"
+  },
+  {
+   "depends_on": "eval:doc.third_party_involved",
+   "fieldname": "third_party_plate",
+   "fieldtype": "Data",
+   "label": "Third Party Plate Number"
+  },
+  {
+   "depends_on": "eval:doc.third_party_involved",
+   "fieldname": "third_party_driver",
+   "fieldtype": "Data",
+   "label": "Third Party Driver"
+  },
+  {
+   "fieldname": "vi_third_party_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.third_party_involved",
+   "fieldname": "third_party_insurer",
+   "fieldtype": "Data",
+   "label": "Third Party Insurer"
+  },
+  {
+   "depends_on": "eval:doc.third_party_involved",
+   "fieldname": "third_party_policy",
+   "fieldtype": "Data",
+   "label": "Third Party Policy Number"
   },
   {
    "fieldname": "vi_sec_disposition",
@@ -302,7 +404,7 @@
    "link_fieldname": "source_incident"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-08 01:52:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Incident",

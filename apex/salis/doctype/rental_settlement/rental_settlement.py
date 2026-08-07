@@ -39,7 +39,9 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, now_datetime
+
+from apex.apex_core.utils.vat import apply_vat
 
 VALID_STATUSES = (
     "Draft",
@@ -104,14 +106,42 @@ class RentalSettlement(Document):
                 _("Claimed Total and Accrued Total cannot be negative.")
             )
 
+        apply_vat(self, self.claimed_total)
+        self._stamp_approval()
+
+    def _stamp_approval(self, persist=False):
+        """Record who approved the settlement and the moment they did, and clear both when it is withdrawn.
+
+        A Saudi rental office reads this statement as its settlement advice, so the paper
+        has to name the officer who committed the company and when. Both fields are
+        read-only; they go on as the settlement reaches Approved or Paid and come off if
+        it is pushed back to Draft or Disputed, so a statement never prints an approval
+        the record no longer holds. ``persist`` writes straight to the row for the
+        post-submit Mark Paid transition, where validate no longer runs.
+        """
+        approved = self.status in SETTLED_STATUSES
+        if approved and not self.approved_by:
+            approved_by, approved_on = frappe.session.user, now_datetime()
+        elif approved:
+            approved_by, approved_on = self.approved_by, self.approved_on or now_datetime()
+        else:
+            approved_by, approved_on = None, None
+
+        if persist:
+            self.db_set("approved_by", approved_by)
+            self.db_set("approved_on", approved_on)
+            return
+        self.approved_by = approved_by
+        self.approved_on = approved_on
 
     def on_submit(self):
         """Stamps this settlement onto its matching rental accrual ledger rows once settled."""
         self._sync_accrual_stamp()
 
     def on_update_after_submit(self):
-        """Re-stamps the accrual ledger rows as the settlement moves through its settled states."""
+        """Re-stamps the accrual ledger rows and the approval as the settlement moves through its settled states."""
         self._sync_accrual_stamp()
+        self._stamp_approval(persist=True)
 
     def on_cancel(self):
         """Releases this settlement's stamped rental accrual ledger rows so they can be re-settled."""

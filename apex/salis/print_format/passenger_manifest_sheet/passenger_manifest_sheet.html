@@ -26,15 +26,19 @@
   {%- set _x = pax.append({
       "empno": e.employee_number or p.employee,
       "pname": p.passenger_name or e.employee_name,
+      "idno": p.id_number,
+      "seat": p.seat_number,
       "phone": e.cell_number,
       "pickup": p.pickup,
       "dropoff": p.dropoff,
+      "btime": p.boarding_time,
       "boarded": _("Boarded") if p.boarded else _("Not Boarded"),
       "sign": "____________"}) -%}
 {%- endfor -%}
 
 {%- set on_board = doc.passengers | selectattr("boarded") | list | length if doc.passengers else 0 -%}
 {%- set listed = doc.passengers | length if doc.passengers else 0 -%}
+{%- set identified = pax | selectattr("idno") | list | length -%}
 {%- set distance = (frappe.utils.cint(trip.odometer_end) - frappe.utils.cint(trip.odometer_start))
                    if (trip.odometer_start and trip.odometer_end) else None -%}
 {%- set licence_days = frappe.utils.date_diff(drv.license_expiry, doc.dispatch_date)
@@ -53,6 +57,9 @@
   {"ar": _("The route plan behind this sheet is approved"), "en": "Route plan approved",
    "state": ("na" if not doc.route_plan else ("ok" if plan.supervisor_approval == "Approved" else "bad")),
    "note": _(plan.supervisor_approval) if plan.supervisor_approval else None},
+  {"ar": _("Every passenger on the sheet carries an ID number"), "en": "Every passenger identified",
+   "state": ("na" if not listed else ("ok" if identified == listed else "bad")),
+   "note": identified | string ~ " / " ~ listed | string},
 ] -%}
 
 <div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
@@ -103,13 +110,16 @@
 
   {{ sec(_("Persons Carried"), "Persons carried") }}
   {{ ax.line_table(
-      [{"ar": _("Employee Number"), "en": "Employee no.", "key": "empno", "width": "12%"},
-       {"ar": _("Passenger Name"), "en": "Name", "key": "pname", "width": "24%"},
-       {"ar": _("Phone"), "en": "Phone", "key": "phone", "width": "12%"},
+      [{"ar": _("Employee Number"), "en": "Employee no.", "key": "empno", "width": "9%"},
+       {"ar": _("Passenger Name"), "en": "Name", "key": "pname", "width": "18%"},
+       {"ar": _("ID Number"), "en": "ID no.", "key": "idno", "width": "11%"},
+       {"ar": _("Seat"), "en": "Seat", "key": "seat", "width": "6%"},
+       {"ar": _("Phone"), "en": "Phone", "key": "phone", "width": "10%"},
        {"ar": _("Pickup"), "en": "Pickup", "key": "pickup"},
        {"ar": _("Drop-off"), "en": "Drop-off", "key": "dropoff"},
-       {"ar": _("Boarding"), "en": "Boarding", "key": "boarded", "width": "11%"},
-       {"ar": _("Signature"), "en": "Signature", "key": "sign", "width": "13%"}],
+       {"ar": _("Boarding Time"), "en": "Boarded at", "key": "btime", "width": "9%", "fmt": "Time"},
+       {"ar": _("Boarding"), "en": "Boarding", "key": "boarded", "width": "9%"},
+       {"ar": _("Signature"), "en": "Signature", "key": "sign", "width": "11%"}],
       pax,
       totals=[on_board | string ~ " / " ~ listed | string, ""],
       empty_text=_("No passenger is listed on this manifest")) }}

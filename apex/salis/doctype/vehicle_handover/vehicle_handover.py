@@ -11,6 +11,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import nowtime
 
 from apex.salis.utils import (
     add_timeline_note,
@@ -21,6 +22,17 @@ from apex.salis.utils import (
 
 
 class VehicleHandover(Document):
+    def before_insert(self):
+        """Default the handover time to the moment the receipt is raised.
+
+        Two handovers of the same vehicle on the same day cannot be ordered by a date
+        alone, and a receipt that states no time cannot say which one came second. The
+        operator may overwrite it with the real clock time; left alone it carries the
+        time the paper was raised, which is what a desk log would have written.
+        """
+        if not self.handover_time:
+            self.handover_time = nowtime()
+
     def validate(self):
         """Validates the two drivers differ, the incoming rider is active, and the odometer only rises."""
         if self.from_driver and self.to_driver and self.from_driver == self.to_driver:

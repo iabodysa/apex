@@ -21,7 +21,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, now_datetime
 
 from apex.salis.utils import add_timeline_note
 
@@ -85,9 +85,22 @@ class VehicleDamageWriteOff(Document):
 
 
     def _stamp_approver(self):
-        """Stamps the current user as approver when the status is set to Approved."""
-        if self.status == "Approved" and not self.approved_by:
-            self.approved_by = frappe.session.user
+        """Record who authorised the case and the moment they did, and clear both when the authority is withdrawn.
+
+        A notice that scraps a vehicle or opens an insurance claim has to name its
+        authority and the moment it was given; a status reading Approved on its own tells
+        an auditor nothing about when the company committed. Closed keeps the stamp
+        because a closed case was approved first; every other status loses it, so the
+        printed notice never carries an approval the record no longer holds.
+        """
+        if self.status in ("Approved", "Closed"):
+            if not self.approved_by:
+                self.approved_by = frappe.session.user
+            if not self.approved_on:
+                self.approved_on = now_datetime()
+            return
+        self.approved_by = None
+        self.approved_on = None
 
     def _stamp_source_incident(self):
         """Sets the source Vehicle Incident's write-off case link to this document."""

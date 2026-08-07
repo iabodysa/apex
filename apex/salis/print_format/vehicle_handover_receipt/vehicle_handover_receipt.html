@@ -33,6 +33,11 @@
 
 {%- set odo = (frappe.format_value(doc.odometer_reading, {"fieldtype": "Int"}) ~ " " ~ _("km")) if doc.odometer_reading else None -%}
 {%- set clean = doc.discrepancy_status == "Clean" -%}
+{%- set officer = frappe.get_fullname(doc.fleet_officer) if doc.fleet_officer else None -%}
+{%- set stamped = (frappe.format_date(doc.handover_date) if doc.handover_date else "")
+                  ~ ((" · " ~ frappe.format_value(doc.handover_time, {"fieldtype": "Time"})) if doc.handover_time else "") -%}
+{%- set evidence = doc.signed_evidence or "" -%}
+{%- set evidence_is_image = evidence.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".webp")) if evidence else False -%}
 
 <div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
   {{ ax.watermark(doc) }}
@@ -40,7 +45,7 @@
   {{ ax.doc_head() }}
 
   {{ ax.doc_title(doc, _("Vehicle Handover Receipt"), "Vehicle Handover Receipt",
-                  (_("Handover Date") ~ ": " ~ frappe.format_date(doc.handover_date)) if doc.handover_date else "") }}
+                  (_("Handover") ~ ": " ~ stamped) if stamped else "") }}
 
   {{ ax.party_block([
       {"role_ar": _("Handed Over By"), "role_en": "Outgoing driver",
@@ -63,7 +68,8 @@
        "lines": [
          (_("Project") ~ ": " ~ veh.project) if veh.project else None,
          (_("Rental Office") ~ ": " ~ veh.rental_office) if veh.rental_office else None,
-         (_("Fleet Supervisor") ~ ": " ~ supervisor) if supervisor else None,
+         (_("Fleet Officer Attending") ~ ": " ~ officer) if officer else None,
+         (_("Witness") ~ ": " ~ doc.witness_name) if doc.witness_name else None,
        ]},
   ]) }}
 
@@ -76,6 +82,10 @@
       [{"ar": _("Odometer at Handover"), "en": "Odometer", "value": odo},
        {"ar": _("Fuel Grade"), "en": "Fuel grade", "value": veh.planned_fuel_grade, "tr": True}],
       [{"ar": _("Handover Date"), "en": "Handover date", "value": doc.handover_date, "fmt": "Date"},
+       {"ar": _("Handover Time"), "en": "Handover time", "value": doc.handover_time, "fmt": "Time"}],
+      [{"ar": _("Handover Location"), "en": "Handover location", "value": doc.handover_location},
+       {"ar": _("Fuel Level at Handover"), "en": "Fuel level", "value": doc.fuel_level, "tr": True}],
+      [{"ar": _("Fleet Officer Attending"), "en": "Fleet officer", "value": officer},
        {"ar": _("Vehicle Status"), "en": "Vehicle status", "value": veh.status, "tr": True}],
   ]) }}
 
@@ -107,12 +117,26 @@
   {{ ax.note_block((_("Discrepancy") ~ " (" ~ _(doc.discrepancy_status or "") ~ "): " ~ (doc.discrepancy_notes or _("No detail was recorded.")))) }}
   {%- endif %}
 
+  {%- if evidence %}
+  {{ sec(_("Signed Evidence on File"), "Signed evidence on file") }}
+  {%- if evidence_is_image %}
+  <div style="border:1px solid #ddd5c2;border-radius:5px;padding:8px 10px;margin-bottom:12px">
+    <img src="{{ evidence }}" style="max-height:230px;max-width:100%;display:block">
+  </div>
+  {%- else %}
+  {{ ax.field_grid([[
+      {"ar": _("Signed Evidence File"), "en": "Evidence file", "value": evidence},
+  ]]) }}
+  {%- endif %}
+  {%- endif %}
+
   {{ ax.declaration(_("The incoming driver confirms he received the vehicle described above in the condition written on this receipt, and holds it together with its fuel chip, its fines and any damage, from the handover date until he returns it by a receipt of the same kind.")) }}
 
   {{ ax.sign_block([
       {"ar": _("Handed Over By"), "en": "Outgoing driver", "name": frm.full_name or doc.from_driver},
       {"ar": _("Received By"), "en": "Incoming driver", "name": tod.full_name or doc.to_driver},
-      {"ar": _("Fleet Supervisor"), "en": "Fleet supervisor", "name": supervisor},
+      {"ar": _("Fleet Officer Attending"), "en": "Fleet officer", "name": officer or supervisor},
+      {"ar": _("Witness"), "en": "Witness", "name": doc.witness_name},
   ]) }}
 
   {{ ax.doc_footer(doc) }}
