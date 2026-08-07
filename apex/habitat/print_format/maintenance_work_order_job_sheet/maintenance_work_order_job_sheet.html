@@ -92,11 +92,13 @@
       empty_text=_("No materials or parts are drawn against this work order")) }}
 
   {{ ax.field_grid([
-      [{"ar": _("Total Procurement Cost (SAR)"), "en": "Total on record", "value": doc.total_procurement_cost, "fmt": "Currency"},
+      [{"ar": _("Total Procurement Cost (SAR)"), "en": "Estimated on record", "value": doc.total_procurement_cost, "fmt": "Currency"},
        {"ar": _("Material Lines"), "en": "Material lines", "value": proc | length, "fmt": "Int"}],
+      [{"ar": _("Actual Cost"), "en": "Actual cost", "value": doc.actual_cost, "fmt": "Currency"},
+       {"ar": _("Labour Hours"), "en": "Labour hours", "value": doc.labour_hours, "fmt": "Float"}],
   ]) }}
 
-  {{ ax.amount_words(doc.total_procurement_cost, doc_currency) }}
+  {{ ax.amount_words(doc.actual_cost or doc.total_procurement_cost, doc_currency) }}
 
   {{ ax.note_block(doc.completion_notes, _("Completion Notes")) }}
 
@@ -113,12 +115,16 @@
         "value": _("Yes") if doc.completion_photo else _("No")},
        {"ar": _("Document State"), "en": "Document state",
         "value": _("Draft") if doc.docstatus == 0 else (_("Submitted") if doc.docstatus == 1 else _("Cancelled"))}],
+      [{"ar": _("Verified By"), "en": "Verified by",
+        "value": frappe.get_fullname(doc.verified_by) if doc.verified_by else None},
+       {"ar": _("Completed On"), "en": "Completed on", "value": doc.completed_on, "fmt": "Datetime"}],
   ]) }}
 
   {{ ax.sign_block([
       {"ar": _("Carried Out By (Technician)"), "en": "Carried out by",
        "name": employee.get("employee_name") or doc.assigned_to},
-      {"ar": _("Inspected and Accepted By (Supervisor)"), "en": "Inspected and accepted by", "name": supervisor},
+      {"ar": _("Inspected and Accepted By (Supervisor)"), "en": "Inspected and accepted by",
+       "name": frappe.get_fullname(doc.verified_by) if doc.verified_by else supervisor},
       {"ar": _("Received By (Requester)"), "en": "Received by", "name": requester if is_done else None},
   ]) }}
 

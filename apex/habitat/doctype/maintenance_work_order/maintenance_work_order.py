@@ -6,7 +6,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, getdate, today
+from frappe.utils import flt, getdate, now, today
 
 
 class MaintenanceWorkOrder(Document):
@@ -191,6 +191,8 @@ def mark_completed(
         "actual_end_date": end_date,
         "completion_photo": photo,
         "status": "Completed",
+        "verified_by": frappe.session.user,
+        "completed_on": now(),
     }
     if completion_notes:
         evidence["completion_notes"] = completion_notes

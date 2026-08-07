@@ -54,6 +54,7 @@ def on_submit(doc, method=None):
     """Post the ship leg out of the source store and mark the transfer In Transit."""
     _assert_source_availability(doc)
     _post_ship_leg(doc)
+    doc.db_set("issued_by", frappe.session.user)
     doc.db_set("status", "In Transit")
 
 
@@ -118,6 +119,7 @@ def mark_received(transfer: str, received_date: str = None):
             posting_date=rcv_date,
         )
     doc.db_set("received_date", rcv_date)
+    doc.db_set("received_by", frappe.session.user)
     doc.db_set("status", "Received")
     _notify_finance_on_cost_center_shift(doc)
     return doc.name

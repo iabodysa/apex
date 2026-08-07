@@ -24,11 +24,15 @@
   "subcontractor_service_order",
   "maintenance_work_order_procurement_col",
   "total_procurement_cost",
+  "actual_cost",
+  "labour_hours",
   "maintenance_work_order_sec_procurement_items_table",
   "procurement_items",
   "maintenance_work_order_sec_large_text",
   "completion_notes",
   "completion_photo",
+  "verified_by",
+  "completed_on",
   "maintenance_work_order_tab_system",
   "maintenance_work_order_sec_system",
   "building",
@@ -250,6 +254,31 @@
    "label": "Issue Type",
    "options": "Electrical\nPlumbing\nFurniture\nAir Conditioning\nFire Safety\nPest Control\nStructural\nOther",
    "read_only": 1
+  },
+  {
+   "fieldname": "actual_cost",
+   "fieldtype": "Currency",
+   "label": "Actual Cost",
+   "description": "What was really spent; total_procurement_cost is the estimate."
+  },
+  {
+   "fieldname": "labour_hours",
+   "fieldtype": "Float",
+   "label": "Labour Hours"
+  },
+  {
+   "fieldname": "verified_by",
+   "fieldtype": "Link",
+   "label": "Verified By",
+   "options": "User",
+   "read_only": 1,
+   "description": "Stamped when the order reaches Completed; the supervisor who accepted the work."
+  },
+  {
+   "fieldname": "completed_on",
+   "fieldtype": "Datetime",
+   "label": "Completed On",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
@@ -265,7 +294,7 @@
    "link_fieldname": "maintenance_work_order"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-08 01:23:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Work Order",

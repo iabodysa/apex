@@ -165,6 +165,7 @@ Active Vehicles by Category,المركبات النشطة حسب الفئة
 Active cameras,الكاميرات العاملة
 Actor,المُنفِّذ
 Actors,الأطراف
+Actual Cost,التكلفة الفعلية
 Actual Duration (Days),المدة الفعلية (أيام)
 Actual End Date,تاريخ النهاية الفعلي
 Actual End Date must be on or after Actual Start Date.,يجب أن يكون تاريخ النهاية الفعلي بعد تاريخ البداية الفعلي أو مساوياً له.
@@ -712,6 +713,7 @@ Card,بطاقة
 Cards / Table,بطاقات وجدول
 Carried By,يحمله
 Carried Out By (Technician),نفّذه (الفنّي)
+Carrier,الناقل
 Carrying Vehicle,المركبة الناقلة
 Cart,السلة
 Cart is empty.,السلة فارغة.
@@ -887,6 +889,7 @@ Complete Work Order,إكمال أمر العمل
 Complete a Maintenance Work Order,إكمال أمر عمل صيانة
 Completed,مكتمل
 Completed Date,تاريخ الإنجاز
+Completed On,تاريخ الإنجاز
 Completed Trips This Month,الرحلات المكتملة هذا الشهر
 Completed Trips Today,الرحلات المكتملة اليوم
 Completion,الإنجاز
@@ -1473,6 +1476,7 @@ Driver license expired on {0}.,انتهت صلاحية رخصة السائق ف�
 Driver license has expired. Renew before assigning to trips.,انتهت صلاحية رخصة القيادة. يرجى التجديد قبل الإسناد للرحلات.
 Driver link revoked.,تم إلغاء رابط السائق.
 Driver on Duty,السائق المناوب
+Driver or vehicle that carried the stock between the two stores.,السائق أو المركبة التي نقلت المواد بين المستودعين.
 Driver portal is not enabled.,بوابة السائق غير مفعّلة.
 Driver reassigned,تمت إعادة إسناد السائق
 "Driver stop record (violation, leave, termination, or transfer). May release the linked vehicle.",سجل إيقاف سائق بسبب مخالفة أو إجازة أو إنهاء خدمة أو نقل، وقد يفك ارتباط المركبة بالسائق.
@@ -2233,6 +2237,7 @@ Key Reports,التقارير المهمة
 Kitchen,المطبخ
 Kitchen gas cooker / stove for accommodation. Durable kitchenware.,موقد / طبّاخ غاز للمطبخ في السكن. أدوات مطبخ معمّرة.
 Kitchenware,أدوات مطبخ
+Labour Hours,ساعات العمل
 Labour Supplier,مورّد العمالة
 Landlord,المؤجّر
 Landlord Contract Reference,رقم عقد المالك
@@ -4072,6 +4077,7 @@ Short Address,العنوان المختصر
 Short Address must be 4 letters followed by 4 digits (e.g. RCTB4359).,يجب أن يتكون العنوان المختصر من أربعة أحرف يتبعها أربعة أرقام (مثال: RCTB4359).
 Short code used to prefix generated room numbers.,رمز مختصر يُستخدم كبادئة لأرقام الغرف المُنشأة.
 Short-term contract worker on a monthly salary with no car or allowances. Recorded in accounting as a party for native Payment Entry. Employee-lite; distinct from the housing Temporary Worker.,عامل بعقد قصير وراتب شهري دون سيارة أو بدلات. يُسجل محاسبيًا كطرف في قيد الدفع القياسي. سجل موظف مبسط يختلف عن العامل المؤقت في السكن.
+Shortage or Damage Note,ملاحظة نقص أو تلف
 Shortfall,النقص
 Show AFMCO brand mark and wordmark in the portal header.,إظهار علامة وشعار AFMCO النصي في رأس البوابة.
 Show Brand,إظهار العلامة التجارية
@@ -4161,6 +4167,9 @@ Stamp,الختم
 Stamped automatically when Finance approves. Read-only.,يُختم آلياً عند اعتماد المالية. للقراءة فقط.
 Stamped when a Maintenance Work Order for the linked asset is completed.,يُختم عند اكتمال أمر عمل صيانة للأصل المرتبط.
 Stamped when the consent signature is first recorded.,يُسجَّل عند تدوين توقيع الموافقة لأول مرة.
+Stamped when the order reaches Completed; the supervisor who accepted the work.,يُسجَّل عند وصول الأمر إلى «منجز»؛ المشرف الذي قبل العمل.
+Stamped when the status reaches Received; the storekeeper who took it in.,يُسجَّل عند وصول الحالة إلى «مستلَم»؛ أمين المستودع الذي استلمها.
+Stamped when the transfer is submitted; the storekeeper who released the stock.,يُسجَّل عند اعتماد النقل؛ أمين المستودع الذي أخرج المواد.
 Stand / wall electric fan for accommodation ventilation. Durable appliance.,مروحة كهربائية أرضية / جدارية لتهوية السكن. جهاز معمّر.
 Standard,قياسي
 Standard Contract Rate,السعر القياسي بالعقد
@@ -4859,6 +4868,7 @@ Vehicles Under Maintenance,المركبات تحت الصيانة
 Vehicles by Status,المركبات حسب الحالة
 Vehicles on Rent,المركبات على الإيجار
 Verdict,النتيجة
+Verified By,تحقّق منه
 Verified by Client,تم التحقق من قِبل العميل
 Version,الإصدار
 Version of the documented API contract the frontend is built against. Additive changes are safe; breaking changes increment this value and require a notice to integrators.,إصدار عقد API الموثق الذي بُنيت عليه الواجهة. الإضافات متوافقة، أما التغييرات غير المتوافقة فترفع هذه القيمة وتتطلب إشعار جهات التكامل.
@@ -4894,6 +4904,7 @@ Water,ماء
 Water Tank,خزان المياه
 Water Tank Cleaning,تنظيف خزان المياه
 Water Tank Inspection Required,فحص خزان المياه مطلوب
+Waybill Reference,رقم بوليصة النقل
 Web QR,رمز QR للويب
 Website,الموقع الإلكتروني
 Wednesday,الأربعاء
@@ -4907,6 +4918,7 @@ What Is Being Claimed,المطالب به
 What This Voucher Authorises,ما يصرّح به هذا الأمر
 What do you need help with?,ما الذي تحتاج المساعدة فيه؟
 What happened?,ماذا حدث؟
+What was really spent; total_procurement_cost is the estimate.,ما صُرف فعلًا؛ أما إجمالي تكلفة المشتريات فهو التقدير.
 WhatsApp,واتساب
 WhatsApp / SMS Gateway,بوابة واتساب / الرسائل النصية
 "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",عند الإيقاف، تكون صفوف سجل تكاليف السكن معلومات تشغيلية فقط ولا تنشئ قيودًا محاسبية.

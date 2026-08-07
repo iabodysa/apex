@@ -12,11 +12,15 @@
   "col_break_head",
   "from_building",
   "to_building",
+  "issued_by",
+  "received_by",
   "sec_items",
   "items",
   "sec_receipt",
   "received_date",
   "remarks",
+  "waybill_reference",
+  "carrier_note",
   "mtr_sec_system",
   "amended_from"
  ],
@@ -116,12 +120,39 @@
    "options": "Material Transfer",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "issued_by",
+   "fieldtype": "Link",
+   "label": "Issued By",
+   "options": "User",
+   "read_only": 1,
+   "description": "Stamped when the transfer is submitted; the storekeeper who released the stock."
+  },
+  {
+   "fieldname": "received_by",
+   "fieldtype": "Link",
+   "label": "Received By",
+   "options": "User",
+   "read_only": 1,
+   "description": "Stamped when the status reaches Received; the storekeeper who took it in."
+  },
+  {
+   "fieldname": "waybill_reference",
+   "fieldtype": "Data",
+   "label": "Waybill Reference"
+  },
+  {
+   "fieldname": "carrier_note",
+   "fieldtype": "Data",
+   "label": "Carrier",
+   "description": "Driver or vehicle that carried the stock between the two stores."
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-07 05:23:00.000000",
+ "modified": "2026-08-08 01:23:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Material Transfer",

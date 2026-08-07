@@ -47,6 +47,8 @@
        {"ar": _("Received Date"), "en": "Received on", "value": doc.received_date, "fmt": "Date"}],
       [{"ar": _("Days in Transit"), "en": "Days in transit", "value": in_transit_days, "fmt": "Int"},
        {"ar": _("Company"), "en": "Company", "value": company.get("company_name") or company_name}],
+      [{"ar": _("Waybill Reference"), "en": "Waybill", "value": doc.waybill_reference},
+       {"ar": _("Carrier"), "en": "Carrier", "value": doc.carrier_note}],
       [{"ar": _("Custody Article Lines"), "en": "Custody article lines", "value": custody_lines, "fmt": "Int"},
        {"ar": _("Maintenance Material Lines"), "en": "Maintenance material lines", "value": material_lines, "fmt": "Int"}],
   ]) }}
@@ -56,9 +58,11 @@
        {"ar": _("Item Code"), "en": "Code", "key": "item", "width": "18%"},
        {"ar": _("Item Name"), "en": "Description", "key": "item_name"},
        {"ar": _("Quantity Transferred"), "en": "Qty", "key": "qty", "num": True, "width": "12%", "fmt": "Float"},
-       {"ar": _("Unit"), "en": "UOM", "key": "uom", "width": "11%"}],
+       {"ar": _("Unit"), "en": "UOM", "key": "uom", "width": "11%"},
+       {"ar": _("Condition"), "en": "Condition", "key": "condition_on_transfer", "width": "12%", "tr": True},
+       {"ar": _("Shortage or Damage Note"), "en": "Shortage / damage", "key": "shortage_note", "width": "16%"}],
       rows,
-      totals=[frappe.format_value(total_qty, {"fieldtype": "Float"}), ""],
+      totals=[frappe.format_value(total_qty, {"fieldtype": "Float"}), "", "", ""],
       empty_text=_("This transfer note carries no item lines — nothing has moved between the two stores")) }}
 
   {{ ax.note_block(doc.remarks, _("Remarks")) }}
@@ -72,8 +76,10 @@
   ]) }}
 
   {{ ax.sign_block([
-      {"ar": _("Dispatching Store Supervisor"), "en": "Handed over by", "name": issuer},
-      {"ar": _("Receiving Store Supervisor"), "en": "Received by", "name": receiver},
+      {"ar": _("Dispatching Store Supervisor"), "en": "Handed over by",
+       "name": frappe.get_fullname(doc.issued_by) if doc.issued_by else issuer},
+      {"ar": _("Receiving Store Supervisor"), "en": "Received by",
+       "name": frappe.get_fullname(doc.received_by) if doc.received_by else receiver},
   ]) }}
 
   {{ ax.doc_footer(doc) }}

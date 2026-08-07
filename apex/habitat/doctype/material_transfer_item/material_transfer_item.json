@@ -9,7 +9,9 @@
   "item",
   "item_name",
   "qty",
-  "uom"
+  "uom",
+  "condition_on_transfer",
+  "shortage_note"
  ],
  "fields": [
   {
@@ -47,12 +49,24 @@
    "fieldtype": "Data",
    "label": "UOM",
    "read_only": 1
+  },
+  {
+   "fieldname": "condition_on_transfer",
+   "fieldtype": "Select",
+   "label": "Condition",
+   "options": "\nNew\nGood\nFair\nPoor\nDamaged",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "shortage_note",
+   "fieldtype": "Data",
+   "label": "Shortage or Damage Note"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-09 10:00:00.000000",
+ "modified": "2026-08-08 01:23:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Material Transfer Item",
