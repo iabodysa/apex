@@ -51,7 +51,7 @@ child table takes its access from the parent document it sits in.
 | --- | --- |
 | DocTypes shipped | 153 |
 | DocTypes granting at least one role | 114 |
-| DocPerm rows | 545 |
+| DocPerm rows | 546 |
 | Roles granted | 18 |
 
 ## Roles
@@ -62,7 +62,7 @@ child table takes its access from the parent document it sits in.
 | All | 1 | 1 |
 | Cleaning Supervisor | 2 | 2 |
 | Driver | 5 | 5 |
-| Finance Manager | 59 | 63 |
+| Finance Manager | 59 | 64 |
 | Fleet Manager | 47 | 51 |
 | Fleet Project Manager | 36 | 39 |
 | Fleet Supervisor | 36 | 39 |
@@ -225,6 +225,7 @@ No DocPerm row of its own: Payment Routing Field Map (child table), Salary Deduc
 | Facility Asset Movement (submittable) | Internal Auditor | 0 | Read | Report, Export | — |
 | Facility Asset Movement (submittable) | Resident Supervisor | 0 | Read, Write, Create | — | — |
 | Facility Asset Movement (submittable) | System Manager | 0 | Read, Write, Create, Submit, Cancel, Delete | Report | — |
+| Facility Asset Movement (submittable) | Finance Manager | 1 | Read, Write | — | — |
 | Facility Asset Movement Ledger | Accommodation Manager | 0 | Read | Report, Export | — |
 | Facility Asset Movement Ledger | Internal Auditor | 0 | Read | Report, Export | — |
 | Facility Asset Movement Ledger | System Manager | 0 | Read | — | — |

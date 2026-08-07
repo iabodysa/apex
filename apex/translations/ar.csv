@@ -1606,6 +1606,7 @@ Final Exit,خروج نهائي
 Finance Approved By,مَن اعتمده من المالية
 Finance Approved On,تاريخ اعتماد المالية
 Finance Decision,قرار المالية
+Finance Manager,المدير المالي
 Finance Manager Dashboard,لوحة معلومات المدير المالي
 Finance Notification Email,بريد إشعار المالية
 Finance-boundary payment request. Routes any payable item through a Finance-exclusive approval gate. Posts NO GL: linked_payment_entry is a reference set externally; the controller never writes accounting.,طلب دفع يخضع حصريًا لاعتماد المالية. يمرّر أي مبلغ مستحق عبر بوابة اعتماد خاصة بالمالية. لا يُنشئ قيودًا محاسبية؛ الحقل linked_payment_entry مرجع يُحدّد خارجيًا، ولا يكتب هذا المستند أي قيد.
@@ -2548,8 +2549,11 @@ Only a Fleet Manager or Fleet Project Manager can {0} a fuel request.,يمكن �
 Only a handover Under Review can be approved.,لا يمكن اعتماد التسليم إلا إذا كان قيد المراجعة.
 Only a submitted delivery can be actioned.,لا يمكن اتخاذ إجراء إلا على تسليم معتمَد.
 Only a submitted handover can be actioned.,لا يمكن اتخاذ إجراء إلا على تسليم معتمد.
+Only a submitted movement can be acknowledged.,لا يمكن اعتماد الحركة إلا بعد اعتماد المستند.
 Only a submitted route plan can be approved or rejected.,لا يمكن اعتماد خطة المسار أو رفضها إلا بعد اعتماد المستند.
 Only a submitted transfer can be received.,لا يمكن استلام النقل إلا بعد اعتماده.
+Only an intercompany movement needs an accounting acknowledgement.,الاعتماد المحاسبي مطلوب فقط للحركات بين الشركات.
+Only {0} can record the accounting acknowledgement.,لا يمكن تسجيل الاعتماد المحاسبي إلا بواسطة {0}.
 Only a {0} may clear this exit.,لا يمكن اعتماد نقطة الخروج هذه إلا بواسطة {0}.
 Only Finance can approve or mark a payment as paid. This step cannot be bypassed.,المالية فقط تعتمد أو تؤكّد الدفع. لا يمكن تجاوز هذه الخطوة.
 Only Open or In Progress Task Instances can be marked Completed.,لا يمكن إكمال إلا المهام المفتوحة أو قيد التنفيذ.
@@ -4585,6 +4589,7 @@ You have no fleet project assigned,لا يوجد مشروع أسطول مُسن�
 You have {0} open operations alert(s),لديك {0} تنبيه عمليات مفتوح
 You hit the rate limit because of too many requests. Please try after sometime.,لقد تجاوزت الحد المسموح بسبب كثرة الطلبات. يُرجى المحاولة بعد قليل.
 You may only handle boarding for your own trips.,لا يمكنك إدارة الصعود إلا لرحلاتك الخاصة.
+"You submitted this movement, so you cannot acknowledge it yourself.","أنت من أرسل هذه الحركة، فلا يمكنك اعتمادها بنفسك."
 You were not part of this trip's manifest.,لم تكن ضمن كشف ركاب هذه الرحلة.
 Your account does not have a role to access it.,لا يملك حسابك دورًا للوصول إليها.
 Your arrival manifest was submitted. The accommodation team will reconcile arrivals against it on the expected date.,تم اعتماد كشف الوصول. سيطابق فريق السكن حالات الوصول الفعلية معه في التاريخ المتوقع.

@@ -162,3 +162,46 @@ def _validate_intercompany_gates(doc):
         frappe.throw(
             _("Accounting Acknowledged is required before submitting a permanent intercompany transfer.")
         )
+
+
+ACCOUNTING_ROLE = "Finance Manager"
+
+
+@frappe.whitelist(methods=["POST"])
+def acknowledge_intercompany_movement(movement: str) -> dict:
+    """Record Accounting's sign-off on a submitted intercompany movement.
+
+    The two fields sit at permlevel 1 with only Finance Manager holding write there, so
+    the desk cannot offer them to a preparer; this is the one path that sets them, and it
+    stamps WHO signed in the same call as the flag. Before this existed the flag had no
+    allow_on_submit, so a movement submitted without it could never acquire it and the
+    pending-acknowledgement card only ever counted up.
+
+    Two refusals are what make it a control rather than a checkbox: a caller without the
+    role, and the movement's own submitter. A sign-off the submitter can give themselves
+    records nothing.
+    """
+    doc = frappe.get_doc("Facility Asset Movement", movement)
+
+    if ACCOUNTING_ROLE not in frappe.get_roles():
+        frappe.throw(
+            _("Only {0} can record the accounting acknowledgement.").format(_(ACCOUNTING_ROLE)),
+            frappe.PermissionError,
+        )
+    if doc.docstatus != 1:
+        frappe.throw(_("Only a submitted movement can be acknowledged."))
+    if not doc.is_intercompany:
+        frappe.throw(_("Only an intercompany movement needs an accounting acknowledgement."))
+    if doc.owner == frappe.session.user:
+        frappe.throw(
+            _("You submitted this movement, so you cannot acknowledge it yourself."),
+            frappe.PermissionError,
+        )
+    if doc.accounting_acknowledged:
+        return {"movement": doc.name, "acknowledged_by": doc.accounting_acknowledged_by}
+
+    doc.db_set(
+        {"accounting_acknowledged": 1, "accounting_acknowledged_by": frappe.session.user},
+        update_modified=True,
+    )
+    return {"movement": doc.name, "acknowledged_by": frappe.session.user}
