@@ -229,6 +229,24 @@
    "allowed": "System Manager",
    "allow_self_approval": 1,
    "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Rejected",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Rejected",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "System Manager",
+   "allow_self_approval": 1,
+   "condition": ""
   }
  ]
 }
