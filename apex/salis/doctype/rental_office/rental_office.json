@@ -15,9 +15,7 @@
   "status",
   "rental_office_sec_contact",
   "contact_person",
-  "phone",
-  "rental_office_sec_address",
-  "address_html"
+  "phone"
  ],
  "fields": [
   {
@@ -81,19 +79,9 @@
    "fieldtype": "Data",
    "label": "Phone",
    "options": "Phone"
-  },
-  {
-   "fieldname": "rental_office_sec_address",
-   "fieldtype": "Section Break",
-   "label": "Address"
-  },
-  {
-   "fieldname": "address_html",
-   "fieldtype": "HTML",
-   "label": "Address"
   }
  ],
-"links": [
+ "links": [
   {
    "group": "Fleet",
    "link_doctype": "Salis Vehicle",
@@ -115,7 +103,7 @@
    "link_fieldname": "rental_office"
   }
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-08-07 06:10:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Rental Office",
