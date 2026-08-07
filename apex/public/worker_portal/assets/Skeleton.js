@@ -1,2 +1,1 @@
-// Copyright (c) 2026, AFMCO and contributors
 import{_ as o}from"./i18n2.js";import{o as e,c as s,F as n,r as c,a}from"./index.js";const d={class:"space-y-3","aria-hidden":"true"},i={__name:"Skeleton",props:{rows:{type:Number,default:3}},setup(t){return(p,r)=>(e(),s("div",d,[(e(!0),s(n,null,c(t.rows,l=>(e(),s("div",{key:l,class:"card card-pad skel-row"},[...r[0]||(r[0]=[a("div",{class:"skel-line skel-w-60"},null,-1),a("div",{class:"skel-line skel-w-40 mt-2"},null,-1)])]))),128))]))}},k=o(i,[["__scopeId","data-v-8ade1943"]]);export{k as S};
