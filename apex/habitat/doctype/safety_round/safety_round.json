@@ -15,6 +15,7 @@
   "supervisor",
   "is_reinspection",
   "overall_result",
+  "reviewed_by",
   "safety_round_sec_system",
   "naming_series",
   "amended_from"
@@ -110,6 +111,12 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "reviewed_by",
+   "fieldtype": "Link",
+   "label": "Reviewed By",
+   "options": "User"
   }
  ],
  "is_submittable": 1,
@@ -125,7 +132,7 @@
    "link_fieldname": "safety_round"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-08 01:18:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Round",

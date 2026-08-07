@@ -76,6 +76,15 @@
 
   {{ ax.note_block(doc.resolution_notes, _("Corrective Action and Closure")) }}
 
+  {{ ax.field_grid([
+      [{"ar": _("Corrective Action Owner"), "en": "Owner responsible",
+        "value": frappe.get_fullname(doc.corrective_action_owner) if doc.corrective_action_owner else None},
+       {"ar": _("Corrective Action Due"), "en": "Due", "value": doc.corrective_action_due, "fmt": "Date"}],
+      [{"ar": _("Closed By"), "en": "Closed by",
+        "value": frappe.get_fullname(doc.closed_by) if doc.closed_by else None},
+       {"ar": _("Closed On"), "en": "Closed on", "value": doc.closed_on, "fmt": "Date"}],
+  ]) }}
+
   {%- if provisions %}
   <div class="lbl" style="margin-bottom:5px">{{ _("Safety Provisions on Record at This Site") }}<span class="en">Safety provisions on record at this site</span></div>
   {{ ax.check_list(provisions) }}

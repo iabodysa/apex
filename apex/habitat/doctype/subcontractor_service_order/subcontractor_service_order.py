@@ -34,6 +34,23 @@ def before_save(doc, method=None):
         doc.company = get_default_company()
 
     apply_vat(doc, doc.service_cost)
+    _stamp_confirmation(doc)
+
+
+def _stamp_confirmation(doc):
+    """Record who confirmed the visit and when, so the tick binds a person.
+
+    The order is what the contractor invoices against, and a bare checkbox on it names
+    nobody. Clearing the tick clears the pair, so a withdrawn confirmation never leaves
+    a name printed under it.
+    """
+    if doc.supervisor_confirmed:
+        if not doc.confirmed_by:
+            doc.confirmed_by = frappe.session.user
+            doc.confirmed_on = frappe.utils.now()
+    else:
+        doc.confirmed_by = None
+        doc.confirmed_on = None
 
 
 @frappe.whitelist(methods=["POST"])

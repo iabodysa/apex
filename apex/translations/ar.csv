@@ -944,6 +944,8 @@ Confirm the type of worker returning the articles.,أكّد نوع العامل 
 Confirmation,التأكيد
 Confirmation Method,طريقة التأكيد
 Confirmed,مؤكَّد
+Confirmed By,أكّده
+Confirmed On,تاريخ التأكيد
 Confirmed Receipt,تأكيد الاستلام
 Confirmed Receipt is the primary path. Choose Signature when the holder cannot type-confirm and signs instead.,الأصل تأكيد الاستلام. استخدم التوقيع إذا تعذّر على المستلم تأكيده كتابةً.
 Confirmed by the facility supervisor,مؤكَّد من مشرف المنشأة
@@ -992,6 +994,8 @@ Contracts,العقود
 Convert to Document,تحويل إلى مستند
 Converted from resident request {0},مُحوَّل من طلب ساكن {0}
 Copy link,نسخ الرابط
+Corrective Action Due,تاريخ استحقاق الإجراء التصحيحي
+Corrective Action Owner,المسؤول عن الإجراء التصحيحي
 Corrective Action and Closure,الإجراء التصحيحي والإغلاق
 Corridors,الممرات
 Cost,التكلفة
@@ -3658,6 +3662,7 @@ Review and approve the handover before confirming receipt.,راجع التسلي
 Review the Housing Assignment List,راجع قائمة التسكين
 Review the Safety Task Catalog,مراجعة دليل مهام السلامة
 "Review the shared integration switchboard: frontend URL, API version, and allowed origins.",راجع لوحة التكامل المشتركة: رابط الواجهة، وإصدار الواجهة البرمجية، والمصادر المسموح بها.
+Reviewed By,راجعه
 Reviewed By (Management),راجعه (الإدارة)
 Reviewed By (Safety Management),راجعه (إدارة السلامة)
 Revise,تعديل
@@ -4388,6 +4393,7 @@ The claim matches what the company accrued for the month,المطالبة تطا
 The claim sits inside the monthly quota,المطالبة داخل الحصة الشهرية
 "The claiming party certifies that the litres above were drawn by this vehicle in the period stated, that the amount is due and has not been claimed before, and that it is charged to the cost centre named on this voucher.",الجهة المطالِبة تقر أن اللترات أعلاه سحبتها هذه المركبة في الفترة المذكورة، وأن المبلغ مستحق وما طولب به من قبل، وأنه يُحمّل على مركز التكلفة المذكور في هذا السند.
 The closer must differ from the person who raised the case.,يجب أن يختلف من يُغلق الحالة عمّن رفعها.
+The contracting buyer; on a multi-company bench this is the party the contract binds.,الجهة المشترية في العقد؛ ومع أكثر من شركة على النظام هي الطرف الذي يلزمه العقد.
 "The contractor carries out the service named above at the buildings listed, at the stated rates, within the response limit shown. The contractor invoices only against a Subcontractor Service Order issued under this contract and confirmed by the site supervisor. No visit outside the covered buildings, and no rate other than the rates above, is payable under this contract.",ينفّذ المقاول الخدمة المذكورة أعلاه في المباني المدرجة، بالأسعار المبيّنة، وخلال مهلة الاستجابة الموضحة. ولا يفوتر المقاول إلا على أمر خدمة صادر بموجب هذا العقد ومؤكَّد من مشرف الموقع. ولا تُدفع أي زيارة خارج المباني المشمولة، ولا أي سعر غير الأسعار أعلاه.
 "The contractor certifies that the service above was carried out at the site on the actual visit date shown, and invoices only the amount payable stated here against this order. The site supervisor confirms the work was received. Any amount not stated on this order is not payable.",يقر المقاول بأن الخدمة أعلاه نُفّذت في الموقع بتاريخ الزيارة الفعلي المبيّن، ولا يفوتر إلا المبلغ المستحق المذكور هنا على هذا الأمر. ويؤكد مشرف الموقع استلام العمل. وأي مبلغ غير مذكور في هذا الأمر غير مستحق الدفع.
 "The current driver's login user, mirrored from the assigned driver. Drives the driver-facing compliance notification.",مستخدم دخول السائق الحالي، منقول من السائق المسند. ويُستخدم لإرسال إشعار الامتثال إلى السائق.
@@ -4927,6 +4933,7 @@ Which lifecycle event on the source document raises the deduction.,أي حدث �
 "Which part of the accommodation this cleaning evidence photo covers, so before-and-after proof can be checked per area during cleaning audits.",الجزء من السكن الذي تغطيه صورة دليل التنظيف هذه، ليتسنى فحص إثبات ما قبل وما بعد لكل منطقة أثناء تدقيقات التنظيف.
 "Which subject this access token grants entry for: a housed/transported Worker (Masar) or a fleet Driver (barcode entry, no Frappe User).",الفئة التي يمنحها رمز الدخول صلاحية الوصول: عامل سكن أو نقل عبر مسار، أو سائق أسطول يدخل بالباركود دون حساب مستخدم في Frappe.
 Who is arriving?,من القادم؟
+Who must clear the finding; without a name the action belongs to nobody.,من يجب أن يعالج الملاحظة؛ وبدون اسم لا يكون الإجراء على أحد.
 "Why a resident is idle and not deployed to work, such as a new hire awaiting assignment, a return from leave, or a legal or HR hold, used to target follow-up.",سبب بقاء الساكن دون تكليف عمل، مثل موظف جديد بانتظار الإسناد أو عائد من إجازة أو متوقف لأسباب قانونية أو لدى الموارد البشرية. يُستخدم لتوجيه المتابعة.
 "Why the driver is being cleared from the fleet, separating a voluntary resignation or end of assignment from a transfer or termination, which affects settlement handling.",سبب إخلاء طرف السائق من الأسطول، يفصل الاستقالة الطوعية أو انتهاء الإسناد عن النقل أو إنهاء الخدمة، ما يؤثر في معالجة التسوية.
 "Why the resident is leaving the accommodation, separating a permanent departure such as final exit or absconding from a move that keeps the worker in the workforce such as an internal or project transfer.",سبب مغادرة الساكن للسكن، ويفصل المغادرة النهائية مثل الخروج النهائي أو الهروب من العمل، عن النقل الذي يبقي العامل على رأس العمل مثل النقل الداخلي أو النقل بين المشاريع.

@@ -238,6 +238,19 @@
    "fieldname": "terms",
    "fieldtype": "Text Editor",
    "label": "Terms and Conditions"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "description": "The contracting buyer; on a multi-company bench this is the party the contract binds."
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
   }
  ],
  "links": [
@@ -305,6 +318,8 @@
   "subcontractor_service_contract_tab_overview",
   "subcontractor_service_contract_sec_overview",
   "supplier",
+  "company",
+  "currency",
   "naming_series",
   "subcontractor_service_contract_overview_col",
   "service_type",
@@ -334,5 +349,5 @@
   "subcontractor_service_contract_sec_table_covered_buildings",
   "covered_buildings"
  ],
- "modified": "2026-08-08 01:11:00.000000"
+ "modified": "2026-08-08 01:18:00.000000"
 }

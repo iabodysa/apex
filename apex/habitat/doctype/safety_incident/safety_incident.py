@@ -28,3 +28,21 @@ class SafetyIncident(Document):
 
         if self.status == "Closed" and not (self.resolution_notes or "").strip():
             frappe.throw(_("Resolution Notes are required to close a Safety Incident."))
+
+        self._stamp_closure()
+
+    def _stamp_closure(self):
+        """Record who closed the incident and when, so time-to-close is on the record.
+
+        An auditor reads the printed report, not the version history, and a status of
+        Closed with no date cannot answer how long the site carried the hazard. Both
+        fields are read-only and set here; reopening clears them so a reopened incident
+        never prints a closure it no longer has.
+        """
+        if self.status == "Closed":
+            if not self.closed_on:
+                self.closed_on = frappe.utils.nowdate()
+                self.closed_by = frappe.session.user
+        else:
+            self.closed_on = None
+            self.closed_by = None

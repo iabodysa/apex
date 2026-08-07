@@ -16,6 +16,8 @@
   "status",
   "subcontractor_service_order_sec_completion",
   "supervisor_confirmed",
+  "confirmed_by",
+  "confirmed_on",
   "completion_photo",
   "subcontractor_service_order_sec_cost",
   "service_cost",
@@ -256,6 +258,19 @@
    "fieldname": "terms",
    "fieldtype": "Text Editor",
    "label": "Terms and Conditions"
+  },
+  {
+   "fieldname": "confirmed_by",
+   "fieldtype": "Link",
+   "label": "Confirmed By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "confirmed_on",
+   "fieldtype": "Datetime",
+   "label": "Confirmed On",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
@@ -276,7 +291,7 @@
    "link_fieldname": "subcontractor_service_order"
   }
  ],
- "modified": "2026-08-08 01:11:00.000000",
+ "modified": "2026-08-08 01:18:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Subcontractor Service Order",

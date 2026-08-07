@@ -23,6 +23,11 @@
   "reported_by",
   "habitat_safety_incident_sec_resolution",
   "resolution_notes",
+  "corrective_action_owner",
+  "corrective_action_due",
+  "habitat_safety_incident_closure_col",
+  "closed_by",
+  "closed_on",
   "habitat_safety_incident_sec_system",
   "naming_series",
   "amended_from"
@@ -159,11 +164,40 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "corrective_action_owner",
+   "fieldtype": "Link",
+   "label": "Corrective Action Owner",
+   "options": "User",
+   "description": "Who must clear the finding; without a name the action belongs to nobody."
+  },
+  {
+   "fieldname": "corrective_action_due",
+   "fieldtype": "Date",
+   "label": "Corrective Action Due"
+  },
+  {
+   "fieldname": "habitat_safety_incident_closure_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "closed_by",
+   "fieldtype": "Link",
+   "label": "Closed By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "closed_on",
+   "fieldtype": "Date",
+   "label": "Closed On",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-06 22:39:00.000000",
+ "modified": "2026-08-08 01:18:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Incident",

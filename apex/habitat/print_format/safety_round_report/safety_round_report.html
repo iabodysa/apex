@@ -124,7 +124,8 @@
   {{ ax.sign_block([
       {"ar": _("Inspected By"), "en": "Inspected by", "name": inspector},
       {"ar": _("Site Supervisor"), "en": "Site supervisor", "name": site_supervisor},
-      {"ar": _("Reviewed By (Safety Management)"), "en": "Reviewed by", "name": None},
+      {"ar": _("Reviewed By (Safety Management)"), "en": "Reviewed by",
+       "name": frappe.get_fullname(doc.reviewed_by) if doc.reviewed_by else None},
   ]) }}
 
   {{ ax.doc_footer(doc) }}

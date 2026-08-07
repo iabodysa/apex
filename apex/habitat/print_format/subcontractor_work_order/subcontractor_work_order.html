@@ -105,6 +105,9 @@
       [{"ar": _("Issued By"), "en": "Issued by", "value": issued_by},
        {"ar": _("Supervisor Confirmed Completion"), "en": "Supervisor confirmed",
         "value": _("Yes") if doc.supervisor_confirmed else _("No")}],
+      [{"ar": _("Confirmed By"), "en": "Confirmed by",
+        "value": frappe.get_fullname(doc.confirmed_by) if doc.confirmed_by else None},
+       {"ar": _("Confirmed On"), "en": "Confirmed on", "value": doc.confirmed_on, "fmt": "Datetime"}],
       [{"ar": _("Purchase Invoice Raised"), "en": "Purchase invoice", "value": doc.linked_purchase_invoice},
        {"ar": _("Document State"), "en": "Document state",
         "value": _("Draft") if doc.docstatus == 0 else (_("Submitted") if doc.docstatus == 1 else _("Cancelled"))}],
@@ -112,7 +115,8 @@
 
   {{ ax.sign_block([
       {"ar": _("Contractor Technician"), "en": "Contractor technician", "name": supplier.get("supplier_name") or doc.supplier},
-      {"ar": _("Site Supervisor"), "en": "Site supervisor", "name": site_supervisor},
+      {"ar": _("Site Supervisor"), "en": "Site supervisor",
+       "name": frappe.get_fullname(doc.confirmed_by) if doc.confirmed_by else site_supervisor},
   ]) }}
 
   {{ ax.doc_footer(doc) }}
