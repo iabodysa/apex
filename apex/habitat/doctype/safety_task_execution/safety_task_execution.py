@@ -34,6 +34,25 @@ class SafetyTaskExecution(Document):
         fan_out_findings(self.findings, self)
         self._escalate_failed_execution()
 
+    def on_cancel(self):
+        self._retract_untouched_requests()
+
+    def _retract_untouched_requests(self) -> None:
+        """Close the tickets this execution raised that nobody has picked up.
+
+        The tickets are found by source_execution, the back-link stamped at
+        creation, so a finding edited or removed after submit cannot hide one.
+        A ticket is retracted only while it is still an untouched Draft at
+        status Open; once it is assigned, progressed, submitted or resolved a
+        technician owns it, and cancelling the paperwork behind it must not
+        reach into work that has already started."""
+        frappe.db.set_value(
+            "Maintenance Request",
+            {"source_execution": self.name, "docstatus": 0, "status": "Open"},
+            "status",
+            "Closed",
+        )
+
     def _escalate_failed_execution(self) -> None:
         """Raise ONE building-scoped Maintenance Request when the task failed.
 

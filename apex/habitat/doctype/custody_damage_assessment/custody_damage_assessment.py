@@ -157,3 +157,31 @@ def before_cancel(doc, method=None):
                 )
             )
 
+
+def on_cancel(doc, method=None):
+    """Undo what on_submit created: the draft deduction and the two fields it
+    wrote onto the source checkout.
+
+    before_cancel has already refused the submitted-deduction case, so anything
+    reaching here holds a deduction that was never paid. A draft Additional
+    Salary cannot be cancelled — docstatus 0 has no cancel — so it is deleted,
+    which is also what leaves the employee with no trace of a deduction that was
+    withdrawn before it ever ran."""
+    if not doc.deduction_entry:
+        return
+
+    if frappe.db.get_value("Additional Salary", doc.deduction_entry, "docstatus") == 0:
+        entry = doc.deduction_entry
+        frappe.delete_doc("Additional Salary", entry, force=True, ignore_permissions=True)  # audit-ok: undoes the entry on_submit created under the same bypass; the caller already holds cancel on this assessment
+
+    if doc.source_checkout:
+        frappe.db.set_value(
+            "Housing Checkout",
+            doc.source_checkout,
+            {"additional_salary_deduction": None, "damage_deduction_amount": 0},
+        )
+
+    frappe.db.set_value(
+        "Custody Damage Assessment", doc.name, "deduction_entry", None
+    )
+

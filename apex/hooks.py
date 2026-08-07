@@ -212,6 +212,7 @@ doc_events = {
         "validate": "apex.habitat.doctype.custody_damage_assessment.custody_damage_assessment.validate",
         "on_submit": "apex.habitat.doctype.custody_damage_assessment.custody_damage_assessment.on_submit",
         "before_cancel": "apex.habitat.doctype.custody_damage_assessment.custody_damage_assessment.before_cancel",
+        "on_cancel": "apex.habitat.doctype.custody_damage_assessment.custody_damage_assessment.on_cancel",
     },
     "Operational Depreciation Snapshot": {
         "validate": "apex.habitat.doctype.operational_depreciation_snapshot.operational_depreciation_snapshot.validate",
