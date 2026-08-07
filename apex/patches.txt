@@ -58,10 +58,6 @@ apex.patches.v0_8.fix_navbar_command_center_route
 
 # PERMANENT: Salis role / settings / theme seeders. Each seeds a DISTINCT record set
 # and only fills blanks, so replaying on migrate can never clobber an admin's edit.
-apex.patches.v1_0.seed_salis_roles
-apex.patches.v1_0.seed_salis_authority_roles
-apex.patches.v1_0.seed_salis_settings
-apex.patches.v1_0.seed_salis_portal_theme
 
 # PERMANENT: the Salis Auto Email Reports stay a seeder for the same runtime-recipient
 # reason, so an installed site needs this replay to gain a newly shipped report.
