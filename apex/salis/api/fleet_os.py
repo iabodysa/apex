@@ -514,9 +514,20 @@ def workshop_out(plate):
     return {"ok": True, "stop": stop.name}
 
 
+BULK_PLATE_LIMIT = 50
+
+
 def _coerce_plates(plates) -> list[str]:
     """Normalize the plates param (a JSON array over HTTP, or a real list) to a
-    de-duplicated, order-preserving list of non-empty plate strings."""
+    de-duplicated, order-preserving list of non-empty plate strings.
+
+    Capped at ``BULK_PLATE_LIMIT``. Every plate in a batch takes a row lock through
+    ``lock_vehicle`` and a ``tabSeries`` lock that is held until the whole REQUEST
+    commits, so an uncapped selection does not merely run long — it holds the series
+    lock the entire time and blocks every other writer that needs a new name. The
+    operator is told the limit and how many they selected, so the answer is to send
+    fewer rather than to guess.
+    """
     parsed = frappe.parse_json(plates) if isinstance(plates, str) else plates
     if not isinstance(parsed, (list, tuple)):
         frappe.throw(_("Select at least one vehicle."))
@@ -527,6 +538,12 @@ def _coerce_plates(plates) -> list[str]:
             seen.setdefault(key, None)
     if not seen:
         frappe.throw(_("Select at least one vehicle."))
+    if len(seen) > BULK_PLATE_LIMIT:
+        frappe.throw(
+            _("Apply to at most {0} vehicles at a time. You selected {1}.").format(
+                BULK_PLATE_LIMIT, len(seen)
+            )
+        )
     return list(seen)
 
 

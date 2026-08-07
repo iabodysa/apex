@@ -27,7 +27,13 @@ import frappe
 
 DEFAULT_ROUTER = "https://routing.openstreetmap.de/routed-car"
 CACHE_KEY = "apex_road_route"
+
+# A drawn route between fixed points does not change, so a hit is worth keeping for a
+# week. A FAILURE is not worth keeping at all beyond a moment: the router is a public
+# service reached over the internet, and its outages are transient. These are two
+# different lifetimes and they were previously one — see _remember below.
 CACHE_TTL_SECONDS = 7 * 24 * 60 * 60
+FAILURE_TTL_SECONDS = 5 * 60
 REQUEST_TIMEOUT = 6
 
 
@@ -38,6 +44,22 @@ def _router_base():
 
 def _fingerprint(points):
     return hashlib.sha1(json.dumps(points, sort_keys=True).encode("utf-8")).hexdigest()
+
+
+def _cache_key(points):
+    return f"{CACHE_KEY}:{_fingerprint(points)}"
+
+
+def _remember(points, path, ttl):
+    """Store a routing answer under its own expiring key.
+
+    It used to be a field in one Redis HASH via ``hset``. A hash field carries no TTL,
+    so ``CACHE_TTL_SECONDS`` could not be applied to it and was never referenced — which
+    meant a router outage cached the empty answer FOREVER, and every later request for
+    that route drew no line until someone flushed Redis. One key per route makes the
+    lifetime expressible, so a failure is forgotten in minutes and retried.
+    """
+    frappe.cache.set_value(_cache_key(points), path, expires_in_sec=ttl)
 
 
 def road_path(points):
@@ -52,7 +74,7 @@ def road_path(points):
     if not base or not points or len(points) < 2:
         return None
 
-    cached = frappe.cache.hget(CACHE_KEY, _fingerprint(points))
+    cached = frappe.cache.get_value(_cache_key(points))
     if cached is not None:
         return cached or None
 
@@ -63,14 +85,14 @@ def road_path(points):
         with urlopen(request, timeout=REQUEST_TIMEOUT) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception:
-        frappe.cache.hset(CACHE_KEY, _fingerprint(points), [])
+        _remember(points, [], FAILURE_TTL_SECONDS)
         return None
 
     if payload.get("code") != "Ok" or not payload.get("routes"):
-        frappe.cache.hset(CACHE_KEY, _fingerprint(points), [])
+        _remember(points, [], FAILURE_TTL_SECONDS)
         return None
 
     geometry = payload["routes"][0].get("geometry", {}).get("coordinates") or []
     path = [[point[1], point[0]] for point in geometry]
-    frappe.cache.hset(CACHE_KEY, _fingerprint(points), path)
+    _remember(points, path, CACHE_TTL_SECONDS)
     return path or None

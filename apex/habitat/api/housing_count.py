@@ -55,6 +55,12 @@ _ITEM_FIELDS = [
 
 _WRITABLE = ("counted_quantity", "condition", "notes")
 
+# Each line costs a get_doc, a full save (so validate and every hook) and a reload, all
+# inside the one request the operator is waiting on. The cost is linear in the lines
+# sent and the payload arrives from a client, so the ceiling has to be stated here
+# rather than assumed from how the screen happens to batch today.
+COUNT_LINE_LIMIT = 200
+
 
 def _condition_options():
     """Return the Housing Inventory ``condition`` Select option list.
@@ -166,6 +172,12 @@ def submit_counts(building, lines):
         frappe.throw(_("Counts must be a list."))
     if not lines:
         frappe.throw(_("No count lines to submit."))
+    if len(lines) > COUNT_LINE_LIMIT:
+        frappe.throw(
+            _("Submit at most {0} count lines at a time. You sent {1}.").format(
+                COUNT_LINE_LIMIT, len(lines)
+            )
+        )
 
     saved_rows = []
     errors = []

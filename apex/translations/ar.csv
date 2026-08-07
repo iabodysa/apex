@@ -279,6 +279,7 @@ Appliance,جهاز
 Applicable Days,الأيام السارية
 Applies to All Buildings,يسري على جميع المباني
 Apply an operational markup to external-supplier accommodation costs in the Supplier Cost Recovery report.,تطبيق هامش تشغيلي على تكاليف السكن الخاصة بالموردين الخارجيين في تقرير استرداد تكلفة المورّد.
+Apply to at most {0} vehicles at a time. You selected {1}.,طبّق الإجراء على {0} مركبة كحدٍّ أقصى في المرة الواحدة. اخترت {1}.
 Applying…,جارٍ تنفيذ الإجراء…
 Approval,الاعتماد
 "Approval and payment stage of the request, from draft to pending finance review, then approved and paid, or rejected or cancelled.",مرحلة اعتماد وسداد الطلب، من مسودة إلى بانتظار المراجعة المالية، ثم معتمد ومدفوع، أو مرفوض أو ملغى.
@@ -3880,6 +3881,7 @@ Subcontractor Service Order,أمر خدمة مقاول الباطن
 Subcontractor Service Orders by Status,أوامر خدمة مقاول الباطن حسب الحالة
 Subcontractors,مقاولو الباطن
 Subject,الموضوع
+Submit at most {0} count lines at a time. You sent {1}.,أرسل {0} سطر جرد كحدٍّ أقصى في المرة الواحدة. أرسلت {1}.
 Submit for Approval,إرسال للاعتماد
 Submit for Review,إرسال للمراجعة
 Submit Manifest,اعتماد كشف الركاب
