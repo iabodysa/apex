@@ -112,7 +112,7 @@ self.addEventListener("notificationclick", (event) => {
   }\n`
     : "";
 
-  const prologue = `// Copyright (c) 2026, AFMCO and contributors
+  const prologue = `// Copyright (c) 2026, afmcoltd
 // ${p.displayName} PWA service worker, served at ROOT (/${p.swFilename}) so its scope
 // covers ${p.navPath}. Shell is NETWORK-FIRST;${headerFontClause} stale owned caches
 // drop on activate. BUILD (full asset-tree hash, stamped per build) changes these bytes on
