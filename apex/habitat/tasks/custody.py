@@ -16,16 +16,17 @@ def _raise_consumable_alert(message: str, dedupe_token: str) -> str | None:
     """Raise a Consumable Expired Operations Alert (idempotent), via the shared helper.
 
     Existence-guarded on ``(alert_type=Consumable Expired, status=Open,
-    message LIKE %dedupe_token%, raised_on=today)`` so the daily job never spams a
-    duplicate for the same held position. The insert itself goes through
-    ``insert_operations_alert`` (the one place that writes the record). Returns the
-    new alert name, or None when a duplicate was skipped or the insert failed.
+    message LIKE %dedupe_token%)`` — ONE OPEN ALERT PER HELD POSITION, not one per
+    position per day. The guard used to also require ``raised_on`` inside today, so a
+    position that stayed over-age raised a fresh row every morning, and
+    ``Consumable Expired`` has no branch in ``reconcile_operations_alerts`` while
+    retention deletes only Resolved rows — so those rows were permanent. The insert
+    itself goes through ``insert_operations_alert`` (the one place that writes the
+    record). Returns the new alert name, or None when a duplicate was skipped or the
+    insert failed.
     """
-    from frappe.utils import today
-
     from apex.apex_core.utils.operations_alert import insert_operations_alert
 
-    today_str = today()
     frappe.db.savepoint(_ALERT_SAVEPOINT)
     try:
         if frappe.db.exists(
@@ -34,7 +35,6 @@ def _raise_consumable_alert(message: str, dedupe_token: str) -> str | None:
                 "alert_type": "Consumable Expired",
                 "status": "Open",
                 "message": ["like", f"%{dedupe_token}%"],
-                "raised_on": ["between", [f"{today_str} 00:00:00", f"{today_str} 23:59:59"]],
             },
         ):
             return None

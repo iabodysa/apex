@@ -80,13 +80,17 @@ def _raise_maintenance_alert(
 ) -> None:
     """Insert an Operations Alert for an overdue Maintenance Request (idempotent).
 
-    Mirrors the Salis ``_raise_alert`` pattern: existence-guarded so one Open
-    alert per (Maintenance Request, day) is never duplicated across runs. Both
-    the insert and the optional timeline comment are individually guarded so a
+    ONE OPEN ALERT PER REQUEST, not one per request per day. The guard used to also
+    require ``raised_on`` to fall inside today, so a request left open raised a fresh
+    row every morning — and ``Maintenance Overdue`` has no branch in
+    ``reconcile_operations_alerts``, while ``OperationsAlert.clear_old_logs`` deletes
+    only Resolved rows. A request open for a year therefore left 365 rows that nothing
+    could resolve and retention could not touch. An alert that is still Open is still
+    saying the same thing, so re-raising it says nothing new.
+
+    Both the insert and the optional timeline comment are individually guarded so a
     failure rolls back and logs but never aborts the calling loop.
     """
-    from frappe.utils import today
-
     alert_type = "Maintenance Overdue"
     severity = "Critical" if priority == "Critical" else "Warning"
     message = (
@@ -98,14 +102,12 @@ def _raise_maintenance_alert(
 
     frappe.db.savepoint(_ALERT_SAVEPOINT)
     try:
-        today_str = today()
         if frappe.db.exists(
             "Operations Alert",
             {
                 "alert_type": alert_type,
                 "status": "Open",
                 "message": ["like", f"%{req_name}%"],
-                "raised_on": ["between", [f"{today_str} 00:00:00", f"{today_str} 23:59:59"]],
             },
         ):
             return
