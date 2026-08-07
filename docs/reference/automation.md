@@ -84,7 +84,6 @@ idempotency key.
 
 ## Related references
 
-- [Permissions and role reference](permissions.md)
 - [Modules, workspaces, and routes](routes-workspaces.md)
 - [Business glossary](glossary.md)
 - [Troubleshooting](troubleshooting.md)

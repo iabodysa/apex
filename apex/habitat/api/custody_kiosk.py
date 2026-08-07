@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Custody Kiosk — POS-style custody issue + return API (v0.9.0).
+"""Custody Kiosk — POS-style custody issue + return API.
 
 A thin presentation + orchestration layer over the existing Custody Issue and
 Custody Return controllers. This module adds NO posting, locking, or ledger
@@ -24,9 +24,9 @@ The kiosk never touches the ledger directly — the no-GL Operational Memo
 boundary is preserved (the ledger is system-written; rows post only through the
 Custody Issue / Custody Return controllers).
 
-The ``image`` field on Custody Article is a confirmed v0.9.0 schema add (an
-Attach Image). The catalog always selects it and returns it as-is (may be
-``None`` → the client renders initials/placeholder).
+The ``image`` field on Custody Article is an Attach Image. The catalog always
+selects it and returns it as-is (may be ``None`` → the client renders
+initials/placeholder).
 """
 
 from __future__ import annotations

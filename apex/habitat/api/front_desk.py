@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Front Desk visual bed board API (v0.8.6).
+"""Front Desk visual bed board API.
 
 A thin presentation + orchestration layer over the existing Accommodation
 Assignment / Accommodation Checkout controllers. This module adds NO posting,

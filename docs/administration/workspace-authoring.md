@@ -7,22 +7,16 @@ The [workspace reference](../reference/routes-workspaces.md#workspaces) is the
 canonical inventory of shipped workspaces, hierarchy, order, and visibility
 roles.
 
-## Native Frappe model
+## Where a workspace lives
 
-A standard Workspace is stored under its owning Python module:
+A shipped Apex workspace is standard JSON under its owning module:
 
 ```text
 apex/<module>/workspace/<workspace>/<workspace>.json
 ```
 
-Use native fields for navigation:
-
-- `roles` controls who can see the workspace in Desk.
-- `parent_page` nests a child under its domain root.
-- `sequence_id` controls sidebar order.
-- `is_hidden` keeps a utility workspace out of normal navigation.
-- `content` defines headers, onboarding, charts, shortcuts, number cards, and
-  link cards.
+Navigation is expressed in the native fields only — Apex adds no workspace
+mechanism of its own.
 
 Workspace visibility is not authorization. The linked DocType, report, page,
 and API must enforce its own permissions and row scope.

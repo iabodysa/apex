@@ -4,7 +4,7 @@
 Apex's nine Workspaces each declare a roles table. The ones frappe, erpnext and hrms
 ship declare none, so every desk user sees them: an accommodation supervisor holding
 Accommodation Manager, Resident Supervisor, Desk User and Employee opened a sidebar of
-31 entries on ci.localhost, 26 of them another app's, Users and Build among them.
+31 entries, 26 of them another app's, Users and Build among them.
 
 THE MECHANISM IS NATIVE AND ACTS ON THE USER, never on another app's records.
 ``get_workspace_sidebar_items`` reads the session user's ``get_blocked_modules()``
@@ -19,8 +19,8 @@ app's Workspace was the alternative and is wrong -- those records re-import from
 own app's JSON on every migrate, so the edit is silently dropped.
 
 NOBODY IS LOCKED OUT BY SHIPPING THIS: nothing here links a profile to any user, so
-every existing account keeps the sidebar it had. Two administrator facts, measured on
-ci.localhost 2026-08-04. Administrator holds every role including Workspace Manager,
+every existing account keeps the sidebar it had. Two administrator facts, both measured.
+Administrator holds every role including Workspace Manager,
 and the filter is cleared outright for that role (``frappe/desk/desktop.py:428,
 435-436``), so a profile could hide nothing from them. A plain System Manager does NOT
 hold it and has no bypass -- linking a profile to one took their sidebar from 40

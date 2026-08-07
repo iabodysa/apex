@@ -3,24 +3,13 @@
 This glossary explains the names used in Apex. It uses the shipped English
 source terms while clarifying their practical business meaning.
 
-## Frappe and company terms
+## Cross-cutting terms
 
 | Term | Meaning in Apex |
 |------|-----------------|
 | **Apex** | One Frappe application containing Habitat, Salis, Apex Core, and Logistay. |
-| **Frappe site** | One deployed Frappe tenant with its own database and configuration. This is not the Habitat **Site** master. |
-| **DocType** | Frappe's schema and behavior definition for a business record. |
-| **Document** | One saved record of a DocType, such as one Housing Assignment or one Fuel Request. |
-| **User** | A login identity. Roles, Desk access, notifications, and User Permissions attach to the User. |
-| **Employee** | The HR record for a worker. An Employee may link to a User, but the records serve different purposes. |
+| **Frappe site** | One deployed Frappe tenant. This is not the Habitat **Site** master. |
 | **Role** | A named permission set such as Fleet Supervisor or Accommodation Manager. A role does not by itself remove project or building row scope. |
-| **User Permission** | A Frappe restriction that limits a user to selected linked records, such as Project or Building. |
-| **Workflow** | The allowed state transitions and approver roles for a document. |
-| **Workflow Action** | Frappe's approval-inbox item for a document awaiting a user's action. It is not the business document itself. |
-| **Draft** | A saved document with `docstatus = 0`. It can normally still be edited. |
-| **Submitted** | A confirmed document with `docstatus = 1`. Cancellation or an allowed post-submit field is required for later change. |
-| **Cancelled** | A submitted document reversed with `docstatus = 2`. Cancellation preserves history. |
-| **Amendment** | A new draft copied from a cancelled submittable document and linked through Amended From. |
 | **Project** | The ERPNext project used for operational ownership and fleet row scope. |
 | **Cost Center** | The ERPNext accounting dimension used to attribute cost to a company unit or project. |
 | **Supplier** | The ERPNext party used for landlords, rental offices, telecom operators, and other vendors where the process requires it. |
@@ -96,7 +85,6 @@ source terms while clarifying their practical business meaning.
 
 ## Related references
 
-- [Permissions and role reference](permissions.md)
 - [Modules, workspaces, and routes](routes-workspaces.md)
 - [Scheduled automation](automation.md)
 - [Troubleshooting](troubleshooting.md)

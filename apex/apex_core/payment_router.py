@@ -6,9 +6,7 @@ target is unconfigured.
 
 Boundary: this layer routes only - it posts no GL itself. ``enable_gl_posting``
 (Apex Settings) gates the auto-submit step, because a native payment posts its
-ledger from its own ``on_submit``; OFF leaves the routed doc in Draft. The fuller
-rationale (config-time mapping vs get_mapped_doc, the GL mechanics) is in the commit
-that tightened this docstring.
+ledger from its own ``on_submit``; OFF leaves the routed doc in Draft.
 """
 
 from __future__ import annotations

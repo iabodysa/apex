@@ -955,7 +955,7 @@ Condition Notes,ملاحظات الحالة
 "Condition of the item when handed back, compared against its issue condition to decide whether a damage or loss charge applies to the holder.",حالة الصنف عند إعادته مقارنة بحالته وقت الصرف، لتحديد ما إذا كان المستلم يتحمل تكلفة تلف أو فقدان.
 Condition on Issue,الحالة عند صرف العهدة
 Condition on Return,الحالة عند إرجاع العهدة
-"Configurable payment router. Per deployment, defines which payment DocType the Pay action creates and how Salis Payment Request fields map onto it. Replaces the inert Habitat Settings default_payment_method with a real mapping-driven router. Routes the payment record only; GL posting stays governed by enable_gl_posting.",موجّه دفع قابل للضبط. يحدد لكل تركيب نوع مستند الدفع الذي ينشئه إجراء الدفع، وكيف تُطابق عليه حقول طلب الدفع في ساليس. يحل محل الحقل المعطّل default_payment_method في إعدادات هابيتات بموجّه فعلي يعتمد المطابقة. يوجّه سجل الدفع فقط؛ ويبقى القيد المحاسبي محكوماً بالحقل enable_gl_posting.
+"Configurable payment router. Per deployment, defines which payment DocType the Pay action creates and how Salis Payment Request fields map onto it. Routes the payment record only; GL posting stays governed by enable_gl_posting.",موجّه مدفوعات قابل للضبط. لكل نشر، يحدد أي مستند دفع ينشئه إجراء الدفع وكيف تُطابَق حقول طلب دفع ساليس عليه. يوجّه سجل الدفع فقط؛ أما الترحيل المحاسبي فيظل محكوماً بـ enable_gl_posting.
 Configuration,التهيئة
 "Configuration and access: settings, users and roles.",التهيئة والصلاحيات: الإعدادات والمستخدمون والأدوار.
 Configuration for the whole application.,إعدادات التطبيق بأكمله.
@@ -988,7 +988,7 @@ Consent & Approval Gate,الموافقة وبوابة الاعتماد
 Consent Signed On,تاريخ توقيع الموافقة
 Constant value written to the target field when Static is checked (for example a fixed payment_type or party_type).,قيمة ثابتة تُكتب في الحقل المستهدف عند تفعيل خيار ثابت (مثل نوع دفع أو نوع طرف محدد).
 Consumable Lifespan (Months),العمر الافتراضي للمستهلك (بالأشهر)
-"Consumable past its lifespan: {0}",انتهى العمر الافتراضي لمستهلك: {0}
+Consumable past its lifespan: {0},انتهى العمر الافتراضي لمستهلك: {0}
 "Consumable {0} held by {1} since {2} is {3} month(s) old, past its {4}-month lifespan.",المستهلك {0} بحوزة {1} منذ {2} وعمره {3} شهرًا، متجاوزًا عمره الافتراضي البالغ {4} شهرًا.
 Consumed Litres,اللترات المستهلكة
 Consumed litres ({0}) exceed the monthly quota ({1}).,اللترات المستهلكة ({0}) تتجاوز الحصة الشهرية ({1}).
@@ -2564,7 +2564,7 @@ Now tap an available bed to transfer the resident.,الآن انقر على سر
 Number of completed maintenance work orders reflected onto this item.,عدد أوامر عمل الصيانة المكتملة والمسجلة لهذا الصنف.
 Number of days a Fuel Request may stay Pending before it is flagged as overdue.,عدد الأيام التي يمكن أن يبقى فيها طلب الوقود قيد الانتظار قبل اعتباره متأخرًا.
 Number of days before an expiry or due date to start raising alerts.,عدد الأيام قبل تاريخ الانتهاء أو الاستحقاق لبدء إطلاق التنبيهات.
-Number of days the resident has been idle. Accrued by the v0.8.6 aging job; not set manually.,عدد الأيام التي بقي فيها الساكن دون تشغيل. تحتسبها مهمة التقادم في الإصدار v0.8.6، ولا تُدخل يدويًا.
+Number of days the resident has been idle. Accrued by the aging job; not set manually.,عدد أيام خمول الساكن. تحتسبها مهمة التقادم، ولا تُدخل يدوياً.
 Number of days without a dispatch trip before an Active vehicle is flagged as idle.,عدد الأيام دون رحلة تسيير قبل اعتبار المركبة النشطة متوقفة عن العمل.
 Number of Passengers,عدد الركاب
 Number of SIM Cards linked to this contract.,عدد الشرائح المرتبطة بهذا العقد.
@@ -3420,7 +3420,7 @@ Reverted,أُعيدت إلى الوضع السابق
 Review Alerts,مراجعة التنبيهات
 Review and approve the handover before confirming receipt.,راجع التسليم واعتمده قبل تأكيد الاستلام.
 Review Apex Integration Settings,مراجعة إعدادات تكامل أبكس
-"Review every alert this site can send. Each one has its own on/off switch and, where it warns ahead of a date, its own number of days. Turn off what your team does not need and set the timing on the rest. The list also holds the alerts that came with Frappe and ERPNext, so sort by Module to see only yours.","راجع كل تنبيه يستطيع هذا الموقع إرساله. لكلٍّ مفتاح تشغيل وإيقاف خاص به، ولِما ينبّه قبل موعدٍ عددُ أيامه الخاص. أطفئ ما لا يحتاجه فريقك واضبط توقيت الباقي. تضمّ القائمة أيضًا التنبيهات التي جاءت مع فرابيه وإي آر بي نكست، فرتّبها حسب الوحدة لترى تنبيهاتك وحدها."
+"Review every alert this site can send. Each one has its own on/off switch and, where it warns ahead of a date, its own number of days. Turn off what your team does not need and set the timing on the rest. The list also holds the alerts that came with Frappe and ERPNext, so sort by Module to see only yours.",راجع كل تنبيه يستطيع هذا الموقع إرساله. لكلٍّ مفتاح تشغيل وإيقاف خاص به، ولِما ينبّه قبل موعدٍ عددُ أيامه الخاص. أطفئ ما لا يحتاجه فريقك واضبط توقيت الباقي. تضمّ القائمة أيضًا التنبيهات التي جاءت مع فرابيه وإي آر بي نكست، فرتّبها حسب الوحدة لترى تنبيهاتك وحدها.
 Review Integration Settings,مراجعة إعدادات التكامل
 "Review stage of the damage write-off case, from open and under review to approved or rejected, then closed or cancelled.",مرحلة مراجعة حالة شطب التلف، من مفتوح وقيد المراجعة إلى معتمد أو مرفوض، ثم مغلق أو ملغى.
 Review the Safety Task Catalog,مراجعة دليل مهام السلامة
@@ -3439,7 +3439,7 @@ Riders who are not registered Employees on the manifest above (e.g. a guest or a
 Risk (default),الخطورة (افتراضي)
 Role,الدور
 Role Profile,ملف الأدوار
-Role that may approve a deduction of this type. Informational in the skeleton.,الدور الذي يجوز له اعتماد خصم من هذا النوع. للعلم فقط في الهيكل المبدئي.
+Role that may approve a deduction of this type. Recorded for reference; nothing enforces it.,الدور الذي يجوز له اعتماد خصم من هذا النوع. مسجَّل للعلم فقط، ولا شيء يفرضه.
 "Rolled-up regulatory compliance state of the vehicle across its documents, flagging vehicles that are compliant, approaching expiry, expired, or not tracked.",حالة الامتثال التنظيمي المجمّعة للمركبة عبر وثائقها، تشير إلى المركبات الممتثلة أو المقتربة من انتهاء الصلاحية أو المنتهية أو غير المتتبَّعة.
 "Rolled-up remediation state for the whole client audit plan, summarising progress across its findings and flagging plans that are overdue or closed by the client.",حالة المعالجة المجمّعة لخطة تدقيق العميل بأكملها، تلخّص التقدّم عبر ملحوظاتها وتشير إلى الخطط المتأخرة أو المغلقة من قبل العميل.
 Roof,سطح
@@ -3719,7 +3719,7 @@ Set how urgent the repair is.,حدّد مدى إلحاح الإصلاح.
 "Set ON only after Legal/HR has reviewed the caps, the consent flow, and the per-type rules against current KSA Labor Law.",فعّل هذا فقط بعد أن تراجع الإدارة القانونية/الموارد البشرية الحدود القصوى ومسار الموافقة وقواعد كل نوع وفقًا لنظام العمل السعودي الحالي.
 Set on the reversal row posted when the source movement is cancelled. The original row is preserved for audit.,يُحدد في صف العكس المرحل عند إلغاء الحركة الأصلية. ويُحتفظ بالصف الأصلي للتدقيق.
 Set only when the request concerns a specific bed.,يُحدَّد فقط عندما يخص الطلب سريرًا معيّنًا.
-"Set when this settlement lists no vehicles, so the accrued total came from the rental accrual ledger instead of from rows on this document.","يُفعَّل حين لا تُدرج هذه التسوية أي مركبة، فيؤخذ إجمالي المستحق من سجل استحقاق الإيجار بدلًا من بنود هذا المستند."
+"Set when this settlement lists no vehicles, so the accrued total came from the rental accrual ledger instead of from rows on this document.",يُفعَّل حين لا تُدرج هذه التسوية أي مركبة، فيؤخذ إجمالي المستحق من سجل استحقاق الإيجار بدلًا من بنود هذا المستند.
 Set the Cadence,حدّد تكرار الجولة
 Set the Check-in Date,حدّد تاريخ التسكين
 Set the Checkout Date,حدّد تاريخ المغادرة
@@ -4076,7 +4076,7 @@ The Dispatch Trip the scanned pass was issued against.,رحلة التسيير �
 The driver this device subscription belongs to.,السائق الذي يخصه اشتراك هذا الجهاز.
 "The driver's current assigned vehicle, captured for reference.",المركبة المسندة حالياً للسائق، مسجّلة للمرجع.
 "The driver's login user, mirrored from the linked driver. Drives the driver-facing notification.",مستخدم دخول السائق، منقول من السائق المرتبط، ويُستخدم لإرسال الإشعار إليه.
-"NOT a login — drivers open the portal with a personal barcode link. Mirrored from the Employee and kept only so desk Notification rules can name a User and support tickets have an author. Empty is normal.",ليس حساب دخول — يفتح السائق البوابة برابط الباركود الخاص به. يُنقل من الموظف المرتبط ويُحتفظ به فقط لتتمكن قواعد الإشعارات في سطح المكتب من تحديد مستخدم، ولتكون لتذاكر الدعم جهة منشئة. وتركه فارغاً أمر طبيعي.
+NOT a login — drivers open the portal with a personal barcode link. Mirrored from the Employee and kept only so desk Notification rules can name a User and support tickets have an author. Empty is normal.,ليس حساب دخول — يفتح السائق البوابة برابط الباركود الخاص به. يُنقل من الموظف المرتبط ويُحتفظ به فقط لتتمكن قواعد الإشعارات في سطح المكتب من تحديد مستخدم، ولتكون لتذاكر الدعم جهة منشئة. وتركه فارغاً أمر طبيعي.
 The Employee Advance raised for this incident. One incident raises at most one advance; the company payment and the wage installments both run on it.,سلفة الموظف المُنشأة لهذه الحادثة. تُنشئ الحادثة سلفة واحدة على الأكثر؛ ويجري عليها سداد الشركة وأقساط الخصم من الأجر.
 The floor plan adds {0} new room(s) and {1} new bed(s) that are not yet created. Existing rooms updated: {2}. Confirm to create the new rooms and beds.,يضيف مخطط الطابق {0} غرفة جديدة و{1} سرير جديد لم تُنشأ بعد. الغرف الموجودة المحدّثة: {2}. أكّد لإنشاء الغرف والأسرّة الجديدة.
 The GPS position is outside the valid coordinate range.,موقع GPS خارج نطاق الإحداثيات الصحيح.
@@ -4091,7 +4091,7 @@ The messaging gateway is not enabled or is missing its URL/API key. Configure it
 The new expiry date must be later than the current expiry date.,يجب أن يكون تاريخ الانتهاء الجديد لاحقًا لتاريخ الانتهاء الحالي.
 The on-site code has expired. Ask the initiator to regenerate it.,انتهت صلاحية رمز الموقع. اطلب من المُبادر إعادة توليده.
 The one-time password has expired. Ask the procurement supervisor to regenerate it.,انتهت صلاحية رمز التحقق لمرة واحدة. اطلب من مشرف المشتريات إعادة توليده.
-"The operational source DocType whose submission may raise this deduction (for example Custody Damage Assessment, Accommodation Checkout). Informational in the skeleton; controller wiring is added in a later increment.",نوع المستند التشغيلي الذي قد يُنشئ اعتماده هذا الخصم، مثل تقييم تلفيات العهدة أو إخلاء السكن. والحقل للعلم فقط في هذه المرحلة، وتُضاف معالجته في تحديث لاحق.
+"The operational source DocType whose submission may raise this deduction (for example Custody Damage Assessment, Accommodation Checkout). Recorded for reference; no controller reads it.",نوع المستند التشغيلي الذي قد يرفع هذا الخصم عند اعتماده (مثل تقييم تلفيات العهدة، أو إخلاء السكن). مسجَّل للعلم فقط، ولا يقرأه أي متحكّم.
 The operator's own contract or account agreement number.,رقم عقد مشغل الاتصالات أو اتفاقية حسابه.
 The originating child row index (Inspection Finding Item idx) within the source execution. Part of the idempotency key so each finding row posts at most once.,ترتيب الصف الفرعي المصدر (ترتيب بند ملاحظة الفحص) ضمن التنفيذ المصدر. جزء من مفتاح منع التكرار بحيث يُرحَّل كل صف ملاحظة مرة واحدة على الأكثر.
 The originating operational document this advance recovers.,المستند التشغيلي الأصلي الذي أُنشئت هذه السلفة لاسترداد قيمته.
@@ -4629,7 +4629,7 @@ You have already rated this trip.,لقد قيّمت هذه الرحلة بالف
 You have no fleet project assigned,لا يوجد مشروع أسطول مُسنَد إليك
 You hit the rate limit because of too many requests. Please try after sometime.,لقد تجاوزت الحد المسموح بسبب كثرة الطلبات. يُرجى المحاولة بعد قليل.
 You may only handle boarding for your own trips.,لا يمكنك إدارة الصعود إلا لرحلاتك الخاصة.
-"You submitted this movement, so you cannot acknowledge it yourself.","أنت من أرسل هذه الحركة، فلا يمكنك اعتمادها بنفسك."
+"You submitted this movement, so you cannot acknowledge it yourself.",أنت من أرسل هذه الحركة، فلا يمكنك اعتمادها بنفسك.
 You were not part of this trip's manifest.,لم تكن ضمن كشف ركاب هذه الرحلة.
 Your account does not have a role to access it.,لا يملك حسابك دورًا للوصول إليها.
 Your arrival manifest was submitted. The accommodation team will reconcile arrivals against it on the expected date.,تم اعتماد كشف الوصول. سيطابق فريق السكن حالات الوصول الفعلية معه في التاريخ المتوقع.

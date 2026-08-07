@@ -148,7 +148,7 @@
    "options": "Open\nAcknowledged\nResolved"
   },
   {
-   "description": "Number of days the resident has been idle. Accrued by the v0.8.6 aging job; not set manually.",
+   "description": "Number of days the resident has been idle. Accrued by the aging job; not set manually.",
    "fieldname": "days_idle",
    "fieldtype": "Int",
    "label": "Days Idle",
@@ -249,7 +249,7 @@
  ],
  "is_submittable": 0,
  "links": [],
- "modified": "2026-08-07 05:23:00.000000",
+ "modified": "2026-08-07 20:54:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Idle Resident Report",

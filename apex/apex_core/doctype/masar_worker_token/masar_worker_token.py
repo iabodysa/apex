@@ -436,9 +436,7 @@ def _issue_token(
     doc: "MasarWorkerToken", regenerate: int = 0, scoped_issuer: bool = False
 ) -> str:
     """Issue or rotate a token for any holder (worker or driver): the logic is
-    holder-agnostic, keyed only off the MasarWorkerToken doc.
-
-    [#a267ai] Every worker and driver desk issuance funnels through here, so the one
+    holder-agnostic, keyed only off the MasarWorkerToken doc. Every worker and driver desk issuance funnels through here, so the one
     audit write lives here too — naming the branch actually taken, because "re-shared
     the same link" and "rotated, invalidating the old QR" are different events for
     anyone later reconstructing who held a live credential when."""

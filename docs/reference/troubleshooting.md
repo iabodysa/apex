@@ -55,8 +55,8 @@ Access has separate layers:
 5. Portal controllers apply their own identity and role checks.
 
 Compare the affected surface with the
-[route and workspace reference](routes-workspaces.md) and the
-[permission reference](permissions.md). Record the exact user, role list,
+[route and workspace reference](routes-workspaces.md) and the granted rights in
+**Role Permissions Manager** (`/app/permission-manager`). Record the exact user, role list,
 DocType, document name, route, and attempted action.
 
 Do not add System Manager or remove row scope as a diagnostic shortcut. A broad
@@ -222,5 +222,4 @@ personal documents.
 
 - [Business glossary](glossary.md)
 - [Scheduled automation](automation.md)
-- [Permissions and roles](permissions.md)
 - [Modules, workspaces, and routes](routes-workspaces.md)

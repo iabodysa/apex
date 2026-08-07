@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Transfer Board API (v0.9.0).
+"""Transfer Board API.
 
 A thin presentation + orchestration layer over the existing Room Bed Transfer
 controller. This module adds NO bed-status, locking, or ledger logic of its own.

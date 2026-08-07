@@ -72,7 +72,7 @@ def _assert_party_in_scope(party_type, party) -> None:
 
     * Temporary Worker — scoped on its own ``building`` field; a worker with no
       building (or one outside the caller's estate) is denied (a scoped user can
-      never act on an estate-less party — mirrors permissions.[#1i4wio]). The
+      never act on an estate-less party — mirrors permissions). The
       passport / Iqama leak (R1) lives here.
     * Employee — scoped on the building of its LIVE Accommodation Assignment. An
       employee actively housed in ANOTHER estate is denied (the real R2 leak). An

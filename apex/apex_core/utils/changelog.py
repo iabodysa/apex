@@ -1,10 +1,9 @@
 # Copyright (c) 2026, AFMCO and contributors
 """The in-app release feed, read from the notes that ship with the release.
 
-A release used to be described twice: once as a markdown note under ``change_log/`` and
-once as a hand-written entry in a Python list here. The list is the copy that fell behind,
-because nothing fails when it is forgotten. The notes are now the only source — adding a
-release means adding its file.
+The notes under ``change_log/`` are the only source: a release is described once, and
+adding one means adding its file. Nothing here restates a release, because a second copy
+falls behind silently — nothing fails when it is forgotten.
 
 Each note carries two machine-readable lines that a reader never sees, because markdown
 hides an HTML comment: ``<!-- released: YYYY-MM-DD HH:MM:SS -->`` (the moment the feed

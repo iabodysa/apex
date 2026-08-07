@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Safety Map API (v0.9.0).
+"""Safety Map API.
 
 A READ-ONLY presentation layer over Room, Maintenance Request and Custody Damage
 Assessment. This module adds NO maintenance-request, posting, or ledger logic of

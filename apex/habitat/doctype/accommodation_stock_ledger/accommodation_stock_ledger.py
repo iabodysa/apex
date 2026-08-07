@@ -7,9 +7,9 @@ means it is in that employee's custody. Reversals are negative mirror entries, a
 are refused outright when the mirror would drive a store or a custody holding
 negative — the stock has already moved on and must be unwound in order.
 
-WHY THE OVERSIGHT ROLES READ EVERY BUILDING'S CUSTODY (owner decision, 2026-07-27)
----------------------------------------------------------------------------------
-Read this before re-raising the estate-wide grant; it has been raised and settled.
+WHY THE OVERSIGHT ROLES READ EVERY BUILDING'S CUSTODY
+----------------------------------------------------
+Read this before re-raising the estate-wide grant; it is deliberate.
 
 Finance Manager and Internal Auditor each hold a permlevel-0 row here granting read,
 report, export, print, email and share, and both are named in ``HOUSING_UNSCOPED_ROLES``

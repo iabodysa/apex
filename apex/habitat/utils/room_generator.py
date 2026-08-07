@@ -69,7 +69,7 @@ def floor_sort_key(row):
 
 def validate_floor_plan(doc):
     """Floor-plan preconditions: at least one row, and no two floors collapsing to the
-    same floor code (which would mint identical room numbers). [#caqr8g]"""
+    same floor code (which would mint identical room numbers)."""
     if not doc.floor_plan:
         frappe.throw(_("No floor plan defined. Add floor rows before generating."))
 
@@ -91,7 +91,7 @@ def validate_floor_plan(doc):
 
 def load_existing(building_name):
     """Pre-load the building's existing rooms (room_number -> name) and bed codes so the
-    generator stays idempotent without per-iteration lookups. [#jcmjsz][#fkd615]"""
+    generator stays idempotent without per-iteration lookups."""
     existing_room_rows = frappe.db.get_all(
         "Room",
         filters={"building": building_name},
@@ -116,7 +116,7 @@ def load_existing(building_name):
 def _apply_capacity_reductions(room_number_value, capacity, old_cap, existing_bed_codes, stats):
     """Retire the surplus beds when a room's planned capacity drops (confirmed path).
     Sets each unoccupied, non-temporary surplus bed Out of Service; an occupied one blocks
-    the reduction. Returns True when the bed_capacity may be lowered (none blocked). [#ea5tqj]"""
+    the reduction. Returns True when the bed_capacity may be lowered (none blocked)."""
     _surplus_blocked = 0
     for _b_idx in range(capacity + 1, old_cap + 1):
         _surplus_code = f"{room_number_value}-B{_b_idx:02d}"
@@ -148,7 +148,7 @@ def _reconcile_existing_room(room_doc_name, room_number_value, rtype, capacity,
                              confirm_capacity_reduction, existing_bed_codes, stats):
     """Bring one existing room in line with the plan: update room_type and bed_capacity.
     A capacity INCREASE applies directly; a DECREASE needs confirmation and surplus-bed
-    retirement (delegated to _apply_capacity_reductions). [#h26quk][#trx8ab]"""
+    retirement (delegated to _apply_capacity_reductions)."""
     current = frappe.db.get_value(
         "Room", room_doc_name,
         ["room_type", "bed_capacity"], as_dict=True,
@@ -175,7 +175,7 @@ def _reconcile_existing_room(room_doc_name, room_number_value, rtype, capacity,
 def _create_room(building_name, room_number_value, floor_num, rtype, capacity,
                  existing_room_map, stats):
     """Insert a NEW room from the plan and register it in the room map. Returns its name,
-    or None when the insert failed (recorded as a row failure). [#4cp8q8]"""
+    or None when the insert failed (recorded as a row failure)."""
     try:
         room = frappe.get_doc({
             "doctype": "Room",
@@ -199,7 +199,7 @@ def _create_room(building_name, room_number_value, floor_num, rtype, capacity,
 def _generate_beds_for_room(room_doc_name, room_number_value, capacity, allow_create,
                             existing_bed_codes, stats):
     """Mint the room's beds (codes ``{room}-B01..``), skipping any that already exist; when
-    new beds are not yet permitted they are counted pending, not created. [#gzcnzc]"""
+    new beds are not yet permitted they are counted pending, not created."""
     for b in range(1, capacity + 1):
         bed_code = f"{room_number_value}-B{b:02d}"
         if bed_code in existing_bed_codes:
@@ -274,7 +274,7 @@ def process_floor_row(row, abbreviation, building_name, allow_create,
 
 
 def finalize_building_stats(building_name, stats):
-    """After any room/bed write, refresh the building's setup status + derived totals. [#o7ywrx]"""
+    """After any room/bed write, refresh the building's setup status + derived totals."""
     if not (stats.created_rooms > 0 or stats.created_beds > 0 or stats.updated_rooms > 0):
         return
     total_floors = building_rollup.distinct_floor_count(building_name)
@@ -341,7 +341,7 @@ def generation_indicator(stats) -> str:
 
 
 def report_generation(stats) -> dict:
-    """Emit the operator msgprint and return the summary dict. [#shn7rw]"""
+    """Emit the operator msgprint and return the summary dict."""
     summary = generation_summary(stats)
     frappe.msgprint(
         generation_message(stats),

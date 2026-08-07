@@ -302,7 +302,7 @@ Desk users work through native workspaces, forms, reports, and operator pages. M
 
 The table above is a published description of a directory that changes whenever a portal is added, split, or retired, and it is written by hand — the audience and design notes in it are judgements, not facts a script can read off the tree.
 
-The facts are published separately and are not hand-maintained. [Modules, workspaces, and routes](docs/reference/routes-workspaces.md) is generated from the shipped `modules.txt`, Workspace JSON, Page JSON and `www/` templates: the route, the controller module, the bundle its shell mounts, whether guests are redirected to login, and the exact role set the controller's `get_context()` applies. A shipped route the page omits, or a role added to or dropped from a gate constant, changes the generated file. Regenerating it must leave the tree unchanged; that check runs in the maintainer's local guard sweep, not in CI, so a clone carries the page but not the gate that keeps it current. When the two disagree, the generated page is the one to believe.
+The facts are published separately and are not hand-maintained. [Modules, workspaces, and routes](docs/reference/routes-workspaces.md) is generated from the shipped `modules.txt`, Workspace JSON, Page JSON and `www/` templates: the route, the controller module, the bundle its shell mounts, whether guests are redirected to login, and the exact role set the controller's `get_context()` applies. A shipped route the page omits, or a role added to or dropped from a gate constant, changes the generated file. When the two disagree, the generated page is the one to believe.
 
 ## Security and integrity
 
