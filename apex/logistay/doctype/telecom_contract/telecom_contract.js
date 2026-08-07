@@ -31,8 +31,7 @@ frappe.ui.form.on('Telecom Contract', {
 });
 
 function current_period() {
-	const d = frappe.datetime.now_date(true);
-	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+	return frappe.datetime.get_today().slice(0, 7);
 }
 
 function period_field() {

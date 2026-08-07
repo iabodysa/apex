@@ -392,7 +392,7 @@ class FleetControl {
 				const first = JSON.parse(raw)[0];
 				const obj = typeof first === "string" ? JSON.parse(first) : first;
 				const msg = obj && obj.message ? obj.message : first;
-				if (msg) return String(msg).replace(/<[^>]*>/g, "").trim();
+				if (msg) return strip_html(msg).trim();
 			} catch (e) {
 			}
 		}
