@@ -1,0 +1,11 @@
+{
+ "doctype": "Number Card",
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Safety Tasks Done This Week %",
+ "method": "apex.habitat.api.dashboard.get_safety_tasks_done_week",
+ "module": "Habitat",
+ "name": "Safety Tasks Done This Week %",
+ "type": "Custom",
+ "modified": "2026-08-07 18:08:00.000000"
+}

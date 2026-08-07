@@ -8,9 +8,9 @@ Safety Round grouping a set of submitted Safety Task Execution rows.
 
 This module adds NO result/compliance logic of its own. The overall result is
 derived by the Safety Round controller's on_submit (worst execution status
-wins); the expected task set mirrors the Safety Task Compliance Summary report's
-two-mode catalog scope so the Page and the report agree on which tasks belong to
-a (building, cadence).
+wins); the expected task set is the two-mode catalog scope — a task applies to
+all buildings or names the building in Safety Task Building Scope — so every
+consumer agrees on which tasks belong to a (building, cadence).
 
 Endpoints:
 
@@ -72,8 +72,7 @@ _TASK_FIELDS = [
 def get_tasks_for_cadence(building, cadence):
     """Return the expected Safety Task Catalog rows for a (building, cadence).
 
-    Uses the SAME two-mode scope as
-    ``safety_task_compliance_summary._expected_tasks``: a task is expected when it is
+    Two-mode scope: a task is expected when it is
     active, its ``frequency`` equals ``cadence``, AND either it applies to all
     buildings (``applicable_to_all_buildings == 1``) OR it names this building in
     its ``applicable_buildings`` child table (Safety Task Building Scope). Both

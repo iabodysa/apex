@@ -32,7 +32,7 @@
    "role": "System Manager"
   }
  ],
- "content": "[{\"id\": \"salisHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Salis</b></span>\", \"col\": 12}}, {\"id\": \"onbSG\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Salis Go-Live\", \"col\": 12}}, {\"id\": \"salisHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"salisSc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Board\", \"col\": 3}}, {\"id\": \"salisSc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Operations Control\", \"col\": 3}}, {\"id\": \"salisSc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Operations Alert\", \"col\": 3}}, {\"id\": \"salisSc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 3}}, {\"id\": \"salisSc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Worker Route (Masar)\", \"col\": 3}}, {\"id\": \"salisSc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Passenger Manifest\", \"col\": 3}}, {\"id\": \"salisSc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Driver\", \"col\": 3}}, {\"id\": \"salisSc8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Clearance\", \"col\": 3}}, {\"id\": \"salisSc9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"salisSc10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Payment Request\", \"col\": 3}}, {\"id\": \"salisHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"salisNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 3}}, {\"id\": \"salisNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Active Trips\", \"col\": 3}}, {\"id\": \"salisNc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Requests Open\", \"col\": 3}}, {\"id\": \"salisNc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Transport Scheduled Awaiting Dispatch\", \"col\": 3}}, {\"id\": \"salisNc5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Large Worker Moves Pending Escalation\", \"col\": 3}}, {\"id\": \"salisNc6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Transport SLA Breaches Open\", \"col\": 3}}, {\"id\": \"salisNc7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Blocked Driver Clearances\", \"col\": 3}}, {\"id\": \"salisNc8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Compliance Drivers Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"salisNc9\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Expiring Vehicle Compliance\", \"col\": 3}}, {\"id\": \"salisNc10\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Rental Settlements\", \"col\": 3}}, {\"id\": \"salisNc11\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Rental Settlements\", \"col\": 3}}, {\"id\": \"salisNc12\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Settlements Pending Approval\", \"col\": 3}}, {\"id\": \"salisNc13\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cost Recovery Aging Backlog\", \"col\": 3}}, {\"id\": \"salisHdrWork\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Work</b></span>\", \"col\": 12}}, {\"id\": \"salisCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Masar\", \"col\": 4}}, {\"id\": \"salisCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Salis Control\", \"col\": 4}}, {\"id\": \"salisCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Vehicles and Alerts\", \"col\": 4}}, {\"id\": \"salisCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Drivers\", \"col\": 4}}, {\"id\": \"salisCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs and Settlement\", \"col\": 4}}, {\"id\": \"salisCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"salisCard7\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"salisCard8\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
+ "content": "[{\"id\": \"salisHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Salis</b></span>\", \"col\": 12}}, {\"id\": \"onbSG\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Salis Go-Live\", \"col\": 12}}, {\"id\": \"salisHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"salisSc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Board\", \"col\": 3}}, {\"id\": \"salisSc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Operations Control\", \"col\": 3}}, {\"id\": \"salisSc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Operations Alert\", \"col\": 3}}, {\"id\": \"salisSc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 3}}, {\"id\": \"salisSc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Worker Route (Masar)\", \"col\": 3}}, {\"id\": \"salisSc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Passenger Manifest\", \"col\": 3}}, {\"id\": \"salisSc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Driver\", \"col\": 3}}, {\"id\": \"salisSc8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Clearance\", \"col\": 3}}, {\"id\": \"salisSc9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"salisSc10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Payment Request\", \"col\": 3}}, {\"id\": \"salisHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"salisNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 3}}, {\"id\": \"salisNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Active Trips\", \"col\": 3}}, {\"id\": \"salisNc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Requests Open\", \"col\": 3}}, {\"id\": \"salisNc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Transport Scheduled Awaiting Dispatch\", \"col\": 3}}, {\"id\": \"salisNc5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Large Worker Moves Pending Escalation\", \"col\": 3}}, {\"id\": \"salisNc6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Transport SLA Breaches Open\", \"col\": 3}}, {\"id\": \"salisNc7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Blocked Driver Clearances\", \"col\": 3}}, {\"id\": \"salisNc8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Compliance Drivers Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"salisNc9\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Expiring Vehicle Compliance\", \"col\": 3}}, {\"id\": \"salisNc10\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Rental Settlements\", \"col\": 3}}, {\"id\": \"salisNc11\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Rental Settlements\", \"col\": 3}}, {\"id\": \"salisNc12\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Settlements Pending Approval\", \"col\": 3}}, {\"id\": \"salisNc13\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cost Recovery Aging Backlog\", \"col\": 3}}, {\"id\": \"salisNc14\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Transport Requests Served %\", \"col\": 3}}, {\"id\": \"salisHdrWork\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Work</b></span>\", \"col\": 12}}, {\"id\": \"salisCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Masar\", \"col\": 4}}, {\"id\": \"salisCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Salis Control\", \"col\": 4}}, {\"id\": \"salisCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Vehicles and Alerts\", \"col\": 4}}, {\"id\": \"salisCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Drivers\", \"col\": 4}}, {\"id\": \"salisCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs and Settlement\", \"col\": 4}}, {\"id\": \"salisCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"salisCard7\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"salisCard8\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -286,24 +286,6 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Transport Fulfilment SLA",
-   "link_type": "Report",
-   "link_to": "Transport Fulfilment SLA",
-   "idx": 23,
-   "is_query_report": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Movement KPI Summary",
-   "link_type": "Report",
-   "link_to": "Movement KPI Summary",
-   "idx": 24,
-   "is_query_report": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Driver Attendance Summary",
    "link_type": "Report",
    "link_to": "Driver Attendance Summary",
@@ -540,9 +522,15 @@
    "number_card_name": "Cost Recovery Aging Backlog",
    "label": "Cost Recovery Aging Backlog",
    "idx": 13
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Transport Requests Served %",
+   "label": "Transport Requests Served %",
+   "idx": 14
   }
  ],
  "quick_lists": [],
  "creation": "2020-01-01 00:00:00.000000",
- "modified": "2026-08-07 17:49:00.000000"
+ "modified": "2026-08-07 18:08:00.000000"
 }

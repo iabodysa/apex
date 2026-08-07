@@ -142,6 +142,7 @@ Blocked by Outstanding Items,موقوف بسبب مستحقات قائمة
 Buildings,المباني
 Chargeable,قابل للتحميل
 Claims,المطالبات
+Cleaning Compliance Today %,نسبة الالتزام بالنظافة اليوم %
 Contracts,العقود
 Cost Centres,مراكز التكلفة
 Currently Held,بحوزته حالياً
@@ -153,7 +154,6 @@ Days Waiting,أيام الانتظار
 Employees,الموظفون
 Expected Return,الإرجاع المتوقّع
 Expiring in 30 Days,تنتهي خلال 30 يوماً
-Fuel Logs,سجلات الوقود
 High or Critical,عالية أو حرجة
 Idle Share,نسبة التعطّل
 Include Ended Assignments,تضمين الإسنادات المنتهية
@@ -187,12 +187,13 @@ Returned in Good Order,أُرجع بحالة جيدة
 Returns,عمليات الإرجاع
 Review the Housing Assignment List,راجع قائمة التسكين
 Rows,الصفوف
+Safety Tasks Done This Week %,نسبة مهام السلامة المنجزة هذا الأسبوع %
 SIMs Covered,الشرائح المشمولة
 SIMs Held,الشرائح المحتفَظ بها
 Settled Share,نسبة المسوّى
 Still Held,لا تزال بالحيازة
 Taken,مُستلَم
-Trips Fulfilled,الرحلات المنفَّذة
+Transport Requests Served %,نسبة طلبات النقل المخدومة %
 Unassigned Only,غير المسندة فقط
 View Housing Assignment list,عرض قائمة التسكين
 Waiting Over a Week,انتظار أكثر من أسبوع
@@ -539,10 +540,7 @@ Available Rooms,الغرف المتاحة
 Available: {0},متاح: {0}
 Average,متوسط
 Average Monthly Bill (SAR),متوسط الفاتورة الشهرية (ريال)
-Average Vehicle Utilisation %,متوسط نسبة استغلال المركبات %
-Avg Available Capacity,متوسط السعة المتاحة
 Avg Cost / Litre,متوسط التكلفة لكل لتر
-Avg Occupancy %,متوسط نسبة الإشغال
 Avg Utilisation %,متوسط نسبة الاستخدام (%)
 Avg Vehicle Utilisation % (All-Time),متوسط نسبة استخدام المركبات منذ البداية (%)
 Awaiting Approval,بانتظار الاعتماد
@@ -879,9 +877,7 @@ Complete,إكمال
 Complete a Maintenance Work Order,إكمال أمر عمل صيانة
 Complete Work Order,إكمال أمر العمل
 Completed,مكتمل
-Completed (timed),مكتملة (بأوقات مسجّلة)
 Completed Date,تاريخ الإنجاز
-Completed Dispatch Trips,رحلات التسيير المكتملة
 Completed Trips This Month,الرحلات المكتملة هذا الشهر
 Completed Trips Today,الرحلات المكتملة اليوم
 Completion,الإنجاز
@@ -892,7 +888,6 @@ Completion Photo,صورة الإنجاز
 Completion Photo Evidence,صورة إثبات الإنجاز
 Completion photo required to close this work order.,صورة الإنجاز مطلوبة لإغلاق أمر العمل.
 Compliance,الامتثال
-Compliance %,نسبة الامتثال (%)
 Compliance & Expiry,الامتثال والانتهاء
 Compliance and Licensing,الامتثال والتراخيص
 Compliance at risk,الامتثال في خطر
@@ -1187,7 +1182,6 @@ Custody Value (SAR),قيمة العهدة (ريال)
 Custody Value in Employee Hands (SAR),قيمة العهدة لدى الموظفين (ريال)
 Custom…,مخصص…
 Daily,يومي
-Daily Cleaning Compliance,الالتزام اليومي بالنظافة
 Daily cleaning record per building with worker accountability and evidence controls.,سجل نظافة يومي لكل مبنى مع مساءلة العامل وضوابط الأدلة.
 Daily driver attendance record with check-in/out times and photographic evidence.,سجل حضور يومي للسائق مع أوقات الحضور والانصراف وصور الإثبات.
 "Daily fuel consumption log for a vehicle: odometer, litres, amount, and platform.",سجل استهلاك وقود يومي لمركبة: عداد المسافة واللترات والمبلغ والمنصة.
@@ -1234,7 +1228,6 @@ Days before expiry to trigger renewal alert,عدد الأيام قبل الان�
 Days Housed,مدة السكن (بالأيام)
 Days Idle,أيام عدم التشغيل
 Days Open,مدة بقاء السجل مفتوحًا (بالأيام)
-Days Over Capacity,أيام تجاوز السعة
 Days Since,عدد الأيام منذ
 Days Since Checkout,أيام منذ المغادرة
 "Days the worker may remain on a passport-only basis. Standard 30, extendable to a maximum of 90.",عدد الأيام التي يجوز للعامل البقاء فيها بالاعتماد على جواز السفر فقط. القياسي 30، قابل للتمديد إلى حد أقصى 90.
@@ -1558,7 +1551,6 @@ Exception,الاستثناء
 Exception Type,نوع الاستثناء
 Exceptions,الاستثناءات
 Excessive Topup,تعبئة مفرطة
-Executed,المُنفَّذة
 Executed By,المنفّذ
 Execution,التنفيذ
 Execution Date,تاريخ التنفيذ
@@ -1758,10 +1750,8 @@ Fuel Claim,مطالبة وقود
 Fuel Claim Register,سجل مطالبات الوقود
 Fuel Claim Variance by Month,فروقات مطالبات الوقود حسب الشهر
 Fuel Claim Voucher,سند مطالبة وقود
-Fuel Consumption (Litres),استهلاك الوقود (لترات)
 Fuel Consumption by Month,استهلاك الوقود حسب الشهر
 Fuel Consumption Ledger,سجل استهلاك الوقود
-Fuel Consumption Summary,ملخص استهلاك الوقود
 Fuel consumption {0} L for vehicle {1} in period {2} exceeds the monthly quota of {3} L by {4} L (quota {5}).,استهلاك الوقود {0} لتر للمركبة {1} في الفترة {2} يتجاوز الحصة الشهرية البالغة {3} لتر بمقدار {4} لتر (الحصة {5}).
 Fuel Cost by Month,تكلفة الوقود حسب الشهر
 Fuel Cost by Platform,تكلفة الوقود حسب المنصة
@@ -1797,7 +1787,6 @@ Fuel top-up {0}: {1} L{2}.,تعبئة وقود {0}: {1} لتر{2}.
 Fulfilled,مُنفّذ
 Fulfilled By (Movement),نُفِّذ بواسطة (الحركة)
 Fulfilled On,تاريخ التنفيذ
-Fulfilled Trips,الرحلات المنفّذة
 Fulfillment,التنفيذ
 Full,ممتلئ
 Full Admin,مسؤول كامل الصلاحيات
@@ -2022,7 +2011,6 @@ Integration Help,مساعدة التكامل
 Inter-City Relocation,نقل بين المدن
 Inter-City Relocations This Month,عمليات النقل بين المدن هذا الشهر
 Inter-City Requests This Month,طلبات النقل بين المدن هذا الشهر
-Inter-City Transport Requests,طلبات النقل بين المدن
 Inter-project cost-transfer control for Movement costs. Records reallocation of a Movement cost from one project/cost center to another. The Posted (memo) status is an operational memo only - no GL or Journal Entry is written.,ضبط تحويل التكاليف بين المشاريع لتكاليف الحركة. يسجل إعادة توزيع تكلفة حركة من مشروع أو مركز تكلفة إلى آخر. وحالة (مقيَّد كمذكرة) تشغيلية فقط، ولا يُكتب معها قيد محاسبي ولا قيد يومية.
 Intercompany Approval,اعتماد النقل بين الشركات
 Intercompany Movement Register,سجل الحركات بين الشركات
@@ -2128,7 +2116,6 @@ Key Reports,التقارير المهمة
 Kitchen,المطبخ
 Kitchen gas cooker / stove for accommodation. Durable kitchenware.,موقد / طبّاخ غاز للمطبخ في السكن. أدوات مطبخ معمّرة.
 Kitchenware,أدوات مطبخ
-KPI,مؤشر الأداء
 KSA Labor Law Note,ملاحظة نظام العمل السعودي
 Labour Supplier,مورّد العمالة
 Landlord,المؤجّر
@@ -2149,7 +2136,6 @@ Last Notified At,آخر إشعار في
 Last Printed On,آخر طباعة في
 Last Renewed On,تاريخ آخر تجديد
 Last Seen,آخر ظهور
-Last Status,آخر حالة
 Last Wait Request At,آخر طلب انتظار في
 Late,متأخر
 Latest,الأحدث
@@ -2253,7 +2239,6 @@ Location Token,رمز الموقع
 Locations,المواقع
 Log,سجل
 Log an accident or theft against a vehicle.,سجّل حادثاً أو سرقة على مركبة.
-Log Count,عدد السجلات
 Log Date,تاريخ السجل
 Log Inspection,تسجيل تفتيش
 Log Inspection — {0},تسجيل فحص — {0}
@@ -2344,7 +2329,6 @@ Material Transfer Item,بند نقل مواد السكن
 Material Transfer {0} moved stock from {1} (cost center {2}) to {3} (cost center {4}). This is a memo only — no GL Entry was posted. Please record the cross-charge if required.,نقل المواد {0} حرّك المخزون من {1} (مركز التكلفة {2}) إلى {3} (مركز التكلفة {4}). هذا قيد مذكرة فقط — لم يُرحّل أي قيد دفتر أستاذ عام. يُرجى تسجيل التحميل المتبادل عند الحاجة.
 Materials required for the repair.,المواد المطلوبة للإصلاح.
 Max % of Salary,الحد الأقصى للخصم من الراتب (%)
-Max Occupancy %,أعلى نسبة إشغال
 Maximum 'please wait' requests a worker may send the driver per trip. A blank or zero value falls back to the built-in default.,"الحد الأقصى لطلبات ""يرجى الانتظار"" التي يمكن للعامل إرسالها إلى السائق في كل رحلة. القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج."
 Maximum 'remaining passengers' notifications the driver may send a worker before that worker can be marked Absent at departure; blank or zero uses the default.,الحد الأقصى لإشعارات «الركاب المتبقون» التي يرسلها السائق إلى العامل قبل تسجيله غائبًا عند المغادرة. عند ترك القيمة فارغة أو صفرًا، يُستخدم الإعداد الافتراضي.
 Maximum share of the worker's wage this type may take in any single pay period. KSA Labor Law Art. 91 caps total wage deductions at 50% of wage; this conservative per-type default (10%) keeps the aggregate well under the lawful ceiling. Do not raise without legal review.,أعلى نسبة يمكن خصمها من أجر العامل لهذا النوع خلال فترة رواتب واحدة. تحدد المادة 91 من نظام العمل السعودي إجمالي الخصومات بحد أقصى 50% من الأجر، وتبقي النسبة الافتراضية المتحفظة لكل نوع (10%) الإجمالي دون هذا الحد. لا ترفعها دون مراجعة قانونية.
@@ -2361,7 +2345,6 @@ Method,الطريقة
 "Method used to spread a shared building cost onto residents or projects: by bed capacity, by actual occupancy, by a manual split, or charged directly without allocation.",الطريقة المستخدمة لتوزيع تكلفة مبنى مشتركة على الساكنين أو المشاريع: حسب سعة الأسرّة، أو حسب الإشغال الفعلي، أو بتقسيم يدوي، أو تحميلها مباشرة دون توزيع.
 Middle,الأوسط
 Migrated From,تم ترحيله من
-Min Occupancy %,أدنى نسبة إشغال
 Mine,الخاصة بي
 Minutes a handover one-time password stays valid before it expires.,عدد الدقائق التي يبقى فيها رمز التحقق للتسليم صالحاً قبل انتهاء صلاحيته.
 Minutes after a worker self-claims boarding before it is auto-confirmed (Boarded) when the driver neither confirms nor rejects; blank or zero uses the default.,عدد الدقائق بعد تأكيد العامل صعوده بنفسه وقبل اعتماد الصعود تلقائيًا إذا لم يؤكد السائق أو يرفض. إذا تُركت القيمة فارغة أو كانت صفرًا، تُستخدم القيمة الافتراضية.
@@ -2417,7 +2400,6 @@ Movement Cost Summary,ملخص تكاليف الحركة
 Movement Cost Transfer,تحويل تكلفة حركة
 Movement Date,تاريخ الحركة
 Movement fuel claim and reconciliation against a quota. Compares claimed litres/amount with consumed litres derived from the Fuel Consumption Ledger and routes a Delegation-of-Authority gate by variance / quota-increase.,مطالبة وقود الحركة وتسويتها مقابل الحصة. تقارن اللترات والمبلغ المطالب بهما مع اللترات المستهلكة المستخرجة من سجل استهلاك الوقود، وتوجّه بوابة تفويض الصلاحيات حسب الفرق أو طلب زيادة الحصة.
-Movement KPI Summary,ملخص مؤشرات أداء الحركة
 Movement Operations Dashboard,لوحة معلومات عمليات الحركة
 "Movement planner who fulfilled the request, set on submit (Movement fulfils the request).",مسؤول تخطيط الحركة الذي نفّذ الطلب، ويُحدد عند الاعتماد لأن فريق الحركة هو المسؤول عن التنفيذ.
 Movement Reason,سبب الحركة
@@ -2559,7 +2541,6 @@ Occupancy % Trend,اتجاه نسبة الإشغال
 Occupancy Percent Trend,اتجاه نسبة الإشغال
 Occupancy Snapshot,لقطة الإشغال
 Occupancy Status,حالة الإشغال
-Occupancy Trend,اتجاه الإشغال
 Occupied,مشغول
 Occupied Beds,الأسرّة المشغولة
 ocr,تعرّف ضوئي على النصوص
@@ -3257,7 +3238,6 @@ Rent payment generated for building: {0} under lease {1},أُنشئت دفعة �
 Rent Payment Schedule,جدول سداد الإيجارات
 Rent payments can only be raised from a submitted lease.,دفعات الإيجار تُصدر من عقد معتمد فقط.
 Rental,إيجار
-Rental Accrual (Amount),استحقاق الإيجار (المبلغ)
 Rental Accrual by Office,استحقاق الإيجار حسب المكتب
 Rental accrual for office {0} in period {1} is unsettled: {2} SAR outstanding with no submitted Rental Settlement. (office {0}),استحقاق إيجار المكتب {0} للفترة {1} غير مسوى: مبلغ {2} ريال مستحق ولا توجد تسوية إيجار معتمدة. (المكتب {0})
 Rental Accrual Ledger,سجل استحقاق الإيجار
@@ -3322,8 +3302,6 @@ Requester,مقدّم الطلب
 Requester Name,اسم مقدّم الطلب
 Requester Type,نوع مقدّم الطلب
 Requests in category {0} are resolved directly and have no target document to create.,الطلبات في الفئة {0} تُحلّ مباشرةً ولا يوجد لها مستند مستهدف لإنشائه.
-Requests Raised,الطلبات المُنشأة
-Requests Served,الطلبات المنفذة
 Require Acknowledgment for All Deductions,اشتراط الإقرار لجميع الخصومات
 Require approval when an assignment or transfer crosses project boundaries.,اشتراط الموافقة عند تجاوز الإسناد أو النقل لحدود المشروع.
 Require Employee Acknowledgment,اشتراط إقرار الموظف
@@ -3470,7 +3448,6 @@ Rooms Needing Readiness,غرف بحاجة إلى تجهيز
 Rooms needing readiness,الغرف التي تحتاج إلى تجهيز
 Rooms on Floor,عدد الغرف في الطابق
 Rooms Planned,الغرف المخطط لها
-Rooms Total,إجمالي الغرف
 Rotate Link and QR,تجديد الرابط ورمز QR
 Rotate Portal Link,تجديد رابط البوابة
 Rotating issues a NEW barcode and stops the previous one working. Continue?,التجديد يصدر باركود جديدًا ويوقف الباركود السابق. هل تريد المتابعة؟
@@ -3538,7 +3515,6 @@ Safety Task (from Catalog),مهمة السلامة (من الدليل)
 Safety Task Building Scope,نطاق مبنى مهمة السلامة
 Safety Task Catalog,دليل مهام السلامة
 "Safety Task Catalog {0} has frequency ""{1}"", which has no scheduling equivalent. Set a supported catalog frequency (Daily, Weekly, Monthly, Quarterly, Annual) or map it before generating.",فهرس مهام السلامة {0} تكراره «{1}»، ولا يقابله جدول زمني. حدد تكرارًا مدعومًا (يومي، أسبوعي، شهري، ربع سنوي، سنوي) أو اربطه قبل الإنشاء.
-Safety Task Compliance Summary,ملخص الالتزام بمهام السلامة
 Safety Task Execution,تنفيذ مهمة السلامة
 Safety Task Executions by Result,تنفيذات مهام السلامة حسب النتيجة
 Salary Component,مكوّن الراتب
@@ -3862,7 +3838,6 @@ Source Handover,التسليم الأصلي
 Source Incident,الحادث الأصلي
 Source Inspection Report,تقرير الفحص الأصلي
 Source Line ID,معرّف سطر المصدر
-Source not installed: {0},المصدر غير مُثبَّت: {0}
 Source Reference,مرجع المصدر
 Source Safety Execution,تنفيذ مهمة السلامة الأصلي
 Source Type,نوع المصدر
@@ -4209,7 +4184,6 @@ Tick for a contractor/temp hire not registered on the trip's worker manifest.,ف
 Tick this once all issued custody has been returned.,علّم هذا الخيار بعد إرجاع كامل العهدة المصروفة.
 Ticket,التذكرة
 Ticket not found.,التذكرة غير موجودة.
-Timed %,نسبة الالتزام بالوقت (%)
 Timeline,الجدول الزمني
 timesheet,سجل الدوام
 Timesheet Exception Workbench,لوحة معالجة استثناءات سجل الدوام
@@ -4250,7 +4224,6 @@ Total Book Value (SAR),إجمالي القيمة الدفترية (ريال)
 Total Capacity,إجمالي السعة
 Total Cost,التكلفة الإجمالية
 Total Deduction Amount,إجمالي مبلغ الخصم
-Total Dispatch Trips,إجمالي رحلات التسيير
 Total Estimated Replacement Cost (SAR),إجمالي تكلفة الاستبدال التقديرية (ريال)
 Total Floors,إجمالي الطوابق
 Total Invoice Amount (SAR),إجمالي مبلغ الفاتورة (ريال)
@@ -4291,7 +4264,6 @@ Transferring…,جارٍ النقل…
 Transfers responsibility of one or more Facility Assets to a supervisor.,ينقل مسؤولية أصل منشأة واحد أو أكثر إلى مشرف.
 Transform,التحويل
 Transport,النقل
-Transport Fulfilment SLA,اتفاقية مستوى خدمة تنفيذ النقل
 Transport Purpose,غرض النقل
 Transport Request,طلب نقل
 Transport Request Ad Hoc Passenger,راكب إضافي
@@ -4324,10 +4296,8 @@ Trip end odometer ({0}) cannot be less than start ({1}).,لا يمكن أن تك
 Trip Execution,تنفيذ الرحلة
 Trip Fulfilment Ledger,سجل تنفيذ الرحلات
 Trip Fulfilment Ledger is a posted audit record and cannot be edited.,سجل تنفيذ الرحلة هو سجل تدقيق مرحَّل ولا يمكن تعديله.
-Trip Fulfilment Ledger Rows,صفوف سجل تنفيذ الرحلات
 Trip fulfilment ledger. Maintained automatically by the system when a Dispatch Trip is completed and not edited manually.,سجل تنفيذ الرحلات. يُحدّثه النظام تلقائيًا عند اكتمال رحلة التسيير، ولا يُعدّل يدويًا.
 Trip Fulfilment Over Time,تنفيذ الرحلات بمرور الوقت
-Trip Fulfilment Rate,معدل تنفيذ الرحلات
 Trip not found or not permitted.,الرحلة غير موجودة أو غير مسموح بالوصول إليها.
 Trip not found.,الرحلة غير موجودة.
 Trip Purpose,غرض الرحلة
@@ -4531,7 +4501,7 @@ Wednesday,الأربعاء
 Weekly,أسبوعي
 Weekly Custody Digest,ملخص العهدة الأسبوعي
 Weekly custody summary for your building(s):,ملخص العهدة الأسبوعي لمبانيك:
-"Weekly on-site safety field inspection. On submit, each actionable finding (one with an Issue Type and Room, not yet resolved) automatically spawns a Maintenance Request, surfaced in the Generated Maintenance Requests table. (Deprecated: superseded by Safety Round + the Safety Task Compliance Summary report.)",تفتيش سلامة ميداني أسبوعي في الموقع. عند الاعتماد تنشئ كل ملاحظة قابلة للتنفيذ (لها نوع عطل وغرفة ولم تُعالج بعد) طلب صيانة آلياً، ويظهر في جدول طلبات الصيانة المولّدة. (متوقف: حل محله جولة السلامة وتقرير ملخص الالتزام بمهام السلامة.)
+"Weekly on-site safety field inspection. On submit, each actionable finding (one with an Issue Type and Room, not yet resolved) automatically spawns a Maintenance Request, surfaced in the Generated Maintenance Requests table. (Deprecated: superseded by Safety Round + the Safety Open Findings report.)",تفتيش سلامة ميداني أسبوعي في الموقع. عند الاعتماد تنشئ كل ملاحظة قابلة للتنفيذ (لها نوع عطل وغرفة ولم تُعالج بعد) طلب صيانة آلياً، ويظهر في جدول طلبات الصيانة المولّدة. (متوقف: حل محله جولة السلامة وتقرير ملاحظات السلامة المفتوحة.)
 What do you need help with?,ما الذي تحتاج المساعدة فيه؟
 What happened?,ماذا حدث؟
 WhatsApp,واتساب
@@ -4602,7 +4572,6 @@ Worker {0} is not on this trip's manifest.,العامل {0} غير مدرج في
 Workers,العمال
 workers,عمال
 Workers are expected to arrive at this building today — prepare beds and custody,من المتوقع وصول عمال إلى هذا المبنى اليوم — جهّز الأسرّة والعهدة
-Workers Moved,العمالة المنقولة
 Workers must be a JSON list of worker IDs.,يجب أن تكون بيانات العمال قائمة من معرّفات العمال.
 Workers Requests by Status,طلبات العمالة حسب الحالة
 Workers Requests Open,طلبات العمالة المفتوحة

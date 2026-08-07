@@ -1,6 +1,6 @@
 # Copyright (c) 2026, AFMCO and contributors
 import frappe
-from frappe.utils import flt, today
+from frappe.utils import add_days, flt, today
 from frappe.query_builder.functions import Coalesce, Count
 from pypika.functions import NullIf
 from apex.habitat.permissions import _building_condition, report_building_scope
@@ -158,3 +158,42 @@ def get_top_custody_holders_by_value(limit: int = 10) -> list[dict]:
         as_dict=True,
     )
     return rows or []
+
+
+@frappe.whitelist()
+def get_cleaning_compliance_today(filters=None):
+    frappe.has_permission("Cleaning Log", "read", throw=True)
+    log_filters = {"cleaning_date": today(), "docstatus": ["<", 2]}
+    restrict, allowed = report_building_scope(frappe.session.user)
+    if restrict:
+        if not allowed:
+            return {"value": 100.0, "fieldtype": "Percent", "precision": 1}
+        log_filters["building"] = ["in", allowed]
+    logs = frappe.get_all("Cleaning Log", filters=log_filters, pluck="name")
+    if not logs:
+        return {"value": 100.0, "fieldtype": "Percent", "precision": 1}
+    child_filters = {"parenttype": "Cleaning Log", "parent": ["in", logs]}
+    total = frappe.db.count("Cleaning Log Room Detail", child_filters)
+    if not total:
+        return {"value": 100.0, "fieldtype": "Percent", "precision": 1}
+    cleaned = frappe.db.count("Cleaning Log Room Detail", {**child_filters, "cleaned": 1})
+    return {"value": round(cleaned / total * 100, 1), "fieldtype": "Percent", "precision": 1}
+
+
+@frappe.whitelist()
+def get_safety_tasks_done_week(filters=None):
+    frappe.has_permission("Safety Task Execution", "read", throw=True)
+    query_filters = {"docstatus": 1, "execution_date": [">=", add_days(today(), -7)]}
+    restrict, allowed = report_building_scope(frappe.session.user)
+    if restrict:
+        if not allowed:
+            return {"value": 100.0, "fieldtype": "Percent", "precision": 1}
+        query_filters["building"] = ["in", allowed]
+    total = frappe.db.count("Safety Task Execution", query_filters)
+    if not total:
+        return {"value": 100.0, "fieldtype": "Percent", "precision": 1}
+    attention = frappe.db.count(
+        "Safety Task Execution",
+        {**query_filters, "execution_status": ["in", ["Poor", "Not Done"]]},
+    )
+    return {"value": round((total - attention) / total * 100, 1), "fieldtype": "Percent", "precision": 1}

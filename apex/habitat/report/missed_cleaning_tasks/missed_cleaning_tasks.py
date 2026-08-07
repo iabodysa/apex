@@ -2,10 +2,10 @@
 
 """Missed Cleaning Tasks — cleaning logs marked missed or needing rework.
 
-Reads the Cleaning Log directly, unlike Daily Cleaning Compliance, which reads the
-immutable Cleaning Compliance Ledger that only exists once a log is SUBMITTED. The two are
-not in conflict and neither filter is wrong: they answer from different sides of the
-submit step, so a deployment that never submits a log sees rows here and nothing there.
+Reads the Cleaning Log directly, unlike the Cleaning Compliance Today card, whose ledger
+sibling (the immutable Cleaning Compliance Ledger) only gains rows once a log is
+SUBMITTED. The owner ruled 2026-08-07 that submitting daily logs is not required, so
+anything answering from the ledger side alone would stay empty on such a deployment.
 
 A CANCELLED log is excluded from both queries. It had no docstatus filter at all, so a log
 someone cancelled would still be reported as a missed cleaning — sending a supervisor after

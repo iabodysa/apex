@@ -12,7 +12,7 @@ mutable Cleaning Log Room Detail child rows. So a historical cleaned-room count
 does not change when the source log's child rows are later edited; a cancel
 posts a negating reversal (flagged is_cancelled) that nets the log out of the
 live count. The status/supervisor/photos columns are review-state and stay
-best-effort from the live log, mirroring daily_cleaning_compliance.
+best-effort from the live log.
 
 Gap detection: for every (date, building) combination in the requested
 [from_date..to_date] window where no Cleaning Log exists (even a draft),

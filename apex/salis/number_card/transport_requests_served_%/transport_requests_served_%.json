@@ -1,0 +1,11 @@
+{
+ "doctype": "Number Card",
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Transport Requests Served %",
+ "method": "apex.salis.api.transport_metrics.get_transport_requests_served_pct",
+ "module": "Salis",
+ "name": "Transport Requests Served %",
+ "type": "Custom",
+ "modified": "2026-08-07 18:08:00.000000"
+}

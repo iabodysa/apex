@@ -1,0 +1,11 @@
+{
+ "doctype": "Number Card",
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Cleaning Compliance Today %",
+ "method": "apex.habitat.api.dashboard.get_cleaning_compliance_today",
+ "module": "Habitat",
+ "name": "Cleaning Compliance Today %",
+ "type": "Custom",
+ "modified": "2026-08-07 18:08:00.000000"
+}
