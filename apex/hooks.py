@@ -476,7 +476,6 @@ after_install = [
     "apex.apex_core.setup.seeders.salis_portal_theme_seed.seed_salis_portal_theme",
     "apex.apex_core.setup.seeders.habitat_core_link_perms_seed.seed_habitat_core_link_perms",
     "apex.apex_core.setup.seeders.module_profile_seed.seed_module_profiles",
-    "apex.patches.v1_x.reorder_root_workspace_creation.execute",
 ]
 
 after_sync = []
@@ -494,7 +493,6 @@ after_migrate = [
     "apex.apex_core.setup.seeders.module_profile_seed.seed_module_profiles",
     "apex.setup.create_roles",
     "apex.setup.create_role_profiles",
-    "apex.patches.v1_x.reorder_root_workspace_creation.execute",
 ]
 
 get_changelog_feed = "apex.apex_core.utils.changelog.get_changelog_feed"

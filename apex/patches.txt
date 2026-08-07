@@ -5,11 +5,6 @@
 # from the DocType JSON and its data from the after_install seeders in
 # apex_core/setup/seeders/.
 #
-# One module stays on disk, deliberately unregistered:
-#   v1_x.reorder_root_workspace_creation — wired into after_install AND after_migrate,
-#     so it runs every migrate rather than once; registering it here would be a second
-#     path to the same call.
-#
 # BEFORE ADDING ONE, ask what a fresh install would do without it. If the answer is
 # "nothing, the JSON or a seeder already covers it", it is not a patch.
 
