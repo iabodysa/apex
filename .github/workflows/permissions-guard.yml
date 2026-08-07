@@ -45,8 +45,20 @@ on:
 # the guard now counts the named calls too and the baseline is the honest total.
 # It falls only when a call site stops bypassing permissions, not when it is renamed.
 
+# 131 -> 132 on 2026-08-08 for apex_core/utils/role_assignment.clear_assignment.
+# Review: it TRADED a worse write for this one. The line it replaced was
+# frappe.db.set_value("ToDo", todo, "status", "Closed"), which needs no bypass because it
+# writes the column and nothing else — and that was the defect: ToDo.on_update never
+# fired, the parent's _assign was never rewritten, and the assignee stayed on the desk
+# sidebar of a settled document. Proven both ways on ci.localhost: the old line left
+# _assign as ["Administrator"] with zero open ToDos; the framework's own
+# assign_to.close_all_assignments leaves it empty. The caller is a scheduled job closing a
+# queue it raised itself, never a user action, and the flag is the framework's own
+# parameter on that function. A count that rises when a hook-skipping write becomes a
+# correct one is the count doing its job, not an argument against the change.
+
 env:
-  BASELINE: 131
+  BASELINE: 132
   BYPASS_RE: 'ignore_permissions["'']?[[:space:]]*[=:][[:space:]]*(True|1)'
   NAMED_RE: '(system_insert|system_save|system_delete)[[:space:]]*\('
   SANCTIONED: 'apex/apex_core/utils/system_write.py'

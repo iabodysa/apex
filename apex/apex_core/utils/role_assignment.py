@@ -15,6 +15,7 @@ A document is queued while any condition holds and settled only when none does.
 from __future__ import annotations
 
 import frappe
+from frappe.desk.form.assign_to import close_all_assignments
 from frappe.utils.user import get_users_with_role
 
 ASSIGNMENT_STATUSES = ("Open", "Overdue")
@@ -71,9 +72,12 @@ def open_assignments(doctype: str) -> list[str]:
 def clear_assignment(doctype: str, name: str) -> int:
     """Close every open ToDo on one document. Returns how many were closed.
 
-    ``assign_to.remove`` needs the assignee and raises when there is none, so the rows
-    are closed directly: the job is settling a queue it raised, not reversing one
-    person's assignment.
+    ``assign_to.remove`` needs the assignee and raises when there is none, so the whole
+    queue is settled at once: the job is closing a queue it raised, not reversing one
+    person's assignment. That is exactly what ``close_all_assignments`` does, and it
+    routes through ``ToDo.save()``, so ``on_update`` fires and rewrites the parent's
+    ``_assign``. Writing the status column directly left the assignee on the document's
+    desk sidebar after the queue was settled, with nothing to show it was stale.
     """
     todos = frappe.get_all(
         "ToDo",
@@ -84,8 +88,8 @@ def clear_assignment(doctype: str, name: str) -> int:
         },
         pluck="name",
     )
-    for todo in todos:
-        frappe.db.set_value("ToDo", todo, "status", "Closed")
+    if todos:
+        close_all_assignments(doctype, name, ignore_permissions=True)
     return len(todos)
 
 
