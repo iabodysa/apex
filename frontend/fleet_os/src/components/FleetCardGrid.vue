@@ -72,8 +72,8 @@ defineProps([
             <div v-if="v.vehicle_status === 'workshop'" class="vc-workshop-stripe"><Icon name="wrench" :size="13" /> {{ v.workshop_notes || t("card.inMaintenance") }}</div>
             <div v-if="v.vehicle_status === 'stolen'" class="vc-stolen-stripe"><Icon name="shield-alert" :size="13" /> {{ t("card.stolen") }} <template v-if="v.stolen_info && v.stolen_info.date">· <bdi>{{ v.stolen_info.date }}</bdi></template></div>
             <div v-if="(v.damages || []).length || (v.accidents || []).length" style="padding:3px 14px;display:flex;gap:6px;border-top:1px solid var(--b1)">
-              <span v-if="(v.damages || []).length" style="font-size:10px;padding:2px 7px;background:var(--red-d);color:var(--red-l);border-radius:6px;border:1px solid rgba(220,38,38,.2);display:inline-flex;align-items:center;gap:3px"><Icon name="hammer" :size="11" /> {{ t("card.damageCount", { n: v.damages.length }) }}</span>
-              <span v-if="(v.accidents || []).length" style="font-size:10px;padding:2px 7px;background:var(--amber-d);color:var(--amber-l);border-radius:6px;border:1px solid rgba(217,119,6,.2);display:inline-flex;align-items:center;gap:3px"><Icon name="crash" :size="11" /> {{ t("card.accidentCount", { n: v.accidents.length }) }}</span>
+              <span v-if="(v.damages || []).length" style="font-size:10px;padding:2px 7px;background:var(--red-d);color:var(--red-l);border-radius:6px;border:1px solid color-mix(in srgb,var(--c-danger) 20%,transparent);display:inline-flex;align-items:center;gap:3px"><Icon name="hammer" :size="11" /> {{ t("card.damageCount", { n: v.damages.length }) }}</span>
+              <span v-if="(v.accidents || []).length" style="font-size:10px;padding:2px 7px;background:var(--amber-d);color:var(--amber-l);border-radius:6px;border:1px solid color-mix(in srgb,var(--c-warning) 20%,transparent);display:inline-flex;align-items:center;gap:3px"><Icon name="crash" :size="11" /> {{ t("card.accidentCount", { n: v.accidents.length }) }}</span>
             </div>
             <!-- Demoted context: vehicle type + office/project/area below the lead -->
             <div class="vc-meta vc-meta-demoted">
@@ -106,8 +106,8 @@ defineProps([
                 <button class="ac ac-free" :disabled="isBusy(v.plate)" :title="t('card.setAvailableTitle')" @click="setAvailable(v.plate)"><span class="ac-ico"><Icon name="circle-dot" :size="14" /></span>{{ t("card.available") }}</button>
                 <button class="ac ac-workshop" :disabled="isBusy(v.plate)" :title="t('card.sendWorkshopTitle')" @click="sendWorkshop(v.plate)"><span class="ac-ico"><Icon name="wrench" :size="14" /></span>{{ t("card.workshop") }}</button>
               </template>
-              <button v-if="v.vehicle_status === 'stolen'" class="ac" style="border-color:rgba(124,58,237,.25);color:var(--purple-l)" :disabled="isBusy(v.plate)" :title="t('card.recoverTitle')" @click="recoverVehicle(v.plate)"><span class="ac-ico"><Icon name="lock-open" :size="14" /></span>{{ t("card.recover") }}</button>
-              <button v-else-if="v.vehicle_status === 'available'" class="ac" style="border-color:rgba(220,38,38,.25);color:var(--red-l)" :disabled="isBusy(v.plate)" :title="t('card.markStolenTitle')" @click="markStolen(v.plate)"><span class="ac-ico"><Icon name="shield-alert" :size="14" /></span>{{ t("card.markStolen") }}</button>
+              <button v-if="v.vehicle_status === 'stolen'" class="ac" style="border-color:color-mix(in srgb,var(--purple) 25%,transparent);color:var(--purple-l)" :disabled="isBusy(v.plate)" :title="t('card.recoverTitle')" @click="recoverVehicle(v.plate)"><span class="ac-ico"><Icon name="lock-open" :size="14" /></span>{{ t("card.recover") }}</button>
+              <button v-else-if="v.vehicle_status === 'available'" class="ac" style="border-color:color-mix(in srgb,var(--c-danger) 25%,transparent);color:var(--red-l)" :disabled="isBusy(v.plate)" :title="t('card.markStolenTitle')" @click="markStolen(v.plate)"><span class="ac-ico"><Icon name="shield-alert" :size="14" /></span>{{ t("card.markStolen") }}</button>
               <button class="ac ac-hist" :title="t('card.historyTitle')" @click="openPanel(v.plate, 5)"><span class="ac-ico"><Icon name="clipboard-list" :size="14" /></span><span class="hist-n">{{ v.history.length }}</span></button>
             </div>
           </div>

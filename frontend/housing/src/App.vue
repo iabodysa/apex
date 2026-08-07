@@ -142,8 +142,10 @@ useDocumentLanguage(lang, dir);
   color: var(--c-header-ink);
   background: color-mix(in srgb, var(--c-header-ink) 14%, transparent);
 }
-.head-actions :deep(.head-btn:hover) {
-  background: color-mix(in srgb, var(--c-header-ink) 24%, transparent);
+@media (hover: hover) {
+  .head-actions :deep(.head-btn:hover) {
+    background: color-mix(in srgb, var(--c-header-ink) 24%, transparent);
+  }
 }
 
 .head-progress :deep(span) {

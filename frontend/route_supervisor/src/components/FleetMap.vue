@@ -261,6 +261,7 @@ onUnmounted(() => {
 }
 .fm-select {
   min-width: 150px;
+  min-height: var(--tap-min);
   padding: 7px 10px;
   border-radius: 10px;
   border: 1px solid var(--c-border);
@@ -325,7 +326,7 @@ onUnmounted(() => {
   background: var(--c-muted);
 }
 .fm-legend li.stale .fm-dot {
-  background: var(--c-warning, #b8860b);
+  background: var(--c-warning);
 }
 .fm-plate {
   font-variant-numeric: tabular-nums;

@@ -117,7 +117,7 @@ defineProps([
               <button class="btn btn-green" style="flex:1" @click="openReassignForm"><Icon name="rotate-cw" :size="15" /> {{ t("driverTab.reassignNew") }}</button>
             </div>
             <!-- Stop sub-form -->
-            <div v-if="subForm === 'stop'" style="margin-top:14px;border:1px solid rgba(244,63,94,.2);border-radius:var(--r2);padding:14px;background:var(--red-d)">
+            <div v-if="subForm === 'stop'" style="margin-top:14px;border:1px solid color-mix(in srgb,var(--c-danger) 20%,transparent);border-radius:var(--r2);padding:14px;background:var(--red-d)">
               <div class="psect-title" style="color:var(--red-l)"><Icon name="circle-pause" :size="14" /> {{ t("stopForm.title") }}</div>
               <div class="form-grid" style="margin-bottom:10px">
                 <div class="ff"><div class="fl">{{ t("stopForm.deliverDate") }} *</div><input class="fi" type="date" v-model="sf.date" /></div>
@@ -149,7 +149,7 @@ defineProps([
               </div>
             </div>
             <!-- Reassign sub-form -->
-            <div v-if="subForm === 'reassign'" style="margin-top:14px;border:1px solid rgba(0,201,122,.2);border-radius:var(--r2);padding:14px;background:var(--green-d)">
+            <div v-if="subForm === 'reassign'" style="margin-top:14px;border:1px solid color-mix(in srgb,var(--c-success) 20%,transparent);border-radius:var(--r2);padding:14px;background:var(--green-d)">
               <div class="psect-title" style="color:var(--green-l)"><Icon name="rotate-cw" :size="14" /> {{ t("reassignForm.title") }}</div>
               <div class="alert alert-amber" style="margin-bottom:12px"><Icon name="triangle-alert" :size="15" /> {{ t("reassignForm.autoLockHint", { name: panel.vehicle.current_driver.name_ar || panel.vehicle.current_driver.name_en || t("common.none") }) }}</div>
               <div class="psect-title" style="color:var(--green-l);margin-top:12px">{{ t("reassignForm.newDriverData") }}</div>
@@ -254,7 +254,7 @@ defineProps([
           <template v-if="panel.vehicle.vehicle_status === 'available' || panel.vehicle.vehicle_status === 'stopped'">
             <div class="psect-title" style="color:var(--red-l)"><Icon name="shield-alert" :size="14" /> {{ t("statusTab.reportTheft") }}</div>
             <button class="btn btn-red" style="width:100%;justify-content:center" @click="openStolenForm"><Icon name="shield-alert" :size="15" /> {{ t("statusTab.reportTheftBtn") }}</button>
-            <div v-if="subForm === 'stolen'" style="border:1px solid rgba(124,58,237,.2);border-radius:var(--r2);padding:14px;background:var(--purple-d);margin-top:10px">
+            <div v-if="subForm === 'stolen'" style="border:1px solid color-mix(in srgb,var(--purple) 20%,transparent);border-radius:var(--r2);padding:14px;background:var(--purple-d);margin-top:10px">
               <div class="psect-title" style="color:var(--purple-l)"><Icon name="shield-alert" :size="14" /> {{ t("stolenForm.title") }}</div>
               <div class="form-grid">
                 <div class="ff"><div class="fl">{{ t("stolenForm.theftDate") }} *</div><input class="fi" type="date" v-model="stf.date" /></div>

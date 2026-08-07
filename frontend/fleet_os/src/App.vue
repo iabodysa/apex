@@ -312,7 +312,7 @@ onUnmounted(() => {
 
   <AlertDrawer
     :alertsOpen="alertsOpen" :alertsState="alertsState" :alerts="alerts" :alertTotal="alertTotal"
-    :closeAlerts="closeAlerts" :sevClass="sevClass" :sevLabel="sevLabel"
+    :closeAlerts="closeAlerts" :loadAlerts="loadAlerts" :sevClass="sevClass" :sevLabel="sevLabel"
     :alertVehicleOnBoard="alertVehicleOnBoard" :openAlertTarget="openAlertTarget" :t="t"
   />
 

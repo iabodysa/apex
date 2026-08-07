@@ -63,7 +63,7 @@ button { font-family: inherit; cursor: pointer; }
 .work { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; align-items: start; }
 .back-btn {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border-radius: 10px;
+  width: var(--tap-min); height: var(--tap-min); border-radius: 10px;
   border: 1px solid var(--c-border); background: var(--c-surface);
   color: var(--c-ink); cursor: pointer; flex: none;
 }

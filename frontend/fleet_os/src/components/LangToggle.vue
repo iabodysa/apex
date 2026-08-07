@@ -66,12 +66,27 @@ const { t, lang, setLang } = useI18n();
   background: transparent;
   border: none;
   cursor: pointer;
+  position: relative;
   transition:
     background 0.15s ease,
     color 0.15s ease;
 }
+.lang-opt::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: max(100%, var(--tap-min));
+  height: max(100%, var(--tap-min));
+}
+@media (hover: hover) {
+  .lang-opt:hover:not(.lang-opt-active) {
+    color: var(--t1);
+  }
+}
 .lang-opt-active {
   background: var(--blue);
-  color: #fff;
+  color: var(--c-primary-ink);
 }
 </style>

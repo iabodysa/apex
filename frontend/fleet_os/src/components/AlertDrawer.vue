@@ -3,7 +3,7 @@
 <script setup>
 import Icon from "./Icon.vue";
 defineProps([
-  "alertsOpen", "alertsState", "alerts", "alertTotal", "closeAlerts",
+  "alertsOpen", "alertsState", "alerts", "alertTotal", "closeAlerts", "loadAlerts",
   "sevClass", "sevLabel", "alertVehicleOnBoard", "openAlertTarget", "t",
 ]);
 </script>
@@ -26,7 +26,10 @@ defineProps([
       </div>
       <div class="panel-body">
         <div v-if="alertsState === 'loading'" class="ad-empty">{{ t("alerts.title") }}…</div>
-        <div v-else-if="alertsState === 'error'" class="alert alert-red">{{ t("alerts.loadError") }}</div>
+        <div v-else-if="alertsState === 'error'" class="alert alert-red" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          {{ t("alerts.loadError") }}
+          <button class="btn btn-red" style="margin-inline-start:auto" @click="loadAlerts">{{ t("common.retry") }}</button>
+        </div>
         <div v-else-if="!alerts.length" class="ad-empty">{{ t("alerts.empty") }}</div>
         <button v-for="a in alerts" v-else :key="a.name" class="ad-row" :class="sevClass(a.severity)" @click="openAlertTarget(a)">
           <div class="ad-row-top">

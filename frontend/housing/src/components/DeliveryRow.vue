@@ -70,8 +70,10 @@ const statusLabel = computed(() =>
     border-color 0.15s ease,
     background 0.15s ease;
 }
-.row:hover {
-  border-color: var(--c-border-strong);
+@media (hover: hover) {
+  .row:hover {
+    border-color: var(--c-border-strong);
+  }
 }
 .row:focus-visible {
   outline: 3px solid var(--c-focus);
