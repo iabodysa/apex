@@ -53,6 +53,10 @@ async function loadTrips() {
   trips.value = (await call(`${API}.get_my_recent_trips`)) || [];
 }
 
+export function fetchFuelRequests({ days = 90, limit = 30 } = {}) {
+  return call(`${API}.get_my_fuel_requests`, { args: { days, limit } }).then((rows) => rows || []);
+}
+
 export function fetchTrips({ days = 90, limit = 100 } = {}) {
   return call(`${API}.get_my_recent_trips`, { args: { days, limit } }).then((rows) => rows || []);
 }

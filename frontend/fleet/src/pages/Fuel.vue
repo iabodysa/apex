@@ -1,10 +1,12 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import Icon from "../components/Icon.vue";
+import EmptyState from "@shared/components/EmptyState.vue";
 import { useI18n } from "../i18n";
 import { useToast } from "@shared/useToast.js";
-import { useEmployee } from "../useEmployee.js";
+import { useEmployee, fetchFuelRequests } from "../useEmployee.js";
+import { fuelMetaFor } from "../fuelMeta.js";
 
 const { t } = useI18n();
 const { toast, showToast } = useToast();
@@ -12,6 +14,23 @@ const { fuelGrades, stations, form, submitting, loading, loadError, reload, subm
   useEmployee();
 
 const formError = ref("");
+
+const history = ref([]);
+const historyLoading = ref(true);
+const historyError = ref(false);
+
+async function loadHistory() {
+  historyLoading.value = true;
+  historyError.value = false;
+  try {
+    history.value = await fetchFuelRequests();
+  } catch (e) {
+    historyError.value = true;
+  } finally {
+    historyLoading.value = false;
+  }
+}
+onMounted(loadHistory);
 
 async function onSubmit() {
   if (submitting.value) return;
@@ -92,6 +111,35 @@ async function onSubmit() {
           {{ submitting ? t("emp.fuel.sending") : t("emp.fuel.submit") }}
         </button>
       </form>
+    </section>
+
+    <section class="emp-card reveal d2">
+      <h3 class="emp-card-title">{{ t("emp.fuel.history") }}</h3>
+      <p v-if="historyLoading" class="emp-empty">{{ t("emp.loading") }}</p>
+      <div v-else-if="historyError" class="emp-fail">
+        <p>{{ t("emp.loadError") }}</p>
+        <button type="button" class="emp-btn emp-btn-ghost emp-retry" @click="loadHistory">
+          <Icon name="rotate-cw" :size="15" />{{ t("common.retry") }}
+        </button>
+      </div>
+      <EmptyState v-else-if="!history.length" :title="t('emp.fuel.historyEmpty')">
+        <template #icon><Icon name="clipboard-list" :size="20" /></template>
+      </EmptyState>
+      <ul v-else class="emp-trips">
+        <li v-for="row in history" :key="row.name" class="emp-trip">
+          <span class="emp-pill" :class="fuelMetaFor(row.statusKey).cls">
+            <span class="dot"></span>{{ t(fuelMetaFor(row.statusKey).key) }}
+          </span>
+          <div class="emp-route">
+            <b>{{ row.litres }} {{ t("emp.fuel.litresUnit") }}</b>
+            <span>
+              <template v-if="row.date">{{ row.date }}</template>
+              <template v-if="row.station"> · {{ row.station }}</template>
+              <template v-if="row.vehicle"> · {{ row.vehicle }}</template>
+            </span>
+          </div>
+        </li>
+      </ul>
     </section>
   </div>
 
