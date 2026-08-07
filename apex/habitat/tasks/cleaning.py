@@ -69,9 +69,11 @@ def daily_cleaning_log_generator() -> None:
         for building in buildings:
             if building in already:
                 continue
+            # A building with no Room rows still gets a log. It used to be skipped, and
+            # the second generator picked it up instead — which is how the same building
+            # could get either a prefilled log or an empty one depending on which job the
+            # scheduler happened to run first.
             rooms = rooms_by_building.get(building) or []
-            if not rooms:
-                continue
 
             frappe.db.savepoint(_CLEANING_SAVEPOINT)
             try:
@@ -98,56 +100,23 @@ def daily_cleaning_log_generator() -> None:
 
 
 def auto_create_cleaning_logs() -> None:
-    """Scheduled daily — create one draft Cleaning Log per active building that
-    has a Housing Supervisor assigned, skipping buildings already logged today.
+    """The spec name for the daily cleaning log. One implementation, not two.
 
-    This is the spec-named entry point. The heavier variant that also
-    pre-populates room_details rows is ``daily_cleaning_log_generator``
-    (registered separately). This function targets buildings that have an
-    assigned ``responsible_supervisor`` and creates a minimal log so
-    the supervisor finds a ready record each morning.
+    This used to be a SECOND daily job with its own building query and its own insert,
+    and that was the defect. Both jobs keyed on (building, cleaning_date) and each
+    skipped what the other had already written, but they wrote different things: this
+    one created an empty log, ``daily_cleaning_log_generator`` created one with
+    ``room_details`` prefilled from the building's rooms. Which of the two reached a
+    given building first was decided by ``frappe/utils/scheduler.py:118``, which calls
+    ``random.shuffle`` on the job list — so a supervisor opened a prefilled log some
+    mornings and an empty one others, for the same building, with nothing changed.
 
-    Guard: ``frappe.db.exists("Cleaning Log", {"building": bld, "cleaning_date":
-    today()})`` — one log per (building, cleaning_date), non-cancelled.
+    Their target sets also differed: this one took Active buildings with a
+    ``responsible_supervisor``, the other took Active buildings with at least one Room.
+    The generator now covers the union — every Active building, prefilled where there
+    are rooms to prefill — so delegating loses neither set.
+
+    Kept as a name rather than deleted because it is the name the spec uses; it is no
+    longer registered in ``hooks.py``, so the work runs once per day.
     """
-    from frappe.utils import today
-
-    cleaning_date = today()
-    logger = frappe.logger()
-
-    buildings = frappe.get_all(
-        "Building",
-        filters={
-            "status": "Active",
-            "responsible_supervisor": ["is", "set"],
-        },
-        fields=["name", "responsible_supervisor"],
-    )
-
-    created = 0
-    for bld in buildings:
-        if frappe.db.exists(
-            "Cleaning Log",
-            {"building": bld.name, "cleaning_date": cleaning_date, "docstatus": ["!=", 2]},
-        ):
-            continue
-
-        frappe.db.savepoint(_CLEANING_SAVEPOINT)
-        try:
-            log = frappe.get_doc({
-                "doctype": "Cleaning Log",
-                "building": bld.name,
-                "cleaning_date": cleaning_date,
-            })
-            log.insert(ignore_permissions=True)  # audit-ok — scheduler-run daily cleaning record
-        except Exception:
-            frappe.db.rollback(save_point=_CLEANING_SAVEPOINT)
-            frappe.log_error(
-                message=frappe.get_traceback(),
-                title=f"auto_create_cleaning_logs: insert failed for {bld.name}"[:140],
-            )
-        else:
-            frappe.db.release_savepoint(_CLEANING_SAVEPOINT)
-            created += 1
-
-    logger.info(f"auto_create_cleaning_logs: created {created} cleaning log(s) for {cleaning_date}.")
+    daily_cleaning_log_generator()

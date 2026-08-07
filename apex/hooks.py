@@ -272,7 +272,6 @@ scheduler_events = {
         "apex.habitat.tasks.scheduled_tasks.daily_scheduled_task_instance_generator",
         "apex.habitat.tasks.occupancy.daily_occupancy_snapshot",
         "apex.habitat.tasks.cleaning.daily_cleaning_log_generator",
-        "apex.habitat.tasks.cleaning.auto_create_cleaning_logs",
         "apex.habitat.tasks.safety.daily_safety_task_compliance_scan",
         "apex.habitat.tasks.safety.audit_remediation_deadline_watch",
         "apex.habitat.temporary_worker_engine.link_temporary_workers",

@@ -297,7 +297,13 @@ def reconcile_operations_alerts() -> None:
                         clear, reason = True, "no fuel request remains overdue for the driver"
 
                 elif atype == "Supervisor Delay":
-                    if not _driver_active(a.driver):
+                    # `a.driver` must be present before the driver can be the reason.
+                    # _driver_active returns False for None, so an alert carrying NO
+                    # driver used to take this branch and close itself citing a driver
+                    # it never had. The zero-rounds and coverage-gate alerts raised by
+                    # habitat/tasks/safety.py carry no driver, so a SAFETY alert cleared
+                    # itself the next day whether or not the building had been walked.
+                    if a.driver and not _driver_active(a.driver):
                         clear, reason = True, "driver is no longer Active"
                     elif a.driver:
                         raised_day = str(a.raised_on)[:10] if a.raised_on else today_str

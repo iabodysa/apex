@@ -24,11 +24,11 @@ idempotency key.
 
 | Cadence | Apex Core | Habitat | Salis | Logistay | Total |
 |---------|-----------|---------|-------|----------|-------|
-| Daily | 1 | 13 | 11 | 1 | 26 |
+| Daily | 1 | 12 | 11 | 1 | 25 |
 | Weekly | 0 | 3 | 2 | 0 | 5 |
 | Monthly | 1 | 0 | 2 | 0 | 3 |
 | Cron | 1 | 0 | 1 | 0 | 2 |
-| **Total** | **3** | **16** | **16** | **1** | **36** |
+| **Total** | **3** | **15** | **16** | **1** | **35** |
 
 ## Daily jobs
 
@@ -43,7 +43,6 @@ idempotency key.
 | `apex.habitat.tasks.scheduled_tasks.daily_scheduled_task_instance_generator` | Create | Creates **Scheduled Task Instance** records from active assignments and active template items. Daily, weekly, monthly, quarterly, and annual items use their period start as the due date. | Existing non-cancelled assignment, task, and due-date combinations are skipped. |
 | `apex.habitat.tasks.occupancy.daily_occupancy_snapshot` | Create | Writes one daily **Occupancy Snapshot** per building, including occupants, capacity, room status counts, and unused-capacity cost. | Skips buildings with no rooms and an existing building/date snapshot. |
 | `apex.habitat.tasks.cleaning.daily_cleaning_log_generator` | Create | Creates today's draft **Cleaning Log** for each active building with rooms and pre-populates its room rows. | Skips an existing non-cancelled building/date log. It never submits the log. |
-| `apex.habitat.tasks.cleaning.auto_create_cleaning_logs` | Create | Creates a minimal draft Cleaning Log for an active building with a responsible supervisor when the first cleaning pass did not create one. | Requires `responsible_supervisor` and no existing non-cancelled building/date log. Because it runs after the populated generator, it normally acts only as a fallback. |
 | `apex.habitat.tasks.safety.daily_safety_task_compliance_scan` | Update, Create, Notify | Marks due **Scheduled Task Instance** records Overdue. High and Critical items also create an Operations Alert and notify Safety Officer users. A second pass alerts on active buildings with no submitted **Safety Round** in the trailing seven-day window and notifies the facility supervisor. | The overdue cutoff uses `safety_overdue_grace_days`. Timeline comments require operational notifications. Alerts are deduplicated for the day. |
 | `apex.habitat.tasks.safety.audit_remediation_deadline_watch` | Update, Notify | Marks submitted **Audit Remediation Plan** records Overdue after their deadline and notifies the internal owner and Operations Director users. | Closed by Client and already Overdue records are excluded. The timeline note requires operational notifications. |
 | `apex.habitat.temporary_worker_engine.link_temporary_workers` | Update, Create, Notify | Matches an active **Temporary Worker** to an active Employee by passport, repoints supported housing and custody party links, backdates missed accommodation-cost rows, and marks the worker Linked. Unmatched workers past their window are marked Expired and HR users are notified in-app. | A link requires a matching passport. Expiry notification uses HR Manager users, falling back to System Manager users. |
