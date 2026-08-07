@@ -90,18 +90,20 @@ def daily_safety_task_compliance_scan() -> None:
     Habitat Settings Single may store 0). With zero grace a task is overdue ON its due
     day (``due_date <= cutoff``), not the day after. On flipping an instance to Overdue, the effective
     priority is resolved through its template's Safety Task Catalog task: a High or
-    Critical task additionally raises an idempotent Operations Alert AND posts a system
-    Notification to the Safety Officer, so urgent safety lapses surface immediately.
+    Critical task is additionally ASSIGNED to every Safety Officer — a native ToDo on the
+    instance itself, in the desk queue that role already watches — with a system
+    Notification beside it, so urgent safety lapses surface immediately.
 
     Second pass: every ACTIVE Building (``status == "Active"``) with ZERO
     submitted Safety Rounds of ANY cadence dated within the trailing
-    ``ZERO_ROUNDS_WINDOW_DAYS`` raises an idempotent Operations Alert, notifies the
-    Safety Officer, posts the reminder to the building timeline, and alerts the
-    building's own Responsible Facility Supervisor. This is broader than
+    ``ZERO_ROUNDS_WINDOW_DAYS`` is assigned to the Safety Officer, posts the reminder to
+    the building timeline, and alerts the building's own Responsible Facility
+    Supervisor. This is broader than
     ``weekly_safety_coverage_gate`` (which only
     checks for a *Weekly*-cadence round in the current ISO week): it catches buildings
-    with no safety activity whatsoever. The alert carries a ``zero-rounds::<building>``
-    dedupe token so daily reruns stay idempotent.
+    with no safety activity whatsoever. Both passes end by reconciling the Building queue
+    against ``buildings_needing_safety_attention``, so a building that no longer fails
+    EITHER condition has its assignment CLOSED — the half an alert row never had.
 
     Per-row error isolation; paginated 500/batch.
     """
@@ -250,8 +252,9 @@ def weekly_safety_coverage_gate() -> None:
     ``value if not None else 1`` — the gate defaults ON, but a falsy stored value on
     the Single turns it off, per the Single new-field caveat). When the gate is ON,
     each ACTIVE Building (``status == "Active"``) with no submitted
-    Weekly-cadence Safety Round dated within the current ISO week raises an idempotent
-    Operations Alert and posts a system Notification to the Safety Officer. Per-row
+    Weekly-cadence Safety Round dated within the current ISO week is assigned to the
+    Safety Officer with a system Notification beside it, and a building covered later
+    has that assignment closed on the next run. Per-row
     error isolation.
 
     The week boundary comes from frappe, never from ``date.weekday()``: Python's
