@@ -1,0 +1,100 @@
+<style>
+  .ax-doc { font-family: Arial, sans-serif; color: #14332a; font-size: 12px; }
+  .ax-doc h1 { font-size: 18px; margin: 0; color: #14332a; }
+  .ax-sub { color: #4a5e55; font-size: 11px; margin-top: 2px; }
+  .ax-head { border-bottom: 3px solid #00844e; padding-bottom: 8px; margin-bottom: 12px;
+             display: flex; justify-content: space-between; align-items: flex-start; }
+  .ax-recipient { font-size: 11px; color: #14332a; background: #eef6f1;
+                  border: 1px solid #00844e; border-radius: 3px; padding: 4px 10px; }
+  .ax-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .ax-meta td { padding: 4px 8px; border: 1px solid #d9e4de; vertical-align: top; }
+  .ax-meta .ax-lbl { background: #f1f7f3; font-weight: bold; width: 22%; color: #14332a; }
+  .ax-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .ax-items th { background: #00844e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
+  .ax-items td { padding: 6px 8px; border: 1px solid #d9e4de; }
+  .ax-items tr:nth-child(even) td { background: #f6faf7; }
+  .ax-block { border: 1px solid #d9e4de; padding: 8px; margin-bottom: 12px; }
+  .ax-block .ax-blk-lbl { font-weight: bold; color: #00844e; margin-bottom: 4px; }
+  .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
+  .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
+  .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
+</style>
+
+<div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  <div class="ax-head">
+    <div>
+      <h1>{{ _("Housing Assignment") }}</h1>
+      <div class="ax-sub">{{ doc.name }} &bull; {{ doc.get_formatted("check_in_date") or "" }}</div>
+    </div>
+    <div class="ax-recipient">{{ _("Recipient") }}: {{ _("Resident") }}</div>
+  </div>
+
+  <table class="ax-meta">
+    <tr>
+      <td class="ax-lbl">{{ _("Resident Type") }}</td>
+      <td>{{ _(doc.party_type) if doc.party_type else "" }}</td>
+      <td class="ax-lbl">{{ _("Resident") }}</td>
+      <td>{{ doc.employee_name or doc.party or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ax-lbl">{{ _("Building") }}</td>
+      <td>{{ doc.building or "" }}</td>
+      <td class="ax-lbl">{{ _("Room") }}</td>
+      <td>{{ doc.room or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ax-lbl">{{ _("Bed") }}</td>
+      <td>{{ doc.bed or "" }}</td>
+      <td class="ax-lbl">{{ _("Assignment Type") }}</td>
+      <td>{{ _(doc.assignment_type) if doc.assignment_type else "" }}</td>
+    </tr>
+    <tr>
+      <td class="ax-lbl">{{ _("Stay Type") }}</td>
+      <td>{{ _(doc.stay_type) if doc.stay_type else "" }}</td>
+      <td class="ax-lbl">{{ _("Responsible Facility Supervisor") }}</td>
+      <td>{{ doc.responsible_supervisor or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ax-lbl">{{ _("Check-in Date") }}</td>
+      <td>{{ doc.get_formatted("check_in_date") or "" }}</td>
+      <td class="ax-lbl">{{ _("Expected Check-out Date") }}</td>
+      <td>{{ doc.get_formatted("expected_checkout_date") or "" }}</td>
+    </tr>
+  </table>
+
+  <div class="ax-blk-lbl">{{ _("Issued Custody Items") }}</div>
+
+  <table class="ax-items">
+    <thead>
+      <tr>
+        <th style="width:5%;">#</th>
+        <th>{{ _("Custody Article") }}</th>
+        <th style="width:14%;">{{ _("Quantity Issued") }}</th>
+        <th style="width:20%;">{{ _("Condition at Check-in") }}</th>
+        <th style="width:20%;">{{ _("Serial No.") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in doc.custody_items %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ row.article or "" }}</td>
+        <td>{{ row.quantity or "" }}</td>
+        <td>{{ _(row.condition_at_checkin) if row.condition_at_checkin else "" }}</td>
+        <td>{{ row.serial_no or "" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if doc.notes %}<div class="ax-block"><div class="ax-blk-lbl">{{ _("Notes") }}</div>{{ doc.notes }}</div>{% endif %}
+
+  <table class="ax-sign">
+    <tr>
+      <td>{{ _("Resident") }}{% if doc.terms_signature %}<br><img src="{{ doc.terms_signature }}" alt="" style="max-height:60px; max-width:220px; margin-top:6px;">{% endif %}{% if doc.terms_accepted_on %}<br>{{ doc.get_formatted("terms_accepted_on") }}{% endif %}<br>{{ _("Signature") }}</td>
+      <td>{{ _("Supervisor") }}<br>{{ _("Signature") }}</td>
+    </tr>
+  </table>
+
+  <div class="ax-foot">{{ doc.name }}</div>
+</div>

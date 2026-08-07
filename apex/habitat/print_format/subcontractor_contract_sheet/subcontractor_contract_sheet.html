@@ -1,0 +1,88 @@
+<style>
+  .ax-doc { font-family: Arial, sans-serif; color: #14332a; font-size: 12px; }
+  .ax-doc h1 { font-size: 18px; margin: 0; color: #14332a; }
+  .ax-sub { color: #4a5e55; font-size: 11px; margin-top: 2px; }
+  .ax-head { border-bottom: 3px solid #00844e; padding-bottom: 8px; margin-bottom: 12px;
+             display: flex; justify-content: space-between; align-items: flex-start; }
+  .ax-recipient { font-size: 11px; color: #14332a; background: #eef6f1;
+                  border: 1px solid #00844e; border-radius: 3px; padding: 4px 10px; }
+  .ax-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .ax-meta td { padding: 4px 8px; border: 1px solid #d9e4de; vertical-align: top; }
+  .ax-meta .ax-lbl { background: #f1f7f3; font-weight: bold; width: 22%; color: #14332a; }
+  .ax-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .ax-items th { background: #00844e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
+  .ax-items td { padding: 6px 8px; border: 1px solid #d9e4de; }
+  .ax-items tr:nth-child(even) td { background: #f6faf7; }
+  .ax-block { border: 1px solid #d9e4de; padding: 8px; margin-bottom: 12px; }
+  .ax-block .ax-blk-lbl { font-weight: bold; color: #00844e; margin-bottom: 4px; }
+  .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
+  .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
+  .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
+</style>
+
+<div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  <div class="ax-head">
+    <div>
+      <h1>{{ _("Subcontractor Service Contract") }}</h1>
+      <div class="ax-sub">{{ doc.name }} &bull; {{ doc.get_formatted("contract_start_date") or "" }}</div>
+    </div>
+    <div class="ax-recipient">{{ _("Recipient") }}: {{ _("Supplier") }}</div>
+  </div>
+
+  <table class="ax-meta">
+    <tr>
+      <td class="ax-lbl">{{ _("Supplier") }}</td>
+      <td>{{ doc.supplier or "" }}</td>
+      <td class="ax-lbl">{{ _("Service Type") }}</td>
+      <td>{{ _(doc.service_type) if doc.service_type else "" }}</td>
+    </tr>
+    <tr>
+      <td class="ax-lbl">{{ _("Contract Start") }}</td>
+      <td>{{ doc.get_formatted("contract_start_date") or "" }}</td>
+      <td class="ax-lbl">{{ _("Contract End") }}</td>
+      <td>{{ doc.get_formatted("contract_end_date") or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ax-lbl">{{ _("Scheduled Visit Frequency") }}</td>
+      <td>{{ _(doc.visit_frequency) if doc.visit_frequency else "" }}</td>
+      <td class="ax-lbl">{{ _("Response SLA (Hours)") }}</td>
+      <td>{{ doc.response_sla_hours or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ax-lbl">{{ _("Standard Rate Per Visit (SAR)") }}</td>
+      <td>{{ doc.get_formatted("rate_per_visit") or "" }}</td>
+      <td class="ax-lbl">{{ _("Monthly Retainer (SAR)") }}</td>
+      <td>{{ doc.get_formatted("monthly_retainer") or "" }}</td>
+    </tr>
+  </table>
+
+  <div class="ax-blk-lbl">{{ _("Covered Buildings") }}</div>
+
+  <table class="ax-items">
+    <thead>
+      <tr>
+        <th style="width:5%;">#</th>
+        <th>{{ _("Building") }}</th>
+        <th style="width:35%;">{{ _("Specific Rate for this Building (SAR)") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in doc.covered_buildings %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ row.building or "" }}</td>
+        <td>{{ row.get_formatted("specific_rate") }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table class="ax-sign">
+    <tr>
+      <td>{{ _("Supplier") }}<br>{{ _("Signature") }}</td>
+      <td>{{ _("Company") }}<br>{{ _("Signature") }}</td>
+    </tr>
+  </table>
+
+  <div class="ax-foot">{{ doc.name }}</div>
+</div>

@@ -1,0 +1,100 @@
+<style>
+  .ax-doc { font-family: Arial, sans-serif; color: #14332a; font-size: 12px; }
+  .ax-doc h1 { font-size: 18px; margin: 0; color: #14332a; }
+  .ax-sub { color: #4a5e55; font-size: 11px; margin-top: 2px; }
+  .ax-head { border-bottom: 3px solid #00844e; padding-bottom: 8px; margin-bottom: 12px;
+             display: flex; justify-content: space-between; align-items: flex-start; }
+  .ax-recipient { font-size: 11px; color: #14332a; background: #eef6f1;
+                  border: 1px solid #00844e; border-radius: 3px; padding: 4px 10px; }
+  .ax-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .ax-meta td { padding: 4px 8px; border: 1px solid #d9e4de; vertical-align: top; }
+  .ax-meta .ax-lbl { background: #f1f7f3; font-weight: bold; width: 22%; color: #14332a; }
+  .ax-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .ax-items th { background: #00844e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
+  .ax-items td { padding: 6px 8px; border: 1px solid #d9e4de; }
+  .ax-items tr:nth-child(even) td { background: #f6faf7; }
+  .ax-block { border: 1px solid #d9e4de; padding: 8px; margin-bottom: 12px; }
+  .ax-block .ax-blk-lbl { font-weight: bold; color: #00844e; margin-bottom: 4px; }
+  .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
+  .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
+  .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
+</style>
+
+<div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  <div class="ax-head">
+    <div>
+      <h1>{{ _("Telecom Contract") }}</h1>
+      <div class="ax-sub">{{ doc.name }} &bull; {{ doc.get_formatted("contract_start_date") or "" }}</div>
+    </div>
+    <div class="ax-recipient">{{ _("Recipient") }}: {{ _("Telecom Supplier") }}</div>
+  </div>
+
+  <table class="ax-meta">
+    <tr>
+      <td class="ax-lbl">{{ _("Company") }}</td>
+      <td>{{ doc.company or "" }}</td>
+      <td class="ax-lbl">{{ _("Telecom Supplier") }}</td>
+      <td>{{ doc.supplier or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ax-lbl">{{ _("Supplier Contract Reference") }}</td>
+      <td>{{ doc.contract_reference or "" }}</td>
+      <td class="ax-lbl">{{ _("Billing Account Number") }}</td>
+      <td>{{ doc.account_number or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ax-lbl">{{ _("Contract Start Date") }}</td>
+      <td>{{ doc.get_formatted("contract_start_date") or "" }}</td>
+      <td class="ax-lbl">{{ _("Contract End Date") }}</td>
+      <td>{{ doc.get_formatted("contract_end_date") or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ax-lbl">{{ _("Billing Frequency") }}</td>
+      <td>{{ _(doc.billing_frequency) if doc.billing_frequency else "" }}</td>
+      <td class="ax-lbl">{{ _("Recurring Amount") }}</td>
+      <td>{{ doc.get_formatted("recurring_amount") or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ax-lbl">{{ _("SIM Count") }}</td>
+      <td>{{ doc.sim_count or "" }}</td>
+      <td class="ax-lbl">{{ _("Status") }}</td>
+      <td>{{ _(doc.status) if doc.status else "" }}</td>
+    </tr>
+  </table>
+
+  <div class="ax-blk-lbl">{{ _("Billing Documents") }}</div>
+
+  <table class="ax-items">
+    <thead>
+      <tr>
+        <th style="width:5%;">#</th>
+        <th style="width:20%;">{{ _("Billing Period") }}</th>
+        <th style="width:20%;">{{ _("Document Type") }}</th>
+        <th>{{ _("Document") }}</th>
+        <th style="width:18%;">{{ _("Amount") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in doc.billing_documents %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ row.billing_period or "" }}</td>
+        <td>{{ _(row.document_type) if row.document_type else "" }}</td>
+        <td>{{ row.document_name or "" }}</td>
+        <td>{{ row.get_formatted("amount") }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if doc.notes %}<div class="ax-block"><div class="ax-blk-lbl">{{ _("Notes") }}</div>{{ doc.notes }}</div>{% endif %}
+
+  <table class="ax-sign">
+    <tr>
+      <td>{{ _("Telecom Supplier") }}<br>{{ _("Signature") }}</td>
+      <td>{{ _("Company") }}<br>{{ _("Signature") }}</td>
+    </tr>
+  </table>
+
+  <div class="ax-foot">{{ doc.name }}</div>
+</div>
