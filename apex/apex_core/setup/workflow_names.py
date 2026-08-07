@@ -45,6 +45,7 @@ WORKFLOW_STATES = (
     "Done",
     "Draft",
     "Evidence Required",
+    "Expired",
     "Failed",
     "Fulfilled",
     "In Progress",
@@ -63,6 +64,7 @@ WORKFLOW_STATES = (
     "Reverted",
     "Scheduled",
     "Submitted to Movement",
+    "Terminated",
     "Under Investigation",
     "Under Review",
     "Validated",
@@ -71,6 +73,7 @@ WORKFLOW_STATES = (
 
 WORKFLOW_ACTIONS = (
     "Acknowledge",
+    "Activate",
     "Approve",
     "Approve (Finance)",
     "Authorize (Operations)",
@@ -104,6 +107,7 @@ WORKFLOW_ACTIONS = (
     "Submit for Review",
     "Submit to Finance",
     "Submit to Movement",
+    "Terminate",
     "Validate",
     "Waive",
 )

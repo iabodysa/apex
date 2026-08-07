@@ -35,6 +35,27 @@
    "doc_status": "0",
    "allow_edit": "Accommodation Manager",
    "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Active",
+   "doc_status": "1",
+   "allow_edit": "Finance Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Expired",
+   "doc_status": "1",
+   "allow_edit": "Finance Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Terminated",
+   "doc_status": "1",
+   "allow_edit": "Finance Manager",
+   "is_optional_state": 0
   }
  ],
  "transitions": [
@@ -73,6 +94,20 @@
    "allowed": "Accommodation Manager",
    "allow_self_approval": 1,
    "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Activate",
+   "next_state": "Active",
+   "allowed": "Accommodation Manager"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Active",
+   "action": "Terminate",
+   "next_state": "Terminated",
+   "allowed": "Finance Manager"
   }
  ]
 }
