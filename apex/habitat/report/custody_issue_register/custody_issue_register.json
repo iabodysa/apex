@@ -1,0 +1,23 @@
+{
+ "doctype": "Report",
+ "name": "Custody Issue Register",
+ "report_name": "Custody Issue Register",
+ "ref_doctype": "Custody Issue",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "Procurement Supervisor"
+  },
+  {
+   "role": "Internal Auditor"
+  }
+ ]
+}

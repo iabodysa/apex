@@ -145,22 +145,28 @@ Contracts,العقود
 Cost Centres,مراكز التكلفة
 Currently Held,بحوزته حالياً
 Days Held,أيام الحيازة
+Days Overdue,أيام التأخير
 Employees,الموظفون
 Estimated Replacement Cost,تكلفة الاستبدال التقديرية
+Expected Return,الإرجاع المتوقّع
 Expiring in 30 Days,تنتهي خلال 30 يوماً
 Fuel Logs,سجلات الوقود
 Idle Share,نسبة التعطّل
 Include Ended Assignments,تضمين الإسنادات المنتهية
+Issued To,صُرف إلى
+Issues,عمليات الصرف
 Leases Watched,العقود المتابَعة
 Missed Over 7 Days,فائتة أكثر من 7 أيام
 Missed Tasks,المهام الفائتة
 Monthly Rent at Risk,الإيجار الشهري المعرّض
+Not Acknowledged,بلا توقيع
 Open Findings,الملاحظات المفتوحة
 Open Over 30 Days,مفتوحة أكثر من 30 يوماً
 Open Over 7 Days,مفتوحة أكثر من 7 أيام
 Open Recoveries,الاستردادات المفتوحة
 Open Requests,الطلبات المفتوحة
 Over 90 Days,أكثر من 90 يوماً
+Overdue Only,المتأخرة فقط
 Past SLA,تجاوز المدة المتفق عليها
 Payments,المدفوعات
 Plans,الخطط
