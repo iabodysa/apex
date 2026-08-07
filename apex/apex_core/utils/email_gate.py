@@ -2,10 +2,11 @@
 
 """Global email kill-switch for the Apex app.
 
-A single source of truth for "is the app allowed to send email at all?". Every
-explicit ``frappe.sendmail(...)`` call site must guard on :func:`email_enabled`
-so the app stays silent unless an administrator has deliberately turned email on
-in Habitat Settings.
+Two questions, both of which every explicit ``frappe.sendmail(...)`` call site must
+ask. :func:`email_enabled` answers "is the app allowed to send email at all?", so the
+app stays silent unless an administrator turned email on in Habitat Settings.
+:func:`mailable` answers "did this person agree to receive?" and filters the recipient
+list. Asking only the first mails people who switched their own notifications off.
 
 The toggle (``enable_email_notifications`` on the ``Habitat Settings`` single)
 defaults to OFF, so a fresh install never emails anyone until it is enabled.
@@ -23,6 +24,9 @@ controllers, scheduler tasks, or seeders without pulling in heavier modules.
 from __future__ import annotations
 
 import frappe
+from frappe.desk.doctype.notification_settings.notification_settings import (
+    is_email_notifications_enabled,
+)
 from frappe.utils import cint
 
 
@@ -35,3 +39,31 @@ def email_enabled() -> bool:
     system by accident.
     """
     return bool(cint(frappe.db.get_single_value("Habitat Settings", "enable_email_notifications")))
+
+
+def mailable(users) -> list[str]:
+    """Keep only the users who can be emailed, in the order given.
+
+    ``email_enabled`` answers whether the APP may send at all; this answers whether
+    a PERSON agreed to receive. They are different questions and both must be asked:
+    ``frappe.sendmail`` honours neither, and ``frappe.db.get_value("User", u,
+    "enabled")`` is the LOGIN flag, so a user who is perfectly able to log in and has
+    switched their own email notifications off still passes it.
+
+    The per-user answer is frappe's own — ``is_email_notifications_enabled``
+    (``frappe/desk/doctype/notification_settings/notification_settings.py:47``), which
+    reads ``Notification Settings.enable_email_notifications`` and defaults to allowed
+    when a user has no settings row yet, so an untouched account is not silenced.
+
+    Administrator and Guest are dropped: neither is a person who chose anything.
+    """
+    out = []
+    for user in users or []:
+        if not user or user in ("Administrator", "Guest"):
+            continue
+        if not frappe.db.get_value("User", user, "enabled"):
+            continue
+        if not is_email_notifications_enabled(user):
+            continue
+        out.append(user)
+    return out

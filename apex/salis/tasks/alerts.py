@@ -38,7 +38,7 @@ def daily_open_alerts_digest() -> None:
 
     from frappe.utils import escape_html, get_url_to_list
 
-    from apex.apex_core.utils.email_gate import email_enabled
+    from apex.apex_core.utils.email_gate import email_enabled, mailable
 
     logger = frappe.logger()
 
@@ -77,7 +77,7 @@ def daily_open_alerts_digest() -> None:
     for supervisor, rows in by_supervisor.items():
         frappe.db.savepoint(_ROW_SAVEPOINT)
         try:
-            if not frappe.db.get_value("User", supervisor, "enabled"):
+            if not mailable([supervisor]):
                 continue
             counts = {s: sum(1 for r in rows if r.severity == s) for s in severities}
             summary = ", ".join(

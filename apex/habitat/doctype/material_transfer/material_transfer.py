@@ -143,11 +143,15 @@ def _notify_finance_on_cost_center_shift(doc):
     if not recipients:
         return
 
-    from apex.apex_core.utils.email_gate import email_enabled
+    from apex.apex_core.utils.email_gate import email_enabled, mailable
     if not email_enabled():
         frappe.logger().info(
             f"Email disabled (Habitat Settings): skipped finance memo for transfer {doc.name}"
         )
+        return
+
+    recipients = mailable(recipients)
+    if not recipients:
         return
 
     subject = _("Cross-cost-center material transfer: {0}").format(doc.name)

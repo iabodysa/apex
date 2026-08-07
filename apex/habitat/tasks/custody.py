@@ -147,7 +147,7 @@ def weekly_custody_digest() -> None:
 
     from frappe.utils import date_diff, escape_html, flt, fmt_money, get_url_to_list, getdate, today
 
-    from apex.apex_core.utils.email_gate import email_enabled
+    from apex.apex_core.utils.email_gate import email_enabled, mailable
 
     logger = frappe.logger()
 
@@ -220,7 +220,7 @@ def weekly_custody_digest() -> None:
     for supervisor, names in by_supervisor.items():
         frappe.db.savepoint(_ROW_SAVEPOINT)
         try:
-            if not frappe.db.get_value("User", supervisor, "enabled"):
+            if not mailable([supervisor]):
                 continue
             rows = "".join(
                 "<tr><td>{b}</td><td>{open_}</td><td>{overdue}</td>"

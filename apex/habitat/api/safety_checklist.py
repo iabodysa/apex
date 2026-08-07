@@ -606,7 +606,7 @@ def _email_round_report(building, round_date, rounds):
     if not rounds:
         return False
 
-    from apex.apex_core.utils.email_gate import email_enabled
+    from apex.apex_core.utils.email_gate import email_enabled, mailable
 
     if not email_enabled():
         frappe.logger().info(
@@ -615,7 +615,7 @@ def _email_round_report(building, round_date, rounds):
         )
         return False
 
-    recipients = _report_recipients()
+    recipients = mailable(_report_recipients())
     if not recipients:
         return False
 
