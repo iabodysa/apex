@@ -40,7 +40,7 @@ portal's own i18n bundle).
 
 import frappe
 
-from apex.apex_core.utils.system_write import system_insert
+from apex.apex_core.utils.system_write import system_delete, system_insert
 
 _ISSUE_TYPES = ["Vehicle", "Fuel", "Attendance", "Salary", "Other"]
 
@@ -76,9 +76,7 @@ def _seed_issue_types():
     for name in _ISSUE_TYPES:
         if frappe.db.exists("Issue Type", name):
             continue
-        frappe.get_doc({"doctype": "Issue Type", "name": name}).insert(
-            ignore_permissions=True
-        )
+        system_insert(frappe.get_doc({"doctype": "Issue Type", "name": name}))
 
 
 def _seed_issue_priorities():
@@ -88,9 +86,7 @@ def _seed_issue_priorities():
     for name in _ISSUE_PRIORITIES:
         if frappe.db.exists("Issue Priority", name):
             continue
-        frappe.get_doc({"doctype": "Issue Priority", "name": name}).insert(
-            ignore_permissions=True
-        )
+        system_insert(frappe.get_doc({"doctype": "Issue Priority", "name": name}))
 
 
 def _pick_holiday_list():
@@ -201,7 +197,7 @@ def _grant_issue_role_perms():
             pluck="name",
         )
         for extra in rows[1:]:
-            frappe.delete_doc("Custom DocPerm", extra, ignore_permissions=True)
+            system_delete("Custom DocPerm", extra)
         if not rows:
             add_permission("Issue", role, ptype="read", permlevel=0)
         for ptype, value in flags.items():

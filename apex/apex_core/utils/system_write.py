@@ -2,7 +2,7 @@
 import frappe
 
 
-def system_insert(doc, ignore_if_duplicate=False, ignore_mandatory=False):
+def system_insert(doc, ignore_if_duplicate=False, ignore_mandatory=False, ignore_links=False):
     """Insert a document the system itself owns, past the acting user's permissions.
 
     The bypass lives behind this NAME so a reader of the call site sees what is being
@@ -16,6 +16,7 @@ def system_insert(doc, ignore_if_duplicate=False, ignore_mandatory=False):
         ignore_permissions=True,
         ignore_if_duplicate=ignore_if_duplicate,
         ignore_mandatory=ignore_mandatory,
+        ignore_links=ignore_links,
     )
 
 
