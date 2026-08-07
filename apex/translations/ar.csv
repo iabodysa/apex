@@ -135,15 +135,19 @@ Activated By,فُعِّل بواسطة
 Activation,التفعيل
 Activation Date,تاريخ التفعيل
 Active,نشط
+Against Issue,مقابل صرف
 Aged Over 60 Days,أقدم من 60 يوماً
 Assessments,التقييمات
 Average Cost per Litre,متوسط تكلفة اللتر
 Blocked by Outstanding Items,موقوف بسبب مستحقات قائمة
 Buildings,المباني
+Chargeable,قابل للتحميل
 Claims,المطالبات
 Contracts,العقود
 Cost Centres,مراكز التكلفة
 Currently Held,بحوزته حالياً
+Damaged or Lost,تالف أو مفقود
+Damaged or Lost Only,التالف أو المفقود فقط
 Days Held,أيام الحيازة
 Days Overdue,أيام التأخير
 Days Waiting,أيام الانتظار
@@ -179,6 +183,10 @@ Recoveries,الاستردادات
 Repair Cost,تكلفة الإصلاح
 Requests,الطلبات
 Residents,الساكنون
+Returned By,أرجعه
+Returned Lines,بنود الإرجاع
+Returned in Good Order,أُرجع بحالة جيدة
+Returns,عمليات الإرجاع
 Rows,الصفوف
 SIMs Covered,الشرائح المشمولة
 SIMs Held,الشرائح المحتفَظ بها

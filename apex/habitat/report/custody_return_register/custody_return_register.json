@@ -1,0 +1,26 @@
+{
+ "doctype": "Report",
+ "name": "Custody Return Register",
+ "report_name": "Custody Return Register",
+ "ref_doctype": "Custody Return",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "Procurement Supervisor"
+  },
+  {
+   "role": "Finance Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  }
+ ]
+}
