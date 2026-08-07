@@ -1,8 +1,10 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 
 from apex.salis import permissions
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
@@ -57,4 +59,8 @@ def execute(filters=None):
         order_by="creation desc",
     )
 
-    return columns, data
+    summary = [
+        count_card(_("Exceptions"), data),
+        total_card(_("Recovered"), data, "amount_recovered", "Currency", indicator="Green"),
+    ]
+    return columns, data, None, None, summary

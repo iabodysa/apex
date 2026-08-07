@@ -1,9 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 
 from apex.apex_core.utils.report_helpers import date_range_condition
 from apex.salis import permissions
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
@@ -56,4 +58,8 @@ def execute(filters=None):
         order_by="creation desc",
     )
 
-    return columns, data
+    summary = [
+        count_card(_("Payments"), data),
+        total_card(_("Total Amount"), data, "amount", "Currency"),
+    ]
+    return columns, data, None, None, summary

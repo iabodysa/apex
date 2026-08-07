@@ -136,14 +136,21 @@ Activation,التفعيل
 Activation Date,تاريخ التفعيل
 Active,نشط
 Aged Over 60 Days,أقدم من 60 يوماً
+Assessments,التقييمات
 Average Cost per Litre,متوسط تكلفة اللتر
+Blocked by Outstanding Items,موقوف بسبب مستحقات قائمة
 Buildings,المباني
 Claims,المطالبات
 Contracts,العقود
+Cost Centres,مراكز التكلفة
+Employees,الموظفون
+Estimated Replacement Cost,تكلفة الاستبدال التقديرية
 Expiring in 30 Days,تنتهي خلال 30 يوماً
 Fuel Logs,سجلات الوقود
 Idle Share,نسبة التعطّل
 Leases Watched,العقود المتابَعة
+Missed Over 7 Days,فائتة أكثر من 7 أيام
+Missed Tasks,المهام الفائتة
 Monthly Rent at Risk,الإيجار الشهري المعرّض
 Open Findings,الملاحظات المفتوحة
 Open Over 30 Days,مفتوحة أكثر من 30 يوماً
@@ -152,6 +159,8 @@ Open Recoveries,الاستردادات المفتوحة
 Open Requests,الطلبات المفتوحة
 Over 90 Days,أكثر من 90 يوماً
 Past SLA,تجاوز المدة المتفق عليها
+Payments,المدفوعات
+Plans,الخطط
 Positions,المواضع
 Recovered Share,نسبة المسترد
 Recoveries,الاستردادات
@@ -159,6 +168,7 @@ Repair Cost,تكلفة الإصلاح
 Residents,الساكنون
 Rows,الصفوف
 SIMs Covered,الشرائح المشمولة
+SIMs Held,الشرائح المحتفَظ بها
 Settled Share,نسبة المسوّى
 Trips Fulfilled,الرحلات المنفَّذة
 active,نشط

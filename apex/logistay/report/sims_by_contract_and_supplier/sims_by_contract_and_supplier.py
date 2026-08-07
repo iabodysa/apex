@@ -2,8 +2,10 @@
 """SIM counts grouped by supplier and contract, company-scoped."""
 
 import frappe
+from frappe import _
 
 from apex.logistay import permissions
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
@@ -53,4 +55,9 @@ def execute(filters=None):
             agg.items(), key=lambda kv: kv[1]["total"], reverse=True
         )
     ]
-    return columns, data
+    summary = [
+        count_card(_("Contracts"), data),
+        total_card(_("SIMs"), data, "sim_count", "Int"),
+        total_card(_("Assigned"), data, "assigned_count", "Int", indicator="Green"),
+    ]
+    return columns, data, None, None, summary

@@ -2,9 +2,11 @@
 """Normalized monthly telecom commitment grouped by cost center, company-scoped."""
 
 import frappe
+from frappe import _
 
 from apex.logistay import permissions
 from apex.logistay.utils.billing import monthly_equivalent
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
@@ -49,4 +51,9 @@ def execute(filters=None):
         }
         for key, bucket in sorted(agg.items(), key=lambda kv: kv[1]["monthly"], reverse=True)
     ]
-    return columns, data
+    summary = [
+        count_card(_("Cost Centres"), data),
+        total_card(_("Contracts"), data, "contract_count", "Int"),
+        total_card(_("Monthly Commitment"), data, "monthly_commitment", "Currency"),
+    ]
+    return columns, data, None, None, summary

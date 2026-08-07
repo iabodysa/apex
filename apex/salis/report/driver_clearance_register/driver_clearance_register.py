@@ -1,9 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 
 from apex.apex_core.utils.report_helpers import scoped_names
 from apex.salis import permissions
+from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
@@ -55,4 +57,14 @@ def execute(filters=None):
         order_by="creation desc",
     )
 
-    return columns, data
+    summary = [
+        count_card(_("Drivers"), data),
+        count_card(
+            _("Blocked by Outstanding Items"),
+            data,
+            lambda r: (r.get("outstanding_fuel_exceptions") or 0)
+            or (r.get("outstanding_recoveries") or 0),
+            "Red",
+        ),
+    ]
+    return columns, data, None, None, summary

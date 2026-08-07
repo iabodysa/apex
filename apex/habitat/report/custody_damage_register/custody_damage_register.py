@@ -1,8 +1,10 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 
 from apex.habitat import permissions
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
@@ -42,4 +44,10 @@ def execute(filters=None):
         ],
         order_by="assessment_date desc",
     )
-    return columns, data
+    summary = [
+        count_card(_("Assessments"), data),
+        total_card(
+            _("Estimated Replacement Cost"), data, "total_estimated_replacement_cost", "Currency"
+        ),
+    ]
+    return columns, data, None, None, summary

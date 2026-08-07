@@ -2,8 +2,10 @@
 """Employees currently holding more than one SIM, company-scoped."""
 
 import frappe
+from frappe import _
 
 from apex.logistay import permissions
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
@@ -55,4 +57,8 @@ def execute(filters=None):
         }
         for emp, mobiles in sorted(multiple.items(), key=lambda kv: len(kv[1]), reverse=True)
     ]
-    return columns, data
+    summary = [
+        count_card(_("Employees"), data),
+        total_card(_("SIMs Held"), data, "sim_count", "Int", indicator="Orange"),
+    ]
+    return columns, data, None, None, summary

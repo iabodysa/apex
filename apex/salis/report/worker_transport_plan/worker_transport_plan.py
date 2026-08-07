@@ -1,8 +1,10 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 
 from apex.salis import permissions
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
@@ -60,4 +62,8 @@ def execute(filters=None):
         order_by="pickup_datetime asc",
     )
 
-    return columns, data
+    summary = [
+        count_card(_("Plans"), data),
+        total_card(_("Workers"), data, "worker_count", "Int"),
+    ]
+    return columns, data, None, None, summary

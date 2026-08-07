@@ -1,9 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
 from frappe.utils import add_days, date_diff, getdate, today
 
 from apex.habitat import permissions
+from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
@@ -113,4 +115,8 @@ def execute(filters=None):
 
     data.sort(key=lambda r: (r["building"] or "", str(r["cleaning_date"] or "")))
 
-    return columns, data
+    summary = [
+        count_card(_("Missed Tasks"), data),
+        count_card(_("Missed Over 7 Days"), data, lambda r: (r.get("days_since") or 0) > 7, "Red"),
+    ]
+    return columns, data, None, None, summary
