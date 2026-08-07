@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Choose Operational Alerts",
+ "title": "Choose Operational Alerts",
+ "action": "Go to Page",
+ "path": "notification",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Review every alert this site can send. Each one has its own on/off switch and, where it warns ahead of a date, its own number of days. Turn off what your team does not need and set the timing on the rest. The list also holds the alerts that came with Frappe and ERPNext, so sort by Module to see only yours.",
+ "action_label": "Review Alerts"
+}

@@ -711,6 +711,7 @@ Chip Action,إجراء الشريحة
 Chip Cancellation,إلغاء الشريحة
 Chip Number,رقم الشريحة
 Choose how often this round recurs.,اختر معدّل تكرار هذه الجولة.
+Choose Operational Alerts,اختر التنبيهات التشغيلية
 Choose the Building,اختر المبنى
 Choose the Checkout Reason,اختر سبب المغادرة
 Choose the employee who will carry out the work.,اختر الموظف الذي سينفّذ العمل.
@@ -3349,8 +3350,10 @@ reversed,معكوس
 Reversed {0} L from Fuel Request {1}.,تم عكس {0} لتر من طلب الوقود {1}.
 Revert Due Date,موعد العودة إلى الوضع السابق
 Reverted,أُعيدت إلى الوضع السابق
+Review Alerts,مراجعة التنبيهات
 Review and approve the handover before confirming receipt.,راجع التسليم واعتمده قبل تأكيد الاستلام.
 Review Apex Integration Settings,مراجعة إعدادات تكامل أبكس
+"Review every alert this site can send. Each one has its own on/off switch and, where it warns ahead of a date, its own number of days. Turn off what your team does not need and set the timing on the rest. The list also holds the alerts that came with Frappe and ERPNext, so sort by Module to see only yours.","راجع كل تنبيه يستطيع هذا الموقع إرساله. لكلٍّ مفتاح تشغيل وإيقاف خاص به، ولِما ينبّه قبل موعدٍ عددُ أيامه الخاص. أطفئ ما لا يحتاجه فريقك واضبط توقيت الباقي. تضمّ القائمة أيضًا التنبيهات التي جاءت مع فرابيه وإي آر بي نكست، فرتّبها حسب الوحدة لترى تنبيهاتك وحدها."
 Review Integration Settings,مراجعة إعدادات التكامل
 "Review stage of the damage write-off case, from open and under review to approved or rejected, then closed or cancelled.",مرحلة مراجعة حالة شطب التلف، من مفتوح وقيد المراجعة إلى معتمد أو مرفوض، ثم مغلق أو ملغى.
 Review the Active Resident Register,راجع سجل الساكنين الحاليين
