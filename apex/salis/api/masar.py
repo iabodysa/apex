@@ -41,7 +41,6 @@ from apex.salis.api.masar_routes import (
     _drop_finished_yesterday,  # noqa: F401  (re-exported)
     _fmt_time,
     _is_upcoming_pickup,
-    _live_dispatch_trip,
     _ordered_stops,
     _pickup_building_of,
     _registered_workers,

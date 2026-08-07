@@ -1,8 +1,8 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Project row-scoping for Salis.
 
-Every scoped Salis DocType is confined to the project it belongs to. The project is
-reached one of six ways, and WHICH WAY IS A PROPERTY OF THE DOCTYPE, not of a function:
+Every scoped Salis DocType is confined to its project, reached one of five ways, and
+WHICH WAY IS A PROPERTY OF THE DOCTYPE rather than of a function:
 
     column    the doc stores the project itself (``project``)
     dual      the doc has two endpoints (``from_project`` / ``to_project``)
@@ -10,47 +10,38 @@ reached one of six ways, and WHICH WAY IS A PROPERTY OF THE DOCTYPE, not of a fu
     manifest  the project is reachable by EITHER of two links (Passenger Manifest)
     driver    the project hangs off a Salis Driver link (``driver``/``related_driver``)
 
-and, orthogonally, a DocType may carry an OWN-ROW BASIS — an access route that does not
-go through the project at all, because a Driver holds no Project User Permission yet
-must still reach their own rows:
+and, orthogonally, a DocType may carry an OWN-ROW BASIS — a route that bypasses the
+project entirely, because a Driver holds no Project User Permission yet must reach
+their own rows:
 
     own="owner"    the DocType grants the Driver role an ``if_owner`` DocPerm
     own="driver"   the row names the acting user's Salis Driver (Dispatch Trip)
 
-``SALIS_SCOPE`` maps DocType to that pair, plus the name of the document-level rule the
-form/REST check applies. ``project_scope_query`` reads the table and emits the list
-fragment; ``project_scoped_has_permission`` reads the SAME table and dispatches the
-document check, so the two can never disagree about what is in scope. Frappe hands the
-DocType to both hooks, so one registration each in ``hooks.py`` covers every DocType.
+``SALIS_SCOPE`` maps DocType to that pair plus the document-level rule. The list
+fragment and the document check both dispatch off that SAME table, so they can never
+disagree about what is in scope, and adding a scoped DocType is a table row rather than
+a new function per hook.
 
-Adding a scoped DocType is a row in ``SALIS_SCOPE`` plus its two ``hooks.py`` entries.
-It is deliberately not a new function: the previous shape carried one hand-written
-function per DocType per hook, and threading a single new argument through them
-(commit 7bd58d09, the ``applicable_for`` narrowing) had to edit every one.
+Three invariants hold on every path and are why the edge cases look asymmetric:
 
-Three invariants hold on every path and are the reason the edge cases look asymmetric:
-
-* "" (no restriction at all) for the Administrator and the ``UNSCOPED_ROLES`` oversight
-  roles. "1=0" (matches nothing) for a scoped user holding no project — EXCEPT where
-  the DocType carries an own-row basis, where the own clause stands alone instead, or
-  a Driver holding no project would lose their own rows. Never the other way round:
-  inverted, it blacks out oversight and leaks every project to a supervisor.
-* An OR lives INSIDE one fragment. Frappe AND-joins the fragments returned by separate
-  ``permission_query_conditions`` hooks (``frappe/model/db_query.py:1129-1131``), so
-  splitting an OR across two fragments silently turns it into a different, narrower
-  rule.
-* Fail closed. A doc whose project cannot be resolved is DENIED, never deferred — with
-  the two named exceptions recorded on ``scoped_has_permission`` and
+* "" (no restriction) for the Administrator and the ``UNSCOPED_ROLES`` oversight roles.
+  "1=0" (matches nothing) for a scoped user holding no project — EXCEPT where the
+  DocType carries an own-row basis, where the own clause stands alone, or a Driver
+  holding no project would lose their own rows. Never inverted: that blacks out
+  oversight and leaks every project to a supervisor.
+* An OR lives INSIDE one fragment. Frappe AND-joins what separate
+  ``permission_query_conditions`` hooks return (``frappe/model/db_query.py:1129-1131``),
+  so splitting an OR across two silently narrows the rule.
+* Fail closed. A doc whose project cannot be resolved is DENIED, never deferred — bar
+  the two exceptions named on ``scoped_has_permission`` and
   ``movement_cost_transfer_has_permission``.
 
-The document rules NEVER return True and never branch on ``ptype``, with one named
-exception (``payment_sod_has_permission``, whose reason is recorded there): they are
-deny-only, so they can narrow Frappe's resolution but never widen it.
+The document rules NEVER return True and never branch on ``ptype`` (one exception, named
+on ``payment_sod_has_permission``): deny-only, so they narrow and never widen.
 
-The block at the foot of this file is COMPATIBILITY ONLY. Those wrappers hold no rule
-— each forwards to a dispatcher with its own ``scope_for`` — and ``hooks.py`` does not
-route through them. They exist because callers outside this module resolve a fragment
-or a check by FUNCTION NAME, and none of them has to be edited when the rule changes.
+The block at the foot of this file is COMPATIBILITY ONLY: wrappers holding no rule, each
+forwarding to a dispatcher with its own ``scope_for``, which ``hooks.py`` does not route
+through. They exist so callers outside this module can still resolve by FUNCTION NAME.
 """
 
 import frappe
