@@ -7,6 +7,11 @@ The Salis Email Templates moved to the data-driven loader
 (M-10/M-11). Auto Email Reports stay a seeder (runtime recipient fields, not
 externalised to JSON), so this patch keeps replaying that one idempotent step;
 already-installed sites pick up newly-added reports on migrate.
+
+Swallowing the failure is safe here because the seeder it calls runs on EVERY migrate:
+``salis_auto_email_reports_seed.seed_salis_auto_email_reports`` is listed in hooks.py
+``after_migrate``. A run that silently did nothing is re-attempted by the next migrate,
+so the stamped patch is never the last chance to create these records.
 """
 
 import frappe

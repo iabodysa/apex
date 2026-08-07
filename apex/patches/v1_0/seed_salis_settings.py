@@ -5,6 +5,11 @@ Idempotent and install-safe: only fills BLANK fields (never clobbers an
 admin's later edits), links default_company / default_cost_center only when
 exactly one exists, skips gracefully if the Salis Settings DocType is not yet
 migrated, and wraps everything so it can never fail an install/migrate.
+
+Swallowing the failure is safe here because this same ``execute`` runs on EVERY migrate:
+``apex.patches.v1_0.seed_salis_settings.execute`` is listed in hooks.py ``after_migrate``
+as well as in patches.txt. A run that silently did nothing is re-attempted by the next
+migrate, so the stamped patch is never the last chance to fill these defaults.
 """
 
 import frappe

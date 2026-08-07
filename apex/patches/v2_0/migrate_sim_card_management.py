@@ -229,3 +229,22 @@ def execute():
         "SIM migration: migrated=%s skipped=%s ambiguous=%s rejected=%s"
         % (migrated, skipped, len(buckets["ambiguous"]), len(buckets["rejected"]))
     )
+
+    _refuse_to_be_stamped_over_nothing(len(buckets["migratable"]), migrated + skipped)
+
+
+def _refuse_to_be_stamped_over_nothing(attempted: int, completed: int) -> None:
+    """Raise when not one migratable row got through.
+
+    The per-row savepoint above is deliberate: one unusable row must not strand a
+    whole migrate, so a partial run finishes and is stamped. But returning normally
+    when EVERY row failed hands Patch Log a success over data that never moved, and
+    the patch never runs again — the legacy records stay in the legacy DocType with
+    nothing left to migrate them. Raising here is what makes bench migrate exit
+    non-zero and leaves the patch unstamped so a fixed run can retry it."""
+    if attempted and not completed:
+        frappe.throw(
+            f"SIM migration moved 0 of {attempted} migratable rows; every row failed "
+            "and the legacy records are untouched. See the 'SIM migration row failed' "
+            "Error Log entries, fix the cause, and run bench migrate again."
+        )

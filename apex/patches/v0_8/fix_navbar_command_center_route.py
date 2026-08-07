@@ -7,18 +7,17 @@ import frappe
 
 
 def execute():
-    try:
-        if not frappe.db.exists("DocType", "Navbar Settings"):
-            return
-        settings = frappe.get_single("Navbar Settings")
-        changed = False
-        for row in settings.help_dropdown:
-            if row.route == "/app/operations-command-center":
-                row.route = "/app/habitat"
-                changed = True
-        if changed:
-            settings.save(ignore_permissions=True)  # audit-ok
-            frappe.db.commit()
-    except Exception:
-        frappe.db.rollback()
-        frappe.log_error(title="fix_navbar_command_center_route failed", message=frappe.get_traceback())
+    """A one-time repair with nothing behind it: no hook re-runs this route fix, and a
+    stamped patch never runs again, so a swallowed failure leaves the dead link in the
+    navbar permanently. A failure is therefore raised rather than logged."""
+    if not frappe.db.exists("DocType", "Navbar Settings"):
+        return
+    settings = frappe.get_single("Navbar Settings")
+    changed = False
+    for row in settings.help_dropdown:
+        if row.route == "/app/operations-command-center":
+            row.route = "/app/habitat"
+            changed = True
+    if changed:
+        settings.save(ignore_permissions=True)  # audit-ok
+        frappe.db.commit()

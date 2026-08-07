@@ -16,28 +16,25 @@ _LINKS = [
 
 
 def execute():
-    try:
-        if not frappe.db.exists("DocType", "Navbar Settings"):
-            return
-        settings = frappe.get_single("Navbar Settings")
-        existing = {row.item_label for row in settings.help_dropdown}
-        changed = False
-        for link in _LINKS:
-            if link["item_label"] in existing:
-                continue
-            settings.append("help_dropdown", {
-                "item_label": link["item_label"],
-                "item_type": link["item_type"],
-                "route": link["route"],
-                "is_standard": 0,
-            })
-            changed = True
-        if changed:
-            settings.save(ignore_permissions=True)  # audit-ok
-            frappe.db.commit()
-    except Exception:
-        frappe.db.rollback()
-        frappe.log_error(
-            title="add_navbar_help_links failed",
-            message=frappe.get_traceback(),
-        )
+    """No hook re-creates these links, so a swallowed failure loses them for good:
+    nothing in ``after_migrate`` appends the Habitat entries (the navbar seeder there
+    carries the Salis pair only), and a stamped patch never runs again. A failure is
+    therefore raised rather than logged."""
+    if not frappe.db.exists("DocType", "Navbar Settings"):
+        return
+    settings = frappe.get_single("Navbar Settings")
+    existing = {row.item_label for row in settings.help_dropdown}
+    changed = False
+    for link in _LINKS:
+        if link["item_label"] in existing:
+            continue
+        settings.append("help_dropdown", {
+            "item_label": link["item_label"],
+            "item_type": link["item_type"],
+            "route": link["route"],
+            "is_standard": 0,
+        })
+        changed = True
+    if changed:
+        settings.save(ignore_permissions=True)  # audit-ok
+        frappe.db.commit()
