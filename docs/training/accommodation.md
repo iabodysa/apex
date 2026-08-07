@@ -18,7 +18,7 @@ controlled checkout without bypassing occupancy or custody controls.
 - A training Employee or Temporary Worker, Project, and Cost Center.
 - A training Building with at least one Room and Bed.
 - Building User Permissions for any building-scoped learner.
-- The [accommodation permission reference](../reference/permissions.md#accommodation-permissions).
+- Accommodation rights: filter **Role Permissions Manager** (`/app/permission-manager`) by Housing Assignment, Housing Checkout and Building.
 
 ## Operating model
 

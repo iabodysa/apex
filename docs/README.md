@@ -9,8 +9,6 @@ Use this page to choose the shortest guide for the job.
   scoped dataset for each cohort
 - [Frappe foundations](training/foundations.md) — shared Desk, workflow,
   evidence, and permission exercise
-- [Permissions and roles](reference/permissions.md) — authoritative role,
-  DocPerm, and row-scope reference
 
 ## Administrators
 
@@ -31,7 +29,6 @@ Use this page to choose the shortest guide for the job.
 ## Reference
 
 - [Modules, workspaces, and routes](reference/routes-workspaces.md)
-- [Permissions and roles](reference/permissions.md)
 - [Scheduled automation](reference/automation.md)
 - [Business glossary](reference/glossary.md)
 - [Troubleshooting](reference/troubleshooting.md)

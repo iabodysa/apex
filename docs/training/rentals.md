@@ -19,7 +19,7 @@ operational accrual, monthly settlement, Finance review, and cancellation.
   ownership is `Rented`.
 - Prepare separate settlement requester, fleet reviewer, and Finance reviewer
   accounts.
-- Review [Rental permissions](../reference/permissions.md#rental-permissions)
+- Review **Role Permissions Manager** (`/app/permission-manager`)
   and the shipped workspace in
   [Modules, Workspaces, and Routes](../reference/routes-workspaces.md).
 

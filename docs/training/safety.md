@@ -19,7 +19,7 @@ incidents and licence follow-up separate from routine inspections.
 - A training Building with at least one Room.
 - An active `Safety Task Catalog` item scoped to that Building and cadence.
 - A training account that can submit `Safety Task Execution`.
-- The [safety permission reference](../reference/permissions.md#safety-permissions).
+- The **Role Permissions Manager** (`/app/permission-manager`).
 
 ## Operating model
 

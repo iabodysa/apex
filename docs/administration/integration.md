@@ -101,8 +101,9 @@ DELETE /api/resource/<DocType>/<name>
 Frappe evaluates the authenticated user's document permissions. Additional row
 scope is not universal: it depends on the DocType, permission query hooks, and
 controller involved. Test every required read and write using the exact
-integration user. The [permissions reference](../reference/permissions.md)
-documents Apex role and row-scope rules.
+integration user. **Role Permissions Manager** (`/app/permission-manager`)
+shows the granted rights, and the row-scope rules are the permission query
+hooks named in `hooks.py`.
 
 ### Whitelisted methods
 

@@ -23,7 +23,7 @@ actions without editing system-written evidence.
 1. [Frappe Foundations](../foundations.md)
 2. [Safety](../safety.md)
 3. [Maintenance](../maintenance.md)
-4. [Safety permissions](../../reference/permissions.md#safety-permissions)
+4. **Role Permissions Manager** (`/app/permission-manager`)
 5. [Workspace and portal entry points](../../reference/routes-workspaces.md)
 
 ## Practice checkpoint

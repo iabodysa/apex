@@ -26,7 +26,7 @@ Freelancer, then complete only the branch owned by the learner's role.
   HR handoff account only when the native Employee link is rehearsed.
 - An authorized Fleet handoff account only when the trainer demonstrates the
   unregistered-rider transport step; otherwise no Fleet fixture is required.
-- [Contingent worker permissions](../reference/permissions.md#contingent-worker-permissions).
+- Contingent worker rights: filter **Role Permissions Manager** (`/app/permission-manager`) by Temporary Worker and Arrival Batch.
 
 ## Navigation by role
 

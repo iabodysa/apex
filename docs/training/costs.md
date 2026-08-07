@@ -19,7 +19,7 @@ operational memo from an accounting posting, and verify the source link.
 - Two Accommodation Manager training users for the Utility Bill approval
   exercise because self-approval is blocked.
 - A Finance Manager training user for Lease approval.
-- The [cost and leasing permission reference](../reference/permissions.md#cost-and-leasing-permissions).
+- Cost and leasing rights: filter **Role Permissions Manager** (`/app/permission-manager`) by the Lease, Utility Bill Entry and Accommodation Ledger documents.
 
 ## Operating model
 

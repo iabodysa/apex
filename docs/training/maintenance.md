@@ -19,7 +19,7 @@ accounting documents.
 - A training Building and Room.
 - Separate training accounts for request handling, work-order issue, and
   technician execution where practical.
-- The [maintenance permission reference](../reference/permissions.md#maintenance-permissions).
+- The **Role Permissions Manager** (`/app/permission-manager`).
 
 ## Operating model
 
@@ -64,7 +64,8 @@ same controllers as the forms; they do not write status or cost directly.
 7. For external work, use an approved `Subcontractor Service Contract`, then
    submit a `Subcontractor Service Order`. Use **Start Work**, then the
    controlled **Mark as Completed** or **Mark Missed** action.
-8. Review **Open Maintenance Requests** and **Maintenance Aging**. The daily
+8. Review **Maintenance Aging**, whose status filter also lists the open
+   requests. The daily
    overdue thresholds and alert effects are listed in the
    [automation reference](../reference/automation.md).
 

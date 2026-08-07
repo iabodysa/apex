@@ -14,7 +14,7 @@ role permits it.
 - Completion of [Getting Started in Apex](getting-started.md).
 - Read access to a DocType used in the learner's track.
 - A non-production training site for export practice.
-- The [permissions and role reference](../../reference/permissions.md).
+- The **Role Permissions Manager** (`/app/permission-manager`).
 
 ## Core concepts
 

@@ -22,7 +22,7 @@ or automation.
 2. [Settings and Desk Pages](../settings.md)
 3. [Driver and Worker Portals](../portals-masar-driver.md)
 4. [Modules, Workspaces, and Routes](../../reference/routes-workspaces.md)
-5. [Permissions and Roles](../../reference/permissions.md)
+5. **Role Permissions Manager** (`/app/permission-manager`)
 
 Use the reference pages as the source for shipped navigation and permission
 claims. Do not copy their tables into local support notes.

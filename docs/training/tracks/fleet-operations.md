@@ -26,7 +26,7 @@ fuel, rentals, and finance review.
 4. [Rentals](../rentals.md)
 5. [Payments and Approvals](../compliance.md)
 6. [Driver and Worker Portals](../portals-masar-driver.md)
-7. [Fleet permissions and project scope](../../reference/permissions.md#fleet-master-permissions)
+7. **Role Permissions Manager** (`/app/permission-manager`)
 
 ## Practice checkpoint
 

@@ -24,7 +24,7 @@ custody, exception review, and the native procurement handoff.
 1. [Frappe Foundations](../foundations.md)
 2. [Telecom](../telecom.md)
 3. [Settings and Desk Pages](../settings.md)
-4. [Telecom permissions](../../reference/permissions.md#telecom-permissions)
+4. **Role Permissions Manager** (`/app/permission-manager`)
 5. [Telecom troubleshooting](../../reference/troubleshooting.md#sim-state-looks-wrong)
 
 ## Practice checkpoint

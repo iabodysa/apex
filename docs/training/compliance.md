@@ -17,7 +17,7 @@ cost transfer, and payment so one event is not counted or paid twice.
   Driver`, employee, company, and cost center.
 - Prepare separate creator and reviewer accounts.
 - Keep salary deductions and General Ledger auto-submit disabled for exercises.
-- See [Permissions and Role Reference](../reference/permissions.md) and
+- See **Role Permissions Manager** (`/app/permission-manager`) and
   [Modules, Workspaces, and Routes](../reference/routes-workspaces.md).
 
 ## Native records and controls

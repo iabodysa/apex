@@ -20,7 +20,7 @@ ledgering, claim reconciliation, and safe reversal.
 - Prepare separate requester and reviewer accounts. Workflow self-approval is
   blocked.
 - Confirm Project User Permissions before entering data. See
-  [Fuel permissions](../reference/permissions.md#fuel-permissions).
+  **Role Permissions Manager** (`/app/permission-manager`).
 - Use the shipped navigation described in
   [Modules, Workspaces, and Routes](../reference/routes-workspaces.md).
 
@@ -91,8 +91,8 @@ The fuel engine creates `Fuel Consumption Ledger` rows from recent
 `Fuel Daily Log` records and submitted, unledgered `Done` requests. Cancellation
 adds a negative reversal instead of deleting ledger history.
 
-Use `Fuel Consumption Summary`, `Fuel Reconciliation`, `Fuel Spend by Vehicle`,
-`Fuel Claim Register`, and `Fuel Exception Register` for review. Scheduled
+Use `Fuel Reconciliation`, `Fuel Spend by Vehicle`, `Fuel Claim Register`, and
+`Fuel Exception Register` for review. Scheduled
 accrual, overdue-request, temporary-top-up, and monthly quota checks are defined
 in the [Scheduled Automation Reference](../reference/automation.md).
 

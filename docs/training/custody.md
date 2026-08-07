@@ -18,7 +18,7 @@ damage or a durable facility asset through the correct record.
 - A training Building, Employee, and non-serialized `Custody Article`.
 - Positive store balance for the article in that Building.
 - Building User Permissions for any building-scoped learner.
-- The [custody permission reference](../reference/permissions.md#custody-permissions).
+- The **Role Permissions Manager** (`/app/permission-manager`).
 
 ## Operating model
 
@@ -99,7 +99,8 @@ The kiosk and workspace entry points are listed in the
 2. In Custody Kiosk, select the training Building and Employee.
 3. Issue one unit and capture a training signature.
 4. Verify the `Custody Issue` is submitted with status **Issued**.
-5. In **Custody Outstanding by Worker**, confirm the Employee holds one unit.
+5. In **Accommodation Stock Balance**, filtered to that Employee, confirm the
+   holding of one unit.
 6. Return that unit in the kiosk.
 7. Verify the linked issue is **Returned** and the store balance is restored.
 

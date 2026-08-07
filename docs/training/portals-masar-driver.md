@@ -21,7 +21,7 @@ experiences share, and protect every issued personal link.
 - A demo housing assignment, transport request, and driver trip where the
   exercise needs them.
 - [Portal routes](../reference/routes-workspaces.md#served-portal-routes) and
-  [permissions](../reference/permissions.md).
+  **Role Permissions Manager** (`/app/permission-manager`).
 
 ## One build, two experiences
 
@@ -98,7 +98,7 @@ cannot select another driver or trip outside that identity.
 11. Do not copy links into tickets, screenshots, chat rooms, or training notes.
 
 Worker issuance can be restricted by Building. Use the
-[permissions reference](../reference/permissions.md) for the current role and
+**Role Permissions Manager** (`/app/permission-manager`) for the current role and
 row-scope rules.
 
 ## Exercise

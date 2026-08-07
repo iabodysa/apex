@@ -17,7 +17,7 @@ workspace that contains the route or the exact Awesome Bar DocType.
 - A training account with the same roles as the intended job.
 - Access to a non-production training site.
 - The [module, workspace, and route reference](../../reference/routes-workspaces.md).
-- The [permissions and role reference](../../reference/permissions.md).
+- The **Role Permissions Manager** (`/app/permission-manager`).
 - The [training role map](../README.md#role-tracks).
 
 ## Core concepts

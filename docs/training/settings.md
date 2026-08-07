@@ -17,7 +17,7 @@ and distinguish configuration, navigation, permission, and automation.
 - Administrator access to a non-production site.
 - An approved before-and-after value for the setting being tested.
 - Separate training accounts for any role or scope checks.
-- [Permissions and roles](../reference/permissions.md).
+- Roles and rights: **Role Permissions Manager** (`/app/permission-manager`).
 - [Modules, workspaces, and routes](../reference/routes-workspaces.md).
 
 ## Configuration records

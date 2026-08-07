@@ -338,7 +338,7 @@ Any reverse proxy, load balancer, or CDN placed in front of the site must **over
 - [Workspace authoring](docs/administration/workspace-authoring.md)
 - [Reverse proxy prerequisite](docs/administration/reverse-proxy.md)
 - [Modules, workspaces, and routes](docs/reference/routes-workspaces.md)
-- [Permissions and roles](docs/reference/permissions.md)
+- Permissions and roles: open **Role Permissions Manager** (`/app/permission-manager`) on the site
 
 ## License
 

@@ -29,7 +29,7 @@ custody, service requests, and checkout across controlled role handoffs.
 4. [Custody](../custody.md)
 5. [Maintenance](../maintenance.md)
 6. [Costs and Leasing](../costs.md)
-7. [Housing permissions and row scope](../../reference/permissions.md#accommodation-permissions)
+7. **Role Permissions Manager** (`/app/permission-manager`)
 
 ## Practice checkpoint
 

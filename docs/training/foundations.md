@@ -49,8 +49,9 @@ The learner will be able to:
 - A private browser session.
 - An approved temporary export location and deletion deadline when the role
   permits export.
-- The canonical [permissions and role reference](../reference/permissions.md)
-  and [modules, workspaces, and routes reference](../reference/routes-workspaces.md).
+- The site's own **Role Permissions Manager** (`/app/permission-manager`) for who may
+  read, write or submit each document, and the [modules, workspaces, and routes
+  reference](../reference/routes-workspaces.md).
 
 ## Demo records
 
@@ -233,7 +234,7 @@ Never export personal, payroll, identity, token, or financial data for practice.
 
 ## References
 
-- [Permissions and Role Reference](../reference/permissions.md)
+- **Role Permissions Manager** (`/app/permission-manager`)
 - [Modules, Workspaces, and Routes](../reference/routes-workspaces.md)
 - [Getting Started in Apex](lessons/getting-started.md)
 - [Records and Workflows](lessons/records-and-workflows.md)

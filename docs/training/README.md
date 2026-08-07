@@ -92,7 +92,7 @@ the linked track.
 
 ## Authoritative references
 
-- [Permissions and roles](../reference/permissions.md)
+- **Role Permissions Manager** (`/app/permission-manager`)
 - [Modules, workspaces, and routes](../reference/routes-workspaces.md)
 - [Scheduled automation](../reference/automation.md)
 - [Business glossary](../reference/glossary.md)

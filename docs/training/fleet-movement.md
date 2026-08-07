@@ -19,7 +19,8 @@ records.
 - Prepare one active `Salis Vehicle`, one active `Salis Driver`, and two user
   accounts so the requester and authorizer are different people.
 - Grant the trainee only the role and Project User Permission needed for the
-  exercise. See [Fleet permissions](../reference/permissions.md#fleet-master-permissions).
+  exercise. Check the grant in **Role Permissions Manager**
+  (`/app/permission-manager`), filtered by Salis Vehicle and Salis Driver.
 - Review the shipped Desk and portal entry points in
   [Modules, Workspaces, and Routes](../reference/routes-workspaces.md).
 
@@ -94,7 +95,8 @@ request.
 
 Use `Fleet Control` for the scoped vehicle view and `Salis Dispatch Board` for
 today's vehicles, drivers, trips, and open requests. Use `Worker Transport Plan`
-before dispatch and `Transport Fulfilment SLA` after fulfilment.
+before dispatch and the **Transport Requests Served %** card on the Salis
+workspace after fulfilment.
 
 Automation that checks idle vehicles, attendance, utilisation, and boarding is
 listed in the [Scheduled Automation Reference](../reference/automation.md).

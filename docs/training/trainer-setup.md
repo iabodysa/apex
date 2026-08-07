@@ -15,7 +15,7 @@ result is a clean baseline that a trainer can restore before each cohort.
   production integrations disabled.
 - A site administrator used only for provisioning, backups, and reset.
 - An encrypted backup location with access limited to training administrators.
-- The [permissions](../reference/permissions.md) and
+- The **Role Permissions Manager** (`/app/permission-manager`) and
   [routes and workspaces](../reference/routes-workspaces.md) references open
   during setup.
 
@@ -85,7 +85,7 @@ trainer administration, and finance review.
 - Create distinct maker and checker accounts for each approval exercise. Sign
   out at handoff; never lend the checker account.
 - Grant only the roles listed in the canonical
-  [role charters and permission matrices](../reference/permissions.md#role-charters).
+  **Role Permissions Manager** (`/app/permission-manager`).
   A workspace or Page entry does not replace record permission.
 
 Test each scoped account. The North account must find North records but not
@@ -290,7 +290,7 @@ does not remove extra files. Never reset a site during another cohort.
 ## References
 
 - [Training curriculum](README.md)
-- [Permissions and role scope](../reference/permissions.md)
+- **Role Permissions Manager** (`/app/permission-manager`)
 - [Routes and workspaces](../reference/routes-workspaces.md)
 - [Troubleshooting](../reference/troubleshooting.md)
 - [Records and workflows](lessons/records-and-workflows.md)

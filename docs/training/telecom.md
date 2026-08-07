@@ -20,7 +20,7 @@ learner's role.
 - Trainer-provided Company, telecom Supplier, Cost Center, Project, Employee,
   and non-stock service Item records.
 - Company User Permission where the training role is company-scoped.
-- [Telecom permissions](../reference/permissions.md#telecom-permissions).
+- **Role Permissions Manager** (`/app/permission-manager`).
 
 ## Record model
 
@@ -86,7 +86,7 @@ Telecom records belong to **Logistay**, which ships its own workspace. They are
 also exposed through the Custody and Costs workspace and the Telecom Control
 page; there is no separate SIM module.
 Page access and visible buttons remain subject to the
-[telecom permission reference](../reference/permissions.md#telecom-permissions).
+**Role Permissions Manager** (`/app/permission-manager`).
 Finance Manager has read-only contract access and no Telecom Control Page role;
 finance reviews the contract form, reports, and any native draft it may create
 through its separate target-DocType permission.
