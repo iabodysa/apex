@@ -75,7 +75,7 @@ def _seed_issue_types():
         if frappe.db.exists("Issue Type", name):
             continue
         frappe.get_doc({"doctype": "Issue Type", "name": name}).insert(
-            ignore_permissions=True  # audit-ok
+            ignore_permissions=True
         )
 
 
@@ -87,7 +87,7 @@ def _seed_issue_priorities():
         if frappe.db.exists("Issue Priority", name):
             continue
         frappe.get_doc({"doctype": "Issue Priority", "name": name}).insert(
-            ignore_permissions=True  # audit-ok
+            ignore_permissions=True
         )
 
 
@@ -121,7 +121,7 @@ def _ensure_holiday_list():
     doc.holiday_list_name = _SLA_HOLIDAY_LIST
     doc.from_date = _SLA_HOLIDAY_WINDOW[0]
     doc.to_date = _SLA_HOLIDAY_WINDOW[1]
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
     return doc.name
 
 
@@ -176,7 +176,7 @@ def _seed_sla():
     for status in ("Resolved", "Closed"):
         doc.append("sla_fulfilled_on", {"status": status})
 
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
 
 
 def _grant_issue_role_perms():

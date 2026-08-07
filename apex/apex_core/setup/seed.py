@@ -173,7 +173,7 @@ def apply_spec(spec):
         frappe.db.savepoint(savepoint)
         try:
             doc = frappe.get_doc({"doctype": doctype, **record})
-            doc.insert(ignore_permissions=True, ignore_if_duplicate=True)  # audit-ok
+            doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
             created += 1
         except Exception:  # noqa: BLE001
             frappe.db.rollback(save_point=savepoint)

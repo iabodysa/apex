@@ -136,7 +136,7 @@ def daily_rental_accrual() -> None:
                         "source_doctype": source_doctype,
                         "source_name": source_name,
                     }
-                ).insert(ignore_permissions=True)  # audit-ok
+                ).insert(ignore_permissions=True)
             except Exception:
                 frappe.db.rollback(save_point=sp)
                 frappe.log_error(

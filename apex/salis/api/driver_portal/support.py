@@ -149,7 +149,7 @@ def _create_support_ticket(
     if project:
         data["project"] = project
     doc = frappe.get_doc(data)
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
     from apex.salis.api.driver_portal.images import save_driver_image
 
     save_driver_image(photo, photo_filename, doc.doctype, doc.name)
@@ -274,7 +274,7 @@ def reply_to_ticket(name, message):
             "content": message,
         }
     )
-    comm.insert(ignore_permissions=True)  # audit-ok
+    comm.insert(ignore_permissions=True)
     if issue.get("status") in ("Resolved", "Closed"):
         frappe.db.set_value("Issue", name, "status", "Open")
     return {"name": comm.name}

@@ -93,7 +93,7 @@ def create_accommodation_item_groups(item_group_root):
         if exists:
             doc = frappe.get_doc("Item Group", group)
             doc.parent_item_group = item_group_root
-            doc.save(ignore_permissions=True)  # audit-ok
+            doc.save(ignore_permissions=True)
         else:
             frappe.get_doc(
                 {
@@ -102,7 +102,7 @@ def create_accommodation_item_groups(item_group_root):
                     "parent_item_group": item_group_root,
                     "is_group": 0,
                 }
-            ).insert(ignore_permissions=True)  # audit-ok
+            ).insert(ignore_permissions=True)
 
 
 def create_accommodation_items():
@@ -110,7 +110,7 @@ def create_accommodation_items():
     for record in _load_accommodation_item_records():
         if frappe.db.exists("Item", record["item_code"]):
             continue
-        frappe.get_doc(record).insert(ignore_permissions=True)  # audit-ok
+        frappe.get_doc(record).insert(ignore_permissions=True)
 
 
 def _load_accommodation_item_records():

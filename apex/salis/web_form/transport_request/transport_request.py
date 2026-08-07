@@ -64,5 +64,5 @@ def submit_transport_request(
         "source_channel": "Web QR",
         "status": "New",
     })
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
     return {"name": doc.name, "tracking_code": doc.anonymous_tracking_code}

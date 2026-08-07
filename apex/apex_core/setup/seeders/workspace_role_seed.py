@@ -48,5 +48,5 @@ def seed_workspace_roles():
             continue
         for role in sorted(roles):
             ws.append("roles", {"role": role})
-        ws.flags.ignore_permissions = True  # audit-ok
+        ws.flags.ignore_permissions = True
         ws.save()

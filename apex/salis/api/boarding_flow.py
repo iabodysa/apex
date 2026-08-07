@@ -129,7 +129,7 @@ def ensure_trip_boarding_state(dispatch_trip, transport_request=None):
         )
         added += 1
     if added:
-        trip.save(ignore_permissions=True)  # audit-ok
+        trip.save(ignore_permissions=True)
     return added
 
 
@@ -149,7 +149,7 @@ def mark_boarded(dispatch_trip, employee, source="Scan"):
             row.confirm_source = source
             changed = True
     if changed:
-        trip.save(ignore_permissions=True)  # audit-ok
+        trip.save(ignore_permissions=True)
         frappe.cache.delete_value(_MISBOARD_CACHE_PREFIX + employee)
 
 
@@ -309,7 +309,7 @@ def auto_confirm_claimed_boardings():
             trip = frappe.get_doc("Dispatch Trip", name)
             flipped = _apply_auto_confirm(trip)
             if flipped:
-                trip.save(ignore_permissions=True)  # audit-ok
+                trip.save(ignore_permissions=True)
                 confirmed += flipped
                 _publish("boarding_update", name, {"auto_confirmed": flipped})
         except Exception:
@@ -372,7 +372,7 @@ def get_trip_boarding(dispatch_trip):
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     if _apply_auto_confirm(trip):
-        trip.save(ignore_permissions=True)  # audit-ok
+        trip.save(ignore_permissions=True)
 
     return {
         "dispatch_trip": dispatch_trip,
@@ -415,7 +415,7 @@ def notify_remaining_passengers(dispatch_trip):
             row.notify_count = cint(row.notify_count) + 1
         changed = True
     if changed:
-        trip.save(ignore_permissions=True)  # audit-ok
+        trip.save(ignore_permissions=True)
 
     _publish("boarding_update", dispatch_trip, {"max_count": max_count, "window": window})
 
@@ -463,7 +463,7 @@ def worker_request_wait(token=None):
     if cint(target.wait_count) < max_count:
         target.wait_count = cint(target.wait_count) + 1
     target.wait_at = now_datetime()
-    trip.save(ignore_permissions=True)  # audit-ok
+    trip.save(ignore_permissions=True)
 
     wait_count = cint(target.wait_count)
     _publish(
@@ -552,11 +552,11 @@ def worker_claim_boarded(token=None):
                 "method": "Worker",
             },
         )
-        log.save(ignore_permissions=True)  # audit-ok
+        log.save(ignore_permissions=True)
 
     if target.status != "Boarded":
         target.worker_claim_at = now_datetime()
-        trip.save(ignore_permissions=True)  # audit-ok
+        trip.save(ignore_permissions=True)
     mark_boarded(dispatch_trip, employee, source="Worker")
 
     _publish(
@@ -591,7 +591,7 @@ def _remove_boarding_event(dispatch_trip, employee):
     if len(kept) == len(log.boarding_events or []):
         return
     log.set("boarding_events", kept)
-    log.save(ignore_permissions=True)  # audit-ok
+    log.save(ignore_permissions=True)
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -619,7 +619,7 @@ def driver_mark_not_boarded(dispatch_trip, employee):
     target.confirm_source = None
     target.worker_claim_at = None
     target.reject_count = cint(target.reject_count) + 1
-    trip.save(ignore_permissions=True)  # audit-ok
+    trip.save(ignore_permissions=True)
     _publish(
         "boarding_unmarked",
         dispatch_trip,
@@ -675,7 +675,7 @@ def worker_trip_boarding(token=None):
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     if _apply_auto_confirm(trip):
-        trip.save(ignore_permissions=True)  # audit-ok
+        trip.save(ignore_permissions=True)
     row = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     state = (
         _state_payload(row, window)
@@ -743,7 +743,7 @@ def depart_and_finalize(dispatch_trip):
         else:
             pending += 1
     if changed:
-        trip.save(ignore_permissions=True)  # audit-ok
+        trip.save(ignore_permissions=True)
 
     _close_trip_log(dispatch_trip)
 
@@ -785,4 +785,4 @@ def _close_trip_log(dispatch_trip):
     log.status = "Completed"
     if not log.end_datetime:
         log.end_datetime = now_datetime()
-    log.save(ignore_permissions=True)  # audit-ok
+    log.save(ignore_permissions=True)

@@ -309,7 +309,7 @@ def _get_or_create_log(dispatch_trip: str) -> "frappe.model.document.Document":
             "start_datetime": now_datetime(),
         }
     )
-    log.insert(ignore_permissions=True)  # audit-ok
+    log.insert(ignore_permissions=True)
     from apex.salis.api.boarding_flow import ensure_trip_boarding_state
 
     ensure_trip_boarding_state(dispatch_trip)
@@ -353,7 +353,7 @@ def _log_scan(
             "notes": notes,
         }
     )
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
     return doc.name
 
 
@@ -469,7 +469,7 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
             "method": "QR",
         },
     )
-    log.save(ignore_permissions=True)  # audit-ok
+    log.save(ignore_permissions=True)
 
     scan_log = _log_scan(
         dispatch_trip, trip, worker, "Valid", pass_token,

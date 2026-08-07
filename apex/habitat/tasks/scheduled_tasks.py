@@ -103,7 +103,7 @@ def daily_scheduled_task_instance_generator() -> None:
                         "due_date": due_date,
                         "status": "Open",
                     })
-                    instance.insert(ignore_permissions=True)  # audit-ok
+                    instance.insert(ignore_permissions=True)
                     created += 1
                     logger.info(
                         "daily_scheduled_task_instance_generator: created %s "

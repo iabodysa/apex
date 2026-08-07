@@ -66,7 +66,7 @@ class MaintenanceWorkOrder(Document):
             "source_name": self.name,
             "allocation_basis": "Direct",
             "reversal_of": original.name,
-        }).insert(ignore_permissions=True)  # audit-ok
+        }).insert(ignore_permissions=True)
 
 
 def validate(doc, method=None):
@@ -223,7 +223,7 @@ def mark_completed(
             "allocation_basis": "Direct",
             "allocation_period_start": doc.actual_start_date,
             "allocation_period_end": doc.actual_end_date,
-        }).insert(ignore_permissions=True)  # audit-ok
+        }).insert(ignore_permissions=True)
         ledger_posted = True
 
     from apex.habitat.maintenance_engine import post_maintenance_cost

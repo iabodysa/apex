@@ -79,7 +79,7 @@ def daily_cleaning_log_generator() -> None:
                     "cleaning_date": cleaning_date,
                     "room_details": [{"room": room} for room in rooms],
                 })
-                log.insert(ignore_permissions=True)  # audit-ok
+                log.insert(ignore_permissions=True)
             except Exception:
                 frappe.db.rollback(save_point=_CLEANING_SAVEPOINT)
                 frappe.log_error(

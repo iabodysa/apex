@@ -153,8 +153,7 @@ def raise_recovery_advance(
             SOURCE_DOCNAME_FIELD: source_name,
         }
     )
-    # audit-ok
-    advance.insert(ignore_permissions=True)  # audit-ok
+    advance.insert(ignore_permissions=True)
     advance.submit()
     logger.info(
         f"employee_recovery: Employee Advance {advance.name} raised for {source_doctype} {source_name}."
@@ -399,8 +398,7 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
             "ref_docname": advance,
         }
     )
-    # audit-ok
-    installment.insert(ignore_permissions=True)  # audit-ok
+    installment.insert(ignore_permissions=True)
     frappe.logger().info(
         f"employee_recovery: installment {installment.name} ({amount}) queued against advance {advance}."
     )

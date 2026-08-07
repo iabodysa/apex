@@ -118,7 +118,7 @@ def on_update(doc, method=None):
         return
     if old_sup:
         for perm in _building_supervisor_permissions(old_sup, doc.name):
-            frappe.delete_doc("User Permission", perm, ignore_permissions=True)  # audit-ok
+            frappe.delete_doc("User Permission", perm, ignore_permissions=True)
     if new_sup and not _building_supervisor_permissions(new_sup, doc.name):
         frappe.get_doc(
             {
@@ -127,7 +127,7 @@ def on_update(doc, method=None):
                 "allow": "Building",
                 "for_value": doc.name,
             }
-        ).insert(ignore_permissions=True)  # audit-ok
+        ).insert(ignore_permissions=True)
 
 
 def _recompute_capacity_and_cost(doc):

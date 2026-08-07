@@ -76,7 +76,7 @@ def seed_module_profiles():
             doc.module_profile_name = profile_name
             for module in blocked_modules_for(profile_name):
                 doc.append("block_modules", {"module": module})
-            doc.insert(ignore_permissions=True)  # audit-ok
+            doc.insert(ignore_permissions=True)
             doc.unlock()
         except Exception:
             frappe.db.rollback(save_point=savepoint)

@@ -232,7 +232,7 @@ def daily_occupancy_snapshot() -> None:
                     "full_rooms": room_bucket.get("Full", 0),
                     "partial_rooms": room_bucket.get("Partially Occupied", 0),
                     "available_rooms": room_bucket.get("Available", 0),
-                }).insert(ignore_permissions=True)  # audit-ok
+                }).insert(ignore_permissions=True)
             except Exception:
                 frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(

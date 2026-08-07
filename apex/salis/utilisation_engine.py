@@ -86,7 +86,7 @@ def weekly_vehicle_utilisation_snapshot() -> None:
                         "idle_days": idle_days,
                         "utilisation_pct": utilisation_pct,
                     }
-                ).insert(ignore_permissions=True)  # audit-ok
+                ).insert(ignore_permissions=True)
             except Exception:
                 frappe.db.rollback(save_point=sp)
                 frappe.log_error(

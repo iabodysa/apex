@@ -60,7 +60,7 @@ def unreverted_topup_watch() -> None:
                 doc = frappe.get_doc("Fuel Request", t.name)
                 doc.reverted = 1
                 doc.status = "Reverted"
-                doc.save(ignore_permissions=True)  # audit-ok
+                doc.save(ignore_permissions=True)
                 doc.add_comment(
                     "Info",
                     _("Auto-reverted: overdue temporary top-up (was due {0}).").format(

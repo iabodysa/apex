@@ -292,7 +292,7 @@ class DispatchTrip(Document):
                 "source_name": self.name,
             }
         )
-        ledger.insert(ignore_permissions=True)  # audit-ok
+        ledger.insert(ignore_permissions=True)
 
     def on_cancel(self):
         """Reverse the on_submit fulfilment effects so a cancelled trip does not
@@ -318,7 +318,7 @@ class DispatchTrip(Document):
             pluck="name",
         ):
             frappe.delete_doc(
-                "Trip Fulfilment Ledger", row, ignore_permissions=True, force=True  # audit-ok
+                "Trip Fulfilment Ledger", row, ignore_permissions=True, force=True
             )
         from apex.salis.boarding_engine import reverse_trip_boarding
 

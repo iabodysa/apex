@@ -45,5 +45,5 @@ def submit_resident_request(
         "mobile_number": contact_number,
         "source_channel": "QR Web Form",
     })
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
     return {"name": doc.name, "tracking_code": doc.anonymous_tracking_code}

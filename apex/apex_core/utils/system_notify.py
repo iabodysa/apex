@@ -79,7 +79,7 @@ def notify_user_system(
             dedup_filter["subject"] = clipped_subject
         if frappe.db.exists(LOG_DOCTYPE, dedup_filter):
             return False
-        frappe.get_doc(payload).insert(ignore_permissions=True)  # audit-ok
+        frappe.get_doc(payload).insert(ignore_permissions=True)
         return True
     except Exception:
         frappe.db.rollback(save_point=_SAVEPOINT)

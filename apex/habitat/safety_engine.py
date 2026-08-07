@@ -82,7 +82,7 @@ def _insert_ledger_row(
             "source_detail_no": source_detail_no,
             "logged_at": logged_at,
         }
-    ).insert(ignore_permissions=True)  # audit-ok
+    ).insert(ignore_permissions=True)
 
 
 def post_safety_findings(safety_round) -> int:
@@ -199,7 +199,7 @@ def reverse_safety_findings(safety_round_name: str) -> int:
                 "reversal_of": row.name,
                 "logged_at": now_datetime(),
             }
-        ).insert(ignore_permissions=True)  # audit-ok
+        ).insert(ignore_permissions=True)
         posted += 1
 
     return posted

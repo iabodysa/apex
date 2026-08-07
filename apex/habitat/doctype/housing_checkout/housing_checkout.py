@@ -258,7 +258,7 @@ def on_submit(doc, method=None):
                         "estimated_replacement_cost": 0,
                     })
             try:
-                damage_doc.insert(ignore_permissions=True)  # audit-ok
+                damage_doc.insert(ignore_permissions=True)
                 doc.add_comment("Comment", _("Draft Damage Assessment created: {0}. Please review and submit.").format(damage_doc.name))
             except Exception:
                 frappe.log_error(
@@ -278,8 +278,7 @@ def _cancel_orphan_damage_assessment(doc):
         filters={"source_checkout": doc.name, "docstatus": 0},
         pluck="name",
     ):
-        # audit-ok
-        frappe.delete_doc("Custody Damage Assessment", cda, ignore_permissions=True)  # audit-ok
+        frappe.delete_doc("Custody Damage Assessment", cda, ignore_permissions=True)
 
 
 def before_cancel(doc, method=None):
@@ -371,7 +370,7 @@ def create_departure_transport(checkout):
 
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)
     request = _build_departure_transport(doc, assignment)
-    request.insert(ignore_permissions=True)  # audit-ok
+    request.insert(ignore_permissions=True)
 
     doc.db_set("departure_transport_request", request.name)
     doc.add_comment("Comment", _("Departure Transport Request raised: {0}").format(request.name))

@@ -786,7 +786,7 @@ def create_worker_request(
             "status": "New",
         }
     )
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
     if photo:
         _attach_worker_photo(doc, photo, photo_filename)
     return {"name": doc.name, "status": doc.status}
@@ -980,7 +980,7 @@ def _get_or_create_trip_log(dispatch_trip):
             "start_datetime": frappe.utils.now_datetime(),
         }
     )
-    log.insert(ignore_permissions=True)  # audit-ok
+    log.insert(ignore_permissions=True)
     from apex.salis.api.boarding_flow import ensure_trip_boarding_state
 
     ensure_trip_boarding_state(dispatch_trip)
@@ -1060,7 +1060,7 @@ def confirm_boarding(token=None, transport_request=None):
             "method": _WORKER_BOARDING_METHOD,
         },
     )
-    log.save(ignore_permissions=True)  # audit-ok
+    log.save(ignore_permissions=True)
     from apex.salis.api.boarding_flow import mark_boarded
 
     mark_boarded(dispatch_trip, employee)
@@ -1211,7 +1211,7 @@ def create_worker_transport_request(
             "adhoc_passengers": adhoc_rows,
         }
     )
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
     return {"name": doc.name, "status": doc.status, "adhoc_count": len(adhoc_rows)}
 
 

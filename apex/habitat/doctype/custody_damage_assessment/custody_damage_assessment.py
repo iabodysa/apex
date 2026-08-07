@@ -159,7 +159,7 @@ def on_cancel(doc, method=None):
 
     if frappe.db.get_value("Additional Salary", doc.deduction_entry, "docstatus") == 0:
         entry = doc.deduction_entry
-        frappe.delete_doc("Additional Salary", entry, force=True, ignore_permissions=True)  # audit-ok
+        frappe.delete_doc("Additional Salary", entry, force=True, ignore_permissions=True)
 
     if doc.source_checkout:
         frappe.db.set_value(

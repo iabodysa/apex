@@ -313,7 +313,7 @@ def log_credential_event(
             "link_doctype": _SUBJECT_DOCTYPES[audience],
             "link_name": subject,
         }
-    ).insert(ignore_permissions=True, ignore_links=True).name  # audit-ok
+    ).insert(ignore_permissions=True, ignore_links=True).name
 
 
 def revoke_subject_tokens(audience: str, subject: str) -> int:

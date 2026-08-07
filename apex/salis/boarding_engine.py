@@ -112,7 +112,7 @@ def _insert_ledger_row(
             "source_name": dispatch_trip,
             "source_detail_no": employee,
         }
-    ).insert(ignore_permissions=True)  # audit-ok
+    ).insert(ignore_permissions=True)
 
 
 def post_trip_boarding(dispatch_trip: str) -> int:
@@ -230,7 +230,7 @@ def reverse_trip_boarding(dispatch_trip: str) -> int:
                 "is_cancelled": 1,
                 "reversal_of": row.name,
             }
-        ).insert(ignore_permissions=True)  # audit-ok
+        ).insert(ignore_permissions=True)
         frappe.db.set_value(
             LEDGER_DOCTYPE, row.name, "is_cancelled", 1, update_modified=False
         )

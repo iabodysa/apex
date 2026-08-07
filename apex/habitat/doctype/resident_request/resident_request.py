@@ -108,7 +108,7 @@ def _sync_assignment_todo(doc):
         "description": _("Resident request assigned for follow-up: {0}").format(doc.name),
         "priority": priority,
         "assigned_by": frappe.session.user,
-    }).insert(ignore_permissions=True)  # audit-ok
+    }).insert(ignore_permissions=True)
     frappe.db.set_value(doc.doctype, doc.name, "_assign",
                         frappe.as_json([doc.assigned_to]), update_modified=False)
 

@@ -67,7 +67,7 @@ def seed_salis_settings():
                 filled.append("default_cost_center")
 
         if filled:
-            settings.save(ignore_permissions=True)  # audit-ok
+            settings.save(ignore_permissions=True)
             frappe.db.commit()
         return filled
     except Exception:

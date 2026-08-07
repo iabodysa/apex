@@ -92,7 +92,7 @@ def _insert_ledger_row(
             "source_name": source_name,
             "logged_at": logged_at,
         }
-    ).insert(ignore_permissions=True)  # audit-ok
+    ).insert(ignore_permissions=True)
 
 
 def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
@@ -154,7 +154,7 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
                 "logged_at": now_datetime(),
                 "reversal_of": row.name,
             }
-        ).insert(ignore_permissions=True)  # audit-ok
+        ).insert(ignore_permissions=True)
         posted += 1
 
     return posted

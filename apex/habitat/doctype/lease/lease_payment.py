@@ -157,7 +157,7 @@ def create_rent_payment(lease: str, due_date: str, purchase_invoice: str | None 
     payment.remarks = _("Rent for {0} — instalment due {1} ({2}), settling {3}.").format(
         lease_doc.building, getdate(row.due_date), lease_doc.name, invoice.name
     )
-    payment.insert(ignore_permissions=True)  # audit-ok
+    payment.insert(ignore_permissions=True)
     return _result(payment.name, False)
 
 

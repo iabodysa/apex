@@ -68,7 +68,7 @@ def start_my_trip(dispatch_trip):
                 "start_datetime": frappe.utils.now_datetime(),
             }
         )
-        doc.insert(ignore_permissions=True)  # audit-ok
+        doc.insert(ignore_permissions=True)
     return _trip_log_state(driver, dispatch_trip)
 
 
@@ -105,7 +105,7 @@ def complete_my_trip(dispatch_trip):
     doc.status = "Completed"
     if not doc.end_datetime:
         doc.end_datetime = frappe.utils.now_datetime()
-    doc.flags.ignore_permissions = True  # audit-ok
+    doc.flags.ignore_permissions = True
     doc.save() if not doc.is_new() else doc.insert()
     return _trip_log_state(driver, dispatch_trip)
 
@@ -193,7 +193,7 @@ def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_na
                 "done_at": frappe.utils.now_datetime() if done else None,
             },
         )
-    log.flags.ignore_permissions = True  # audit-ok
+    log.flags.ignore_permissions = True
     log.save()
     return {
         "route_stop": route_stop,

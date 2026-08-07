@@ -46,7 +46,7 @@ def seed_salis_navbar_help_links():
             })
             changed = True
         if changed:
-            settings.save(ignore_permissions=True)  # audit-ok
+            settings.save(ignore_permissions=True)
             frappe.db.commit()
     except Exception:
         frappe.log_error(

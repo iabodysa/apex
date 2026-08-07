@@ -55,5 +55,5 @@ def submit_vehicle_incident(
         "reported_by": reported_by,
         "status": "Open",
     })
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
     return {"name": doc.name}

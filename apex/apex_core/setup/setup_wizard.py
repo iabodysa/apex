@@ -58,7 +58,7 @@ def _apply_apex_settings(args):
     """Apex Settings — the app-wide GL-posting finance gate (default OFF)."""
     apex = frappe.get_single("Apex Settings")
     apex.enable_gl_posting = 1 if cint(args.get("apex_post_gl")) else 0
-    apex.save(ignore_permissions=True)  # audit-ok
+    apex.save(ignore_permissions=True)
 
 
 def _apply_habitat_settings(args):
@@ -72,7 +72,7 @@ def _apply_habitat_settings(args):
     habitat.enable_operational_notifications = (
         1 if cint(args.get("apex_enable_operational_notifications")) else 0
     )
-    habitat.save(ignore_permissions=True)  # audit-ok
+    habitat.save(ignore_permissions=True)
 
 
 def _apply_salis_settings(args):
@@ -87,7 +87,7 @@ def _apply_salis_settings(args):
         salis.default_cost_center = cost_center
     salis.enable_driver_portal = 1 if cint(args.get("apex_enable_driver_portal")) else 0
     salis.enable_approvals = 1 if cint(args.get("apex_enable_approvals")) else 0
-    salis.save(ignore_permissions=True)  # audit-ok
+    salis.save(ignore_permissions=True)
 
 
 def _apply_payment_routing(args):
@@ -105,7 +105,7 @@ def _apply_payment_routing(args):
     validate_target_doctype(payment_method)
     router = frappe.get_single("Payment Routing Settings")
     router.target_payment_doctype = payment_method
-    router.save(ignore_permissions=True)  # audit-ok
+    router.save(ignore_permissions=True)
 
 
 def _apply_deduction_policy(args):
@@ -123,14 +123,14 @@ def _apply_deduction_policy(args):
     _set_rule_enabled(policy, "Rent", deduct_housing)
     _set_rule_enabled(policy, "Damage", deduct_damage)
     try:
-        policy.save(ignore_permissions=True)  # audit-ok
+        policy.save(ignore_permissions=True)
     except frappe.ValidationError:
         frappe.clear_last_message()
         policy.reload()
         policy.enable_salary_deductions = 0
         _set_rule_enabled(policy, "Rent", False)
         _set_rule_enabled(policy, "Damage", False)
-        policy.save(ignore_permissions=True)  # audit-ok
+        policy.save(ignore_permissions=True)
         frappe.msgprint(
             _(
                 "Payment method saved. To enable salary deductions, set the "

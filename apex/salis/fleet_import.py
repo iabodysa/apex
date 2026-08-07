@@ -59,7 +59,7 @@ def run(csv_dir=None):
             try:
                 frappe.get_doc({"doctype": "Vehicle Category", "category_name": cn,
                                 "default_fuel_type": (r.get("default_fuel_type") or "").strip() or None}
-                               ).insert(ignore_permissions=True)  # audit-ok
+                               ).insert(ignore_permissions=True)
                 made += 1
             except Exception:
                 pass
@@ -71,7 +71,7 @@ def run(csv_dir=None):
         if on and not frappe.db.exists("Rental Office", {"name": on}):
             try:
                 frappe.get_doc({"doctype": "Rental Office", "office_name": on,
-                                "status": (r.get("status") or "Active").strip()}).insert(ignore_permissions=True)  # audit-ok
+                                "status": (r.get("status") or "Active").strip()}).insert(ignore_permissions=True)
                 made += 1
             except Exception:
                 pass
@@ -85,7 +85,7 @@ def run(csv_dir=None):
         name = frappe.db.get_value("Project", {"project_name": pn}, "name")
         if not name:
             try:
-                name = frappe.get_doc({"doctype": "Project", "project_name": pn}).insert(ignore_permissions=True).name  # audit-ok
+                name = frappe.get_doc({"doctype": "Project", "project_name": pn}).insert(ignore_permissions=True).name
             except Exception:
                 continue
         proj[pn] = name
@@ -115,7 +115,7 @@ def run(csv_dir=None):
                     "phone": (r.get("phone") or "").strip() or None,
                     "status": (r.get("status") or "Active").strip(),
                     "project": proj.get((r.get("project") or "").strip()),
-                }).insert(ignore_permissions=True).name  # audit-ok
+                }).insert(ignore_permissions=True).name
             except Exception:
                 continue
         drv[did] = name
@@ -149,7 +149,7 @@ def run(csv_dir=None):
                     "rental_office": (r.get("rental_office") or "").strip() or None,
                     "project": proj.get((r.get("project") or "").strip()),
                     "status": (r.get("status") or "Active").strip(),
-                }).insert(ignore_permissions=True).name  # audit-ok
+                }).insert(ignore_permissions=True).name
             except Exception:
                 continue
         veh[plate] = name
@@ -181,7 +181,7 @@ def run(csv_dir=None):
                 "status": (r.get("status") or "Ended").strip(),
             })
             a.flags.ignore_validate = True
-            a.insert(ignore_permissions=True)  # audit-ok
+            a.insert(ignore_permissions=True)
             loaded += 1
         except Exception:
             skipped += 1

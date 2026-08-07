@@ -127,7 +127,7 @@ def clear_demo_data():
             else:
                 deleted += 1
 
-    frappe.db.commit()  # audit-ok
+    frappe.db.commit()
     deleted, residue = _remove_demo_users(deleted, residue)
 
     frappe.cache.delete_keys("bootinfo")
@@ -153,7 +153,7 @@ def _remove_one(doctype, name):
         frappe.delete_doc(
             doctype,
             name,
-            ignore_permissions=True,  # audit-ok
+            ignore_permissions=True,
             delete_permanently=True,
         )
     except Exception as exc:
@@ -219,7 +219,7 @@ def _remove_demo_users(deleted, residue):
             residue.append({"doctype": "User", "name": user, "error": error})
         else:
             deleted += 1
-    frappe.db.commit()  # audit-ok
+    frappe.db.commit()
 
     for contact in contacts:
         if not frappe.db.exists("Contact", {"name": contact}):
@@ -273,7 +273,7 @@ def _create_demo_users():
                 "first_name": full_name,
                 "send_welcome_email": 0,
             }
-        ).insert(ignore_permissions=True)  # audit-ok
+        ).insert(ignore_permissions=True)
         installed = [
             role for role in roles if frappe.db.exists("Role", {"name": role})
         ]
@@ -293,7 +293,7 @@ def _scope_supervisor(building):
             "allow": "Building",
             "for_value": building,
         }
-    ).insert(ignore_permissions=True)  # audit-ok
+    ).insert(ignore_permissions=True)
 
 
 def _create(doctype, payload):
@@ -305,7 +305,7 @@ def _create(doctype, payload):
             )
         )
     doc = frappe.get_doc(dict(payload, doctype=doctype))
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
     return doc
 
 

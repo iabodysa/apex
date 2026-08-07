@@ -270,15 +270,15 @@ async function networkFirstShell(request, shellKey) {
   // Only handle our own origin.
   if (url.origin !== self.location.origin) return;
 
-${networkOnlyApiPrefixes.length ? `  // Driver and boarding API data is credential-scoped and must never enter or use a cache.
+${networkOnlyApiPrefixes.length ? `
   if (isNetworkOnlyApiRequest(url)) {
     event.respondWith(fetch(request));
     return;
   }
 
-` : ""}${cacheData ? `  // Portal data API: network-first, fall back to cache offline. frappe-ui issues
-  // these as POST (args in the body), so we handle GET and POST and key the cache
-  // on the body — see networkFirstData.
+` : ""}${cacheData ? `
+
+
   if (isPortalDataRequest(url) && (request.method === "GET" || request.method === "POST")) {
     event.respondWith(networkFirstData(request));
     return;

@@ -80,7 +80,7 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
          "request_date": request_date, "status": "Pending"}
     )
     doc._guard_quota_allowance()
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
     return {"name": doc.name}
 
 

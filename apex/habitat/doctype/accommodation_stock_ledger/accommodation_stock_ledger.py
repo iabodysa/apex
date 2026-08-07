@@ -102,7 +102,7 @@ def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no
         "reversal_of": reversal_of,
         "remarks": remarks,
     })
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
     return doc.name
 
 

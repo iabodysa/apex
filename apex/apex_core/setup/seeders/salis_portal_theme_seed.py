@@ -33,5 +33,5 @@ def seed_salis_portal_theme():
             settings.set(field, value)
             filled.append(field)
     if filled:
-        settings.save(ignore_permissions=True)  # audit-ok
+        settings.save(ignore_permissions=True)
     return filled

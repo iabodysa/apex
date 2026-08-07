@@ -47,5 +47,5 @@ def seed_auto_email_reports_for(reports):
             "data_modified_till": 0,
             "no_of_rows": 100,
         })
-        doc.insert(ignore_permissions=True)  # audit-ok
+        doc.insert(ignore_permissions=True)
     frappe.db.commit()

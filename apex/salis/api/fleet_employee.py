@@ -238,7 +238,7 @@ def submit_fuel_request(litres, vehicle=None, fuel_grade=None, station=None, not
         }
     )
     doc._guard_quota_allowance()
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
 
     extras = []
     if fuel_grade:

@@ -71,5 +71,5 @@ def submit_arrival_manifest(
         "project": project,
         "expected_workers": rows,
     })
-    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.insert(ignore_permissions=True)
     return {"name": doc.name}

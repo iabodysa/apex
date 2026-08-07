@@ -467,7 +467,7 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
                     "priority": "High",
                     "assigned_by": frappe.session.user,
                 }
-            ).insert(ignore_permissions=True)  # audit-ok
+            ).insert(ignore_permissions=True)
             created.append(todo.name)
 
         if source_doctype and source_name:

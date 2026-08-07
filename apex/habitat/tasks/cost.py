@@ -78,7 +78,7 @@ def _post_accommodation_ledger_row(
         "allocation_basis": "Capacity",
         "allocation_period_start": posting_date,
         "allocation_period_end": posting_date,
-    }).insert(ignore_permissions=True)  # audit-ok
+    }).insert(ignore_permissions=True)
 
 
 def daily_accommodation_cost_allocation() -> None:

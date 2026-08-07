@@ -126,7 +126,7 @@ def _persist_attendance(doc):
 	  are ``allow_on_submit`` on the DocType, so ``save`` persists them with no
 	  amendment.
 	"""
-    doc.flags.ignore_permissions = True  # audit-ok
+    doc.flags.ignore_permissions = True
     if doc.docstatus == 0:
         doc.insert()
         doc.submit()
@@ -150,7 +150,7 @@ def _attach_attendance_photo(doc, photo, photo_filename):
         "images",
         {"image": file_doc.file_url, "captured_at": frappe.utils.now_datetime()},
     )
-    doc.flags.ignore_permissions = True  # audit-ok
+    doc.flags.ignore_permissions = True
     doc.save()
 
 

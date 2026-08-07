@@ -172,7 +172,7 @@ def _insert_ledger_row(
             "source_doctype": source_doctype,
             "source_name": source_name,
         }
-    ).insert(ignore_permissions=True)  # audit-ok
+    ).insert(ignore_permissions=True)
 
 
 def post_asset_movement(doc) -> None:
@@ -248,7 +248,7 @@ def reverse_asset_movement(source_doctype: str, source_name: str) -> int:
                 "source_name": source_name,
                 "reversal_of": row.name,
             }
-        ).insert(ignore_permissions=True)  # audit-ok
+        ).insert(ignore_permissions=True)
         posted += 1
 
     return posted

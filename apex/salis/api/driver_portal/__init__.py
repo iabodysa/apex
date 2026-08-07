@@ -428,7 +428,7 @@ def mark_arrived(dispatch_trip, route_stop, arrived=1, sequence=None, stop_name=
                 "arrived_at": frappe.utils.now_datetime() if arrived else None,
             },
         )
-    log.flags.ignore_permissions = True  # audit-ok
+    log.flags.ignore_permissions = True
     log.save()
 
     if arrived:
@@ -500,7 +500,7 @@ def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
             "last_seen": frappe.utils.now_datetime(),
         }
     )
-    doc.save(ignore_permissions=True)  # audit-ok
+    doc.save(ignore_permissions=True)
     return {"name": doc.name}
 
 
