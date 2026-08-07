@@ -1,73 +1,112 @@
-<style>
-  .ax-doc { font-family: Arial, sans-serif; color: #14332a; font-size: 12px; }
-  .ax-doc h1 { font-size: 18px; margin: 0; color: #14332a; }
-  .ax-sub { color: #4a5e55; font-size: 11px; margin-top: 2px; }
-  .ax-head { border-bottom: 3px solid #00844e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ax-recipient { font-size: 11px; color: #14332a; background: #eef6f1;
-                  border: 1px solid #00844e; border-radius: 3px; padding: 4px 10px; }
-  .ax-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ax-meta td { padding: 4px 8px; border: 1px solid #d9e4de; vertical-align: top; }
-  .ax-meta .ax-lbl { background: #f1f7f3; font-weight: bold; width: 22%; color: #14332a; }
-  .ax-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .ax-items th { background: #00844e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ax-items td { padding: 6px 8px; border: 1px solid #d9e4de; }
-  .ax-items tr:nth-child(even) td { background: #f6faf7; }
-  .ax-block { border: 1px solid #d9e4de; padding: 8px; margin-bottom: 12px; }
-  .ax-block .ax-blk-lbl { font-weight: bold; color: #00844e; margin-bottom: 4px; }
-  .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
-  .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
-  .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
-  .ax-letterhead { margin-bottom: 10px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div class="ax-letterhead">{{ letter_head }}</div>
-{% endif %}
-  <div class="ax-head">
-    <div>
-      <h1>{{ _("Subcontractor Service Order") }}</h1>
-      <div class="ax-sub">{{ doc.name }} &bull; {{ doc.get_formatted("scheduled_date") or "" }}</div>
-    </div>
-    <div class="ax-recipient">{{ _("Recipient") }}: {{ _("Supplier") }}</div>
-  </div>
+{%- set contract = (frappe.db.get_value("Subcontractor Service Contract", doc.contract,
+      ["service_type", "visit_frequency", "response_sla_hours", "rate_per_visit",
+       "monthly_retainer", "contract_start_date", "contract_end_date", "status"], as_dict=True) or {}) if doc.contract else {} -%}
+{%- set supplier = (frappe.db.get_value("Supplier", doc.supplier,
+      ["supplier_name", "tax_id", "mobile_no", "email_id"], as_dict=True) or {}) if doc.supplier else {} -%}
+{%- set company = (frappe.db.get_value("Company", doc.company,
+      ["company_name", "tax_id", "registration_details", "phone_no"], as_dict=True) or {}) if doc.company else {} -%}
+{%- set building = (frappe.db.get_value("Building", doc.building,
+      ["building_name", "responsible_supervisor", "city", "district", "total_capacity"], as_dict=True) or {}) if doc.building else {} -%}
+{%- set site_supervisor = frappe.get_fullname(building.responsible_supervisor) if building.get("responsible_supervisor") else None -%}
 
-  <table class="ax-meta">
-    <tr>
-      <td class="ax-lbl">{{ _("Supplier") }}</td>
-      <td>{{ doc.supplier or "" }}</td>
-      <td class="ax-lbl">{{ _("Service Type") }}</td>
-      <td>{{ doc.service_type or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Building") }}</td>
-      <td>{{ doc.building or "" }}</td>
-      <td class="ax-lbl">{{ _("Service Contract") }}</td>
-      <td>{{ doc.contract or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Scheduled Date") }}</td>
-      <td>{{ doc.get_formatted("scheduled_date") or "" }}</td>
-      <td class="ax-lbl">{{ _("Actual Visit Date") }}</td>
-      <td>{{ doc.get_formatted("actual_visit_date") or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Service Cost (SAR)") }}</td>
-      <td>{{ doc.get_formatted("service_cost") or "" }}</td>
-      <td class="ax-lbl">{{ _("Status") }}</td>
-      <td>{{ _(doc.status) if doc.status else "" }}</td>
-    </tr>
-  </table>
+{%- set service = doc.service_type or contract.get("service_type") -%}
+{%- set contract_rate = contract.get("rate_per_visit") -%}
+{%- set variance = frappe.utils.flt(doc.service_cost) - frappe.utils.flt(contract_rate) -%}
+{%- set order_rows = [{
+      "service": _(service) if service else None,
+      "site": building.get("building_name") or doc.building,
+      "scheduled": doc.scheduled_date,
+      "actual": doc.actual_visit_date,
+      "rate": contract_rate,
+      "cost": doc.service_cost,
+  }] if (doc.contract or service or doc.service_cost) else [] -%}
+{%- set issued_by = frappe.get_fullname(doc.owner) if doc.owner else None -%}
+{%- set doc_currency = (frappe.db.get_value("Company", doc.company, "default_currency") if doc.company else None)
+      or frappe.db.get_single_value("Habitat Settings", "default_currency")
+      or frappe.db.get_default("currency") or "SAR" -%}
 
-  {% if doc.visit_notes %}<div class="ax-block"><div class="ax-blk-lbl">{{ _("Technician Notes") }}</div>{{ doc.visit_notes }}</div>{% endif %}
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
 
-  <table class="ax-sign">
-    <tr>
-      <td>{{ _("Supplier") }}<br>{{ _("Signature") }}</td>
-      <td>{{ _("Supervisor") }}<br>{{ _("Signature") }}</td>
-    </tr>
-  </table>
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
 
-  <div class="ax-foot">{{ doc.name }}</div>
+  {{ ax.doc_title(doc, _("Subcontractor Service Order"), "Subcontractor Service Order",
+                  (_("Status") ~ ": " ~ _(doc.status)) if doc.status else "") }}
+
+  {{ ax.party_block([
+      {"role_ar": _("Order Issued To (Contractor)"), "role_en": "Issued to",
+       "name": supplier.get("supplier_name") or doc.supplier,
+       "lines": [
+         (_("VAT / Tax Registration No.") ~ ": " ~ supplier.tax_id) if supplier.get("tax_id") else None,
+         (_("Mobile") ~ ": " ~ supplier.mobile_no) if supplier.get("mobile_no") else None,
+         (_("Under Contract") ~ ": " ~ doc.contract) if doc.contract else None,
+       ]},
+      {"role_ar": _("Order Issued By (Client)"), "role_en": "Issued by",
+       "name": company.get("company_name") or doc.company,
+       "lines": [
+         (_("VAT / Tax Registration No.") ~ ": " ~ company.tax_id) if company.get("tax_id") else None,
+         (_("Site Supervisor") ~ ": " ~ site_supervisor) if site_supervisor else None,
+         get_address_text("Company", doc.company) if doc.company else None,
+       ]},
+  ]) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Authorising Contract"), "en": "Authorising contract", "value": doc.contract},
+       {"ar": _("Contract Period"), "en": "Contract period",
+        "value": (frappe.format_value(contract.contract_start_date, {"fieldtype": "Date"}) ~ " — " ~ frappe.format_value(contract.contract_end_date, {"fieldtype": "Date"})) if contract.get("contract_start_date") else None}],
+      [{"ar": _("Service of Work"), "en": "Service", "value": service, "tr": True},
+       {"ar": _("Response SLA (Hours)"), "en": "Response limit", "value": contract.get("response_sla_hours"), "fmt": "Int"}],
+      [{"ar": _("Site of Work"), "en": "Site", "value": building.get("building_name") or doc.building},
+       {"ar": _("Site Address"), "en": "Site address",
+        "value": (get_address_text("Building", doc.building) or building.get("district") or building.get("city")) if doc.building else None}],
+      [{"ar": _("Scheduled Date"), "en": "Scheduled", "value": doc.scheduled_date, "fmt": "Date"},
+       {"ar": _("Actual Visit Date"), "en": "Actual visit", "value": doc.actual_visit_date, "fmt": "Date"}],
+      [{"ar": _("Cost Center Charged"), "en": "Cost center", "value": doc.cost_center},
+       {"ar": _("Photographic Evidence on File"), "en": "Photo evidence on file",
+        "value": _("Yes") if doc.completion_photo else _("No")}],
+  ]) }}
+
+  {{ ax.line_table(
+      [{"ar": _("Service of Work"), "en": "Service", "key": "service"},
+       {"ar": _("Site of Work"), "en": "Site", "key": "site", "width": "18%"},
+       {"ar": _("Actual Visit Date"), "en": "Visited on", "key": "actual", "width": "14%", "fmt": "Date"},
+       {"ar": _("Contract Rate Per Visit"), "en": "Contract rate", "key": "rate", "num": True, "width": "15%", "fmt": "Currency"},
+       {"ar": _("Amount Payable"), "en": "Payable", "key": "cost", "num": True, "width": "15%", "fmt": "Currency"}],
+      order_rows,
+      totals=[frappe.format_value(doc.service_cost, {"fieldtype": "Currency"})],
+      empty_text=_("No service has been ordered on this sheet yet")) }}
+
+  {{ ax.amount_words(doc.service_cost, doc_currency) }}
+
+  {%- if doc.contract and contract_rate and variance %}
+  {{ ax.field_grid([
+      [{"ar": _("Difference Against the Contract Rate"), "en": "Variance vs contract rate", "value": variance, "fmt": "Currency"},
+       {"ar": _("Reason Recorded"), "en": "Reason on record", "value": doc.visit_notes}],
+  ]) }}
+  {%- endif %}
+
+  {{ ax.note_block(doc.visit_notes, _("Technician Notes")) }}
+
+  {{ ax.terms_block(doc) }}
+
+  {{ ax.declaration(_("The contractor certifies that the service above was carried out at the site on the actual visit date shown, and invoices only the amount payable stated here against this order. The site supervisor confirms the work was received. Any amount not stated on this order is not payable.")) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Issued By"), "en": "Issued by", "value": issued_by},
+       {"ar": _("Supervisor Confirmed Completion"), "en": "Supervisor confirmed",
+        "value": _("Yes") if doc.supervisor_confirmed else _("No")}],
+      [{"ar": _("Purchase Invoice Raised"), "en": "Purchase invoice", "value": doc.linked_purchase_invoice},
+       {"ar": _("Document State"), "en": "Document state",
+        "value": _("Draft") if doc.docstatus == 0 else (_("Submitted") if doc.docstatus == 1 else _("Cancelled"))}],
+  ]) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Contractor Technician"), "en": "Contractor technician", "name": supplier.get("supplier_name") or doc.supplier},
+      {"ar": _("Site Supervisor"), "en": "Site supervisor", "name": site_supervisor},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

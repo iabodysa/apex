@@ -1,100 +1,126 @@
-<style>
-  .ah-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
-  .ah-doc h1 { font-size: 18px; margin: 0; }
-  .ah-doc .ah-sub { color: #666; font-size: 12px; margin-top: 2px; }
-  .ah-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ah-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ah-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
-  .ah-meta .ah-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
-  .ah-desc { border: 1px solid #e2e2ea; padding: 8px; margin-bottom: 14px; min-height: 40px; }
-  .ah-items { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-  .ah-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: left; }
-  .ah-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
-  .ah-items tr:nth-child(even) td { background: #f8f8fb; }
-  .ah-total { text-align: right; font-weight: bold; margin-bottom: 16px; }
-  .ah-ar { color: #555; font-size: 10px; }
-  .ah-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
-  .ah-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
-  .ah-foot { margin-top: 20px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ah-doc">
-{% if not no_letterhead and letter_head %}
-  <div style="margin-bottom:10px">{{ letter_head }}</div>
-{% endif %}
-  <div class="ah-head">
-    <div>
-      <h1>Maintenance Work Order</h1>
-      <div class="ah-sub">أمر عمل صيانة &bull; {{ doc.name }}</div>
-    </div>
-    <div style="text-align:right; font-size:11px; color:#666;">
-      {{ frappe.db.get_single_value("Habitat Settings", "company") or "" }}
-    </div>
-  </div>
+{%- set req = (frappe.db.get_value("Maintenance Request", doc.maintenance_request,
+      ["company", "building", "room", "bed", "issue_type", "priority", "status",
+       "reported_by", "issue_description", "cost_center", "target_asset_name", "target_asset_location"], as_dict=True) or {}) if doc.maintenance_request else {} -%}
+{%- set building_name = doc.building or req.get("building") -%}
+{%- set building = (frappe.db.get_value("Building", building_name,
+      ["building_name", "company", "responsible_supervisor", "city", "district"], as_dict=True) or {}) if building_name else {} -%}
+{%- set employee = (frappe.db.get_value("Employee", doc.assigned_to,
+      ["employee_name", "designation", "cell_number", "department"], as_dict=True) or {}) if doc.assigned_to else {} -%}
+{%- set supervisor = frappe.get_fullname(building.responsible_supervisor) if building.get("responsible_supervisor") else None -%}
+{%- set requester = frappe.get_fullname(req.reported_by) if req.get("reported_by") else None -%}
+{%- set company_name = building.get("company") or req.get("company") -%}
+{%- set company = (frappe.db.get_value("Company", company_name, ["company_name", "tax_id", "phone_no"], as_dict=True) or {}) if company_name else {} -%}
 
-  <table class="ah-meta">
-    <tr>
-      <td class="ah-lbl">Request <span class="ah-ar">الطلب</span></td>
-      <td>{{ doc.maintenance_request or "" }}</td>
-      <td class="ah-lbl">Building <span class="ah-ar">المبنى</span></td>
-      <td>{{ doc.building or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ah-lbl">Assigned To <span class="ah-ar">المكلَّف</span></td>
-      <td>{{ doc.assigned_to or "" }}</td>
-      <td class="ah-lbl">Status <span class="ah-ar">الحالة</span></td>
-      <td>{{ doc.status or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ah-lbl">Planned <span class="ah-ar">المخطّط</span></td>
-      <td>{{ frappe.format(doc.planned_start_date, {"fieldtype": "Date"}) }} → {{ frappe.format(doc.planned_end_date, {"fieldtype": "Date"}) }}</td>
-      <td class="ah-lbl">Actual <span class="ah-ar">الفعلي</span></td>
-      <td>{{ frappe.format(doc.actual_start_date, {"fieldtype": "Date"}) }} → {{ frappe.format(doc.actual_end_date, {"fieldtype": "Date"}) }}</td>
-    </tr>
-  </table>
+{%- set proc = [] -%}
+{%- for r in (doc.procurement_items or []) -%}
+  {%- set _p = proc.append({
+      "desc": r.item_description or r.material or r.item,
+      "kind": _("Capital Item") if r.is_fixed_asset else _("Consumable"),
+      "qty": r.quantity,
+      "unit": r.unit,
+      "cost": r.estimated_cost}) -%}
+{%- endfor -%}
+{%- set proc_qty = proc | map(attribute="qty") | map("float") | sum -%}
+{%- set proc_cost = proc | map(attribute="cost") | map("float") | sum -%}
 
-  <div><b>Work Description <span class="ah-ar">وصف العمل</span></b></div>
-  <div class="ah-desc">{{ doc.work_description or "" }}</div>
+{%- set planned_days = frappe.utils.date_diff(doc.planned_end_date, doc.planned_start_date) if (doc.planned_start_date and doc.planned_end_date) else None -%}
+{%- set actual_days = frappe.utils.date_diff(doc.actual_end_date, doc.actual_start_date) if (doc.actual_start_date and doc.actual_end_date) else None -%}
+{%- set is_done = doc.status == "Completed" -%}
+{%- set doc_currency = (frappe.db.get_value("Company", company_name, "default_currency") if company_name else None)
+      or frappe.db.get_single_value("Habitat Settings", "default_currency")
+      or frappe.db.get_default("currency") or "SAR" -%}
 
-  {% if doc.procurement_items %}
-  <table class="ah-items">
-    <thead>
-      <tr>
-        <th style="width:5%;">#</th>
-        <th>Material / Description <span class="ah-ar">المادة / الوصف</span></th>
-        <th style="width:12%;">Qty <span class="ah-ar">الكمية</span></th>
-        <th style="width:12%;">Unit <span class="ah-ar">الوحدة</span></th>
-        <th style="width:18%;">Est. Cost (SAR) <span class="ah-ar">التكلفة المقدّرة</span></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in doc.procurement_items %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ row.material or row.item_description or "" }}</td>
-        <td>{{ row.quantity }}</td>
-        <td>{{ row.unit or "" }}</td>
-        <td>{{ frappe.format(row.estimated_cost, {"fieldtype": "Currency"}) }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <div class="ah-total">Total Estimated Cost <span class="ah-ar">إجمالي التكلفة المقدّرة</span>: {{ frappe.format(doc.total_procurement_cost, {"fieldtype": "Currency"}) }}</div>
-  {% endif %}
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
 
-  {% if doc.completion_notes %}<div style="margin-bottom:12px;"><b>Completion Notes <span class="ah-ar">ملاحظات الإنجاز</span>:</b> {{ doc.completion_notes }}</div>{% endif %}
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
 
-  <table class="ah-sign">
-    <tr>
-      <td>Performed by (Technician)<br><span class="ah-ar">نفّذها (الفنّي)</span></td>
-      <td style="text-align:right;">Verified by (Supervisor)<br><span class="ah-ar">اعتمدها (المشرف)</span></td>
-    </tr>
-  </table>
+  {{ ax.doc_title(doc, _("Maintenance Work Order"), "Maintenance Work Order — Job Sheet",
+                  (_("Status") ~ ": " ~ _(doc.status)) if doc.status else "") }}
 
-  <div class="ah-foot">
-    Job order for the assigned maintenance work; record actual dates and completion on finishing.
-    أمر عمل للصيانة المكلَّف بها؛ سجّل التواريخ الفعلية والإنجاز عند الانتهاء.
-    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
-  </div>
+  {{ ax.party_block([
+      {"role_ar": _("Work Ordered By"), "role_en": "Ordered by",
+       "name": company.get("company_name") or company_name,
+       "lines": [
+         (_("Authorising Request") ~ ": " ~ doc.maintenance_request) if doc.maintenance_request else None,
+         (_("Requested By") ~ ": " ~ requester) if requester else None,
+         (_("Site Supervisor") ~ ": " ~ supervisor) if supervisor else None,
+       ]},
+      {"role_ar": _("Work Assigned To"), "role_en": "Assigned to",
+       "name": employee.get("employee_name") or doc.assigned_to,
+       "lines": [
+         employee.get("designation") or None,
+         employee.get("department") or None,
+         (_("Mobile") ~ ": " ~ employee.cell_number) if employee.get("cell_number") else None,
+         (_("Dispatched to Contractor") ~ ": " ~ doc.subcontractor_service_order) if doc.subcontractor_service_order else None,
+       ]},
+  ]) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Site of Work"), "en": "Site", "value": building.get("building_name") or building_name},
+       {"ar": _("Exact Location"), "en": "Exact location",
+        "value": req.get("room") or req.get("bed") or req.get("target_asset_location")}],
+      [{"ar": _("Site Address"), "en": "Site address",
+        "value": (get_address_text("Building", building_name) or building.get("district") or building.get("city")) if building_name else None},
+       {"ar": _("Equipment Concerned"), "en": "Equipment", "value": req.get("target_asset_name")}],
+      [{"ar": _("Issue Type"), "en": "Issue type", "value": doc.issue_type or req.get("issue_type"), "tr": True},
+       {"ar": _("Priority of the Request"), "en": "Priority", "value": req.get("priority"), "tr": True}],
+      [{"ar": _("Planned Start Date"), "en": "Planned start", "value": doc.planned_start_date, "fmt": "Date"},
+       {"ar": _("Planned End Date"), "en": "Planned end", "value": doc.planned_end_date, "fmt": "Date"}],
+      [{"ar": _("Actual Start Date"), "en": "Actual start", "value": doc.actual_start_date, "fmt": "Date"},
+       {"ar": _("Actual End Date"), "en": "Actual end", "value": doc.actual_end_date, "fmt": "Date"}],
+      [{"ar": _("Planned Duration (Days)"), "en": "Planned days", "value": planned_days, "fmt": "Int"},
+       {"ar": _("Actual Duration (Days)"), "en": "Actual days", "value": actual_days, "fmt": "Int"}],
+      [{"ar": _("Cost Center Charged"), "en": "Cost center", "value": req.get("cost_center")},
+       {"ar": _("Reported Fault"), "en": "Reported fault", "value": req.get("issue_description")}],
+  ]) }}
+
+  {{ ax.note_block(doc.work_description, _("Scope of Work to be Carried Out")) }}
+
+  {{ ax.line_table(
+      [{"ar": _("Material or Part"), "en": "Material / part", "key": "desc"},
+       {"ar": _("Nature"), "en": "Nature", "key": "kind", "width": "16%"},
+       {"ar": _("Quantity"), "en": "Qty", "key": "qty", "num": True, "width": "11%", "fmt": "Float"},
+       {"ar": _("Unit"), "en": "Unit", "key": "unit", "width": "11%"},
+       {"ar": _("Estimated Cost"), "en": "Est. cost", "key": "cost", "num": True, "width": "16%", "fmt": "Currency"}],
+      proc,
+      totals=[frappe.format_value(proc_qty, {"fieldtype": "Float"}), "",
+              frappe.format_value(proc_cost, {"fieldtype": "Currency"})],
+      empty_text=_("No materials or parts are drawn against this work order")) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Total Procurement Cost (SAR)"), "en": "Total on record", "value": doc.total_procurement_cost, "fmt": "Currency"},
+       {"ar": _("Material Lines"), "en": "Material lines", "value": proc | length, "fmt": "Int"}],
+  ]) }}
+
+  {{ ax.amount_words(doc.total_procurement_cost, doc_currency) }}
+
+  {{ ax.note_block(doc.completion_notes, _("Completion Notes")) }}
+
+  {{ ax.note_block(doc.cancellation_reason, _("Cancellation Reason")) }}
+
+  {%- if not doc.completion_photo %}
+  {{ ax.photo_slots(2, _("Attach photographic evidence of the work before and after")) }}
+  {%- endif %}
+
+  {{ ax.declaration(_("The technician certifies that the scope of work above was carried out at the site named, on the actual dates shown, and that the materials listed were the materials consumed. The supervisor certifies that the work was inspected on site and accepted. Work not written on this sheet was not ordered and is not accepted.")) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Photographic Evidence on File"), "en": "Photo evidence on file",
+        "value": _("Yes") if doc.completion_photo else _("No")},
+       {"ar": _("Document State"), "en": "Document state",
+        "value": _("Draft") if doc.docstatus == 0 else (_("Submitted") if doc.docstatus == 1 else _("Cancelled"))}],
+  ]) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Carried Out By (Technician)"), "en": "Carried out by",
+       "name": employee.get("employee_name") or doc.assigned_to},
+      {"ar": _("Inspected and Accepted By (Supervisor)"), "en": "Inspected and accepted by", "name": supervisor},
+      {"ar": _("Received By (Requester)"), "en": "Received by", "name": requester if is_done else None},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

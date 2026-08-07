@@ -1,104 +1,111 @@
-<style>
-  .ax-doc { font-family: Arial, sans-serif; color: #14332a; font-size: 12px; }
-  .ax-doc h1 { font-size: 18px; margin: 0; color: #14332a; }
-  .ax-sub { color: #4a5e55; font-size: 11px; margin-top: 2px; }
-  .ax-head { border-bottom: 3px solid #00844e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ax-recipient { font-size: 11px; color: #14332a; background: #eef6f1;
-                  border: 1px solid #00844e; border-radius: 3px; padding: 4px 10px; }
-  .ax-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ax-meta td { padding: 4px 8px; border: 1px solid #d9e4de; vertical-align: top; }
-  .ax-meta .ax-lbl { background: #f1f7f3; font-weight: bold; width: 22%; color: #14332a; }
-  .ax-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .ax-items th { background: #00844e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ax-items td { padding: 6px 8px; border: 1px solid #d9e4de; }
-  .ax-items tr:nth-child(even) td { background: #f6faf7; }
-  .ax-block { border: 1px solid #d9e4de; padding: 8px; margin-bottom: 12px; }
-  .ax-block .ax-blk-lbl { font-weight: bold; color: #00844e; margin-bottom: 4px; }
-  .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
-  .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
-  .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
-  .ax-letterhead { margin-bottom: 10px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div class="ax-letterhead">{{ letter_head }}</div>
-{% endif %}
-  <div class="ax-head">
-    <div>
-      <h1>{{ _("Telecom Contract") }}</h1>
-      <div class="ax-sub">{{ doc.name }} &bull; {{ doc.get_formatted("contract_start_date") or "" }}</div>
-    </div>
-    <div class="ax-recipient">{{ _("Recipient") }}: {{ _("Telecom Supplier") }}</div>
-  </div>
+{%- set company = (frappe.db.get_value("Company", doc.company,
+      ["company_name", "tax_id", "registration_details", "phone_no", "email"], as_dict=True) or {}) if doc.company else {} -%}
+{%- set supplier = (frappe.db.get_value("Supplier", doc.supplier,
+      ["supplier_name", "tax_id", "mobile_no", "email_id", "website"], as_dict=True) or {}) if doc.supplier else {} -%}
 
-  <table class="ax-meta">
-    <tr>
-      <td class="ax-lbl">{{ _("Company") }}</td>
-      <td>{{ doc.company or "" }}</td>
-      <td class="ax-lbl">{{ _("Telecom Supplier") }}</td>
-      <td>{{ doc.supplier or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Supplier Contract Reference") }}</td>
-      <td>{{ doc.contract_reference or "" }}</td>
-      <td class="ax-lbl">{{ _("Billing Account Number") }}</td>
-      <td>{{ doc.account_number or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Contract Start Date") }}</td>
-      <td>{{ doc.get_formatted("contract_start_date") or "" }}</td>
-      <td class="ax-lbl">{{ _("Contract End Date") }}</td>
-      <td>{{ doc.get_formatted("contract_end_date") or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Billing Frequency") }}</td>
-      <td>{{ _(doc.billing_frequency) if doc.billing_frequency else "" }}</td>
-      <td class="ax-lbl">{{ _("Recurring Amount") }}</td>
-      <td>{{ doc.get_formatted("recurring_amount") or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("SIM Count") }}</td>
-      <td>{{ doc.sim_count or "" }}</td>
-      <td class="ax-lbl">{{ _("Status") }}</td>
-      <td>{{ _(doc.status) if doc.status else "" }}</td>
-    </tr>
-  </table>
+{%- set rows = doc.billing_documents or [] -%}
+{%- set billed_total = rows | map(attribute="amount") | map("float") | sum -%}
+{%- set cycles_per_year = 12 if doc.billing_frequency == "Monthly" else (4 if doc.billing_frequency == "Quarterly" else (1 if doc.billing_frequency == "Annually" else 0)) -%}
+{%- set annual_value = frappe.utils.flt(doc.recurring_amount) * cycles_per_year -%}
+{%- set has_term = doc.contract_start_date and doc.contract_end_date -%}
+{%- set term_months = frappe.utils.month_diff(doc.contract_end_date, doc.contract_start_date) if has_term else None -%}
 
-  <div class="ax-blk-lbl">{{ _("Billing Documents") }}</div>
+{%- set sim_cards = frappe.db.get_all("SIM Card", filters={"telecom_contract": doc.name},
+      fields=["status"], order_by="status asc") if doc.name else [] -%}
+{%- set sims = [] -%}
+{%- for grp in sim_cards | groupby("status") -%}
+  {%- set _s = sims.append({"status": grp.grouper, "qty": grp.list | length}) -%}
+{%- endfor -%}
+{%- set sim_total = sim_cards | length -%}
+{%- set prepared_by = frappe.get_fullname(doc.owner) if doc.owner else None -%}
+{%- set doc_currency = doc.currency
+      or (frappe.db.get_value("Company", doc.company, "default_currency") if doc.company else None)
+      or frappe.db.get_default("currency") or "SAR" -%}
 
-  <table class="ax-items">
-    <thead>
-      <tr>
-        <th style="width:5%;">#</th>
-        <th style="width:20%;">{{ _("Billing Period") }}</th>
-        <th style="width:20%;">{{ _("Document Type") }}</th>
-        <th>{{ _("Document") }}</th>
-        <th style="width:18%;">{{ _("Amount") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in doc.billing_documents %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ row.billing_period or "" }}</td>
-        <td>{{ _(row.document_type) if row.document_type else "" }}</td>
-        <td>{{ row.document_name or "" }}</td>
-        <td>{{ row.get_formatted("amount") }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
 
-  {% if doc.notes %}<div class="ax-block"><div class="ax-blk-lbl">{{ _("Notes") }}</div>{{ doc.notes }}</div>{% endif %}
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
 
-  <table class="ax-sign">
-    <tr>
-      <td>{{ _("Telecom Supplier") }}<br>{{ _("Signature") }}</td>
-      <td>{{ _("Company") }}<br>{{ _("Signature") }}</td>
-    </tr>
-  </table>
+  {{ ax.doc_title(doc, _("Telecom Service Contract"), "Telecom Service Contract",
+                  (_("Status") ~ ": " ~ _(doc.status)) if doc.status else "") }}
 
-  <div class="ax-foot">{{ doc.name }}</div>
+  {{ ax.party_block([
+      {"role_ar": _("Telecom Service Provider"), "role_en": "Service provider",
+       "name": supplier.get("supplier_name") or doc.supplier,
+       "lines": [
+         (_("VAT / Tax Registration No.") ~ ": " ~ supplier.tax_id) if supplier.get("tax_id") else None,
+         (_("Mobile") ~ ": " ~ supplier.mobile_no) if supplier.get("mobile_no") else None,
+         (_("Email") ~ ": " ~ supplier.email_id) if supplier.get("email_id") else None,
+         get_address_text("Supplier", doc.supplier) if doc.supplier else None,
+       ]},
+      {"role_ar": _("Subscriber (Company)"), "role_en": "Subscriber",
+       "name": company.get("company_name") or doc.company,
+       "lines": [
+         (_("VAT / Tax Registration No.") ~ ": " ~ company.tax_id) if company.get("tax_id") else None,
+         company.get("registration_details") or None,
+         (_("Phone") ~ ": " ~ company.phone_no) if company.get("phone_no") else None,
+         get_address_text("Company", doc.company) if doc.company else None,
+       ]},
+  ]) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Provider Contract Reference"), "en": "Provider contract ref.", "value": doc.contract_reference},
+       {"ar": _("Billing Account Number"), "en": "Billing account no.", "value": doc.account_number}],
+      [{"ar": _("Contract Start Date"), "en": "Start date", "value": doc.contract_start_date, "fmt": "Date"},
+       {"ar": _("Contract End Date"), "en": "End date", "value": doc.contract_end_date, "fmt": "Date"}],
+      [{"ar": _("Contract Term"), "en": "Term", "value": (term_months ~ " " ~ _("months")) if has_term else None},
+       {"ar": _("Billing Frequency"), "en": "Billing frequency", "value": doc.billing_frequency, "tr": True}],
+      [{"ar": _("Recurring Amount per Billing Cycle"), "en": "Recurring amount", "value": doc.recurring_amount, "fmt": "Currency"},
+       {"ar": _("Currency of the Contract"), "en": "Currency", "value": doc.currency}],
+      [{"ar": _("Value Over Twelve Months"), "en": "Value over 12 months", "value": annual_value, "fmt": "Currency"},
+       {"ar": _("SIM Lines Covered"), "en": "SIM lines", "value": doc.sim_count, "fmt": "Int"}],
+      [{"ar": _("Cost Center Charged"), "en": "Cost center", "value": doc.cost_center},
+       {"ar": _("Project Charged"), "en": "Project", "value": doc.project}],
+      [{"ar": _("Service Item Billed Against"), "en": "Service item", "value": doc.service_item},
+       {"ar": _("Prepared By"), "en": "Prepared by", "value": prepared_by}],
+  ]) }}
+
+  {{ ax.amount_words(annual_value, doc_currency) }}
+
+  <div class="lbl" style="margin-bottom:5px">{{ _("SIM Lines Held Under This Contract") }}<span class="en">SIM lines held under this contract</span></div>
+  {{ ax.line_table(
+      [{"ar": _("Line State"), "en": "Line state", "key": "status", "tr": True},
+       {"ar": _("Number of Lines"), "en": "Lines", "key": "qty", "num": True, "width": "22%", "fmt": "Int"}],
+      sims,
+      totals=[frappe.format_value(sim_total, {"fieldtype": "Int"})],
+      empty_text=_("No SIM line is registered against this contract yet")) }}
+
+  <div class="lbl" style="margin-bottom:5px">{{ _("Billing Raised Against This Contract") }}<span class="en">Billing raised against this contract</span></div>
+  {{ ax.line_table(
+      [{"ar": _("Billing Period"), "en": "Period", "key": "billing_period", "width": "20%"},
+       {"ar": _("Document Type"), "en": "Document type", "key": "document_type", "width": "18%", "tr": True},
+       {"ar": _("Document Reference"), "en": "Reference", "key": "document_name"},
+       {"ar": _("Raised On"), "en": "Raised on", "key": "created_on", "width": "16%", "fmt": "Date"},
+       {"ar": _("Amount"), "en": "Amount", "key": "amount", "num": True, "width": "16%", "fmt": "Currency"}],
+      rows,
+      totals=[frappe.format_value(billed_total, {"fieldtype": "Currency"})],
+      empty_text=_("No billing document has been raised against this contract yet")) }}
+
+  {{ ax.note_block(doc.notes, _("Notes")) }}
+
+  {{ ax.terms_block(doc) }}
+
+  {{ ax.declaration(_("The provider supplies the service on the billing account shown above for the contract period, and bills only the recurring amount stated, on the stated frequency, to that account. The subscriber pays only what is billed against this account and this contract reference. Any change to the amount, the frequency or the number of lines takes effect only after both parties sign a written amendment.")) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Document State"), "en": "Document state",
+        "value": _("Draft") if doc.docstatus == 0 else (_("Submitted") if doc.docstatus == 1 else _("Cancelled"))},
+       {"ar": _("Contract Status"), "en": "Contract status", "value": doc.status, "tr": True}],
+  ]) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Telecom Service Provider"), "en": "Provider representative", "name": supplier.get("supplier_name") or doc.supplier},
+      {"ar": _("Subscriber (Company)"), "en": "Authorised representative of the subscriber", "name": company.get("company_name") or doc.company},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

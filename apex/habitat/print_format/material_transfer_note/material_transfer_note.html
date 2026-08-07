@@ -1,88 +1,80 @@
-<style>
-  .ax-doc { font-family: Arial, sans-serif; color: #14332a; font-size: 12px; }
-  .ax-doc h1 { font-size: 18px; margin: 0; color: #14332a; }
-  .ax-sub { color: #4a5e55; font-size: 11px; margin-top: 2px; }
-  .ax-head { border-bottom: 3px solid #00844e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ax-recipient { font-size: 11px; color: #14332a; background: #eef6f1;
-                  border: 1px solid #00844e; border-radius: 3px; padding: 4px 10px; }
-  .ax-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ax-meta td { padding: 4px 8px; border: 1px solid #d9e4de; vertical-align: top; }
-  .ax-meta .ax-lbl { background: #f1f7f3; font-weight: bold; width: 22%; color: #14332a; }
-  .ax-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .ax-items th { background: #00844e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ax-items td { padding: 6px 8px; border: 1px solid #d9e4de; }
-  .ax-items tr:nth-child(even) td { background: #f6faf7; }
-  .ax-block { border: 1px solid #d9e4de; padding: 8px; margin-bottom: 12px; }
-  .ax-block .ax-blk-lbl { font-weight: bold; color: #00844e; margin-bottom: 4px; }
-  .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
-  .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
-  .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
-  .ax-letterhead { margin-bottom: 10px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div class="ax-letterhead">{{ letter_head }}</div>
-{% endif %}
-  <div class="ax-head">
-    <div>
-      <h1>{{ _("Material Transfer") }}</h1>
-      <div class="ax-sub">{{ doc.name }} &bull; {{ doc.get_formatted("transfer_date") or "" }}</div>
-    </div>
-    <div class="ax-recipient">{{ _("Recipient") }}: {{ _("Receiving Supervisor") }}</div>
-  </div>
+{%- set src = (frappe.db.get_value("Building", doc.from_building,
+      ["building_name", "company", "responsible_supervisor", "city", "district"], as_dict=True) or {}) if doc.from_building else {} -%}
+{%- set dst = (frappe.db.get_value("Building", doc.to_building,
+      ["building_name", "company", "responsible_supervisor", "city", "district"], as_dict=True) or {}) if doc.to_building else {} -%}
+{%- set company_name = src.get("company") or dst.get("company") -%}
+{%- set company = (frappe.db.get_value("Company", company_name, ["company_name", "tax_id"], as_dict=True) or {}) if company_name else {} -%}
+{%- set issuer = frappe.get_fullname(src.responsible_supervisor) if src.get("responsible_supervisor") else None -%}
+{%- set receiver = frappe.get_fullname(dst.responsible_supervisor) if dst.get("responsible_supervisor") else None -%}
 
-  <table class="ax-meta">
-    <tr>
-      <td class="ax-lbl">{{ _("Transfer Date") }}</td>
-      <td>{{ doc.get_formatted("transfer_date") or "" }}</td>
-      <td class="ax-lbl">{{ _("Status") }}</td>
-      <td>{{ _(doc.status) if doc.status else "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("From Building") }}</td>
-      <td>{{ doc.from_building or "" }}</td>
-      <td class="ax-lbl">{{ _("To Building") }}</td>
-      <td>{{ doc.to_building or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Received Date") }}</td>
-      <td colspan="3">{{ doc.get_formatted("received_date") or "" }}</td>
-    </tr>
-  </table>
+{%- set rows = doc.items or [] -%}
+{%- set total_qty = rows | map(attribute="qty") | map("float") | sum -%}
+{%- set custody_lines = rows | selectattr("item_type", "equalto", "Custody Article") | list | length -%}
+{%- set material_lines = rows | selectattr("item_type", "equalto", "Maintenance Material") | list | length -%}
+{%- set in_transit_days = frappe.utils.date_diff(doc.received_date, doc.transfer_date) if (doc.transfer_date and doc.received_date) else None -%}
+{%- set prepared_by = frappe.get_fullname(doc.owner) if doc.owner else None -%}
 
-  <table class="ax-items">
-    <thead>
-      <tr>
-        <th style="width:5%;">#</th>
-        <th style="width:16%;">{{ _("Item Type") }}</th>
-        <th>{{ _("Item Name") }}</th>
-        <th style="width:10%;">{{ _("Qty") }}</th>
-        <th style="width:12%;">{{ _("UOM") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in doc.items %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ _(row.item_type) if row.item_type else "" }}</td>
-        <td>{{ row.item_name or row.item or "" }}</td>
-        <td>{{ row.get_formatted("qty") }}</td>
-        <td>{{ row.uom or "" }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
 
-  {% if doc.remarks %}<div class="ax-block"><div class="ax-blk-lbl">{{ _("Remarks") }}</div>{{ doc.remarks }}</div>{% endif %}
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
 
-  <table class="ax-sign">
-    <tr>
-      <td>{{ _("Supervisor") }}<br>{{ _("Signature") }}</td>
-      <td>{{ _("Receiving Supervisor") }}<br>{{ _("Signature") }}</td>
-    </tr>
-  </table>
+  {{ ax.doc_title(doc, _("Material Transfer Note"), "Material Transfer Note",
+                  (_("Status") ~ ": " ~ _(doc.status)) if doc.status else "") }}
 
-  <div class="ax-foot">{{ doc.name }}</div>
+  {{ ax.party_block([
+      {"role_ar": _("Dispatching Store"), "role_en": "Dispatched from",
+       "name": src.get("building_name") or doc.from_building,
+       "lines": [
+         (_("Store Supervisor") ~ ": " ~ issuer) if issuer else None,
+         get_address_text("Building", doc.from_building) if doc.from_building else None,
+         src.get("city") or None,
+       ]},
+      {"role_ar": _("Receiving Store"), "role_en": "Received at",
+       "name": dst.get("building_name") or doc.to_building,
+       "lines": [
+         (_("Store Supervisor") ~ ": " ~ receiver) if receiver else None,
+         get_address_text("Building", doc.to_building) if doc.to_building else None,
+         dst.get("city") or None,
+       ]},
+  ]) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Transfer Date"), "en": "Dispatched on", "value": doc.transfer_date, "fmt": "Date"},
+       {"ar": _("Received Date"), "en": "Received on", "value": doc.received_date, "fmt": "Date"}],
+      [{"ar": _("Days in Transit"), "en": "Days in transit", "value": in_transit_days, "fmt": "Int"},
+       {"ar": _("Company"), "en": "Company", "value": company.get("company_name") or company_name}],
+      [{"ar": _("Custody Article Lines"), "en": "Custody article lines", "value": custody_lines, "fmt": "Int"},
+       {"ar": _("Maintenance Material Lines"), "en": "Maintenance material lines", "value": material_lines, "fmt": "Int"}],
+  ]) }}
+
+  {{ ax.line_table(
+      [{"ar": _("Item Type"), "en": "Type", "key": "item_type", "width": "17%", "tr": True},
+       {"ar": _("Item Code"), "en": "Code", "key": "item", "width": "18%"},
+       {"ar": _("Item Name"), "en": "Description", "key": "item_name"},
+       {"ar": _("Quantity Transferred"), "en": "Qty", "key": "qty", "num": True, "width": "12%", "fmt": "Float"},
+       {"ar": _("Unit"), "en": "UOM", "key": "uom", "width": "11%"}],
+      rows,
+      totals=[frappe.format_value(total_qty, {"fieldtype": "Float"}), ""],
+      empty_text=_("This transfer note carries no item lines — nothing has moved between the two stores")) }}
+
+  {{ ax.note_block(doc.remarks, _("Remarks")) }}
+
+  {{ ax.declaration(_("The dispatching store confirms it handed over the quantities listed above and released them from its own stock. The receiving store confirms it took them into custody in the stated quantities and in usable condition, and carries them from the received date onward. Anything short, damaged or missing must be written on this note before it is signed.")) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Prepared By"), "en": "Prepared by", "value": prepared_by},
+       {"ar": _("Document State"), "en": "Document state",
+        "value": _("Draft") if doc.docstatus == 0 else (_("Submitted") if doc.docstatus == 1 else _("Cancelled"))}],
+  ]) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Dispatching Store Supervisor"), "en": "Handed over by", "name": issuer},
+      {"ar": _("Receiving Store Supervisor"), "en": "Received by", "name": receiver},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

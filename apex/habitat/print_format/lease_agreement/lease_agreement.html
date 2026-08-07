@@ -1,102 +1,107 @@
-<style>
-  .ax-doc { font-family: Arial, sans-serif; color: #14332a; font-size: 12px; }
-  .ax-doc h1 { font-size: 18px; margin: 0; color: #14332a; }
-  .ax-sub { color: #4a5e55; font-size: 11px; margin-top: 2px; }
-  .ax-head { border-bottom: 3px solid #00844e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ax-recipient { font-size: 11px; color: #14332a; background: #eef6f1;
-                  border: 1px solid #00844e; border-radius: 3px; padding: 4px 10px; }
-  .ax-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ax-meta td { padding: 4px 8px; border: 1px solid #d9e4de; vertical-align: top; }
-  .ax-meta .ax-lbl { background: #f1f7f3; font-weight: bold; width: 22%; color: #14332a; }
-  .ax-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .ax-items th { background: #00844e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ax-items td { padding: 6px 8px; border: 1px solid #d9e4de; }
-  .ax-items tr:nth-child(even) td { background: #f6faf7; }
-  .ax-block { border: 1px solid #d9e4de; padding: 8px; margin-bottom: 12px; }
-  .ax-block .ax-blk-lbl { font-weight: bold; color: #00844e; margin-bottom: 4px; }
-  .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
-  .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
-  .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
-  .ax-letterhead { margin-bottom: 10px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div class="ax-letterhead">{{ letter_head }}</div>
-{% endif %}
-  <div class="ax-head">
-    <div>
-      <h1>{{ _("Lease") }}</h1>
-      <div class="ax-sub">{{ doc.name }} &bull; {{ doc.get_formatted("lease_start_date") or "" }}</div>
-    </div>
-    <div class="ax-recipient">{{ _("Recipient") }}: {{ _("Landlord") }}</div>
-  </div>
+{%- set company = (frappe.db.get_value("Company", doc.company,
+      ["company_name", "tax_id", "registration_details", "phone_no", "email"], as_dict=True) or {}) if doc.company else {} -%}
+{%- set landlord = (frappe.db.get_value("Supplier", doc.landlord,
+      ["supplier_name", "tax_id", "mobile_no", "email_id"], as_dict=True) or {}) if doc.landlord else {} -%}
+{%- set building = (frappe.db.get_value("Building", doc.building,
+      ["building_name", "accommodation_type", "total_rooms", "total_capacity", "city", "district"], as_dict=True) or {}) if doc.building else {} -%}
 
-  <table class="ax-meta">
-    <tr>
-      <td class="ax-lbl">{{ _("Company") }}</td>
-      <td>{{ doc.company or "" }}</td>
-      <td class="ax-lbl">{{ _("Building") }}</td>
-      <td>{{ doc.building or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Landlord") }}</td>
-      <td>{{ doc.landlord or "" }}</td>
-      <td class="ax-lbl">{{ _("Lease / Contract Reference") }}</td>
-      <td>{{ doc.lease_reference or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Lease Start Date") }}</td>
-      <td>{{ doc.get_formatted("lease_start_date") or "" }}</td>
-      <td class="ax-lbl">{{ _("Lease End Date") }}</td>
-      <td>{{ doc.get_formatted("lease_end_date") or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Rent (SAR)") }}</td>
-      <td>{{ doc.get_formatted("rent_amount") or "" }}</td>
-      <td class="ax-lbl">{{ _("Billing Cycle") }}</td>
-      <td>{{ _(doc.billing_cycle) if doc.billing_cycle else "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("First Payment Date") }}</td>
-      <td>{{ doc.get_formatted("first_payment_date") or "" }}</td>
-      <td class="ax-lbl">{{ _("Total Scheduled Amount (SAR)") }}</td>
-      <td>{{ doc.get_formatted("total_scheduled") or "" }}</td>
-    </tr>
-  </table>
+{%- set rows = doc.payment_schedule or [] -%}
+{%- set sched_total = rows | map(attribute="amount") | map("float") | sum -%}
+{%- set paid_total = rows | selectattr("status", "equalto", "Paid") | map(attribute="amount") | map("float") | sum -%}
+{%- set open_total = sched_total - paid_total -%}
+{%- set has_term = doc.lease_start_date and doc.lease_end_date -%}
+{%- set term_months = frappe.utils.month_diff(doc.lease_end_date, doc.lease_start_date) if has_term else None -%}
+{%- set term_days = frappe.utils.date_diff(doc.lease_end_date, doc.lease_start_date) if has_term else None -%}
+{%- set prepared_by = frappe.get_fullname(doc.owner) if doc.owner else None -%}
+{%- set doc_currency = (frappe.db.get_value("Company", doc.company, "default_currency") if doc.company else None)
+      or frappe.db.get_single_value("Habitat Settings", "default_currency")
+      or frappe.db.get_default("currency") or "SAR" -%}
 
-  <div class="ax-blk-lbl">{{ _("Rent Payment Schedule") }}</div>
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
 
-  <table class="ax-items">
-    <thead>
-      <tr>
-        <th style="width:5%;">#</th>
-        <th style="width:30%;">{{ _("Due Date") }}</th>
-        <th style="width:30%;">{{ _("Amount (SAR)") }}</th>
-        <th style="width:25%;">{{ _("Status") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in doc.payment_schedule %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ row.get_formatted("due_date") }}</td>
-        <td>{{ row.get_formatted("amount") }}</td>
-        <td>{{ _(row.status) if row.status else "" }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
 
-  {% if doc.notes %}<div class="ax-block"><div class="ax-blk-lbl">{{ _("Notes") }}</div>{{ doc.notes }}</div>{% endif %}
+  {{ ax.doc_title(doc, _("Lease Agreement"), "Lease Agreement",
+                  (_("Status") ~ ": " ~ _(doc.status)) if doc.status else "") }}
 
-  <table class="ax-sign">
-    <tr>
-      <td>{{ _("Landlord") }}<br>{{ _("Signature") }}</td>
-      <td>{{ _("Company") }}<br>{{ _("Signature") }}</td>
-    </tr>
-  </table>
+  {{ ax.party_block([
+      {"role_ar": _("Lessor (Landlord)"), "role_en": "Lessor / Landlord",
+       "name": landlord.get("supplier_name") or doc.landlord,
+       "lines": [
+         (_("VAT / Tax Registration No.") ~ ": " ~ landlord.tax_id) if landlord.get("tax_id") else None,
+         (_("Mobile") ~ ": " ~ landlord.mobile_no) if landlord.get("mobile_no") else None,
+         (_("Email") ~ ": " ~ landlord.email_id) if landlord.get("email_id") else None,
+         get_address_text("Supplier", doc.landlord) if doc.landlord else None,
+       ]},
+      {"role_ar": _("Lessee (Tenant)"), "role_en": "Lessee / Tenant",
+       "name": company.get("company_name") or doc.company,
+       "lines": [
+         (_("VAT / Tax Registration No.") ~ ": " ~ company.tax_id) if company.get("tax_id") else None,
+         company.get("registration_details") or None,
+         (_("Phone") ~ ": " ~ company.phone_no) if company.get("phone_no") else None,
+         get_address_text("Company", doc.company) if doc.company else None,
+       ]},
+  ]) }}
 
-  <div class="ax-foot">{{ doc.name }}</div>
+  {{ ax.field_grid([
+      [{"ar": _("Leased Property"), "en": "Leased property",
+        "value": building.get("building_name") or doc.building},
+       {"ar": _("Property Address"), "en": "Property address",
+        "value": (get_address_text("Building", doc.building) or building.get("district") or building.get("city")) if doc.building else None}],
+      [{"ar": _("Accommodation Type"), "en": "Property type", "value": building.get("accommodation_type"), "tr": True},
+       {"ar": _("Rooms and Bed Capacity"), "en": "Rooms / beds",
+        "value": (frappe.utils.cint(building.get("total_rooms")) ~ " / " ~ frappe.utils.cint(building.get("total_capacity"))) if building else None}],
+      [{"ar": _("Lease Start Date"), "en": "Start date", "value": doc.lease_start_date, "fmt": "Date"},
+       {"ar": _("Lease End Date"), "en": "End date", "value": doc.lease_end_date, "fmt": "Date"}],
+      [{"ar": _("Lease Term"), "en": "Term",
+        "value": (term_months ~ " " ~ _("months") ~ " (" ~ term_days ~ " " ~ _("days") ~ ")") if has_term else None},
+       {"ar": _("Landlord Contract Reference"), "en": "Landlord contract ref.", "value": doc.lease_reference}],
+  ]) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Rent per Billing Cycle"), "en": "Rent per cycle", "value": doc.rent_amount, "fmt": "Currency"},
+       {"ar": _("Billing Cycle"), "en": "Billing cycle", "value": doc.billing_cycle, "tr": True}],
+      [{"ar": _("First Payment Date"), "en": "First payment due", "value": doc.first_payment_date, "fmt": "Date"},
+       {"ar": _("Utility Cost Share Borne by Tenant"), "en": "Tenant utility share", "value": doc.company_share_pct, "fmt": "Percent"}],
+      [{"ar": _("Number of Instalments"), "en": "Instalments", "value": rows | length, "fmt": "Int"},
+       {"ar": _("Total Scheduled Amount (SAR)"), "en": "Total scheduled on record", "value": doc.total_scheduled, "fmt": "Currency"}],
+  ]) }}
+
+  {{ ax.line_table(
+      [{"ar": _("Due Date"), "en": "Due date", "key": "due_date", "width": "28%", "fmt": "Date"},
+       {"ar": _("Instalment Amount"), "en": "Amount", "key": "amount", "num": True, "width": "26%", "fmt": "Currency"},
+       {"ar": _("Settlement State"), "en": "Settlement", "key": "status", "width": "24%", "tr": True}],
+      rows,
+      totals=[frappe.format_value(sched_total, {"fieldtype": "Currency"}), ""],
+      empty_text=_("No rent instalments have been scheduled on this lease yet")) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Instalments Settled to Date"), "en": "Settled to date", "value": paid_total, "fmt": "Currency"},
+       {"ar": _("Instalments Still Due"), "en": "Still due", "value": open_total, "fmt": "Currency"}],
+  ]) }}
+
+  {{ ax.amount_words(sched_total, doc_currency) }}
+
+  {{ ax.terms_block(doc) }}
+
+  {{ ax.declaration(_("The tenant undertakes to pay every instalment listed above on its due date for the whole lease term. The landlord confirms handover of the property described above in a condition fit for use and undertakes to keep it so for the same term. Any amount outside this schedule is not due under this lease unless both parties sign a written amendment.")) }}
+
+  {{ ax.note_block(doc.notes, _("Notes")) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Prepared By"), "en": "Prepared by", "value": prepared_by},
+       {"ar": _("Document State"), "en": "Document state",
+        "value": _("Draft") if doc.docstatus == 0 else (_("Submitted") if doc.docstatus == 1 else _("Cancelled"))}],
+  ]) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Lessor (Landlord)"), "en": "Lessor / Landlord", "name": landlord.get("supplier_name") or doc.landlord},
+      {"ar": _("Lessee (Tenant)"), "en": "Authorised representative of the tenant", "name": company.get("company_name") or doc.company},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

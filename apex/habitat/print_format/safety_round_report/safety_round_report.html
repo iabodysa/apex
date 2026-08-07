@@ -1,112 +1,131 @@
-<style>
-  .ah-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
-  .ah-doc h1 { font-size: 18px; margin: 0; }
-  .ah-doc .ah-sub { color: #666; font-size: 12px; margin-top: 2px; }
-  .ah-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ah-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ah-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
-  .ah-meta .ah-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
-  .ah-result { display: inline-block; padding: 2px 10px; border-radius: 3px; font-weight: bold; }
-  .ah-result-pass { background: #e6f4ea; color: #137333; }
-  .ah-result-attention { background: #fef7e0; color: #b06000; }
-  .ah-result-fail { background: #fce8e6; color: #c5221f; }
-  .ah-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .ah-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ah-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
-  .ah-items tr:nth-child(even) td { background: #f8f8fb; }
-  .ah-empty { padding: 10px; color: #999; font-style: italic; }
-  .ah-ar { color: #555; font-size: 10px; }
-  .ah-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
-  .ah-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
-  .ah-foot { margin-top: 24px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ah-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div style="margin-bottom:10px">{{ letter_head }}</div>
-{% endif %}
-  <div class="ah-head">
-    <div>
-      <h1>{{ _("Safety Round Report") }}</h1>
-      <div class="ah-sub">{{ doc.name }}</div>
-    </div>
-    <div style="text-align:right; font-size:11px; color:#666;">
-      {{ frappe.db.get_single_value("Habitat Settings", "company") or "" }}
-    </div>
-  </div>
+{%- set building = (frappe.db.get_value("Building", doc.building,
+      ["building_name", "company", "responsible_supervisor", "city", "district",
+       "current_occupants", "total_capacity"], as_dict=True) or {}) if doc.building else {} -%}
+{%- set company = (frappe.db.get_value("Company", building.get("company"),
+      ["company_name", "tax_id", "registration_details", "phone_no"], as_dict=True) or {}) if building.get("company") else {} -%}
+{%- set inspector = frappe.get_fullname(doc.supervisor) if doc.supervisor else None -%}
+{%- set site_supervisor = frappe.get_fullname(building.responsible_supervisor) if building.get("responsible_supervisor") else None -%}
 
-  <table class="ah-meta">
-    <tr>
-      <td class="ah-lbl">{{ _("Building") }}</td>
-      <td>{{ doc.building or "" }}</td>
-      <td class="ah-lbl">{{ _("Round Date") }}</td>
-      <td>{{ frappe.format(doc.round_date, {"fieldtype": "Date"}) }}</td>
-    </tr>
-    <tr>
-      <td class="ah-lbl">{{ _("Cadence") }}</td>
-      <td>{{ _(doc.cadence) if doc.cadence else "" }}</td>
-      <td class="ah-lbl">{{ _("Supervisor") }}</td>
-      <td>{{ frappe.db.get_value("User", doc.supervisor, "full_name") or doc.supervisor or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ah-lbl">{{ _("Overall Result") }}</td>
-      <td>
-        {% if doc.overall_result == "Pass" %}
-          <span class="ah-result ah-result-pass">{{ _("Pass") }}</span>
-        {% elif doc.overall_result == "Needs Attention" %}
-          <span class="ah-result ah-result-attention">{{ _("Needs Attention") }}</span>
-        {% elif doc.overall_result == "Fail" %}
-          <span class="ah-result ah-result-fail">{{ _("Fail") }}</span>
-        {% else %}—{% endif %}
-      </td>
-      <td class="ah-lbl">{{ _("Re-inspection") }}</td>
-      <td>{{ _("Yes") if doc.is_reinspection else _("No") }}</td>
-    </tr>
-  </table>
+{%- set executions = frappe.db.get_all("Safety Task Execution",
+      filters={"safety_round": doc.name},
+      fields=["name", "task", "execution_status", "execution_date", "execution_time", "executed_by", "notes", "evidence_photo"],
+      order_by="execution_date asc, creation asc") if doc.name else [] -%}
 
-  {%- set executions = frappe.get_all("Safety Task Execution",
-        filters={"safety_round": doc.name},
-        fields=["task", "execution_status", "execution_date", "executed_by", "notes"],
-        order_by="execution_date asc, idx asc") -%}
+{%- set checks = [] -%}
+{%- set findings = [] -%}
+{%- set ok_states = ["Excellent", "Good", "Average"] -%}
+{%- set bad_states = ["Poor"] -%}
+{%- set grades = [] -%}
+{%- for ex in executions -%}
+  {%- set cat = (frappe.db.get_value("Safety Task Catalog", ex.task,
+        ["task_title", "department", "frequency", "priority"], as_dict=True) or {}) if ex.task else {} -%}
+  {%- set who = frappe.get_fullname(ex.executed_by) if ex.executed_by else None -%}
+  {%- set _g = grades.append(ex.execution_status or "") -%}
+  {%- set _c = checks.append({
+      "ar": cat.get("task_title") or ex.task,
+      "en": cat.get("department") or "",
+      "state": "ok" if ex.execution_status in ok_states else ("bad" if ex.execution_status in bad_states else "na"),
+      "note": (_(ex.execution_status) if ex.execution_status else _("Not Recorded"))
+              ~ ((" · " ~ who) if who else "")
+              ~ ((" · " ~ frappe.format_value(ex.execution_date, {"fieldtype": "Date"})) if ex.execution_date else "")
+              ~ ((" · " ~ ex.notes) if ex.notes else "")}) -%}
+  {%- for f in (frappe.get_doc("Safety Task Execution", ex.name).findings or []) -%}
+    {%- set _f = findings.append({
+        "task": cat.get("task_title") or ex.task,
+        "severity": f.severity,
+        "room": f.room,
+        "description": f.description,
+        "owner_name": frappe.get_fullname(f.assigned_to) if f.assigned_to else None,
+        "due_date": f.due_date,
+        "state": f.status,
+        "request": f.generated_maintenance_request}) -%}
+  {%- endfor -%}
+{%- endfor -%}
 
-  <table class="ah-items">
-    <thead>
-      <tr>
-        <th style="width:5%;">#</th>
-        <th>{{ _("Task") }}</th>
-        <th style="width:14%;">{{ _("Status") }}</th>
-        <th style="width:14%;">{{ _("Date") }}</th>
-        <th style="width:18%;">{{ _("Executed By") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in executions %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>
-          {{ row.task or "" }}
-          {% if row.notes %}<div class="ah-ar">{{ row.notes }}</div>{% endif %}
-        </td>
-        <td>{{ _(row.execution_status) if row.execution_status else "" }}</td>
-        <td>{{ frappe.format(row.execution_date, {"fieldtype": "Date"}) }}</td>
-        <td>{{ frappe.db.get_value("User", row.executed_by, "full_name") or row.executed_by or "" }}</td>
-      </tr>
-      {% else %}
-      <tr><td colspan="5" class="ah-empty">{{ _("No task executions recorded for this round.") }}</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+{%- set pass_count = grades | select("in", ["Excellent", "Good"]) | list | length -%}
+{%- set average_count = grades | select("equalto", "Average") | list | length -%}
+{%- set poor_count = grades | select("equalto", "Poor") | list | length -%}
+{%- set undone_count = grades | select("equalto", "Not Done") | list | length -%}
+{%- set open_findings = findings | rejectattr("state", "equalto", "Resolved") | list | length -%}
+{%- set with_photo = executions | selectattr("evidence_photo") | list | length -%}
 
-  <table class="ah-sign">
-    <tr>
-      <td>{{ _("Inspected by (Supervisor)") }}</td>
-      <td style="text-align:right;">{{ _("Reviewed by") }}</td>
-    </tr>
-  </table>
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
 
-  <div class="ah-foot">
-    {{ _("This report records the safety tasks executed during the round and their outcomes.") }}
-    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
-  </div>
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
+
+  {{ ax.doc_title(doc, _("Safety Round Report"), "Safety Round Report",
+                  ((_("Overall Result") ~ ": " ~ _(doc.overall_result)) if doc.overall_result else "")
+                  ~ ((" · " ~ _("Re-inspection")) if doc.is_reinspection else "")) }}
+
+  {{ ax.party_block([
+      {"role_ar": _("Site Inspected"), "role_en": "Site inspected",
+       "name": building.get("building_name") or doc.building,
+       "lines": [
+         get_address_text("Building", doc.building) if doc.building else None,
+         building.get("district") or building.get("city") or None,
+         (_("Occupants at the Site") ~ ": " ~ frappe.utils.cint(building.current_occupants) ~ " / " ~ frappe.utils.cint(building.total_capacity)) if building else None,
+       ]},
+      {"role_ar": _("Inspecting Entity"), "role_en": "Inspecting entity",
+       "name": company.get("company_name") or building.get("company"),
+       "lines": [
+         (_("Inspector") ~ ": " ~ inspector) if inspector else None,
+         (_("Site Supervisor") ~ ": " ~ site_supervisor) if site_supervisor else None,
+         company.get("registration_details") or None,
+       ]},
+  ]) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Round Date"), "en": "Round date", "value": doc.round_date, "fmt": "Date"},
+       {"ar": _("Inspection Cadence"), "en": "Cadence", "value": doc.cadence, "tr": True}],
+      [{"ar": _("Overall Result"), "en": "Overall result", "value": doc.overall_result, "tr": True},
+       {"ar": _("Is Re-inspection"), "en": "Re-inspection", "value": _("Yes") if doc.is_reinspection else _("No")}],
+      [{"ar": _("Tasks Checked"), "en": "Tasks checked", "value": checks | length, "fmt": "Int"},
+       {"ar": _("Tasks Rated Good or Better"), "en": "Good or better", "value": pass_count, "fmt": "Int"}],
+      [{"ar": _("Tasks Rated Average"), "en": "Average", "value": average_count, "fmt": "Int"},
+       {"ar": _("Tasks Rated Poor"), "en": "Poor", "value": poor_count, "fmt": "Int"}],
+      [{"ar": _("Tasks Not Carried Out"), "en": "Not carried out", "value": undone_count, "fmt": "Int"},
+       {"ar": _("Findings Still Open"), "en": "Open findings", "value": open_findings, "fmt": "Int"}],
+  ]) }}
+
+  <div class="lbl" style="margin-bottom:5px">{{ _("Tasks Checked on This Round") }}<span class="en">Tasks checked on this round</span></div>
+  {%- if checks %}
+  {{ ax.check_list(checks) }}
+  {%- else %}
+  <div class="ax-none" style="margin-bottom:12px">{{ _("No safety task was executed against this round — the round proves nothing until at least one task is recorded") }}</div>
+  {%- endif %}
+
+  <div class="lbl" style="margin-bottom:5px">{{ _("Findings Raised and Who Must Clear Them") }}<span class="en">Findings raised and their owners</span></div>
+  {{ ax.line_table(
+      [{"ar": _("Finding"), "en": "Finding", "key": "description"},
+       {"ar": _("Severity"), "en": "Severity", "key": "severity", "width": "10%", "tr": True},
+       {"ar": _("Room"), "en": "Room", "key": "room", "width": "12%"},
+       {"ar": _("Owner Responsible"), "en": "Owner", "key": "owner_name", "width": "16%"},
+       {"ar": _("Due Date"), "en": "Due", "key": "due_date", "width": "12%", "fmt": "Date"},
+       {"ar": _("State"), "en": "State", "key": "state", "width": "11%", "tr": True}],
+      findings,
+      empty_text=_("No finding was raised on this round")) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Tasks with Photographic Evidence on File"), "en": "Tasks with photo evidence", "value": with_photo, "fmt": "Int"},
+       {"ar": _("Document State"), "en": "Document state",
+        "value": _("Draft") if doc.docstatus == 0 else (_("Submitted") if doc.docstatus == 1 else _("Cancelled"))}],
+  ]) }}
+
+  {%- if executions | length > with_photo %}
+  {{ ax.photo_slots(3, _("Attach photographic evidence of the round")) }}
+  {%- endif %}
+
+  {{ ax.declaration(_("The inspector declares that every task listed above was checked on site on the round date, that the result written against each task is what was actually seen, and that every fault found is written in the findings table with the person who must clear it and the date it is due. A task not listed here was not checked on this round.")) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Inspected By"), "en": "Inspected by", "name": inspector},
+      {"ar": _("Site Supervisor"), "en": "Site supervisor", "name": site_supervisor},
+      {"ar": _("Reviewed By (Safety Management)"), "en": "Reviewed by", "name": None},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>

@@ -1,77 +1,101 @@
-<style>
-  .ax-doc { font-family: Arial, sans-serif; color: #14332a; font-size: 12px; }
-  .ax-doc h1 { font-size: 18px; margin: 0; color: #14332a; }
-  .ax-sub { color: #4a5e55; font-size: 11px; margin-top: 2px; }
-  .ax-head { border-bottom: 3px solid #00844e; padding-bottom: 8px; margin-bottom: 12px;
-             display: flex; justify-content: space-between; align-items: flex-start; }
-  .ax-recipient { font-size: 11px; color: #14332a; background: #eef6f1;
-                  border: 1px solid #00844e; border-radius: 3px; padding: 4px 10px; }
-  .ax-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  .ax-meta td { padding: 4px 8px; border: 1px solid #d9e4de; vertical-align: top; }
-  .ax-meta .ax-lbl { background: #f1f7f3; font-weight: bold; width: 22%; color: #14332a; }
-  .ax-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .ax-items th { background: #00844e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
-  .ax-items td { padding: 6px 8px; border: 1px solid #d9e4de; }
-  .ax-items tr:nth-child(even) td { background: #f6faf7; }
-  .ax-block { border: 1px solid #d9e4de; padding: 8px; margin-bottom: 12px; }
-  .ax-block .ax-blk-lbl { font-weight: bold; color: #00844e; margin-bottom: 4px; }
-  .ax-sign { width: 100%; margin-top: 28px; border-collapse: separate; border-spacing: 24px 0; }
-  .ax-sign td { width: 50%; padding-top: 36px; border-top: 1px solid #14332a; font-size: 11px; vertical-align: top; }
-  .ax-foot { margin-top: 24px; font-size: 9px; color: #7a8c83; border-top: 1px solid #e3ece7; padding-top: 6px; }
-  .ax-letterhead { margin-bottom: 10px; }
-</style>
+{%- import "templates/print_formats/apex_doc.html" as ax with context -%}
+{{ ax.doc_styles() }}
 
-<div class="ax-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
-{% if not no_letterhead and letter_head %}
-  <div class="ax-letterhead">{{ letter_head }}</div>
-{% endif %}
-  <div class="ax-head">
-    <div>
-      <h1>{{ _("Safety Incident") }}</h1>
-      <div class="ax-sub">{{ doc.name }} &bull; {{ doc.get_formatted("incident_datetime") or "" }}</div>
-    </div>
-    <div class="ax-recipient">{{ _("Recipient") }}: {{ _("Auditor") }}</div>
-  </div>
+{%- set building = (frappe.db.get_value("Building", doc.building,
+      ["building_name", "company", "responsible_supervisor", "city", "district",
+       "accommodation_type", "current_occupants", "total_capacity",
+       "fire_alarm_panel_present", "smoke_detectors_present",
+       "cctv_camera_count", "dvr_status"], as_dict=True) or {}) if doc.building else {} -%}
+{%- set company = (frappe.db.get_value("Company", building.get("company"),
+      ["company_name", "tax_id", "registration_details", "phone_no"], as_dict=True) or {}) if building.get("company") else {} -%}
+{%- set reporter = frappe.get_fullname(doc.reported_by) if doc.reported_by else None -%}
+{%- set supervisor = frappe.get_fullname(building.responsible_supervisor) if building.get("responsible_supervisor") else None -%}
+{%- set days_open = frappe.utils.date_diff(frappe.utils.nowdate(), doc.incident_datetime) if (doc.incident_datetime and doc.status != "Closed") else None -%}
+{%- set is_closed = doc.status == "Closed" -%}
 
-  <table class="ax-meta">
-    <tr>
-      <td class="ax-lbl">{{ _("Incident Date and Time") }}</td>
-      <td>{{ doc.get_formatted("incident_datetime") or "" }}</td>
-      <td class="ax-lbl">{{ _("Building") }}</td>
-      <td>{{ doc.building or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Specific Location") }}</td>
-      <td>{{ doc.specific_location or "" }}</td>
-      <td class="ax-lbl">{{ _("Incident Type") }}</td>
-      <td>{{ _(doc.incident_type) if doc.incident_type else "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Severity") }}</td>
-      <td>{{ _(doc.severity) if doc.severity else "" }}</td>
-      <td class="ax-lbl">{{ _("Casualties") }}</td>
-      <td>{{ doc.casualties or "" }}</td>
-    </tr>
-    <tr>
-      <td class="ax-lbl">{{ _("Reported By") }}</td>
-      <td>{{ doc.reported_by or "" }}</td>
-      <td class="ax-lbl">{{ _("Status") }}</td>
-      <td>{{ _(doc.status) if doc.status else "" }}</td>
-    </tr>
-  </table>
+{%- set provisions = [] -%}
+{%- if building %}
+  {%- set _a = provisions.append({
+      "ar": _("Fire Alarm Panel at the Site"), "en": "Fire alarm panel",
+      "state": "ok" if building.fire_alarm_panel_present else "bad",
+      "note": _("Recorded as installed") if building.fire_alarm_panel_present else _("Recorded as not installed")}) -%}
+  {%- set _b = provisions.append({
+      "ar": _("Smoke Detectors at the Site"), "en": "Smoke detectors",
+      "state": "ok" if building.smoke_detectors_present else "bad",
+      "note": _("Recorded as installed") if building.smoke_detectors_present else _("Recorded as not installed")}) -%}
+  {%- set _c = provisions.append({
+      "ar": _("Surveillance Cameras at the Site"), "en": "CCTV cameras",
+      "state": "ok" if frappe.utils.cint(building.cctv_camera_count) else "bad",
+      "note": _("Active cameras") ~ ": " ~ frappe.utils.cint(building.cctv_camera_count)}) -%}
+  {%- set _d = provisions.append({
+      "ar": _("Recorder State on the Building File"), "en": "DVR / NVR state",
+      "state": "ok" if building.dvr_status == "Recording" else ("na" if building.dvr_status in (None, "", "Not Installed") else "bad"),
+      "note": _(building.dvr_status) if building.dvr_status else _("Not Recorded")}) -%}
+{%- endif -%}
 
-  {% if doc.description %}<div class="ax-block"><div class="ax-blk-lbl">{{ _("Description") }}</div>{{ doc.description }}</div>{% endif %}
+<div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  {{ ax.watermark(doc) }}
 
-  {% if doc.immediate_action_taken %}<div class="ax-block"><div class="ax-blk-lbl">{{ _("Immediate Action Taken") }}</div>{{ doc.immediate_action_taken }}</div>{% endif %}
+  {% if not no_letterhead and letter_head %}{{ letter_head }}{% endif %}
 
-  {% if doc.resolution_notes %}<div class="ax-block"><div class="ax-blk-lbl">{{ _("Resolution Notes") }}</div>{{ doc.resolution_notes }}</div>{% endif %}
+  {{ ax.doc_title(doc, _("Safety Incident Report"), "Safety Incident Report",
+                  ((_("Severity") ~ ": " ~ _(doc.severity)) if doc.severity else "")
+                  ~ ((" · " ~ _("Status") ~ ": " ~ _(doc.status)) if doc.status else "")) }}
 
-  <table class="ax-sign">
-    <tr>
-      <td>{{ _("Reported By") }}<br>{{ _("Signature") }}</td>
-      <td>{{ _("Supervisor") }}<br>{{ _("Signature") }}</td>
-    </tr>
-  </table>
+  {{ ax.party_block([
+      {"role_ar": _("Site Where the Incident Occurred"), "role_en": "Site of incident",
+       "name": building.get("building_name") or doc.building,
+       "lines": [
+         get_address_text("Building", doc.building) if doc.building else None,
+         building.get("district") or building.get("city") or None,
+         (_("Occupants at the Site") ~ ": " ~ frappe.utils.cint(building.current_occupants) ~ " / " ~ frappe.utils.cint(building.total_capacity)) if building else None,
+       ]},
+      {"role_ar": _("Reporting Entity"), "role_en": "Reporting entity",
+       "name": company.get("company_name") or building.get("company"),
+       "lines": [
+         (_("VAT / Tax Registration No.") ~ ": " ~ company.tax_id) if company.get("tax_id") else None,
+         company.get("registration_details") or None,
+         (_("Phone") ~ ": " ~ company.phone_no) if company.get("phone_no") else None,
+       ]},
+  ]) }}
 
-  <div class="ax-foot">{{ doc.name }}</div>
+  {{ ax.field_grid([
+      [{"ar": _("Incident Date and Time"), "en": "Date and time", "value": doc.incident_datetime, "fmt": "Datetime"},
+       {"ar": _("Exact Location at the Site"), "en": "Exact location", "value": doc.specific_location}],
+      [{"ar": _("Classification of the Incident"), "en": "Classification", "value": doc.incident_type, "tr": True},
+       {"ar": _("Severity Rating"), "en": "Severity", "value": doc.severity, "tr": True}],
+      [{"ar": _("Persons Hurt"), "en": "Casualties", "value": doc.casualties, "fmt": "Int"},
+       {"ar": _("Reported By"), "en": "Reported by", "value": reporter}],
+      [{"ar": _("Investigation Status"), "en": "Investigation status", "value": doc.status, "tr": True},
+       {"ar": _("Days Open Since the Incident"), "en": "Days open", "value": days_open, "fmt": "Int"}],
+  ]) }}
+
+  {{ ax.note_block(doc.description, _("What Happened")) }}
+
+  {{ ax.note_block(doc.immediate_action_taken, _("Action Taken on the Spot")) }}
+
+  {{ ax.note_block(doc.resolution_notes, _("Corrective Action and Closure")) }}
+
+  {%- if provisions %}
+  <div class="lbl" style="margin-bottom:5px">{{ _("Safety Provisions on Record at This Site") }}<span class="en">Safety provisions on record at this site</span></div>
+  {{ ax.check_list(provisions) }}
+  {%- endif %}
+
+  {{ ax.photo_slots(3, _("Attach photographic evidence of the scene")) }}
+
+  {{ ax.declaration(_("The reporter declares that the account above is a true and complete record of what happened, to the best of their knowledge, and that nothing material has been left out. This report is issued as the company's own record of the incident and may be relied on by an inspector, an auditor or an insurer.")) }}
+
+  {{ ax.field_grid([
+      [{"ar": _("Document State"), "en": "Document state",
+        "value": _("Draft") if doc.docstatus == 0 else (_("Submitted") if doc.docstatus == 1 else _("Cancelled"))},
+       {"ar": _("Case Closed"), "en": "Case closed", "value": _("Yes") if is_closed else _("No")}],
+  ]) }}
+
+  {{ ax.sign_block([
+      {"ar": _("Reported By"), "en": "Reported by", "name": reporter},
+      {"ar": _("Site Safety Supervisor"), "en": "Site safety supervisor", "name": supervisor},
+      {"ar": _("Reviewed By (Management)"), "en": "Reviewed by", "name": None},
+  ]) }}
+
+  {{ ax.doc_footer(doc) }}
 </div>
