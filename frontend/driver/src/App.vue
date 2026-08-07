@@ -103,11 +103,12 @@ import InstallHint from "./components/InstallHint.vue";
 import TodaySkeleton from "./components/TodaySkeleton.vue";
 import LoadError from "@shared/components/LoadError.vue";
 import { useI18n, resourceErrorMessage } from "./i18n";
+import { useDocumentLanguage } from "@shared/useDocumentLanguage";
 import { clearToasts } from "./toast";
 import { online } from "./cache";
 import { updateReady, applyUpdate, initPwaUpdates } from "./pwa-updates";
 
-const { t, dir, fmtTodayDate } = useI18n();
+const { t, lang, dir, fmtTodayDate } = useI18n();
 
 // Watch the registered service worker for a new build and surface the reload
 // banner. Tear it down on unmount so its interval/listeners don't stack on an
@@ -120,17 +121,7 @@ onUnmounted(() => stopPwaUpdates && stopPwaUpdates());
 const route = useRoute();
 watch(() => route.fullPath, () => clearToasts());
 
-// Keep the document direction (and lang attribute) in sync with the chosen
-// language so native RTL applies to the whole page, scrollbars and inputs
-// included — not just the app shell.
-watch(
-  dir,
-  (d) => {
-    document.documentElement.setAttribute("dir", d);
-    document.documentElement.setAttribute("lang", d === "rtl" ? "ar" : "en");
-  },
-  { immediate: true },
-);
+useDocumentLanguage(lang, dir);
 
 // The page template (www/driver.html) sets data-theme server-side, and all theme
 // tokens are scoped to [data-theme="…"] (a missing attribute silently falls back to

@@ -111,6 +111,7 @@ import Icon from "./components/Icon.vue";
 import MobileConsoleShell from "@shared/components/MobileConsoleShell.vue";
 import LangToggle from "./components/LangToggle.vue";
 import { useI18n, resourceErrorMessage, setEnumLabels } from "./i18n";
+import { useDocumentLanguage } from "@shared/useDocumentLanguage";
 import { TOKEN, hasToken } from "./utils/token";
 import { updateReady, applyUpdate, initPwaUpdates } from "./pwa";
 import { usePoll } from "@shared/usePoll.js";
@@ -131,19 +132,7 @@ watch(
   { immediate: true },
 );
 
-// This portal offers five languages, so <html lang> must carry the CHOSEN one, not
-// ar/en derived from direction: it is what a screen reader announces and what
-// @shared/call reads to stamp `_lang` on every request, so a Hindi page asking for
-// English refusals was the same bug in two places. Watch `lang`, since ar -> ur
-// leaves `dir` unchanged and a dir-keyed watcher would never fire.
-watch(
-  lang,
-  (l) => {
-    document.documentElement.setAttribute("dir", dir.value);
-    document.documentElement.setAttribute("lang", l);
-  },
-  { immediate: true },
-);
+useDocumentLanguage(lang, dir);
 
 // [T-318] reactive connectivity so the shell can show an offline banner.
 const online = ref(typeof navigator === "undefined" ? true : navigator.onLine);

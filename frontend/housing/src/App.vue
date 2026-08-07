@@ -62,16 +62,17 @@
 </template>
 
 <script setup>
-import { computed, watch } from "vue";
+import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Button, Dialogs, Progress, Toast } from "frappe-ui";
 import MobileConsoleShell from "@shared/components/MobileConsoleShell.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
 import Icon from "./components/Icon.vue";
 import { useI18n } from "./i18n";
+import { useDocumentLanguage } from "@shared/useDocumentLanguage";
 import { building, buildingLabel, clearBuilding, countProgress } from "./session";
 
-const { t, dir } = useI18n();
+const { t, lang, dir } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
@@ -101,14 +102,7 @@ function onChangeBuilding() {
   router.push("/count");
 }
 
-watch(
-  dir,
-  (d) => {
-    document.documentElement.setAttribute("dir", d);
-    document.documentElement.setAttribute("lang", d === "rtl" ? "ar" : "en");
-  },
-  { immediate: true },
-);
+useDocumentLanguage(lang, dir);
 </script>
 
 <style scoped>

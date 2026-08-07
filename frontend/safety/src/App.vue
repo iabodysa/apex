@@ -175,10 +175,11 @@ import LangToggle from "@shared/components/LangToggle.vue";
 import BuildingPicker from "@shared/components/BuildingPicker.vue";
 import CadenceSection from "./components/CadenceSection.vue";
 import { useI18n, resourceErrorMessage } from "./i18n";
+import { useDocumentLanguage } from "@shared/useDocumentLanguage";
 import { connectSafetyRealtime } from "./realtime.js";
 import { makeCache } from "@shared/makeCache.js";
 
-const { t, tEnum, dir } = useI18n();
+const { t, tEnum, lang, dir } = useI18n();
 
 // Branding flags projected by the page template (www/safety.html). Default to
 // showing the brand; an explicit `false` hides it, and a tenant logo overrides
@@ -187,15 +188,7 @@ const { t, tEnum, dir } = useI18n();
 const showBrand = computed(() => window.portal_show_brand !== false);
 const brandLogo = computed(() => window.portal_logo || "");
 
-// Keep the document direction/lang in sync with the toggle.
-watch(
-  dir,
-  (d) => {
-    document.documentElement.setAttribute("dir", d);
-    document.documentElement.setAttribute("lang", d === "rtl" ? "ar" : "en");
-  },
-  { immediate: true },
-);
+useDocumentLanguage(lang, dir);
 
 // ---- selected building -------------------------------------------------
 const building = ref("");

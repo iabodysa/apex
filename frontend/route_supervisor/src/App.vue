@@ -285,11 +285,12 @@ import DriverMap from "./components/DriverMap.vue";
 import FleetMap from "./components/FleetMap.vue";
 import ApprovalQueue from "./components/ApprovalQueue.vue";
 import { useI18n } from "./i18n";
+import { useDocumentLanguage } from "@shared/useDocumentLanguage";
 import { getSupervisorContext, approveRoutePlan, rejectRoutePlan } from "./api.js";
 import { connectRouteSupervisorRealtime } from "./realtime.js";
 import { pct } from "./fmt.js";
 
-const { t, dir, resourceErrorMessage } = useI18n();
+const { t, lang, dir, resourceErrorMessage } = useI18n();
 
 const TABS = [
   { key: "approval", icon: "circle-check" },
@@ -487,15 +488,7 @@ async function confirmReject() {
   }
 }
 
-// Keep the document direction/lang in sync so native RTL applies page-wide.
-watch(
-  dir,
-  (d) => {
-    document.documentElement.setAttribute("dir", d);
-    document.documentElement.setAttribute("lang", d === "rtl" ? "ar" : "en");
-  },
-  { immediate: true },
-);
+useDocumentLanguage(lang, dir);
 
 // The server now announces a decision (RoutePlan.set_supervisor_decision), so the
 // socket carries the update instantly instead of the supervisor waiting out a 45s

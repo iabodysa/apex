@@ -27,6 +27,7 @@ import FleetTable from "./components/FleetTable.vue";
 import AlertDrawer from "./components/AlertDrawer.vue";
 import VehiclePanel from "./components/VehiclePanel.vue";
 import { useI18n } from "./i18n";
+import { useDocumentLanguage } from "@shared/useDocumentLanguage";
 import { useFleetFormat } from "./useFleetFormat.js";
 import { useToast } from "@shared/useToast.js";
 import { useConfirm } from "./useConfirm.js";
@@ -38,17 +39,9 @@ import { useSelection } from "./useSelection.js";
 import { useDriverAssignment } from "./useDriverAssignment.js";
 import { useFleetActions } from "./useFleetActions.js";
 
-const { t, dir } = useI18n();
+const { t, lang, dir } = useI18n();
 
-// Keep the document direction/lang in sync so native RTL applies page-wide.
-watch(
-  dir,
-  (d) => {
-    document.documentElement.setAttribute("dir", d);
-    document.documentElement.setAttribute("lang", d === "rtl" ? "ar" : "en");
-  },
-  { immediate: true },
-);
+useDocumentLanguage(lang, dir);
 
 // Display formatters (single source: pure helpers + t-bound ones).
 const fmt = useFleetFormat(t);
