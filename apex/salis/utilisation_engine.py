@@ -39,26 +39,35 @@ def weekly_vehicle_utilisation_snapshot() -> None:
         )
         if not vehicle_names:
             break
+
+        snapshotted = set(
+            frappe.get_all(
+                "Vehicle Utilisation Snapshot",
+                filters={"vehicle": ["in", vehicle_names], "snapshot_date": snapshot_date},
+                pluck="vehicle",
+            )
+        )
+        trips_by_vehicle = {}
+        for trip in frappe.get_all(
+            "Dispatch Trip",
+            filters={
+                "vehicle": ["in", vehicle_names],
+                "status": "Completed",
+                "docstatus": 1,
+                "trip_date": ["between", [window_start, snapshot_date]],
+            },
+            fields=["vehicle", "trip_date"],
+        ):
+            trips_by_vehicle.setdefault(trip.vehicle, []).append(trip)
+
         for vehicle_name in vehicle_names:
             sp = "accrual_row"
             frappe.db.savepoint(sp)
             try:
-                if frappe.db.exists(
-                    "Vehicle Utilisation Snapshot",
-                    {"vehicle": vehicle_name, "snapshot_date": snapshot_date},
-                ):
+                if vehicle_name in snapshotted:
                     continue
 
-                trip_rows = frappe.get_all(
-                    "Dispatch Trip",
-                    filters={
-                        "vehicle": vehicle_name,
-                        "status": "Completed",
-                        "docstatus": 1,
-                        "trip_date": ["between", [window_start, snapshot_date]],
-                    },
-                    fields=["trip_date"],
-                )
+                trip_rows = trips_by_vehicle.get(vehicle_name, [])
                 trips_count = len(trip_rows)
 
                 days_with_trip = len({getdate(r.trip_date) for r in trip_rows if r.trip_date})

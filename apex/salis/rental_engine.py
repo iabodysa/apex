@@ -38,31 +38,31 @@ ALERT_DOCTYPE = "Operations Alert"
 BATCH_SIZE = 500
 
 
-def _is_currently_received(
-    vehicle: str, posting_date: str
-) -> tuple[bool, str | None, float, str | None]:
+def _currently_received(
+    vehicles: list[str], posting_date: str
+) -> dict[str, tuple[str | None, float, str | None]]:
     """A rented vehicle is in-service when its latest submitted Rental Vehicle
     Movement on or before ``posting_date`` is a Receipt (i.e. there is an open
-    Receipt with no later Return). Returns
-    (in_service, rental_office, daily_rate, movement_name).
+    Receipt with no later Return). Returns the in-service vehicles only, keyed
+    by vehicle, each mapped to (rental_office, daily_rate, movement_name).
     """
-    latest = frappe.get_all(
+    latest: dict = {}
+    for row in frappe.get_all(
         "Rental Vehicle Movement",
         filters={
-            "vehicle": vehicle,
+            "vehicle": ["in", vehicles],
             "docstatus": 1,
             "movement_date": ["<=", posting_date],
         },
-        fields=["name", "movement_type", "rental_office", "daily_rate"],
+        fields=["name", "vehicle", "movement_type", "rental_office", "daily_rate"],
         order_by="movement_date desc, creation desc",
-        limit_page_length=1,
-    )
-    if not latest:
-        return False, None, 0.0, None
-    row = latest[0]
-    if row.movement_type != "Receipt":
-        return False, None, 0.0, None
-    return True, row.rental_office, flt(row.daily_rate), row.name
+    ):
+        latest.setdefault(row.vehicle, row)
+    return {
+        vehicle: (row.rental_office, flt(row.daily_rate), row.name)
+        for vehicle, row in latest.items()
+        if row.movement_type == "Receipt"
+    }
 
 
 def daily_rental_accrual() -> None:
@@ -93,22 +93,27 @@ def daily_rental_accrual() -> None:
         if not vehicles:
             break
 
+        vehicle_names = [vehicle_row.name for vehicle_row in vehicles]
+        accrued = set(
+            frappe.get_all(
+                LEDGER_DOCTYPE,
+                filters={"vehicle": ["in", vehicle_names], "accrual_date": posting_date},
+                pluck="vehicle",
+            )
+        )
+        received = _currently_received(vehicle_names, posting_date)
+
         for vehicle_row in vehicles:
             vehicle = vehicle_row.name
             sp = "accrual_row"
             frappe.db.savepoint(sp)
             try:
-                if frappe.db.exists(
-                    "Rental Accrual Ledger",
-                    {"vehicle": vehicle, "accrual_date": posting_date},
-                ):
+                if vehicle in accrued:
                     continue
 
-                in_service, rental_office, daily_rate, movement_name = (
-                    _is_currently_received(vehicle, posting_date)
-                )
-                if not in_service:
+                if vehicle not in received:
                     continue
+                rental_office, daily_rate, movement_name = received[vehicle]
 
                 if movement_name:
                     source_doctype = "Rental Vehicle Movement"

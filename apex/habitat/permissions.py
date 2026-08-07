@@ -134,19 +134,15 @@ def _dual(first, second):
     return ("dual", {"first": first, "second": second})
 
 
-def _hop(field, doctype, stored=False):
+def _hop(field, doctype):
     """Estate one link away, reached through ``field`` -> ``doctype``.``building``.
 
-    ``stored`` says whether a ``building`` ATTRIBUTE on the doc itself is an accepted
-    estate, tried ahead of the link. NEITHER hop DocType has a ``building`` column, so
-    on a stored row the attribute is always empty and the flag is inert; it exists
-    because it is not inert on an UNSAVED doc, where a caller can put any key in the
-    payload and ``frappe.get_doc`` makes it an attribute. Room Bed Transfer accepted
-    such an attribute before this table existed and still does; Housing Checkout never
-    did, and must not start — accepting one would let a caller name their own estate
-    and be granted on it.
+    NEITHER hop DocType has a ``building`` column, and a ``building`` ATTRIBUTE on the
+    doc itself is never consulted: on a stored row it is always empty, and on an
+    UNSAVED doc a caller controls every key in the payload — accepting one would let a
+    caller name their own estate and be granted on it.
     """
-    return ("hop", {"field": field, "doctype": doctype, "stored": stored})
+    return ("hop", {"field": field, "doctype": doctype})
 
 
 def _child(child_doctype, parent_doctype):
@@ -194,7 +190,7 @@ BUILDING_SCOPE = {
     "Material Transfer": _dual("from_building", "to_building"),
     "Facility Asset Delivery": _dual("from_building", "to_building"),
     "Housing Checkout": _hop("bed", "Bed"),
-    "Room Bed Transfer": _hop("assignment", "Housing Assignment", stored=True),
+    "Room Bed Transfer": _hop("assignment", "Housing Assignment"),
     "Audit Remediation Plan": _child("Audit Remediation Building Scope", "Audit Remediation Plan"),
 }
 
@@ -352,14 +348,9 @@ def _estates_hop(doc, spec):
 
     Load-bearing for Housing Checkout: the fragment reaches its estate through ``bed``,
     so the form check must prefer ``bed`` too, or a stored row whose ``bed`` and
-    ``assignment`` disagree would be readable in the list and denied on the form.
-    ``spec["stored"]`` is why the doc's own ``building`` attribute is consulted first
-    for Room Bed Transfer and never for Housing Checkout — see ``_hop``.
+    ``assignment`` disagree would be readable in the list and denied on the form. The
+    doc's own ``building`` attribute is never consulted — see ``_hop``.
     """
-    if spec["stored"]:
-        stored = getattr(doc, BUILDING, None)
-        if stored:
-            return [stored]
     link = getattr(doc, spec["field"], None)
     if not link:
         return []

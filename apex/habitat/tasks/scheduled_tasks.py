@@ -61,16 +61,26 @@ def daily_scheduled_task_instance_generator() -> None:
         if not assignments:
             break
 
+        templates = list({assignment.template for assignment in assignments})
+        items_by_template = {}
+        for item in frappe.get_all(
+            "Scheduled Task Template Item",
+            filters={"parent": ["in", templates], "is_active": 1},
+            fields=["parent", "task_catalog", "frequency_override", "title"],
+        ):
+            items_by_template.setdefault(item.parent, []).append(item)
+        frequency_by_template = dict(
+            frappe.get_all(
+                "Scheduled Task Template",
+                filters={"name": ["in", templates]},
+                fields=["name", "frequency"],
+                as_list=True,
+            )
+        )
+
         for assignment in assignments:
-            items = frappe.get_all(
-                "Scheduled Task Template Item",
-                filters={"parent": assignment.template, "is_active": 1},
-                fields=["task_catalog", "frequency_override", "title"],
-            )
-            template_frequency = (
-                frappe.db.get_value("Scheduled Task Template", assignment.template, "frequency")
-                or "Monthly"
-            )
+            items = items_by_template.get(assignment.template, [])
+            template_frequency = frequency_by_template.get(assignment.template) or "Monthly"
             for item in items:
                 frequency = item.frequency_override or template_frequency
 

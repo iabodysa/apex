@@ -244,12 +244,6 @@ def reconcile_operations_alerts() -> None:
         if quota > 0 and consumed > quota * (1 + overage_margin):
             excessive_topup_vehicles.add(r["vehicle"])
 
-    def _vehicle_active(vehicle: str | None) -> bool:
-        return bool(vehicle) and frappe.db.get_value("Salis Vehicle", vehicle, "status") == "Active"
-
-    def _driver_active(driver: str | None) -> bool:
-        return bool(driver) and frappe.db.get_value("Salis Driver", driver, "status") == "Active"
-
     resolved_projects: set[str | None] = set()
     cursor = ""
     while True:
@@ -262,6 +256,37 @@ def reconcile_operations_alerts() -> None:
         )
         if not alerts:
             break
+
+        batch_vehicles = list({a.vehicle for a in alerts if a.vehicle})
+        batch_drivers = list({a.driver for a in alerts if a.driver})
+        vehicle_status = dict(
+            frappe.get_all(
+                "Salis Vehicle",
+                filters={"name": ["in", batch_vehicles]},
+                fields=["name", "status"],
+                as_list=True,
+            )
+            if batch_vehicles
+            else []
+        )
+        driver_rows = {
+            r.name: r
+            for r in (
+                frappe.get_all(
+                    "Salis Driver",
+                    filters={"name": ["in", batch_drivers]},
+                    fields=["name", "status", "license_expiry"],
+                )
+                if batch_drivers
+                else []
+            )
+        }
+
+        def _vehicle_active(vehicle: str | None) -> bool:
+            return bool(vehicle) and vehicle_status.get(vehicle) == "Active"
+
+        def _driver_active(driver: str | None) -> bool:
+            return bool(driver) and getattr(driver_rows.get(driver), "status", None) == "Active"
 
         for a in alerts:
             frappe.db.savepoint(_ROW_SAVEPOINT)
@@ -286,7 +311,7 @@ def reconcile_operations_alerts() -> None:
                         if not _driver_active(a.driver):
                             clear, reason = True, "driver is no longer Active"
                         else:
-                            expiry = frappe.db.get_value("Salis Driver", a.driver, "license_expiry")
+                            expiry = driver_rows[a.driver].license_expiry
                             if expiry and getdate(expiry) > add_days(today_date, license_lead):
                                 clear, reason = True, "driver licence renewed"
 

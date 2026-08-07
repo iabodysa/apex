@@ -17,10 +17,9 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from apex.salis.api.dispatch_board import VEHICLE_STATUSES
 from apex.salis.api.fleet_reader import driver_names, scope_filter, scoped_vehicles
 from apex.salis.utils import close_open_stop, lock_vehicle, reassign_vehicle_driver
-
-VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
 
 COMPLIANCE_AT_RISK = ("Expiring Soon", "Expired")
 
