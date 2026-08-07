@@ -6,6 +6,40 @@
  "is_submittable": 0,
  "engine": "InnoDB",
  "search_fields": "worker_name, mobile_number, anonymous_tracking_code",
+ "states": [
+  {
+   "color": "Blue",
+   "title": "New"
+  },
+  {
+   "color": "Cyan",
+   "title": "Triaged"
+  },
+  {
+   "color": "Light Blue",
+   "title": "Assigned"
+  },
+  {
+   "color": "Orange",
+   "title": "In Progress"
+  },
+  {
+   "color": "Yellow",
+   "title": "Waiting Evidence"
+  },
+  {
+   "color": "Green",
+   "title": "Resolved"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
+  },
+  {
+   "color": "Gray",
+   "title": "Closed"
+  }
+ ],
  "track_changes": 1,
  "field_order": [
   "arr_tab_overview",
@@ -356,5 +390,5 @@
  "naming_rule": "By \"Naming Series\" field",
  "sort_field": "modified",
  "sort_order": "DESC",
- "modified": "2026-07-11 04:09:36.115685"
+ "modified": "2026-08-07 05:23:00.000000"
 }

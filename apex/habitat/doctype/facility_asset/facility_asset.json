@@ -6,6 +6,32 @@
  "istable": 0,
  "engine": "InnoDB",
  "search_fields": "asset_name, serial_number, linked_erpnext_asset",
+ "states": [
+  {
+   "color": "Green",
+   "title": "Operational"
+  },
+  {
+   "color": "Red",
+   "title": "Faulty"
+  },
+  {
+   "color": "Orange",
+   "title": "Under Repair"
+  },
+  {
+   "color": "Blue",
+   "title": "Replaced"
+  },
+  {
+   "color": "Gray",
+   "title": "Scrapped"
+  },
+  {
+   "color": "Gray",
+   "title": "In Storage"
+  }
+ ],
  "track_changes": 1,
  "autoname": "naming_series:",
  "naming_rule": "By \"Naming Series\" field",
@@ -323,5 +349,5 @@
   "movement_count",
   "last_movement_date"
  ],
- "modified": "2026-07-11 04:09:36.115685"
+ "modified": "2026-08-07 05:23:00.000000"
 }

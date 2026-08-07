@@ -203,7 +203,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-27 16:10:26.351481",
+ "modified": "2026-08-07 05:23:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Handover",
@@ -274,6 +274,35 @@
  "search_fields": "from_building, to_building, handover_date",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Gray",
+   "title": "Draft"
+  },
+  {
+   "color": "Orange",
+   "title": "Pending Receipt"
+  },
+  {
+   "color": "Yellow",
+   "title": "Under Review"
+  },
+  {
+   "color": "Blue",
+   "title": "Approved"
+  },
+  {
+   "color": "Green",
+   "title": "Confirmed"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
+  },
+  {
+   "color": "Gray",
+   "title": "Cancelled"
+  }
+ ],
  "track_changes": 1
 }

@@ -260,7 +260,7 @@
    "link_fieldname": "maintenance_work_order"
   }
  ],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-08-07 05:23:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Work Order",
@@ -286,7 +286,28 @@
  "search_fields": "maintenance_request, subcontractor_service_order, building",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Gray",
+   "title": "Draft"
+  },
+  {
+   "color": "Blue",
+   "title": "Planned"
+  },
+  {
+   "color": "Orange",
+   "title": "In Progress"
+  },
+  {
+   "color": "Green",
+   "title": "Completed"
+  },
+  {
+   "color": "Gray",
+   "title": "Cancelled"
+  }
+ ],
  "title_field": "maintenance_request",
  "track_changes": 1
 }

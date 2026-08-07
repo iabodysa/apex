@@ -7,6 +7,28 @@
  "engine": "InnoDB",
  "is_submittable": 1,
  "search_fields": "status, requested_for, access_level",
+ "states": [
+  {
+   "color": "Orange",
+   "title": "Pending Approval"
+  },
+  {
+   "color": "Blue",
+   "title": "Approved"
+  },
+  {
+   "color": "Green",
+   "title": "Active"
+  },
+  {
+   "color": "Gray",
+   "title": "Expired"
+  },
+  {
+   "color": "Red",
+   "title": "Revoked"
+  }
+ ],
  "track_changes": 1,
  "autoname": "naming_series:",
  "naming_rule": "By \"Naming Series\" field",
@@ -190,5 +212,5 @@
   "camera_access_grant_system_col",
   "naming_series"
  ],
- "modified": "2026-07-27 08:11:35.893365"
+ "modified": "2026-08-07 05:23:00.000000"
 }

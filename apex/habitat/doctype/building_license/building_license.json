@@ -7,6 +7,28 @@
  "engine": "InnoDB",
  "is_submittable": 1,
  "search_fields": "license_number, building, issue_date",
+ "states": [
+  {
+   "color": "Green",
+   "title": "Active"
+  },
+  {
+   "color": "Yellow",
+   "title": "Expiring Soon"
+  },
+  {
+   "color": "Red",
+   "title": "Expired"
+  },
+  {
+   "color": "Blue",
+   "title": "Under Renewal"
+  },
+  {
+   "color": "Gray",
+   "title": "Revoked"
+  }
+ ],
  "track_changes": 1,
  "autoname": "naming_series:",
  "naming_rule": "By \"Naming Series\" field",
@@ -251,5 +273,5 @@
   "naming_series",
   "amended_from"
  ],
- "modified": "2026-07-11 04:09:36.115685"
+ "modified": "2026-08-07 05:23:00.000000"
 }

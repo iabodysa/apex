@@ -7,6 +7,28 @@
  "engine": "InnoDB",
  "is_submittable": 0,
  "show_title_field_in_link": 1,
+ "states": [
+  {
+   "color": "Green",
+   "title": "Available"
+  },
+  {
+   "color": "Blue",
+   "title": "Assigned"
+  },
+  {
+   "color": "Orange",
+   "title": "Suspended"
+  },
+  {
+   "color": "Red",
+   "title": "Lost"
+  },
+  {
+   "color": "Gray",
+   "title": "Terminated"
+  }
+ ],
  "track_changes": 1,
  "autoname": "naming_series:",
  "naming_rule": "By \"Naming Series\" field",
@@ -315,5 +337,5 @@
    "idx": 4
   }
  ],
- "modified": "2026-08-06 22:39:00.000000"
+ "modified": "2026-08-07 05:23:00.000000"
 }

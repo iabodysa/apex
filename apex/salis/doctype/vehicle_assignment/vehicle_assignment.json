@@ -133,7 +133,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-06 22:39:00.000000",
+ "modified": "2026-08-07 05:23:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Assignment",
@@ -203,6 +203,15 @@
  "search_fields": "vehicle, driver, project",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Green",
+   "title": "Active"
+  },
+  {
+   "color": "Gray",
+   "title": "Ended"
+  }
+ ],
  "track_changes": 1
 }

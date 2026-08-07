@@ -121,7 +121,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-12 00:13:46.755746",
+ "modified": "2026-08-07 05:23:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Material Transfer",
@@ -163,6 +163,23 @@
  "search_fields": "from_building, to_building, transfer_date",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Gray",
+   "title": "Draft"
+  },
+  {
+   "color": "Orange",
+   "title": "In Transit"
+  },
+  {
+   "color": "Green",
+   "title": "Received"
+  },
+  {
+   "color": "Gray",
+   "title": "Cancelled"
+  }
+ ],
  "track_changes": 1
 }
