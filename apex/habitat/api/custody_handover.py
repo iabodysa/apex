@@ -14,7 +14,7 @@ import hmac
 
 import frappe
 from frappe import _
-from frappe.utils import add_to_date, flt, now_datetime
+from frappe.utils import add_to_date, cint, flt, now_datetime
 
 from apex.habitat.doctype.custody_handover.custody_handover import (
     VOUCHER_TYPE,
@@ -154,15 +154,29 @@ def _post_receive_and_confirm(doc):
 
 
 @frappe.whitelist(methods=["POST"])
-def approve_handover(handover: str):
+def approve_handover(handover: str, all_items_verified=None):
     """Move a handover from Under Review to Approved. Every line must have been
-    physically checked (all_items_verified) first."""
+    physically checked (all_items_verified) first.
+
+    The verification travels with this call rather than being read from a field the
+    approver could have set. ``all_items_verified`` is not ``allow_on_submit``, and
+    widening it would not help: saving a submitted document is
+    ``update_after_submit``, which Frappe gates on the SUBMIT permission
+    (``frappe/model/document.py:905-906``), while the receiving side holds write. So
+    before this parameter existed the box was reachable only in DRAFT — by the
+    SENDING side, pre-attesting a physical check the RECEIVER had not yet made.
+    Passing it here records the attestation against the party
+    ``_require_receiving_side`` just authenticated, at the moment they approve. A
+    handover whose box was already ticked still approves unchanged.
+    """
     doc = _get_submitted(handover)
     _require_receiving_side(doc)
     if doc.status == "Approved":
         return doc.name
     if doc.status != "Under Review":
         frappe.throw(_("Only a handover Under Review can be approved."))
+    if all_items_verified is not None and cint(all_items_verified) and not doc.all_items_verified:
+        doc.db_set("all_items_verified", 1)
     if not doc.all_items_verified:
         frappe.throw(_("Confirm that all items have been verified before approving."))
     doc.db_set("status", "Approved")

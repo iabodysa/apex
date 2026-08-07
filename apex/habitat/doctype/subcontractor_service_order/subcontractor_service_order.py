@@ -18,7 +18,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import nowdate
+from frappe.utils import cint, nowdate
 
 
 class SubcontractorServiceOrder(Document):
@@ -48,12 +48,31 @@ def start_work(service_order):
 
 
 @frappe.whitelist(methods=["POST"])
-def mark_completed(service_order):
-    """Transition Subcontractor Service Order from In Progress to Completed.
+def mark_completed(
+    service_order,
+    supervisor_confirmed=None,
+    completion_photo=None,
+    visit_notes=None,
+    actual_visit_date=None,
+):
+    """Transition Subcontractor Service Order from In Progress to Completed, and
+    record the visit evidence in the same call.
 
     Controlled completion gate mirroring start_work / mark_missed: only a submitted
     order that is In Progress may be marked Completed, so the terminal state is
-    reached through a guarded chokepoint rather than a free-form status edit."""
+    reached through a guarded chokepoint rather than a free-form status edit.
+
+    The four evidence fields travel with this method for the reason
+    ``maintenance_work_order.mark_completed`` records: they are filled once the order
+    is SUBMITTED and In Progress, none is ``allow_on_submit``, and widening them would
+    not be enough anyway — saving a submitted document is ``update_after_submit``,
+    which Frappe gates on the SUBMIT permission
+    (``frappe/model/document.py:905-906``), while the supervisor doing the visit holds
+    write. Granting submit to reach a notes box would also hand them authority to
+    submit and cancel the order they are executing. ``db_set`` is therefore their only
+    writer at docstatus 1; permission is re-checked above because ``db_set`` goes
+    straight to the database. Each field is written only when supplied, so a caller
+    that passes none behaves exactly as before."""
     doc = frappe.get_doc("Subcontractor Service Order", service_order)
     frappe.has_permission("Subcontractor Service Order", "write", doc=doc, throw=True)
 
@@ -61,6 +80,16 @@ def mark_completed(service_order):
         frappe.throw(_("Only submitted Service Orders can be marked Completed."))
     if doc.status != "In Progress":
         frappe.throw(_("Only Service Orders with status In Progress can be marked Completed."))
+
+    evidence = {
+        "supervisor_confirmed": cint(supervisor_confirmed) if supervisor_confirmed is not None else None,
+        "completion_photo": completion_photo,
+        "visit_notes": visit_notes,
+        "actual_visit_date": actual_visit_date,
+    }
+    for fieldname, value in evidence.items():
+        if value is not None:
+            doc.db_set(fieldname, value)
 
     doc.db_set("status", "Completed")
     doc.add_comment("Comment", _("Marked Completed via controlled method."))
