@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
-from frappe.utils import cint, now_datetime, time_diff_in_seconds
+from frappe.utils import add_to_date, cint, now_datetime, time_diff_in_seconds
 
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.apex_core.doctype.salis_settings.salis_settings import (
@@ -259,6 +259,17 @@ def _grace_elapsed(dispatch_trip):
 
 
 
+def _auto_confirm_cutoff():
+    """The instant a claim must predate to be due for auto-confirm.
+
+    Same edge as ``_apply_auto_confirm``'s own test, stated as a timestamp so the
+    scheduled tick can put it in the QUERY instead of loading every claimed trip to
+    discover most are not due yet. Recomputed per tick from the current time, so a claim
+    that crosses the cutoff between two ticks is picked up by the next one."""
+    minutes = get_boarding_setting("boarding_auto_confirm_minutes")
+    return add_to_date(now_datetime(), seconds=-(minutes * 60))
+
+
 def _apply_auto_confirm(trip):
     """In-place: any Worker Claimed row whose claim is older than
     boarding_auto_confirm_minutes becomes Boarded (confirm_source=Auto). Mutates
@@ -297,7 +308,11 @@ def auto_confirm_claimed_boardings():
     and re-stall on the same row on the next tick."""
     trips = frappe.get_all(
         "Trip Boarding State",
-        filters={"status": "Worker Claimed", "parenttype": "Dispatch Trip"},
+        filters={
+            "status": "Worker Claimed",
+            "parenttype": "Dispatch Trip",
+            "worker_claim_at": ["<=", _auto_confirm_cutoff()],
+        },
         pluck="parent",
         distinct=True,
     )
