@@ -24,10 +24,9 @@ lives in the DocPerm row and in ``HOUSING_UNSCOPED_ROLES`` — never in a report
 table, which only clears ``Report.is_permitted``.
 
 What makes the decision REVIEWABLE rather than permanent: this record carries ZERO
-permission levels, so a level-0 read is every field. Under the field sensitivity model
-(``apex_core/utils/field_sensitivity.py``) it is a first-tier candidate — once the levels
-exist, this grant can be narrowed to the fields finance actually needs without touching
-either role's scope at all. The decision was taken against today's all-or-nothing shape,
+permission levels, so a level-0 read is every field. Give the record permission levels and
+this grant narrows to the fields finance actually needs, without touching either role's
+scope at all. The decision was taken against today's all-or-nothing shape,
 not against a considered one. ``test_accommodation_stock_ledger`` asserts the three grants
 and the flat level, so a change to either forces this paragraph to be revisited."""
 
