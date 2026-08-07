@@ -69,8 +69,9 @@ ledger, not ERPNext Stock Ledger or a General Ledger posting.
    changes and intercompany approvals, but no role currently has Create on
    `Facility Asset Movement`; do not teach or attempt a new movement until that
    DocPerm gap is corrected.
-8. Review **Custody Outstanding by Worker**, **Accommodation Stock Balance**,
-   and **Custody Damage Register**. Custody expiry alerts and the weekly digest
+8. Review **Accommodation Stock Balance** (its employee filter answers what each
+   worker holds) and the **Custody Damage Assessment** list view. Custody expiry
+   alerts and the weekly digest
    are described in the
    [automation reference](../reference/automation.md).
 

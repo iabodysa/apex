@@ -76,7 +76,7 @@ Use them for traceability and reports; do not enter or correct them manually.
    **Damaged**. Submission closes the assignment, releases the Bed, and marks
    the Room **Needs Cleaning**. Lost or damaged lines create a draft
    `Custody Damage Assessment` for review.
-7. Verify the result in **Active Resident Register**, **Checkout Pending
+7. Verify the result in the **Housing Assignment** list view, **Checkout Pending
    Clearance**, and **Accommodation Occupancy Summary**. See the
    [automation reference](../reference/automation.md) for reconciliation,
    snapshots, expiry checks, and daily cost allocation.

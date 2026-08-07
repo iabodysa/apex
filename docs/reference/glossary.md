@@ -86,7 +86,7 @@ source terms while clarifying their practical business meaning.
 
 | Term | Meaning in Apex |
 |------|-----------------|
-| **Logistay** | Workforce-arrival and telecom operations. Telecom records are reached through Telecom Control and Custody navigation rather than a separate workspace. |
+| **Logistay** | Workforce-arrival and telecom operations, with its own Logistay workspace; telecom records are also reached through Telecom Control and Custody navigation. |
 | **Telecom Contract** | One supplier service agreement that owns SIM cards and provides recurring billing terms. |
 | **SIM Card** | The managed telecom asset. Its mobile number can be corrected on the same record; a number change does not create a second SIM record. |
 | **SIM Custody Assignment** | One immutable SIM action: Assign, Transfer, Return, Suspend, or Reactivate. The latest submitted action projects the SIM's current state. |

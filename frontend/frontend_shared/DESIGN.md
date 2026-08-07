@@ -91,7 +91,7 @@ part of the work this guide sets up.
 | ≥ 1024 | `min(100%, 1100px)` centred | **two panes**: list on the reading side (360–420px), detail filling the rest; navbar moves to a side rail |
 
 **The open defect this guide exists to fix.** Today these four portals draw the same ~480px
-column at 1440px and leave two thirds of the screen empty (`_staging/evidence/viewports/driver-desktop.png`).
+column at 1440px and leave two thirds of the screen empty.
 That is not "mobile first", it is one layout pretending to be responsive. The desktop row
 above is the contract; the shell has to grow to meet it.
 
