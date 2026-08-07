@@ -1,7 +1,7 @@
 {
  "actions": [],
  "creation": "2026-06-12 00:00:00.000000",
- "description": "App-wide Apex configuration shared by every module (Habitat and Salis). Holds settings that are not scoped to a single domain — for example the GL-posting finance gate and the data-retention windows that govern how long machine-written time-series and alert records are kept.",
+ "description": "App-wide Apex configuration shared by every module (Habitat and Salis). Holds settings that are not scoped to a single domain — for example the GL-posting finance gate and the data-retention windows that govern how long machine-written time-series records are kept.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -9,9 +9,8 @@
   "enable_gl_posting",
   "apex_settings_sec_retention",
   "snapshot_retention_days",
-  "depreciation_snapshot_retention_days",
   "apex_settings_retention_col",
-  "alert_retention_days"
+  "depreciation_snapshot_retention_days"
  ],
  "fields": [
   {
@@ -28,7 +27,7 @@
   },
   {
    "collapsible": 1,
-   "description": "How long machine-written time-series and alert records are kept before the daily log cleanup purges old rows. Blank or 0 falls back to the built-in default for that record. Financial ledgers are never auto-purged.",
+   "description": "How long machine-written time-series records are kept before the daily log cleanup purges old rows. Blank or 0 falls back to the built-in default for that record. Financial ledgers are never auto-purged.",
    "fieldname": "apex_settings_sec_retention",
    "fieldtype": "Section Break",
    "label": "Data Retention"
@@ -42,29 +41,21 @@
    "non_negative": 1
   },
   {
+   "fieldname": "apex_settings_retention_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "730",
    "description": "Retention for submitted Non-Financial Depreciation Snapshots (days). Default 730.",
    "fieldname": "depreciation_snapshot_retention_days",
    "fieldtype": "Int",
    "label": "Depreciation Snapshot Retention (Days)",
    "non_negative": 1
-  },
-  {
-   "fieldname": "apex_settings_retention_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "90",
-   "description": "Retention for resolved Operations Alerts (days). Open and acknowledged alerts are never purged by age. Default 90.",
-   "fieldname": "alert_retention_days",
-   "fieldtype": "Int",
-   "label": "Resolved Alert Retention (Days)",
-   "non_negative": 1
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-08-03 00:08:00.000000",
+ "modified": "2026-08-07 20:25:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Apex Settings",

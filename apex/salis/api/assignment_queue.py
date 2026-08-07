@@ -2,16 +2,15 @@
 """Assignment-queue reader for the operations board, the /fleet-os drawer and the
 vehicle timelines.
 
-The Salis scheduler jobs no longer write Operations Alert rows: a condition about
-a document ASSIGNS that document to the Fleet Supervisor queue (the ToDo carries
-reference_type/reference_name), and a non-document condition notifies the role.
-The board and the drawer still speak the Operations Alert row shape, and their
-built JS cannot change in this instalment — so this module reads the open
-assignment queue and renders it in that exact shape, alongside the legacy alert
-rows that are still draining. Severity round-trips through the ToDo priority the
-writers set; ``alert_type`` is derived from the reference DocType for display
-only — it is never a dedupe or filter key, so the retired fragile text-matching
-dedupe cannot come back through here.
+A condition about a document ASSIGNS that document to the Fleet Supervisor queue
+(the ToDo carries reference_type/reference_name), and a non-document condition
+notifies the role. The board and the drawer still speak the row shape of the
+retired alert DocType, and their built JS predates its retirement — so this
+module reads the open assignment queue and renders it in that exact shape.
+Severity round-trips through the ToDo priority the writers set; ``alert_type``
+is derived from the reference DocType for display only — it is never a dedupe or
+filter key, so the retired fragile text-matching dedupe cannot come back through
+here.
 """
 
 from __future__ import annotations
@@ -73,7 +72,7 @@ def _vehicle_driver_refs(groups: list[dict]) -> None:
 
 
 def open_queue_rows() -> list:
-    """The open Fleet Supervisor queue rendered as Operations Alert-shaped rows.
+    """The open Fleet Supervisor queue rendered as alert-shaped rows.
 
     One row per queued DOCUMENT (a role assignment is one ToDo per holder, so the
     holders collapse into the row's assignee list). The row ``name`` is the oldest

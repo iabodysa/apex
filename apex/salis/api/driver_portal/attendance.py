@@ -167,11 +167,11 @@ def driver_check_in(photo=None, photo_filename=None):
 	A portal check-in is an authoritative record of presence, so the Driver
 	Attendance is submitted (docstatus 1) — not left in draft. This is what the
 	rest of the module treats as "attendance recorded": ``missing_attendance_watch``
-	and the Supervisor-Delay branch of ``reconcile_operations_alerts`` both key on
+	and the Salis Driver drain in ``reconcile_operations_alerts`` both key on
 	``docstatus = 1``. Leaving the record in draft meant a portal-using driver still
-	tripped a daily "Supervisor Delay" alert that never auto-resolved. Submitting on
-	check-in satisfies the watcher, so a compliant driver raises no alert (and any
-	already-open one auto-resolves on the next reconcile pass).
+	tripped a daily missing-attendance flag that never auto-resolved. Submitting on
+	check-in satisfies the watcher, so a compliant driver is never queued (and any
+	already-queued assignment drains on the next reconcile pass).
 
 	The Driver role holds a ``submit`` DocPerm on Driver Attendance (if_owner via the
 	identity-scoped resolution here); ``ignore_permissions`` keeps the write

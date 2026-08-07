@@ -4,15 +4,11 @@
 from __future__ import annotations
 
 import frappe
-from frappe import _
 
 from apex.apex_core.utils.role_assignment import assign_role, reconcile_role_queue
 
 
 BATCH_SIZE = 500
-
-
-ALERT_DOCTYPE = "Operations Alert"
 
 _ALERT_SAVEPOINT = "salis_alert"
 
@@ -38,26 +34,6 @@ def _settings_int(fieldname: str, default: int) -> int:
     from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
 
     return get_salis_int(fieldname, default)
-
-
-def _resolve_project_supervisor(vehicle: str | None) -> str | None:
-    """Resolve the vehicle's project supervisor User, or None.
-
-    Denormalised onto the Operations Alert so the Critical-alert Notification can
-    reach the specific project's supervisor (a User Permission holder) — Frappe
-    notification recipients cannot follow the vehicle -> project -> supervisor
-    chain declaratively. Never raises: a lookup failure must not abort the job.
-    """
-    if not vehicle:
-        return None
-    try:
-        from apex.salis.permissions import _project_supervisor
-
-        project = frappe.db.get_value("Salis Vehicle", vehicle, "project")
-        return _project_supervisor(project)
-    except Exception:
-        frappe.log_error(title="Salis: resolve project supervisor failed")
-        return None
 
 
 def _vehicle_project(vehicle: str | None) -> str | None:
@@ -161,41 +137,3 @@ def _reconcile_queue(doctype: str, still_needing_attention) -> int:
     if cleared:
         _publish_operations_alert(None)
     return cleared
-
-
-def _resolve_alert(alert_name: str, reason: str) -> bool:
-    """Resolve an Operations Alert: set ``status = Resolved`` and stamp
-    ``resolved_on`` + ``resolution_note``, then drop an audit comment.
-
-    Idempotent: an alert that is already ``Resolved`` is left untouched (no
-    status flip, no fresh ``resolved_on``, no duplicate comment) so a re-run
-    cannot flip-flop the row or rewrite its resolution timestamp. Returns
-    ``True`` only when this call performed the resolution. Per-alert error
-    isolation is the caller's responsibility.
-    """
-    from frappe.utils import now_datetime
-
-    current = frappe.db.get_value(ALERT_DOCTYPE, alert_name, "status")
-    if current == "Resolved":
-        return False
-
-    frappe.db.set_value(
-        ALERT_DOCTYPE,
-        alert_name,
-        {
-            "status": "Resolved",
-            "resolved_on": now_datetime(),
-            "resolution_note": reason[:140],
-        },
-        update_modified=True,
-    )
-    try:
-        frappe.get_doc(ALERT_DOCTYPE, alert_name).add_comment(
-            "Info", _("Auto-resolved: {0}").format(reason)
-        )
-    except Exception:
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title=f"Alert resolve comment failed for {alert_name}"[:140],
-        )
-    return True

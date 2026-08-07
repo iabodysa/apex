@@ -4,9 +4,8 @@
 App-wide configuration shared by every Apex module (Habitat and Salis). Holds
 settings that are not scoped to a single domain: the ``enable_gl_posting`` finance
 gate and the data-retention windows (``snapshot_retention_days``,
-``depreciation_snapshot_retention_days``, ``alert_retention_days``) that govern how
-long machine-written time-series and alert records are kept before the daily log
-cleanup purges old rows.
+``depreciation_snapshot_retention_days``) that govern how long machine-written
+time-series records are kept before the daily log cleanup purges old rows.
 """
 
 from __future__ import annotations
@@ -18,7 +17,6 @@ from frappe.utils import cint
 RETENTION_DEFAULTS = {
     "snapshot_retention_days": 365,
     "depreciation_snapshot_retention_days": 730,
-    "alert_retention_days": 90,
 }
 
 

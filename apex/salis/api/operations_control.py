@@ -184,8 +184,7 @@ def get_vehicle_timeline(vehicle):
     """Return one vehicle's consolidated operational history as a single date-sorted feed.
 
     Unions the event sources into one timeline — Vehicle Incident, Vehicle Suspension,
-    Vehicle Assignment, *resolved* Operations Alert (legacy, still draining) and the
-    drained Fleet Supervisor assignment queue that replaced it — so the drawer shows the whole
+    Vehicle Assignment and the drained Fleet Supervisor assignment queue — so the drawer shows the whole
     operational story of a vehicle in one place instead of three disconnected lists.
     Permission- and scope-gated identically to ``get_vehicle_detail``: read access to
     the vehicle is the single chokepoint (once you may read the vehicle you may read its
@@ -251,22 +250,6 @@ def get_vehicle_timeline(vehicle):
             "driver": r.driver,
             "end_date": str(r.end_date) if r.end_date else None,
             "status": r.status,
-        })
-
-    for r in frappe.get_all(
-        "Operations Alert",
-        filters={"vehicle": vehicle, "status": "Resolved", "resolved_on": ["is", "set"]},
-        fields=["name", "alert_type", "severity", "resolved_on", "message"],
-        order_by="resolved_on desc",
-        limit=TIMELINE_PER_SOURCE,
-    ):
-        events.append({
-            "kind": "alert",
-            "date": str(r.resolved_on) if r.resolved_on else None,
-            "name": r.name,
-            "alert_type": r.alert_type,
-            "severity": r.severity,
-            "message": r.message,
         })
 
     from apex.salis.api.assignment_queue import queue_events_for_vehicle

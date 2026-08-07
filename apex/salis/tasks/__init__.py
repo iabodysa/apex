@@ -9,7 +9,6 @@ scheduler dotted path keep resolving unchanged.
 from __future__ import annotations
 
 from apex.salis.tasks.common import (
-    ALERT_DOCTYPE,
     BATCH_SIZE,
     FLEET_ROLE,
     PRIORITY_TO_SEVERITY,
@@ -19,8 +18,6 @@ from apex.salis.tasks.common import (
     _publish_operations_alert,
     _queue_document,
     _reconcile_queue,
-    _resolve_alert,
-    _resolve_project_supervisor,
     _settings_int,
     _vehicle_project,
 )
@@ -30,14 +27,12 @@ from apex.salis.tasks.vehicle import (
     vehicle_utilization_summary,
 )
 from apex.salis.tasks.fuel import (
-    resolve_excessive_topup_alerts,
     unreverted_topup_watch,
 )
 from apex.salis.tasks.attendance import (
     missing_attendance_watch,
 )
 from apex.salis.tasks.alerts import (
-    daily_open_alerts_digest,
     reconcile_operations_alerts,
 )
 from apex.salis.tasks.workshop import (
@@ -47,7 +42,6 @@ from apex.salis.tasks.workshop import (
 )
 
 __all__ = [
-    "ALERT_DOCTYPE",
     "BATCH_SIZE",
     "FLEET_ROLE",
     "PRIORITY_TO_SEVERITY",
@@ -58,16 +52,12 @@ __all__ = [
     "_publish_operations_alert",
     "_queue_document",
     "_reconcile_queue",
-    "_resolve_alert",
-    "_resolve_project_supervisor",
     "_settings_int",
     "_vehicle_project",
-    "daily_open_alerts_digest",
     "get_workshop_overstay_count",
     "idle_vehicle_watch",
     "missing_attendance_watch",
     "reconcile_operations_alerts",
-    "resolve_excessive_topup_alerts",
     "unreverted_topup_watch",
     "vehicle_compliance_expiry_watch",
     "vehicle_utilization_summary",

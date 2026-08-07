@@ -147,18 +147,6 @@ class FuelRequest(Document):
         if self.request_type == "Standard" and self.status == "Done":
             self._apply_quota_consumption()
 
-        if (
-            self.request_type == "Top-up"
-            and self.reverted
-            and self.has_value_changed("reverted")
-        ):
-            from apex.salis.tasks import resolve_excessive_topup_alerts
-
-            resolve_excessive_topup_alerts(
-                self.vehicle,
-                _("temporary top-up {0} was reverted").format(self.name),
-            )
-
     def on_cancel(self):
         if self.request_type == "Standard":
             self._reverse_quota_consumption()

@@ -1,36 +1,29 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Operations Alert action API (read the open queue + advance the status ladder),
-for the operations-control board and the /fleet-os alert drawer.
+"""Operations-queue action API (read the open queue + act on its rows), for the
+operations-control board and the /fleet-os alert drawer.
 
 Route trace: the alert drawer is a ``frontend/fleet_os`` composable
 (``useAlerts.js``), built into ``fleet_os_portal``, which ``www/fleet-os.html``
 loads — so the drawer is on ``/fleet-os``, NOT on ``/fleet`` (that bundle
 references ``apex.salis.api.fleet_employee`` only).
 
-Read-only ``get_open_alerts`` lists the Open/Acknowledged queue, project-scoped
-server-side through the SAME ``_permitted_projects`` resolver the dispatch board
-and operations-control reader use. An Operations Alert has no own ``project``
-column, so scope is derived from the alert's vehicle project: a scoped user sees
-only alerts anchored to a vehicle in a permitted project; an alert with no
-vehicle anchor cannot be safely scoped and is shown to oversight roles only.
+The queue's rows are Fleet Supervisor assignments (ToDos carrying
+reference_type/reference_name) rendered by ``assignment_queue`` in the row shape
+the board page JS and the built /fleet-os bundle already speak — those bundles
+predate the retired Operations Alert DocType and cannot change here.
 
-The write actions advance the ladder Open -> Acknowledged -> Resolved. Each
-re-checks ``frappe.has_permission('Operations Alert', 'write')`` on top of the
-DocPerm grant (the board role alone does not authorise the write) and is
-idempotent. ``resolve_alert`` reuses the ``tasks._resolve_alert`` helper so the
-manual and the periodic/auto resolvers stamp ``resolved_on`` + ``resolution_note``
-and drop the audit comment identically.
+Read-only ``get_open_alerts`` lists the open queue, project-scoped server-side
+through the SAME ``_permitted_projects`` resolver the dispatch board uses: a
+scoped user sees only rows anchored to a vehicle in a permitted project; a row
+with no vehicle anchor cannot be safely scoped and is shown to oversight roles
+only.
 
-THE QUEUE NOW HAS TWO SOURCES. The Salis writers stopped inserting Operations
-Alert rows; a condition about a document assigns it to the Fleet Supervisor
-queue instead (see ``assignment_queue``). This API's readers merge the legacy
-rows (still draining) with the assignment queue in the same row shape, because
-the board page JS and the built /fleet-os bundle cannot change in this
-instalment. Each action first tries the legacy row and falls through to the
-queue-backed id, where the write check moves to the ASSIGNED DOCUMENT itself —
-a stricter, real grant than the retired alert row's. Acknowledge and snooze
-have no queue-side state to move, so on a queue row they permission-check and
-report no transition rather than fake one.
+Each write action resolves the queue row back to its ASSIGNED DOCUMENT and
+enforces ``write`` on that document — a real grant, not a board-role side door —
+and is idempotent. Acknowledge and snooze have no queue-side state to move, so
+they permission-check and report no transition rather than fake one. Resolving
+closes every open assignment on the document; if the underlying condition still
+holds, the next scheduled pass queues it again.
 """
 
 from __future__ import annotations
@@ -38,15 +31,14 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.desk.form import assign_to
-from frappe.utils import add_to_date, get_datetime, now_datetime, time_diff_in_seconds
+from frappe.utils import add_to_date, get_datetime, now_datetime
 
 from apex.apex_core.utils.role_assignment import clear_assignment
 from apex.salis.api.assignment_queue import open_queue_rows, queue_ref
 from apex.salis.api.dispatch_board import _permitted_projects
 from apex.salis.api.enrich import vehicle_driver_titles
-from apex.salis.tasks import ALERT_DOCTYPE, QUEUE_DOCTYPES, _resolve_alert, _settings_int
+from apex.salis.tasks import QUEUE_DOCTYPES, _settings_int
 
-OPEN_STATUSES = ["Open", "Acknowledged"]
 SEVERITIES = ["Info", "Warning", "Critical"]
 
 AGING_SETTING = {"Critical": "alert_aging_critical_hours", "Warning": "alert_aging_warning_hours", "Info": "alert_aging_info_hours"}
@@ -62,7 +54,7 @@ def _scoped_vehicles(unscoped, projects):
     """Vehicle names visible to the caller, or ``None`` when unscoped (no filter).
 
     A scoped user with no permitted project gets an empty list, so the queue is
-    empty rather than leaking another project's alerts.
+    empty rather than leaking another project's rows.
     """
     if unscoped:
         return None
@@ -78,20 +70,18 @@ def _scoped_vehicles(unscoped, projects):
 
 @frappe.whitelist()
 def get_open_alerts(project=None, severity=None, since=None):
-    """Return the open operations queue for the caller's scope — the still-draining
-    legacy Operations Alert rows merged with the Fleet Supervisor assignment queue,
-    both in the same row shape.
+    """Return the open operations queue for the caller's scope, in the row shape
+    the board and the drawer render.
 
-    Read-only and project-scoped server-side: a scoped user only sees alerts whose
+    Read-only and project-scoped server-side: a scoped user only sees rows whose
     vehicle belongs to a project they are permitted, and an optional ``project``
     narrows further but cannot widen past that scope. ``severity`` optionally
-    filters to one of Info/Warning/Critical. Snoozed rows (``snooze_until`` still
-    in the future) are excluded so a deferred alert disappears until its moment
-    passes. Each row carries native ``_assign`` (the assignment column) so the
-    client can show the owner and offer the Mine/Unowned facet. ``since`` (the
-    user's last-seen time) drives a ``resolved_since`` count for the delta banner.
+    filters to one of Info/Warning/Critical. Each row carries ``_assign`` (the
+    open holders) so the client can show the owner and offer the Mine/Unowned
+    facet. ``since`` (the user's last-seen time) drives a ``resolved_since``
+    count for the delta banner.
     """
-    frappe.has_permission(ALERT_DOCTYPE, "read", throw=True)
+    frappe.has_permission("Salis Vehicle", "read", throw=True)
     unscoped, projects = _permitted_projects()
 
     proj_opts = (
@@ -101,44 +91,20 @@ def get_open_alerts(project=None, severity=None, since=None):
     )
 
     now = now_datetime()
-    filters = {"status": ["in", OPEN_STATUSES]}
-    if severity in SEVERITIES:
-        filters["severity"] = severity
-    or_filters = [
-        ["Operations Alert", "snooze_until", "is", "not set"],
-        ["Operations Alert", "snooze_until", "<=", now],
-    ]
 
     if project and (unscoped or project in (projects or [])):
         plates = frappe.get_all(
             "Salis Vehicle", filters={"project": project}, pluck="name", limit_page_length=0
         )
-        filters["vehicle"] = ["in", plates or [None]]
     else:
         plates = _scoped_vehicles(unscoped, projects)
-        if plates is not None:
-            filters["vehicle"] = ["in", plates or [None]]
 
-    alerts = frappe.get_all(
-        ALERT_DOCTYPE,
-        filters=filters,
-        or_filters=or_filters,
-        fields=[
-            "name", "alert_type", "severity", "status",
-            "vehicle", "driver", "message", "raised_on", "snooze_until", "_assign",
-        ],
-        order_by="raised_on desc",
-        limit_page_length=0,
-    )
-
-    queue_rows = open_queue_rows()
+    alerts = open_queue_rows()
     if severity in SEVERITIES:
-        queue_rows = [r for r in queue_rows if r.severity == severity]
-    scope_filter = filters.get("vehicle")
-    if scope_filter is not None:
-        allowed_plates = {p for p in scope_filter[1] if p}
-        queue_rows = [r for r in queue_rows if r.vehicle and r.vehicle in allowed_plates]
-    alerts.extend(queue_rows)
+        alerts = [r for r in alerts if r.severity == severity]
+    if plates is not None:
+        allowed_plates = {p for p in plates if p}
+        alerts = [r for r in alerts if r.vehicle and r.vehicle in allowed_plates]
     alerts.sort(key=lambda a: str(a.get("raised_on") or ""), reverse=True)
 
     vehicle_driver_titles(alerts)
@@ -157,7 +123,7 @@ def get_open_alerts(project=None, severity=None, since=None):
     summary = {"total": len(alerts), "by_severity": {s: 0 for s in SEVERITIES}, "mine": 0, "unowned": 0}
     for a in alerts:
         a["assignee_names"] = [name_map.get(u, u) for u in a["assignees"]]
-        a["snooze_until"] = str(a["snooze_until"]) if a.get("snooze_until") else None
+        a["snooze_until"] = None
         if a.severity in summary["by_severity"]:
             summary["by_severity"][a.severity] += 1
         if user in a["assignees"]:
@@ -174,51 +140,42 @@ def get_open_alerts(project=None, severity=None, since=None):
         "aging_hours": _aging_thresholds(),
         "server_now": str(now),
         "current_user": user,
-        "resolved_since": _resolved_since(since, filters.get("vehicle")),
+        "resolved_since": _resolved_since(since, plates),
     }
 
 
-def _resolved_since(since, vehicle_filter) -> int:
-    """Count rows resolved after ``since``, under the same vehicle scope as the queue.
+def _resolved_since(since, plates) -> int:
+    """Count queue rows drained after ``since`` for the delta banner.
 
-    Legacy alert resolves plus, for unscoped callers, assignment-queue drains (a
-    closed ToDo carries no vehicle column to scope by, so scoped callers keep the
-    legacy count only rather than leak another project's activity).
+    Unscoped callers only: a closed ToDo carries no vehicle column to scope by,
+    so a scoped caller gets zero rather than leak another project's activity.
     """
-    if not since:
+    if not since or plates is not None:
         return 0
-    resolved_filters = {"status": "Resolved", "resolved_on": [">", since]}
-    if vehicle_filter is not None:
-        resolved_filters["vehicle"] = vehicle_filter
-    count = frappe.db.count(ALERT_DOCTYPE, resolved_filters)
-    if vehicle_filter is None:
-        count += frappe.db.count(
-            "ToDo",
-            {
-                "reference_type": ["in", list(QUEUE_DOCTYPES)],
-                "status": "Closed",
-                "modified": [">", since],
-            },
-        )
-    return count
+    return frappe.db.count(
+        "ToDo",
+        {
+            "reference_type": ["in", list(QUEUE_DOCTYPES)],
+            "status": "Closed",
+            "modified": [">", since],
+        },
+    )
 
 
 def _queue_ref_checked(name):
-    """Resolve a queue-backed row id, enforcing ``write`` on the ASSIGNED document.
-
-    The new-source twin of the legacy per-alert write check: the grant the caller
-    must hold is on the subject document itself. Returns None when ``name`` is not
-    a queue ToDo, so the caller falls through to the legacy path (and its own
-    not-found failure mode).
-    """
+    """Resolve a queue row id to its reference, enforcing ``write`` on the
+    ASSIGNED document — the grant the caller must hold is on the subject document
+    itself. Throws when ``name`` is not a queue row (e.g. it drained between the
+    board's fetch and the action)."""
     ref = queue_ref(name)
-    if ref:
-        frappe.has_permission(ref.reference_type, "write", doc=ref.reference_name, throw=True)
+    if not ref:
+        frappe.throw(_("Queue row {0} not found (it may have already drained).").format(name))
+    frappe.has_permission(ref.reference_type, "write", doc=ref.reference_name, throw=True)
     return ref
 
 
 def _queue_assignees(ref) -> list:
-    """The current open-assignment holders of a queue-backed row's document."""
+    """The current open-assignment holders of a queue row's document."""
     return frappe.get_all(
         "ToDo",
         filters={
@@ -233,44 +190,24 @@ def _queue_assignees(ref) -> list:
 
 @frappe.whitelist(methods=["POST"])
 def acknowledge_alert(name):
-    """Move an Open Operations Alert to Acknowledged.
+    """Acknowledge a queue row: permission-check and report no transition.
 
-    Re-checks ``write`` on the specific alert. Idempotent: an alert that is already
-    Acknowledged or Resolved is left untouched (no status flip, no duplicate
-    comment) and reports ``acknowledged=False``. A queue-backed row has no
-    Acknowledged state to move to, so it reports the same no-transition result.
+    A queue row has no Acknowledged state to move to — the assignment either
+    stands or drains — so this validates the caller's grant and reports
+    ``acknowledged=False``, which the clients render as a no-op.
     """
-    if not frappe.db.exists(ALERT_DOCTYPE, {"name": name}):
-        ref = _queue_ref_checked(name)
-        if ref:
-            return {"ok": True, "name": name, "status": "Open", "acknowledged": False}
-    frappe.has_permission(ALERT_DOCTYPE, "write", doc=name, throw=True)
-    current = frappe.db.get_value(ALERT_DOCTYPE, name, "status")
-    if current != "Open":
-        return {"ok": True, "name": name, "status": current, "acknowledged": False}
-
-    frappe.db.set_value(ALERT_DOCTYPE, name, "status", "Acknowledged", update_modified=True)
-    try:
-        frappe.get_doc(ALERT_DOCTYPE, name).add_comment(
-            "Info", _("Acknowledged by {0}").format(frappe.session.user)
-        )
-    except Exception:
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title=f"Alert acknowledge comment failed for {name}"[:140],
-        )
-    return {"ok": True, "name": name, "status": "Acknowledged", "acknowledged": True}
+    _queue_ref_checked(name)
+    return {"ok": True, "name": name, "status": "Open", "acknowledged": False}
 
 
 @frappe.whitelist(methods=["POST"])
 def bulk_acknowledge_alerts(names):
-    """Acknowledge several Open alerts in one call (the queue's multi-select).
+    """Acknowledge several rows in one call (the queue's multi-select).
 
-    ``names`` is a JSON list (or list) of Operations Alert ids. Each row is run
-    through ``acknowledge_alert``, which re-checks ``write`` per alert server-side,
-    so a row the caller may not act on is skipped rather than trusted from the
-    client. Idempotent: an already-acknowledged/resolved row is left untouched.
-    Returns the ids that actually moved Open -> Acknowledged.
+    Each row is run through ``acknowledge_alert``, which re-checks ``write``
+    server-side, so a row the caller may not act on is skipped rather than
+    trusted from the client. Queue rows never transition, so this returns an
+    empty moved list.
     """
     if isinstance(names, str):
         names = frappe.parse_json(names)
@@ -286,62 +223,49 @@ def bulk_acknowledge_alerts(names):
 
 @frappe.whitelist(methods=["POST"])
 def assign_alert(name, user=None):
-    """Take ownership of an alert (or assign it to ``user``) via native ``_assign``.
+    """Take ownership of a queue row (or assign it to ``user``) via native
+    ``_assign`` on the assigned document itself.
 
-    Delegates to ``frappe.desk.form.assign_to.add``, which creates the ToDo, writes
-    the ``_assign`` column and shares the doc — so the alert appears in the owner's
-    ToDo list with no custom field. ``user`` defaults to the caller (assign-to-me).
-    Permission is re-checked on the specific alert (assign_to.add re-checks too).
-    Idempotent: a duplicate assignment is swallowed as success. On a queue-backed
-    row the native assignment goes on the assigned document itself.
+    Delegates to ``frappe.desk.form.assign_to.add``, which creates the ToDo,
+    writes the ``_assign`` column and shares the doc. ``user`` defaults to the
+    caller (assign-to-me). Permission is re-checked on the referenced document
+    (assign_to.add re-checks too). Idempotent: a duplicate assignment is
+    swallowed as success.
     """
     target = user or frappe.session.user
-    if not frappe.db.exists(ALERT_DOCTYPE, {"name": name}):
-        ref = _queue_ref_checked(name)
-        if ref:
-            assign_to.add({
-                "assign_to": [target],
-                "doctype": ref.reference_type,
-                "name": ref.reference_name,
-            })
-            return {"ok": True, "name": name, "assignees": _queue_assignees(ref)}
-    frappe.has_permission(ALERT_DOCTYPE, "write", doc=name, throw=True)
-    assign_to.add({"assign_to": [target], "doctype": ALERT_DOCTYPE, "name": name})
-    return {"ok": True, "name": name, "assignees": _assignees(name)}
+    ref = _queue_ref_checked(name)
+    assign_to.add({
+        "assign_to": [target],
+        "doctype": ref.reference_type,
+        "name": ref.reference_name,
+    })
+    return {"ok": True, "name": name, "assignees": _queue_assignees(ref)}
 
 
 @frappe.whitelist(methods=["POST"])
 def unassign_alert(name, user=None):
-    """Drop ``user`` (default the caller) from an alert's native ``_assign``.
+    """Drop ``user`` (default the caller) from a queue row's document.
 
-    Delegates to ``assign_to.remove``, which closes the ToDo and rewrites ``_assign``.
-    Permission is re-checked on the alert. No-op (still ``ok``) if not assigned.
-    On a queue-backed row the removal targets the assigned document itself.
+    Delegates to ``assign_to.remove``, which closes the ToDo and rewrites
+    ``_assign``. Permission is re-checked on the referenced document. No-op
+    (still ``ok``) if not assigned.
     """
     target = user or frappe.session.user
-    if not frappe.db.exists(ALERT_DOCTYPE, {"name": name}):
-        ref = _queue_ref_checked(name)
-        if ref:
-            try:
-                assign_to.remove(ref.reference_type, ref.reference_name, target)
-            except Exception:
-                pass
-            return {"ok": True, "name": name, "assignees": _queue_assignees(ref)}
-    frappe.has_permission(ALERT_DOCTYPE, "write", doc=name, throw=True)
+    ref = _queue_ref_checked(name)
     try:
-        assign_to.remove(ALERT_DOCTYPE, name, target)
+        assign_to.remove(ref.reference_type, ref.reference_name, target)
     except Exception:
         pass
-    return {"ok": True, "name": name, "assignees": _assignees(name)}
+    return {"ok": True, "name": name, "assignees": _queue_assignees(ref)}
 
 
 @frappe.whitelist(methods=["POST"])
 def bulk_assign_alerts(names, user=None):
-    """Assign several alerts to ``user`` (default the caller) in one call.
+    """Assign several queue rows to ``user`` (default the caller) in one call.
 
-    Each id is run through ``assign_alert``, which re-checks ``write`` per alert, so
-    a row the caller may not act on is skipped rather than trusted from the client.
-    Returns the ids actually assigned.
+    Each id is run through ``assign_alert``, which re-checks ``write`` per row,
+    so a row the caller may not act on is skipped rather than trusted from the
+    client. Returns the ids actually assigned.
     """
     if isinstance(names, str):
         names = frappe.parse_json(names)
@@ -353,11 +277,6 @@ def bulk_assign_alerts(names, user=None):
         except frappe.PermissionError:
             continue
     return {"ok": True, "assigned": assigned}
-
-
-def _assignees(name) -> list:
-    """The current native-_assign user list for an alert (post-mutation read-back)."""
-    return frappe.parse_json(frappe.db.get_value(ALERT_DOCTYPE, name, "_assign")) or []
 
 
 SNOOZE_PRESETS = {"tomorrow": ("days", 1), "2d": ("days", 2), "1w": ("days", 7)}
@@ -375,43 +294,24 @@ def _snooze_target(preset=None, until=None):
 
 @frappe.whitelist(methods=["POST"])
 def snooze_alert(name, preset=None, until=None):
-    """Hide an alert from the queue until a deadline by stamping ``snooze_until``.
+    """Snooze a queue row: permission-check and report a null snooze.
 
-    The deadline comes from a named ``preset`` (tomorrow / 2d / 1w) or an explicit
-    ``until`` datetime. The queue reader excludes rows whose ``snooze_until`` is
-    still in the future, so the alert disappears now and reappears once it lapses.
-    Permission is re-checked on the alert. Pass an empty ``until`` with no preset to
-    clear a snooze. A queue-backed row carries no snooze state — the ToDo has no
-    field to hold one — so it permission-checks and reports a null snooze rather
-    than pretend the row will hide.
+    A queue row carries no snooze state — the ToDo has no field to hold one —
+    so this validates the caller's grant and reports ``snooze_until: None``
+    rather than pretend the row will hide.
     """
-    if not frappe.db.exists(ALERT_DOCTYPE, {"name": name}):
-        ref = _queue_ref_checked(name)
-        if ref:
-            return {"ok": True, "name": name, "snooze_until": None}
-    frappe.has_permission(ALERT_DOCTYPE, "write", doc=name, throw=True)
-    target = _snooze_target(preset, until)
-    frappe.db.set_value(ALERT_DOCTYPE, name, "snooze_until", target, update_modified=True)
-    try:
-        when = _("until {0}").format(target) if target else _("cleared")
-        frappe.get_doc(ALERT_DOCTYPE, name).add_comment(
-            "Info", _("Snoozed by {0} ({1})").format(frappe.session.user, when)
-        )
-    except Exception:
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title=f"Alert snooze comment failed for {name}"[:140],
-        )
-    return {"ok": True, "name": name, "snooze_until": str(target) if target else None}
+    _queue_ref_checked(name)
+    _snooze_target(preset, until)
+    return {"ok": True, "name": name, "snooze_until": None}
 
 
 @frappe.whitelist(methods=["POST"])
 def bulk_snooze_alerts(names, preset=None, until=None):
-    """Snooze several alerts in one call (the queue's multi-select).
+    """Snooze several rows in one call (the queue's multi-select).
 
-    Each id is run through ``snooze_alert``, which re-checks ``write`` per alert, so
-    a row the caller may not act on is skipped rather than trusted from the client.
-    Returns the ids actually snoozed.
+    Each id is run through ``snooze_alert``, which re-checks ``write`` per row,
+    so a row the caller may not act on is skipped rather than trusted from the
+    client. Returns the ids the check passed for.
     """
     if isinstance(names, str):
         names = frappe.parse_json(names)
@@ -427,84 +327,23 @@ def bulk_snooze_alerts(names, preset=None, until=None):
 
 @frappe.whitelist(methods=["POST"])
 def resolve_alert(name, note=None):
-    """Resolve an Operations Alert, stamping ``resolved_on`` + ``resolution_note``.
+    """Resolve a queue row: close every open assignment on its document.
 
-    Re-checks ``write`` on the specific alert, then delegates the transition to the
-    shared ``_resolve_alert`` helper so a manual resolve is identical to the
-    periodic/auto resolver (idempotent; an already-Resolved alert is a no-op).
-    Resolving a queue-backed row closes every open assignment on its document —
-    and if the underlying condition still holds, the next scheduled pass queues it
-    again, exactly as the daily alert dedupe window used to re-raise.
+    Permission is re-checked as ``write`` on the referenced document. An audit
+    comment lands on the document with the resolver's note. If the underlying
+    condition still holds, the next scheduled pass queues the document again —
+    exactly as the retired alert dedupe window used to re-raise.
     """
     reason = (note or _("Resolved by {0}").format(frappe.session.user)).strip()
-    if not frappe.db.exists(ALERT_DOCTYPE, {"name": name}):
-        ref = _queue_ref_checked(name)
-        if ref:
-            resolved = bool(clear_assignment(ref.reference_type, ref.reference_name))
-            try:
-                frappe.get_doc(ref.reference_type, ref.reference_name).add_comment(
-                    "Info", _("Queue resolved: {0}").format(reason)
-                )
-            except Exception:
-                frappe.log_error(
-                    message=frappe.get_traceback(),
-                    title=f"Queue resolve comment failed for {ref.reference_name}"[:140],
-                )
-            return {"ok": True, "name": name, "status": "Resolved", "resolved": resolved}
-    frappe.has_permission(ALERT_DOCTYPE, "write", doc=name, throw=True)
-    resolved = _resolve_alert(name, reason)
-    return {
-        "ok": True,
-        "name": name,
-        "status": frappe.db.get_value(ALERT_DOCTYPE, name, "status"),
-        "resolved": resolved,
-    }
-
-
-def _median(values):
-    """Median of a non-empty numeric list (mean of the two middle items on even n)."""
-    ordered = sorted(values)
-    n = len(ordered)
-    mid = n // 2
-    if n % 2:
-        return ordered[mid]
-    return (ordered[mid - 1] + ordered[mid]) / 2
-
-
-@frappe.whitelist()
-def get_alert_median_resolve_days(filters=None):
-    """Custom Number Card: median days from ``raised_on`` to ``resolved_on``.
-
-    The resolution-latency twin of the open-alert queue: it measures how long
-    Resolved alerts took to close. Scoped through the SAME ``_permitted_projects``
-    resolver as the queue, so a scoped user's median covers only alerts on a
-    vehicle in a permitted project; a vehicle-less alert has no project anchor and
-    is excluded for scoped users (oversight roles see all). Only alerts with both
-    timestamps set are counted. ``filters`` is accepted and ignored (the widget
-    always passes it). Returns ``{value, fieldtype}`` per the Custom card contract.
-    """
-    frappe.has_permission(ALERT_DOCTYPE, "read", throw=True)
-    unscoped, projects = _permitted_projects()
-
-    alert_filters = {
-        "status": "Resolved",
-        "raised_on": ["is", "set"],
-        "resolved_on": ["is", "set"],
-    }
-    if not unscoped:
-        plates = _scoped_vehicles(unscoped, projects)
-        alert_filters["vehicle"] = ["in", plates or [None]]
-
-    rows = frappe.get_all(
-        ALERT_DOCTYPE,
-        filters=alert_filters,
-        fields=["raised_on", "resolved_on"],
-        limit_page_length=0,
-    )
-    spans = [
-        time_diff_in_seconds(r.resolved_on, r.raised_on) / 86400.0
-        for r in rows
-        if r.resolved_on and r.raised_on
-    ]
-    value = round(_median(spans), 2) if spans else 0
-    return {"value": value, "fieldtype": "Float"}
+    ref = _queue_ref_checked(name)
+    resolved = bool(clear_assignment(ref.reference_type, ref.reference_name))
+    try:
+        frappe.get_doc(ref.reference_type, ref.reference_name).add_comment(
+            "Info", _("Queue resolved: {0}").format(reason)
+        )
+    except Exception:
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Queue resolve comment failed for {ref.reference_name}"[:140],
+        )
+    return {"ok": True, "name": name, "status": "Resolved", "resolved": resolved}

@@ -3,6 +3,7 @@
 # output names the row a change just stranded instead of all of them.
 # Regenerate after deleting drained rows, with the translation gate:
 #   --package apex --lang ar --update-stale-baseline
+A Critical operations alert was raised
 A building is required to log an inspection.
 ABSENT
 AR
@@ -24,6 +25,7 @@ Building safety inspection.
 By
 Capture an incident with the guided Safety Incident form and save it for manager review.
 Change
+Classifies the operational anomaly that triggered this alert so it routes to the right owner: idle assets, stalled or forgotten requests, supervisor delays, abnormal fuel top-ups, lapsing licenses, overdue maintenance, unsettled rentals, or expired consumables.
 Client
 Client Code
 Component
@@ -102,6 +104,7 @@ Site Code
 Source Field
 TRAINING
 TS Intake Source
+The vehicle's project supervisor, resolved when the alert is raised; drives the Critical-alert notification.
 This worker link is invalid or has been disabled.
 Threshold
 Timesheet Exception Workbench

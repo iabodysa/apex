@@ -413,9 +413,8 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
 
 	Native primitive: a Frappe **ToDo** assigned to the supervisor — the standard
 	"actionable item owned by a person" object, surfaced on their desk and in the
-	assignment badge. The Operations Alert DocType is intentionally NOT used here:
-	its ``alert_type`` enum (Idle Vehicle / Forgotten Request / ... ) has no
-	recovery/clearance type, and that enum lives in apex_core.
+	assignment badge, the same shape the retired alert DocType's replacement
+	queues use.
 
 	Assignee resolution (first that yields a user):
 	  1. The supervisor on the driver's current Vehicle Assignment.

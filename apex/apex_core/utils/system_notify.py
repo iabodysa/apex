@@ -9,8 +9,8 @@ the Habitat safety/audit scheduler jobs and the Temporary Worker engine. The
 out the repeated best-effort system-write boilerplate so a column or default change
 lives in one place.
 
-Mirrors ``operations_alert.insert_operations_alert``: a leaf utility under
-``apex_core`` so any module can import it without coupling to ``habitat.tasks``.
+A leaf utility under ``apex_core`` so any module can import it without coupling
+to ``habitat.tasks``.
 Callers keep their own recipient resolution (role lookups are domain-specific) and
 loop this per user. Best-effort by design — a Notification Log failure must never
 abort the calling scheduler job; for request-path sends that should surface errors,

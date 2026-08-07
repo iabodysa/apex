@@ -3,6 +3,8 @@
 4-digit building number.,رقم المبنى المكوّن من أربعة أرقام.
 4-digit secondary (additional) number.,الرقم الفرعي (الإضافي) المكوّن من أربعة أرقام.
 8-character SPL code: 4 letters + 4 digits (e.g. RCTB4359).,رمز العنوان المختصر المكوّن من ثمانية خانات: أربعة أحرف زائد أربعة أرقام (مثال: RCTB4359).
+"<b>Derived from the Compliance Documents rows below — it stays empty, and the compliance alert stays silent, until at least one document with an expiry date is entered.</b>",<b>مشتق من صفوف وثائق الامتثال أدناه — يبقى فارغاً ويبقى تنبيه الامتثال صامتاً حتى تُدخل وثيقة واحدة على الأقل بتاريخ انتهاء.</b>
+<b>The licence-expiry alert reads this date and stays silent while it is empty. Fill it for every active driver.</b>,<b>تنبيه انتهاء الرخصة يقرأ هذا التاريخ ويبقى صامتاً ما دام فارغاً. عبّئه لكل سائق نشط.</b>
 A building is required to build the checklist.,يلزم مبنى لبناء قائمة الفحص.
 A building is required to compute due cadences.,يلزم تحديد مبنى لحساب الجولات المستحقة حسب التكرار.
 A building is required to load the inventory.,يجب تحديد مبنى لتحميل المخزون.
@@ -68,7 +70,6 @@ A Utility Bill Entry already overlaps this account's billing period: {0},يوج�
 A valid GPS position (latitude and longitude) is required.,يلزم موقع GPS صحيح (خط العرض وخط الطول).
 A vehicle compliance document is expiring soon — please start renewal,وثيقة امتثال مركبة على وشك الانتهاء — يُرجى بدء التجديد
 A vehicle has been reported stolen,تم الإبلاغ عن سرقة مركبة
-A vehicle has overstayed in the workshop,تجاوزت مركبة المدة المسموح بها في الورشة
 A Work Order already exists for this Maintenance Request: {0},يوجد بالفعل أمر عمل لطلب الصيانة هذا: {0}
 A {0} Safety Round already exists for {1} on {2} ({3}). Tick Is Re-inspection to record a follow-up round.,توجد بالفعل جولة سلامة {0} لـ {1} في {2} ({3}). فعّل خيار إعادة الفحص لتسجيل جولة متابعة.
 Abbreviation,الاختصار
@@ -120,7 +121,6 @@ Acknowledge selected ({0}),تأكيد الاطلاع على المحدد ({0})
 Acknowledged,تم الإقرار
 Acknowledged By,أقرّ به
 Acknowledged By (Employee),أقر بالاستلام (الموظف)
-Acknowledged by {0},تم الإقرار بواسطة {0}
 Acknowledged On,تاريخ الإقرار
 Acknowledgement Received,تم استلام الإقرار
 Acknowledgement Received must be set before a recovery can be {0}.,يجب تحديد «تم استلام الإقرار» قبل تغيير حالة الاسترداد إلى {0}.
@@ -137,6 +137,7 @@ Activation Date,تاريخ التفعيل
 Active,نشط
 Against Issue,مقابل صرف
 Aged Over 60 Days,أقدم من 60 يوماً
+App-wide Apex configuration shared by every module (Habitat and Salis). Holds settings that are not scoped to a single domain — for example the GL-posting finance gate and the data-retention windows that govern how long machine-written time-series records are kept.,إعدادات أبيكس العامة المشتركة بين كل الوحدات (هابيتات وساليس). تحمل الإعدادات غير المحصورة بنطاق واحد — مثل بوابة الترحيل المالي ونوافذ الاحتفاظ بالبيانات التي تحكم مدة بقاء السجلات الزمنية المكتوبة آلياً.
 Assets,الأصول
 Auditor,المدقق
 Average Cost per Litre,متوسط تكلفة اللتر
@@ -175,15 +176,14 @@ Handovers,التسليمات
 High or Critical,عالية أو حرجة
 High Severity,خطورة عالية
 Highest Variance %,أعلى نسبة انحراف %
+How long machine-written time-series records are kept before the daily log cleanup purges old rows. Blank or 0 falls back to the built-in default for that record. Financial ledgers are never auto-purged.,مدة الاحتفاظ بالسجلات الزمنية المكتوبة آلياً قبل أن تمسح عملية التنظيف اليومية الصفوف القديمة. الفارغ أو 0 يرجع للافتراضي المدمج لذلك السجل. الدفاتر المالية لا تُمسح آلياً أبداً.
 Idle Share,نسبة التعطّل
 Incidents,الحوادث
 Include Ended Assignments,تضمين الإسنادات المنتهية
 Include Settled Requests,تضمين الطلبات المنتهية
-Inventory,المخزون
 Issued To,صُرف إلى
 Issues,عمليات الصرف
 Leases Watched,العقود المتابَعة
-Ledgers,الدفاتر
 Manifest,كشف الركاب
 Manifests,كشوف الركاب
 Missed Over 7 Days,فائتة أكثر من 7 أيام
@@ -209,6 +209,7 @@ Pending Checkouts,مغادرات معلقة
 Plans,الخطط
 Positions,المواضع
 Queue resolved: {0},صُفّي الطابور: {0}
+Queue row {0} not found (it may have already drained).,صف الطابور {0} غير موجود (ربما صُفّي بالفعل).
 Receipt Lines,بنود الاستلام
 Receipts,الاستلامات
 Recovered Share,نسبة المسترد
@@ -234,7 +235,6 @@ SIMs Covered,الشرائح المشمولة
 SIMs Held,الشرائح المحتفَظ بها
 Settled Share,نسبة المسوّى
 Still Held,لا تزال بالحيازة
-Stores,المستودعات
 Suppliers,الموردون
 Suspended or Lost,موقوفة أو مفقودة
 Taken,مُستلَم
@@ -313,14 +313,12 @@ Agreed amount to deduct per pay period. Leave blank to recover as fast as the st
 Agreed Installment cannot exceed the Amount to Recover.,لا يمكن أن يتجاوز القسط المتفق عليه المبلغ المطلوب استرداده.
 Agreed Installment per Pay Period (SAR),القسط المتفق عليه لكل فترة رواتب (ريال)
 Air Conditioning,تكييف الهواء
-Alert,تنبيه
 Alert acknowledged,تم الإقرار بالتنبيه
 Alert Aging SLA (Hours),مهلة بقاء التنبيه مفتوحًا (بالساعات)
 Alert Lead Days,أيام التنبيه المسبق
 Alert Lead Days cannot be negative.,لا يمكن أن تكون أيام التنبيه المسبق سالبة.
 Alert queue,قائمة التنبيهات
 Alert resolved,تمت معالجة التنبيه
-Alert Type,نوع التنبيه
 Alerts,تنبيهات
 All,الكل
 All Assets Physically Verified,تم الجرد الفعلي لجميع الأصول
@@ -387,7 +385,6 @@ Apex — Company and Accounting Defaults,أبكس — الشركة والإعد�
 Apex — Notifications and Operations,أبكس — التنبيهات والتشغيل
 Apex — Salary Deductions,أبكس — الخصومات من الراتب
 API Contract Version,إصدار عقد الواجهة البرمجية
-App-wide Apex configuration shared by every module (Habitat and Salis). Holds settings that are not scoped to a single domain — for example the GL-posting finance gate and the data-retention windows that govern how long machine-written time-series and alert records are kept.,إعدادات أبكس العامة المشتركة بين جميع الوحدات (هابيتات وساليس). تشمل الإعدادات غير الخاصة بمجال واحد، مثل ضابط القيد المحاسبي ومدد الاحتفاظ بالسلاسل الزمنية والتنبيهات المنشأة آليًا.
 Appearance,المظهر
 "Append-only audit row for one QR boarding-pass scan-validate attempt (valid, duplicate, invalid, wrong-trip, or expired). The operational headcount lives on Trip Start Log; this is the immutable scan trail.",صف تدقيق يُضاف ولا يُعدَّل لكل محاولة مسح والتحقق من بطاقة ركوب QR (صالحة أو مكررة أو غير صالحة أو لرحلة خاطئة أو منتهية). عدد الركاب التشغيلي مكانه سجل بدء الرحلة، وهذا هو أثر المسح غير القابل للتعديل.
 Appliance,جهاز
@@ -579,7 +576,6 @@ Auto-generated from Building and Expected Date on save. Read-only by design.,ي�
 Auto-generated from Housing Checkout {0}. Review replacement costs and submit.,أُنشئ تلقائيًا من إخلاء السكن {0}. راجع تكاليف الاستبدال ثم اعتمده.
 Auto-generated from {0} {1},مُولَّد آلياً من {0} {1}
 Auto-generated summary of meter sharing calculation,ملخّص يُنشأ تلقائياً لحساب مشاركة العدّاد
-Auto-resolved: {0},تمت المعالجة تلقائيًا: {0}
 Auto-reverted: overdue temporary top-up (was due {0}).,أُعيدت التعبئة الإضافية المؤقتة المتأخرة تلقائيًا إلى وضعها السابق، وكان موعد عودتها في {0}.
 Auto-submit Target Payment,اعتماد مستند الدفع المستهدف تلقائيًا
 Automation Links,روابط الأتمتة
@@ -891,7 +887,6 @@ Clearance Reason,سبب إخلاء الطرف
 Clearance required: rider {0} is on leave/inactive but still holds vehicle {1}. Recover the vehicle and custody.,إخلاءٌ مطلوب: السائق {0} في إجازة/غير نشط لكنّه ما يزال يحوز المركبة {1}. استردّ المركبة والعهدة.
 Clearance {0} cancelled; driver restored to Active.,أُلغي إخلاء الطرف {0} وأُعيد السائق إلى حالة «نشط».
 Cleared,تم إخلاء الطرف
-cleared,أُلغي التأجيل
 Cleared and released via {0} (reason {1}; vehicle {2}).,تم إخلاء طرف السائق وفك ارتباط المركبة بموجب {0} (السبب {1}؛ المركبة {2}).
 Cleared By,تم الإخلاء بواسطة
 Cleared On,تاريخ الإخلاء
@@ -992,7 +987,6 @@ Consent,الموافقة
 Consent & Approval Gate,الموافقة وبوابة الاعتماد
 Consent Signed On,تاريخ توقيع الموافقة
 Constant value written to the target field when Static is checked (for example a fixed payment_type or party_type).,قيمة ثابتة تُكتب في الحقل المستهدف عند تفعيل خيار ثابت (مثل نوع دفع أو نوع طرف محدد).
-Consumable Expired,مستهلك منتهي الصلاحية
 Consumable Lifespan (Months),العمر الافتراضي للمستهلك (بالأشهر)
 "Consumable past its lifespan: {0}",انتهى العمر الافتراضي لمستهلك: {0}
 "Consumable {0} held by {1} since {2} is {3} month(s) old, past its {4}-month lifespan.",المستهلك {0} بحوزة {1} منذ {2} وعمره {3} شهرًا، متجاوزًا عمره الافتراضي البالغ {4} شهرًا.
@@ -1236,7 +1230,6 @@ Daily,يومي
 Daily cleaning record per building with worker accountability and evidence controls.,سجل نظافة يومي لكل مبنى مع مساءلة العامل وضوابط الأدلة.
 Daily driver attendance record with check-in/out times and photographic evidence.,سجل حضور يومي للسائق مع أوقات الحضور والانصراف وصور الإثبات.
 "Daily fuel consumption log for a vehicle: odometer, litres, amount, and platform.",سجل استهلاك وقود يومي لمركبة: عداد المسافة واللترات والمبلغ والمنصة.
-Daily Open Operations Alerts: {0},تنبيهات العمليات المفتوحة اليوم: {0}
 Daily Rate (SAR),السعر اليومي (ريال)
 Daily Rate cannot be negative.,لا يمكن أن يكون السعر اليومي سالباً.
 Daily Rate is required on a Receipt movement.,السعر اليومي مطلوب في حركة الاستلام.
@@ -1601,7 +1594,6 @@ Excellent,ممتاز
 Exception,الاستثناء
 Exception Type,نوع الاستثناء
 Exceptions,الاستثناءات
-Excessive Topup,تعبئة مفرطة
 Executed By,المنفّذ
 Execution,التنفيذ
 Execution Date,تاريخ التنفيذ
@@ -1766,7 +1758,6 @@ For emergencies contact your supervisor directly.,للطوارئ تواصل مع
 For example: Camera-Laundry-Room.,مثال: Camera-Laundry-Room.
 "For life or safety emergencies, contact the accommodation supervisor directly.",في حالات الطوارئ المتعلقة بالحياة أو السلامة، تواصل مع مشرف السكن مباشرة.
 For Subcontractor or External Worker when Employee link is not available.,للمقاول من الباطن أو العامل الخارجي عند عدم توفّر ارتباط الموظف.
-Forgotten Request,طلب منسي
 Formal accommodation/housing safety-incident record with severity and automatic management escalation.,سجل رسمي لحادث سلامة في السكن مع درجة الخطورة والتصعيد الإداري التلقائي.
 Formal lease contract holder for one building. Carries the rent payment schedule. The landlord is identified by the Lease's landlord field.,سجل عقد إيجار رسمي لمبنى واحد، ويتضمن جدول دفعات الإيجار. يُحدَّد المؤجّر في حقل المؤجّر بالعقد.
 Freelancer,مستقل
@@ -1921,7 +1912,6 @@ Held: {0},بالعهدة: {0}
 Here is your personal driver link: {0},هذا رابطك الشخصي كسائق: {0}
 Here is your personal Masar link: {0},هذا رابطك الشخصي في مسار: {0}
 Hide out of service,إخفاء العناصر الخارجة عن الخدمة
-Hide this alert from the operations queue until this time; it reappears when the moment passes.,إخفاء هذا التنبيه من قائمة العمليات حتى هذا الوقت؛ ويعاود الظهور عند انقضاء الموعد.
 High,عالية
 High Priority,أولوية عالية
 Hindi,الهندية
@@ -1962,7 +1952,6 @@ Housing Supervisor,مشرف السكن
 Housing Terms & Conditions,شروط وأحكام السكن
 Housing Terms Acceptance,قبول شروط السكن
 Housing Terms — {0},شروط السكن — {0}
-How long machine-written time-series and alert records are kept before the daily log cleanup purges old rows. Blank or 0 falls back to the built-in default for that record. Financial ledgers are never auto-purged.,مدة الاحتفاظ بسجلات السلاسل الزمنية والتنبيهات التي ينشئها النظام قبل أن تحذف مهمة التنظيف اليومية الصفوف القديمة. إذا تُركت المدة فارغة أو كانت صفرًا، تُستخدم المدة الافتراضية للنظام لذلك السجل. لا تُحذف السجلات المالية تلقائيًا.
 How many 'please wait' requests the worker has sent back to the driver.,"عدد طلبات ""يرجى الانتظار"" التي أرسلها العامل إلى السائق."
 How many 'remaining passengers' notifications the driver has sent this worker.,"عدد إشعارات ""الركاب المتبقون"" التي أرسلها السائق لهذا العامل."
 How many times the driver has rejected this worker's boarding claim.,عدد المرات التي رفض فيها السائق تأكيد العامل لصعوده.
@@ -2006,7 +1995,6 @@ Idle Resident Housing Cost by Building,تكلفة سكن الساكنين غير
 Idle Resident Report,تقرير ساكن غير مُشغَّل
 Idle resident reported to {0}: employee {1} (building {2}). Please action.,تم الإبلاغ عن ساكن متوقف عن العمل إلى {0}: الموظف {1} (المبنى {2}). يُرجى اتخاذ الإجراء.
 Idle Residents,الساكنون غير المشغّلين
-Idle Vehicle,مركبة خاملة
 Idle Vehicle Days,أيام خمول المركبة
 If different from contract default,إذا كان مختلفاً عن افتراضي العقد
 If execution discovered an issue requiring formal inspection,إذا اكتشف التنفيذ مشكلة تتطلب تفتيشاً رسمياً
@@ -2033,7 +2021,6 @@ incidents,البلاغات
 Incidents and Recovery,الحوادث والاسترداد
 Incidents by Type,البلاغات حسب النوع
 Indicates the resolved request has been recorded in the asset's maintenance history.,يشير إلى أن الطلب المُعالَج سُجِّل في سجل صيانة الأصل.
-Info,معلومة
 Info Alert Aging Hours,مهلة معالجة التنبيه المعلوماتي (بالساعات)
 Information,معلومات
 Initiated By,بدأه
@@ -2318,7 +2305,6 @@ Maintenance Inspection Report,تقرير فحص الصيانة
 Maintenance Material,مادة الصيانة
 Maintenance Material Template,قالب مواد الصيانة
 Maintenance Material Template Item,عنصر قالب مواد الصيانة
-Maintenance Overdue,صيانة متأخرة
 Maintenance Procurement Item,بند مشتريات الصيانة
 Maintenance Reflection,بيانات الصيانة المرتبطة
 Maintenance Request,طلب صيانة
@@ -2384,9 +2370,7 @@ Maximum 'please wait' requests a worker may send the driver per trip. A blank or
 Maximum 'remaining passengers' notifications the driver may send a worker before that worker can be marked Absent at departure; blank or zero uses the default.,الحد الأقصى لإشعارات «الركاب المتبقون» التي يرسلها السائق إلى العامل قبل تسجيله غائبًا عند المغادرة. عند ترك القيمة فارغة أو صفرًا، يُستخدم الإعداد الافتراضي.
 Maximum share of the worker's wage this type may take in any single pay period. KSA Labor Law Art. 91 caps total wage deductions at 50% of wage; this conservative per-type default (10%) keeps the aggregate well under the lawful ceiling. Do not raise without legal review.,أعلى نسبة يمكن خصمها من أجر العامل لهذا النوع خلال فترة رواتب واحدة. تحدد المادة 91 من نظام العمل السعودي إجمالي الخصومات بحد أقصى 50% من الأجر، وتبقي النسبة الافتراضية المتحفظة لكل نوع (10%) الإجمالي دون هذا الحد. لا ترفعها دون مراجعة قانونية.
 May,مايو
-Median Alert Resolve Days,وسيط مدة معالجة التنبيهات (بالأيام)
 Medium,متوسطة
-Message,الرسالة
 Messaging Gateway,بوابة المراسلة
 Messaging gateway is not configured yet (Apex Integration Settings).,لم تُضبط بوابة المراسلة بعد (إعدادات تكامل أبكس).
 Meter and Sharing,العدّاد والمشاركة
@@ -2666,7 +2650,6 @@ Only Work Orders with status Planned can be marked In Progress.,لا يمكن ت
 Open,مفتوح
 "Open a maintenance ticket, guided step by step through the form.",افتح تذكرة صيانة، بإرشاد خطوة بخطوة عبر النموذج.
 Open Action Inbox,فتح صندوق الإجراءات
-Open Alerts by Type,التنبيهات المفتوحة حسب النوع
 "Open an assigned work order to record progress. If the queue is empty, ask an authorized creator to create and assign one.",افتح أمر عمل مسندًا لتسجيل التقدم. إذا كانت القائمة فارغة، فاطلب من مخوّل بالإنشاء إنشاء أمر وإسناده.
 Open Assigned Work,افتح العمل المسند
 Open Audit Remediation Plans,خطط معالجة التدقيق المفتوحة
@@ -2711,7 +2694,6 @@ Open the Front Desk,افتح مكتب الاستقبال
 Open the incident record,فتح سجل الحادث
 Open the live Fleet Control board to watch and act on every vehicle.,افتح لوحة مركز التحكم بالأسطول المباشرة لمتابعة كل مركبة واتخاذ الإجراء المناسب.
 Open the maintenance request,فتح طلب الصيانة
-Open the operations alert list,فتح قائمة تنبيهات العمليات
 Open the Safety Map,افتح خريطة السلامة
 Open the unified inbox that gathers everything pending your action across modules.,افتح الصندوق الموحد الذي يجمع كل ما ينتظر إجراءك عبر الوحدات.
 Open the visual Dispatch Board to plan trips and assign vehicles to requests.,افتح لوحة التسيير المرئية لتخطيط الرحلات وإسناد المركبات للطلبات.
@@ -2743,7 +2725,6 @@ Operational source of the deduction. Damage = custody damage assessment; Rent = 
 "Operational state of the vehicle, distinguishing an active vehicle from one stopped or under maintenance, or released from the fleet.",الحالة التشغيلية للمركبة، وتميز المركبة النشطة عن المتوقفة أو الخاضعة للصيانة أو المستبعدة من الأسطول.
 Operational Status,الحالة التشغيلية
 Operations,العمليات
-Operations Alert,تنبيه تشغيلي
 Operations Control,التحكم بالعمليات
 Operations Director by default,مدير العمليات افتراضياً
 "Operations requester, carried from the linked Transport Request (Operations owns the request).",مقدم الطلب من العمليات، ويُنقل من طلب النقل المرتبط لأن الطلب تابع لفريق العمليات.
@@ -3048,7 +3029,6 @@ Project,المشروع
 Project Cost Center,مركز تكلفة المشروع
 Project is required.,المشروع مطلوب.
 Project Status,حالة المشروع
-Project Supervisor,مشرف المشروع
 Project Transfer,تحويل المشروع
 Projected from the custody engine; not edited directly.,مُشتقّة من محرّك العهدة؛ لا تُعدَّل مباشرة.
 Proof of Handover,إثبات التسليم
@@ -3387,7 +3367,6 @@ Residual Value (%) must be between 0 and 100.,يجب أن تكون القيمة 
 Resignation,استقالة
 Resolution,المعالجة
 Resolution Category,نوع المعالجة
-Resolution Note,ملاحظة المعالجة
 Resolution Notes,ملاحظات المعالجة
 Resolution Notes are required to close a Safety Incident.,ملاحظات المعالجة مطلوبة لإغلاق حادثة السلامة.
 Resolution Notes are required to resolve or close a Maintenance Request.,ملاحظات المعالجة مطلوبة لمعالجة طلب الصيانة أو إغلاقه.
@@ -3395,7 +3374,6 @@ Resolution Notes are required when closing or resolving a request.,ملاحظا�
 Resolution Notes are required when resolving an Idle Resident Report.,ملاحظات المعالجة مطلوبة عند معالجة تقرير الساكن غير المشغّل.
 Resolve,حل
 Resolved,تمت المعالجة
-Resolved Alert Retention (Days),مدة الاحتفاظ بالتنبيهات المُعالجة (أيام)
 Resolved By,تمت المعالجة بواسطة
 Resolved by {0},تمت المعالجة بواسطة {0}
 Resolved On,تاريخ المعالجة
@@ -3412,7 +3390,6 @@ Results must be a list.,يجب أن تكون النتائج قائمةً.
 Results must be valid JSON.,يجب أن تكون النتائج بصيغة JSON صحيحة.
 Resume Investigation,استئناف التحقيق
 Retention for daily occupancy and weekly vehicle-utilisation snapshots (days). Default 365.,مدة الاحتفاظ بلقطات الإشغال اليومية واستخدام المركبات الأسبوعية (أيام). الافتراضي 365.
-Retention for resolved Operations Alerts (days). Open and acknowledged alerts are never purged by age. Default 90.,مدة الاحتفاظ بتنبيهات العمليات المعالجة (بالأيام). لا تُحذف التنبيهات المفتوحة أو المؤكد الاطلاع عليها بسبب عمرها. الافتراضي 90 يومًا.
 Retention for submitted Non-Financial Depreciation Snapshots (days). Default 730.,مدة الاحتفاظ بلقطات الإهلاك غير المالي المعتمدة (أيام). الافتراضي 730.
 Retry,إعادة المحاولة
 Return,إرجاع
@@ -3866,10 +3843,8 @@ Snooze,تأجيل
 Snooze alert,تأجيل التنبيه
 Snooze alerts,تأجيل التنبيهات
 Snooze selected ({0}),تأجيل المحدد ({0})
-Snooze Until,التأجيل حتى
 Snooze until,تأجيل حتى
 Snoozed,مؤجَّل
-Snoozed by {0} ({1}),أجَّله {0} ({1})
 Sort,ترتيب
 Source,المصدر
 Source and destination buildings must be different.,يجب أن يكون مبنى المصدر والوجهة مختلفين.
@@ -3997,7 +3972,6 @@ Supervisor approval decision for the plan. System-maintained by the Masar superv
 Supervisor Approved,معتمد من المشرف
 Supervisor at the receiving accommodation who confirms the on-site code receipt.,المشرف في السكن المستلِم الذي يؤكد الاستلام برمز الموقع.
 Supervisor Confirmed Completion,أكد المشرف اكتمال العمل
-Supervisor Delay,تأخر المشرف
 Supervisor E-Signature,التوقيع الإلكتروني للمشرف
 Supervisor Inventory,جرد المشرف
 Supervisor Rating,تقييم المشرف
@@ -4074,7 +4048,6 @@ Temporary (Over-Capacity) Bed,سرير مؤقت (فوق الطاقة الاست�
 Temporary Stay Lead Days,أيام التنبيه قبل المغادرة المؤقتة
 Temporary Top-up,تعبئة مؤقتة
 Temporary Top-up Not Reverted,تعبئة إضافية مؤقتة لم تُعد إلى وضعها السابق
-temporary top-up {0} was reverted,أُعيدت التعبئة الإضافية المؤقتة {0} إلى وضعها السابق
 Temporary Window,المهلة المؤقتة
 Temporary Worker,عامل مؤقت
 Temporary Worker {0} ({1}) expired without an Employee link — the temporary window lapsed.,انتهت مهلة العامل المؤقت {0} ({1}) دون ربطه بموظف دائم.
@@ -4399,13 +4372,10 @@ Unowned,بلا مالك
 Unpaid,غير مدفوع
 Unregistered,غير مسجّل
 Unregistered manifest,كشف الركاب غير المسجلين
-Unresolved Alerts,التنبيهات القائمة
 Unreverted Temporary Topups,تعبئات إضافية مؤقتة لم تُعد إلى وضعها السابق
 Unsatisfactory,غير مُرضٍ
-Unsettled Rental,إيجار غير مُسوَّى
 Unspecified,غير محدد
 Unsupported supervisor decision.,قرار المشرف غير مدعوم.
-until {0},حتى {0}
 UOM,وحدة القياس
 Updating status...,جارٍ تحديث الحالة...
 Upload Photo (Optional),رفع صورة (اختياري)
@@ -4507,7 +4477,6 @@ Vehicle {0} was just assigned by {1}. Please review.,تم إسناد المرك�
 Vehicle {0} was not re-linked on cancel; it is no longer free.,لم يُعد ربط المركبة {0} عند الإلغاء لأنها لم تعد متاحة.
 Vehicle: {0},المركبة: {0}
 Vehicles,المركبات
-Vehicles and Alerts,المركبات والتنبيهات
 Vehicles by Status,المركبات حسب الحالة
 Vehicles In Service,المركبات في الخدمة
 Vehicles Stopped,المركبات الموقوفة
@@ -4533,7 +4502,6 @@ Waiting Evidence,بانتظار الإثباتات
 Waive,إسقاط
 Waived,مُعفى
 Walk each floor and set the type of every room.,امشِ في كل طابق وحدد نوع كل غرفة.
-Warning,تحذير
 Warning Alert Aging Hours,مدة بقاء التنبيه التحذيري (ساعات)
 Warning: building occupancy will reach {0:.0f}%.,تحذير: سيبلغ إشغال المبنى {0:.0f}%.
 Warning: vehicle {0} has expired compliance.,تحذير: المركبة {0} منتهية الامتثال.
@@ -4659,7 +4627,6 @@ You don't have permission to view this building.,ليس لديك صلاحية ل
 You have a trip assigned for tomorrow,لديك رحلة مجدولة غدًا
 You have already rated this trip.,لقد قيّمت هذه الرحلة بالفعل.
 You have no fleet project assigned,لا يوجد مشروع أسطول مُسنَد إليك
-You have {0} open operations alert(s),لديك {0} تنبيه عمليات مفتوح
 You hit the rate limit because of too many requests. Please try after sometime.,لقد تجاوزت الحد المسموح بسبب كثرة الطلبات. يُرجى المحاولة بعد قليل.
 You may only handle boarding for your own trips.,لا يمكنك إدارة الصعود إلا لرحلاتك الخاصة.
 "You submitted this movement, so you cannot acknowledge it yourself.","أنت من أرسل هذه الحركة، فلا يمكنك اعتمادها بنفسك."

@@ -94,34 +94,6 @@ def _is_unscoped(user):
     return permission_scope.is_unscoped(user, UNSCOPED_ROLES)
 
 
-def _project_supervisor(project):
-    """Return the supervisor User scoped to ``project``, or None.
-
-    The reverse of ``_allowed_projects``: a project's supervisor is the enabled,
-    non-oversight User who holds a User Permission for that Project. When several
-    qualify, the lowest user id is returned deterministically so the resolution is
-    stable. Oversight roles are excluded — they see every project and are not a
-    project's owning supervisor.
-    """
-    if not project:
-        return None
-    users = frappe.get_all(
-        "User Permission",
-        filters={"allow": "Project", "for_value": project},
-        pluck="user",
-        order_by="user asc",
-    )
-    for user in users:
-        if user in ("Administrator", "Guest"):
-            continue
-        if not frappe.db.get_value("User", user, "enabled"):
-            continue
-        if _is_unscoped(user):
-            continue
-        return user
-    return None
-
-
 def report_project_scope(user=None, doctype=None):
     """Return ``(restrict, allowed_projects)`` for report-side project scoping.
 
@@ -182,7 +154,6 @@ SALIS_SCOPE = {
     "Salis Driver": _column(rule="owner_or_project", own="owner"),
     "Dispatch Trip": _hop("route_plan", "Route Plan", rule="dispatch_trip", own="driver"),
     "Trip Start Log": _hop("route_plan", "Route Plan", rule="owner_or_project", own="owner"),
-    "Operations Alert": _hop("vehicle", "Salis Vehicle", rule="vehicle"),
     "Passenger Manifest": _manifest(),
     "Driver Attendance": _driver(own="owner"),
     "Driver Suspension": _driver(own="owner"),
@@ -664,29 +635,6 @@ def movement_cost_transfer_has_permission(doc, ptype, user=None):
     return False
 
 
-def operations_alert_has_permission(doc, ptype, user=None):
-    """Scope an Operations Alert through ``vehicle`` -> Salis Vehicle -> project.
-
-    Denies a scoped user acting on an alert outside their permitted projects. A
-    vehicle-less alert has no project anchor and is denied — fail closed, matching the
-    fragment, which excludes the same row from the list. Returns False to block, else
-    None to defer to Frappe's default resolution.
-    """
-    user = _resolve_user(user)
-    if _is_unscoped(user):
-        return None
-
-    vehicle = getattr(doc, "vehicle", None)
-    project = frappe.db.get_value("Salis Vehicle", vehicle, PROJECT) if vehicle else None
-    if not project:
-        return False
-
-    if project not in _allowed_projects_for(user, doc.doctype):
-        return False
-
-    return None
-
-
 FINANCE_EXCLUSIVE_STATES = {
     "Approved by Finance",
     "Paid",
@@ -763,7 +711,6 @@ DOCUMENT_RULES = {
     "dispatch_trip": lambda doc, ptype, user, spec: _dispatch_trip_has_permission(doc, user),
     "driver_chain": _rule_driver_chain,
     "dual": lambda doc, ptype, user, spec: movement_cost_transfer_has_permission(doc, ptype, user),
-    "vehicle": lambda doc, ptype, user, spec: operations_alert_has_permission(doc, ptype, user),
     "payment_sod": lambda doc, ptype, user, spec: payment_sod_has_permission(doc, ptype, user),
 }
 

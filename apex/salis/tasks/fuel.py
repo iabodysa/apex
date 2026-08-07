@@ -7,15 +7,11 @@ import frappe
 from frappe import _
 
 from apex.salis.tasks.common import (
-    ALERT_DOCTYPE,
     BATCH_SIZE,
     _notify_fleet_role,
-    _resolve_alert,
 )
 
 _ROW_SAVEPOINT = "salis_fuel_row"
-
-_RESOLVE_SAVEPOINT = "salis_topup_resolve"
 
 
 def unreverted_topup_watch() -> None:
@@ -90,44 +86,3 @@ def unreverted_topup_watch() -> None:
                 )
 
         cursor = topups[-1].name
-
-
-
-
-def resolve_excessive_topup_alerts(vehicle: str | None, reason: str) -> int:
-    """Resolve any open/acknowledged ``Excessive Topup`` alert for ``vehicle``.
-
-    Event-driven counterpart to the periodic resolver: callers fire this from a
-    clean source event (e.g. a temporary top-up is reverted) so the alert clears
-    immediately rather than waiting for the next daily reconciliation pass. Safe
-    to call even when no matching alert exists (returns 0) and idempotent
-    (already-Resolved rows are filtered out). Never raises: a failure rolls back only
-    to this call's own savepoint and is logged, so it can neither raise into nor
-    discard the source-document save that triggered it.
-
-    Returns the number of alerts this call resolved.
-    """
-    if not vehicle:
-        return 0
-    resolved = 0
-    frappe.db.savepoint(_RESOLVE_SAVEPOINT)
-    try:
-        open_alerts = frappe.get_all(
-            ALERT_DOCTYPE,
-            filters={
-                "alert_type": "Excessive Topup",
-                "vehicle": vehicle,
-                "status": ["in", ["Open", "Acknowledged"]],
-            },
-            pluck="name",
-        )
-        for name in open_alerts:
-            if _resolve_alert(name, reason):
-                resolved += 1
-    except Exception:
-        frappe.db.rollback(save_point=_RESOLVE_SAVEPOINT)
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title=f"Excessive-topup alert resolve-on-event failed ({vehicle})"[:140],
-        )
-    return resolved

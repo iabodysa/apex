@@ -282,7 +282,6 @@ scheduler_events = {
         "apex.salis.tasks.vehicle.vehicle_compliance_expiry_watch",
         "apex.salis.tasks.workshop.workshop_overstay_watch",
         "apex.salis.tasks.alerts.reconcile_operations_alerts",
-        "apex.salis.tasks.alerts.daily_open_alerts_digest",
         "apex.logistay.tasks.sim_alerts.assigned_suspended_or_lost_watch",
         "apex.salis.fuel_engine.accrue_fuel_consumption",
         "apex.salis.rental_engine.daily_rental_accrual",
@@ -311,7 +310,6 @@ scheduler_events = {
 }
 
 default_log_clearing_doctypes = {
-    "Operations Alert": 90,
     "Occupancy Snapshot": 365,
     "Vehicle Utilisation Snapshot": 365,
     "Operational Depreciation Snapshot": 730,
@@ -386,7 +384,6 @@ permission_query_conditions = {
     "Driver Clearance": _SALIS_SCOPE_QUERY,
     "Vehicle Suspension": _SALIS_SCOPE_QUERY,
     "Movement Cost Transfer": _SALIS_SCOPE_QUERY,
-    "Operations Alert": _SALIS_SCOPE_QUERY,
     "Telecom Contract": _LOGISTAY_SCOPE_QUERY,
     "SIM Card": _LOGISTAY_SCOPE_QUERY,
     "SIM Custody Assignment": _LOGISTAY_SCOPE_QUERY,
@@ -452,7 +449,6 @@ has_permission = {
     "Driver Clearance": _SALIS_SCOPE_CHECK,
     "Vehicle Suspension": _SALIS_SCOPE_CHECK,
     "Movement Cost Transfer": _SALIS_SCOPE_CHECK,
-    "Operations Alert": _SALIS_SCOPE_CHECK,
     "Telecom Contract": _LOGISTAY_SCOPE_CHECK,
     "SIM Card": _LOGISTAY_SCOPE_CHECK,
     "SIM Custody Assignment": _LOGISTAY_SCOPE_CHECK,
