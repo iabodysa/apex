@@ -11,11 +11,20 @@ list. Asking only the first mails people who switched their own notifications of
 The toggle (``enable_email_notifications`` on the ``Habitat Settings`` single)
 defaults to OFF, so a fresh install never emails anyone until it is enabled.
 
-This gate covers the *imperative* send path only. The declarative paths are
-off by default in their own metadata and an admin enables them individually:
+This gate covers the *imperative* send path only. The two declarative paths do NOT
+share one policy, and the difference matters:
 
-* Frappe **Notification** records ship with ``enabled: 0`` in their fixtures.
-* **Auto Email Report** records are seeded with ``enabled: 0``.
+* **Auto Email Report** records are seeded disabled — ``enabled: 0`` in
+  ``auto_email_report_seed_base.py`` — so an administrator turns each one on.
+* Frappe **Notification** records do not follow that rule. 23 of the 36 records this
+  app ships carry ``enabled: 1``; 13 ship disabled. What keeps a fresh install quiet
+  is the toggle above, not the record metadata.
+
+The shipped value is a FIRST-INSTALL default and nothing more.
+``frappe/modules/import_file.py:33`` lists ``"Notification": ["enabled"]`` in
+``ignore_values``, so once the record exists on a site an app update never writes that
+field again — whatever the administrator chose is permanent, and shipping a different
+default in a later version reaches new sites only.
 
 This is intentionally a tiny, dependency-light helper so it can be imported from
 controllers, scheduler tasks, or seeders without pulling in heavier modules.
