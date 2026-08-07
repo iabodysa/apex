@@ -16,6 +16,46 @@ return plain values, so each can be exercised without a bench or a site.
 
 Identity is established HERE and nowhere else. No function takes an Employee id
 from a client: the id is always the one ``_resolve_worker`` returned.
+
+THE WORKER-WRITE CONTRACT
+=========================
+Four clauses. Every token-scoped endpoint in ``masar.py`` obeys all four, or it
+is named below as an exception with its reason. A new endpoint that breaks one
+is a defect, not a variation.
+
+1. **Resolve first.** The first thing a token-scoped endpoint does is call
+   ``_resolve_worker(token)``. Until it returns there is no worker, and nothing
+   may be read or written on one.
+2. **Derive every scope server-side.** The client presents a token and nothing
+   else that identifies a person. An Employee id, a building, a trip or a
+   request name arriving from the client is a parameter to VALIDATE against what
+   the resolved worker owns — never a scope to trust.
+3. **Carry ``@rate_limit``.** The token is a passwordless bearer credential, so
+   an unbounded endpoint is an unbounded credential. Writes are tighter than
+   reads: 10/hour for a request, 6/hour for the HR notice, 12/hour for boarding.
+4. **A system write says its own name.** Where the worker's own action must
+   write past the acting user's permissions, it calls ``system_insert`` /
+   ``system_save`` / ``system_delete`` from ``apex_core.utils.system_write``, so
+   the grant is legible at the call site. This clause replaced an ``audit-ok``
+   comment marker, deleted on 2026-08-07: a comment drifts from the line it sits
+   beside and is invisible to the caller, and the shipped source carries no
+   comments at all.
+
+Measured against ``masar.py`` on 2026-08-08 by walking its AST: 17 whitelisted
+endpoints, of which 14 are token-scoped and every one of the 14 calls
+``_resolve_worker`` and carries ``@rate_limit``. Five of those are writes —
+``create_worker_request``, ``notify_hr_iqama_expiring``, ``confirm_boarding``,
+``create_worker_transport_request``, ``submit_trip_rating`` — and all five reach
+the database through ``system_insert`` or ``system_save``, never a bare
+``ignore_permissions``.
+
+The three exceptions, and why each is not a breach:
+
+- ``get_my_worker_route_today`` and ``get_my_worker_route_summary`` are for a
+  logged-in staff session, not a worker token. Frappe's own session identity
+  governs them, so clauses 1 to 3 do not apply.
+- ``get_enum_labels`` returns static translated labels and reads no record of
+  any worker, so there is no scope to derive. It carries ``@rate_limit`` anyway.
 """
 
 import os
