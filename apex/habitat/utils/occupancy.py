@@ -22,6 +22,29 @@ def active_assignment_filters(**extra) -> dict:
     return {**extra, **ACTIVE_ASSIGNMENT}
 
 
+def room_status(active: int, capacity: int | None) -> str:
+    """The occupancy ladder for a Room: Available, Partially Occupied, or Full.
+
+    A ROOM WITH NO DECLARED CAPACITY IS NEVER FULL. Zero or null bed_capacity means the
+    capacity is unknown — the room has not been set up yet — not that the room holds
+    nobody, so the first resident must not read as a room that can take no more. The
+    honest answer while the ceiling is unknown is Partially Occupied: someone is in
+    there, and how many more fit is not recorded.
+
+    This is the product decision the two former writers disagreed on. The live handler
+    used ``active >= (capacity or 0)``, which made an undeclared room Full on its first
+    occupant; the weekly job used ``capacity and active >= capacity``, which did not. The
+    room's status therefore flipped every time the sync ran. The weekly job's answer is
+    the one kept, for the reason above rather than because it ran last.
+
+    Takes plain values and returns a value, so it is exercisable without a database."""
+    if active <= 0:
+        return "Available"
+    if capacity and active >= capacity:
+        return "Full"
+    return "Partially Occupied"
+
+
 def bed_color(bed_status: str, condition: str, readiness_status: str) -> str:
     """Resolve the housing board bed color. First matching rule wins (top-down).
 

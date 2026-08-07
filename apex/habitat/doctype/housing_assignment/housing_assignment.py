@@ -25,6 +25,7 @@ from apex.apex_core.doctype.salary_deduction_policy.salary_deduction_policy impo
     get_policy,
 )
 from apex.apex_core.utils.party_link import sync_party_employee
+from apex.habitat.utils.occupancy import room_status
 
 
 class HousingAssignment(Document):
@@ -85,12 +86,7 @@ def recalculate_room_occupancy(room_name: str) -> None:
         {"room": room_name, "docstatus": 1, "check_out_date": ["is", "not set"]},
     )
     room.db_set("current_occupancy", active)
-    if active <= 0:
-        room.db_set("status", "Available")
-    elif active >= (room.bed_capacity or 0):
-        room.db_set("status", "Full")
-    else:
-        room.db_set("status", "Partially Occupied")
+    room.db_set("status", room_status(active, room.bed_capacity))
 
 
 def recalculate_building_occupancy(building_name: str) -> None:

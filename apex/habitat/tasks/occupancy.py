@@ -7,6 +7,8 @@ import calendar
 import frappe
 from frappe.query_builder.functions import Count
 
+from apex.habitat.utils.occupancy import room_status
+
 _ROW_SAVEPOINT = "occupancy_row"
 
 
@@ -46,13 +48,7 @@ def weekly_occupancy_sync() -> None:
             frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 active = active_by_room.get(room.name, 0)
-                capacity = room.bed_capacity or 0
-                if active <= 0:
-                    new_status = "Available"
-                elif capacity and active >= capacity:
-                    new_status = "Full"
-                else:
-                    new_status = "Partially Occupied"
+                new_status = room_status(active, room.bed_capacity)
 
                 frappe.db.set_value(
                     "Room",
