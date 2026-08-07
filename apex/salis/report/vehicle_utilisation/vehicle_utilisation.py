@@ -14,9 +14,11 @@ Optional filters: vehicle, from_date / to_date (applied to snapshot_date).
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 from apex.apex_core.utils.report_helpers import date_range_condition, scoped_names
 from apex.salis import permissions
+from apex.apex_core.utils.report_summary import count_card, percent_card, total_card
 
 
 def execute(filters=None):
@@ -85,4 +87,12 @@ def execute(filters=None):
 
     data.sort(key=lambda r: r["vehicle"])
 
-    return columns, data
+    idle = sum(flt(r.get("idle_days")) for r in data)
+    period = sum(flt(r.get("period_days")) for r in data)
+    summary = [
+        count_card(_("Vehicles"), data),
+        total_card(_("Trips"), data, "trips_count", "Int"),
+        total_card(_("Idle Days"), data, "idle_days", "Int", indicator="Orange" if idle else None),
+        percent_card(_("Idle Share"), idle, period),
+    ]
+    return columns, data, None, None, summary

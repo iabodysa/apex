@@ -14,9 +14,11 @@ Optional filters: vehicle, period_month (YYYY-MM exact match).
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 from apex.apex_core.utils.report_helpers import scoped_names
 from apex.salis import permissions
+from apex.apex_core.utils.report_summary import card, count_card, total_card
 
 
 def execute(filters=None):
@@ -78,7 +80,15 @@ def execute(filters=None):
 
     data.sort(key=lambda r: r["total_amount"], reverse=True)
 
-    return columns, data, None, _build_chart(data)
+    litres = sum(flt(r.get("total_litres")) for r in data)
+    amount = sum(flt(r.get("total_amount")) for r in data)
+    summary = [
+        count_card(_("Vehicles"), data),
+        total_card(_("Total Litres"), data, "total_litres"),
+        total_card(_("Total Amount"), data, "total_amount", "Currency"),
+        card(_("Average Cost per Litre"), round(amount / litres, 2) if litres else 0.0, "Currency"),
+    ]
+    return columns, data, None, _build_chart(data), summary
 
 
 def _build_chart(data):

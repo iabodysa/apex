@@ -9,9 +9,12 @@ means consumption exceeded the quota.
 """
 
 import frappe
+from frappe import _
+from frappe.utils import flt
 
 from apex.apex_core.utils.report_helpers import scoped_names
 from apex.salis import permissions
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
@@ -83,7 +86,14 @@ def execute(filters=None):
 
     data = sorted(groups.values(), key=lambda r: (r["vehicle"], r["period_month"]))
 
-    return columns, data, None, _build_chart(data)
+    variance = sum(flt(r.get("variance")) for r in data)
+    summary = [
+        count_card(_("Rows"), data),
+        total_card(_("Total Litres"), data, "total_litres"),
+        total_card(_("Total Amount"), data, "total_amount", "Currency"),
+        total_card(_("Variance"), data, "variance", indicator="Red" if variance < 0 else "Green"),
+    ]
+    return columns, data, None, _build_chart(data), summary
 
 
 def _build_chart(data):

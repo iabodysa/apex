@@ -15,8 +15,10 @@ Optional filters: rental_office, vehicle, from_date / to_date (on accrual_date).
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 from apex.apex_core.utils.report_helpers import date_range_condition
+from apex.apex_core.utils.report_summary import percent_card, total_card
 
 
 def execute(filters=None):
@@ -87,4 +89,12 @@ def execute(filters=None):
 
     data.sort(key=lambda r: r["total_accrued"], reverse=True)
 
-    return columns, data
+    accrued = sum(flt(r.get("total_accrued")) for r in data)
+    settled = sum(flt(r.get("settled_amount")) for r in data)
+    summary = [
+        total_card(_("Vehicles"), data, "vehicles", "Int"),
+        total_card(_("Accrued"), data, "total_accrued", "Currency"),
+        total_card(_("Settled"), data, "settled_amount", "Currency"),
+        percent_card(_("Settled Share"), settled, accrued),
+    ]
+    return columns, data, None, None, summary

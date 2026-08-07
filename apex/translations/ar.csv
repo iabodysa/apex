@@ -108,6 +108,7 @@ Accounting Acknowledged is required before submitting a permanent intercompany t
 Accrual,الاستحقاق
 Accrual Date,تاريخ الاستحقاق
 Accrual Rows,أسطر الاستحقاق
+Accrued,المستحق
 Accrued Total,إجمالي المستحق
 Accrued Total Taken From Ledger,إجمالي المستحق مأخوذ من السجل
 Accrued Total (SAR),إجمالي المستحق (ريال)
@@ -134,13 +135,21 @@ Activated By,فُعِّل بواسطة
 Activation,التفعيل
 Activation Date,تاريخ التفعيل
 Active,نشط
+Aged Over 60 Days,أقدم من 60 يوماً
+Average Cost per Litre,متوسط تكلفة اللتر
 Buildings,المباني
 Claims,المطالبات
 Expiring in 30 Days,تنتهي خلال 30 يوماً
+Idle Share,نسبة التعطّل
 Leases Watched,العقود المتابَعة
 Monthly Rent at Risk,الإيجار الشهري المعرّض
+Open Recoveries,الاستردادات المفتوحة
 Open Requests,الطلبات المفتوحة
+Over 90 Days,أكثر من 90 يوماً
 Residents,الساكنون
+Rows,الصفوف
+Settled Share,نسبة المسوّى
+Trips Fulfilled,الرحلات المنفَّذة
 active,نشط
 Active CCTV Cameras,كاميرات المراقبة المفعّلة
 Active Contracts,العقود النشطة

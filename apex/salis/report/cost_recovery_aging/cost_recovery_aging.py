@@ -17,6 +17,7 @@ as_on_date (the reference date for aging; defaults to today).
 import frappe
 from frappe import _
 from frappe.utils import date_diff, getdate, nowdate
+from apex.apex_core.utils.report_summary import count_card, total_card
 
 OPEN_STATUSES = ("Open", "Acknowledged", "Approved")
 
@@ -115,10 +116,18 @@ def execute(filters=None):
         totals["amount"] += amount
         data.append(row)
 
+    # Built BEFORE the totals row joins `data`: that row carries the column sums, so a
+    # summary counting it would report one recovery too many and double every amount.
+    summary = [
+        count_card(_("Open Recoveries"), data),
+        total_card(_("Outstanding"), data, "amount", "Currency"),
+        total_card(_("Over 90 Days"), data, "b_90_plus", "Currency", indicator="Red"),
+        count_card(_("Aged Over 60 Days"), data, lambda r: (r.get("age_days") or 0) > 60, "Orange"),
+    ]
+
     if data:
         data.append(totals)
-
-    return columns, data, None, _build_chart(totals if data else None)
+    return columns, data, None, _build_chart(totals if data else None), summary
 
 
 def _build_chart(totals):

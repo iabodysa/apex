@@ -16,9 +16,11 @@ Optional filters: vehicle, from_date / to_date (on trip_date / request day).
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 from frappe.utils import getdate, nowdate
 
 from apex.apex_core.utils.report_helpers import date_range_condition
+from apex.apex_core.utils.report_summary import percent_card, total_card
 
 
 def _date_range(field, filters):
@@ -117,7 +119,15 @@ def execute(filters=None):
 
     data.sort(key=lambda r: (r["trip_date"] is None, r["trip_date"] or getdate(nowdate())))
 
-    return columns, data, None, _build_chart(data)
+    raised = sum(flt(r.get("requests_raised")) for r in data)
+    served = sum(flt(r.get("requests_served")) for r in data)
+    summary = [
+        total_card(_("Requests Raised"), data, "requests_raised", "Int"),
+        total_card(_("Trips Fulfilled"), data, "fulfilled_trips", "Int"),
+        total_card(_("Workers Moved"), data, "workers_moved", "Int"),
+        percent_card(_("Requests Served"), served, raised),
+    ]
+    return columns, data, None, _build_chart(data), summary
 
 
 def _build_chart(data):
