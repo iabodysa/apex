@@ -24,8 +24,11 @@ Housing Assignment rows behind the count are never themselves exposed.
 """
 
 import frappe
+from frappe import _
+from frappe.utils import flt
 
 from apex.habitat import permissions
+from apex.apex_core.utils.report_summary import count_card, percent_card, total_card
 
 
 def execute(filters=None):
@@ -99,4 +102,14 @@ def execute(filters=None):
             "available_rooms": room_counts["Available"],
         })
 
-    return columns, data
+    summary = [
+        count_card(_("Buildings"), data),
+        total_card(_("Residents"), data, "active_residents", "Int"),
+        total_card(_("Total Capacity"), data, "total_capacity", "Int"),
+        percent_card(
+            _("Occupancy"),
+            sum(flt(r.get("active_residents")) for r in data),
+            sum(flt(r.get("total_capacity")) for r in data),
+        ),
+    ]
+    return columns, data, None, None, summary

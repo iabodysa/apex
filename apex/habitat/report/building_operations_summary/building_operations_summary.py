@@ -3,9 +3,11 @@
 from collections import defaultdict
 
 import frappe
-from frappe.utils import add_days, getdate, today
+from frappe import _
+from frappe.utils import add_days, flt, getdate, today
 
 from apex.habitat import permissions
+from apex.apex_core.utils.report_summary import count_card, percent_card, total_card
 
 
 def execute(filters=None):
@@ -54,7 +56,17 @@ def execute(filters=None):
             "open_resident_requests": resident[n],
         })
 
-    return columns, data
+    summary = [
+        count_card(_("Buildings"), data),
+        total_card(_("Occupied Beds"), data, "occupied_beds", "Int"),
+        percent_card(
+            _("Occupancy"),
+            sum(flt(r.get("occupied_beds")) for r in data),
+            sum(flt(r.get("total_beds")) for r in data),
+        ),
+        total_card(_("Cleaning Logs"), data, "cleaning_logs", "Int"),
+    ]
+    return columns, data, None, None, summary
 
 
 def _columns():

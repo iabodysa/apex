@@ -1,9 +1,12 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 import frappe
+from frappe import _
+from frappe.utils import flt
 
 from apex.apex_core.utils.report_helpers import date_range_condition, scoped_names
 from apex.salis import permissions
+from apex.apex_core.utils.report_summary import count_card, percent_card, total_card
 
 
 def execute(filters=None):
@@ -51,4 +54,12 @@ def execute(filters=None):
 
     data = sorted(summary.values(), key=lambda row: row["driver"])
 
-    return columns, data
+    present = sum(flt(r.get("present")) for r in data)
+    absent = sum(flt(r.get("absent")) for r in data)
+    summary = [
+        count_card(_("Drivers"), data),
+        total_card(_("Present"), data, "present", "Int", indicator="Green"),
+        total_card(_("Absent"), data, "absent", "Int", indicator="Red" if absent else None),
+        percent_card(_("Attendance"), present, present + absent),
+    ]
+    return columns, data, None, None, summary
