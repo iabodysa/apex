@@ -1,111 +1,21 @@
 [pre_model_sync]
-# Patch register policy (audit 2026-07-25):
-#   PERMANENT      = idempotent seeder. Must keep replaying on migrate so a site
-#                    installed earlier picks up records added to the seed later.
-#                    (Fresh installs never run patches; they seed via after_install.)
-#   STILL-REQUIRED = one-time rename / cleanup / backfill whose "every deployed site
-#                    has already run it" gate CANNOT be answered from source. Prune
-#                    against a real tabPatch Log census, or on an owner decision that
-#                    accepts the risk in writing — on 2026-08-02 four pre-v2 one-time
-#                    backfills went that way (scheduled-task template migration,
-#                    building address, assignment supervisor, deduction policy), with
-#                    the two Masar token patches deliberately kept because a site that
-#                    never ran them keeps a personal token readable and never-expiring.
-#   Every entry below carries its own reason.
-#   Earlier passes pruned 53 spent one-time patches (2026-06-03 and 2026-07-23).
+# Empty by owner decision, 2026-08-07. Every registered patch had already run on the
+# deployed site, so each one was dead weight: frappe records a patch by name in Patch
+# Log and never replays it, and a FRESH install runs no patch at all — its schema comes
+# from the DocType JSON and its data from the after_install seeders in
+# apex_core/setup/seeders/.
 #
-#   A patch module on disk that is deliberately NOT registered here must say so in
-#   its OWN docstring, with two labelled lines carrying real reasons:
-#       UNREGISTERED-PATCH: <why registering it would be wrong>
-#       COVERED-BY:         <what provides that state instead>
-#   Currently one, recorded in this file:
-#     v2_0.app_identity_cutover — the apex_habitat -> apex upgrade path. It CANNOT be
-#       registered: frappe resolves patches per installed-app name (patch_handler.py
-#       get_all_patches -> get_app_path(app, "patches.txt")), and a pre-rename site's
-#       name is still the dead package, so it never opens this file. Registering it
-#       would reach only already-canonical sites and sweep every table for nothing.
-#       Operator-invoked instead, per docs/administration/identity-upgrade.md.
-
-# STILL-REQUIRED (ONE-TIME): MUST stay in [pre_model_sync] — renames the Workspace
-# primary key 'fleet' -> 'Fleet' BEFORE sync_all() re-imports fleet.json. After the
-# sync, PostgreSQL already holds a duplicate row plus an orphan and MariaDB has
-# already dropped the row and any User pinned to it. Non-destructive and idempotent.
-apex.patches.v2_0.rename_fleet_workspace_to_title_case
-
-# STILL-REQUIRED (ONE-TIME): MUST stay in [pre_model_sync] — renames the Print Format
-# key 'Accommodation Checkout Clearance' -> 'Housing Checkout Clearance' BEFORE
-# sync_all() re-imports the shipped JSON, which resolves the record by name and would
-# otherwise leave the retired key orphaned in the print dropdown beside the new one.
-apex.patches.v2_0.rename_checkout_clearance_print_format
-
-# STILL-REQUIRED (ONE-TIME): MUST stay in [pre_model_sync] — renames the last five stored
-# records still keyed on a retired DocType name (two Number Cards, a Dashboard Chart, an
-# Onboarding Step and a Workflow). The first four are re-imported by name on every migrate,
-# so renaming after the sync would leave the retired key orphaned beside the new one; the
-# Workflow is never imported at all, so nothing but this patch can move its row.
-apex.patches.v2_0.rename_retired_habitat_record_names
-
-# The demo seeders that used to sit in v1_x are no longer shipped: demo data is not part
-# of the product, and a customer install has no use for a module that fabricates users and
-# trips. They were never wired here — a normal `bench migrate` must never create
-# demo data — and they now live only in the maintainer's own tree.
+# Two modules stay on disk, deliberately unregistered:
+#   v1_x.reorder_root_workspace_creation — wired into after_install AND after_migrate,
+#     so it runs every migrate rather than once; registering it here would be a second
+#     path to the same call.
+#   v2_0.app_identity_cutover — the apex_habitat -> apex rename. It CANNOT be registered:
+#     frappe resolves patches per installed-app name (patch_handler.get_all_patches ->
+#     get_app_path(app, "patches.txt")), and a pre-rename site is still called by the dead
+#     package, so it would never open this file. Operator-invoked, per
+#     docs/administration/identity-upgrade.md.
 #
-# HISTORICAL (security), and STILL ACTIONABLE even though the module has left this
-# repository: seed_demo_role_logins once carried the demo login password as a source
-# literal, so every checkout shared one working password. The literal is gone from the tree
-# but REMAINS IN GIT HISTORY, so it must be treated as burned. Deleting the module does not
-# retire the accounts it may already have created.
-#
-# NOT ANSWERABLE FROM SOURCE: whether any real site ever created those two accounts. The
-# seeder only wrote Users when developer_mode was on, and it was never an active entry
-# here, so it can only have run by an explicit bench execute or by a migrate predating
-# that un-wiring.
-#
-# OPERATOR ACTION, per site, in this order:
-#   1. tabPatch Log for apex.patches.v1_x.seed_demo_role_logins — a row means a migrate
-#      reached the module while it was still registered. It does NOT mean Users were
-#      created: the developer_mode gate may have returned first. Absence of a row is
-#      likewise not an all-clear, since a manual bench execute logs nothing.
-#   2. tabUser for supervisor.demo@example.com and employee.demo@example.com — this is the
-#      decisive check, and it is named here rather than in the module because the module is
-#      gone. Present means the published password is live on that site: disable or reset.
-# Until step 2 is done on a given site, those accounts are UNKNOWN, not safe.
+# BEFORE ADDING ONE, ask what a fresh install would do without it. If the answer is
+# "nothing, the JSON or a seeder already covers it", it is not a patch.
 
-# STILL-REQUIRED: adds the two Housing Assignment bed-occupancy indexes on an
-# already-installed site. Its controller on_doctype_update only fires when that DocType
-# JSON re-imports, and the older v0_7 patch is logged complete-without-running on every
-# site installed since it was registered, so neither reaches an existing site.
-apex.patches.v1_x.add_bed_occupancy_indexes
-
-# STILL-REQUIRED (ONE-TIME): deletes the ghost "SIM Operations" Module Def that
-# add_module_defs minted from modules.txt on every site installed after the fold — those
-# sites logged the fold patch complete-without-running, so it can never reach them.
-apex.patches.v2_0.drop_ghost_sim_operations_module_def
-
-# STILL-REQUIRED (ONE-TIME): types the historical Salis Payment Request payment links.
-# linked_payment_entry was declared Link -> Payment Entry while the router built the
-# configured target (default: Payment Request), and it is stamped with db_set, which
-# skips validate — so existing rows hold a name their declared type cannot resolve.
-# Leaves an ambiguous row blank and logs it rather than guessing a type.
-apex.patches.v2_0.backfill_routed_payment_doctype
-
-# STILL-REQUIRED (ONE-TIME): re-seeds the Apex Integration Settings help panels from the
-# shipped DocType defaults. A Text Editor default seeds a Single once, so every site
-# installed before the API guidance was corrected still shows a browser client being told
-# to carry an API secret. Must stay in [post_model_sync]: it reads the imported default.
-apex.patches.v2_1.refresh_integration_settings_help
-
-# Eight workspaces and seven onboardings left the app for the new Apex tree. A standard record
-# that leaves is not removed by migrate, so each one survives and keeps rendering on every site
-# installed before this release. The date suffix is what re-runs it: Patch Log matches the whole
-# line, so a site that already ran the four-workspace version would otherwise skip the rest.
-apex.patches.v2_1.drop_retired_workspaces #2026-08-02
-
-# The portal theme screen offered six names; the token system implements two. A site already
-# saved on one of the four retired names keeps that value until something rewrites it, and a
-# stored value outside the Select reaches the portal unchanged.
-apex.patches.v2_1.repoint_retired_portal_themes
-
-# Current SIM Custody only filtered SIM Card, which the list view does natively; the report left
-# the app and migrate does not remove a standard record whose file is gone.
-apex.patches.v2_1.drop_current_sim_custody_report
+[post_model_sync]
