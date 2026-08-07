@@ -143,11 +143,14 @@ Buildings,المباني
 Claims,المطالبات
 Contracts,العقود
 Cost Centres,مراكز التكلفة
+Currently Held,بحوزته حالياً
+Days Held,أيام الحيازة
 Employees,الموظفون
 Estimated Replacement Cost,تكلفة الاستبدال التقديرية
 Expiring in 30 Days,تنتهي خلال 30 يوماً
 Fuel Logs,سجلات الوقود
 Idle Share,نسبة التعطّل
+Include Ended Assignments,تضمين الإسنادات المنتهية
 Leases Watched,العقود المتابَعة
 Missed Over 7 Days,فائتة أكثر من 7 أيام
 Missed Tasks,المهام الفائتة
@@ -170,6 +173,7 @@ Rows,الصفوف
 SIMs Covered,الشرائح المشمولة
 SIMs Held,الشرائح المحتفَظ بها
 Settled Share,نسبة المسوّى
+Still Held,لا تزال بالحيازة
 Trips Fulfilled,الرحلات المنفَّذة
 active,نشط
 Active CCTV Cameras,كاميرات المراقبة المفعّلة
