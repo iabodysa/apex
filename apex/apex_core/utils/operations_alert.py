@@ -11,24 +11,30 @@ place. Callers keep their own dedupe (the dedupe key is domain-specific).
 Leaf utility under apex_core so an engine can import it without coupling to
 ``salis.tasks``.
 
-THE ALERT SYSTEM IS DELIBERATELY ALIVE. A decommission has been proposed once and
-refused on architectural review; the surfaces are listed here so the next reader
-weighs the real cost before proposing it again, measured at 2026-07-31:
+THE DOCTYPE IS BEING RETIRED. Every alert whose trigger is a date or a value on a
+document becomes a standard ``Notification`` record, and every alert whose trigger
+is the absence of a record or a computed total keeps its scheduled job but assigns
+the source document so ``ToDo`` carries the open/closed lifecycle. Nothing new
+should be routed through this helper.
+
+Retire it last, after both replacements carry their traffic — the record is read
+in more places than it is written, and dropping it first blanks a card, a chart and
+a shortcut count before any writer is touched. The surfaces, measured 2026-08-07:
 
 - one DocType, ``Operations Alert``
-- three workspace links: ``salis/salis.json``, ``salis/fleet.json``,
-  ``habitat/safety.json``
-- one workspace SHORTCUT that carries an open-count stats filter and is the most
-  visible surface of the four (``salis/salis.json``, ``{} Open``, red)
+- ONE workspace, ``salis/salis.json``, carrying both a card link and the SHORTCUT
+  that shows an open-count stats filter — the most visible surface of the set
 - two Number Cards (``unresolved_alerts``, ``median_alert_resolve_days``), one
-  Dashboard Chart (``open_alerts_by_type``), one Notification
-  (``operations_alert_critical``), and a setting on ``Apex Settings``
-- fifteen write sites across seven modules, every one funnelling through this
-  helper: habitat maintenance/safety/custody tasks, salis common tasks, the fuel
-  and rental engines, and ``system_notify``
+  Dashboard Chart (``open_alerts_by_type``), two Notifications
+  (``operations_alert_critical``, ``salis___workshop_overstay``), and a setting on
+  ``Apex Settings``
+- a permission query, a ``has_permission`` hook, and a retention entry in ``hooks.py``
+- seven writer modules, every one funnelling through this helper: habitat
+  maintenance/safety/custody tasks, salis common tasks, the fuel and rental engines,
+  and ``system_notify``
 
-Removing the record therefore blanks a card, a chart and a shortcut count before
-any writer is touched.
+Habitat's scheduled notices already left: ``habitat/tasks/common.py`` posts a
+timeline Comment gated by a Habitat Settings toggle instead of inserting a record.
 """
 
 from __future__ import annotations
