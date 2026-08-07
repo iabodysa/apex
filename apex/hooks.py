@@ -275,7 +275,6 @@ scheduler_events = {
         "apex.habitat.tasks.safety.daily_safety_task_compliance_scan",
         "apex.habitat.tasks.safety.audit_remediation_deadline_watch",
         "apex.habitat.temporary_worker_engine.link_temporary_workers",
-        "apex.salis.tasks.driver.driver_license_expiry_watch",
         "apex.salis.tasks.vehicle.idle_vehicle_watch",
         "apex.salis.tasks.fuel.unreverted_topup_watch",
         "apex.salis.tasks.fuel.overdue_fuel_request_watch",

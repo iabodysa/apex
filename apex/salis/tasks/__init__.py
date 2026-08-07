@@ -18,9 +18,6 @@ from apex.salis.tasks.common import (
     _settings_int,
     _vehicle_project,
 )
-from apex.salis.tasks.driver import (
-    driver_license_expiry_watch,
-)
 from apex.salis.tasks.vehicle import (
     idle_vehicle_watch,
     vehicle_compliance_expiry_watch,
@@ -55,7 +52,6 @@ __all__ = [
     "_settings_int",
     "_vehicle_project",
     "daily_open_alerts_digest",
-    "driver_license_expiry_watch",
     "get_workshop_overstay_count",
     "idle_vehicle_watch",
     "missing_attendance_watch",

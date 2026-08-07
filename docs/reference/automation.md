@@ -24,11 +24,11 @@ idempotency key.
 
 | Cadence | Apex Core | Habitat | Salis | Logistay | Total |
 |---------|-----------|---------|-------|----------|-------|
-| Daily | 1 | 12 | 11 | 1 | 25 |
+| Daily | 1 | 12 | 10 | 1 | 24 |
 | Weekly | 0 | 3 | 2 | 0 | 5 |
 | Monthly | 1 | 0 | 2 | 0 | 3 |
 | Cron | 1 | 0 | 1 | 0 | 2 |
-| **Total** | **3** | **15** | **16** | **1** | **35** |
+| **Total** | **3** | **15** | **15** | **1** | **34** |
 
 ## Daily jobs
 
@@ -46,7 +46,6 @@ idempotency key.
 | `apex.habitat.tasks.safety.daily_safety_task_compliance_scan` | Update, Create, Notify | Marks due **Scheduled Task Instance** records Overdue. High and Critical items also create an Operations Alert and notify Safety Officer users. A second pass alerts on active buildings with no submitted **Safety Round** in the trailing seven-day window and notifies the facility supervisor. | The overdue cutoff uses `safety_overdue_grace_days`. Timeline comments require operational notifications. Alerts are deduplicated for the day. |
 | `apex.habitat.tasks.safety.audit_remediation_deadline_watch` | Update, Notify | Marks submitted **Audit Remediation Plan** records Overdue after their deadline and notifies the internal owner and Operations Director users. | Closed by Client and already Overdue records are excluded. The timeline note requires operational notifications. |
 | `apex.habitat.temporary_worker_engine.link_temporary_workers` | Update, Create, Notify | Matches an active **Temporary Worker** to an active Employee by passport, repoints supported housing and custody party links, backdates missed accommodation-cost rows, and marks the worker Linked. Unmatched workers past their window are marked Expired and HR users are notified in-app. | A link requires a matching passport. Expiry notification uses HR Manager users, falling back to System Manager users. |
-| `apex.salis.tasks.driver.driver_license_expiry_watch` | Check, Create | Creates a Critical **Operations Alert** for an expired active driver's licence and a Warning within the lead window. | The effective lead is never below 30 days, even when configured values are lower. The alert helper keeps one Open License Expiry alert per driver per day. |
 | `apex.salis.tasks.vehicle.idle_vehicle_watch` | Check, Create | Creates an Info Operations Alert for an active vehicle with no submitted Dispatched or Completed trip in the recent window. | Uses `idle_vehicle_days`, default 7. One Open Idle Vehicle alert per vehicle per day is retained. |
 | `apex.salis.tasks.fuel.unreverted_topup_watch` | Update, Create, Notify | Changes an overdue temporary **Fuel Request** top-up to Reverted, adds a timeline comment, and creates a Critical Operations Alert. | Applies to unreverted Approved or Done top-ups whose revert due date has passed. |
 | `apex.salis.tasks.fuel.overdue_fuel_request_watch` | Check, Create | Creates a Warning Operations Alert for a submitted Pending Fuel Request older than the allowed age. | Uses `fuel_pending_max_days`, default 2. |
