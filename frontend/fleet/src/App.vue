@@ -341,7 +341,18 @@ async function onSubmit() {
           </div>
         </header>
 
-        <form @submit.prevent="onSubmit">
+        <p v-if="loading" class="emp-empty">{{ t("emp.loading") }}</p>
+        <!-- Same [#emp-fail] rule as the two cards on the left: a broken stations
+             load must not render a silently empty select. Gated on the list being
+             empty, so stations that did load keep the form usable when only a
+             sibling request failed. -->
+        <div v-else-if="loadError && !stations.length" class="emp-fail">
+          <p>{{ t("emp.loadError") }}</p>
+          <button type="button" class="emp-btn emp-btn-ghost emp-retry" @click="reload">
+            <Icon name="rotate-cw" :size="15" />{{ t("common.retry") }}
+          </button>
+        </div>
+        <form v-else @submit.prevent="onSubmit">
           <div class="emp-field">
             <label for="ff-grade">{{ t("emp.fuel.fuelType") }}</label>
             <div class="emp-select-wrap">

@@ -143,7 +143,10 @@ body {
   border: var(--border-width) solid var(--c-border);
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
-.emp-trip:hover { border-color: color-mix(in srgb, var(--c-primary) 45%, var(--c-border)); transform: translateY(-1px); }
+/* Hover is a pointer answer: gated so a touch tap never leaves a row stuck lifted. */
+@media (hover: hover) {
+  .emp-trip:hover { border-color: color-mix(in srgb, var(--c-primary) 45%, var(--c-border)); transform: translateY(-1px); }
+}
 .emp-route { flex: 1; min-width: 0; }
 .emp-route b { display: block; font-size: 13.5px; font-weight: 700; }
 .emp-route span { font-size: 11.5px; color: var(--c-muted); }
@@ -164,34 +167,55 @@ body {
   color: var(--c-ink-soft); margin-bottom: 6px;
 }
 .emp-control {
-  width: 100%; padding: 11px 13px; border-radius: 10px;
+  width: 100%; min-height: var(--tap-min); padding: 11px 13px; border-radius: 10px;
   font-family: inherit; font-size: 14px; color: var(--c-ink);
   background: var(--c-surface); border: var(--border-width) solid var(--c-border-strong);
-  outline: none; transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
+@media (hover: hover) {
+  .emp-control:hover { border-color: color-mix(in srgb, var(--c-primary) 45%, var(--c-border-strong)); }
+}
+/* A pointer press keeps the border+shadow answer without a ring; the keyboard
+   path gets the shared 3px :focus-visible ring from tokens.css back. */
 .emp-control:focus {
+  outline: none;
   border-color: var(--c-primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 18%, transparent);
 }
+.emp-control:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
+}
 .emp-select-wrap { position: relative; }
 .emp-select-wrap select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-inline-end: 34px; }
-.emp-control:focus-within { border-color: var(--c-primary); }
+.emp-control:focus-within {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 18%, transparent);
+}
 .emp-select-caret {
   position: absolute; inset-inline-end: 12px; top: 50%; transform: translateY(-50%);
   color: var(--c-muted); pointer-events: none; rotate: -90deg;
 }
 .emp-control-num { display: flex; align-items: center; gap: 8px; padding-block: 0; padding-inline-end: 13px; }
 .emp-control-num input {
-  flex: 1; min-width: 0; border: none; outline: none; background: transparent;
-  padding: 11px 0 11px 13px; font-family: var(--font-num); font-size: 15px; font-weight: 700;
+  flex: 1; min-width: 0; border: none; background: transparent;
+  padding-block: 11px; padding-inline: 13px 0;
+  font-family: var(--font-num); font-size: 15px; font-weight: 700;
   color: var(--c-ink);
+}
+/* The wrapper's :focus-within ring answers a pointer press; the input keeps only
+   the keyboard ring, drawn inset so it is not clipped by the wrapper. */
+.emp-control-num input:focus { outline: none; }
+.emp-control-num input:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: -3px;
 }
 .emp-unit { font-size: 12px; color: var(--c-muted); flex-shrink: 0; }
 .emp-textarea { resize: vertical; min-height: 46px; line-height: 1.6; }
 
 .emp-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; padding: 13px 18px; border-radius: 11px; margin-top: 6px;
+  width: 100%; min-height: var(--tap-min); padding: 13px 18px; border-radius: 11px; margin-top: 6px;
   font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
   border: var(--border-width) solid transparent; transition: filter 0.15s ease, transform 0.1s ease;
 }
@@ -203,12 +227,14 @@ body {
   background: var(--c-primary); color: var(--c-primary-ink);
   box-shadow: 0 6px 16px color-mix(in srgb, var(--c-primary) 34%, transparent);
 }
-.emp-btn-primary:hover:not(:disabled) { filter: brightness(1.05); }
 .emp-btn-ghost {
   background: transparent; color: var(--c-ink);
   border-color: var(--c-border-strong); box-shadow: none; margin-top: 9px;
 }
-.emp-btn-ghost:hover:not(:disabled) { background: color-mix(in srgb, var(--c-ink) 5%, transparent); }
+@media (hover: hover) {
+  .emp-btn-primary:hover:not(:disabled) { filter: brightness(1.05); }
+  .emp-btn-ghost:hover:not(:disabled) { background: color-mix(in srgb, var(--c-ink) 5%, transparent); }
+}
 
 /* Server rejection, held on the form. --c-danger on --c-danger-bg is 5.39:1. */
 .emp-form-error {
