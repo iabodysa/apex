@@ -51,7 +51,13 @@ class TransferBoard {
 
 		$('<div class="tb-help text-muted"></div>')
 			.attr("style", TB_STYLE.help)
-			.text(__("Drag an occupied bed onto an empty bed to transfer the resident."))
+			// The tap is named first because HTML5 drag-and-drop does not fire on touch at
+			// all, so on a tablet the drag this used to advertise is not a gesture that exists.
+			.text(
+				__(
+					"Tap an occupied bed, then tap an empty bed to transfer the resident. With a mouse you can drag instead."
+				)
+			)
 			.appendTo(this.$root);
 
 		this.$split = $('<div class="tb-split"></div>').attr("style", TB_STYLE.split).appendTo(this.$root);
@@ -97,7 +103,7 @@ class TransferBoard {
 		const val = pane.field.get_value();
 		if (val && val !== pane.building) {
 			pane.building = val;
-			this.selected_source = null;
+			this._set_selection(null);
 			this.refresh(side);
 		}
 	}
@@ -166,6 +172,9 @@ class TransferBoard {
 		const pane = this.panes[side];
 		const $grid = pane.$grid;
 		const data = pane.data;
+		// The cards about to be discarded include the selected one. Dropping the selection
+		// with them is what stops a lit bed from outliving the resident behind it.
+		this._set_selection(null);
 		$grid.empty();
 
 		const s = (data && data.summary) || {};
@@ -241,16 +250,19 @@ class TransferBoard {
 		}
 
 		if (is_available) {
+			// The drop hover carries its OWN class. Sharing `active` with the selection meant
+			// a dragleave cleared the selected bed and a new selection cleared a hover.
 			$card.on("dragover", (e) => {
 				e.preventDefault();
 				e.originalEvent.dataTransfer.dropEffect = "move";
-				$card.addClass("active").css("box-shadow", "0 0 0 2px var(--primary)");
+				$card.addClass("tb-drop-hover").css("outline", "2px dashed var(--primary)");
 			});
-			$card.on("dragleave", () => $card.removeClass("active").css("box-shadow", ""));
+			$card.on("dragleave", () => $card.removeClass("tb-drop-hover").css("outline", ""));
 			$card.on("drop", (e) => {
 				e.preventDefault();
-				$card.removeClass("active").css("box-shadow", "");
+				$card.removeClass("tb-drop-hover").css("outline", "");
 				const source_bed = e.originalEvent.dataTransfer.getData("text/plain");
+				this._set_selection(null);
 				if (source_bed) {
 					this._begin_transfer(source_bed, bed, building);
 				}
@@ -283,9 +295,7 @@ class TransferBoard {
 				}
 				return;
 			}
-			this.selected_source = { side, bed, room, building };
-			this._clear_selection_highlight();
-			$card.addClass("active").css("box-shadow", "0 0 0 2px var(--primary)");
+			this._set_selection({ side, bed, room, building });
 			frappe.show_alert({
 				message: __("Now tap an available bed to transfer the resident."),
 				indicator: "blue",
@@ -294,8 +304,7 @@ class TransferBoard {
 		}
 
 		if (this.selected_source.bed.bed === bed.bed) {
-			this.selected_source = null;
-			this._clear_selection_highlight();
+			this._set_selection(null);
 			return;
 		}
 
@@ -308,13 +317,27 @@ class TransferBoard {
 		}
 
 		const source_bed = this.selected_source.bed.bed;
-		this.selected_source = null;
-		this._clear_selection_highlight();
+		this._set_selection(null);
 		this._begin_transfer(source_bed, bed, building);
 	}
 
-	_clear_selection_highlight() {
+	/* The ONE writer of the transfer selection. The model was assigned from five places and
+	   the highlight painted from a sixth, so a bed could stay lit with nothing behind it and
+	   the next tap would move a resident the supervisor had not chosen. The highlight is
+	   derived here from the model, never set beside it. */
+	_set_selection(ctx) {
+		this.selected_source = ctx || null;
+		if (!this.$root) return;
 		this.$root.find(".tb-bed.active").removeClass("active").css("box-shadow", "");
+		if (!this.selected_source) return;
+		const wanted = this.selected_source.bed.bed;
+		this.$root.find(".tb-bed").each(function () {
+			const bed_ctx = $(this).data("ctx");
+			if (bed_ctx && bed_ctx.bed && bed_ctx.bed.bed === wanted) {
+				$(this).addClass("active").css("box-shadow", "0 0 0 2px var(--primary)");
+				return false;
+			}
+		});
 	}
 
 	_begin_transfer(source_bed, target_bed_card, target_building) {

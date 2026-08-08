@@ -1483,7 +1483,6 @@ Draft,مسودة
 Draft Damage Assessment created: {0}. Please review and submit.,أُنشئت مسودة تقييم الأضرار {0}. راجعها واعتمدها.
 "Draft purchase requests and payment orders raised from this contract, one set per billing period.",مسودات طلبات الشراء وأوامر الدفع المُصدَرة من هذا العقد، مجموعة واحدة لكل فترة فوترة.
 Draft {0} ready: {1},مسودة {0} جاهزة: {1}
-Drag an occupied bed onto an empty bed to transfer the resident.,اسحب سريراً مشغولاً إلى سرير فارغ لنقل الساكن.
 Drawn against the quota so far,المسحوب من الحصة حتى الآن
 Drinking-water cooler / dispenser. Required corrective item from client safety audits.,مبرّد / موزّع مياه شرب. صنف تصحيحي مطلوب من تدقيقات سلامة العميل.
 Driver,سائق
@@ -4476,6 +4475,7 @@ Target Payment Document,مستند الدفعة المستهدفة
 Target Room {0} is not associated with any Building.,الغرفة الهدف {0} غير مرتبطة بأي مبنى.
 Target bed is already occupied.,السرير المستهدف مشغول بالفعل.
 Target bed {0} is not linked to a room and building.,السرير الهدف {0} غير مرتبط بغرفة ومبنى.
+"Tap an occupied bed, then tap an empty bed to transfer the resident. With a mouse you can drag instead.",اضغط سريراً مشغولاً ثم اضغط سريراً فاضياً لنقل الساكن. وبالفأرة تقدر تسحبه بدل ذلك.
 Task,المهمة
 Task Catalog,دليل المهام
 Task Code,رمز المهمة
