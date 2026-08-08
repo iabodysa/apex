@@ -77,12 +77,13 @@ def execute(filters=None):
                 **row,
                 "raised_on": getdate(row.creation),
                 "days_waiting": date_diff(until, getdate(row.creation)),
+                "is_owner_taken": bool(row.assigned_to),
                 "owner_taken": _("Yes") if row.assigned_to else _("No"),
             }
         )
 
     if filters.get("unassigned_only"):
-        data = [r for r in data if r["owner_taken"] == _("No")]
+        data = [r for r in data if not r.get("is_owner_taken")]
 
     return columns, data, None, None, _summary(data)
 
@@ -90,7 +91,7 @@ def execute(filters=None):
 def _summary(data):
     """Built for any result including none, so an empty queue reads 0 rather than a blank
     strip that looks like a page which failed to load."""
-    unassigned = [r for r in data if r.get("owner_taken") == _("No")]
+    unassigned = [r for r in data if not r.get("is_owner_taken")]
     urgent = [r for r in data if r.get("priority") in URGENT_PRIORITIES]
     ageing = [r for r in data if (r.get("days_waiting") or 0) > AGEING_DAYS]
     return [

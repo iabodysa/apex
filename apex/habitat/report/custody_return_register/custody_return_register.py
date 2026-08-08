@@ -84,12 +84,13 @@ def execute(filters=None):
                 "qty": line.qty,
                 "condition_on_return": condition,
                 "serial_no": line.serial_no,
+                "is_chargeable": bool(condition in CHARGEABLE_CONDITIONS),
                 "chargeable": _("Yes") if condition in CHARGEABLE_CONDITIONS else _("No"),
             }
         )
 
     if filters.get("chargeable_only"):
-        data = [r for r in data if r["chargeable"] == _("Yes")]
+        data = [r for r in data if r.get("is_chargeable")]
 
     return columns, data, None, None, _summary(data)
 
@@ -97,7 +98,7 @@ def execute(filters=None):
 def _summary(data):
     """Built for any result including none, so an empty register reads 0 rather than a
     blank strip that looks like a page which failed to load."""
-    chargeable = [r for r in data if r.get("chargeable") == _("Yes")]
+    chargeable = [r for r in data if r.get("is_chargeable")]
     return [
         count_card(_("Returned Lines"), data),
         count_card(

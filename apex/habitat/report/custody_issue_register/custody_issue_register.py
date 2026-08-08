@@ -75,6 +75,7 @@ def execute(filters=None):
         data.append(
             {
                 **row,
+                "is_acknowledged": bool(row.acknowledged_on),
                 "acknowledged": _("Yes") if row.acknowledged_on else _("No"),
                 "days_overdue": date_diff(today_date, due) if overdue else 0,
             }
@@ -89,7 +90,7 @@ def execute(filters=None):
 def _summary(data):
     """Built for any result including none, so an empty register reads 0 rather than a
     blank strip that looks like a page which failed to load."""
-    unsigned = [r for r in data if r.get("acknowledged") == _("No")]
+    unsigned = [r for r in data if not r.get("is_acknowledged")]
     overdue = [r for r in data if r.get("days_overdue")]
     return [
         count_card(_("Issues"), data),

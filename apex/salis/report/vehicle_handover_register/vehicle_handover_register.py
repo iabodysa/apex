@@ -89,13 +89,14 @@ def execute(filters=None):
                 "to_driver": handover.to_driver,
                 "odometer_reading": handover.odometer_reading,
                 "discrepancy_status": handover.discrepancy_status,
+                "is_signed": bool(handover.signed_evidence),
                 "signed": _("Yes") if handover.signed_evidence else _("No"),
                 "failed_checks": failed.get(handover.name, 0),
             }
         )
 
     if filters.get("unsigned_only"):
-        data = [r for r in data if r["signed"] == _("No")]
+        data = [r for r in data if not r.get("is_signed")]
 
     return columns, data, None, None, _summary(data)
 
@@ -103,7 +104,7 @@ def execute(filters=None):
 def _summary(data):
     """Built for any result including none, so an empty register reads 0 rather than a
     blank strip that looks like a page which failed to load."""
-    unsigned = [r for r in data if r.get("signed") == _("No")]
+    unsigned = [r for r in data if not r.get("is_signed")]
     discrepancies = [r for r in data if r.get("discrepancy_status") == "Discrepancy"]
     return [
         count_card(_("Handovers"), data),

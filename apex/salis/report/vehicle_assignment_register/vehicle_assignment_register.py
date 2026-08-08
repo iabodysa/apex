@@ -76,6 +76,7 @@ def execute(filters=None):
         data.append(
             {
                 **row,
+                "is_held": bool(live),
                 "held": _("Yes") if live else _("No"),
                 "days_held": date_diff(until, start) if start else 0,
             }
@@ -87,7 +88,7 @@ def execute(filters=None):
 def _summary(data):
     """Built for any result including none, so an empty register reads 0 rather than
     blank — a blank strip looks like a page that failed to load."""
-    live = [r for r in data if r.get("held") == _("Yes")]
+    live = [r for r in data if r.get("is_held")]
     return [
         count_card(_("Assignments"), data),
         count_card(_("Currently Held"), live, indicator="Green"),
