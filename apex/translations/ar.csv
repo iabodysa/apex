@@ -302,8 +302,9 @@ Apex Settings,إعدادات أبكس
 Apex Setup,إعداد أبكس
 Apex is configured. Each module now has its own go-live list.,أبكس مُهيّأ. لكل وحدة الآن قائمة تشغيلها.
 Apex messaging gateway test message.,رسالة اختبار بوابة مراسلة أبكس.
+"Apex takes its default company and cost center from the company this wizard creates. Set how it posts costs and which document the Pay action builds. You can change all of these later in Habitat Settings, Salis Settings, and Payment Routing Settings.",يأخذ أبكس الشركة ومركز التكلفة الافتراضيين من الشركة التي ينشئها هذا المعالج. حدد طريقة ترحيل التكاليف والمستند الذي يبنيه إجراء الدفع. تقدر تغيّر كل هذا لاحقاً من إعدادات هابيتات وإعدادات ساليس وإعدادات توجيه الدفع.
 "Apex runs accommodation, facilities and fleet operations. Field teams work in the portals below on their phones; supervisors and the back office work in the modules in the sidebar.",يدير أبكس عمليات الإسكان والمرافق والأسطول. تعمل الفرق الميدانية من البوابات أدناه على هواتفها، ويعمل المشرفون والإدارة من الوحدات في الشريط الجانبي.
-Apex — Company and Accounting Defaults,أبكس — الشركة والإعدادات المحاسبية الافتراضية
+Apex — Accounting and Payment Defaults,أبكس — إعدادات المحاسبة والدفع الافتراضية
 Apex — Notifications and Operations,أبكس — التنبيهات والتشغيل
 Apex — Salary Deductions,أبكس — الخصومات من الراتب
 App-wide Apex configuration shared by every module (Habitat and Salis). Holds settings that are not scoped to a single domain — for example the GL-posting finance gate and the data-retention windows that govern how long machine-written time-series records are kept.,إعدادات أبيكس العامة المشتركة بين كل الوحدات (هابيتات وساليس). تحمل الإعدادات غير المحصورة بنطاق واحد — مثل بوابة الترحيل المالي ونوافذ الاحتفاظ بالبيانات التي تحكم مدة بقاء السجلات الزمنية المكتوبة آلياً.
@@ -1352,8 +1353,6 @@ Default Salary Component,مكوّن الراتب الافتراضي
 Default UOM,وحدة القياس الافتراضية
 Default company applied to Salis transactions when not set explicitly.,الشركة الافتراضية لمعاملات ساليس عند عدم تحديد شركة.
 "Default company for Accommodation Ledger, Maintenance, Utility, and Lease documents. Required before enabling financial posting.",الشركة الافتراضية لسجل تكاليف السكن ومستندات الصيانة والخدمات وعقود الإيجار. مطلوبة قبل تفعيل الترحيل المالي.
-Default company for Habitat and Salis documents. Leave blank to set it per-module later.,الشركة الافتراضية لمستندات هابيتات وساليس. اتركه فارغًا لضبطه لكل وحدة لاحقًا.
-Default cost center for Salis fleet cost postings. Leave blank to set it later.,مركز التكلفة الافتراضي لترحيل تكاليف أسطول ساليس. اتركه فارغًا لضبطه لاحقًا.
 Default cost center for this contract's billing documents.,مركز التكلفة الافتراضي لمستندات فوترة هذا العقد.
 Default cost center used for fleet cost postings.,مركز التكلفة الافتراضي المستخدم لقيود تكاليف الأسطول.
 Default mode keeps all custody and depreciation inside Habitat with no financial posting.,الوضع الافتراضي يبقي جميع العهد والإهلاك داخل هابيتات دون ترحيل مالي.
@@ -4158,7 +4157,6 @@ Set the date the resident leaves the accommodation.,حدّد تاريخ مغاد
 "Set the date the resident moves in, then save to begin the stay.",حدّد تاريخ تسكين الساكن، ثم احفظ لبدء الإقامة.
 Set the date the work is planned to begin.,حدّد التاريخ المخطط لبدء العمل.
 Set the date these articles are handed over.,حدّد تاريخ تسليم هذه الأصناف.
-"Set the default company, cost center, and payment routing Apex uses for Habitat and Salis. You can change all of these later in Habitat Settings, Salis Settings, and Payment Routing Settings.",اضبط الشركة ومركز التكلفة وتوجيه المدفوعات التي يستخدمها أبكس لهابيتات وساليس. يمكنك تغييرها جميعًا لاحقًا في إعدادات هابيتات وإعدادات ساليس وإعدادات توجيه المدفوعات.
 Set the monthly litre allowance for a vehicle so consumption can be reconciled.,حدد البدل الشهري باللترات لمركبة ليتسنى مطابقة الاستهلاك.
 Set the number of beds in each room. Use − / + to adjust.,حدد عدد الأسرّة في كل غرفة. استخدم − / + للتعديل.
 "Set the overall result of the round, then save.",حدّد النتيجة الإجمالية للجولة، ثم احفظ.
@@ -4552,6 +4550,7 @@ The Other Party,الطرف الآخر
 The Route Supervisor this plan is assigned to for approval and live oversight. Only this user may approve or reject the plan from the Masar supervisor portal.,مشرف المسار المسندة إليه هذه الخطة للاعتماد والمتابعة المباشرة. هذا المستخدم وحده يمكنه اعتماد الخطة أو رفضها من بوابة مشرف مسار.
 "The Safety Round this execution belongs to, if recorded as part of a round.",جولةُ السلامة التي ينتمي إليها هذا التنفيذ، إن سُجِّل ضمن جولة.
 The Salis Driver this barcode token grants portal entry for. Set on a Driver-holder token; the driver enters by scanning the QR with no Frappe User.,سائق ساليس الذي يمنحه رمز الباركود هذا دخول البوابة. يُحدد للرمز الخاص بالسائق، ويدخل السائق بمسح رمز الاستجابة السريعة دون حساب مستخدم في فرابي.
+The Apex demo data could not be built. It stopped at {0}; the Error Log has why.,ما قدر يبني بيانات أبكس التجريبية. وقف عند {0}، والسبب في سجل الأخطاء.
 The Trip Start Log this scan boarded onto (set only when a boarding row was created).,سجل بدء الرحلة الذي أضاف إليه هذا المسح عملية الصعود. يُحدد فقط عند إنشاء صف صعود.
 "The accrual was taken from the rental ledger, not typed by hand",المستحق مأخوذ من سجل الإيجار، ما هو مدخل يدوي
 The approval carries the moment it was given,الاعتماد يحمل وقت صدوره
@@ -4703,6 +4702,7 @@ This arrival manifest has not been fully reconciled — workers are still unhous
 This assignment was already checked out on {0}.,انتهى هذا التسكين بالفعل بتاريخ {0}.
 This barcode signs the driver in with no password. Anyone holding it enters as this driver until it expires or is revoked.,هذا الرمز يسجّل دخول السائق بلا كلمة مرور. أي شخص يملكه يدخل بصفته هذا السائق حتى تنتهي صلاحيته أو يُلغى.
 This bed is in a room that is not ready. Resolve room readiness before check-in.,هذا السرير في غرفة غير جاهزة. أكمل تجهيز الغرفة قبل التسكين.
+This cadence could not be recorded.,ما قدر يسجل هذا التكرار.
 This bed is out of service and cannot be assigned.,هذا السرير خارج الخدمة ولا يمكن تخصيصه.
 This building has no rooms yet.,لا توجد غرف في هذا المبنى بعد.
 This building has rooms but every bed is occupied — use Over-capacity,يحتوي هذا المبنى على غرف لكن جميع الأسرّة مشغولة — استخدم تجاوز السعة
@@ -4717,6 +4717,7 @@ This fuel request has been pending approval for too long,ظل طلب الوقو�
 "This license is submitted. Amend it (Cancel, then Amend) with the new expiry date to renew.",هذه الرخصة معتمدة. لتجديدها، ألغها ثم عدلها وأدخل تاريخ الانتهاء الجديد.
 This page is for route supervisors.,هذه الصفحة مخصصة لمشرفي المسارات.
 This page is for the fleet team.,هذه الصفحة مخصّصة لفريق الأسطول.
+This page is for the housing and safety team.,هذه الصفحة لفريق الإسكان والسلامة.
 This page is for the housing team.,هذه الصفحة مخصصة لفريق الإسكان.
 This page is for the safety team.,هذه الصفحة لفريق السلامة.
 This payment request is not finance-approved yet; it cannot be paid.,طلب الدفع هذا لم يُعتمد ماليًا بعد؛ لا يمكن دفعه.

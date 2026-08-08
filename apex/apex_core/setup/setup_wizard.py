@@ -13,6 +13,9 @@ re-engineered Apex Single:
   - Salary Deduction Policy  — the housing/damage deduction toggles + posting company.
   - Payment Routing Settings — the Pay-action target payment DocType.
 
+The company and its cost center are NOT among the operator's answers. They are read
+from the records ERPNext's own stage created, which run before this hook.
+
 Safe-by-default + skip-safe: a field the operator leaves blank (or a toggle left
 at its pre-filled value) keeps the Single's own default — the wizard never writes
 a phantom value. The deduction master switch and the GL gate stay OFF unless the
@@ -46,12 +49,30 @@ def apply_apex_setup(args=None):
     below only write a Link when the arg is present and the target exists). No commit
     — Frappe commits after all setup stages succeed."""
     args = frappe._dict(args or {})
+    company = _created_company()
+    cost_center = _created_cost_center(company)
 
     _apply_payment_routing(args)
     _apply_apex_settings(args)
-    _apply_habitat_settings(args)
-    _apply_salis_settings(args)
-    _apply_deduction_policy(args)
+    _apply_habitat_settings(args, company)
+    _apply_salis_settings(args, company, cost_center)
+    _apply_deduction_policy(args, company)
+
+
+def _created_company():
+    """The company this wizard has just created, read rather than asked for.
+
+    The Apex slide used to carry Link fields at Company and Cost Center. Frappe renders
+    every slide before it runs a single stage, and ERPNext creates the company in a
+    stage, so both pickers queried empty tables — the operator was asked a question he
+    could not answer, and the blank he was forced to leave was written down as a choice.
+    ERPNext's stage runs before this completion hook, so both values exist by now."""
+    return frappe.defaults.get_global_default("company") or frappe.db.get_value("Company", {})
+
+
+def _created_cost_center(company):
+    """The default cost center ERPNext attached to that company."""
+    return frappe.get_cached_value("Company", company, "cost_center") if company else None
 
 
 def _apply_apex_settings(args):
@@ -61,12 +82,11 @@ def _apply_apex_settings(args):
     apex.save(ignore_permissions=True)
 
 
-def _apply_habitat_settings(args):
+def _apply_habitat_settings(args, company):
     """Habitat Settings — default company + the email/operational notification
-    kill-switches. Company is only written when chosen so the Single default holds."""
+    kill-switches. Company is only written when one exists so the Single default holds."""
     habitat = frappe.get_single("Habitat Settings")
-    company = args.get("apex_default_company")
-    if company and frappe.db.exists("Company", company):
+    if company:
         habitat.company = company
     habitat.enable_email_notifications = 1 if cint(args.get("apex_enable_email")) else 0
     habitat.enable_operational_notifications = (
@@ -75,15 +95,13 @@ def _apply_habitat_settings(args):
     habitat.save(ignore_permissions=True)
 
 
-def _apply_salis_settings(args):
-    """Salis Settings — default company + cost center (write-when-chosen) and the
-    driver-portal / approvals switches."""
+def _apply_salis_settings(args, company, cost_center):
+    """Salis Settings — default company + cost center and the driver-portal /
+    approvals switches."""
     salis = frappe.get_single("Salis Settings")
-    company = args.get("apex_default_company")
-    if company and frappe.db.exists("Company", company):
+    if company:
         salis.default_company = company
-    cost_center = args.get("apex_default_cost_center")
-    if cost_center and frappe.db.exists("Cost Center", cost_center):
+    if cost_center:
         salis.default_cost_center = cost_center
     salis.enable_driver_portal = 1 if cint(args.get("apex_enable_driver_portal")) else 0
     salis.enable_approvals = 1 if cint(args.get("apex_enable_approvals")) else 0
@@ -108,16 +126,15 @@ def _apply_payment_routing(args):
     router.save(ignore_permissions=True)
 
 
-def _apply_deduction_policy(args):
+def _apply_deduction_policy(args, company):
     """Salary Deduction Policy — the housing/damage deduction toggles (default OFF)
     plus the posting company. The global master switch only turns on if at least one
     per-type rule is enabled."""
     deduct_housing = bool(cint(args.get("apex_deduct_housing_allowance")))
     deduct_damage = bool(cint(args.get("apex_deduct_damage")))
-    company = args.get("apex_default_company")
 
     policy = frappe.get_single("Salary Deduction Policy")
-    if company and frappe.db.exists("Company", company):
+    if company:
         policy.company = company
     policy.enable_salary_deductions = 1 if (deduct_housing or deduct_damage) else 0
     _set_rule_enabled(policy, "Rent", deduct_housing)

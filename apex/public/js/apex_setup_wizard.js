@@ -8,26 +8,12 @@ frappe.setup.on("before_load", function () {
 apex.setup.slides_settings = [
 	{
 		name: "apex_defaults",
-		title: __("Apex — Company and Accounting Defaults"),
+		title: __("Apex — Accounting and Payment Defaults"),
 		icon: "fa fa-building",
 		help: __(
-			"Set the default company, cost center, and payment routing Apex uses for Habitat and Salis. You can change all of these later in Habitat Settings, Salis Settings, and Payment Routing Settings."
+			"Apex takes its default company and cost center from the company this wizard creates. Set how it posts costs and which document the Pay action builds. You can change all of these later in Habitat Settings, Salis Settings, and Payment Routing Settings."
 		),
 		fields: [
-			{
-				fieldname: "apex_default_company",
-				label: __("Default Company"),
-				fieldtype: "Link",
-				options: "Company",
-				description: __("Default company for Habitat and Salis documents. Leave blank to set it per-module later."),
-			},
-			{
-				fieldname: "apex_default_cost_center",
-				label: __("Default Cost Center"),
-				fieldtype: "Link",
-				options: "Cost Center",
-				description: __("Default cost center for Salis fleet cost postings. Leave blank to set it later."),
-			},
 			{ fieldname: "apex_gl_sb", fieldtype: "Section Break", label: __("Accounting") },
 			{
 				fieldname: "apex_post_gl",

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import random
 import string
+import time
 
 import frappe
 from frappe import _
@@ -17,6 +18,8 @@ from frappe.utils import add_days, today
 
 
 DEMO_ARG = "apex_setup_demo"
+
+_GENDER_WAIT_SECONDS = 60
 
 DEMO_OWNER = "demo.manager@apex.example"
 DEMO_SUPERVISOR = "demo.supervisor@apex.example"
@@ -110,18 +113,52 @@ def build_demo_data():
     if frappe.db.exists("User", DEMO_OWNER):
         return
 
+    operator = frappe.session.user
+    if not _company():
+        _report_build_failure(operator, "Company", None)
+        return
+
+    gender = _demo_gender()
+
     _create_demo_users()
     previous_user = frappe.session.user
+    failure = None
     try:
         frappe.set_user(DEMO_OWNER)
-        context = {}
-        for _doctype, step in _BUILD_STEPS:
-            step(context)
+        context = {"gender": gender}
+        for doctype, step in _BUILD_STEPS:
+            try:
+                step(context)
+            except Exception:
+                failure = (doctype, frappe.get_traceback(with_context=True))
+                break
     finally:
         frappe.set_user(previous_user)
 
+    if failure:
+        _report_build_failure(operator, *failure)
+        return
+
     _scope_supervisor(context.get("building"))
     frappe.cache.delete_keys("bootinfo")
+
+
+def _report_build_failure(operator, doctype, traceback):
+    """Names the step that failed to the operator who ticked the demo box.
+
+    The wizard reports success the moment its stages finish, while this job is still
+    queued, so a raw exception here surfaces only in a worker log the operator never
+    opens. Roll the half-built scenario back, keep the traceback in the Error Log, and
+    say which step stopped."""
+    frappe.db.rollback()
+    frappe.log_error(title="Apex demo build", message=traceback or doctype)
+    frappe.publish_realtime(
+        "msgprint",
+        _("The Apex demo data could not be built. It stopped at {0}; the Error Log has why.").format(
+            _(doctype)
+        ),
+        user=operator,
+    )
 
 
 @frappe.whitelist()
@@ -477,21 +514,36 @@ def _build_beds(context):
 
 
 def _demo_gender():
-    """Returns a Gender that exists on THIS site, creating one only if the master is empty.
+    """Returns a Gender that exists on THIS site, creating one only if none ever arrives.
 
-    Employee.gender is mandatory and is a Link, so a hardcoded "Male" fails outright on a site
-    whose Gender records were never seeded or carry different names — which is what
-    LinkValidationError: Could not find Gender: Male means. Read the master, do not assume it.
-    """
-    existing = frappe.db.get_value("Gender", {"name": "Male"}) or frappe.db.get_value("Gender", {})
-    if existing:
-        return existing
-    return frappe.get_doc({"doctype": "Gender", "gender": "Male"}).insert().name
+    Employee.gender is mandatory and is a Link, so a hardcoded "Male" fails outright on a
+    site whose Gender records are not there yet — the LinkValidationError measured on a bare
+    site. They are not there yet because Frappe installs its Gender fixtures only after every
+    setup stage has run, while this build is queued from a stage; writing our own row in that
+    window deadlocks against the fixture's insert on tabgender. So wait for the framework's
+    rows first and write one only if the wait runs out. Rolling back between reads is what
+    lets this connection see the other transaction's commit — and is why this is resolved
+    before the build starts rather than at the Employee step, where the same rollback threw
+    away every row already built and left the next link pointing at nothing."""
+    deadline = time.monotonic() + _GENDER_WAIT_SECONDS
+    while True:
+        existing = frappe.db.get_value("Gender", {"name": "Male"}) or frappe.db.get_value(
+            "Gender", {}
+        )
+        if existing:
+            return existing
+        if time.monotonic() >= deadline:
+            break
+        time.sleep(1)
+        frappe.db.rollback()
+    doc = frappe.get_doc({"doctype": "Gender", "gender": "Male"})
+    doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
+    return doc.name
 
 
 def _build_employee(context):
     """Creates the demo resident, supplier-worker, and leaver Employee records."""
-    gender = _demo_gender()
+    gender = context["gender"]
     context["employees"] = [
         _create(
             "Employee",
