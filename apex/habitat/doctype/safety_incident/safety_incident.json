@@ -275,7 +275,8 @@
    "create": 1,
    "read": 1,
    "role": "Safety Officer",
-   "write": 1
+   "write": 1,
+   "report": 1
   }
  ],
  "row_format": "Dynamic",

@@ -232,14 +232,16 @@
    "read": 1,
    "role": "Fleet Project Manager",
    "submit": 1,
-   "write": 1
+   "write": 1,
+   "report": 1
   },
   {
    "create": 1,
    "read": 1,
    "role": "Fleet Supervisor",
    "submit": 1,
-   "write": 1
+   "write": 1,
+   "report": 1
   },
   {
    "create": 1,

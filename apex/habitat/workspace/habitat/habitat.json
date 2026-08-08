@@ -44,7 +44,7 @@
    "role": "Administrator"
   }
  ],
- "content": "[{\"id\": \"habHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Habitat</b></span>\", \"col\": 12}}, {\"id\": \"habHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"habScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Assignment\", \"col\": 3}}, {\"id\": \"habScMaint\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"habScCustody\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"habScBuilding\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building\", \"col\": 3}}, {\"id\": \"habScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 3}}, {\"id\": \"habHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"habNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Occupancy Percent\", \"col\": 3}}, {\"id\": \"habNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"habNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"secSetup\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup</b></span>\", \"col\": 12}}, {\"id\": \"habCardSetup\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}, {\"id\": \"habCardLogs\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 4}}]",
+ "content": "[{\"id\": \"habHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Habitat</b></span>\", \"col\": 12}}, {\"id\": \"habHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"habScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Assignment\", \"col\": 3}}, {\"id\": \"habScMaint\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"habScCustody\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"habScBuilding\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building\", \"col\": 3}}, {\"id\": \"habScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 3}}, {\"id\": \"habScCleaning\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Cleaning Log\", \"col\": 3}}, {\"id\": \"habScSafety\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Round\", \"col\": 3}}, {\"id\": \"habScSim\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"SIM Custody Assignment\", \"col\": 3}}, {\"id\": \"habHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"habNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Occupancy Percent\", \"col\": 3}}, {\"id\": \"habNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"habNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"secSetup\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup</b></span>\", \"col\": 12}}, {\"id\": \"habCardSetup\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}, {\"id\": \"habCardLogs\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -85,6 +85,30 @@
    "link_to": "action-inbox",
    "color": "Blue",
    "idx": 5
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Cleaning Log",
+   "link_to": "Cleaning Log",
+   "color": "Cyan",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Safety Round",
+   "link_to": "Safety Round",
+   "color": "Orange",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "SIM Custody Assignment",
+   "link_to": "SIM Custody Assignment",
+   "color": "Purple",
+   "idx": 8
   }
  ],
  "links": [
@@ -166,5 +190,5 @@
  ],
  "quick_lists": [],
  "creation": "2020-01-01 00:00:06.000000",
- "modified": "2026-08-07 20:53:00.000000"
+ "modified": "2026-08-08 05:06:00.000000"
 }

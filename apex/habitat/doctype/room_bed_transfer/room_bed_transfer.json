@@ -219,7 +219,8 @@
    "submit": 1,
    "cancel": 1,
    "amend": 1,
-   "idx": 2
+   "idx": 2,
+   "report": 1
   }
  ]
 }
