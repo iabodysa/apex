@@ -30,6 +30,7 @@ control its data.
 | **Habitat** | Habitat | Apex | `4.0` | Accommodation Manager, Administrator, Cleaning Supervisor, Finance Manager, Fleet Manager, Internal Auditor, Maintenance Technician, Resident Supervisor, SIM Operations User, Safety Officer, System Manager |
 | **Logistay** | Logistay | Apex | `5.0` | Administrator, SIM Operations User, System Manager |
 | **My Tasks** | Apex Core | Apex | `6.0` | — |
+| **Back Engines** | Apex Core | Apex Core | `9.0` | System Manager |
 
 An em dash under Roles means the Workspace JSON declares no role rows, so the
 workspace is visible to every signed-in user. Visibility is not access.
