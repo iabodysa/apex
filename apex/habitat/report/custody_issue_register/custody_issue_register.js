@@ -2,12 +2,7 @@
 
 frappe.query_reports["Custody Issue Register"] = {
 	filters: [
-		{
-			fieldname: "building",
-			label: __("Building"),
-			fieldtype: "Link",
-			options: "Building",
-		},
+		apex.report_filters.building(),
 		{
 			fieldname: "issued_to_employee",
 			label: __("Issued To"),

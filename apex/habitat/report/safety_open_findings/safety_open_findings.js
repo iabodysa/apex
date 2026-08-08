@@ -1,12 +1,7 @@
 // Copyright (c) 2026, afmcoltd
 frappe.query_reports["Safety Open Findings"] = {
 	filters: [
-		{
-			fieldname: "building",
-			label: __("Building"),
-			fieldtype: "Link",
-			options: "Building",
-		},
+		apex.report_filters.building(),
 		{
 			fieldname: "priority",
 			label: __("Priority"),

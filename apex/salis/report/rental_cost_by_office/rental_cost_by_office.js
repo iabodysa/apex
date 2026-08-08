@@ -1,34 +1,15 @@
 // Copyright (c) 2026, afmcoltd
 frappe.query_reports["Rental Cost by Office"] = {
 	filters: [
-		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company"),
-		},
+		apex.report_filters.company(),
 		{
 			fieldname: "rental_office",
 			label: __("Rental Office"),
 			fieldtype: "Link",
 			options: "Rental Office",
 		},
-		{
-			fieldname: "vehicle",
-			label: __("Vehicle"),
-			fieldtype: "Link",
-			options: "Salis Vehicle",
-		},
-		{
-			fieldname: "from_date",
-			label: __("From Date"),
-			fieldtype: "Date",
-		},
-		{
-			fieldname: "to_date",
-			label: __("To Date"),
-			fieldtype: "Date",
-		},
+		apex.report_filters.vehicle(),
+		apex.report_filters.from_date(),
+		apex.report_filters.to_date(),
 	],
 };

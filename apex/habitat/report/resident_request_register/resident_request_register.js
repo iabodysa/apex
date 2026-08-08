@@ -2,12 +2,7 @@
 
 frappe.query_reports["Resident Request Register"] = {
 	filters: [
-		{
-			fieldname: "building",
-			label: __("Building"),
-			fieldtype: "Link",
-			options: "Building",
-		},
+		apex.report_filters.building(),
 		{
 			fieldname: "priority",
 			label: __("Priority"),

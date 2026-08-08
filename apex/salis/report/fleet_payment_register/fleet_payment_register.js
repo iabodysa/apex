@@ -1,25 +1,9 @@
 // Copyright (c) 2026, afmcoltd
 frappe.query_reports["Fleet Payment Register"] = {
 	filters: [
-		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company"),
-		},
-		{
-			fieldname: "cost_center",
-			label: __("Cost Center"),
-			fieldtype: "Link",
-			options: "Cost Center",
-		},
-		{
-			fieldname: "project",
-			label: __("Project"),
-			fieldtype: "Link",
-			options: "Project",
-		},
+		apex.report_filters.company(),
+		apex.report_filters.cost_center(),
+		apex.report_filters.project(),
 		{
 			fieldname: "expense_type",
 			label: __("Expense Type"),
@@ -32,15 +16,7 @@ frappe.query_reports["Fleet Payment Register"] = {
 			fieldtype: "Select",
 			options: ["", "Draft", "Pending Finance", "Approved by Finance", "Paid", "Rejected", "Cancelled"].join("\n"),
 		},
-		{
-			fieldname: "from_date",
-			label: __("From Date"),
-			fieldtype: "Date",
-		},
-		{
-			fieldname: "to_date",
-			label: __("To Date"),
-			fieldtype: "Date",
-		},
+		apex.report_filters.from_date(),
+		apex.report_filters.to_date(),
 	],
 };

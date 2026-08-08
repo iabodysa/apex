@@ -1,13 +1,7 @@
 // Copyright (c) 2026, afmcoltd
 frappe.query_reports["Cost Recovery Aging"] = {
 	filters: [
-		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company"),
-		},
+		apex.report_filters.company(),
 		{
 			fieldname: "status",
 			label: __("Status"),
@@ -20,29 +14,11 @@ frappe.query_reports["Cost Recovery Aging"] = {
 			fieldtype: "Select",
 			options: ["", "Vehicle Damage", "Fuel Misuse", "Custody Loss", "Fine / Violation", "Other"].join("\n"),
 		},
-		{
-			fieldname: "vehicle",
-			label: __("Vehicle"),
-			fieldtype: "Link",
-			options: "Salis Vehicle",
-		},
-		{
-			fieldname: "driver",
-			label: __("Driver"),
-			fieldtype: "Link",
-			options: "Salis Driver",
-		},
-		{
-			fieldname: "employee",
-			label: __("Employee"),
-			fieldtype: "Link",
-			options: "Employee",
-		},
-		{
-			fieldname: "as_on_date",
-			label: __("As On Date"),
-			fieldtype: "Date",
+		apex.report_filters.vehicle(),
+		apex.report_filters.driver(),
+		apex.report_filters.employee(),
+		apex.report_filters.as_on_date({
 			default: frappe.datetime.get_today(),
-		},
+		}),
 	],
 };

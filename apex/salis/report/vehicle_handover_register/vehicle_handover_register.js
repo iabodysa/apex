@@ -2,18 +2,8 @@
 
 frappe.query_reports["Vehicle Handover Register"] = {
 	filters: [
-		{
-			fieldname: "vehicle",
-			label: __("Vehicle"),
-			fieldtype: "Link",
-			options: "Salis Vehicle",
-		},
-		{
-			fieldname: "driver",
-			label: __("Driver"),
-			fieldtype: "Link",
-			options: "Salis Driver",
-		},
+		apex.report_filters.vehicle(),
+		apex.report_filters.driver(),
 		{
 			fieldname: "discrepancy_status",
 			label: __("Discrepancy Status"),
@@ -25,15 +15,7 @@ frappe.query_reports["Vehicle Handover Register"] = {
 			label: __("Unsigned Only"),
 			fieldtype: "Check",
 		},
-		{
-			fieldname: "from_date",
-			label: __("From Date"),
-			fieldtype: "Date",
-		},
-		{
-			fieldname: "to_date",
-			label: __("To Date"),
-			fieldtype: "Date",
-		},
+		apex.report_filters.from_date(),
+		apex.report_filters.to_date(),
 	],
 };

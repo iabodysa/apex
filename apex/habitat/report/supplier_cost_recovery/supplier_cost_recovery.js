@@ -29,24 +29,8 @@ frappe.query_reports["Supplier Cost Recovery"] = {
 			fieldtype: "Link",
 			options: "Supplier",
 		},
-		{
-			fieldname: "project",
-			label: __("Project"),
-			fieldtype: "Link",
-			options: "Project",
-		},
-		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company"),
-		},
-		{
-			fieldname: "cost_center",
-			label: __("Cost Center"),
-			fieldtype: "Link",
-			options: "Cost Center",
-		},
+		apex.report_filters.project(),
+		apex.report_filters.company(),
+		apex.report_filters.cost_center(),
 	],
 };

@@ -1,36 +1,14 @@
 // Copyright (c) 2026, afmcoltd
 frappe.query_reports["Cost by Dimension"] = {
 	filters: [
-		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company"),
-		},
-		{
-			fieldname: "building",
-			label: __("Building"),
-			fieldtype: "Link",
-			options: "Building",
-		},
-		{
-			fieldname: "project",
-			label: __("Project"),
-			fieldtype: "Link",
-			options: "Project",
-		},
-		{
-			fieldname: "from_date",
-			label: __("From Date"),
-			fieldtype: "Date",
+		apex.report_filters.company(),
+		apex.report_filters.building(),
+		apex.report_filters.project(),
+		apex.report_filters.from_date({
 			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
-		},
-		{
-			fieldname: "to_date",
-			label: __("To Date"),
-			fieldtype: "Date",
+		}),
+		apex.report_filters.to_date({
 			default: frappe.datetime.get_today(),
-		},
+		}),
 	],
 };

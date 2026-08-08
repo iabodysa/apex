@@ -1,34 +1,15 @@
 // Copyright (c) 2026, afmcoltd
 frappe.query_reports["Movement Cost Summary"] = {
 	filters: [
-		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company"),
-		},
-		{
-			fieldname: "cost_center",
-			label: __("Cost Center"),
-			fieldtype: "Link",
-			options: "Cost Center",
-		},
+		apex.report_filters.company(),
+		apex.report_filters.cost_center(),
 		{
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "Select",
 			options: ["", "Open", "Acknowledged", "Approved", "Recovered", "Waived", "Rejected"].join("\n"),
 		},
-		{
-			fieldname: "from_date",
-			label: __("From Date"),
-			fieldtype: "Date",
-		},
-		{
-			fieldname: "to_date",
-			label: __("To Date"),
-			fieldtype: "Date",
-		},
+		apex.report_filters.from_date(),
+		apex.report_filters.to_date(),
 	],
 };

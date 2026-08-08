@@ -1,12 +1,7 @@
 // Copyright (c) 2026, afmcoltd
 frappe.query_reports["Missed Cleaning Tasks"] = {
 	filters: [
-		{
-			fieldname: "building",
-			label: __("Building"),
-			fieldtype: "Link",
-			options: "Building",
-		},
+		apex.report_filters.building(),
 		{
 			fieldname: "date_from",
 			label: __("From Date"),

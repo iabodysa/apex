@@ -2,30 +2,17 @@
 
 frappe.query_reports["Accommodation Stock Balance"] = {
 	filters: [
-		{
-			fieldname: "building",
-			label: __("Building"),
-			fieldtype: "Link",
-			options: "Building",
-		},
+		apex.report_filters.building(),
 		{
 			fieldname: "item_type",
 			label: __("Item Type"),
 			fieldtype: "Select",
 			options: ["", "Custody Article", "Maintenance Material"],
 		},
-		{
-			fieldname: "employee",
-			label: __("Employee"),
-			fieldtype: "Link",
-			options: "Employee",
-		},
-		{
-			fieldname: "as_on_date",
-			label: __("As On Date"),
-			fieldtype: "Date",
+		apex.report_filters.employee(),
+		apex.report_filters.as_on_date({
 			default: frappe.datetime.get_today(),
-		},
+		}),
 		{
 			fieldname: "show_zero_balances",
 			label: __("Show Zero Balances"),

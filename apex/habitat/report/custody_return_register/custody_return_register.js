@@ -2,12 +2,7 @@
 
 frappe.query_reports["Custody Return Register"] = {
 	filters: [
-		{
-			fieldname: "building",
-			label: __("Building"),
-			fieldtype: "Link",
-			options: "Building",
-		},
+		apex.report_filters.building(),
 		{
 			fieldname: "returned_by_employee",
 			label: __("Returned By"),

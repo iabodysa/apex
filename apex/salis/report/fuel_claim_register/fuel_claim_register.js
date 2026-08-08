@@ -1,24 +1,9 @@
 // Copyright (c) 2026, afmcoltd
 frappe.query_reports["Fuel Claim Register"] = {
 	filters: [
-		{
-			fieldname: "project",
-			label: __("Project"),
-			fieldtype: "Link",
-			options: "Project",
-		},
-		{
-			fieldname: "vehicle",
-			label: __("Vehicle"),
-			fieldtype: "Link",
-			options: "Salis Vehicle",
-		},
-		{
-			fieldname: "period_month",
-			label: __("Period (Month)"),
-			fieldtype: "Data",
-			description: __("YYYY-MM, e.g. 2026-05"),
-		},
+		apex.report_filters.project(),
+		apex.report_filters.vehicle(),
+		apex.report_filters.period_month(),
 		{
 			fieldname: "status",
 			label: __("Status"),

@@ -2,12 +2,7 @@
 
 frappe.query_reports["Safety Incident Register"] = {
 	filters: [
-		{
-			fieldname: "building",
-			label: __("Building"),
-			fieldtype: "Link",
-			options: "Building",
-		},
+		apex.report_filters.building(),
 		{
 			fieldname: "incident_type",
 			label: __("Incident Type"),
@@ -35,15 +30,7 @@ frappe.query_reports["Safety Incident Register"] = {
 			fieldtype: "Select",
 			options: ["", "Open", "Under Investigation", "Closed"].join("\n"),
 		},
-		{
-			fieldname: "from_date",
-			label: __("From Date"),
-			fieldtype: "Date",
-		},
-		{
-			fieldname: "to_date",
-			label: __("To Date"),
-			fieldtype: "Date",
-		},
+		apex.report_filters.from_date(),
+		apex.report_filters.to_date(),
 	],
 };

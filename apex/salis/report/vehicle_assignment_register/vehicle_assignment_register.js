@@ -2,24 +2,9 @@
 
 frappe.query_reports["Vehicle Assignment Register"] = {
 	filters: [
-		{
-			fieldname: "vehicle",
-			label: __("Vehicle"),
-			fieldtype: "Link",
-			options: "Salis Vehicle",
-		},
-		{
-			fieldname: "driver",
-			label: __("Driver"),
-			fieldtype: "Link",
-			options: "Salis Driver",
-		},
-		{
-			fieldname: "project",
-			label: __("Project"),
-			fieldtype: "Link",
-			options: "Project",
-		},
+		apex.report_filters.vehicle(),
+		apex.report_filters.driver(),
+		apex.report_filters.project(),
 		{
 			fieldname: "include_ended",
 			label: __("Include Ended Assignments"),

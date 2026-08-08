@@ -2,27 +2,14 @@
 
 frappe.query_reports["Room Bed Transfer Register"] = {
 	filters: [
-		{
-			fieldname: "building",
-			label: __("Building"),
-			fieldtype: "Link",
-			options: "Building",
-		},
+		apex.report_filters.building(),
 		{
 			fieldname: "party_type",
 			label: __("Resident Type"),
 			fieldtype: "Select",
 			options: ["", "Employee", "Temporary Worker"].join("\n"),
 		},
-		{
-			fieldname: "from_date",
-			label: __("From Date"),
-			fieldtype: "Date",
-		},
-		{
-			fieldname: "to_date",
-			label: __("To Date"),
-			fieldtype: "Date",
-		},
+		apex.report_filters.from_date(),
+		apex.report_filters.to_date(),
 	],
 };

@@ -1,12 +1,7 @@
 // Copyright (c) 2026, afmcoltd
 frappe.query_reports["Maintenance Aging"] = {
 	filters: [
-		{
-			fieldname: "building",
-			label: __("Building"),
-			fieldtype: "Link",
-			options: "Building",
-		},
+		apex.report_filters.building(),
 		{
 			fieldname: "priority",
 			label: __("Priority"),
@@ -19,18 +14,7 @@ frappe.query_reports["Maintenance Aging"] = {
 			fieldtype: "Select",
 			options: ["", "Open", "Assigned", "In Progress", "Reopened"].join("\n"),
 		},
-		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company"),
-		},
-		{
-			fieldname: "cost_center",
-			label: __("Cost Center"),
-			fieldtype: "Link",
-			options: "Cost Center",
-		},
+		apex.report_filters.company(),
+		apex.report_filters.cost_center(),
 	],
 };

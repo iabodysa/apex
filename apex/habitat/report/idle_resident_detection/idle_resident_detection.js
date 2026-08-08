@@ -1,12 +1,7 @@
 // Copyright (c) 2026, afmcoltd
 frappe.query_reports["Idle Resident Detection"] = {
 	filters: [
-		{
-			fieldname: "building",
-			label: __("Building"),
-			fieldtype: "Link",
-			options: "Building",
-		},
+		apex.report_filters.building(),
 		{
 			fieldname: "project_status",
 			label: __("Project Status"),
