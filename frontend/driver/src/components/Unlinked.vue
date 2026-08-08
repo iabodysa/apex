@@ -2,19 +2,14 @@
 <template>
   <div class="flex-1 flex flex-col px-6 py-7 mx-auto w-full" style="max-width: 480px">
     <header class="mb-6 flex items-center gap-2">
-      <template v-if="showBrand">
-        <img
-          v-if="brandLogo"
-          :src="brandLogo"
-          alt="AFMCO"
-          class="h-7 w-auto max-w-[120px] object-contain"
-        />
-        <template v-else>
-          <Brand mode="mark" :size="24" primary-color="var(--c-primary)" accent-color="var(--c-mint)" />
-          <span class="text-xl font-extrabold tracking-tight">AFMCO</span>
-        </template>
-      </template>
-      <span v-else class="text-xl font-extrabold tracking-tight">Salis</span>
+      <Brand :size="24" />
+      <span class="text-xl font-extrabold tracking-tight">Salis</span>
+      <img
+        v-if="showBrand && brandLogo"
+        :src="brandLogo"
+        :alt="t('common.operatorLogo')"
+        class="h-7 w-auto max-w-[120px] object-contain"
+      />
       <span class="pill pill-accent">{{ t("common.driverPortal") }}</span>
       <div class="ms-auto"><LangToggle /></div>
     </header>

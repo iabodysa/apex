@@ -1,51 +1,43 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <svg
-    v-if="mode === 'mark'"
-    :width="size"
-    :height="size"
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path d="M12 21c0-6 3-10 8-12-1 6-4 9-8 12Z" :fill="primaryColor" />
-    <path d="M12 21C12 13 8 8 3 6c1 7 5 11 9 15Z" :fill="accentColor" opacity=".92" />
-  </svg>
-
-  <svg
-    v-else
-    viewBox="0 0 200 200"
-    fill="none"
-    preserveAspectRatio="xMidYMid meet"
-    aria-hidden="true"
-  >
-    <path
-      d="M70 10 A95 95 0 0 1 70 190"
-      stroke="currentColor"
-      stroke-width="26"
-      stroke-linecap="round"
-      fill="none"
-    />
-    <path
-      d="M120 35 A70 70 0 0 1 120 165"
-      stroke="currentColor"
-      stroke-width="26"
-      stroke-linecap="round"
-      fill="none"
-      opacity="0.6"
-    />
-  </svg>
+  <img :src="src" :width="size" :height="size" :alt="alt" :aria-hidden="alt ? undefined : 'true'" />
 </template>
 
 <script setup>
-/* The mark's two leaves are filled, not stroked, so `strokeWidth` no longer reaches it; it is
-   kept because `arc` mode still draws strokes and both modes share one prop list. The default
-   colours are the approved pair, which is read against the dark header the portals ship. */
-defineProps({
-  mode: { type: String, default: "mark" },
+/* The approved marks are SVG masters, so this component chooses one and never redraws it.
+   Path data lives in the files under assets/logo/ — copies of docs/brand/assets/logo/ and
+   byte-identical to them — because a mark redrawn inside a component is a second master that
+   drifts. Each variant already carries its own fills, which is why nothing here recolours.
+
+   `mark` reads on light surfaces, `reverse` on forest and dark, `mono` for one-colour output
+   such as print or a stamp. The lockups pair the mark with the wordmark and are the only
+   correct choice beside a product name; the Arabic one stores its wordmark as outlines, so it
+   must never be rebuilt from a runtime font. */
+import { computed } from "vue";
+
+import appIcon from "../assets/logo/apex-app-icon.svg";
+import lockupAr from "../assets/logo/apex-lockup-ar.svg";
+import lockupEn from "../assets/logo/apex-lockup-en.svg";
+import markMono from "../assets/logo/apex-mark-mono.svg";
+import markReverse from "../assets/logo/apex-mark-reverse.svg";
+import mark from "../assets/logo/apex-mark.svg";
+
+const SOURCES = {
+  mark,
+  reverse: markReverse,
+  mono: markMono,
+  "lockup-ar": lockupAr,
+  "lockup-en": lockupEn,
+  "app-icon": appIcon,
+};
+
+const props = defineProps({
+  variant: { type: String, default: "mark" },
   size: { type: [Number, String], default: 28 },
-  strokeWidth: { type: [Number, String], default: 6 },
-  primaryColor: { type: String, default: "#60d297" },
-  accentColor: { type: String, default: "#ffffff" },
+  /* Empty by default: a mark sitting beside the product name is decoration, and naming it
+     twice makes a screen reader say it twice. Pass a label only when the mark stands alone. */
+  alt: { type: String, default: "" },
 });
+
+const src = computed(() => SOURCES[props.variant] || SOURCES.mark);
 </script>

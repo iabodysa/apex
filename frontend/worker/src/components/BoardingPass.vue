@@ -2,11 +2,9 @@
 <template>
   <div class="bpass">
     <div class="bpass-band">
-      <div class="bpass-band-arc" aria-hidden="true"><Brand mode="arc" /></div>
       <div class="bpass-band-inner">
         <div class="bpass-brand">
-          <Brand mode="mark" :size="22" />
-          <span class="bpass-brand-name">AFMCO</span>
+          <Brand variant="reverse" :size="22" />
         </div>
         <span class="bpass-kind">{{ t("boarding.title") }}</span>
       </div>
@@ -114,22 +112,6 @@ const pickupPoint = computed(() => {
   color: var(--c-primary-ink);
   overflow: hidden;
 }
-.bpass-band-arc {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.5;
-}
-.bpass-band-arc :deep(svg) {
-  position: absolute;
-  inset-inline-end: -24px;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 180%;
-  width: auto;
-  color: var(--c-primary-ink);
-  opacity: 0.18;
-}
 .bpass-band-inner {
   position: relative;
   z-index: 1;
@@ -144,11 +126,6 @@ const pickupPoint = computed(() => {
   align-items: center;
   gap: 8px;
   min-width: 0;
-}
-.bpass-brand-name {
-  font-size: 1.0625rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
 }
 .bpass-kind {
   font-size: var(--fs-xs);
