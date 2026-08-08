@@ -13,7 +13,7 @@ const messages = {
       pending: "{n} pending",
       summary: "{p} awaiting your approval · {t} active plans",
     },
-    nav: { work: "Work", account: "Account", menu: "Menu" },
+    nav: { work: "Work", screens: "Screens", account: "Account", menu: "Menu", plans: "Back to plans" },
     kpi: { pending: "Awaiting approval", active: "Active plans", boarding: "Boarded now" },
     common: {
       none: "—",
@@ -28,7 +28,13 @@ const messages = {
     list: {
       title: "Assigned plans",
       empty: "No route plans are assigned to you yet.",
+      emptyHint: "A plan appears here the moment a planner hands it to you.",
       loadError: "Couldn't load your plans.",
+      loadErrorHint: "Check the connection, then try again.",
+      pickPlan: "Choose a plan to review",
+      pickPlanHint: "Pick one from the list to read its stops and decide on it.",
+      gonePlan: "This plan is no longer in your list",
+      gonePlanHint: "It was decided or handed to someone else. Go back and pick another.",
       shift: "Shift",
       stops: "{n} stops",
     },
@@ -110,6 +116,7 @@ const messages = {
       noneLive: "No driver is sharing a position yet",
       noneLiveHint: "A marker appears the moment a driver starts sharing location.",
       noFix: "no position yet",
+      staleShort: "position is old",
       loadError: "Couldn't load the live positions.",
     },
     map: {
@@ -128,8 +135,6 @@ const messages = {
       loadError: "Couldn't load the driver position.",
     },
     time: { sec: "{n}s", min: "{n}m", hour: "{n}h" },
-    errors: {
-    },
   },
   ar: {
     lang: { en: "EN", ar: "ع", label: "اللغة", english: "English", arabic: "العربية" },
@@ -139,7 +144,7 @@ const messages = {
       pending: "{n} بانتظار الاعتماد",
       summary: "{p} بانتظار اعتمادك · {t} خطة نشطة",
     },
-    nav: { work: "العمل", account: "الحساب", menu: "القائمة" },
+    nav: { work: "العمل", screens: "الشاشات", account: "الحساب", menu: "القائمة", plans: "الرجوع إلى الخطط" },
     kpi: { pending: "بانتظار الاعتماد", active: "الخطط النشطة", boarding: "الصاعدون الآن" },
     common: {
       none: "—",
@@ -154,7 +159,13 @@ const messages = {
     list: {
       title: "الخطط المُسندة",
       empty: "لا توجد خطط مسارات مُسندة إليك حتى الآن.",
+      emptyHint: "تظهر الخطة هنا بمجرّد أن يسندها إليك المخطّط.",
       loadError: "تعذّر تحميل خططك.",
+      loadErrorHint: "تحقق من الاتصال ثم أعد المحاولة.",
+      pickPlan: "اختر خطة لمراجعتها",
+      pickPlanHint: "اختر واحدة من القائمة لتقرأ محطاتها وتقرر بشأنها.",
+      gonePlan: "هذه الخطة لم تعد في قائمتك",
+      gonePlanHint: "تم البت فيها أو أُسندت لشخص آخر. ارجع واختر غيرها.",
       shift: "الوردية",
       stops: "{n} محطات",
     },
@@ -236,6 +247,7 @@ const messages = {
       noneLive: "لا سائق يشارك موقعه بعد",
       noneLiveHint: "تظهر العلامة بمجرد أن يبدأ سائق بمشاركة موقعه.",
       noFix: "لا موقع بعد",
+      staleShort: "الموقع قديم",
       loadError: "تعذّر تحميل المواقع المباشرة.",
     },
     map: {
@@ -254,8 +266,6 @@ const messages = {
       loadError: "تعذّر تحميل موقع السائق.",
     },
     time: { sec: "{n} ث", min: "{n} د", hour: "{n} س" },
-    errors: {
-    },
   },
 };
 

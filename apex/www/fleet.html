@@ -6,18 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0f1117" />
     <link rel="stylesheet" href="/assets/apex/vendor/cairo-v31/cairo.css" />
-    <link rel="stylesheet" href="/assets/apex/vendor/jetbrains-mono-v24/jetbrains-mono.css" />
     <title>{{ _("My Fleet") }}</title>
     <link rel="stylesheet" href="/assets/apex/fleet_portal/assets/index.css" />
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
       window.user_full_name = {{ (user_full_name or '') | tojson }};
-      window.fleet_socket = {
-        site_name: {{ site_name | tojson }},
-        socketio_port: {{ socketio_port }},
-        enabled: {{ "true" if async_enabled else "false" }},
-        dev_server: {{ dev_server or 0 }},
-      };
     </script>
   </head>
   <body>

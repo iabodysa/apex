@@ -1,1 +1,0 @@
-const e={planned:{cls:"pill-warn",key:"emp.trips.planned"},inProgress:{cls:"pill-ok",key:"emp.trips.inProgress"},completed:{cls:"pill-ok",key:"emp.trips.completed"}};function l(p){return e[p]||e.planned}export{l as m};
