@@ -480,8 +480,8 @@ jinja = {
     "methods": [
         "apex.apex_core.utils.addresses.get_address_text",
         "apex.apex_core.utils.addresses.get_address_text_by_name",
-        "apex.apex_core.utils.print_helpers.doc_verify_qr",
-        "apex.apex_core.utils.print_helpers.qr_data_uri",
+        "apex.apex_core.doctype.masar_worker_token.masar_worker_token.doc_verify_qr",
+        "apex.apex_core.doctype.masar_worker_token.masar_worker_token.masar_qr_data_uri",
     ],
 }
 

@@ -37,7 +37,7 @@
 {%- set supervisor_phone = contact.get("mobile_no") or contact.get("phone") -%}
 {%- set room = (frappe.db.get_value("Room", doc.room, "room_number")) if doc.room else None -%}
 {%- set site = frappe.db.get_value("Site", doc.accommodation_site, "site_name") if doc.accommodation_site else building.get("site") -%}
-{%- set qr = qr_data_uri(doc.public_url) if (qr_data_uri is defined and doc.public_url) else None -%}
+{%- set qr = masar_qr_data_uri(doc.public_url) if (masar_qr_data_uri is defined and doc.public_url) else None -%}
 
 <div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
   {{ ax.doc_head() }}

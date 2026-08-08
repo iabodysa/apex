@@ -653,3 +653,17 @@ def masar_qr_data_uri(text: str):
         return "data:image/svg+xml;base64," + b64encode(buf.getvalue()).decode("ascii")
     except Exception:
         return None
+
+
+def doc_verify_qr(doctype: str, name: str):
+    """QR data-URI pointing at the document's own desk record, for print verification.
+
+    A printed page leaves the system; the QR is how a reader holding the paper gets back
+    to the record that issued it. It lives beside :func:`masar_qr_data_uri` so one module
+    owns every QR this app draws.
+    """
+    if not (doctype and name):
+        return None
+    return masar_qr_data_uri(
+        frappe.utils.get_url(f"/app/{frappe.scrub(doctype).replace('_', '-')}/{name}")
+    )

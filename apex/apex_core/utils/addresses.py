@@ -28,10 +28,13 @@ def get_address_text(doctype: str, name: str | None) -> str:
     """Plain single-line display of the default native Address linked to ``doctype`` /
     ``name`` (non-empty parts comma-joined).
 
-    Permission-safe for guest / portal contexts: it reads via ``frappe.db.get_value``
-    and never calls ``Address.check_permission()``, so a token-authenticated worker
-    (session user = Guest) can render their building address. Returns plain text (no
-    HTML), so it renders cleanly both in print templates and in the worker-portal SPA.
+    Why not ``get_condensed_address`` (``frappe/contacts/doctype/address/address.py:282``):
+    it renders ``address_title`` and ``county`` and OMITS ``pincode``, so every printed
+    lease, contract, receipt and poster would lose its postal code. Guest-safety is not
+    the reason — the framework's version checks no permission either, since
+    ``check_permission`` lives in ``render_address`` (:167) and not there.
+
+    Returns plain text, so it renders in a print template and in the portal SPA alike.
     Empty string when nothing is linked.
     """
     if not name:
