@@ -26,7 +26,6 @@ import frappe
 
 from apex.apex_core.utils.company import company_for_building
 
-from apex.apex_core.utils.system_write import system_insert
 
 LEDGER_DOCTYPE = "Safety Finding Ledger"
 EXECUTION_DOCTYPE = "Safety Task Execution"
@@ -68,7 +67,7 @@ def _insert_ledger_row(
     logged_at,
 ) -> None:
     """Insert one immutable Safety Finding Ledger row (system-written)."""
-    system_insert(frappe.get_doc(
+    frappe.get_doc(
         {
             "doctype": LEDGER_DOCTYPE,
             "safety_round": safety_round,
@@ -84,7 +83,7 @@ def _insert_ledger_row(
             "source_detail_no": source_detail_no,
             "logged_at": logged_at,
         }
-    ))
+    ).insert(ignore_permissions=True)
 
 
 def post_safety_findings(safety_round) -> int:
@@ -183,7 +182,7 @@ def reverse_safety_findings(safety_round_name: str) -> int:
     for row in originals:
         if frappe.db.exists(LEDGER_DOCTYPE, {"reversal_of": row.name}):
             continue
-        system_insert(frappe.get_doc(
+        frappe.get_doc(
             {
                 "doctype": LEDGER_DOCTYPE,
                 "safety_round": row.safety_round,
@@ -201,7 +200,7 @@ def reverse_safety_findings(safety_round_name: str) -> int:
                 "reversal_of": row.name,
                 "logged_at": now_datetime(),
             }
-        ))
+        ).insert(ignore_permissions=True)
         posted += 1
 
     return posted

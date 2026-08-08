@@ -2,8 +2,6 @@
 """Seed the Maintenance Material catalog on fresh install."""
 import frappe
 
-from apex.apex_core.utils.system_write import system_insert
-
 
 MAINTENANCE_MATERIAL_CATALOG = [
     {"material_name": "Electrical Wires and Cables", "material_category": "Electrical", "default_uom": "Meter"},
@@ -59,5 +57,5 @@ def seed_catalog():
             "default_uom": item.get("default_uom", "Piece"),
             "is_active": 1,
         })
-        system_insert(doc)
+        doc.insert(ignore_permissions=True)
     frappe.db.commit()

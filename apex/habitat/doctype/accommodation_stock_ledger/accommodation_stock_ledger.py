@@ -37,8 +37,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, today
 
-from apex.apex_core.utils.system_write import system_insert
-
 
 class AccommodationStockLedger(Document):
     pass
@@ -103,7 +101,7 @@ def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no
         "reversal_of": reversal_of,
         "remarks": remarks,
     })
-    system_insert(doc)
+    doc.insert(ignore_permissions=True)
     return doc.name
 
 

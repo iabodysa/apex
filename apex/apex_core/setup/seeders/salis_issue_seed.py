@@ -40,7 +40,6 @@ portal's own i18n bundle).
 
 import frappe
 
-from apex.apex_core.utils.system_write import system_delete, system_insert
 
 _ISSUE_TYPES = ["Vehicle", "Fuel", "Attendance", "Salary", "Other"]
 
@@ -76,7 +75,7 @@ def _seed_issue_types():
     for name in _ISSUE_TYPES:
         if frappe.db.exists("Issue Type", name):
             continue
-        system_insert(frappe.get_doc({"doctype": "Issue Type", "name": name}))
+        frappe.get_doc({"doctype": "Issue Type", "name": name}).insert(ignore_permissions=True)
 
 
 def _seed_issue_priorities():
@@ -86,7 +85,9 @@ def _seed_issue_priorities():
     for name in _ISSUE_PRIORITIES:
         if frappe.db.exists("Issue Priority", name):
             continue
-        system_insert(frappe.get_doc({"doctype": "Issue Priority", "name": name}))
+        frappe.get_doc({"doctype": "Issue Priority", "name": name}).insert(
+            ignore_permissions=True
+        )
 
 
 def _pick_holiday_list():
@@ -119,7 +120,7 @@ def _ensure_holiday_list():
     doc.holiday_list_name = _SLA_HOLIDAY_LIST
     doc.from_date = _SLA_HOLIDAY_WINDOW[0]
     doc.to_date = _SLA_HOLIDAY_WINDOW[1]
-    system_insert(doc)
+    doc.insert(ignore_permissions=True)
     return doc.name
 
 
@@ -174,7 +175,7 @@ def _seed_sla():
     for status in ("Resolved", "Closed"):
         doc.append("sla_fulfilled_on", {"status": status})
 
-    system_insert(doc)
+    doc.insert(ignore_permissions=True)
 
 
 def _grant_issue_role_perms():
@@ -197,7 +198,7 @@ def _grant_issue_role_perms():
             pluck="name",
         )
         for extra in rows[1:]:
-            system_delete("Custom DocPerm", extra)
+            frappe.delete_doc("Custom DocPerm", extra, ignore_permissions=True)
         if not rows:
             add_permission("Issue", role, ptype="read", permlevel=0)
         for ptype, value in flags.items():

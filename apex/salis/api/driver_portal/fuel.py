@@ -12,8 +12,6 @@ from apex.salis.api.driver_portal import (
 )
 from apex.salis.utils import period_quota
 
-from apex.apex_core.utils.system_write import system_insert
-
 
 FUEL_REQUEST_DEFAULT_LIMIT = 30
 FUEL_REQUEST_MAX_LIMIT = 50
@@ -82,7 +80,7 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
          "request_date": request_date, "status": "Pending"}
     )
     doc._guard_quota_allowance()
-    system_insert(doc)
+    doc.insert(ignore_permissions=True)
     return {"name": doc.name}
 
 

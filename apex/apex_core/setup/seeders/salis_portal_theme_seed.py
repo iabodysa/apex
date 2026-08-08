@@ -13,7 +13,6 @@ and a site whose DocType has not migrated yet is skipped rather than raising.
 
 import frappe
 
-from apex.apex_core.utils.system_write import system_save
 
 DOCTYPE = "Driver Portal Theme"
 
@@ -35,5 +34,5 @@ def seed_salis_portal_theme():
             settings.set(field, value)
             filled.append(field)
     if filled:
-        system_save(settings)
+        settings.save(ignore_permissions=True)
     return filled

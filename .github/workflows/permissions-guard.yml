@@ -6,15 +6,12 @@ on:
   pull_request:
     branches: [apex]
 
-# A permission bypass must be NAMED by the code that performs it, not annotated.
-# The sanctioned home is apex/apex_core/utils/system_write.py, which exports
-# system_insert / system_save / system_delete; every other call site is counted.
+# Count every permission bypass in shipped code, one number, no exceptions.
 #
-# This replaced a "# audit-ok" comment marker on 2026-08-07. A comment is not a
-# name: it drifts from the line it sits on, it is invisible at the call site that
-# reads the helper, and the owner's standing rule leaves no comments in shipped
-# source. The count is ONE number over every spelling of the bypass, because they
-# are the same runtime grant and a guard blind to one spelling is no guard:
+# It replaced a "# audit-ok" comment marker on 2026-08-07, because a comment drifts
+# from the line it sits on and the shipped source carries no comments at all. The
+# count covers every spelling, because they are the same runtime grant and a guard
+# blind to one spelling is no guard:
 #   ignore_permissions=True          keyword argument, unspaced
 #   ignore_permissions = True        assignment or PEP8-spaced keyword
 #   doc.flags.ignore_permissions = True / frappe.flags.ignore_permissions = True
@@ -36,32 +33,34 @@ on:
 # reads no request input and never runs inside a web request, so the bypass grants
 # nothing an install does not already have.
 #
-# THE COUNT NOW INCLUDES BOTH SPELLINGS, measured 2026-08-08 and corrected the same
-# hour. Moving 105 sites behind system_insert / system_save / system_delete dropped
-# the raw count 131 -> 26 while granting exactly the same thing 131 times: 26 raw +
-# 105 named = 131, the number we started with. A guard that counted only the raw
-# spelling would have reported a 80% reduction for a rename. That is the very defect
-# the paragraph above warns about -- a count blind to one spelling is no count -- so
-# the guard now counts the named calls too and the baseline is the honest total.
-# It falls only when a call site stops bypassing permissions, not when it is renamed.
-
+# THE WRAPPER IS GONE, and the count is one number again. Moving 105 sites behind
+# system_insert / system_save / system_delete dropped the raw count 131 -> 26 while
+# granting exactly the same thing 131 times, so for a few hours this guard counted both
+# spellings to stop a rename reading as an 80% reduction. The A-433 audit then measured
+# the wrapper against frappe/model/document.py:261 and found it added nothing a caller
+# could not write itself -- and briefly took something away, since document.py:285-292
+# reads None as "keep the caller's flag" and the wrapper passed False. It was deleted on
+# 2026-08-08 and all 105 sites returned to the primitive, so there is one spelling to
+# count and BASELINE is the honest total. It falls only when a call site stops bypassing
+# permissions.
+#
+# The number after the unwrap is 133, measured, and it is the honest one: every grant
+# now appears once, on its own line, in the one spelling this guard reads. It is NOT a
+# regression from 131 — that figure was taken while a wrapper folded some of these calls
+# out of the raw count. Ratchet down from here.
+#
 # 131 -> 132 on 2026-08-08 for apex_core/utils/role_assignment.clear_assignment.
 # Review: it TRADED a worse write for this one. The line it replaced was
 # frappe.db.set_value("ToDo", todo, "status", "Closed"), which needs no bypass because it
-# writes the column and nothing else — and that was the defect: ToDo.on_update never
+# writes the column and nothing else -- and that was the defect: ToDo.on_update never
 # fired, the parent's _assign was never rewritten, and the assignee stayed on the desk
 # sidebar of a settled document. Proven both ways on ci.localhost: the old line left
-# _assign as ["Administrator"] with zero open ToDos; the framework's own
-# assign_to.close_all_assignments leaves it empty. The caller is a scheduled job closing a
-# queue it raised itself, never a user action, and the flag is the framework's own
-# parameter on that function. A count that rises when a hook-skipping write becomes a
-# correct one is the count doing its job, not an argument against the change.
+# _assign as ["Administrator"] with zero open ToDos; assign_to.close_all_assignments
+# leaves it empty. The caller is a scheduled job closing a queue it raised itself.
 
 env:
-  BASELINE: 132
+  BASELINE: 133
   BYPASS_RE: 'ignore_permissions["'']?[[:space:]]*[=:][[:space:]]*(True|1)'
-  NAMED_RE: '(system_insert|system_save|system_delete)[[:space:]]*\('
-  SANCTIONED: 'apex/apex_core/utils/system_write.py'
 
 jobs:
   permissions-guard:
@@ -69,25 +68,19 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Count permission bypasses outside the sanctioned helper
+      - name: Count permission bypasses
         run: |
           # Production code only. Test files (tests/ and test_*.py) legitimately use
           # a permission bypass to build fixtures and are not a runtime security
           # surface, so they are excluded from the guard.
           sites() {
             grep -rnE "$1" apex/ --include="*.py" \
-              | grep -v "^$SANCTIONED:" \
-              | grep -v 'import system_' \
               | grep -vE '/tests/|/test_[A-Za-z0-9_]*\.py:' || true
           }
 
-          RAW=$(sites "$BYPASS_RE" | wc -l | tr -d ' ')
-          NAMED=$(sites "$NAMED_RE" | wc -l | tr -d ' ')
-          COUNT=$((RAW + NAMED))
+          COUNT=$(sites "$BYPASS_RE" | wc -l | tr -d ' ')
 
-          echo "Raw spelling (ignore_permissions=):   $RAW"
-          echo "Named spelling (system_* helpers):    $NAMED"
-          echo "Permission bypasses outside $SANCTIONED: $COUNT"
+          echo "Permission bypasses: $COUNT"
           echo "Baseline: $BASELINE"
 
           if [ "$COUNT" -gt "$BASELINE" ]; then
@@ -96,11 +89,9 @@ jobs:
             echo ""
             echo "Call sites:"
             sites "$BYPASS_RE"
-            sites "$NAMED_RE"
             echo ""
             echo "To fix:"
-            echo "  - Remove the bypass, or make the write go through permissions."
-            echo "    $SANCTIONED, whose name states the bypass, and lower BASELINE."
+            echo "  - Make the write go through permissions, and lower BASELINE."
             echo "  - If the bypass was added by mistake, remove it."
             exit 1
           fi

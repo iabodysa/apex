@@ -21,7 +21,6 @@ from frappe.model.document import Document
 
 from apex.habitat.utils.finding_fanout import fan_out_findings, is_actionable
 
-from apex.apex_core.utils.system_write import system_insert
 
 _SECURITY_CATEGORY = "security"
 
@@ -84,7 +83,7 @@ class SafetyTaskExecution(Document):
         mr.reported_by = self.executed_by or frappe.session.user
         mr.status = "Open"
         mr.source_execution = self.name
-        system_insert(mr)
+        mr.insert(ignore_permissions=True)
         self.db_set("linked_maintenance_request", mr.name)
 
     def _has_linked_request(self) -> bool:

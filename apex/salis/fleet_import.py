@@ -32,8 +32,6 @@ import frappe
 
 from apex.salis.utils import normalize_plate
 
-from apex.apex_core.utils.system_write import system_insert, system_save
-
 
 def _read(csv_dir, name):
     """Reads a CSV file from the import directory into a list of row dicts, or an empty list."""
@@ -106,7 +104,7 @@ def run(csv_dir=None):
                 doc.phone = (r.get("phone") or "").strip() or None
                 doc.status = (r.get("status") or "Active").strip()
                 doc.project = proj.get((r.get("project") or "").strip())
-                system_save(doc)
+                doc.save(ignore_permissions=True)
             except Exception:
                 continue
         else:
@@ -139,7 +137,7 @@ def run(csv_dir=None):
                 doc.rental_office = (r.get("rental_office") or "").strip() or None
                 doc.project = proj.get((r.get("project") or "").strip())
                 doc.status = (r.get("status") or "Active").strip()
-                system_save(doc)
+                doc.save(ignore_permissions=True)
             except Exception:
                 continue
         else:
@@ -183,7 +181,7 @@ def run(csv_dir=None):
                 "status": (r.get("status") or "Ended").strip(),
             })
             a.flags.ignore_validate = True
-            system_insert(a)
+            a.insert(ignore_permissions=True)
             loaded += 1
         except Exception:
             skipped += 1

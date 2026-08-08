@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import frappe
 
-from apex.apex_core.utils.system_write import system_insert
 
 _ROW_SAVEPOINT = "scheduled_task_row"
 
@@ -105,7 +104,7 @@ def daily_scheduled_task_instance_generator() -> None:
                         "due_date": due_date,
                         "status": "Open",
                     })
-                    system_insert(instance)
+                    instance.insert(ignore_permissions=True)
                     created += 1
                     logger.info(
                         "daily_scheduled_task_instance_generator: created %s "

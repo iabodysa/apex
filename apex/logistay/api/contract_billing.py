@@ -43,7 +43,6 @@ from frappe.utils import getdate, today
 
 from apex.apex_core.utils import payable_allocation
 
-from apex.apex_core.utils.system_write import system_insert, system_save
 
 CONTRACT_DOCTYPE = "Telecom Contract"
 PURCHASE_REQUEST_DOCTYPE = "Material Request"
@@ -105,7 +104,7 @@ def _record_link(contract_doc, billing_period, document_type, document_name, amo
         },
     )
     contract_doc.flags.ignore_validate_update_after_submit = True
-    system_save(contract_doc)
+    contract_doc.save(ignore_permissions=True)
 
 
 def _result(document_type, document_name, existing):
@@ -157,7 +156,7 @@ def create_purchase_request(contract: str, billing_period: str):
         },
     )
     mr.set_missing_values()
-    system_insert(mr)
+    mr.insert(ignore_permissions=True)
 
     _record_link(
         contract_doc,
@@ -208,7 +207,7 @@ def create_payment_entry(contract: str, billing_period: str, purchase_invoice: s
     pe.remarks = _("Telecom {0} — billing period {1} ({2}), settling {3}.").format(
         contract_doc.supplier, billing_period, contract_doc.name, invoice.name
     )
-    system_insert(pe)
+    pe.insert(ignore_permissions=True)
 
     _record_link(
         contract_doc,

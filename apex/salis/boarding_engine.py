@@ -32,7 +32,6 @@ from frappe.utils import today
 
 from apex.apex_core.utils.company import company_for_trip
 
-from apex.apex_core.utils.system_write import system_insert
 
 LEDGER_DOCTYPE = "Trip Boarding Ledger"
 
@@ -99,7 +98,7 @@ def _insert_ledger_row(
     Source traceability: the originating record is the Dispatch Trip, and the
     worker id is stamped into ``source_detail_no`` so the row points back to the
     exact Trip Boarding State child it snapshots."""
-    system_insert(frappe.get_doc(
+    frappe.get_doc(
         {
             "doctype": LEDGER_DOCTYPE,
             "company": company,
@@ -114,7 +113,7 @@ def _insert_ledger_row(
             "source_name": dispatch_trip,
             "source_detail_no": employee,
         }
-    ))
+    ).insert(ignore_permissions=True)
 
 
 def post_trip_boarding(dispatch_trip: str) -> int:
@@ -215,7 +214,7 @@ def reverse_trip_boarding(dispatch_trip: str) -> int:
     for row in originals:
         if frappe.db.exists(LEDGER_DOCTYPE, {"reversal_of": row.name}):
             continue
-        system_insert(frappe.get_doc(
+        frappe.get_doc(
             {
                 "doctype": LEDGER_DOCTYPE,
                 "company": row.company,
@@ -232,7 +231,7 @@ def reverse_trip_boarding(dispatch_trip: str) -> int:
                 "is_cancelled": 1,
                 "reversal_of": row.name,
             }
-        ))
+        ).insert(ignore_permissions=True)
         frappe.db.set_value(
             LEDGER_DOCTYPE, row.name, "is_cancelled", 1, update_modified=False
         )

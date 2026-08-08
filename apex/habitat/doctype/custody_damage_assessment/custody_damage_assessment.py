@@ -23,8 +23,6 @@ from apex.apex_core.doctype.salary_deduction_policy.salary_deduction_policy impo
 )
 from apex.apex_core.utils.party_link import sync_party_employee
 
-from apex.apex_core.utils.system_write import system_insert
-
 
 class CustodyDamageAssessment(Document):
     pass
@@ -153,7 +151,7 @@ def on_submit(doc, method=None):
             "company": company,
             "remarks": f"Deduction for custody damage assessment {doc.name}"
         })
-        system_insert(add_sal)
+        add_sal.insert(ignore_permissions=True)
 
         frappe.db.set_value("Custody Damage Assessment", doc.name, "deduction_entry", add_sal.name)
 

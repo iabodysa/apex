@@ -4,8 +4,6 @@ from frappe import _
 
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 
-from apex.apex_core.utils.system_write import system_insert
-
 
 def get_context(context):
     """Disables page caching for the Transport Request web form."""
@@ -66,5 +64,5 @@ def submit_transport_request(
         "source_channel": "Web QR",
         "status": "New",
     })
-    system_insert(doc)
+    doc.insert(ignore_permissions=True)
     return {"name": doc.name, "tracking_code": doc.anonymous_tracking_code}

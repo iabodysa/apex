@@ -10,8 +10,6 @@ from apex.apex_core.utils.portal_token_security import (
     resolve_portal_subject,
 )
 
-from apex.apex_core.utils.system_write import system_insert
-
 
 def get_driver_for_user(user=None):
     """Return the Salis Driver for the caller, or None.
@@ -459,7 +457,7 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
 
         created = []
         for user in assignees:
-            todo = system_insert(frappe.get_doc(
+            todo = frappe.get_doc(
                 {
                     "doctype": "ToDo",
                     "allocated_to": user,
@@ -469,7 +467,7 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
                     "priority": "High",
                     "assigned_by": frappe.session.user,
                 }
-            ))
+            ).insert(ignore_permissions=True)
             created.append(todo.name)
 
         if source_doctype and source_name:

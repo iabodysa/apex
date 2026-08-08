@@ -18,7 +18,6 @@ the last chance to fill these defaults. A seed with no such re-run must raise in
 
 import frappe
 
-from apex.apex_core.utils.system_write import system_save
 
 DOCTYPE = "Salis Settings"
 
@@ -69,7 +68,7 @@ def seed_salis_settings():
                 filled.append("default_cost_center")
 
         if filled:
-            system_save(settings)
+            settings.save(ignore_permissions=True)
             frappe.db.commit()
         return filled
     except Exception:

@@ -164,7 +164,7 @@ def get_vehicle_detail(vehicle):
         "Vehicle Incident",
         filters={"vehicle": vehicle},
         fields=["name", "incident_type", "incident_date", "status", "location"],
-        order_by="incident_date desc",
+        order_by="incident_date desc, incident_time desc",
         limit=10,
     )
     assignments = frappe.get_all(
@@ -205,7 +205,7 @@ def get_vehicle_timeline(vehicle):
         "Vehicle Incident",
         filters={"vehicle": vehicle},
         fields=["name", "incident_type", "incident_date", "status", "location"],
-        order_by="incident_date desc",
+        order_by="incident_date desc, incident_time desc",
         limit=TIMELINE_PER_SOURCE,
     ):
         events.append({

@@ -46,7 +46,6 @@ from apex.apex_core.doctype.salary_deduction_policy.salary_deduction_policy impo
     KSA_MAX_TOTAL_DEDUCTION_PERCENT,
     get_policy,
 )
-from apex.apex_core.utils.system_write import system_insert
 
 SOURCE_DOCTYPE_FIELD = "custom_source_doctype"
 SOURCE_DOCNAME_FIELD = "custom_source_document"
@@ -154,7 +153,7 @@ def raise_recovery_advance(
             SOURCE_DOCNAME_FIELD: source_name,
         }
     )
-    system_insert(advance)
+    advance.insert(ignore_permissions=True)
     advance.submit()
     logger.info(
         f"employee_recovery: Employee Advance {advance.name} raised for {source_doctype} {source_name}."
@@ -399,7 +398,7 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
             "ref_docname": advance,
         }
     )
-    system_insert(installment)
+    installment.insert(ignore_permissions=True)
     frappe.logger().info(
         f"employee_recovery: installment {installment.name} ({amount}) queued against advance {advance}."
     )

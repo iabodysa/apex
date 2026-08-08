@@ -41,7 +41,6 @@ from frappe.utils import flt, getdate, today
 from apex.apex_core.payment_router import require_configured_target
 from apex.apex_core.utils import payable_allocation
 
-from apex.apex_core.utils.system_write import system_insert
 
 LEASE_DOCTYPE = "Lease"
 
@@ -159,7 +158,7 @@ def create_rent_payment(lease: str, due_date: str, purchase_invoice: str | None 
     payment.remarks = _("Rent for {0} — instalment due {1} ({2}), settling {3}.").format(
         lease_doc.building, getdate(row.due_date), lease_doc.name, invoice.name
     )
-    system_insert(payment)
+    payment.insert(ignore_permissions=True)
     return _result(payment.name, False)
 
 

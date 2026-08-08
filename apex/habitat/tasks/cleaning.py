@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import frappe
 
-from apex.apex_core.utils.system_write import system_insert
 
 _CLEANING_SAVEPOINT = "cleaning_log_insert"
 
@@ -81,7 +80,7 @@ def daily_cleaning_log_generator() -> None:
                     "cleaning_date": cleaning_date,
                     "room_details": [{"room": room} for room in rooms],
                 })
-                system_insert(log)
+                log.insert(ignore_permissions=True)
             except Exception:
                 frappe.db.rollback(save_point=_CLEANING_SAVEPOINT)
                 frappe.log_error(

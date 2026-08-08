@@ -49,6 +49,7 @@ def execute(filters=None):
         fields=[
             "name",
             "handover_date",
+            "handover_time",
             "vehicle",
             "from_driver",
             "to_driver",
@@ -56,7 +57,7 @@ def execute(filters=None):
             "discrepancy_status",
             "signed_evidence",
         ],
-        order_by="handover_date desc",
+        order_by="handover_date desc, handover_time desc",
     )
     if filters.get("driver"):
         driver = filters["driver"]
@@ -82,6 +83,7 @@ def execute(filters=None):
             {
                 "name": handover.name,
                 "handover_date": handover.handover_date,
+                "handover_time": handover.handover_time,
                 "vehicle": handover.vehicle,
                 "from_driver": handover.from_driver,
                 "to_driver": handover.to_driver,
@@ -116,6 +118,7 @@ def _columns():
     return [
         {"label": _("Handover"), "fieldname": "name", "fieldtype": "Link", "options": "Vehicle Handover", "width": 150},
         {"label": _("Handover Date"), "fieldname": "handover_date", "fieldtype": "Date", "width": 115},
+        {"label": _("Handover Time"), "fieldname": "handover_time", "fieldtype": "Time", "width": 90},
         {"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Salis Vehicle", "width": 150},
         {"label": _("From Driver"), "fieldname": "from_driver", "fieldtype": "Link", "options": "Salis Driver", "width": 160},
         {"label": _("To Driver"), "fieldname": "to_driver", "fieldtype": "Link", "options": "Salis Driver", "width": 160},

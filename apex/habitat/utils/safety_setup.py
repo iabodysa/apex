@@ -17,7 +17,6 @@ import frappe
 from frappe import _
 from frappe.utils import today
 
-from apex.apex_core.utils.system_write import system_insert, system_save
 
 SAFETY_FREQ_MAP = {
     "Daily": "Daily",
@@ -72,7 +71,7 @@ def _ensure_building_scope(catalog, building_name, tally) -> None:
         scope.parenttype = "Safety Task Catalog"
         scope.parentfield = "applicable_buildings"
         scope.building = building_name
-        system_insert(scope)
+        scope.insert(ignore_permissions=True)
         tally.created_scopes += 1
     except Exception as exc:
         tally.failures.append(
@@ -104,7 +103,7 @@ def _get_or_create_template(catalog, template_freq):
         if not has_item:
             tmpl = frappe.get_doc("Scheduled Task Template", existing)
             tmpl.append("template_items", {"task_catalog": catalog.name, "is_active": 1})
-            system_save(tmpl)
+            tmpl.save(ignore_permissions=True)
         return existing, False
 
     title = catalog.task_title or catalog.task_code or catalog.name

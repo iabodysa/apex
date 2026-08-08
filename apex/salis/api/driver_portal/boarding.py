@@ -10,8 +10,6 @@ from apex.salis.api.driver_portal import (
     _require_enabled,
 )
 
-from apex.apex_core.utils.system_write import system_insert, system_save
-
 
 MAX_MANUAL_BOARD_WORKERS = 100
 
@@ -175,7 +173,7 @@ def manual_board_workers(dispatch_trip, workers, stop_name=None, accommodation_b
         boarded.append(worker)
 
     if boarded:
-        system_save(log)
+        log.save(ignore_permissions=True)
         for worker in boarded:
             _log_manual_scan(dispatch_trip, trip, worker, "Valid", log.name,
                              boarding_created=1, accommodation_building=accommodation_building)
@@ -211,5 +209,5 @@ def _log_manual_scan(dispatch_trip, trip, worker, result, trip_start_log,
             "boarding_event_created": frappe.utils.cint(boarding_created),
         }
     )
-    system_insert(doc)
+    doc.insert(ignore_permissions=True)
     return doc.name

@@ -29,7 +29,6 @@ from apex.salis.utils import (
     period_quota,
 )
 
-from apex.apex_core.utils.system_write import system_insert
 
 _VEHICLE_STATUS_KEY = {
     "Active": "assigned",
@@ -240,7 +239,7 @@ def submit_fuel_request(litres, vehicle=None, fuel_grade=None, station=None, not
         }
     )
     doc._guard_quota_allowance()
-    system_insert(doc)
+    doc.insert(ignore_permissions=True)
 
     extras = []
     if fuel_grade:

@@ -27,7 +27,6 @@ from frappe.utils import getdate
 from apex.habitat.doctype.housing_assignment.housing_assignment import recalculate_spatial
 from apex.apex_core.utils.party_link import sync_party_employee
 
-from apex.apex_core.utils.system_write import system_insert
 
 DEPARTURE_REASONS = ("Final Exit", "End of Contract")
 
@@ -275,7 +274,7 @@ def on_submit(doc, method=None):
                         "estimated_replacement_cost": 0,
                     })
             try:
-                system_insert(damage_doc)
+                damage_doc.insert(ignore_permissions=True)
                 doc.add_comment("Comment", _("Draft Damage Assessment created: {0}. Please review and submit.").format(damage_doc.name))
             except Exception:
                 frappe.log_error(
@@ -388,7 +387,7 @@ def create_departure_transport(checkout):
 
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)
     request = _build_departure_transport(doc, assignment)
-    system_insert(request)
+    request.insert(ignore_permissions=True)
 
     doc.db_set("departure_transport_request", request.name)
     doc.add_comment("Comment", _("Departure Transport Request raised: {0}").format(request.name))

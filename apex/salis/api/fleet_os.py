@@ -258,7 +258,7 @@ def get_vehicle_timeline(plate):
         "Vehicle Incident",
         filters={"vehicle": vehicle, "docstatus": ["<", 2]},
         fields=["name", "incident_type", "incident_date", "status", "location"],
-        order_by="incident_date desc",
+        order_by="incident_date desc, incident_time desc",
         limit_page_length=0,
     ):
         events.append({

@@ -8,7 +8,6 @@ supplies a driver id.
 
 import frappe
 
-from apex.apex_core.utils.system_write import system_save
 from frappe import _
 
 from apex.apex_core.utils.rate_limit_identity import rate_limit
@@ -502,7 +501,7 @@ def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
             "last_seen": frappe.utils.now_datetime(),
         }
     )
-    system_save(doc)
+    doc.save(ignore_permissions=True)
     return {"name": doc.name}
 
 

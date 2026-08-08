@@ -21,15 +21,17 @@ four clauses, or is named an exception below. Breaking one is a defect.
    owns — never a scope to trust.
 3. Carry ``@rate_limit``: a passwordless bearer token on an unbounded endpoint is
    an unbounded credential. Writes are tighter than reads.
-4. A system write says its own name — ``system_insert`` / ``system_save`` /
-   ``system_delete`` — so the grant is legible at the call site. This replaced an
-   ``audit-ok`` comment: a comment drifts from its line and the caller never sees it.
+4. A system write is the framework's own call with ``ignore_permissions=True`` on it,
+   nothing wrapped. An ``audit-ok`` comment beside it was deleted on 2026-08-07 because
+   a comment drifts from its line, and the wrapper that replaced it was deleted on
+   2026-08-08 because it renamed the grant without withdrawing one: 26 raw plus 105
+   named was the same 131 sites. The count that matters is the raw one.
 
 Measured by AST over ``masar.py`` on 2026-08-08: 17 whitelisted endpoints, 14
 token-scoped, and all 14 resolve and rate-limit. The five writes
 (``create_worker_request``, ``notify_hr_iqama_expiring``, ``confirm_boarding``,
-``create_worker_transport_request``, ``submit_trip_rating``) all reach the
-database through the named helpers, never a bare ``ignore_permissions``.
+``create_worker_transport_request``, ``submit_trip_rating``) write only after the
+token has resolved to one worker.
 
 Exceptions: ``get_my_worker_route_today`` and ``get_my_worker_route_summary`` run
 on a logged-in staff session, not a token, so Frappe's session identity governs

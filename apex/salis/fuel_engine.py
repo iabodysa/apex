@@ -29,7 +29,6 @@ from frappe.query_builder.functions import Coalesce, Sum
 
 from apex.apex_core.utils.company import company_for_vehicle
 
-from apex.apex_core.utils.system_write import system_insert
 
 LEDGER_DOCTYPE = "Fuel Consumption Ledger"
 BATCH_SIZE = 500
@@ -80,7 +79,7 @@ def _insert_ledger_row(
     ("Fuel Daily Log" / "Fuel Request"), so ``source_doctype`` mirrors it and
     ``source_name`` points to the originating record.
     """
-    system_insert(frappe.get_doc(
+    frappe.get_doc(
         {
             "doctype": LEDGER_DOCTYPE,
             "vehicle": vehicle,
@@ -94,7 +93,7 @@ def _insert_ledger_row(
             "source_name": source_name,
             "logged_at": logged_at,
         }
-    ))
+    ).insert(ignore_permissions=True)
 
 
 def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
@@ -143,7 +142,7 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
         if frappe.db.exists(LEDGER_DOCTYPE, {"reversal_of": row.name}):
             continue
 
-        system_insert(frappe.get_doc(
+        frappe.get_doc(
             {
                 "doctype": LEDGER_DOCTYPE,
                 "vehicle": row.vehicle,
@@ -156,7 +155,7 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
                 "logged_at": now_datetime(),
                 "reversal_of": row.name,
             }
-        ))
+        ).insert(ignore_permissions=True)
         posted += 1
 
     return posted

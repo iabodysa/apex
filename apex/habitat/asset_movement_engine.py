@@ -20,7 +20,6 @@ import frappe
 from frappe import _
 from frappe.utils import getdate
 
-from apex.apex_core.utils.system_write import system_insert
 
 LEDGER_DOCTYPE = "Facility Asset Movement Ledger"
 
@@ -160,7 +159,7 @@ def _insert_ledger_row(
     """
     if _ledger_exists(source_doctype, source_name):
         return
-    system_insert(frappe.get_doc(
+    frappe.get_doc(
         {
             "doctype": LEDGER_DOCTYPE,
             "facility_asset": facility_asset,
@@ -174,7 +173,7 @@ def _insert_ledger_row(
             "source_doctype": source_doctype,
             "source_name": source_name,
         }
-    ))
+    ).insert(ignore_permissions=True)
 
 
 def post_asset_movement(doc) -> None:
@@ -234,7 +233,7 @@ def reverse_asset_movement(source_doctype: str, source_name: str) -> int:
     for row in originals:
         if frappe.db.exists(LEDGER_DOCTYPE, {"reversal_of": row.name}):
             continue
-        system_insert(frappe.get_doc(
+        frappe.get_doc(
             {
                 "doctype": LEDGER_DOCTYPE,
                 "facility_asset": row.facility_asset,
@@ -250,7 +249,7 @@ def reverse_asset_movement(source_doctype: str, source_name: str) -> int:
                 "source_name": source_name,
                 "reversal_of": row.name,
             }
-        ))
+        ).insert(ignore_permissions=True)
         posted += 1
 
     return posted
