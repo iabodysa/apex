@@ -755,22 +755,7 @@ class FrontDesk {
 		const occupant = bed.occupant || {};
 
 		if (occupant.has_custody) {
-			const d = new frappe.ui.Dialog({
-				title: __("Quick Check-out"),
-				fields: [
-					{
-						fieldname: "msg",
-						fieldtype: "HTML",
-						options: `<div>${__("This resident has custody items. Opening the full Checkout form to clear custody.")}</div>`,
-					},
-				],
-				primary_action_label: __("Open Checkout Form"),
-				primary_action: () => {
-					d.hide();
-					frappe.new_doc("Housing Checkout", { assignment: occupant.assignment });
-				},
-			});
-			d.show();
+			apex.habitat.custody_block_dialog(occupant.assignment);
 			return;
 		}
 

@@ -28,10 +28,31 @@ apex.habitat.bed_style = function (bed_color, base) {
 /**
  * Open the quick check-out dialog for one bed and post the checkout.
  *
- * Written out in full on both the front desk and the arrivals desk, so one change to
- * what a checkout asks for landed on only one of them. The caller keeps its own busy
- * state through on_busy, which is the only thing the two copies did differently.
+ * Written out in full on both desks, so one change landed on only one of them. on_busy
+ * is the one thing the copies did differently.
  */
+apex.habitat.custody_block_dialog = function (assignment) {
+	const d = new frappe.ui.Dialog({
+		title: __("Quick Check-out"),
+		fields: [
+			{
+				fieldname: "msg",
+				fieldtype: "HTML",
+				options: `<div>${__(
+					"This resident has custody items. Opening the full Checkout form to clear custody."
+				)}</div>`,
+			},
+		],
+		primary_action_label: __("Open Checkout Form"),
+		primary_action: () => {
+			d.hide();
+			frappe.new_doc("Housing Checkout", { assignment: assignment });
+		},
+	});
+	d.show();
+	return d;
+};
+
 apex.habitat.quick_checkout_dialog = function (occupant, on_busy, on_done) {
 	const busy = (state) => {
 		if (on_busy) {
