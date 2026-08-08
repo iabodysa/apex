@@ -46,12 +46,7 @@ const SKIP_FILES = new Set(["auto-imports.d.ts", "components.d.ts"]);
 // unnecessary. Anything NOT listed here fails the test.
 const ALLOWED = new Map([
   [
-    "fleet:src/api.js | fleet_os:src/api.js",
-    "A one-line re-export of @shared/call. The implementation is already " +
-      "single-sourced; merging would delete a module specifier, not duplicated logic.",
-  ],
-  [
-    "fleet_os:src/main.js | route_supervisor:src/main.js | safety:src/main.js",
+    "fleet:src/main.js | fleet_os:src/main.js | housing:src/main.js | route_supervisor:src/main.js",
     "Each is its portal's Vite entry point. The relative specifiers ./App.vue " +
       "and ./index.css must resolve inside the portal that owns them, so a single " +
       "shared copy would load the wrong App and the wrong stylesheet.",
@@ -59,8 +54,17 @@ const ALLOWED = new Map([
   // --- Pre-existing groups outside A-281's scope, kept because the tooling
   // --- requires a file at that exact path in each package.
   [
-    "housing:postcss.config.js | safety:postcss.config.js | worker:postcss.config.js",
+    "fleet:postcss.config.js | fleet_os:postcss.config.js | housing:postcss.config.js | " +
+      "route_supervisor:postcss.config.js | safety:postcss.config.js | worker:postcss.config.js",
     "PostCSS resolves its config from the package root, so each portal needs its own.",
+  ],
+  [
+    "fleet:tailwind.config.js | fleet_os:tailwind.config.js | route_supervisor:tailwind.config.js",
+    "Tailwind resolves its config from the package root and reads the content globs " +
+      "relative to that file, so a shared copy would scan the wrong portal's sources. " +
+      "It must also stay a CommonJS-resolvable config: the frappe-ui preset it imports " +
+      "reaches for tailwindcss/plugin without an extension, which Node's ESM resolver " +
+      "refuses, so the preset cannot be inlined into vite.config.js instead.",
   ],
   [
     "driver:.gitignore | worker:.gitignore",

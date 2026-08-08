@@ -1,12 +1,25 @@
 // Copyright (c) 2026, AFMCO and contributors
 // The shared BuildingPicker (housing/safety) lists the buildings a user may read
-// and emits `select`. frappe-ui is aliased to a fixture stub (see vitest.config) so
-// the test drives the list-render + click path and the single-building auto-select
-// without a bench.
-import { describe, it, expect, beforeEach } from "vitest";
+// and emits `select`. Only createListResource is replaced — the rest of frappe-ui
+// stays real, so the test drives the list-render + click path and the
+// single-building auto-select without a bench.
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
-import { __setRows } from "frappe-ui";
 import BuildingPicker from "@shared/components/BuildingPicker.vue";
+
+const rows = vi.hoisted(() => ({ current: [] }));
+
+vi.mock("frappe-ui", async (importOriginal) => ({
+  ...(await importOriginal()),
+  createListResource(opts) {
+    if (opts && typeof opts.onSuccess === "function") opts.onSuccess(rows.current);
+    return { data: rows.current, list: { loading: false } };
+  },
+}));
+
+const __setRows = (next) => {
+  rows.current = next;
+};
 
 describe("BuildingPicker (shared)", () => {
   beforeEach(() => __setRows([]));
