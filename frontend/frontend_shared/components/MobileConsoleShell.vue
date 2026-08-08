@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <div class="mc-shell" :style="shellVars">
+  <div class="mc-shell">
     <header class="mc-head">
       <slot name="header">
         <div class="mc-head-row">
@@ -14,95 +14,100 @@
       <div v-if="$slots.progress" class="mc-progress"><slot name="progress" /></div>
     </header>
 
-    <main class="mc-scroll"><slot /></main>
+    <div class="mc-body" :class="{ 'has-list': !!$slots.list }">
+      <nav v-if="$slots.nav" class="mc-rail"><slot name="nav" /></nav>
+
+      <aside v-if="$slots.list" class="mc-list"><slot name="list" /></aside>
+
+      <main class="mc-frame">
+        <slot />
+        <div v-if="$slots.action" class="mc-action"><slot name="action" /></div>
+      </main>
+    </div>
 
     <nav v-if="$slots.nav" class="mc-nav"><slot name="nav" /></nav>
   </div>
 </template>
 
 <script setup>
-import { computed } from "vue";
-
-const props = defineProps({
+defineProps({
   title: { type: String, default: "" },
   subtitle: { type: String, default: "" },
-  maxWidth: { type: [Number, String], default: 480 },
 });
-
-const shellVars = computed(() => ({
-  "--mc-width": typeof props.maxWidth === "number" ? props.maxWidth + "px" : props.maxWidth,
-}));
 </script>
 
 <style scoped>
+/* DESIGN.md §1 — header, frame, navbar, and nothing else. The frame is the ONLY element
+   that scrolls; two nested scrollers is what makes a phone feel broken. */
 .mc-shell {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
-  margin: 0 auto;
-  width: 100%;
-  max-width: var(--mc-width);
-  background: var(--c-surface);
+  block-size: 100vh;
+  block-size: 100dvh;
+  inline-size: 100%;
+  background: var(--c-canvas);
   color: var(--c-ink);
   font-family: var(--font);
   font-weight: var(--fw-body);
 }
-@media (min-width: 768px) {
-  .mc-shell {
-    max-width: var(--shell-wide, 560px);
-  }
-}
-@media (min-width: 1024px) {
-  .mc-shell {
-    max-width: var(--shell-wide, 640px);
-    box-shadow: var(--shadow);
-    border-inline: 1px solid var(--c-border);
-  }
-}
 
 .mc-head {
   position: sticky;
-  top: 0;
+  inset-block-start: 0;
   z-index: 20;
-  background: var(--c-header-bg);
-  color: var(--c-header-ink);
-  padding: var(--sp-4) var(--sp-5);
+  flex: 0 0 auto;
+  padding: 14px var(--sp-5) var(--sp-4);
+  background: var(--c-surface);
+  border-block-end: 1px solid var(--c-border);
 }
 .mc-head-row {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
+  max-inline-size: var(--mc-max, 1100px);
+  margin-inline: auto;
+  inline-size: 100%;
 }
 .mc-greet {
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  flex: 1 1 auto;
 }
 .mc-greet small {
-  display: block;
-  font-size: var(--fs-sm);
-  opacity: 0.72;
+  font-size: var(--fs-xs);
+  color: var(--c-muted);
 }
 .mc-greet b {
   font-size: var(--fs-h2);
   font-weight: var(--fw-heading);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .mc-head-actions {
-  margin-inline-start: auto;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: var(--sp-2);
+  flex: 0 0 auto;
 }
 .mc-progress {
-  margin-top: var(--sp-4);
-  background: color-mix(in srgb, var(--c-header-ink) 8%, transparent);
-  border-radius: var(--radius);
-  padding: var(--sp-3) var(--sp-4);
+  max-inline-size: var(--mc-max, 1100px);
+  margin: var(--sp-2) auto 0;
 }
 
-.mc-scroll {
-  flex: 1;
+.mc-body {
+  flex: 1 1 auto;
+  display: flex;
+  min-block-size: 0;
+  inline-size: 100%;
+}
+
+/* The frame owns the scroll. */
+.mc-frame {
+  flex: 1 1 auto;
+  min-inline-size: 0;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   padding: var(--sp-4);
   display: flex;
@@ -110,56 +115,130 @@ const shellVars = computed(() => ({
   gap: var(--sp-3);
 }
 
-.mc-nav {
+/* §2 — the primary action lives at the bottom of the frame, full width, and does not
+   scroll away. A destructive action never goes here. */
+.mc-action {
   position: sticky;
-  bottom: 0;
-  z-index: 20;
-  display: flex;
-  gap: var(--sp-1);
-  background: var(--c-surface-2);
-  border-top: var(--border-width) solid var(--c-border);
-  padding: var(--sp-2) var(--sp-2) calc(var(--sp-2) + env(safe-area-inset-bottom, 0px));
+  inset-block-end: 0;
+  margin-block-start: auto;
+  padding-block-start: var(--sp-3);
+  background: linear-gradient(to top, var(--c-canvas) 70%, transparent);
 }
-.mc-nav :slotted(*) {
-  flex: 1;
-  min-height: var(--tap-lg);
+.mc-action :slotted(button) {
+  inline-size: 100%;
+  min-block-size: var(--tap-lg);
+}
+
+.mc-list {
+  display: none;
+}
+
+/* The side rail only exists on the desktop row. */
+.mc-rail {
+  display: none;
+}
+
+/* §1 — sticky bottom navbar, destinations only, --tap-lg tall. */
+.mc-nav {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  gap: var(--sp-1);
+  padding-inline: var(--sp-2);
+  padding-block: var(--sp-1);
+  padding-block-end: calc(var(--sp-1) + env(safe-area-inset-bottom, 0px));
+  background: var(--c-surface);
+  border-block-start: 1px solid var(--c-border);
+}
+.mc-nav :slotted(a),
+.mc-nav :slotted(button) {
+  flex: 1 1 0;
+  min-block-size: var(--tap-lg);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--sp-1);
-  text-decoration: none;
+  gap: 2px;
+  border: none;
+  background: none;
   color: var(--c-muted);
   font-size: var(--fs-xs);
   font-weight: var(--fw-semibold);
-  border: none;
-  background: none;
-  border-radius: var(--radius);
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
 }
-@media (hover: hover) {
-  .mc-nav :slotted(a:hover:not(.is-active)),
-  .mc-nav :slotted(button:hover:not(:disabled):not(.is-active)) {
-    color: var(--c-ink-soft);
-    background: color-mix(in srgb, var(--c-ink) 6%, transparent);
+.mc-nav :slotted(a.is-active),
+.mc-nav :slotted(button.is-active) {
+  color: var(--c-primary);
+  background: var(--c-primary-soft, transparent);
+}
+
+/* --bp-tablet 768: the column gains breathing room, still one column. */
+@media (min-width: 768px) {
+  .mc-frame {
+    max-inline-size: 560px;
+    margin-inline: auto;
+    inline-size: 100%;
+    padding: var(--sp-5);
   }
 }
-.mc-nav :slotted(.is-active),
-.mc-nav :slotted([aria-current="page"]) {
-  color: var(--c-accent-ink);
-  background: color-mix(in srgb, var(--c-primary) 13%, transparent);
-  font-weight: var(--fw-heading);
-}
-.mc-nav :slotted([aria-disabled="true"]),
-.mc-nav :slotted(button:disabled) {
-  opacity: 0.45;
-  cursor: default;
-}
-.mc-nav :slotted(a:focus-visible),
-.mc-nav :slotted(button:focus-visible) {
-  outline: 3px solid var(--c-focus);
-  outline-offset: -3px;
+
+/* --bp-desktop 1024: the contract's desktop row — frame min(100%, 1100px) centred, TWO
+   panes where the screen has a list, and the navbar becomes a side rail. Before this, all
+   four field portals drew the same narrow column at 1440 and left the screen empty. */
+@media (min-width: 1024px) {
+  .mc-body {
+    max-inline-size: 1100px;
+    margin-inline: auto;
+    gap: var(--sp-4);
+    padding-inline: var(--sp-4);
+  }
+  .mc-nav {
+    display: none;
+  }
+  .mc-rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    flex: 0 0 220px;
+    padding-block: var(--sp-4);
+    border-inline-end: 1px solid var(--c-border);
+  }
+  .mc-rail :slotted(a),
+  .mc-rail :slotted(button) {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--sp-3);
+    min-block-size: var(--tap-md);
+    padding-inline: var(--sp-3);
+    border: none;
+    background: none;
+    color: var(--c-muted);
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+  }
+  .mc-rail :slotted(a.is-active),
+  .mc-rail :slotted(button.is-active) {
+    color: var(--c-primary);
+    background: var(--c-surface-2);
+  }
+  .mc-body.has-list .mc-list {
+    display: block;
+    flex: 0 0 380px;
+    min-inline-size: 360px;
+    max-inline-size: 420px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-block: var(--sp-4);
+    border-inline-end: 1px solid var(--c-border);
+  }
+  .mc-frame {
+    max-inline-size: none;
+    margin-inline: 0;
+  }
 }
 </style>
