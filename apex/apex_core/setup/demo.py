@@ -61,6 +61,17 @@ DEMO_DOCTYPES = (
     "Vehicle Damage Write-Off",
     "Subcontractor Service Contract",
     "Subcontractor Service Order",
+    "Rental Office",
+    "Goods Receipt",
+    "Material Transfer",
+    "Custody Issue",
+    "Maintenance Work Order",
+    "Safety Incident",
+    "Safety Round",
+    "Fuel Request",
+    "Fuel Claim",
+    "Passenger Manifest",
+    "Rental Settlement",
 )
 
 _DEMO_SITE = "Demo Housing Site"
@@ -72,6 +83,7 @@ _DEMO_PARTNER_COMPANY = "Demo Partner Company"
 _DEMO_SUPPLIER = "Demo Accommodation Supplier"
 _DEMO_CATEGORY = "Demo Custody Category"
 _DEMO_ARTICLE = "Demo Custody Article"
+_DEMO_RENTAL_OFFICE = "Demo Rental Office"
 _DEMO_ROOMS = ("DEMO-101", "DEMO-102")
 
 
@@ -403,6 +415,7 @@ def _build_building(context):
         "responsible_facility_supervisor": DEMO_SUPERVISOR,
         "annual_rent": 60000,
         "annual_electricity": 12000,
+        "is_procurement_store": 1,
     }
     cost_center = frappe.get_cached_value("Company", company, "cost_center") if company else None
     if cost_center:
@@ -936,15 +949,16 @@ def _build_vehicle_write_off(context):
     The DocType makes `evidence` mandatory, so a placeholder File is attached: an Attach field
     stores a URL, and a write-off with no photo is a record no approver could act on.
     """
-    evidence = frappe.get_doc(
+    evidence = frappe.new_doc("File")
+    evidence.update(
         {
-            "doctype": "File",
             "file_name": "demo-write-off-evidence.txt",
             "content": "Demo damage evidence placeholder.",
             "is_private": 0,
         }
-    ).insert(ignore_permissions=True)
-    context["vehicle_write_off"] = _create(
+    )
+    evidence.insert()
+    name = _create(
         "Vehicle Damage Write-Off",
         {
             "vehicle": context["vehicle"],
@@ -953,6 +967,11 @@ def _build_vehicle_write_off(context):
             "status": "Open",
         },
     ).name
+    evidence.db_set(
+        {"attached_to_doctype": "Vehicle Damage Write-Off", "attached_to_name": name},
+        update_modified=False,
+    )
+    context["vehicle_write_off"] = name
 
 
 def _build_subcontractor_contract(context):
@@ -985,6 +1004,178 @@ def _build_subcontractor_order(context):
             "service_items": [
                 {"description": "Monthly pest-control visit", "qty": 1, "rate": 350},
             ],
+        },
+    ).name
+
+
+def _build_rental_office(context):
+    """Creates the demo rental office that the settlement is raised against."""
+    context["rental_office"] = _create(
+        "Rental Office",
+        {"office_name": _DEMO_RENTAL_OFFICE, "status": "Active"},
+    ).name
+
+
+def _build_goods_receipt(context):
+    """Creates the demo goods receipt into the building store, left in Draft.
+
+    Nothing in the demo is submitted: submitting writes Accommodation Stock Ledger rows, and
+    those rows link the building, the article and the employee, so `clear_demo_data` can no
+    longer take the demo back. A printable draft is worth more than a demo that will not clear.
+    """
+    receipt = _create(
+        "Goods Receipt",
+        {
+            "receipt_date": today(),
+            "intake_building": context["building"],
+            "procurement_supervisor": DEMO_SUPERVISOR,
+            "status": "Draft",
+            "items": [
+                {
+                    "item_type": "Custody Article",
+                    "item": context["article"],
+                    "qty": 10,
+                    "condition_on_transfer": "New",
+                }
+            ],
+        },
+    )
+    context["goods_receipt"] = receipt.name
+
+
+def _build_material_transfer(context):
+    """Creates the demo transfer between the two demo buildings."""
+    context["material_transfer"] = _create(
+        "Material Transfer",
+        {
+            "transfer_date": today(),
+            "from_building": context["building"],
+            "to_building": context["partner_building"],
+            "status": "Draft",
+            "items": [
+                {
+                    "item_type": "Custody Article",
+                    "item": context["article"],
+                    "qty": 3,
+                    "condition_on_transfer": "Good",
+                }
+            ],
+        },
+    ).name
+
+
+def _build_custody_issue(context):
+    """Issues two demo articles to the demo employee, left in Draft.
+
+    A Custody Return cannot be raised against a draft issue, so Custody Return Receipt is the
+    one print format with no demo document. The alternative — submitting the issue — writes
+    stock ledger rows the demo removal cannot take back, which costs more than it buys.
+    """
+    context["custody_issue"] = _create(
+        "Custody Issue",
+        {
+            "issue_date": today(),
+            "building": context["building"],
+            "party_type": "Employee",
+            "party": context["employee"],
+            "status": "Draft",
+            "items": [
+                {"article": context["article"], "qty": 2, "condition_on_issue": "Good"},
+            ],
+        },
+    ).name
+
+
+def _build_work_order(context):
+    """Creates the demo work order against the demo maintenance request."""
+    context["work_order"] = _create(
+        "Maintenance Work Order",
+        {
+            "maintenance_request": context["maintenance_request"],
+            "planned_start_date": today(),
+            "status": "Planned",
+            "work_description": "<p>Replace the failed corridor light fitting and test the "
+            "circuit before handing the room back.</p>",
+        },
+    ).name
+
+
+def _build_safety_incident(context):
+    """Creates the demo open safety incident."""
+    context["safety_incident"] = _create(
+        "Safety Incident",
+        {
+            "incident_datetime": frappe.utils.now_datetime(),
+            "building": context["building"],
+            "incident_type": "Electrical",
+            "severity": "Medium",
+            "status": "Open",
+            "description": "Exposed wiring found in the corridor junction box during the "
+            "weekly round. Power isolated and the area cordoned off.",
+        },
+    ).name
+
+
+def _build_safety_round(context):
+    """Creates the demo weekly safety round for the building."""
+    context["safety_round"] = _create(
+        "Safety Round",
+        {
+            "building": context["building"],
+            "round_date": today(),
+            "cadence": "Weekly",
+            "overall_result": "Needs Attention",
+        },
+    ).name
+
+
+def _build_fuel_request(context):
+    """Creates the demo fuel request in its initial workflow state."""
+    context["fuel_request"] = _create(
+        "Fuel Request",
+        {
+            "request_type": "Standard",
+            "vehicle": context["vehicle"],
+            "fuel_grade": "Petrol 91",
+            "requested_litres": 40,
+            "status": "Pending",
+        },
+    ).name
+
+
+def _build_fuel_claim(context):
+    """Creates the demo monthly fuel claim in its initial workflow state."""
+    context["fuel_claim"] = _create(
+        "Fuel Claim",
+        {
+            "project": context["project"],
+            "vehicle": context["vehicle"],
+            "period_month": today()[:7],
+            "claimed_litres": 320,
+            "status": "Draft",
+        },
+    ).name
+
+
+def _build_passenger_manifest(context):
+    """Creates the demo passenger manifest with the demo employee on board."""
+    context["passenger_manifest"] = _create(
+        "Passenger Manifest",
+        {
+            "passengers": [{"employee": context["employee"]}],
+        },
+    ).name
+
+
+def _build_rental_settlement(context):
+    """Creates the demo monthly rental settlement in its initial workflow state."""
+    context["rental_settlement"] = _create(
+        "Rental Settlement",
+        {
+            "rental_office": context["rental_office"],
+            "period_month": today()[:7],
+            "status": "Draft",
+            "vehicles": [{"vehicle": context["vehicle"]}],
         },
     ).name
 
@@ -1027,4 +1218,15 @@ _BUILD_STEPS = (
     ("Vehicle Damage Write-Off", _build_vehicle_write_off),
     ("Subcontractor Service Contract", _build_subcontractor_contract),
     ("Subcontractor Service Order", _build_subcontractor_order),
+    ("Rental Office", _build_rental_office),
+    ("Goods Receipt", _build_goods_receipt),
+    ("Material Transfer", _build_material_transfer),
+    ("Custody Issue", _build_custody_issue),
+    ("Maintenance Work Order", _build_work_order),
+    ("Safety Incident", _build_safety_incident),
+    ("Safety Round", _build_safety_round),
+    ("Fuel Request", _build_fuel_request),
+    ("Fuel Claim", _build_fuel_claim),
+    ("Passenger Manifest", _build_passenger_manifest),
+    ("Rental Settlement", _build_rental_settlement),
 )
