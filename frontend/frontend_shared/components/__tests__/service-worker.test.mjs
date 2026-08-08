@@ -106,7 +106,7 @@ describe("portal service worker — install", () => {
       // nav path + index.js + index.css + one entry per self-hosted font.
       expect(cache.store.size).toBe(3 + params.fonts.length);
       expect(await cache.match(params.navPath), "nav shell precached").toBeTruthy();
-      expect(sw.state.skipWaiting).toBe(params === DRIVER ? 1 : 0);
+      expect(sw.state.skipWaiting).toBe(params.skipWaitingOnInstall ? 1 : 0);
     }
   });
 });
@@ -131,21 +131,23 @@ describe("portal service worker — activate cleanup", () => {
   });
 });
 
-describe("portal service worker — data fetch cache-hit", () => {
-  it("keeps Masar's worker data offline fallback", async () => {
+describe("masar service worker — credential APIs", () => {
+  // Masar used to cache these reads under one key for every worker, so a reissued token
+  // or a shared phone showed the previous worker's housing, documents and custody. The
+  // offline fallback that behaviour bought is not worth a credential bleed.
+  it("never caches or offline-serves worker API data", async () => {
     const sw = loadSW(MASAR);
-    const ep = MASAR.dataEndpoints[0];
-    const online = () => makeReq({ url: ORIGIN + ep, method: "POST", body: '{"token":"t"}' });
+    const ep = MASAR.networkOnlyApiPrefixes[0] + "get_worker_accommodation";
+    const request = () => makeReq({ url: ORIGIN + ep, method: "POST", body: "{}" });
 
-    sw.state.fetchImpl = async () => makeRes("fresh-data");
-    const r1 = await sw.dispatch("fetch", { request: online() });
-    expect(r1.responded).toBe(true);
-    expect(r1.response._tag, "online read returns fresh network response").toBe("fresh-data");
+    sw.state.fetchImpl = async () => makeRes("worker-a");
+    const online = await sw.dispatch("fetch", { request: request() });
+    expect(online.response._tag).toBe("worker-a");
+    expect([...sw.cacheStorage.keys()].some((name) => name.endsWith("-data"))).toBe(false);
 
     sw.state.fetchImpl = async () => { throw new Error("offline"); };
-    const r2 = await sw.dispatch("fetch", { request: online() });
-    expect(r2.responded).toBe(true);
-    expect(r2.response._tag, "offline read is served from the data cache (cache-hit)").toBe("fresh-data");
+    await expect(sw.dispatch("fetch", { request: request() })).rejects.toThrow("offline");
+    expect([...sw.cacheStorage.keys()].some((name) => name.endsWith("-data"))).toBe(false);
   });
 });
 

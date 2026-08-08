@@ -24,7 +24,10 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 function extractMessages(source) {
   const start = source.indexOf("const messages = {");
   if (start === -1) return null;
-  const open = source.indexOf("{", start);
+  return extractLiteral(source, source.indexOf("{", start));
+}
+
+function extractLiteral(source, open) {
   let depth = 0;
   let inStr = null;
   let inComment = null;
@@ -75,16 +78,42 @@ function flatten(obj, prefix = "", out = {}) {
   return out;
 }
 
+function extractDefault(source) {
+  const start = source.indexOf("export default {");
+  if (start === -1) return null;
+  return extractLiteral(source, source.indexOf("{", start));
+}
+
+// A portal keeps its strings either in one src/i18n.js keyed by locale, or in a
+// src/i18n/ directory with a file per locale. Both shapes must be read, or a portal
+// that splits its locales silently drops out of this check instead of failing it.
+function readMessages(portal) {
+  const single = join(ROOT, portal, "src", "i18n.js");
+  if (existsSync(single)) {
+    const literal = extractMessages(readFileSync(single, "utf8"));
+    assert.ok(literal, `${portal}: could not read its messages literal`);
+    return new Function(`return ${literal}`)();
+  }
+  const dir = join(ROOT, portal, "src", "i18n");
+  const messages = {};
+  for (const file of readdirSync(dir)) {
+    if (!file.endsWith(".js") || ["index.js", "enums.js"].includes(file)) continue;
+    const literal = extractDefault(readFileSync(join(dir, file), "utf8"));
+    assert.ok(literal, `${portal}/${file}: could not read its default export`);
+    messages[file.slice(0, -3)] = new Function(`return ${literal}`)();
+  }
+  return messages;
+}
+
 const portals = readdirSync(ROOT, { withFileTypes: true })
   .filter((d) => d.isDirectory() && !["frontend_shared", "node_modules"].includes(d.name))
   .map((d) => d.name)
-  .filter((p) => existsSync(join(ROOT, p, "src", "i18n.js")));
+  .filter(
+    (p) =>
+      existsSync(join(ROOT, p, "src", "i18n.js")) || existsSync(join(ROOT, p, "src", "i18n")),
+  );
 
-const loaded = portals.map((portal) => {
-  const literal = extractMessages(readFileSync(join(ROOT, portal, "src", "i18n.js"), "utf8"));
-  assert.ok(literal, `${portal}: could not read its messages literal`);
-  return [portal, new Function(`return ${literal}`)()];
-});
+const loaded = portals.map((portal) => [portal, readMessages(portal)]);
 
 test("every portal's i18n was actually read", () => {
   assert.equal(loaded.length, portals.length);
