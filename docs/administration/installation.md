@@ -10,8 +10,7 @@ result. Prove the exact revision in staging before production.
 | Frappe Framework | Version 15 |
 | ERPNext | Version 15 |
 | HRMS | Version 15 |
-| Python | `>=3.10,<3.15` |
-| Node.js | 20 for portal development and bundle verification |
+| Python | `>=3.10` |
 
 Apex declares Frappe, ERPNext, and HRMS as required apps. Install all three on
 the target site before Apex. Use one reviewed Version 15 combination across the

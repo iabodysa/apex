@@ -1,55 +1,51 @@
-# Search, Filter, and Export
+# Prioritize the Resident Request Queue
 
-## Audience
+[Back to foundations](../foundations.md)
 
-Desk users who need to find, review, or share operational data.
+## Business outcome
 
-## Outcome
+Give the accommodation team a focused list of urgent, unowned resident requests so work is
+assigned before it is missed or exceeds its expected response time.
 
-Build a focused List view, verify its scope, and export data safely when the
-role permits it.
+## Journey and role
 
-## Prerequisites
+The learner is a **Resident Supervisor** using the `Resident Request Register`.
+The trainer prepares at least three fictional requests in the learner's permitted Building:
 
-- Completion of [Getting Started in Apex](getting-started.md).
-- Read access to a DocType used in the learner's track.
-- A non-production training site for export practice.
-- The **Role Permissions Manager** (`/app/permission-manager`).
+- one unassigned **Critical** request;
+- one unassigned **High** request; and
+- one assigned lower-priority request.
 
-## Core concepts
+A fourth request belongs to another Building and must not appear.
 
-The **Awesome Bar** finds named DocTypes, pages, and records. A **List view**
-filters and sorts one DocType. A **Report** answers a defined business question.
+## Build the worklist
 
-Filters narrow the records already allowed by DocPerm and row scope; they never
-widen access. Export creates a separate copy of operational data and therefore
-needs the same care as the source system.
+1. Open **Resident Request Register** from Habitat.
+2. Select the learner's Building and enable **Unassigned Only**.
+3. Review the **Requests**, **Unassigned**, **High or Critical**, and **Waiting Over a Week**
+   figures before opening a row.
+4. Confirm that the Critical and High requests appear and that the assigned request does not.
+5. Open each remaining row. Verify its location, description, priority, waiting days, and
+   current state before deciding who should own it.
+6. Record the Critical request as the first handoff. Use **Days Waiting** to order requests
+   of the same priority. This lesson does not assign or change the record.
+7. Export the filtered rows only when the trainer authorizes an operational handoff. Keep
+   only the columns needed to identify and prioritize the request.
+8. Compare the export row count with the report, store it in the approved temporary
+   location, and record its deletion deadline.
 
-## Exercise
+Stop immediately if a row from another Building, personal contact detail, identity value,
+token, signature, or confidential attachment appears. Do not share the export.
 
-1. Open a List view used in the learner's role.
-2. Add a status filter and one scope filter available on that DocType, such as
-   Project or Building.
-3. Add a Modified date filter that limits the result to the training period.
-4. Sort the result and inspect three records to confirm the filter is correct.
-5. Save the filter as **Training - My Active Records** if the site offers saved
-   filters.
-6. If the trainer authorizes export and the role exposes it, export only the
-   filtered rows and required columns.
-7. Compare the exported row count with the filtered List view.
+## Expected state and evidence
 
-## Verification
+The source requests remain unchanged. The learner can show:
 
-The learner can show:
+- the selected Building and **Unassigned Only** filter;
+- the two expected urgent requests and the decision to handle Critical before High;
+- the first request chosen for handoff and the reason;
+- absence of the assigned and out-of-scope requests; and
+- when export is authorized, matching row counts and a deletion deadline.
 
-- the active filters and their expected scope;
-- that no unexpected record outside the account's assigned scope appears;
-- matching row counts for the List view and authorized export;
-- the approved location and retention period for the downloaded file.
-
-## Cleanup and data safety
-
-Remove the saved training filter when it is no longer useful. Delete the
-downloaded file after verification. Never export personal, payroll, identity,
-token, or financial data for practice. If unexpected records appear, stop and
-report the scope issue instead of opening or sharing them.
+The business result is a scoped triage list that directs attention to the highest-risk
+unowned work without exposing unrelated resident data.

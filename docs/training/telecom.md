@@ -1,143 +1,122 @@
-# Telecom
+# Telecom in Logistay
 
 [Back to training](README.md)
 
-## Audience
-
-SIM Operations Users and System Managers who operate telecom contracts, SIM
-inventory, and custody. Finance reviewers inspect permitted contract data and
-native billing drafts; they do not use Telecom Control.
-
 ## Outcome
 
-Set up a telecom contract, register SIM cards, record each custody change, and
-trace the result through the correct control page, form, and reports for the
-learner's role.
+Bring a telecom agreement and its SIM inventory under control, keep custody and
+cost ownership current, and hand each billing period to Finance through the
+correct native documents.
 
-## Prerequisites
+## Intended role
 
-- A non-production training site.
-- Trainer-provided Company, telecom Supplier, Cost Center, Project, Employee,
-  and non-stock service Item records.
-- Company User Permission where the training role is company-scoped.
-- **Role Permissions Manager** (`/app/permission-manager`).
+- A **SIM Operations User** creates Telecom Contracts, SIM Cards, and submitted
+  SIM Custody Assignments for an allowed Company. This role operates
+  **Telecom Control**.
+- A **Finance Manager** reviews telecom records and reports, raises authorized
+  procurement and payment drafts, and completes the native accounting process.
+  Finance does not have access to Telecom Control.
+- An **Internal Auditor** has read and report access. A **System Manager** is the
+  administrative fallback, not the routine operator.
 
-## Record model
+A SIM Operations User sees only Companies granted through Company User
+Permission. A user with no allowed Company sees no telecom rows.
 
-### Telecom Contract
+## Before starting
 
-One submitted **Telecom Contract** represents one supplier agreement for one
-Company. It stores the contract dates, billing frequency, recurring amount,
-currency, and optional Project, Cost Center, and service Item.
+- Use a disposable training site and fictional mobile numbers and ICCIDs.
+- Prepare one Company, telecom Supplier, service Item, contract Cost Center,
+  Project, and active Employee in the same Company.
+- Give the Project a Cost Center. For the Employee exercise, configure an
+  Employee payroll Cost Center, a Department payroll Cost Center, or a Company
+  default Cost Center.
+- Use a SIM Operations User with the training Company permission and a separate
+  Finance Manager account with the required native document permissions.
+- For the payment handoff, prepare one submitted, outstanding Purchase Invoice
+  for the same Company and Supplier. Apex does not create that invoice from the
+  telecom contract.
 
-The server derives its state:
+## Realistic end-to-end exercise
 
-- Draft before submission;
-- Active while a submitted contract is in force;
-- Expired when validation finds that a submitted contract has passed its end
-  date; and
-- Terminated when cancelled.
+1. From **Logistay**, create a **Telecom Contract** for the training Company and
+   Supplier. Enter the contract period, billing frequency, recurring amount,
+   currency, Cost Center, Project, and service Item, then submit it.
+2. Create two **SIM Card** records under the submitted contract. Use distinct
+   fictional mobile numbers and ICCIDs and confirm that the contract's SIM Count
+   becomes two.
+3. Open **Custody and Costs > Telecom Control** (`/app/telecom-control`), filter
+   to the training Company, and open the first SIM.
+4. Assign the first SIM to the training Employee. Open the submitted **SIM
+   Custody Assignment** and confirm its Employee Cost Center and Effective Cost
+   Center snapshots.
+5. Assign the second SIM to the training Project and confirm that its Project
+   Cost Center becomes the SIM's current Cost Center.
+6. Transfer the first SIM to the Project, then return it. Confirm that each
+   action created a submitted custody event and that the SIM now reads
+   **Available**.
+7. Correct the first SIM's mobile number from Telecom Control. Confirm that the
+   same SIM Card remains in place and its custody history is unchanged.
+8. Review **Employees Holding Multiple SIMs**, **SIM Exceptions**, and
+   **Telecom Contract Expiry** from Logistay. Use **Telecom Cost Allocation** to
+   review recurring contract commitment by the contract's Cost Center.
+9. Sign in as the authorized Finance user. On the submitted contract, choose
+   **Billing > Raise Purchase Request**, enter a `YYYY-MM` billing period, and
+   open the resulting draft **Material Request**. Confirm that it is a Purchase
+   request for the service Item; it is not an invoice or a payment.
+10. After the matching Purchase Invoice is submitted and remains outstanding,
+    choose **Billing > Raise Payment Entry**, use the same billing period, and
+    select that invoice. Open the draft **Payment Entry** and confirm that its
+    References table allocates an amount to the selected Purchase Invoice.
+    Finance reviews and submits the native document under the site's approval
+    rules.
+11. Repeat each billing action for the same contract, period, and document type.
+    Confirm that Apex returns the recorded document instead of creating a
+    duplicate.
 
-One supplier may have several contracts. The SIM count on each contract is
-recalculated from the SIM cards linked to it.
+## Decisions and exceptions
 
-### SIM Card
+- **SIM Card is the source of truth for the current mobile number.** Correct the
+  number on that record. Apex ships no separate **Mobile Number** or **SIM Number
+  Assignment** record, so a number correction does not require a second SIM.
+- **SIM Custody Assignment** records actions. Assign starts from Available;
+  Transfer and Return start from Assigned; Suspend starts from Available or
+  Assigned; Reactivate starts from Suspended. Lost and Terminated are retirement
+  events and require a reason. Do not edit the SIM's projected status or current
+  holder fields.
+- Employee custody must stay within the SIM's Company. On Assign or Transfer,
+  Apex freezes the effective Cost Center on the event. The Employee payroll Cost
+  Center takes precedence, followed by the Department payroll Cost Center and
+  the Company default. Project custody uses the Project Cost Center. Later master
+  edits do not rewrite that history.
+- An assigned SIM with no resolved Cost Center appears in **SIM Exceptions**.
+  Correct the source master and record the appropriate next custody action; do
+  not overwrite the historical snapshot.
+- **Raise Purchase Request** needs a service Item and Create permission on
+  Material Request. **Raise Payment Entry** needs Create permission on Payment
+  Entry and a submitted, outstanding Purchase Invoice for the same Company and
+  Supplier. The allocation comes from that invoice, not from a copied contract
+  amount.
+- Both billing actions create drafts. A draft Payment Entry is awaiting Finance
+  approval; it is evidence of a handoff, not settlement or a General Ledger
+  posting.
 
-**SIM Card** is the managed telecom asset. It belongs to one submitted Telecom
-Contract and carries the mobile number, optional ICCID, plan, and current
-custody projection.
+## Evidence of completion
 
-The mobile number remains editable on the same SIM Card. Apex does not ship a
-**Mobile Number** or **SIM Number Assignment** DocType, and a number correction
-must not create a second SIM record.
+The learner can show:
 
-### SIM Custody Assignment
+- one submitted Telecom Contract with the expected Company, Supplier, billing
+  data, service Item, and SIM Count;
+- two SIM Cards whose current status, holder, and Cost Center agree with their
+  latest submitted custody events;
+- an Employee assignment with its frozen Employee and Effective Cost Centers;
+- the same SIM Card name before and after the mobile-number correction;
+- only the permitted Company's rows in Telecom Control and telecom reports;
+- one draft Material Request for the billing period; and
+- one draft Payment Entry whose References row names the submitted Purchase
+  Invoice and carries a positive allocation.
 
-Each submitted **SIM Custody Assignment** is one custody event:
+## Related links
 
-- **Assign** gives an Available SIM to an Employee or Project.
-- **Transfer** moves an Assigned SIM to another Employee or Project.
-- **Return** releases an Assigned SIM back to Available.
-- **Suspend** pauses an Available or Assigned SIM.
-- **Reactivate** restores a Suspended SIM to its prior assigned or available
-  state.
-
-Transfer is an action in this record. Apex does not ship a separate **SIM
-Transfer Request**.
-
-The event captures the previous holder and freezes the Employee or Project Cost
-Center. The SIM Card's current holder, state, effective Cost Center, assignment,
-and assignment date are rebuilt from submitted events. Correct history through
-the supported cancel or amend lifecycle; do not edit projected fields.
-
-## Operating path
-
-1. Create and submit the Telecom Contract.
-2. Create each SIM Card under that contract.
-3. With a SIM Operations User or System Manager account, open **Telecom
-   Control** from the Custody and Costs workspace.
-4. Filter by Company, Supplier, contract, Project, Cost Center, or state.
-5. Open a SIM drawer and use the action allowed by its current state.
-6. Review the resulting custody history and current projection.
-7. Use the telecom reports to review current custody, multiple-SIM holders,
-   contract distribution, expiry, cost allocation, and exceptions.
-
-Telecom records belong to **Logistay**, which ships its own workspace. They are
-also exposed through the Custody and Costs workspace and the Telecom Control
-page; there is no separate SIM module.
-Page access and visible buttons remain subject to the
-**Role Permissions Manager** (`/app/permission-manager`).
-Finance Manager has read-only contract access and no Telecom Control Page role;
-finance reviews the contract form, reports, and any native draft it may create
-through its separate target-DocType permission.
-
-## Billing drafts
-
-A submitted contract offers **Raise Purchase Request**, which creates or
-returns one draft native **Material Request** of type Purchase for the contract
-and billing period. The contract needs a service Item. The action requires
-create permission, records the draft on the contract, and returns the existing
-draft when repeated for the same period.
-
-Do not use **Raise Payment Order** in production or training. It currently
-saves an unreferenced Supplier Payment Entry: an unallocated supplier advance
-draft, not an ERPNext Payment Order and not settlement of a supplier bill.
-`reference_no` is descriptive and does not allocate the payment.
-
-Finance uses the native payable path instead: create the Purchase Order first
-when site policy requires it, approve the Supplier Purchase Invoice for the
-telecom period, then create a Payment Entry whose References table allocates the
-amount to that Purchase Invoice. Native approval and submission remain with
-Finance.
-
-## Exercise
-
-1. Create and submit a `TRAINING` Telecom Contract for the demo Supplier.
-2. Register two SIM Cards with fictional mobile numbers under that contract.
-3. Assign the first SIM to the demo Employee.
-4. Transfer it to the demo Project and confirm the Cost Center snapshot.
-5. Edit the mobile number on the same SIM Card.
-6. Return the SIM and confirm its current state is Available.
-7. Open the **SIMs in Custody** shortcut on the Logistay workspace, then
-   **Employees Holding Multiple SIMs** and **SIM Exceptions**, to explain why the
-   training rows do or do not appear.
-
-## Verification
-
-The learner can show that:
-
-- the contract, SIM Card, and custody event have distinct purposes;
-- the number change kept the same SIM Card and timeline;
-- every custody change produced a submitted event;
-- the SIM projection matches the latest submitted event;
-- Company scope limits the records shown; and
-- the Material Request is only a procurement draft and Supplier payment follows
-  the native invoice-allocation path.
-
-## Cleanup and data safety
-
-Use fictional numbers and no real ICCID. Reverse or cancel training custody
-events through the normal lifecycle and in dependency order. A System Manager
-may remove unused training masters after linked records are cleared. Do not
-delete submitted custody history, edit projection fields, use **Raise Payment
-Order**, or create finance documents on production for practice.
+- [Telecom Operations track](tracks/telecom-operations.md)
+- [Costs and Leasing](costs.md)
+- [Modules, workspaces, and routes](../reference/routes-workspaces.md)

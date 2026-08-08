@@ -2,111 +2,70 @@
 
 [Back to training index](README.md)
 
-## Audience
-
-Requesters, Resident Supervisors, Accommodation Managers, Maintenance
-Technicians, and System Managers who issue work orders.
-
 ## Outcome
 
-Turn a reported fault into a controlled work order, capture completion evidence,
-and understand which records are operational memos rather than purchasing or
-accounting documents.
+Turn a reported facility fault into a planned work order, record the technician's work,
+and close the request with completion evidence.
 
-## Prerequisites
+## Intended role
 
-- A non-production training site.
-- A training Building and Room.
-- Separate training accounts for request handling, work-order issue, and
-  technician execution where practical.
-- The **Role Permissions Manager** (`/app/permission-manager`).
+Any signed-in user may raise their own `Maintenance Request`. An
+**Accommodation Manager**, **Resident Supervisor**, or
+**Resident Request Coordinator** can submit and manage the request. Under the shipped
+permissions, a **System Manager** creates and submits the `Maintenance Work Order`; a
+**Maintenance Technician** starts and completes it but cannot create, submit, or cancel
+it.
 
-## Operating model
+## Before starting
 
-Use the submitted Frappe documents as the audit trail. Desk buttons call the
-same controllers as the forms; they do not write status or cost directly.
+- Use a disposable training site with a fictional Building and Room.
+- Prepare separate request-handler, System Manager, and Maintenance Technician accounts.
+- Prepare a non-sensitive completion image.
+- Keep procurement cost at zero for the basic exercise.
 
-| Record | Operational purpose |
-|---|---|
-| `Maintenance Request` | Report, priority, location, assignment, and resolution. |
-| `Maintenance Work Order` | Planned work, technician action, evidence, and operational cost. |
-| `Maintenance Inspection Report` | Optional System Manager inspection linked to a facility asset or work order. |
-| `Maintenance Material Template` | Reusable draft procurement lines; it creates no purchase or stock transaction. |
-| `Maintenance Cost Ledger` | System-written cost row for each positive-cost procurement line. |
-| `Subcontractor Service Contract`, `Subcontractor Service Order` | External coverage and visit execution. |
+## Exercise: resolve one facility fault
 
-## Operational flow
+1. Create a `Maintenance Request` with Building, Room, issue type, priority, and a clear
+   description. Submit it as **Open**.
+2. Sign in as System Manager, open the request, and choose **Create Work Order**. Enter
+   planned dates, an assignee, and the work description, then submit it.
+3. Confirm that the `Maintenance Work Order` is **Planned** and its source request is
+   **In Progress**. Sign out of the System Manager account.
+4. As Maintenance Technician, choose **Start Work**. Confirm that the order is
+   **In Progress** and its actual start date was recorded.
+5. Choose **Mark as Completed**. Enter the actual end date, completion notes, and the
+   sanitized completion photo.
+6. Confirm that the order is **Completed**, the request is **Closed**, and the order
+   records who verified completion and when.
 
-1. Create a `Maintenance Request` with Building, Room, issue type, priority, and
-   description. Any signed-in user can create their own request; operational
-   roles triage and submit it. Setting **Assigned** requires an assignee, and
-   resolving or closing requires resolution notes.
-2. While the request is Draft, **Load Material Template** can append matching
-   procurement lines. Review the result: the action does not create a
-   `Material Request`, `Purchase Order`, stock entry, or accounting record.
-3. Submit the request with status **Open**. From it, choose **Create Work
-   Order**. Only an account with Work Order Create and Submit rights can finish
-   that step under the current permission model.
-4. On the draft `Maintenance Work Order`, enter the planned dates, work
-   description, assignee, and any procurement lines. Enter actual start and end
-   dates before submission if this record will be completed through the current
-   Desk controls.
-5. Submit the Work Order. Its status becomes **Planned** and the source request
-   becomes **In Progress**. A Maintenance Technician with write access can use
-   **Start Work**, attach the required completion photo, then use **Mark as
-   Completed**.
-6. Completion requires actual start and end dates plus the photo. It closes the
-   source request and, when procurement cost is positive, writes one aggregate
-   `Accommodation Ledger` memo plus one `Maintenance Cost Ledger` row per
-   positive-cost procurement line. These are operational records; completion
-   does not create a General Ledger Entry, Payment Entry, Purchase Invoice, or
-   salary record.
-7. For external work, use an approved `Subcontractor Service Contract`, then
-   submit a `Subcontractor Service Order`. Use **Start Work**, then the
-   controlled **Mark as Completed** or **Mark Missed** action.
-8. Review **Maintenance Aging**, whose status filter also lists the open
-   requests. The daily
-   overdue thresholds and alert effects are listed in the
-   [automation reference](../reference/automation.md).
+## Decisions and exceptions
 
-`Maintenance Inspection Report` is currently restricted to System Manager. It
-requires at least one finding and updates a linked `Facility Asset` inspection
-date when submitted.
+- **Assigned** requires an assignee. **Resolved** and **Closed** require resolution
+  notes.
+- **Load Material Template** adds suggested lines to a draft request or work order. It
+  does not buy, receive, reserve, or pay for materials.
+- **Start Work** records the actual start date. **Mark as Completed** records the end
+  date and requires a completion photo; the end date cannot precede the start date.
+- Positive procurement lines create `Maintenance Cost Ledger` entries and one direct
+  `Accommodation Ledger` memo when work is completed. They do not create a Purchase
+  Invoice, Payment Entry, or General Ledger posting.
+- Use an active `Subcontractor Service Contract` and `Subcontractor Service Order` for
+  an external visit. Its **Start Work**, **Mark as Completed**, and **Mark Missed**
+  actions are separate from the internal work order.
+- `Maintenance Inspection Report` is limited to System Manager.
 
-## Current boundary
+Cancelling a work order requires a reason, reopens a source request that is still
+**In Progress** or **Closed**, and reverses its operational cost records. Preserve the
+original and reversal rows.
 
-`Maintenance Work Order` completion requires actual start and end dates, but
-those fields are not editable after submission in the shipped form. Record them
-on the draft before submission until the execution flow is corrected.
+## Evidence of completion
 
-## Non-production exercise
+Show the submitted request and linked work order, the **Planned** to **In Progress** to
+**Completed** history, actual dates, completion photo, verifier, and the closed source
+request. For the zero-cost exercise, confirm that no maintenance cost row was created.
 
-1. Create a low-priority `Maintenance Request` for the training Room and submit
-   it as **Open**.
-2. With the authorized training account, use **Create Work Order**.
-3. Enter planned and actual dates, work description, and no procurement cost.
-4. Submit the Work Order.
-5. With the technician account, choose **Start Work**.
-6. Attach a non-sensitive training image and choose **Mark as Completed**.
-7. Verify the Work Order is **Completed** and the source request is **Closed**.
+## Related links
 
-## Verification
-
-The learner can show:
-
-- the submitted request and its linked Work Order;
-- the transition from **Planned** to **In Progress** to **Completed**;
-- actual dates, completion photo, and timeline comments;
-- that a zero-cost exercise created no operational cost row;
-- why a material template is not a purchasing transaction.
-
-## Cleanup and data safety
-
-An authorized user may cancel the training Work Order with a reason. Cancellation
-reopens a source request that was **In Progress** or **Closed** and reverses any
-operational cost the Work Order posted. Cancel the request afterwards if the
-training scenario is no longer needed.
-
-Never delete an original `Accommodation Ledger` or `Maintenance Cost Ledger`
-row. Preserve its reversal. Do not use a live facility asset, production room,
-supplier contract, or real completion photo in training.
+- [Accommodation operations](accommodation.md)
+- [Safety operations](safety.md)
+- [Scheduled automation](../reference/automation.md)

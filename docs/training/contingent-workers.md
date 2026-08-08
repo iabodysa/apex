@@ -1,167 +1,131 @@
-# Contingent Workers
+# Contingent Workers in Logistay
 
 [Back to training](README.md)
 
-## Audience
-
-Accommodation Managers and Resident Supervisors who receive Temporary Workers,
-plus Finance Managers who create and maintain Freelancers. HR staff own the
-native Employee handoff but have no Apex DocPerm on these two records unless
-another role is also assigned. System Manager is an administrative fallback,
-not the routine finance learner.
-
 ## Outcome
 
-Choose the correct record for a passport-only arrival or an accounting
-Freelancer, then complete only the branch owned by the learner's role.
+Record a passport-only arrival without inventing an Employee, record a paid
+contractor without putting that person into housing, and complete the correct
+housing, HR, or Finance handoff for each case.
 
-## Prerequisites
+## Intended role
 
-- A non-production training site.
-- For the housing branch: a trainer-provided Project, Building, Bed, optional
-  Arrival Batch, and an Accommodation Manager or Resident Supervisor account.
-- For the finance branch: a trainer-provided Project and Finance Manager
-  account.
-- Separate housing and finance accounts when both branches are taught, plus an
-  HR handoff account only when the native Employee link is rehearsed.
-- An authorized Fleet handoff account only when the trainer demonstrates the
-  unregistered-rider transport step; otherwise no Fleet fixture is required.
-- Contingent worker rights: filter **Role Permissions Manager** (`/app/permission-manager`) by Temporary Worker and Arrival Batch.
+- An **Accommodation Manager** or **Resident Supervisor** registers and houses a
+  Temporary Worker from **Arrivals Desk**. Resident Supervisors are limited by
+  Building User Permission; Accommodation Managers have building-wide oversight.
+- An authorized **HR** user creates the permanent HRMS Employee when the worker's
+  employment record is ready. Housing users do not create that Employee.
+- A **Finance Manager** creates and maintains Freelancers, including the
+  protected National ID/Iqama and monthly salary, and owns the native payment
+  handoff.
+- A **System Manager** is the administrative fallback. An Internal Auditor can
+  review the records allowed by its field permissions.
 
-## Navigation by role
+Creating a Freelancer requires Finance Manager or System Manager access because
+its required identity and salary fields are protected at permission level 1.
 
-- **Housing branch:** an Accommodation Manager or Resident Supervisor opens
-  **Arrivals Desk**, then uses Temporary Worker and the party-aware housing
-  forms.
-- **Finance branch:** a Finance Manager uses the Awesome Bar to open
-  **Freelancer List**, then selects New.
+## Before starting
 
-Do not combine the branches in one learner account unless that learner actually
-holds an appropriate role for both and the trainer assigned both checkpoints.
-In a multi-account cohort, compare the housing-to-HR handoff with the separate
-finance record; do not treat Temporary Worker and Freelancer as successive
-states of one person.
+- Use a disposable training site and fictional passport, Iqama, phone, and
+  salary values. Do not capture identity fields in screenshots or exports.
+- For the arrival case, prepare a Building, Room, available Bed, Project, and an
+  Accommodation Manager account or a Resident Supervisor account with Building
+  access. An Arrival Batch and Labour Supplier are optional.
+- If custody will be demonstrated, prepare a Custody Article and use an account
+  that can submit Custody Issue. A Resident Supervisor can prepare the record but
+  cannot submit it; an Accommodation Manager or System Manager owns that step.
+- For the HR handoff, prepare an authorized HR account that can later create an
+  active Employee with the same passport number.
+- For the contractor case, prepare a Finance Manager account, a Project, an
+  optional supervisor User, and the native accounting defaults required for a
+  draft Payment Entry.
 
-## Choose the correct identity
+## Realistic end-to-end exercise
 
-### Temporary Worker
+### Passport-only arrival
 
-Use **Temporary Worker** for a person who has arrived with a passport but does
-not yet have a permanent Employee record. It is a temporary housing and custody
-identity, not a payroll or payable party.
-
-The record requires a unique passport number and arrival date. Its stay window
-defaults to thirty days, cannot exceed ninety days, and calculates an expiry
-date. Its lifecycle is Active, Linked, or Expired.
-
-### Employee
-
-Use the native HRMS **Employee** after HR completes the permanent worker record.
-The daily linking process matches an active Employee to an active Temporary
-Worker by passport number.
-
-### Freelancer
-
-Use **Freelancer** for a short-term contractor paid as an accounting party. It
-stores the identity, contract dates, positive monthly salary, Project, and
-supervisor. The app registers Freelancer as an ERPNext payable Party Type, so
-finance can use native accounting documents that support that party.
-
-Freelancer is not a replacement for Temporary Worker or Employee. It does not
-automatically receive housing, custody, transport, payroll, or portal access,
-and no automatic monthly payment is created.
-
-## Temporary Worker path
-
-1. Open **Arrivals Desk** and search the expected arrivals or existing workers.
-2. If no Employee exists, register a Temporary Worker from the passport
-   details. Optional passport scanning only pre-fills fields; the operator must
-   verify them.
-3. Assign the Temporary Worker to an available bed through the party-aware
-   housing flow.
-4. Use the party-aware custody process if property must be issued. The Arrivals
-   Desk completion pack deliberately defers custody and personal portal access
-   for this holder type.
-5. Arrivals Desk identifies the unregistered-manifest boundary. The housing
-   learner hands the transport need to an authorized Fleet role, which may add
-   the person as an unregistered rider. The housing learner does not create a
-   Transport Request.
-6. HR creates the active Employee with the same passport number.
-7. The daily task links the records, repoints supported housing and custody
-   references to the Employee, backdates skipped accommodation-cost rows, and
-   marks the Temporary Worker Linked.
+1. Open **Housing and Safety > Arrivals Desk** (`/app/arrivals-desk`). Search for
+   the fictional passport first so an existing worker is not duplicated.
+2. Register a **Temporary Worker** with the worker name, passport, Building, and
+   Project. Review any scanned passport values before saving. Confirm the default
+   30-day window and computed Expiry Date.
+3. Select the worker, the demo Bed, and the Project, then complete check-in.
+   Open the submitted **Housing Assignment** and confirm that Resident Type is
+   Temporary Worker and that the Dynamic Link points to the new record.
+4. In the Arrivals Desk completion panel, confirm that custody is marked
+   **Custody deferred**, personal access is marked **Link after registration**,
+   and transport is marked **Unregistered manifest**.
+5. If property must be issued before the HR link, hand the worker to an authorized
+   operator using **Custody Kiosk** with Party Type **Temporary Worker**. Arrivals
+   Desk itself does not issue custody to this holder type.
+6. Hand transport details to the authorized Fleet role. The Temporary Worker is
+   entered in the Transport Request's **Additional (Unregistered) Passengers**
+   table; the housing operator does not add the person to the Employee manifest.
+7. When HR creates an active HRMS Employee with the same passport number, allow
+   the daily link to complete. Confirm that the Temporary Worker becomes
+   **Linked**, records the Linked Employee, and that supported housing and custody
+   references now point to the Employee. Any skipped accommodation-cost rows for
+   the active stay are backdated by that handoff.
 8. Issue personal worker access only after the Employee link exists.
 
-If the window expires before a match, the task marks the Temporary Worker
-Expired and sends an in-app notice to HR recipients. Housing an expired record
-raises a warning; it does not silently extend the window.
+### Paid contractor
 
-Departure transport raised from Housing Checkout also requires a linked
-Employee. Complete the link before that step.
+9. Sign in as Finance Manager and open **Freelancer List** from search. Create a
+   fictional **Freelancer** with a unique National ID/Iqama, contract start and
+   end dates, a positive Monthly Salary, and the applicable Project and
+   supervisor.
+10. Start a native **Payment Entry** under the approved Finance process, select
+    Party Type **Freelancer**, and select the training record. Keep it in Draft
+    unless the trainer has authorized a full non-production accounting exercise.
+11. Confirm that saving the Freelancer created no Employee, Housing Assignment,
+    payroll transaction, portal access, or automatic monthly payment.
 
-## Freelancer path
+## Decisions and exceptions
 
-1. The Finance Manager confirms that the person is an accounting contractor
-   rather than a passport-only housing arrival.
-2. Create the Freelancer with a unique national ID or Iqama, contract start and
-   end dates, and positive monthly salary.
-3. Add the Project and supervisor when they apply.
-4. Let finance use the native ERPNext accounting process approved for the site.
-5. Review the contract end date. Saving a record past that date derives Expired;
-   use Terminated only for an intentional early end.
+- Use **Temporary Worker** for a person who has arrived on a passport and needs a
+  temporary housing or custody identity before an Employee exists. Passport is
+  unique and cannot be changed after the first save. The window defaults to 30
+  days and cannot exceed 90.
+- Use the native **Employee** only after HR owns the permanent employment record.
+  The daily passport match is the supported Temporary Worker-to-Employee
+  handoff; do not relink records in the database.
+- Use **Freelancer** for a fixed-monthly-salary contractor who is a payable party.
+  The contract end date must be after the start date and salary must be positive.
+  Finance uses the native ERPNext Payment Entry process; Apex does not generate a
+  payment or payroll run.
+- Temporary Worker, Employee, and Freelancer are not three statuses of one
+  record. A Freelancer does not convert to either worker type, and it does not
+  receive housing, custody, transport, payroll, or portal access automatically.
+- If no matching Employee exists when a Temporary Worker's window lapses, the
+  daily process marks it Expired and notifies HR. Housing an expired record gives
+  a warning; it does not extend the window.
+- A departure Transport Request from Housing Checkout requires a linked Employee.
+  Complete the HR handoff before using that departure action.
 
-There is no automatic conversion between Freelancer, Temporary Worker, and
-Employee.
+## Evidence of completion
 
-## Exercise
+The housing learner can show:
 
-Each learner completes only the branch owned by that account.
+- an Active Temporary Worker with a fictional passport, 30-day window, Expiry
+  Date, Building, and Project;
+- a submitted Housing Assignment linked by Resident Type and party to that
+  Temporary Worker;
+- the deferred-custody, personal-access, and unregistered-transport boundaries;
+  and
+- after the scheduled HR handoff, the Linked status, Linked Employee, and updated
+  housing or custody reference.
 
-### Housing branch
+The finance learner can show:
 
-1. Sign in as Accommodation Manager or Resident Supervisor and open
-   **Arrivals Desk**.
-2. Register a fictional `TRAINING` Temporary Worker with today's arrival date
-   and the default window.
-3. Assign the worker to a demo bed and confirm the Housing Assignment identifies
-   the Temporary Worker party.
-4. Confirm that personal worker access is unavailable, identify the
-   unregistered-rider transport boundary, and record the handoff to the
-   authorized Fleet role. Do not create a Transport Request.
-5. Identify HR as the next role when a permanent Employee must be created and
-   linked.
+- one Freelancer with protected identity and salary values, valid contract dates,
+  and the applicable Project and supervisor;
+- a native draft Payment Entry that can select Party Type Freelancer and the
+  training record; and
+- the absence of automatically created Employee, housing, payroll, portal, and
+  payment records.
 
-### Finance branch
+## Related links
 
-1. Sign in as Finance Manager.
-2. Use the Awesome Bar to open **Freelancer List**, select New, and create a
-   fictional `TRAINING` Freelancer with a future contract end date and positive
-   monthly salary.
-3. Confirm the Project and supervisor when applicable.
-4. Explain why the Freelancer does not create housing, payroll, or portal
-   access.
-
-Do not create a matching Employee during this exercise unless the trainer
-intends to test the daily link and its record-repointing effects.
-
-## Verification
-
-The housing learner can show the Arrivals Desk record, housing assignment,
-portal restriction, unregistered-transport boundary, Fleet handoff, and HR
-handoff without creating a Transport Request.
-
-The finance learner can show the Freelancer created from its List, its Project
-and contract dates, and the absence of automatic housing, payroll, or portal
-records.
-
-When both branches run as a multi-account cohort, the learners compare their
-separate records and explain why Temporary Worker, Employee, and Freelancer
-must not be merged.
-
-## Cleanup and data safety
-
-Use fictional identity values only. End the demo housing assignment through the
-supported checkout or cancellation path before removing training records.
-Delete an unused Freelancer only when no native accounting document references
-it. Never force a passport match, edit linked records in the database, or run
-the daily linker on production for practice.
+- [Accommodation](accommodation.md)
+- [Custody](custody.md)
+- [Worker and Driver Portals](portals-masar-driver.md)

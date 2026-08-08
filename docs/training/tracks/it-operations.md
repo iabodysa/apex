@@ -1,51 +1,52 @@
 # IT Operations Track
 
-## Audience
-
-Site administrators and IT staff who support Apex access, navigation, portals,
-and background processing.
+[Back to training](../README.md)
 
 ## Outcome
 
-Support users without confusing navigation, role grants, row scope, workflow,
-or automation.
+Restore service for one scoped Desk persona and one personal portal user without
+broadening access, exposing a credential, or editing protected state directly.
 
-## Prerequisites
+## Roles
 
-- Administrator access to a non-production site.
-- A separate training account for each persona being tested.
-- Change approval for any role, User Permission, or settings change.
+Use separate **System Manager**, affected-persona, and portal-user sessions on a
+disposable training site. Add a security or integration reviewer when the selected
+case crosses that boundary.
 
-## Learning path
+## Guide sequence
 
-1. [Frappe Foundations](../foundations.md)
-2. [Settings and Desk Pages](../settings.md)
-3. [Driver and Worker Portals](../portals-masar-driver.md)
-4. [Modules, Workspaces, and Routes](../../reference/routes-workspaces.md)
-5. **Role Permissions Manager** (`/app/permission-manager`)
+1. Prepare and restore the site with [Trainer Setup and Reset](../trainer-setup.md).
+2. Review role, scope, and supported settings in
+   [Follow Work from Request to Proof](../foundations.md) and [Settings](../settings.md).
+3. Rehearse safe personal-link handling in
+   [Worker and Driver Portals](../portals-masar-driver.md).
+4. Use [Installation](../../administration/installation.md) for service controls
+   and [Troubleshooting](../../reference/troubleshooting.md) for diagnosis.
+5. Use [Scheduled automation](../../reference/automation.md) to identify the
+   source and result of the selected background operation.
 
-Use the reference pages as the source for shipped navigation and permission
-claims. Do not copy their tables into local support notes.
+## Capstone
 
-## Practice checkpoint
+1. Confirm maintenance mode is off before opening Desk or issuing, rotating, or
+   testing a personal token.
+2. Reproduce one missing-page or missing-record report with the affected fictional
+   persona. Compare the expected route, role, and Building, Project, or Company
+   scope, including one expected denial.
+3. Correct only the verified configuration error and repeat the same checks.
+4. In Desk, rotate the fictional user's personal portal link. Prove that the old
+   link is rejected and the new link resolves only to its intended holder without
+   recording either credential.
+5. Trace one scheduled Apex follow-up from its source record to the job log and
+   result without creating the output manually.
 
-Choose one operational persona. With that persona's training account:
+## Passing evidence
 
-1. Confirm the expected workspace or portal entry point.
-2. Open one permitted record and attempt no write.
-3. Identify the DocPerm role, row-scope rule, and workflow owner.
-4. Compare the result with an administrator account.
-5. Record any mismatch as a configuration or product defect; do not grant a
-   broad role as a shortcut.
+Show the cause and minimal correction for the Desk case, the expected scope and
+denial, safe link rotation, and the source-to-job-to-result chain. Stop and isolate
+the site if production data, real recipients, credential leakage, or unexplained
+cross-scope access appears.
 
-## Verification
+## Related links
 
-The trainee can explain the difference between a workspace role, DocPerm,
-User Permission, workflow action, and server-side portal scope.
-
-## Data safety
-
-Never troubleshoot with another person's personal portal link. Do not reveal,
-copy, or log API secrets or personal-link tokens. Test access with dedicated
-accounts and remove temporary role or User Permission changes through the
-approved change process.
+- [Modules, workspaces, and routes](../../reference/routes-workspaces.md)
+- [Trainer Setup and Reset](../trainer-setup.md)

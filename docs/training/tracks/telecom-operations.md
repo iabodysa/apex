@@ -1,69 +1,51 @@
 # Telecom Operations Track
 
-## Audience
-
-SIM Operations Users and System Managers responsible for telecom contracts and
-SIM custody, plus finance reviewers who inspect contracts and native drafts
-outside Telecom Control.
+[Back to training](../README.md)
 
 ## Outcome
 
-Trace one telecom agreement from contract setup through SIM registration,
-custody, exception review, and the native procurement handoff.
+Complete one company-scoped telecom cycle from contract and SIM custody to an
+allocated Finance draft, with a clean handoff between roles.
 
-## Prerequisites
+## Roles
 
-- A non-production training site.
-- A training Company, Supplier, service Item, Cost Center, Project, Employee,
-  and two fictional SIM numbers.
-- Company User Permission for the operating account where scope applies.
-- Separate operating and finance accounts for maker-checker practice.
+Run the track with separate **SIM Operations User** and **Finance Manager**
+accounts. An **Internal Auditor** may review the result. Use **System Manager**
+only for training administration.
 
-## Learning path
+## Guide sequence
 
-1. [Frappe Foundations](../foundations.md)
-2. [Telecom](../telecom.md)
-3. [Settings and Desk Pages](../settings.md)
-4. **Role Permissions Manager** (`/app/permission-manager`)
-5. [Telecom troubleshooting](../../reference/troubleshooting.md#sim-state-looks-wrong)
+1. Restore the Telecom baseline with [Trainer Setup and Reset](../trainer-setup.md).
+2. Confirm the learner's Company scope with
+   [Follow Work from Request to Proof](../foundations.md).
+3. Complete the operating and Finance procedures in [Telecom](../telecom.md).
+4. Use [Telecom troubleshooting](../../reference/troubleshooting.md#sim-state-looks-wrong)
+   only if the resulting state or Cost Center is unexpected.
 
-## Practice checkpoint
+## Capstone
 
-1. Create and submit one `TRAINING` Telecom Contract with a service Item.
-2. Create two SIM Cards under the contract.
-3. Assign the first SIM to the training Employee.
-4. Assign the second SIM to the training Project.
-5. Transfer the first SIM to the Project, then return it.
-6. Correct its mobile number on the same SIM Card.
-7. With the SIM Operations User or System Manager account, use Telecom Control
-   and the telecom reports to verify current custody, contract totals, multiple
-   holdings, expiry, cost allocation, and exceptions.
-8. With the authorized finance account, open the Telecom Contract form and
-   raise a purchase request for one training billing period. Confirm it is a
-   draft Material Request. Finance does not enter Telecom Control.
-9. Repeat **Raise Purchase Request** for the same period and confirm it returns
-   the existing Material Request instead of creating a duplicate.
-10. Do not use **Raise Payment Order**. Identify the approved native path:
-    Purchase Order when site policy requires it, Supplier Purchase Invoice for
-    the billing period, then Payment Entry allocated to that invoice.
+1. As SIM Operations User, create one submitted contract and two SIM Cards for
+   the permitted Company.
+2. On the first SIM, record **Assign to Employee → Transfer to Project → Return**.
+   It must finish Available.
+3. On the second SIM, record **Suspend while Available → Reactivate**, then assign
+   it to the Project. This keeps the suspend/reactivate exercise independent of the
+   transfer/return chain.
+4. Correct one mobile number on its existing SIM Card, then use Telecom Control
+   and the telecom reports to prove current custody, Cost Center, exception, and
+   Company scope.
+5. As Finance Manager, raise the period's draft Material Request and the draft
+   Payment Entry allocated to the prepared submitted Purchase Invoice. Repeat the
+   actions for the same period and confirm that no duplicate is created.
 
-## Verification
+## Passing evidence
 
-The trainee can identify:
+Show the submitted contract, both SIM identities, both valid custody chains, the
+Employee and Project Cost Center snapshots, the in-place number correction, the
+out-of-scope Company denial, and the two source-linked Finance drafts. A draft
+Payment Entry is a handoff, not proof of settlement.
 
-- Telecom Contract as the commercial source;
-- SIM Card as the editable asset record;
-- SIM Custody Assignment as the immutable event history;
-- Company as the row-scope boundary;
-- Employee or Project Cost Center captured at the custody event; and
-- Material Request as the procurement handoff rather than evidence of a bill or
-  payment; and
-- the Finance-owned invoice and allocated-payment steps that follow.
+## Related links
 
-## Cleanup and data safety
-
-Delete the draft Material Request only through its native form and with finance
-approval. Cancel training custody events newest first, then clear dependent SIM
-and contract records through normal Frappe actions. Use fictional numbers and
-no real ICCID. Never use **Raise Payment Order**, submit a training payment,
-alter live custody, or remove submitted history directly.
+- [Modules, workspaces, and routes](../../reference/routes-workspaces.md)
+- [Scheduled automation](../../reference/automation.md)

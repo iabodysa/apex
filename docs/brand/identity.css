@@ -2341,6 +2341,8 @@ main {
 
   .site-visual {
     min-height: 280px;
+    border-block-start: 1px solid rgba(7, 43, 26, 0.12);
+    border-inline-start: 0;
   }
 
   .site-stats {
@@ -2397,7 +2399,7 @@ main {
   }
 }
 
-  @media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {

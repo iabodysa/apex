@@ -1,102 +1,138 @@
-# Apex Training
+# Learn Apex Through the Work
 
-Use these guides on a non-production site. Choose the role track that matches
-the learner's job and follow its links in order. Each track places the
-foundation lessons and operating guides in one curriculum; use the standalone
-pages below only as refreshers.
+Apex training follows real operating journeys. Learners receive a scoped task, complete
+their part, leave evidence, and hand the record to the next role. They do not study menus or
+generic software features in isolation.
 
-## Start and assessment
+Run every exercise on a disposable training site with fictional people, projects, assets,
+contracts, and attachments. Never use production records or personal portal links.
 
-Trainers first prepare and rehearse the disposable site with
-[Trainer Setup and Reset](trainer-setup.md). Every Desk learner then completes
-[Frappe Foundations](foundations.md) before choosing one role track. A
-portal-only Driver skips Foundations and goes directly to
-[Driver and Worker Portals](portals-masar-driver.md).
+## Start here
 
-Allow about three hours for one role track after trainer setup. Pass a Desk
-learner only when they complete their role-owned checkpoint, show the resulting
-record and timeline evidence, and name the next role at each handoff. A learner
-who owns a workflow transition completes its real Workflow Action; another
-learner identifies the documented handoff and confirms that no action for that
-source appears in Action Inbox. A scoped role proves an out-of-scope denial; an
-unscoped role repeats the trainer-rehearsed denied operation. Use the portal
-guide's verification for a Driver. Do not add broader roles to make an
-assessment pass.
+1. The trainer prepares the selected domain with [Trainer Setup and Reset](trainer-setup.md).
+2. Desk learners complete [Follow Work from Request to Proof](foundations.md).
+3. Choose one role track below and follow it in order.
+4. Complete the track checkpoint with the learner's real training role and scope.
+5. Preserve safe evidence, reset the site, and rotate any issued training link.
 
-## Foundation refresher library
-
-1. [Getting Started in Apex](lessons/getting-started.md)
-2. [Records and Workflows](lessons/records-and-workflows.md)
-3. [Search, Filter, and Export](lessons/search-filter-export.md)
+A portal-only worker or driver starts with
+[Worker and Driver Portals](portals-masar-driver.md) instead of the Desk lesson.
 
 ## Role tracks
 
-- [Housing Operations](tracks/housing-operations.md)
-- [Safety Operations](tracks/safety-operations.md)
-- [Fleet Operations](tracks/fleet-operations.md)
-- [Telecom Operations](tracks/telecom-operations.md)
-- [IT Operations](tracks/it-operations.md)
+### Housing Operations
 
-Use only the checkpoints owned by the learner's role, not every checkpoint in
-the linked track.
+For Accommodation Managers, Resident Supervisors, Resident Request Coordinators,
+Maintenance Technicians, and Cleaning Supervisors.
 
-| Learner role | Track and owned checkpoints |
-|--------------|-----------------------------|
-| Accommodation Manager or Resident Supervisor | Housing and Safety: permitted housing, custody, safety, and Building-scoped handoffs |
-| Resident Request Coordinator | Housing: no dedicated workspace; use Awesome Bar to open Resident Request or Maintenance Request |
-| Cleaning Supervisor or Maintenance Technician | Housing: cleaning or prepared-draft work fields only |
-| Procurement Supervisor | Housing: no dedicated workspace; use Awesome Bar to open Goods Receipt or Custody Handover |
-| Safety Officer | Safety: preparation, evidence, and documented handoff only |
-| Fleet Manager, Fleet Project Manager, or Fleet Supervisor | Fleet: only the Project scope, workflow, and operating actions granted to that role |
-| Government Relations Officer | Fleet: compliance and register checkpoints, read-only |
-| Finance Manager | Housing, Fleet, or Telecom: finance review checkpoints only |
-| SIM Operations User | Telecom: Company-scoped contract, SIM, and custody checkpoints |
-| System Manager | IT: provisioning, navigation, settings, and access-support checkpoints |
-| Internal Auditor | Relevant Housing, Safety, Fleet, and Telecom checkpoints, read-only where explicitly granted |
-| Driver | Fleet portal checkpoint only when a reviewed driver-link issuance action exists |
+Learners place a resident, manage a change during the stay, complete a facilities action,
+and prove the assigned-building boundary with a Building-scoped role.
 
-## Operating guides
+[Open the Housing Operations track](tracks/housing-operations.md)
 
-### Housing and facilities
+### Safety Operations
 
-- [Accommodation](accommodation.md) — assign residents, transfer beds, and
-  complete checkout.
-- [Contingent Workers](contingent-workers.md) — distinguish passport-only
-  arrivals, Employees, and accounting Freelancers.
-- [Custody](custody.md) — issue, acknowledge, return, and assess company
-  property.
-- [Maintenance](maintenance.md) — turn reported work into inspected work
-  orders.
-- [Safety](safety.md) — complete safety rounds and follow findings.
-- [Costs and Leasing](costs.md) — maintain leases, utilities, and operational
-  cost records.
+For Accommodation Managers, Resident Supervisors, Safety Officers, and reviewers.
 
-### Fleet and movement
+Learners prepare due work, complete a round, record evidence, and route a finding without
+closing work that remains unresolved.
 
-- [Fleet and Movement](fleet-movement.md) — manage vehicles, drivers,
-  assignments, transport requests, and dispatch.
-- [Fuel](fuel.md) — manage quotas, requests, claims, and exceptions.
-- [Rentals](rentals.md) — receive rented vehicles, accrue cost, and settle
-  periods.
-- [Payments and Approvals](compliance.md) — preserve maker-checker controls at
-  the finance boundary.
+[Open the Safety Operations track](tracks/safety-operations.md)
 
-### Telecom and self-service
+### Fleet Operations
 
-- [Telecom](telecom.md) — manage contracts, SIM cards, custody, and billing
-  drafts.
-- [Driver and Worker Portals](portals-masar-driver.md) — use the shared mobile
-  build through distinct worker and driver entry paths.
-- [Settings and Desk Pages](settings.md) — configure shared behavior and
-  support operational screens.
+For Fleet Managers, Fleet Project Managers, Fleet Supervisors, Government Relations staff,
+Finance reviewers, workers, and drivers.
 
-## Authoritative references
+Learners move a transport need through route planning and dispatch, then handle the vehicle,
+fuel, rental, compliance, or payment decision owned by their role.
 
-- **Role Permissions Manager** (`/app/permission-manager`)
+[Open the Fleet Operations track](tracks/fleet-operations.md)
+
+### Telecom Operations
+
+For SIM Operations Users, Finance reviewers, and Internal Auditors.
+
+Learners connect a telecom contract to its SIM cards, issue and transfer custody, review
+billing, and keep company and cost allocation visible.
+
+[Open the Telecom Operations track](tracks/telecom-operations.md)
+
+### IT Operations
+
+For System Managers and IT staff supporting Apex access, settings, portals, scheduled work,
+and safe incident response.
+
+[Open the IT Operations track](tracks/it-operations.md)
+
+## Short operating lessons
+
+Use these lessons as preparation or refreshers. Each one finishes with an observable Apex
+result.
+
+- [Start a Shift with Assigned Work](lessons/getting-started.md)
+- [Approve a Fuel Request with Separation of Duties](lessons/records-and-workflows.md)
+- [Prioritize the Resident Request Queue](lessons/search-filter-export.md)
+
+## Product guides
+
+### Habitat
+
+- [Accommodation](accommodation.md)
+- [Custody](custody.md)
+- [Maintenance](maintenance.md)
+- [Safety](safety.md)
+- [Costs and Leasing](costs.md)
+
+### Salis
+
+- [Fleet and Movement](fleet-movement.md)
+- [Fuel](fuel.md)
+- [Rentals](rentals.md)
+- [Fleet Compliance and Financial Handoffs](compliance.md)
+- [Worker and Driver Portals](portals-masar-driver.md)
+
+### Logistay
+
+- [Telecom](telecom.md)
+- [Contingent Workers](contingent-workers.md)
+
+### Product administration
+
+- [Settings](settings.md)
+- [Trainer Setup and Reset](trainer-setup.md)
+
+## Passing a learner
+
+Pass the learner when they can:
+
+- open the correct Apex workspace, page, or portal for the job;
+- identify the record and business outcome they own;
+- complete only the action offered to their role;
+- attach or reference safe evidence when the process requires it;
+- name the next role and explain the handoff;
+- show the resulting status, linked record, timeline, or queue change; and
+- prove that an out-of-scope record or action remains unavailable.
+
+Do not grant a broader role to make an exercise pass. A missing action can be the correct
+result when another role owns the decision.
+
+## Evidence rules
+
+- Use fictional identifiers and sanitized files.
+- Exclude personal links, tokens, QR codes, signatures, identity documents, financial data,
+  and real contact details from screenshots and exports.
+- Capture the result and decision, not every click.
+- Delete temporary exports and cohort files at the approved deadline.
+- Preserve submitted history; reset through supported cancellation or the rehearsed training
+  restore procedure.
+
+## Exact system references
+
+Use these only when a trainer or administrator needs to verify the shipped configuration:
+
+- **Role Permissions Manager** at `/app/permission-manager`
 - [Modules, workspaces, and routes](../reference/routes-workspaces.md)
 - [Scheduled automation](../reference/automation.md)
 - [Business glossary](../reference/glossary.md)
 - [Troubleshooting](../reference/troubleshooting.md)
-
-Workspaces and portal links provide navigation. They do not grant record
-permission or replace workflow, DocPerm, or row scope.

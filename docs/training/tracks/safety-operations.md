@@ -1,54 +1,44 @@
 # Safety Operations Track
 
-## Audience
-
-Safety Officers, Accommodation Managers, Resident Supervisors, and staff who
-follow up maintenance or remediation work.
+[Back to training](../README.md)
 
 ## Outcome
 
-Record a building safety round, trace its findings, and follow the resulting
-actions without editing system-written evidence.
+Move one Building safety finding from field evidence to its maintenance handoff
+while preserving maker, reviewer, and audit ownership.
 
-## Prerequisites
+## Roles
 
-- A Safety Officer training account for preparation and review.
-- An Accommodation Manager or Resident Supervisor training account for
-  submission.
-- Trainer-provided Building and Safety Task Catalog records.
-- Building User Permissions where the role is building-scoped.
+Use separate **Safety Officer**, authorized submitting-role, maintenance-owner,
+and **Internal Auditor** accounts with the Building access described in the
+canonical guides.
 
-## Learning path
+## Guide sequence
 
-1. [Frappe Foundations](../foundations.md)
-2. [Safety](../safety.md)
-3. [Maintenance](../maintenance.md)
-4. **Role Permissions Manager** (`/app/permission-manager`)
-5. [Workspace and portal entry points](../../reference/routes-workspaces.md)
+1. Restore the Safety baseline with [Trainer Setup and Reset](../trainer-setup.md).
+2. Complete the round, finding, and evidence rules in [Safety](../safety.md).
+3. Complete the generated-request handoff in [Maintenance](../maintenance.md).
+4. Review the scheduled source and expected result in
+   [Scheduled automation](../../reference/automation.md).
 
-## Practice checkpoint
+## Capstone
 
-On the training site, use a trainer-provided Building. A Safety Officer prepares
-a draft **Safety Round**, its **Safety Task Execution**, and any required
-evidence. An Accommodation Manager or Resident Supervisor reviews and submits
-the execution, then the round. Trace one finding to the system-written finding
-ledger. If follow-up work is needed, identify the separate operational record
-and role that should own it.
+1. Use the prepared due task to record one draft round with a finding that needs
+   maintenance, following the maker rules in the Safety guide.
+2. Change accounts and complete the authorized review and submission.
+3. Open the generated Maintenance Request, name its next owner, and leave it open
+   unless the repair is genuinely completed through the Maintenance guide.
+4. As Internal Auditor, trace the submitted round and execution, finding evidence,
+   maintenance back-link, system-written finding ledger, and actor history.
 
-## Verification
+## Passing evidence
 
-The trainee can identify:
+Show one complete source chain with the correct Building, distinct maker and
+submitter, required evidence, generated maintenance handoff, and unchanged audit
+ledger. The existence of a Maintenance Request is not evidence that the repair is
+complete.
 
-- the Safety Round as the source operating record;
-- the linked task execution and generated finding-ledger evidence;
-- the Safety Officer preparation boundary and the submitting role;
-- the role responsible for review or follow-up;
-- why workspace or portal visibility does not replace DocPerm and Building
-  scope.
+## Related links
 
-## Data safety
-
-Never create false incidents, findings, or license dates in production. Do not
-edit generated ledgers, snapshots, or alerts. Cancel or reverse training records
-only through their supported lifecycle and only when the trainer confirms there
-are no downstream effects.
+- [Modules, workspaces, and routes](../../reference/routes-workspaces.md)
+- [Troubleshooting](../../reference/troubleshooting.md)

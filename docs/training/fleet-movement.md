@@ -1,140 +1,114 @@
-# Fleet and Movement
+# Complete a Fleet Movement in Salis
 
 [Back to the training index](README.md)
 
-## Audience
-
-Fleet desk operators who maintain vehicles and drivers, assign custody, approve
-transport, plan routes, and dispatch trips.
-
 ## Outcome
 
-Complete one project-scoped movement from request to fulfilment while preserving
-the source record, workflow state, vehicle assignment, and generated audit
-records.
+Assign a vehicle to a driver, approve a project-scoped transport request, plan
+the route, dispatch the trip, and close it with a traceable fulfilment record.
 
-## Prerequisites
+## Intended role
 
-- Use a non-production site and a dedicated training `Project`.
-- Prepare one active `Salis Vehicle`, one active `Salis Driver`, and two user
-  accounts so the requester and authorizer are different people.
-- Grant the trainee only the role and Project User Permission needed for the
-  exercise. Check the grant in **Role Permissions Manager**
-  (`/app/permission-manager`), filtered by Salis Vehicle and Salis Driver.
-- Review the shipped Desk and portal entry points in
-  [Modules, Workspaces, and Routes](../reference/routes-workspaces.md).
+- A **Fleet Supervisor** prepares the operational records, validates requests,
+  and dispatches planned trips.
+- A **Fleet Project Manager** or **Fleet Manager** submits assignments, handovers,
+  and route plans and can complete a dispatched trip.
+- A separate **Fleet Supervisor** may use **Authorize (Regional)** when the
+  request stays below the Operations threshold. A **Fleet Manager** uses
+  **Authorize (Operations)** when Salis derives that the higher tier is required.
+- The user named as **Route Supervisor** signs off only the submitted plans
+  assigned to them.
 
-## Native records and controls
+Do not add all of these roles to one learner. Change accounts at each handoff.
 
-Apex uses standard Frappe forms, Submit/Cancel, Workflows, attachments, timeline
-comments, and Version history around these records:
+## Before starting
 
-- `Salis Vehicle` and `Salis Driver` are the fleet masters.
-- `Vehicle Assignment` is the authoritative submitted vehicle-to-driver
-  pairing. The current vehicle and driver fields on the masters are mirrors.
-- `Vehicle Handover` records the custody checklist and signed evidence. It does
-  not replace `Vehicle Assignment`.
-- `Transport Request` owns demand and its approval workflow.
-- `Route Plan` and `Passenger Manifest` hold the planned stops and passengers.
-- `Dispatch Trip` owns execution and its workflow.
-- `Trip Fulfilment Ledger` is generated when a trip completes. Operators do not
-  create or edit it.
+- Work on a non-production site with one training `Project` and the matching
+  Project User Permissions.
+- Prepare one Active `Salis Vehicle` with a seat capacity and current compliance,
+  one Active `Salis Driver` linked to an Active employee who is not on approved
+  leave, and one fictional worker for the passenger list.
+- Prepare separate maker, authorizer, movement, and route-supervisor accounts.
+- Use fictional signed evidence for the handover. Do not use a production plate,
+  driver, worker, route, or attachment.
 
-## Operational flow
+## End-to-end exercise
 
-### Maintain and assign the fleet
+1. As the Fleet Supervisor, confirm the vehicle's Project, status, capacity,
+   odometer, and compliance documents. Confirm the driver's Project, status,
+   licence, and employee link.
+2. Create an Active `Vehicle Assignment` for the vehicle and driver. A Fleet
+   Project Manager or Fleet Manager submits it. Confirm that the vehicle's
+   **Current Driver** and the driver's **Current Vehicle** match the submitted
+   assignment.
+3. Record physical custody in `Vehicle Handover`. Use the assigned driver as
+   **To Driver**, complete the checklist, attach signed evidence, and submit it
+   with an authorized account. If **Discrepancy** is selected, enter discrepancy
+   notes and route the damage decision through `Vehicle Damage Write-Off`.
+4. As the maker, create a `Transport Request` of type **Site Transport**. Enter
+   the training Building and Project, pickup time, locations, and the fictional
+   worker. Use **Validate**.
+5. Change to a different authorized account. Use **Authorize (Regional)** when
+   **Needs Operations** is clear; otherwise a Fleet Manager uses **Authorize
+   (Operations)**. The request is now `Approved`.
+6. Create a `Route Plan` linked to the request. Add the vehicle, driver, Project,
+   assigned Route Supervisor, and ordered stops. A Fleet Project Manager or
+   Fleet Manager submits it. Submission moves the request to `Scheduled`.
+7. As the assigned Route Supervisor, open **Masar Supervisor**, review the
+   driver, vehicle, and stops, then approve the plan. If the plan is wrong,
+   reject it with a reason and return it to the planner; do not dispatch it.
+8. Create a `Passenger Manifest` when a named boarding list is required. Do not
+   enter the same Employee twice.
+9. As the Fleet Supervisor, create the `Dispatch Trip` in `Planned`, link the
+   route, vehicle, driver, and date, then use **Dispatch**.
+10. After the driver has finished the training run, enter completion notes. If
+    odometer readings are used, enter both values and keep the end reading at or
+    above the start. A Fleet Project Manager or Fleet Manager uses **Complete**.
 
-1. Set the vehicle plate, category, Project, status, ownership, seat capacity,
-   and compliance documents on `Salis Vehicle`.
-2. Link `Salis Driver` to the employee and set the Project, licence details, and
-   status.
-3. Submit `Vehicle Assignment` with the vehicle, driver, Project, and start
-   date. The controller blocks overlapping active assignments and drivers who
-   are stopped, released, inactive, or on approved leave.
-4. Use `Vehicle Handover` when physical custody changes. Signed evidence is
-   required before submit, and discrepancy notes are required when a
-   discrepancy is recorded.
+The completed trip fulfils the linked request, records the assigned vehicle and
+driver, advances the vehicle odometer when the new value is higher, and creates
+one `Trip Fulfilment Ledger` row.
 
-Expired vehicle compliance can warn or block assignment and dispatch according
-to `Salis Settings`. Do not bypass that decision by editing the master mirrors.
+## Decisions and exceptions
 
-### Approve a transport request
+- Use **Site Transport** for accommodation-to-project movement,
+  **Inter-City Relocation** for a move containing at least one worker, and
+  **Administrative Trip** for a destination-only trip without a worker manifest.
+- Salis derives worker count and the required authority tier. Do not try to lower
+  **Needs Operations**, and never authorize a request you created or requested.
+- `Vehicle Assignment` is the authoritative pairing. `Vehicle Handover` records
+  physical custody; when custody changes to another driver, create the matching
+  assignment rather than relying on the handover mirror alone.
+- Expired vehicle compliance warns or blocks assignment and dispatch according
+  to `Salis Settings`. Resolve the compliance issue instead of changing a mirror
+  field.
+- Route-supervisor approval is a separate operational sign-off. It does not
+  advance the `Transport Request` or `Dispatch Trip`, and Salis does not block a
+  dispatch merely because that sign-off is still Pending. Check it before
+  dispatch.
+- The driver's portal completion records a `Trip Start Log`; it does not complete
+  the `Dispatch Trip`. The Fleet Project Manager or Fleet Manager owns that final
+  workflow action.
+- Cancelling a completed trip is a Fleet Manager action. It returns the request
+  to `Scheduled`, removes the fulfilment ledger row, and reverses boarding, but
+  it deliberately does not reduce the vehicle odometer.
 
-Choose the transport type that matches the work:
+## Evidence of completion
 
-- Site Transport requires a Building and Project.
-- Inter-City Relocation requires at least one worker.
-- Administrative Trip requires a destination and cannot carry a worker
-  manifest.
+- The submitted `Vehicle Assignment` and both fleet masters show the same pair.
+- The `Route Plan` is submitted and its supervisor decision is `Approved`, with
+  the deciding user and time recorded.
+- The `Transport Request` is `Fulfilled` and links the route, trip, vehicle, and
+  driver.
+- The `Dispatch Trip` is submitted in `Completed` with completion notes.
+- One `Trip Fulfilment Ledger` row points to the trip, and the vehicle odometer
+  shows the completed reading.
+- The learner can show that another Project is absent or denied under the scoped
+  account.
 
-The `Transport Request Workflow` follows:
+## Related links
 
-`New` → `Validated` → `Approved` → `Scheduled` → `Fulfilled`
-
-A request can also be rejected, reopened, or cancelled through the available
-workflow action. The system derives worker count and authority tier; a client
-cannot lower the required approval. The requester cannot authorize their own
-request.
-
-### Plan and execute the trip
-
-1. Create a `Route Plan` from the approved request, add ordered stops, vehicle,
-   driver, and Project, then submit it. Submission moves the linked request to
-   `Scheduled`.
-2. Add a `Passenger Manifest` when a named passenger list is required. Duplicate
-   employees are rejected.
-3. Create `Dispatch Trip` in `Planned`, link the route, vehicle, driver, and trip
-   date, then use the workflow:
-
-   `Planned` → `Dispatched` → `Completed`
-
-4. Enter completion notes. If odometer values are used, enter both start and end
-   and keep the end value at or above the start value.
-5. Completing the trip submits it, advances the vehicle odometer, moves the
-   request to `Fulfilled`, and writes one `Trip Fulfilment Ledger` row.
-
-Use `Fleet Control` for the scoped vehicle view and `Salis Dispatch Board` for
-today's vehicles, drivers, trips, and open requests. Use `Worker Transport Plan`
-before dispatch and the **Transport Requests Served %** card on the Salis
-workspace after fulfilment.
-
-Automation that checks idle vehicles, attendance, utilisation, and boarding is
-listed in the [Scheduled Automation Reference](../reference/automation.md).
-
-## Non-production exercise
-
-1. Create training vehicle and driver masters under the training Project.
-2. Submit a `Vehicle Assignment`.
-3. Create an Administrative Trip `Transport Request` with a future pickup time,
-   destination, and the training Project.
-4. Use the requester account to validate it and a different authorized account
-   to approve it.
-5. Submit a one-stop `Route Plan` linked to the request.
-6. Create a `Dispatch Trip`, dispatch it, then complete it with notes and a small
-   valid odometer increase.
-
-Do not add real employees to the manifest and do not use a production vehicle,
-driver, Project, or route.
-
-## Verification
-
-- The assignment is submitted and both fleet masters show the same pairing.
-- The request ends in `Fulfilled` and links the route, vehicle, driver, and trip.
-- The trip is submitted in `Completed`.
-- The vehicle odometer reflects the completed trip.
-- Exactly one generated `Trip Fulfilment Ledger` row points to the trip.
-- The Project-filtered board and reports do not expose another Project.
-
-## Cleanup and data safety
-
-Cancel records through their native lifecycle in reverse order:
-
-1. Cancel the completed `Dispatch Trip`; the request returns to `Scheduled` and
-   the system removes or reverses its generated trip effects.
-2. Cancel the `Route Plan`; the request returns to `Approved`.
-3. Cancel the `Transport Request` through its workflow.
-4. Cancel the `Vehicle Assignment`.
-5. Delete only unused training drafts and masters that have no remaining links.
-
-Never edit generated ledgers, change `docstatus` directly, or delete submitted
-production records.
+- [Fuel operations](fuel.md)
+- [Masar, driver, and supervisor journeys](portals-masar-driver.md)
+- [Fleet compliance and financial handoffs](compliance.md)
+- [Modules, workspaces, and routes](../reference/routes-workspaces.md)

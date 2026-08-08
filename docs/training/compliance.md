@@ -1,144 +1,102 @@
-# Compliance and Financial Controls
+# Manage Fleet Compliance and Financial Handoffs
 
 [Back to the training index](README.md)
 
-## Audience
-
-Fleet operators, incident reviewers, managers, and Finance reviewers.
-
 ## Outcome
 
-Choose the correct record for compliance, suspension, incident, recovery,
-cost transfer, and payment so one event is not counted or paid twice.
+Record a vehicle compliance issue and incident with the correct operational
+records, preserve maker-checker approval, and hand a payable item to Finance
+without confusing an operational memo with accounting or payroll.
 
-## Prerequisites
+## Intended role
 
-- Use a non-production site with a training `Project`, `Salis Vehicle`, `Salis
-  Driver`, employee, company, and cost center.
-- Prepare separate creator and reviewer accounts.
-- Keep salary deductions and General Ledger auto-submit disabled for exercises.
-- See **Role Permissions Manager** (`/app/permission-manager`) and
-  [Modules, Workspaces, and Routes](../reference/routes-workspaces.md).
+- **Fleet Supervisors** prepare compliance, suspension, incident, write-off,
+  recovery, and payment-request records within their Project scope.
+- **Fleet Project Managers** prepare cross-Project cost transfers and, with Fleet
+  Managers, submit suspensions. A Fleet Manager submits incidents and owns
+  Operations-tier approvals and reversals.
+- **Government Relations Officers** and **Internal Auditors** inspect the records
+  granted to them; they do not perform fleet workflow actions.
+- **Finance Managers** approve `Salis Payment Request` records only. Payroll and
+  Accounts own any later HRMS or ERPNext transaction.
 
-## Native records and controls
+## Before starting
 
-- `Salis Vehicle Compliance` is a child table on `Salis Vehicle`.
-- `Vehicle Suspension` and `Driver Suspension` are submitted state-change
-  records whose cancellation restores state when safe.
-- `Vehicle Incident` is the submitted event of record.
-- `Vehicle Damage Write-Off`, `Driver Clearance`, `Movement Cost Recovery`,
-  `Movement Cost Transfer`, and `Salis Payment Request` use native Frappe
-  Workflows where approval is required.
-- `Employee Advance`, its native payment action, and `Additional Salary` handle
-  employee recovery.
+- Use a non-production site with a training Project, vehicle, driver, employee,
+  Company, and Cost Center.
+- Prepare separate fleet maker, fleet approver, and Finance Manager accounts.
+- Keep **Enable GL Entry Posting** and salary deductions off for this exercise.
+- Use fictional reports, photos, signatures, amounts, and reference numbers.
+  Never rehearse with a real accident, worker debt, or payment.
 
-## Operational flow
+## End-to-end exercise
 
-### Maintain compliance
+1. On the training `Salis Vehicle`, add one future-dated and one expired row to
+   **Compliance Documents**, then save. Confirm that each row is classified and
+   the vehicle shows the worst compliance state and its next expiry date.
+2. As the fleet maker, create an Accident `Vehicle Incident` with description and
+   fictional evidence. Leave **Recover Cost from Driver** clear. A Fleet Manager
+   submits the incident. The Accident records the event but does not stop the
+   vehicle.
+3. If the training scenario says the vehicle is unsafe, create a separate
+   `Vehicle Suspension` with reason **Accident** and evidence. A Fleet Project
+   Manager or Fleet Manager submits it and confirms the vehicle is `Stopped`.
+4. Create a `Vehicle Damage Write-Off` linked to the incident. Enter the proposed
+   disposition, estimated cost, and evidence, then use **Submit for Review**. A
+   different authorized user applies the Regional or Operations action shown by
+   the workflow. Confirm that the approved case is linked back to the incident.
+5. Create a small `Salis Payment Request` for the approved operational expense,
+   linking the incident or write-off as its reference. Use **Submit to Finance**.
+6. Change to the Finance Manager account, review the source, Company, Cost Center,
+   Project, supplier, and amount, then use **Approve (Finance)**. Stop at
+   `Approved by Finance`; do not use **Create Payment** or **Mark Paid** in this
+   exercise.
 
-Add Registration, Insurance, Periodic Inspection, Operating Card, or Other rows
-to the vehicle's Compliance Documents table. Each row carries an expiry date and
-optional attachment. Saving `Salis Vehicle` recalculates each row's status, the
-vehicle's worst compliance status, and its next expiry date.
+## Decisions and exceptions
 
-Maintain the licence number and expiry date on `Salis Driver`. Scheduled checks
-raise alerts; they do not renew documents. See
-[Scheduled Automation Reference](../reference/automation.md).
+- A compliance row proves a dated document. `Vehicle Suspension` changes service
+  state. `Vehicle Incident` records the event. `Vehicle Damage Write-Off` records
+  the disposition and authority. Do not replace one with another.
+- A submitted Theft incident stops the vehicle and clears its driver. An Accident
+  does neither; use a suspension when an Accident also requires a stop.
+- `Driver Clearance` is for fleet exit clearance, not HR end-of-service or visa
+  clearance. **Clear** is available only after vehicle, fuel chip, and custody are
+  returned and open fuel exceptions and movement recoveries are resolved. A
+  cleared driver becomes `Released` and their driver portal credential is revoked.
+- `Movement Cost Recovery` documents an operational loss and its authority. It
+  does not deduct wages or post accounting. `Movement Cost Transfer` is also a
+  no-GL memo; `Posted (memo)` is not a journal entry.
+- For a driver-related incident that will be recovered from pay, use the
+  `Vehicle Incident` recovery fields once, with the employee, amount, installment,
+  and worker signature. Submission may create one HRMS `Employee Advance` when
+  Accounts is configured. Only after the advance is actually paid and the legally
+  reviewed Damage deduction policy is enabled can the monthly process prepare a
+  draft `Additional Salary`; Payroll reviews and submits it. Do not duplicate the
+  same event in `Movement Cost Recovery`.
+- `Salis Payment Request` itself posts no General Ledger entry. **Create Payment**
+  builds the target configured in `Payment Routing Settings`; auto-submit also
+  requires the app-wide GL gate. The shipped gates are off by default. Finance
+  must validate the target and field map before using that action, and **Mark
+  Paid** should follow evidence of the actual accounting payment.
+- Cancelling an incident after its Employee Advance carries a paid or recovered
+  amount is refused. Reverse the accounting or payroll transaction through its
+  own lifecycle first.
 
-### Record a stop, incident, and disposition
+## Evidence of completion
 
-- Use `Vehicle Suspension` to take a vehicle out of service. Accident and
-  Violation stops require evidence. Safe cancellation restores the prior state.
-- Use `Driver Suspension` to stop a driver and release its vehicle. Safe
-  cancellation restores prior links.
-- Use `Vehicle Incident` for an Accident or Theft. An Accident records the event;
-  stop the vehicle separately when required. A submitted Theft stops the vehicle
-  and clears its driver.
-- Use `Vehicle Damage Write-Off` for the disposition and authority decision.
-  Evidence is required beyond `Open`, and higher estimated cost can require the
-  higher authority tier.
+- The vehicle shows the expected worst compliance state and next expiry.
+- The incident, suspension, and write-off remain separate, linked records with
+  their own evidence and actor history.
+- The vehicle is `Stopped` only because of the submitted suspension.
+- The write-off shows the derived authority tier and a different approving user.
+- The payment request is `Approved by Finance`, with a Finance approver different
+  from the requester and no linked payment document.
+- No `GL Entry`, `Employee Advance`, or `Additional Salary` was created by the
+  exercise.
 
-Do not use a status field as a substitute for the source incident or suspension
-record.
+## Related links
 
-### Clear a driver
-
-`Driver Clearance` follows:
-
-`Open` → `In Progress` → `Cleared`
-
-Workflow can also block, reopen, or cancel it. Clearance requires return of the
-vehicle, fuel chip, and custody, plus resolution of open `Fuel Exception Case`
-and `Movement Cost Recovery` records. Submitting `Cleared` releases the driver.
-
-### Recover an employee-paid incident cost
-
-For an incident where the company pays a driver-related amount and will recover
-it from salary:
-
-1. Record the decision on `Vehicle Incident`.
-2. Set the employee, recovery amount, agreed installment, and worker signature.
-3. Submit the incident. The system attempts to create exactly one linked
-   `Employee Advance`.
-4. Finance pays it through the native Employee Advance action.
-5. After payment, the enabled `Salary Deduction Policy` Damage rule allows the
-   monthly process to create a draft `Additional Salary` installment.
-6. Payroll reviews and submits the installment. HRMS updates the advance's
-   recovered balance and reverses it if the installment is cancelled.
-
-Verify the incident's Recovery Advance link. Missing Accounts setup can leave
-the incident submitted without an advance. Do not duplicate the incident with
-`Movement Cost Recovery`.
-
-### Route other cost controls and payments
-
-- `Movement Cost Recovery` records another operational loss and its approval.
-  It does not deduct wages or post accounting entries.
-- `Movement Cost Transfer` records a cross-Project or cross-cost-center
-  reallocation. `Posted (memo)` is not a General Ledger posting.
-- `Salis Payment Request` follows:
-
-  `Draft` → `Pending Finance` → `Approved by Finance` → `Paid`
-
-  The requester cannot approve or pay it. Stop after Finance approval in this
-  release. The setup wizard selects a target DocType but does not create its
-  field map. Keep target auto-submit off and do not use **Create Payment** until
-  Finance has reviewed and validated a complete `Payment Entry` mapping on the
-  target site. Do not select `Payment Order` or a custom target.
-
-## Non-production exercise
-
-1. Add one future-dated and one expired compliance row to a training vehicle,
-   save it, and inspect the calculated vehicle status and next expiry.
-2. Submit a training `Vehicle Suspension`, confirm the vehicle becomes Stopped,
-   then cancel it and confirm the prior status returns.
-3. Submit an Accident `Vehicle Incident` with evidence and
-   `Recover Cost from Driver` left off.
-4. Create a `Vehicle Damage Write-Off` linked to the incident and move it through
-   review with a different authorized user.
-5. Create a small `Salis Payment Request`, submit it to Finance, and approve it
-   with a different Finance user.
-
-Stop before `Paid`, Create Payment, or any employee-recovery option.
-
-## Verification
-
-- Vehicle compliance shows the worst dated row and the correct next expiry.
-- Suspension and cancellation preserve an auditable state change.
-- Incident and write-off remain separate and linked.
-- Workflow actions, not direct status edits, record each approval.
-- Payment requester and Finance approver are different users.
-- No exercise action creates a `GL Entry`, `Employee Advance`, or
-  `Additional Salary`.
-
-## Cleanup and data safety
-
-1. Cancel the approved training payment request before it reaches `Paid`.
-2. Cancel the write-off, then cancel the incident.
-3. Confirm the suspension is already cancelled.
-4. Remove only the training compliance rows and delete unlinked drafts or
-   masters.
-
-If a payment target, paid Employee Advance, or submitted salary installment
-exists, stop and use the native accounting or payroll reversal. Never delete
-financial history or force a workflow status.
+- [Fleet and movement](fleet-movement.md)
+- [Fuel operations](fuel.md)
+- [Rental fleet](rentals.md)
+- [Scheduled automation](../reference/automation.md)

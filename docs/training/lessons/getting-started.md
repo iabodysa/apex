@@ -1,64 +1,44 @@
-# Getting Started in Apex
+# Start a Shift with Assigned Work
 
-## Audience
+[Back to foundations](../foundations.md)
 
-New Desk operators, reviewers, and site administrators.
-Portal-only Drivers are outside this lesson and use the
-[Driver and Worker Portals](../portals-masar-driver.md) guide.
+## Business outcome
 
-## Outcome
+Find the resident request that needs this user's attention, understand its operating context,
+and begin the shift without missing urgent or out-of-scope work.
 
-Use the exact available entry path supplied for a trainer-selected authorized
-DocType, then distinguish navigation from permission. The path may be a named
-workspace that contains the route or the exact Awesome Bar DocType.
+## Journey and role
 
-## Prerequisites
+The learner is a **Resident Request Coordinator**. The trainer prepares a fictional
+`Resident Request` in **Assigned** state with an open task allocated to the learner.
 
-- A training account with the same roles as the intended job.
-- Access to a non-production training site.
-- The [module, workspace, and route reference](../../reference/routes-workspaces.md).
-- The **Role Permissions Manager** (`/app/permission-manager`).
-- The [training role map](../README.md#role-tracks).
+The record concerns one permitted Building and names the learner in **Assigned To**. A second
+request belongs to another Building and is used only to confirm scope.
 
-## Core concepts
+## Start the shift
 
-**Desk** is Frappe's signed-in working area. A **Workspace** groups shortcuts,
-reports, charts, and onboarding steps. A **DocType** defines a business record.
-A portal is a focused web interface for a specific audience.
+1. Open **My Tasks**, then open **Action Inbox**.
+2. Find the assigned resident request. Confirm that the task and source record have the same
+   reference.
+3. Read the Building, Room, category, priority, description, source channel, and current
+   assignee before choosing any action.
+4. Confirm that the prepared AC category should become a linked `Maintenance Request` and
+   name the role that will own the resulting maintenance work.
+5. Do not perform the conversion in this lesson. Return to **Action Inbox** and confirm that
+   the item remains available for the shift.
+6. Try the out-of-scope request supplied by the trainer. It must be unavailable.
 
-Seeing a workspace, shortcut, page, or portal does not grant access to its
-records. Frappe DocPerm, workflow rules, and Apex row scope decide what the user
-can read or change.
+Never broaden the account's role or Building access to make a task appear.
 
-Use the **Awesome Bar** to find a DocType or page when you know its name. Use the
-workspace when you need the normal business path and related context.
+## Expected state and evidence
 
-## Exercise
+The `Resident Request` remains **Assigned** and unchanged. The learner can show:
 
-1. Sign in with the training account.
-2. Ask the trainer for one authorized DocType and its exact available entry
-   path from the training role map and current Desk.
-3. If the supplied path names a workspace that contains the route, open that
-   workspace and follow its navigation to the selected DocType.
-4. Otherwise, use the supplied exact Awesome Bar DocType even when the role has
-   another assigned workspace.
-5. Open the selected List view and one record the account is allowed to read.
-6. Identify the screen as Desk rather than a portal, then compare its visible
-   navigation with the canonical permission reference.
-7. Return to the starting workspace or Awesome Bar entry without changing the
-   record.
+- the open task and its matching source record;
+- the permitted Building and current assignee;
+- the request's category, priority, and correct target record;
+- the next responsible role; and
+- denied access to the second Building.
 
-## Verification
-
-The learner can identify:
-
-- the exact workspace route or Awesome Bar entry used to reach the record;
-- the trainer-selected authorized DocType that stores the record;
-- whether the screen is Desk or a portal;
-- why visible navigation is not proof of read, write, or submit access.
-
-## Cleanup and data safety
-
-This exercise is read-only and creates no records. Do not change roles, User
-Permissions, or existing business records to make a training screen visible.
-Report an access mismatch to the trainer or administrator.
+The business result is a correctly understood work item ready for action, with no premature
+status change or duplicate target record.

@@ -1,142 +1,104 @@
-# Driver and Worker Portals
+# Run Masar, Driver, and Route Supervisor Journeys
 
-[Back to training](README.md)
-
-## Audience
-
-Workers, drivers, supervisors who issue worker access links, and support staff
-who troubleshoot the mobile experience.
+[Back to the training index](README.md)
 
 ## Outcome
 
-Use the worker portal for one person, explain what the worker and driver
-experiences share, and protect every issued personal link.
+Complete one training journey from route-supervisor sign-off through worker
+boarding and driver execution while keeping every personal link private and every
+action bound to the correct person or assigned route.
 
-## Prerequisites
+## Intended role
 
-- A non-production training site.
-- One active Employee and one active Salis Driver created for training.
-- A trainer-issued worker access link. A driver link is optional until a
-  reviewed Desk issuance action is available.
-- A demo housing assignment, transport request, and driver trip where the
-  exercise needs them.
-- [Portal routes](../reference/routes-workspaces.md#served-portal-routes) and
-  **Role Permissions Manager** (`/app/permission-manager`).
+- An active **Employee** uses **Masar** through a personal worker link.
+- An active **Salis Driver** uses **Salis Driver** through a separate personal
+  driver link.
+- A signed-in **Fleet Supervisor**, **Fleet Project Manager**, or **Fleet Manager**
+  uses **Masar Supervisor**, but sees and acts only on submitted `Route Plan`
+  records assigned to their User.
+- Accommodation or HR roles issue worker links within their Building authority;
+  fleet roles issue driver links within their Project authority.
 
-## One build, two experiences
+## Before starting
 
-The Worker and Driver entry pages load the same built mobile package. The entry
-type selects either the worker screens or the driver screens:
+- Use fictional records on a non-production site.
+- Prepare an Active Employee with a submitted housing assignment and a scheduled
+  training transport request.
+- Prepare an Active driver with a submitted vehicle assignment, an enabled driver
+  portal, and a training trip. Submit its Route Plan with the supervisor account
+  in **Route Supervisor**.
+- Give the worker and driver separate private browser sessions. Never paste a
+  link or QR into a ticket, screenshot, chat room, training note, or test output.
 
-- **Worker** opens the Masar experience.
-- **Driver** opens the driver experience.
+## End-to-end exercise
 
-The shared package does not merge their authority. Worker and driver links are
-bound to different subject types, and each server call resolves that subject
-before reading or writing records. The browser does not choose an Employee or
-driver identifier.
+1. From the worker's `Housing Assignment`, an authorized issuer uses **Issue
+   Masar Link** and delivers it through the approved private channel.
+2. From `Salis Driver`, an authorized fleet issuer uses **Driver Portal > Show
+   Portal Link** and delivers that link separately. Use **Rotate Portal Link**
+   only when a fresh credential is intended; it invalidates the previous link.
+3. The assigned route supervisor signs in at **Masar Supervisor**, reviews the
+   route, vehicle, driver, and ordered stops, then approves the submitted plan.
+4. The worker opens Masar and confirms their own name, bed, next ride, and route.
+   They open their boarding pass. When the vehicle is at their pickup stop, they
+   may use **I'm at the pickup** to confirm boarding.
+5. The driver opens Salis Driver, confirms their own profile and assigned vehicle,
+   and checks in. On the assigned dispatched trip, they use **Start**, board the
+   training worker by scanning the pass or using the manual list, mark each stop,
+   then use **Complete** and check out.
+6. While the trip page remains active and the device grants location permission,
+   the route supervisor checks the live boarding count and driver position. A
+   missing position is a valid no-location state, not permission to enter a
+   location manually.
+7. A Fleet Project Manager or Fleet Manager completes the `Dispatch Trip` in
+   Desk. The worker then rates that completed trip once.
 
-A visible tab, route, or button is navigation only. The server still checks the
-personal identity, active status, record ownership, and applicable business
-state.
+## Decisions and exceptions
 
-## Worker path
+- A personal link is a bearer credential. The person opening it is not asked to
+  choose an Employee, driver, trip, or Project; the link determines the identity.
+  A worker link cannot be reused as a driver link or vice versa.
+- Worker access is available only to an Active Employee. A `Temporary Worker`
+  must first be linked to a permanent Employee. Driver access is available only
+  while the `Salis Driver` is Active and the portal is enabled.
+- If a driver link is exposed or a device is lost, use **Revoke Portal Link** on
+  `Salis Driver` immediately. Suspension, clearance, or changing the driver to a
+  non-Active status also revokes it. Reissue only after the incident is closed.
+- There is no equivalent worker **Revoke Portal Link** action in the current Desk
+  UI. Rotate an exposed worker link so the old one fails, and involve the site
+  administrator when all access must end while the Employee remains Active.
+  Making the Employee non-Active revokes the worker link automatically.
+- Workers can view their profile, accommodation, custody, transport, boarding,
+  resident requests, and completed-trip rating. They can request Site Transport
+  or Inter-City Relocation, but not an Administrative Trip.
+- Drivers can record attendance and their own trip execution, boarding, stops,
+  fuel requests, vehicle problems, support conversations, licence-renewal
+  requests when due, and clearance status. Their **Complete** action closes the
+  `Trip Start Log`; it does not complete the `Dispatch Trip` workflow.
+- Route-supervisor approval is a one-time sign-off on a submitted plan. It does
+  not schedule, dispatch, or complete the trip. A rejection requires a reason and
+  returns the plan to operations for correction.
+- Driver location begins after **Start** only when the browser grants location
+  access and the trip page remains active. The supervisor view marks an old fix
+  as stale; worker ETA and the map cannot promise a current position without a
+  recent fix.
 
-An active Employee can use Masar to:
+## Evidence of completion
 
-- view their profile and document-expiry notices;
-- view their current accommodation and custody;
-- view transport, route, boarding, and trip history;
-- request transport and confirm boarding where the trip state allows it;
-- raise and track resident requests, including an optional photo;
-- rate a completed trip; and
-- notify HR when the Iqama-expiry action is available.
+- Masar displays only the intended Employee; Salis Driver displays only the
+  intended driver and assigned vehicle.
+- The submitted Route Plan records `Approved`, the assigned supervisor, and the
+  decision time.
+- `Driver Attendance` records the training check-in and check-out.
+- `Trip Start Log` records Started and Completed execution, and boarding evidence
+  identifies the training worker without duplication.
+- The staff-owned `Dispatch Trip`, not the driver action, ends in `Completed`.
+- The worker's rating links to that completed trip.
+- No personal link, QR, token, or cookie value appears in the retained evidence.
 
-A Temporary Worker cannot receive a worker portal link. Complete the
-[Temporary Worker linking flow](contingent-workers.md) first.
+## Related links
 
-## Driver path
-
-An active Salis Driver can use the driver experience to:
-
-- view their profile, assigned vehicle, compliance dates, and clearance state;
-- check in and out, with an optional shift photo;
-- view, start, board, navigate, and complete assigned trips;
-- view route stops and report stop progress;
-- submit a fuel request and review their own requests;
-- raise, read, and reply to support tickets;
-- report a vehicle problem or request licence renewal when due; and
-- download a clearance certificate after clearance is issued.
-
-Actions remain limited to the driver resolved from the personal link. A driver
-cannot select another driver or trip outside that identity.
-
-## Issuing and supporting access
-
-1. Confirm that the Employee is Active.
-2. Create a new **Masar Worker Token**.
-3. Set **Holder Type** to **Worker**, **Worker Type** to **Employee**, and
-   **Worker** to the intended Employee, then Save.
-4. Use whichever **Issue Link and QR** or **Rotate Link and QR** action is
-   displayed. Either action generates a fresh link and invalidates any previous
-   link. The label depends on whether the user's form can read the
-   permission-level-one token field, not on lifecycle state.
-5. **Enabled**, **Expires On**, and the credential fields are read-only. Do not
-   edit them or the database to change access.
-6. The current Desk UI has no reviewed driver-link issuance action. Do not work
-   around it with direct API calls or hand-built URLs.
-7. Share the worker link only through the approved private channel.
-8. Ask the person to open the link on their own device and confirm their name.
-9. If the link is exposed or the device changes hands, close the affected
-   session, generate a fresh link with the displayed action, and notify the site
-   administrator or security owner through your organization's
-   credential-incident procedure. Confirm that the old link is rejected and the
-   incident is recorded without the credential.
-10. If access must end, escalate to the site administrator. This release has no
-    reviewed Disable or Set Expiry action on the form; revocation follows the
-    approved administrative process.
-11. Do not copy links into tickets, screenshots, chat rooms, or training notes.
-
-Worker issuance can be restricted by Building. Use the
-**Role Permissions Manager** (`/app/permission-manager`) for the current role and
-row-scope rules.
-
-## Exercise
-
-1. Open the training worker link in a private browser window.
-2. Confirm the expected Employee name, accommodation, and next transport.
-3. Create one low-priority resident request with `TRAINING` in the subject.
-4. Confirm that driver-only actions are absent from the worker experience.
-
-When a later release provides reviewed Desk issuance, the trainer may extend
-the exercise:
-
-1. Open the training driver link in a new private window.
-2. Confirm the expected driver, vehicle, and assigned trip.
-3. Raise one `TRAINING` support ticket without starting or completing a trip.
-4. Verify that worker-only actions are absent from the driver experience.
-
-## Verification
-
-The learner can show that:
-
-- both entry paths use one visual foundation but different screen sets;
-- the displayed worker matches the issued link;
-- worker requests are stamped to the correct identity;
-- changing navigation does not change record authority; and
-- no personal link appears in notes, screenshots, or logs.
-
-When the optional driver exercise is available, also verify the displayed
-driver and the identity stamped on the support ticket.
-
-## Cleanup and data safety
-
-Use fictional training records only. Close the training request and any
-optional ticket through their normal lifecycle, close private browser sessions,
-then follow the pre-token baseline reset in
-[Trainer Setup and Reset](trainer-setup.md). The form has no reviewed Disable or
-Set Expiry action; escalate to the site administrator for approved revocation
-when access must end. If a link was exposed before reset, use the incident flow
-above. Do not test another person's link, copy a link between worker and driver
-entry paths, or use production attendance, boarding, fuel, or clearance actions
-for practice.
+- [Fleet and movement](fleet-movement.md)
+- [Fuel operations](fuel.md)
+- [Trainer setup and reset](trainer-setup.md)
+- [Portal routes and audiences](../reference/routes-workspaces.md#served-portal-routes)

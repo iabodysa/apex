@@ -1,71 +1,67 @@
 # Housing Operations Track
 
-## Audience
-
-Run this as a multi-account track. Accommodation Managers, Resident
-Supervisors, Resident Request Coordinators, Cleaning Supervisors, and
-Maintenance Technicians complete only their role-owned checkpoints. A System
-Manager provisions the draft Maintenance Work Order but is not a learner.
+[Back to training index](../README.md)
 
 ## Outcome
 
-Trace a resident's housing journey from reusable masters through assignment,
-custody, service requests, and checkout across controlled role handoffs.
+Keep one resident's stay controlled from arrival to a ready room: place the resident,
+issue company property, route a facilities fault, return the property, check out, and
+restore the room for use.
 
-## Prerequisites
+## Cohort
 
-- Separate training accounts for each participating housing role.
-- Trainer-provided Site, Building, Room, Bed, resident, and item records.
-- A safe draft Maintenance Work Order linked to a training Maintenance Request
-  and provisioned by System Manager.
-- Building User Permissions where the role is building-scoped.
+Run the track with separate accounts for **Accommodation Manager**,
+**Resident Request Coordinator**, **Maintenance Technician**, and
+**Cleaning Supervisor**. A **System Manager** performs the current work-order creation
+and submission handoff, then signs out.
 
-## Learning path
+Use a disposable training site with fictional people and assets. Give Building access to
+the roles that are scoped by Building, and prepare only sanitized evidence. Accommodation
+Manager and System Manager are oversight roles; do not claim they are Building-limited.
 
-1. [Frappe Foundations](../foundations.md)
-2. [Accommodation](../accommodation.md)
-3. [Contingent Workers](../contingent-workers.md) — optional for cohorts that
-   receive passport-only arrivals before an Employee exists.
-4. [Custody](../custody.md)
-5. [Maintenance](../maintenance.md)
-6. [Costs and Leasing](../costs.md)
-7. **Role Permissions Manager** (`/app/permission-manager`)
+## Learning sequence
 
-## Practice checkpoint
+Complete these guides in order. Each guide teaches its own controls and exceptions; do not
+repeat those steps here.
 
-On the training site, trace one demo resident through an available bed,
-assignment, issued article, maintenance request, return, and checkout.
+1. [Accommodation Operations](../accommodation.md) — place the resident and prove that the
+   selected Bed becomes occupied.
+2. [Custody Operations](../custody.md) — issue one stocked article and prove who holds it.
+3. [Maintenance Operations](../maintenance.md) — turn the resident's reported fault into
+   completed work with the correct maker, approver, and technician.
+4. Return to [Accommodation Operations](../accommodation.md) — return all custody, check the
+   resident out, and move the Room through cleaning to readiness.
 
-- Accommodation Manager or Resident Supervisor traces the housing and custody
-  records that their account can read.
-- Resident Request Coordinator records and triages the request, then hands it
-  to the housing team.
-- Cleaning Supervisor submits the assigned Cleaning Log checkpoint.
-- The trainer signs in as System Manager, opens and verifies the prepared draft
-  Maintenance Work Order, records its handoff, and signs out. Do not create a
-  second Work Order. Never lend that account or add its role to a learner.
-- Maintenance Technician updates only the exercise's actual dates, completion
-  notes, and sanitized completion photo on that draft. The learner does not
-  submit, cancel, add procurement cost, or change the source link.
+## Capstone
 
-Use each record's timeline to explain its owned Save or Submit action. Change
-accounts at handoff; do not add roles to one learner account.
+Give the cohort one scenario: a resident reports a leaking tap while holding company
+property and is due to leave after the repair.
 
-## Verification
+The cohort must complete the journey using its normal role handoffs. No learner may borrow
+a broader role. At the end, ask each learner to identify:
 
-The cohort can identify:
+- the record they owned;
+- the state or evidence they produced;
+- the next role in the chain; and
+- one action their role correctly could not perform.
 
-- which records are masters and which are transactions;
-- the source record for occupancy, custody, and maintenance history;
-- the next responsible role when the current account cannot submit or cancel;
-- the Building scope applied to a supervisor.
+## Completion evidence
 
-Each role-specific participant can also complete its own checkpoint and name
-the role responsible for the next action. The Maintenance Technician can show
-the allowed draft changes and the absence of Submit and Cancel authority.
+Pass the cohort when it can show:
 
-## Data safety
+- one submitted Housing Assignment and occupied Bed;
+- one Custody Issue followed by its normal Custody Return;
+- one Resident Request linked to the Maintenance Request and completed Work Order;
+- one submitted Housing Checkout and available Bed;
+- one Cleaning Log and a Room ready for the next assignment; and
+- correct actor, applicable Building scope, status, and timeline at every handoff.
 
-Use demo residents and assets only. Do not reassign an occupied production bed,
-change a live holder, or cancel an official record for practice. Let the trainer
-reverse or remove the training scenario through normal document actions.
+Cross-Building moves remain a checkout followed by a new assignment. A checkout clearance
+line does not replace a Custody Return, and a Cleaning Log does not by itself declare the
+Room ready.
+
+## Reference
+
+- [Safety Operations](../safety.md)
+- [Costs and Leasing](../costs.md)
+- [Workspaces and routes](../../reference/routes-workspaces.md)

@@ -2,124 +2,73 @@
 
 [Back to training index](README.md)
 
-## Audience
-
-Accommodation Managers, Resident Supervisors, Procurement Supervisors, and
-custody counter operators.
-
 ## Outcome
 
-Issue and return an in-stock article with a complete audit trail, then route
-damage or a durable facility asset through the correct record.
+Issue and return a custody article with a traceable holder, Building balance, and source
+document, then send damaged items or durable assets through the correct follow-up.
 
-## Prerequisites
+## Intended role
 
-- A non-production training site.
-- A training Building, Employee, and non-serialized `Custody Article`.
-- Positive store balance for the article in that Building.
-- Building User Permissions for any building-scoped learner.
-- The **Role Permissions Manager** (`/app/permission-manager`).
+An **Accommodation Manager** completes normal issues and returns. A
+**Resident Supervisor** may prepare them and open **Custody Kiosk**, but cannot submit
+`Custody Issue` or `Custody Return`. A **Procurement Supervisor** receives external
+stock and participates in Building-to-Building handover.
 
-## Operating model
+## Before starting
 
-Frappe submission and cancellation preserve the business documents. Apex posts
-the quantity effects to its no-GL stock ledger.
+- Use a disposable training site, a fictional Employee, and a Building in scope.
+- Prepare a non-serialized `Custody Article` with positive store balance in that
+  Building.
+- Use an Accommodation Manager account for the kiosk exercise.
+- Use a sanitized training signature; never capture a real worker signature.
 
-| Record | Operational purpose |
-|---|---|
-| `Custody Asset Category`, `Custody Article` | Reusable item catalogue and return rules. |
-| `Goods Receipt` | External stock received into a procurement intake store. |
-| `Custody Handover` | Controlled stock handover between Buildings. |
-| `Custody Issue`, `Custody Return` | Articles handed to and received from a worker. |
-| `Custody Damage Assessment` | Approval and replacement-cost review for damaged or lost items. |
-| `Facility Asset`, `Facility Asset Custody Assignment`, `Facility Asset Movement` | Durable equipment, supervisor custody, and location history. |
+## Exercise: issue and return one article
 
-`Accommodation Stock Ledger` is system-written. It is an operational quantity
-ledger, not ERPNext Stock Ledger or a General Ledger posting.
+1. Open **Custody Kiosk**, choose **Employee**, select the training worker and Building,
+   and add one unit of the article.
+2. Capture the training signature and issue the cart.
+3. Open the resulting `Custody Issue`. Confirm it is submitted with status **Issued**.
+4. In **Accommodation Stock Balance**, verify that the Building store decreased by one
+   and the Employee holding increased by one.
+5. Change the kiosk to **Return**, select the same worker and article, and complete the
+   return.
+6. Confirm the new `Custody Return` is submitted, the source issue is **Returned**, and
+   the Building store balance is restored.
 
-## Operational flow
+## Decisions and exceptions
 
-1. Maintain the item catalogue. Mark serialized articles correctly; each
-   serialized issue or return line must carry one serial number and a quantity
-   of one.
-2. Establish stock before issue. A Procurement Supervisor submits a
-   `Goods Receipt` into a Building marked as a procurement intake store. Use a
-   submitted `Custody Handover` when stock must move to another Building. The
-   receiving side reviews, approves, and confirms the handover; confirmation
-   posts the receiving ledger leg.
-3. For a normal non-serialized issue, open **Custody Kiosk**, select the
-   Building and worker, add the articles, capture the signature when available,
-   and issue. The page submits a real `Custody Issue`; it does not bypass the
-   stock or quantity checks.
-4. Use the kiosk Return mode for an ordinary return. It groups lines by their
-   source issue, submits one `Custody Return` per issue, blocks over-return, and
-   updates the issue to **Partially Returned** or **Returned**.
-5. Use the full `Custody Issue` or `Custody Return` form for serialized items.
-   Use the full Return form for damaged or lost items because the kiosk does not
-   capture condition. After submitting that return, choose **Create Damage
-   Assessment**.
-6. Send `Custody Damage Assessment` through its Frappe Workflow:
-   **Draft**, **Pending Approval**, then **Approved** or **Rejected**. Approval
-   records the assessed value. If the Damage rule in
-   `Salary Deduction Policy` is active and the holder is an Employee, submission
-   can create one draft `Additional Salary` deduction. Payroll staff must still
-   review it; the assessment does not submit payroll.
-7. Use `Facility Asset` for durable building equipment. A custody assignment
-   changes the responsible supervisor. The movement record models location
-   changes and intercompany approvals, but no role currently has Create on
-   `Facility Asset Movement`; do not teach or attempt a new movement until that
-   DocPerm gap is corrected.
-8. Review **Accommodation Stock Balance** (its employee filter answers what each
-   worker holds) and the **Custody Damage Assessment** list view. Custody expiry
-   alerts and the weekly digest
-   are described in the
-   [automation reference](../reference/automation.md).
+- Use the full `Custody Issue` and `Custody Return` forms for serialized articles. Each
+  serialized line requires one serial number and quantity one.
+- Use the full Return form for **Damaged** or **Lost** condition. Then choose
+  **Create Damage Assessment** and send the `Custody Damage Assessment` through
+  **Submit for Approval** and **Approve** or **Reject**. A different Accommodation
+  Manager must approve it.
+- A damage assessment may create a draft `Additional Salary` deduction only for a
+  linked Employee when the Damage policy is active. Payroll must still review it.
+- A Temporary Worker may be selected in the kiosk, but an issue with no linked Employee
+  posts no store or holder ledger movement. Do not treat that case as stock evidence.
+- A Procurement Supervisor records external stock in `Goods Receipt` at a Building
+  marked as a procurement store. A `Custody Handover` then follows **Pending Receipt**,
+  **Under Review**, **Approved**, and **Confirmed**; the shipper and receiver must be
+  different people, and confirmation uses the one-time code when enabled.
+- Use `Facility Asset Custody Assignment` for supervisor responsibility and
+  `Facility Asset Movement` for location changes. Intercompany movements require
+  release and receiving confirmation; permanent intercompany movement also requires
+  accounting acknowledgement before submission.
+- `Accommodation Stock Ledger` is an operational quantity record, not accounting stock
+  or a General Ledger. Never edit or delete it.
 
-The kiosk and workspace entry points are listed in the
-[route and workspace reference](../reference/routes-workspaces.md).
+Cancel a `Custody Return` before its source issue. A submitted damage assessment must be
+handled before its return can be cancelled.
 
-## Current boundaries
+## Evidence of completion
 
-- A Temporary Worker can hold a `Custody Issue`, but an issue submitted without
-  a linked Employee posts no store or Employee ledger legs.
-- A Resident Supervisor can open Custody Kiosk, but the current DocPerm does not
-  grant Submit on `Custody Issue` or `Custody Return`. An account with Submit
-  permission must complete the operation.
-- Custody Kiosk does not collect serial numbers or return condition. Use the
-  full forms for those cases.
-- `Facility Asset Movement` currently has no Create grant, including for System
-  Manager. Existing records have role-specific Read, Write, Submit, and Cancel
-  rights, but a normal user cannot start a new one.
-- A damage assessment creates at most a draft payroll record, and only when the
-  policy and salary component are configured.
+Show the submitted issue and return, worker signature evidence, article and quantities,
+the source-to-return link, the updated issue status, and the matching Building and
+Employee balance changes.
 
-## Non-production exercise
+## Related links
 
-1. Ask the trainer for a pre-stocked, non-serialized training article.
-2. In Custody Kiosk, select the training Building and Employee.
-3. Issue one unit and capture a training signature.
-4. Verify the `Custody Issue` is submitted with status **Issued**.
-5. In **Accommodation Stock Balance**, filtered to that Employee, confirm the
-   holding of one unit.
-6. Return that unit in the kiosk.
-7. Verify the linked issue is **Returned** and the store balance is restored.
-
-## Verification
-
-The learner can show:
-
-- the source `Custody Issue` and `Custody Return`;
-- the worker, Building, article, quantity, and signature evidence;
-- the matching store and Employee legs in `Accommodation Stock Ledger`;
-- the updated issue status and outstanding-custody report;
-- when the full form is required instead of Custody Kiosk.
-
-## Cleanup and data safety
-
-Cancel the submitted `Custody Return` before cancelling its source
-`Custody Issue`. A live Return blocks cancellation of the Issue, and a submitted
-damage assessment blocks cancellation of its Return.
-
-Cancellation posts reversal rows. Never delete or edit
-`Accommodation Stock Ledger` to restore a balance. Do not test with serialized
-production equipment, live worker custody, or a production procurement store.
+- [Accommodation operations](accommodation.md)
+- [Costs and leasing](costs.md)
+- [Scheduled automation](../reference/automation.md)

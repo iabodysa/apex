@@ -1,118 +1,67 @@
 # Rental Fleet
 
-[Back to the training index](README.md)
-
-## Audience
-
-Fleet operators who receive and return rented vehicles, reconcile rental
-charges, and hand approved settlements to Finance.
+[Back to training index](README.md)
 
 ## Outcome
 
-Maintain an auditable rental window from vehicle receipt through daily
-operational accrual, monthly settlement, Finance review, and cancellation.
+Control a rented vehicle from receipt to return, reconcile the supplier's monthly claim
+against daily accruals, and hand an approved settlement to Finance.
 
-## Prerequisites
+## Intended role
 
-- Use a disposable training site or an isolated training company and period.
-- Prepare a training `Supplier`, `Rental Office`, and `Salis Vehicle` whose
-  ownership is `Rented`.
-- Prepare separate settlement requester, fleet reviewer, and Finance reviewer
-  accounts.
-- Review **Role Permissions Manager** (`/app/permission-manager`)
-  and the shipped workspace in
-  [Modules, Workspaces, and Routes](../reference/routes-workspaces.md).
+A **Fleet Supervisor** or **Fleet Project Manager** may prepare rental movements; a
+**Fleet Manager** submits them. A Fleet Project Manager prepares the monthly
+`Rental Settlement`, a Fleet Manager reconciles and approves it, and a
+**Finance Manager** marks it paid only after payment evidence exists.
 
-## Native records and controls
+## Before starting
 
-- `Supplier` is the native ERPNext counterparty linked from `Rental Office`.
-- `Rental Office` stores the fleet-facing office and contact details.
-- `Rental Vehicle Movement` is the submitted Receipt or Return record.
-- `Rental Accrual Ledger` is a system-written operational memo. It is not a
-  General Ledger.
-- `Rental Settlement` uses a Frappe Workflow to reconcile, approve, and mark the
-  period paid.
-- `Salis Payment Request` is the controlled handoff to Finance. Its **Create
-  Payment** action remains unavailable until Finance validates a complete
-  `Payment Entry` field map on the target site.
+- Use a disposable training site or an isolated Company and closed period.
+- Prepare a `Rental Office` linked to a fictional native ERPNext `Supplier`.
+- Prepare a `Salis Vehicle` whose ownership is **Rented**.
+- Use trainer-prepared `Rental Accrual Ledger` rows and separate requester, Fleet
+  Manager, and Finance accounts.
 
-## Operational flow
+## Exercise: close and reconcile one rental period
 
-### Open and close the rental window
+1. Prepare a `Rental Vehicle Movement` of type **Receipt** with the vehicle, office,
+   date, and positive daily rate. Have a Fleet Manager submit it.
+2. Confirm that a second Receipt is rejected while the first rental window is open.
+3. Prepare and submit a **Return** dated after the Receipt. Record odometer, fuel level,
+   condition notes, and evidence where applicable.
+4. Create a `Rental Settlement` for the trainer-prepared office and month. Compare the
+   claimed total, vehicle-line accrued total, ledger accrued total, and both variance
+   fields.
+5. As Fleet Manager, choose **Reconcile**. Resolve a discrepancy through **Dispute** and
+   **Re-reconcile** if needed.
+6. Have a Fleet Manager who is not the requester choose **Approve**.
+7. Confirm that eligible accrual rows now carry the settlement link and are marked
+   settled. Stop before **Mark Paid** in the training exercise.
 
-1. Link `Rental Office` to the native `Supplier`.
-2. Set the fleet vehicle's ownership to `Rented` and link its rental office.
-3. Submit a `Rental Vehicle Movement` of type `Receipt` with the vehicle, office,
-   date, and positive daily rate.
-4. When the vehicle leaves service, submit a `Return` with its date, odometer,
-   fuel level, condition notes, and evidence as applicable.
+## Decisions and exceptions
 
-The controller rejects a duplicate open Receipt, a Return without an open
-Receipt, and a Return dated before its Receipt.
+- A Return requires an open Receipt and cannot precede it. A Receipt requires a daily
+  rate and only accepts a vehicle whose ownership is **Rented**.
+- The daily job creates at most one original `Rental Accrual Ledger` row per vehicle and
+  date while its latest submitted movement is a Receipt. Operators must not create,
+  edit, or delete these rows.
+- Settlement approval does not post accounting. **Raise Payment Request** creates one
+  linked `Salis Payment Request` for the payable amount; Finance approval and the
+  configured **Create Payment** route are separate controls.
+- **Mark Paid** is restricted to Finance and cannot be performed by the requester. The
+  label itself is not General Ledger evidence; Finance must verify the linked routed
+  payment.
+- Cancelling an approved settlement releases its accrual rows for a replacement. Cancel
+  the Return before cancelling its Receipt.
 
-### Accrue and settle
+## Evidence of completion
 
-While the latest submitted movement is a Receipt, the rental engine creates one
-`Rental Accrual Ledger` row per vehicle and day. Re-running the job does not
-create a second row for the same vehicle and date. Each row is an operational
-memo and posts no accounting entry.
+Show the ordered Receipt and Return, the settlement totals and variances, approval by a
+non-requester, and accrual rows linked to the approved settlement. Confirm that the
+exercise created no General Ledger entry.
 
-Create one `Rental Settlement` for the office and month. Vehicle lines calculate
-the accrued total; the controller also reads the generated ledger total and
-shows both the claimed variance and ledger variance.
+## Related links
 
-The `Rental Settlement Workflow` follows:
-
-`Draft` → `Reconciled` → `Approved` → `Paid`
-
-A reconciled settlement can be disputed and re-reconciled. The requester cannot
-approve or mark their own settlement paid. Approval submits the settlement and
-stamps its eligible accrual rows as settled. Cancelling an approved settlement
-releases those rows for a replacement settlement.
-
-An approved settlement can supply one linked `Salis Payment Request` as the
-controlled Finance handoff. Neither settlement approval nor the `Paid` label
-posts to the General Ledger. Stop at the approved settlement and linked
-request. Keep the payment target on `Payment Entry`, keep target auto-submit
-off, and do not use **Create Payment** until its complete field map has passed
-Finance review.
-
-Use `Rental Cost by Office` and `Rental Settlement Register` to review monthly
-cost and settlement state. The registered daily and monthly jobs are described
-in the [Scheduled Automation Reference](../reference/automation.md).
-
-## Non-production exercise
-
-Use a trainer-prepared period that already contains generated training accrual
-rows.
-
-1. Submit a Receipt for a rented training vehicle.
-2. Attempt a second Receipt and confirm the lifecycle guard rejects it.
-3. Submit a Return dated after the Receipt.
-4. Create a `Rental Settlement` for the prepared office and period.
-5. Compare vehicle-line accrued total, ledger accrued total, claimed total, and
-   both variance fields.
-6. Reconcile and approve with different authorized users, then stop.
-7. Confirm the period's generated accrual rows now link to the settlement.
-
-Do not move to `Paid` or create a payment document during training.
-
-## Verification
-
-- The submitted Receipt and Return form a valid, ordered rental window.
-- The ledger contains at most one original row per vehicle and date.
-- Settlement totals match the intended vehicle lines and generated ledger.
-- The requester does not approve their own settlement.
-- Approved accrual rows show the settlement link and settled flag.
-- No `GL Entry` is created by a movement, accrual, or settlement action.
-
-## Cleanup and data safety
-
-1. Cancel the approved training settlement before it reaches `Paid`; confirm its
-   accrual rows are released.
-2. Cancel the Return, then cancel the Receipt.
-3. Delete only unused training drafts and unlinked training masters.
-
-Do not hand-create, edit, or delete `Rental Accrual Ledger` rows. A scheduler may
-create new rows for any open Receipt, so use a disposable site or close the
-training rental before leaving the exercise.
+- [Fleet and movement](fleet-movement.md)
+- [Fleet compliance and financial handoffs](compliance.md)
+- [Scheduled automation](../reference/automation.md)

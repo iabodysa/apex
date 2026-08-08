@@ -1,140 +1,82 @@
-# Settings and Desk Pages
-
-[Back to training](README.md)
-
-## Audience
-
-Site administrators and designated process owners who configure Apex or support
-Desk pages.
+# Configure Apex Safely
 
 ## Outcome
 
-Choose the correct settings record, make a controlled non-production change,
-and distinguish configuration, navigation, permission, and automation.
+Choose the setting that owns a business behavior, test one controlled change, prove the
+result with the affected persona, and restore the baseline.
 
-## Prerequisites
+This guide is for System Managers and designated process owners on a non-production site.
 
-- Administrator access to a non-production site.
-- An approved before-and-after value for the setting being tested.
-- Separate training accounts for any role or scope checks.
-- Roles and rights: **Role Permissions Manager** (`/app/permission-manager`).
-- [Modules, workspaces, and routes](../reference/routes-workspaces.md).
+## Choose the setting by outcome
 
-## Configuration records
+- **Apex Settings** — shared company behavior, General Ledger posting gate, and snapshot
+  retention.
+- **Habitat Settings** — housing defaults, custody handoffs, safety thresholds,
+  notifications, contact details, and optional passport scanning.
+- **Salis Settings** — fleet defaults, alert thresholds, approvals, boarding, driver access,
+  and optional web push.
+- **Apex Integration Settings** — approved external origins and messaging configuration.
+- **Payment Routing Settings** — controlled creation of the approved native payment target.
+- **Salary Deduction Policy** — legal and HR gate for operational recovery through payroll.
+- **Driver Portal Theme** — shared worker and driver appearance.
 
-Use the narrowest setting that owns the behavior:
+A setting changes the site, not one user. Record the old value, owner, reason, expected
+result, test persona, and rollback before saving.
 
-- **Apex Settings** controls the General Ledger posting gate and retention
-  windows for snapshots.
-- **Habitat Settings** controls accommodation defaults, custody integration,
-  safety thresholds, notifications, handover controls, housing contact details,
-  and optional passport scanning.
-- **Salis Settings** controls fleet defaults, alert thresholds, approvals,
-  driver access, boarding behavior, and optional web push.
-- **Apex Integration Settings** records external-frontend and messaging-gateway
-  configuration. Its integration switch and origin list are descriptive; they
-  do not modify server CORS or grant API access. Follow the
-  [integration guide](../administration/integration.md).
-- **Payment Routing Settings** is not production-ready from the setup-wizard
-  choice alone. Keep `Payment Entry` as the target, keep target auto-submit off,
-  and do not use **Create Payment** until Finance has reviewed and validated a
-  complete field map on the target site. Do not select `Payment Order` or a
-  custom target in this release.
-- **Salary Deduction Policy** gates operational recovery through payroll. It
-  ships inactive and must not be enabled without the required legal, HR, and
-  management review.
-- **Driver Portal Theme** controls the appearance shared by the worker and
-  driver mobile experiences.
+## High-risk settings
 
-Changing a Single affects the site, not one user. Record the old value and test
-the effect before using the same change in production.
+Keep General Ledger posting, salary deductions, messaging credentials, and automatic target
+submission disabled until the responsible Finance, HR, Legal, and IT owners approve the
+complete process.
 
-## Personal portal access
+For this release, keep **Payment Entry** as the payment target and target auto-submit off.
+The target selection alone is not a complete field map. Do not use **Create Payment** until
+Finance validates the mapping on the target site.
 
-**Masar Worker Token** is an operational credential record, not a general
-setting. After Save, use whichever **Issue Link and QR** or **Rotate Link and
-QR** action the form displays. Either action generates a fresh link and
-invalidates any previous link. The label depends on permission-level-one token
-visibility, not lifecycle state. **Enabled**, **Expires On**, and the credential
-fields are read-only, and the form exposes no reviewed Disable or Set Expiry
-action.
+Integration origins do not grant data access. Authentication, roles, record permission, and
+server-side scope continue to apply.
 
-If a link is exposed, close the affected session, generate a fresh link with
-the displayed action, and follow your organization's credential-incident
-procedure with the site administrator or security owner. Confirm that the old
-link is rejected and the incident is recorded without the credential. If
-access must end, escalate to the site administrator for approved revocation.
-Never edit credential fields or the database to work around the missing form
-actions.
+## Portal access is not a general setting
 
-Worker and driver bindings remain distinct even though both experiences use one
-frontend build. The current Desk UI has no reviewed driver-link issuance action,
-so driver access and walkthroughs remain optional and unavailable. Do not work
-around that boundary with direct API calls or hand-built URLs. Temporary
-Workers cannot receive a worker link until the daily linking flow connects them
-to an Employee. See
-[Driver and Worker Portals](portals-masar-driver.md).
+**Masar Worker Token** is a personal credential record. Save the intended holder, then use
+the displayed **Issue Link and QR** or **Rotate Link and QR** action. Never type a token,
+construct a portal URL, or edit credential fields directly.
 
-## Desk pages
+If a link is exposed, rotate it and follow the organization's credential-incident process.
+Do not include the old or new link in the incident record.
 
-A Frappe Page is a task-focused screen over existing DocTypes. Use it for the
-workflow it presents, then open the source record when full history or form
-actions are needed.
+## Controlled exercise
 
-The canonical list of shipped pages, workspaces, shortcuts, and public routes
-is maintained in the
-[modules, workspaces, and routes reference](../reference/routes-workspaces.md).
-Do not grant a role merely to reveal a page. Page visibility does not replace
-DocPerm, User Permission, workflow, or server-side scope.
+1. Record the current **Driver Portal Theme** and accent.
+2. Identify the fictional worker who will verify the change.
+3. Change only the accent on the training site.
+4. Open the worker experience with a freshly issued training link.
+5. Confirm the identity, language, contrast, and primary actions remain usable.
+6. Restore the original accent.
+7. Reload the worker experience and prove the baseline returned.
 
-**Action Inbox** is the signed-in user's cross-module worklist. An item appears
-because a workflow or assignment expects that user; the page itself does not
-grant the next action.
+Do not use a production link or capture the training credential in evidence.
 
-## Background processing
+## Background follow-up
 
-Use the [scheduled automation reference](../reference/automation.md) to identify
-the exact callable, cadence, effect, and gate. Check **Scheduled Job Log** and
-the affected source record before rerunning a job.
+Use the [scheduled automation reference](../reference/automation.md) to identify which Apex
+job follows a business condition, what enables it, and what record it may create or update.
+Check the source record and **Scheduled Job Log** before rerunning anything.
 
-An empty run can be correct when no source record qualifies, an idempotency key
-already exists, or a feature switch is off. Do not infer failure from an
-unchanged dashboard alone.
+An unchanged dashboard is not proof of failure. No source may be due, the feature may be
+disabled, or the expected record may already exist.
 
-## Change path
+## Completion evidence
 
-1. Identify the business behavior and its owning settings record.
-2. Capture the current value and expected result.
-3. Change one field on the non-production site.
-4. Test with the affected operational persona.
-5. Check source records and logs, not only navigation.
-6. Restore the baseline or record the approved new value.
+- The correct settings record was selected for the requested outcome.
+- Before and after values were recorded without credentials.
+- The affected persona verified the result.
+- The baseline was restored.
+- No role, scope, payment, payroll, or integration boundary changed as a side effect.
 
-## Exercise
+## Related guides
 
-1. Record the current **Driver Portal Theme** and accent color.
-2. Change only the accent color on the training site.
-3. Open the training worker experience and confirm the new appearance.
-4. Check the driver experience only when a later release provides reviewed
-   Desk issuance.
-5. Find one relevant background task in the
-   [automation reference](../reference/automation.md) and identify its gate
-   without running it.
-6. Restore the original theme value.
-
-## Verification
-
-The learner can:
-
-- select the settings record that owns a stated behavior;
-- explain why a Page or workspace does not grant record access;
-- locate a scheduled task without copying its inventory into local notes;
-- show that shared appearance does not grant another portal identity; and
-- prove the exercise value was restored.
-
-## Cleanup and data safety
-
-Never practise with production feature switches, retention windows, payment
-routing, salary deductions, messaging credentials, or personal access links.
-Restore training settings after the exercise. Do not run a scheduled task until
-its writes, deduplication behavior, and downstream effects are understood.
+- [IT Operations track](tracks/it-operations.md)
+- [Installation](../administration/installation.md)
+- [Integration](../administration/integration.md)
+- [Scheduled automation](../reference/automation.md)

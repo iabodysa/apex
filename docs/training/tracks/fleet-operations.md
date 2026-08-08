@@ -1,59 +1,52 @@
 # Fleet Operations Track
 
-## Audience
-
-Fleet Managers, Fleet Project Managers, and Fleet Supervisors complete the
-operational path. Finance Managers join the finance segment only. Run the
-complete scenario as a multi-account cohort; finance accounts must not be used
-to perform fleet operations.
+[Back to training](../README.md)
 
 ## Outcome
 
-Trace project-scoped fleet work from masters and assignment through dispatch,
-fuel, rentals, and finance review.
+Complete one project-scoped Salis journey from transport through fuel and rental
+evidence, ending at the controlled Finance handoff.
 
-## Prerequisites
+## Roles
 
-- A training account with the intended fleet or finance role.
-- Trainer-provided Project, vehicle, driver, and rental master data.
-- Project User Permissions for scoped roles.
+Use the separate Fleet, route-supervisor, driver, worker, and Finance accounts
+named by the guides. Each learner performs only the actions granted to that
+account and Project.
 
-## Learning path
+## Guide sequence
 
-1. [Frappe Foundations](../foundations.md)
-2. [Fleet and Movement](../fleet-movement.md)
-3. [Fuel](../fuel.md)
-4. [Rentals](../rentals.md)
-5. [Payments and Approvals](../compliance.md)
-6. [Driver and Worker Portals](../portals-masar-driver.md)
-7. **Role Permissions Manager** (`/app/permission-manager`)
+1. Restore the Fleet baseline with [Trainer Setup and Reset](../trainer-setup.md).
+2. Learn the request, plan, dispatch, and custody chain in
+   [Fleet and Movement](../fleet-movement.md).
+3. Rehearse the assigned user surfaces with
+   [Worker and Driver Portals](../portals-masar-driver.md).
+4. Complete the controlled fuel path in [Fuel](../fuel.md).
+5. Complete the rental evidence path in [Rentals](../rentals.md).
+6. Finish with the approval and Finance boundaries in
+   [Fleet Compliance and Financial Handoffs](../compliance.md).
 
-## Practice checkpoint
+## Capstone
 
-Use one training Project to trace:
+1. Select one prepared Project and use separate accounts for every maker,
+   reviewer, supervisor, driver, worker, and Finance handoff.
+2. Complete one linked Transport Request, Route Plan, and Dispatch Trip through
+   the Desk and portal steps taught in the guides.
+3. Complete one linked Fuel Request and Fuel Claim, then trace one prepared rental
+   period through settlement to its Salis Payment Request.
+4. Have Finance review and approve only the payment request. Stop before creating
+   a native payment, marking it paid, or performing a payroll action.
+5. Prove that the scoped Fleet learner cannot find or open the trainer's other
+   Project.
 
-- vehicle assignment to a driver;
-- a transport request into dispatch;
-- a fuel request into movement and finance review;
-- a rental movement into settlement.
+## Passing evidence
 
-Fleet learners perform the assignment, transport, dispatch, fuel, and rental
-steps allowed by their role. The Finance Manager reviews only the payment,
-settlement, and cost records available to that account. The trainer presents
-source operational records when finance has no direct read permission.
+Show one source-linked transport chain, its driver and worker evidence, the fuel
+and rental source records, the Finance handoff, distinct actors at approval gates,
+and the out-of-scope Project denial. System-written ledgers remain unchanged by
+hand, and no payment or payroll document is created.
 
-Change accounts at each handoff instead of adding roles to one learner.
+## Related links
 
-## Verification
-
-Fleet learners can identify the Project scope on each operational transaction
-and the next workflow owner. The Finance Manager can identify the source
-reference exposed by the finance record without claiming access to dispatch or
-transport records. Every learner can explain where maker-checker separation
-applies.
-
-## Data safety
-
-Use demo vehicles, drivers, and Projects. Never change live compliance dates,
-assignments, fuel balances, payment requests, or settlements for practice.
-Keep the creator and reviewer accounts separate.
+- [Modules, workspaces, and routes](../../reference/routes-workspaces.md)
+- [Scheduled automation](../../reference/automation.md)
+- [Troubleshooting](../../reference/troubleshooting.md)

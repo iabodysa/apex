@@ -26,8 +26,9 @@ mint marks progress and focus.
 - `assets/social/` — editable ratio masters for social channels
 
 Keep SVG files as masters. Export PNG only for channels that cannot accept SVG.
-The two lockups embed their approved font subsets, so they render consistently
-without installed fonts. Do not rebuild them from arbitrary runtime fonts.
+The Arabic lockup stores the approved Thmanyah wordmark as vector outlines; it does
+not redistribute the licensed font. The English lockup embeds its approved subset.
+Do not rebuild either lockup from arbitrary runtime fonts.
 
 ## Product boundary
 

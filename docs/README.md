@@ -1,44 +1,81 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="brand/assets/logo/apex-mark-reverse.svg">
+    <source media="(prefers-color-scheme: light)" srcset="brand/assets/logo/apex-mark.svg">
+    <img src="brand/assets/logo/apex-mark.svg" alt="Apex" width="88" height="88">
+  </picture>
+</p>
+
 # Apex Documentation
 
-Use this page to choose the shortest guide for the job.
+Use Apex documentation to complete a job, prepare a team, or operate the system safely.
+Start with the product journey that matches your work; use administration and reference
+pages when you need exact deployment or configuration detail.
 
-## Operators and trainers
+[See the product overview and operating maps](../README.md#how-apex-connects-the-work).
 
-- [Training guide](training/README.md) — daily records, workflows, and portal use
-- [Trainer setup and reset](training/trainer-setup.md) — prepare a disposable,
-  scoped dataset for each cohort
-- [Frappe foundations](training/foundations.md) — shared Desk, workflow,
-  evidence, and permission exercise
+## Run the operation
 
-## Administrators
+### Habitat
 
-- [Installation](administration/installation.md) — install, configure, and
-  verify Apex safely
-- [Reverse proxy prerequisite](administration/reverse-proxy.md) — the edge must
-  overwrite `X-Forwarded-For`, and how to grade a running deployment
-- [Workspace authoring](administration/workspace-authoring.md) — create and
-  maintain task-focused Desk navigation
-- [Frontend architecture](administration/frontend-architecture.md) — build and
-  serve the first-party portals
+Move people safely through accommodation and keep each site ready for use.
 
-## Integrators
+- [Accommodation](training/accommodation.md) — arrival, bed assignment, transfer, and checkout
+- [Custody](training/custody.md) — issue, acknowledge, return, and assess company property
+- [Maintenance](training/maintenance.md) — move reported work through inspection and completion
+- [Safety](training/safety.md) — complete due rounds and follow findings to closure
+- [Costs and leasing](training/costs.md) — review utilities, leases, and operational cost records
 
-- [Integration guide](administration/integration.md) — choose authentication,
-  call Frappe APIs, and configure CORS safely
+### Salis
 
-## Designers and builders
+Coordinate daily movement while keeping vehicles, drivers, fuel, and exceptions under
+control.
 
-- [Apex identity and product system](brand/index.html) — logo assets, interface
-  foundations, responsive layouts, and social templates
-- [Portal implementation contract](../frontend/frontend_shared/DESIGN.md) — the
-  source-level rules for portal components and states
+- [Fleet and movement](training/fleet-movement.md) — requests, routes, dispatch, and trips
+- [Fuel](training/fuel.md) — quotas, requests, claims, and exceptions
+- [Rentals](training/rentals.md) — receive rented vehicles, accrue cost, and settle periods
+- [Compliance, incidents, and finance handoffs](training/compliance.md) — keep exceptions
+  and approvals traceable
+- [Worker and driver portals](training/portals-masar-driver.md) — use the mobile experience safely
+
+### Logistay
+
+Keep contingent workforce and telecom obligations visible from contract to custody and
+payment handoff.
+
+- [Telecom operations](training/telecom.md) — contracts, SIM cards, custody, and billing
+- [Contingent workers](training/contingent-workers.md) — temporary workers and freelancers
+
+## Train by role
+
+- [Training home](training/README.md) — choose a complete role-based learning path
+- [Housing Operations](training/tracks/housing-operations.md)
+- [Safety Operations](training/tracks/safety-operations.md)
+- [Fleet Operations](training/tracks/fleet-operations.md)
+- [Telecom Operations](training/tracks/telecom-operations.md)
+- [IT Operations](training/tracks/it-operations.md)
+- [Trainer setup and reset](training/trainer-setup.md) — prepare a safe, repeatable training site
+
+## Operate Apex
+
+- [Installation](administration/installation.md) — install a reviewed release and verify the site
+- [Reverse proxy prerequisite](administration/reverse-proxy.md) — protect address-based controls
+- [Settings](training/settings.md) — change product behavior safely on a non-production site
+- [Troubleshooting](reference/troubleshooting.md) — start from the visible symptom
+- [Scheduled automation](reference/automation.md) — understand due work and background follow-up
+
+## Build and integrate
+
+- [Integration guide](administration/integration.md) — connect through supported Frappe APIs
+- [Workspace authoring](administration/workspace-authoring.md) — maintain task-focused navigation
+- [Frontend architecture](administration/frontend-architecture.md) — build and serve the portals
+- [Apex identity](brand/index.html) — logo, interface foundations, layouts, and communication assets
+- [Portal implementation contract](../frontend/frontend_shared/DESIGN.md) — source-level portal rules
 
 ## Reference
 
 - [Modules, workspaces, and routes](reference/routes-workspaces.md)
-- [Scheduled automation](reference/automation.md)
 - [Business glossary](reference/glossary.md)
-- [Troubleshooting](reference/troubleshooting.md)
 
-Reference pages contain canonical inventories. Training and administration
-pages link to them instead of copying tables that can drift.
+Training pages explain the work. Administration pages explain controlled change. Reference
+pages contain exact inventories that should not be copied into user guides.

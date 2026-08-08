@@ -1,68 +1,52 @@
-# Records and Workflows
+# Approve a Fuel Request with Separation of Duties
 
-## Audience
+[Back to foundations](../foundations.md)
 
-Operators who create records and reviewers who approve, submit, cancel, or
-amend them.
+## Business outcome
 
-## Outcome
+Authorize a valid fuel request while preserving the requester, approver, Project scope, and
+decision history needed for operational control.
 
-Recognize Frappe record types and choose the correct action for each lifecycle
-state.
+## Journey and roles
 
-## Prerequisites
+```text
+Fuel Request: Pending
+  -> Fleet Manager reviews another user's request
+  -> Approve
+  -> Fuel Request: Approved
+```
 
-- Completion of [Getting Started in Apex](getting-started.md).
-- A non-production training site.
-- A trainer-selected DocType allowed by the learner's role.
-- The **Role Permissions Manager** (`/app/permission-manager`).
+- A **Fleet Supervisor** creates the fictional `Fuel Request`.
+- A different **Fleet Manager** or **Fleet Project Manager** reviews it.
 
-## Core concepts
+The trainer prepares an active vehicle, driver, Project, fuel platform, and monthly
+`Fuel Quota`. The requested litres must fit inside the remaining training quota.
 
-A **master** is reusable data such as a building, vehicle, or item. A
-**transaction** records an event such as an assignment, request, issue, or
-settlement. A **child table** stores lines inside its parent record and is not an
-independent operating record.
+## Review and decide
 
-A standard submittable record follows Frappe's document lifecycle:
+1. Sign in as the approver and open the pending `Fuel Request` from **Action Inbox**.
+2. Confirm that **Requested By** names another user. Do not approve your own request.
+3. Compare the vehicle, driver, Project, request date, requested litres, fuel platform, and
+   linked quota with the trainer's evidence.
+4. Record the quota's current consumed litres before the decision.
+5. Choose **Approve** only when the source and scope agree. Choose **Reject** when they do not.
+6. Reopen the request and inspect its timeline and actor fields.
+7. Confirm that the approved request is ready for fulfilment but is not yet a completed fuel
+   issue.
 
-1. **Draft** can be edited.
-2. **Submitted** is the official record.
-3. **Cancelled** preserves history after reversal.
-4. **Amend** creates a corrected draft linked to the cancelled record.
+Do not type a status, edit a generated ledger, or use another user's account to manufacture
+an approval.
 
-A **Frappe Workflow** adds controlled states and role-based actions. Workflow
-state and document status are related but not interchangeable. Use the action
-shown by the form; do not bypass a required review with direct database changes.
+## Expected state and evidence
 
-System-written ledgers and snapshots are outputs. Operators work through the
-source transaction, not the generated record.
+For the approval path, the learner can show:
 
-## Exercise
+- the request moved from **Pending** to **Approved**;
+- **Requested By** and **Approved By** name different users;
+- vehicle, driver, Project, litres, platform, and quota match the source evidence;
+- the decision appears in the timeline;
+- the approval task no longer waits in **Action Inbox**; and
+- quota consumption has not changed yet.
 
-1. On the training site, open the DocType selected by the trainer.
-2. Create a record using only realistic training values and add `TRAINING` to a
-   suitable title or description field.
-3. Save it as Draft and note which fields remain editable.
-4. Identify whether the form offers **Submit** or a workflow action.
-5. Use the approved action only when the trainer confirms the record and the
-   learner's role is responsible for that step.
-6. Open the timeline and identify the creator, changes, and workflow events.
-
-## Verification
-
-The learner can explain:
-
-- why master data and transactions have different purposes;
-- the difference between Save, Submit, a workflow action, Cancel, and Amend;
-- why a submitted record is not corrected by deleting its history;
-- which role owns the next action by checking the canonical permission reference
-  and the action available on the form.
-
-## Cleanup and data safety
-
-Never practise on production. Delete an unused Draft only when policy and
-permission allow it. Cancel a submitted training record through its normal
-lifecycle; do not delete it or edit the database. Ask the trainer to clean up
-records when cancellation could trigger accounting, stock, payroll, or other
-downstream effects.
+The business result is an authorized request ready for controlled fulfilment. Completing the
+request and reconciling fuel are covered in [Control Fuel from Quota to Claim](../fuel.md).
