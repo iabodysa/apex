@@ -426,21 +426,63 @@ main {
   height: 330px;
 }
 
-.logo-stage img {
+.startup-loader {
   position: relative;
   z-index: 1;
-  width: min(54%, 260px);
+  display: grid;
+  justify-items: center;
+  width: min(72%, 320px);
+}
+
+.startup-loader img {
+  width: clamp(72px, 30%, 104px);
+}
+
+.startup-track {
+  width: 160px;
+  height: 2px;
+  margin-block-start: 28px;
+  overflow: hidden;
+  background: rgba(248, 245, 238, 0.2);
+}
+
+.startup-track span {
+  display: block;
+  width: 42%;
+  height: 100%;
+  background: var(--mint);
+  animation: startup-progress 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.startup-loader p {
+  margin: 14px 0 0;
+  color: rgba(248, 245, 238, 0.72);
+  font-size: 11px;
+}
+
+@keyframes startup-progress {
+  from {
+    transform: translateX(170%);
+  }
+
+  to {
+    transform: translateX(-170%);
+  }
 }
 
 .logo-stage small {
   position: absolute;
-  inset-inline-start: 28px;
+  inset-inline: 28px;
   inset-block-end: 24px;
+  display: flex;
+  justify-content: space-between;
   color: rgba(248, 245, 238, 0.6);
-  font-family: var(--font-en);
   font-size: 10px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+}
+
+.logo-stage small b {
+  color: var(--mint);
+  font-weight: 600;
 }
 
 .story-card {
@@ -1017,13 +1059,16 @@ main {
   font-size: 20px;
 }
 
-.breakpoint-card code,
+.breakpoint-card .breakpoint-spec,
 .breakpoint-card p {
   display: block;
   margin: 6px 0 0;
   color: var(--muted);
-  font-family: var(--font-en);
   font-size: 11px;
+}
+
+.breakpoint-card .breakpoint-spec {
+  font-weight: 600;
 }
 
 .web-specimen {
@@ -1133,7 +1178,8 @@ main {
   align-content: center;
   gap: 12px;
   padding: 12%;
-  background: var(--mint);
+  border-inline-start: 1px solid rgba(7, 43, 26, 0.12);
+  background: var(--canvas);
 }
 
 .metric-line {
@@ -2351,7 +2397,7 @@ main {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
+  @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
@@ -2359,5 +2405,10 @@ main {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  .startup-track span {
+    width: 100%;
+    animation: none;
   }
 }

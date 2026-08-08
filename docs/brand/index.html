@@ -86,9 +86,13 @@
             </header>
 
             <div class="story-grid">
-              <div class="logo-stage">
-                <img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="علامة أبكس المعكوسة" />
-                <small>Primary symbol · reverse</small>
+              <div class="logo-stage" aria-label="نموذج شاشة بدء تشغيل أبكس">
+                <div class="startup-loader" aria-hidden="true">
+                  <img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" />
+                  <div class="startup-track"><span></span></div>
+                  <p>جاري تجهيز مساحة العمل</p>
+                </div>
+                <small><span>شاشة بدء التشغيل</span><b>عند وجود انتظار حقيقي</b></small>
               </div>
               <article class="story-card">
                 <span class="story-number">THE QUIET ASCENT</span>
@@ -256,7 +260,7 @@
                 <h2 class="chapter-title">شبكة واحدة، وثلاث طرق للعمل.</h2>
               </div>
               <p class="chapter-intro">
-                اثنا عشر عموداً للشاشات الكبيرة، ثمانية للمتوسطة، وأربعة للجوال. نقطة
+                اثنا عشر عمودًا للكمبيوتر، وثمانية للجهاز اللوحي، وأربعة للجوال. نقطة
                 الانتقال يحددها المحتوى؛ لا نضغط واجهة المكتب داخل هاتف.
               </p>
             </header>
@@ -273,15 +277,15 @@
             <div class="breakpoint-grid">
               <article class="breakpoint-card">
                 <div class="screen-icon"></div>
-                <div><strong>جوال</strong><code>4 columns · 16–20px gutter</code><p>مهمة واحدة وإجراء أساسي واحد.</p></div>
+                <div><strong>جوال</strong><span class="breakpoint-spec">٤ أعمدة · مسافة ١٦–٢٠ بكسل</span><p>مهمة واحدة وإجراء أساسي واحد.</p></div>
               </article>
               <article class="breakpoint-card">
                 <div class="screen-icon"></div>
-                <div><strong>جهاز لوحي</strong><code>8 columns · 24px gutter</code><p>قائمة وتفاصيل عند اتساع المحتوى.</p></div>
+                <div><strong>جهاز لوحي</strong><span class="breakpoint-spec">٨ أعمدة · مسافة ٢٤ بكسل</span><p>قائمة وتفاصيل عند اتساع المحتوى.</p></div>
               </article>
               <article class="breakpoint-card">
                 <div class="screen-icon"></div>
-                <div><strong>شاشة كبيرة</strong><code>12 columns · 32px gutter</code><p>لوحة عمليات ومسح بصري سريع.</p></div>
+                <div><strong>كمبيوتر</strong><span class="breakpoint-spec">١٢ عمودًا · مسافة ٣٢ بكسل</span><p>لوحة عمليات ومسح بصري سريع.</p></div>
               </article>
             </div>
           </div>
@@ -301,7 +305,7 @@
             </header>
 
             <div class="web-specimen">
-              <div class="browser-frame" aria-label="نموذج صفحة موقع على شاشة كبيرة">
+              <div class="browser-frame" aria-label="نموذج صفحة موقع على الكمبيوتر">
                 <div class="browser-chrome"><i></i><i></i><i></i></div>
                 <div class="site-header">
                   <img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" />
