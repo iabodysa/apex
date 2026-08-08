@@ -16,6 +16,13 @@ const routes = [
   { path: "/tickets", name: "tickets", component: () => import("./pages/Tickets.vue") },
   { path: "/profile", name: "profile", component: () => import("./pages/Profile.vue") },
   { path: "/vehicle", name: "vehicle", component: () => import("./pages/Vehicle.vue") },
+  { path: "/:pathMatch(.*)*", redirect: "/" },
 ];
 
-export default createRouter({ history: createWebHashHistory(), routes });
+export default createRouter({
+  history: createWebHashHistory(),
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    return savedPosition || { top: 0 };
+  },
+});

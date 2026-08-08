@@ -5,11 +5,6 @@
 
     <h2 class="section-title">{{ t("transport.title") }}</h2>
 
-    <div v-if="isStale" class="stale-note">
-      <Icon name="alert" :size="14" class="shrink-0" />
-      <span>{{ t("common.stale") }}</span>
-    </div>
-
     <template v-if="tr.loading && !td">
       <Skeleton :lines="4" />
       <Skeleton :lines="3" />
@@ -120,7 +115,7 @@
           :trip="trip"
           :boarding="boardingState"
           :stale="boardingStale"
-          @refresh="boardingResource.reload().catch(() => {})"
+          @refresh="refreshBoarding"
         />
 
         <div v-else class="space-y-2">
@@ -225,35 +220,22 @@ import BoardingFlow from "../components/BoardingFlow.vue";
 import BoardingWindow from "../components/BoardingWindow.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatTime, formatDateTime } from "../utils/datetime";
-import { TOKEN } from "../utils/token";
 import { waLink } from "../utils/phone";
 import { usePullToRefresh } from "../composables/usePullToRefresh";
-import { cacheGet, cacheSet } from "../utils/cache";
+import { useWorkerRealtime } from "../realtime.js";
 
 const { t, tEnum } = useI18n();
 
-const CACHE_KEY = "get_worker_transport";
-const staleTr = ref(null);
 const tr = createResource({
   url: "apex.salis.api.masar.get_worker_transport",
-  params: { token: TOKEN },
   auto: true,
-  onSuccess: (r) => {
-    staleTr.value = null;
-    cacheSet(CACHE_KEY, r);
-  },
-  onError: () => {
-    const cached = cacheGet(CACHE_KEY);
-    if (cached) staleTr.value = cached;
-  },
 });
 
 const ptr = usePullToRefresh(() => tr.reload());
 
 const errorMessage = computed(() => resourceErrorMessage(tr.error));
 
-const td = computed(() => tr.data || staleTr.value?.data || null);
-const isStale = computed(() => !tr.data && !!staleTr.value);
+const td = computed(() => tr.data || null);
 
 const upcoming = computed(() => td.value?.upcoming || td.value?.trips || []);
 const past = computed(() => td.value?.past || []);
@@ -280,7 +262,6 @@ function canConfirm(trip) {
 const boardingStale = ref(false);
 const boardingResource = createResource({
   url: "apex.salis.api.boarding_flow.worker_trip_boarding",
-  params: { token: TOKEN },
   auto: true,
   onSuccess: () => {
     boardingStale.value = false;
@@ -290,6 +271,17 @@ const boardingResource = createResource({
   },
 });
 const boardingState = computed(() => boardingResource.data || null);
+
+function refreshBoarding() {
+  boardingResource.reload().catch(() => {});
+}
+
+/* An event is a doorbell. Both reads below go back through the token-scoped endpoints;
+   nothing is rendered out of a socket payload. */
+useWorkerRealtime((event) => {
+  refreshBoarding();
+  if (event === "driver_trip_update") tr.reload().catch(() => {});
+});
 
 const boardingActive = computed(() => {
   const b = boardingState.value;
@@ -309,7 +301,7 @@ function stopBoardingPoll() {
 function startBoardingPoll(seconds) {
   stopBoardingPoll();
   boardingTimer = setInterval(() => {
-    if (!document.hidden) boardingResource.reload().catch(() => {});
+    if (!document.hidden) refreshBoarding();
   }, seconds * 1000);
 }
 watch(
@@ -341,20 +333,7 @@ const boarding = createResource({
 function confirmBoarding(trip) {
   boardingFor.value = trip.transport_request;
   boardingError.value = "";
-  boarding.submit({ token: TOKEN, transport_request: trip.transport_request });
+  boarding.submit({ transport_request: trip.transport_request });
 }
 </script>
 
-<style scoped>
-.stale-note {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: var(--radius);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  background: var(--c-warning-bg);
-  color: var(--c-warning);
-}
-</style>

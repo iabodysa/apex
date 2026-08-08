@@ -4,6 +4,7 @@
     <Transition name="bpass-overlay">
       <div
         v-if="open"
+        ref="overlay"
         class="bpass-overlay"
         :dir="dir"
         role="dialog"
@@ -38,6 +39,7 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import { useOverlay } from "@shared/useOverlay.js";
 import BoardingPass from "./BoardingPass.vue";
 import Icon from "./Icon.vue";
 import { useI18n } from "../i18n";
@@ -51,9 +53,13 @@ const emit = defineEmits(["close"]);
 
 const { t, dir } = useI18n();
 
+const overlay = ref(null);
+
 function close() {
   emit("close");
 }
+
+useOverlay({ active: () => props.open, container: overlay, close });
 
 const THRESHOLD = 70;
 const startY = ref(0);

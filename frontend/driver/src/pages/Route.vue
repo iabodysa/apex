@@ -63,6 +63,7 @@
                   <div class="font-semibold leading-tight" :class="{ 'line-through': stop.done }">
                     {{ stop.stop_name || t("route.stop") }}
                     <span v-if="stop.planned_time" class="text-muted font-normal">· <bdi>{{ stop.planned_time }}</bdi></span>
+                    <span v-if="stop.arrived" class="pill pill-success ms-2">{{ t("route.arrived") }}</span>
                   </div>
                   <div v-if="stop.pickup" class="text-sm text-muted">
                     {{ stop.pickup.building_name || stop.accommodation_building }}
@@ -78,6 +79,19 @@
                   >
                     <Icon name="external" :size="14" /> {{ t("route.openMap") }}
                   </a>
+                  <button
+                    v-if="tripData.started && stop.route_stop"
+                    type="button"
+                    class="btn btn-outline arrive-btn"
+                    :disabled="arriveBusy === stop.route_stop"
+                    @click="toggleArrived(stop)"
+                  >
+                    <Icon name="bus" :size="16" class="rtl-flip" />
+                    {{ stop.arrived ? t("route.markNotArrived") : t("route.markArrived") }}
+                  </button>
+                  <p v-if="tripData.started && stop.route_stop && !stop.arrived" class="text-xs text-muted mt-1">
+                    {{ t("route.arrivedHint") }}
+                  </p>
                 </div>
               </li>
             </ol>
@@ -277,11 +291,22 @@ const doneCount = computed(
   () => (tripData.value?.stops || []).filter((s) => s.done).length,
 );
 const stopBusy = ref(null);
+const arriveBusy = ref(null);
 
 const stopProgress = createResource({
   url: "apex.salis.api.driver_portal.mark_stop_progress",
   onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),
 });
+
+function applyProgress(map) {
+  for (const row of tripData.value?.stops || []) {
+    const state = map[row.route_stop];
+    row.done = !!(state && state.done);
+    row.done_at = state ? state.done_at : null;
+    row.arrived = !!(state && state.arrived);
+    row.arrived_at = state ? state.arrived_at : null;
+  }
+}
 
 async function toggleStop(stop) {
   if (!stop.route_stop || stopBusy.value) return;
@@ -296,31 +321,52 @@ async function toggleStop(stop) {
       sequence: stop.sequence,
       stop_name: stop.stop_name,
     });
-    const map = res?.stop_progress || {};
-    for (const s of tripData.value?.stops || []) {
-      const st = map[s.route_stop];
-      s.done = !!(st && st.done);
-      s.done_at = st ? st.done_at : null;
-    }
+    applyProgress(res?.stop_progress || {});
   } catch (e) {
     stop.done = !next;
   } finally {
     stopBusy.value = null;
   }
 }
+
+/* The arrival flag is the only thing that lights the worker's "your driver has arrived"
+   panel, and until now nothing in any portal wrote it. */
+const arrival = createResource({
+  url: "apex.salis.api.driver_portal.mark_arrived",
+  onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),
+});
+
+async function toggleArrived(stop) {
+  if (!stop.route_stop || arriveBusy.value) return;
+  arriveBusy.value = stop.route_stop;
+  const next = !stop.arrived;
+  stop.arrived = next;
+  try {
+    const res = await arrival.submit({
+      dispatch_trip: props.trip,
+      route_stop: stop.route_stop,
+      arrived: next ? 1 : 0,
+      sequence: stop.sequence,
+      stop_name: stop.stop_name,
+    });
+    applyProgress(res?.stop_progress || {});
+    pushToast(next ? t("route.arrivedToast") : t("route.notArrivedToast"), "ok");
+  } catch (e) {
+    stop.arrived = !next;
+  } finally {
+    arriveBusy.value = null;
+  }
+}
 </script>
 
 <style scoped>
-.stale-note {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: var(--radius);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  background: var(--c-warning-bg);
-  color: var(--c-warning);
+.arrive-btn {
+  width: auto;
+  min-height: var(--tap-min);
+  padding-block: 8px;
+  padding-inline: 14px;
+  margin-block-start: 8px;
+  font-size: var(--fs-sm);
 }
 .stop-check {
   position: relative;

@@ -94,7 +94,6 @@ import { computed, reactive, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
-import { TOKEN } from "../utils/token";
 
 const { t } = useI18n();
 
@@ -139,7 +138,6 @@ function submit() {
     return;
   }
   create.submit({
-    token: TOKEN,
     service_line: form.service_line,
     from_location: form.from_location,
     to_location: form.to_location,

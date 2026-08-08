@@ -1,29 +1,31 @@
 # Copyright (c) 2026, afmcoltd
 """Masar — worker self-service app shell (Vue SPA served at /masar).
 
-Masar is the worker's mobile self-service app: a transported and housed Employee
-opens their PERSONAL link (``/masar?w=<token>``) on a phone and manages their
-profile, accommodation, transport, and requests. Workers are NOT Frappe users —
-identity is the unguessable token, resolved server-side by the worker endpoints
+Masar is the worker's mobile self-service app: a transported and housed Employee opens
+their PERSONAL link (``/masar?w=<token>``) on a phone and manages their profile,
+accommodation, transport, and requests. Workers are NOT Frappe users — identity is the
+unguessable token, resolved server-side by the worker endpoints
 (``apex.salis.api.masar``), which scope every query to one Employee.
 
-This page is therefore Guest-accessible (no login redirect): it only serves the
-built SPA shell and passes the token through to the client. The CSRF token is
-exposed using ``frappe.sessions.get_csrf_token()`` (same pattern as the driver
-portal) so the SPA's whitelisted calls work behind Frappe's CSRF guard. The
-appearance (theme + optional brand overrides) reuses the Salis Portal Theme.
+This page is therefore Guest-accessible (no login redirect). The order below is
+load-bearing and must not be rearranged: charset-guard the query parameter, run it
+through the shared bad-token throttle BEFORE it is trusted enough to cookie, set the
+httpOnly SameSite=Lax cookie, then redirect to the clean path so the secret leaves the
+address bar and the history. After that the SPA sends no credential at all.
 
-The old read-only "my worker route today" view that previously lived here has
-moved into the driver portal (/driver → "My Route"); see
-``apex.salis.api.driver_portal.my_worker_route_today``.
+The socket globals published into the shell carry no identity: the room a worker may
+join is handed to the client by ``get_worker_context``, which authenticated the token
+first, and never derived in the browser.
 """
 
 import re
 
 import frappe
 from frappe.sessions import get_csrf_token
+from frappe.utils import cint
 
 from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance
+from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.apex_core.utils.portal_token_security import WORKER, throttle_entry_token
 
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
@@ -35,8 +37,6 @@ _COOKIE_MAX_AGE_SECONDS = 180 * 24 * 60 * 60
 def get_context(context):
     """Validates a worker token in the URL, cookies it and redirects, or bootstraps the guest SPA."""
     context.no_cache = 1
-
-
     context.csrf_token = get_csrf_token()
 
     raw_token = frappe.form_dict.get("w") or ""
@@ -47,6 +47,14 @@ def get_context(context):
         frappe.local.flags.redirect_location = "/masar"
         raise frappe.Redirect
 
+    render_in_arabic()
+
+    conf = frappe.get_site_config()
+    context.site_name = frappe.local.site
+    context.socketio_port = cint(conf.get("socketio_port")) or 9000
+    context.async_enabled = not cint(conf.get("disable_async"))
+    context.dev_server = 1 if frappe.conf.developer_mode else 0
+
     context.masar_has_token = bool(_request_token_cookie())
 
     apply_portal_appearance(context)
@@ -54,10 +62,11 @@ def get_context(context):
 
 
 def _set_token_cookie(token: str) -> None:
-    """Persist the validated token in the httpOnly /masar cookie (best-effort).
+    """Persist the validated token in the httpOnly site cookie (best-effort).
 
 	Guarded so a missing cookie_manager (e.g. a non-request render path) degrades to
-	leaving the query-string token in place rather than 500-ing the page."""
+	leaving the query-string token in place rather than 500-ing the page. No ``path`` is
+	passed, so the cookie defaults to ``/`` and rides every request to this site."""
     cm = getattr(frappe.local, "cookie_manager", None)
     if cm is None:
         return

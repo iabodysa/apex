@@ -1,0 +1,1 @@
+import{c as r}from"./portalRealtime.js";import{r as e}from"./session2.js";const o=["driver_trip_update","boarding_update","boarding_confirmed","boarding_unmarked","boarding_arrived","wait_request"],i=r({socketGlobal:"masar_socket",events:o,room:e});export{i as u};

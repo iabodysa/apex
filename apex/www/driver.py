@@ -22,6 +22,7 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     DRIVER_TOKEN_COOKIE,
 )
 from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance
+from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.apex_core.utils.portal_token_security import DRIVER, throttle_entry_token
 
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
@@ -42,6 +43,8 @@ def get_context(context):
         frappe.local.flags.redirect_location = "/driver"
         raise frappe.Redirect
 
+    render_in_arabic()
+
     conf = frappe.get_site_config()
     context.site_name = frappe.local.site
     context.socketio_port = cint(conf.get("socketio_port")) or 9000
@@ -55,10 +58,11 @@ def get_context(context):
 
 
 def _set_token_cookie(token: str) -> None:
-    """Persist the validated token in the httpOnly /driver cookie (best-effort).
+    """Persist the validated token in the httpOnly site cookie (best-effort).
 
 	Guarded so a missing cookie_manager (a non-request render path) degrades to
-	leaving the query-string token in place rather than 500-ing the page."""
+	leaving the query-string token in place rather than 500-ing the page. No ``path``
+	is passed, so the cookie defaults to ``/`` and rides every request to this site."""
     cm = getattr(frappe.local, "cookie_manager", None)
     if cm is None:
         return

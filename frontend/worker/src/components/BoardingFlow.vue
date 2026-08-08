@@ -103,7 +103,7 @@
       <button class="btn btn-outline" :disabled="passLoading" @click="openPass">
         <Icon name="card" :size="18" /> {{ t("boarding.view") }}
       </button>
-      <p v-if="passError && !passData" class="text-sm text-muted">{{ t("boarding.none") }}</p>
+      <p v-if="passError && !passData" class="text-sm text-danger">{{ passError }}</p>
 
       <BoardingPassOverlay
         v-if="passData"
@@ -124,7 +124,6 @@ import Icon from "./Icon.vue";
 import BoardingWindow from "./BoardingWindow.vue";
 import BoardingPassOverlay from "./BoardingPassOverlay.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
-import { TOKEN } from "../utils/token";
 import { waLink } from "../utils/phone";
 
 const { t } = useI18n();
@@ -212,7 +211,7 @@ const claim = createResource({
 });
 function doClaim() {
   claimError.value = "";
-  claim.submit({ token: TOKEN });
+  claim.submit({});
 }
 
 const waitError = ref("");
@@ -229,7 +228,7 @@ const wait = createResource({
 });
 function doWait() {
   waitError.value = "";
-  wait.submit({ token: TOKEN });
+  wait.submit({});
 }
 
 const emit = defineEmits(["refresh"]);
@@ -241,7 +240,6 @@ const passOpen = ref(false);
 const passErrorMsg = ref("");
 const passResource = createResource({
   url: "apex.salis.api.masar.get_worker_boarding_pass",
-  params: { token: TOKEN },
   onError: (e) => {
     passErrorMsg.value = resourceErrorMessage(e, "boarding.failed");
   },
@@ -251,7 +249,9 @@ const passResource = createResource({
 });
 const passData = computed(() => passResource.data?.pass || null);
 const passLoading = computed(() => passResource.loading);
-const passError = computed(() => passErrorMsg.value || passResource.error);
+const passError = computed(() =>
+  passErrorMsg.value || (passResource.error ? t("boarding.none") : ""),
+);
 function openPass() {
   if (passData.value) {
     passOpen.value = true;

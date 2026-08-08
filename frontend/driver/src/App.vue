@@ -1,12 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="app-shell" :dir="dir">
-    <div v-if="updateReady" class="update-banner">
-      <Icon name="refresh" :size="14" class="shrink-0" />
-      <span>{{ t("update.available") }}</span>
-      <button class="update-reload" @click="applyUpdate">{{ t("update.reload") }}</button>
-    </div>
-
     <MobileConsoleShell
       v-if="ctx.loading"
       :title="t('common.driverPortal')"
@@ -75,7 +69,6 @@
 <script setup>
 import { computed, watch, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
-import { createResource } from "frappe-ui";
 import Unlinked from "./components/Unlinked.vue";
 import Icon from "./components/Icon.vue";
 import MobileConsoleShell from "@shared/components/MobileConsoleShell.vue";
@@ -88,7 +81,8 @@ import { useI18n, resourceErrorMessage } from "./i18n";
 import { useDocumentLanguage } from "@shared/useDocumentLanguage";
 import { clearToasts } from "./toast";
 import { online } from "./cache";
-import { updateReady, applyUpdate, initPwaUpdates } from "./pwa-updates";
+import { driverContext } from "./session.js";
+import { initPwaUpdates } from "./pwa-updates";
 
 const { t, lang, dir, fmtTodayDate } = useI18n();
 
@@ -104,11 +98,7 @@ if (!document.documentElement.getAttribute("data-theme") && window.portal_theme)
   document.documentElement.setAttribute("data-theme", window.portal_theme);
 }
 
-const ctx = createResource({
-  url: "apex.salis.api.driver_portal.get_driver_context",
-  method: "GET",
-  auto: true,
-});
+const ctx = driverContext();
 
 const linkedDriver = computed(
   () => ctx.data && ctx.data.enabled && ctx.data.linked && ctx.data.driver,
@@ -168,25 +158,5 @@ const unlinkedCtx = computed(() => {
   font-weight: 600;
   background: var(--c-warning-bg);
   color: var(--c-warning);
-}
-.update-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: var(--c-accent);
-  color: var(--c-primary-ink);
-}
-.update-reload {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--tap-min);
-  font-weight: 700;
-  text-decoration: underline;
-  padding-inline: 10px;
-  color: var(--c-primary-ink);
 }
 </style>

@@ -124,7 +124,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Badge, Button, Dialog, TabButtons, createResource } from "frappe-ui";
 import EmptyState from "@shared/components/EmptyState.vue";
@@ -142,7 +142,7 @@ import BoardingManifest from "../components/BoardingManifest.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { useDesktop } from "@shared/useBreakpoint.js";
 import { pushToast } from "../toast";
-import { connectDriverRealtime } from "../realtime.js";
+import { useDriverRealtime } from "../realtime.js";
 import { STEP_ICONS, dockStep } from "../trips";
 
 const { t, n, dir } = useI18n();
@@ -288,22 +288,28 @@ async function complete(trip) {
 }
 
 const wait = ref(null);
-function onBoardingEvent(event, payload) {
+
+/* A wait request names the bus it came from. Raising it without that name put a
+   worker from one trip in front of a driver who was running another. */
+function onPortalEvent(event, payload) {
+  if (event === "driver_trip_update") {
+    today.reload();
+    return;
+  }
   if (event !== "wait_request") return;
+  const trip = payload.dispatch_trip || "";
+  const row = trip ? rows.value.find((r) => r.name === trip) : null;
+  if (trip && !row) return;
   wait.value = {
     employee: payload.employee || t("trips.defaultWorker"),
     seconds: payload.wait_window_seconds || 60,
+    trip: row ? row.route_plan || row.name : "",
   };
 }
 
-let stopRealtime = () => {};
-onMounted(() => {
-  stopRealtime = connectDriverRealtime(() => today.reload(), onBoardingEvent);
-});
-onUnmounted(() => {
-  stopRealtime();
-  stopPositionTracking();
-});
+useDriverRealtime(onPortalEvent);
+
+onUnmounted(stopPositionTracking);
 
 const POSITION_PUSH_INTERVAL_MS = 30000;
 const pushPosition = createResource({

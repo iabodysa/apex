@@ -138,10 +138,10 @@ async function onPhoto(e) {
   try {
     photo.value = await readPhotoFile(file);
     photoName.value = photo.value.photo ? file.name : "";
-  } catch (err) {
+  } catch (failure) {
     clearPhoto();
     photoError.value =
-      err instanceof UnsupportedPhotoType ? t("attendance.photoType") : t("common.error");
+      failure instanceof UnsupportedPhotoType ? t("attendance.photoType") : t("common.error");
     pushToast(photoError.value, "err");
   } finally {
     uploading.value = false;

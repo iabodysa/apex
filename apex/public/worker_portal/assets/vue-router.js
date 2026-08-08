@@ -1,4 +1,4 @@
-import{u as $,s as at,v as ct,x as Fe,y as lt,z as F,A as ut,B as Ke,k as L,i as ft,g as ht,C as he}from"./index.js";/*!
+import{u as $,s as at,v as ct,x as Fe,y as lt,z as F,A as ut,B as Ke,j as L,i as ft,g as ht,C as he}from"./index.js";/*!
  * vue-router v4.6.4
  * (c) 2025 Eduardo San Martin Morote
  * @license MIT

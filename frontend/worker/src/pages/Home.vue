@@ -87,7 +87,7 @@ import DestinationsCard from "../components/DestinationsCard.vue";
 import Icon from "../components/Icon.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { useDesktop } from "@shared/useBreakpoint.js";
-import { TOKEN } from "../utils/token";
+import { useWorkerRealtime } from "../realtime.js";
 
 defineProps({
   ctx: { type: Object, default: null },
@@ -99,17 +99,17 @@ const desktop = useDesktop();
 
 const home = createResource({
   url: "apex.salis.api.masar.get_worker_home",
-  params: { token: TOKEN },
   auto: true,
   onError: () => {},
 });
 
 const contacts = createResource({
   url: "apex.salis.api.masar.get_worker_contacts",
-  params: { token: TOKEN },
   auto: true,
   onError: () => {},
 });
+
+useWorkerRealtime(() => home.reload().catch(() => {}));
 
 const loading = computed(() => home.loading && !home.data);
 const homeErrorMessage = computed(() => resourceErrorMessage(home.error));
@@ -176,6 +176,6 @@ const notifyHr = createResource({
 
 function sendNotifyHr() {
   notifyHrError.value = "";
-  notifyHr.submit({ token: TOKEN });
+  notifyHr.submit({});
 }
 </script>

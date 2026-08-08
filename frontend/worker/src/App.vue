@@ -1,10 +1,7 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="app-shell" :dir="dir">
-    <div
-      v-if="updateReady"
-      class="update-banner flex items-center justify-center gap-2 text-xs font-semibold"
-    >
+    <div v-if="updateReady" class="update-banner flex items-center justify-center gap-2 text-xs font-semibold">
       <Icon name="refresh" :size="14" />
       <span>{{ t("update.available") }}</span>
       <button class="update-reload font-bold underline" @click="applyUpdate">
@@ -39,36 +36,34 @@
       </div>
     </div>
 
-    <template v-else-if="worker">
-      <MobileConsoleShell :title="workerName" :subtitle="greeting" :max-width="480">
-        <template #header-actions>
-          <LangToggle variant="header" />
-          <span
-            class="avatar h-9 w-9 text-sm overflow-hidden"
-            style="background: var(--c-header-accent); color: var(--c-header-bg)"
-          >
-            <img v-if="worker.photo" :src="worker.photo" alt="" class="h-full w-full object-cover" />
-            <template v-else>{{ initial }}</template>
-          </span>
-        </template>
+    <MobileConsoleShell v-else-if="worker" :title="workerName" :subtitle="greeting" :max-width="480">
+      <template #header-actions>
+        <LangToggle variant="header" />
+        <span
+          class="avatar h-9 w-9 text-sm overflow-hidden"
+          style="background: var(--c-header-accent); color: var(--c-header-bg)"
+        >
+          <img v-if="worker.photo" :src="worker.photo" alt="" class="h-full w-full object-cover" />
+          <template v-else>{{ initial }}</template>
+        </span>
+      </template>
 
-        <router-view :ctx="ctx.data" />
+      <router-view :ctx="ctx.data" />
 
-        <template #nav>
-          <router-link
-            v-for="tab in tabs"
-            :key="tab.to"
-            :to="tab.to"
-            :class="{ 'is-active': isTabActive(tab) }"
-            active-class=""
-            exact-active-class=""
-          >
-            <Icon :name="tab.icon" :size="22" :class="{ 'rtl-flip': tab.icon === 'route' }" />
-            <span>{{ t(tab.labelKey) }}</span>
-          </router-link>
-        </template>
-      </MobileConsoleShell>
-    </template>
+      <template #nav>
+        <router-link
+          v-for="tab in tabs"
+          :key="tab.to"
+          :to="tab.to"
+          :class="{ 'is-active': isTabActive(tab) }"
+          active-class=""
+          exact-active-class=""
+        >
+          <Icon :name="tab.icon" :size="22" :class="{ 'rtl-flip': tab.icon === 'route' }" />
+          <span>{{ t(tab.labelKey) }}</span>
+        </router-link>
+      </template>
+    </MobileConsoleShell>
 
     <div v-else class="flex-1 grid place-items-center p-8 text-center">
       <div>
@@ -87,19 +82,23 @@
 </template>
 
 <script setup>
-import { computed, watch, ref, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { createResource } from "frappe-ui";
-import Icon from "./components/Icon.vue";
 import MobileConsoleShell from "@shared/components/MobileConsoleShell.vue";
+import { useDocumentLanguage } from "@shared/useDocumentLanguage";
+import { usePoll } from "@shared/usePoll.js";
+import Icon from "./components/Icon.vue";
 import LangToggle from "./components/LangToggle.vue";
 import { useI18n, resourceErrorMessage, setEnumLabels } from "./i18n";
-import { useDocumentLanguage } from "@shared/useDocumentLanguage";
-import { TOKEN, hasToken } from "./utils/token";
+import { hasToken } from "./token.js";
+import { online } from "./storage.js";
+import { workerContext } from "./session.js";
 import { updateReady, applyUpdate, initPwaUpdates } from "./pwa";
-import { usePoll } from "@shared/usePoll.js";
 
 const { t, dir, lang } = useI18n();
+
+useDocumentLanguage(lang, dir);
 
 const enumLabels = createResource({
   url: "apex.salis.api.masar.get_enum_labels",
@@ -108,46 +107,29 @@ const enumLabels = createResource({
 
 watch(
   lang,
-  (l) => {
-    if (l === "en") return;
-    enumLabels.fetch({ lang: l }, { onSuccess: (data) => setEnumLabels(l, data) });
+  (code) => {
+    if (code === "en") return;
+    enumLabels.fetch({ lang: code }, { onSuccess: (data) => setEnumLabels(code, data) });
   },
   { immediate: true },
 );
 
-useDocumentLanguage(lang, dir);
-
-const online = ref(typeof navigator === "undefined" ? true : navigator.onLine);
-const syncOnline = () => (online.value = navigator.onLine);
 let stopPwaUpdates = null;
 onMounted(() => {
-  window.addEventListener("online", syncOnline);
-  window.addEventListener("offline", syncOnline);
   stopPwaUpdates = initPwaUpdates();
 });
 onUnmounted(() => {
-  window.removeEventListener("online", syncOnline);
-  window.removeEventListener("offline", syncOnline);
   if (stopPwaUpdates) stopPwaUpdates();
 });
 
-const ctx = createResource({
-  url: "apex.salis.api.masar.get_worker_context",
-  method: "GET",
-  params: { token: TOKEN },
-  auto: hasToken,
-});
-
+const ctx = workerContext();
 const worker = computed(() => ctx.data && ctx.data.employee && ctx.data);
 
 if (hasToken) usePoll(() => ctx.reload());
 
 const route = useRoute();
 
-const firstName = computed(
-  () => (ctx.data?.employee_name || "").trim().split(/\s+/)[0] || "",
-);
-const workerName = computed(() => (ctx.data?.employee_name || "").trim() || firstName.value);
+const workerName = computed(() => (ctx.data?.employee_name || "").trim());
 const initial = computed(
   () => (ctx.data?.employee_name || "?").trim().charAt(0).toUpperCase() || "?",
 );
@@ -156,9 +138,9 @@ const isTabActive = (tab) =>
   tab.to === "/" ? route.path === "/" : route.path === tab.to || route.path.startsWith(tab.to + "/");
 
 const greeting = computed(() => {
-  const h = new Date().getHours();
-  if (h < 12) return t("greeting.morning");
-  if (h < 18) return t("greeting.afternoon");
+  const hour = new Date().getHours();
+  if (hour < 12) return t("greeting.morning");
+  if (hour < 18) return t("greeting.afternoon");
   return t("greeting.evening");
 });
 

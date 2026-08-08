@@ -3,11 +3,6 @@
   <div class="space-y-5">
     <h2 class="section-title">{{ t("accommodation.title") }}</h2>
 
-    <div v-if="isStale" class="stale-note">
-      <Icon name="alert" :size="14" class="shrink-0" />
-      <span>{{ t("common.stale") }}</span>
-    </div>
-
     <template v-if="acc.loading && !ad">
       <Skeleton variant="stats" :lines="3" />
       <Skeleton :lines="4" />
@@ -103,38 +98,24 @@
 </template>
 
 <script setup>
-import { computed, h, ref } from "vue";
+import { computed, h } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatDate } from "../utils/datetime";
-import { TOKEN } from "../utils/token";
 import { waLink } from "../utils/phone";
-import { cacheGet, cacheSet } from "../utils/cache";
 
 const { t, tEnum } = useI18n();
 
-const CACHE_KEY = "get_worker_accommodation";
-const staleAcc = ref(null);
 const acc = createResource({
   url: "apex.salis.api.masar.get_worker_accommodation",
-  params: { token: TOKEN },
   auto: true,
-  onSuccess: (r) => {
-    staleAcc.value = null;
-    cacheSet(CACHE_KEY, r);
-  },
-  onError: () => {
-    const cached = cacheGet(CACHE_KEY);
-    if (cached) staleAcc.value = cached;
-  },
 });
 
 const errorMessage = computed(() => resourceErrorMessage(acc.error));
 
-const ad = computed(() => acc.data || staleAcc.value?.data || null);
-const isStale = computed(() => !acc.data && !!staleAcc.value);
+const ad = computed(() => acc.data || null);
 
 const building = computed(() => ad.value?.building);
 const room = computed(() => ad.value?.room);
@@ -160,16 +141,3 @@ const Row = (rprops) =>
   ]);
 </script>
 
-<style scoped>
-.stale-note {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: var(--radius);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  background: var(--c-warning-bg);
-  color: var(--c-warning);
-}
-</style>

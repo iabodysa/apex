@@ -12,6 +12,9 @@
       <p class="wait-body">
         <bdi>{{ request.employee }}</bdi> {{ t("trips.waitRequestBody") }}
       </p>
+      <p v-if="request.trip" class="wait-body">
+        {{ t("trips.waitRequestTrip", { trip: request.trip }) }}
+      </p>
     </template>
     <template #footer>
       <Badge

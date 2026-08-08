@@ -1,0 +1,1 @@
+import{m as t,j as o}from"./index.js";let e=null;function a(){return e||(e=t({url:"apex.salis.api.driver_portal.get_driver_context",method:"GET",auto:!0})),e}const m=o(()=>{var r;return((r=a().data)==null?void 0:r.realtime_room)||""});export{a as d,m as r};

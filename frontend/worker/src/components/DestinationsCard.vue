@@ -33,10 +33,10 @@ const props = defineProps({
 });
 
 const destinations = computed(() => [
-  { to: "/accommodation", icon: "bed", labelKey: "nav.accommodation", count: 0 },
+  { to: "/accommodation", icon: "bed", labelKey: "nav.accommodation" },
   { to: "/requests", icon: "doc", labelKey: "nav.requests", count: props.openRequests },
-  { to: "/custody", icon: "briefcase", labelKey: "nav.custody", count: 0 },
-  { to: "/profile", icon: "user", labelKey: "nav.profile", count: 0 },
+  { to: "/custody", icon: "briefcase", labelKey: "nav.custody" },
+  { to: "/profile", icon: "user", labelKey: "nav.profile" },
 ]);
 </script>
 

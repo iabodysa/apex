@@ -93,6 +93,7 @@
       <button class="btn btn-primary" :disabled="create.loading || !canSubmit" @click="submit">
         <Icon name="send" :size="20" /> {{ t("requests.submit") }}
       </button>
+      <p v-if="!canSubmit" class="text-xs text-muted">{{ t("requests.needText") }}</p>
       <p v-if="ok" class="status-note status-ok">{{ t("requests.submitted") }}</p>
       <p v-if="err" class="status-note status-err">{{ err }}</p>
     </section>
@@ -148,7 +149,6 @@ import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
-import { TOKEN } from "../utils/token";
 import { PHOTO_ACCEPT, isAcceptedPhoto } from "@shared/photoFile.js";
 
 const { t, tEnum } = useI18n();
@@ -199,7 +199,6 @@ function onPhoto(e) {
 
 const list = createResource({
   url: "apex.salis.api.masar.list_worker_requests",
-  params: { token: TOKEN },
   auto: true,
 });
 
@@ -227,7 +226,6 @@ function submit() {
   ok.value = false;
   err.value = "";
   create.submit({
-    token: TOKEN,
     category: form.category,
     priority: form.priority,
     issue_location: form.issue_location,

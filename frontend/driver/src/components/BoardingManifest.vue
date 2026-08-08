@@ -1,7 +1,7 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <div class="sheet-overlay" role="dialog" aria-modal="true" @click.self="close">
-    <div class="sheet">
+  <div class="sheet-overlay" @click.self="close">
+    <div ref="sheet" class="sheet" role="dialog" aria-modal="true" :aria-label="t('manifest.title')">
       <div class="sheet-bar">
         <span class="font-bold">{{ t("manifest.title") }}</span>
         <button class="sheet-close" :aria-label="t('manifest.close')" @click="close">
@@ -13,10 +13,10 @@
 
       <div v-if="!summary" class="flex flex-wrap items-center gap-2 mb-4">
         <button class="btn btn-accent flex-1" @click="emit('open-scan')">
-          <Icon name="qr" :size="16" /> {{ t("trips.scanBoarding", "Scan Boarding") }}
+          <Icon name="qr" :size="16" /> {{ t("trips.scanBoarding") }}
         </button>
         <button class="btn btn-outline flex-1" @click="emit('open-manual')">
-          <Icon name="user" :size="16" /> {{ t("trips.manualBoarding", "Manual Boarding") }}
+          <Icon name="user" :size="16" /> {{ t("trips.manualBoarding") }}
         </button>
       </div>
 
@@ -78,7 +78,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, ref } from "vue";
 import { createResource } from "frappe-ui";
 import { BOARDING, BOARDING_REFUSED } from "@shared/statusVocabularies";
 import Icon from "./Icon.vue";
@@ -86,8 +86,9 @@ import Skeleton from "./Skeleton.vue";
 import EmptyState from "./EmptyState.vue";
 import ErrorState from "./ErrorState.vue";
 import { useI18n } from "../i18n";
+import { useOverlay } from "@shared/useOverlay.js";
 import { pushToast } from "../toast";
-import { connectDriverRealtime } from "../realtime.js";
+import { useDriverRealtime } from "../realtime.js";
 
 const { t, te } = useI18n();
 
@@ -189,7 +190,6 @@ async function depart() {
   }
 }
 
-let stopRealtime = () => {};
 function onBoarding(event, payload) {
   if (payload.dispatch_trip && payload.dispatch_trip !== props.trip) return;
   if (event === "wait_request") {
@@ -206,16 +206,16 @@ function onBoarding(event, payload) {
   }
   panel.reload();
 }
-onMounted(() => {
-  stopRealtime = connectDriverRealtime(() => {}, onBoarding);
-});
-onUnmounted(() => {
-  stopRealtime();
-});
+
+useDriverRealtime(onBoarding);
+
+const sheet = ref(null);
 
 function close() {
   emit("close");
 }
+
+useOverlay({ active: () => true, container: sheet, close });
 </script>
 
 <style scoped>
@@ -298,10 +298,6 @@ function close() {
   content: "";
   position: absolute;
   inset: calc((var(--tap-min) - 30px) / -2);
-}
-.mini-ok {
-  background: var(--c-success);
-  color: var(--c-primary-ink);
 }
 .mini-no {
   background: var(--c-surface-2);

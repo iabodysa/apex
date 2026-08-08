@@ -20,6 +20,13 @@
       window.masar_has_token = {{ "true" if masar_has_token else "false" }};
       window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
       window.portal_logo = {{ (portal_logo or '') | tojson }};
+      window.portal_theme = {{ (portal_theme or 'afmco') | tojson }};
+      window.masar_socket = {
+        site_name: {{ site_name | tojson }},
+        socketio_port: {{ socketio_port }},
+        enabled: {{ "true" if async_enabled else "false" }},
+        dev_server: {{ dev_server or 0 }},
+      };
     </script>
   </head>
   <body>
@@ -30,9 +37,7 @@
         window.addEventListener("load", function () {
           navigator.serviceWorker
             .register("/masar-sw.min.js", { scope: "/masar" })
-            .catch(function (err) {
-              console.warn("Masar SW registration failed", err);
-            });
+            .catch(function () {});
         });
       }
     </script>

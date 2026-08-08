@@ -258,13 +258,32 @@ const clearanceRow = computed(() => (clearance.data?.has_clearance ? clearance.d
 const certificate = createResource({
   url: "apex.salis.api.driver_portal.get_my_clearance_certificate",
   method: "POST",
-  onSuccess: (data) => {
-    if (data?.certificate_url) window.open(data.certificate_url, "_blank", "noopener");
-  },
   onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),
 });
+
+/* The print key is minted by a POST, so the URL only exists after the round trip — and a
+   window opened from that callback is outside the gesture and blocked on both mobile
+   browsers. The tab is claimed on the tap and navigated when the answer lands. */
 function downloadClearanceCertificate() {
-  certificate.submit();
+  const tab = window.open("", "_blank");
+  if (tab) tab.opener = null;
+  certificate.submit(
+    {},
+    {
+      onSuccess: (data) => {
+        const url = data?.certificate_url;
+        if (!url) {
+          if (tab) tab.close();
+          return;
+        }
+        if (tab) tab.location.href = url;
+        else window.open(url, "_blank", "noopener");
+      },
+      onError: () => {
+        if (tab) tab.close();
+      },
+    },
+  );
 }
 
 const documents = computed(() => profile.data?.documents || []);

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <!-- Copyright (c) 2026, afmcoltd -->
-<html lang="en" data-theme="{{ portal_theme or 'afmco' }}">
+<html lang="ar" data-theme="{{ portal_theme or 'afmco' }}">
   <head>
     <meta charset="utf-8" />
+    <meta name="referrer" content="no-referrer" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#072B1A" />
-    <link rel="manifest" href="/assets/apex/worker_portal/manifest.webmanifest" />
+    <link rel="manifest" href="/assets/apex/worker_portal/driver.webmanifest" />
+    <link rel="apple-touch-icon" href="/assets/apex/worker_portal/icons/driver-icon-192.png" />
     <link rel="stylesheet" href="/assets/apex/vendor/montserrat-v31/montserrat.css" />
     <link rel="stylesheet" href="/assets/apex/vendor/cairo-v31/cairo.css" />
     <link rel="stylesheet" href="/assets/apex/vendor/thmanyah-v1/thmanyah.css" />
@@ -15,6 +17,7 @@
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
       window.holder_type = "Driver";
+      window.driver_has_token = {{ "true" if driver_has_token else "false" }};
       window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
       window.portal_logo = {{ (portal_logo or '') | tojson }};
       window.portal_theme = {{ (portal_theme or 'afmco') | tojson }};
@@ -34,9 +37,7 @@
         window.addEventListener("load", function () {
           navigator.serviceWorker
             .register("/driver-sw.min.js", { scope: "/driver" })
-            .catch(function (err) {
-              console.warn("Driver SW registration failed", err);
-            });
+            .catch(function () {});
         });
       }
     </script>

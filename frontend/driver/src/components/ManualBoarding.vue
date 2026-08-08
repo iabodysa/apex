@@ -1,7 +1,7 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <div class="sheet-overlay" role="dialog" aria-modal="true" @click.self="close">
-    <div class="sheet">
+  <div class="sheet-overlay" @click.self="close">
+    <div ref="panel" class="sheet" role="dialog" aria-modal="true" :aria-label="t('manual.title')">
       <div class="sheet-bar">
         <span class="font-bold">{{ t("manual.title") }}</span>
         <button class="sheet-close" :aria-label="t('manual.close')" @click="close">
@@ -59,6 +59,7 @@ import Icon from "./Icon.vue";
 import Skeleton from "./Skeleton.vue";
 import EmptyState from "./EmptyState.vue";
 import ErrorState from "./ErrorState.vue";
+import { useOverlay } from "@shared/useOverlay.js";
 import { useI18n } from "../i18n";
 import { pushToast } from "../toast";
 
@@ -69,6 +70,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["close", "boarded"]);
 
+const panel = ref(null);
 const selected = ref(new Set());
 const busy = ref(false);
 
@@ -111,6 +113,8 @@ async function confirm() {
 function close() {
   emit("close");
 }
+
+useOverlay({ active: () => true, container: panel, close });
 </script>
 
 <style scoped>

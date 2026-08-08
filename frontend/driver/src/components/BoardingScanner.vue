@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <div class="scanner-overlay" role="dialog" aria-modal="true">
+  <div ref="stage" class="scanner-overlay" role="dialog" aria-modal="true" :aria-label="t('boarding.title')">
     <div class="scanner-bar">
       <span class="font-bold">{{ t("boarding.title") }}</span>
       <button class="scanner-close" :aria-label="t('boarding.close')" @click="close">
@@ -39,8 +39,9 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { createResource } from "frappe-ui";
+import { useOverlay } from "@shared/useOverlay.js";
 import Icon from "./Icon.vue";
 import { useI18n } from "../i18n";
 
@@ -52,6 +53,7 @@ const props = defineProps({
   accommodationBuilding: { type: String, default: null },
 });
 
+const stage = ref(null);
 const video = ref(null);
 const phase = ref("starting");
 const errorMsg = ref("");
@@ -74,13 +76,11 @@ const RESULTS = {
   Expired: { class: "is-err", icon: "alert", title: "boarding.resultExpired", hint: "boarding.expiredHint" },
   "Invalid Token": { class: "is-err", icon: "alert", title: "boarding.resultInvalid", hint: "boarding.invalidHint" },
 };
-function meta() {
-  return RESULTS[lastResult.value] || RESULTS["Invalid Token"];
-}
-const resultClass = () => meta().class;
-const resultIcon = () => meta().icon;
-const resultTitleKey = () => meta().title;
-const resultHintKey = () => meta().hint;
+const meta = computed(() => RESULTS[lastResult.value] || RESULTS["Invalid Token"]);
+const resultClass = computed(() => meta.value.class);
+const resultIcon = computed(() => meta.value.icon);
+const resultTitleKey = computed(() => meta.value.title);
+const resultHintKey = computed(() => meta.value.hint);
 
 function supported() {
   return (
@@ -177,6 +177,8 @@ function releaseStream() {
 function close() {
   emit("close");
 }
+
+useOverlay({ active: () => true, container: stage, close });
 
 onMounted(start);
 onBeforeUnmount(() => {

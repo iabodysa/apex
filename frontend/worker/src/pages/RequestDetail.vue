@@ -104,14 +104,13 @@ import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatDateTime } from "../utils/datetime";
-import { TOKEN } from "../utils/token";
 
 const { t, tEnum } = useI18n();
 const route = useRoute();
 
 const detail = createResource({
   url: "apex.salis.api.masar.get_worker_request_detail",
-  makeParams: () => ({ token: TOKEN, name: route.params.name }),
+  makeParams: () => ({ name: route.params.name }),
   auto: true,
 });
 

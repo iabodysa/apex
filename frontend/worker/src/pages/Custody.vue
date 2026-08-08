@@ -3,11 +3,6 @@
   <div class="space-y-5">
     <h2 class="section-title">{{ t("custody.title") }}</h2>
 
-    <div v-if="isStale" class="stale-note">
-      <Icon name="alert" :size="14" class="shrink-0" />
-      <span>{{ t("common.stale") }}</span>
-    </div>
-
     <template v-if="cus.loading && !cd">
       <Skeleton :lines="3" />
       <Skeleton :lines="3" />
@@ -45,10 +40,6 @@
           <Row v-if="it.building" icon="building" :label="t('custody.building')" :value="it.building" />
         </dl>
       </section>
-
-      <a :href="ackUrl" class="btn btn-outline" style="text-decoration: none">
-        <Icon name="check" :size="18" /> {{ t("custody.acknowledge") }}
-      </a>
     </template>
 
     <div v-else class="card card-pad text-center">
@@ -59,41 +50,25 @@
 </template>
 
 <script setup>
-import { computed, h, ref } from "vue";
+import { computed, h } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatDate } from "../utils/datetime";
-import { TOKEN } from "../utils/token";
-import { cacheGet, cacheSet } from "../utils/cache";
 
 const { t } = useI18n();
 
-const CACHE_KEY = "get_worker_custody";
-const staleCus = ref(null);
 const cus = createResource({
   url: "apex.salis.api.masar.get_worker_custody",
-  params: { token: TOKEN },
   auto: true,
-  onSuccess: (r) => {
-    staleCus.value = null;
-    cacheSet(CACHE_KEY, r);
-  },
-  onError: () => {
-    const cached = cacheGet(CACHE_KEY);
-    if (cached) staleCus.value = cached;
-  },
 });
 
 const errorMessage = computed(() => resourceErrorMessage(cus.error));
 
-const cd = computed(() => cus.data || staleCus.value?.data || null);
-const isStale = computed(() => !cus.data && !!staleCus.value);
+const cd = computed(() => cus.data || null);
 
 const items = computed(() => cd.value?.items || []);
-
-const ackUrl = "/my-custody-acknowledgment";
 
 function fmtQty(n) {
   const v = Number(n) || 0;
@@ -108,16 +83,3 @@ const Row = (rprops) =>
   ]);
 </script>
 
-<style scoped>
-.stale-note {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: var(--radius);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  background: var(--c-warning-bg);
-  color: var(--c-warning);
-}
-</style>
