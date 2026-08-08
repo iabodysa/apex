@@ -16,6 +16,7 @@ RETIRED_REPORTS = [
     "Transport Fulfilment SLA",
     "Movement KPI Summary",
     "Fuel Consumption Summary",
+    "Current SIM Custody",
 ]
 
 
