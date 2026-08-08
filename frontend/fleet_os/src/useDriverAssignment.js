@@ -1,90 +1,119 @@
 // Copyright (c) 2026, afmcoltd
-import { reactive } from "vue";
-import { call } from "./api.js";
+import { reactive, ref } from "vue";
+
+import { createHandover, reassign, searchDrivers } from "./api.js";
 import { today, trim } from "./fleetHelpers.js";
-import { resourceErrorMessage } from "./i18n.js";
+import { resourceErrorMessage } from "@/i18n";
 
-const POST = (m) => "apex.salis.api.fleet_os." + m;
-
-export function useDriverAssignment({ panel, subForm, showToast, cfShow, reloadFleet, t }) {
+export function useDriverAssignment({
+  subForm,
+  showToast,
+  ask,
+  reloadFleet,
+  panelVehicle,
+  t,
+}) {
   const rf = reactive({
-    driverName: "", driverLabel: "", date: today(),
-    captureHandover: false, odometer: null, checklistTemplate: "", conditionNotes: "",
+    driverName: "",
+    driverLabel: "",
+    date: today(),
+    captureHandover: false,
+    odometer: null,
+    checklistTemplate: "",
+    conditionNotes: "",
   });
-  const dp = reactive({ query: "", results: [], open: false, loading: false });
-  let dpTimer = null;
+  const driverOptions = ref([]);
+  const driverLoading = ref(false);
+  const handoverMissing = ref(false);
+  let searchTimer = null;
+  let issued = 0;
 
   function resetReassign() {
     Object.assign(rf, {
-      driverName: "", driverLabel: "", date: today(),
-      captureHandover: false, odometer: null, checklistTemplate: "", conditionNotes: "",
+      driverName: "",
+      driverLabel: "",
+      date: today(),
+      captureHandover: false,
+      odometer: null,
+      checklistTemplate: "",
+      conditionNotes: "",
     });
-    Object.assign(dp, { query: "", results: [], open: false, loading: false });
+    driverOptions.value = [];
+    handoverMissing.value = false;
   }
-  async function runDriverSearch() {
-    dp.loading = true;
+
+  /* The picker binds the canonical driver record name, never the free text: the typed query is
+     a search term and the value sent to the server is an id the server checks again. */
+  async function runSearch(query) {
+    driverLoading.value = true;
+    const ticket = ++issued;
     try {
-      dp.results = (await call(POST("search_drivers"), { type: "GET", args: { q: trim(dp.query) } })) || [];
-      dp.open = true;
+      const rows = (await searchDrivers(trim(query))) || [];
+      if (ticket !== issued) return;
+      driverOptions.value = rows.map((d) => ({
+        label: d.full_name || d.name,
+        value: d.name,
+        description: [d.driver_id, d.phone].filter(Boolean).join(" · "),
+      }));
     } catch (e) {
-      dp.results = [];
+      if (ticket !== issued) return;
+      driverOptions.value = [];
       showToast(resourceErrorMessage(e, "errors.loadError"), "red");
     } finally {
-      dp.loading = false;
+      if (ticket === issued) driverLoading.value = false;
     }
   }
-  function onDriverQuery() {
-    rf.driverName = "";
-    rf.driverLabel = "";
-    clearTimeout(dpTimer);
-    dpTimer = setTimeout(runDriverSearch, 250);
+
+  function onDriverQuery(query) {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => runSearch(query), 250);
   }
-  function pickDriver(d) {
-    rf.driverName = d.name;
-    rf.driverLabel = d.full_name || d.driver_id || d.name;
-    dp.query = rf.driverLabel + (d.driver_id ? " — " + d.driver_id : "");
-    dp.open = false;
+
+  function pickDriver(option) {
+    rf.driverName = option ? option.value : "";
+    rf.driverLabel = option ? option.label : "";
   }
+
   function openReassignForm() {
     resetReassign();
     subForm.value = "reassign";
   }
+
   function openNewDriverForm() {
     window.open("/salis-driver", "_blank", "noopener");
   }
+
+  /* Two writes, and the second is deliberately best-effort: a handover that fails must not undo
+     an assignment the yard has already acted on. What was missing is the record of it — the
+     flag below keeps "assigned, handover not captured" on screen instead of letting a warning
+     toast disappear and take the fact with it. */
   async function submitReassign() {
-    const v = panel.vehicle;
+    const v = panelVehicle.value;
     if (!v) return;
     if (!rf.driverName) {
       showToast(t("toast.pickDriverRequired"), "amber");
       return;
     }
-    const ok = await cfShow(
-      t("confirm.reassignTitle"),
-      t("confirm.reassignMsg", { name: rf.driverLabel, plate: v.plate }),
-      "lock",
-      t("confirm.reassignOk"),
-      "btn-green"
-    );
+    const ok = await ask({
+      title: t("confirm.reassignTitle"),
+      message: t("confirm.reassignMsg", { name: rf.driverLabel, plate: v.plate }),
+      okLabel: t("confirm.reassignOk"),
+      theme: "green",
+    });
     if (!ok) return;
     try {
-      await call(POST("reassign"), {
-        type: "POST",
-        args: { plate: v.plate, driver_id: rf.driverName, date: rf.date || today() },
-      });
+      await reassign(v.plate, rf.driverName, rf.date || today());
       showToast(t("toast.reassigned", { name: rf.driverLabel, plate: v.plate }), "green");
+      handoverMissing.value = false;
       if (rf.captureHandover) {
         try {
-          const res = await call(POST("create_handover"), {
-            type: "POST",
-            args: {
-              plate: v.plate,
-              driver_id: rf.driverName,
-              date: rf.date || today(),
-              odometer: rf.odometer,
-              checklist_template: trim(rf.checklistTemplate),
-              condition_notes: rf.conditionNotes,
-            },
+          const res = await createHandover({
+            plate: v.plate,
+            driver_id: rf.driverName,
+            date: rf.date || today(),
+            odometer: rf.odometer,
+            checklist_template: trim(rf.checklistTemplate),
+            condition_notes: rf.conditionNotes,
           });
           if (res && res.handover) {
             showToast(t("toast.handoverDrafted", { name: res.handover }), "green");
@@ -92,10 +121,14 @@ export function useDriverAssignment({ panel, subForm, showToast, cfShow, reloadF
             showToast(t("toast.handoverSkipped"), "green");
           }
         } catch (e) {
-          showToast(t("toast.handoverFailed", { msg: resourceErrorMessage(e, "errors.actionError") }), "amber");
+          handoverMissing.value = true;
+          showToast(
+            t("toast.handoverFailed", { msg: resourceErrorMessage(e, "errors.actionError") }),
+            "amber",
+          );
         }
       }
-      subForm.value = null;
+      if (!handoverMissing.value) subForm.value = null;
       await reloadFleet();
     } catch (e) {
       showToast(resourceErrorMessage(e, "errors.actionError"), "red");
@@ -103,8 +136,14 @@ export function useDriverAssignment({ panel, subForm, showToast, cfShow, reloadF
   }
 
   return {
-    rf, dp,
-    resetReassign, runDriverSearch, onDriverQuery, pickDriver,
-    openReassignForm, openNewDriverForm, submitReassign,
+    rf,
+    driverOptions,
+    driverLoading,
+    handoverMissing,
+    onDriverQuery,
+    pickDriver,
+    openReassignForm,
+    openNewDriverForm,
+    submitReassign,
   };
 }

@@ -1,60 +1,55 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <IconBase :shape="ICONS[name]" :name="name" :size="size" :stroke-width="strokeWidth"
-            :align="true" :mirror="MIRROR" />
+  <IconBase
+    :shape="ICONS[name]"
+    :name="name"
+    :size="size"
+    :stroke-width="strokeWidth"
+    :align="true"
+    :mirror="MIRROR"
+  />
 </template>
 
 <script setup>
 import IconBase from "@shared/components/IconBase.vue";
 import {
-  route,
-  bus,
-  truck,
-  check,
-  circleCheck,
-  circleDot,
-  clipboardCheck,
-  x,
-  chevron,
-  arrowLeft,
-  user,
-  building,
-  pin,
-  clock,
-  gauge,
-  flag,
-  refresh,
-  triangleAlert,
-  calendar,
   badge,
-  sparkles,
+  building,
+  bus,
+  check,
+  chevron,
+  circleCheck,
+  clipboardCheck,
+  clock,
+  pin,
+  refresh,
+  route,
+  triangleAlert,
+  truck,
+  user,
+  x,
 } from "@shared/components/icons.js";
 
 const ICONS = {
-  route,
-  bus,
-  truck,
-  check,
-  "circle-check": circleCheck,
-  "circle-dot": circleDot,
-  "clipboard-check": clipboardCheck,
-  x,
-  chevron,
-  "arrow-left": arrowLeft,
-  user,
-  building,
-  pin,
-  clock,
-  gauge,
-  flag,
-  refresh,
-  "triangle-alert": triangleAlert,
-  calendar,
   badge,
-  sparkles,
+  building,
+  bus,
+  check,
+  chevron,
+  "circle-check": circleCheck,
+  "clipboard-check": clipboardCheck,
+  clock,
+  pin,
+  refresh,
+  route,
+  "triangle-alert": triangleAlert,
+  truck,
+  user,
+  x,
 };
 
-const MIRROR = ["chevron", "arrow-left"];
+/* Direction glyphs flip in RTL; object glyphs (a bus, a pin) never do. */
+const MIRROR = ["chevron"];
 
 defineProps({
   name: { type: String, required: true },

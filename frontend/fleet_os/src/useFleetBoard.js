@@ -1,41 +1,51 @@
 // Copyright (c) 2026, afmcoltd
-import { ref, computed } from "vue";
-import { call } from "./api.js";
-import { normalize } from "./fleetHelpers.js";
-import { resourceErrorMessage } from "./i18n.js";
+import { computed, ref } from "vue";
 
-const GET = "apex.salis.api.fleet_os.get_fleet_os";
+import { getFleetOs } from "./api.js";
+import { hasOpenIncident, normalize } from "./fleetHelpers.js";
+import { resourceErrorMessage } from "@/i18n";
 
 export function useFleetBoard({ expiryFlag }) {
   const vehicles = ref([]);
   const loadState = ref("loading");
   const loadError = ref("");
   const loadReason = ref(null);
+  const readerErrors = ref([]);
   const reloadStale = ref(false);
+  let issued = 0;
 
-  async function loadFleet() {
-    loadState.value = "loading";
+  /* Mount, the 30 s poll, the realtime handler and the return-to-tab all reach this one
+     function, so two reads can easily be in flight together. The ticket is what stops the
+     older answer landing last and painting a board that is already out of date. */
+  async function fetchBoard({ background }) {
+    if (!background) loadState.value = "loading";
+    const ticket = ++issued;
     try {
-      const r = await call(GET);
-      vehicles.value = ((r && r.vehicles) || []).map(normalize);
-      loadReason.value = (r && r.reason) || null;
+      const res = await getFleetOs();
+      if (ticket !== issued) return;
+      vehicles.value = ((res && res.vehicles) || []).map(normalize);
+      loadReason.value = (res && res.reason) || null;
+      /* The server reports which enrichment readers failed so a board that loaded with a
+         section missing does not look identical to one that loaded whole. */
+      readerErrors.value = (res && res.reader_errors) || [];
       loadState.value = "ready";
+      loadError.value = "";
+      reloadStale.value = false;
     } catch (e) {
+      if (ticket !== issued) return;
+      if (background) {
+        /* Keep the last good board on screen and say it is old, rather than blanking a screen
+           the supervisor is mid-decision on. */
+        reloadStale.value = true;
+        return;
+      }
       loadError.value = resourceErrorMessage(e, "main.loadFailed");
       loadState.value = "error";
     }
   }
-  async function reloadFleet() {
-    try {
-      const r = await call(GET);
-      vehicles.value = ((r && r.vehicles) || []).map(normalize);
-      loadReason.value = (r && r.reason) || null;
-      reloadStale.value = false;
-    } catch (e) {
-      console.warn("[fleet] background reload failed:", e);
-      reloadStale.value = true;
-    }
-  }
+
+  const loadFleet = () => fetchBoard({ background: false });
+  const reloadFleet = () => fetchBoard({ background: true });
 
   const isScopeEmpty = computed(() => loadReason.value === "scope_empty");
 
@@ -43,7 +53,7 @@ export function useFleetBoard({ expiryFlag }) {
     const all = vehicles.value;
     const by = (s) => all.filter((v) => v.vehicle_status === s).length;
     const drivers = new Set(
-      all.flatMap((v) => v.history.map((h) => h.driver_id)).filter(Boolean)
+      all.flatMap((v) => v.history.map((h) => h.driver_id)).filter(Boolean),
     );
     return {
       total: all.length,
@@ -57,20 +67,23 @@ export function useFleetBoard({ expiryFlag }) {
   });
   const countsLoading = computed(() => loadState.value === "loading");
 
-  const triage = computed(() => {
-    const all = vehicles.value;
-    const hasOpenIncident = (v) =>
-      (v.damages || []).some((d) => d.status !== "completed") ||
-      (v.accidents || []).some((a) => a.status !== "closed");
-    return {
-      incidents: all.filter(hasOpenIncident).length,
-      expiring: all.filter((v) => expiryFlag(v).show).length,
-    };
-  });
+  const triage = computed(() => ({
+    incidents: vehicles.value.filter(hasOpenIncident).length,
+    expiring: vehicles.value.filter((v) => expiryFlag(v).show).length,
+  }));
 
   return {
-    vehicles, loadState, loadError, loadReason, reloadStale, isScopeEmpty,
-    counts, countsLoading, triage,
-    loadFleet, reloadFleet,
+    vehicles,
+    loadState,
+    loadError,
+    loadReason,
+    readerErrors,
+    reloadStale,
+    isScopeEmpty,
+    counts,
+    countsLoading,
+    triage,
+    loadFleet,
+    reloadFleet,
   };
 }

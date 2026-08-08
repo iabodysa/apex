@@ -12,7 +12,7 @@ export const EXPIRY_FLAG_DAYS = 7;
 
 export const statusKey = (s) => (SB[s] ? s : "stopped");
 export const icon = (v) => (v.sheet === "CAR" ? "car" : "bike");
-export const initials = (d) => (d ? (d.name_ar || d.name_en || "") : "").slice(0, 2);
+export const initials = (d) => (d ? d.name_ar || d.name_en || "" : "").slice(0, 2);
 export const trim = (x) => (x || "").toString().trim();
 
 export function today() {
@@ -27,11 +27,11 @@ export function calcTotalDaysNum(v) {
 }
 
 export function calcActiveDaysNum(v) {
-  return v.history.reduce((s, h) => {
-    if (!h.date_receive) return s;
-    const d1 = new Date(h.date_receive);
-    const d2 = h.date_deliver ? new Date(h.date_deliver) : new Date();
-    return s + Math.max(0, Math.round((d2 - d1) / 86400000));
+  return v.history.reduce((sum, h) => {
+    if (!h.date_receive) return sum;
+    const from = new Date(h.date_receive);
+    const to = h.date_deliver ? new Date(h.date_deliver) : new Date();
+    return sum + Math.max(0, Math.round((to - from) / 86400000));
   }, 0);
 }
 
@@ -41,6 +41,15 @@ export function historyItems(v) {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
+export function hasOpenIncident(v) {
+  return (
+    (v.damages || []).some((d) => d.status !== "completed") ||
+    (v.accidents || []).some((a) => a.status !== "closed")
+  );
+}
+
+/* The server omits an empty child table rather than sending an empty list, so every consumer
+   would otherwise have to guard each one. */
 export function normalize(v) {
   if (!Array.isArray(v.damages)) v.damages = [];
   if (!Array.isArray(v.accidents)) v.accidents = [];

@@ -21,15 +21,18 @@
         @retry="stations.reload()"
       />
 
-      <EmptyState
-        v-else-if="!hasVehicle && vehicle.state.status === 'ready'"
-        :title="t('emp.vehicle.empty')"
-        :hint="t('emp.fuel.needVehicleHint')"
-      >
-        <template #icon><Icon name="car" :size="20" /></template>
-      </EmptyState>
-
       <form v-else class="emp-form" @submit.prevent="onSubmit">
+        <!-- The form stays on screen for an employee who holds no vehicle, with the reason
+             beside it and the send button disabled: hiding it would leave him guessing why
+             the screen he was pointed at is empty, and the server refuses the write anyway. -->
+        <Alert
+          v-if="blocked"
+          theme="yellow"
+          :title="t('emp.vehicle.empty')"
+          :description="t('emp.fuel.needVehicleHint')"
+          :dismissable="false"
+        />
+
         <FormControl
           v-model="form.fuelGrade"
           type="select"
@@ -39,6 +42,7 @@
         />
 
         <FormControl
+          id="ff-litres"
           v-model.number="form.litres"
           type="number"
           size="md"
@@ -75,6 +79,7 @@
           variant="solid"
           theme="green"
           size="xl"
+          :disabled="blocked"
           :loading="submitting"
           :loading-text="t('emp.fuel.sending')"
           :label="t('emp.fuel.submit')"
@@ -129,7 +134,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from "vue";
-import { Badge, Button, ErrorMessage, FormControl } from "frappe-ui";
+import { Alert, Badge, Button, ErrorMessage, FormControl } from "frappe-ui";
 
 import EmptyState from "@shared/components/EmptyState.vue";
 import LoadError from "@shared/components/LoadError.vue";
@@ -145,6 +150,10 @@ const { showToast } = useAppToast();
 const { vehicle, stations, fuelRequests, grades, form, submitting, hasVehicle } = useEmployee();
 
 const formError = ref("");
+
+/* Only once the vehicle read has answered — a form disabled while it is still loading would
+   flicker between states on a slow connection. */
+const blocked = computed(() => vehicle.state.status === "ready" && !hasVehicle.value);
 
 const gradeOptions = computed(() =>
   grades.map((g) => ({ label: t("fuelGrade." + g), value: g })),

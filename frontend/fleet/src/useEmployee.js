@@ -1,24 +1,40 @@
 // Copyright (c) 2026, afmcoltd
-import { reactive, ref } from "vue";
-import { call } from "./api.js";
+import { computed, reactive, ref } from "vue";
 
-const API = "apex.salis.api.fleet_employee";
+import {
+  getFuelStations,
+  getMyFuelRequests,
+  getMyRecentTrips,
+  getMyVehicle,
+  submitFuelRequest,
+} from "./api.js";
+import { createResource } from "./resource.js";
 
-const vehicle = reactive({
-  empty: true,
-  name: null,
-  plate: "",
-  model: "",
-  office: "",
-  status: "available",
-  odometerKm: null,
-  registrationExpiry: null,
+/* The employee's own vehicle, trips and fuel requests, read once and shared by the three
+   screens so moving between them does not re-fetch what is already on the page. Each reader
+   carries its own state, so one failure never speaks for the others. */
+const vehicleRes = createResource({
+  fetcher: () => getMyVehicle().then((r) => (r && r.vehicle) || null),
+  errorKey: "emp.loadError",
+});
+const tripsRes = createResource({
+  fetcher: () => getMyRecentTrips().then((rows) => rows || []),
+  initial: [],
+  errorKey: "emp.loadError",
+});
+const fuelRes = createResource({
+  fetcher: () => getMyFuelRequests().then((rows) => rows || []),
+  initial: [],
+  errorKey: "emp.loadError",
+});
+const stationsRes = createResource({
+  fetcher: () => getFuelStations().then((rows) => rows || []),
+  initial: [],
+  errorKey: "emp.loadError",
 });
 
-const trips = ref([]);
+const GRADES = ["petrol91", "petrol95", "diesel"];
 
-const fuelGrades = ["petrol91", "petrol95", "diesel"];
-const stations = ref([]);
 const form = reactive({
   fuelGrade: "petrol91",
   litres: 60,
@@ -26,75 +42,36 @@ const form = reactive({
   notes: "",
 });
 const submitting = ref(false);
-const loading = ref(true);
-const loadError = ref(false);
+
 let started = false;
 
-async function loadVehicle() {
-  const res = await call(`${API}.get_my_vehicle`);
-  const v = res && res.vehicle;
-  if (!v) {
-    vehicle.empty = true;
-    return;
-  }
-  Object.assign(vehicle, {
-    empty: false,
-    name: v.name,
-    plate: v.plate || "",
-    model: v.model || "",
-    office: v.office || "",
-    status: v.status || "available",
-    odometerKm: v.odometerKm ?? null,
-    registrationExpiry: v.registrationExpiry || null,
-  });
+/* The station list only matters on the fuel screen, so it is asked for when that screen opens
+   rather than on every first paint. */
+export async function ensureStations() {
+  if (stationsRes.state.status === "idle") await stationsRes.reload();
+  if (!form.station && stationsRes.state.data.length) form.station = stationsRes.state.data[0];
 }
 
-async function loadTrips() {
-  trips.value = (await call(`${API}.get_my_recent_trips`)) || [];
-}
-
-export function fetchFuelRequests({ days = 90, limit = 30 } = {}) {
-  return call(`${API}.get_my_fuel_requests`, { args: { days, limit } }).then((rows) => rows || []);
-}
-
-export function fetchTrips({ days = 90, limit = 100 } = {}) {
-  return call(`${API}.get_my_recent_trips`, { args: { days, limit } }).then((rows) => rows || []);
-}
-
-async function loadStations() {
-  const list = (await call(`${API}.get_fuel_stations`)) || [];
-  stations.value = list;
-  if (list.length && !form.station) form.station = list[0];
-}
-
-async function load() {
-  loading.value = true;
-  loadError.value = false;
-  try {
-    await Promise.all([loadVehicle(), loadTrips(), loadStations()]);
-  } catch (e) {
-    loadError.value = true;
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function submitFuelRequest() {
+export async function submitFuel() {
   if (submitting.value) return { ok: false };
   submitting.value = true;
   try {
-    const res = await call(`${API}.submit_fuel_request`, {
-      type: "POST",
-      args: {
-        vehicle: vehicle.name || null,
-        fuel_grade: form.fuelGrade,
-        litres: form.litres,
-        station: form.station || null,
-        notes: form.notes || null,
-      },
+    /* `vehicle` is sent for the server to check against the caller's binding — it is validated
+       and then replaced by the bound vehicle there, so this is a claim, never an authority. */
+    const res = await submitFuelRequest({
+      vehicle: vehicleRes.state.data?.name || null,
+      fuel_grade: form.fuelGrade,
+      litres: form.litres,
+      station: form.station || null,
+      notes: form.notes || null,
     });
     form.notes = "";
+    /* The request the employee just sent has to appear in "my requests" without a reload —
+       leaving the history untouched made a successful submit look like it had not happened. */
+    await fuelRes.reload();
     return { ok: true, name: res && res.name };
+  } catch (e) {
+    return { ok: false, error: e };
   } finally {
     submitting.value = false;
   }
@@ -103,18 +80,22 @@ async function submitFuelRequest() {
 export function useEmployee() {
   if (!started) {
     started = true;
-    load();
+    vehicleRes.reload();
+    tripsRes.reload();
+    fuelRes.reload();
   }
   return {
-    vehicle,
-    trips,
-    fuelGrades,
-    stations,
+    vehicle: vehicleRes,
+    trips: tripsRes,
+    fuelRequests: fuelRes,
+    stations: stationsRes,
+    grades: GRADES,
     form,
     submitting,
-    loading,
-    loadError,
-    submitFuelRequest,
-    reload: load,
+    hasVehicle: computed(() => Boolean(vehicleRes.state.data)),
+    pendingFuelCount: computed(
+      () => fuelRes.state.data.filter((r) => r.statusKey === "pending").length,
+    ),
+    latestFuelRequest: computed(() => fuelRes.state.data[0] || null),
   };
 }

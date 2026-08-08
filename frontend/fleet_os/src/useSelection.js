@@ -1,6 +1,9 @@
 // Copyright (c) 2026, afmcoltd
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 
+/* Selection stays in memory on purpose. It is the one piece of board state nobody expects to
+   survive a refresh, and a list of plates in the address would make a shared link act on the
+   receiver's fleet rather than show him the sender's view. */
 export function useSelection(filtered) {
   const selectMode = ref(false);
   const selected = ref(new Set());
@@ -9,7 +12,8 @@ export function useSelection(filtered) {
 
   function toggleSelect(plate) {
     const next = new Set(selected.value);
-    next.has(plate) ? next.delete(plate) : next.add(plate);
+    if (next.has(plate)) next.delete(plate);
+    else next.add(plate);
     selected.value = next;
   }
   function clearSelection() {
@@ -20,7 +24,7 @@ export function useSelection(filtered) {
     if (!selectMode.value) clearSelection();
   }
   const allVisibleSelected = computed(
-    () => filtered.value.length > 0 && filtered.value.every((v) => selected.value.has(v.plate))
+    () => filtered.value.length > 0 && filtered.value.every((v) => selected.value.has(v.plate)),
   );
   function toggleSelectAll() {
     if (allVisibleSelected.value) clearSelection();
@@ -28,8 +32,14 @@ export function useSelection(filtered) {
   }
 
   return {
-    selectMode, selected, selectedCount, isSelected,
-    toggleSelect, clearSelection, toggleSelectMode,
-    allVisibleSelected, toggleSelectAll,
+    selectMode,
+    selected,
+    selectedCount,
+    isSelected,
+    toggleSelect,
+    clearSelection,
+    toggleSelectMode,
+    allVisibleSelected,
+    toggleSelectAll,
   };
 }

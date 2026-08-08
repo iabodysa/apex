@@ -1,306 +1,242 @@
 <!-- Copyright (c) 2026, afmcoltd -->
-<script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from "vue";
-import FleetPageShell from "@shared/components/FleetPageShell.vue";
-import { connectFleetRealtime } from "./realtime.js";
-import Icon from "./components/Icon.vue";
-import LangToggle from "./components/LangToggle.vue";
-import FleetSidebar from "./components/FleetSidebar.vue";
-import FleetToolbar from "./components/FleetToolbar.vue";
-import FleetCardGrid from "./components/FleetCardGrid.vue";
-import FleetDriverLens from "./components/FleetDriverLens.vue";
-import FleetTable from "./components/FleetTable.vue";
-import AlertDrawer from "./components/AlertDrawer.vue";
-import VehiclePanel from "./components/VehiclePanel.vue";
-import { useI18n } from "./i18n";
-import { useDocumentLanguage } from "@shared/useDocumentLanguage";
-import { useFleetFormat } from "./useFleetFormat.js";
-import { useToast } from "@shared/useToast.js";
-import { useConfirm } from "./useConfirm.js";
-import { useFleetBoard } from "./useFleetBoard.js";
-import { useVehiclePanel } from "./useVehiclePanel.js";
-import { useAlerts } from "./useAlerts.js";
-import { useFleetFilters } from "./useFleetFilters.js";
-import { useSelection } from "./useSelection.js";
-import { useDriverAssignment } from "./useDriverAssignment.js";
-import { useFleetActions } from "./useFleetActions.js";
-
-const { t, lang, dir } = useI18n();
-
-useDocumentLanguage(lang, dir);
-
-const fmt = useFleetFormat(t);
-
-const board = useFleetBoard({ expiryFlag: fmt.expiryFlag });
-const {
-  vehicles, loadState, loadError, reloadStale, isScopeEmpty,
-  counts, countsLoading, triage, loadFleet,
-} = board;
-
-const { toast, showToast } = useToast();
-const { cf, cfShow, cfDo } = useConfirm(t);
-
-const { panel, subForm, openPanel, closePanel, setPTab, tabDmg, tabAcc } = useVehiclePanel(vehicles);
-function closeSubForm() {
-  subForm.value = null;
-}
-
-const {
-  alerts, alertTotal, alertsState, alertsOpen,
-  loadAlerts, toggleAlerts, closeAlerts,
-  sevClass, sevLabel, alertVehicleOnBoard, openAlertTarget,
-} = useAlerts({ vehicles, t, openPanel });
-
-async function reloadFleet() {
-  await board.reloadFleet();
-  if (panel.open && panel.plate) {
-    const fresh = vehicles.value.find((x) => x.plate === panel.plate);
-    if (fresh) panel.vehicle = fresh;
-    else closePanel();
-  }
-}
-
-const {
-  f, triageFilter,
-  setSP, setSheet, setFuel, setDateType, setView, setTriage, onSortCol,
-  setQuickDate, clearDateFilter, resetFilters,
-  hasDateFilter, anyFilterActive, filtered, driverGroups, dateInfo, activeFilterChips,
-  projectOptions, areaOptions, officeOptions,
-  density, toggleDensity,
-  filtersSheetOpen, toggleFiltersSheet, closeFiltersSheet,
-} = useFleetFilters({ vehicles, fmt, t });
-
-const {
-  selectMode, selected, selectedCount, isSelected,
-  toggleSelect, clearSelection, toggleSelectMode,
-  allVisibleSelected, toggleSelectAll,
-} = useSelection(filtered);
-
-const {
-  rf, dp, onDriverQuery, pickDriver,
-  openReassignForm, openNewDriverForm, submitReassign,
-} = useDriverAssignment({ panel, subForm, showToast, cfShow, reloadFleet, t });
-
-const {
-  busyPlates, isBusy,
-  sf, openStopForm, confirmStop,
-  stf, openStolenForm, submitStolen,
-  quickStop, quickReassign, sendWorkshop, exitWorkshop, setAvailable, recoverVehicle, markStolen,
-  bulkNote, bulkStop, bulkWorkshop,
-  changeStatus,
-} = useFleetActions({
-  vehicles, panel, subForm, openPanel,
-  showToast, cfShow, reloadFleet,
-  selected, clearSelection, openReassignForm, t,
-});
-
-const caps = (typeof window !== "undefined" && window.fleet_caps) || {};
-const canDriverLens = computed(() => caps.driver_lens === true);
-
-const POLL_MS = 30000;
-let pollTimer = null;
-const pollPaused = computed(
-  () =>
-    loadState.value !== "ready" ||
-    cf.open ||
-    !!subForm.value ||
-    busyPlates.value.size > 0 ||
-    selected.value.size > 0
-);
-async function pollTick() {
-  if (document.hidden || pollPaused.value) return;
-  await reloadFleet();
-  await loadAlerts();
-}
-function startPoll() {
-  if (pollTimer) return;
-  pollTimer = setInterval(pollTick, POLL_MS);
-}
-function stopPoll() {
-  if (pollTimer) {
-    clearInterval(pollTimer);
-    pollTimer = null;
-  }
-}
-let stopRealtime = () => {};
-const realtimePending = ref(false);
-async function onRealtimeUpdate() {
-  if (document.hidden || pollPaused.value) {
-    realtimePending.value = true;
-    return;
-  }
-  realtimePending.value = false;
-  await reloadFleet();
-  await loadAlerts();
-}
-watch(pollPaused, (paused) => {
-  if (!paused && realtimePending.value && !document.hidden) onRealtimeUpdate();
-});
-function onVisibility() {
-  if (document.hidden) return;
-  if (!pollPaused.value) reloadFleet();
-  else realtimePending.value = true;
-}
-onMounted(() => {
-  loadFleet();
-  loadAlerts();
-  startPoll();
-  stopRealtime = connectFleetRealtime(onRealtimeUpdate);
-  document.addEventListener("visibilitychange", onVisibility);
-});
-onUnmounted(() => {
-  stopPoll();
-  stopRealtime();
-  document.removeEventListener("visibilitychange", onVisibility);
-});
-</script>
-
 <template>
   <FleetPageShell max-width="100%">
     <template #brand>
       <span class="fp-brandmark"><Icon name="car" :size="20" /></span>
       <span class="fp-brandword">{{ t("brand.name") }}</span>
     </template>
+
     <template #actions>
-      <div class="search-bar fp-head-search">
-        <span class="si"><Icon name="search" :size="15" /></span>
-        <input v-model="f.search" :placeholder="t('topbar.searchPlaceholder')" />
-      </div>
-      <button class="alert-bell" :class="{ active: alertsOpen }" :title="t('alerts.bellTitle')" :aria-label="t('alerts.bellTitle')" @click="toggleAlerts">
-        <Icon name="bell" :size="18" />
-        <span v-if="alertTotal > 0" class="alert-bell-badge">{{ alertTotal > 99 ? "99+" : alertTotal }}</span>
-      </button>
-      <LangToggle />
+      <Button
+        class="alert-bell"
+        variant="outline"
+        size="xl"
+        :label="t('alerts.bellTitle')"
+        @click="state.toggleAlerts()"
+      >
+        <template #icon>
+          <span class="alert-bell-wrap">
+            <Icon name="bell" :size="18" />
+            <span v-if="alertTotal > 0" class="alert-bell-badge">
+              {{ alertTotal > 99 ? "99+" : alertTotal }}
+            </span>
+          </span>
+        </template>
+      </Button>
+      <LangToggle variant="header" />
     </template>
 
-    <div class="fp-pills-bar">
-      <template v-if="countsLoading">
-        <span v-for="n in 6" :key="n" class="sp fp-kpi-skel"></span>
-      </template>
-      <template v-else>
-        <button type="button" class="sp sp-all" :class="{ active: f.status === '' }" :aria-pressed="f.status === ''" @click="setSP('')">{{ counts.total }} {{ t("topbar.allVehicles") }}</button>
-        <button type="button" class="sp sp-assigned" :class="{ active: f.status === 'assigned' }" :aria-pressed="f.status === 'assigned'" @click="setSP('assigned')">{{ counts.assigned }} {{ t("statusShort.assigned") }}</button>
-        <button type="button" class="sp sp-available" :class="{ active: f.status === 'available' }" :aria-pressed="f.status === 'available'" @click="setSP('available')">{{ counts.available }} {{ t("statusShort.available") }}</button>
-        <button type="button" class="sp sp-workshop" :class="{ active: f.status === 'workshop' }" :aria-pressed="f.status === 'workshop'" @click="setSP('workshop')">{{ counts.workshop }} {{ t("statusShort.workshop") }}</button>
-        <button type="button" class="sp sp-stopped" :class="{ active: f.status === 'stopped' }" :aria-pressed="f.status === 'stopped'" @click="setSP('stopped')">{{ counts.stopped }} {{ t("statusShort.stopped") }}</button>
-        <button type="button" class="sp sp-stolen" :class="{ active: f.status === 'stolen' }" :aria-pressed="f.status === 'stolen'" @click="setSP('stolen')">{{ counts.stolen }} {{ t("statusShort.stolen") }}</button>
-        <button v-if="triage.incidents" type="button" class="sp sp-triage-incident" :class="{ active: triageFilter === 'incidents' }" :aria-pressed="triageFilter === 'incidents'" @click="setTriage('incidents')"><Icon name="crash" :size="12" /> {{ triage.incidents }} {{ t("topbar.openIncidents") }}</button>
-        <button v-if="triage.expiring" type="button" class="sp sp-triage-expiry" :class="{ active: triageFilter === 'expiring' }" :aria-pressed="triageFilter === 'expiring'" @click="setTriage('expiring')"><Icon name="shield-alert" :size="12" /> {{ triage.expiring }} {{ t("topbar.expiringSoon") }}</button>
-      </template>
-    </div>
-
-    <div class="layout">
-    <FleetSidebar
-      :f="f" :counts="counts" :countsLoading="countsLoading" :hasDateFilter="hasDateFilter"
-      :dateInfo="dateInfo" :filtersSheetOpen="filtersSheetOpen" :closeFiltersSheet="closeFiltersSheet"
-      :projectOptions="projectOptions" :areaOptions="areaOptions" :officeOptions="officeOptions"
-      :setSheet="setSheet" :setFuel="setFuel" :setDateType="setDateType" :setQuickDate="setQuickDate"
-      :clearDateFilter="clearDateFilter" :resetFilters="resetFilters" :t="t"
-    />
-
-    <div class="main">
-      <FleetToolbar
-        :f="f" :filtered="filtered" :anyFilterActive="anyFilterActive" :selectMode="selectMode"
-        :density="density" :canDriverLens="canDriverLens" :toggleFiltersSheet="toggleFiltersSheet"
-        :toggleSelectMode="toggleSelectMode" :setView="setView" :toggleDensity="toggleDensity" :t="t"
-      />
-
-      <div v-if="selectMode && selectedCount" class="fp-bulk-bar">
-        <span class="fp-bulk-count">{{ t("bulk.selected", { n: selectedCount }) }}</span>
-        <input class="fp-bulk-note fs" v-model="bulkNote" :placeholder="t('stopForm.notesPlaceholder')" />
-        <div class="fp-bulk-actions">
-          <button class="btn btn-red" @click="bulkStop"><Icon name="circle-pause" :size="14" /> {{ t("bulk.stopSelected") }}</button>
-          <button class="btn btn-amber" @click="bulkWorkshop"><Icon name="wrench" :size="14" /> {{ t("bulk.workshopSelected") }}</button>
-          <button class="btn" @click="clearSelection"><Icon name="x" :size="14" /> {{ t("bulk.clear") }}</button>
-        </div>
-      </div>
-
-      <div v-if="loadState === 'ready' && reloadStale" class="fp-error-banner" style="border-color:var(--amber);background:color-mix(in srgb,var(--amber) 12%,transparent)">
-        <span style="color:var(--amber)"><Icon name="triangle-alert" :size="20" /></span>
-        <span class="fp-err-msg">{{ t("main.staleData") }}</span>
-        <button class="btn btn-amber" @click="reloadFleet">{{ t("common.retry") }}</button>
-      </div>
-
-      <div v-if="loadState === 'error'" class="fp-error-banner">
-        <span style="color:var(--red-l)"><Icon name="triangle-alert" :size="20" /></span>
-        <span class="fp-err-msg">{{ loadError }}</span>
-        <button class="btn btn-red" @click="loadFleet">{{ t("common.retry") }}</button>
-      </div>
-
-      <div v-else-if="loadState === 'loading'" class="cards-wrap">
-        <div class="cards-grid">
-          <div class="fp-skel-card" v-for="n in 8" :key="n">
-            <div class="fp-skel-line" style="width:40%"></div>
-            <div class="fp-skel-line" style="width:70%"></div>
-            <div class="fp-skel-line" style="width:55%"></div>
-            <div class="fp-skel-line" style="width:80%"></div>
-          </div>
-        </div>
-      </div>
-
-      <FleetCardGrid
-        v-else-if="f.view === 'cards'"
-        :filtered="filtered" :density="density" :isScopeEmpty="isScopeEmpty"
-        :anyFilterActive="anyFilterActive" :activeFilterChips="activeFilterChips"
-        :selectMode="selectMode" :resetFilters="resetFilters" :isSelected="isSelected"
-        :toggleSelect="toggleSelect" :isBusy="isBusy" :openPanel="openPanel"
-        :sb="fmt.sb" :icon="fmt.icon" :trim="fmt.trim" :initials="fmt.initials"
-        :expiryFlag="fmt.expiryFlag" :calcTotalDaysNum="fmt.calcTotalDaysNum"
-        :quickStop="quickStop" :quickReassign="quickReassign" :sendWorkshop="sendWorkshop"
-        :exitWorkshop="exitWorkshop" :setAvailable="setAvailable" :recoverVehicle="recoverVehicle"
-        :markStolen="markStolen" :t="t"
-      />
-
-      <FleetDriverLens
-        v-else-if="f.view === 'drivers'"
-        :filtered="filtered" :isScopeEmpty="isScopeEmpty" :anyFilterActive="anyFilterActive"
-        :resetFilters="resetFilters" :driverGroups="driverGroups"
-        :initials="fmt.initials" :icon="fmt.icon" :sb="fmt.sb" :sl="fmt.sl" :trim="fmt.trim"
-        :openPanel="openPanel" :t="t"
-      />
-
-      <FleetTable
-        v-else
-        :filtered="filtered" :isScopeEmpty="isScopeEmpty" :selectMode="selectMode"
-        :allVisibleSelected="allVisibleSelected" :toggleSelectAll="toggleSelectAll"
-        :isSelected="isSelected" :toggleSelect="toggleSelect" :onSortCol="onSortCol"
-        :openPanel="openPanel" :icon="fmt.icon" :sb="fmt.sb" :sl="fmt.sl" :trim="fmt.trim"
-        :calcTotalDaysNum="fmt.calcTotalDaysNum" :t="t"
-      />
-    </div>
-    </div>
+    <router-view />
   </FleetPageShell>
 
-  <AlertDrawer
-    :alertsOpen="alertsOpen" :alertsState="alertsState" :alerts="alerts" :alertTotal="alertTotal"
-    :closeAlerts="closeAlerts" :loadAlerts="loadAlerts" :sevClass="sevClass" :sevLabel="sevLabel"
-    :alertVehicleOnBoard="alertVehicleOnBoard" :openAlertTarget="openAlertTarget" :t="t"
-  />
+  <VehiclePanel />
+  <AlertDrawer />
 
-  <VehiclePanel
-    :panel="panel" :subForm="subForm" :closePanel="closePanel" :setPTab="setPTab"
-    :tabDmg="tabDmg" :tabAcc="tabAcc" :closeSubForm="closeSubForm"
-    :sb="fmt.sb" :initials="fmt.initials" :calcTotalDaysNum="fmt.calcTotalDaysNum"
-    :calcActiveDaysNum="fmt.calcActiveDaysNum" :fuelView="fmt.fuelView" :trim="fmt.trim"
-    :historyItems="fmt.historyItems" :calcDur="fmt.calcDur" :today="fmt.today"
-    :openStopForm="openStopForm" :openReassignForm="openReassignForm" :sf="sf" :confirmStop="confirmStop"
-    :dp="dp" :onDriverQuery="onDriverQuery" :pickDriver="pickDriver"
-    :openNewDriverForm="openNewDriverForm" :rf="rf" :submitReassign="submitReassign"
-    :changeStatus="changeStatus" :stf="stf" :submitStolen="submitStolen"
-    :openStolenForm="openStolenForm" :recoverVehicle="recoverVehicle" :t="t"
-  />
+  <Dialog v-model="confirmOpen" :options="confirmOptions" @close="confirm.settle(false)">
+    <template #body-content>
+      <p class="cf-msg">{{ confirm.state.message }}</p>
+    </template>
+  </Dialog>
 
-  <div class="toast" :class="[toast.show ? 'show' : '', 'toast-' + toast.type]">{{ toast.msg }}</div>
-
-  <div v-if="cf.open" class="cf-overlay" @click.self="cfDo(false)">
-    <div class="cf-box">
-      <div class="cf-icon"><Icon :name="cf.icon" :size="36" :stroke-width="1.75" /></div>
-      <div class="cf-title">{{ cf.title }}</div>
-      <div class="cf-msg">{{ cf.msg }}</div>
-      <div class="cf-btns">
-        <button class="btn" @click="cfDo(false)">{{ t("common.cancel") }}</button>
-        <button class="btn" :class="cf.okCls" @click="cfDo(true)">{{ cf.okLabel }}</button>
-      </div>
-    </div>
-  </div>
+  <PortalToast :toast="toast" />
 </template>
+
+<script setup>
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { Button, Dialog } from "frappe-ui";
+
+import FleetPageShell from "@shared/components/FleetPageShell.vue";
+import LangToggle from "@shared/components/LangToggle.vue";
+import { useDocumentLanguage } from "@shared/useDocumentLanguage";
+import { useToast } from "@shared/useToast.js";
+
+import Icon from "./Icon.vue";
+import AlertDrawer from "./components/AlertDrawer.vue";
+import PortalToast from "./components/PortalToast.vue";
+import VehiclePanel from "./components/VehiclePanel.vue";
+import { provideBoardContext } from "./boardContext.js";
+import { useBoardState } from "./boardState.js";
+import { provideConfirm } from "./confirm.js";
+import { useDensity } from "./density.js";
+import { connectFleetRealtime } from "./realtime.js";
+import { useAlerts } from "./useAlerts.js";
+import { useDriverAssignment } from "./useDriverAssignment.js";
+import { useFleetActions } from "./useFleetActions.js";
+import { useFleetBoard } from "./useFleetBoard.js";
+import { useFleetFilters } from "./useFleetFilters.js";
+import { useFleetFormat } from "./useFleetFormat.js";
+import { useSelection } from "./useSelection.js";
+import { useI18n } from "@/i18n";
+
+const { t, lang, dir } = useI18n();
+useDocumentLanguage(lang, dir);
+
+const fmt = useFleetFormat(t);
+const state = useBoardState();
+const { toast, showToast } = useToast();
+const confirm = provideConfirm();
+const { density, toggle: toggleDensity } = useDensity();
+
+const board = useFleetBoard({ expiryFlag: fmt.expiryFlag });
+const { vehicles, loadState, reloadFleet } = board;
+
+const filters = useFleetFilters({ vehicles, board: state, fmt, t });
+const selection = useSelection(filters.filtered);
+
+/* The open vehicle is derived from the address and the freshly loaded board, so a reload keeps
+   the panel showing current data and a vehicle that leaves the board closes its own panel. */
+const panelVehicle = computed(
+  () => vehicles.value.find((v) => v.plate === state.openPlate.value) || null,
+);
+const subForm = ref(null);
+watch(
+  () => state.openPlate.value,
+  () => {
+    subForm.value = null;
+  },
+);
+watch(
+  () => state.panelTab.value,
+  () => {
+    subForm.value = null;
+  },
+);
+
+const assignment = useDriverAssignment({
+  subForm,
+  showToast,
+  ask: confirm.ask,
+  reloadFleet,
+  panelVehicle,
+  t,
+});
+
+const actions = useFleetActions({
+  vehicles,
+  openVehicle: state.openVehicle,
+  subForm,
+  showToast,
+  ask: confirm.ask,
+  reloadFleet,
+  selected: selection.selected,
+  clearSelection: selection.clearSelection,
+  openReassignForm: assignment.openReassignForm,
+  panelVehicle,
+  t,
+});
+
+const alertsApi = useAlerts({
+  vehicles,
+  t,
+  openVehicle: state.openVehicle,
+  closeAlerts: () => state.setAlerts(false),
+});
+const { alertTotal, loadAlerts } = alertsApi;
+
+/* One capability arrives from the page: whether the driver lens is offered. It is a display
+   gate — the rows behind it come down in get_fleet_os regardless — and the server decides it,
+   so it is read exactly as published rather than assumed. */
+const caps = (typeof window !== "undefined" && window.fleet_caps) || {};
+const canDriverLens = computed(() => caps.driver_lens === true);
+
+const confirmOpen = computed({
+  get: () => confirm.state.open,
+  set: (open) => {
+    if (!open) confirm.settle(false);
+  },
+});
+const confirmOptions = computed(() => ({
+  title: confirm.state.title,
+  size: "sm",
+  actions: [
+    {
+      label: confirm.state.okLabel,
+      variant: "solid",
+      theme: confirm.state.theme,
+      onClick: () => confirm.settle(true),
+    },
+    { label: t("common.cancel"), variant: "outline", onClick: () => confirm.settle(false) },
+  ],
+}));
+
+provideBoardContext({
+  t,
+  fmt,
+  state,
+  board,
+  filters,
+  selection,
+  actions,
+  assignment,
+  alerts: alertsApi,
+  density,
+  toggleDensity,
+  canDriverLens,
+  panelVehicle,
+  subForm,
+  showToast,
+});
+
+/* The board refuses to repaint under the supervisor's hands. All five conditions are behaviour
+   earned by real breakage: never while the first load is still running, never while a
+   confirmation is open, never while a sub-form is half typed, never while a per-vehicle action
+   is in flight, and never while anything is selected. */
+const POLL_MS = 30000;
+const paused = computed(
+  () =>
+    loadState.value !== "ready" ||
+    confirm.state.open ||
+    Boolean(subForm.value) ||
+    actions.busyPlates.value.size > 0 ||
+    selection.selected.value.size > 0,
+);
+
+let pollTimer = null;
+const realtimePending = ref(false);
+
+async function refreshAll() {
+  await reloadFleet();
+  await loadAlerts();
+}
+
+async function tick() {
+  if (document.hidden || paused.value) return;
+  await refreshAll();
+}
+
+/* An update that arrives during a pause is remembered and replayed the moment the pause lifts,
+   rather than dropped — the supervisor finishes his action and then sees the newer board. */
+async function onRealtimeUpdate() {
+  if (document.hidden || paused.value) {
+    realtimePending.value = true;
+    return;
+  }
+  realtimePending.value = false;
+  await refreshAll();
+}
+
+watch(paused, (isPaused) => {
+  if (!isPaused && realtimePending.value && !document.hidden) onRealtimeUpdate();
+});
+
+function onVisibility() {
+  if (document.hidden) return;
+  if (paused.value) realtimePending.value = true;
+  else refreshAll();
+}
+
+let stopRealtime = () => {};
+onMounted(() => {
+  board.loadFleet();
+  loadAlerts();
+  pollTimer = setInterval(tick, POLL_MS);
+  stopRealtime = connectFleetRealtime(onRealtimeUpdate);
+  document.addEventListener("visibilitychange", onVisibility);
+});
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = null;
+  stopRealtime();
+  document.removeEventListener("visibilitychange", onVisibility);
+});
+</script>
