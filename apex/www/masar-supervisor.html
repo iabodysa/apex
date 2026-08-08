@@ -14,7 +14,7 @@
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
       window.apex_map_tiles = {{ map_tiles | tojson }};
-      window.masar_sup_socket = {
+      window.route_supervisor_socket = {
         site_name: {{ site_name | tojson }},
         socketio_port: {{ socketio_port }},
         enabled: {{ "true" if async_enabled else "false" }},

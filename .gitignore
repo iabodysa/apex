@@ -106,6 +106,10 @@ docs/*
 # The portal design guide ships with the workspace it governs: a builder working from a
 # clone has to be able to read the tokens, the scales and the archetypes.
 !frontend/frontend_shared/DESIGN.md
+# What each portal DOES, beside the portal it describes: the record a rebuild is checked
+# against, so no earned behaviour is dropped silently. Capability only — the visual design
+# stays in docs/brand, and two sources for one thing is how they drift apart.
+!frontend/*/CAPABILITY.md
 # Frappe's "Updated To A New Version" popup reads these as shipped app files.
 !apex/change_log/v*/*.md
 # The three flat pages these lines used to publish were replaced by the per-audience
