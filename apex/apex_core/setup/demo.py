@@ -476,15 +476,31 @@ def _build_beds(context):
     ]
 
 
+def _demo_gender():
+    """Returns a Gender that exists on THIS site, creating one only if the master is empty.
+
+    Employee.gender is mandatory and is a Link, so a hardcoded "Male" fails outright on a site
+    whose Gender records were never seeded or carry different names — which is what
+    LinkValidationError: Could not find Gender: Male means. Read the master, do not assume it.
+    """
+    existing = frappe.db.get_value("Gender", {"name": "Male"}) or frappe.db.get_value("Gender", {})
+    if existing:
+        return existing
+    return frappe.get_doc({"doctype": "Gender", "gender": "Male"}).insert(
+        ignore_permissions=True
+    ).name
+
+
 def _build_employee(context):
     """Creates the demo resident, supplier-worker, and leaver Employee records."""
+    gender = _demo_gender()
     context["employees"] = [
         _create(
             "Employee",
             {
                 "first_name": first_name,
                 "company": context["company"],
-                "gender": "Male",
+                "gender": gender,
                 "date_of_birth": "1990-01-01",
                 "date_of_joining": add_days(today(), -365),
                 "status": "Active",
