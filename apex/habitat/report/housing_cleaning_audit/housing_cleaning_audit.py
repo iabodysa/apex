@@ -69,6 +69,24 @@ def execute(filters=None):
     if not all_buildings:
         return columns, []
 
+    building_supervisor = _supervisor_by_building(all_buildings)
+
+    rows = _cleaning_logs(date_from, date_to, chosen_building, allowed if restrict else None)
+    rooms_cleaned_map, photos_map = _log_counts([r.name for r in rows])
+
+    data = _logged_rows(rows, building_supervisor, rooms_cleaned_map, photos_map)
+    covered = {(r["building"], str(r["cleaning_date"])) for r in data}
+    data += _missed_rows(date_from, date_to, building_supervisor, covered)
+
+    data.sort(key=lambda r: (str(r["cleaning_date"] or ""), r["building"] or ""),
+              reverse=False)
+    data.sort(key=lambda r: str(r["cleaning_date"] or ""), reverse=True)
+
+    return columns, data, None, None, _summary_cards(data)
+
+
+def _supervisor_by_building(all_buildings):
+    """Maps each building to its supervisor's full name, falling back to the user id."""
     supervisor_ids = list({b.responsible_supervisor for b in all_buildings
                            if b.responsible_supervisor})
     supervisor_names: dict[str, str] = {}
@@ -80,12 +98,14 @@ def execute(filters=None):
         ):
             supervisor_names[u.name] = u.full_name or u.name
 
-    building_supervisor: dict[str, str] = {
+    return {
         b.name: supervisor_names.get(b.responsible_supervisor, b.responsible_supervisor or "")
         for b in all_buildings
     }
-    building_names_set = set(building_supervisor)
 
+
+def _cleaning_logs(date_from, date_to, chosen_building, allowed):
+    """Reads the non-cancelled Cleaning Logs in the window, newest day first."""
     cl = frappe.qb.DocType("Cleaning Log")
     query = (
         frappe.qb.from_(cl)
@@ -106,67 +126,74 @@ def execute(filters=None):
     )
     if chosen_building:
         query = query.where(cl.building == chosen_building)
-    elif restrict and allowed:
+    elif allowed:
         query = query.where(cl.building.isin(allowed))
 
-    rows = query.run(as_dict=True)
+    return query.run(as_dict=True)
 
-    log_names = [r.name for r in rows]
+
+def _log_counts(log_names):
+    """Returns (rooms cleaned, photos attached) per log, both keyed by Cleaning Log name."""
     rooms_cleaned_map: dict[str, int] = {}
     photos_map: dict[str, int] = {}
+    if not log_names:
+        return rooms_cleaned_map, photos_map
 
-    if log_names:
-        for rec in frappe.get_all(
-            "Cleaning Compliance Ledger",
-            filters={"cleaning_log": ["in", log_names], "cleaned": 1, "is_cancelled": 0},
-            fields=["cleaning_log", "count(name) as cnt"],
-            group_by="cleaning_log",
-        ):
-            rooms_cleaned_map[rec.cleaning_log] = int(rec.cnt or 0)
+    for rec in frappe.get_all(
+        "Cleaning Compliance Ledger",
+        filters={"cleaning_log": ["in", log_names], "cleaned": 1, "is_cancelled": 0},
+        fields=["cleaning_log", "count(name) as cnt"],
+        group_by="cleaning_log",
+    ):
+        rooms_cleaned_map[rec.cleaning_log] = int(rec.cnt or 0)
 
-        cap = frappe.qb.DocType("Cleaning Area Photo")
-        for rec in (
-            frappe.qb.from_(cap)
-            .select(cap.parent, Count(cap.name).as_("cnt"))
-            .where(cap.parent.isin(log_names))
-            .groupby(cap.parent)
-        ).run(as_dict=True):
-            photos_map[rec.parent] = int(rec.cnt or 0)
+    cap = frappe.qb.DocType("Cleaning Area Photo")
+    for rec in (
+        frappe.qb.from_(cap)
+        .select(cap.parent, Count(cap.name).as_("cnt"))
+        .where(cap.parent.isin(log_names))
+        .groupby(cap.parent)
+    ).run(as_dict=True):
+        photos_map[rec.parent] = int(rec.cnt or 0)
 
-    covered: set[tuple[str, str]] = set()
+    return rooms_cleaned_map, photos_map
+
+
+def _derive_status(row) -> str:
+    """Derives a log's status as Missed, Rework Required, Completed, or Pending from its flags."""
+    if row.missed_cleaning:
+        return "Missed"
+    if row.rework_required:
+        return "Rework Required"
+    if row.supervisor_approved:
+        return "Completed"
+    return "Pending"
+
+
+def _logged_rows(rows, building_supervisor, rooms_cleaned_map, photos_map):
+    """Turns each Cleaning Log into a report row."""
     data = []
-
-    def _derive_status(row) -> str:
-        """Derives a log's status as Missed, Rework Required, Completed, or Pending from its flags."""
-        if row.missed_cleaning:
-            return "Missed"
-        if row.rework_required:
-            return "Rework Required"
-        if row.supervisor_approved:
-            return "Completed"
-        return "Pending"
-
     for row in rows:
         building = row.building or ""
-        cleaning_date = row.cleaning_date
-        covered.add((building, str(cleaning_date)))
-
-        submitted_at = row.modified.date() if (row.docstatus == 1 and row.modified) else None
-
         data.append({
-            "cleaning_date": cleaning_date,
+            "cleaning_date": row.cleaning_date,
             "building": building,
             "housing_supervisor": building_supervisor.get(building, ""),
             "status": _derive_status(row),
-            "submitted_at": submitted_at,
+            "submitted_at": row.modified.date() if (row.docstatus == 1 and row.modified) else None,
             "rooms_cleaned": rooms_cleaned_map.get(row.name, 0),
             "photos_attached": photos_map.get(row.name, 0),
         })
+    return data
 
+
+def _missed_rows(date_from, date_to, building_supervisor, covered):
+    """Builds a synthetic Missed row for every building-day the logs never covered."""
+    data = []
     current = date_from
     while current <= date_to:
         date_str = str(current)
-        for bld_name in sorted(building_names_set):
+        for bld_name in sorted(building_supervisor):
             if (bld_name, date_str) not in covered:
                 data.append({
                     "cleaning_date": current,
@@ -178,13 +205,13 @@ def execute(filters=None):
                     "photos_attached": 0,
                 })
         current = getdate(add_days(current, 1))
+    return data
 
-    data.sort(key=lambda r: (str(r["cleaning_date"] or ""), r["building"] or ""),
-              reverse=False)
-    data.sort(key=lambda r: str(r["cleaning_date"] or ""), reverse=True)
 
+def _summary_cards(data):
+    """Builds the four summary cards; the labels stay inside _() so the language is per call."""
     missed_count = len([r for r in data if r.get("status") == "Missed"])
-    summary = [
+    return [
         count_card(_("Cleaning Days"), data),
         count_card(_("Missed"), data, lambda r: r.get("status") == "Missed", "Red"),
         count_card(
@@ -195,7 +222,6 @@ def execute(filters=None):
         ),
         percent_card(_("Compliance"), len(data) - missed_count, len(data)),
     ]
-    return columns, data, None, None, summary
 
 
 def _columns():
