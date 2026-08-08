@@ -4,24 +4,12 @@
     v-if="mode === 'mark'"
     :width="size"
     :height="size"
-    viewBox="0 0 48 48"
+    viewBox="0 0 24 24"
     fill="none"
     aria-hidden="true"
   >
-    <path
-      d="M19 6 A18 18 0 0 0 19 42"
-      :stroke="primaryColor"
-      :stroke-width="strokeWidth"
-      stroke-linecap="round"
-      fill="none"
-    />
-    <path
-      d="M29 6 A18 18 0 0 1 29 42"
-      :stroke="accentColor"
-      :stroke-width="strokeWidth"
-      stroke-linecap="round"
-      fill="none"
-    />
+    <path d="M12 21c0-6 3-10 8-12-1 6-4 9-8 12Z" :fill="primaryColor" />
+    <path d="M12 21C12 13 8 8 3 6c1 7 5 11 9 15Z" :fill="accentColor" opacity=".92" />
   </svg>
 
   <svg
@@ -50,11 +38,14 @@
 </template>
 
 <script setup>
+/* The mark's two leaves are filled, not stroked, so `strokeWidth` no longer reaches it; it is
+   kept because `arc` mode still draws strokes and both modes share one prop list. The default
+   colours are the approved pair, which is read against the dark header the portals ship. */
 defineProps({
   mode: { type: String, default: "mark" },
   size: { type: [Number, String], default: 28 },
   strokeWidth: { type: [Number, String], default: 6 },
-  primaryColor: { type: String, default: "var(--c-header-accent)" },
-  accentColor: { type: String, default: "var(--c-header-accent)" },
+  primaryColor: { type: String, default: "#60d297" },
+  accentColor: { type: String, default: "#ffffff" },
 });
 </script>

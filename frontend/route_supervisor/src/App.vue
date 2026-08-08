@@ -7,7 +7,7 @@
     :menu-label="t('nav.menu')"
   >
     <template #brand>
-      <span class="brand-mark"><Icon name="route" :size="20" :stroke-width="2.2" /></span>
+      <span class="brand-mark"><Brand :size="24" /></span>
       <span class="brand-txt">
         <span class="brand-name">{{ t("brand.name") }}</span>
         <span class="brand-sub">{{ t("brand.sub") }}</span>
@@ -237,6 +237,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import Icon from "./Icon.vue";
+import Brand from "@shared/components/Brand.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
 import TabletSupervisorShell from "@shared/components/TabletSupervisorShell.vue";
 import { useToast } from "@shared/useToast.js";
