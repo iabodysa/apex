@@ -49,7 +49,7 @@ const CK_STYLE = {
 	cart_line_name_info: "font-size:14px;font-weight:500;flex:0 0 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;",
 	cart_line_sub: "font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;",
 	stepper: "display:flex;align-items:center;gap:8px;flex:0 0 auto;",
-	step: "inline-size:36px;block-size:36px;font-size:18px;line-height:1;padding:0;font-weight:700;",
+	step: "inline-size:44px;block-size:44px;font-size:18px;line-height:1;padding:0;font-weight:700;",
 	step_qty: "min-inline-size:28px;text-align:center;font-size:15px;font-weight:600;",
 	cart_footer: "padding-block:14px;padding-inline:16px;border-block-start:1px solid var(--border-color);",
 	cart_subtotal: "display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-block-end:12px;font-size:14px;",
@@ -70,7 +70,18 @@ class CustodyKiosk {
 		this.articles = [];
 		this.held = [];
 		this.cart = {};
-		this.return_cart = {};
+		this._reset_return_cart();
+	}
+
+	/* The one place the return cart is written. It was assigned and deleted from eight
+	   sites, including a render function, so what was on screen and what would be sent
+	   could disagree with no single line to read. */
+	_write_return_cart(next) {
+		this.return_cart = next;
+	}
+
+	_reset_return_cart() {
+		this._write_return_cart({});
 	}
 
 	setup() {
@@ -93,8 +104,9 @@ class CustodyKiosk {
 					this.party = null;
 					this.party_field.set_value("");
 					this._update_party_options();
-					this.return_cart = {};
+					this._reset_return_cart();
 					if (this.mode === "return") {
+						this.held = [];
 						this._render_held_empty(
 							__("Select a worker to load held custody.")
 						);
@@ -114,7 +126,7 @@ class CustodyKiosk {
 				if (val !== this.party) {
 					this.party = val;
 					if (this.mode === "return") {
-						this.return_cart = {};
+						this._reset_return_cart();
 						this.refresh();
 					}
 				}
@@ -154,6 +166,14 @@ class CustodyKiosk {
 			method: "apex.habitat.api.custody_kiosk.resolve_scan",
 			args: { code: code, party_type: this.party_type, building: this.building },
 			callback: (r) => {
+				if (r.exc) {
+					frappe.show_alert({
+						message: __("Could not resolve the scan. Please try again."),
+						indicator: "red",
+					});
+					this._focus_scan();
+					return;
+				}
 				const res = r.message || {};
 				if (res.kind === "worker") {
 					this._apply_worker_scan(res);
@@ -190,7 +210,7 @@ class CustodyKiosk {
 			indicator: "green",
 		});
 		if (this.mode === "return") {
-			this.return_cart = {};
+			this._reset_return_cart();
 			this.refresh();
 		}
 	}
@@ -323,6 +343,7 @@ class CustodyKiosk {
 
 		if (is_return) {
 			if (!this.party) {
+				this.held = [];
 				this._render_held_empty(__("Select a worker to load held custody."));
 			} else {
 				this.refresh();
@@ -371,6 +392,7 @@ class CustodyKiosk {
 
 	_refresh_held() {
 		if (!this.party) {
+			this.held = [];
 			this._render_held_empty(__("Select a worker to load held custody."));
 			return;
 		}
@@ -405,8 +427,10 @@ class CustodyKiosk {
 		$('<div class="ck-empty text-muted"></div>').attr("style", CK_STYLE.empty).text(message).appendTo(this.$tiles);
 	}
 
+	/* The held list is cleared by the caller that knows it is gone, not here: a render
+	   function that writes the model leaves the screen and the model disagreeing about
+	   which of them decided. */
 	_render_held_empty(message) {
-		this.held = [];
 		this._render_empty(message);
 	}
 
@@ -587,19 +611,19 @@ class CustodyKiosk {
 	_add_held_to_cart(line) {
 		const key = `${line.custody_issue}::${line.article}`;
 		const existing = this.return_cart[key];
-		if (existing) {
-			if (existing.qty < line.qty) existing.qty += 1;
-		} else {
-			this.return_cart[key] = {
-				key: key,
-				custody_issue: line.custody_issue,
-				article: line.article,
-				article_name: line.article_name || line.article,
-				uom: line.uom,
-				qty: 1,
-				max: line.qty,
-			};
-		}
+		const next = { ...this.return_cart };
+		next[key] = existing
+			? { ...existing, qty: Math.min(existing.qty + 1, line.qty) }
+			: {
+					key: key,
+					custody_issue: line.custody_issue,
+					article: line.article,
+					article_name: line.article_name || line.article,
+					uom: line.uom,
+					qty: 1,
+					max: line.qty,
+				};
+		this._write_return_cart(next);
 		this._render_cart();
 	}
 
@@ -616,12 +640,14 @@ class CustodyKiosk {
 	_change_return_qty(key, delta) {
 		const line = this.return_cart[key];
 		if (!line) return;
-		line.qty += delta;
-		if (line.qty <= 0) {
-			delete this.return_cart[key];
-		} else if (line.max && line.qty > line.max) {
-			line.qty = line.max;
+		const next = { ...this.return_cart };
+		const qty = line.max ? Math.min(line.qty + delta, line.max) : line.qty + delta;
+		if (qty <= 0) {
+			delete next[key];
+		} else {
+			next[key] = { ...line, qty: qty };
 		}
+		this._write_return_cart(next);
 		this._render_cart();
 	}
 
@@ -865,7 +891,7 @@ class CustodyKiosk {
 					message: __("Returned from {0}: {1}", [this.party, returns.join(", ")]),
 					indicator: "green",
 				});
-				this.return_cart = {};
+				this._reset_return_cart();
 				this._render_cart();
 				this.refresh();
 			},

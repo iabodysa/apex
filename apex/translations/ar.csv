@@ -1078,6 +1078,7 @@ Could not load employee photo.,تعذّر تحميل صورة الموظف.
 Could not load fleet data. Please try again.,تعذّر تحميل بيانات الأسطول. حاول مرة أخرى.
 Could not load held custody.,تعذّر تحميل العهدة المحتفظ بها.
 Could not load pending fuel requests.,تعذّر تحميل طلبات الوقود المعلّقة.
+Could not load the alerts.,تعذّر تحميل التنبيهات.
 Could not load the approval queue,تعذّر تحميل قائمة الاعتماد
 Could not load the board for this building.,تعذّر تحميل اللوحة لهذا المبنى.
 Could not load the board. Check your connection and try again.,تعذّر تحميل اللوحة. تحقق من اتصالك وحاول مجدداً.
@@ -1094,6 +1095,7 @@ Could not load your buildings. Check your connection and try again.,تعذّر �
 Could not load your work center. Please retry.,تعذّر تحميل مركز عملك. أعد المحاولة.
 Could not load {0}.,تعذّر تحميل {0}.
 Could not log the inspection. Please try again.,تعذّر تسجيل التفتيش. يرجى المحاولة مجدداً.
+Could not load the timeline.,تعذّر تحميل السجل الزمني.
 Could not mark the Work Order as Completed. Please try again.,تعذّر تغيير حالة أمر العمل إلى «مكتمل». يرجى المحاولة مجددًا.
 Could not mark the room ready.,تعذّر تعيين الغرفة كجاهزة.
 Could not mark the transfer as received. Please try again.,تعذّر تحديد التحويل كمستلَم. حاول مرة أخرى.
@@ -1103,16 +1105,19 @@ Could not raise the payment request. Please try again.,تعذّر رفع طلب 
 Could not read the passport — enter the details manually.,تعذّرت قراءة الجواز — أدخل التفاصيل يدوياً.
 Could not read the payment settings. Please try again.,تعذّر قراءة إعدادات الدفع. يرجى المحاولة مجدداً.
 Could not record the decision. Please try again.,تعذّر تسجيل القرار. يرجى المحاولة مجدداً.
+Could not reassign the driver.,تعذّر إعادة تعيين السائق.
 Could not regenerate the OTP. Please try again.,تعذّر إعادة توليد رمز التحقق. حاول مرة أخرى.
 Could not regenerate the code. Please try again.,تعذّر إعادة توليد الرمز. يرجى إعادة المحاولة.
 Could not regenerate the payment schedule. Please try again.,تعذّر إعادة توليد جدول الدفعات. يرجى المحاولة مجدداً.
 Could not reject the handover. Please try again.,تعذّر رفض التسليم. حاول مرة أخرى.
+Could not release the vehicle.,تعذّر إرجاع المركبة للخدمة.
 Could not renew the license. Please try again.,تعذّر تجديد الترخيص. حاول مرة أخرى.
 Could not resolve the scan. Please try again.,تعذّر تحديد نتيجة المسح. يرجى المحاولة مرة أخرى.
 Could not return the cart. Please review and try again.,تعذّر إرجاع السلة. الرجاء المراجعة والمحاولة مرة أخرى.
 Could not revoke the driver link. Please try again.,تعذّر إلغاء رابط السائق. حاول مرة أخرى.
 Could not save changes. Please try again or contact support.,تعذّر حفظ التغييرات. يرجى المحاولة مجدداً أو التواصل مع الدعم الفني.
 Could not send the link.,تعذّر إرسال الرابط.
+Could not send the link. Please try again.,تعذّر إرسال الرابط. حاول مرة أخرى.
 Could not snooze the selected alerts.,تعذّر تأجيل التنبيهات المحددة.
 Could not triage the requests. Please try again.,تعذّر فرز الطلبات. حاول مرة أخرى.
 Could not update bed occupancy. The assignment was not submitted.,تعذّر تحديث إشغال السرير. لم يُعتمد التسكين.
@@ -4718,8 +4723,6 @@ This fuel request has been pending approval for too long,ظل طلب الوقو�
 This page is for route supervisors.,هذه الصفحة مخصصة لمشرفي المسارات.
 This page is for the fleet team.,هذه الصفحة مخصّصة لفريق الأسطول.
 This page is for the housing and safety team.,هذه الصفحة لفريق الإسكان والسلامة.
-This page is for the housing team.,هذه الصفحة مخصصة لفريق الإسكان.
-This page is for the safety team.,هذه الصفحة لفريق السلامة.
 This payment request is not finance-approved yet; it cannot be paid.,طلب الدفع هذا لم يُعتمد ماليًا بعد؛ لا يمكن دفعه.
 This plan has already been {0}.,تم {0} هذه الخطة مسبقاً.
 This portal access token is invalid or inactive.,رمز الوصول إلى البوابة غير صالح أو غير نشط.
@@ -5376,6 +5379,7 @@ workshop status,حالة الورشة
 {0} free of {1} beds,{0} متاح من أصل {1} سرير
 {0} is not a demo DocType; the demo removal would never clear it.,{0} ليس نوع مستند تجريبي، فإزالة البيانات التجريبية لن تمسحه أبدًا.
 {0} is not a valid readiness status.,{0} ليست حالة جاهزية صالحة.
+{0} is not a valid return condition.,{0} ليست حالة إرجاع صالحة.
 {0} is too long.,{0} طويل جداً.
 {0} is too long. Use no more than {1} characters.,{0} طويل جدًا. استخدم ما لا يزيد عن {1} حرفًا.
 {0} material(s) loaded from template {1},حُمِّلت {0} مادّة من القالب {1}

@@ -339,8 +339,11 @@ class RoomSetup {
 				method: "apex.habitat.doctype.building.building.setup_building_rooms",
 				args: { building_name: this.building, floors: JSON.stringify(floors) },
 			})
-			.then(() => {
+			.then((r) => {
 				frappe.dom.unfreeze();
+				// frappe.call resolves its promise for a server exception too, carrying it in
+				// r.exc. Announcing success here told the operator that rooms exist which do not.
+				if (r && r.exc) return;
 				frappe.show_alert({ message: __("Rooms and beds created."), indicator: "green" });
 				frappe.set_route("Form", "Building", this.building);
 			})

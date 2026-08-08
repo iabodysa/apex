@@ -273,6 +273,15 @@ class FleetControl {
 		frappe.router.push_state("/" + ["app", route[1] || "operations-control"].join("/") + qs);
 	}
 
+	/* frappe.call runs the callback for a thrown server exception too, with r.exc set and
+	   r.message absent. Every handler on this page read only r.message, so a refused or
+	   failed action was announced in green with a count of zero. */
+	_call_failed(r, message) {
+		if (!r || !r.exc) return false;
+		frappe.show_alert({ message: message, indicator: "red" });
+		return true;
+	}
+
 	refresh() {
 		this._set_loading(true);
 		this._persist_filters();
@@ -281,7 +290,7 @@ class FleetControl {
 			method: "apex.salis.api.operations_control.get_fleet",
 			args: { ...this.filters },
 			callback: (r) => {
-				if (!r || !r.message) {
+				if (!r || r.exc || !r.message) {
 					this._render_board_error(() => this.refresh());
 					return;
 				}
@@ -302,6 +311,7 @@ class FleetControl {
 			method: "apex.salis.api.operations_alerts.get_open_alerts",
 			args: { project: this.filters.project || undefined, since: this.last_seen || undefined },
 			callback: (r) => {
+				if (this._call_failed(r, __("Could not load the alerts."))) return;
 				const m = (r && r.message) || { alerts: [], summary: { total: 0, by_severity: {} } };
 				this.alerts = m.alerts || [];
 				this.alert_summary = m.summary || { total: 0, by_severity: {}, mine: 0, unowned: 0 };
@@ -860,6 +870,7 @@ class FleetControl {
 			method: "apex.salis.api.operations_alerts." + method,
 			args,
 			callback: (r) => {
+				if (this._call_failed(r, __("Could not complete the alert action."))) return;
 				if (r && r.message && r.message.ok) {
 					frappe.show_alert({ message: ok_msg, indicator: "green" });
 					this._refresh_alerts();
@@ -876,6 +887,7 @@ class FleetControl {
 			method: "apex.salis.api.operations_alerts.bulk_acknowledge_alerts",
 			args: { names },
 			callback: (r) => {
+				if (this._call_failed(r, __("Could not acknowledge the selected alerts."))) return;
 				const n = (r && r.message && (r.message.acknowledged || []).length) || 0;
 				frappe.show_alert({ message: __("{0} acknowledged", [n]), indicator: "green" });
 				this.selected_alerts = new Set();
@@ -892,6 +904,7 @@ class FleetControl {
 			method: "apex.salis.api.operations_alerts.bulk_assign_alerts",
 			args: { names },
 			callback: (r) => {
+				if (this._call_failed(r, __("Could not assign the selected alerts."))) return;
 				const n = (r && r.message && (r.message.assigned || []).length) || 0;
 				frappe.show_alert({ message: __("{0} assigned", [n]), indicator: "green" });
 				this.selected_alerts = new Set();
@@ -911,6 +924,7 @@ class FleetControl {
 					method: "apex.salis.api.operations_alerts.bulk_snooze_alerts",
 					args: { names, until },
 					callback: (r) => {
+						if (this._call_failed(r, __("Could not snooze the selected alerts."))) return;
 						const n = (r && r.message && (r.message.snoozed || []).length) || 0;
 						frappe.show_alert({ message: __("{0} snoozed", [n]), indicator: "green" });
 						this.selected_alerts = new Set();
@@ -985,7 +999,7 @@ class FleetControl {
 			method: "apex.salis.api.operations_control.get_vehicle_detail",
 			args: { vehicle: v.name },
 			callback: (r) => {
-				if (!r || !r.message) {
+				if (!r || r.exc || !r.message) {
 					this._render_error($body.removeClass("text-muted"), () => this._load_detail(v, $body));
 					return;
 				}
@@ -1007,6 +1021,7 @@ class FleetControl {
 			args: { vehicle: v.name },
 			callback: (r) => {
 				$loading.remove();
+				if (this._call_failed(r, __("Could not load the timeline."))) return;
 				const events = (r && r.message && r.message.events) || [];
 				if (!events.length) {
 					$('<div class="text-muted small"></div>').text(__("None.")).appendTo($section);
@@ -1067,6 +1082,10 @@ class FleetControl {
 				method: "apex.salis.api.operations_control.release_vehicle",
 				args: { vehicle: v.name },
 				callback: (r) => {
+					if (this._call_failed(r, __("Could not release the vehicle."))) {
+						$btn.prop("disabled", false);
+						return;
+					}
 					if (r && r.message && r.message.ok) {
 						frappe.show_alert({ message: __("Vehicle released"), indicator: "green" });
 						this.$drawer.removeClass("fc-open").css("display", "none");
@@ -1095,6 +1114,10 @@ class FleetControl {
 					method: "apex.salis.api.operations_control.reassign_driver",
 					args: { vehicle: v.name, driver },
 					callback: (r) => {
+						if (this._call_failed(r, __("Could not reassign the driver."))) {
+							$btn.prop("disabled", false);
+							return;
+						}
 						if (r && r.message && r.message.ok) {
 							frappe.show_alert({ message: __("Driver reassigned"), indicator: "green" });
 							this.$drawer.removeClass("fc-open").css("display", "none");

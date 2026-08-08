@@ -537,7 +537,7 @@ def _demo_gender():
         time.sleep(1)
         frappe.db.rollback()
     doc = frappe.get_doc({"doctype": "Gender", "gender": "Male"})
-    doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
+    doc.insert(ignore_if_duplicate=True)
     return doc.name
 
 

@@ -669,6 +669,10 @@ class ArrivalsDesk {
 			method: 'apex.habitat.api.arrivals_desk.parse_passport',
 			args: { image: dataUrl },
 			callback: (r) => {
+				if (r.exc) {
+					$status.text(__('Could not read the passport — enter the details manually.'));
+					return;
+				}
 				const res = r.message || {};
 				if (res.ok && res.fields) {
 					Object.keys(res.fields).forEach((k) => {
@@ -1183,6 +1187,14 @@ class ArrivalsDesk {
 			method: 'apex.habitat.api.arrivals_desk.send_masar_link_message',
 			args: { employee: c.party, phone: m.phone || null },
 			callback: (r) => {
+				if (r.exc) {
+					$btn.prop('disabled', false).text(__('Send via WhatsApp/SMS'));
+					frappe.show_alert({
+						message: __('Could not send the link. Please try again.'),
+						indicator: 'red',
+					});
+					return;
+				}
 				const res = r.message || {};
 				if (res.queued) {
 					$btn.text(__('Sent ✓'));
