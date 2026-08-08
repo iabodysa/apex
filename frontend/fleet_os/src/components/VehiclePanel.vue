@@ -42,7 +42,7 @@ defineProps([
         <div v-if="panel.tab === 0" class="pb on">
           <div class="psect-title"><Icon name="chart-column" :size="14" /> {{ t("panel.vehicleStats") }}</div>
           <div class="pstats">
-            <div class="pstat"><div class="pstat-n" style="color:var(--purple-l)">{{ panel.vehicle.history.length }}</div><div class="pstat-l">{{ t("panel.totalDrivers") }}</div></div>
+            <div class="pstat"><div class="pstat-n" style="color:var(--critical-l)">{{ panel.vehicle.history.length }}</div><div class="pstat-l">{{ t("panel.totalDrivers") }}</div></div>
             <div class="pstat"><div class="pstat-n" style="color:var(--amber-l)">{{ calcTotalDaysNum(panel.vehicle) }}</div><div class="pstat-l">{{ t("panel.runningDays") }}</div></div>
             <div class="pstat"><div class="pstat-n" style="color:var(--green-l)">{{ calcActiveDaysNum(panel.vehicle) }}</div><div class="pstat-l">{{ t("panel.activeDays") }}</div></div>
             <div class="pstat"><div class="pstat-n" style="color:var(--cyan-l)">{{ panel.vehicle.history.filter((h) => h.status === "Active").length }}</div><div class="pstat-l">{{ t("panel.activations") }}</div></div>
@@ -244,8 +244,8 @@ defineProps([
           <template v-if="panel.vehicle.vehicle_status === 'available' || panel.vehicle.vehicle_status === 'stopped'">
             <div class="psect-title" style="color:var(--red-l)"><Icon name="shield-alert" :size="14" /> {{ t("statusTab.reportTheft") }}</div>
             <button class="btn btn-red" style="width:100%;justify-content:center" @click="openStolenForm"><Icon name="shield-alert" :size="15" /> {{ t("statusTab.reportTheftBtn") }}</button>
-            <div v-if="subForm === 'stolen'" style="border:1px solid color-mix(in srgb,var(--purple) 20%,transparent);border-radius:var(--r2);padding:14px;background:var(--purple-d);margin-top:10px">
-              <div class="psect-title" style="color:var(--purple-l)"><Icon name="shield-alert" :size="14" /> {{ t("stolenForm.title") }}</div>
+            <div v-if="subForm === 'stolen'" style="border:1px solid color-mix(in srgb,var(--critical) 20%,transparent);border-radius:var(--r2);padding:14px;background:var(--critical-d);margin-top:10px">
+              <div class="psect-title" style="color:var(--critical-l)"><Icon name="shield-alert" :size="14" /> {{ t("stolenForm.title") }}</div>
               <div class="form-grid">
                 <div class="ff"><div class="fl">{{ t("stolenForm.theftDate") }} *</div><input class="fi" type="date" v-model="stf.date" /></div>
                 <div class="ff"><div class="fl">{{ t("stolenForm.policeNumber") }}</div><input class="fi mono" v-model="stf.police" :placeholder="t('stolenForm.policePlaceholder')" /></div>
@@ -256,7 +256,7 @@ defineProps([
               </div>
               <div class="form-actions" style="margin-top:10px">
                 <button class="btn" @click="closeSubForm()">{{ t("common.cancel") }}</button>
-                <button class="btn" style="background:var(--purple);color:#fff;border-color:var(--purple)" @click="submitStolen"><Icon name="shield-alert" :size="15" /> {{ t("stolenForm.confirm") }}</button>
+                <button class="btn" style="background:var(--critical);color:var(--c-danger-ink);border-color:var(--critical)" @click="submitStolen"><Icon name="shield-alert" :size="15" /> {{ t("stolenForm.confirm") }}</button>
               </div>
             </div>
           </template>

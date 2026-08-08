@@ -39,7 +39,7 @@ defineProps([
               <td><template v-if="v.current_driver">{{ v.current_driver.name_ar || v.current_driver.name_en }} <Icon name="lock" :size="13" /></template><span v-else style="color:var(--t3)">—</span></td>
               <td>{{ trim(v.project) || t("common.none") }}</td>
               <td>{{ v.area }}</td>
-              <td style="color:var(--purple-l)">{{ v.history.length }}</td>
+              <td style="color:var(--critical-l)">{{ v.history.length }}</td>
               <td style="color:var(--amber-l);font-family:'JetBrains Mono',monospace">{{ calcTotalDaysNum(v) ? t("duration.dayUnit", { n: calcTotalDaysNum(v) }) : t("common.none") }}</td>
               <td @click.stop>
                 <button class="btn" style="padding:3px 10px;font-size:11px" @click="openPanel(v.plate)">{{ t("table.details") }} <Icon name="chevron" :size="13" /></button>
