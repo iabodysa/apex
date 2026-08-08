@@ -225,6 +225,15 @@
   outline-offset: 2px;
 }
 
+/* frappe-ui sizes its controls for a mouse: the TabButtons group ships min-h-7 (28px)
+   and a FormControl's select trigger renders at 32px. Both are under the 44px a finger
+   needs, and neither exposes a size prop. The floor is set once here rather than in each
+   portal that adopts them. */
+.min-h-7 button,
+[class~="space-y-1.5"] > button {
+  min-block-size: var(--tap-min);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

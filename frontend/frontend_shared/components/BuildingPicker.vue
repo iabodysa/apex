@@ -141,6 +141,10 @@ const filtered = computed(() => {
 .search-input:focus {
   outline: none;
 }
+.search-input:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
+}
 
 .b-list {
   display: flex;

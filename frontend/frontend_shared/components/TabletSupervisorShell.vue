@@ -122,6 +122,7 @@ const shellVars = computed(() => ({
   display: flex;
   align-items: center;
   gap: 11px;
+  min-block-size: var(--tap-min);
   padding: 10px var(--sp-3);
   border-radius: var(--radius-sm);
   text-decoration: none;
