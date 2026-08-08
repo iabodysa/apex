@@ -11,16 +11,6 @@ frappe.pages["transfer-board"].on_page_load = function (wrapper) {
 	tb.setup();
 };
 
-function tb_indicator_color(bed_color) {
-	return { green: "green", red: "red", amber: "orange", grey: "gray" }[bed_color] || "gray";
-}
-
-const TB_BED_PALETTE = {
-	green: "background:var(--green-100);border-color:var(--green-500);color:var(--green-700);",
-	red: "background:var(--red-100);border-color:var(--red-500);color:var(--red-700);",
-	amber: "background:var(--yellow-100);border-color:var(--orange-500);color:var(--orange-700);cursor:not-allowed;",
-	grey: "background:var(--gray-100);border-color:var(--gray-400);color:var(--gray-600);cursor:not-allowed;",
-};
 const TB_STYLE = {
 	help: "margin-block:var(--margin-sm,10px);font-size:var(--text-sm,12px);",
 	split: "display:flex;flex-wrap:wrap;gap:var(--margin-md,15px);align-items:flex-start;",
@@ -218,7 +208,7 @@ class TransferBoard {
 		const is_available = bed.bed_color === "green";
 
 		const $card = $(`<div class="tb-bed" tabindex="0" role="button"></div>`);
-		$card.attr("style", TB_STYLE.bed + (TB_BED_PALETTE[bed.bed_color] || ""));
+		$card.attr("style", apex.habitat.bed_style(bed.bed_color, TB_STYLE.bed));
 		$card.data("ctx", { side, bed, room, building });
 
 		$('<div class="tb-bed-code"></div>').attr("style", TB_STYLE.bed_code).text(bed.bed_code || bed.bed).appendTo($card);
@@ -228,7 +218,7 @@ class TransferBoard {
 		else if (bed.bed_color === "red") badge = __("Occupied");
 		else if (bed.bed_color === "amber") badge = __("Room not ready");
 		else badge = __("Out of Service");
-		$(`<span class="tb-bed-badge indicator-pill ${tb_indicator_color(bed.bed_color)}"></span>`)
+		$(`<span class="tb-bed-badge indicator-pill ${apex.habitat.indicator_color(bed.bed_color)}"></span>`)
 			.text(badge)
 			.appendTo($card);
 

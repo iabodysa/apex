@@ -25,16 +25,6 @@ function fd_percent(pct) {
 	return `${fd_int(pct)}%`;
 }
 
-function fd_indicator_color(bed_color) {
-	return { green: "green", red: "red", amber: "orange", grey: "gray" }[bed_color] || "gray";
-}
-
-const FD_BED_PALETTE = {
-	green: "background:var(--green-100);border-color:var(--green-500);color:var(--green-700);",
-	red: "background:var(--red-100);border-color:var(--red-500);color:var(--red-700);",
-	amber: "background:var(--yellow-100);border-color:var(--orange-500);color:var(--orange-700);cursor:not-allowed;",
-	grey: "background:var(--gray-100);border-color:var(--gray-400);color:var(--gray-600);cursor:not-allowed;",
-};
 const FD_PRESSURE_BORDER = {
 	green: "var(--green-500)",
 	amber: "var(--orange-500)",
@@ -468,7 +458,7 @@ class FrontDesk {
 		const $key = $('<div class="fd-legend-key"></div>').attr("style", FD_STYLE.legend_key).appendTo($legend);
 		swatches.forEach(([color, label]) => {
 			const $item = $('<span class="fd-legend-item"></span>').attr("style", FD_STYLE.legend_item).appendTo($key);
-			$(`<span class="fd-legend-dot indicator ${fd_indicator_color(color)}"></span>`).appendTo(
+			$(`<span class="fd-legend-dot indicator ${apex.habitat.indicator_color(color)}"></span>`).appendTo(
 				$item
 			);
 			$('<span class="fd-legend-label"></span>').text(label).appendTo($item);
@@ -552,7 +542,7 @@ class FrontDesk {
 
 	_render_bed_card(bed, room, building) {
 		const $card = $(`<div class="fd-bed" tabindex="0" role="button"></div>`);
-		$card.attr("style", FD_STYLE.bed + (FD_BED_PALETTE[bed.bed_color] || ""));
+		$card.attr("style", apex.habitat.bed_style(bed.bed_color, FD_STYLE.bed));
 		$('<bdi class="fd-bed-code" dir="ltr"></bdi>').attr("style", FD_STYLE.bed_code).text(bed.bed_code || bed.bed).appendTo($card);
 
 		let badge = "";
@@ -560,7 +550,7 @@ class FrontDesk {
 		else if (bed.bed_color === "red") badge = __("Occupied");
 		else if (bed.bed_color === "amber") badge = __("Room not ready");
 		else badge = __("Out of Service");
-		$(`<span class="fd-bed-badge indicator-pill ${fd_indicator_color(bed.bed_color)}"></span>`)
+		$(`<span class="fd-bed-badge indicator-pill ${apex.habitat.indicator_color(bed.bed_color)}"></span>`)
 			.attr("style", FD_STYLE.bed_badge)
 			.text(badge)
 			.appendTo($card);
@@ -784,70 +774,10 @@ class FrontDesk {
 			return;
 		}
 
-		const d = new frappe.ui.Dialog({
-			title: __("Quick Check-out"),
-			fields: [
-				{
-					fieldname: "context",
-					fieldtype: "HTML",
-					options: `<div class="text-muted" style="margin-bottom:8px">${frappe.utils.escape_html(occupant.employee_name || "")}</div>`,
-				},
-				{
-					fieldname: "checkout_date",
-					label: __("Check-out Date"),
-					fieldtype: "Date",
-					reqd: 1,
-					default: frappe.datetime.get_today(),
-				},
-				{
-					fieldname: "checkout_reason",
-					label: __("Check-out Reason"),
-					fieldtype: "Select",
-					reqd: 1,
-					options: "\nFinal Exit\nInternal Transfer\nProject Transfer\nAbsconding\nEnd of Contract",
-				},
-				{
-					fieldname: "room_condition_snapshot",
-					label: __("Room Condition Snapshot"),
-					fieldtype: "Attach Image",
-				},
-			],
-			primary_action_label: __("Check Out"),
-			primary_action: (values) => {
-				d.hide();
-				this._set_bed_updating($card, true);
-				frappe.call({
-					method: "apex.habitat.api.front_desk.quick_check_out",
-					args: {
-						bed: bed.bed,
-						checkout_date: values.checkout_date,
-						checkout_reason: values.checkout_reason,
-						room_condition_snapshot: values.room_condition_snapshot || null,
-					},
-					callback: (r) => {
-						if (r.exc || !r.message) {
-							this._set_bed_updating($card, false);
-							return;
-						}
-						if (r.message.requires_full_form) {
-							this._set_bed_updating($card, false);
-							frappe.show_alert({
-								message: __("This resident has custody items. Opening the full Checkout form to clear custody."),
-								indicator: "orange",
-							});
-							frappe.new_doc("Housing Checkout", { assignment: r.message.assignment });
-							return;
-						}
-						frappe.show_alert({
-							message: __("Checked out: {0}", [r.message.checkout]),
-							indicator: "green",
-						});
-						this.refresh();
-					},
-					error: () => this._set_bed_updating($card, false),
-				});
-			},
-		});
-		d.show();
+		apex.habitat.quick_checkout_dialog(
+			{ bed: bed.bed, employee_name: occupant.employee_name },
+			(state) => this._set_bed_updating($card, state),
+			() => this.refresh()
+		);
 	}
 }
