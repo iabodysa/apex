@@ -54,6 +54,13 @@ DEMO_DOCTYPES = (
     "Driver Clearance",
     "Vehicle Utilisation Snapshot",
     "Accommodation Ledger",
+    "QR Location",
+    "Custody Handover",
+    "Vehicle Handover",
+    "Vehicle Incident",
+    "Vehicle Damage Write-Off",
+    "Subcontractor Service Contract",
+    "Subcontractor Service Order",
 )
 
 _DEMO_SITE = "Demo Housing Site"
@@ -851,6 +858,137 @@ def _build_accommodation_ledger(context):
     allocate_building_accommodation_cost(context["building"], today())
 
 
+def _build_qr_location(context):
+    """Creates the demo QR poster for the building entrance."""
+    context["qr_location"] = _create(
+        "QR Location",
+        {
+            "poster_title": "Demo Building A — Main Entrance",
+            "is_active": 1,
+            "accommodation_site": context["site"],
+            "building": context["building"],
+            "room": context["rooms"][0],
+        },
+    ).name
+
+
+def _build_custody_handover(context):
+    """Creates the demo custody handover between the two demo buildings."""
+    context["custody_handover"] = _create(
+        "Custody Handover",
+        {
+            "handover_date": today(),
+            "from_building": context["building"],
+            "to_building": context["partner_building"],
+            "procurement_supervisor": DEMO_SUPERVISOR,
+            "receiving_supervisor": DEMO_APPROVER,
+            "items": [
+                {
+                    "item_type": "Custody Article",
+                    "item": context["article"],
+                    "qty": 2,
+                    "condition_on_transfer": "Good",
+                }
+            ],
+        },
+    ).name
+
+
+def _build_vehicle_handover(context):
+    """Creates the demo vehicle handover receipt with its inspection checklist."""
+    context["vehicle_handover"] = _create(
+        "Vehicle Handover",
+        {
+            "vehicle": context["vehicle"],
+            "to_driver": context["driver"],
+            "handover_date": today(),
+            "fuel_level": "Half",
+            "discrepancy_status": "Clean",
+            "handover_check_items": [
+                {"check_item": "Spare tyre"},
+                {"check_item": "Jack and wrench"},
+                {"check_item": "First aid kit"},
+                {"check_item": "Fire extinguisher"},
+            ],
+        },
+    ).name
+
+
+def _build_vehicle_incident(context):
+    """Creates the demo open vehicle incident."""
+    context["vehicle_incident"] = _create(
+        "Vehicle Incident",
+        {
+            "incident_type": "Accident",
+            "vehicle": context["vehicle"],
+            "incident_date": today(),
+            "injuries": "No Injuries",
+            "status": "Open",
+            "description": "Minor rear bumper contact while reversing at the site gate. "
+            "No third party involved and the vehicle remained drivable.",
+        },
+    ).name
+
+
+def _build_vehicle_write_off(context):
+    """Creates the demo damage write-off in its initial workflow state.
+
+    The DocType makes `evidence` mandatory, so a placeholder File is attached: an Attach field
+    stores a URL, and a write-off with no photo is a record no approver could act on.
+    """
+    evidence = frappe.get_doc(
+        {
+            "doctype": "File",
+            "file_name": "demo-write-off-evidence.txt",
+            "content": "Demo damage evidence placeholder.",
+            "is_private": 0,
+        }
+    ).insert(ignore_permissions=True)
+    context["vehicle_write_off"] = _create(
+        "Vehicle Damage Write-Off",
+        {
+            "vehicle": context["vehicle"],
+            "evidence": evidence.file_url,
+            "recommended_action": "Repair",
+            "status": "Open",
+        },
+    ).name
+
+
+def _build_subcontractor_contract(context):
+    """Creates the demo pest-control contract and walks it to Active through its workflow."""
+    name = _create(
+        "Subcontractor Service Contract",
+        {
+            "supplier": context["supplier"],
+            "service_type": "Pest Control",
+            "contract_start_date": today(),
+            "contract_end_date": add_days(today(), 365),
+            "visit_frequency": "Monthly",
+            "status": "Draft",
+            "covered_buildings": [{"building": context["building"]}],
+        },
+    ).name
+    _walk_workflow("Subcontractor Service Contract", name, ("Submit for Approval", "Approve"))
+    context["subcontractor_contract"] = name
+
+
+def _build_subcontractor_order(context):
+    """Creates the demo service order against the demo contract."""
+    context["subcontractor_order"] = _create(
+        "Subcontractor Service Order",
+        {
+            "building": context["building"],
+            "scheduled_date": today(),
+            "contract": context["subcontractor_contract"],
+            "status": "Scheduled",
+            "service_items": [
+                {"description": "Monthly pest-control visit", "qty": 1, "rate": 350},
+            ],
+        },
+    ).name
+
+
 _BUILD_STEPS = (
     ("Company", _build_partner_company),
     ("Supplier", _build_supplier),
@@ -882,4 +1020,11 @@ _BUILD_STEPS = (
     ("Driver Clearance", _build_driver_clearance),
     ("Vehicle Utilisation Snapshot", _build_vehicle_snapshots),
     ("Accommodation Ledger", _build_accommodation_ledger),
+    ("QR Location", _build_qr_location),
+    ("Custody Handover", _build_custody_handover),
+    ("Vehicle Handover", _build_vehicle_handover),
+    ("Vehicle Incident", _build_vehicle_incident),
+    ("Vehicle Damage Write-Off", _build_vehicle_write_off),
+    ("Subcontractor Service Contract", _build_subcontractor_contract),
+    ("Subcontractor Service Order", _build_subcontractor_order),
 )
