@@ -3622,6 +3622,7 @@ Rental movement {0} ({1}) cancelled.,تم إلغاء حركة الإيجار {0}
 Rental settlement {0} for period {1}.,تسوية إيجار {0} عن الفترة {1}.
 Rental {0} via {1} (office {2}).,إيجار {0} عبر {1} (المكتب {2}).
 Rented,مستأجرة
+Reopen,إعادة فتح
 Reopened,أُعيد فتحه
 Repair,إصلاح
 Repair Cost,تكلفة الإصلاح
@@ -3765,6 +3766,7 @@ Returns And Outstanding Items,المرتجعات والأصناف المعلقة
 Reversal Of,عكس قيد
 Reversal Status,حالة العكس
 Reversed {0} L from Fuel Request {1}.,تم عكس {0} لتر من طلب الوقود {1}.
+Revert,تراجع
 Revert Due Date,موعد العودة إلى الوضع السابق
 Revert by,يرجع قبل
 Reverted,أُعيدت إلى الوضع السابق
