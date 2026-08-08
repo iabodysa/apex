@@ -459,9 +459,29 @@ def get_worker_transport(token=None):
     assignment = _active_assignment(employee)
     my_building = assignment.get("building") if assignment else None
 
+    lookups = _transport_lookups(requests, employee)
+
+    upcoming = []
+    past = []
+    for req in requests:
+        trip = _transport_trip(req, lookups, my_building, now_dt)
+        (upcoming if trip["is_upcoming"] else past).append(trip)
+
+    past.reverse()
+    return {
+        "date": frappe.utils.today(),
+        "upcoming": upcoming,
+        "past": past,
+        "trips": upcoming,
+    }
+
+
+def _transport_lookups(requests, employee):
+    """Reads every vehicle, driver, trip and rating the request list refers to, in one pass each."""
     vehicle_names = {r["assigned_vehicle"] for r in requests if r.get("assigned_vehicle")}
     driver_names = {r["assigned_driver"] for r in requests if r.get("assigned_driver")}
     trip_names = {r["dispatch_trip"] for r in requests if r.get("dispatch_trip")}
+
     vehicle_map = {}
     if vehicle_names:
         for v in frappe.get_all(
@@ -470,6 +490,7 @@ def get_worker_transport(token=None):
             fields=["name", "plate_number", "vehicle_category"],
         ):
             vehicle_map[v["name"]] = v
+
     driver_map = {}
     if driver_names:
         for d in frappe.get_all(
@@ -478,6 +499,7 @@ def get_worker_transport(token=None):
             fields=["name", "full_name", "phone"],
         ):
             driver_map[d["name"]] = {"full_name": d["full_name"], "phone": d["phone"]}
+
     depart_map = {}
     status_map = {}
     if trip_names:
@@ -488,9 +510,7 @@ def get_worker_transport(token=None):
         ):
             depart_map[dt["name"]] = dt["depart_time"]
             status_map[dt["name"]] = dt["status"]
-    live_map = _live_trips_by_request(
-        [r["name"] for r in requests if not r.get("dispatch_trip")], status_map
-    )
+
     rated_trips = set()
     if trip_names:
         rated_trips = set(
@@ -501,59 +521,62 @@ def get_worker_transport(token=None):
             )
         )
 
-    upcoming = []
-    past = []
-    for req in requests:
-        vehicle = vehicle_map.get(req["assigned_vehicle"]) if req.get("assigned_vehicle") else None
-        driver = driver_map.get(req["assigned_driver"]) if req.get("assigned_driver") else None
-        depart_time = None
-        if req.get("dispatch_trip"):
-            depart_time = _fmt_time(depart_map.get(req["dispatch_trip"]))
-        pickup_datetime = (
-            frappe.utils.cstr(req["pickup_datetime"]) if req.get("pickup_datetime") else None
-        )
-        is_upcoming = _is_upcoming_pickup(req.get("pickup_datetime"), now_dt)
-        stops = _ordered_stops(req.get("route_plan"))
-        my_pickup = _worker_pickup_stop(stops, my_building)
-        destination = _route_destination_stop(stops, my_pickup)
-        has_rated = bool(
-            req.get("dispatch_trip") and not is_upcoming and req["dispatch_trip"] in rated_trips
-        )
+    return {
+        "vehicle": vehicle_map,
+        "driver": driver_map,
+        "depart": depart_map,
+        "status": status_map,
+        "live": _live_trips_by_request(
+            [r["name"] for r in requests if not r.get("dispatch_trip")], status_map
+        ),
+        "rated": rated_trips,
+    }
 
-        dispatch_trip = req.get("dispatch_trip") or live_map.get(req["name"])
-        window = boarding_window.resolve(
+
+def _transport_trip(req, lookups, my_building, now_dt):
+    """Shapes one Transport Request into the trip the Transport screen renders."""
+    is_upcoming = _is_upcoming_pickup(req.get("pickup_datetime"), now_dt)
+    stops = _ordered_stops(req.get("route_plan"))
+    my_pickup = _worker_pickup_stop(stops, my_building)
+    dispatch_trip = req.get("dispatch_trip") or lookups["live"].get(req["name"])
+
+    return {
+        "transport_request": req["name"],
+        "dispatch_trip": dispatch_trip,
+        "request_type": req.get("request_type"),
+        "status": req.get("status"),
+        "trip_status": _trip_status(dispatch_trip, lookups["status"]),
+        "pickup_point": req.get("pickup_point"),
+        "pickup_datetime": (
+            frappe.utils.cstr(req["pickup_datetime"]) if req.get("pickup_datetime") else None
+        ),
+        "depart_time": (
+            _fmt_time(lookups["depart"].get(req["dispatch_trip"]))
+            if req.get("dispatch_trip")
+            else None
+        ),
+        "is_upcoming": is_upcoming,
+        "has_rated": bool(
+            req.get("dispatch_trip")
+            and not is_upcoming
+            and req["dispatch_trip"] in lookups["rated"]
+        ),
+        "boarding_window": boarding_window.resolve(
             dispatch_trip,
             req["name"],
             (my_pickup or {}).get("accommodation_building") or req.get("accommodation_building"),
             now=now_dt,
-        )
-        trip = {
-            "transport_request": req["name"],
-            "dispatch_trip": dispatch_trip,
-            "request_type": req.get("request_type"),
-            "status": req.get("status"),
-            "trip_status": _trip_status(dispatch_trip, status_map),
-            "pickup_point": req.get("pickup_point"),
-            "pickup_datetime": pickup_datetime,
-            "depart_time": depart_time,
-            "is_upcoming": is_upcoming,
-            "has_rated": bool(has_rated),
-            "boarding_window": window,
-            "stops": stops,
-            "my_pickup": my_pickup,
-            "destination": destination,
-            "maps_route_url": _full_route_maps_url(stops),
-            "vehicle": vehicle,
-            "driver": driver,
-        }
-        (upcoming if is_upcoming else past).append(trip)
-
-    past.reverse()
-    return {
-        "date": frappe.utils.today(),
-        "upcoming": upcoming,
-        "past": past,
-        "trips": upcoming,
+        ),
+        "stops": stops,
+        "my_pickup": my_pickup,
+        "destination": _route_destination_stop(stops, my_pickup),
+        "maps_route_url": _full_route_maps_url(stops),
+        "vehicle": (
+            lookups["vehicle"].get(req["assigned_vehicle"]) if req.get("assigned_vehicle") else None
+        ),
+        "driver": (
+            lookups["driver"].get(req["assigned_driver"]) if req.get("assigned_driver") else None
+        ),
     }
 
 
