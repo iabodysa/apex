@@ -184,7 +184,7 @@
                   <Icon :name="statusIcon" :size="30" :stroke-width="1.8" />
                   <div>
                     <div class="sb-label">{{ t("approval." + selectedPlan.approval) }}</div>
-                    <div v-if="selectedPlan.decided_on" class="sb-sub">{{ t("approval.decidedOn", { at: selectedPlan.decided_on }) }}</div>
+                    <div v-if="selectedPlan.decided_on" class="sb-sub">{{ t("approval.decidedOn", { at: agoLabel(selectedPlan.decided_on, lang) }) }}</div>
                   </div>
                 </div>
 
@@ -251,7 +251,7 @@ import { useI18n } from "./i18n";
 import { useDocumentLanguage } from "@shared/useDocumentLanguage";
 import { getSupervisorContext, approveRoutePlan, rejectRoutePlan } from "./api.js";
 import { connectRouteSupervisorRealtime } from "./realtime.js";
-import { pct } from "./fmt.js";
+import { pct, agoLabel } from "./fmt.js";
 
 const { t, lang, dir, resourceErrorMessage } = useI18n();
 
@@ -268,6 +268,9 @@ const onFleetMap = ref(false);
 const onQueue = ref(false);
 
 function readFleetMapRoute() {
+  /* The hash is the ONLY writer of these two flags. Setting them anywhere else lets the screen
+     and the address disagree, and then a tab click changes the URL while the queue stays on
+     top of it. */
   const hash = window.location.hash || "";
   onFleetMap.value = hash.startsWith(FLEET_MAP_ROUTE);
   onQueue.value = hash.startsWith(QUEUE_ROUTE);
@@ -372,6 +375,7 @@ function routeToLocation() {
     ? `#/plan/${encodeURIComponent(selectedName.value)}/${tab.value}`
     : "#/";
   if (window.location.hash !== target) window.history.pushState(null, "", target);
+  readFleetMapRoute();
 }
 
 function applyRoute() {
@@ -383,10 +387,11 @@ function applyRoute() {
 }
 
 function selectPlan(name) {
-  onFleetMap.value = false;
-  onQueue.value = false;
+  /* Sets the plan and lets the URL watcher clear the queue and map flags. Clearing them here
+     as well left the address on #/approvals, and the next history event read it back. */
   selectedName.value = name;
   tab.value = TAB_KEYS[0];
+  routeToLocation();
 }
 
 async function loadContext() {
