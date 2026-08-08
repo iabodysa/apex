@@ -657,7 +657,7 @@ def worker_trip_boarding(token=None):
     from apex.salis.api.masar import _resolve_worker, _worker_today_dispatch_trip
 
     employee = _resolve_worker(token)
-    window = get_boarding_setting("boarding_notify_window_seconds")
+    notify_window_seconds = get_boarding_setting("boarding_notify_window_seconds")
     wait_max = get_boarding_setting("worker_wait_request_max")
     poll_seconds = get_boarding_setting("boarding_active_poll_seconds")
     misboard = _read_misboard(employee)
@@ -679,14 +679,14 @@ def worker_trip_boarding(token=None):
         trip.save(ignore_permissions=True)
     row = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     state = (
-        _state_payload(row, window)
+        _state_payload(row, notify_window_seconds)
         if row is not None
         else {
             "employee": employee,
             "status": "Pending",
             "notify_count": 0,
             "notify_at": None,
-            "notify_window_seconds": window,
+            "notify_window_seconds": notify_window_seconds,
             "wait_count": 0,
             "wait_at": None,
         }
