@@ -486,9 +486,7 @@ def _demo_gender():
     existing = frappe.db.get_value("Gender", {"name": "Male"}) or frappe.db.get_value("Gender", {})
     if existing:
         return existing
-    return frappe.get_doc({"doctype": "Gender", "gender": "Male"}).insert(
-        ignore_permissions=True
-    ).name
+    return frappe.get_doc({"doctype": "Gender", "gender": "Male"}).insert().name
 
 
 def _build_employee(context):
