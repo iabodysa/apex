@@ -17,12 +17,12 @@
     <template #nav>
       <span class="nav-label">{{ t("nav.work") }}</span>
       <button
-        v-for="tb in TABS"
+        v-for="tb in shownTabs"
         :key="tb.key"
         type="button"
-        :class="{ 'is-active': tab === tb.key }"
+        :class="{ 'is-active': onPlan && tab === tb.key }"
         :disabled="!selectedPlan"
-        @click="tab = tb.key"
+        @click="selectTab(tb.key)"
       >
         <Icon :name="tb.icon" :size="17" />
         <span>{{ t("tabs." + tb.key) }}</span>
@@ -165,7 +165,7 @@
 
           <nav class="tabs" role="tablist">
             <button v-for="tb in shownTabs" :key="tb.key" class="tab" :class="{ on: tab === tb.key }"
-                    role="tab" :aria-selected="tab === tb.key" @click="tab = tb.key">
+                    role="tab" :aria-selected="tab === tb.key" @click="selectTab(tb.key)">
               <Icon :name="tb.icon" :size="16" /> {{ t("tabs." + tb.key) }}
             </button>
           </nav>
@@ -267,6 +267,12 @@ const QUEUE_ROUTE = "#/approvals";
 const onFleetMap = ref(false);
 const onQueue = ref(false);
 
+/* The menu holds two groups of buttons — the plan's tabs, and the two whole-screen
+   destinations — and each group knew only its own state. So the tab you last opened stayed lit
+   while you moved to the queue, and two items looked selected at once. One flag settles it:
+   a tab is current only while a plan is what the screen is showing. */
+const onPlan = computed(() => !onQueue.value && !onFleetMap.value);
+
 function readFleetMapRoute() {
   /* The hash is the ONLY writer of these two flags. Setting them anywhere else lets the screen
      and the address disagree, and then a tab click changes the URL while the queue stays on
@@ -276,23 +282,39 @@ function readFleetMapRoute() {
   onQueue.value = hash.startsWith(QUEUE_ROUTE);
 }
 
-function openFleetMap() {
-  window.history.pushState(null, "", FLEET_MAP_ROUTE);
+function goTo(target) {
+  /* Every navigation in this screen goes through here: push only when the address really
+     changes, then re-derive the view from it. Pushing an unchanged hash costs a back press
+     that does nothing, and skipping the re-read leaves the menu lit on the wrong item. */
+  if (window.location.hash !== target) window.history.pushState(null, "", target);
   readFleetMapRoute();
+}
+
+function openFleetMap() {
+  goTo(FLEET_MAP_ROUTE);
 }
 
 function openQueue() {
-  window.history.pushState(null, "", QUEUE_ROUTE);
-  readFleetMapRoute();
+  goTo(QUEUE_ROUTE);
+}
+
+function selectTab(key) {
+  /* Assigning `tab` its CURRENT value changes no ref, so the watcher below never fires and
+     nothing reconciles — which is why tapping the tab you are already on used to do nothing
+     at all while the queue stayed on screen. Reconcile here instead of relying on the watcher. */
+  tab.value = key;
+  routeToLocation();
 }
 
 async function approvePlan(name) {
-  selectedName.value = name;
-  await approve();
+  /* Acts on the card that was tapped, without moving the selection. Selecting it first was a
+     navigation as far as the watcher was concerned, so approving from the queue jumped him
+     out of the queue — but only for cards that were not already selected. */
+  await approve(name);
 }
 
 function rejectPlan(name) {
-  selectedName.value = name;
+  rejecting.value = name;
   openReject();
 }
 
@@ -303,6 +325,10 @@ const selectedName = ref(null);
 const tab = ref("approval");
 const busy = ref(false);
 const reject = ref({ open: false, reason: "" });
+/* The plan the reject dialog is about, when it was opened from a queue card rather than from
+   the open plan. Keeping it here instead of moving the selection is what stops a rejection
+   from navigating him somewhere he did not ask to go. */
+const rejecting = ref(null);
 const rejectEl = ref(null);
 useOverlay({
   active: () => reject.value.open,
@@ -364,9 +390,13 @@ const shownTabs = computed(() => (wide.value ? TABS.filter((tb) => tb.key !== "m
 function routeFromLocation() {
   const match = (window.location.hash || "").match(/^#\/plan\/([^/]+)(?:\/([a-z]+))?/);
   if (!match) return null;
+  /* A wide layout draws the map beside the plan instead of as a tab, so `map` is not a tab it
+     can show. A link carrying it would otherwise land on an empty panel with the tab lit. */
+  const asked = match[2];
+  const offered = shownTabs.value.some((tb) => tb.key === asked);
   return {
     name: decodeURIComponent(match[1]),
-    tab: TAB_KEYS.includes(match[2]) ? match[2] : TAB_KEYS[0],
+    tab: offered ? asked : TAB_KEYS[0],
   };
 }
 
@@ -401,7 +431,16 @@ async function loadContext() {
     ctx.value = res;
     loadState.value = "ready";
     loadError.value = "";
-    if (!applyRoute() && !narrow.value && !res.plans.find((p) => p.name === selectedName.value)) {
+    /* Only pick a plan for him while a plan is what the screen is showing. Doing it on the
+       queue or the map moved `selectedName`, and the watcher below read that as an intent to
+       navigate — so a reload on the queue, or approving any card but the first, threw him into
+       a plan he had not opened. */
+    if (
+      onPlan.value
+      && !applyRoute()
+      && !narrow.value
+      && !res.plans.find((p) => p.name === selectedName.value)
+    ) {
       selectedName.value = res.plans[0]?.name || null;
     }
   } catch (e) {
@@ -410,11 +449,12 @@ async function loadContext() {
   }
 }
 
-async function approve() {
-  if (!selectedPlan.value || busy.value) return;
+async function approve(name) {
+  const target = name || selectedPlan.value?.name;
+  if (!target || busy.value) return;
   busy.value = true;
   try {
-    await approveRoutePlan(selectedPlan.value.name);
+    await approveRoutePlan(target);
     showToast(t("approval.approvedToast"), "ok");
     await loadContext();
   } catch (e) {
@@ -429,6 +469,7 @@ function openReject() {
 }
 function closeReject() {
   reject.value.open = false;
+  rejecting.value = null;
 }
 async function confirmReject() {
   const reason = (reject.value.reason || "").trim();
@@ -439,7 +480,7 @@ async function confirmReject() {
   if (busy.value) return;
   busy.value = true;
   try {
-    await rejectRoutePlan(selectedPlan.value.name, reason);
+    await rejectRoutePlan(rejecting.value || selectedPlan.value?.name, reason);
     showToast(t("approval.rejectedToast"), "ok");
     closeReject();
     await loadContext();

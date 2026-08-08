@@ -112,6 +112,31 @@ check(
 );
 check("the indicator stays put mid-scroll", state.distance.value === 0);
 
+touch("touchend", 0, target);
+
+// The bottom nav and the header are siblings of the scrolling column, not descendants, so a
+// tap on them has no scrollable ancestor. The guard used to fall back to window.scrollY, read
+// 0, arm a pull, and cancel the touchmove — which suppresses the click the browser would
+// synthesise, so the nav link never fired. Some taps navigated and some did not.
+const outside = document.createElement("button");
+document.body.appendChild(outside);
+frameScrollTop = 0;
+touch("touchstart", 100, outside);
+const preventedOutside = touch("touchmove", 160, outside);
+check("a drag that starts outside the scrolling column is left alone", !preventedOutside);
+check("the indicator does not move for a touch the column does not own", state.distance.value === 0);
+
+touch("touchend", 0, outside);
+
+// A thumb drifts a few pixels while pressing. Cancelling on the first pixel of that drift is
+// what turned a tap into nothing.
+touch("touchstart", 100, target);
+const preventedTinyDrift = touch("touchmove", 106, target);
+check("a few pixels of drift while tapping does NOT cancel the tap", !preventedTinyDrift);
+
+const preventedRealDrag = touch("touchmove", 160, target);
+check("a real drag past the slop still arms the pull", preventedRealDrag);
+
 console.log(
   failed
     ? `pull-to-refresh: ${failed} failed`

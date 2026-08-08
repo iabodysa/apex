@@ -94,9 +94,12 @@ const cssWidth = computed(() =>
   white-space: nowrap;
   transition: background 0.15s ease, color 0.15s ease;
 }
-.fleet-nav :slotted(a:hover) {
-  background: color-mix(in srgb, var(--c-header-ink) 10%, transparent);
-  color: var(--c-header-ink);
+/* Touch leaves the last-tapped link stuck in :hover; only a device with a real pointer gets it. */
+@media (hover: hover) {
+  .fleet-nav :slotted(a:not(.is-active):hover) {
+    background: color-mix(in srgb, var(--c-header-ink) 10%, transparent);
+    color: var(--c-header-ink);
+  }
 }
 .fleet-nav :slotted(a.is-active),
 .fleet-nav :slotted(a[aria-current="page"]) {

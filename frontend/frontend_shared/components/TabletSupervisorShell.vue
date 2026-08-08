@@ -134,10 +134,14 @@ const shellVars = computed(() => ({
   cursor: pointer;
   text-align: start;
 }
-.ts-nav-list :slotted(a:hover),
-.ts-nav-list :slotted(button:hover) {
-  background: color-mix(in srgb, var(--c-header-ink) 8%, transparent);
-  color: var(--c-header-ink);
+/* A tap leaves a touch device in :hover and it stays there, so the last button pressed keeps
+   a highlight it has not earned. Guarded the way MobileConsoleShell already guards its own. */
+@media (hover: hover) {
+  .ts-nav-list :slotted(a:not(.is-active):hover),
+  .ts-nav-list :slotted(button:not(.is-active):hover) {
+    background: color-mix(in srgb, var(--c-header-ink) 8%, transparent);
+    color: var(--c-header-ink);
+  }
 }
 .ts-nav-list :slotted(a.is-active),
 .ts-nav-list :slotted(a[aria-current="page"]),

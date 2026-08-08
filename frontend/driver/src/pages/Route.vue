@@ -235,7 +235,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
@@ -252,14 +252,23 @@ const singleTrip = computed(() => !!props.trip);
 
 const route = createResource({
   url: "apex.salis.api.driver_portal.my_worker_route_today",
-  auto: !singleTrip.value,
 });
 
 const tripRoute = createResource({
   url: "apex.salis.api.driver_portal.my_trip_route",
   makeParams: () => ({ dispatch_trip: props.trip }),
-  auto: singleTrip.value,
 });
+
+/* `/route` and `/route/:trip` are two records over ONE component, and vue-router renders the
+   view unkeyed — so moving between them patches the same instance instead of remounting it.
+   `auto` is read once when the resource is created, so whichever screen was opened first was
+   the only one that ever fetched, and the other showed "no route" until a full reload.
+   Fetching from a watcher makes the decision follow the parameter. */
+watch(
+  () => props.trip,
+  (trip) => (trip ? tripRoute.fetch() : route.fetch()),
+  { immediate: true },
+);
 
 const routeData = computed(() => route.data || null);
 const tripData = computed(() => tripRoute.data || null);

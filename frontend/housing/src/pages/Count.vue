@@ -258,10 +258,18 @@ function onBuildingSelected(name, label) {
 
 function onChangeBuilding() {
   clearBuilding();
-  clearStaged();
-  submitError.value = "";
   router.push("/count");
 }
+
+/* Counts belong to the building they were entered against, so changing the building drops
+   them. This lives with the counts rather than in each button, because there are two ways to
+   change the building — this page's own control and the one in the header — and the header's
+   used to leave the previous building's counts staged. The progress bar then reported them
+   against the new building, and submitting posted the old item names under the new name. */
+watch(building, () => {
+  clearStaged();
+  submitError.value = "";
+});
 
 function clearStaged() {
   for (const k of Object.keys(staged)) delete staged[k];
