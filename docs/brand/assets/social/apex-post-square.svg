@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080" role="img" aria-labelledby="title desc" lang="ar">
+  <title id="title">قالب أبكس المربع لإعلان</title>
+  <desc id="desc">قالب عربي مربع قابل للتحرير لإعلان واحد، مع منطقة آمنة وهوية أبكس.</desc>
+  <style>
+    .ar { font-family: Cairo, "Noto Sans Arabic", Tahoma, sans-serif; }
+    .label { font-size: 22px; font-weight: 700; }
+    .headline { font-size: 72px; font-weight: 700; }
+    .body { font-size: 28px; font-weight: 400; }
+    .meta { font-size: 21px; font-weight: 600; }
+  </style>
+
+  <rect width="1080" height="1080" fill="#e9e3d3"/>
+  <rect width="284" height="1080" fill="#072b1a"/>
+  <rect x="284" y="0" width="12" height="1080" fill="#00844e"/>
+  <rect x="296" y="0" width="4" height="1080" fill="#60d297"/>
+
+  <!-- Official Apex Arabic lockup geometry, embedded for a self-contained asset. -->
+  <g id="apex-lockup-ar" transform="translate(616 78) scale(.76)">
+    <g transform="translate(332 8) scale(1.25)">
+      <path d="M7 56 25.7 15.8C27.1 12.6 29.3 10 32 10l6.2 13.4-7.9 7.6-4.1-8.8L20.5 56Z" fill="#072b1a"/>
+      <path d="M32 10c2.7 0 4.9 2.6 6.3 5.8L57 56H43.5L30.3 31l7.9-7.6Z" fill="#00844e"/>
+      <path d="M32 10c2.7 0 4.9 2.6 6.3 5.8l3.5 7.6h-3.6Z" fill="#60d297"/>
+    </g>
+    <text x="300" y="67" text-anchor="end" fill="#072b1a" font-family="Cairo, Noto Sans Arabic, Tahoma, sans-serif" font-size="48" font-weight="700">أبكس</text>
+  </g>
+
+  <g id="editable-content" class="ar" direction="rtl">
+    <rect x="884" y="248" width="44" height="8" rx="4" fill="#00844e"/>
+    <text id="editable-category" x="928" y="312" text-anchor="start" class="label" fill="#00844e">إعلان</text>
+    <text id="editable-title" x="928" y="438" text-anchor="start" class="headline" fill="#072b1a">
+      <tspan x="928" dy="0">عنوان الإعلان</tspan>
+      <tspan x="928" dy="92">يوضع هنا</tspan>
+    </text>
+    <text id="editable-summary" x="928" y="648" text-anchor="start" class="body" fill="#072b1a">
+      <tspan x="928" dy="0">اكتب الرسالة الأساسية في سطر موجز،</tspan>
+      <tspan x="928" dy="46">ثم أضف التفصيل الضروري فقط.</tspan>
+    </text>
+    <line x1="420" y1="798" x2="928" y2="798" stroke="#00844e" stroke-width="2"/>
+    <text id="editable-date" x="928" y="858" text-anchor="start" class="meta" fill="#072b1a">اليوم · التاريخ · الوقت</text>
+    <text id="editable-action" x="928" y="920" text-anchor="start" class="meta" fill="#00844e">التفاصيل عبر الموقع</text>
+  </g>
+
+  <g id="brand-mark-reverse" transform="translate(63 780) scale(2.5)">
+    <path d="M7 56 25.7 15.8C27.1 12.6 29.3 10 32 10l6.2 13.4-7.9 7.6-4.1-8.8L20.5 56Z" fill="#f8f5ee"/>
+    <path d="M32 10c2.7 0 4.9 2.6 6.3 5.8L57 56H43.5L30.3 31l7.9-7.6Z" fill="#60d297"/>
+    <path d="M32 10c2.7 0 4.9 2.6 6.3 5.8l3.5 7.6h-3.6Z" fill="#ffffff" opacity=".72"/>
+  </g>
+
+  <!-- Toggle display to inline while editing; keep all brand content inside this 80px safe zone. -->
+  <rect id="safe-zone" x="80" y="80" width="920" height="920" fill="none" stroke="#60d297" stroke-width="2" stroke-dasharray="12 12" display="none"/>
+</svg>

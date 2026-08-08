@@ -26,6 +26,13 @@ Use this page to choose the shortest guide for the job.
 - [Integration guide](administration/integration.md) — choose authentication,
   call Frappe APIs, and configure CORS safely
 
+## Designers and builders
+
+- [Apex identity and product system](brand/index.html) — logo assets, interface
+  foundations, responsive layouts, and social templates
+- [Portal implementation contract](../frontend/frontend_shared/DESIGN.md) — the
+  source-level rules for portal components and states
+
 ## Reference
 
 - [Modules, workspaces, and routes](reference/routes-workspaces.md)

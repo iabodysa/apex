@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="627" viewBox="0 0 1200 627" role="img" aria-labelledby="title desc" lang="ar">
+  <title id="title">قالب أبكس العريض لرؤية</title>
+  <desc id="desc">قالب عربي عريض قابل للتحرير لمقال أو خبر واحد، مع منطقة آمنة وهوية أبكس.</desc>
+  <style>
+    .ar { font-family: Cairo, "Noto Sans Arabic", Tahoma, sans-serif; }
+    .label { font-size: 18px; font-weight: 700; }
+    .headline { font-size: 50px; font-weight: 700; }
+    .body { font-size: 23px; font-weight: 400; }
+    .action { font-size: 18px; font-weight: 700; }
+  </style>
+
+  <rect width="1200" height="627" fill="#e9e3d3"/>
+  <rect width="394" height="627" fill="#072b1a"/>
+  <rect x="394" width="12" height="627" fill="#00844e"/>
+  <rect x="406" width="5" height="627" fill="#60d297"/>
+
+  <g id="brand-mark-reverse" transform="translate(86 164) scale(3.55)">
+    <path d="M7 56 25.7 15.8C27.1 12.6 29.3 10 32 10l6.2 13.4-7.9 7.6-4.1-8.8L20.5 56Z" fill="#f8f5ee"/>
+    <path d="M32 10c2.7 0 4.9 2.6 6.3 5.8L57 56H43.5L30.3 31l7.9-7.6Z" fill="#60d297"/>
+    <path d="M32 10c2.7 0 4.9 2.6 6.3 5.8l3.5 7.6h-3.6Z" fill="#ffffff" opacity=".72"/>
+  </g>
+  <text x="196" y="480" text-anchor="middle" direction="rtl" class="ar label" fill="#f8f5ee">وضوح في كل قرار</text>
+
+  <!-- Official Apex Arabic lockup geometry, embedded for a self-contained asset. -->
+  <g id="apex-lockup-ar" transform="translate(824 54) scale(.72)">
+    <g transform="translate(332 8) scale(1.25)">
+      <path d="M7 56 25.7 15.8C27.1 12.6 29.3 10 32 10l6.2 13.4-7.9 7.6-4.1-8.8L20.5 56Z" fill="#072b1a"/>
+      <path d="M32 10c2.7 0 4.9 2.6 6.3 5.8L57 56H43.5L30.3 31l7.9-7.6Z" fill="#00844e"/>
+      <path d="M32 10c2.7 0 4.9 2.6 6.3 5.8l3.5 7.6h-3.6Z" fill="#60d297"/>
+    </g>
+    <text x="300" y="67" text-anchor="end" fill="#072b1a" font-family="Cairo, Noto Sans Arabic, Tahoma, sans-serif" font-size="48" font-weight="700">أبكس</text>
+  </g>
+
+  <g id="editable-content" class="ar" direction="rtl">
+    <rect x="1086" y="176" width="38" height="7" rx="3.5" fill="#00844e"/>
+    <text id="editable-category" x="1124" y="222" text-anchor="start" class="label" fill="#072b1a">رؤية</text>
+    <text id="editable-title" x="1124" y="310" text-anchor="start" class="headline" fill="#072b1a">
+      <tspan x="1124" dy="0">عنوان المقال أو الخبر</tspan>
+      <tspan x="1124" dy="67">يوضع هنا</tspan>
+    </text>
+    <text id="editable-summary" x="1124" y="438" text-anchor="start" class="body" fill="#072b1a">وصف تمهيدي قصير يوضح الفكرة في سطر واحد.</text>
+    <rect x="954" y="494" width="170" height="58" rx="29" fill="#00844e"/>
+    <text id="editable-action" x="1039" y="532" text-anchor="middle" class="action" fill="#ffffff">اقرأ المزيد</text>
+  </g>
+
+  <!-- Toggle display to inline while editing; keep all brand content inside this safe zone. -->
+  <rect id="safe-zone" x="72" y="60" width="1056" height="507" fill="none" stroke="#60d297" stroke-width="2" stroke-dasharray="12 12" display="none"/>
+</svg>

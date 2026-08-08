@@ -128,6 +128,10 @@ docs/*
 # generated from the shipped JSON, so a hand edit here is overwritten, not merged.
 !docs/reference/
 !docs/reference/*.md
+# Public identity system, logo masters and channel templates. This directory is
+# intentionally self-contained so designers can open index.html from a clone.
+!docs/brand/
+!docs/brand/**
 # Screenshots a lesson links, one directory per lesson, captured from synthetic rows.
 # Every parent has to be un-ignored first: git never descends into an ignored directory,
 # so a rule naming only the file matches nothing and the image can reach the repository
