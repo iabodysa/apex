@@ -112,131 +112,8 @@ def daily_safety_task_compliance_scan() -> None:
     cutoff = str(getdate(add_days(today(), -int(grace_days))))
     logger = frappe.logger()
 
-    total_overdue = 0
-    escalated = 0
-    queued_instances: list[str] = []
-
-    cursor = ""
-    batch_size = 500
-    while True:
-        overdue = frappe.get_all(
-            "Scheduled Task Instance",
-            filters={"docstatus": 0, "status": ["in", ["Open", "In Progress"]],
-                     "due_date": ["<=", cutoff], "name": [">", cursor]},
-            fields=["name", "due_date", "template", "building"],
-            order_by="name asc",
-            limit_page_length=batch_size,
-        )
-        if not overdue:
-            break
-
-        for inst in overdue:
-            frappe.db.savepoint(_ROW_SAVEPOINT)
-            try:
-                frappe.db.set_value("Scheduled Task Instance", inst.name, "status", "Overdue")
-                _notify_operational(
-                    "Scheduled Task Instance", inst.name,
-                    f"Scheduled task {inst.name} ({inst.template}) is overdue (was due {inst.due_date}).",
-                )
-                priority = _instance_priority(inst.template)
-                if priority in ("High", "Critical"):
-                    msg = (
-                        f"daily_safety_task_compliance_scan: {priority}-priority scheduled task "
-                        f"{inst.name} ({inst.template}) is overdue (was due {inst.due_date})."
-                    )
-                    assign_role(
-                        "Scheduled Task Instance",
-                        inst.name,
-                        SAFETY_ROLE,
-                        description=msg,
-                        priority="High" if priority == "Critical" else "Medium",
-                    )
-                    queued_instances.append(inst.name)
-                    _notify_role_system(
-                        SAFETY_ROLE,
-                        subject=f"Overdue {priority} safety task: {inst.name}",
-                        message=msg,
-                    )
-                    escalated += 1
-            except Exception:
-                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
-                frappe.log_error(
-                    message=frappe.get_traceback(),
-                    title=f"Safety compliance scan failed for {inst.name}"[:140],
-                )
-
-        total_overdue += len(overdue)
-        cursor = overdue[-1].name
-
-    if total_overdue:
-        logger.warning(
-            f"daily_safety_task_compliance_scan: Marked {total_overdue} Scheduled Task Instances "
-            f"as Overdue ({escalated} High/Critical escalated)."
-        )
-    else:
-        logger.info("daily_safety_task_compliance_scan: No overdue instances found.")
-
-    reconcile_role_queue("Scheduled Task Instance", queued_instances)
-
-    window_start = str(getdate(add_days(today(), -ZERO_ROUNDS_WINDOW_DAYS)))
-    no_rounds = 0
-
-    start = 0
-    while True:
-        buildings = frappe.get_all(
-            "Building",
-            filters={"status": "Active"},
-            fields=["name", "building_name", "responsible_supervisor"],
-            limit_start=start,
-            limit_page_length=batch_size,
-        )
-        if not buildings:
-            break
-
-        for b in buildings:
-            frappe.db.savepoint(_ROW_SAVEPOINT)
-            try:
-                has_round = frappe.db.exists(
-                    "Safety Round",
-                    {
-                        "docstatus": 1,
-                        "building": b.name,
-                        "round_date": [">=", window_start],
-                    },
-                )
-                if has_round:
-                    continue
-                label = b.building_name or b.name
-                token = f"zero-rounds::{b.name}"
-                msg = (
-                    f"daily_safety_task_compliance_scan [{token}]: building {label} has no "
-                    f"submitted Safety Round in the last {ZERO_ROUNDS_WINDOW_DAYS} days."
-                )
-                assign_role("Building", b.name, SAFETY_ROLE, description=msg)
-                _notify_role_system(
-                    SAFETY_ROLE,
-                    subject=zero_rounds_alert_subject(label),
-                    message=msg,
-                )
-                _notify_operational("Building", b.name, msg)
-                _notify_user_system(
-                    b.responsible_supervisor,
-                    subject=zero_rounds_alert_subject(label),
-                    message=msg,
-                    document_type="Building",
-                    document_name=b.name,
-                )
-                no_rounds += 1
-            except Exception:
-                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
-                frappe.log_error(
-                    message=frappe.get_traceback(),
-                    title=f"Zero-rounds scan failed for {b.name}"[:140],
-                )
-
-        start += batch_size
-
-    reconcile_role_queue("Building", buildings_needing_safety_attention())
+    total_overdue, escalated = _flag_overdue_instances(cutoff, logger)
+    no_rounds = _flag_buildings_without_rounds(logger)
 
     logger.info(
         f"daily_safety_task_compliance_scan: {no_rounds} active building(s) with no recent safety round."
@@ -398,3 +275,148 @@ def audit_remediation_deadline_watch() -> None:
         cursor = plans[-1].name
 
     logger.info(f"audit_remediation_deadline_watch: {flagged} remediation plan(s) flagged Overdue.")
+
+
+
+def _flag_overdue_instances(cutoff, logger):
+    """Flag Scheduled Task Instances past their grace window and escalate the urgent ones.
+
+    Returns (total_overdue, escalated).
+    """
+    total_overdue = 0
+    escalated = 0
+    queued_instances: list[str] = []
+
+    cursor = ""
+    batch_size = 500
+    while True:
+        overdue = frappe.get_all(
+            "Scheduled Task Instance",
+            filters={"docstatus": 0, "status": ["in", ["Open", "In Progress"]],
+                     "due_date": ["<=", cutoff], "name": [">", cursor]},
+            fields=["name", "due_date", "template", "building"],
+            order_by="name asc",
+            limit_page_length=batch_size,
+        )
+        if not overdue:
+            break
+
+        for inst in overdue:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
+            try:
+                frappe.db.set_value("Scheduled Task Instance", inst.name, "status", "Overdue")
+                _notify_operational(
+                    "Scheduled Task Instance", inst.name,
+                    f"Scheduled task {inst.name} ({inst.template}) is overdue (was due {inst.due_date}).",
+                )
+                priority = _instance_priority(inst.template)
+                if priority in ("High", "Critical"):
+                    msg = (
+                        f"daily_safety_task_compliance_scan: {priority}-priority scheduled task "
+                        f"{inst.name} ({inst.template}) is overdue (was due {inst.due_date})."
+                    )
+                    assign_role(
+                        "Scheduled Task Instance",
+                        inst.name,
+                        SAFETY_ROLE,
+                        description=msg,
+                        priority="High" if priority == "Critical" else "Medium",
+                    )
+                    queued_instances.append(inst.name)
+                    _notify_role_system(
+                        SAFETY_ROLE,
+                        subject=f"Overdue {priority} safety task: {inst.name}",
+                        message=msg,
+                    )
+                    escalated += 1
+            except Exception:
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Safety compliance scan failed for {inst.name}"[:140],
+                )
+
+        total_overdue += len(overdue)
+        cursor = overdue[-1].name
+
+    if total_overdue:
+        logger.warning(
+            f"daily_safety_task_compliance_scan: Marked {total_overdue} Scheduled Task Instances "
+            f"as Overdue ({escalated} High/Critical escalated)."
+        )
+    else:
+        logger.info("daily_safety_task_compliance_scan: No overdue instances found.")
+
+    reconcile_role_queue("Scheduled Task Instance", queued_instances)
+    return total_overdue, escalated
+
+
+def _flag_buildings_without_rounds(logger):
+    """Flag active Buildings with no submitted Safety Round in the trailing window.
+
+    Broader than the weekly coverage gate, which only asks for a Weekly-cadence round in
+    the current ISO week; this catches a building with no safety activity at all.
+    """
+    from frappe.utils import add_days, getdate, today
+
+    batch_size = 500
+    window_start = str(getdate(add_days(today(), -ZERO_ROUNDS_WINDOW_DAYS)))
+    no_rounds = 0
+
+    start = 0
+    while True:
+        buildings = frappe.get_all(
+            "Building",
+            filters={"status": "Active"},
+            fields=["name", "building_name", "responsible_supervisor"],
+            limit_start=start,
+            limit_page_length=batch_size,
+        )
+        if not buildings:
+            break
+
+        for b in buildings:
+            frappe.db.savepoint(_ROW_SAVEPOINT)
+            try:
+                has_round = frappe.db.exists(
+                    "Safety Round",
+                    {
+                        "docstatus": 1,
+                        "building": b.name,
+                        "round_date": [">=", window_start],
+                    },
+                )
+                if has_round:
+                    continue
+                label = b.building_name or b.name
+                token = f"zero-rounds::{b.name}"
+                msg = (
+                    f"daily_safety_task_compliance_scan [{token}]: building {label} has no "
+                    f"submitted Safety Round in the last {ZERO_ROUNDS_WINDOW_DAYS} days."
+                )
+                assign_role("Building", b.name, SAFETY_ROLE, description=msg)
+                _notify_role_system(
+                    SAFETY_ROLE,
+                    subject=zero_rounds_alert_subject(label),
+                    message=msg,
+                )
+                _notify_operational("Building", b.name, msg)
+                _notify_user_system(
+                    b.responsible_supervisor,
+                    subject=zero_rounds_alert_subject(label),
+                    message=msg,
+                    document_type="Building",
+                    document_name=b.name,
+                )
+                no_rounds += 1
+            except Exception:
+                frappe.db.rollback(save_point=_ROW_SAVEPOINT)
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Zero-rounds scan failed for {b.name}"[:140],
+                )
+
+        start += batch_size
+
+    reconcile_role_queue("Building", buildings_needing_safety_attention())
+    return no_rounds
