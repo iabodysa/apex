@@ -77,6 +77,7 @@ add_to_apps_screen = [
 export_python_type_annotations = True
 
 app_include_js = ["masar_worker_link.bundle.js", "habitat_desk.bundle.js"]
+web_include_js = ["/assets/apex/js/apex_web_form.js"]
 
 setup_wizard_requires = "assets/apex/js/apex_setup_wizard.js"
 setup_wizard_complete = [
