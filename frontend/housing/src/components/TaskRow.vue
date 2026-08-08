@@ -15,7 +15,7 @@
           <span v-if="task.task_code" class="task-code">{{ task.task_code }}</span>
           <span v-if="task.priority" class="pill" :class="priorityPill">{{ priorityLabel }}</span>
           <span v-if="task.evidence_required" class="task-evidence">
-            <Icon name="flag" :size="12" /> {{ t("due.evidence") }}
+            <Icon name="flag" :size="12" /> {{ t("round.due.evidence") }}
           </span>
         </div>
       </div>
@@ -27,7 +27,7 @@
         class="tap tap-pass"
         :class="{ 'tap-on': verdict === 'pass' }"
         :aria-pressed="verdict === 'pass'"
-        :aria-label="t('due.pass')"
+        :aria-label="t('round.due.pass')"
         @click="choose('pass')"
       >
         <Icon name="check" :size="22" />
@@ -37,7 +37,7 @@
         class="tap tap-fail"
         :class="{ 'tap-on': verdict === 'fail' }"
         :aria-pressed="verdict === 'fail'"
-        :aria-label="t('due.fail')"
+        :aria-label="t('round.due.fail')"
         @click="choose('fail')"
       >
         <Icon name="x" :size="22" />
@@ -47,7 +47,7 @@
         class="tap tap-issue"
         :class="{ 'tap-on': verdict === 'issue' }"
         :aria-pressed="verdict === 'issue'"
-        :aria-label="t('due.issue')"
+        :aria-label="t('round.due.issue')"
         @click="choose('issue')"
       >
         <Icon name="triangle-alert" :size="20" />
@@ -57,11 +57,49 @@
         class="tap tap-note"
         :class="{ 'tap-on': noteOpen || hasNote }"
         :aria-pressed="noteOpen"
-        :aria-label="t('due.addNote')"
+        :aria-label="t('round.due.addNote')"
         @click="noteOpen = !noteOpen"
       >
         <Icon name="pencil" :size="18" />
       </button>
+    </div>
+
+    <div v-if="needsPhoto" class="task-photo">
+      <p v-if="!photo" class="task-photo-need">
+        <Icon name="image" :size="13" /> {{ t("round.due.photoNeeded") }}
+      </p>
+      <div class="task-photo-row">
+        <img v-if="photo" class="task-photo-thumb" :src="photo" alt="" />
+        <FileUploader
+          :file-types="PHOTO_ACCEPT"
+          :validate-file="validatePhoto"
+          :upload-args="{ private: 1, folder: 'Home/Attachments' }"
+          @success="onUploaded"
+        >
+          <template #default="{ openFileSelector, uploading, error }">
+            <div class="task-photo-actions">
+              <Button
+                size="lg"
+                variant="outline"
+                :loading="uploading"
+                :loading-text="t('round.due.photoUploading')"
+                :label="photo ? t('round.due.photoAttached') : t('round.due.addPhoto')"
+                @click="openFileSelector"
+              >
+                <template #prefix><Icon name="image" :size="16" /></template>
+              </Button>
+              <Button
+                v-if="photo"
+                size="lg"
+                variant="ghost"
+                :label="t('round.due.removePhoto')"
+                @click="$emit('photo', '')"
+              />
+              <p v-if="error" class="status-note status-err">{{ t("round.due.photoFailed") }}</p>
+            </div>
+          </template>
+        </FileUploader>
+      </div>
     </div>
 
     <Transition name="note">
@@ -70,11 +108,11 @@
           :value="notes"
           class="note-input"
           rows="2"
-          :placeholder="t('due.notePlaceholder')"
+          :placeholder="t('round.due.notePlaceholder')"
           @input="$emit('note', $event.target.value)"
         ></textarea>
         <p v-if="task.instructions" class="note-hint">
-          <strong>{{ t("due.instructions") }}:</strong> {{ task.instructions }}
+          <strong>{{ t("round.due.instructions") }}:</strong> {{ task.instructions }}
         </p>
       </div>
     </Transition>
@@ -83,22 +121,29 @@
 
 <script setup>
 import { computed, ref } from "vue";
+import { Button, FileUploader } from "frappe-ui";
 import Icon from "./Icon.vue";
+import { PHOTO_ACCEPT, isAcceptedPhoto } from "@shared/photoFile.js";
 import { useI18n } from "../i18n";
 
 const props = defineProps({
   task: { type: Object, required: true },
   verdict: { type: String, default: "" },
   notes: { type: String, default: "" },
+  photo: { type: String, default: "" },
 });
 
-const emit = defineEmits(["rate", "note"]);
+const emit = defineEmits(["rate", "note", "photo"]);
 const { t, tEnum } = useI18n();
 
 const noteOpen = ref(false);
 const hasNote = computed(() => !!(props.notes && props.notes.trim()));
 
 const title = computed(() => props.task.task_title || props.task.name);
+
+const needsPhoto = computed(
+  () => !!props.task.evidence_required && (props.verdict === "fail" || props.verdict === "issue"),
+);
 
 const priorityLabel = computed(() => tEnum("priority", props.task.priority));
 const priorityPill = computed(() => {
@@ -116,6 +161,14 @@ const stateClass = computed(() => (props.verdict ? "task-" + props.verdict : "")
 
 function choose(next) {
   emit("rate", props.verdict === next ? "" : next);
+}
+
+function validatePhoto(file) {
+  return isAcceptedPhoto(file) ? null : t("round.due.photoWrongType");
+}
+
+function onUploaded(file) {
+  emit("photo", (file && file.file_url) || "");
 }
 </script>
 
@@ -218,12 +271,14 @@ function choose(next) {
 .tap {
   display: grid;
   place-items: center;
-  min-height: 48px;
+  min-height: var(--tap-min);
   border-radius: var(--radius);
   border: 1.5px solid var(--c-border-strong);
   background: var(--c-surface-2);
   color: var(--c-muted);
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition:
     transform 0.08s ease,
     background 0.15s ease,
@@ -258,6 +313,42 @@ function choose(next) {
   background: color-mix(in srgb, var(--c-ink) 88%, transparent);
   border-color: var(--c-ink);
   color: var(--c-surface);
+}
+
+.task-photo {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.task-photo-need {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--c-warning);
+}
+.task-photo-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.task-photo-thumb {
+  height: 56px;
+  width: 56px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+.task-photo-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.task-photo-actions :deep(button) {
+  min-height: var(--tap-min);
 }
 
 .task-note {

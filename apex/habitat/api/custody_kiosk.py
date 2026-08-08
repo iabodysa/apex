@@ -344,6 +344,13 @@ def issue_cart(
 _OPEN_ISSUE_STATUSES = ("Issued", "Partially Returned")
 
 
+def _return_condition_options() -> list[str]:
+    """The Custody Return Item condition values, read from the field's own Select so a
+    kiosk cannot post one the DocType does not offer."""
+    options = frappe.get_meta("Custody Return Item").get_field("condition_on_return").options or ""
+    return [o for o in (opt.strip() for opt in options.split("\n")) if o]
+
+
 def _normalize_party(party_type: str | None, party: str | None) -> tuple[str, str]:
     """Validate the (party_type, party) pair and return it normalized.
 
@@ -524,8 +531,11 @@ def return_cart(party_type: str, party: str, items_json: str) -> dict:
     Args:
         party_type: ``Employee`` or ``Temporary Worker`` (the returning party).
         party: the party docname.
-        items_json: JSON string of
-            ``[{"custody_issue": <name>, "article": <name>, "qty": <int>}]``.
+        items_json: JSON string of ``[{"custody_issue": <name>, "article":
+            <name>, "qty": <int>, "condition_on_return": <optional select>}]``.
+            The condition is what decides whether a damage or loss charge
+            follows the handback, so a kiosk that can see the item may state it;
+            omitting it leaves the field's own default in place.
 
     Returns:
         dict: ``{"custody_returns": [<docname>, ...]}`` — one per source issue.
@@ -539,21 +549,26 @@ def return_cart(party_type: str, party: str, items_json: str) -> dict:
     if not isinstance(items, list) or not items:
         frappe.throw(_("Add at least one item to the cart before returning."))
 
+    conditions = _return_condition_options()
     grouped: dict[str, list[dict]] = {}
     for line in items:
         line = line or {}
         custody_issue = line.get("custody_issue")
         article = line.get("article")
         qty = line.get("qty")
+        condition = (line.get("condition_on_return") or "").strip()
         if not custody_issue:
             frappe.throw(_("Each return line must reference a Custody Issue."))
         if not article:
             frappe.throw(_("Each return line must reference an article."))
         if not qty or int(qty) <= 0:
             frappe.throw(_("Each return line must have a quantity greater than zero."))
-        grouped.setdefault(custody_issue, []).append(
-            {"article": article, "qty": int(qty)}
-        )
+        if condition and condition not in conditions:
+            frappe.throw(_("{0} is not a valid return condition.").format(condition))
+        row = {"article": article, "qty": int(qty)}
+        if condition:
+            row["condition_on_return"] = condition
+        grouped.setdefault(custody_issue, []).append(row)
 
     issue_party = frappe.get_all(
         "Custody Issue",

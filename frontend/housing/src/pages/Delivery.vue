@@ -76,17 +76,28 @@
         <template #prefix><Icon name="shield-check" :size="20" /></template>
       </Button>
 
-      <Button
-        v-else
-        class="dock-btn"
-        size="2xl"
-        variant="solid"
-        theme="green"
-        :label="t('delivery.confirmReceipt')"
-        @click="openOtp"
-      >
-        <template #prefix><Icon name="key" :size="20" /></template>
-      </Button>
+      <template v-else>
+        <Button
+          class="dock-btn"
+          size="2xl"
+          variant="solid"
+          theme="green"
+          :label="t('delivery.confirmReceipt')"
+          @click="openOtp"
+        >
+          <template #prefix><Icon name="key" :size="20" /></template>
+        </Button>
+        <Button
+          class="dock-btn dock-btn-second"
+          size="xl"
+          variant="outline"
+          :loading="busy === selectedDelivery.name"
+          :label="t('delivery.showCode')"
+          @click="showCode"
+        >
+          <template #prefix><Icon name="qr" :size="18" /></template>
+        </Button>
+      </template>
 
       <p class="dock-hint">{{ stepHint }}</p>
     </div>
@@ -106,20 +117,42 @@
         />
       </template>
       <template #actions>
-        <Button
-          class="dock-btn"
-          size="2xl"
-          variant="solid"
-          theme="green"
-          :loading="busy === selectedDelivery.name"
-          :loading-text="selectedDelivery.status === 'Pending Exits' ? t('delivery.clearing') : t('delivery.confirming')"
-          :label="
-            selectedDelivery.status === 'Pending Exits'
-              ? t('delivery.clearCheckpoint', { label: exitLabel(nextExit(selectedDelivery)) })
-              : t('delivery.confirmReceipt')
-          "
-          @click="selectedDelivery.status === 'Pending Exits' ? (confirmOpen = true) : openOtp()"
-        />
+        <div class="sheet-actions">
+          <Button
+            class="dock-btn"
+            size="2xl"
+            variant="solid"
+            theme="green"
+            :loading="busy === selectedDelivery.name"
+            :loading-text="selectedDelivery.status === 'Pending Exits' ? t('delivery.clearing') : t('delivery.confirming')"
+            :label="
+              selectedDelivery.status === 'Pending Exits'
+                ? t('delivery.clearCheckpoint', { label: exitLabel(nextExit(selectedDelivery)) })
+                : t('delivery.confirmReceipt')
+            "
+            @click="selectedDelivery.status === 'Pending Exits' ? (confirmOpen = true) : openOtp()"
+          />
+          <Button
+            v-if="selectedDelivery.status !== 'Pending Exits'"
+            size="xl"
+            variant="outline"
+            :label="t('delivery.showCode')"
+            @click="showCode"
+          />
+        </div>
+      </template>
+    </Dialog>
+
+    <Dialog v-model="codeOpen" :options="{ title: t('delivery.codeTitle'), size: 'sm' }">
+      <template #body-content>
+        <div class="sheet">
+          <p v-if="codeValue" class="code-value mono">{{ codeValue }}</p>
+          <p class="sheet-text">{{ t("delivery.codeHint") }}</p>
+          <ErrorMessage v-if="codeError" :message="codeError" />
+        </div>
+      </template>
+      <template #actions>
+        <Button size="2xl" variant="solid" :label="t('common.close')" @click="codeOpen = false" />
       </template>
     </Dialog>
 
@@ -197,7 +230,7 @@ import DeliveryRow from "../components/DeliveryRow.vue";
 import DeliveryDetail from "../components/DeliveryDetail.vue";
 import ListSkeleton from "../components/ListSkeleton.vue";
 import LoadError from "../components/LoadError.vue";
-import { useI18n, resourceErrorMessage } from "../i18n";
+import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { useDesktop } from "@shared/useBreakpoint.js";
 import { nextExit } from "../gates";
 
@@ -214,8 +247,12 @@ const actionError = ref("");
 const confirmOpen = ref(false);
 const otpOpen = ref(false);
 const otpCode = ref("");
+const codeOpen = ref(false);
+const codeValue = ref("");
+const codeError = ref("");
 
 const PENDING_FILTERS = [["status", "in", ["Pending Exits", "Released"]]];
+const PAGE_LENGTH = 200;
 
 const deliveriesRes = createResource({
   url: "frappe.client.get_list",
@@ -233,26 +270,16 @@ const deliveriesRes = createResource({
       "exit3_receiving_cleared",
     ],
     order_by: "creation asc",
-    limit_page_length: 50,
+    limit_page_length: PAGE_LENGTH,
   },
   auto: true,
 });
 
-const deliveryCountRes = createResource({
-  url: "frappe.client.get_count",
-  params: { doctype: "Facility Asset Delivery", filters: PENDING_FILTERS },
-  auto: true,
-});
-
 const deliveries = computed(() => deliveriesRes.data || []);
-const deliveryCount = computed(() => {
-  const total = deliveryCountRes.data;
-  return typeof total === "number" ? total : deliveries.value.length;
-});
-const hasMoreThanShown = computed(() => deliveryCount.value > deliveries.value.length);
+const deliveryCount = computed(() => deliveries.value.length);
+const hasMoreThanShown = computed(() => deliveries.value.length >= PAGE_LENGTH);
 
 function reloadDeliveries() {
-  deliveryCountRes.reload();
   return deliveriesRes.reload();
 }
 const loadErrorMessage = computed(() =>
@@ -293,6 +320,26 @@ function openOtp() {
   otpOpen.value = true;
 }
 
+async function showCode() {
+  const del = selectedDelivery.value;
+  if (!del || busy.value) return;
+  busy.value = del.name;
+  codeValue.value = "";
+  codeError.value = "";
+  codeOpen.value = true;
+  try {
+    const code = await call(API + "regenerate_code", {
+      args: { delivery: del.name },
+      type: "POST",
+    });
+    codeValue.value = String(code || "");
+  } catch (err) {
+    codeError.value = apiErrorMessage(err, "delivery.codeDenied");
+  } finally {
+    busy.value = "";
+  }
+}
+
 async function passExit() {
   const del = selectedDelivery.value;
   if (!del) return;
@@ -306,7 +353,7 @@ async function passExit() {
     toast.create({ type: "success", message: t("delivery.exitCleared") });
     await reloadDeliveries();
   } catch (err) {
-    actionError.value = resourceErrorMessage(err);
+    actionError.value = apiErrorMessage(err);
     confirmOpen.value = false;
   } finally {
     busy.value = "";
@@ -329,7 +376,7 @@ async function confirmReceipt() {
     closeDelivery();
     await reloadDeliveries();
   } catch (err) {
-    actionError.value = resourceErrorMessage(err);
+    actionError.value = apiErrorMessage(err);
   } finally {
     busy.value = "";
   }
@@ -372,5 +419,16 @@ async function confirmReceipt() {
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
+}
+.dock-btn-second {
+  margin-top: var(--sp-2);
+}
+.code-value {
+  text-align: center;
+  font-size: var(--fs-display, 2rem);
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.24em;
+  text-indent: 0.24em;
+  color: var(--c-ink);
 }
 </style>

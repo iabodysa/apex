@@ -33,6 +33,10 @@
           ]"
         />
 
+        <p class="hint draft-note">
+          <Icon name="shield" :size="13" /> {{ t("list.draftKept") }}
+        </p>
+
         <EmptyState
           v-if="!filteredGroups.length"
           :title="t('list.filteredTitle')"
@@ -55,7 +59,7 @@
             :key="item.name"
             :row="item"
             :model="modelFor(item)"
-            :edited="!!touched[item.name]"
+            :edited="!!staged[item.name]"
             :open="selected === item.name"
             @open="openItem(item.name)"
           />
@@ -91,14 +95,14 @@
         theme="green"
         :loading="submitRes.loading"
         :loading-text="t('submit.sending')"
-        :disabled="touchedCount === 0"
+        :disabled="touchedCount === 0 || !canCount"
         :label="t('submit.cta')"
         @click="doSubmit"
       >
         <template #prefix><Icon name="send" :size="20" /></template>
       </Button>
       <p class="dock-hint">
-        {{ touchedCount ? t("submit.ready", { n: touchedCount }) : t("submit.needOne") }}
+        {{ dockHint }}
       </p>
     </div>
 
@@ -139,7 +143,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Button, Dialog, ErrorMessage, TabButtons, createResource, toast } from "frappe-ui";
 import BuildingPicker from "@shared/components/BuildingPicker.vue";
@@ -151,6 +155,8 @@ import ListSkeleton from "../components/ListSkeleton.vue";
 import LoadError from "../components/LoadError.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { useDesktop } from "@shared/useBreakpoint.js";
+import { can } from "../portal.js";
+import { dropCountDraft, readCountDraft, writeCountDraft } from "../drafts.js";
 import { building, clearBuilding, countProgress, selectBuilding } from "../session";
 
 const { t, dir } = useI18n();
@@ -159,9 +165,9 @@ const router = useRouter();
 const desktop = useDesktop();
 
 const submitError = ref("");
+const canCount = can("count");
 
 const staged = reactive({});
-const touched = reactive({});
 
 const invRes = createResource({
   url: "apex.habitat.api.housing_count.get_inventory_for_building",
@@ -239,7 +245,12 @@ function roomLabelFor(item) {
   return item.room_label || item.room || "";
 }
 
-const touchedCount = computed(() => Object.keys(touched).length);
+const touchedCount = computed(() => Object.keys(staged).length);
+
+const dockHint = computed(() => {
+  if (!canCount) return t("access.hint");
+  return touchedCount.value ? t("submit.ready", { n: touchedCount.value }) : t("submit.needOne");
+});
 
 watch(
   [touchedCount, rows],
@@ -249,11 +260,36 @@ watch(
   { immediate: true },
 );
 
+function clearStaged() {
+  for (const k of Object.keys(staged)) delete staged[k];
+}
+
+function persistDraft() {
+  writeCountDraft(building.value, staged);
+}
+
+function restoreDraft() {
+  const saved = readCountDraft(building.value);
+  if (!saved) return 0;
+  let restored = 0;
+  for (const [name, model] of Object.entries(saved)) {
+    if (!model || typeof model !== "object") continue;
+    staged[name] = {
+      counted_quantity: Number(model.counted_quantity || 0),
+      condition: model.condition || "Good",
+      notes: model.notes || "",
+    };
+    restored += 1;
+  }
+  return restored;
+}
+
+function announceRestored(restored) {
+  if (restored) toast.create({ type: "info", message: t("list.draftRestored", { n: restored }) });
+}
+
 function onBuildingSelected(name, label) {
   selectBuilding(name, label);
-  submitError.value = "";
-  clearStaged();
-  invRes.fetch();
 }
 
 function onChangeBuilding() {
@@ -261,47 +297,48 @@ function onChangeBuilding() {
   router.push("/count");
 }
 
-/* Counts belong to the building they were entered against, so changing the building drops
-   them. This lives with the counts rather than in each button, because there are two ways to
-   change the building — this page's own control and the one in the header — and the header's
-   used to leave the previous building's counts staged. The progress bar then reported them
-   against the new building, and submitting posted the old item names under the new name. */
-watch(building, () => {
+watch(building, (name) => {
   clearStaged();
   submitError.value = "";
+  if (!name) return;
+  announceRestored(restoreDraft());
+  invRes.fetch();
 });
 
-function clearStaged() {
-  for (const k of Object.keys(staged)) delete staged[k];
-  for (const k of Object.keys(touched)) delete touched[k];
-}
+onMounted(() => {
+  if (!building.value) return;
+  announceRestored(restoreDraft());
+  invRes.fetch();
+});
 
 function ensure(item) {
   if (!staged[item.name]) staged[item.name] = baseModel(item);
-  touched[item.name] = true;
   return staged[item.name];
 }
 
 function onCount(item, value) {
   ensure(item).counted_quantity = value;
+  persistDraft();
 }
 function onCondition(item, value) {
   ensure(item).condition = value;
+  persistDraft();
 }
 function onNote(item, value) {
   ensure(item).notes = value;
+  persistDraft();
 }
 
 function buildLines() {
+  const known = new Set(rows.value.map((r) => r.name));
   const out = [];
-  for (const name of Object.keys(touched)) {
-    const m = staged[name];
-    if (!m) continue;
+  for (const [name, model] of Object.entries(staged)) {
+    if (!known.has(name)) continue;
     out.push({
       name,
-      counted_quantity: m.counted_quantity,
-      condition: m.condition,
-      notes: m.notes || "",
+      counted_quantity: model.counted_quantity,
+      condition: model.condition,
+      notes: model.notes || "",
     });
   }
   return out;
@@ -329,22 +366,23 @@ async function doSubmit() {
     message: failed ? t("success.partial", { ok: saved, failed }) : t("success.saved", { n: saved }),
   });
   clearStaged();
+  dropCountDraft(building.value);
   closeItem();
   invRes.reload();
 }
-
-watch(
-  building,
-  (name) => {
-    if (name) invRes.fetch();
-  },
-  { immediate: true },
-);
 </script>
 
 <style scoped>
 .filter {
   align-self: start;
+}
+.draft-note {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  color: var(--c-success);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-xs);
 }
 
 .room {

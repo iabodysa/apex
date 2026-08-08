@@ -3,19 +3,25 @@
 <html lang="ar" dir="rtl" data-theme="{{ portal_theme or 'afmco' }}">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#072b1a" />
     <link rel="stylesheet" href="/assets/apex/vendor/montserrat-v31/montserrat.css" />
     <link rel="stylesheet" href="/assets/apex/vendor/cairo-v31/cairo.css" />
     <link rel="stylesheet" href="/assets/apex/vendor/thmanyah-v1/thmanyah.css" />
     <title>{{ _("Safety Rounds") }}</title>
-    {%- if has_safety_role %}
+    {%- if has_portal_role %}
     <link rel="stylesheet" href="/assets/apex/safety_portal/assets/index.css" />
     {%- include "apex/templates/includes/portal_accent.html" %}
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
       window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
       window.portal_logo = {{ (portal_logo or '') | tojson }};
+      window.portal_theme = {{ (portal_theme or 'afmco') | tojson }};
+      window.apex_portal = {
+        entry: {{ portal_entry | tojson }},
+        sections: {{ portal_sections | tojson }},
+        can: {{ portal_capabilities | tojson }},
+      };
       window.safety_socket = {
         site_name: {{ site_name | tojson }},
         socketio_port: {{ socketio_port }},
@@ -26,12 +32,12 @@
     {%- endif %}
   </head>
   <body>
-    {%- if has_safety_role %}
+    {%- if has_portal_role %}
     <div id="app"></div>
     <script type="module" src="/assets/apex/safety_portal/assets/index.js"></script>
     {%- else %}
     {%- set denied_title = _("Safety rounds") %}
-    {%- set denied_audience = _("This page is for the safety team.") %}
+    {%- set denied_audience = _("This page is for the housing and safety team.") %}
     {%- include "apex/templates/includes/portal_denied.html" %}
     {%- endif %}
   </body>

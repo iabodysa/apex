@@ -117,7 +117,9 @@ const loaded = portals.map((portal) => [portal, readMessages(portal)]);
 
 test("every portal's i18n was actually read", () => {
   assert.equal(loaded.length, portals.length);
-  assert.ok(portals.length >= 7, `expected all portals, saw ${portals.join(", ")}`);
+  // Six, not seven: /safety is no longer its own SPA — it builds the merged housing app
+  // from the same source, so it carries no i18n of its own to read.
+  assert.ok(portals.length >= 6, `expected all portals, saw ${portals.join(", ")}`);
 });
 
 for (const locale of Object.keys(SHARED_MESSAGES)) {

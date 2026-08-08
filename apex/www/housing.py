@@ -1,34 +1,26 @@
 # Copyright (c) 2026, afmcoltd
-"""Unified Housing portal served at /housing.
+"""Merged Habitat portal served at /housing, and through www/safety.py at /safety.
 
-One mobile-first admin surface for TWO housing flows: the periodic Housing
-Inventory count (formerly /housing-count) and the three-exit Facility Asset
-Delivery clearance. Like /safety and /fleet this is an admin-style portal, not a
-guest link, so it requires a logged-in user AND a housing role.
+One mobile-first supervisor surface for a whole housing and safety day: the Housing
+Inventory count, the three-exit Facility Asset Delivery clearance, the building bed
+board, the custody kiosk, arrivals intake, bed transfers, and the safety round.
 
-Access gate (mirrors www/safety.py, minus the realtime socket config — the
-housing surface has no live push):
-  * Guests are redirected to /login (then back to /housing).
-  * A logged-in user without any housing role gets a friendly "role required"
-    page, not a raw 403. The same permissions the count and delivery APIs
-    enforce still apply to every read and write the page makes — the building
-    scope confines a supervisor to their own estate.
+Admission is the UNION of the two former role sets, because both doors already
+redirect a guest to /login and both gate on a role set — one identity model, one
+portal. What a user then SEES is decided here from the DocPerms the endpoints
+themselves enforce, and shipped to the page as a section list. Hiding a section in
+the client is presentation only; every read and write is refused again by its own
+endpoint, and the building scope still confines a supervisor to their own estate.
 
-HOUSING_ROLES is the UNION of the two flows' write roles:
-  * count (habitat/api/housing_count.py submit_counts): System Manager,
-    Accommodation Manager, Resident Supervisor;
-  * delivery exits (habitat/api/facility_asset_delivery.py): Resident
-    Supervisor (exit 1), Accommodation Manager (exit 2), Procurement Supervisor
-    (exit 3), System Manager override.
-
-The CSRF token is exposed (same pattern as safety.py) so the SPA's whitelisted
-POSTs (submit_counts / pass_exit_* / confirm_receipt) pass Frappe's CSRF guard.
-no_cache is set because the page renders per-user, live data.
+The gate lives in this module because it serves both doors. www/safety.py is the
+second door and imports it rather than keeping a second copy.
 """
 
 import frappe
 from frappe.sessions import get_csrf_token
+from frappe.utils import cint
 
+from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.apex_core.utils.portal_bootstrap import (
     apply_portal_appearance,
     guest_redirect,
@@ -41,22 +33,96 @@ HOUSING_ROLES = {
     "Procurement Supervisor",
 }
 
+SAFETY_ROLES = {
+    "System Manager",
+    "Accommodation Manager",
+    "Resident Supervisor",
+    "Safety Officer",
+}
+
+PORTAL_ROLES = HOUSING_ROLES | SAFETY_ROLES
+
 
 def has_apps_screen_access() -> bool:
-    """Gate for the /apps app-selector tile — same HOUSING_ROLES check
-	get_context() applies, so the tile never shows for a user the page itself
-	would turn away. Wired as the has_permission of the "apex-housing" tile in
-	hooks.py add_to_apps_screen."""
-    return bool(HOUSING_ROLES & set(frappe.get_roles()))
+    """Gate for the /apps tiles — the same union check get_context applies, so a tile
+    never advertises a page the portal would turn away."""
+    return bool(PORTAL_ROLES & set(frappe.get_roles()))
 
 
-def get_context(context):
-    """Redirects guests to login and bootstraps the housing portal context, gated on a housing role."""
-    guest_redirect("/housing")
+def _can(doctype: str, *ptypes: str) -> bool:
+    """True only when the caller holds every named permission type on the doctype."""
+    return all(frappe.has_permission(doctype, ptype) for ptype in ptypes)
+
+
+def portal_capabilities() -> dict:
+    """The per-action grants a section needs, so a control can be disabled with a
+    stated reason instead of failing at the server."""
+    return {
+        "count": _can("Housing Inventory", "read", "write"),
+        "clear_exit": _can("Facility Asset Delivery", "write"),
+        "set_readiness": _can("Room", "write"),
+        "check_in": _can("Housing Assignment", "create", "submit"),
+        "check_out": _can("Housing Checkout", "create", "submit"),
+        "issue_custody": _can("Custody Issue", "create", "submit"),
+        "return_custody": _can("Custody Return", "create", "submit"),
+        "register_worker": _can("Temporary Worker", "create"),
+        "transfer": _can("Room Bed Transfer", "create", "submit"),
+        "record_round": _can("Safety Task Execution", "create"),
+        "submit_round": _can("Safety Task Execution", "submit"),
+    }
+
+
+def portal_sections() -> list[str]:
+    """The sections this user may actually work, in nav order.
+
+    Each test names the permission the section's own endpoints already enforce, so a
+    role reaches only screens it can use: Procurement Supervisor holds the delivery
+    and nothing else, Safety Officer holds the round and nothing else, and the three
+    shared roles get both halves at one address instead of two.
+    """
+    reads_estate = _can("Building", "read")
+    sections = []
+    if reads_estate and _can("Housing Inventory", "read"):
+        sections.append("count")
+    if _can("Facility Asset Delivery", "read"):
+        sections.append("delivery")
+    if reads_estate and _can("Room", "read") and _can("Bed", "read"):
+        sections.append("beds")
+    if reads_estate and _can("Housing Assignment", "create", "submit"):
+        sections.append("arrivals")
+    if _can("Custody Issue", "read") and _can("Custody Article", "read"):
+        sections.append("custody")
+    if reads_estate and _can("Room Bed Transfer", "create", "submit"):
+        sections.append("transfer")
+    if reads_estate and _can("Safety Task Catalog", "read"):
+        sections.append("safety")
+    return sections
+
+
+def bootstrap_portal_context(context, route: str, entry: str):
+    """Redirect a guest to login, then publish the merged portal's gate and its
+    realtime configuration for whichever door was opened."""
+    guest_redirect(route)
+    render_in_arabic()
 
     context.no_cache = 1
     apply_portal_appearance(context)
-    context.has_housing_role = bool(HOUSING_ROLES & set(frappe.get_roles()))
-    if context.has_housing_role:
-        context.csrf_token = get_csrf_token()
+    context.portal_entry = entry
+    context.has_portal_role = bool(PORTAL_ROLES & set(frappe.get_roles()))
+    if not context.has_portal_role:
+        return context
+
+    context.csrf_token = get_csrf_token()
+    context.portal_sections = portal_sections()
+    context.portal_capabilities = portal_capabilities()
+    conf = frappe.get_site_config()
+    context.site_name = frappe.local.site
+    context.socketio_port = cint(conf.get("socketio_port")) or 9000
+    context.async_enabled = not cint(conf.get("disable_async"))
+    context.dev_server = 1 if frappe.conf.developer_mode else 0
     return context
+
+
+def get_context(context):
+    """Bootstraps the merged portal at its housing door."""
+    return bootstrap_portal_context(context, "/housing", "housing")

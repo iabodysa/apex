@@ -40,3 +40,9 @@ export function clearBuilding() {
   buildingLabel.value = "";
   countProgress.value = { done: 0, total: 0 };
 }
+
+export function localDate() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}

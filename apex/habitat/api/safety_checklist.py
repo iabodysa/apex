@@ -296,8 +296,10 @@ def submit_round(building, cadence, round_date, lines, is_reinspection=0):
             ``execution_date``.
         lines: a JSON list (or already-parsed list) of dicts, each
             ``{"task": <Safety Task Catalog>, "execution_status": <status>,
-            "notes": <optional>}``. ``execution_status`` is one of Excellent /
-            Good / Average / Poor / Not Done.
+            "notes": <optional>, "evidence_photo": <optional file url>}``.
+            ``execution_status`` is one of Excellent / Good / Average / Poor /
+            Not Done; a failing status on a task flagged ``evidence_required``
+            is refused without ``evidence_photo``.
         is_reinspection: pass truthy to record a follow-up round for the same
             (building, date, cadence) past the duplicate guard.
 
@@ -340,8 +342,14 @@ def submit_round(building, cadence, round_date, lines, is_reinspection=0):
     }
 
 
-def _create_round(building, cadence, round_date, lines, is_reinspection):
+def _create_round(building, cadence, round_date, lines, is_reinspection, ratify=True):
     """Insert + submit ONE Safety Round and its executions in a savepoint.
+
+    ``ratify`` False records the round and its executions as DRAFTS and submits
+    nothing — the maker path the DocPerms already describe, where a Safety Officer
+    composes the evidence and a checker closes the round (Safety Round.on_submit
+    ratifies the drafts it finds). Everything else is identical, including the
+    evidence guard, which runs on insert.
 
     The single source of truth for "record a round": inserts the Safety Round
     (not yet submitted), inserts and submits one Safety Task Execution per line
@@ -395,14 +403,17 @@ def _create_round(building, cadence, round_date, lines, is_reinspection):
                     "execution_date": round_date,
                     "execution_status": execution_status,
                     "notes": line.get("notes"),
+                    "evidence_photo": line.get("evidence_photo") or None,
                     "safety_round": round_doc.name,
                 }
             )
             ste.insert(ignore_permissions=False)
-            ste.submit()
+            if ratify:
+                ste.submit()
             count += 1
 
-        round_doc.submit()
+        if ratify:
+            round_doc.submit()
     except Exception:
         frappe.db.rollback(save_point=savepoint)
         raise
@@ -420,37 +431,46 @@ def submit_due_rounds(building, round_date, results):
     """Record one round per cadence from a multi-cadence result set, then email.
 
     ``results`` is a JSON list (an already-parsed list is also accepted) of
-    ``{"task", "cadence", "execution_status", "notes"?}`` lines spanning one or
-    more cadences. The lines are grouped by ``cadence`` and, for EACH cadence
-    that has lines, ONE Safety Round plus its submitted executions is created via
-    the shared :func:`_create_round` helper (round submitted last).
+    ``{"task", "cadence", "execution_status", "notes"?, "evidence_photo"?}``
+    lines spanning one or more cadences. The lines are grouped by ``cadence``
+    and, for EACH cadence that has lines, ONE Safety Round plus its submitted
+    executions is created via the shared :func:`_create_round` helper (round
+    submitted last).
 
-    The whole multi-cadence submit runs inside ONE OUTER savepoint: if any
-    cadence fails, every round created in this call is rolled back together — so
-    a partial multi-cadence submit never persists. (Each :func:`_create_round`
-    keeps its own inner savepoint; the outer one wraps them all.)
+    EACH CADENCE STANDS ALONE. A cadence that fails is rolled back to its own
+    savepoint and reported in ``failed``; the cadences that succeeded stay
+    submitted. One fire door that cannot be recorded without a photo used to
+    discard a whole daily-plus-weekly walk, which destroyed a morning of work to
+    protect nothing — the round it belongs to is the unit that must be
+    all-or-nothing, not the trip.
 
     After the rounds commit, the manager is emailed a report
     (:func:`_email_round_report`). A mail failure is caught and logged and never
     rolls back a submitted round; ``emailed`` reports whether mail was sent.
 
-    Permission: caller must have ``submit`` on Safety Task Execution (same gate
-    as :func:`submit_round`) AND ``read`` on the target Accommodation Building —
-    the latter rejects a supervisor scoped off this building before any round is
-    created or the report is emailed.
+    Permission: ``read`` on the target Accommodation Building, which rejects a
+    supervisor scoped off this building before any round is created or the report
+    is emailed; plus ``submit`` on Safety Task Execution to CLOSE the rounds, or
+    ``create`` alone to record them as drafts for a checker to close. The maker
+    path is what the DocPerms already describe — a Safety Officer holds create and
+    not submit — so the role can now record what it walked instead of losing it.
 
     Args:
         building: Accommodation Building docname (source of truth).
         round_date: the round date; also each execution's ``execution_date``.
         results: JSON list (or list) of ``{"task", "cadence",
-            "execution_status", "notes"?}``.
+            "execution_status", "notes"?, "evidence_photo"?}``.
 
     Returns:
-        ``{"ok": True, "rounds": [{"cadence", "safety_round", "overall_result"}],
+        ``{"ok": <bool>, "ratified": <bool>, "rounds": [{"cadence",
+        "safety_round", "overall_result"}], "failed": [{"cadence", "message"}],
         "count": <total executions>, "emailed": <bool>}`` — ``rounds`` ordered
-        Daily..Annual.
+        Daily..Annual, ``ok`` False only when no cadence was recorded at all, and
+        ``ratified`` False when the rounds are drafts awaiting a checker.
     """
-    frappe.has_permission("Safety Task Execution", "submit", throw=True)
+    ratify = frappe.has_permission("Safety Task Execution", "submit")
+    if not ratify:
+        frappe.has_permission("Safety Task Execution", "create", throw=True)
 
     if not building:
         frappe.throw(_("A building is required to submit rounds."))
@@ -478,36 +498,57 @@ def submit_due_rounds(building, round_date, results):
     if not by_cadence:
         frappe.throw(_("No result lines to submit."))
 
-    outer = "safety_checklist_submit_due_rounds"
-    frappe.db.savepoint(outer)
     rounds = []
+    failed = []
     total = 0
-    try:
-        for cadence in _CADENCE_ORDER:
-            lines = by_cadence.get(cadence)
-            if not lines:
-                continue
+    for cadence in _CADENCE_ORDER:
+        lines = by_cadence.get(cadence)
+        if not lines:
+            continue
+        try:
             round_doc, count = _create_round(
-                building, cadence, round_date, lines, is_reinspection=0
+                building, cadence, round_date, lines, is_reinspection=0, ratify=ratify
             )
-            round_doc.reload()
-            rounds.append(
-                {
-                    "cadence": cadence,
-                    "safety_round": round_doc.name,
-                    "overall_result": round_doc.overall_result,
-                }
-            )
-            total += count
-    except Exception:
-        frappe.db.rollback(save_point=outer)
-        raise
-    else:
-        frappe.db.release_savepoint(outer)
+        except Exception as exc:
+            failed.append({"cadence": cadence, "message": _refusal_text(exc)})
+            continue
+        round_doc.reload()
+        rounds.append(
+            {
+                "cadence": cadence,
+                "safety_round": round_doc.name,
+                "overall_result": round_doc.overall_result,
+            }
+        )
+        total += count
 
-    emailed = _email_round_report(building, round_date, rounds)
+    emailed = _email_round_report(building, round_date, rounds) if rounds and ratify else False
 
-    return {"ok": True, "rounds": rounds, "count": total, "emailed": emailed}
+    return {
+        "ok": bool(rounds),
+        "ratified": ratify,
+        "rounds": rounds,
+        "failed": failed,
+        "count": total,
+        "emailed": emailed,
+    }
+
+
+def _refusal_text(exc: Exception) -> str:
+    """The plain sentence a refused cadence should show, taken from the thrown message.
+
+    The message log is drained as it is read so a refusal that this call has already
+    turned into a ``failed`` entry is not ALSO raised at the client as a server
+    message on an otherwise successful submit.
+    """
+    log = getattr(frappe.local, "message_log", None) or []
+    text = ""
+    if log:
+        last = log[-1]
+        raw = last.get("message") if isinstance(last, dict) else last
+        text = frappe.utils.strip_html(str(raw or "")).strip()
+        frappe.clear_last_message()
+    return text or str(exc) or _("This cadence could not be recorded.")
 
 
 def _report_recipients():

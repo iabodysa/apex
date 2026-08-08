@@ -864,7 +864,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-08 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Building",
@@ -894,6 +894,10 @@
    "read": 1,
    "report": 1,
    "role": "Resident Supervisor"
+  },
+  {
+   "read": 1,
+   "role": "Safety Officer"
   }
  ],
  "row_format": "Dynamic",

@@ -1,62 +1,23 @@
 # Copyright (c) 2026, afmcoltd
-"""Safety Rounds portal served at /safety.
+"""The merged Habitat portal's second door, served at /safety.
 
-A mobile-first supervisor surface for the Safety Checklist: pick a
-building, see the cadences that are DUE now, tap each task Pass/Fail/Issue, then
-submit one round per cadence and email the manager. Like /fleet this is an
-admin-style portal, not a guest link, so it requires a logged-in user AND a
-safety role.
+/safety and /housing are one application. This module exists so the safety bookmark,
+the /apps tile and every link that already points here keep landing on the same
+screen they always did — the portal opens on the safety round instead of the count.
 
-Access gate (mirrors www/fleet.py):
-  * Guests are redirected to /login (then back to /safety).
-  * A logged-in user without any safety role gets a friendly "role required"
-    page, not a raw 403. The same permissions the API enforces still apply to
-    every read and write the page makes.
-
-The CSRF token is exposed (same pattern as fleet.py) so the single-page app's
-whitelisted POSTs (submit_due_rounds) pass Frappe's CSRF guard. no_cache is set
-because the page renders per-user, live data.
+The gate, the section map and the realtime configuration all come from www/housing.py
+so there is one copy of them; SAFETY_ROLES is re-exported here because that is where
+readers of this route look for it.
 """
 
-import frappe
-from frappe.sessions import get_csrf_token
-from frappe.utils import cint
-
-from apex.apex_core.utils.portal_language import render_in_arabic
-from apex.apex_core.utils.portal_bootstrap import (
-    apply_portal_appearance,
-    guest_redirect,
+from apex.www.housing import (  # noqa: F401
+    PORTAL_ROLES,
+    SAFETY_ROLES,
+    bootstrap_portal_context,
+    has_apps_screen_access,
 )
-
-SAFETY_ROLES = {
-    "System Manager",
-    "Accommodation Manager",
-    "Resident Supervisor",
-    "Safety Officer",
-}
-
-
-def has_apps_screen_access() -> bool:
-    """Gate for the /apps app-selector tile — same SAFETY_ROLES check
-    get_context() applies, so the tile never shows for a user the page itself
-    would turn away. Wired as the has_permission of the "apex-safety" tile in
-    hooks.py add_to_apps_screen."""
-    return bool(SAFETY_ROLES & set(frappe.get_roles()))
 
 
 def get_context(context):
-    """Redirects guests to login and bootstraps the safety rounds portal, gated on a safety role."""
-    guest_redirect("/safety")
-    render_in_arabic()
-
-    context.no_cache = 1
-    apply_portal_appearance(context)
-    context.has_safety_role = bool(SAFETY_ROLES & set(frappe.get_roles()))
-    if context.has_safety_role:
-        context.csrf_token = get_csrf_token()
-        conf = frappe.get_site_config()
-        context.site_name = frappe.local.site
-        context.socketio_port = cint(conf.get("socketio_port")) or 9000
-        context.async_enabled = not cint(conf.get("disable_async"))
-        context.dev_server = 1 if frappe.conf.developer_mode else 0
-    return context
+    """Bootstraps the merged portal at its safety door."""
+    return bootstrap_portal_context(context, "/safety", "safety")

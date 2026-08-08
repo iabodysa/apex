@@ -10,7 +10,7 @@
         <div class="head-actions">
           <LangToggle variant="header" />
           <Button
-            v-if="onCount && building"
+            v-if="usesBuilding && building"
             size="xl"
             variant="ghost"
             class="head-btn"
@@ -41,11 +41,12 @@
 
     <router-view />
 
-    <template #nav>
+    <template v-if="tabs.length > 1" #nav>
       <router-link
         v-for="tab in tabs"
-        :key="tab.to"
-        :to="tab.to"
+        :key="tab.path"
+        class="nav-tab"
+        :to="tab.path"
         :class="{ 'is-active': isActive(tab) }"
         :aria-current="isActive(tab) ? 'page' : undefined"
         active-class=""
@@ -70,28 +71,36 @@ import LangToggle from "@shared/components/LangToggle.vue";
 import Icon from "./components/Icon.vue";
 import { useI18n } from "./i18n";
 import { useDocumentLanguage } from "@shared/useDocumentLanguage";
+import { allowedSections, landingPath } from "./sections.js";
 import { building, buildingLabel, clearBuilding, countProgress } from "./session";
 
 const { t, lang, dir } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
-const tabs = [
-  { to: "/count", icon: "clipboard-check", labelKey: "nav.count", match: "/count" },
-  { to: "/delivery", icon: "truck", labelKey: "nav.delivery", match: "/delivery" },
-];
+const BUILDING_SECTIONS = new Set(["count", "beds", "arrivals", "custody", "transfer", "safety"]);
+
+const tabs = allowedSections();
 
 function isActive(tab) {
-  return route.path === tab.match || route.path.startsWith(tab.match + "/");
+  return route.path === tab.path || route.path.startsWith(tab.path + "/");
 }
 
-const onCount = computed(() => route.path.startsWith("/count"));
-const screenName = computed(() => t(onCount.value ? "nav.count" : "nav.delivery"));
+const currentSection = computed(() => (route.meta && route.meta.section) || "");
+const usesBuilding = computed(() => BUILDING_SECTIONS.has(currentSection.value));
+const onCount = computed(() => currentSection.value === "count");
+
+const screenName = computed(() => {
+  const tab = tabs.find((entry) => entry.id === currentSection.value);
+  return tab ? t(tab.labelKey) : t("common.appName");
+});
 const headTitle = computed(() =>
-  onCount.value && buildingLabel.value ? buildingLabel.value : t("common.appName"),
+  usesBuilding.value && buildingLabel.value ? buildingLabel.value : t("common.appName"),
 );
 
-const showProgress = computed(() => onCount.value && !!building.value && countProgress.value.total > 0);
+const showProgress = computed(
+  () => onCount.value && !!building.value && countProgress.value.total > 0,
+);
 const progressPercent = computed(() => {
   const { done, total } = countProgress.value;
   return total ? Math.round((done / total) * 100) : 0;
@@ -99,7 +108,7 @@ const progressPercent = computed(() => {
 
 function onChangeBuilding() {
   clearBuilding();
-  router.push("/count");
+  if (!currentSection.value) router.push(landingPath());
 }
 
 useDocumentLanguage(lang, dir);

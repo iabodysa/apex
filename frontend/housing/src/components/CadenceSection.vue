@@ -25,8 +25,10 @@
           :task="task"
           :verdict="(ratings[task.name] || {}).verdict || ''"
           :notes="(ratings[task.name] || {}).notes || ''"
+          :photo="(ratings[task.name] || {}).photo || ''"
           @rate="(v) => $emit('rate', block.cadence, task.name, v)"
           @note="(n) => $emit('note', block.cadence, task.name, n)"
+          @photo="(p) => $emit('photo', block.cadence, task.name, p)"
         />
       </div>
     </Transition>
@@ -45,7 +47,7 @@ const props = defineProps({
   ratings: { type: Object, default: () => ({}) },
 });
 
-defineEmits(["rate", "note"]);
+defineEmits(["rate", "note", "photo"]);
 const { tEnum } = useI18n();
 
 const open = ref(true);
