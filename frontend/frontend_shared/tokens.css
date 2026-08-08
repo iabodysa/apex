@@ -93,6 +93,14 @@
   --font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-num: ui-monospace, "SF Mono", "Menlo", monospace;
   --font-num-ar: var(--font);
+  /* The brand faces, vendored at apex/public/vendor/thmanyah-v1 and linked by the portal
+     shells. A @font-face costs nothing until something asks for the family, so declaring
+     these is free — the file downloads only where one is actually used. Display is for a
+     headline, Text for running prose; using Display at body size is what makes the family
+     look wrong. Interface chrome stays on --font. */
+  --font-display: "Thmanyah Serif Display", "Cairo", serif;
+  --font-serif: "Thmanyah Serif Text", "Cairo", serif;
+  --font-brand: "Thmanyah Sans", var(--font);
   --fs-display: 28px;
   --fs-h1: 22px;
   --fs-h2: 20px;
