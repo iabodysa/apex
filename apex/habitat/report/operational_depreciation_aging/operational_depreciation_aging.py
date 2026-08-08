@@ -6,9 +6,61 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 from apex.habitat import permissions
 
 
-def execute(filters=None):
-    """Returns the columns, rows and summary cards for the operational depreciation aging register."""
-    columns = [
+HEALTHY = "healthy"
+FULLY_DEPRECIATED = "fully_depreciated"
+OVER_BUDGET = "over_budget"
+DATA_ERROR = "data_error"
+
+
+def status_label(state):
+    """The display text for a state, translated per request.
+
+    Written as literals inside ``frappe._()`` rather than a table of bare strings: the
+    translation scanner reads the source, so a string reached only through a variable is
+    invisible to it and its Arabic row goes stale and is pruned.
+    """
+    if state == HEALTHY:
+        return frappe._("Healthy")
+    if state == FULLY_DEPRECIATED:
+        return frappe._("Fully Depreciated")
+    if state == OVER_BUDGET:
+        return frappe._("Over Budget")
+    return frappe._("Data Error")
+
+
+def depreciation_pct(original_cost, book_value):
+    """How much of an article's cost has been written off, capped at 100 percent.
+
+    Pure arithmetic, so the rule can be exercised without a bench.
+    """
+    if not original_cost:
+        return 0.0
+    return min((original_cost - book_value) / original_cost * 100, 100.0)
+
+
+def health_state(original_cost, book_value):
+    """The article's depreciation state as a STABLE key, never as display text.
+
+    The summary card used to count rows by comparing against the translated label, so
+    the count depended on the language the row was built in. The key is the fact; the
+    label is a rendering of it.
+    """
+    if not original_cost and book_value:
+        return DATA_ERROR
+    if book_value > 0:
+        return HEALTHY
+    if book_value == 0:
+        return FULLY_DEPRECIATED
+    return OVER_BUDGET
+
+
+def _columns():
+    """The register's column set.
+
+    A function, not a module constant: every label goes through ``frappe._()``, and a
+    constant would freeze them in whatever language first imported this module.
+    """
+    return [
         {
             "label": frappe._("Snapshot"),
             "fieldname": "snapshot_name",
@@ -77,6 +129,11 @@ def execute(filters=None):
         },
     ]
 
+
+def execute(filters=None):
+    """Returns the columns, rows and summary cards for the operational depreciation aging register."""
+    columns = _columns()
+
     parent_filters = {"docstatus": 1}
     if filters:
         if filters.get("from_date"):
@@ -140,19 +197,7 @@ def execute(filters=None):
         original_cost = row.get("original_cost") or 0
         book_value = row.get("book_value") or 0
 
-        if original_cost:
-            depreciation_pct = min((original_cost - book_value) / original_cost * 100, 100.0)
-        else:
-            depreciation_pct = 0.0
-
-        if not original_cost and book_value:
-            status = frappe._("Data Error")
-        elif book_value > 0:
-            status = frappe._("Healthy")
-        elif book_value == 0:
-            status = frappe._("Fully Depreciated")
-        else:
-            status = frappe._("Over Budget")
+        state = health_state(original_cost, book_value)
 
         data.append(
             {
@@ -164,8 +209,9 @@ def execute(filters=None):
                 "original_cost": original_cost,
                 "book_value": book_value,
                 "age_years": row.get("age_years") or 0,
-                "depreciation_pct": round(depreciation_pct, 2),
-                "status": status,
+                "depreciation_pct": round(depreciation_pct(original_cost, book_value), 2),
+                "state": state,
+                "status": status_label(state),
             }
         )
 
@@ -181,7 +227,7 @@ def _summary(data):
         count_card(
             frappe._("Fully Depreciated"),
             data,
-            lambda r: r.get("status") == frappe._("Fully Depreciated"),
+            lambda r: r.get("state") == FULLY_DEPRECIATED,
             "Orange",
         ),
     ]
