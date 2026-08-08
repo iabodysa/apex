@@ -1,0 +1,245 @@
+{
+ "doctype": "Workspace",
+ "name": "Back Engines",
+ "label": "Back Engines",
+ "title": "Back Engines",
+ "module": "Apex Core",
+ "icon": "gear",
+ "public": 1,
+ "is_hidden": 0,
+ "sequence_id": 9.0,
+ "parent_page": "Apex Core",
+ "roles": [
+  {
+   "doctype": "Has Role",
+   "role": "System Manager"
+  }
+ ],
+ "charts": [],
+ "number_cards": [],
+ "quick_lists": [],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Written by the app",
+   "description": "Records the app writes for itself. Read them to see what a job did; never type into one.",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Accommodation Ledger",
+   "label": "Accommodation Ledger",
+   "onboard": 0,
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Accommodation Stock Ledger",
+   "label": "Accommodation Stock Ledger",
+   "onboard": 0,
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Boarding Scan Log",
+   "label": "Boarding Scan Log",
+   "onboard": 0,
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Cleaning Compliance Ledger",
+   "label": "Cleaning Compliance Ledger",
+   "onboard": 0,
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Facility Asset Movement Ledger",
+   "label": "Facility Asset Movement Ledger",
+   "onboard": 0,
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Fuel Consumption Ledger",
+   "label": "Fuel Consumption Ledger",
+   "onboard": 0,
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Fuel Daily Log",
+   "label": "Fuel Daily Log",
+   "onboard": 0,
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Maintenance Cost Ledger",
+   "label": "Maintenance Cost Ledger",
+   "onboard": 0,
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Occupancy Snapshot",
+   "label": "Occupancy Snapshot",
+   "onboard": 0,
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Operational Depreciation Snapshot",
+   "label": "Operational Depreciation Snapshot",
+   "onboard": 0,
+   "idx": 11
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Rental Accrual Ledger",
+   "label": "Rental Accrual Ledger",
+   "onboard": 0,
+   "idx": 12
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Safety Finding Ledger",
+   "label": "Safety Finding Ledger",
+   "onboard": 0,
+   "idx": 13
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Trip Boarding Ledger",
+   "label": "Trip Boarding Ledger",
+   "onboard": 0,
+   "idx": 14
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Trip Fulfilment Ledger",
+   "label": "Trip Fulfilment Ledger",
+   "onboard": 0,
+   "idx": 15
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Trip Start Log",
+   "label": "Trip Start Log",
+   "onboard": 0,
+   "idx": 16
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Vehicle Utilisation Snapshot",
+   "label": "Vehicle Utilisation Snapshot",
+   "onboard": 0,
+   "idx": 17
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Identity and access",
+   "description": "The keys a worker or driver holds instead of a desk account.",
+   "idx": 18
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Custody Acknowledgment",
+   "label": "Custody Acknowledgment",
+   "onboard": 0,
+   "idx": 19
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Driver Push Subscription",
+   "label": "Driver Push Subscription",
+   "onboard": 0,
+   "idx": 20
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Masar Worker Token",
+   "label": "Masar Worker Token",
+   "onboard": 0,
+   "idx": 21
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Everything else",
+   "description": "Records that belong to no screen yet.",
+   "idx": 22
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Safety Inspection Report",
+   "label": "Safety Inspection Report",
+   "onboard": 0,
+   "idx": 23
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Scheduled Task Instance",
+   "label": "Scheduled Task Instance",
+   "onboard": 0,
+   "idx": 24
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "link_type": "DocType",
+   "link_to": "Transport Trip Rating",
+   "label": "Transport Trip Rating",
+   "onboard": 0,
+   "idx": 25
+  }
+ ],
+ "content": "[{\"id\": \"beHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Back Engines</b></span>\", \"col\": 12}}, {\"id\": \"beNote\", \"type\": \"paragraph\", \"data\": {\"text\": \"Everything the app owns that no other screen shows: the records it writes for itself, and every chart and card that is built but not placed. Nothing here is for daily work \\u2014 it is here so that nothing is invisible.\", \"col\": 12}}, {\"id\": \"beCardWrittenbytheapp\", \"type\": \"card\", \"data\": {\"card_name\": \"Written by the app\", \"col\": 4}}, {\"id\": \"beCardIdentityandaccess\", \"type\": \"card\", \"data\": {\"card_name\": \"Identity and access\", \"col\": 4}}, {\"id\": \"beCardEverythingelse\", \"type\": \"card\", \"data\": {\"card_name\": \"Everything else\", \"col\": 4}}, {\"id\": \"beCardsHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Cards no screen shows</b></span>\", \"col\": 12}}, {\"id\": \"beNcActiveHousingAssignments\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Housing Assignments\", \"col\": 3}}, {\"id\": \"beNcActiveVehicles\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Vehicles\", \"col\": 3}}, {\"id\": \"beNcApprovedFuelAwaitingFulf\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Fuel Awaiting Fulfilment\", \"col\": 3}}, {\"id\": \"beNcApprovedLast48h\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 3}}, {\"id\": \"beNcArrivalsToday\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Arrivals Today\", \"col\": 3}}, {\"id\": \"beNcAssetsMovedThisMonth\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Assets Moved This Month\", \"col\": 3}}, {\"id\": \"beNcBedsOutofService\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Beds Out of Service\", \"col\": 3}}, {\"id\": \"beNcBuildingsOverOccupancyTh\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Buildings Over Occupancy Threshold\", \"col\": 3}}, {\"id\": \"beNcCleaningLogsRecorded\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cleaning Logs Recorded\", \"col\": 3}}, {\"id\": \"beNcCompletedTripsThisMonth\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Completed Trips This Month\", \"col\": 3}}, {\"id\": \"beNcCompletedTripsToday\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Completed Trips Today\", \"col\": 3}}, {\"id\": \"beNcExpiredLicenses\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Expired Licenses\", \"col\": 3}}, {\"id\": \"beNcFailedFuelRequests\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Failed Fuel Requests\", \"col\": 3}}, {\"id\": \"beNcFuelApprovedThisMonth\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Approved This Month\", \"col\": 3}}, {\"id\": \"beNcFuelCostThisMonth\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Cost This Month\", \"col\": 3}}, {\"id\": \"beNcFuelLitresDispensedThisM\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Litres Dispensed This Month\", \"col\": 3}}, {\"id\": \"beNcFuelOpenClaimDisputes\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Open Claim Disputes\", \"col\": 3}}, {\"id\": \"beNcInterCityRelocationsThis\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Inter-City Relocations This Month\", \"col\": 3}}, {\"id\": \"beNcInterCityRequestsThisMon\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Inter-City Requests This Month\", \"col\": 3}}, {\"id\": \"beNcIntercompanyMovesPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Intercompany Moves Pending Acknowledgement\", \"col\": 3}}, {\"id\": \"beNcMaintenanceWorkOrdersCom\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Maintenance Work Orders Completed\", \"col\": 3}}, {\"id\": \"beNcOccupiedBeds\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Occupied Beds\", \"col\": 3}}, {\"id\": \"beNcOpenCostRecoveries\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Cost Recoveries\", \"col\": 3}}, {\"id\": \"beNcOpenFuelClaims\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Fuel Claims\", \"col\": 3}}, {\"id\": \"beNcOpenTransportRequests\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Transport Requests\", \"col\": 3}}, {\"id\": \"beNcOperatingDaysThisMonth\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Operating Days This Month\", \"col\": 3}}, {\"id\": \"beNcOverdueArrivalsAwaitingH\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Arrivals Awaiting Housing\", \"col\": 3}}, {\"id\": \"beNcOverdueAuditRemediationP\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Audit Remediation Plans\", \"col\": 3}}, {\"id\": \"beNcOverdueTemporaryTopups\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Temporary Topups\", \"col\": 3}}, {\"id\": \"beNcPendingHousingCheckouts\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Housing Checkouts\", \"col\": 3}}, {\"id\": \"beNcPendingTransportRequests\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Transport Requests\", \"col\": 3}}, {\"id\": \"beNcPendingVehicleWriteOffs\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Vehicle Write-Offs\", \"col\": 3}}, {\"id\": \"beNcRecentErrorLogs\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 3}}, {\"id\": \"beNcRentalAccrualThisMonth\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rental Accrual This Month\", \"col\": 3}}, {\"id\": \"beNcRentalSettlementsThisMon\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rental Settlements This Month\", \"col\": 3}}, {\"id\": \"beNcRepresentativesTransport\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Representatives Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"beNcRepresentativesTransport\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Representatives Transport Requests Open\", \"col\": 3}}, {\"id\": \"beNcSalisActiveDrivers\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Active Drivers\", \"col\": 3}}, {\"id\": \"beNcSalisComplianceDriversCl\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Compliance Drivers Clearances Pending\", \"col\": 3}}, {\"id\": \"beNcSalisRentalsCostsActiveR\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Active Rentals\", \"col\": 3}}, {\"id\": \"beNcSalisRentalsCostsRentalC\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Rental Cost This Month\", \"col\": 3}}, {\"id\": \"beNcSalisRepresentativesFlee\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Representatives Fleet Active Assignments\", \"col\": 3}}, {\"id\": \"beNcSalisVehiclesInService\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Vehicles In Service\", \"col\": 3}}, {\"id\": \"beNcScheduledTaskCompletionR\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Scheduled Task Completion Rate %\", \"col\": 3}}, {\"id\": \"beNcScheduledTasksOpen\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Scheduled Tasks Open\", \"col\": 3}}, {\"id\": \"beNcTasksCompletedThisMonth\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Tasks Completed This Month\", \"col\": 3}}, {\"id\": \"beNcTasksDueToday\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Tasks Due Today\", \"col\": 3}}, {\"id\": \"beNcTotalAssetBookValue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Asset Book Value\", \"col\": 3}}, {\"id\": \"beNcUnrevertedTemporaryTopup\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unreverted Temporary Topups\", \"col\": 3}}, {\"id\": \"beNcVehiclesTracked\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Tracked\", \"col\": 3}}, {\"id\": \"beNcWorkersTransportFulfille\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"beNcWorkersTransportPassenge\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Transport Passenger Manifests Today\", \"col\": 3}}, {\"id\": \"beNcWorkersTransportRequests\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Transport Requests Open\", \"col\": 3}}, {\"id\": \"beNcWorkersTransportTripsDis\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Transport Trips Dispatched Today\", \"col\": 3}}, {\"id\": \"beChartsHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Charts no screen shows</b></span>\", \"col\": 12}}, {\"id\": \"beChAccommodationCostbyType\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Accommodation Cost by Type\", \"col\": 6}}, {\"id\": \"beChActiveVehiclesbyCategory\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Active Vehicles by Category\", \"col\": 6}}, {\"id\": \"beChAssetMovementsOverTime\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Asset Movements Over Time\", \"col\": 6}}, {\"id\": \"beChAuditRemediationPlansbyS\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Audit Remediation Plans by Status\", \"col\": 6}}, {\"id\": \"beChAvailableCapacityTrend\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Available Capacity Trend\", \"col\": 6}}, {\"id\": \"beChAvgVehicleUtilisationAll\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Avg Vehicle Utilisation % (All-Time)\", \"col\": 6}}, {\"id\": \"beChBedsbyBuilding\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Beds by Building\", \"col\": 6}}, {\"id\": \"beChBedsbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Beds by Status\", \"col\": 6}}, {\"id\": \"beChBuildingLicensesbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Building Licenses by Status\", \"col\": 6}}, {\"id\": \"beChCostRecoverybyType\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Cost Recovery by Type\", \"col\": 6}}, {\"id\": \"beChCustodyIssuesbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Custody Issues by Status\", \"col\": 6}}, {\"id\": \"beChDamageCostbyBuilding\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Damage Cost by Building\", \"col\": 6}}, {\"id\": \"beChDispatchTripsbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Dispatch Trips by Status\", \"col\": 6}}, {\"id\": \"beChFacilityAssetsbyCategory\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Facility Assets by Category\", \"col\": 6}}, {\"id\": \"beChFacilityAssetsbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Facility Assets by Status\", \"col\": 6}}, {\"id\": \"beChFindingsbySeverity\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Findings by Severity\", \"col\": 6}}, {\"id\": \"beChFuelClaimVariancebyMonth\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Fuel Claim Variance by Month\", \"col\": 6}}, {\"id\": \"beChFuelConsumptionbyMonth\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Fuel Consumption by Month\", \"col\": 6}}, {\"id\": \"beChFuelCostbyMonth\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Fuel Cost by Month\", \"col\": 6}}, {\"id\": \"beChFuelCostbyPlatform\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Fuel Cost by Platform\", \"col\": 6}}, {\"id\": \"beChFuelRequestsbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Fuel Requests by Status\", \"col\": 6}}, {\"id\": \"beChIdleResidentHousingCostb\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Idle Resident Housing Cost by Building\", \"col\": 6}}, {\"id\": \"beChIncidentsbyType\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Incidents by Type\", \"col\": 6}}, {\"id\": \"beChLeasesbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Leases by Status\", \"col\": 6}}, {\"id\": \"beChMaintenanceRequestsbyPri\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Maintenance Requests by Priority\", \"col\": 6}}, {\"id\": \"beChMaintenanceRequestsbySta\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Maintenance Requests by Status\", \"col\": 6}}, {\"id\": \"beChMaintenanceWorkOrdersbyS\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Maintenance Work Orders by Status\", \"col\": 6}}, {\"id\": \"beChOccupancyPercentTrend\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Occupancy Percent Trend\", \"col\": 6}}, {\"id\": \"beChOperatingDaysTrend\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Operating Days Trend\", \"col\": 6}}, {\"id\": \"beChRentalAccrualTrend\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Rental Accrual Trend\", \"col\": 6}}, {\"id\": \"beChRentalAccrualbyOffice\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Rental Accrual by Office\", \"col\": 6}}, {\"id\": \"beChSafetyInspectionsOverTim\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Safety Inspections Over Time\", \"col\": 6}}, {\"id\": \"beChSafetyTaskExecutionsbyRe\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Safety Task Executions by Result\", \"col\": 6}}, {\"id\": \"beChScheduledTaskInstancesby\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Scheduled Task Instances by Status\", \"col\": 6}}, {\"id\": \"beChSubcontractorServiceOrde\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Subcontractor Service Orders by Status\", \"col\": 6}}, {\"id\": \"beChTaskCompletionsOverTime\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Task Completions Over Time\", \"col\": 6}}, {\"id\": \"beChTopWorkersbyCustodyValue\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Top Workers by Custody Value\", \"col\": 6}}, {\"id\": \"beChTopupsbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Topups by Status\", \"col\": 6}}, {\"id\": \"beChTransportRequestsbyServi\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Transport Requests by Service Line\", \"col\": 6}}, {\"id\": \"beChTripFulfilmentOverTime\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Trip Fulfilment Over Time\", \"col\": 6}}, {\"id\": \"beChUtilityBillsbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Utility Bills by Status\", \"col\": 6}}, {\"id\": \"beChVacantCapacityCostTrendM\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Vacant Capacity Cost Trend (Monthly)\", \"col\": 6}}, {\"id\": \"beChVehicleActivations\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Vehicle Activations\", \"col\": 6}}, {\"id\": \"beChVehiclesbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Vehicles by Status\", \"col\": 6}}, {\"id\": \"beChWorkersRequestsbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workers Requests by Status\", \"col\": 6}}, {\"id\": \"beChWorkersTransportOverTime\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workers Transport Over Time\", \"col\": 6}}]",
+ "creation": "2020-01-01 00:00:09.000000",
+ "modified": "2026-08-08 21:00:00.000000"
+}

@@ -538,6 +538,7 @@ Awaiting My Approval,بانتظار اعتمادي
 Awaiting confirmation by the receiving supervisor,بانتظار تأكيد المشرف المستلم
 Awareness and Training,التوعية والتدريب
 Back,رجوع
+Back Engines,المحركات الخلفية
 Back to the system,العودة إلى النظام
 Back-Dated Retirement,إخراج من الخدمة بتاريخ سابق
 Back-link to the Maintenance Request spawned from this finding. Presence makes the fan-out idempotent: a linked finding is never re-spawned. Intentionally copyable (no no_copy) so the link carries into an amended report and prevents duplicate tickets on amend.,رابط لطلب الصيانة الذي أُنشئ من هذه الملاحظة. وجوده يمنع إنشاء طلب مكرر، فالملاحظة المرتبطة لا يُعاد توليد طلب لها. والحقل قابل للنسخ عمداً لينتقل الرابط إلى التقرير المعدّل ويمنع تكرار التذاكر عند التعديل.
@@ -722,6 +723,7 @@ Captured At,وقت الالتقاط
 Captured By,ملتقط الصورة
 Card,بطاقة
 Cards / Table,بطاقات وجدول
+Cards no screen shows,بطاقات لا تظهر في أي شاشة
 Carried By,يحمله
 Carried Out By (Technician),نفّذه (الفنّي)
 Carrier,الناقل
@@ -748,6 +750,7 @@ Change,التغيير
 Charge per billing period. Used as the draft Payment Order amount.,الرسم لكل فترة فوترة. يُستخدم كمبلغ لمسودة أمر الدفع.
 Chargeable,قابل للتحميل
 Charged To,تُحمّل على
+Charts no screen shows,رسوم لا تظهر في أي شاشة
 Check In Resident,تسكين الساكن
 Check Item,بند الفحص
 Check Out,مغادرة
@@ -1646,6 +1649,7 @@ Every article came back sound,كل الأصناف رجعت سليمة
 "Every company item the driver held, line by line. The single Custody Returned check says nothing about what came back or in what state.",كل صنف للشركة كان بيد السائق، صنفاً صنفاً. خانة «أعاد العهدة» وحدها لا تقول ما الذي عاد ولا بأي حال.
 Every listed passenger boarded,كل راكب في الكشف صعد
 Every passenger on the sheet carries an ID number,كل راكب في الكشف يحمل رقم هوية
+Everything else,ما تبقّى
 "Everything waiting on you, from Frappe's own queues.",كل ما ينتظر إجراءك في قوائم انتظار فرابي.
 Evidence,الأدلة
 Evidence & Follow-up,الأدلة والمتابعة
@@ -2097,6 +2101,7 @@ Identification,التعريف
 Identifier (e.g. Iqama/contractor id) for an unregistered worker.,معرّف (مثل الإقامة/معرّف المتعاقد) لعامل غير مسجّل.
 Identifiers,المعرّفات
 Identity,الهوية
+Identity and access,الهوية والوصول
 Idle Days,أيام التوقف
 Idle Report,تقرير الخمول
 Idle Report Status,حالة تقرير الخمول
@@ -3490,6 +3495,8 @@ Records,السجلات
 Records a vehicle stop event with reason and ownership context.,يسجّل حدث إيقاف مركبة مع السبب وسياق الملكية.
 Records damage on returned custody articles. A salary deduction is applied only when damage deduction is enabled in Habitat Settings.,يسجّل التلف في أصناف العهدة المرتجعة. ولا يُطبّق خصم من الراتب إلا عند تفعيل خصم التلف في إعدادات هابيتات.
 Records execution of a single safety task on a specific date for a specific building.,يسجّل تنفيذ مهمة سلامة واحدة في تاريخ محدد لمبنى محدد.
+Records that belong to no screen yet.,سجلات لا تتبع أي شاشة بعد.
+Records the app writes for itself. Read them to see what a job did; never type into one.,سجلات يكتبها التطبيق لنفسه. اقرأها لتعرف ماذا فعلت المهمة، ولا تكتب فيها.
 Records the handover of a vehicle from one driver to another.,يسجّل تسليم مركبة من سائق إلى آخر.
 Recover,استرداد
 Recover Cost from Driver,استرداد التكلفة من السائق
@@ -4596,6 +4603,7 @@ The initiator and the receiving supervisor must be different people.,يجب أن
 The initiator who shipped the asset cannot confirm its own receipt.,لا يمكن للمُبادر الذي شحن الأصل تأكيد استلامه بنفسه.
 "The inspector declares that every task listed above was checked on site on the round date, that the result written against each task is what was actually seen, and that every fault found is written in the findings table with the person who must clear it and the date it is due. A task not listed here was not checked on this round.",يقر المفتّش بأن كل مهمة مدرجة أعلاه فُحصت في الموقع بتاريخ الجولة، وأن النتيجة المكتوبة أمام كل مهمة هي ما شوهد فعلًا، وأن كل خلل وُجد مكتوب في جدول الملاحظات ومعه من يجب أن يعالجه وتاريخ استحقاقه. وأي مهمة غير مدرجة هنا لم تُفحص في هذه الجولة.
 "The issue line this return answers, resolved on save instead of re-matched at print time.",سطر الصرف الذي يقابله هذا الإرجاع، يُحدَّد عند الحفظ لا عند الطباعة.
+The keys a worker or driver holds instead of a desk account.,المفاتيح التي يحملها العامل أو السائق بدل حساب المكتب.
 "The last day the driver actually worked. HR settles from this date, not from the day the paper was signed.",آخر يوم عمل فيه السائق فعلاً. تحسب الموارد البشرية المستحقات من هذا التاريخ، لا من يوم توقيع الورقة.
 The lease for,عقد إيجار
 The linked Custody Issue {0} must be submitted before returning.,يجب اعتماد صرف العهدة المرتبط {0} قبل الإرجاع.
@@ -5234,6 +5242,7 @@ Write-Off,شطب
 Write-Off Case,قضية الشطب
 Write-Off Operations Threshold (SAR),حد صلاحية العمليات للشطب (ريال)
 Written Off,مشطوب
+Written by the app,يكتبها التطبيق
 Written record of who authorized this request outside the system. Nothing in the app reads this field and a grant submits whether it is filled in or left empty.,سجل يوضح من اعتمد هذا الطلب خارج النظام. لا يستخدم التطبيق هذا الحقل، ويمكن اعتماد منح الصلاحية سواء عُبئ أو تُرك فارغًا.
 Wrong Trip,رحلة خاطئة
 "YYYY-MM, e.g. 2026-05",YYYY-MM، مثال: 2026-05
