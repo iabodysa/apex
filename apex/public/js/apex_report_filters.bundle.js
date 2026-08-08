@@ -63,17 +63,4 @@ Object.assign(apex.report_filters, {
 			...(extra || {}),
 		});
 	},
-
-	date_range(days, extra) {
-		return [
-			apex.report_filters.from_date({
-				default: frappe.datetime.add_days(frappe.datetime.get_today(), -days),
-				...(extra || {}),
-			}),
-			apex.report_filters.to_date({
-				default: frappe.datetime.get_today(),
-				...(extra || {}),
-			}),
-		];
-	},
 });
