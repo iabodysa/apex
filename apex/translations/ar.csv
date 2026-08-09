@@ -2314,6 +2314,7 @@ Landlord,المؤجّر
 Landlord Contract Reference,رقم عقد المالك
 Landlord Signatory,الموقّع عن المالك
 Landlord-issued contract number or file reference.,رقم العقد أو مرجع الملف الصادر من المؤجر.
+Lane must be pending or decided.,يجب أن تكون الفئة «قيد الانتظار» أو «محسومة».
 "Language the resident prefers for updates and responses on this request, so notifications and handling can be routed to staff who can communicate with the worker.",اللغة التي يفضّلها الساكن للتحديثات والردود على هذا الطلب، ليتسنى توجيه الإشعارات والمعالجة إلى الموظفين القادرين على التواصل مع العامل.
 Large Worker Moves Pending Escalation,تنقلات العمالة الكبيرة بانتظار التصعيد
 Last Count Date,تاريخ آخر جرد
@@ -3073,6 +3074,8 @@ P256DH Key,مفتاح P256DH
 POD,إثبات التسليم
 Page {0} of {1},صفحة {0} من {1}
 Page {0} of {1} · {2} SIMs,صفحة {0} من {1} · {2} شريحة
+Page length must be between 1 and {0}.,يجب أن يكون حجم الصفحة بين 1 و{0}.
+Page start cannot be negative.,لا يمكن أن تكون بداية الصفحة رقماً سالباً.
 Paid,مدفوع
 Partial / Attention: {0},جزئي أو يحتاج متابعة: {0}
 Partially Occupied,مشغول جزئياً

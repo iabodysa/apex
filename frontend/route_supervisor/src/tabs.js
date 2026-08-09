@@ -5,13 +5,6 @@
    them back. */
 export const TAB_KEYS = ["approval", "boarding", "route", "map"];
 
-export const TAB_ICONS = {
-  approval: "circle-check",
-  boarding: "bus",
-  route: "route",
-  map: "pin",
-};
-
 /* Above this width the live map is a pane beside the plan, so offering it as a tab as well
    would light a tab over a panel that is already on screen twice. */
 export const tabsFor = (wide) => (wide ? TAB_KEYS.filter((key) => key !== "map") : TAB_KEYS);

@@ -14,27 +14,23 @@
 import IconBase from "@shared/components/IconBase.vue";
 import {
   calendar,
-  car,
-  chevron,
   clipboardList,
   fuel,
   gauge,
-  rotateCw,
-  triangleAlert,
+  home,
+  send,
 } from "@shared/components/icons.js";
 
 const ICONS = {
   calendar,
-  car,
-  chevron,
   "clipboard-list": clipboardList,
   fuel,
   gauge,
-  "rotate-cw": rotateCw,
-  "triangle-alert": triangleAlert,
+  home,
+  send,
 };
 
-const MIRROR = ["chevron"];
+const MIRROR = ["send"];
 
 defineProps({
   name: { type: String, required: true },

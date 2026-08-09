@@ -4,11 +4,23 @@
 // documented regions and expose the layout hooks the portals target.
 import { describe, it, expect } from "vitest";
 import { mount } from "@vue/test-utils";
+import { createMemoryHistory, createRouter } from "vue-router";
 import {
   FleetPageShell,
   MobileConsoleShell,
   TabletSupervisorShell,
 } from "@shared/components/index.js";
+
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes: [{ path: "/", component: { template: "<div />" } }],
+});
+
+const mountSupervisor = (options = {}) =>
+  mount(TabletSupervisorShell, {
+    ...options,
+    global: { ...(options.global || {}), plugins: [router] },
+  });
 
 describe("FleetPageShell", () => {
   it("renders brand, nav, actions and default content", () => {
@@ -50,7 +62,7 @@ describe("MobileConsoleShell", () => {
     });
     expect(w.find(".mc-greet b").text()).toBe("Khalid");
     expect(w.find(".mc-greet small").text()).toBe("Morning");
-    expect(w.find(".mc-scroll .card").exists()).toBe(true);
+    expect(w.find(".mc-frame .card").exists()).toBe(true);
     expect(w.findAll(".mc-nav a").length).toBe(3);
   });
 
@@ -59,27 +71,16 @@ describe("MobileConsoleShell", () => {
     expect(w.find(".mc-nav").exists()).toBe(false);
   });
 
-  // The default is what safety and housing will inherit when they adopt the shell,
-  // and 520 is not a width any archetype-2 screen was designed at.
-  it("defaults the column to the 480px one-hand width", () => {
-    const w = mount(MobileConsoleShell, { slots: { default: "x" } });
-    expect(w.find(".mc-shell").attributes("style")).toContain("--mc-width: 480px");
-  });
-
-  // The width must arrive as a custom property, never as an inline max-width: an
-  // inline declaration out-ranks every stylesheet rule, so the tablet breakpoint
-  // could never widen the column. That is why the shipped shell had no media query.
-  it("hands the width to CSS as a custom property, not an inline max-width", () => {
+  it("accepts the legacy width prop without turning it into a layout target", () => {
     const w = mount(MobileConsoleShell, { props: { maxWidth: 720 }, slots: { default: "x" } });
-    const style = w.find(".mc-shell").attributes("style");
-    expect(style).toContain("--mc-width: 720px");
-    expect(style).not.toMatch(/(^|;)\s*max-width:/);
+    expect(w.find(".mc-shell").attributes("style")).toBeUndefined();
+    expect(w.find(".mc-frame").exists()).toBe(true);
   });
 });
 
 describe("TabletSupervisorShell", () => {
   it("renders side nav, top bar, KPI row and main content", () => {
-    const w = mount(TabletSupervisorShell, {
+    const w = mountSupervisor({
       props: { title: "Overview", subtitle: "Riyadh", accent: "#c0392b" },
       slots: {
         brand: "<b class='brand'>Apex</b>",
@@ -98,7 +99,7 @@ describe("TabletSupervisorShell", () => {
   });
 
   it("toggles the drawer via the menu button", async () => {
-    const w = mount(TabletSupervisorShell, {
+    const w = mountSupervisor({
       slots: { nav: "<a>Board</a>" },
     });
     expect(w.find(".ts-nav-open").exists()).toBe(false);
@@ -108,7 +109,7 @@ describe("TabletSupervisorShell", () => {
   });
 
   it("hides the KPI row when no kpis slot is given", () => {
-    const w = mount(TabletSupervisorShell, { slots: { default: "x" } });
+    const w = mountSupervisor({ slots: { default: "x" } });
     expect(w.find(".ts-kpis").exists()).toBe(false);
   });
 
@@ -117,7 +118,7 @@ describe("TabletSupervisorShell", () => {
   // on slot content. Route Supervisor supplies bare <button>s and relies entirely on
   // that stamp, so a regression here would silently unstyle the whole nav.
   it("stamps the slot scope id on nav items so :slotted rules reach them", () => {
-    const w = mount(TabletSupervisorShell, {
+    const w = mountSupervisor({
       slots: { nav: "<button class='item' disabled>Boarding</button>" },
     });
     const item = w.find(".ts-nav-list .item");

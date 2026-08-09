@@ -17,15 +17,14 @@ defineProps({
 </script>
 
 <style scoped>
-/* Centring uses physical `left` with a transform on purpose: a transformed element does not
-   flip with the writing direction, so pairing it with `inset-inline-start` pushed the toast
-   off-canvas in RTL. */
 .portal-toast {
   position: fixed;
   inset-block-end: var(--sp-6);
-  left: 50%;
-  transform: translate(-50%, var(--sp-5));
-  max-width: min(90vw, 460px);
+  inset-inline: 0;
+  inline-size: max-content;
+  max-inline-size: min(90vw, 460px);
+  margin-inline: auto;
+  transform: translateY(var(--sp-5));
   padding: var(--sp-3) var(--sp-5);
   border-radius: var(--radius-pill);
   font-size: var(--fs-sm);
@@ -41,7 +40,7 @@ defineProps({
 }
 .portal-toast.show {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: translateY(0);
 }
 .toast-ok {
   background: var(--c-success);

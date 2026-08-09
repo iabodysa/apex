@@ -7,10 +7,12 @@ export default {
     none: "—",
     back: "رجوع",
     driverPortal: "بوابة السائق",
+    skipContent: "تجاوز إلى المحتوى",
     operatorLogo: "شعار الجهة المشغّلة",
     staff: "موظف",
     goToApp: "الذهاب إلى التطبيق الرئيسي",
     done: "تم",
+    more: "المزيد",
   },
   install: {
     body: "ثبّت تطبيق سائق سالس للوصول السريع بملء الشاشة.",
@@ -41,6 +43,7 @@ export default {
     fuel: "الوقود",
     tickets: "الدعم",
     profile: "الملف",
+    more: "المزيد",
   },
   home: {
     vehicle: "المركبة",

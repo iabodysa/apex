@@ -1,8 +1,7 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
-    <h2 class="section-title">{{ t("accommodation.title") }}</h2>
-
+    <HousingNav />
     <template v-if="acc.loading && !ad">
       <Skeleton variant="stats" :lines="3" />
       <Skeleton :lines="4" />
@@ -11,9 +10,7 @@
     <div v-else-if="acc.error && !ad" class="card card-pad text-center">
       <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
       <p class="text-sm text-muted">{{ errorMessage }}</p>
-      <button class="btn btn-primary mt-3" style="width: auto; padding-inline: 24px" @click="acc.reload()">
-        {{ t("common.retry") }}
-      </button>
+      <Button class="mt-3" variant="outline" size="xl" :label="t('common.retry')" @click="acc.reload()" />
     </div>
 
     <template v-else-if="ad && ad.assignment">
@@ -99,8 +96,9 @@
 
 <script setup>
 import { computed, h } from "vue";
-import { createResource } from "frappe-ui";
+import { Button, createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import HousingNav from "../components/HousingNav.vue";
 import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatDate } from "../utils/datetime";
@@ -140,4 +138,3 @@ const Row = (rprops) =>
     h("dd", { class: "ms-auto font-semibold" }, h("bdi", null, rprops.value || t("common.none"))),
   ]);
 </script>
-

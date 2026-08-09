@@ -8,10 +8,11 @@
     :class="{ 'fp-sheet-open': sheetOpen }"
     :role="isModal ? 'dialog' : null"
     :aria-modal="isModal ? 'true' : null"
-    :aria-label="t('sidebar.filtersAndStats')"
+    :aria-label="t('sidebar.filters')"
   >
     <div class="sidebar-header">
-      <span class="sidebar-title"><Icon name="funnel" :size="13" /> {{ t("sidebar.filtersAndStats") }}</span>
+      <span class="sidebar-kicker">{{ t("sidebar.eyebrow") }}</span>
+      <span class="sidebar-title"><Icon name="funnel" :size="15" /> {{ t("sidebar.filters") }}</span>
       <Button
         class="fp-mobile-only"
         variant="ghost"
@@ -24,9 +25,8 @@
     </div>
 
     <div class="sidebar-scroll">
-      <!-- Debounced so a search does not rewrite the address on every keystroke; the field is
-           in the filter rail rather than the header because the header carries the page's
-           identity and at most two actions, never a filter. -->
+      <p class="sidebar-intro">{{ t("sidebar.intro") }}</p>
+
       <FormControl
         v-model="search"
         type="text"
@@ -76,7 +76,7 @@
         <TabButtons :buttons="fuelButtons" :model-value="f.fuel.value" @update:model-value="setFilter('fuel', $event)" />
       </div>
 
-      <div class="sep"></div>
+      <div class="filter-separator"></div>
 
       <div class="fg">
         <div class="fl"><Icon name="calendar" :size="13" /> {{ t("sidebar.dateSearchType") }}</div>
@@ -114,22 +114,10 @@
 
       <p v-if="hasDateFilter" class="fp-date-info">{{ dateInfo }}</p>
 
-      <div class="sep"></div>
+      <div class="filter-separator"></div>
       <Button class="fp-block-btn" variant="outline" size="xl" :label="t('sidebar.reset')" @click="resetFilters()">
         <template #prefix><Icon name="rotate-cw" :size="15" /></template>
       </Button>
-
-      <div class="sep"></div>
-      <div class="fl"><Icon name="chart-column" :size="13" /> {{ t("sidebar.quickStats") }}</div>
-      <div v-if="countsLoading" class="stat-mini-grid" aria-hidden="true">
-        <div v-for="n in 7" :key="n" class="stat-mini fp-stat-skel"></div>
-      </div>
-      <div v-else class="stat-mini-grid">
-        <div v-for="stat in stats" :key="stat.key" class="stat-mini">
-          <div class="stat-mini-n">{{ stat.value }}</div>
-          <div class="stat-mini-l">{{ stat.label }}</div>
-        </div>
-      </div>
     </div>
   </aside>
 </template>
@@ -145,8 +133,7 @@ import Icon from "../Icon.vue";
 import { useBoardContext } from "../boardContext.js";
 import { useFilterSheet } from "../filterSheet.js";
 
-const { t, state, board, filters } = useBoardContext();
-const { counts, countsLoading } = board;
+const { t, state, filters } = useBoardContext();
 const { projectOptions, areaOptions, officeOptions, dateInfo } = filters;
 const { f, hasDateFilter, setFilter, setQuickDate, clearDates, resetFilters } = state;
 
@@ -190,13 +177,4 @@ const ranges = computed(() => [
   { days: 365, label: t("sidebar.year1") },
 ]);
 
-const stats = computed(() => [
-  { key: "total", value: counts.value.total, label: t("sidebar.total") },
-  { key: "assigned", value: counts.value.assigned, label: t("sidebar.assigned") },
-  { key: "available", value: counts.value.available, label: t("sidebar.available") },
-  { key: "workshop", value: counts.value.workshop, label: t("sidebar.workshop") },
-  { key: "stopped", value: counts.value.stopped, label: t("sidebar.stopped") },
-  { key: "stolen", value: counts.value.stolen, label: t("sidebar.stolen") },
-  { key: "drivers", value: counts.value.drivers, label: t("sidebar.drivers") },
-]);
 </script>

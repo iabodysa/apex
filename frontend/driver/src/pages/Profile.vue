@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
-    <h2 class="section-title">{{ t("profile.title") }}</h2>
-
     <LoadingState v-if="profile.loading" :label="t('common.loading')" />
 
     <ErrorState v-else-if="profile.error" :message="t('errors.loadFailed')" @retry="profile.reload()" />
@@ -70,14 +68,18 @@
           </div>
         </dl>
 
-        <button
+        <Button
           v-if="licenseDue"
-          class="btn btn-outline mt-3"
+          class="mt-3"
+          variant="outline"
+          size="xl"
           :disabled="renewal.loading"
+          :loading="renewal.loading"
+          :label="t('profile.requestRenewal')"
           @click="requestRenewal"
         >
-          <Icon name="alert" :size="18" /> {{ t("profile.requestRenewal") }}
-        </button>
+          <template #prefix><Icon name="alert" :size="18" /></template>
+        </Button>
       </section>
 
       <section v-if="documents.length" class="card card-pad">
@@ -131,15 +133,20 @@
             </div>
           </template>
         </dl>
-        <button
+        <Button
           v-if="clearanceRow.issued"
           type="button"
           :disabled="certificate.loading"
-          class="btn btn-primary mt-3"
+          class="mt-3"
+          variant="solid"
+          theme="green"
+          size="xl"
+          :loading="certificate.loading"
+          :label="t('clearance.downloadCertificate')"
           @click="downloadClearanceCertificate"
         >
-          <Icon name="badge" :size="18" /> {{ t("clearance.downloadCertificate") }}
-        </button>
+          <template #prefix><Icon name="badge" :size="18" /></template>
+        </Button>
       </section>
 
       <div class="space-y-2">
@@ -190,15 +197,17 @@
             <div class="text-sm font-semibold">{{ t("push.title") }}</div>
             <div class="text-xs text-muted">{{ t("push.body") }}</div>
           </div>
-          <button
+          <Button
             type="button"
-            class="btn btn-sm ms-auto shrink-0"
-            :class="isSubscribed ? 'btn-ghost' : 'btn-primary'"
+            class="ms-auto shrink-0"
+            :variant="isSubscribed ? 'outline' : 'solid'"
+            :theme="isSubscribed ? 'gray' : 'green'"
+            size="lg"
             :disabled="isBusy"
+            :loading="isBusy"
+            :label="isSubscribed ? t('push.disable') : t('push.enable')"
             @click="togglePush"
-          >
-            {{ isSubscribed ? t("push.disable") : t("push.enable") }}
-          </button>
+          />
         </div>
         <div v-if="isDenied" class="text-xs text-warning mt-2">{{ t("push.denied") }}</div>
       </section>
@@ -210,7 +219,7 @@
 
 <script setup>
 import { computed, onMounted } from "vue";
-import { createResource } from "frappe-ui";
+import { Button, createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
 import LoadingState from "../components/LoadingState.vue";
@@ -231,10 +240,7 @@ import {
 const { t } = useI18n();
 
 const moreLinks = [
-  { to: "/", icon: "home", labelKey: "profile.dashboard" },
-  { to: "/route", icon: "route", labelKey: "home.myRoute" },
   { to: "/vehicle", icon: "truck", labelKey: "home.myVehicle" },
-  { to: "/attendance", icon: "calendar", labelKey: "home.attendance" },
 ];
 
 onMounted(initPush);

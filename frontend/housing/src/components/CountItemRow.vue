@@ -15,9 +15,9 @@
       <span class="row-meta">
         <span>{{ tEnum("category", row.item_category) }}</span>
         <span class="row-sep" aria-hidden="true">·</span>
-        <span>{{ t("card.counted") }} <bdi class="mono">{{ fmt(model.counted_quantity) }}</bdi></span>
+        <span>{{ t("card.counted") }} <bdi class="tnum">{{ fmt(model.counted_quantity) }}</bdi></span>
         <span class="row-sep" aria-hidden="true">·</span>
-        <span>{{ t("card.expected") }} <bdi class="mono">{{ fmt(row.expected_quantity) }}</bdi></span>
+        <span>{{ t("card.expected") }} <bdi class="tnum">{{ fmt(row.expected_quantity) }}</bdi></span>
       </span>
     </span>
 
@@ -25,7 +25,7 @@
       <Badge v-if="edited" theme="blue" size="sm" :label="t('list.edited')" />
       <Badge :theme="varianceTheme" size="lg">
         <template #prefix><Icon :name="varianceIcon" :size="16" /></template>
-        <bdi class="mono">{{ varianceText }}</bdi>
+        <bdi class="tnum">{{ varianceText }}</bdi>
       </Badge>
     </span>
   </button>
@@ -74,12 +74,12 @@ const varianceIcon = computed(() => {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  width: 100%;
-  min-height: var(--tap-lg);
-  padding: var(--sp-3) var(--sp-4);
-  border: var(--border-width) solid var(--c-border);
-  border-radius: var(--radius);
-  background: var(--c-surface-2);
+  inline-size: 100%;
+  min-block-size: 68px;
+  padding: var(--sp-3) var(--sp-1);
+  border: 0;
+  border-block-end: var(--border-width) solid var(--c-border);
+  background: transparent;
   text-align: start;
   cursor: pointer;
   touch-action: manipulation;
@@ -89,7 +89,7 @@ const varianceIcon = computed(() => {
 }
 @media (hover: hover) {
   .row:hover {
-    border-color: var(--c-border-strong);
+    background: color-mix(in srgb, var(--c-ink) 4%, transparent);
   }
 }
 .row:focus-visible {
@@ -100,24 +100,24 @@ const varianceIcon = computed(() => {
   border-inline-start: 3px solid var(--c-primary);
 }
 .row-open {
-  border-color: var(--c-primary);
-  background: color-mix(in srgb, var(--c-primary) 7%, var(--c-surface-2));
+  border-inline-start: 3px solid var(--c-primary);
+  background: color-mix(in srgb, var(--c-primary) 7%, transparent);
 }
 
 .row-mark {
   display: grid;
   place-items: center;
-  height: var(--tap-min);
-  width: var(--tap-min);
+  block-size: var(--tap-min);
+  inline-size: var(--tap-min);
   flex-shrink: 0;
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   color: var(--c-primary);
   background: color-mix(in srgb, var(--c-primary) 10%, transparent);
 }
 
 .row-id {
   flex: 1;
-  min-width: 0;
+  min-inline-size: 0;
   display: flex;
   flex-direction: column;
   gap: var(--sp-1);

@@ -2,6 +2,7 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 
 import FleetMapView from "./views/FleetMapView.vue";
+import HistoryView from "./views/HistoryView.vue";
 import PlansView from "./views/PlansView.vue";
 import QueueView from "./views/QueueView.vue";
 
@@ -13,11 +14,13 @@ import QueueView from "./views/QueueView.vue";
 /* Statically imported: the page template links exactly one stylesheet, so a lazily loaded view
    would have to inject its own at runtime for the sake of a few kilobytes. */
 const routes = [
-  { path: "/", name: "plans", component: PlansView },
+  { path: "/", redirect: "/approvals" },
+  { path: "/routes", name: "routes", component: PlansView },
   { path: "/plan/:name/:tab?", name: "plan", component: PlansView },
   { path: "/approvals", name: "approvals", component: QueueView },
   { path: "/map", name: "map", component: FleetMapView },
-  { path: "/:pathMatch(.*)*", redirect: "/" },
+  { path: "/history", name: "history", component: HistoryView },
+  { path: "/:pathMatch(.*)*", redirect: "/approvals" },
 ];
 
 export default createRouter({

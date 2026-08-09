@@ -1,0 +1,76 @@
+/* Copyright (c) 2026, afmcoltd */
+/* Map Apex semantic tokens to frappe-ui's public colour vocabulary. */
+
+html:root,
+html[data-theme="dark"] {
+  --surface-white: var(--c-surface-2);
+  --surface-gray-1: var(--c-surface);
+  --surface-gray-2: color-mix(in srgb, var(--c-ink) 6%, transparent);
+  --surface-gray-3: color-mix(in srgb, var(--c-ink) 10%, transparent);
+  --surface-gray-4: color-mix(in srgb, var(--c-ink) 16%, transparent);
+  --surface-gray-5: var(--c-ink-soft);
+  --surface-gray-6: var(--c-ink-soft);
+  --surface-gray-7: var(--c-ink);
+  --surface-modal: var(--c-surface-2);
+  --surface-cards: var(--c-surface-2);
+  --surface-menu-bar: var(--c-surface);
+  --surface-selected: color-mix(in srgb, var(--c-primary) 12%, transparent);
+  --surface-green-1: color-mix(in srgb, var(--c-success) 8%, transparent);
+  --surface-green-2: var(--c-success-bg);
+  --surface-green-3: var(--c-primary);
+  --surface-red-1: var(--c-danger-bg);
+  --surface-red-2: var(--c-danger-bg);
+  --surface-red-3: var(--c-danger);
+  --surface-red-4: var(--c-danger);
+  --surface-red-5: var(--c-danger);
+  --surface-red-6: var(--c-danger);
+  --surface-red-7: var(--c-danger);
+  --surface-amber-1: var(--c-warning-bg);
+  --surface-amber-2: var(--c-warning-bg);
+  --surface-amber-3: var(--c-warning);
+  --surface-blue-1: var(--c-info-bg);
+  --surface-blue-2: var(--c-info-bg);
+  --surface-blue-3: var(--c-info);
+
+  --ink-white: var(--c-primary-ink);
+  --ink-gray-1: var(--c-muted);
+  --ink-gray-2: var(--c-muted);
+  --ink-gray-3: var(--c-muted);
+  --ink-gray-4: var(--c-muted);
+  --ink-gray-5: var(--c-ink-soft);
+  --ink-gray-6: var(--c-ink-soft);
+  --ink-gray-7: var(--c-ink-soft);
+  --ink-gray-8: var(--c-ink);
+  --ink-gray-9: var(--c-ink);
+  --ink-green-1: var(--c-primary-ink);
+  --ink-green-2: var(--c-success);
+  --ink-green-3: var(--c-success);
+  --ink-red-1: var(--c-primary-ink);
+  --ink-red-2: var(--c-danger);
+  --ink-red-3: var(--c-danger);
+  --ink-red-4: var(--c-danger);
+  --ink-amber-1: var(--c-primary-ink);
+  --ink-amber-2: var(--c-warning);
+  --ink-amber-3: var(--c-warning);
+  --ink-blue-1: var(--c-primary-ink);
+  --ink-blue-2: var(--c-info);
+  --ink-blue-3: var(--c-info);
+  --ink-blue-link: var(--c-info);
+
+  --outline-white: var(--c-surface-2);
+  --outline-gray-1: var(--c-border);
+  --outline-gray-2: var(--c-border);
+  --outline-gray-3: var(--c-border-strong);
+  --outline-gray-4: var(--c-border-control);
+  --outline-gray-5: var(--c-border-control);
+  --outline-gray-modals: var(--c-border);
+  --outline-green-1: var(--c-primary);
+  --outline-green-2: var(--c-primary);
+  --outline-red-1: var(--c-danger);
+  --outline-red-2: var(--c-danger);
+  --outline-red-3: var(--c-danger);
+  --outline-amber-1: var(--c-warning);
+  --outline-amber-2: var(--c-warning);
+  --outline-blue-1: var(--c-info);
+  --outline-orange-1: var(--c-warning);
+}

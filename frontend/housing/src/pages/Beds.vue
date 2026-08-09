@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <BuildingSwitcher v-if="!building" @select="onBuildingSelected" />
-
-  <ListSkeleton v-else-if="gridRes.loading && !grid" :rows="6" :label="t('beds.loadingLabel')" />
+  <ListSkeleton v-if="gridRes.loading && !grid" :rows="6" :label="t('beds.loadingLabel')" />
 
   <LoadError
     v-else-if="gridRes.error"
@@ -214,14 +212,13 @@ import {
 } from "frappe-ui";
 import EmptyState from "@shared/components/EmptyState.vue";
 import BedGrid from "../components/BedGrid.vue";
-import BuildingSwitcher from "../components/BuildingSwitcher.vue";
 import Icon from "../components/Icon.vue";
 import ListSkeleton from "../components/ListSkeleton.vue";
 import LoadError from "../components/LoadError.vue";
 import { call } from "@shared/call";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { can, hasSection } from "../portal.js";
-import { building, clearBuilding, localDate, selectBuilding } from "../session";
+import { building, clearBuilding, localDate } from "../session";
 
 const { t, tEnum } = useI18n();
 const route = useRoute();
@@ -311,10 +308,6 @@ function fetchAll() {
   if (!building.value) return;
   gridRes.fetch();
   requestsRes.fetch();
-}
-
-function onBuildingSelected(name, label) {
-  selectBuilding(name, label);
 }
 
 function onChangeBuilding() {
@@ -491,14 +484,13 @@ function goToCustody() {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  padding: var(--sp-3);
-  border-radius: var(--radius);
-  border: var(--border-width) solid var(--c-border);
-  background: var(--c-surface-2);
+  padding-block: var(--sp-3);
+  border-block: var(--border-width) solid var(--c-border);
+  background: transparent;
 }
 .worker-photo {
-  height: 44px;
-  width: 44px;
+  block-size: 44px;
+  inline-size: 44px;
   border-radius: var(--radius-pill);
   object-fit: cover;
   flex-shrink: 0;
@@ -510,7 +502,7 @@ function goToCustody() {
   background: color-mix(in srgb, var(--c-ink) 8%, transparent);
 }
 .worker-body {
-  min-width: 0;
+  min-inline-size: 0;
   display: flex;
   flex-direction: column;
 }

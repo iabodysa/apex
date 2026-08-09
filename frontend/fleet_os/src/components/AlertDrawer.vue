@@ -23,7 +23,14 @@
         </EmptyState>
 
         <template v-else>
-        <button v-for="a in alerts" :key="a.name" type="button" class="ad-row" @click="openAlertTarget(a)">
+        <button
+          v-for="a in alerts"
+          :key="a.name"
+          type="button"
+          class="ad-row"
+          :disabled="!alertVehicleOnBoard(a)"
+          @click="openAlertTarget(a)"
+        >
           <span class="ad-row-top">
             <Badge :theme="sevTheme(a.severity)" size="sm" :label="sevLabel(a.severity)" />
             <span class="ad-when"><bdi>{{ a.raised_on }}</bdi></span>
@@ -33,7 +40,7 @@
             <bdi v-if="a.vehicle_plate">{{ a.vehicle_plate }}</bdi>
             <span v-if="a.driver_name">· {{ a.driver_name }}</span>
             <span class="ad-link">
-              {{ alertVehicleOnBoard(a) ? t("alerts.viewVehicle") : t("alerts.openInDesk") }}
+              {{ alertVehicleOnBoard(a) ? t("alerts.viewVehicle") : t("alerts.targetUnavailable") }}
             </span>
           </span>
         </button>

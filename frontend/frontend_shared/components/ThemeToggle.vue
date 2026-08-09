@@ -1,23 +1,26 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="theme-toggle" role="group" :aria-label="t('theme.label')">
-    <button
+    <Button
       v-for="m in MODES"
       :key="m"
       type="button"
       class="theme-opt"
+      variant="ghost"
+      size="xl"
       :class="{ 'theme-opt-active': mode === m }"
+      :label="t('theme.' + m)"
       :aria-pressed="mode === m"
       :aria-label="t('theme.' + m)"
       @click="setMode(m)"
     >
-      <IconBase :shape="ICONS[m]" :size="13" :align="true" />
-      <span>{{ t("theme." + m) }}</span>
-    </button>
+      <template #prefix><IconBase :shape="ICONS[m]" :size="13" :align="true" /></template>
+    </Button>
   </div>
 </template>
 
 <script setup>
+import { Button } from "frappe-ui";
 import { ref, onMounted } from "vue";
 import IconBase from "./IconBase.vue";
 import { circleCheck, circleDot, settings } from "./icons.js";
@@ -79,13 +82,11 @@ onMounted(() => {
   gap: 5px;
   min-height: var(--tap-min);
   padding: var(--sp-1) 10px;
-  border: none;
   border-radius: var(--radius-pill);
   font-family: inherit;
   font-size: 12px;
   font-weight: var(--fw-semibold);
   line-height: 1;
-  cursor: pointer;
   color: color-mix(in srgb, var(--c-header-ink) 72%, transparent);
   background: transparent;
   transition: background 0.15s ease, color 0.15s ease;
@@ -102,7 +103,6 @@ onMounted(() => {
 }
 .theme-opt:disabled {
   opacity: 0.45;
-  cursor: default;
 }
 @media (max-width: 480px) {
   .theme-opt span {

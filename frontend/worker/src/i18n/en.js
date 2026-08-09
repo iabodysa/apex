@@ -8,6 +8,7 @@ export default {
     none: "—",
     error: "Something went wrong.",
     workerApp: "Worker App",
+    skipContent: "Skip to content",
     call: "Call",
     whatsapp: "WhatsApp",
     openMap: "Open map",
@@ -38,6 +39,7 @@ export default {
     transport: "Transport",
     custody: "Custody",
     requests: "Requests",
+    housingHelp: "Housing & help",
   },
   home: {
     title: "Today",

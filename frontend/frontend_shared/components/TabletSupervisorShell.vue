@@ -17,16 +17,20 @@
 
     <div class="ts-main">
       <header class="ts-top">
-        <button
-          type="button"
+        <Button
           class="ts-menu"
+          variant="ghost"
+          size="xl"
+          :label="menuLabel"
           :aria-label="menuLabel"
           aria-haspopup="true"
           :aria-expanded="drawerOpen ? 'true' : 'false'"
           @click="drawerOpen = !drawerOpen"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
-        </button>
+          <template #icon>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </template>
+        </Button>
         <div class="ts-title">
           <h1>{{ title }}</h1>
           <div v-if="subtitle" class="ts-sub">{{ subtitle }}</div>
@@ -44,6 +48,7 @@
 
 <script setup>
 import { ref, computed, onScopeDispose } from "vue";
+import { Button } from "frappe-ui";
 import { useOverlay } from "../useOverlay.js";
 
 const props = defineProps({
@@ -87,9 +92,11 @@ const shellVars = computed(() => ({
 <style scoped>
 .ts-shell {
   display: flex;
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: var(--c-surface);
+  block-size: 100vh;
+  block-size: 100dvh;
+  min-inline-size: 0;
+  overflow: hidden;
+  background: var(--c-canvas);
   color: var(--c-ink);
   font-family: var(--font);
   font-weight: var(--fw-body);
@@ -100,7 +107,9 @@ const shellVars = computed(() => ({
   width: var(--ts-nav-w);
   background: var(--c-header-bg);
   color: var(--c-header-ink);
-  padding: var(--sp-5) var(--sp-4);
+  min-block-size: 0;
+  overflow-y: auto;
+  padding: var(--sp-5) var(--sp-4) calc(var(--sp-5) + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -174,27 +183,41 @@ const shellVars = computed(() => ({
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  background: var(--c-surface);
+  min-inline-size: 0;
+  min-block-size: 0;
+  background: var(--c-canvas);
 }
 .ts-top {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   gap: 14px;
   padding: var(--sp-4) clamp(var(--sp-4), 3vw, var(--sp-6));
-  border-bottom: var(--border-width) solid var(--c-border);
+  overflow: hidden;
+  border-block-end: var(--border-width) solid color-mix(in srgb, var(--c-header-ink) 14%, transparent);
+  background: var(--c-header-bg);
+  color: var(--c-header-ink);
+}
+.ts-top::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset-block: -160%;
+  inset-inline-end: clamp(4rem, 24vw, 24rem);
+  inline-size: 1px;
+  background: var(--c-header-accent);
+  opacity: 0.3;
+  transform: rotate(24deg);
 }
 .ts-menu {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-sm);
-  border: var(--border-width) solid var(--c-border);
-  background: var(--c-surface-2);
-  color: var(--c-ink);
-  cursor: pointer;
+  min-inline-size: var(--tap-min);
+  min-block-size: var(--tap-min);
+  color: var(--c-header-ink);
+  background: color-mix(in srgb, var(--c-header-ink) 10%, transparent);
   flex: 0 0 auto;
 }
 .ts-menu:focus-visible {
@@ -205,11 +228,11 @@ const shellVars = computed(() => ({
   margin: 0;
   font-size: var(--fs-h2);
   font-weight: var(--fw-heading);
-  letter-spacing: -0.01em;
+  color: var(--c-header-ink);
 }
 .ts-sub {
   font-size: var(--fs-sm);
-  color: var(--c-muted);
+  color: color-mix(in srgb, var(--c-header-ink) 68%, transparent);
 }
 .ts-top-actions {
   margin-inline-start: auto;
@@ -220,15 +243,25 @@ const shellVars = computed(() => ({
 
 .ts-scroll {
   flex: 1;
+  min-inline-size: 0;
+  min-block-size: 0;
   overflow-y: auto;
+  overflow-x: clip;
   padding: 18px clamp(var(--sp-4), 3vw, var(--sp-6)) 28px;
 }
 
 .ts-kpis {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 13px;
-  margin-bottom: 18px;
+  display: flex;
+  min-inline-size: 0;
+  margin-block-end: var(--sp-5);
+  overflow-x: auto;
+  border-block: 1px solid var(--c-border-strong);
+}
+.ts-kpis :slotted(*) {
+  flex: 1 0 min(12rem, 70vw);
+  border-inline-end: 1px solid var(--c-border);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .ts-scrim {

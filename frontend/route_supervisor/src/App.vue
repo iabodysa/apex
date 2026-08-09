@@ -1,86 +1,59 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <TabletSupervisorShell :title="t('list.title')" :subtitle="summary" :menu-label="t('nav.menu')">
+  <PortalFrame
+    :title="sceneTitle"
+    :eyebrow="sceneEyebrow"
+    :subtitle="sceneSubtitle"
+    :navigation-label="t('nav.menu')"
+    :skip-label="t('nav.skip')"
+  >
     <template #brand>
-      <span class="brand-mark"><Brand :size="24" /></span>
-      <span class="brand-txt">
-        <span class="brand-name">{{ t("brand.name") }}</span>
-        <span class="brand-sub">{{ t("brand.sub") }}</span>
+      <Brand variant="reverse" :size="32" />
+      <span class="portal-brand-copy">
+        <strong>{{ t("brand.name") }}</strong>
+        <span>{{ t("brand.sub") }}</span>
       </span>
     </template>
 
-    <template #nav>
-      <span class="nav-label">{{ t("nav.work") }}</span>
-
-      <template v-if="selectedName">
-        <router-link
-          v-for="tb in shownTabs"
-          :key="tb.key"
-          :to="planRoute(selectedName, tb.key)"
-          :class="{ 'is-active': onPlan && tab === tb.key }"
-        >
-          <Icon :name="tb.icon" :size="17" />
-          <span>{{ t("tabs." + tb.key) }}</span>
-          <span v-if="tb.key === 'approval' && pendingCount" class="nav-count">{{ pendingCount }}</span>
-        </router-link>
-      </template>
-      <template v-else>
-        <button v-for="tb in shownTabs" :key="'off-' + tb.key" type="button" disabled>
-          <Icon :name="tb.icon" :size="17" />
-          <span>{{ t("tabs." + tb.key) }}</span>
-        </button>
-      </template>
-
-      <span class="nav-label">{{ t("nav.screens") }}</span>
-      <router-link to="/approvals">
-        <Icon name="circle-check" :size="17" />
-        <span>{{ t("queue.title") }}</span>
-        <span v-if="pendingCount" class="nav-count">{{ pendingCount }}</span>
-      </router-link>
-      <router-link to="/map">
-        <Icon name="pin" :size="17" />
-        <span>{{ t("fleetMap.title") }}</span>
-      </router-link>
-
-      <span class="nav-label">{{ t("nav.account") }}</span>
-      <span v-if="supervisorName" class="nav-user">
+    <template #header-actions>
+      <span v-if="supervisorName" class="portal-user">
         <Icon name="user" :size="16" />
         <span>{{ supervisorName }}</span>
       </span>
-    </template>
-
-    <template #title-actions>
       <Button
         variant="outline"
         size="lg"
-        :label="t('common.refresh')"
+        :aria-label="t('common.refresh')"
         :loading="loadState === 'loading'"
         @click="plans.load()"
       >
         <template #icon><Icon name="refresh" :size="17" /></template>
       </Button>
-      <LangToggle />
+      <LangToggle variant="header" />
     </template>
 
-    <template #kpis>
-      <div class="kpi">
-        <span class="kpi-label">{{ t("kpi.pending") }}</span>
-        <b class="kpi-num">{{ pendingCount }}</b>
-      </div>
-      <div class="kpi">
-        <span class="kpi-label">{{ t("kpi.active") }}</span>
-        <b class="kpi-num">{{ totalCount }}</b>
-      </div>
-      <div v-if="selectedBoarding" class="kpi">
-        <span class="kpi-label">{{ t("kpi.boarding") }}</span>
-        <b class="kpi-num">
-          {{ selectedBoarding.boarded }}/{{ selectedBoarding.expected || t("common.none") }}
-        </b>
-      </div>
+    <template #nav>
+      <router-link to="/approvals" :class="{ 'is-active': navSection === 'inbox' }">
+        <Icon name="circle-check" :size="18" />
+        <span>{{ t("nav.inbox") }}</span>
+        <bdi v-if="pendingCount" class="nav-count">{{ pendingCount }}</bdi>
+      </router-link>
+      <router-link to="/routes" :class="{ 'is-active': navSection === 'routes' }">
+        <Icon name="route" :size="18" />
+        <span>{{ t("nav.routes") }}</span>
+      </router-link>
+      <router-link to="/map" :class="{ 'is-active': navSection === 'map' }">
+        <Icon name="pin" :size="18" />
+        <span>{{ t("nav.liveFleet") }}</span>
+      </router-link>
+      <router-link to="/history" :class="{ 'is-active': navSection === 'history' }">
+        <Icon name="clipboard-check" :size="18" />
+        <span>{{ t("nav.history") }}</span>
+      </router-link>
     </template>
 
     <router-view />
-  </TabletSupervisorShell>
+  </PortalFrame>
 
   <Dialog v-model="rejectOpen" :options="rejectOptions" @close="closeReject">
     <template #body-content>
@@ -101,14 +74,13 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import { Button, Dialog, ErrorMessage, FormControl } from "frappe-ui";
 
 import Brand from "@shared/components/Brand.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
-import TabletSupervisorShell from "@shared/components/TabletSupervisorShell.vue";
-import { useMediaQuery } from "@shared/useBreakpoint.js";
+import PortalFrame from "@shared/components/PortalFrame.vue";
 import { useDocumentLanguage } from "@shared/useDocumentLanguage";
 import { usePoll } from "@shared/usePoll.js";
 import { useToast } from "@shared/useToast.js";
@@ -116,58 +88,51 @@ import { useToast } from "@shared/useToast.js";
 import Icon from "./Icon.vue";
 import PortalToast from "./components/PortalToast.vue";
 import { provideActions } from "./actions.js";
+import { laneForPlan } from "./planLanes.js";
 import { connectRouteSupervisorRealtime } from "./realtime.js";
 import { createPlansStore } from "./usePlans.js";
-import { TAB_ICONS, TAB_KEYS, tabsFor } from "./tabs.js";
 import { useI18n } from "@/i18n";
 
 const { t, lang, dir } = useI18n();
 useDocumentLanguage(lang, dir);
 
 const route = useRoute();
-const router = useRouter();
 const plans = createPlansStore();
-const { loadState, pendingCount, totalCount, supervisorName, busy } = plans;
+const { loadState, pendingCount, activeCount, supervisorName, busy } = plans;
 const { toast, showToast } = useToast();
 
-const wide = useMediaQuery("(min-width: 1280px)");
-const shownTabs = computed(() =>
-  tabsFor(wide.value).map((key) => ({ key, icon: TAB_ICONS[key] })),
+const selectedPlan = computed(() =>
+  route.name === "plan" ? plans.planByName(String(route.params.name || "")) : null,
 );
+const selectedSection = computed(() => {
+  if (!selectedPlan.value) return "routes";
+  return ({ pending: "inbox", active: "routes", history: "history" })[
+    laneForPlan(selectedPlan.value)
+  ];
+});
+const navSection = computed(() => {
+  if (route.name === "plan") return selectedSection.value;
+  return ({ approvals: "inbox", routes: "routes", map: "map", history: "history" })[route.name] || "inbox";
+});
 
-const onPlan = computed(() => route.name === "plan");
-const selectedName = computed(() => (onPlan.value ? String(route.params.name) : ""));
-const askedTab = computed(() => (onPlan.value ? String(route.params.tab || "") : ""));
-const tab = computed(() =>
-  shownTabs.value.some((tb) => tb.key === askedTab.value) ? askedTab.value : TAB_KEYS[0],
-);
-
-const selectedPlan = computed(() => plans.planByName(selectedName.value));
-const selectedBoarding = computed(() => selectedPlan.value?.trip?.boarding || null);
-const summary = computed(() =>
-  t("header.summary", { p: pendingCount.value, t: totalCount.value }),
-);
-
-const planRoute = (name, key) => ({ name: "plan", params: { name, tab: key } });
-
-/* A shared link that names a tab this width does not offer, or names none at all, is rewritten
-   rather than left pointing at nothing. Replace, not push: the reader did not navigate. */
-watch(
-  [askedTab, shownTabs, selectedName],
-  () => {
-    if (!onPlan.value || !selectedName.value) return;
-    if (askedTab.value !== tab.value) {
-      router.replace(planRoute(selectedName.value, tab.value));
-    }
-  },
-  { immediate: true },
-);
+const sceneTitle = computed(() => {
+  if (route.name === "plan") return "";
+  return t(`scenes.${navSection.value}.title`);
+});
+const sceneEyebrow = computed(() => (route.name === "plan" ? "" : t("scenes.eyebrow")));
+const sceneSubtitle = computed(() => {
+  if (route.name === "plan") return "";
+  if (navSection.value === "inbox") return t("scenes.inbox.subtitle", { n: pendingCount.value });
+  if (navSection.value === "routes") {
+    return t("scenes.routes.subtitle", { n: activeCount.value });
+  }
+  return t(`scenes.${navSection.value}.subtitle`);
+});
 
 const rejectOpen = ref(false);
 const rejectReason = ref("");
 const rejectError = ref("");
-/* The plan the dialog is about. Holding it here instead of moving the selection is what stops a
-   rejection raised from the queue from navigating the supervisor out of the queue. */
+// Keep dialog target independent from route selection. A queue decision must not move the reader.
 const rejectTarget = ref("");
 
 const rejectOptions = computed(() => ({
@@ -215,8 +180,10 @@ async function confirmReject({ close }) {
 
 async function approvePlan(name) {
   const res = await plans.approve(name);
-  showToast(res.ok ? t("approval.approvedToast") : res.message || t("approval.actionError"),
-    res.ok ? "ok" : "bad");
+  showToast(
+    res.ok ? t("approval.approvedToast") : res.message || t("approval.actionError"),
+    res.ok ? "ok" : "bad",
+  );
 }
 
 provideActions({ approvePlan, requestReject, showToast });

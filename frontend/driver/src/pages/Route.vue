@@ -1,7 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
-    <h2 class="section-title">{{ singleTrip ? t("route.tripTitle") : t("route.title") }}</h2>
     <p v-if="!singleTrip" class="-mt-2 text-sm text-soft">{{ t("route.subtitle") }}</p>
 
     <template v-if="singleTrip">
@@ -41,17 +40,14 @@
                 class="flex items-start gap-3"
                 :class="{ 'opacity-60': stop.done }"
               >
-                <button
+                <Checkbox
                   v-if="tripData.started && stop.route_stop"
                   class="stop-check shrink-0"
-                  :class="{ 'is-done': stop.done }"
+                  :model-value="!!stop.done"
                   :disabled="stopBusy === stop.route_stop"
-                  :aria-pressed="stop.done ? 'true' : 'false'"
                   :aria-label="stop.done ? t('route.stopUndo') : t('route.stopDone')"
-                  @click="toggleStop(stop)"
-                >
-                  <Icon :name="stop.done ? 'badge' : 'route'" :size="14" />
-                </button>
+                  @update:model-value="toggleStop(stop)"
+                />
                 <span
                   v-else
                   class="avatar h-6 w-6 text-xs shrink-0"
@@ -79,16 +75,19 @@
                   >
                     <Icon name="external" :size="14" /> {{ t("route.openMap") }}
                   </a>
-                  <button
+                  <Button
                     v-if="tripData.started && stop.route_stop"
                     type="button"
-                    class="btn btn-outline arrive-btn"
+                    class="arrive-btn"
+                    variant="outline"
+                    size="lg"
                     :disabled="arriveBusy === stop.route_stop"
+                    :loading="arriveBusy === stop.route_stop"
+                    :label="stop.arrived ? t('route.markNotArrived') : t('route.markArrived')"
                     @click="toggleArrived(stop)"
                   >
-                    <Icon name="bus" :size="16" class="rtl-flip" />
-                    {{ stop.arrived ? t("route.markNotArrived") : t("route.markArrived") }}
-                  </button>
+                    <template #prefix><Icon name="bus" :size="16" class="rtl-flip" /></template>
+                  </Button>
                   <p v-if="tripData.started && stop.route_stop && !stop.arrived" class="text-xs text-muted mt-1">
                     {{ t("route.arrivedHint") }}
                   </p>
@@ -250,7 +249,7 @@
 
 <script setup>
 import { computed, ref, watch } from "vue";
-import { createResource } from "frappe-ui";
+import { Button, Checkbox, createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import EmptyState from "../components/EmptyState.vue";
@@ -369,28 +368,9 @@ async function toggleArrived(stop) {
   font-size: var(--fs-sm);
 }
 .stop-check {
-  position: relative;
-  width: 24px;
-  height: 24px;
+  min-inline-size: var(--tap-min);
+  min-block-size: var(--tap-min);
   display: grid;
   place-items: center;
-  border-radius: var(--radius-sm);
-  border: 2px solid var(--c-primary);
-  background: transparent;
-  color: var(--c-primary);
-  transition: background 0.12s ease, color 0.12s ease;
-}
-.stop-check::after {
-  content: "";
-  position: absolute;
-  inset: calc((var(--tap-min) - 24px) / -2);
-}
-.stop-check.is-done {
-  background: var(--c-success);
-  border-color: var(--c-success);
-  color: var(--c-primary-ink);
-}
-.stop-check:disabled {
-  opacity: 0.6;
 }
 </style>

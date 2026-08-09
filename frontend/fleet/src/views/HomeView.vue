@@ -1,125 +1,95 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <div class="emp-grid">
-    <div class="emp-col">
-      <section class="emp-card">
-        <header class="emp-card-head">
-          <span class="emp-ic"><Icon name="car" :size="17" /></span>
-          <div class="emp-card-titles">
-            <h2>{{ t("emp.vehicle.title") }}</h2>
-            <p class="emp-hint">{{ t("emp.vehicle.hint") }}</p>
+  <div class="emp-grid emp-today">
+    <div class="emp-sheet emp-today-ledger">
+      <section class="emp-section emp-vehicle-section" aria-labelledby="emp-vehicle-title">
+        <header class="emp-section-head">
+          <span class="emp-section-index" aria-hidden="true">01</span>
+          <div>
+            <h2 id="emp-vehicle-title">{{ t("emp.vehicle.title") }}</h2>
+            <p>{{ t("emp.vehicle.hint") }}</p>
           </div>
         </header>
 
-        <div v-if="vehicle.state.status === 'loading'" class="emp-skel" aria-hidden="true" />
-
-        <LoadError
-          v-else-if="vehicle.state.status === 'error'"
-          :title="t('emp.loadError')"
-          :detail="vehicle.state.error"
-          :hint="t('emp.loadErrorHint')"
+        <AsyncBoundary
+          :state="vehicleState"
+          :title="vehicleState === 'empty' ? t('emp.vehicle.empty') : t('emp.loadError')"
+          :message="vehicleState === 'empty' ? t('emp.vehicle.emptyHint') : vehicle.state.error"
           :retry-label="t('common.retry')"
           @retry="vehicle.reload()"
-        />
-
-        <EmptyState
-          v-else-if="!vehicle.state.data"
-          :title="t('emp.vehicle.empty')"
-          :hint="t('emp.vehicle.emptyHint')"
         >
-          <template #icon><Icon name="car" :size="20" /></template>
-        </EmptyState>
-
-        <template v-else>
-          <div class="emp-vehicle-hero">
-            <bdi class="emp-plate">{{ vehicle.state.data.plate }}</bdi>
-            <div class="emp-vinfo">
-              <b>{{ vehicle.state.data.model || t("common.none") }}</b>
+          <div class="emp-vehicle-lockup">
+            <div class="emp-plate-block">
+              <span>{{ t("emp.vehicle.plateLabel") }}</span>
+              <bdi class="emp-plate">{{ vehicle.state.data.plate || t("common.none") }}</bdi>
+            </div>
+            <div class="emp-vehicle-identity">
+              <strong>{{ vehicle.state.data.model || t("common.none") }}</strong>
               <span>{{ vehicle.state.data.office || t("common.none") }}</span>
             </div>
             <Badge
-              class="emp-vehicle-status"
               :theme="vehicleMeta(vehicle.state.data.status).theme"
               size="md"
               :label="t(vehicleMeta(vehicle.state.data.status).key)"
             />
           </div>
 
-          <div class="emp-kv-row">
-            <div class="emp-kv">
-              <small><Icon name="gauge" :size="13" /> {{ t("emp.vehicle.odometer") }}</small>
-              <b class="tnum">
+          <dl class="emp-facts">
+            <div>
+              <dt><Icon name="gauge" :size="15" /> {{ t("emp.vehicle.odometer") }}</dt>
+              <dd class="tnum">
                 <bdi>{{ formatInt(vehicle.state.data.odometerKm, lang) }}</bdi>
                 {{ t("emp.vehicle.kmUnit") }}
-              </b>
+              </dd>
             </div>
-            <div class="emp-kv">
-              <small><Icon name="calendar" :size="13" /> {{ t("emp.vehicle.registration") }}</small>
-              <b>
+            <div>
+              <dt><Icon name="calendar" :size="15" /> {{ t("emp.vehicle.registration") }}</dt>
+              <dd>
                 <template v-if="vehicle.state.data.registrationExpiry">
-                  {{ t("emp.vehicle.validUntil", { date: vehicle.state.data.registrationExpiry }) }}
+                  {{ t("emp.vehicle.validUntil", { date: formatDate(vehicle.state.data.registrationExpiry, lang) }) }}
                 </template>
                 <template v-else>{{ t("common.none") }}</template>
-              </b>
+              </dd>
             </div>
-          </div>
-        </template>
+          </dl>
+        </AsyncBoundary>
       </section>
 
-      <section class="emp-card">
-        <header class="emp-card-head">
-          <span class="emp-ic"><Icon name="clipboard-list" :size="17" /></span>
-          <div class="emp-card-titles">
-            <h2>{{ t("emp.trips.title") }}</h2>
-            <p class="emp-hint">{{ t("emp.trips.previewHint") }}</p>
+      <section class="emp-section" aria-labelledby="emp-trip-title">
+        <header class="emp-section-head">
+          <span class="emp-section-index" aria-hidden="true">02</span>
+          <div>
+            <h2 id="emp-trip-title">{{ t("emp.today.tripTitle") }}</h2>
+            <p>{{ t("emp.trips.previewHint") }}</p>
           </div>
         </header>
 
-        <div v-if="trips.state.status === 'loading'" class="emp-skel" aria-hidden="true" />
-
-        <LoadError
-          v-else-if="trips.state.status === 'error'"
-          :title="t('emp.loadError')"
-          :detail="trips.state.error"
-          :hint="t('emp.loadErrorHint')"
+        <AsyncBoundary
+          :state="tripsState"
+          :title="tripsState === 'empty' ? t('emp.trips.empty') : t('emp.loadError')"
+          :message="tripsState === 'empty' ? t('emp.trips.emptyHint') : trips.state.error"
           :retry-label="t('common.retry')"
           @retry="trips.reload()"
-        />
-
-        <EmptyState
-          v-else-if="!trips.state.data.length"
-          :title="t('emp.trips.empty')"
-          :hint="t('emp.trips.emptyHint')"
         >
-          <template #icon><Icon name="clipboard-list" :size="20" /></template>
-        </EmptyState>
-
-        <template v-else>
           <TripList :rows="tripPreview" />
           <Button
-            class="emp-block-btn"
+            class="emp-secondary-action"
             variant="outline"
             size="xl"
             :label="t('emp.trips.viewAll')"
             @click="router.push('/trips')"
           />
-        </template>
+        </AsyncBoundary>
       </section>
     </div>
 
-    <section class="emp-card">
-      <header class="emp-card-head">
-        <span class="emp-ic"><Icon name="fuel" :size="17" /></span>
-        <div class="emp-card-titles">
-          <h2>{{ t("emp.fuel.title") }}</h2>
-          <p class="emp-hint">{{ t("emp.fuel.cardHint") }}</p>
-        </div>
-      </header>
+    <aside class="emp-fuel-commitment" aria-labelledby="emp-fuel-title">
+      <span class="emp-commitment-kicker">{{ t("emp.today.nextAction") }}</span>
+      <Icon name="fuel" :size="28" />
+      <h2 id="emp-fuel-title">{{ t("emp.fuel.formTitle") }}</h2>
+      <p>{{ t("emp.fuel.cardHint") }}</p>
 
-      <!-- This card used to be a heading and a link to a screen the nav bar already offers. It
-           now answers the question it is named after: what happened to what I asked for. -->
-      <div v-if="fuelRequests.state.status === 'loading'" class="emp-skel" aria-hidden="true" />
-
+      <div v-if="fuelRequests.state.status === 'loading'" class="emp-line-pulse" aria-hidden="true" />
       <LoadError
         v-else-if="fuelRequests.state.status === 'error'"
         :title="t('emp.loadError')"
@@ -128,40 +98,39 @@
         :retry-label="t('common.retry')"
         @retry="fuelRequests.reload()"
       />
+      <div v-else class="emp-latest-fuel">
+        <template v-if="latestFuelRequest">
+          <span>{{ t("emp.fuel.lastRequest") }}</span>
+          <strong>
+            <bdi>{{ latestFuelRequest.litres }}</bdi> {{ t("emp.fuel.litresUnit") }}
+          </strong>
+          <span>
+            <bdi v-if="latestFuelRequest.date">{{ formatDate(latestFuelRequest.date, lang) }}</bdi>
+            <Badge
+              :theme="fuelMeta(latestFuelRequest.statusKey).theme"
+              size="md"
+              :label="t(fuelMeta(latestFuelRequest.statusKey).key)"
+            />
+          </span>
+        </template>
+        <span v-else>{{ t("emp.fuel.historyEmpty") }}</span>
+      </div>
 
-      <template v-else>
-        <div v-if="latestFuelRequest" class="emp-fuel-state">
-          <div class="emp-kv">
-            <small>{{ t("emp.fuel.lastRequest") }}</small>
-            <b>
-              <bdi>{{ latestFuelRequest.litres }}</bdi> {{ t("emp.fuel.litresUnit") }}
-              <template v-if="latestFuelRequest.date"> · <bdi>{{ latestFuelRequest.date }}</bdi></template>
-            </b>
-          </div>
-          <Badge
-            :theme="fuelMeta(latestFuelRequest.statusKey).theme"
-            size="md"
-            :label="t(fuelMeta(latestFuelRequest.statusKey).key)"
-          />
-        </div>
-        <p v-else class="emp-hint">{{ t("emp.fuel.historyEmpty") }}</p>
+      <p v-if="pendingFuelCount" class="emp-pending-note">
+        {{ t("emp.fuel.pendingCount", { n: pendingFuelCount }) }}
+      </p>
 
-        <p v-if="pendingFuelCount" class="emp-hint emp-pending-note">
-          {{ t("emp.fuel.pendingCount", { n: pendingFuelCount }) }}
-        </p>
-
-        <Button
-          class="emp-block-btn"
-          variant="solid"
-          theme="green"
-          size="xl"
-          :label="t('emp.fuel.newRequest')"
-          @click="router.push('/fuel')"
-        >
-          <template #prefix><Icon name="fuel" :size="17" /></template>
-        </Button>
-      </template>
-    </section>
+      <Button
+        class="emp-primary-action"
+        variant="solid"
+        theme="green"
+        size="xl"
+        :label="t('emp.fuel.newRequest')"
+        @click="router.push('/fuel')"
+      >
+        <template #prefix><Icon name="send" :size="18" /></template>
+      </Button>
+    </aside>
   </div>
 </template>
 
@@ -170,12 +139,12 @@ import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { Badge, Button } from "frappe-ui";
 
-import EmptyState from "@shared/components/EmptyState.vue";
+import AsyncBoundary from "@shared/components/AsyncBoundary.vue";
 import LoadError from "@shared/components/LoadError.vue";
 
 import Icon from "../Icon.vue";
 import TripList from "../components/TripList.vue";
-import { formatInt } from "../fmt.js";
+import { formatDate, formatInt } from "../fmt.js";
 import { fuelMeta, vehicleMeta } from "../statusMeta.js";
 import { useEmployee } from "../useEmployee.js";
 import { useI18n } from "@/i18n";
@@ -184,5 +153,20 @@ const { t, lang } = useI18n();
 const router = useRouter();
 const { vehicle, trips, fuelRequests, latestFuelRequest, pendingFuelCount } = useEmployee();
 
-const tripPreview = computed(() => trips.state.data.slice(0, 2));
+const vehicleState = computed(() => {
+  if (vehicle.state.status === "loading" || vehicle.state.status === "idle") return "loading";
+  if (vehicle.state.status === "error") return "error";
+  return vehicle.state.data ? "ready" : "empty";
+});
+
+const tripsState = computed(() => {
+  if (trips.state.status === "loading" || trips.state.status === "idle") return "loading";
+  if (trips.state.status === "error") return "error";
+  return trips.state.data.length ? "ready" : "empty";
+});
+
+const tripPreview = computed(() => {
+  const openTrip = trips.state.data.find((trip) => trip.status !== "completed");
+  return openTrip ? [openTrip] : trips.state.data.slice(0, 1);
+});
 </script>

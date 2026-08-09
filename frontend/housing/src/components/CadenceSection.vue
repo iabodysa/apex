@@ -73,17 +73,15 @@ const badgeClass = computed(() => "badge-" + props.block.cadence.toLowerCase());
 
 <style scoped>
 .cadence {
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--c-border);
-  background: var(--c-surface);
+  border-block: 1px solid var(--c-border-strong);
+  background: transparent;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
 }
 .cadence-head {
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 100%;
+  inline-size: 100%;
   padding: 14px 14px;
   background: transparent;
   border: none;
@@ -98,8 +96,8 @@ const badgeClass = computed(() => "badge-" + props.block.cadence.toLowerCase());
 .cadence-badge {
   display: grid;
   place-items: center;
-  height: 38px;
-  width: 38px;
+  block-size: 38px;
+  inline-size: 38px;
   border-radius: var(--radius);
   flex-shrink: 0;
   color: var(--c-primary);
@@ -117,7 +115,7 @@ const badgeClass = computed(() => "badge-" + props.block.cadence.toLowerCase());
 }
 .cadence-titles {
   flex: 1;
-  min-width: 0;
+  min-inline-size: 0;
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -154,8 +152,8 @@ const badgeClass = computed(() => "badge-" + props.block.cadence.toLowerCase());
 .cadence-rows {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 0 12px 14px;
+  gap: 0;
+  padding-block-end: var(--sp-3);
 }
 
 .rows-enter-active,

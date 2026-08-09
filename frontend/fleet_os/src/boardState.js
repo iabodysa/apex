@@ -41,7 +41,7 @@ const DEFAULTS = {
   to: "",
   sort: "plate",
   dir: "asc",
-  view: "cards",
+  view: "table",
   vehicle: "",
   vtab: "overview",
   alerts: "",

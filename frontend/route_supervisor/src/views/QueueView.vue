@@ -1,56 +1,40 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <div class="work work-single">
-    <section class="queue">
-      <header class="queue-head">
-        <h2>{{ t("queue.title") }}</h2>
-        <p>{{ t("queue.subtitle", { n: pendingPlans.length }) }}</p>
-      </header>
+  <MetricRibbon :metrics="metrics" />
 
-      <div v-if="loadState === 'loading'" class="plan-skel" aria-hidden="true">
-        <div v-for="n in 3" :key="n" class="skeleton-card" />
-      </div>
-
-      <LoadError
-        v-else-if="loadState === 'error'"
-        :title="t('list.loadError')"
-        :detail="loadError"
-        :hint="t('list.loadErrorHint')"
-        :retry-label="t('common.retry')"
-        @retry="load()"
-      />
-
-      <EmptyState
-        v-else-if="!pendingPlans.length"
-        :title="t('queue.empty')"
-        :hint="t('queue.emptyHint')"
-      >
-        <template #icon><Icon name="circle-check" :size="20" :stroke-width="1.6" /></template>
-      </EmptyState>
-
-      <ul v-else class="queue-list">
-        <li v-for="plan in pendingPlans" :key="plan.name" class="queue-row">
+  <AsyncBoundary
+    :state="boundaryState"
+    :title="boundaryTitle"
+    :message="boundaryMessage"
+    :retry-label="t('common.retry')"
+    @retry="load()"
+  >
+    <WorkQueue :title="t('queue.title')" :eyebrow="t('queue.eyebrow')">
+      <ol class="decision-ledger">
+        <li v-for="(plan, index) in pendingPlans" :key="plan.name" class="decision-row">
           <router-link
-            class="queue-open"
+            class="decision-open"
             :to="{ name: 'plan', params: { name: plan.name, tab: 'approval' } }"
           >
-            <span class="qr-name">{{ plan.route_name || plan.name }}</span>
-            <span class="qr-meta">
-              <span v-if="plan.project"><Icon name="badge" :size="12" /> {{ plan.project }}</span>
-              <span v-if="plan.shift"><Icon name="clock" :size="12" /> {{ t("shift." + plan.shift) }}</span>
-              <span><Icon name="pin" :size="12" /> {{ t("list.stops", { n: plan.total_stops }) }}</span>
-              <span v-if="plan.driver"><Icon name="user" :size="12" /> {{ plan.driver }}</span>
-              <span v-if="plan.vehicle"><Icon name="truck" :size="12" /> {{ plan.vehicle }}</span>
+            <span class="decision-order"><bdi>{{ String(index + 1).padStart(2, "0") }}</bdi></span>
+            <span class="decision-copy">
+              <strong>{{ plan.route_name || plan.name }}</strong>
+              <span class="decision-evidence">
+                <span v-if="plan.project"><Icon name="badge" :size="13" /> {{ plan.project }}</span>
+                <span v-if="plan.shift"><Icon name="clock" :size="13" /> {{ t("shift." + plan.shift) }}</span>
+                <span><Icon name="pin" :size="13" /> {{ t("list.stops", { n: plan.total_stops }) }}</span>
+                <span v-if="plan.driver"><Icon name="user" :size="13" /> {{ plan.driver }}</span>
+                <span v-if="plan.vehicle"><Icon name="truck" :size="13" /> <bdi>{{ plan.vehicle }}</bdi></span>
+              </span>
             </span>
+            <Icon class="decision-chevron" name="chevron" :size="18" />
           </router-link>
-          <!-- Deciding a card never moves the selection: the supervisor keeps his place in the
-               queue he is working through. -->
-          <div class="qr-actions">
+          <div class="decision-actions" :aria-label="t('approval.status')">
             <Button
               variant="solid"
               theme="green"
               size="xl"
-              :disabled="busy"
+              :loading="busy"
               :label="t('approval.approve')"
               @click="approvePlan(plan.name)"
             >
@@ -68,16 +52,27 @@
             </Button>
           </div>
         </li>
-      </ul>
-    </section>
-  </div>
+      </ol>
+      <div v-if="pendingHasMore" class="ledger-more">
+        <Button
+          variant="outline"
+          size="lg"
+          :loading="laneBusy.pending"
+          :label="t('common.loadMore')"
+          @click="loadNextPending"
+        />
+      </div>
+    </WorkQueue>
+  </AsyncBoundary>
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { Button } from "frappe-ui";
 
-import EmptyState from "@shared/components/EmptyState.vue";
-import LoadError from "@shared/components/LoadError.vue";
+import AsyncBoundary from "@shared/components/AsyncBoundary.vue";
+import MetricRibbon from "@shared/components/MetricRibbon.vue";
+import WorkQueue from "@shared/components/WorkQueue.vue";
 
 import Icon from "../Icon.vue";
 import { useActions } from "../actions.js";
@@ -85,6 +80,41 @@ import { usePlans } from "../usePlans.js";
 import { useI18n } from "@/i18n";
 
 const { t } = useI18n();
-const { pendingPlans, loadState, loadError, busy, load } = usePlans();
-const { approvePlan, requestReject } = useActions();
+const {
+  pendingPlans,
+  pendingCount,
+  activeCount,
+  historyCount,
+  pendingHasMore,
+  laneBusy,
+  loadState,
+  loadError,
+  busy,
+  load,
+  loadMore,
+} = usePlans();
+const { approvePlan, requestReject, showToast } = useActions();
+
+const metrics = computed(() => [
+  { key: "pending", label: t("kpi.pending"), value: pendingCount.value, tone: "warning" },
+  { key: "active", label: t("kpi.active"), value: activeCount.value, tone: "info" },
+  { key: "history", label: t("kpi.decided"), value: historyCount.value },
+]);
+
+async function loadNextPending() {
+  const result = await loadMore("pending");
+  if (!result.ok && result.message) showToast(result.message, "bad");
+}
+const boundaryState = computed(() => {
+  if (loadState.value === "loading") return "loading";
+  if (loadState.value === "error") return "error";
+  if (!pendingPlans.value.length) return "empty";
+  return "ready";
+});
+const boundaryTitle = computed(() =>
+  boundaryState.value === "empty" ? t("queue.empty") : t("list.loadError"),
+);
+const boundaryMessage = computed(() =>
+  boundaryState.value === "empty" ? t("queue.emptyHint") : loadError.value,
+);
 </script>

@@ -10,7 +10,17 @@ import {
   workshopIn,
   workshopOut,
 } from "./api.js";
-import { statusKey, today, trim } from "./fleetHelpers.js";
+import {
+  canAssignVehicle,
+  canChooseVehicleStatus,
+  canSendToWorkshop,
+  canStopVehicle,
+  createStopForm,
+  createTheftForm,
+  normalizeBulkResult,
+  statusKey,
+  trim,
+} from "./fleetHelpers.js";
 import { resourceErrorMessage } from "@/i18n";
 
 export function useFleetActions({
@@ -46,9 +56,9 @@ export function useFleetActions({
 
   const fail = (e) => showToast(resourceErrorMessage(e, "errors.actionError"), "red");
 
-  const sf = reactive({ date: today(), branch: "", reason: "", notes: "", nextStatus: "available" });
+  const sf = reactive(createStopForm());
   function openStopForm(nextStatus = "available") {
-    Object.assign(sf, { date: today(), branch: "", reason: "", notes: "", nextStatus });
+    Object.assign(sf, createStopForm(nextStatus));
     subForm.value = "stop";
   }
 
@@ -67,7 +77,7 @@ export function useFleetActions({
       theme: "red",
     });
     if (!ok) return;
-    const reason = sf.notes ? `${sf.reason} — ${sf.notes}` : sf.reason;
+    const reason = sf.notes ? `${sf.reason}، ${sf.notes}` : sf.reason;
     let stopped = false;
     try {
       await stopVehicle(v.plate, reason);
@@ -92,16 +102,9 @@ export function useFleetActions({
     }
   }
 
-  const stf = reactive({ date: today(), police: "", location: "", reporter: "", desc: "", notes: "" });
+  const stf = reactive(createTheftForm());
   function openStolenForm() {
-    Object.assign(stf, {
-      date: today(),
-      police: "",
-      location: "",
-      reporter: "",
-      desc: "",
-      notes: "",
-    });
+    Object.assign(stf, createTheftForm());
     subForm.value = "stolen";
   }
   async function submitStolen() {
@@ -129,6 +132,16 @@ export function useFleetActions({
     openStopForm(goWorkshop ? "workshop" : "available");
   }
   function quickReassign(plate) {
+    const vehicle = find(plate);
+    if (!canAssignVehicle(vehicle)) {
+      showToast(
+        vehicle?.vehicle_status === "workshop"
+          ? t("toast.releaseWorkshopFirst")
+          : t("toast.setAvailableFirst"),
+        "amber",
+      );
+      return;
+    }
     openVehicle(plate, "driver");
     openReassignForm();
   }
@@ -142,8 +155,11 @@ export function useFleetActions({
   async function sendWorkshop(plate) {
     const v = find(plate);
     if (!v) return;
-    if (v.current_driver) {
-      showToast(t("toast.stopBeforeWorkshop"), "amber");
+    if (!canSendToWorkshop(v)) {
+      showToast(
+        v.current_driver ? t("toast.stopBeforeWorkshop") : t("toast.workshopUnavailable"),
+        "amber",
+      );
       return;
     }
     const ok = await ask({
@@ -225,15 +241,17 @@ export function useFleetActions({
   }
 
   const bulkNote = ref("");
+  const bulkResult = ref(null);
   function showBulkSummary(res) {
-    const r = res || {};
+    const r = normalizeBulkResult(res);
+    bulkResult.value = r;
     showToast(
       t("bulk.summary", { ok: r.succeeded || 0, failed: r.failed || 0 }),
       (r.failed || 0) > 0 ? "amber" : "green",
     );
   }
 
-  async function runBulk({ titleKey, okKey, request }) {
+  async function runBulk({ titleKey, okKey, request, eligible, blockedMessageKey }) {
     const plates = [...selected.value];
     if (!plates.length) return;
     const ok = await ask({
@@ -244,7 +262,23 @@ export function useFleetActions({
     });
     if (!ok) return;
     try {
-      showBulkSummary(await request(plates, trim(bulkNote.value)));
+      const allowed = eligible ? plates.filter((plate) => eligible(find(plate))) : plates;
+      const blocked = eligible ? plates.filter((plate) => !eligible(find(plate))) : [];
+      const response = allowed.length
+        ? await request(allowed, trim(bulkNote.value))
+        : { succeeded: 0, failed: 0, results: [] };
+      showBulkSummary({
+        ...response,
+        failed: (Number(response.failed) || 0) + blocked.length,
+        results: [
+          ...(Array.isArray(response.results) ? response.results : []),
+          ...blocked.map((plate) => ({
+            plate,
+            ok: false,
+            error: t(blockedMessageKey),
+          })),
+        ],
+      });
       bulkNote.value = "";
       clearSelection();
       await reloadFleet();
@@ -258,31 +292,28 @@ export function useFleetActions({
       titleKey: "confirm.stopTitle",
       okKey: "bulk.stopSelected",
       request: bulkStopVehicles,
+      eligible: canStopVehicle,
+      blockedMessageKey: "bulk.stopBlocked",
     });
   const bulkWorkshop = () =>
     runBulk({
       titleKey: "confirm.sendWorkshopTitle",
       okKey: "bulk.workshopSelected",
       request: bulkWorkshopIn,
+      eligible: canSendToWorkshop,
+      blockedMessageKey: "bulk.workshopBlocked",
     });
 
   async function changeStatus(plate, newStatus) {
     const v = find(plate);
     if (!v || newStatus === v.vehicle_status) return;
+    if (!canChooseVehicleStatus(v, newStatus)) return;
     if (newStatus === "assigned") {
       openReassignForm();
       return;
     }
-    if (v.current_driver) {
-      showToast(t("toast.stopCurrentFirst"), "amber");
-      return;
-    }
     if (newStatus === "stolen") {
       openStolenForm();
-      return;
-    }
-    if (v.vehicle_status === "stolen") {
-      await recoverVehicle(plate);
       return;
     }
     const ok = await ask({
@@ -296,16 +327,17 @@ export function useFleetActions({
       theme: "gray",
     });
     if (!ok) return;
-    const wasWorkshop = v.vehicle_status === "workshop";
-    try {
-      if (newStatus === "workshop") await workshopIn(plate);
-      else if (newStatus === "available") await (wasWorkshop ? workshopOut(plate) : recover(plate));
-      else if (newStatus === "stopped") await stopVehicle(plate, "");
-      showToast(t("toast.statusUpdated"), "green");
-      await reloadFleet();
-    } catch (e) {
-      fail(e);
-    }
+    await runCardAction(plate, async () => {
+      try {
+        if (newStatus === "workshop") await workshopIn(plate);
+        else if (newStatus === "available") await recover(plate);
+        else if (newStatus === "stopped") await stopVehicle(plate, "");
+        showToast(t("toast.statusUpdated"), "green");
+        await reloadFleet();
+      } catch (e) {
+        fail(e);
+      }
+    });
   }
 
   return {
@@ -325,6 +357,7 @@ export function useFleetActions({
     recoverVehicle,
     markStolen,
     bulkNote,
+    bulkResult,
     bulkStop,
     bulkWorkshop,
     changeStatus,

@@ -8,6 +8,7 @@ export default {
     none: "—",
     error: "कुछ गलत हो गया।",
     workerApp: "वर्कर ऐप",
+    skipContent: "सामग्री पर जाएँ",
     call: "कॉल",
     whatsapp: "व्हाट्सऐप",
     openMap: "नक्शा खोलें",
@@ -28,6 +29,7 @@ export default {
     transport: "परिवहन",
     custody: "अभिरक्षा",
     requests: "अनुरोध",
+    housingHelp: "आवास और सहायता",
   },
   home: {
     title: "आज",

@@ -17,7 +17,8 @@
       <Badge :theme="settled(row) ? 'green' : isDamages ? 'red' : 'orange'" size="sm" :label="badgeLabel(row)" />
       <bdi class="incident-date">{{ row.date || t("common.none") }}</bdi>
       <span v-if="row.cost" class="incident-cost">
-        <Icon name="banknote" :size="12" /> <bdi>{{ row.cost }}</bdi> {{ t("common.sar") }}
+        <Icon name="banknote" :size="12" />
+        <bdi class="price-lockup" dir="ltr">&#xFDFC;{{ row.cost }}</bdi>
       </span>
     </header>
     <div class="incident-card-body">

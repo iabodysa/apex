@@ -1,5 +1,4 @@
 /* Copyright (c) 2026, afmcoltd */
-
 :root,
 [data-theme="afmco"],
 :root[data-theme="light"] {
@@ -90,19 +89,14 @@
   --tap-md: 48px;
   --tap-min: 44px;
 
-  --font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font: "Thmanyah Sans", "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-num: ui-monospace, "SF Mono", "Menlo", monospace;
   --font-num-ar: var(--font);
-  /* The brand faces, vendored at apex/public/vendor/thmanyah-v1 and linked by the portal
-     shells. A @font-face costs nothing until something asks for the family, so declaring
-     these is free — the file downloads only where one is actually used. Display is for a
-     headline, Text for running prose; using Display at body size is what makes the family
-     look wrong. Interface chrome stays on --font. */
   --font-display: "Thmanyah Serif Display", "Cairo", serif;
   --font-serif: "Thmanyah Serif Text", "Cairo", serif;
-  --font-brand: "Thmanyah Sans", var(--font);
-  --fs-display: 28px;
-  --fs-h1: 22px;
+  --font-brand: var(--font);
+  --fs-display: clamp(2rem, 2vw + 1rem, 3.5rem);
+  --fs-h1: clamp(1.5rem, 1vw + 1.15rem, 2.25rem);
   --fs-h2: 20px;
   --fs-h3: 16px;
   --fs-body: 14px;
@@ -125,6 +119,52 @@
   --bp-tablet: 768px;
   --bp-wide: 860px;
   --bp-desktop: 1024px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-inline-size: 0;
+  inline-size: 100%;
+  min-block-size: 100%;
+}
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  background: var(--c-canvas);
+  color: var(--c-ink);
+  font-family: var(--font);
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-inline-size: 100%;
+}
+
+:lang(ar) {
+  letter-spacing: normal;
+}
+
+bdi,
+[data-numeric] {
+  font-variant-numeric: tabular-nums;
 }
 
 @media (prefers-color-scheme: dark) {

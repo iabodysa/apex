@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <BuildingSwitcher v-if="!building" @select="onBuildingSelected" />
-
-  <ListSkeleton v-else-if="gridRes.loading && !grid" :rows="6" :label="t('beds.loadingLabel')" />
+  <ListSkeleton v-if="gridRes.loading && !grid" :rows="6" :label="t('beds.loadingLabel')" />
 
   <LoadError
     v-else-if="gridRes.error"
@@ -91,14 +89,13 @@ import { computed, onMounted, ref, watch } from "vue";
 import { Button, Dialog, ErrorMessage, FormControl, createResource, toast } from "frappe-ui";
 import EmptyState from "@shared/components/EmptyState.vue";
 import BedGrid from "../components/BedGrid.vue";
-import BuildingSwitcher from "../components/BuildingSwitcher.vue";
 import Icon from "../components/Icon.vue";
 import ListSkeleton from "../components/ListSkeleton.vue";
 import LoadError from "../components/LoadError.vue";
 import { call } from "@shared/call";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { can } from "../portal.js";
-import { building, localDate, selectBuilding } from "../session";
+import { building, localDate } from "../session";
 
 const { t } = useI18n();
 
@@ -167,10 +164,6 @@ async function doTransfer() {
   } finally {
     busy.value = "";
   }
-}
-
-function onBuildingSelected(name, label) {
-  selectBuilding(name, label);
 }
 
 watch(building, () => {

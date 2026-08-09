@@ -3,8 +3,6 @@
   <div class="space-y-5">
     <PullIndicator :distance="ptr.distance.value" :refreshing="ptr.refreshing.value" :threshold="ptr.THRESHOLD" />
 
-    <h2 class="section-title">{{ t("transport.title") }}</h2>
-
     <template v-if="tr.loading && !td">
       <Skeleton :lines="4" />
       <Skeleton :lines="3" />
@@ -13,9 +11,7 @@
     <div v-else-if="tr.error && !td" class="card card-pad text-center">
       <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
       <p class="text-sm text-muted">{{ errorMessage }}</p>
-      <button class="btn btn-primary mt-3" style="width: auto; padding-inline: 24px" @click="tr.reload()">
-        {{ t("common.retry") }}
-      </button>
+      <Button class="mt-3" variant="outline" size="xl" :label="t('common.retry')" @click="tr.reload()" />
     </div>
 
     <template v-else-if="upcoming.length || past.length">
@@ -121,16 +117,18 @@
         <div v-else class="space-y-2">
           <BoardingWindow v-if="!canConfirm(trip)" :window="trip.boarding_window" />
           <template v-else>
-            <button
+            <Button
               v-if="!confirmedTrips[trip.transport_request]"
-              class="btn btn-primary"
-              style="width: auto; padding-inline: 18px"
+              variant="solid"
+              theme="green"
+              size="xl"
               :disabled="boarding.loading && boardingFor === trip.transport_request"
+              :loading="boarding.loading && boardingFor === trip.transport_request"
+              :label="t('transport.atPickup')"
               @click="confirmBoarding(trip)"
             >
-              <Icon name="check" :size="18" />
-              {{ boarding.loading && boardingFor === trip.transport_request ? t("transport.atPickupSending") : t("transport.atPickup") }}
-            </button>
+              <template #prefix><Icon name="check" :size="18" /></template>
+            </Button>
             <p v-else class="status-ok flex items-center gap-2 text-sm">
               <Icon name="check" :size="16" class="shrink-0" />
               {{ t("transport.atPickupDone") }}
@@ -146,12 +144,10 @@
       </div>
 
       <section v-if="past.length" class="card card-pad space-y-3">
-        <button class="flex w-full items-center gap-2" @click="showPast = !showPast">
-          <Icon name="clock" :size="18" class="text-muted shrink-0" />
-          <span class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("transport.past") }}</span>
-          <span class="pill pill-neutral shrink-0">{{ past.length }}</span>
-          <Icon name="chevron" :size="18" class="text-muted shrink-0 ms-auto" :style="showPast ? 'transform: rotate(90deg)' : ''" />
-        </button>
+        <Button variant="ghost" size="xl" :label="`${t('transport.past')} (${past.length})`" @click="showPast = !showPast">
+          <template #prefix><Icon name="clock" :size="18" /></template>
+          <template #suffix><Icon name="chevron" :size="18" :style="showPast ? 'transform: rotate(90deg)' : ''" /></template>
+        </Button>
         <ul v-if="showPast" class="space-y-2">
           <li v-for="trip in past" :key="trip.transport_request" class="flex flex-col gap-2 text-sm border-b pb-3 last:border-0 last:pb-0">
             <div class="flex items-start gap-2">
@@ -210,7 +206,7 @@
 <script setup>
 import { computed, reactive, ref, watch, onUnmounted } from "vue";
 import { BOARDING_SETTLED, REQUEST } from "@shared/statusVocabularies";
-import { createResource } from "frappe-ui";
+import { Button, createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import TripProgressBar from "../components/TripProgressBar.vue";
@@ -336,4 +332,3 @@ function confirmBoarding(trip) {
   boarding.submit({ transport_request: trip.transport_request });
 }
 </script>
-

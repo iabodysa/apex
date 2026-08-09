@@ -1,76 +1,27 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
-    <h2 class="section-title">{{ t("requests.title") }}</h2>
-
+    <HousingNav />
     <section class="card card-pad space-y-3">
       <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("requests.new") }}</h3>
 
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="field-label">{{ t("requests.category") }}</label>
-          <select v-model="form.category" class="select">
-            <option value="Maintenance">{{ t("requests.catMaintenance") }}</option>
-            <option value="Cleaning">{{ t("requests.catCleaning") }}</option>
-            <option value="AC">{{ t("requests.catAC") }}</option>
-            <option value="Plumbing">{{ t("requests.catPlumbing") }}</option>
-            <option value="Electrical">{{ t("requests.catElectrical") }}</option>
-            <option value="Water">{{ t("requests.catWater") }}</option>
-            <option value="Pest Control">{{ t("requests.catPestControl") }}</option>
-            <option value="Custody">{{ t("requests.catCustody") }}</option>
-            <option value="Complaint">{{ t("requests.catComplaint") }}</option>
-            <option value="Suggestion">{{ t("requests.catSuggestion") }}</option>
-            <option value="Other">{{ t("requests.catOther") }}</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label">{{ t("requests.priority") }}</label>
-          <select v-model="form.priority" class="select">
-            <option value="Low">{{ t("requests.prioLow") }}</option>
-            <option value="Medium">{{ t("requests.prioMedium") }}</option>
-            <option value="High">{{ t("requests.prioHigh") }}</option>
-            <option value="Critical">{{ t("requests.prioCritical") }}</option>
-          </select>
-        </div>
+      <div class="form-pair">
+        <FormControl v-model="form.category" type="select" size="lg" :label="t('requests.category')" :options="categoryOptions" />
+        <FormControl v-model="form.priority" type="select" size="lg" :label="t('requests.priority')" :options="priorityOptions" />
       </div>
 
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="field-label">{{ t("requests.issueLocation") }}</label>
-          <select v-model="form.issue_location" class="select">
-            <option value="">{{ t("requests.issueLocationNone") }}</option>
-            <option value="Room">{{ t("requests.locRoom") }}</option>
-            <option value="Bathroom">{{ t("requests.locBathroom") }}</option>
-            <option value="Kitchen">{{ t("requests.locKitchen") }}</option>
-            <option value="Common Area">{{ t("requests.locCommonArea") }}</option>
-            <option value="Entrance">{{ t("requests.locEntrance") }}</option>
-            <option value="Staircase">{{ t("requests.locStaircase") }}</option>
-            <option value="External Area">{{ t("requests.locExternalArea") }}</option>
-            <option value="Other">{{ t("requests.locOther") }}</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label">{{ t("requests.prefLang") }}</label>
-          <select v-model="form.preferred_language" class="select">
-            <option value="Arabic">{{ t("requests.langArabic") }}</option>
-            <option value="English">{{ t("requests.langEnglish") }}</option>
-          </select>
-        </div>
+      <div class="form-pair">
+        <FormControl v-model="form.issue_location" type="select" size="lg" :label="t('requests.issueLocation')" :options="locationOptions" />
+        <FormControl v-model="form.preferred_language" type="select" size="lg" :label="t('requests.prefLang')" :options="languageOptions" />
       </div>
 
-      <div>
-        <label class="field-label">{{ t("requests.subject") }}</label>
-        <input v-model="form.subject" :placeholder="t('requests.subjectPlaceholder')" class="input" />
-      </div>
-      <div>
-        <label class="field-label">{{ t("requests.description") }}</label>
-        <textarea v-model="form.body" :placeholder="t('requests.descriptionPlaceholder')" class="textarea"></textarea>
-      </div>
+      <FormControl v-model="form.subject" type="text" size="lg" :label="t('requests.subject')" :placeholder="t('requests.subjectPlaceholder')" />
+      <FormControl v-model="form.body" type="textarea" size="lg" :rows="4" :label="t('requests.description')" :placeholder="t('requests.descriptionPlaceholder')" />
 
       <div>
         <label class="field-label">{{ t("requests.photo") }}</label>
         <div class="photo-row">
-          <label class="btn btn-outline photo-pick">
+          <label class="photo-pick">
             <Icon name="image" :size="18" />
             {{ photo.dataUrl ? t("requests.photoChange") : t("requests.photoAdd") }}
             <input
@@ -80,9 +31,7 @@
               @change="onPhoto"
             />
           </label>
-          <button v-if="photo.dataUrl" type="button" class="photo-remove" @click="clearPhoto">
-            {{ t("requests.photoRemove") }}
-          </button>
+          <Button v-if="photo.dataUrl" type="button" variant="ghost" theme="red" size="lg" :label="t('requests.photoRemove')" @click="clearPhoto" />
         </div>
         <div v-if="photo.dataUrl" class="photo-preview">
           <img :src="photo.dataUrl" alt="" />
@@ -90,9 +39,17 @@
         </div>
       </div>
 
-      <button class="btn btn-primary" :disabled="create.loading || !canSubmit" @click="submit">
-        <Icon name="send" :size="20" /> {{ t("requests.submit") }}
-      </button>
+      <Button
+        variant="solid"
+        theme="green"
+        size="2xl"
+        :disabled="create.loading || !canSubmit"
+        :loading="create.loading"
+        :label="t('requests.submit')"
+        @click="submit"
+      >
+        <template #prefix><Icon name="send" :size="20" /></template>
+      </Button>
       <p v-if="!canSubmit" class="text-xs text-muted">{{ t("requests.needText") }}</p>
       <p v-if="ok" class="status-note status-ok">{{ t("requests.submitted") }}</p>
       <p v-if="err" class="status-note status-err">{{ err }}</p>
@@ -126,9 +83,7 @@
     <div v-else-if="list.error" class="card card-pad text-center">
       <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
       <p class="text-sm text-muted">{{ listErrorMessage }}</p>
-      <button class="btn btn-primary mt-3" style="width: auto; padding-inline: 24px" @click="list.reload()">
-        {{ t("common.retry") }}
-      </button>
+      <Button class="mt-3" variant="outline" size="xl" :label="t('common.retry')" @click="list.reload()" />
     </div>
 
     <section v-else-if="list.loading" class="space-y-3">
@@ -145,8 +100,9 @@
 
 <script setup>
 import { computed, reactive, ref } from "vue";
-import { createResource } from "frappe-ui";
+import { Button, FormControl, createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import HousingNav from "../components/HousingNav.vue";
 import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { PHOTO_ACCEPT, isAcceptedPhoto } from "@shared/photoFile.js";
@@ -168,6 +124,26 @@ const PHOTO_MAX_BYTES = 8 * 1024 * 1024;
 const photo = reactive({ dataUrl: "", name: "" });
 
 const canSubmit = computed(() => !!(form.subject.trim() || form.body.trim()));
+
+const categoryOptions = computed(() => [
+  ["Maintenance", "catMaintenance"], ["Cleaning", "catCleaning"], ["AC", "catAC"],
+  ["Plumbing", "catPlumbing"], ["Electrical", "catElectrical"], ["Water", "catWater"],
+  ["Pest Control", "catPestControl"], ["Custody", "catCustody"], ["Complaint", "catComplaint"],
+  ["Suggestion", "catSuggestion"], ["Other", "catOther"],
+].map(([value, key]) => ({ value, label: t(`requests.${key}`) })));
+const priorityOptions = computed(() => ["Low", "Medium", "High", "Critical"].map((value) => ({
+  value,
+  label: t(`requests.prio${value}`),
+})));
+const locationOptions = computed(() => [
+  ["", "issueLocationNone"], ["Room", "locRoom"], ["Bathroom", "locBathroom"],
+  ["Kitchen", "locKitchen"], ["Common Area", "locCommonArea"], ["Entrance", "locEntrance"],
+  ["Staircase", "locStaircase"], ["External Area", "locExternalArea"], ["Other", "locOther"],
+].map(([value, key]) => ({ value, label: t(`requests.${key}`) })));
+const languageOptions = computed(() => [
+  { value: "Arabic", label: t("requests.langArabic") },
+  { value: "English", label: t("requests.langEnglish") },
+]);
 
 function clearPhoto() {
   photo.dataUrl = "";
@@ -264,8 +240,12 @@ function formatDate(c) {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  width: auto;
-  padding-inline: 16px;
+  min-block-size: var(--tap-min);
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--c-ink);
+  font-weight: var(--fw-semibold);
   cursor: pointer;
 }
 .photo-input {
@@ -278,25 +258,6 @@ function formatDate(c) {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-.photo-remove {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--tap-min);
-  background: none;
-  border: 0;
-  padding-block: 0;
-  padding-inline: 4px;
-  margin-inline: -4px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--c-danger);
-  cursor: pointer;
-}
-@media (hover: hover) {
-  .photo-remove:hover {
-    text-decoration: underline;
-  }
 }
 .photo-preview {
   display: flex;

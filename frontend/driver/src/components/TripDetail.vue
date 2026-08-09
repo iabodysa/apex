@@ -34,15 +34,6 @@
 
     <div class="detail-actions">
       <Button
-        class="row-btn"
-        variant="outline"
-        :route="'/route/' + encodeURIComponent(trip.name)"
-        :label="t('trips.fullRoute')"
-      >
-        <template #prefix><Icon name="route" :size="16" /></template>
-      </Button>
-
-      <Button
         v-if="trip.google_maps_url"
         class="row-btn"
         variant="ghost"
@@ -75,6 +66,11 @@
     </div>
 
     <p v-if="closed" class="detail-note">{{ t("trips.closedNote") }}</p>
+
+    <section class="detail-route">
+      <h3>{{ t("route.stops") }}</h3>
+      <RouteWorkspace :trip="trip.name" />
+    </section>
   </component>
 </template>
 
@@ -83,6 +79,7 @@ import { computed } from "vue";
 import { Badge, Button, Progress } from "frappe-ui";
 import Panel from "@shared/components/Panel.vue";
 import Icon from "./Icon.vue";
+import RouteWorkspace from "../pages/Route.vue";
 import { useI18n } from "../i18n";
 import { tripTone, tripStateLabel } from "../trips";
 
@@ -172,5 +169,16 @@ const boardedPercent = computed(() => {
   margin-top: var(--sp-3);
   font-size: var(--fs-sm);
   color: var(--c-muted);
+}
+.detail-route {
+  margin-block-start: var(--sp-5);
+  padding-block-start: var(--sp-4);
+  border-block-start: 1px solid var(--c-border-strong);
+}
+.detail-route h3 {
+  margin: 0 0 var(--sp-3);
+  color: var(--c-ink);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-heading);
 }
 </style>

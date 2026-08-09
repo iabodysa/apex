@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
-    <h2 class="section-title">{{ t("fuel.title") }}</h2>
-
     <section v-if="quotaRow" class="card card-pad">
       <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
         {{ t("fuel.quota") }}
@@ -38,21 +36,26 @@
           <Icon name="alert" :size="14" class="text-warning shrink-0 inline" /> {{ thresholdNote }}
         </p>
       </div>
-      <div>
-        <label class="field-label" for="fuel-litres">{{ t("fuel.litres") }}</label>
-        <input
-          id="fuel-litres"
-          v-model.number="litres"
-          type="number"
-          min="1"
-          inputmode="numeric"
-          :placeholder="t('fuel.placeholder')"
-          class="input"
-        />
-      </div>
-      <button class="btn btn-primary" :disabled="req.loading || !litres" @click="submit">
-        <Icon name="fuel" :size="20" /> {{ t("fuel.submit") }}
-      </button>
+      <FormControl
+        v-model="litres"
+        type="number"
+        size="lg"
+        :min="1"
+        inputmode="numeric"
+        :label="t('fuel.litres')"
+        :placeholder="t('fuel.placeholder')"
+      />
+      <Button
+        variant="solid"
+        theme="green"
+        size="2xl"
+        :disabled="req.loading || !litres"
+        :loading="req.loading"
+        :label="t('fuel.submit')"
+        @click="submit"
+      >
+        <template #prefix><Icon name="fuel" :size="20" /></template>
+      </Button>
     </section>
 
     <section class="space-y-3">
@@ -91,7 +94,7 @@
 
 <script setup>
 import { computed, ref } from "vue";
-import { createResource } from "frappe-ui";
+import { Button, FormControl, createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import EmptyState from "../components/EmptyState.vue";
@@ -124,7 +127,7 @@ const req = createResource({
 });
 
 function submit() {
-  req.submit({ litres: litres.value });
+  req.submit({ litres: Number(litres.value) });
 }
 
 const quotaRow = computed(() => (quota.data?.has_quota ? quota.data : null));

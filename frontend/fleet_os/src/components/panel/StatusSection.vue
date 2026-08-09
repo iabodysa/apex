@@ -10,7 +10,8 @@
       class="stpick"
       :class="{ ['cur-' + opt.key]: vehicle.vehicle_status === opt.key }"
       :aria-current="vehicle.vehicle_status === opt.key ? 'true' : undefined"
-      @click="actions.changeStatus(vehicle.plate, opt.key)"
+      :disabled="optionDisabled(opt.key)"
+      @click="chooseStatus(opt.key)"
     >
       <span class="sp-ico"><Icon :name="opt.icon" :size="20" /></span>
       <span class="sp-lbl">{{ opt.label }}</span>
@@ -63,6 +64,7 @@ import { computed } from "vue";
 import { Button } from "frappe-ui";
 
 import Icon from "../../Icon.vue";
+import { canChooseVehicleStatus } from "../../fleetHelpers.js";
 import StolenForm from "./StolenForm.vue";
 import { useBoardContext } from "../../boardContext.js";
 
@@ -70,7 +72,7 @@ const props = defineProps({
   vehicle: { type: Object, required: true },
 });
 
-const { t, actions, subForm } = useBoardContext();
+const { t, actions, state, subForm } = useBoardContext();
 
 const options = computed(() => [
   { key: "assigned", icon: "lock", label: t("statusTab.assignedLabel"), desc: t("statusTab.assignedDesc") },
@@ -85,4 +87,15 @@ const options = computed(() => [
 const canReportTheft = computed(() =>
   ["available", "stopped"].includes(props.vehicle.vehicle_status),
 );
+
+const optionDisabled = (key) =>
+  !canChooseVehicleStatus(props.vehicle, key);
+
+const chooseStatus = (key) => {
+  if (key === "assigned") {
+    state.setPanelTab("driver");
+    return;
+  }
+  actions.changeStatus(props.vehicle.plate, key);
+};
 </script>

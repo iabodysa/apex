@@ -1,21 +1,18 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
+    <HousingNav />
     <router-link to="/requests" class="back-link" style="text-decoration: none">
       <Icon name="chevron" :size="18" class="back-chevron" />
       <span>{{ t("requests.back") }}</span>
     </router-link>
-
-    <h2 class="section-title">{{ t("requests.detailTitle") }}</h2>
 
     <div v-if="detail.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
 
     <div v-else-if="detail.error" class="card card-pad text-center">
       <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
       <p class="text-sm text-muted">{{ errorMessage }}</p>
-      <button class="btn btn-primary mt-3" style="width: auto; padding-inline: 24px" @click="detail.reload()">
-        {{ t("common.retry") }}
-      </button>
+      <Button class="mt-3" variant="outline" size="xl" :label="t('common.retry')" @click="detail.reload()" />
     </div>
 
     <template v-else-if="data">
@@ -100,8 +97,9 @@
 <script setup>
 import { computed } from "vue";
 import { useRoute } from "vue-router";
-import { createResource } from "frappe-ui";
+import { Button, createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import HousingNav from "../components/HousingNav.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatDateTime } from "../utils/datetime";
 

@@ -1,16 +1,17 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <section class="panel">
-    <header class="panel-head">
+  <section class="boarding-panel">
+    <header class="section-heading section-heading-row">
       <div>
-        <h2 class="panel-title">{{ t("boarding.title") }}</h2>
-        <p class="panel-sub">{{ t("boarding.subtitle") }}</p>
+        <p>{{ t("boarding.eyebrow") }}</p>
+        <h3>{{ t("boarding.title") }}</h3>
+        <span>{{ t("boarding.subtitle") }}</span>
       </div>
       <Button
         v-if="tripName"
         variant="outline"
         size="lg"
-        :label="t('common.refresh')"
+        :aria-label="t('common.refresh')"
         :loading="state === 'loading' && Boolean(data)"
         @click="load()"
       >
@@ -18,66 +19,50 @@
       </Button>
     </header>
 
-    <EmptyState v-if="!tripName" :title="t('boarding.noTrip')">
-      <template #icon><Icon name="bus" :size="20" :stroke-width="1.6" /></template>
-    </EmptyState>
-
-    <LoadError
-      v-else-if="state === 'error'"
-      :title="t('boarding.loadError')"
-      :detail="error"
-      :hint="t('list.loadErrorHint')"
+    <AsyncBoundary
+      :state="boundaryState"
+      :title="boundaryTitle"
+      :message="boundaryMessage"
       :retry-label="t('common.retry')"
       @retry="load()"
-    />
-
-    <div v-else-if="state === 'loading' && !data" class="skeleton-bar" aria-hidden="true" />
-
-    <div v-else-if="data" class="boarding-body">
-      <div class="progress-hero">
-        <div class="count-hero">
-          <span class="count-num">{{ data.boarding.boarded }}</span>
-          <span class="count-den">/ {{ data.boarding.expected || t("common.none") }}</span>
+    >
+      <div class="boarding-progress">
+        <div class="boarding-count">
+          <strong><bdi>{{ data.boarding.boarded }}</bdi></strong>
+          <span>{{ t("boarding.of", { boarded: data.boarding.boarded, expected: data.boarding.expected }) }}</span>
         </div>
-        <div class="progress-meta">
-          <div class="of-line">{{ ofLabel }}</div>
-          <Progress class="of-bar" :value="ratio" size="md" />
-          <div class="trip-status">
-            <span class="dot" :class="'st-' + (data.status || '').toLowerCase()" />
-            {{ t("boarding.tripStatus") }}: {{ tripStatusLabel }}
-          </div>
-          <p v-if="!data.boarding.has_manifest" class="hint">{{ t("boarding.noManifest") }}</p>
+        <div class="boarding-progress-line">
+          <Progress :value="ratio" size="md" />
+          <StatusLabel :label="tripStatusLabel" :tone="tripStatusTone" />
         </div>
+        <p v-if="!data.boarding.has_manifest" class="boarding-note">{{ t("boarding.noManifest") }}</p>
       </div>
 
-      <div class="chips">
-        <div class="chip chip-ok"><b>{{ data.boarding.boarded }}</b>{{ t("boarding.boarded") }}</div>
-        <div class="chip chip-claim"><b>{{ data.boarding.claimed }}</b>{{ t("boarding.claimed") }}</div>
-        <div class="chip chip-wait"><b>{{ data.boarding.pending }}</b>{{ t("boarding.pending") }}</div>
-        <div class="chip chip-bad">
-          <b>{{ data.boarding.absent + data.boarding.rejected }}</b>{{ t("boarding.absent") }}
-        </div>
-      </div>
+      <MetricRibbon :metrics="boardingMetrics" />
 
-      <div v-if="data.workers.length" class="worker-list">
-        <h3 class="mini-title">{{ t("boarding.workers") }}</h3>
+      <section v-if="data.workers.length" class="passenger-ledger">
+        <h4>{{ t("boarding.workers") }}</h4>
         <ul>
-          <li v-for="w in data.workers" :key="w.employee" class="worker-row">
-            <span class="w-name"><Icon name="user" :size="15" /> {{ w.employee_name }}</span>
-            <Badge :theme="workerTheme(w.status)" size="sm" :label="t('workerStatus.' + w.status)" />
+          <li v-for="worker in data.workers" :key="worker.employee">
+            <span><Icon name="user" :size="15" /> {{ worker.employee_name }}</span>
+            <StatusLabel
+              :label="t('workerStatus.' + worker.status)"
+              :tone="workerTone(worker.status)"
+            />
           </li>
         </ul>
-      </div>
-    </div>
+      </section>
+    </AsyncBoundary>
   </section>
 </template>
 
 <script setup>
 import { computed, ref, watch } from "vue";
-import { Badge, Button, Progress } from "frappe-ui";
+import { Button, Progress } from "frappe-ui";
 
-import EmptyState from "@shared/components/EmptyState.vue";
-import LoadError from "@shared/components/LoadError.vue";
+import AsyncBoundary from "@shared/components/AsyncBoundary.vue";
+import MetricRibbon from "@shared/components/MetricRibbon.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import { usePoll } from "@shared/usePoll.js";
 import { BOARDING } from "@shared/statusVocabularies";
 
@@ -101,30 +86,50 @@ const POLL_MS = 15000;
 const ratio = computed(() =>
   data.value ? pct(data.value.boarding.boarded, data.value.boarding.expected) : 0,
 );
-const ofLabel = computed(() =>
-  data.value
-    ? t("boarding.of", {
-        boarded: data.value.boarding.boarded,
-        expected: data.value.boarding.expected,
-      })
-    : "",
-);
 const tripStatusLabel = computed(() => {
-  const s = data.value && data.value.status;
-  if (!s) return t("common.none");
-  const key = "tripStatus." + s;
+  const status = data.value?.status;
+  if (!status) return t("common.none");
+  const key = "tripStatus." + status;
   const label = t(key);
-  return label === key ? s : label;
+  return label === key ? status : label;
 });
+const tripStatusTone = computed(
+  () => ({ Planned: "info", Dispatched: "warning", Completed: "success", Cancelled: "danger" })[data.value?.status] || "neutral",
+);
+const boardingMetrics = computed(() =>
+  data.value
+    ? [
+        { key: "boarded", label: t("boarding.boarded"), value: data.value.boarding.boarded, tone: "success" },
+        { key: "claimed", label: t("boarding.claimed"), value: data.value.boarding.claimed, tone: "info" },
+        { key: "pending", label: t("boarding.pending"), value: data.value.boarding.pending, tone: "warning" },
+        {
+          key: "absent",
+          label: t("boarding.absent"),
+          value: data.value.boarding.absent + data.value.boarding.rejected,
+          tone: "danger",
+        },
+      ]
+    : [],
+);
+const boundaryState = computed(() => {
+  if (!props.tripName) return "empty";
+  if (state.value === "error") return "error";
+  if (state.value === "loading" && !data.value) return "loading";
+  return data.value ? "ready" : "loading";
+});
+const boundaryTitle = computed(() =>
+  !props.tripName ? t("boarding.noTrip") : t("boarding.loadError"),
+);
+const boundaryMessage = computed(() => (state.value === "error" ? error.value : ""));
 
-const workerTheme = (status) =>
+const workerTone = (status) =>
   ({
-    Boarded: "green",
-    [BOARDING.WORKER_CLAIMED]: "blue",
-    Pending: "gray",
-    [BOARDING.DRIVER_REJECTED]: "red",
-    Absent: "red",
-  })[status] || "gray";
+    Boarded: "success",
+    [BOARDING.WORKER_CLAIMED]: "info",
+    Pending: "warning",
+    [BOARDING.DRIVER_REJECTED]: "danger",
+    Absent: "danger",
+  })[status] || "neutral";
 
 async function load() {
   if (!props.tripName) {
@@ -134,17 +139,15 @@ async function load() {
   if (!data.value) state.value = "loading";
   const ticket = seq.next();
   try {
-    const res = await getTripBoarding(props.tripName);
-    /* The manual refresh and the 15 s poll can be in flight together; only the newest answer
-       is allowed to repaint, or a slow one lands on top of a fresher count. */
+    const response = await getTripBoarding(props.tripName);
     if (!seq.isCurrent(ticket)) return;
-    data.value = res;
+    data.value = response;
     state.value = "ready";
     error.value = "";
-  } catch (e) {
+  } catch (exception) {
     if (!seq.isCurrent(ticket)) return;
     state.value = "error";
-    error.value = resourceErrorMessage(e, "boarding.loadError");
+    error.value = resourceErrorMessage(exception, "boarding.loadError");
   }
 }
 

@@ -1,12 +1,7 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <h3 class="psect-title"><Icon name="chart-column" :size="14" /> {{ t("panel.vehicleStats") }}</h3>
-  <div class="pstats">
-    <div v-for="stat in stats" :key="stat.key" class="pstat">
-      <div class="pstat-n">{{ stat.value }}</div>
-      <div class="pstat-l">{{ stat.label }}</div>
-    </div>
-  </div>
+  <MetricRibbon :metrics="stats" />
 
   <h3 class="psect-title"><Icon name="car" :size="14" /> {{ t("panel.vehicleDetails") }}</h3>
   <dl class="kv-grid">
@@ -54,6 +49,8 @@
 <script setup>
 import { computed } from "vue";
 import { Badge } from "frappe-ui";
+
+import MetricRibbon from "@shared/components/MetricRibbon.vue";
 
 import Icon from "../../Icon.vue";
 import { useBoardContext } from "../../boardContext.js";

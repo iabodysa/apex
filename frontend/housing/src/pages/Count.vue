@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <BuildingPicker v-if="!building" @select="onBuildingSelected" />
-
-  <ListSkeleton v-else-if="invRes.loading && !rows.length" :rows="6" :label="t('list.loadingLabel')" />
+  <ListSkeleton v-if="invRes.loading && !rows.length" :rows="6" :label="t('list.loadingLabel')" />
 
   <LoadError
     v-else-if="invRes.error"
@@ -146,7 +144,6 @@
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Button, Dialog, ErrorMessage, TabButtons, createResource, toast } from "frappe-ui";
-import BuildingPicker from "@shared/components/BuildingPicker.vue";
 import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "../components/Icon.vue";
 import CountItemRow from "../components/CountItemRow.vue";
@@ -157,7 +154,7 @@ import { useI18n, resourceErrorMessage } from "../i18n";
 import { useDesktop } from "@shared/useBreakpoint.js";
 import { can } from "../portal.js";
 import { dropCountDraft, readCountDraft, writeCountDraft } from "../drafts.js";
-import { building, clearBuilding, countProgress, selectBuilding } from "../session";
+import { building, clearBuilding, countProgress } from "../session";
 
 const { t, dir } = useI18n();
 const route = useRoute();
@@ -286,10 +283,6 @@ function restoreDraft() {
 
 function announceRestored(restored) {
   if (restored) toast.create({ type: "info", message: t("list.draftRestored", { n: restored }) });
-}
-
-function onBuildingSelected(name, label) {
-  selectBuilding(name, label);
 }
 
 function onChangeBuilding() {

@@ -11,7 +11,7 @@
       <Icon name="minus" :size="20" />
     </button>
     <input
-      class="step-input mono"
+      class="step-input tnum"
       type="number"
       inputmode="numeric"
       :min="min"

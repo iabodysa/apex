@@ -392,7 +392,7 @@ async function confirmReceipt() {
 }
 .list-title {
   flex: 1;
-  min-width: 0;
+  min-inline-size: 0;
   font-size: var(--fs-h3);
   font-weight: var(--fw-heading);
   color: var(--c-ink);
@@ -424,11 +424,11 @@ async function confirmReceipt() {
   margin-top: var(--sp-2);
 }
 .code-value {
+  direction: ltr;
+  unicode-bidi: isolate;
   text-align: center;
   font-size: var(--fs-display, 2rem);
   font-weight: var(--fw-heading);
-  letter-spacing: 0.24em;
-  text-indent: 0.24em;
   color: var(--c-ink);
 }
 </style>

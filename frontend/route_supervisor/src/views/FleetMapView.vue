@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <div class="work work-single">
-    <FleetMap />
-  </div>
+  <FleetMap />
 </template>
 
 <script setup>

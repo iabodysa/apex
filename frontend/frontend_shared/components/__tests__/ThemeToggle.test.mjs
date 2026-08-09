@@ -9,6 +9,13 @@
 // case has to re-import the module with the DOM already in the state under test.
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { mount } from "@vue/test-utils";
+import { createMemoryHistory, createRouter } from "vue-router";
+
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes: [{ path: "/", component: { template: "<div />" } }],
+});
+const mountToggle = (component) => mount(component, { global: { plugins: [router] } });
 
 async function freshToggle(serverTheme) {
   const root = document.documentElement;
@@ -28,7 +35,7 @@ describe("ThemeToggle", () => {
 
   it("pins the chosen theme on <html>", async () => {
     const ThemeToggle = await freshToggle(null);
-    const w = mount(ThemeToggle);
+    const w = mountToggle(ThemeToggle);
 
     await optionFor(w, "dark").trigger("click");
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
@@ -39,7 +46,7 @@ describe("ThemeToggle", () => {
 
   it("restores the wrapper's theme on Auto instead of deleting it", async () => {
     const ThemeToggle = await freshToggle("afmco");
-    const w = mount(ThemeToggle);
+    const w = mountToggle(ThemeToggle);
 
     await optionFor(w, "dark").trigger("click");
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
@@ -50,7 +57,7 @@ describe("ThemeToggle", () => {
 
   it("keeps an administrator's non-default theme through a round trip", async () => {
     const ThemeToggle = await freshToggle("creative");
-    const w = mount(ThemeToggle);
+    const w = mountToggle(ThemeToggle);
 
     await optionFor(w, "light").trigger("click");
     await optionFor(w, "auto").trigger("click");
@@ -59,7 +66,7 @@ describe("ThemeToggle", () => {
 
   it("removes the attribute on Auto only when the wrapper never set one", async () => {
     const ThemeToggle = await freshToggle(null);
-    const w = mount(ThemeToggle);
+    const w = mountToggle(ThemeToggle);
 
     await optionFor(w, "dark").trigger("click");
     await optionFor(w, "auto").trigger("click");
@@ -69,7 +76,7 @@ describe("ThemeToggle", () => {
   it("re-applies the stored choice on mount and marks it pressed", async () => {
     localStorage.setItem("apex_theme", "dark");
     const ThemeToggle = await freshToggle("afmco");
-    const w = mount(ThemeToggle);
+    const w = mountToggle(ThemeToggle);
     await w.vm.$nextTick();
 
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
@@ -79,7 +86,7 @@ describe("ThemeToggle", () => {
 
   it("labels the group and every option through the portal's own dictionary", async () => {
     const ThemeToggle = await freshToggle(null);
-    const w = mount(ThemeToggle);
+    const w = mountToggle(ThemeToggle);
 
     expect(w.find(".theme-toggle").attributes("aria-label")).toBe("theme.label");
     expect(w.findAll(".theme-opt").map((b) => b.text())).toEqual([
@@ -93,7 +100,7 @@ describe("ThemeToggle", () => {
   // without this the three buttons have no accessible name at all on a phone.
   it("keeps an accessible name when the label is hidden on a phone", async () => {
     const ThemeToggle = await freshToggle(null);
-    const w = mount(ThemeToggle);
+    const w = mountToggle(ThemeToggle);
 
     expect(w.findAll(".theme-opt").map((b) => b.attributes("aria-label"))).toEqual([
       "theme.light",

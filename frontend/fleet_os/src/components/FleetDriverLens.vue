@@ -29,7 +29,7 @@
         >
           <Icon :name="fmt.icon(v)" :size="16" />
           <span class="fp-lens-plate mono"><bdi>{{ v.plate }}</bdi></span>
-          <Badge :theme="fmt.sb(v).theme" size="sm" :label="fmt.sl(v.vehicle_status)" />
+          <StatusLabel :tone="vehicleStatusTone(v.vehicle_status)" :label="fmt.sl(v.vehicle_status)" />
           <span class="fp-lens-meta">
             {{ v.vehicle_type || t("common.none") }} · {{ fmt.trim(v.project) || t("common.none") }}
           </span>
@@ -41,13 +41,14 @@
 </template>
 
 <script setup>
-import { Badge } from "frappe-ui";
-
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import Icon from "../Icon.vue";
 import EmptyBoard from "./EmptyBoard.vue";
+import { vehicleStatusTone } from "../fleetHelpers.js";
 import { useBoardContext } from "../boardContext.js";
 
 const { t, fmt, state, filters } = useBoardContext();
 const { filtered, driverGroups } = filters;
 const { openVehicle } = state;
+
 </script>

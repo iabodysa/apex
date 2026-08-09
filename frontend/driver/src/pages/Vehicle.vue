@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
-    <h2 class="section-title">{{ t("vehicle.title") }}</h2>
-
     <LoadingState v-if="vehicle.loading" :label="t('common.loading')" />
 
     <ErrorState v-else-if="vehicle.error" :message="t('errors.loadFailed')" @retry="vehicle.reload()" />
@@ -104,20 +102,23 @@
       </section>
 
       <section class="card card-pad space-y-3">
-        <button v-if="!reporting" class="btn btn-outline" @click="reporting = true">
-          <Icon name="alert" :size="18" /> {{ t("vehicle.reportProblem") }}
-        </button>
+        <Button v-if="!reporting" variant="outline" size="xl" :label="t('vehicle.reportProblem')" @click="reporting = true">
+          <template #prefix><Icon name="alert" :size="18" /></template>
+        </Button>
         <template v-else>
-          <textarea
+          <FormControl
             v-model="problem"
+            type="textarea"
+            size="lg"
+            :rows="4"
+            :label="t('vehicle.problemSubject')"
             :placeholder="t('vehicle.problemPlaceholder')"
-            class="textarea"
-          ></textarea>
+          />
           <div class="flex gap-2">
-            <button class="btn btn-primary" :disabled="report.loading || !problem.trim()" @click="submitProblem">
-              <Icon name="help" :size="18" /> {{ t("vehicle.send") }}
-            </button>
-            <button class="btn btn-outline" @click="reporting = false">{{ t("vehicle.cancel") }}</button>
+            <Button variant="solid" theme="green" size="xl" :disabled="report.loading || !problem.trim()" :loading="report.loading" :label="t('vehicle.send')" @click="submitProblem">
+              <template #prefix><Icon name="help" :size="18" /></template>
+            </Button>
+            <Button variant="outline" size="xl" :label="t('vehicle.cancel')" @click="reporting = false" />
           </div>
         </template>
       </section>
@@ -134,7 +135,7 @@
 
 <script setup>
 import { computed, ref } from "vue";
-import { createResource } from "frappe-ui";
+import { Button, FormControl, createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import LoadingState from "../components/LoadingState.vue";
 import EmptyState from "../components/EmptyState.vue";

@@ -11,43 +11,50 @@
     @retry="reload"
   />
 
-  <template v-else>
-    <div class="hz-split">
-      <div class="hz-split-main">
-        <ShiftCard :today="td" />
-        <AlertsCard v-if="alerts.length" :alerts="alerts" />
-        <NextTripCard v-if="!desktop" :trip="nextTrip" />
-        <NotificationsCard v-if="!desktop" :notifications="notifications" />
-        <DestinationsCard />
-      </div>
+  <div v-else class="field-runway">
+    <DecisionStage
+      class="field-stage"
+      :eyebrow="t('home.today')"
+      :title="t('home.step.' + step.key)"
+      :subtitle="t('home.stepHint.' + step.key)"
+    >
+      <ShiftCard :today="td" />
+      <NextTripCard :trip="nextTrip" />
 
-      <aside v-if="desktop" class="hz-split-side">
-        <NextTripCard :trip="nextTrip" />
-        <NotificationsCard :notifications="notifications" />
-      </aside>
-    </div>
+      <template #footer>
+        <ActionDock>
+          <template #primary>
+            <Button
+              class="dock-btn"
+              variant="solid"
+              theme="green"
+              size="2xl"
+              :disabled="!step.to"
+              :label="t('home.step.' + step.key)"
+              @click="go"
+            >
+              <template #prefix><Icon :name="stepIcon" :size="20" /></template>
+            </Button>
+          </template>
+        </ActionDock>
+      </template>
+    </DecisionStage>
 
-    <div class="hz-dock" data-dock>
-      <Button
-        class="dock-btn"
-        variant="solid"
-        theme="green"
-        size="2xl"
-        :disabled="!step.to"
-        :label="t('home.step.' + step.key)"
-        @click="go"
-      >
-        <template #prefix><Icon :name="stepIcon" :size="20" /></template>
-      </Button>
-      <p class="hz-dock-reason">{{ t("home.stepHint." + step.key) }}</p>
-    </div>
-  </template>
+    <aside class="field-evidence">
+      <AlertsCard v-if="alerts.length" :alerts="alerts" />
+      <NotificationsCard :notifications="notifications" />
+    </aside>
+
+    <DestinationsCard class="field-ledger" />
+  </div>
 </template>
 
 <script setup>
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { Button, createResource } from "frappe-ui";
+import ActionDock from "@shared/components/ActionDock.vue";
+import DecisionStage from "@shared/components/DecisionStage.vue";
 import TodaySkeleton from "../components/TodaySkeleton.vue";
 import LoadError from "@shared/components/LoadError.vue";
 import ShiftCard from "../components/ShiftCard.vue";
@@ -57,12 +64,10 @@ import NotificationsCard from "../components/NotificationsCard.vue";
 import DestinationsCard from "../components/DestinationsCard.vue";
 import Icon from "../components/Icon.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
-import { useDesktop } from "@shared/useBreakpoint.js";
 import { useToday, nextStep } from "../today";
 
 const { t, n } = useI18n();
 const router = useRouter();
-const desktop = useDesktop();
 
 const today = useToday();
 const td = computed(() => today.data || {});

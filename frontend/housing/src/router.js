@@ -9,25 +9,72 @@ import Custody from "./pages/Custody.vue";
 import Delivery from "./pages/Delivery.vue";
 import NoAccess from "./pages/NoAccess.vue";
 import Round from "./pages/Round.vue";
+import Today from "./pages/Today.vue";
 import Transfer from "./pages/Transfer.vue";
 
 const routes = [
   { path: "/", redirect: () => landingPath() },
-  { path: "/count", name: "Count", component: Count, meta: { section: "count" } },
-  { path: "/count/:item", name: "CountItem", component: Count, meta: { section: "count" } },
-  { path: "/delivery", name: "Delivery", component: Delivery, meta: { section: "delivery" } },
+  { path: "/today", name: "Today", component: Today, meta: { section: "today", domain: "today" } },
+  {
+    path: "/count",
+    name: "Count",
+    component: Count,
+    meta: { section: "count", domain: "assets" },
+  },
+  {
+    path: "/count/:item",
+    name: "CountItem",
+    component: Count,
+    meta: { section: "count", domain: "assets" },
+  },
+  {
+    path: "/delivery",
+    name: "Delivery",
+    component: Delivery,
+    meta: { section: "delivery", domain: "assets" },
+  },
   {
     path: "/delivery/:name",
     name: "DeliveryDetail",
     component: Delivery,
-    meta: { section: "delivery" },
+    meta: { section: "delivery", domain: "assets" },
   },
-  { path: "/beds", name: "Beds", component: Beds, meta: { section: "beds" } },
-  { path: "/beds/:bed", name: "BedDetail", component: Beds, meta: { section: "beds" } },
-  { path: "/arrivals", name: "Arrivals", component: Arrivals, meta: { section: "arrivals" } },
-  { path: "/custody", name: "Custody", component: Custody, meta: { section: "custody" } },
-  { path: "/transfer", name: "Transfer", component: Transfer, meta: { section: "transfer" } },
-  { path: "/safety", name: "Round", component: Round, meta: { section: "safety" } },
+  {
+    path: "/beds",
+    name: "Beds",
+    component: Beds,
+    meta: { section: "beds", domain: "residents" },
+  },
+  {
+    path: "/beds/:bed",
+    name: "BedDetail",
+    component: Beds,
+    meta: { section: "beds", domain: "residents" },
+  },
+  {
+    path: "/arrivals",
+    name: "Arrivals",
+    component: Arrivals,
+    meta: { section: "arrivals", domain: "residents" },
+  },
+  {
+    path: "/custody",
+    name: "Custody",
+    component: Custody,
+    meta: { section: "custody", domain: "assets" },
+  },
+  {
+    path: "/transfer",
+    name: "Transfer",
+    component: Transfer,
+    meta: { section: "transfer", domain: "residents" },
+  },
+  {
+    path: "/safety",
+    name: "Round",
+    component: Round,
+    meta: { section: "safety", domain: "safety" },
+  },
   { path: "/no-access", name: "NoAccess", component: NoAccess },
   { path: "/:pathMatch(.*)*", redirect: () => landingPath() },
 ];
@@ -39,6 +86,11 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const section = to.meta && to.meta.section;
+  if (section === "today") {
+    const target = landingPath();
+    if (target !== "/today") return { path: target };
+    return true;
+  }
   if (section && !hasSection(section)) return { path: "/no-access" };
   return true;
 });

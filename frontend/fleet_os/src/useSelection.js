@@ -1,6 +1,8 @@
 // Copyright (c) 2026, afmcoltd
 import { computed, ref } from "vue";
 
+export const MAX_BULK_SELECTION = 50;
+
 /* Selection stays in memory on purpose. It is the one piece of board state nobody expects to
    survive a refresh, and a list of plates in the address would make a shared link act on the
    receiver's fleet rather than show him the sender's view. */
@@ -13,7 +15,7 @@ export function useSelection(filtered) {
   function toggleSelect(plate) {
     const next = new Set(selected.value);
     if (next.has(plate)) next.delete(plate);
-    else next.add(plate);
+    else if (next.size < MAX_BULK_SELECTION) next.add(plate);
     selected.value = next;
   }
   function clearSelection() {
@@ -24,11 +26,16 @@ export function useSelection(filtered) {
     if (!selectMode.value) clearSelection();
   }
   const allVisibleSelected = computed(
-    () => filtered.value.length > 0 && filtered.value.every((v) => selected.value.has(v.plate)),
+    () =>
+      filtered.value.length > 0 &&
+      filtered.value.slice(0, MAX_BULK_SELECTION).every((v) => selected.value.has(v.plate)),
+  );
+  const selectionLimitReached = computed(
+    () => selected.value.size >= MAX_BULK_SELECTION,
   );
   function toggleSelectAll() {
     if (allVisibleSelected.value) clearSelection();
-    else selected.value = new Set(filtered.value.map((v) => v.plate));
+    else selected.value = new Set(filtered.value.slice(0, MAX_BULK_SELECTION).map((v) => v.plate));
   }
 
   return {
@@ -40,6 +47,8 @@ export function useSelection(filtered) {
     clearSelection,
     toggleSelectMode,
     allVisibleSelected,
+    selectionLimitReached,
+    maxSelection: MAX_BULK_SELECTION,
     toggleSelectAll,
   };
 }

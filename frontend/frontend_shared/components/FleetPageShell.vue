@@ -7,7 +7,7 @@
       <span class="fleet-actions"><slot name="actions" /></span>
     </header>
 
-    <main class="fleet-body" :style="{ maxWidth: cssWidth }">
+    <main class="fleet-body" :class="{ 'has-bottom-nav': !!$slots.nav }" :style="bodyStyle">
       <div v-if="$slots.heading || title" class="fleet-heading">
         <slot name="heading">
           <h1 class="fleet-hello">{{ title }}</h1>
@@ -28,23 +28,23 @@ import { computed } from "vue";
 const props = defineProps({
   title: { type: String, default: "" },
   subtitle: { type: String, default: "" },
-  maxWidth: { type: [Number, String], default: 1180 },
+  maxWidth: { type: [Number, String], default: "" },
 });
 
-const cssWidth = computed(() =>
-  typeof props.maxWidth === "number" ? props.maxWidth + "px" : props.maxWidth,
-);
+const bodyStyle = computed(() => {
+  if (!props.maxWidth) return undefined;
+  const value = typeof props.maxWidth === "number" ? props.maxWidth + "px" : props.maxWidth;
+  return { "--fleet-content-limit": value };
+});
 </script>
 
 <style scoped>
 .fleet-shell {
   min-height: 100vh;
   min-height: 100dvh;
-  background:
-    radial-gradient(1200px 600px at 80% -10%, color-mix(in srgb, var(--c-mint) 14%, transparent), transparent 60%),
-    radial-gradient(1000px 500px at 10% 0%, color-mix(in srgb, var(--c-primary) 10%, transparent), transparent 55%),
-    var(--c-canvas);
-  background-attachment: fixed;
+  min-inline-size: 0;
+  overflow-x: clip;
+  background: var(--c-canvas);
   color: var(--c-ink);
   font-family: var(--font);
   font-weight: var(--fw-body);
@@ -52,7 +52,7 @@ const cssWidth = computed(() =>
 
 .fleet-top {
   position: sticky;
-  top: 0;
+  inset-block-start: 0;
   z-index: 20;
   display: flex;
   align-items: center;
@@ -60,6 +60,18 @@ const cssWidth = computed(() =>
   padding: 14px clamp(var(--sp-4), 4vw, var(--sp-8));
   background: var(--c-header-bg);
   color: var(--c-header-ink);
+  overflow: hidden;
+}
+.fleet-top::after {
+  content: "";
+  position: absolute;
+  inset-block: -180%;
+  inset-inline-end: clamp(5rem, 24vw, 24rem);
+  inline-size: 1px;
+  background: var(--c-header-accent);
+  opacity: 0.3;
+  transform: rotate(24deg);
+  pointer-events: none;
 }
 .fleet-brand {
   display: inline-flex;
@@ -118,7 +130,10 @@ const cssWidth = computed(() =>
 }
 
 .fleet-body {
-  margin: 0 auto;
+  inline-size: 100%;
+  max-inline-size: var(--fleet-content-limit, none);
+  min-inline-size: 0;
+  margin-inline: auto;
   padding: clamp(var(--sp-5), 4vw, 34px) clamp(var(--sp-4), 4vw, var(--sp-8)) 80px;
 }
 .fleet-heading {
@@ -126,42 +141,56 @@ const cssWidth = computed(() =>
 }
 .fleet-hello {
   margin: 0 0 3px;
-  font-size: clamp(20px, 3vw, 26px);
-  font-weight: var(--fw-heading);
-  letter-spacing: -0.01em;
+  max-inline-size: 22ch;
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: 700;
   text-wrap: balance;
 }
 .fleet-sub {
   margin: 0;
   color: var(--c-muted);
-  font-size: var(--fs-sm);
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  line-height: 1.65;
 }
 .fleet-footer {
   margin-top: 48px;
   padding: 22px var(--sp-6);
-  background: var(--c-surface-2);
-  border: var(--border-width) solid var(--c-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  border-block: var(--border-width) solid var(--c-border-strong);
 }
 
 @media (max-width: 767px) {
   .fleet-top {
-    flex-wrap: wrap;
-    row-gap: var(--sp-2);
+    min-block-size: 64px;
   }
   .fleet-nav {
-    order: 3;
-    flex-basis: 100%;
-    margin-inline-start: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
+    position: fixed;
+    z-index: 25;
+    inset-inline: 0;
+    inset-block-end: 0;
+    justify-content: stretch;
+    gap: var(--sp-1);
+    margin: 0;
+    padding: var(--sp-1) var(--sp-2) calc(var(--sp-1) + env(safe-area-inset-bottom, 0px));
+    border-block-start: 1px solid var(--c-border);
+    background: var(--c-surface);
   }
-  .fleet-nav::-webkit-scrollbar {
-    display: none;
+  .fleet-nav :slotted(a) {
+    flex: 1 1 0;
+    justify-content: center;
+    min-inline-size: 0;
+    min-block-size: var(--tap-lg);
+    color: var(--c-muted);
+    text-align: center;
   }
-  .fleet-actions {
-    margin-inline-start: auto;
+  .fleet-nav :slotted(a.is-active),
+  .fleet-nav :slotted(a[aria-current="page"]) {
+    background: color-mix(in srgb, var(--c-primary) 10%, transparent);
+    color: var(--c-primary);
+  }
+  .fleet-body.has-bottom-nav {
+    padding-block-end: calc(5rem + env(safe-area-inset-bottom, 0px));
   }
 }
 </style>

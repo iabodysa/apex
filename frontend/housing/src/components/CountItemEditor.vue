@@ -22,16 +22,16 @@
     <dl class="figures">
       <div class="figure">
         <dt class="figure-label">{{ t("card.expected") }}</dt>
-        <dd class="figure-value"><bdi class="mono">{{ fmt(row.expected_quantity) }}</bdi></dd>
+        <dd class="figure-value"><bdi class="tnum">{{ fmt(row.expected_quantity) }}</bdi></dd>
       </div>
       <div class="figure">
         <dt class="figure-label">{{ t("card.counted") }}</dt>
-        <dd class="figure-value figure-strong"><bdi class="mono">{{ fmt(model.counted_quantity) }}</bdi></dd>
+        <dd class="figure-value figure-strong"><bdi class="tnum">{{ fmt(model.counted_quantity) }}</bdi></dd>
       </div>
       <Tooltip :text="t('card.varianceHint')">
         <div class="figure">
           <dt class="figure-label">{{ t("card.variance") }}</dt>
-          <dd class="figure-value" :class="varianceClass"><bdi class="mono">{{ varianceText }}</bdi></dd>
+          <dd class="figure-value" :class="varianceClass"><bdi class="tnum">{{ varianceText }}</bdi></dd>
         </div>
       </Tooltip>
     </dl>

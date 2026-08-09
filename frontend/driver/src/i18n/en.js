@@ -7,10 +7,12 @@ export default {
     none: "—",
     back: "Back",
     driverPortal: "Driver Portal",
+    skipContent: "Skip to content",
     operatorLogo: "Operator logo",
     staff: "Staff",
     goToApp: "Go to the main app",
     done: "Done",
+    more: "More",
   },
   install: {
     body: "Install Salis Driver for quick, full-screen access.",
@@ -41,6 +43,7 @@ export default {
     fuel: "Fuel",
     tickets: "Support",
     profile: "Profile",
+    more: "More",
   },
   home: {
     vehicle: "Vehicle",

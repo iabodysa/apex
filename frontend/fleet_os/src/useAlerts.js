@@ -40,12 +40,10 @@ export function useAlerts({ vehicles, t, openVehicle, closeAlerts }) {
 
   function openAlertTarget(a) {
     const v = alertVehicleOnBoard(a);
-    if (v) {
-      closeAlerts();
-      openVehicle(v.plate);
-      return;
-    }
-    window.open("/app/operations-alert/" + encodeURIComponent(a.name), "_blank", "noopener");
+    if (!v) return false;
+    closeAlerts();
+    openVehicle(v.plate);
+    return true;
   }
 
   return {

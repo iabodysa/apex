@@ -57,12 +57,12 @@ const statusLabel = computed(() =>
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  width: 100%;
-  min-height: var(--tap-lg);
-  padding: var(--sp-3) var(--sp-4);
-  border: var(--border-width) solid var(--c-border);
-  border-radius: var(--radius);
-  background: var(--c-surface-2);
+  inline-size: 100%;
+  min-block-size: 76px;
+  padding: var(--sp-3) var(--sp-1);
+  border: 0;
+  border-block-end: var(--border-width) solid var(--c-border);
+  background: transparent;
   text-align: start;
   cursor: pointer;
   touch-action: manipulation;
@@ -72,7 +72,7 @@ const statusLabel = computed(() =>
 }
 @media (hover: hover) {
   .row:hover {
-    border-color: var(--c-border-strong);
+    background: color-mix(in srgb, var(--c-ink) 4%, transparent);
   }
 }
 .row:focus-visible {
@@ -80,15 +80,15 @@ const statusLabel = computed(() =>
   outline-offset: 2px;
 }
 .row-open {
-  border-color: var(--c-primary);
-  background: color-mix(in srgb, var(--c-primary) 7%, var(--c-surface-2));
+  border-inline-start: 3px solid var(--c-primary);
+  background: color-mix(in srgb, var(--c-primary) 7%, transparent);
 }
 
 .row-mark {
   display: grid;
   place-items: center;
-  height: var(--tap-min);
-  width: var(--tap-min);
+  block-size: var(--tap-min);
+  inline-size: var(--tap-min);
   flex-shrink: 0;
   border-radius: var(--radius);
   color: var(--c-warning);
@@ -101,7 +101,7 @@ const statusLabel = computed(() =>
 
 .row-id {
   flex: 1;
-  min-width: 0;
+  min-inline-size: 0;
   display: flex;
   flex-direction: column;
   gap: var(--sp-1);
@@ -120,7 +120,7 @@ const statusLabel = computed(() =>
   gap: var(--sp-1);
   font-size: var(--fs-sm);
   color: var(--c-muted);
-  min-width: 0;
+  min-inline-size: 0;
 }
 .row-meta > span {
   overflow: hidden;
@@ -137,8 +137,8 @@ const statusLabel = computed(() =>
   margin-top: var(--sp-1);
 }
 .track-bar {
-  height: var(--sp-1);
-  width: var(--sp-6);
+  block-size: var(--sp-1);
+  inline-size: var(--sp-6);
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--c-ink) 14%, transparent);
 }

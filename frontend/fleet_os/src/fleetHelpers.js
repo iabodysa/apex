@@ -15,6 +15,72 @@ export const icon = (v) => (v.sheet === "CAR" ? "car" : "bike");
 export const initials = (d) => (d ? d.name_ar || d.name_en || "" : "").slice(0, 2);
 export const trim = (x) => (x || "").toString().trim();
 
+export function normalizeReaderErrors(errors) {
+  return (Array.isArray(errors) ? errors : [])
+    .map((item) => {
+      if (typeof item === "string") return trim(item);
+      if (!item || typeof item !== "object") return "";
+      return trim(item.error) || trim(item.reader);
+    })
+    .filter(Boolean);
+}
+
+export const createStopForm = (nextStatus = "available") => ({
+  reason: "",
+  notes: "",
+  nextStatus,
+});
+
+export const createTheftForm = () => ({
+  police: "",
+  location: "",
+});
+
+export const canAssignVehicle = (vehicle) => vehicle?.vehicle_status === "available";
+
+export const canStopVehicle = (vehicle) =>
+  Boolean(vehicle && ["assigned", "available"].includes(vehicle.vehicle_status));
+
+export const canSendToWorkshop = (vehicle) =>
+  Boolean(
+    vehicle &&
+    !vehicle.current_driver &&
+    ["available", "stopped"].includes(vehicle.vehicle_status),
+  );
+
+export const canChooseVehicleStatus = (vehicle, target) => {
+  const current = vehicle?.vehicle_status;
+  if (!current || !target || target === current || vehicle.current_driver) return false;
+  if (["workshop", "stolen"].includes(current)) return false;
+  if (target === "assigned") return current === "available";
+  return (
+    ["available", "stopped"].includes(current) &&
+    ["available", "workshop", "stopped", "stolen"].includes(target)
+  );
+};
+
+export const vehicleStatusTone = (status) => ({
+  assigned: "success",
+  available: "info",
+  workshop: "warning",
+  stopped: "neutral",
+  stolen: "danger",
+})[status] || "neutral";
+
+export function normalizeBulkResult(result) {
+  const source = result || {};
+  const rows = (Array.isArray(source.results) ? source.results : []).map((row) => ({
+    plate: trim(row?.plate),
+    ok: row?.ok === true,
+    error: trim(row?.error),
+  }));
+  return {
+    succeeded: Number(source.succeeded) || 0,
+    failed: Number(source.failed) || 0,
+    rows,
+  };
+}
+
 export function today() {
   return new Date().toISOString().split("T")[0];
 }

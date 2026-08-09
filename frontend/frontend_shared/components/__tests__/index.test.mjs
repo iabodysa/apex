@@ -15,16 +15,25 @@ describe("components barrel", () => {
     // which every portal's i18n.js exports, so a name-import from this barrel still
     // resolves everywhere. That is the admission test, not "it is shared".
     expect(Object.keys(barrel).sort()).toEqual([
+      "ActionDock",
+      "AsyncBoundary",
       "Brand",
+      "DataLedger",
+      "DecisionStage",
       // EmptyState takes its text as props and imports nothing portal-local, so a
       // name-import from this barrel still resolves in every portal.
       "EmptyState",
+      "EvidenceRail",
       "FleetPageShell",
       "IconBase",
       "LangToggle",
+      "MetricRibbon",
       "MobileConsoleShell",
+      "PortalFrame",
+      "StatusLabel",
       "TabletSupervisorShell",
       "ThemeToggle",
+      "WorkQueue",
     ]);
   });
 

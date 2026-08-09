@@ -1,12 +1,17 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <FleetPageShell max-width="100%">
+  <PortalFrame
+    :eyebrow="t('brand.eyebrow')"
+    :title="t('brand.title')"
+    :subtitle="t('brand.subtitle')"
+    :skip-label="t('brand.skip')"
+  >
     <template #brand>
-      <span class="fp-brandmark"><Icon name="car" :size="20" /></span>
-      <span class="fp-brandword">{{ t("brand.name") }}</span>
+      <Brand variant="reverse" size="32" />
+      <span class="product-name">{{ t("brand.name") }}</span>
     </template>
 
-    <template #actions>
+    <template #header-actions>
       <Button
         class="alert-bell"
         variant="outline"
@@ -18,7 +23,7 @@
           <span class="alert-bell-wrap">
             <Icon name="bell" :size="18" />
             <span v-if="alertTotal > 0" class="alert-bell-badge">
-              {{ alertTotal > 99 ? "99+" : alertTotal }}
+              <bdi>{{ alertTotal > 99 ? "99+" : alertTotal }}</bdi>
             </span>
           </span>
         </template>
@@ -27,9 +32,8 @@
     </template>
 
     <router-view />
-  </FleetPageShell>
+  </PortalFrame>
 
-  <VehiclePanel />
   <AlertDrawer />
 
   <Dialog v-model="confirmOpen" :options="confirmOptions" @close="confirm.settle(false)">
@@ -45,15 +49,15 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { Button, Dialog } from "frappe-ui";
 
-import FleetPageShell from "@shared/components/FleetPageShell.vue";
+import Brand from "@shared/components/Brand.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
+import PortalFrame from "@shared/components/PortalFrame.vue";
 import { useDocumentLanguage } from "@shared/useDocumentLanguage";
 import { useToast } from "@shared/useToast.js";
 
 import Icon from "./Icon.vue";
 import AlertDrawer from "./components/AlertDrawer.vue";
 import PortalToast from "./components/PortalToast.vue";
-import VehiclePanel from "./components/VehiclePanel.vue";
 import { provideBoardContext } from "./boardContext.js";
 import { useBoardState } from "./boardState.js";
 import { provideConfirm } from "./confirm.js";

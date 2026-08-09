@@ -33,18 +33,20 @@
 defineProps({
   title: { type: String, default: "" },
   subtitle: { type: String, default: "" },
+  // Kept while portals migrate. Composition now follows available content, not this hint.
+  maxWidth: { type: [Number, String], default: "" },
 });
 </script>
 
 <style scoped>
-/* DESIGN.md §1 — header, frame, navbar, and nothing else. The frame is the ONLY element
-   that scrolls; two nested scrollers is what makes a phone feel broken. */
 .mc-shell {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   block-size: 100vh;
   block-size: 100dvh;
+  min-inline-size: 0;
   inline-size: 100%;
+  overflow: hidden;
   background: var(--c-canvas);
   color: var(--c-ink);
   font-family: var(--font);
@@ -52,20 +54,31 @@ defineProps({
 }
 
 .mc-head {
-  position: sticky;
-  inset-block-start: 0;
+  position: relative;
   z-index: 20;
-  flex: 0 0 auto;
-  padding: 14px var(--sp-5) var(--sp-4);
-  background: var(--c-surface);
-  border-block-end: 1px solid var(--c-border);
+  min-inline-size: 0;
+  padding: var(--sp-3) clamp(var(--sp-4), 4vw, var(--sp-6));
+  overflow: hidden;
+  background: var(--c-header-bg);
+  color: var(--c-header-ink);
+}
+.mc-head::after {
+  content: "";
+  position: absolute;
+  inset-block: -160%;
+  inset-inline-end: clamp(3rem, 24vw, 18rem);
+  inline-size: 1px;
+  background: var(--c-header-accent);
+  opacity: 0.3;
+  transform: rotate(24deg);
+  pointer-events: none;
 }
 .mc-head-row {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  max-inline-size: var(--mc-max, 1100px);
-  margin-inline: auto;
   inline-size: 100%;
 }
 .mc-greet {
@@ -76,7 +89,7 @@ defineProps({
 }
 .mc-greet small {
   font-size: var(--fs-xs);
-  color: var(--c-muted);
+  color: color-mix(in srgb, var(--c-header-ink) 70%, transparent);
 }
 .mc-greet b {
   font-size: var(--fs-h2);
@@ -92,55 +105,53 @@ defineProps({
   flex: 0 0 auto;
 }
 .mc-progress {
-  max-inline-size: var(--mc-max, 1100px);
-  margin: var(--sp-2) auto 0;
+  position: relative;
+  z-index: 1;
+  margin-block-start: var(--sp-2);
 }
 
 .mc-body {
-  flex: 1 1 auto;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-block-size: 0;
+  min-inline-size: 0;
   inline-size: 100%;
 }
 
-/* The frame owns the scroll. */
 .mc-frame {
-  flex: 1 1 auto;
   min-inline-size: 0;
+  min-block-size: 0;
   overflow-y: auto;
+  overflow-x: clip;
   overscroll-behavior: contain;
-  padding: var(--sp-4);
+  padding: clamp(var(--sp-4), 4vw, var(--sp-8));
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
+  gap: var(--sp-4);
 }
 
-/* §2 — the primary action lives at the bottom of the frame, full width, and does not
-   scroll away. A destructive action never goes here. */
 .mc-action {
   position: sticky;
   inset-block-end: 0;
   margin-block-start: auto;
-  padding-block-start: var(--sp-3);
-  background: linear-gradient(to top, var(--c-canvas) 70%, transparent);
+  padding: var(--sp-3);
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--c-surface) 94%, transparent);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
 }
 .mc-action :slotted(button) {
   inline-size: 100%;
   min-block-size: var(--tap-lg);
 }
 
-.mc-list {
-  display: none;
-}
-
-/* The side rail only exists on the desktop row. */
+.mc-list,
 .mc-rail {
   display: none;
 }
 
-/* §1 — sticky bottom navbar, destinations only, --tap-lg tall. */
 .mc-nav {
-  flex: 0 0 auto;
   display: flex;
   align-items: stretch;
   justify-content: space-around;
@@ -169,30 +180,15 @@ defineProps({
   border-radius: var(--radius-sm);
 }
 .mc-nav :slotted(a.is-active),
+.mc-nav :slotted(a[aria-current="page"]),
 .mc-nav :slotted(button.is-active) {
   color: var(--c-primary);
-  background: var(--c-primary-soft, transparent);
+  background: color-mix(in srgb, var(--c-primary) 10%, transparent);
 }
 
-/* --bp-tablet 768: the column gains breathing room, still one column. */
-@media (min-width: 768px) {
-  .mc-frame {
-    max-inline-size: 560px;
-    margin-inline: auto;
-    inline-size: 100%;
-    padding: var(--sp-5);
-  }
-}
-
-/* --bp-desktop 1024: the contract's desktop row — frame min(100%, 1100px) centred, TWO
-   panes where the screen has a list, and the navbar becomes a side rail. Before this, all
-   four field portals drew the same narrow column at 1440 and left the screen empty. */
-@media (min-width: 1024px) {
+@media (min-width: 62rem) {
   .mc-body {
-    max-inline-size: 1100px;
-    margin-inline: auto;
-    gap: var(--sp-4);
-    padding-inline: var(--sp-4);
+    grid-template-columns: max-content minmax(0, 1fr);
   }
   .mc-nav {
     display: none;
@@ -201,9 +197,11 @@ defineProps({
     display: flex;
     flex-direction: column;
     gap: var(--sp-1);
-    flex: 0 0 220px;
-    padding-block: var(--sp-4);
-    border-inline-end: 1px solid var(--c-border);
+    inline-size: clamp(12rem, 17vw, 15rem);
+    min-inline-size: 0;
+    padding: var(--sp-5) var(--sp-3);
+    border-inline-end: 1px solid color-mix(in srgb, var(--c-header-ink) 14%, transparent);
+    background: var(--c-header-bg);
   }
   .mc-rail :slotted(a),
   .mc-rail :slotted(button) {
@@ -215,30 +213,30 @@ defineProps({
     padding-inline: var(--sp-3);
     border: none;
     background: none;
-    color: var(--c-muted);
+    color: color-mix(in srgb, var(--c-header-ink) 72%, transparent);
     font-size: var(--fs-body);
     font-weight: var(--fw-semibold);
     text-decoration: none;
     border-radius: var(--radius-sm);
   }
   .mc-rail :slotted(a.is-active),
+  .mc-rail :slotted(a[aria-current="page"]),
   .mc-rail :slotted(button.is-active) {
-    color: var(--c-primary);
-    background: var(--c-surface-2);
+    color: var(--c-header-ink);
+    background: color-mix(in srgb, var(--c-header-accent) 14%, transparent);
+  }
+}
+
+@media (min-width: 72rem) {
+  .mc-body.has-list {
+    grid-template-columns: max-content minmax(16rem, 0.72fr) minmax(24rem, 1.28fr);
   }
   .mc-body.has-list .mc-list {
     display: block;
-    flex: 0 0 380px;
-    min-inline-size: 360px;
-    max-inline-size: 420px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding-block: var(--sp-4);
+    min-inline-size: 0;
+    padding: var(--sp-5) var(--sp-4);
     border-inline-end: 1px solid var(--c-border);
-  }
-  .mc-frame {
-    max-inline-size: none;
-    margin-inline: 0;
+    background: color-mix(in srgb, var(--c-surface) 74%, transparent);
   }
 }
 </style>

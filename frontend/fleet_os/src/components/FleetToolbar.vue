@@ -1,7 +1,13 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <div class="main-header">
-    <div class="mh-left">
+  <header class="ledger-toolbar">
+    <div class="ledger-heading">
+      <p>{{ t("main.workingSetEyebrow") }}</p>
+      <h2>{{ t("main.workingSet") }}</h2>
+      <span class="result-count"><bdi>{{ filtered.length }}</bdi> {{ t("main.vehiclesLabel") }}</span>
+    </div>
+
+    <div class="ledger-controls">
       <Button
         class="fp-mobile-only"
         :variant="anyFilterActive ? 'solid' : 'outline'"
@@ -13,10 +19,8 @@
         <template #prefix><Icon name="funnel" :size="14" /></template>
       </Button>
 
-      <span class="rcount">{{ t("main.vehicleCount", { n: filtered.length }) }}</span>
-
       <FormControl
-        class="mh-sort"
+        class="ledger-sort"
         type="select"
         size="md"
         :label="t('main.sortLabel')"
@@ -24,9 +28,6 @@
         :model-value="sort"
         @update:model-value="setSort($event)"
       />
-    </div>
-
-    <div class="mh-right">
       <Button
         :variant="selectMode ? 'solid' : 'outline'"
         :theme="selectMode ? 'green' : 'gray'"
@@ -50,7 +51,7 @@
 
       <TabButtons :buttons="viewButtons" :model-value="view" @update:model-value="setView($event)" />
     </div>
-  </div>
+  </header>
 </template>
 
 <script setup>

@@ -19,11 +19,9 @@ defineProps({
 
 <style scoped>
 .panel {
-  background: var(--c-surface-2);
-  border: var(--border-width) solid var(--c-border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  padding: var(--sp-4);
+  min-inline-size: 0;
+  padding-block: var(--sp-4);
+  border-block: var(--border-width) solid var(--c-border-strong);
 }
 .panel-head {
   display: flex;
@@ -36,10 +34,9 @@ defineProps({
   min-width: 0;
   font-size: var(--fs-sm);
   font-weight: var(--fw-semibold);
-  color: var(--c-muted);
-  letter-spacing: 0.02em;
+  color: var(--c-ink);
 }
 .panel-body {
-  margin-top: var(--sp-3);
+  margin-block-start: var(--sp-4);
 }
 </style>

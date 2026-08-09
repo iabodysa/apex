@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <BuildingPicker v-if="!building" @select="onBuildingSelected" />
-
-  <ListSkeleton v-else-if="dueRes.loading && !due.length" :rows="5" :label="t('common.loading')" />
+  <ListSkeleton v-if="dueRes.loading && !due.length" :rows="5" :label="t('common.loading')" />
 
   <LoadError
     v-else-if="dueRes.error"
@@ -119,7 +117,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { Badge, Button, ErrorMessage, createResource } from "frappe-ui";
-import BuildingPicker from "@shared/components/BuildingPicker.vue";
 import EmptyState from "@shared/components/EmptyState.vue";
 import CadenceSection from "../components/CadenceSection.vue";
 import Icon from "../components/Icon.vue";
@@ -129,7 +126,7 @@ import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { can } from "../portal.js";
 import { connectSafetyRealtime } from "../realtime.js";
 import { dropRoundDraft, readRoundDraft, writeRoundDraft } from "../drafts.js";
-import { building, clearBuilding, localDate, selectBuilding } from "../session";
+import { building, clearBuilding, localDate } from "../session";
 
 const { t, tEnum } = useI18n();
 
@@ -260,10 +257,6 @@ function resetAll() {
   if (building.value) dueRes.fetch();
 }
 
-function onBuildingSelected(name, label) {
-  selectBuilding(name, label);
-}
-
 function changeBuilding() {
   clearBuilding();
 }
@@ -323,8 +316,8 @@ watch(building, load);
   flex-direction: column;
   gap: var(--sp-2);
   padding: var(--sp-3);
-  border-radius: var(--radius);
-  border: var(--border-width) solid var(--c-warning);
+  border-block: var(--border-width) solid var(--c-warning);
+  border-inline-start: 3px solid var(--c-warning);
   background: var(--c-warning-bg);
 }
 .stale-title {
@@ -337,7 +330,7 @@ watch(building, load);
   flex-wrap: wrap;
 }
 .stale-actions :deep(button) {
-  min-height: var(--tap-min);
+  min-block-size: var(--tap-min);
 }
 
 .done {
@@ -364,8 +357,6 @@ watch(building, load);
 .results-head {
   font-size: var(--fs-xs);
   font-weight: var(--fw-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   color: var(--c-muted);
 }
 .result-row {
@@ -373,13 +364,12 @@ watch(building, load);
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-3);
-  padding: var(--sp-3);
-  border-radius: var(--radius);
-  border: var(--border-width) solid var(--c-border);
-  background: var(--c-surface);
+  padding: var(--sp-3) var(--sp-1);
+  border-block-end: var(--border-width) solid var(--c-border);
+  background: transparent;
 }
 .result-failed {
-  border-color: color-mix(in srgb, var(--c-danger) 45%, transparent);
+  border-inline-start: 3px solid var(--c-danger);
   background: var(--c-danger-bg);
 }
 .result-cadence {
@@ -393,7 +383,7 @@ watch(building, load);
   text-align: end;
 }
 .wide {
-  width: 100%;
+  inline-size: 100%;
 }
 .dock-error {
   margin-bottom: var(--sp-2);

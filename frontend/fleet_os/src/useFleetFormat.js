@@ -58,7 +58,7 @@ export function useFleetFormat(t) {
     return {
       gradeLabel,
       daily,
-      dailyDisplay: daily > 0 ? daily.toFixed(1) : "—",
+      dailyDisplay: daily > 0 ? daily.toFixed(1) : t("common.none"),
     };
   }
 

@@ -23,21 +23,20 @@ defineProps({
 .sk {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-2);
+  gap: 0;
 }
 .sk-row {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  min-height: var(--tap-lg);
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--radius);
-  border: var(--border-width) solid var(--c-border);
-  background: var(--c-surface-2);
+  min-block-size: 68px;
+  padding: var(--sp-3) var(--sp-1);
+  border-block-end: var(--border-width) solid var(--c-border);
+  background: transparent;
 }
 .sk-lines {
   flex: 1;
-  min-width: 0;
+  min-inline-size: 0;
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
@@ -49,23 +48,23 @@ defineProps({
   animation: sk-pulse 1.4s ease-in-out infinite;
 }
 .sk-mark {
-  height: var(--sp-8);
-  width: var(--sp-8);
+  block-size: var(--sp-8);
+  inline-size: var(--sp-8);
   flex-shrink: 0;
   border-radius: var(--radius);
 }
 .sk-line {
-  height: var(--sp-3);
+  block-size: var(--sp-3);
 }
 .sk-line-wide {
-  width: 68%;
+  inline-size: 68%;
 }
 .sk-line-narrow {
-  width: 38%;
+  inline-size: 38%;
 }
 .sk-pill {
-  height: var(--sp-5);
-  width: var(--sp-8);
+  block-size: var(--sp-5);
+  inline-size: var(--sp-8);
   flex-shrink: 0;
   border-radius: var(--radius-pill);
 }

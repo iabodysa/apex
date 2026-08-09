@@ -22,46 +22,50 @@
     </div>
 
     <div class="task-actions">
-      <button
-        type="button"
+      <Button
         class="tap tap-pass"
+        size="xl"
+        variant="outline"
         :class="{ 'tap-on': verdict === 'pass' }"
         :aria-pressed="verdict === 'pass'"
-        :aria-label="t('round.due.pass')"
+        :label="t('round.due.pass')"
         @click="choose('pass')"
       >
-        <Icon name="check" :size="22" />
-      </button>
-      <button
-        type="button"
+        <template #prefix><Icon name="check" :size="18" /></template>
+      </Button>
+      <Button
         class="tap tap-fail"
+        size="xl"
+        variant="outline"
         :class="{ 'tap-on': verdict === 'fail' }"
         :aria-pressed="verdict === 'fail'"
-        :aria-label="t('round.due.fail')"
+        :label="t('round.due.fail')"
         @click="choose('fail')"
       >
-        <Icon name="x" :size="22" />
-      </button>
-      <button
-        type="button"
+        <template #prefix><Icon name="x" :size="18" /></template>
+      </Button>
+      <Button
         class="tap tap-issue"
+        size="xl"
+        variant="outline"
         :class="{ 'tap-on': verdict === 'issue' }"
         :aria-pressed="verdict === 'issue'"
-        :aria-label="t('round.due.issue')"
+        :label="t('round.due.issue')"
         @click="choose('issue')"
       >
-        <Icon name="triangle-alert" :size="20" />
-      </button>
-      <button
-        type="button"
+        <template #prefix><Icon name="triangle-alert" :size="17" /></template>
+      </Button>
+      <Button
         class="tap tap-note"
+        size="xl"
+        variant="outline"
         :class="{ 'tap-on': noteOpen || hasNote }"
         :aria-pressed="noteOpen"
-        :aria-label="t('round.due.addNote')"
+        :label="t('round.due.addNote')"
         @click="noteOpen = !noteOpen"
       >
-        <Icon name="pencil" :size="18" />
-      </button>
+        <template #prefix><Icon name="pencil" :size="16" /></template>
+      </Button>
     </div>
 
     <div v-if="needsPhoto" class="task-photo">
@@ -104,13 +108,15 @@
 
     <Transition name="note">
       <div v-if="noteOpen" class="task-note">
-        <textarea
-          :value="notes"
+        <FormControl
           class="note-input"
-          rows="2"
+          type="textarea"
+          size="lg"
+          :rows="2"
           :placeholder="t('round.due.notePlaceholder')"
-          @input="$emit('note', $event.target.value)"
-        ></textarea>
+          :model-value="notes"
+          @update:model-value="$emit('note', $event)"
+        />
         <p v-if="task.instructions" class="note-hint">
           <strong>{{ t("round.due.instructions") }}:</strong> {{ task.instructions }}
         </p>
@@ -121,7 +127,7 @@
 
 <script setup>
 import { computed, ref } from "vue";
-import { Button, FileUploader } from "frappe-ui";
+import { Button, FileUploader, FormControl } from "frappe-ui";
 import Icon from "./Icon.vue";
 import { PHOTO_ACCEPT, isAcceptedPhoto } from "@shared/photoFile.js";
 import { useI18n } from "../i18n";
@@ -174,26 +180,25 @@ function onUploaded(file) {
 
 <style scoped>
 .task {
-  border-radius: var(--radius);
-  border: 1px solid var(--c-border);
-  background: var(--c-surface);
-  padding: 12px;
-  padding-inline-start: 14px;
+  border-block-end: 1px solid var(--c-border);
+  background: transparent;
+  padding: var(--sp-4) var(--sp-1);
+  padding-inline-start: var(--sp-3);
   transition:
     border-color 0.2s ease,
     background 0.2s ease;
 }
 .task-pass {
-  border-color: color-mix(in srgb, var(--c-success) 45%, transparent);
-  background: color-mix(in srgb, var(--c-success-bg) 55%, var(--c-surface));
+  border-inline-start: 3px solid var(--c-success);
+  background: color-mix(in srgb, var(--c-success-bg) 40%, transparent);
 }
 .task-fail {
-  border-color: color-mix(in srgb, var(--c-danger) 45%, transparent);
-  background: color-mix(in srgb, var(--c-danger-bg) 55%, var(--c-surface));
+  border-inline-start: 3px solid var(--c-danger);
+  background: color-mix(in srgb, var(--c-danger-bg) 40%, transparent);
 }
 .task-issue {
-  border-color: color-mix(in srgb, var(--c-warning) 45%, transparent);
-  background: color-mix(in srgb, var(--c-warning-bg) 55%, var(--c-surface));
+  border-inline-start: 3px solid var(--c-warning);
+  background: color-mix(in srgb, var(--c-warning-bg) 40%, transparent);
 }
 
 .task-main {
@@ -251,7 +256,6 @@ function onUploaded(file) {
   font-size: var(--fs-xs);
   font-weight: var(--fw-semibold);
   color: var(--c-muted);
-  letter-spacing: 0.03em;
 }
 .task-evidence {
   display: inline-flex;
@@ -264,29 +268,17 @@ function onUploaded(file) {
 
 .task-actions {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin-top: 12px;
 }
 .tap {
-  display: grid;
-  place-items: center;
-  min-height: var(--tap-min);
-  border-radius: var(--radius);
-  border: 1.5px solid var(--c-border-strong);
-  background: var(--c-surface-2);
+  min-block-size: var(--tap-min);
   color: var(--c-muted);
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
   transition:
-    transform 0.08s ease,
     background 0.15s ease,
     color 0.15s ease,
     border-color 0.15s ease;
-}
-.tap:active {
-  transform: scale(0.92);
 }
 @media (hover: hover) {
   .tap:hover:not(.tap-on) {
@@ -355,29 +347,7 @@ function onUploaded(file) {
   margin-top: 10px;
   overflow: hidden;
 }
-.note-input {
-  width: 100%;
-  background: var(--c-surface);
-  color: var(--c-ink);
-  border: 1px solid var(--c-border-strong);
-  border-radius: var(--radius-sm);
-  padding: 9px 11px;
-  font-family: var(--font);
-  font-size: var(--fs-sm);
-  line-height: 1.4;
-  resize: vertical;
-}
-.note-input:focus {
-  outline: none;
-  border-color: var(--c-primary);
-}
-.note-input:focus-visible {
-  outline: 3px solid var(--c-focus);
-  outline-offset: 2px;
-}
-.note-input::placeholder {
-  color: var(--c-muted);
-}
+.note-input :deep(textarea) { min-block-size: 5rem; }
 .note-hint {
   margin-top: 6px;
   font-size: var(--fs-xs);
@@ -395,5 +365,11 @@ function onUploaded(file) {
 .note-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+
+@media (min-width: 42rem) {
+  .task-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 </style>

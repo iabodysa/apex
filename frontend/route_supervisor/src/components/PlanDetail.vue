@@ -1,46 +1,62 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <div class="hero">
-    <router-link v-if="narrow" to="/" class="back-btn" :aria-label="t('nav.plans')">
+  <DecisionStage>
+    <router-link :to="backTo" class="back-link">
       <Icon name="chevron" :size="18" />
+      <span>{{ backLabel }}</span>
     </router-link>
-    <div class="hero-main">
-      <h2 class="hero-title">{{ plan.route_name || plan.name }}</h2>
-      <div class="hero-chips">
-        <span v-if="plan.project" class="hc"><Icon name="badge" :size="13" /> {{ plan.project }}</span>
-        <span v-if="plan.shift" class="hc"><Icon name="clock" :size="13" /> {{ t("shift." + plan.shift) }}</span>
-        <span v-if="plan.driver" class="hc"><Icon name="user" :size="13" /> {{ plan.driver }}</span>
-        <span v-if="plan.vehicle" class="hc"><Icon name="truck" :size="13" /> {{ plan.vehicle }}</span>
-        <span class="hc"><Icon name="pin" :size="13" /> {{ t("list.stops", { n: plan.total_stops }) }}</span>
+
+    <header class="plan-record-heading">
+      <div>
+        <p>{{ t("plan.eyebrow") }}</p>
+        <h1><bdi dir="auto">{{ plan.route_name || plan.name }}</bdi></h1>
+        <span>{{ plan.project || t("plan.noProject") }}</span>
       </div>
-    </div>
-    <Badge :theme="badgeTheme" size="lg" :label="t('approval.' + plan.approval)" />
-  </div>
+      <StatusLabel :label="t('approval.' + plan.approval)" :tone="statusTone" />
+    </header>
 
-  <TabButtons
-    class="tabs"
-    :buttons="tabButtons"
-    :model-value="tab"
-    @update:model-value="openTab"
-  />
+    <dl class="plan-facts">
+      <div>
+        <dt>{{ t("approval.driver") }}</dt>
+        <dd>{{ plan.driver || t("common.none") }}</dd>
+      </div>
+      <div>
+        <dt>{{ t("approval.vehicle") }}</dt>
+        <dd><bdi dir="auto">{{ plan.vehicle || t("common.none") }}</bdi></dd>
+      </div>
+      <div>
+        <dt>{{ t("list.shift") }}</dt>
+        <dd>{{ plan.shift ? t("shift." + plan.shift) : t("common.none") }}</dd>
+      </div>
+      <div>
+        <dt>{{ t("approval.stops") }}</dt>
+        <dd><bdi>{{ plan.total_stops }}</bdi></dd>
+      </div>
+    </dl>
 
-  <div class="panel-area">
-    <!-- Rendered on demand. Keeping every panel mounted and merely hidden fired the boarding
-         and route reads the moment any plan was opened, which cost two requests per card on
-         the queue-clearing path for panels nobody looked at. -->
-    <ApprovalPanel v-if="tab === 'approval'" :plan="plan" />
-    <BoardingPanel v-else-if="tab === 'boarding'" :trip-name="tripName" :active="true" />
-    <RoutePanel v-else-if="tab === 'route'" :plan-name="plan.name" />
-    <DriverMap v-else-if="tab === 'map'" :trip-name="tripName" :active="true" />
-  </div>
+    <TabButtons
+      class="plan-tabs"
+      :buttons="tabButtons"
+      :model-value="tab"
+      @update:model-value="openTab"
+    />
+
+    <section class="plan-panel" :aria-label="t('tabs.' + tab)">
+      <ApprovalPanel v-if="tab === 'approval'" :plan="plan" />
+      <BoardingPanel v-else-if="tab === 'boarding'" :trip-name="tripName" :active="true" />
+      <RoutePanel v-else-if="tab === 'route'" :plan-name="plan.name" />
+      <DriverMap v-else-if="tab === 'map'" :trip-name="tripName" :active="true" />
+    </section>
+  </DecisionStage>
 </template>
 
 <script setup>
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import { Badge, TabButtons } from "frappe-ui";
+import { TabButtons } from "frappe-ui";
 
-import { useMediaQuery } from "@shared/useBreakpoint.js";
+import DecisionStage from "@shared/components/DecisionStage.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 
 import Icon from "../Icon.vue";
 import ApprovalPanel from "./ApprovalPanel.vue";
@@ -54,24 +70,25 @@ const props = defineProps({
   plan: { type: Object, required: true },
   tab: { type: String, required: true },
   wide: { type: Boolean, default: false },
+  backTo: { type: String, default: "/routes" },
 });
 
 const { t } = useI18n();
 const router = useRouter();
-const narrow = useMediaQuery("(max-width: 640px)");
 
 const tripName = computed(() => props.plan.trip?.name || null);
-const badgeTheme = computed(
-  () => ({ Pending: "orange", Approved: "green", Rejected: "red" })[props.plan.approval] || "gray",
+const statusTone = computed(
+  () => ({ Pending: "warning", Approved: "success", Rejected: "danger" })[props.plan.approval] || "neutral",
 );
-
+const backLabel = computed(() => {
+  if (props.backTo === "/approvals") return t("nav.inbox");
+  if (props.backTo === "/history") return t("nav.history");
+  return t("nav.routes");
+});
 const tabButtons = computed(() =>
   tabsFor(props.wide).map((key) => ({ label: t("tabs." + key), value: key })),
 );
 
-/* The tab control asks for a screen; the address grants it. Writing a local ref here would put
-   a second writer beside the URL, and assigning that ref its current value fires no watcher —
-   which is exactly why re-opening the tab already on screen used to do nothing. */
 function openTab(key) {
   if (!key || key === props.tab) return;
   router.push({ name: "plan", params: { name: props.plan.name, tab: key } });

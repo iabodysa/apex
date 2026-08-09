@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <template v-if="vehicle.current_driver">
+  <template v-if="vehicle.current_driver && vehicle.vehicle_status === 'assigned'">
     <Alert
       theme="green"
       :title="t('driverTab.lockedFor', { name: driverName })"
@@ -46,8 +46,44 @@
       :dismissable="false"
     />
 
-    <h3 class="psect-title">{{ t("driverTab.assignNewDriver") }}</h3>
-    <ReassignForm :vehicle="vehicle" />
+    <Alert
+      v-else-if="vehicle.vehicle_status === 'stolen'"
+      theme="red"
+      :title="t('driverTab.stolenHint')"
+      :dismissable="false"
+    />
+
+    <template v-if="!vehicle.current_driver && vehicle.vehicle_status === 'available'">
+      <h3 class="psect-title">{{ t("driverTab.assignNewDriver") }}</h3>
+      <ReassignForm :vehicle="vehicle" />
+    </template>
+
+    <div v-else class="panel-actions">
+      <Button
+        v-if="vehicle.vehicle_status === 'workshop'"
+        variant="solid"
+        theme="green"
+        size="xl"
+        :label="t('statusTab.exitWorkshop')"
+        @click="actions.exitWorkshop(vehicle.plate)"
+      />
+      <Button
+        v-else-if="vehicle.vehicle_status === 'stolen'"
+        variant="solid"
+        theme="green"
+        size="xl"
+        :label="t('statusTab.recoverVehicle')"
+        @click="actions.recoverVehicle(vehicle.plate)"
+      />
+      <Button
+        v-else-if="vehicle.vehicle_status === 'stopped'"
+        variant="solid"
+        theme="green"
+        size="xl"
+        :label="t('card.available')"
+        @click="actions.setAvailable(vehicle.plate)"
+      />
+    </div>
   </template>
 </template>
 

@@ -45,7 +45,24 @@ _POSITION_STALE_SECONDS = 120
 
 ROUTER_CALLS_PER_REQUEST = 3
 
-PLAN_DISPLAY_LIMIT = 50
+PLAN_PAGE_LENGTH = 50
+
+_PLAN_FIELDS = [
+    "name",
+    "route_name",
+    "project",
+    "shift",
+    "driver",
+    "vehicle",
+    "transport_request",
+    "route_assignment",
+    "total_stops",
+    "route_supervisor",
+    "supervisor_approval",
+    "supervisor_action_on",
+    "supervisor_rejection_reason",
+    "modified",
+]
 
 _TRIP_FIELDS = [
     "name",
@@ -110,7 +127,9 @@ def _owned_plan(name: str) -> dict:
     if not plan:
         frappe.throw(_("Route plan not found."), frappe.DoesNotExistError)
     if not _is_admin(user) and plan.get("route_supervisor") != user:
-        frappe.throw(_("This route plan is not assigned to you."), frappe.PermissionError)
+        frappe.throw(
+            _("This route plan is not assigned to you."), frappe.PermissionError
+        )
     return plan
 
 
@@ -160,30 +179,42 @@ def _vehicle_label(vehicle):
 
 def _active_trips_by_plan(plan_names: list) -> dict:
     """The most relevant Dispatch Trip per plan for the supervisor's dashboard — a
-    live/today trip first (Dispatched, then today's), else the latest — resolved for
-    ALL plans in three batched queries instead of three probes per plan. A plan that
-    has spawned no trip yet is simply absent from the map. Read-only."""
-    chosen = {}
-    remaining = [p for p in plan_names if p]
-    probes = (
-        {"status": "Dispatched"},
-        {"trip_date": frappe.utils.today()},
-        {},
+    live/today trip first (Dispatched, then today's), else the latest. The window query
+    returns at most one row per requested plan, rather than loading every historical trip
+    and discarding all but one in Python. A plan with no trip is absent. Read-only."""
+    names = tuple(sorted({name for name in plan_names if name}))
+    if not names:
+        return {}
+
+    fields = ",\n                ".join(f"dt.`{field}`" for field in _TRIP_FIELDS)
+    rows = frappe.db.sql(
+        f"""
+        SELECT {", ".join(f"`{field}`" for field in _TRIP_FIELDS)}
+        FROM (
+            SELECT
+                {fields},
+                ROW_NUMBER() OVER (
+                    PARTITION BY dt.route_plan
+                    ORDER BY
+                        CASE
+                          WHEN dt.status = 'Dispatched' THEN 0
+                          WHEN dt.trip_date = %(today)s THEN 1
+                          ELSE 2
+                        END,
+                        dt.trip_date DESC,
+                        dt.creation DESC,
+                        dt.name DESC
+                ) AS trip_rank
+            FROM `tabDispatch Trip` dt
+            WHERE dt.route_plan IN %(plan_names)s
+              AND dt.docstatus < 2
+        ) ranked
+        WHERE trip_rank = 1
+        """,
+        {"plan_names": names, "today": frappe.utils.today()},
+        as_dict=True,
     )
-    for extra in probes:
-        if not remaining:
-            break
-        filters = {"route_plan": ["in", remaining], "docstatus": ["<", 2]}
-        filters.update(extra)
-        for trip in frappe.get_all(
-            "Dispatch Trip",
-            filters=filters,
-            fields=_TRIP_FIELDS,
-            order_by="trip_date desc, creation desc",
-        ):
-            chosen.setdefault(trip["route_plan"], trip)
-        remaining = [p for p in remaining if p not in chosen]
-    return chosen
+    return {row["route_plan"]: row for row in rows}
 
 
 def _manifest_expected(trip: dict) -> int:
@@ -219,7 +250,13 @@ def _boarding_summary(dispatch_trip: str, trip: dict | None = None) -> dict:
         fields=["employee", "status"],
         order_by="idx asc",
     )
-    counts = {"Boarded": 0, "Worker Claimed": 0, "Pending": 0, "Driver Rejected": 0, "Absent": 0}
+    counts = {
+        "Boarded": 0,
+        "Worker Claimed": 0,
+        "Pending": 0,
+        "Driver Rejected": 0,
+        "Absent": 0,
+    }
     for s in states:
         st = s.get("status") or "Pending"
         counts[st] = counts.get(st, 0) + 1
@@ -228,7 +265,9 @@ def _boarding_summary(dispatch_trip: str, trip: dict | None = None) -> dict:
     if states:
         expected = len(states)
     else:
-        expected = _manifest_expected(trip or {"transport_request": None, "route_plan": None})
+        expected = _manifest_expected(
+            trip or {"transport_request": None, "route_plan": None}
+        )
 
     return {
         "boarded": boarded,
@@ -259,7 +298,9 @@ def _boarding_summaries(trips: list) -> dict:
 
     bare = [t for t in trips if not states_by_trip.get(t["name"])]
     worker_counts = {}
-    requests = sorted({t["transport_request"] for t in bare if t.get("transport_request")})
+    requests = sorted(
+        {t["transport_request"] for t in bare if t.get("transport_request")}
+    )
     if requests:
         for row in frappe.get_all(
             "Transport Request",
@@ -282,14 +323,20 @@ def _boarding_summaries(trips: list) -> dict:
             filters={"parent": ["in", fallback_plans], "parenttype": "Route Plan"},
             fields=["parent", "passengers"],
         ):
-            plan_totals[row["parent"]] = plan_totals.get(row["parent"], 0) + frappe.utils.cint(
-                row.get("passengers")
-            )
+            plan_totals[row["parent"]] = plan_totals.get(
+                row["parent"], 0
+            ) + frappe.utils.cint(row.get("passengers"))
 
     out = {}
     for t in trips:
         states = states_by_trip.get(t["name"], [])
-        counts = {"Boarded": 0, "Worker Claimed": 0, "Pending": 0, "Driver Rejected": 0, "Absent": 0}
+        counts = {
+            "Boarded": 0,
+            "Worker Claimed": 0,
+            "Pending": 0,
+            "Driver Rejected": 0,
+            "Absent": 0,
+        }
         for s in states:
             st = s.get("status") or "Pending"
             counts[st] = counts.get(st, 0) + 1
@@ -341,64 +388,146 @@ def _pending_first(plans: list) -> list:
     return plans
 
 
-@frappe.whitelist()
-def get_supervisor_context():
-    """One composite payload for the supervisor portal (read).
-
-    Returns the caller's identity plus the Route Plans assigned to them (submitted
-    plans — a draft plan is not yet handed to a supervisor — capped at the
-    ``PLAN_DISPLAY_LIMIT`` most recently modified), Pending decisions first, each
-    enriched with human driver/vehicle labels and its most-relevant Dispatch Trip's live
-    boarding summary + whether a live driver position exists. Strictly row-scoped: only
-    plans where ``route_supervisor`` == the session user (Administrator sees all, for
-    verification). Read-only, no commit."""
-    _require_portal_role()
-    user = frappe.session.user
-
+def _plan_scope_filters() -> dict:
     filters = {"docstatus": 1}
-    if not _is_admin(user):
-        filters["route_supervisor"] = user
+    if not _is_admin():
+        filters["route_supervisor"] = frappe.session.user
+    return filters
 
-    plans = frappe.get_all(
+
+def _validate_page(lane, start, page_length):
+    lane = frappe.utils.cstr(lane).strip().lower()
+    if lane not in {"pending", "decided"}:
+        frappe.throw(_("Lane must be pending or decided."), frappe.ValidationError)
+
+    start = frappe.utils.cint(start)
+    page_length = frappe.utils.cint(page_length)
+    if start < 0:
+        frappe.throw(_("Page start cannot be negative."), frappe.ValidationError)
+    if not 1 <= page_length <= PLAN_PAGE_LENGTH:
+        frappe.throw(
+            _("Page length must be between 1 and {0}.").format(PLAN_PAGE_LENGTH),
+            frappe.ValidationError,
+        )
+    return lane, start, page_length
+
+
+def _plan_counts(filters=None) -> dict:
+    filters = dict(filters or _plan_scope_filters())
+    total = frappe.db.count("Route Plan", filters)
+    decided_filters = {
+        **filters,
+        "supervisor_approval": ["in", ["Approved", "Rejected"]],
+    }
+    decided = frappe.db.count("Route Plan", decided_filters)
+    rejected = frappe.db.count(
+        "Route Plan", {**filters, "supervisor_approval": "Rejected"}
+    )
+    terminal_approved = _terminal_approved_count(filters)
+    active = decided - rejected - terminal_approved
+    history = rejected + terminal_approved
+    return {
+        "total": total,
+        "pending": total - decided,
+        "decided": decided,
+        "active": active,
+        "history": history,
+    }
+
+
+def _terminal_approved_count(filters: dict) -> int:
+    """Count approved plans whose selected trip is terminal without loading plan rows.
+
+    The correlated scalar subquery applies the same trip priority as
+    ``_active_trips_by_plan``: dispatched first, then today's trip, then latest. This
+    keeps the aggregate ``active`` and ``history`` lanes identical to the hydrated list.
+    """
+    conditions = [
+        "rp.docstatus = %(docstatus)s",
+        "rp.supervisor_approval = 'Approved'",
+    ]
+    values = {
+        "docstatus": frappe.utils.cint(filters.get("docstatus", 1)),
+        "today": frappe.utils.today(),
+    }
+    if filters.get("route_supervisor"):
+        conditions.append("rp.route_supervisor = %(route_supervisor)s")
+        values["route_supervisor"] = filters["route_supervisor"]
+
+    rows = frappe.db.sql(
+        f"""
+        SELECT COUNT(*) AS count
+        FROM `tabRoute Plan` rp
+        WHERE {" AND ".join(conditions)}
+          AND (
+              SELECT dt.status
+              FROM `tabDispatch Trip` dt
+              WHERE dt.route_plan = rp.name
+                AND dt.docstatus < 2
+              ORDER BY
+                CASE
+                  WHEN dt.status = 'Dispatched' THEN 0
+                  WHEN dt.trip_date = %(today)s THEN 1
+                  ELSE 2
+                END,
+                dt.trip_date DESC,
+                dt.creation DESC,
+                dt.name DESC
+              LIMIT 1
+          ) IN ('Completed', 'Cancelled')
+        """,
+        values,
+        as_dict=True,
+    )
+    return frappe.utils.cint(rows[0].get("count")) if rows else 0
+
+
+def _page_rows(lane: str, start: int, page_length: int, filters=None) -> list:
+    filters = dict(filters or _plan_scope_filters())
+    or_filters = None
+    if lane == "pending":
+        or_filters = [
+            ["Route Plan", "supervisor_approval", "=", "Pending"],
+            ["Route Plan", "supervisor_approval", "is", "not set"],
+        ]
+    else:
+        filters["supervisor_approval"] = ["in", ["Approved", "Rejected"]]
+
+    return frappe.get_all(
         "Route Plan",
         filters=filters,
-        fields=[
-            "name",
-            "route_name",
-            "project",
-            "shift",
-            "driver",
-            "vehicle",
-            "transport_request",
-            "route_assignment",
-            "total_stops",
-            "route_supervisor",
-            "supervisor_approval",
-            "supervisor_action_on",
-            "supervisor_rejection_reason",
-            "modified",
-        ],
-        order_by="modified desc",
-        limit_page_length=PLAN_DISPLAY_LIMIT,
+        or_filters=or_filters,
+        fields=_PLAN_FIELDS,
+        order_by="modified desc, name desc",
+        limit_start=start,
+        limit_page_length=page_length,
     )
-    plans = _pending_first(plans)
 
+
+def _serialize_plans(plans: list) -> list:
     trips_by_plan = _active_trips_by_plan([p["name"] for p in plans])
     summaries = _boarding_summaries(list(trips_by_plan.values()))
-    driver_labels = _label_map("Salis Driver", "full_name", [p.get("driver") for p in plans])
-    vehicle_labels = _label_map("Salis Vehicle", "plate_number", [p.get("vehicle") for p in plans])
+    driver_labels = _label_map(
+        "Salis Driver", "full_name", [p.get("driver") for p in plans]
+    )
+    vehicle_labels = _label_map(
+        "Salis Vehicle", "plate_number", [p.get("vehicle") for p in plans]
+    )
 
     out = []
     for p in plans:
-        t = trips_by_plan.get(p["name"])
+        trip = trips_by_plan.get(p["name"])
         trip_block = None
-        if t:
+        if trip:
             trip_block = {
-                "name": t["name"],
-                "status": t.get("status"),
-                "trip_date": frappe.utils.cstr(t.get("trip_date")) if t.get("trip_date") else None,
-                "boarding": summaries[t["name"]],
-                "has_position": t.get("driver_lat") is not None and t.get("driver_lng") is not None,
+                "name": trip["name"],
+                "status": trip.get("status"),
+                "trip_date": frappe.utils.cstr(trip.get("trip_date"))
+                if trip.get("trip_date")
+                else None,
+                "boarding": summaries[trip["name"]],
+                "has_position": trip.get("driver_lat") is not None
+                and trip.get("driver_lng") is not None,
             }
         out.append(
             {
@@ -406,8 +535,12 @@ def get_supervisor_context():
                 "route_name": p.get("route_name"),
                 "project": p.get("project"),
                 "shift": p.get("shift"),
-                "driver": driver_labels.get(p.get("driver"), p.get("driver")) if p.get("driver") else None,
-                "vehicle": vehicle_labels.get(p.get("vehicle"), p.get("vehicle")) if p.get("vehicle") else None,
+                "driver": driver_labels.get(p.get("driver"), p.get("driver"))
+                if p.get("driver")
+                else None,
+                "vehicle": vehicle_labels.get(p.get("vehicle"), p.get("vehicle"))
+                if p.get("vehicle")
+                else None,
                 "total_stops": frappe.utils.cint(p.get("total_stops")),
                 "approval": p.get("supervisor_approval") or "Pending",
                 "decided_on": frappe.utils.cstr(p.get("supervisor_action_on"))
@@ -417,15 +550,75 @@ def get_supervisor_context():
                 "trip": trip_block,
             }
         )
+    return out
 
-    pending = sum(1 for p in out if p["approval"] == "Pending")
+
+def _page_meta(
+    lane: str, start: int, page_length: int, returned: int, counts: dict
+) -> dict:
+    total = counts[lane]
+    return {
+        "lane": lane,
+        "start": start,
+        "page_length": page_length,
+        "returned": returned,
+        "total": total,
+        "has_more": start + returned < total,
+    }
+
+
+@frappe.whitelist()
+def get_supervisor_plans(lane: str, start=0, page_length=PLAN_PAGE_LENGTH):
+    """Return one bounded page from the caller's pending or decided lane."""
+    _require_portal_role()
+    lane, start, page_length = _validate_page(lane, start, page_length)
+    filters = _plan_scope_filters()
+    counts = _plan_counts(filters)
+    plans = _serialize_plans(_page_rows(lane, start, page_length, filters))
+    return {
+        **_page_meta(lane, start, page_length, len(plans), counts),
+        "plans": plans,
+    }
+
+
+@frappe.whitelist()
+def get_supervisor_plan(name: str):
+    """Return one owned plan in the same hydrated shape as list rows."""
+    _require_portal_role()
+    plan = _owned_plan(name)
+    return {"plan": _serialize_plans([plan])[0]}
+
+
+@frappe.whitelist()
+def get_supervisor_context():
+    """One composite payload for the supervisor portal (read).
+
+    Returns identity, full scoped counts, and the first bounded page of each lane.
+    ``plans`` remains the combined pending-first list expected by existing callers;
+    ``pages`` tells clients when to continue through ``get_supervisor_plans``."""
+    _require_portal_role()
+    user = frappe.session.user
+    filters = _plan_scope_filters()
+    counts = _plan_counts(filters)
+    pending_rows = _page_rows("pending", 0, PLAN_PAGE_LENGTH, filters)
+    decided_rows = _page_rows("decided", 0, PLAN_PAGE_LENGTH, filters)
+    plans = _serialize_plans(_pending_first(pending_rows + decided_rows))
+
     return {
         "supervisor": {
             "user": user,
             "full_name": frappe.utils.get_fullname(user) or user,
         },
-        "counts": {"total": len(out), "pending": pending},
-        "plans": out,
+        "counts": counts,
+        "plans": plans,
+        "pages": {
+            "pending": _page_meta(
+                "pending", 0, PLAN_PAGE_LENGTH, len(pending_rows), counts
+            ),
+            "decided": _page_meta(
+                "decided", 0, PLAN_PAGE_LENGTH, len(decided_rows), counts
+            ),
+        },
         "generated_at": frappe.utils.cstr(frappe.utils.now_datetime()),
     }
 
@@ -489,7 +682,9 @@ def get_trip_boarding(dispatch_trip: str):
     return {
         "dispatch_trip": dispatch_trip,
         "status": trip.get("status"),
-        "trip_date": frappe.utils.cstr(trip.get("trip_date")) if trip.get("trip_date") else None,
+        "trip_date": frappe.utils.cstr(trip.get("trip_date"))
+        if trip.get("trip_date")
+        else None,
         "boarding": summary,
         "workers": workers,
     }
@@ -516,7 +711,9 @@ def get_trip_driver_position(dispatch_trip: str):
     age_seconds = None
     stale = None
     if updated:
-        age_seconds = int(frappe.utils.time_diff_in_seconds(frappe.utils.now_datetime(), updated))
+        age_seconds = int(
+            frappe.utils.time_diff_in_seconds(frappe.utils.now_datetime(), updated)
+        )
         stale = age_seconds > _POSITION_STALE_SECONDS
 
     return {
@@ -535,9 +732,22 @@ def get_trip_driver_position(dispatch_trip: str):
     }
 
 
+def _validate_position_page(start, page_length):
+    start = frappe.utils.cint(start)
+    page_length = frappe.utils.cint(page_length)
+    if start < 0:
+        frappe.throw(_("Page start cannot be negative."), frappe.ValidationError)
+    if not 1 <= page_length <= PLAN_PAGE_LENGTH:
+        frappe.throw(
+            _("Page length must be between 1 and {0}.").format(PLAN_PAGE_LENGTH),
+            frappe.ValidationError,
+        )
+    return start, page_length
+
+
 @frappe.whitelist()
-def get_active_driver_positions():
-    """Every live driver position across the plans the caller owns (read).
+def get_active_driver_positions(start=0, page_length=PLAN_PAGE_LENGTH):
+    """One bounded page of driver positions across plans the caller owns (read).
 
     The single-trip endpoint answers "where is this plan's driver"; a supervisor watching
     a yard needs "where is everyone", which is one query rather than one request per plan.
@@ -548,26 +758,34 @@ def get_active_driver_positions():
     plus the same age and stale computation the single-trip reader applies, so a frozen
     marker reads as frozen here too. A plan whose driver has never pushed a fix is
     returned with ``has_position`` False rather than dropped, because the filter list must
-    still offer that driver."""
+    still offer that driver. Pagination is over the stable scoped Route Plan ordering;
+    ``total`` therefore counts plans, while ``returned`` counts positions in this page."""
     _require_portal_role()
     user = frappe.session.user
+    start, page_length = _validate_position_page(start, page_length)
 
     filters = {"docstatus": 1}
     if not _is_admin(user):
         filters["route_supervisor"] = user
+    total = frappe.db.count("Route Plan", filters)
 
     plans = frappe.get_all(
         "Route Plan",
         filters=filters,
         fields=["name", "route_name", "project"],
-        order_by="modified desc",
-        limit_page_length=PLAN_DISPLAY_LIMIT,
+        order_by="modified desc, name desc",
+        limit_start=start,
+        limit_page_length=page_length,
     )
 
     trips_by_plan = _active_trips_by_plan([p["name"] for p in plans])
     trips = list(trips_by_plan.values())
-    driver_labels = _label_map("Salis Driver", "full_name", [t.get("driver") for t in trips])
-    vehicle_labels = _label_map("Salis Vehicle", "plate_number", [t.get("vehicle") for t in trips])
+    driver_labels = _label_map(
+        "Salis Driver", "full_name", [t.get("driver") for t in trips]
+    )
+    vehicle_labels = _label_map(
+        "Salis Vehicle", "plate_number", [t.get("vehicle") for t in trips]
+    )
 
     stops_by_plan = {}
     if trips_by_plan:
@@ -610,32 +828,42 @@ def get_active_driver_positions():
         if not warm:
             router_budget -= 1
 
-        out.append({
-            "dispatch_trip": trip["name"],
-            "route_plan": plan["name"],
-            "route_name": plan.get("route_name") or plan["name"],
-            "stops": stops,
-            "path": path,
-            "project": plan.get("project"),
-            "status": trip.get("status"),
-            "driver": trip.get("driver"),
-            "driver_name": driver_labels.get(trip.get("driver"), trip.get("driver"))
-            if trip.get("driver")
-            else None,
-            "vehicle": trip.get("vehicle"),
-            "plate": vehicle_labels.get(trip.get("vehicle"), trip.get("vehicle"))
-            if trip.get("vehicle")
-            else None,
-            "has_position": bool(lat is not None and lng is not None and (lat or lng)),
-            "lat": lat,
-            "lng": lng,
-            "updated_at": frappe.utils.cstr(updated) if updated else None,
-            "age_seconds": age_seconds,
-            "stale": stale,
-        })
+        out.append(
+            {
+                "dispatch_trip": trip["name"],
+                "route_plan": plan["name"],
+                "route_name": plan.get("route_name") or plan["name"],
+                "stops": stops,
+                "path": path,
+                "project": plan.get("project"),
+                "status": trip.get("status"),
+                "driver": trip.get("driver"),
+                "driver_name": driver_labels.get(trip.get("driver"), trip.get("driver"))
+                if trip.get("driver")
+                else None,
+                "vehicle": trip.get("vehicle"),
+                "plate": vehicle_labels.get(trip.get("vehicle"), trip.get("vehicle"))
+                if trip.get("vehicle")
+                else None,
+                "has_position": bool(
+                    lat is not None and lng is not None and (lat or lng)
+                ),
+                "lat": lat,
+                "lng": lng,
+                "updated_at": frappe.utils.cstr(updated) if updated else None,
+                "age_seconds": age_seconds,
+                "stale": stale,
+            }
+        )
 
-    out.sort(key=lambda item: (not item["has_position"], item["driver_name"] or ""))
-    return out
+    return {
+        "positions": out,
+        "start": start,
+        "page_length": page_length,
+        "returned": len(out),
+        "total": total,
+        "has_more": start + len(plans) < total,
+    }
 
 
 def _resolve_owned_plan_doc(name: str):
@@ -649,7 +877,9 @@ def _resolve_owned_plan_doc(name: str):
     if supervisor is None and not frappe.db.exists("Route Plan", {"name": name}):
         frappe.throw(_("Route plan not found."), frappe.DoesNotExistError)
     if not _is_admin(user) and supervisor != user:
-        frappe.throw(_("This route plan is not assigned to you."), frappe.PermissionError)
+        frappe.throw(
+            _("This route plan is not assigned to you."), frappe.PermissionError
+        )
 
     doc = frappe.get_doc("Route Plan", name)
     if doc.docstatus != 1:

@@ -19,6 +19,7 @@ import { fileURLToPath } from "node:url";
 const SHARED = dirname(dirname(fileURLToPath(import.meta.url)));
 const FRONTEND = dirname(SHARED);
 const TOKENS = readFileSync(join(SHARED, "tokens.css"), "utf8");
+const FRAPPE_UI_THEME = readFileSync(join(SHARED, "frappe-ui-theme.css"), "utf8");
 
 // Properties a portal may reference without declaring: set at runtime by a
 // component's :style binding, or an intentionally-optional opt-in with a fallback.
@@ -26,6 +27,7 @@ const RUNTIME_PROPS = new Set([
   "--ts-accent", // TabletSupervisorShell, from its `accent` prop
   "--ts-nav-w", // TabletSupervisorShell, from its `navWidth` prop
   "--mc-width", // MobileConsoleShell, from its `maxWidth` prop
+  "--fleet-content-limit", // FleetPageShell, from its `maxWidth` compatibility prop
   "--shell-wide", // opt-in: a portal widens the phone column at --bp-tablet
 ]);
 
@@ -66,8 +68,21 @@ function declarations(body) {
 }
 
 describe("shared token layer", () => {
+  it("assigns each licensed brand family one role without bundling the server-owned font assets", () => {
+    expect(TOKENS).not.toContain("thmanyah-v1/thmanyah.css");
+    expect(TOKENS).toContain('--font: "Thmanyah Sans"');
+    expect(TOKENS).toContain('--font-display: "Thmanyah Serif Display"');
+    expect(TOKENS).toContain('--font-serif: "Thmanyah Serif Text"');
+  });
+
+  it("establishes a viewport-safe root before portal layouts add their own composition", () => {
+    expect(TOKENS).toMatch(/\*,\s*\*::before,\s*\*::after\s*\{[^}]*box-sizing:\s*border-box/s);
+    expect(TOKENS).toMatch(/html,\s*body,\s*#app\s*\{[^}]*min-inline-size:\s*0/s);
+    expect(TOKENS).toMatch(/body\s*\{[^}]*overflow-x:\s*clip/s);
+  });
+
   it("declares every custom property any portal or shared component references", () => {
-    const shared = declaredIn(TOKENS);
+    const shared = declaredIn(TOKENS + FRAPPE_UI_THEME);
     // A portal may alias the shared tokens into a private vocabulary in its own
     // src/index.css (fleet_os does: --t1: var(--c-ink)). That file is in scope for
     // every file of that portal — but for no other portal, which is the drift this

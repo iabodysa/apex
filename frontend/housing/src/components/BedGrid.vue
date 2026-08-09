@@ -17,16 +17,16 @@
       <article v-for="room in floor.rooms" :key="room.room" class="room-card">
         <header class="room-line">
           <span class="room-no">{{ room.room_number }}</span>
-          <button
-            type="button"
+          <Button
             class="ready-chip"
+            size="lg"
+            variant="outline"
             :class="readinessClass(room.readiness_status)"
             :disabled="!canSetReadiness"
+            :label="tEnum('readiness', room.readiness_status || 'Unknown')"
             :title="canSetReadiness ? t('beds.readiness') : t('access.needReadiness')"
             @click="$emit('room', room)"
-          >
-            {{ tEnum("readiness", room.readiness_status || "Unknown") }}
-          </button>
+          />
         </header>
 
         <div class="bed-row">
@@ -55,6 +55,7 @@
 </template>
 
 <script setup>
+import { Button } from "frappe-ui";
 import Icon from "./Icon.vue";
 import { useI18n } from "../i18n";
 
@@ -90,7 +91,7 @@ function isDisabled(bed) {
 function bedLabel(bed) {
   if (bed.bed_color === "red") {
     const name = bed.occupant ? bed.occupant.employee_name : "";
-    const held = bed.occupant && bed.occupant.has_custody ? " — " + t("beds.holdsCustody") : "";
+    const held = bed.occupant && bed.occupant.has_custody ? "، " + t("beds.holdsCustody") : "";
     return t("beds.bedTaken", { name }) + held;
   }
   if (bed.bed_color === "green") return t("beds.bedFree");
@@ -118,8 +119,8 @@ function bedLabel(bed) {
   gap: var(--sp-1);
 }
 .dot {
-  height: 10px;
-  width: 10px;
+  block-size: 10px;
+  inline-size: 10px;
   border-radius: var(--radius-pill);
   display: inline-block;
 }
@@ -147,15 +148,12 @@ function bedLabel(bed) {
   gap: var(--sp-2);
   font-size: var(--fs-sm);
   font-weight: var(--fw-heading);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: var(--c-muted);
 }
 .room-card {
-  border: var(--border-width) solid var(--c-border);
-  border-radius: var(--radius);
-  background: var(--c-surface-2);
-  padding: var(--sp-3);
+  border-block-start: var(--border-width) solid var(--c-border);
+  background: transparent;
+  padding-block: var(--sp-3);
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
@@ -167,16 +165,13 @@ function bedLabel(bed) {
 }
 .room-no {
   flex: 1;
-  min-width: 0;
+  min-inline-size: 0;
   font-size: var(--fs-body);
   font-weight: var(--fw-heading);
   color: var(--c-ink);
 }
 .ready-chip {
-  border: none;
-  cursor: pointer;
-  min-height: var(--tap-min);
-  padding-inline: var(--sp-3);
+  min-block-size: var(--tap-min);
 }
 .ready-chip:disabled {
   cursor: default;
@@ -190,7 +185,7 @@ function bedLabel(bed) {
 }
 .bed {
   position: relative;
-  min-height: var(--tap-lg);
+  min-block-size: var(--tap-lg);
   padding: var(--sp-2);
   border-radius: var(--radius-sm);
   border: 2px solid transparent;
@@ -214,7 +209,7 @@ function bedLabel(bed) {
 }
 .bed-who {
   font-size: var(--fs-xs);
-  max-width: 100%;
+  max-inline-size: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

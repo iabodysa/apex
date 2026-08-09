@@ -2,7 +2,7 @@
 import { computed, ref } from "vue";
 
 import { getFleetOs } from "./api.js";
-import { hasOpenIncident, normalize } from "./fleetHelpers.js";
+import { hasOpenIncident, normalize, normalizeReaderErrors } from "./fleetHelpers.js";
 import { resourceErrorMessage } from "@/i18n";
 
 export function useFleetBoard({ expiryFlag }) {
@@ -27,7 +27,7 @@ export function useFleetBoard({ expiryFlag }) {
       loadReason.value = (res && res.reason) || null;
       /* The server reports which enrichment readers failed so a board that loaded with a
          section missing does not look identical to one that loaded whole. */
-      readerErrors.value = (res && res.reader_errors) || [];
+      readerErrors.value = normalizeReaderErrors(res && res.reader_errors);
       loadState.value = "ready";
       loadError.value = "";
       reloadStale.value = false;
@@ -70,6 +70,7 @@ export function useFleetBoard({ expiryFlag }) {
   const triage = computed(() => ({
     incidents: vehicles.value.filter(hasOpenIncident).length,
     expiring: vehicles.value.filter((v) => expiryFlag(v).show).length,
+    workshop: vehicles.value.filter((v) => v.workshop_overstay === true).length,
   }));
 
   return {

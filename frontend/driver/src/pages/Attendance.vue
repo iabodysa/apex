@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
-    <h2 class="section-title">{{ t("attendance.title") }}</h2>
-
     <LoadingState v-if="today.loading && !state.exists" :label="t('common.loading')" />
 
     <ErrorState v-else-if="today.error" :message="err || t('errors.loadFailed')" @retry="today.reload()" />
@@ -44,14 +42,25 @@
       <div v-if="!state.checked_out">
         <label class="field-label" for="att-photo">{{ t("attendance.photo") }}</label>
         <input
+          ref="photoInput"
           id="att-photo"
           type="file"
           :accept="PHOTO_ACCEPT"
           capture="environment"
-          class="input"
+          class="visually-hidden"
           :disabled="loading || uploading"
           @change="onPhoto"
         />
+        <Button
+          variant="outline"
+          size="xl"
+          :disabled="loading || uploading"
+          :loading="uploading"
+          :label="photoName || t('attendance.photo')"
+          @click="choosePhoto"
+        >
+          <template #prefix><Icon name="image" :size="18" /></template>
+        </Button>
         <p v-if="uploading" class="mt-1 text-xs text-muted">{{ t("common.loading") }}</p>
         <p v-else-if="photoError" class="mt-1 text-xs text-danger">{{ photoError }}</p>
         <p v-else-if="photoName" class="mt-1 text-xs text-success">
@@ -59,22 +68,27 @@
         </p>
       </div>
 
-      <button
-        class="btn btn-primary"
+      <Button
+        variant="solid"
+        theme="green"
+        size="2xl"
         :disabled="loading || uploading || today.loading || state.checked_in"
+        :loading="checkin.loading"
+        :label="state.checked_in ? t('attendance.checkedInLabel') : t('attendance.checkIn')"
         @click="doCheckIn()"
       >
-        <Icon name="calendar" :size="20" />
-        {{ state.checked_in ? t("attendance.checkedInLabel") : t("attendance.checkIn") }}
-      </button>
-      <button
-        class="btn btn-dark"
+        <template #prefix><Icon name="calendar" :size="20" /></template>
+      </Button>
+      <Button
+        variant="outline"
+        size="2xl"
         :disabled="loading || uploading || today.loading || !state.checked_in || state.checked_out"
+        :loading="checkout.loading"
+        :label="state.checked_out ? t('attendance.checkedOutLabel') : t('attendance.checkOut')"
         @click="doCheckOut()"
       >
-        <Icon name="calendar" :size="20" />
-        {{ state.checked_out ? t("attendance.checkedOutLabel") : t("attendance.checkOut") }}
-      </button>
+        <template #prefix><Icon name="calendar" :size="20" /></template>
+      </Button>
       <p v-if="state.checked_out" class="status-note status-ok">{{ t("attendance.doneForToday") }}</p>
     </section>
 
@@ -109,7 +123,7 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
 import { ATTENDANCE } from "@shared/statusVocabularies";
-import { createResource } from "frappe-ui";
+import { Button, createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import LoadingState from "../components/LoadingState.vue";
 import Skeleton from "../components/Skeleton.vue";
@@ -128,6 +142,11 @@ const photo = ref({ photo: null, photo_filename: null });
 const photoName = ref("");
 const photoError = ref("");
 const uploading = ref(false);
+const photoInput = ref(null);
+
+function choosePhoto() {
+  photoInput.value?.click();
+}
 
 async function onPhoto(e) {
   const file = e.target.files && e.target.files[0];

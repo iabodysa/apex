@@ -11,65 +11,57 @@
     @retry="reload"
   />
 
-  <template v-else>
-    <div class="hz-split">
-      <div class="hz-split-main">
-        <RideCard :ride="ride" :relative-hint="relativeHint" />
+  <div v-else class="field-runway">
+    <DecisionStage
+      class="field-stage"
+      :eyebrow="t('home.today')"
+      :title="t('home.nextRide')"
+      :subtitle="t('home.stepHint.' + step.key)"
+    >
+      <RideCard :ride="ride" :relative-hint="relativeHint" />
 
-        <AttentionCard
-          v-if="alerts.length"
-          :alerts="alerts"
-          :window-days="IQAMA_NOTIFY_HR_LEAD_DAYS"
-          :notifying="notifyHr.loading"
-          :notified="hrNotified"
-          :error="notifyHrError"
-          @notify="sendNotifyHr"
-        />
+      <template #footer>
+        <ActionDock>
+          <template #primary>
+            <Button
+              class="dock-btn"
+              variant="solid"
+              theme="green"
+              size="2xl"
+              :label="t('home.step.' + step.key)"
+              @click="go"
+            >
+              <template #prefix><Icon :name="step.icon" :size="20" /></template>
+            </Button>
+          </template>
+        </ActionDock>
+      </template>
+    </DecisionStage>
 
-        <BedCard v-if="!desktop" :bed="bed" />
+    <aside class="field-evidence">
+      <AttentionCard
+        v-if="alerts.length"
+        :alerts="alerts"
+        :window-days="IQAMA_NOTIFY_HR_LEAD_DAYS"
+        :notifying="notifyHr.loading"
+        :notified="hrNotified"
+        :error="notifyHrError"
+        @notify="sendNotifyHr"
+      />
+      <BedCard :bed="bed" />
+      <LoadError
+        v-if="contacts.error"
+        :title="t('contacts.title')"
+        :detail="contactsErrorMessage"
+        :hint="t('errors.retryHint')"
+        :retry-label="t('common.retry')"
+        @retry="contacts.reload()"
+      />
+      <ContactsCard v-else :contacts="contacts.data" />
+    </aside>
 
-        <LoadError
-          v-if="!desktop && contacts.error"
-          :title="t('contacts.title')"
-          :detail="contactsErrorMessage"
-          :hint="t('errors.retryHint')"
-          :retry-label="t('common.retry')"
-          @retry="contacts.reload()"
-        />
-        <ContactsCard v-else-if="!desktop" :contacts="contacts.data" />
-
-        <DestinationsCard :open-requests="openRequests" />
-      </div>
-
-      <aside v-if="desktop" class="hz-split-side">
-        <BedCard :bed="bed" />
-
-        <LoadError
-          v-if="contacts.error"
-          :title="t('contacts.title')"
-          :detail="contactsErrorMessage"
-          :hint="t('errors.retryHint')"
-          :retry-label="t('common.retry')"
-          @retry="contacts.reload()"
-        />
-        <ContactsCard v-else :contacts="contacts.data" />
-      </aside>
-    </div>
-
-    <div class="hz-dock" data-dock>
-      <Button
-        class="dock-btn"
-        variant="solid"
-        theme="green"
-        size="2xl"
-        :label="t('home.step.' + step.key)"
-        @click="go"
-      >
-        <template #prefix><Icon :name="step.icon" :size="20" /></template>
-      </Button>
-      <p class="hz-dock-reason">{{ t("home.stepHint." + step.key) }}</p>
-    </div>
-  </template>
+    <DestinationsCard class="field-ledger" :open-requests="openRequests" />
+  </div>
 </template>
 
 <script setup>
@@ -77,6 +69,8 @@ import { computed, onUnmounted, ref } from "vue";
 import { TRIP } from "@shared/statusVocabularies";
 import { useRouter } from "vue-router";
 import { Button, createResource } from "frappe-ui";
+import ActionDock from "@shared/components/ActionDock.vue";
+import DecisionStage from "@shared/components/DecisionStage.vue";
 import HomeSkeleton from "../components/HomeSkeleton.vue";
 import LoadError from "@shared/components/LoadError.vue";
 import RideCard from "../components/RideCard.vue";
@@ -86,7 +80,6 @@ import ContactsCard from "../components/ContactsCard.vue";
 import DestinationsCard from "../components/DestinationsCard.vue";
 import Icon from "../components/Icon.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
-import { useDesktop } from "@shared/useBreakpoint.js";
 import { useWorkerRealtime } from "../realtime.js";
 
 defineProps({
@@ -95,7 +88,6 @@ defineProps({
 
 const { t } = useI18n();
 const router = useRouter();
-const desktop = useDesktop();
 
 const home = createResource({
   url: "apex.salis.api.masar.get_worker_home",

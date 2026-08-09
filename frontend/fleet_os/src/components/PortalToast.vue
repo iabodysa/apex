@@ -16,13 +16,13 @@ defineProps({
 </script>
 
 <style scoped>
-/* Physical `left` with the transform on purpose: a transformed element does not flip with the
-   writing direction, so pairing it with `inset-inline-start` pushed the toast off-canvas. */
 .portal-toast {
   position: fixed;
   inset-block-end: var(--sp-5);
-  left: 50%;
-  transform: translate(-50%, var(--sp-4));
+  inset-inline: var(--sp-4);
+  inline-size: fit-content;
+  margin-inline: auto;
+  transform: translateY(var(--sp-4));
   max-width: min(90vw, 520px);
   padding: 10px 18px;
   border-radius: var(--radius);
@@ -39,7 +39,7 @@ defineProps({
 }
 .portal-toast.show {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: translateY(0);
 }
 .toast-green {
   color: var(--c-success);

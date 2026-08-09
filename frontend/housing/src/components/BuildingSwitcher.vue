@@ -97,34 +97,43 @@ watch(
   gap: var(--sp-4);
 }
 .switcher-hero {
-  text-align: center;
-  padding-top: var(--sp-2);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--sp-1) var(--sp-3);
+  padding-block: var(--sp-3) var(--sp-5);
+  text-align: start;
 }
 .switcher-mark {
   display: grid;
   place-items: center;
-  height: 56px;
-  width: 56px;
-  margin: 0 auto var(--sp-3);
-  border-radius: var(--radius-lg);
+  grid-row: 1 / span 2;
+  block-size: 56px;
+  inline-size: 56px;
+  border-radius: var(--radius-sm);
   color: var(--c-primary);
   background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+}
+.switcher-hero .section-title,
+.switcher-hero .section-sub {
+  margin: 0;
 }
 .switcher-list {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-2);
+  gap: 0;
+  border-block: 1px solid var(--c-border-strong);
 }
 .switcher-item {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  width: 100%;
-  min-height: var(--tap-lg);
-  padding: 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--c-border);
-  background: var(--c-surface);
+  inline-size: 100%;
+  min-block-size: 72px;
+  padding: var(--sp-3) var(--sp-1);
+  border: 0;
+  border-block-end: 1px solid var(--c-border);
+  background: transparent;
   cursor: pointer;
   text-align: start;
 }
@@ -137,16 +146,16 @@ watch(
 .switcher-icon {
   display: grid;
   place-items: center;
-  height: 36px;
-  width: 36px;
-  border-radius: var(--radius);
+  block-size: 36px;
+  inline-size: 36px;
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
   color: var(--c-primary);
   background: color-mix(in srgb, var(--c-primary) 10%, transparent);
 }
 .switcher-body {
   flex: 1;
-  min-width: 0;
+  min-inline-size: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -163,8 +172,8 @@ watch(
 @media (min-width: 768px) {
   .switcher-list {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--sp-3);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .switcher-item { border-inline-end: 1px solid var(--c-border); }
 }
 </style>

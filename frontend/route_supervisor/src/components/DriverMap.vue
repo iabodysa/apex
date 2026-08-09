@@ -1,15 +1,17 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <section class="panel map-panel">
-    <header class="panel-head">
+  <section class="driver-map" :class="{ 'is-compact': compact }">
+    <header class="section-heading section-heading-row">
       <div>
-        <h2 class="panel-title">{{ t("map.title") }}</h2>
-        <p class="panel-sub">{{ t("map.subtitle") }}</p>
+        <p>{{ t("map.eyebrow") }}</p>
+        <h3>{{ t("map.title") }}</h3>
+        <span v-if="!compact">{{ t("map.subtitle") }}</span>
       </div>
-      <div v-if="data && data.has_position" class="live-badge" :class="{ stale: data.stale }">
-        <span class="live-dot" data-motion="loop" />
-        {{ data.stale ? t("map.stale", { age }) : t("common.live") }}
-      </div>
+      <StatusLabel
+        v-if="data"
+        :label="positionLabel"
+        :tone="data.has_position ? (data.stale ? 'warning' : 'success') : 'neutral'"
+      />
     </header>
 
     <EmptyState v-if="!tripName" :title="t('map.noTrip')">
@@ -24,6 +26,8 @@
       :retry-label="t('common.retry')"
       @retry="load()"
     />
+
+    <div v-else-if="state === 'loading' && !data" class="map-loading" aria-hidden="true" />
 
     <template v-else>
       <div v-if="data" class="map-info">
@@ -69,6 +73,7 @@ import { Alert } from "frappe-ui";
 
 import EmptyState from "@shared/components/EmptyState.vue";
 import LoadError from "@shared/components/LoadError.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import { usePoll } from "@shared/usePoll.js";
 
 import Icon from "../Icon.vue";
@@ -80,6 +85,7 @@ import { useI18n } from "@/i18n";
 const props = defineProps({
   tripName: { type: String, default: null },
   active: { type: Boolean, default: false },
+  compact: { type: Boolean, default: false },
 });
 
 const { t, resourceErrorMessage } = useI18n();
@@ -87,7 +93,7 @@ const L = leaflet();
 const hasLeaflet = Boolean(L);
 
 const data = ref(null);
-const state = ref("idle");
+const state = ref("loading");
 const error = ref("");
 const tilesDown = ref(false);
 const mapEl = ref(null);
@@ -100,6 +106,10 @@ const DEFAULT_CENTER = [24.7136, 46.6753];
 const DEFAULT_ZOOM = 11;
 
 const age = computed(() => ageLabel(data.value?.age_seconds, t));
+const positionLabel = computed(() => {
+  if (!data.value?.has_position) return t("map.noFixShort");
+  return data.value.stale ? t("map.stale", { age: age.value }) : t("common.live");
+});
 
 function ensureMap() {
   if (!hasLeaflet || map || !mapEl.value) return;
@@ -122,7 +132,7 @@ function ensureMap() {
 function busIcon() {
   return L.divIcon({
     className: "driver-marker",
-    html: '<span class="dm-pulse" data-motion="loop"></span><span class="dm-core">\u{1F68C}</span>',
+    html: '<span class="dm-pulse" data-motion="loop"></span><span class="dm-core" aria-hidden="true"></span>',
     iconSize: [34, 34],
     iconAnchor: [17, 17],
   });
@@ -145,6 +155,7 @@ async function load() {
     data.value = null;
     return;
   }
+  if (!data.value) state.value = "loading";
   const ticket = seq.next();
   try {
     const res = await getTripDriverPosition(props.tripName);

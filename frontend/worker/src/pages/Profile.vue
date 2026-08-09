@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
-    <h2 class="section-title">{{ t("profile.title") }}</h2>
-
     <template v-if="p && p.employee">
       <section class="card card-pad">
         <div class="flex items-center gap-3">
@@ -56,24 +54,6 @@
         </div>
       </section>
 
-      <section class="space-y-3">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("profile.more") }}</h3>
-        <div class="card">
-          <router-link
-            v-for="(link, i) in moreLinks"
-            :key="link.to"
-            :to="link.to"
-            class="flex items-center gap-3 card-pad"
-            :class="{ 'border-t': i > 0 }"
-            style="text-decoration: none; border-color: var(--c-border)"
-          >
-            <Icon :name="link.icon" :size="18" class="text-primary shrink-0" />
-            <span class="font-semibold">{{ t(link.labelKey) }}</span>
-            <Icon name="chevron" :size="18" class="ms-auto text-muted shrink-0 rtl-flip" />
-          </router-link>
-        </div>
-      </section>
-
       <router-link to="/requests" class="btn btn-outline" style="text-decoration: none">
         <Icon name="plus" :size="18" /> {{ t("profile.requestChange") }}
       </router-link>
@@ -105,12 +85,6 @@ const { t, tEnum } = useI18n();
 
 const props = defineProps({ ctx: { type: Object, required: true } });
 const p = computed(() => props.ctx);
-
-const moreLinks = [
-  { to: "/accommodation", icon: "building", labelKey: "nav.accommodation" },
-  { to: "/custody", icon: "briefcase", labelKey: "nav.custody" },
-  { to: "/requests", icon: "message", labelKey: "nav.requests" },
-];
 
 const Row = (rprops) =>
   h("div", { class: "flex items-center gap-2" }, [

@@ -4,8 +4,6 @@
     <h4 class="psect-title"><Icon name="circle-pause" :size="14" /> {{ t("stopForm.title") }}</h4>
 
     <div class="form-grid">
-      <FormControl v-model="sf.date" type="date" size="md" lang="en" :label="t('stopForm.deliverDate')" :required="true" />
-      <FormControl v-model="sf.branch" type="text" size="md" :label="t('stopForm.deliverBranch')" :placeholder="t('stopForm.branchPlaceholder')" />
       <FormControl v-model="sf.reason" type="select" size="md" :label="t('stopForm.stopReason')" :options="reasonOptions" />
       <FormControl v-model="sf.nextStatus" type="select" size="md" :label="t('stopForm.nextStatus')" :options="nextOptions" />
     </div>

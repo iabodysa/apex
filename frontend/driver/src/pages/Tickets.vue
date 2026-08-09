@@ -2,9 +2,9 @@
 <template>
   <div class="space-y-5">
     <template v-if="selected">
-      <button class="btn btn-outline" style="width: auto; padding-inline: 16px" @click="closeDetail">
-        <Icon name="chevron" :size="18" /> {{ t("common.back") }}
-      </button>
+      <Button variant="outline" size="xl" :label="t('common.back')" @click="closeDetail">
+        <template #prefix><Icon name="chevron" :size="18" /></template>
+      </Button>
 
       <Skeleton v-if="detailLoading" :rows="4" />
 
@@ -59,73 +59,59 @@
             </div>
             <p v-if="c.content" class="mt-1 text-sm whitespace-pre-line">{{ c.content }}</p>
           </div>
-          <button
+          <Button
             v-if="communicationHasMore"
-            class="btn btn-outline w-full"
+            variant="outline"
+            size="xl"
             :disabled="moreLoading"
+            :loading="moreLoading"
+            :label="t('common.more')"
             @click="loadMoreCommunications"
-          >
-            {{ moreLoading ? t("common.loading") : t("common.more") }}
-          </button>
+          />
         </section>
 
         <section class="card card-pad space-y-3">
-          <label class="field-label">{{ t("tickets.reply") }}</label>
-          <textarea v-model="replyText" :placeholder="t('tickets.replyPlaceholder')" class="textarea"></textarea>
-          <button class="btn btn-primary" :disabled="reply.loading || !replyText.trim()" @click="submitReply">
-            <Icon name="help" :size="18" /> {{ t("tickets.send") }}
-          </button>
+          <FormControl v-model="replyText" type="textarea" size="lg" :rows="4" :label="t('tickets.reply')" :placeholder="t('tickets.replyPlaceholder')" />
+          <Button variant="solid" theme="green" size="2xl" :disabled="reply.loading || !replyText.trim()" :loading="reply.loading" :label="t('tickets.send')" @click="submitReply">
+            <template #prefix><Icon name="help" :size="18" /></template>
+          </Button>
         </section>
       </template>
     </template>
 
     <template v-else>
-      <h2 class="section-title">{{ t("tickets.title") }}</h2>
-
       <section class="card card-pad space-y-3">
         <p class="text-sm text-soft">{{ t("tickets.hint") }}</p>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="field-label">{{ t("tickets.category") }}</label>
-            <select v-model="form.category" class="select">
-              <option v-for="c in categories" :key="c" :value="c">{{ te("issueCategory", c) }}</option>
-            </select>
-          </div>
-          <div>
-            <label class="field-label">{{ t("tickets.priority") }}</label>
-            <select v-model="form.priority" class="select">
-              <option v-for="p in priorities" :key="p" :value="p">{{ te("issuePriority", p) }}</option>
-            </select>
-          </div>
+        <div class="form-pair">
+          <FormControl v-model="form.category" type="select" size="lg" :label="t('tickets.category')" :options="categoryOptions" />
+          <FormControl v-model="form.priority" type="select" size="lg" :label="t('tickets.priority')" :options="priorityOptions" />
         </div>
 
-        <div>
-          <label class="field-label">{{ t("tickets.subject") }}</label>
-          <input v-model="form.subject" :placeholder="t('tickets.subjectPlaceholder')" class="input" />
-        </div>
-        <div>
-          <label class="field-label">{{ t("tickets.description") }}</label>
-          <textarea v-model="form.description" :placeholder="t('tickets.descriptionPlaceholder')" class="textarea"></textarea>
-        </div>
+        <FormControl v-model="form.subject" type="text" size="lg" :label="t('tickets.subject')" :placeholder="t('tickets.subjectPlaceholder')" />
+        <FormControl v-model="form.description" type="textarea" size="lg" :rows="4" :label="t('tickets.description')" :placeholder="t('tickets.descriptionPlaceholder')" />
 
         <div>
           <label class="field-label" for="ticket-photo">{{ t("tickets.attachment") }}</label>
           <input
+            ref="photoInput"
             id="ticket-photo"
             type="file"
             :accept="PHOTO_ACCEPT"
             capture="environment"
-            class="input"
+            class="visually-hidden"
             @change="onPhoto"
           />
+          <Button variant="outline" size="xl" :loading="uploading" :label="photoName || t('tickets.addPhoto')" @click="choosePhoto">
+            <template #prefix><Icon name="image" :size="18" /></template>
+          </Button>
           <p v-if="photoError" class="mt-1 text-xs text-danger">{{ photoError }}</p>
           <p v-else-if="photoName" class="mt-1 text-xs text-success">{{ t("tickets.photoAttached") }}: {{ photoName }}</p>
         </div>
 
-        <button class="btn btn-primary" :disabled="create.loading || uploading || !form.subject" @click="submit">
-          <Icon name="help" :size="20" /> {{ t("tickets.raise") }}
-        </button>
+        <Button variant="solid" theme="green" size="2xl" :disabled="create.loading || uploading || !form.subject" :loading="create.loading" :label="t('tickets.raise')" @click="submit">
+          <template #prefix><Icon name="help" :size="20" /></template>
+        </Button>
         <p v-if="err" class="text-sm text-danger">{{ err }}</p>
       </section>
 
@@ -161,8 +147,8 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
-import { createResource } from "frappe-ui";
+import { computed, reactive, ref } from "vue";
+import { Button, FormControl, createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import LoadingState from "../components/LoadingState.vue";
 import Skeleton from "../components/Skeleton.vue";
@@ -178,6 +164,8 @@ const { t, te } = useI18n();
 
 const categories = ISSUE_CATEGORIES;
 const priorities = ISSUE_PRIORITIES;
+const categoryOptions = computed(() => categories.map((value) => ({ value, label: te("issueCategory", value) })));
+const priorityOptions = computed(() => priorities.map((value) => ({ value, label: te("issuePriority", value) })));
 
 const err = ref("");
 const form = reactive({ category: "Vehicle", priority: "Medium", subject: "", description: "" });
@@ -186,6 +174,11 @@ const photo = ref({ photo: null, photo_filename: null });
 const photoName = ref("");
 const photoError = ref("");
 const uploading = ref(false);
+const photoInput = ref(null);
+
+function choosePhoto() {
+  photoInput.value?.click();
+}
 
 const list = createResource({
   url: "apex.salis.api.driver_portal.my_support_tickets",

@@ -1,48 +1,47 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <div class="emp-narrow">
-    <section class="emp-card">
-      <header class="emp-card-head">
-        <span class="emp-ic"><Icon name="clipboard-list" :size="17" /></span>
-        <div class="emp-card-titles">
-          <h2>{{ t("emp.trips.title") }}</h2>
-          <p class="emp-hint">{{ t("emp.trips.windowHint") }}</p>
+  <div class="emp-narrow emp-history-scene">
+    <section class="emp-sheet" aria-labelledby="emp-history-heading">
+      <header class="emp-ledger-head">
+        <div>
+          <span class="emp-ledger-kicker">{{ t("emp.trips.windowLabel") }}</span>
+          <h2 id="emp-history-heading">{{ t("emp.trips.historyTitle") }}</h2>
         </div>
+        <strong class="emp-ledger-count tnum">
+          <bdi>{{ formatInt(trips.state.data.length, lang) }}</bdi>
+          <span>{{ t("emp.trips.countLabel") }}</span>
+        </strong>
       </header>
 
-      <div v-if="trips.state.status === 'loading'" class="emp-skel" aria-hidden="true" />
-
-      <LoadError
-        v-else-if="trips.state.status === 'error'"
-        :title="t('emp.loadError')"
-        :detail="trips.state.error"
-        :hint="t('emp.loadErrorHint')"
+      <AsyncBoundary
+        :state="tripsState"
+        :title="tripsState === 'empty' ? t('emp.trips.empty') : t('emp.loadError')"
+        :message="tripsState === 'empty' ? t('emp.trips.emptyHint') : trips.state.error"
         :retry-label="t('common.retry')"
         @retry="trips.reload()"
-      />
-
-      <EmptyState
-        v-else-if="!trips.state.data.length"
-        :title="t('emp.trips.empty')"
-        :hint="t('emp.trips.emptyHint')"
       >
-        <template #icon><Icon name="clipboard-list" :size="20" /></template>
-      </EmptyState>
-
-      <TripList v-else :rows="trips.state.data" />
+        <TripList :rows="trips.state.data" />
+      </AsyncBoundary>
     </section>
   </div>
 </template>
 
 <script setup>
-import EmptyState from "@shared/components/EmptyState.vue";
-import LoadError from "@shared/components/LoadError.vue";
+import { computed } from "vue";
 
-import Icon from "../Icon.vue";
+import AsyncBoundary from "@shared/components/AsyncBoundary.vue";
+
 import TripList from "../components/TripList.vue";
+import { formatInt } from "../fmt.js";
 import { useEmployee } from "../useEmployee.js";
 import { useI18n } from "@/i18n";
 
-const { t } = useI18n();
+const { t, lang } = useI18n();
 const { trips } = useEmployee();
+
+const tripsState = computed(() => {
+  if (trips.state.status === "loading" || trips.state.status === "idle") return "loading";
+  if (trips.state.status === "error") return "error";
+  return trips.state.data.length ? "ready" : "empty";
+});
 </script>

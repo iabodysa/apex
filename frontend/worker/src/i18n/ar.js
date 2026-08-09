@@ -8,6 +8,7 @@ export default {
     none: "—",
     error: "حدث خطأ ما.",
     workerApp: "تطبيق العامل",
+    skipContent: "تجاوز إلى المحتوى",
     call: "اتصال",
     whatsapp: "واتساب",
     openMap: "فتح الخريطة",
@@ -38,6 +39,7 @@ export default {
     transport: "النقل",
     custody: "العهدة",
     requests: "الطلبات",
+    housingHelp: "السكن والمساعدة",
   },
   home: {
     title: "اليوم",

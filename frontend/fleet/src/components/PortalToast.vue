@@ -1,11 +1,14 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <!-- frappe-ui 0.1.278 exports `toast` but not the surface that draws it, so the portal keeps
-       its own. The live region is always in the DOM: a region that appears at the same moment
-       as its text is not announced. -->
-  <div class="portal-toast" :class="[toast.show ? 'show' : '', 'toast-' + toast.type]"
-       role="status" aria-live="polite" aria-atomic="true">
-    {{ toast.show ? toast.msg : "" }}
+  <div
+    class="portal-toast"
+    :class="[toast.show ? 'show' : '', 'toast-' + toast.type]"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    <span class="portal-toast-mark" aria-hidden="true"></span>
+    <span>{{ toast.show ? toast.msg : "" }}</span>
   </div>
 </template>
 
@@ -16,42 +19,57 @@ defineProps({
 </script>
 
 <style scoped>
-/* Physical `left` with the transform on purpose: a transformed element does not flip with the
-   writing direction, so pairing it with `inset-inline-start` pushed the toast off-canvas in
-   RTL and needed a direction-specific patch to look centred. */
 .portal-toast {
   position: fixed;
-  inset-block-end: var(--sp-5);
+  inset-block-end: calc(5rem + env(safe-area-inset-bottom, 0px));
   left: 50%;
-  transform: translate(-50%, var(--sp-4));
-  max-width: min(90vw, 460px);
-  padding: 11px 18px;
-  border-radius: var(--radius);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  inline-size: max-content;
+  max-inline-size: min(90vw, 32rem);
+  min-block-size: var(--tap-min);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--c-header-bg);
+  color: var(--c-header-ink);
+  box-shadow: var(--shadow-lg);
   font-size: var(--fs-sm);
   font-weight: var(--fw-semibold);
-  text-align: center;
-  background: var(--c-surface-2);
-  border: var(--border-width) solid var(--c-border-strong);
-  box-shadow: var(--shadow-lg);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  z-index: 500;
+  transform: translate(-50%, var(--sp-4));
+  transition: opacity 180ms ease, transform 180ms ease;
 }
 .portal-toast.show {
   opacity: 1;
   transform: translate(-50%, 0);
 }
-.toast-green {
-  color: var(--c-success);
-  border-color: color-mix(in srgb, var(--c-success) 30%, transparent);
+.portal-toast-mark {
+  inline-size: 0.55rem;
+  block-size: 1.5rem;
+  flex: 0 0 auto;
+  border-radius: var(--radius-pill);
+  background: var(--c-header-accent);
 }
-.toast-amber {
-  color: var(--c-warning);
-  border-color: color-mix(in srgb, var(--c-warning) 30%, transparent);
+.toast-amber .portal-toast-mark {
+  background: var(--c-warning-fill);
 }
-.toast-red {
-  color: var(--c-danger);
-  border-color: color-mix(in srgb, var(--c-danger) 30%, transparent);
+.toast-red .portal-toast-mark {
+  background: var(--c-danger);
+}
+
+@media (min-width: 56rem) {
+  .portal-toast {
+    inset-block-end: var(--sp-6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-toast {
+    transition: none;
+  }
 }
 </style>

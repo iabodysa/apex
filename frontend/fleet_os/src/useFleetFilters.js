@@ -15,6 +15,7 @@ export function useFleetFilters({ vehicles, board, fmt, t }) {
     const list = vehicles.value.filter((v) => {
       if (f.triage.value === "incidents" && !hasOpenIncident(v)) return false;
       if (f.triage.value === "expiring" && !expiryFlag(v).show) return false;
+      if (f.triage.value === "workshop" && v.workshop_overstay !== true) return false;
       if (f.status.value && v.vehicle_status !== f.status.value) return false;
       if (f.type.value && v.sheet !== f.type.value) return false;
       if (f.fuel.value && !(v.fuel || "").includes(f.fuel.value)) return false;
