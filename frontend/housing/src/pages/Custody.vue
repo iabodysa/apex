@@ -115,8 +115,8 @@
                     <Stepper
                         :model-value="issueQty(art.article)"
                         :min="0"
-                        :max="9999"
-                        :disabled="!canIssue"
+                        :max="art.store_balance === null ? 9999 : art.store_balance"
+                        :disabled="!canIssue || art.store_balance === 0"
                         :label="art.article_name"
                         @update:model-value="(qty) => setIssueQty(art, qty)"
                     />
