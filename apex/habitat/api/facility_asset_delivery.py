@@ -2,13 +2,12 @@
 """Whitelisted API for the Facility Asset Delivery 3-exit transfer lock and the
 on-site code receipt.
 
-THE 3-EXIT TRANSFER LOCK, the core of this module: a submitted delivery sits in
-``Pending Exits`` until THREE exit checkpoints pass IN ORDER, each by a distinct
-role. Only clearing the third exit opens the lock — status flips to ``Released``
-and the on-site code is issued. Until then the asset has NOT moved.
+THE 2-EXIT TRANSFER LOCK, the core of this module: a submitted delivery sits in
+``Pending Exits`` until BOTH exit checkpoints pass IN ORDER, one on each side of
+the hand-over. Only clearing the last exit opens the lock — status flips to
+``Released`` and the on-site code is issued. Until then the asset has NOT moved.
 
-  exit 1  Security / Gate       Procurement Supervisor    pass_exit_1
-  exit 2  Logistics / Dispatch  Accommodation Manager     pass_exit_2
+  exit 1  Gate / hand-over      Procurement Supervisor    pass_exit_1
   exit 3  Receiving Acceptance  receiving supervisor      pass_exit_3
                                 OR Resident Supervisor
 
@@ -50,9 +49,11 @@ from apex.habitat.utils.otp_policy import (
 
 EXIT_ROLES = {
     1: "Procurement Supervisor",
-    2: "Accommodation Manager",
     3: "Resident Supervisor",
 }
+
+EXIT_ORDER = sorted(EXIT_ROLES)
+LAST_EXIT = EXIT_ORDER[-1]
 
 
 def _get_submitted(delivery: str):
@@ -92,7 +93,9 @@ def _pass_exit(delivery: str, n: int):
     if doc.get(flag):
         frappe.throw(_("Exit {0} has already been cleared.").format(n))
 
-    for prior in range(1, n):
+    for prior in EXIT_ORDER:
+        if prior >= n:
+            break
         if not doc.get(f"exit{prior}_{_exit_slug(prior)}_cleared"):
             frappe.throw(
                 _("Exit {0} must be cleared before exit {1}.").format(prior, n)
@@ -110,7 +113,7 @@ def _pass_exit(delivery: str, n: int):
     )
 
     code = None
-    if n == 3:
+    if n == LAST_EXIT:
         doc.db_set("status", "Released")
         code = generate_otp(doc)
     return {"delivery": doc.name, "code": code}
@@ -123,19 +126,13 @@ def _exit_slug(n: int) -> str:
 
 @frappe.whitelist(methods=["POST"])
 def pass_exit_1(delivery: str):
-    """Exit 1 of 3 — Security / Gate clearance at the source (Procurement Supervisor)."""
+    """Exit 1 of 2 — Gate clearance at the source (Procurement Supervisor)."""
     return _pass_exit(delivery, 1)
 
 
 @frappe.whitelist(methods=["POST"])
-def pass_exit_2(delivery: str):
-    """Exit 2 of 3 — Logistics / Dispatch authorization (Accommodation Manager)."""
-    return _pass_exit(delivery, 2)
-
-
-@frappe.whitelist(methods=["POST"])
 def pass_exit_3(delivery: str):
-    """Exit 3 of 3 — Receiving acceptance (Resident Supervisor). Opens the lock
+    """Exit 2 of 2 — Receiving acceptance (Resident Supervisor). Opens the lock
     (status -> Released) and issues the on-site code."""
     return _pass_exit(delivery, 3)
 
@@ -181,7 +178,7 @@ def confirm_receipt(delivery: str, code: str):
         frappe.throw(_("Too many incorrect attempts. This delivery is temporarily locked."))
 
     if locked.status != "Released":
-        frappe.throw(_("All three exit checkpoints must be cleared before confirming receipt."))
+        frappe.throw(_("Both exit checkpoints must be cleared before confirming receipt."))
 
     if locked.otp_expires_at and now > locked.otp_expires_at:
         frappe.throw(_("The on-site code has expired. Ask the initiator to regenerate it."))

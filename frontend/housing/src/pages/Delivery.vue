@@ -232,7 +232,7 @@ import DeliveryDetail from "../components/DeliveryDetail.vue";
 import PageShell from "../components/PageShell.vue";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { useDesktop } from "@shared/useBreakpoint.js";
-import { nextExit } from "../gates";
+import { EXIT_ORDER, nextExit } from "../gates";
 import { canClearExit } from "../portal.js";
 
 const { t } = useI18n();
@@ -241,7 +241,7 @@ const router = useRouter();
 const desktop = useDesktop();
 
 const API = "apex.habitat.api.facility_asset_delivery.";
-const EXIT_METHOD = { 1: API + "pass_exit_1", 2: API + "pass_exit_2", 3: API + "pass_exit_3" };
+const EXIT_METHOD = { 1: API + "pass_exit_1", 3: API + "pass_exit_3" };
 
 const busy = ref("");
 const actionError = ref("");
@@ -319,7 +319,7 @@ const stepHint = computed(() => {
   const del = selectedDelivery.value;
   if (!del) return "";
   const n = nextExit(del);
-  return n ? t("delivery.exitStep", { n }) : t("delivery.allCleared");
+  return n ? t("delivery.exitStep", { n: EXIT_ORDER.indexOf(n) + 1 }) : t("delivery.allCleared");
 });
 
 function exitLabel(n) {

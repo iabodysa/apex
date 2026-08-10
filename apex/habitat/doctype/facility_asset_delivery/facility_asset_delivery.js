@@ -38,15 +38,11 @@ frappe.ui.form.on("Facility Asset Delivery", {
 
 		if (frm.doc.status === "Pending Exits") {
 			if (!frm.doc.exit1_security_cleared) {
-				frm.add_custom_button(__("Pass Exit 1 — Security"), () =>
+				frm.add_custom_button(__("Pass Exit 1 — Hand-over"), () =>
 					call("pass_exit_1")
 				).addClass("btn-primary");
-			} else if (!frm.doc.exit2_logistics_cleared) {
-				frm.add_custom_button(__("Pass Exit 2 — Logistics"), () =>
-					call("pass_exit_2")
-				).addClass("btn-primary");
 			} else if (!frm.doc.exit3_receiving_cleared) {
-				frm.add_custom_button(__("Pass Exit 3 — Receiving"), () =>
+				frm.add_custom_button(__("Pass Exit 2 — Receiving"), () =>
 					call("pass_exit_3", (r) => {
 						if (r.message) {
 							frappe.msgprint({

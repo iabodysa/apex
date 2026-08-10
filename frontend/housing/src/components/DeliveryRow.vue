@@ -20,7 +20,7 @@
         <span>{{ delivery.to_building || t("common.none") }}</span>
       </span>
       <span class="track" :aria-label="t('delivery.exitStep', { n: cleared })">
-        <span v-for="g in 3" :key="g" class="track-bar" :class="g <= cleared ? 'track-bar-on' : ''"></span>
+        <span v-for="g in 2" :key="g" class="track-bar" :class="g <= cleared ? 'track-bar-on' : ''"></span>
       </span>
     </span>
 

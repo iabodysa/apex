@@ -172,10 +172,10 @@
    "label": "Exit Checkpoints"
   },
   {
-   "description": "Exit 1 of 3 — gate-out clearance at the source by a Procurement Supervisor.",
+   "description": "Exit 1 of 2 — gate-out clearance at the source by a Procurement Supervisor.",
    "fieldname": "fad_sec_exit1",
    "fieldtype": "Section Break",
-   "label": "Exit 1 — Security / Gate"
+   "label": "Exit 1 — Hand-over at the source"
   },
   {
    "allow_on_submit": 1,
@@ -204,7 +204,8 @@
    "description": "Exit 2 of 3 — transit / dispatch authorization by an Accommodation Manager.",
    "fieldname": "fad_sec_exit2",
    "fieldtype": "Section Break",
-   "label": "Exit 2 — Logistics / Dispatch"
+   "label": "Exit 2 — Logistics / Dispatch",
+   "hidden": 1
   },
   {
    "allow_on_submit": 1,
@@ -212,7 +213,8 @@
    "fieldname": "exit2_logistics_cleared",
    "fieldtype": "Check",
    "label": "Logistics Cleared",
-   "read_only": 1
+   "read_only": 1,
+   "hidden": 1
   },
   {
    "allow_on_submit": 1,
@@ -220,20 +222,22 @@
    "fieldtype": "Link",
    "label": "Cleared By",
    "options": "User",
-   "read_only": 1
+   "read_only": 1,
+   "hidden": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "exit2_cleared_on",
    "fieldtype": "Datetime",
    "label": "Cleared On",
-   "read_only": 1
+   "read_only": 1,
+   "hidden": 1
   },
   {
-   "description": "Exit 3 of 3 — destination acceptance by the receiving supervisor or a Resident Supervisor.",
+   "description": "Exit 2 of 2 — destination acceptance by the receiving supervisor or a Resident Supervisor.",
    "fieldname": "fad_sec_exit3",
    "fieldtype": "Section Break",
-   "label": "Exit 3 — Receiving Acceptance"
+   "label": "Exit 2 — Receiving Acceptance"
   },
   {
    "allow_on_submit": 1,
@@ -349,7 +353,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-10 23:08:00.000000",
+ "modified": "2026-08-11 00:14:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Facility Asset Delivery",
