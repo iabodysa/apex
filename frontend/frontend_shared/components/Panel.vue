@@ -21,6 +21,7 @@ defineProps({
 .panel {
   min-inline-size: 0;
   padding-block: var(--sp-4);
+  padding-inline: var(--sp-2);
   border-block: var(--border-width) solid var(--c-border-strong);
 }
 .panel-head {

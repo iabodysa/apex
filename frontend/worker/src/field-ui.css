@@ -203,7 +203,7 @@ body {
 }
 .card-pad,
 .pane {
-  padding: var(--sp-4) 0;
+  padding: var(--sp-4) var(--sp-2);
 }
 .card-primary {
   position: relative;
