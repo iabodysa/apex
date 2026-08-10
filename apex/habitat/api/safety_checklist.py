@@ -200,18 +200,17 @@ def _current_period(cadence, on_date=None):
 
 
 def _cadence_is_due(building, cadence, on_date=None):
-    """A cadence is DUE when no SUBMITTED round covers the current period.
+    """A cadence is DUE when no round covers the current period.
 
-    Returns ``True`` iff there is NO Safety Round with ``docstatus == 1`` for
-    this building and cadence whose ``round_date`` lies within the current
-    period's inclusive ``[start, end]`` boundary. Drafts and cancelled rounds
-    (docstatus 0 / 2) do NOT satisfy a cadence — only a submitted round closes
-    it for the period.
+    Returns ``True`` iff there is NO Safety Round with ``docstatus < 2`` for this
+    building and cadence whose ``round_date`` lies within the current period's
+    inclusive ``[start, end]`` boundary. A DRAFT closes the cadence as well as a
+    submitted round, which is the same set the duplicate guard in ``safety_round``
+    counts: counting only submitted rounds here told a maker who had recorded a
+    draft that the work was still due, and the guard then refused the second walk
+    as a duplicate. Cancelled rounds (docstatus 2) close nothing.
     """
     start, end, _label = _current_period(cadence, on_date)
-    # docstatus < 2 — the SAME set the duplicate guard counts (safety_round.py). It counted
-    # only submitted rounds while the guard counted drafts too, so a maker who recorded a
-    # draft was told the work was still due, walked it again, and was refused as a duplicate.
     existing = frappe.db.exists(
         "Safety Round",
         {

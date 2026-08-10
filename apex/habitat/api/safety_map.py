@@ -73,9 +73,6 @@ def get_safety_map(building=None):
         ``maintenance_count``, ``has_recent_damage``, ``signal``) and a
         ``common_zone`` tile.
     """
-    # Optional in the signature, refused here: a client that has not chosen a building
-    # omits the key, and a required positional turns that into a TypeError the reader
-    # sees as the endpoint not existing.
     if not building:
         frappe.throw(_("A building is required to draw the safety map."))
     frappe.has_permission("Building", "read", doc=building, throw=True)
