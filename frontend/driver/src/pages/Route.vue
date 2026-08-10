@@ -21,7 +21,7 @@
               </div>
             </div>
             <span v-if="tripData.status" class="pill pill-accent shrink-0">
-              {{ tripData.status }}
+              {{ te("tripStatus", tripData.status) }}
             </span>
           </div>
 
@@ -258,7 +258,7 @@ import StopStepper from "../components/StopStepper.vue";
 import { useI18n } from "../i18n";
 import { pushToast } from "../toast";
 
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const props = defineProps({ trip: { type: String, default: null } });
 const singleTrip = computed(() => !!props.trip);

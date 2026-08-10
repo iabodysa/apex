@@ -650,7 +650,7 @@ def _round_report_html(building, round_date, rounds):
             items = "".join(
                 "<li>{0} &mdash; <b>{1}</b>{2}</li>".format(
                     frappe.utils.escape_html(it.task or ""),
-                    frappe.utils.escape_html(it.execution_status or ""),
+                    frappe.utils.escape_html(_(it.execution_status) if it.execution_status else ""),
                     (": " + frappe.utils.escape_html(it.notes)) if it.notes else "",
                 )
                 for it in issues
@@ -661,8 +661,8 @@ def _round_report_html(building, round_date, rounds):
 
         sections.append(
             "<h4>{0} &mdash; {1}</h4>{2}".format(
-                frappe.utils.escape_html(r["cadence"]),
-                frappe.utils.escape_html(r.get("overall_result") or ""),
+                frappe.utils.escape_html(_(r["cadence"]) if r["cadence"] else ""),
+                frappe.utils.escape_html(_(r.get("overall_result")) if r.get("overall_result") else ""),
                 issues_html,
             )
         )
