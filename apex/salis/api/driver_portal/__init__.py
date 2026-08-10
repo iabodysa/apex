@@ -292,11 +292,17 @@ def _resolve_my_trip(dispatch_trip, driver):
     trip = frappe.db.get_value(
         "Dispatch Trip",
         {"name": dispatch_trip, "driver": driver},
-        ["name", "vehicle", "route_plan", "transport_request", "trip_date"],
+        ["name", "vehicle", "route_plan", "transport_request", "trip_date", "status"],
         as_dict=True,
     )
     if not trip:
         frappe.throw(_("Trip not found."), frappe.DoesNotExistError)
+    if trip.get("status") in ("Completed", "Cancelled"):
+        frappe.throw(_("This trip is already closed."))
+    trip_date = frappe.utils.getdate(trip.get("trip_date")) if trip.get("trip_date") else None
+    today = frappe.utils.getdate(frappe.utils.today())
+    if trip_date and not (frappe.utils.add_days(today, -1) <= trip_date <= today):
+        frappe.throw(_("This trip is not today's."))
     return trip
 
 
