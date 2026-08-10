@@ -78,7 +78,13 @@
 
         <section id="portal-detail" class="masar-detail" tabindex="-1">
           <AsyncBoundary
-            v-if="ctx.loading || ctx.error"
+            v-if="linkDead"
+            state="error"
+            :title="t('errors.linkDeadTitle')"
+            :message="t('errors.invalidLink')"
+          />
+          <AsyncBoundary
+            v-else-if="ctx.loading || ctx.error"
             :state="ctx.loading ? 'loading' : 'error'"
             :title="ctx.loading ? '' : t('errors.loadFailed')"
             :message="ctx.loading ? '' : errorMessage"
@@ -124,6 +130,7 @@ const linkedDriver = computed(
   () => ctx.data && ctx.data.enabled && ctx.data.linked && ctx.data.driver,
 );
 const errorMessage = computed(() => resourceErrorMessage(ctx.error, "errors.invalidLink"));
+const linkDead = computed(() => typeof window !== "undefined" && window.driver_link_dead === true);
 const driverName = computed(() => (ctx.data?.driver?.full_name || "").trim());
 const initial = computed(() => driverName.value.charAt(0).toUpperCase() || "?");
 

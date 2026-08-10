@@ -148,7 +148,7 @@ class TelecomControl {
 	}
 
 	refresh() {
-		const gen = ++this._gen;
+		const newest = apex.desk.newest_only(this, "_gen");
 		const page = this.state.page;
 		this._render_loading();
 		const args = { filters: this.filters };
@@ -158,14 +158,14 @@ class TelecomControl {
 			this._call('get_sim_rows', { ...args, page, page_size: this.state.page_size }),
 		])
 			.then(([cards, charts, rows]) => {
-				if (gen !== this._gen) return;
+				if (!newest()) return;
 				this.$empty.hide();
 				this._render_cards(cards || {});
 				this._render_charts(charts || {});
 				this._render_table(rows || { rows: [], total: 0 });
 			})
 			.catch(() => {
-				if (gen === this._gen) this._render_error();
+				if (newest()) this._render_error();
 			});
 	}
 

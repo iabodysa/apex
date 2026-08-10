@@ -291,7 +291,7 @@ class FleetControl {
 	}
 
 	refresh() {
-		const gen = ++this._gen;
+		const newest = apex.desk.newest_only(this, "_gen");
 		this._set_loading(true);
 		this._persist_filters();
 		this._refresh_alerts();
@@ -299,7 +299,7 @@ class FleetControl {
 			method: "apex.salis.api.operations_control.get_fleet",
 			args: { ...this.filters },
 			callback: (r) => {
-				if (gen !== this._gen) return;
+				if (!newest()) return;
 				if (!r || r.exc || !r.message) {
 					this._render_board_error(() => this.refresh());
 					return;
@@ -313,21 +313,21 @@ class FleetControl {
 				this._render();
 			},
 			error: (r) => {
-				if (gen === this._gen) this._render_board_error(() => this.refresh(), r);
+				if (newest()) this._render_board_error(() => this.refresh(), r);
 			},
 			always: () => {
-				if (gen === this._gen) this._set_loading(false);
+				if (newest()) this._set_loading(false);
 			},
 		});
 	}
 
 	_refresh_alerts() {
-		const gen = ++this._alert_gen;
+		const newest = apex.desk.newest_only(this, "_alert_gen");
 		frappe.call({
 			method: "apex.salis.api.operations_alerts.get_open_alerts",
 			args: { project: this.filters.project || undefined, since: this.last_seen || undefined },
 			callback: (r) => {
-				if (gen !== this._alert_gen) return;
+				if (!newest()) return;
 				if (this._call_failed(r, __("Could not load the alerts."))) return;
 				const m = (r && r.message) || { alerts: [], summary: { total: 0, by_severity: {} } };
 				this.alerts = m.alerts || [];
@@ -347,7 +347,7 @@ class FleetControl {
 				this._mark_seen();
 			},
 			error: () => {
-				if (gen !== this._alert_gen) return;
+				if (!newest()) return;
 				this.alerts = [];
 				this.alert_summary = { total: 0, by_severity: {}, mine: 0, unowned: 0 };
 				this.alerts_by_vehicle = {};
@@ -1136,7 +1136,7 @@ class FleetControl {
 
 	release_vehicle(v, $btn) {
 		const d = frappe.confirm(__("Release {0} back to service?", [v.plate_number || v.name]), () => {
-			d.disable_primary_action();
+			apex.desk.lock_dialog_action(d, true);
 			$btn.prop("disabled", true);
 			frappe.call({
 				method: "apex.salis.api.operations_control.release_vehicle",

@@ -79,6 +79,7 @@ export_python_type_annotations = True
 app_include_js = [
     "masar_worker_link.bundle.js",
     "habitat_desk.bundle.js",
+    "apex_desk.bundle.js",
     "apex_report_filters.bundle.js",
 ]
 web_include_js = ["/assets/apex/js/apex_web_form.js"]

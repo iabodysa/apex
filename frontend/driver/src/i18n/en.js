@@ -391,6 +391,7 @@ export default {
     todayFailed: "Couldn't load today's board",
     invalidLink:
       "This driver link is invalid or has been disabled. Please ask your supervisor for a new link.",
+    linkDeadTitle: "This link no longer works",
     rateLimited: "Too many requests. Please wait a moment and try again.",
     retryHint: "Check your connection and try again.",
     sessionExpired: "Your session expired. Please refresh the page.",

@@ -17,6 +17,7 @@
       window.csrf_token = {{ csrf_token | tojson }};
       window.holder_type = "Driver";
       window.driver_has_token = {{ "true" if driver_has_token else "false" }};
+      window.driver_link_dead = {{ "true" if driver_link_dead else "false" }};
       window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
       window.portal_logo = {{ (portal_logo or '') | tojson }};
       window.driver_socket = {

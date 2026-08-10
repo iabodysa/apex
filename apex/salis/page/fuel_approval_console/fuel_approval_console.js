@@ -54,10 +54,6 @@ function fac_upper() {
 	return frappe.utils.is_rtl() ? "" : "text-transform:uppercase;letter-spacing:0.03em;";
 }
 
-function fac_lock_primary(d, locked) {
-	d.get_primary_btn().prop("disabled", locked).toggleClass("disabled", locked);
-}
-
 class FuelApprovalConsole {
 	constructor(page) {
 		this.page = page;
@@ -276,7 +272,7 @@ class FuelApprovalConsole {
 		const d = frappe.confirm(
 			__("Approve fuel request {0}?", [row.name]),
 			() => {
-				fac_lock_primary(d, true);
+				apex.desk.lock_dialog_action(d, true);
 				frappe.call({
 					method: "apex.salis.api.fuel_console.approve_fuel_request",
 					args: { name: row.name },
@@ -321,7 +317,7 @@ class FuelApprovalConsole {
 			],
 			primary_action_label: __("Reject"),
 			primary_action: (values) => {
-				fac_lock_primary(d, true);
+				apex.desk.lock_dialog_action(d, true);
 				frappe.call({
 					method: "apex.salis.api.fuel_console.reject_fuel_request",
 					args: { name: row.name, reason: values.reason },
@@ -329,7 +325,7 @@ class FuelApprovalConsole {
 					freeze_message: __("Rejecting…"),
 					callback: (r) => {
 						if (r.exc || !r.message) {
-							fac_lock_primary(d, false);
+							apex.desk.lock_dialog_action(d, false);
 							return;
 						}
 						d.hide();
@@ -340,7 +336,7 @@ class FuelApprovalConsole {
 						this.refresh();
 					},
 					error: () => {
-						fac_lock_primary(d, false);
+						apex.desk.lock_dialog_action(d, false);
 						frappe.show_alert({
 							message: __("Rejection failed for {0}.", [row.name]),
 							indicator: "red",

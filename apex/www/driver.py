@@ -20,6 +20,7 @@ from frappe.utils import cint
 
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     DRIVER_TOKEN_COOKIE,
+    resolve_driver_token,
 )
 from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance
 from apex.apex_core.utils.portal_language import render_in_arabic
@@ -39,9 +40,10 @@ def get_context(context):
     valid_token = raw_token if _TOKEN_RE.match(raw_token) else ""
     if valid_token:
         throttle_entry_token(DRIVER, valid_token)
-        _set_token_cookie(valid_token)
-        frappe.local.flags.redirect_location = "/driver"
-        raise frappe.Redirect
+        if _token_resolves(valid_token):
+            _set_token_cookie(valid_token)
+            frappe.local.flags.redirect_location = "/driver"
+            raise frappe.Redirect
 
     render_in_arabic()
 
@@ -51,10 +53,21 @@ def get_context(context):
     context.async_enabled = not cint(conf.get("disable_async"))
     context.dev_server = 1 if frappe.conf.developer_mode else 0
 
-    context.driver_has_token = bool(_request_token_cookie())
+    cookie_token = _request_token_cookie()
+    cookie_is_live = bool(cookie_token) and _token_resolves(cookie_token)
+    context.driver_has_token = bool(cookie_token)
+    context.driver_link_dead = not cookie_is_live and bool(raw_token or cookie_token)
 
     apply_portal_appearance(context)
     return context
+
+
+def _token_resolves(token: str) -> bool:
+    """Whether the credential still names an active driver, not merely a legal string."""
+    try:
+        return bool(resolve_driver_token(token))
+    except frappe.PermissionError:
+        return False
 
 
 def _set_token_cookie(token: str) -> None:

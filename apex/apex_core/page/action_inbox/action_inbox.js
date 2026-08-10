@@ -69,16 +69,16 @@ class ActionInbox {
 	}
 
 	refresh() {
-		const gen = ++this._gen;
+		const newest = apex.desk.newest_only(this, "_gen");
 		this._render_loading();
 		frappe
 			.call('apex.apex_core.worklist.my_work_center.get_my_work')
 			.then((r) => {
-				if (gen !== this._gen) return;
+				if (!newest()) return;
 				this._render((r && r.message) || {});
 			})
 			.catch(() => {
-				if (gen === this._gen) this._render_error();
+				if (newest()) this._render_error();
 			});
 	}
 
