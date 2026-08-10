@@ -17,17 +17,17 @@ export const SECTIONS = [
     icon: "route",
     labelKey: "nav.transfer",
   },
-  { id: "custody", domain: "assets", path: "/custody", icon: "box", labelKey: "nav.custody" },
+  { id: "custody", domain: "custody", path: "/custody", icon: "box", labelKey: "nav.custody" },
   {
     id: "count",
-    domain: "assets",
+    domain: "count",
     path: "/count",
     icon: "clipboard-check",
     labelKey: "nav.count",
   },
   {
     id: "delivery",
-    domain: "assets",
+    domain: "delivery",
     path: "/delivery",
     icon: "truck",
     labelKey: "nav.delivery",
@@ -57,11 +57,25 @@ export const DOMAINS = [
     sectionIds: ["beds", "arrivals", "transfer"],
   },
   {
-    id: "assets",
+    id: "custody",
     path: "/custody",
     icon: "box",
-    labelKey: "nav.assets",
-    sectionIds: ["custody", "count", "delivery"],
+    labelKey: "nav.custody",
+    sectionIds: ["custody"],
+  },
+  {
+    id: "count",
+    path: "/count",
+    icon: "clipboard-check",
+    labelKey: "nav.count",
+    sectionIds: ["count"],
+  },
+  {
+    id: "delivery",
+    path: "/delivery",
+    icon: "truck",
+    labelKey: "nav.delivery",
+    sectionIds: ["delivery"],
   },
   {
     id: "safety",
@@ -89,7 +103,8 @@ export function sectionsForDomain(domainId, granted = grantedSections()) {
 export function visibleDomains(granted = grantedSections()) {
   const allowed = asSet(granted);
   return DOMAINS.filter((domain) => domain.sectionIds.some((id) => allowed.has(id))).map((domain) => {
-    if (domain.id === "today" || domain.id === "safety") return domain;
+    if (domain.sectionIds.length === 1) return domain;
+    if (domain.id === "today") return domain;
     const first = sectionsForDomain(domain.id, allowed)[0];
     return first ? { ...domain, path: first.path } : domain;
   });

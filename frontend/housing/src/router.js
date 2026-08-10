@@ -19,25 +19,25 @@ const routes = [
     path: "/count",
     name: "Count",
     component: Count,
-    meta: { section: "count", domain: "assets" },
+    meta: { section: "count", domain: "count" },
   },
   {
     path: "/count/:item",
     name: "CountItem",
     component: Count,
-    meta: { section: "count", domain: "assets" },
+    meta: { section: "count", domain: "count" },
   },
   {
     path: "/delivery",
     name: "Delivery",
     component: Delivery,
-    meta: { section: "delivery", domain: "assets" },
+    meta: { section: "delivery", domain: "delivery" },
   },
   {
     path: "/delivery/:name",
     name: "DeliveryDetail",
     component: Delivery,
-    meta: { section: "delivery", domain: "assets" },
+    meta: { section: "delivery", domain: "delivery" },
   },
   {
     path: "/beds",
@@ -61,7 +61,7 @@ const routes = [
     path: "/custody",
     name: "Custody",
     component: Custody,
-    meta: { section: "custody", domain: "assets" },
+    meta: { section: "custody", domain: "custody" },
   },
   {
     path: "/transfer",

@@ -13,9 +13,9 @@ describe("housing portal information architecture", () => {
     expect(domainForSection("beds")).toBe("residents");
     expect(domainForSection("arrivals")).toBe("residents");
     expect(domainForSection("transfer")).toBe("residents");
-    expect(domainForSection("custody")).toBe("assets");
-    expect(domainForSection("count")).toBe("assets");
-    expect(domainForSection("delivery")).toBe("assets");
+    expect(domainForSection("custody")).toBe("custody");
+    expect(domainForSection("count")).toBe("count");
+    expect(domainForSection("delivery")).toBe("delivery");
     expect(domainForSection("safety")).toBe("safety");
   });
 
@@ -24,12 +24,13 @@ describe("housing portal information architecture", () => {
     expect(visibleDomains(granted).map((domain) => domain.id)).toEqual([
       "today",
       "residents",
-      "assets",
+      "count",
     ]);
     expect(sectionsForDomain("residents", granted).map((section) => section.id)).toEqual([
       "arrivals",
     ]);
-    expect(sectionsForDomain("assets", granted).map((section) => section.id)).toEqual(["count"]);
+    expect(sectionsForDomain("count", granted).map((section) => section.id)).toEqual(["count"]);
+    expect(sectionsForDomain("delivery", granted).map((section) => section.id)).toEqual([]);
   });
 
   it("lands safety entry on safety and housing entry on the overview when useful", () => {

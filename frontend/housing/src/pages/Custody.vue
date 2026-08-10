@@ -1,5 +1,10 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
+    <header class="custody-head">
+        <h1>{{ t("custody.jobTitle") }}</h1>
+        <p>{{ balanceLine }}</p>
+    </header>
+
     <TabButtons
         class="filter"
         v-model="mode"
@@ -32,8 +37,6 @@
                 />
             </li>
         </ul>
-        <!-- Same rule as the arrivals search: a failure and an empty result are different
-             answers, and this is the first control on the screen. -->
         <p v-else-if="searchRes.error" class="status-note status-err">
             {{ resourceErrorMessage(searchRes.error, "errors.searchFailed") }}
         </p>
@@ -47,9 +50,6 @@
         <div class="section-head">
             <h2>
                 {{ party.party_name }}
-                <!-- The type stays on screen through the commit: two workers can share a
-                     name, one an Employee and one a Temporary Worker, and the operator was
-                     choosing between them blind. -->
                 <Badge theme="gray" size="sm" :label="tEnum('custody', party.party_type)" />
             </h2>
             <Button variant="ghost" size="md" :label="t('common.change')" @click="clearParty">
@@ -255,6 +255,16 @@ const matches = computed(() => {
 const articles = computed(() => (catalogRes.data && catalogRes.data.articles) || []);
 const heldLines = computed(() => (heldRes.data && heldRes.data.lines) || []);
 
+const balanceLine = computed(() => {
+    if (catalogRes.error) return t("errors.custodyFailed");
+    if (catalogRes.loading && !articles.value.length) return t("common.loading");
+    const counted = articles.value.filter((a) => a.store_balance !== null);
+    if (!counted.length) return t("custody.balanceUnknown");
+    const units = counted.reduce((sum, a) => sum + Number(a.store_balance || 0), 0);
+    const stocked = counted.filter((a) => Number(a.store_balance) > 0).length;
+    return t("custody.balanceLine", { units, stocked, articles: counted.length });
+});
+
 const loading = computed(() =>
     mode.value === "issue" ? catalogRes.loading && !articles.value.length : heldRes.loading,
 );
@@ -440,6 +450,21 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.custody-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+}
+.custody-head h1 {
+    font-size: var(--fs-h2);
+    font-weight: var(--fw-semibold);
+    color: var(--c-ink);
+    line-height: 1.3;
+}
+.custody-head p {
+    font-size: var(--fs-sm);
+    color: var(--c-muted);
+}
 .filter {
     align-self: start;
 }
