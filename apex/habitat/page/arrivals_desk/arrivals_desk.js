@@ -42,7 +42,7 @@ const AX_STYLE = {
 	cap_fill_free: "background:var(--green-500);",
 	cap_fill_occ: "background:var(--red-500);",
 	cap_fill_over:
-		"background:repeating-linear-gradient(45deg,var(--red-500),var(--red-500) 4px,var(--orange-500) 4px,var(--orange-500) 8px);",
+		"background:var(--red-500);box-shadow:inset 0 0 0 2px var(--orange-500);",
 	cap_legend: "font-size:var(--text-sm);color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;",
 	cap_swatch: "inline-size:10px;block-size:10px;border-radius:2px;display:inline-block;",
 	stages: "flex:1 1 100%;display:flex;gap:6px;flex-wrap:wrap;",

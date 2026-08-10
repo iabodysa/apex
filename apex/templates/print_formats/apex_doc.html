@@ -1,63 +1,64 @@
 {%- macro doc_styles() -%}
 <style>
-  .ax { font-family: "SF Arabic", "Geeza Pro", Tahoma, Arial, sans-serif; color: #14332a; font-size: 11.5px; }
-  .ax .lbl { font-size: 9px; color: #6f7e76; font-weight: 700; letter-spacing: .02em; }
-  .ax .lbl .en { display: block; font-size: 7.5px; color: #9aa8a1; font-weight: 400; letter-spacing: 0; }
-  .ax .val { font-size: 11.5px; color: #14332a; }
+  .ax { font-family: "Thmanyah Sans", "SF Arabic", "Geeza Pro", Tahoma, Arial, sans-serif; color: #072b1a; font-size: 11.5px; }
+  .ax .lbl { font-size: 9px; color: #47584f; font-weight: 700; letter-spacing: .02em; }
+  .ax .lbl .en { display: block; font-size: 7.5px; color: #47584f; font-weight: 400; letter-spacing: 0; }
+  .ax .val { font-size: 11.5px; color: #072b1a; }
   .ax-title { display: flex; justify-content: space-between; align-items: flex-end;
               border-bottom: 2.5px solid #00844e; padding-bottom: 7px; margin: 8px 0 12px; }
   .ax-title h1 { margin: 0; font-size: 17px; font-weight: 800; color: #072b1a; }
-  .ax-title h1 .en { display: block; font-size: 9.5px; font-weight: 400; color: #6f7e76; letter-spacing: .04em; }
+  .ax-title h1 .en { display: block; font-size: 9.5px; font-weight: 400; color: #47584f; letter-spacing: .04em; }
   .ax-ident { text-align: end; font-size: 10px; color: #47584f; line-height: 1.7; }
   .ax-ident b { font-size: 12px; color: #072b1a; letter-spacing: .04em; }
   .ax-parties { display: flex; gap: 10px; margin-bottom: 12px; }
-  .ax-party { flex: 1; border: 1px solid #ddd5c2; border-radius: 5px; padding: 8px 10px; }
+  .ax-party { flex: 1; border: 1px solid #d8d0bd; border-radius: 8px; padding: 8px 10px; }
   .ax-party .who { font-size: 12px; font-weight: 700; color: #072b1a; margin: 2px 0; }
   .ax-party .meta { font-size: 9.5px; color: #47584f; line-height: 1.6; }
   table.ax-grid { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-  table.ax-grid td { border: 1px solid #ddd5c2; padding: 5px 8px; vertical-align: top; }
-  table.ax-grid td.k { background: #f4f7f5; width: 17%; }
+  table.ax-grid td { border: 1px solid #d8d0bd; padding: 5px 8px; vertical-align: top; }
+  table.ax-grid td.k { background: #f8f5ee; width: 17%; }
   table.ax-lines { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
   table.ax-lines th { background: #00844e; color: #fff; font-size: 9.5px; font-weight: 700;
                       padding: 6px 8px; text-align: start; }
   table.ax-lines th .en { display: block; font-size: 7.5px; font-weight: 400; opacity: .85; }
-  table.ax-lines td { border-bottom: 1px solid #e6ece9; padding: 6px 8px; }
-  table.ax-lines tr:nth-child(even) td { background: #f8faf9; }
+  table.ax-lines td { border-bottom: 1px solid #e9e3d3; padding: 6px 8px; }
+  table.ax-lines tr:nth-child(even) td { background: #f8f5ee; }
   table.ax-lines .num { text-align: end; font-variant-numeric: tabular-nums; }
-  table.ax-lines tr.total td { background: #f0f5f2; font-weight: 700; border-top: 1.5px solid #00844e; }
-  .ax-words { border: 1px solid #ddd5c2; border-radius: 5px; background: #f8faf9;
+  table.ax-lines tr.total td { background: #e9e3d3; font-weight: 700; border-top: 1.5px solid #00844e; }
+  .ax-words { border: 1px solid #d8d0bd; border-radius: 8px; background: #f8f5ee;
               padding: 7px 10px; font-size: 10.5px; margin-bottom: 12px; }
-  .ax-none { border: 1px dashed #cabfa3; border-radius: 5px; padding: 14px; text-align: center;
-             color: #6f7e76; font-size: 10px; }
-  .ax-note { border: 1px solid #ddd5c2; border-inline-start: 3px solid #00844e; border-radius: 4px;
+  .ax-none { border: 1px dashed #cabfa3; border-radius: 8px; padding: 14px; text-align: center;
+             color: #47584f; font-size: 10px; }
+  .ax-note { border: 1px solid #d8d0bd; border-inline-start: 3px solid #00844e; border-radius: 8px;
              padding: 7px 10px; font-size: 10px; color: #47584f; margin-bottom: 12px; line-height: 1.7; }
   .ax-note .lbl { display: block; margin-bottom: 3px; }
   .ax-note .lbl .en { display: inline; margin-inline-start: 5px; }
-  .ax-decl { border: 1px solid #cdbb8a; background: #fdfaf1; border-radius: 5px;
-             padding: 9px 11px; font-size: 10.5px; color: #4a3f22; margin-bottom: 12px; line-height: 1.8; }
+  .ax-decl { border: 1px solid #cabfa3; background: #f8f5ee; border-radius: 8px;
+             padding: 9px 11px; font-size: 10.5px; color: #47584f; margin-bottom: 12px; line-height: 1.8; }
   table.ax-check { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-  table.ax-check td { border-bottom: 1px solid #e6ece9; padding: 5px 8px; font-size: 10.5px; }
+  table.ax-check td { border-bottom: 1px solid #e9e3d3; padding: 5px 8px; font-size: 10.5px; }
   table.ax-check td.res { width: 76px; text-align: center; font-weight: 700; font-size: 9.5px; }
   table.ax-check td.ok { color: #00844e; }
-  table.ax-check td.bad { color: #b23b2e; }
-  table.ax-check td.na { color: #9aa8a1; }
+  table.ax-check td.bad { color: #b42318; }
+  table.ax-check td.na { color: #47584f; }
   .ax-photos { display: flex; gap: 8px; margin-bottom: 12px; }
-  .ax-photo { flex: 1; height: 96px; border: 1px dashed #cabfa3; border-radius: 5px;
+  .ax-photo { flex: 1; height: 96px; border: 1px dashed #cabfa3; border-radius: 8px;
               display: flex; align-items: center; justify-content: center;
-              color: #b9b09a; font-size: 9px; text-align: center; }
+              color: #cabfa3; font-size: 9px; text-align: center; }
   .ax-signs { display: flex; gap: 10px; margin-top: 16px; }
   .ax-sign { flex: 1; border-top: 1px solid #cabfa3; padding-top: 6px; }
   .ax-sign .role { font-size: 10px; font-weight: 700; color: #072b1a; }
-  .ax-sign .role .en { font-weight: 400; color: #9aa8a1; font-size: 7.5px; }
-  .ax-sign .line { font-size: 9px; color: #6f7e76; margin-top: 6px; }
-  .ax-stamp { width: 108px; border: 1px dashed #cabfa3; border-radius: 5px; height: 74px;
-              display: flex; align-items: center; justify-content: center; color: #b9b09a; font-size: 9px; }
-  .ax-foot { margin-top: 14px; padding-top: 7px; border-top: 1px solid #ddd5c2;
+  .ax-sign .role .en { font-weight: 400; color: #47584f; font-size: 7.5px; }
+  .ax-sign .line { font-size: 9px; color: #47584f; margin-top: 6px; }
+  .ax-stamp { width: 108px; border: 1px dashed #cabfa3; border-radius: 8px; height: 74px;
+              display: flex; align-items: center; justify-content: center; color: #cabfa3; font-size: 9px; }
+  .ax-foot { margin-top: 14px; padding-top: 7px; border-top: 1px solid #d8d0bd;
              display: flex; justify-content: space-between; align-items: center;
-             font-size: 8.5px; color: #6f7e76; }
+             font-size: 8.5px; color: #47584f; }
   .ax-foot img { width: 58px; height: 58px; }
+  .ax-sig { display: inline-flex; align-items: center; gap: 4px; }
   .ax-mark { position: fixed; top: 42%; inset-inline-start: 22%; font-size: 76px; font-weight: 800;
-             color: rgba(192, 57, 43, .11); transform: rotate(-24deg); letter-spacing: .06em; z-index: 0; }
+             color: rgba(180, 35, 24, .11); transform: rotate(-24deg); letter-spacing: .06em; z-index: 0; }
   @media print { .ax-lines tr, .ax-check tr, .ax-sign, .ax-party { page-break-inside: avoid; } }
 </style>
 {%- endmacro -%}
@@ -221,6 +222,10 @@
 </div>
 {%- endmacro -%}
 
+{%- macro apex_mark(size=11) -%}
+<svg viewBox="0 0 64 64" width="{{ size }}" height="{{ size }}" style="vertical-align:-1px" role="img" aria-label="Apex"><path d="M7 56 25.7 15.8C27.1 12.6 29.3 10 32 10l6.2 13.4-7.9 7.6-4.1-8.8L20.5 56Z" fill="#072b1a"/><path d="M32 10c2.7 0 4.9 2.6 6.3 5.8L57 56H43.5L30.3 31l7.9-7.6Z" fill="#00844e"/><path d="M32 10c2.7 0 4.9 2.6 6.3 5.8l3.5 7.6h-3.6Z" fill="#60d297"/></svg>
+{%- endmacro -%}
+
 {%- macro doc_footer(doc, qr=True) -%}
 {%- set uri = doc_verify_qr(doc.doctype, doc.name) if qr else None -%}
 <div class="ax-foot">
@@ -229,7 +234,7 @@
     {{ _("Printed by") }}: {{ frappe.get_fullname(frappe.session.user) }} ·
     {{ frappe.format_date(frappe.utils.nowdate()) }}<br>
     {{ _(doc.doctype) }} · {{ doc.name }}<br>
-    {{ _("System-generated document from Apex") }}
+    <span class="ax-sig">{{ apex_mark() }} {{ _("System-generated document from Apex") }}</span>
   </div>
 </div>
 <div {% if print_settings and print_settings.repeat_header_footer %}id="footer-html" class="visible-pdf"{% endif %}>

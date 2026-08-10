@@ -9,22 +9,22 @@
   .ax-label .hero { display: flex; align-items: center; gap: 12px; margin: 6px 0 4px; }
   .ax-label .num { font-size: 62px; font-weight: 800; color: #072b1a; line-height: 1;
                    font-variant-numeric: tabular-nums; }
-  .ax-label .num .cap { display: block; font-size: 10px; font-weight: 700; color: #6f7e76;
+  .ax-label .num .cap { display: block; font-size: 10px; font-weight: 700; color: #47584f;
                         letter-spacing: .06em; }
   .ax-label .qr { margin-inline-start: auto; text-align: center; }
   .ax-label .qr img { width: 78px; height: 78px; }
-  .ax-label .qr span { display: block; font-size: 7px; color: #6f7e76; margin-top: 2px; }
+  .ax-label .qr span { display: block; font-size: 7px; color: #47584f; margin-top: 2px; }
   .ax-chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0; }
-  .ax-chip { border: 1px solid #ddd5c2; border-radius: 4px; padding: 2px 7px; font-size: 9.5px; color: #14332a; }
+  .ax-chip { border: 1px solid #d8d0bd; border-radius: 4px; padding: 2px 7px; font-size: 9.5px; color: #072b1a; }
   .ax-chip b { font-size: 11px; color: #072b1a; }
-  .ax-chip .en { color: #9aa8a1; font-size: 7px; }
+  .ax-chip .en { color: #47584f; font-size: 7px; }
   .ax-band { border-radius: 4px; padding: 4px 8px; font-size: 10.5px; font-weight: 700; margin: 4px 0; }
-  .ax-band.ready { background: #f0f7f3; color: #05502f; border: 1px solid #00844e; }
-  .ax-band.warn { background: #fdf3f1; color: #7d2418; border: 1px solid #b23b2e; }
+  .ax-band.ready { background: #e9e3d3; color: #14804a; border: 1px solid #00844e; }
+  .ax-band.warn { background: #f8f5ee; color: #b42318; border: 1px solid #b42318; }
   .ax-beds { font-size: 9.5px; color: #47584f; line-height: 1.7; margin-top: 2px; }
   .ax-beds b { color: #072b1a; }
-  .ax-label .foot { margin-top: auto; padding-top: 5px; border-top: 1px solid #ddd5c2;
-                    font-size: 8.5px; color: #6f7e76; line-height: 1.6; }
+  .ax-label .foot { margin-top: auto; padding-top: 5px; border-top: 1px solid #d8d0bd;
+                    font-size: 8.5px; color: #47584f; line-height: 1.6; }
 </style>
 
 {%- set building = frappe.db.get_value("Building", doc.building,
@@ -82,7 +82,8 @@
       {%- if supervisor %}{{ _("Facility Supervisor") }}: {{ supervisor }}{% if supervisor_phone %} · {{ supervisor_phone }}{% endif %} · {% endif -%}
       {{ _("Report any fault to your facility supervisor. In an emergency call him directly.") }}<br>
       {%- if doc.last_inventory_date %}{{ _("Last inventory") }}: {{ frappe.format_date(doc.last_inventory_date) }} · {% endif -%}
-      {{ doc.name }}
+      {{ doc.name }}<br>
+      <span class="ax-sig">{{ ax.apex_mark(9) }} {{ _("System-generated document from Apex") }}</span>
     </div>
   </div>
 </div>
