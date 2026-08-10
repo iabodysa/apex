@@ -876,6 +876,7 @@ def get_arrival_slip(party_type, party) -> dict:
     return {
         "html": frappe.render_template(arrival_slips.ARRIVAL_SLIP_TEMPLATE, ctx),
         "title": ctx["worker_name"],
+        "card": ctx,
     }
 
 

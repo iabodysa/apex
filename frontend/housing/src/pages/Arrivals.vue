@@ -90,6 +90,13 @@
                 @click="houseWorker(w)"
             />
             <Button
+                v-if="canIssueCustody"
+                size="lg"
+                variant="subtle"
+                :label="t('arrivals.custodyCta')"
+                @click="issueCustody(w)"
+            />
+            <Button
                 size="lg"
                 variant="ghost"
                 :label="t('arrivals.slipCta')"
@@ -196,7 +203,7 @@
 
     <Dialog v-model="slipOpen" :options="{ title: t('arrivals.slipTitle'), size: 'xl' }">
         <template #body-content>
-            <div class="slip" v-html="slipHtml"></div>
+            <ArrivalCard v-if="slipCard" :card="slipCard" />
             <ErrorMessage v-if="slipError" :message="slipError" />
         </template>
         <template #actions>
@@ -232,13 +239,14 @@ import {
     createResource,
     toast,
 } from "frappe-ui";
+import ArrivalCard from "../components/ArrivalCard.vue";
 import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "../components/Icon.vue";
 import ListSkeleton from "@shared/components/ListSkeleton.vue";
 import LoadError from "../components/LoadError.vue";
 import { call } from "@shared/call";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
-import { can } from "../portal.js";
+import { can, hasSection } from "../portal.js";
 import { building, localDate } from "../session";
 
 const { t, tEnum } = useI18n();
@@ -246,6 +254,7 @@ const router = useRouter();
 
 const API = "apex.habitat.api.arrivals_desk.";
 const canRegister = can("register_worker");
+const canIssueCustody = can("issue_custody") && hasSection("custody");
 
 const query = ref("");
 const registerOpen = ref(false);
@@ -257,6 +266,7 @@ const linkUrl = ref("");
 const linkError = ref("");
 const slipOpen = ref(false);
 const slipHtml = ref("");
+const slipCard = ref(null);
 const slipError = ref("");
 
 const form = reactive({
@@ -374,6 +384,18 @@ async function doRegister() {
     }
 }
 
+function issueCustody(worker) {
+    router.push({
+        path: "/custody",
+        query: {
+            party_type: worker.party_type,
+            party: worker.party,
+            name: worker.label || worker.party,
+            mode: "issue",
+        },
+    });
+}
+
 function houseWorker(worker) {
     router.push({
         path: "/beds",
@@ -412,6 +434,7 @@ async function showSlip(worker) {
     if (busy.value) return;
     busy.value = "slip";
     slipHtml.value = "";
+    slipCard.value = null;
     slipError.value = "";
     try {
         const slip = await call(API + "get_arrival_slip", {
@@ -419,7 +442,8 @@ async function showSlip(worker) {
             type: "POST",
         });
         slipHtml.value = (slip && slip.html) || "";
-        if (!slipHtml.value) throw new Error(t("arrivals.slipEmpty"));
+        slipCard.value = (slip && slip.card) || null;
+        if (!slipCard.value || !slipCard.value.worker_name) throw new Error(t("arrivals.slipEmpty"));
         slipOpen.value = true;
     } catch (err) {
         toast.create({ type: "error", message: apiErrorMessage(err) });

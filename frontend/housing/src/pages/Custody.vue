@@ -445,7 +445,7 @@ onMounted(() => {
     if (building.value) catalogRes.fetch();
     const q = route.query;
     if (q.party_type && q.party)
-        selectParty(String(q.party_type), String(q.party), String(q.party));
+        selectParty(String(q.party_type), String(q.party), String(q.name || q.party));
 });
 </script>
 
