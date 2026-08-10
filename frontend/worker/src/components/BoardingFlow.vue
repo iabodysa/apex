@@ -293,14 +293,14 @@ function openPass() {
 }
 .bflow-panel-title {
   font-size: var(--fs-h3);
-  font-weight: 800;
+  font-weight: 700;
 }
 .bflow-line {
   margin: 2px 0;
   font-size: var(--fs-sm);
 }
 .bflow-strong {
-  font-weight: 800;
+  font-weight: 700;
   color: var(--c-ink);
 }
 .bflow-muted {
@@ -324,7 +324,7 @@ function openPass() {
 }
 .bflow-countdown {
   font-size: var(--fs-h1);
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 

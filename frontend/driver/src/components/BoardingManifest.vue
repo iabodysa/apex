@@ -159,9 +159,9 @@ const maxNotifySent = computed(() =>
 
 const reminderStyle = computed(() => {
   if (maxNotifySent.value === 1) {
-    return { color: "var(--c-success)", fontWeight: "600" };
+    return { color: "var(--c-success)", fontWeight: "700" };
   } else if (maxNotifySent.value === 2) {
-    return { color: "var(--c-warning)", fontWeight: "600" };
+    return { color: "var(--c-warning-ink)", fontWeight: "700" };
   } else if (maxNotifySent.value >= notifyMaxCount.value) {
     return { color: "var(--c-danger)", fontWeight: "700" };
   }
@@ -310,7 +310,7 @@ useOverlay({ active: () => true, container: sheet, close });
   margin-bottom: 12px;
   border-radius: var(--radius);
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   background: var(--c-success-bg);
   color: var(--c-success);
 }

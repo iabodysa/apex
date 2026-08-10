@@ -278,7 +278,7 @@ onBeforeUnmount(() => {
 }
 .result-title {
   font-size: 1.375rem;
-  font-weight: 800;
+  font-weight: 700;
 }
 .result-hint {
   margin-top: 6px;

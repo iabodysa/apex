@@ -231,7 +231,7 @@ button,
   color: var(--c-ink);
   font-family: var(--font-brand);
   font-size: var(--fs-xs);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .emp-vehicle-lockup {
@@ -258,7 +258,7 @@ button,
   color: var(--c-ink);
   font-family: var(--font-num);
   font-size: clamp(1.2rem, 2vw, 1.7rem);
-  font-weight: 800;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -456,7 +456,7 @@ button,
 .emp-trip-sequence {
   color: var(--c-accent-ink);
   font-size: var(--fs-xs);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .emp-route {

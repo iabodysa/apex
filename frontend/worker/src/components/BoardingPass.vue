@@ -154,7 +154,7 @@ const pickupPoint = computed(() => {
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--c-primary) 14%, transparent);
   color: var(--c-primary);
-  font-weight: 800;
+  font-weight: 700;
   font-size: 1.0625rem;
 }
 .bpass-holder-text {
@@ -163,7 +163,7 @@ const pickupPoint = computed(() => {
 .bpass-holder-name {
   display: block;
   font-size: var(--fs-h3);
-  font-weight: 800;
+  font-weight: 700;
   color: var(--c-ink);
   line-height: 1.2;
   overflow: hidden;

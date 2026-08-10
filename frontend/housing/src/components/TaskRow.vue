@@ -316,7 +316,7 @@ function onUploaded(file) {
   gap: 3px;
   font-size: var(--fs-xs);
   font-weight: var(--fw-semibold);
-  color: var(--c-warning);
+  color: var(--c-warning-ink);
 }
 
 .task-actions {
@@ -372,7 +372,7 @@ function onUploaded(file) {
   gap: 5px;
   font-size: var(--fs-xs);
   font-weight: var(--fw-semibold);
-  color: var(--c-warning);
+  color: var(--c-warning-ink);
 }
 .task-photo-row {
   display: flex;

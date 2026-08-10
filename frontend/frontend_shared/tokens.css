@@ -19,6 +19,7 @@
   --border-control: #8d8168;
 
   --warn: #a76609;
+  --warn-ink: #8a5407; /* 4.89:1 on canvas, 5.75:1 on surface */
   --warn-fill: var(--warn);
   --warn-fill-ink: #ffffff;
   --warn-bg: color-mix(in srgb, var(--warn) 1%, var(--surface-2)); /* 4.56:1 */
@@ -69,6 +70,7 @@
   --c-success: var(--ok);
   --c-success-bg: var(--ok-bg);
   --c-warning: var(--warn);
+  --c-warning-ink: var(--warn-ink);
   --c-warning-fill: var(--warn-fill);
   --c-warning-fill-ink: var(--warn-fill-ink);
   --c-warning-bg: var(--warn-bg);
@@ -129,6 +131,7 @@
   --fs-h2: 20px;
   --fs-h3: 16px;
   --fs-body: 14px;
+  --lh-body: 1.7;
   --fs-sm: 13px;
   --fs-xs: 11px;
   --fs-2xs: 10px;
@@ -170,6 +173,8 @@ body {
   background: var(--c-canvas);
   color: var(--c-ink);
   font-family: var(--font);
+  font-weight: var(--fw-body);
+  line-height: var(--lh-body);
   text-rendering: optimizeLegibility;
 }
 

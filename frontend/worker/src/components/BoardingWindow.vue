@@ -80,11 +80,11 @@ const etaLine = computed(() => {
 }
 .bwin-title {
   font-size: var(--fs-h3);
-  font-weight: 800;
+  font-weight: 700;
 }
 .bwin-eta {
   font-size: var(--fs-h3);
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   margin: 0;
 }

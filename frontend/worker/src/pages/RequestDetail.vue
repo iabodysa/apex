@@ -152,7 +152,7 @@ function statusPill(status) {
   padding-inline: 4px;
   margin-inline: -4px;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--c-muted);
 }
 @media (hover: hover) {
