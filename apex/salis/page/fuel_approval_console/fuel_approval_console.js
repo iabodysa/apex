@@ -54,6 +54,10 @@ function fac_upper() {
 	return frappe.utils.is_rtl() ? "" : "text-transform:uppercase;letter-spacing:0.03em;";
 }
 
+function fac_lock_primary(d, locked) {
+	d.get_primary_btn().prop("disabled", locked).toggleClass("disabled", locked);
+}
+
 class FuelApprovalConsole {
 	constructor(page) {
 		this.page = page;
@@ -95,16 +99,15 @@ class FuelApprovalConsole {
 			method: "apex.salis.api.fuel_console.get_pending_fuel_requests",
 			args: { project: this.project || null },
 			callback: (r) => {
-				this._loading = false;
 				if (r.exc) {
 					this._render_error(this._error_text(r));
 					return;
 				}
 				this._render_cards(r.message || []);
 			},
-			error: (r) => {
+			error: (r) => this._render_error(this._error_text(r)),
+			always: () => {
 				this._loading = false;
-				this._render_error(this._error_text(r));
 			},
 		});
 	}
@@ -270,9 +273,10 @@ class FuelApprovalConsole {
 	}
 
 	_approve(row) {
-		frappe.confirm(
+		const d = frappe.confirm(
 			__("Approve fuel request {0}?", [row.name]),
 			() => {
+				fac_lock_primary(d, true);
 				frappe.call({
 					method: "apex.salis.api.fuel_console.approve_fuel_request",
 					args: { name: row.name },
@@ -317,7 +321,7 @@ class FuelApprovalConsole {
 			],
 			primary_action_label: __("Reject"),
 			primary_action: (values) => {
-				d.disable_primary_action();
+				fac_lock_primary(d, true);
 				frappe.call({
 					method: "apex.salis.api.fuel_console.reject_fuel_request",
 					args: { name: row.name, reason: values.reason },
@@ -325,7 +329,7 @@ class FuelApprovalConsole {
 					freeze_message: __("Rejecting…"),
 					callback: (r) => {
 						if (r.exc || !r.message) {
-							d.enable_primary_action();
+							fac_lock_primary(d, false);
 							return;
 						}
 						d.hide();
@@ -336,7 +340,7 @@ class FuelApprovalConsole {
 						this.refresh();
 					},
 					error: () => {
-						d.enable_primary_action();
+						fac_lock_primary(d, false);
 						frappe.show_alert({
 							message: __("Rejection failed for {0}.", [row.name]),
 							indicator: "red",

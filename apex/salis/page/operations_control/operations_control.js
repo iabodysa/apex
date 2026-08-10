@@ -23,6 +23,14 @@ const SEVERITY_RANK = { Critical: 3, Warning: 2, Info: 1 };
 
 const SETTINGS_KEY = "operations-control";
 const ROUTE_FILTERS = ["status", "rental_office", "project", "search", "compliance"];
+const COMPLIANCE_OPTIONS = ["Compliant", "Expiring Soon", "Expired"];
+
+function _empty_filters() {
+	return ROUTE_FILTERS.reduce((acc, k) => {
+		acc[k] = "";
+		return acc;
+	}, {});
+}
 
 const SNOOZE_PRESETS = [
 	["tomorrow", "Tomorrow"],
@@ -120,10 +128,13 @@ class FleetControl {
 	constructor(page) {
 		this.page = page;
 		this.data = { vehicles: [], summary: null, offices: [], projects: [], statuses: [], unscoped: false };
-		this.filters = { status: "", rental_office: "", project: "", search: "", compliance: "" };
+		this.filters = _empty_filters();
 		this.sort = "risk";
 		this.severity_filter = "";
 		this.ownership_filter = "";
+		this._incidents_only = false;
+		this._gen = 0;
+		this._alert_gen = 0;
 		this.alerts = [];
 		this.alerts_by_vehicle = {};
 		this.alert_summary = { total: 0, by_severity: {}, mine: 0, unowned: 0 };
@@ -185,7 +196,7 @@ class FleetControl {
 		this.$office = this._select(__("Rental Office"), () => this._on_filter());
 		this.$project = this._select(__("Project"), () => this._on_filter());
 		this.$compliance = this._select(__("Compliance"), () => this._on_filter());
-		this._fill_select(this.$compliance, ["Compliant", "Expiring Soon", "Expired"], this.filters.compliance);
+		this._fill_select(this.$compliance, COMPLIANCE_OPTIONS, this.filters.compliance);
 		this.$search = $(
 			`<input type="text" class="form-control input-sm fc-search" placeholder="${__("Search plate or category")}">`
 		).attr("style", FC.search).appendTo(this.$controls);
@@ -273,9 +284,6 @@ class FleetControl {
 		frappe.router.push_state("/" + ["app", route[1] || "operations-control"].join("/") + qs);
 	}
 
-	/* frappe.call runs the callback for a thrown server exception too, with r.exc set and
-	   r.message absent. Every handler on this page read only r.message, so a refused or
-	   failed action was announced in green with a count of zero. */
 	_call_failed(r, message) {
 		if (!r || !r.exc) return false;
 		frappe.show_alert({ message: message, indicator: "red" });
@@ -283,6 +291,7 @@ class FleetControl {
 	}
 
 	refresh() {
+		const gen = ++this._gen;
 		this._set_loading(true);
 		this._persist_filters();
 		this._refresh_alerts();
@@ -290,6 +299,7 @@ class FleetControl {
 			method: "apex.salis.api.operations_control.get_fleet",
 			args: { ...this.filters },
 			callback: (r) => {
+				if (gen !== this._gen) return;
 				if (!r || r.exc || !r.message) {
 					this._render_board_error(() => this.refresh());
 					return;
@@ -298,19 +308,26 @@ class FleetControl {
 				this._fill_select(this.$status, this.data.statuses, this.filters.status);
 				this._fill_select(this.$office, this.data.offices, this.filters.rental_office);
 				this._fill_select(this.$project, this.data.projects, this.filters.project);
+				if (this._drop_dead_filters()) return;
 				this._render_summary();
 				this._render();
 			},
-			error: (r) => this._render_board_error(() => this.refresh(), r),
-			always: () => this._set_loading(false),
+			error: (r) => {
+				if (gen === this._gen) this._render_board_error(() => this.refresh(), r);
+			},
+			always: () => {
+				if (gen === this._gen) this._set_loading(false);
+			},
 		});
 	}
 
 	_refresh_alerts() {
+		const gen = ++this._alert_gen;
 		frappe.call({
 			method: "apex.salis.api.operations_alerts.get_open_alerts",
 			args: { project: this.filters.project || undefined, since: this.last_seen || undefined },
 			callback: (r) => {
+				if (gen !== this._alert_gen) return;
 				if (this._call_failed(r, __("Could not load the alerts."))) return;
 				const m = (r && r.message) || { alerts: [], summary: { total: 0, by_severity: {} } };
 				this.alerts = m.alerts || [];
@@ -330,6 +347,7 @@ class FleetControl {
 				this._mark_seen();
 			},
 			error: () => {
+				if (gen !== this._alert_gen) return;
 				this.alerts = [];
 				this.alert_summary = { total: 0, by_severity: {}, mine: 0, unowned: 0 };
 				this.alerts_by_vehicle = {};
@@ -625,12 +643,37 @@ class FleetControl {
 	}
 
 	_clear_filters() {
-		this.filters = { status: "", rental_office: "", project: "", search: "" };
-		if (this.$status) this.$status.val("");
-		if (this.$office) this.$office.val("");
-		if (this.$project) this.$project.val("");
-		if (this.$search) this.$search.val("");
+		this.filters = _empty_filters();
+		this.severity_filter = "";
+		this.ownership_filter = "";
+		this._incidents_only = false;
+		this._sync_controls();
 		this.refresh();
+	}
+
+	_drop_dead_filters() {
+		const lists = {
+			status: this.data.statuses,
+			rental_office: this.data.offices,
+			project: this.data.projects,
+			compliance: COMPLIANCE_OPTIONS,
+		};
+		let dropped = false;
+		Object.keys(lists).forEach((k) => {
+			const value = this.filters[k];
+			if (value && !(lists[k] || []).includes(value)) {
+				this.filters[k] = "";
+				dropped = true;
+			}
+		});
+		if (!dropped) return false;
+		frappe.show_alert({
+			message: __("A saved filter no longer exists here and was cleared."),
+			indicator: "orange",
+		});
+		this._sync_controls();
+		this.refresh();
+		return true;
 	}
 
 	_render_card(v) {
@@ -795,39 +838,40 @@ class FleetControl {
 
 	_alert_actions(a, $into) {
 		if (a.status === "Open") {
-			$('<button class="btn btn-xs btn-default"></button>')
+			const $ack = $('<button class="btn btn-xs btn-default"></button>')
 				.text(__("Acknowledge"))
-				.on("click", (e) => {
-					e.stopPropagation();
-					this._alert_action("acknowledge_alert", { name: a.name }, __("Alert acknowledged"));
-				})
 				.appendTo($into);
+			$ack.on("click", (e) => {
+				e.stopPropagation();
+				this._alert_action("acknowledge_alert", { name: a.name }, __("Alert acknowledged"), $ack);
+			});
 		}
 		const mine = (a.assignees || []).includes(this.current_user);
-		$('<button class="btn btn-xs btn-default"></button>')
+		const $own = $('<button class="btn btn-xs btn-default"></button>')
 			.text(mine ? __("Release") : __("Assign to me"))
-			.on("click", (e) => {
-				e.stopPropagation();
-				this._alert_action(
-					mine ? "unassign_alert" : "assign_alert",
-					{ name: a.name },
-					mine ? __("Released") : __("Assigned to you")
-				);
-			})
 			.appendTo($into);
+		$own.on("click", (e) => {
+			e.stopPropagation();
+			this._alert_action(
+				mine ? "unassign_alert" : "assign_alert",
+				{ name: a.name },
+				mine ? __("Released") : __("Assigned to you"),
+				$own
+			);
+		});
 		this._snooze_button(a, $into);
-		$('<button class="btn btn-xs btn-default"></button>')
+		const $resolve = $('<button class="btn btn-xs btn-default"></button>')
 			.text(__("Resolve"))
-			.on("click", (e) => {
-				e.stopPropagation();
-				this._alert_action("resolve_alert", { name: a.name }, __("Alert resolved"));
-			})
 			.appendTo($into);
+		$resolve.on("click", (e) => {
+			e.stopPropagation();
+			this._alert_action("resolve_alert", { name: a.name }, __("Alert resolved"), $resolve);
+		});
 	}
 
 	_snooze_button(a, $into) {
 		const $wrap = $('<span class="fc-snooze dropdown"></span>').appendTo($into);
-		$('<button class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown"></button>')
+		const $toggle = $('<button class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown"></button>')
 			.text(__("Snooze"))
 			.appendTo($wrap);
 		const $menu = $('<ul class="dropdown-menu fc-snooze-menu"></ul>').appendTo($wrap);
@@ -838,7 +882,7 @@ class FleetControl {
 				.on("click", (e) => {
 					e.preventDefault();
 					e.stopPropagation();
-					this._alert_action("snooze_alert", { name: a.name, preset: key }, __("Snoozed"));
+					this._alert_action("snooze_alert", { name: a.name, preset: key }, __("Snoozed"), $toggle);
 				})
 				.end()
 				.appendTo($menu);
@@ -849,34 +893,49 @@ class FleetControl {
 			.on("click", (e) => {
 				e.preventDefault();
 				e.stopPropagation();
-				this._snooze_custom(a);
+				this._snooze_custom(a, $toggle);
 			})
 			.end()
 			.appendTo($menu);
 	}
 
-	_snooze_custom(a) {
+	_snooze_custom(a, $toggle) {
 		frappe.prompt(
 			[{ fieldname: "until", fieldtype: "Datetime", label: __("Snooze until"), reqd: 1 }],
 			({ until }) =>
-				this._alert_action("snooze_alert", { name: a.name, until }, __("Snoozed")),
+				this._alert_action("snooze_alert", { name: a.name, until }, __("Snoozed"), $toggle),
 			__("Snooze alert"),
 			__("Snooze")
 		);
 	}
 
-	_alert_action(method, args, ok_msg) {
+	_alert_action(method, args, ok_msg, $btn) {
+		if ($btn && $btn.length) {
+			if ($btn.prop("disabled")) return;
+			$btn.prop("disabled", true);
+		}
+		const release = () => {
+			if ($btn && $btn.length) $btn.prop("disabled", false);
+		};
 		frappe.call({
 			method: "apex.salis.api.operations_alerts." + method,
 			args,
 			callback: (r) => {
-				if (this._call_failed(r, __("Could not complete the alert action."))) return;
+				if (this._call_failed(r, __("Could not complete the alert action."))) {
+					release();
+					return;
+				}
 				if (r && r.message && r.message.ok) {
 					frappe.show_alert({ message: ok_msg, indicator: "green" });
 					this._refresh_alerts();
+					return;
 				}
+				release();
 			},
-			error: () => frappe.show_alert({ message: __("Could not complete the alert action."), indicator: "red" }),
+			error: () => {
+				release();
+				frappe.show_alert({ message: __("Could not complete the alert action."), indicator: "red" });
+			},
 		});
 	}
 
@@ -1076,7 +1135,8 @@ class FleetControl {
 	}
 
 	release_vehicle(v, $btn) {
-		frappe.confirm(__("Release {0} back to service?", [v.plate_number || v.name]), () => {
+		const d = frappe.confirm(__("Release {0} back to service?", [v.plate_number || v.name]), () => {
+			d.disable_primary_action();
 			$btn.prop("disabled", true);
 			frappe.call({
 				method: "apex.salis.api.operations_control.release_vehicle",
