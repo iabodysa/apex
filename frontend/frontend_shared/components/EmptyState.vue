@@ -35,8 +35,8 @@ defineProps({
   width: var(--tap-min);
   height: var(--tap-min);
   border-radius: var(--radius-pill);
-  background: var(--c-surface-2, rgba(127, 127, 127, 0.12));
-  color: var(--c-muted, #7d8f84);
+  background: var(--c-surface-2, #ffffff);
+  color: var(--c-muted, #47584f);
 }
 .apex-empty-title {
   margin: 0;
@@ -48,7 +48,7 @@ defineProps({
   margin: 0;
   font-size: var(--fs-sm);
   line-height: 1.7;
-  color: var(--c-muted, #7d8f84);
+  color: var(--c-muted, #47584f);
 }
 .apex-empty-action {
   margin-top: var(--sp-1);

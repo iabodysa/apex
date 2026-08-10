@@ -13,7 +13,7 @@ export default {
       fontFamily: {
         sans: "var(--font)",
       },
-      borderRadius: { ah: "14px" },
+      borderRadius: { ah: "var(--radius)" },
     },
   },
   plugins: [],
