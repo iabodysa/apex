@@ -575,6 +575,22 @@ def bulk_workshop_in(plates, expected_return=None, notes=None):
     return _bulk_apply(plates, lambda p: workshop_in(p, expected_return=expected_return, notes=notes))
 
 
+def _close_open_suspension(vehicle):
+    """Close whatever submitted Vehicle Suspension still holds this vehicle.
+
+    Returning a vehicle to service is the act that ends its stop, so the stop record
+    has to end with it — otherwise the vehicle reads Active while a submitted
+    suspension stays open behind it, and the two never agree again. Uses the shared
+    ``close_open_stop``, which stamps the audit fields and cancels through the native
+    lifecycle rather than poking the vehicle a second time."""
+    for r in frappe.get_all(
+        "Vehicle Suspension",
+        filters={"vehicle": vehicle, "docstatus": 1, "released_on": ["is", "not set"]},
+        pluck="name",
+    ):
+        close_open_stop(r)
+
+
 @frappe.whitelist(methods=["POST"])
 def recover(plate):
     """Recover a stopped/stolen vehicle back to service.
@@ -596,6 +612,8 @@ def recover(plate):
         as_dict=True,
         order_by="creation desc",
     )
+    _close_open_suspension(vehicle)
+
     if not incident:
         frappe.db.set_value("Salis Vehicle", vehicle, "status", "Active")
         _publish_fleet_update(plate, "recover")

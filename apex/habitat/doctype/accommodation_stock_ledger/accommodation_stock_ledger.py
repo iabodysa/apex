@@ -154,8 +154,13 @@ def get_store_balance(item_type: str, item: str, building: str, employee=None,
         .where(Ledger.building == building)
         .where(Ledger.is_cancelled == 0)
     )
-    _, holder, _ = _resolve_holder(employee, party_type, party)
-    q = q.where(Ledger.party == holder) if holder else q.where(Ledger.party.isnull())
+    holder_type, holder, _ = _resolve_holder(employee, party_type, party)
+    if holder:
+        # Both halves of the holder, never the name alone: an Employee and a Temporary
+        # Worker whose docnames collide would otherwise share one balance.
+        q = q.where(Ledger.party == holder).where(Ledger.party_type == holder_type)
+    else:
+        q = q.where(Ledger.party.isnull())
     if for_update:
         q = q.for_update()
     rows = q.run(as_dict=True)
@@ -176,12 +181,15 @@ def _assert_reversal_keeps_stock_positive(rows) -> None:
     before writing any mirror row, so a blocked cancel leaves the ledger untouched."""
     drained: dict[tuple, float] = {}
     for r in rows:
-        key = (r.item_type, r.item, r.building, r.party or r.employee or None)
+        holder = r.party or r.employee or None
+        holder_type = r.party_type or ("Employee" if r.employee else None)
+        key = (r.item_type, r.item, r.building, holder_type, holder)
         drained[key] = drained.get(key, 0.0) + flt(r.signed_qty)
-    for (item_type, item, building, holder), qty in drained.items():
+    for (item_type, item, building, holder_type, holder), qty in drained.items():
         if flt(qty) <= 0:
             continue
-        available = get_store_balance(item_type, item, building, party=holder, for_update=True)
+        available = get_store_balance(item_type, item, building, party_type=holder_type,
+                                      party=holder, for_update=True)
         if flt(qty) <= available:
             continue
         if holder:

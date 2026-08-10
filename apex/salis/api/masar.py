@@ -1256,6 +1256,20 @@ def _worker_was_on_trip(employee, dispatch_trip):
        Passenger`` rows."""
     if not (employee and dispatch_trip):
         return False
+
+    # Where the trip tracks boarding at all, that record is authoritative and being on
+    # the manifest is not enough — a rating is about the ride, and a worker marked
+    # Absent or Driver Rejected did not take it. A trip with no boarding rows falls
+    # through to the two links below, which is how a trip tracked another way still
+    # accepts its riders.
+    boarding = frappe.get_all(
+        "Trip Boarding State",
+        filters={"parent": dispatch_trip, "parenttype": "Dispatch Trip"},
+        fields=["employee", "status"],
+    )
+    if boarding:
+        return any(b.employee == employee and b.status == "Boarded" for b in boarding)
+
     transport_request = frappe.db.get_value(
         "Dispatch Trip", dispatch_trip, "transport_request"
     )

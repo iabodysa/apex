@@ -305,12 +305,30 @@ def _post_checkin_custody(doc):
     assignments submitted before this shipped stay as they are — history is left alone
     and the ledger starts from the next check-in."""
     from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        post_stock_entry, has_stock_entries,
+        post_stock_entry, has_stock_entries, get_store_balance,
     )
     if not doc.get("custody_items") or not doc.party:
         return
     if has_stock_entries("Housing Assignment", doc.name):
         return
+
+    # Same gate Custody Issue applies before it moves anything: handing over what the
+    # building store does not hold would post a negative balance. Aggregated per article
+    # so duplicate rows cannot each pass on their own, and read for update so two
+    # concurrent check-ins cannot both clear the same last unit.
+    needed: dict[str, float] = {}
+    for row in doc.custody_items:
+        if row.article and (row.quantity or 0):
+            needed[row.article] = needed.get(row.article, 0) + (row.quantity or 0)
+    for article, qty in needed.items():
+        available = get_store_balance("Custody Article", article, doc.building, for_update=True)
+        if qty > available:
+            frappe.throw(
+                _("Cannot hand over {0} unit(s) of {1} from {2}: only {3} available in the store.").format(
+                    qty, article, doc.building, available
+                )
+            )
+
     for row in doc.custody_items:
         if not row.article or not (row.quantity or 0):
             continue
