@@ -17,6 +17,7 @@ export default {
       fontFamily: {
         sans: "var(--font)",
       },
+      fontWeight: { semibold: "700" },
     },
   },
   plugins: [],

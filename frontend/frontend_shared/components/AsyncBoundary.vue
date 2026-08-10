@@ -1,13 +1,7 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <slot v-if="state === 'ready'" />
-  <div
-    v-else-if="state === 'loading'"
-    class="async-boundary-skeleton"
-    role="status"
-    aria-live="polite"
-    :aria-label="title || loadingLabel"
-  >
+  <div v-else-if="state === 'loading'" class="async-boundary-skeleton">
     <slot name="skeleton">
       <ListSkeleton :rows="skeletonRows" :label="title || loadingLabel" />
     </slot>

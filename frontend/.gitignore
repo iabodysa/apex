@@ -11,3 +11,4 @@
 # byte-identically by the next build.
 auto-imports.d.ts
 components.d.ts
+.vite/

@@ -14,7 +14,7 @@ const props = defineProps({
   tone: { type: String, default: "neutral" },
 });
 
-const tones = new Set(["neutral", "info", "success", "warning", "danger"]);
+const tones = new Set(["neutral", "accent", "info", "success", "warning", "danger"]);
 const safeTone = computed(() => (tones.has(props.tone) ? props.tone : "neutral"));
 </script>
 
@@ -41,6 +41,11 @@ const safeTone = computed(() => (tones.has(props.tone) ? props.tone : "neutral")
   flex: 0 0 auto;
   border-radius: 50%;
   background: currentColor;
+}
+.status-label[data-tone="accent"] {
+  --status-bg: color-mix(in srgb, var(--c-mint) 20%, transparent);
+  --status-border: color-mix(in srgb, var(--c-primary) 28%, transparent);
+  --status-ink: var(--c-accent-ink);
 }
 .status-label[data-tone="info"] {
   --status-bg: var(--c-info-bg);

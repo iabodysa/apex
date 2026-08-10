@@ -2,7 +2,7 @@
 <template>
   <section class="panel">
     <header class="panel-head">
-      <h2 class="panel-title">{{ title }}</h2>
+      <h2 class="panel-title"><slot name="title">{{ title }}</slot></h2>
       <slot name="status" />
     </header>
     <div class="panel-body">
@@ -13,7 +13,7 @@
 
 <script setup>
 defineProps({
-  title: { type: String, required: true },
+  title: { type: String, default: "" },
 });
 </script>
 
