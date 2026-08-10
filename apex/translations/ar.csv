@@ -1683,11 +1683,11 @@ Execution Time,وقت التنفيذ
 "Execution stage of the dispatch trip, from a planned trip to one dispatched to the driver, then completed or cancelled.",مرحلة تنفيذ رحلة التسيير، من رحلة مخططة إلى رحلة مُسيَّرة للسائق، ثم إكمالها أو إلغائها.
 "Execution stage of the maintenance work order, from draft and planned through in-progress work to completion or cancellation.",مرحلة تنفيذ أمر عمل الصيانة، من مسودة ومخططة مرورًا بالعمل قيد التنفيذ حتى الاكتمال أو الإلغاء.
 Exhausted,مستنفدة
-Exit 1 of 3 — gate-out clearance at the source by a Resident Supervisor.,الخروج 1 من 3 — تصريح الخروج من بوابة المصدر بواسطة مشرف الساكنين.
+Exit 1 of 3 — gate-out clearance at the source by a Procurement Supervisor.,الخروج 1 من 3 — تصريح الخروج من بوابة المصدر بواسطة مشرف المشتريات.
 Exit 1 — Security / Gate,الخروج الأول — الأمن / البوابة
 Exit 2 of 3 — transit / dispatch authorization by an Accommodation Manager.,الخروج 2 من 3 — اعتماد النقل والتسيير بواسطة مدير الإسكان.
 Exit 2 — Logistics / Dispatch,الخروج 2 — النقل والتسيير
-Exit 3 of 3 — destination acceptance by the receiving supervisor or a Procurement Supervisor.,الخروج الثالث من ثلاثة — قبول الوجهة بواسطة المشرف المستلِم أو مشرف المشتريات.
+Exit 3 of 3 — destination acceptance by the receiving supervisor or a Resident Supervisor.,الخروج الثالث من ثلاثة — قبول الوجهة بواسطة المشرف المستلِم أو مشرف الساكنين.
 Exit 3 — Receiving Acceptance,الخروج الثالث — قبول الاستلام
 Exit Checkpoints,نقاط الخروج
 Exit checkpoints can only be cleared while the delivery is Pending Exits.,لا يمكن اجتياز نقاط الخروج إلا عندما تكون حالة التسليم «بانتظار نقاط الخروج».

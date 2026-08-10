@@ -7,10 +7,10 @@ THE 3-EXIT TRANSFER LOCK, the core of this module: a submitted delivery sits in
 role. Only clearing the third exit opens the lock — status flips to ``Released``
 and the on-site code is issued. Until then the asset has NOT moved.
 
-  exit 1  Security / Gate       Resident Supervisor      pass_exit_1
+  exit 1  Security / Gate       Procurement Supervisor    pass_exit_1
   exit 2  Logistics / Dispatch  Accommodation Manager     pass_exit_2
   exit 3  Receiving Acceptance  receiving supervisor      pass_exit_3
-                                OR Procurement Supervisor
+                                OR Resident Supervisor
 
 Each ``pass_exit_N`` is fail-closed: it requires the delivery to be submitted and
 in ``Pending Exits``, requires the PRIOR exit to already be cleared, and requires
@@ -49,9 +49,9 @@ from apex.habitat.utils.otp_policy import (
 )
 
 EXIT_ROLES = {
-    1: "Resident Supervisor",
+    1: "Procurement Supervisor",
     2: "Accommodation Manager",
-    3: "Procurement Supervisor",
+    3: "Resident Supervisor",
 }
 
 
@@ -123,7 +123,7 @@ def _exit_slug(n: int) -> str:
 
 @frappe.whitelist(methods=["POST"])
 def pass_exit_1(delivery: str):
-    """Exit 1 of 3 — Security / Gate clearance at the source (Resident Supervisor)."""
+    """Exit 1 of 3 — Security / Gate clearance at the source (Procurement Supervisor)."""
     return _pass_exit(delivery, 1)
 
 
@@ -135,7 +135,7 @@ def pass_exit_2(delivery: str):
 
 @frappe.whitelist(methods=["POST"])
 def pass_exit_3(delivery: str):
-    """Exit 3 of 3 — Receiving acceptance (Procurement Supervisor). Opens the lock
+    """Exit 3 of 3 — Receiving acceptance (Resident Supervisor). Opens the lock
     (status -> Released) and issues the on-site code."""
     return _pass_exit(delivery, 3)
 
