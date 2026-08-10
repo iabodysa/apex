@@ -542,6 +542,9 @@ class FrontDesk {
 
 	_render_bed_card(bed, room, building) {
 		const $card = $(`<div class="fd-bed" tabindex="0" role="button"></div>`);
+		// The bed's own name on the element, so a busy state can find the card that is on
+		// screen NOW rather than one a refresh has already replaced.
+		$card.attr("data-bed", bed.bed);
 		$card.attr("style", apex.habitat.bed_style(bed.bed_color, FD_STYLE.bed));
 		$('<bdi class="fd-bed-code" dir="ltr"></bdi>').attr("style", FD_STYLE.bed_code).text(bed.bed_code || bed.bed).appendTo($card);
 
@@ -573,8 +576,14 @@ class FrontDesk {
 		return $card;
 	}
 
-	_set_bed_updating($card, busy) {
-		if (!$card) return;
+	/* Takes the bed's NAME, not a jQuery handle. A refresh replaces every card, so a handle
+	   captured before a call points at an element that is no longer on the page — the busy
+	   state was being written to a detached node and the operator saw nothing. */
+	_set_bed_updating(bed, busy) {
+		const name = bed && bed.jquery ? bed.attr("data-bed") : bed;
+		if (!name) return;
+		const $card = this.$root.find(`.fd-bed[data-bed="${CSS.escape(name)}"]`);
+		if (!$card.length) return;
 		$card.attr("aria-busy", busy ? "true" : null);
 	}
 
@@ -721,7 +730,7 @@ class FrontDesk {
 			primary_action_label: __("Check In Resident"),
 			primary_action: (values) => {
 				d.hide();
-				this._set_bed_updating($card, true);
+				this._set_bed_updating(bed.bed, true);
 				frappe.call({
 					method: "apex.habitat.api.front_desk.quick_check_in",
 					args: {
@@ -735,7 +744,7 @@ class FrontDesk {
 					},
 					callback: (r) => {
 						if (r.exc || !r.message) {
-							this._set_bed_updating($card, false);
+							this._set_bed_updating(bed.bed, false);
 							return;
 						}
 						frappe.show_alert({
@@ -744,7 +753,7 @@ class FrontDesk {
 						});
 						this.refresh();
 					},
-					error: () => this._set_bed_updating($card, false),
+					error: () => this._set_bed_updating(bed.bed, false),
 				});
 			},
 		});
@@ -761,7 +770,7 @@ class FrontDesk {
 
 		apex.habitat.quick_checkout_dialog(
 			{ bed: bed.bed, employee_name: occupant.employee_name },
-			(state) => this._set_bed_updating($card, state),
+			(state) => this._set_bed_updating(bed.bed, state),
 			() => this.refresh()
 		);
 	}
