@@ -89,7 +89,7 @@ describe("/fleet employee nav", () => {
     w = await open();
     // Home: the vehicle/preview cards, not the fuel form.
     expect(w.find(".emp-grid").exists()).toBe(true);
-    expect(w.find("#ff-litres").exists()).toBe(false);
+    expect(w.find(".emp-fuel-request").exists()).toBe(false);
 
     await links(w)[1].trigger("click");
     await flushPromises();
@@ -103,12 +103,12 @@ describe("/fleet employee nav", () => {
     await flushPromises();
     expect(router.currentRoute.value.path).toBe("/fuel");
     // The fuel page owns the request form.
-    expect(w.find("#ff-litres").exists()).toBe(true);
+    expect(w.find(".emp-fuel-request").exists()).toBe(true);
 
     await links(w)[0].trigger("click");
     await flushPromises();
     expect(router.currentRoute.value.path).toBe("/");
-    expect(w.find("#ff-litres").exists()).toBe(false);
+    expect(w.find(".emp-fuel-request").exists()).toBe(false);
   });
 
   it("redirects an unknown path home instead of rendering nothing", async () => {

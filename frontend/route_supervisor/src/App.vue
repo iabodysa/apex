@@ -26,7 +26,7 @@
         <Button
           variant="outline"
           size="lg"
-          :aria-label="t('common.refresh')"
+          :label="t('common.refresh')"
           :loading="loadState === 'loading'"
           @click="plans.load()"
         >

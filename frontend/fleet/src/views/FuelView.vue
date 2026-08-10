@@ -60,7 +60,6 @@
             />
 
             <FormControl
-              id="ff-litres"
               v-model.number="form.litres"
               type="number"
               size="md"

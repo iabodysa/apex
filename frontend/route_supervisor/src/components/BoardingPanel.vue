@@ -11,7 +11,7 @@
         v-if="tripName"
         variant="outline"
         size="lg"
-        :aria-label="t('common.refresh')"
+        :label="t('common.refresh')"
         :loading="state === 'loading' && Boolean(data)"
         @click="load()"
       >
