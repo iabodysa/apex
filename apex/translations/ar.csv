@@ -81,6 +81,7 @@ A {0} Safety Round already exists for {1} on {2} ({3}). Tick Is Re-inspection to
 ABSENT,غائب
 AC,تكييف
 AC Maintenance,صيانة المكيفات
+Alias,الاسم المتداول
 API Contract Version,إصدار عقد الواجهة البرمجية
 AR,عربي
 Abbreviation,الاختصار
@@ -679,6 +680,7 @@ By Project,حسب المشروع
 By Status,حسب الحالة
 By Supplier,حسب المورّد
 CCTV Camera,كاميرا مراقبة
+Control Plus,كنترول بلس
 "CORS origin(s) an administrator should add to allow_cors in site_config.json so the frontend can call this backend, for example https://salis-fleet.com. This field only records the intended origins; it does not modify server configuration.",مصادر CORS التي يضيفها المسؤول إلى allow_cors في ملف site_config.json لتتمكن الواجهة الأمامية من الاتصال بهذا الخادم، مثل https://salis-fleet.com. هذا الحقل يسجّل المصادر المقصودة فقط ولا يغيّر إعدادات الخادم.
 Cadence,تكرار الجولة
 Camera Access Building Scope,نطاق الوصول لكاميرات المبنى
@@ -1254,6 +1256,7 @@ Custody issued to {0},صُرفت العهدة إلى {0}
 Custody items have been issued to you,صُرفت لك أصناف عهدة
 Custody items on this issue are overdue for return,أصناف العهدة في هذا الصرف متأخرة عن الإرجاع
 Custom…,مخصص…
+Data,بيانات
 DVR/NVR,جهاز التسجيل DVR/NVR
 DVR/NVR Status,حالة جهاز التسجيل DVR/NVR
 Daily,يومي
@@ -1973,6 +1976,7 @@ Grace period (minutes) from trip start before notify escalation and absence mark
 Ground,أرضي
 Ground Floor,الطابق الأرضي
 Group Housing Permit,تصريح السكن الجماعي
+How the line is billed. Blank until the package is known.,طريقة فوترة الخط. يُترك فارغاً حتى تُعرف الباقة.
 HR,الموارد البشرية
 HR Case,قضية موارد بشرية
 HRMS Salary Component (Type = Deduction) posted to Additional Salary for this type. Must exist and be of type Deduction before the rule is enabled. Defaults to the shipped 'Operational Deduction' component.,مكوّن الراتب في HRMS (النوع = خصم) الذي يُرحّل إلى «راتب إضافي» لهذا النوع. يجب أن يكون موجودًا ومن نوع «خصم» قبل تفعيل القاعدة. القيمة الافتراضية هي مكوّن «الخصم التشغيلي» المثبت مع التطبيق.
@@ -2473,6 +2477,7 @@ Logs,السجلات
 Longitude,خط الطول
 Lost,مفقود
 Low,منخفضة
+"Mirrored from the employee, never stored: an HR change to the supervisor moves the SIM with it.",مأخوذ من سجل الموظف ولا يُخزَّن هنا: أي تغيير للمشرف في الموارد البشرية ينتقل للشريحة معه.
 MOL Worker Housing Approval,اعتماد سكن العمالة من وزارة الموارد البشرية
 "Machine-written daily rental accrual memo, one row per in-service rented vehicle per day. Maintained automatically by the rental accrual engine; no human role may create, write, or delete rows. Posts NO GL.",مذكرة استحقاق إيجار يومية تُكتب آلياً، صف واحد لكل مركبة مستأجرة في الخدمة لكل يوم. يتولاها محرك استحقاق الإيجار تلقائياً، ولا يملك أي دور بشري إنشاء صفوفها أو تعديلها أو حذفها. ولا تقيّد محاسبياً.
 Maintained by movement processing.,تحدّثه إجراءات الحركة.
@@ -3071,6 +3076,8 @@ Owning company. Must match the contract's company; scopes visibility.,الشرك
 Owning company. SIM records are visible only to users scoped to this company.,الشركة المالكة. سجلات الشرائح مرئية فقط للمستخدمين ضمن نطاق هذه الشركة.
 Owning company; defaulted from Salis Settings. Reference only — posts no GL.,الشركة المالكة؛ تُؤخذ افتراضيًا من إعدادات ساليس. للمرجعية فقط — لا تُنشئ قيدًا محاسبيًا.
 P256DH Key,مفتاح P256DH
+Package Expiry,انتهاء الباقة
+Package Type,نوع الباقة
 POD,إثبات التسليم
 Page {0} of {1},صفحة {0} من {1}
 Page {0} of {1} · {2} SIMs,صفحة {0} من {1} · {2} شريحة
@@ -3275,6 +3282,7 @@ Poster Title,عنوان الملصق
 Posting,الترحيل
 Posting Date,تاريخ الترحيل
 Posting Mode,نمط الترحيل
+Postpaid,فوترة لاحقة
 "Pots, pans and cooking utensils set for shared accommodation kitchen. Consumable kitchenware.",طقم قدور ومقالي وأدوات طهي لمطبخ السكن المشترك. أدوات مطبخ استهلاكية.
 Pre-Work,قبل العمل
 "Pre-arrival manifest: the workers a labour supplier expects to deliver to a building on a date. Captured up front via the public Arrival Manifest web form (front-desk intake) and managed here as the backend record the Arrivals Desk reconciles real arrivals against. Title, Expected Count and each row's Arrived As are system-maintained (read-only by design).",كشف وصول مسبق للعمال الذين يتوقع مورد العمالة وصولهم إلى مبنى في تاريخ محدد. يُسجل مسبقًا عبر نموذج كشف الوصول العام في مكتب الاستقبال، ويستخدمه مكتب الوصول لمطابقة القادمين فعليًا. يتولى النظام العنوان والعدد المتوقع وحقل «وصل بصفة» في كل صف، وهي حقول للقراءة فقط.
@@ -3284,6 +3292,7 @@ Pre-filled — please verify.,تمت التعبئة المسبقة — يرجى 
 Preferred Language,اللغة المفضّلة
 Preferred channel passed to the gateway. The gateway provider decides actual delivery; this is the channel hint sent in the request payload.,القناة المفضّلة المُمرّرة إلى البوابة. مزوّد البوابة هو من يقرّر التسليم الفعلي؛ هذا تلميح للقناة يُرسَل ضمن حمولة الطلب.
 Prefix added before the room number (e.g. 'A' gives A101). Leave blank for numeric only.,"بادئة تُضاف قبل رقم الغرفة (مثال: ""A"" ينتج A101). اتركها فارغة للأرقام فقط."
+Prepaid,مدفوعة مسبقاً
 Prepared By,أعدّه
 Present,حاضر
 Previous,السابق
@@ -5101,6 +5110,7 @@ Villa,فيلا
 Violation,مخالفة
 Virtual over-capacity bed created by the Arrivals Desk when a room is full but building headroom still allows another worker.,سرير افتراضي يتجاوز السعة يُنشئه مكتب الوصول عندما تكون الغرفة ممتلئة بينما لا تزال سعة المبنى تتسع لعامل آخر.
 Visit,الزيارة
+Voice,مكالمات
 Voucher Detail No,رقم تفصيل القسيمة
 Voucher Identification,بيانات الأمر
 Voucher No,رقم القسيمة
@@ -5137,6 +5147,7 @@ Weekly custody summary for your building(s):,ملخص العهدة الأسبو�
 What Happened,ماذا حصل
 What He Was Holding,ما كان بعهدته
 What Is Being Claimed,المطالب به
+"What the line is called locally, when the number alone does not identify it.",اسم الخط المتداول محلياً، حين لا يكفي الرقم وحده للتعريف به.
 What This Voucher Authorises,ما يصرّح به هذا الأمر
 What do you need help with?,ما الذي تحتاج المساعدة فيه؟
 What happened?,ماذا حدث؟
@@ -5166,6 +5177,7 @@ When the resident accepted the housing terms at the tablet.,وقت موافقة 
 When the supervisor recorded the approval decision.,وقت تسجيل المشرف لقرار الاعتماد.
 When the worker self-claimed boarding (drives the auto-confirm timeout).,وقت تأكيد العامل صعوده بنفسه، ومنه تبدأ مهلة التأكيد التلقائي.
 When this device last refreshed or confirmed its subscription.,وقت آخر تحديث أو تأكيد لاشتراك هذا الجهاز.
+"When THIS package ends. A package may end before or after the contract it sits under, so this is watched separately from the Telecom Contract expiry.",تاريخ انتهاء هذي الباقة تحديداً. الباقة قد تنتهي قبل العقد أو بعده، فتُتابع منفصلة عن انتهاء عقد الاتصالات.
 "When this passenger boarded, so a late boarding is on the paper and not only in the driver's memory.",متى ركب هذا الراكب، ليظهر التأخر في الورقة لا في ذاكرة السائق وحدها.
 "When unchecked, the worker's personal Masar link stops resolving.",عند إلغاء التفعيل، يتوقف رابط مسار العامل الشخصي عن العمل.
 "Where inside or around the accommodation the reported issue is located, helping staff locate the problem and group recurring faults by area.",موقع المشكلة المُبلّغ عنها داخل السكن أو حوله، يساعد الموظفين على تحديد موضع المشكلة وتجميع الأعطال المتكررة حسب المنطقة.

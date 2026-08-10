@@ -47,10 +47,15 @@
   "mobile_number",
   "iccid",
   "plan_name",
+  "alias",
+  "package_type",
+  "service_type",
+  "package_expiry_date",
   "custody_sec",
   "status",
   "current_custodian_type",
   "current_custodian_employee",
+  "custodian_supervisor",
   "current_project",
   "custody_col",
   "current_cost_center",
@@ -295,6 +300,40 @@
    "reqd": 1,
    "hidden": 1,
    "idx": 25
+  },
+  {
+   "fieldname": "package_type",
+   "fieldtype": "Select",
+   "label": "Package Type",
+   "options": "\nPostpaid\nPrepaid\nControl Plus",
+   "description": "How the line is billed. Blank until the package is known."
+  },
+  {
+   "fieldname": "service_type",
+   "fieldtype": "Select",
+   "label": "Service Type",
+   "options": "\nVoice\nData"
+  },
+  {
+   "fieldname": "alias",
+   "fieldtype": "Data",
+   "label": "Alias",
+   "description": "What the line is called locally, when the number alone does not identify it."
+  },
+  {
+   "fieldname": "package_expiry_date",
+   "fieldtype": "Date",
+   "label": "Package Expiry",
+   "description": "When THIS package ends. A package may end before or after the contract it sits under, so this is watched separately from the Telecom Contract expiry."
+  },
+  {
+   "fieldname": "custodian_supervisor",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "label": "Custodian Supervisor",
+   "fetch_from": "current_custodian_employee.reports_to",
+   "read_only": 1,
+   "description": "Mirrored from the employee, never stored: an HR change to the supervisor moves the SIM with it."
   }
  ],
  "permissions": [
@@ -348,5 +387,5 @@
    "link_fieldname": "sim_card"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000"
+ "modified": "2026-08-10 21:00:00.000000"
 }
