@@ -4762,7 +4762,9 @@ This transfer can no longer be reversed: the resident is no longer in Bed {0}.,�
 This transfer needs an active (checked-in) assignment to move.,يتطلب هذا النقل تسكينًا نشطًا لم تنتهِ إقامته.
 This transfer note carries no item lines — nothing has moved between the two stores,هذا السند لا يحمل أي بند — لم ينتقل شيء بين المستودعين
 This transfer was raised from Bed {0} but the resident is now in Bed {1}.,أُنشئ هذا النقل من السرير {0} لكن الساكن الآن في السرير {1}.
+This trip is already closed.,هذه الرحلة مقفلة.
 This trip is already finished. Boarding can no longer be confirmed.,انتهت هذه الرحلة. لم يعد بالإمكان تأكيد الصعود.
+This trip is not today's.,هذه الرحلة ليست رحلة اليوم.
 This vehicle has no open stop to release.,لا يوجد إيقاف مفتوح لهذه المركبة لإعادتها إلى الخدمة.
 This vehicle has no open workshop stop to return.,لا يوجد لهذه المركبة إيقاف ورشة مفتوح لإعادتها.
 This vehicle is under maintenance and should not be dispatched.,هذه المركبة تحت الصيانة ولا يجوز تسييرها.
