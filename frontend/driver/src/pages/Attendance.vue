@@ -96,6 +96,9 @@
     <section class="card card-pad space-y-3">
       <p class="text-sm font-semibold text-soft">{{ t("attendance.history") }}</p>
       <Skeleton v-if="history.loading" :rows="3" />
+      <p v-else-if="history.error" class="text-sm text-warning">
+        {{ resourceErrorMessage(history.error, "attendance.historyFailed") }}
+      </p>
       <p v-else-if="!rows.length" class="text-sm text-muted">{{ t("attendance.historyEmpty") }}</p>
       <ul class="space-y-3">
         <li v-for="(row, i) in rows" :key="row.name">
@@ -128,7 +131,7 @@ import Icon from "../components/Icon.vue";
 import LoadingState from "../components/LoadingState.vue";
 import Skeleton from "../components/Skeleton.vue";
 import ErrorState from "../components/ErrorState.vue";
-import { useI18n } from "../i18n";
+import { useI18n, resourceErrorMessage } from "../i18n";
 import { pushToast } from "../toast";
 import { readPhotoFile, UnsupportedPhotoType } from "../upload";
 import { PHOTO_ACCEPT } from "@shared/photoFile.js";

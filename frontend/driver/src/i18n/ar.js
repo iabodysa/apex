@@ -217,6 +217,7 @@ export default {
     statusOnLeave: "في إجازة",
     history: "هذا الشهر",
     historyEmpty: "لا يوجد حضور مسجَّل هذا الشهر بعد.",
+    historyFailed: "تعذّرت قراءة حضورك — هذا ليس معناه أنه ما فيه حضور. حاول مرة ثانية.",
     noTime: "—",
     photo: "صورة الوردية",
     photoAttached: "تم إرفاق الصورة",

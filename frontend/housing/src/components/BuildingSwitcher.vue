@@ -72,7 +72,7 @@ import { computed, watch } from "vue";
 import { Badge, createResource } from "frappe-ui";
 import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "./Icon.vue";
-import ListSkeleton from "./ListSkeleton.vue";
+import ListSkeleton from "@shared/components/ListSkeleton.vue";
 import LoadError from "./LoadError.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 

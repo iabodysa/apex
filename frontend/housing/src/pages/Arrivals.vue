@@ -57,6 +57,9 @@
             />
         </li>
     </ul>
+    <p v-if="manifest.workers.length && !canRegister" class="hint">
+        {{ t("access.needRegister") }}
+    </p>
 
     <div class="section-head">
         <h2>{{ t("arrivals.searchWorker") }}</h2>
@@ -70,6 +73,7 @@
             <template #prefix><Icon name="plus" :size="18" /></template>
         </Button>
     </div>
+    <p v-if="!canRegister" class="hint">{{ t("access.needRegister") }}</p>
 
     <FormControl type="text" size="lg" :label="t('common.search')" v-model="query" />
 
@@ -89,6 +93,7 @@
                 size="lg"
                 variant="ghost"
                 :label="t('arrivals.slipCta')"
+                :loading="busy === 'slip'"
                 @click="showSlip(w)"
             />
             <Button
@@ -96,6 +101,7 @@
                 size="lg"
                 variant="ghost"
                 :label="t('arrivals.linkCta')"
+                :loading="busy === 'link'"
                 @click="issueLink(w)"
             />
         </li>
@@ -228,7 +234,7 @@ import {
 } from "frappe-ui";
 import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "../components/Icon.vue";
-import ListSkeleton from "../components/ListSkeleton.vue";
+import ListSkeleton from "@shared/components/ListSkeleton.vue";
 import LoadError from "../components/LoadError.vue";
 import { call } from "@shared/call";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
@@ -380,7 +386,8 @@ function houseWorker(worker) {
 }
 
 async function issueLink(worker) {
-    linkOpen.value = true;
+    if (busy.value) return;
+    busy.value = "link";
     linkQr.value = "";
     linkUrl.value = "";
     linkError.value = "";
@@ -392,14 +399,18 @@ async function issueLink(worker) {
         const row = (rows || [])[0] || {};
         linkQr.value = row.qr || "";
         linkUrl.value = row.link || "";
+        linkOpen.value = true;
         toast.create({ type: "success", message: t("arrivals.linkIssued") });
     } catch (err) {
-        linkError.value = apiErrorMessage(err);
+        toast.create({ type: "error", message: apiErrorMessage(err) });
+    } finally {
+        busy.value = "";
     }
 }
 
 async function showSlip(worker) {
-    slipOpen.value = true;
+    if (busy.value) return;
+    busy.value = "slip";
     slipHtml.value = "";
     slipError.value = "";
     try {
@@ -408,8 +419,12 @@ async function showSlip(worker) {
             type: "POST",
         });
         slipHtml.value = (slip && slip.html) || "";
+        if (!slipHtml.value) throw new Error(t("arrivals.slipEmpty"));
+        slipOpen.value = true;
     } catch (err) {
-        slipError.value = apiErrorMessage(err);
+        toast.create({ type: "error", message: apiErrorMessage(err) });
+    } finally {
+        busy.value = "";
     }
 }
 

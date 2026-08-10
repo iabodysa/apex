@@ -180,7 +180,7 @@ import {
 } from "frappe-ui";
 import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "../components/Icon.vue";
-import ListSkeleton from "../components/ListSkeleton.vue";
+import ListSkeleton from "@shared/components/ListSkeleton.vue";
 import LoadError from "../components/LoadError.vue";
 import ScanField from "../components/ScanField.vue";
 import Stepper from "../components/Stepper.vue";

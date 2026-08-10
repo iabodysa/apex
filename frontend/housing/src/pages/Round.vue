@@ -151,7 +151,7 @@ import { Badge, Button, ErrorMessage, TabButtons, createResource } from "frappe-
 import EmptyState from "@shared/components/EmptyState.vue";
 import CadenceSection from "../components/CadenceSection.vue";
 import Icon from "../components/Icon.vue";
-import ListSkeleton from "../components/ListSkeleton.vue";
+import ListSkeleton from "@shared/components/ListSkeleton.vue";
 import LoadError from "../components/LoadError.vue";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { can } from "../portal.js";

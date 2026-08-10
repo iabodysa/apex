@@ -90,7 +90,7 @@ import { Button, Dialog, ErrorMessage, FormControl, createResource, toast } from
 import EmptyState from "@shared/components/EmptyState.vue";
 import BedGrid from "../components/BedGrid.vue";
 import Icon from "../components/Icon.vue";
-import ListSkeleton from "../components/ListSkeleton.vue";
+import ListSkeleton from "@shared/components/ListSkeleton.vue";
 import LoadError from "../components/LoadError.vue";
 import { call } from "@shared/call";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";

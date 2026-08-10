@@ -235,7 +235,7 @@ import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "../components/Icon.vue";
 import DeliveryRow from "../components/DeliveryRow.vue";
 import DeliveryDetail from "../components/DeliveryDetail.vue";
-import ListSkeleton from "../components/ListSkeleton.vue";
+import ListSkeleton from "@shared/components/ListSkeleton.vue";
 import LoadError from "../components/LoadError.vue";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { useDesktop } from "@shared/useBreakpoint.js";

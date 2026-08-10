@@ -2,15 +2,25 @@
 <template>
   <slot v-if="state === 'ready'" />
   <div
+    v-else-if="state === 'loading'"
+    class="async-boundary-skeleton"
+    role="status"
+    aria-live="polite"
+    :aria-label="title || loadingLabel"
+  >
+    <slot name="skeleton">
+      <ListSkeleton :rows="skeletonRows" :label="title || loadingLabel" />
+    </slot>
+  </div>
+  <div
     v-else
     class="async-boundary"
     :data-state="state"
     :role="['loading', 'empty'].includes(state) ? 'status' : undefined"
     :aria-live="['loading', 'empty'].includes(state) ? 'polite' : undefined"
   >
-    <span v-if="state === 'loading'" class="async-boundary-pulse" aria-hidden="true"></span>
     <Alert
-      v-else-if="state === 'error' || state === 'offline' || state === 'stale'"
+      v-if="state === 'error' || state === 'offline' || state === 'stale'"
       :theme="state === 'error' ? 'red' : 'yellow'"
       :title="title"
       :description="message"
@@ -34,6 +44,7 @@
 
 <script setup>
 import { Alert, Button } from "frappe-ui";
+import ListSkeleton from "./ListSkeleton.vue";
 
 defineProps({
   state: {
@@ -44,6 +55,8 @@ defineProps({
   title: { type: String, default: "" },
   message: { type: String, default: "" },
   retryLabel: { type: String, default: "" },
+  skeletonRows: { type: Number, default: 4 },
+  loadingLabel: { type: String, default: "Loading" },
 });
 
 defineEmits(["retry"]);
@@ -61,13 +74,8 @@ defineEmits(["retry"]);
   color: var(--c-ink-soft);
   text-align: center;
 }
-.async-boundary-pulse {
-  inline-size: 2.25rem;
-  aspect-ratio: 1;
-  border: 3px solid color-mix(in srgb, var(--c-primary) 22%, transparent);
-  border-block-start-color: var(--c-primary);
-  border-radius: 50%;
-  animation: async-turn 0.8s linear infinite;
+.async-boundary-skeleton {
+  display: block;
 }
 .async-boundary-copy h2,
 .async-boundary-copy p {
@@ -84,8 +92,5 @@ defineEmits(["retry"]);
 }
 .async-boundary-retry {
   min-block-size: var(--tap-min);
-}
-@keyframes async-turn {
-  to { transform: rotate(1turn); }
 }
 </style>

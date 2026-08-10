@@ -217,6 +217,7 @@ export default {
     statusOnLeave: "On Leave",
     history: "This month",
     historyEmpty: "No attendance recorded this month yet.",
+    historyFailed: "Your attendance could not be read — this is not a record of no attendance. Try again.",
     noTime: "—",
     photo: "Shift photo",
     photoAttached: "Photo attached",
