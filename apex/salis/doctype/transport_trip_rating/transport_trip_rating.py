@@ -17,3 +17,15 @@ class TransportTripRating(Document):
         rating: DF.Rating
         transport_request: DF.Link | None
     pass
+
+
+def on_doctype_update():
+    """One rating per worker per trip, enforced by the database rather than by a
+    read-then-insert that two taps can both pass."""
+    from apex.apex_core.utils.ledger_index import add_unique_guarded
+
+    add_unique_guarded(
+        "Transport Trip Rating",
+        ["employee", "dispatch_trip"],
+        constraint_name="unique_ttr_employee_trip",
+    )

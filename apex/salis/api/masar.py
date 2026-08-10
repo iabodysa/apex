@@ -1299,6 +1299,14 @@ def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=Non
     if rating < 1 or rating > 5:
         frappe.throw(_("Rating must be between 1 and 5."))
 
+    trip = frappe.db.get_value(
+        "Dispatch Trip", dispatch_trip, ["status", "transport_request"], as_dict=True
+    )
+    if not trip:
+        frappe.throw(_("Trip not found."), frappe.DoesNotExistError)
+    if trip.status != "Completed":
+        frappe.throw(_("A trip can only be rated once it is completed."))
+
     if not _worker_was_on_trip(employee, dispatch_trip):
         frappe.throw(_("You were not part of this trip's manifest."), frappe.PermissionError)
 
@@ -1314,8 +1322,11 @@ def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=Non
         "employee": employee,
         "dispatch_trip": dispatch_trip,
         "rating": rating,
-        "transport_request": transport_request,
+        "transport_request": trip.transport_request,
         "feedback": (feedback or "").strip()[:2000]
     })
-    doc.insert(ignore_permissions=True)
+    try:
+        doc.insert(ignore_permissions=True)
+    except frappe.exceptions.UniqueValidationError:
+        frappe.throw(_("You have already rated this trip."))
     return {"status": "success", "name": doc.name}

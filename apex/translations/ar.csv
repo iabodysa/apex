@@ -73,6 +73,7 @@ A submitted Housing Checkout already exists for this assignment: {0},يوجد ب
 A telecom service agreement with one supplier that governs one or more SIM Cards and drives recurring billing.,اتفاقية خدمة اتصالات مع مورّد واحد، تنظم شريحة أو أكثر وتحدد فوترتها الدورية.
 A temporary top-up requires a revert due date.,تتطلب التعبئة المؤقتة تحديد موعد للعودة إلى الوضع السابق.
 A temporary voucher that has to be reverted,أمر مؤقت لازم يرجع
+A trip can only be rated once it is completed.,لا يمكن تقييم الرحلة إلا بعد اكتمالها.
 A trip has been scheduled,تمت جدولة رحلة
 A valid GPS position (latitude and longitude) is required.,يلزم موقع GPS صحيح (خط العرض وخط الطول).
 A vehicle compliance document is expiring soon — please start renewal,وثيقة امتثال مركبة على وشك الانتهاء — يُرجى بدء التجديد
