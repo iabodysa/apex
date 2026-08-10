@@ -75,20 +75,36 @@ def _temporary_worker_names(assignments) -> dict:
     return {row.name: row.worker_name for row in rows}
 
 
-def _assignments_holding_custody(assignment_names) -> set:
-    """Which of these assignments still carry custody items, in one query or none."""
-    if not assignment_names:
+def _assignments_holding_custody(assignments) -> set:
+    """Which of these assignments belong to a resident who still holds custody.
+
+    ONE definition serves the board, the quick-checkout guard and the checkout gate:
+    the net Accommodation Stock Ledger balance, which is what
+    ``housing_checkout._outstanding_custody_for_employee`` reads and what the stock
+    balance report and the value-at-risk card already use. The board previously asked
+    a different question — whether the assignment carried any Accommodation Custody
+    Item child row — and those rows are written by the desk form and cleared by
+    nothing, so a resident who returned everything stayed blocked for ever.
+
+    One bulk query regardless of occupancy: the ledger is read once for every
+    employee on the board, never per bed.
+    """
+    employees = {a.employee for a in assignments if a.employee}
+    if not employees:
         return set()
-    custody_rows = frappe.get_all(
-        "Accommodation Custody Item",
+    balances: dict[str, float] = {}
+    for row in frappe.get_all(
+        "Accommodation Stock Ledger",
         filters={
-            "parenttype": "Housing Assignment",
-            "parent": ["in", assignment_names],
+            "is_cancelled": 0,
+            "item_type": "Custody Article",
+            "employee": ["in", list(employees)],
         },
-        fields=["parent"],
-        distinct=True,
-    )
-    return {c.parent for c in custody_rows}
+        fields=["employee", "signed_qty"],
+    ):
+        balances[row.employee] = balances.get(row.employee, 0) + (row.signed_qty or 0)
+    holding = {emp for emp, qty in balances.items() if qty > 0}
+    return {a.name for a in assignments if a.employee in holding}
 
 
 def _dominant_project_by_room(assignments, bed_to_room) -> dict:
@@ -236,7 +252,7 @@ def get_building_grid(building: str) -> dict:
     assignments_by_bed = {a.bed: a for a in assignments}
 
     tw_names = _temporary_worker_names(assignments)
-    custody_parents = _assignments_holding_custody([a.name for a in assignments])
+    custody_parents = _assignments_holding_custody(assignments)
 
     bed_to_room = {b.bed: b.room for b in bed_rows}
     dominant_project_by_room = _dominant_project_by_room(assignments, bed_to_room)
@@ -756,21 +772,21 @@ def quick_check_out(bed, checkout_date=None, checkout_reason=None, room_conditio
     frappe.has_permission("Housing Checkout", "create", throw=True)
     frappe.has_permission("Housing Checkout", "submit", throw=True)
 
-    assignment = frappe.db.get_value(
+    row = frappe.db.get_value(
         "Housing Assignment",
         occupancy.active_assignment_filters(bed=bed),
-        "name",
+        ["name", "employee"],
+        as_dict=True,
     )
-    if not assignment:
+    if not row:
         frappe.throw(_("No active assignment found for bed {0}.").format(bed))
+    assignment = row.name
 
-    has_custody = bool(
-        frappe.db.exists(
-            "Accommodation Custody Item",
-            {"parenttype": "Housing Assignment", "parent": assignment},
-        )
+    from apex.habitat.doctype.housing_checkout.housing_checkout import (
+        _outstanding_custody_for_employee,
     )
-    if has_custody:
+
+    if _outstanding_custody_for_employee(row.employee):
         return {"requires_full_form": True, "assignment": assignment}
 
     doc = frappe.get_doc(
