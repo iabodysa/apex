@@ -3,7 +3,14 @@
   <div class="space-y-5">
     <LoadingState v-if="vehicle.loading" :label="t('common.loading')" />
 
-    <ErrorState v-else-if="vehicle.error" :message="t('errors.loadFailed')" @retry="vehicle.reload()" />
+    <LoadError
+      v-else-if="vehicle.error"
+      :title="t('errors.loadFailed')"
+      :detail="loadErrorMessage"
+      :hint="t('errors.retryHint')"
+      :retry-label="t('common.retry')"
+      @retry="vehicle.reload()"
+    />
 
     <template v-else-if="v">
       <section class="card card-pad">
@@ -15,10 +22,10 @@
             <Icon name="truck" :size="26" />
           </span>
           <div class="min-w-0">
-            <div class="text-lg font-extrabold leading-tight truncate">
+            <div class="text-lg font-bold leading-tight truncate">
               <bdi>{{ v.plate_number || v.name }}</bdi>
             </div>
-            <span class="pill mt-1" :class="statusPill">{{ v.status || t("common.none") }}</span>
+            <StatusLabel class="mt-1" :label="v.status || t('common.none')" :tone="statusTone" />
           </div>
         </div>
 
@@ -31,10 +38,7 @@
         </VehicleFacts>
       </section>
 
-      <section v-if="compliance.length" class="card card-pad">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
-          {{ t("vehicle.compliance") }}
-        </h3>
+      <Panel v-if="compliance.length" :title="t('vehicle.compliance')">
         <dl class="space-y-3 text-sm">
           <div
             v-for="doc in compliance"
@@ -55,12 +59,12 @@
             </dd>
           </div>
         </dl>
-      </section>
+      </Panel>
 
-      <section v-if="v.project || v.assignment_start || v.last_site_maps_url" class="card card-pad">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
-          {{ t("home.myVehicle") }}
-        </h3>
+      <Panel
+        v-if="v.project || v.assignment_start || v.last_site_maps_url"
+        :title="t('vehicle.details')"
+      >
         <dl class="space-y-3 text-sm">
           <div v-if="v.project" class="flex items-center gap-2">
             <Icon name="briefcase" :size="18" class="text-primary shrink-0" />
@@ -85,49 +89,69 @@
             </a>
           </div>
         </dl>
+      </Panel>
+
+      <section v-if="reporting" class="card card-pad">
+        <FormControl
+          v-model="problem"
+          type="textarea"
+          size="lg"
+          :rows="4"
+          :label="t('vehicle.problemSubject')"
+          :placeholder="t('vehicle.problemPlaceholder')"
+        />
       </section>
 
-      <section class="card card-pad space-y-3">
-        <Button v-if="!reporting" variant="outline" size="xl" :label="t('vehicle.reportProblem')" @click="reporting = true">
-          <template #prefix><Icon name="alert" :size="18" /></template>
-        </Button>
-        <template v-else>
-          <FormControl
-            v-model="problem"
-            type="textarea"
-            size="lg"
-            :rows="4"
-            :label="t('vehicle.problemSubject')"
-            :placeholder="t('vehicle.problemPlaceholder')"
-          />
-          <div class="flex gap-2">
-            <Button variant="solid" theme="green" size="xl" :disabled="report.loading || !problem.trim()" :loading="report.loading" :label="t('vehicle.send')" @click="submitProblem">
-              <template #prefix><Icon name="help" :size="18" /></template>
-            </Button>
-            <Button variant="outline" size="xl" :label="t('vehicle.cancel')" @click="reporting = false" />
-          </div>
+      <ActionDock>
+        <template v-if="reporting" #secondary>
+          <Button class="row-btn" variant="outline" size="2xl" :label="t('vehicle.cancel')" @click="reporting = false" />
         </template>
-      </section>
+        <template #primary>
+          <Button
+            v-if="reporting"
+            class="dock-btn"
+            variant="solid"
+            theme="green"
+            size="2xl"
+            :disabled="report.loading || !problem.trim()"
+            :loading="report.loading"
+            :label="t('vehicle.send')"
+            @click="submitProblem"
+          >
+            <template #prefix><Icon name="help" :size="20" /></template>
+          </Button>
+          <Button
+            v-else
+            class="dock-btn"
+            variant="outline"
+            size="2xl"
+            :label="t('vehicle.reportProblem')"
+            @click="reporting = true"
+          >
+            <template #prefix><Icon name="alert" :size="20" /></template>
+          </Button>
+        </template>
+      </ActionDock>
     </template>
 
-    <EmptyState
-      v-else
-      icon="truck"
-      :title="t('vehicle.empty')"
-      :hint="t('vehicle.emptyHint')"
-    />
+    <EmptyState v-else :title="t('vehicle.empty')" :hint="t('vehicle.emptyHint')">
+      <template #icon><Icon name="truck" :size="22" /></template>
+    </EmptyState>
   </div>
 </template>
 
 <script setup>
 import { computed, ref } from "vue";
 import { Button, FormControl, createResource } from "frappe-ui";
+import ActionDock from "@shared/components/ActionDock.vue";
+import EmptyState from "@shared/components/EmptyState.vue";
+import LoadError from "@shared/components/LoadError.vue";
+import Panel from "@shared/components/Panel.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
+import VehicleFacts from "@shared/components/VehicleFacts.vue";
 import Icon from "../components/Icon.vue";
 import LoadingState from "../components/LoadingState.vue";
-import EmptyState from "../components/EmptyState.vue";
-import ErrorState from "../components/ErrorState.vue";
-import VehicleFacts from "@shared/components/VehicleFacts.vue";
-import { useI18n } from "../i18n";
+import { useI18n, resourceErrorMessage } from "../i18n";
 import { pushToast } from "../toast";
 
 const { t } = useI18n();
@@ -136,6 +160,8 @@ const vehicle = createResource({
   url: "apex.salis.api.driver_portal.get_my_vehicle",
   auto: true,
 });
+
+const loadErrorMessage = computed(() => resourceErrorMessage(vehicle.error, "errors.loadFailed"));
 
 const reporting = ref(false);
 const problem = ref("");
@@ -191,12 +217,12 @@ const vehicleFacts = computed(() =>
 
 const compliance = computed(() => v.value?.compliance || []);
 
-const statusPill = computed(() => {
+const statusTone = computed(() => {
   const s = (v.value?.status || "").toLowerCase();
-  if (s === "active") return "pill-success";
-  if (s === "released" || s === "stopped") return "pill-danger";
-  if (s === "under maintenance") return "pill-warning";
-  return "pill-neutral";
+  if (s === "active") return "success";
+  if (s === "released" || s === "stopped") return "danger";
+  if (s === "under maintenance") return "warning";
+  return "neutral";
 });
 
 const COMPLIANCE_LABELS = {

@@ -65,22 +65,26 @@
       </aside>
     </div>
 
-    <div class="hz-dock" data-dock>
-      <Button
-        class="dock-btn"
-        variant="solid"
-        theme="green"
-        size="2xl"
-        :disabled="!step.trip"
-        :loading="!!step.trip && busy === step.trip.name"
-        :loading-text="t('trips.working')"
-        :label="t('trips.step.' + step.key)"
-        @click="runStep"
-      >
-        <template #prefix><Icon :name="STEP_ICONS[step.key]" :size="20" /></template>
-      </Button>
-      <p class="hz-dock-reason">{{ stepHint }}</p>
-    </div>
+    <ActionDock>
+      <template #secondary>
+        <p class="row-reason">{{ stepHint }}</p>
+      </template>
+      <template #primary>
+        <Button
+          class="dock-btn"
+          variant="solid"
+          theme="green"
+          size="2xl"
+          :disabled="!step.trip"
+          :loading="!!step.trip && busy === step.trip.name"
+          :loading-text="t('trips.working')"
+          :label="t('trips.step.' + step.key)"
+          @click="runStep"
+        >
+          <template #prefix><Icon :name="STEP_ICONS[step.key]" :size="20" /></template>
+        </Button>
+      </template>
+    </ActionDock>
 
     <Dialog
       v-if="!desktop"
@@ -127,6 +131,7 @@
 import { computed, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Badge, Button, Dialog, TabButtons, createResource } from "frappe-ui";
+import ActionDock from "@shared/components/ActionDock.vue";
 import EmptyState from "@shared/components/EmptyState.vue";
 import Panel from "@shared/components/Panel.vue";
 import Icon from "../components/Icon.vue";

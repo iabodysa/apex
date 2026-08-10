@@ -45,7 +45,14 @@
       </div>
 
       <Skeleton v-if="panel.loading && !data" :rows="3" />
-      <ErrorState v-else-if="panel.error && !data" :message="t('errors.loadFailed')" @retry="panel.reload()" />
+      <LoadError
+        v-else-if="panel.error && !data"
+        :title="t('errors.loadFailed')"
+        :detail="loadErrorMessage"
+        :hint="t('errors.retryHint')"
+        :retry-label="t('common.retry')"
+        @retry="panel.reload()"
+      />
 
       <template v-else-if="data">
         <ul v-if="workers.length" class="sheet-list">
@@ -53,12 +60,15 @@
             <div class="min-w-0 flex items-center gap-2">
               <Icon name="user" :size="14" class="text-primary shrink-0" />
               <span class="font-semibold truncate"><bdi>{{ w.employee }}</bdi></span>
-              <span v-if="w.wait_count" class="pill pill-warning shrink-0">
-                <Icon name="alert" :size="12" /> {{ t("manifest.remaining", { n: w.wait_count }) }}
-              </span>
+              <StatusLabel
+                v-if="w.wait_count"
+                class="shrink-0"
+                :label="t('manifest.remaining', { n: w.wait_count })"
+                tone="warning"
+              />
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <span class="pill shrink-0" :class="pillClass(w.status)">{{ te("boardingStatus", w.status) }}</span>
+              <StatusLabel class="shrink-0" :label="te('boardingStatus', w.status)" :tone="statusTone(w.status)" />
               <Button
                 v-if="w.status === BOARDING.BOARDED"
                 class="mini-btn mini-no"
@@ -126,11 +136,12 @@
 import { computed, ref } from "vue";
 import { Button, createResource } from "frappe-ui";
 import { BOARDING, BOARDING_REFUSED } from "@shared/statusVocabularies";
+import EmptyState from "@shared/components/EmptyState.vue";
+import LoadError from "@shared/components/LoadError.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import Icon from "./Icon.vue";
 import Skeleton from "./Skeleton.vue";
-import EmptyState from "./EmptyState.vue";
-import ErrorState from "./ErrorState.vue";
-import { useI18n } from "../i18n";
+import { useI18n, resourceErrorMessage } from "../i18n";
 import { useOverlay } from "@shared/useOverlay.js";
 import { pushToast } from "../toast";
 import { useDriverRealtime } from "../realtime.js";
@@ -149,6 +160,7 @@ const panel = createResource({
   onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),
 });
 const data = computed(() => panel.data || null);
+const loadErrorMessage = computed(() => resourceErrorMessage(panel.error, "errors.loadFailed"));
 const workers = computed(() => data.value?.workers || []);
 const notifyMaxCount = computed(() => data.value?.notify_max_count || 0);
 const graceElapsed = computed(() => !!data.value?.grace_elapsed);
@@ -172,11 +184,11 @@ const busy = ref(null);
 const acting = ref(false);
 const summary = ref(null);
 
-function pillClass(status) {
-  if (status === BOARDING.BOARDED) return "pill-success";
-  if (BOARDING_REFUSED.includes(status)) return "pill-danger";
-  if (status === BOARDING.WORKER_CLAIMED) return "pill-warning";
-  return "pill-accent";
+function statusTone(status) {
+  if (status === BOARDING.BOARDED) return "success";
+  if (BOARDING_REFUSED.includes(status)) return "danger";
+  if (status === BOARDING.WORKER_CLAIMED) return "warning";
+  return "accent";
 }
 
 const notBoardedRes = createResource({

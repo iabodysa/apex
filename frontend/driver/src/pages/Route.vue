@@ -6,13 +6,20 @@
     <template v-if="singleTrip">
       <Skeleton v-if="tripRoute.loading && !tripData" :rows="2" />
 
-      <ErrorState v-else-if="tripRoute.error && !tripData" :message="t('errors.loadFailed')" @retry="tripRoute.reload()" />
+      <LoadError
+        v-else-if="tripRoute.error && !tripData"
+        :title="t('errors.loadFailed')"
+        :detail="tripErrorMessage"
+        :hint="t('errors.retryHint')"
+        :retry-label="t('common.retry')"
+        @retry="tripRoute.reload()"
+      />
 
       <template v-else-if="tripData">
         <section class="card card-pad space-y-3">
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0">
-              <div class="font-extrabold leading-tight truncate">
+              <div class="font-bold leading-tight truncate">
                 <bdi>{{ tripData.route_name || tripData.dispatch_trip }}</bdi>
               </div>
               <div class="mt-0.5 text-sm text-muted">
@@ -20,9 +27,12 @@
                 <span v-if="tripData.vehicle"> · <bdi>{{ tripData.vehicle }}</bdi></span>
               </div>
             </div>
-            <span v-if="tripData.status" class="pill pill-accent shrink-0">
-              {{ te("tripStatus", tripData.status) }}
-            </span>
+            <StatusLabel
+              v-if="tripData.status"
+              class="shrink-0"
+              :label="te('tripStatus', tripData.status)"
+              tone="accent"
+            />
           </div>
 
           <div v-if="tripData.has_route_plan && tripData.stops && tripData.stops.length">
@@ -59,7 +69,7 @@
                   <div class="font-semibold leading-tight" :class="{ 'line-through': stop.done }">
                     {{ stop.stop_name || t("route.stop") }}
                     <span v-if="stop.planned_time" class="text-muted font-normal">· <bdi>{{ stop.planned_time }}</bdi></span>
-                    <span v-if="stop.arrived" class="pill pill-success ms-2">{{ t("route.arrived") }}</span>
+                    <StatusLabel v-if="stop.arrived" class="ms-2" :label="t('route.arrived')" tone="success" />
                   </div>
                   <div v-if="stop.pickup" class="text-sm text-muted">
                     {{ stop.pickup.building_name || stop.accommodation_building }}
@@ -130,32 +140,34 @@
             </ul>
           </div>
 
-          <div v-else class="text-center py-4">
-            <div
-              class="avatar mx-auto mb-2 h-11 w-11"
-              style="background: color-mix(in srgb, var(--c-mint) 25%, transparent); color: var(--c-primary)"
-            >
-              <Icon name="route" :size="22" />
-            </div>
-            <p class="font-semibold">{{ t("route.noRoutePlanned") }}</p>
-            <p class="text-sm text-muted">{{ t("route.noRoutePlannedHint") }}</p>
-          </div>
+          <EmptyState v-else :title="t('route.noRoutePlanned')" :hint="t('route.noRoutePlannedHint')">
+            <template #icon><Icon name="route" :size="22" /></template>
+          </EmptyState>
         </section>
       </template>
 
-      <EmptyState v-else :title="t('route.empty')" />
+      <EmptyState v-else :title="t('route.empty')">
+        <template #icon><Icon name="route" :size="22" /></template>
+      </EmptyState>
     </template>
 
     <template v-else>
       <Skeleton v-if="route.loading && !routeData" :rows="3" />
 
-      <ErrorState v-else-if="route.error && !routeData" :message="t('errors.loadFailed')" @retry="route.reload()" />
+      <LoadError
+        v-else-if="route.error && !routeData"
+        :title="t('errors.loadFailed')"
+        :detail="routeErrorMessage"
+        :hint="t('errors.retryHint')"
+        :retry-label="t('common.retry')"
+        @retry="route.reload()"
+      />
 
       <template v-else-if="routeData && routeData.trips && routeData.trips.length">
         <section v-for="trip in routeData.trips" :key="trip.dispatch_trip" class="card card-pad space-y-3">
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0">
-              <div class="font-extrabold leading-tight truncate">
+              <div class="font-bold leading-tight truncate">
                 <bdi>{{ trip.dispatch_trip }}</bdi>
               </div>
               <div class="mt-0.5 text-sm text-muted">
@@ -163,9 +175,11 @@
                 <span v-if="trip.vehicle"> · <bdi>{{ trip.vehicle }}</bdi></span>
               </div>
             </div>
-            <span class="pill pill-accent shrink-0">
-              {{ t("route.expected", { n: trip.expected_count }) }}
-            </span>
+            <StatusLabel
+              class="shrink-0"
+              :label="t('route.expected', { n: trip.expected_count })"
+              tone="accent"
+            />
           </div>
 
           <div v-if="trip.stops && trip.stops.length">
@@ -242,7 +256,9 @@
         </section>
       </template>
 
-      <EmptyState v-else :title="t('route.empty')" :hint="t('route.emptyHint')" />
+      <EmptyState v-else :title="t('route.empty')" :hint="t('route.emptyHint')">
+        <template #icon><Icon name="route" :size="22" /></template>
+      </EmptyState>
     </template>
   </div>
 </template>
@@ -250,12 +266,13 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { Button, Checkbox, createResource } from "frappe-ui";
+import EmptyState from "@shared/components/EmptyState.vue";
+import LoadError from "@shared/components/LoadError.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
-import EmptyState from "../components/EmptyState.vue";
-import ErrorState from "../components/ErrorState.vue";
 import StopStepper from "../components/StopStepper.vue";
-import { useI18n } from "../i18n";
+import { useI18n, resourceErrorMessage } from "../i18n";
 import { pushToast } from "../toast";
 
 const { t, te } = useI18n();
@@ -285,6 +302,8 @@ watch(
 
 const routeData = computed(() => route.data || null);
 const tripData = computed(() => tripRoute.data || null);
+const routeErrorMessage = computed(() => resourceErrorMessage(route.error, "errors.loadFailed"));
+const tripErrorMessage = computed(() => resourceErrorMessage(tripRoute.error, "errors.loadFailed"));
 
 const doneCount = computed(
   () => (tripData.value?.stops || []).filter((s) => s.done).length,

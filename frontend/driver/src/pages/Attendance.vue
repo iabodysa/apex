@@ -3,19 +3,24 @@
   <div class="space-y-5">
     <LoadingState v-if="today.loading && !state.exists" :label="t('common.loading')" />
 
-    <ErrorState v-else-if="today.error" :message="err || t('errors.loadFailed')" @retry="today.reload()" />
+    <LoadError
+      v-else-if="today.error"
+      :title="t('errors.loadFailed')"
+      :detail="err"
+      :hint="t('errors.retryHint')"
+      :retry-label="t('common.retry')"
+      @retry="today.reload()"
+    />
 
     <template v-else>
-    <section class="card card-pad space-y-4">
-      <div class="flex items-center justify-between gap-3">
-        <div class="min-w-0">
-          <p class="text-xs font-semibold uppercase tracking-wider text-soft">{{ t("attendance.today") }}</p>
-          <p class="text-lg font-extrabold leading-tight">{{ stateLabel }}</p>
-        </div>
-        <span class="pill" :class="statePill">{{ statusLabel }}</span>
-      </div>
+    <Panel :title="t('attendance.today')">
+      <template #status>
+        <StatusLabel :label="statusLabel" :tone="stateTone" />
+      </template>
 
-      <div v-if="state.exists" class="divider"></div>
+      <p class="state-line">{{ stateLabel }}</p>
+
+      <div v-if="state.exists" class="divider my-4"></div>
 
       <div v-if="state.exists" class="space-y-3 text-sm">
         <div v-if="state.check_in" class="flex items-center gap-2">
@@ -34,7 +39,7 @@
           <span class="ms-auto font-semibold">{{ hoursPresent }}</span>
         </div>
       </div>
-    </section>
+    </Panel>
 
     <section class="card card-pad space-y-3">
       <p class="text-sm text-soft">{{ t("attendance.hint") }}</p>
@@ -68,39 +73,23 @@
         </p>
       </div>
 
-      <Button
-        variant="solid"
-        theme="green"
-        size="2xl"
-        :disabled="loading || uploading || today.loading || state.checked_in"
-        :loading="checkin.loading"
-        :label="state.checked_in ? t('attendance.checkedInLabel') : t('attendance.checkIn')"
-        @click="doCheckIn()"
-      >
-        <template #prefix><Icon name="calendar" :size="20" /></template>
-      </Button>
-      <Button
-        variant="outline"
-        size="2xl"
-        :disabled="loading || uploading || today.loading || !state.checked_in || state.checked_out"
-        :loading="checkout.loading"
-        :label="state.checked_out ? t('attendance.checkedOutLabel') : t('attendance.checkOut')"
-        @click="doCheckOut()"
-      >
-        <template #prefix><Icon name="calendar" :size="20" /></template>
-      </Button>
       <p v-if="state.checked_out" class="status-note status-ok">{{ t("attendance.doneForToday") }}</p>
     </section>
 
-
-    <section class="card card-pad space-y-3">
-      <p class="text-sm font-semibold text-soft">{{ t("attendance.history") }}</p>
+    <Panel :title="t('attendance.history')">
       <Skeleton v-if="history.loading" :rows="3" />
-      <p v-else-if="history.error" class="text-sm text-warning">
-        {{ resourceErrorMessage(history.error, "attendance.historyFailed") }}
-      </p>
-      <p v-else-if="!rows.length" class="text-sm text-muted">{{ t("attendance.historyEmpty") }}</p>
-      <ul class="space-y-3">
+      <LoadError
+        v-else-if="history.error"
+        :title="t('attendance.historyFailed')"
+        :detail="historyErrorMessage"
+        :hint="t('errors.retryHint')"
+        :retry-label="t('common.retry')"
+        @retry="history.reload()"
+      />
+      <EmptyState v-else-if="!rows.length" :title="t('attendance.historyEmpty')">
+        <template #icon><Icon name="calendar" :size="22" /></template>
+      </EmptyState>
+      <ul v-else class="space-y-3">
         <li v-for="(row, i) in rows" :key="row.name">
           <div class="flex items-center gap-3">
             <div class="min-w-0">
@@ -113,12 +102,42 @@
                 <bdi>{{ fmtTime(row.check_out) || t("attendance.noTime") }}</bdi>
               </p>
             </div>
-            <span class="pill ms-auto shrink-0" :class="rowPill(row.status)">{{ rowStatusLabel(row.status) }}</span>
+            <StatusLabel class="ms-auto shrink-0" :label="rowStatusLabel(row.status)" :tone="rowTone(row.status)" />
           </div>
           <div v-if="i < rows.length - 1" class="divider mt-3"></div>
         </li>
       </ul>
-    </section>
+    </Panel>
+
+    <ActionDock>
+      <template #secondary>
+        <Button
+          class="dock-btn"
+          variant="outline"
+          size="2xl"
+          :disabled="loading || uploading || today.loading || !state.checked_in || state.checked_out"
+          :loading="checkout.loading"
+          :label="state.checked_out ? t('attendance.checkedOutLabel') : t('attendance.checkOut')"
+          @click="doCheckOut()"
+        >
+          <template #prefix><Icon name="calendar" :size="20" /></template>
+        </Button>
+      </template>
+      <template #primary>
+        <Button
+          class="dock-btn"
+          variant="solid"
+          theme="green"
+          size="2xl"
+          :disabled="loading || uploading || today.loading || state.checked_in"
+          :loading="checkin.loading"
+          :label="state.checked_in ? t('attendance.checkedInLabel') : t('attendance.checkIn')"
+          @click="doCheckIn()"
+        >
+          <template #prefix><Icon name="calendar" :size="20" /></template>
+        </Button>
+      </template>
+    </ActionDock>
     </template>
   </div>
 </template>
@@ -127,10 +146,14 @@
 import { computed, reactive, ref } from "vue";
 import { ATTENDANCE } from "@shared/statusVocabularies";
 import { Button, createResource } from "frappe-ui";
+import ActionDock from "@shared/components/ActionDock.vue";
+import EmptyState from "@shared/components/EmptyState.vue";
+import LoadError from "@shared/components/LoadError.vue";
+import Panel from "@shared/components/Panel.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import Icon from "../components/Icon.vue";
 import LoadingState from "../components/LoadingState.vue";
 import Skeleton from "../components/Skeleton.vue";
-import ErrorState from "../components/ErrorState.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { pushToast } from "../toast";
 import { readPhotoFile, UnsupportedPhotoType } from "../upload";
@@ -255,19 +278,19 @@ function rowStatusLabel(status) {
     default: return t("common.none");
   }
 }
-function rowPill(status) {
-  if (status === ATTENDANCE.ABSENT) return "pill-danger";
-  if (status === ATTENDANCE.LATE) return "pill-warning";
-  if (status === ATTENDANCE.ON_LEAVE) return "pill-neutral";
-  return "pill-success";
+function rowTone(status) {
+  if (status === ATTENDANCE.ABSENT) return "danger";
+  if (status === ATTENDANCE.LATE) return "warning";
+  if (status === ATTENDANCE.ON_LEAVE) return "neutral";
+  return "success";
 }
 
 const statusLabel = computed(() =>
   state.status ? rowStatusLabel(state.status) : (state.checked_in ? t("attendance.statusPresent") : t("common.none"))
 );
-const statePill = computed(() => {
-  if (state.status) return rowPill(state.status);
-  return state.checked_in ? "pill-success" : "pill-neutral";
+const stateTone = computed(() => {
+  if (state.status) return rowTone(state.status);
+  return state.checked_in ? "success" : "neutral";
 });
 
 const history = createResource({
@@ -275,6 +298,9 @@ const history = createResource({
   auto: true,
 });
 const rows = computed(() => history.data?.rows ?? []);
+const historyErrorMessage = computed(() =>
+  resourceErrorMessage(history.error, "attendance.historyFailed"),
+);
 
 const hoursPresent = computed(() => {
   if (state.worked_hours != null && state.worked_hours !== 0) {
@@ -292,3 +318,12 @@ const hoursPresent = computed(() => {
   return (mins / 60).toFixed(2);
 });
 </script>
+
+<style scoped>
+.state-line {
+  color: var(--c-ink);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-heading);
+  line-height: 1.3;
+}
+</style>

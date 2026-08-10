@@ -364,6 +364,8 @@ export default {
     descriptionPlaceholder: "صف المشكلة",
     raise: "إنشاء تذكرة",
     myTickets: "تذاكري",
+    empty: "لا توجد تذاكر بعد",
+    emptyHint: "ارفع تذكرة من الأعلى وسيتابعها الفريق.",
     attachment: "صورة",
     addPhoto: "إضافة صورة",
     photoAttached: "تم إرفاق الصورة",

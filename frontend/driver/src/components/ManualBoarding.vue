@@ -12,7 +12,14 @@
       <p class="sheet-hint">{{ t("manual.hint") }}</p>
 
       <Skeleton v-if="sheet.loading && !data" :rows="3" />
-      <ErrorState v-else-if="sheet.error && !data" :message="t('errors.loadFailed')" @retry="sheet.reload()" />
+      <LoadError
+        v-else-if="sheet.error && !data"
+        :title="t('errors.loadFailed')"
+        :detail="loadErrorMessage"
+        :hint="t('errors.retryHint')"
+        :retry-label="t('common.retry')"
+        @retry="sheet.reload()"
+      />
 
       <template v-else-if="data">
         <ul v-if="data.workers && data.workers.length" class="sheet-list">
@@ -29,12 +36,12 @@
                 <span v-if="w.pickup_point" class="text-xs text-muted">{{ w.pickup_point }}</span>
               </span>
             </label>
-            <span v-if="w.boarded" class="pill pill-success shrink-0">
-              <Icon name="badge" :size="14" /> {{ t("manual.aboard") }}
-            </span>
+            <StatusLabel v-if="w.boarded" class="shrink-0" :label="t('manual.aboard')" tone="success" />
           </li>
         </ul>
-        <EmptyState v-else :title="t('manual.empty')" />
+        <EmptyState v-else :title="t('manual.empty')">
+          <template #icon><Icon name="user" :size="22" /></template>
+        </EmptyState>
 
         <div class="sheet-actions">
           <button
@@ -55,12 +62,13 @@
 <script setup>
 import { computed, ref } from "vue";
 import { createResource } from "frappe-ui";
+import EmptyState from "@shared/components/EmptyState.vue";
+import LoadError from "@shared/components/LoadError.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import Icon from "./Icon.vue";
 import Skeleton from "./Skeleton.vue";
-import EmptyState from "./EmptyState.vue";
-import ErrorState from "./ErrorState.vue";
 import { useOverlay } from "@shared/useOverlay.js";
-import { useI18n } from "../i18n";
+import { useI18n, resourceErrorMessage } from "../i18n";
 import { pushToast } from "../toast";
 
 const { t } = useI18n();
@@ -80,6 +88,7 @@ const sheet = createResource({
   auto: true,
 });
 const data = computed(() => sheet.data || null);
+const loadErrorMessage = computed(() => resourceErrorMessage(sheet.error, "errors.loadFailed"));
 
 const board = createResource({
   url: "apex.salis.api.driver_portal.manual_board_workers",

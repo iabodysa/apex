@@ -364,6 +364,8 @@ export default {
     descriptionPlaceholder: "Describe the issue",
     raise: "Raise Ticket",
     myTickets: "My tickets",
+    empty: "No tickets yet",
+    emptyHint: "Raise one above and the team will follow up.",
     attachment: "Photo",
     addPhoto: "Add a photo",
     photoAttached: "Photo attached",

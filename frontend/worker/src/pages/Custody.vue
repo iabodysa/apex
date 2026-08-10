@@ -7,11 +7,14 @@
       <Skeleton :lines="3" />
     </template>
 
-    <div v-else-if="cus.error && !cd" class="card card-pad text-center">
-      <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
-      <p class="text-sm text-muted">{{ errorMessage }}</p>
-      <Button class="mt-3" variant="outline" size="xl" :label="t('common.retry')" @click="cus.reload()" />
-    </div>
+    <LoadError
+      v-else-if="cus.error && !cd"
+      :title="t('errors.loadError')"
+      :detail="errorMessage"
+      :hint="t('errors.retryHint')"
+      :retry-label="t('common.retry')"
+      @retry="cus.reload()"
+    />
 
     <template v-else-if="items.length">
       <section v-for="(it, i) in items" :key="i" class="card card-pad">
@@ -20,13 +23,13 @@
             <Icon name="briefcase" :size="22" />
           </span>
           <div class="min-w-0 flex-1">
-            <div class="text-base font-extrabold leading-tight truncate">
+            <div class="text-base font-bold leading-tight truncate">
               {{ it.item_name || it.item }}
             </div>
             <div v-if="it.building" class="text-sm text-muted truncate">{{ it.building }}</div>
           </div>
           <div class="text-end shrink-0">
-            <div class="text-lg font-extrabold leading-none">{{ fmtQty(it.qty) }}</div>
+            <div class="text-lg font-bold leading-none">{{ fmtQty(it.qty) }}</div>
             <div class="text-xs text-muted">{{ it.uom || t("custody.qty") }}</div>
           </div>
         </div>
@@ -39,16 +42,17 @@
       </section>
     </template>
 
-    <div v-else class="card card-pad text-center">
-      <p class="text-sm text-muted">{{ t("custody.empty") }}</p>
-      <p class="text-xs text-muted mt-1">{{ t("custody.emptyHint") }}</p>
-    </div>
+    <EmptyState v-else :title="t('custody.empty')" :hint="t('custody.emptyHint')">
+      <template #icon><Icon name="briefcase" :size="22" /></template>
+    </EmptyState>
   </div>
 </template>
 
 <script setup>
 import { computed, h } from "vue";
-import { Button, createResource } from "frappe-ui";
+import { createResource } from "frappe-ui";
+import EmptyState from "@shared/components/EmptyState.vue";
+import LoadError from "@shared/components/LoadError.vue";
 import Icon from "../components/Icon.vue";
 import HousingNav from "../components/HousingNav.vue";
 import Skeleton from "../components/Skeleton.vue";

@@ -8,15 +8,24 @@
 
       <Skeleton v-if="detailLoading" :rows="4" />
 
-      <ErrorState v-else-if="detailError" :message="t('errors.loadFailed')" @retry="loadTicketDetail" />
+      <LoadError
+        v-else-if="detailError"
+        :title="t('errors.loadFailed')"
+        :detail="detailErrorMessage"
+        :hint="t('errors.retryHint')"
+        :retry-label="t('common.retry')"
+        @retry="loadTicketDetail"
+      />
 
       <template v-else-if="detailData">
         <section class="card card-pad">
           <div class="flex items-start justify-between gap-2">
             <div class="font-bold leading-tight">{{ detailData.subject }}</div>
-            <span class="pill shrink-0" :class="statusPill(detailData.status)">
-              {{ te("issueStatus", detailData.status) }}
-            </span>
+            <StatusLabel
+              class="shrink-0"
+              :label="te('issueStatus', detailData.status)"
+              :tone="statusTone(detailData.status)"
+            />
           </div>
           <div class="mt-1 text-sm text-muted">
             {{ te("issueCategory", detailData.category) }} · {{ te("issuePriority", detailData.priority) }}
@@ -47,11 +56,10 @@
           </dl>
         </section>
 
-        <section class="space-y-3">
-          <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("tickets.conversation") }}</h3>
-          <p v-if="!communications.length" class="text-sm text-muted">
-            {{ t("tickets.noReplies") }}
-          </p>
+        <Panel :title="t('tickets.conversation')">
+          <EmptyState v-if="!communications.length" :title="t('tickets.noReplies')">
+            <template #icon><Icon name="help" :size="22" /></template>
+          </EmptyState>
           <div v-for="c in communications" :key="c.name" class="card card-pad">
             <div class="flex items-center justify-between gap-2 text-xs text-muted">
               <span><bdi>{{ c.sender || t("tickets.you") }}</bdi></span>
@@ -61,6 +69,7 @@
           </div>
           <Button
             v-if="communicationHasMore"
+            class="mt-3"
             variant="outline"
             size="xl"
             :disabled="moreLoading"
@@ -68,14 +77,28 @@
             :label="t('common.more')"
             @click="loadMoreCommunications"
           />
+        </Panel>
+
+        <section class="card card-pad">
+          <FormControl v-model="replyText" type="textarea" size="lg" :rows="4" :label="t('tickets.reply')" :placeholder="t('tickets.replyPlaceholder')" />
         </section>
 
-        <section class="card card-pad space-y-3">
-          <FormControl v-model="replyText" type="textarea" size="lg" :rows="4" :label="t('tickets.reply')" :placeholder="t('tickets.replyPlaceholder')" />
-          <Button variant="solid" theme="green" size="2xl" :disabled="reply.loading || !replyText.trim()" :loading="reply.loading" :label="t('tickets.send')" @click="submitReply">
-            <template #prefix><Icon name="help" :size="18" /></template>
-          </Button>
-        </section>
+        <ActionDock>
+          <template #primary>
+            <Button
+              class="dock-btn"
+              variant="solid"
+              theme="green"
+              size="2xl"
+              :disabled="reply.loading || !replyText.trim()"
+              :loading="reply.loading"
+              :label="t('tickets.send')"
+              @click="submitReply"
+            >
+              <template #prefix><Icon name="help" :size="20" /></template>
+            </Button>
+          </template>
+        </ActionDock>
       </template>
     </template>
 
@@ -109,20 +132,28 @@
           <p v-else-if="photoName" class="mt-1 text-xs text-success">{{ t("tickets.photoAttached") }}: {{ photoName }}</p>
         </div>
 
-        <Button variant="solid" theme="green" size="2xl" :disabled="create.loading || uploading || !form.subject" :loading="create.loading" :label="t('tickets.raise')" @click="submit">
-          <template #prefix><Icon name="help" :size="20" /></template>
-        </Button>
         <p v-if="err" class="text-sm text-danger">{{ err }}</p>
       </section>
 
-      <section class="space-y-3">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("tickets.myTickets") }}</h3>
-
+      <Panel :title="t('tickets.myTickets')">
         <LoadingState v-if="list.loading" :label="t('common.loading')" />
 
-        <ErrorState v-else-if="list.error" :message="t('errors.loadFailed')" @retry="list.reload()" />
+        <LoadError
+          v-else-if="list.error"
+          :title="t('errors.loadFailed')"
+          :detail="listErrorMessage"
+          :hint="t('errors.retryHint')"
+          :retry-label="t('common.retry')"
+          @retry="list.reload()"
+        />
 
-        <EmptyState v-else-if="!list.data || !list.data.length" icon="help" />
+        <EmptyState
+          v-else-if="!list.data || !list.data.length"
+          :title="t('tickets.empty')"
+          :hint="t('tickets.emptyHint')"
+        >
+          <template #icon><Icon name="help" :size="22" /></template>
+        </EmptyState>
 
         <template v-else>
           <button
@@ -133,7 +164,7 @@
           >
             <div class="flex items-start justify-between gap-2">
               <div class="font-bold leading-tight">{{ row.subject }}</div>
-              <span class="pill shrink-0" :class="statusPill(row.status)">{{ te("issueStatus", row.status) }}</span>
+              <StatusLabel class="shrink-0" :label="te('issueStatus', row.status)" :tone="statusTone(row.status)" />
             </div>
             <div class="mt-1 flex items-center gap-2 text-sm text-muted">
               <span>{{ te("issueCategory", row.category) }} · {{ te("issuePriority", row.priority) }}</span>
@@ -141,7 +172,24 @@
             </div>
           </button>
         </template>
-      </section>
+      </Panel>
+
+      <ActionDock>
+        <template #primary>
+          <Button
+            class="dock-btn"
+            variant="solid"
+            theme="green"
+            size="2xl"
+            :disabled="create.loading || uploading || !form.subject"
+            :loading="create.loading"
+            :label="t('tickets.raise')"
+            @click="submit"
+          >
+            <template #prefix><Icon name="help" :size="20" /></template>
+          </Button>
+        </template>
+      </ActionDock>
     </template>
   </div>
 </template>
@@ -149,12 +197,15 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
 import { Button, FormControl, createResource } from "frappe-ui";
+import ActionDock from "@shared/components/ActionDock.vue";
+import EmptyState from "@shared/components/EmptyState.vue";
+import LoadError from "@shared/components/LoadError.vue";
+import Panel from "@shared/components/Panel.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import Icon from "../components/Icon.vue";
 import LoadingState from "../components/LoadingState.vue";
 import Skeleton from "../components/Skeleton.vue";
-import EmptyState from "../components/EmptyState.vue";
-import ErrorState from "../components/ErrorState.vue";
-import { useI18n, ISSUE_CATEGORIES, ISSUE_PRIORITIES } from "../i18n";
+import { useI18n, resourceErrorMessage, ISSUE_CATEGORIES, ISSUE_PRIORITIES } from "../i18n";
 import { pushToast } from "../toast";
 import { readPhotoFile, UnsupportedPhotoType } from "../upload";
 import { PHOTO_ACCEPT } from "@shared/photoFile.js";
@@ -184,6 +235,7 @@ const list = createResource({
   url: "apex.salis.api.driver_portal.my_support_tickets",
   auto: true,
 });
+const listErrorMessage = computed(() => resourceErrorMessage(list.error, "errors.loadFailed"));
 const create = createResource({
   url: "apex.salis.api.driver_portal.raise_support_ticket",
   onSuccess: () => {
@@ -232,6 +284,9 @@ const ticketGeneration = ref(0);
 const detailData = ref(null);
 const detailLoading = ref(false);
 const detailError = ref(null);
+const detailErrorMessage = computed(() =>
+  resourceErrorMessage(detailError.value, "errors.loadFailed"),
+);
 const moreLoading = ref(false);
 
 function activeTicketRequest() {
@@ -357,11 +412,11 @@ function submitReply() {
   );
 }
 
-function statusPill(status) {
+function statusTone(status) {
   const s = (status || "").toLowerCase();
-  if (s === "resolved" || s === "closed") return "pill-success";
-  if (s === "waiting") return "pill-warning";
-  if (s === "cancelled") return "pill-danger";
-  return "pill-accent";
+  if (s === "resolved" || s === "closed") return "success";
+  if (s === "waiting") return "warning";
+  if (s === "cancelled") return "danger";
+  return "accent";
 }
 </script>

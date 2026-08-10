@@ -12,10 +12,14 @@
             <template v-else>{{ initial }}</template>
           </span>
           <div class="min-w-0">
-            <div class="text-lg font-extrabold leading-tight truncate">
+            <div class="text-lg font-bold leading-tight truncate">
               {{ p.employee_name || t("common.none") }}
             </div>
-            <span class="pill mt-1" :class="statusPill">{{ p.status ? tEnum("status", p.status) : t("common.none") }}</span>
+            <StatusLabel
+              class="mt-1"
+              :label="p.status ? tEnum('status', p.status) : t('common.none')"
+              :tone="statusTone"
+            />
           </div>
         </div>
 
@@ -31,13 +35,17 @@
         </dl>
       </section>
 
-      <section v-if="p.documents && p.documents.length" class="space-y-3">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("profile.documents") }}</h3>
+      <Panel v-if="p.documents && p.documents.length" :title="t('profile.documents')">
         <div v-for="doc in p.documents" :key="doc.type" class="card card-pad">
           <div class="flex items-center gap-2">
             <Icon name="doc" :size="18" class="text-primary shrink-0" />
             <span class="font-bold">{{ t("profile." + doc.type) }}</span>
-            <span v-if="docPill(doc)" class="pill ms-auto" :class="docPill(doc).cls">{{ docPill(doc).text }}</span>
+            <StatusLabel
+              v-if="docStatus(doc)"
+              class="ms-auto"
+              :label="docStatus(doc).text"
+              :tone="docStatus(doc).tone"
+            />
           </div>
           <dl class="mt-3 space-y-2 text-sm">
             <div v-if="doc.number" class="flex items-center gap-2">
@@ -52,30 +60,36 @@
             </div>
           </dl>
         </div>
-      </section>
+      </Panel>
 
-      <router-link to="/requests" class="btn btn-outline" style="text-decoration: none">
-        <Icon name="plus" :size="18" /> {{ t("profile.requestChange") }}
-      </router-link>
-
-      <section class="card card-pad">
+      <Panel :title="t('lang.label')">
         <div class="flex items-center gap-2">
           <Icon name="globe" :size="18" class="text-primary shrink-0" />
-          <span class="text-sm font-semibold">{{ t("lang.label") }}</span>
           <div class="ms-auto"><LangToggle /></div>
         </div>
-      </section>
+      </Panel>
+
+      <ActionDock>
+        <template #primary>
+          <router-link to="/requests" class="btn btn-outline" style="text-decoration: none">
+            <Icon name="plus" :size="18" /> {{ t("profile.requestChange") }}
+          </router-link>
+        </template>
+      </ActionDock>
     </template>
 
-    <div v-else class="card card-pad text-center">
-      <p class="text-sm text-muted">{{ t("profile.empty") }}</p>
-      <p class="text-xs text-muted mt-1">{{ t("profile.emptyHint") }}</p>
-    </div>
+    <EmptyState v-else :title="t('profile.empty')" :hint="t('profile.emptyHint')">
+      <template #icon><Icon name="user" :size="22" /></template>
+    </EmptyState>
   </div>
 </template>
 
 <script setup>
 import { computed, h } from "vue";
+import ActionDock from "@shared/components/ActionDock.vue";
+import EmptyState from "@shared/components/EmptyState.vue";
+import Panel from "@shared/components/Panel.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import Icon from "../components/Icon.vue";
 import LangToggle from "../components/LangToggle.vue";
 import { useI18n } from "../i18n";
@@ -97,11 +111,11 @@ const initial = computed(
   () => (props.ctx.employee_name || "?").trim().charAt(0).toUpperCase() || "?",
 );
 
-const statusPill = computed(() => {
+const statusTone = computed(() => {
   const s = (props.ctx.status || "").toLowerCase();
-  if (s === "active") return "pill-success";
-  if (s === "left" || s === "suspended" || s === "inactive") return "pill-danger";
-  return "pill-neutral";
+  if (s === "active") return "success";
+  if (s === "left" || s === "suspended" || s === "inactive") return "danger";
+  return "neutral";
 });
 
 function docColor(doc) {
@@ -111,11 +125,11 @@ function docColor(doc) {
   if (d <= 30) return "text-warning";
   return "";
 }
-function docPill(doc) {
+function docStatus(doc) {
   const d = doc.days_left;
   if (d == null) return null;
-  if (d < 0) return { cls: "pill-danger", text: t("profile.expired") };
-  if (d <= 30) return { cls: "pill-warning", text: t("profile.daysLeft", { n: d }) };
+  if (d < 0) return { tone: "danger", text: t("profile.expired") };
+  if (d <= 30) return { tone: "warning", text: t("profile.daysLeft", { n: d }) };
   return null;
 }
 </script>

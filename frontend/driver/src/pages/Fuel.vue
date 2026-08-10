@@ -1,13 +1,10 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
-    <section v-if="quotaRow" class="card card-pad">
-      <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
-        {{ t("fuel.quota") }}
-      </h3>
+    <Panel v-if="quotaRow" :title="t('fuel.quota')">
       <div class="flex items-end justify-between gap-3">
         <div>
-          <div class="text-2xl font-extrabold leading-none">
+          <div class="text-2xl font-bold leading-none">
             <bdi>{{ litreText(quotaRow.remaining_litres) }}</bdi>
           </div>
           <div class="text-xs text-muted mt-1">{{ t("fuel.quotaRemaining") }}</div>
@@ -26,7 +23,7 @@
       <div class="quota-track mt-3">
         <div class="quota-fill" :style="{ width: usedPct + '%' }"></div>
       </div>
-    </section>
+    </Panel>
 
     <section class="card card-pad space-y-4">
       <div class="fuel-note">
@@ -45,32 +42,27 @@
         :label="t('fuel.litres')"
         :placeholder="t('fuel.placeholder')"
       />
-      <Button
-        variant="solid"
-        theme="green"
-        size="2xl"
-        :disabled="req.loading || !litres"
-        :loading="req.loading"
-        :label="t('fuel.submit')"
-        @click="submit"
-      >
-        <template #prefix><Icon name="fuel" :size="20" /></template>
-      </Button>
     </section>
 
-    <section class="space-y-3">
-      <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("fuel.history") }}</h3>
-
+    <Panel :title="t('fuel.history')">
       <Skeleton v-if="history.loading" :rows="3" />
 
-      <ErrorState v-else-if="history.error" :message="t('errors.loadFailed')" @retry="history.reload()" />
+      <LoadError
+        v-else-if="history.error"
+        :title="t('errors.loadFailed')"
+        :detail="historyErrorMessage"
+        :hint="t('errors.retryHint')"
+        :retry-label="t('common.retry')"
+        @retry="history.reload()"
+      />
 
       <EmptyState
         v-else-if="!history.data || !history.data.length"
-        icon="fuel"
         :title="t('fuel.historyEmpty')"
         :hint="t('fuel.historyEmptyHint')"
-      />
+      >
+        <template #icon><Icon name="fuel" :size="22" /></template>
+      </EmptyState>
 
       <template v-else>
         <div v-for="r in history.data" :key="r.name" class="card card-pad">
@@ -78,7 +70,7 @@
             <div class="font-bold leading-tight">
               <bdi>{{ litreText(r.requested_litres) }}</bdi>
             </div>
-            <span class="pill shrink-0" :class="statusPill(r.status)">{{ te("fuelStatus", r.status) }}</span>
+            <StatusLabel class="shrink-0" :label="te('fuelStatus', r.status)" :tone="statusTone(r.status)" />
           </div>
           <div class="mt-1 flex items-center gap-2 text-sm text-muted">
             <Icon name="calendar" :size="16" class="text-primary shrink-0" />
@@ -88,18 +80,38 @@
           </div>
         </div>
       </template>
-    </section>
+    </Panel>
+
+    <ActionDock>
+      <template #primary>
+        <Button
+          class="dock-btn"
+          variant="solid"
+          theme="green"
+          size="2xl"
+          :disabled="req.loading || !litres"
+          :loading="req.loading"
+          :label="t('fuel.submit')"
+          @click="submit"
+        >
+          <template #prefix><Icon name="fuel" :size="20" /></template>
+        </Button>
+      </template>
+    </ActionDock>
   </div>
 </template>
 
 <script setup>
 import { computed, ref } from "vue";
 import { Button, FormControl, createResource } from "frappe-ui";
+import ActionDock from "@shared/components/ActionDock.vue";
+import EmptyState from "@shared/components/EmptyState.vue";
+import LoadError from "@shared/components/LoadError.vue";
+import Panel from "@shared/components/Panel.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
-import EmptyState from "../components/EmptyState.vue";
-import ErrorState from "../components/ErrorState.vue";
-import { useI18n } from "../i18n";
+import { useI18n, resourceErrorMessage } from "../i18n";
 import { pushToast } from "../toast";
 
 const { t, te, n } = useI18n();
@@ -114,6 +126,10 @@ const history = createResource({
   url: "apex.salis.api.driver_portal.my_fuel_requests",
   auto: true,
 });
+
+const historyErrorMessage = computed(() =>
+  resourceErrorMessage(history.error, "errors.loadFailed"),
+);
 
 const req = createResource({
   url: "apex.salis.api.driver_portal.submit_fuel_request",
@@ -148,12 +164,12 @@ function litreText(v) {
   return `${n(Number(v || 0), { maximumFractionDigits: 1 })} ${t("fuel.litreUnit")}`;
 }
 
-function statusPill(status) {
+function statusTone(status) {
   const s = (status || "").toLowerCase();
-  if (s === "approved" || s === "done") return "pill-success";
-  if (s === "pending") return "pill-warning";
-  if (s === "failed" || s === "reverted" || s === "cancelled") return "pill-danger";
-  return "pill-accent";
+  if (s === "approved" || s === "done") return "success";
+  if (s === "pending") return "warning";
+  if (s === "failed" || s === "reverted" || s === "cancelled") return "danger";
+  return "accent";
 }
 </script>
 

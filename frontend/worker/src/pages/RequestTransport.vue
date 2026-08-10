@@ -1,18 +1,18 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="space-y-5">
-    <div v-if="submitted" class="card card-pad text-center space-y-3">
-      <div class="avatar mx-auto h-12 w-12" style="background: var(--c-mint); color: var(--c-ink)">
-        <Icon name="check" :size="26" />
-      </div>
-      <div>
-        <p class="font-bold">{{ t("reqTransport.submitted") }}</p>
-        <p class="text-sm text-muted mt-1">{{ t("reqTransport.submittedHint") }}</p>
-      </div>
-      <router-link to="/transport" class="btn btn-primary" style="text-decoration: none">
-        <Icon name="route" :size="18" class="rtl-flip" /> {{ t("reqTransport.viewRequests") }}
-      </router-link>
-    </div>
+    <EmptyState
+      v-if="submitted"
+      :title="t('reqTransport.submitted')"
+      :hint="t('reqTransport.submittedHint')"
+    >
+      <template #icon><Icon name="check" :size="22" /></template>
+      <template #action>
+        <router-link to="/transport" class="btn btn-primary" style="text-decoration: none">
+          <Icon name="route" :size="18" class="rtl-flip" /> {{ t("reqTransport.viewRequests") }}
+        </router-link>
+      </template>
+    </EmptyState>
 
     <form v-else class="space-y-5" @submit.prevent="submit">
       <p class="text-sm text-muted">{{ t("reqTransport.intro") }}</p>
@@ -55,11 +55,8 @@
         />
       </section>
 
-      <section class="card card-pad space-y-3">
-        <div class="flex items-center gap-2">
-          <Icon name="user" :size="18" class="text-primary shrink-0" />
-          <span class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("reqTransport.addPassengers") }}</span>
-        </div>
+      <Panel :title="t('reqTransport.addPassengers')">
+        <div class="space-y-3">
         <p class="text-xs text-muted">{{ t("reqTransport.addPassengersHint") }}</p>
 
         <div v-for="(p, i) in form.adhoc_passengers" :key="i" class="adhoc-row">
@@ -88,21 +85,27 @@
         <Button type="button" variant="outline" size="xl" :label="t('reqTransport.addRow')" @click="addPassenger">
           <template #prefix><Icon name="plus" :size="18" /></template>
         </Button>
-      </section>
+        </div>
+      </Panel>
 
       <p v-if="errorMsg" class="text-sm text-danger">{{ errorMsg }}</p>
 
-      <Button
-        type="submit"
-        variant="solid"
-        theme="green"
-        size="2xl"
-        :loading="create.loading"
-        :loading-text="t('reqTransport.submitting')"
-        :label="t('reqTransport.submit')"
-      >
-        <template #prefix><Icon name="send" :size="18" /></template>
-      </Button>
+      <ActionDock>
+        <template #primary>
+          <Button
+            class="dock-btn"
+            type="submit"
+            variant="solid"
+            theme="green"
+            size="2xl"
+            :loading="create.loading"
+            :loading-text="t('reqTransport.submitting')"
+            :label="t('reqTransport.submit')"
+          >
+            <template #prefix><Icon name="send" :size="20" /></template>
+          </Button>
+        </template>
+      </ActionDock>
     </form>
   </div>
 </template>
@@ -110,6 +113,9 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
 import { Button, FormControl, createResource } from "frappe-ui";
+import ActionDock from "@shared/components/ActionDock.vue";
+import EmptyState from "@shared/components/EmptyState.vue";
+import Panel from "@shared/components/Panel.vue";
 import Icon from "../components/Icon.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 

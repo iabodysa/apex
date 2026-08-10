@@ -8,17 +8,20 @@
       <Skeleton :lines="3" />
     </template>
 
-    <div v-else-if="tr.error && !td" class="card card-pad text-center">
-      <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
-      <p class="text-sm text-muted">{{ errorMessage }}</p>
-      <Button class="mt-3" variant="outline" size="xl" :label="t('common.retry')" @click="tr.reload()" />
-    </div>
+    <LoadError
+      v-else-if="tr.error && !td"
+      :title="t('errors.loadError')"
+      :detail="errorMessage"
+      :hint="t('errors.retryHint')"
+      :retry-label="t('common.retry')"
+      @retry="tr.reload()"
+    />
 
     <template v-else-if="upcoming.length || past.length">
       <section v-for="trip in upcoming" :key="trip.transport_request" class="card card-pad space-y-3">
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0">
-            <div class="font-extrabold leading-tight truncate">
+            <div class="font-bold leading-tight truncate">
               {{ trip.request_type ? tEnum("requestType", trip.request_type) : trip.transport_request }}
             </div>
             <div v-if="trip.pickup_point || trip.pickup_datetime" class="mt-0.5 text-sm text-muted">
@@ -26,7 +29,12 @@
               <span v-if="trip.depart_time || trip.pickup_datetime"> · <bdi>{{ trip.depart_time ? formatTime(trip.depart_time) : formatDateTime(trip.pickup_datetime) }}</bdi></span>
             </div>
           </div>
-          <span v-if="trip.status" class="pill pill-accent shrink-0">{{ tEnum("transportStatus", trip.status) }}</span>
+          <StatusLabel
+            v-if="trip.status"
+            class="shrink-0"
+            :label="tEnum('transportStatus', trip.status)"
+            tone="accent"
+          />
         </div>
 
         <TripProgressBar :status="trip.trip_status" />
@@ -138,10 +146,9 @@
         </div>
       </section>
 
-      <div v-if="!upcoming.length" class="card card-pad text-center">
-        <p class="text-sm text-muted">{{ t("transport.empty") }}</p>
-        <p class="text-xs text-muted mt-1">{{ t("transport.emptyHint") }}</p>
-      </div>
+      <EmptyState v-if="!upcoming.length" :title="t('transport.empty')" :hint="t('transport.emptyHint')">
+        <template #icon><Icon name="route" :size="22" class="rtl-flip" /></template>
+      </EmptyState>
 
       <section v-if="past.length" class="card card-pad space-y-3">
         <Button variant="ghost" size="xl" :label="`${t('transport.past')} (${past.length})`" @click="showPast = !showPast">
@@ -175,12 +182,18 @@
         </ul>
       </section>
 
-      <router-link to="/request-transport" class="btn btn-primary" style="text-decoration: none">
-        <Icon name="route" :size="18" class="rtl-flip" /> {{ t("transport.requestNew") }}
-      </router-link>
-      <router-link to="/requests" class="btn btn-outline" style="text-decoration: none">
-        <Icon name="plus" :size="18" /> {{ t("transport.reportIssue") }}
-      </router-link>
+      <ActionDock>
+        <template #secondary>
+          <router-link to="/requests" class="btn btn-outline" style="text-decoration: none">
+            <Icon name="plus" :size="18" /> {{ t("transport.reportIssue") }}
+          </router-link>
+        </template>
+        <template #primary>
+          <router-link to="/request-transport" class="btn btn-primary" style="text-decoration: none">
+            <Icon name="route" :size="18" class="rtl-flip" /> {{ t("transport.requestNew") }}
+          </router-link>
+        </template>
+      </ActionDock>
     </template>
 
     <div v-else class="space-y-3">
@@ -190,15 +203,14 @@
         :boarding="boardingState"
         :stale="boardingStale"
       />
-      <div class="card card-pad text-center space-y-3">
-        <div>
-          <p class="text-sm text-muted">{{ t("transport.empty") }}</p>
-          <p class="text-xs text-muted mt-1">{{ t("transport.emptyHint") }}</p>
-        </div>
-        <router-link to="/request-transport" class="btn btn-primary" style="text-decoration: none">
-          <Icon name="route" :size="18" class="rtl-flip" /> {{ t("transport.requestNew") }}
-        </router-link>
-      </div>
+      <EmptyState :title="t('transport.empty')" :hint="t('transport.emptyHint')">
+        <template #icon><Icon name="route" :size="22" class="rtl-flip" /></template>
+        <template #action>
+          <router-link to="/request-transport" class="btn btn-primary" style="text-decoration: none">
+            <Icon name="route" :size="18" class="rtl-flip" /> {{ t("transport.requestNew") }}
+          </router-link>
+        </template>
+      </EmptyState>
     </div>
   </div>
 </template>
@@ -207,6 +219,10 @@
 import { computed, reactive, ref, watch, onUnmounted } from "vue";
 import { BOARDING_SETTLED, REQUEST } from "@shared/statusVocabularies";
 import { Button, createResource } from "frappe-ui";
+import ActionDock from "@shared/components/ActionDock.vue";
+import EmptyState from "@shared/components/EmptyState.vue";
+import LoadError from "@shared/components/LoadError.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import TripProgressBar from "../components/TripProgressBar.vue";

@@ -12,7 +12,7 @@
           </span>
           <div class="min-w-0">
             <div class="text-base font-bold truncate">{{ ctx.full_name || t("common.staff") }}</div>
-            <span class="pill pill-accent mt-0.5">{{ t("common.staff") }}</span>
+            <StatusLabel class="mt-0.5" :label="t('common.staff')" tone="accent" />
           </div>
         </div>
         <p class="mt-3 text-sm text-soft">{{ t("unlinked.staffHint") }}</p>
@@ -39,26 +39,24 @@
     </section>
 
     <section v-else class="space-y-5">
-      <div class="card card-pad text-center">
-        <span
-          class="avatar mx-auto h-12 w-12"
-          style="background: color-mix(in srgb, var(--c-mint) 22%, transparent); color: var(--c-primary)"
-        >
-          <Icon name="user" :size="26" />
-        </span>
-        <div class="mt-3 text-base font-bold">
-          {{ t("unlinked.hello") }}{{ ctx.full_name ? ", " + ctx.full_name : "" }}
-        </div>
-        <p class="mt-2 text-sm text-soft">{{ t("unlinked.notLinked") }}</p>
-      </div>
-      <a href="/app" class="btn btn-primary" style="text-decoration: none">
-        <Icon name="external" :size="18" /> {{ t("common.goToApp") }}
-      </a>
+      <EmptyState
+        :title="t('unlinked.hello') + (ctx.full_name ? ', ' + ctx.full_name : '')"
+        :hint="t('unlinked.notLinked')"
+      >
+        <template #icon><Icon name="user" :size="22" /></template>
+        <template #action>
+          <a href="/app" class="btn btn-primary" style="text-decoration: none">
+            <Icon name="external" :size="18" /> {{ t("common.goToApp") }}
+          </a>
+        </template>
+      </EmptyState>
     </section>
   </div>
 </template>
 
 <script setup>
+import EmptyState from "@shared/components/EmptyState.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import Icon from "./Icon.vue";
 import { useI18n } from "../i18n";
 

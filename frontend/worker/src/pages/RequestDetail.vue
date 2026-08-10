@@ -9,24 +9,27 @@
 
     <div v-if="detail.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
 
-    <div v-else-if="detail.error" class="card card-pad text-center">
-      <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
-      <p class="text-sm text-muted">{{ errorMessage }}</p>
-      <Button class="mt-3" variant="outline" size="xl" :label="t('common.retry')" @click="detail.reload()" />
-    </div>
+    <LoadError
+      v-else-if="detail.error"
+      :title="t('errors.loadError')"
+      :detail="errorMessage"
+      :hint="t('errors.retryHint')"
+      :retry-label="t('common.retry')"
+      @retry="detail.reload()"
+    />
 
     <template v-else-if="data">
       <section class="card card-pad space-y-2">
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0">
-            <div class="text-base font-extrabold leading-tight">
+            <div class="text-base font-bold leading-tight">
               {{ tEnum("requestCategory", data.request_category) }}
             </div>
             <div class="mt-0.5 text-xs text-muted">
               {{ t("requests.reference") }}: <bdi>{{ data.name }}</bdi>
             </div>
           </div>
-          <span class="pill shrink-0" :class="statusPill(data.status)">{{ tEnum("requestStatus", data.status) }}</span>
+          <StatusLabel class="shrink-0" :label="tEnum('requestStatus', data.status)" :tone="statusTone(data.status)" />
         </div>
         <div v-if="data.priority || data.issue_location" class="text-xs text-muted">
           <span v-if="data.priority">{{ tEnum("priority", data.priority) }}</span>
@@ -35,8 +38,7 @@
         </div>
       </section>
 
-      <section v-if="data.timeline && data.timeline.length" class="card card-pad space-y-3">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("requests.timeline") }}</h3>
+      <Panel v-if="data.timeline && data.timeline.length" :title="t('requests.timeline')">
         <ol class="timeline">
           <li v-for="(step, i) in data.timeline" :key="i" class="timeline-row">
             <span class="timeline-dot" :class="i === data.timeline.length - 1 ? 'timeline-dot-active' : ''">
@@ -51,7 +53,7 @@
             </div>
           </li>
         </ol>
-      </section>
+      </Panel>
 
       <section class="card card-pad space-y-4">
         <div v-if="data.description">
@@ -74,8 +76,7 @@
         </div>
       </section>
 
-      <section v-if="data.attachment" class="card card-pad space-y-2">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("requests.attachment") }}</h3>
+      <Panel v-if="data.attachment" :title="t('requests.attachment')">
         <a :href="data.attachment" target="_blank" rel="noopener" class="attach-tile" style="text-decoration: none">
           <img v-if="isImage(data.attachment)" :src="data.attachment" alt="" class="attach-thumb" />
           <span v-else class="attach-icon"><Icon name="doc" :size="22" /></span>
@@ -85,19 +86,23 @@
           </span>
           <Icon name="external" :size="18" class="text-muted shrink-0" />
         </a>
-      </section>
+      </Panel>
     </template>
 
-    <div v-else-if="!detail.loading" class="card card-pad text-center">
-      <p class="text-sm text-muted">{{ t("requests.notFound") }}</p>
-    </div>
+    <EmptyState v-else-if="!detail.loading" :title="t('requests.notFound')">
+      <template #icon><Icon name="doc" :size="22" /></template>
+    </EmptyState>
   </div>
 </template>
 
 <script setup>
 import { computed } from "vue";
 import { useRoute } from "vue-router";
-import { Button, createResource } from "frappe-ui";
+import { createResource } from "frappe-ui";
+import EmptyState from "@shared/components/EmptyState.vue";
+import LoadError from "@shared/components/LoadError.vue";
+import Panel from "@shared/components/Panel.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import Icon from "../components/Icon.vue";
 import HousingNav from "../components/HousingNav.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
@@ -134,12 +139,12 @@ function timelineLabel(step) {
   return t("requests.timelineCurrent");
 }
 
-function statusPill(status) {
+function statusTone(status) {
   const s = (status || "").toLowerCase();
-  if (s === "resolved" || s === "closed") return "pill-success";
-  if (s === "in progress" || s === "assigned" || s === "triaged") return "pill-warning";
-  if (s === "rejected") return "pill-danger";
-  return "pill-accent";
+  if (s === "resolved" || s === "closed") return "success";
+  if (s === "in progress" || s === "assigned" || s === "triaged") return "warning";
+  if (s === "rejected") return "danger";
+  return "accent";
 }
 </script>
 

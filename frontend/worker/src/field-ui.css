@@ -233,54 +233,6 @@ body {
   line-height: 1.45;
 }
 
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  min-block-size: 28px;
-  max-inline-size: 100%;
-  padding-inline: 0.65rem;
-  border: 1px solid var(--pill-border, var(--c-border-strong));
-  border-radius: var(--radius-pill);
-  background: var(--pill-bg, transparent);
-  color: var(--pill-ink, var(--c-ink-soft));
-  font-family: var(--font-brand);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  line-height: 1.2;
-}
-.pill::before {
-  content: "";
-  inline-size: 0.42rem;
-  block-size: 0.42rem;
-  flex: 0 0 auto;
-  border-radius: var(--radius-pill);
-  background: currentColor;
-}
-.pill-neutral {
-  --pill-bg: color-mix(in srgb, var(--c-ink) 5%, transparent);
-}
-.pill-success {
-  --pill-bg: var(--c-success-bg);
-  --pill-border: color-mix(in srgb, var(--c-success) 32%, transparent);
-  --pill-ink: var(--c-success);
-}
-.pill-warning {
-  --pill-bg: var(--c-warning-bg);
-  --pill-border: color-mix(in srgb, var(--c-warning) 32%, transparent);
-  --pill-ink: var(--c-warning);
-}
-.pill-danger {
-  --pill-bg: var(--c-danger-bg);
-  --pill-border: color-mix(in srgb, var(--c-danger) 32%, transparent);
-  --pill-ink: var(--c-danger);
-}
-.pill-accent {
-  --pill-bg: color-mix(in srgb, var(--c-mint) 20%, transparent);
-  --pill-border: color-mix(in srgb, var(--c-primary) 28%, transparent);
-  --pill-ink: var(--c-accent-ink);
-}
-
 /* Legacy classes remain only as adapters while visible controls use frappe-ui. */
 .btn {
   display: inline-flex;
@@ -546,19 +498,6 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.hz-dock {
-  position: sticky;
-  z-index: 12;
-  inset-block-end: 0;
-  margin-block-start: var(--sp-6);
-  padding: var(--sp-3);
-  border: 1px solid var(--c-border-strong);
-  border-radius: var(--radius);
-  background: color-mix(in srgb, var(--c-surface) 95%, transparent);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(12px);
-}
-.hz-dock-reason,
 .row-reason {
   margin: var(--sp-2) 0 0;
   color: var(--c-muted);
@@ -675,7 +614,6 @@ body {
 @media (max-width: 30rem) {
   .card-pad,
   .pane { padding-block: var(--sp-3); }
-  .hz-dock { margin-inline: calc(-1 * var(--sp-1)); }
 }
 
 @media (prefers-reduced-motion: reduce) {

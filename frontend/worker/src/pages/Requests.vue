@@ -2,9 +2,8 @@
 <template>
   <div class="space-y-5">
     <HousingNav />
-    <section class="card card-pad space-y-3">
-      <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("requests.new") }}</h3>
-
+    <Panel :title="t('requests.new')">
+      <div class="space-y-3">
       <div class="form-pair">
         <FormControl v-model="form.category" type="select" size="lg" :label="t('requests.category')" :options="categoryOptions" />
         <FormControl v-model="form.priority" type="select" size="lg" :label="t('requests.priority')" :options="priorityOptions" />
@@ -39,68 +38,85 @@
         </div>
       </div>
 
-      <Button
-        variant="solid"
-        theme="green"
-        size="2xl"
-        :disabled="create.loading || !canSubmit"
-        :loading="create.loading"
-        :label="t('requests.submit')"
-        @click="submit"
-      >
-        <template #prefix><Icon name="send" :size="20" /></template>
-      </Button>
-      <p v-if="!canSubmit" class="text-xs text-muted">{{ t("requests.needText") }}</p>
       <p v-if="ok" class="status-note status-ok">{{ t("requests.submitted") }}</p>
       <p v-if="err" class="status-note status-err">{{ err }}</p>
-    </section>
+      </div>
+    </Panel>
 
-    <section v-if="list.data && list.data.length" class="space-y-3">
-      <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("requests.mine") }}</h3>
-      <router-link
-        v-for="r in list.data"
-        :key="r.name"
-        :to="`/requests/${encodeURIComponent(r.name)}`"
-        class="card card-pad block"
-        style="text-decoration: none"
-      >
-        <div class="flex items-start justify-between gap-2">
-          <div class="font-bold leading-tight">{{ tEnum("requestCategory", r.request_category) }}</div>
-          <span class="pill shrink-0" :class="statusPill(r.status)">{{ tEnum("requestStatus", r.status) }}</span>
-        </div>
-        <p class="mt-1 text-sm text-soft whitespace-pre-line line-clamp-3">{{ r.description }}</p>
-        <div class="mt-1 flex items-center justify-between gap-2">
-          <div class="text-xs text-muted">{{ tEnum("priority", r.priority) }} · <bdi>{{ formatDate(r.creation) }}</bdi></div>
-          <Icon name="chevron" :size="16" class="text-muted shrink-0 row-chevron" />
-        </div>
-        <div v-if="r.resolution_notes" class="mt-2 text-sm">
-          <span class="text-muted">{{ t("requests.resolution") }}:</span>
-          <span class="font-semibold"> {{ r.resolution_notes }}</span>
-        </div>
-      </router-link>
-    </section>
+    <Panel :title="t('requests.mine')">
+      <template v-if="list.data && list.data.length">
+        <router-link
+          v-for="r in list.data"
+          :key="r.name"
+          :to="`/requests/${encodeURIComponent(r.name)}`"
+          class="card card-pad block"
+          style="text-decoration: none"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <div class="font-bold leading-tight">{{ tEnum("requestCategory", r.request_category) }}</div>
+            <StatusLabel class="shrink-0" :label="tEnum('requestStatus', r.status)" :tone="statusTone(r.status)" />
+          </div>
+          <p class="mt-1 text-sm text-soft whitespace-pre-line line-clamp-3">{{ r.description }}</p>
+          <div class="mt-1 flex items-center justify-between gap-2">
+            <div class="text-xs text-muted">{{ tEnum("priority", r.priority) }} · <bdi>{{ formatDate(r.creation) }}</bdi></div>
+            <Icon name="chevron" :size="16" class="text-muted shrink-0 row-chevron" />
+          </div>
+          <div v-if="r.resolution_notes" class="mt-2 text-sm">
+            <span class="text-muted">{{ t("requests.resolution") }}:</span>
+            <span class="font-semibold"> {{ r.resolution_notes }}</span>
+          </div>
+        </router-link>
+      </template>
 
-    <div v-else-if="list.error" class="card card-pad text-center">
-      <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
-      <p class="text-sm text-muted">{{ listErrorMessage }}</p>
-      <Button class="mt-3" variant="outline" size="xl" :label="t('common.retry')" @click="list.reload()" />
-    </div>
+      <LoadError
+        v-else-if="list.error"
+        :title="t('errors.loadError')"
+        :detail="listErrorMessage"
+        :hint="t('errors.retryHint')"
+        :retry-label="t('common.retry')"
+        @retry="list.reload()"
+      />
 
-    <section v-else-if="list.loading" class="space-y-3">
-      <Skeleton :lines="2" />
-      <Skeleton :lines="2" />
-    </section>
+      <div v-else-if="list.loading" class="space-y-3">
+        <Skeleton :lines="2" />
+        <Skeleton :lines="2" />
+      </div>
 
-    <div v-else class="card card-pad text-center">
-      <p class="text-sm text-muted">{{ t("requests.empty") }}</p>
-      <p class="text-xs text-muted mt-1">{{ t("requests.emptyHint") }}</p>
-    </div>
+      <EmptyState v-else :title="t('requests.empty')" :hint="t('requests.emptyHint')">
+        <template #icon><Icon name="plus" :size="22" /></template>
+      </EmptyState>
+    </Panel>
+
+    <ActionDock>
+      <template #secondary>
+        <p v-if="!canSubmit" class="row-reason">{{ t("requests.needText") }}</p>
+      </template>
+      <template #primary>
+        <Button
+          class="dock-btn"
+          variant="solid"
+          theme="green"
+          size="2xl"
+          :disabled="create.loading || !canSubmit"
+          :loading="create.loading"
+          :label="t('requests.submit')"
+          @click="submit"
+        >
+          <template #prefix><Icon name="send" :size="20" /></template>
+        </Button>
+      </template>
+    </ActionDock>
   </div>
 </template>
 
 <script setup>
 import { computed, reactive, ref } from "vue";
 import { Button, FormControl, createResource } from "frappe-ui";
+import ActionDock from "@shared/components/ActionDock.vue";
+import EmptyState from "@shared/components/EmptyState.vue";
+import LoadError from "@shared/components/LoadError.vue";
+import Panel from "@shared/components/Panel.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import Icon from "../components/Icon.vue";
 import HousingNav from "../components/HousingNav.vue";
 import Skeleton from "../components/Skeleton.vue";
@@ -213,12 +229,12 @@ function submit() {
   });
 }
 
-function statusPill(status) {
+function statusTone(status) {
   const s = (status || "").toLowerCase();
-  if (s === "resolved" || s === "closed") return "pill-success";
-  if (s === "in progress" || s === "assigned" || s === "triaged") return "pill-warning";
-  if (s === "rejected") return "pill-danger";
-  return "pill-accent";
+  if (s === "resolved" || s === "closed") return "success";
+  if (s === "in progress" || s === "assigned" || s === "triaged") return "warning";
+  if (s === "rejected") return "danger";
+  return "accent";
 }
 
 function formatDate(c) {

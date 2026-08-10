@@ -3,7 +3,14 @@
   <div class="space-y-5">
     <LoadingState v-if="profile.loading" :label="t('common.loading')" />
 
-    <ErrorState v-else-if="profile.error" :message="t('errors.loadFailed')" @retry="profile.reload()" />
+    <LoadError
+      v-else-if="profile.error"
+      :title="t('errors.loadFailed')"
+      :detail="loadErrorMessage"
+      :hint="t('errors.retryHint')"
+      :retry-label="t('common.retry')"
+      @retry="profile.reload()"
+    />
 
     <template v-else-if="profile.data && profile.data.name">
       <section class="card card-pad">
@@ -15,10 +22,10 @@
             {{ initial }}
           </span>
           <div class="min-w-0">
-            <div class="text-lg font-extrabold leading-tight truncate">
+            <div class="text-lg font-bold leading-tight truncate">
               {{ profile.data.full_name || t("common.none") }}
             </div>
-            <span class="pill mt-1" :class="statusPill">{{ profile.data.status || t("common.none") }}</span>
+            <StatusLabel class="mt-1" :label="profile.data.status || t('common.none')" :tone="statusTone" />
           </div>
         </div>
 
@@ -48,10 +55,10 @@
         </dl>
       </section>
 
-      <section v-if="profile.data.license_number || profile.data.license_expiry" class="card card-pad">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
-          {{ t("home.license") }}
-        </h3>
+      <Panel
+        v-if="profile.data.license_number || profile.data.license_expiry"
+        :title="t('home.license')"
+      >
         <dl class="space-y-3 text-sm">
           <div v-if="profile.data.license_number" class="flex items-center gap-2">
             <Icon name="badge" :size="18" class="text-primary shrink-0" />
@@ -80,12 +87,9 @@
         >
           <template #prefix><Icon name="alert" :size="18" /></template>
         </Button>
-      </section>
+      </Panel>
 
-      <section v-if="documents.length" class="card card-pad">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
-          {{ t("profile.documents") }}
-        </h3>
+      <Panel v-if="documents.length" :title="t('profile.documents')">
         <dl class="space-y-3 text-sm">
           <div
             v-for="docu in documents"
@@ -104,17 +108,13 @@
             </dd>
           </div>
         </dl>
-      </section>
+      </Panel>
 
-      <section v-if="clearanceRow" class="card card-pad">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
-          {{ t("clearance.title") }}
-        </h3>
-        <div class="flex items-center justify-between gap-3">
-          <span class="text-sm text-muted">{{ t("clearance.status") }}</span>
-          <span class="pill" :class="clearancePill">{{ clearanceStatusLabel }}</span>
-        </div>
-        <dl class="mt-3 space-y-2 text-sm">
+      <Panel v-if="clearanceRow" :title="t('clearance.title')">
+        <template #status>
+          <StatusLabel :label="clearanceStatusLabel" :tone="clearanceTone" />
+        </template>
+        <dl class="space-y-2 text-sm">
           <div v-if="clearanceRow.clearance_reason" class="flex items-center gap-2">
             <dt class="text-muted">{{ t("clearance.reason") }}</dt>
             <dd class="ms-auto font-semibold">{{ clearanceRow.clearance_reason }}</dd>
@@ -147,12 +147,9 @@
         >
           <template #prefix><Icon name="badge" :size="18" /></template>
         </Button>
-      </section>
+      </Panel>
 
-      <div class="space-y-2">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted">
-          {{ t("profile.more") }}
-        </h3>
+      <Panel :title="t('profile.more')">
         <router-link
           v-for="m in moreLinks"
           :key="m.to"
@@ -164,12 +161,9 @@
           <span class="text-sm font-semibold">{{ t(m.labelKey) }}</span>
           <Icon name="chevron" :size="18" class="ms-auto text-muted shrink-0" />
         </router-link>
-      </div>
+      </Panel>
 
-      <div class="space-y-2">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted">
-          {{ t("profile.myRequests") }}
-        </h3>
+      <Panel :title="t('profile.myRequests')">
         <router-link to="/fuel" class="card card-pad flex items-center gap-3" style="text-decoration: none">
           <Icon name="fuel" :size="18" class="text-primary shrink-0" />
           <span class="text-sm font-semibold">{{ t("profile.fuelRequest") }}</span>
@@ -180,23 +174,19 @@
           <span class="text-sm font-semibold">{{ t("profile.supportTickets") }}</span>
           <Icon name="chevron" :size="18" class="ms-auto text-muted shrink-0" />
         </router-link>
-      </div>
+      </Panel>
 
-      <section class="card card-pad">
+      <Panel :title="t('lang.label')">
         <div class="flex items-center gap-2">
           <Icon name="globe" :size="18" class="text-primary shrink-0" />
-          <span class="text-sm font-semibold">{{ t("lang.label") }}</span>
           <div class="ms-auto"><LangToggle /></div>
         </div>
-      </section>
+      </Panel>
 
-      <section v-if="canOfferPush" class="card card-pad">
+      <Panel v-if="canOfferPush" :title="t('push.title')">
         <div class="flex items-center gap-2">
           <Icon name="bell" :size="18" class="text-primary shrink-0" />
-          <div class="min-w-0">
-            <div class="text-sm font-semibold">{{ t("push.title") }}</div>
-            <div class="text-xs text-muted">{{ t("push.body") }}</div>
-          </div>
+          <div class="min-w-0 text-xs text-muted">{{ t("push.body") }}</div>
           <Button
             type="button"
             class="ms-auto shrink-0"
@@ -210,22 +200,26 @@
           />
         </div>
         <div v-if="isDenied" class="text-xs text-warning mt-2">{{ t("push.denied") }}</div>
-      </section>
+      </Panel>
     </template>
 
-    <EmptyState v-else :title="t('profile.empty')" />
+    <EmptyState v-else :title="t('profile.empty')">
+      <template #icon><Icon name="user" :size="22" /></template>
+    </EmptyState>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted } from "vue";
 import { Button, createResource } from "frappe-ui";
-import Icon from "../components/Icon.vue";
+import EmptyState from "@shared/components/EmptyState.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
+import LoadError from "@shared/components/LoadError.vue";
+import Panel from "@shared/components/Panel.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
+import Icon from "../components/Icon.vue";
 import LoadingState from "../components/LoadingState.vue";
-import EmptyState from "../components/EmptyState.vue";
-import ErrorState from "../components/ErrorState.vue";
-import { useI18n } from "../i18n";
+import { useI18n, resourceErrorMessage } from "../i18n";
 import { pushToast } from "../toast";
 import {
   initPush,
@@ -255,6 +249,8 @@ const profile = createResource({
   url: "apex.salis.api.driver_portal.get_driver_profile",
   auto: true,
 });
+
+const loadErrorMessage = computed(() => resourceErrorMessage(profile.error, "errors.loadFailed"));
 
 const clearance = createResource({
   url: "apex.salis.api.driver_portal.my_clearance",
@@ -298,12 +294,12 @@ const initial = computed(
   () => ((profile.data?.full_name || "?").trim().charAt(0).toUpperCase()) || "?",
 );
 
-const statusPill = computed(() => {
+const statusTone = computed(() => {
   const s = (profile.data?.status || "").toLowerCase();
-  if (s === "active") return "pill-success";
-  if (s === "released" || s === "stopped") return "pill-danger";
-  if (s === "on leave") return "pill-warning";
-  return "pill-neutral";
+  if (s === "active") return "success";
+  if (s === "released" || s === "stopped") return "danger";
+  if (s === "on leave") return "warning";
+  return "neutral";
 });
 
 const daysToExpiry = computed(() => {
@@ -372,12 +368,12 @@ function docHint(docu) {
   return "";
 }
 
-const clearancePill = computed(() => {
+const clearanceTone = computed(() => {
   const s = (clearanceRow.value?.status || "").toLowerCase();
-  if (s === "cleared") return "pill-success";
-  if (s === "blocked") return "pill-danger";
-  if (s === "in progress") return "pill-warning";
-  return "pill-neutral";
+  if (s === "cleared") return "success";
+  if (s === "blocked") return "danger";
+  if (s === "in progress") return "warning";
+  return "neutral";
 });
 const clearanceStatusLabel = computed(() => {
   const c = clearanceRow.value;

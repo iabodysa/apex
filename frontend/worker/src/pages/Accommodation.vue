@@ -7,11 +7,14 @@
       <Skeleton :lines="4" />
     </template>
 
-    <div v-else-if="acc.error && !ad" class="card card-pad text-center">
-      <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
-      <p class="text-sm text-muted">{{ errorMessage }}</p>
-      <Button class="mt-3" variant="outline" size="xl" :label="t('common.retry')" @click="acc.reload()" />
-    </div>
+    <LoadError
+      v-else-if="acc.error && !ad"
+      :title="t('errors.loadError')"
+      :detail="errorMessage"
+      :hint="t('errors.retryHint')"
+      :retry-label="t('common.retry')"
+      @retry="acc.reload()"
+    />
 
     <template v-else-if="ad && ad.assignment">
       <section class="card card-pad space-y-4">
@@ -20,7 +23,7 @@
             <Icon name="building" :size="22" />
           </span>
           <div class="min-w-0">
-            <div class="text-base font-extrabold leading-tight truncate">
+            <div class="text-base font-bold leading-tight truncate">
               {{ building?.building_name || ad.assignment.name }}
             </div>
             <div v-if="buildingLocation" class="text-sm text-muted truncate">{{ buildingLocation }}</div>
@@ -56,8 +59,7 @@
         </a>
       </section>
 
-      <section v-if="building?.in_charge" class="card card-pad">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">{{ t("accommodation.inCharge") }}</h3>
+      <Panel v-if="building?.in_charge" :title="t('accommodation.inCharge')">
         <div class="flex items-center gap-3">
           <span class="avatar h-10 w-10" style="background: var(--c-mint); color: var(--c-ink)">
             <Icon name="user" :size="18" />
@@ -75,28 +77,34 @@
             <Icon name="message" :size="18" /> {{ t("common.whatsapp") }}
           </a>
         </div>
-      </section>
+      </Panel>
 
-      <section v-if="ad.assignment.notes" class="card card-pad">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-2">{{ t("accommodation.notes") }}</h3>
+      <Panel v-if="ad.assignment.notes" :title="t('accommodation.notes')">
         <p class="text-sm text-soft whitespace-pre-line">{{ ad.assignment.notes }}</p>
-      </section>
+      </Panel>
 
-      <router-link to="/requests" class="btn btn-outline" style="text-decoration: none">
-        <Icon name="plus" :size="18" /> {{ t("accommodation.reportIssue") }}
-      </router-link>
+      <ActionDock>
+        <template #primary>
+          <router-link to="/requests" class="btn btn-outline" style="text-decoration: none">
+            <Icon name="plus" :size="18" /> {{ t("accommodation.reportIssue") }}
+          </router-link>
+        </template>
+      </ActionDock>
     </template>
 
-    <div v-else class="card card-pad text-center">
-      <p class="text-sm text-muted">{{ t("accommodation.empty") }}</p>
-      <p class="text-xs text-muted mt-1">{{ t("accommodation.emptyHint") }}</p>
-    </div>
+    <EmptyState v-else :title="t('accommodation.empty')" :hint="t('accommodation.emptyHint')">
+      <template #icon><Icon name="building" :size="22" /></template>
+    </EmptyState>
   </div>
 </template>
 
 <script setup>
 import { computed, h } from "vue";
-import { Button, createResource } from "frappe-ui";
+import { createResource } from "frappe-ui";
+import ActionDock from "@shared/components/ActionDock.vue";
+import EmptyState from "@shared/components/EmptyState.vue";
+import LoadError from "@shared/components/LoadError.vue";
+import Panel from "@shared/components/Panel.vue";
 import Icon from "../components/Icon.vue";
 import HousingNav from "../components/HousingNav.vue";
 import Skeleton from "../components/Skeleton.vue";
