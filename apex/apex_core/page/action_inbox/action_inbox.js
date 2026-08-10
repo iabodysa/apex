@@ -28,6 +28,7 @@ const AI_STYLE = {
 class ActionInbox {
 	constructor(page) {
 		this.page = page;
+		this._gen = 0;
 		this._build_skeleton();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
 		frappe.realtime.on('notification', frappe.utils.debounce(() => this.refresh(), 5000));
@@ -68,11 +69,17 @@ class ActionInbox {
 	}
 
 	refresh() {
+		const gen = ++this._gen;
 		this._render_loading();
 		frappe
 			.call('apex.apex_core.worklist.my_work_center.get_my_work')
-			.then((r) => this._render((r && r.message) || {}))
-			.catch(() => this._render_error());
+			.then((r) => {
+				if (gen !== this._gen) return;
+				this._render((r && r.message) || {});
+			})
+			.catch(() => {
+				if (gen === this._gen) this._render_error();
+			});
 	}
 
 	_render(data) {

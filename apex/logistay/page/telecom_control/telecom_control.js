@@ -48,6 +48,8 @@ class TelecomControl {
 		this.filters = this._load_filters();
 		this.state = { page: 1, page_size: 20 };
 		this.charts = {};
+		this.current_sim = null;
+		this._gen = 0;
 		this._build_skeleton();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
 		this.refresh();
@@ -74,7 +76,12 @@ class TelecomControl {
 		this.$tableWrap = $('<div class="tc-table-wrap"></div>').attr('style', TC_STYLE.table_wrap).appendTo(this.$root);
 		this.$pager = $('<div class="tc-pager"></div>').attr('style', TC_STYLE.pager).appendTo(this.$root);
 		this.$empty = $('<div class="tc-empty"></div>').attr('style', TC_STYLE.empty).appendTo(this.$root).hide();
-		this.$drawer = $('<div class="tc-drawer"></div>').attr('style', TC_STYLE.drawer).appendTo(document.body);
+		this.$backdrop = $('<div class="tc-backdrop"></div>').appendTo(document.body);
+		this.$drawer = $('<div class="tc-drawer" role="dialog" aria-modal="true"></div>')
+			.attr('style', TC_STYLE.drawer)
+			.attr('aria-label', __('SIM details'))
+			.appendTo(document.body);
+		this.$backdrop.on('click', () => this._close_drawer());
 		this._build_filters();
 	}
 
@@ -141,20 +148,25 @@ class TelecomControl {
 	}
 
 	refresh() {
+		const gen = ++this._gen;
+		const page = this.state.page;
 		this._render_loading();
 		const args = { filters: this.filters };
 		Promise.all([
 			this._call('get_summary_cards', args),
 			this._call('get_charts', args),
-			this._call('get_sim_rows', { ...args, page: this.state.page, page_size: this.state.page_size }),
+			this._call('get_sim_rows', { ...args, page, page_size: this.state.page_size }),
 		])
 			.then(([cards, charts, rows]) => {
+				if (gen !== this._gen) return;
 				this.$empty.hide();
 				this._render_cards(cards || {});
 				this._render_charts(charts || {});
 				this._render_table(rows || { rows: [], total: 0 });
 			})
-			.catch(() => this._render_error());
+			.catch(() => {
+				if (gen === this._gen) this._render_error();
+			});
 	}
 
 	_call(method, args) {
@@ -227,13 +239,13 @@ class TelecomControl {
 			this.$pager.empty();
 			return;
 		}
-		const $table = $('<table class="table table-hover" style="margin:0;"></table>').appendTo(this.$tableWrap);
+		const $table = $('<table class="table tc-table" style="margin:0;"></table>').appendTo(this.$tableWrap);
 		const heads = [__('Mobile Number'), __('Status'), __('Custodian'), __('Contract'), __('Cost Center')];
 		const $tr = $('<tr></tr>').appendTo($('<thead></thead>').appendTo($table));
 		heads.forEach((h) => $('<th></th>').text(h).appendTo($tr));
 		const $tbody = $('<tbody></tbody>').appendTo($table);
 		rows.forEach((row) => {
-			const $r = $('<tr style="cursor:pointer;"></tr>').on('click', () => this._open_drawer(row.name)).appendTo($tbody);
+			const $r = $('<tr></tr>').on('click', () => this._open_drawer(row.name)).appendTo($tbody);
 			$('<td></td>').text(row.mobile_number || '').appendTo($r);
 			const $st = $('<td></td>').appendTo($r);
 			$(`<span class="indicator-pill no-indicator-dot ${TC_STATUS_COLOR[row.status] || 'gray'}"></span>`).text(__(row.status || '')).appendTo($st);
@@ -263,12 +275,29 @@ class TelecomControl {
 
 	_open_drawer(sim_card) {
 		this.current_sim = sim_card;
+		this.$backdrop.show();
 		this.$drawer.empty().show();
+		$(document).on('keydown.tc-drawer', (e) => {
+			if (e.key === 'Escape') this._close_drawer();
+		});
 		$('<div></div>').attr('style', TC_STYLE.section_head).text(__('Loading…')).appendTo(this.$drawer);
 		frappe
 			.call({ method: 'apex.logistay.api.telecom_control.get_sim_detail', args: { sim_card }, type: 'GET' })
-			.then((r) => this._render_drawer(r && r.message))
-			.catch(() => this.$drawer.empty().append($('<div></div>').attr('style', TC_STYLE.empty).text(__('Could not load SIM.'))));
+			.then((r) => {
+				if (this.current_sim !== sim_card) return;
+				this._render_drawer(r && r.message);
+			})
+			.catch(() => {
+				if (this.current_sim !== sim_card) return;
+				this.$drawer.empty().append($('<div></div>').attr('style', TC_STYLE.empty).text(__('Could not load SIM.')));
+			});
+	}
+
+	_close_drawer() {
+		this.current_sim = null;
+		$(document).off('keydown.tc-drawer');
+		this.$backdrop.hide();
+		this.$drawer.hide().empty();
 	}
 
 	_render_drawer(detail) {
@@ -278,7 +307,10 @@ class TelecomControl {
 		this.$drawer.empty();
 		const $head = $('<div style="display:flex;justify-content:space-between;align-items:center;"></div>').appendTo(this.$drawer);
 		$('<h4 style="margin:0;"></h4>').text(detail.mobile_number || detail.name).appendTo($head);
-		$('<button class="btn btn-default btn-sm">✕</button>').on('click', () => this.$drawer.hide()).appendTo($head);
+		$('<button class="btn btn-default btn-sm tc-drawer-close">✕</button>')
+			.attr('aria-label', __('Close'))
+			.on('click', () => this._close_drawer())
+			.appendTo($head);
 
 		this._render_action_bar(detail);
 
@@ -367,15 +399,19 @@ class TelecomControl {
 			primary_action_label: verb,
 			primary_action: (values) => {
 				dialog.hide();
-				this._run_action('perform_custody_action', {
-					sim_card: detail.name,
-					action,
-					custodian_type: values.custodian_type,
-					employee: values.employee,
-					project: values.project,
-					assignment_date: values.assignment_date,
-					reason: values.reason,
-				});
+				this._run_action(
+					'perform_custody_action',
+					{
+						sim_card: detail.name,
+						action,
+						custodian_type: values.custodian_type,
+						employee: values.employee,
+						project: values.project,
+						assignment_date: values.assignment_date,
+						reason: values.reason,
+					},
+					detail.name,
+				);
 			},
 		});
 		dialog.show();
@@ -384,7 +420,12 @@ class TelecomControl {
 	_edit_mobile_dialog(detail) {
 		frappe.prompt(
 			[{ fieldname: 'mobile_number', label: __('Mobile Number'), fieldtype: 'Data', reqd: 1, default: detail.mobile_number }],
-			(values) => this._run_action('edit_mobile_number', { sim_card: detail.name, mobile_number: values.mobile_number }),
+			(values) =>
+				this._run_action(
+					'edit_mobile_number',
+					{ sim_card: detail.name, mobile_number: values.mobile_number },
+					detail.name,
+				),
 			__('Edit Mobile Number'),
 			__('Save'),
 		);
@@ -393,23 +434,33 @@ class TelecomControl {
 	_move_contract_dialog(detail) {
 		frappe.prompt(
 			[{ fieldname: 'telecom_contract', label: __('New Contract'), fieldtype: 'Link', options: 'Telecom Contract', reqd: 1, get_query: () => ({ filters: { docstatus: 1 } }) }],
-			(values) => this._run_action('move_to_contract', { sim_card: detail.name, telecom_contract: values.telecom_contract }),
+			(values) =>
+				this._run_action(
+					'move_to_contract',
+					{ sim_card: detail.name, telecom_contract: values.telecom_contract },
+					detail.name,
+				),
 			__('Move to Contract'),
 			__('Move'),
 		);
 	}
 
-	_run_action(method, args) {
+	_run_action(method, args, sim_card) {
 		frappe.dom.freeze(__('Working…'));
 		frappe
 			.call({ method: `apex.logistay.api.sim_actions.${method}`, args })
 			.then((r) => {
+				if (r && r.exc) {
+					frappe.show_alert({ message: __('That did not go through.'), indicator: 'red' });
+					return;
+				}
 				frappe.show_alert({ message: __('Done'), indicator: 'green' });
 				this.refresh();
-				if (this.current_sim) {
-					this._open_drawer(this.current_sim);
+				if (sim_card && this.current_sim === sim_card) {
+					this._open_drawer(sim_card);
 				}
 			})
+			.catch(() => frappe.show_alert({ message: __('That did not go through.'), indicator: 'red' }))
 			.always(() => frappe.dom.unfreeze());
 	}
 }

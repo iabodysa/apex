@@ -3894,6 +3894,7 @@ SIM Exceptions,استثناءات الشرائح
 SIM Lines Covered,عدد الشرائح المشمولة
 SIM Lines Held Under This Contract,الشرائح المسجّلة على هذا العقد
 SIM company {0} must match its contract's company {1}.,شركة الشريحة {0} يجب أن تطابق شركة عقدها {1}.
+SIM details,تفاصيل الشريحة
 SIMs,الشرائح
 SIMs & Billing,الشرائح والفوترة
 SIMs Covered,الشرائح المشمولة
@@ -4545,6 +4546,7 @@ Terms Accepted On,تاريخ قبول الشروط
 Terms Signature,توقيع الموافقة
 Terms and Conditions,الشروط والأحكام
 Thank you. Your receipt of the custody items has been recorded.,شكراً لك. تم تسجيل استلامك أصناف العهدة.
+That did not go through.,ما تمت العملية.
 That vehicle is not assigned to you. You can only request fuel for your own vehicle.,تلك المركبة غير مسندة إليك. يمكنك طلب الوقود لمركبتك فقط.
 The Dispatch Trip being executed; its linked Transport Request carries the worker manifest this log records boarding against.,رحلة التسيير الجاري تنفيذها؛ ويحمل طلب النقل المرتبط بها كشف الركاب الذي يسجل هذا السجل صعودهم.
 The Dispatch Trip the scanned pass was issued against.,رحلة التسيير التي صدر التصريح الممسوح مقابلها.
