@@ -15,9 +15,6 @@
   </dl>
 
   <h3 class="psect-title"><Icon name="fuel" :size="14" /> {{ t("panel.fuelPlan") }}</h3>
-  <!-- Grade and the planned daily figure, both from the vehicle's own record. The per-litre
-       price that used to sit here was fixed in the bundle and rendered as if it had come from
-       the server, and the "monthly" figure beside it was the daily one times a flat 30. -->
   <div class="fuel-row">
     <Badge theme="orange" size="md" :label="fuel.gradeLabel" />
     <span v-if="fuel.daily > 0" class="fuel-daily">

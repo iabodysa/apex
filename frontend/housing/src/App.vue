@@ -48,9 +48,6 @@
         <h2>{{ sceneTitle }}</h2>
         <p v-if="sceneSubtitle" class="context-copy">{{ sceneSubtitle }}</p>
 
-        <!-- The chip that names the building IS the way back to the list. It was a static
-             div, so once a building was chosen there was no way to choose another from the
-             screen the reader was on. -->
         <button
           v-if="showsBuilding && building"
           type="button"
@@ -92,10 +89,6 @@
       tabindex="-1"
     >
       <section v-if="needsBuilding" class="building-stage" :aria-label="t('building.title')">
-        <!-- "الافتتاحيات: استخدم التركيب الأفقي في وسط شاشات الدخول والافتتاحيات" — the guide
-             puts the horizontal lockup at the centre of an opening screen, and this is the
-             portal's opening screen. It is the only place the approved lockup belongs, and
-             the only surface light enough to carry it: its wordmark is drawn in forest. -->
         <Brand class="stage-lockup" :variant="lockupVariant" :alt="t('common.appName')" />
         <p class="stage-kicker">{{ t("building.context") }}</p>
         <BuildingSwitcher @select="selectBuilding" />

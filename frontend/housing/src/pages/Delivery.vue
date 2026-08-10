@@ -70,8 +70,6 @@
       >
         <template #prefix><Icon name="shield-check" :size="20" /></template>
       </Button>
-      <!-- Disabled with the reason beside it, per DESIGN.md §7 — the control stays visible
-           so the reader learns WHO clears this checkpoint rather than meeting a refusal. -->
       <p v-if="selectedDelivery.status === 'Pending Exits' && !mayClearNext" class="dock-hint">
         {{ t("delivery.notYourCheckpoint", { label: exitLabel(nextExit(selectedDelivery)) }) }}
       </p>

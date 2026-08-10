@@ -14,8 +14,6 @@
     <div class="form-grid">
       <div class="ff">
         <FormLabel :label="t('reassignForm.driver')" :required="true" />
-        <!-- The picker binds the driver's record name; the typed text is only a search term,
-             and the server checks the id again before it writes. -->
         <Autocomplete
           :options="driverOptions"
           :model-value="selectedOption"
@@ -55,8 +53,6 @@
       <p class="ho-hint"><Icon name="clipboard-list" :size="13" /> {{ t("reassignForm.handoverHint") }}</p>
     </div>
 
-    <!-- The reassign stands even when the handover draft fails, so the fact that it is missing
-         stays on screen rather than leaving with a toast. -->
     <Alert
       v-if="handoverMissing"
       class="subform-note"

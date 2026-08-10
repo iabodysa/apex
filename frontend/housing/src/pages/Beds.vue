@@ -18,7 +18,6 @@
         size="lg"
         :label="t('beds.openRequests', { n: openRequests })"
       />
-      <!-- Zero open requests and a failed read drew the same picture: no badge. -->
       <Badge
         v-else-if="requestsRes.error"
         theme="gray"
@@ -98,8 +97,6 @@
             {{ t("beds.alreadyHoused") }}
           </p>
 
-          <!-- Without this the operator cannot tell a permission gap from a dead call:
-               the select is simply empty and check-in stays disabled with no reason. -->
           <FormControl
             v-if="worker"
             type="select"

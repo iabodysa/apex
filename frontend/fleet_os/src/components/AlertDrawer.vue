@@ -1,7 +1,5 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <!-- The library's Dialog rather than a hand-rolled overlay: it portals, traps the focus,
-       closes on Escape and gives the focus back — none of which the old drawer did. -->
   <Dialog v-model="open" :options="{ title: t('alerts.title'), size: 'lg' }">
     <template #body-content>
       <div class="ad-body">
