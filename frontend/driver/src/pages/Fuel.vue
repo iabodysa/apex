@@ -25,6 +25,15 @@
       </div>
     </Panel>
 
+    <Panel v-else-if="quota.error" :title="t('fuel.quota')">
+      <LoadError
+        :title="t('errors.loadFailed')"
+        :hint="t('errors.retryHint')"
+        :retry-label="t('common.retry')"
+        @retry="quota.reload()"
+      />
+    </Panel>
+
     <section class="card card-pad space-y-4">
       <div class="fuel-note">
         <p class="font-semibold leading-tight">{{ t("fuel.typeStandard") }}</p>

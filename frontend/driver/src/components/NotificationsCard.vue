@@ -15,6 +15,14 @@
       </li>
     </ul>
 
+    <LoadError
+      v-else-if="error"
+      :title="t('errors.loadFailed')"
+      :hint="t('errors.retryHint')"
+      :retry-label="t('common.retry')"
+      @retry="$emit('retry')"
+    />
+
     <EmptyState v-else :title="t('notifications.empty')" :hint="t('notifications.emptyHint')">
       <template #icon><Icon name="bell" :size="22" /></template>
     </EmptyState>
@@ -25,6 +33,7 @@
 import { computed } from "vue";
 import { Badge } from "frappe-ui";
 import EmptyState from "@shared/components/EmptyState.vue";
+import LoadError from "@shared/components/LoadError.vue";
 import Panel from "@shared/components/Panel.vue";
 import Icon from "./Icon.vue";
 import { useI18n } from "../i18n";
@@ -33,7 +42,10 @@ const { t, n } = useI18n();
 
 const props = defineProps({
   notifications: { type: Array, required: true },
+  error: { type: [Object, String], default: null },
 });
+
+defineEmits(["retry"]);
 
 const unread = computed(() => props.notifications.filter((note) => !note.read).length);
 </script>

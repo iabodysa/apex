@@ -42,7 +42,11 @@
 
     <aside class="field-evidence">
       <AlertsCard v-if="alerts.length" :alerts="alerts" />
-      <NotificationsCard :notifications="notifications" />
+      <NotificationsCard
+        :notifications="notifications"
+        :error="notes.error"
+        @retry="notes.reload()"
+      />
     </aside>
 
     <DestinationsCard class="field-ledger" />

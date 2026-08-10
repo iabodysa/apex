@@ -149,6 +149,15 @@
         </Button>
       </Panel>
 
+      <Panel v-else-if="clearance.error" :title="t('clearance.title')">
+        <LoadError
+          :title="t('errors.loadFailed')"
+          :hint="t('errors.retryHint')"
+          :retry-label="t('common.retry')"
+          @retry="clearance.reload()"
+        />
+      </Panel>
+
       <Panel :title="t('profile.more')">
         <router-link
           v-for="m in moreLinks"
