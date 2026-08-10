@@ -56,9 +56,6 @@
         </p>
     </PageShell>
 
-    <!-- A failed search is NOT an empty one. Rendering searchEmpty for both told the clerk
-         no worker by that name exists, so they retyped it, tried the passport number, and
-         went and reported the worker missing from the system. -->
     <PageShell
         :state="searchState"
         :title="t('arrivals.searchWorker')"
@@ -141,9 +138,6 @@
                     :label="t('arrivals.passport')"
                     v-model="form.passport_number"
                 />
-                <!-- 300 countries cannot be found in a plain select: no search, and on a
-                     phone the list cannot even be scrolled to the end. Autocomplete is the
-                     library's own control for a long list. -->
                 <div class="field-block">
                     <label class="field-label" for="arrivals-nationality">
                         {{ t("arrivals.nationality") }}
@@ -318,7 +312,12 @@ const expectedErrorMessage = computed(() =>
     resourceErrorMessage(expectedRes.error, "errors.arrivalsFailed"),
 );
 
-const workers = computed(() => (query.value.trim() ? searchRes.data || [] : []));
+const resultsQuery = ref("");
+const workers = computed(() => {
+    const term = query.value.trim();
+    if (!term || resultsQuery.value !== term) return [];
+    return searchRes.data || [];
+});
 
 const expectedState = computed(() => {
     if (expectedRes.loading && !manifest.value.total) return "loading";
@@ -334,7 +333,8 @@ const searchState = computed(() => {
     if (workers.value.length) return "ready";
     if (searchRes.error) return "error";
     if (searchRes.loading && query.value.trim()) return "loading";
-    return query.value.trim() ? "empty" : "ready";
+    if (!query.value.trim()) return "ready";
+    return resultsQuery.value === query.value.trim() ? "empty" : "loading";
 });
 
 function fetchAll() {
@@ -348,7 +348,12 @@ let searchTimer = 0;
 watch(query, () => {
     window.clearTimeout(searchTimer);
     if (!query.value.trim()) return;
-    searchTimer = window.setTimeout(() => searchRes.fetch(), 250);
+    searchTimer = window.setTimeout(() => {
+        const term = query.value.trim();
+        searchRes.fetch().then(() => {
+            resultsQuery.value = term;
+        });
+    }, 250);
 });
 
 function linkValue(value) {

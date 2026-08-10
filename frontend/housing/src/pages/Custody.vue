@@ -234,10 +234,12 @@ const conditionOptions = computed(() =>
    left the previous doctype's rows on screen under the new type, so one tap sent a
    Temporary Worker type with an Employee name. */
 const resultsType = ref(partyType.value);
+const resultsQuery = ref("");
 
 const matches = computed(() => {
     if (!query.value.trim()) return [];
     if (resultsType.value !== partyType.value) return [];
+    if (resultsQuery.value !== query.value.trim()) return [];
     return (searchRes.data || []).map((row) => ({
         name: row.name,
         partyType: resultsType.value,
@@ -298,7 +300,8 @@ const searchState = computed(() => {
     if (matches.value.length) return "ready";
     if (searchRes.error) return "error";
     if (searchRes.loading && query.value.trim()) return "loading";
-    return query.value.trim() ? "empty" : "ready";
+    if (!query.value.trim()) return "ready";
+    return resultsQuery.value === query.value.trim() ? "empty" : "loading";
 });
 
 function lineKey(line) {
@@ -455,6 +458,7 @@ watch([query, partyType], () => {
     });
     searchRes.reload().then(() => {
         resultsType.value = wanted;
+        resultsQuery.value = term;
     });
 });
 
