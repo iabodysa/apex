@@ -70,7 +70,7 @@ import MetricRibbon from "@shared/components/MetricRibbon.vue";
 import WorkQueue from "@shared/components/WorkQueue.vue";
 import Icon from "../components/Icon.vue";
 import { readCountDraft, readRoundDraft } from "../drafts.js";
-import { useI18n } from "../i18n";
+import { useI18n, resourceErrorMessage } from "../i18n";
 import { hasSection } from "../portal.js";
 import { connectSafetyRealtime } from "../realtime.js";
 import { building, localDate } from "../session";
@@ -133,9 +133,16 @@ const pageState = computed(() =>
 const pageTitle = computed(() =>
   pageState.value === "error" ? t("today.loadErrorTitle") : t("today.loadingTitle"),
 );
-const pageMessage = computed(() =>
-  pageState.value === "error" ? t("today.loadErrorHint") : t("today.loadingHint"),
-);
+/* The landing screen used to blame the network for every failure, including a building the
+   site has never heard of. It now reads the server's own answer, so the one cause a person
+   can act on is named instead of hidden behind "check your connection". */
+const pageMessage = computed(() => {
+  if (pageState.value !== "error") return t("today.loadingHint");
+  const first = errors.value[0];
+  return first
+    ? resourceErrorMessage(first.error, "today.loadErrorHint")
+    : t("today.loadErrorHint");
+});
 
 const gridReady = computed(() => gridRes.data != null);
 const requestsReady = computed(() => requestsRes.data != null);

@@ -125,14 +125,21 @@
                     :label="t('arrivals.passport')"
                     v-model="form.passport_number"
                 />
-                <FormControl
-                    type="select"
-                    size="lg"
-                    :label="t('arrivals.nationality')"
-                    :options="countryOptions"
-                    :description="countriesRes.error ? t('errors.listFailed') : undefined"
-                    v-model="form.nationality"
-                />
+                <!-- 300 countries cannot be found in a plain select: no search, and on a
+                     phone the list cannot even be scrolled to the end. Autocomplete is the
+                     library's own control for a long list. -->
+                <div class="field-block">
+                    <label class="field-label" for="arrivals-nationality">
+                        {{ t("arrivals.nationality") }}
+                    </label>
+                    <Autocomplete
+                        id="arrivals-nationality"
+                        v-model="form.nationality"
+                        :options="countryOptions"
+                        :placeholder="t('arrivals.nationalitySearch')"
+                    />
+                    <p v-if="countriesRes.error" class="field-hint">{{ t("errors.listFailed") }}</p>
+                </div>
                 <FormControl
                     type="text"
                     size="lg"
@@ -209,6 +216,7 @@
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import {
+    Autocomplete,
     Badge,
     Button,
     Dialog,
@@ -345,7 +353,11 @@ async function doRegister() {
         });
         registerOpen.value = false;
         expectedRes.reload();
-        if (query.value.trim()) searchRes.reload();
+        /* A worker registered from the top button carries no manifest row, so reloading the
+           expected list alone left him in NO list at all — the toast fired and not one pixel
+           moved. Put him in the search results, which is the one list that can hold him. */
+        if (!form.batch_row) query.value = form.worker_name;
+        else if (query.value.trim()) searchRes.reload();
     } catch (err) {
         formError.value = apiErrorMessage(err);
     } finally {

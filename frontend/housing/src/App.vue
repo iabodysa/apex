@@ -41,9 +41,13 @@
     </template>
 
     <template v-if="showContextList" #list>
-      <section class="desktop-context" :aria-label="t('nav.sectionLabel')">
+      <section
+        class="desktop-context"
+        :class="{ 'is-narrow': narrowContextList }"
+        :aria-label="t('nav.sectionLabel')"
+      >
         <p class="context-kicker">
-          <bdi v-if="usesBuilding && buildingLabel" dir="auto">{{ buildingLabel }}</bdi>
+          <bdi v-if="showsBuilding && buildingLabel" dir="auto">{{ buildingLabel }}</bdi>
           <span v-else>{{ sceneEyebrow }}</span>
         </p>
         <h2>{{ sceneTitle }}</h2>
@@ -53,7 +57,7 @@
              div, so once a building was chosen there was no way to choose another from the
              screen the reader was on. -->
         <button
-          v-if="usesBuilding && building"
+          v-if="showsBuilding && building"
           type="button"
           class="context-building"
           :aria-label="t('common.changeBuilding')"
@@ -100,7 +104,7 @@
       <template v-else>
         <header class="scene-heading">
           <p class="scene-eyebrow">
-            <bdi v-if="usesBuilding && buildingLabel" dir="auto">{{ buildingLabel }}</bdi>
+            <bdi v-if="showsBuilding && buildingLabel" dir="auto">{{ buildingLabel }}</bdi>
             <span v-else>{{ sceneEyebrow }}</span>
           </p>
           <h1>{{ sceneTitle }}</h1>
@@ -136,9 +140,9 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Button, FrappeUIProvider, Progress, TabButtons } from "frappe-ui";
+import { Button, FrappeUIProvider, Progress, TabButtons, createResource } from "frappe-ui";
 import Brand from "@shared/components/Brand.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
 import MobileConsoleShell from "@shared/components/MobileConsoleShell.vue";
@@ -156,17 +160,43 @@ import {
 import { building, buildingLabel, clearBuilding, countProgress, selectBuilding } from "./session";
 
 const { t, lang, dir } = useI18n();
+
+/* A building restored from this browser is a CLAIM, not a fact — it may have been chosen
+   against another site, or removed since. Left unchecked it is worse than having none: the
+   portal believes one is selected, never offers the picker, and every page reads forever
+   against a name the server has never heard of. The desk page has validated its own stored
+   building for as long as it has existed (front_desk.js:197-205); this is those three lines,
+   moved to the portal, so the right state is produced instead of the wrong one detected. */
+const storedCheck = createResource({
+  url: "apex.habitat.api.front_desk.list_supervisor_buildings",
+  onSuccess: (rows) => {
+    if (!building.value) return;
+    const known = (rows || []).some((row) => (row.building || row.name) === building.value);
+    if (!known) clearBuilding();
+  },
+});
+
+onMounted(() => {
+  if (building.value) storedCheck.fetch();
+});
 const route = useRoute();
 const router = useRouter();
 
 const BUILDING_SECTIONS = new Set(["today", "count", "beds", "arrivals", "custody", "transfer", "safety"]);
+// Sections that work against a building without owning the choice of one.
+const ASSET_SECTIONS = new Set(["delivery"]);
 const domains = allowedDomains();
 
 const currentSection = computed(() => (route.meta && route.meta.section) || "");
 const currentDomain = computed(
   () => (route.meta && route.meta.domain) || domainForSection(currentSection.value),
 );
+/* The chip that names the working scope shows in EVERY section. Count and delivery choose
+   their building inside the screen, so it used to be hidden there — and the operator watched
+   their scope vanish just by moving between tabs. Which section OWNS the choice is a
+   different question from whether the reader may see and change it. */
 const usesBuilding = computed(() => BUILDING_SECTIONS.has(currentSection.value));
+const showsBuilding = computed(() => usesBuilding.value || ASSET_SECTIONS.has(currentSection.value));
 const needsBuilding = computed(() => usesBuilding.value && !building.value);
 const portalName = computed(() =>
   ENTRY === "safety" ? t("common.safetyPortalName") : t("common.portalName"),
@@ -178,19 +208,20 @@ const sceneTitle = computed(() => {
   return section ? t(section.labelKey) : t("common.appName");
 });
 const sceneEyebrow = computed(() =>
-  usesBuilding.value && buildingLabel.value ? buildingLabel.value : t("common.operationalPortal"),
+  showsBuilding.value && buildingLabel.value ? buildingLabel.value : t("common.operationalPortal"),
 );
 const sceneSubtitle = computed(() =>
   currentSection.value ? t(`scene.${currentSection.value}`) : "",
 );
 
 const subsections = computed(() => sectionsForDomain(currentDomain.value));
-const showContextList = computed(
-  () =>
-    !!currentSection.value &&
-    !needsBuilding.value &&
-    !["count", "delivery"].includes(currentSection.value),
-);
+/* Count and delivery were excluded BY NAME, so the whole context pane vanished on them —
+   and the building chip with it. They own a wide two-pane list of their own, so they keep a
+   narrow rail carrying the scope and the section nav, not the full pane. */
+const WIDE_LIST_SECTIONS = new Set(["count", "delivery"]);
+
+const showContextList = computed(() => !!currentSection.value && !needsBuilding.value);
+const narrowContextList = computed(() => WIDE_LIST_SECTIONS.has(currentSection.value));
 const subsectionButtons = computed(() =>
   subsections.value.map((section) => ({ label: t(section.labelKey), value: section.id })),
 );
@@ -363,6 +394,12 @@ useDocumentLanguage(lang, dir);
   flex-direction: column;
   gap: var(--sp-4);
   min-inline-size: 0;
+}
+/* Count and delivery own a wide list of their own, so their rail carries the scope and the
+   section nav and gives the rest of the width back. */
+.desktop-context.is-narrow > h2,
+.desktop-context.is-narrow > .context-copy {
+  display: none;
 }
 .desktop-context h2 {
   margin: 0;
