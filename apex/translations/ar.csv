@@ -5258,6 +5258,7 @@ You can only save Trip Start Logs assigned to your own driver record.,لا يم�
 You can't check out at or before your check-in time. Try again in a moment.,لا يمكنك المغادرة في وقت التسكين أو قبله. حاول مرة أخرى بعد قليل.
 You cannot approve or pay a Payment Request you raised; a different Finance approver is required.,لا يمكنك اعتماد طلب دفع أنشأته أو تسديده؛ يلزم معتمد آخر من المالية.
 You cannot {0} a fuel request you raised yourself (segregation of duties).,لا يمكنك {0} طلب وقود أنشأته بنفسك (الفصل بين المهام).
+You are not allowed to look up workers.,ما عندك صلاحية للبحث عن العمال.
 You do not have write permission on this Dispatch Trip.,لا تملك صلاحية الكتابة على رحلة التسيير هذه.
 You don't have any building assigned. Ask an administrator to grant you a building.,لا يوجد مبنى مسند إليك. اطلب من المسؤول منحك صلاحية على مبنى.
 You don't have permission to view this building.,ليس لديك صلاحية لعرض هذا المبنى.

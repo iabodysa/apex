@@ -502,7 +502,17 @@ def resolve_worker(identifier: str) -> dict:
         has_active_assignment, message}``. ``found`` is False with a message when
         nothing matches.
     """
-    frappe.has_permission("Employee", "read", throw=True)
+    # ``select`` OR ``read``, which is what a Link picker itself accepts. This resolves ONE
+    # worker's identity from a scan, exactly the picker's job — and the housing roles are
+    # deliberately granted select and denied read (habitat_core_link_perms_seed) so they
+    # cannot open every Employee record. Demanding read here refused all five portal roles
+    # at the only step that populates a check-in.
+    if not frappe.has_permission("Employee", "select") and not frappe.has_permission(
+        "Employee", "read"
+    ):
+        frappe.throw(
+            _("You are not allowed to look up workers."), frappe.PermissionError
+        )
 
     identifier = (identifier or "").strip()
     if not identifier:
