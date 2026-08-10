@@ -321,6 +321,7 @@ class ArrivalsDesk {
 		if (val && val !== this.building) {
 			this.building = val;
 			this.catalog = null;
+			this._clear_deck();
 			this.refresh();
 			this._load_catalog();
 			this._load_manifest();
@@ -328,6 +329,7 @@ class ArrivalsDesk {
 			this.building = null;
 			this.grid = null;
 			this.catalog = null;
+			this._clear_deck();
 			this._render_stages();
 			this._render_capacity(null);
 			this._render_empty(__('Pick a building to start the arrival.'));
@@ -820,6 +822,13 @@ class ArrivalsDesk {
 	/* The highlight is derived from the selection, so the two places that drop the worker
 	   cannot leave a row lit behind them. A lit row with nothing selected tells the clerk
 	   they are still working on someone they have already housed. */
+	_clear_deck() {
+		this.cart = [];
+		this.custodyIssued = false;
+		this._clear_active(true);
+		this._render_deck();
+	}
+
 	_clear_active(clearPane) {
 		this.active = null;
 		if (this.$results) {
@@ -847,6 +856,7 @@ class ArrivalsDesk {
 				this.grid = r.message;
 				this._render_grid(this.grid);
 				this._load_manifest();
+				this._load_strip();
 			})
 			.catch(() => {});
 	}
@@ -1104,7 +1114,8 @@ class ArrivalsDesk {
 					this.custodyIssued = true;
 					frappe.show_alert({ message: __('Custody issued to {0}', [c.label]), indicator: 'green' });
 					this._render_stages();
-					this._render_deck();
+					this._load_catalog();
+					this.refresh();
 				},
 			});
 		});

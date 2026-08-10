@@ -553,6 +553,62 @@ def resolve_worker(identifier: str) -> dict:
     }
 
 
+@frappe.whitelist()
+def describe_worker(party_type: str, party: str) -> dict:
+    """Resolve a worker the caller already identified into the check-in payload.
+
+    ``resolve_worker`` answers for a SCAN; this answers for a party the caller
+    already holds, which is what a screen navigating from the arrivals list has.
+    It returns the same shape, computed the same way, so no client has to invent
+    ``has_active_assignment`` or ``employee`` — values only the server can know.
+    Same gates: the ``select`` or ``read`` pair a Link picker accepts, the
+    Temporary Worker read grant, and the per-doc estate scope.
+    """
+    if not frappe.has_permission("Employee", "select") and not frappe.has_permission(
+        "Employee", "read"
+    ):
+        frappe.throw(_("You are not allowed to look up workers."), frappe.PermissionError)
+
+    party_type = (party_type or "").strip()
+    party = (party or "").strip()
+    if party_type not in ("Employee", "Temporary Worker") or not party:
+        return {"found": False, "message": _("No worker matches {0}.").format(party or "")}
+
+    if party_type == "Temporary Worker":
+        frappe.has_permission("Temporary Worker", "read", throw=True)
+
+    from apex.habitat.api.arrivals_desk import _assert_party_in_scope
+
+    _assert_party_in_scope(party_type, party)
+
+    if party_type == "Employee":
+        employee = party
+        employee_name, image = (
+            frappe.db.get_value("Employee", party, ["employee_name", "image"]) or (None, None)
+        )
+    else:
+        tw = frappe.db.get_value(
+            "Temporary Worker", party, ["linked_employee", "worker_name"], as_dict=True
+        )
+        employee = (tw or {}).get("linked_employee") or None
+        employee_name = (tw or {}).get("worker_name")
+        image = frappe.db.get_value("Employee", employee, "image") if employee else None
+
+    if not employee_name:
+        return {"found": False, "message": _("No worker matches {0}.").format(party)}
+
+    return {
+        "found": True,
+        "party_type": party_type,
+        "party": party,
+        "employee": employee,
+        "employee_name": employee_name,
+        "image": image,
+        "has_active_assignment": _has_active_assignment(party_type, party, employee),
+        "message": None,
+    }
+
+
 @frappe.whitelist(methods=["POST"])
 def set_room_readiness(room, status):
     """Set Accommodation Room.readiness_status from the Front Desk board.

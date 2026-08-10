@@ -260,6 +260,8 @@ const form = reactive({
     cell_number: "",
     iqama_number: "",
     batch_row: null,
+    labour_supplier: null,
+    project: null,
 });
 
 const expectedRes = createResource({
@@ -327,6 +329,8 @@ function openRegister(row) {
     form.cell_number = "";
     form.iqama_number = "";
     form.batch_row = row ? row.row : null;
+    form.labour_supplier = row ? row.labour_supplier || null : null;
+    form.project = row ? row.project || null : null;
     registerOpen.value = true;
 }
 
@@ -344,6 +348,8 @@ async function doRegister() {
                 cell_number: form.cell_number || null,
                 iqama_number: form.iqama_number || null,
                 batch_row: form.batch_row,
+                labour_supplier: form.labour_supplier,
+                project: form.project,
             },
             type: "POST",
         });
@@ -353,9 +359,6 @@ async function doRegister() {
         });
         registerOpen.value = false;
         expectedRes.reload();
-        /* A worker registered from the top button carries no manifest row, so reloading the
-           expected list alone left him in NO list at all — the toast fired and not one pixel
-           moved. Put him in the search results, which is the one list that can hold him. */
         if (!form.batch_row) query.value = form.worker_name;
         else if (query.value.trim()) searchRes.reload();
     } catch (err) {

@@ -314,6 +314,17 @@ function reloadAll() {
   requestsRes.reload();
 }
 
+function findBed(bedName) {
+  const floors = (grid.value && grid.value.floors) || [];
+  for (const floor of floors) {
+    for (const room of floor.rooms || []) {
+      const hit = (room.beds || []).find((b) => b.bed === bedName);
+      if (hit) return hit;
+    }
+  }
+  return null;
+}
+
 function fetchAll() {
   if (!building.value) return;
   gridRes.fetch();
@@ -324,6 +335,19 @@ function onChangeBuilding() {
   clearBuilding();
 }
 
+async function loadPendingWorker(party_type, party) {
+  try {
+    const found = await call(API + "describe_worker", { args: { party_type, party } });
+    pendingWorker.value = found && found.found ? found : null;
+    if (!found || !found.found) {
+      toast.create({ type: "error", message: (found && found.message) || t("errors.workerFailed") });
+    }
+  } catch (err) {
+    pendingWorker.value = null;
+    toast.create({ type: "error", message: apiErrorMessage(err) });
+  }
+}
+
 watch(building, () => {
   closeSheet();
   fetchAll();
@@ -332,17 +356,7 @@ watch(building, () => {
 onMounted(() => {
   fetchAll();
   const q = route.query;
-  if (q.party_type && q.party) {
-    pendingWorker.value = {
-      found: true,
-      party_type: String(q.party_type),
-      party: String(q.party),
-      employee_name: String(q.name || q.party),
-      employee: null,
-      image: null,
-      has_active_assignment: false,
-    };
-  }
+  if (q.party_type && q.party) loadPendingWorker(String(q.party_type), String(q.party));
 });
 
 function closeSheet() {
@@ -465,8 +479,13 @@ async function doCheckOut() {
       type: "POST",
     });
     if (result && result.requires_full_form) {
-      occupant.value = { ...(occupant.value || {}), has_custody: true };
       sheetError.value = t("beds.custodyBlockTitle");
+      await gridRes.reload();
+      const fresh = findBed(bed.bed);
+      if (fresh) {
+        occupantBed.value = fresh;
+        occupant.value = fresh.occupant;
+      }
       return;
     }
     toast.create({ type: "success", message: t("beds.checkedOut") });
