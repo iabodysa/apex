@@ -249,10 +249,20 @@ const dockHint = computed(() => {
   return touchedCount.value ? t("submit.ready", { n: touchedCount.value }) : t("submit.needOne");
 });
 
+/* The header bar counts what the SERVER has settled, plus whatever is staged on top. It
+   counted only the staged rows before, so the bar ran BACKWARDS — 12 of 40 to 0 of 40 — at
+   the exact moment a submit succeeded and the staged rows were cleared. */
+const settledCount = computed(
+  () => rows.value.filter((row) => !needsCount(row) && !staged[row.name]).length,
+);
+
 watch(
-  [touchedCount, rows],
+  [settledCount, touchedCount, rows],
   () => {
-    countProgress.value = { done: touchedCount.value, total: rows.value.length };
+    countProgress.value = {
+      done: settledCount.value + touchedCount.value,
+      total: rows.value.length,
+    };
   },
   { immediate: true },
 );
@@ -344,22 +354,38 @@ async function doSubmit() {
     submitError.value = t("submit.needOne");
     return;
   }
-  const result = await submitRes.submit({
-    building: building.value,
-    lines: JSON.stringify(lines),
-  });
-  if (submitRes.error) {
-    submitError.value = resourceErrorMessage(submitRes.error, "errors.submitFailed");
+  /* frappe-ui's resource sets .error and then RETHROWS, so an uncaught submit aborted this
+     function before the error check below could run — and it clears .loading on the way out,
+     so the button un-spun exactly as if the save had worked. The operator counted a whole
+     building and was told nothing at all. */
+  let result;
+  try {
+    result = await submitRes.submit({
+      building: building.value,
+      lines: JSON.stringify(lines),
+    });
+  } catch (e) {
+    submitError.value = resourceErrorMessage(submitRes.error || e, "errors.submitFailed");
     return;
   }
+
   const saved = (result && result.saved) || 0;
   const failed = (result && result.failed) || 0;
   toast.create({
     type: failed ? "warning" : "success",
     message: failed ? t("success.partial", { ok: saved, failed }) : t("success.saved", { n: saved }),
   });
-  clearStaged();
-  dropCountDraft(building.value);
+
+  /* Only the rows the server took are cleared. Dropping everything on a partial failure
+     destroyed the typed quantities the server had just REFUSED, so the operator retyped
+     work that was never saved. */
+  const rejected = new Set(((result && result.errors) || []).map((row) => row.name));
+  for (const name of Object.keys(staged)) {
+    if (!rejected.has(name)) delete staged[name];
+  }
+  if (rejected.size) persistDraft();
+  else dropCountDraft(building.value);
+
   closeItem();
   invRes.reload();
 }

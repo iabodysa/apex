@@ -249,12 +249,18 @@ async function doSubmit() {
   }
 }
 
+/* A partial failure KEEPS the draft on purpose six lines above, so the walker can retry the
+   cadences the server refused. Dropping it here destroyed exactly that — the only button on
+   the success screen threw away the work it was preserved for. */
 function resetAll() {
+  const partial = !!(submitted.value && (submitted.value.failed || []).length);
   submitted.value = null;
   submitError.value = "";
   staleOffer.value = false;
-  dropRoundDraft(building.value, localDate());
-  clearRatings();
+  if (!partial) {
+    dropRoundDraft(building.value, localDate());
+    clearRatings();
+  }
   if (building.value) dueRes.fetch();
 }
 
