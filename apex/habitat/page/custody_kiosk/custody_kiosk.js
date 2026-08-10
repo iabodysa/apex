@@ -84,6 +84,16 @@ class CustodyKiosk {
 		this._write_return_cart({});
 	}
 
+	/* Switching the worker type drops EVERYTHING that belonged to the previous worker.
+	   Clearing only the return cart left a fully built issue cart on screen with the party
+	   field blank: pick the next worker, press Issue, and the first worker's articles are
+	   issued to the second. The server cannot catch it — the pair it receives is valid. */
+	_reset_for_party_change() {
+		this.cart = {};
+		this._reset_return_cart();
+		this.held = [];
+	}
+
 	setup() {
 		this._setup_controls();
 		this._build_layout();
@@ -104,14 +114,19 @@ class CustodyKiosk {
 					this.party = null;
 					this.party_field.set_value("");
 					this._update_party_options();
-					this._reset_return_cart();
+					this._reset_for_party_change();
 					if (this.mode === "return") {
-						this.held = [];
 						this._render_held_empty(
 							__("Select a worker to load held custody.")
 						);
+					} else {
+						this._render_tiles();
 					}
 					this._render_cart();
+					frappe.show_alert({
+						message: __("Worker type changed — the cart was cleared."),
+						indicator: "orange",
+					});
 				}
 			},
 		});
@@ -338,7 +353,7 @@ class CustodyKiosk {
 		this._toggle_field(this.party_field, true);
 		this._toggle_field(this.building_field, !is_return);
 
-		this.$cart_header.text(is_return ? __("Return cart") : __("Cart"));
+		this._render_cart_header();
 		this.$action_btn.text(is_return ? __("Return") : __("Issue"));
 
 		if (is_return) {
@@ -651,7 +666,20 @@ class CustodyKiosk {
 		this._render_cart();
 	}
 
+	/* The cart names the worker AND the type it will be committed against. Two workers can
+	   share a name, one an Employee and one a Temporary Worker, and the type lived only in a
+	   toolbar field at the far end of the screen from the Issue button. */
+	_render_cart_header() {
+		const who = this.party
+			? this.party + " — " + __(this.party_type)
+			: __("no worker selected");
+		this.$cart_header.text(
+			(this.mode === "return" ? __("Return cart") : __("Cart")) + " · " + who
+		);
+	}
+
 	_render_cart() {
+		this._render_cart_header();
 		if (this.mode === "return") {
 			this._render_return_cart();
 			return;

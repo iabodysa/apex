@@ -28,7 +28,7 @@
                     size="xl"
                     variant="outline"
                     :label="row.label"
-                    @click="selectParty(partyType, row.name, row.label)"
+                    @click="selectParty(row.partyType, row.name, row.label)"
                 />
             </li>
         </ul>
@@ -40,7 +40,13 @@
 
     <template v-else>
         <div class="section-head">
-            <h2>{{ party.party_name }}</h2>
+            <h2>
+                {{ party.party_name }}
+                <!-- The type stays on screen through the commit: two workers can share a
+                     name, one an Employee and one a Temporary Worker, and the operator was
+                     choosing between them blind. -->
+                <Badge theme="gray" size="sm" :label="tEnum('custody', party.party_type)" />
+            </h2>
             <Button variant="ghost" size="md" :label="t('common.change')" @click="clearParty">
                 <template #icon><Icon name="user" :size="18" /></template>
             </Button>
@@ -158,6 +164,7 @@
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import {
+    Badge,
     Button,
     ErrorMessage,
     FormControl,
@@ -224,10 +231,18 @@ const conditionOptions = computed(() =>
     RETURN_CONDITIONS.map((value) => ({ label: tEnum("returnCondition", value), value })),
 );
 
+/* Rows carry the type they were FETCHED under, and the list is empty while that type and
+   the chosen one disagree. Binding the row to the live partyType meant the async re-point
+   left the previous doctype's rows on screen under the new type, so one tap sent a
+   Temporary Worker type with an Employee name. */
+const resultsType = ref(partyType.value);
+
 const matches = computed(() => {
     if (!query.value.trim()) return [];
+    if (resultsType.value !== partyType.value) return [];
     return (searchRes.data || []).map((row) => ({
         name: row.name,
+        partyType: resultsType.value,
         label: row.employee_name || row.worker_name || row.name,
     }));
 });
@@ -400,12 +415,15 @@ watch([query, partyType], () => {
     if (!term) return;
     const isEmployee = partyType.value === "Employee";
     const titleField = isEmployee ? "employee_name" : "worker_name";
+    const wanted = partyType.value;
     searchRes.update({
-        doctype: partyType.value,
+        doctype: wanted,
         fields: ["name", titleField],
         filters: { [titleField]: ["like", "%" + term + "%"] },
     });
-    searchRes.reload();
+    searchRes.reload().then(() => {
+        resultsType.value = wanted;
+    });
 });
 
 onMounted(() => {

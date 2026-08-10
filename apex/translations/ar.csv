@@ -5214,6 +5214,7 @@ Worker Route (Masar),خط سير العامل (مسار)
 Worker Signature,توقيع العامل
 Worker Transport Plan,خطة نقل العمال
 Worker Type,نوع العامل
+Worker type changed — the cart was cleared.,تغيّر نوع العامل — أُفرغت السلة.
 Worker Wait Request (Seconds),طلب انتظار العامل (ثوانٍ)
 Worker Wait Request Max,الحد الأقصى لطلب انتظار العامل
 "Worker accommodation blanket. Consumable bedding item, routinely purchased per site.",بطانية سكن العمال. صنف مفروشات استهلاكي يُشترى دورياً لكل موقع.
@@ -5324,6 +5325,7 @@ matched,مطابق
 mixed,مختلط
 months,شهر
 n/a,غير متاح
+no worker selected,لم يُختر عامل
 none,لا شيء
 normalized,موحّد
 not recorded,غير مسجّل
