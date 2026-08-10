@@ -36,9 +36,11 @@
                         >{{ row.passport_number }} · {{ row.nationality || t("common.none") }}</small
                     >
                 </div>
-                <span v-if="row.arrived" class="pill pill-success">{{
-                    t("arrivals.registered")
-                }}</span>
+                <StatusLabel
+                    v-if="row.arrived"
+                    tone="success"
+                    :label="t('arrivals.registered')"
+                />
                 <Button
                     v-else
                     size="lg"
@@ -243,6 +245,7 @@ import {
 import ArrivalCard from "../components/ArrivalCard.vue";
 import Icon from "../components/Icon.vue";
 import PageShell from "../components/PageShell.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import { call } from "@shared/call";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { can, hasSection } from "../portal.js";

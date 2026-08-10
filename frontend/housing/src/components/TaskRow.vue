@@ -31,7 +31,7 @@
         <p class="task-title">{{ title }}</p>
         <div class="task-meta">
           <span v-if="task.task_code" class="task-code">{{ task.task_code }}</span>
-          <span v-if="task.priority" class="pill" :class="priorityPill">{{ priorityLabel }}</span>
+          <StatusLabel v-if="task.priority" :tone="priorityTone" :label="priorityLabel" />
           <span v-if="task.evidence_required" class="task-evidence">
             <Icon name="flag" :size="12" /> {{ t("round.due.evidence") }}
           </span>
@@ -147,6 +147,7 @@
 import { computed, ref } from "vue";
 import { Button, FileUploader, FormControl } from "frappe-ui";
 import Icon from "./Icon.vue";
+import StatusLabel from "@shared/components/StatusLabel.vue";
 import { PHOTO_ACCEPT, isAcceptedPhoto } from "@shared/photoFile.js";
 import { useI18n } from "../i18n";
 
@@ -171,14 +172,14 @@ const needsPhoto = computed(
 );
 
 const priorityLabel = computed(() => tEnum("priority", props.task.priority));
-const priorityPill = computed(() => {
+const priorityTone = computed(() => {
   switch (props.task.priority) {
     case "Critical":
-      return "pill-danger";
+      return "danger";
     case "High":
-      return "pill-warning";
+      return "warning";
     default:
-      return "pill-neutral";
+      return "neutral";
   }
 });
 
