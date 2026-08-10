@@ -1,6 +1,24 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <div class="task" :class="stateClass">
+  <button
+    v-if="settled"
+    type="button"
+    class="task task-settled"
+    :class="stateClass"
+    :aria-label="t('round.due.reopen', { task: title })"
+    @click="$emit('reopen')"
+  >
+    <span class="task-status" aria-hidden="true">
+      <Icon v-if="verdict === 'pass'" name="check" :size="16" />
+      <Icon v-else-if="verdict === 'fail'" name="x" :size="16" />
+      <Icon v-else name="triangle-alert" :size="15" />
+    </span>
+    <span class="task-settled-title">{{ title }}</span>
+    <span class="task-settled-verdict">{{ verdictLabel }}</span>
+    <span class="task-settled-change">{{ t("common.change") }}</span>
+  </button>
+
+  <div v-else class="task" :class="stateClass">
     <div class="task-main">
       <span class="task-status" aria-hidden="true">
         <Icon v-if="verdict === 'pass'" name="check" :size="16" />
@@ -137,9 +155,10 @@ const props = defineProps({
   verdict: { type: String, default: "" },
   notes: { type: String, default: "" },
   photo: { type: String, default: "" },
+  settled: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(["rate", "note", "photo"]);
+const emit = defineEmits(["rate", "note", "photo", "reopen"]);
 const { t, tEnum } = useI18n();
 
 const noteOpen = ref(false);
@@ -165,6 +184,13 @@ const priorityPill = computed(() => {
 
 const stateClass = computed(() => (props.verdict ? "task-" + props.verdict : ""));
 
+const verdictLabel = computed(() => {
+  if (props.verdict === "pass") return t("round.due.pass");
+  if (props.verdict === "fail") return t("round.due.fail");
+  if (props.verdict === "issue") return t("round.due.issue");
+  return "";
+});
+
 function choose(next) {
   emit("rate", props.verdict === next ? "" : next);
 }
@@ -187,6 +213,33 @@ function onUploaded(file) {
   transition:
     border-color 0.2s ease,
     background 0.2s ease;
+}
+.task-settled {
+  inline-size: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-block-size: var(--tap-min);
+  text-align: start;
+  cursor: pointer;
+}
+.task-settled-title {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--c-ink-soft);
+}
+.task-settled-verdict {
+  flex: none;
+  font-weight: var(--fw-semibold);
+}
+.task-settled-change {
+  flex: none;
+  font-size: var(--fs-sm);
+  color: var(--c-muted);
+  text-decoration: underline;
 }
 .task-pass {
   border-inline-start: 3px solid var(--c-success);

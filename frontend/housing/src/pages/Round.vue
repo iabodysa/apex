@@ -81,9 +81,17 @@
 
   <template v-else>
     <div class="due-intro">
-      <h2 class="section-title">{{ t("round.due.title") }}</h2>
-      <p class="section-sub">{{ t("round.due.subtitle") }}</p>
-      <p class="draft-note"><Icon name="shield" :size="13" /> {{ t("round.due.draftKept") }}</p>
+      <ProgressRing
+        class="due-ring"
+        :done="totalRated"
+        :total="totalTasks"
+        :size="64"
+      />
+      <div class="due-intro-copy">
+        <h2 class="section-title">{{ t("round.due.title") }}</h2>
+        <p class="section-sub">{{ t("round.due.subtitle") }}</p>
+        <p class="draft-note"><Icon name="shield" :size="13" /> {{ t("round.due.draftKept") }}</p>
+      </div>
     </div>
 
     <div v-if="staleOffer" class="stale">
@@ -150,6 +158,7 @@ import { useRoute, useRouter } from "vue-router";
 import { Badge, Button, ErrorMessage, TabButtons, createResource } from "frappe-ui";
 import EmptyState from "@shared/components/EmptyState.vue";
 import CadenceSection from "../components/CadenceSection.vue";
+import ProgressRing from "../components/ProgressRing.vue";
 import Icon from "../components/Icon.vue";
 import ListSkeleton from "@shared/components/ListSkeleton.vue";
 import LoadError from "../components/LoadError.vue";
@@ -367,7 +376,15 @@ watch(building, load);
 
 <style scoped>
 .due-intro {
-  padding-inline: var(--sp-1);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.due-intro-copy {
+  min-inline-size: 0;
+}
+.due-ring {
+  flex: none;
 }
 .draft-note {
   display: inline-flex;

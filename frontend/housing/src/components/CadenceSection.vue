@@ -19,16 +19,28 @@
 
     <Transition name="rows">
       <div v-show="open" class="cadence-rows">
+        <button
+          v-if="ratedCount"
+          type="button"
+          class="cadence-toggle"
+          @click="hideSettled = !hideSettled"
+        >
+          {{ hideSettled ? t("round.due.showSettled", { n: ratedCount }) : t("round.due.hideSettled") }}
+        </button>
+
         <TaskRow
-          v-for="task in block.tasks"
+          v-for="task in visibleTasks"
           :key="task.name"
+          :ref="(el) => registerRow(task.name, el)"
           :task="task"
           :verdict="(ratings[task.name] || {}).verdict || ''"
           :notes="(ratings[task.name] || {}).notes || ''"
           :photo="(ratings[task.name] || {}).photo || ''"
-          @rate="(v) => $emit('rate', block.cadence, task.name, v)"
+          :settled="isSettled(task.name)"
+          @rate="(v) => onRate(task.name, v)"
           @note="(n) => $emit('note', block.cadence, task.name, n)"
           @photo="(p) => $emit('photo', block.cadence, task.name, p)"
+          @reopen="reopened = task.name"
         />
       </div>
     </Transition>
@@ -36,7 +48,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import Icon from "./Icon.vue";
 import ProgressRing from "./ProgressRing.vue";
 import TaskRow from "./TaskRow.vue";
@@ -47,13 +59,59 @@ const props = defineProps({
   ratings: { type: Object, default: () => ({}) },
 });
 
-defineEmits(["rate", "note", "photo"]);
-const { tEnum } = useI18n();
+const emit = defineEmits(["rate", "note", "photo"]);
+const { t, tEnum } = useI18n();
 
 const open = ref(true);
+const hideSettled = ref(false);
+const reopened = ref("");
+const rows = new Map();
+
+function registerRow(name, el) {
+  if (el) rows.set(name, el);
+  else rows.delete(name);
+}
+
+function isSettled(name) {
+  if (reopened.value === name) return false;
+  return !!(props.ratings[name] || {}).verdict;
+}
+
+const visibleTasks = computed(() =>
+  hideSettled.value ? props.block.tasks.filter((t) => !isSettled(t.name)) : props.block.tasks,
+);
+
+function onRate(name, verdict) {
+  if (reopened.value === name) reopened.value = "";
+  emit("rate", props.block.cadence, name, verdict);
+  if (!verdict) return;
+  nextTick(() => {
+    const next = props.block.tasks.find((t) => !(props.ratings[t.name] || {}).verdict);
+    const el = next && rows.get(next.name);
+    const node = el && (el.$el || el);
+    if (node && node.scrollIntoView) {
+      node.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "center" });
+    }
+  });
+}
+
+function reduceMotion() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
 
 const ratedCount = computed(
   () => props.block.tasks.filter((t) => (props.ratings[t.name] || {}).verdict).length,
+);
+
+watch(
+  () => ratedCount.value === props.block.tasks.length && props.block.tasks.length > 0,
+  (complete, was) => {
+    if (complete && !was) open.value = false;
+  },
 );
 
 const badgeIcon = computed(() => {
@@ -143,6 +201,18 @@ const badgeClass = computed(() => "badge-" + props.block.cadence.toLowerCase());
   transform: rotate(90deg);
 }
 
+.cadence-toggle {
+  display: block;
+  inline-size: 100%;
+  min-block-size: var(--tap-min);
+  padding: var(--sp-2) var(--sp-3);
+  border-block-end: 1px solid var(--c-border);
+  color: var(--c-primary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  text-align: start;
+  cursor: pointer;
+}
 .cadence-rows {
   display: flex;
   flex-direction: column;
