@@ -242,7 +242,6 @@ All Items Verified,تم التحقق من جميع البنود
 All clear — no open alerts,لا توجد تنبيهات مفتوحة
 All housing custody returned,إرجاع كامل عهدة السكن
 All issued articles are back,إرجاع كل الأصناف المصروفة
-All three exit checkpoints must be cleared before confirming receipt.,يجب إخلاء نقاط الخروج الثلاث جميعها قبل تأكيد الاستلام.
 Allocation,تخصيص
 Allocation Audit,تدقيق التوزيع
 Allocation Basis,أساس التوزيع
@@ -1686,15 +1685,11 @@ Execution Time,وقت التنفيذ
 "Execution stage of the maintenance work order, from draft and planned through in-progress work to completion or cancellation.",مرحلة تنفيذ أمر عمل الصيانة، من مسودة ومخططة مرورًا بالعمل قيد التنفيذ حتى الاكتمال أو الإلغاء.
 Exhausted,مستنفدة
 Exit 1 of 2 — gate-out clearance at the source by a Procurement Supervisor.,الخروج 1 من 2 — تصريح الخروج من بوابة المصدر بواسطة مشرف المشتريات.
-Exit 1 of 3 — gate-out clearance at the source by a Procurement Supervisor.,الخروج 1 من 3 — تصريح الخروج من بوابة المصدر بواسطة مشرف المشتريات.
 Exit 1 — Hand-over at the source,الخروج 1 — التسليم من المصدر
-Exit 1 — Security / Gate,الخروج الأول — الأمن / البوابة
 Exit 2 of 2 — destination acceptance by the receiving supervisor or a Resident Supervisor.,الخروج 2 من 2 — قبول الوجهة بواسطة المشرف المستلِم أو مشرف الساكنين.
 Exit 2 of 3 — transit / dispatch authorization by an Accommodation Manager.,الخروج 2 من 3 — اعتماد النقل والتسيير بواسطة مدير الإسكان.
 Exit 2 — Logistics / Dispatch,الخروج 2 — النقل والتسيير
 Exit 2 — Receiving Acceptance,الخروج 2 — قبول الاستلام
-Exit 3 of 3 — destination acceptance by the receiving supervisor or a Resident Supervisor.,الخروج الثالث من ثلاثة — قبول الوجهة بواسطة المشرف المستلِم أو مشرف الساكنين.
-Exit 3 — Receiving Acceptance,الخروج الثالث — قبول الاستلام
 Exit Checkpoints,نقاط الخروج
 Exit checkpoints can only be cleared while the delivery is Pending Exits.,لا يمكن اجتياز نقاط الخروج إلا عندما تكون حالة التسليم «بانتظار نقاط الخروج».
 Exit {0} has already been cleared.,تم اجتياز نقطة الخروج {0} مسبقًا.
@@ -3100,10 +3095,7 @@ Party,الطرف
 Party Type,نوع الطرف
 Pass,مجتاز
 Pass Exit 1 — Hand-over,اجتياز الخروج 1 — التسليم
-Pass Exit 1 — Security,اجتياز الخروج الأول — الأمن
-Pass Exit 2 — Logistics,اجتياز الخروج الثاني — اللوجستيات
 Pass Exit 2 — Receiving,اجتياز الخروج 2 — الاستلام
-Pass Exit 3 — Receiving,اجتياز الخروج الثالث — الاستلام
 Pass Token Hash,بصمة رمز التصريح
 Pass with Observations,اجتياز مع وجود ملاحظات
 Passenger Count,عدد الركاب
