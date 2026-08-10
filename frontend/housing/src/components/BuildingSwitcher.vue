@@ -121,29 +121,32 @@ watch(
 .switcher-hero .section-sub {
   margin: 0;
 }
+/* Each building is one subject, so each is one card (DESIGN.md §1) rather than a row in a
+   ruled ledger. It is the first screen the operator meets and it was the flattest. */
 .switcher-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  border-block: 1px solid var(--c-border-strong);
+  display: grid;
+  gap: var(--sp-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 .switcher-item {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
   inline-size: 100%;
-  min-block-size: 72px;
-  padding: var(--sp-3) var(--sp-1);
-  border: 0;
-  border-block-end: 1px solid var(--c-border);
-  background: transparent;
+  min-block-size: 76px;
+  padding: var(--sp-3) var(--sp-4);
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--radius);
+  background: var(--c-surface-2);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   text-align: start;
 }
 @media (hover: hover) {
   .switcher-item:hover {
-    border-color: var(--c-border-strong);
-    background: var(--c-surface-2, var(--c-surface));
+    border-color: var(--c-primary);
   }
 }
 .switcher-icon {
@@ -172,11 +175,9 @@ watch(
   font-size: var(--fs-xs);
   color: var(--c-muted);
 }
-@media (min-width: 768px) {
+@container mc-frame (min-width: 34rem) {
   .switcher-list {
-    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .switcher-item { border-inline-end: 1px solid var(--c-border); }
 }
 </style>

@@ -35,7 +35,14 @@
   --header-bg: #072b1a;
   --header-ink: #f8f5ee;
   --header-accent: #60d297;
+  /* The identity guide forbids gradients and gets depth from angled paths instead
+     (docs/brand/index.html §05: "مسارات بزاوية ٦٥٫٠٥٣ درجة، بخطوط قليلة ومساحات مفتوحة").
+     These three are the paint for those paths. They sit under nothing that is read, so
+     they carry no contrast ratio; the ink over them is measured against --header-bg. */
   --arc: rgba(96, 210, 151, 0.16);
+  --arc-strong: rgba(96, 210, 151, 0.3);
+  --arc-action: rgba(0, 132, 78, 0.42);
+  --arc-canvas: rgba(7, 43, 26, 0.05);
   --scrim: rgba(0, 0, 0, 0.4);
 
   --chrome: #cfc7b4;
@@ -75,6 +82,9 @@
   --c-header-ink: var(--header-ink);
   --c-header-accent: var(--header-accent);
   --c-arc: var(--arc);
+  --c-arc-strong: var(--arc-strong);
+  --c-arc-action: var(--arc-action);
+  --c-arc-canvas: var(--arc-canvas);
   --c-scrim: var(--scrim);
 
   --radius-sm: 8px;
@@ -86,6 +96,27 @@
   --tap-lg: 52px;
   --tap-md: 48px;
   --tap-min: 44px;
+
+  /* Brand geometry, every value taken from docs/brand/identity.css so the product and the
+     guide cannot drift. --mark is the size the guide gives its own cover lockup and its
+     signature bar; --mark-sm is the app-bar mark of the product mockup; --mark-lg is the
+     splash. --lockup is the width the guide sets for an opening screen, --lockup-min the
+     floor it publishes for the horizontal lockup. --disc is the guide's chapter numeral. */
+  --app-bar: 68px;
+  --mark: 44px;
+  --mark-lg: 84px;
+  --lockup: 160px;
+  --lockup-min: 96px;
+  --disc: 54px;
+  --brand-tilt: 25deg;
+  --brand-bar: 28px;
+
+  /* DESIGN.md §3, the field-worker row: one column to 480, a 560px column to 1023, and a
+     1100px centred frame above it. */
+  --frame-column: 560px;
+  --frame-wide: 1100px;
+  --pane-list-min: 360px;
+  --pane-list-max: 420px;
 
   --font: "Thmanyah Sans";
   --font-num: var(--font);

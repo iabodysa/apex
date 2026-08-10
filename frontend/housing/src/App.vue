@@ -7,7 +7,7 @@
     <template #header>
       <div class="console-head-row">
         <div class="console-identity">
-          <Brand variant="reverse" :size="32" />
+          <span class="brand-mark"><Brand variant="reverse" :size="44" /></span>
           <span class="brand-copy">
             <strong>{{ portalName }}</strong>
             <small>{{ t("common.appName") }}</small>
@@ -32,20 +32,15 @@
       </div>
     </template>
 
-    <template v-if="showProgress" #progress>
-      <Progress size="md" :value="progressPercent" :label="t('list.progressLabel')">
-        <template #hint>
-          <span>{{ t("list.progress", { done: countProgress.done, total: countProgress.total }) }}</span>
-        </template>
-      </Progress>
-    </template>
-
     <template v-if="showContextList" #list>
       <section
         class="desktop-context"
         :class="{ 'is-narrow': narrowContextList }"
         :aria-label="t('nav.sectionLabel')"
       >
+        <span class="scene-disc" aria-hidden="true">
+          <Icon :name="sceneIcon" :size="24" />
+        </span>
         <p class="context-kicker">
           <bdi v-if="showsBuilding && buildingLabel" dir="auto">{{ buildingLabel }}</bdi>
           <span v-else>{{ sceneEyebrow }}</span>
@@ -97,18 +92,28 @@
       tabindex="-1"
     >
       <section v-if="needsBuilding" class="building-stage" :aria-label="t('building.title')">
+        <!-- "الافتتاحيات: استخدم التركيب الأفقي في وسط شاشات الدخول والافتتاحيات" — the guide
+             puts the horizontal lockup at the centre of an opening screen, and this is the
+             portal's opening screen. It is the only place the approved lockup belongs, and
+             the only surface light enough to carry it: its wordmark is drawn in forest. -->
+        <Brand class="stage-lockup" :variant="lockupVariant" :alt="t('common.appName')" />
         <p class="stage-kicker">{{ t("building.context") }}</p>
         <BuildingSwitcher @select="selectBuilding" />
       </section>
 
       <template v-else>
         <header class="scene-heading">
-          <p class="scene-eyebrow">
-            <bdi v-if="showsBuilding && buildingLabel" dir="auto">{{ buildingLabel }}</bdi>
-            <span v-else>{{ sceneEyebrow }}</span>
-          </p>
-          <h1>{{ sceneTitle }}</h1>
-          <p v-if="sceneSubtitle" class="scene-subtitle">{{ sceneSubtitle }}</p>
+          <span class="scene-disc" aria-hidden="true">
+            <Icon :name="sceneIcon" :size="24" />
+          </span>
+          <div class="scene-copy">
+            <p class="scene-eyebrow">
+              <bdi v-if="showsBuilding && buildingLabel" dir="auto">{{ buildingLabel }}</bdi>
+              <span v-else>{{ sceneEyebrow }}</span>
+            </p>
+            <h1>{{ sceneTitle }}</h1>
+            <p v-if="sceneSubtitle" class="scene-subtitle">{{ sceneSubtitle }}</p>
+          </div>
         </header>
 
         <nav
@@ -135,6 +140,16 @@
         <span>{{ t(domain.labelKey) }}</span>
       </router-link>
     </template>
+
+    <template v-if="domains.length" #railfoot>{{ t("common.rights", { year }) }}</template>
+
+    <template #signature>
+      <Brand variant="reverse" :size="44" />
+      <span class="signature-copy">
+        <strong>{{ t("common.signature") }}</strong>
+        <small>{{ t("common.rights", { year }) }}</small>
+      </span>
+    </template>
     </MobileConsoleShell>
   </FrappeUIProvider>
 </template>
@@ -142,7 +157,7 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Button, FrappeUIProvider, Progress, TabButtons, createResource } from "frappe-ui";
+import { Button, FrappeUIProvider, TabButtons, createResource } from "frappe-ui";
 import Brand from "@shared/components/Brand.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
 import MobileConsoleShell from "@shared/components/MobileConsoleShell.vue";
@@ -157,7 +172,7 @@ import {
   domainForSection,
   sectionsForDomain,
 } from "./sections.js";
-import { building, buildingLabel, clearBuilding, countProgress, selectBuilding } from "./session";
+import { building, buildingLabel, clearBuilding, selectBuilding } from "./session";
 
 const { t, lang, dir } = useI18n();
 
@@ -210,6 +225,14 @@ const sceneTitle = computed(() => {
 const sceneEyebrow = computed(() =>
   showsBuilding.value && buildingLabel.value ? buildingLabel.value : t("common.operationalPortal"),
 );
+const sceneIcon = computed(() => {
+  const section = SECTIONS.find((entry) => entry.id === currentSection.value);
+  return section ? section.icon : "calendar";
+});
+/* The Arabic lockup stores its wordmark as outlines and the English one is a separate
+   master, so the language picks the file — it is never one asset with swapped text. */
+const lockupVariant = computed(() => (lang.value === "ar" ? "lockup-ar" : "lockup-en"));
+const year = new Date().getFullYear();
 const sceneSubtitle = computed(() =>
   currentSection.value ? t(`scene.${currentSection.value}`) : "",
 );
@@ -237,13 +260,9 @@ function domainActive(domain) {
   return currentDomain.value === domain.id;
 }
 
-const showProgress = computed(
-  () => currentSection.value === "count" && !!building.value && countProgress.value.total > 0,
-);
-const progressPercent = computed(() => {
-  const { done, total } = countProgress.value;
-  return total ? Math.round((done / total) * 100) : 0;
-});
+/* The count progress lived in the HEADER, so it appeared the moment a first item was
+   counted and pushed every screen down under it. The count screen already states the same
+   number in its own dock, next to the button that acts on it. */
 
 useDocumentLanguage(lang, dir);
 </script>
@@ -281,37 +300,54 @@ useDocumentLanguage(lang, dir);
 }
 .console-identity {
   flex: 1 1 auto;
+  gap: var(--sp-4);
 }
+/* The two sides of the row used to fight: the chip took 342 of the 358px and the identity
+   was squeezed to 4px, and once the chip was bounded a long English product name pushed the
+   language control off the canvas instead. The actions are now a fixed, bounded width and
+   the identity takes what is left and wraps inside it. */
 .console-actions {
   flex: 0 0 auto;
+}
+/* The guide's clear space is the width of the mark's base opening — 23 of its 64 units.
+   At --mark that is ~16px, and giving the mark that room is most of what makes it read as
+   a mark rather than a favicon. */
+.brand-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  padding-inline-end: var(--sp-4);
+  border-inline-end: var(--border-width) solid
+    color-mix(in srgb, var(--c-header-accent) 34%, transparent);
+}
+/* The token is the size; the width and height attributes on the element are only there so
+   the box is reserved before the file arrives. */
+.brand-mark :deep(img) {
+  inline-size: var(--mark);
+  block-size: var(--mark);
 }
 .brand-copy {
   display: grid;
   min-inline-size: 0;
-  line-height: 1.15;
+  overflow: hidden;
+  line-height: 1.2;
 }
 .brand-copy strong {
   color: var(--c-header-ink);
-  font-family: var(--font-brand);
-  font-size: var(--fs-sm);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
   font-weight: var(--fw-heading);
+  overflow-wrap: anywhere;
 }
 .brand-copy small {
-  color: color-mix(in srgb, var(--c-header-ink) 68%, transparent);
+  color: color-mix(in srgb, var(--c-header-ink) 72%, transparent);
   font-family: var(--font-serif);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
 }
-.building-control {
-  min-block-size: var(--tap-min);
-  max-inline-size: min(38vw, 17rem);
-  color: var(--c-header-ink);
-  background: color-mix(in srgb, var(--c-header-ink) 10%, transparent);
-}
-.building-control :deep(span) {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+/* The chip's own rules live in index.css, unscoped: a scoped selector does not reach the
+   root of a frappe-ui Button, which is why it kept its library width, pushed the language
+   control off the canvas at 390 and printed under the mark. tokens.css records the same
+   trap for LangToggle. */
 .console-scene {
   min-inline-size: 0;
   outline: none;
@@ -320,10 +356,30 @@ useDocumentLanguage(lang, dir);
   outline: 3px solid var(--c-focus);
   outline-offset: var(--sp-1);
 }
+/* The guide's .page-head: the disc in its own column, the eyebrow and the title beside it. */
 .scene-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--sp-4);
   padding-block-end: clamp(var(--sp-5), 4vw, var(--sp-8));
   border-block-end: var(--border-width) solid var(--c-border-strong);
   margin-block-end: clamp(var(--sp-5), 3vw, var(--sp-8));
+}
+.scene-copy {
+  min-inline-size: 0;
+}
+/* The guide opens every chapter with a mint disc carrying a glyph (.page-number). It is the
+   only round form in the system and the page had none of it. */
+.scene-disc {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  inline-size: var(--disc);
+  block-size: var(--disc);
+  border-radius: var(--radius-pill);
+  background: var(--c-mint);
+  color: var(--c-header-bg);
 }
 .scene-eyebrow,
 .context-kicker {
@@ -369,6 +425,18 @@ useDocumentLanguage(lang, dir);
   margin-inline: auto;
   padding-block: clamp(var(--sp-3), 3vw, var(--sp-8));
 }
+.stage-lockup {
+  display: block;
+  /* The guide publishes 96 as the floor for the horizontal lockup and draws it at 160 on an
+     opening screen; an opening screen with room to breathe takes the top of that range. */
+  inline-size: clamp(var(--lockup-min), 46vw, calc(var(--lockup) * 1.5));
+  block-size: auto;
+  /* The master's own viewBox. Declared so the box is the right shape before the file
+     arrives and the heading under it never jumps. */
+  aspect-ratio: 420 / 96;
+  margin-inline: auto;
+  margin-block-end: clamp(var(--sp-6), 5vw, var(--sp-8));
+}
 .stage-kicker {
   margin: 0 0 var(--sp-4);
   padding-block-end: var(--sp-3);
@@ -377,6 +445,21 @@ useDocumentLanguage(lang, dir);
   font-family: var(--font-brand);
   font-size: var(--fs-xs);
   font-weight: var(--fw-heading);
+}
+.signature-copy {
+  display: grid;
+  gap: var(--sp-1);
+  min-inline-size: 0;
+}
+.signature-copy strong {
+  color: var(--c-header-ink);
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-heading);
+  line-height: 1.5;
+}
+.signature-copy small {
+  font-size: var(--fs-xs);
 }
 .context-nav {
   margin-block-end: clamp(var(--sp-5), 3vw, var(--sp-8));
@@ -400,6 +483,10 @@ useDocumentLanguage(lang, dir);
 .desktop-context.is-narrow > h2,
 .desktop-context.is-narrow > .context-copy {
   display: none;
+}
+/* The pane replaces the scene heading at --bp-desktop, so it carries the same disc. */
+.desktop-context .scene-disc {
+  margin-block-end: calc(-1 * var(--sp-2));
 }
 .desktop-context h2 {
   margin: 0;
@@ -487,21 +574,37 @@ useDocumentLanguage(lang, dir);
   color: var(--c-primary);
 }
 
-@media (min-width: 72rem) {
+/* --bp-desktop 1024, the width at which the shell opens the list pane. It was 72rem, so
+   between 1024 and 1152 the title, the subtitle and the section tabs were drawn twice. */
+@media (min-width: 64rem) {
   .has-context-list .scene-heading,
   .has-context-list .context-nav {
     display: none;
   }
+  .brand-copy strong {
+    font-size: var(--fs-h1);
+  }
 }
 
 @media (max-width: 32rem) {
-  .brand-copy small,
-  .building-control :deep(span:not(:first-child)) {
+  .brand-copy small {
     display: none;
   }
-  .building-control {
-    inline-size: var(--tap-min);
-    padding-inline: 0;
+  .brand-copy strong {
+    font-size: var(--fs-h3);
+  }
+}
+
+/* 320 is the narrowest width the guide supports (§09). There the row holds the mark and the
+   two controls and nothing else — which is the guide's product-bar rule anyway: the mark
+   goes at the start of the app bar and the title belongs to the content. */
+@media (max-width: 23rem) {
+  .brand-copy {
+    display: none;
+  }
+  .brand-mark {
+    padding-inline-end: 0;
+    border-inline-end: 0;
   }
 }
 </style>

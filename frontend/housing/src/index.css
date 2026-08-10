@@ -7,9 +7,68 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --boot-bar: 20rem;
+}
+
 html,
 body {
   background: var(--c-canvas);
+}
+
+/* First paint. The bundle is fetched and parsed before a single line of this portal's
+   JavaScript runs, and until now that window was a bare canvas — the owner's "there is no
+   loading screen and no progress bar". The stylesheet is in the document head, so it can
+   dress the empty mount point without the portal being able to boot first, and the rule
+   stops matching the moment Vue fills #app. It is the guide's splash: the reverse mark on
+   the brand field over a mint loader (docs/brand §10 .splash-screen). No text — a literal
+   here could not go through i18n.js — so the mark carries it, and the screens behind it
+   have their own translated skeletons. */
+#app:empty {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: clamp(var(--sp-6), 8vh, var(--sp-8));
+  min-block-size: 100dvh;
+  background: var(--c-header-bg);
+}
+#app:empty::before {
+  content: "";
+  inline-size: var(--mark-lg);
+  block-size: var(--mark-lg);
+  background: url("../../frontend_shared/assets/logo/apex-mark-reverse.svg") center / contain
+    no-repeat;
+}
+#app:empty::after {
+  content: "";
+  inline-size: min(62vw, var(--boot-bar));
+  block-size: var(--sp-1);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--c-header-ink) 20%, transparent);
+  box-shadow: inset calc(-1 * var(--boot-bar) * 0.62) 0 0 0 var(--c-mint);
+  animation: boot-fill 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes boot-fill {
+  from {
+    box-shadow: inset 0 0 0 0 var(--c-mint);
+  }
+  to {
+    box-shadow: inset calc(-1 * var(--boot-bar)) 0 0 0 var(--c-mint);
+  }
+}
+
+/* The guide's card: a white sheet with a quiet edge and the system radius
+   (docs/brand identity.css .page-surface), which is what DESIGN.md §1 asks a card to be. */
+.card {
+  min-inline-size: 0;
+  padding: clamp(var(--sp-4), 3vw, var(--sp-6));
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--radius);
+  background: var(--c-surface-2);
+  box-shadow: var(--shadow-sm);
+}
+.card-flush {
+  padding-inline: 0;
 }
 
 body {
@@ -34,9 +93,11 @@ body {
 .hz-split-detail {
   min-inline-size: 0;
 }
-@media (min-width: 68rem) {
+/* Against the frame, not the window. A viewport query here promised a two-column split at
+   1440 that the pane it actually lives in cannot give, and the columns clipped instead. */
+@container mc-frame (min-width: 48rem) {
   .hz-split {
-    grid-template-columns: minmax(22rem, 0.85fr) minmax(26rem, 1.15fr);
+    grid-template-columns: minmax(20rem, 0.85fr) minmax(24rem, 1.15fr);
   }
   .hz-split-detail {
     position: sticky;
@@ -44,13 +105,19 @@ body {
   }
 }
 
+/* The detail half of a list-and-detail screen. It was a transparent band between two rules;
+   the thing it holds is one subject, so it is a card. */
 .pane {
-  padding-block: var(--sp-4);
-  border-block: var(--border-width) solid var(--c-border-strong);
-  background: transparent;
+  padding: clamp(var(--sp-4), 3vw, var(--sp-6));
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--radius);
+  background: var(--c-surface-2);
+  box-shadow: var(--shadow-sm);
 }
 .pane-idle {
   border-style: dashed;
+  background: transparent;
+  box-shadow: none;
 }
 
 .hz-dock {
@@ -74,6 +141,39 @@ body {
 .filter button {
   min-block-size: var(--tap-min);
   font-size: var(--fs-body);
+}
+
+/* The header's building chip. Unscoped for the reason tokens.css records beside .lang-opt:
+   a scoped rule in App.vue never reaches the root of a frappe-ui Button, so the chip kept
+   the library's own width, took 228 of the 358px in the row and pushed both the identity
+   and the language control off the canvas at 390. */
+.building-control {
+  flex: 0 1 auto;
+  min-inline-size: var(--tap-min);
+  min-block-size: var(--tap-min);
+  max-inline-size: min(30vw, 14rem);
+  color: var(--c-header-ink);
+  background: color-mix(in srgb, var(--c-header-ink) 10%, transparent);
+}
+.building-control > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 32rem) {
+  /* Icon only on a phone: the building is named again under the heading, and the row has
+     room for the identity or the name, not both. */
+  .building-control {
+    flex: 0 0 auto;
+    inline-size: var(--tap-min);
+    max-inline-size: var(--tap-min);
+    padding-inline: 0;
+  }
+  .building-control bdi,
+  .building-control > span:not(:first-child) {
+    display: none;
+  }
 }
 
 .step-btn {

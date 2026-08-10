@@ -1,6 +1,11 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
+  <!-- The overview was the one screen still answering a wait with a turning ring. It now
+       draws its own shape while it loads, the way every list in this portal already does. -->
+  <OverviewSkeleton v-if="pageState === 'loading'" :label="pageTitle" />
+
   <AsyncBoundary
+    v-else
     :state="pageState"
     :title="pageTitle"
     :message="pageMessage"
@@ -19,7 +24,7 @@
     <MetricRibbon v-if="metrics.length" :metrics="metrics" />
 
     <div class="overview-layout">
-      <section class="overview-lead">
+      <section class="overview-lead card">
         <p class="overview-kicker">{{ t("today.now") }}</p>
         <h2>{{ leadTitle }}</h2>
         <p>{{ leadHint }}</p>
@@ -30,7 +35,11 @@
         </div>
       </section>
 
-      <WorkQueue :title="t('today.queueTitle')" :eyebrow="t('today.queueEyebrow')">
+      <WorkQueue
+        class="overview-queue card card-flush"
+        :title="t('today.queueTitle')"
+        :eyebrow="t('today.queueEyebrow')"
+      >
         <router-link
           v-for="item in workItems"
           :key="item.key"
@@ -69,6 +78,7 @@ import AsyncBoundary from "@shared/components/AsyncBoundary.vue";
 import MetricRibbon from "@shared/components/MetricRibbon.vue";
 import WorkQueue from "@shared/components/WorkQueue.vue";
 import Icon from "../components/Icon.vue";
+import OverviewSkeleton from "../components/OverviewSkeleton.vue";
 import { readCountDraft, readRoundDraft } from "../drafts.js";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { hasSection } from "../portal.js";
@@ -321,8 +331,20 @@ watch(building, load);
 }
 .overview-lead {
   align-self: start;
-  padding-block-start: var(--sp-4);
-  border-block-start: 4px solid var(--c-primary);
+}
+/* The card is white with a quiet edge; the accent rule on its reading edge is what marks
+   it as the lead, the way the guide leads a surface with a single coloured stroke. */
+.overview-lead.card {
+  border-inline-start: var(--sp-1) solid var(--c-primary);
+}
+/* WorkQueue draws itself as a bare ledger between two rules. Inside a card that edge is the
+   card's job, so it is handed back. */
+.overview-queue.card {
+  border: var(--border-width) solid var(--c-border);
+  background: var(--c-surface-2);
+}
+.overview-queue.card :deep(.work-queue-head) {
+  padding-inline: clamp(var(--sp-4), 3vw, var(--sp-6));
 }
 .overview-kicker {
   margin: 0 0 var(--sp-2);
@@ -367,8 +389,14 @@ watch(building, load);
   gap: var(--sp-3);
   min-block-size: 72px;
   padding-block: var(--sp-3);
+  padding-inline: clamp(var(--sp-4), 3vw, var(--sp-6));
   color: inherit;
   text-decoration: none;
+}
+@media (hover: hover) {
+  .overview-row:hover {
+    background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+  }
 }
 .overview-row-icon {
   display: grid;
@@ -403,20 +431,26 @@ watch(building, load);
 .overview-row-value[data-tone="info"] { color: var(--c-info); }
 .domain-ledger {
   display: grid;
+  gap: var(--sp-3);
   margin-block-start: clamp(var(--sp-6), 5vw, 4rem);
-  border-block: 1px solid var(--c-border-strong);
 }
 .domain-ledger a {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
   min-block-size: 76px;
-  padding-block: var(--sp-3);
+  padding: var(--sp-3) clamp(var(--sp-4), 3vw, var(--sp-5));
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--radius);
+  background: var(--c-surface-2);
+  box-shadow: var(--shadow-sm);
   color: inherit;
   text-decoration: none;
 }
-.domain-ledger a + a {
-  border-block-start: 1px solid var(--c-border);
+@media (hover: hover) {
+  .domain-ledger a:hover {
+    border-color: var(--c-primary);
+  }
 }
 .domain-ledger a > span {
   display: grid;
@@ -433,19 +467,15 @@ watch(building, load);
   line-height: 1.5;
 }
 
-@media (min-width: 64rem) {
+/* Against the frame, not the window — the detail pane is about 550px at 1440. */
+@container mc-frame (min-width: 46rem) {
   .overview-layout {
-    grid-template-columns: minmax(18rem, 0.8fr) minmax(26rem, 1.2fr);
+    grid-template-columns: minmax(18rem, 0.8fr) minmax(24rem, 1.2fr);
   }
+}
+@container mc-frame (min-width: 34rem) {
   .domain-ledger {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .domain-ledger a {
-    padding-inline: var(--sp-5);
-  }
-  .domain-ledger a + a {
-    border-block-start: 0;
-    border-inline-start: 1px solid var(--c-border);
   }
 }
 </style>

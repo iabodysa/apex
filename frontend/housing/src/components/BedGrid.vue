@@ -138,9 +138,8 @@ function bedLabel(bed) {
 }
 
 .floor {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
+  display: grid;
+  gap: var(--sp-3);
 }
 .floor-name {
   display: inline-flex;
@@ -150,13 +149,27 @@ function bedLabel(bed) {
   font-weight: var(--fw-heading);
   color: var(--c-muted);
 }
+/* One room is one subject, so it is one card (DESIGN.md §1). It was named a card while
+   drawing a hairline over a transparent ground, which is what made the board read as a
+   wireframe. */
 .room-card {
-  border-block-start: var(--border-width) solid var(--c-border);
-  background: transparent;
-  padding-block: var(--sp-3);
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
+  min-inline-size: 0;
+  padding: var(--sp-4);
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--radius);
+  background: var(--c-surface-2);
+  box-shadow: var(--shadow-sm);
+}
+@container mc-frame (min-width: 34rem) {
+  .floor {
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  }
+  .floor-name {
+    grid-column: 1 / -1;
+  }
 }
 .room-line {
   display: flex;

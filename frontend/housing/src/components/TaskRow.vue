@@ -367,7 +367,7 @@ function onUploaded(file) {
   transform: translateY(-4px);
 }
 
-@media (min-width: 42rem) {
+@container mc-frame (min-width: 34rem) {
   .task-actions {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
