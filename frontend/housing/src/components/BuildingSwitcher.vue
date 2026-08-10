@@ -22,20 +22,48 @@
       <template #icon><Icon name="building" :size="24" /></template>
     </EmptyState>
 
-    <ul v-else class="switcher-list">
-      <li v-for="b in buildings" :key="b.building">
-        <button type="button" class="switcher-item" @click="$emit('select', b.building, b.building_title)">
-          <span class="switcher-icon"><Icon name="building" :size="18" /></span>
-          <span class="switcher-body">
-            <span class="switcher-name">{{ b.building_title }}</span>
-            <span class="switcher-mix">
-              {{ t("beds.summary", { occupied: b.occupied, total: b.total_beds }) }}
-            </span>
-          </span>
-          <Badge :theme="mixTheme(b)" size="lg" :label="b.occupancy_pct + '%'" />
-        </button>
-      </li>
-    </ul>
+    <template v-else>
+      <section v-for="group in grouped" :key="group.key" class="switcher-group">
+        <h3 class="switcher-site">{{ group.title }}</h3>
+        <ul class="switcher-list">
+          <li v-for="b in group.buildings" :key="b.building">
+            <button
+              type="button"
+              class="switcher-item"
+              :class="{ 'is-empty': !b.has_rooms }"
+              @click="$emit('select', b.building, b.building_title)"
+            >
+              <span class="switcher-icon"><Icon name="building" :size="18" /></span>
+              <span class="switcher-body">
+                <span class="switcher-name">
+                  {{ b.building_title }}
+                  <Badge
+                    v-if="b.accommodation_type"
+                    theme="gray"
+                    size="sm"
+                    :label="tEnum('accommodationType', b.accommodation_type)"
+                  />
+                </span>
+                <span class="switcher-mix">
+                  {{
+                    b.has_rooms
+                      ? t("beds.summary", { occupied: b.occupied, total: b.total_beds })
+                      : t("building.noRooms")
+                  }}
+                </span>
+              </span>
+              <Badge
+                v-if="b.has_rooms"
+                :theme="mixTheme(b)"
+                size="lg"
+                :label="b.occupancy_pct + '%'"
+              />
+              <Badge v-else theme="orange" size="lg" :label="t('building.noRoomsBadge')" />
+            </button>
+          </li>
+        </ul>
+      </section>
+    </template>
   </div>
 </template>
 
@@ -49,7 +77,7 @@ import LoadError from "./LoadError.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 
 const emit = defineEmits(["select"]);
-const { t } = useI18n();
+const { t, tEnum } = useI18n();
 
 const listRes = createResource({
   url: "apex.habitat.api.front_desk.list_supervisor_buildings",
@@ -67,6 +95,22 @@ const scopeRes = createResource({
 
 const buildings = computed(() => listRes.data || []);
 const listErrorMessage = computed(() => resourceErrorMessage(listRes.error, "errors.gridFailed"));
+
+const grouped = computed(() => {
+  const groups = new Map();
+  for (const b of buildings.value) {
+    const key = b.site || "";
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key: key || "__unsited",
+        title: b.site_title || t("building.noSite"),
+        buildings: [],
+      });
+    }
+    groups.get(key).buildings.push(b);
+  }
+  return [...groups.values()];
+});
 
 const scopeHint = computed(() => {
   /* Without this the hint is simply absent when the scope read fails, so "your account is
@@ -123,6 +167,20 @@ watch(
 }
 /* Each building is one subject, so each is one card (DESIGN.md §1) rather than a row in a
    ruled ledger. It is the first screen the operator meets and it was the flattest. */
+.switcher-group + .switcher-group {
+  margin-block-start: var(--sp-5);
+}
+.switcher-site {
+  margin-block-end: var(--sp-2);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--c-muted);
+  letter-spacing: 0.02em;
+}
+.switcher-item.is-empty .switcher-name,
+.switcher-item.is-empty .switcher-mix {
+  color: var(--c-muted);
+}
 .switcher-list {
   display: grid;
   gap: var(--sp-3);

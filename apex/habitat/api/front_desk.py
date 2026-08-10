@@ -319,13 +319,16 @@ def list_supervisor_buildings() -> list[dict]:
         return []
 
     buildings = frappe.get_all(
-        "Building", filters=scope.filters, fields=["name", "building_name"]
+        "Building",
+        filters=scope.filters,
+        fields=["name", "building_name", "site", "accommodation_type"],
     )
     if not buildings:
         return []
     building_names = [b.name for b in buildings]
 
     mix = occupancy.bed_mix(occupancy.bed_mix_rows(building_names), building_names)
+    site_titles = _site_titles({b.site for b in buildings if b.site})
 
     auto = len(buildings) == 1
     result = []
@@ -336,6 +339,10 @@ def list_supervisor_buildings() -> list[dict]:
             {
                 "building": b.name,
                 "building_title": b.building_name or b.name,
+                "site": b.site,
+                "site_title": site_titles.get(b.site) or b.site,
+                "accommodation_type": b.accommodation_type,
+                "has_rooms": bool(total),
                 "total_beds": total,
                 "available": m["available"],
                 "occupied": m["occupied"],
@@ -345,8 +352,18 @@ def list_supervisor_buildings() -> list[dict]:
                 "auto": auto,
             }
         )
-    result.sort(key=lambda r: str(r["building_title"]))
+    result.sort(key=lambda r: (str(r["site_title"] or ""), str(r["building_title"])))
     return result
+
+
+def _site_titles(sites: set) -> dict:
+    """Docname to display title for the Sites the caller's buildings sit under."""
+    if not sites:
+        return {}
+    rows = frappe.get_all(
+        "Site", filters={"name": ["in", list(sites)]}, fields=["name", "site_name"]
+    )
+    return {row.name: row.site_name or row.name for row in rows}
 
 
 _RESIDENT_REQUEST_CLOSED = ("Resolved", "Rejected", "Closed")

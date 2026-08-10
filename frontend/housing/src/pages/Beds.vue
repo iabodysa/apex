@@ -11,7 +11,11 @@
     @retry="gridRes.reload()"
   />
 
-  <EmptyState v-else-if="!hasBeds" :title="t('beds.empty')" :hint="t('building.subtitle')">
+  <EmptyState
+    v-else-if="!hasBeds"
+    :title="t('building.emptyBoardTitle')"
+    :hint="t('building.emptyBoardHint')"
+  >
     <template #icon><Icon name="bed" :size="24" /></template>
     <template #action>
       <Button size="xl" variant="outline" :label="t('empty.switch')" @click="onChangeBuilding" />

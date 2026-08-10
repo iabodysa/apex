@@ -83,6 +83,12 @@ const messages = {
       context: "Building context",
       search: "Search buildings",
       empty: "No buildings available for your account.",
+      noSite: "Not under a site",
+      noRooms: "No rooms yet — nothing to show inside",
+      noRoomsBadge: "Empty",
+      emptyBoardTitle: "This building has no rooms yet",
+      emptyBoardHint:
+        "Rooms and beds are created on the desk, under Room Setup. Ask your supervisor to set them up, or pick another building.",
     },
     today: {
       title: "Today",
@@ -459,6 +465,13 @@ const messages = {
       Quarterly: "Quarterly",
       Annual: "Annual",
     },
+    accommodationType: {
+      Apartment: "Apartment",
+      Building: "Building",
+      Villa: "Villa",
+      "Compound Block": "Compound block",
+      Other: "Other",
+    },
     errors: {
       loadFailed: "Couldn't load the inventory",
       deliveriesFailed: "Couldn't load the deliveries",
@@ -554,6 +567,12 @@ const messages = {
       context: "نطاق العمل",
       search: "ابحث عن مبنى",
       empty: "لا توجد مبانٍ متاحة لحسابك.",
+      noSite: "غير تابع لموقع",
+      noRooms: "ما فيه غرف بعد — ما بداخله شي يُعرض",
+      noRoomsBadge: "فارغ",
+      emptyBoardTitle: "هذا المبنى ما فيه غرف بعد",
+      emptyBoardHint:
+        "الغرف والأسرّة تُنشأ من صفحة إعداد الغرف في الديسك. اطلب من مشرفك إنشاءها، أو اختر مبنى آخر.",
     },
     today: {
       title: "اليوم",
@@ -927,6 +946,13 @@ const messages = {
       Monthly: "شهري",
       Quarterly: "ربع سنوي",
       Annual: "سنوي",
+    },
+    accommodationType: {
+      Apartment: "شقة",
+      Building: "عمارة",
+      Villa: "فيلا",
+      "Compound Block": "بلوك في مجمّع",
+      Other: "أخرى",
     },
     errors: {
       loadFailed: "تعذّر تحميل المخزون",
