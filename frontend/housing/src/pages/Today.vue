@@ -37,13 +37,10 @@
         :title="t('today.queueTitle')"
         :eyebrow="t('today.queueEyebrow')"
       >
-        <TabButtons
-          v-if="canSteer"
-          class="queue-filter"
-          v-model="scope"
-          :dir="dir"
-          :buttons="scopeButtons"
-        />
+        <template v-if="canSteer" #actions>
+          <TabButtons v-model="scope" :dir="dir" :buttons="scopeButtons" />
+        </template>
+
         <router-link
           v-for="item in visibleWork"
           :key="item.key"
@@ -354,13 +351,9 @@ watch(building, load);
 .overview-lead {
   align-self: start;
 }
-/* The card is white with a quiet edge; the accent rule on its reading edge is what marks
-   it as the lead, the way the guide leads a surface with a single coloured stroke. */
 .overview-lead.card {
   border-inline-start: var(--sp-1) solid var(--c-primary);
 }
-/* WorkQueue draws itself as a bare ledger between two rules. Inside a card that edge is the
-   card's job, so it is handed back. */
 .overview-queue.card {
   border: var(--border-width) solid var(--c-border);
   background: var(--c-surface-2);

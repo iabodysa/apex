@@ -29,6 +29,7 @@ defineProps({
 }
 .work-queue-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: end;
   gap: var(--sp-3);
   padding: var(--sp-4) 0;
