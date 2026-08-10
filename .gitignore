@@ -140,3 +140,4 @@ docs/*
 !docs/assets/training/
 !docs/assets/training/*/
 !docs/assets/training/*/*.png
+.vite/
