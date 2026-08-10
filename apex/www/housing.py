@@ -54,12 +54,31 @@ def _can(doctype: str, *ptypes: str) -> bool:
     return all(frappe.has_permission(doctype, ptype) for ptype in ptypes)
 
 
+def _clearable_exits() -> list:
+    """The exit numbers this caller may actually clear.
+
+    Write on the delivery is not the gate — each exit is held by its own role
+    (``api.facility_asset_delivery.EXIT_ROLES``), so a screen that offered the button on
+    write alone showed a Procurement Supervisor a large green control that only a Resident
+    Supervisor may press, and the refusal arrived after the tap.
+    """
+    from apex.habitat.api.facility_asset_delivery import EXIT_ROLES
+
+    if not _can("Facility Asset Delivery", "write"):
+        return []
+    roles = set(frappe.get_roles())
+    if "System Manager" in roles:
+        return sorted(EXIT_ROLES)
+    return sorted(number for number, role in EXIT_ROLES.items() if role in roles)
+
+
 def portal_capabilities() -> dict:
     """The per-action grants a section needs, so a control can be disabled with a
     stated reason instead of failing at the server."""
     return {
         "count": _can("Housing Inventory", "read", "write"),
         "clear_exit": _can("Facility Asset Delivery", "write"),
+        "exits": _clearable_exits(),
         "set_readiness": _can("Room", "write"),
         "check_in": _can("Housing Assignment", "create", "submit"),
         "check_out": _can("Housing Checkout", "create", "submit"),

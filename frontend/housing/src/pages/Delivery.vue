@@ -68,6 +68,7 @@
         size="2xl"
         variant="solid"
         theme="green"
+        :disabled="!mayClearNext"
         :loading="busy === selectedDelivery.name"
         :loading-text="t('delivery.clearing')"
         :label="t('delivery.clearCheckpoint', { label: exitLabel(nextExit(selectedDelivery)) })"
@@ -75,6 +76,11 @@
       >
         <template #prefix><Icon name="shield-check" :size="20" /></template>
       </Button>
+      <!-- Disabled with the reason beside it, per DESIGN.md §7 — the control stays visible
+           so the reader learns WHO clears this checkpoint rather than meeting a refusal. -->
+      <p v-if="selectedDelivery.status === 'Pending Exits' && !mayClearNext" class="dock-hint">
+        {{ t("delivery.notYourCheckpoint", { label: exitLabel(nextExit(selectedDelivery)) }) }}
+      </p>
 
       <template v-else>
         <Button
@@ -123,6 +129,7 @@
             size="2xl"
             variant="solid"
             theme="green"
+            :disabled="selectedDelivery.status === 'Pending Exits' && !mayClearNext"
             :loading="busy === selectedDelivery.name"
             :loading-text="selectedDelivery.status === 'Pending Exits' ? t('delivery.clearing') : t('delivery.confirming')"
             :label="
@@ -233,6 +240,7 @@ import LoadError from "../components/LoadError.vue";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { useDesktop } from "@shared/useBreakpoint.js";
 import { nextExit } from "../gates";
+import { canClearExit } from "../portal.js";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -288,6 +296,10 @@ const loadErrorMessage = computed(() =>
 
 const selected = computed(() => route.params.name || "");
 const selectedDelivery = computed(() => deliveries.value.find((d) => d.name === selected.value) || null);
+const mayClearNext = computed(() => {
+  const del = selectedDelivery.value;
+  return !!del && canClearExit(nextExit(del));
+});
 
 function openDelivery(name) {
   actionError.value = "";

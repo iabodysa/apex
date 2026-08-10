@@ -14,6 +14,14 @@ export function can(action) {
   return grants[action] === true;
 }
 
+/* Write on the delivery is not the gate — each exit is held by its own role, so the server
+   publishes the exits this caller may actually clear. Offering the button on write alone
+   showed a large green control to someone the server would refuse after the tap. */
+export function canClearExit(number) {
+  const exits = Array.isArray(grants.exits) ? grants.exits : [];
+  return exits.includes(Number(number));
+}
+
 export function grantedSections() {
   return [...granted];
 }
