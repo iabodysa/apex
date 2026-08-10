@@ -1,5 +1,5 @@
 // Copyright (c) 2026, afmcoltd
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHashHistory, START_LOCATION } from "vue-router";
 import { hasSection } from "./portal.js";
 import { landingPath } from "./sections.js";
 import Arrivals from "./pages/Arrivals.vue";
@@ -84,13 +84,23 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to) => {
+/* The entry door decides the FIRST screen, and only that one. Consulting it on every
+   navigation meant a reader who came in through /safety was sent straight back to safety
+   every time they tapped Today, so the tab could never be opened at all. */
+let landingResolved = false;
+
+router.beforeEach((to, from) => {
   const section = to.meta && to.meta.section;
   if (section === "today") {
-    const target = landingPath();
-    if (target !== "/today") return { path: target };
+    const firstNavigation = !landingResolved && from === START_LOCATION;
+    landingResolved = true;
+    if (firstNavigation) {
+      const target = landingPath();
+      if (target !== "/today") return { path: target };
+    }
     return true;
   }
+  landingResolved = true;
   if (section && !hasSection(section)) return { path: "/no-access" };
   return true;
 });

@@ -8,7 +8,7 @@
     :detail="dueErrorMessage"
     :hint="t('errors.retryHint')"
     :retry-label="t('common.retry')"
-    @retry="dueRes.reload()"
+    @retry="load()"
   />
 
   <template v-else-if="submitted">
@@ -126,7 +126,7 @@ import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { can } from "../portal.js";
 import { connectSafetyRealtime } from "../realtime.js";
 import { dropRoundDraft, readRoundDraft, writeRoundDraft } from "../drafts.js";
-import { building, clearBuilding, localDate } from "../session";
+import { building, clearBuilding, forgetMissingBuilding, localDate } from "../session";
 
 const { t, tEnum } = useI18n();
 
@@ -143,6 +143,7 @@ const staleOffer = ref(false);
 const dueRes = createResource({
   url: "apex.habitat.api.safety_checklist.get_due_cadences",
   makeParams: () => ({ building: building.value }),
+  onError: (error) => forgetMissingBuilding(error),
 });
 
 const submitRes = createResource({
@@ -271,9 +272,12 @@ function load() {
   dueRes.fetch();
 }
 
+/* Every path that reads the round goes through the same building guard. Retry and the
+   stale-data offer used to fetch unconditionally, so a reader with no building chosen
+   asked the server for the rounds of nothing and was shown a failure for it. */
 function acceptStale() {
   staleOffer.value = false;
-  dueRes.fetch();
+  if (building.value) dueRes.fetch();
 }
 
 function resultTheme(value) {

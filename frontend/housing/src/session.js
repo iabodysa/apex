@@ -35,6 +35,17 @@ export function selectBuilding(name, label) {
   buildingLabel.value = label || name;
 }
 
+/* A building restored from this browser is a claim, not a fact: it may have been chosen
+   against another site, or deleted since. Left unchecked it is worse than having none —
+   the portal believes a building is selected, so it never offers the picker, and every
+   read fails against a name the server has never heard of. */
+export function forgetMissingBuilding(error) {
+  const text = String((error && (error.message || error.exc_type)) || error || "");
+  if (!/DoesNotExist|not found/i.test(text)) return false;
+  clearBuilding();
+  return true;
+}
+
 export function clearBuilding() {
   building.value = "";
   buildingLabel.value = "";

@@ -23,6 +23,7 @@ A Work Order already exists for this Maintenance Request: {0},يوجد بالف�
 A building is required to build the checklist.,يلزم مبنى لبناء قائمة الفحص.
 A building is required to compute due cadences.,يلزم تحديد مبنى لحساب الجولات المستحقة حسب التكرار.
 A building is required to load the inventory.,يجب تحديد مبنى لتحميل المخزون.
+A building is required to draw the safety map.,يلزم تحديد مبنى لعرض خريطة السلامة.
 A building is required to log an inspection.,يلزم تحديد مبنى لتسجيل التفتيش.
 A building is required to submit a round.,يلزم مبنى لاعتماد جولة.
 A building is required to submit counts.,يجب تحديد مبنى لإرسال أعداد الجرد.

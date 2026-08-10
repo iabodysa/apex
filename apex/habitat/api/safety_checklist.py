@@ -220,7 +220,7 @@ def _cadence_is_due(building, cadence, on_date=None):
 
 
 @frappe.whitelist()
-def get_due_cadences(building):
+def get_due_cadences(building=None):
     """Return the cadences DUE for a building, each with its expected tasks.
 
     For every cadence (Daily -> Weekly -> Monthly -> Quarterly -> Annual) that is
@@ -236,6 +236,11 @@ def get_due_cadences(building):
 
     Permission: caller must have ``read`` on Safety Task Catalog (same gate as
     :func:`get_tasks_for_cadence`).
+
+    ``building`` is optional in the signature and refused in the body on purpose: a client
+    that has not chosen one yet omits the key entirely, and a required positional argument
+    turns that into a TypeError the reader sees as the endpoint not existing. A stated
+    refusal is a screen someone can act on; a server error is not.
 
     Args:
         building: Accommodation Building docname (source of truth).

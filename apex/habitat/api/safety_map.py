@@ -38,7 +38,7 @@ _DAMAGE_RECENCY_DAYS = 14
 
 
 @frappe.whitelist()
-def get_safety_map(building):
+def get_safety_map(building=None):
     """Return the floor -> room safety map for one building (read-only, N+1-free).
 
     Built from a BOUNDED set of bulk queries:
@@ -73,6 +73,11 @@ def get_safety_map(building):
         ``maintenance_count``, ``has_recent_damage``, ``signal``) and a
         ``common_zone`` tile.
     """
+    # Optional in the signature, refused here: a client that has not chosen a building
+    # omits the key, and a required positional turns that into a TypeError the reader
+    # sees as the endpoint not existing.
+    if not building:
+        frappe.throw(_("A building is required to draw the safety map."))
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
     building_title = (

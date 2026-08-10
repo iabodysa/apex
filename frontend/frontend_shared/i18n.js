@@ -64,6 +64,15 @@ export function createI18n({
     if (excType.includes("CSRFTokenError") || excType.includes("Authorization")) {
       return translate("errors.sessionExpired");
     }
+    /* A record the server has never heard of is the one failure whose cause a reader can
+       act on, and it looks identical to every other failure unless it is named. It happens
+       to anyone carrying a saved choice from a site that no longer holds it. */
+    if (excType.includes("DoesNotExist") || status === 404) {
+      return translate("errors.gone");
+    }
+    if (excType.includes("PermissionError")) {
+      return translate("errors.notAllowed");
+    }
     return translate(fallbackKey);
   }
 
