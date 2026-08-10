@@ -107,6 +107,18 @@ class DispatchTrip(Document):
             )
         except Exception:
             pass
+        try:
+            from apex.apex_core.utils.portal_token_security import (
+                DRIVER,
+                publish_to_portal_subject,
+            )
+
+            if self.driver:
+                publish_to_portal_subject(
+                    DRIVER, self.driver, "driver_trip_update", {"name": self.name}
+                )
+        except Exception:
+            pass
 
     def _mark_assigned_requests(self):
         """Best-effort: flag each assigned Transport Request as Assigned to this trip.

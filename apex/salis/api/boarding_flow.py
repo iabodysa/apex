@@ -31,6 +31,11 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, now_datetime, time_diff_in_seconds
 
+from apex.apex_core.utils.portal_token_security import (
+    DRIVER,
+    WORKER,
+    publish_to_portal_subject,
+)
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.apex_core.doctype.salis_settings.salis_settings import (
     get_boarding_setting,
@@ -44,20 +49,35 @@ _MISBOARD_TTL_SECONDS = 30 * 60
 _ROW_SAVEPOINT = "salis_boarding_auto_confirm_row"
 
 
-def _publish(event, dispatch_trip, payload):
-    """Publish a boarding flow event to the Dispatch Trip room.
+def _publish(event, dispatch_trip, payload, driver=None, employee=None):
+    """Announce a boarding flow event to everyone entitled to hear it.
+
+    The Dispatch Trip room reaches DESK subscribers, who hold read permission on it.
+    It can never reach a portal: /driver and /masar are Guest sessions carrying a
+    token, and frappe's socket server gates a doctype room on read permission, so a
+    publish routed only there is emitted and never delivered. The portal subjects are
+    therefore rung on their own rooms as well — see
+    ``portal_token_security.portal_room``.
 
     after_commit so subscribers read committed state; best-effort so a publish
     failure can never abort the calling write."""
+    body = {"dispatch_trip": dispatch_trip, **payload}
     try:
         frappe.publish_realtime(
             event,
-            {"dispatch_trip": dispatch_trip, **payload},
+            body,
             doctype="Dispatch Trip",
             after_commit=True,
         )
     except Exception:
         pass
+    for audience, subject in ((DRIVER, driver), (WORKER, employee)):
+        if not subject:
+            continue
+        try:
+            publish_to_portal_subject(audience, subject, event, body)
+        except Exception:
+            pass
 
 
 def _request_workers(transport_request):
@@ -418,7 +438,12 @@ def notify_remaining_passengers(dispatch_trip):
     if changed:
         trip.save(ignore_permissions=True)
 
-    _publish("boarding_update", dispatch_trip, {"max_count": max_count, "window": window})
+    _publish(
+        "boarding_update",
+        dispatch_trip,
+        {"max_count": max_count, "window": window},
+        driver=trip.driver,
+    )
 
     return {
         "dispatch_trip": dispatch_trip,
@@ -475,6 +500,8 @@ def worker_request_wait(token=None):
             "wait_count": wait_count,
             "wait_window_seconds": window,
         },
+        driver=trip.driver,
+        employee=employee,
     )
     return {
         "dispatch_trip": dispatch_trip,
@@ -564,6 +591,8 @@ def worker_claim_boarded(token=None):
         "boarding_confirmed",
         dispatch_trip,
         {"employee": employee, "confirm_source": "Worker"},
+        driver=trip.driver,
+        employee=employee,
     )
     return {
         "dispatch_trip": dispatch_trip,
@@ -625,6 +654,8 @@ def driver_mark_not_boarded(dispatch_trip, employee):
         "boarding_unmarked",
         dispatch_trip,
         {"employee": employee, "reject_count": cint(target.reject_count)},
+        driver=trip.driver,
+        employee=employee,
     )
 
     return {
@@ -762,6 +793,7 @@ def depart_and_finalize(dispatch_trip):
         "boarding_update",
         dispatch_trip,
         {"finalized": True, "boarded": boarded, "absent": absent},
+        driver=trip.driver,
     )
     return {
         "dispatch_trip": dispatch_trip,

@@ -29,6 +29,7 @@ existing /driver portal and have no GL or write side effects.
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.portal_token_security import WORKER, portal_room
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.apex_core.utils.system_notify import notify_user_system
 from apex.salis.api import boarding_window
@@ -296,6 +297,7 @@ def get_worker_context(token=None):
         "cell_number": emp.get("cell_number") or emp.get("personal_email"),
         "photo": photo,
         "documents": documents,
+        "realtime_room": portal_room(WORKER, token),
     }
 
 

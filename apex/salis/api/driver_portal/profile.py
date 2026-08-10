@@ -113,7 +113,14 @@ def get_driver_context():
     )
     if d and d.get("license_expiry"):
         d["license_expiry"] = frappe.utils.cstr(d["license_expiry"])
-    return {"enabled": True, "linked": True, "driver": d}
+    from apex.apex_core.utils.portal_token_security import DRIVER, portal_room
+
+    return {
+        "enabled": True,
+        "linked": True,
+        "driver": d,
+        "realtime_room": portal_room(DRIVER),
+    }
 
 
 @frappe.whitelist(allow_guest=True)

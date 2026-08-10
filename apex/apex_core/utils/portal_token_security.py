@@ -87,6 +87,71 @@ def hash_token(raw: str) -> str:
     return hashlib.sha256((raw or "").encode("utf-8")).hexdigest()
 
 
+PORTAL_ROOM_PREFIX = "apex-portal-"
+
+
+def portal_room(audience: str, token=None) -> str:
+    """The realtime room this portal session may join, or "" when it has no token.
+
+    A portal session is a GUEST holding a token, not a permissioned user, so it can
+    never join a doctype room: frappe's socket server gates doctype_subscribe and
+    doc_subscribe on read permission, while task_subscribe
+    (realtime/handlers/frappe_handlers.js) joins with no check at all. The task room is
+    therefore the only native room a Guest may join, and it admits on knowledge of an
+    unguessable id — which is what the token's stored SHA-256 hash already is.
+
+    The RAW token never appears in a room id, and the client is handed this value by
+    the context call that has already authenticated the token; it is never derived
+    client-side.
+    """
+    _require_audience(audience)
+    raw, was_presented = presented_token(audience, token)
+    if not was_presented or not raw:
+        return ""
+    return PORTAL_ROOM_PREFIX + hash_token(raw)
+
+
+def portal_rooms_for_subject(audience: str, subject: str) -> list:
+    """Every live room belonging to one driver or employee.
+
+    The room id is the token's stored hash, so it is read straight off the enabled
+    token rows — the raw token is never needed and never leaves the holder's browser.
+    A subject with a reissued link may hold more than one enabled row, so all of them
+    are rung rather than guessing which browser is open.
+    """
+    _require_audience(audience)
+    if not subject:
+        return []
+    field = "driver" if audience == DRIVER else "employee"
+    hashes = frappe.get_all(
+        "Masar Worker Token",
+        filters={"holder_type": audience, "enabled": 1, field: subject},
+        pluck="token",
+    )
+    return [PORTAL_ROOM_PREFIX + h for h in hashes if h]
+
+
+def publish_to_portal_subject(audience: str, subject: str, event: str, message=None) -> int:
+    """Ring one subject's own rooms. Returns how many were rung."""
+    rooms = portal_rooms_for_subject(audience, subject)
+    for room in rooms:
+        frappe.publish_realtime(event, message or {}, room=room, after_commit=True)
+    return len(rooms)
+
+
+def publish_to_portal(audience: str, event: str, message=None, token=None) -> bool:
+    """Ring the doorbell on one portal subject's own room. Returns whether it was sent.
+
+    The payload is a SIGNAL, never a data path: the client refetches through its own
+    token-scoped endpoint, so nothing here can widen what a portal may read.
+    """
+    room = portal_room(audience, token)
+    if not room:
+        return False
+    frappe.publish_realtime(event, message or {}, room=room, after_commit=True)
+    return True
+
+
 def presented_token(audience: str, explicit=None) -> tuple[str, bool]:
     """Return the audience credential and whether the request presented one."""
     _require_audience(audience)
