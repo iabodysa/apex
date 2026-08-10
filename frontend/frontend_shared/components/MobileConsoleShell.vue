@@ -40,7 +40,6 @@
 defineProps({
   title: { type: String, default: "" },
   subtitle: { type: String, default: "" },
-  // Kept while portals migrate. Composition now follows available content, not this hint.
   maxWidth: { type: [Number, String], default: "" },
 });
 </script>

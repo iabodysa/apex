@@ -34,8 +34,6 @@ const SOURCES = {
 const props = defineProps({
   variant: { type: String, default: "mark" },
   size: { type: [Number, String], default: 28 },
-  /* Empty by default: a mark sitting beside the product name is decoration, and naming it
-     twice makes a screen reader say it twice. Pass a label only when the mark stands alone. */
   alt: { type: String, default: "" },
 });
 
