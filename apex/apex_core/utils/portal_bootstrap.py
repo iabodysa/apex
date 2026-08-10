@@ -2,12 +2,9 @@
 
 """Shared bootstrap for the www portal host pages.
 
-The four THEMED host pages (driver / masar / housing / safety) each rendered the
-SAME two bits of boilerplate: the Driver Portal Theme appearance projection, and
-the Guest -> /login redirect. These helpers hold that single copy so the pages stay
-identical where they should. The fixed-palette pages (fleet / fleet_os /
-masar_supervisor) take ``guest_redirect`` only — they set no ``data-theme`` and so
-never project an accent. See ``apex/templates/__init__.py`` for the full audit.
+Portal host pages share appearance projection and the Guest -> /login redirect.
+These helpers keep that boilerplate in one place while page-specific security stays
+local. Apex uses one light color system; appearance only controls brand overrides.
 
 Deliberately NOT here (kept local to each page): the CSRF-token mint, the masar
 ``?w`` token charset guard, per-page role gates, and fleet's Socket.IO config —
@@ -24,13 +21,11 @@ from apex.salis.doctype.driver_portal_theme.driver_portal_theme import (
 
 
 def apply_portal_appearance(context) -> None:
-    """Project the Salis Portal Theme onto ``context`` (theme + brand overrides).
+    """Project portal brand overrides onto ``context``.
 
-	Sets ``portal_theme`` / ``portal_accent`` / ``portal_logo`` /
-	``portal_show_brand`` so every portal shell re-skins from the one Single.
+	Sets ``portal_accent`` / ``portal_logo`` / ``portal_show_brand``.
 	"""
     appearance = get_portal_appearance()
-    context.portal_theme = appearance["theme"]
     context.portal_accent = appearance["accent"]
     context.portal_logo = appearance["logo"]
     context.portal_show_brand = appearance["show_brand"]

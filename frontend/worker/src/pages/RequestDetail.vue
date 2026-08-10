@@ -190,7 +190,7 @@ function statusPill(status) {
   inline-size: 24px;
   block-size: 24px;
   flex-shrink: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--c-primary) 12%, transparent);
   color: var(--c-primary);
 }

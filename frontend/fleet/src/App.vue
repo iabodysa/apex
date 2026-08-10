@@ -1,67 +1,69 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <PortalFrame
-    :title="pageTitle"
-    :eyebrow="pageEyebrow"
-    :subtitle="pageSubtitle"
-    :navigation-label="t('emp.nav.label')"
-    :skip-label="t('common.skipContent')"
-  >
-    <template #brand>
-      <Brand variant="reverse" :size="30" />
-      <span class="emp-brandword">
-        {{ t("emp.brand") }}
-        <small>{{ t("emp.brandSub") }}</small>
-      </span>
-    </template>
+  <FrappeUIProvider>
+    <a class="emp-skip-link" href="#fleet-content">{{ t("common.skipContent") }}</a>
+    <FleetPageShell max-width="80rem">
+      <template #brand>
+        <Brand variant="reverse" :size="30" />
+        <span class="emp-brandword">
+          <bdi dir="ltr">{{ t("emp.brand") }}</bdi>
+          <small>{{ t("emp.brandSub") }}</small>
+        </span>
+      </template>
 
-    <template #header-actions>
-      <ThemeToggle />
-      <LangToggle variant="header" />
-      <span
-        class="emp-avatar"
-        :title="userName || t('emp.brand')"
-        :aria-label="userName || t('emp.brand')"
-      >{{ avatarInitial }}</span>
-    </template>
+      <template #actions>
+        <LangToggle variant="header" />
+        <span
+          class="emp-avatar"
+          :title="userName || t('emp.brand')"
+          :aria-label="userName || t('emp.brand')"
+        ><bdi>{{ avatarInitial }}</bdi></span>
+      </template>
 
-    <template #nav>
-      <span class="fleet-nav">
+      <template #nav>
         <router-link
           v-for="item in navItems"
           :key="item.to"
           :to="item.to"
+          class="emp-nav-link"
           active-class=""
           exact-active-class="is-active"
         >
           <Icon :name="item.icon" :size="18" />
           <span>{{ t(item.key) }}</span>
         </router-link>
-      </span>
-    </template>
+      </template>
 
-    <router-view v-slot="{ Component }">
-      <transition name="emp-scene" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </router-view>
-  </PortalFrame>
+      <template #heading>
+        <header class="emp-page-heading">
+          <span class="emp-page-eyebrow"><bdi>{{ pageEyebrow }}</bdi></span>
+          <h1>{{ pageTitle }}</h1>
+          <p>{{ pageSubtitle }}</p>
+        </header>
+      </template>
 
-  <PortalToast :toast="toast" />
+      <div id="fleet-content" tabindex="-1">
+        <router-view v-slot="{ Component }">
+          <transition name="emp-scene" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+      </div>
+    </FleetPageShell>
+  </FrappeUIProvider>
 </template>
 
 <script setup>
 import { computed, watch } from "vue";
 import { useRoute } from "vue-router";
+import { FrappeUIProvider } from "frappe-ui";
 
 import Brand from "@shared/components/Brand.vue";
+import FleetPageShell from "@shared/components/FleetPageShell.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
-import PortalFrame from "@shared/components/PortalFrame.vue";
-import ThemeToggle from "@shared/components/ThemeToggle.vue";
 import { useDocumentLanguage } from "@shared/useDocumentLanguage";
 
 import Icon from "./Icon.vue";
-import PortalToast from "./components/PortalToast.vue";
 import { formatToday } from "./fmt.js";
 import { provideToast } from "./toast.js";
 import { useI18n } from "@/i18n";
@@ -77,7 +79,7 @@ watch(
   { immediate: true },
 );
 
-const { toast } = provideToast();
+provideToast();
 const route = useRoute();
 
 const navItems = [

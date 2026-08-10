@@ -10,20 +10,25 @@
       >
         <span class="plan-row-seam" aria-hidden="true" />
         <span class="plan-row-main">
-          <span class="plan-row-title">{{ plan.route_name || plan.name }}</span>
+          <span class="plan-row-title"><bdi dir="auto">{{ plan.route_name || plan.name }}</bdi></span>
           <span class="plan-row-meta">
-            <span v-if="plan.project"><Icon name="badge" :size="13" /> {{ plan.project }}</span>
+            <span v-if="plan.project"><Icon name="badge" :size="13" /> <bdi dir="auto">{{ plan.project }}</bdi></span>
             <span v-if="plan.shift"><Icon name="clock" :size="13" /> {{ t("shift." + plan.shift) }}</span>
-            <span><Icon name="pin" :size="13" /> {{ t("list.stops", { n: plan.total_stops }) }}</span>
+            <span><Icon name="pin" :size="13" /> <bdi dir="auto">{{ t("list.stops", { n: plan.total_stops }) }}</bdi></span>
           </span>
           <span class="plan-row-assignment">
-            <span v-if="plan.driver"><Icon name="user" :size="13" /> {{ plan.driver }}</span>
+            <span v-if="plan.driver"><Icon name="user" :size="13" /> <bdi dir="auto">{{ plan.driver }}</bdi></span>
             <span v-if="plan.vehicle"><Icon name="truck" :size="13" /> <bdi>{{ plan.vehicle }}</bdi></span>
           </span>
         </span>
 
         <span class="plan-row-state">
-          <StatusLabel :label="statusLabel(plan)" :tone="statusTone(plan)" />
+          <Badge
+            :label="statusLabel(plan)"
+            :theme="statusTheme(plan)"
+            variant="subtle"
+            size="lg"
+          />
           <span v-if="plan.trip?.boarding" class="plan-row-progress">
             <Progress
               :value="pct(plan.trip.boarding.boarded, plan.trip.boarding.expected)"
@@ -39,9 +44,7 @@
 
 <script setup>
 import { computed } from "vue";
-import { Progress } from "frappe-ui";
-
-import StatusLabel from "@shared/components/StatusLabel.vue";
+import { Badge, Progress } from "frappe-ui";
 
 import Icon from "../Icon.vue";
 import { pct } from "../fmt.js";
@@ -71,10 +74,10 @@ function statusLabel(plan) {
   return status ? t("tripStatus." + status) : t("approval.Approved");
 }
 
-function statusTone(plan) {
-  if (plan.approval === "Rejected" || plan.trip?.status === "Cancelled") return "danger";
-  if (plan.approval === "Pending" || plan.trip?.status === "Dispatched") return "warning";
-  if (plan.trip?.status === "Completed") return "success";
-  return "info";
+function statusTheme(plan) {
+  if (plan.approval === "Rejected" || plan.trip?.status === "Cancelled") return "red";
+  if (plan.approval === "Pending" || plan.trip?.status === "Dispatched") return "orange";
+  if (plan.trip?.status === "Completed") return "green";
+  return "blue";
 }
 </script>

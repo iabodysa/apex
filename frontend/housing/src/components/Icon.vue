@@ -44,6 +44,7 @@ import {
   search,
   send2,
   shield,
+  shield2,
   triangleAlert,
   truck,
   user,
@@ -81,7 +82,7 @@ const ICONS = {
   "scale": scale,
   "search": search,
   "send": send2,
-  "shield": shield,
+  "shield": shield2,
   "shield-check": shield,
   "triangle-alert": triangleAlert,
   "truck": truck,
@@ -94,6 +95,6 @@ const MIRROR = ["chevron", "arrow-left"];
 defineProps({
   name: { type: String, required: true },
   size: { type: [Number, String], default: 22 },
-  strokeWidth: { type: [Number, String], default: 2 },
+  strokeWidth: { type: [Number, String], default: 1.75 },
 });
 </script>

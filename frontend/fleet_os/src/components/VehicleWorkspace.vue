@@ -41,7 +41,7 @@
   </section>
 
   <EmptyState v-else :title="t('panel.gone')" :hint="t('panel.goneHint')">
-    <template #icon><Icon name="car" :size="20" :stroke-width="1.6" /></template>
+    <template #icon><Icon name="car" :size="20" /></template>
   </EmptyState>
 </template>
 

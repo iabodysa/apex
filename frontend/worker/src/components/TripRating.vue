@@ -29,22 +29,27 @@
       </div>
 
       <div v-if="rating > 0">
-        <textarea
+        <FormControl
           v-model="feedback"
-          class="input w-full resize-none text-sm"
-          rows="2"
+          type="textarea"
+          size="md"
+          variant="outline"
+          :rows="2"
           :placeholder="t('tripRating.feedbackPlaceholder')"
-        ></textarea>
+        />
         <p v-if="errorMessage" class="text-sm text-danger mt-2" role="alert">
           {{ errorMessage }}
         </p>
-        <button
+        <Button
+          class="w-full mt-3"
           type="submit"
-          class="btn btn-primary w-full mt-3"
+          variant="solid"
+          theme="green"
+          size="xl"
           :disabled="submitting"
-        >
-          {{ t("tripRating.submit") }}
-        </button>
+          :loading="submitting"
+          :label="t('tripRating.submit')"
+        />
       </div>
     </form>
   </div>
@@ -52,7 +57,7 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { createResource } from "frappe-ui";
+import { Button, FormControl, createResource } from "frappe-ui";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import Icon from "../components/Icon.vue";
 
@@ -125,6 +130,6 @@ function submitRating() {
 }
 .rating-star:focus-visible {
   outline: 2px solid var(--c-primary);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 </style>

@@ -13,7 +13,7 @@
         :title="stop.stop_name || ''"
       >
         <svg v-if="stop.done" class="stepper-check" viewBox="0 0 16 16" fill="none">
-          <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
         <span v-else class="stepper-num">{{ stop.sequence || i + 1 }}</span>
       </div>
@@ -42,7 +42,7 @@ defineProps({
 .stepper-dot {
   width: 28px;
   height: 28px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -67,7 +67,7 @@ defineProps({
   flex: 1;
   min-width: 16px;
   height: 3px;
-  border-radius: 2px;
+  border-radius: var(--radius-pill);
   background: var(--c-border-strong);
   transition: background 0.4s ease;
 }

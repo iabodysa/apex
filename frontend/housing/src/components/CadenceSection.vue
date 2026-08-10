@@ -142,12 +142,6 @@ const badgeClass = computed(() => "badge-" + props.block.cadence.toLowerCase());
 .cadence-chevron-open {
   transform: rotate(90deg);
 }
-:global([dir="rtl"] .cadence-chevron) {
-  transform: scaleX(-1);
-}
-:global([dir="rtl"] .cadence-chevron-open) {
-  transform: scaleX(-1) rotate(90deg);
-}
 
 .cadence-rows {
   display: flex;

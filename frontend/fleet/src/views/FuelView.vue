@@ -15,7 +15,7 @@
           <span>{{ t("emp.fuel.boundVehicle") }}</span>
           <template v-if="vehicle.state.status === 'ready' && vehicle.state.data">
             <strong><bdi>{{ vehicle.state.data.plate || vehicle.state.data.name }}</bdi></strong>
-            <small>{{ vehicle.state.data.model || t("common.none") }}</small>
+            <small><bdi>{{ vehicle.state.data.model || t("common.none") }}</bdi></small>
           </template>
           <strong v-else-if="vehicle.state.status === 'loading' || vehicle.state.status === 'idle'">
             {{ t("emp.fuel.checkingVehicle") }}
@@ -131,13 +131,13 @@
         <ol class="emp-fuel-rows">
           <li v-for="(row, index) in fuelRequests.state.data" :key="row.name" class="emp-fuel-row">
             <span class="emp-trip-sequence tnum" aria-hidden="true">
-              {{ String(index + 1).padStart(2, "0") }}
+              <bdi>{{ String(index + 1).padStart(2, "0") }}</bdi>
             </span>
             <div class="emp-route">
               <strong><bdi>{{ row.litres }}</bdi> {{ t("emp.fuel.litresUnit") }}</strong>
               <span>
                 <bdi v-if="row.date">{{ formatDate(row.date, lang) }}</bdi>
-                <template v-if="row.station"> · {{ row.station }}</template>
+                <template v-if="row.station"> · <bdi>{{ row.station }}</bdi></template>
                 <template v-if="row.vehicle"> · <bdi>{{ row.vehicle }}</bdi></template>
               </span>
             </div>

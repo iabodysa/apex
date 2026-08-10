@@ -3,10 +3,10 @@
   <ol class="emp-trips">
     <li v-for="(trip, index) in rows" :key="trip.id" class="emp-trip">
       <span class="emp-trip-sequence tnum" aria-hidden="true">
-        {{ String(index + 1).padStart(2, "0") }}
+        <bdi>{{ String(index + 1).padStart(2, "0") }}</bdi>
       </span>
       <div class="emp-route">
-        <strong>{{ trip.title }}</strong>
+        <strong><bdi>{{ trip.title }}</bdi></strong>
         <span>
           <bdi v-if="trip.date">{{ formatDate(trip.date, lang) }}</bdi>
           <template v-if="trip.when"> · <bdi>{{ formatTime(trip.when, lang) }}</bdi></template>

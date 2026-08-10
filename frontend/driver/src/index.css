@@ -1,10 +1,16 @@
 /* Copyright (c) 2026, afmcoltd */
 @import "../../worker/src/field-ui.css";
 
-.portal-scene-body > .space-y-5,
-.portal-scene-body > form,
-.portal-scene-body > .space-y-3 {
+.masar-detail > .space-y-5,
+.masar-detail > form,
+.masar-detail > .space-y-3 {
   max-inline-size: 72rem;
+}
+
+.mc-action .install-hint {
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .dialog-overlay { z-index: 30; }

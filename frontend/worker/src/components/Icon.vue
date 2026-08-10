@@ -85,6 +85,6 @@ const MIRROR = [];
 defineProps({
   name: { type: String, required: true },
   size: { type: [Number, String], default: 22 },
-  strokeWidth: { type: [Number, String], default: 2 },
+  strokeWidth: { type: [Number, String], default: 1.75 },
 });
 </script>

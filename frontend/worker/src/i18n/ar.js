@@ -7,7 +7,7 @@ export default {
     notAssigned: "غير مُعيَّن",
     none: "—",
     error: "حدث خطأ ما.",
-    workerApp: "تطبيق العامل",
+    workerApp: "مسار",
     skipContent: "تجاوز إلى المحتوى",
     call: "اتصال",
     whatsapp: "واتساب",

@@ -103,6 +103,7 @@ describe("TabletSupervisorShell", () => {
       slots: { nav: "<a>Board</a>" },
     });
     expect(w.find(".ts-nav-open").exists()).toBe(false);
+    expect(w.find(".ts-menu svg").attributes("stroke-width")).toBe("1.75");
     await w.find(".ts-menu").trigger("click");
     expect(w.find(".ts-nav-open").exists()).toBe(true);
     expect(w.find(".ts-menu").attributes("aria-expanded")).toBe("true");

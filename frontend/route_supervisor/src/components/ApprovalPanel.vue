@@ -7,19 +7,21 @@
       <span>{{ statusHint }}</span>
     </header>
 
-    <div class="approval-status" :data-tone="statusTone">
-      <Icon :name="statusIcon" :size="28" :stroke-width="1.7" />
-      <div>
-        <strong>{{ t("approval." + plan.approval) }}</strong>
-        <span v-if="plan.decided_on">
-          {{ t("approval.decidedOn", { at: agoLabel(plan.decided_on, lang) }) }}
-        </span>
-      </div>
-    </div>
+    <Alert
+      class="approval-status"
+      :theme="statusTheme"
+      :title="t('approval.' + plan.approval)"
+      :dismissable="false"
+    >
+      <template #icon><Icon :name="statusIcon" :size="28" /></template>
+      <template v-if="plan.decided_on" #description>
+        <bdi dir="auto">{{ t("approval.decidedOn", { at: agoLabel(plan.decided_on, lang) }) }}</bdi>
+      </template>
+    </Alert>
 
     <div v-if="plan.approval === 'Rejected' && plan.rejection_reason" class="rejection-reason">
       <span>{{ t("approval.reason") }}</span>
-      <p>{{ plan.rejection_reason }}</p>
+      <p><bdi dir="auto">{{ plan.rejection_reason }}</bdi></p>
     </div>
 
     <ActionDock v-if="plan.approval === 'Pending'">
@@ -54,7 +56,7 @@
 
 <script setup>
 import { computed } from "vue";
-import { Button } from "frappe-ui";
+import { Alert, Button } from "frappe-ui";
 
 import ActionDock from "@shared/components/ActionDock.vue";
 
@@ -78,7 +80,7 @@ const statusHint = computed(() =>
 const statusIcon = computed(
   () => ({ Pending: "clock", Approved: "circle-check", Rejected: "x" })[props.plan.approval] || "clock",
 );
-const statusTone = computed(
-  () => ({ Pending: "warning", Approved: "success", Rejected: "danger" })[props.plan.approval] || "neutral",
+const statusTheme = computed(
+  () => ({ Pending: "yellow", Approved: "green", Rejected: "red" })[props.plan.approval] || "blue",
 );
 </script>

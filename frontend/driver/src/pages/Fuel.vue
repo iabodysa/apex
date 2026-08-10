@@ -160,13 +160,13 @@ function statusPill(status) {
 <style scoped>
 .quota-track {
   height: 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--c-border);
   overflow: hidden;
 }
 .quota-fill {
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--c-primary);
   transition: width 0.3s ease;
 }

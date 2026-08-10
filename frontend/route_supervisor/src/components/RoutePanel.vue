@@ -18,11 +18,11 @@
         <li v-for="(stop, index) in data.stops" :key="stop.sequence != null ? stop.sequence : index">
           <span class="stop-sequence"><bdi>{{ stop.sequence || index + 1 }}</bdi></span>
           <span class="stop-copy">
-            <strong>{{ stop.stop_name }}</strong>
+            <strong><bdi dir="auto">{{ stop.stop_name }}</bdi></strong>
             <span class="stop-meta">
-              <span v-if="stop.location"><Icon name="pin" :size="13" /> {{ stop.location }}</span>
+              <span v-if="stop.location"><Icon name="pin" :size="13" /> <bdi dir="auto">{{ stop.location }}</bdi></span>
               <span v-if="stop.expected_passengers">
-                <Icon name="user" :size="13" /> {{ t("route.passengers", { n: stop.expected_passengers }) }}
+                <Icon name="user" :size="13" /> <bdi dir="auto">{{ t("route.passengers", { n: stop.expected_passengers }) }}</bdi>
               </span>
             </span>
             <a
@@ -31,10 +31,10 @@
               target="_blank"
               rel="noopener"
             >
-              <Icon name="building" :size="13" /> {{ t("route.housing") }}: {{ stop.pickup.building_name }}
+              <Icon name="building" :size="13" /> {{ t("route.housing") }}: <bdi dir="auto">{{ stop.pickup.building_name }}</bdi>
             </a>
             <span v-else-if="stop.pickup?.building_name" class="stop-building">
-              <Icon name="building" :size="13" /> {{ t("route.housing") }}: {{ stop.pickup.building_name }}
+              <Icon name="building" :size="13" /> {{ t("route.housing") }}: <bdi dir="auto">{{ stop.pickup.building_name }}</bdi>
             </span>
           </span>
           <time v-if="stop.planned_time" class="stop-time">

@@ -19,7 +19,7 @@
         />
 
         <EmptyState v-else-if="!alerts.length" :title="t('alerts.empty')" :hint="t('alerts.emptyHint')">
-          <template #icon><Icon name="bell" :size="20" :stroke-width="1.6" /></template>
+          <template #icon><Icon name="bell" :size="20" /></template>
         </EmptyState>
 
         <template v-else>

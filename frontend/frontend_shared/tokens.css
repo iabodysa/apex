@@ -1,8 +1,6 @@
 /* Copyright (c) 2026, afmcoltd */
-:root,
-[data-theme="afmco"],
-:root[data-theme="light"] {
-  color-scheme: light;
+:root {
+  color-scheme: only light;
 
   --brand-green: #00844e;
   --brand-green-ink: #ffffff;
@@ -15,24 +13,24 @@
   --surface-2: #ffffff;
   --ink: #072b1a;
   --ink-soft: #47584f;
-  --muted: #586962;
-  --border: #ddd5c2;
+  --muted: #47584f;
+  --border: #d8d0bd;
   --border-strong: #cabfa3;
   --border-control: #8d8168;
 
-  --warn: #8a5a10;
-  --warn-fill: #c9851f;
-  --warn-fill-ink: #3a2708;
-  --warn-bg: #f7ead2;
-  --danger: #a52d21;
-  --danger-bg: #f6dcd8;
+  --warn: #a76609;
+  --warn-fill: var(--warn);
+  --warn-fill-ink: #ffffff;
+  --warn-bg: color-mix(in srgb, var(--warn) 1%, var(--surface-2)); /* 4.56:1 */
+  --danger: #b42318;
+  --danger-bg: color-mix(in srgb, var(--danger) 10%, var(--surface-2)); /* 5.58:1 */
   --danger-ink: #ffffff;
-  --ok: #046b41;
-  --ok-bg: #d9f0e3;
-  --info: #1c6fa8;
-  --info-bg: #dfeef7;
-  --accent-ink: #046b41;
-  --focus: #046b41;
+  --ok: #14804a;
+  --ok-bg: color-mix(in srgb, var(--ok) 6%, var(--surface-2)); /* 4.59:1 */
+  --info: #1266a0;
+  --info-bg: color-mix(in srgb, var(--info) 10%, var(--surface-2)); /* 5.30:1 */
+  --accent-ink: var(--brand-green);
+  --focus: var(--brand-green);
 
   --header-bg: #072b1a;
   --header-ink: #f8f5ee;
@@ -80,8 +78,8 @@
   --c-scrim: var(--scrim);
 
   --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 18px;
+  --radius: 14px;
+  --radius-lg: 24px;
   --radius-pill: 999px;
   --border-width: 1px;
 
@@ -89,11 +87,11 @@
   --tap-md: 48px;
   --tap-min: 44px;
 
-  --font: "Thmanyah Sans", "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-num: ui-monospace, "SF Mono", "Menlo", monospace;
+  --font: "Thmanyah Sans";
+  --font-num: var(--font);
   --font-num-ar: var(--font);
-  --font-display: "Thmanyah Serif Display", "Cairo", serif;
-  --font-serif: "Thmanyah Serif Text", "Cairo", serif;
+  --font-display: "Thmanyah Serif Display";
+  --font-serif: "Thmanyah Serif Text";
   --font-brand: var(--font);
   --fs-display: clamp(2rem, 2vw + 1rem, 3.5rem);
   --fs-h1: clamp(1.5rem, 1vw + 1.15rem, 2.25rem);
@@ -103,8 +101,8 @@
   --fs-sm: 13px;
   --fs-xs: 11px;
   --fs-2xs: 10px;
-  --fw-heading: 800;
-  --fw-semibold: 600;
+  --fw-heading: 700;
+  --fw-semibold: 700;
   --fw-body: 500;
 
   --sp-1: 4px;
@@ -167,99 +165,6 @@ bdi,
   font-variant-numeric: tabular-nums;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]),
-  :root[data-theme="afmco"] {
-    color-scheme: dark;
-    --brand-green: #00a862;
-    --brand-green-ink: #04130c;
-    --mint: #60d297;
-    --forest: #04130c;
-    --forest-soft: #a6b6ac;
-
-    --canvas: #0b110e;
-    --surface: #15211b;
-    --surface-2: #1c2c24;
-    --ink: #e7efe9;
-    --ink-soft: #b7c6bd;
-    --muted: #94a69a;
-    --border: #25362c;
-    --border-strong: #324a3c;
-    --border-control: #587c66;
-
-    --warn: #e0a02f;
-    --warn-fill: #e0a02f;
-    --warn-bg: rgba(224, 160, 47, 0.16);
-    --danger: #f5867a;
-    --danger-bg: rgba(239, 107, 94, 0.16);
-    --danger-ink: #04130c;
-    --ok: #60d297;
-    --ok-bg: rgba(96, 210, 151, 0.14);
-    --info: #6cb0ef;
-    --info-bg: rgba(108, 176, 239, 0.14);
-    --accent-ink: #2fd38a;
-    --focus: #7ee3ad;
-
-    --header-bg: #0c130f;
-    --header-ink: #e7efe9;
-    --header-accent: #60d297;
-    --arc: rgba(96, 210, 151, 0.1);
-    --scrim: rgba(0, 0, 0, 0.62);
-
-    --chrome: #1e2a23;
-    --chrome-2: #26362c;
-
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
-    --shadow-lg: 0 26px 60px rgba(0, 0, 0, 0.55);
-  }
-}
-
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --brand-green: #00a862;
-  --brand-green-ink: #04130c;
-  --mint: #60d297;
-  --forest: #04130c;
-  --forest-soft: #a6b6ac;
-
-  --canvas: #0b110e;
-  --surface: #15211b;
-  --surface-2: #1c2c24;
-  --ink: #e7efe9;
-  --ink-soft: #b7c6bd;
-  --muted: #94a69a;
-  --border: #25362c;
-  --border-strong: #324a3c;
-  --border-control: #587c66;
-
-  --warn: #e0a02f;
-  --warn-fill: #e0a02f;
-  --warn-bg: rgba(224, 160, 47, 0.16);
-  --danger: #f5867a;
-  --danger-bg: rgba(239, 107, 94, 0.16);
-  --danger-ink: #04130c;
-  --ok: #60d297;
-  --ok-bg: rgba(96, 210, 151, 0.14);
-  --info: #6cb0ef;
-  --info-bg: rgba(108, 176, 239, 0.14);
-  --accent-ink: #2fd38a;
-  --focus: #7ee3ad;
-
-  --header-bg: #0c130f;
-  --header-ink: #e7efe9;
-  --header-accent: #60d297;
-  --arc: rgba(96, 210, 151, 0.1);
-  --scrim: rgba(0, 0, 0, 0.62);
-
-  --chrome: #1e2a23;
-  --chrome-2: #26362c;
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 26px 60px rgba(0, 0, 0, 0.55);
-}
-
 :focus-visible {
   outline: 3px solid var(--c-focus);
   outline-offset: 2px;
@@ -271,6 +176,14 @@ bdi,
    portal that adopts them. */
 .min-h-7 button,
 [class~="space-y-1.5"] > button {
+  min-block-size: var(--tap-min);
+}
+
+/* The same reason, from the other side: a scoped rule in a component that puts a class on
+   a frappe-ui Button does not reach that Button's root, so LangToggle's own 44px floor was
+   computing as `auto` and the language buttons rendered 38px wide. Set here, unscoped. */
+.lang-opt {
+  min-inline-size: var(--tap-min);
   min-block-size: var(--tap-min);
 }
 

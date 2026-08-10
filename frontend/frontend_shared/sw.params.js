@@ -1,8 +1,27 @@
 // Copyright (c) 2026, afmcoltd
 
+const THMANYAH_OFFLINE_ASSETS = Object.freeze([
+  "/assets/apex/vendor/thmanyah-v1/thmanyah.css",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahsans-Light.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahserifdisplay-Light.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahseriftext-Light.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahsans-Regular.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahserifdisplay-Regular.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahseriftext-Regular.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahsans-Medium.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahserifdisplay-Medium.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahseriftext-Medium.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahsans-Bold.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahserifdisplay-Bold.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahseriftext-Bold.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahsans-Black.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahserifdisplay-Black.woff2",
+  "/assets/apex/vendor/thmanyah-v1/thmanyahseriftext-Black.woff2",
+]);
+
 export const SW_PARAMS = {
   driver_portal: {
-    displayName: "Salis Driver",
+    displayName: "Masar",
     swFilename: "driver-sw.min.js",
     navPath: "/driver",
     assetBase: "/assets/apex/worker_portal",
@@ -15,9 +34,9 @@ export const SW_PARAMS = {
       "/api/method/apex.salis.api.boarding.",
       "/api/method/apex.salis.api.boarding_flow.",
     ],
-    fonts: [],
+    offlineAssets: THMANYAH_OFFLINE_ASSETS,
     enablePush: true,
-    push: { title: "Salis Driver", tag: "salis-driver" },
+    push: { title: "Masar", tag: "salis-driver" },
   },
 
   worker_portal: {
@@ -34,13 +53,7 @@ export const SW_PARAMS = {
       "/api/method/apex.salis.api.masar_worker.",
       "/api/method/apex.salis.api.boarding_flow.",
     ],
-    fonts: [
-      "cairo-arabic",
-      "cairo-latin",
-      "cairo-latin-ext",
-      "montserrat-latin",
-      "montserrat-latin-ext",
-    ],
+    offlineAssets: THMANYAH_OFFLINE_ASSETS,
     enablePush: false,
     push: null,
   },

@@ -69,15 +69,19 @@
       </div>
 
       <BoardingWindow v-else-if="!canConfirm" :window="boardingWindow" />
-      <button
+      <Button
         v-else
-        class="btn btn-primary"
+        class="w-full"
+        variant="solid"
+        theme="green"
+        size="xl"
         :disabled="claim.loading || stale"
+        :loading="claim.loading"
+        :label="claim.loading ? t('boarding.onBusSending') : t('boarding.onBus')"
         @click="doClaim"
       >
-        <Icon name="check" :size="18" />
-        {{ claim.loading ? t("boarding.onBusSending") : t("boarding.onBus") }}
-      </button>
+        <template #prefix><Icon name="check" :size="18" /></template>
+      </Button>
 
       <p v-if="claimError" class="text-sm text-danger">{{ claimError }}</p>
 
@@ -86,23 +90,34 @@
           <Icon name="clock" :size="14" class="shrink-0" />
           {{ t("boarding.waitCountdown", { s: waitCountdown }) }}
         </p>
-        <button
-          class="btn btn-outline"
+        <Button
+          class="w-full"
+          variant="outline"
+          size="xl"
           :disabled="wait.loading || waitCapReached || stale"
+          :loading="wait.loading"
+          :label="wait.loading ? t('boarding.waitSending') : t('boarding.waitForMe')"
           @click="doWait"
         >
-          <Icon name="clock" :size="18" />
-          {{ wait.loading ? t("boarding.waitSending") : t("boarding.waitForMe") }}
-        </button>
+          <template #prefix><Icon name="clock" :size="18" /></template>
+        </Button>
         <p v-if="waitMax" class="bflow-wait-used">
           {{ waitCapReached ? t("boarding.waitCapReached") : t("boarding.waitRemaining", { n: waitCount, max: waitMax }) }}
         </p>
         <p v-if="waitError" class="text-sm text-danger">{{ waitError }}</p>
       </template>
 
-      <button class="btn btn-outline" :disabled="passLoading" @click="openPass">
-        <Icon name="card" :size="18" /> {{ t("boarding.view") }}
-      </button>
+      <Button
+        class="w-full"
+        variant="outline"
+        size="xl"
+        :disabled="passLoading"
+        :loading="passLoading"
+        :label="t('boarding.view')"
+        @click="openPass"
+      >
+        <template #prefix><Icon name="card" :size="18" /></template>
+      </Button>
       <p v-if="passError && !passData" class="text-sm text-danger">{{ passError }}</p>
 
       <BoardingPassOverlay
@@ -119,7 +134,7 @@
 <script setup>
 import { computed, ref, onUnmounted, watch } from "vue";
 import { BOARDING, BOARDING_SETTLED } from "@shared/statusVocabularies";
-import { createResource } from "frappe-ui";
+import { Button, createResource } from "frappe-ui";
 import Icon from "./Icon.vue";
 import BoardingWindow from "./BoardingWindow.vue";
 import BoardingPassOverlay from "./BoardingPassOverlay.vue";

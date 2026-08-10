@@ -143,7 +143,7 @@ onUnmounted(stop);
   width: 100%;
   max-height: 240px;
   border-radius: var(--radius);
-  background: #000;
+  background: var(--c-ink);
   object-fit: cover;
 }
 </style>

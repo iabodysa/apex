@@ -9,7 +9,7 @@
     v-if="!rows.length"
     :title="isDamages ? t('damages.empty') : t('accidents.empty')"
   >
-    <template #icon><Icon :name="isDamages ? 'hammer' : 'crash'" :size="20" :stroke-width="1.6" /></template>
+    <template #icon><Icon :name="isDamages ? 'hammer' : 'crash'" :size="20" /></template>
   </EmptyState>
 
   <article v-for="(row, i) in rows" v-else :key="i" class="incident-card">

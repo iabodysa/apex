@@ -31,7 +31,7 @@ const props = defineProps({
   shape: { type: Array, default: () => [] },
   name: { type: String, default: "" },
   size: { type: [Number, String], default: 22 },
-  strokeWidth: { type: [Number, String], default: 2 },
+  strokeWidth: { type: [Number, String], default: 1.75 },
   align: { type: Boolean, default: false },
   mirror: { type: Array, default: () => [] },
 });

@@ -52,8 +52,8 @@ for holder_type Worker and `/driver` for holder_type Driver.
 | `bootstrap.js` | `bootstrapPortal({ App, router?, setup? })` — the one SPA boot sequence (configureApi + createApp + optional router + optional pre-mount `setup(app)` + mount). Every `<portal>/src/main.js` is a single call to it. |
 | `realtime.js` | `createRealtime({ socketGlobal, roomDoctype, event, extraEvents? })` — the Frappe Socket.IO subscription factory (host/join/refetch/teardown, every failure path swallowed). Used by the live portals (fleet, safety, driver); each supplies only its socket-config global, room doctype, event, and optional same-room extra events. Its `socket.io-client` import resolves via the factory's `dedupe`. |
 | `makeCache.js` | Shared offline/data cache factory. |
-| `components/` | Shared presentational `.vue` components imported via `@shared/components/*` (e.g. `Brand.vue` — the AFMCO inline-SVG emblem/supergraphic, self-contained, token-driven), the two header controls (`LangToggle`, `ThemeToggle`) and the three page shells (`FleetPageShell`, `MobileConsoleShell`, `TabletSupervisorShell`). |
-| `tokens.css` | Shared design tokens (CSS custom properties) — the one Growth-Green source, plus the single `:focus-visible` ring and the `prefers-reduced-motion` duration collapse. |
+| `components/` | Shared presentational `.vue` components imported via `@shared/components/*` (e.g. `Brand.vue` — the Apex inline-SVG mark, self-contained and token-driven), the `LangToggle` header control and the three page shells (`FleetPageShell`, `MobileConsoleShell`, `TabletSupervisorShell`). |
+| `tokens.css` | Shared Apex design tokens (CSS custom properties), plus the single `:focus-visible` ring and the `prefers-reduced-motion` duration collapse. |
 | `photoFile.js` | The client half of the photo contract: the accepted set (JPEG/PNG/WebP) written once, so the three pickers in two portals cannot drift from the server's byte check in `apex/salis/api/driver_portal/images.py`. |
 
 ## Arabic has one home, and the dictionaries are a declared exception
@@ -113,7 +113,7 @@ does not have.**
   class or slot rather than restyling it from scratch, and never fork a component to change
   its look.
 - What stays local is what the library has no answer for: the three page shells, `Brand`,
-  `LangToggle`, `ThemeToggle`, `BuildingPicker`, `EmptyState`, and the offline layer
+  `LangToggle`, `BuildingPicker`, `EmptyState`, and the offline layer
   (`makeCache`, the service worker, `usePoll`).
 - A hand-rolled control that duplicates a library component is a defect, not a preference.
   If you write one, the report says which library component you searched for and why it did
@@ -155,17 +155,10 @@ dead CSS. `tailwindcss` / `postcss` / `autoprefixer` stay in `frontend/package.j
 
 ### The token layer is the whole appearance contract
 
-A portal `@import "@shared/tokens.css"` and declares **no palette of its own**. A
-local `--c-*` block masks the shared one at equal specificity, and because
-light/dark switches PRIMITIVES, a masked semantic token never moves — that is what
-kept four portals stuck in light mode. `__tests__/tokens.test.mjs` fails the build
-on a `var(--x)` no file declares, on drift between the two dark blocks, and on a
+A portal `@import "@shared/tokens.css"` and declares **no palette of its own**.
+`tokens.css` ships one light palette; tenant branding may override only the accent.
+`__tests__/tokens.test.mjs` fails on an undeclared `var(--x)`, a theme branch, or a
 revert of a contrast-corrected value.
-
-Auto-dark is an **allow-list**: the `prefers-color-scheme` block names the identity
-themes it may repaint (no attribute, and the `afmco` default alias four wrappers
-server-render). A deny-list would hand dark primitives to the off-identity light
-themes while their own surfaces stayed light.
 
 Two shared conventions consume it:
 
@@ -173,10 +166,6 @@ Two shared conventions consume it:
   below `--tap-min`.
 - `data-motion="loop"` — mark a genuine busy indicator with it and reduced motion
   slows it to 2.4s instead of freezing it mid-turn. Everything else collapses.
-
-`ThemeToggle`'s **Auto restores the value the wrapper rendered**; it does not
-remove the attribute. Four shells emit `data-theme="{{ portal_theme or 'afmco' }}"`,
-so removing it would delete an administrator's configured theme on first tap.
 
 Import from a portal with the `@shared` alias, e.g. `import { call } from "@shared/call.js"`.
 `frontend_shared/` has no `node_modules` of its own; bare imports (`vue`,

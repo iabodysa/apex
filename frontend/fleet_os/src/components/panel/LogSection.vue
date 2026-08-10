@@ -1,7 +1,7 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <EmptyState v-if="!vehicle.history.length" :title="t('logTab.empty')" :hint="t('logTab.emptyHint')">
-    <template #icon><Icon name="clipboard-list" :size="20" :stroke-width="1.6" /></template>
+    <template #icon><Icon name="clipboard-list" :size="20" /></template>
   </EmptyState>
 
   <template v-else>

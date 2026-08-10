@@ -11,9 +11,6 @@ import * as barrel from "@shared/components/index.js";
 
 describe("components barrel", () => {
   it("exports only portal-agnostic pieces", () => {
-    // ThemeToggle joins LangToggle here: its only portal-local import is `useI18n`,
-    // which every portal's i18n.js exports, so a name-import from this barrel still
-    // resolves everywhere. That is the admission test, not "it is shared".
     expect(Object.keys(barrel).sort()).toEqual([
       "ActionDock",
       "AsyncBoundary",
@@ -29,10 +26,8 @@ describe("components barrel", () => {
       "LangToggle",
       "MetricRibbon",
       "MobileConsoleShell",
-      "PortalFrame",
       "StatusLabel",
       "TabletSupervisorShell",
-      "ThemeToggle",
       "WorkQueue",
     ]);
   });

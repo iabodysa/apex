@@ -7,15 +7,18 @@
         <h3>{{ t("map.title") }}</h3>
         <span v-if="!compact">{{ t("map.subtitle") }}</span>
       </div>
-      <StatusLabel
+      <Badge
         v-if="data"
-        :label="positionLabel"
-        :tone="data.has_position ? (data.stale ? 'warning' : 'success') : 'neutral'"
-      />
+        :theme="positionTheme"
+        variant="subtle"
+        size="lg"
+      >
+        <bdi dir="auto">{{ positionLabel }}</bdi>
+      </Badge>
     </header>
 
     <EmptyState v-if="!tripName" :title="t('map.noTrip')">
-      <template #icon><Icon name="truck" :size="20" :stroke-width="1.6" /></template>
+      <template #icon><Icon name="truck" :size="20" /></template>
     </EmptyState>
 
     <LoadError
@@ -31,10 +34,10 @@
 
     <template v-else>
       <div v-if="data" class="map-info">
-        <span><Icon name="user" :size="14" /> {{ t("map.driver") }}: <b>{{ data.driver_name || t("common.none") }}</b></span>
+        <span><Icon name="user" :size="14" /> {{ t("map.driver") }}: <b><bdi dir="auto">{{ data.driver_name || t("common.none") }}</bdi></b></span>
         <span><Icon name="truck" :size="14" /> {{ t("map.vehicle") }}: <b><bdi>{{ data.plate || t("common.none") }}</bdi></b></span>
         <span v-if="data.has_position" class="upd">
-          <Icon name="clock" :size="13" /> {{ t("map.updated", { age }) }}
+          <Icon name="clock" :size="13" /> <bdi dir="auto">{{ t("map.updated", { age }) }}</bdi>
         </span>
       </div>
 
@@ -48,7 +51,7 @@
           :dismissable="false"
         />
         <div v-if="data && !data.has_position" class="map-overlay">
-          <Icon name="pin" :size="30" :stroke-width="1.6" />
+          <Icon name="pin" :size="30" />
           <p class="ov-title">{{ t("map.noFix") }}</p>
           <p class="ov-hint">{{ t("map.noFixHint") }}</p>
         </div>
@@ -60,7 +63,7 @@
           <span><Icon name="pin" :size="15" /> <bdi>{{ data.lat.toFixed(6) }}, {{ data.lng.toFixed(6) }}</bdi></span>
         </div>
         <EmptyState v-else :title="t('map.noFix')" :hint="t('map.noFixHint')">
-          <template #icon><Icon name="pin" :size="20" :stroke-width="1.6" /></template>
+          <template #icon><Icon name="pin" :size="20" /></template>
         </EmptyState>
       </div>
     </template>
@@ -69,11 +72,10 @@
 
 <script setup>
 import { computed, nextTick, onUnmounted, ref, watch } from "vue";
-import { Alert } from "frappe-ui";
+import { Alert, Badge } from "frappe-ui";
 
 import EmptyState from "@shared/components/EmptyState.vue";
 import LoadError from "@shared/components/LoadError.vue";
-import StatusLabel from "@shared/components/StatusLabel.vue";
 import { usePoll } from "@shared/usePoll.js";
 
 import Icon from "../Icon.vue";
@@ -110,6 +112,9 @@ const positionLabel = computed(() => {
   if (!data.value?.has_position) return t("map.noFixShort");
   return data.value.stale ? t("map.stale", { age: age.value }) : t("common.live");
 });
+const positionTheme = computed(() =>
+  !data.value?.has_position ? "gray" : data.value.stale ? "orange" : "green",
+);
 
 function ensureMap() {
   if (!hasLeaflet || map || !mapEl.value) return;

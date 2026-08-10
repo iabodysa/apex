@@ -45,9 +45,26 @@ button,
 .mono,
 bdi,
 [data-numeric] {
-  font-family: var(--font-brand);
+  font-family: var(--font-num-ar);
   font-variant-numeric: tabular-nums lining-nums;
   unicode-bidi: isolate;
+}
+
+.fleet-skip {
+  position: fixed;
+  z-index: 100;
+  inset-block-start: var(--sp-3);
+  inset-inline-start: var(--sp-3);
+  transform: translateY(-180%);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--radius-sm);
+  background: var(--c-surface-2);
+  color: var(--c-ink);
+  font-weight: var(--fw-semibold);
+}
+
+.fleet-skip:focus {
+  transform: none;
 }
 
 .product-name {
@@ -86,8 +103,42 @@ bdi,
   font-weight: var(--fw-heading);
 }
 
-.portal-scene-body {
+.fleet-page-eyebrow {
+  margin: 0 0 var(--sp-2);
+  color: var(--c-accent-ink);
+  font-family: var(--font);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-heading);
+  text-transform: uppercase;
+}
+
+.fleet-page-title {
+  max-inline-size: 22ch;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-heading);
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.fleet-page-subtitle {
+  max-inline-size: 62ch;
+  margin: var(--sp-2) 0 0;
+  color: var(--c-ink-soft);
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  line-height: 1.65;
+}
+
+.fleet-scene-body {
   min-inline-size: 0;
+  outline: none;
+}
+
+.fleet-scene-body:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
 }
 
 .attention-ribbon {
@@ -112,7 +163,7 @@ bdi,
 .sidebar-kicker {
   margin: 0 0 var(--sp-1);
   color: var(--c-accent-ink);
-  font-family: var(--font-brand);
+  font-family: var(--font);
   font-size: var(--fs-xs);
   font-weight: var(--fw-heading);
   text-transform: uppercase;
@@ -225,9 +276,9 @@ bdi,
 
 .sidebar {
   position: sticky;
-  inset-block-start: 0;
+  inset-block-start: var(--fleet-header-offset, 72px);
   min-inline-size: 0;
-  max-block-size: calc(100dvh - 5rem);
+  max-block-size: calc(100dvh - var(--fleet-header-offset, 72px));
   display: flex;
   flex-direction: column;
   border-inline-end: 1px solid var(--c-border-strong);
@@ -601,7 +652,7 @@ bdi,
   block-size: 2.25rem;
   display: grid;
   place-items: center;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: var(--c-header-bg);
   color: var(--c-header-ink);
   font-weight: var(--fw-heading);
@@ -667,9 +718,9 @@ bdi,
 
 .vehicle-context {
   position: sticky;
-  inset-block-start: 0;
+  inset-block-start: var(--fleet-header-offset, 72px);
   min-inline-size: 0;
-  max-block-size: calc(100dvh - 5rem);
+  max-block-size: calc(100dvh - var(--fleet-header-offset, 72px));
   overflow-y: auto;
   border-inline-start: 1px solid var(--c-border-strong);
   background: var(--c-surface-2);
@@ -717,7 +768,7 @@ bdi,
 
 .vehicle-workspace-head h2 {
   color: var(--c-header-ink);
-  font-family: var(--font-brand);
+  font-family: var(--font-num-ar);
   font-size: var(--fs-h1);
   font-weight: var(--fw-heading);
 }
@@ -811,7 +862,7 @@ bdi,
   block-size: 2.5rem;
   display: grid;
   place-items: center;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: var(--c-header-bg);
   color: var(--c-header-ink);
   font-weight: var(--fw-heading);
@@ -969,7 +1020,7 @@ bdi,
   display: grid;
   place-items: center;
   border: 1px solid var(--c-border-strong);
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: var(--c-surface-2);
   color: var(--c-muted);
 }
@@ -1094,21 +1145,7 @@ bdi,
 }
 
 @media (max-width: 47.99rem) {
-  .portal-masthead {
-    min-block-size: 58px;
-    padding-inline: var(--sp-4);
-  }
-
   .product-name { display: none; }
-
-  .portal-workspace {
-    padding: var(--sp-4);
-  }
-
-  .portal-scene-heading {
-    padding-block-end: var(--sp-5);
-    margin-block-end: var(--sp-5);
-  }
 
   .attention-ribbon {
     display: block;
@@ -1222,8 +1259,7 @@ bdi,
 }
 
 @media (max-width: 29.99rem) {
-  .portal-scene-heading h1 { font-size: clamp(1.85rem, 10vw, 2.45rem); }
-  .portal-scene-subtitle { display: none; }
+  .fleet-page-subtitle { display: none; }
   .ledger-controls > * { flex: 1 1 9rem; }
   .ledger-sort { min-inline-size: 100%; }
   .alert-bell { max-inline-size: var(--tap-min); overflow: hidden; }

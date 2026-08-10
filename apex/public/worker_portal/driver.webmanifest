@@ -1,8 +1,8 @@
 {
   "id": "/driver",
-  "name": "Salis Driver",
-  "short_name": "Salis",
-  "description": "Driver shift, trips and boarding app",
+  "name": "Masar",
+  "short_name": "Masar",
+  "description": "Masar for drivers: shifts, trips and boarding",
   "start_url": "/driver",
   "scope": "/driver",
   "display": "standalone",

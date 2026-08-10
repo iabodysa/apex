@@ -1,21 +1,22 @@
 // Copyright (c) 2026, afmcoltd
 
 export function renderServiceWorker(p) {
-  const hasFonts = Array.isArray(p.fonts) && p.fonts.length > 0;
+  const offlineAssets = Array.isArray(p.offlineAssets) ? p.offlineAssets : [];
+  const hasOfflineAssets = offlineAssets.length > 0;
   const cacheData = p.cacheData !== false;
   const networkOnlyApiPrefixes = p.networkOnlyApiPrefixes || [];
 
-  const headerFontClause = hasFonts ? " fonts are cache-first;" : "";
-  const shellComment = hasFonts
+  const headerOfflineClause = hasOfflineAssets ? " licensed font assets are cache-first;" : "";
+  const shellComment = hasOfflineAssets
     ? `// The app shell: the portal HTML document, the built SPA bundle, and the
-// self-hosted fonts. The HTML is cached under ${p.navPath} (no query string) so
+// licensed Thmanyah stylesheet and fonts. The HTML is cached under ${p.navPath} (no query string) so
 // an offline reload matches.`
-    : `// The app shell: the portal HTML document and the built SPA bundle. Fonts load
-// from a CDN (not self-hosted), left to the browser HTTP cache. The HTML is cached
-// under ${p.navPath} (no query string) so an offline reload matches.`;
+    : `// The app shell: the portal HTML document and the built SPA bundle. No additional
+// offline assets are precached. The HTML is cached under ${p.navPath} (no query
+// string) so an offline reload matches.`;
 
-  const fontShell = hasFonts
-    ? "\n" + p.fonts.map((f) => `  ASSET_BASE + "/fonts/${f}.woff2",`).join("\n")
+  const offlineAssetShell = hasOfflineAssets
+    ? "\n" + offlineAssets.map((asset) => `  ${JSON.stringify(asset)},`).join("\n")
     : "";
 
   const dataConds = (p.dataEndpoints || [])
@@ -43,9 +44,9 @@ ${networkOnlyApiPrefixes
       : "",
   ].filter(Boolean).join("\n\n");
 
-  const cacheFirstBlock = hasFonts
-    ? `// Cache-first for immutable assets (self-hosted fonts): serve instantly from
-// cache, fetch+store on a miss. Fonts never change, so no revalidation needed.
+  const cacheFirstBlock = hasOfflineAssets
+    ? `// Cache-first for the licensed, versioned font assets: serve instantly from
+// cache, fetch+store on a miss. The versioned path changes when the font set changes.
 async function cacheFirst(request) {
   const cache = await caches.open(SHELL_CACHE);
   const cached = await cache.match(request);
@@ -72,8 +73,8 @@ self.addEventListener("push", (event) => {
   const title = data.title || ${JSON.stringify(p.push.title)};
   const options = {
     body: data.body || "",
-    // The PWA's own logo (same asset the manifest uses); guaranteed to exist.
-    icon: ASSET_BASE + "/afmco-logo.svg",
+    // The shared Apex app icon; client-neutral and guaranteed to exist.
+    icon: "/assets/apex/images/apex-app-icon.svg",
     data: { url: data.url || ${JSON.stringify(p.navPath)} },
     tag: data.tag || ${JSON.stringify(p.push.tag)},
   };
@@ -104,9 +105,9 @@ self.addEventListener("notificationclick", (event) => {
 });`
     : "";
 
-  const fontsFetchBranch = hasFonts
-    ? `\n  // Self-hosted fonts: immutable -> cache-first for speed.
-  if (url.pathname.startsWith(ASSET_BASE + "/fonts/")) {
+  const offlineAssetFetchBranch = hasOfflineAssets
+    ? `\n  // Exact licensed font assets: cache-first for resilient typography.
+  if (OFFLINE_ASSETS.includes(url.pathname)) {
     event.respondWith(cacheFirst(request));
     return;
   }\n`
@@ -114,7 +115,7 @@ self.addEventListener("notificationclick", (event) => {
 
   const prologue = `// Copyright (c) 2026, afmcoltd
 // ${p.displayName} PWA service worker, served at ROOT (/${p.swFilename}) so its scope
-// covers ${p.navPath}. Shell is NETWORK-FIRST;${headerFontClause} stale owned caches
+// covers ${p.navPath}. Shell is NETWORK-FIRST;${headerOfflineClause} stale owned caches
 // drop on activate. BUILD (full asset-tree hash, stamped per build) changes these bytes on
 // each deploy -> updatefound.${p.skipWaitingOnInstall ? " Driver security builds activate immediately." : " Activates on SKIP_WAITING."}
 // GENERATED — do not edit by hand. Single-sourced from frontend/frontend_shared/sw.template.js
@@ -131,12 +132,13 @@ const DATA_CACHE = ${cacheData ? 'CACHE_VERSION + "-data"' : "null"};
 const SHELL_NETWORK_TIMEOUT_MS = 3000;
 
 const ASSET_BASE = "${p.assetBase}";
+const OFFLINE_ASSETS = ${JSON.stringify(offlineAssets)};
 
 ${shellComment}
 const SHELL_URLS = [
   "${p.navPath}",
   ASSET_BASE + "/assets/index.js",
-  ASSET_BASE + "/assets/index.css",${fontShell}
+  ASSET_BASE + "/assets/index.css",${offlineAssetShell}
 ];
 
 ${apiClassifiers}`;
@@ -295,7 +297,7 @@ ${networkOnlyApiPrefixes.length ? `
     event.respondWith(networkFirstShell(request, "${p.navPath}"));
     return;
   }
-${fontsFetchBranch}
+${offlineAssetFetchBranch}
   // Built bundle (index.js/index.css): network-first so a rebuild is picked up
   // immediately online; cached copy only when offline.
   if (url.pathname.startsWith(ASSET_BASE + "/assets/")) {

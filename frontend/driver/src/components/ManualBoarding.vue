@@ -134,7 +134,7 @@ useOverlay({ active: () => true, container: panel, close });
   overflow-y: auto;
   background: var(--c-surface);
   color: var(--c-ink);
-  border-radius: 18px 18px 0 0;
+  border-radius: var(--radius) var(--radius) 0 0;
   padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
 }
 .sheet-bar {

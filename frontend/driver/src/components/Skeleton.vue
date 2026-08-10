@@ -18,13 +18,7 @@ defineProps({
 .skel-line {
   height: 12px;
   border-radius: var(--radius-sm);
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--c-ink) 7%, transparent) 25%,
-    color-mix(in srgb, var(--c-ink) 12%, transparent) 37%,
-    color-mix(in srgb, var(--c-ink) 7%, transparent) 63%
-  );
-  background-size: 400% 100%;
+  background: color-mix(in srgb, var(--c-ink) 9%, transparent);
   animation: skel-shimmer 1.4s ease infinite;
 }
 .skel-w-60 {
@@ -34,12 +28,7 @@ defineProps({
   width: 40%;
 }
 @keyframes skel-shimmer {
-  0% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  50% { opacity: 0.54; }
 }
 @media (prefers-reduced-motion: reduce) {
   .skel-line {

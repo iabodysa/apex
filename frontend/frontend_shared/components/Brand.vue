@@ -9,7 +9,7 @@
    byte-identical to them — because a mark redrawn inside a component is a second master that
    drifts. Each variant already carries its own fills, which is why nothing here recolours.
 
-   `mark` reads on light surfaces, `reverse` on forest and dark, `mono` for one-colour output
+   `mark` reads on light surfaces, `reverse` on the forest brand field, `mono` for one-colour output
    such as print or a stamp. The lockups pair the mark with the wordmark and are the only
    correct choice beside a product name; the Arabic one stores its wordmark as outlines, so it
    must never be rebuilt from a runtime font. */

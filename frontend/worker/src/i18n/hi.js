@@ -7,7 +7,7 @@ export default {
     notAssigned: "नियत नहीं",
     none: "—",
     error: "कुछ गलत हो गया।",
-    workerApp: "वर्कर ऐप",
+    workerApp: "Masar",
     skipContent: "सामग्री पर जाएँ",
     call: "कॉल",
     whatsapp: "व्हाट्सऐप",

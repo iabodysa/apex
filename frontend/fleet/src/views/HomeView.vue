@@ -4,7 +4,7 @@
     <div class="emp-sheet emp-today-ledger">
       <section class="emp-section emp-vehicle-section" aria-labelledby="emp-vehicle-title">
         <header class="emp-section-head">
-          <span class="emp-section-index" aria-hidden="true">01</span>
+          <span class="emp-section-index" aria-hidden="true"><bdi>01</bdi></span>
           <div>
             <h2 id="emp-vehicle-title">{{ t("emp.vehicle.title") }}</h2>
             <p>{{ t("emp.vehicle.hint") }}</p>
@@ -24,8 +24,8 @@
               <bdi class="emp-plate">{{ vehicle.state.data.plate || t("common.none") }}</bdi>
             </div>
             <div class="emp-vehicle-identity">
-              <strong>{{ vehicle.state.data.model || t("common.none") }}</strong>
-              <span>{{ vehicle.state.data.office || t("common.none") }}</span>
+              <strong><bdi>{{ vehicle.state.data.model || t("common.none") }}</bdi></strong>
+              <span><bdi>{{ vehicle.state.data.office || t("common.none") }}</bdi></span>
             </div>
             <Badge
               :theme="vehicleMeta(vehicle.state.data.status).theme"
@@ -46,7 +46,8 @@
               <dt><Icon name="calendar" :size="15" /> {{ t("emp.vehicle.registration") }}</dt>
               <dd>
                 <template v-if="vehicle.state.data.registrationExpiry">
-                  {{ t("emp.vehicle.validUntil", { date: formatDate(vehicle.state.data.registrationExpiry, lang) }) }}
+                  {{ t("emp.vehicle.validUntil") }}
+                  <bdi>{{ formatDate(vehicle.state.data.registrationExpiry, lang) }}</bdi>
                 </template>
                 <template v-else>{{ t("common.none") }}</template>
               </dd>
@@ -57,7 +58,7 @@
 
       <section class="emp-section" aria-labelledby="emp-trip-title">
         <header class="emp-section-head">
-          <span class="emp-section-index" aria-hidden="true">02</span>
+          <span class="emp-section-index" aria-hidden="true"><bdi>02</bdi></span>
           <div>
             <h2 id="emp-trip-title">{{ t("emp.today.tripTitle") }}</h2>
             <p>{{ t("emp.trips.previewHint") }}</p>
@@ -117,7 +118,7 @@
       </div>
 
       <p v-if="pendingFuelCount" class="emp-pending-note">
-        {{ t("emp.fuel.pendingCount", { n: pendingFuelCount }) }}
+        {{ t("emp.fuel.pendingCount") }} <bdi>{{ formatInt(pendingFuelCount, lang) }}</bdi>
       </p>
 
       <Button

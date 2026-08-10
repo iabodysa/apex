@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { computed } from "vue";
 import { encodeQr } from "../utils/qrcode";
 import { qrColors } from "../utils/qrColor";
 
@@ -30,20 +30,7 @@ const props = defineProps({
   lightVar: { type: String, default: "--c-surface" },
 });
 
-const themeTick = ref(0);
-let observer = null;
-onMounted(() => {
-  if (typeof MutationObserver === "undefined") return;
-  observer = new MutationObserver(() => themeTick.value++);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["data-theme", "class"],
-  });
-});
-onUnmounted(() => observer && observer.disconnect());
-
 const colors = computed(() => {
-  themeTick.value;
   if (!props.themed || typeof window === "undefined") return { dark: "#000000", light: "#ffffff" };
   const cs = getComputedStyle(document.documentElement);
   const inkColor = cs.getPropertyValue(props.darkVar).trim();

@@ -1,11 +1,8 @@
 # Copyright (c) 2026, afmcoltd
-"""Salis Portal Theme controller.
+"""Masar portal appearance controller.
 
-Single DocType that drives the look and feel of the Salis Driver Portal (the
-mobile web app served at ``/driver``). The values here are read by
-``www/driver.py`` at render time and projected onto the page as a ``data-theme``
-attribute plus an optional ``--c-accent`` override, so the entire token-based
-stylesheet re-skins without rebuilding the SPA.
+Single DocType that controls the optional brand mark and accent used by portal
+shells. Apex ships one light color system; this record does not select a theme.
 
 Only display configuration lives here — no fleet data and no financial impact.
 """
@@ -30,31 +27,9 @@ _CSS_COLOR_RE = re.compile(
 
 _BRAND_LOGO_RE = re.compile(r"^/files/[^\"'<>\s]+$")
 
-THEME_SLUGS = {
-    "AFMCO": "afmco",
-    "Dark": "dark",
-}
-RETIRED_THEMES = ("Frappe Standard", "Gemini", "Atelier", "Creative")
-
-DEFAULT_THEME = "AFMCO"
-DEFAULT_SLUG = "afmco"
-
-
 class DriverPortalTheme(Document):
     def validate(self):
-        """Resets a retired theme to the default and validates the accent colour and brand logo values."""
-        if self.theme in RETIRED_THEMES:
-            frappe.msgprint(
-                _("The {0} theme was retired; this portal now uses {1}.").format(
-                    self.theme, DEFAULT_THEME
-                ),
-                indicator="orange",
-            )
-            self.theme = DEFAULT_THEME
-
-        if self.theme and self.theme not in THEME_SLUGS:
-            frappe.throw(_("Invalid portal theme: {0}").format(self.theme))
-
+        """Validate the optional accent color and brand logo."""
         accent = (self.accent_color or "").strip()
         if accent and not _CSS_COLOR_RE.match(accent):
             frappe.throw(_("Accent Color must be a valid CSS colour."))
@@ -70,25 +45,21 @@ def get_portal_appearance() -> dict:
 	Returns a plain dict with safe defaults so ``www/driver.py`` never has to
 	branch on a missing Single or a half-configured record:
 
-	- ``theme``      : token slug ("afmco" | "frappe" | "dark"), default "afmco".
-	- ``accent``     : optional accent colour override (hex) or "".
+    - ``accent``     : optional accent colour override (hex) or "".
 	- ``logo``       : optional brand-logo URL or "".
 	- ``show_brand`` : bool, default True.
 	"""
-    theme_slug = DEFAULT_SLUG
     accent = ""
     logo = ""
     show_brand = True
 
     if frappe.db.exists("DocType", "Driver Portal Theme"):
         settings = frappe.get_cached_doc("Driver Portal Theme")
-        theme_slug = THEME_SLUGS.get(settings.theme or DEFAULT_THEME, DEFAULT_SLUG)
         accent = (settings.accent_color or "").strip()
         logo = (settings.brand_logo or "").strip()
         show_brand = bool(settings.show_brand) if settings.get("show_brand") is not None else True
 
     return {
-        "theme": theme_slug,
         "accent": accent,
         "logo": logo,
         "show_brand": show_brand,

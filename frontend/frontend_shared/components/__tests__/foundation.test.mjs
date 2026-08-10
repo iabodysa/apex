@@ -10,7 +10,6 @@ import {
   DecisionStage,
   EvidenceRail,
   MetricRibbon,
-  PortalFrame,
   StatusLabel,
   WorkQueue,
 } from "@shared/components/index.js";
@@ -21,29 +20,6 @@ const router = createRouter({
 });
 
 describe("Quiet Ascent composition", () => {
-  it("keeps context lanes optional instead of forcing a pane count", () => {
-    const single = mount(PortalFrame, {
-      props: { title: "Today", eyebrow: "Driver" },
-      slots: { default: "<p class='task'>Next trip</p>" },
-    });
-    expect(single.find(".portal-scene .task").exists()).toBe(true);
-    expect(single.find(".portal-queue").exists()).toBe(false);
-    expect(single.find(".portal-evidence").exists()).toBe(false);
-
-    const contextual = mount(PortalFrame, {
-      props: { title: "Decision inbox" },
-      slots: {
-        queue: "<div class='queue'>Plans</div>",
-        default: "<div class='decision'>Plan</div>",
-        evidence: "<div class='evidence'>Audit</div>",
-      },
-    });
-    expect(contextual.find(".portal-queue .queue").exists()).toBe(true);
-    expect(contextual.find(".portal-scene .decision").exists()).toBe(true);
-    expect(contextual.find(".portal-evidence .evidence").exists()).toBe(true);
-    expect(contextual.find(".portal-workspace").classes()).toContain("has-evidence");
-  });
-
   it("gives each operational region a stable semantic landmark", () => {
     const queue = mount(WorkQueue, {
       props: { title: "Pending", label: "Pending routes" },

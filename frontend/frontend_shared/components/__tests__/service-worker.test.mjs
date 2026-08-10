@@ -12,6 +12,15 @@ import { SW_PARAMS } from "@shared/sw.params.js";
 
 const ORIGIN = "https://bench.local";
 const TEST_BUILD = "deadbeef0000";
+const THMANYAH_BASE = "/assets/apex/vendor/thmanyah-v1";
+const THMANYAH_ASSETS = [
+  `${THMANYAH_BASE}/thmanyah.css`,
+  ...["Light", "Regular", "Medium", "Bold", "Black"].flatMap((weight) => [
+    `${THMANYAH_BASE}/thmanyahsans-${weight}.woff2`,
+    `${THMANYAH_BASE}/thmanyahserifdisplay-${weight}.woff2`,
+    `${THMANYAH_BASE}/thmanyahseriftext-${weight}.woff2`,
+  ]),
+];
 
 // A minimal Response stand-in: cacheable (clone) and taggable so a test can prove
 // WHICH response a fetch resolved to (fresh network vs served-from-cache).
@@ -96,18 +105,27 @@ const DRIVER = SW_PARAMS.driver_portal;
 const MASAR = SW_PARAMS.worker_portal;
 
 describe("portal service worker — install", () => {
-  it("precaches every shell URL (nav + bundle + any self-hosted fonts) on install", async () => {
+  it("uses the Masar product name for both role-specific entry workers", () => {
+    expect(DRIVER.displayName).toBe("Masar");
+    expect(DRIVER.push.title).toBe("Masar");
+    expect(MASAR.displayName).toBe("Masar");
+  });
+
+  it("precaches every shell URL and declared offline asset on install", async () => {
     for (const params of [DRIVER, MASAR]) {
       const sw = loadSW(params);
       sw.state.fetchImpl = async () => makeRes("shell");
       await sw.dispatch("install");
       const cache = sw.shellCache();
       expect(cache, `${params.swFilename}: shell cache created`).toBeTruthy();
-      // nav path + index.js + index.css + one entry per self-hosted font.
-      expect(cache.store.size).toBe(3 + params.fonts.length);
+      // nav path + index.js + index.css + each exact offline asset URL.
+      expect(cache.store.size).toBe(3 + params.offlineAssets.length);
       expect(await cache.match(params.navPath), "nav shell precached").toBeTruthy();
       expect(sw.state.skipWaiting).toBe(params.skipWaitingOnInstall ? 1 : 0);
     }
+    expect(DRIVER.offlineAssets).toEqual(THMANYAH_ASSETS);
+    expect(MASAR.offlineAssets).toEqual(THMANYAH_ASSETS);
+    expect(DRIVER.offlineAssets).toBe(MASAR.offlineAssets);
   });
 });
 
@@ -183,28 +201,21 @@ describe("portal service worker — shell network fallback", () => {
   });
 });
 
-describe("portal service worker — font caching is masar-only", () => {
-  it("masar serves self-hosted fonts cache-first; driver does not handle font requests at all", async () => {
-    // masar: font request is answered from cache (cache-first) after precache.
-    const masar = loadSW(MASAR);
-    masar.state.fetchImpl = async () => makeRes("font");
-    await masar.dispatch("install");
-    masar.state.fetchImpl = async () => { throw new Error("offline"); };
-    const fontUrl = ORIGIN + MASAR.assetBase + "/fonts/" + MASAR.fonts[0] + ".woff2";
-    const rm = await masar.dispatch("fetch", { request: makeReq({ url: fontUrl }) });
-    expect(rm.responded, "masar handles the font request").toBe(true);
-    expect(rm.response._tag, "masar serves the font from cache (cache-first)").toBe("font");
-    expect(masar.code).toContain("cacheFirst");
-    expect(masar.code).toContain('/fonts/');
-
-    // driver: no fonts in the shell, no cacheFirst branch -> font request is passed
-    // through untouched (respondWith never called), so driver never caches fonts.
-    const driver = loadSW(DRIVER);
-    expect(driver.code).not.toContain("cacheFirst");
-    expect(driver.code).not.toContain("/fonts/");
-    const driverFontUrl = ORIGIN + DRIVER.assetBase + "/fonts/some-font.woff2";
-    const rd = await driver.dispatch("fetch", { request: makeReq({ url: driverFontUrl }) });
-    expect(rd.responded, "driver does not intercept font requests").toBe(false);
+describe("portal service worker — licensed font caching", () => {
+  it("both entry workers serve the exact Thmanyah stylesheet and fonts cache-first", async () => {
+    for (const params of [DRIVER, MASAR]) {
+      const sw = loadSW(params);
+      sw.state.fetchImpl = async () => makeRes("licensed-font");
+      await sw.dispatch("install");
+      sw.state.fetchImpl = async () => { throw new Error("offline"); };
+      for (const asset of [THMANYAH_ASSETS[0], THMANYAH_ASSETS.at(-1)]) {
+        const result = await sw.dispatch("fetch", { request: makeReq({ url: ORIGIN + asset }) });
+        expect(result.responded, `${params.navPath} handles ${asset}`).toBe(true);
+        expect(result.response._tag, `${params.navPath} serves ${asset} cache-first`).toBe("licensed-font");
+      }
+      expect(sw.code).toContain("cacheFirst");
+      expect(sw.code).toContain(THMANYAH_BASE);
+    }
   });
 });
 

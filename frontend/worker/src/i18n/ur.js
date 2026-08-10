@@ -7,7 +7,7 @@ export default {
     notAssigned: "تفویض نہیں",
     none: "—",
     error: "کچھ غلط ہو گیا۔",
-    workerApp: "ورکر ایپ",
+    workerApp: "Masar",
     skipContent: "مواد پر جائیں",
     call: "کال",
     whatsapp: "واٹس ایپ",

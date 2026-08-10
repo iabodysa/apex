@@ -29,11 +29,16 @@
       <div class="boarding-progress">
         <div class="boarding-count">
           <strong><bdi>{{ data.boarding.boarded }}</bdi></strong>
-          <span>{{ t("boarding.of", { boarded: data.boarding.boarded, expected: data.boarding.expected }) }}</span>
+          <span><bdi dir="auto">{{ t("boarding.of", { boarded: data.boarding.boarded, expected: data.boarding.expected }) }}</bdi></span>
         </div>
         <div class="boarding-progress-line">
           <Progress :value="ratio" size="md" />
-          <StatusLabel :label="tripStatusLabel" :tone="tripStatusTone" />
+          <Badge
+            :label="tripStatusLabel"
+            :theme="tripStatusTheme"
+            variant="subtle"
+            size="lg"
+          />
         </div>
         <p v-if="!data.boarding.has_manifest" class="boarding-note">{{ t("boarding.noManifest") }}</p>
       </div>
@@ -44,10 +49,12 @@
         <h4>{{ t("boarding.workers") }}</h4>
         <ul>
           <li v-for="worker in data.workers" :key="worker.employee">
-            <span><Icon name="user" :size="15" /> {{ worker.employee_name }}</span>
-            <StatusLabel
+            <span><Icon name="user" :size="15" /> <bdi dir="auto">{{ worker.employee_name }}</bdi></span>
+            <Badge
               :label="t('workerStatus.' + worker.status)"
-              :tone="workerTone(worker.status)"
+              :theme="workerTheme(worker.status)"
+              variant="subtle"
+              size="lg"
             />
           </li>
         </ul>
@@ -58,11 +65,10 @@
 
 <script setup>
 import { computed, ref, watch } from "vue";
-import { Button, Progress } from "frappe-ui";
+import { Badge, Button, Progress } from "frappe-ui";
 
 import AsyncBoundary from "@shared/components/AsyncBoundary.vue";
 import MetricRibbon from "@shared/components/MetricRibbon.vue";
-import StatusLabel from "@shared/components/StatusLabel.vue";
 import { usePoll } from "@shared/usePoll.js";
 import { BOARDING } from "@shared/statusVocabularies";
 
@@ -93,8 +99,8 @@ const tripStatusLabel = computed(() => {
   const label = t(key);
   return label === key ? status : label;
 });
-const tripStatusTone = computed(
-  () => ({ Planned: "info", Dispatched: "warning", Completed: "success", Cancelled: "danger" })[data.value?.status] || "neutral",
+const tripStatusTheme = computed(
+  () => ({ Planned: "blue", Dispatched: "orange", Completed: "green", Cancelled: "red" })[data.value?.status] || "gray",
 );
 const boardingMetrics = computed(() =>
   data.value
@@ -122,14 +128,14 @@ const boundaryTitle = computed(() =>
 );
 const boundaryMessage = computed(() => (state.value === "error" ? error.value : ""));
 
-const workerTone = (status) =>
+const workerTheme = (status) =>
   ({
-    Boarded: "success",
-    [BOARDING.WORKER_CLAIMED]: "info",
-    Pending: "warning",
-    [BOARDING.DRIVER_REJECTED]: "danger",
-    Absent: "danger",
-  })[status] || "neutral";
+    Boarded: "green",
+    [BOARDING.WORKER_CLAIMED]: "blue",
+    Pending: "orange",
+    [BOARDING.DRIVER_REJECTED]: "red",
+    Absent: "red",
+  })[status] || "gray";
 
 async function load() {
   if (!props.tripName) {

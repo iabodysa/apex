@@ -5,7 +5,7 @@
       <VehicleWorkspace :vehicle="vehicle" />
     </template>
     <div v-else class="context-empty">
-      <Icon name="car" :size="28" :stroke-width="1.5" />
+      <Icon name="car" :size="28" />
       <p>{{ t("panel.contextEyebrow") }}</p>
       <h2>{{ t("panel.selectTitle") }}</h2>
       <span>{{ t("panel.selectHint") }}</span>

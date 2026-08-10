@@ -1,7 +1,7 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <EmptyState :title="title" :hint="hint">
-    <template #icon><Icon :name="isScopeEmpty ? 'lock' : icon" :size="20" :stroke-width="1.6" /></template>
+    <template #icon><Icon :name="isScopeEmpty ? 'lock' : icon" :size="20" /></template>
     <template v-if="!isScopeEmpty && anyFilterActive" #action>
       <div class="fp-empty-actions">
         <p v-if="activeFilterChips.length" class="fp-empty-filters">

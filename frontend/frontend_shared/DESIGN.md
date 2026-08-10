@@ -35,7 +35,7 @@ A second header row is allowed for progress only.
 nowhere else. Two nested scrollers is the defect that makes a phone feel broken. Maximum
 width by archetype in §3.
 
-**Card.** Radius `--radius` (12px), `--sp-4` (16px) padding, `--c-surface-2` ground,
+**Card.** Radius `--radius` (14px), `--sp-4` (16px) padding, `--c-surface-2` ground,
 `--c-border` edge, `--shadow-sm`. One subject per card, one primary action per card. A card
 that holds two unrelated things is two cards. A list row is not a card: rows sit inside one
 card with `--c-border` dividers.
@@ -199,33 +199,32 @@ finished.
 Never write a colour, radius, gap or font size as a literal. The only names a portal uses are
 the `--c-*` aliases.
 
-| Role | Token | Light (afmco) | Dark |
-| --- | --- | --- | --- |
-| Page ground | `--c-canvas` | `#e9e3d3` | `#0b110e` |
-| Raised sheet | `--c-surface` | `#f8f5ee` | — |
-| Card | `--c-surface-2` | `#ffffff` | — |
-| Body ink | `--c-ink` | `#072b1a` | `#e7efe9` |
-| Secondary ink | `--c-muted` | `#586962` | — |
-| Primary fill | `--c-primary` | `#00844e` | — |
-| Ink on primary | `--c-primary-ink` | `#ffffff` | — |
-| Divider | `--c-border` | `#ddd5c2` | — |
-| Control edge | `--c-border-control` | `#8d8168` | — |
-| Success | `--c-success` / `-bg` | `#046b41` / `#d9f0e3` | — |
-| Warning | `--c-warning` / `-bg` | `#8a5a10` / `#f7ead2` | — |
-| Danger | `--c-danger` / `-bg` | `#a52d21` / `#f6dcd8` | — |
-| Focus ring | `--focus` | `#046b41` | — |
+| Role | Token | Value |
+| --- | --- | --- |
+| Page ground | `--c-canvas` | `#e9e3d3` |
+| Raised sheet | `--c-surface` | `#f8f5ee` |
+| Card | `--c-surface-2` | `#ffffff` |
+| Body ink | `--c-ink` | `#072b1a` |
+| Secondary ink | `--c-muted` | `#47584f` |
+| Primary fill | `--c-primary` | `#00844e` |
+| Ink on primary | `--c-primary-ink` | `#ffffff` |
+| Divider | `--c-border` | `#d8d0bd` |
+| Control edge | `--c-border-control` | `#8d8168` |
+| Success | `--c-success` / `-bg` | `#14804a` / derived tint |
+| Warning | `--c-warning` / `-bg` | `#a76609` / derived tint |
+| Danger | `--c-danger` / `-bg` | `#b42318` / derived tint |
+| Info | `--c-info` / `-bg` | `#1266a0` / derived tint |
+| Focus ring | `--focus` | `#00844e` |
 
-Two themes exist and only two — `afmco` and `dark` — both declared in `tokens.css` and
-nowhere else. The server writes the choice onto `<html data-theme>`; a portal never picks its
-own. Contrast ratios are recorded beside each value in `tokens.css`; a new colour records its
-ratio there too.
+Apex ships one light color system in `tokens.css`. Tenant configuration may override
+the accent and logo, not the palette. Contrast ratios stay recorded beside each token.
 
 **Type** `--fs-display` 28 · `--fs-h1` 22 · `--fs-h2` 20 · `--fs-h3` 16 · `--fs-body` 14 ·
 `--fs-sm` 13 · `--fs-xs` 11 · `--fs-2xs` 10 (dense table headers only; nothing a worker reads
 on a phone goes below `--fs-sm`).
 
 **Spacing** `--sp-1` 4 · `--sp-2` 8 · `--sp-3` 12 · `--sp-4` 16 · `--sp-5` 20 · `--sp-6` 24 ·
-`--sp-8` 32. **Radius** `--radius-sm` 8 · `--radius` 12 · `--radius-lg` 18 · `--radius-pill`
+`--sp-8` 32. **Radius** `--radius-sm` 8 · `--radius` 14 · `--radius-lg` 24 · `--radius-pill`
 999.
 
 **Tap targets** `--tap-lg` 52 primary and navbar · `--tap-md` 48 ordinary control ·
@@ -257,8 +256,8 @@ Arabic is the primary direction and English is the exception.
 5. Every string through the portal's `i18n.js`.
 6. Icons from `icons.js`, labelled unless the meaning is one of the four unambiguous ones.
 7. Make the route addressable and reload-safe.
-8. Check at 390, 834 and 1440, in both directions and both themes.
+8. Check at 390, 834 and 1440 in both directions.
 9. Reach for what exists first, in this order: a `frappe-ui` component, then the shared
-   layer here — `EmptyState`, `Brand`, `LangToggle`, `ThemeToggle`, `IconBase`,
+   layer here — `EmptyState`, `Brand`, `LangToggle`, `IconBase`,
    `BuildingPicker`, `useToast`, `useOverlay`, `usePoll` — and only then your own. A
    hand-rolled control that the library already ships is a defect.

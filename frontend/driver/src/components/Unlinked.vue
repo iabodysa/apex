@@ -1,19 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <div class="flex-1 flex flex-col px-6 py-7 mx-auto w-full" style="max-width: 480px">
-    <header class="mb-6 flex items-center gap-2">
-      <Brand :size="24" />
-      <span class="text-xl font-extrabold tracking-tight">Salis</span>
-      <img
-        v-if="showBrand && brandLogo"
-        :src="brandLogo"
-        :alt="t('common.operatorLogo')"
-        class="h-7 w-auto max-w-[120px] object-contain"
-      />
-      <span class="pill pill-accent">{{ t("common.driverPortal") }}</span>
-      <div class="ms-auto"><LangToggle /></div>
-    </header>
-
+  <div class="mx-auto w-full px-6 py-7" style="max-width: 480px">
     <section v-if="ctx.is_staff" class="space-y-5">
       <div class="card card-pad">
         <div class="flex items-center gap-3">
@@ -73,15 +60,9 @@
 
 <script setup>
 import Icon from "./Icon.vue";
-import Brand from "@shared/components/Brand.vue";
-import LangToggle from "@shared/components/LangToggle.vue";
 import { useI18n } from "../i18n";
 
 const { t } = useI18n();
 
-defineProps({
-  ctx: { type: Object, required: true },
-  showBrand: { type: Boolean, default: true },
-  brandLogo: { type: String, default: "" },
-});
+defineProps({ ctx: { type: Object, required: true } });
 </script>

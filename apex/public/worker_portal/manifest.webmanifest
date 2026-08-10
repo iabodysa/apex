@@ -2,13 +2,13 @@
   "id": "/masar",
   "name": "Masar",
   "short_name": "Masar",
-  "description": "Worker self-service app",
+  "description": "Masar for workers: transport, housing and self-service",
   "start_url": "/masar",
   "scope": "/masar",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#00844e",
-  "theme_color": "#00844e",
+  "background_color": "#072b1a",
+  "theme_color": "#072b1a",
   "icons": [
     {
       "src": "/assets/apex/worker_portal/icons/masar-icon-192.png",

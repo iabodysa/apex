@@ -446,8 +446,8 @@ function printSlip() {
 .slip {
     max-height: 60vh;
     overflow: auto;
-    background: #fff;
-    color: #111;
+    background: var(--c-surface-2);
+    color: var(--c-ink);
     padding: var(--sp-3);
     border-radius: var(--radius-sm);
 }

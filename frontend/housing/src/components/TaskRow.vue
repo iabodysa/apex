@@ -232,7 +232,7 @@ function onUploaded(file) {
 .task-status-dot {
   height: 7px;
   width: 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1.5px dashed var(--c-muted);
 }
 .task-text {

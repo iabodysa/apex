@@ -18,12 +18,12 @@
           >
             <span class="decision-order"><bdi>{{ String(index + 1).padStart(2, "0") }}</bdi></span>
             <span class="decision-copy">
-              <strong>{{ plan.route_name || plan.name }}</strong>
+              <strong><bdi dir="auto">{{ plan.route_name || plan.name }}</bdi></strong>
               <span class="decision-evidence">
-                <span v-if="plan.project"><Icon name="badge" :size="13" /> {{ plan.project }}</span>
+                <span v-if="plan.project"><Icon name="badge" :size="13" /> <bdi dir="auto">{{ plan.project }}</bdi></span>
                 <span v-if="plan.shift"><Icon name="clock" :size="13" /> {{ t("shift." + plan.shift) }}</span>
-                <span><Icon name="pin" :size="13" /> {{ t("list.stops", { n: plan.total_stops }) }}</span>
-                <span v-if="plan.driver"><Icon name="user" :size="13" /> {{ plan.driver }}</span>
+                <span><Icon name="pin" :size="13" /> <bdi dir="auto">{{ t("list.stops", { n: plan.total_stops }) }}</bdi></span>
+                <span v-if="plan.driver"><Icon name="user" :size="13" /> <bdi dir="auto">{{ plan.driver }}</bdi></span>
                 <span v-if="plan.vehicle"><Icon name="truck" :size="13" /> <bdi>{{ plan.vehicle }}</bdi></span>
               </span>
             </span>

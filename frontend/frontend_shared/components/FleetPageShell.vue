@@ -40,6 +40,7 @@ const bodyStyle = computed(() => {
 
 <style scoped>
 .fleet-shell {
+  --fleet-header-offset: 72px;
   min-height: 100vh;
   min-height: 100dvh;
   min-inline-size: 0;
@@ -55,6 +56,7 @@ const bodyStyle = computed(() => {
   inset-block-start: 0;
   z-index: 20;
   display: flex;
+  min-block-size: var(--fleet-header-offset);
   align-items: center;
   gap: var(--sp-3);
   padding: 14px clamp(var(--sp-4), 4vw, var(--sp-8));

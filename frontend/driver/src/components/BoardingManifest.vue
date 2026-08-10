@@ -4,20 +4,39 @@
     <div ref="sheet" class="sheet" role="dialog" aria-modal="true" :aria-label="t('manifest.title')">
       <div class="sheet-bar">
         <span class="font-bold">{{ t("manifest.title") }}</span>
-        <button class="sheet-close" :aria-label="t('manifest.close')" @click="close">
-          <Icon name="x" :size="20" />
-        </button>
+        <Button
+          class="sheet-close"
+          variant="ghost"
+          size="md"
+          :label="t('manifest.close')"
+          @click="close"
+        >
+          <template #icon><Icon name="x" :size="20" /></template>
+        </Button>
       </div>
 
       <p class="sheet-hint">{{ t("manifest.hint") }}</p>
 
       <div v-if="!summary" class="flex flex-wrap items-center gap-2 mb-4">
-        <button class="btn btn-accent flex-1" @click="emit('open-scan')">
-          <Icon name="qr" :size="16" /> {{ t("trips.scanBoarding") }}
-        </button>
-        <button class="btn btn-outline flex-1" @click="emit('open-manual')">
-          <Icon name="user" :size="16" /> {{ t("trips.manualBoarding") }}
-        </button>
+        <Button
+          class="flex-1"
+          variant="solid"
+          theme="green"
+          size="xl"
+          :label="t('trips.scanBoarding')"
+          @click="emit('open-scan')"
+        >
+          <template #prefix><Icon name="qr" :size="16" /></template>
+        </Button>
+        <Button
+          class="flex-1"
+          variant="outline"
+          size="xl"
+          :label="t('trips.manualBoarding')"
+          @click="emit('open-manual')"
+        >
+          <template #prefix><Icon name="user" :size="16" /></template>
+        </Button>
       </div>
 
       <div v-if="summary" class="depart-summary">
@@ -40,25 +59,35 @@
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <span class="pill shrink-0" :class="pillClass(w.status)">{{ te("boardingStatus", w.status) }}</span>
-              <button
+              <Button
                 v-if="w.status === BOARDING.BOARDED"
                 class="mini-btn mini-no"
+                variant="ghost"
+                theme="red"
+                size="sm"
                 :disabled="busy === w.employee"
-                :aria-label="t('manifest.notBoarded')"
+                :label="t('manifest.notBoarded')"
                 @click="markNotBoarded(w)"
               >
-                <Icon name="x" :size="14" />
-              </button>
+                <template #icon><Icon name="x" :size="14" /></template>
+              </Button>
             </div>
           </li>
         </ul>
         <EmptyState v-else :title="t('manifest.empty')" />
 
         <div v-if="hasPending" class="notify-row">
-          <button class="btn btn-outline" :disabled="acting" @click="notify">
-            <Icon name="alert" :size="16" />
-            {{ graceElapsed ? t("manifest.notify") : t("manifest.notifySoft") }}
-          </button>
+          <Button
+            class="notify-action"
+            variant="outline"
+            size="xl"
+            :disabled="acting"
+            :loading="notifyRes.loading"
+            :label="graceElapsed ? t('manifest.notify') : t('manifest.notifySoft')"
+            @click="notify"
+          >
+            <template #prefix><Icon name="alert" :size="16" /></template>
+          </Button>
           <span v-if="graceElapsed" class="text-xs text-muted transition-colors duration-300" :style="reminderStyle">
             {{ t("manifest.notifyHint", { n: maxNotifySent, max: notifyMaxCount }) }}
           </span>
@@ -66,10 +95,26 @@
         </div>
 
         <div class="sheet-actions">
-          <button class="btn btn-dark" :disabled="acting" @click="depart">
-            <Icon name="route" :size="16" /> {{ t("manifest.depart") }}
-          </button>
-          <button class="btn btn-outline" :disabled="acting" @click="close">{{ t("manifest.close") }}</button>
+          <Button
+            class="flex-1"
+            variant="solid"
+            theme="green"
+            size="xl"
+            :disabled="acting"
+            :loading="departRes.loading"
+            :label="t('manifest.depart')"
+            @click="depart"
+          >
+            <template #prefix><Icon name="route" :size="16" /></template>
+          </Button>
+          <Button
+            class="flex-1"
+            variant="outline"
+            size="xl"
+            :disabled="acting"
+            :label="t('manifest.close')"
+            @click="close"
+          />
         </div>
         <p class="text-xs text-muted mt-2">{{ t("manifest.departHint") }}</p>
       </template>
@@ -79,7 +124,7 @@
 
 <script setup>
 import { computed, ref } from "vue";
-import { createResource } from "frappe-ui";
+import { Button, createResource } from "frappe-ui";
 import { BOARDING, BOARDING_REFUSED } from "@shared/statusVocabularies";
 import Icon from "./Icon.vue";
 import Skeleton from "./Skeleton.vue";
@@ -235,7 +280,7 @@ useOverlay({ active: () => true, container: sheet, close });
   overflow-y: auto;
   background: var(--c-surface);
   color: var(--c-ink);
-  border-radius: 18px 18px 0 0;
+  border-radius: var(--radius) var(--radius) 0 0;
   padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
 }
 .sheet-bar {
@@ -313,16 +358,12 @@ useOverlay({ active: () => true, container: sheet, close });
   flex-wrap: wrap;
   margin-top: 16px;
 }
-.notify-row .btn {
+.notify-action {
   width: auto;
-  padding-inline: 16px;
 }
 .sheet-actions {
   display: flex;
   gap: 10px;
   margin-top: 12px;
-}
-.sheet-actions .btn {
-  flex: 1;
 }
 </style>

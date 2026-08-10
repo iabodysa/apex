@@ -1,16 +1,13 @@
 // Copyright (c) 2026, AFMCO and contributors
 // Guards the shared token layer — the one file every portal's appearance resolves
-// through. Three failures this replaces, all of which shipped for months:
+// through. Two failures this replaces, both of which shipped for months:
 //
 //   1. A portal referenced var(--x) for an --x nothing declared. The property
 //      silently resolved to nothing, so a tap target collapsed to content height
 //      and a colour fell back to the UA default. The existing duplication guard
 //      hashes whole FILES, so it cannot see a missing property.
-//   2. The dark palette is authored twice (the prefers-color-scheme block and the
-//      explicit [data-theme="dark"] toggle cannot be one rule), and the two copies
-//      drifted — a correction landed in one and not the other.
-//   3. Auto-dark was gated by a DENY-list that excluded the default-identity alias,
-//      so four portals could never follow the OS however clean their stylesheet was.
+//   2. Multiple theme branches drifted and repainted the same semantic vocabulary.
+//      Apex now ships one light palette; portal identity overrides only the accent.
 import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, extname } from "node:path";
@@ -28,6 +25,7 @@ const RUNTIME_PROPS = new Set([
   "--ts-nav-w", // TabletSupervisorShell, from its `navWidth` prop
   "--mc-width", // MobileConsoleShell, from its `maxWidth` prop
   "--fleet-content-limit", // FleetPageShell, from its `maxWidth` compatibility prop
+  "--fleet-header-offset", // FleetPageShell, shared sticky-header contract for fleet portals
   "--shell-wide", // opt-in: a portal widens the phone column at --bp-tablet
 ]);
 
@@ -69,10 +67,17 @@ function declarations(body) {
 
 describe("shared token layer", () => {
   it("assigns each licensed brand family one role without bundling the server-owned font assets", () => {
+    const light = declarations(ruleBody(TOKENS, ":root"));
+
     expect(TOKENS).not.toContain("thmanyah-v1/thmanyah.css");
-    expect(TOKENS).toContain('--font: "Thmanyah Sans"');
-    expect(TOKENS).toContain('--font-display: "Thmanyah Serif Display"');
-    expect(TOKENS).toContain('--font-serif: "Thmanyah Serif Text"');
+    expect(light["--font"]).toBe('"Thmanyah Sans"');
+    expect(light["--font-num"]).toBe("var(--font)");
+    expect(light["--font-num-ar"]).toBe("var(--font)");
+    expect(light["--font-display"]).toBe('"Thmanyah Serif Display"');
+    expect(light["--font-serif"]).toBe('"Thmanyah Serif Text"');
+    expect(light["--fw-heading"]).toBe("700");
+    expect(light["--fw-semibold"]).toBe("700");
+    expect(TOKENS).not.toMatch(/"Montserrat"|"Cairo"|system-ui|ui-monospace|"SF Mono"|"Menlo"|monospace/);
   });
 
   it("establishes a viewport-safe root before portal layouts add their own composition", () => {
@@ -116,60 +121,32 @@ describe("shared token layer", () => {
     expect([...new Set(offenders)].sort()).toEqual([]);
   });
 
-  it("keeps the two dark blocks identical, because they cannot be merged into one rule", () => {
-    const auto = declarations(ruleBody(TOKENS, ':root:not([data-theme]),\n  :root[data-theme="afmco"]'));
-    const explicit = declarations(ruleBody(TOKENS, ':root[data-theme="dark"]'));
+  it("ships one light palette with no theme switch or OS dark branch", () => {
+    const light = declarations(ruleBody(TOKENS, ":root"));
 
-    expect(Object.keys(auto).length).toBeGreaterThan(20);
-    expect(auto).toEqual(explicit);
-  });
-
-  it("reaches auto-dark through an allow-list, never a :not() deny-list", () => {
-    const media = TOKENS.slice(TOKENS.indexOf("@media (prefers-color-scheme: dark)"));
-    const selector = media.slice(0, media.indexOf("{", media.indexOf("{") + 1));
-
-    // The default identity has two spellings — no attribute, and the "afmco" alias
-    // four wrappers server-render. Both must be repainted.
-    expect(selector).toContain(":root:not([data-theme])");
-    expect(selector).toContain(':root[data-theme="afmco"]');
-    // A deny-list would hand dark primitives to the off-identity LIGHT themes
-    // (frappe, atelier) while their own semantic tokens stayed light.
-    expect(selector).not.toContain(':not([data-theme="afmco"])');
-  });
-
-  it("pins the contrast-corrected values, so a revert has to be deliberate", () => {
-    const light = declarations(ruleBody(TOKENS, ":root,\n[data-theme=\"afmco\"],\n:root[data-theme=\"light\"]"));
-    const dark = declarations(ruleBody(TOKENS, ':root[data-theme="dark"]'));
-
-    // Ink tokens measured against the ground they are actually drawn on.
-    expect(light["--warn"]).toBe("#8a5a10"); // 4.97:1 on --warn-bg, was 2.57:1
-    expect(light["--ok"]).toBe("#046b41"); // 5.50:1 on --ok-bg, was 3.97:1
-    expect(light["--danger"]).toBe("#a52d21"); // 5.39:1 on --danger-bg, was 4.18:1
-    expect(light["--muted"]).toBe("#586962"); // 4.54:1 worst ground, was 3.33:1
-    expect(dark["--muted"]).toBe("#94a69a");
-    expect(dark["--danger"]).toBe("#f5867a");
-    // In dark, --info used to equal --ok exactly: an "in progress" pill and a
-    // "done" pill rendered pixel-identical at 1.00:1.
-    expect(dark["--info"]).not.toBe(dark["--ok"]);
-
-    // The ink on a danger fill follows the mode. White clears the light red at
-    // 7.01:1 but only reaches 2.45:1 on the lighter dark red, where forest ink
-    // reaches 7.77:1 — so it cannot be one mode-independent value.
+    expect(light["--brand-green"]).toBe("#00844e");
+    expect(light["--mint"]).toBe("#60d297");
+    expect(light["--forest"]).toBe("#072b1a");
+    expect(light["--canvas"]).toBe("#e9e3d3");
+    expect(light["--surface"]).toBe("#f8f5ee");
+    expect(light["--muted"]).toBe("#47584f");
+    expect(light["--border"]).toBe("#d8d0bd");
+    expect(light["--ok"]).toBe("#14804a");
+    expect(light["--warn"]).toBe("#a76609");
+    expect(light["--danger"]).toBe("#b42318");
+    expect(light["--info"]).toBe("#1266a0");
+    expect(light["--ok-bg"]).toBe("color-mix(in srgb, var(--ok) 6%, var(--surface-2))");
+    expect(light["--warn-bg"]).toBe("color-mix(in srgb, var(--warn) 1%, var(--surface-2))");
+    expect(light["--danger-bg"]).toBe("color-mix(in srgb, var(--danger) 10%, var(--surface-2))");
+    expect(light["--info-bg"]).toBe("color-mix(in srgb, var(--info) 10%, var(--surface-2))");
     expect(light["--danger-ink"]).toBe("#ffffff");
-    expect(dark["--danger-ink"]).toBe("#04130c");
-  });
-
-  // Repainting every --c-* still leaves the parts CSS cannot reach — scrollbars, the
-  // canvas behind the document, native select and date pickers — on their light
-  // defaults. Only color-scheme moves those, and it has to move in all three blocks.
-  it("declares color-scheme alongside the palette in every mode", () => {
-    const light = TOKENS.slice(0, TOKENS.indexOf("@media (prefers-color-scheme: dark)"));
-    const media = TOKENS.slice(TOKENS.indexOf("@media (prefers-color-scheme: dark)"));
-
-    // The lookbehind matters: "prefers-color-scheme: dark" contains the declaration
-    // as a substring, so a naive count reads the @media header as a third mode.
-    expect(light).toContain("color-scheme: light");
-    expect(media.match(/(?<!prefers-)color-scheme: dark/g) || []).toHaveLength(2);
+    expect(light["--radius-sm"]).toBe("8px");
+    expect(light["--radius"]).toBe("14px");
+    expect(light["--radius-lg"]).toBe("24px");
+    expect(TOKENS).toContain("color-scheme: only light");
+    expect(TOKENS).not.toContain("prefers-color-scheme");
+    expect(TOKENS).not.toContain("data-theme");
+    expect(TOKENS).not.toContain("color-scheme: dark");
   });
 
   it("ships one focus ring and one reduced-motion rule for every portal", () => {

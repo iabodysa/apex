@@ -1,22 +1,15 @@
 // Copyright (c) 2026, afmcoltd
-import { ref } from "vue";
-
-export const toasts = ref([]);
-
-let seq = 0;
+import { toast } from "frappe-ui";
 
 export function pushToast(message, kind = "ok", ttl) {
   if (!message) return;
-  const id = ++seq;
-  const life = ttl ?? (kind === "err" ? 4000 : 2500);
-  toasts.value.push({ id, message, kind });
-  setTimeout(() => dismissToast(id), life);
-}
-
-export function dismissToast(id) {
-  toasts.value = toasts.value.filter((t) => t.id !== id);
+  return toast.create({
+    message,
+    type: kind === "err" ? "error" : "success",
+    duration: (ttl ?? (kind === "err" ? 4000 : 2500)) / 1000,
+  });
 }
 
 export function clearToasts() {
-  toasts.value = [];
+  toast.removeAll();
 }

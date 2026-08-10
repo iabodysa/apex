@@ -1,8 +1,7 @@
 /* Copyright (c) 2026, afmcoltd */
 /* Map Apex semantic tokens to frappe-ui's public colour vocabulary. */
 
-html:root,
-html[data-theme="dark"] {
+html:root {
   --surface-white: var(--c-surface-2);
   --surface-gray-1: var(--c-surface);
   --surface-gray-2: color-mix(in srgb, var(--c-ink) 6%, transparent);

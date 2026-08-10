@@ -70,11 +70,6 @@ const ALLOWED = new Map([
     "driver:.gitignore | worker:.gitignore",
     "git applies ignore rules per directory; the file must sit in the dir it governs.",
   ],
-  [
-    "driver:src/assets/afmco-logo.svg | worker:public/afmco-logo.svg",
-    "Same brand asset through two different pipelines: driver imports it as a " +
-      "bundled module asset, worker serves it verbatim from public/ at a stable URL.",
-  ],
 ]);
 
 function walk(dir, base, out) {

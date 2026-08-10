@@ -1,12 +1,11 @@
 {
  "actions": [],
  "creation": "2026-05-30 06:00:00.000000",
- "description": "Single configuration record controlling the look and feel of the Salis Driver Portal (the mobile web app at /driver).",
+ "description": "Single configuration record for optional Masar portal brand overrides.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "portal_theme_sec_appearance",
-  "theme",
   "show_brand",
   "portal_theme_appearance_col",
   "accent_color",
@@ -19,18 +18,8 @@
    "label": "Appearance"
   },
   {
-   "default": "AFMCO",
-   "description": "Portal design theme: AFMCO, the light brand default, or Dark. These are the two the token system implements.",
-   "fieldname": "theme",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Theme",
-   "options": "AFMCO\nDark",
-   "reqd": 1
-  },
-  {
    "default": "1",
-   "description": "Show AFMCO brand mark and wordmark in the portal header.",
+   "description": "Show the optional tenant mark beside the Apex identity.",
    "fieldname": "show_brand",
    "fieldtype": "Check",
    "label": "Show Brand"
@@ -40,7 +29,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Optional primary accent colour override. Leave blank to use the theme default.",
+   "description": "Optional primary accent colour override. Leave blank to use the Apex default.",
    "fieldname": "accent_color",
    "fieldtype": "Color",
    "label": "Accent Color"
@@ -54,7 +43,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-05-30 06:00:00.000000",
+ "modified": "2026-08-09 13:13:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Driver Portal Theme",

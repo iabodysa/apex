@@ -79,7 +79,6 @@ A {0} Safety Round already exists for {1} on {2} ({3}). Tick Is Re-inspection to
 ABSENT,غائب
 AC,تكييف
 AC Maintenance,صيانة المكيفات
-AFMCO,AFMCO
 API Contract Version,إصدار عقد الواجهة البرمجية
 AR,عربي
 Abbreviation,الاختصار
@@ -1286,7 +1285,6 @@ Damaged Items,الأصناف التالفة
 Damaged Parts,الأجزاء المتضررة
 Damaged or Lost,تالف أو مفقود
 Damaged or Lost Only,التالف أو المفقود فقط
-Dark,داكن
 "Dashboard reading at the pump, which ties the litres to the distance run.",قراءة العداد عند المضخة، وهي تربط اللترات بالمسافة المقطوعة.
 "Dashboard reading when the incident happened, which fixes the vehicle's mileage at the moment of loss.",قراءة العداد وقت وقوع الحادث، وهي تثبّت مسافة المركبة لحظة الخسارة.
 Dashboards,اللوحات
@@ -2216,7 +2214,6 @@ Invalid Token,رمز غير صالح
 Invalid code.,رمز غير صحيح.
 Invalid incident type.,نوع الحادث غير صالح.
 Invalid or inactive location token.,رمز الموقع غير صالح أو غير مُفعّل.
-Invalid portal theme: {0},سمة بوابة غير صالحة: {0}
 Invalid readiness status.,حالة جاهزية غير صالحة.
 Invalid status: {0},حالة غير صالحة: {0}
 Invalid submission.,طلب غير صالح.
@@ -3015,7 +3012,7 @@ Optional link when this item is a tracked facility fixed asset. Maintenance comp
 Optional logo shown in the portal header in place of the built-in brand mark.,شعار اختياري يظهر في ترويسة البوابة بدلاً من علامة الهوية المدمجة.
 Optional photo of the bed/room condition at check-in (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند التسكين (دليل تسليم).
 Optional photo of the bed/room condition at checkout (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند المغادرة (دليل تسليم).
-Optional primary accent colour override. Leave blank to use the theme default.,لون تمييز أساسي اختياري بدل اللون الافتراضي. اتركه فارغًا لاستخدام اللون الافتراضي للسمة.
+Optional primary accent colour override. Leave blank to use the Apex default.,لون تمييز أساسي اختياري. اتركه فارغاً لاستخدام لون أبكس الافتراضي.
 Optional sender id / from number the gateway should send as (when the provider requires it). Sent as sender_id in the request body.,معرّف مُرسِل / رقم إرسال اختياري ترسل البوابة باسمه (عندما يتطلّب المزوّد ذلك). يُرسَل بوصفه sender_id في جسم الطلب.
 Optional: the specific Facility Asset this inspection covers. On submit its Last Inspected Date is stamped with the Inspection Date.,اختياري: أصل المنشأة المحدد الذي يشمله هذا الفحص. عند الاعتماد، يُحدّث «تاريخ آخر فحص» بتاريخ الفحص.
 Order Issued By (Client),صدر الأمر من (العميل)
@@ -3258,7 +3255,6 @@ Portal credential re-shared for {0} {1},أُعيدت مشاركة بيانات �
 Portal credential reissued for {0} {1},أُعيد إصدار بيانات دخول البوابة لـ {0} {1}
 Portal credential revoked for {0} {1},أُلغيت بيانات دخول البوابة لـ {0} {1}
 Portal credential rotated for {0} {1},جُدِّدت بيانات دخول البوابة لـ {0} {1}
-"Portal design theme: AFMCO, the light brand default, or Dark. These are the two the token system implements.",نمط تصميم البوابة: AFMCO، وهو النمط الفاتح الافتراضي للهوية، أو الداكن. هذان هما النمطان اللذان يطبقهما نظام متغيرات التصميم.
 Portal token audience must be Worker or Driver.,يجب أن تكون فئة رمز البوابة عاملًا أو سائقًا.
 Portal token subject binding cannot be changed after issuance.,لا يمكن تغيير ارتباط صاحب رمز البوابة بعد إصداره.
 Portal token subject binding is invalid.,ارتباط صاحب رمز البوابة غير صالح.
@@ -4219,7 +4215,7 @@ Short code used to prefix generated room numbers.,رمز مختصر يُستخد
 Short-term contract worker on a monthly salary with no car or allowances. Recorded in accounting as a party for native Payment Entry. Employee-lite; distinct from the housing Temporary Worker.,عامل بعقد قصير وراتب شهري دون سيارة أو بدلات. يُسجل محاسبيًا كطرف في قيد الدفع القياسي. سجل موظف مبسط يختلف عن العامل المؤقت في السكن.
 Shortage or Damage Note,ملاحظة نقص أو تلف
 Shortfall,النقص
-Show AFMCO brand mark and wordmark in the portal header.,إظهار علامة وشعار AFMCO النصي في رأس البوابة.
+Show the optional tenant mark beside the Apex identity.,إظهار علامة العميل الاختيارية بجانب هوية أبكس.
 Show Brand,إظهار العلامة التجارية
 Show Portal Link,عرض رابط البوابة
 Show Zero Balances,عرض الأرصدة الصفرية
@@ -4241,7 +4237,7 @@ Signed handover evidence is required before submitting.,إثبات تسليم م
 Signed on paper below,التوقيع على الورق أدناه
 "Signing records that the notice was served and read, not that its value is agreed.",التوقيع يثبت أن الإشعار سُلِّم وقُرئ، ولا يعني الموافقة على المبلغ.
 "Single config that governs whether, and how, operational events (damage, rent, fuel, custody) may be deducted from a worker's salary. Default = NO deduction: the global switch is OFF and every per-type rule is disabled until explicitly activated after legal review.",إعداد واحد يحكم هل يمكن خصم الأحداث التشغيلية (تلف أو إيجار أو وقود أو عهدة) من راتب العامل وكيف. الافتراضي هو عدم الخصم: المفتاح العام موقوف وكل قاعدة نوع معطّلة حتى تُفعَّل صراحة بعد المراجعة القانونية.
-Single configuration record controlling the look and feel of the Salis Driver Portal (the mobile web app at /driver).,سجل إعدادات واحد يتحكم في مظهر بوابة سائق ساليس، وهي تطبيق الويب للجوال على /driver.
+Single configuration record for optional Masar portal brand overrides.,سجل إعدادات واحد لتخصيص علامة بوابة مسار اختيارياً.
 "Single configuration record describing how an external frontend integrates with this Frappe backend over HTTP. This DocType documents and surfaces the integration; the real linking uses native Frappe tools (User API Access, OAuth Client, Webhook).",سجل إعداد واحد يوضح تكامل واجهة خارجية مع خادم Frappe عبر HTTP. يعرض هذا المستند إعدادات التكامل، أما الربط الفعلي فيستخدم أدوات Frappe القياسية (User API Access وOAuth Client وWebhook).
 Single configuration record for the Salis Fleet Management module.,سجل إعدادات واحد لوحدة إدارة أسطول ساليس.
 Single mattress for worker accommodation bed. Routinely purchased bedding item.,مرتبة مفردة لسرير سكن العمال. صنف مفروشات يُشترى دورياً.
@@ -4691,10 +4687,8 @@ The worker's signed consent to the recovery. Required before the incident can be
 The workshop quotation the estimated cost was taken from.,عرض سعر الورشة الذي أُخذت منه التكلفة المقدّرة.
 The {0} DocType is not available on this site.,نوع المستند {0} غير متاح على هذا الموقع.
 The {0} date {1} is before SIM {2}'s last custody event on {3}. Record the retirement on or after that date.,تاريخ {0} وهو {1} أسبق من آخر حدث عهدة للشريحة {2} بتاريخ {3}. سجّل الإخراج من الخدمة في ذلك التاريخ أو بعده.
-The {0} theme was retired; this portal now uses {1}.,أُوقف نمط {0}؛ تستخدم هذه البوابة الآن {1}.
 Theft,سرقة
 Theft report {0} cancelled.,أُلغي بلاغ السرقة {0}.
-Theme,السمة
 There is no submitted Purchase Invoice outstanding for {0} under this company. Raise and submit the landlord invoice first — a payment with no invoice behind it settles nothing.,لا توجد فاتورة شراء معتمدة ومستحقة لـ {0} في هذه الشركة. أنشئ فاتورة المؤجر واعتمدها أولًا؛ فلا يمكن تسوية دفعة دون فاتورة مرتبطة بها.
 There is no submitted Purchase Invoice outstanding for {0} under this company. Raise and submit the supplier invoice first — a payment with no invoice behind it settles nothing.,لا توجد فاتورة شراء معتمدة ومستحقة للمورد {0} في هذه الشركة. أنشئ فاتورة المورد واعتمدها أولًا؛ فلا تسدد الدفعة شيئًا ما لم ترتبط بفاتورة.
 There is nothing to reconcile on this voucher,ما في شيء يُطابق على هذا السند

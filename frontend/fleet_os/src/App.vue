@@ -1,17 +1,15 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <PortalFrame
-    :eyebrow="t('brand.eyebrow')"
-    :title="t('brand.title')"
-    :subtitle="t('brand.subtitle')"
-    :skip-label="t('brand.skip')"
-  >
+  <FrappeUIProvider>
+    <a class="fleet-skip" href="#fleet-main">{{ t("brand.skip") }}</a>
+
+    <FleetPageShell>
     <template #brand>
       <Brand variant="reverse" size="32" />
-      <span class="product-name">{{ t("brand.name") }}</span>
+      <bdi class="product-name" dir="ltr">{{ t("brand.name") }}</bdi>
     </template>
 
-    <template #header-actions>
+    <template #actions>
       <Button
         class="alert-bell"
         variant="outline"
@@ -31,33 +29,38 @@
       <LangToggle variant="header" />
     </template>
 
-    <router-view />
-  </PortalFrame>
-
-  <AlertDrawer />
-
-  <Dialog v-model="confirmOpen" :options="confirmOptions" @close="confirm.settle(false)">
-    <template #body-content>
-      <p class="cf-msg">{{ confirm.state.message }}</p>
+    <template #heading>
+      <p class="fleet-page-eyebrow">{{ t("brand.eyebrow") }}</p>
+      <h1 class="fleet-page-title">{{ t("brand.title") }}</h1>
+      <p class="fleet-page-subtitle">{{ t("brand.subtitle") }}</p>
     </template>
-  </Dialog>
 
-  <PortalToast :toast="toast" />
+    <div id="fleet-main" class="fleet-scene-body" tabindex="-1">
+      <router-view />
+    </div>
+    </FleetPageShell>
+
+    <AlertDrawer />
+
+    <Dialog v-model="confirmOpen" :options="confirmOptions" @close="confirm.settle(false)">
+      <template #body-content>
+        <p class="cf-msg">{{ confirm.state.message }}</p>
+      </template>
+    </Dialog>
+  </FrappeUIProvider>
 </template>
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-import { Button, Dialog } from "frappe-ui";
+import { Button, Dialog, FrappeUIProvider, toast } from "frappe-ui";
 
 import Brand from "@shared/components/Brand.vue";
+import FleetPageShell from "@shared/components/FleetPageShell.vue";
 import LangToggle from "@shared/components/LangToggle.vue";
-import PortalFrame from "@shared/components/PortalFrame.vue";
 import { useDocumentLanguage } from "@shared/useDocumentLanguage";
-import { useToast } from "@shared/useToast.js";
 
 import Icon from "./Icon.vue";
 import AlertDrawer from "./components/AlertDrawer.vue";
-import PortalToast from "./components/PortalToast.vue";
 import { provideBoardContext } from "./boardContext.js";
 import { useBoardState } from "./boardState.js";
 import { provideConfirm } from "./confirm.js";
@@ -77,9 +80,17 @@ useDocumentLanguage(lang, dir);
 
 const fmt = useFleetFormat(t);
 const state = useBoardState();
-const { toast, showToast } = useToast();
 const confirm = provideConfirm();
 const { density, toggle: toggleDensity } = useDensity();
+
+const TOAST_TYPES = { green: "success", amber: "warning", red: "error" };
+function showToast(message, type = "green") {
+  toast.create({
+    message,
+    type: TOAST_TYPES[type] || "info",
+    duration: 3.5,
+  });
+}
 
 const board = useFleetBoard({ expiryFlag: fmt.expiryFlag });
 const { vehicles, loadState, reloadFleet } = board;

@@ -3,9 +3,15 @@
   <div ref="stage" class="scanner-overlay" role="dialog" aria-modal="true" :aria-label="t('boarding.title')">
     <div class="scanner-bar">
       <span class="font-bold">{{ t("boarding.title") }}</span>
-      <button class="scanner-close" :aria-label="t('boarding.close')" @click="close">
-        <Icon name="x" :size="20" />
-      </button>
+      <Button
+        class="scanner-close"
+        variant="ghost"
+        size="md"
+        :label="t('boarding.close')"
+        @click="close"
+      >
+        <template #icon><Icon name="x" :size="20" /></template>
+      </Button>
     </div>
 
     <div class="scanner-stage">
@@ -30,17 +36,29 @@
     <p v-if="phase === 'scanning'" class="scanner-hint">{{ t("boarding.hint") }}</p>
 
     <div class="scanner-actions">
-      <button v-if="phase === 'result'" class="btn btn-primary" @click="rescan">
-        {{ t("boarding.again") }}
-      </button>
-      <button class="btn btn-outline" @click="close">{{ t("boarding.close") }}</button>
+      <Button
+        v-if="phase === 'result'"
+        class="flex-1"
+        variant="solid"
+        theme="green"
+        size="xl"
+        :label="t('boarding.again')"
+        @click="rescan"
+      />
+      <Button
+        class="flex-1"
+        variant="outline"
+        size="xl"
+        :label="t('boarding.close')"
+        @click="close"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import { createResource } from "frappe-ui";
+import { Button, createResource } from "frappe-ui";
 import { useOverlay } from "@shared/useOverlay.js";
 import Icon from "./Icon.vue";
 import { useI18n } from "../i18n";
@@ -195,8 +213,8 @@ onBeforeUnmount(() => {
   z-index: 60;
   display: flex;
   flex-direction: column;
-  background: #000;
-  color: #fff;
+  background: var(--c-ink);
+  color: var(--c-header-ink);
 }
 .scanner-bar {
   display: flex;
@@ -210,8 +228,8 @@ onBeforeUnmount(() => {
   line-height: 1;
   padding: 6px 10px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
+  background: color-mix(in srgb, var(--c-header-ink) 14%, transparent);
+  color: var(--c-header-ink);
 }
 .scanner-stage {
   position: relative;
@@ -230,9 +248,9 @@ onBeforeUnmount(() => {
   width: 64%;
   max-width: 280px;
   aspect-ratio: 1;
-  border: 3px solid rgba(255, 255, 255, 0.9);
-  border-radius: 18px;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+  border: 3px solid color-mix(in srgb, var(--c-header-ink) 90%, transparent);
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 9999px var(--c-scrim);
 }
 .scanner-note {
   position: absolute;
@@ -261,8 +279,8 @@ onBeforeUnmount(() => {
   height: 72px;
   display: grid;
   place-items: center;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--c-header-ink) 20%, transparent);
   margin-bottom: 14px;
 }
 .result-title {
@@ -284,8 +302,5 @@ onBeforeUnmount(() => {
   gap: 10px;
   padding: 16px;
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
-}
-.scanner-actions .btn {
-  flex: 1;
 }
 </style>

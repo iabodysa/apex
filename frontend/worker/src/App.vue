@@ -1,33 +1,33 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <div class="app-shell" :dir="dir">
+    <a class="portal-skip" href="#portal-detail">{{ t("common.skipContent") }}</a>
+
     <div v-if="updateReady" class="system-banner system-banner-update" role="status">
       <Icon name="refresh" :size="16" />
       <span>{{ t("update.available") }}</span>
       <Button variant="ghost" size="md" :label="t('update.reload')" @click="applyUpdate" />
     </div>
 
-    <PortalFrame
+    <MobileConsoleShell
       v-if="hasToken && worker"
-      :title="scene.title"
-      :eyebrow="greeting"
-      :subtitle="workerName"
-      :navigation-label="t('common.workerApp')"
-      :skip-label="t('common.skipContent')"
     >
-      <template #header-actions>
-        <LangToggle variant="header" />
-        <span class="identity-chip" :aria-label="workerName">
-          <img v-if="worker.photo" :src="worker.photo" alt="" />
-          <span v-else>{{ initial }}</span>
-        </span>
+      <template #header>
+        <div class="masar-head-row">
+          <Brand variant="reverse" :size="34" />
+          <div class="masar-head-copy">
+            <small>{{ t("common.workerApp") }} · {{ greeting }}</small>
+            <b>{{ scene.title }}</b>
+          </div>
+          <div class="masar-head-actions">
+            <LangToggle variant="header" />
+            <span class="identity-chip" :aria-label="workerName">
+              <img v-if="worker.photo" :src="worker.photo" alt="" />
+              <span v-else>{{ initial }}</span>
+            </span>
+          </div>
+        </div>
       </template>
-
-      <div v-if="!online" class="system-banner system-banner-offline" role="status">
-        <Icon name="alert" :size="16" />
-        <span>{{ t("common.offline") }}</span>
-      </div>
-      <router-view :ctx="ctx.data" />
 
       <template #nav>
         <router-link
@@ -43,24 +43,67 @@
           <span>{{ t(tab.labelKey) }}</span>
         </router-link>
       </template>
-    </PortalFrame>
 
-    <PortalFrame
-      v-else
-      :title="t('common.workerApp')"
-      :eyebrow="greeting"
-      :subtitle="accessSubtitle"
-      :skip-label="t('common.skipContent')"
-    >
-      <template #header-actions><LangToggle variant="header" /></template>
-      <AsyncBoundary
-        :state="accessState"
-        :title="accessTitle"
-        :message="accessMessage"
-        :retry-label="accessState === 'error' ? t('common.retry') : ''"
-        @retry="ctx.reload()"
-      />
-    </PortalFrame>
+      <template v-if="scene.links.length" #list>
+        <section class="masar-context-list" :aria-label="scene.title">
+          <p>{{ t("common.workerApp") }}</p>
+          <h2>{{ scene.title }}</h2>
+          <router-link
+            v-for="link in scene.links"
+            :key="link.to"
+            :to="link.to"
+            :class="{ 'is-active': isSceneLinkActive(link) }"
+            :aria-current="isSceneLinkActive(link) ? 'page' : undefined"
+          >
+            <Icon :name="link.icon" :size="20" />
+            <span>{{ link.label }}</span>
+          </router-link>
+        </section>
+      </template>
+
+      <section id="portal-detail" class="masar-detail" tabindex="-1">
+        <div v-if="!online" class="system-banner system-banner-offline" role="status">
+          <Icon name="alert" :size="16" />
+          <span>{{ t("common.offline") }}</span>
+        </div>
+        <router-view :ctx="ctx.data" />
+      </section>
+
+      <template v-if="scene.action" #action>
+        <Button
+          variant="solid"
+          theme="green"
+          size="2xl"
+          :label="scene.action.label"
+          :route="scene.action.to"
+        >
+          <template #prefix><Icon :name="scene.action.icon" :size="20" /></template>
+        </Button>
+      </template>
+    </MobileConsoleShell>
+
+    <MobileConsoleShell v-else>
+      <template #header>
+        <div class="masar-head-row">
+          <Brand variant="reverse" :size="34" />
+          <div class="masar-head-copy">
+            <small>{{ greeting }}</small>
+            <b>{{ t("common.workerApp") }}</b>
+          </div>
+          <div class="masar-head-actions"><LangToggle variant="header" /></div>
+        </div>
+      </template>
+
+      <section id="portal-detail" class="masar-detail" tabindex="-1">
+        <AsyncBoundary
+          :state="accessState"
+          :title="accessTitle"
+          :message="accessMessage"
+          :retry-label="accessState === 'error' ? t('common.retry') : ''"
+          @retry="ctx.reload()"
+        />
+      </section>
+    </MobileConsoleShell>
   </div>
 </template>
 
@@ -69,7 +112,8 @@ import { computed, onMounted, onUnmounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { Button, createResource } from "frappe-ui";
 import AsyncBoundary from "@shared/components/AsyncBoundary.vue";
-import PortalFrame from "@shared/components/PortalFrame.vue";
+import Brand from "@shared/components/Brand.vue";
+import MobileConsoleShell from "@shared/components/MobileConsoleShell.vue";
 import { useDocumentLanguage } from "@shared/useDocumentLanguage";
 import { usePoll } from "@shared/usePoll.js";
 import Icon from "./components/Icon.vue";
@@ -122,14 +166,55 @@ const greeting = computed(() => {
 
 const scene = computed(() => {
   const name = route.name;
-  if (name === "transport") return { title: t("transport.title") };
-  if (name === "request-transport") return { title: t("reqTransport.title") };
-  if (name === "accommodation") return { title: t("accommodation.title") };
-  if (name === "custody") return { title: t("custody.title") };
-  if (name === "requests") return { title: t("requests.title") };
-  if (name === "request-detail") return { title: t("requests.detailTitle") };
-  if (name === "profile") return { title: t("profile.title") };
-  return { title: t("home.title") };
+  const transportLinks = [
+    { to: "/transport", icon: "route", label: t("nav.transport"), routes: ["transport"] },
+    {
+      to: "/request-transport",
+      icon: "plus",
+      label: t("reqTransport.title"),
+      routes: ["request-transport"],
+    },
+  ];
+  const housingLinks = [
+    {
+      to: "/accommodation",
+      icon: "building",
+      label: t("nav.accommodation"),
+      routes: ["accommodation"],
+    },
+    { to: "/custody", icon: "briefcase", label: t("nav.custody"), routes: ["custody"] },
+    {
+      to: "/requests",
+      icon: "help",
+      label: t("nav.requests"),
+      routes: ["requests", "request-detail"],
+    },
+  ];
+
+  if (name === "transport") {
+    return {
+      title: t("transport.title"),
+      links: transportLinks,
+      action: { to: "/request-transport", icon: "plus", label: t("reqTransport.title") },
+    };
+  }
+  if (name === "request-transport") {
+    return { title: t("reqTransport.title"), links: transportLinks };
+  }
+  if (name === "accommodation") {
+    return {
+      title: t("accommodation.title"),
+      links: housingLinks,
+      action: { to: "/requests", icon: "plus", label: t("requests.new") },
+    };
+  }
+  if (name === "custody") return { title: t("custody.title"), links: housingLinks };
+  if (name === "requests") return { title: t("requests.title"), links: housingLinks };
+  if (name === "request-detail") {
+    return { title: t("requests.detailTitle"), links: housingLinks };
+  }
+  if (name === "profile") return { title: t("profile.title"), links: [] };
+  return { title: t("home.title"), links: [] };
 });
 
 const tabs = [
@@ -150,6 +235,7 @@ const tabs = [
 ];
 
 const isTabActive = (tab) => tab.routes.includes(route.name);
+const isSceneLinkActive = (link) => link.routes.includes(route.name);
 
 const accessState = computed(() => {
   if (!hasToken) return "empty";
@@ -164,7 +250,4 @@ const accessMessage = computed(() => {
   if (ctx.error) return resourceErrorMessage(ctx.error, "errors.invalidLink");
   return t("errors.invalidLink");
 });
-const accessSubtitle = computed(() =>
-  accessState.value === "loading" ? t("common.loading") : accessMessage.value,
-);
 </script>

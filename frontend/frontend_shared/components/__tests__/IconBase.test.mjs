@@ -21,12 +21,15 @@ describe("IconBase", () => {
   });
 
   it("carries the standard svg wrapper attributes", () => {
-    const w = mount(IconBase, { props: { shape, size: 30, strokeWidth: 3 } });
+    const w = mount(IconBase, { props: { shape, size: 30 } });
     const svg = w.find("svg");
     expect(svg.attributes("viewBox")).toBe("0 0 24 24");
     expect(svg.attributes("width")).toBe("30");
-    expect(svg.attributes("stroke-width")).toBe("3");
+    expect(svg.attributes("stroke-width")).toBe("1.75");
     expect(svg.attributes("aria-hidden")).toBe("true");
+
+    const override = mount(IconBase, { props: { shape, strokeWidth: 3 } });
+    expect(override.find("svg").attributes("stroke-width")).toBe("3");
   });
 
   it("applies the align class only when align=true", () => {

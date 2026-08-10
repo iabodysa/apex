@@ -51,6 +51,41 @@ textarea {
   min-block-size: var(--tap-min);
 }
 
+.supervisor-skip {
+  position: fixed;
+  z-index: 100;
+  inset-block-start: var(--sp-3);
+  inset-inline-start: var(--sp-3);
+  translate: 0 -180%;
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--radius-sm);
+  background: var(--c-surface-2);
+  color: var(--c-ink);
+  font-weight: var(--fw-semibold);
+}
+
+.supervisor-skip:focus {
+  translate: 0;
+}
+
+.supervisor-main {
+  min-inline-size: 0;
+  outline: none;
+}
+
+.supervisor-main:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: var(--sp-1);
+}
+
+.supervisor-intro {
+  max-inline-size: 62ch;
+  margin: 0 0 var(--sp-4);
+  color: var(--c-ink-soft);
+  font-family: var(--font-serif);
+  line-height: 1.7;
+}
+
 .portal-brand-copy {
   min-inline-size: 0;
   display: grid;
@@ -83,15 +118,7 @@ textarea {
 }
 
 .nav-count {
-  min-inline-size: 1.5rem;
   margin-inline-start: auto;
-  padding-inline: var(--sp-2);
-  border-radius: var(--radius-pill);
-  background: var(--c-header-accent);
-  color: var(--c-header-bg);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-heading);
-  text-align: center;
 }
 
 .modal-sub {
@@ -131,7 +158,7 @@ textarea {
   display: grid;
   place-items: center;
   border: 1px solid var(--c-border-strong);
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   color: var(--c-accent-ink);
   font-size: var(--fs-sm);
   font-weight: var(--fw-heading);
@@ -415,45 +442,6 @@ textarea {
   line-height: 1.65;
 }
 
-.approval-status {
-  min-block-size: 6rem;
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  padding: var(--sp-5);
-  border-block: 1px solid var(--c-border-strong);
-  background: var(--status-plane, var(--c-surface));
-  color: var(--status-ink, var(--c-ink));
-}
-
-.approval-status[data-tone="warning"] {
-  --status-plane: var(--c-warning-bg);
-  --status-ink: var(--c-warning);
-}
-
-.approval-status[data-tone="success"] {
-  --status-plane: var(--c-success-bg);
-  --status-ink: var(--c-success);
-}
-
-.approval-status[data-tone="danger"] {
-  --status-plane: var(--c-danger-bg);
-  --status-ink: var(--c-danger);
-}
-
-.approval-status > div {
-  display: grid;
-  gap: var(--sp-1);
-}
-
-.approval-status strong {
-  font-size: var(--fs-h2);
-}
-
-.approval-status span {
-  font-size: var(--fs-sm);
-}
-
 .rejection-reason {
   margin-block-start: var(--sp-5);
   padding-inline-start: var(--sp-4);
@@ -570,7 +558,7 @@ textarea {
   display: grid;
   place-items: center;
   border: 1px solid var(--c-primary);
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: var(--c-surface);
   color: var(--c-primary);
   font-weight: var(--fw-heading);
@@ -672,9 +660,8 @@ textarea {
   min-block-size: 24rem;
   border: 1px solid var(--c-border);
   border-radius: var(--radius-lg);
-  background: linear-gradient(100deg, var(--c-surface), var(--c-border), var(--c-surface));
-  background-size: 220% 100%;
-  animation: map-loading 1.2s linear infinite;
+  background: var(--c-surface-2);
+  animation: map-loading 1.2s ease-in-out infinite alternate;
 }
 
 .map-canvas {
@@ -770,7 +757,7 @@ textarea {
   z-index: 2;
   inset: 8px;
   border: 3px solid var(--c-surface-2);
-  border-radius: 50% 50% 50% 12%;
+  border-radius: var(--radius-pill) var(--radius-pill) var(--radius-pill) 0;
   background: var(--c-primary);
   transform: rotate(45deg);
 }
@@ -778,7 +765,7 @@ textarea {
 .driver-marker .dm-pulse {
   position: absolute;
   inset: 0;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: var(--c-primary);
   opacity: 0.35;
   animation: driver-signal 1.8s infinite ease-out;
@@ -795,7 +782,8 @@ textarea {
 }
 
 @keyframes map-loading {
-  to { background-position: -220% 0; }
+  from { opacity: 0.55; }
+  to { opacity: 1; }
 }
 
 @media (hover: hover) {

@@ -10,15 +10,20 @@
       <div>
         <p>{{ t("plan.eyebrow") }}</p>
         <h1><bdi dir="auto">{{ plan.route_name || plan.name }}</bdi></h1>
-        <span>{{ plan.project || t("plan.noProject") }}</span>
+        <span><bdi dir="auto">{{ plan.project || t("plan.noProject") }}</bdi></span>
       </div>
-      <StatusLabel :label="t('approval.' + plan.approval)" :tone="statusTone" />
+      <Badge
+        :label="t('approval.' + plan.approval)"
+        :theme="statusTheme"
+        variant="subtle"
+        size="lg"
+      />
     </header>
 
     <dl class="plan-facts">
       <div>
         <dt>{{ t("approval.driver") }}</dt>
-        <dd>{{ plan.driver || t("common.none") }}</dd>
+        <dd><bdi dir="auto">{{ plan.driver || t("common.none") }}</bdi></dd>
       </div>
       <div>
         <dt>{{ t("approval.vehicle") }}</dt>
@@ -53,10 +58,9 @@
 <script setup>
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import { TabButtons } from "frappe-ui";
+import { Badge, TabButtons } from "frappe-ui";
 
 import DecisionStage from "@shared/components/DecisionStage.vue";
-import StatusLabel from "@shared/components/StatusLabel.vue";
 
 import Icon from "../Icon.vue";
 import ApprovalPanel from "./ApprovalPanel.vue";
@@ -77,8 +81,8 @@ const { t } = useI18n();
 const router = useRouter();
 
 const tripName = computed(() => props.plan.trip?.name || null);
-const statusTone = computed(
-  () => ({ Pending: "warning", Approved: "success", Rejected: "danger" })[props.plan.approval] || "neutral",
+const statusTheme = computed(
+  () => ({ Pending: "orange", Approved: "green", Rejected: "red" })[props.plan.approval] || "gray",
 );
 const backLabel = computed(() => {
   if (props.backTo === "/approvals") return t("nav.inbox");

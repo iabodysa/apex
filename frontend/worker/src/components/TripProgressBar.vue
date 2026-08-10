@@ -12,7 +12,7 @@
     >
       <div class="progress-dot">
         <svg v-if="step.reached && !step.active" class="progress-check" viewBox="0 0 16 16" fill="none">
-          <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
         <div v-else-if="step.active" class="progress-pulse"></div>
         <span v-else class="progress-num">{{ i + 1 }}</span>
@@ -68,7 +68,7 @@ const steps = computed(() => {
 .progress-dot {
   width: 24px;
   height: 24px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -131,7 +131,7 @@ const steps = computed(() => {
 .progress-pulse {
   width: 8px;
   height: 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: currentColor;
   animation: pulse-dot 1.2s ease-in-out infinite;
 }

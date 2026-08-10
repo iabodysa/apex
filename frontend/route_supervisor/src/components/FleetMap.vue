@@ -41,8 +41,8 @@
           <Alert theme="yellow" :title="t('map.unavailable')" :dismissable="false" />
           <ul v-if="visible.length" class="fleet-map-coordinates">
             <li v-for="row in visible" :key="row.dispatch_trip">
-              <b>{{ row.driver_name || t("common.none") }}</b>
-              <span>{{ row.route_name }}</span>
+              <b><bdi dir="auto">{{ row.driver_name || t("common.none") }}</bdi></b>
+              <bdi dir="auto">{{ row.route_name }}</bdi>
               <bdi v-if="row.has_position">{{ row.lat.toFixed(5) }}, {{ row.lng.toFixed(5) }}</bdi>
               <span v-else>{{ t("fleetMap.noFix") }}</span>
             </li>
@@ -73,7 +73,7 @@
           :title="t('fleetMap.emptyApi')"
           :hint="t('fleetMap.emptyApiHint')"
         >
-          <template #icon><Icon name="route" :size="20" :stroke-width="1.6" /></template>
+          <template #icon><Icon name="route" :size="20" /></template>
         </EmptyState>
 
         <EmptyState
@@ -82,7 +82,7 @@
           :title="t('fleetMap.noMatch')"
           :hint="t('fleetMap.noMatchHint')"
         >
-          <template #icon><Icon name="pin" :size="20" :stroke-width="1.6" /></template>
+          <template #icon><Icon name="pin" :size="20" /></template>
         </EmptyState>
 
         <EmptyState
@@ -91,7 +91,7 @@
           :title="t('fleetMap.noneLive')"
           :hint="t('fleetMap.noneLiveHint')"
         >
-          <template #icon><Icon name="pin" :size="20" :stroke-width="1.6" /></template>
+          <template #icon><Icon name="pin" :size="20" /></template>
         </EmptyState>
 
         <div v-else-if="state === 'loading' && !rows.length" class="fleet-map-loading" aria-hidden="true" />
@@ -101,16 +101,21 @@
         <header>
           <p>{{ t("fleetMap.eyebrow") }}</p>
           <h2>{{ t("fleetMap.signalLedger") }}</h2>
-          <span>{{ t("fleetMap.subtitle", { live: liveCount, total: visible.length }) }}</span>
+          <span><bdi dir="auto">{{ t("fleetMap.subtitle", { live: liveCount, total: visible.length }) }}</bdi></span>
         </header>
         <ul>
           <li v-for="row in visible" :key="row.dispatch_trip">
             <span class="fleet-signal-copy">
-              <strong>{{ row.driver_name || t("common.none") }}</strong>
-              <span>{{ row.route_name }}</span>
+              <strong><bdi dir="auto">{{ row.driver_name || t("common.none") }}</bdi></strong>
+              <bdi dir="auto">{{ row.route_name }}</bdi>
               <bdi v-if="row.plate">{{ row.plate }}</bdi>
             </span>
-            <StatusLabel :label="positionLabel(row)" :tone="positionTone(row)" />
+            <Badge
+              :label="positionLabel(row)"
+              :theme="positionTheme(row)"
+              variant="subtle"
+              size="lg"
+            />
           </li>
         </ul>
         <footer v-if="hasMore" class="fleet-map-more">
@@ -130,12 +135,11 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Alert, Button, FormControl } from "frappe-ui";
+import { Alert, Badge, Button, FormControl } from "frappe-ui";
 
 import EmptyState from "@shared/components/EmptyState.vue";
 import LoadError from "@shared/components/LoadError.vue";
 import MetricRibbon from "@shared/components/MetricRibbon.vue";
-import StatusLabel from "@shared/components/StatusLabel.vue";
 import { usePoll } from "@shared/usePoll.js";
 
 import Icon from "../Icon.vue";
@@ -207,7 +211,7 @@ const signalMetrics = computed(() => [
 ]);
 const positionLabel = (row) =>
   !row.has_position ? t("fleetMap.noFix") : row.stale ? t("fleetMap.staleShort") : t("common.live");
-const positionTone = (row) => (!row.has_position ? "neutral" : row.stale ? "warning" : "success");
+const positionTheme = (row) => (!row.has_position ? "gray" : row.stale ? "orange" : "green");
 
 const driverOptions = computed(() => {
   return [
@@ -504,9 +508,8 @@ onUnmounted(() => {
 .fleet-map-loading {
   position: absolute;
   inset: 0;
-  background: linear-gradient(100deg, var(--c-surface), var(--c-border), var(--c-surface));
-  background-size: 220% 100%;
-  animation: signal-loading 1.2s linear infinite;
+  background: var(--c-surface-2);
+  animation: signal-loading 1.2s ease-in-out infinite alternate;
 }
 .fleet-signal-ledger {
   min-inline-size: 0;
@@ -569,7 +572,8 @@ onUnmounted(() => {
   font-size: var(--fs-xs);
 }
 @keyframes signal-loading {
-  to { background-position: -220% 0; }
+  from { opacity: 0.55; }
+  to { opacity: 1; }
 }
 @media (min-width: 70rem) {
   .fleet-map-layout {

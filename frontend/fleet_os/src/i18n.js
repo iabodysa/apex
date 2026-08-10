@@ -56,7 +56,7 @@ const messages = {
       petrol91: "Petrol 91",
     },
     brand: {
-      name: "Fleet Operations",
+      name: "Salis",
       eyebrow: "APEX · FLEET CONTROL",
       title: "Read every fleet signal. Act on the right one.",
       subtitle: "One operational ledger for exceptions, custody, lifecycle decisions, and their evidence.",
@@ -478,7 +478,7 @@ const messages = {
       petrol91: "بنزين 91",
     },
     brand: {
-      name: "تشغيل الأسطول",
+      name: "Salis",
       eyebrow: "أبكس · تحكم الأسطول",
       title: "اقرأ إشارات الأسطول. واتخذ القرار الصحيح.",
       subtitle: "سجل تشغيل واحد للاستثناءات والعهدة وقرارات دورة المركبة وأدلتها.",

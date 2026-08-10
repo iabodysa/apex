@@ -7,7 +7,7 @@ export default {
     notAssigned: "Not assigned",
     none: "—",
     error: "Something went wrong.",
-    workerApp: "Worker App",
+    workerApp: "Masar",
     skipContent: "Skip to content",
     call: "Call",
     whatsapp: "WhatsApp",
