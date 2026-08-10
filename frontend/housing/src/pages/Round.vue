@@ -95,8 +95,27 @@
       </div>
     </div>
 
+    <TabButtons
+      v-if="due.length > 1"
+      class="cadence-filter"
+      v-model="cadence"
+      :dir="dir"
+      :buttons="cadenceButtons"
+    />
+
+    <EmptyState
+      v-if="!visibleDue.length"
+      :title="t('round.filtered.title')"
+      :hint="t('round.filtered.hint')"
+    >
+      <template #icon><Icon name="shield" :size="24" /></template>
+      <template #action>
+        <Button size="xl" variant="outline" :label="t('list.clearFilter')" @click="cadence = 'all'" />
+      </template>
+    </EmptyState>
+
     <CadenceSection
-      v-for="block in due"
+      v-for="block in visibleDue"
       :key="block.cadence"
       :block="block"
       :ratings="ratings[block.cadence] || {}"
@@ -127,7 +146,8 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
-import { Badge, Button, ErrorMessage, createResource } from "frappe-ui";
+import { useRoute, useRouter } from "vue-router";
+import { Badge, Button, ErrorMessage, TabButtons, createResource } from "frappe-ui";
 import EmptyState from "@shared/components/EmptyState.vue";
 import CadenceSection from "../components/CadenceSection.vue";
 import Icon from "../components/Icon.vue";
@@ -139,7 +159,7 @@ import { connectSafetyRealtime } from "../realtime.js";
 import { dropRoundDraft, readRoundDraft, writeRoundDraft } from "../drafts.js";
 import { building, clearBuilding, forgetMissingBuilding, localDate } from "../session";
 
-const { t, tEnum } = useI18n();
+const { t, tEnum, dir } = useI18n();
 
 const STATUS = { pass: "Good", fail: "Not Done", issue: "Poor" };
 
@@ -167,6 +187,28 @@ const awaitingLabel = computed(() =>
   awaiting.value.map((row) => tEnum("cadence", row.cadence)).join("، "),
 );
 const dueErrorMessage = computed(() => resourceErrorMessage(dueRes.error, "errors.roundFailed"));
+
+const route = useRoute();
+const router = useRouter();
+const cadence = computed({
+  get: () => {
+    const asked = String(route.query.cadence || "");
+    return due.value.some((block) => block.cadence === asked) ? asked : "all";
+  },
+  set: (value) => {
+    const query = { ...route.query };
+    if (value && value !== "all") query.cadence = value;
+    else delete query.cadence;
+    router.replace({ path: route.path, query });
+  },
+});
+const cadenceButtons = computed(() => [
+  { label: t("list.filterEverything"), value: "all" },
+  ...due.value.map((block) => ({ label: tEnum("cadence", block.cadence), value: block.cadence })),
+]);
+const visibleDue = computed(() =>
+  cadence.value === "all" ? due.value : due.value.filter((b) => b.cadence === cadence.value),
+);
 
 const totalRated = computed(() => {
   let n = 0;

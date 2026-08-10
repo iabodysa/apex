@@ -40,8 +40,15 @@
         :title="t('today.queueTitle')"
         :eyebrow="t('today.queueEyebrow')"
       >
+        <TabButtons
+          v-if="canSteer"
+          class="queue-filter"
+          v-model="scope"
+          :dir="dir"
+          :buttons="scopeButtons"
+        />
         <router-link
-          v-for="item in workItems"
+          v-for="item in visibleWork"
           :key="item.key"
           class="overview-row"
           :to="item.path"
@@ -73,7 +80,8 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-import { Alert, createResource } from "frappe-ui";
+import { useRoute, useRouter } from "vue-router";
+import { Alert, TabButtons, createResource } from "frappe-ui";
 import AsyncBoundary from "@shared/components/AsyncBoundary.vue";
 import MetricRibbon from "@shared/components/MetricRibbon.vue";
 import WorkQueue from "@shared/components/WorkQueue.vue";
@@ -92,7 +100,9 @@ import {
   todayPageState,
 } from "../today.js";
 
-const { t } = useI18n();
+const { t, dir } = useI18n();
+const route = useRoute();
+const router = useRouter();
 
 const localCountDraft = ref(0);
 const localRoundDraft = ref(0);
@@ -243,6 +253,27 @@ const workItems = computed(() => {
   }
   return items;
 });
+
+const needsAttention = computed(() => workItems.value.filter((item) => item.tone !== "quiet"));
+const canSteer = computed(
+  () => needsAttention.value.length > 0 && needsAttention.value.length < workItems.value.length,
+);
+const scope = computed({
+  get: () => (canSteer.value && route.query.scope === "attention" ? "attention" : "all"),
+  set: (value) => {
+    const query = { ...route.query };
+    if (value === "attention") query.scope = "attention";
+    else delete query.scope;
+    router.replace({ path: route.path, query });
+  },
+});
+const visibleWork = computed(() =>
+  scope.value === "attention" ? needsAttention.value : workItems.value,
+);
+const scopeButtons = computed(() => [
+  { label: t("list.filterEverything"), value: "all" },
+  { label: t("today.filterAttention", { n: needsAttention.value.length }), value: "attention" },
+]);
 
 const leadTitle = computed(() => {
   if (safetyReady.value && dueTasks.value) return t("today.leadSafety", { n: dueTasks.value });

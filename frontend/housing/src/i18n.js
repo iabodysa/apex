@@ -95,6 +95,7 @@ const messages = {
       now: "Current priority",
       queueTitle: "Work due now",
       queueEyebrow: "Selected building",
+      filterAttention: "Needs you ({n})",
       occupied: "Occupied beds",
       available: "Available beds",
       arrivals: "Expected arrivals",
@@ -123,6 +124,7 @@ const messages = {
     },
     list: {
       filterAll: "All items",
+      filterEverything: "All",
       filterNeedsCount: "Needs count / variance",
       noRoom: "No specific room",
       count: "{n} items",
@@ -411,6 +413,10 @@ const messages = {
         subtitle: "Nothing is due for this building right now. Great work.",
         switch: "Check another building",
       },
+      filtered: {
+        title: "Nothing due in this cadence",
+        hint: "Other cadences are still due. Clear the filter to see them.",
+      },
       awaiting: {
         title: "Recorded, waiting for a supervisor",
         hint: "You recorded {list} for this period. A supervisor closes it; nothing more is needed from you.",
@@ -560,6 +566,7 @@ const messages = {
       now: "الأولوية الحالية",
       queueTitle: "الأعمال المستحقة الآن",
       queueEyebrow: "المبنى المحدد",
+      filterAttention: "يحتاجك ({n})",
       occupied: "الأسرّة المشغولة",
       available: "الأسرّة الشاغرة",
       arrivals: "الوصول المتوقع",
@@ -588,6 +595,7 @@ const messages = {
     },
     list: {
       filterAll: "كل الأصناف",
+      filterEverything: "الكل",
       filterNeedsCount: "بحاجة للجرد / فرق",
       noRoom: "بدون غرفة محددة",
       count: "عدد الأصناف {n}",
@@ -873,6 +881,10 @@ const messages = {
         title: "جميع جولات السلامة محدّثة",
         subtitle: "لا يوجد مستحق لهذا المبنى حالياً. عمل رائع.",
         switch: "افحص مبنى آخر",
+      },
+      filtered: {
+        title: "ما فيه مستحق في هذي الوتيرة",
+        hint: "فيه وتيرات ثانية مستحقة. امسح الفلتر عشان تشوفها.",
       },
       awaiting: {
         title: "مسجّلة وتنتظر المشرف",
