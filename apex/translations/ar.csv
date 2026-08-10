@@ -2656,6 +2656,7 @@ My Unread Notifications,إشعاراتي غير المقروءة
 My Work,مهامي
 My Work Center,مركز مهامي
 N/A,لا ينطبق
+No building granted,لا يوجد مبنى ممنوح
 NOT a login — drivers open the portal with a personal barcode link. Mirrored from the Employee and kept only so desk Notification rules can name a User and support tickets have an author. Empty is normal.,ليس حساب دخول — يفتح السائق البوابة برابط الباركود الخاص به. يُنقل من الموظف المرتبط ويُحتفظ به فقط لتتمكن قواعد الإشعارات في سطح المكتب من تحديد مستخدم، ولتكون لتذاكر الدعم جهة منشئة. وتركه فارغاً أمر طبيعي.
 Name,الاسم
 Naming Series,سلسلة الترقيم
@@ -5264,6 +5265,7 @@ Written Off,مشطوب
 Written by the app,يكتبها التطبيق
 Written record of who authorized this request outside the system. Nothing in the app reads this field and a grant submits whether it is filled in or left empty.,سجل يوضح من اعتمد هذا الطلب خارج النظام. لا يستخدم التطبيق هذا الحقل، ويمكن اعتماد منح الصلاحية سواء عُبئ أو تُرك فارغًا.
 Wrong Trip,رحلة خاطئة
+"Your account is not granted any building yet, so there is nothing here it may act on. Ask an administrator to grant you a building.",حسابك ما مُنح أي مبنى بعد، فما فيه شي هنا يقدر يشتغل عليه. اطلب من المسؤول يمنحك مبنى.
 "YYYY-MM, e.g. 2026-05",YYYY-MM، مثال: 2026-05
 Year,السنة
 Yes,نعم

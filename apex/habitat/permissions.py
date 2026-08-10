@@ -42,6 +42,7 @@ working, and none of them has to be edited when the rule changes.
 """
 
 import frappe
+from frappe import _
 
 from apex.apex_core.utils import permission_scope
 
@@ -103,6 +104,31 @@ def _allowed_buildings_for(user, doctype):
 def _building_is_unscoped(user):
     """True when the user is the Administrator or holds a building-oversight role."""
     return permission_scope.is_unscoped(user, HOUSING_UNSCOPED_ROLES)
+
+
+def assert_building_scope(user=None, doctype=None):
+    """Refuse a building-scoped user who holds NO building, naming that as the cause.
+
+    An empty allowed set can never match any document, so every action fails with
+    Frappe's generic 'not permitted for <doctype> - <docname>' — which names a docname
+    that may not even exist yet and sends the reader hunting for missing data or a
+    broken DocPerm. The scope layer is the only place that knows the real reason, so
+    it says it here. Callers invoke this BEFORE acting; the deny-only hook stays
+    deny-only, since a permission hook that throws would break list rendering.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return
+    if _allowed_buildings_for(user, doctype):
+        return
+    frappe.throw(
+        _(
+            "Your account is not granted any building yet, so there is nothing here it"
+            " may act on. Ask an administrator to grant you a building."
+        ),
+        frappe.PermissionError,
+        title=_("No building granted"),
+    )
 
 
 def _building_condition(user=None, column="`building`", doctype=None):
