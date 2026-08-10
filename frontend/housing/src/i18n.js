@@ -129,6 +129,7 @@ const messages = {
       safetyHint: "Due rounds, evidence, and recorded outcomes.",
     },
     list: {
+      title: "Items to count",
       filterAll: "All items",
       filterEverything: "All",
       filterNeedsCount: "Needs count / variance",
@@ -623,6 +624,7 @@ const messages = {
       safetyHint: "الجولات المستحقة والإثبات والنتائج المسجلة.",
     },
     list: {
+      title: "أصناف الجرد",
       filterAll: "كل الأصناف",
       filterEverything: "الكل",
       filterNeedsCount: "بحاجة للجرد / فرق",

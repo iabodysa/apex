@@ -1,127 +1,128 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-    <div class="section-head">
-        <h2>{{ t("arrivals.expected") }}</h2>
-        <Badge
-            theme="green"
-            size="lg"
-            :label="t('arrivals.arrived', { arrived: manifest.arrived, total: manifest.total })"
-        />
-        <Button
-            variant="ghost"
-            size="md"
-            :label="t('common.refresh')"
-            @click="expectedRes.reload()"
-        >
-            <template #icon><Icon name="refresh" :size="18" /></template>
-        </Button>
-    </div>
-
-    <ListSkeleton
-        v-if="expectedRes.loading && !manifest.total"
-        :rows="4"
-        :label="t('common.loading')"
-    />
-
-    <LoadError
-        v-else-if="expectedRes.error"
-        :title="t('errors.arrivalsFailed')"
-        :detail="expectedErrorMessage"
-        :hint="t('errors.retryHint')"
-        :retry-label="t('common.retry')"
+    <PageShell
+        :state="expectedState"
+        :title="t('arrivals.expected')"
+        :loading-label="t('common.loading')"
+        :skeleton-rows="4"
+        :error-title="t('errors.arrivalsFailed')"
+        :error-detail="expectedErrorMessage"
+        :empty-title="t('arrivals.expectedEmpty')"
         @retry="expectedRes.reload()"
-    />
-
-    <EmptyState v-else-if="!manifest.workers.length" :title="t('arrivals.expectedEmpty')">
-        <template #icon><Icon name="calendar" :size="24" /></template>
-    </EmptyState>
-
-    <ul v-else class="stack-tight">
-        <li v-for="row in manifest.workers" :key="row.row" class="row-card">
-            <div class="row-body">
-                <b>{{ row.worker_name }}</b>
-                <small
-                    >{{ row.passport_number }} · {{ row.nationality || t("common.none") }}</small
-                >
-            </div>
-            <span v-if="row.arrived" class="pill pill-success">{{
-                t("arrivals.registered")
-            }}</span>
-            <Button
-                v-else
+    >
+        <template #actions>
+            <Badge
+                theme="green"
                 size="lg"
-                variant="subtle"
-                :disabled="!canRegister"
-                :label="t('arrivals.registerCta')"
-                @click="openRegister(row)"
-            />
-        </li>
-    </ul>
-    <p v-if="manifest.workers.length && !canRegister" class="hint">
-        {{ t("access.needRegister") }}
-    </p>
-
-    <div class="section-head">
-        <h2>{{ t("arrivals.searchWorker") }}</h2>
-        <Button
-            size="lg"
-            variant="outline"
-            :disabled="!canRegister"
-            :label="t('arrivals.registerTitle')"
-            @click="openRegister(null)"
-        >
-            <template #prefix><Icon name="plus" :size="18" /></template>
-        </Button>
-    </div>
-    <p v-if="!canRegister" class="hint">{{ t("access.needRegister") }}</p>
-
-    <FormControl type="text" size="lg" :label="t('common.search')" v-model="query" />
-
-    <ul v-if="workers.length" class="stack-tight">
-        <li v-for="w in workers" :key="w.party_type + w.party" class="row-card">
-            <div class="row-body">
-                <b>{{ w.label || w.party }}</b>
-                <small>{{ tEnum("custody", w.party_type) }}</small>
-            </div>
-            <Button
-                size="lg"
-                variant="subtle"
-                :label="t('arrivals.houseCta')"
-                @click="houseWorker(w)"
+                :label="t('arrivals.arrived', { arrived: manifest.arrived, total: manifest.total })"
             />
             <Button
-                v-if="canIssueCustody"
-                size="lg"
-                variant="subtle"
-                :label="t('arrivals.custodyCta')"
-                @click="issueCustody(w)"
-            />
-            <Button
-                size="lg"
                 variant="ghost"
-                :label="t('arrivals.slipCta')"
-                :loading="busy === 'slip'"
-                @click="showSlip(w)"
-            />
-            <Button
-                v-if="w.party_type === 'Employee'"
-                size="lg"
-                variant="ghost"
-                :label="t('arrivals.linkCta')"
-                :loading="busy === 'link'"
-                @click="issueLink(w)"
-            />
-        </li>
-    </ul>
+                size="md"
+                :label="t('common.refresh')"
+                @click="expectedRes.reload()"
+            >
+                <template #icon><Icon name="refresh" :size="18" /></template>
+            </Button>
+        </template>
+
+        <template #empty-icon><Icon name="calendar" :size="24" /></template>
+
+        <ul class="stack-tight">
+            <li v-for="row in manifest.workers" :key="row.row" class="row-card">
+                <div class="row-body">
+                    <b>{{ row.worker_name }}</b>
+                    <small
+                        >{{ row.passport_number }} · {{ row.nationality || t("common.none") }}</small
+                    >
+                </div>
+                <span v-if="row.arrived" class="pill pill-success">{{
+                    t("arrivals.registered")
+                }}</span>
+                <Button
+                    v-else
+                    size="lg"
+                    variant="subtle"
+                    :disabled="!canRegister"
+                    :label="t('arrivals.registerCta')"
+                    @click="openRegister(row)"
+                />
+            </li>
+        </ul>
+        <p v-if="!canRegister" class="hint">
+            {{ t("access.needRegister") }}
+        </p>
+    </PageShell>
+
     <!-- A failed search is NOT an empty one. Rendering searchEmpty for both told the clerk
          no worker by that name exists, so they retyped it, tried the passport number, and
          went and reported the worker missing from the system. -->
-    <p v-else-if="searchRes.error" class="status-note status-err">
-        {{ resourceErrorMessage(searchRes.error, "errors.searchFailed") }}
-    </p>
-    <p v-else-if="query.trim() && !searchRes.loading" class="hint">
-        {{ t("arrivals.searchEmpty") }}
-    </p>
+    <PageShell
+        :state="searchState"
+        :title="t('arrivals.searchWorker')"
+        :loading-label="t('common.loading')"
+        :skeleton-rows="3"
+        :error-title="t('errors.searchFailed')"
+        :error-detail="searchErrorMessage"
+        :empty-title="t('arrivals.searchEmpty')"
+        @retry="searchRes.reload()"
+    >
+        <template #actions>
+            <Button
+                size="lg"
+                variant="outline"
+                :disabled="!canRegister"
+                :label="t('arrivals.registerTitle')"
+                @click="openRegister(null)"
+            >
+                <template #prefix><Icon name="plus" :size="18" /></template>
+            </Button>
+        </template>
+
+        <template #toolbar>
+            <p v-if="!canRegister" class="hint">{{ t("access.needRegister") }}</p>
+            <FormControl type="text" size="lg" :label="t('common.search')" v-model="query" />
+        </template>
+
+        <template #empty-icon><Icon name="search" :size="24" /></template>
+
+        <ul v-if="workers.length" class="stack-tight">
+            <li v-for="w in workers" :key="w.party_type + w.party" class="row-card">
+                <div class="row-body">
+                    <b>{{ w.label || w.party }}</b>
+                    <small>{{ tEnum("custody", w.party_type) }}</small>
+                </div>
+                <Button
+                    size="lg"
+                    variant="subtle"
+                    :label="t('arrivals.houseCta')"
+                    @click="houseWorker(w)"
+                />
+                <Button
+                    v-if="canIssueCustody"
+                    size="lg"
+                    variant="subtle"
+                    :label="t('arrivals.custodyCta')"
+                    @click="issueCustody(w)"
+                />
+                <Button
+                    size="lg"
+                    variant="ghost"
+                    :label="t('arrivals.slipCta')"
+                    :loading="busy === 'slip'"
+                    @click="showSlip(w)"
+                />
+                <Button
+                    v-if="w.party_type === 'Employee'"
+                    size="lg"
+                    variant="ghost"
+                    :label="t('arrivals.linkCta')"
+                    :loading="busy === 'link'"
+                    @click="issueLink(w)"
+                />
+            </li>
+        </ul>
+    </PageShell>
 
     <Dialog v-model="registerOpen" :options="{ title: t('arrivals.registerTitle'), size: 'lg' }">
         <template #body-content>
@@ -240,10 +241,8 @@ import {
     toast,
 } from "frappe-ui";
 import ArrivalCard from "../components/ArrivalCard.vue";
-import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "../components/Icon.vue";
-import ListSkeleton from "@shared/components/ListSkeleton.vue";
-import LoadError from "../components/LoadError.vue";
+import PageShell from "../components/PageShell.vue";
 import { call } from "@shared/call";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { can, hasSection } from "../portal.js";
@@ -317,6 +316,23 @@ const expectedErrorMessage = computed(() =>
 );
 
 const workers = computed(() => (query.value.trim() ? searchRes.data || [] : []));
+
+const expectedState = computed(() => {
+    if (expectedRes.loading && !manifest.value.total) return "loading";
+    if (expectedRes.error) return "error";
+    if (!manifest.value.workers.length) return "empty";
+    return "ready";
+});
+
+const searchErrorMessage = computed(() =>
+    resourceErrorMessage(searchRes.error, "errors.searchFailed"),
+);
+const searchState = computed(() => {
+    if (workers.value.length) return "ready";
+    if (searchRes.error) return "error";
+    if (searchRes.loading && query.value.trim()) return "loading";
+    return query.value.trim() ? "empty" : "ready";
+});
 
 function fetchAll() {
     if (building.value) expectedRes.fetch();

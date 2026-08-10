@@ -1,79 +1,100 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-    <header class="custody-head">
-        <h1>{{ t("custody.jobTitle") }}</h1>
-        <p>{{ balanceLine }}</p>
-    </header>
-
-    <TabButtons
-        class="filter"
-        v-model="mode"
-        :dir="dir"
-        :buttons="[
-            { label: t('custody.issue'), value: 'issue' },
-            { label: t('custody.return'), value: 'return' },
-        ]"
-    />
-
-    <section v-if="!party" class="stack">
-        <h2 class="section-title">{{ t("custody.pickWorker") }}</h2>
-        <FormControl
-            type="select"
-            size="lg"
-            :label="t('custody.workerType')"
-            :options="partyTypeOptions"
-            v-model="partyType"
-        />
-        <ScanField @code="onScan" />
-        <FormControl type="text" size="lg" :label="t('custody.searchWorker')" v-model="query" />
-        <ul v-if="matches.length" class="stack-tight">
-            <li v-for="row in matches" :key="row.name">
-                <Button
-                    class="wide"
-                    size="xl"
-                    variant="outline"
-                    :label="row.label"
-                    @click="selectParty(row.partyType, row.name, row.label)"
-                />
-            </li>
-        </ul>
-        <p v-else-if="searchRes.error" class="status-note status-err">
-            {{ resourceErrorMessage(searchRes.error, "errors.searchFailed") }}
-        </p>
-        <p v-else-if="query.trim() && !searchRes.loading" class="hint">
-            {{ t("arrivals.searchEmpty") }}
-        </p>
-        <p v-if="scanError" class="status-note status-err">{{ scanError }}</p>
-    </section>
-
-    <template v-else>
-        <div class="section-head">
-            <h2>
-                {{ party.party_name }}
-                <Badge theme="gray" size="sm" :label="tEnum('custody', party.party_type)" />
-            </h2>
+    <PageShell
+        :state="pageState"
+        :title="headTitle"
+        :subtitle="balanceLine"
+        :loading-label="t('common.loading')"
+        :skeleton-rows="5"
+        :error-title="t('errors.custodyFailed')"
+        :error-detail="loadError"
+        :empty-title="emptyTitle"
+        :dock="!!party"
+        @retry="reload"
+    >
+        <template v-if="party" #actions>
+            <Badge theme="gray" size="sm" :label="tEnum('custody', party.party_type)" />
             <Button variant="ghost" size="md" :label="t('common.change')" @click="clearParty">
                 <template #icon><Icon name="user" :size="18" /></template>
             </Button>
-        </div>
+        </template>
 
-        <ListSkeleton v-if="loading" :rows="5" :label="t('common.loading')" />
+        <template #toolbar>
+            <TabButtons
+                class="filter"
+                v-model="mode"
+                :dir="dir"
+                :buttons="[
+                    { label: t('custody.issue'), value: 'issue' },
+                    { label: t('custody.return'), value: 'return' },
+                ]"
+            />
+        </template>
 
-        <LoadError
-            v-else-if="loadError"
-            :title="t('errors.custodyFailed')"
-            :detail="loadError"
-            :hint="t('errors.retryHint')"
-            :retry-label="t('common.retry')"
-            @retry="reload"
-        />
+        <template #empty-icon><Icon :name="emptyIcon" :size="24" /></template>
+
+        <template #dock>
+            <ErrorMessage v-if="actionError" class="dock-error" :message="actionError" />
+            <Button
+                class="dock-btn"
+                size="2xl"
+                variant="solid"
+                theme="green"
+                :disabled="!cartCount || (mode === 'issue' ? !canIssue : !canReturn)"
+                :loading="!!busy"
+                :loading-text="mode === 'issue' ? t('custody.issuing') : t('custody.returning')"
+                :label="
+                    mode === 'issue'
+                        ? t('custody.issueCta', { n: cartCount })
+                        : t('custody.returnCta', { n: cartCount })
+                "
+                @click="commit"
+            >
+                <template #prefix><Icon name="send" :size="20" /></template>
+            </Button>
+            <p class="dock-hint">{{ dockHint }}</p>
+        </template>
+
+        <section v-if="!party" class="stack">
+            <h2 class="section-title">{{ t("custody.pickWorker") }}</h2>
+            <FormControl
+                type="select"
+                size="lg"
+                :label="t('custody.workerType')"
+                :options="partyTypeOptions"
+                v-model="partyType"
+            />
+            <ScanField @code="onScan" />
+            <FormControl type="text" size="lg" :label="t('custody.searchWorker')" v-model="query" />
+
+            <PageShell
+                :state="searchState"
+                :loading-label="t('common.loading')"
+                :skeleton-rows="3"
+                :error-title="t('errors.searchFailed')"
+                :error-detail="searchErrorMessage"
+                :empty-title="t('arrivals.searchEmpty')"
+                @retry="searchRes.reload()"
+            >
+                <template #empty-icon><Icon name="search" :size="24" /></template>
+                <ul v-if="matches.length" class="stack-tight">
+                    <li v-for="row in matches" :key="row.name">
+                        <Button
+                            class="wide"
+                            size="xl"
+                            variant="outline"
+                            :label="row.label"
+                            @click="selectParty(row.partyType, row.name, row.label)"
+                        />
+                    </li>
+                </ul>
+            </PageShell>
+
+            <p v-if="scanError" class="status-note status-err">{{ scanError }}</p>
+        </section>
 
         <template v-else-if="mode === 'issue'">
-            <EmptyState v-if="!articles.length" :title="t('custody.catalogEmpty')">
-                <template #icon><Icon name="box" :size="24" /></template>
-            </EmptyState>
-
-            <ul v-else class="tiles">
+            <ul class="tiles">
                 <li v-for="art in articles" :key="art.article" class="tile">
                     <div class="tile-head">
                         <img v-if="art.image" class="tile-img" :src="art.image" alt="" />
@@ -104,11 +125,7 @@
         </template>
 
         <template v-else>
-            <EmptyState v-if="!heldLines.length" :title="t('custody.holdingEmpty')">
-                <template #icon><Icon name="check-circle" :size="24" /></template>
-            </EmptyState>
-
-            <ul v-else class="tiles">
+            <ul class="tiles">
                 <li v-for="line in heldLines" :key="lineKey(line)" class="tile">
                     <div class="tile-head">
                         <span class="tile-img tile-img-blank"><Icon name="box" :size="18" /></span>
@@ -140,29 +157,7 @@
                 </li>
             </ul>
         </template>
-
-        <div class="hz-dock">
-            <ErrorMessage v-if="actionError" class="dock-error" :message="actionError" />
-            <Button
-                class="dock-btn"
-                size="2xl"
-                variant="solid"
-                theme="green"
-                :disabled="!cartCount || (mode === 'issue' ? !canIssue : !canReturn)"
-                :loading="!!busy"
-                :loading-text="mode === 'issue' ? t('custody.issuing') : t('custody.returning')"
-                :label="
-                    mode === 'issue'
-                        ? t('custody.issueCta', { n: cartCount })
-                        : t('custody.returnCta', { n: cartCount })
-                "
-                @click="commit"
-            >
-                <template #prefix><Icon name="send" :size="20" /></template>
-            </Button>
-            <p class="dock-hint">{{ dockHint }}</p>
-        </div>
-    </template>
+    </PageShell>
 </template>
 
 <script setup>
@@ -178,10 +173,8 @@ import {
     createResource,
     toast,
 } from "frappe-ui";
-import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "../components/Icon.vue";
-import ListSkeleton from "@shared/components/ListSkeleton.vue";
-import LoadError from "../components/LoadError.vue";
+import PageShell from "../components/PageShell.vue";
 import ScanField from "../components/ScanField.vue";
 import Stepper from "../components/Stepper.vue";
 import { call } from "@shared/call";
@@ -282,6 +275,30 @@ const dockHint = computed(() => {
     if (mode.value === "return" && !canReturn) return t("access.needReturn");
     if (!cartCount.value) return t("custody.cartEmpty");
     return t("custody.cartLines", { n: cartCount.value });
+});
+
+const headTitle = computed(() => (party.value ? party.value.party_name : t("custody.jobTitle")));
+const emptyTitle = computed(() =>
+    mode.value === "issue" ? t("custody.catalogEmpty") : t("custody.holdingEmpty"),
+);
+const emptyIcon = computed(() => (mode.value === "issue" ? "box" : "check-circle"));
+
+const pageState = computed(() => {
+    if (!party.value) return "ready";
+    if (loading.value) return "loading";
+    if (loadError.value) return "error";
+    const rows = mode.value === "issue" ? articles.value : heldLines.value;
+    return rows.length ? "ready" : "empty";
+});
+
+const searchErrorMessage = computed(() =>
+    resourceErrorMessage(searchRes.error, "errors.searchFailed"),
+);
+const searchState = computed(() => {
+    if (matches.value.length) return "ready";
+    if (searchRes.error) return "error";
+    if (searchRes.loading && query.value.trim()) return "loading";
+    return query.value.trim() ? "empty" : "ready";
 });
 
 function lineKey(line) {
@@ -450,21 +467,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.custody-head {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
-}
-.custody-head h1 {
-    font-size: var(--fs-h2);
-    font-weight: var(--fw-semibold);
-    color: var(--c-ink);
-    line-height: 1.3;
-}
-.custody-head p {
-    font-size: var(--fs-sm);
-    color: var(--c-muted);
-}
 .filter {
     align-self: start;
 }

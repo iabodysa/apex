@@ -1,31 +1,17 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <ListSkeleton v-if="gridRes.loading && !grid" :rows="6" :label="t('beds.loadingLabel')" />
-
-  <LoadError
-    v-else-if="gridRes.error"
-    :title="t('errors.gridFailed')"
-    :detail="gridErrorMessage"
-    :hint="t('errors.retryHint')"
-    :retry-label="t('common.retry')"
-    @retry="gridRes.reload()"
-  />
-
-  <EmptyState
-    v-else-if="!hasBeds"
-    :title="t('building.emptyBoardTitle')"
-    :hint="t('building.emptyBoardHint')"
+  <PageShell
+    :state="pageState"
+    :loading-label="t('beds.loadingLabel')"
+    :skeleton-rows="6"
+    :error-title="t('errors.gridFailed')"
+    :error-detail="gridErrorMessage"
+    :empty-title="t('building.emptyBoardTitle')"
+    :empty-hint="t('building.emptyBoardHint')"
+    @retry="reloadAll"
   >
-    <template #icon><Icon name="bed" :size="24" /></template>
-    <template #action>
-      <Button size="xl" variant="outline" :label="t('empty.switch')" @click="onChangeBuilding" />
-    </template>
-  </EmptyState>
-
-  <template v-else>
-    <div class="section-head">
-      <h2>{{ t("beds.title") }}</h2>
-      <Badge theme="green" size="lg" :label="summaryLabel" />
+    <template #actions>
+      <Badge v-if="grid" theme="green" size="lg" :label="summaryLabel" />
       <Badge
         v-if="openRequests"
         theme="orange"
@@ -42,7 +28,12 @@
       <Button variant="ghost" size="md" :label="t('common.refresh')" @click="reloadAll">
         <template #icon><Icon name="refresh" :size="18" /></template>
       </Button>
-    </div>
+    </template>
+
+    <template #empty-icon><Icon name="bed" :size="24" /></template>
+    <template #empty-action>
+      <Button size="xl" variant="outline" :label="t('empty.switch')" @click="onChangeBuilding" />
+    </template>
 
     <BedGrid
       :grid="grid"
@@ -208,7 +199,7 @@
         </div>
       </template>
     </Dialog>
-  </template>
+  </PageShell>
 </template>
 
 <script setup>
@@ -224,11 +215,9 @@ import {
   createResource,
   toast,
 } from "frappe-ui";
-import EmptyState from "@shared/components/EmptyState.vue";
 import BedGrid from "../components/BedGrid.vue";
 import Icon from "../components/Icon.vue";
-import ListSkeleton from "@shared/components/ListSkeleton.vue";
-import LoadError from "../components/LoadError.vue";
+import PageShell from "../components/PageShell.vue";
 import { call } from "@shared/call";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { can, hasSection } from "../portal.js";
@@ -290,6 +279,13 @@ const grid = computed(() => gridRes.data || null);
 const gridErrorMessage = computed(() => resourceErrorMessage(gridRes.error, "errors.gridFailed"));
 const hasBeds = computed(() => !!(grid.value && grid.value.floors && grid.value.floors.length));
 const openRequests = computed(() => (requestsRes.data && requestsRes.data.open_requests) || 0);
+
+const pageState = computed(() => {
+  if (gridRes.loading && !grid.value) return "loading";
+  if (gridRes.error) return "error";
+  if (!hasBeds.value) return "empty";
+  return "ready";
+});
 
 const summaryLabel = computed(() => {
   const s = (grid.value && grid.value.summary) || {};

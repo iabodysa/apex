@@ -1,24 +1,21 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <ListSkeleton v-if="invRes.loading && !rows.length" :rows="6" :label="t('list.loadingLabel')" />
-
-  <LoadError
-    v-else-if="invRes.error"
-    :title="t('errors.loadFailed')"
-    :detail="invErrorMessage"
-    :hint="t('errors.retryHint')"
-    :retry-label="t('common.retry')"
+  <PageShell
+    :state="pageState"
+    :title="t('list.title')"
+    :loading-label="t('list.loadingLabel')"
+    :skeleton-rows="6"
+    :error-title="t('errors.loadFailed')"
+    :error-detail="invErrorMessage"
+    :empty-title="t('empty.title')"
+    :empty-hint="t('empty.subtitle')"
     @retry="invRes.reload()"
-  />
-
-  <EmptyState v-else-if="!rows.length" :title="t('empty.title')" :hint="t('empty.subtitle')">
-    <template #icon><Icon name="package" :size="24" /></template>
-    <template #action>
+  >
+    <template #empty-icon><Icon name="package" :size="24" /></template>
+    <template #empty-action>
       <Button size="xl" variant="outline" :label="t('empty.switch')" @click="onChangeBuilding" />
     </template>
-  </EmptyState>
 
-  <template v-else>
     <div class="hz-split">
       <div class="hz-split-list">
         <TabButtons
@@ -84,7 +81,7 @@
       </aside>
     </div>
 
-    <div class="hz-dock">
+    <template #dock>
       <ErrorMessage v-if="submitError" class="dock-error" :message="submitError" />
       <Button
         class="dock-btn"
@@ -102,7 +99,7 @@
       <p class="dock-hint">
         {{ dockHint }}
       </p>
-    </div>
+    </template>
 
     <Dialog
       v-if="!desktop"
@@ -137,7 +134,7 @@
         />
       </template>
     </Dialog>
-  </template>
+  </PageShell>
 </template>
 
 <script setup>
@@ -148,8 +145,7 @@ import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "../components/Icon.vue";
 import CountItemRow from "../components/CountItemRow.vue";
 import CountItemEditor from "../components/CountItemEditor.vue";
-import ListSkeleton from "@shared/components/ListSkeleton.vue";
-import LoadError from "../components/LoadError.vue";
+import PageShell from "../components/PageShell.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { useDesktop } from "@shared/useBreakpoint.js";
 import { can } from "../portal.js";
@@ -178,6 +174,13 @@ const submitRes = createResource({
 const rows = computed(() => (invRes.data && invRes.data.items) || []);
 const conditions = computed(() => (invRes.data && invRes.data.conditions) || []);
 const invErrorMessage = computed(() => resourceErrorMessage(invRes.error, "errors.loadFailed"));
+
+const pageState = computed(() => {
+  if (invRes.loading && !rows.value.length) return "loading";
+  if (invRes.error) return "error";
+  if (!rows.value.length) return "empty";
+  return "ready";
+});
 
 const selected = computed(() => route.params.item || "");
 const selectedRow = computed(() => rows.value.find((r) => r.name === selected.value) || null);

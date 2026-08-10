@@ -1,27 +1,22 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <ListSkeleton v-if="gridRes.loading && !grid" :rows="6" :label="t('beds.loadingLabel')" />
-
-  <LoadError
-    v-else-if="gridRes.error"
-    :title="t('errors.gridFailed')"
-    :detail="gridErrorMessage"
-    :hint="t('errors.retryHint')"
-    :retry-label="t('common.retry')"
+  <PageShell
+    :state="pageState"
+    :loading-label="t('beds.loadingLabel')"
+    :skeleton-rows="6"
+    :error-title="t('errors.gridFailed')"
+    :error-detail="gridErrorMessage"
+    :empty-title="t('beds.empty')"
+    :dock="!!selection"
     @retry="gridRes.reload()"
-  />
-
-  <EmptyState v-else-if="!hasBeds" :title="t('beds.empty')">
-    <template #icon><Icon name="bed" :size="24" /></template>
-  </EmptyState>
-
-  <template v-else>
-    <div class="section-head">
-      <h2>{{ t("transfer.title") }}</h2>
+  >
+    <template #actions>
       <Button variant="ghost" size="md" :label="t('common.refresh')" @click="gridRes.reload()">
         <template #icon><Icon name="refresh" :size="18" /></template>
       </Button>
-    </div>
+    </template>
+
+    <template #empty-icon><Icon name="bed" :size="24" /></template>
 
     <p class="status-note" :class="selection ? 'status-ok' : 'status-warn'">
       {{ selection ? t("transfer.selected", { name: selection.name }) : t("transfer.pickSource") }}
@@ -37,7 +32,7 @@
       @bed="onBed"
     />
 
-    <div v-if="selection" class="hz-dock">
+    <template #dock>
       <Button
         class="dock-btn"
         size="xl"
@@ -45,7 +40,7 @@
         :label="t('transfer.clear')"
         @click="setSelection(null)"
       />
-    </div>
+    </template>
 
     <Dialog
       :modelValue="!!target"
@@ -81,17 +76,15 @@
         </div>
       </template>
     </Dialog>
-  </template>
+  </PageShell>
 </template>
 
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { Button, Dialog, ErrorMessage, FormControl, createResource, toast } from "frappe-ui";
-import EmptyState from "@shared/components/EmptyState.vue";
 import BedGrid from "../components/BedGrid.vue";
 import Icon from "../components/Icon.vue";
-import ListSkeleton from "@shared/components/ListSkeleton.vue";
-import LoadError from "../components/LoadError.vue";
+import PageShell from "../components/PageShell.vue";
 import { call } from "@shared/call";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { can } from "../portal.js";
@@ -115,6 +108,13 @@ const gridRes = createResource({
 const grid = computed(() => gridRes.data || null);
 const gridErrorMessage = computed(() => resourceErrorMessage(gridRes.error, "errors.gridFailed"));
 const hasBeds = computed(() => !!(grid.value && grid.value.floors && grid.value.floors.length));
+
+const pageState = computed(() => {
+  if (gridRes.loading && !grid.value) return "loading";
+  if (gridRes.error) return "error";
+  if (!hasBeds.value) return "empty";
+  return "ready";
+});
 
 const moveTitle = computed(() =>
   selection.value ? t("transfer.cta", { name: selection.value.name }) : "",

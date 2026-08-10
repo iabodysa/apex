@@ -1,45 +1,39 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <ListSkeleton
-    v-if="deliveriesRes.loading && !deliveries.length"
-    :rows="5"
-    :label="t('delivery.loadingLabel')"
-  />
-
-  <LoadError
-    v-else-if="deliveriesRes.error"
-    :title="t('errors.deliveriesFailed')"
-    :detail="loadErrorMessage"
-    :hint="t('errors.retryHint')"
-    :retry-label="t('common.retry')"
+  <PageShell
+    :state="pageState"
+    :title="t('delivery.listTitle')"
+    :loading-label="t('delivery.loadingLabel')"
+    :skeleton-rows="5"
+    :error-title="t('errors.deliveriesFailed')"
+    :error-detail="loadErrorMessage"
+    :empty-title="t('delivery.emptyTitle')"
+    :empty-hint="t('delivery.emptySubtitle')"
+    :dock="!!selectedDelivery && desktop"
     @retry="reloadDeliveries()"
-  />
-
-  <EmptyState
-    v-else-if="!deliveries.length"
-    :title="t('delivery.emptyTitle')"
-    :hint="t('delivery.emptySubtitle')"
   >
-    <template #icon><Icon name="check-circle" :size="24" /></template>
-    <template #action>
+    <template #actions>
+      <Badge
+        v-if="deliveries.length"
+        theme="orange"
+        size="lg"
+        :label="t('delivery.count', { n: deliveryCount })"
+      />
+      <Badge
+        v-if="hasMoreThanShown"
+        theme="gray"
+        size="lg"
+        :label="t('delivery.showingOldest', { n: deliveries.length })"
+      />
+    </template>
+
+    <template #empty-icon><Icon name="check-circle" :size="24" /></template>
+    <template #empty-action>
       <Button size="xl" variant="outline" :label="t('common.refresh')" @click="reloadDeliveries()" />
     </template>
-  </EmptyState>
 
-  <template v-else>
     <div class="hz-split">
       <div class="hz-split-list">
-        <div class="list-head">
-          <h2 class="list-title">{{ t("delivery.listTitle") }}</h2>
-          <Badge theme="orange" size="lg" :label="t('delivery.count', { n: deliveryCount })" />
-          <Badge
-            v-if="hasMoreThanShown"
-            theme="gray"
-            size="lg"
-            :label="t('delivery.showingOldest', { n: deliveries.length })"
-          />
-        </div>
-
         <DeliveryRow
           v-for="del in deliveries"
           :key="del.name"
@@ -61,7 +55,7 @@
       </aside>
     </div>
 
-    <div v-if="selectedDelivery && desktop" class="hz-dock">
+    <template #dock>
       <Button
         v-if="selectedDelivery.status === 'Pending Exits'"
         class="dock-btn"
@@ -106,7 +100,7 @@
       </template>
 
       <p class="dock-hint">{{ stepHint }}</p>
-    </div>
+    </template>
 
     <Dialog
       v-if="!desktop"
@@ -223,7 +217,7 @@
         </div>
       </template>
     </Dialog>
-  </template>
+  </PageShell>
 </template>
 
 <script setup>
@@ -235,8 +229,7 @@ import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "../components/Icon.vue";
 import DeliveryRow from "../components/DeliveryRow.vue";
 import DeliveryDetail from "../components/DeliveryDetail.vue";
-import ListSkeleton from "@shared/components/ListSkeleton.vue";
-import LoadError from "../components/LoadError.vue";
+import PageShell from "../components/PageShell.vue";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { useDesktop } from "@shared/useBreakpoint.js";
 import { nextExit } from "../gates";
@@ -293,6 +286,13 @@ function reloadDeliveries() {
 const loadErrorMessage = computed(() =>
   resourceErrorMessage(deliveriesRes.error, "errors.deliveriesFailed"),
 );
+
+const pageState = computed(() => {
+  if (deliveriesRes.loading && !deliveries.value.length) return "loading";
+  if (deliveriesRes.error) return "error";
+  if (!deliveries.value.length) return "empty";
+  return "ready";
+});
 
 const selected = computed(() => route.params.name || "");
 const selectedDelivery = computed(() => deliveries.value.find((d) => d.name === selected.value) || null);
@@ -401,20 +401,6 @@ async function confirmReceipt() {
 </script>
 
 <style scoped>
-.list-head {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  padding-inline: var(--sp-1);
-}
-.list-title {
-  flex: 1;
-  min-inline-size: 0;
-  font-size: var(--fs-h3);
-  font-weight: var(--fw-heading);
-  color: var(--c-ink);
-}
-
 .dock-hint {
   margin-top: var(--sp-2);
   text-align: center;

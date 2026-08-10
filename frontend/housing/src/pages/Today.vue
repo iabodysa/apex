@@ -1,17 +1,14 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <!-- The overview was the one screen still answering a wait with a turning ring. It now
-       draws its own shape while it loads, the way every list in this portal already does. -->
-  <OverviewSkeleton v-if="pageState === 'loading'" :label="pageTitle" />
-
-  <AsyncBoundary
-    v-else
+  <PageShell
     :state="pageState"
-    :title="pageTitle"
-    :message="pageMessage"
-    :retry-label="t('common.retry')"
+    :loading-label="t('today.loadingTitle')"
+    :error-title="t('today.loadErrorTitle')"
+    :error-detail="pageMessage"
     @retry="load"
   >
+    <template #skeleton><OverviewSkeleton :label="t('today.loadingTitle')" /></template>
+
     <Alert
       v-if="errors.length && pageState !== 'error'"
       class="overview-alert"
@@ -75,18 +72,18 @@
         <Icon name="chevron" :size="18" />
       </router-link>
     </nav>
-  </AsyncBoundary>
+  </PageShell>
 </template>
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Alert, TabButtons, createResource } from "frappe-ui";
-import AsyncBoundary from "@shared/components/AsyncBoundary.vue";
 import MetricRibbon from "@shared/components/MetricRibbon.vue";
 import WorkQueue from "@shared/components/WorkQueue.vue";
 import Icon from "../components/Icon.vue";
 import OverviewSkeleton from "../components/OverviewSkeleton.vue";
+import PageShell from "../components/PageShell.vue";
 import { readCountDraft, readRoundDraft } from "../drafts.js";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { hasSection } from "../portal.js";
@@ -150,12 +147,6 @@ const pageState = computed(() =>
     total: resources.value.length,
   }),
 );
-const pageTitle = computed(() =>
-  pageState.value === "error" ? t("today.loadErrorTitle") : t("today.loadingTitle"),
-);
-/* The landing screen used to blame the network for every failure, including a building the
-   site has never heard of. It now reads the server's own answer, so the one cause a person
-   can act on is named instead of hidden behind "check your connection". */
 const pageMessage = computed(() => {
   if (pageState.value !== "error") return t("today.loadingHint");
   const first = errors.value[0];

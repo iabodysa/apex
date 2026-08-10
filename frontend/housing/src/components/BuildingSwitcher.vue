@@ -7,22 +7,18 @@
       <p class="section-sub">{{ t("building.subtitle") }}</p>
     </div>
 
-    <ListSkeleton v-if="listRes.loading && !buildings.length" :rows="4" :label="t('common.loading')" />
-
-    <LoadError
-      v-else-if="listRes.error"
-      :title="t('errors.gridFailed')"
-      :detail="listErrorMessage"
-      :hint="t('errors.retryHint')"
-      :retry-label="t('common.retry')"
+    <PageShell
+      :state="pickerState"
+      :loading-label="t('common.loading')"
+      :skeleton-rows="4"
+      :error-title="t('errors.gridFailed')"
+      :error-detail="listErrorMessage"
+      :empty-title="t('building.empty')"
+      :empty-hint="scopeHint"
       @retry="listRes.reload()"
-    />
+    >
+      <template #empty-icon><Icon name="building" :size="24" /></template>
 
-    <EmptyState v-else-if="!buildings.length" :title="t('building.empty')" :hint="scopeHint">
-      <template #icon><Icon name="building" :size="24" /></template>
-    </EmptyState>
-
-    <template v-else>
       <section v-for="group in grouped" :key="group.key" class="switcher-group">
         <h3 class="switcher-site">{{ group.title }}</h3>
         <ul class="switcher-list">
@@ -63,17 +59,15 @@
           </li>
         </ul>
       </section>
-    </template>
+    </PageShell>
   </div>
 </template>
 
 <script setup>
 import { computed, watch } from "vue";
 import { Badge, createResource } from "frappe-ui";
-import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "./Icon.vue";
-import ListSkeleton from "@shared/components/ListSkeleton.vue";
-import LoadError from "./LoadError.vue";
+import PageShell from "./PageShell.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 
 const emit = defineEmits(["select"]);
@@ -95,6 +89,13 @@ const scopeRes = createResource({
 
 const buildings = computed(() => listRes.data || []);
 const listErrorMessage = computed(() => resourceErrorMessage(listRes.error, "errors.gridFailed"));
+
+const pickerState = computed(() => {
+  if (listRes.loading && !buildings.value.length) return "loading";
+  if (listRes.error) return "error";
+  if (!buildings.value.length) return "empty";
+  return "ready";
+});
 
 const grouped = computed(() => {
   const groups = new Map();

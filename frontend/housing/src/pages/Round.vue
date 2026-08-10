@@ -1,18 +1,46 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <ListSkeleton v-if="dueRes.loading && !due.length" :rows="5" :label="t('common.loading')" />
-
-  <LoadError
-    v-else-if="dueRes.error"
-    :title="t('errors.roundFailed')"
-    :detail="dueErrorMessage"
-    :hint="t('errors.retryHint')"
-    :retry-label="t('common.retry')"
+  <PageShell
+    :state="pageState"
+    :title="headTitle"
+    :subtitle="headSubtitle"
+    :loading-label="t('common.loading')"
+    :skeleton-rows="5"
+    :error-title="t('errors.roundFailed')"
+    :error-detail="dueErrorMessage"
+    :empty-title="emptyTitle"
+    :empty-hint="emptyHint"
+    :dock="!submitted"
     @retry="load()"
-  />
+  >
+    <template v-if="showRing" #actions>
+      <ProgressRing class="due-ring" :done="totalRated" :total="totalTasks" :size="64" />
+    </template>
 
-  <template v-else-if="submitted">
-    <div class="done">
+    <template #empty-icon><Icon name="shield-check" :size="24" /></template>
+    <template v-if="!awaiting.length" #empty-action>
+      <Button size="xl" variant="outline" :label="t('round.empty.switch')" @click="changeBuilding" />
+    </template>
+
+    <template #dock>
+      <ErrorMessage v-if="submitError" class="dock-error" :message="submitError" />
+      <Button
+        class="dock-btn"
+        size="2xl"
+        variant="solid"
+        theme="green"
+        :disabled="totalRated === 0 || !canSubmit"
+        :loading="submitRes.loading"
+        :loading-text="t('round.submit.sending')"
+        :label="canRatify ? t('round.submit.cta') : t('round.submit.ctaDraft')"
+        @click="doSubmit"
+      >
+        <template #prefix><Icon name="send" :size="20" /></template>
+      </Button>
+      <p class="dock-hint">{{ dockHint }}</p>
+    </template>
+
+    <div v-if="submitted" class="done">
       <div class="done-mark"><Icon name="check" :size="34" /></div>
       <h2 class="section-title">
         {{ submitted.ratified ? t("round.success.title") : t("round.success.draftTitle") }}
@@ -55,101 +83,49 @@
 
       <Button size="2xl" variant="outline" class="wide" :label="t('round.success.another')" @click="resetAll" />
     </div>
-  </template>
 
-  <!-- A period held by someone else's signature is not an empty one. Without this the
-       walker who recorded a draft sees "nothing due" and cannot tell a finished period from
-       one waiting on a supervisor. -->
-  <EmptyState
-    v-else-if="!due.length && awaiting.length"
-    :title="t('round.awaiting.title')"
-    :hint="t('round.awaiting.hint', { list: awaitingLabel })"
-  >
-    <template #icon><Icon name="shield-check" :size="24" /></template>
-  </EmptyState>
+    <template v-else>
+      <p class="draft-note"><Icon name="shield" :size="13" /> {{ t("round.due.draftKept") }}</p>
 
-  <EmptyState
-    v-else-if="!due.length"
-    :title="t('round.empty.title')"
-    :hint="t('round.empty.subtitle')"
-  >
-    <template #icon><Icon name="shield-check" :size="24" /></template>
-    <template #action>
-      <Button size="xl" variant="outline" :label="t('round.empty.switch')" @click="changeBuilding" />
-    </template>
-  </EmptyState>
+      <div v-if="staleOffer" class="stale">
+        <p class="stale-title">{{ t("round.stale.title") }}</p>
+        <p class="hint">{{ t("round.stale.body") }}</p>
+        <div class="stale-actions">
+          <Button size="lg" variant="solid" :label="t('round.stale.reload')" @click="acceptStale" />
+          <Button size="lg" variant="outline" :label="t('round.stale.dismiss')" @click="staleOffer = false" />
+        </div>
+      </div>
 
-  <template v-else>
-    <div class="due-intro">
-      <ProgressRing
-        class="due-ring"
-        :done="totalRated"
-        :total="totalTasks"
-        :size="64"
+      <TabButtons
+        v-if="due.length > 1"
+        class="cadence-filter"
+        v-model="cadence"
+        :dir="dir"
+        :buttons="cadenceButtons"
       />
-      <div class="due-intro-copy">
-        <h2 class="section-title">{{ t("round.due.title") }}</h2>
-        <p class="section-sub">{{ t("round.due.subtitle") }}</p>
-        <p class="draft-note"><Icon name="shield" :size="13" /> {{ t("round.due.draftKept") }}</p>
-      </div>
-    </div>
 
-    <div v-if="staleOffer" class="stale">
-      <p class="stale-title">{{ t("round.stale.title") }}</p>
-      <p class="hint">{{ t("round.stale.body") }}</p>
-      <div class="stale-actions">
-        <Button size="lg" variant="solid" :label="t('round.stale.reload')" @click="acceptStale" />
-        <Button size="lg" variant="outline" :label="t('round.stale.dismiss')" @click="staleOffer = false" />
-      </div>
-    </div>
-
-    <TabButtons
-      v-if="due.length > 1"
-      class="cadence-filter"
-      v-model="cadence"
-      :dir="dir"
-      :buttons="cadenceButtons"
-    />
-
-    <EmptyState
-      v-if="!visibleDue.length"
-      :title="t('round.filtered.title')"
-      :hint="t('round.filtered.hint')"
-    >
-      <template #icon><Icon name="shield" :size="24" /></template>
-      <template #action>
-        <Button size="xl" variant="outline" :label="t('list.clearFilter')" @click="cadence = 'all'" />
-      </template>
-    </EmptyState>
-
-    <CadenceSection
-      v-for="block in visibleDue"
-      :key="block.cadence"
-      :block="block"
-      :ratings="ratings[block.cadence] || {}"
-      @rate="onRate"
-      @note="onNote"
-      @photo="onPhoto"
-    />
-
-    <div class="hz-dock">
-      <ErrorMessage v-if="submitError" class="dock-error" :message="submitError" />
-      <Button
-        class="dock-btn"
-        size="2xl"
-        variant="solid"
-        theme="green"
-        :disabled="totalRated === 0 || !canSubmit"
-        :loading="submitRes.loading"
-        :loading-text="t('round.submit.sending')"
-        :label="canRatify ? t('round.submit.cta') : t('round.submit.ctaDraft')"
-        @click="doSubmit"
+      <EmptyState
+        v-if="!visibleDue.length"
+        :title="t('round.filtered.title')"
+        :hint="t('round.filtered.hint')"
       >
-        <template #prefix><Icon name="send" :size="20" /></template>
-      </Button>
-      <p class="dock-hint">{{ dockHint }}</p>
-    </div>
-  </template>
+        <template #icon><Icon name="shield" :size="24" /></template>
+        <template #action>
+          <Button size="xl" variant="outline" :label="t('list.clearFilter')" @click="cadence = 'all'" />
+        </template>
+      </EmptyState>
+
+      <CadenceSection
+        v-for="block in visibleDue"
+        :key="block.cadence"
+        :block="block"
+        :ratings="ratings[block.cadence] || {}"
+        @rate="onRate"
+        @note="onNote"
+        @photo="onPhoto"
+      />
+    </template>
+  </PageShell>
 </template>
 
 <script setup>
@@ -160,8 +136,7 @@ import EmptyState from "@shared/components/EmptyState.vue";
 import CadenceSection from "../components/CadenceSection.vue";
 import ProgressRing from "../components/ProgressRing.vue";
 import Icon from "../components/Icon.vue";
-import ListSkeleton from "@shared/components/ListSkeleton.vue";
-import LoadError from "../components/LoadError.vue";
+import PageShell from "../components/PageShell.vue";
 import { useI18n, apiErrorMessage, resourceErrorMessage } from "../i18n";
 import { can } from "../portal.js";
 import { connectSafetyRealtime } from "../realtime.js";
@@ -229,6 +204,31 @@ const totalRated = computed(() => {
   return n;
 });
 const totalTasks = computed(() => due.value.reduce((sum, b) => sum + b.tasks.length, 0));
+
+const pageState = computed(() => {
+  if (dueRes.loading && !due.value.length) return "loading";
+  if (dueRes.error) return "error";
+  if (submitted.value) return "ready";
+  if (!due.value.length) return "empty";
+  return "ready";
+});
+const headTitle = computed(() =>
+  submitted.value || pageState.value === "empty" ? "" : t("round.due.title"),
+);
+const headSubtitle = computed(() =>
+  pageState.value === "ready" && !submitted.value ? t("round.due.subtitle") : "",
+);
+const showRing = computed(
+  () => pageState.value === "ready" && !submitted.value && totalTasks.value > 0,
+);
+const emptyTitle = computed(() =>
+  awaiting.value.length ? t("round.awaiting.title") : t("round.empty.title"),
+);
+const emptyHint = computed(() =>
+  awaiting.value.length
+    ? t("round.awaiting.hint", { list: awaitingLabel.value })
+    : t("round.empty.subtitle"),
+);
 
 const dockHint = computed(() => {
   if (!canSubmit) return t("access.needRound");
@@ -375,14 +375,6 @@ watch(building, load);
 </script>
 
 <style scoped>
-.due-intro {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-}
-.due-intro-copy {
-  min-inline-size: 0;
-}
 .due-ring {
   flex: none;
 }
