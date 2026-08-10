@@ -57,6 +57,17 @@
     </div>
   </template>
 
+  <!-- A period held by someone else's signature is not an empty one. Without this the
+       walker who recorded a draft sees "nothing due" and cannot tell a finished period from
+       one waiting on a supervisor. -->
+  <EmptyState
+    v-else-if="!due.length && awaiting.length"
+    :title="t('round.awaiting.title')"
+    :hint="t('round.awaiting.hint', { list: awaitingLabel })"
+  >
+    <template #icon><Icon name="shield-check" :size="24" /></template>
+  </EmptyState>
+
   <EmptyState
     v-else-if="!due.length"
     :title="t('round.empty.title')"
@@ -151,6 +162,10 @@ const submitRes = createResource({
 });
 
 const due = computed(() => (dueRes.data && dueRes.data.due) || []);
+const awaiting = computed(() => (dueRes.data && dueRes.data.awaiting) || []);
+const awaitingLabel = computed(() =>
+  awaiting.value.map((row) => tEnum("cadence", row.cadence)).join("، "),
+);
 const dueErrorMessage = computed(() => resourceErrorMessage(dueRes.error, "errors.roundFailed"));
 
 const totalRated = computed(() => {

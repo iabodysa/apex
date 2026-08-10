@@ -404,6 +404,10 @@ const messages = {
         subtitle: "Nothing is due for this building right now. Great work.",
         switch: "Check another building",
       },
+      awaiting: {
+        title: "Recorded, waiting for a supervisor",
+        hint: "You recorded {list} for this period. A supervisor closes it; nothing more is needed from you.",
+      },
       stale: {
         title: "This building changed",
         body: "Someone else recorded a round for this building. Reload to see what is still due. Your marks are kept.",
@@ -854,6 +858,10 @@ const messages = {
         title: "جميع جولات السلامة محدّثة",
         subtitle: "لا يوجد مستحق لهذا المبنى حالياً. عمل رائع.",
         switch: "افحص مبنى آخر",
+      },
+      awaiting: {
+        title: "مسجّلة وتنتظر المشرف",
+        hint: "سجّلت {list} لهذي الفترة. المشرف هو اللي يقفلها، وما عليك شي بعد.",
       },
       stale: {
         title: "تغيّر هذا المبنى",

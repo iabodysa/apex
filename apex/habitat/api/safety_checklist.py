@@ -207,12 +207,15 @@ def _cadence_is_due(building, cadence, on_date=None):
     it for the period.
     """
     start, end, _label = _current_period(cadence, on_date)
+    # docstatus < 2 — the SAME set the duplicate guard counts (safety_round.py). It counted
+    # only submitted rounds while the guard counted drafts too, so a maker who recorded a
+    # draft was told the work was still due, walked it again, and was refused as a duplicate.
     existing = frappe.db.exists(
         "Safety Round",
         {
             "building": building,
             "cadence": cadence,
-            "docstatus": 1,
+            "docstatus": ["<", 2],
             "round_date": ["between", [start, end]],
         },
     )
@@ -268,7 +271,40 @@ def get_due_cadences(building=None):
             {"cadence": cadence, "period_label": period_label, "tasks": tasks}
         )
 
-    return {"building": building, "due": due}
+    return {"building": building, "due": due, "awaiting": _awaiting_ratification(building)}
+
+
+def _awaiting_ratification(building) -> list:
+    """Rounds recorded for this period that a supervisor has not closed yet.
+
+    A maker who cannot submit records a draft. Without this the screen simply loses that
+    work — the cadence stops being due and nothing says why, so the walker cannot tell a
+    finished period from one waiting on someone else.
+    """
+    out = []
+    for cadence in _CADENCE_ORDER:
+        start, end, period_label = _current_period(cadence)
+        row = frappe.db.get_value(
+            "Safety Round",
+            {
+                "building": building,
+                "cadence": cadence,
+                "docstatus": 0,
+                "round_date": ["between", [start, end]],
+            },
+            ["name", "round_date"],
+            as_dict=True,
+        )
+        if row:
+            out.append(
+                {
+                    "cadence": cadence,
+                    "period_label": period_label,
+                    "round": row.name,
+                    "round_date": str(row.round_date),
+                }
+            )
+    return out
 
 
 @frappe.whitelist(methods=["POST"])
