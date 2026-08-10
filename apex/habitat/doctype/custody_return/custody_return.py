@@ -165,19 +165,26 @@ def on_submit(doc, method=None):
 
 
 def _post_return_stock(doc):
-    """Move stock from the employee's custody back into the building store on the
-    Accommodation Stock Ledger."""
+    """Move stock from the holder's custody back into the building store on the
+    Accommodation Stock Ledger. ``returned_by_employee`` is the older Employee-only
+    field and still wins where set; otherwise the party pair names the holder, which
+    is how a Temporary Worker returns what was issued to them."""
     from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
         post_stock_entry, has_stock_entries,
     )
-    if not doc.returned_by_employee or has_stock_entries("Custody Return", doc.name):
+    if doc.get("returned_by_employee"):
+        party_type, party = "Employee", doc.returned_by_employee
+    else:
+        party_type, party = doc.get("party_type"), doc.get("party")
+    if not party or has_stock_entries("Custody Return", doc.name):
         return
     for row in doc.items:
         post_stock_entry(item_type="Custody Article", item=row.article, qty=-(row.qty or 0),
-                         building=doc.building, employee=doc.returned_by_employee, voucher_type="Custody Return",
+                         building=doc.building, party_type=party_type, party=party,
+                         voucher_type="Custody Return",
                          voucher_no=doc.name, voucher_detail_no=row.name, posting_date=doc.return_date)
         post_stock_entry(item_type="Custody Article", item=row.article, qty=(row.qty or 0),
-                         building=doc.building, employee=None, voucher_type="Custody Return",
+                         building=doc.building, voucher_type="Custody Return",
                          voucher_no=doc.name, voucher_detail_no=row.name, posting_date=doc.return_date)
 
 

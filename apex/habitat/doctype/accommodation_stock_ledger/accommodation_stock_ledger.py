@@ -2,8 +2,11 @@
 """Accommodation Stock Ledger — read-only, system-written quantity ledger for the
 decentralized internal-store engine. Each Accommodation Building is its own store.
 Rows are posted only through the helpers below (never created manually); a blank
-employee means the stock sits unassigned in the building's store, a set employee
-means it is in that employee's custody. Reversals are negative mirror entries, and
+holder means the stock sits unassigned in the building's store, a set holder means
+it is in that holder's custody. The holder is ``party_type``/``party`` so a
+Temporary Worker can hold stock as well as an Employee, and ``employee`` is still
+written for Employee rows — the composite index and the oversight grant below both
+read it. Reversals are negative mirror entries, and
 are refused outright when the mirror would drive a store or a custody holding
 negative — the stock has already moved on and must be unwound in order.
 
@@ -54,6 +57,11 @@ def on_doctype_update():
         ["is_cancelled", "item_type", "employee"],
         "idx_asl_cancel_type_emp",
     )
+    add_index_guarded(
+        "Accommodation Stock Ledger",
+        ["is_cancelled", "item_type", "party"],
+        "idx_asl_cancel_type_party",
+    )
 
 
 _MASTER_FIELDS = {
@@ -71,11 +79,30 @@ def _resolve_item(item_type: str, item: str):
     return (vals.get(fields[0]) or item, vals.get(fields[1]) or "", flt(vals.get(fields[2])))
 
 
+def _resolve_holder(employee, party_type, party):
+    """The holder of a row as the (party_type, party, employee) triple every column
+    needs. A caller may name the holder either way round: ``employee`` is the older
+    Employee-only argument and is still honoured, ``party_type``/``party`` carry a
+    Temporary Worker as well. Employee rows keep writing ``employee`` so the composite
+    index and the permlevel-0 oversight grant described above still see them."""
+    if party and not party_type:
+        party_type = "Employee"
+    if not party and employee:
+        party_type, party = "Employee", employee
+    if party_type == "Employee":
+        employee = party
+    elif party:
+        employee = None
+    return party_type or None, party or None, employee or None
+
+
 def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no,
-                     voucher_detail_no=None, employee=None, posting_date=None,
-                     from_building=None, to_building=None, remarks=None, reversal_of=None):
+                     voucher_detail_no=None, employee=None, party_type=None, party=None,
+                     posting_date=None, from_building=None, to_building=None,
+                     remarks=None, reversal_of=None):
     """Insert one signed-quantity Stock Ledger row. Denormalises item name/uom/cost,
     company and cost center from the source masters/building."""
+    party_type, party, employee = _resolve_holder(employee, party_type, party)
     item_name, uom, unit_cost = _resolve_item(item_type, item)
     company, cost_center = frappe.db.get_value(
         "Building", building, ["company", "default_cost_center"]
@@ -93,6 +120,8 @@ def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no
         "building": building,
         "cost_center": cost_center,
         "employee": employee,
+        "party_type": party_type,
+        "party": party,
         "from_building": from_building,
         "to_building": to_building,
         "voucher_type": voucher_type,
@@ -106,7 +135,7 @@ def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no
 
 
 def get_store_balance(item_type: str, item: str, building: str, employee=None,
-                      for_update: bool = False) -> float:
+                      for_update: bool = False, party_type=None, party=None) -> float:
     """Live signed-quantity balance for one item in a building's store (employee
     unset) or in an employee's custody (employee set). Sums non-cancelled rows.
 
@@ -125,7 +154,8 @@ def get_store_balance(item_type: str, item: str, building: str, employee=None,
         .where(Ledger.building == building)
         .where(Ledger.is_cancelled == 0)
     )
-    q = q.where(Ledger.employee == employee) if employee else q.where(Ledger.employee.isnull())
+    _, holder, _ = _resolve_holder(employee, party_type, party)
+    q = q.where(Ledger.party == holder) if holder else q.where(Ledger.party.isnull())
     if for_update:
         q = q.for_update()
     rows = q.run(as_dict=True)
@@ -146,20 +176,20 @@ def _assert_reversal_keeps_stock_positive(rows) -> None:
     before writing any mirror row, so a blocked cancel leaves the ledger untouched."""
     drained: dict[tuple, float] = {}
     for r in rows:
-        key = (r.item_type, r.item, r.building, r.employee or None)
+        key = (r.item_type, r.item, r.building, r.party or r.employee or None)
         drained[key] = drained.get(key, 0.0) + flt(r.signed_qty)
-    for (item_type, item, building, employee), qty in drained.items():
+    for (item_type, item, building, holder), qty in drained.items():
         if flt(qty) <= 0:
             continue
-        available = get_store_balance(item_type, item, building, employee, for_update=True)
+        available = get_store_balance(item_type, item, building, party=holder, for_update=True)
         if flt(qty) <= available:
             continue
-        if employee:
+        if holder:
             frappe.throw(
                 _(
-                    "Cannot reverse {0} unit(s) of {1} in {2}: employee {3} now holds only {4}. "
+                    "Cannot reverse {0} unit(s) of {1} in {2}: {3} now holds only {4}. "
                     "Reverse the later movements first."
-                ).format(flt(qty), item, building, employee, available)
+                ).format(flt(qty), item, building, holder, available)
             )
         frappe.throw(
             _(
@@ -176,7 +206,7 @@ def _live_rows(voucher_type: str, voucher_no: str):
         "Accommodation Stock Ledger",
         filters={"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},
         fields=["name", "item_type", "item", "signed_qty", "building", "employee",
-                "from_building", "to_building"],
+                "party_type", "party", "from_building", "to_building"],
     )
 
 
@@ -202,7 +232,8 @@ def reverse_stock_entries(voucher_type: str, voucher_no: str) -> None:
     for r in rows:
         rev = post_stock_entry(
             item_type=r.item_type, item=r.item, qty=-flt(r.signed_qty), building=r.building,
-            employee=r.employee, voucher_type=voucher_type, voucher_no=voucher_no,
+            party_type=r.party_type, party=r.party or r.employee,
+            voucher_type=voucher_type, voucher_no=voucher_no,
             from_building=r.from_building, to_building=r.to_building,
             reversal_of=r.name, remarks="Reversal",
         )

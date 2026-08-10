@@ -106,9 +106,9 @@ def _assert_source_availability(doc):
 
     Mirrors Custody Handover's source-availability gate: issuing must
     not drive the store balance negative. Only the case where stock is actually
-    posted is checked — a free-text issue with no linked employee moves no stock
+    posted is checked — an issue naming no holder at all moves no stock
     (see ``_post_custody_stock``), so it has nothing to verify."""
-    if not doc.issued_to_employee:
+    if not _holder(doc)[1]:
         return
     from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
         get_store_balance,
@@ -128,21 +128,31 @@ def _assert_source_availability(doc):
             )
 
 
+def _holder(doc):
+    """The (party_type, party) this issue hands stock to. ``issued_to_employee`` is the
+    older Employee-only field and still wins where it is set; otherwise the document's
+    own party pair carries the holder, which is how a Temporary Worker is named."""
+    if doc.get("issued_to_employee"):
+        return "Employee", doc.issued_to_employee
+    return doc.get("party_type"), doc.get("party")
+
+
 def _post_custody_stock(doc):
-    """Move stock from the building store into the employee's custody (same
-    building) on the Accommodation Stock Ledger. Skipped for free-text issues
-    with no linked employee."""
+    """Move stock from the building store into the holder's custody (same building) on
+    the Accommodation Stock Ledger. Skipped for a free-text issue naming no holder."""
     from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
         post_stock_entry, has_stock_entries,
     )
-    if not doc.issued_to_employee or has_stock_entries("Custody Issue", doc.name):
+    party_type, party = _holder(doc)
+    if not party or has_stock_entries("Custody Issue", doc.name):
         return
     for row in doc.items:
         post_stock_entry(item_type="Custody Article", item=row.article, qty=-(row.qty or 0),
-                         building=doc.building, employee=None, voucher_type="Custody Issue",
+                         building=doc.building, voucher_type="Custody Issue",
                          voucher_no=doc.name, voucher_detail_no=row.name, posting_date=doc.issue_date)
         post_stock_entry(item_type="Custody Article", item=row.article, qty=(row.qty or 0),
-                         building=doc.building, employee=doc.issued_to_employee, voucher_type="Custody Issue",
+                         building=doc.building, party_type=party_type, party=party,
+                         voucher_type="Custody Issue",
                          voucher_no=doc.name, voucher_detail_no=row.name, posting_date=doc.issue_date)
 
 

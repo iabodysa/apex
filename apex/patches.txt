@@ -11,3 +11,4 @@
 [post_model_sync]
 apex.patches.v2_3.retire_replaced_reports #2026-08-08
 apex.patches.v2_3.retire_operations_alert
+apex.patches.v2_3.backfill_stock_ledger_holder

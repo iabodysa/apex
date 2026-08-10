@@ -293,6 +293,37 @@ def on_submit(doc, method=None):
             "Housing Allowance not suspended - feature disabled in Salary Deduction Policy.",
         )
 
+    _post_checkin_custody(doc)
+
+
+def _post_checkin_custody(doc):
+    """Post the items handed over at check-in to the stock ledger, so a resident who
+    holds a mattress and a locker key shows a custody balance the checkout gate, the
+    balance report and the value-at-risk card can all see. The store leg leaves the
+    building's stock and the holder leg enters the resident's custody, exactly as a
+    Custody Issue does. Idempotent through ``has_stock_entries``, which also means
+    assignments submitted before this shipped stay as they are — history is left alone
+    and the ledger starts from the next check-in."""
+    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+        post_stock_entry, has_stock_entries,
+    )
+    if not doc.get("custody_items") or not doc.party:
+        return
+    if has_stock_entries("Housing Assignment", doc.name):
+        return
+    for row in doc.custody_items:
+        if not row.article or not (row.quantity or 0):
+            continue
+        post_stock_entry(item_type="Custody Article", item=row.article, qty=-(row.quantity or 0),
+                         building=doc.building, voucher_type="Housing Assignment",
+                         voucher_no=doc.name, voucher_detail_no=row.name,
+                         posting_date=doc.check_in_date)
+        post_stock_entry(item_type="Custody Article", item=row.article, qty=(row.quantity or 0),
+                         building=doc.building, party_type=doc.party_type, party=doc.party,
+                         voucher_type="Housing Assignment",
+                         voucher_no=doc.name, voucher_detail_no=row.name,
+                         posting_date=doc.check_in_date)
+
 
 def on_cancel(doc, method=None):
     """Frees the bed if no other active assignment holds it and refreshes occupancy counts."""
@@ -307,5 +338,10 @@ def on_cancel(doc, method=None):
     )
     if active_on_bed == 0:
         frappe.db.set_value("Bed", doc.bed, "status", "Available")
+
+    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+        reverse_stock_entries,
+    )
+    reverse_stock_entries("Housing Assignment", doc.name)
 
     recalculate_spatial(doc.room, doc.building)
