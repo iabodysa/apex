@@ -69,6 +69,9 @@ const buildings = computed(() => listRes.data || []);
 const listErrorMessage = computed(() => resourceErrorMessage(listRes.error, "errors.gridFailed"));
 
 const scopeHint = computed(() => {
+  /* Without this the hint is simply absent when the scope read fails, so "your account is
+     scoped to no building" and "the scope could not be read" are the same empty screen. */
+  if (scopeRes.error) return t("errors.scopeUnknown");
   const state = scopeRes.data;
   if (!state) return "";
   if (state.is_scoped && !state.active_buildings) return t("beds.emptyScoped");

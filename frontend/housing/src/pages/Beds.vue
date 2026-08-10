@@ -28,6 +28,13 @@
         size="lg"
         :label="t('beds.openRequests', { n: openRequests })"
       />
+      <!-- Zero open requests and a failed read drew the same picture: no badge. -->
+      <Badge
+        v-else-if="requestsRes.error"
+        theme="gray"
+        size="lg"
+        :label="t('errors.requestsUnknown')"
+      />
       <Button variant="ghost" size="md" :label="t('common.refresh')" @click="reloadAll">
         <template #icon><Icon name="refresh" :size="18" /></template>
       </Button>
@@ -96,12 +103,15 @@
             {{ t("beds.alreadyHoused") }}
           </p>
 
+          <!-- Without this the operator cannot tell a permission gap from a dead call:
+               the select is simply empty and check-in stays disabled with no reason. -->
           <FormControl
             v-if="worker"
             type="select"
             size="lg"
             :label="t('beds.project')"
             :options="projectOptions"
+            :description="projectsRes.error ? t('errors.listFailed') : undefined"
             v-model="project"
           />
           <FormControl

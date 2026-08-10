@@ -32,6 +32,11 @@
                 />
             </li>
         </ul>
+        <!-- Same rule as the arrivals search: a failure and an empty result are different
+             answers, and this is the first control on the screen. -->
+        <p v-else-if="searchRes.error" class="status-note status-err">
+            {{ resourceErrorMessage(searchRes.error, "errors.searchFailed") }}
+        </p>
         <p v-else-if="query.trim() && !searchRes.loading" class="hint">
             {{ t("arrivals.searchEmpty") }}
         </p>

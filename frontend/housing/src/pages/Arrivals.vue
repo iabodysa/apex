@@ -100,6 +100,12 @@
             />
         </li>
     </ul>
+    <!-- A failed search is NOT an empty one. Rendering searchEmpty for both told the clerk
+         no worker by that name exists, so they retyped it, tried the passport number, and
+         went and reported the worker missing from the system. -->
+    <p v-else-if="searchRes.error" class="status-note status-err">
+        {{ resourceErrorMessage(searchRes.error, "errors.searchFailed") }}
+    </p>
     <p v-else-if="query.trim() && !searchRes.loading" class="hint">
         {{ t("arrivals.searchEmpty") }}
     </p>
@@ -124,6 +130,7 @@
                     size="lg"
                     :label="t('arrivals.nationality')"
                     :options="countryOptions"
+                    :description="countriesRes.error ? t('errors.listFailed') : undefined"
                     v-model="form.nationality"
                 />
                 <FormControl

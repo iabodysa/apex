@@ -49,13 +49,23 @@
         <h2>{{ sceneTitle }}</h2>
         <p v-if="sceneSubtitle" class="context-copy">{{ sceneSubtitle }}</p>
 
-        <div v-if="usesBuilding && building" class="context-building">
+        <!-- The chip that names the building IS the way back to the list. It was a static
+             div, so once a building was chosen there was no way to choose another from the
+             screen the reader was on. -->
+        <button
+          v-if="usesBuilding && building"
+          type="button"
+          class="context-building"
+          :aria-label="t('common.changeBuilding')"
+          @click="clearBuilding"
+        >
           <span class="context-building-icon"><Icon name="building" :size="20" /></span>
           <span>
             <small>{{ t("building.context") }}</small>
             <b><bdi dir="auto">{{ buildingLabel || building }}</bdi></b>
           </span>
-        </div>
+          <span class="context-building-swap">{{ t("common.change") }}</span>
+        </button>
 
         <nav
           v-if="subsections.length > 1"
@@ -371,8 +381,27 @@ useDocumentLanguage(lang, dir);
   display: flex;
   align-items: center;
   gap: var(--sp-3);
+  inline-size: 100%;
+  min-block-size: var(--tap-lg);
   padding-block: var(--sp-3);
+  border: none;
   border-block: var(--border-width) solid var(--c-border-strong);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.context-building:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
+}
+.context-building-swap {
+  margin-inline-start: auto;
+  flex: 0 0 auto;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--c-primary);
 }
 .context-building-icon {
   display: grid;
