@@ -193,15 +193,18 @@ class ArrivalsDesk {
 		this.custodyIssued = false;
 		this.cardIssued = false;
 		this.transportStarted = false;
-		this.mrzOcrEnabled = false;
-		frappe
+		/* Held as the promise, not as the flag it resolves to. A clerk who opens the register
+		   modal before this call lands read `false` and got no passport scanner at all, with
+		   nothing to retry — and the faster the clerk, the more likely it was. */
+		this.mrzOcrEnabled = frappe
 			.xcall('apex.habitat.api.arrivals_desk.get_intake_settings')
-			.then((r) => (this.mrzOcrEnabled = !!(r && r.enable_passport_mrz_ocr)))
-			.catch(() => {});
+			.then((r) => !!(r && r.enable_passport_mrz_ocr))
+			.catch(() => false);
 		this.page.hide_form();
 		this._build_skeleton();
 		this._setup_anchor();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
+		this._watch_transport_saved();
 		this._load_strip();
 		this._render_empty(__('Pick a building to start the arrival.'));
 	}
@@ -641,7 +644,9 @@ class ArrivalsDesk {
 		});
 		d.$wrapper.addClass('ax-register-modal');
 		d.show();
-		if (this.mrzOcrEnabled) this._render_mrz_scan(d);
+		this.mrzOcrEnabled.then((enabled) => {
+			if (enabled && d.$wrapper.is(':visible')) this._render_mrz_scan(d);
+		});
 	}
 
 	_render_mrz_scan(d) {
@@ -804,36 +809,46 @@ class ArrivalsDesk {
 					(c) => c.party === worker.party && c.party_type === worker.party_type
 				);
 				if (!dupe) this.cart.push({ ...worker, bed: r.message.bed || bed });
-				this.active = null;
-				this.$active.empty();
+				this._clear_active(true);
 				this._render_cart();
-				this._reconcile_housed_bed(bed, worker, $bed);
+				this._reload_after_housing();
 			},
 			error: () => rollback(),
 		});
 	}
 
-	_reconcile_housed_bed(bed, worker, $bed) {
-		if (!this.grid) return;
-		const s = this.grid.summary || (this.grid.summary = {});
-		if (s.available) s.available -= 1;
-		s.occupied = (s.occupied || 0) + 1;
-		(this.grid.floors || []).forEach((floor) =>
-			(floor.rooms || []).forEach((room) =>
-				(room.beds || []).forEach((b) => {
-					if (b.bed === bed) {
-						b.bed_color = 'red';
-						b.occupant = { employee_name: worker.label, party_type: worker.party_type, party: worker.party };
-					}
-				})
-			)
-		);
-		if ($bed && $bed.length && !$bed.find('.ax-bed-occupant').length) {
-			$('<span class="ax-bed-occupant"></span>').attr('style', AX_STYLE.bed_occupant).text(worker.label || '').appendTo($bed);
+	/* The highlight is derived from the selection, so the two places that drop the worker
+	   cannot leave a row lit behind them. A lit row with nothing selected tells the clerk
+	   they are still working on someone they have already housed. */
+	_clear_active(clearPane) {
+		this.active = null;
+		if (this.$results) {
+			this.$results.find('.ax-result').removeClass('ax-result--active').attr('style', AX_STYLE.result);
 		}
-		this._render_capacity(this.grid);
-		this._render_stages();
-		this._load_manifest();
+		if (clearPane && this.$active) this.$active.empty();
+	}
+
+	/* The board is re-read from the server after a housing, never patched in place.
+	   The patch that used to live here built an occupant out of the three fields the clerk
+	   had typed, so the bed it lit carried no has_custody and no assignment. _open_check_out
+	   reads exactly those, which meant the custody block could not fire for anyone housed in
+	   the current session: the clerk checked them out and the kit left with them. A round
+	   trip is slower on a tablet, and that is the trade. */
+	_reload_after_housing() {
+		if (!this.building) return;
+		const requested = this.building;
+		frappe
+			.call({
+				method: 'apex.habitat.api.front_desk.get_building_grid',
+				args: { building: this.building },
+			})
+			.then((r) => {
+				if (this.building !== requested || r.exc || !r.message) return;
+				this.grid = r.message;
+				this._render_grid(this.grid);
+				this._load_manifest();
+			})
+			.catch(() => {});
 	}
 
 	_house_over_capacity(room) {
@@ -868,8 +883,7 @@ class ArrivalsDesk {
 						(c) => c.party === worker.party && c.party_type === worker.party_type
 					);
 					if (!dupe) this.cart.push({ ...worker, bed: r.message.bed_code || r.message.bed, temp: true });
-					this.active = null;
-					this.$active.empty();
+					this._clear_active(true);
 					this._render_cart();
 					this.refresh();
 				},
@@ -1318,6 +1332,19 @@ class ArrivalsDesk {
 		}
 	}
 
+	/* The Transport stage is marked from the SAVE, not from the tap. `frappe.new_doc` only
+	   opens a draft, so marking it beside that call told the clerk transport was arranged
+	   for a form they might close without saving. */
+	_watch_transport_saved() {
+		frappe.ui.form.on('Transport Request', {
+			after_save: (frm) => {
+				if (!this.building || frm.doc.accommodation_building !== this.building) return;
+				this.transportStarted = true;
+				this._render_stages();
+			},
+		});
+	}
+
 	_create_transport($tlist) {
 		const workers = [];
 		$tlist.find('input[type="checkbox"]:checked').each((i, el) => {
@@ -1327,8 +1354,6 @@ class ArrivalsDesk {
 			frappe.show_alert({ message: __('Select at least one passenger.'), indicator: 'orange' });
 			return;
 		}
-		this.transportStarted = true;
-		this._render_stages();
 		frappe.new_doc('Transport Request', {
 			service_line: 'Site Transport',
 			request_type: 'Accommodation to Project Shuttle',
