@@ -585,7 +585,7 @@ body {
 .active\:bg-green-800:active { background: color-mix(in srgb, var(--c-primary) 74%, black); }
 .focus-visible\:ring:focus-visible { outline: 3px solid var(--c-focus); outline-offset: 2px; }
 
-@media (min-width: 64rem) {
+@container mc-frame (min-width: 44rem) {
   .field-runway {
     grid-template-columns: minmax(26rem, 1.35fr) minmax(18rem, 0.65fr);
   }
