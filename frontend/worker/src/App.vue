@@ -69,17 +69,6 @@
         <router-view :ctx="ctx.data" />
       </section>
 
-      <template v-if="scene.action" #action>
-        <Button
-          variant="solid"
-          theme="green"
-          size="2xl"
-          :label="scene.action.label"
-          :route="scene.action.to"
-        >
-          <template #prefix><Icon :name="scene.action.icon" :size="20" /></template>
-        </Button>
-      </template>
     </MobileConsoleShell>
 
     <MobileConsoleShell v-else>
@@ -195,7 +184,6 @@ const scene = computed(() => {
     return {
       title: t("transport.title"),
       links: transportLinks,
-      action: { to: "/request-transport", icon: "plus", label: t("reqTransport.title") },
     };
   }
   if (name === "request-transport") {
@@ -205,7 +193,6 @@ const scene = computed(() => {
     return {
       title: t("accommodation.title"),
       links: housingLinks,
-      action: { to: "/requests", icon: "plus", label: t("requests.new") },
     };
   }
   if (name === "custody") return { title: t("custody.title"), links: housingLinks };

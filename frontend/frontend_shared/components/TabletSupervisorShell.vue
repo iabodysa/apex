@@ -32,7 +32,7 @@
           </template>
         </Button>
         <div class="ts-title">
-          <h1>{{ title }}</h1>
+          <h1 v-if="title">{{ title }}</h1>
           <div v-if="subtitle" class="ts-sub">{{ subtitle }}</div>
         </div>
         <span class="ts-top-actions"><slot name="title-actions" /></span>

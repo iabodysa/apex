@@ -175,7 +175,6 @@ const sceneSubtitle = computed(() => {
 const rejectOpen = ref(false);
 const rejectReason = ref("");
 const rejectError = ref("");
-// Keep dialog target independent from route selection. A queue decision must not move the reader.
 const rejectTarget = ref("");
 
 const rejectOptions = computed(() => ({
