@@ -34,25 +34,7 @@
             />
           </div>
 
-          <dl class="emp-facts">
-            <div>
-              <dt><Icon name="gauge" :size="15" /> {{ t("emp.vehicle.odometer") }}</dt>
-              <dd class="tnum">
-                <bdi>{{ formatInt(vehicle.state.data.odometerKm, lang) }}</bdi>
-                {{ t("emp.vehicle.kmUnit") }}
-              </dd>
-            </div>
-            <div>
-              <dt><Icon name="calendar" :size="15" /> {{ t("emp.vehicle.registration") }}</dt>
-              <dd>
-                <template v-if="vehicle.state.data.registrationExpiry">
-                  {{ t("emp.vehicle.validUntil") }}
-                  <bdi>{{ formatDate(vehicle.state.data.registrationExpiry, lang) }}</bdi>
-                </template>
-                <template v-else>{{ t("common.none") }}</template>
-              </dd>
-            </div>
-          </dl>
+          <VehicleFacts :facts="vehicleFacts" :empty-value="t('common.none')" />
         </AsyncBoundary>
       </section>
 
@@ -142,6 +124,7 @@ import { Badge, Button } from "frappe-ui";
 
 import AsyncBoundary from "@shared/components/AsyncBoundary.vue";
 import LoadError from "@shared/components/LoadError.vue";
+import VehicleFacts from "@shared/components/VehicleFacts.vue";
 
 import Icon from "../Icon.vue";
 import TripList from "../components/TripList.vue";
@@ -151,8 +134,29 @@ import { useEmployee } from "../useEmployee.js";
 import { useI18n } from "@/i18n";
 
 const { t, lang } = useI18n();
+
 const router = useRouter();
 const { vehicle, trips, fuelRequests, latestFuelRequest, pendingFuelCount } = useEmployee();
+
+const vehicleFacts = computed(() => {
+  const v = vehicle.state.data || {};
+  return [
+    {
+      key: "odometer",
+      label: t("emp.vehicle.odometer"),
+      value: formatInt(v.odometerKm, lang),
+      suffix: t("emp.vehicle.kmUnit"),
+      numeric: true,
+    },
+    {
+      key: "registration",
+      label: t("emp.vehicle.registration"),
+      value: v.registrationExpiry
+        ? `${t("emp.vehicle.validUntil")} ${formatDate(v.registrationExpiry, lang)}`
+        : "",
+    },
+  ];
+});
 
 const vehicleState = computed(() => {
   if (vehicle.state.status === "loading" || vehicle.state.status === "idle") return "loading";

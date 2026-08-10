@@ -24,25 +24,11 @@
 
         <div v-if="hasDetails" class="divider my-4"></div>
 
-        <dl v-if="hasDetails" class="space-y-3 text-sm">
-          <div v-if="v.vehicle_category" class="flex items-center gap-2">
-            <Icon name="layers" :size="18" class="text-primary shrink-0" />
-            <dt class="text-muted">{{ t("vehicle.category") }}</dt>
-            <dd class="ms-auto font-semibold">{{ v.vehicle_category }}</dd>
-          </div>
-          <div v-if="odometer != null" class="flex items-center gap-2">
-            <Icon name="gauge" :size="18" class="text-primary shrink-0" />
-            <dt class="text-muted">{{ t("vehicle.odometer") }}</dt>
-            <dd class="ms-auto font-semibold">
-              <bdi>{{ odometer }}</bdi> {{ t("vehicle.km") }}
-            </dd>
-          </div>
-          <div v-if="v.planned_fuel_grade" class="flex items-center gap-2">
-            <Icon name="fuel" :size="18" class="text-primary shrink-0" />
-            <dt class="text-muted">{{ t("vehicle.fuelGrade") }}</dt>
-            <dd class="ms-auto font-semibold">{{ v.planned_fuel_grade }}</dd>
-          </div>
-        </dl>
+        <VehicleFacts v-if="hasDetails" :facts="vehicleFacts" :empty-value="t('common.none')">
+          <template #icon="{ fact }">
+            <Icon v-if="fact.icon" :name="fact.icon" :size="18" class="text-primary shrink-0" />
+          </template>
+        </VehicleFacts>
       </section>
 
       <section v-if="compliance.length" class="card card-pad">
@@ -140,6 +126,7 @@ import Icon from "../components/Icon.vue";
 import LoadingState from "../components/LoadingState.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
+import VehicleFacts from "@shared/components/VehicleFacts.vue";
 import { useI18n } from "../i18n";
 import { pushToast } from "../toast";
 
@@ -175,6 +162,31 @@ const odometer = computed(() => {
 
 const hasDetails = computed(
   () => !!(v.value?.vehicle_category || odometer.value != null || v.value?.planned_fuel_grade),
+);
+
+const vehicleFacts = computed(() =>
+  [
+    v.value?.vehicle_category && {
+      key: "category",
+      icon: "layers",
+      label: t("vehicle.category"),
+      value: v.value.vehicle_category,
+    },
+    odometer.value != null && {
+      key: "odometer",
+      icon: "gauge",
+      label: t("vehicle.odometer"),
+      value: odometer.value,
+      suffix: t("vehicle.km"),
+      numeric: true,
+    },
+    v.value?.planned_fuel_grade && {
+      key: "grade",
+      icon: "fuel",
+      label: t("vehicle.fuelGrade"),
+      value: v.value.planned_fuel_grade,
+    },
+  ].filter(Boolean),
 );
 
 const compliance = computed(() => v.value?.compliance || []);
