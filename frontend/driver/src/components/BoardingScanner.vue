@@ -59,6 +59,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { Button, createResource } from "frappe-ui";
+import { cameraFailure, cameraState } from "@shared/camera";
 import { useOverlay } from "@shared/useOverlay.js";
 import Icon from "./Icon.vue";
 import { useI18n } from "../i18n";
@@ -100,19 +101,11 @@ const resultIcon = computed(() => meta.value.icon);
 const resultTitleKey = computed(() => meta.value.title);
 const resultHintKey = computed(() => meta.value.hint);
 
-function supported() {
-  return (
-    typeof window !== "undefined" &&
-    "BarcodeDetector" in window &&
-    navigator.mediaDevices &&
-    typeof navigator.mediaDevices.getUserMedia === "function"
-  );
-}
-
 async function start() {
-  if (!supported()) {
+  const state = await cameraState();
+  if (state !== "ready") {
     phase.value = "error";
-    errorMsg.value = t("boarding.unsupported");
+    errorMsg.value = t(`boarding.camera_${state}`);
     return;
   }
   try {
@@ -128,7 +121,7 @@ async function start() {
     loop();
   } catch (e) {
     phase.value = "error";
-    errorMsg.value = t("boarding.cameraDenied");
+    errorMsg.value = t(`boarding.camera_${cameraFailure(e)}`);
   }
 }
 

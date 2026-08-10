@@ -33,7 +33,7 @@
       <template #prefix><Icon name="qr" :size="18" /></template>
     </Button>
 
-    <p v-if="!supported" class="hint">{{ t("custody.scanUnsupported") }}</p>
+    <p v-if="!supported" class="hint">{{ stateHint }}</p>
     <p v-else-if="live" class="hint">{{ t("custody.scanHint") }}</p>
     <p v-if="cameraError" class="status-note status-err">{{ cameraError }}</p>
 
@@ -42,8 +42,9 @@
 </template>
 
 <script setup>
-import { onUnmounted, ref } from "vue";
+import { computed, onUnmounted, ref } from "vue";
 import { Button, FormControl } from "frappe-ui";
+import { cameraFailure, cameraState, onCameraChange } from "@shared/camera";
 import Icon from "./Icon.vue";
 import { useI18n } from "../i18n";
 
@@ -55,10 +56,17 @@ const live = ref(false);
 const cameraError = ref("");
 const videoEl = ref(null);
 
-const supported =
-  typeof window !== "undefined" &&
-  "BarcodeDetector" in window &&
-  !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+const state = ref("unsupported");
+const supported = computed(() => state.value === "ready");
+const stateHint = computed(() =>
+  state.value === "ready" ? "" : t(`custody.camera_${state.value}`),
+);
+
+async function readCamera() {
+  state.value = await cameraState();
+}
+readCamera();
+const stopWatchingDevices = onCameraChange(readCamera);
 
 let stream = null;
 let detector = null;
@@ -84,8 +92,9 @@ async function start() {
     await video.play();
     timer = window.setInterval(scanFrame, 400);
   } catch (e) {
-    cameraError.value = t("custody.scanDenied");
+    cameraError.value = t(`custody.camera_${cameraFailure(e)}`);
     stop();
+    readCamera();
   }
 }
 
@@ -116,7 +125,10 @@ function stop() {
   if (videoEl.value) videoEl.value.srcObject = null;
 }
 
-onUnmounted(stop);
+onUnmounted(() => {
+  stop();
+  stopWatchingDevices();
+});
 </script>
 
 <style scoped>
