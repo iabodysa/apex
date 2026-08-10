@@ -41,9 +41,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import today
 
-from apex.habitat.doctype.custody_handover.custody_handover import (
-    generate_otp,
-)
 from apex.habitat.asset_movement_engine import (
     ensure_asset_still_at,
     ledgered_origin,
@@ -91,12 +88,12 @@ class FacilityAssetDelivery(Document):
             )
 
     def on_submit(self):
-        """Open the 3-exit lock (status Pending Exits) and issue the on-site code
-        to the initiator. The asset does NOT move yet — it moves only when all
-        three exits pass (Released) and the receiving side confirms the code."""
+        """Open the exit lock (status Pending Exits). The asset does NOT move yet — it
+        moves only when the exits pass (Released) and the receiving side confirms the
+        code. The code is issued at release, not here: confirm_receipt refuses anything
+        that is not Released, so a code minted at submit could never be used, and the
+        release step replaced it anyway."""
         self.db_set("status", "Pending Exits")
-        code = generate_otp(self)
-        frappe.response["delivery_otp"] = code
 
     def on_cancel(self):
         """Reverse the movement ledger if the asset already moved (Delivered), then

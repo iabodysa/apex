@@ -109,11 +109,11 @@ def _pass_exit(delivery: str, n: int):
         }
     )
 
+    code = None
     if n == 3:
         doc.db_set("status", "Released")
         code = generate_otp(doc)
-        frappe.response["delivery_otp"] = code
-    return doc.name
+    return {"delivery": doc.name, "code": code}
 
 
 def _exit_slug(n: int) -> str:

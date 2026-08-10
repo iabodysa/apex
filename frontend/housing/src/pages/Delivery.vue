@@ -360,9 +360,14 @@ async function passExit() {
   busy.value = del.name;
   actionError.value = "";
   try {
-    await call(EXIT_METHOD[n], { args: { delivery: del.name }, type: "POST" });
+    const cleared = await call(EXIT_METHOD[n], { args: { delivery: del.name }, type: "POST" });
     confirmOpen.value = false;
     toast.create({ type: "success", message: t("delivery.exitCleared") });
+    if (cleared && cleared.code) {
+        codeValue.value = cleared.code;
+        codeError.value = "";
+        codeOpen.value = true;
+    }
     await reloadDeliveries();
   } catch (err) {
     actionError.value = apiErrorMessage(err);
