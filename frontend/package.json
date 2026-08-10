@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "test": "npm test -w frontend_shared && node worker/phone.test.mjs && node worker/qrColor.test.mjs && node worker/pullToRefresh.test.mjs"
+    "test": "npm test -w frontend_shared && vitest run --root fleet_os && vitest run --root housing && vitest run --root route_supervisor && node worker/phone.test.mjs && node worker/qrColor.test.mjs && node worker/pullToRefresh.test.mjs && node worker/portalLibraryControls.test.mjs"
   },
   "dependencies": {
     "frappe-ui": "^0.1.0",

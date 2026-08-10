@@ -23,8 +23,13 @@ assert.match(toastAdapter, /toast\.create\s*\(/);
 assert.doesNotMatch(toastAdapter, /toast\.(?:success|error)\s*\(/);
 assert.doesNotMatch(toastAdapter, /\bref\s*\(|\btoasts\b/);
 
+// Navigation stays DECLARATIVE: the destination is bound on the element that carries
+// it, never pushed imperatively from a handler. The binding used to be a frappe-ui
+// Button's `route` prop on a floating action; that action was removed when the shell
+// and the page dock both claimed the bottom of the screen, so the assertion follows
+// the shape that survived rather than the instance that did not.
 const workerApp = read(WORKER, "src/App.vue");
-assert.match(workerApp, /:route="scene\.action\.to"/);
+assert.match(workerApp, /<router-link[\s\S]{0,200}:to="tab\.to"/);
 assert.doesNotMatch(workerApp, /\buseRouter\b|router\.push/);
 
 for (const [root, relativePath] of [

@@ -22,6 +22,13 @@ jobs:
     # workspace of the single frontend/ npm workspace but is NOT a portal: it declares
     # no deps of its own (they live in frontend/package.json) and emits no bundle, so
     # this job cannot affect the committed portal bundles or the bundle-guard job.
+    #
+    # The step below invokes the frontend workspace root's own `npm test` rather than
+    # `npm test -w frontend_shared`. It used to name the frontend_shared workspace
+    # directly, which meant the per-portal suites the root script also runs were never
+    # executed by CI at all: the job's name is historical, its scope is now every
+    # frontend test the root script knows about. Wire a new suite into that one script
+    # and it is guarded here automatically — there is no second list to keep in sync.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -35,6 +42,6 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Run shared-component vitest
+      - name: Run the frontend test suite
         working-directory: frontend
-        run: npm test -w frontend_shared
+        run: npm test
