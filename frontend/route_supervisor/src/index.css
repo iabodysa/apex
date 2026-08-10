@@ -128,7 +128,6 @@ textarea {
   line-height: 1.65;
 }
 
-/* Decision inbox */
 .decision-ledger,
 .plan-ledger {
   margin: 0;
@@ -209,7 +208,6 @@ textarea {
   padding-inline-start: 3.5rem;
 }
 
-/* Plan directory and selected-plan workspace */
 .plan-workspace {
   min-inline-size: 0;
   display: grid;
@@ -401,7 +399,6 @@ textarea {
   min-inline-size: 0;
 }
 
-/* Evidence sections */
 .section-heading {
   margin-block-end: var(--sp-5);
   padding-block-end: var(--sp-4);
@@ -624,7 +621,6 @@ textarea {
   font-weight: var(--fw-heading);
 }
 
-/* Live plan evidence */
 .driver-map {
   min-inline-size: 0;
 }

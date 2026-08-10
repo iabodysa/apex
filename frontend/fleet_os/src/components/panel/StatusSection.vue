@@ -82,8 +82,6 @@ const options = computed(() => [
   { key: "stolen", icon: "shield-alert", label: t("statusTab.stolenLabel"), desc: t("statusTab.stolenDesc") },
 ]);
 
-/* Reporting a theft is only offered where it makes sense — a vehicle a driver is holding has
-   to be stopped first, and one already reported has a recovery path instead. */
 const canReportTheft = computed(() =>
   ["available", "stopped"].includes(props.vehicle.vehicle_status),
 );

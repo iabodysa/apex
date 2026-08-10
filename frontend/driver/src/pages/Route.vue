@@ -289,11 +289,6 @@ const tripRoute = createResource({
   makeParams: () => ({ dispatch_trip: props.trip }),
 });
 
-/* `/route` and `/route/:trip` are two records over ONE component, and vue-router renders the
-   view unkeyed — so moving between them patches the same instance instead of remounting it.
-   `auto` is read once when the resource is created, so whichever screen was opened first was
-   the only one that ever fetched, and the other showed "no route" until a full reload.
-   Fetching from a watcher makes the decision follow the parameter. */
 watch(
   () => props.trip,
   (trip) => (trip ? tripRoute.fetch() : route.fetch()),
@@ -347,8 +342,6 @@ async function toggleStop(stop) {
   }
 }
 
-/* The arrival flag is the only thing that lights the worker's "your driver has arrived"
-   panel, and until now nothing in any portal wrote it. */
 const arrival = createResource({
   url: "apex.salis.api.driver_portal.mark_arrived",
   onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),

@@ -229,10 +229,6 @@ const conditionOptions = computed(() =>
     RETURN_CONDITIONS.map((value) => ({ label: tEnum("returnCondition", value), value })),
 );
 
-/* Rows carry the type they were FETCHED under, and the list is empty while that type and
-   the chosen one disagree. Binding the row to the live partyType meant the async re-point
-   left the previous doctype's rows on screen under the new type, so one tap sent a
-   Temporary Worker type with an Employee name. */
 const resultsType = ref(partyType.value);
 const resultsQuery = ref("");
 

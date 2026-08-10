@@ -114,8 +114,6 @@ const grouped = computed(() => {
 });
 
 const scopeHint = computed(() => {
-  /* Without this the hint is simply absent when the scope read fails, so "your account is
-     scoped to no building" and "the scope could not be read" are the same empty screen. */
   if (scopeRes.error) return t("errors.scopeUnknown");
   const state = scopeRes.data;
   if (!state) return "";
@@ -166,8 +164,6 @@ watch(
 .switcher-hero .section-sub {
   margin: 0;
 }
-/* Each building is one subject, so each is one card (DESIGN.md §1) rather than a row in a
-   ruled ledger. It is the first screen the operator meets and it was the flattest. */
 .switcher-group + .switcher-group {
   margin-block-start: var(--sp-5);
 }

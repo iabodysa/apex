@@ -65,7 +65,6 @@ defineProps({
   display: grid;
   align-content: center;
   min-inline-size: 0;
-  /* §06 of the guide sizes a product app bar at 64 and its own mockup draws 68. */
   min-block-size: var(--app-bar);
   padding: var(--sp-3) clamp(var(--sp-4), 4vw, var(--sp-6));
   overflow: hidden;
@@ -80,9 +79,6 @@ defineProps({
   min-inline-size: 0;
 }
 
-/* The identity's background effect. The guide builds it from the mark's own folded paths —
-   a few wide bars at the logo's tilt over open space — and it bans gradients outright
-   (docs/brand §03: "لا تستخدم تدرجات لونية"). Three bars, no blend, nothing under text. */
 .mc-field {
   position: absolute;
   inset: 0;
@@ -120,8 +116,6 @@ defineProps({
   align-items: center;
   gap: var(--sp-3);
   inline-size: 100%;
-  /* The guide sizes a product app bar at 64 (§06) and draws its own at 68 (.app-bar).
-     The mark is what sets that height, so the row carries the floor rather than the mark. */
   min-block-size: var(--mark);
 }
 .mc-greet {
@@ -155,8 +149,6 @@ defineProps({
 
 .mc-body {
   position: relative;
-  /* So the path below can sit behind every pane instead of over them: an absolutely
-     positioned pseudo-element otherwise paints above the backgrounds of static siblings. */
   isolation: isolate;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -166,8 +158,6 @@ defineProps({
   max-inline-size: var(--frame-wide);
   margin-inline: auto;
 }
-/* The same folded path, once, very quiet, so the canvas is a surface rather than a flat
-   fill. It sits behind the frame and never under a control. */
 .mc-body::before {
   content: "";
   position: absolute;
@@ -182,9 +172,6 @@ defineProps({
 
 .mc-frame {
   position: relative;
-  /* A screen inside the frame has to lay itself out against the FRAME, not the window: at
-     1440 the detail pane is about 550px, and a page that split itself on a viewport query
-     put a two-column grid in it and clipped its own rows. Pages query this container. */
   container: mc-frame / inline-size;
   min-inline-size: 0;
   min-block-size: 0;
@@ -197,8 +184,6 @@ defineProps({
   gap: var(--sp-4);
 }
 
-/* DESIGN.md §3: a 560px column from --bp-phone up, so a tablet stops stretching a
-   one-hand column across the whole sheet. */
 @media (min-width: 30rem) {
   .mc-frame > * {
     inline-size: 100%;
@@ -223,9 +208,6 @@ defineProps({
   min-block-size: var(--tap-lg);
 }
 
-/* The guide's signature block (.site-footer): a forest bar carrying the reverse mark and a
-   version line. It is the last thing in the scroll, so it never reaches the hot zone and
-   never competes with the navbar the way a fixed footer would. */
 .mc-signature {
   display: flex;
   align-items: center;
@@ -238,7 +220,6 @@ defineProps({
   font-size: var(--fs-sm);
   line-height: 1.6;
 }
-/* The guide's signature carries the reverse mark at the size of its own cover lockup. */
 .mc-signature :slotted(img) {
   flex: 0 0 auto;
   inline-size: var(--mark);
@@ -285,8 +266,6 @@ defineProps({
   background: color-mix(in srgb, var(--c-primary) 10%, transparent);
 }
 
-/* --bp-desktop 1024. DESIGN.md §3: two panes, list on the reading side and detail filling
-   the rest, with the navbar moved to a side rail. Everything sits inside the 1100 frame. */
 @media (min-width: 64rem) {
   .mc-body {
     grid-template-columns: max-content minmax(0, 1fr);
@@ -316,7 +295,6 @@ defineProps({
     gap: var(--sp-1);
     min-inline-size: 0;
   }
-  /* The guide parks its version line at the foot of its own rail (.rail-version). */
   .mc-rail-foot {
     display: block;
     padding-block-start: var(--sp-3);
@@ -348,7 +326,6 @@ defineProps({
     background: color-mix(in srgb, var(--c-header-accent) 14%, transparent);
   }
 
-  /* §3 puts the list at 360–420 and lets the detail take the rest. */
   .mc-body.has-list {
     grid-template-columns:
       max-content

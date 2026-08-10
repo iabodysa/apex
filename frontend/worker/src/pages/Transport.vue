@@ -288,8 +288,6 @@ function refreshBoarding() {
   boardingResource.reload().catch(() => {});
 }
 
-/* An event is a doorbell. Both reads below go back through the token-scoped endpoints;
-   nothing is rendered out of a socket payload. */
 useWorkerRealtime((event) => {
   refreshBoarding();
   if (event === "driver_trip_update") tr.reload().catch(() => {});

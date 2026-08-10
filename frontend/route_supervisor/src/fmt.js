@@ -9,9 +9,6 @@ export function ageLabel(seconds, t) {
 }
 
 export function agoLabel(value, lang) {
-  /* Intl.RelativeTimeFormat is the platform's own, and it carries the Arabic dual and the
-     plural rules that a {n} template cannot. A Frappe datetime is "YYYY-MM-DD HH:MM:SS" in
-     the site's timezone, which Date only parses with the T separator. */
   if (!value) return "";
   const then = new Date(String(value).replace(" ", "T"));
   if (Number.isNaN(then.getTime())) return String(value);
@@ -33,8 +30,6 @@ export function pct(boarded, expected) {
   return Math.min(100, Math.round((boarded / expected) * 100));
 }
 
-/* A response that started earlier must never land on top of a newer one. Each caller takes a
-   ticket before it fetches and only writes when its ticket is still the latest one issued. */
 export function createSequence() {
   let issued = 0;
   return {

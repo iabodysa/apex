@@ -98,8 +98,6 @@ const { vehicles, loadState, reloadFleet } = board;
 const filters = useFleetFilters({ vehicles, board: state, fmt, t });
 const selection = useSelection(filters.filtered);
 
-/* The open vehicle is derived from the address and the freshly loaded board, so a reload keeps
-   the panel showing current data and a vehicle that leaves the board closes its own panel. */
 const panelVehicle = computed(
   () => vehicles.value.find((v) => v.plate === state.openPlate.value) || null,
 );
@@ -148,9 +146,6 @@ const alertsApi = useAlerts({
 });
 const { alertTotal, loadAlerts } = alertsApi;
 
-/* One capability arrives from the page: whether the driver lens is offered. It is a display
-   gate — the rows behind it come down in get_fleet_os regardless — and the server decides it,
-   so it is read exactly as published rather than assumed. */
 const caps = (typeof window !== "undefined" && window.fleet_caps) || {};
 const canDriverLens = computed(() => caps.driver_lens === true);
 
@@ -192,10 +187,6 @@ provideBoardContext({
   showToast,
 });
 
-/* The board refuses to repaint under the supervisor's hands. All five conditions are behaviour
-   earned by real breakage: never while the first load is still running, never while a
-   confirmation is open, never while a sub-form is half typed, never while a per-vehicle action
-   is in flight, and never while anything is selected. */
 const POLL_MS = 30000;
 const paused = computed(
   () =>
@@ -219,8 +210,6 @@ async function tick() {
   await refreshAll();
 }
 
-/* An update that arrives during a pause is remembered and replayed the moment the pause lifts,
-   rather than dropped — the supervisor finishes his action and then sees the newer board. */
 async function onRealtimeUpdate() {
   if (document.hidden || paused.value) {
     realtimePending.value = true;

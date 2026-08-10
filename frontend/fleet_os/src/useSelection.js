@@ -3,9 +3,6 @@ import { computed, ref } from "vue";
 
 export const MAX_BULK_SELECTION = 50;
 
-/* Selection stays in memory on purpose. It is the one piece of board state nobody expects to
-   survive a refresh, and a list of plates in the address would make a shared link act on the
-   receiver's fleet rather than show him the sender's view. */
 export function useSelection(filtered) {
   const selectMode = ref(false);
   const selected = ref(new Set());

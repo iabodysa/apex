@@ -169,12 +169,6 @@ import { building, buildingLabel, clearBuilding, selectBuilding } from "./sessio
 
 const { t, lang, dir } = useI18n();
 
-/* A building restored from this browser is a CLAIM, not a fact — it may have been chosen
-   against another site, or removed since. Left unchecked it is worse than having none: the
-   portal believes one is selected, never offers the picker, and every page reads forever
-   against a name the server has never heard of. The desk page has validated its own stored
-   building for as long as it has existed (front_desk.js:197-205); this is those three lines,
-   moved to the portal, so the right state is produced instead of the wrong one detected. */
 const storedCheck = createResource({
   url: "apex.habitat.api.front_desk.list_supervisor_buildings",
   onSuccess: (rows) => {
@@ -199,10 +193,6 @@ const currentSection = computed(() => (route.meta && route.meta.section) || "");
 const currentDomain = computed(
   () => (route.meta && route.meta.domain) || domainForSection(currentSection.value),
 );
-/* The chip that names the working scope shows in EVERY section. Count and delivery choose
-   their building inside the screen, so it used to be hidden there — and the operator watched
-   their scope vanish just by moving between tabs. Which section OWNS the choice is a
-   different question from whether the reader may see and change it. */
 const usesBuilding = computed(() => BUILDING_SECTIONS.has(currentSection.value));
 const showsBuilding = computed(() => usesBuilding.value || ASSET_SECTIONS.has(currentSection.value));
 const needsBuilding = computed(() => usesBuilding.value && !building.value);
@@ -222,8 +212,6 @@ const sceneIcon = computed(() => {
   const section = SECTIONS.find((entry) => entry.id === currentSection.value);
   return section ? section.icon : "calendar";
 });
-/* The Arabic lockup stores its wordmark as outlines and the English one is a separate
-   master, so the language picks the file — it is never one asset with swapped text. */
 const lockupVariant = computed(() => (lang.value === "ar" ? "lockup-ar" : "lockup-en"));
 const year = new Date().getFullYear();
 const sceneSubtitle = computed(() =>
@@ -231,9 +219,6 @@ const sceneSubtitle = computed(() =>
 );
 
 const subsections = computed(() => sectionsForDomain(currentDomain.value));
-/* Count and delivery were excluded BY NAME, so the whole context pane vanished on them —
-   and the building chip with it. They own a wide two-pane list of their own, so they keep a
-   narrow rail carrying the scope and the section nav, not the full pane. */
 const WIDE_LIST_SECTIONS = new Set(["count", "delivery"]);
 
 const showContextList = computed(() => !!currentSection.value && !needsBuilding.value);
@@ -253,9 +238,6 @@ function domainActive(domain) {
   return currentDomain.value === domain.id;
 }
 
-/* The count progress lived in the HEADER, so it appeared the moment a first item was
-   counted and pushed every screen down under it. The count screen already states the same
-   number in its own dock, next to the button that acts on it. */
 
 useDocumentLanguage(lang, dir);
 </script>
@@ -295,16 +277,9 @@ useDocumentLanguage(lang, dir);
   flex: 1 1 auto;
   gap: var(--sp-4);
 }
-/* The two sides of the row used to fight: the chip took 342 of the 358px and the identity
-   was squeezed to 4px, and once the chip was bounded a long English product name pushed the
-   language control off the canvas instead. The actions are now a fixed, bounded width and
-   the identity takes what is left and wraps inside it. */
 .console-actions {
   flex: 0 0 auto;
 }
-/* The guide's clear space is the width of the mark's base opening — 23 of its 64 units.
-   At --mark that is ~16px, and giving the mark that room is most of what makes it read as
-   a mark rather than a favicon. */
 .brand-mark {
   display: grid;
   place-items: center;
@@ -313,8 +288,6 @@ useDocumentLanguage(lang, dir);
   border-inline-end: var(--border-width) solid
     color-mix(in srgb, var(--c-header-accent) 34%, transparent);
 }
-/* The token is the size; the width and height attributes on the element are only there so
-   the box is reserved before the file arrives. */
 .brand-mark :deep(img) {
   inline-size: var(--mark);
   block-size: var(--mark);
@@ -337,10 +310,6 @@ useDocumentLanguage(lang, dir);
   font-family: var(--font-serif);
   font-size: var(--fs-sm);
 }
-/* The chip's own rules live in index.css, unscoped: a scoped selector does not reach the
-   root of a frappe-ui Button, which is why it kept its library width, pushed the language
-   control off the canvas at 390 and printed under the mark. tokens.css records the same
-   trap for LangToggle. */
 .console-scene {
   min-inline-size: 0;
   outline: none;
@@ -349,7 +318,6 @@ useDocumentLanguage(lang, dir);
   outline: 3px solid var(--c-focus);
   outline-offset: var(--sp-1);
 }
-/* The guide's .page-head: the disc in its own column, the eyebrow and the title beside it. */
 .scene-heading {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -362,8 +330,6 @@ useDocumentLanguage(lang, dir);
 .scene-copy {
   min-inline-size: 0;
 }
-/* The guide opens every chapter with a mint disc carrying a glyph (.page-number). It is the
-   only round form in the system and the page had none of it. */
 .scene-disc {
   display: grid;
   place-items: center;
@@ -420,12 +386,8 @@ useDocumentLanguage(lang, dir);
 }
 .stage-lockup {
   display: block;
-  /* The guide publishes 96 as the floor for the horizontal lockup and draws it at 160 on an
-     opening screen; an opening screen with room to breathe takes the top of that range. */
   inline-size: clamp(var(--lockup-min), 46vw, calc(var(--lockup) * 1.5));
   block-size: auto;
-  /* The master's own viewBox. Declared so the box is the right shape before the file
-     arrives and the heading under it never jumps. */
   aspect-ratio: 420 / 96;
   margin-inline: auto;
   margin-block-end: clamp(var(--sp-6), 5vw, var(--sp-8));
@@ -471,13 +433,10 @@ useDocumentLanguage(lang, dir);
   gap: var(--sp-4);
   min-inline-size: 0;
 }
-/* Count and delivery own a wide list of their own, so their rail carries the scope and the
-   section nav and gives the rest of the width back. */
 .desktop-context.is-narrow > h2,
 .desktop-context.is-narrow > .context-copy {
   display: none;
 }
-/* The pane replaces the scene heading at --bp-desktop, so it carries the same disc. */
 .desktop-context .scene-disc {
   margin-block-end: calc(-1 * var(--sp-2));
 }
@@ -567,8 +526,6 @@ useDocumentLanguage(lang, dir);
   color: var(--c-primary);
 }
 
-/* --bp-desktop 1024, the width at which the shell opens the list pane. It was 72rem, so
-   between 1024 and 1152 the title, the subtitle and the section tabs were drawn twice. */
 @media (min-width: 64rem) {
   .has-context-list .scene-heading,
   .has-context-list .context-nav {
@@ -588,9 +545,6 @@ useDocumentLanguage(lang, dir);
   }
 }
 
-/* 320 is the narrowest width the guide supports (§09). There the row holds the mark and the
-   two controls and nothing else — which is the guide's product-bar rule anyway: the mark
-   goes at the start of the app bar and the title belongs to the content. */
 @media (max-width: 23rem) {
   .brand-copy {
     display: none;

@@ -42,8 +42,6 @@ export function useDriverAssignment({
     handoverMissing.value = false;
   }
 
-  /* The picker binds the canonical driver record name, never the free text: the typed query is
-     a search term and the value sent to the server is an id the server checks again. */
   async function runSearch(query) {
     driverLoading.value = true;
     const ticket = ++issued;
@@ -83,10 +81,6 @@ export function useDriverAssignment({
     window.open("/salis-driver", "_blank", "noopener");
   }
 
-  /* Two writes, and the second is deliberately best-effort: a handover that fails must not undo
-     an assignment the yard has already acted on. What was missing is the record of it — the
-     flag below keeps "assigned, handover not captured" on screen instead of letting a warning
-     toast disappear and take the fact with it. */
   async function submitReassign() {
     const v = panelVehicle.value;
     if (!v) return;

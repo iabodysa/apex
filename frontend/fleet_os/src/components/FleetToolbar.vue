@@ -68,10 +68,6 @@ const { filtered } = filters;
 const { selectMode, toggleSelectMode } = selection;
 const { sheetOpen } = useFilterSheet();
 
-/* One control writes the sort, and it writes the address. The board used to keep the sort in
-   two places — a `sort` value the list read and a `sortCol` the table headers read — so
-   clearing the filters reset one and left the other, and the next header click started
-   descending. */
 const sortOptions = computed(() => [
   { label: t("main.sortPlate"), value: "plate" },
   { label: t("main.sortStatus"), value: "status" },

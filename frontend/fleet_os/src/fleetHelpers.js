@@ -114,8 +114,6 @@ export function hasOpenIncident(v) {
   );
 }
 
-/* The server omits an empty child table rather than sending an empty list, so every consumer
-   would otherwise have to guard each one. */
 export function normalize(v) {
   if (!Array.isArray(v.damages)) v.damages = [];
   if (!Array.isArray(v.accidents)) v.accidents = [];

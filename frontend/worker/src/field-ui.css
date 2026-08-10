@@ -191,7 +191,6 @@ body {
   color: var(--c-warning);
 }
 
-/* Quiet Ascent surfaces: one stage, then a continuous ledger of evidence. */
 .card,
 .pane {
   min-inline-size: 0;
@@ -233,7 +232,6 @@ body {
   line-height: 1.45;
 }
 
-/* Legacy classes remain only as adapters while visible controls use frappe-ui. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -545,7 +543,6 @@ body {
   min-block-size: var(--tap-min);
 }
 
-/* Frappe UI semantic color adapters. */
 .bg-surface-white { background-color: var(--surface-white); }
 .bg-surface-gray-1 { background-color: var(--surface-gray-1); }
 .bg-surface-gray-2 { background-color: var(--surface-gray-2); }

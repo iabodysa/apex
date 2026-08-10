@@ -3,9 +3,6 @@ import { computed } from "vue";
 
 import { calcTotalDaysNum, hasOpenIncident, trim } from "./fleetHelpers.js";
 
-/* Derives the visible list from the vehicles and the address. It holds no state of its own —
-   that is the point: the sort key the list actually reads is the one in the URL, so clearing
-   the filters cannot leave a stale sort behind the way a second copy of it did. */
 export function useFleetFilters({ vehicles, board, fmt, t }) {
   const { f, sort, sortDir } = board;
   const { expiryFlag, statusKey } = fmt;

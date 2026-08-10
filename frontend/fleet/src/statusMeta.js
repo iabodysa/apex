@@ -1,7 +1,5 @@
 // Copyright (c) 2026, afmcoltd
 
-/* Colour never carries a state on its own here: each entry pairs a badge theme with the word
-   the reader sees, so a colour-blind reader and a printed screenshot both keep the meaning. */
 const VEHICLE = {
   available: { theme: "green", key: "statusShort.available" },
   assigned: { theme: "green", key: "statusShort.assigned" },

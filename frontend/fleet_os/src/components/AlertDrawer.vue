@@ -61,14 +61,11 @@ import { useBoardContext } from "../boardContext.js";
 const { t, state, alerts: api } = useBoardContext();
 const { alerts, alertsState, alertsError, loadAlerts, sevTheme, sevLabel, alertVehicleOnBoard, openAlertTarget } = api;
 
-/* The drawer is a place in the address, so Back closes it and a link can open it. */
 const open = computed({
   get: () => state.alertsOpen.value,
   set: (value) => state.setAlerts(value),
 });
 
-/* Opening the drawer is the moment the supervisor asked to see the alerts, so they are read
-   again then — the background poll may be many seconds old. */
 watch(open, (isOpen) => {
   if (isOpen) loadAlerts();
 });

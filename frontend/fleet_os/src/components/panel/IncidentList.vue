@@ -49,8 +49,6 @@ const rows = computed(() =>
   isDamages.value ? props.vehicle.damages : props.vehicle.accidents,
 );
 
-/* The two logs settle on different words, so the closed state is asked for by kind rather than
-   by a single status string that only one of them uses. */
 const settled = (row) => (isDamages.value ? row.status === "completed" : row.status === "closed");
 const badgeLabel = (row) => {
   if (isDamages.value) return settled(row) ? t("damages.repaired") : t("damages.damage");

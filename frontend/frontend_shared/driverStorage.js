@@ -2,10 +2,6 @@
 
 const LEGACY_DRIVER_PAYLOAD_PREFIX = "salis_portal_cache:";
 
-/* Both token portals once kept one holder's payloads in localStorage under a key that
-   was the same for every holder, so a reissued token or a shared phone rendered the
-   previous person's data. Nothing is cached there any more; this clears what earlier
-   builds left behind, on every boot. */
 export function purgePayloadStorage(storage, prefix) {
   if (!storage || !prefix) return;
   const doomed = [];

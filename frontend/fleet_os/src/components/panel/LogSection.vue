@@ -60,7 +60,6 @@ const { t, fmt } = useBoardContext();
 
 const items = computed(() => fmt.historyItems(props.vehicle));
 
-/* An open assignment is measured to today; a closed one to the day it ended. */
 const durationOf = (d) =>
   fmt.calcDur(d.date_receive, d.date_deliver || (d.status === "Active" ? fmt.today() : ""));
 </script>

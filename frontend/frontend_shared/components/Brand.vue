@@ -4,15 +4,6 @@
 </template>
 
 <script setup>
-/* The approved marks are SVG masters, so this component chooses one and never redraws it.
-   Path data lives in the files under assets/logo/ — copies of docs/brand/assets/logo/ and
-   byte-identical to them — because a mark redrawn inside a component is a second master that
-   drifts. Each variant already carries its own fills, which is why nothing here recolours.
-
-   `mark` reads on light surfaces, `reverse` on the forest brand field, `mono` for one-colour output
-   such as print or a stamp. The lockups pair the mark with the wordmark and are the only
-   correct choice beside a product name; the Arabic one stores its wordmark as outlines, so it
-   must never be rebuilt from a runtime font. */
 import { computed } from "vue";
 
 import appIcon from "../assets/logo/apex-app-icon.svg";

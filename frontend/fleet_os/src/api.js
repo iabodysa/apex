@@ -4,10 +4,6 @@ import { call } from "@shared/call";
 const FLEET_OS = "apex.salis.api.fleet_os";
 const ALERTS = "apex.salis.api.operations_alerts";
 
-/* Twelve endpoints, eleven of them in one module: the module path is named once here so a
-   rebuild that greps for a literal dotted path finds the whole surface in one file. Every one
-   is whitelisted, and each write re-resolves the plate through a permission check on the
-   server — a plate string from this client is never trusted as a record id. */
 const fleetOs = (method, opts = {}) => call(FLEET_OS + "." + method, opts);
 const post = (method, args) => fleetOs(method, { args, type: "POST" });
 

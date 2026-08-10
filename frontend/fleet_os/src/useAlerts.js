@@ -11,8 +11,6 @@ export function useAlerts({ vehicles, t, openVehicle, closeAlerts }) {
   const alertsError = ref("");
   let issued = 0;
 
-  /* Sequenced for the same reason the board is: the drawer, the poll and the realtime handler
-     all start this read, and the older answer must not win. */
   async function loadAlerts() {
     if (alertsState.value !== "ready") alertsState.value = "loading";
     const ticket = ++issued;

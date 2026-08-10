@@ -48,7 +48,6 @@ const ICONS = {
   x,
 };
 
-/* Direction glyphs flip in RTL; object glyphs (a bus, a pin) never do. */
 const MIRROR = ["chevron"];
 
 defineProps({

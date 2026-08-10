@@ -2,13 +2,6 @@
 import { io } from "socket.io-client";
 import { onUnmounted, watch } from "vue";
 
-/* The realtime binding both token portals use. A portal session is Guest, so the only
-   room its socket may join is the task room, and that room id is handed over by the
-   portal's own already-authenticated context call — never derived here. A client that
-   can compute its own room can compute someone else's.
-
-   Nothing below reads a field out of a payload: an event is a doorbell, and every
-   subscriber refetches through its own token-scoped endpoint. */
 
 function socketSettings(globalName) {
   const conf = (typeof window !== "undefined" && window[globalName]) || {};
@@ -73,8 +66,6 @@ export function connectPortalRoom({ socketGlobal, room, events, onEvent }) {
   };
 }
 
-/* One socket per portal, however many screens listen. Two components each opening
-   their own connection to the same room is waste that doubles every refetch. */
 export function createRealtimeHub({ socketGlobal, events, room }) {
   const subscribers = new Set();
   let joinedRoom = "";

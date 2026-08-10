@@ -62,10 +62,6 @@ export function useFleetActions({
     subForm.value = "stop";
   }
 
-  /* Stopping and then choosing where the vehicle lands is two writes with no server-side
-     transaction between them. If the second fails the vehicle IS stopped, so the message has
-     to say which half went through — a bare "the action could not be completed" left the
-     supervisor guessing, and the board reloads either way so the truth is on screen. */
   async function confirmStop() {
     const v = panelVehicle.value;
     if (!v || !v.current_driver) return;

@@ -36,10 +36,6 @@
   --header-bg: #072b1a;
   --header-ink: #f8f5ee;
   --header-accent: #60d297;
-  /* The identity guide forbids gradients and gets depth from angled paths instead
-     (docs/brand/index.html §05: "مسارات بزاوية ٦٥٫٠٥٣ درجة، بخطوط قليلة ومساحات مفتوحة").
-     These three are the paint for those paths. They sit under nothing that is read, so
-     they carry no contrast ratio; the ink over them is measured against --header-bg. */
   --arc: rgba(96, 210, 151, 0.16);
   --arc-strong: rgba(96, 210, 151, 0.3);
   --arc-action: rgba(0, 132, 78, 0.42);
@@ -99,11 +95,6 @@
   --tap-md: 48px;
   --tap-min: 44px;
 
-  /* Brand geometry, every value taken from docs/brand/identity.css so the product and the
-     guide cannot drift. --mark is the size the guide gives its own cover lockup and its
-     signature bar; --mark-sm is the app-bar mark of the product mockup; --mark-lg is the
-     splash. --lockup is the width the guide sets for an opening screen, --lockup-min the
-     floor it publishes for the horizontal lockup. --disc is the guide's chapter numeral. */
   --app-bar: 68px;
   --mark: 44px;
   --mark-lg: 84px;
@@ -113,8 +104,6 @@
   --brand-tilt: 25deg;
   --brand-bar: 28px;
 
-  /* DESIGN.md §3, the field-worker row: one column to 480, a 560px column to 1023, and a
-     1100px centred frame above it. */
   --frame-column: 560px;
   --frame-wide: 1100px;
   --pane-list-min: 360px;
@@ -206,18 +195,11 @@ bdi,
   outline-offset: 2px;
 }
 
-/* frappe-ui sizes its controls for a mouse: the TabButtons group ships min-h-7 (28px)
-   and a FormControl's select trigger renders at 32px. Both are under the 44px a finger
-   needs, and neither exposes a size prop. The floor is set once here rather than in each
-   portal that adopts them. */
 .min-h-7 button,
 [class~="space-y-1.5"] > button {
   min-block-size: var(--tap-min);
 }
 
-/* The same reason, from the other side: a scoped rule in a component that puts a class on
-   a frappe-ui Button does not reach that Button's root, so LangToggle's own 44px floor was
-   computing as `auto` and the language buttons rendered 38px wide. Set here, unscoped. */
 .lang-opt {
   min-inline-size: var(--tap-min);
   min-block-size: var(--tap-min);

@@ -3,9 +3,6 @@ import { call } from "@shared/call";
 
 export const API = "apex.salis.api.route_supervisor";
 
-/* The module path is declared once and composed, so a rename touches one line rather than
-   seven call sites. Every method below is whitelisted server-side and re-derives the
-   supervisor's scope there; nothing here is an authorization decision. */
 function callApi(method, opts = {}) {
   return call(API + "." + method, opts);
 }

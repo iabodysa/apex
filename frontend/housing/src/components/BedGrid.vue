@@ -149,9 +149,6 @@ function bedLabel(bed) {
   font-weight: var(--fw-heading);
   color: var(--c-muted);
 }
-/* One room is one subject, so it is one card (DESIGN.md §1). It was named a card while
-   drawing a hairline over a transparent ground, which is what made the board read as a
-   wireframe. */
 .room-card {
   display: flex;
   flex-direction: column;

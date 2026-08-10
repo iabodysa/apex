@@ -23,9 +23,6 @@ import EmptyState from "@shared/components/EmptyState.vue";
 import Icon from "../Icon.vue";
 import { useBoardContext } from "../boardContext.js";
 
-/* Three different nothings, and the board must never confuse them: no project is an access
-   gap the supervisor has to raise with his manager, no match is his own filters, and an empty
-   fleet is the truth. */
 defineProps({
   icon: { type: String, default: "car" },
 });

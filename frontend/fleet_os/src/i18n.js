@@ -1,15 +1,9 @@
 // Copyright (c) 2026, afmcoltd
 import { createI18n } from "@shared/i18n";
 
-/* This board's own key. It used to share `fleet_portal_lang` with /fleet, so a language chosen
-   on the employee page silently changed the supervisor board and back again; every other
-   portal keys its own preference and this one now does too. */
 const STORAGE_KEY = "fleet_os_portal_lang";
 export const SUPPORTED = ["en", "ar"];
 
-/* `errors.rateLimited` and `errors.sessionExpired` are deliberately absent: they live in
-   frontend_shared/sharedMessages.js, the lookup falls through to it on a miss, and the copies
-   that used to sit here were word-for-word duplicates waiting to drift. */
 const messages = {
   en: {
     common: {

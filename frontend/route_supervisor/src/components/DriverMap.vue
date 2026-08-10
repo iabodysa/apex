@@ -132,8 +132,6 @@ function ensureMap() {
     .addTo(map);
 }
 
-/* A marker for a bus: the glyph is decorative and the position is what carries meaning, so the
-   readout beside the map repeats it for anyone who cannot see the pin. */
 function busIcon() {
   return L.divIcon({
     className: "driver-marker",

@@ -179,8 +179,6 @@ const PAGE_LENGTH = 50;
 const DEFAULT_CENTER = [24.7136, 46.6753];
 const DEFAULT_ZOOM = 10;
 
-/* Both filters live in the address so a supervisor can send "these drivers, this plan" to a
-   colleague and refresh without losing the narrowing he just did. */
 const driverFilter = computed(() => String(route.query.driver || ""));
 const planFilter = computed(() => String(route.query.plan || ""));
 const driverSelectValue = computed(() =>
@@ -220,9 +218,6 @@ const driverOptions = computed(() => {
   ];
 });
 
-/* Two live trips can share one route plan, so the rows are collapsed by plan before they
-   become options — mapping rows straight to options produced duplicate keys and a list that
-   offered the same plan twice. */
 const planOptions = computed(() => {
   const byPlan = new Map();
   for (const row of rows.value) {

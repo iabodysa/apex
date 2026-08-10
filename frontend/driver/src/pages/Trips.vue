@@ -294,8 +294,6 @@ async function complete(trip) {
 
 const wait = ref(null);
 
-/* A wait request names the bus it came from. Raising it without that name put a
-   worker from one trip in front of a driver who was running another. */
 function onPortalEvent(event, payload) {
   if (event === "driver_trip_update") {
     today.reload();

@@ -15,9 +15,6 @@ import { resourceErrorMessage } from "@/i18n";
 
 const PLANS = Symbol("apex.route-supervisor.plans");
 
-/* One store for the plan list, its counters and the two decisions, created once at the root and
-   handed to the views through provide/inject. Two stores would mean a plan decided in the queue
-   stays Pending in the detail until the next poll. */
 export function createPlansStore() {
   const ctx = ref(null);
   const loadState = ref("loading");
@@ -49,8 +46,6 @@ export function createPlansStore() {
     const ticket = seq.next();
     try {
       const res = await getSupervisorContext();
-      /* The 45 s poll, the realtime handler and the manual refresh all land here, so a slow
-         response can finish after a newer one. Only the latest ticket may write. */
       if (!seq.isCurrent(ticket)) return;
       ctx.value = res;
       const contextNames = new Set((res.plans || []).map((plan) => plan.name));
@@ -111,8 +106,6 @@ export function createPlansStore() {
     }
   }
 
-  /* Both writers return the outcome rather than raising a toast themselves: the caller owns the
-     words, and the verb on the toast has to match the verb on the button that was pressed. */
   async function approve(name) {
     if (!name || busy.value) return { ok: false };
     busy.value = true;

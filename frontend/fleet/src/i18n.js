@@ -1,14 +1,9 @@
 // Copyright (c) 2026, afmcoltd
 import { createI18n } from "@shared/i18n";
 
-/* This page's own key. It used to share `fleet_portal_lang` with /fleet-os, so a language
-   chosen on the supervisor board silently changed the employee page and back again; every
-   other portal keys its own preference and this one now does too. */
 const STORAGE_KEY = "fleet_portal_lang";
 export const SUPPORTED = ["en", "ar"];
 
-/* Only what this page renders. The table used to carry the fleet supervisor board's whole
-   vocabulary — twenty-five namespaces — left behind when the board moved to /fleet-os. */
 const messages = {
   en: {
     common: {

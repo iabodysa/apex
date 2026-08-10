@@ -139,9 +139,6 @@ const { f, hasDateFilter, setFilter, setQuickDate, clearDates, resetFilters } = 
 
 const { sheetOpen } = useFilterSheet();
 const sheetEl = ref(null);
-/* Below the desktop breakpoint the rail becomes a sheet over the board, and a sheet over the
-   board is a dialog: it traps the focus, Escape closes it, and focus returns to the button
-   that opened it. */
 const narrow = useMediaQuery("(max-width: 860px)");
 const isModal = computed(() => sheetOpen.value && narrow.value);
 useOverlay({ active: isModal, container: sheetEl, close: () => (sheetOpen.value = false) });

@@ -9,8 +9,6 @@ const TOAST_TYPES = {
   red: "error",
 };
 
-/* One toast surface for the whole page, created at the root. A screen that mounts its own ends
-   up with a second surface that outlives the route change it was raised on. */
 export function provideToast() {
   const api = {
     showToast(message, type = "green") {

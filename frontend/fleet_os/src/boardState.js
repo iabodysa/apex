@@ -2,16 +2,6 @@
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-/* Every piece of board state a person expects to survive lives in the address, and only there.
- *
- * The board used to hold filters, search, the status pill, the triage toggle, the sort, the
- * view, the open vehicle and the alerts drawer in memory, so a refresh, a Back press or a link
- * sent to a colleague lost every one of them. There is no second store below: each getter
- * reads the query and each setter writes it, which is also why "clear filters" can no longer
- * miss the key the list actually sorts by — there is exactly one sort key to clear.
- *
- * Density stays in localStorage on purpose: it is a preference of this screen on this device,
- * not something a shared link should impose on the reader. */
 
 export const VIEWS = ["cards", "table", "drivers"];
 export const PANEL_TABS = ["overview", "driver", "status", "damages", "accidents", "log"];
@@ -47,8 +37,6 @@ const DEFAULTS = {
   alerts: "",
 };
 
-/* Filters only. `view`, the open vehicle, the panel tab and the drawer are places the reader
-   navigated to, not narrowings he applied, so clearing the filters leaves them alone. */
 const FILTER_KEYS = [
   "q",
   "status",
@@ -110,8 +98,6 @@ export function useBoardState() {
 
   const setFilter = (key, value) => write({ [key]: value });
 
-  /* A pill and the triage chips toggle: pressing the one already applied clears it, which is
-     what the reader means by pressing it a second time. */
   const toggleFilter = (key, value) => write({ [key]: f[key].value === value ? "" : value });
 
   function setSort(key) {

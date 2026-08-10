@@ -272,9 +272,6 @@ const certificate = createResource({
   onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),
 });
 
-/* The print key is minted by a POST, so the URL only exists after the round trip — and a
-   window opened from that callback is outside the gesture and blocked on both mobile
-   browsers. The tab is claimed on the tap and navigated when the answer lands. */
 function downloadClearanceCertificate() {
   const tab = window.open("", "_blank");
   if (tab) tab.opener = null;

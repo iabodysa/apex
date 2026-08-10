@@ -82,7 +82,6 @@ const ICONS = {
   x,
 };
 
-/* Direction glyphs flip with the writing direction; object glyphs never do. */
 const MIRROR = ["chevron"];
 
 defineProps({

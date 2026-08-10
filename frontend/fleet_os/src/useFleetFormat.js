@@ -38,12 +38,6 @@ export function useFleetFormat(t) {
     return t("duration.days", { n: days });
   }
 
-  /* Grade and the planned daily figure, both read from the vehicle's own record.
-   *
-   * What used to sit beside them was a per-litre price fixed in the bundle and a "monthly"
-   * number derived by multiplying the daily figure by a flat 30. Neither came from a record,
-   * and both were rendered as though they had. A currency figure the screen invented is worse
-   * than no currency figure, so they are gone rather than approximated. */
   function fuelView(v) {
     const planned = trim(v.planned_fuel_grade);
     const catType = trim(v.fuel).toUpperCase();

@@ -1,5 +1,4 @@
 /* Copyright (c) 2026, afmcoltd */
-/* Map Apex semantic tokens to frappe-ui's public colour vocabulary. */
 
 html:root {
   --surface-white: var(--c-surface-2);

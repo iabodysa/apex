@@ -33,9 +33,6 @@
 </template>
 
 <script setup>
-/* DESIGN.md §7: a skeleton of the shape that is coming, never a spinner alone. This draws
-   the overview it replaces — the metric ribbon, the lead panel beside the work queue, and
-   the three domain tiles — at the same sizes, so nothing moves when the data lands. */
 defineProps({
   label: { type: String, required: true },
 });
@@ -151,7 +148,6 @@ defineProps({
   }
 }
 
-/* Mirrors the overview's own breakpoints so the skeleton and the content share one shape. */
 @container mc-frame (min-width: 46rem) {
   .ov-sk-layout {
     grid-template-columns: minmax(18rem, 0.8fr) minmax(24rem, 1.2fr);

@@ -3,16 +3,6 @@ import { computed, reactive } from "vue";
 
 import { resourceErrorMessage } from "@/i18n";
 
-/* One resource = one reader, its own state and its own error.
- *
- * The screens used to share a single `loadError` boolean across three parallel reads, so a
- * failure in any one of them made the other two claim an error they never had. Splitting the
- * state per reader is what lets a screen say "your vehicle could not be loaded" while the trip
- * list beside it is fine.
- *
- * frappe-ui's own `createResource` was the first choice and is not used here: it assigns the
- * response to `data` unconditionally, with no request sequence, so two overlapping fetches can
- * land oldest-last. The ticket below is the whole reason this wrapper exists. */
 export function createResource({ fetcher, initial = null, errorKey = "errors.loadError" }) {
   let issued = 0;
 

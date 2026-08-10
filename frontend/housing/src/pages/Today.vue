@@ -482,7 +482,6 @@ watch(building, load);
   line-height: 1.5;
 }
 
-/* Against the frame, not the window — the detail pane is about 550px at 1440. */
 @container mc-frame (min-width: 46rem) {
   .overview-layout {
     grid-template-columns: minmax(18rem, 0.8fr) minmax(24rem, 1.2fr);

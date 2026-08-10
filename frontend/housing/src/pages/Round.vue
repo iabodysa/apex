@@ -315,9 +315,6 @@ async function doSubmit() {
   }
 }
 
-/* A partial failure KEEPS the draft on purpose six lines above, so the walker can retry the
-   cadences the server refused. Dropping it here destroyed exactly that — the only button on
-   the success screen threw away the work it was preserved for. */
 function resetAll() {
   const partial = !!(submitted.value && (submitted.value.failed || []).length);
   submitted.value = null;
@@ -344,9 +341,6 @@ function load() {
   dueRes.fetch();
 }
 
-/* Every path that reads the round goes through the same building guard. Retry and the
-   stale-data offer used to fetch unconditionally, so a reader with no building chosen
-   asked the server for the rounds of nothing and was shown a failure for it. */
 function acceptStale() {
   staleOffer.value = false;
   if (building.value) dueRes.fetch();

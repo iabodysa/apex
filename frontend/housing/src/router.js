@@ -84,9 +84,6 @@ const router = createRouter({
   routes,
 });
 
-/* The entry door decides the FIRST screen, and only that one. Consulting it on every
-   navigation meant a reader who came in through /safety was sent straight back to safety
-   every time they tapped Today, so the tab could never be opened at all. */
 let landingResolved = false;
 
 router.beforeEach((to, from) => {

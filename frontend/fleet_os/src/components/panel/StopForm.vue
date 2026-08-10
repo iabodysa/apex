@@ -29,8 +29,6 @@ import { useBoardContext } from "../../boardContext.js";
 const { t, actions, subForm } = useBoardContext();
 const { sf } = actions;
 
-/* The reason travels to the server as free text, so the option value IS the translated
-   sentence — the record keeps what the supervisor actually read and chose. */
 const reasonOptions = computed(() =>
   [
     "",
