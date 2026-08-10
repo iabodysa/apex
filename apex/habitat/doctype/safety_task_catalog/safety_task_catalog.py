@@ -3,7 +3,15 @@
 
 from __future__ import annotations
 
+import re
+
+import frappe
+from frappe import _
 from frappe.model.document import Document
+
+SOURCE_FILE_RE = re.compile(r"\S+\.(?:xlsx|xlsm|xlsb|xls|csv|ods|docx|doc)\b", re.IGNORECASE)
+
+WORKER_FACING_FIELDS = ("task_title", "instructions")
 
 
 class SafetyTaskCatalog(Document):
@@ -25,4 +33,19 @@ class SafetyTaskCatalog(Document):
         priority: DF.Literal["High", "Medium", "Low"]
         task_code: DF.Data
         task_title: DF.Data
-    pass
+
+    def validate(self):
+        self.reject_source_provenance()
+
+    def reject_source_provenance(self):
+        for fieldname in WORKER_FACING_FIELDS:
+            match = SOURCE_FILE_RE.search(self.get(fieldname) or "")
+            if not match:
+                continue
+            frappe.throw(
+                _(
+                    "{0} carries the file it was imported from ({1}). The worker walking the round"
+                    " reads this field, so write the method of inspection here or leave it empty."
+                ).format(_(self.meta.get_label(fieldname)), match.group(0)),
+                title=_("Import trail in an operator-facing field"),
+            )

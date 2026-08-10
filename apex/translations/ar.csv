@@ -2127,6 +2127,7 @@ In Storage,في المستودع
 In Transit,في الطريق
 In stock: {0},في المخزون: {0}
 "In the first row, choose the article being issued and set its quantity.",في الصف الأول، اختر الصنف المصروف وحدّد كميته.
+Import trail in an operator-facing field,أثر استيراد في حقل يقرأه المشغّل
 Inactive,غير نشط
 Inactivity Evidence,إثبات عدم النشاط
 Inactivity evidence is required to submit a fuel chip cancellation.,إثبات عدم النشاط مطلوب لاعتماد إلغاء شريحة الوقود.
@@ -5373,6 +5374,7 @@ workshop status,حالة الورشة
 {0} assigned,تم إسناد {0}
 {0} awaiting approval,{0} بانتظار الاعتماد
 {0} cannot be negative.,لا يمكن أن يكون {0} سالبًا.
+"{0} carries the file it was imported from ({1}). The worker walking the round reads this field, so write the method of inspection here or leave it empty.",{0} يحمل اسم الملف الذي استُورد منه ({1}). العامل الذي يمشي الجولة يقرأ هذا الحقل، فاكتب فيه طريقة الفحص أو اتركه فارغاً.
 {0} check item(s) loaded from template {1},تم تحميل {0} بند فحص من القالب {1}
 "{0} custody line(s) came back short, lost or damaged.",{0} سطر عهدة رجع ناقصًا أو مفقودًا أو تالفًا.
 {0} day(s),{0} يوم
