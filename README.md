@@ -1,9 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/assets/logo/apex-mark-reverse.svg">
-    <source media="(prefers-color-scheme: light)" srcset="docs/brand/assets/logo/apex-mark.svg">
-    <img src="docs/brand/assets/logo/apex-mark.svg" alt="Apex" width="112" height="112">
-  </picture>
+  <img src="docs/brand/assets/logo/apex-mark.svg" alt="Apex" width="112" height="112">
 </p>
 
 <h1 align="center">Apex</h1>
