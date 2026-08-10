@@ -60,7 +60,7 @@ def bound_vehicle(driver):
     if vehicle:
         return vehicle
     return frappe.db.get_value(
-        "Vehicle Assignment", {"driver": driver, "status": "Active"}, "vehicle"
+        "Vehicle Assignment", {"driver": driver, "status": "Active", "docstatus": 1}, "vehicle"
     )
 
 

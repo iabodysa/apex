@@ -39,7 +39,7 @@ def _vehicle_bound_to_driver(driver, vehicle):
     return bool(
         frappe.db.exists(
             "Vehicle Assignment",
-            {"driver": driver, "vehicle": vehicle, "status": "Active"},
+            {"driver": driver, "vehicle": vehicle, "status": "Active", "docstatus": 1},
         )
     )
 

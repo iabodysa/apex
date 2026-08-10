@@ -332,7 +332,7 @@ def create_handover(plate, driver_id, date=None, odometer=None, checklist_templa
 
     prev = frappe.get_all(
         "Vehicle Assignment",
-        filters={"vehicle": vehicle, "status": "Ended", "driver": ["!=", to_driver]},
+        filters={"vehicle": vehicle, "status": "Ended", "driver": ["!=", to_driver], "docstatus": 1},
         fields=["driver"],
         order_by="end_date desc, creation desc",
         limit_page_length=1,

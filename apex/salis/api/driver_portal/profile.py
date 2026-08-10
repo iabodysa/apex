@@ -230,7 +230,7 @@ def get_my_vehicle():
     if not vehicle:
         assignment = frappe.db.get_value(
             "Vehicle Assignment",
-            {"driver": driver, "status": "Active"},
+            {"driver": driver, "status": "Active", "docstatus": 1},
             ["name", "vehicle", "start_date"],
             as_dict=True,
         )
@@ -255,7 +255,7 @@ def get_my_vehicle():
     if assignment is None:
         assignment = frappe.db.get_value(
             "Vehicle Assignment",
-            {"driver": driver, "vehicle": vehicle, "status": "Active"},
+            {"driver": driver, "vehicle": vehicle, "status": "Active", "docstatus": 1},
             ["name", "start_date"],
             as_dict=True,
         )
