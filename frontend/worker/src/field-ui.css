@@ -76,7 +76,8 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.masar-head-copy b {
+.masar-head-copy .masar-title {
+  margin: 0;
   overflow: hidden;
   color: var(--c-header-ink);
   font-family: var(--font-brand);

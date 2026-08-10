@@ -60,7 +60,9 @@ describe("MobileConsoleShell", () => {
         nav: "<a class='is-active'>Home</a><a>Tasks</a><a>Me</a>",
       },
     });
-    expect(w.find(".mc-greet b").text()).toBe("Khalid");
+    // The scene title must be a real heading: driver and worker render 16 phone pages
+    // through this shell, and a <b> gave those pages no heading element at all.
+    expect(w.find(".mc-greet h1.mc-title").text()).toBe("Khalid");
     expect(w.find(".mc-greet small").text()).toBe("Morning");
     expect(w.find(".mc-frame .card").exists()).toBe(true);
     expect(w.findAll(".mc-nav a").length).toBe(3);

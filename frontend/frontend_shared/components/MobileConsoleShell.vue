@@ -8,7 +8,7 @@
           <div class="mc-head-row">
             <div class="mc-greet">
               <small v-if="subtitle">{{ subtitle }}</small>
-              <b>{{ title }}</b>
+              <h1 class="mc-title">{{ title }}</h1>
             </div>
             <span class="mc-head-actions"><slot name="header-actions" /></span>
           </div>
@@ -135,7 +135,7 @@ defineProps({
   font-size: var(--fs-xs);
   color: color-mix(in srgb, var(--c-header-ink) 70%, transparent);
 }
-.mc-greet b {
+.mc-title {
   font-size: var(--fs-h2);
   font-weight: var(--fw-heading);
   overflow: hidden;

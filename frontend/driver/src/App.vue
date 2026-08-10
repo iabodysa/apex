@@ -12,7 +12,7 @@
             <Brand variant="reverse" :size="34" />
             <div class="masar-head-copy">
               <small>{{ t("common.driverPortal") }} · <bdi>{{ fmtTodayDate() }}</bdi></small>
-              <b>{{ scene.title }}</b>
+              <h1 class="masar-title">{{ scene.title }}</h1>
             </div>
             <div class="masar-head-actions">
               <LangToggle variant="header" />
@@ -70,7 +70,7 @@
             <Brand variant="reverse" :size="34" />
             <div class="masar-head-copy">
               <small><bdi>{{ fmtTodayDate() }}</bdi></small>
-              <b>{{ t("common.driverPortal") }}</b>
+              <h1 class="masar-title">{{ t("common.driverPortal") }}</h1>
             </div>
             <div class="masar-head-actions"><LangToggle variant="header" /></div>
           </div>
