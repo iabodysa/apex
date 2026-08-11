@@ -7,12 +7,25 @@ from apex.habitat.permissions import _building_condition, report_building_scope
 
 @frappe.whitelist()
 def get_compliance_percent(filters=None):
-    """Returns the percentage of non-cancelled Scheduled Task Instances marked Completed."""
+    """Returns the percentage of non-cancelled Scheduled Task Instances marked Completed.
+
+    Row scope is spliced explicitly for the same reason the card below states: neither
+    ``frappe.db.count`` nor ``frappe.qb`` consults ``permission_query_conditions`` — those
+    apply on the ``get_list`` path only (``frappe/model/db_query.py:646``) — so counting
+    without it told a building-scoped supervisor the compliance of the whole estate.
+    """
     frappe.has_permission("Scheduled Task Instance", "read", throw=True)
-    total = frappe.db.count("Scheduled Task Instance", {"status": ["not in", ["Cancelled"]]})
+    restrict, allowed = report_building_scope(frappe.session.user)
+    if restrict and not allowed:
+        return {"value": 100.0, "fieldtype": "Percent", "precision": 2}
+    scope = {"building": ["in", allowed]} if restrict else {}
+
+    total = frappe.db.count(
+        "Scheduled Task Instance", {"status": ["not in", ["Cancelled"]], **scope}
+    )
     if not total:
         return {"value": 100.0, "fieldtype": "Percent", "precision": 2}
-    completed = frappe.db.count("Scheduled Task Instance", {"status": "Completed"})
+    completed = frappe.db.count("Scheduled Task Instance", {"status": "Completed", **scope})
     return {"value": round((completed / total) * 100, 2), "fieldtype": "Percent", "precision": 2}
 
 

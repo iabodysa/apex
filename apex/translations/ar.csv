@@ -2881,6 +2881,7 @@ Odometer cannot be negative.,لا يمكن أن تكون قراءة عداد ا�
 Odometer on File,العداد المسجّل
 Odometer reading {0} cannot be lower than the vehicle's current {1}.,قراءة عداد المسافة {0} لا يمكن أن تكون أقل من القراءة الحالية للمركبة {1}.
 "Odometer start and end must be set together, or both left empty.",يجب إدخال قراءتي عداد المسافة في البداية والنهاية معًا، أو تركهما فارغتين.
+Odometer {0} is lower than the last reading for this vehicle ({1}).,قراءة العدّاد {0} أقل من آخر قراءة لهذه المركبة ({1}).
 "Off by default — builds one sample accommodation site with rooms, beds, a resident and an open maintenance request. You can remove all of it later from Apex Settings.",معطّل افتراضيًا — ينشئ موقع سكن تجريبيًا يضم غرفًا وأسرّة وساكنًا وطلب صيانة مفتوحًا. يمكنك إزالة هذه البيانات لاحقًا من إعدادات أبكس.
 Off by default — let drivers access the Salis self-service portal.,معطّل افتراضيًا — يسمح للسائقين بالدخول إلى بوابة الخدمة الذاتية في ساليس.
 Off by default — no automatic housing-allowance deduction. Requires legal/HR review.,معطّل افتراضيًا — لا خصم تلقائي لبدل السكن. يتطلّب مراجعة قانونية وموارد بشرية.

@@ -11,17 +11,52 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 from apex.salis.utils import add_timeline_note
 
 
 class FuelDailyLog(Document):
     def validate(self):
-        """Rejects a negative litres or odometer reading."""
+        """Rejects a negative litres or odometer reading, and one that runs backwards."""
         if self.litres is not None and self.litres < 0:
             frappe.throw(_("Litres cannot be negative."))
         if self.odometer is not None and self.odometer < 0:
             frappe.throw(_("Odometer cannot be negative."))
+        self._refuse_an_odometer_that_runs_backwards()
+
+    def _refuse_an_odometer_that_runs_backwards(self):
+        """A reading may not be lower than the last one taken on or before its own date.
+
+        Rejecting only a NEGATIVE reading let a typo through, and a typo here is not
+        cosmetic: the weekly utilisation summary scores an inverted pair as zero distance
+        (``salis/tasks/vehicle.py:156-160``) and says nothing, so the vehicle simply
+        under-reports. hrms enforces the same rule in eighteen lines at
+        ``hrms/hr/doctype/vehicle_log/vehicle_log.py:12-29``, but against a denormalised
+        ``last_odometer`` it advances on submit and rewinds on cancel. This log is not
+        submittable and can be deleted, so the comparison is made against the logs
+        themselves — there is no second copy to keep in step, and a late entry for an
+        earlier date is judged against its own day rather than against the newest.
+        """
+        if self.odometer is None or not self.vehicle or not self.log_date:
+            return
+        previous = frappe.db.get_value(
+            "Fuel Daily Log",
+            {
+                "vehicle": self.vehicle,
+                "log_date": ["<=", self.log_date],
+                "name": ["!=", self.name or ""],
+                "odometer": [">", 0],
+            },
+            "odometer",
+            order_by="log_date desc, creation desc",
+        )
+        if previous is not None and flt(self.odometer) < flt(previous):
+            frappe.throw(
+                _("Odometer {0} is lower than the last reading for this vehicle ({1}).").format(
+                    flt(self.odometer), flt(previous)
+                )
+            )
 
     def after_insert(self):
         """Adds a vehicle timeline note recording the logged litres and amount."""
