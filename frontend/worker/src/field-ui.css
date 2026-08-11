@@ -8,6 +8,7 @@
 
 html:root {
   --surface-selected: color-mix(in srgb, var(--c-mint) 22%, transparent);
+  --fs-xs: var(--fs-sm);
 }
 
 html,

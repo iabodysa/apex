@@ -9,6 +9,7 @@
 
 :root {
   --boot-bar: 20rem;
+  --fs-xs: var(--fs-sm);
 }
 
 html,
