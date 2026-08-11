@@ -1,4 +1,10 @@
-# frontend_shared
+# Shared Frontend Runtime
+
+Source: [`frontend/frontend_shared/`](../../frontend/frontend_shared/)
+
+Component props, slots, and state behavior stay beside the source in
+[`CONTRACTS.md`](../../frontend/frontend_shared/CONTRACTS.md). This document
+explains the shared runtime and build boundary; it does not duplicate component APIs.
 
 Code shared by every `*_portal` SPA (fleet, fleet_os, worker+driver, safety,
 housing, route_supervisor). These portals are Vite + Vue 3 apps that build to
@@ -93,7 +99,7 @@ only hit is the literal Unicode RANGE (U+0600-U+06FF) inside the scanners' own
 regex — the guard's alphabet, not content. Write ranges escaped, never as literal
 characters, or the rule text trips its own sweep.
 
-## frappe-ui is the toolkit, not a dependency to ration — owner rule, 2026-08-03
+## Use frappe-ui before custom components
 
 Use `frappe-ui` as it is, with its features. Its components, its calls, its styles and its
 shapes are what a portal is built from; it is a Vue library with an ordered component tree,

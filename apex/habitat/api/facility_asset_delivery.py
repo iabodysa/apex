@@ -30,7 +30,7 @@ import hmac
 
 import frappe
 from frappe import _
-from frappe.utils import add_to_date, now_datetime
+from frappe.utils import now_datetime
 
 from apex.habitat.doctype.custody_handover.custody_handover import (
     generate_otp,
@@ -41,6 +41,7 @@ from apex.habitat.doctype.facility_asset_delivery.facility_asset_delivery import
     move_asset_on_delivery,
 )
 
+from apex.apex_core.utils.otp_lockout import charge_wrong_code
 from apex.habitat.utils.otp_policy import (
     ELEVATED_ROLE,
     LOCKOUT_MINUTES,
@@ -187,15 +188,11 @@ def confirm_receipt(delivery: str, code: str):
         return _move_and_deliver(doc)
 
     attempts = (locked.otp_attempts or 0) + 1
-    if attempts >= MAX_OTP_ATTEMPTS:
-        doc.db_set(
-            {
-                "otp_attempts": 0,
-                "otp_locked_until": add_to_date(now, minutes=LOCKOUT_MINUTES),
-            }
-        )
-    else:
-        doc.db_set("otp_attempts", attempts)
+    charge_wrong_code(
+        DELIVERY_DOCTYPE, doc.name,
+        attempts=MAX_OTP_ATTEMPTS, lockout_minutes=LOCKOUT_MINUTES,
+    )
+    doc.db_set("otp_attempts", attempts)
     frappe.throw(_("Invalid code."))
 
 

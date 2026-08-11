@@ -1,5 +1,10 @@
 # Portal design guide
 
+Runtime values come from
+[`tokens.css`](../../frontend/frontend_shared/tokens.css). Component props,
+slots, and states remain in the source-adjacent
+[`CONTRACTS.md`](../../frontend/frontend_shared/CONTRACTS.md).
+
 A developer joining Apex reads this once and can then add a screen to any portal without
 asking anyone where things go. It is a contract, not advice: where it gives a number, that
 number is already in `tokens.css` or in a shared shell, and a screen that disagrees with it
