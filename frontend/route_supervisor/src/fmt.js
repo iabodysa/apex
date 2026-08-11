@@ -1,5 +1,9 @@
 // Copyright (c) 2026, afmcoltd
 
+const AR_LOCALE = "ar-SA-u-ca-gregory-nu-latn";
+
+export const localeFor = (lang) => (lang === "ar" ? AR_LOCALE : "en-US");
+
 export function ageLabel(seconds, t) {
   if (seconds == null) return t("map.justNow");
   const s = Math.max(0, Math.floor(seconds));
@@ -15,7 +19,7 @@ export function agoLabel(value, lang) {
 
   const seconds = Math.round((then.getTime() - Date.now()) / 1000);
   const abs = Math.abs(seconds);
-  const rtf = new Intl.RelativeTimeFormat(lang || "ar", { numeric: "auto" });
+  const rtf = new Intl.RelativeTimeFormat(localeFor(lang || "ar"), { numeric: "auto" });
 
   if (abs < 60) return rtf.format(seconds, "second");
   if (abs < 3600) return rtf.format(Math.round(seconds / 60), "minute");

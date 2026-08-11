@@ -377,6 +377,11 @@ const messages = {
     round: {
       title: "Safety round",
       eyebrow: "Safety walkthrough",
+      period: {
+        today: "Today",
+        thisWeek: "This week",
+        quarter: "Q{n} {year}",
+      },
       due: {
         title: "Due today",
         subtitle: "Tap each task to mark it, then submit.",
@@ -869,6 +874,11 @@ const messages = {
     round: {
       title: "جولة السلامة",
       eyebrow: "جولة السلامة",
+      period: {
+        today: "اليوم",
+        thisWeek: "هذا الأسبوع",
+        quarter: "الربع {n} {year}",
+      },
       due: {
         title: "المستحق اليوم",
         subtitle: "اضغط على كل مهمة لتقييمها ثم أرسل.",

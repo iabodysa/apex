@@ -8,7 +8,7 @@
       <span class="cadence-titles">
         <span class="cadence-name">{{ tEnum("cadence", block.cadence) }}</span>
         <span class="cadence-period">
-          <Icon name="calendar" :size="12" /> {{ block.period_label }}
+          <Icon name="calendar" :size="12" /> {{ periodLabel }}
         </span>
       </span>
       <ProgressRing :done="ratedCount" :total="block.tasks.length" :size="52" />
@@ -60,7 +60,26 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["rate", "note", "photo"]);
-const { t, tEnum } = useI18n();
+const { t, tEnum, lang } = useI18n();
+
+// The server sends the period as a kind plus numbers, never a rendered string, so the
+// label follows the portal's own language toggle instead of the session language.
+const periodLabel = computed(() => {
+  const p = props.block.period || {};
+  const locale = lang.value === "ar" ? "ar-SA-u-ca-gregory-nu-latn" : "en-US";
+  const num = (n) => new Intl.NumberFormat(locale, { useGrouping: false }).format(n);
+  if (p.kind === "day") return t("round.period.today");
+  if (p.kind === "week") return t("round.period.thisWeek");
+  if (p.kind === "month") {
+    const month = new Intl.DateTimeFormat(locale, { month: "long" }).format(
+      new Date(Date.UTC(p.year, p.month - 1, 1)),
+    );
+    return `${month} ${num(p.year)}`;
+  }
+  if (p.kind === "quarter") return t("round.period.quarter", { n: num(p.quarter), year: num(p.year) });
+  if (p.kind === "year") return num(p.year);
+  return "";
+});
 
 const open = ref(true);
 const hideSettled = ref(false);

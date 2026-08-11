@@ -150,51 +150,51 @@ def _scoped_tasks(building, cadence):
 
 
 def _current_period(cadence, on_date=None):
-    """Return ``(start, end, period_label)`` for ``cadence``'s CURRENT period.
+    """Return ``(start, end, period)`` for ``cadence``'s CURRENT period.
 
     ``start`` / ``end`` are inclusive ``datetime.date`` boundaries used to test
-    whether an existing round's ``round_date`` falls in the live period; the
-    label is a short human string for the portal.
+    whether an existing round's ``round_date`` falls in the live period.
+
+    ``period`` is a kind plus the numbers, never a rendered string: the portals hold
+    their own language toggle in local storage, so a label built here is frozen in the
+    session's language and contradicts the toggle the walker just used.
 
     Boundaries (all computed from ``on_date``, default today):
 
-    - **Daily**: the single day ``on_date`` (start == end). Label ``Today``.
+    - **Daily**: the single day ``on_date`` (start == end).
     - **Weekly**: the ISO week Monday..Sunday. Computed DIRECTLY from
       ``date.weekday()`` (Mon=0) — NOT frappe ``get_first_day_of_week``, which
       honours the System Settings week-start (Sunday by default) and would give
-      a Sun..Sat window, not the ISO Mon..Sun the contract requires. Label
-      ``This week``.
-    - **Monthly**: first..last day of the month. Label is the month name+year,
-      e.g. ``June 2026``.
-    - **Quarterly**: the calendar quarter via ``get_quarter_start`` /
-      ``get_quarter_ending``. Label e.g. ``Q2 2026``.
-    - **Annual**: Jan 1..Dec 31 of the year. Label e.g. ``2026``.
+      a Sun..Sat window, not the ISO Mon..Sun the contract requires.
+    - **Monthly**: first..last day of the month.
+    - **Quarterly**: the calendar quarter via ``get_quarter_start`` / ``get_quarter_ending``.
+    - **Annual**: Jan 1..Dec 31 of the year.
     """
     day = getdate(on_date or nowdate())
 
     if cadence == "Daily":
-        return day, day, "Today"
+        return day, day, {"kind": "day"}
 
     if cadence == "Weekly":
         start = day - datetime.timedelta(days=day.weekday())
         end = start + datetime.timedelta(days=6)
-        return start, end, "This week"
+        return start, end, {"kind": "week"}
 
     if cadence == "Monthly":
         start = getdate(get_first_day(day))
         end = getdate(get_last_day(day))
-        return start, end, start.strftime("%B %Y")
+        return start, end, {"kind": "month", "month": start.month, "year": start.year}
 
     if cadence == "Quarterly":
         start = getdate(get_quarter_start(day))
         end = getdate(get_quarter_ending(day))
         quarter = (day.month - 1) // 3 + 1
-        return start, end, f"Q{quarter} {day.year}"
+        return start, end, {"kind": "quarter", "quarter": quarter, "year": day.year}
 
     if cadence == "Annual":
         start = getdate(get_year_start(day))
         end = getdate(get_year_ending(day))
-        return start, end, str(day.year)
+        return start, end, {"kind": "year", "year": day.year}
 
     frappe.throw(_("Unknown cadence: {0}").format(cadence))
 
@@ -210,7 +210,7 @@ def _cadence_is_due(building, cadence, on_date=None):
     draft that the work was still due, and the guard then refused the second walk
     as a duplicate. Cancelled rounds (docstatus 2) close nothing.
     """
-    start, end, _label = _current_period(cadence, on_date)
+    start, end, _period = _current_period(cadence, on_date)
     existing = frappe.db.exists(
         "Safety Round",
         {
@@ -250,7 +250,7 @@ def get_due_cadences(building=None):
         building: Accommodation Building docname (source of truth).
 
     Returns:
-        ``{"building": building, "due": [ {"cadence", "period_label",
+        ``{"building": building, "due": [ {"cadence", "period",
         "tasks": [...]}, ... ]}`` — ``due`` ordered Daily..Annual, each task
         carrying the same render fields as :func:`get_tasks_for_cadence`.
     """
@@ -267,10 +267,8 @@ def get_due_cadences(building=None):
         tasks = _scoped_tasks(building, cadence)
         if not tasks:
             continue
-        _start, _end, period_label = _current_period(cadence)
-        due.append(
-            {"cadence": cadence, "period_label": period_label, "tasks": tasks}
-        )
+        _start, _end, period = _current_period(cadence)
+        due.append({"cadence": cadence, "period": period, "tasks": tasks})
 
     return {"building": building, "due": due, "awaiting": _awaiting_ratification(building)}
 
@@ -284,7 +282,7 @@ def _awaiting_ratification(building) -> list:
     """
     out = []
     for cadence in _CADENCE_ORDER:
-        start, end, period_label = _current_period(cadence)
+        start, end, period = _current_period(cadence)
         row = frappe.db.get_value(
             "Safety Round",
             {
@@ -300,7 +298,7 @@ def _awaiting_ratification(building) -> list:
             out.append(
                 {
                     "cadence": cadence,
-                    "period_label": period_label,
+                    "period": period,
                     "round": row.name,
                     "round_date": str(row.round_date),
                 }

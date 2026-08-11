@@ -1,6 +1,6 @@
 // Copyright (c) 2026, afmcoltd
 
-const AR_LOCALE = "ar-SA-u-nu-latn";
+const AR_LOCALE = "ar-SA-u-ca-gregory-nu-latn";
 
 export const localeFor = (lang) => (lang === "ar" ? AR_LOCALE : "en-US");
 

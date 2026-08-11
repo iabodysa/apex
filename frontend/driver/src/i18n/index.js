@@ -22,7 +22,7 @@ const { lang, dir, translate, setLang, resourceErrorMessage } = createI18n({
 
 export { translate, setLang, resourceErrorMessage };
 
-const INTL_LOCALE = { ar: "ar-SA", en: "en-US" };
+const INTL_LOCALE = { ar: "ar-SA-u-ca-gregory-nu-latn", en: "en-US" };
 
 function intlLocale() {
   return INTL_LOCALE[lang.value] || "en-US";
