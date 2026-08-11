@@ -31,9 +31,7 @@ VOUCHER_TYPE = "Custody Handover"
 
 class CustodyHandover(Document):
     def validate(self):
-        """Blocks handovers with no items, same building, same supervisor, or non-positive quantities."""
-        if not self.items:
-            frappe.throw(_("At least one item is required on a Custody Handover."))
+        """Blocks handovers that share a building, share a supervisor, or carry a non-positive quantity."""
         if self.from_building and self.to_building and self.from_building == self.to_building:
             frappe.throw(_("Source and destination buildings must be different."))
         if self.procurement_supervisor and self.receiving_supervisor and self.procurement_supervisor == self.receiving_supervisor:

@@ -3,15 +3,11 @@
 
 from __future__ import annotations
 
-import frappe
-from frappe import _
 from frappe.model.document import Document
 
 
 class FuelPlatform(Document):
     def validate(self):
-        """Requires a non-blank platform name, trimmed of surrounding whitespace."""
+        """Trims the platform name so the stored value matches the name frappe derives from it."""
         if self.platform_name:
             self.platform_name = self.platform_name.strip()
-        if not self.platform_name:
-            frappe.throw(_("Platform Name is required."))

@@ -21,15 +21,11 @@ the panel and letting the two drift.
 
 from __future__ import annotations
 
-import frappe
-from frappe import _
 from frappe.model.document import Document
 
 
 class RentalOffice(Document):
     def validate(self):
-        """Requires a non-blank office name, trimmed of surrounding whitespace."""
+        """Trims the office name so the stored value matches the name frappe derives from it."""
         if self.office_name:
             self.office_name = self.office_name.strip()
-        if not self.office_name:
-            frappe.throw(_("Office Name is required."))

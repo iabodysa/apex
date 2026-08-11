@@ -56,9 +56,7 @@ LEDGER_SOURCE = "Facility Asset Delivery"
 
 class FacilityAssetDelivery(Document):
     def validate(self):
-        """Blocks a delivery missing an asset, sharing source/destination, or initiator/receiver."""
-        if not self.facility_asset:
-            frappe.throw(_("A Facility Asset is required on a delivery."))
+        """Blocks a delivery that shares its source and destination, or its initiator and receiver."""
         if self.from_building and self.to_building and self.from_building == self.to_building:
             frappe.throw(_("Source and destination buildings must be different."))
         if (

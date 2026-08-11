@@ -22,9 +22,7 @@ VOUCHER_TYPE = "Goods Receipt"
 
 class GoodsReceipt(Document):
     def validate(self):
-        """Requires items with positive qty and confirms the intake building is a procurement store."""
-        if not self.items:
-            frappe.throw(_("At least one item is required on a Goods Receipt."))
+        """Requires a positive qty on every line and confirms the intake building is a procurement store."""
         if self.intake_building and not frappe.db.get_value(
             "Building", self.intake_building, "is_procurement_store"
         ):

@@ -6,7 +6,6 @@
 "<b>Derived from the Compliance Documents rows below — it stays empty, and the compliance alert stays silent, until at least one document with an expiry date is entered.</b>",<b>مشتق من صفوف وثائق الامتثال أدناه — يبقى فارغاً ويبقى تنبيه الامتثال صامتاً حتى تُدخل وثيقة واحدة على الأقل بتاريخ انتهاء.</b>
 <b>The licence-expiry alert reads this date and stays silent while it is empty. Fill it for every active driver.</b>,<b>تنبيه انتهاء الرخصة يقرأ هذا التاريخ ويبقى صامتاً ما دام فارغاً. عبّئه لكل سائق نشط.</b>
 A Critical operations alert was raised,تم إصدار تنبيه حرج للعمليات
-A Facility Asset is required on a delivery.,يجب تحديد أصل منشأة في التسليم.
 A Fuel Claim must be created with status Draft; {0} is reached through the workflow.,يجب إنشاء مطالبة الوقود بالحالة مسودة؛ يتم الوصول إلى {0} عبر سير العمل.
 A Fuel Exception Case must be created with status Open; {0} is reached through the workflow.,يجب إنشاء حالة استثناء الوقود بالحالة مفتوحة؛ يتم الوصول إلى {0} عبر سير العمل.
 A Fuel Request must be created with status Pending; {0} is reached through the workflow.,يجب إنشاء طلب الوقود بالحالة قيد الانتظار؛ يتم الوصول إلى {0} عبر سير العمل.
@@ -462,10 +461,8 @@ At,في
 At least one asset line is required.,يجب إدخال بند أصول واحد على الأقل.
 At least one damaged item is required.,يجب إدخال بند تالف واحد على الأقل.
 At least one finding is required on a Maintenance Inspection Report.,يجب تسجيل ملاحظة واحدة على الأقل في تقرير فحص الصيانة.
-At least one item is required on a Custody Handover.,يلزم بند واحد على الأقل في تسليم العهدة.
 At least one item is required on a Custody Issue.,يجب إدخال صنف واحد على الأقل لصرف العهدة.
 At least one item is required on a Custody Return.,يجب إدخال صنف واحد على الأقل لإرجاع العهدة.
-At least one item is required on a Goods Receipt.,يلزم بند واحد على الأقل في استلام البضائع.
 At least one item is required on a Material Transfer.,يجب إدخال صنف واحد على الأقل في نقل المواد.
 At least one worker is required for an Inter-City Relocation.,يلزم عامل واحد على الأقل لعملية النقل بين المدن.
 Attach a photograph of the damage,أرفق صورة للتلف
@@ -758,7 +755,6 @@ Catalog master for individual issuable articles.,السجل الرئيسي لد�
 Category,الفئة
 Category Details,تفاصيل الفئة
 Category Name,اسم الفئة
-Category Name is required.,اسم الفئة مطلوب.
 "Category of cost being transferred between cost centres, whether fuel, rental, trip cost, or another type, used for internal cost reallocation.",فئة التكلفة المُحوّلة بين مراكز التكلفة، سواء وقود أو إيجار أو تكلفة رحلة أو نوع آخر، تُستخدم لإعادة توزيع التكاليف داخليًا.
 "Category of the safety incident in the accommodation, routing fire, electrical, injury, structural, hygiene, and security events to the appropriate response and reporting path.",فئة حادث السلامة في السكن، توجّه أحداث الحريق والكهرباء والإصابات والأضرار الإنشائية والنظافة والأمن إلى مسار الاستجابة والإبلاغ المناسب.
 Cell Number,رقم الجوال
@@ -2896,7 +2892,6 @@ Off by default. Requires legal/HR review.,معطّل افتراضيًا. يتط�
 Office,مكتب
 Office Details,تفاصيل المكتب
 Office Name,اسم المكتب
-Office Name is required.,اسم المكتب مطلوب.
 Offline,غير متصل
 On Acknowledgment,عند الإقرار
 On Entry,عند الدخول
@@ -3264,7 +3259,6 @@ Plate is required.,اللوحة مطلوبة.
 Platform,المنصة
 Platform Details,تفاصيل المنصة
 Platform Name,اسم المنصة
-Platform Name is required.,اسم المنصة مطلوب.
 Please action my driving licence renewal. Expiry on file: {0}.,يرجى مباشرة تجديد رخصة قيادتي. تاريخ الانتهاء المسجّل: {0}.
 Please confirm you have received them,يرجى تأكيد استلامك لها
 Please describe where you need to go.,يُرجى وصف الوجهة التي تريد الذهاب إليها.
