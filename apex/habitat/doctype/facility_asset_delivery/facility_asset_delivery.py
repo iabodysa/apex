@@ -89,18 +89,10 @@ class FacilityAssetDelivery(Document):
             )
 
     def before_update_after_submit(self):
-        """An exit is cleared by its own action, never by editing the delivery.
-
-        The nine exit fields carry allow_on_submit so the API can stamp them, and
-        read_only, which is a FORM control and not a server one. Without this, anyone
-        holding write permission could call frappe.client.set_value on a submitted
-        delivery and tick the other side's checkpoint — opening the transfer lock and
-        issuing themselves the on-site code, past both the role gate and the ordering
-        gate that api.facility_asset_delivery._pass_exit exists to enforce.
-
-        The sanctioned path is unaffected: _pass_exit stamps with db_set, which writes
-        the column and runs no controller hook, so only a real save reaches this.
-        """
+        """The exit fields are allow_on_submit so the API can stamp them, and read_only,
+        which is a form control and not a server one — so a plain set_value could tick the
+        other side's checkpoint, open the lock and issue the code past the role and order
+        gates. db_set runs no hook, so _pass_exit never reaches here."""
         touched = [f for f in _EXIT_FIELDS if self.has_value_changed(f)]
         if touched:
             frappe.throw(

@@ -15,6 +15,8 @@ from frappe.model.document import Document
 
 from apex.salis.utils import drive_transport_request, revert_transport_request
 
+_DECISION_FIELDS = ("supervisor_approval", "supervisor_action_by", "supervisor_action_on", "supervisor_rejection_reason")
+
 
 class RoutePlan(Document):
     def validate(self):
@@ -61,6 +63,17 @@ class RoutePlan(Document):
             to_state="Approved",
             clear_fields=["route_plan"],
         )
+
+    def before_update_after_submit(self):
+        """The decision fields are allow_on_submit so the API can stamp them, and read_only,
+        which is a form control and not a server one — so a plain set_value on a submitted
+        plan could self-approve it past both checks the API makes. db_set runs no hook, so
+        the sanctioned writer never reaches here."""
+        if any(self.has_value_changed(f) for f in _DECISION_FIELDS):
+            frappe.throw(
+                _("A supervisor decision is recorded by approving or rejecting the plan, not by editing it."),
+                frappe.PermissionError,
+            )
 
     def set_supervisor_decision(self, decision: str, user: str, reason: str | None = None):
         """Record the Route Supervisor's approval decision on this plan.
