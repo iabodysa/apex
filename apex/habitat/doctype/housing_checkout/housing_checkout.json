@@ -209,7 +209,8 @@
    "fieldname": "damage_deduction_amount",
    "fieldtype": "Currency",
    "label": "Damage Deduction Amount (SAR)",
-   "permlevel": 1
+   "permlevel": 1,
+   "read_only": 1
   },
   {
    "fieldname": "accommodation_checkout_financials_col2",
@@ -307,7 +308,7 @@
    "link_fieldname": "source_checkout"
   }
  ],
- "modified": "2026-08-08 01:40:00.000000",
+ "modified": "2026-08-11 10:18:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Checkout",

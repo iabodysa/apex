@@ -116,7 +116,8 @@
    "options": "Building",
    "reqd": 1,
    "idx": 5,
-   "search_index": 1
+   "search_index": 1,
+   "read_only_depends_on": "eval:!doc.__islocal"
   },
   {
    "doctype": "DocField",
@@ -124,7 +125,8 @@
    "fieldname": "location_in_building",
    "fieldtype": "Data",
    "label": "Physical Location",
-   "idx": 6
+   "idx": 6,
+   "read_only_depends_on": "eval:!doc.__islocal"
   },
   {
    "doctype": "DocField",
@@ -139,7 +141,8 @@
    "options": "User",
    "reqd": 1,
    "description": "Supervisor accountable for this asset; appears on facility custody report",
-   "idx": 10
+   "idx": 10,
+   "read_only": 1
   },
   {
    "doctype": "DocField",
@@ -369,5 +372,5 @@
   "movement_count",
   "last_movement_date"
  ],
- "modified": "2026-08-07 20:24:00.000000"
+ "modified": "2026-08-11 10:18:00.000000"
 }

@@ -95,7 +95,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Available\nPartially Occupied\nFull\nUnder Maintenance"
+   "options": "Available\nPartially Occupied\nFull\nUnder Maintenance",
+   "read_only": 1
   },
   {
    "fieldname": "accommodation_room_capacity_col2",
@@ -121,7 +122,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Readiness Status",
-   "options": "Unknown\nReady\nNeeds Cleaning\nNeeds Repair\nOut of Service"
+   "options": "Unknown\nReady\nNeeds Cleaning\nNeeds Repair\nOut of Service",
+   "read_only": 1
   },
   {
    "fieldname": "accommodation_room_inventory_col",
@@ -238,7 +240,7 @@
    "table_fieldname": "findings"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-11 10:18:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Room",

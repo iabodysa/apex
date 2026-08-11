@@ -88,7 +88,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Active\nStopped\nUnder Maintenance\nReleased"
+   "options": "Active\nStopped\nUnder Maintenance\nReleased",
+   "read_only": 1
   },
   {
    "fieldname": "vehicle_status_col1",
@@ -118,7 +119,8 @@
    "default": "0",
    "fieldname": "odometer",
    "fieldtype": "Int",
-   "label": "Odometer"
+   "label": "Odometer",
+   "read_only_depends_on": "eval:!doc.__islocal"
   },
   {
    "default": "0",
@@ -408,7 +410,7 @@
    "link_fieldname": "vehicle"
   }
  ],
- "modified": "2026-08-11 10:04:00.000000",
+ "modified": "2026-08-11 10:18:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Vehicle",
