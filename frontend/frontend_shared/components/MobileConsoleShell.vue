@@ -20,7 +20,6 @@
     <div class="mc-body" :class="{ 'has-list': !!$slots.list }">
       <nav v-if="$slots.nav" class="mc-rail">
         <span class="mc-rail-links"><slot name="nav" /></span>
-        <small v-if="$slots.railfoot" class="mc-rail-foot"><slot name="railfoot" /></small>
       </nav>
 
       <aside v-if="$slots.list" class="mc-list"><slot name="list" /></aside>
@@ -28,7 +27,6 @@
       <main class="mc-frame">
         <slot />
         <div v-if="$slots.action" class="mc-action"><slot name="action" /></div>
-        <div v-if="$slots.signature" class="mc-signature"><slot name="signature" /></div>
       </main>
     </div>
 
@@ -208,24 +206,6 @@ defineProps({
   min-block-size: var(--tap-lg);
 }
 
-.mc-signature {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  margin-block-start: auto;
-  padding: var(--sp-5) clamp(var(--sp-4), 4vw, var(--sp-6));
-  border-radius: var(--radius);
-  background: var(--c-header-bg);
-  color: color-mix(in srgb, var(--c-header-ink) 72%, transparent);
-  font-size: var(--fs-sm);
-  line-height: 1.6;
-}
-.mc-signature :slotted(img) {
-  flex: 0 0 auto;
-  inline-size: var(--mark);
-  block-size: var(--mark);
-}
-
 .mc-list,
 .mc-rail {
   display: none;
@@ -294,14 +274,6 @@ defineProps({
     flex-direction: column;
     gap: var(--sp-1);
     min-inline-size: 0;
-  }
-  .mc-rail-foot {
-    display: block;
-    padding-block-start: var(--sp-3);
-    border-block-start: 1px solid color-mix(in srgb, var(--c-header-ink) 18%, transparent);
-    color: color-mix(in srgb, var(--c-header-ink) 62%, transparent);
-    font-size: var(--fs-xs);
-    line-height: 1.6;
   }
   .mc-rail :slotted(a),
   .mc-rail :slotted(button) {

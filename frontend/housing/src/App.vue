@@ -134,15 +134,6 @@
       </router-link>
     </template>
 
-    <template v-if="domains.length" #railfoot>{{ t("common.rights", { year }) }}</template>
-
-    <template #signature>
-      <Brand variant="reverse" :size="44" />
-      <span class="signature-copy">
-        <strong>{{ t("common.signature") }}</strong>
-        <small>{{ t("common.rights", { year }) }}</small>
-      </span>
-    </template>
     </MobileConsoleShell>
   </FrappeUIProvider>
 </template>
@@ -213,7 +204,6 @@ const sceneIcon = computed(() => {
   return section ? section.icon : "calendar";
 });
 const lockupVariant = computed(() => (lang.value === "ar" ? "lockup-ar" : "lockup-en"));
-const year = new Date().getFullYear();
 const sceneSubtitle = computed(() =>
   currentSection.value ? t(`scene.${currentSection.value}`) : "",
 );
@@ -400,21 +390,6 @@ useDocumentLanguage(lang, dir);
   font-family: var(--font-brand);
   font-size: var(--fs-xs);
   font-weight: var(--fw-heading);
-}
-.signature-copy {
-  display: grid;
-  gap: var(--sp-1);
-  min-inline-size: 0;
-}
-.signature-copy strong {
-  color: var(--c-header-ink);
-  font-family: var(--font-serif);
-  font-size: var(--fs-h3);
-  font-weight: var(--fw-heading);
-  line-height: 1.5;
-}
-.signature-copy small {
-  font-size: var(--fs-xs);
 }
 .context-nav {
   margin-block-end: clamp(var(--sp-5), 3vw, var(--sp-8));
