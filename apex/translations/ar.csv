@@ -20,6 +20,7 @@ A Salis Driver is required for a driver access token.,يلزم تحديد سائ
 A Security-category finding requires photo evidence before it can escalate. Please attach an Evidence Photo before submitting.,تتطلب ملاحظة فئة الأمن صورة إثبات قبل تصعيدها. أرفق صورة إثبات قبل الاعتماد.
 A Utility Bill Entry already overlaps this account's billing period: {0},يوجد سجل فاتورة خدمات يتداخل مع فترة فوترة هذا الحساب: {0}
 A Work Order already exists for this Maintenance Request: {0},يوجد بالفعل أمر عمل لطلب الصيانة هذا: {0}
+A backdating role has no effect while the window is zero days.,دور التأريخ الرجعي بلا أثر ما دامت النافذة صفر يوم.
 A building is required to build the checklist.,يلزم مبنى لبناء قائمة الفحص.
 A building is required to compute due cadences.,يلزم تحديد مبنى لحساب الجولات المستحقة حسب التكرار.
 A building is required to load the inventory.,يجب تحديد مبنى لتحميل المخزون.
@@ -58,6 +59,8 @@ A payment request has been raised for this statement,صدر طلب دفع لهذ
 "A periodic safety round over a building for a given cadence. Groups the building's Safety Task Execution rows for that round and, on submit, derives an overall result from their statuses. Supersedes the legacy Safety Inspection Report.",جولة سلامة دورية على مبنى وفق تكرار الجولة المحدد. تجمع سجلات تنفيذ مهام السلامة للمبنى في تلك الجولة، وتستخرج النتيجة العامة من حالاتها عند الاعتماد. وتحل محل تقرير فحص السلامة السابق.
 A photo and filename are required together.,يجب إرفاق الصورة واسم ملفها معاً.
 A portal access token is required.,يلزم وجود رمز وصول إلى البوابة.
+A posting cannot be dated before {0}. Ask a {1} to post it.,لا يمكن تأريخ الحركة قبل {0}. اطلب من {1} تسجيلها.
+A posting cannot be dated in the future.,لا يمكن تأريخ الحركة في المستقبل.
 A push subscription endpoint is required.,عنوان اشتراك الإشعارات مطلوب.
 A reason is required to reject a handover.,يلزم سبب لرفض التسليم.
 A rejection reason is required.,سبب الرفض مطلوب.
@@ -247,6 +250,7 @@ Allocation Audit,تدقيق التوزيع
 Allocation Basis,أساس التوزيع
 Allocation Period End,نهاية فترة التوزيع
 Allocation Period Start,بداية فترة التوزيع
+Allow Negative Stock,السماح برصيد سالب
 Allow Over-Capacity,السماح بتجاوز الطاقة الاستيعابية
 Allow drivers to access the self-service portal.,السماح للسائقين بالوصول إلى بوابة الخدمة الذاتية.
 Allow pop-ups to print the slip.,اسمح بالنوافذ المنبثقة لطباعة القسيمة.
@@ -275,6 +279,7 @@ An Administrative Trip cannot be linked to labour accommodation.,لا يمكن �
 An Administrative Trip cannot carry a worker manifest.,لا يمكن أن تحمل الرحلة الإدارية كشف الركاب.
 An additional passenger's ID expiry is not a valid date.,تاريخ انتهاء هوية أحد الركاب الإضافيين غير صالح.
 An idle resident has been reported and routed to the responsible department,تم الإبلاغ عن ساكن غير مشغّل وإحالته إلى القسم المسؤول.
+An inactive store accepts no new posting. What it already holds stays held.,المخزن المغلق لا يقبل حركة جديدة، وما فيه يبقى فيه.
 An open Idle Resident Report already exists for employee {0}: {1}.,يوجد بالفعل تقرير ساكن غير مُشغَّل مفتوح للموظف {0}: {1}.
 An over-capacity (temporary) bed was created to house a worker beyond the room's physical capacity,تم إنشاء سرير فوق السعة (مؤقت) لإسكان عامل يتجاوز السعة الفعلية للغرفة
 An overlapping lease already exists for this building: {0},يوجد بالفعل عقد إيجار متداخل لهذا المبنى: {0}
@@ -302,6 +307,7 @@ Apex Core,نواة أبكس
 Apex Integration Settings,إعدادات تكامل أبكس
 Apex Settings,إعدادات أبكس
 Apex Setup,إعداد أبكس
+Apex Stock Settings,إعدادات مخزون أبيكس
 Apex is configured. Each module now has its own go-live list.,أبكس مُهيّأ. لكل وحدة الآن قائمة تشغيلها.
 Apex messaging gateway test message.,رسالة اختبار بوابة مراسلة أبكس.
 "Apex takes its default company and cost center from the company this wizard creates. Set how it posts costs and which document the Pay action builds. You can change all of these later in Habitat Settings, Salis Settings, and Payment Routing Settings.",يأخذ أبكس الشركة ومركز التكلفة الافتراضيين من الشركة التي ينشئها هذا المعالج. حدد طريقة ترحيل التكاليف والمستند الذي يبنيه إجراء الدفع. تقدر تغيّر كل هذا لاحقاً من إعدادات هابيتات وإعدادات ساليس وإعدادات توجيه الدفع.
@@ -545,6 +551,9 @@ Back Engines,المحركات الخلفية
 Back to the system,العودة إلى النظام
 Back-Dated Retirement,إخراج من الخدمة بتاريخ سابق
 Back-link to the Maintenance Request spawned from this finding. Presence makes the fan-out idempotent: a linked finding is never re-spawned. Intentionally copyable (no no_copy) so the link carries into an amended report and prevents duplicate tickets on amend.,رابط لطلب الصيانة الذي أُنشئ من هذه الملاحظة. وجوده يمنع إنشاء طلب مكرر، فالملاحظة المرتبطة لا يُعاد توليد طلب لها. والحقل قابل للنسخ عمداً لينتقل الرابط إلى التقرير المعدّل ويمنع تكرار التذاكر عند التعديل.
+Backdating Days,أيام التأريخ الرجعي
+Backdating Role,دور التأريخ الرجعي
+Backdating days cannot be negative.,لا يمكن أن تكون أيام التأريخ الرجعي سالبة.
 Background notifications are not enabled.,الإشعارات في الخلفية غير مفعّلة.
 Balady Certificate,شهادة بلدي
 Balance Qty,الكمية المتبقية
@@ -681,6 +690,7 @@ By Project,حسب المشروع
 By Status,حسب الحالة
 By Supplier,حسب المورّد
 CCTV Camera,كاميرا مراقبة
+Cannot move {0} unit(s) of {1} out of {2}: {3} holds only {4}.,لا يمكن إخراج {0} وحدة من {1} من {2}: {3} يحوز {4} فقط.
 Control Plus,كنترول بلس
 "CORS origin(s) an administrator should add to allow_cors in site_config.json so the frontend can call this backend, for example https://salis-fleet.com. This field only records the intended origins; it does not modify server configuration.",مصادر CORS التي يضيفها المسؤول إلى allow_cors في ملف site_config.json لتتمكن الواجهة الأمامية من الاتصال بهذا الخادم، مثل https://salis-fleet.com. هذا الحقل يسجّل المصادر المقصودة فقط ولا يغيّر إعدادات الخادم.
 Cadence,تكرار الجولة
@@ -1610,6 +1620,7 @@ Enable Messaging Gateway,تفعيل بوابة المراسلة
 Enable Operational Notifications,تفعيل الإشعارات التشغيلية
 Enable Passport MRZ OCR Autofill,تفعيل التعبئة الآلية لبيانات الجواز عبر OCR لمنطقة MRZ
 Enable Salary Deductions,تفعيل الخصومات من الراتب
+Enable Stock Engine,تشغيل محرّك المخزون
 Enable Stock Entry Posting,تفعيل ترحيل حركة المخزون
 Enable Supplier Markup,تفعيل هامش المورد
 Enable approval routing for fleet transactions?,تفعيل توجيه الاعتماد لحركات الأسطول؟
@@ -1628,6 +1639,7 @@ End of Assignment,انتهاء الإسناد
 End of Contract,نهاية العقد
 Ended,منتهٍ
 Endpoint,العنوان
+Engine,المحرّك
 English,الإنجليزية
 Enter a valid mobile number.,أدخل رقم جوال صحيحاً.
 Enter any deduction for room or asset damage.,أدخل أي خصم مقابل أضرار الغرفة أو الأصول.
@@ -1977,6 +1989,8 @@ Grace period (minutes) from trip start before notify escalation and absence mark
 Ground,أرضي
 Ground Floor,الطابق الأرضي
 Group Housing Permit,تصريح السكن الجماعي
+Guards,الحرّاس
+How many days back a posting may be dated. Zero means today only.,كم يوماً يجوز تأريخ الحركة إلى الوراء. الصفر يعني اليوم فقط.
 How the line is billed. Blank until the package is known.,طريقة فوترة الخط. يُترك فارغاً حتى تُعرف الباقة.
 HR,الموارد البشرية
 HR Case,قضية موارد بشرية
@@ -2811,6 +2825,7 @@ Nothing has been claimed on this voucher,ما في مطالبة على هذا ا
 "Nothing is left against this driver in the fleet. Everything he held has been returned and no fuel exception or cost recovery is open, so the company releases him and his final settlement may be paid.",ما بقي على هذا السائق شيء في الأسطول. رجّع كل ما كان بعهدته، وما عليه استثناء وقود ولا تحصيل مفتوح، فتخلي الشركة طرفه ويُصرف مستحقه النهائي.
 Nothing on your work center right now.,لا يوجد ما يحتاج متابعتك حاليًا.
 Nothing outstanding against this issue,لا يوجد متبقٍ على هذا الصرف
+"Nothing posts on or before this date, whatever the window allows.",لا تُسجَّل حركة في هذا التاريخ أو قبله مهما سمحت النافذة.
 Nothing to assess,لا يوجد ما يُقيَّم
 Notice Acknowledged On,تاريخ الإقرار بالإشعار
 Notice Period (Days),مدة الإشعار (أيام)
@@ -2873,6 +2888,7 @@ Off by default — no automatic housing-allowance deduction. Requires legal/HR r
 Off by default — post expiry and overdue reminders as timeline comments on the source document.,معطّل افتراضيًا — ينشر تذكيرات الانتهاء والتأخّر كتعليقات في مسار المستند المصدر.
 Off by default — turn on only after the site's outgoing email (SMTP) is configured.,معطّل افتراضيًا — فعّله بعد ضبط البريد الصادر (SMTP) للموقع فقط.
 Off by default. Requires legal/HR review.,معطّل افتراضيًا. يتطلّب مراجعة قانونية وموارد بشرية.
+"Off, a posting that would drive a store or a holder below zero is refused.",عند الإيقاف تُرفض أي حركة تُنزل المخزن أو الحائز تحت الصفر.
 Office,مكتب
 Office Details,تفاصيل المكتب
 Office Name,اسم المكتب
@@ -3545,6 +3561,7 @@ Reflected from the linked Facility Asset's maintenance.,مأخوذ من بيان
 Refresh,تحديث
 Refresh Board,تحديث اللوحة
 Refresh Map,تحديث الخريطة
+Refuse a posting whose building is not an open store.,ارفض الحركة إذا لم يكن مبناها مخزناً مفتوحاً.
 Regenerate Code,إعادة توليد الرمز
 Regenerate OTP,إعادة توليد رمز التحقق
 Regenerate Payment Schedule,إعادة توليد جدول السداد
@@ -3696,6 +3713,7 @@ Requester Type,نوع مقدّم الطلب
 Requests,الطلبات
 Requests in category {0} are resolved directly and have no target document to create.,الطلبات في الفئة {0} تُحلّ مباشرةً ولا يوجد لها مستند مستهدف لإنشائه.
 Require Acknowledgment for All Deductions,اشتراط الإقرار لجميع الخصومات
+Require An Active Store,اشتراط مخزن مفتوح
 Require Employee Acknowledgment,اشتراط إقرار الموظف
 Require Handover OTP,اشتراط رمز تحقق للتسليم
 Require Internal Approval,اشتراط الاعتماد الداخلي
@@ -4378,7 +4396,10 @@ Sticker Requested,تم طلب الملصق
 Still Held,لا تزال بالحيازة
 Still Outstanding,المتبقي
 Still open on the resident's account,ما زالت مفتوحة على الساكن
+Stock Engine,محرّك المخزون
 Stock Entry,حركة المخزون
+Stock Frozen Upto,المخزون مجمَّد حتى
+Stock is frozen up to {0}. Nothing can be posted on or before that date.,المخزون مجمَّد حتى {0}. لا تُسجَّل حركة في ذلك التاريخ أو قبله.
 Stop,محطة
 Stop Date,تاريخ الإيقاف
 Stop Details,تفاصيل الإيقاف
@@ -4393,6 +4414,7 @@ Stopped via {0}: {1}.,تم الإيقاف عبر {0}: {1}.
 Stops,المحطات
 Storage,مخزن
 Store & Custody,المستودع والعهدة
+Store Is Active,المخزن مفتوح
 Store Supervisor,مشرف المستودع
 Storekeeper,أمين المستودع
 Straight Line,القسط الثابت
@@ -4470,6 +4492,7 @@ Suspended or Lost,موقوفة أو مفقودة
 System,النظام
 System Details,تفاصيل النظام
 System Info,معلومات النظام
+System Manager,مدير النظام
 System logs: read-only diagnostics.,سجلات النظام: تشخيصات للقراءة فقط.
 System-generated document from Apex,مستند صادر آليًا من نظام أبيكس
 "System-written, read-only periodic snapshot of vehicle utilisation over a trailing window. Never hand-entered; derived from completed Dispatch Trips.",لقطة دورية للقراءة فقط يكتبها النظام لاستخدام المركبات عبر نافذة زمنية متحركة. لا تُدخل يدوياً؛ وتُشتق من رحلات التسيير المكتملة.
@@ -4633,6 +4656,7 @@ The notice carries an approving officer,الإشعار عليه مسؤول مع�
 The notification number given by whoever was told outside the company.,رقم البلاغ الذي أعطته الجهة التي أُبلغت خارج الشركة.
 The number listed fits the seats in the vehicle,عدد المذكورين يناسب مقاعد المركبة
 The on-site code has expired. Ask the initiator to regenerate it.,انتهت صلاحية رمز الموقع. اطلب من المُبادر إعادة توليده.
+The one role allowed to post further back than the window above.,الدور الوحيد الذي يجوز له التسجيل أبعد من النافذة أعلاه.
 The one-time password has expired. Ask the procurement supervisor to regenerate it.,انتهت صلاحية رمز التحقق لمرة واحدة. اطلب من مشرف المشتريات إعادة توليده.
 "The operational source DocType whose submission may raise this deduction (for example Custody Damage Assessment, Accommodation Checkout). Recorded for reference; no controller reads it.",نوع المستند التشغيلي الذي قد يرفع هذا الخصم عند اعتماده (مثل تقييم تلفيات العهدة، أو إخلاء السكن). مسجَّل للعلم فقط، ولا يقرأه أي متحكّم.
 The operator's own contract or account agreement number.,رقم عقد مشغل الاتصالات أو اتفاقية حسابه.
@@ -4673,6 +4697,8 @@ The statement names the supplier invoice it settles,الكشف يذكر فاتو
 "The station attendant states that he dispensed the litres written in the dispense record above, of the grade shown, into this vehicle at the odometer reading he entered.",يقرّ موظف المحطة أنه صرف اللترات المكتوبة في سجل الصرف أعلاه، من النوع المبيّن، لهذه المركبة عند قراءة العداد التي أدخلها.
 The station recorded what it actually dispensed,المحطة سجّلت ما صرفته فعلاً
 "The station that actually dispensed the fuel. Filled after the voucher is approved, which is what binds the attendant's signature.",المحطة التي صرفت الوقود فعلاً. تُملأ بعد اعتماد السند، وهي ما يلزم توقيع الموظف.
+The stock engine is switched off in Apex Stock Settings.,محرّك المخزون موقوف في إعدادات مخزون أبيكس.
+"The store at {0} is closed, so nothing can be posted to it.",المخزن في {0} مغلق، فلا تُسجَّل إليه حركة.
 "The storekeeper confirms receiving the articles shown as Returned Now, in the condition recorded against each line. Any line marked Damaged or Lost, and any quantity still outstanding, stays on the holder's account and is settled through a custody damage assessment. This receipt clears the holder only for what is recorded as returned and sound.",يقر أمين المستودع باستلام الأصناف الموضحة في عمود «المرتجع الآن» بالحالة المسجلة أمام كل سطر. وأي سطر مؤشر كتالف أو مفقود، وأي كمية ما زالت متبقية، تبقى على حساب حائز العهدة وتُسوّى عبر تقييم تلفيات العهدة. ولا يبرئ هذا الإيصال ذمة الحائز إلا عما سُجّل مرتجعًا وسليمًا.
 The submitted Custody Issue whose receipt is being acknowledged.,صرف العهدة المعتمد الذي يجري الإقرار باستلامه.
 The submitted landlord invoice this payment settles.,فاتورة المؤجّر المعتمدة التي تسددها هذه الدفعة.
@@ -4808,8 +4834,6 @@ Today's Dispatch Trips,رحلات التسيير اليوم
 Today's expected arrivals ({0}),الوافدون المتوقع وصولهم اليوم ({0})
 Token (Encrypted),الرمز (مشفّر)
 Token Hash,بصمة الرمز
-Too many incorrect attempts. This delivery is temporarily locked.,محاولات خاطئة كثيرة. هذا التسليم مقفل مؤقتًا.
-Too many incorrect attempts. This handover is temporarily locked.,محاولات خاطئة كثيرة. هذا التسليم مقفل مؤقتاً.
 Tools,أدوات
 Top Workers by Custody Value,أعلى العمال من حيث قيمة العهدة
 Top-up,تعبئة
@@ -4925,6 +4949,7 @@ True when the finding's snapshot status was Resolved at posting time.,صحيح �
 True when the trip recorded both a depart and return timestamp. Data-completeness flag — no planned return time is stored to judge punctuality against.,صحيح عندما تسجّل الرحلة طابعي وقت للمغادرة والعودة معًا. مؤشر اكتمال البيانات — لا يُخزَّن وقت عودة مخطط للحكم على الالتزام بالمواعيد مقابله.
 Tuesday,الثلاثاء
 "Turn on email and operational notifications, the driver self-service portal, and approval routing. All of these can be changed later in Habitat Settings and Salis Settings.",فعّل تنبيهات البريد والتنبيهات التشغيلية وبوابة الخدمة الذاتية للسائق وتوجيه الاعتماد. يمكن تغييرها جميعًا لاحقًا في إعدادات هابيتات وإعدادات ساليس.
+Turn the building-store engine off to stop every custody and material posting at once.,أوقف محرّك مخازن المباني لإيقاف كل حركات العهد والمواد دفعة واحدة.
 Type,النوع
 Type a message before sending.,اكتب رسالة قبل الإرسال.
 "Type of cost being recovered from a driver or party, such as vehicle damage, fuel misuse, custody loss, or a fine, which determines the recovery basis.",نوع التكلفة المستردة من سائق أو طرف، كتلف المركبة أو إساءة استخدام الوقود أو فقدان العهدة أو مخالفة، ما يحدّد أساس الاسترداد.
@@ -5193,6 +5218,7 @@ Which lifecycle event on the source document raises the deduction.,أي حدث �
 "Which part of the accommodation this cleaning evidence photo covers, so before-and-after proof can be checked per area during cleaning audits.",الجزء من السكن الذي تغطيه صورة دليل التنظيف هذه، ليتسنى فحص إثبات ما قبل وما بعد لكل منطقة أثناء تدقيقات التنظيف.
 "Which physical unit came back, for a serialised article.",أي قطعة رجعت، للصنف ذي الرقم التسلسلي.
 "Which subject this access token grants entry for: a housed/transported Worker (Masar) or a fleet Driver (barcode entry, no Frappe User).",الفئة التي يمنحها رمز الدخول صلاحية الوصول: عامل سكن أو نقل عبر مسار، أو سائق أسطول يدخل بالباركود دون حساب مستخدم في Frappe.
+Who answers for this building's store balance.,من يتحمّل مسؤولية رصيد مخزن هذا المبنى.
 Who is arriving?,من القادم؟
 Who must clear the finding; without a name the action belongs to nobody.,من يجب أن يعالج الملاحظة؛ وبدون اسم لا يكون الإجراء على أحد.
 "Why a resident is idle and not deployed to work, such as a new hire awaiting assignment, a return from leave, or a legal or HR hold, used to target follow-up.",سبب بقاء الساكن دون تكليف عمل، مثل موظف جديد بانتظار الإسناد أو عائد من إجازة أو متوقف لأسباب قانونية أو لدى الموارد البشرية. يُستخدم لتوجيه المتابعة.
@@ -5374,6 +5400,7 @@ stamped,مختوم
 standing,دائم
 superseded,مُلغى بإصدار أحدث
 tabular,جدولي
+the building store,مخزن المبنى
 timesheet,سجل الدوام
 trim,تشذيب
 unknown,غير معروفة

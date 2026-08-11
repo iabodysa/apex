@@ -75,7 +75,7 @@ def confirm_handover(handover: str, otp: str):
 
     locked = frappe.db.get_value(
         VOUCHER_TYPE, doc.name,
-        ["status", "otp_attempts", "otp_locked_until", "otp_expires_at", "otp_hash"],
+        ["status", "otp_expires_at", "otp_hash"],
         as_dict=True, for_update=True,
     )
 
@@ -83,9 +83,6 @@ def confirm_handover(handover: str, otp: str):
         return doc.name
 
     now = now_datetime()
-    if locked.otp_locked_until and now < locked.otp_locked_until:
-        frappe.throw(_("Too many incorrect attempts. This handover is temporarily locked."))
-
     otp_required = _otp_required()
 
     if otp_required and locked.otp_expires_at and now > locked.otp_expires_at:
@@ -102,12 +99,10 @@ def confirm_handover(handover: str, otp: str):
     if locked.otp_hash and hmac.compare_digest(hash_otp(otp or "", doc.name), locked.otp_hash):
         return _post_receive_and_confirm(doc)
 
-    attempts = (locked.otp_attempts or 0) + 1
     charge_wrong_code(
         doc.doctype, doc.name,
         attempts=MAX_OTP_ATTEMPTS, lockout_minutes=LOCKOUT_MINUTES,
     )
-    doc.db_set("otp_attempts", attempts)
     frappe.throw(_("Invalid code."))
 
 
@@ -149,8 +144,6 @@ def _post_receive_and_confirm(doc):
     doc.db_set({
         "otp_verified_on": now,
         "otp_hash": None,
-        "otp_locked_until": None,
-        "otp_attempts": 0,
         "status": "Confirmed",
     })
     return doc.name

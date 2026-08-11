@@ -1,0 +1,105 @@
+{
+ "actions": [],
+ "creation": "2026-08-11 02:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "stock_settings_tab_engine",
+  "stock_settings_sec_engine",
+  "enable_stock_engine",
+  "require_active_store",
+  "stock_settings_sec_guards",
+  "allow_negative_stock",
+  "backdating_days",
+  "stock_settings_guards_col",
+  "backdating_role",
+  "stock_frozen_upto"
+ ],
+ "fields": [
+  {
+   "fieldname": "stock_settings_tab_engine",
+   "fieldtype": "Tab Break",
+   "label": "Stock Engine"
+  },
+  {
+   "fieldname": "stock_settings_sec_engine",
+   "fieldtype": "Section Break",
+   "label": "Engine"
+  },
+  {
+   "default": "1",
+   "description": "Turn the building-store engine off to stop every custody and material posting at once.",
+   "fieldname": "enable_stock_engine",
+   "fieldtype": "Check",
+   "label": "Enable Stock Engine"
+  },
+  {
+   "default": "0",
+   "description": "Refuse a posting whose building is not an open store.",
+   "fieldname": "require_active_store",
+   "fieldtype": "Check",
+   "label": "Require An Active Store"
+  },
+  {
+   "fieldname": "stock_settings_sec_guards",
+   "fieldtype": "Section Break",
+   "label": "Guards"
+  },
+  {
+   "default": "0",
+   "description": "Off, a posting that would drive a store or a holder below zero is refused.",
+   "fieldname": "allow_negative_stock",
+   "fieldtype": "Check",
+   "label": "Allow Negative Stock"
+  },
+  {
+   "default": "0",
+   "description": "How many days back a posting may be dated. Zero means today only.",
+   "fieldname": "backdating_days",
+   "fieldtype": "Int",
+   "label": "Backdating Days",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "stock_settings_guards_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The one role allowed to post further back than the window above.",
+   "fieldname": "backdating_role",
+   "fieldtype": "Link",
+   "label": "Backdating Role",
+   "options": "Role"
+  },
+  {
+   "description": "Nothing posts on or before this date, whatever the window allows.",
+   "fieldname": "stock_frozen_upto",
+   "fieldtype": "Date",
+   "label": "Stock Frozen Upto"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-08-11 02:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Apex Core",
+ "name": "Apex Stock Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

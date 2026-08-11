@@ -144,18 +144,3 @@ def company_scoped_has_permission(doc, ptype, user=None):
     if not company:
         return False
     return None if company in _allowed_companies_for(user, doc.doctype) else False
-
-
-def telecom_contract_query(user=None, doctype=None):
-    """Telecom Contract list fragment. Compatibility name."""
-    return company_scope_query(user, doctype)
-
-
-def sim_card_query(user=None, doctype=None):
-    """SIM Card list fragment. Compatibility name."""
-    return company_scope_query(user, doctype)
-
-
-def sim_custody_assignment_query(user=None, doctype=None):
-    """SIM Custody Assignment list fragment. Compatibility name."""
-    return company_scope_query(user, doctype)

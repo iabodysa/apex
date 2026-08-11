@@ -39,6 +39,8 @@
   "accommodation_building_capacity_col",
   "over_capacity_threshold_percent",
   "is_procurement_store",
+  "store_is_active",
+  "storekeeper",
   "accommodation_building_tab_financials",
   "accommodation_building_sec_financials",
   "annual_rent",
@@ -295,6 +297,22 @@
    "fieldname": "is_procurement_store",
    "fieldtype": "Check",
    "label": "Procurement Intake Store"
+  },
+  {
+   "default": "1",
+   "depends_on": "is_procurement_store",
+   "description": "An inactive store accepts no new posting. What it already holds stays held.",
+   "fieldname": "store_is_active",
+   "fieldtype": "Check",
+   "label": "Store Is Active"
+  },
+  {
+   "depends_on": "is_procurement_store",
+   "description": "Who answers for this building's store balance.",
+   "fieldname": "storekeeper",
+   "fieldtype": "Link",
+   "label": "Storekeeper",
+   "options": "User"
   },
   {
    "fieldname": "accommodation_building_tab_financials",
@@ -864,7 +882,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-08-08 12:00:00.000000",
+ "modified": "2026-08-11 08:22:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Building",

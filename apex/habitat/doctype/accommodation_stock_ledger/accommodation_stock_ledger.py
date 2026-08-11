@@ -103,6 +103,8 @@ def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no
     """Insert one signed-quantity Stock Ledger row. Denormalises item name/uom/cost,
     company and cost center from the source masters/building."""
     party_type, party, employee = _resolve_holder(employee, party_type, party)
+    if not reversal_of:
+        _assert_policy_allows(item_type, item, qty, building, party_type, party, posting_date)
     item_name, uom, unit_cost = _resolve_item(item_type, item)
     company, cost_center = frappe.db.get_value(
         "Building", building, ["company", "default_cost_center"]
@@ -132,6 +134,39 @@ def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no
     })
     doc.insert(ignore_permissions=True)
     return doc.name
+
+
+def _assert_policy_allows(item_type, item, qty, building, party_type, party, posting_date) -> None:
+    """The engine's policy, applied where the row is WRITTEN rather than in each caller.
+
+    A guard in the caller is a convention the next voucher type does not inherit — four of
+    the five callers checked availability and one did not, which is how a check-in could
+    drive a store below zero. Apex Stock Settings owns the three rules ERPNext ships and
+    this ledger lacked: a period freeze, a backdating window, and negative-stock refusal.
+
+    Reversals are exempt and pass ``reversal_of``: a mirror row must be able to unwind a
+    posting whose date has since fallen outside the window, and its own positivity rule
+    already lives in ``_assert_reversal_keeps_stock_positive``.
+    """
+    from apex.apex_core.doctype.apex_stock_settings.apex_stock_settings import (
+        assert_posting_allowed,
+        policy,
+    )
+
+    assert_posting_allowed(building, posting_date)
+
+    if flt(qty) >= 0 or policy()["allow_negative"]:
+        return
+    available = get_store_balance(
+        item_type, item, building, party_type=party_type, party=party, for_update=True
+    )
+    if abs(flt(qty)) > available:
+        holder = party or _("the building store")
+        frappe.throw(
+            _("Cannot move {0} unit(s) of {1} out of {2}: {3} holds only {4}.").format(
+                abs(flt(qty)), item, building, holder, available
+            )
+        )
 
 
 def get_store_balance(item_type: str, item: str, building: str, employee=None,
