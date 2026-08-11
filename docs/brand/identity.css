@@ -102,7 +102,7 @@ body {
   font-family: var(--font-ui);
   font-size: 16px;
   line-height: 1.7;
-  text-align: right;
+  text-align: start;
   text-rendering: optimizeLegibility;
 }
 
@@ -213,12 +213,12 @@ h3 {
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: 0;
-  text-align: right;
+  text-align: start;
 }
 
 [dir="ltr"],
 [dir="ltr"] :where(h1, h2, h3, h4) {
-  text-align: left;
+  text-align: start;
 }
 
 code,
@@ -282,7 +282,6 @@ pre,
 
 .rail-brand strong {
   font-size: 15px;
-  letter-spacing: 0.16em;
 }
 
 .rail-brand small {
@@ -327,12 +326,7 @@ pre,
 
 main {
   width: calc(100% - 260px);
-  margin-left: 260px;
-}
-
-[dir="rtl"] main {
-  margin-right: 260px;
-  margin-left: 0;
+  margin-inline-start: 260px;
 }
 
 .guide-page {
@@ -413,7 +407,6 @@ main {
   color: var(--green-text);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
@@ -1556,7 +1549,6 @@ main {
   color: var(--surface);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -1708,7 +1700,7 @@ main {
 .numeral-card span {
   color: var(--green);
   direction: ltr;
-  text-align: right;
+  text-align: end;
 }
 
 .control-type {
@@ -3881,7 +3873,7 @@ progress {
   direction: ltr;
   font-size: 13px;
   line-height: 2.1;
-  text-align: left;
+  text-align: start;
   white-space: normal;
 }
 
@@ -4026,12 +4018,12 @@ html[data-capture] .cover-top > span {
 
 html[data-capture] .cover-copy {
   direction: rtl;
-  text-align: right;
+  text-align: start;
 }
 
 html[data-capture] .cover-copy > * {
-  margin-right: 0;
-  margin-left: auto;
+  margin-inline-start: 0;
+  margin-inline-end: auto;
 }
 
 @media (max-width: 1180px) {
