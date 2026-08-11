@@ -1,9 +1,9 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <footer class="action-dock">
+    <div v-if="$slots.danger" class="action-dock-danger"><slot name="danger" /></div>
     <div v-if="$slots.secondary" class="action-dock-secondary"><slot name="secondary" /></div>
     <div v-if="$slots.primary" class="action-dock-primary"><slot name="primary" /></div>
-    <div v-if="$slots.danger" class="action-dock-danger"><slot name="danger" /></div>
   </footer>
 </template>
 
@@ -40,7 +40,7 @@
 @media (max-width: 30rem) {
   .action-dock {
     align-items: stretch;
-    flex-direction: column-reverse;
+    flex-direction: column;
   }
   .action-dock-primary,
   .action-dock-secondary,
