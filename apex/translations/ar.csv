@@ -279,6 +279,7 @@ Amounts,المبالغ
 An Administrative Trip cannot be linked to labour accommodation.,لا يمكن ربط الرحلة الإدارية بسكن العمال.
 An Administrative Trip cannot carry a worker manifest.,لا يمكن أن تحمل الرحلة الإدارية كشف الركاب.
 An additional passenger's ID expiry is not a valid date.,تاريخ انتهاء هوية أحد الركاب الإضافيين غير صالح.
+"An exit checkpoint is cleared by its own action, not by editing the delivery.","تُجتاز نقطة الخروج بإجرائها الخاص، لا بتعديل مستند التسليم."
 An idle resident has been reported and routed to the responsible department,تم الإبلاغ عن ساكن غير مشغّل وإحالته إلى القسم المسؤول.
 An inactive store accepts no new posting. What it already holds stays held.,المخزن المغلق لا يقبل حركة جديدة، وما فيه يبقى فيه.
 An open Idle Resident Report already exists for employee {0}: {1}.,يوجد بالفعل تقرير ساكن غير مُشغَّل مفتوح للموظف {0}: {1}.

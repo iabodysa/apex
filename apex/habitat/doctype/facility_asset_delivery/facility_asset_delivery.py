@@ -11,22 +11,20 @@ same engine Facility Asset Movement uses — NOT a stock-quantity post.
 
 Lifecycle (guarded controller state machine, mirroring Custody Handover):
   Draft
-   -> (submit)            Pending Exits   [on-site code issued to initiator]
-   -> exit 1 (security)   Pending Exits
-   -> exit 2 (logistics)  Pending Exits
-   -> exit 3 (receiving)  Released        [all 3 exits passed; lock open]
+   -> (submit)            Pending Exits
+   -> exit 1 (hand-over)  Pending Exits
+   -> exit 2 (receiving)  Released        [both exits passed; lock open, code issued]
    -> (confirm on-site code, by the receiving side, NOT the initiator)
                           Delivered       [asset location/custody actually moves]
   cancel -> Cancelled (reverses the movement ledger if the asset already moved).
 
-THE 3-EXIT TRANSFER LOCK: the asset is NOT released and does NOT move until all
-three exit checkpoints are passed, each by a DISTINCT role (owner-confirmable
-default — see the module README / report):
-  exit 1  Security / Gate       Resident Supervisor (source gate-out)
-  exit 2  Logistics / Dispatch  Accommodation Manager (transit authorization)
-  exit 3  Receiving Acceptance  receiving supervisor OR Procurement Supervisor
-The exits MUST be cleared in order (1 -> 2 -> 3); clearing exit 3 opens the lock
-(status -> Released) and issues the on-site code.
+THE 2-EXIT TRANSFER LOCK: the asset is NOT released and does NOT move until both
+checkpoints pass, one on each side of the hand-over:
+  exit 1  Gate / hand-over      Procurement Supervisor (source gate-out)
+  exit 3  Receiving Acceptance  receiving supervisor OR Resident Supervisor
+The numbers are the stored field numbers, not positions — the middle checkpoint was
+retired and its fields are hidden rather than dropped. The exits MUST be cleared in
+order; clearing the last opens the lock (status -> Released) and issues the code.
 
 Lifecycle logic lives as Document methods so Frappe runs it natively with no
 hooks.py doc_events wiring (the Goods Receipt / Custody Handover convention). The
@@ -50,6 +48,9 @@ from apex.habitat.asset_movement_engine import (
 )
 
 DELIVERY_DOCTYPE = "Facility Asset Delivery"
+
+_EXIT_SLUG = {1: "security_cleared", 2: "logistics_cleared", 3: "receiving_cleared"}
+_EXIT_FIELDS = tuple(f"exit{n}_{p}" for n in _EXIT_SLUG for p in (_EXIT_SLUG[n], "cleared_by", "cleared_on"))
 LEDGER_SOURCE = "Facility Asset Delivery"
 
 
@@ -85,6 +86,26 @@ class FacilityAssetDelivery(Document):
                 _("From Building does not match the asset's current location ({0}).").format(
                     asset_building
                 )
+            )
+
+    def before_update_after_submit(self):
+        """An exit is cleared by its own action, never by editing the delivery.
+
+        The nine exit fields carry allow_on_submit so the API can stamp them, and
+        read_only, which is a FORM control and not a server one. Without this, anyone
+        holding write permission could call frappe.client.set_value on a submitted
+        delivery and tick the other side's checkpoint — opening the transfer lock and
+        issuing themselves the on-site code, past both the role gate and the ordering
+        gate that api.facility_asset_delivery._pass_exit exists to enforce.
+
+        The sanctioned path is unaffected: _pass_exit stamps with db_set, which writes
+        the column and runs no controller hook, so only a real save reaches this.
+        """
+        touched = [f for f in _EXIT_FIELDS if self.has_value_changed(f)]
+        if touched:
+            frappe.throw(
+                _("An exit checkpoint is cleared by its own action, not by editing the delivery."),
+                frappe.PermissionError,
             )
 
     def on_submit(self):
