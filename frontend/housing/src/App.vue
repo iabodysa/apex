@@ -45,7 +45,7 @@
           <bdi v-if="showsBuilding && buildingLabel" dir="auto">{{ buildingLabel }}</bdi>
           <span v-else>{{ sceneEyebrow }}</span>
         </p>
-        <h2>{{ sceneTitle }}</h2>
+        <h1>{{ sceneTitle }}</h1>
         <p v-if="sceneSubtitle" class="context-copy">{{ sceneSubtitle }}</p>
 
         <button
@@ -88,9 +88,10 @@
       :class="{ 'has-context-list': showContextList }"
       tabindex="-1"
     >
-      <section v-if="needsBuilding" class="building-stage" :aria-label="t('building.title')">
+      <section v-if="needsBuilding" class="building-stage">
         <Brand class="stage-lockup" :variant="lockupVariant" :alt="t('common.appName')" />
         <p class="stage-kicker">{{ t("building.context") }}</p>
+        <h1 class="stage-title">{{ t("building.title") }}</h1>
         <BuildingSwitcher @select="selectBuilding" />
       </section>
 
@@ -383,13 +384,22 @@ useDocumentLanguage(lang, dir);
   margin-block-end: clamp(var(--sp-6), 5vw, var(--sp-8));
 }
 .stage-kicker {
-  margin: 0 0 var(--sp-4);
+  margin: 0 0 var(--sp-2);
   padding-block-end: var(--sp-3);
   border-block-end: 1px solid var(--c-border-strong);
   color: var(--c-accent-ink);
   font-family: var(--font-brand);
   font-size: var(--fs-xs);
   font-weight: var(--fw-heading);
+}
+.stage-title {
+  margin: 0 0 var(--sp-4);
+  color: var(--c-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-heading);
+  line-height: 1.15;
+  text-wrap: balance;
 }
 .context-nav {
   margin-block-end: clamp(var(--sp-5), 3vw, var(--sp-8));
@@ -408,14 +418,13 @@ useDocumentLanguage(lang, dir);
   gap: var(--sp-4);
   min-inline-size: 0;
 }
-.desktop-context.is-narrow > h2,
 .desktop-context.is-narrow > .context-copy {
   display: none;
 }
 .desktop-context .scene-disc {
   margin-block-end: calc(-1 * var(--sp-2));
 }
-.desktop-context h2 {
+.desktop-context h1 {
   margin: 0;
   color: var(--c-ink);
   font-family: var(--font-display);
@@ -423,6 +432,9 @@ useDocumentLanguage(lang, dir);
   font-weight: var(--fw-heading);
   line-height: 1.15;
   text-wrap: balance;
+}
+.desktop-context.is-narrow > h1 {
+  font-size: var(--fs-h2);
 }
 .context-copy {
   margin: calc(-1 * var(--sp-2)) 0 0;
