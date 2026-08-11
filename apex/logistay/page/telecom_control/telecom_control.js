@@ -9,6 +9,23 @@ frappe.pages['telecom-control'].on_page_load = function (wrapper) {
 	wrapper.telecom_control = new TelecomControl(page);
 };
 
+// Chart colours follow the DESK theme instead of five frozen hex values: the same five
+// were drawn in dark mode as in light, and none of them was a token anything else in this
+// file used. frappe.Chart needs real colour values rather than var() strings, so the
+// scale the desk already defines is read once per render and any variable the theme does
+// not carry falls back to its own name, which frappe then resolves.
+function TC_CHART_COLORS() {
+	const root = getComputedStyle(document.documentElement);
+	const pick = (name, fallback) => (root.getPropertyValue(name) || '').trim() || fallback;
+	return [
+		pick('--blue-500', '#5e64ff'),
+		pick('--purple-500', '#743ee2'),
+		pick('--red-500', '#ff5858'),
+		pick('--orange-500', '#ffa00a'),
+		pick('--green-500', '#28a745'),
+	];
+}
+
 const TC_STYLE = {
 	root: 'display:flex;flex-direction:column;gap:var(--margin-lg,20px);padding-block:var(--padding-md,15px);',
 	filters: 'display:flex;flex-wrap:wrap;gap:var(--margin-sm,10px);align-items:flex-end;',
@@ -226,7 +243,7 @@ class TelecomControl {
 				data: { labels: rows.map((r) => r.label), datasets: [{ values: rows.map((r) => r.value) }] },
 				type: spec.type,
 				height: 200,
-				colors: ['#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#28a745'],
+				colors: TC_CHART_COLORS(),
 			});
 		});
 	}

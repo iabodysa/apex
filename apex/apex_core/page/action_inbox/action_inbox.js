@@ -171,8 +171,14 @@ class ActionInbox {
 			$('<span class="ai-actions-none text-muted"></span>').text(__('No actions available.')).appendTo($actions);
 			return;
 		}
+		// One button per DISTINCT action. get_transitions returns a row per transition, and a
+		// workflow that allows the same action from two states, or to two roles, returns it
+		// more than once — which drew two identical buttons that do the same thing.
+		const seen = new Set();
 		transitions.forEach((t) => {
 			const action = t.action || '';
+			if (!action || seen.has(action)) return;
+			seen.add(action);
 			const danger = /reject|cancel/i.test(action);
 			const cls = danger ? 'btn-danger' : 'btn-primary';
 			$(`<button class="btn btn-sm ${cls} ai-action-btn"></button>`)
