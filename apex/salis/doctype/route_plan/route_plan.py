@@ -24,6 +24,27 @@ class RoutePlan(Document):
                 frappe.throw(_("Row {0}: Stop Name is required").format(stop.idx))
         self.total_stops = len(self.stops or [])
         self._default_operations_requester()
+        self._require_project_on_a_new_plan()
+
+    def _require_project_on_a_new_plan(self):
+        """A NEW plan must name its project. Existing untagged ones are left alone.
+
+        Dispatch Trip has no project of its own — every project scope reaches a trip
+        through its Route Plan (``dispatch_board._trips_today_pane``, and
+        ``permissions.dispatch_trip_query``). So a plan with no project does not degrade
+        gracefully: its trips vanish from a scoped supervisor's board entirely while
+        staying visible to an unscoped one, which is the worst shape a scoping gap takes.
+
+        The field is not marked ``reqd`` because 169 plans already exist without one and a
+        blanket rule would refuse to save any of them until somebody invented a project for
+        it — a decision about live data, not about the schema. Enforcing it on insert only
+        stops the bleeding without freezing history; tagging the existing ones stays an
+        operator decision, and the count is what makes it visible.
+        """
+        if self.is_new() and not self.project:
+            frappe.throw(
+                _("A route plan must name its project, or its trips are invisible to every project-scoped supervisor.")
+            )
 
     def on_submit(self):
         """Stamps the submitting user as movement planner and drives the linked request to Scheduled."""
