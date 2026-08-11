@@ -1,11 +1,10 @@
 // Copyright (c) 2026, AFMCO and contributors
-// Regression guard for the barrel entry (components/index.js). BuildingPicker
-// imports `resourceErrorMessage` from the portal-local "@/i18n" — an export only
-// some portals' i18n.js provide — so re-exporting it here would make any
-// name-import from "@shared/components" fail `vite build` in portals that lack
-// that export (this broke A-041 shell imports for fleet/route_supervisor/driver/
-// safety). This test fails loudly if BuildingPicker (or any future component with
-// the same kind of portal-specific dependency) is added back to the barrel.
+// Regression guard for the barrel entry (components/index.js). A component that imports
+// a PORTAL-LOCAL alias — "@/i18n", whose exports differ per portal — must never be
+// re-exported here: a name-import from "@shared/components" would then fail `vite build`
+// in every portal that lacks the export (this broke A-041 shell imports for fleet,
+// route_supervisor, driver and safety). The explicit export list below is the guard; it
+// fails the moment a new name appears without someone deciding it belongs.
 import { describe, it, expect } from "vitest";
 import * as barrel from "@shared/components/index.js";
 
@@ -30,9 +29,5 @@ describe("components barrel", () => {
       "TabletSupervisorShell",
       "WorkQueue",
     ]);
-  });
-
-  it("does not re-export BuildingPicker", () => {
-    expect(barrel.BuildingPicker).toBeUndefined();
   });
 });
