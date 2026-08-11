@@ -4343,6 +4343,8 @@ Staircase,الدرج
 Stale,متقادم
 Stamp,الختم
 Stamped automatically when Finance approves. Read-only.,يُختم آلياً عند اعتماد المالية. للقراءة فقط.
+"Stamped by the driver's assignment, not entered here.",يُختم من إسناد السائق، لا يُدخل هنا.
+"Stamped by the vehicle's assignment, not entered here.",يُختم من إسناد المركبة، لا يُدخل هنا.
 "Stamped the day the claim is reconciled against the movement record, and cleared if it goes back to the movement team.",يُثبَت يوم تُطابَق المطالبة مع سجل الحركة، ويُمسح إذا رجعت إلى فريق الحركة.
 "Stamped the day the clearance reaches Cleared, and cleared again if the clearance is withdrawn.",يُثبَت يوم يصبح الإخلاء مخلًى، ويُمسح إذا سُحب الإخلاء.
 Stamped when a Maintenance Work Order for the linked asset is completed.,يُختم عند اكتمال أمر عمل صيانة للأصل المرتبط.
