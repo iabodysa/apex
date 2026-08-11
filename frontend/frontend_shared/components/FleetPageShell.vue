@@ -3,7 +3,7 @@
   <div class="fleet-shell">
     <header class="fleet-top">
       <span class="fleet-brand"><slot name="brand" /></span>
-      <nav class="fleet-nav"><slot name="nav" /></nav>
+      <nav v-if="$slots.nav" class="fleet-nav"><slot name="nav" /></nav>
       <span class="fleet-actions"><slot name="actions" /></span>
     </header>
 
@@ -92,7 +92,7 @@ const bodyStyle = computed(() => {
   align-items: center;
   gap: var(--sp-2);
 }
-.fleet-nav:empty + .fleet-actions {
+.fleet-brand + .fleet-actions {
   margin-inline-start: auto;
 }
 

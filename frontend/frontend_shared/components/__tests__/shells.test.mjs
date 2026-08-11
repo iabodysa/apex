@@ -49,6 +49,12 @@ describe("FleetPageShell", () => {
     expect(w.find(".custom").exists()).toBe(true);
     expect(w.find(".fleet-hello").exists()).toBe(false);
   });
+
+  it("draws no navigation landmark for a portal that has no nav", () => {
+    const w = mount(FleetPageShell, { slots: { default: "<div class='content'>Body</div>" } });
+    expect(w.find("nav").exists()).toBe(false);
+    expect(w.find(".fleet-body").classes()).not.toContain("has-bottom-nav");
+  });
 });
 
 describe("MobileConsoleShell", () => {
