@@ -46,8 +46,6 @@
 
       <template v-if="scene.links.length" #list>
         <section class="masar-context-list" :aria-label="scene.title">
-          <p>{{ t("common.workerApp") }}</p>
-          <h2>{{ scene.title }}</h2>
           <router-link
             v-for="link in scene.links"
             :key="link.to"

@@ -1,8 +1,8 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
   <section class="panel">
-    <header class="panel-head">
-      <h2 class="panel-title"><slot name="title">{{ title }}</slot></h2>
+    <header v-if="title || $slots.title || $slots.status" class="panel-head">
+      <h2 v-if="title || $slots.title" class="panel-title"><slot name="title">{{ title }}</slot></h2>
       <slot name="status" />
     </header>
     <div class="panel-body">

@@ -99,20 +99,6 @@ body {
   gap: var(--sp-2);
   min-inline-size: 0;
 }
-.masar-context-list p {
-  margin: 0;
-  color: var(--c-accent-ink);
-  font-family: var(--font-brand);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-}
-.masar-context-list h2 {
-  margin: 0 0 var(--sp-3);
-  color: var(--c-ink);
-  font-family: var(--font-display);
-  font-size: var(--fs-h2);
-  line-height: 1.2;
-}
 .masar-context-list a {
   display: flex;
   align-items: center;

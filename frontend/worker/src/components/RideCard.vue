@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2026, afmcoltd -->
 <template>
-  <Panel :title="t('home.nextRide')">
+  <Panel>
     <template v-if="ride && ride.status" #status>
       <Badge
         class="tone-badge"
@@ -50,16 +50,6 @@
 
     <EmptyState v-else :title="t('home.noRide')" :hint="t('home.noRideHint')">
       <template #icon><Icon name="route" :size="22" /></template>
-      <template #action>
-        <Button
-          class="row-btn"
-          variant="outline"
-          route="/request-transport"
-          :label="t('transport.requestNew')"
-        >
-          <template #prefix><Icon name="plus" :size="16" /></template>
-        </Button>
-      </template>
     </EmptyState>
   </Panel>
 </template>

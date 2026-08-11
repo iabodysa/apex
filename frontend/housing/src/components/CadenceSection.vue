@@ -62,8 +62,6 @@ const props = defineProps({
 const emit = defineEmits(["rate", "note", "photo"]);
 const { t, tEnum, lang } = useI18n();
 
-// The server sends the period as a kind plus numbers, never a rendered string, so the
-// label follows the portal's own language toggle instead of the session language.
 const periodLabel = computed(() => {
   const p = props.block.period || {};
   const locale = lang.value === "ar" ? "ar-SA-u-ca-gregory-nu-latn" : "en-US";
