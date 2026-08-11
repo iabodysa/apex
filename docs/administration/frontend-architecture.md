@@ -17,6 +17,55 @@ This is one delivery pipeline, not four competing implementations. Business
 validation and authorization remain in Python controllers and DocTypes; Vue
 components present the workflow.
 
+## Approved target architecture
+
+All portal source converges on one capability-driven Vue application. This is
+one codebase and one dependency/build boundary, not one large component. Two
+shells own device composition; feature modules own business behavior.
+
+```text
+frontend/apex_portal/
+├── core/
+│   ├── session/
+│   ├── permissions/
+│   ├── realtime/
+│   ├── offline/
+│   └── router/
+├── shells/
+│   ├── MobileShell.vue
+│   └── OperationsShell.vue
+└── features/
+    ├── worker/
+    ├── driver/
+    ├── housing/
+    ├── safety/
+    ├── fleet-self-service/
+    ├── fleet-operations/
+    └── transport-supervisor/
+```
+
+The server returns allowed sections and actions. The router and navigation use
+that capability document for presentation, but it is never the security
+boundary: every API continues to enforce Frappe roles, DocPerms, User
+Permissions, and row scope. Feature routes load lazily. Mobile and operations
+shells may use different offline policies without becoming separate projects.
+
+Existing `/driver`, `/masar`, `/housing`, `/safety`, `/fleet`, `/fleet-os`, and
+`/masar-supervisor` links remain compatible during migration. Old source roots
+and bundles are removed only after route, permission, offline, accessibility,
+test, build, and screenshot parity is demonstrated. This lets every migration
+commit remain deployable.
+
+Migration order:
+
+1. Establish `apex_portal` core contracts and both shells.
+2. Move Worker and Driver behind `MobileShell`.
+3. Move Housing and Safety behind `OperationsShell`.
+4. Move fleet self-service, fleet operations, and transport supervision.
+5. Replace commodity controls and icons with `frappe-ui` and Lucide; keep only
+   Apex-specific SVG assets under `apex/public/icons/`.
+6. Repoint the Frappe web shells, prove parity, then delete compatibility code.
+
 ## One frontend workspace
 
 `frontend/package.json` owns dependencies and

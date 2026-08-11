@@ -8,7 +8,7 @@ Use Apex documentation to complete a job, prepare a team, or operate the system 
 Start with the product journey that matches your work; use administration and reference
 pages when you need exact deployment or configuration detail.
 
-[See the product overview and operating maps](../README.md#how-apex-connects-the-work).
+[Start with the role-based training map](training/README.md) when you are preparing a team.
 
 ## Run the operation
 
@@ -65,8 +65,10 @@ payment handoff.
 - [Integration guide](administration/integration.md) — connect through supported Frappe APIs
 - [Workspace authoring](administration/workspace-authoring.md) — maintain task-focused navigation
 - [Frontend architecture](administration/frontend-architecture.md) — build and serve the portals
+- [Shared frontend runtime](administration/frontend-shared.md) — understand the common Vue runtime and build contract
 - [Apex identity](brand/index.html) — logo, interface foundations, layouts, and communication assets
-- [Portal implementation contract](../frontend/frontend_shared/DESIGN.md) — source-level portal rules
+- [Portal implementation contract](brand/portal-design.md) — source-level layout and interaction rules
+- [Shared component API contract](../frontend/frontend_shared/CONTRACTS.md) — source-adjacent props, slots, and states
 
 ## Reference
 

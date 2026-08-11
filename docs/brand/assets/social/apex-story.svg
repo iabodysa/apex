@@ -2,7 +2,9 @@
   <title id="title">قالب قصة أبكس لدعوة</title>
   <desc id="desc">قالب قصة عربي قابل للتحرير لدعوة واحدة، مع منطقة آمنة بعيدة عن عناصر واجهة المنصة.</desc>
   <style>
-    .ar { font-family: Cairo, "Noto Sans Arabic", Tahoma, sans-serif; }
+    @font-face { font-family: "Thmanyah Sans"; src: url("https://framerusercontent.com/assets/x6EBzvXf1Fi35XhsRoHxePDVo.woff2"); font-weight: 400; }
+    @font-face { font-family: "Thmanyah Sans"; src: url("https://framerusercontent.com/assets/LZvgFRUsP7pGWYj3tKxMUrKuhSY.woff2"); font-weight: 700; }
+    .ar { font-family: "Thmanyah Sans", Arial, sans-serif; }
     .label { font-size: 23px; font-weight: 700; }
     .headline { font-size: 78px; font-weight: 700; }
     .body { font-size: 29px; font-weight: 400; }
@@ -22,7 +24,7 @@
       <path d="M32 10c2.7 0 4.9 2.6 6.3 5.8L57 56H43.5L30.3 31l7.9-7.6Z" fill="#60d297"/>
       <path d="M32 10c2.7 0 4.9 2.6 6.3 5.8l3.5 7.6h-3.6Z" fill="#ffffff" opacity=".72"/>
     </g>
-    <text x="300" y="67" text-anchor="end" fill="#f8f5ee" font-family="Cairo, Noto Sans Arabic, Tahoma, sans-serif" font-size="48" font-weight="700">أبكس</text>
+    <text x="300" y="67" text-anchor="end" fill="#f8f5ee" font-family="Thmanyah Sans, Arial, sans-serif" font-size="48" font-weight="700">أبكس</text>
   </g>
 
   <g id="editable-heading" class="ar" direction="rtl">

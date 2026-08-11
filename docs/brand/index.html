@@ -3,632 +3,732 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="دليل هوية أبكس ونظام تصميم المنتج للمواقع والبوابات والمنشورات."
-    />
+    <meta name="description" content="دليل هوية أبكس ونظام تصميم واجهاته ومنتجاته الرقمية." />
     <meta name="theme-color" content="#072b1a" />
-    <title>أبكس — دليل الهوية ونظام المنتج</title>
+    <title>أبكس، دليل الهوية ونظام الواجهات</title>
     <link rel="icon" href="assets/logo/apex-app-icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="../../apex/public/vendor/cairo-v31/cairo.css" />
-    <link rel="stylesheet" href="../../apex/public/vendor/montserrat-v31/montserrat.css" />
     <link rel="stylesheet" href="identity.css" />
-    <script src="identity.js" defer></script>
   </head>
   <body>
-    <a class="skip-link" href="#main">انتقل إلى المحتوى</a>
+    <a class="skip-link" href="#page-00">انتقل إلى الدليل</a>
 
-    <div class="shell">
-      <aside class="rail" aria-label="فصول الدليل" data-rail>
-        <div class="mobile-bar">
-          <img src="assets/logo/apex-mark.svg" width="64" height="64" alt="أبكس" />
-          <button type="button" aria-label="فتح الفصول" aria-expanded="false" aria-controls="guide-nav" data-menu>
-            <span aria-hidden="true">☰</span>
-            <span hidden>فتح الفصول</span>
-          </button>
+    <svg class="icon-sprite" aria-hidden="true">
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V21h-6v-6H9v6H3Z"/></symbol>
+      <symbol id="i-task" viewBox="0 0 24 24"><path d="M7 4h10v3h3v14H4V7h3Zm2 0v4h6V4Zm0 9h6m-6 4h4"/></symbol>
+      <symbol id="i-car" viewBox="0 0 24 24"><path d="m5 16 1.5-6h11L19 16M3 16h18v4h-3v-2H6v2H3Zm4-6 2-4h6l2 4"/></symbol>
+      <symbol id="i-bus" viewBox="0 0 24 24"><path d="M5 3h14v15H5Zm0 9h14M8 21v-3m8 3v-3M8 7h8"/></symbol>
+      <symbol id="i-building" viewBox="0 0 24 24"><path d="M5 21V3h10v18m0-12h4v12M8 7h4m-4 4h4m-4 4h4M3 21h18"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6 7-13a7 7 0 1 0-14 0c0 7 7 13 7 13Zm0-10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/></symbol>
+      <symbol id="i-user" viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 9a8 8 0 0 1 16 0"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Zm-3-11 2 2 4-5"/></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 21h20Zm0 6v5m0 3v1"/></symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm0-12v2m0 13v2m8.5-8.5h-2m-13 0h-2m14.5-6L16.5 7.5m-9 9L6 18m12 0-1.5-1.5m-9-9L6 6"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m-5 5 5-5 5 5M4 16v5h16v-5"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4 10-10"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    </svg>
+
+    <aside class="rail" aria-label="فصول الدليل">
+      <a class="rail-brand" href="#page-00">
+        <img src="assets/logo/apex-mark.svg" alt="" width="40" height="40" />
+        <span><strong>APEX</strong><small>Brand Guidelines &amp; UI System</small></span>
+      </a>
+      <nav>
+        <a href="#page-00"><b>00</b><span>الغلاف والفهرس</span></a>
+        <a href="#page-01"><b>01</b><span>أسس العلامة</span></a>
+        <a href="#page-02"><b>02</b><span>نظام الشعار</span></a>
+        <a href="#page-03"><b>03</b><span>نظام الألوان</span></a>
+        <a href="#page-04"><b>04</b><span>الخطوط</span></a>
+        <a href="#page-05"><b>05</b><span>التخطيط واللغة البصرية</span></a>
+        <a href="#page-06"><b>06</b><span>أسس الواجهة</span></a>
+        <a href="#page-07"><b>07</b><span>المكونات الأساسية</span></a>
+        <a href="#page-08"><b>08</b><span>أنماط المنتج</span></a>
+        <a href="#page-09"><b>09</b><span>الاستجابة والوصول</span></a>
+        <a href="#page-10"><b>10</b><span>تطبيقات الهوية</span></a>
+        <a href="#page-11"><b>11</b><span>تسليم المطور</span></a>
+      </nav>
+      <small class="rail-version">Version 2.0 · 09 Aug 2026</small>
+    </aside>
+
+    <main>
+      <section class="guide-page cover" id="page-00" aria-label="00 — Cover & Index">
+        <div class="cover-hero">
+          <div class="cover-top">
+            <div class="cover-lockup" aria-label="أبكس">
+              <img src="assets/logo/apex-mark-reverse.svg" alt="" width="64" height="64" />
+              <strong>أبكس</strong>
+            </div>
+            <span>Brand Guidelines &amp; UI System</span>
+          </div>
+          <div class="cover-copy">
+            <p class="eyebrow">APEX · VERSION 2.0</p>
+            <h1>شغلك واضح.<br />من البداية للنهاية.</h1>
+            <p>أبكس يجمع أعمال التشغيل في مكان واحد، عشان تعرف وش صار، ومين المسؤول، وش الخطوة الجاية.</p>
+          </div>
+          <div class="cover-meta">
+            <span><b>الإصدار</b>٢٫٠</span>
+            <span><b>تاريخ الإصدار</b>٩ أغسطس ٢٠٢٦</span>
+            <span><b>النطاق</b>العلامة · الواجهات · التطبيقات</span>
+          </div>
         </div>
 
-        <a class="rail-brand" href="#overview">
-          <img src="assets/logo/apex-mark.svg" width="64" height="64" alt="" />
-          <span>
-            <strong>APEX</strong>
-            <span>Brand &amp; Product System</span>
-          </span>
-        </a>
-
-        <nav class="rail-nav" id="guide-nav">
-          <a href="#overview" aria-current="true">الفكرة</a>
-          <a href="#identity">الشعار</a>
-          <a href="#color">الألوان</a>
-          <a href="#typography">الخطوط</a>
-          <a href="#layout">التخطيط</a>
-          <a href="#web">الموقع</a>
-          <a href="#product">عناصر المنتج</a>
-          <a href="#experiences">أنماط البوابات</a>
-          <a href="#rtl">العربية والاتجاه</a>
-          <a href="#social">المنشورات</a>
-          <a href="#voice">الصوت والحركة</a>
-          <a href="#assets">الأصول</a>
-        </nav>
-
-        <div class="rail-meta">Version 1.0 · 2026</div>
-      </aside>
-
-      <main id="main">
-        <section class="hero" id="overview" data-section>
-          <img class="hero-mark" src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="علامة أبكس" />
-          <div class="hero-inner">
-            <p class="eyebrow">Apex Identity System · 01</p>
-            <h1>كل عمل يتجه إلى نتيجة واضحة.</h1>
-            <p class="hero-lead">
-              هوية هادئة لنظام تشغيلي واسع. تجمع التفاصيل في مسار واحد، وتترك للمستخدم
-              ما يحتاجه الآن فقط.
-            </p>
-            <div class="hero-principles" aria-label="مبادئ الهوية">
-              <div><strong>واضح</strong><span>القرار يظهر قبل الزينة</span></div>
-              <div><strong>هادئ</strong><span>المساحة تنظّم الانتباه</span></div>
-              <div><strong>موثوق</strong><span>الحالة والدليل لا يختفيان</span></div>
-            </div>
+        <div class="page-surface index-panel">
+          <header class="section-head compact">
+            <div><p class="eyebrow">INDEX</p><h2>كل ما تحتاجه للهوية في دليل واحد.</h2></div>
+            <p>ابدأ بقصة العلامة، ثم تعرّف على شعارها وألوانها وخطوطها ومكوّناتها وتطبيقاتها.</p>
+          </header>
+          <div class="toc-grid">
+            <a href="#page-00"><b>00</b><span>الغلاف والفهرس</span><small>Cover &amp; Index</small></a>
+            <a href="#page-01"><b>01</b><span>أسس العلامة</span><small>Brand Foundations</small></a>
+            <a href="#page-02"><b>02</b><span>نظام الشعار</span><small>Logo System</small></a>
+            <a href="#page-03"><b>03</b><span>نظام الألوان</span><small>Color System</small></a>
+            <a href="#page-04"><b>04</b><span>الخطوط</span><small>Typography</small></a>
+            <a href="#page-05"><b>05</b><span>التخطيط واللغة البصرية</span><small>Layout &amp; Visual Language</small></a>
+            <a href="#page-06"><b>06</b><span>أسس الواجهة</span><small>UI Foundations</small></a>
+            <a href="#page-07"><b>07</b><span>المكونات الأساسية</span><small>Core Components</small></a>
+            <a href="#page-08"><b>08</b><span>أنماط المنتج</span><small>Product Patterns</small></a>
+            <a href="#page-09"><b>09</b><span>التصميم المتجاوب وإتاحة الوصول</span><small>Responsive &amp; Accessibility</small></a>
+            <a href="#page-10"><b>10</b><span>تطبيقات الهوية</span><small>Brand Applications</small></a>
+            <a href="#page-11"><b>11</b><span>تسليم التصميم للتطوير</span><small>Developer Handoff</small></a>
           </div>
-        </section>
-
-        <section class="chapter chapter--surface" id="identity" data-section>
-          <div class="chapter-inner">
-            <header class="chapter-head">
-              <div>
-                <p class="eyebrow">01 · Identity</p>
-                <h2 class="chapter-title">طريقان يلتقيان عند قمة واحدة.</h2>
-              </div>
-              <p class="chapter-intro">
-                العلامة حرف A مطويّ ومسار مفتوح في الوقت نفسه. ضلعان يجمعان مجالات
-                التشغيل، والفراغ بينهما بوابة تقود إلى النتيجة.
-              </p>
-            </header>
-
-            <div class="story-grid">
-              <div class="logo-stage" role="img" aria-label="نموذج شاشة بدء تشغيل أبكس">
-                <div class="startup-loader" aria-hidden="true">
-                  <img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" />
-                  <div class="startup-track"><span></span></div>
-                  <p>جارٍ تجهيز مساحة العمل…</p>
-                </div>
-                <small><span>شاشة بدء التشغيل</span><b>عند وجود انتظار حقيقي</b></small>
-              </div>
-              <article class="story-card">
-                <span class="story-number">THE QUIET ASCENT</span>
-                <div>
-                  <blockquote>الصعود الهادئ</blockquote>
-                  <p>
-                    لا تصوّر العلامة جبلاً أو قطاعاً بعينه. هي نواة محايدة تجمع السكن
-                    والمرافق والحركة والخدمات في اتجاه واحد.
-                  </p>
-                  <div class="meaning-list">
-                    <div>
-                      <b>01</b>
-                      <span><strong>المساران</strong><span>مجالات مختلفة تعمل على أساس مشترك.</span></span>
-                    </div>
-                    <div>
-                      <b>02</b>
-                      <span><strong>القمة</strong><span>نتيجة واضحة يمكن قياسها.</span></span>
-                    </div>
-                    <div>
-                      <b>03</b>
-                      <span><strong>البوابة</strong><span>واجهة مفتوحة لا تعيق المستخدم.</span></span>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </div>
-
-            <div class="lockup-grid" aria-label="تركيبات الشعار">
-              <figure class="lockup-card">
-                <img src="assets/logo/apex-lockup-ar.svg" width="420" height="96" alt="شعار أبكس بالعربية" />
-                <figcaption><span>التركيب العربي</span><span>خط ثمانية · رسم متجهي</span></figcaption>
-              </figure>
-              <figure class="lockup-card" dir="ltr">
-                <img src="assets/logo/apex-lockup-en.svg" width="420" height="96" alt="Apex English logo" />
-                <figcaption><span>English lockup</span><span>Product and technical contexts</span></figcaption>
-              </figure>
-            </div>
-
-            <div class="usage-grid" aria-label="نسخ العلامة">
-              <article class="usage-card">
-                <img src="assets/logo/apex-mark.svg" width="64" height="64" alt="" />
-                <h3>النسخة الأساسية</h3>
-                <p>على الأبيض والرملي والأسطح الفاتحة.</p>
-              </article>
-              <article class="usage-card usage-card--dark">
-                <img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" />
-                <h3>النسخة المعكوسة</h3>
-                <p>على الأخضر الداكن والأسطح الليلية.</p>
-              </article>
-              <article class="usage-card usage-card--mint">
-                <img src="assets/logo/apex-mark-mono.svg" width="64" height="64" alt="" />
-                <h3>النسخة الأحادية</h3>
-                <p>للطباعة والختم والاستخدام بلون واحد.</p>
-              </article>
-            </div>
-
-            <div class="rule-strip" aria-label="قواعد الشعار">
-              <div><strong>1×</strong><span>مساحة أمان تساوي عرض الفتحة الداخلية حول العلامة.</span></div>
-              <div><strong>20 px</strong><span>أقل ارتفاع للعلامة الرقمية. استخدم التركيب من 96 بكسل فأكثر.</span></div>
-              <div><strong>0°</strong><span>لا تدوير ولا تمديد ولا ظل ولا إعادة رسم أو تلوين.</span></div>
-            </div>
-
-            <div class="brand-architecture">
-              <header class="architecture-head">
-                <h3>علامة واحدة، وأسماء واضحة.</h3>
-                <p>الوحدات امتداد للمنتج وليست علامات مستقلة. مسار هو واجهة ضمن ساليس، وليس وحدة خامسة.</p>
-              </header>
-              <div class="architecture-master">
-                <div><strong>APEX · أبكس</strong><span>المنتج الرئيسي والهوية الجامعة</span></div>
-                <img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" />
-              </div>
-              <div class="architecture-modules">
-                <div class="module-name"><code>APEX CORE</code><strong>نواة أبكس</strong><span>الخدمات المشتركة</span></div>
-                <div class="module-name"><code>APEX HABITAT</code><strong>السكن والمرافق</strong><span>الإسكان والتشغيل</span></div>
-                <div class="module-name"><code>APEX SALIS</code><strong>ساليس</strong><span>الحركة والأسطول</span></div>
-                <div class="module-name"><code>APEX LOGISTAY</code><strong>لوجستي</strong><span>الاتصالات والعمالة المؤقتة</span></div>
-              </div>
-            </div>
+          <div class="how-to">
+            <article><b>ابدأ بالقاعدة.</b><p>كل فصل يشرح الفكرة أولاً، ثم يعرض تطبيقها.</p></article>
+            <article><b>افهم الاستخدام.</b><p>كل مثال يوضّح متى يُستخدم العنصر وما الذي يحتاج المستخدم أن يفهمه.</p></article>
+            <article><b>استخدم النسخة المعتمدة.</b><p>خذ الشعار والألوان والخطوط والمكوّنات من هذا الدليل.</p></article>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section class="chapter" id="color" data-section>
-          <div class="chapter-inner">
-            <header class="chapter-head">
-              <div>
-                <p class="eyebrow">02 · Color</p>
-                <h2 class="chapter-title">الألوان نفسها. استخدامها أكثر هدوءاً.</h2>
-              </div>
-              <p class="chapter-intro">
-                لم تتغير قيم لوحة المنتج. الرملي هو المجال، والأخضر الداكن يثبت المشهد،
-                والأخضر الفعّال للأفعال، والنعناعي للتركيز والتقدم.
-              </p>
-            </header>
+      <section class="guide-page" id="page-01" aria-label="01 — Brand Foundations">
+        <header class="page-head">
+          <span class="page-number">01</span>
+          <div><p class="eyebrow">BRAND FOUNDATIONS</p><h2>أعمال كثيرة. ونظام واحد يجمعها.</h2></div>
+          <p>أبكس يجمع شغل السكن والمرافق والحركة والاتصالات في مكان واحد، بدون ما يصير الاستخدام معقّد.</p>
+        </header>
 
-            <div class="palette" aria-label="نسبة استخدام الألوان الأساسية">
-              <div class="swatch swatch--canvas"><strong>المجال</strong><code>#E9E3D3 · 70%</code></div>
-              <div class="swatch swatch--forest"><strong>الثبات</strong><code>#072B1A · 20%</code></div>
-              <div class="swatch swatch--green"><strong>الفعل</strong><code>#00844E · 10%</code></div>
+        <div class="story-layout">
+          <article class="story-card page-surface">
+            <p class="eyebrow">STORY &amp; NAMING</p>
+            <h3>لماذا أبكس؟</h3>
+            <p>اسم «أبكس» يعني القمة. اخترناه لأن النظام يجمع شغل التشغيل من أكثر من جهة، ويعطيك صورة واحدة واضحة. والشعار يحكي الفكرة نفسها: مساران يصعدان لقمة واحدة، وبينهما فتحة تشبه البوابة.</p>
+            <div class="story-points">
+              <span><b>01 · المساران</b>أعمال مختلفة تبدأ من أماكن متعددة.</span>
+              <span><b>02 · القمة</b>تفاصيل العمل تجتمع في صورة واحدة واضحة.</span>
+              <span><b>03 · البوابة</b>مسار مفتوح يقود إلى الخطوة التالية.</span>
             </div>
+          </article>
+          <div class="mark-stage brand-field"><img src="assets/logo/apex-mark-reverse.svg" alt="" width="190" height="190" /><small>THE QUIET ASCENT</small></div>
+        </div>
 
-            <div class="palette-secondary">
-              <div class="mini-swatch" style="--swatch:#60d297"><strong>نعناعي</strong><code>#60D297</code></div>
-              <div class="mini-swatch" style="--swatch:#f8f5ee"><strong>سطح دافئ</strong><code>#F8F5EE</code></div>
-              <div class="mini-swatch" style="--swatch:#ffffff"><strong>أبيض</strong><code>#FFFFFF</code></div>
-              <div class="mini-swatch" style="--swatch:#47584f"><strong>نص ثانوي</strong><code>#47584F</code></div>
-            </div>
+        <div class="three-up">
+          <article class="principle"><small>MISSION</small><h3>نخلّي الشغل اليومي واضحاً وسهل المتابعة.</h3><p>حالة واضحة، ومسؤول معروف، وخطوة تالية ما فيها تخمين.</p></article>
+          <article class="principle"><small>VISION</small><h3>كل أعمال التشغيل قدّامك في مكان واحد.</h3><p>المعلومة توصل من الميدان إلى الإدارة بوضوح، مع بقاء تفاصيل كل مجال.</p></article>
+          <article class="principle"><small>BRAND PROMISE</small><h3>وضوح تقدر تعتمد عليه.</h3><p>المستخدم يشوف حالته بوضوح، ويعرف وش يقدر يسوي، وكل خطوة تنحفظ.</p></article>
+        </div>
 
-            <div class="dark-specimen" aria-label="معالجة الوضع الداكن">
-              <article class="dark-panel">
-                <small>Dark canvas · #0B110E</small>
-                <h3>المشهد الليلي</h3>
-                <p>الأسطح الداكنة درجات مستقلة وليست قلباً آلياً للألوان.</p>
-                <button class="dark-action" type="button">إجراء واضح</button>
-              </article>
-              <article class="dark-panel">
-                <small>Dark surface · #15211B</small>
-                <h3>مستوى ثانٍ</h3>
-                <p>الأخضر #00A862 للفعل والنعناعي #60D297 للحالة الإيجابية.</p>
-              </article>
-            </div>
+        <div class="design-principles page-surface">
+          <p class="eyebrow">DESIGN PRINCIPLES</p>
+          <div>
+            <span><b>وضّح المطلوب</b>أظهر للمستخدم وش يحتاج يسوي الآن، ثم اعرض التفاصيل.</span>
+            <span><b>وضّح الحالة</b>بيّن المسؤول والوقت والخطوة التالية.</span>
+            <span><b>بسّط المهمة</b>في الجوال، ركّز على مهمة واحدة. وفي الإشراف، اعرض الصورة كاملة.</span>
+            <span><b>وثّق كل خطوة</b>خلّ القرار ونتيجته واضحين وقت المراجعة.</span>
           </div>
-        </section>
+        </div>
 
-        <section class="chapter chapter--white" id="typography" data-section>
-          <div class="chapter-inner">
-            <header class="chapter-head">
-              <div>
-                <p class="eyebrow">03 · Typography</p>
-                <h2 class="chapter-title">لغة عربية طبيعية، وأرقام لا تلتبس.</h2>
-              </div>
-              <p class="chapter-intro">
-                خط واجهات المنتج Cairo، والتركيب العربي للشعار بخط ثمانية، وMontserrat
-                للإنجليزية. العناوين قصيرة، ونص الأعمال مباشر.
-              </p>
-            </header>
-
-            <div class="type-showcase">
-              <article class="type-primary">
-                <span class="type-kicker">Arabic primary</span>
-                <p class="display-ar">اعرف الحالة.<br />اتخذ القرار.</p>
-                <p class="display-en" dir="ltr">See the state.<br />Make the decision.</p>
-              </article>
-              <article class="type-secondary">
-                <span class="type-kicker">Character test</span>
-                <p class="alphabet">أبجد هوز<br />Apex 2026</p>
-                <p class="numeric" dir="ltr">0123 456 789</p>
-              </article>
+        <div class="split">
+          <article class="page-surface">
+            <p class="eyebrow">CORE VALUES</p>
+            <div class="value-list">
+              <span><b>واضح</b>الوضوح قبل الزينة.</span>
+              <span><b>هادئ</b>الترتيب والمساحة يسهّلون القراءة.</span>
+              <span><b>موثوق</b>كل حالة وكل خطوة موثّقة بوضوح.</span>
+              <span><b>عملي</b>كل عنصر له فائدة واضحة.</span>
             </div>
-
-            <div class="type-roles" aria-label="أدوار النص">
-              <div class="type-role" style="--role-size:40px"><small>Display</small><strong>المشهد في جملة واحدة</strong><code>40–72 / 1.2</code></div>
-              <div class="type-role" style="--role-size:28px"><small>Title</small><strong>عنوان يصف المهمة</strong><code>28–36 / 1.35</code></div>
-              <div class="type-role" style="--role-size:18px"><small>Body</small><strong>نص واضح لا يحتاج أن يقرأه المستخدم مرتين.</strong><code>16–18 / 1.7</code></div>
-              <div class="type-role" style="--role-size:14px"><small>Control</small><strong>اعتماد الطلب</strong><code>14–16 / 1.5</code></div>
-              <div class="type-role" style="--role-size:13px"><small>Metadata</small><strong>آخر تحديث اليوم، 10:30 ص</strong><code>12–13 / 1.55</code></div>
+          </article>
+          <article class="page-surface">
+            <p class="eyebrow">PERSONALITY</p>
+            <div class="axis-list">
+              <span><b>واثق</b><i></i><em>لا متعالٍ</em></span>
+              <span><b>حديث</b><i></i><em>لا استعراضي</em></span>
+              <span><b>مباشر</b><i></i><em>لا جاف</em></span>
+              <span><b>منظّم</b><i></i><em>لا جامد</em></span>
             </div>
+          </article>
+        </div>
+
+        <div class="voice-grid">
+          <article class="voice-card good"><small>العربية · اكتب</small><q>ما قدرنا نحفظ. تأكد من الاتصال وجرّب مرة ثانية.</q></article>
+          <article class="voice-card"><small>العربية · تجنّب</small><q>حدث خطأ غير متوقع أثناء محاولة تنفيذ العملية المطلوبة.</q></article>
+          <article class="voice-card good" dir="ltr"><small>English · Write</small><q>Couldn’t save. Check your connection and try again.</q></article>
+          <article class="voice-card" dir="ltr"><small>English · Avoid</small><q>An unexpected error occurred while processing the requested operation.</q></article>
+        </div>
+
+        <div class="audience-grid">
+          <article><svg><use href="#i-user"/></svg><b>الميدان</b><p>العامل والسائق يحتاجون مهمة واضحة وإجراء قريب.</p></article>
+          <article><svg><use href="#i-task"/></svg><b>الإشراف</b><p>المشرف يحتاج قائمة توضّح ما ينتظر قراره وسببه وما يترتب عليه.</p></article>
+          <article><svg><use href="#i-building"/></svg><b>العمليات</b><p>المدير يحتاج صورة محدثة ومؤشرات يقدر يرجع لتفاصيلها.</p></article>
+        </div>
+
+        <div class="is-isnt">
+          <article><h3>أبكس هو</h3><ul><li>نظام تشغيل عملي</li><li>واجهة عربية أصلية</li><li>حالة واضحة وخطوة معروفة</li><li>هوية هادئة تواكب نمو العمل</li></ul></article>
+          <article><h3>أبكس ليس</h3><ul><li>لوحة زينة للمؤشرات</li><li>نسخة معكوسة من واجهة إنجليزية</li><li>تجميعاً عشوائياً لكل وظائف النظام</li><li>واجهة تعتمد على الزخرفة والمؤثرات</li></ul></article>
+        </div>
+      </section>
+
+      <section class="guide-page" id="page-02" aria-label="02 — Logo System">
+        <header class="page-head">
+          <span class="page-number">02</span>
+          <div><p class="eyebrow">LOGO SYSTEM</p><h2>شعار محسوب في كل تفصيل.</h2></div>
+          <p>بُني الشعار على نسب وزوايا ثابتة. وتضمن مساحة الأمان والمقاسات الدنيا ظهوره بوضوح في كل استخدام.</p>
+        </header>
+
+        <div class="geometry-layout">
+          <figure class="geometry-board page-surface">
+            <div class="geometry-graphic">
+              <svg viewBox="0 0 420 420" role="img" aria-label="شبكة بناء علامة أبكس">
+                <defs><pattern id="grid64" width="6.25" height="6.25" patternUnits="userSpaceOnUse"><path d="M6.25 0H0V6.25" fill="none" stroke="#d8d0bd" stroke-width=".5"/></pattern></defs>
+                <rect x="10" y="10" width="400" height="400" rx="22" fill="url(#grid64)"/>
+                <rect x="53.75" y="72.5" width="312.5" height="287.5" fill="none" stroke="#00844e" stroke-dasharray="8 8"/>
+                <line x1="210" y1="42" x2="210" y2="380" stroke="#60d297" stroke-width="2" stroke-dasharray="6 7"/>
+                <g transform="translate(10 10) scale(6.25)">
+                  <path d="M7 56 25.7 15.8C27.1 12.6 29.3 10 32 10l6.2 13.4-7.9 7.6-4.1-8.8L20.5 56Z" fill="#072b1a"/>
+                  <path d="M32 10c2.7 0 4.9 2.6 6.3 5.8L57 56H43.5L30.3 31l7.9-7.6Z" fill="#00844e"/>
+                  <path d="M32 10c2.7 0 4.9 2.6 6.3 5.8l3.5 7.6h-3.6Z" fill="#60d297"/>
+                </g>
+                <path d="M99.75 360A46 46 0 0 0 73.19 318.3" fill="none" stroke="#00844e" stroke-width="2"/>
+                <path d="M320.25 360A46 46 0 0 1 346.81 318.3" fill="none" stroke="#00844e" stroke-width="2"/>
+                <line x1="138" y1="360" x2="282" y2="360" stroke="#60d297" stroke-width="4"/>
+              </svg>
+              <span class="geometry-label axis">المحور الأوسط = ٣٢ وحدة</span>
+              <span class="geometry-label angle-left">65.053°</span>
+              <span class="geometry-label angle-right">65.053°</span>
+              <span class="geometry-label base">فتحة القاعدة · ٢٣ وحدة</span>
+            </div>
+            <figcaption>شبكة من ٦٤ وحدة · حدود الرسم ٥٠ × ٤٦ وحدة · النسبة ٢٥:٢٣</figcaption>
+          </figure>
+          <div class="geometry-facts">
+            <article><b>64 × 64</b><span>شبكة البناء الأصلية</span></article>
+            <article><b>50 × 46</b><span>حدود العلامة المرسومة</span></article>
+            <article><b>65.053°</b><span>الحافتان الخارجيتان</span></article>
+            <article><b>80.428°</b><span>الحافة الداخلية اليسرى</span></article>
+            <article><b>62.166°</b><span>الحافة الداخلية اليمنى</span></article>
+            <article><b>43.891°</b><span>زاوية طي الشريط</span></article>
+            <p>القمة منحنية عمداً، واختلاف جانبي الفتحة جزء من فكرة الشريط المطوي.</p>
           </div>
-        </section>
+        </div>
 
-        <section class="chapter chapter--surface" id="layout" data-section>
-          <div class="chapter-inner">
-            <header class="chapter-head">
-              <div>
-                <p class="eyebrow">04 · Layout</p>
-                <h2 class="chapter-title">شبكة واحدة، وثلاث طرق للعمل.</h2>
-              </div>
-              <p class="chapter-intro">
-                اثنا عشر عمودًا للكمبيوتر، وثمانية للجهاز اللوحي، وأربعة للجوال. نقطة
-                الانتقال يحددها المحتوى؛ لا نضغط واجهة المكتب داخل هاتف.
-              </p>
-            </header>
+        <div class="logo-family">
+          <figure><img src="assets/logo/apex-mark.svg" alt="علامة أبكس" /><figcaption><b>Primary Mark</b><span>العلامة الأساسية</span></figcaption></figure>
+          <figure><img src="assets/logo/apex-lockup-ar.svg" alt="تركيب أبكس العربي" /><figcaption><b>Arabic Horizontal</b><span>التركيب العربي</span></figcaption></figure>
+          <figure><div class="html-lockup english" dir="ltr"><img src="assets/logo/apex-mark.svg" alt="" /><strong>APEX</strong></div><figcaption><b>English Horizontal</b><span>التركيب الإنجليزي</span></figcaption></figure>
+          <figure class="app-icon"><img src="assets/logo/apex-app-icon.svg" alt="أيقونة تطبيق أبكس" /><figcaption><b>Mark / App Icon</b><span>128 × 128</span></figcaption></figure>
+        </div>
 
-            <div class="layout-grid" aria-label="شبكة الاثني عشر عموداً">
-              <span></span><span></span><span></span><span></span><span></span><span></span>
-              <span></span><span></span><span></span><span></span><span></span><span></span>
-              <div class="layout-grid-content">
-                <h3>المحتوى يقود نقطة الانتقال.</h3>
-                <p>العمود يضبط المحاذاة، لكنه لا يفرض شكلاً واحداً على كل شاشة.</p>
-              </div>
-            </div>
+        <div class="variant-row">
+          <article class="variant light"><img src="assets/logo/apex-mark.svg" alt="" /><b>Primary</b><span>أسطح فاتحة</span></article>
+          <article class="variant forest"><img src="assets/logo/apex-mark-reverse.svg" alt="" /><b>Reversed</b><span>الخلفية الخضراء المعتمدة</span></article>
+          <article class="variant mono"><img src="assets/logo/apex-mark-mono.svg" alt="" /><b>Monochrome</b><span>طباعة بلون واحد</span></article>
+          <article class="variant unavailable"><b>Vertical / Stacked</b><span>غير معتمد. لا يوجد أصل رأسي؛ استخدم التركيب الأفقي.</span></article>
+        </div>
 
-            <div class="breakpoint-grid">
-              <article class="breakpoint-card">
-                <div class="screen-icon"></div>
-                <div><strong>جوال</strong><span class="breakpoint-spec">٤ أعمدة · مسافة ١٦–٢٠ بكسل</span><p>مهمة واحدة وإجراء أساسي واحد.</p></div>
-              </article>
-              <article class="breakpoint-card">
-                <div class="screen-icon"></div>
-                <div><strong>جهاز لوحي</strong><span class="breakpoint-spec">٨ أعمدة · مسافة ٢٤ بكسل</span><p>قائمة وتفاصيل عند اتساع المحتوى.</p></div>
-              </article>
-              <article class="breakpoint-card">
-                <div class="screen-icon"></div>
-                <div><strong>كمبيوتر</strong><span class="breakpoint-spec">١٢ عمودًا · مسافة ٣٢ بكسل</span><p>لوحة عمليات ومسح بصري سريع.</p></div>
-              </article>
-            </div>
+        <div class="clearspace-layout">
+          <figure class="clearspace-board page-surface">
+            <div class="clearspace-box"><img src="assets/logo/apex-mark.svg" alt="" /></div>
+            <figcaption>اترك حول الشعار مساحة تساوي عرض فتحة القاعدة: ٢٣ وحدة.</figcaption>
+          </figure>
+          <article class="size-card page-surface">
+            <p class="eyebrow">MINIMUM SIZE</p>
+            <div class="size-samples"><img class="mark-20" src="assets/logo/apex-mark.svg" alt="" /><span>٢٠ بكسل<br /><small>أقل ارتفاع للاستخدام الرقمي</small></span></div>
+            <div class="size-samples"><img class="lockup-96" src="assets/logo/apex-lockup-ar.svg" alt="" /><span>٩٦ بكسل<br /><small>أقل عرض للتركيب الأفقي</small></span></div>
+            <p class="print-proof">في الطباعة، اختبر الشعار على الخامة والحجم المقصودين قبل الاعتماد.</p>
+          </article>
+        </div>
+
+        <div class="background-grid">
+          <article class="bg-white"><img src="assets/logo/apex-mark.svg" alt="" /><span>أبيض أو رملي هادئ</span></article>
+          <article class="bg-forest"><img src="assets/logo/apex-mark-reverse.svg" alt="" /><span>أخضر الغابة مع النسخة البيضاء</span></article>
+          <article class="bg-photo"><div class="photo-noise"></div><img src="assets/logo/apex-mark-reverse.svg" alt="" /><span>فوق الصور، استخدم طبقة هادئة تحافظ على وضوح الشعار.</span></article>
+        </div>
+
+        <div class="placement-grid page-surface">
+          <p class="eyebrow">PLACEMENT GUIDELINES</p>
+          <article><div><img src="assets/logo/apex-mark.svg" alt="" /></div><b>واجهات المنتج</b><span>ضع العلامة في بداية شريط التطبيق، واترك عنوان الصفحة للمحتوى.</span></article>
+          <article><div class="centered"><span class="html-lockup arabic"><img src="assets/logo/apex-mark.svg" alt="" /><strong>أبكس</strong></span></div><b>الافتتاحيات</b><span>استخدم التركيب الأفقي في وسط شاشات الدخول والافتتاحيات.</span></article>
+          <article><div class="quiet"><img src="assets/logo/apex-mark.svg" alt="" /></div><b>المواد التحريرية</b><span>ضع الشعار بهدوء عند الحافة، مع الحفاظ على مساحة الأمان.</span></article>
+        </div>
+
+        <div class="donts-grid">
+          <article><div class="wrong rotate"><img src="assets/logo/apex-mark.svg" alt="" /></div><b>لا تدوّر</b></article>
+          <article><div class="wrong stretch"><img src="assets/logo/apex-mark.svg" alt="" /></div><b>لا تمدّد</b></article>
+          <article><div class="wrong shadow"><img src="assets/logo/apex-mark.svg" alt="" /></div><b>لا تضف ظلاً</b></article>
+          <article><div class="wrong recolor"><img src="assets/logo/apex-mark.svg" alt="" /></div><b>لا تعِد التلوين</b></article>
+          <article><div class="wrong crowd"><img src="assets/logo/apex-mark.svg" alt="" /><i></i><i></i></div><b>لا تضع عناصر داخل مساحة الأمان</b></article>
+          <article><div class="wrong fabricated"><img src="assets/logo/apex-lockup-ar.svg" alt="" /></div><b>لا تصنع تركيباً رأسياً</b></article>
+        </div>
+
+        <div class="export-strip">
+          <span><b>apex-mark.svg</b>الأصل الرئيسي</span>
+          <span><b>apex-mark-reverse.svg</b>نسخة الخلفية الخضراء</span>
+          <span><b>apex-mark-mono.svg</b>نسخة أحادية اللون</span>
+          <span><b>apex-lockup-ar.svg</b>التركيب العربي الأفقي</span>
+          <span><b>apex-lockup-en.svg</b>التركيب الإنجليزي الأفقي</span>
+          <span><b>apex-app-icon.svg</b>أيقونة التطبيق</span>
+        </div>
+        <p class="export-rule"><b>قاعدة التسمية:</b> الملفات أعلاه هي الأصول المعتمدة. لا تستبدل الأصل الرئيسي بصورة نقطية. <code>apex-[asset]-[variant]-[width]px.png</code></p>
+      </section>
+
+      <section class="guide-page" id="page-03" aria-label="03 — Color System">
+        <header class="page-head">
+          <span class="page-number">03</span>
+          <div><p class="eyebrow">COLOR SYSTEM</p><h2>ألوان هادئة، والأخضر يوضّح الخطوة المهمة.</h2></div>
+          <p>استخدم الرملي للخلفيات، وأخضر الغابة لمساحات العلامة، والأخضر الأساسي للأزرار والإجراءات المهمة. لا تستخدم تدرجات لونية.</p>
+        </header>
+
+        <div class="primary-colors">
+          <article class="color-hero action"><b>#00844E</b><span>الأخضر الأساسي · للإجراءات</span></article>
+          <article class="color-hero forest"><b>#072B1A</b><span>أخضر الغابة · للثبات</span></article>
+          <article class="color-hero canvas"><b>#E9E3D3</b><span>الرملي · للخلفيات</span></article>
+        </div>
+
+        <div class="scale" aria-label="تدرجات اللون الأساسي">
+          <span style="--c:#e6f5ee"><b>50</b>#E6F5EE</span>
+          <span style="--c:#c9ebdd"><b>100</b>#C9EBDD</span>
+          <span style="--c:#95d6bd"><b>200</b>#95D6BD</span>
+          <span style="--c:#60d297"><b>300</b>#60D297</span>
+          <span style="--c:#2faa73"><b>400</b>#2FAA73</span>
+          <span class="inverse" style="--c:#00844e"><b>500</b>#00844E</span>
+          <span class="inverse" style="--c:#006f41"><b>600</b>#006F41</span>
+          <span class="inverse" style="--c:#005936"><b>700</b>#005936</span>
+          <span class="inverse" style="--c:#07452c"><b>800</b>#07452C</span>
+          <span class="inverse" style="--c:#073522"><b>900</b>#073522</span>
+          <span class="inverse" style="--c:#031e13"><b>950</b>#031E13</span>
+        </div>
+
+        <div class="palette-grid">
+          <article><h3>ألوان مساندة</h3><span style="--c:#60d297"><b>Mint</b>#60D297</span><span style="--c:#f8f5ee"><b>Surface</b>#F8F5EE</span><span style="--c:#ffffff"><b>White</b>#FFFFFF</span></article>
+          <article><h3>ألوان محايدة</h3><span style="--c:#072b1a"><b>Ink</b>#072B1A</span><span style="--c:#47584f"><b>Muted</b>#47584F</span><span style="--c:#d8d0bd"><b>Border</b>#D8D0BD</span></article>
+          <article><h3>ألوان دلالية</h3><span style="--c:#14804a"><b>Success</b>#14804A</span><span style="--c:#a76609"><b>Warning</b>#A76609</span><span style="--c:#b42318"><b>Error</b>#B42318</span><span style="--c:#1266a0"><b>Info</b>#1266A0</span></article>
+        </div>
+
+        <div class="split">
+          <article class="page-surface ratio-card"><p class="eyebrow">USAGE RATIO</p><div><span class="r70">70%<small>Canvas</small></span><span class="r20">20%<small>Forest</small></span><span class="r10">10%<small>Action</small></span></div><p>توزيع أبكس المقترح: ٧٠٪ للخلفيات، و٢٠٪ لأخضر الغابة، و١٠٪ للإجراءات المهمة.</p></article>
+          <article class="page-surface no-gradient"><p class="eyebrow">APPROVED GRADIENTS</p><h3>لا يوجد تدرج معتمد.</h3><p>استخدم المساحات والطبقات لإبراز المحتوى، بدون خلط الألوان.</p></article>
+        </div>
+
+        <div class="data-table">
+          <div class="table-head"><span>Token</span><span>HEX</span><span>RGB</span><span>HSL</span><span>CMYK</span></div>
+          <div><span>color.action</span><span>#00844E</span><span>0, 132, 78</span><span>155°, 100%, 26%</span><span>100, 0, 41, 48</span></div>
+          <div><span>color.forest</span><span>#072B1A</span><span>7, 43, 26</span><span>152°, 72%, 10%</span><span>84, 0, 40, 83</span></div>
+          <div><span>color.mint</span><span>#60D297</span><span>96, 210, 151</span><span>149°, 56%, 60%</span><span>54, 0, 28, 18</span></div>
+        </div>
+
+        <div class="contrast-grid">
+          <article><b>14.08:1</b><span>Forest / Surface</span><small>AAA</small></article>
+          <article><b>4.76:1</b><span>White / Action</span><small>AA</small></article>
+          <article><b>7.56:1</b><span>Muted / White</span><small>AAA</small></article>
+          <article><b>8.15:1</b><span>Forest / Mint</span><small>AAA</small></article>
+        </div>
+      </section>
+
+      <section class="guide-page" id="page-04" aria-label="04 — Typography">
+        <header class="page-head">
+          <span class="page-number">04</span>
+          <div><p class="eyebrow">TYPOGRAPHY</p><h2>خط ثمانية، بثلاثة استخدامات محددة.</h2></div>
+          <p>نستخدم خط ثمانية في العربية والإنجليزية: للعناوين، والنصوص، وعناصر الواجهة.</p>
+        </header>
+
+        <div class="type-family-grid">
+          <article class="type-display brand-field"><small>THMANYAH SERIF DISPLAY</small><h3>العنوان أول ما يلفت النظر.</h3><p>العناوين الكبيرة والافتتاحيات.</p></article>
+          <article class="type-text page-surface"><small>THMANYAH SERIF TEXT</small><h3>نص مريح للقراءة.</h3><p>الفقرات والشروحات والمحتوى الطويل.</p></article>
+          <article class="type-ui page-surface"><small>THMANYAH SANS</small><h3>واجهة واضحة وسريعة.</h3><p>الأزرار والحقول والأرقام والنصوص الإنجليزية.</p></article>
+        </div>
+
+        <div class="type-scale-table">
+          <div class="table-head"><span>Style</span><span>Size / Line</span><span>Weight</span><span>Specimen</span></div>
+          <div class="t-display"><span>Display</span><span>72 / 80</span><span>700</span><b>أهم معلومة في سطر واحد.</b></div>
+          <div class="t-h1"><span>H1</span><span>56 / 68</span><span>700</span><b>عنوان يصف المهمة.</b></div>
+          <div class="t-h2"><span>H2</span><span>40 / 52</span><span>700</span><b>قرار واضح في كل خطوة.</b></div>
+          <div class="t-h3"><span>H3</span><span>30 / 42</span><span>700</span><b>تفاصيل يحتاجها المستخدم.</b></div>
+          <div class="t-h4"><span>H4</span><span>24 / 34</span><span>700</span><b>مجموعة مترابطة.</b></div>
+          <div class="t-h5"><span>H5</span><span>20 / 30</span><span>700</span><b>عنوان بطاقة.</b></div>
+          <div class="t-h6"><span>H6</span><span>17 / 26</span><span>700</span><b>عنوان فرعي.</b></div>
+          <div><span>Body L</span><span>18 / 32</span><span>400</span><p>نص واضح لا يحتاج أن يقرأه المستخدم مرتين.</p></div>
+          <div><span>Body M</span><span>16 / 28</span><span>400</span><p>شرح الحالة والخطوة والنتيجة المتوقعة.</p></div>
+          <div><span>Body S</span><span>14 / 24</span><span>400</span><p>معلومة إضافية قصيرة.</p></div>
+          <div><span>Caption</span><span>12 / 19</span><span>500</span><p>آخر تحديث اليوم، الساعة ١٠:٣٠ ص</p></div>
+          <div><span>Overline</span><span>11 / 18</span><span>700</span><p>OPERATIONAL VIEW</p></div>
+        </div>
+
+        <div class="split">
+          <article class="page-surface reading-card"><p class="eyebrow">READING TEXT</p><h3>بيّن الحالة قبل زر الإجراء.</h3><p>إذا عرف المستخدم وش صار، وش يقدر يسوي، وش النتيجة المتوقعة، ما يحتاج تعليمات طويلة.</p></article>
+          <article class="page-surface numeral-card"><p class="eyebrow">NUMERALS &amp; DATA</p><b>0123 456 789</b><span>APX-0024 · 08 Aug · 10:30</span><p>اعزل الأرقام والوقت عن اتجاه النص حتى تبقى مرتبة وسهلة القراءة.</p></article>
+        </div>
+
+        <div class="control-type">
+          <button>اعتماد الطلب</button><label>اسم السائق<input value="سائق تجريبي" readonly /></label><span class="status success">جاهز</span><small>معلومة إضافية · قبل ٤ دقائق</small>
+        </div>
+
+        <div class="bidi-specimen">
+          <article dir="rtl"><small>RTL</small><h3>الطلب رقم ٠٠٢٤ جاهز الساعة <bdi>١٠:٣٠</bdi>.</h3><p>في النص العربي، ثبّت ترتيب الرمز والوقت حتى يظهرا كما كُتبا.</p></article>
+          <article dir="ltr"><small>LTR</small><h3>Request APX-0024 is ready at <bdi>10:30</bdi>.</h3><p>Mirror spatial controls, not media, time, or confirmation marks.</p></article>
+        </div>
+
+        <div class="data-table text-style-reference">
+          <div class="table-head"><span>Figma style</span><span>Family</span><span>Size / Line</span><span>Tracking</span></div>
+          <div><span>Display / XL</span><span>Thmanyah Serif Display 700</span><span>72 / 80</span><span>0</span></div>
+          <div><span>Heading / H2</span><span>Thmanyah Serif Display 700</span><span>40 / 52</span><span>0</span></div>
+          <div><span>Body / M</span><span>Thmanyah Serif Text 400</span><span>16 / 28</span><span>0</span></div>
+          <div><span>UI / Label</span><span>Thmanyah Sans 700</span><span>14 / 20</span><span>0</span></div>
+          <div><span>UI / Overline</span><span>Thmanyah Sans 700</span><span>11 / 18</span><span>0.12em · Latin only</span></div>
+        </div>
+      </section>
+
+      <section class="guide-page" id="page-05" aria-label="05 — Layout & Visual Language">
+        <header class="page-head">
+          <span class="page-number">05</span>
+          <div><p class="eyebrow">LAYOUT &amp; VISUAL LANGUAGE</p><h2>ترتيب واضح في كل شاشة.</h2></div>
+          <p>نعتمد شبكة من ٤ و٨ نقاط، ومسافات ثابتة، وأيقونات خطية. وتزداد المعلومات بحسب حجم الشاشة وحاجة المستخدم.</p>
+        </header>
+
+        <div class="spacing-scale page-surface">
+          <p class="eyebrow">4PT / 8PT GRID</p>
+          <div><span style="--w:4px"><b>4</b></span><span style="--w:8px"><b>8</b></span><span style="--w:12px"><b>12</b></span><span style="--w:16px"><b>16</b></span><span style="--w:24px"><b>24</b></span><span style="--w:32px"><b>32</b></span><span style="--w:48px"><b>48</b></span><span style="--w:64px"><b>64</b></span><span style="--w:96px"><b>96</b></span></div>
+        </div>
+
+        <div class="breakpoint-grid">
+          <article><div class="device mobile-grid"><i></i><i></i><i></i><i></i></div><b>جوال</b><span>٤ أعمدة · هامش ١٦ بكسل · فاصل ١٦ بكسل</span></article>
+          <article><div class="device tablet-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><b>جهاز لوحي</b><span>٨ أعمدة · هامش ٢٤ بكسل · فاصل ٢٤ بكسل</span></article>
+          <article><div class="device desktop-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><b>كمبيوتر</b><span>١٢ عموداً · هامش ٣٢ بكسل · فاصل ٣٢ بكسل</span></article>
+        </div>
+
+        <div class="token-row">
+          <article><p class="eyebrow">CONTAINERS</p><b>١١٨٠ بكسل</b><span>محتوى المنتج</span><b>٧٩٠ بكسل</b><span>نص القراءة</span></article>
+          <article><p class="eyebrow">RADIUS</p><div class="radius-demo"><i>8</i><i>14</i><i>24</i></div></article>
+          <article><p class="eyebrow">ELEVATION</p><div class="shadow-demo"><i>01</i><i>02</i><i>03</i></div></article>
+        </div>
+
+        <div class="icon-system page-surface">
+          <header><div><p class="eyebrow">ICONOGRAPHY</p><h3>أيقونات بخط موحّد وزوايا هادئة، بحجم ٢٤.</h3></div><p>سُمك الخط ١٫٧٥، ونهاياته مستديرة، ولا نستخدم التعبئة إلا للحالة المختارة.</p></header>
+          <div class="icon-grid">
+            <span><svg><use href="#i-home"/></svg><small>home</small></span><span><svg><use href="#i-task"/></svg><small>tasks</small></span>
+            <span><svg><use href="#i-car"/></svg><small>vehicle</small></span><span><svg><use href="#i-bus"/></svg><small>transport</small></span>
+            <span><svg><use href="#i-building"/></svg><small>housing</small></span><span><svg><use href="#i-pin"/></svg><small>location</small></span>
+            <span><svg><use href="#i-user"/></svg><small>user</small></span><span><svg><use href="#i-shield"/></svg><small>safety</small></span>
+            <span><svg><use href="#i-alert"/></svg><small>alert</small></span><span><svg><use href="#i-settings"/></svg><small>settings</small></span>
+            <span><svg><use href="#i-search"/></svg><small>search</small></span><span><svg><use href="#i-upload"/></svg><small>upload</small></span>
           </div>
-        </section>
+        </div>
 
-        <section class="chapter chapter--white" id="web" data-section>
-          <div class="chapter-inner">
-            <header class="chapter-head">
-              <div>
-                <p class="eyebrow">05 · Website</p>
-                <h2 class="chapter-title">موقع يشرح القيمة قبل التفاصيل.</h2>
-              </div>
-              <p class="chapter-intro">
-                رأس قصير، رسالة واحدة، دليل مرئي، ثم أرقام موثوقة. في الجوال يبقى الفعل
-                الأساسي قريباً وتتحول الأدلة إلى وحدات رأسية.
-              </p>
-            </header>
+        <div class="visual-direction">
+          <article class="photo-direction"><p class="eyebrow">PHOTOGRAPHY</p><div class="photo-scene"><span>عمل حقيقي<br />إضاءة طبيعية<br />مساحة للسياق</span></div><p>لقطات تشغيلية صادقة، لا صور مصافحة أو مكاتب مصطنعة.</p></article>
+          <article class="illustration-direction"><p class="eyebrow">ILLUSTRATION</p><div class="illustration-scene"><i></i><i></i><i></i></div><p>أشكال هندسية قليلة مستمدة من طي العلامة ومسارها.</p></article>
+          <article class="pattern-direction"><p class="eyebrow">PATTERN</p><div class="brand-pattern"></div><p>مسارات بزاوية ٦٥٫٠٥٣ درجة، بخطوط قليلة ومساحات مفتوحة.</p></article>
+        </div>
 
-            <div class="web-specimen">
-              <div class="browser-frame" aria-label="نموذج صفحة موقع على الكمبيوتر">
-                <div class="browser-chrome"><i></i><i></i><i></i></div>
-                <div class="site-header">
-                  <img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" />
-                  <div class="site-nav"><span>المنتج</span><span>الحلول</span><span>الأمان</span></div>
-                  <a class="site-cta" href="#assets">ابدأ بوضوح</a>
-                </div>
-                <div class="site-hero">
-                  <div class="site-copy">
-                    <small>ONE OPERATIONAL VIEW</small>
-                    <h3>تشغيل يومي<br />من دون ضجيج.</h3>
-                    <p>مساحة واحدة تجمع الحالة والإجراء والدليل للفرق الميدانية والإدارية.</p>
-                    <a class="site-cta" href="#product">شاهد النظام</a>
-                  </div>
-                  <div class="site-visual">
-                    <div class="metric-line"><span><strong>طلبات اليوم</strong><span>تحديث مباشر</span></span><b>48</b></div>
-                    <div class="metric-line"><span><strong>قيد التنفيذ</strong><span>ضمن الوقت</span></span><b>17</b></div>
-                    <div class="metric-line"><span><strong>مكتمل</strong><span>بدليل محفوظ</span></span><b>31</b></div>
-                  </div>
-                </div>
-                <div class="site-stats">
-                  <div><strong>01</strong><span>رسالة أساسية في كل مشهد</span></div>
-                  <div><strong>44px</strong><span>الحد الأدنى لمساحة اللمس</span></div>
-                  <div><strong>AA</strong><span>معيار الوصول عند الإطلاق</span></div>
-                </div>
-              </div>
+        <div class="data-viz">
+          <article class="chart-card"><p class="eyebrow">CHARTS</p><div class="bars"><i style="--h:45%"></i><i style="--h:72%"></i><i style="--h:58%"></i><i style="--h:88%"></i><i style="--h:66%"></i></div><span>اللون يوضّح الحالة، والاسم يشرح القيمة.</span></article>
+          <article class="map-card"><p class="eyebrow">MAPS</p><div class="map-lines"><i></i><i></i><b><svg><use href="#i-pin"/></svg></b></div><span>الخريطة تحدد الموقع، والبطاقة تعرض الإجراء المطلوب.</span></article>
+          <article class="motion-card"><p class="eyebrow">MOTION</p><span><b>من ٩٠ إلى ١٦٠ مللي ثانية</b>استجابة مباشرة</span><span><b>من ١٦٠ إلى ٢٤٠ مللي ثانية</b>انتقال داخل الصفحة</span><span><b>من ٢٤٠ إلى ٤٠٠ مللي ثانية</b>انتقال بين المشاهد</span><small>يخفّف الحركة عند تفعيل خيار تقليل الحركة في الجهاز.</small></article>
+        </div>
+      </section>
 
-              <div class="phone-frame" aria-label="نموذج صفحة موقع على الجوال">
-                <div class="phone-notch"></div>
-                <div class="phone-screen">
-                  <div class="mobile-site-head"><img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" /><span>القائمة</span></div>
-                  <div class="mobile-site-hero">
-                    <h3>تشغيل يومي من دون ضجيج.</h3>
-                    <p>الحالة والفعل والدليل في مكان واحد.</p>
-                    <a class="site-cta" href="#product">شاهد النظام</a>
-                  </div>
-                  <div class="mobile-cards">
-                    <div><strong>واجهة حسب الدور</strong><span>كل مستخدم يرى مهمته الحالية.</span></div>
-                    <div><strong>حالة يمكن فهمها</strong><span>الكلمة والرمز واللون تعمل معاً.</span></div>
-                    <div><strong>أثر لا يضيع</strong><span>الإثبات مرتبط بالعملية نفسها.</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <section class="guide-page" id="page-06" aria-label="06 — UI Foundations">
+        <header class="page-head">
+          <span class="page-number">06</span>
+          <div><p class="eyebrow">UI FOUNDATIONS · DESIGN TOKENS</p><h2>كل لون ومسافة وحجم له مكان معروف.</h2></div>
+          <p>نبدأ بقيمة أساسية، ثم نحدّد معناها، وبعدها نربطها بالمكوّن المناسب.</p>
+        </header>
+
+        <div class="token-flow">
+          <article><small>قيمة أساسية</small><b>green.500</b><span>#00844E</span></article><i></i>
+          <article><small>استخدام وظيفي</small><b>action.primary</b><span>الإجراء الأساسي</span></article><i></i>
+          <article><small>مكوّن</small><b>button.primary.bg</b><span>خلفية الزر</span></article>
+        </div>
+
+        <div class="mode-card page-surface">
+          <div><p class="eyebrow">FIGMA VARIABLES &amp; MODES</p><h3>الواجهة فاتحة، وتدعم العربية والإنجليزية.</h3><p>يُستخدم أخضر الغابة في مساحات العلامة، بينما تبقى واجهات الاستخدام فاتحة.</p></div>
+          <div class="mode-pills"><span class="active">فاتح</span><span>من اليمين إلى اليسار</span><span>من اليسار إلى اليمين</span><span class="disabled">غير معتمد</span></div>
+        </div>
+
+        <div class="sizing-grid">
+          <article><b>44</b><span>أقل مساحة للمس</span></article><article><b>48</b><span>ارتفاع الحقل</span></article><article><b>56</b><span>زر رئيسي</span></article><article><b>64</b><span>شريط التطبيق</span></article>
+        </div>
+
+        <div class="state-showcase">
+          <article class="state"><i></i><b>فارغ</b><p>رسالة واضحة وخطوة واحدة.</p><button>إنشاء أول طلب</button></article>
+          <article class="state loading"><i></i><b>جارٍ التحميل</b><div class="skeleton"><span></span><span></span><span></span></div></article>
+          <article class="state"><i></i><b>التقدم</b><p>رفع المرفق: ٦٤٪</p><progress value="64" max="100"></progress></article>
+          <article class="state success"><i></i><b>نجاح</b><p>تم الحفظ، وأُرسل الطلب للمراجعة.</p></article>
+          <article class="state error"><i></i><b>خطأ</b><p>ما قدرنا نحفظ. تأكد من الاتصال وجرّب مرة ثانية.</p><button>جرّب مرة ثانية</button></article>
+          <article class="state disabled-state"><i></i><b>غير متاح</b><p>اختر المركبة أولاً.</p><button disabled>اعتماد الإسناد</button></article>
+        </div>
+
+        <div class="focus-row">
+          <label>التركيز<input value="إطار تركيز ٣ بكسل" readonly /></label>
+          <label>غير متاح<input value="غير متاح الآن" disabled /></label>
+          <label>دون اتصال<input value="بانتظار الشبكة" readonly /><small>أعد المحاولة بعد عودة الاتصال.</small></label>
+        </div>
+      </section>
+
+      <section class="guide-page" id="page-07" aria-label="07 — Core Components">
+        <header class="page-head">
+          <span class="page-number">07</span>
+          <div><p class="eyebrow">CORE COMPONENTS</p><h2>مكوّنات تتصرف بنفس الطريقة في كل صفحة.</h2></div>
+          <p>كل مكوّن يبيّن حالته ويوجّه المستخدم للخطوة الجاية.</p>
+        </header>
+
+        <div class="component-section">
+          <div class="component-title"><span>01</span><div><h3>الإجراءات</h3><p>الأزرار، والشارات، والحالات</p></div></div>
+          <div class="component-canvas actions">
+            <button class="primary">إجراء رئيسي</button><button>إجراء ثانوي</button><button class="ghost">إلغاء</button><button class="danger">حذف</button><button disabled>غير متاح</button>
+            <span class="badge">جديد</span><span class="status success">مكتمل</span><span class="status warning">بانتظار القرار</span><span class="status error">متأخر</span>
           </div>
-        </section>
+        </div>
 
-        <section class="chapter" id="product" data-section>
-          <div class="chapter-inner">
-            <header class="chapter-head">
-              <div>
-                <p class="eyebrow">06 · Product UI</p>
-                <h2 class="chapter-title">واجهة للعمل، لا معرض للعناصر.</h2>
-              </div>
-              <p class="chapter-intro">
-                عناصر Frappe UI هي الأساس. نركّبها حول المهمة، ونُبقي سبب التعطيل، حالة
-                الحفظ، والخطأ مرئية بدل إخفائها خلف اللون.
-              </p>
-            </header>
-
-            <div class="component-stage">
-              <article class="operation-panel">
-                <header class="panel-head">
-                  <div><h3>إسناد مركبة</h3><p>راجع البيانات ثم اعتمد الإسناد.</p></div>
-                  <span class="status">جاهز</span>
-                </header>
-                <div class="field-grid">
-                  <div class="field"><label>السائق</label><div class="control"><span>سائق تجريبي</span><span>⌄</span></div></div>
-                  <div class="field"><label>المركبة</label><div class="control"><span>مركبة تجريبية</span><span>⌄</span></div></div>
-                  <div class="field"><label>بداية الإسناد</label><div class="control"><span>8 أغسطس 2026</span><span>◷</span></div></div>
-                  <div class="field"><label>مركز التكلفة</label><div class="control"><span>المشروع التجريبي</span><span>⌄</span></div></div>
-                </div>
-                <div class="panel-actions"><button class="button-secondary" type="button">إلغاء</button><button class="button-primary" type="button">اعتماد الإسناد</button></div>
-              </article>
-
-              <aside class="component-panel">
-                <h3>هرم الأفعال</h3>
-                <div class="button-stack">
-                  <button class="button-primary" type="button">الفعل الأساسي</button>
-                  <button class="button-secondary" type="button">فعل ثانوي</button>
-                  <button class="button-danger" type="button">إلغاء العملية</button>
-                  <div><button class="button-disabled" type="button" disabled>غير متاح الآن</button><span class="disabled-reason">أكمل حقل المركبة أولاً</span></div>
-                </div>
-              </aside>
-            </div>
-
-            <div class="state-grid" aria-label="حالات العناصر الثماني">
-              <div class="state-card" style="--state-color:#586962"><i></i><strong>فارغ</strong><span>رسالة بداية واضحة وفعل واحد.</span></div>
-              <div class="state-card" style="--state-color:#1c6fa8"><i></i><strong>تحميل</strong><span>هيكل ثابت بلا قفز في التخطيط.</span></div>
-              <div class="state-card" style="--state-color:#00844e"><i></i><strong>جاهز</strong><span>المحتوى والفعل الأساسي ظاهران.</span></div>
-              <div class="state-card" style="--state-color:#046b41"><i></i><strong>نجاح</strong><span>ما الذي تم وما الخطوة التالية.</span></div>
-              <div class="state-card" style="--state-color:#a52d21"><i></i><strong>خطأ</strong><span>سبب مفهوم وطريق مباشر للتعافي.</span></div>
-              <div class="state-card" style="--state-color:#8a5a10"><i></i><strong>تحذير</strong><span>الأثر قبل طلب التأكيد.</span></div>
-              <div class="state-card" style="--state-color:#8d8168"><i></i><strong>معطّل</strong><span>يبقى السبب مكتوباً بجانب الفعل.</span></div>
-              <div class="state-card" style="--state-color:#60d297"><i></i><strong>محفوظ محلياً</strong><span>لا يضيع إدخال المستخدم عند الانقطاع.</span></div>
-            </div>
+        <div class="component-section">
+          <div class="component-title"><span>02</span><div><h3>النماذج</h3><p>الحقول، والقوائم، والتاريخ، والبحث، والاختيارات، والمرفقات</p></div></div>
+          <div class="component-canvas form-catalog">
+            <label>حقل نص<input placeholder="أدخل البيانات" /></label>
+            <label>قائمة اختيار<select><option>اختر من القائمة</option></select></label>
+            <label>التاريخ<input type="text" value="٩ أغسطس ٢٠٢٦" readonly /></label>
+            <label>الوقت<input type="text" value="١٠:٣٠ ص" readonly /></label>
+            <label class="search-field"><svg><use href="#i-search"/></svg><input placeholder="ابحث في السجلات" /></label>
+            <label class="wide">ملاحظات<textarea placeholder="اكتب ملاحظتك باختصار"></textarea></label>
+            <fieldset><legend>اختيار واحد</legend><label><input type="radio" checked /> نشط</label><label><input type="radio" /> موقوف</label></fieldset>
+            <fieldset><legend>اختيارات</legend><label><input type="checkbox" checked /> إرسال إشعار</label><label class="switch"><input type="checkbox" checked /><i></i> تفعيل</label></fieldset>
+            <button class="upload"><svg><use href="#i-upload"/></svg><span><b>إرفاق ملف</b><small>صورة أو مستند، حتى ١٠ ميغابايت</small></span></button>
           </div>
-        </section>
+        </div>
 
-        <section class="chapter chapter--forest" id="experiences" data-section>
-          <div class="chapter-inner">
-            <header class="chapter-head">
-              <div>
-                <p class="eyebrow">07 · Experiences</p>
-                <h2 class="chapter-title">ثلاثة أنماط تغطي كل البوابات.</h2>
-              </div>
-              <p class="chapter-intro">
-                لا نصمم ثماني واجهات من الصفر. نستخدم نمط العامل، المشرف، أو لوحة
-                العمليات، ثم نضيف فرق المجال فقط.
-              </p>
-            </header>
-
-            <div class="experience-grid">
-              <article class="experience-card">
-                <div class="experience-label"><span>FIELD</span><span>01</span></div>
-                <div class="experience-screen">
-                  <div class="app-head"><img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" /><span>مهامي</span></div>
-                  <div class="app-body">
-                    <h3 class="app-title">المهمة الحالية</h3>
-                    <div class="task-card"><strong>فحص المركبة</strong><span>الموقع التجريبي · 08:30</span><button class="task-action" type="button">بدء المهمة</button></div>
-                    <div class="task-card"><strong>الطلب التالي</strong><span>يظهر بعد إكمال المهمة الحالية</span></div>
-                  </div>
-                </div>
-              </article>
-              <article class="experience-card">
-                <div class="experience-label"><span>SUPERVISOR</span><span>02</span></div>
-                <div class="experience-screen">
-                  <div class="app-head"><img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" /><span>فريق اليوم</span></div>
-                  <div class="app-body">
-                    <h3 class="app-title">بانتظار المراجعة</h3>
-                    <div class="task-card"><strong>طلب نقل</strong><span>مسار تجريبي · مكتمل البيانات</span><button class="task-action" type="button">مراجعة</button></div>
-                    <div class="task-card"><strong>طلب وصول</strong><span>الموقع التجريبي · يحتاج إسناداً</span><button class="task-action" type="button">إسناد</button></div>
-                    <div class="task-card"><strong>مهمة متأخرة</strong><span>منذ 25 دقيقة</span></div>
-                  </div>
-                </div>
-              </article>
-              <article class="experience-card">
-                <div class="experience-label"><span>OPERATIONS BOARD</span><span>03</span></div>
-                <div class="experience-screen">
-                  <div class="app-head"><img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" /><span>لوحة العمليات</span></div>
-                  <div class="app-body">
-                    <h3 class="app-title">الحالة الآن</h3>
-                    <div class="board-kpis"><div><strong>48</strong><span>نشط</span></div><div><strong>7</strong><span>يحتاج قراراً</span></div><div><strong>94%</strong><span>ضمن الوقت</span></div></div>
-                    <div class="board-table">
-                      <div class="board-row"><strong>المهمة</strong><strong>الحالة</strong><strong>الوقت</strong></div>
-                      <div class="board-row"><span>رحلة تجريبية 01</span><span>في الطريق</span><span dir="ltr">08:42</span></div>
-                      <div class="board-row"><span>رحلة تجريبية 02</span><span>بانتظار السائق</span><span dir="ltr">08:55</span></div>
-                      <div class="board-row"><span>رحلة تجريبية 03</span><span>مكتملة</span><span dir="ltr">09:10</span></div>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </div>
-
-            <div class="portal-map" aria-label="خريطة البوابات">
-              <div class="portal-line"><code>/driver</code><span>عامل ميداني · مهام السائق</span></div>
-              <div class="portal-line"><code>/masar</code><span>عامل ميداني · طلبات ومسارات</span></div>
-              <div class="portal-line"><code>/safety</code><span>عامل ميداني · فحص وسلامة</span></div>
-              <div class="portal-line"><code>/housing-count</code><span>مسار قديم · يعيد التوجيه إلى شاشة العد داخل السكن</span></div>
-              <div class="portal-line"><code>/housing</code><span>عامل ميداني · طلبات السكن والخدمة</span></div>
-              <div class="portal-line"><code>/masar-supervisor</code><span>مشرف · إسناد ومتابعة</span></div>
-              <div class="portal-line"><code>/fleet</code><span>عمليات · إدارة الأسطول</span></div>
-              <div class="portal-line"><code>/fleet-os</code><span>عمليات · لوحة احتياطية مستقلة للمراقبة</span></div>
-            </div>
+        <div class="component-section">
+          <div class="component-title"><span>03</span><div><h3>التنقل</h3><p>التبويبات، والأقسام، ومسار الصفحة، والتنقل العلوي والجانبي</p></div></div>
+          <div class="component-canvas navigation-catalog">
+            <nav class="top-nav"><img src="assets/logo/apex-mark-reverse.svg" alt="" /><a class="active">المهام</a><a>الطلبات</a><a>الرحلات</a><span></span><button>إجراء جديد</button></nav>
+            <div class="breadcrumbs"><a>الرئيسية</a><i>/</i><a>الأسطول</a><i>/</i><b>المركبة ٠٢٤</b></div>
+            <div class="tabs"><button class="active">الكل</button><button>تحتاج إجراء</button><button>مكتملة</button></div>
+            <div class="segments"><button class="active">قائمة</button><button>خريطة</button><button>تقويم</button></div>
+            <aside class="side-nav"><a class="active"><svg><use href="#i-home"/></svg>الرئيسية</a><a><svg><use href="#i-task"/></svg>المهام</a><a><svg><use href="#i-settings"/></svg>الإعدادات</a></aside>
           </div>
-        </section>
+        </div>
 
-        <section class="chapter chapter--surface" id="rtl" data-section>
-          <div class="chapter-inner">
-            <header class="chapter-head">
-              <div>
-                <p class="eyebrow">08 · Arabic &amp; RTL</p>
-                <h2 class="chapter-title">العربية أصل، وليست نسخة معكوسة.</h2>
-              </div>
-              <p class="chapter-intro">
-                نبني بالخصائص المنطقية، ونختبر العربية والإنجليزية كلتيهما. الرموز
-                المكانية تنعكس؛ الوقت والوسائط وعلامة الصح لا تنعكس.
-              </p>
-            </header>
-
-            <div class="prose">
-              <h3>اتجاه الصفحة لا يكفي وحده.</h3>
-              <p>
-                استخدم <code>lang</code> و<code>dir</code> على الجذر، و<code>dir="auto"</code>
-                للمدخلات الحرة، و<code>bdi</code> للأسماء والأكواد المختلطة. احتفظ بلوحات
-                الأرقام والتواريخ التي تحتاج ترتيباً ثابتاً كجزر LTR صريحة.
-              </p>
-            </div>
-
-            <div class="direction-demo" data-direction-demo>
-              <div class="direction-toolbar">
-                <strong>النظام نفسه في الاتجاهين</strong>
-                <button type="button" data-direction-toggle>عرض LTR</button>
-              </div>
-              <div class="direction-surface" dir="rtl" data-direction-surface>
-                <aside class="direction-side">
-                  <img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" />
-                  <div>نظرة عامة</div><div>المهام</div><div>التقارير</div><div>الإعدادات</div>
-                </aside>
-                <div class="direction-main">
-                  <h3>سجل العمليات</h3>
-                  <div class="direction-record"><span>طلب تشغيل تجريبي</span><b dir="ltr">APX-0024</b></div>
-                  <div class="direction-record"><span>موعد التنفيذ</span><b dir="ltr">08 Aug · 10:30</b></div>
-                  <div class="direction-record"><span>الحالة</span><b>جاهز</b></div>
-                </div>
-              </div>
-            </div>
+        <div class="component-section">
+          <div class="component-title"><span>04</span><div><h3>التصفية والهوية</h3><p>المرشحات، وصور المستخدمين، والتلميحات، ونوافذ المساعدة</p></div></div>
+          <div class="component-canvas filters-catalog">
+            <div class="chips"><button class="active">نشط</button><button>جدة ×</button><button>هذا الأسبوع ×</button><button>إضافة مرشح</button></div>
+            <div class="avatars"><span>أم</span><span>س م</span><span><svg><use href="#i-user"/></svg></span><b>+٨</b></div>
+            <div class="tooltip-demo"><button>عرض المساعدة</button><span>يعرض شرحاً مختصراً عند الحاجة.</span></div>
+            <div class="popover"><b>تعيين المهمة</b><p>اختر مسؤولاً قبل الحفظ.</p><button class="primary">اختيار المسؤول</button></div>
           </div>
-        </section>
+        </div>
 
-        <section class="chapter chapter--white" id="social" data-section>
-          <div class="chapter-inner">
-            <header class="chapter-head">
-              <div>
-                <p class="eyebrow">09 · Social</p>
-                <h2 class="chapter-title">نظام منشورات، لا قوالب متفرقة.</h2>
-              </div>
-              <p class="chapter-intro">
-                منطقة العلامة ثابتة، والرسالة تتغير. لكل مقاس فكرة واحدة، وعنوان بين
-                ثلاثة وخمسة أسطر، وتفاصيله في الوصف المرافق.
-              </p>
-            </header>
-
-            <div class="social-grid">
-              <figure class="social-card">
-                <img src="assets/social/apex-post-square.svg" width="1080" height="1080" alt="قالب إعلان مربع لأبكس" />
-                <figcaption><span>إعلان</span><code>1:1 · 1080 × 1080</code></figcaption>
-              </figure>
-              <figure class="social-card">
-                <img src="assets/social/apex-post-portrait.svg" width="1080" height="1350" alt="قالب نتيجة رأسي لأبكس" />
-                <figcaption><span>نتيجة أو رقم</span><code>4:5 · 1080 × 1350</code></figcaption>
-              </figure>
-              <figure class="social-card">
-                <img src="assets/social/apex-story.svg" width="1080" height="1920" alt="قالب قصة رأسي لأبكس" />
-                <figcaption><span>قصة أو دعوة</span><code>9:16 · 1080 × 1920</code></figcaption>
-              </figure>
-              <figure class="social-card">
-                <img src="assets/social/apex-wide.svg" width="1200" height="627" alt="قالب فكرة عريض لأبكس" />
-                <figcaption><span>خبر أو فكرة</span><code>1.91:1 · 1200 × 627</code></figcaption>
-              </figure>
-            </div>
-
-            <div class="channel-rules">
-              <div><strong>منطقة العلامة</strong><span>ثابتة في أعلى البداية البصرية مع مساحة أمان كاملة.</span></div>
-              <div><strong>فكرة واحدة</strong><span>لا تجمع خبراً ورقماً ودعوة في صورة واحدة.</span></div>
-              <div><strong>لغة مستقلة</strong><span>نسخة عربية وأخرى إنجليزية أفضل من ازدحام اللغتين.</span></div>
-              <div><strong>وصول كامل</strong><span>وصف بديل، تباين واضح، ونسخة ثابتة لأي حركة.</span></div>
-            </div>
+        <div class="component-section">
+          <div class="component-title"><span>05</span><div><h3>المحتوى</h3><p>البطاقات، والقوائم، والجداول، والتنقل بين الصفحات</p></div></div>
+          <div class="component-canvas content-catalog">
+            <article class="record-card"><span class="status success">نشط</span><h4>المركبة رقم ٠٢٤</h4><p>الموقع التجريبي، آخر تحديث قبل ٤ دقائق</p><button>فتح السجل</button></article>
+            <ul class="list-view"><li><b>طلب نقل</b><span>بانتظار المراجعة</span><time>٠٨:٤٢</time></li><li><b>تسكين عامل</b><span>جاهز للإسناد</span><time>٠٩:١٠</time></li><li><b>فحص سلامة</b><span>مكتمل</span><time>٠٩:٢٤</time></li></ul>
+            <div class="mini-table"><div><b>المهمة</b><b>الحالة</b><b>الوقت</b></div><div><span>رحلة ٠١</span><span>في الطريق</span><span>٠٨:٤٢</span></div><div><span>رحلة ٠٢</span><span>بانتظار السائق</span><span>٠٨:٥٥</span></div><div><span>رحلة ٠٣</span><span>مكتملة</span><span>٠٩:١٠</span></div></div>
+            <nav class="pagination"><button>السابق</button><b>١</b><button>٢</button><button>٣</button><button>التالي</button></nav>
           </div>
-        </section>
+        </div>
 
-        <section class="chapter" id="voice" data-section>
-          <div class="chapter-inner">
-            <header class="chapter-head">
-              <div>
-                <p class="eyebrow">10 · Voice &amp; Motion</p>
-                <h2 class="chapter-title">نتكلم بلغة العمل، ونتحرك لسبب.</h2>
-              </div>
-              <p class="chapter-intro">
-                الجملة تشرح الحالة أو الإجراء أو الأثر. الحركة توضح الانتقال ولا تستعرض
-                نفسها، وتتوقف عند تفضيل تقليل الحركة.
-              </p>
-            </header>
-
-            <div class="voice-grid">
-              <article class="voice-card"><span class="voice-index">01 · CLEAR</span><div><h3>مباشر</h3><p>ابدأ بالفعل: راجع، اعتمد، أوقف، حوّل. لا تكتب مقدمة قبل المهمة.</p></div></article>
-              <article class="voice-card"><span class="voice-index">02 · HUMAN</span><div><h3>طبيعي</h3><p>عربية بيضاء مستخدمة في بيئة العمل السعودية، بلا حرفية أو تكلف.</p></div></article>
-              <article class="voice-card"><span class="voice-index">03 · EXACT</span><div><h3>دقيق</h3><p>اذكر ما حدث، أثره، وما الذي يستطيع المستخدم فعله بعده.</p></div></article>
-            </div>
-
-            <div class="do-dont">
-              <article class="example-card example-card--do"><small>اكتب</small><blockquote>تعذّر الحفظ. تحقق من الاتصال ثم حاول مرة أخرى؛ مدخلاتك محفوظة.</blockquote></article>
-              <article class="example-card example-card--dont"><small>لا تكتب</small><blockquote>حدث خطأ غير متوقع أثناء محاولة تنفيذ العملية المطلوبة.</blockquote></article>
-            </div>
-
-            <div class="motion-line">
-              <div class="motion-item"><strong>استجابة</strong><span>ضغط، تحديد، تحقق.</span><code>90–160 ms</code></div>
-              <div class="motion-item"><strong>انتقال محلي</strong><span>قائمة، نافذة، توسع.</span><code>160–240 ms</code></div>
-              <div class="motion-item"><strong>تغير مشهد</strong><span>لوحة أو مسار رئيسي.</span><code>240–400 ms</code></div>
-            </div>
+        <div class="component-section">
+          <div class="component-title"><span>06</span><div><h3>النوافذ والتنبيهات</h3><p>مربع حوار، ولوحة جانبية، ولوحة سفلية، ورسالة عابرة، وتنبيه</p></div></div>
+          <div class="component-canvas overlays-catalog">
+            <article class="dialog"><h4>متأكد من إسناد الطلب؟</h4><p>سيُسند الطلب للسائق، ويبدأ احتساب الوقت.</p><div><button>إلغاء</button><button class="primary">اعتماد</button></div></article>
+            <article class="drawer"><b>تفاصيل الطلب</b><p>مقدم الطلب</p><strong>عامل تجريبي</strong><p>مركز التكلفة</p><strong>مشروع المطار</strong></article>
+            <article class="bottom-sheet"><i></i><h4>وش تحتاج تسوي الآن؟</h4><button class="primary">بدء الرحلة</button><button>عرض التفاصيل</button></article>
+            <div class="feedback-stack"><span class="toast success">تم الحفظ.</span><span class="alert warning">باقي ١٥ دقيقة قبل ما تتأخر المهمة.</span><span class="alert error">انقطع الاتصال. أعد المحاولة بعد عودة الشبكة.</span></div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section class="chapter chapter--forest" id="assets" data-section>
-          <div class="chapter-inner">
-            <header class="chapter-head">
-              <div>
-                <p class="eyebrow">11 · Handoff</p>
-                <h2 class="chapter-title">أصول جاهزة، وقاعدة إطلاق واحدة.</h2>
-              </div>
-              <p class="chapter-intro">
-                ملفات SVG هي النسخ الأصلية. هذا الدليل يحدد الهوية؛ نشرها داخل بوابات
-                المنتج يتم كتغيير مستقل يشمل المصدر والحزم وملفات الخدمة معاً.
-              </p>
-            </header>
+      <section class="guide-page brand-field" id="page-08" aria-label="08 — Product Patterns">
+        <header class="page-head light-head">
+          <span class="page-number">08</span>
+          <div><p class="eyebrow">PRODUCT PATTERNS</p><h2>كل مستخدم يشوف اللي يحتاجه.</h2></div>
+          <p>في الميدان تظهر المهمة مباشرة، وللمشرف تظهر الطلبات التي تحتاج قراراً، وللعمليات تظهر الصورة كاملة. يتغيّر المحتوى حسب الدور، وتبقى التجربة واحدة.</p>
+        </header>
 
-            <div class="asset-grid">
-              <a class="asset-link" href="assets/logo/apex-mark.svg" download><img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" /><span><strong>Primary mark</strong><span>SVG · light surfaces</span></span></a>
-              <a class="asset-link" href="assets/logo/apex-mark-reverse.svg" download><img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" /><span><strong>Reverse mark</strong><span>SVG · dark surfaces</span></span></a>
-              <a class="asset-link" href="assets/logo/apex-mark-mono.svg" download><img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" /><span><strong>Mono mark</strong><span>SVG · one-colour output</span></span></a>
-              <a class="asset-link" href="assets/logo/apex-lockup-ar.svg" download><img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" /><span><strong>Arabic lockup</strong><span>SVG · authored asset</span></span></a>
-              <a class="asset-link" href="assets/logo/apex-lockup-en.svg" download><img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="" /><span><strong>English lockup</strong><span>SVG · authored asset</span></span></a>
-              <a class="asset-link" href="assets/logo/apex-app-icon.svg" download><img src="assets/logo/apex-app-icon.svg" width="128" height="128" alt="" /><span><strong>App icon</strong><span>SVG · maskable master</span></span></a>
-            </div>
+        <div class="portal-showcase">
+          <article class="phone-shell">
+            <div class="app-bar"><img src="assets/logo/apex-mark-reverse.svg" alt="" /><span>مهامي</span><button>•••</button></div>
+            <div class="phone-content"><small>صباح الخير</small><h3>مهمتك الحالية</h3><div class="task-card"><span class="status success">جاهز</span><b>فحص المركبة</b><p>الموقع التجريبي · ٠٨:٣٠</p><button class="primary">بدء المهمة</button></div><div class="quick-grid"><span><svg><use href="#i-task"/></svg>الطلبات</span><span><svg><use href="#i-car"/></svg>الرحلات</span><span><svg><use href="#i-building"/></svg>السكن</span><span><svg><use href="#i-user"/></svg>ملفي</span></div></div>
+            <nav><a class="active"><svg><use href="#i-home"/></svg>الرئيسية</a><a><svg><use href="#i-task"/></svg>المهام</a><a><svg><use href="#i-user"/></svg>الملف</a></nav>
+            <footer><b>بوابة العامل والسائق</b><span>الرئيسية، والمهام، والرحلات، والسكن، والملف الشخصي</span></footer>
+          </article>
 
-            <div class="release-checklist" aria-label="قائمة فحص الإطلاق">
-              <div class="check">العربية والإنجليزية بجودة متساوية.</div>
-              <div class="check">التباين يحقق WCAG 2.2 AA.</div>
-              <div class="check">أهداف اللمس 44 بكسل على الأقل.</div>
-              <div class="check">الصفحة تعمل عند 320 بكسل وتكبير 200%.</div>
-              <div class="check">الحالات لا تعتمد على اللون وحده.</div>
-              <div class="check">الحركة تحترم prefers-reduced-motion.</div>
-              <div class="check">الصور والمنشورات تحمل وصفاً بديلاً.</div>
-              <div class="check">المصدر والحزمة وملف الخدمة في إصدار واحد.</div>
-            </div>
-          </div>
-        </section>
+          <article class="dashboard-shell fleet">
+            <div class="dash-top"><img src="assets/logo/apex-mark-reverse.svg" alt="" /><b>إدارة الأسطول</b><div class="chips"><button class="active">اليوم</button><button>جدة</button><button>كل الحالات</button></div></div>
+            <div class="dash-content"><header><div><small>لوحة العمليات</small><h3>الحالة الآن</h3></div><button class="primary">إضافة مركبة</button></header><div class="kpis"><span><b>٤٨</b>مركبة نشطة</span><span><b>٧</b>تحتاج قراراً</span><span><b>٩٤٪</b>ضمن الوقت</span><span><b>٣</b>رحلات متأخرة</span></div><div class="dash-table"><div><b>المركبة</b><b>السائق</b><b>الرحلة</b><b>الحالة</b></div><div><span dir="ltr">APX-024</span><span>سائق تجريبي</span><span>المطار ← السكن</span><span class="status success">نشط</span></div><div><span dir="ltr">APX-031</span><span>غير مسند</span><span>لا توجد رحلة</span><span class="status warning">يحتاج إسناداً</span></div></div></div>
+            <footer><b>بوابة الأسطول</b><span>المركبات، والسائقون، والرحلات، والمرشحات، والمشاهد المحفوظة</span></footer>
+          </article>
+        </div>
 
-        <footer class="guide-footer">
-          <img src="assets/logo/apex-mark-reverse.svg" width="64" height="64" alt="أبكس" />
-          <span>دليل هوية المنتج وواجهاته · إصدار 1.0</span>
-          <code>APEX / 2026</code>
-        </footer>
-      </main>
-    </div>
+        <div class="domain-patterns">
+          <article><header><svg><use href="#i-building"/></svg><div><small>السكن</small><h3>الإشغال والتسكين</h3></div></header><div class="occupancy"><b>٨٧٪</b><span>الإشغال الحالي</span><i><em></em></i></div><ul><li>المباني والغرف</li><li>إسناد السرير</li><li>طلبات السكان</li></ul></article>
+          <article><header><svg><use href="#i-shield"/></svg><div><small>السلامة</small><h3>الفحص والإجراء</h3></div></header><div class="decision-card"><span class="status warning">يحتاج إجراء</span><b>ملاحظة سلامة</b><p>الملاحظة فيها صورة وموقع ومسؤول وموعد للمعالجة.</p><button class="primary">إسناد المعالجة</button></div></article>
+          <article><header><svg><use href="#i-bus"/></svg><div><small>مشرف النقل</small><h3>الإسناد والمتابعة</h3></div></header><div class="queue"><span><b>طلب نقل</b><small>بانتظار المراجعة</small></span><button>مراجعة</button><span><b>طلب وصول</b><small>يحتاج سائقاً</small></span><button>إسناد</button></div></article>
+        </div>
+
+        <div class="map-approval">
+          <article class="operations-map"><div class="route-line"></div><span class="marker m1"><svg><use href="#i-pin"/></svg></span><span class="marker m2"><svg><use href="#i-pin"/></svg></span><div class="map-panel"><small>المسار الحالي</small><b>المطار ← السكن</b><p>٢٤ دقيقة · ١٨ كم</p></div></article>
+          <article class="approval-flow"><p class="eyebrow">الإجراءات والموافقات</p><div><span class="done"><b>١</b>تسجيل الطلب</span><i></i><span class="current"><b>٢</b>مراجعة المشرف</span><i></i><span><b>٣</b>التنفيذ</span><i></i><span><b>٤</b>توثيق الإجراء</span></div><p>يظهر مسار الموافقة فقط إذا كان الإجراء يحتاج اعتماداً.</p></article>
+        </div>
+      </section>
+
+      <section class="guide-page" id="page-09" aria-label="09 — Responsive & Accessibility">
+        <header class="page-head">
+          <span class="page-number">09</span>
+          <div><p class="eyebrow">RESPONSIVE &amp; ACCESSIBILITY</p><h2>المهمة واضحة على كل شاشة.</h2></div>
+          <p>يتغيّر ترتيب المحتوى حسب حجم الشاشة، وتبقى الحالة والخطوة التالية واضحة في كل عرض.</p>
+        </header>
+
+        <div class="responsive-frames">
+          <article class="r-mobile"><div><header><span></span><b>المهمة</b></header><main><h3>فحص المركبة</h3><p>الموقع التجريبي</p><button>بدء المهمة</button></main><nav><i></i><i></i><i></i></nav></div><b>الجوال، من ٣٢٠ إلى ٦١٩ بكسل</b><span>مهمة واحدة وزر رئيسي ثابت.</span></article>
+          <article class="r-tablet"><div><aside></aside><main><header></header><section><i></i><i></i><i></i></section></main></div><b>الجهاز اللوحي، من ٦٢٠ إلى ٨٩٩ بكسل</b><span>قائمة وتفاصيل عند الحاجة.</span></article>
+          <article class="r-desktop"><div><aside></aside><main><header></header><section><i></i><i></i><i></i><i></i></section><footer></footer></main></div><b>الكمبيوتر، ٩٠٠ بكسل فأكثر</b><span>لوحة عمليات تعرض أهم المعلومات بسرعة.</span></article>
+        </div>
+
+        <div class="access-grid">
+          <article><b>٤٤ بكسل</b><span>أقل حجم لمنطقة اللمس</span></article><article><b>٢٠٠٪</b><span>تكبير النص دون فقدان المحتوى</span></article><article><b>٣٢٠ بكسل</b><span>أقل عرض مدعوم</span></article><article><b dir="ltr">WCAG 2.2 AA</b><span>المستوى المعتمد للوصول</span></article>
+        </div>
+
+        <div class="a11y-checklist">
+          <span><svg><use href="#i-check"/></svg><b>لوحة المفاتيح</b>تنقّل مرتب ومؤشر تركيز واضح.</span>
+          <span><svg><use href="#i-check"/></svg><b>التباين</b>المعنى لا يعتمد على اللون وحده.</span>
+          <span><svg><use href="#i-check"/></svg><b>قارئ الشاشة</b>لكل مكوّن اسم ووصف وحالة واضحة.</span>
+          <span><svg><use href="#i-check"/></svg><b>الاتجاه العربي</b>ينعكس ترتيب العناصر، بينما يبقى الوقت والوسائط كما هي.</span>
+          <span><svg><use href="#i-check"/></svg><b>الحركة</b>نخففها إذا فعّل المستخدم هذا الخيار.</span>
+          <span><svg><use href="#i-check"/></svg><b>الأخطاء</b>سبب الخطأ وطريقة التصحيح بجانب الحقل.</span>
+        </div>
+
+        <div class="offline-pattern page-surface">
+          <div><svg><use href="#i-alert"/></svg><span><b>تعذّر الاتصال</b><small>أعد المحاولة بعد عودة الشبكة.</small></span></div>
+          <div class="sync-steps"><span class="done">تعذّر الاتصال</span><i></i><span class="current">بانتظار الشبكة</span><i></i><span>إعادة المحاولة</span></div>
+        </div>
+      </section>
+
+      <section class="guide-page" id="page-10" aria-label="10 — Brand Applications">
+        <header class="page-head">
+          <span class="page-number">10</span>
+          <div><p class="eyebrow">BRAND APPLICATIONS</p><h2>هوية ثابتة في كل استخدام.</h2></div>
+          <p>هذه أمثلة توضّح كيف تظهر الهوية في الاستخدام، من الشاشات إلى المطبوعات.</p>
+        </header>
+
+        <div class="digital-entry">
+          <article class="splash-screen brand-field"><img src="assets/logo/apex-mark-reverse.svg" alt="" /><h3>نجهّز أبكس لك…</h3><div class="loader"><i></i></div><small>لحظات ويكون كل شيء جاهز.</small></article>
+          <article class="login-screen"><img src="assets/logo/apex-lockup-ar.svg" alt="أبكس" /><h3>أهلاً بعودتك</h3><label>البريد الإلكتروني<input value="user@example.com" readonly /></label><label>كلمة المرور<input value="••••••••••" readonly /></label><button class="primary">تسجيل الدخول</button><a>نسيت كلمة المرور؟</a></article>
+          <article class="app-icon-showcase"><img src="assets/logo/apex-app-icon.svg" alt="أيقونة أبكس" /><div><b>أيقونة التطبيق</b><span>للجوال والويب</span><small>تظهر العلامة وحدها، من غير إطار أو نص.</small></div></article>
+        </div>
+
+        <div class="stationery-grid">
+          <article class="id-card"><header><img src="assets/logo/apex-mark-reverse.svg" alt="" /><span>بطاقة موظف</span></header><div><i></i><b>موظف تجريبي</b><span>فريق العمليات</span><small>الرقم الوظيفي ٠٠٢٤</small></div></article>
+          <article class="business-card"><img src="assets/logo/apex-lockup-ar.svg" alt="أبكس" /><div><b>مدير العمليات</b><span>operations@example.com</span><span>+966 00 000 0000</span></div></article>
+          <article class="letterhead"><header><img src="assets/logo/apex-lockup-ar.svg" alt="أبكس" /><small>٩ أغسطس ٢٠٢٦</small></header><h4>ملخص الأعمال</h4><p>هذا ملخص أعمال الفترة، ويشمل أبرز القرارات والنتائج.</p><footer>الرياض، المملكة العربية السعودية</footer></article>
+          <article class="envelope"><img src="assets/logo/apex-mark.svg" alt="" /><span>أبكس · الرياض</span></article>
+        </div>
+
+        <div class="presentation-row">
+          <article class="slide-cover brand-field"><img src="assets/logo/apex-mark-reverse.svg" alt="" /><h3>عنوان العرض</h3><p>عرض مختصر يوضّح القرار.</p><small>أبكس · ٢٠٢٦</small></article>
+          <article class="slide-content"><p class="eyebrow">عمليات اليوم</p><h3>أهم أرقام اليوم، من أول نظرة.</h3><div><span><b>٤٨</b>نشط</span><span><b>٧</b>قرارات</span><span><b>٩٤٪</b>ضمن الوقت</span></div></article>
+          <article class="email-signature"><img src="assets/logo/apex-mark.svg" alt="" /><div><b>اسم الموظف</b><span>مدير العمليات</span><small dir="ltr">name@example.com<br />+966 00 000 0000</small></div></article>
+        </div>
+
+        <div class="social-gallery">
+          <figure><img src="assets/social/apex-post-square-preview.png" alt="منشور مربع" /><figcaption>منشور مربع، بنسبة ١ إلى ١</figcaption></figure>
+          <figure><img src="assets/social/apex-post-portrait-preview.png" alt="منشور رأسي" /><figcaption>منشور رأسي، بنسبة ٤ إلى ٥</figcaption></figure>
+          <figure><img src="assets/social/apex-story-preview.png" alt="قصة" /><figcaption>قصة، بنسبة ٩ إلى ١٦</figcaption></figure>
+          <figure class="wide"><img src="assets/social/apex-wide-preview.png" alt="غلاف عريض" /><figcaption>غلاف عريض، بنسبة ١٫٩١ إلى ١</figcaption></figure>
+        </div>
+
+        <div class="ad-templates">
+          <article class="ad-minimal"><small>أبكس</small><h3>شوف التفاصيل قبل القرار.</h3><button>تعرّف على أبكس</button></article>
+          <article class="ad-metric brand-field"><small>عمليات اليوم</small><b>٩٤٪</b><span>من المهام ضمن الوقت</span></article>
+          <article class="ad-story"><img src="assets/logo/apex-mark.svg" alt="" /><h3>شوف الحالة.<br />وخذ القرار.</h3><span>أبكس يجمع تفاصيل التشغيل في مكان واحد.</span></article>
+        </div>
+      </section>
+
+      <section class="guide-page" id="page-11" aria-label="11 — Developer Handoff">
+        <header class="page-head">
+          <span class="page-number">11</span>
+          <div><p class="eyebrow">DEVELOPER HANDOFF</p><h2>كل ما يحتاجه المطوّر لتنفيذ الواجهة.</h2></div>
+          <p>هنا يجد المطوّر أسماء المكوّنات والرموز وقواعد استخدامها، عشان يطلع التطبيق مطابقاً للهوية.</p>
+        </header>
+
+        <div class="handoff-tree page-surface">
+          <p class="eyebrow">FIGMA LIBRARY STRUCTURE</p>
+          <pre dir="ltr">APEX / Design System
+├── Foundations
+│   ├── Color · Type · Spacing · Radius · Elevation
+├── Components
+│   ├── Button · Field · Navigation · Feedback · Data
+├── Patterns
+│   ├── Field · Supervisor · Operations
+└── Applications
+    ├── Portal · Social · Print</pre>
+        </div>
+
+        <div class="data-table naming-table">
+          <div class="table-head"><span>النوع</span><span>قاعدة التسمية</span><span>مثال</span></div>
+          <div><span>متغيّر</span><span>group.role.state</span><span>color.action.primary</span></div>
+          <div><span>مكوّن</span><span>Family / Variant / State</span><span>Button / Primary / Disabled</span></div>
+          <div><span>خاصية</span><span>property=value</span><span>state=Loading · size=Large</span></div>
+          <div><span>أصل</span><span>apex-kind-language-mode.ext</span><span>apex-lockup-ar.svg</span></div>
+        </div>
+
+        <div class="mapping-grid">
+          <article><p class="eyebrow">ربط المتغيّرات بالأنماط</p><code>color.green.500 → --color-green-500<br />color.action.primary → --color-action-primary<br />color.surface.canvas → --canvas<br />space.6 → --space-24<br />radius.lg → --radius-lg</code></article>
+          <article><p class="eyebrow">ربط المكوّنات</p><code>Button → Button<br />Field → FormControl<br />Dialog → Dialog<br />Toast → toast<br />List → ListView</code></article>
+          <article><p class="eyebrow">قواعد التنفيذ</p><ul><li>أسلوب التنفيذ المعتمد:<br /><code>Composition API · script setup</code></li><li>ابدأ بالمكوّن المشترك المطابق قبل إنشاء مكوّن جديد.</li><li>طابق جميع حالات المكوّن المعتمدة.</li><li>استخدم الرموز والمسافات المعتمدة من النظام.</li></ul></article>
+        </div>
+
+        <div class="asset-paths page-surface">
+          <p class="eyebrow">مسارات الملفات والتصدير</p>
+          <span><b>assets/logo/</b>الشعارات المعتمدة</span>
+          <span><b>assets/social/</b>قوالب المنشورات</span>
+          <span><b>components/</b>مكوّنات الواجهة</span>
+          <span><b>examples/</b>نماذج التطبيق</span>
+          <small>الشعارات والأيقونات ملفات متجهية، والصور النقطية للمعاينات فقط. استخدم الحجم المطلوب، ولا تكبّر صورة صغيرة أو تعِد رسم الشعار.</small>
+        </div>
+
+        <div class="checklist-columns">
+          <article><h3>حالات المكوّن</h3><label><input type="checkbox" checked /> افتراضي</label><label><input type="checkbox" checked /> مرور المؤشر والتركيز</label><label><input type="checkbox" checked /> غير متاح مع توضيح السبب</label><label><input type="checkbox" checked /> جارٍ التحميل</label><label><input type="checkbox" checked /> خطأ ونجاح</label><label><input type="checkbox" checked /> دون اتصال</label></article>
+          <article><h3>مطابقة التنفيذ</h3><label><input type="checkbox" checked /> الجوال وتكبير النص</label><label><input type="checkbox" checked /> العربية والإنجليزية</label><label><input type="checkbox" checked /> التنقل بلوحة المفاتيح</label><label><input type="checkbox" checked /> التباين وسهولة الوصول</label><label><input type="checkbox" checked /> حالات البيانات المختلفة</label><label><input type="checkbox" checked /> الرسائل والحالات مكتملة</label></article>
+          <article><h3>محتوى التسليم</h3><label><input type="checkbox" checked /> الشعار المعتمد</label><label><input type="checkbox" checked /> الأيقونات المعتمدة</label><label><input type="checkbox" checked /> الألوان والخطوط</label><label><input type="checkbox" checked /> النصوص العربية</label><label><input type="checkbox" checked /> النماذج المتجاوبة</label><label><input type="checkbox" checked /> إرشادات الاستخدام</label></article>
+        </div>
+
+        <div class="version-log">
+          <span><b>٢٫٠</b><time>٩ أغسطس ٢٠٢٦</time><p>توسيع الدليل إلى ١٢ فصلاً، واعتماد خط ثمانية، وتوحيد الشعار والألوان ومكوّنات الواجهة.</p></span>
+          <span><b>١٫٠</b><time>٢٠٢٦</time><p>إطلاق الهوية الأساسية: الشعار والألوان وأولى نماذج المنتج.</p></span>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <img src="assets/logo/apex-mark-reverse.svg" alt="" width="44" height="44" />
+      <span>أبكس، دليل الهوية ونظام الواجهة، الإصدار ٢٫٠</span>
+    </footer>
+    <script>
+      (() => {
+        const chapter = new URLSearchParams(window.location.search).get("capture");
+        if (!chapter) return;
+
+        const activePage = document.getElementById(`page-${chapter}`);
+        if (!activePage) return;
+
+        document.documentElement.dataset.capture = chapter;
+        document.querySelectorAll(".guide-page").forEach((page) => {
+          page.hidden = page !== activePage;
+        });
+        activePage.dataset.captureActive = "true";
+
+        const captureScript = document.createElement("script");
+        captureScript.src = "https://mcp.figma.com/mcp/html-to-design/capture.js";
+        captureScript.async = true;
+        document.head.append(captureScript);
+      })();
+    </script>
   </body>
 </html>
