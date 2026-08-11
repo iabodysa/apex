@@ -7,7 +7,7 @@
       <span>{{ t("requests.back") }}</span>
     </router-link>
 
-    <div v-if="detail.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
+    <Skeleton v-if="detail.loading" :lines="4" />
 
     <LoadError
       v-else-if="detail.error"
@@ -104,6 +104,7 @@ import LoadError from "@shared/components/LoadError.vue";
 import Panel from "@shared/components/Panel.vue";
 import StatusLabel from "@shared/components/StatusLabel.vue";
 import Icon from "../components/Icon.vue";
+import Skeleton from "../components/Skeleton.vue";
 import HousingNav from "../components/HousingNav.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatDateTime } from "../utils/datetime";
