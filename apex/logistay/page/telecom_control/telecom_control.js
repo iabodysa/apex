@@ -9,11 +9,12 @@ frappe.pages['telecom-control'].on_page_load = function (wrapper) {
 	wrapper.telecom_control = new TelecomControl(page);
 };
 
-// Chart colours follow the DESK theme instead of five frozen hex values: the same five
-// were drawn in dark mode as in light, and none of them was a token anything else in this
-// file used. frappe.Chart needs real colour values rather than var() strings, so the
-// scale the desk already defines is read once per render and any variable the theme does
-// not carry falls back to its own name, which frappe then resolves.
+// frappe.Chart needs real values, not var() strings, so the desk scale is read per render.
+// Bidi moves a leading + to the end of an LTR number inside an Arabic page.
+function TC_LTR(value) {
+	return $('<bdi dir="ltr"></bdi>').text(value == null ? '' : String(value));
+}
+
 function TC_CHART_COLORS() {
 	const root = getComputedStyle(document.documentElement);
 	const pick = (name, fallback) => (root.getPropertyValue(name) || '').trim() || fallback;
@@ -263,7 +264,7 @@ class TelecomControl {
 		const $tbody = $('<tbody></tbody>').appendTo($table);
 		rows.forEach((row) => {
 			const $r = $('<tr></tr>').on('click', () => this._open_drawer(row.name)).appendTo($tbody);
-			$('<td></td>').text(row.mobile_number || '').appendTo($r);
+			$('<td></td>').append(TC_LTR(row.mobile_number)).appendTo($r);
 			const $st = $('<td></td>').appendTo($r);
 			$(`<span class="indicator-pill no-indicator-dot ${TC_STATUS_COLOR[row.status] || 'gray'}"></span>`).text(__(row.status || '')).appendTo($st);
 			$('<td></td>').text(row.custodian_name || row.current_project || __('Unassigned')).appendTo($r);
@@ -323,7 +324,7 @@ class TelecomControl {
 		}
 		this.$drawer.empty();
 		const $head = $('<div style="display:flex;justify-content:space-between;align-items:center;"></div>').appendTo(this.$drawer);
-		$('<h4 style="margin:0;"></h4>').text(detail.mobile_number || detail.name).appendTo($head);
+		$('<h4 style="margin:0;"></h4>').append(TC_LTR(detail.mobile_number || detail.name)).appendTo($head);
 		$('<button class="btn btn-default btn-sm tc-drawer-close">✕</button>')
 			.attr('aria-label', __('Close'))
 			.on('click', () => this._close_drawer())
