@@ -30,7 +30,7 @@
   --ok-bg: color-mix(in srgb, var(--ok) 6%, var(--surface-2)); /* 4.59:1 */
   --info: #1266a0;
   --info-bg: color-mix(in srgb, var(--info) 10%, var(--surface-2)); /* 5.30:1 */
-  --accent-ink: var(--brand-green);
+  --accent-ink: #00713f; /* 4.77:1 on canvas, 5.62:1 on surface; --brand-green is 3.72 and 4.37 */
   --focus: var(--brand-green);
 
   --header-bg: #072b1a;
