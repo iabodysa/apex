@@ -15,10 +15,30 @@ from frappe.utils import getdate, today
 
 class SalisDriver(Document):
     def validate(self):
-        """Warns when the driver's licence has already expired."""
+        """Warns when the driver's licence has already expired, and refuses a hand-written pairing."""
+        self._refuse_a_hand_written_pairing()
         if self.license_expiry and getdate(self.license_expiry) < getdate(today()):
             frappe.msgprint(
                 _("Driver license expired on {0}.").format(self.license_expiry),
                 indicator="orange",
                 title=_("License Expired"),
+            )
+
+    def _refuse_a_hand_written_pairing(self):
+        """The mirror named in this module's docstring, enforced. ``dispatch_board`` reads the
+        driver's side and ``fleet_os_board`` reads the vehicle's, so a half-written pair makes
+        the two boards disagree over who holds what with no Vehicle Assignment behind either.
+        The sanctioned writers all use ``frappe.db.set_value``, which runs no controller method
+        and never reaches here."""
+        if self.is_new():
+            if self.current_vehicle:
+                frappe.throw(
+                    _("The current vehicle is set by assigning the driver, not by typing it here."),
+                    frappe.PermissionError,
+                )
+            return
+        if self.has_value_changed("current_vehicle"):
+            frappe.throw(
+                _("The current vehicle is set by assigning the driver, not by editing it."),
+                frappe.PermissionError,
             )
