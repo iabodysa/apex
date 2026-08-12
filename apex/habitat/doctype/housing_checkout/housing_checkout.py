@@ -89,7 +89,9 @@ def before_submit(doc, method=None):
     is marked Lost/Damaged, or marked Returned with the outstanding quantity
     actually returned. validate() has already auto-fetched the outstanding set, so
     a missing row here means it was deleted after the fetch — still a block."""
-    outstanding = _outstanding_custody_for_employee(doc.employee)
+    outstanding = _outstanding_custody_for_party(
+        doc.party_type, doc.party, doc.employee
+    )
     if not outstanding:
         return
     rows_by_article = {row.article: row for row in (doc.custody_return_items or []) if row.article}
@@ -140,6 +142,33 @@ def _issued_quantities_for_employee(employee):
     return issued
 
 
+def _issued_quantities_for_party(party_type, party, employee=None):
+    """Return issued quantities for either supported resident identity."""
+    if party_type == "Employee" and employee:
+        return _issued_quantities_for_employee(employee)
+    if not party_type or not party:
+        return {}
+    issues = frappe.get_all(
+        "Custody Issue",
+        filters={
+            "party_type": party_type,
+            "party": party,
+            "docstatus": 1,
+        },
+        pluck="name",
+    )
+    if not issues:
+        return {}
+    issued = {}
+    for row in frappe.get_all(
+        "Custody Issue Item",
+        filters={"parent": ["in", issues]},
+        fields=["article", "qty"],
+    ):
+        issued[row.article] = issued.get(row.article, 0) + (row.qty or 0)
+    return issued
+
+
 def _populate_issued_quantities(doc):
     """Stamp each custody-return row's read-only quantity_issued with the total
     quantity of that article issued to the resident employee (the original
@@ -147,7 +176,9 @@ def _populate_issued_quantities(doc):
     unknown."""
     if not doc.custody_return_items:
         return
-    issued = _issued_quantities_for_employee(doc.employee)
+    issued = _issued_quantities_for_party(
+        doc.party_type, doc.party, doc.employee
+    )
     for row in doc.custody_return_items:
         if row.article:
             row.quantity_issued = issued.get(row.article, 0)
@@ -179,12 +210,30 @@ def _outstanding_custody_for_employee(employee):
     return {article: qty for article, qty in outstanding.items() if qty > 0}
 
 
+def _outstanding_custody_for_party(party_type, party, employee=None):
+    """Return canonical held quantities for Employee or Temporary Worker."""
+    if party_type == "Employee" and employee:
+        return _outstanding_custody_for_employee(employee)
+    if not party_type or not party:
+        return {}
+
+    from apex.habitat.api.custody_kiosk import _open_party_custody
+
+    outstanding = {}
+    for line in _open_party_custody(party_type, party):
+        article = line.get("article")
+        outstanding[article] = outstanding.get(article, 0) + (line.get("qty") or 0)
+    return {article: qty for article, qty in outstanding.items() if qty > 0}
+
+
 def _autofetch_outstanding_custody(doc):
     """Add a custody-return row for every article the resident still holds that is
     not already listed, so the checkout starts from the full outstanding set. Rows
     already present (and any user edits to them) are preserved; this only fills
     gaps, so it is safe to re-run on every save."""
-    outstanding = _outstanding_custody_for_employee(doc.employee)
+    outstanding = _outstanding_custody_for_party(
+        doc.party_type, doc.party, doc.employee
+    )
     if not outstanding:
         return
     listed = {row.article for row in (doc.custody_return_items or []) if row.article}

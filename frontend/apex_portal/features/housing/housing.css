@@ -1,0 +1,24 @@
+.feature-page { display: grid; gap: var(--sp-4); }
+.feature-page__header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--sp-3); }
+.feature-page__header h2 { font-size: 1.6rem; }
+.feature-page__list { display: grid; gap: var(--sp-3); padding: 0; margin: 0; list-style: none; }
+.feature-page__list li, .feature-card { display: grid; gap: var(--sp-2); padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
+.feature-page__empty { padding: var(--sp-6); border: 1px dashed var(--border); border-radius: var(--radius); text-align: center; color: var(--muted); }
+.feature-form { display: grid; gap: var(--sp-4); max-inline-size: 680px; }
+.feature-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.feature-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--sp-3); }
+.feature-kpis strong { font-size: 1.8rem; }
+.room-card header, .inventory-row > div { display: flex; justify-content: space-between; gap: var(--sp-2); flex-wrap: wrap; }
+.bed-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: var(--sp-2); }
+.bed-grid a { display: grid; min-block-size: 72px; padding: var(--sp-3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--ink); text-decoration: none; }
+.bed-grid a[data-state="green"] { border-inline-start: 4px solid var(--ok); }
+.bed-grid a[data-state="red"] { border-inline-start: 4px solid var(--danger); }
+.bed-grid a[data-state="orange"], .bed-grid a[data-state="gray"] { border-inline-start: 4px solid var(--warn); }
+.inventory-form, .safety-group { display: grid; gap: var(--sp-3); }
+.inventory-row { grid-template-columns: minmax(160px, 1fr) repeat(3, minmax(120px, .6fr)); align-items: end; }
+.safety-task { grid-template-columns: minmax(200px, 1fr) minmax(150px, .5fr); align-items: start; }
+.safety-evidence { display: block; inline-size: min(100%, 320px); block-size: auto; border-radius: var(--radius-sm); }
+
+@media (max-width: 760px) {
+  .inventory-row, .safety-task { grid-template-columns: 1fr; }
+}

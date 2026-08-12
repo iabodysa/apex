@@ -49,7 +49,6 @@ from apex.apex_core.utils import permission_scope
 PRIVILEGED_ROLES = {
     "System Manager",
     "Accommodation Manager",
-    "Resident Supervisor",
     "Resident Request Coordinator",
 }
 
@@ -443,10 +442,9 @@ def maintenance_request_query(user=None, doctype=None):
     who raised it and the technician it went to — so it is absent from
     ``BUILDING_SCOPE`` and keeps its own fragment and its own ``hooks.py`` entry.
 
-    Returns "" (no restriction) for the Administrator and the privileged oversight
-    roles. Returns "1=0" for Guest, who must see nothing. For every other user the
-    fragment confines the view to the tickets they raised (``owner``) or were assigned
-    (``assigned_to``).
+    Returns "" for the Administrator and oversight roles. Resident Supervisors are
+    confined to their User-Permission buildings. Guest sees nothing. Other users see
+    tickets they raised or were assigned.
 
     NOTE on the ``if_owner`` interaction: when a user's ONLY read on Maintenance
     Request is the universal "All" role's ``if_owner`` DocPerm, Frappe AND-s its own
@@ -459,6 +457,14 @@ def maintenance_request_query(user=None, doctype=None):
     user = _resolve_user(user)
     if user == "Guest":
         return "1=0"
+    roles = set(frappe.get_roles(user))
+    if "Resident Supervisor" in roles and not (
+        roles & {"System Manager", "Accommodation Manager"}
+    ):
+        buildings = _allowed_buildings_for(user, "Maintenance Request")
+        if not buildings:
+            return "1=0"
+        return _fragment("column", {"field": BUILDING}, buildings)
     if _is_privileged(user):
         return ""
 
@@ -469,17 +475,21 @@ def maintenance_request_query(user=None, doctype=None):
 def maintenance_request_has_permission(doc, ptype, user=None):
     """Confine individual Maintenance Request access to its owner/assignee.
 
-    Mirrors ``maintenance_request_query`` for the form view, REST resource and link
-    reads. Returns None to defer to Frappe's default permission resolution for the
-    Administrator and the privileged oversight roles, so their DocPerms govern
-    unwidened. For every other user it returns True only when the user raised the
-    ticket (``owner``) or is its ``assigned_to`` technician, and False otherwise —
-    never exposing a ticket the user neither raised nor was assigned.
+    Mirrors ``maintenance_request_query`` for form, REST, and link reads. Resident
+    Supervisors are confined to their User-Permission buildings; other non-oversight
+    users are confined to tickets they own or are assigned.
 
     This is the ONE handler in this module that returns True: the owner/assignee basis
     is an independent grant, not a narrowing of the building axis.
     """
     user = _resolve_user(user)
+    roles = set(frappe.get_roles(user))
+    if "Resident Supervisor" in roles and not (
+        roles & {"System Manager", "Accommodation Manager"}
+    ):
+        building = getattr(doc, "building", None)
+        allowed = _allowed_buildings_for(user, "Maintenance Request")
+        return bool(building and building in allowed)
     if _is_privileged(user):
         return None
 
