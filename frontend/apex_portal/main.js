@@ -3,6 +3,12 @@ import { FrappeUI } from "frappe-ui";
 import App from "./App.vue";
 import { createPortalRouter, getPortalContext } from "./core/router.js";
 import { parsePortalBootstrap } from "./core/session.js";
+import { configurePortalApi } from "./core/api.js";
+import { registerPortalWorker } from "./core/serviceWorker.js";
+import { createDriverGateway } from "./features/driver/gateway.js";
+import { createTransportSupervisorGateway } from "./features/transport-supervisor/gateway.js";
+import { createWorkerGateway } from "./features/worker/gateway.js";
+import { portalRoutes } from "./routes.js";
 import "./styles/foundation.css";
 
 const CONTEXT_TITLES = Object.freeze({
@@ -26,7 +32,7 @@ function navigationFrom(router) {
 
 export async function mountPortal({
   source = globalThis.window?.apex_portal,
-  routes = [],
+  routes = portalRoutes,
   target = "#app",
 } = {}) {
   const bootstrap = parsePortalBootstrap(source);
@@ -35,12 +41,17 @@ export async function mountPortal({
     context,
     capabilities: bootstrap.capabilities,
     routes,
+    initialRoute: bootstrap.initial_route,
   });
   const application = createApp(App, {
     context,
     title: CONTEXT_TITLES[context.id],
     navigation: navigationFrom(router),
   });
+  const call = configurePortalApi();
+  application.provide("workerGateway", createWorkerGateway(call));
+  application.provide("driverGateway", createDriverGateway(call));
+  application.provide("transportSupervisorGateway", createTransportSupervisorGateway(call));
   application.use(FrappeUI, { socketio: false });
   application.use(router);
 
@@ -48,6 +59,7 @@ export async function mountPortal({
   if (!currentHash || currentHash === "/") await router.replace(bootstrap.initial_route);
   await router.isReady();
   application.mount(target);
+  void registerPortalWorker().catch(() => {});
   return Object.freeze({ application, router, bootstrap, context });
 }
 

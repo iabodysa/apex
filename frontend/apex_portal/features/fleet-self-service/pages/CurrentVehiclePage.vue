@@ -5,6 +5,7 @@ import AsyncPanel from "../components/AsyncPanel.vue";
 import { createFleetSelfResources } from "../api.js";
 const resource = createFleetSelfResources().vehicle;
 const vehicle = computed(() => resource.data?.vehicle || null);
+const canHandover = (globalThis.window?.apex_portal?.capabilities || []).includes("fleet.self.handover");
 onMounted(() => resource.fetch());
 </script>
 <template>
@@ -51,8 +52,8 @@ onMounted(() => resource.fetch());
                     </dd>
                 </div>
             </dl>
-            <RouterLink class="salis-primary-link" to="/vehicle/receipt">تأكيد الاستلام</RouterLink
-            ><RouterLink to="/vehicle/return">إرجاع المركبة</RouterLink>
+            <RouterLink v-if="canHandover" class="salis-primary-link" to="/vehicle/receipt">تأكيد الاستلام</RouterLink
+            ><RouterLink v-if="canHandover" to="/vehicle/return">إرجاع المركبة</RouterLink>
         </article>
     </section>
 </template>

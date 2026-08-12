@@ -1,4 +1,4 @@
-# Copyright (c) 2026, afmcoltd
+# Copyright (c) 2026, Apex contributors
 """Fleet OS supervisor dashboard API (read + live operations).
 
 Backs the ``/fleet-os`` www page, which is the fleet supervisor's single-screen
@@ -12,12 +12,8 @@ fields make a vehicle, how a driver appears on a card, how an incident becomes a
 stolen flag — lives in :mod:`apex.salis.api.fleet_os_board`, so changing what the
 screen shows is one edit in one file.
 
-Route trace (NOT ``/fleet`` — that is the unrelated employee self-service page,
-whose bundle calls ``apex.salis.api.fleet_employee`` only): hooks.py tile
-"apex-fleet-os" -> ``/fleet-os`` -> ``www/fleet-os.html`` ->
-``/assets/apex/fleet_os_portal/assets/index.js``, built from ``frontend/fleet_os``
-(``vite.config.js`` name="fleet_os_portal"), whose ``useFleetBoard`` /
-``useFleetActions`` / ``useDriverAssignment`` composables call this module.
+The `fleet-operations` feature calls this module. The fleet representative feature
+uses `apex.salis.api.fleet_employee` instead.
 
 Every endpoint is permission-gated on ``Salis Vehicle`` and project-scoped
 server-side through the SAME ``_permitted_projects`` resolver the dispatch

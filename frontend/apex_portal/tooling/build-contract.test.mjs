@@ -1,16 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
 import path from "node:path";
 
 const root = process.cwd();
 const read = (name) => readFileSync(path.join(root, name), "utf8");
 
-describe("inactive build contract", () => {
-  it("runs from the root test chain without joining root workspaces", () => {
+describe("unified build contract", () => {
+  it("runs from the root test chain", () => {
     const rootPackage = JSON.parse(readFileSync(path.join(root, "../package.json"), "utf8"));
-    expect(rootPackage.workspaces).not.toContain("apex_portal");
-    expect(rootPackage.scripts.test).toContain("npm test --prefix apex_portal");
+    expect(rootPackage.workspaces).toEqual(["apex_portal"]);
+    expect(rootPackage.scripts.test).toBe("npm test -w apex_portal");
   });
 
   it("has one HTML source, one mount call, one router creation, and one token entry", () => {
@@ -32,7 +31,17 @@ describe("inactive build contract", () => {
     ]) {
       expect(router).toContain(`\"${feature}\"`);
     }
-    expect(readdirSync(root)).not.toContain("features");
+    expect(readdirSync(path.join(root, "features")).sort()).toEqual([
+      "driver", "fleet-operations", "fleet-self-service", "housing", "safety",
+      "transport-supervisor", "worker",
+    ]);
+    const registry = read("routes.js");
+    for (const feature of [
+      "worker", "driver", "housing", "safety", "fleet-self-service",
+      "fleet-operations", "transport-supervisor",
+    ]) {
+      expect(registry).toContain(`features/${feature}/routes.js`);
+    }
   });
 
   it("does not import retired portal or frontend_shared source", () => {
@@ -44,13 +53,4 @@ describe("inactive build contract", () => {
     expect(source).toContain('from "frappe-ui"');
   });
 
-  it("fails closed when verification mode is absent", () => {
-    const result = spawnSync(
-      process.execPath,
-      ["../node_modules/vite/bin/vite.js", "build", "--config", "vite.config.js"],
-      { cwd: root, encoding: "utf8", env: { ...process.env, APEX_PORTAL_REBUILD_VERIFY: "" } },
-    );
-    expect(result.status).not.toBe(0);
-    expect(`${result.stdout}\n${result.stderr}`).toContain("APEX_PORTAL_REBUILD_VERIFY=1");
-  });
 });

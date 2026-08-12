@@ -6,29 +6,8 @@ on:
   pull_request:
     branches: [apex]
 
-# This workflow used to carry a second job, portal-smoke, which provisioned a bench,
-# served the site and opened every portal to prove the SPA actually mounts. It drove a
-# browser harness that is maintainer tooling and no longer ships, so the job went with
-# it: nothing in CI now proves a portal MOUNTS when served, only that its bundle builds
-# (portal-bundles) and that the served/guarded route sets agree (the app's own
-# test_portal_route_coverage). The harness still runs on the maintainer's machine.
-
 jobs:
-  shared-components:
-    # Vitest for the shared portal components (@shared/components/*): IconBase, the
-    # deduped LangToggle / BuildingPicker, and the icons.js geometry registry
-    # invariants. Runs fully in CI (jsdom, no bench) so a change to a shared
-    # component that would break a consuming portal fails here. frontend_shared is a
-    # workspace of the single frontend/ npm workspace but is NOT a portal: it declares
-    # no deps of its own (they live in frontend/package.json) and emits no bundle, so
-    # this job cannot affect the committed portal bundles or the bundle-guard job.
-    #
-    # The step below invokes the frontend workspace root's own `npm test` rather than
-    # `npm test -w frontend_shared`. It used to name the frontend_shared workspace
-    # directly, which meant the per-portal suites the root script also runs were never
-    # executed by CI at all: the job's name is historical, its scope is now every
-    # frontend test the root script knows about. Wire a new suite into that one script
-    # and it is guarded here automatically — there is no second list to keep in sync.
+  portal-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

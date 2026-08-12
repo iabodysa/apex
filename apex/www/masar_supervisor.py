@@ -1,4 +1,4 @@
-# Copyright (c) 2026, afmcoltd
+# Copyright (c) 2026, Apex contributors
 """Masar Route Supervisor portal — served at /masar-supervisor.
 
 The route supervisor is the person who dispatches buses: they approve the Route Plan
@@ -24,47 +24,15 @@ so its controller MUST be ``masar_supervisor.py`` (underscore); a hyphenated
 ``masar-supervisor.py`` is never imported, ``get_context`` never runs, and the page falls
 through to the "no role" branch for EVERY user regardless of their actual roles.
 
-Map tile source — ACCEPTED THIRD-PARTY FETCH
-The live driver map draws its background from tile.openstreetmap.org by default. That
-is a deliberate acceptance, not an oversight: self-hosting or rendering a tile
-pyramid is disproportionate for one supervisor panel, and the executable-code risk that
-forced Leaflet itself to be vendored does not apply here — a tile is a PNG image, not a
-script, so nothing third-party executes with the supervisor's session.
-
-What a tile request discloses, precisely:
-  * the tile path ``/{z}/{x}/{y}.png`` — the map's approximate viewport at tile
-    resolution. The map re-centres on the tracked driver, so this is approximately where
-    an AFMCO vehicle is, to roughly a city block at the zoom levels used;
-  * timing — one burst per pan/zoom, and the position poll runs every 10s while the map
-    tab is open and visible, so the request stream also reveals WHEN a trip is being
-    watched and that the vehicle is moving;
-  * ordinary HTTP metadata — the browser's public IP and User-Agent, plus the site's
-    ORIGIN as Referer (the default strict-origin-when-cross-origin policy trims the path,
-    so ``/masar-supervisor`` itself is not sent).
-
-What it does NOT disclose: no cookie or CSRF token crosses the boundary (a plain
-cross-origin image request carries no credentials), and no employee name, plate, trip id,
-Route Plan or any other Frappe record appears anywhere in a tile URL. The requests do
-originate from an authenticated supervisor session, so the coordinates are attributable
-to this deployment even though no identity is transmitted.
-
-Degradation: the map is never load-bearing. Leaflet missing → a plain coordinate readout;
-tile host unreachable → the driver marker, the live badge, the driver/vehicle strip and
-every other tab still render over a blank canvas, with a note that the background is
-unavailable. Asserted in DriverMap.vue.
-
-A deployment that needs a contracted or self-hosted tile source sets ``apex_map_tile_url``
-(and optionally ``apex_map_tile_attribution``) in site_config.json — no code change. The
-value must be https:// or a root-relative path; anything else is ignored so a
-misconfiguration cannot silently downgrade an https page into blocked mixed content.
+The live map loads the vendored Leaflet runtime and uses OpenStreetMap raster tiles.
+Only tile coordinates and ordinary browser request metadata leave the site; no Frappe
+cookie, token, employee name, plate number, or document identifier is sent. The route
+list remains visible when the background tiles cannot load.
 """
 
 import frappe
-from frappe.sessions import get_csrf_token
-from frappe.utils import cint
-
 from apex.apex_core.utils.portal_language import render_in_arabic
-from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance, guest_redirect
+from apex.apex_core.utils.portal_bootstrap import guest_redirect, publish_portal_context
 
 SUPERVISOR_ROLES = {
     "System Manager",
@@ -72,16 +40,16 @@ SUPERVISOR_ROLES = {
     "Fleet Project Manager",
     "Fleet Supervisor",
 }
-
-
-def map_tile_override(conf) -> dict:
-    """Site-config tile source, or empty to keep the component's OpenStreetMap default.
-    Rejects anything that is not https:// or root-relative — see the module docstring."""
-    url = str(conf.get("apex_map_tile_url") or "").strip()
-    root_relative = url.startswith("/") and not url.startswith("//")
-    if not (url.startswith("https://") or root_relative):
-        return {"url": "", "attribution": ""}
-    return {"url": url, "attribution": str(conf.get("apex_map_tile_attribution") or "").strip()}
+SUPERVISOR_CAPABILITIES = (
+    "transport.request.read",
+    "transport.shift.read",
+    "transport.plan.read",
+    "transport.plan.create",
+    "transport.trip.read",
+    "transport.trip.dispatch",
+    "transport.trip.location.read",
+    "transport.history.read",
+)
 
 
 def has_apps_screen_access() -> bool:
@@ -95,17 +63,13 @@ def get_context(context):
     """Redirects guests to login and bootstraps the route supervisor portal, gated on a role."""
     guest_redirect("/masar-supervisor")
 
-    apply_portal_appearance(context)
     render_in_arabic()
-
-    context.no_cache = 1
-    context.has_supervisor_role = bool(SUPERVISOR_ROLES & set(frappe.get_roles()))
-    if context.has_supervisor_role:
-        context.csrf_token = get_csrf_token()
-        conf = frappe.get_site_config()
-        context.site_name = frappe.local.site
-        context.socketio_port = cint(conf.get("socketio_port")) or 9000
-        context.async_enabled = not cint(conf.get("disable_async"))
-        context.dev_server = 1 if frappe.conf.developer_mode else 0
-        context.map_tiles = map_tile_override(conf)
-    return context
+    allowed = bool(SUPERVISOR_ROLES & set(frappe.get_roles()))
+    return publish_portal_context(
+        context,
+        entry="transport-supervisor",
+        public_path="/masar-supervisor",
+        initial_route="/requests",
+        capabilities=SUPERVISOR_CAPABILITIES if allowed else (),
+        subject=frappe.session.user,
+    )

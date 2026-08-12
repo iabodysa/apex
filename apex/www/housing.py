@@ -17,13 +17,10 @@ second door and imports it rather than keeping a second copy.
 """
 
 import frappe
-from frappe.sessions import get_csrf_token
-from frappe.utils import cint
-
 from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.apex_core.utils.portal_bootstrap import (
-    apply_portal_appearance,
     guest_redirect,
+    publish_portal_context,
 )
 
 HOUSING_ROLES = {
@@ -153,23 +150,21 @@ def bootstrap_portal_context(context, route: str, entry: str):
     guest_redirect(route)
     render_in_arabic()
 
-    context.no_cache = 1
-    apply_portal_appearance(context)
-    context.portal_entry = entry
-    context.has_portal_role = bool(PORTAL_ROLES & set(frappe.get_roles()))
-    if not context.has_portal_role:
-        return context
-
-    context.csrf_token = get_csrf_token()
-    context.portal_sections = portal_sections()
-    context.portal_capabilities = portal_capabilities()
-    context.portal_landing = portal_landing(context.portal_capabilities)
-    conf = frappe.get_site_config()
-    context.site_name = frappe.local.site
-    context.socketio_port = cint(conf.get("socketio_port")) or 9000
-    context.async_enabled = not cint(conf.get("disable_async"))
-    context.dev_server = 1 if frappe.conf.developer_mode else 0
-    return context
+    allowed = bool(PORTAL_ROLES & set(frappe.get_roles()))
+    capability_map = portal_capabilities() if allowed else {}
+    capabilities = [
+        name for name, granted in capability_map.items()
+        if granted is True
+    ]
+    initial_route = "/rounds" if route == "/safety" else portal_landing(capability_map)
+    return publish_portal_context(
+        context,
+        entry="housing",
+        public_path=route,
+        initial_route=initial_route,
+        capabilities=capabilities,
+        subject=frappe.session.user,
+    )
 
 
 def get_context(context):

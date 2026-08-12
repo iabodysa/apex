@@ -30,13 +30,13 @@ export const PORTAL_CONTEXTS = Object.freeze({
     id: "driver", publicPaths: ["/driver/"], features: ["driver"], shell: "mobile", landing: "/today",
   }),
   "transport-supervisor": context({
-    id: "transport-supervisor", publicPaths: ["/masar-supervisor"], features: ["transport-supervisor"], shell: "operations", landing: "/board",
+    id: "transport-supervisor", publicPaths: ["/masar-supervisor"], features: ["transport-supervisor"], shell: "operations", landing: "/requests",
   }),
   "fleet-self-service": context({
     id: "fleet-self-service", publicPaths: ["/fleet"], features: ["fleet-self-service"], shell: "mobile", landing: "/vehicle",
   }),
   "fleet-operations": context({
-    id: "fleet-operations", publicPaths: ["/fleet-os"], features: ["fleet-operations"], shell: "operations", landing: "/board",
+    id: "fleet-operations", publicPaths: ["/fleet-os"], features: ["fleet-operations"], shell: "operations", landing: "/",
   }),
   housing: context({
     id: "housing", publicPaths: ["/housing", "/safety"], features: ["housing", "safety"], shell: "operations", landing: "/overview",
@@ -49,14 +49,22 @@ export function getPortalContext(entry) {
   return portalContext;
 }
 
-export function createPortalRouter({ context: activeContext, capabilities, routes, history }) {
+export function createPortalRouter({
+  context: activeContext,
+  capabilities,
+  routes,
+  initialRoute = activeContext.landing,
+  history,
+}) {
   const eligible = routes.filter((route) => activeContext.features.includes(route.feature));
   const deniedPaths = new Set(
     eligible.filter((route) => !can(route.capability, capabilities)).map((route) => route.path),
   );
   const granted = eligible.filter((route) => can(route.capability, capabilities));
-  const landing = granted.some((route) => route.path === activeContext.landing)
-    ? activeContext.landing
+  const landing = granted.some((route) => route.path === initialRoute)
+    ? initialRoute
+    : granted.some((route) => route.path === activeContext.landing)
+      ? activeContext.landing
     : "/access-denied";
 
   return createRouter({

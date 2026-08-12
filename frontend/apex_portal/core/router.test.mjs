@@ -65,4 +65,17 @@ describe("portal router", () => {
     await router.isReady();
     expect(router.currentRoute.value.path).toBe("/home");
   });
+
+  it("uses a granted server-selected initial route", async () => {
+    const router = createPortalRouter({
+      context: getPortalContext("worker"),
+      capabilities: ["worker.home", "worker.request.read"],
+      routes,
+      initialRoute: "/requests",
+      history: createMemoryHistory(),
+    });
+    await router.push("/unknown");
+    await router.isReady();
+    expect(router.currentRoute.value.path).toBe("/requests");
+  });
 });

@@ -25,6 +25,16 @@ describe("Salis representative feature", () => {
         (route) => route.feature === "fleet-self-service",
       ),
     ).toBe(true);
+    const capabilities = Object.fromEntries(
+      createFleetSelfRoutes().map((route) => [route.path, route.capability]),
+    );
+    expect(capabilities).toMatchObject({
+      "/fuel": "fleet.self.fuel",
+      "/incidents": "fleet.self.incident",
+      "/complaints": "fleet.self.complaint",
+      "/complaints/:name": "fleet.self.complaint",
+      "/vehicle/receipt": "fleet.self.handover",
+    });
   });
 
   it("binds every write to the session-derived Salis API", () => {

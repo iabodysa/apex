@@ -2,6 +2,8 @@
 import { FeatherIcon } from "frappe-ui";
 import { ar } from "../i18n/ar.js";
 
+const reverseBrandMark = "/assets/apex/icons/brand/apex-mark-reverse.svg";
+
 defineProps({
   title: { type: String, required: true },
   navigation: { type: Array, default: () => [] },
@@ -12,7 +14,10 @@ defineProps({
   <div class="mobile-shell">
     <a class="skip-link" href="#portal-content">{{ ar.skipToContent }}</a>
     <header class="mobile-shell__header">
-      <h1 class="mobile-shell__title">{{ title }}</h1>
+      <div class="portal-brand-lockup">
+        <img class="portal-brand-mark" :src="reverseBrandMark" alt="" />
+        <h1 class="mobile-shell__title">{{ title }}</h1>
+      </div>
       <div class="mobile-shell__actions"><slot name="actions" /></div>
     </header>
     <main id="portal-content" class="mobile-shell__main" tabindex="-1">

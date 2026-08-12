@@ -1,9 +1,0 @@
-{
-  "name": "frontend_shared",
-  "private": true,
-  "type": "module",
-  "description": "Dev-only test harness for the shared portal components/runtime. NOT a portal: the six *_portal builds import these source files via the @shared alias and emit no bundle from here. Its test deps (vitest, jsdom, @vue/test-utils) are declared once in the workspace root frontend/package.json, like every other frontend dep. Run `npm ci` at frontend/, then `npm test -w frontend_shared`.",
-  "scripts": {
-    "test": "vitest run && node --test driver-storage.security.test.mjs driver-tickets-pagination.security.test.mjs sw.security.test.mjs statusVocabularies.test.mjs sharedMessages.test.mjs && node sw.generate.js --check"
-  }
-}

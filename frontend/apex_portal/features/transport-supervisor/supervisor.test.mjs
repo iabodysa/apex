@@ -27,6 +27,12 @@ describe("Masar transport supervisor feature", () => {
     expect(supervisorRedirects[2].redirect({ params: { name: "RP-1" } })).toBe("/plans/RP-1");
   });
 
+  it("keeps the live map on its specialized map component", () => {
+    const mapRoute = supervisorRoutes.find((route) => route.path === "/map");
+    expect(mapRoute.component.__name).toBe("TransportMapPage");
+    expect(mapRoute.meta.navigation).toBe(true);
+  });
+
   it("uses workflow actions instead of parallel supervisor approval fields", async () => {
     const call = vi.fn().mockResolvedValue({ message: { status: "Validated" } });
     const gateway = createTransportSupervisorGateway(call);

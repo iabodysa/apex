@@ -11,7 +11,7 @@ one apex while the negative space remains an open gateway. It expresses the
 product promise: many moving parts, one clear outcome.
 
 The palette is unchanged from the shipped
-[`tokens.css`](../../frontend/frontend_shared/tokens.css). This source link is
+[`tokens.css`](../../frontend/apex_portal/styles/tokens.css). This source link is
 intentional: the runtime token file, not a copied document, is authoritative.
 Forest and warm canvas carry most of the visual weight; green signals action;
 mint marks progress and focus.
@@ -45,7 +45,7 @@ reviewable implementation step.
 This guide explains intent and use. Portal code continues to follow the
 [portal implementation contract](portal-design.md), the shipped token file,
 and the source-adjacent
-[`CONTRACTS.md`](../../frontend/frontend_shared/CONTRACTS.md). Component API
+[`CONTRACTS.md`](../../frontend/apex_portal/CONTRACTS.md). Component API
 contracts stay beside the Vue source so code and contract change together.
 When prose and code disagree, inspect the live code and update both in one
 scoped change.

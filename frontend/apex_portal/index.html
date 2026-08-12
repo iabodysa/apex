@@ -3,13 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#00844e" />
+    <meta name="theme-color" content="{{ shell_meta.theme_color }}" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="canonical" href="{{ shell_meta.canonical_path }}" />
+    {% if shell_meta.manifest_url %}<link rel="manifest" href="{{ shell_meta.manifest_url }}" />{% endif %}
+    {% if shell_meta.apple_icon_url %}<link rel="apple-touch-icon" sizes="180x180" href="{{ shell_meta.apple_icon_url }}" />{% endif %}
     <link rel="stylesheet" href="/assets/apex/vendor/thmanyah-v1/thmanyah.css" />
-    <title>Apex Portal</title>
+    <title>{{ shell_meta.title }}</title>
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      window.csrf_token = {{ csrf_token | tojson }};
+      window.apex_portal_shell = {{ shell_meta | tojson }};
+    </script>
     <script type="module" src="/main.js"></script>
   </body>
 </html>

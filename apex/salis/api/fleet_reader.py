@@ -13,12 +13,8 @@ different surfaces:
     desk Page board, which needs the card/table shape (``current_driver_name``/
     ``open_incidents`` + a status ``summary``).
 
-Route trace for the SPA half, read off the built bundles rather than assumed:
-``www/fleet-os.html`` loads ``/assets/apex/fleet_os_portal/assets/index.js``, and
-that bundle is the only one referencing ``apex.salis.api.fleet_os``, which imports
-this module. The ``/fleet`` bundle (``fleet_portal``) references
-``apex.salis.api.fleet_employee`` alone, so nothing here reaches ``/fleet``. The
-desk half has no bundle at all — ``operations-control`` is a Desk Page.
+The `fleet-operations` feature reaches this module through `fleet_os`; the fleet
+representative feature uses `fleet_employee`. The Desk board has no portal bundle.
 
 This module owns the SHARED half: the project-scope resolution and the bounded,
 N+1-free base ``Salis Vehicle`` query, plus the driver-name enrichment both

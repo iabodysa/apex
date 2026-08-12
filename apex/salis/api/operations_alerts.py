@@ -2,10 +2,7 @@
 """Operations-queue action API (read the open queue + act on its rows), for the
 operations-control board and the /fleet-os alert drawer.
 
-Route trace: the alert drawer is a ``frontend/fleet_os`` composable
-(``useAlerts.js``), built into ``fleet_os_portal``, which ``www/fleet-os.html``
-loads — so the drawer is on ``/fleet-os``, NOT on ``/fleet`` (that bundle
-references ``apex.salis.api.fleet_employee`` only).
+The fleet operations feature uses this queue; fleet self-service does not.
 
 The queue's rows are Fleet Supervisor assignments (ToDos carrying
 reference_type/reference_name) rendered by ``assignment_queue`` in the row shape

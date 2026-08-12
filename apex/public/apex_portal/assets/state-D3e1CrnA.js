@@ -1,0 +1,1 @@
+function i(){const e=new Map;return(r,s)=>{if(e.has(r))return e.get(r);let t;try{t=s()}catch(c){t=Promise.reject(c)}const n=Promise.resolve(t).finally(()=>e.delete(r));return e.set(r,n),n}}export{i as c};

@@ -114,6 +114,19 @@ h3 {
   color: var(--surface-2);
 }
 
+.portal-brand-lockup,
+.operations-shell__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.portal-brand-mark {
+  inline-size: 44px;
+  block-size: 44px;
+  flex: 0 0 auto;
+}
+
 .mobile-shell__title {
   font-size: clamp(1.75rem, 8vw, 2.5rem);
   line-height: 1.05;

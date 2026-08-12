@@ -1,16 +1,19 @@
-import AdditionalFuelRequestPage from "./pages/AdditionalFuelRequestPage.vue";
-import ComplaintCreatePage from "./pages/ComplaintCreatePage.vue";
-import ComplaintDetailPage from "./pages/ComplaintDetailPage.vue";
-import FuelQuotaPage from "./pages/FuelQuotaPage.vue";
-import FuelRequestPage from "./pages/FuelRequestPage.vue";
-import IncidentReportPage from "./pages/IncidentReportPage.vue";
-import CurrentVehiclePage from "./pages/CurrentVehiclePage.vue";
-import RepresentativeComplaintsPage from "./pages/RepresentativeComplaintsPage.vue";
-import RepresentativeHomePage from "./pages/RepresentativeHomePage.vue";
-import RepresentativeIncidentsPage from "./pages/RepresentativeIncidentsPage.vue";
-import VehicleReceiptPage from "./pages/VehicleReceiptPage.vue";
-import VehicleReturnPage from "./pages/VehicleReturnPage.vue";
 import "./styles.css";
+
+const pages = Object.freeze({
+    home: () => import("./pages/RepresentativeHomePage.vue"),
+    vehicle: () => import("./pages/CurrentVehiclePage.vue"),
+    receipt: () => import("./pages/VehicleReceiptPage.vue"),
+    vehicleReturn: () => import("./pages/VehicleReturnPage.vue"),
+    quota: () => import("./pages/FuelQuotaPage.vue"),
+    fuel: () => import("./pages/FuelRequestPage.vue"),
+    additionalFuel: () => import("./pages/AdditionalFuelRequestPage.vue"),
+    incidents: () => import("./pages/RepresentativeIncidentsPage.vue"),
+    incident: () => import("./pages/IncidentReportPage.vue"),
+    complaints: () => import("./pages/RepresentativeComplaintsPage.vue"),
+    complaintCreate: () => import("./pages/ComplaintCreatePage.vue"),
+    complaint: () => import("./pages/ComplaintDetailPage.vue"),
+});
 
 const route = (path, name, label, icon, component, capability = "fleet.self.read") =>
     Object.freeze({
@@ -28,14 +31,14 @@ const route = (path, name, label, icon, component, capability = "fleet.self.read
 
 export function createFleetSelfRoutes() {
     return Object.freeze([
-        route("/", "representative-home", "الرئيسية", "home", RepresentativeHomePage),
-        route("/vehicle", "current-vehicle", "المركبة", "truck", CurrentVehiclePage),
+        route("/", "representative-home", "الرئيسية", "home", pages.home),
+        route("/vehicle", "current-vehicle", "المركبة", "truck", pages.vehicle),
         route(
             "/vehicle/receipt",
             "vehicle-receipt",
             "استلام المركبة",
             "clipboard-check",
-            VehicleReceiptPage,
+            pages.receipt,
             "fleet.self.handover",
         ),
         route(
@@ -43,16 +46,16 @@ export function createFleetSelfRoutes() {
             "vehicle-return",
             "إرجاع المركبة",
             "undo-2",
-            VehicleReturnPage,
+            pages.vehicleReturn,
             "fleet.self.handover",
         ),
-        route("/fuel", "fuel-quota", "الوقود", "fuel", FuelQuotaPage),
+        route("/fuel", "fuel-quota", "الوقود", "fuel", pages.quota, "fleet.self.fuel"),
         route(
             "/fuel/request",
             "fuel-request",
             "طلب وقود",
             "plus",
-            FuelRequestPage,
+            pages.fuel,
             "fleet.self.fuel",
         ),
         route(
@@ -60,7 +63,7 @@ export function createFleetSelfRoutes() {
             "additional-fuel",
             "زيادة الوقود",
             "gauge",
-            AdditionalFuelRequestPage,
+            pages.additionalFuel,
             "fleet.self.fuel",
         ),
         route(
@@ -68,14 +71,15 @@ export function createFleetSelfRoutes() {
             "representative-incidents",
             "الحوادث",
             "triangle-alert",
-            RepresentativeIncidentsPage,
+            pages.incidents,
+            "fleet.self.incident",
         ),
         route(
             "/incidents/new",
             "incident-report",
             "بلاغ حادث",
             "file-warning",
-            IncidentReportPage,
+            pages.incident,
             "fleet.self.incident",
         ),
         route(
@@ -83,14 +87,15 @@ export function createFleetSelfRoutes() {
             "representative-complaints",
             "البلاغات",
             "messages-square",
-            RepresentativeComplaintsPage,
+            pages.complaints,
+            "fleet.self.complaint",
         ),
         route(
             "/complaints/new",
             "complaint-create",
             "بلاغ جديد",
             "message-square-plus",
-            ComplaintCreatePage,
+            pages.complaintCreate,
             "fleet.self.complaint",
         ),
         route(
@@ -98,7 +103,8 @@ export function createFleetSelfRoutes() {
             "complaint-detail",
             "تفاصيل البلاغ",
             "message-square",
-            ComplaintDetailPage,
+            pages.complaint,
+            "fleet.self.complaint",
         ),
     ]);
 }

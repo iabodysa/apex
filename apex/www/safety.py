@@ -1,4 +1,4 @@
-# Copyright (c) 2026, afmcoltd
+# Copyright (c) 2026, Apex contributors
 """The merged Habitat portal's second door, served at /safety.
 
 /safety and /housing are one application. This module exists so the safety bookmark,

@@ -1,5 +1,6 @@
 import SupervisorPage from "./SupervisorPage.vue";
 import RoutePlanForm from "./RoutePlanForm.vue";
+import TransportMapPage from "./TransportMapPage.vue";
 import "../worker/masar.css";
 
 const page = (path, name, capability, label, icon, gateway, view = {}) => ({
@@ -15,7 +16,7 @@ export const supervisorRoutes = Object.freeze([
   page("/plans/:name", "transport-plan-detail", "transport.plan.read", "تفاصيل الخطة", "map-pin", "plan", { fields: [{ key: "route_name", label: "المسار" }, { key: "shift", label: "الشفت" }, { key: "driver", label: "السائق" }] }),
   page("/trips", "dispatch-trips", "transport.trip.read", "الرحلات", "navigation", "trips", { collections: ["trips"] }),
   page("/trips/:name", "dispatch-trip-control", "transport.trip.dispatch", "تشغيل الرحلة", "play-circle", "trip", { fields: [{ key: "status", label: "الحالة" }, { key: "vehicle", label: "المركبة" }, { key: "driver", label: "السائق" }] }),
-  page("/map", "live-trips-map", "transport.trip.location.read", "الخريطة", "map-pin", "map", { collections: ["items"] }),
+  { path: "/map", name: "live-trips-map", feature: "transport-supervisor", capability: "transport.trip.location.read", component: TransportMapPage, meta: { navigation: true, label: "الخريطة", icon: "map-pin" } },
   page("/history", "movement-history", "transport.history.read", "سجل الحركة", "clock", "history", { collections: ["items"] }),
 ]);
 

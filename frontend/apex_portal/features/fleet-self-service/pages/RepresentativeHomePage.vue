@@ -5,6 +5,8 @@ import { createFleetSelfResources } from "../api.js";
 import AsyncPanel from "../components/AsyncPanel.vue";
 const resources = createFleetSelfResources();
 const context = computed(() => resources.context.data || {});
+const grants = new Set(globalThis.window?.apex_portal?.capabilities || []);
+const can = (capability) => grants.has(capability);
 onMounted(() => resources.context.fetch());
 </script>
 <template>
@@ -43,11 +45,11 @@ onMounted(() => resources.context.fetch());
             <div class="salis-metrics">
                 <RouterLink class="salis-metric" to="/vehicle"
                     ><strong>مركبتي</strong><span>الاستلام والإرجاع</span></RouterLink
-                ><RouterLink class="salis-metric" to="/fuel"
+                ><RouterLink v-if="can('fleet.self.fuel')" class="salis-metric" to="/fuel"
                     ><strong>الوقود</strong><span>الرصيد والطلبات</span></RouterLink
-                ><RouterLink class="salis-metric" to="/incidents"
+                ><RouterLink v-if="can('fleet.self.incident')" class="salis-metric" to="/incidents"
                     ><strong>الحوادث</strong><span>بلاغاتك السابقة</span></RouterLink
-                ><RouterLink class="salis-metric" to="/complaints"
+                ><RouterLink v-if="can('fleet.self.complaint')" class="salis-metric" to="/complaints"
                     ><strong>البلاغات</strong><span>المتابعة والردود</span></RouterLink
                 >
             </div>

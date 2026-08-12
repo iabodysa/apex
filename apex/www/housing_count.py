@@ -1,4 +1,4 @@
-# Copyright (c) 2026, afmcoltd
+# Copyright (c) 2026, Apex contributors
 """Legacy Housing Inventory count portal served at /housing-count.
 Now redirects to the unified /housing SPA.
 

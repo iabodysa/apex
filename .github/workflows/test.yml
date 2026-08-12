@@ -106,13 +106,6 @@ jobs:
           fi
           echo "no internal/experimental files tracked"
 
-      # Dependency-free node unit tests for the worker/Masar pure helpers.
-      - name: Worker-portal phone normaliser unit test
-        run: node frontend/worker/phone.test.mjs
-
-      - name: Worker-portal QR colour unit test
-        run: node frontend/worker/qrColor.test.mjs
-
   # The former `spa-lockfiles` matrix (one `npm ci` per portal lockfile) is gone:
   # frontend/ is a single npm workspace with one frontend/package-lock.json, and the
   # portal-bundles `bundle-guard` job already runs `npm ci` from that frozen lockfile

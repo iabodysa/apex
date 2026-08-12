@@ -1,9 +1,0 @@
-{
-  "name": "route_supervisor_portal",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build"
-  }
-}

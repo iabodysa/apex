@@ -1,4 +1,4 @@
-# Copyright (c) 2026, afmcoltd
+# Copyright (c) 2026, Apex contributors
 """Salis Driver portal — mobile SPA shell served at /driver.
 
 Drivers are NOT Frappe users (full barcode cutover): a driver opens their PERSONAL
@@ -15,14 +15,12 @@ The CSRF token is exposed so the guest SPA's whitelisted POSTs pass Frappe's CSR
 import re
 
 import frappe
-from frappe.sessions import get_csrf_token
-from frappe.utils import cint
 
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     DRIVER_TOKEN_COOKIE,
     resolve_driver_token,
 )
-from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance
+from apex.apex_core.utils.portal_bootstrap import publish_portal_context
 from apex.apex_core.utils.portal_language import render_in_arabic
 
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
@@ -30,12 +28,20 @@ _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 _COOKIE_MAX_AGE_SECONDS = 180 * 24 * 60 * 60
 DRIVER_LINK_DEAD_COOKIE = "driver_link_dead"
 _LINK_DEAD_MAX_AGE_SECONDS = 5 * 60
+DRIVER_CAPABILITIES = (
+    "driver.today",
+    "driver.profile.read",
+    "driver.employee.accommodation.read",
+    "driver.employee.custody.read",
+    "driver.employee.request.read",
+    "driver.trip.execute",
+    "driver.trip.read",
+)
 
 
 def get_context(context):
     """Validates a driver token in the URL, cookies it and redirects, or bootstraps the guest SPA."""
     context.no_cache = 1
-    context.csrf_token = get_csrf_token()
 
     query_token_supplied = "d" in frappe.form_dict
     raw_token = frappe.form_dict.get("d") or ""
@@ -52,23 +58,19 @@ def get_context(context):
 
     render_in_arabic()
 
-    conf = frappe.get_site_config()
-    context.site_name = frappe.local.site
-    context.socketio_port = cint(conf.get("socketio_port")) or 9000
-    context.async_enabled = not cint(conf.get("disable_async"))
-    context.dev_server = 1 if frappe.conf.developer_mode else 0
-
     cookie_token = _request_token_cookie()
-    cookie_is_live = bool(cookie_token) and _token_resolves(cookie_token)
-    context.driver_has_token = cookie_is_live
-    context.driver_link_dead = _consume_dead_link_marker() or (
-        bool(cookie_token) and not cookie_is_live
-    )
-    if cookie_token and not cookie_is_live:
+    subject = _resolve_token_subject(cookie_token) if cookie_token else None
+    _consume_dead_link_marker()
+    if cookie_token and not subject:
         _delete_cookie(DRIVER_TOKEN_COOKIE)
-
-    apply_portal_appearance(context)
-    return context
+    return publish_portal_context(
+        context,
+        entry="driver",
+        public_path="/driver/",
+        initial_route="/today",
+        capabilities=DRIVER_CAPABILITIES if subject else (),
+        subject=subject,
+    )
 
 
 def _token_resolves(token: str) -> bool:
@@ -77,6 +79,13 @@ def _token_resolves(token: str) -> bool:
         return bool(resolve_driver_token(token))
     except frappe.PermissionError:
         return False
+
+
+def _resolve_token_subject(token: str) -> str | None:
+    try:
+        return resolve_driver_token(token)
+    except frappe.PermissionError:
+        return None
 
 
 def _set_token_cookie(token: str) -> None:

@@ -1,9 +1,5 @@
-# Copyright (c) 2026, afmcoltd
-"""Fleet OS supervisor board — preserved BACKUP served at /fleet-os.
-
-This is the untouched supervisor dashboard that used to live at /fleet. When
-/fleet became the employee self-service page, the full board was kept alive here
-as a fallback (bundle: fleet_os_portal) until the owner decides to retire it.
+# Copyright (c) 2026, Apex contributors
+"""Fleet operations supervisor board served at /fleet-os.
 
 Controller shape follows fleet.py (same FLEET_ROLES constant, same CSRF + socket
 bootstrap), but the GATES now differ: this board still requires a fleet role,
@@ -12,18 +8,13 @@ redirect target and served bundle differ too. The route is hyphenated (/fleet-os
 via www/fleet-os.html) while THIS module is underscored so it is importable — a
 hyphenated .py never imports.
 
-Route trace: hooks.py tile "apex-fleet-os" (route /fleet-os) -> www/fleet-os.html
--> /assets/apex/fleet_os_portal/assets/index.js, built from frontend/fleet_os
-(vite.config.js name="fleet_os_portal"), whose composables call
-apex.salis.api.fleet_os.
+Route trace: hooks.py tile `apex-fleet-os` -> `www/fleet-os.html` -> generated
+`apex_portal` shell -> `fleet-operations` feature.
 """
 
 import frappe
-from frappe.sessions import get_csrf_token
-from frappe.utils import cint
-
 from apex.apex_core.utils.portal_language import render_in_arabic
-from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance, guest_redirect
+from apex.apex_core.utils.portal_bootstrap import guest_redirect, publish_portal_context
 
 FLEET_ROLES = {
     "System Manager",
@@ -44,17 +35,18 @@ def get_context(context):
     """Redirects guests to login and bootstraps the fleet supervisor board, gated on a fleet role."""
     guest_redirect("/fleet-os")
 
-    apply_portal_appearance(context)
     render_in_arabic()
-
-    context.no_cache = 1
-    context.has_fleet_role = bool(FLEET_ROLES & set(frappe.get_roles()))
-    if context.has_fleet_role:
-        context.fleet_caps = {"driver_lens": context.has_fleet_role}
-        context.csrf_token = get_csrf_token()
-        conf = frappe.get_site_config()
-        context.site_name = frappe.local.site
-        context.socketio_port = cint(conf.get("socketio_port")) or 9000
-        context.async_enabled = not cint(conf.get("disable_async"))
-        context.dev_server = 1 if frappe.conf.developer_mode else 0
-    return context
+    allowed = bool(FLEET_ROLES & set(frappe.get_roles())) and bool(
+        frappe.has_permission("Salis Vehicle", "read")
+    )
+    grants = ["fleet.operations.read"] if allowed else []
+    if allowed and frappe.has_permission("Fuel Request", "write"):
+        grants.append("fleet.operations.fuel")
+    return publish_portal_context(
+        context,
+        entry="fleet-operations",
+        public_path="/fleet-os",
+        initial_route="/",
+        capabilities=grants,
+        subject=frappe.session.user,
+    )

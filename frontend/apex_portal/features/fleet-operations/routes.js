@@ -1,15 +1,17 @@
-import AssignmentQueuePage from "./pages/AssignmentQueuePage.vue";
-import FuelApprovalQueuePage from "./pages/FuelApprovalQueuePage.vue";
-import HandoverQueuePage from "./pages/HandoverQueuePage.vue";
-import IncidentDetailPage from "./pages/IncidentDetailPage.vue";
-import IncidentQueuePage from "./pages/IncidentQueuePage.vue";
-import ProblemDetailPage from "./pages/ProblemDetailPage.vue";
-import ProblemQueuePage from "./pages/ProblemQueuePage.vue";
-import ReturnQueuePage from "./pages/ReturnQueuePage.vue";
-import SupervisorOverviewPage from "./pages/SupervisorOverviewPage.vue";
-import VehicleBoardPage from "./pages/VehicleBoardPage.vue";
-import VehicleWorkspacePage from "./pages/VehicleWorkspacePage.vue";
 import "./styles.css";
+const pages = Object.freeze({
+    overview: () => import("./pages/SupervisorOverviewPage.vue"),
+    vehicles: () => import("./pages/VehicleBoardPage.vue"),
+    vehicle: () => import("./pages/VehicleWorkspacePage.vue"),
+    assignments: () => import("./pages/AssignmentQueuePage.vue"),
+    handovers: () => import("./pages/HandoverQueuePage.vue"),
+    returns: () => import("./pages/ReturnQueuePage.vue"),
+    fuel: () => import("./pages/FuelApprovalQueuePage.vue"),
+    incidents: () => import("./pages/IncidentQueuePage.vue"),
+    incident: () => import("./pages/IncidentDetailPage.vue"),
+    problems: () => import("./pages/ProblemQueuePage.vue"),
+    problem: () => import("./pages/ProblemDetailPage.vue"),
+});
 const nav = new Set([
     "/",
     "/vehicles",
@@ -33,47 +35,47 @@ const route = (path, name, label, icon, component, capability = "fleet.operation
     });
 export function createFleetOperationsRoutes() {
     return Object.freeze([
-        route("/", "supervisor-overview", "نظرة عامة", "layout-dashboard", SupervisorOverviewPage),
-        route("/vehicles", "vehicle-board", "المركبات", "truck", VehicleBoardPage),
+        route("/", "supervisor-overview", "نظرة عامة", "layout-dashboard", pages.overview),
+        route("/vehicles", "vehicle-board", "المركبات", "truck", pages.vehicles),
         route(
             "/vehicles/:vehicle",
             "vehicle-workspace",
             "مساحة المركبة",
             "panel-right",
-            VehicleWorkspacePage,
+            pages.vehicle,
         ),
         route(
             "/assignments",
             "assignment-queue",
             "الإسناد",
             "user-round-check",
-            AssignmentQueuePage,
+            pages.assignments,
         ),
-        route("/handovers", "handover-queue", "الاستلام", "clipboard-check", HandoverQueuePage),
-        route("/returns", "return-queue", "الإرجاع", "undo-2", ReturnQueuePage),
+        route("/handovers", "handover-queue", "الاستلام", "clipboard-check", pages.handovers),
+        route("/returns", "return-queue", "الإرجاع", "undo-2", pages.returns),
         route(
             "/fuel-approvals",
             "fuel-approval-queue",
             "اعتماد الوقود",
             "fuel",
-            FuelApprovalQueuePage,
+            pages.fuel,
             "fleet.operations.fuel",
         ),
-        route("/incidents", "incident-queue", "الحوادث", "triangle-alert", IncidentQueuePage),
+        route("/incidents", "incident-queue", "الحوادث", "triangle-alert", pages.incidents),
         route(
             "/incidents/:name",
             "incident-detail",
             "تفاصيل الحادث",
             "file-warning",
-            IncidentDetailPage,
+            pages.incident,
         ),
-        route("/problems", "problem-queue", "المشكلات", "messages-square", ProblemQueuePage),
+        route("/problems", "problem-queue", "المشكلات", "messages-square", pages.problems),
         route(
             "/problems/:name",
             "problem-detail",
             "تفاصيل المشكلة",
             "message-square",
-            ProblemDetailPage,
+            pages.problem,
         ),
     ]);
 }

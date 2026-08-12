@@ -2,6 +2,8 @@
 import { FeatherIcon } from "frappe-ui";
 import { ar } from "../i18n/ar.js";
 
+const brandMark = "/assets/apex/icons/brand/apex-mark.svg";
+
 defineProps({
   title: { type: String, required: true },
   navigation: { type: Array, default: () => [] },
@@ -12,7 +14,10 @@ defineProps({
   <div class="operations-shell">
     <a class="skip-link" href="#portal-content">{{ ar.skipToContent }}</a>
     <aside class="operations-shell__rail">
-      <div class="operations-shell__brand">{{ ar.brandName }}</div>
+      <div class="operations-shell__brand">
+        <img class="portal-brand-mark" :src="brandMark" alt="" />
+        <span>{{ ar.brandName }}</span>
+      </div>
       <nav v-if="navigation.length" class="operations-shell__nav" :aria-label="ar.primaryNavigation">
         <RouterLink
           v-for="item in navigation"

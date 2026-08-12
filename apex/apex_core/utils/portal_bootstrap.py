@@ -10,14 +10,13 @@ This module does not validate credentials, grant capabilities, or mint CSRF toke
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import re
 
 import frappe
-
-from apex.salis.doctype.driver_portal_theme.driver_portal_theme import (
-    get_portal_appearance,
-)
-
+from frappe.sessions import get_csrf_token
+from frappe.utils import cint
 
 PORTAL_PUBLIC_PATHS = {
     "worker": frozenset({"/masar/"}),
@@ -39,17 +38,17 @@ _PORTAL_TITLES = {
 
 _PWA_META = {
     "worker": {
-        "manifest_url": "/assets/apex/worker_portal/manifest.webmanifest",
+        "manifest_url": "/assets/apex/apex_portal/manifests/masar.webmanifest",
         "apple_icon_url": (
-            "/assets/apex/worker_portal/icons/masar-apple-touch-icon-180.png"
+            "/assets/apex/apex_portal/icons/masar-apple-touch-icon-180.png"
         ),
         "service_worker_url": "/masar-sw.min.js",
         "service_worker_scope": "/masar/",
     },
     "driver": {
-        "manifest_url": "/assets/apex/worker_portal/driver.webmanifest",
+        "manifest_url": "/assets/apex/apex_portal/manifests/driver.webmanifest",
         "apple_icon_url": (
-            "/assets/apex/worker_portal/icons/driver-apple-touch-icon-180.png"
+            "/assets/apex/apex_portal/icons/driver-apple-touch-icon-180.png"
         ),
         "service_worker_url": "/driver-sw.min.js",
         "service_worker_scope": "/driver/",
@@ -116,15 +115,50 @@ def build_portal_shell_meta(*, entry: str, public_path: str) -> dict:
     }
 
 
-def apply_portal_appearance(context) -> None:
-    """Project portal brand overrides onto ``context``.
+def opaque_subject_scope(*, entry: str, subject: str | None) -> str:
+    """Return a stable client storage namespace without exposing the subject."""
+    _validate_entry_path(entry, next(iter(PORTAL_PUBLIC_PATHS[entry])))
+    material = "\x1f".join(
+        (frappe.local.site or "site", entry, subject or "unauthenticated")
+    ).encode()
+    encryption_key = frappe.get_site_config().get("encryption_key")
+    if not encryption_key:
+        raise RuntimeError("Site encryption_key is required for portal subject scope")
+    digest = hmac.new(str(encryption_key).encode(), material, hashlib.sha256).hexdigest()
+    return f"scope_{digest[:24]}"
 
-	Sets ``portal_accent`` / ``portal_logo`` / ``portal_show_brand``.
-	"""
-    appearance = get_portal_appearance()
-    context.portal_accent = appearance["accent"]
-    context.portal_logo = appearance["logo"]
-    context.portal_show_brand = appearance["show_brand"]
+
+def publish_portal_context(
+    context,
+    *,
+    entry: str,
+    public_path: str,
+    initial_route: str,
+    capabilities,
+    subject: str | None,
+):
+    """Publish the shared shell contract after its route authenticated the caller."""
+    conf = frappe.get_site_config()
+    context.no_cache = 1
+    context.csrf_token = get_csrf_token()
+    context.shell_meta = build_portal_shell_meta(
+        entry=entry,
+        public_path=public_path,
+    )
+    context.boot = {
+        "apex_portal": build_portal_bootstrap(
+            entry=entry,
+            public_path=public_path,
+            initial_route=initial_route,
+            capabilities=capabilities,
+            site_name=frappe.local.site,
+            socketio_port=cint(conf.get("socketio_port")) or 9000,
+            async_enabled=not cint(conf.get("disable_async")),
+            language=getattr(frappe.local, "lang", None) or "ar",
+            subject_scope=opaque_subject_scope(entry=entry, subject=subject),
+        )
+    }
+    return context
 
 
 def guest_redirect(path: str) -> None:
