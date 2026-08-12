@@ -39,7 +39,11 @@ def my_trips_today():
     driver = _resolve_driver()
     trips = frappe.get_all(
         "Dispatch Trip",
-        filters={"driver": driver, "trip_date": frappe.utils.today()},
+        filters={
+            "driver": driver,
+            "trip_date": frappe.utils.today(),
+            "status": "Dispatched",
+        },
         fields=["name", "route_plan", "vehicle", "transport_request", "depart_time", "return_time", "status"],
         order_by="depart_time asc",
     )

@@ -297,8 +297,8 @@ def _resolve_my_trip(dispatch_trip, driver):
     )
     if not trip:
         frappe.throw(_("Trip not found."), frappe.DoesNotExistError)
-    if trip.get("status") in ("Completed", "Cancelled"):
-        frappe.throw(_("This trip is already closed."))
+    if trip.get("status") != "Dispatched":
+        frappe.throw(_("Only a dispatched trip can be executed."))
     trip_date = frappe.utils.getdate(trip.get("trip_date")) if trip.get("trip_date") else None
     today = frappe.utils.getdate(frappe.utils.today())
     if trip_date and not (frappe.utils.add_days(today, -1) <= trip_date <= today):
@@ -563,4 +563,3 @@ from apex.salis.api.driver_portal.notifications import (  # noqa: E402
 from apex.salis.api.driver_portal.home import (  # noqa: E402
     get_my_today,
 )
-

@@ -68,7 +68,7 @@ payment handoff.
 - [Shared frontend runtime](administration/frontend-shared.md) — understand the common Vue runtime and build contract
 - [Apex identity](brand/index.html) — logo, interface foundations, layouts, and communication assets
 - [Portal implementation contract](brand/portal-design.md) — source-level layout and interaction rules
-- [Shared component API contract](../frontend/frontend_shared/CONTRACTS.md) — source-adjacent props, slots, and states
+- [Portal source contract](../frontend/apex_portal/CONTRACTS.md) — contexts, shells, features, and shared boundaries
 
 ## Reference
 

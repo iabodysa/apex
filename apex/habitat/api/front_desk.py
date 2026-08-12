@@ -770,7 +770,7 @@ def quick_check_out(bed, checkout_date=None, checkout_reason=None, room_conditio
     row = frappe.db.get_value(
         "Housing Assignment",
         occupancy.active_assignment_filters(bed=bed),
-        ["name", "employee"],
+        ["name", "employee", "party_type", "party"],
         as_dict=True,
     )
     if not row:
@@ -778,10 +778,12 @@ def quick_check_out(bed, checkout_date=None, checkout_reason=None, room_conditio
     assignment = row.name
 
     from apex.habitat.doctype.housing_checkout.housing_checkout import (
-        _outstanding_custody_for_employee,
+        _outstanding_custody_for_party,
     )
 
-    if _outstanding_custody_for_employee(row.employee):
+    if _outstanding_custody_for_party(
+        row.party_type, row.party, row.employee
+    ):
         return {"requires_full_form": True, "assignment": assignment}
 
     doc = frappe.get_doc(

@@ -41,7 +41,7 @@ portal's own i18n bundle).
 import frappe
 
 
-_ISSUE_TYPES = ["Vehicle", "Fuel", "Attendance", "Salary", "Other"]
+_ISSUE_TYPES = ["Vehicle", "Fuel", "Attendance", "Salary", "Complaint", "Other"]
 
 _ISSUE_PRIORITIES = ["Low", "Medium", "High", "Urgent"]
 

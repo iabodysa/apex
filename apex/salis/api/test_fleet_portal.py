@@ -1,0 +1,205 @@
+from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
+
+from frappe.tests.utils import FrappeTestCase
+
+from apex.salis.api import fleet_employee, fleet_employee_services, fleet_os
+from apex.salis.doctype.fuel_request.fuel_request import FuelRequest
+from apex.salis.utils import reassign_vehicle_driver
+
+
+class FleetEmployeePortalTest(FrappeTestCase):
+    @patch.object(fleet_employee, "get_driver_for_session_user", return_value=None)
+    def test_context_returns_typed_unlinked_state(self, _driver):
+        self.assertEqual(
+            fleet_employee.get_context(),
+            {"state": "unlinked", "driver": None, "vehicle": None, "capabilities": {}},
+        )
+
+    @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
+    @patch.object(fleet_employee, "get_driver_for_session_user", return_value="DRV-1")
+    @patch("apex.salis.api.fleet_employee_services.frappe.utils.today", return_value="2026-08-12")
+    @patch.object(fleet_employee.frappe.db, "get_value", return_value=None)
+    @patch.object(fleet_employee.frappe, "get_doc")
+    def test_receipt_binds_vehicle_and_driver_to_session(self, get_doc, _duplicate, _today, _driver, _vehicle):
+        doc = MagicMock(name="handover")
+        doc.name = "GV-1"
+        doc.status = "Submitted"
+        get_doc.return_value = doc
+
+        result = fleet_employee.receive_vehicle(
+            odometer=120,
+            fuel_level="Half",
+            signed_evidence="/private/files/receipt.pdf",
+        )
+
+        payload = get_doc.call_args.args[0]
+        self.assertEqual(payload["direction"], "Receipt")
+        self.assertEqual(payload["vehicle"], "VEH-1")
+        self.assertIsNone(payload["from_driver"])
+        self.assertEqual(payload["to_driver"], "DRV-1")
+        doc.insert.assert_called_once_with(ignore_permissions=True)
+        doc.submit.assert_called_once_with()
+        self.assertEqual(result["name"], "GV-1")
+
+    @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
+    @patch.object(fleet_employee, "get_driver_for_session_user", return_value="DRV-1")
+    @patch("apex.salis.api.fleet_employee_services.frappe.utils.today", return_value="2026-08-12")
+    @patch.object(fleet_employee.frappe.db, "get_value", return_value=None)
+    @patch.object(fleet_employee.frappe, "get_doc")
+    def test_return_uses_pool_direction_without_fake_driver(self, get_doc, _duplicate, _today, _driver, _vehicle):
+        doc = MagicMock(name="handover")
+        doc.name = "GV-2"
+        get_doc.return_value = doc
+
+        fleet_employee.return_vehicle(
+            odometer=150,
+            fuel_level="Quarter",
+            signed_evidence="/private/files/return.pdf",
+        )
+
+        payload = get_doc.call_args.args[0]
+        self.assertEqual(payload["direction"], "Return")
+        self.assertEqual(payload["from_driver"], "DRV-1")
+        self.assertIsNone(payload["to_driver"])
+
+    @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
+    @patch.object(fleet_employee, "get_driver_for_session_user", return_value="DRV-1")
+    @patch.object(fleet_employee.frappe, "get_doc")
+    def test_incident_intake_excludes_staff_disposition_fields(self, get_doc, _driver, _vehicle):
+        doc = MagicMock(name="incident")
+        doc.name = "VI-1"
+        doc.status = "Open"
+        get_doc.return_value = doc
+
+        fleet_employee.report_incident(
+            incident_type="Accident",
+            incident_date="2026-08-12",
+            description="Rear bumper damaged",
+            location="Riyadh",
+        )
+
+        payload = get_doc.call_args.args[0]
+        self.assertEqual(payload["driver"], "DRV-1")
+        self.assertEqual(payload["vehicle"], "VEH-1")
+        for forbidden in ("estimated_cost", "fault", "recover_from_driver", "write_off_case"):
+            self.assertNotIn(forbidden, payload)
+
+    @patch.object(fleet_employee, "get_driver_for_session_user", return_value="DRV-1")
+    @patch.object(fleet_employee.frappe.db, "get_value", return_value="PROJ-1")
+    @patch.object(fleet_employee.frappe, "get_doc")
+    def test_complaint_reuses_issue_and_session_project(self, get_doc, _project, _driver):
+        doc = MagicMock(name="issue")
+        doc.name = "ISS-1"
+        doc.status = "Open"
+        get_doc.return_value = doc
+
+        fleet_employee.create_complaint("High", "Late handover", "Vehicle was unavailable")
+
+        payload = get_doc.call_args.args[0]
+        self.assertEqual(payload["doctype"], "Issue")
+        self.assertEqual(payload["issue_type"], "Complaint")
+        self.assertEqual(payload["custom_driver"], "DRV-1")
+        self.assertEqual(payload["project"], "PROJ-1")
+        self.assertEqual(payload["via_customer_portal"], 1)
+        doc.insert.assert_called_once_with(ignore_permissions=True)
+
+    @patch.object(fleet_employee_services.frappe, "get_all")
+    @patch.object(fleet_employee_services, "_my_issue")
+    def test_complaint_messages_follow_a_validated_owned_issue(self, my_issue, get_all):
+        my_issue.return_value = [{"name": "ISS-1", "status": "Open"}]
+        get_all.return_value = [{"name": "COMM-1", "content": "<p>Received</p>"}]
+
+        result = fleet_employee.get_complaint("ISS-1")
+
+        my_issue.assert_called_once_with("ISS-1")
+        self.assertEqual(get_all.call_args.kwargs["filters"]["reference_name"], "ISS-1")
+        self.assertEqual(result["communications"][0]["content"], "Received")
+
+    @patch.object(fleet_employee_services.frappe.db, "set_value")
+    @patch.object(fleet_employee_services.frappe, "get_doc")
+    @patch.object(fleet_employee_services, "_my_issue")
+    def test_reply_reopens_the_owned_complaint(self, my_issue, get_doc, set_value):
+        my_issue.return_value = [SimpleNamespace(name="ISS-1", status="Closed")]
+        communication = MagicMock(name="communication")
+        communication.name = "COMM-1"
+        get_doc.return_value = communication
+
+        result = fleet_employee.reply_to_complaint("ISS-1", "Please review again")
+
+        payload = get_doc.call_args.args[0]
+        self.assertEqual(payload["reference_doctype"], "Issue")
+        self.assertEqual(payload["reference_name"], "ISS-1")
+        communication.insert.assert_called_once_with(ignore_permissions=True)
+        set_value.assert_called_once_with("Issue", "ISS-1", "status", "Open")
+        self.assertEqual(result["status"], "Open")
+
+
+class FleetOperationsScopeTest(FrappeTestCase):
+    @patch.object(fleet_os, "_permitted_projects", return_value=(False, ["PROJ-1"]))
+    @patch.object(fleet_os.frappe, "get_list", return_value=[])
+    @patch.object(fleet_os.frappe, "has_permission", return_value=True)
+    def test_assignment_queue_uses_permission_aware_project_filter(self, _permission, get_list, _scope):
+        fleet_os.get_assignment_queue(project="PROJ-1")
+        self.assertEqual(get_list.call_args.kwargs["filters"]["project"], ["in", ["PROJ-1"]])
+
+    @patch.object(fleet_os, "_permitted_projects", return_value=(False, ["PROJ-1"]))
+    @patch.object(fleet_os.frappe, "get_list")
+    @patch.object(fleet_os.frappe, "has_permission", return_value=True)
+    def test_out_of_scope_project_cannot_widen_queue(self, _permission, get_list, _scope):
+        self.assertEqual(fleet_os.get_incident_queue(project="PROJ-2"), [])
+        get_list.assert_not_called()
+
+
+class FuelTopupLifecycleTest(FrappeTestCase):
+    @patch("apex.salis.doctype.fuel_request.fuel_request.add_timeline_note")
+    @patch("apex.salis.doctype.fuel_request.fuel_request.lock_fuel_quota")
+    @patch("apex.salis.doctype.fuel_request.fuel_request.frappe.db.set_value")
+    @patch("apex.salis.doctype.fuel_request.fuel_request.frappe.db.get_value")
+    def test_topup_is_applied_once_and_reversed_once(self, get_value, set_value, _lock, _timeline):
+        get_value.return_value = SimpleNamespace(monthly_litres=100.0, status="Active")
+        doc = SimpleNamespace(
+            name="FR-1",
+            fuel_quota="FQ-1",
+            topup_litres=20.0,
+            topup_applied=0,
+            db_set=MagicMock(),
+        )
+
+        FuelRequest._apply_topup(doc)
+        self.assertEqual(set_value.call_args.args[2]["monthly_litres"], 120.0)
+        doc.topup_applied = 1
+        FuelRequest._apply_topup(doc)
+        self.assertEqual(set_value.call_count, 1)
+
+        get_value.return_value = SimpleNamespace(monthly_litres=120.0, status="Active")
+        FuelRequest._reverse_topup(doc)
+        self.assertEqual(set_value.call_args.args[2]["monthly_litres"], 100.0)
+        doc.topup_applied = 0
+        FuelRequest._reverse_topup(doc)
+        self.assertEqual(set_value.call_count, 2)
+
+
+class VehicleAssignmentLifecycleTest(FrappeTestCase):
+    @patch("apex.salis.utils.lock_driver")
+    @patch("apex.salis.utils.lock_vehicle")
+    @patch("apex.salis.utils.frappe.get_doc")
+    @patch("apex.salis.utils.frappe.get_all")
+    @patch("apex.salis.utils.frappe.db.set_value")
+    @patch("apex.salis.utils.frappe.db.get_value")
+    def test_reassignment_clears_the_outgoing_driver_mirror(
+        self, get_value, set_value, get_all, get_doc, _lock_vehicle, _lock_driver
+    ):
+        get_all.return_value = [SimpleNamespace(name="VA-OLD", driver="DRV-OLD")]
+        get_value.side_effect = lambda doctype, name, field: (
+            "VEH-1" if doctype == "Salis Driver" else "PROJ-1"
+        )
+        assignment = MagicMock(name="assignment")
+        assignment.name = "VA-NEW"
+        get_doc.return_value = assignment
+
+        reassign_vehicle_driver("VEH-1", "DRV-NEW", "2026-08-12")
+
+        set_value.assert_any_call("Salis Driver", "DRV-OLD", "current_vehicle", None)
+        assignment.insert.assert_called_once_with()
+        assignment.submit.assert_called_once_with()

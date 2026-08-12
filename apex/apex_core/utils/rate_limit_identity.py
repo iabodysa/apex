@@ -3,9 +3,8 @@
 
 Two spellings are not an accident to be tidied away. 32 of the 35 live pairs come
 from the driver portal package re-exporting its own submodules
-(salis/api/driver_portal/__init__.py), and the SPA calls the SHORT name
-(frontend/driver/src/pages/Fuel.vue:113) while the function is defined in the long
-one -- so BOTH names are production and neither can be deleted. Deduplicating the
+(``salis/api/driver_portal/__init__.py``), while clients may call the short name and
+the function is defined in the long one. Both names are production. Deduplicating the
 names would also only hold until the next re-export; naming the window after the
 resolved function holds by construction.
 

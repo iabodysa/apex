@@ -9,6 +9,7 @@
   "vehicle_handover_tab_overview",
   "vehicle_handover_sec_main",
   "vehicle",
+  "direction",
   "from_driver",
   "to_driver",
   "vehicle_handover_main_col",
@@ -56,6 +57,16 @@
    "search_index": 1
   },
   {
+   "default": "Transfer",
+   "fieldname": "direction",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Direction",
+   "options": "Receipt\nTransfer\nReturn",
+   "reqd": 1
+  },
+  {
    "fetch_from": "vehicle.current_driver",
    "fetch_if_empty": 1,
    "fieldname": "from_driver",
@@ -69,8 +80,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "To Driver",
-   "options": "Salis Driver",
-   "reqd": 1
+   "options": "Salis Driver"
   },
   {
    "fieldname": "vehicle_handover_main_col",
@@ -216,7 +226,7 @@
    "link_fieldname": "source_handover"
   }
  ],
- "modified": "2026-08-08 01:42:00.000000",
+ "modified": "2026-08-12 08:43:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Handover",
@@ -268,6 +278,11 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "if_owner": 1,
+   "read": 1,
+   "role": "Driver"
   },
   {
    "read": 1,

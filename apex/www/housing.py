@@ -1,4 +1,4 @@
-# Copyright (c) 2026, afmcoltd
+# Copyright (c) 2026, Apex contributors
 """Merged Habitat portal served at /housing, and through www/safety.py at /safety.
 
 One mobile-first supervisor surface for a whole housing and safety day: the Housing
@@ -17,13 +17,10 @@ second door and imports it rather than keeping a second copy.
 """
 
 import frappe
-from frappe.sessions import get_csrf_token
-from frappe.utils import cint
-
 from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.apex_core.utils.portal_bootstrap import (
-    apply_portal_appearance,
     guest_redirect,
+    publish_portal_context,
 )
 
 HOUSING_ROLES = {
@@ -75,20 +72,49 @@ def _clearable_exits() -> list:
 def portal_capabilities() -> dict:
     """The per-action grants a section needs, so a control can be disabled with a
     stated reason instead of failing at the server."""
+    exits = _clearable_exits()
+    roles = set(frappe.get_roles())
     return {
+        "estate_read": _can("Building", "read"),
+        "today": _can("Housing Assignment", "create", "submit")
+        or _can("Housing Checkout", "create", "submit"),
         "count": _can("Housing Inventory", "read", "write"),
+        "delivery_read": _can("Facility Asset Delivery", "read"),
         "clear_exit": _can("Facility Asset Delivery", "write"),
-        "exits": _clearable_exits(),
+        "exits": exits,
+        "clear_exit_1": 1 in exits,
+        "clear_exit_3": 3 in exits,
+        "confirm_delivery_receipt": _can("Facility Asset Delivery", "write")
+        and bool({"System Manager", "Accommodation Manager", "Resident Supervisor"} & roles),
         "set_readiness": _can("Room", "write"),
         "check_in": _can("Housing Assignment", "create", "submit"),
         "check_out": _can("Housing Checkout", "create", "submit"),
+        "custody_read": _can("Custody Issue", "read"),
         "issue_custody": _can("Custody Issue", "create", "submit"),
         "return_custody": _can("Custody Return", "create", "submit"),
         "register_worker": _can("Temporary Worker", "create"),
         "transfer": _can("Room Bed Transfer", "create", "submit"),
-        "record_round": _can("Safety Task Execution", "create"),
-        "submit_round": _can("Safety Task Execution", "submit"),
+        "maintenance_read": _can("Maintenance Request", "read"),
+        "maintenance_create": _can("Maintenance Request", "create"),
+        "maintenance_work_order_action": False,
+        "safety_draft": _can("Safety Task Execution", "create"),
+        "safety_check": _can("Safety Task Execution", "submit"),
+        "safety_read": _can("Safety Task Execution", "create")
+        or _can("Safety Task Execution", "submit"),
     }
+
+
+def portal_landing(capabilities: dict) -> str:
+    """Choose the first useful route from server-derived capabilities."""
+    if capabilities.get("estate_read") and capabilities.get("set_readiness"):
+        return "/overview"
+    if capabilities.get("check_in") or capabilities.get("check_out"):
+        return "/today"
+    if capabilities.get("delivery_read"):
+        return "/delivery"
+    if capabilities.get("safety_draft"):
+        return "/rounds"
+    return "/access-denied"
 
 
 def portal_sections() -> list[str]:
@@ -124,22 +150,21 @@ def bootstrap_portal_context(context, route: str, entry: str):
     guest_redirect(route)
     render_in_arabic()
 
-    context.no_cache = 1
-    apply_portal_appearance(context)
-    context.portal_entry = entry
-    context.has_portal_role = bool(PORTAL_ROLES & set(frappe.get_roles()))
-    if not context.has_portal_role:
-        return context
-
-    context.csrf_token = get_csrf_token()
-    context.portal_sections = portal_sections()
-    context.portal_capabilities = portal_capabilities()
-    conf = frappe.get_site_config()
-    context.site_name = frappe.local.site
-    context.socketio_port = cint(conf.get("socketio_port")) or 9000
-    context.async_enabled = not cint(conf.get("disable_async"))
-    context.dev_server = 1 if frappe.conf.developer_mode else 0
-    return context
+    allowed = bool(PORTAL_ROLES & set(frappe.get_roles()))
+    capability_map = portal_capabilities() if allowed else {}
+    capabilities = [
+        name for name, granted in capability_map.items()
+        if granted is True
+    ]
+    initial_route = "/rounds" if route == "/safety" else portal_landing(capability_map)
+    return publish_portal_context(
+        context,
+        entry="housing",
+        public_path=route,
+        initial_route=initial_route,
+        capabilities=capabilities,
+        subject=frappe.session.user,
+    )
 
 
 def get_context(context):

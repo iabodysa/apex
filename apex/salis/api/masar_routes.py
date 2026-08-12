@@ -161,6 +161,7 @@ def _today_worker_trips(driver):
         filters={
             "driver": driver,
             "trip_date": _trip_date_window(),
+            "status": "Dispatched",
             "docstatus": ["<", 2],
         },
         fields=[

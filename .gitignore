@@ -78,10 +78,7 @@ curl_output*.txt
 *.swp
 
 
-# ---- 3. Publication allowlist -----------------------------------------------
-# Documents and data files are denied by TYPE first and re-included one named path
-# at a time, so a new file under docs/ ships only when someone adds it here on
-# purpose. Every `!` below carries the reason it exists.
+# ---- 3. Publication rules ---------------------------------------------------
 
 # Private office source files — the app ships no spreadsheet.
 *.xlsx
@@ -95,10 +92,8 @@ curl_output*.txt
 !apex/translations/
 !apex/translations/*.csv
 
-# Internal notes and design documents are markdown, and docs/ is internal by
-# default; the published set is named one file at a time below.
+# Markdown outside the documentation tree stays private by default.
 *.md
-docs/*
 # Deliberately NOT anchored to the repo root: matching README.md at every depth is
 # what keeps apex/change_log/README.md (the in-app changelog index) and the
 # frontend package READMEs shipping. Rewriting this as `!/README.md` drops them.
@@ -108,36 +103,17 @@ docs/*
 !frontend/frontend_shared/DESIGN.md
 # Frappe's "Updated To A New Version" popup reads these as shipped app files.
 !apex/change_log/v*/*.md
-# The three flat pages these lines used to publish were replaced by the per-audience
-# structure below; naming a file that no longer exists publishes nothing and hides that the
-# real allowlist is the two directory globs.
-# Public per-area training guide: index plus one file per functional area.
-!docs/training/
-!docs/training/*.md
-# The refresher lessons and the per-role tracks the index links. Both were tracked
-# already but matched no `!` line, so a new page in either sub-directory could reach the
-# repository only by force-add — the allowlist has to name the depth it publishes.
-!docs/training/lessons/
-!docs/training/lessons/*.md
-!docs/training/tracks/
-!docs/training/tracks/*.md
-# Operator runbooks; the pre-rename app-identity cutover path lives here.
-!docs/administration/
-!docs/administration/*.md
-# Canonical inventories the other pages link instead of copying. Two of them are
-# generated from the shipped JSON, so a hand edit here is overwritten, not merged.
-!docs/reference/
-!docs/reference/*.md
-# Public identity system, logo masters and channel templates. This directory is
-# intentionally self-contained so designers can open index.html from a clone.
-!docs/brand/
-!docs/brand/**
-# Screenshots a lesson links, one directory per lesson, captured from synthetic rows.
-# Every parent has to be un-ignored first: git never descends into an ignored directory,
-# so a rule naming only the file matches nothing and the image can reach the repository
-# only by force-add.
-!docs/assets/
-!docs/assets/training/
-!docs/assets/training/*/
-!docs/assets/training/*/*.png
+
+# Documentation is a first-class project tree. New public guides, diagrams and
+# assets under docs/ are tracked without editing this file or using git add -f.
+# Internal execution plans remain under .claude/ and stay local.
+!docs/
+!docs/**
+
+# Unlocking docs does not publish credentials or private key material.
+docs/**/.env*
+docs/**/*.secret
+docs/**/*secret*
+docs/**/*.key
+docs/**/*.pem
 .vite/

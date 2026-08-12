@@ -1,9 +1,8 @@
-# Copyright (c) 2026, afmcoltd
-"""Fleet employee self-service page served at /fleet.
+# Copyright (c) 2026, Apex contributors
+"""Fleet representative self-service page served at /fleet.
 
-This is the EMPLOYEE page (my vehicle · fuel request · my recent trips), open to
-any logged-in user. The old supervisor board that used to live here is preserved
-untouched at /fleet-os (module fleet_os, bundle fleet_os_portal).
+The signed-in representative sees their vehicle, fuel, incidents, and complaints.
+Fleet operations use `/fleet-os` in the same Vue application.
 
 Access gate:
   * Guests are redirected to /login (then back to /fleet).
@@ -19,10 +18,8 @@ the page renders per-user, live data.
 """
 
 import frappe
-from frappe.sessions import get_csrf_token
-from frappe.utils import cint
-
-from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance, guest_redirect
+from apex.apex_core.utils.portal_bootstrap import guest_redirect, publish_portal_context
+from apex.salis.api.fleet_employee import get_context as get_fleet_context
 
 FLEET_ROLES = {
     "System Manager",
@@ -56,14 +53,16 @@ def get_context(context):
     """Redirects guests to login and bootstraps the fleet self-service page for any logged-in user."""
     guest_redirect("/fleet")
 
-    apply_portal_appearance(context)
-    context.no_cache = 1
-    context.can_view = 1
-    context.user_full_name = frappe.utils.get_fullname()
-    context.csrf_token = get_csrf_token()
-    conf = frappe.get_site_config()
-    context.site_name = frappe.local.site
-    context.socketio_port = cint(conf.get("socketio_port")) or 9000
-    context.async_enabled = not cint(conf.get("disable_async"))
-    context.dev_server = 1 if frappe.conf.developer_mode else 0
-    return context
+    fleet_context = get_fleet_context()
+    grants = ["fleet.self.read"]
+    for key in ("handover", "fuel", "incident", "complaint"):
+        if fleet_context.get("capabilities", {}).get(key):
+            grants.append(f"fleet.self.{key}")
+    return publish_portal_context(
+        context,
+        entry="fleet-self-service",
+        public_path="/fleet",
+        initial_route="/",
+        capabilities=grants,
+        subject=frappe.session.user,
+    )

@@ -130,10 +130,10 @@ def _quote(field):
 
 SALIS_SCOPE = {
     "Vehicle Assignment": _column(),
-    "Fuel Request": _column(),
+    "Fuel Request": _column(rule="owner_or_project", own="owner"),
     "Transport Request": _column(),
     "Route Plan": _column(),
-    "Issue": _column(),
+    "Issue": _column(rule="owner_or_project", own="owner"),
     "Fuel Claim": _column(),
     "Fuel Quota": _column(),
     "Fuel Exception Case": _column(),
@@ -147,7 +147,7 @@ SALIS_SCOPE = {
     "Driver Suspension": _driver(own="owner"),
     "Boarding Scan Log": _driver(own="owner"),
     "Vehicle Damage Write-Off": _driver(),
-    "Vehicle Incident": _driver(),
+    "Vehicle Incident": _driver(own="owner"),
     "Driver Clearance": _driver(),
     "Vehicle Suspension": _driver(field="related_driver"),
     "Movement Cost Transfer": _dual(),

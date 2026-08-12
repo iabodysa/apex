@@ -46,6 +46,55 @@ _TRIP_STATUS_KEY = {
 _REGISTRATION_TYPE = "Registration (Istimara)"
 
 
+def _session_driver(required=False):
+    """Resolve only the signed-in user's driver record."""
+    driver = get_driver_for_session_user(frappe.session.user)
+    if required and not driver:
+        frappe.throw(_("Your account is not linked to a fleet representative."), frappe.PermissionError)
+    return driver
+
+
+def _driver_project(driver):
+    return frappe.db.get_value("Salis Driver", driver, "project") if driver else None
+
+
+def _session_vehicle(driver):
+    return bound_vehicle(driver) if driver else None
+
+
+@frappe.whitelist()
+def get_context():
+    """Return the representative identity derived from the active Frappe session."""
+    driver = _session_driver()
+    if not driver:
+        return {"state": "unlinked", "driver": None, "vehicle": None, "capabilities": {}}
+    vehicle = _session_vehicle(driver)
+    details = frappe.db.get_value(
+        "Salis Driver", driver, ["full_name", "project", "status"], as_dict=True
+    ) or {}
+    plate = frappe.db.get_value("Salis Vehicle", vehicle, "plate_number") if vehicle else None
+    assignment = frappe.db.get_value(
+        "Vehicle Assignment",
+        {"driver": driver, "vehicle": vehicle, "docstatus": 1, "status": "Active"},
+        "name",
+    ) if vehicle else None
+    return {
+        "state": "ready",
+        "driver": driver,
+        "driver_name": details.get("full_name"),
+        "project": details.get("project"),
+        "vehicle": vehicle,
+        "vehicle_plate": plate,
+        "assignment_status": "Active" if assignment else "Unassigned",
+        "capabilities": {
+            "handover": bool(vehicle and assignment),
+            "fuel": bool(vehicle),
+            "incident": bool(vehicle),
+            "complaint": True,
+        },
+    }
+
+
 def _registration_expiry(vehicle):
     """The vehicle's registration (Istimara) expiry, else its next rolled-up expiry.
 
@@ -105,7 +154,7 @@ def get_my_vehicle():
 def get_my_recent_trips(days=30, limit=20):
     """The session user's recent Dispatch Trips, newest first (read).
 
-    Identity-scoped via endpoint-scoped ``get_all`` filtered on the caller's own
+    Identity-scoped via permission-aware ``get_list`` filtered on the caller's own
     driver, so it can only ever return the caller's own trips — the client never
     supplies a driver id. Cancelled trips are omitted. Returns ``[]`` (empty
     state) when the user is not a driver. Read-only, no commit.
@@ -118,7 +167,7 @@ def get_my_recent_trips(days=30, limit=20):
         return []
 
     since = frappe.utils.add_days(frappe.utils.today(), -(frappe.utils.cint(days) or 30))
-    rows = frappe.get_all(
+    rows = frappe.get_list(
         "Dispatch Trip",
         filters={
             "driver": driver,
@@ -168,7 +217,7 @@ def get_fuel_stations():
 
     Replaces the page's hard-coded station list. Returns a list of platform names
     (the Fuel Platform's autoname = its display name), active only. Read-only."""
-    return frappe.get_all(
+    return frappe.get_list(
         "Fuel Platform",
         filters={"status": "Active"},
         pluck="name",
@@ -276,7 +325,7 @@ def get_my_fuel_requests(days=90, limit=30):
         return []
 
     since = frappe.utils.add_days(frappe.utils.today(), -(frappe.utils.cint(days) or 90))
-    rows = frappe.get_all(
+    rows = frappe.get_list(
         "Fuel Request",
         filters={
             "driver": driver,
@@ -317,3 +366,18 @@ def get_my_fuel_requests(days=90, limit=30):
         }
         for r in rows
     ]
+
+
+from apex.salis.api.fleet_employee_services import (  # noqa: E402,F401
+    create_complaint,
+    get_complaint,
+    get_my_complaints,
+    get_my_fuel_quota,
+    get_my_handovers,
+    get_my_incidents,
+    receive_vehicle,
+    reply_to_complaint,
+    report_incident,
+    return_vehicle,
+    submit_additional_fuel_request,
+)

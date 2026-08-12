@@ -1,3 +1,0 @@
-# .vite/ is a Vite cache dir not covered by the repo-root .gitignore.
-# node_modules/ and dist/ are intentionally omitted here — the root rules cover them.
-.vite/

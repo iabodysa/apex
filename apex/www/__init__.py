@@ -1,1 +1,1 @@
-# Copyright (c) 2026, afmcoltd
+# Copyright (c) 2026, Apex contributors

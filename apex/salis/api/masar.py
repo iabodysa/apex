@@ -603,6 +603,8 @@ def list_worker_requests(token=None):
             "description",
             "status",
             "resolution_notes",
+            "target_doctype",
+            "target_document",
             "creation",
         ],
         order_by="creation desc",
@@ -889,14 +891,21 @@ def get_worker_home(token=None):
             "check_in_date": asg.get("check_in_date"),
         }
 
+    custody = get_worker_custody(token)
+    requests = list_worker_requests(token)
     open_request_count = sum(
         1
-        for r in list_worker_requests(token)
+        for r in requests
         if r.get("status") not in _RESIDENT_REQUEST_CLOSED_STATES
     )
 
     return {
         "date": frappe.utils.today(),
+        "profile": profile,
+        "accommodation": acc,
+        "custody": custody,
+        "transport": transport,
+        "requests": requests,
         "profile_alerts": profile_alerts,
         "next_ride": next_ride,
         "bed": bed,

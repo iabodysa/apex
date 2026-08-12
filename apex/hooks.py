@@ -84,6 +84,10 @@ app_include_js = [
 ]
 web_include_js = ["/assets/apex/js/apex_web_form.js"]
 
+after_request = [
+    "apex.apex_core.utils.portal_response_headers.apply_portal_response_headers"
+]
+
 setup_wizard_requires = "assets/apex/js/apex_setup_wizard.js"
 setup_wizard_complete = [
     "apex.apex_core.setup.setup_wizard.setup_wizard_complete",

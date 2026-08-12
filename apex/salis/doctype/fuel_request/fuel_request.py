@@ -122,6 +122,8 @@ class FuelRequest(Document):
             if self.status == "Done":
                 self._apply_quota_consumption()
         elif self.request_type == "Top-up":
+            if self.status in ("Approved", "Done"):
+                self._apply_topup()
             add_timeline_note(
                 "Salis Vehicle",
                 self.vehicle,
@@ -150,12 +152,18 @@ class FuelRequest(Document):
 		the ``quota_applied`` flag, so it is safe even if on_submit already ran."""
         if self.request_type == "Standard" and self.status == "Done":
             self._apply_quota_consumption()
+        elif self.request_type == "Top-up":
+            if self.status in ("Approved", "Done"):
+                self._apply_topup()
+            elif self.status in ("Reverted", "Cancelled"):
+                self._reverse_topup()
 
     def on_cancel(self):
         """Reverses posted quota consumption and the request's fuel ledger entry."""
         if self.request_type == "Standard":
             self._reverse_quota_consumption()
         elif self.request_type == "Top-up":
+            self._reverse_topup()
             add_timeline_note(
                 "Salis Vehicle",
                 self.vehicle,
@@ -178,6 +186,8 @@ class FuelRequest(Document):
         """Requires positive top-up litres and a revert date for a temporary top-up."""
         if (self.topup_litres or 0) <= 0:
             frappe.throw(_("Top-up Litres must be greater than zero."))
+        if not self.fuel_quota:
+            frappe.throw(_("A Top-up request requires an active Fuel Quota."))
         if self.is_temporary and not self.revert_due_date:
             frappe.throw(_("A temporary top-up requires a revert due date."))
         self._warn_overdue_temporary()
@@ -341,4 +351,45 @@ class FuelRequest(Document):
             _("Reversed {0} L from Fuel Request {1}.").format(
                 self.requested_litres, self.name
             ),
+        )
+
+    def _apply_topup(self):
+        """Increase the linked monthly quota once when this request is approved."""
+        if self.topup_applied or not self.fuel_quota:
+            return
+        lock_fuel_quota(self.fuel_quota)
+        quota = frappe.db.get_value(
+            "Fuel Quota", self.fuel_quota, ["monthly_litres", "status"], as_dict=True
+        )
+        if not quota:
+            return
+        frappe.db.set_value(
+            "Fuel Quota",
+            self.fuel_quota,
+            {"monthly_litres": flt(quota.monthly_litres) + flt(self.topup_litres), "status": "Active"},
+        )
+        self.db_set("topup_applied", 1)
+        add_timeline_note(
+            "Fuel Quota", self.fuel_quota,
+            _("Added {0} L via Fuel Request {1}.").format(self.topup_litres, self.name),
+        )
+
+    def _reverse_topup(self):
+        """Remove an applied top-up once on revert or cancellation."""
+        if not self.topup_applied or not self.fuel_quota:
+            return
+        lock_fuel_quota(self.fuel_quota)
+        quota = frappe.db.get_value(
+            "Fuel Quota", self.fuel_quota, ["monthly_litres", "status"], as_dict=True
+        )
+        if quota:
+            frappe.db.set_value(
+                "Fuel Quota",
+                self.fuel_quota,
+                {"monthly_litres": max(flt(quota.monthly_litres) - flt(self.topup_litres), 0)},
+            )
+        self.db_set("topup_applied", 0)
+        add_timeline_note(
+            "Fuel Quota", self.fuel_quota,
+            _("Removed {0} L from reverted Fuel Request {1}.").format(self.topup_litres, self.name),
         )

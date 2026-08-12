@@ -932,3 +932,16 @@ def reject_route_plan(name: str, reason: str):
     doc = _resolve_owned_plan_doc(name)
     doc.set_supervisor_decision("Rejected", frappe.session.user, reason)
     return _decision_result(doc)
+
+
+from apex.salis.api.route_supervisor_operations import (  # noqa: E402,F401
+    apply_dispatch_trip_action,
+    apply_transport_request_action,
+    get_dispatch_trip,
+    get_dispatch_trips,
+    get_movement_history,
+    get_route_plan,
+    get_route_plans,
+    get_shift_routes,
+    get_transport_requests,
+)

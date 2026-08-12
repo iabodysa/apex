@@ -1,0 +1,99 @@
+.ops-page {
+    display: grid;
+    gap: var(--sp-4);
+}
+.ops-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--sp-4);
+}
+.ops-heading > div > p {
+    color: var(--accent-ink);
+    font-weight: 800;
+}
+.ops-heading h2 {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+}
+.ops-state,
+.ops-card,
+.ops-table {
+    padding: var(--sp-5);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-2);
+    box-shadow: var(--shadow-sm);
+}
+.ops-state {
+    display: grid;
+    gap: var(--sp-3);
+    justify-items: start;
+}
+.ops-state--error {
+    color: var(--danger);
+}
+.ops-table {
+    display: grid;
+    padding: 0;
+    overflow: hidden;
+}
+.ops-row {
+    display: flex;
+    min-block-size: 72px;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+    border-block-end: 1px solid var(--border);
+}
+.ops-row:last-child {
+    border-block-end: 0;
+}
+.ops-row > div {
+    display: grid;
+    min-inline-size: 0;
+}
+.ops-row span {
+    color: var(--muted);
+}
+.ops-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sp-3);
+}
+.ops-metric {
+    padding: var(--sp-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+}
+.ops-metric strong {
+    display: block;
+    font-size: 2rem;
+}
+.ops-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+    gap: var(--sp-4);
+}
+.ops-panels {
+    display: grid;
+    gap: var(--sp-3);
+}
+.ops-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+}
+.ops-reason {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+@media (max-width: 900px) {
+    .ops-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .ops-workspace {
+        grid-template-columns: 1fr;
+    }
+}

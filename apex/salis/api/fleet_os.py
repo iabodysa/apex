@@ -1,4 +1,4 @@
-# Copyright (c) 2026, afmcoltd
+# Copyright (c) 2026, Apex contributors
 """Fleet OS supervisor dashboard API (read + live operations).
 
 Backs the ``/fleet-os`` www page, which is the fleet supervisor's single-screen
@@ -12,12 +12,8 @@ fields make a vehicle, how a driver appears on a card, how an incident becomes a
 stolen flag — lives in :mod:`apex.salis.api.fleet_os_board`, so changing what the
 screen shows is one edit in one file.
 
-Route trace (NOT ``/fleet`` — that is the unrelated employee self-service page,
-whose bundle calls ``apex.salis.api.fleet_employee`` only): hooks.py tile
-"apex-fleet-os" -> ``/fleet-os`` -> ``www/fleet-os.html`` ->
-``/assets/apex/fleet_os_portal/assets/index.js``, built from ``frontend/fleet_os``
-(``vite.config.js`` name="fleet_os_portal"), whose ``useFleetBoard`` /
-``useFleetActions`` / ``useDriverAssignment`` composables call this module.
+The `fleet-operations` feature calls this module. The fleet representative feature
+uses `apex.salis.api.fleet_employee` instead.
 
 Every endpoint is permission-gated on ``Salis Vehicle`` and project-scoped
 server-side through the SAME ``_permitted_projects`` resolver the dispatch
@@ -115,7 +111,154 @@ def get_fleet_os():
     its own active filters).
     """
     frappe.has_permission("Salis Vehicle", "read", throw=True)
-    return build_board()
+    result = build_board()
+    can_write = bool(frappe.has_permission("Salis Vehicle", "write"))
+    for vehicle in result.get("vehicles", []):
+        status = vehicle.get("vehicle_status")
+        vehicle["capabilities"] = {
+            "stop": {"allowed": can_write and status in ("assigned", "available"), "reason": _("Only an authorised user can stop an active vehicle.")},
+            "workshopIn": {"allowed": can_write and status != "workshop", "reason": _("Vehicle is already in the workshop or you cannot update it.")},
+            "workshopOut": {"allowed": can_write and status == "workshop", "reason": _("Vehicle has no open workshop visit or you cannot update it.")},
+            "recover": {"allowed": can_write and status == "stopped", "reason": _("Only an authorised user can return a stopped vehicle to service.")},
+        }
+    return result
+
+
+def _queue_scope(project=None):
+    """Return a project filter that can only narrow the caller's User Permissions."""
+    unscoped, projects = _permitted_projects()
+    if project:
+        if unscoped:
+            return [project]
+        return [project] if project in (projects or []) else []
+    return None if unscoped else list(projects or [])
+
+
+def _project_queue(doctype, fields, project=None, filters=None, order_by="modified desc", limit=100):
+    frappe.has_permission(doctype, "read", throw=True)
+    projects = _queue_scope(project)
+    if projects == []:
+        return []
+    scoped_filters = dict(filters or {})
+    if projects is not None:
+        scoped_filters["project"] = ["in", projects]
+    return frappe.get_list(
+        doctype,
+        filters=scoped_filters,
+        fields=fields,
+        order_by=order_by,
+        limit_page_length=limit,
+    )
+
+
+@frappe.whitelist()
+def get_assignment_queue(project=None):
+    return _project_queue(
+        "Vehicle Assignment",
+        ["name", "vehicle", "driver", "project", "start_date", "end_date", "status", "docstatus"],
+        project=project,
+        filters={"docstatus": ["<", 2]},
+        order_by="start_date desc, creation desc",
+    )
+
+
+def _handover_queue(direction, project=None):
+    projects = _queue_scope(project)
+    if projects == []:
+        return []
+    vehicle_filters = {"project": ["in", projects]} if projects is not None else {}
+    vehicles = frappe.get_list("Salis Vehicle", filters=vehicle_filters, pluck="name", limit_page_length=0)
+    if not vehicles:
+        return []
+    return frappe.get_list(
+        "Vehicle Handover",
+        filters={"vehicle": ["in", vehicles], "direction": direction, "docstatus": ["<", 2]},
+        fields=["name", "direction", "vehicle", "from_driver", "to_driver", "handover_date", "discrepancy_status", "docstatus"],
+        order_by="handover_date desc, creation desc",
+        limit_page_length=100,
+    )
+
+
+@frappe.whitelist()
+def get_handover_queue(project=None):
+    return _handover_queue("Receipt", project)
+
+
+@frappe.whitelist()
+def get_return_queue(project=None):
+    return _handover_queue("Return", project)
+
+
+@frappe.whitelist()
+def get_incident_queue(project=None):
+    projects = _queue_scope(project)
+    if projects == []:
+        return []
+    driver_filters = {"project": ["in", projects]} if projects is not None else {}
+    drivers = frappe.get_list("Salis Driver", filters=driver_filters, pluck="name", limit_page_length=0)
+    if not drivers:
+        return []
+    return frappe.get_list(
+        "Vehicle Incident",
+        filters={"driver": ["in", drivers], "docstatus": ["<", 2]},
+        fields=["name", "incident_type", "vehicle", "driver", "incident_date", "location", "description", "status"],
+        order_by="incident_date desc, creation desc",
+        limit_page_length=100,
+    )
+
+
+@frappe.whitelist()
+def get_incident_detail(name):
+    doc = frappe.get_doc("Vehicle Incident", name)
+    frappe.has_permission("Vehicle Incident", "read", doc=doc, throw=True)
+    return doc.as_dict(no_nulls=False)
+
+
+@frappe.whitelist()
+def get_problem_queue(project=None):
+    return _project_queue(
+        "Issue",
+        ["name", "subject", "description", "priority", "status", "project", "custom_driver", "modified"],
+        project=project,
+        filters={"issue_type": "Complaint"},
+    )
+
+
+@frappe.whitelist()
+def get_problem_detail(name):
+    doc = frappe.get_doc("Issue", name)
+    frappe.has_permission("Issue", "read", doc=doc, throw=True)
+    if doc.issue_type != "Complaint":
+        frappe.throw(_("Problem not found."), frappe.DoesNotExistError)
+    result = doc.as_dict(no_nulls=False)
+    result["communications"] = frappe.get_all(
+        "Communication",
+        filters={"reference_doctype": "Issue", "reference_name": name},
+        fields=["name", "sender", "content", "communication_date"],
+        order_by="communication_date asc, creation asc",
+        limit_page_length=100,
+    )
+    return result
+
+
+@frappe.whitelist()
+def get_operations_overview(project=None):
+    vehicles = get_fleet_os().get("vehicles", [])
+    assignments = get_assignment_queue(project)
+    fuel = get_pending_fuel_requests_for_overview(project)
+    incidents = get_incident_queue(project)
+    return {"summary": {
+        "vehicles": len(vehicles),
+        "assignments": sum(1 for row in assignments if row.status == "Active"),
+        "fuel_pending": len(fuel),
+        "incidents_open": sum(1 for row in incidents if row.status in ("Open", "Under Review")),
+    }}
+
+
+def get_pending_fuel_requests_for_overview(project=None):
+    from apex.salis.api.fuel_console import get_pending_fuel_requests
+
+    return get_pending_fuel_requests(project)
 
 
 @frappe.whitelist()

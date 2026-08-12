@@ -1,1 +1,0 @@
-import{L as t}from"./ListSkeleton.js";import{u as a}from"./index4.js";import{b as r,c as l,u as s}from"./index.js";const p={__name:"LoadingState",props:{label:{type:String,default:""},rows:{type:Number,default:4}},setup(e){const{t:o}=a();return(n,c)=>(r(),l(t,{rows:e.rows,label:e.label||s(o)("common.loading")},null,8,["rows","label"]))}};export{p as _};

@@ -1,0 +1,109 @@
+.salis-page {
+    display: grid;
+    gap: var(--sp-4);
+    max-inline-size: 760px;
+    margin-inline: auto;
+}
+.salis-page__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+}
+.salis-page h2 {
+    font-size: clamp(1.5rem, 6vw, 2.25rem);
+    line-height: 1.2;
+}
+.salis-eyebrow {
+    color: var(--accent-ink);
+    font-weight: 800;
+}
+.salis-primary-link {
+    display: grid;
+    place-items: center;
+    min-block-size: 48px;
+    border-radius: var(--radius);
+    background: var(--brand-green);
+    color: white;
+    font-weight: 800;
+}
+.salis-state {
+    display: grid;
+    justify-items: start;
+    gap: var(--sp-2);
+    padding: var(--sp-6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-2);
+}
+.salis-state__mark {
+    display: grid;
+    place-items: center;
+    inline-size: 44px;
+    block-size: 44px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--brand-green) 12%, white);
+    color: var(--accent-ink);
+    font-weight: 900;
+}
+.salis-list {
+    display: grid;
+    gap: var(--sp-3);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+.salis-list li,
+.salis-card,
+.salis-form {
+    display: grid;
+    gap: var(--sp-3);
+    padding: var(--sp-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-2);
+    box-shadow: var(--shadow-sm);
+}
+.salis-list li {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+}
+.salis-list p,
+.salis-form-page header > p:last-child {
+    color: var(--muted);
+}
+.salis-form {
+    gap: var(--sp-4);
+}
+.salis-upload {
+    display: grid;
+    gap: var(--sp-2);
+}
+.salis-notice,
+.salis-error {
+    padding: var(--sp-3);
+    border-radius: var(--radius-sm);
+}
+.salis-notice {
+    background: color-mix(in srgb, var(--ok) 12%, white);
+    color: var(--ok);
+}
+.salis-error {
+    background: color-mix(in srgb, var(--danger) 10%, white);
+    color: var(--danger);
+}
+.salis-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-3);
+}
+.salis-metric {
+    padding: var(--sp-4);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+}
+.salis-metric strong {
+    display: block;
+    font-size: 1.5rem;
+}

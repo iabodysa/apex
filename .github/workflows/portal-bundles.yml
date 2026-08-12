@@ -8,120 +8,43 @@ on:
 
 jobs:
   bundle-guard:
-    # Staleness guard for the committed SPA bundles. Each portal's built output
-    # (apex/public/<portal>/) is shipped committed so the app installs without a Node
-    # toolchain. This job installs the ONE frontend workspace from the ONE frozen
-    # lockfile (frontend/package-lock.json), rebuilds every portal, and fails if the
-    # fresh output differs from what is committed — i.e. someone changed portal src
-    # (or the shared vite factory / frontend_shared / a dependency pin) without
-    # rebuilding and committing the bundle. The SW portal also stamps its
-    # www/*-sw.min.js, so those files are diff-checked too.
-    # `dir` is the source tree (frontend/<dir>/); `portal` is the served output
-    # dir name (apex/public/<portal>/) — the two diverge since the src relocated.
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - dir: fleet
-            portal: fleet_portal
-          - dir: fleet_os
-            portal: fleet_os_portal
-          - dir: worker
-            portal: worker_portal
-            sw: "apex/www/masar-sw.min.js apex/www/driver-sw.min.js"
-          - dir: safety
-            portal: safety_portal
-          - dir: housing
-            portal: housing_portal
-          - dir: route_supervisor
-            portal: route_supervisor_portal
     steps:
       - uses: actions/checkout@v5
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
-
-      - name: Install the frontend workspace from the frozen lockfile
+      - name: Install the frozen frontend workspace
         working-directory: frontend
         run: npm ci
-
-      - name: Build the portal bundle
-        working-directory: frontend/${{ matrix.dir }}
+      - name: Build the unified portal
+        working-directory: frontend
         run: npm run build
-
-      - name: Fail if the committed bundle is stale
+      - name: Reject stale generated portal output
         run: |
           set -uo pipefail
-          # `git diff` alone is blind to a file git has never tracked, so a rebuild that
-          # emits a BRAND-NEW chunk passed the guard while the old chunk names stayed
-          # byte-identical. rollup renumbers its `[name]` chunk suffixes on nearly any
-          # source change, so that is the normal shape of a stale multi-chunk portal.
-          # `git status --porcelain` covers all three drift shapes at once — untracked
-          # new output (`??`), rewritten tracked bytes (` M`), and a chunk that vanished
-          # under emptyOutDir (` D`) — while still honouring .gitignore, so ordinary
-          # build noise (.DS_Store, editor swap files) cannot red the job. The pathspec
-          # keeps the check confined to this portal's committed output.
-          drift=$(git status --porcelain --untracked-files=all -- "apex/public/${{ matrix.portal }}" ${{ matrix.sw }})
+          drift=$(git status --porcelain --untracked-files=all -- \
+            apex/public/apex_portal \
+            apex/templates/includes/apex_portal_app.html \
+            apex/www/masar-sw.min.js \
+            apex/www/driver-sw.min.js)
           if [ -n "$drift" ]; then
-            echo "::error::Committed bundle for ${{ matrix.portal }} is stale."
+            echo "::error::Committed unified portal output is stale."
             echo "$drift"
-            git diff -- "apex/public/${{ matrix.portal }}" ${{ matrix.sw }}
-            echo "Run 'npm ci' in frontend/ then 'npm run build' in frontend/${{ matrix.dir }} and commit apex/public/${{ matrix.portal }}/ (and the stamped www SW, if any)."
             exit 1
           fi
-          echo "${{ matrix.portal }} bundle is in sync with committed output"
 
   manifest-ownership:
-    # frontend/ is ONE npm workspace: frontend/package.json is the only manifest that
-    # may declare dependencies and frontend/package-lock.json the only lockfile in the
-    # repo. That makes a framework-version drift between portals structurally
-    # impossible, which is why this single job replaces the old
-    # override-pins + dep-pins loops (and frontend_shared/pins.json, which existed
-    # only to simulate cross-package sharing npm workspaces now provide natively).
-    # It fails if a portal reintroduces its own deps/overrides or a second lockfile,
-    # or if the root manifest loses a security override.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-
-      - name: One manifest owns every frontend dependency
+      - name: Enforce one portal workspace and one lockfile
         run: |
           set -uo pipefail
-          fail=0
-          root=frontend/package.json
-
-          strays=$(git ls-files 'frontend/**/package-lock.json' | grep -v '^frontend/package-lock.json$' || true)
-          if [ -n "$strays" ]; then
-            echo "::error::frontend/package-lock.json must be the only lockfile; found also:"
-            echo "$strays"
-            fail=1
-          fi
-          [ -f frontend/package-lock.json ] || { echo "::error::frontend/package-lock.json is missing"; fail=1; }
-
-          for ws in $(jq -r '.workspaces[]' "$root"); do
-            pkg="frontend/${ws}/package.json"
-            if [ ! -f "$pkg" ]; then
-              echo "::error::workspace '${ws}' declared in ${root} has no package.json"
-              fail=1
-              continue
-            fi
-            owned=$(jq '[(.dependencies // {}), (.devDependencies // {}), (.overrides // {})] | map(length) | add' "$pkg")
-            if [ "$owned" != "0" ]; then
-              echo "::error::${pkg} declares its own dependencies/overrides — declare them once in ${root}"
-              fail=1
-            fi
+          test "$(jq -c '.workspaces' frontend/package.json)" = '["apex_portal"]'
+          test "$(git ls-files 'frontend/package-lock.json' 'frontend/*/package-lock.json' | wc -l | tr -d ' ')" = '1'
+          test -f frontend/package-lock.json
+          test "$(jq '[.dependencies // {}, .devDependencies // {}, .overrides // {}] | map(length) | add' frontend/apex_portal/package.json)" = '0'
+          for key in dompurify echarts nanoid ws; do
+            test "$(jq -r --arg key "$key" '.overrides[$key] // empty' frontend/package.json)" != ''
           done
-
-          for key in dompurify ws; do
-            got=$(jq -r --arg k "$key" '.overrides[$k] // "MISSING"' "$root")
-            if [ "$got" = "MISSING" ]; then
-              echo "::error::${root} lost the '${key}' security override"
-              fail=1
-            fi
-          done
-
-          [ "$fail" -eq 0 ] && echo "frontend dependency ownership is single-sourced"
-          exit "$fail"

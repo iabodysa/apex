@@ -57,6 +57,15 @@
    "state": "Pending",
    "action": "Approve",
    "next_state": "Approved",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 0,
+   "condition": "doc.requested_by != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Pending",
+   "action": "Approve",
+   "next_state": "Approved",
    "allowed": "Fleet Manager",
    "allow_self_approval": 0,
    "condition": "doc.requested_by != frappe.session.user"
@@ -67,6 +76,15 @@
    "action": "Approve",
    "next_state": "Approved",
    "allowed": "Fleet Project Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.requested_by != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Pending",
+   "action": "Reject",
+   "next_state": "Failed",
+   "allowed": "Fleet Supervisor",
    "allow_self_approval": 0,
    "condition": "doc.requested_by != frappe.session.user"
   },
