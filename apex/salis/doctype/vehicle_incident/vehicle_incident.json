@@ -404,7 +404,7 @@
    "link_fieldname": "source_incident"
   }
  ],
- "modified": "2026-08-09 02:58:00.000000",
+ "modified": "2026-08-12 08:43:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Incident",
@@ -465,6 +465,11 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "if_owner": 1,
+   "read": 1,
+   "role": "Driver"
   },
   {
    "permlevel": 1,

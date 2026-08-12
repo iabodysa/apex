@@ -152,9 +152,9 @@ def reassign_vehicle_driver(vehicle, driver, start_date=None, reject_same_driver
 
 	The single native reassign operation shared by both supervisor surfaces (the
 	/fleet board and the Fleet Control drawer) so they can never diverge: ends
-	every open Active Vehicle Assignment for the vehicle, then inserts + submits a
-	new one. ``VehicleAssignment.on_submit`` is what stamps Salis Vehicle.current_driver
-	and Salis Driver.current_vehicle (controllers are not bypassed). Callers own
+	every open Active Vehicle Assignment for the vehicle, clears each outgoing driver
+	mirror, then inserts + submits a new one. ``VehicleAssignment.on_submit`` stamps
+	the new Salis Vehicle.current_driver and Salis Driver.current_vehicle pair. Callers own
 	their own input resolution (plate->vehicle, external driver_id->driver) and
 	permission checks before calling. Returns the new assignment name.
 
@@ -174,6 +174,8 @@ def reassign_vehicle_driver(vehicle, driver, start_date=None, reject_same_driver
                 _("Vehicle {0} is already assigned to driver {1}.").format(vehicle, driver)
             )
         frappe.db.set_value("Vehicle Assignment", r.name, {"status": "Ended", "end_date": start})
+        if frappe.db.get_value("Salis Driver", r.driver, "current_vehicle") == vehicle:
+            frappe.db.set_value("Salis Driver", r.driver, "current_vehicle", None)
 
     assignment = frappe.get_doc({
         "doctype": "Vehicle Assignment",

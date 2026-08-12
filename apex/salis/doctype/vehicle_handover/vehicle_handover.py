@@ -35,6 +35,21 @@ class VehicleHandover(Document):
 
     def validate(self):
         """Validates the two drivers differ, the incoming rider is active, and the odometer only rises."""
+        self.direction = self.direction or "Transfer"
+        if self.direction == "Receipt":
+            self.from_driver = None
+            if not self.to_driver:
+                frappe.throw(_("To Driver is required for a receipt."))
+        elif self.direction == "Transfer":
+            if not self.from_driver or not self.to_driver:
+                frappe.throw(_("From Driver and To Driver are required for a transfer."))
+        elif self.direction == "Return":
+            self.to_driver = None
+            if not self.from_driver:
+                frappe.throw(_("From Driver is required for a return."))
+        else:
+            frappe.throw(_("Invalid handover direction."))
+
         if self.from_driver and self.to_driver and self.from_driver == self.to_driver:
             frappe.throw(_("To Driver must differ from From Driver."))
 
@@ -86,9 +101,26 @@ class VehicleHandover(Document):
         if self.to_driver:
             frappe.db.set_value("Salis Driver", self.to_driver, "current_vehicle", self.vehicle)
 
+        if self.direction == "Return" and self.from_driver:
+            for assignment in frappe.get_list(
+                "Vehicle Assignment",
+                filters={
+                    "vehicle": self.vehicle,
+                    "driver": self.from_driver,
+                    "status": "Active",
+                    "docstatus": 1,
+                },
+                pluck="name",
+            ):
+                frappe.db.set_value(
+                    "Vehicle Assignment",
+                    assignment,
+                    {"status": "Ended", "end_date": self.handover_date},
+                )
+
         self.add_comment(
             "Comment",
-            _("Vehicle {0} handed over to driver {1}.").format(self.vehicle, self.to_driver),
+            _("Vehicle {0} custody recorded as {1}.").format(self.vehicle, _(self.direction)),
         )
 
         if self.discrepancy_status == "Discrepancy":
@@ -124,6 +156,27 @@ class VehicleHandover(Document):
                 frappe.db.set_value("Salis Driver", self.to_driver, "current_vehicle", None)
             if self.from_driver:
                 frappe.db.set_value("Salis Driver", self.from_driver, "current_vehicle", self.vehicle)
+
+                if self.direction == "Return" and not frappe.db.exists(
+                    "Vehicle Assignment",
+                    {"vehicle": self.vehicle, "status": "Active", "docstatus": 1},
+                ):
+                    assignment = frappe.db.get_value(
+                        "Vehicle Assignment",
+                        {
+                            "vehicle": self.vehicle,
+                            "driver": self.from_driver,
+                            "status": "Ended",
+                            "docstatus": 1,
+                            "end_date": self.handover_date,
+                        },
+                        "name",
+                        order_by="modified desc",
+                    )
+                    if assignment:
+                        frappe.db.set_value(
+                            "Vehicle Assignment", assignment, {"status": "Active", "end_date": None}
+                        )
 
         add_timeline_note(
             "Salis Vehicle",
