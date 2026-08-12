@@ -1,14 +1,17 @@
 {
-  "id": "/masar",
+  "id": "/masar/",
   "name": "Masar",
   "short_name": "Masar",
   "description": "Masar for workers: transport, housing and self-service",
-  "start_url": "/masar",
-  "scope": "/masar",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/masar/",
+  "scope": "/masar/",
   "display": "standalone",
+  "display_override": ["standalone"],
   "orientation": "portrait",
-  "background_color": "#072b1a",
-  "theme_color": "#072b1a",
+  "background_color": "#F8F5EE",
+  "theme_color": "#00844E",
   "icons": [
     {
       "src": "/assets/apex/worker_portal/icons/masar-icon-192.png",

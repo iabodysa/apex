@@ -1,14 +1,17 @@
 {
-  "id": "/driver",
+  "id": "/driver/",
   "name": "Masar",
   "short_name": "Masar",
   "description": "Masar for drivers: shifts, trips and boarding",
-  "start_url": "/driver",
-  "scope": "/driver",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/driver/",
+  "scope": "/driver/",
   "display": "standalone",
+  "display_override": ["standalone"],
   "orientation": "portrait",
-  "background_color": "#072b1a",
-  "theme_color": "#072b1a",
+  "background_color": "#F8F5EE",
+  "theme_color": "#00844E",
   "icons": [
     {
       "src": "/assets/apex/worker_portal/icons/driver-icon-192.png",

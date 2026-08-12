@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#00844E" />
     <link rel="manifest" href="/assets/apex/worker_portal/manifest.webmanifest" />
     <link rel="icon" href="/assets/apex/images/apex-app-icon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/assets/apex/worker_portal/icons/masar-icon-192.png" />
+    <link rel="apple-touch-icon" href="/assets/apex/worker_portal/icons/masar-apple-touch-icon-180.png" />
     <link rel="stylesheet" href="/assets/apex/vendor/thmanyah-v1/thmanyah.css" />
     <link rel="stylesheet" href="/assets/apex/worker_portal/assets/index.css" />
     {%- include "apex/templates/includes/portal_accent.html" %}
@@ -30,14 +30,5 @@
   <body>
     <div id="app"></div>
     <script type="module" src="/assets/apex/worker_portal/assets/index.js"></script>
-    <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function () {
-          navigator.serviceWorker
-            .register("/masar-sw.min.js", { scope: "/masar" })
-            .catch(function () {});
-        });
-      }
-    </script>
   </body>
 </html>

@@ -1,60 +1,62 @@
-// Copyright (c) 2026, afmcoltd
+const ASSET_BASE = "/assets/apex/worker_portal";
 
-const THMANYAH_OFFLINE_ASSETS = Object.freeze([
+const THMANYAH_ASSETS = Object.freeze([
   "/assets/apex/vendor/thmanyah-v1/thmanyah.css",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahsans-Light.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahserifdisplay-Light.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahseriftext-Light.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahsans-Regular.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahserifdisplay-Regular.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahseriftext-Regular.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahsans-Medium.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahserifdisplay-Medium.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahseriftext-Medium.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahsans-Bold.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahserifdisplay-Bold.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahseriftext-Bold.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahsans-Black.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahserifdisplay-Black.woff2",
-  "/assets/apex/vendor/thmanyah-v1/thmanyahseriftext-Black.woff2",
+  ...["Light", "Regular", "Medium", "Bold", "Black"].flatMap((weight) => [
+    `/assets/apex/vendor/thmanyah-v1/thmanyahsans-${weight}.woff2`,
+    `/assets/apex/vendor/thmanyah-v1/thmanyahserifdisplay-${weight}.woff2`,
+    `/assets/apex/vendor/thmanyah-v1/thmanyahseriftext-${weight}.woff2`,
+  ]),
 ]);
 
-export const SW_PARAMS = {
-  driver_portal: {
+const SHARED_ASSETS = Object.freeze([
+  `${ASSET_BASE}/assets/index.js`,
+  `${ASSET_BASE}/assets/index.css`,
+  ...THMANYAH_ASSETS,
+]);
+
+export const SW_PARAMS = Object.freeze({
+  driver_portal: Object.freeze({
     displayName: "Masar",
     swFilename: "driver-sw.min.js",
-    navPath: "/driver",
-    assetBase: "/assets/apex/worker_portal",
-    cacheVersion: "driver-pwa-v1-",
-    cacheNamespace: "driver-pwa-",
-    cacheData: false,
+    navPath: "/driver/",
+    scope: "/driver/",
+    appId: "/driver/",
+    offlinePath: `${ASSET_BASE}/offline.html`,
+    immutableAssets: Object.freeze([
+      ...SHARED_ASSETS,
+      `${ASSET_BASE}/icons/driver-icon-192.png`,
+      `${ASSET_BASE}/icons/driver-icon-512.png`,
+      `${ASSET_BASE}/icons/driver-apple-touch-icon-180.png`,
+    ]),
+    cacheNamespace: "apex:driver:",
+    legacyCachePatterns: Object.freeze([
+      "^driver-pwa-v[0-9]+-[a-f0-9]{12}-(?:shell|data)$",
+    ]),
     skipWaitingOnInstall: true,
-    networkOnlyApiPrefixes: [
-      "/api/method/apex.salis.api.driver_portal.",
-      "/api/method/apex.salis.api.boarding.",
-      "/api/method/apex.salis.api.boarding_flow.",
-    ],
-    offlineAssets: THMANYAH_OFFLINE_ASSETS,
     enablePush: true,
-    push: { title: "Masar", tag: "salis-driver" },
-  },
+    push: Object.freeze({ title: "Masar", tag: "salis-driver" }),
+  }),
 
-  worker_portal: {
+  worker_portal: Object.freeze({
     displayName: "Masar",
     swFilename: "masar-sw.min.js",
-    navPath: "/masar",
-    assetBase: "/assets/apex/worker_portal",
-    cacheVersion: "masar-pwa-v4-",
-    cacheNamespace: "masar-pwa-",
-    cacheData: false,
-    skipWaitingOnInstall: true,
-    networkOnlyApiPrefixes: [
-      "/api/method/apex.salis.api.masar.",
-      "/api/method/apex.salis.api.masar_worker.",
-      "/api/method/apex.salis.api.boarding_flow.",
-    ],
-    offlineAssets: THMANYAH_OFFLINE_ASSETS,
+    navPath: "/masar/",
+    scope: "/masar/",
+    appId: "/masar/",
+    offlinePath: `${ASSET_BASE}/offline.html`,
+    immutableAssets: Object.freeze([
+      ...SHARED_ASSETS,
+      `${ASSET_BASE}/icons/masar-icon-192.png`,
+      `${ASSET_BASE}/icons/masar-icon-512.png`,
+      `${ASSET_BASE}/icons/masar-apple-touch-icon-180.png`,
+    ]),
+    cacheNamespace: "apex:masar:",
+    legacyCachePatterns: Object.freeze([
+      "^masar-pwa-v[0-9]+-[a-f0-9]{12}-(?:shell|data)$",
+    ]),
+    skipWaitingOnInstall: false,
     enablePush: false,
     push: null,
-  },
-};
+  }),
+});

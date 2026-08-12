@@ -26,7 +26,7 @@ from frappe.utils import cint
 
 from apex.apex_core.utils.portal_bootstrap import apply_portal_appearance
 from apex.apex_core.utils.portal_language import render_in_arabic
-from apex.apex_core.utils.portal_token_security import WORKER, throttle_entry_token
+from apex.apex_core.utils.portal_token_security import WORKER, resolve_portal_subject
 
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 
@@ -39,12 +39,15 @@ def get_context(context):
     context.no_cache = 1
     context.csrf_token = get_csrf_token()
 
+    query_token_supplied = "w" in frappe.form_dict
     raw_token = frappe.form_dict.get("w") or ""
-    valid_token = raw_token if _TOKEN_RE.match(raw_token) else ""
-    if valid_token:
-        throttle_entry_token(WORKER, valid_token)
-        _set_token_cookie(valid_token)
-        frappe.local.flags.redirect_location = "/masar"
+    valid_token = raw_token if isinstance(raw_token, str) and _TOKEN_RE.fullmatch(raw_token) else ""
+    if query_token_supplied:
+        if valid_token and _token_resolves(valid_token):
+            _set_token_cookie(valid_token)
+        else:
+            _delete_cookie(MASAR_TOKEN_COOKIE)
+        frappe.local.flags.redirect_location = "/masar/"
         raise frappe.Redirect
 
     render_in_arabic()
@@ -55,10 +58,21 @@ def get_context(context):
     context.async_enabled = not cint(conf.get("disable_async"))
     context.dev_server = 1 if frappe.conf.developer_mode else 0
 
-    context.masar_has_token = bool(_request_token_cookie())
+    cookie_token = _request_token_cookie()
+    context.masar_has_token = bool(cookie_token and _token_resolves(cookie_token))
+    if cookie_token and not context.masar_has_token:
+        _delete_cookie(MASAR_TOKEN_COOKIE)
 
     apply_portal_appearance(context)
     return context
+
+
+def _token_resolves(token: str) -> bool:
+    """Whether the credential still names an active worker."""
+    try:
+        return bool(resolve_portal_subject(WORKER, token, required=True))
+    except frappe.PermissionError:
+        return False
 
 
 def _set_token_cookie(token: str) -> None:
@@ -77,6 +91,12 @@ def _set_token_cookie(token: str) -> None:
         samesite="Lax",
         max_age=_COOKIE_MAX_AGE_SECONDS,
     )
+
+
+def _delete_cookie(name: str) -> None:
+    cm = getattr(frappe.local, "cookie_manager", None)
+    if cm is not None:
+        cm.delete_cookie(name)
 
 
 def _request_token_cookie() -> str:

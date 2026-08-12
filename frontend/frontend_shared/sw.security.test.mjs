@@ -1,70 +1,87 @@
-// Copyright (c) 2026, AFMCO and contributors
 import assert from "node:assert/strict";
-import crypto from "node:crypto";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import vm from "node:vm";
 
 import { completeAssetTreeBuildId } from "./sw.build-id.js";
+import { generate } from "./sw.generate.js";
+import { SW_PARAMS } from "./sw.params.js";
+import { renderServiceWorker } from "./sw.template.js";
+import {
+  LEGACY_APEX_WORKER_PATHS,
+  reconcileServiceWorker,
+} from "../worker/src/serviceWorkerRegistration.js";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
 const ASSET_TREE = path.join(ROOT, "apex/public/worker_portal");
 const DRIVER_SW = path.join(ROOT, "apex/www/driver-sw.min.js");
 const MASAR_SW = path.join(ROOT, "apex/www/masar-sw.min.js");
+const TEST_BUILD = "deadbeef0000";
+const ORIGIN = "https://apex.test";
 
-function filesBelow(root, current = root) {
-  return fs.readdirSync(current, { withFileTypes: true }).flatMap((entry) => {
-    const absolute = path.join(current, entry.name);
-    return entry.isDirectory() ? filesBelow(root, absolute) : [absolute];
-  });
+function response(tag, { ok = true, redirected = false, type = "basic", contentType = "application/javascript" } = {}) {
+  return {
+    ok,
+    redirected,
+    type,
+    headers: { get(name) { return name.toLowerCase() === "content-type" ? contentType : null; } },
+    clone() { return this; },
+    tag,
+  };
 }
 
-function completeTreeBuildId(root) {
-  const hash = crypto.createHash("sha256");
-  for (const absolute of filesBelow(root).sort()) {
-    const relative = path.relative(root, absolute).split(path.sep).join("/");
-    hash.update(relative);
-    hash.update("\0");
-    hash.update(fs.readFileSync(absolute));
-    hash.update("\0");
-  }
-  return hash.digest("hex").slice(0, 12);
+function request(pathname, { method = "GET", mode, origin = ORIGIN } = {}) {
+  return { url: origin + pathname, method, mode, clone() { return this; } };
 }
 
-function buildId(source) {
-  return source.match(/const BUILD = "([^"]+)";/)?.[1];
+class MemoryCache {
+  constructor() { this.values = new Map(); }
+  key(value) { return new URL(typeof value === "string" ? value : value.url, ORIGIN).href; }
+  async match(value) { return this.values.get(this.key(value)); }
+  async put(value, result) { this.values.set(this.key(value), result); }
 }
 
-function loadDriverWorker() {
+function loadWorker(params) {
   const handlers = {};
-  const cacheBuckets = new Map();
-  let cacheOpenCount = 0;
-  const deletedCaches = [];
+  const buckets = new Map();
+  const deleted = [];
+  const opened = [];
+  const fetches = [];
+  const clientActions = [];
   let cacheNames = [];
-  let fetchMode = "online";
-  let skipWaitingCount = 0;
-  let claimCount = 0;
-  const responseA = { ok: true, driver: "A", clone() { return this; } };
-  const keyOf = (key) => typeof key === "string" ? key : key.url;
+  let fetchResult = (input) => {
+    const url = new URL(typeof input === "string" ? input : input.url, ORIGIN);
+    if (url.pathname.endsWith(".html")) return response("offline", { contentType: "text/html; charset=utf-8" });
+    if (url.pathname.endsWith(".css")) return response("css", { contentType: "text/css" });
+    if (url.pathname.endsWith(".woff2")) return response("font", { contentType: "font/woff2" });
+    if (url.pathname.endsWith(".png")) return response("png", { contentType: "image/png" });
+    return response("js");
+  };
   const caches = {
     async open(name) {
-      cacheOpenCount += 1;
-      if (!cacheBuckets.has(name)) cacheBuckets.set(name, new Map());
-      const bucket = cacheBuckets.get(name);
-      return {
-        async match(key) { return bucket.get(keyOf(key)); },
-        async put(key, value) { bucket.set(keyOf(key), value); },
-      };
+      opened.push(name);
+      if (!buckets.has(name)) buckets.set(name, new MemoryCache());
+      return buckets.get(name);
     },
-    async keys() { return cacheNames; },
-    async delete(name) { deletedCaches.push(name); return true; },
+    async keys() { return cacheNames.length ? cacheNames : [...buckets.keys()]; },
+    async delete(name) { deleted.push(name); buckets.delete(name); return true; },
+  };
+  const clients = {
+    async matchAll() {
+      return [{
+        url: `${ORIGIN}${params.navPath}`,
+        async navigate(url) { clientActions.push(["navigate", url]); },
+        async focus() { clientActions.push(["focus"]); },
+      }];
+    },
+    async openWindow(url) { clientActions.push(["open", url]); },
   };
   const self = {
-    location: { origin: "https://driver.test" },
-    clients: { async claim() { claimCount += 1; } },
-    async skipWaiting() { skipWaitingCount += 1; },
+    location: { origin: ORIGIN },
+    registration: { async showNotification() {} },
+    clients: { ...clients, async claim() {} },
+    async skipWaiting() {},
     addEventListener(name, handler) { handlers[name] = handler; },
   };
   const context = {
@@ -72,123 +89,231 @@ function loadDriverWorker() {
     Request,
     URL,
     caches,
-    clients: self.clients,
+    clients,
     clearTimeout,
     console,
-    fetch: async () => {
-      if (fetchMode === "offline") throw new Error("offline");
-      return responseA;
+    fetch: async (input, options) => {
+      fetches.push([input, options]);
+      return fetchResult(input, options);
     },
     self,
     setTimeout,
   };
-  vm.runInNewContext(fs.readFileSync(DRIVER_SW, "utf8"), context);
+  vm.runInNewContext(renderServiceWorker({ ...params, build: TEST_BUILD }), context);
+
+  async function dispatch(name, event = {}) {
+    let responsePromise;
+    const waits = [];
+    event.respondWith = (value) => { responsePromise = Promise.resolve(value); };
+    event.waitUntil = (value) => { waits.push(Promise.resolve(value)); };
+    handlers[name]?.(event);
+    await Promise.all(waits);
+    return responsePromise;
+  }
+
   return {
-    deletedCaches,
-    handlers,
-    responseA,
-    cacheOpenCount: () => cacheOpenCount,
-    claimCount: () => claimCount,
-    skipWaitingCount: () => skipWaitingCount,
-    setCacheNames: (names) => { cacheNames = names; },
-    setFetchMode: (mode) => { fetchMode = mode; },
+    buckets,
+    clientActions,
+    deleted,
+    dispatch,
+    fetches,
+    opened,
+    setCacheNames(names) { cacheNames = names; },
+    setFetchResult(value) { fetchResult = value; },
   };
 }
 
-function driverApiRequest() {
-  return {
-    url: "https://driver.test/api/method/apex.salis.api.driver_portal.get_driver_profile",
-    method: "POST",
-    clone() { return this; },
-    async text() { return "{}"; },
-  };
+for (const [entry, navPath] of [["worker_portal", "/masar/"], ["driver_portal", "/driver/"]]) {
+  test(`${entry} uses one canonical trailing-slash identity and a distinct cache namespace`, () => {
+    const params = SW_PARAMS[entry];
+    assert.equal(params.navPath, navPath);
+    assert.equal(params.scope, navPath);
+    assert.equal(params.appId, navPath);
+    assert.match(params.cacheNamespace, new RegExp(`^apex:${entry === "worker_portal" ? "masar" : "driver"}:`));
+  });
+
+  test(`${entry} install caches only generic offline content and exact immutable assets`, async () => {
+    const params = SW_PARAMS[entry];
+    const worker = loadWorker(params);
+    await worker.dispatch("install", {});
+    const storedUrls = [...worker.buckets.values()].flatMap((cache) => [...cache.values.keys()]);
+    assert(storedUrls.includes(new URL(params.offlinePath, ORIGIN).href));
+    assert(!storedUrls.includes(new URL(params.navPath, ORIGIN).href), "personalized navigation HTML was cached");
+    assert.deepEqual(
+      storedUrls.sort(),
+      [params.offlinePath, ...params.immutableAssets].map((value) => new URL(value, ORIGIN).href).sort(),
+    );
+  });
+
+  test(`${entry} navigation is network-only and falls back only to generic offline HTML`, async () => {
+    const params = SW_PARAMS[entry];
+    const worker = loadWorker(params);
+    await worker.dispatch("install", {});
+
+    worker.setFetchResult(async () => response("personalized", { contentType: "text/html" }));
+    const online = await worker.dispatch("fetch", { request: request(`${params.navPath}?token=secret`, { mode: "navigate" }) });
+    assert.equal((await online).tag, "personalized");
+
+    worker.setFetchResult(async () => { throw new Error("offline"); });
+    const offline = await worker.dispatch("fetch", { request: request(params.navPath, { mode: "navigate" }) });
+    assert.equal((await offline).tag, "offline");
+
+    const storedUrls = [...worker.buckets.values()].flatMap((cache) => [...cache.values.keys()]);
+    assert(!storedUrls.includes(new URL(params.navPath, ORIGIN).href));
+  });
+
+  test(`${entry} never handles API, files, cross-origin, or non-allowlisted requests`, async () => {
+    const params = SW_PARAMS[entry];
+    const worker = loadWorker(params);
+    for (const req of [
+      request("/api/method/apex.secret", { method: "POST" }),
+      request("/files/private/photo.jpg"),
+      request("/assets/apex/worker_portal/assets/not-allowlisted.js"),
+      request(params.immutableAssets[0], { origin: "https://attacker.test" }),
+    ]) {
+      assert.equal(await worker.dispatch("fetch", { request: req }), undefined);
+    }
+    assert.equal(worker.opened.length, 0);
+  });
+
+  test(`${entry} caches allowlisted assets only after origin, status, redirect, and MIME validation`, async () => {
+    const params = SW_PARAMS[entry];
+    const asset = params.immutableAssets.find((value) => value.endsWith(".js"));
+    assert(asset, "fixture needs one JavaScript asset");
+    const cases = [
+      response("redirect", { redirected: true }),
+      response("login", { contentType: "text/html" }),
+      response("wrong-mime", { contentType: "text/plain" }),
+      response("not-ok", { ok: false }),
+    ];
+    for (const candidate of cases) {
+      const worker = loadWorker(params);
+      worker.setFetchResult(async () => candidate);
+      assert.equal((await worker.dispatch("fetch", { request: request(asset) })).tag, candidate.tag);
+      assert.equal([...worker.buckets.values()].flatMap((cache) => [...cache.values.keys()]).length, 0);
+    }
+
+    const worker = loadWorker(params);
+    worker.setFetchResult(async () => response("valid-js"));
+    assert.equal((await worker.dispatch("fetch", { request: request(asset) })).tag, "valid-js");
+    assert.deepEqual(
+      [...worker.buckets.values()].flatMap((cache) => [...cache.values.keys()]),
+      [new URL(asset, ORIGIN).href],
+    );
+  });
+
+  test(`${entry} deletes only caches in its exact entry namespace`, async () => {
+    const params = SW_PARAMS[entry];
+    const other = entry === "worker_portal" ? "driver" : "masar";
+    const worker = loadWorker(params);
+    const current = `${params.cacheNamespace}${TEST_BUILD}`;
+    const stale = `${params.cacheNamespace}0123456789ab`;
+    worker.setCacheNames([
+      current,
+      stale,
+      `${entry === "worker_portal" ? "masar" : "driver"}-pwa-v9-0123456789ab-data`,
+      `apex:${other}:0123456789ab`,
+      `${params.cacheNamespace}0123456789ab:near-miss`,
+      "another-app-cache",
+    ]);
+    await worker.dispatch("activate", {});
+    assert.deepEqual(worker.deleted, [
+      stale,
+      `${entry === "worker_portal" ? "masar" : "driver"}-pwa-v9-0123456789ab-data`,
+    ]);
+  });
 }
 
-async function dispatchFetch(worker, request) {
-  let response;
-  worker.handlers.fetch({ request, respondWith(value) { response = value; } });
-  return response;
-}
-
-test("both service workers use the complete emitted asset-tree build id", () => {
-  const expected = completeTreeBuildId(ASSET_TREE);
-  assert.equal(completeAssetTreeBuildId(ASSET_TREE), expected);
-  assert.equal(buildId(fs.readFileSync(DRIVER_SW, "utf8")), expected);
-  assert.equal(buildId(fs.readFileSync(MASAR_SW, "utf8")), expected);
+test("driver notification URLs stay on the canonical driver path", async () => {
+  for (const [payload, expected] of [
+    ["/driver/#/trip/1", `${ORIGIN}/driver/#/trip/1`],
+    ["https://attacker.test/driver/", `${ORIGIN}/driver/`],
+    ["//attacker.test/driver/", `${ORIGIN}/driver/`],
+    ["/masar/", `${ORIGIN}/driver/`],
+    ["/app/", `${ORIGIN}/driver/`],
+  ]) {
+    const worker = loadWorker(SW_PARAMS.driver_portal);
+    await worker.dispatch("notificationclick", {
+      notification: { close() {}, data: { url: payload } },
+    });
+    assert.deepEqual(worker.clientActions[0], ["navigate", expected]);
+  }
 });
 
-test("the worker build stamps both service workers from one output tree", () => {
-  const source = fs.readFileSync(
-    path.join(ROOT, "frontend/worker/vite.config.js"),
-    "utf8",
+test("both manifests use canonical standalone Arabic identities and approved colors", () => {
+  for (const [filename, route] of [["manifest.webmanifest", "/masar/"], ["driver.webmanifest", "/driver/"]]) {
+    const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "frontend/worker/public", filename)));
+    assert.equal(manifest.id, route);
+    assert.equal(manifest.start_url, route);
+    assert.equal(manifest.scope, route);
+    assert.equal(manifest.display, "standalone");
+    assert.deepEqual(manifest.display_override, ["standalone"]);
+    assert.equal(manifest.lang, "ar");
+    assert.equal(manifest.dir, "rtl");
+    assert.equal(manifest.theme_color, "#00844E");
+    assert.equal(manifest.background_color, "#F8F5EE");
+  }
+});
+
+test("each entry provides an opaque 180px Apple touch icon", () => {
+  for (const entry of ["masar", "driver"]) {
+    const png = fs.readFileSync(path.join(ROOT, `frontend/worker/public/icons/${entry}-apple-touch-icon-180.png`));
+    assert.equal(png.readUInt32BE(16), 180);
+    assert.equal(png.readUInt32BE(20), 180);
+    assert.equal(png[25], 2, "Apple touch icon must be truecolor without an alpha channel");
+  }
+});
+
+test("registration migration removes legacy Apex scripts and slashless scopes only", async () => {
+  assert.deepEqual(LEGACY_APEX_WORKER_PATHS, ["/driver-sw.js", "/masar-sw.js"]);
+  function registration(pathname, scope = `${ORIGIN}/driver/`) {
+    return {
+      active: { scriptURL: ORIGIN + pathname },
+      scope,
+      removed: false,
+      async unregister() { this.removed = true; },
+    };
+  }
+  const legacy = registration("/driver-sw.js");
+  const slashlessCurrentScript = registration("/driver-sw.min.js", `${ORIGIN}/driver`);
+  const current = registration("/driver-sw.min.js");
+  const otherEntry = registration("/masar-sw.min.js", `${ORIGIN}/masar/`);
+  const unrelated = registration("/service-worker.js");
+  const registered = [];
+  await reconcileServiceWorker({
+    async getRegistrations() {
+      return [legacy, slashlessCurrentScript, current, otherEntry, unrelated];
+    },
+    async register(script, options) { registered.push([script, options]); },
+  }, { script: "/driver-sw.min.js", scope: "/driver/" });
+  assert.equal(legacy.removed, true);
+  assert.equal(slashlessCurrentScript.removed, true);
+  assert.equal(current.removed, false);
+  assert.equal(otherEntry.removed, false);
+  assert.equal(unrelated.removed, false);
+  assert.deepEqual(registered, [["/driver-sw.min.js", { scope: "/driver/" }]]);
+});
+
+test("registration requires a canonical trailing-slash scope", async () => {
+  await assert.rejects(
+    reconcileServiceWorker({ getRegistrations: async () => [], register: async () => {} }, {
+      script: "/driver-sw.min.js",
+      scope: "/driver",
+    }),
+    /canonical trailing-slash scope/,
   );
-  assert.match(
-    source,
-    /serviceWorkers:\s*\["driver_portal",\s*"worker_portal"\]/,
-  );
-  const workflow = fs.readFileSync(
-    path.join(ROOT, ".github/workflows/portal-bundles.yml"),
-    "utf8",
-  );
-  assert.match(
-    workflow,
-    /sw:\s*"apex\/www\/masar-sw\.min\.js apex\/www\/driver-sw\.min\.js"/,
-  );
 });
 
-test("changing only a lazy upload chunk changes the complete-tree build id", () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "apex-sw-tree-"));
-  fs.mkdirSync(path.join(root, "assets"));
-  fs.writeFileSync(path.join(root, "assets/index.js"), "entry");
-  fs.writeFileSync(path.join(root, "assets/upload.js"), "old upload");
-  const before = completeTreeBuildId(root);
-  fs.writeFileSync(path.join(root, "assets/upload.js"), "inline photo upload");
-  assert.notEqual(completeTreeBuildId(root), before);
+test("route adapters leave service-worker registration to the single runtime owner", () => {
+  for (const adapter of ["apex/www/masar.html", "apex/www/driver.html"]) {
+    const source = fs.readFileSync(path.join(ROOT, adapter), "utf8");
+    assert.doesNotMatch(source, /navigator\.serviceWorker\s*\.register|serviceWorker\.register/);
+  }
 });
 
-test("driver API responses are network-only across a token switch and offline retry", async () => {
-  const worker = loadDriverWorker();
-  assert.equal(await dispatchFetch(worker, driverApiRequest()), worker.responseA);
-  assert.equal(worker.cacheOpenCount(), 0, "driver API response entered a cache");
-
-  worker.setFetchMode("offline");
-  await assert.rejects(dispatchFetch(worker, driverApiRequest()), /offline/);
-  assert.equal(worker.cacheOpenCount(), 0, "offline driver API read consulted a cache");
-});
-
-test("driver activation removes legacy driver data caches without touching Masar", async () => {
-  const worker = loadDriverWorker();
-  worker.setCacheNames([
-    "driver-pwa-v1-old-data",
-    "driver-pwa-v1-current-data",
-    "masar-pwa-v3-current-data",
-  ]);
-  let activation;
-  worker.handlers.activate({ waitUntil(value) { activation = value; } });
-  await activation;
-  assert(worker.deletedCaches.includes("driver-pwa-v1-old-data"));
-  assert(worker.deletedCaches.includes("driver-pwa-v1-current-data"));
-  assert(!worker.deletedCaches.includes("masar-pwa-v3-current-data"));
-});
-
-test("a waiting secure driver worker automatically activates and purges vulnerable caches", async () => {
-  const worker = loadDriverWorker();
-  worker.setCacheNames([
-    "driver-pwa-v1-vulnerable-data",
-    "driver-pwa-v1-vulnerable-shell",
-    "masar-pwa-v3-current-data",
-  ]);
-
-  let installation;
-  worker.handlers.install({ waitUntil(value) { installation = value; } });
-  await installation;
-  assert.equal(worker.skipWaitingCount(), 1, "secure driver worker remained waiting");
-
-  let activation;
-  worker.handlers.activate({ waitUntil(value) { activation = value; } });
-  await activation;
-  assert(worker.deletedCaches.includes("driver-pwa-v1-vulnerable-data"));
-  assert(worker.deletedCaches.includes("driver-pwa-v1-vulnerable-shell"));
-  assert(!worker.deletedCaches.includes("masar-pwa-v3-current-data"));
-  assert.equal(worker.claimCount(), 1, "secure worker did not claim existing driver clients");
+test("generated workers reconstruct byte-for-byte from the complete asset-tree build", () => {
+  const build = completeAssetTreeBuildId(ASSET_TREE);
+  assert.match(fs.readFileSync(DRIVER_SW, "utf8"), new RegExp(`const BUILD = "${build}"`));
+  assert.match(fs.readFileSync(MASAR_SW, "utf8"), new RegExp(`const BUILD = "${build}"`));
+  assert.equal(generate({ write: false }), true);
 });
