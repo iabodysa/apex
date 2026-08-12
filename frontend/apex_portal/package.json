@@ -1,0 +1,9 @@
+{
+  "name": "apex-portal-rebuild",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build --config vite.config.js",
+    "test": "vitest run --config vitest.config.mjs"
+  }
+}

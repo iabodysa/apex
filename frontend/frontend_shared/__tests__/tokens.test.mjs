@@ -1,4 +1,4 @@
-// Copyright (c) 2026, AFMCO and contributors
+// Copyright (c) 2026, Apex contributors
 // Guards the shared token layer — the one file every portal's appearance resolves
 // through. Two failures this replaces, both of which shipped for months:
 //
@@ -97,10 +97,15 @@ describe("shared token layer", () => {
       const portal = file.slice(FRONTEND.length + 1).split("/")[0];
       if (!portalScope.has(portal)) {
         let names = new Set();
-        try {
-          names = declaredIn(readFileSync(join(FRONTEND, portal, "src", "index.css"), "utf8"));
-        } catch {
-          /* portal has no stylesheet of its own — shared tokens only */
+        for (const relative of [["styles", "tokens.css"], ["src", "index.css"]]) {
+          try {
+            names = new Set([
+              ...names,
+              ...declaredIn(readFileSync(join(FRONTEND, portal, ...relative), "utf8")),
+            ]);
+          } catch {
+            /* Optional portal token entry is absent. */
+          }
         }
         portalScope.set(portal, names);
       }
