@@ -16,12 +16,24 @@ from frappe.utils import getdate, today
 class SalisDriver(Document):
     def validate(self):
         """Warns when the driver's licence has already expired, and refuses a hand-written pairing."""
+        self._refuse_a_hand_written_status()
         self._refuse_a_hand_written_pairing()
         if self.license_expiry and getdate(self.license_expiry) < getdate(today()):
             frappe.msgprint(
                 _("Driver license expired on {0}.").format(self.license_expiry),
                 indicator="orange",
                 title=_("License Expired"),
+            )
+
+    def _refuse_a_hand_written_status(self):
+        """Keep the fleet state under Driver Suspension and Driver Clearance."""
+        if self.is_new():
+            self.status = "Active"
+            return
+        if self.has_value_changed("status"):
+            frappe.throw(
+                _("Driver status is set by suspension and clearance records, not by editing it."),
+                frappe.PermissionError,
             )
 
     def _refuse_a_hand_written_pairing(self):

@@ -33,8 +33,8 @@ class MaintenanceRequest(Document):
     pass
 
 
-def before_save(doc, method=None):
-    """Defaults reported_by and company on a new request, then enforces the status transition rules."""
+def validate(doc, method=None):
+    """Default request ownership and enforce lifecycle rules on save and submit."""
     _guard_status(doc)
     if doc.is_new() and not doc.reported_by:
         doc.reported_by = frappe.session.user

@@ -379,28 +379,21 @@ def rider_block_reason(driver, on_date=None):
 
 def _approved_leave_on(employee, on_date):
     """Return the name of an Approved, submitted Leave Application for ``employee``
-	whose period covers ``on_date``, else ``None``.
-
-	Defensive: HRMS may not be installed (the Leave Application DocType is absent)
-	on a given bench, so a lookup failure degrades to "no leave" rather than
-	aborting the delivery guard."""
+	whose period covers ``on_date``, else ``None``."""
     if not employee:
         return None
-    try:
-        rows = frappe.get_all(
-            "Leave Application",
-            filters={
-                "employee": employee,
-                "status": "Approved",
-                "docstatus": 1,
-                "from_date": ["<=", on_date],
-                "to_date": [">=", on_date],
-            },
-            pluck="name",
-            limit=1,
-        )
-    except Exception:
-        return None
+    rows = frappe.get_all(
+        "Leave Application",
+        filters={
+            "employee": employee,
+            "status": "Approved",
+            "docstatus": 1,
+            "from_date": ["<=", on_date],
+            "to_date": [">=", on_date],
+        },
+        pluck="name",
+        limit=1,
+    )
     return rows[0] if rows else None
 
 

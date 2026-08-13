@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import frappe
+from frappe.desk.form.assign_to import add as add_assignment
+from frappe.desk.form.assign_to import close_all_assignments
 from frappe.utils import today
 
 from apex.habitat.doctype.audit_remediation_plan.audit_remediation_plan import (
@@ -60,8 +62,14 @@ def _preflight():
     for status in frappe.get_all("Salis Driver", pluck="status"):
         driver_status(status)
 
-    for status in frappe.get_all("Maintenance Request", pluck="status"):
-        maintenance_status(status)
+    for row in frappe.get_all(
+        "Maintenance Request", fields=["name", "status", "docstatus", "assigned_to"]
+    ):
+        maintenance_status(row.status)
+        if row.assigned_to and not frappe.db.exists("User", row.assigned_to):
+            raise ValueError(
+                f"Maintenance Request {row.name} has unknown assignee {row.assigned_to!r}"
+            )
 
     for row in frappe.get_all(
         "Vehicle Incident", fields=["name", "status", "docstatus"]
@@ -134,13 +142,52 @@ def _converge_drivers():
 
 
 def _converge_maintenance_requests():
-    for row in frappe.get_all("Maintenance Request", fields=["name", "status"]):
+    for row in frappe.get_all(
+        "Maintenance Request", fields=["name", "status", "docstatus", "assigned_to"]
+    ):
+        target = maintenance_status(row.status)
         _set_status(
             "Maintenance Request",
             row.name,
             row.status,
-            maintenance_status(row.status),
+            target,
         )
+        _converge_maintenance_assignment(
+            row.name, target, row.docstatus, row.assigned_to
+        )
+
+
+def _converge_maintenance_assignment(name, status, docstatus, assigned_to):
+    if status == "Closed" or docstatus == 2:
+        close_all_assignments("Maintenance Request", name, ignore_permissions=True)
+        _set_status(
+            "Maintenance Request",
+            name,
+            assigned_to,
+            None,
+            fieldname="assigned_to",
+        )
+        return
+    if not assigned_to:
+        return
+    if frappe.db.exists(
+        "ToDo",
+        {
+            "reference_type": "Maintenance Request",
+            "reference_name": name,
+            "allocated_to": assigned_to,
+            "status": "Open",
+        },
+    ):
+        return
+    add_assignment(
+        {
+            "doctype": "Maintenance Request",
+            "name": name,
+            "assign_to": frappe.as_json([assigned_to]),
+        },
+        ignore_permissions=True,
+    )
 
 
 def _converge_vehicle_incidents():
@@ -219,20 +266,27 @@ def _converge_maintenance_kanban():
     if not frappe.db.exists("Kanban Board", name):
         return
     board = frappe.get_doc("Kanban Board", name)
-    board.set("columns", [])
-    for column_name, indicator in (
-        ("Open", "Blue"),
-        ("In Progress", "Orange"),
-        ("Resolved", "Green"),
-        ("Closed", "Gray"),
-    ):
-        board.append(
-            "columns",
-            {
-                "column_name": column_name,
-                "status": "Active",
-                "indicator": indicator,
-                "order": "[]",
-            },
+    canonical = [
+        {
+            "column_name": column_name,
+            "status": "Active",
+            "indicator": indicator,
+            "order": "[]",
+        }
+        for column_name, indicator in (
+            ("Open", "Blue"),
+            ("In Progress", "Orange"),
+            ("Resolved", "Green"),
+            ("Closed", "Gray"),
         )
+    ]
+    current = [
+        {key: row.get(key) for key in canonical[0]}
+        for row in board.get("columns")
+    ]
+    if current == canonical:
+        return
+    board.set("columns", [])
+    for column in canonical:
+        board.append("columns", column)
     board.save(ignore_permissions=True)

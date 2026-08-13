@@ -103,6 +103,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nStopped\nReleased",
+   "read_only": 1,
    "search_index": 1
   },
   {

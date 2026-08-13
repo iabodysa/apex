@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 import frappe
 
 from apex.salis import utils
+from apex.salis.doctype.salis_driver import salis_driver
 
 
 class TestSalisDriverStateContract(TestCase):
@@ -53,6 +54,36 @@ class TestSalisDriverStateContract(TestCase):
         ):
             self.assertIsNone(utils.rider_block_reason("DRV-1", "2026-08-14"))
 
+    def test_leave_query_failure_blocks_the_operation(self):
+        with patch.object(
+            utils.frappe,
+            "get_all",
+            side_effect=RuntimeError("database unavailable"),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "database unavailable"):
+                utils._approved_leave_on("EMP-1", "2026-08-14")
+
+    def test_driver_status_is_server_owned(self):
+        new_doc = MagicMock(status="Released")
+        new_doc.is_new.return_value = True
+        salis_driver.SalisDriver._refuse_a_hand_written_status(new_doc)
+        self.assertEqual(new_doc.status, "Active")
+
+        existing = MagicMock()
+        existing.is_new.return_value = False
+        existing.has_value_changed.return_value = True
+        fake_frappe = MagicMock()
+        fake_frappe.PermissionError = frappe.PermissionError
+        fake_frappe.throw.side_effect = lambda message, exc=None: (_ for _ in ()).throw(
+            (exc or frappe.ValidationError)(message)
+        )
+        with (
+            patch.object(salis_driver, "frappe", fake_frappe),
+            patch.object(salis_driver, "_", side_effect=lambda message: message),
+            self.assertRaises(frappe.PermissionError),
+        ):
+            salis_driver.SalisDriver._refuse_a_hand_written_status(existing)
+
     def test_driver_master_has_no_duplicate_leave_state(self):
         self.assertEqual(utils.BLOCKING_DRIVER_STATUSES, ("Stopped", "Released"))
 
@@ -65,4 +96,5 @@ class TestSalisDriverStateContract(TestCase):
         self.assertEqual(
             status["options"].splitlines(), ["Active", "Stopped", "Released"]
         )
+        self.assertTrue(status["read_only"])
         self.assertNotIn("On Leave", {state["title"] for state in metadata["states"]})

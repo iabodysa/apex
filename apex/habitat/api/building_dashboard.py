@@ -131,7 +131,11 @@ def get_building_metrics(building: str) -> dict:
         ),
         "open_maintenance": frappe.db.count(
             "Maintenance Request",
-            {"building": building, "status": ["in", ["Open", "In Progress"]]},
+            {
+                "building": building,
+                "docstatus": 1,
+                "status": ["in", ["Open", "In Progress", "Resolved"]],
+            },
         ),
         "open_custody": frappe.db.count(
             "Custody Issue",

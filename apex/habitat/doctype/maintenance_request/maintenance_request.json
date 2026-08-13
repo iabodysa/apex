@@ -175,7 +175,8 @@
    "fieldname": "assigned_to",
    "fieldtype": "Link",
    "label": "Assigned To",
-   "options": "User"
+   "options": "User",
+   "read_only": 1
   },
   {
    "fieldname": "maintenance_request_sec_primary_large_text",

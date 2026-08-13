@@ -11,6 +11,7 @@ import frappe
 
 from apex.habitat.doctype.maintenance_request import maintenance_request
 from apex.habitat.doctype.maintenance_work_order import maintenance_work_order
+from apex.apex_core.worklist.my_work_center import WORKLIST_REGISTRY
 
 
 def _raising_frappe() -> MagicMock:
@@ -29,6 +30,15 @@ def _call(endpoint, *args, **kwargs):
 
 
 class TestMaintenanceRequestTransitions(TestCase):
+    def test_validate_hook_covers_both_save_and_submit_lifecycles(self):
+        hooks = __import__("apex.hooks", fromlist=["doc_events"])
+        self.assertEqual(
+            hooks.doc_events["Maintenance Request"],
+            {
+                "validate": "apex.habitat.doctype.maintenance_request.maintenance_request.validate"
+            },
+        )
+
     def test_status_is_server_owned_on_insert_and_direct_update(self):
         fake = _raising_frappe()
         new_doc = MagicMock(status="Closed")
@@ -247,6 +257,16 @@ class TestMaintenanceWorkOrderContract(TestCase):
 
 
 class TestMaintenanceMetadata(TestCase):
+    def test_resolved_submitted_requests_remain_active_until_closed(self):
+        self.assertEqual(
+            WORKLIST_REGISTRY["Maintenance Request"],
+            {
+                "active": ["Open", "In Progress", "Resolved"],
+                "terminal": ["Closed"],
+                "docstatus": 1,
+            },
+        )
+
     def test_status_field_has_one_work_lifecycle_and_native_assignment_is_separate(
         self,
     ):
@@ -263,5 +283,9 @@ class TestMaintenanceMetadata(TestCase):
             ["Open", "In Progress", "Resolved", "Closed"],
         )
         self.assertTrue(status["read_only"])
+        assigned_to = next(
+            field for field in metadata["fields"] if field["fieldname"] == "assigned_to"
+        )
+        self.assertTrue(assigned_to["read_only"])
         self.assertNotIn("Assigned", {state["title"] for state in metadata["states"]})
         self.assertNotIn("Reopened", {state["title"] for state in metadata["states"]})

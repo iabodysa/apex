@@ -1531,6 +1531,7 @@ Driver Position Updated At,وقت آخر تحديث لموقع السائق
 Driver Record Status,حالة سجل السائق
 Driver Rejected,مرفوض من السائق
 Driver Suspension,إيقاف سائق
+"Driver status is set by suspension and clearance records, not by editing it.","تُحدّد حالة السائق من سجل الإيقاف أو إخلاء الطرف، ولا تُعدّل مباشرة."
 Driver User,مستخدم السائق
 Driver Web Push,إشعارات الويب للسائق
 Driver assigned,تم إسناد سائق

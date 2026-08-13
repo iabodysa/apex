@@ -208,13 +208,13 @@ def _maintenance(building_names):
     result = defaultdict(lambda: {"open": 0, "closed": 0})
     rows = frappe.get_all(
         "Maintenance Request",
-        filters={"building": ["in", building_names]},
+        filters={"building": ["in", building_names], "docstatus": 1},
         fields=["building", "status"],
     )
     for r in rows:
-        if r.status in ("Open", "In Progress"):
+        if r.status in ("Open", "In Progress", "Resolved"):
             result[r.building]["open"] += 1
-        elif r.status in ("Resolved", "Closed"):
+        elif r.status == "Closed":
             result[r.building]["closed"] += 1
     return result
 

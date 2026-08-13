@@ -40,6 +40,7 @@ WORKLIST_REGISTRY: dict[str, dict] = {
     "Maintenance Request": {
         "active": ["Open", "In Progress", "Resolved"],
         "terminal": ["Closed"],
+        "docstatus": 1,
     },
     "Resident Request": {
         "active": ["New", "Triaged", "Assigned", "In Progress", "Waiting Evidence"],
@@ -91,6 +92,8 @@ def _mine(doctype: str, states: list[str], *, recent: bool = False) -> list[dict
     if not frappe.has_permission(doctype, "read"):
         return []
     filters: dict = {"owner": frappe.session.user, "status": ["in", states]}
+    if "docstatus" in WORKLIST_REGISTRY[doctype]:
+        filters["docstatus"] = WORKLIST_REGISTRY[doctype]["docstatus"]
     if recent:
         filters["modified"] = [">=", add_to_date(now_datetime(), hours=-_RECENT_HOURS)]
     try:
