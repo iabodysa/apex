@@ -89,6 +89,8 @@ describe("operations identity", () => {
   });
 
   it("offers grouped mobile navigation instead of a horizontally scrolling route strip", async () => {
+    const priorWidth = window.innerWidth;
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 390 });
     const navigation = [
       { label: "مهام اليوم", to: "/today", icon: "home", group: "اليوم" },
       { label: "القادمون", to: "/arrivals", icon: "users", group: "السكن" },
@@ -99,5 +101,6 @@ describe("operations identity", () => {
     expect(wrapper.find(".operations-shell__mobile-nav").exists()).toBe(true);
     expect(wrapper.findAll(".operations-shell__mobile-group")).toHaveLength(4);
     expect(wrapper.find(".operations-shell__mobile-nav").text()).toContain("العهد والجرد");
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: priorWidth });
   });
 });

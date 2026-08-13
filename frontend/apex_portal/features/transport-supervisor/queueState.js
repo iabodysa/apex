@@ -16,5 +16,6 @@ export function queryFromFilters(filters = {}) {
 
 export function resultCountLabel(count, hasMore) {
   const suffix = hasMore ? " مع نتائج إضافية" : "";
-  return `${count} ${count === 1 ? "نتيجة" : "نتائج"}${suffix}`;
+  const noun = count === 1 || count > 10 ? "نتيجة" : "نتائج";
+  return `${count} ${noun}${suffix}`;
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { FeatherIcon } from "frappe-ui";
 import { ar } from "../i18n/ar.js";
 
@@ -9,6 +9,12 @@ const props = defineProps({
   title: { type: String, required: true },
   navigation: { type: Array, default: () => [] },
 });
+const isMobile = ref(globalThis.window?.innerWidth < 768);
+function updateViewport() {
+  isMobile.value = globalThis.window?.innerWidth < 768;
+}
+onMounted(() => globalThis.window?.addEventListener("resize", updateViewport));
+onBeforeUnmount(() => globalThis.window?.removeEventListener("resize", updateViewport));
 
 const mobileGroups = computed(() => {
   const groups = new Map();
@@ -29,7 +35,7 @@ const mobileGroups = computed(() => {
         <img class="portal-brand-mark" :src="brandMark" alt="" />
         <span>{{ ar.brandName }}</span>
       </div>
-      <nav v-if="navigation.length" class="operations-shell__nav" :aria-label="ar.primaryNavigation">
+      <nav v-if="navigation.length && !isMobile" class="operations-shell__nav" :aria-label="ar.primaryNavigation">
         <RouterLink
           v-for="item in navigation"
           :key="item.to"
@@ -48,7 +54,7 @@ const mobileGroups = computed(() => {
           </a>
         </RouterLink>
       </nav>
-      <nav v-if="mobileGroups.length" class="operations-shell__mobile-nav" :aria-label="ar.primaryNavigation">
+      <nav v-if="mobileGroups.length && isMobile" class="operations-shell__mobile-nav" :aria-label="ar.primaryNavigation">
         <details v-for="group in mobileGroups" :key="group.label" class="operations-shell__mobile-group">
           <summary>{{ group.label }}</summary>
           <RouterLink
