@@ -23,6 +23,7 @@ WORKFLOWS = (
     "Movement Cost Recovery Workflow",
     "Movement Cost Transfer Workflow",
     "Rental Settlement Workflow",
+    "Route Assignment Workflow",
     "Salis Payment Request Workflow",
     "Subcontractor Service Contract Workflow",
     "Transport Request Workflow",

@@ -7,14 +7,27 @@
  "field_order": [
   "ra_tab_overview",
   "ra_sec_assignment",
+  "assignment_name",
   "route_template",
   "work_shift",
   "shift_name",
   "ra_sec_assignment_col",
+  "project",
+  "driver",
+  "vehicle",
   "shift_start_time",
   "shift_end_time",
-  "project",
+  "ra_sec_schedule",
+  "starts_on",
+  "ends_on",
+  "enabled",
+  "ra_sec_schedule_col",
+  "route_supervisor",
+  "status",
+  "approved_by",
+  "approved_on",
   "ra_sec_system",
+  "generated_through",
   "naming_series"
  ],
  "fields": [
@@ -29,12 +42,20 @@
    "label": "Route Assignment"
   },
   {
+   "fieldname": "assignment_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Assignment Name",
+   "read_only": 1
+  },
+  {
    "fieldname": "route_template",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Route Template",
    "options": "Route Template",
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -61,6 +82,27 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project",
+   "reqd": 1
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "label": "Default Driver",
+   "options": "Salis Driver"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Default Vehicle",
+   "options": "Salis Vehicle"
+  },
+  {
    "fetch_from": "work_shift.start_time",
    "fetch_if_empty": 1,
    "fieldname": "shift_start_time",
@@ -77,14 +119,68 @@
    "read_only": 1
   },
   {
-   "fetch_from": "work_shift.project",
-   "fetch_if_empty": 1,
-   "fieldname": "project",
+   "fieldname": "ra_sec_schedule",
+   "fieldtype": "Section Break",
+   "label": "Schedule and Approval"
+  },
+  {
+   "fieldname": "starts_on",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Starts On",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ends_on",
+   "fieldtype": "Date",
+   "label": "Ends On"
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "ra_sec_schedule_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "route_supervisor",
    "fieldtype": "Link",
+   "label": "Route Supervisor",
+   "options": "User"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Project",
-   "options": "Project",
+   "label": "Status",
+   "options": "Pending\nApproved\nRejected\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approved_on",
+   "fieldtype": "Datetime",
+   "label": "Approved On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "generated_through",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Generated Through",
    "read_only": 1
   },
   {
@@ -103,6 +199,7 @@
    "reqd": 1
   }
  ],
+ "is_submittable": 1,
  "links": [
   {
    "group": "Operations",
@@ -115,7 +212,7 @@
    "link_fieldname": "route_assignment"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-13 20:31:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Assignment",
@@ -133,6 +230,7 @@
    "report": 1,
    "role": "Fleet Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
@@ -140,12 +238,15 @@
    "read": 1,
    "report": 1,
    "role": "Fleet Project Manager",
+   "submit": 1,
    "write": 1
   },
   {
    "read": 1,
    "report": 1,
-   "role": "Fleet Supervisor"
+   "role": "Fleet Supervisor",
+   "submit": 1,
+   "write": 1
   },
   {
    "cancel": 0,
@@ -158,6 +259,7 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
@@ -173,9 +275,10 @@
   }
  ],
  "row_format": "Dynamic",
- "search_fields": "shift_name, route_template, work_shift",
+ "search_fields": "assignment_name, shift_name, route_template, work_shift, project",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "assignment_name",
  "track_changes": 1
 }
