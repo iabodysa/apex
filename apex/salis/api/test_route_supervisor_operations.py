@@ -76,6 +76,12 @@ class TestRouteSupervisorOperations(TestCase):
             get_list.call_args.kwargs["filters"],
             {"route_plan": ["in", ["RP-OWN"]]},
         )
+        self.assertEqual(
+            get_list.call_args.kwargs["order_by"],
+            "`tabDispatch Trip`.trip_date desc, "
+            "`tabDispatch Trip`.modified desc, "
+            "`tabDispatch Trip`.name desc",
+        )
 
     @patch.object(operations, "_require_portal_role")
     @patch.object(
@@ -93,6 +99,12 @@ class TestRouteSupervisorOperations(TestCase):
                 "status": ["in", ["Completed", "Cancelled"]],
                 "route_plan": ["in", ["RP-OWN"]],
             },
+        )
+        self.assertEqual(
+            get_list.call_args.kwargs["order_by"],
+            "`tabDispatch Trip`.trip_date desc, "
+            "`tabDispatch Trip`.modified desc, "
+            "`tabDispatch Trip`.name desc",
         )
 
     @patch.object(operations, "_owned_trip", create=True)

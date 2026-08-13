@@ -1,13 +1,22 @@
 import SupervisorPage from "./SupervisorPage.vue";
 import RoutePlanForm from "./RoutePlanForm.vue";
 import TransportMapPage from "./TransportMapPage.vue";
+import "./styles.css";
 
-const page = (path, name, capability, label, icon, endpoint, view = {}) => ({
+const pages = Object.freeze({
+  requests: () => import("./pages/TransportRequestsPage.vue"),
+  shifts: () => import("./pages/ShiftRoutesPage.vue"),
+  plans: () => import("./pages/RoutePlansPage.vue"),
+  trips: () => import("./pages/DispatchTripsPage.vue"),
+  history: () => import("./pages/MovementHistoryPage.vue"),
+});
+
+const page = (path, name, capability, label, icon, component, endpoint, view = {}) => ({
   path,
   name,
   feature: "transport-supervisor",
   capability,
-  component: SupervisorPage,
+  component,
   meta: {
     navigation: !path.includes(":"),
     label,
@@ -17,9 +26,9 @@ const page = (path, name, capability, label, icon, endpoint, view = {}) => ({
 });
 
 export const supervisorRoutes = Object.freeze([
-  page("/requests", "transport-requests", "transport.request.read", "طلبات النقل", "inbox", "apex.salis.api.route_supervisor.get_transport_requests", { collections: ["requests"], titleFields: ["display_title"], fallbackTitle: "طلب نقل" }),
-  page("/shifts", "transport-shifts", "transport.shift.read", "الشفتات", "calendar", "apex.salis.api.route_supervisor.get_shift_routes", { collections: ["items"], titleFields: ["shift_name", "route_name"], fallbackTitle: "شفت تشغيل" }),
-  page("/plans", "transport-plans", "transport.plan.read", "خطط المسار", "map", "apex.salis.api.route_supervisor.get_route_plans", { collections: ["plans"], titleFields: ["route_name"], fallbackTitle: "خطة مسار", detail: "/plans/:name" }),
+  page("/requests", "transport-requests", "transport.request.read", "طلبات النقل", "inbox", pages.requests, "apex.salis.api.route_supervisor.get_transport_requests", { collections: ["requests"], titleFields: ["display_title"], fallbackTitle: "طلب نقل" }),
+  page("/shifts", "transport-shifts", "transport.shift.read", "الشفتات", "calendar", pages.shifts, "apex.salis.api.route_supervisor.get_shift_routes", { collections: ["items"], titleFields: ["shift_name", "route_name"], fallbackTitle: "شفت تشغيل" }),
+  page("/plans", "transport-plans", "transport.plan.read", "خطط المسار", "map", pages.plans, "apex.salis.api.route_supervisor.get_route_plans", { collections: ["plans"], titleFields: ["route_name"], fallbackTitle: "خطة مسار", detail: "/plans/:name" }),
   {
     path: "/plans/new",
     name: "transport-plan-new",
@@ -28,15 +37,15 @@ export const supervisorRoutes = Object.freeze([
     component: RoutePlanForm,
     meta: { navigation: false, label: "خطة جديدة", icon: "plus" },
   },
-  page("/plans/:name", "transport-plan-detail", "transport.plan.read", "تفاصيل الخطة", "map-pin", "apex.salis.api.route_supervisor.get_route_plan", {
+  page("/plans/:name", "transport-plan-detail", "transport.plan.read", "تفاصيل الخطة", "map-pin", SupervisorPage, "apex.salis.api.route_supervisor.get_route_plan", {
     fields: [
       { key: "route_name", label: "المسار" },
       { key: "shift", label: "الشفت" },
       { key: "driver", label: "السائق" },
     ],
   }),
-  page("/trips", "dispatch-trips", "transport.trip.read", "الرحلات", "navigation", "apex.salis.api.route_supervisor.get_dispatch_trips", { collections: ["trips"], titleFields: ["route_name", "shift_name"], fallbackTitle: "رحلة تشغيل", detail: "/trips/:name" }),
-  page("/trips/:name", "dispatch-trip-control", "transport.trip.dispatch", "تشغيل الرحلة", "play-circle", "apex.salis.api.route_supervisor.get_dispatch_trip", {
+  page("/trips", "dispatch-trips", "transport.trip.read", "الرحلات", "navigation", pages.trips, "apex.salis.api.route_supervisor.get_dispatch_trips", { collections: ["trips"], titleFields: ["route_name", "shift_name"], fallbackTitle: "رحلة تشغيل", detail: "/trips/:name" }),
+  page("/trips/:name", "dispatch-trip-control", "transport.trip.dispatch", "تشغيل الرحلة", "play-circle", SupervisorPage, "apex.salis.api.route_supervisor.get_dispatch_trip", {
     fields: [
       { key: "status", label: "الحالة" },
       { key: "vehicle", label: "المركبة" },
@@ -51,7 +60,7 @@ export const supervisorRoutes = Object.freeze([
     component: TransportMapPage,
     meta: { navigation: true, label: "الخريطة", icon: "map-pin" },
   },
-  page("/history", "movement-history", "transport.history.read", "سجل الحركة", "clock", "apex.salis.api.route_supervisor.get_movement_history", { collections: ["items"], titleFields: ["route_name", "shift_name"], fallbackTitle: "حركة سابقة" }),
+  page("/history", "movement-history", "transport.history.read", "سجل الحركة", "clock", pages.history, "apex.salis.api.route_supervisor.get_movement_history", { collections: ["items"], titleFields: ["route_name", "shift_name"], fallbackTitle: "حركة سابقة" }),
 ]);
 
 export const supervisorRedirects = Object.freeze([

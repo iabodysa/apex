@@ -23,13 +23,22 @@ vi.mock("frappe-ui", () => ({
   createResource: vi.fn((options) => {
     let url = options.url;
     return {
+      data: resourceData.get(url),
+      error: null,
+      loading: false,
+      url,
       update(next) {
-        if (next.url) url = next.url;
+        if (next.url) {
+          url = next.url;
+          this.url = next.url;
+          this.data = resourceData.get(next.url);
+        }
       },
-      fetch: vi.fn(async (params) => {
+      fetch: vi.fn(async function (params) {
         const value = resourceData.get(url);
         if (value instanceof Error) throw value;
-        return typeof value === "function" ? value(params) : value;
+        this.data = typeof value === "function" ? value(params) : value;
+        return this.data;
       }),
     };
   }),
@@ -56,6 +65,35 @@ describe("Masar transport supervisor feature", () => {
 
   it("centres operations on requests, shifts, plans and dispatch trips", () => {
     expect(supervisorRoutes.map((route) => route.path)).toEqual(["/requests", "/shifts", "/plans", "/plans/new", "/plans/:name", "/trips", "/trips/:name", "/map", "/history"]);
+  });
+
+  it("gives every sidebar destination its own page component", () => {
+    const navigationRoutes = supervisorRoutes.filter((route) => route.meta.navigation);
+
+    expect(new Set(navigationRoutes.map((route) => route.component)).size).toBe(
+      navigationRoutes.length,
+    );
+  });
+
+  it("renders a distinct operations layout for every list destination", async () => {
+    const expectations = new Map([
+      ["/requests", ["طلبات النقل", ".supervisor-request-queue"]],
+      ["/shifts", ["الشفتات", ".supervisor-shift-grid"]],
+      ["/plans", ["خطط المسار", ".supervisor-plan-grid"]],
+      ["/trips", ["الرحلات", ".supervisor-trip-board"]],
+      ["/history", ["سجل الحركة", ".supervisor-history"]],
+    ]);
+    for (const [path, [title, layout]] of expectations) {
+      const route = supervisorRoutes.find((candidate) => candidate.path === path);
+      resourceData.set(route.meta.view.endpoint, [{ name: `${path}-1` }]);
+      const module = await route.component();
+      const wrapper = mount(module.default);
+      await flushPromises();
+
+      expect(wrapper.get("h2").text()).toBe(title);
+      expect(wrapper.find(layout).exists(), path).toBe(true);
+      wrapper.unmount();
+    }
   });
 
   it("declares human title fields for every operations collection", () => {

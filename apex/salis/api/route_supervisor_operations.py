@@ -189,7 +189,11 @@ def get_dispatch_trips(start=0, page_length=PLAN_PAGE_LENGTH):
         ],
         start,
         page_length,
-        order_by="trip_date desc, modified desc, name desc",
+        order_by=(
+            "`tabDispatch Trip`.trip_date desc, "
+            "`tabDispatch Trip`.modified desc, "
+            "`tabDispatch Trip`.name desc"
+        ),
         **({"filters": filters} if filters else {}),
     )
 
@@ -224,7 +228,11 @@ def get_movement_history(start=0, page_length=PLAN_PAGE_LENGTH):
         start,
         page_length,
         filters=filters,
-        order_by="trip_date desc, modified desc, name desc",
+        order_by=(
+            "`tabDispatch Trip`.trip_date desc, "
+            "`tabDispatch Trip`.modified desc, "
+            "`tabDispatch Trip`.name desc"
+        ),
     )
 
 
