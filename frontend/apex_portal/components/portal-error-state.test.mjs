@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import PortalErrorState from "./PortalErrorState.vue";
-import { safeErrorMessage } from "../core/errorMessage.js";
+import { errorStatus, safeErrorMessage } from "../core/errorMessage.js";
 
 describe("shared portal error state", () => {
   it("sanitizes backend detail and never repeats the title as its explanation", async () => {
@@ -34,5 +34,25 @@ describe("shared portal error state", () => {
     expect(safeErrorMessage({ message: error.message }, "تعذّر تنفيذ الإجراء.")).toBe(
       "تعذّر تنفيذ الإجراء.",
     );
+  });
+
+  it("normalizes frappe-ui response status and hides retry for permission failures", () => {
+    const error = {
+      message: 'Traceback: File "/home/frappe/apps/apex/secret.py", line 9',
+      response: {
+        status: 403,
+        data: {
+          _server_messages: JSON.stringify([
+            JSON.stringify({ message: "لا تملك صلاحية عرض هذا السجل." }),
+          ]),
+        },
+      },
+    };
+    const wrapper = mount(PortalErrorState, { props: { message: error } });
+
+    expect(errorStatus(error)).toBe(403);
+    expect(wrapper.text()).toContain("لا تملك صلاحية عرض هذا السجل.");
+    expect(wrapper.text()).not.toContain("Traceback");
+    expect(wrapper.find("button").exists()).toBe(false);
   });
 });

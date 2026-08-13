@@ -2,12 +2,13 @@
 import { computed, inject, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { Badge, Button, ErrorMessage, createResource, toast } from "frappe-ui";
 import QRCode from "qrcode";
-import { dateTimeLabel, remainingSeconds } from "../../core/displayLabels.js";
+import { dateTimeLabel, remainingSeconds, workerTransportStatusLabel } from "../../core/displayLabels.js";
 import PortalSkeleton from "../../components/PortalSkeleton.vue";
 import PortalErrorState from "../../components/PortalErrorState.vue";
 
 const gateway = inject("workerGateway");
 const subscribe = inject("portalSubscribe", () => () => {});
+const drafts = inject("portalDrafts", null);
 const transportResource = createResource({
   url: "apex.salis.api.masar.get_worker_transport",
   method: "GET",
@@ -56,23 +57,37 @@ const canConfirm = computed(() => boarding.value?.boarding_window?.can_confirm &
 const waitSeconds = computed(() => remainingSeconds(boarding.value?.wait_at, boarding.value?.wait_window_seconds, now.value));
 const notifySeconds = computed(() => remainingSeconds(boarding.value?.notify_at, boarding.value?.notify_window_seconds, now.value));
 
-const statusLabels = Object.freeze({
-  Pending: "بانتظار الصعود",
-  Boarded: "تم الصعود",
-  Absent: "لم يصعد",
-  scheduled: "الرحلة مجدولة",
-  en_route: "الحافلة في الطريق",
-  at_stop: "الحافلة عند نقطة التجمع",
-  departed: "غادرت الحافلة النقطة",
-  finished: "انتهت الرحلة",
-});
-const statusLabel = (value) => statusLabels[value] || value || "بانتظار التحديث";
+const ratingKey = (trip) => `trip-rating-${trip.dispatch_trip}`;
 
 function ratingDraft(trip) {
   if (!ratingDrafts[trip.dispatch_trip]) {
-    ratingDrafts[trip.dispatch_trip] = { rating: 0, feedback: "" };
+    const saved = drafts?.read(ratingKey(trip));
+    ratingDrafts[trip.dispatch_trip] = {
+      rating: [1, 2, 3, 4, 5].includes(Number(saved?.rating)) ? Number(saved.rating) : 0,
+      feedback: String(saved?.feedback || "").slice(0, 2000),
+    };
   }
   return ratingDrafts[trip.dispatch_trip];
+}
+
+// portalDrafts is subject-scoped; only trip rating text is durable. QR and boarding tokens stay transient.
+function persistRating(trip) {
+  drafts?.write(ratingKey(trip), { ...ratingDraft(trip) });
+}
+
+function setRating(trip, rating) {
+  ratingDraft(trip).rating = rating;
+  persistRating(trip);
+}
+
+function setRatingFeedback(trip, feedback) {
+  ratingDraft(trip).feedback = feedback;
+  persistRating(trip);
+}
+
+function dismissRating(trip) {
+  drafts?.clear(ratingKey(trip));
+  ratingDrafts[trip.dispatch_trip] = { rating: 0, feedback: "" };
 }
 
 async function rateTrip(trip) {
@@ -88,6 +103,7 @@ async function rateTrip(trip) {
       feedback: draft.feedback,
     });
     trip.has_rated = true;
+    drafts?.clear(ratingKey(trip));
     ratingMessages[trip.dispatch_trip] = "تم إرسال تقييمك، شكراً لك.";
   } catch (reason) {
     error.value = reason?.message || "تعذّر إرسال التقييم.";
@@ -196,10 +212,10 @@ onBeforeUnmount(stopLive);
           <div>
             <span class="journey-kicker">الحالة الآن</span>
             <h3>
-              {{ statusLabel(boarding.boarding_window?.state || boarding.status) }}
+              {{ workerTransportStatusLabel(boarding.boarding_window?.state || boarding.status) }}
             </h3>
           </div>
-          <Badge :label="statusLabel(boarding.status)" />
+          <Badge :label="workerTransportStatusLabel(boarding.status)" />
         </div>
         <p v-if="boarding.driver_arrived" class="journey-alert">وصل السائق إلى نقطة تجمعك.</p>
         <p v-if="notifySeconds !== null" class="journey-alert journey-alert--notice">
@@ -224,7 +240,7 @@ onBeforeUnmount(stopLive);
         </div>
         <article v-for="trip in trips" :key="trip.transport_request" class="journey-card">
           <div class="journey-card__main">
-            <Badge :label="statusLabel(trip.boarding_window?.state || trip.trip_status)" />
+            <Badge :label="workerTransportStatusLabel(trip.boarding_window?.state || trip.trip_status)" />
             <h3>
               {{ trip.destination?.location || trip.destination?.stop_name || trip.pickup_point || "رحلة مسار" }}
             </h3>
@@ -273,6 +289,7 @@ onBeforeUnmount(stopLive);
           <div>
             <strong>{{ trip.destination?.location || trip.pickup_point || "رحلة مسار" }}</strong>
             <bdi>{{ dateTimeLabel(trip.pickup_datetime) }}</bdi>
+            <Badge :label="workerTransportStatusLabel(trip.trip_status)" />
           </div>
           <form
             v-if="trip.dispatch_trip && trip.trip_status === 'Completed' && !trip.has_rated"
@@ -288,17 +305,18 @@ onBeforeUnmount(stopLive);
                   type="button"
                   :aria-label="`${score} نجوم`"
                   :aria-pressed="ratingDraft(trip).rating === score"
-                  @click="ratingDraft(trip).rating = score"
+                  @click="setRating(trip, score)"
                 >★</button>
               </div>
             </fieldset>
             <label>
               ملاحظات اختيارية
               <textarea
-                v-model="ratingDraft(trip).feedback"
+                :value="ratingDraft(trip).feedback"
                 :data-rating-feedback="trip.dispatch_trip"
                 maxlength="2000"
                 rows="2"
+                @input="setRatingFeedback(trip, $event.target.value)"
               />
             </label>
             <Button
@@ -309,6 +327,12 @@ onBeforeUnmount(stopLive);
               :data-rating-submit="trip.dispatch_trip"
               @click="rateTrip(trip)"
             >إرسال التقييم</Button>
+            <Button
+              type="button"
+              variant="ghost"
+              :data-rating-dismiss="trip.dispatch_trip"
+              @click="dismissRating(trip)"
+            >تجاهل المسودة</Button>
           </form>
           <p v-else-if="trip.has_rated || ratingMessages[trip.dispatch_trip]" class="journey-rating__thanks" role="status">
             {{ ratingMessages[trip.dispatch_trip] || "تم إرسال تقييمك مسبقاً." }}

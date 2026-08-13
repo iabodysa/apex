@@ -77,7 +77,7 @@ function displayValue(field) {
   }
   if (field.link) {
     return {
-      label: linkLabels.value[field.key] || field.link.fallback || "سجل مرتبط",
+      label: doc.value?.[field.labelKey] || linkLabels.value[field.key] || field.link.fallback || "سجل مرتبط",
       reference: value,
     };
   }

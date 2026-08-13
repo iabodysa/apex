@@ -72,6 +72,12 @@ const statusLabels = Object.freeze({
   Triaged: "مصنف",
   Assigned: "مسند",
   "Waiting Evidence": "بانتظار الإثبات",
+  Absent: "لم يصعد",
+  scheduled: "الرحلة مجدولة",
+  en_route: "الحافلة في الطريق",
+  at_stop: "الحافلة عند نقطة التجمع",
+  departed: "غادرت الحافلة النقطة",
+  finished: "انتهت الرحلة",
 });
 
 const frappeDateTime = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2})(?:\.\d+)?)?$/;
@@ -119,6 +125,35 @@ const inventoryConditionLabels = Object.freeze({
 
 export function statusLabel(value) {
   return statusLabels[value] || value || "جديد";
+}
+
+export function statusOptions(values = []) {
+  return values.map((value) => ({ value, label: statusLabel(value) }));
+}
+
+const workerTransportLabels = Object.freeze({
+  Pending: "بانتظار الصعود",
+  Boarded: "تم الصعود",
+  Absent: "لم يصعد",
+  "Worker Claimed": "أكد صعوده",
+});
+
+export function workerTransportStatusLabel(value) {
+  return workerTransportLabels[value] || statusLabel(value) || "بانتظار التحديث";
+}
+
+export function humanLabel(record, valueField, labelField, fallback = "") {
+  return String(record?.[labelField] || fallback || record?.[valueField] || "").trim();
+}
+
+export function humanOptions(rows = [], valueField, labelField) {
+  const options = new Map();
+  for (const row of rows) {
+    const value = String(row?.[valueField] || "").trim();
+    if (!value || options.has(value)) continue;
+    options.set(value, { value, label: humanLabel(row, valueField, labelField, value) });
+  }
+  return [...options.values()];
 }
 
 const greenStatuses = new Set([

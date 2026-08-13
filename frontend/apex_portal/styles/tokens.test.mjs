@@ -84,16 +84,16 @@ describe("Apex portal identity", () => {
     expect(css).toContain("--sp-5: 20px");
   });
 
-  it("makes each shell own its viewport scroll and keeps the operations rail on iPad", () => {
+  it("makes each shell own its viewport scroll and uses the grouped operations hierarchy through 834px", () => {
     const css = read("./foundation.css");
     expect(css).toMatch(/\.mobile-shell\s*\{[^}]*block-size:\s*100dvh[^}]*grid-template-rows:\s*auto minmax\(0, 1fr\) auto/s);
     expect(css).toMatch(/\.mobile-shell__header\s*\{[^}]*position:\s*sticky/s);
     expect(css).toMatch(/\.mobile-shell__main\s*\{[^}]*overflow-y:\s*auto/s);
     expect(css).toMatch(/\.operations-shell__body\s*\{[^}]*block-size:\s*100dvh[^}]*grid-template-rows:\s*auto minmax\(0, 1fr\)/s);
     expect(css).toMatch(/\.operations-shell__main\s*\{[^}]*overflow-y:\s*auto/s);
-    expect(css).toContain("@media (max-width: 767px)");
-    expect(css).toMatch(/@media \(max-width: 767px\)[\s\S]*?\.operations-shell__rail\s*\{[^}]*min-inline-size:\s*0[^}]*max-inline-size:\s*100%/);
-    expect(css).toMatch(/@media \(max-width: 767px\)[\s\S]*?\.operations-shell__nav\s*\{[^}]*min-inline-size:\s*0[^}]*max-inline-size:\s*100%/);
+    expect(css).toContain("@media (max-width: 834px)");
+    expect(css).toMatch(/@media \(max-width: 834px\)[\s\S]*?\.operations-shell__rail\s*\{[^}]*min-inline-size:\s*0[^}]*max-inline-size:\s*100%/);
+    expect(css).toMatch(/@media \(max-width: 834px\)[\s\S]*?\.operations-shell__nav\s*\{[^}]*min-inline-size:\s*0[^}]*max-inline-size:\s*100%/);
   });
 
   it("keeps housing room cards vertical when other feature styles are loaded", () => {

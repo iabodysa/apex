@@ -3,6 +3,7 @@ import { computed, inject, reactive, watch } from "vue";
 import { Button, FeatherIcon, FormControl } from "frappe-ui";
 import { routeLocationKey, routerKey } from "vue-router";
 import { filtersFromQuery, queryFromFilters, resultCountLabel } from "../queueState.js";
+import { humanOptions } from "../../../core/displayLabels.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 
 const props = defineProps({
@@ -20,6 +21,7 @@ const props = defineProps({
 const route = inject(routeLocationKey, reactive({ query: {} }));
 const router = inject(routerKey, null);
 const filters = reactive({ status: "", project: "", date: "" });
+const allowedStatuses = computed(() => props.statusOptions.map((option) => option.value));
 
 const rows = computed(() => {
   if (Array.isArray(props.resource.data)) return props.resource.data;
@@ -30,6 +32,7 @@ const rows = computed(() => {
 });
 const loading = computed(() => props.resource.list?.loading ?? props.resource.loading);
 const error = computed(() => props.resource.list?.error ?? props.resource.error);
+const projectOptions = computed(() => humanOptions(rows.value, "project", "project_label"));
 
 function refresh() {
   return props.resource.reload?.() ?? props.resource.fetch?.();
@@ -37,7 +40,9 @@ function refresh() {
 
 async function applyQuery(query) {
   Object.assign(filters, {
-    status: typeof query?.status === "string" ? query.status : "",
+    status: typeof query?.status === "string" && allowedStatuses.value.includes(query.status)
+      ? query.status
+      : "",
     project: typeof query?.project === "string" ? query.project : "",
     date: typeof query?.date === "string" ? query.date : "",
   });
@@ -46,6 +51,7 @@ async function applyQuery(query) {
     filters: filtersFromQuery(filters, {
       base: props.baseFilters,
       dateField: props.dateField,
+      allowedStatuses: allowedStatuses.value,
     }),
   });
   await refresh();
@@ -94,7 +100,12 @@ watch(() => route.query, applyQuery, { immediate: true, deep: true });
         label="الحالة"
         :options="[{ label: 'كل الحالات', value: '' }, ...statusOptions]"
       />
-      <FormControl v-model="filters.project" label="المشروع" />
+      <FormControl
+        v-model="filters.project"
+        type="select"
+        label="المشروع"
+        :options="[{ label: 'كل المشاريع', value: '' }, ...projectOptions]"
+      />
       <FormControl v-if="dateField" v-model="filters.date" type="date" label="التاريخ" />
       <Button type="submit" variant="outline">تطبيق</Button>
     </form>

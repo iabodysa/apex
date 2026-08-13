@@ -18,7 +18,11 @@ vi.mock("frappe-ui", () => ({
   Badge: { template: "<span />" },
   Button: { template: "<button><slot /></button>" },
   FeatherIcon: { template: "<i />" },
-  FormControl: { template: "<input />" },
+  FormControl: {
+    name: "FormControl",
+    props: ["modelValue", "label", "type", "options"],
+    template: "<input />",
+  },
   createResource: vi.fn((options) => {
     let url = options.url;
     return {
@@ -192,6 +196,7 @@ describe("Masar transport supervisor feature", () => {
     const requests = readFileSync(path.join(root, "pages", "TransportRequestsPage.vue"), "utf8");
     expect(requests).toMatch(/project\.project_name as project_label/);
     expect(requests).toMatch(/assigned_to_trip\.trip_title as assigned_trip_label/);
+    expect(requests).toContain("request.accommodation_building_label");
     expect(requests).toContain("request.assigned_trip_label || 'رحلة مسندة'");
     const assignments = readFileSync(path.join(root, "pages", "RouteAssignmentsPage.vue"), "utf8");
     expect(assignments).toMatch(/work_shift\.shift_name as work_shift_label/);
@@ -202,21 +207,48 @@ describe("Masar transport supervisor feature", () => {
       expect(source, name).toContain("trip.route_assignment_label");
       expect(source, name).not.toMatch(/trip\.(driver|vehicle|project|route_template|route_assignment) \|\|/);
     }
+    const routes = readFileSync(path.join(root, "routes.js"), "utf8");
+    expect(routes).toContain('key: "accommodation_building"');
+    expect(routes).toContain('labelKey: "accommodation_building_label"');
+  });
+
+  it("shows project labels in the shared project filter while retaining ids as values", async () => {
+    const resource = {
+      data: [{ name: "DT-1", project: "PROJ-1", project_label: "مشروع المطار" }],
+      list: { loading: false, error: null },
+      update: vi.fn(),
+      reload: vi.fn(),
+    };
+    const wrapper = mount(SupervisorCollection, {
+      props: {
+        title: "الرحلات",
+        description: "الوصف",
+        icon: "navigation",
+        resource,
+        empty: "فارغ",
+      },
+      slots: { default: "<div />" },
+    });
+    await flushPromises();
+
+    const projectFilter = wrapper.findAllComponents({ name: "FormControl" })
+      .find((control) => control.props("label") === "المشروع");
+    expect(projectFilter.props("type")).toBe("select");
+    expect(projectFilter.props("options")).toContainEqual({
+      value: "PROJ-1",
+      label: "مشروع المطار",
+    });
   });
 
   it("uses the exact status options declared by the current DocType metadata", () => {
     const root = path.dirname(fileURLToPath(import.meta.url));
     const assignments = readFileSync(path.join(root, "pages", "RouteAssignmentsPage.vue"), "utf8");
-    for (const value of ["Pending", "Approved", "Rejected", "Cancelled"]) {
-      expect(assignments).toContain(`value: '${value}'`);
-    }
-    expect(assignments).not.toContain("value: 'Active'");
-    expect(assignments).not.toContain("value: 'Inactive'");
+    expect(assignments).toContain('statusOptions(["Pending", "Approved", "Rejected", "Cancelled"])');
+    expect(assignments).not.toContain('"Active"');
+    expect(assignments).not.toContain('"Inactive"');
 
     const requests = readFileSync(path.join(root, "pages", "TransportRequestsPage.vue"), "utf8");
-    for (const value of ["New", "Validated", "Approved", "Scheduled", "Fulfilled", "Rejected", "Cancelled"]) {
-      expect(requests).toContain(`value: '${value}'`);
-    }
+    expect(requests).toMatch(/statusOptions\(\[\s*"New", "Validated", "Approved", "Scheduled", "Fulfilled", "Rejected", "Cancelled",?\s*\]\)/);
   });
 
   it("resets native list pagination before reloading changed URL filters", async () => {
@@ -245,6 +277,7 @@ describe("Masar transport supervisor feature", () => {
         icon: "inbox",
         resource,
         empty: "فارغ",
+        statusOptions: [{ label: "معتمد", value: "Approved" }],
       },
       global: { plugins: [router] },
       slots: { default: "<div />" },
@@ -264,6 +297,44 @@ describe("Masar transport supervisor feature", () => {
     }));
     expect(resource.start).toBe(0);
     expect(reload).toHaveBeenCalledOnce();
+    wrapper.unmount();
+  });
+
+  it.each([
+    ["/trips?status=Completed", { status: ["not in", ["Completed", "Cancelled"]] }, ["Planned", "Dispatched"]],
+    ["/history?status=Planned", { status: ["in", ["Completed", "Cancelled"]] }, ["Completed", "Cancelled"]],
+  ])("keeps %s inside its route-owned status scope", async (location, baseFilters, allowed) => {
+    const update = vi.fn();
+    const resource = {
+      data: [],
+      list: { loading: false, error: null },
+      update,
+      reload: vi.fn().mockResolvedValue(undefined),
+    };
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: "/trips", component: { template: "<div />" } },
+        { path: "/history", component: { template: "<div />" } },
+      ],
+    });
+    await router.push(location);
+    await router.isReady();
+    const wrapper = mount(SupervisorCollection, {
+      props: {
+        title: "الرحلات",
+        description: "الوصف",
+        icon: "navigation",
+        resource,
+        empty: "فارغ",
+        baseFilters,
+        statusOptions: allowed.map((value) => ({ value, label: value })),
+      },
+      global: { plugins: [router] },
+    });
+    await flushPromises();
+
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ filters: baseFilters }));
     wrapper.unmount();
   });
 

@@ -1,6 +1,6 @@
 <script setup>
 import { Badge, createListResource } from "frappe-ui";
-import { dateTimeLabel, recordTitle, statusLabel, statusTheme } from "../../../core/displayLabels.js";
+import { dateTimeLabel, recordTitle, statusLabel, statusOptions, statusTheme } from "../../../core/displayLabels.js";
 import SupervisorCollection from "../components/SupervisorCollection.vue";
 
 const history = createListResource({
@@ -28,6 +28,7 @@ const history = createListResource({
   pageLength: 20,
   auto: false,
 });
+const historyStatusOptions = statusOptions(["Completed", "Cancelled"]);
 </script>
 
 <template>
@@ -38,7 +39,7 @@ const history = createListResource({
     :resource="history"
     date-field="trip_date"
     :base-filters="{ status: ['in', ['Completed', 'Cancelled']] }"
-    :status-options="[{ label: 'مكتملة', value: 'Completed' }, { label: 'ملغاة', value: 'Cancelled' }]"
+    :status-options="historyStatusOptions"
     empty="لا توجد رحلات سابقة في السجل."
   >
     <template #default="{ rows }">

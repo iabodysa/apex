@@ -1,6 +1,10 @@
-export function filtersFromQuery(query = {}, { base = {}, dateField = "" } = {}) {
+export function filtersFromQuery(query = {}, {
+  base = {},
+  dateField = "",
+  allowedStatuses = [],
+} = {}) {
   const filters = { ...base };
-  if (query.status) filters.status = query.status;
+  if (query.status && allowedStatuses.includes(query.status)) filters.status = query.status;
   if (query.project) filters.project = query.project;
   if (query.date && dateField) {
     filters[dateField] = ["between", [`${query.date} 00:00:00`, `${query.date} 23:59:59`]];

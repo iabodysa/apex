@@ -10,12 +10,25 @@ describe("supervisor queue URL state", () => {
     }, {
       base: { docstatus: ["<", 2] },
       dateField: "pickup_datetime",
+      allowedStatuses: ["Approved"],
     })).toEqual({
       docstatus: ["<", 2],
       status: "Approved",
       project: "PROJ-1",
       pickup_datetime: ["between", ["2026-08-14 00:00:00", "2026-08-14 23:59:59"]],
     });
+  });
+
+  it("never lets a URL status escape the active or history route scope", () => {
+    expect(filtersFromQuery({ status: "Completed" }, {
+      base: { status: ["not in", ["Completed", "Cancelled"]] },
+      allowedStatuses: ["Planned", "Dispatched"],
+    })).toEqual({ status: ["not in", ["Completed", "Cancelled"]] });
+
+    expect(filtersFromQuery({ status: "Planned" }, {
+      base: { status: ["in", ["Completed", "Cancelled"]] },
+      allowedStatuses: ["Completed", "Cancelled"],
+    })).toEqual({ status: ["in", ["Completed", "Cancelled"]] });
   });
 
   it("keeps only meaningful filter values in the URL", () => {

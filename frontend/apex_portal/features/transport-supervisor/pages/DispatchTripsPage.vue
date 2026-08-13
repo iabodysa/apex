@@ -1,6 +1,6 @@
 <script setup>
 import { Badge, FeatherIcon, createListResource } from "frappe-ui";
-import { dateTimeLabel, recordTitle, statusLabel, statusTheme } from "../../../core/displayLabels.js";
+import { dateTimeLabel, recordTitle, statusLabel, statusOptions, statusTheme } from "../../../core/displayLabels.js";
 import SupervisorCollection from "../components/SupervisorCollection.vue";
 
 const trips = createListResource({
@@ -29,6 +29,7 @@ const trips = createListResource({
   pageLength: 20,
   auto: false,
 });
+const tripStatusOptions = statusOptions(["Planned", "Dispatched"]);
 </script>
 
 <template>
@@ -39,7 +40,7 @@ const trips = createListResource({
     :resource="trips"
     date-field="trip_date"
     :base-filters="{ status: ['not in', ['Completed', 'Cancelled']] }"
-    :status-options="[{ label: 'مخططة', value: 'Planned' }, { label: 'في الطريق', value: 'Dispatched' }]"
+    :status-options="tripStatusOptions"
     empty="لا توجد رحلات تشغيل حالياً."
   >
     <template #default="{ rows }">

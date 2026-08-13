@@ -1,6 +1,6 @@
 <script setup>
 import { Badge, createListResource } from "frappe-ui";
-import { dateTimeLabel, statusLabel, statusTheme } from "../../../core/displayLabels.js";
+import { dateTimeLabel, humanLabel, statusLabel, statusOptions, statusTheme } from "../../../core/displayLabels.js";
 import SupervisorCollection from "../components/SupervisorCollection.vue";
 
 const requests = createListResource({
@@ -37,7 +37,7 @@ const requests = createListResource({
 });
 
 function requestTitle(request) {
-  const from = request.from_location || request.accommodation_building_label;
+  const from = request.from_location || humanLabel(request, "accommodation_building", "accommodation_building_label");
   const to = request.to_location || request.destination;
   if (from && to) {
     return `${from} إلى ${to}`;
@@ -47,6 +47,10 @@ function requestTitle(request) {
   }
   return to || from || request.request_type || request.service_line || "طلب نقل";
 }
+
+const requestStatusOptions = statusOptions([
+  "New", "Validated", "Approved", "Scheduled", "Fulfilled", "Rejected", "Cancelled",
+]);
 </script>
 
 <template>
@@ -56,15 +60,7 @@ function requestTitle(request) {
     icon="inbox"
     :resource="requests"
     date-field="pickup_datetime"
-    :status-options="[
-      { label: 'جديد', value: 'New' },
-      { label: 'تم التحقق', value: 'Validated' },
-      { label: 'معتمد', value: 'Approved' },
-      { label: 'مجدول', value: 'Scheduled' },
-      { label: 'مكتمل', value: 'Fulfilled' },
-      { label: 'مرفوض', value: 'Rejected' },
-      { label: 'ملغى', value: 'Cancelled' },
-    ]"
+    :status-options="requestStatusOptions"
     empty="لا توجد طلبات نقل تحتاج متابعة."
   >
     <template #default="{ rows }">
@@ -75,7 +71,7 @@ function requestTitle(request) {
             <strong dir="auto">{{ requestTitle(request) }}</strong>
             <bdi class="record-reference" dir="auto" translate="no">{{ request.name }}</bdi>
             <div class="supervisor-route-line">
-              <span dir="auto">{{ request.from_location || 'موقع الانطلاق غير محدد' }}</span>
+              <span dir="auto">{{ request.from_location || request.accommodation_building_label || 'موقع الانطلاق غير محدد' }}</span>
               <span aria-hidden="true">←</span>
               <span dir="auto">{{ request.to_location || 'الوجهة غير محددة' }}</span>
             </div>

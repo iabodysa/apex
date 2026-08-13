@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { FeatherIcon } from "frappe-ui";
+import { useRoute } from "vue-router";
 import { ar } from "../i18n/ar.js";
 
 const brandMark = "/assets/apex/icons/brand/apex-mark.svg";
@@ -9,9 +10,10 @@ const props = defineProps({
   title: { type: String, required: true },
   navigation: { type: Array, default: () => [] },
 });
-const isMobile = ref(globalThis.window?.innerWidth < 768);
+const route = useRoute();
+const isMobile = ref(globalThis.window?.innerWidth <= 834);
 function updateViewport() {
-  isMobile.value = globalThis.window?.innerWidth < 768;
+  isMobile.value = globalThis.window?.innerWidth <= 834;
 }
 onMounted(() => globalThis.window?.addEventListener("resize", updateViewport));
 onBeforeUnmount(() => globalThis.window?.removeEventListener("resize", updateViewport));
@@ -25,6 +27,15 @@ const mobileGroups = computed(() => {
   }
   return [...groups.entries()].map(([label, items]) => ({ label, items }));
 });
+
+function isActiveDestination(destination) {
+  if (destination === "/") return route.path === destination;
+  return route.path === destination || route.path.startsWith(`${destination}/`);
+}
+
+function groupContainsActiveRoute(group) {
+  return group.items.some((item) => isActiveDestination(item.to));
+}
 </script>
 
 <template>
@@ -55,7 +66,12 @@ const mobileGroups = computed(() => {
         </RouterLink>
       </nav>
       <nav v-if="mobileGroups.length && isMobile" class="operations-shell__mobile-nav" :aria-label="ar.primaryNavigation">
-        <details v-for="group in mobileGroups" :key="group.label" class="operations-shell__mobile-group">
+        <details
+          v-for="group in mobileGroups"
+          :key="group.label"
+          class="operations-shell__mobile-group"
+          :open="groupContainsActiveRoute(group)"
+        >
           <summary>{{ group.label }}</summary>
           <RouterLink
             v-for="item in group.items"

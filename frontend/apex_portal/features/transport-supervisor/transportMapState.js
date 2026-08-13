@@ -1,6 +1,8 @@
 import { computed, ref } from "vue";
+import { errorStatus, safeErrorMessage } from "../../core/errorMessage.js";
 
 export const SAUDI_BOUNDS = Object.freeze({ minLat: 16, maxLat: 33, minLng: 34, maxLng: 56 });
+const POSITION_STALE_SECONDS = 120;
 
 export function coordinatePair(point) {
   const values = Array.isArray(point)
@@ -17,15 +19,39 @@ export function coordinatePair(point) {
 
 export function normalizePosition(row) {
   const pair = coordinatePair(row);
-  const positionAvailable = Boolean(row?.has_position && pair);
+  const coordinatesAvailable = Boolean(row?.has_position && pair);
+  const updatedAt = String(row?.updated_at || "").trim();
+  const ageSeconds = row?.age_seconds === null || row?.age_seconds === undefined || row?.age_seconds === ""
+    ? null
+    : Number(row.age_seconds);
+  const freshnessKnown = coordinatesAvailable && Boolean(updatedAt) && Number.isFinite(ageSeconds);
+  const stale = freshnessKnown && (row?.stale === true || ageSeconds > POSITION_STALE_SECONDS);
+  const positionState = !coordinatesAvailable
+    ? "offline"
+    : !freshnessKnown
+      ? "unknown"
+      : stale
+        ? "stale"
+        : "live";
+  const positionAvailable = positionState === "live" || positionState === "stale";
   return {
     ...row,
-    lat: positionAvailable ? pair[0] : null,
-    lng: positionAvailable ? pair[1] : null,
+    lat: coordinatesAvailable ? pair[0] : null,
+    lng: coordinatesAvailable ? pair[1] : null,
     has_position: positionAvailable,
     position_available: positionAvailable,
-    stale: positionAvailable ? Boolean(row?.stale) : false,
+    position_state: positionState,
+    stale,
   };
+}
+
+export function positionStateLabel(value) {
+  return {
+    live: "مباشر",
+    stale: "آخر موقع متأخر",
+    unknown: "حداثة الموقع غير معروفة",
+    offline: "الموقع غير متاح",
+  }[value] || "حالة الموقع غير معروفة";
 }
 
 function uniqueValues(rows, key) {
@@ -37,6 +63,7 @@ export function selectedMapRows(rows, selectedTrip) {
 }
 
 export function createTransportMapState() {
+  let loadGeneration = 0;
   const phase = ref("loading");
   const error = ref("");
   const positions = ref([]);
@@ -50,22 +77,31 @@ export function createTransportMapState() {
   ));
 
   function fail(reason) {
-    phase.value = reason?.status === 403 ? "denied" : "error";
-    error.value = reason?.message || "تعذّر تحميل حركة المركبات.";
+    phase.value = errorStatus(reason) === 403 ? "denied" : "error";
+    error.value = safeErrorMessage(reason, "تعذّر تحميل حركة المركبات.");
   }
 
   async function load(readPositions) {
+    const generation = ++loadGeneration;
     phase.value = "loading";
     error.value = "";
     try {
       const result = await readPositions();
+      if (generation !== loadGeneration) return false;
       positions.value = Array.isArray(result?.positions)
         ? result.positions.map(normalizePosition)
         : [];
       phase.value = positions.value.length ? "ready" : "empty";
+      return true;
     } catch (reason) {
+      if (generation !== loadGeneration) return false;
       fail(reason);
+      return true;
     }
+  }
+
+  function cancel() {
+    loadGeneration += 1;
   }
 
   return Object.freeze({
@@ -79,5 +115,6 @@ export function createTransportMapState() {
     visible,
     fail,
     load,
+    cancel,
   });
 }

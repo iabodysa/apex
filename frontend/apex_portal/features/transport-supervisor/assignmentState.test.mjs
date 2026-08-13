@@ -55,5 +55,10 @@ describe("transport request assignment state", () => {
       { transport_request: "REQ-9", pickup_stop: "pickup", dropoff_stop: "dropoff" },
     ]);
     expect(meaningfulRequestTitle({ from_location: "أ", to_location: "ب" })).toBe("من أ إلى ب");
+    expect(meaningfulRequestTitle({
+      accommodation_building: "BLD-0001",
+      accommodation_building_label: "سكن الشمال",
+      to_location: "المطار",
+    })).toBe("من سكن الشمال إلى المطار");
   });
 });

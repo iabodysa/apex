@@ -33,8 +33,10 @@ const existingError = ref("");
 const tripListError = ref("");
 const adHocError = ref("");
 const notice = ref("");
+const tripStopsByName = reactive({});
 const savingExisting = ref(false);
 const savingAdHoc = ref(false);
+let stopLoadGeneration = 0;
 const pickupDateTime = String(props.request.pickup_datetime || "")
   .trim()
   .replace(" ", "T")
@@ -53,7 +55,7 @@ const tripOptions = computed(() => [
     label: trip.trip_title || `${trip.trip_date || "رحلة"} · ${trip.project || trip.name}`,
   })),
 ]);
-const stops = computed(() => tripRecord.data?.stops || []);
+const stops = computed(() => tripStopsByName[selectedTrip.value] || []);
 const stopOptions = computed(() => [
   { label: "اختر نقطة توقف", value: "" },
   ...stops.value.map((stop) => ({ value: stop.stop_key, label: stop.stop_name || stop.stop_key })),
@@ -87,16 +89,20 @@ async function loadMoreTrips() {
 }
 
 watch(selectedTrip, async (name) => {
+  const generation = ++stopLoadGeneration;
   pickupStop.value = "";
   dropoffStop.value = "";
   existingError.value = "";
   if (!name) return;
   try {
-    await tripRecord.fetch({ doctype: "Dispatch Trip", name });
+    const result = await tripRecord.fetch({ doctype: "Dispatch Trip", name });
+    tripStopsByName[name] = Array.isArray(result?.stops) ? result.stops : [];
+    if (generation !== stopLoadGeneration || selectedTrip.value !== name) return;
     if (!stops.value.length) {
       existingError.value = "الرحلة المختارة لا تحتوي نقاط توقف فعلية. أضف التوقفات من سجل الرحلة أولاً.";
     }
   } catch (reason) {
+    if (generation !== stopLoadGeneration || selectedTrip.value !== name) return;
     existingError.value = safeErrorMessage(reason, "تعذّر تحميل توقفات الرحلة المختارة.");
   }
 });

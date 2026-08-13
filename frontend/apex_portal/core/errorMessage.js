@@ -46,6 +46,17 @@ function candidatesFrom(source) {
   return messages;
 }
 
+export function errorStatus(source) {
+  const value = source?.status ?? source?.response?.status;
+  if (value === null || value === undefined || value === "") return null;
+  const status = Number(value);
+  return Number.isInteger(status) && status >= 100 && status <= 599 ? status : null;
+}
+
+export function isRetryablePortalError(source) {
+  return ![401, 403].includes(errorStatus(source));
+}
+
 export function safeErrorMessage(source, fallback = "تحقق من الاتصال ثم حاول مرة أخرى.", title = "") {
   for (const candidate of candidatesFrom(source)) {
     const clean = cleanText(candidate);

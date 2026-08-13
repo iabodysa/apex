@@ -120,11 +120,13 @@ describe("Masar worker feature", () => {
     resourceData.set("apex.salis.api.boarding_flow.worker_trip_boarding", null);
     resourceData.set("apex.salis.api.masar.get_worker_context", { realtime_room: "" });
     resourceData.set("apex.salis.api.masar.submit_trip_rating", { status: "success" });
+    const drafts = { read: vi.fn(() => null), write: vi.fn(), clear: vi.fn() };
     const wrapper = mount(WorkerTransportPage, {
       global: {
         provide: {
           portalSubscribe: () => () => {},
           workerGateway: {},
+          portalDrafts: drafts,
         },
       },
     });
@@ -141,6 +143,73 @@ describe("Masar worker feature", () => {
       { dispatch_trip: "DT-1", rating: 5, feedback: "رحلة ممتازة" },
     ]);
     expect(wrapper.text()).toContain("تم إرسال تقييمك");
+    expect(drafts.clear).toHaveBeenCalledWith("trip-rating-DT-1");
+    wrapper.unmount();
+  });
+
+  it("restores, updates, and explicitly dismisses a subject-scoped trip rating draft", async () => {
+    resourceData.set("apex.salis.api.masar.get_worker_transport", {
+      upcoming: [],
+      past: [{
+        transport_request: "TR-1",
+        dispatch_trip: "DT-1",
+        trip_status: "Completed",
+        has_rated: false,
+      }],
+    });
+    resourceData.set("apex.salis.api.boarding_flow.worker_trip_boarding", null);
+    resourceData.set("apex.salis.api.masar.get_worker_context", { realtime_room: "" });
+    const drafts = {
+      read: vi.fn(() => ({ rating: 4, feedback: "قيادة هادئة" })),
+      write: vi.fn(),
+      clear: vi.fn(),
+    };
+    const wrapper = mount(WorkerTransportPage, {
+      global: {
+        provide: {
+          portalSubscribe: () => () => {},
+          workerGateway: {},
+          portalDrafts: drafts,
+        },
+      },
+    });
+    await flushPromises();
+    await wrapper.get("summary").trigger("click");
+
+    expect(wrapper.get('[aria-label="4 نجوم"]').attributes("aria-pressed")).toBe("true");
+    expect(wrapper.get('[data-rating-feedback="DT-1"]').element.value).toBe("قيادة هادئة");
+    await wrapper.get('[aria-label="5 نجوم"]').trigger("click");
+    await wrapper.get('[data-rating-feedback="DT-1"]').setValue("ممتازة");
+    expect(drafts.write).toHaveBeenLastCalledWith("trip-rating-DT-1", {
+      rating: 5,
+      feedback: "ممتازة",
+    });
+
+    await wrapper.get('[data-rating-dismiss="DT-1"]').trigger("click");
+    expect(drafts.clear).toHaveBeenCalledWith("trip-rating-DT-1");
+    expect(wrapper.get('[data-rating-feedback="DT-1"]').element.value).toBe("");
+    wrapper.unmount();
+  });
+
+  it("localizes planned, dispatched, and completed trip states through the shared source", async () => {
+    resourceData.set("apex.salis.api.masar.get_worker_transport", {
+      upcoming: [
+        { transport_request: "TR-1", trip_status: "Planned" },
+        { transport_request: "TR-2", trip_status: "Dispatched" },
+      ],
+      past: [{ transport_request: "TR-3", trip_status: "Completed", has_rated: true }],
+    });
+    resourceData.set("apex.salis.api.boarding_flow.worker_trip_boarding", null);
+    resourceData.set("apex.salis.api.masar.get_worker_context", { realtime_room: "" });
+    const wrapper = mount(WorkerTransportPage, {
+      global: { provide: { portalSubscribe: () => () => {}, workerGateway: {} } },
+    });
+    await flushPromises();
+    await wrapper.get("summary").trigger("click");
+
+    expect(wrapper.text()).toContain("مجدولة");
+    expect(wrapper.text()).toContain("في الطريق");
+    expect(wrapper.text()).toContain("مكتملة");
     wrapper.unmount();
   });
 

@@ -3,7 +3,7 @@ import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
 import { Badge, Button, ErrorMessage, FormControl, createResource, toast } from "frappe-ui";
 import { useRoute } from "vue-router";
 import { createQrScanner } from "./scanner.js";
-import { dateTimeLabel, remainingSeconds, statusLabel } from "../../core/displayLabels.js";
+import { dateTimeLabel, remainingSeconds, statusLabel, workerTransportStatusLabel } from "../../core/displayLabels.js";
 import PortalSkeleton from "../../components/PortalSkeleton.vue";
 import PortalErrorState from "../../components/PortalErrorState.vue";
 
@@ -54,12 +54,6 @@ function waitSeconds(worker) {
   return remainingSeconds(worker.wait_at, boarding.value?.worker_wait_request_seconds, now.value);
 }
 
-const statusLabels = Object.freeze({
-  Pending: "بانتظار الصعود",
-  Boarded: "صعد",
-  Absent: "لم يصعد",
-  "Worker Claimed": "أكد صعوده",
-});
 const scanMessages = Object.freeze({
   Valid: "تم تسجيل الصعود.",
   Duplicate: "تم تسجيل هذا الصعود من قبل.",
@@ -231,7 +225,7 @@ onBeforeUnmount(stopLive);
             طلب الانتظار {{ worker.wait_count }} من {{ waitLimit }}
             <template v-if="waitSeconds(worker) !== null">· {{ waitSeconds(worker) }} ث</template>
           </span>
-          <Badge :label="statusLabels[worker.status] || worker.status" />
+          <Badge :label="workerTransportStatusLabel(worker.status)" />
           <div class="journey-actions">
             <Button v-if="worker.status !== 'Boarded'" variant="outline" :loading="busy === `manual:${worker.employee}`" @click="run(`manual:${worker.employee}`, () => gateway.manualBoard(dispatchTrip, worker.employee), 'تم تسجيل الصعود يدوياً')">تسجيل يدوي</Button>
             <Button v-else variant="outline" :loading="busy === `unmark:${worker.employee}`" @click="run(`unmark:${worker.employee}`, () => gateway.markNotBoarded(dispatchTrip, worker.employee), 'أعيد العامل إلى قائمة الانتظار')">ليس في الحافلة</Button>

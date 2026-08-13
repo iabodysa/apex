@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 
-const { tripsReload, createAdHocSubmit, assignSubmit } = vi.hoisted(() => ({
+const { tripsReload, tripRecordFetch, createAdHocSubmit, assignSubmit } = vi.hoisted(() => ({
   tripsReload: vi.fn().mockResolvedValue(undefined),
+  tripRecordFetch: vi.fn().mockResolvedValue({ stops: [] }),
   createAdHocSubmit: vi.fn().mockResolvedValue({ name: "TRIP-1" }),
   assignSubmit: vi.fn().mockResolvedValue({ name: "TRIP-1" }),
 }));
@@ -13,9 +14,9 @@ vi.mock("frappe-ui", () => ({
     template: '<button :type="type || \'button\'" :disabled="disabled"><slot /></button>',
   },
   FormControl: {
-    props: ["modelValue", "label"],
+    props: ["modelValue", "label", "options"],
     emits: ["update:modelValue"],
-    template: '<label>{{ label }}<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" /></label>',
+    template: '<label>{{ label }}<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" /><output>{{ (options || []).map((item) => item.label).join("|") }}</output></label>',
   },
   createListResource: vi.fn(() => ({
     data: [],
@@ -27,7 +28,7 @@ vi.mock("frappe-ui", () => ({
   createResource: vi.fn(({ url }) => ({
     data: null,
     loading: false,
-    fetch: vi.fn().mockResolvedValue({ stops: [] }),
+    fetch: url === "frappe.client.get" ? tripRecordFetch : vi.fn().mockResolvedValue({ stops: [] }),
     submit: url.endsWith("create_ad_hoc_trip") ? createAdHocSubmit : assignSubmit,
   })),
 }));
@@ -45,7 +46,10 @@ const approvedRequest = {
 };
 
 describe("request trip planning", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    tripRecordFetch.mockResolvedValue({ stops: [] });
+  });
 
   it("creates the ad-hoc trip and its request assignment in one server call", async () => {
     const wrapper = mount(RequestTripPlanning, { props: { request: approvedRequest } });
@@ -96,5 +100,23 @@ describe("request trip planning", () => {
 
     expect(tripsReload).toHaveBeenCalledOnce();
     expect(wrapper.findAll("form")).toHaveLength(2);
+  });
+
+  it("keeps the selected trip stops when an older trip response arrives late", async () => {
+    const pending = new Map();
+    tripRecordFetch.mockImplementation(({ name }) => new Promise((resolve) => pending.set(name, resolve)));
+    const wrapper = mount(RequestTripPlanning, { props: { request: approvedRequest } });
+    await flushPromises();
+    const tripInput = wrapper.findAll("form")[0].findAll("input")[0];
+
+    await tripInput.setValue("TRIP-A");
+    await tripInput.setValue("TRIP-B");
+    pending.get("TRIP-B")({ stops: [{ stop_key: "B", stop_name: "توقف ب" }] });
+    await flushPromises();
+    pending.get("TRIP-A")({ stops: [{ stop_key: "A", stop_name: "توقف أ" }] });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("توقف ب");
+    expect(wrapper.text()).not.toContain("توقف أ");
   });
 });

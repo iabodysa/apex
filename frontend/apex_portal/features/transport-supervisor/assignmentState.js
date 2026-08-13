@@ -1,3 +1,5 @@
+import { humanLabel } from "../../core/displayLabels.js";
+
 function text(value) {
   return String(value ?? "").trim();
 }
@@ -9,7 +11,11 @@ function timePart(value) {
 }
 
 export function meaningfulRequestTitle(request, fallback = "طلب نقل") {
-  const pickup = text(request?.from_location || request?.pickup_point || request?.accommodation_building);
+  const pickup = text(request?.from_location || request?.pickup_point || humanLabel(
+    request,
+    "accommodation_building",
+    "accommodation_building_label",
+  ));
   const destination = text(request?.to_location || request?.destination);
   if (pickup && destination) return `من ${pickup} إلى ${destination}`;
   if (destination) return `إلى ${destination}`;
@@ -40,7 +46,11 @@ export function buildTripAssignments(selectedNames, selections, stopKeys) {
 
 export function buildAdHocRequest(request, form) {
   const requestName = text(request?.name);
-  const pickup = text(request?.from_location || request?.pickup_point || request?.accommodation_building);
+  const pickup = text(request?.from_location || request?.pickup_point || humanLabel(
+    request,
+    "accommodation_building",
+    "accommodation_building_label",
+  ));
   const destination = text(request?.to_location || request?.destination);
   if (!requestName || !pickup || !destination) {
     throw new Error("أكمل موقع الانطلاق والوجهة في طلب النقل قبل إنشاء رحلة مخصصة.");

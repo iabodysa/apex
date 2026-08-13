@@ -2,6 +2,7 @@
 import { useRoute } from "vue-router";
 import { createDocumentResource } from "frappe-ui";
 import ResourceListPage from "../components/ResourceListPage.vue";
+import { statusLabel } from "../../../core/displayLabels.js";
 const route = useRoute();
 const request = createDocumentResource({
   doctype: "Maintenance Request",
@@ -25,7 +26,7 @@ const request = createDocumentResource({
       </div>
       <p v-if="row.issue_description">{{ row.issue_description }}</p>
       <span>{{ row.building }}<template v-if="row.room"> · {{ row.room }}</template></span>
-      <small>{{ row.status }}</small>
+      <small>{{ statusLabel(row.status) }}</small>
     </template>
   </ResourceListPage>
 </template>

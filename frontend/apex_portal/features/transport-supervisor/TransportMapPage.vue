@@ -3,7 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import { Button, FormControl, createResource } from "frappe-ui";
 import { statusLabel } from "../../core/displayLabels.js";
 import { createLeafletAdapter } from "./leafletAdapter.js";
-import { createTransportMapState, selectedMapRows } from "./transportMapState.js";
+import { createTransportMapState, positionStateLabel, selectedMapRows } from "./transportMapState.js";
 import "./styles.css";
 import PortalErrorState from "../../components/PortalErrorState.vue";
 
@@ -29,7 +29,8 @@ async function draw() {
 }
 
 async function load() {
-  await mapState.load(() => positions.fetch());
+  const committed = await mapState.load(() => positions.fetch());
+  if (!committed) return;
   if (!visible.value.some((item) => item.dispatch_trip === selectedTrip.value)) {
     selectedTrip.value = visible.value[0]?.dispatch_trip || "";
   }
@@ -52,7 +53,10 @@ async function selectTrip(name) {
 }
 
 onMounted(load);
-onBeforeUnmount(mapAdapter.destroy);
+onBeforeUnmount(() => {
+  mapState.cancel();
+  mapAdapter.destroy();
+});
 </script>
 
 <template>
@@ -63,7 +67,7 @@ onBeforeUnmount(mapAdapter.destroy);
         <h2>الخريطة المباشرة</h2>
         <p>مواقع السائقين ومسارات الرحلات المسندة إليك.</p>
       </div>
-      <Button variant="outline" icon-left="refresh-cw" @click="load">تحديث</Button>
+      <Button variant="outline" icon-left="refresh-cw" :loading="state === 'loading'" :disabled="state === 'loading'" @click="load">تحديث</Button>
     </header>
     <div v-if="state === 'loading'" class="feature-state" role="status">جارٍ تحديث الخريطة…</div>
     <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الخريطة" message="لا تملك صلاحية هذه الرحلات." @retry="load" />
@@ -78,6 +82,7 @@ onBeforeUnmount(mapAdapter.destroy);
         <li data-kind="route">مسار الرحلة</li>
         <li data-kind="live">موقع مباشر</li>
         <li data-kind="stale">موقع متأخر</li>
+        <li data-kind="unknown">حداثة غير معروفة</li>
         <li data-kind="stop">نقطة توقف</li>
       </ul>
       <div ref="mapRoot" class="transport-map" aria-label="خريطة حركة المركبات" />
@@ -102,8 +107,8 @@ onBeforeUnmount(mapAdapter.destroy);
           </div>
           <span
             class="transport-map-status"
-            :data-state="!item.position_available ? 'offline' : item.stale ? 'stale' : 'live'"
-          >{{ !item.position_available ? "الموقع غير متاح" : item.stale ? "آخر موقع متأخر" : "مباشر" }}</span>
+            :data-state="item.position_state"
+          >{{ positionStateLabel(item.position_state) }}</span>
         </button>
       </div>
     </template>

@@ -1,6 +1,6 @@
 <script setup>
 import { Badge, FeatherIcon, createListResource } from "frappe-ui";
-import { dateTimeLabel, recordTitle, statusLabel, statusTheme } from "../../../core/displayLabels.js";
+import { dateTimeLabel, recordTitle, statusLabel, statusOptions, statusTheme } from "../../../core/displayLabels.js";
 import SupervisorCollection from "../components/SupervisorCollection.vue";
 
 const assignments = createListResource({
@@ -30,6 +30,7 @@ const assignments = createListResource({
   pageLength: 20,
   auto: false,
 });
+const assignmentStatusOptions = statusOptions(["Pending", "Approved", "Rejected", "Cancelled"]);
 </script>
 
 <template>
@@ -39,12 +40,7 @@ const assignments = createListResource({
     icon="repeat"
     :resource="assignments"
     date-field="starts_on"
-    :status-options="[
-      { label: 'بانتظار الاعتماد', value: 'Pending' },
-      { label: 'معتمد', value: 'Approved' },
-      { label: 'مرفوض', value: 'Rejected' },
-      { label: 'ملغى', value: 'Cancelled' },
-    ]"
+    :status-options="assignmentStatusOptions"
     empty="لا يوجد تشغيل متكرر مسند إليك."
   >
     <template #default="{ rows }">

@@ -67,7 +67,7 @@ describe("transport map state", () => {
     const mapState = createTransportMapState();
     await mapState.load(async () => ({
       positions: [
-        { dispatch_trip: "VALID", has_position: true, lat: "24.7", lng: "46.7" },
+        { dispatch_trip: "VALID", has_position: true, lat: "24.7", lng: "46.7", updated_at: "2026-08-14 12:00:00", age_seconds: 30 },
         { dispatch_trip: "SWAPPED", has_position: true, lat: 46.7, lng: 24.7 },
         { dispatch_trip: "ZERO", has_position: true, lat: 0, lng: 0 },
       ],
@@ -78,5 +78,50 @@ describe("transport map state", () => {
       expect.objectContaining({ dispatch_trip: "SWAPPED", has_position: false, position_available: false, lat: null, lng: null }),
       expect.objectContaining({ dispatch_trip: "ZERO", has_position: false, position_available: false, lat: null, lng: null }),
     ]);
+  });
+
+  it("treats coordinates without freshness metadata as unknown rather than live", async () => {
+    const { normalizePosition } = await loadModule();
+
+    expect(normalizePosition({
+      dispatch_trip: "UNKNOWN",
+      has_position: true,
+      lat: 24.7,
+      lng: 46.7,
+      updated_at: null,
+      age_seconds: null,
+    })).toMatchObject({
+      has_position: false,
+      position_available: false,
+      position_state: "unknown",
+      stale: false,
+    });
+    expect(normalizePosition({
+      dispatch_trip: "LIVE",
+      has_position: true,
+      lat: 24.7,
+      lng: 46.7,
+      updated_at: "2026-08-14 12:00:00",
+      age_seconds: 30,
+    })).toMatchObject({ position_state: "live", position_available: true });
+  });
+
+  it("ignores a late older map response after a newer refresh has committed", async () => {
+    const { createTransportMapState } = await loadModule();
+    const mapState = createTransportMapState();
+    let resolveOlder;
+    let resolveNewer;
+    const older = new Promise((resolve) => { resolveOlder = resolve; });
+    const newer = new Promise((resolve) => { resolveNewer = resolve; });
+
+    const firstLoad = mapState.load(() => older);
+    const secondLoad = mapState.load(() => newer);
+    resolveNewer({ positions: [{ dispatch_trip: "NEW", project: "New" }] });
+    await secondLoad;
+    resolveOlder({ positions: [{ dispatch_trip: "OLD", project: "Old" }] });
+    await firstLoad;
+
+    expect(mapState.positions.value.map((row) => row.dispatch_trip)).toEqual(["NEW"]);
+    expect(mapState.phase.value).toBe("ready");
   });
 });

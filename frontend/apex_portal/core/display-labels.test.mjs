@@ -4,10 +4,13 @@ import {
   conditionLabel,
   dateTimeLabel,
   floorLabel,
+  humanLabel,
+  humanOptions,
   recordTitle,
   remainingSeconds,
   periodLabel,
   statusLabel,
+  statusOptions,
   statusTheme,
   vehicleCategoryLabel,
 } from "./displayLabels.js";
@@ -36,7 +39,22 @@ describe("portal display labels", () => {
     expect(statusLabel("Under Maintenance")).toBe("تحت الصيانة");
     expect(statusLabel("Not Tracked")).toBe("غير متابع");
     expect(statusLabel("Standard")).toBe("عادي");
+    expect(statusLabel("scheduled")).toBe("الرحلة مجدولة");
+    expect(statusLabel("en_route")).toBe("الحافلة في الطريق");
     expect(statusLabel("Custom State")).toBe("Custom State");
+  });
+
+  it("builds shared status and Link options with human labels as the primary text", () => {
+    expect(statusOptions(["Planned", "Dispatched", "Completed"])).toEqual([
+      { value: "Planned", label: "مجدولة" },
+      { value: "Dispatched", label: "في الطريق" },
+      { value: "Completed", label: "مكتملة" },
+    ]);
+    const project = { project: "PROJ-001", project_label: "مشروع المطار" };
+    expect(humanLabel(project, "project", "project_label", "غير محدد")).toBe("مشروع المطار");
+    expect(humanOptions([project, project], "project", "project_label")).toEqual([
+      { value: "PROJ-001", label: "مشروع المطار" },
+    ]);
   });
 
   it("maps workflow meaning to native frappe-ui badge themes", () => {
