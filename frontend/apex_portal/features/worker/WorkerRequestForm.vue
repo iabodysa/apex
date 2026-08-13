@@ -45,7 +45,18 @@ function save() {
       </template>
       <p v-if="action.state.value === 'error'" class="feature-error" role="alert">{{ action.error.value }}</p>
       <p v-if="action.state.value === 'saved'" class="feature-success" role="status">تم إرسال الطلب.</p>
-      <Button type="submit" theme="green" variant="solid" :loading="action.state.value === 'saving'">إرسال</Button>
+      <div class="feature-actions">
+        <Button type="submit" theme="green" variant="solid" :loading="action.state.value === 'saving'">إرسال</Button>
+        <Button
+          v-if="action.dirty.value"
+          type="button"
+          variant="outline"
+          :disabled="action.state.value === 'saving'"
+          @click="action.discard"
+        >
+          تجاهل المسودة
+        </Button>
+      </div>
     </form>
   </section>
 </template>

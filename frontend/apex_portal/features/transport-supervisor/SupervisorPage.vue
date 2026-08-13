@@ -4,7 +4,10 @@ import { Badge, Button, FeatherIcon, createDocumentResource, createResource } fr
 import { useRoute } from "vue-router";
 import { dateTimeLabel, statusLabel, statusTheme } from "../../core/displayLabels.js";
 import TripRequestAssignment from "./components/TripRequestAssignment.vue";
+import RequestTripPlanning from "./components/RequestTripPlanning.vue";
 import PortalErrorState from "../../components/PortalErrorState.vue";
+import { safeErrorMessage } from "../../core/errorMessage.js";
+import { meaningfulRequestTitle } from "./assignmentState.js";
 
 const route = useRoute();
 const spec = route.meta.view || {};
@@ -22,17 +25,27 @@ const workflow = createResource({
   method: "POST",
   auto: false,
 });
+const linkTitle = createResource({
+  url: "frappe.client.get_value",
+  method: "GET",
+  auto: false,
+});
 const actionError = ref("");
 const busyAction = ref("");
+const linkLabels = ref({});
+let linkLoadVersion = 0;
 const doc = computed(() => record?.doc || null);
 const state = computed(() => {
   if (record?.get.loading && !doc.value) return "loading";
   if (record?.get.error) return record.get.error?.status === 403 ? "denied" : "error";
   return doc.value ? "ready" : "empty";
 });
-const title = computed(() =>
-  doc.value?.assignment_name || doc.value?.trip_title || spec.title,
-);
+const title = computed(() => {
+  if (spec.doctype === "Transport Request") {
+    return meaningfulRequestTitle(doc.value, spec.title);
+  }
+  return doc.value?.assignment_name || doc.value?.trip_title || spec.title;
+});
 const workflowActions = computed(() => [
   ...new Map(
     (transitions.data || []).map((item) => [
@@ -51,13 +64,49 @@ const actionLabels = Object.freeze({
   Complete: "إكمال الرحلة",
 });
 
-function valueLabel(field) {
+function displayValue(field) {
   const value = doc.value?.[field.key];
-  if (value === null || value === undefined || value === "") return "—";
-  if (["starts_on", "ends_on", "generated_through", "trip_date", "planned_start", "planned_end"].includes(field.key)) {
-    return dateTimeLabel(value) || value;
+  if (value === null || value === undefined || value === "") {
+    return { label: "—", reference: "" };
   }
-  return value;
+  if (["starts_on", "ends_on", "generated_through", "trip_date", "planned_start", "planned_end", "pickup_datetime"].includes(field.key)) {
+    return { label: dateTimeLabel(value) || value, reference: "" };
+  }
+  if (field.key === "status") {
+    return { label: statusLabel(value), reference: "" };
+  }
+  if (field.link) {
+    return {
+      label: linkLabels.value[field.key] || field.link.fallback || "سجل مرتبط",
+      reference: value,
+    };
+  }
+  return { label: value, reference: "" };
+}
+
+async function loadLinkLabels(current) {
+  const version = ++linkLoadVersion;
+  const next = {};
+  if (!current) {
+    linkLabels.value = next;
+    return;
+  }
+  for (const field of spec.fields || []) {
+    const value = current[field.key];
+    if (!field.link || !value) continue;
+    try {
+      const result = await linkTitle.fetch({
+        doctype: field.link.doctype,
+        filters: { name: value },
+        fieldname: [field.link.fieldname],
+      });
+      const data = result?.message || result || {};
+      next[field.key] = data[field.link.fieldname] || field.link.fallback || "سجل مرتبط";
+    } catch {
+      next[field.key] = field.link.fallback || "تعذّر جلب الاسم";
+    }
+  }
+  if (version === linkLoadVersion) linkLabels.value = next;
 }
 
 async function loadTransitions(current) {
@@ -76,13 +125,14 @@ async function applyAction(action) {
     await workflow.submit({ doc: JSON.stringify(doc.value), action });
     await record.reload();
   } catch (reason) {
-    actionError.value = reason?.message || "تعذّر تنفيذ الإجراء.";
+    actionError.value = safeErrorMessage(reason, "تعذّر تنفيذ الإجراء.");
   } finally {
     busyAction.value = "";
   }
 }
 
 watch(doc, loadTransitions, { immediate: true });
+watch(doc, loadLinkLabels, { immediate: true });
 </script>
 
 <template>
@@ -110,7 +160,15 @@ watch(doc, loadTransitions, { immediate: true });
       <dl class="feature-details supervisor-detail__facts">
         <template v-for="field in spec.fields || []" :key="field.key">
           <dt>{{ field.label }}</dt>
-          <dd dir="auto">{{ valueLabel(field) }}</dd>
+          <dd>
+            <span dir="auto">{{ displayValue(field).label }}</span>
+            <bdi
+              v-if="displayValue(field).reference"
+              class="record-reference"
+              dir="auto"
+              translate="no"
+            >{{ displayValue(field).reference }}</bdi>
+          </dd>
         </template>
       </dl>
 
@@ -142,6 +200,12 @@ watch(doc, loadTransitions, { immediate: true });
       <TripRequestAssignment
         v-if="spec.doctype === 'Dispatch Trip' && doc.status === 'Planned' && doc.stops?.length"
         :trip="doc"
+        @saved="record.reload"
+      />
+
+      <RequestTripPlanning
+        v-if="spec.doctype === 'Transport Request' && !doc.assigned_to_trip && ['Validated', 'Approved', 'Scheduled'].includes(doc.status)"
+        :request="doc"
         @saved="record.reload"
       />
 

@@ -100,7 +100,10 @@ onBeforeUnmount(mapAdapter.destroy);
             <strong>{{ item.route_name || item.route_plan }}</strong>
             <span>{{ item.driver_name || "لم يحدد السائق" }} · <bdi dir="auto" translate="no">{{ item.plate || "لم تحدد المركبة" }}</bdi></span>
           </div>
-          <span class="transport-map-status" :data-state="item.stale ? 'stale' : item.has_position ? 'live' : 'offline'">{{ item.stale ? "آخر موقع متأخر" : item.has_position ? "مباشر" : "لا يوجد موقع" }}</span>
+          <span
+            class="transport-map-status"
+            :data-state="!item.position_available ? 'offline' : item.stale ? 'stale' : 'live'"
+          >{{ !item.position_available ? "الموقع غير متاح" : item.stale ? "آخر موقع متأخر" : "مباشر" }}</span>
         </button>
       </div>
     </template>

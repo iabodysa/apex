@@ -1,7 +1,6 @@
 import "./housing.css";
 
 const pages = Object.freeze({
-  overview: () => import("./pages/ManagerOverviewPage.vue"),
   today: () => import("./pages/TodayPage.vue"),
   count: () => import("./pages/InventoryCountPage.vue"),
   countItem: () => import("./pages/InventoryItemPage.vue"),
@@ -32,7 +31,14 @@ const route = (path, name, label, capability, component, group = "") => ({
 });
 
 export const housingRoutes = Object.freeze([
-  route("/overview", "housing-overview", "نظرة عامة", "estate_read", pages.overview, "اليوم"),
+  {
+    path: "/overview",
+    name: "housing-overview",
+    feature: "housing",
+    capability: "estate_read",
+    redirect: "/today",
+    meta: { navigation: false, label: "نظرة عامة", capability: "estate_read", group: "اليوم" },
+  },
   route("/today", "housing-today", "مهام اليوم", "today", pages.today, "اليوم"),
   route("/count", "housing-count", "الجرد", "count", pages.count, "العهد والجرد"),
   route("/count/:item", "housing-count-item", "تفاصيل الجرد", "count", pages.countItem),

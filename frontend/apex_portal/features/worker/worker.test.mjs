@@ -204,7 +204,7 @@ describe("Masar worker feature", () => {
     });
   });
 
-  it("restores a subject-scoped draft and clears it only after a successful submit", async () => {
+  it("restores a subject-scoped draft, then clears storage and the live form without rewriting it", async () => {
     let saved = { subject: "طلب صيانة", description: "المكيف لا يعمل" };
     const store = {
       read: vi.fn(() => saved),
@@ -226,8 +226,35 @@ describe("Masar worker feature", () => {
 
     await action.submit(vi.fn().mockRejectedValue(new Error("network")));
     expect(store.clear).not.toHaveBeenCalled();
+    store.write.mockClear();
     await action.submit(vi.fn().mockResolvedValue({ name: "REQ-1" }));
     expect(store.clear).toHaveBeenCalledWith("service-request");
+    expect(action.draft).toEqual({ subject: "", description: "" });
+    expect(store.write).not.toHaveBeenCalled();
+  });
+
+  it("explicitly discards a persisted draft and restores its declared defaults", async () => {
+    const store = {
+      read: vi.fn(() => ({ request_type: "Complaint", subject: "ضوضاء", description: "ليلاً" })),
+      write: vi.fn(),
+      clear: vi.fn(),
+    };
+    const action = createDraftAction(
+      { request_type: "Maintenance", subject: "", description: "" },
+      { store, key: "service-request" },
+    );
+
+    await action.discard();
+
+    expect(action.draft).toEqual({
+      request_type: "Maintenance",
+      subject: "",
+      description: "",
+    });
+    expect(action.dirty.value).toBe(false);
+    expect(action.state.value).toBe("ready");
+    expect(store.clear).toHaveBeenCalledWith("service-request");
+    expect(store.write).not.toHaveBeenCalled();
   });
 
   it("renders an empty state for an object containing an empty collection", async () => {

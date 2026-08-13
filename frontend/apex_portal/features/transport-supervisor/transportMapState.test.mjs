@@ -56,4 +56,27 @@ describe("transport map state", () => {
     expect(mapState.phase.value).toBe("error");
     expect(mapState.error.value).toBe("server failed");
   });
+
+  it("normalizes coordinate validity before a position can be presented as live", async () => {
+    const { coordinatePair, createTransportMapState } = await loadModule();
+    expect(coordinatePair({ lat: 24.7, lng: 46.7 })).toEqual([24.7, 46.7]);
+    expect(coordinatePair({ lat: 46.7, lng: 24.7 })).toBeNull();
+    expect(coordinatePair({ lat: 0, lng: 0 })).toBeNull();
+    expect(coordinatePair({ lat: 90, lng: 181 })).toBeNull();
+
+    const mapState = createTransportMapState();
+    await mapState.load(async () => ({
+      positions: [
+        { dispatch_trip: "VALID", has_position: true, lat: "24.7", lng: "46.7" },
+        { dispatch_trip: "SWAPPED", has_position: true, lat: 46.7, lng: 24.7 },
+        { dispatch_trip: "ZERO", has_position: true, lat: 0, lng: 0 },
+      ],
+    }));
+
+    expect(mapState.positions.value).toEqual([
+      expect.objectContaining({ dispatch_trip: "VALID", has_position: true, position_available: true, lat: 24.7, lng: 46.7 }),
+      expect.objectContaining({ dispatch_trip: "SWAPPED", has_position: false, position_available: false, lat: null, lng: null }),
+      expect.objectContaining({ dispatch_trip: "ZERO", has_position: false, position_available: false, lat: null, lng: null }),
+    ]);
+  });
 });

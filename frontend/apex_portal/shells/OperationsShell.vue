@@ -19,7 +19,7 @@ onBeforeUnmount(() => globalThis.window?.removeEventListener("resize", updateVie
 const mobileGroups = computed(() => {
   const groups = new Map();
   for (const item of props.navigation) {
-    const name = item.group || "أخرى";
+    const name = item.group || props.title;
     if (!groups.has(name)) groups.set(name, []);
     groups.get(name).push(item);
   }

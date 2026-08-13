@@ -9,9 +9,16 @@ const requests = createListResource({
   pageLength: 50,
   auto: true,
 });
+const capabilities = globalThis.window?.apex_portal?.capabilities || [];
+const canCreate = capabilities.includes("maintenance_create");
 </script>
 <template>
   <ResourceListPage title="طلبات الصيانة" :rows="requests.data || []" :loading="requests.list.loading" :error="requests.list.error" :refresh="requests.fetch">
+    <template #actions>
+      <RouterLink v-if="canCreate" class="supervisor-primary-link" to="/maintenance/new">
+        طلب صيانة جديد
+      </RouterLink>
+    </template>
     <template #row="{ row }">
       <RouterLink :to="`/maintenance/${row.name}`">
         <strong>{{ row.issue_type }}</strong>

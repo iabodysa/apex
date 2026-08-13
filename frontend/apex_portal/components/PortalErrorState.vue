@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import { Button } from "frappe-ui";
+import { safeErrorMessage } from "../core/errorMessage.js";
 
 const props = defineProps({
   title: { type: String, default: "تعذّر تحميل البيانات" },
@@ -9,15 +10,7 @@ const props = defineProps({
 });
 defineEmits(["retry"]);
 
-const detail = computed(() => {
-  const source = props.message?.message || props.message || "";
-  const clean = String(source)
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 240);
-  return !clean || clean === props.title ? props.fallback : clean;
-});
+const detail = computed(() => safeErrorMessage(props.message, props.fallback, props.title));
 </script>
 
 <template>

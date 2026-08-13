@@ -23,7 +23,10 @@ const errorMessage = computed(() => props.error?.message || props.error || "تع
   <section class="feature-page" :aria-labelledby="titleId">
     <header class="feature-page__header">
       <h2 :id="titleId">{{ title }}</h2>
-      <Button variant="subtle" icon-left="refresh-cw" label="تحديث" :loading="loading" @click="refresh" />
+      <div class="feature-page__actions">
+        <slot name="actions" />
+        <Button variant="subtle" icon-left="refresh-cw" label="تحديث" :loading="loading" @click="refresh" />
+      </div>
     </header>
     <LoadingIndicator v-if="loading && !rows.length" aria-label="جارٍ التحميل" />
     <PortalErrorState v-else-if="error" :title="`تعذّر تحميل ${title}`" :message="errorMessage" @retry="refresh" />

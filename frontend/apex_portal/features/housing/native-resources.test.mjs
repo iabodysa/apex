@@ -67,7 +67,10 @@ describe("housing native DocType resources", () => {
     expect(bed).toContain('v-model="checkInForm.project"');
     expect(bed).toContain('!checkInForm.project');
     expect(buildings).not.toContain("cache:");
-    expect(maintenance).toContain("await rooms.reload()");
+    expect(maintenance).toContain('doctype: "Room"');
+    expect(maintenance).toContain("while (rooms.hasNextPage)");
+    expect(maintenance).toContain("await rooms.list.fetch()");
+    expect(maintenance).not.toContain("pageLength: 500");
   });
 
   it("does not offer a second bed assignment to an already housed arrival", () => {

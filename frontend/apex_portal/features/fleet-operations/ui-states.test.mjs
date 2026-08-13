@@ -4,6 +4,7 @@ import { createMemoryHistory, createRouter } from "vue-router";
 import { createResource } from "frappe-ui";
 import FuelApprovalQueuePage from "./pages/FuelApprovalQueuePage.vue";
 import VehicleWorkspacePage from "./pages/VehicleWorkspacePage.vue";
+import QueuePage from "./components/QueuePage.vue";
 
 const { resources } = vi.hoisted(() => ({ resources: new Map() }));
 
@@ -98,5 +99,29 @@ describe("fleet operations async states", () => {
     expect(failed.text()).toContain("تعذر تحميل السجل الزمني");
     await failed.get("button.timeline-retry").trigger("click");
     expect(timeline.fetch).toHaveBeenCalledWith({ plate: "VEH-1" });
+  });
+
+  it("shows actionable normalized queue detail without leaking a server traceback", async () => {
+    const queue = readResource({
+      error: {
+        message: 'Traceback: File "/home/frappe/apps/apex/secret.py", line 9',
+        _server_messages: JSON.stringify([
+          JSON.stringify({ message: "لا تملك صلاحية اعتماد هذا الطلب." }),
+        ]),
+      },
+    });
+    const wrapper = mount(QueuePage, {
+      props: {
+        title: "قائمة التسليم",
+        resource: queue,
+        empty: "لا توجد سجلات.",
+      },
+      global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } },
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("لا تملك صلاحية اعتماد هذا الطلب.");
+    expect(wrapper.text()).not.toContain("Traceback");
+    expect(wrapper.text()).not.toContain("/home/frappe");
   });
 });

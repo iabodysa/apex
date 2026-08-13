@@ -139,6 +139,19 @@ describe("Masar transport supervisor feature", () => {
     expect(mapRoute.meta.navigation).toBe(true);
   });
 
+  it("groups every mobile destination by its operational task hierarchy", () => {
+    const navigation = supervisorRoutes.filter((route) => route.meta.navigation);
+    expect(navigation.every((route) => route.meta.group)).toBe(true);
+    expect(navigation.map((route) => route.meta.group)).toEqual([
+      "الطلبات",
+      "التخطيط",
+      "التشغيل المباشر",
+      "التشغيل المباشر",
+      "السجل",
+    ]);
+    expect(navigation.map((route) => route.meta.group)).not.toContain("أخرى");
+  });
+
   it("uses native Frappe resources for records and workflow", () => {
     const root = path.dirname(fileURLToPath(import.meta.url));
     const page = readFileSync(path.join(root, "SupervisorPage.vue"), "utf8");
@@ -170,6 +183,12 @@ describe("Masar transport supervisor feature", () => {
     }
     expect(readFileSync(path.join(root, "SupervisorPage.vue"), "utf8"))
       .toContain("passenger.passenger_name || 'راكب غير مسمى'");
+    const detail = readFileSync(path.join(root, "SupervisorPage.vue"), "utf8");
+    expect(detail).toContain("frappe.client.get_value");
+    expect(detail).toContain("meaningfulRequestTitle");
+    for (const field of ["work_shift", "route_template", "project", "driver", "vehicle", "requested_by", "assigned_to_trip"]) {
+      expect(readFileSync(path.join(root, "routes.js"), "utf8"), field).toContain(`key: "${field}"`);
+    }
     const requests = readFileSync(path.join(root, "pages", "TransportRequestsPage.vue"), "utf8");
     expect(requests).toMatch(/project\.project_name as project_label/);
     expect(requests).toMatch(/assigned_to_trip\.trip_title as assigned_trip_label/);
@@ -275,5 +294,19 @@ describe("Masar transport supervisor feature", () => {
 
     expect(wrapper.text()).toContain("السجل غير موجود.");
     expect(wrapper.find(".feature-details").exists()).toBe(false);
+  });
+
+  it("exposes request planning and atomic multi-request trip assignment on the detail surfaces", () => {
+    const root = path.dirname(fileURLToPath(import.meta.url));
+    const detail = readFileSync(path.join(root, "SupervisorPage.vue"), "utf8");
+    const tripAssignment = readFileSync(path.join(root, "components", "TripRequestAssignment.vue"), "utf8");
+    const requestPlanning = readFileSync(path.join(root, "components", "RequestTripPlanning.vue"), "utf8");
+
+    expect(detail).toContain("RequestTripPlanning");
+    expect(tripAssignment).toContain("buildTripAssignments");
+    expect(tripAssignment).toContain('type="checkbox"');
+    expect(requestPlanning).toContain("assign_requests_to_trip");
+    expect(requestPlanning).toContain("create_ad_hoc_trip");
+    expect(requestPlanning).toContain("اعتمد الطلب أولاً");
   });
 });

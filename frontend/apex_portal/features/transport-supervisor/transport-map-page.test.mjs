@@ -47,4 +47,21 @@ describe("transport map selection", () => {
     ]);
     wrapper.unmount();
   });
+
+  it("never labels an invalid claimed coordinate as live", async () => {
+    fetch.mockResolvedValue({
+      positions: [
+        { dispatch_trip: "TRIP-BAD", has_position: true, lat: 46.7, lng: 24.7 },
+      ],
+    });
+    const wrapper = mount(TransportMapPage, {
+      global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } },
+    });
+    await flushPromises();
+
+    const status = wrapper.get(".transport-map-status");
+    expect(status.text()).toBe("الموقع غير متاح");
+    expect(status.attributes("data-state")).toBe("offline");
+    wrapper.unmount();
+  });
 });

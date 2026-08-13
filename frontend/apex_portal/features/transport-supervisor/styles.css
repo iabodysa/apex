@@ -249,9 +249,69 @@
 
 .supervisor-request-assignment__form {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
-  align-items: end;
   gap: var(--sp-3);
+}
+
+.supervisor-detail__facts dd {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--sp-1);
+}
+
+.supervisor-request-assignment__list {
+  display: grid;
+  gap: var(--sp-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.supervisor-request-assignment__list > li,
+.request-trip-planning__panel {
+  display: grid;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.supervisor-request-assignment__choice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sp-3);
+  cursor: pointer;
+}
+
+.supervisor-request-assignment__choice input {
+  inline-size: 20px;
+  block-size: 20px;
+  accent-color: var(--brand-green);
+}
+
+.supervisor-request-assignment__choice small,
+.request-trip-planning__panel > p {
+  color: var(--muted);
+}
+
+.supervisor-request-assignment__stops,
+.request-trip-planning__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+
+.request-trip-planning__panel {
+  align-content: start;
+}
+
+.request-trip-planning__panel h4 {
+  margin: 0;
+}
+
+.request-trip-planning__approval {
+  border-inline-start: 4px solid var(--warn);
 }
 
 .supervisor-detail__facts {
@@ -579,6 +639,12 @@
   }
 
   .supervisor-request-assignment__form {
+    grid-template-columns: 1fr;
+  }
+
+  .supervisor-request-assignment__choice,
+  .supervisor-request-assignment__stops,
+  .request-trip-planning__grid {
     grid-template-columns: 1fr;
   }
 
