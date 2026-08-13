@@ -103,7 +103,9 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "Open\nIn Progress\nEvidence Submitted\nVerified by Client\nRejected by Client",
+   "allow_on_submit": 1,
    "default": "Open",
+   "read_only": 1,
    "idx": 10
   },
   {
@@ -116,7 +118,9 @@
    "doctype": "DocField",
    "fieldname": "completion_date",
    "fieldtype": "Date",
+   "allow_on_submit": 1,
    "label": "Completion Date",
+   "read_only": 1,
    "idx": 12
   },
   {
@@ -130,6 +134,7 @@
    "doctype": "DocField",
    "fieldname": "evidence_attached",
    "fieldtype": "Attach",
+   "allow_on_submit": 1,
    "label": "Evidence (Photo/Document)",
    "idx": 14
   }

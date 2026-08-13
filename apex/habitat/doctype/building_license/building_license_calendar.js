@@ -12,7 +12,6 @@ frappe.views.calendar["Building License"] = {
 		Active: "green",
 		"Expiring Soon": "orange",
 		Expired: "red",
-		"Under Renewal": "blue",
 		Revoked: "darkgrey",
 	},
 	get_events_method: "frappe.desk.calendar.get_events",

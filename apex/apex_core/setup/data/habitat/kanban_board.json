@@ -30,11 +30,9 @@
       "filters": "[]",
       "columns": [
         { "column_name": "Open", "status": "Active", "indicator": "Blue", "order": "[]" },
-        { "column_name": "Assigned", "status": "Active", "indicator": "Cyan", "order": "[]" },
         { "column_name": "In Progress", "status": "Active", "indicator": "Orange", "order": "[]" },
         { "column_name": "Resolved", "status": "Active", "indicator": "Green", "order": "[]" },
-        { "column_name": "Closed", "status": "Active", "indicator": "Gray", "order": "[]" },
-        { "column_name": "Reopened", "status": "Active", "indicator": "Red", "order": "[]" }
+        { "column_name": "Closed", "status": "Active", "indicator": "Gray", "order": "[]" }
       ]
     },
     {

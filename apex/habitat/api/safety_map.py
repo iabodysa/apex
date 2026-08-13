@@ -30,7 +30,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, now, today
 
-_OPEN_MAINTENANCE_STATUSES = ["Open", "Assigned", "In Progress", "Reopened"]
+_OPEN_MAINTENANCE_STATUSES = ["Open", "In Progress"]
 
 _RED_PRIORITIES = {"High", "Critical"}
 

@@ -322,7 +322,7 @@ def revert_transport_request(tr_name, from_state, to_state, dispatch_trip=None, 
 
 INACTIVE_EMPLOYEE_STATUSES = ("Inactive", "Left", "Suspended")
 
-BLOCKING_DRIVER_STATUSES = ("Stopped", "On Leave", "Released")
+BLOCKING_DRIVER_STATUSES = ("Stopped", "Released")
 
 
 def rider_block_reason(driver, on_date=None):
@@ -335,7 +335,7 @@ def rider_block_reason(driver, on_date=None):
 	1. The linked Employee is Inactive / Left / Suspended.
 	2. The Employee has an approved Leave Application covering ``on_date``
 	   (default: today).
-	3. The Salis Driver's own status is Stopped / On Leave / Released.
+	3. The Salis Driver's own status is Stopped / Released.
 
 	The returned string is already wrapped with ``_()`` and names the driver so a
 	caller can ``frappe.throw`` it directly. Read-only and side-effect free.

@@ -15,3 +15,4 @@ apex.patches.v2_3.retire_operations_alert
 apex.patches.v2_3.backfill_stock_ledger_holder
 apex.patches.v2_6.backfill_portal_push_subscription_holder
 apex.patches.v2_6.migrate_masar_route_model
+apex.patches.v2_6.converge_state_contracts

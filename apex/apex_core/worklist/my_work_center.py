@@ -38,8 +38,8 @@ from apex.apex_core.worklist.action_inbox import get_pending_actions
 
 WORKLIST_REGISTRY: dict[str, dict] = {
     "Maintenance Request": {
-        "active": ["Open", "Assigned", "In Progress", "Reopened"],
-        "terminal": ["Resolved", "Closed"],
+        "active": ["Open", "In Progress", "Resolved"],
+        "terminal": ["Closed"],
     },
     "Resident Request": {
         "active": ["New", "Triaged", "Assigned", "In Progress", "Waiting Evidence"],

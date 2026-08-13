@@ -256,7 +256,7 @@ def _drivers_pane(unscoped, projects) -> dict:
     Trip dated today (the operational dispatch sense); every other Active driver
     is "available". ``current_vehicle`` is surfaced on each row so the board can
     show the bound vehicle without an extra round trip. Only ``Active`` drivers
-    are considered for the availability split (Stopped / On Leave / Released
+    are considered for the availability split (Stopped / Released
     drivers are out of the dispatchable pool).
     """
     driver_filters = _project_filter(unscoped, projects)

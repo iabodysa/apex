@@ -96,7 +96,7 @@
    "label": "Maintenance Request",
    "link_to": "Maintenance Request",
    "idx": 8,
-   "stats_filter": "{\"status\": [\"in\", [\"Open\", \"Assigned\", \"In Progress\", \"Reopened\"]]}",
+   "stats_filter": "{\"status\": [\"in\", [\"Open\", \"In Progress\", \"Resolved\"]]}",
    "format": "{} Open",
    "color": "Yellow"
   },
@@ -683,6 +683,6 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-08-07 20:53:00.000000",
+ "modified": "2026-08-14 02:17:00.000000",
  "creation": "2020-01-01 00:00:02.000000"
 }

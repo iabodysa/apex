@@ -44,7 +44,6 @@ A handover discrepancy was recorded. Please raise a Vehicle Damage Write-Off for
 A large worker-transport request needs management escalation,طلب نقل عمال كبير يتطلب تصعيدًا إلى الإدارة
 A line is missing its item.,أحد السطور ينقصه الصنف.
 A linked Employee is required to raise departure transport (the manifest cannot carry a Temporary Worker).,يلزم ربط موظف لإنشاء نقل المغادرة (لا يمكن إدراج عامل مؤقت في كشف الركاب).
-A maintenance request has been assigned to you,تم إسناد طلب صيانة إليك
 A maintenance request raised automatically when the task execution indicates a repair is needed.,طلب صيانة يُنشأ آلياً عندما يشير تنفيذ المهمة إلى الحاجة لإصلاح.
 A maintenance request spawned from a safety finding requires the maintenance technician in parallel,طلب صيانة ناتج عن ملاحظة سلامة يتطلب تدخل فني الصيانة بالتوازي
 A manifest can list at most {0} expected workers.,يمكن أن يضم كشف الوصول {0} عاملاً متوقعاً كحد أقصى.
@@ -59,8 +58,13 @@ A portal access token is required.,يلزم وجود رمز وصول إلى ال
 A posting cannot be dated before {0}. Ask a {1} to post it.,لا يمكن تأريخ الحركة قبل {0}. اطلب من {1} تسجيلها.
 A posting cannot be dated in the future.,لا يمكن تأريخ الحركة في المستقبل.
 A reason is required to reject a handover.,يلزم سبب لرفض التسليم.
+A reason is required to reopen a Maintenance Request.,يلزم سبب لإعادة فتح طلب الصيانة.
+A reason is required to revoke a Building License.,يلزم سبب لسحب رخصة المبنى.
 A rent payment is due today and remains unpaid,دفعة إيجار مستحقة اليوم ولم تُسدد بعد
 A request reference is required.,مرجع الطلب مطلوب.
+A resolution is required to close a Vehicle Incident.,يلزم توضيح نتيجة المعالجة لإغلاق بلاغ المركبة.
+A revoked Building License cannot be cancelled or reinstated.,لا يمكن إلغاء رخصة مبنى مسحوبة أو إعادتها إلى حالة سارية.
+A revoked Building License cannot be renewed.,لا يمكن تجديد رخصة مبنى مسحوبة.
 A round date is required to submit a round.,يلزم تاريخ جولة لاعتماد جولة.
 A round date is required to submit rounds.,يلزم تاريخ الجولة لاعتماد الجولات.
 "A route plan must name its project, or its trips are invisible to every project-scoped supervisor.",يجب أن تذكر خطة المسار مشروعها، وإلا اختفت رحلاتها عن كل مشرف مقيَّد بمشروع.
@@ -321,6 +325,7 @@ Appearance,المظهر
 Appliance,جهاز
 Applicable Days,الأيام السارية
 Applies to All Buildings,يسري على جميع المباني
+Apply,تنفيذ
 Apply an operational markup to external-supplier accommodation costs in the Supplier Cost Recovery report.,تطبيق هامش تشغيلي على تكاليف السكن الخاصة بالموردين الخارجيين في تقرير استرداد تكلفة المورّد.
 Applying…,جارٍ تنفيذ الإجراء…
 Approval,الاعتماد
@@ -663,6 +668,7 @@ Building Address,عنوان المبنى
 Building B,المبنى ب
 Building Code Locked,رمز المبنى مقفل
 Building License,رخصة المبنى
+Building License revoked: {0},سُحبت رخصة المبنى: {0}
 Building Licenses by Status,رخص المباني حسب الحالة
 Building Number,رقم المبنى
 Building Operations Summary,ملخص عمليات المبنى
@@ -712,6 +718,7 @@ Cannot cancel incident {0}: Employee Advance {1} already carries a paid or recov
 Cannot hand over {0} unit(s) of {1} from {2}: only {3} available in the store.,لا يمكن تسليم {0} وحدة من {1} من {2}: المتوفر في المخزن {3} فقط.
 Cannot issue {0} unit(s) of {1} from {2}: only {3} available in the store.,لا يمكن صرف {0} وحدة من {1} من {2}: المتوفر في المخزن {3} فقط.
 Cannot mark Missed before the scheduled date ({0}).,لا يمكن تغيير الحالة إلى «فائتة» قبل التاريخ المجدول ({0}).
+Cannot move a remediation action from {0} to {1}.,لا يمكن نقل إجراء المعالجة من {0} إلى {1}.
 Cannot move {0} unit(s) of {1} out of {2}: {3} holds only {4}.,لا يمكن إخراج {0} وحدة من {1} من {2}: {3} يحوز {4} فقط.
 Cannot return {0} unit(s) of {1}: {2} were issued and {3} already returned.,لا يمكن إرجاع {0} وحدة من {1}: تم صرف {2} وأُرجعت {3} بالفعل.
 Cannot reverse {0} unit(s) of {1} in {2}: only {3} left in the building store. Reverse the later movements first.,لا يمكن عكس {0} وحدة من {1} في {2}: لم يتبقَّ في مخزن المبنى سوى {3}. اعكس الحركات الأحدث أولًا.
@@ -891,6 +898,8 @@ Client Project,مشروع العميل
 "Clock time of the incident. A police report and an insurer both ask for it, and it orders two incidents on the same day.",ساعة وقوع الحادث. يطلبها تقرير المرور وشركة التأمين، وترتّب حادثين في يوم واحد.
 "Clock time the vehicle changed hands. Defaults to the time the receipt is raised, so two handovers on the same day can be ordered.",الساعة التي انتقلت فيها المركبة من يد إلى يد. تأتي افتراضاً وقت تحرير السند، ليُرتّب تسليمان في يوم واحد.
 Close,إغلاق
+Close Incident,إغلاق البلاغ
+Close Request,إغلاق الطلب
 Close a Rental Settlement,إغلاق تسوية إيجار
 Closed,مغلق
 Closed By,أُغلق بواسطة
@@ -928,6 +937,7 @@ Completed Trips Today,الرحلات المكتملة اليوم
 Completion,الإنجاز
 Completion Date,تاريخ الاكتمال
 Completion Notes,ملاحظات الإنجاز
+Completion Notes are required before closing a Maintenance Work Order.,يلزم تسجيل ملاحظات الإنجاز قبل إغلاق أمر عمل الصيانة.
 Completion Notes are required when the trip status is Completed.,ملاحظات الإنجاز مطلوبة عندما تكون حالة الرحلة مكتملة.
 Completion Photo,صورة الإنجاز
 Completion Photo Evidence,صورة إثبات الإنجاز
@@ -1137,6 +1147,7 @@ Could not update the Work Order. Please try again.,تعذّر تحديث أمر 
 Could not update the bed. Please try again.,تعذّر تحديث السرير. حاول مرة أخرى.
 Could not update the room. Please try again.,تعذّر تحديث الغرفة. حاول مرة أخرى.
 Could not verify the Expense Request Afmco DocType. Please try again.,تعذّر التحقق من نوع المستند Expense Request Afmco. حاول مرة أخرى.
+Could not verify the submitted remediation plan changes.,تعذّر التحقق من تغييرات خطة المعالجة المعتمدة.
 Couldn't load custody store — retry,تعذّر تحميل مستودع العهدة — أعد المحاولة
 Count,العدد
 Count of open Fuel Exception Case records for this driver. Must be zero to clear.,عدد حالات استثناء الوقود المفتوحة لهذا السائق. يجب أن يكون صفراً لإخلاء الطرف.
@@ -1207,7 +1218,7 @@ Current Reading,القراءة الحالية
 Current Vehicle,المركبة الحالية
 "Current condition of the inventory item, flagging units that need maintenance, are damaged, or are missing so replacements and charges can be raised.",الحالة الراهنة لصنف المخزون، تشير إلى الوحدات التي تحتاج صيانة أو المتضررة أو المفقودة ليتسنى طلب البدائل أو تحميل الرسوم.
 "Current custody state of the item held by the resident, distinguishing items still issued from those returned intact versus those reported lost or damaged and therefore chargeable.",حالة العهدة الحالية للصنف الذي بحوزة الساكن، وتميّز الأصناف المصروفة عن المعادة سليمة وعن المفقودة أو التالفة التي يمكن تحميل تكلفتها على المستلم.
-"Current employment and availability state of the driver, distinguishing an active driver from one temporarily stopped or on leave, or released from the fleet.",حالة عمل السائق وجاهزيته، وتوضح ما إذا كان نشطًا أو موقوفًا مؤقتًا أو في إجازة أو مستبعدًا من الأسطول.
+Current fleet state of the driver. Approved HRMS Leave Applications are the source for leave availability.,حالة السائق في الأسطول. تُؤخذ الإجازات من طلبات الإجازة المعتمدة في نظام الموارد البشرية.
 Currently Held,بحوزته حالياً
 Custodian,أمين العهدة
 Custodian Supervisor,مشرف العهدة
@@ -1681,6 +1692,7 @@ Evidence Photo Required,صورة إثبات مطلوبة
 Evidence Required,إثبات مطلوب
 Evidence Submitted,تم تقديم الإثبات
 Evidence is required before moving the write-off case beyond Open.,الأدلة مطلوبة قبل نقل حالة الشطب إلى ما بعد «مفتوح».
+Evidence is required before submitting a remediation action.,يلزم إرفاق إثبات قبل إرسال إجراء المعالجة.
 Evidence is required to submit a stop with reason {0}.,يلزم إثبات لاعتماد إيقاف بالسبب {0}.
 Evidence required before resolving,الإثبات مطلوب قبل المعالجة
 Exact Location,الموقع بالتحديد
@@ -2016,7 +2028,6 @@ Handed over to,إلى مستودع
 "Handling priority assigned to the finding for scheduling remediation, independent of severity, from low up to critical.",أولوية متابعة الملاحظة عند جدولة المعالجة، وهي مستقلة عن درجة الخطورة وتتدرج من منخفضة إلى حرجة.
 "Handling stage of the resident request from intake to closure, tracking triage, assignment, active work, an evidence hold, and the final resolved, rejected, or closed outcome.",مرحلة معالجة طلب الساكن من الاستلام حتى الإغلاق، وتشمل الفرز والإسناد والعمل الجاري والتعليق بانتظار الأدلة، ثم المعالجة أو الرفض أو الإغلاق.
 "Handling stage of the transport request from intake through validation, approval, and scheduling to fulfilment, or a rejected or cancelled outcome.",مرحلة معالجة طلب النقل من الاستلام مرورًا بالتحقق والاعتماد والجدولة حتى التنفيذ، أو نتيجة مرفوضة أو ملغاة.
-"Handling stage of the vehicle incident record, from open and under review to closed or cancelled.",مرحلة معالجة سجل حادث المركبة، من مفتوح وقيد المراجعة حتى مغلق أو ملغى.
 Handover,تسليم
 Handover Check Items,بنود فحص التسليم
 Handover Date,تاريخ التسليم
@@ -2163,7 +2174,9 @@ Incident Date and Time,تاريخ ووقت الحادثة
 Incident Details,تفاصيل الحادثة
 Incident Time,وقت الحادث
 Incident Type,نوع الحادثة
+Incident closed: {0},أُغلق البلاغ: {0}
 Incident date cannot be in the future.,لا يمكن أن يكون تاريخ البلاغ في المستقبل.
+Incident {0} closed: {1},أُغلق البلاغ {0}: {1}
 Incidents,الحوادث
 Incidents and Recovery,الحوادث والاسترداد
 Incidents by Type,البلاغات حسب النوع
@@ -2522,6 +2535,8 @@ Maintenance Material Template Item,عنصر قالب مواد الصيانة
 Maintenance Procurement Item,بند مشتريات الصيانة
 Maintenance Reflection,بيانات الصيانة المرتبطة
 Maintenance Request,طلب صيانة
+Maintenance Request closed.,أُغلق طلب الصيانة.
+Maintenance Request reopened: {0},أُعيد فتح طلب الصيانة: {0}
 Maintenance Requests by Priority,طلبات الصيانة حسب الأولوية
 Maintenance Requests by Status,طلبات الصيانة حسب الحالة
 Maintenance Technician,فني الصيانة
@@ -2715,6 +2730,7 @@ New driver,السائق الجديد
 Next,التالي
 Next Expiry Date,تاريخ الانتهاء القادم
 Next Round Due,موعد الجولة القادمة
+Next Status,الحالة التالية
 Next: Approve,التالي: الاعتماد
 Next: Beds,التالي: الأسرّة
 Next: Room Types,التالي: أنواع الغرف
@@ -2939,6 +2955,8 @@ Only Work Orders with status Planned can be marked In Progress.,لا يمكن ت
 "Only a Fleet Supervisor, Fleet Project Manager, or Fleet Manager can {0} a fuel request.",لا يحق {0} طلب الوقود إلا لمشرف الأسطول أو مدير مشروع الأسطول أو مدير الأسطول.
 Only a dispatched trip can be executed.,لا يمكن تنفيذ الرحلة قبل إرسالها.
 Only a handover Under Review can be approved.,لا يمكن اعتماد التسليم إلا إذا كان قيد المراجعة.
+Only a resolved Maintenance Request can be closed.,لا يمكن إغلاق طلب الصيانة إلا بعد معالجته.
+Only a resolved or closed Maintenance Request can be reopened.,لا يمكن إعادة فتح إلا طلب صيانة معالج أو مغلق.
 Only a submitted delivery can be actioned.,لا يمكن اتخاذ إجراء إلا على تسليم معتمَد.
 Only a submitted handover can be actioned.,لا يمكن اتخاذ إجراء إلا على تسليم معتمد.
 Only a submitted movement can be acknowledged.,لا يمكن اعتماد الحركة إلا بعد اعتماد المستند.
@@ -2946,18 +2964,26 @@ Only a submitted transfer can be received.,لا يمكن استلام النقل
 Only a {0} may clear this exit.,لا يمكن اعتماد نقطة الخروج هذه إلا بواسطة {0}.
 Only an authorised user can return a stopped vehicle to service.,لا يعيد المركبة الموقوفة إلى الخدمة إلا مستخدم مخوّل.
 Only an authorised user can stop an active vehicle.,لا يوقف المركبة النشطة إلا مستخدم مخوّل.
+Only an incident under review can be closed.,لا يمكن إغلاق البلاغ إلا إذا كان قيد المراجعة.
 Only an intercompany movement needs an accounting acknowledgement.,الاعتماد المحاسبي مطلوب فقط للحركات بين الشركات.
+Only submitted Building Licenses can be revoked.,لا يمكن سحب إلا رخصة مبنى معتمدة.
+Only submitted Maintenance Requests can be closed.,لا يمكن إغلاق إلا طلب صيانة معتمد.
+Only submitted Maintenance Requests can be reopened.,لا يمكن إعادة فتح إلا طلب صيانة معتمد.
 Only submitted Maintenance Work Orders can be marked Completed.,لا يمكن وسم أوامر عمل الصيانة كمكتملة إلا بعد اعتمادها.
 Only submitted Service Orders can be marked Completed.,لا يمكن وضع علامة «مكتمل» إلا على أوامر الخدمة المعتمدة.
 Only submitted Service Orders can be marked Missed.,لا يمكن تحديد حالة 'فائت' إلا لأوامر الخدمة المعتمدة.
 Only submitted Service Orders can be started.,لا يمكن بدء تنفيذ أوامر الخدمة غير المعتمدة.
 Only submitted Task Instances can be marked Completed.,لا يمكن تحديد المهمة كمكتملة إلا بعد اعتمادها.
 Only submitted Task Instances can be started.,لا يمكن بدء تنفيذ المهام غير المعتمدة.
+Only submitted Vehicle Incidents can be closed.,لا يمكن إغلاق إلا بلاغ مركبة معتمد.
 Only submitted Work Orders can be started.,لا يمكن بدء تنفيذ أوامر العمل غير المعتمدة.
+Only submitted remediation plans can be progressed.,لا يمكن متابعة التنفيذ إلا في خطة معالجة معتمدة.
+Only submitted remediation plans can be rolled up.,لا يمكن تحديث حالة الخطة إلا بعد اعتمادها.
 Only the initiator or an Accommodation Manager may regenerate the code.,لا يمكن إعادة إنشاء الرمز إلا بواسطة منشئ التسليم أو مدير السكن.
 Only the procurement supervisor or an Accommodation Manager may regenerate the code.,لا يمكن إعادة إنشاء الرمز إلا بواسطة مشرف المشتريات أو مدير السكن.
 Only the receiving supervisor or an Accommodation Manager may action this handover.,لا يجوز اتخاذ إجراء على هذا التسليم إلا للمشرف المستلم أو مدير السكن.
 Only the receiving supervisor or an Accommodation Manager may confirm receipt.,يحق فقط للمشرف المستلِم أو مدير الإسكان تأكيد الاستلام.
+Only the selected remediation action may change.,لا يمكن تغيير إلا إجراء المعالجة المحدد.
 Only {0} can record the accounting acknowledgement.,لا يمكن تسجيل الاعتماد المحاسبي إلا بواسطة {0}.
 Open,مفتوح
 Open Action Inbox,فتح صندوق الإجراءات
@@ -3088,6 +3114,7 @@ Over-Consumption,استهلاك زائد
 Over-capacity,تجاوز السعة
 Overall Result,النتيجة الإجمالية
 Overall Status,الحالة العامة
+Overall Status must match the remediation actions.,يجب أن تتوافق الحالة العامة مع إجراءات المعالجة.
 Overdue,متأخر
 Overdue Arrivals Awaiting Housing,الوافدون المتأخرون بانتظار الإسكان
 Overdue Audit Remediation Plans,خطط معالجة التدقيق المتأخرة
@@ -3380,6 +3407,8 @@ Procurement intake store that receives the externally-purchased goods.,مخزن 
 Procurement intake store that the goods leave.,مخزن استلام المشتريات الذي تغادر منه البضائع.
 Procurement intake store the asset leaves.,مخزن استلام المشتريات الذي يغادره الأصل.
 "Procurement item row idx (1-based) within the Work Order, so each item posts a distinct idempotency-keyed ledger row.",ترتيب صف بند المشتريات (يبدأ من واحد) ضمن أمر العمل، بحيث يُرحِّل كل بند صف سجل مستقلاً بمفتاح يمنع التكرار.
+Progress Remediation Action,تحديث إجراء المعالجة
+Progress Selected Action,تحديث الإجراء المحدد
 "Progress of a single audit finding through remediation, tracking work start, evidence submission, and whether the client verified or rejected the fix.",تقدم معالجة ملاحظة تدقيق واحدة، من بدء العمل وتقديم الأدلة إلى تحقق العميل من الإصلاح أو رفضه.
 "Progress of the driver clearance process, tracking whether checks are open or in progress, fully cleared, blocked by an outstanding item, or cancelled.",تقدم إجراءات إخلاء طرف السائق، وتوضح ما إذا كانت الفحوص مفتوحة أو قيد التنفيذ أو مكتملة، أو متوقفة بسبب بند عالق، أو ملغاة.
 Project,المشروع
@@ -3566,7 +3595,6 @@ Recover from Driver,استرداد من السائق
 Recover the repair cost from the driver. On submit this raises one Employee Advance (the receivable); the wage installments are then governed by the Salary Deduction Policy and are OFF until it is activated.,استرداد تكلفة الإصلاح من السائق. عند الاعتماد تُنشأ سلفة موظف واحدة (المديونية)؛ وتخضع أقساط الخصم من الأجر بعدها لسياسة خصومات الرواتب وتظل موقوفة حتى تفعيلها.
 Recovered,مُسترد
 Recovered Share,نسبة المسترد
-Recovered; theft report {0} closed.,تمت الاستعادة؛ أُغلق بلاغ السرقة {0}.
 Recoveries,الاستردادات
 Recovery,الاسترداد
 Recovery Advance,سلفة الاسترداد
@@ -3644,6 +3672,10 @@ Remediation Action Required,الإجراء العلاجي المطلوب
 Remediation Actions,الإجراءات العلاجية
 Remediation Deadline,الموعد النهائي للمعالجة
 Remediation Plan,خطة المعالجة
+Remediation action details cannot change after submission.,لا يمكن تغيير تفاصيل إجراء المعالجة بعد اعتماد الخطة.
+Remediation action {0} was not found.,إجراء المعالجة {0} غير موجود.
+Remediation action {0}: {1} to {2}.,تغيّرت حالة إجراء المعالجة {0} من {1} إلى {2}.
+"Remediation actions cannot be added, removed, or reordered after submission.",لا يمكن إضافة إجراءات المعالجة أو حذفها أو إعادة ترتيبها بعد اعتماد الخطة.
 Remove,إزالة
 Remove Demo Data,إزالة البيانات التجريبية
 Remove every record the demo build created? Nothing else on this site is touched.,هل تريد إزالة كل سجل أنشأه إعداد البيانات التجريبية؟ لن تتأثر أي بيانات أخرى في هذا الموقع.
@@ -3693,7 +3725,8 @@ Rental settlement {0} for period {1}.,تسوية إيجار {0} عن الفتر�
 Rental {0} via {1} (office {2}).,إيجار {0} عبر {1} (المكتب {2}).
 Rented,مستأجرة
 Reopen,إعادة فتح
-Reopened,أُعيد فتحه
+Reopen Maintenance Request,إعادة فتح طلب الصيانة
+Reopen Request,إعادة فتح الطلب
 Repair,إصلاح
 Repair Cost,تكلفة الإصلاح
 Repair Quotation Reference,مرجع عرض سعر الإصلاح
@@ -3855,6 +3888,8 @@ Reviewed By,راجعه
 Reviewed By (Management),راجعه (الإدارة)
 Reviewed By (Safety Management),راجعه (إدارة السلامة)
 Revise,تعديل
+Revoke,سحب
+Revoke License,سحب الرخصة
 Revoke Portal Link,إلغاء رابط البوابة
 Revoked,مُلغى
 Revoking driver link…,جارٍ إلغاء رابط السائق…
@@ -3870,7 +3905,6 @@ Role,الدور
 Role Profile,ملف الأدوار
 Role that may approve a deduction of this type. Recorded for reference; nothing enforces it.,الدور الذي يجوز له اعتماد خصم من هذا النوع. مسجَّل للعلم فقط، ولا شيء يفرضه.
 "Rolled-up regulatory compliance state of the vehicle across its documents, flagging vehicles that are compliant, approaching expiry, expired, or not tracked.",حالة الامتثال التنظيمي المجمّعة للمركبة عبر وثائقها، تشير إلى المركبات الممتثلة أو المقتربة من انتهاء الصلاحية أو المنتهية أو غير المتتبَّعة.
-"Rolled-up remediation state for the whole client audit plan, summarising progress across its findings and flagging plans that are overdue or closed by the client.",حالة المعالجة المجمّعة لخطة تدقيق العميل بأكملها، تلخّص التقدّم عبر ملحوظاتها وتشير إلى الخطط المتأخرة أو المغلقة من قبل العميل.
 Roof,سطح
 Room,الغرفة
 Room Bed Transfer,نقل الساكن إلى سرير آخر
@@ -4112,6 +4146,7 @@ Select a worker to load held custody.,اختر عاملًا لعرض العهد�
 Select all,تحديد الكل
 Select at least one applicable day.,اختر يوماً واحداً على الأقل.
 Select at least one passenger.,اختر راكباً واحداً على الأقل.
+Select exactly one remediation action.,حدد إجراء معالجة واحداً فقط.
 Select from the Habitat material catalog. Optional — use instead of or alongside ERPNext Item.,اختر من قائمة مواد هابيتات. الحقل اختياري، ويمكن استخدامه بدل صنف ERPNext أو معه.
 Select one or more New requests first.,اختر طلباً جديداً واحداً أو أكثر أولاً.
 Select the Assignment,اختر التسكين
@@ -4529,6 +4564,9 @@ System Info,معلومات النظام
 System Manager,مدير النظام
 System logs: read-only diagnostics.,سجلات النظام: تشخيصات للقراءة فقط.
 System-generated document from Apex,مستند صادر آليًا من نظام أبيكس
+System-managed handling stage of the vehicle incident record.,حالة معالجة البلاغ ويحدّثها النظام تلقائياً.
+System-managed rollup of remediation progress and deadline.,حالة عامة يحسبها النظام من تقدم المعالجة وموعدها النهائي.
+"System-managed validity state derived from expiry, unless the license is revoked.",حالة الرخصة يحسبها النظام من تاريخ الانتهاء ما لم تكن مسحوبة.
 "System-written, read-only periodic snapshot of vehicle utilisation over a trailing window. Never hand-entered; derived from completed Dispatch Trips.",لقطة دورية للقراءة فقط يكتبها النظام لاستخدام المركبات عبر نافذة زمنية متحركة. لا تُدخل يدوياً؛ وتُشتق من رحلات التسيير المكتملة.
 TRAINING,تدريب
 TS Intake Source,مصدر إدخال الدوام
@@ -4659,6 +4697,7 @@ The current link cannot be shown again. Rotating issues a NEW link and QR and in
 "The damage described above is passed to the insurer as a claim on the policy in force, and the company keeps the right to the balance the insurer does not settle.",التلف الموصوف أعلاه يُرفع لشركة التأمين كمطالبة على الوثيقة السارية، وتحتفظ الشركة بحقها في الباقي الذي ما يغطيه التأمين.
 "The damage described above is repairable. This notice authorises repair up to the estimated cost shown, and any excess needs a fresh authority.",التلف الموصوف أعلاه قابل للإصلاح. هذا الإشعار يصرّح بالإصلاح في حدود التكلفة التقديرية المبينة، وأي زيادة تحتاج اعتماد جديد.
 The day the settled amount falls due to the rental office.,اليوم الذي يستحق فيه المبلغ لمكتب التأجير.
+The deadline rollup cannot change remediation actions.,تحديث الموعد النهائي لا يغيّر إجراءات المعالجة.
 The difference against metered consumption is inside the allowed margin,الفرق مع المستهلك بالعداد داخل الهامش المسموح
 "The dispatching store confirms it handed over the quantities listed above and released them from its own stock. The receiving store confirms it took them into custody in the stated quantities and in usable condition, and carries them from the received date onward. Anything short, damaged or missing must be written on this note before it is signed.",يقر المستودع المرسِل بأنه سلّم الكميات المذكورة أعلاه وأخرجها من رصيده. ويقر المستودع المستلِم بأنه استلمها بالكميات المذكورة وبحالة صالحة للاستعمال، ويتحمّلها من تاريخ الاستلام. وأي نقص أو تلف أو فقد يُكتب على هذا السند قبل التوقيع عليه.
 "The driver confirms that only the persons listed on this sheet travelled with him on this trip, that each one boarded and left at the point written against his name, and that he carried nobody else.",يقر السائق أن الأشخاص المذكورين في هذا الكشف هم وحدهم من ركبوا معه في هذه الرحلة، وأن كل واحد صعد ونزل في النقطة المكتوبة أمام اسمه، وأنه ما نقل أحدًا غيرهم.
@@ -4714,6 +4753,7 @@ The quantity fits inside what is left on the quota,الكمية داخل الم�
 The quota behind this voucher is still open,الحصة خلف هذا الأمر ما زالت مفتوحة
 The receiving party confirms the items above were delivered in the stated quantities and taken into the building store.,تُقرّ الجهة المستلِمة بأن الأصناف المذكورة أعلاه سُلّمت بالكميات المبينة وأُدخلت إلى مستودع المبنى.
 "The receiving supervisor confirms taking the items listed above into the receiving building store in the quantities shown. Responsibility for this stock, and for any shortage found later, passes to the receiving store from the handover date. The releasing store is discharged only for the quantities confirmed above.",يقر المشرف المستلم باستلام الأصناف المذكورة أعلاه في مستودع المبنى المستلم بالكميات الموضحة. وتنتقل مسؤولية هذه العهدة، وأي نقص يظهر لاحقًا، إلى المستودع المستلم من تاريخ التسليم. ولا تبرأ ذمة المستودع المسلِّم إلا بالكميات المؤكدة أعلاه.
+The remediation transition changed unexpected values.,غيّر انتقال حالة المعالجة قيماً غير متوقعة.
 The rental contract this vehicle sits on. One office can run several at different rates.,عقد التأجير الذي تقع تحته هذه المركبة. المكتب الواحد قد يشغّل عدة عقود بأسعار مختلفة.
 The rental office states its VAT registration number,مكتب التأجير يذكر رقمه الضريبي
 The rental office's invoice this statement settles.,فاتورة مكتب التأجير التي يسوّيها هذا الكشف.
@@ -4725,6 +4765,8 @@ The room and its fittings have not been inspected and accepted.,الغرفة و�
 The route plan behind this sheet is approved,خطة المسار خلف هذا الكشف معتمدة
 The route stop name (mirrors the Route Stop on the trip's route).,اسم محطة المسار (يعكس محطة المسار على مسار الرحلة).
 The route stop where this worker boarded (mirrors the Route Stop name on the trip's route).,محطة المسار التي صعد منها هذا العامل (تطابق اسم محطة المسار في مسار الرحلة).
+The selected remediation action has no available transition.,لا توجد خطوة تالية متاحة لإجراء المعالجة المحدد.
+The selected remediation action no longer exists.,إجراء المعالجة المحدد لم يعد موجوداً.
 The source Route Stop child row name — the stable identity used to match a stop across reloads.,اسم صف محطة المسار الفرعي المصدر — الهوية الثابتة المستخدمة لمطابقة محطة عبر عمليات إعادة التحميل.
 The state the item came back in. Lost or Damaged is what a recovery is raised against.,الحال التي عاد بها الصنف. «مفقود» أو «تالف» هو ما يُرفع عليه استرداد.
 The statement carries an approving officer,الكشف يحمل اسم من اعتمده
@@ -4772,6 +4814,7 @@ Third Party Insurer,شركة تأمين الطرف الآخر
 Third Party Involved,يوجد طرف ثالث
 Third Party Plate Number,رقم لوحة الطرف الآخر
 Third Party Policy Number,رقم وثيقة الطرف الآخر
+This Building License is already revoked.,رخصة المبنى مسحوبة بالفعل.
 This Custody Issue has no issued-to Employee; nothing to hand over.,لم يُحدد موظف مستلم في صرف العهدة هذا، لذلك لا يوجد ما يُسلّم.
 This Maintenance Work Order is already Completed.,أمر عمل الصيانة هذا مكتمل بالفعل.
 This arrival manifest has not been fully reconciled — workers are still unhoused after the expected date,لم تتم مطابقة كشف الوصول بالكامل؛ فما زال بعض العمال دون سكن بعد التاريخ المتوقع.
@@ -4998,7 +5041,6 @@ Unassigned Only,غير المسندة فقط
 Under Contract,بموجب العقد
 Under Investigation,قيد التحقيق
 Under Maintenance,تحت الصيانة
-Under Renewal,تحت التجديد
 Under Renovation,تحت الترميم
 Under Repair,تحت الإصلاح
 Under Review,قيد المراجعة
@@ -5038,6 +5080,9 @@ Urdu,الأردية
 "Urgency of the maintenance request, setting target response time and escalation from routine low priority to critical faults needing immediate attention.",إلحاح طلب الصيانة، يحدّد زمن الاستجابة المستهدف والتصعيد من الأولوية المنخفضة الاعتيادية إلى الأعطال الحرجة التي تحتاج اهتمامًا فوريًا.
 Use filters to focus on work assigned to you and its current status.,استخدم المرشحات لعرض العمل المسند إليك وحالته الحالية.
 Use the Approve workflow action to approve this assignment.,اعتمد الإسناد من إجراء «اعتماد».
+Use the Maintenance Request actions to change Status.,استخدم إجراءات طلب الصيانة لتغيير الحالة.
+Use the incident actions to change Status.,استخدم إجراءات البلاغ لتغيير الحالة.
+Use the remediation action controls to update submitted actions.,استخدم إجراءات المعالجة لتحديث البنود بعد اعتماد الخطة.
 Use this table to list every article handed over.,استخدم هذا الجدول لسرد كل صنف يتم تسليمه.
 "Use this table to record every article returned, then save.",استخدم هذا الجدول لتسجيل كل صنف مُرجع، ثم احفظ.
 "Use when the issue concerns a specific facility asset (e.g., CCTV camera, fire alarm panel)",استخدمه عندما تخص المشكلة أصل مرفق محدد (مثل كاميرا مراقبة، لوحة إنذار حريق)
@@ -5083,7 +5128,6 @@ Validate,تدقيق
 Validated,تم التحقق
 Validity,الصلاحية
 Validity Period,فترة الصلاحية
-"Validity state of the license, flagging documents that are active, approaching expiry, already expired, in renewal, or revoked so compliance gaps are visible.",حالة سريان الرخصة، تشير إلى الوثائق السارية أو المقتربة من انتهاء الصلاحية أو المنتهية بالفعل أو قيد التجديد أو الملغاة ليتسنى إبراز فجوات الامتثال.
 Valuation and Disposal,التقييم والتخلّص
 Value,القيمة
 Value Added Tax,ضريبة القيمة المضافة
@@ -5280,6 +5324,7 @@ Work Scope,نطاق العمل
 Work Scope Ordered,نطاق العمل المطلوب
 Work Shift,وردية عمل
 Work Shift Day,يوم وردية العمل
+Work stage of the request. Frappe assignments track who owns the work; they do not create a second lifecycle state.,مرحلة تنفيذ الطلب. يستخدم النظام الإسناد لتحديد المسؤول من دون إضافة حالة عمل أخرى.
 Work started — status set to In Progress.,بدأ العمل — الحالة: قيد التنفيذ.
 Worked Hours,ساعات العمل
 Worker,عامل
@@ -5317,7 +5362,6 @@ Workers Transport Requests Open,طلبات نقل العمالة المفتوح�
 Workers Transport Scheduled Awaiting Dispatch,نقل العمال المجدول بانتظار التسيير
 Workers are expected to arrive at this building today — prepare beds and custody,من المتوقع وصول عمال إلى هذا المبنى اليوم — جهّز الأسرّة والعهدة
 Workflow Action,إجراء سير العمل
-"Workflow stage of the maintenance request from open through assignment and active work to resolution and closure, including reopening when a fix does not hold.",مرحلة طلب الصيانة في سير العمل، من مفتوح ثم الإسناد والتنفيذ إلى المعالجة والإغلاق، مع إمكانية إعادة فتحه إذا لم ينجح الإصلاح.
 Working…,جارٍ العمل…
 Workshop Overstay,تجاوز مدة البقاء في الورشة
 Workshop Overstay Days,مدة تجاوز البقاء في الورشة (بالأيام)
@@ -5368,6 +5412,7 @@ Zero for a rental office outside the VAT scope.,صفر لمكتب تأجير خ�
 active,نشط
 aggregated,مُجمَّع
 allowances,بدلات
+an empty status,حالة فارغة
 assignments,الإسنادات
 basic,أساسي
 blocked,محجوب

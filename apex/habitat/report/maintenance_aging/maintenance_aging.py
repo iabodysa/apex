@@ -30,7 +30,7 @@ def execute(filters=None):
         {"label": frappe._("Cost of Repair"), "fieldname": "cost_of_repair", "fieldtype": "Currency", "width": 140},
     ]
 
-    open_statuses = ["Open", "Assigned", "In Progress", "Reopened"]
+    open_statuses = ["Open", "In Progress"]
     if filters.get("status"):
         query_filters = {"status": filters["status"]}
     else:

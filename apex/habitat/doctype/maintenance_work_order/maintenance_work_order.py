@@ -31,7 +31,7 @@ class MaintenanceWorkOrder(Document):
         if not frappe.db.exists("DocType", "Maintenance Request"):
             return
         mr_status = frappe.db.get_value("Maintenance Request", self.maintenance_request, "status")
-        if mr_status in ("In Progress", "Closed"):
+        if mr_status in ("In Progress", "Resolved"):
             frappe.db.set_value(
                 "Maintenance Request", self.maintenance_request, "status", "Open"
             )
@@ -83,6 +83,7 @@ def validate(doc, method=None):
             {
                 "maintenance_request": doc.maintenance_request,
                 "docstatus": ["!=", 2],
+                "status": ["in", ["Draft", "Planned", "In Progress"]],
                 "name": ["!=", doc.name or ""],
             },
         )
@@ -103,9 +104,7 @@ def on_submit(doc, method=None):
     if frappe.db.exists("DocType", "Maintenance Request") and doc.maintenance_request:
         mr = frappe.get_doc("Maintenance Request", doc.maintenance_request)
         if mr.docstatus == 1:
-            mr_status_field = {f.fieldname for f in frappe.get_meta("Maintenance Request").fields}
-            if "status" in mr_status_field:
-                frappe.db.set_value("Maintenance Request", doc.maintenance_request, "status", "In Progress")
+            frappe.db.set_value("Maintenance Request", doc.maintenance_request, "status", "In Progress")
 
 
 def before_cancel(doc, method=None):
@@ -176,12 +175,15 @@ def mark_completed(
     start_date = actual_start_date or doc.actual_start_date
     end_date = actual_end_date or doc.actual_end_date or today()
     photo = completion_photo or doc.completion_photo
+    notes = str(completion_notes or doc.completion_notes or "").strip()
     if not start_date:
         frappe.throw(_("Actual Start Date is required to mark Completed."))
     if getdate(end_date) < getdate(start_date):
         frappe.throw(_("Actual End Date must be on or after Actual Start Date."))
     if not photo:
         frappe.throw(_("A completion photo is required before closing a Maintenance Work Order."))
+    if not notes:
+        frappe.throw(_("Completion Notes are required before closing a Maintenance Work Order."))
 
     ledger_posted = False
     cost = flt(doc.total_procurement_cost)
@@ -193,15 +195,16 @@ def mark_completed(
         "status": "Completed",
         "verified_by": frappe.session.user,
         "completed_on": now(),
+        "completion_notes": notes,
     }
-    if completion_notes:
-        evidence["completion_notes"] = completion_notes
     doc.db_set(evidence)
 
     if frappe.db.exists("DocType", "Maintenance Request") and doc.maintenance_request:
-        mr_status_field = {f.fieldname for f in frappe.get_meta("Maintenance Request").fields}
-        if "status" in mr_status_field:
-            frappe.db.set_value("Maintenance Request", doc.maintenance_request, "status", "Closed")
+        frappe.db.set_value(
+            "Maintenance Request",
+            doc.maintenance_request,
+            {"status": "Resolved", "resolution_notes": notes},
+        )
 
     from apex.habitat.doctype.housing_inventory.housing_inventory import reflect_completed_maintenance
     reflect_completed_maintenance(doc)
