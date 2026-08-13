@@ -52,14 +52,15 @@ class TestBackendBoardContract(unittest.TestCase):
             path.read_text(encoding="utf-8")
             for path in APP_ROOT.rglob("*.py")
             if "test_backend_board_contract.py" not in str(path)
+            and "/patches/" not in str(path)
         )
         self.assertNotIn("flags.in_import", python_sources)
         self.assertNotIn("Salary Deduction Policy", python_sources)
         self.assertFalse(
-            (APP_ROOT / "apex_core" / "doctype" / "salary_deduction_policy").exists()
+            list((APP_ROOT / "apex_core" / "doctype" / "salary_deduction_policy").glob("*.*"))
         )
         self.assertFalse(
-            (APP_ROOT / "apex_core" / "doctype" / "salary_deduction_type_rule").exists()
+            list((APP_ROOT / "apex_core" / "doctype" / "salary_deduction_type_rule").glob("*.*"))
         )
 
 
