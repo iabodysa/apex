@@ -38,6 +38,15 @@ async function act(kind, row) {
             />
         </header>
         <div v-if="r.fuelQueue.loading" class="ops-state">جاري تحميل الطلبات…</div>
+        <div v-else-if="r.fuelQueue.error" class="ops-state ops-state--error">
+            <p>تعذر تحميل طلبات الوقود.</p>
+            <Button
+                class="ops-retry"
+                variant="outline"
+                label="إعادة المحاولة"
+                @click="r.fuelQueue.fetch()"
+            />
+        </div>
         <div v-else-if="!rows.length" class="ops-state">لا توجد طلبات بانتظار الاعتماد.</div>
         <div v-else class="ops-table">
             <article v-for="row in rows" :key="row.name" class="ops-row">

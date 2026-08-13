@@ -5,6 +5,48 @@ from apex.apex_core.utils.portal_bootstrap import PORTAL_PUBLIC_PATHS
 
 
 class TestPortalShellContract(TestCase):
+    def test_retired_driver_portal_api_surface_is_absent(self):
+        app = Path(__file__).parents[1]
+        driver_api = app / "salis" / "api" / "driver_portal"
+
+        for module in (
+            "attendance.py",
+            "boarding.py",
+            "clearance.py",
+            "fuel.py",
+            "home.py",
+            "notifications.py",
+            "support.py",
+        ):
+            self.assertFalse((driver_api / module).exists(), module)
+
+        forbidden_symbols = {
+            driver_api / "__init__.py": (
+                "def mark_arrived(",
+                "def save_push_subscription(",
+            ),
+            driver_api / "execution.py": ("def push_driver_position(",),
+            driver_api / "profile.py": (
+                "def get_driver_context(",
+                "def get_my_vehicle(",
+            ),
+            app / "salis" / "api" / "fleet_employee.py": (
+                "def get_my_recent_trips(",
+            ),
+            app / "salis" / "api" / "fleet_os.py": (
+                "def search_drivers(",
+                "def get_status_meta(",
+                "def create_handover(",
+                "def report_theft(",
+                "def bulk_stop_vehicles(",
+                "def bulk_workshop_in(",
+            ),
+        }
+        for filename, symbols in forbidden_symbols.items():
+            source = filename.read_text()
+            for symbol in symbols:
+                self.assertNotIn(symbol, source, f"{filename.name}: {symbol}")
+
     def test_all_seven_adapters_use_only_the_generated_shell(self):
         www = Path(__file__).parent
         for filename in (

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, inject, onMounted, ref } from "vue";
 import { Button, Badge, FeatherIcon } from "frappe-ui";
-import { useRoute } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 
 const route = useRoute();
 const gateway = inject("driverGateway", null);
@@ -14,12 +14,18 @@ const rows = computed(() => {
   for (const key of spec.value.collections || []) if (Array.isArray(data.value?.[key])) return data.value[key];
   return [];
 });
+const hasCollectionPayload = computed(() =>
+  Array.isArray(data.value)
+  || (spec.value.collections || []).some((key) => Array.isArray(data.value?.[key])),
+);
 
 async function load() {
   state.value = "loading";
   try {
     data.value = await gateway[spec.value.gateway](route.params.trip);
-    state.value = rows.value.length || (data.value && Object.keys(data.value).length) ? "ready" : "empty";
+    state.value = hasCollectionPayload.value
+      ? (rows.value.length ? "ready" : "empty")
+      : (data.value && Object.keys(data.value).length ? "ready" : "empty");
   } catch (reason) {
     state.value = reason?.status === 403 ? "denied" : "error";
     error.value = reason?.message || "تعذّر تحميل البيانات.";
@@ -42,10 +48,10 @@ onMounted(load);
     <div v-else-if="state === 'error'" class="feature-state feature-state--error"><p>{{ error }}</p><Button variant="outline" @click="load">إعادة المحاولة</Button></div>
     <div v-else-if="state === 'empty'" class="feature-state">{{ spec.empty || 'لا توجد بيانات حالياً.' }}</div>
     <div v-else class="feature-grid">
-      <article v-for="row in rows" :key="row.name" class="feature-card">
+      <component :is="spec.detail ? RouterLink : 'article'" v-for="row in rows" :key="row.name" class="feature-card" :to="spec.detail ? spec.detail.replace(':trip', row.name) : undefined">
         <strong>{{ row.route_name || row.employee_name || row.name }}</strong><Badge :label="row.status || 'جاهز'" />
         <span>{{ row.depart_time || row.trip_date || row.description }}</span>
-      </article>
+      </component>
       <dl v-if="!rows.length" class="feature-details"><template v-for="field in spec.fields || []" :key="field.key"><dt>{{ field.label }}</dt><dd dir="auto">{{ data?.[field.key] || '—' }}</dd></template></dl>
       <div v-if="spec.execution" class="feature-actions"><Button variant="solid" @click="execute('startTrip')">بدء الرحلة</Button><Button variant="outline" @click="execute('finishTrip')">إنهاء مسار السائق</Button></div>
     </div>

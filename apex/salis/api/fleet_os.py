@@ -262,92 +262,6 @@ def get_pending_fuel_requests_for_overview(project=None):
 
 
 @frappe.whitelist()
-def search_drivers(q=None, limit=20):
-    """Typeahead over Salis Driver backing the reassign picker.
-
-    Same gates as :func:`get_fleet_os`: read permission on Salis Driver, project
-    scope via ``_permitted_projects`` (a scoped supervisor only finds drivers on
-    a permitted-project vehicle or with no vehicle yet), and the permlevel-1 PII
-    gate on ``driver_id``/``phone`` — blanked for a role without it.
-
-    Each row carries the canonical Salis Driver ``name``; the picker binds THAT
-    (not free-typed text) so reassign resolves a real, permitted driver and a
-    typo can no longer silently mis-assign a vehicle.
-    """
-    frappe.has_permission("Salis Driver", "read", throw=True)
-    show_pii = driver_pii_visible()
-    unscoped, projects = _permitted_projects()
-    if not unscoped and not projects:
-        return []
-
-    try:
-        limit = max(1, min(int(limit), 50))
-    except (TypeError, ValueError):
-        limit = 20
-
-    filters = {"status": "Active"}
-    or_filters = None
-    term = (q or "").strip()
-    if term:
-        like = f"%{term}%"
-        or_filters = {"full_name": ["like", like]}
-        if show_pii:
-            or_filters["driver_id"] = ["like", like]
-
-    rows = frappe.get_all(
-        "Salis Driver",
-        filters=filters,
-        or_filters=or_filters,
-        fields=["name", "full_name", "driver_id", "phone", "current_vehicle", "project"],
-        order_by="full_name asc",
-        limit_page_length=limit * 3 if not unscoped else limit,
-    )
-
-    if not unscoped:
-        veh_names = {r.current_vehicle for r in rows if r.get("current_vehicle")}
-        permitted_veh = set()
-        if veh_names:
-            permitted_veh = {
-                v.name
-                for v in frappe.get_all(
-                    "Salis Vehicle",
-                    filters={"name": ["in", list(veh_names)], "project": ["in", projects]},
-                    fields=["name"],
-                )
-            }
-        rows = [
-            r for r in rows
-            if not r.get("current_vehicle") or r.current_vehicle in permitted_veh
-        ][:limit]
-
-    return [
-        {
-            "name": r.name,
-            "full_name": r.full_name or "",
-            "driver_id": (r.driver_id or "") if show_pii else "",
-            "phone": (r.phone or "") if show_pii else "",
-            "current_vehicle": r.current_vehicle or "",
-        }
-        for r in rows
-    ]
-
-
-@frappe.whitelist()
-def get_status_meta():
-    """Return the Salis Vehicle ``status`` Select options as label/value pairs.
-
-    Server-drives the SPA's status chips so the front-end stops hand-keeping a
-    label map that drifts from the DocType Select. ``value`` is the canonical
-    English option (the stored value); ``label`` is the translated display
-    string. Read-gated like the rest of the dashboard.
-    """
-    frappe.has_permission("Salis Vehicle", "read", throw=True)
-    field = frappe.get_meta("Salis Vehicle").get_field("status")
-    options = [o.strip() for o in (field.options or "").split("\n") if o.strip()] if field else []
-    return {"statuses": [{"value": o, "label": _(o)} for o in options]}
-
-
-@frappe.whitelist()
 def get_vehicle_timeline(plate):
     """Merged per-vehicle audit timeline for the /fleet-os panel Log tab.
 
@@ -452,67 +366,6 @@ def reassign(plate, driver_id, date=None):
 
 
 @frappe.whitelist(methods=["POST"])
-def create_handover(plate, driver_id, date=None, odometer=None, checklist_template=None, condition_notes=None):
-    """Create an OPTIONAL DRAFT Vehicle Handover for a just-reassigned vehicle.
-
-    Called by /fleet-os AFTER reassign succeeds, only when the supervisor ticked the
-    optional capture box. Reuses the native Vehicle Handover DocType/controller —
-    no parallel handover logic. It is left as a DRAFT (insert only, never submit):
-    the controller requires signed evidence before submit, so a manager later
-    attaches it and submits via Desk (where the checklist UI + print format live).
-
-    ``to_driver`` is the just-assigned driver, resolved through the SAME
-    ``_resolve_driver_id`` reassign used so the two cannot disagree about which
-    driver the identifier names; ``from_driver`` is the previous driver, read from
-    the most recent Ended assignment reassign left behind. With no prior driver (a
-    first-ever assignment) there is no custody to transfer, so no handover is
-    drafted — the caller shows that as a benign notice. A checklist template, when
-    given, is loaded via the existing template loader.
-    """
-    vehicle = _resolve_plate(plate)
-    to_driver = _resolve_driver_id(driver_id)
-    frappe.has_permission("Vehicle Handover", "create", throw=True)
-
-    prev = frappe.get_all(
-        "Vehicle Assignment",
-        filters={"vehicle": vehicle, "status": "Ended", "driver": ["!=", to_driver], "docstatus": 1},
-        fields=["driver"],
-        order_by="end_date desc, creation desc",
-        limit_page_length=1,
-    )
-    from_driver = prev[0].driver if prev else None
-
-    if not from_driver:
-        return {"ok": True, "handover": None, "skipped": "no_prior_driver"}
-
-    doc = frappe.get_doc({
-        "doctype": "Vehicle Handover",
-        "vehicle": vehicle,
-        "from_driver": from_driver,
-        "to_driver": to_driver,
-        "handover_date": getdate(date) if date else getdate(today()),
-        "condition_notes": condition_notes or "",
-    })
-    if odometer not in (None, ""):
-        try:
-            doc.odometer_reading = int(odometer)
-        except (TypeError, ValueError):
-            pass
-    doc.insert()
-
-    if checklist_template and frappe.db.exists(
-        "Vehicle Handover Checklist Template", {"name": checklist_template}
-    ):
-        from apex.salis.doctype.vehicle_handover_checklist_template.vehicle_handover_checklist_template import (
-            load_template_into_doc,
-        )
-
-        load_template_into_doc(doc.name, checklist_template)
-
-    return {"ok": True, "handover": doc.name}
-
-
-@frappe.whitelist(methods=["POST"])
 def stop_vehicle(plate, reason=None):
     """Stop a vehicle and release its driver by submitting a Vehicle Suspension.
 
@@ -548,30 +401,6 @@ def stop_vehicle(plate, reason=None):
         frappe.db.set_value("Salis Driver", current_driver, "current_vehicle", None)
     _publish_fleet_update(plate, "stop")
     return {"ok": True, "stop": doc.name}
-
-
-@frappe.whitelist(methods=["POST"])
-def report_theft(plate, location=None, report_number=None):
-    """Report a vehicle stolen by submitting a Theft Vehicle Incident.
-
-    Vehicle Incident.on_submit (Theft) flips Salis Vehicle.status to "Stopped",
-    nulls current_driver, and clears the ex-driver's current_vehicle — the
-    controller owns that flow, so we only build and submit the incident.
-    """
-    vehicle = _resolve_plate(plate)
-    doc = frappe.get_doc({
-        "doctype": "Vehicle Incident",
-        "incident_type": "Theft",
-        "vehicle": vehicle,
-        "incident_date": getdate(today()),
-        "location": (location or ""),
-        "report_number": (report_number or ""),
-        "description": _("Reported stolen from the Fleet OS dashboard."),
-    })
-    doc.insert()
-    doc.submit()
-    _publish_fleet_update(plate, "theft")
-    return {"ok": True, "incident": doc.name}
 
 
 @frappe.whitelist(methods=["POST"])
@@ -641,81 +470,6 @@ def workshop_out(plate):
         frappe.db.set_value("Salis Vehicle", vehicle, "status", stop.previous_status or "Active")
     _publish_fleet_update(plate, "workshop_out")
     return {"ok": True, "stop": stop.name}
-
-
-BULK_PLATE_LIMIT = 50
-
-
-def _coerce_plates(plates) -> list[str]:
-    """Normalize the plates param (a JSON array over HTTP, or a real list) to a
-    de-duplicated, order-preserving list of non-empty plate strings.
-
-    Capped at ``BULK_PLATE_LIMIT``. Every plate in a batch takes a row lock through
-    ``lock_vehicle`` and a ``tabSeries`` lock that is held until the whole REQUEST
-    commits, so an uncapped selection does not merely run long — it holds the series
-    lock the entire time and blocks every other writer that needs a new name. The
-    operator is told the limit and how many they selected, so the answer is to send
-    fewer rather than to guess.
-    """
-    parsed = frappe.parse_json(plates) if isinstance(plates, str) else plates
-    if not isinstance(parsed, (list, tuple)):
-        frappe.throw(_("Select at least one vehicle."))
-    seen: dict[str, None] = {}
-    for p in parsed:
-        key = str(p).strip()
-        if key:
-            seen.setdefault(key, None)
-    if not seen:
-        frappe.throw(_("Select at least one vehicle."))
-    if len(seen) > BULK_PLATE_LIMIT:
-        frappe.throw(
-            _("Apply to at most {0} vehicles at a time. You selected {1}.").format(
-                BULK_PLATE_LIMIT, len(seen)
-            )
-        )
-    return list(seen)
-
-
-def _bulk_apply(plates, action) -> dict:
-    """Run a single-vehicle fleet action over many plates, isolating each row.
-
-    Each plate runs inside its own savepoint so one row's failure (a permission
-    gap, a missing plate, a guard throw) rolls back only that row and is reported
-    back, instead of aborting the whole batch. Reuses the existing per-vehicle
-    controllers verbatim — no parallel mutation logic.
-    """
-    results = []
-    for plate in _coerce_plates(plates):
-        sp = "sp" + frappe.generate_hash(length=10)
-        frappe.db.savepoint(sp)
-        try:
-            res = action(plate)
-            frappe.db.release_savepoint(sp)
-            results.append({"plate": plate, "ok": True, **(res or {})})
-        except Exception as e:
-            frappe.db.rollback(save_point=sp)
-            results.append({"plate": plate, "ok": False, "error": str(e)})
-    succeeded = sum(1 for r in results if r["ok"])
-    return {
-        "ok": succeeded == len(results),
-        "succeeded": succeeded,
-        "failed": len(results) - succeeded,
-        "results": results,
-    }
-
-
-@frappe.whitelist(methods=["POST"])
-def bulk_stop_vehicles(plates, reason=None):
-    """Stop several vehicles at once, reusing stop_vehicle per plate."""
-    frappe.has_permission("Salis Vehicle", "write", throw=True)
-    return _bulk_apply(plates, lambda p: stop_vehicle(p, reason=reason))
-
-
-@frappe.whitelist(methods=["POST"])
-def bulk_workshop_in(plates, expected_return=None, notes=None):
-    """Send several vehicles to the workshop at once, reusing workshop_in per plate."""
-    frappe.has_permission("Salis Vehicle", "write", throw=True)
-    return _bulk_apply(plates, lambda p: workshop_in(p, expected_return=expected_return, notes=notes))
 
 
 def _close_open_suspension(vehicle):

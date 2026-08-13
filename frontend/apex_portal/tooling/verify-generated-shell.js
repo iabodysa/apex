@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -35,13 +35,35 @@ export function verifyGeneratedShell({ outDir = outputRoot, indexPath = shellPat
       throw new Error(`Generated portal shell references missing output: ${file}`);
     }
   }
+  const entryCss = (entry.css || [])
+    .map((file) => readFileSync(path.join(outDir, file), "utf8"))
+    .join("\n");
+  for (const utility of [".inline-flex", ".w-7", ".h-7"]) {
+    if (!entryCss.includes(utility)) {
+      throw new Error(`Generated portal CSS is missing frappe-ui utility: ${utility}`);
+    }
+  }
   if (!shell.includes("window.csrf_token") || !shell.includes('window["{{ key }}"]')) {
     throw new Error("Generated portal shell lost Frappe boot or CSRF contracts");
   }
   return { manifestPath, indexPath, entry: entry.file };
 }
 
+export function normalizeGeneratedShell(html) {
+  return html
+    .replace(/^[ \t]+$/gm, "")
+    .replace(/^ {10}<script>/gm, "    <script>")
+    .replace(/^ {14}({%|window)/gm, "      $1")
+    .replace(/^ {10}<\/script>/gm, "    </script>")
+    .replace(/^ {10}<\/body>/gm, "  </body>")
+    .replace(/^ {10}<\/html>/gm, "</html>")
+    .replace(/\n{3,}/g, "\n\n");
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  writeFileSync(shellPath, normalizeGeneratedShell(readFileSync(shellPath, "utf8")));
+  const builtIndexPath = path.join(outputRoot, "index.html");
+  writeFileSync(builtIndexPath, normalizeGeneratedShell(readFileSync(builtIndexPath, "utf8")));
   const result = verifyGeneratedShell();
   console.log(`Verified generated portal shell: ${result.entry}`);
 }

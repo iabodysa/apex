@@ -7,7 +7,10 @@ const fields = [
         name: "incident_type",
         type: "select",
         label: "نوع الحادث",
-        options: ["Accident", "Theft"],
+        options: [
+            { label: "حادث مروري", value: "Accident" },
+            { label: "سرقة", value: "Theft" },
+        ],
         default: "Accident",
         required: true,
     },

@@ -51,10 +51,7 @@ def has_any_role(user, roles):
 def bound_vehicle(driver):
     """The vehicle bound to ``driver`` (current_vehicle, else Active Assignment), or None.
 
-	The single read-side binding rule, deliberately kept in one place beside the
-	driver resolvers: it must stay identical to the write-side check fuel requests
-	enforce (``driver_portal.fuel._vehicle_bound_to_driver``), so a drift between a
-	portal read and a fuel write would be a permission bug, not a cosmetic one.
+	Shared by the fleet self-service reads and writes so vehicle scope cannot drift.
 	"""
     vehicle = frappe.db.get_value("Salis Driver", driver, "current_vehicle")
     if vehicle:

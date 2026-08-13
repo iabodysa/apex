@@ -5,6 +5,13 @@ import { createDraftAction } from "./asyncState.js";
 
 const props = defineProps({ transport: { type: Boolean, default: false } });
 const gateway = inject("workerGateway", null);
+const requestTypes = [
+  { label: "صيانة", value: "Maintenance" },
+  { label: "سلامة", value: "Safety" },
+  { label: "عهدة", value: "Custody" },
+  { label: "شكوى", value: "Complaint" },
+  { label: "اقتراح", value: "Suggestion" },
+];
 const action = createDraftAction(props.transport
   ? { pickup_point: "", destination: "", travel_date: "", reason: "" }
   : { request_type: "Maintenance", subject: "", description: "" });
@@ -28,7 +35,7 @@ function save() {
         <FormControl v-model="action.draft.reason" type="textarea" label="السبب" />
       </template>
       <template v-else>
-        <FormControl v-model="action.draft.request_type" type="select" label="نوع الطلب" :options="['Maintenance', 'Safety', 'Custody', 'Complaint', 'Suggestion']" />
+        <FormControl v-model="action.draft.request_type" type="select" label="نوع الطلب" :options="requestTypes" />
         <FormControl v-model="action.draft.subject" label="الموضوع" required />
         <FormControl v-model="action.draft.description" type="textarea" label="التفاصيل" required />
       </template>

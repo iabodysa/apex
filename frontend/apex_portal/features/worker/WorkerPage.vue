@@ -1,7 +1,7 @@
 <script setup>
 import { computed, inject, onMounted, ref } from "vue";
 import { Button, FeatherIcon } from "frappe-ui";
-import { useRoute } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 
 const route = useRoute();
 const gateway = inject("workerGateway", null);
@@ -17,6 +17,10 @@ const records = computed(() => {
   }
   return [];
 });
+const hasCollectionPayload = computed(() =>
+  Array.isArray(data.value)
+  || (spec.value.collections || []).some((key) => Array.isArray(data.value?.[key])),
+);
 function valueAt(source, path) {
   return path.split(".").reduce((value, key) => value?.[key], source);
 }
@@ -28,7 +32,9 @@ async function load() {
     const method = gateway?.[spec.value.gateway];
     if (!method) throw new Error("الخدمة غير متاحة حالياً.");
     data.value = await method(route.params.name);
-    state.value = records.value.length || (data.value && Object.keys(data.value).length) ? "ready" : "empty";
+    state.value = hasCollectionPayload.value
+      ? (records.value.length ? "ready" : "empty")
+      : (data.value && Object.keys(data.value).length ? "ready" : "empty");
   } catch (reason) {
     state.value = reason?.status === 403 ? "denied" : "error";
     error.value = reason?.message || "تعذّر تحميل البيانات.";
@@ -56,10 +62,10 @@ onMounted(load);
     </div>
     <div v-else-if="state === 'empty'" class="feature-state">{{ spec.empty || 'لا توجد بيانات حالياً.' }}</div>
     <div v-else class="feature-grid">
-      <article v-for="record in records" :key="record.name" class="feature-card">
+      <component :is="spec.detail ? RouterLink : 'article'" v-for="record in records" :key="record.name" class="feature-card" :to="spec.detail ? spec.detail.replace(':name', record.name) : undefined">
         <strong>{{ record.title || record.subject || record.route_name || record.name }}</strong>
         <span>{{ record.status || record.trip_date || record.description }}</span>
-      </article>
+      </component>
       <dl v-if="!records.length" class="feature-details">
         <template v-for="field in spec.fields || []" :key="field.key">
           <dt>{{ field.label }}</dt><dd dir="auto">{{ valueAt(data, field.key) || '—' }}</dd>

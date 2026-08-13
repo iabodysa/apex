@@ -26,9 +26,7 @@ watch(() => props.params, () => resource.fetch(), { deep: true });
   <section class="feature-page" :aria-labelledby="titleId">
     <header class="feature-page__header">
       <h2 :id="titleId">{{ title }}</h2>
-      <Button variant="subtle" icon="refresh-cw" :loading="resource.loading" @click="resource.fetch()">
-        تحديث
-      </Button>
+      <Button variant="subtle" icon="refresh-cw" label="تحديث" :loading="resource.loading" @click="resource.fetch()" />
     </header>
     <LoadingIndicator v-if="resource.loading && !rows.length" aria-label="جارٍ التحميل" />
     <ErrorMessage v-else-if="resource.error" :message="resource.error.message || 'تعذر تحميل البيانات.'" />

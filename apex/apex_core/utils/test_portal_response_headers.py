@@ -50,7 +50,7 @@ class TestPortalResponseHeaders(TestCase):
         for path in (
             "/api/method/apex.salis.api.masar.get_worker_home",
             "/api/method/apex.salis.api.masar_worker.get_worker_context",
-            "/api/method/apex.salis.api.driver_portal.get_driver_context",
+            "/api/method/apex.salis.api.driver_portal.get_driver_profile",
             "/api/method/apex.salis.api.boarding.scan_boarding_pass",
             "/api/method/apex.salis.api.boarding_flow.worker_trip_boarding",
         ):

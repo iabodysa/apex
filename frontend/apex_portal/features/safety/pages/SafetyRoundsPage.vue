@@ -4,6 +4,7 @@ import { Button, ErrorMessage, LoadingIndicator, createResource, toast } from "f
 import BuildingPicker from "../../housing/components/BuildingPicker.vue";
 import { building } from "../../housing/building.js";
 import SafetyTaskRow from "../components/SafetyTaskRow.vue";
+import { cadenceLabel, periodLabel } from "../../../core/displayLabels.js";
 
 const error = ref("");
 const results = reactive({});
@@ -60,12 +61,12 @@ async function saveRound() {
       <section v-if="awaiting.length" class="feature-card">
         <h3>جولات تنتظر المراجعة</h3>
         <RouterLink v-for="item in awaiting" :key="item.round" :to="`/rounds/${item.round}`">
-          {{ item.cadence }} · {{ item.round_date }}
+          {{ cadenceLabel(item.cadence) }} · {{ item.round_date }}
         </RouterLink>
       </section>
       <p v-if="!groups.length" class="feature-page__empty">لا توجد جولات مستحقة لهذا المبنى.</p>
       <section v-for="group in groups" :key="group.cadence" class="safety-group">
-        <h3>{{ group.cadence }} · {{ group.period }}</h3>
+        <h3>{{ cadenceLabel(group.cadence) }} · {{ periodLabel(group.period) }}</h3>
         <SafetyTaskRow
           v-for="task in group.tasks"
           :key="task.name"

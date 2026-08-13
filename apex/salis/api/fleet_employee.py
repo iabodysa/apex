@@ -1,6 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Fleet employee self-service API — backs the /fleet employee page (my vehicle,
-my recent trips, fuel request).
+"""Fleet employee self-service API — backs the /fleet employee page.
 
 Unlike the supervisor board (fleet_os) these endpoints are IDENTITY-SCOPED: every
 one resolves ``frappe.session.user`` to the caller's own Salis Driver and returns
@@ -35,12 +34,6 @@ _VEHICLE_STATUS_KEY = {
     "Under Maintenance": "workshop",
     "Stopped": "stopped",
     "Released": "stopped",
-}
-
-_TRIP_STATUS_KEY = {
-    "Planned": "planned",
-    "Dispatched": "inProgress",
-    "Completed": "completed",
 }
 
 _REGISTRATION_TYPE = "Registration (Istimara)"
@@ -148,67 +141,6 @@ def get_my_vehicle():
             "registrationExpiry": _registration_expiry(vehicle),
         }
     }
-
-
-@frappe.whitelist()
-def get_my_recent_trips(days=30, limit=20):
-    """The session user's recent Dispatch Trips, newest first (read).
-
-    Identity-scoped via permission-aware ``get_list`` filtered on the caller's own
-    driver, so it can only ever return the caller's own trips — the client never
-    supplies a driver id. Cancelled trips are omitted. Returns ``[]`` (empty
-    state) when the user is not a driver. Read-only, no commit.
-
-    Each row is shaped for the "My trips" card: route title, date/time, distance
-    (from the odometer delta when both readings are present), and a status key
-    mapped to the page's trip-pill vocabulary."""
-    driver = get_driver_for_session_user(frappe.session.user)
-    if not driver:
-        return []
-
-    since = frappe.utils.add_days(frappe.utils.today(), -(frappe.utils.cint(days) or 30))
-    rows = frappe.get_list(
-        "Dispatch Trip",
-        filters={
-            "driver": driver,
-            "trip_date": [">=", since],
-            "status": ["!=", "Cancelled"],
-        },
-        fields=[
-            "name", "route_plan", "shift_name", "trip_date", "depart_time",
-            "odometer_start", "odometer_end", "status",
-        ],
-        order_by="trip_date desc, depart_time desc",
-        limit=frappe.utils.cint(limit) or 20,
-    )
-
-    route_names = {r["route_plan"] for r in rows if r.get("route_plan")}
-    labels = {}
-    if route_names:
-        for rp in frappe.get_all(
-            "Route Plan", filters={"name": ["in", list(route_names)]},
-            fields=["name", "route_name"],
-        ):
-            labels[rp["name"]] = rp.get("route_name") or rp["name"]
-
-    out = []
-    for r in rows:
-        start, end = r.get("odometer_start"), r.get("odometer_end")
-        distance = None
-        if start is not None and end is not None and end > start:
-            distance = frappe.utils.cint(end) - frappe.utils.cint(start)
-        title = labels.get(r.get("route_plan")) or r.get("shift_name") or _("Dispatch trip")
-        out.append(
-            {
-                "id": r["name"],
-                "title": title,
-                "date": frappe.utils.cstr(r["trip_date"]) if r.get("trip_date") else None,
-                "when": frappe.utils.cstr(r["depart_time"])[:5] if r.get("depart_time") else None,
-                "distanceKm": distance,
-                "status": _TRIP_STATUS_KEY.get(r.get("status"), "planned"),
-            }
-        )
-    return out
 
 
 @frappe.whitelist()

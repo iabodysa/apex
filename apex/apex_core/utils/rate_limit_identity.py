@@ -1,27 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""The rate-limit window named after the HANDLER, not after the caller's spelling.
-
-Two spellings are not an accident to be tidied away. 32 of the 35 live pairs come
-from the driver portal package re-exporting its own submodules
-(``salis/api/driver_portal/__init__.py``), while clients may call the short name and
-the function is defined in the long one. Both names are production. Deduplicating the
-names would also only hold until the next re-export; naming the window after the
-resolved function holds by construction.
-
-Everything else stays frappe's. The identity (``<ip>`` or ``<ip>:<form field>``), the
-window length, the TTL-once behaviour, the 429 and its message all come from the
-installed limiter -- this only decides which NAME it charges, by substituting the
-canonical command for the caller's for the duration of the charge and putting the
-caller's back before any endpoint code runs. ``frappe.local.form_dict`` is a process
-global that no transaction rolls back, so the swap covers the charging call alone
-and restores absence as absence.
-
-Deploy note: for the 34 endpoints that had a second path, the LIVE window name
-changes once (``rl:apex.salis.api.driver_portal.submit_fuel_request:<ip>`` becomes
-``rl:apex.salis.api.driver_portal.fuel.submit_fuel_request:<ip>``). Windows in flight
-at that moment are abandoned and reopened -- a one-off, bounded by the 60s window.
-Endpoints with a single path keep the name they already had.
-"""
+"""Charge Frappe rate limits under the resolved handler's canonical path."""
 
 from __future__ import annotations
 

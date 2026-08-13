@@ -13,11 +13,11 @@
     {% if shell_meta.apple_icon_url %}<link rel="apple-touch-icon" sizes="180x180" href="{{ shell_meta.apple_icon_url }}" />{% endif %}
     <link rel="stylesheet" href="/assets/apex/vendor/thmanyah-v1/thmanyah.css" />
     <title>{{ shell_meta.title }}</title>
-    <script type="module" crossorigin src="/assets/apex/apex_portal/assets/index-DmXPY8SW.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/apex/apex_portal/assets/vue-runtime-DF-5nJlw.js">
-    <link rel="modulepreload" crossorigin href="/assets/apex/apex_portal/assets/frappe-ui-runtime-duGxw6ji.js">
-    <link rel="stylesheet" crossorigin href="/assets/apex/apex_portal/assets/frappe-ui-runtime-BaHLiCb2.css">
-    <link rel="stylesheet" crossorigin href="/assets/apex/apex_portal/assets/index-ByTkUXDc.css">
+    <script type="module" crossorigin src="/assets/apex/apex_portal/assets/index-BvybYJN9.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/apex/apex_portal/assets/vue-runtime-BsASgDso.js">
+    <link rel="modulepreload" crossorigin href="/assets/apex/apex_portal/assets/frappe-ui-runtime-DL0eeggd.js">
+    <link rel="stylesheet" crossorigin href="/assets/apex/apex_portal/assets/frappe-ui-runtime-BTUUvaN1.css">
+    <link rel="stylesheet" crossorigin href="/assets/apex/apex_portal/assets/index-Dpyxpkja.css">
   </head>
   <body>
     <div id="app"></div>
@@ -26,11 +26,11 @@
       window.apex_portal_shell = {{ shell_meta | tojson }};
     </script>
 
-          <script>
-              {% for key in boot %}
-              window["{{ key }}"] = {{ boot[key] | tojson }};
-              {% endfor %}
-          </script>
-          </body>
+    <script>
+      {% for key in boot %}
+      window["{{ key }}"] = {{ boot[key] | tojson }};
+      {% endfor %}
+    </script>
+  </body>
 
 </html>

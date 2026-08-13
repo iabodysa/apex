@@ -112,51 +112,6 @@ def complete_my_trip(dispatch_trip):
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=30, seconds=60)
-def push_driver_position(dispatch_trip, lat, lng):
-    """Record the driver's live GPS position onto their own Dispatch Trip (write).
-
-	The driver portal calls this periodically while a trip is dispatched; the
-	stored position feeds the worker's live ride ETA on Masar Home. Identity-scoped
-	via ``_resolve_my_trip`` — a driver can only write a trip that belongs to them,
-	so one driver can never spoof another driver's (or another trip's) position by
-	passing an arbitrary id. Latitude/longitude are range-validated. The write is
-	server-authoritative (driver resolved credential-first), and the position fields
-	are ``allow_on_submit`` on the submitted trip, so ``db_set`` persists without an
-	amendment. No GL — this is an execution/telematics stamp only."""
-    _require_enabled()
-    driver = _resolve_driver()
-    _resolve_my_trip(dispatch_trip, driver)
-    lat, lng = _validate_coords(lat, lng)
-    now = frappe.utils.now_datetime()
-    trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
-    trip.db_set(
-        {"driver_lat": lat, "driver_lng": lng, "driver_position_updated_at": now},
-        update_modified=False,
-    )
-    return {
-        "dispatch_trip": dispatch_trip,
-        "driver_lat": lat,
-        "driver_lng": lng,
-        "driver_position_updated_at": frappe.utils.cstr(now),
-    }
-
-
-def _validate_coords(lat, lng):
-    """Coerce ``lat``/``lng`` to floats and assert they are in valid WGS-84 ranges
-	(lat -90..90, lng -180..180). A client-supplied position that is non-numeric or
-	out of range is rejected so a bad reading can never corrupt the ETA math."""
-    try:
-        lat = float(lat)
-        lng = float(lng)
-    except (TypeError, ValueError):
-        frappe.throw(_("A valid GPS position (latitude and longitude) is required."))
-    if not (-90.0 <= lat <= 90.0) or not (-180.0 <= lng <= 180.0):
-        frappe.throw(_("The GPS position is outside the valid coordinate range."))
-    return lat, lng
-
-
-@frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=30, seconds=60)
 def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_name=None):
     """Mark one route stop done/undone on the driver's STARTED trip (write).
 

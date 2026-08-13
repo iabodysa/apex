@@ -7,7 +7,12 @@ const fields = [
         name: "priority",
         type: "select",
         label: "الأولوية",
-        options: ["Low", "Medium", "High", "Urgent"],
+        options: [
+            { label: "منخفضة", value: "Low" },
+            { label: "متوسطة", value: "Medium" },
+            { label: "عالية", value: "High" },
+            { label: "عاجلة", value: "Urgent" },
+        ],
         default: "Medium",
     },
     { name: "subject", label: "عنوان البلاغ", required: true },

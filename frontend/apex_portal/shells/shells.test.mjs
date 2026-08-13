@@ -19,6 +19,7 @@ async function mountShell(component, options = {}) {
       navigation: [
         { label: "الرئيسية", to: "/home", icon: "home" },
         { label: "الطلبات", to: "/requests", icon: "file-text" },
+        ...(options.navigation || []),
       ],
     },
     slots: {
@@ -57,5 +58,25 @@ describe.each([
     expect(active[0].text()).toBe("الطلبات");
     expect(wrapper.find("header .test-action").exists()).toBe(true);
     expect(wrapper.find("main .test-content").exists()).toBe(true);
+  });
+});
+
+describe("mobile navigation", () => {
+  it("keeps four primary destinations visible and places every remaining route under more", async () => {
+    const navigation = [
+      { label: "التنقل", to: "/transport", icon: "navigation" },
+      { label: "السجل", to: "/history", icon: "clock" },
+      { label: "السكن", to: "/housing", icon: "map-pin" },
+      { label: "العهد", to: "/custody", icon: "briefcase" },
+      { label: "الملف", to: "/profile", icon: "user" },
+    ];
+    const { wrapper } = await mountShell(MobileShell, { navigation });
+
+    expect(wrapper.findAll(".mobile-shell__nav > .portal-nav-link")).toHaveLength(4);
+    expect(wrapper.find(".mobile-shell__more").exists()).toBe(true);
+    expect(wrapper.findAll(".mobile-shell__more-menu .portal-nav-link")).toHaveLength(3);
+    expect(new Set(wrapper.findAll("nav a").map((link) => link.attributes("href")))).toEqual(
+      new Set(["/home", "/requests", ...navigation.map((item) => item.to)]),
+    );
   });
 });

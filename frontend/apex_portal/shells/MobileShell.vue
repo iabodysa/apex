@@ -1,13 +1,28 @@
 <script setup>
+import { computed } from "vue";
+import { useRoute } from "vue-router";
 import { FeatherIcon } from "frappe-ui";
 import { ar } from "../i18n/ar.js";
 
 const reverseBrandMark = "/assets/apex/icons/brand/apex-mark-reverse.svg";
+const primaryLimit = 4;
 
-defineProps({
+const props = defineProps({
   title: { type: String, required: true },
   navigation: { type: Array, default: () => [] },
 });
+
+const route = useRoute();
+const hasOverflow = computed(() => props.navigation.length > primaryLimit + 1);
+const primaryNavigation = computed(() => (
+  hasOverflow.value ? props.navigation.slice(0, primaryLimit) : props.navigation
+));
+const overflowNavigation = computed(() => (
+  hasOverflow.value ? props.navigation.slice(primaryLimit) : []
+));
+const overflowActive = computed(() => (
+  overflowNavigation.value.some((item) => item.to === route.path)
+));
 </script>
 
 <template>
@@ -25,7 +40,7 @@ defineProps({
     </main>
     <nav v-if="navigation.length" class="mobile-shell__nav" :aria-label="ar.primaryNavigation">
       <RouterLink
-        v-for="item in navigation"
+        v-for="item in primaryNavigation"
         :key="item.to"
         v-slot="{ href, navigate, isActive }"
         :to="item.to"
@@ -41,6 +56,31 @@ defineProps({
           <span>{{ item.label }}</span>
         </a>
       </RouterLink>
+      <details v-if="overflowNavigation.length" class="mobile-shell__more">
+        <summary class="portal-nav-link" :aria-current="overflowActive ? 'page' : undefined">
+          <FeatherIcon class="portal-nav-icon" name="more-horizontal" aria-hidden="true" />
+          <span>المزيد</span>
+        </summary>
+        <div class="mobile-shell__more-menu">
+          <RouterLink
+            v-for="item in overflowNavigation"
+            :key="item.to"
+            v-slot="{ href, navigate, isActive }"
+            :to="item.to"
+            custom
+          >
+            <a
+              class="portal-nav-link"
+              :href="href"
+              :aria-current="isActive ? 'page' : undefined"
+              @click="navigate"
+            >
+              <FeatherIcon v-if="item.icon" class="portal-nav-icon" :name="item.icon" aria-hidden="true" />
+              <span>{{ item.label }}</span>
+            </a>
+          </RouterLink>
+        </div>
+      </details>
     </nav>
   </div>
 </template>

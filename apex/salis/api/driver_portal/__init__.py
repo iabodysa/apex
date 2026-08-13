@@ -10,32 +10,13 @@ import frappe
 
 from frappe import _
 
-from apex.apex_core.utils.rate_limit_identity import rate_limit
-
 from apex.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_url
 from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401
-from apex.salis.utils import bound_vehicle, expiry_state, get_driver_for_user, has_any_role
-
-
-STAFF_ROLES = (
-    "Fleet Manager",
-    "Fleet Project Manager",
-    "Fleet Supervisor",
-    "Finance Manager",
-    "System Manager",
-)
+from apex.salis.utils import get_driver_for_user
 
 def _portal_enabled():
     """Returns True when the driver portal is enabled in Salis Settings."""
     return bool(frappe.db.get_single_value("Salis Settings", "enable_driver_portal"))
-
-def _license_warn_days():
-    """Days-to-expiry at/below which a licence or vehicle compliance document is
-	flagged ``expiring`` (the amber/red threshold). Read from Salis Settings via the
-	zero-trap helper so a blank/0 Single value keeps today's 30-day window."""
-    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
-
-    return get_salis_int("license_expiring_warn_days", 30)
 
 def _find_driver(user=None):
     """Resolve the presented driver credential, else a linked preview user.
@@ -60,41 +41,6 @@ def _require_enabled():
     """Blocks the request with a permission error when the driver portal is disabled."""
     if not _portal_enabled():
         frappe.throw(_("Driver portal is not enabled."), frappe.PermissionError)
-
-def _is_staff(user=None):
-    """True when the user holds any Salis desk/oversight role (display hint)."""
-    return has_any_role(user, STAFF_ROLES)
-
-def _staff_links(user=None):
-    """Useful desk destinations for an unlinked staff user, filtered to what
-	they may actually open. Each entry carries a translated label and an /app URL;
-	links are included only when the user holds a required role or has read
-	permission on the underlying DocType. The mobile portal action endpoints stay
-	driver-scoped — these are navigation hints to the full desk, nothing more."""
-    user = user or frappe.session.user
-    roles = set(frappe.get_roles(user))
-    links = []
-
-    if user == "Administrator" or roles & set(STAFF_ROLES):
-        links.append({"label": frappe._("Salis Workspace"), "url": "/app/salis"})
-
-    dispatch_roles = {"System Manager", "Fleet Manager", "Fleet Project Manager", "Fleet Supervisor"}
-    if user == "Administrator" or roles & dispatch_roles:
-        links.append({"label": frappe._("Dispatch Board"), "url": "/app/salis-dispatch-board"})
-
-    if frappe.has_permission("Transport Request", "read", user=user):
-        links.append({"label": frappe._("Transport Requests"), "url": "/app/transport-request"})
-
-    fuel_roles = {"System Manager", "Fleet Manager", "Fleet Project Manager", "Finance Manager"}
-    if user == "Administrator" or roles & fuel_roles:
-        links.append({"label": frappe._("Fuel Approval Console"), "url": "/app/fuel-approval-console"})
-
-    return links
-
-def _user_full_name(user=None):
-    """Returns the display full name for the given user, or the current session user."""
-    user = user or frappe.session.user
-    return frappe.utils.get_fullname(user) or user
 
 def _label_trips(trips):
     """Swap route_plan / vehicle link ids for their human labels (Route Plan.
@@ -148,23 +94,6 @@ def _route_first_stop_maps_url(route_plan):
         if pickup.get("google_maps_url"):
             return pickup["google_maps_url"]
     return None
-
-def _vehicle_last_site_maps_url(vehicle):
-    """The Maps deep-link for the vehicle's last-known site, or None.
-
-	Salis Vehicle records no GPS/coordinate field, so "last-known site" is derived
-	from where the vehicle was last operated: the most recent Dispatch Trip's route
-	first mapped stop. Reuses ``_route_first_stop_maps_url`` (read-only); returns None
-	when the vehicle has no trip with a mappable route, so the card omits the link."""
-    if not vehicle:
-        return None
-    rp = frappe.db.get_value(
-        "Dispatch Trip",
-        {"vehicle": vehicle, "route_plan": ["is", "set"]},
-        "route_plan",
-        order_by="trip_date desc, creation desc",
-    )
-    return _route_first_stop_maps_url(rp)
 
 def _attach_trip_maps(trips):
     """Stamp each trip with ``google_maps_url`` (its first mapped stop's deep-link).
@@ -223,67 +152,6 @@ def _attach_boarding_counts(trips, driver):
     for t in trips:
         t["boarded_count"] = boarded_by_trip.get(t["name"], 0)
         t["expected_count"] = expected_by_request.get(t.get("transport_request"), 0)
-
-def _today_attendance_state(driver):
-    """Today's attendance state for ``driver`` as the portal's display shape (read).
-
-	The single source of truth shared by ``get_today_attendance`` and the
-	``get_my_today`` composite, so both render identically. Returns the durable
-	Driver Attendance fields (Time fields stringified for JSON) plus the
-	``exists``/``checked_in``/``checked_out`` flags; the not-recorded-yet case
-	returns the same shape with null times and never creates a row."""
-    row = frappe.db.get_value(
-        "Driver Attendance",
-        {"driver": driver, "attendance_date": frappe.utils.today(), "docstatus": ["<", 2]},
-        ["name", "status", "check_in", "check_out", "worked_hours"],
-        as_dict=True,
-    )
-    if not row:
-        return {
-            "exists": False,
-            "checked_in": False,
-            "checked_out": False,
-            "status": None,
-            "check_in": None,
-            "check_out": None,
-            "worked_hours": None,
-        }
-    check_in = frappe.utils.cstr(row.get("check_in")) if row.get("check_in") else None
-    check_out = frappe.utils.cstr(row.get("check_out")) if row.get("check_out") else None
-    return {
-        "exists": True,
-        "checked_in": bool(check_in),
-        "checked_out": bool(check_out),
-        "status": row.get("status"),
-        "check_in": check_in,
-        "check_out": check_out,
-        "worked_hours": row.get("worked_hours"),
-    }
-
-def _bound_vehicle(driver):
-    """The vehicle bound to ``driver`` (current_vehicle, else Active Assignment), or None.
-
-	Kept as the package-level name the portal submodules import; the rule itself
-	lives in ``salis.utils.bound_vehicle`` so this read can never drift from the
-	binding check ``_vehicle_bound_to_driver`` enforces for fuel writes."""
-    return bound_vehicle(driver)
-
-def _license_countdown(driver):
-    """The driver's licence expiry with a server-computed near-/over-expiry state.
-
-	Mirrors ``_vehicle_compliance``: ``days_to_expiry`` is a signed int (negative =
-	already expired) and ``state`` is ``expired`` | ``expiring`` (<= 30 days) |
-	``valid``, so the SPA needs no date math. Returns null fields when the driver
-	records no licence expiry."""
-    expiry = frappe.db.get_value("Salis Driver", driver, "license_expiry")
-    if not expiry:
-        return {"expiry_date": None, "days_to_expiry": None, "state": None}
-    days, state = expiry_state(expiry, _license_warn_days())
-    return {
-        "expiry_date": frappe.utils.cstr(expiry),
-        "days_to_expiry": days,
-        "state": state,
-    }
 
 def _resolve_my_trip(dispatch_trip, driver):
     """The Dispatch Trip ``dispatch_trip`` only when it belongs to ``driver``, else
@@ -388,133 +256,8 @@ def _attach_stop_progress(stops, route_plan, dispatch_trip, driver):
         stop["arrived_at"] = state.get("arrived_at") if state else None
 
 
-@frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=30, seconds=60)
-def mark_arrived(dispatch_trip, route_stop, arrived=1, sequence=None, stop_name=None):
-    """Driver action: "I've arrived at this pickup stop" (write).
-
-	The explicit arrival signal surfaced to the workers waiting at that stop.
-	Reuses the SAME Trip Stop Progress rail ``mark_stop_progress`` writes (one row
-	per route stop, keyed on the stable ``route_stop`` row name) — arrival is a new
-	flag on that row, not a new record — so the driver's per-stop state stays in one
-	place. Identity-scoped (``_resolve_my_trip``) and requires the trip to be started
-	(an open Trip Start Log must exist). Idempotent and reversible: ``arrived=0``
-	clears it; re-marking the same state is a no-op.
-
-	On arrival it publishes ``boarding_arrived`` to the Dispatch Trip room (the shared
-	after_commit pattern, via the boarding flow's shared ``_publish``) so socketed
-	clients refresh; the durable arrival state on the row is what the guest worker
-	poll (``worker_trip_boarding``) reads — the delivery path for the worker's Masar
-	app, since guests have no socket. Server-authoritative, so ``ignore_permissions``
-	is set. No GL."""
-    from apex.salis.api.boarding_flow import _publish
-
-    _require_enabled()
-    driver = _resolve_driver()
-    trip = _resolve_my_trip(dispatch_trip, driver)
-    stop = _resolve_trip_route_stop(trip, route_stop)
-    log = _open_trip_log(dispatch_trip, driver)
-    if not log:
-        frappe.throw(_("Start the trip before marking arrival."))
-
-    arrived = frappe.utils.cint(arrived)
-    existing = next((r for r in (log.stop_progress or []) if r.route_stop == route_stop), None)
-    if existing:
-        existing.sequence = stop.get("idx")
-        existing.stop_name = stop.get("stop_name")
-        existing.arrived = arrived
-        existing.arrived_at = frappe.utils.now_datetime() if arrived else None
-    else:
-        log.append(
-            "stop_progress",
-            {
-                "route_stop": route_stop,
-                "sequence": stop.get("idx"),
-                "stop_name": stop.get("stop_name"),
-                "arrived": arrived,
-                "arrived_at": frappe.utils.now_datetime() if arrived else None,
-            },
-        )
-    log.flags.ignore_permissions = True
-    log.save()
-
-    if arrived:
-        _publish("boarding_arrived", dispatch_trip, {"route_stop": route_stop})
-
-    return {
-        "route_stop": route_stop,
-        "arrived": bool(arrived),
-        "stop_progress": _stop_progress_map(dispatch_trip, driver),
-    }
-
-@frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=10, seconds=60)
-def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
-    """Store (or refresh) the driver's Web Push subscription on opt-in (write).
-
-	Identity-scoped: the driver is resolved from the credential-first boundary, so
-	a subscription is always bound to the caller's own driver. The browser passes its
-	PushSubscription endpoint + keys; the endpoint is unique, so a re-subscribe on the
-	same device updates the existing row (re-enabling it and refreshing its keys) rather
-	than duplicating. Refused (403) when push is not configured, so the client cannot
-	bank a subscription against a portal that can never deliver. Returns ``{"name": ...}``.
-	"""
-    _require_enabled()
-    driver = _resolve_driver()
-    endpoint = (endpoint or "").strip()
-    if not endpoint:
-        frappe.throw(_("A push subscription endpoint is required."))
-
-    from apex.salis.api import web_push
-
-    if not web_push.is_configured():
-        frappe.throw(_("Background notifications are not enabled."), frappe.PermissionError)
-
-    if not web_push.is_allowed_push_endpoint(endpoint):
-        frappe.throw(_("This push subscription endpoint is not allowed."))
-
-    owner = frappe.db.get_value(
-        "Driver Push Subscription",
-        {"endpoint": endpoint},
-        ["name", "driver"],
-        as_dict=True,
-    )
-    if owner and owner.get("driver") != driver:
-        frappe.throw(
-            _("This push subscription belongs to another driver."),
-            frappe.PermissionError,
-        )
-    existing = frappe.db.get_value(
-        "Driver Push Subscription",
-        {"driver": driver, "endpoint": endpoint},
-        "name",
-    )
-    doc = (
-        frappe.get_doc("Driver Push Subscription", existing)
-        if existing
-        else frappe.new_doc("Driver Push Subscription")
-    )
-    session_user = frappe.session.user
-    doc.update(
-        {
-            "driver": driver,
-            "user": None if session_user == "Guest" else session_user,
-            "endpoint": endpoint,
-            "p256dh": p256dh,
-            "auth": auth,
-            "user_agent": user_agent,
-            "enabled": 1,
-            "last_seen": frappe.utils.now_datetime(),
-        }
-    )
-    doc.save(ignore_permissions=True)
-    return {"name": doc.name}
-
-
 from apex.salis.api.driver_portal.profile import (  # noqa: E402
-    get_driver_context,
     get_driver_profile,
-    get_my_vehicle,
 )
 from apex.salis.api.driver_portal.trips import (  # noqa: E402
     my_trips_today,
@@ -522,44 +265,8 @@ from apex.salis.api.driver_portal.trips import (  # noqa: E402
     my_worker_route_today,
     my_trip_route,
 )
-from apex.salis.api.driver_portal.attendance import (  # noqa: E402
-    get_today_attendance,
-    my_attendance,
-    driver_check_in,
-    driver_check_out,
-)
-from apex.salis.api.driver_portal.fuel import (  # noqa: E402
-    submit_fuel_request,
-    my_fuel_quota,
-    my_fuel_requests,
-)
-from apex.salis.api.driver_portal.support import (  # noqa: E402
-    my_support_tickets,
-    raise_support_ticket,
-    get_ticket,
-    reply_to_ticket,
-    report_vehicle_problem,
-    request_license_renewal,
-)
-from apex.salis.api.driver_portal.boarding import (  # noqa: E402
-    manual_boarding_sheet,
-    manual_board_workers,
-)
 from apex.salis.api.driver_portal.execution import (  # noqa: E402
     start_my_trip,
     complete_my_trip,
-    push_driver_position,
     mark_stop_progress,
-)
-from apex.salis.api.driver_portal.clearance import (  # noqa: E402
-    get_my_clearance_certificate,
-    my_clearance,
-)
-from apex.salis.api.driver_portal.notifications import (  # noqa: E402
-    get_my_notifications,
-    get_push_config,
-    delete_push_subscription,
-)
-from apex.salis.api.driver_portal.home import (  # noqa: E402
-    get_my_today,
 )

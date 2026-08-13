@@ -1,7 +1,8 @@
 <script setup>
 import { computed, inject, onMounted, ref } from "vue";
 import { Badge, Button, FeatherIcon } from "frappe-ui";
-import { useRoute } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
+import { statusLabel } from "../../core/displayLabels.js";
 
 const route = useRoute();
 const gateway = inject("transportSupervisorGateway", null);
@@ -14,12 +15,19 @@ const rows = computed(() => {
   for (const key of spec.value.collections || ["items", "plans", "trips", "requests"]) if (Array.isArray(data.value?.[key])) return data.value[key];
   return [];
 });
+const collectionKeys = computed(() => spec.value.collections || ["items", "plans", "trips", "requests"]);
+const hasCollectionPayload = computed(() =>
+  Array.isArray(data.value)
+  || collectionKeys.value.some((key) => Array.isArray(data.value?.[key])),
+);
 
 async function load() {
   state.value = "loading";
   try {
     data.value = await gateway[spec.value.gateway](route.params.name);
-    state.value = rows.value.length || (data.value && Object.keys(data.value).length) ? "ready" : "empty";
+    state.value = hasCollectionPayload.value
+      ? (rows.value.length ? "ready" : "empty")
+      : (data.value && Object.keys(data.value).length ? "ready" : "empty");
   } catch (reason) {
     state.value = reason?.status === 403 ? "denied" : "error";
     error.value = reason?.message || "تعذّر تحميل لوحة التشغيل.";
@@ -36,10 +44,10 @@ onMounted(load);
     <div v-else-if="state === 'error'" class="feature-state feature-state--error"><p>{{ error }}</p><Button variant="outline" @click="load">إعادة المحاولة</Button></div>
     <div v-else-if="state === 'empty'" class="feature-state">{{ spec.empty || 'لا توجد عمليات في هذا النطاق.' }}</div>
     <div v-else class="feature-grid feature-grid--wide">
-      <article v-for="row in rows" :key="row.name" class="feature-card">
+      <component :is="spec.detail ? RouterLink : 'article'" v-for="row in rows" :key="row.name" class="feature-card" :to="spec.detail ? spec.detail.replace(':name', row.name) : undefined">
         <div><strong>{{ row.route_name || row.subject || row.name }}</strong><span>{{ row.project || row.shift || row.trip_date }}</span></div>
-        <Badge :label="row.workflow_state || row.status || 'جديد'" />
-      </article>
+        <Badge :label="statusLabel(row.workflow_state || row.status)" />
+      </component>
       <dl v-if="!rows.length" class="feature-details"><template v-for="field in spec.fields || []" :key="field.key"><dt>{{ field.label }}</dt><dd dir="auto">{{ data?.[field.key] || '—' }}</dd></template></dl>
     </div>
   </section>

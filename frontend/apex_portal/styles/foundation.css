@@ -1,5 +1,9 @@
 @import "./tokens.css";
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 *,
 *::before,
 *::after {
@@ -99,12 +103,17 @@ h3 {
 }
 
 .mobile-shell {
-  min-block-size: 100dvh;
-  padding-block-end: calc(76px + env(safe-area-inset-bottom));
+  display: grid;
+  block-size: 100dvh;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
   background: var(--surface);
 }
 
 .mobile-shell__header {
+  position: sticky;
+  z-index: 10;
+  inset-block-start: 0;
   display: flex;
   align-items: end;
   justify-content: space-between;
@@ -133,13 +142,15 @@ h3 {
 }
 
 .mobile-shell__main {
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--sp-4);
 }
 
 .mobile-shell__nav {
-  position: fixed;
+  position: relative;
   z-index: 20;
-  inset: auto 0 0;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
@@ -154,17 +165,55 @@ h3 {
   justify-content: center;
   gap: 2px;
   padding: var(--sp-1);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.mobile-shell__more {
+  position: relative;
+  min-inline-size: 0;
+}
+
+.mobile-shell__more summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.mobile-shell__more summary::-webkit-details-marker {
+  display: none;
+}
+
+.mobile-shell__more-menu {
+  position: absolute;
+  z-index: 30;
+  inset-block-end: calc(100% + var(--sp-2));
+  inset-inline-end: 0;
+  display: grid;
+  inline-size: min(280px, calc(100vw - 2 * var(--sp-4)));
+  gap: var(--sp-1);
+  padding: var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-lg);
+}
+
+.mobile-shell__more-menu .portal-nav-link {
+  flex-direction: row;
+  justify-content: start;
+  padding: var(--sp-2) var(--sp-3);
 }
 
 .operations-shell {
   display: grid;
-  min-block-size: 100dvh;
+  block-size: 100dvh;
   grid-template-columns: minmax(220px, 260px) 1fr;
+  overflow: hidden;
   background: var(--canvas);
 }
 
 .operations-shell__rail {
+  min-block-size: 0;
+  overflow-y: auto;
   padding: calc(var(--sp-6) + env(safe-area-inset-top)) var(--sp-4) var(--sp-6);
   border-inline-end: 1px solid var(--border);
   background: var(--surface);
@@ -188,10 +237,18 @@ h3 {
 }
 
 .operations-shell__body {
+  display: grid;
+  block-size: 100dvh;
+  grid-template-rows: auto minmax(0, 1fr);
   min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
 }
 
 .operations-shell__header {
+  position: sticky;
+  z-index: 10;
+  inset-block-start: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -205,15 +262,21 @@ h3 {
 }
 
 .operations-shell__main {
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 0 var(--sp-6) var(--sp-8);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 1023px) {
   .operations-shell {
     grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
   .operations-shell__rail {
+    overflow: hidden;
+    padding: calc(var(--sp-4) + env(safe-area-inset-top)) var(--sp-4) var(--sp-3);
     border-inline-end: 0;
     border-block-end: 1px solid var(--border);
   }
@@ -225,5 +288,14 @@ h3 {
   .operations-shell__nav {
     display: flex;
     overflow-x: auto;
+    overscroll-behavior-inline: contain;
+  }
+
+  .operations-shell__nav .portal-nav-link {
+    flex: 0 0 auto;
+  }
+
+  .operations-shell__body {
+    block-size: auto;
   }
 }

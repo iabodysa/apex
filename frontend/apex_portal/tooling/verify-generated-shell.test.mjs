@@ -15,9 +15,10 @@ function fixture({ shellEntry = "assets/index-abc.js", outputEntry = "assets/ind
   mkdirSync(path.join(outDir, ".vite"), { recursive: true });
   mkdirSync(path.join(outDir, "assets"), { recursive: true });
   writeFileSync(path.join(outDir, ".vite/manifest.json"), JSON.stringify({
-    "index.html": { file: outputEntry, isEntry: true },
+    "index.html": { file: outputEntry, isEntry: true, css: ["assets/index.css"] },
   }));
   writeFileSync(path.join(outDir, outputEntry), "ready");
+  writeFileSync(path.join(outDir, "assets/index.css"), ".inline-flex{}.w-7{}.h-7{}");
   writeFileSync(indexPath, `<script>window.csrf_token = 1; window["{{ key }}"] = 1;</script><script src="/assets/apex/apex_portal/${shellEntry}"></script>`);
   return { outDir, indexPath };
 }

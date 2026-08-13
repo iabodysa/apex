@@ -120,7 +120,7 @@ onBeforeUnmount(() => { map?.remove(); map = null; });
   <section class="feature-page transport-map-page" :aria-busy="state === 'loading'">
     <header class="feature-page__heading">
       <div><p class="feature-page__eyebrow">تشغيل النقل</p><h2>الخريطة المباشرة</h2><p>مواقع السائقين ومسارات الرحلات المسندة إليك.</p></div>
-      <Button variant="outline" icon="refresh-cw" @click="load">تحديث</Button>
+      <Button variant="outline" icon="refresh-cw" label="تحديث" @click="load" />
     </header>
     <div v-if="state === 'loading'" class="feature-state" role="status">جارٍ تحديث الخريطة…</div>
     <div v-else-if="state === 'denied'" class="feature-state">لا تملك صلاحية هذه الرحلات.</div>

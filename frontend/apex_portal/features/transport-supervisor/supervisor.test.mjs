@@ -1,7 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
+import { flushPromises, mount } from "@vue/test-utils";
+import { createMemoryHistory, createRouter } from "vue-router";
 
 import { createTransportSupervisorGateway } from "./gateway.js";
 import { supervisorRedirects, supervisorRoutes } from "./routes.js";
+import SupervisorPage from "./SupervisorPage.vue";
+
+vi.mock("frappe-ui", () => ({
+  Badge: { template: "<span />" },
+  Button: { template: "<button><slot /></button>" },
+  FeatherIcon: { template: "<i />" },
+}));
 
 describe("Masar transport supervisor feature", () => {
   it("centres operations on requests, shifts, plans and dispatch trips", () => {
@@ -41,5 +50,28 @@ describe("Masar transport supervisor feature", () => {
       "apex.salis.api.route_supervisor.apply_transport_request_action",
       { name: "TR-1", action: "Validate" },
     );
+  });
+
+  it("renders an empty state for an object containing an empty collection", async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{
+        path: "/requests",
+        component: SupervisorPage,
+        meta: { view: { gateway: "requests", collections: ["items"], empty: "لا توجد عمليات." } },
+      }],
+    });
+    await router.push("/requests");
+    await router.isReady();
+    const wrapper = mount(SupervisorPage, {
+      global: {
+        plugins: [router],
+        provide: { transportSupervisorGateway: { requests: vi.fn().mockResolvedValue({ items: [] }) } },
+      },
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("لا توجد عمليات.");
+    expect(wrapper.find(".feature-details").exists()).toBe(false);
   });
 });

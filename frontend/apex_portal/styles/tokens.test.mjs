@@ -34,4 +34,19 @@ describe("Apex portal identity", () => {
     expect(css).toMatch(/min-(?:block-size|height): 44px/);
     expect(css).toContain("env(safe-area-inset-bottom)");
   });
+
+  it("defines every spacing step consumed by portal feature styles", () => {
+    const css = read("./tokens.css");
+    expect(css).toContain("--sp-5: 20px");
+  });
+
+  it("makes each shell own its viewport scroll and switches operations before iPad portrait", () => {
+    const css = read("./foundation.css");
+    expect(css).toMatch(/\.mobile-shell\s*\{[^}]*block-size:\s*100dvh[^}]*grid-template-rows:\s*auto minmax\(0, 1fr\) auto/s);
+    expect(css).toMatch(/\.mobile-shell__header\s*\{[^}]*position:\s*sticky/s);
+    expect(css).toMatch(/\.mobile-shell__main\s*\{[^}]*overflow-y:\s*auto/s);
+    expect(css).toMatch(/\.operations-shell__body\s*\{[^}]*block-size:\s*100dvh[^}]*grid-template-rows:\s*auto minmax\(0, 1fr\)/s);
+    expect(css).toMatch(/\.operations-shell__main\s*\{[^}]*overflow-y:\s*auto/s);
+    expect(css).toContain("@media (max-width: 1023px)");
+  });
 });
