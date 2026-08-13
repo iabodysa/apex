@@ -42,6 +42,7 @@ async function applyQuery(query) {
     date: typeof query?.date === "string" ? query.date : "",
   });
   props.resource.update?.({
+    start: 0,
     filters: filtersFromQuery(filters, {
       base: props.baseFilters,
       dateField: props.dateField,

@@ -45,6 +45,12 @@ async function applyFilters() {
   await draw();
 }
 
+async function selectTrip(name) {
+  selectedTrip.value = name;
+  await nextTick();
+  await draw();
+}
+
 onMounted(load);
 onBeforeUnmount(mapAdapter.destroy);
 </script>
@@ -89,7 +95,7 @@ onBeforeUnmount(mapAdapter.destroy);
         <RouterLink class="transport-map-selection__action" :to="`/trips/${selected.dispatch_trip}`">فتح تشغيل الرحلة</RouterLink>
       </article>
       <div class="transport-map-list" aria-live="polite">
-        <button v-for="item in visible" :key="item.dispatch_trip" type="button" class="feature-card transport-map-card" :aria-pressed="item.dispatch_trip === selected?.dispatch_trip" @click="selectedTrip = item.dispatch_trip">
+        <button v-for="item in visible" :key="item.dispatch_trip" type="button" class="feature-card transport-map-card" :aria-pressed="item.dispatch_trip === selected?.dispatch_trip" @click="selectTrip(item.dispatch_trip)">
           <div>
             <strong>{{ item.route_name || item.route_plan }}</strong>
             <span>{{ item.driver_name || "لم يحدد السائق" }} · <bdi dir="auto" translate="no">{{ item.plate || "لم تحدد المركبة" }}</bdi></span>

@@ -28,6 +28,11 @@ const boardingPassResource = createResource({
   method: "GET",
   auto: false,
 });
+const ratingResource = createResource({
+  url: "apex.salis.api.masar.submit_trip_rating",
+  method: "POST",
+  auto: false,
+});
 const state = ref("loading");
 const transport = ref({ upcoming: [], past: [] });
 const boarding = ref(null);
@@ -77,7 +82,7 @@ async function rateTrip(trip) {
   busy.value = key;
   error.value = "";
   try {
-    await gateway.submitTripRating({
+    await ratingResource.submit({
       dispatch_trip: trip.dispatch_trip,
       rating: draft.rating,
       feedback: draft.feedback,

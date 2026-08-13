@@ -22,7 +22,7 @@ const directionLabel = (value) => ({ Receipt: "استلام", Return: "إرجا�
         <h2>{{ handover.doc?.vehicle || "تفاصيل تسليم المركبة" }}</h2>
         <bdi class="record-reference" dir="auto" translate="no">{{ route.params.name }}</bdi>
       </div>
-      <Button variant="outline" icon="refresh-cw" label="تحديث" :loading="handover.get.loading" @click="handover.reload()" />
+      <Button variant="outline" icon-left="refresh-cw" :loading="handover.get.loading" @click="handover.reload()">تحديث</Button>
     </header>
 
     <PortalSkeleton v-if="handover.get.loading" :rows="3" label="جارٍ تحميل تسليم المركبة" />

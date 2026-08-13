@@ -33,6 +33,12 @@ vi.mock("frappe-ui", () => ({
         if (value instanceof Error) throw value;
         return typeof value === "function" ? value(params) : value;
       }),
+      submit: vi.fn(async (params) => {
+        resourceCalls.push([url, params]);
+        const value = resourceData.get(url);
+        if (value instanceof Error) throw value;
+        return typeof value === "function" ? value(params) : value;
+      }),
     };
   }),
   toast: { create: toastCreate },
@@ -93,21 +99,9 @@ describe("Masar worker feature", () => {
     expect(call.mock.calls).toEqual([["apex.salis.api.boarding_flow.worker_request_wait"], ["apex.salis.api.boarding_flow.worker_claim_boarded"]]);
   });
 
-  it("submits a completed-trip rating through the worker-scoped endpoint", async () => {
-    const call = vi.fn().mockResolvedValue({ message: { status: "success" } });
-    const gateway = createWorkerGateway(call);
-
-    await gateway.submitTripRating({
-      dispatch_trip: "DT-1",
-      rating: 5,
-      feedback: "رحلة ممتازة",
-    });
-
-    expect(call).toHaveBeenCalledWith("apex.salis.api.masar.submit_trip_rating", {
-      dispatch_trip: "DT-1",
-      rating: 5,
-      feedback: "رحلة ممتازة",
-    });
+  it("keeps completed-trip rating page-local instead of routing it through the gateway", () => {
+    const gateway = createWorkerGateway(vi.fn());
+    expect(gateway).not.toHaveProperty("submitTripRating");
   });
 
   it("offers rating only for an unrated completed trip", async () => {
@@ -125,12 +119,12 @@ describe("Masar worker feature", () => {
     });
     resourceData.set("apex.salis.api.boarding_flow.worker_trip_boarding", null);
     resourceData.set("apex.salis.api.masar.get_worker_context", { realtime_room: "" });
-    const submitTripRating = vi.fn().mockResolvedValue({ status: "success" });
+    resourceData.set("apex.salis.api.masar.submit_trip_rating", { status: "success" });
     const wrapper = mount(WorkerTransportPage, {
       global: {
         provide: {
           portalSubscribe: () => () => {},
-          workerGateway: { submitTripRating },
+          workerGateway: {},
         },
       },
     });
@@ -142,11 +136,10 @@ describe("Masar worker feature", () => {
     await wrapper.get('[data-rating-submit="DT-1"]').trigger("click");
     await flushPromises();
 
-    expect(submitTripRating).toHaveBeenCalledWith({
-      dispatch_trip: "DT-1",
-      rating: 5,
-      feedback: "رحلة ممتازة",
-    });
+    expect(resourceCalls).toContainEqual([
+      "apex.salis.api.masar.submit_trip_rating",
+      { dispatch_trip: "DT-1", rating: 5, feedback: "رحلة ممتازة" },
+    ]);
     expect(wrapper.text()).toContain("تم إرسال تقييمك");
     wrapper.unmount();
   });

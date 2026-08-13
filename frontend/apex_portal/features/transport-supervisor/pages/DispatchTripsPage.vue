@@ -10,6 +10,7 @@ const trips = createListResource({
     "trip_title",
     "trip_type",
     "route_assignment",
+    "route_assignment.assignment_name as route_assignment_label",
     "route_template",
     "project",
     "project.project_name as project_label",
@@ -52,8 +53,10 @@ const trips = createListResource({
             <div class="record-identity">
               <strong dir="auto">{{ recordTitle(trip, ['trip_title', 'shift_name'], 'رحلة تشغيل') }}</strong>
               <bdi class="record-reference" dir="auto" translate="no">{{ trip.name }}</bdi>
-              <span dir="auto">{{ trip.driver_label || trip.driver || 'السائق غير مسند' }} · <bdi translate="no">{{ trip.vehicle_label || trip.vehicle || 'المركبة غير مسندة' }}</bdi></span>
-              <small v-if="trip.project_label || trip.project" dir="auto">{{ trip.project_label || trip.project }}</small>
+              <span dir="auto">{{ trip.driver_label || 'السائق غير مسند' }} · <bdi translate="no">{{ trip.vehicle_label || 'المركبة غير مسندة' }}</bdi></span>
+              <small v-if="trip.project_label || trip.route_template_label || trip.route_assignment_label" dir="auto">
+                {{ [trip.project_label, trip.route_template_label, trip.route_assignment_label].filter(Boolean).join(' · ') }}
+              </small>
             </div>
             <Badge :theme="statusTheme(trip.status)" :label="statusLabel(trip.status)" />
             <FeatherIcon class="supervisor-row-chevron" name="arrow-left" aria-hidden="true" />

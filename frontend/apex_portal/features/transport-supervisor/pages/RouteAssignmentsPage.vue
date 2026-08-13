@@ -11,6 +11,7 @@ const assignments = createListResource({
     "route_template",
     "work_shift",
     "shift_name",
+    "work_shift.shift_name as work_shift_label",
     "project",
     "project.project_name as project_label",
     "driver",
@@ -38,7 +39,12 @@ const assignments = createListResource({
     icon="repeat"
     :resource="assignments"
     date-field="starts_on"
-    :status-options="[{ label: 'نشط', value: 'Active' }, { label: 'متوقف', value: 'Inactive' }]"
+    :status-options="[
+      { label: 'بانتظار الاعتماد', value: 'Pending' },
+      { label: 'معتمد', value: 'Approved' },
+      { label: 'مرفوض', value: 'Rejected' },
+      { label: 'ملغى', value: 'Cancelled' },
+    ]"
     empty="لا يوجد تشغيل متكرر مسند إليك."
   >
     <template #default="{ rows }">
@@ -57,11 +63,11 @@ const assignments = createListResource({
             <Badge :theme="statusTheme(assignment.status)" :label="statusLabel(assignment.status)" />
           </header>
           <dl>
-            <div><dt>الشفت</dt><dd dir="auto">{{ assignment.work_shift || assignment.shift_name || 'غير محدد' }}</dd></div>
-            <div><dt>المسار</dt><dd dir="auto">{{ assignment.route_template_label || assignment.route_template || 'غير محدد' }}</dd></div>
-            <div><dt>المشروع</dt><dd dir="auto">{{ assignment.project_label || assignment.project || 'غير محدد' }}</dd></div>
-            <div><dt>السائق</dt><dd dir="auto">{{ assignment.driver_label || assignment.driver || 'غير مسند' }}</dd></div>
-            <div><dt>المركبة</dt><dd><bdi dir="auto">{{ assignment.vehicle_label || assignment.vehicle || 'غير مسندة' }}</bdi></dd></div>
+            <div><dt>الشفت</dt><dd dir="auto">{{ assignment.shift_name || assignment.work_shift_label || 'غير محدد' }}</dd></div>
+            <div><dt>المسار</dt><dd dir="auto">{{ assignment.route_template_label || 'غير محدد' }}</dd></div>
+            <div><dt>المشروع</dt><dd dir="auto">{{ assignment.project_label || 'غير محدد' }}</dd></div>
+            <div><dt>السائق</dt><dd dir="auto">{{ assignment.driver_label || 'غير مسند' }}</dd></div>
+            <div><dt>المركبة</dt><dd><bdi dir="auto">{{ assignment.vehicle_label || 'غير مسندة' }}</bdi></dd></div>
             <div><dt>يبدأ في</dt><dd>{{ dateTimeLabel(assignment.starts_on) || 'غير محدد' }}</dd></div>
             <div><dt>مولّد حتى</dt><dd>{{ dateTimeLabel(assignment.generated_through) || 'لم يبدأ' }}</dd></div>
           </dl>

@@ -22,14 +22,6 @@ export function createWorkerGateway(call) {
   return Object.freeze({
     requestWait: () => mutate("wait", () => unwrap(call, "apex.salis.api.boarding_flow.worker_request_wait")),
     claimBoarded: () => mutate("boarded", () => unwrap(call, "apex.salis.api.boarding_flow.worker_claim_boarded")),
-    submitTripRating: ({ dispatch_trip, rating, feedback }) =>
-      mutate(`rating:${dispatch_trip}`, () =>
-        unwrap(call, "apex.salis.api.masar.submit_trip_rating", {
-          dispatch_trip,
-          rating,
-          feedback,
-        }),
-      ),
     createRequest: (values) =>
       unwrap(call, "apex.salis.api.masar.create_worker_request", {
         category: values.request_type,

@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 
 import { supervisorRedirects, supervisorRoutes } from "./routes.js";
 import SupervisorPage from "./SupervisorPage.vue";
+import SupervisorCollection from "./components/SupervisorCollection.vue";
 
 const { resourceData } = vi.hoisted(() => ({
   resourceData: new Map(),
@@ -169,6 +170,75 @@ describe("Masar transport supervisor feature", () => {
     }
     expect(readFileSync(path.join(root, "SupervisorPage.vue"), "utf8"))
       .toContain("passenger.passenger_name || 'راكب غير مسمى'");
+    const requests = readFileSync(path.join(root, "pages", "TransportRequestsPage.vue"), "utf8");
+    expect(requests).toMatch(/project\.project_name as project_label/);
+    expect(requests).toMatch(/assigned_to_trip\.trip_title as assigned_trip_label/);
+    expect(requests).toContain("request.assigned_trip_label || 'رحلة مسندة'");
+    const assignments = readFileSync(path.join(root, "pages", "RouteAssignmentsPage.vue"), "utf8");
+    expect(assignments).toMatch(/work_shift\.shift_name as work_shift_label/);
+    expect(assignments).toMatch(/assignment\.shift_name \|\| assignment\.work_shift_label \|\| 'غير محدد'/);
+    for (const name of ["DispatchTripsPage.vue", "MovementHistoryPage.vue"]) {
+      const source = readFileSync(path.join(root, "pages", name), "utf8");
+      expect(source, name).toContain("trip.route_template_label");
+      expect(source, name).toContain("trip.route_assignment_label");
+      expect(source, name).not.toMatch(/trip\.(driver|vehicle|project|route_template|route_assignment) \|\|/);
+    }
+  });
+
+  it("uses the exact status options declared by the current DocType metadata", () => {
+    const root = path.dirname(fileURLToPath(import.meta.url));
+    const assignments = readFileSync(path.join(root, "pages", "RouteAssignmentsPage.vue"), "utf8");
+    for (const value of ["Pending", "Approved", "Rejected", "Cancelled"]) {
+      expect(assignments).toContain(`value: '${value}'`);
+    }
+    expect(assignments).not.toContain("value: 'Active'");
+    expect(assignments).not.toContain("value: 'Inactive'");
+
+    const requests = readFileSync(path.join(root, "pages", "TransportRequestsPage.vue"), "utf8");
+    for (const value of ["New", "Validated", "Approved", "Scheduled", "Fulfilled", "Rejected", "Cancelled"]) {
+      expect(requests).toContain(`value: '${value}'`);
+    }
+  });
+
+  it("resets native list pagination before reloading changed URL filters", async () => {
+    const update = vi.fn(function (options) { Object.assign(resource, options); });
+    const reload = vi.fn().mockResolvedValue(undefined);
+    const resource = {
+      data: [{ name: "ROW-1" }],
+      list: { loading: false, error: null },
+      start: 20,
+      pageLength: 20,
+      hasNextPage: true,
+      update,
+      reload,
+      next: vi.fn(),
+    };
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: "/", component: { template: "<div />" } }],
+    });
+    await router.push("/?status=Approved");
+    await router.isReady();
+    const wrapper = mount(SupervisorCollection, {
+      props: {
+        title: "طلبات النقل",
+        description: "الوصف",
+        icon: "inbox",
+        resource,
+        empty: "فارغ",
+      },
+      global: { plugins: [router] },
+      slots: { default: "<div />" },
+    });
+    await flushPromises();
+
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({
+      start: 0,
+      filters: { status: "Approved" },
+    }));
+    expect(resource.start).toBe(0);
+    expect(reload).toHaveBeenCalledOnce();
+    wrapper.unmount();
   });
 
   it("renders a clear missing-record state on a native detail route", async () => {

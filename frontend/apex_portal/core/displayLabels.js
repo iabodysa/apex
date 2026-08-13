@@ -1,5 +1,6 @@
 const statusLabels = Object.freeze({
   New: "جديد",
+  Validated: "تم التحقق",
   Pending: "قيد الانتظار",
   Approved: "معتمد",
   Rejected: "مرفوض",
@@ -121,7 +122,7 @@ export function statusLabel(value) {
 }
 
 const greenStatuses = new Set([
-  "Approved", "Completed", "Fulfilled", "Ready", "Good", "Excellent",
+  "Validated", "Approved", "Completed", "Fulfilled", "Ready", "Good", "Excellent",
   "Active", "Closed", "Resolved", "Confirmed", "Received", "Delivered", "Done",
   "Available", "Valid", "Issued", "Returned", "assigned",
 ]);
