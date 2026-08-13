@@ -4,7 +4,17 @@ from collections import defaultdict
 
 import frappe
 
-from apex.salis.doctype.dispatch_trip.trip_manifest import ROUTE_STOP_FIELDS
+
+ROUTE_STOP_FIELDS = (
+    "stop_key",
+    "stop_name",
+    "accommodation_building",
+    "location",
+    "planned_time",
+    "passengers",
+    "latitude",
+    "longitude",
+)
 
 
 def execute():
