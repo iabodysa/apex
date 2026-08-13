@@ -52,19 +52,53 @@ class FleetEmployeePortalTest(FrappeTestCase):
         doc.status = "Submitted"
         get_doc.return_value = doc
 
-        result = fleet_employee.receive_vehicle(
-            odometer=120,
-            fuel_level="Half",
-            signed_evidence="/private/files/receipt.pdf",
+        template = SimpleNamespace(
+            name="Daily Inspection",
+            items=[SimpleNamespace(check_item="Tyres", remark="")],
         )
+        evidence = SimpleNamespace(
+            name="FILE-1", attached_to_doctype=None, attached_to_name=None
+        )
+        with (
+            patch.object(fleet_employee_services, "lock_vehicle"),
+            patch.object(
+                fleet_employee_services.frappe.db, "set_value"
+            ) as attach_evidence,
+            patch.object(
+                fleet_employee_services,
+                "_handover_checklist_template",
+                return_value=template,
+            ),
+            patch.object(
+                fleet_employee_services,
+                "_owned_evidence_file",
+                return_value=evidence,
+            ),
+        ):
+            result = fleet_employee.receive_vehicle(
+                odometer=120,
+                fuel_level="Half",
+                signed_evidence="/private/files/receipt.pdf",
+                inspection_rows=[{"check_item": "Tyres", "ok": 1}],
+            )
 
         payload = get_doc.call_args.args[0]
         self.assertEqual(payload["direction"], "Receipt")
         self.assertEqual(payload["vehicle"], "VEH-1")
         self.assertIsNone(payload["from_driver"])
         self.assertEqual(payload["to_driver"], "DRV-1")
+        self.assertEqual(payload["checklist_template"], "Daily Inspection")
         doc.insert.assert_called_once_with(ignore_permissions=True)
         doc.submit.assert_called_once_with()
+        attach_evidence.assert_called_once_with(
+            "File",
+            "FILE-1",
+            {
+                "attached_to_doctype": "Vehicle Handover",
+                "attached_to_name": "GV-1",
+                "attached_to_field": "signed_evidence",
+            },
+        )
         self.assertEqual(result["name"], "GV-1")
 
     @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
@@ -77,11 +111,32 @@ class FleetEmployeePortalTest(FrappeTestCase):
         doc.name = "GV-2"
         get_doc.return_value = doc
 
-        fleet_employee.return_vehicle(
-            odometer=150,
-            fuel_level="Quarter",
-            signed_evidence="/private/files/return.pdf",
+        template = SimpleNamespace(
+            name="Daily Inspection",
+            items=[SimpleNamespace(check_item="Tyres", remark="")],
         )
+        evidence = SimpleNamespace(
+            name="FILE-2", attached_to_doctype=None, attached_to_name=None
+        )
+        with (
+            patch.object(fleet_employee_services, "lock_vehicle"),
+            patch.object(
+                fleet_employee_services,
+                "_handover_checklist_template",
+                return_value=template,
+            ),
+            patch.object(
+                fleet_employee_services,
+                "_owned_evidence_file",
+                return_value=evidence,
+            ),
+        ):
+            fleet_employee.return_vehicle(
+                odometer=150,
+                fuel_level="Quarter",
+                signed_evidence="/private/files/return.pdf",
+                inspection_rows=[{"check_item": "Tyres", "ok": 1}],
+            )
 
         payload = get_doc.call_args.args[0]
         self.assertEqual(payload["direction"], "Return")
@@ -108,15 +163,26 @@ class FleetEmployeePortalTest(FrappeTestCase):
         doc.name = "GV-3"
         get_doc.return_value = doc
 
-        fleet_employee.return_vehicle(
-            odometer=150,
-            signed_evidence="/private/files/return.pdf",
-            checklist_template="Daily Inspection",
-            inspection_rows=[
-                {"check_item": "Tyres", "ok": 1, "remark": ""},
-                {"check_item": "Lights", "ok": 0, "remark": "Left lamp cracked"},
-            ],
+        evidence = SimpleNamespace(
+            name="FILE-3", attached_to_doctype=None, attached_to_name=None
         )
+        with (
+            patch.object(fleet_employee_services, "lock_vehicle"),
+            patch.object(
+                fleet_employee_services,
+                "_owned_evidence_file",
+                return_value=evidence,
+            ),
+        ):
+            fleet_employee.return_vehicle(
+                odometer=150,
+                signed_evidence="/private/files/return.pdf",
+                checklist_template="Daily Inspection",
+                inspection_rows=[
+                    {"check_item": "Tyres", "ok": 1, "remark": ""},
+                    {"check_item": "Lights", "ok": 0, "remark": "Left lamp cracked"},
+                ],
+            )
 
         checklist_template.assert_called_once_with("VEH-1", "Daily Inspection")
         payload = get_doc.call_args.args[0]
@@ -146,13 +212,130 @@ class FleetEmployeePortalTest(FrappeTestCase):
             ],
         )
 
-        with self.assertRaises(frappe.ValidationError):
+        evidence = SimpleNamespace(
+            name="FILE-4", attached_to_doctype=None, attached_to_name=None
+        )
+        with (
+            patch.object(fleet_employee_services, "lock_vehicle"),
+            patch.object(
+                fleet_employee_services,
+                "_owned_evidence_file",
+                return_value=evidence,
+            ),
+            self.assertRaises(frappe.ValidationError),
+        ):
             fleet_employee.return_vehicle(
                 odometer=150,
                 signed_evidence="/private/files/return.pdf",
                 checklist_template="Daily Inspection",
                 inspection_rows=[{"check_item": "Tyres", "ok": 1}],
             )
+
+    @patch.object(fleet_employee_services.frappe.db, "get_value", return_value=None)
+    @patch.object(
+        fleet_employee_services.frappe,
+        "throw",
+        side_effect=frappe.PermissionError,
+    )
+    @patch.object(fleet_employee_services, "_", side_effect=lambda message: message)
+    def test_handover_evidence_must_be_owned_private_file(
+        self, _translate, _throw, get_value
+    ):
+        with self.assertRaises(frappe.PermissionError):
+            fleet_employee_services._owned_evidence_file(
+                "/private/files/not-mine.pdf"
+            )
+
+        filters = get_value.call_args.args[1]
+        self.assertEqual(filters["owner"], frappe.session.user)
+        self.assertEqual(filters["is_private"], 1)
+        self.assertTrue(get_value.call_args.kwargs["for_update"])
+
+    @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
+    @patch.object(fleet_employee, "get_driver_for_session_user", return_value="DRV-1")
+    @patch("apex.salis.api.fleet_employee_services.frappe.utils.today", return_value="2026-08-12")
+    @patch.object(fleet_employee.frappe.db, "get_value", return_value=None)
+    @patch.object(fleet_employee.frappe, "get_doc")
+    def test_receipt_rejects_omitted_checklist_answers(
+        self, get_doc, _duplicate, _today, _driver, _vehicle
+    ):
+        template = SimpleNamespace(
+            name="Daily Inspection",
+            items=[SimpleNamespace(check_item="Tyres", remark="")],
+        )
+        evidence = SimpleNamespace(
+            name="FILE-5", attached_to_doctype=None, attached_to_name=None
+        )
+        with (
+            patch.object(fleet_employee_services, "lock_vehicle"),
+            patch.object(
+                fleet_employee_services,
+                "_handover_checklist_template",
+                return_value=template,
+            ),
+            patch.object(
+                fleet_employee_services,
+                "_owned_evidence_file",
+                return_value=evidence,
+            ),
+            patch.object(
+                fleet_employee_services,
+                "_",
+                side_effect=lambda message: message,
+            ),
+            patch.object(
+                fleet_employee_services.frappe,
+                "throw",
+                side_effect=frappe.ValidationError,
+            ),
+            self.assertRaises(frappe.ValidationError),
+        ):
+            fleet_employee.receive_vehicle(
+                odometer=120,
+                signed_evidence="/private/files/receipt.pdf",
+            )
+
+        get_doc.assert_not_called()
+
+    @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
+    @patch.object(fleet_employee, "get_driver_for_session_user", return_value="DRV-1")
+    @patch.object(
+        fleet_employee_services.frappe.db, "get_value", return_value="GV-EXISTING"
+    )
+    @patch.object(fleet_employee_services.frappe, "get_doc")
+    def test_retried_handover_returns_submitted_document_after_locks(
+        self, get_doc, _duplicate, _driver, _vehicle
+    ):
+        template = SimpleNamespace(
+            name="Daily Inspection",
+            items=[SimpleNamespace(check_item="Tyres", remark="")],
+        )
+        evidence = SimpleNamespace(
+            name="FILE-6", attached_to_doctype=None, attached_to_name=None
+        )
+        with (
+            patch.object(fleet_employee_services, "lock_vehicle") as lock_vehicle,
+            patch.object(
+                fleet_employee_services,
+                "_handover_checklist_template",
+                return_value=template,
+            ),
+            patch.object(
+                fleet_employee_services,
+                "_owned_evidence_file",
+                return_value=evidence,
+            ) as owned_evidence,
+        ):
+            result = fleet_employee.return_vehicle(
+                odometer=150,
+                signed_evidence="/private/files/return.pdf",
+                inspection_rows=[{"check_item": "Tyres", "ok": 1}],
+            )
+
+        lock_vehicle.assert_called_once_with("VEH-1")
+        owned_evidence.assert_called_once_with("/private/files/return.pdf")
+        get_doc.assert_not_called()
+        self.assertEqual(result, {"name": "GV-EXISTING", "status": "Submitted"})
 
     @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
     @patch.object(fleet_employee, "get_driver_for_session_user", return_value="DRV-1")

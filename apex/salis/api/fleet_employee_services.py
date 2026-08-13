@@ -4,7 +4,7 @@ import frappe
 from frappe import _
 
 from apex.salis.api import fleet_employee as base
-from apex.salis.utils import add_timeline_note, period_quota
+from apex.salis.utils import add_timeline_note, lock_vehicle, period_quota
 
 
 def _handover_checklist_template(vehicle, requested_template=None):
@@ -12,15 +12,7 @@ def _handover_checklist_template(vehicle, requested_template=None):
     vehicle_category = frappe.db.get_value("Salis Vehicle", vehicle, "vehicle_category")
     if requested_template:
         template = frappe.get_doc("Vehicle Handover Checklist Template", requested_template)
-        if not frappe.has_permission(
-            "Vehicle Handover Checklist Template", "read", doc=template
-        ):
-            frappe.throw(_("You cannot read that handover checklist."), frappe.PermissionError)
-        if not template.is_active:
-            frappe.throw(_("Checklist template {0} is not active.").format(template.name))
-        if template.vehicle_category and template.vehicle_category != vehicle_category:
-            frappe.throw(_("Checklist template {0} does not apply to this vehicle.").format(template.name))
-        return template
+        return _validate_handover_template(template, vehicle_category)
 
     names = []
     if vehicle_category:
@@ -41,13 +33,32 @@ def _handover_checklist_template(vehicle, requested_template=None):
         )
     if not names:
         frappe.throw(_("No active vehicle handover checklist is configured."))
-    return frappe.get_doc("Vehicle Handover Checklist Template", names[0])
+    return _validate_handover_template(
+        frappe.get_doc("Vehicle Handover Checklist Template", names[0]),
+        vehicle_category,
+    )
+
+
+def _validate_handover_template(template, vehicle_category):
+    if not frappe.has_permission(
+        "Vehicle Handover Checklist Template", "read", doc=template
+    ):
+        frappe.throw(_("You cannot read that handover checklist."), frappe.PermissionError)
+    if not template.is_active:
+        frappe.throw(_("Checklist template {0} is not active.").format(template.name))
+    if template.vehicle_category and template.vehicle_category != vehicle_category:
+        frappe.throw(
+            _("Checklist template {0} does not apply to this vehicle.").format(
+                template.name
+            )
+        )
+    if not template.items:
+        frappe.throw(_("The selected handover checklist has no inspection items."))
+    return template
 
 
 def _inspection_rows(template, value):
     """Bind explicit portal answers to every native template row in order."""
-    if not template.items:
-        frappe.throw(_("The selected handover checklist has no inspection items."))
     if isinstance(value, str):
         value = frappe.parse_json(value)
     if not isinstance(value, list):
@@ -67,6 +78,29 @@ def _inspection_rows(template, value):
             frappe.throw(_("Explain the failed check: {0}.").format(template_item.check_item))
         result.append({"check_item": template_item.check_item, "ok": ok, "remark": remark})
     return result
+
+
+def _owned_evidence_file(file_url):
+    """Lock and return the caller-owned private File used as signed evidence."""
+    if not file_url:
+        frappe.throw(_("Receipt evidence is required."))
+    evidence = frappe.db.get_value(
+        "File",
+        {
+            "file_url": file_url,
+            "owner": frappe.session.user,
+            "is_private": 1,
+        },
+        ["name", "attached_to_doctype", "attached_to_name"],
+        as_dict=True,
+        for_update=True,
+    )
+    if not evidence:
+        frappe.throw(
+            _("Signed evidence must be a private file uploaded by your account."),
+            frappe.PermissionError,
+        )
+    return evidence
 
 
 def _handover_payload(direction, driver, vehicle, odometer, fuel_level=None,
@@ -100,8 +134,10 @@ def _submit_session_handover(direction, odometer, fuel_level=None,
     vehicle = base._session_vehicle(driver)
     if not vehicle:
         frappe.throw(_("No vehicle is assigned to you."))
-    if not signed_evidence:
-        frappe.throw(_("Receipt evidence is required."))
+    lock_vehicle(vehicle)
+    evidence = _owned_evidence_file(signed_evidence)
+    template = _handover_checklist_template(vehicle, checklist_template)
+    answers = _inspection_rows(template, inspection_rows)
     duplicate = frappe.db.get_value(
         "Vehicle Handover",
         {
@@ -116,17 +152,25 @@ def _submit_session_handover(direction, odometer, fuel_level=None,
     )
     if duplicate:
         return {"name": duplicate, "status": "Submitted"}
-    template = None
-    if checklist_template or inspection_rows is not None:
-        template = _handover_checklist_template(vehicle, checklist_template)
+    if evidence.attached_to_doctype or evidence.attached_to_name:
+        frappe.throw(_("Signed evidence is already attached to another document."))
     doc = frappe.get_doc(
         _handover_payload(
             direction, driver, vehicle, odometer, fuel_level, condition_notes,
-            signed_evidence, template, inspection_rows
+            signed_evidence, template, answers
         )
     )
     doc.insert(ignore_permissions=True)
     doc.submit()
+    frappe.db.set_value(
+        "File",
+        evidence.name,
+        {
+            "attached_to_doctype": "Vehicle Handover",
+            "attached_to_name": doc.name,
+            "attached_to_field": "signed_evidence",
+        },
+    )
     return {"name": doc.name, "status": getattr(doc, "status", None) or "Submitted"}
 
 

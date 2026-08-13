@@ -327,6 +327,7 @@ def create_ad_hoc_trip(trip, transport_requests):
         trip = frappe.parse_json(trip)
     if not isinstance(trip, dict):
         frappe.throw(_("Trip must be an object."))
+    transport_requests = _parse_request_assignment_rows(transport_requests)
     if not transport_requests:
         frappe.throw(_("Add at least one Transport Request to the ad-hoc trip."))
 
@@ -448,16 +449,7 @@ def assign_requests_to_trip(dispatch_trip, transport_requests):
 
 
 def _normalise_request_assignments(value, trip):
-    if isinstance(value, str):
-        value = (
-            frappe.parse_json(value)
-            if value.strip().startswith(("[", "{"))
-            else [value]
-        )
-    if isinstance(value, dict):
-        value = [value]
-    if not isinstance(value, list):
-        frappe.throw(_("Transport Requests must be a list."))
+    value = _parse_request_assignment_rows(value)
 
     stop_keys = [row.stop_key for row in (trip.stops or []) if row.stop_key]
     known = set(stop_keys)
@@ -496,3 +488,18 @@ def _normalise_request_assignments(value, trip):
             }
         )
     return result
+
+
+def _parse_request_assignment_rows(value):
+    """Parse the request collection before any trip row is inserted."""
+    if isinstance(value, str):
+        value = (
+            frappe.parse_json(value)
+            if value.strip().startswith(("[", "{"))
+            else [value]
+        )
+    if isinstance(value, dict):
+        value = [value]
+    if not isinstance(value, list):
+        frappe.throw(_("Transport Requests must be a list."))
+    return value

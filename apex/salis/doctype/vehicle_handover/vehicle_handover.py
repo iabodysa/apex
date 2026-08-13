@@ -50,6 +50,8 @@ class VehicleHandover(Document):
         else:
             frappe.throw(_("Invalid handover direction."))
 
+        self._validate_native_checklist()
+
         if self.from_driver and self.to_driver and self.from_driver == self.to_driver:
             frappe.throw(_("To Driver must differ from From Driver."))
 
@@ -75,17 +77,46 @@ class VehicleHandover(Document):
                     )
                 )
 
+    def _validate_native_checklist(self):
+        """Require exact active native-template parity for receipts and returns."""
+        if self.direction not in ("Receipt", "Return"):
+            return
+        if not self.checklist_template:
+            frappe.throw(_("Select a handover checklist before saving."))
+
+        template = frappe.get_doc(
+            "Vehicle Handover Checklist Template", self.checklist_template
+        )
+        if not template.is_active:
+            frappe.throw(
+                _("Checklist template {0} is not active.").format(template.name)
+            )
+        vehicle_category = frappe.db.get_value(
+            "Salis Vehicle", self.vehicle, "vehicle_category"
+        )
+        if template.vehicle_category and template.vehicle_category != vehicle_category:
+            frappe.throw(
+                _("Checklist template {0} does not apply to this vehicle.").format(
+                    template.name
+                )
+            )
+
+        expected = [row.check_item for row in template.items]
+        actual = [row.check_item for row in (self.handover_check_items or [])]
+        if not expected or actual != expected:
+            frappe.throw(
+                _("Handover checklist rows must exactly match the selected template.")
+            )
+        for row in self.handover_check_items:
+            if not row.ok and not (row.remark or "").strip():
+                frappe.throw(_("Explain the failed check: {0}.").format(row.check_item))
+
     def before_submit(self):
         """Requires signed evidence, and discrepancy notes when a discrepancy is recorded."""
         if not self.signed_evidence:
             frappe.throw(_("Signed handover evidence is required before submitting."))
 
-        if self.checklist_template:
-            if not self.handover_check_items:
-                frappe.throw(_("Complete the handover checklist before submitting."))
-            for row in self.handover_check_items:
-                if not row.ok and not (row.remark or "").strip():
-                    frappe.throw(_("Explain the failed check: {0}.").format(row.check_item))
+        self._validate_native_checklist()
 
         if self.discrepancy_status == "Discrepancy" and not self.discrepancy_notes:
             frappe.throw(_("Discrepancy notes are required when the discrepancy status is Discrepancy."))

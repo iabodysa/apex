@@ -432,3 +432,43 @@ class TestDispatchTripAggregate(FrappeTestCase):
             )
 
         rollback.assert_called_once_with(save_point="create_ad_hoc_dispatch_trip")
+
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.db.savepoint")
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.get_doc")
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.get_roles")
+    @patch(
+        "apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.has_permission",
+        return_value=True,
+    )
+    @patch(
+        "apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.throw",
+        side_effect=frappe.ValidationError,
+    )
+    @patch(
+        "apex.salis.doctype.dispatch_trip.dispatch_trip._", side_effect=lambda value: value
+    )
+    def test_ad_hoc_creation_rejects_serialized_empty_request_list_before_insert(
+        self,
+        _translate,
+        _throw,
+        _has_permission,
+        get_roles,
+        get_doc,
+        savepoint,
+    ):
+        get_roles.return_value = ["Fleet Supervisor"]
+
+        with self.assertRaises(frappe.ValidationError):
+            create_ad_hoc_trip(
+                {
+                    "project": "PROJ-1",
+                    "trip_date": "2026-08-14",
+                    "vehicle": "VEH-1",
+                    "driver": "DRV-1",
+                    "stops": [{"stop_key": "housing", "stop_name": "Housing"}],
+                },
+                "[]",
+            )
+
+        get_doc.assert_not_called()
+        savepoint.assert_not_called()
