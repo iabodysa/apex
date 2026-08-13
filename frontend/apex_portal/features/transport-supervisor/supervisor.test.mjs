@@ -143,6 +143,9 @@ describe("Masar transport supervisor feature", () => {
     expect(page).toContain("createDocumentResource");
     expect(page).toContain("frappe.model.workflow.get_transitions");
     expect(page).toContain("frappe.model.workflow.apply_workflow");
+    expect(page).toMatch(
+      /url: "frappe\.model\.workflow\.get_transitions",\s+method: "POST"/,
+    );
     for (const name of [
       "TransportRequestsPage.vue",
       "RouteAssignmentsPage.vue",

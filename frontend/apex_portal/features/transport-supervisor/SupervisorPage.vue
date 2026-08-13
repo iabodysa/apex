@@ -13,7 +13,7 @@ const record = createDocumentResource({
 });
 const transitions = createResource({
   url: "frappe.model.workflow.get_transitions",
-  method: "GET",
+  method: "POST",
   auto: false,
 });
 const workflow = createResource({
