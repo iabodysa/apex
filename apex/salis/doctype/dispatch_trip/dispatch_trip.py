@@ -6,7 +6,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_time, now_datetime
+from frappe.utils import cint, get_time, now_datetime
 
 from apex.salis.doctype.dispatch_trip.trip_manifest import (
     copy_route_stops,
@@ -99,11 +99,11 @@ class DispatchTrip(Document):
             pass
 
     def before_submit(self):
-        """Blocks submission until the trip has a route, vehicle, driver, date and an assigned request."""
+        """Blocks submission until the trip has stops, resources, date and riders."""
         self._enforce_dispatch_readiness()
 
     def _enforce_dispatch_readiness(self):
-        """A trip must be ready (route, vehicle, driver set) before it is submitted."""
+        """A trip must carry its executable route and resources before submission."""
         required = {
             "vehicle": _("Vehicle"),
             "driver": _("Driver"),
@@ -118,10 +118,6 @@ class DispatchTrip(Document):
                     )
                 )
 
-        if not self.route_template and not self.route_plan:
-            frappe.throw(
-                _("Dispatch readiness: Route Template is required before submitting.")
-            )
         if not self.stops:
             frappe.throw(
                 _("Dispatch readiness: Add at least one trip stop before submitting.")
@@ -285,6 +281,17 @@ ASSIGNMENT_ROLES = (
 )
 
 
+def _request_rider_count(request):
+    manifest_count = len(request.get("workers") or []) + len(
+        request.get("adhoc_passengers") or []
+    )
+    return max(
+        manifest_count,
+        cint(request.get("worker_count")),
+        cint(request.get("passenger_count")),
+    )
+
+
 @frappe.whitelist(methods=["POST"])
 def assign_requests_to_trip(dispatch_trip, transport_requests):
     """Atomically attach requests and their pickup/drop-off stops to one trip."""
@@ -340,7 +347,7 @@ def assign_requests_to_trip(dispatch_trip, transport_requests):
                 "transport_request": request.name,
                 "pickup_stop": row["pickup_stop"],
                 "dropoff_stop": row["dropoff_stop"],
-                "requested_count": request.worker_count,
+                "requested_count": _request_rider_count(request),
                 "purpose": request.transport_purpose,
             },
         )

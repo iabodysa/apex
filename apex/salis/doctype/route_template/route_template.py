@@ -15,8 +15,19 @@ class RouteTemplate(Document):
         for index, stop in enumerate(self.stops, start=1):
             if not (stop.stop_name or "").strip():
                 frappe.throw(_("Row {0}: Stop Name is required.").format(index))
-            if not stop.get("stop_key"):
-                stop.set("stop_key", f"stop-{index}")
-            if stop.get("stop_key") in keys:
+            key = (stop.get("stop_key") or "").strip()
+            if key in keys:
                 frappe.throw(_("Route stop keys must be unique."))
-            keys.add(stop.get("stop_key"))
+            if key:
+                stop.set("stop_key", key)
+                keys.add(key)
+
+        next_key = 1
+        for stop in self.stops:
+            if stop.get("stop_key"):
+                continue
+            while f"stop-{next_key}" in keys:
+                next_key += 1
+            key = f"stop-{next_key}"
+            stop.set("stop_key", key)
+            keys.add(key)

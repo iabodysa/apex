@@ -8,6 +8,7 @@ from frappe.tests.utils import FrappeTestCase
 from apex.salis.doctype.dispatch_trip.dispatch_trip import (
     DispatchTrip,
     _normalise_request_assignments,
+    _request_rider_count,
     assign_requests_to_trip,
 )
 
@@ -58,6 +59,25 @@ class TestDispatchTripAggregate(FrappeTestCase):
                     "transport_request": "TR-1",
                     "pickup_stop": "pickup",
                     "dropoff_stop": "dropoff",
+                }
+            ],
+        )
+
+        trip._enforce_dispatch_readiness()
+
+    def test_ad_hoc_trip_is_dispatch_ready_with_its_own_stops(self):
+        trip = self._trip(
+            trip_type="Ad Hoc",
+            project="PROJ-1",
+            stops=[
+                {"stop_key": "hospital", "stop_name": "Hospital"},
+                {"stop_key": "office", "stop_name": "Office"},
+            ],
+            assigned_requests=[
+                {
+                    "transport_request": "TR-1",
+                    "pickup_stop": "hospital",
+                    "dropoff_stop": "office",
                 }
             ],
         )
@@ -157,6 +177,29 @@ class TestDispatchTripAggregate(FrappeTestCase):
 
         with self.assertRaises(frappe.ValidationError):
             _normalise_request_assignments(["TR-1"], trip)
+
+    def test_request_rider_count_includes_registered_and_ad_hoc_passengers(self):
+        request = frappe._dict(
+            worker_count=1,
+            passenger_count=0,
+            workers=[frappe._dict(employee="EMP-1")],
+            adhoc_passengers=[
+                frappe._dict(full_name="Guest 1"),
+                frappe._dict(full_name="Guest 2"),
+            ],
+        )
+
+        self.assertEqual(_request_rider_count(request), 3)
+
+    def test_request_rider_count_uses_declared_count_without_a_manifest(self):
+        request = frappe._dict(
+            worker_count=0,
+            passenger_count=4,
+            workers=[],
+            adhoc_passengers=[],
+        )
+
+        self.assertEqual(_request_rider_count(request), 4)
 
     @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.get_all")
     def test_passengers_include_employee_and_guest_with_request_stops(self, get_all):
