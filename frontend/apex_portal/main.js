@@ -2,7 +2,7 @@ import { createApp } from "vue";
 import { FrappeUI } from "frappe-ui";
 import App from "./App.vue";
 import { createPortalRouter, getPortalContext } from "./core/router.js";
-import { parsePortalBootstrap } from "./core/session.js";
+import { parsePortalBootstrap, readPortalDocumentBootstrap } from "./core/session.js";
 import { configurePortalApi } from "./core/api.js";
 import { registerPortalWorker } from "./core/serviceWorker.js";
 import { createDriverGateway } from "./features/driver/gateway.js";
@@ -31,11 +31,20 @@ function navigationFrom(router) {
 }
 
 export async function mountPortal({
-  source = globalThis.window?.apex_portal,
+  source,
+  shell,
+  csrfToken,
   routes = portalRoutes,
   target = "#app",
 } = {}) {
+  if (source === undefined && globalThis.document) {
+    ({ portal: source, shell, csrfToken } = readPortalDocumentBootstrap(globalThis.document));
+  }
   const bootstrap = parsePortalBootstrap(source);
+  if (globalThis.window) {
+    globalThis.window.apex_portal = bootstrap;
+    if (csrfToken !== undefined) globalThis.window.csrf_token = csrfToken;
+  }
   const context = getPortalContext(bootstrap.entry);
   const router = createPortalRouter({
     context,
@@ -59,10 +68,10 @@ export async function mountPortal({
   if (!currentHash || currentHash === "/") await router.replace(bootstrap.initial_route);
   await router.isReady();
   application.mount(target);
-  void registerPortalWorker().catch(() => {});
+  void registerPortalWorker(shell).catch(() => {});
   return Object.freeze({ application, router, bootstrap, context });
 }
 
-if (globalThis.document?.querySelector("#app") && globalThis.window?.apex_portal) {
+if (globalThis.document?.querySelector("#app") && globalThis.document?.querySelector("#apex-portal-bootstrap")) {
   void mountPortal();
 }

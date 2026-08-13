@@ -20,6 +20,24 @@ describe("unified build contract", () => {
     expect(main.match(/styles\/foundation\.css/g)).toHaveLength(1);
   });
 
+  it("keeps bootstrap data non-executable and offline styles external", () => {
+    const index = new DOMParser().parseFromString(read("index.html"), "text/html");
+    for (const id of ["apex-portal-bootstrap", "apex-portal-shell", "apex-csrf-token"]) {
+      expect(index.querySelector(`#${id}`)?.type).toBe("application/json");
+    }
+    const executableScripts = [...index.querySelectorAll("script")]
+      .filter((script) => script.type !== "application/json");
+    expect(executableScripts).toHaveLength(1);
+    expect(executableScripts[0].getAttribute("src")).toBe("/main.js");
+    expect(executableScripts[0].textContent.trim()).toBe("");
+
+    const offline = new DOMParser().parseFromString(read("public/offline.html"), "text/html");
+    expect(offline.querySelector("style")).toBeNull();
+    expect(offline.querySelector("[style]")).toBeNull();
+    expect(offline.querySelector('link[rel="stylesheet"]')?.getAttribute("href"))
+      .toBe("/assets/apex/apex_portal/offline.css");
+  });
+
   it("uses both shells and declares all seven domain feature slots without fake pages", () => {
     const app = read("App.vue");
     expect(app).toContain("MobileShell");

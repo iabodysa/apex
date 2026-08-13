@@ -35,6 +35,12 @@ describe("portal PWA contract", () => {
     }
   });
 
+  it("pre-caches the stylesheet required by the offline document", () => {
+    for (const entry of Object.values(parameters())) {
+      expect(entry.immutableAssets).toContain("/assets/apex/apex_portal/offline.css");
+    }
+  });
+
   it("ships opaque 180 pixel Apple icons", () => {
     for (const entry of ["masar", "driver"]) {
       const png = readFileSync(path.join(process.cwd(), `public/icons/${entry}-apple-touch-icon-180.png`));

@@ -13,6 +13,37 @@ const CONTRACT_KEYS = new Set([
   "subject_scope",
 ]);
 
+const DOCUMENT_CONTRACTS = Object.freeze({
+  portal: "apex-portal-bootstrap",
+  shell: "apex-portal-shell",
+  csrfToken: "apex-csrf-token",
+});
+
+function readJsonContract(documentSource, id) {
+  const element = documentSource?.getElementById(id);
+  if (!element || element.getAttribute("type") !== "application/json") {
+    throw new TypeError(`Missing non-executable portal contract: ${id}`);
+  }
+  try {
+    return JSON.parse(element.textContent);
+  } catch {
+    throw new TypeError(`Invalid JSON in portal contract: ${id}`);
+  }
+}
+
+export function readPortalDocumentBootstrap(documentSource = globalThis.document) {
+  const portal = readJsonContract(documentSource, DOCUMENT_CONTRACTS.portal);
+  const shell = readJsonContract(documentSource, DOCUMENT_CONTRACTS.shell);
+  const csrfToken = readJsonContract(documentSource, DOCUMENT_CONTRACTS.csrfToken);
+  if (!shell || typeof shell !== "object" || Array.isArray(shell)) {
+    throw new TypeError("Portal shell contract must be an object");
+  }
+  if (typeof csrfToken !== "string" || !csrfToken) {
+    throw new TypeError("Portal CSRF contract must be a non-empty string");
+  }
+  return Object.freeze({ portal, shell, csrfToken });
+}
+
 function requireString(record, key) {
   if (typeof record[key] !== "string" || !record[key]) {
     throw new TypeError(`Portal bootstrap ${key} must be a non-empty string`);

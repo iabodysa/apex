@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parsePortalBootstrap } from "./session.js";
+import { parsePortalBootstrap, readPortalDocumentBootstrap } from "./session.js";
 
 const valid = () => ({
   entry: "worker",
@@ -14,6 +14,25 @@ const valid = () => ({
 });
 
 describe("portal bootstrap", () => {
+  it("reads non-executable JSON contracts from the generated document", () => {
+    document.body.innerHTML = `
+      <script id="apex-portal-bootstrap" type="application/json">${JSON.stringify(valid())}</script>
+      <script id="apex-portal-shell" type="application/json">{"service_worker_url":"/worker.js"}</script>
+      <script id="apex-csrf-token" type="application/json">"csrf-value"</script>
+    `;
+
+    expect(readPortalDocumentBootstrap(document)).toEqual({
+      portal: valid(),
+      shell: { service_worker_url: "/worker.js" },
+      csrfToken: "csrf-value",
+    });
+  });
+
+  it("rejects a missing or malformed document contract", () => {
+    document.body.innerHTML = '<script id="apex-portal-bootstrap" type="application/json">{</script>';
+    expect(() => readPortalDocumentBootstrap(document)).toThrow(/apex-portal-bootstrap/);
+  });
+
   it("returns an immutable normalized contract", () => {
     const parsed = parsePortalBootstrap(valid());
     expect(parsed.entry).toBe("worker");

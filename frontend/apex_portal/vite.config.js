@@ -32,7 +32,7 @@ export default defineConfig({
         sourcemap: false,
       },
       frappeProxy: false,
-      jinjaBootData: true,
+      jinjaBootData: false,
     }),
     vue(),
   ],

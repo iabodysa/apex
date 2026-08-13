@@ -25,6 +25,7 @@ function builtAssets() {
 export function workerParameters({ assetUrls = builtAssets() } = {}) {
   const common = [
     ...assetUrls,
+    `${assetBase}/offline.css`,
     "/assets/apex/vendor/thmanyah-v1/thmanyah.css",
     ...fontAssets,
   ];

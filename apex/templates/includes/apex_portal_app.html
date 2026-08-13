@@ -13,7 +13,7 @@
     {% if shell_meta.apple_icon_url %}<link rel="apple-touch-icon" sizes="180x180" href="{{ shell_meta.apple_icon_url }}" />{% endif %}
     <link rel="stylesheet" href="/assets/apex/vendor/thmanyah-v1/thmanyah.css" />
     <title>{{ shell_meta.title }}</title>
-    <script type="module" crossorigin src="/assets/apex/apex_portal/assets/index-BkXduukX.js"></script>
+    <script type="module" crossorigin src="/assets/apex/apex_portal/assets/index-C7jUglBc.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/apex/apex_portal/assets/vue-runtime-BsASgDso.js">
     <link rel="modulepreload" crossorigin href="/assets/apex/apex_portal/assets/frappe-ui-runtime-Cwyiobvq.js">
     <link rel="stylesheet" crossorigin href="/assets/apex/apex_portal/assets/frappe-ui-runtime-BTUUvaN1.css">
@@ -28,16 +28,8 @@
         <p>لحظات ويكون كل شيء جاهز.</p>
       </section>
     </div>
-    <script>
-      window.csrf_token = {{ csrf_token | tojson }};
-      window.apex_portal_shell = {{ shell_meta | tojson }};
-    </script>
-
-    <script>
-      {% for key in boot %}
-      window["{{ key }}"] = {{ boot[key] | tojson }};
-      {% endfor %}
-    </script>
+    <script id="apex-portal-bootstrap" type="application/json">{{ boot["apex_portal"] | tojson }}</script>
+    <script id="apex-portal-shell" type="application/json">{{ shell_meta | tojson }}</script>
+    <script id="apex-csrf-token" type="application/json">{{ csrf_token | tojson }}</script>
   </body>
-
 </html>

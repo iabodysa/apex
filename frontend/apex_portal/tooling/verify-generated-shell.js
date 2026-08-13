@@ -12,6 +12,32 @@ const shellPath = verification
   ? process.env.APEX_PORTAL_VERIFY_INDEX_PATH
   : path.resolve(repositoryRoot, "apex/templates/includes/apex_portal_app.html");
 
+const JSON_BOOT_CONTRACTS = Object.freeze([
+  ["apex-portal-bootstrap", '{{ boot["apex_portal"] | tojson }}'],
+  ["apex-portal-shell", "{{ shell_meta | tojson }}"],
+  ["apex-csrf-token", "{{ csrf_token | tojson }}"],
+]);
+
+function assertNonExecutableBootstrap(shell) {
+  for (const [id, payload] of JSON_BOOT_CONTRACTS) {
+    const pattern = new RegExp(
+      `<script\\b(?=[^>]*\\bid=["']${id}["'])(?=[^>]*\\btype=["']application/json["'])[^>]*>[\\s\\S]*?<\\/script>`,
+      "i",
+    );
+    const tag = shell.match(pattern)?.[0];
+    if (!tag || !tag.includes(payload)) {
+      throw new Error(`Generated portal shell lost JSON bootstrap contract: ${id}`);
+    }
+  }
+  for (const match of shell.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+    const attributes = match[1];
+    if (/\btype=["']application\/json["']/i.test(attributes)) continue;
+    if (!/\bsrc\s*=/i.test(attributes)) {
+      throw new Error("Generated portal shell contains an executable inline script");
+    }
+  }
+}
+
 export function verifyGeneratedShell({ outDir = outputRoot, indexPath = shellPath } = {}) {
   if (!outDir || !path.isAbsolute(outDir) || !indexPath || !path.isAbsolute(indexPath)) {
     throw new Error("Generated shell verification requires absolute output and index paths");
@@ -43,9 +69,7 @@ export function verifyGeneratedShell({ outDir = outputRoot, indexPath = shellPat
       throw new Error(`Generated portal CSS is missing frappe-ui utility: ${utility}`);
     }
   }
-  if (!shell.includes("window.csrf_token") || !shell.includes('window["{{ key }}"]')) {
-    throw new Error("Generated portal shell lost Frappe boot or CSRF contracts");
-  }
+  assertNonExecutableBootstrap(shell);
   return { manifestPath, indexPath, entry: entry.file };
 }
 
