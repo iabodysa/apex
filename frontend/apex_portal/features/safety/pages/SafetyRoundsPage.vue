@@ -15,6 +15,22 @@ const due = createResource({
 const submit = createResource({ url: "apex.habitat.api.safety_checklist.submit_due_rounds" });
 const groups = computed(() => due.data?.due || []);
 const awaiting = computed(() => due.data?.awaiting || []);
+const taskCount = computed(() => groups.value.reduce((total, group) => total + group.tasks.length, 0));
+const checkedCount = computed(() => Object.values(results).filter((row) => row.execution_status).length);
+const missingEvidence = computed(() => groups.value.some((group) => group.tasks.some((task) => {
+  const row = results[`${group.cadence}:${task.name}`];
+  return Boolean(task.evidence_required)
+    && ["Poor", "Not Done"].includes(row?.execution_status)
+    && !row.evidence_photo;
+})));
+const checklistComplete = computed(() => taskCount.value > 0
+  && checkedCount.value === taskCount.value
+  && !missingEvidence.value);
+const progressLabel = computed(() => {
+  if (missingEvidence.value) return "أكمل الصور المطلوبة قبل حفظ الجولة.";
+  if (checklistComplete.value) return "اكتملت بنود الجولة.";
+  return `${checkedCount.value} من ${taskCount.value} تم فحصها.`;
+});
 
 watch(building, async (value) => {
   Object.keys(results).forEach((key) => delete results[key]);
@@ -33,6 +49,12 @@ function today() {
 }
 async function saveRound() {
   error.value = "";
+  if (!checklistComplete.value) {
+    error.value = missingEvidence.value
+      ? "أكمل الصور المطلوبة قبل حفظ الجولة."
+      : "أكمل فحص جميع البنود قبل حفظ الجولة.";
+    return;
+  }
   try {
     const response = await submit.submit({
       building: building.value,
@@ -75,7 +97,15 @@ async function saveRound() {
         />
       </section>
       <ErrorMessage v-if="error" :message="error" />
-      <Button v-if="groups.length" variant="solid" :loading="submit.loading" @click="saveRound">حفظ الجولة</Button>
+      <p v-if="groups.length" class="safety-checklist__progress" role="status">{{ progressLabel }}</p>
+      <Button
+        v-if="groups.length"
+        class="safety-checklist__save"
+        variant="solid"
+        :disabled="!checklistComplete"
+        :loading="submit.loading"
+        @click="saveRound"
+      >حفظ الجولة</Button>
     </template>
   </section>
 </template>

@@ -17,8 +17,18 @@
 .inventory-form, .safety-group { display: grid; gap: var(--sp-3); }
 .inventory-row { grid-template-columns: minmax(160px, 1fr) repeat(3, minmax(120px, .6fr)); align-items: end; }
 .safety-task { grid-template-columns: minmax(200px, 1fr) minmax(150px, .5fr); align-items: start; }
+.safety-checklist__decisions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); }
+.safety-checklist__decision { min-block-size: 44px; }
+.safety-checklist__decision[aria-pressed="true"] { border-color: var(--brand-green); background: var(--brand-green); color: white; }
+.safety-checklist__decision--poor[aria-pressed="true"] { border-color: var(--warn); background: var(--warn); color: white; }
+.safety-checklist__decision--not-done[aria-pressed="true"] { border-color: var(--danger); background: var(--danger); color: white; }
+.safety-checklist__note-toggle { justify-self: start; }
+.safety-checklist__evidence { display: grid; gap: var(--sp-1); }
+.safety-checklist__progress { margin: 0; color: var(--muted); }
+.safety-checklist__save { min-block-size: 44px; justify-self: start; }
 .safety-evidence { display: block; inline-size: min(100%, 320px); block-size: auto; border-radius: var(--radius-sm); }
 
 @media (max-width: 760px) {
   .inventory-row, .safety-task { grid-template-columns: 1fr; }
+  .safety-checklist__decisions { grid-template-columns: 1fr; }
 }
