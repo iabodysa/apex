@@ -10,6 +10,11 @@
   "default_company",
   "salis_settings_general_col",
   "default_cost_center",
+  "salis_settings_sec_employee_recovery",
+  "enable_employee_advance_recovery",
+  "employee_advance_recovery_component",
+  "salis_settings_recovery_col",
+  "employee_advance_recovery_max_percent",
   "salis_settings_sec_alerts",
   "alert_lead_days",
   "license_alert_lead_days",
@@ -85,6 +90,38 @@
    "fieldtype": "Link",
    "label": "Default Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "salis_settings_sec_employee_recovery",
+   "fieldtype": "Section Break",
+   "label": "Employee Advance Recovery"
+  },
+  {
+   "default": "0",
+   "description": "Schedule native Additional Salary installments against paid Employee Advances. Disabled until payroll and accounts are configured.",
+   "fieldname": "enable_employee_advance_recovery",
+   "fieldtype": "Check",
+   "label": "Enable Employee Advance Recovery"
+  },
+  {
+   "depends_on": "eval:doc.enable_employee_advance_recovery",
+   "description": "Native HRMS deduction component used for Employee Advance installments.",
+   "fieldname": "employee_advance_recovery_component",
+   "fieldtype": "Link",
+   "label": "Recovery Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "salis_settings_recovery_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "50",
+   "depends_on": "eval:doc.enable_employee_advance_recovery",
+   "description": "Maximum share of monthly base salary available to all scheduled deductions in one pay period.",
+   "fieldname": "employee_advance_recovery_max_percent",
+   "fieldtype": "Percent",
+   "label": "Maximum Recovery Percent"
   },
   {
    "fieldname": "salis_settings_sec_alerts",

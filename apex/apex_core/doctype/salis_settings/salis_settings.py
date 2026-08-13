@@ -18,6 +18,18 @@ class SalisSettings(Document):
             and self.fuel_request_approval_threshold_litres < 0
         ):
             frappe.throw(_("Fuel Request Approval Threshold cannot be negative."))
+        if self.employee_advance_recovery_max_percent is not None and not (
+            0 < self.employee_advance_recovery_max_percent <= 100
+        ):
+            frappe.throw(_("Maximum Recovery Percent must be between 0 and 100."))
+        if self.enable_employee_advance_recovery:
+            if not self.employee_advance_recovery_component:
+                frappe.throw(_("Recovery Salary Component is required to enable recovery."))
+            component_type = frappe.db.get_value(
+                "Salary Component", self.employee_advance_recovery_component, "type"
+            )
+            if component_type != "Deduction":
+                frappe.throw(_("Recovery Salary Component must be a Deduction."))
 
 
 def get_salis_int(field: str, default: int) -> int:

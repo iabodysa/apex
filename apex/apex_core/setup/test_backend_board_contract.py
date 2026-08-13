@@ -1,0 +1,67 @@
+from __future__ import annotations
+
+import json
+import unittest
+from pathlib import Path
+
+from apex.apex_core.setup.demo import DEMO_INVENTORY, DEMO_DOCTYPES
+from apex.apex_core.utils.employee_recovery import bounded_installment
+
+
+APP_ROOT = Path(__file__).resolve().parents[2]
+
+
+class TestBackendBoardContract(unittest.TestCase):
+    def test_salis_issue_masters_are_native_fixtures(self):
+        hooks = (APP_ROOT / "hooks.py").read_text(encoding="utf-8")
+        self.assertIn('{"dt": "Issue Type"', hooks)
+        self.assertIn('{"dt": "Issue Priority"', hooks)
+        self.assertNotIn("seeders.salis_issue_seed", hooks)
+
+        issue_types = json.loads(
+            (APP_ROOT / "fixtures" / "issue_type.json").read_text(encoding="utf-8")
+        )
+        priorities = json.loads(
+            (APP_ROOT / "fixtures" / "issue_priority.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            {row["name"] for row in issue_types},
+            {"Vehicle", "Fuel", "Attendance", "Salary", "Complaint", "Other"},
+        )
+        self.assertEqual(
+            {row["name"] for row in priorities}, {"Low", "Medium", "High", "Urgent"}
+        )
+
+    def test_demo_inventory_exactly_covers_every_cleanup_doctype(self):
+        self.assertEqual(
+            set(DEMO_INVENTORY),
+            set(DEMO_DOCTYPES) | {"User", "Contact", "User Permission"},
+        )
+        for doctype, contract in DEMO_INVENTORY.items():
+            self.assertGreaterEqual(contract["required_scenarios"], 1, doctype)
+            if contract["required_scenarios"] < 3:
+                self.assertTrue(contract.get("cardinality_reason"), doctype)
+
+    def test_employee_recovery_uses_currency_precision_without_site_defaults(self):
+        self.assertEqual(bounded_installment(100, 50, 60), 50.0)
+        self.assertEqual(bounded_installment(100, 50, 0), 0.0)
+        self.assertEqual(bounded_installment(100, 50, 60, agreed=25), 25.0)
+
+    def test_no_demo_data_import_mode_or_bespoke_policy_runtime(self):
+        python_sources = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in APP_ROOT.rglob("*.py")
+            if "test_backend_board_contract.py" not in str(path)
+        )
+        self.assertNotIn("flags.in_import", python_sources)
+        self.assertNotIn("Salary Deduction Policy", python_sources)
+        self.assertFalse(
+            (APP_ROOT / "apex_core" / "doctype" / "salary_deduction_policy").exists()
+        )
+        self.assertFalse(
+            (APP_ROOT / "apex_core" / "doctype" / "salary_deduction_type_rule").exists()
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

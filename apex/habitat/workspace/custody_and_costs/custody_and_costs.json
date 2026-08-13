@@ -418,14 +418,6 @@
    "link_type": "DocType",
    "link_to": "Operational Depreciation Policy",
    "idx": 39
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Salary Deduction Policy",
-   "link_type": "DocType",
-   "link_to": "Salary Deduction Policy",
-   "idx": 40
   }
  ],
  "charts": [],

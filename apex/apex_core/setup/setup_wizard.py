@@ -10,7 +10,8 @@ re-engineered Apex Single:
   - Apex Settings           — the app-wide GL-posting finance gate.
   - Habitat Settings        — default company + the email/operational kill-switches.
   - Salis Settings          — default company, cost center, driver portal, approvals.
-  - Salary Deduction Policy  — the housing/damage deduction toggles + posting company.
+  - native Employee Advance recovery — disabled until payroll/account settings exist.
+  - native ERPNext Issue SLA — created only with an operator-selected schedule.
   - Payment Routing Settings — the Pay-action target payment DocType.
 
 The company and its cost center are NOT among the operator's answers. They are read
@@ -56,7 +57,8 @@ def apply_apex_setup(args=None):
     _apply_apex_settings(args)
     _apply_habitat_settings(args, company)
     _apply_salis_settings(args, company, cost_center)
-    _apply_deduction_policy(args, company)
+    _apply_employee_advance_recovery(args, company)
+    _apply_salis_support(args)
 
 
 def _created_company():
@@ -126,44 +128,26 @@ def _apply_payment_routing(args):
     router.save(ignore_permissions=True)
 
 
-def _apply_deduction_policy(args, company):
-    """Salary Deduction Policy — the housing/damage deduction toggles (default OFF)
-    plus the posting company. The global master switch only turns on if at least one
-    per-type rule is enabled."""
-    deduct_housing = bool(cint(args.get("apex_deduct_housing_allowance")))
-    deduct_damage = bool(cint(args.get("apex_deduct_damage")))
+def _apply_employee_advance_recovery(args, company):
+    """Enable the Apex scheduler only after native HRMS accounts and component exist."""
+    from apex.apex_core.setup.employee_advance_recovery import configure_recovery
 
-    policy = frappe.get_single("Salary Deduction Policy")
-    if company:
-        policy.company = company
-    policy.enable_salary_deductions = 1 if (deduct_housing or deduct_damage) else 0
-    _set_rule_enabled(policy, "Rent", deduct_housing)
-    _set_rule_enabled(policy, "Damage", deduct_damage)
-    try:
-        policy.save(ignore_permissions=True)
-    except frappe.ValidationError:
-        frappe.clear_last_message()
-        policy.reload()
-        policy.enable_salary_deductions = 0
-        _set_rule_enabled(policy, "Rent", False)
-        _set_rule_enabled(policy, "Damage", False)
-        policy.save(ignore_permissions=True)
-        frappe.msgprint(
-            _(
-                "Payment method saved. To enable salary deductions, set the "
-                "authorizer and salary components on the Salary Deduction Policy "
-                "first, then turn the rules on there."
-            ),
-            title=_("Apex Setup"),
-            indicator="orange",
-        )
+    configure_recovery(
+        enabled=bool(cint(args.get("apex_enable_employee_advance_recovery"))),
+        company=company,
+        salary_component=args.get("apex_employee_advance_recovery_component"),
+        max_percent=args.get("apex_employee_advance_recovery_max_percent"),
+    )
 
 
-def _set_rule_enabled(policy, rule_type, on):
-    """Find-or-create the policy's type rule for ``rule_type`` and set its enabled flag."""
-    row = next((r for r in policy.type_rules or [] if r.deduction_type == rule_type), None)
-    if row is None:
-        if not on:
-            return
-        row = policy.append("type_rules", {"deduction_type": rule_type})
-    row.enabled = 1 if on else 0
+def _apply_salis_support(args):
+    """Create an Issue SLA only when the setup answers include a complete schedule."""
+    from apex.apex_core.setup.salis_support import configure_support_sla
+
+    configure_support_sla(
+        enabled=bool(cint(args.get("apex_enable_salis_support_sla"))),
+        holiday_list=args.get("apex_salis_support_holiday_list"),
+        workdays=args.get("apex_salis_support_workdays"),
+        start_time=args.get("apex_salis_support_start_time"),
+        end_time=args.get("apex_salis_support_end_time"),
+    )

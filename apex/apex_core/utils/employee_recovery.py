@@ -19,10 +19,9 @@ is exactly what HRMS already models:
                               cancel, so the recovered balance is maintained
                               natively — never recomputed here.
 
-This module only decides WHETHER and HOW MUCH, mirroring the Salary Deduction
-Policy contract already used by Custody Damage Assessment: the deduction side is
-gated by the policy (master switch + per-type rule, both OFF by default), so no
-wage is ever touched until the policy is activated after legal review. Raising the
+This module only decides WHETHER and HOW MUCH. The deduction side is gated by
+Salis Settings and is OFF by default, so no wage is touched until Accounts and
+Payroll configure the native recovery Salary Component. Raising the
 receivable is NOT policy-gated — an advance is a lawful receivable regardless; only
 its recovery from wages is capped by KSA Labor Law Art. 91.
 
@@ -42,13 +41,10 @@ from __future__ import annotations
 import frappe
 from frappe.utils import flt, get_first_day, get_last_day, getdate, today
 
-from apex.apex_core.doctype.salary_deduction_policy.salary_deduction_policy import (
-    KSA_MAX_TOTAL_DEDUCTION_PERCENT,
-    get_policy,
-)
-
 SOURCE_DOCTYPE_FIELD = "custom_source_doctype"
 SOURCE_DOCNAME_FIELD = "custom_source_document"
+SIGNED_EVIDENCE_FIELD = "custom_signed_recovery_evidence"
+AGREED_INSTALLMENT_FIELD = "custom_agreed_installment_amount"
 
 OPEN_ADVANCE_STATUSES = ("Unpaid", "Paid", "Partly Claimed and Returned")
 
@@ -85,6 +81,8 @@ def raise_recovery_advance(
     purpose: str,
     company: str | None = None,
     posting_date: str | None = None,
+    signed_evidence: str | None = None,
+    agreed_installment: float | None = None,
 ) -> str | None:
     """Raise (once) the submitted Employee Advance recovering ``amount`` from ``employee``.
 
@@ -151,6 +149,8 @@ def raise_recovery_advance(
             "repay_unclaimed_amount_from_salary": 1,
             SOURCE_DOCTYPE_FIELD: source_doctype,
             SOURCE_DOCNAME_FIELD: source_name,
+            SIGNED_EVIDENCE_FIELD: signed_evidence,
+            AGREED_INSTALLMENT_FIELD: flt(agreed_installment),
         }
     )
     advance.insert(ignore_permissions=True)
@@ -221,19 +221,6 @@ def _pending_installments(advance: str) -> float:
     return sum(flt(amount) for amount in queued)
 
 
-def _agreed_installment(source_doctype: str | None, source_name: str | None) -> float:
-    """The per-period installment agreed on the source document, or 0.0 for "no
-    agreed installment". Read generically so any source DocType that grows an
-    ``installment_amount`` field participates without touching this module."""
-    if not (source_doctype and source_name):
-        return 0.0
-    if not frappe.db.exists("DocType", source_doctype):
-        return 0.0
-    if not frappe.get_meta(source_doctype).has_field("installment_amount"):
-        return 0.0
-    return flt(frappe.db.get_value(source_doctype, source_name, "installment_amount"))
-
-
 def bounded_installment(
     outstanding: float, statutory_cap: float, availability: float, agreed: float = 0.0
 ) -> float:
@@ -247,7 +234,7 @@ def bounded_installment(
     limits = [flt(outstanding), flt(statutory_cap), flt(availability)]
     if flt(agreed) > 0:
         limits.append(flt(agreed))
-    return max(flt(min(limits), 2), 0.0)
+    return max(round(float(min(limits)), 2), 0.0)
 
 
 def compute_recovery_installment(advance: str, payroll_date: str | None = None) -> float:
@@ -269,7 +256,7 @@ def compute_recovery_installment(advance: str, payroll_date: str | None = None) 
     payroll_date = payroll_date or today()
     fields = ["employee", "paid_amount", "return_amount", "docstatus"]
     if _source_link_available():
-        fields += [SOURCE_DOCTYPE_FIELD, SOURCE_DOCNAME_FIELD]
+        fields += [AGREED_INSTALLMENT_FIELD]
     advance_doc = frappe.db.get_value("Employee Advance", advance, fields, as_dict=True)
     if not advance_doc or advance_doc.docstatus != 1:
         return 0.0
@@ -280,9 +267,10 @@ def compute_recovery_installment(advance: str, payroll_date: str | None = None) 
     if outstanding <= 0:
         return 0.0
 
-    policy = get_policy()
-    rule = policy.get_type_rule("Damage")
-    if not rule:
+    enabled = frappe.db.get_single_value(
+        "Salis Settings", "enable_employee_advance_recovery"
+    )
+    if not enabled:
         return 0.0
 
     wage = _monthly_wage(advance_doc.employee, payroll_date)
@@ -290,9 +278,13 @@ def compute_recovery_installment(advance: str, payroll_date: str | None = None) 
         return 0.0
 
     cap_percent = min(
-        flt(rule.max_percent_of_salary),
-        flt(policy.global_max_percent_of_salary) or KSA_MAX_TOTAL_DEDUCTION_PERCENT,
-        KSA_MAX_TOTAL_DEDUCTION_PERCENT,
+        flt(
+            frappe.db.get_single_value(
+                "Salis Settings", "employee_advance_recovery_max_percent"
+            )
+        )
+        or 50,
+        100,
     )
     committed = _scheduled_deductions(
         advance_doc.employee, get_first_day(payroll_date), get_last_day(payroll_date)
@@ -301,37 +293,21 @@ def compute_recovery_installment(advance: str, payroll_date: str | None = None) 
         outstanding=outstanding,
         statutory_cap=wage * cap_percent / 100.0,
         availability=wage - committed,
-        agreed=_agreed_installment(
-            advance_doc.get(SOURCE_DOCTYPE_FIELD), advance_doc.get(SOURCE_DOCNAME_FIELD)
-        ),
+        agreed=advance_doc.get(AGREED_INSTALLMENT_FIELD),
     )
 
 
-def _recovery_component(policy) -> str | None:
-    """The Salary Component the Damage rule deducts through, verified to be of type
-    Deduction. ``None`` (logged) when the policy has no usable component — an Earning
-    component would silently PAY the worker the damage, so it must never be used.
-
-    TYPE is checked here; the component's LEDGER ACCOUNT deliberately is not, and an
-    earlier clause that claimed otherwise was wrong. This module writes no GL entry.
-    It reads the advance account off ``Company.default_employee_advance_account``
-    (never choosing it) and validates only what HRMS itself enforces on submit — that
-    the account is Receivable. Recovery is then reconciled by HRMS off the
-    ``ref_doctype``/``ref_docname`` link on the Additional Salary, not by any equality
-    between the component's account and the advance account. Adding such a check here
-    would fail CLOSED and SILENTLY (a ``None`` return queues no installment, ever), so
-    a site whose deduction component posts to a clearing account would lose wage
-    recovery that works today. Account agreement is payroll configuration, verifiable
-    only against a running HRMS site — not an invariant this module can assert.
-    """
-    rule = policy.get_type_rule("Damage")
-    if not rule:
+def _recovery_component() -> str | None:
+    """Return the configured native deduction component while recovery is enabled."""
+    if not frappe.db.get_single_value("Salis Settings", "enable_employee_advance_recovery"):
         return None
-    component = rule.salary_component or policy.default_salary_component
+    component = frappe.db.get_single_value(
+        "Salis Settings", "employee_advance_recovery_component"
+    )
     if not component:
         frappe.logger().warning(
-            "employee_recovery: Salary Deduction Policy > Damage rule has no Salary Component "
-            "(and no default). No installment scheduled."
+            "employee_recovery: Salis Settings has no Recovery Salary Component. "
+            "No installment scheduled."
         )
         return None
     if frappe.db.get_value("Salary Component", component, "type") != "Deduction":
@@ -369,8 +345,7 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
     ):
         return None
 
-    policy = get_policy()
-    component = _recovery_component(policy)
+    component = _recovery_component()
     if not component:
         return None
 
@@ -408,11 +383,11 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
 def monthly_employee_recovery_run() -> None:
     """Queue this month's installment for every open salary-recovery advance.
 
-    No-op while the Salary Deduction Policy Damage rule is disabled (the shipped
-    default), so an un-reviewed site never deducts a wage. One advance failing never
+    No-op while Employee Advance recovery is disabled (the shipped default), so an
+    unconfigured site never deducts a wage. One advance failing never
     stops the rest.
     """
-    if not get_policy().get_type_rule("Damage"):
+    if not frappe.db.get_single_value("Salis Settings", "enable_employee_advance_recovery"):
         return
     if not _source_link_available():
         return
