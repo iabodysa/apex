@@ -7,9 +7,72 @@ from apex.salis.api import fleet_employee as base
 from apex.salis.utils import add_timeline_note, period_quota
 
 
+def _handover_checklist_template(vehicle, requested_template=None):
+    """Return the active native checklist applicable to ``vehicle``."""
+    vehicle_category = frappe.db.get_value("Salis Vehicle", vehicle, "vehicle_category")
+    if requested_template:
+        template = frappe.get_doc("Vehicle Handover Checklist Template", requested_template)
+        if not frappe.has_permission(
+            "Vehicle Handover Checklist Template", "read", doc=template
+        ):
+            frappe.throw(_("You cannot read that handover checklist."), frappe.PermissionError)
+        if not template.is_active:
+            frappe.throw(_("Checklist template {0} is not active.").format(template.name))
+        if template.vehicle_category and template.vehicle_category != vehicle_category:
+            frappe.throw(_("Checklist template {0} does not apply to this vehicle.").format(template.name))
+        return template
+
+    names = []
+    if vehicle_category:
+        names = frappe.get_list(
+            "Vehicle Handover Checklist Template",
+            filters={"is_active": 1, "vehicle_category": vehicle_category},
+            pluck="name",
+            order_by="template_name asc",
+            limit_page_length=1,
+        )
+    if not names:
+        names = frappe.get_list(
+            "Vehicle Handover Checklist Template",
+            filters={"is_active": 1, "vehicle_category": ["is", "not set"]},
+            pluck="name",
+            order_by="template_name asc",
+            limit_page_length=1,
+        )
+    if not names:
+        frappe.throw(_("No active vehicle handover checklist is configured."))
+    return frappe.get_doc("Vehicle Handover Checklist Template", names[0])
+
+
+def _inspection_rows(template, value):
+    """Bind explicit portal answers to every native template row in order."""
+    if not template.items:
+        frappe.throw(_("The selected handover checklist has no inspection items."))
+    if isinstance(value, str):
+        value = frappe.parse_json(value)
+    if not isinstance(value, list):
+        frappe.throw(_("Inspection answers must be a list."))
+    if len(value) != len(template.items):
+        frappe.throw(_("Answer every item in the selected handover checklist."))
+
+    result = []
+    for template_item, answer in zip(template.items, value, strict=True):
+        if not isinstance(answer, dict) or answer.get("check_item") != template_item.check_item:
+            frappe.throw(_("Inspection answers do not match the selected checklist template."))
+        if "ok" not in answer or answer.get("ok") not in (0, 1, "0", "1", False, True):
+            frappe.throw(_("Record a pass or failure for every checklist item."))
+        ok = frappe.utils.cint(answer.get("ok"))
+        remark = frappe.utils.cstr(answer.get("remark")).strip()
+        if not ok and not remark:
+            frappe.throw(_("Explain the failed check: {0}.").format(template_item.check_item))
+        result.append({"check_item": template_item.check_item, "ok": ok, "remark": remark})
+    return result
+
+
 def _handover_payload(direction, driver, vehicle, odometer, fuel_level=None,
-                      condition_notes=None, signed_evidence=None):
-    return {
+                      condition_notes=None, signed_evidence=None,
+                      checklist_template=None, inspection_rows=None):
+    payload = {
         "doctype": "Vehicle Handover",
         "direction": direction,
         "vehicle": vehicle,
@@ -22,10 +85,17 @@ def _handover_payload(direction, driver, vehicle, odometer, fuel_level=None,
         "signed_evidence": signed_evidence or None,
         "discrepancy_status": "Clean",
     }
+    if checklist_template:
+        payload.update({
+            "checklist_template": checklist_template.name,
+            "handover_check_items": _inspection_rows(checklist_template, inspection_rows),
+        })
+    return payload
 
 
 def _submit_session_handover(direction, odometer, fuel_level=None,
-                             condition_notes=None, signed_evidence=None):
+                             condition_notes=None, signed_evidence=None,
+                             checklist_template=None, inspection_rows=None):
     driver = base._session_driver(required=True)
     vehicle = base._session_vehicle(driver)
     if not vehicle:
@@ -46,9 +116,13 @@ def _submit_session_handover(direction, odometer, fuel_level=None,
     )
     if duplicate:
         return {"name": duplicate, "status": "Submitted"}
+    template = None
+    if checklist_template or inspection_rows is not None:
+        template = _handover_checklist_template(vehicle, checklist_template)
     doc = frappe.get_doc(
         _handover_payload(
-            direction, driver, vehicle, odometer, fuel_level, condition_notes, signed_evidence
+            direction, driver, vehicle, odometer, fuel_level, condition_notes,
+            signed_evidence, template, inspection_rows
         )
     )
     doc.insert(ignore_permissions=True)
@@ -57,17 +131,42 @@ def _submit_session_handover(direction, odometer, fuel_level=None,
 
 
 @frappe.whitelist(methods=["POST"])
-def receive_vehicle(odometer, fuel_level=None, condition_notes=None, signed_evidence=None):
+def receive_vehicle(odometer, fuel_level=None, condition_notes=None, signed_evidence=None,
+                    checklist_template=None, inspection_rows=None):
     return _submit_session_handover(
-        "Receipt", odometer, fuel_level, condition_notes, signed_evidence
+        "Receipt", odometer, fuel_level, condition_notes, signed_evidence,
+        checklist_template, inspection_rows
     )
 
 
 @frappe.whitelist(methods=["POST"])
-def return_vehicle(odometer, fuel_level=None, condition_notes=None, signed_evidence=None):
+def return_vehicle(odometer, fuel_level=None, condition_notes=None, signed_evidence=None,
+                   checklist_template=None, inspection_rows=None):
     return _submit_session_handover(
-        "Return", odometer, fuel_level, condition_notes, signed_evidence
+        "Return", odometer, fuel_level, condition_notes, signed_evidence,
+        checklist_template, inspection_rows
     )
+
+
+@frappe.whitelist()
+def get_handover_checklist(direction):
+    """Load the native inspection rows for a session-bound receipt or return."""
+    if direction not in ("Receipt", "Return"):
+        frappe.throw(_("Direction must be Receipt or Return."))
+    driver = base._session_driver(required=True)
+    vehicle = base._session_vehicle(driver)
+    if not vehicle:
+        frappe.throw(_("No vehicle is assigned to you."))
+    template = _handover_checklist_template(vehicle)
+    return {
+        "direction": direction,
+        "vehicle": vehicle,
+        "template": template.name,
+        "items": [
+            {"check_item": item.check_item, "default_remark": item.remark or ""}
+            for item in template.items
+        ],
+    }
 
 
 @frappe.whitelist()

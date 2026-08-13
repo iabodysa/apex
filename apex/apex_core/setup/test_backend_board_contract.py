@@ -38,9 +38,10 @@ class TestBackendBoardContract(unittest.TestCase):
             set(DEMO_DOCTYPES) | {"User", "Contact", "User Permission"},
         )
         for doctype, contract in DEMO_INVENTORY.items():
-            self.assertGreaterEqual(contract["required_scenarios"], 1, doctype)
-            if contract["required_scenarios"] < 3:
-                self.assertTrue(contract.get("cardinality_reason"), doctype)
+            self.assertEqual(contract["target_scenarios"], 3, doctype)
+            self.assertGreaterEqual(contract["observed_scenarios"], 1, doctype)
+            if contract["observed_scenarios"] < contract["target_scenarios"]:
+                self.assertTrue(contract.get("gap"), doctype)
 
     def test_employee_recovery_uses_currency_precision_without_site_defaults(self):
         self.assertEqual(bounded_installment(100, 50, 60), 50.0)

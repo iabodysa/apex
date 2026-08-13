@@ -80,6 +80,13 @@ class VehicleHandover(Document):
         if not self.signed_evidence:
             frappe.throw(_("Signed handover evidence is required before submitting."))
 
+        if self.checklist_template:
+            if not self.handover_check_items:
+                frappe.throw(_("Complete the handover checklist before submitting."))
+            for row in self.handover_check_items:
+                if not row.ok and not (row.remark or "").strip():
+                    frappe.throw(_("Explain the failed check: {0}.").format(row.check_item))
+
         if self.discrepancy_status == "Discrepancy" and not self.discrepancy_notes:
             frappe.throw(_("Discrepancy notes are required when the discrepancy status is Discrepancy."))
 

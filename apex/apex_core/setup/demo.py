@@ -78,9 +78,9 @@ DEMO_DOCTYPES = (
     "Rental Settlement",
 )
 
-# Machine-readable build/clear contract. Counts are the minimum distinct scenarios the
-# current builder promises, not a claim that every master needs three arbitrary copies.
-# A sub-three count therefore names the product cardinality that makes it intentional.
+# Machine-readable build/clear audit. ``target_scenarios`` preserves the board's
+# three-record acceptance basis; a lower observed count is recorded as an open gap,
+# not waived by this inventory.
 _DEMO_SCENARIO_COUNTS = {
     "Project": 2,
     "Building": 2,
@@ -93,15 +93,16 @@ _DEMO_SCENARIO_COUNTS = {
 
 DEMO_INVENTORY = {
     doctype: {
-        "required_scenarios": _DEMO_SCENARIO_COUNTS.get(doctype, 1),
+        "target_scenarios": 3,
+        "observed_scenarios": _DEMO_SCENARIO_COUNTS.get(doctype, 1),
         "cleanup": "owner",
         **(
             {}
             if _DEMO_SCENARIO_COUNTS.get(doctype, 1) >= 3
             else {
-                "cardinality_reason": (
-                    "One coherent linked scenario is sufficient; diversity is represented "
-                    "by its related records rather than duplicate isolated documents."
+                "gap": (
+                    "The current coherent linked demo has fewer than three records; "
+                    "additional diverse scenarios remain to be built."
                 )
             }
         ),
@@ -111,16 +112,19 @@ DEMO_INVENTORY = {
 DEMO_INVENTORY.update(
     {
         "User Permission": {
-            "required_scenarios": 1,
+            "target_scenarios": 3,
+            "observed_scenarios": 1,
             "cleanup": "demo-user",
-            "cardinality_reason": "One scoped supervisor permission defines the demo estate.",
+            "gap": "Two more distinct scoped permission scenarios remain to be built.",
         },
         "User": {
-            "required_scenarios": 3,
+            "target_scenarios": 3,
+            "observed_scenarios": 3,
             "cleanup": "explicit-name",
         },
         "Contact": {
-            "required_scenarios": 3,
+            "target_scenarios": 3,
+            "observed_scenarios": 3,
             "cleanup": "linked-demo-user",
         },
     }
