@@ -6,6 +6,7 @@ from frappe.utils import cint, flt
 
 
 RECOVERY_COMPONENT = "Employee Advance Recovery"
+MAX_RECOVERY_PERCENT = 50.0
 
 
 def seed_recovery_component():
@@ -32,8 +33,25 @@ def seed_recovery_component():
 def configure_recovery(*, enabled=False, company=None, salary_component=None, max_percent=None):
     """Apply setup-wizard recovery choices without bypassing native HRMS validation."""
     settings = frappe.get_single("Salis Settings")
+    max_percent = (
+        MAX_RECOVERY_PERCENT if max_percent in (None, "") else flt(max_percent)
+    )
+    if not 0 < max_percent <= MAX_RECOVERY_PERCENT:
+        frappe.throw(
+            _(
+                "Maximum Recovery Percent must be greater than 0 and no more than {0}."
+            ).format(int(MAX_RECOVERY_PERCENT))
+        )
+    if salary_component and frappe.db.get_value(
+        "Salary Component", salary_component, "type"
+    ) != "Deduction":
+        frappe.throw(_("Select a Salary Component of type Deduction for recovery."))
+
     if not enabled:
         settings.enable_employee_advance_recovery = 0
+        if salary_component:
+            settings.employee_advance_recovery_component = salary_component
+        settings.employee_advance_recovery_max_percent = max_percent
         settings.save(ignore_permissions=True)
         return False
 
@@ -50,9 +68,7 @@ def configure_recovery(*, enabled=False, company=None, salary_component=None, ma
         frappe.throw(_("The Default Employee Advance Account must be Receivable."))
 
     salary_component = salary_component or seed_recovery_component()
-    if not salary_component or frappe.db.get_value(
-        "Salary Component", salary_component, "type"
-    ) != "Deduction":
+    if not salary_component:
         frappe.throw(_("Select a Salary Component of type Deduction for recovery."))
     component = frappe.get_doc("Salary Component", salary_component)
     account_row = next((row for row in component.accounts if row.company == company), None)
@@ -65,6 +81,6 @@ def configure_recovery(*, enabled=False, company=None, salary_component=None, ma
 
     settings.enable_employee_advance_recovery = 1
     settings.employee_advance_recovery_component = salary_component
-    settings.employee_advance_recovery_max_percent = flt(max_percent) or 50
+    settings.employee_advance_recovery_max_percent = max_percent
     settings.save(ignore_permissions=True)
     return bool(cint(settings.enable_employee_advance_recovery))

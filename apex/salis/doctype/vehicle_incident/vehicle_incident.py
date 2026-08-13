@@ -172,8 +172,6 @@ class VehicleIncident(Document):
                 self.name, self.vehicle
             ),
             posting_date=self.incident_date,
-            signed_evidence=self.worker_signature,
-            agreed_installment=self.installment_amount,
         )
         if advance:
             self.db_set("recovery_advance", advance)

@@ -7,6 +7,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex.apex_core.setup.employee_advance_recovery import MAX_RECOVERY_PERCENT
+
 
 class SalisSettings(Document):
     def validate(self):
@@ -19,9 +21,13 @@ class SalisSettings(Document):
         ):
             frappe.throw(_("Fuel Request Approval Threshold cannot be negative."))
         if self.employee_advance_recovery_max_percent is not None and not (
-            0 < self.employee_advance_recovery_max_percent <= 100
+            0 < self.employee_advance_recovery_max_percent <= MAX_RECOVERY_PERCENT
         ):
-            frappe.throw(_("Maximum Recovery Percent must be between 0 and 100."))
+            frappe.throw(
+                _(
+                    "Maximum Recovery Percent must be greater than 0 and no more than {0}."
+                ).format(int(MAX_RECOVERY_PERCENT))
+            )
         if self.enable_employee_advance_recovery:
             if not self.employee_advance_recovery_component:
                 frappe.throw(_("Recovery Salary Component is required to enable recovery."))

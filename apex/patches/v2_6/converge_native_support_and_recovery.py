@@ -15,6 +15,10 @@ from apex.apex_core.setup.salis_support import (
 
 _LEGACY_HOLIDAY_LIST = "Apex Support 24x7"
 _LEGACY_DAYS = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
+_REDUNDANT_EMPLOYEE_ADVANCE_FIELDS = (
+    "custom_signed_recovery_evidence",
+    "custom_agreed_installment_amount",
+)
 
 
 def execute():
@@ -23,6 +27,7 @@ def execute():
     _retire_untouched_legacy_sla()
     seed_recovery_component()
     _migrate_deduction_policy()
+    _remove_redundant_employee_advance_fields()
     _repair_demo_import_residue()
     _assert_select_consistency()
 
@@ -89,6 +94,9 @@ def _migrate_deduction_policy():
     max_percent = frappe.db.get_single_value(
         "Salary Deduction Policy", "global_max_percent_of_salary"
     )
+    default_component = frappe.db.get_single_value(
+        "Salary Deduction Policy", "default_salary_component"
+    )
     damage = frappe.db.get_value(
         "Salary Deduction Type Rule",
         {
@@ -99,25 +107,40 @@ def _migrate_deduction_policy():
         ["enabled", "salary_component"],
         as_dict=True,
     )
-    if enabled and damage and damage.enabled:
-        company = frappe.db.get_single_value("Salary Deduction Policy", "company")
-        try:
-            configure_recovery(
-                enabled=True,
-                company=company,
-                salary_component=damage.salary_component,
-                max_percent=max_percent,
-            )
-        except Exception:
-            frappe.clear_last_message()
-            frappe.log_error(
-                title="Employee Advance recovery migration left disabled",
-                message=frappe.get_traceback(),
-            )
+    if enabled and not (damage and damage.enabled):
+        frappe.throw(
+            "Salary Deduction Policy is enabled without an enabled Damage rule; "
+            "its source configuration was preserved for operator review."
+        )
+    company = frappe.db.get_single_value("Salary Deduction Policy", "company")
+    configure_recovery(
+        enabled=bool(enabled),
+        company=company,
+        salary_component=(damage.salary_component if damage else None)
+        or default_component,
+        max_percent=max_percent,
+    )
 
     for doctype in ("Salary Deduction Type Rule", "Salary Deduction Policy"):
         if frappe.db.exists("DocType", doctype):
             frappe.delete_doc("DocType", doctype, ignore_permissions=True, force=True)
+
+
+def _remove_redundant_employee_advance_fields():
+    """Keep source evidence and the agreed installment on the operational record."""
+    for fieldname in _REDUNDANT_EMPLOYEE_ADVANCE_FIELDS:
+        custom_field = frappe.db.get_value(
+            "Custom Field",
+            {"dt": "Employee Advance", "fieldname": fieldname},
+            "name",
+        )
+        if custom_field:
+            frappe.delete_doc(
+                "Custom Field",
+                custom_field,
+                ignore_permissions=True,
+                force=True,
+            )
 
 
 def _repair_demo_import_residue():
@@ -156,13 +179,15 @@ def _assert_select_consistency():
     )
     for doctype in doctypes:
         meta = frappe.get_meta(doctype)
-        if meta.issingle or meta.istable:
-            continue
         for field in meta.get("fields", {"fieldtype": "Select"}):
             options = {line.strip() for line in (field.options or "").splitlines() if line.strip()}
             if not options:
                 continue
-            values = frappe.get_all(doctype, fields=[field.fieldname], distinct=True)
+            values = (
+                [{field.fieldname: frappe.db.get_single_value(doctype, field.fieldname)}]
+                if meta.issingle
+                else frappe.get_all(doctype, fields=[field.fieldname], distinct=True)
+            )
             for row in values:
                 value = row.get(field.fieldname)
                 if value not in (None, "") and value not in options:
