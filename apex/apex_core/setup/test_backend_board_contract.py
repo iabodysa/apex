@@ -3,7 +3,9 @@ from __future__ import annotations
 import json
 import unittest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
+from apex.apex_core.setup import salis_support
 from apex.apex_core.setup.demo import DEMO_INVENTORY, DEMO_DOCTYPES
 from apex.apex_core.utils.employee_recovery import bounded_installment
 
@@ -12,6 +14,29 @@ APP_ROOT = Path(__file__).resolve().parents[2]
 
 
 class TestBackendBoardContract(unittest.TestCase):
+    @patch.object(salis_support, "frappe")
+    def test_support_switch_is_enabled_before_native_sla_validation(self, frappe):
+        sequence = []
+        frappe.db.exists.side_effect = lambda doctype, _filters=None: (
+            doctype in {"Holiday List", "Issue Priority"}
+        )
+        frappe.db.set_single_value.side_effect = lambda *args: sequence.append("switch")
+        sla = MagicMock(name="sla")
+        sla.name = "Salis Support SLA"
+        sla.insert.side_effect = lambda **kwargs: sequence.append("insert")
+        frappe.new_doc.return_value = sla
+
+        salis_support.configure_support_sla(
+            enabled=True,
+            holiday_list="Saudi Holidays",
+            workdays=["Sunday"],
+            start_time="08:00:00",
+            end_time="17:00:00",
+        )
+
+        self.assertEqual(sequence, ["switch", "insert"])
+        sla.insert.assert_called_once_with(ignore_permissions=True)
+
     def test_salis_issue_masters_are_native_fixtures(self):
         hooks = (APP_ROOT / "hooks.py").read_text(encoding="utf-8")
         self.assertIn('"dt": "Issue Type"', hooks)

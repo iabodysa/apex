@@ -81,8 +81,10 @@ def configure_support_sla(
         )
     for status in ("Resolved", "Closed"):
         doc.append("sla_fulfilled_on", {"status": status})
-    doc.insert(ignore_permissions=True)
+    # ERPNext validates this switch during Service Level Agreement.insert(). The
+    # surrounding setup/install transaction rolls it back if native validation fails.
     frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
+    doc.insert(ignore_permissions=True)
     return doc.name
 
 
