@@ -3,6 +3,7 @@ import { computed, inject, onBeforeUnmount, onMounted, reactive, ref } from "vue
 import { Badge, Button, ErrorMessage, createResource, toast } from "frappe-ui";
 import QRCode from "qrcode";
 import { dateTimeLabel, remainingSeconds, workerTransportStatusLabel } from "../../core/displayLabels.js";
+import { errorStatus, safeErrorMessage } from "../../core/errorMessage.js";
 import PortalSkeleton from "../../components/PortalSkeleton.vue";
 import PortalErrorState from "../../components/PortalErrorState.vue";
 
@@ -37,7 +38,7 @@ const ratingResource = createResource({
 const state = ref("loading");
 const transport = ref({ upcoming: [], past: [] });
 const boarding = ref(null);
-const error = ref("");
+const error = ref(null);
 const busy = ref("");
 const pass = ref(null);
 const passImage = ref("");
@@ -95,7 +96,7 @@ async function rateTrip(trip) {
   if (!draft.rating) return;
   const key = `rating:${trip.dispatch_trip}`;
   busy.value = key;
-  error.value = "";
+  error.value = null;
   try {
     await ratingResource.submit({
       dispatch_trip: trip.dispatch_trip,
@@ -106,7 +107,7 @@ async function rateTrip(trip) {
     drafts?.clear(ratingKey(trip));
     ratingMessages[trip.dispatch_trip] = "تم إرسال تقييمك، شكراً لك.";
   } catch (reason) {
-    error.value = reason?.message || "تعذّر إرسال التقييم.";
+    error.value = reason;
   } finally {
     busy.value = "";
   }
@@ -137,7 +138,7 @@ function startLive(room, seconds) {
 
 async function load(quiet = false) {
   if (!quiet) state.value = "loading";
-  error.value = "";
+  error.value = null;
   try {
     const [transportData, boardingData, context] = await Promise.all([transportResource.fetch(), boardingResource.fetch(), contextResource.fetch()]);
     transport.value = transportData || { upcoming: [], past: [] };
@@ -146,8 +147,8 @@ async function load(quiet = false) {
     startLive(context?.realtime_room || "", boarding.value?.poll_seconds);
   } catch (reason) {
     if (quiet) return;
-    state.value = reason?.status === 403 ? "denied" : "error";
-    error.value = reason?.message || "تعذّر تحميل الرحلات.";
+    state.value = [401, 403].includes(errorStatus(reason)) ? "denied" : "error";
+    error.value = reason;
   }
 }
 
@@ -158,7 +159,7 @@ async function run(key, action, message) {
     toast.create({ type: "success", message });
     await load(true);
   } catch (reason) {
-    error.value = reason?.message || "تعذّر تنفيذ الإجراء.";
+    error.value = reason;
   } finally {
     busy.value = "";
   }
@@ -166,13 +167,13 @@ async function run(key, action, message) {
 
 async function showPass(request) {
   busy.value = `pass:${request}`;
-  error.value = "";
+  error.value = null;
   try {
     const result = await boardingPassResource.fetch({ transport_request: request });
     pass.value = result?.pass || null;
     passImage.value = pass.value?.qr_payload ? await QRCode.toDataURL(pass.value.qr_payload, { margin: 1, width: 320 }) : "";
   } catch (reason) {
-    error.value = reason?.message || "تعذّر عرض بطاقة الصعود.";
+    error.value = reason;
   } finally {
     busy.value = "";
   }
@@ -198,15 +199,15 @@ onBeforeUnmount(stopLive);
     </header>
 
     <PortalSkeleton v-if="state === 'loading'" :rows="2" label="جارٍ تحميل الرحلة" />
-    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الرحلات" message="هذا القسم غير متاح لحسابك." @retry="load()" />
-    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الرحلات" :message="error" @retry="load()" />
+    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الرحلات" :message="error" fallback="هذا القسم غير متاح لحسابك." @retry="load()" />
+    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الرحلات" :message="error" fallback="تعذّر تحميل الرحلات." @retry="load()" />
     <div v-else-if="state === 'empty'" class="feature-state">
       <strong>يومك هادئ</strong>
       <p>لا توجد رحلة مجدولة لك حالياً.</p>
     </div>
 
     <template v-else>
-      <ErrorMessage v-if="error" :message="error" />
+      <ErrorMessage v-if="error" :message="safeErrorMessage(error, 'تعذّر تنفيذ الإجراء.')" />
       <article v-if="boarding?.dispatch_trip" class="journey-live" aria-live="polite">
         <div class="journey-live__top">
           <div>

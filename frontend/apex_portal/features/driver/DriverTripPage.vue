@@ -4,6 +4,7 @@ import { Badge, Button, ErrorMessage, FormControl, createResource, toast } from 
 import { useRoute } from "vue-router";
 import { createQrScanner } from "./scanner.js";
 import { dateTimeLabel, remainingSeconds, statusLabel, workerTransportStatusLabel } from "../../core/displayLabels.js";
+import { errorStatus, safeErrorMessage } from "../../core/errorMessage.js";
 import PortalSkeleton from "../../components/PortalSkeleton.vue";
 import PortalErrorState from "../../components/PortalErrorState.vue";
 
@@ -29,7 +30,7 @@ const scanner = createQrScanner();
 const state = ref("loading");
 const trip = ref(null);
 const boarding = ref({ workers: [] });
-const error = ref("");
+const error = ref(null);
 const busy = ref("");
 const scanToken = ref("");
 const scanResult = ref("");
@@ -82,7 +83,7 @@ function startLive(room) {
 
 async function load(quiet = false) {
   if (!quiet) state.value = "loading";
-  error.value = "";
+  error.value = null;
   try {
     const [tripData, boardingData, today] = await Promise.all([tripResource.fetch({ dispatch_trip: dispatchTrip.value }), boardingResource.fetch({ dispatch_trip: dispatchTrip.value }), todayResource.fetch()]);
     trip.value = tripData;
@@ -91,20 +92,20 @@ async function load(quiet = false) {
     startLive(today?.realtime_room || "");
   } catch (reason) {
     if (quiet) return;
-    state.value = reason?.status === 403 ? "denied" : "error";
-    error.value = reason?.message || "تعذّر تحميل الرحلة.";
+    state.value = [401, 403].includes(errorStatus(reason)) ? "denied" : "error";
+    error.value = reason;
   }
 }
 
 async function run(key, action, message) {
   busy.value = key;
-  error.value = "";
+  error.value = null;
   try {
     await action();
     toast.create({ type: "success", message });
     await load(true);
   } catch (reason) {
-    error.value = reason?.message || "تعذّر تنفيذ الإجراء.";
+    error.value = reason;
   } finally {
     busy.value = "";
   }
@@ -118,7 +119,7 @@ async function submitScan(token = scanToken.value) {
     scanResult.value = scanMessages[result?.result] || "تعذّر قراءة البطاقة.";
     if (["Valid", "Duplicate"].includes(result?.result)) await load(true);
   } catch (reason) {
-    scanResult.value = reason?.message || "تعذّر تسجيل الصعود.";
+    scanResult.value = safeErrorMessage(reason, "تعذّر تسجيل الصعود.");
   } finally {
     busy.value = "";
   }
@@ -128,7 +129,7 @@ async function startCamera() {
   try {
     await scanner.start(scannerVideo.value, submitScan);
   } catch (reason) {
-    scanResult.value = reason?.message || "تعذّر تشغيل الكاميرا.";
+    scanResult.value = safeErrorMessage(reason, "تعذّر تشغيل الكاميرا.");
   }
 }
 
@@ -153,12 +154,12 @@ onBeforeUnmount(stopLive);
     </header>
 
     <PortalSkeleton v-if="state === 'loading'" :rows="3" label="جارٍ تجهيز الرحلة" />
-    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الرحلة" message="هذه الرحلة غير متاحة لحسابك." @retry="load()" />
-    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الرحلة" :message="error" @retry="load()" />
+    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الرحلة" :message="error" fallback="هذه الرحلة غير متاحة لحسابك." @retry="load()" />
+    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الرحلة" :message="error" fallback="تعذّر تحميل الرحلة." @retry="load()" />
     <div v-else-if="state === 'empty'" class="feature-state">لا توجد بيانات لهذه الرحلة.</div>
 
     <template v-else>
-      <ErrorMessage v-if="error" :message="error" />
+      <ErrorMessage v-if="error" :message="safeErrorMessage(error, 'تعذّر تنفيذ الإجراء.')" />
       <section class="journey-command">
         <div class="journey-command__metric">
           <strong>{{ workers.filter((worker) => worker.status === "Boarded").length }}</strong>

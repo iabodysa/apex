@@ -3,10 +3,15 @@ import {
   cadenceLabel,
   conditionLabel,
   dateTimeLabel,
+  fieldLabel,
   floorLabel,
   humanLabel,
   humanOptions,
+  maintenanceIssueLabel,
+  maintenanceIssueOptions,
   recordTitle,
+  requestCategoryLabel,
+  requestCategoryOptions,
   remainingSeconds,
   periodLabel,
   statusLabel,
@@ -115,5 +120,34 @@ describe("portal display labels", () => {
       "رحلة",
     )).toBe("رحلة الوردية الصباحية");
     expect(recordTitle({ name: "DT-2026-00007" }, ["route_name"], "رحلة")).toBe("رحلة");
+  });
+
+  it("gives every stored maintenance and resident-request enum key an Arabic label", () => {
+    expect(maintenanceIssueLabel("Air Conditioning")).toBe("تكييف");
+    expect(maintenanceIssueLabel("Fire Safety")).toBe("سلامة الحريق");
+    expect(maintenanceIssueOptions().map((option) => option.value)).toEqual([
+      "Electrical", "Plumbing", "Furniture", "Air Conditioning",
+      "Fire Safety", "Pest Control", "Structural", "Other",
+    ]);
+    expect(maintenanceIssueOptions().every((option) => !/[A-Za-z]/.test(option.label))).toBe(true);
+
+    expect(requestCategoryLabel("Facility Item")).toBe("أثاث ومرافق");
+    expect(requestCategoryLabel("Reimbursement")).toBe("مطالبة مالية");
+    expect(requestCategoryOptions().map((option) => option.value)).toEqual([
+      "Maintenance", "Safety", "Cleaning", "Pest Control", "Custody", "Facility Item",
+      "Water", "Electrical", "AC", "Plumbing", "Reimbursement", "Complaint",
+      "Suggestion", "Other",
+    ]);
+    expect(requestCategoryOptions().every((option) => !/[A-Za-z]/.test(option.label))).toBe(true);
+    expect(statusLabel("Critical")).toBe("حرجة");
+  });
+
+  it("labels an enum-bearing title field and leaves free text untouched", () => {
+    expect(recordTitle({ name: "MR-1", issue_type: "Structural" }, ["issue_type"])).toBe("إنشائي");
+    expect(recordTitle({ name: "RR-1", request_category: "Facility Item" }, ["request_category"])).toBe("أثاث ومرافق");
+    expect(recordTitle({ name: "RR-2", description: "المكيف لا يعمل" }, ["request_category", "description"]))
+      .toBe("المكيف لا يعمل");
+    expect(fieldLabel("issue_type", "")).toBe("");
+    expect(fieldLabel("subject", "شكوى ضوضاء")).toBe("شكوى ضوضاء");
   });
 });

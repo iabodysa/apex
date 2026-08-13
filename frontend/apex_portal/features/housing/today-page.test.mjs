@@ -9,7 +9,8 @@ const { calls, dataByUrl } = vi.hoisted(() => ({
 vi.mock("frappe-ui", () => ({
   ErrorMessage: { props: ["message"], template: "<p>{{ message }}</p>" },
   LoadingIndicator: { template: "<span />" },
-  Button: { template: "<button><slot /></button>" },
+  Button: { props: ["label"], template: "<button>{{ label }}<slot /></button>" },
+  Select: { props: ["options"], template: '<select data-building-select />' },
   createResource: vi.fn(({ url }) => ({
     data: dataByUrl.get(url) ?? null,
     loading: false,
@@ -38,7 +39,6 @@ async function mountToday(capabilities) {
   const wrapper = mount(TodayPage, {
     global: {
       stubs: {
-        BuildingPicker: { template: "<div data-building-picker />" },
         RouterLink: {
           props: ["to"],
           template: '<a :data-to="to"><slot /></a>',
@@ -54,7 +54,9 @@ describe("housing Today capability boundaries", () => {
   beforeEach(() => {
     calls.length = 0;
     dataByUrl.clear();
-    dataByUrl.set(endpoints.buildings, []);
+    dataByUrl.set(endpoints.buildings, [
+      { building: "BLD-1", building_title: "سكن الشمال", occupied: 4, available: 2, blocked: 0, oos: 0, occupancy_pct: 66 },
+    ]);
     dataByUrl.set(endpoints.beds, { summary: { available: 3 } });
     dataByUrl.set(endpoints.maintenance, { open_requests: 2 });
     dataByUrl.set(endpoints.arrivals, { pending: 1 });
@@ -75,6 +77,8 @@ describe("housing Today capability boundaries", () => {
     expect(urls).not.toContain(endpoints.maintenance);
     expect(urls).not.toContain(endpoints.safety);
     expect(urls).not.toContain(endpoints.buildings);
+    expect(wrapper.find("[data-building-select]").exists()).toBe(false);
+    expect(wrapper.text()).not.toContain("جاري تحميل المباني");
     expect(wrapper.find('[data-to="/arrivals"]').exists()).toBe(true);
     for (const unauthorized of ["/beds", "/maintenance", "/maintenance/new", "/custody", "/rounds"]) {
       expect(wrapper.find(`[data-to="${unauthorized}"]`).exists(), unauthorized).toBe(false);
@@ -100,6 +104,8 @@ describe("housing Today capability boundaries", () => {
       endpoints.safety,
     ]));
     expect(urls).not.toContain(endpoints.arrivals);
+    expect(urls.filter((url) => url === endpoints.buildings)).toHaveLength(1);
+    expect(wrapper.find("[data-building-select]").exists()).toBe(true);
     for (const allowed of ["/beds", "/maintenance", "/maintenance/new", "/custody", "/rounds"]) {
       expect(wrapper.find(`[data-to="${allowed}"]`).exists(), allowed).toBe(true);
     }

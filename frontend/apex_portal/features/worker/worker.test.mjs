@@ -44,10 +44,99 @@ vi.mock("frappe-ui", () => ({
   toast: { create: toastCreate },
 }));
 
+// The shape frappe-ui's frappeRequest actually throws: statusText-ish message, HTTP
+// status only on response, and the clean server messages on messages.
+function frappeError(status, messages) {
+  const error = new Error("/api/method/apex.salis.api.masar.list_worker_requests ValidationError");
+  error.response = { status };
+  error.messages = messages;
+  return error;
+}
+
+async function mountWorkerRoute(path) {
+  const router = createRouter({ history: createMemoryHistory(), routes: workerRoutes });
+  await router.push(path);
+  await router.isReady();
+  const wrapper = mount(WorkerPage, { global: { plugins: [router] } });
+  await flushPromises();
+  return wrapper;
+}
+
 describe("Masar worker feature", () => {
   beforeEach(() => {
     resourceData.clear();
     resourceCalls.length = 0;
+  });
+
+  it("reads the denial from response.status and shows the server message without a retry", async () => {
+    resourceData.set(
+      "apex.salis.api.masar.list_worker_requests",
+      frappeError(403, ["لا تملك صلاحية عرض هذه الطلبات."]),
+    );
+    const wrapper = await mountWorkerRoute("/requests");
+
+    const alert = wrapper.get("[role='alert']");
+    expect(alert.get("h2").text()).toBe("تعذّر فتح الصفحة");
+    expect(alert.text()).toContain("لا تملك صلاحية عرض هذه الطلبات.");
+    expect(alert.text()).not.toContain("/api/method/");
+    expect(alert.find("button").exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it("falls back to the denial wording when a 403 carries no server message", async () => {
+    resourceData.set("apex.salis.api.masar.list_worker_requests", frappeError(403, []));
+    const wrapper = await mountWorkerRoute("/requests");
+
+    const alert = wrapper.get("[role='alert']");
+    expect(alert.get("h2").text()).toBe("تعذّر فتح الصفحة");
+    expect(alert.text()).toContain("لا تملك صلاحية عرض هذه الصفحة.");
+    expect(alert.text()).not.toContain("/api/method/");
+    wrapper.unmount();
+  });
+
+  it("keeps a retry and the server message for a retryable failure", async () => {
+    resourceData.set(
+      "apex.salis.api.masar.list_worker_requests",
+      frappeError(500, ["تعذّر الوصول إلى الخادم."]),
+    );
+    const wrapper = await mountWorkerRoute("/requests");
+
+    const alert = wrapper.get("[role='alert']");
+    expect(alert.get("h2").text()).toBe("تعذّر تحميل الصفحة");
+    expect(alert.text()).toContain("تعذّر الوصول إلى الخادم.");
+    expect(alert.find("button").exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it("titles a worker request with the Arabic category instead of the stored enum key", async () => {
+    resourceData.set("apex.salis.api.masar.list_worker_requests", {
+      requests: [{ name: "RR-1", request_category: "Facility Item" }],
+    });
+    const wrapper = await mountWorkerRoute("/requests");
+
+    expect(wrapper.text()).toContain("أثاث ومرافق");
+    expect(wrapper.text()).not.toContain("Facility Item");
+    wrapper.unmount();
+  });
+
+  it("keeps the transport server message and its retry instead of a fixed replacement", async () => {
+    const failure = new Error("/api/method/apex.salis.api.masar.get_worker_transport");
+    failure.response = { status: 500 };
+    failure.messages = ["الخدمة متوقفة مؤقتاً."];
+    resourceData.set("apex.salis.api.masar.get_worker_transport", failure);
+    resourceData.set("apex.salis.api.boarding_flow.worker_trip_boarding", null);
+    resourceData.set("apex.salis.api.masar.get_worker_context", { realtime_room: "" });
+    const wrapper = mount(WorkerTransportPage, {
+      global: { provide: { portalSubscribe: () => () => {}, workerGateway: {} } },
+    });
+    await flushPromises();
+
+    const alert = wrapper.get("[role='alert']");
+    expect(alert.get("h2").text()).toBe("تعذّر تحميل الرحلات");
+    expect(alert.text()).toContain("الخدمة متوقفة مؤقتاً.");
+    expect(alert.text()).not.toContain("/api/method/");
+    expect(alert.find("button").exists()).toBe(true);
+    wrapper.unmount();
   });
 
   it("publishes only the canonical worker routes", () => {

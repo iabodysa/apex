@@ -16,6 +16,7 @@ vi.mock("frappe-ui", () => ({
 
 import CurrentVehiclePage from "./pages/CurrentVehiclePage.vue";
 import FuelQuotaPage from "./pages/FuelQuotaPage.vue";
+import SimpleListPage from "./components/SimpleListPage.vue";
 
 const responseError = {
   message: 'Traceback: File "/home/frappe/apps/apex/private.py", line 4',
@@ -50,6 +51,34 @@ describe("fleet self-service error surfaces", () => {
     expect(wrapper.get("[role='alert']").text()).toContain("لا تملك صلاحية عرض هذه البيانات.");
     expect(wrapper.get("[role='alert']").text()).not.toContain("Traceback");
     expect(wrapper.find("[role='alert'] button").exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it("surfaces the list server message instead of a fixed connection line", async () => {
+    const wrapper = mount(SimpleListPage, {
+      props: { title: "بلاغاتي", resource: { data: null, loading: false, error: responseError, fetch: vi.fn() } },
+      global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } },
+    });
+    await flushPromises();
+
+    expect(wrapper.get("[role='alert']").text()).toContain("لا تملك صلاحية عرض هذه البيانات.");
+    expect(wrapper.get("[role='alert']").text()).not.toContain("تحقق من الاتصال وحاول مرة ثانية.");
+    expect(wrapper.find("[role='alert'] button").exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it("keeps the retry on a retryable list failure", async () => {
+    const retryable = { response: { status: 500 }, messages: ["تعذّر الوصول إلى الخادم."] };
+    const fetch = vi.fn();
+    const wrapper = mount(SimpleListPage, {
+      props: { title: "بلاغاتي", resource: { data: null, loading: false, error: retryable, fetch } },
+      global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } },
+    });
+    await flushPromises();
+
+    expect(wrapper.get("[role='alert']").text()).toContain("تعذّر الوصول إلى الخادم.");
+    await wrapper.get("[role='alert'] button").trigger("click");
+    expect(fetch).toHaveBeenCalled();
     wrapper.unmount();
   });
 });

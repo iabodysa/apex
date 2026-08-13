@@ -1,7 +1,7 @@
 <script setup>
 import { createListResource } from "frappe-ui";
 import ResourceListPage from "../components/ResourceListPage.vue";
-import { statusLabel } from "../../../core/displayLabels.js";
+import { maintenanceIssueLabel, statusLabel } from "../../../core/displayLabels.js";
 const requests = createListResource({
   doctype: "Maintenance Request",
   fields: ["name", "issue_type", "issue_description", "status", "building", "room", "priority"],
@@ -21,7 +21,7 @@ const canCreate = capabilities.includes("maintenance_create");
     </template>
     <template #row="{ row }">
       <RouterLink :to="`/maintenance/${row.name}`">
-        <strong>{{ row.issue_type }}</strong>
+        <strong>{{ maintenanceIssueLabel(row.issue_type) || "طلب صيانة" }}</strong>
       </RouterLink>
       <span>{{ row.building }} · {{ row.room }}</span>
       <small>{{ statusLabel(row.status) }} · {{ statusLabel(row.priority) }}</small>

@@ -55,4 +55,21 @@ describe("shared portal error state", () => {
     expect(wrapper.text()).not.toContain("Traceback");
     expect(wrapper.find("button").exists()).toBe(false);
   });
+
+  it("prefers frappe-ui messages and never falls back to its composed endpoint line", () => {
+    const composed = new Error("/api/method/apex.salis.api.masar.list_worker_requests ValidationError");
+    composed.response = { status: 500 };
+    composed.messages = ["تعذّر الوصول إلى الخادم."];
+
+    expect(safeErrorMessage(composed, "تحقق من الاتصال.")).toBe("تعذّر الوصول إلى الخادم.");
+
+    const silent = new Error("/api/method/apex.salis.api.masar.list_worker_requests ValidationError");
+    silent.response = { status: 403 };
+    silent.messages = [];
+
+    expect(errorStatus(silent)).toBe(403);
+    expect(safeErrorMessage(silent, "لا تملك صلاحية عرض هذه الصفحة.")).toBe(
+      "لا تملك صلاحية عرض هذه الصفحة.",
+    );
+  });
 });

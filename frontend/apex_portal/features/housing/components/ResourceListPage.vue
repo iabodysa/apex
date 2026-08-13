@@ -16,7 +16,6 @@ const props = defineProps({
 });
 
 const titleId = computed(() => `resource-list-${props.title.replace(/\s+/g, "-")}`);
-const errorMessage = computed(() => props.error?.message || props.error || "تعذر تحميل البيانات.");
 </script>
 
 <template>
@@ -29,7 +28,7 @@ const errorMessage = computed(() => props.error?.message || props.error || "تع
       </div>
     </header>
     <LoadingIndicator v-if="loading && !rows.length" aria-label="جارٍ التحميل" />
-    <PortalErrorState v-else-if="error" :title="`تعذّر تحميل ${title}`" :message="errorMessage" @retry="refresh" />
+    <PortalErrorState v-else-if="error" :title="`تعذّر تحميل ${title}`" :message="error" fallback="تعذر تحميل البيانات." @retry="refresh" />
     <p v-else-if="!rows.length" class="feature-page__empty">{{ emptyText }}</p>
     <ul v-else class="feature-page__list">
       <li v-for="(row, index) in rows" :key="row.name || index">

@@ -1,4 +1,6 @@
-const INTERNAL_DETAIL = /(?:traceback|most recent call last|\bfile\s+["'][^"']+["']\s*,?\s*line\s+\d+|\/home\/frappe|\/apps\/|frappe\.|pymysql|mariadb|sqlalchemy|\bselect\b[\s\S]*\bfrom\b|\bat\s+\S+\s*\([^)]*:\d+:\d+\))/i;
+// frappe-ui builds error.message as "<url> <exc_type> <_error_message>", so the
+// endpoint path and exception class leak unless the composed line is rejected here.
+const INTERNAL_DETAIL = /(?:traceback|most recent call last|\bfile\s+["'][^"']+["']\s*,?\s*line\s+\d+|\/home\/frappe|\/apps\/|\/api\/(?:method|resource)\/|frappe\.|pymysql|mariadb|sqlalchemy|\bselect\b[\s\S]*\bfrom\b|\bat\s+\S+\s*\([^)]*:\d+:\d+\))/i;
 
 function cleanText(value) {
   return String(value ?? "")

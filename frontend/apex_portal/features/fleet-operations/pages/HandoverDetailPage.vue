@@ -29,7 +29,7 @@ const directionLabel = (value) => ({ Receipt: "استلام", Return: "إرجا�
     <PortalErrorState
       v-else-if="handover.get.error"
       title="تعذّر تحميل تسليم المركبة"
-      :message="handover.get.error.message"
+      :message="handover.get.error"
       @retry="handover.reload()"
     />
     <template v-else-if="handover.doc">

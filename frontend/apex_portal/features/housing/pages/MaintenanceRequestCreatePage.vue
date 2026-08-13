@@ -3,6 +3,7 @@ import { computed, reactive, ref, watch } from "vue";
 import { Button, ErrorMessage, FormControl, createListResource, toast } from "frappe-ui";
 import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
+import { maintenanceIssueOptions } from "../../../core/displayLabels.js";
 
 const form = reactive({
   room: "",
@@ -88,16 +89,7 @@ async function submit() {
         v-model="form.issue_type"
         type="select"
         label="نوع المشكلة"
-        :options="[
-          { label: 'كهرباء', value: 'Electrical' },
-          { label: 'سباكة', value: 'Plumbing' },
-          { label: 'أثاث', value: 'Furniture' },
-          { label: 'تكييف', value: 'Air Conditioning' },
-          { label: 'سلامة الحريق', value: 'Fire Safety' },
-          { label: 'مكافحة آفات', value: 'Pest Control' },
-          { label: 'إنشائي', value: 'Structural' },
-          { label: 'أخرى', value: 'Other' },
-        ]"
+        :options="maintenanceIssueOptions()"
         required
       />
       <FormControl v-model="form.issue_description" type="textarea" label="وصف المشكلة" required />

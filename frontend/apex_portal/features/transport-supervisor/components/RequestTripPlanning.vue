@@ -96,13 +96,13 @@ watch(selectedTrip, async (name) => {
   if (!name) return;
   try {
     const result = await tripRecord.fetch({ doctype: "Dispatch Trip", name });
+    if (generation !== stopLoadGeneration) return;
     tripStopsByName[name] = Array.isArray(result?.stops) ? result.stops : [];
-    if (generation !== stopLoadGeneration || selectedTrip.value !== name) return;
     if (!stops.value.length) {
       existingError.value = "الرحلة المختارة لا تحتوي نقاط توقف فعلية. أضف التوقفات من سجل الرحلة أولاً.";
     }
   } catch (reason) {
-    if (generation !== stopLoadGeneration || selectedTrip.value !== name) return;
+    if (generation !== stopLoadGeneration) return;
     existingError.value = safeErrorMessage(reason, "تعذّر تحميل توقفات الرحلة المختارة.");
   }
 });

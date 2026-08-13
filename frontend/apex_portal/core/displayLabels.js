@@ -28,6 +28,7 @@ const statusLabels = Object.freeze({
   Average: "متوسطة",
   Poor: "ضعيفة",
   "Not Done": "لم تُنفذ",
+  Critical: "حرجة",
   High: "عالية",
   Medium: "متوسطة",
   Low: "منخفضة",
@@ -122,6 +123,66 @@ const inventoryConditionLabels = Object.freeze({
   Damaged: "تالفة",
   Missing: "مفقودة",
 });
+
+// Maintenance Request.issue_type options, verbatim from the DocType.
+const maintenanceIssueLabels = Object.freeze({
+  Electrical: "كهرباء",
+  Plumbing: "سباكة",
+  Furniture: "أثاث",
+  "Air Conditioning": "تكييف",
+  "Fire Safety": "سلامة الحريق",
+  "Pest Control": "مكافحة آفات",
+  Structural: "إنشائي",
+  Other: "أخرى",
+});
+
+// Resident Request.request_category options, verbatim from the DocType.
+const requestCategoryLabels = Object.freeze({
+  Maintenance: "صيانة",
+  Safety: "سلامة",
+  Cleaning: "نظافة",
+  "Pest Control": "مكافحة آفات",
+  Custody: "عهدة",
+  "Facility Item": "أثاث ومرافق",
+  Water: "مياه",
+  Electrical: "كهرباء",
+  AC: "تكييف",
+  Plumbing: "سباكة",
+  Reimbursement: "مطالبة مالية",
+  Complaint: "شكوى",
+  Suggestion: "اقتراح",
+  Other: "أخرى",
+});
+
+export function maintenanceIssueLabel(value) {
+  return maintenanceIssueLabels[value] || value || "";
+}
+
+export function requestCategoryLabel(value) {
+  return requestCategoryLabels[value] || value || "";
+}
+
+const fieldLabelReaders = Object.freeze({
+  issue_type: maintenanceIssueLabel,
+  request_category: requestCategoryLabel,
+  status: statusLabel,
+  priority: statusLabel,
+});
+
+export function fieldLabel(field, value) {
+  const text = String(value ?? "").trim();
+  if (!text) return "";
+  const reader = fieldLabelReaders[field];
+  return reader ? reader(text) : text;
+}
+
+export function maintenanceIssueOptions() {
+  return Object.entries(maintenanceIssueLabels).map(([value, label]) => ({ value, label }));
+}
+
+export function requestCategoryOptions() {
+  return Object.entries(requestCategoryLabels).map(([value, label]) => ({ value, label }));
+}
 
 export function statusLabel(value) {
   return statusLabels[value] || value || "جديد";
@@ -228,7 +289,7 @@ export function conditionLabel(value) {
 export function recordTitle(record, fields = [], fallback = "سجل") {
   for (const field of fields) {
     const value = String(record?.[field] || "").trim();
-    if (value) return value;
+    if (value) return fieldLabel(field, value);
   }
   for (const field of ["title", "label"]) {
     const value = String(record?.[field] || "").trim();

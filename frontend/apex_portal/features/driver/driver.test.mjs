@@ -39,10 +39,54 @@ vi.mock("frappe-ui", () => ({
   toast: { create: vi.fn() },
 }));
 
+// The shape frappe-ui's frappeRequest actually throws: HTTP status only on response.
+function frappeError(url, status, messages) {
+  const error = new Error(`/api/method/${url} ValidationError`);
+  error.response = { status };
+  error.messages = messages;
+  return error;
+}
+
 describe("Masar driver feature", () => {
   beforeEach(() => {
     resourceData.clear();
     resourceCalls.length = 0;
+  });
+
+  it("reads the driver denial from response.status and drops the retry", async () => {
+    const url = "apex.salis.api.driver_portal.personal.get_masar_today";
+    resourceData.set(url, frappeError(url, 403, ["حسابك غير مرتبط بسائق."]));
+    const router = createRouter({ history: createMemoryHistory(), routes: driverRoutes });
+    await router.push("/today");
+    await router.isReady();
+    const wrapper = mount(DriverPage, { global: { plugins: [router] } });
+    await flushPromises();
+
+    const alert = wrapper.get("[role='alert']");
+    expect(alert.get("h2").text()).toBe("تعذّر فتح القسم");
+    expect(alert.text()).toContain("حسابك غير مرتبط بسائق.");
+    expect(alert.text()).not.toContain("/api/method/");
+    expect(alert.find("button").exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it("keeps the trip server message and its retry for a retryable failure", async () => {
+    const url = "apex.salis.api.driver_portal.my_trip_route";
+    resourceData.set(url, frappeError(url, 500, ["تعذّر الوصول إلى الخادم."]));
+    const router = createRouter({ history: createMemoryHistory(), routes: driverRoutes });
+    await router.push("/route/TRIP-1");
+    await router.isReady();
+    const wrapper = mount(DriverTripPage, {
+      global: { plugins: [router], provide: { portalSubscribe: () => () => {}, driverGateway: {} } },
+    });
+    await flushPromises();
+
+    const alert = wrapper.get("[role='alert']");
+    expect(alert.get("h2").text()).toBe("تعذّر تحميل الرحلة");
+    expect(alert.text()).toContain("تعذّر الوصول إلى الخادم.");
+    expect(alert.text()).not.toContain("/api/method/");
+    expect(alert.find("button").exists()).toBe(true);
+    wrapper.unmount();
   });
 
   it("keeps personal service and bus execution while excluding fleet self-service", () => {

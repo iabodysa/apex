@@ -119,4 +119,27 @@ describe("request trip planning", () => {
     expect(wrapper.text()).toContain("توقف ب");
     expect(wrapper.text()).not.toContain("توقف أ");
   });
+
+  it("keeps the newest stops of a re-selected trip when its own earlier response arrives last", async () => {
+    const pending = [];
+    tripRecordFetch.mockImplementation(() => new Promise((resolve) => pending.push(resolve)));
+    const wrapper = mount(RequestTripPlanning, { props: { request: approvedRequest } });
+    await flushPromises();
+    const tripInput = wrapper.findAll("form")[0].findAll("input")[0];
+
+    await tripInput.setValue("TRIP-A");
+    await tripInput.setValue("TRIP-B");
+    await tripInput.setValue("TRIP-A");
+    expect(pending).toHaveLength(3);
+
+    pending[2]({ stops: [{ stop_key: "A2", stop_name: "توقف أ الحالي" }] });
+    await flushPromises();
+    pending[1]({ stops: [{ stop_key: "B", stop_name: "توقف ب" }] });
+    pending[0]({ stops: [{ stop_key: "A1", stop_name: "توقف أ القديم" }] });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("توقف أ الحالي");
+    expect(wrapper.text()).not.toContain("توقف أ القديم");
+    expect(wrapper.text()).not.toContain("توقف ب");
+  });
 });

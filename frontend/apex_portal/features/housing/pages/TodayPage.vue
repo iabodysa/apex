@@ -61,7 +61,7 @@ onMounted(() => {
   <section class="feature-page today-page">
     <header class="feature-page__header arrivals-heading">
       <div><p class="feature-kicker">وردية السكن</p><h2>ما يحتاج انتباهك اليوم</h2><p>صورة سريعة للمبنى، ثم أقرب إجراء.</p></div>
-      <BuildingPicker />
+      <BuildingPicker v-if="canSeePortfolio" :resource="buildings" />
     </header>
 
     <section v-if="canSeePortfolio" class="today-portfolio" aria-labelledby="today-portfolio-title">
