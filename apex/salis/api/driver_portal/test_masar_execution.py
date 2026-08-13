@@ -93,6 +93,7 @@ class TestMasarDriverExecution(TestCase):
         with self.assertRaises(frappe.ValidationError):
             driver_portal._resolve_my_trip("DT-1", "DRV-1")
 
+    @patch("apex.salis.api.boarding_flow._manifest_employees", return_value=[])
     @patch("apex.salis.api.boarding_flow.ensure_trip_boarding_state")
     @patch.object(execution, "_trip_log_state", return_value={"started": True})
     @patch.object(execution.frappe, "get_doc")
@@ -101,7 +102,7 @@ class TestMasarDriverExecution(TestCase):
     @patch.object(execution, "_resolve_driver", return_value="DRV-1")
     @patch.object(execution, "_require_enabled")
     def test_start_seeds_the_existing_boarding_state(
-        self, _enabled, _driver, _trip, _value, get_doc, _state, ensure_state
+        self, _enabled, _driver, _trip, _value, get_doc, _state, ensure_state, _manifest
     ):
         get_doc.return_value.insert.return_value = None
 
