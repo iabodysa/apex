@@ -206,18 +206,18 @@ describe("Masar transport supervisor feature", () => {
     const resource = {
       data: [{ name: "ROW-1" }],
       list: { loading: false, error: null },
-      start: 20,
+      start: 0,
       pageLength: 20,
       hasNextPage: true,
       update,
       reload,
-      next: vi.fn(),
+      next: vi.fn(function () { resource.start += resource.pageLength; }),
     };
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [{ path: "/", component: { template: "<div />" } }],
     });
-    await router.push("/?status=Approved");
+    await router.push("/");
     await router.isReady();
     const wrapper = mount(SupervisorCollection, {
       props: {
@@ -230,6 +230,13 @@ describe("Masar transport supervisor feature", () => {
       global: { plugins: [router] },
       slots: { default: "<div />" },
     });
+    await flushPromises();
+
+    resource.next();
+    expect(resource.start).toBe(20);
+    update.mockClear();
+    reload.mockClear();
+    await router.push("/?status=Approved");
     await flushPromises();
 
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({

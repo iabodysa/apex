@@ -61,8 +61,8 @@ function requestTitle(request) {
       { label: 'تم التحقق', value: 'Validated' },
       { label: 'معتمد', value: 'Approved' },
       { label: 'مجدول', value: 'Scheduled' },
-      { label: 'مرفوض', value: 'Rejected' },
       { label: 'مكتمل', value: 'Fulfilled' },
+      { label: 'مرفوض', value: 'Rejected' },
       { label: 'ملغى', value: 'Cancelled' },
     ]"
     empty="لا توجد طلبات نقل تحتاج متابعة."
