@@ -273,6 +273,7 @@ scheduler_events = {
         "apex.salis.tasks.vehicle.vehicle_compliance_expiry_watch",
         "apex.salis.tasks.workshop.workshop_overstay_watch",
         "apex.salis.tasks.alerts.reconcile_operations_alerts",
+        "apex.salis.tasks.dispatch.daily_dispatch_trip_generation",
         "apex.logistay.tasks.sim_alerts.assigned_suspended_or_lost_watch",
         "apex.salis.fuel_engine.accrue_fuel_consumption",
         "apex.salis.rental_engine.daily_rental_accrual",

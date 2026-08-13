@@ -131,11 +131,13 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "ends_on",
    "fieldtype": "Date",
    "label": "Ends On"
   },
   {
+   "allow_on_submit": 1,
    "default": "1",
    "fieldname": "enabled",
    "fieldtype": "Check",
@@ -212,7 +214,7 @@
    "link_fieldname": "route_assignment"
   }
  ],
- "modified": "2026-08-13 20:31:00.000000",
+ "modified": "2026-08-13 20:47:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Assignment",

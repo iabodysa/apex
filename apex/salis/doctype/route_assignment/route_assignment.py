@@ -29,12 +29,21 @@ class RouteAssignment(Document):
         ]
         if missing:
             frappe.throw(
-                _("Complete these fields before approval: {0}.").format(", ".join(missing))
+                _("Complete these fields before approval: {0}.").format(
+                    ", ".join(missing)
+                )
             )
         if self.status != "Approved":
-            frappe.throw(_("Use the Approve workflow action to approve this assignment."))
+            frappe.throw(
+                _("Use the Approve workflow action to approve this assignment.")
+            )
         self.approved_by = frappe.session.user
         self.approved_on = now_datetime()
+
+    def on_submit(self):
+        from apex.salis.tasks.dispatch import generate_for_assignment
+
+        generate_for_assignment(self.name)
 
     def _set_assignment_name(self):
         labels = (
