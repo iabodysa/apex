@@ -3,6 +3,7 @@ import { computed, onMounted } from "vue";
 import { Badge, Button } from "frappe-ui";
 import AsyncPanel from "../components/AsyncPanel.vue";
 import { createFleetSelfResources } from "../api.js";
+import { statusLabel, vehicleCategoryLabel } from "../../../core/displayLabels.js";
 const resource = createFleetSelfResources().vehicle;
 const vehicle = computed(() => resource.data?.vehicle || null);
 const canHandover = (globalThis.window?.apex_portal?.capabilities || []).includes("fleet.self.handover");
@@ -35,11 +36,11 @@ onMounted(() => resource.fetch());
             message="ستظهر هنا بعد الإسناد من مشرف التشغيل."
         />
         <article v-else class="salis-card">
-            <Badge theme="green" :label="vehicle.status || 'مسندة'" />
+            <Badge theme="green" :label="statusLabel(vehicle.status || 'assigned')" />
             <h3>
                 <bdi>{{ vehicle.plate }}</bdi>
             </h3>
-            <p>{{ vehicle.model || "الفئة غير محددة" }}</p>
+            <p>{{ vehicleCategoryLabel(vehicle.model) || "الفئة غير محددة" }}</p>
             <dl>
                 <div>
                     <dt>المشروع</dt>

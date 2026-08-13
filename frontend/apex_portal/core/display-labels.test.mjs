@@ -4,6 +4,7 @@ import {
   dateTimeLabel,
   periodLabel,
   statusLabel,
+  vehicleCategoryLabel,
 } from "./displayLabels.js";
 
 describe("portal display labels", () => {
@@ -11,7 +12,15 @@ describe("portal display labels", () => {
     expect(statusLabel("New")).toBe("جديد");
     expect(statusLabel("Completed")).toBe("مكتملة");
     expect(statusLabel("Dispatched")).toBe("في الطريق");
+    expect(statusLabel("Unassigned")).toBe("غير مسندة");
+    expect(statusLabel("assigned")).toBe("مسندة");
     expect(statusLabel("Custom State")).toBe("Custom State");
+  });
+
+  it("uses fleet terms familiar to Saudi operations teams", () => {
+    expect(vehicleCategoryLabel("Coach")).toBe("حافلة");
+    expect(vehicleCategoryLabel("Crew Van")).toBe("فان طاقم");
+    expect(vehicleCategoryLabel("Custom Vehicle")).toBe("Custom Vehicle");
   });
 
   it("turns Frappe date and time values into concise Arabic business labels", () => {

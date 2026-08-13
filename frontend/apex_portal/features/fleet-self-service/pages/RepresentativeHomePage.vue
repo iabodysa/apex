@@ -3,6 +3,7 @@ import { computed, onMounted } from "vue";
 import { Badge, Button } from "frappe-ui";
 import { createFleetSelfResources } from "../api.js";
 import AsyncPanel from "../components/AsyncPanel.vue";
+import { statusLabel } from "../../../core/displayLabels.js";
 const resources = createFleetSelfResources();
 const context = computed(() => resources.context.data || {});
 const grants = new Set(globalThis.window?.apex_portal?.capabilities || []);
@@ -37,7 +38,7 @@ onMounted(() => resources.context.fetch());
                     <p>المندوب</p>
                     <strong>{{ context.driver_name || "—" }}</strong>
                 </div>
-                <Badge theme="green" :label="context.assignment_status || 'جاهز'" />
+                <Badge theme="green" :label="statusLabel(context.assignment_status || 'جاهز')" />
                 <p>
                     المركبة: <bdi>{{ context.vehicle_plate || "لا توجد مركبة مسندة" }}</bdi>
                 </p>

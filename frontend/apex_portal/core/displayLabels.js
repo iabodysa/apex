@@ -7,6 +7,11 @@ const statusLabels = Object.freeze({
   Dispatched: "في الطريق",
   Scheduled: "مجدولة",
   Fulfilled: "مكتملة",
+  Unassigned: "غير مسندة",
+  assigned: "مسندة",
+  available: "متاحة",
+  workshop: "في الورشة",
+  stopped: "متوقفة",
   Started: "بدأت",
   Completed: "مكتملة",
   Cancelled: "ملغاة",
@@ -40,6 +45,12 @@ const cadenceLabels = Object.freeze({
   Annual: "سنوية",
 });
 
+const vehicleCategoryLabels = Object.freeze({
+  Coach: "حافلة",
+  "Crew Van": "فان طاقم",
+  Minibus: "حافلة صغيرة",
+});
+
 export function statusLabel(value) {
   return statusLabels[value] || value || "جديد";
 }
@@ -64,6 +75,10 @@ export function dateTimeLabel(value) {
 
 export function cadenceLabel(value) {
   return cadenceLabels[value] || value || "";
+}
+
+export function vehicleCategoryLabel(value) {
+  return vehicleCategoryLabels[value] || value || "";
 }
 
 export function periodLabel(period) {
