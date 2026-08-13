@@ -1,0 +1,8 @@
+[
+ {"docstatus": 0, "doctype": "Issue Type", "modified": "2000-01-01 00:00:00.000000", "name": "Vehicle"},
+ {"docstatus": 0, "doctype": "Issue Type", "modified": "2000-01-01 00:00:00.000000", "name": "Fuel"},
+ {"docstatus": 0, "doctype": "Issue Type", "modified": "2000-01-01 00:00:00.000000", "name": "Attendance"},
+ {"docstatus": 0, "doctype": "Issue Type", "modified": "2000-01-01 00:00:00.000000", "name": "Salary"},
+ {"docstatus": 0, "doctype": "Issue Type", "modified": "2000-01-01 00:00:00.000000", "name": "Complaint"},
+ {"docstatus": 0, "doctype": "Issue Type", "modified": "2000-01-01 00:00:00.000000", "name": "Other"}
+]

@@ -61,6 +61,7 @@ DEMO_DOCTYPES = (
     "Custody Handover",
     "Vehicle Handover",
     "Vehicle Incident",
+    "File",
     "Vehicle Damage Write-Off",
     "Subcontractor Service Contract",
     "Subcontractor Service Order",
@@ -75,6 +76,58 @@ DEMO_DOCTYPES = (
     "Fuel Claim",
     "Passenger Manifest",
     "Rental Settlement",
+)
+
+# Machine-readable build/clear audit. ``target_scenarios`` preserves the board's
+# three-record acceptance basis; a lower observed count is recorded as an open gap,
+# not waived by this inventory.
+_DEMO_SCENARIO_COUNTS = {
+    "Project": 2,
+    "Building": 2,
+    "Room": 2,
+    "Bed": 4,
+    "Employee": 3,
+    "SIM Card": 3,
+    "Housing Assignment": 3,
+}
+
+DEMO_INVENTORY = {
+    doctype: {
+        "target_scenarios": 3,
+        "observed_scenarios": _DEMO_SCENARIO_COUNTS.get(doctype, 1),
+        "cleanup": "owner",
+        **(
+            {}
+            if _DEMO_SCENARIO_COUNTS.get(doctype, 1) >= 3
+            else {
+                "gap": (
+                    "The current coherent linked demo has fewer than three records; "
+                    "additional diverse scenarios remain to be built."
+                )
+            }
+        ),
+    }
+    for doctype in DEMO_DOCTYPES
+}
+DEMO_INVENTORY.update(
+    {
+        "User Permission": {
+            "target_scenarios": 3,
+            "observed_scenarios": 1,
+            "cleanup": "demo-user",
+            "gap": "Two more distinct scoped permission scenarios remain to be built.",
+        },
+        "User": {
+            "target_scenarios": 3,
+            "observed_scenarios": 3,
+            "cleanup": "explicit-name",
+        },
+        "Contact": {
+            "target_scenarios": 3,
+            "observed_scenarios": 3,
+            "cleanup": "linked-demo-user",
+        },
+    }
 )
 
 _DEMO_SITE = "Demo Housing Site"
