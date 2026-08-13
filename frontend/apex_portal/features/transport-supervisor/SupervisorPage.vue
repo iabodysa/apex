@@ -4,6 +4,7 @@ import { Badge, Button, FeatherIcon, createDocumentResource, createResource } fr
 import { useRoute } from "vue-router";
 import { dateTimeLabel, statusLabel, statusTheme } from "../../core/displayLabels.js";
 import TripRequestAssignment from "./components/TripRequestAssignment.vue";
+import PortalErrorState from "../../components/PortalErrorState.vue";
 
 const route = useRoute();
 const spec = route.meta.view || {};
@@ -96,11 +97,8 @@ watch(doc, loadTransitions, { immediate: true });
     </header>
 
     <div v-if="state === 'loading'" class="feature-state" role="status">جارٍ تحميل السجل…</div>
-    <div v-else-if="state === 'denied'" class="feature-state">لا تملك صلاحية هذا السجل.</div>
-    <div v-else-if="state === 'error'" class="feature-state feature-state--error">
-      <p role="alert">تعذّر تحميل السجل.</p>
-      <Button variant="outline" @click="record.reload">إعادة المحاولة</Button>
-    </div>
+    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح السجل" message="لا تملك صلاحية هذا السجل." @retry="record.reload" />
+    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل السجل" :message="record.get.error" @retry="record.reload" />
     <div v-else-if="state === 'empty'" class="feature-state">السجل غير موجود.</div>
 
     <template v-else>

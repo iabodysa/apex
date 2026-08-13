@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { Button, ErrorMessage, LoadingIndicator } from "frappe-ui";
 import { recordTitle, statusLabel } from "../../../core/displayLabels.js";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -25,7 +26,7 @@ const errorMessage = computed(() => props.error?.message || props.error || "تع
       <Button variant="subtle" icon-left="refresh-cw" label="تحديث" :loading="loading" @click="refresh" />
     </header>
     <LoadingIndicator v-if="loading && !rows.length" aria-label="جارٍ التحميل" />
-    <ErrorMessage v-else-if="error" :message="errorMessage" />
+    <PortalErrorState v-else-if="error" :title="`تعذّر تحميل ${title}`" :message="errorMessage" @retry="refresh" />
     <p v-else-if="!rows.length" class="feature-page__empty">{{ emptyText }}</p>
     <ul v-else class="feature-page__list">
       <li v-for="(row, index) in rows" :key="row.name || index">

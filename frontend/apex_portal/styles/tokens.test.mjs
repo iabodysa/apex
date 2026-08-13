@@ -64,6 +64,11 @@ describe("Apex portal identity", () => {
     expect(css).toContain("env(safe-area-inset-bottom)");
   });
 
+  it("truncates long LTR record references at their visual end", () => {
+    const css = read("./foundation.css");
+    expect(css).toMatch(/\.record-reference\s*\{[^}]*direction:\s*ltr[^}]*text-align:\s*start[^}]*text-overflow:\s*ellipsis/s);
+  });
+
   it("ships branded waiting and reduced-motion states", () => {
     const css = `${read("./tokens.css")}\n${read("./foundation.css")}`;
     const html = read("../index.html");

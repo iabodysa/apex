@@ -5,6 +5,7 @@ import { statusLabel } from "../../core/displayLabels.js";
 import { createLeafletAdapter } from "./leafletAdapter.js";
 import { createTransportMapState, selectedMapRows } from "./transportMapState.js";
 import "./styles.css";
+import PortalErrorState from "../../components/PortalErrorState.vue";
 
 const positions = createResource({
   url: "apex.salis.api.route_supervisor.get_active_driver_positions",
@@ -59,11 +60,8 @@ onBeforeUnmount(mapAdapter.destroy);
       <Button variant="outline" icon-left="refresh-cw" @click="load">تحديث</Button>
     </header>
     <div v-if="state === 'loading'" class="feature-state" role="status">جارٍ تحديث الخريطة…</div>
-    <div v-else-if="state === 'denied'" class="feature-state">لا تملك صلاحية هذه الرحلات.</div>
-    <div v-else-if="state === 'error'" class="feature-state feature-state--error">
-      <p role="alert">{{ error }}</p>
-      <Button variant="outline" @click="load">إعادة المحاولة</Button>
-    </div>
+    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الخريطة" message="لا تملك صلاحية هذه الرحلات." @retry="load" />
+    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الخريطة" :message="error" @retry="load" />
     <div v-else-if="state === 'empty'" class="feature-state">لا توجد رحلات نشطة الآن.</div>
     <template v-else>
       <div class="transport-map-filters">

@@ -185,10 +185,16 @@ h3 {
 }
 
 .record-reference {
+  max-inline-size: 100%;
+  overflow: hidden;
   color: var(--muted);
+  direction: ltr;
   font-family: var(--font);
   font-size: .78rem;
   font-variant-numeric: tabular-nums;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .record-card__title,
@@ -629,6 +635,8 @@ h3 {
 
   .operations-shell__nav {
     display: none;
+    min-inline-size: 0;
+    max-inline-size: 100%;
   }
 
   .operations-shell__mobile-nav {

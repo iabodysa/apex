@@ -3,6 +3,7 @@ import { computed, inject, reactive, watch } from "vue";
 import { Button, FeatherIcon, FormControl } from "frappe-ui";
 import { routeLocationKey, routerKey } from "vue-router";
 import { filtersFromQuery, queryFromFilters, resultCountLabel } from "../queueState.js";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -100,10 +101,7 @@ watch(() => route.query, applyQuery, { immediate: true, deep: true });
     <div v-if="loading && !resource.data" class="feature-state" role="status">
       جارٍ تحميل {{ title }}…
     </div>
-    <div v-else-if="error" class="feature-state feature-state--error">
-      <p role="alert">تعذّر تحميل {{ title }}.</p>
-      <Button variant="outline" @click="refresh">إعادة المحاولة</Button>
-    </div>
+    <PortalErrorState v-else-if="error" :title="`تعذّر تحميل ${title}`" :message="error" @retry="refresh" />
     <div v-else-if="!rows.length" class="feature-state">{{ empty }}</div>
     <template v-else>
       <p class="supervisor-result-count" role="status">{{ resultCountLabel(rows.length, resource.hasNextPage) }}</p>
