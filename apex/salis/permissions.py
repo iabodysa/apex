@@ -1,12 +1,16 @@
 # Copyright (c) 2026, afmcoltd
 """Project row-scoping for Salis.
 
-Every scoped Salis DocType is confined to its project, reached one of five ways, and
+Every scoped Salis DocType is confined to its project, reached through its own field or
+one known parent. Actual trips prefer their direct project and retain a fail-closed
+fallback for historical Route Plan rows.
 WHICH WAY IS A PROPERTY OF THE DOCTYPE rather than of a function:
 
     column    the doc stores the project itself (``project``)
     dual      the doc has two endpoints (``from_project`` / ``to_project``)
-    hop       the project is one link away (Dispatch Trip -> Route Plan -> project)
+    hop       the project is one link away
+    trip      Dispatch Trip.project, then historical Route Plan.project
+    trip_child  project through Dispatch Trip, then historical Route Plan
     manifest  the project is reachable by EITHER of two links (Passenger Manifest)
     driver    the project hangs off a Salis Driver link (``driver``/``related_driver``)
 
@@ -16,6 +20,7 @@ their own rows:
 
     own="owner"    the DocType grants the Driver role an ``if_owner`` DocPerm
     own="driver"   the row names the acting user's Salis Driver (Dispatch Trip)
+    own="route_supervisor"  the row names its assigned supervisor
 
 ``SALIS_SCOPE`` maps DocType to that pair plus the document-level rule. The list
 fragment and the document check both dispatch off that SAME table, so they can never
@@ -113,8 +118,16 @@ def _hop(field, doctype, rule, own=None):
     return ("hop", {"field": field, "doctype": doctype, "own": own, "rule": rule})
 
 
+def _trip(rule="dispatch_trip", own="trip_actor"):
+    return ("trip", {"own": own, "rule": rule})
+
+
+def _trip_child(rule="owner_or_project", own="owner"):
+    return ("trip_child", {"own": own, "rule": rule})
+
+
 def _manifest():
-    """Project reachable through ``route_plan`` OR ``dispatch_trip`` -> ``route_plan``."""
+    """Project through the actual trip, with a historical Route Plan fallback."""
     return ("manifest", {"own": None, "rule": "scoped"})
 
 
@@ -133,6 +146,9 @@ SALIS_SCOPE = {
     "Fuel Request": _column(rule="owner_or_project", own="owner"),
     "Transport Request": _column(),
     "Route Plan": _column(),
+    "Route Assignment": _column(
+        rule="route_assignment", own="route_supervisor"
+    ),
     "Issue": _column(rule="owner_or_project", own="owner"),
     "Fuel Claim": _column(),
     "Fuel Quota": _column(),
@@ -140,8 +156,8 @@ SALIS_SCOPE = {
     "Salis Vehicle": _column(),
     "Salis Payment Request": _column(rule="payment_sod"),
     "Salis Driver": _column(rule="owner_or_project", own="owner"),
-    "Dispatch Trip": _hop("route_plan", "Route Plan", rule="dispatch_trip", own="driver"),
-    "Trip Start Log": _hop("route_plan", "Route Plan", rule="owner_or_project", own="owner"),
+    "Dispatch Trip": _trip(),
+    "Trip Start Log": _trip_child(),
     "Passenger Manifest": _manifest(),
     "Driver Attendance": _driver(own="owner"),
     "Driver Suspension": _driver(own="owner"),
@@ -153,10 +169,10 @@ SALIS_SCOPE = {
     "Movement Cost Transfer": _dual(),
 }
 
-ROUTE_PLAN_ANCHORED = frozenset(
+INDIRECT_PROJECT_SCOPED = frozenset(
     doctype
     for doctype, (kind, spec) in SALIS_SCOPE.items()
-    if kind == "manifest" or (kind == "hop" and spec["doctype"] == "Route Plan")
+    if kind in {"manifest", "trip_child"} or kind == "hop"
 )
 
 PROJECT_MANDATORY_ON_CREATE = frozenset({"Fuel Claim"})
@@ -177,6 +193,16 @@ def _own_driver_trips_condition(user):
     )
 
 
+def _own_trip_actor_condition(user):
+    escaped_user = frappe.db.escape(user)
+    return (
+        "({driver} or `route_assignment` in ("
+        "select `name` from `tabRoute Assignment` where `route_supervisor` = {user}"
+        ") or (coalesce(`route_assignment`, '') = '' and `route_plan` in ("
+        "select `name` from `tabRoute Plan` where `route_supervisor` = {user})))"
+    ).format(driver=_own_driver_trips_condition(user), user=escaped_user)
+
+
 def _own_clause(spec, user):
     """SQL fragment for the DocType's own-row basis, or None when it has none.
 
@@ -190,6 +216,10 @@ def _own_clause(spec, user):
         return "`owner` = {0}".format(frappe.db.escape(user))
     if own == "driver":
         return _own_driver_trips_condition(user)
+    if own == "trip_actor":
+        return _own_trip_actor_condition(user)
+    if own == "route_supervisor":
+        return "`route_supervisor` = {0}".format(frappe.db.escape(user))
     return None
 
 
@@ -212,6 +242,40 @@ def _render_hop(spec, escaped):
     )
 
 
+def _route_plan_scope(escaped):
+    return "select `name` from `tabRoute Plan` where `project` in ({0})".format(
+        escaped
+    )
+
+
+def _trip_scope(escaped):
+    route_plans = _route_plan_scope(escaped)
+    return (
+        "select `name` from `tabDispatch Trip` where "
+        "(`project` in ({values}) or (coalesce(`project`, '') = '' and "
+        "`route_plan` in ({route_plans})))"
+    ).format(values=escaped, route_plans=route_plans)
+
+
+def _render_trip(spec, escaped):
+    del spec
+    route_plans = _route_plan_scope(escaped)
+    return (
+        "(`project` in ({values}) or (coalesce(`project`, '') = '' and "
+        "`route_plan` in ({route_plans})))"
+    ).format(values=escaped, route_plans=route_plans)
+
+
+def _render_trip_child(spec, escaped):
+    del spec
+    trips = _trip_scope(escaped)
+    route_plans = _route_plan_scope(escaped)
+    return (
+        "(`dispatch_trip` in ({trips}) or "
+        "(coalesce(`dispatch_trip`, '') = '' and `route_plan` in ({route_plans})))"
+    ).format(trips=trips, route_plans=route_plans)
+
+
 def _render_driver(spec, escaped):
     """The project hanging off the row's Salis Driver link."""
     return (
@@ -222,27 +286,22 @@ def _render_driver(spec, escaped):
 
 
 def _render_manifest(spec, escaped):
-    """A manifest keyed by ``route_plan`` directly OR only by ``dispatch_trip``.
-
-    Neither field is mandatory and there is no fetch between them, so the fragment
-    admits a row whose Route Plan — reached by EITHER path — is in scope. The OR is
-    inside this one fragment for the reason recorded on ``_render_dual``.
-    """
+    """Prefer the actual trip; use Route Plan only for historical rows without one."""
     del spec
-    route_plans = "select `name` from `tabRoute Plan` where `project` in ({values})".format(
-        values=escaped
-    )
+    route_plans = _route_plan_scope(escaped)
+    trips = _trip_scope(escaped)
     return (
-        "(`route_plan` in ({rp}) or `dispatch_trip` in ("
-        "select `name` from `tabDispatch Trip` where `route_plan` in ({rp})"
-        "))".format(rp=route_plans)
-    )
+        "(`dispatch_trip` in ({trips}) or "
+        "(coalesce(`dispatch_trip`, '') = '' and `route_plan` in ({route_plans})))"
+    ).format(trips=trips, route_plans=route_plans)
 
 
 FRAGMENTS = {
     "column": _render_column,
     "dual": _render_dual,
     "hop": _render_hop,
+    "trip": _render_trip,
+    "trip_child": _render_trip_child,
     "driver": _render_driver,
     "manifest": _render_manifest,
 }
@@ -302,27 +361,39 @@ def project_scope_query(user=None, doctype=None, scope_for=None):
     return in_scope
 
 
+def _dispatch_trip_project(dispatch_trip):
+    trip = frappe.db.get_value(
+        "Dispatch Trip",
+        dispatch_trip,
+        ["project", "route_plan"],
+        as_dict=True,
+    )
+    if not trip:
+        return None
+    if trip.project:
+        return trip.project
+    if trip.route_plan:
+        return frappe.db.get_value("Route Plan", trip.route_plan, PROJECT)
+    return None
+
+
 def _doc_project(doc):
-    """Resolve the project a document belongs to, including the route-plan chain.
-
-    ``ROUTE_PLAN_ANCHORED`` is derived from ``SALIS_SCOPE`` itself, so the set of
-    DocTypes that reach their project through a Route Plan cannot drift from the
-    strategy the list fragment uses for them.
-
-    """
+    """Resolve direct project first, then one historical parent."""
     project = getattr(doc, PROJECT, None)
     if project:
         return project
 
     doctype = getattr(doc, "doctype", None)
-    if doctype in ROUTE_PLAN_ANCHORED:
-        route_plan = getattr(doc, "route_plan", None)
-        if not route_plan:
-            dispatch_trip = getattr(doc, "dispatch_trip", None)
-            if dispatch_trip:
-                route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan")
-        if route_plan:
-            return frappe.db.get_value("Route Plan", route_plan, PROJECT)
+    if doctype not in INDIRECT_PROJECT_SCOPED:
+        return None
+
+    dispatch_trip = getattr(doc, "dispatch_trip", None)
+    if dispatch_trip:
+        return _dispatch_trip_project(dispatch_trip)
+
+    route_plan = getattr(doc, "route_plan", None)
+    if route_plan:
+        return frappe.db.get_value("Route Plan", route_plan, PROJECT)
 
     return None
 
@@ -348,9 +419,7 @@ def _driver_chain_project(doc, driver_field="driver"):
 
     dispatch_trip = getattr(doc, "dispatch_trip", None)
     if dispatch_trip:
-        route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan")
-        if route_plan:
-            return frappe.db.get_value("Route Plan", route_plan, PROJECT)
+        return _dispatch_trip_project(dispatch_trip)
     return None
 
 
@@ -476,25 +545,28 @@ def _owner_or_project_has_permission(doc, user=None):
 
 
 def _dispatch_trip_has_permission(doc, user=None):
-    """Project-scope Dispatch Trip access, but never block a Driver from their OWN trip.
-
-    Dispatch Trip reaches its project through the Route Plan chain (resolved by
-    ``_doc_project``); enforcing that project boundary alone would deny a Driver
-    opening a trip dispatched to them — a Driver holds no Project User Permission and
-    does not own the trip (dispatchers create it). This mirrors the list fragment's
-    ``own="driver"`` clause: a trip whose ``driver`` resolves to the acting user's
-    Salis Driver is always allowed; every other doc is confined to the user's allowed
-    projects. The driver-own basis is independent and valid, exactly like the if_owner
-    basis on Trip Start Log / Salis Driver.
-
-    Returns False to block, else None to defer to Frappe's default resolution.
-    """
+    """Allow the assigned driver; otherwise enforce the trip's project."""
     user = _resolve_user(user)
     if _is_unscoped(user):
         return None
 
     own_driver = get_driver_for_session_user(user)
     if own_driver and getattr(doc, "driver", None) == own_driver:
+        return None
+
+    route_assignment = getattr(doc, "route_assignment", None)
+    if route_assignment:
+        supervisor = frappe.db.get_value(
+            "Route Assignment", route_assignment, "route_supervisor"
+        )
+    else:
+        route_plan = getattr(doc, "route_plan", None)
+        supervisor = (
+            frappe.db.get_value("Route Plan", route_plan, "route_supervisor")
+            if route_plan
+            else None
+        )
+    if supervisor == user:
         return None
 
     project = _doc_project(doc)
@@ -504,6 +576,23 @@ def _dispatch_trip_has_permission(doc, user=None):
     if project not in _allowed_projects_for(user, doc.doctype):
         return False
 
+    return None
+
+
+def _route_assignment_has_permission(doc, user=None):
+    """Allow the named supervisor; otherwise enforce the assignment's project."""
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return None
+
+    if getattr(doc, "route_supervisor", None) == user:
+        return None
+
+    project = _doc_project(doc)
+    if not project:
+        return False
+    if project not in _allowed_projects_for(user, doc.doctype):
+        return False
     return None
 
 
@@ -631,6 +720,9 @@ DOCUMENT_RULES = {
     "scoped": lambda doc, ptype, user, spec: scoped_has_permission(doc, ptype, user=user),
     "owner_or_project": lambda doc, ptype, user, spec: _owner_or_project_has_permission(doc, user),
     "dispatch_trip": lambda doc, ptype, user, spec: _dispatch_trip_has_permission(doc, user),
+    "route_assignment": lambda doc, ptype, user, spec: _route_assignment_has_permission(
+        doc, user
+    ),
     "driver_chain": _rule_driver_chain,
     "dual": lambda doc, ptype, user, spec: movement_cost_transfer_has_permission(doc, ptype, user),
     "payment_sod": lambda doc, ptype, user, spec: payment_sod_has_permission(doc, ptype, user),

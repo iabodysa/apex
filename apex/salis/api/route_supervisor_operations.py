@@ -30,37 +30,6 @@ def _permission_checked_doc(doctype: str, name: str, ptype: str = "read"):
     return doc
 
 
-def _owned_plan(name: str):
-    from apex.salis.api.route_supervisor import _owned_plan as owned_plan
-
-    return owned_plan(name)
-
-
-def _owned_trip(name: str):
-    from apex.salis.api.route_supervisor import _owned_trip as owned_trip
-
-    return owned_trip(name)
-
-
-def _owned_plan_names():
-    if frappe.session.user == "Administrator":
-        return None
-    return frappe.get_list(
-        "Route Plan",
-        filters={"route_supervisor": frappe.session.user},
-        pluck="name",
-        limit_page_length=0,
-    )
-
-
-def _trip_filters(filters=None):
-    scoped = dict(filters or {})
-    plan_names = _owned_plan_names()
-    if plan_names is not None:
-        scoped["route_plan"] = ["in", plan_names]
-    return scoped, plan_names
-
-
 def _workflow_result(doc) -> dict:
     return {"name": doc.name, "status": doc.status, "docstatus": doc.docstatus}
 
@@ -121,68 +90,60 @@ def get_transport_requests(start=0, page_length=PLAN_PAGE_LENGTH):
 
 
 @frappe.whitelist()
-def get_shift_routes(start=0, page_length=PLAN_PAGE_LENGTH):
+def get_route_assignments(start=0, page_length=PLAN_PAGE_LENGTH):
+    """Return recurring operations through native row-level permission hooks."""
     _require_portal_role()
     return _page(
         "Route Assignment",
-        ["name", "shift_name", "project", "route_template", "driver", "vehicle"],
-        start,
-        page_length,
-        order_by="modified desc, name desc",
-    )
-
-
-@frappe.whitelist()
-def get_route_plans(start=0, page_length=PLAN_PAGE_LENGTH):
-    """Return plans through native DocPerm and Project User Permission filters."""
-    _require_portal_role()
-    filters = (
-        {}
-        if frappe.session.user == "Administrator"
-        else {"route_supervisor": frappe.session.user}
-    )
-    return _page(
-        "Route Plan",
         [
             "name",
-            "route_name",
+            "assignment_name",
+            "route_template",
+            "route_template.template_name as route_template_label",
+            "work_shift",
+            "shift_name",
             "project",
-            "shift",
+            "project.project_name as project_label",
             "driver",
             "vehicle",
-            "transport_request",
+            "starts_on",
+            "ends_on",
+            "enabled",
+            "route_supervisor",
+            "status",
             "docstatus",
-            "modified",
         ],
         start,
         page_length,
         order_by="modified desc, name desc",
-        **({"filters": filters} if filters else {}),
     )
 
 
 @frappe.whitelist()
-def get_route_plan(name: str):
+def get_route_assignment(name: str):
     _require_portal_role()
-    _owned_plan(name)
-    return _permission_checked_doc("Route Plan", name).as_dict(no_nulls=True)
+    return _permission_checked_doc("Route Assignment", name).as_dict(no_nulls=True)
 
 
 @frappe.whitelist()
 def get_dispatch_trips(start=0, page_length=PLAN_PAGE_LENGTH):
     _require_portal_role()
-    filters, plan_names = _trip_filters()
-    if plan_names == []:
-        return []
     return _page(
         "Dispatch Trip",
         [
             "name",
+            "trip_title",
+            "trip_type",
+            "route_assignment",
+            "route_template",
+            "project",
+            "project.project_name as project_label",
             "route_plan",
-            "route_plan.route_name as route_name",
             "transport_request",
             "shift_name",
             "trip_date",
+            "planned_start",
+            "planned_end",
             "status",
             "driver",
             "vehicle",
@@ -194,31 +155,28 @@ def get_dispatch_trips(start=0, page_length=PLAN_PAGE_LENGTH):
             "`tabDispatch Trip`.modified desc, "
             "`tabDispatch Trip`.name desc"
         ),
-        **({"filters": filters} if filters else {}),
     )
 
 
 @frappe.whitelist()
 def get_dispatch_trip(name: str):
     _require_portal_role()
-    _owned_trip(name)
     return _permission_checked_doc("Dispatch Trip", name).as_dict(no_nulls=True)
 
 
 @frappe.whitelist()
 def get_movement_history(start=0, page_length=PLAN_PAGE_LENGTH):
     _require_portal_role()
-    filters, plan_names = _trip_filters(
-        {"status": ["in", ["Completed", "Cancelled"]]}
-    )
-    if plan_names == []:
-        return []
     return _page(
         "Dispatch Trip",
         [
             "name",
+            "trip_title",
+            "trip_type",
+            "route_assignment",
+            "route_template",
+            "project",
             "route_plan",
-            "route_plan.route_name as route_name",
             "shift_name",
             "trip_date",
             "status",
@@ -227,7 +185,7 @@ def get_movement_history(start=0, page_length=PLAN_PAGE_LENGTH):
         ],
         start,
         page_length,
-        filters=filters,
+        filters={"status": ["in", ["Completed", "Cancelled"]]},
         order_by=(
             "`tabDispatch Trip`.trip_date desc, "
             "`tabDispatch Trip`.modified desc, "
@@ -250,8 +208,13 @@ def apply_transport_request_action(name: str, action: str):
 
 
 @frappe.whitelist(methods=["POST"])
+def apply_route_assignment_action(name: str, action: str):
+    _require_portal_role()
+    return _apply_workflow("Route Assignment", name, action)
+
+
+@frappe.whitelist(methods=["POST"])
 def apply_dispatch_trip_action(name: str, action: str):
     """Native workflow keeps completion reserved for manager roles."""
     _require_portal_role()
-    _owned_trip(name)
     return _apply_workflow("Dispatch Trip", name, action)

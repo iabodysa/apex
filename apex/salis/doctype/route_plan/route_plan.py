@@ -15,8 +15,6 @@ from frappe.model.document import Document
 
 from apex.salis.utils import drive_transport_request, revert_transport_request
 
-_DECISION_FIELDS = ("supervisor_approval", "supervisor_action_by", "supervisor_action_on", "supervisor_rejection_reason")
-
 
 class RoutePlan(Document):
     def validate(self):
@@ -31,11 +29,8 @@ class RoutePlan(Document):
     def _require_project_on_a_new_plan(self):
         """A NEW plan must name its project. Existing untagged ones are left alone.
 
-        Dispatch Trip has no project of its own — every project scope reaches a trip
-        through its Route Plan (``dispatch_board._trips_today_pane``, and
-        ``permissions.dispatch_trip_query``). So a plan with no project does not degrade
-        gracefully: its trips vanish from a scoped supervisor's board entirely while
-        staying visible to an unscoped one, which is the worst shape a scoping gap takes.
+        Historical Dispatch Trips may still reach their project through this record.
+        New trips store project directly, but a new legacy plan must remain scoped too.
 
         The field is not marked ``reqd`` because 169 plans already exist without one and a
         blanket rule would refuse to save any of them until somebody invented a project for
@@ -62,48 +57,6 @@ class RoutePlan(Document):
             from_state="Scheduled",
             to_state="Approved",
             clear_fields=["route_plan"],
-        )
-
-    def before_update_after_submit(self):
-        """The decision fields are allow_on_submit so the API can stamp them, and read_only,
-        which is a form control and not a server one — so a plain set_value on a submitted
-        plan could self-approve it past both checks the API makes. db_set runs no hook, so
-        the sanctioned writer never reaches here."""
-        if any(self.has_value_changed(f) for f in _DECISION_FIELDS):
-            frappe.throw(
-                _("A supervisor decision is recorded by approving or rejecting the plan, not by editing it."),
-                frappe.PermissionError,
-            )
-
-    def set_supervisor_decision(self, decision: str, user: str, reason: str | None = None):
-        """Record the Route Supervisor's approval decision on this plan.
-
-        State-machine writer for the ``supervisor_approval`` field. Called only by the
-        guarded ``route_supervisor`` portal API after it has verified the caller is the
-        assigned supervisor and the plan is still Pending — the permission/precondition
-        gate lives there; this method just performs the write atomically.
-
-        ``supervisor_approval`` and its audit fields are ``allow_on_submit``, so the
-        decision persists on the already-submitted plan without an amendment. Uses
-        ``db_set`` (audit-only stamp, no re-validate) mirroring the driver-portal
-        execution stamps. Rejection reason is cleared on approval so a re-approval of a
-        previously rejected plan carries no stale reason."""
-        if decision not in ("Approved", "Rejected"):
-            frappe.throw(_("Unsupported supervisor decision."))
-        self.db_set(
-            {
-                "supervisor_approval": decision,
-                "supervisor_action_by": user,
-                "supervisor_action_on": frappe.utils.now_datetime(),
-                "supervisor_rejection_reason": reason if decision == "Rejected" else None,
-            },
-            update_modified=False,
-        )
-        frappe.publish_realtime(
-            "route_plan_decision",
-            {"name": self.name, "approval": decision},
-            doctype="Route Plan",
-            after_commit=True,
         )
 
     def _default_operations_requester(self):

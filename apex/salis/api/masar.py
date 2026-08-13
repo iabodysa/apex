@@ -43,8 +43,10 @@ from apex.salis.api.masar_routes import (
     _fmt_time,
     _is_upcoming_pickup,
     _ordered_stops,
+    _ordered_trip_stops,
     _pickup_building_of,
-    _registered_workers,
+    _registered_trip_workers,
+    _registered_workers,  # noqa: F401
     _route_destination_stop,
     _today_worker_trips,
     _worker_pickup_stop,
@@ -112,18 +114,23 @@ def get_my_worker_route_today():
     driver = _resolve_driver()
     trips = []
     for t in _today_worker_trips(driver):
-        workers = _registered_workers(t.get("transport_request"))
+        workers = _registered_trip_workers(t["name"], t.get("transport_request"))
         trips.append(
             {
                 "dispatch_trip": t["name"],
+                "trip_title": t.get("trip_title"),
+                "route_assignment": t.get("route_assignment"),
+                "route_template": t.get("route_template"),
+                "project": t.get("project"),
                 "transport_request": t.get("transport_request"),
+                "transport_requests": t.get("transport_requests") or [],
                 "route_plan": t.get("route_plan"),
                 "vehicle": t.get("vehicle"),
                 "depart_time": _fmt_time(t.get("depart_time")),
                 "return_time": _fmt_time(t.get("return_time")),
                 "status": t.get("status"),
                 "expected_count": len(workers),
-                "stops": _ordered_stops(t.get("route_plan")),
+                "stops": _ordered_trip_stops(t["name"], t.get("route_plan")),
                 "workers": workers,
             }
         )
@@ -164,8 +171,10 @@ def get_my_worker_route_summary() -> dict:
     expected_total = 0
     next_pickup = None
     for t in worker_trips:
-        expected_total += len(_registered_workers(t.get("transport_request")))
-        stops = _ordered_stops(t.get("route_plan"))
+        expected_total += len(
+            _registered_trip_workers(t["name"], t.get("transport_request"))
+        )
+        stops = _ordered_trip_stops(t["name"], t.get("route_plan"))
         stop_count += len(stops)
         if next_pickup is None:
             for s in stops:
@@ -538,9 +547,13 @@ def _transport_lookups(requests, employee):
 def _transport_trip(req, lookups, my_building, now_dt):
     """Shapes one Transport Request into the trip the Transport screen renders."""
     is_upcoming = _is_upcoming_pickup(req.get("pickup_datetime"), now_dt)
-    stops = _ordered_stops(req.get("route_plan"))
-    my_pickup = _worker_pickup_stop(stops, my_building)
     dispatch_trip = req.get("dispatch_trip") or lookups["live"].get(req["name"])
+    stops = (
+        _ordered_trip_stops(dispatch_trip, req.get("route_plan"))
+        if dispatch_trip
+        else _ordered_stops(req.get("route_plan"))
+    )
+    my_pickup = _worker_pickup_stop(stops, my_building)
 
     return {
         "transport_request": req["name"],
@@ -553,15 +566,15 @@ def _transport_trip(req, lookups, my_building, now_dt):
             frappe.utils.cstr(req["pickup_datetime"]) if req.get("pickup_datetime") else None
         ),
         "depart_time": (
-            _fmt_time(lookups["depart"].get(req["dispatch_trip"]))
-            if req.get("dispatch_trip")
-            else None
+                _fmt_time(lookups["depart"].get(dispatch_trip))
+                if dispatch_trip
+                else None
         ),
         "is_upcoming": is_upcoming,
         "has_rated": bool(
-            req.get("dispatch_trip")
+            dispatch_trip
             and not is_upcoming
-            and req["dispatch_trip"] in lookups["rated"]
+            and dispatch_trip in lookups["rated"]
         ),
         "boarding_window": boarding_window.resolve(
             dispatch_trip,
@@ -1133,10 +1146,10 @@ def get_worker_boarding_pass(token=None, transport_request=None):
         return {"pass": None}
     dispatch_trip, request_name, stop_name, building = resolved
 
-    route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan") or frappe.db.get_value(
-        "Transport Request", request_name, "route_plan"
-    )
-    stops = _ordered_stops(route_plan)
+    route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan")
+    if not route_plan:
+        route_plan = frappe.db.get_value("Transport Request", request_name, "route_plan")
+    stops = _ordered_trip_stops(dispatch_trip, route_plan)
     my_pickup = _worker_pickup_stop(stops, building)
     destination = _route_destination_stop(stops, my_pickup)
     pickup_label = (

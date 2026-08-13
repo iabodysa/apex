@@ -4,7 +4,7 @@ from unittest.mock import patch
 import frappe
 
 from apex.apex_core.utils.portal_token_security import DRIVER
-from apex.salis.api import driver_portal
+from apex.salis.api import driver_portal, masar_routes
 from apex.salis.api.driver_portal import execution, personal, trips
 
 
@@ -27,8 +27,8 @@ class TestMasarDriverExecution(TestCase):
 
     @patch("apex.salis.api.boarding_flow._manifest_request_names", return_value=["TR-1", "TR-2"])
     @patch("apex.salis.api.masar._registered_workers")
-    @patch("apex.salis.api.masar._ordered_stops", return_value=[])
-    @patch.object(trips, "_full_route_maps_url", return_value=None)
+    @patch("apex.salis.api.masar._ordered_trip_stops", return_value=[])
+    @patch.object(trips, "_trip_route_maps_url", return_value=None)
     @patch.object(trips, "_attach_stop_progress")
     @patch.object(trips, "_enrich_workers_with_phone")
     @patch.object(trips.frappe.db, "exists", return_value=False)
@@ -51,7 +51,9 @@ class TestMasarDriverExecution(TestCase):
         get_value.side_effect = [
             frappe._dict(
                 name="DT-1",
+                trip_title="رحلة المستشفى",
                 route_plan="RP-1",
+                route_template="RT-1",
                 vehicle="BUS-1",
                 transport_request="TR-1",
                 depart_time=None,
@@ -59,7 +61,6 @@ class TestMasarDriverExecution(TestCase):
                 status="Dispatched",
             ),
             "ABC 123",
-            "خط المطار",
         ]
         registered_workers.side_effect = [
             [
@@ -80,6 +81,60 @@ class TestMasarDriverExecution(TestCase):
             ["EMP-1", "EMP-2", "EMP-3"],
         )
         self.assertEqual(payload["expected_count"], 3)
+        _stops.assert_called_once_with("DT-1", "RP-1")
+        self.assertEqual(payload["route_name"], "رحلة المستشفى")
+
+    @patch.object(masar_routes.frappe, "get_all")
+    def test_actual_trip_stops_override_legacy_route_plan(self, get_all):
+        get_all.return_value = [
+            frappe._dict(
+                name="ROW-1",
+                idx=1,
+                stop_name="المستشفى",
+                stop_key="hospital",
+                location="https://maps.example/hospital",
+                planned_time=None,
+                passengers=2,
+                accommodation_building=None,
+                latitude=24.7,
+                longitude=46.7,
+            )
+        ]
+
+        stops = masar_routes._ordered_trip_stops("DT-1", "RP-OLD")
+
+        self.assertEqual(stops[0]["route_stop"], "ROW-1")
+        self.assertEqual(stops[0]["stop_key"], "hospital")
+        self.assertEqual(get_all.call_count, 1)
+        self.assertEqual(
+            get_all.call_args.kwargs["filters"],
+            {"parent": "DT-1", "parenttype": "Dispatch Trip"},
+        )
+
+    @patch.object(masar_routes.frappe, "get_all")
+    def test_legacy_route_stops_are_fallback_only(self, get_all):
+        get_all.side_effect = [
+            [],
+            [
+                frappe._dict(
+                    name="ROW-OLD",
+                    idx=1,
+                    stop_name="السكن",
+                    stop_key=None,
+                    location=None,
+                    planned_time=None,
+                    passengers=3,
+                    accommodation_building=None,
+                    latitude=None,
+                    longitude=None,
+                )
+            ],
+        ]
+
+        stops = masar_routes._ordered_trip_stops("DT-OLD", "RP-OLD")
+
+        self.assertEqual(stops[0]["route_stop"], "ROW-OLD")
+        self.assertEqual(get_all.call_args.kwargs["filters"]["parenttype"], "Route Plan")
 
     @patch.object(driver_portal.frappe.db, "get_value")
     def test_execution_rejects_a_trip_not_dispatched(self, get_value):

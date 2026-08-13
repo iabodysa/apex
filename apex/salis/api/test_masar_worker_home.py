@@ -1,6 +1,8 @@
 from unittest import TestCase
 from unittest.mock import patch
 
+import frappe
+
 from apex.salis.api import masar
 
 
@@ -21,3 +23,31 @@ class TestMasarWorkerHome(TestCase):
         self.assertEqual(result["custody"], custody.return_value)
         self.assertEqual(result["transport"], transport.return_value)
         self.assertEqual(result["requests"], requests.return_value)
+
+    @patch.object(masar.boarding_window, "resolve", return_value={"state": "waiting"})
+    @patch.object(masar, "_ordered_trip_stops", return_value=[])
+    @patch.object(masar, "_ordered_stops")
+    def test_worker_transport_reads_actual_trip_stops(
+        self, legacy_stops, trip_stops, _boarding_window
+    ):
+        request = frappe._dict(
+            name="TR-1",
+            dispatch_trip="DT-1",
+            route_plan="RP-OLD",
+            pickup_datetime=None,
+            status="Scheduled",
+        )
+        lookups = {
+            "live": {},
+            "status": {"DT-1": "Dispatched"},
+            "depart": {"DT-1": None},
+            "rated": set(),
+            "vehicle": {},
+            "driver": {},
+        }
+
+        payload = masar._transport_trip(request, lookups, None, frappe.utils.now_datetime())
+
+        trip_stops.assert_called_once_with("DT-1", "RP-OLD")
+        legacy_stops.assert_not_called()
+        self.assertEqual(payload["dispatch_trip"], "DT-1")

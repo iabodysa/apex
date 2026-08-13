@@ -32,50 +32,38 @@ class TestRouteSupervisorOperations(TestCase):
 
     @patch.object(operations, "_require_portal_role")
     @patch.object(operations.frappe, "get_list", return_value=[])
-    @patch.object(operations.frappe, "session", MagicMock(user="supervisor@example.com"))
-    def test_route_plan_list_is_limited_to_assigned_supervisor(self, get_list, _role):
-        operations.get_route_plans()
-        self.assertEqual(get_list.call_args.args[0], "Route Plan")
-        self.assertEqual(
-            get_list.call_args.kwargs.get("filters"),
-            {"route_supervisor": "supervisor@example.com"},
-        )
+    def test_assignment_list_uses_native_permission_query(self, get_list, _role):
+        operations.get_route_assignments()
 
-    @patch.object(operations, "_require_portal_role")
-    @patch.object(operations.frappe, "get_list", return_value=[])
-    @patch.object(operations.frappe, "session", MagicMock(user="Administrator"))
-    def test_administrator_route_plan_list_keeps_oversight_scope(self, get_list, _role):
-        operations.get_route_plans()
+        self.assertEqual(get_list.call_args.args[0], "Route Assignment")
+        self.assertNotIn("route_supervisor", get_list.call_args.kwargs.get("filters", {}))
+        self.assertIn("assignment_name", get_list.call_args.kwargs["fields"])
+        self.assertIn("status", get_list.call_args.kwargs["fields"])
 
-        self.assertNotIn("filters", get_list.call_args.kwargs)
-
-    @patch.object(operations, "_owned_plan", create=True)
     @patch.object(operations, "_permission_checked_doc")
-    def test_route_plan_detail_checks_assignment_before_loading_document(
-        self, permission_checked_doc, owned_plan
+    @patch.object(operations, "_require_portal_role")
+    def test_assignment_detail_checks_native_document_permission(
+        self, _role, permission_checked_doc
     ):
-        permission_checked_doc.return_value.as_dict.return_value = {"name": "RP-1"}
+        permission_checked_doc.return_value.as_dict.return_value = {"name": "RA-1"}
 
-        operations.get_route_plan("RP-1")
+        result = operations.get_route_assignment("RA-1")
 
-        owned_plan.assert_called_once_with("RP-1")
-        permission_checked_doc.assert_called_once_with("Route Plan", "RP-1")
+        permission_checked_doc.assert_called_once_with("Route Assignment", "RA-1")
+        self.assertEqual(result, {"name": "RA-1"})
 
     @patch.object(operations, "_require_portal_role")
-    @patch.object(
-        operations, "_owned_plan_names", return_value=["RP-OWN"], create=True
-    )
     @patch.object(operations.frappe, "get_list", return_value=[])
-    def test_dispatch_trip_lists_are_limited_to_owned_plans(
-        self, get_list, owned_plan_names, _role
-    ):
+    def test_dispatch_trip_list_uses_direct_actual_trip_fields(self, get_list, _role):
         operations.get_dispatch_trips()
 
-        owned_plan_names.assert_called_once_with()
-        self.assertEqual(
-            get_list.call_args.kwargs["filters"],
-            {"route_plan": ["in", ["RP-OWN"]]},
-        )
+        self.assertEqual(get_list.call_args.args[0], "Dispatch Trip")
+        fields = get_list.call_args.kwargs["fields"]
+        self.assertIn("trip_title", fields)
+        self.assertIn("route_assignment", fields)
+        self.assertIn("project", fields)
+        self.assertNotIn("route_plan.route_name as route_name", fields)
+        self.assertNotIn("filters", get_list.call_args.kwargs)
         self.assertEqual(
             get_list.call_args.kwargs["order_by"],
             "`tabDispatch Trip`.trip_date desc, "
@@ -84,21 +72,15 @@ class TestRouteSupervisorOperations(TestCase):
         )
 
     @patch.object(operations, "_require_portal_role")
-    @patch.object(
-        operations, "_owned_plan_names", return_value=["RP-OWN"], create=True
-    )
     @patch.object(operations.frappe, "get_list", return_value=[])
-    def test_movement_history_combines_status_with_owned_plan_scope(
-        self, get_list, _owned_plan_names, _role
+    def test_movement_history_uses_status_plus_native_permission_scope(
+        self, get_list, _role
     ):
         operations.get_movement_history()
 
         self.assertEqual(
             get_list.call_args.kwargs["filters"],
-            {
-                "status": ["in", ["Completed", "Cancelled"]],
-                "route_plan": ["in", ["RP-OWN"]],
-            },
+            {"status": ["in", ["Completed", "Cancelled"]]},
         )
         self.assertEqual(
             get_list.call_args.kwargs["order_by"],
@@ -107,16 +89,15 @@ class TestRouteSupervisorOperations(TestCase):
             "`tabDispatch Trip`.name desc",
         )
 
-    @patch.object(operations, "_owned_trip", create=True)
+    @patch.object(operations, "_require_portal_role")
     @patch.object(operations, "_permission_checked_doc")
-    def test_dispatch_trip_detail_checks_assignment_before_loading_document(
-        self, permission_checked_doc, owned_trip
+    def test_dispatch_trip_detail_checks_native_document_permission(
+        self, permission_checked_doc, _role
     ):
         permission_checked_doc.return_value.as_dict.return_value = {"name": "DT-1"}
 
         operations.get_dispatch_trip("DT-1")
 
-        owned_trip.assert_called_once_with("DT-1")
         permission_checked_doc.assert_called_once_with("Dispatch Trip", "DT-1")
 
     @patch.object(operations, "_require_portal_role")
@@ -139,11 +120,29 @@ class TestRouteSupervisorOperations(TestCase):
         self.assertEqual(result["status"], "Validated")
 
     @patch.object(operations, "_require_portal_role")
-    @patch.object(operations, "_owned_trip", create=True)
+    @patch.object(operations.frappe, "get_doc")
+    @patch("frappe.model.workflow.apply_workflow")
+    def test_assignment_approval_delegates_to_native_workflow(
+        self, apply_workflow, get_doc, _role
+    ):
+        doc = MagicMock(name="route-assignment")
+        doc.name = "RA-1"
+        doc.status = "Approved"
+        doc.docstatus = 1
+        get_doc.return_value = doc
+        apply_workflow.return_value = doc
+
+        result = operations.apply_route_assignment_action("RA-1", "Approve")
+
+        doc.check_permission.assert_called_once_with("write")
+        apply_workflow.assert_called_once_with(doc, "Approve")
+        self.assertEqual(result["status"], "Approved")
+
+    @patch.object(operations, "_require_portal_role")
     @patch.object(operations.frappe, "get_doc")
     @patch("frappe.model.workflow.apply_workflow")
     def test_trip_completion_remains_native_role_gated(
-        self, apply_workflow, get_doc, owned_trip, _role
+        self, apply_workflow, get_doc, _role
     ):
         doc = MagicMock(name="dispatch-trip")
         doc.name = "DT-1"
@@ -154,6 +153,5 @@ class TestRouteSupervisorOperations(TestCase):
 
         operations.apply_dispatch_trip_action("DT-1", "Complete")
 
-        owned_trip.assert_called_once_with("DT-1")
         doc.check_permission.assert_called_once_with("write")
         apply_workflow.assert_called_once_with(doc, "Complete")

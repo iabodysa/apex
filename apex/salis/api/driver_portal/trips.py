@@ -9,7 +9,7 @@ from apex.salis.api.driver_portal import (
     _resolve_driver,
     _require_enabled,
     _label_trips,
-    _full_route_maps_url,
+    _trip_route_maps_url,
     _attach_trip_maps,
     _attach_trip_log_state,
     _attach_boarding_counts,
@@ -44,7 +44,19 @@ def my_trips_today():
             "trip_date": frappe.utils.today(),
             "status": "Dispatched",
         },
-        fields=["name", "route_plan", "vehicle", "transport_request", "depart_time", "return_time", "status"],
+        fields=[
+            "name",
+            "trip_title",
+            "route_assignment",
+            "route_template",
+            "route_plan",
+            "project",
+            "vehicle",
+            "transport_request",
+            "depart_time",
+            "return_time",
+            "status",
+        ],
         order_by="depart_time asc",
     )
     _attach_trip_maps(trips)
@@ -78,7 +90,19 @@ def my_trips_recent(days=30, limit=50):
     trips = frappe.get_all(
         "Dispatch Trip",
         filters={"driver": driver, "trip_date": [">=", since]},
-        fields=["name", "trip_date", "route_plan", "vehicle", "depart_time", "return_time", "status"],
+        fields=[
+            "name",
+            "trip_title",
+            "trip_date",
+            "route_assignment",
+            "route_template",
+            "route_plan",
+            "project",
+            "vehicle",
+            "depart_time",
+            "return_time",
+            "status",
+        ],
         order_by="trip_date desc, depart_time desc",
         limit=limit,
     )
@@ -122,7 +146,9 @@ def my_worker_route_today():
     data = masar.get_my_worker_route_today()
     for trip in data.get("trips", []):
         _enrich_workers_with_phone(trip.get("workers"))
-        trip["maps_route_url"] = _full_route_maps_url(trip.get("route_plan"))
+        trip["maps_route_url"] = _trip_route_maps_url(
+            trip.get("dispatch_trip"), trip.get("route_plan")
+        )
     return data
 
 
@@ -149,7 +175,19 @@ def my_trip_route(dispatch_trip):
     trip = frappe.db.get_value(
         "Dispatch Trip",
         {"name": dispatch_trip, "driver": driver},
-        ["name", "route_plan", "vehicle", "transport_request", "depart_time", "return_time", "status"],
+        [
+            "name",
+            "trip_title",
+            "route_assignment",
+            "route_template",
+            "route_plan",
+            "project",
+            "vehicle",
+            "transport_request",
+            "depart_time",
+            "return_time",
+            "status",
+        ],
         as_dict=True,
     )
     if not trip:
@@ -158,8 +196,8 @@ def my_trip_route(dispatch_trip):
     from apex.salis.api import masar
 
     route_plan = trip.get("route_plan")
-    stops = masar._ordered_stops(route_plan)
-    _attach_stop_progress(stops, route_plan, trip["name"], driver)
+    stops = masar._ordered_trip_stops(trip["name"], route_plan)
+    _attach_stop_progress(stops, trip["name"], driver)
 
     from apex.salis.api.boarding_flow import _manifest_request_names
 
@@ -179,17 +217,17 @@ def my_trip_route(dispatch_trip):
 
     return {
         "dispatch_trip": trip["name"],
+        "trip_title": trip.get("trip_title"),
+        "route_assignment": trip.get("route_assignment"),
+        "route_template": trip.get("route_template"),
         "route_plan": route_plan,
-        "route_name": (
-            (frappe.db.get_value("Route Plan", route_plan, "route_name") or route_plan)
-            if route_plan
-            else None
-        ),
+        "route_name": trip.get("trip_title") or trip["name"],
+        "project": trip.get("project"),
         "vehicle": vehicle,
         "depart_time": masar._fmt_time(trip.get("depart_time")),
         "return_time": masar._fmt_time(trip.get("return_time")),
         "status": trip.get("status"),
-        "has_route_plan": bool(route_plan),
+        "has_route_plan": bool(stops),
         "started": bool(
             frappe.db.exists(
                 "Trip Start Log",
@@ -199,5 +237,5 @@ def my_trip_route(dispatch_trip):
         "stops": stops,
         "workers": workers,
         "expected_count": len(workers),
-        "maps_route_url": _full_route_maps_url(route_plan),
+        "maps_route_url": _trip_route_maps_url(trip["name"], route_plan),
     }

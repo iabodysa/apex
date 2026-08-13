@@ -136,24 +136,24 @@
   {
    "fieldname": "rp_sec_supervision",
    "fieldtype": "Section Break",
-   "label": "Supervision"
+   "hidden": 1,
+   "label": "Legacy Supervision"
   },
   {
-   "description": "The Route Supervisor this plan is assigned to for approval and live oversight. Only this user may approve or reject the plan from the Masar supervisor portal.",
+   "description": "Historical supervisor value retained for earlier route plans.",
    "fieldname": "route_supervisor",
    "fieldtype": "Link",
-   "in_standard_filter": 1,
+   "hidden": 1,
    "label": "Route Supervisor",
    "options": "User"
   },
   {
    "allow_on_submit": 1,
    "default": "Pending",
-   "description": "Supervisor approval decision for the plan. System-maintained by the Masar supervisor portal; never edited manually.",
+   "description": "Historical decision retained for earlier route plans.",
    "fieldname": "supervisor_approval",
    "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
+   "hidden": 1,
    "label": "Supervisor Approval",
    "options": "Pending\nApproved\nRejected",
    "permlevel": 1,
@@ -161,13 +161,15 @@
   },
   {
    "fieldname": "rp_supervision_col",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "hidden": 1
   },
   {
    "allow_on_submit": 1,
    "description": "The supervisor user who recorded the approval decision.",
    "fieldname": "supervisor_action_by",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Decision By",
    "options": "User",
    "permlevel": 1,
@@ -178,6 +180,7 @@
    "description": "When the supervisor recorded the approval decision.",
    "fieldname": "supervisor_action_on",
    "fieldtype": "Datetime",
+   "hidden": 1,
    "label": "Decision On",
    "permlevel": 1,
    "read_only": 1
@@ -188,6 +191,7 @@
    "description": "Reason the supervisor rejected the plan, captured on rejection.",
    "fieldname": "supervisor_rejection_reason",
    "fieldtype": "Small Text",
+   "hidden": 1,
    "label": "Rejection Reason",
    "permlevel": 1,
    "read_only": 1

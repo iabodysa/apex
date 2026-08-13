@@ -166,7 +166,11 @@ def _today_worker_trips(driver):
         },
         fields=[
             "name",
+            "trip_title",
+            "route_assignment",
+            "route_template",
             "route_plan",
+            "project",
             "transport_request",
             "vehicle",
             "trip_date",
@@ -179,7 +183,22 @@ def _today_worker_trips(driver):
     trips = _drop_finished_yesterday(trips)
     if not trips:
         return []
-    rp_ids = {t["route_plan"] for t in trips if not t.get("transport_request") and t.get("route_plan")}
+    trip_names = [t["name"] for t in trips]
+    requests_by_trip = {t["name"]: [] for t in trips}
+    for row in frappe.get_all(
+        "Dispatch Trip Assigned Request",
+        filters={"parent": ["in", trip_names], "parenttype": "Dispatch Trip"},
+        fields=["parent", "transport_request"],
+        order_by="parent asc, idx asc",
+    ):
+        if row.get("transport_request"):
+            requests_by_trip[row["parent"]].append(row["transport_request"])
+
+    rp_ids = {
+        t["route_plan"]
+        for t in trips
+        if not t.get("transport_request") and t.get("route_plan")
+    }
     if rp_ids:
         rp_tr = {
             r["name"]: r["transport_request"]
@@ -193,7 +212,21 @@ def _today_worker_trips(driver):
             if not t.get("transport_request") and t.get("route_plan"):
                 t["transport_request"] = rp_tr.get(t["route_plan"])
 
-    tr_ids = {t["transport_request"] for t in trips if t.get("transport_request")}
+    for trip in trips:
+        requests_by_trip[trip["name"]] = list(
+            dict.fromkeys(
+                request
+                for request in [
+                    trip.get("transport_request"),
+                    *requests_by_trip[trip["name"]],
+                ]
+                if request
+            )
+        )
+
+    tr_ids = {
+        request for requests in requests_by_trip.values() for request in requests
+    }
     service_lines = (
         {
             r["name"]: r["service_line"]
@@ -206,7 +239,13 @@ def _today_worker_trips(driver):
         if tr_ids
         else {}
     )
-    return [t for t in trips if service_lines.get(t.get("transport_request")) in WORKER_SERVICE_LINES]
+    result = []
+    for trip in trips:
+        requests = requests_by_trip[trip["name"]]
+        if any(service_lines.get(request) in WORKER_SERVICE_LINES for request in requests):
+            trip["transport_requests"] = requests
+            result.append(trip)
+    return result
 
 
 def _registered_workers(transport_request):
@@ -244,22 +283,41 @@ def _registered_workers(transport_request):
     return workers
 
 
-def _ordered_stops(route_plan):
-    """The ordered Route Stop rows for a Route Plan, each enriched with its Habitat
-    pickup (Accommodation Building) details when the stop is a housing pickup."""
-    if not route_plan:
+def _registered_trip_workers(dispatch_trip, transport_request=None):
+    """Return the de-duplicated worker manifest across all trip requests."""
+    from apex.salis.api.boarding_flow import _manifest_request_names
+
+    workers = []
+    seen = set()
+    for request in _manifest_request_names(dispatch_trip, transport_request):
+        for worker in _registered_workers(request):
+            employee = worker.get("employee")
+            key = employee or (request, worker.get("pickup_point"), worker.get("notes"))
+            if key in seen:
+                continue
+            seen.add(key)
+            workers.append(worker)
+    return workers
+
+
+def _ordered_stops(parent, parenttype="Route Plan"):
+    """Return ordered stops for one route-bearing document."""
+    if not parent:
         return []
     rows = frappe.get_all(
         "Route Stop",
-        filters={"parent": route_plan, "parenttype": "Route Plan"},
+        filters={"parent": parent, "parenttype": parenttype},
         fields=[
             "name",
             "idx",
+            "stop_key",
             "stop_name",
             "accommodation_building",
             "location",
             "planned_time",
             "passengers",
+            "latitude",
+            "longitude",
         ],
         order_by="idx asc",
     )
@@ -291,16 +349,30 @@ def _ordered_stops(route_plan):
                 }
         stops.append(
             {
+                "route_stop": r.get("name"),
+                "stop_key": r.get("stop_key"),
                 "stop_name": r.get("stop_name"),
                 "sequence": r.get("idx"),
                 "location": r.get("location"),
                 "planned_time": _fmt_time(r.get("planned_time")),
                 "expected_passengers": r.get("passengers"),
+                "latitude": r.get("latitude"),
+                "longitude": r.get("longitude"),
                 "accommodation_building": r.get("accommodation_building"),
                 "pickup": building,
             }
         )
     return stops
+
+
+def _ordered_trip_stops(dispatch_trip, route_plan=None):
+    """Read the immutable trip copy; use Route Plan only for legacy trips."""
+    stops = _ordered_stops(dispatch_trip, "Dispatch Trip")
+    if stops:
+        return stops
+    if not route_plan and dispatch_trip:
+        route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan")
+    return _ordered_stops(route_plan, "Route Plan")
 
 
 def _is_upcoming_pickup(pickup_datetime, now_dt=None):
