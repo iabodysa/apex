@@ -87,12 +87,12 @@ controller is that name with hyphens turned into underscores.
 |---|---|---|---|
 | `/driver/` | Drivers | Guest-accessible personal token; identity is resolved server-side. | `apex/www/driver.py` · `apex_portal` |
 | `/fleet-os` | Fleet supervisors | Guest redirect, then `FLEET_ROLES`: Fleet Manager, Fleet Project Manager, Fleet Supervisor, System Manager. | `apex/www/fleet_os.py` · `apex_portal` |
-| `/fleet` | Signed-in employees | Guest redirect, then endpoints scope data to the signed-in representative. | `apex/www/fleet.py` · `apex_portal` |
+| `/fleet` | Signed-in employees | Guest redirect, then no role gate; endpoints scope data to the signed-in user. | `apex/www/fleet.py` · `apex_portal` |
 | `/housing-count` | Accommodation operators | Redirects to `/housing#/count`; the target enforces the gate. | `apex/www/housing_count.py` · — |
-| `/housing` | Accommodation operators | Guest redirect, then DocPerm and building scope select capabilities. | `apex/www/housing.py` · `apex_portal` |
-| `/masar-supervisor` | Route supervisors | Guest redirect, then supervisor role and project scope. | `apex/www/masar_supervisor.py` · `apex_portal` |
+| `/housing` | Accommodation operators | Guest redirect, then `PORTAL_ROLES`: Accommodation Manager, Procurement Supervisor, Resident Supervisor, Safety Officer, System Manager. | `apex/www/housing.py` · `apex_portal` |
+| `/masar-supervisor` | Route supervisors | Guest redirect, then `SUPERVISOR_ROLES`: Fleet Manager, Fleet Project Manager, Fleet Supervisor, System Manager. | `apex/www/masar_supervisor.py` · `apex_portal` |
 | `/masar/` | Workers | Guest-accessible personal token; identity is resolved server-side. | `apex/www/masar.py` · `apex_portal` |
-| `/safety` | Safety supervisors | Guest redirect, then DocPerm and building scope select capabilities. | `apex/www/safety.py` · `apex_portal` |
+| `/safety` | Safety supervisors | Guest redirect, then `PORTAL_ROLES`: Accommodation Manager, Procurement Supervisor, Resident Supervisor, Safety Officer, System Manager. | `apex/www/safety.py` · `apex_portal` |
 
 The route gate is only the entry check. Each API must enforce document
 permission and row scope independently.
