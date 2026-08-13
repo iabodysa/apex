@@ -303,6 +303,7 @@ def get_my_fuel_requests(days=90, limit=30):
 from apex.salis.api.fleet_employee_services import (  # noqa: E402,F401
     create_complaint,
     get_complaint,
+    get_handover_checklist,
     get_my_complaints,
     get_my_fuel_quota,
     get_my_handovers,

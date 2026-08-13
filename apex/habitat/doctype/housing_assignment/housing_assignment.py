@@ -4,7 +4,8 @@
 The Assignment record IS the check-in and the active occupancy stay. It carries
 both check_in_date and check_out_date; Accommodation Checkout closes it.
 
-Payroll effects are gated behind the Salary Deduction Policy and disabled by default.
+Housing records have no automatic payroll side effects. Employee cost recovery uses
+the native HRMS Employee Advance path from its originating operational document.
 """
 
 from __future__ import annotations
@@ -12,9 +13,6 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from apex.apex_core.doctype.salary_deduction_policy.salary_deduction_policy import (
-    get_policy,
-)
 from apex.apex_core.utils.party_link import sync_party_employee
 from apex.habitat.utils.occupancy import room_status
 
@@ -248,7 +246,7 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    """Occupies the bed, refreshes occupancy, and suspends the allowance under the Rent policy."""
+    """Occupies the bed and refreshes occupancy without creating a payroll deduction."""
     Bed = frappe.qb.DocType("Bed")
     (
         frappe.qb.from_(Bed)
@@ -277,21 +275,6 @@ def on_submit(doc, method=None):
 
     frappe.db.set_value("Bed", doc.bed, "status", "Occupied")
     recalculate_spatial(doc.room, doc.building)
-
-    rent_rule = get_policy().get_type_rule("Rent")
-    activation = rent_rule.activation_date if rent_rule else None
-    if rent_rule and (not activation or doc.check_in_date >= activation):
-        doc.db_set("housing_allowance_suspended", 1)
-        doc.add_comment(
-            "Comment",
-            "Housing Allowance suspended per Salary Deduction Policy.",
-        )
-    else:
-        doc.db_set("housing_allowance_suspended", 0)
-        doc.add_comment(
-            "Comment",
-            "Housing Allowance not suspended - feature disabled in Salary Deduction Policy.",
-        )
 
     _post_checkin_custody(doc)
 

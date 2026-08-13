@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.utils import cint, get_time, now_datetime
 
 from apex.salis.doctype.dispatch_trip.trip_manifest import (
+    ROUTE_STOP_FIELDS,
     copy_route_stops,
     request_names,
     resolve_route_context,
@@ -280,6 +281,17 @@ ASSIGNMENT_ROLES = (
     "System Manager",
 )
 
+AD_HOC_TRIP_FIELDS = (
+    "project",
+    "trip_date",
+    "planned_start",
+    "planned_end",
+    "vehicle",
+    "driver",
+)
+
+AD_HOC_TRIP_SAVEPOINT = "create_ad_hoc_dispatch_trip"
+
 
 def _request_rider_count(request):
     manifest_count = len(request.get("workers") or []) + len(
@@ -290,6 +302,68 @@ def _request_rider_count(request):
         cint(request.get("worker_count")),
         cint(request.get("passenger_count")),
     )
+
+
+@frappe.whitelist(methods=["POST"])
+def create_ad_hoc_trip(trip, transport_requests):
+    """Create one ad-hoc trip and attach approved requests in one transaction.
+
+    The caller controls only ad-hoc planning fields and stop facts. Workflow,
+    assignment, passenger, and status fields continue through the Dispatch Trip
+    controller and ``assign_requests_to_trip`` invariants.
+    """
+    if not (set(frappe.get_roles()) & set(ASSIGNMENT_ROLES)):
+        frappe.throw(
+            _("You are not permitted to create ad-hoc dispatch trips."),
+            frappe.PermissionError,
+        )
+    if not frappe.has_permission("Dispatch Trip", "create"):
+        frappe.throw(
+            _("You do not have permission to create a Dispatch Trip."),
+            frappe.PermissionError,
+        )
+
+    if isinstance(trip, str):
+        trip = frappe.parse_json(trip)
+    if not isinstance(trip, dict):
+        frappe.throw(_("Trip must be an object."))
+    transport_requests = _parse_request_assignment_rows(transport_requests)
+    if not transport_requests:
+        frappe.throw(_("Add at least one Transport Request to the ad-hoc trip."))
+
+    stops = trip.get("stops") or []
+    if isinstance(stops, str):
+        stops = frappe.parse_json(stops)
+    if not isinstance(stops, list) or not stops:
+        frappe.throw(_("Add at least one stop to the ad-hoc trip."))
+    if not all(isinstance(row, dict) for row in stops):
+        frappe.throw(_("Every trip stop must be an object."))
+
+    payload = {
+        "doctype": "Dispatch Trip",
+        "trip_type": "Ad Hoc",
+        "status": "Planned",
+        **{fieldname: trip.get(fieldname) for fieldname in AD_HOC_TRIP_FIELDS},
+        "stops": [
+            {
+                fieldname: row.get(fieldname)
+                for fieldname in ROUTE_STOP_FIELDS
+                if row.get(fieldname) is not None
+            }
+            for row in stops
+        ],
+    }
+
+    frappe.db.savepoint(AD_HOC_TRIP_SAVEPOINT)
+    try:
+        doc = frappe.get_doc(payload)
+        doc.insert()
+        assigned = assign_requests_to_trip(doc.name, transport_requests)
+    except Exception:
+        frappe.db.rollback(save_point=AD_HOC_TRIP_SAVEPOINT)
+        raise
+    frappe.db.release_savepoint(AD_HOC_TRIP_SAVEPOINT)
+    return {"name": doc.name, "assigned_requests": assigned}
 
 
 @frappe.whitelist(methods=["POST"])
@@ -375,16 +449,7 @@ def assign_requests_to_trip(dispatch_trip, transport_requests):
 
 
 def _normalise_request_assignments(value, trip):
-    if isinstance(value, str):
-        value = (
-            frappe.parse_json(value)
-            if value.strip().startswith(("[", "{"))
-            else [value]
-        )
-    if isinstance(value, dict):
-        value = [value]
-    if not isinstance(value, list):
-        frappe.throw(_("Transport Requests must be a list."))
+    value = _parse_request_assignment_rows(value)
 
     stop_keys = [row.stop_key for row in (trip.stops or []) if row.stop_key]
     known = set(stop_keys)
@@ -423,3 +488,18 @@ def _normalise_request_assignments(value, trip):
             }
         )
     return result
+
+
+def _parse_request_assignment_rows(value):
+    """Parse the request collection before any trip row is inserted."""
+    if isinstance(value, str):
+        value = (
+            frappe.parse_json(value)
+            if value.strip().startswith(("[", "{"))
+            else [value]
+        )
+    if isinstance(value, dict):
+        value = [value]
+    if not isinstance(value, list):
+        frappe.throw(_("Transport Requests must be a list."))
+    return value

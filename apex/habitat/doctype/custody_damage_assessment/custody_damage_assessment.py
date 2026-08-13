@@ -17,10 +17,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from apex.apex_core.doctype.salary_deduction_policy.salary_deduction_policy import (
-    get_damage_rule,
-    get_policy,
-)
 from apex.apex_core.utils.party_link import sync_party_employee
 
 
@@ -104,71 +100,8 @@ def _stamp_acknowledgement(doc):
 
 
 def on_submit(doc, method=None):
-    """Creates a capped draft salary deduction for the employee and links it to the source checkout."""
-    if doc.deduction_entry:
-        return
-    rule = get_damage_rule()
-    if rule and doc.employee:
-        logger = frappe.logger()
-
-        amount = flt(doc.total_estimated_replacement_cost)
-        max_deduction = flt(rule.cap_amount_per_event)
-        if max_deduction > 0 and amount > max_deduction:
-            amount = max_deduction
-
-        if amount <= 0:
-            logger.info(
-                f"custody_damage_assessment.on_submit: Assessment {doc.name} has zero or negative cost. Skipping deduction."
-            )
-            return
-
-        company = frappe.db.get_value("Employee", doc.employee, "company")
-        if not company:
-            logger.warning(
-                f"custody_damage_assessment.on_submit: Employee {doc.employee} has no company linked. "
-                f"Cannot create Additional Salary entry for assessment {doc.name}. Entry remains manual."
-            )
-            return
-
-        salary_component = rule.salary_component or get_policy().default_salary_component
-        if not salary_component:
-            logger.warning(
-                f"custody_damage_assessment.on_submit: Salary Deduction Policy > Damage rule has no "
-                f"Salary Component (and no default). Cannot auto-generate Additional Salary for assessment {doc.name}."
-            )
-            return
-
-        component_type = frappe.db.get_value("Salary Component", salary_component, "type")
-        if component_type != "Deduction":
-            frappe.throw(_("Salary component {0} must be of type Deduction for damage assessments.").format(salary_component))
-
-        add_sal = frappe.get_doc({
-            "doctype": "Additional Salary",
-            "employee": doc.employee,
-            "salary_component": salary_component,
-            "amount": amount,
-            "payroll_date": doc.assessment_date,
-            "company": company,
-            "remarks": f"Deduction for custody damage assessment {doc.name}"
-        })
-        add_sal.insert(ignore_permissions=True)
-
-        frappe.db.set_value("Custody Damage Assessment", doc.name, "deduction_entry", add_sal.name)
-
-        if doc.source_checkout:
-            frappe.db.set_value(
-                "Housing Checkout",
-                doc.source_checkout,
-                {
-                    "additional_salary_deduction": add_sal.name,
-                    "damage_deduction_amount": add_sal.amount,
-                },
-            )
-
-        logger.info(
-            f"custody_damage_assessment.on_submit: Draft Additional Salary {add_sal.name} "
-            f"created for assessment {doc.name}."
-        )
+    """Record the assessment only; it does not create a parallel payroll deduction path."""
+    return None
 
 
 def before_cancel(doc, method=None):
