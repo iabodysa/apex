@@ -22,9 +22,9 @@ function builtAssets() {
     .map((file) => `${assetBase}/${file}`);
 }
 
-export function workerParameters() {
+export function workerParameters({ assetUrls = builtAssets() } = {}) {
   const common = [
-    ...builtAssets(),
+    ...assetUrls,
     "/assets/apex/vendor/thmanyah-v1/thmanyah.css",
     ...fontAssets,
   ];

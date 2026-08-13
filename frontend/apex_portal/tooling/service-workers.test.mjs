@@ -5,6 +5,8 @@ import { renderServiceWorker } from "./service-worker-template.js";
 import { workerParameters } from "./service-workers.js";
 
 describe("portal PWA contract", () => {
+  const parameters = () => workerParameters({ assetUrls: [] });
+
   it("ships two standalone Arabic manifests with canonical scopes", () => {
     for (const [name, route] of [["masar", "/masar/"], ["driver", "/driver/"]]) {
       const manifest = JSON.parse(readFileSync(path.join(process.cwd(), `public/manifests/${name}.webmanifest`), "utf8"));
@@ -22,7 +24,7 @@ describe("portal PWA contract", () => {
   });
 
   it("uses distinct exact cache namespaces and network-only navigation", () => {
-    const params = workerParameters();
+    const params = parameters();
     expect(params.worker.cacheNamespace).toBe("apex:masar:");
     expect(params.driver.cacheNamespace).toBe("apex:driver:");
     for (const entry of Object.values(params)) {
@@ -43,7 +45,7 @@ describe("portal PWA contract", () => {
   });
 
   it("keeps driver notification targets inside the driver path", () => {
-    const source = renderServiceWorker({ ...workerParameters().driver, build: "deadbeef0000" });
+    const source = renderServiceWorker({ ...parameters().driver, build: "deadbeef0000" });
     expect(source).toContain("target.origin === self.location.origin");
     expect(source).toContain("target.pathname.startsWith(NAV_PATH)");
   });
