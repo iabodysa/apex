@@ -32,7 +32,6 @@ A cadence is required to build the checklist.,حدد تكرار الجولة ل�
 A cadence is required to submit a round.,حدد تكرار الجولة قبل اعتمادها.
 A chip action (Issue / Replace / Cancel) is required.,يلزم تحديد إجراء للشريحة (إصدار / استبدال / إلغاء).
 A chip number is required to {0} a fuel chip.,يلزم رقم شريحة من أجل {0} شريحة وقود.
-A cleared driver clearance is required.,يلزم وجود مخالصة سائق مكتملة.
 A code can only be regenerated once the delivery is Released.,لا يمكن إعادة إنشاء الرمز إلا بعد اجتياز عملية التسليم جميع نقاط الخروج.
 A completion photo is required before closing a Maintenance Work Order.,يجب إرفاق صورة إنجاز قبل إغلاق أمر عمل الصيانة.
 A custody damage assessment has been submitted and may create a salary deduction,تم اعتماد تقييم تلف العهدة وقد يترتب عليه خصم من الراتب
@@ -60,7 +59,6 @@ A photo and filename are required together.,يجب إرفاق الصورة وا�
 A portal access token is required.,يلزم وجود رمز وصول إلى البوابة.
 A posting cannot be dated before {0}. Ask a {1} to post it.,لا يمكن تأريخ الحركة قبل {0}. اطلب من {1} تسجيلها.
 A posting cannot be dated in the future.,لا يمكن تأريخ الحركة في المستقبل.
-A push subscription endpoint is required.,عنوان اشتراك الإشعارات مطلوب.
 A reason is required to reject a handover.,يلزم سبب لرفض التسليم.
 A rejection reason is required.,سبب الرفض مطلوب.
 A rent payment is due today and remains unpaid,دفعة إيجار مستحقة اليوم ولم تُسدد بعد
@@ -79,7 +77,6 @@ A temporary top-up requires a revert due date.,تتطلب التعبئة الم�
 A temporary voucher that has to be reverted,أمر مؤقت لازم يرجع
 A trip can only be rated once it is completed.,لا يمكن تقييم الرحلة إلا بعد اكتمالها.
 A trip has been scheduled,تمت جدولة رحلة
-A valid GPS position (latitude and longitude) is required.,يلزم موقع GPS صحيح (خط العرض وخط الطول).
 A vehicle compliance document is expiring soon — please start renewal,وثيقة امتثال مركبة على وشك الانتهاء — يُرجى بدء التجديد
 A vehicle has been reported stolen,تم الإبلاغ عن سرقة مركبة
 A {0} Safety Round already exists for {1} on {2} ({3}). Tick Is Re-inspection to record a follow-up round.,توجد بالفعل جولة سلامة {0} لـ {1} في {2} ({3}). فعّل خيار إعادة الفحص لتسجيل جولة متابعة.
@@ -324,7 +321,6 @@ Appliance,جهاز
 Applicable Days,الأيام السارية
 Applies to All Buildings,يسري على جميع المباني
 Apply an operational markup to external-supplier accommodation costs in the Supplier Cost Recovery report.,تطبيق هامش تشغيلي على تكاليف السكن الخاصة بالموردين الخارجيين في تقرير استرداد تكلفة المورّد.
-Apply to at most {0} vehicles at a time. You selected {1}.,طبّق الإجراء على {0} مركبة كحدٍّ أقصى في المرة الواحدة. اخترت {1}.
 Applying…,جارٍ تنفيذ الإجراء…
 Approval,الاعتماد
 Approval Controls,ضوابط الاعتماد
@@ -548,13 +544,11 @@ Awaiting confirmation by the receiving supervisor,بانتظار تأكيد ال
 Awareness and Training,التوعية والتدريب
 Back,رجوع
 Back Engines,المحركات الخلفية
-Back to the system,العودة إلى النظام
 Back-Dated Retirement,إخراج من الخدمة بتاريخ سابق
 Back-link to the Maintenance Request spawned from this finding. Presence makes the fan-out idempotent: a linked finding is never re-spawned. Intentionally copyable (no no_copy) so the link carries into an amended report and prevents duplicate tickets on amend.,رابط لطلب الصيانة الذي أُنشئ من هذه الملاحظة. وجوده يمنع إنشاء طلب مكرر، فالملاحظة المرتبطة لا يُعاد توليد طلب لها. والحقل قابل للنسخ عمداً لينتقل الرابط إلى التقرير المعدّل ويمنع تكرار التذاكر عند التعديل.
 Backdating Days,أيام التأريخ الرجعي
 Backdating Role,دور التأريخ الرجعي
 Backdating days cannot be negative.,لا يمكن أن تكون أيام التأريخ الرجعي سالبة.
-Background notifications are not enabled.,الإشعارات في الخلفية غير مفعّلة.
 Balady Certificate,شهادة بلدي
 Balance Qty,الكمية المتبقية
 Base Accommodation Cost,تكلفة السكن الأساسية
@@ -1005,7 +999,6 @@ Contact,جهة الاتصال
 Contact Person,الشخص المسؤول
 Contact mobile number. PII — readable only by privileged roles (permlevel 1).,رقم الجوال للتواصل. بيانات شخصية — لا يقرؤها إلا أصحاب الصلاحيات المميزة (مستوى الصلاحية 1).
 Contact your Fleet Manager to be granted a project.,تواصل مع مدير الأسطول لمنحك مشروعًا.
-Contact your system administrator to request access.,تواصل مع مسؤول النظام لطلب الصلاحية.
 Content,المحتوى
 Contract,العقد
 Contract Details,تفاصيل العقد
@@ -1456,7 +1449,6 @@ Dispatch a Trip,تسيير رحلة
 Dispatch readiness: A trip must have at least one assigned worker/request before submitting.,جاهزية التسيير: يجب أن تتضمن الرحلة عاملًا أو طلبًا مسندًا واحدًا على الأقل قبل الاعتماد.
 Dispatch readiness: {0} is required before submitting.,جاهزية التسيير: يلزم تحديد {0} قبل الاعتماد.
 Dispatch the first trip to put a vehicle and driver on the road.,سيّر أول رحلة لإطلاق مركبة وسائق على الطريق.
-Dispatch trip,رحلة التسيير
 Dispatched,تم التسيير
 Dispatched to Contractor,أُحيل إلى مقاول
 Dispatching Store,المستودع المرسِل
@@ -1541,7 +1533,6 @@ Driver {0} stopped: {1}.,تم إيقاف السائق {0}: {1}.
 Driver {0} was just assigned by {1}. Please review.,تم إسناد السائق {0} للتو بواسطة {1}. يُرجى المراجعة.
 Drivers,السائقون
 Drives the expiry watch and the expiry report.,يُستخدم لمتابعة انتهاء الصلاحية وتقريرها.
-Driving licence renewal,تجديد رخصة القيادة
 Drop target must be an available bed.,اختر سريرًا متاحًا للنقل إليه.
 Drop-off,الإنزال
 Drop-off To,نقطة الإنزال
@@ -1568,7 +1559,6 @@ Each result line needs a cadence.,حدّد تكرار الجولة لكل سطر
 Each return line must have a quantity greater than zero.,يجب أن يكون لكل بند إرجاع كمية أكبر من صفر.
 Each return line must reference a Custody Issue.,يجب أن يشير كل بند إرجاع إلى صرف عهدة.
 Each return line must reference an article.,يجب أن يشير كل بند إرجاع إلى صنف.
-Each worker ID must be a non-empty string.,يجب أن يكون معرّف كل عامل نصًا غير فارغ.
 Edit Mobile Number,تعديل رقم الجوال
 Edit Rooms and Beds,تعديل الغرف والأسرّة
 "Editable in place. Uniqueness is enforced on a normalized form, so layout differences do not create duplicates.",قابل للتعديل في مكانه. تُفرض الفرادة على صيغة مُوحّدة، لذا لا تُنشئ اختلافات التنسيق تكرارات.
@@ -1848,7 +1838,6 @@ Fleet Supervisor,مشرف الأسطول
 Fleet Supervisor Dashboard,لوحة معلومات مشرف الأسطول
 Fleet Supervisor Dashboard (Dashboard),لوحة مشرف الأسطول (لوحة معلومات)
 Fleet and Fuel Dashboard,لوحة الأسطول والوقود
-Fleet dashboard,لوحة الأسطول
 "Fleet driver master record: identity, project, supervisor, vehicle linkage, and compliance.",سجل أساسي لسائق الأسطول: الهوية والمشروع والمشرف وربط المركبة والامتثال.
 "Fleet is live. Fleet Control shows every vehicle's state, and fuel claims reconcile against the quota you set.",الأسطول قيد التشغيل. يعرض مركز التحكم بالأسطول حالة كل مركبة، وتُطابق مطالبات الوقود مع الحصة التي حددتها.
 "Fleet vehicle master record. Stores plate, ownership, and operational status.",سجل أساسي لمركبة الأسطول. يخزّن اللوحة والملكية والحالة التشغيلية.
@@ -2083,7 +2072,6 @@ Housing office contact number shown to workers on the Masar home My Contacts car
 Housing over capacity…,جارٍ التسكين فوق السعة…
 Housing pickup for this boarding (Habitat-Salis bridge).,نقطة الصعود من السكن لهذه الرحلة (تكامل هابيتات وساليس).
 "Housing pickup recorded with the scan (Habitat-Salis bridge), when present.",نقطة الصعود من السكن المسجلة مع عملية المسح، إن وجدت (تكامل هابيتات وساليس).
-Housing portal,بوابة الإسكان
 How The Gateway Works,كيف تعمل البوابة
 How To Integrate,كيفية التكامل
 How long machine-written time-series records are kept before the daily log cleanup purges old rows. Blank or 0 falls back to the built-in default for that record. Financial ledgers are never auto-purged.,مدة الاحتفاظ بالسجلات الزمنية المكتوبة آلياً قبل أن تمسح عملية التنظيف اليومية الصفوف القديمة. الفارغ أو 0 يرجع للافتراضي المدمج لذلك السجل. الدفاتر المالية لا تُمسح آلياً أبداً.
@@ -2916,7 +2904,6 @@ Only Service Orders with status Scheduled can be marked In Progress.,لا يمك
 Only Task Instances with status Open can be marked In Progress.,لا يمكن تسجيل المهمة «قيد التنفيذ» إلا إذا كانت حالتها «مفتوحة».
 Only Without an Idle Report,بدون تقرير ساكن غير مشغّل فقط
 Only Work Orders with status Planned can be marked In Progress.,لا يمكن تحديد حالة 'قيد التنفيذ' إلا لأوامر العمل ذات الحالة 'مخطط'.
-Only a Fleet Manager or Fleet Project Manager can {0} a fuel request.,يمكن فقط لمدير الأسطول أو مدير مشروع الأسطول {0} طلب وقود.
 Only a handover Under Review can be approved.,لا يمكن اعتماد التسليم إلا إذا كان قيد المراجعة.
 Only a submitted delivery can be actioned.,لا يمكن اتخاذ إجراء إلا على تسليم معتمَد.
 Only a submitted handover can be actioned.,لا يمكن اتخاذ إجراء إلا على تسليم معتمد.
@@ -3259,7 +3246,6 @@ Plate is required.,اللوحة مطلوبة.
 Platform,المنصة
 Platform Details,تفاصيل المنصة
 Platform Name,اسم المنصة
-Please action my driving licence renewal. Expiry on file: {0}.,يرجى مباشرة تجديد رخصة قيادتي. تاريخ الانتهاء المسجّل: {0}.
 Please confirm you have received them,يرجى تأكيد استلامك لها
 Please describe where you need to go.,يُرجى وصف الوجهة التي تريد الذهاب إليها.
 Please describe your request.,يرجى وصف طلبك.
@@ -3435,7 +3421,6 @@ Rating must be between 1 and 5.,يجب أن يكون التقييم بين ١ و
 Re-inspection,إعادة فحص
 Re-reconcile,إعادة التسوية
 Re-submit,إعادة الإرسال
-Re: {0},بشأن: {0}
 Reactivate,إعادة تفعيل
 Read-only — managed by the Room Setup wizard.,للقراءة فقط — يُدار عبر معالج إعداد الغرف.
 Readiness Status,حالة جاهزية الغرفة
@@ -3680,7 +3665,6 @@ Reported By (Optional),المبلّغ (اختياري)
 Reported Fault,العطل المبلّغ عنه
 Reported On,تاريخ الإبلاغ
 Reported during checkout ({0}),تم الإبلاغ عنه أثناء المغادرة ({0})
-Reported stolen from the Fleet OS dashboard.,أُبلغ عن السرقة من لوحة نظام إدارة الأسطول.
 Reported stolen via {0}.,أُبلغ عن سرقتها عبر {0}.
 Reporter & Resident,المبلِّغ والساكن
 Reporting Entity,الجهة المبلِّغة
@@ -3898,7 +3882,6 @@ Route plan approved.,تم اعتماد خطة المسار.
 Route plan not found.,خطة المسار غير موجودة.
 Route plan rejected.,تم رفض خطة المسار.
 Route stop is not part of this trip.,محطة المسار ليست جزءًا من هذه الرحلة.
-Route supervisor portal,بوابة مشرف المسار
 Router,راوتر
 Routing,التوجيه
 Routing & Tracking,التوجيه والتتبع
@@ -3972,7 +3955,6 @@ Safety Task Execution,تنفيذ مهمة السلامة
 Safety Task Executions by Result,تنفيذات مهام السلامة حسب النتيجة
 Safety Tasks Done This Week %,نسبة مهام السلامة المنجزة هذا الأسبوع %
 "Safety finding ledger. Maintained automatically by the system when a Safety Round is submitted and not edited manually. One immutable row per finding observed on the round's executions, so a closed finding cannot silently reopen on the mutable parent report.",سجل ملاحظات السلامة. يتولاه النظام آلياً عند اعتماد جولة السلامة ولا يُعدَّل يدوياً. صف ثابت واحد لكل ملاحظة رُصدت في تنفيذات الجولة، فلا تعود ملاحظة مغلقة للفتح بصمت على التقرير الأصل القابل للتعديل.
-Safety rounds,جولات السلامة
 Safety rounds were recorded for {0} on {1}.,سُجِّلت جولات السلامة لـ{0} بتاريخ {1}.
 "Safety setup complete. Assignments created: {0}, skipped (existing): {1}. Templates created: {2}, reused: {3}.",اكتمل إعداد السلامة. الإسنادات المُنشأة: {0}، المتخطاة (موجودة مسبقاً): {1}. القوالب المُنشأة: {2}، المُعاد استخدامها: {3}.
 Safety task '{0}' failed on {1} (result: {2}). Repair required.,فشلت مهمة السلامة '{0}' بتاريخ {1} (النتيجة: {2}). يلزم إجراء إصلاح.
@@ -4000,7 +3982,6 @@ Salis Representatives Fleet Vehicles Stopped,مركبات أسطول مندوب�
 Salis Settings,إعدادات ساليس
 Salis Vehicle,مركبة ساليس
 Salis Vehicle Compliance,امتثال مركبات ساليس
-Salis Workspace,مساحة عمل ساليس
 Salis departure (relocation) transport raised for a Final Exit / End of Contract checkout.,أُنشئ نقل مغادرة في ساليس بسبب مغادرة السكن للخروج النهائي أو انتهاء العقد.
 Salis is live. The Dispatch Board shows every trip; the manifest records who was on it.,ساليس قيد التشغيل. تعرض لوحة التسيير كل رحلة، ويسجل كشف الركاب من كان فيها.
 Salvage Value,قيمة الخردة
@@ -4080,10 +4061,7 @@ Select a worker to load held custody.,اختر عاملًا لعرض العهد�
 Select all,تحديد الكل
 Select at least one passenger.,اختر راكباً واحداً على الأقل.
 Select at least one transport request.,اختر طلب نقل واحداً على الأقل.
-Select at least one vehicle.,اختر مركبة واحدة على الأقل.
-Select at least one worker to board.,اختر عاملًا واحدًا على الأقل للصعود.
 Select from the Habitat material catalog. Optional — use instead of or alongside ERPNext Item.,اختر من قائمة مواد هابيتات. الحقل اختياري، ويمكن استخدامه بدل صنف ERPNext أو معه.
-Select no more than {0} workers at a time.,لا تحدد أكثر من {0} عامل في المرة الواحدة.
 Select one or more New requests first.,اختر طلباً جديداً واحداً أو أكثر أولاً.
 Select the Assignment,اختر التسكين
 Select the Employee receiving the SIM.,اختر الموظف المُستلِم للشريحة.
@@ -4369,7 +4347,6 @@ Start Review,بدء المراجعة
 Start Task,بدء المهمة
 Start Time,وقت البداية
 Start Work,بدء العمل
-Start the trip before marking arrival.,ابدأ الرحلة قبل تسجيل الوصول.
 Start the trip before marking stops.,ابدأ الرحلة قبل وضع علامات على المحطات.
 Start the work first — only a Work Order In Progress can be Completed.,ابدأ العمل أولاً — لا يُوسم كمكتمل إلا أمر عمل قيد التنفيذ.
 Started,بدأ
@@ -4587,7 +4564,6 @@ The Dispatch Trip being executed; its linked Transport Request carries the worke
 The Dispatch Trip the scanned pass was issued against.,رحلة التسيير التي صدر التصريح الممسوح مقابلها.
 "The DocType of the routed payment. Stamped by the Payment Router from the document it actually created, so the link below always resolves against the right table.",نوع مستند الدفع الموجه. يسجله موجه الدفع من المستند الذي أنشأه فعليًا، لذلك يشير الرابط أدناه دائمًا إلى الجدول الصحيح.
 The Employee Advance raised for this incident. One incident raises at most one advance; the company payment and the wage installments both run on it.,سلفة الموظف المُنشأة لهذه الحادثة. تُنشئ الحادثة سلفة واحدة على الأكثر؛ ويجري عليها سداد الشركة وأقساط الخصم من الأجر.
-The GPS position is outside the valid coordinate range.,موقع GPS خارج نطاق الإحداثيات الصحيح.
 The Incident,الحادث
 The Other Party,الطرف الآخر
 The Route Supervisor this plan is assigned to for approval and live oversight. Only this user may approve or reject the plan from the Masar supervisor portal.,مشرف المسار المسندة إليه هذه الخطة للاعتماد والمتابعة المباشرة. هذا المستخدم وحده يمكنه اعتماد الخطة أو رفضها من بوابة مشرف مسار.
@@ -4762,16 +4738,11 @@ This ends the current custody and retires the SIM. The SIM and its history are k
 This fuel request has been pending approval for too long,ظل طلب الوقود هذا بانتظار الاعتماد لفترة طويلة جدًا
 "This is a temporary voucher. The vehicle goes back to its standing quota on the revert date shown above, and any litre drawn after that date is an exception.",هذا أمر مؤقت. ترجع المركبة لحصتها الثابتة في تاريخ الرجوع المبين أعلاه، وأي لتر يُسحب بعد هذا التاريخ يُعد استثناء.
 "This license is submitted. Amend it (Cancel, then Amend) with the new expiry date to renew.",هذه الرخصة معتمدة. لتجديدها، ألغها ثم عدلها وأدخل تاريخ الانتهاء الجديد.
-This page is for route supervisors.,هذه الصفحة مخصصة لمشرفي المسارات.
-This page is for the fleet team.,هذه الصفحة مخصّصة لفريق الأسطول.
-This page is for the housing and safety team.,هذه الصفحة لفريق الإسكان والسلامة.
 This payment request is not finance-approved yet; it cannot be paid.,طلب الدفع هذا لم يُعتمد ماليًا بعد؛ لا يمكن دفعه.
 This plan has already been {0}.,تم {0} هذه الخطة مسبقاً.
 This portal access token is invalid or inactive.,رمز الوصول إلى البوابة غير صالح أو غير نشط.
 This portal is for route supervisors.,هذه البوابة مخصصة لمشرفي المسارات.
 This poster is out of service. Speak to your facility supervisor instead.,هذا الملصق غير مفعّل. راجع مشرف المنشأة مباشرة.
-This push subscription belongs to another driver.,اشتراك الإشعارات هذا يخص سائقاً آخر.
-This push subscription endpoint is not allowed.,نقطة اشتراك الإشعارات هذه غير مسموح بها.
 This queue contains the maintenance work orders you are allowed to see.,تحتوي هذه القائمة على أوامر عمل الصيانة المسموح لك برؤيتها.
 This receipt carries no item lines,لا توجد أصناف في هذا الاستلام
 This recovery reaches the Operations threshold and can only be approved by Operations-tier authority (Fleet Manager).,يبلغ هذا الاسترداد حد العمليات، ولا يعتمده إلا صاحب صلاحية على مستوى العمليات (مدير الأسطول).
@@ -4792,7 +4763,6 @@ This transfer can no longer be reversed: the resident is no longer in Bed {0}.,�
 This transfer needs an active (checked-in) assignment to move.,يتطلب هذا النقل تسكينًا نشطًا لم تنتهِ إقامته.
 This transfer note carries no item lines — nothing has moved between the two stores,هذا السند لا يحمل أي بند — لم ينتقل شيء بين المستودعين
 This transfer was raised from Bed {0} but the resident is now in Bed {1}.,أُنشئ هذا النقل من السرير {0} لكن الساكن الآن في السرير {1}.
-This trip is already closed.,هذه الرحلة مقفلة.
 This trip is already finished. Boarding can no longer be confirmed.,انتهت هذه الرحلة. لم يعد بالإمكان تأكيد الصعود.
 This trip is not today's.,هذه الرحلة ليست رحلة اليوم.
 This vehicle has an open incident. Close the incident to change its status.,على هذه المركبة بلاغ مفتوح. أغلق البلاغ لتغيير حالتها.
@@ -4819,7 +4789,6 @@ Tick for a contractor/temp hire not registered on the trip's worker manifest.,ف
 Tick only after the room and its fittings were inspected and accepted; custody alone is not a full clearance.,أشِّر بعد فحص الغرفة وتجهيزاتها وقبولها؛ إخلاء العهدة وحده لا يكفي.
 Tick this once all issued custody has been returned.,علّم هذا الخيار بعد إرجاع كامل العهدة المصروفة.
 Ticket,التذكرة
-Ticket not found.,التذكرة غير موجودة.
 Timeline,الجدول الزمني
 Timesheet Exception Workbench,لوحة معالجة استثناءات سجل الدوام
 Timesheet Period,فترة سجل الدوام
@@ -4957,7 +4926,6 @@ Tuesday,الثلاثاء
 "Turn on email and operational notifications, the driver self-service portal, and approval routing. All of these can be changed later in Habitat Settings and Salis Settings.",فعّل تنبيهات البريد والتنبيهات التشغيلية وبوابة الخدمة الذاتية للسائق وتوجيه الاعتماد. يمكن تغييرها جميعًا لاحقًا في إعدادات هابيتات وإعدادات ساليس.
 Turn the building-store engine off to stop every custody and material posting at once.,أوقف محرّك مخازن المباني لإيقاف كل حركات العهد والمواد دفعة واحدة.
 Type,النوع
-Type a message before sending.,اكتب رسالة قبل الإرسال.
 "Type of cost being recovered from a driver or party, such as vehicle damage, fuel misuse, custody loss, or a fine, which determines the recovery basis.",نوع التكلفة المستردة من سائق أو طرف، كتلف المركبة أو إساءة استخدام الوقود أو فقدان العهدة أو مخالفة، ما يحدّد أساس الاسترداد.
 "Type of fixed facility asset being tracked, grouping surveillance, network, fire-safety, and utility equipment for inventory, maintenance, and compliance reporting.",نوع الأصل الثابت للمنشأة المُتتبَّع، يجمّع معدات المراقبة والشبكات والسلامة من الحريق والمرافق لأغراض الجرد والصيانة وتقارير الامتثال.
 "Type of housing inventory item, grouping furniture, appliances, bedding, kitchenware, fixtures, and equipment for stock counts and replacement planning.",نوع صنف مخزون الإسكان، يجمّع الأثاث والأجهزة والمفروشات وأدوات المطبخ والتجهيزات والمعدات لأغراض جرد المخزون وتخطيط الاستبدال.
@@ -5110,7 +5078,6 @@ Vehicle wash service platform or provider used for cleaning fleet vehicles.,من
 Vehicle {0} already has an active assignment {1}.,المركبة {0} لديها بالفعل إسناد نشط {1}.
 Vehicle {0} already has an open rental Receipt; return it before a new Receipt.,للمركبة {0} عملية استلام إيجار مفتوحة بالفعل؛ أعد المركبة قبل تسجيل استلام جديد.
 Vehicle {0} assigned to driver {1}.,تم إسناد المركبة {0} إلى السائق {1}.
-Vehicle {0} handed over to driver {1}.,تم تسليم المركبة {0} إلى السائق {1}.
 Vehicle {0} has been in the workshop since {1} (over {2} days).,المركبة {0} في الورشة منذ {1} (أكثر من {2} يوماً).
 Vehicle {0} has expired compliance and cannot be dispatched/assigned.,وثائق امتثال المركبة {0} منتهية، ولا يمكن تسييرها أو إسنادها.
 Vehicle {0} has no open rental Receipt to return.,لا توجد للمركبة {0} عملية استلام إيجار مفتوحة لتسجيل إرجاعها.
@@ -5122,7 +5089,6 @@ Vehicle {0} reported stolen.,أُبلغ عن سرقة المركبة {0}.
 Vehicle {0} stopped: {1}.,تم إيقاف المركبة {0}: {1}.
 Vehicle {0} was just assigned by {1}. Please review.,تم إسناد المركبة {0} للتو بواسطة {1}. يُرجى المراجعة.
 Vehicle {0} was not re-linked on cancel; it is no longer free.,لم يُعد ربط المركبة {0} عند الإلغاء لأنها لم تعد متاحة.
-Vehicle: {0},المركبة: {0}
 Vehicles,المركبات
 Vehicles Charged in This Period,المركبات المحتسبة في هذه الفترة
 Vehicles In Service,المركبات في الخدمة
@@ -5286,7 +5252,6 @@ Workers Transport Over Time,نقل العمالة عبر الزمن
 Workers Transport Requests Open,طلبات نقل العمالة المفتوحة
 Workers Transport Scheduled Awaiting Dispatch,نقل العمال المجدول بانتظار التسيير
 Workers are expected to arrive at this building today — prepare beds and custody,من المتوقع وصول عمال إلى هذا المبنى اليوم — جهّز الأسرّة والعهدة
-Workers must be a JSON list of worker IDs.,يجب أن تكون بيانات العمال قائمة من معرّفات العمال.
 Workflow Action,إجراء سير العمل
 "Workflow stage of the maintenance request from open through assignment and active work to resolution and closure, including reopening when a fix does not hold.",مرحلة طلب الصيانة في سير العمل، من مفتوح ثم الإسناد والتنفيذ إلى المعالجة والإغلاق، مع إمكانية إعادة فتحه إذا لم ينجح الإصلاح.
 Working…,جارٍ العمل…
@@ -5307,7 +5272,6 @@ You are not permitted to access this worker's record.,لا تملك صلاحية
 You are not permitted to assign transport requests.,لا تملك صلاحية إسناد طلبات النقل.
 You are not permitted to issue {0} portal credentials.,لا يُسمح لك بإصدار بيانات اعتماد البوابة من فئة {0}.
 You can only save Trip Start Logs assigned to your own driver record.,لا يمكنك حفظ سوى سجلات بدء الرحلة المُسندة إلى سجل سائقك.
-You can't check out at or before your check-in time. Try again in a moment.,لا يمكنك المغادرة في وقت التسكين أو قبله. حاول مرة أخرى بعد قليل.
 You cannot approve or pay a Payment Request you raised; a different Finance approver is required.,لا يمكنك اعتماد طلب دفع أنشأته أو تسديده؛ يلزم معتمد آخر من المالية.
 You cannot {0} a fuel request you raised yourself (segregation of duties).,لا يمكنك {0} طلب وقود أنشأته بنفسك (الفصل بين المهام).
 You do not have write permission on this Dispatch Trip.,لا تملك صلاحية الكتابة على رحلة التسيير هذه.
@@ -5322,7 +5286,6 @@ You may only handle boarding for your own trips.,لا يمكنك إدارة ال
 You were not part of this trip's manifest.,لم تكن ضمن كشف ركاب هذه الرحلة.
 Your Name (Optional),اسمك (اختياري)
 Your Work-Order Queue,قائمة أوامر العمل الخاصة بك
-Your account does not have a role to access it.,لا يملك حسابك دورًا للوصول إليها.
 "Your account is not granted any building yet, so there is nothing here it may act on. Ask an administrator to grant you a building.",حسابك ما مُنح أي مبنى بعد، فما فيه شي هنا يقدر يشتغل عليه. اطلب من المسؤول يمنحك مبنى.
 Your arrival manifest was submitted. The accommodation team will reconcile arrivals against it on the expected date.,تم اعتماد كشف الوصول. سيطابق فريق السكن حالات الوصول الفعلية معه في التاريخ المتوقع.
 Your bus has not reached your stop yet. Confirm boarding once it arrives.,لم تصل حافلتك إلى محطتك بعد. أكّد صعودك عند وصولها.
@@ -5330,7 +5293,6 @@ Your driving licence is expiring soon — please start the renewal,رخصة قي
 Your exit clearance has been issued — you can download the certificate from the driver portal,تم إصدار إخلاء طرفك — يمكنك تنزيل الشهادة من بوابة السائق
 Your fuel request has been decided,تم البت في طلب الوقود الخاص بك
 Your incident report was submitted. A supervisor will review and confirm it.,تم اعتماد بلاغ الحادثة. سيراجعه المشرف ويؤكده.
-Your licence isn't due for renewal yet.,رخصتك لا تستحق التجديد بعد.
 Your request has been submitted. Save your tracking code shown below to follow up with your supervisor.,تم تقديم طلبك. احفظ رمز التتبع أدناه للمتابعة مع مشرفك.
 Your tracking code:,رمز المتابعة الخاص بك:
 Your transport request was submitted. Save your tracking code to follow up with your supervisor.,تم تقديم طلب النقل. احفظ رمز التتبع للمتابعة مع مشرفك.
@@ -5381,7 +5343,6 @@ n/a,غير متاح
 no worker selected,لم يُختر عامل
 none,لا شيء
 normalized,موحّد
-not recorded,غير مسجّل
 not_required,غير مطلوب
 ocr,تعرّف ضوئي على النصوص
 of,من
@@ -5436,7 +5397,6 @@ workshop status,حالة الورشة
 {0} is not a valid readiness status.,{0} ليست حالة جاهزية صالحة.
 {0} is not a valid return condition.,{0} ليست حالة إرجاع صالحة.
 {0} is too long.,{0} طويل جداً.
-{0} is too long. Use no more than {1} characters.,{0} طويل جدًا. استخدم ما لا يزيد عن {1} حرفًا.
 {0} material(s) loaded from template {1},حُمِّلت {0} مادّة من القالب {1}
 {0} moved to {1},تم نقل {0} إلى {1}
 {0} must be a 4-digit number.,{0} يجب أن يكون رقمًا من أربع خانات.
@@ -5467,3 +5427,33 @@ workshop status,حالة الورشة
 "{0} {1} is billed by {2}, not by {3}.",{0} {1} صادرة من المورّد {2} وليس من {3}.
 {0} {1} is not submitted. Only an approved invoice can be paid.,{0} {1} غير معتمدة. لا يمكن دفع سوى فاتورة معتمدة.
 {0}: {1} occupied bed(s) prevented capacity reduction.,منعت الأسرّة المشغولة وعددها {1} في {0} تخفيض السعة.
+A Top-up request requires an active Fuel Quota.,يتطلب طلب زيادة الحصة وجود حصة وقود سارية.
+Added {0} L via Fuel Request {1}.,أُضيف {0} لتر عبر طلب الوقود {1}.
+Complaint not found.,الشكوى غير موجودة.
+Direction,الاتجاه
+Enter a reply.,اكتب الرد.
+Enter the reason for the additional fuel request.,اكتب سبب طلب الوقود الإضافي.
+From Driver and To Driver are required for a transfer.,يلزم تحديد السائق المسلّم والسائق المستلم عند التحويل.
+From Driver is required for a return.,يلزم تحديد السائق عند الإرجاع.
+Invalid handover direction.,اتجاه التسليم غير صحيح.
+No active Employee is linked to this driver.,لا يوجد موظف نشط مرتبط بهذا السائق.
+No vehicle is assigned to you.,لا توجد مركبة مسندة إليك.
+"Only a Fleet Supervisor, Fleet Project Manager, or Fleet Manager can {0} a fuel request.",لا يحق {0} طلب الوقود إلا لمشرف الأسطول أو مدير مشروع الأسطول أو مدير الأسطول.
+Only a dispatched trip can be executed.,لا يمكن تنفيذ الرحلة قبل إرسالها.
+Only an authorised user can return a stopped vehicle to service.,لا يعيد المركبة الموقوفة إلى الخدمة إلا مستخدم مخوّل.
+Only an authorised user can stop an active vehicle.,لا يوقف المركبة النشطة إلا مستخدم مخوّل.
+Problem not found.,المشكلة غير موجودة.
+Reason: {0},السبب: {0}
+Receipt evidence is required.,يلزم إرفاق إثبات الاستلام.
+Removed {0} L from reverted Fuel Request {1}.,خُصم {0} لتر بعد التراجع عن طلب الوقود {1}.
+Set when an approved top-up has increased the linked quota. Prevents workflow replay from applying it twice.,يُفعّل بعد إضافة الزيادة المعتمدة إلى الحصة المرتبطة لمنع تكرار الإضافة.
+Subject and description are required.,يلزم كتابة الموضوع والتفاصيل.
+The requester cannot approve the same request.,لا يمكن لمقدم الطلب اعتماد طلبه.
+The requester cannot reject the same request.,لا يمكن لمقدم الطلب رفض طلبه.
+To Driver is required for a receipt.,يلزم تحديد السائق المستلم.
+Top-up Applied,تمت إضافة الزيادة
+Vehicle has no open workshop visit or you cannot update it.,لا توجد زيارة ورشة مفتوحة للمركبة أو لا تملك صلاحية تحديثها.
+Vehicle is already in the workshop or you cannot update it.,المركبة موجودة في الورشة أو لا تملك صلاحية تحديثها.
+Vehicle {0} custody recorded as {1}.,سُجلت عهدة المركبة {0} بحالة {1}.
+You do not have the approval role.,لا تملك صلاحية الاعتماد.
+Your account is not linked to a fleet representative.,حسابك غير مرتبط بمندوب أسطول.
