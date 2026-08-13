@@ -65,7 +65,7 @@ h3 {
   justify-items: center;
   gap: var(--sp-4);
   padding: var(--sp-6);
-  background: var(--forest);
+  background: var(--brand-green);
   color: var(--surface-2);
   text-align: center;
 }
@@ -262,14 +262,14 @@ h3 {
   min-block-size: 0;
   overflow-y: auto;
   padding: calc(var(--sp-6) + env(safe-area-inset-top)) var(--sp-4) var(--sp-6);
-  border-inline-end: 1px solid color-mix(in srgb, var(--surface) 18%, transparent);
-  background: var(--forest);
-  color: var(--surface);
+  border-inline-end: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink);
 }
 
 .operations-shell__brand {
   margin-block-end: var(--sp-8);
-  color: var(--surface);
+  color: var(--ink);
   font-family: var(--font-display);
   font-size: 1.6rem;
   font-weight: 700;
@@ -282,12 +282,12 @@ h3 {
 
 .operations-shell__nav .portal-nav-link {
   padding-inline: var(--sp-3);
-  color: color-mix(in srgb, var(--surface) 72%, transparent);
+  color: var(--muted);
 }
 
 .operations-shell__nav .portal-nav-link:hover {
-  background: color-mix(in srgb, var(--surface) 9%, transparent);
-  color: var(--surface);
+  background: var(--surface);
+  color: var(--accent-ink);
 }
 
 .operations-shell__nav .portal-nav-link[aria-current="page"] {
@@ -327,7 +327,7 @@ h3 {
   padding: 0 var(--sp-6) var(--sp-8);
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 767px) {
   .operations-shell {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr);

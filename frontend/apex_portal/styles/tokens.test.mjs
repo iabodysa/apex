@@ -24,10 +24,12 @@ describe("Apex portal identity", () => {
     expect(css).toContain("--outline-gray-2: var(--border)");
   });
 
-  it("uses the approved brand field for operations navigation", () => {
+  it("uses a light operations rail with the primary brand color reserved for selection", () => {
     const css = read("./foundation.css");
-    expect(css).toMatch(/\.operations-shell__rail\s*\{[^}]*background:\s*var\(--forest\)/s);
+    expect(css).toMatch(/\.operations-shell__rail\s*\{[^}]*background:\s*var\(--surface-2\)/s);
     expect(css).toMatch(/\.operations-shell__nav \.portal-nav-link\[aria-current="page"\]\s*\{[^}]*background:\s*var\(--brand-green\)/s);
+    expect(css).toMatch(/\.apex-boot\s*\{[^}]*background:\s*var\(--brand-green\)/s);
+    expect(css).not.toMatch(/background:\s*var\(--forest\)/);
   });
 
   it("loads the vendored Thmanyah stylesheet and no remote font", () => {
@@ -65,15 +67,15 @@ describe("Apex portal identity", () => {
     expect(css).toContain("--sp-5: 20px");
   });
 
-  it("makes each shell own its viewport scroll and switches operations before iPad portrait", () => {
+  it("makes each shell own its viewport scroll and keeps the operations rail on iPad", () => {
     const css = read("./foundation.css");
     expect(css).toMatch(/\.mobile-shell\s*\{[^}]*block-size:\s*100dvh[^}]*grid-template-rows:\s*auto minmax\(0, 1fr\) auto/s);
     expect(css).toMatch(/\.mobile-shell__header\s*\{[^}]*position:\s*sticky/s);
     expect(css).toMatch(/\.mobile-shell__main\s*\{[^}]*overflow-y:\s*auto/s);
     expect(css).toMatch(/\.operations-shell__body\s*\{[^}]*block-size:\s*100dvh[^}]*grid-template-rows:\s*auto minmax\(0, 1fr\)/s);
     expect(css).toMatch(/\.operations-shell__main\s*\{[^}]*overflow-y:\s*auto/s);
-    expect(css).toContain("@media (max-width: 1023px)");
-    expect(css).toMatch(/@media \(max-width: 1023px\)[\s\S]*?\.operations-shell__rail\s*\{[^}]*min-inline-size:\s*0[^}]*max-inline-size:\s*100%/);
-    expect(css).toMatch(/@media \(max-width: 1023px\)[\s\S]*?\.operations-shell__nav\s*\{[^}]*min-inline-size:\s*0[^}]*max-inline-size:\s*100%/);
+    expect(css).toContain("@media (max-width: 767px)");
+    expect(css).toMatch(/@media \(max-width: 767px\)[\s\S]*?\.operations-shell__rail\s*\{[^}]*min-inline-size:\s*0[^}]*max-inline-size:\s*100%/);
+    expect(css).toMatch(/@media \(max-width: 767px\)[\s\S]*?\.operations-shell__nav\s*\{[^}]*min-inline-size:\s*0[^}]*max-inline-size:\s*100%/);
   });
 });

@@ -1,6 +1,25 @@
 const LEAFLET_STYLE = "/assets/apex/vendor/leaflet-1.9.4/leaflet.css";
 const LEAFLET_SCRIPT = "/assets/apex/vendor/leaflet-1.9.4/leaflet.js";
 const DEFAULT_CENTER = Object.freeze([24.7136, 46.6753]);
+const TOKEN_FALLBACKS = Object.freeze({
+  primary: "var(--brand-green)",
+  ink: "var(--ink)",
+  surface: "var(--surface)",
+  ring: "var(--surface-2)",
+  stale: "var(--warn)",
+});
+
+export function mapTheme(documentSource, windowSource) {
+  const style = windowSource?.getComputedStyle?.(documentSource?.documentElement);
+  const token = (name, fallback) => style?.getPropertyValue(name)?.trim() || fallback;
+  return Object.freeze({
+    primary: token("--brand-green", TOKEN_FALLBACKS.primary),
+    ink: token("--ink", TOKEN_FALLBACKS.ink),
+    surface: token("--surface", TOKEN_FALLBACKS.surface),
+    ring: token("--surface-2", TOKEN_FALLBACKS.ring),
+    stale: token("--warn", TOKEN_FALLBACKS.stale),
+  });
+}
 
 function coordinatePair(point) {
   const pair = Array.isArray(point)
@@ -76,19 +95,20 @@ export function createLeafletAdapter({
     }
 
     layer.clearLayers();
+    const theme = mapTheme(documentSource, windowSource);
     const bounds = [];
     for (const item of positions) {
       const route = routeCoordinates(item);
       if (route.length > 1) {
-        L.polyline(route, { color: "#079455", weight: 4, opacity: 0.8 }).addTo(layer);
+        L.polyline(route, { color: theme.primary, weight: 4, opacity: 0.82 }).addTo(layer);
       }
       for (const stop of item.stops || []) {
         const point = coordinatePair(stop);
         if (!point) continue;
         L.circleMarker(point, {
           radius: 5,
-          color: "#07583a",
-          fillColor: "#f5efe2",
+          color: theme.ink,
+          fillColor: theme.surface,
           fillOpacity: 1,
         }).bindTooltip(stop.stop_name || "نقطة توقف").addTo(layer);
         bounds.push(point);
@@ -97,9 +117,9 @@ export function createLeafletAdapter({
       if (item.has_position && driver) {
         L.circleMarker(driver, {
           radius: 9,
-          color: "#ffffff",
+          color: theme.ring,
           weight: 3,
-          fillColor: item.stale ? "#b54708" : "#079455",
+          fillColor: item.stale ? theme.stale : theme.primary,
           fillOpacity: 1,
         }).bindPopup(driverPopup(documentSource, item)).addTo(layer);
         bounds.push(driver);

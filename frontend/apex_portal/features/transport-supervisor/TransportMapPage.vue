@@ -47,11 +47,17 @@ onBeforeUnmount(mapAdapter.destroy);
         <FormControl v-model="project" type="select" label="المشروع" :options="[{ label: 'كل المشاريع', value: '' }, ...projects.map((value) => ({ label: value, value }))]" @change="applyFilters" />
         <FormControl v-model="status" type="select" label="الحالة" :options="[{ label: 'كل الحالات', value: '' }, ...statuses.map((value) => ({ label: value, value }))]" @change="applyFilters" />
       </div>
+      <ul class="transport-map-legend" aria-label="دليل الخريطة">
+        <li data-kind="route">مسار الرحلة</li>
+        <li data-kind="live">موقع مباشر</li>
+        <li data-kind="stale">موقع متأخر</li>
+        <li data-kind="stop">نقطة توقف</li>
+      </ul>
       <div ref="mapRoot" class="transport-map" aria-label="خريطة حركة المركبات" />
       <div class="transport-map-list" aria-live="polite">
         <article v-for="item in visible" :key="item.dispatch_trip" class="feature-card">
           <div><strong>{{ item.route_name || item.route_plan }}</strong><span>{{ item.driver_name || 'لم يحدد السائق' }} · {{ item.plate || 'لم تحدد المركبة' }}</span></div>
-          <span>{{ item.stale ? 'الموقع قديم' : item.has_position ? 'مباشر' : 'لا يوجد موقع' }}</span>
+          <span class="transport-map-status" :data-state="item.stale ? 'stale' : item.has_position ? 'live' : 'offline'">{{ item.stale ? 'آخر موقع متأخر' : item.has_position ? 'مباشر' : 'لا يوجد موقع' }}</span>
         </article>
       </div>
     </template>
