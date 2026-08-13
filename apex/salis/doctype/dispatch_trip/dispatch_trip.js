@@ -5,7 +5,7 @@ frappe.ui.form.on("Dispatch Trip", {
 		_update_trip_indicator(frm);
 
 		if (!frm.is_new() && frm.doc.docstatus === 0 && frm.doc.status === "Planned") {
-			frm.add_custom_button(__("Assign Transport Requests"), function() {
+			frm.add_custom_button(__("Assign Transport Request"), function() {
 				_prompt_assign_requests(frm);
 			}).addClass("btn-primary");
 		}
@@ -29,36 +29,53 @@ function _update_trip_indicator(frm) {
 }
 
 function _prompt_assign_requests(frm) {
+	const stops = (frm.doc.stops || []).map((stop) => ({
+		label: stop.stop_name,
+		value: stop.stop_key,
+	}));
+	if (!stops.length) {
+		frappe.msgprint(__("Add trip stops before assigning requests."));
+		return;
+	}
 	frappe.prompt(
 		[
 			{
-				fieldname: "transport_requests",
-				label: __("Transport Requests"),
-				fieldtype: "MultiSelectList",
+				fieldname: "transport_request",
+				label: __("Transport Request"),
+				fieldtype: "Link",
+				options: "Transport Request",
 				reqd: 1,
-				get_data(txt) {
-					return frappe.db.get_link_options("Transport Request", txt, {
-						docstatus: 1,
-						status: ["in", ["Approved", "Scheduled"]],
-						is_assigned: 0,
-					});
+				get_query() {
+					return {
+						filters: {
+							docstatus: 1,
+							status: ["in", ["Approved", "Scheduled"]],
+							is_assigned: 0,
+						},
+					};
 				},
+			},
+			{
+				fieldname: "pickup_stop",
+				label: __("Pickup Stop"),
+				fieldtype: "Select",
+				options: stops,
+				reqd: 1,
+			},
+			{
+				fieldname: "dropoff_stop",
+				label: __("Drop-off Stop"),
+				fieldtype: "Select",
+				options: stops,
+				reqd: 1,
 			},
 		],
 		function(values) {
-			const requests = values.transport_requests || [];
-			if (!requests.length) {
-				frappe.show_alert({
-					message: __("Select at least one transport request."),
-					indicator: "orange",
-				});
-				return;
-			}
 			frappe.call({
 				method: "apex.salis.doctype.dispatch_trip.dispatch_trip.assign_requests_to_trip",
 				args: {
 					dispatch_trip: frm.doc.name,
-					transport_requests: JSON.stringify(requests),
+					transport_requests: JSON.stringify(values),
 				},
 				freeze: true,
 				freeze_message: __("Assigning transport requests..."),
@@ -68,7 +85,7 @@ function _prompt_assign_requests(frm) {
 					}
 					frm.reload_doc();
 					frappe.show_alert({
-						message: __("{0} request(s) assigned to this trip.", [r.message.length]),
+						message: __("Transport request assigned."),
 						indicator: "green",
 					});
 				},
@@ -80,7 +97,7 @@ function _prompt_assign_requests(frm) {
 				},
 			});
 		},
-		__("Assign Transport Requests"),
+		__("Assign Transport Request"),
 		__("Assign")
 	);
 }

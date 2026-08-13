@@ -7,15 +7,23 @@
  "field_order": [
   "__tab_0",
   "dispatch_trip_sec_trip",
-  "route_plan",
-  "transport_request",
+  "trip_title",
+  "trip_type",
   "route_assignment",
+  "route_template",
+  "project",
   "shift_name",
   "dispatch_trip_sec_trip_col1",
   "trip_date",
   "status",
+  "planned_start",
+  "planned_end",
+  "dispatch_trip_sec_route",
+  "stops",
   "dispatch_trip_sec_assigned_requests",
   "assigned_requests",
+  "route_plan",
+  "transport_request",
   "dispatch_trip_sec_assignment",
   "vehicle",
   "dispatch_trip_sec_assignment_col1",
@@ -36,6 +44,7 @@
   "dispatch_trip_sec_live_position_col",
   "driver_position_updated_at",
   "dispatch_trip_sec_system",
+  "generation_key",
   "driver_user",
   "naming_series",
   "amended_from"
@@ -52,30 +61,42 @@
    "label": "Trip"
   },
   {
-   "fieldname": "route_plan",
-   "fieldtype": "Link",
-   "label": "Route Plan",
-   "options": "Route Plan",
-   "search_index": 1
-  },
-  {
-   "fetch_from": "route_plan.transport_request",
-   "fetch_if_empty": 1,
-   "fieldname": "transport_request",
-   "fieldtype": "Link",
-   "label": "Transport Request",
-   "options": "Transport Request",
+   "fieldname": "trip_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Trip Title",
    "read_only": 1,
    "search_index": 1
   },
   {
-   "fetch_from": "route_plan.route_assignment",
-   "fetch_if_empty": 1,
+   "default": "Ad Hoc",
+   "fieldname": "trip_type",
+   "fieldtype": "Select",
+   "label": "Trip Type",
+   "options": "Scheduled\nAd Hoc",
+   "reqd": 1
+  },
+  {
    "fieldname": "route_assignment",
    "fieldtype": "Link",
    "label": "Route Assignment",
    "options": "Route Assignment",
-   "read_only": 1
+   "search_index": 1
+  },
+  {
+   "fieldname": "route_template",
+   "fieldtype": "Link",
+   "label": "Route Template",
+   "options": "Route Template",
+   "search_index": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project",
+   "search_index": 1
   },
   {
    "fetch_from": "route_assignment.shift_name",
@@ -94,6 +115,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Trip Date",
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -110,17 +132,55 @@
    "search_index": 1
   },
   {
+   "fieldname": "planned_start",
+   "fieldtype": "Datetime",
+   "label": "Planned Start"
+  },
+  {
+   "fieldname": "planned_end",
+   "fieldtype": "Datetime",
+   "label": "Planned End"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_route",
+   "fieldtype": "Section Break",
+   "label": "Trip Stops"
+  },
+  {
+   "fieldname": "stops",
+   "fieldtype": "Table",
+   "label": "Stops",
+   "options": "Route Stop"
+  },
+  {
    "fieldname": "dispatch_trip_sec_assigned_requests",
    "fieldtype": "Section Break",
    "label": "Assigned Requests"
   },
   {
    "allow_on_submit": 1,
-   "description": "Transport requests the supervisor has assigned onto this trip. The trip manifest is the union of these requests' workers (plus any Route Plan request).",
+   "description": "Transport requests assigned to this trip, including each request's pickup and drop-off stops.",
    "fieldname": "assigned_requests",
    "fieldtype": "Table",
    "label": "Assigned Requests",
-   "options": "Dispatch Trip Assigned Request"
+   "options": "Dispatch Trip Assigned Request",
+   "read_only": 1
+  },
+  {
+   "fieldname": "route_plan",
+   "fieldtype": "Link",
+   "label": "Legacy Route Plan",
+   "options": "Route Plan",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "transport_request",
+   "fieldtype": "Link",
+   "label": "Legacy Primary Request",
+   "options": "Transport Request",
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "dispatch_trip_sec_assignment",
@@ -128,8 +188,6 @@
    "label": "Vehicle and Driver"
   },
   {
-   "fetch_from": "route_plan.vehicle",
-   "fetch_if_empty": 1,
    "fieldname": "vehicle",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -141,13 +199,19 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "route_plan.driver",
-   "fetch_if_empty": 1,
    "fieldname": "driver",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Driver",
    "options": "Salis Driver"
+  },
+  {
+   "fieldname": "generation_key",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Generation Key",
+   "read_only": 1,
+   "unique": 1
   },
   {
    "fieldname": "dispatch_trip_sec_execution",
@@ -315,7 +379,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-08-12 08:43:00.000000",
+ "modified": "2026-08-13 20:43:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",
@@ -384,5 +448,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "trip_title",
  "track_changes": 1
 }

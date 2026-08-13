@@ -1,33 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Dispatch Trip controller.
-
-The FINAL status DocType on the Salis Workflow Spine. Status transitions are
-owned by the native **Dispatch Trip Workflow** (see
-``salis/workflow/dispatch_trip_workflow/``), not by this controller. The
-workflow enforces the role per transition (operational, role-gated — a dispatch
-trip carries no maker/checker actor field, so there is no self-approval gate)
-and the legal order of states via its transitions:
-
-    Planned (0) --Dispatch--> Dispatched (0) --Complete--> Completed (1)
-                                                Completed (1) --Cancel--> Cancelled (2)
-
-``Complete`` is the submit transition (docstatus 0 -> 1): it is the only point
-at which the trip's side-effects fire — it locks the vehicle, advances the
-odometer, drives the linked Transport Request to Fulfilled through *its* native
-workflow, and posts the Trip Fulfilment Ledger. ``Cancel`` (only from the
-submitted ``Completed`` state, docstatus 1 -> 2) fires the ``on_cancel``
-reversal of those effects. A not-yet-completed (draft) trip that is called off
-is simply deleted — it never reached submit and has no downstream effects to
-reverse, so it never needs a ``Cancelled`` state (mirroring Fuel Request, which
-likewise reserves Cancel for its submitted states). A draft->Cancelled
-transition is in any case forbidden by Frappe (cannot cancel before submitting).
-
-This controller keeps only what the workflow cannot express: the dispatch
-readiness gate, the Completed completion-notes requirement, the odometer and
-compliance validation, the initial-status guard (a trip must be created at
-Planned), the idempotent cross-document fulfilment side-effects and their
-reversal on cancel.
-"""
+"""Dispatch Trip lifecycle and atomic request assignment."""
 
 from __future__ import annotations
 
@@ -36,6 +8,13 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_time, now_datetime
 
+from apex.salis.doctype.dispatch_trip.trip_manifest import (
+    copy_route_stops,
+    request_names,
+    resolve_route_context,
+    sync_passengers,
+    validate_request_stop_mappings,
+)
 from apex.salis.utils import (
     add_timeline_note,
     drive_transport_request,
@@ -47,8 +26,11 @@ from apex.salis.utils import (
 
 class DispatchTrip(Document):
     def validate(self):
-        """Runs readiness, odometer, timing, compliance and capacity checks before a trip is saved."""
-        self._resolve_transport_request()
+        """Resolve immutable trip context, then validate execution facts."""
+        self._resolve_route_context()
+        self._copy_route_stops()
+        self._validate_request_stop_mappings()
+        self._sync_passengers()
         self._guard_initial_status()
         self._validate_odometer()
         self._validate_trip_times()
@@ -56,25 +38,28 @@ class DispatchTrip(Document):
         self._require_completion_notes()
         self._enforce_capacity()
 
-    def _resolve_transport_request(self):
-        """Resolve the Transport Request from the Route Plan when not already set,
-        so the fulfilment chain is intact even if the fetch did not populate it."""
-        if self.transport_request or not self.route_plan:
-            return
-        self.transport_request = frappe.db.get_value(
-            "Route Plan", self.route_plan, "transport_request"
-        )
+    def _resolve_route_context(self):
+        resolve_route_context(self)
+
+    def _copy_route_stops(self):
+        copy_route_stops(self)
+
+    def _validate_request_stop_mappings(self):
+        validate_request_stop_mappings(self)
+
+    def _request_names(self):
+        return request_names(self)
+
+    def _sync_passengers(self):
+        sync_passengers(self)
 
     def _enforce_capacity(self):
-        """Cap the assigned requests' total workers at the vehicle's seat capacity.
-
-        Preliminary assignment guard: when the vehicle has a known seat_capacity
-        (non-zero) and assigned_requests are set, the sum of the requests' worker
-        counts must not exceed it. Skipped when capacity is unknown (0/unset) — the
-        field is optional and the existing Route Plan path carries no capacity."""
+        """Reject request groups larger than a known vehicle capacity."""
         if not (self.vehicle and self.assigned_requests):
             return
-        capacity = frappe.db.get_value("Salis Vehicle", self.vehicle, "seat_capacity") or 0
+        capacity = (
+            frappe.db.get_value("Salis Vehicle", self.vehicle, "seat_capacity") or 0
+        )
         if capacity <= 0:
             return
         total = sum((row.requested_count or 0) for row in self.assigned_requests)
@@ -86,18 +71,11 @@ class DispatchTrip(Document):
             )
 
     def on_update(self):
-        """Notifies subscribed driver portals of the trip change and flags its assigned requests as taken."""
+        """Notify subscribed driver portals after a trip change."""
         self._publish_driver_update()
-        self._mark_assigned_requests()
 
     def _publish_driver_update(self):
-        """Signal subscribed drivers' portals to refetch their trips ahead of a
-        manual refresh, on any trip change (assignment / status / board). Routed to
-        the Dispatch Trip doctype room; the socket server delivers only to recipients
-        with read permission, and each driver's my_trips query is server-scoped to
-        their own trips, so scope is honoured. after_commit so subscribers read
-        committed state. The payload is advisory — the SPA refetches, it does not
-        trust the body. Best-effort: a publish failure must never abort the save."""
+        """Tell authorised desk and portal clients to refetch after commit."""
         try:
             frappe.publish_realtime(
                 "driver_trip_update",
@@ -120,47 +98,6 @@ class DispatchTrip(Document):
         except Exception:
             pass
 
-    def _mark_assigned_requests(self):
-        """Best-effort: flag each assigned Transport Request as Assigned to this trip.
-
-        Sets the request's is_assigned flag + assigned_to_trip back-link so the
-        preliminary assignment is visible on the request, WITHOUT touching the
-        workflow-owned status (a native Workflow is forward-only and has no
-        "Assigned" state between Scheduled and Fulfilled; forcing one would break
-        the existing fulfilment chain). A terminal/cancelled request is skipped.
-        Swallowed per row so an un-writable request never aborts the trip save."""
-        request_names = [
-            row.transport_request for row in (self.assigned_requests or []) if row.transport_request
-        ]
-        if not request_names:
-            return
-        try:
-            current_by_name = {
-                r["name"]: r
-                for r in frappe.get_all(
-                    "Transport Request",
-                    filters={"name": ["in", request_names]},
-                    fields=["name", "is_assigned", "assigned_to_trip", "status"],
-                )
-            }
-        except Exception:
-            return
-        for name in request_names:
-            current = current_by_name.get(name)
-            if not current or current.get("status") in ("Cancelled", "Rejected"):
-                continue
-            if current.get("is_assigned") and current.get("assigned_to_trip") == self.name:
-                continue
-            try:
-                frappe.db.set_value(
-                    "Transport Request",
-                    name,
-                    {"is_assigned": 1, "assigned_to_trip": self.name},
-                    update_modified=False,
-                )
-            except Exception:
-                continue
-
     def before_submit(self):
         """Blocks submission until the trip has a route, vehicle, driver, date and an assigned request."""
         self._enforce_dispatch_readiness()
@@ -168,20 +105,33 @@ class DispatchTrip(Document):
     def _enforce_dispatch_readiness(self):
         """A trip must be ready (route, vehicle, driver set) before it is submitted."""
         required = {
-            "route_plan": _("Route Plan"),
             "vehicle": _("Vehicle"),
             "driver": _("Driver"),
             "trip_date": _("Trip Date"),
+            "project": _("Project"),
         }
         for fieldname, label in required.items():
             if not self.get(fieldname):
                 frappe.throw(
-                    _("Dispatch readiness: {0} is required before submitting.").format(label)
+                    _("Dispatch readiness: {0} is required before submitting.").format(
+                        label
+                    )
                 )
 
-        if not self.transport_request and not self.assigned_requests:
+        if not self.route_template and not self.route_plan:
             frappe.throw(
-                _("Dispatch readiness: A trip must have at least one assigned worker/request before submitting.")
+                _("Dispatch readiness: Route Template is required before submitting.")
+            )
+        if not self.stops:
+            frappe.throw(
+                _("Dispatch readiness: Add at least one trip stop before submitting.")
+            )
+        self._validate_request_stop_mappings()
+        if not self._request_names() and not self.boarding_state:
+            frappe.throw(
+                _(
+                    "Dispatch readiness: Add at least one request or passenger before submitting."
+                )
             )
 
     def _require_completion_notes(self):
@@ -192,15 +142,12 @@ class DispatchTrip(Document):
             )
 
     def _guard_initial_status(self):
-        """A new trip may only be created in the initial state (Planned). Later
-        states are reached only through the Dispatch Trip Workflow, which the desk
-        drives — this closes the insert-bypass the workflow itself cannot cover
-        (a brand-new document inserted directly at a later/terminal status)."""
+        """Force new trips through the native workflow from Planned."""
         if self.is_new() and self.status and self.status != "Planned":
             frappe.throw(
-                _("A new Dispatch Trip must start as Planned; {0} is reached through the workflow.").format(
-                    _(self.status)
-                )
+                _(
+                    "A new Dispatch Trip must start as Planned; {0} is reached through the workflow."
+                ).format(_(self.status))
             )
 
     def _validate_odometer(self):
@@ -219,19 +166,7 @@ class DispatchTrip(Document):
             )
 
     def _validate_trip_times(self):
-        """Return Time must not precede Depart Time (a single-day trip cannot return
-        before it departs).
-
-        Guard to Completed trips only with BOTH times set. A return is a recorded
-        execution fact, not a plan, so it is meaningful only at completion. This also
-        avoids a false positive on a freshly created Planned trip: Frappe auto-fills
-        an unset Time field with the creation-time nowtime (model.create_new), so a
-        brand-new trip carries a spurious return_time that can read as earlier than a
-        later depart_time depending on the wall-clock at creation. Equal times are
-        allowed (a zero-duration record is not a sequencing error). get_time
-        normalizes both representations (HH:MM[:SS] str / datetime.time / DB
-        timedelta) so the comparison never raises on mismatched types.
-        """
+        """Validate recorded same-day execution times at completion."""
         if self.status != "Completed":
             return
         if not (self.depart_time and self.return_time):
@@ -243,7 +178,9 @@ class DispatchTrip(Document):
         """Advances the vehicle's odometer and fulfils the linked transport request once a trip completes."""
         if self.status == "Completed" and self.odometer_end and self.vehicle:
             lock_vehicle(self.vehicle)
-            current = frappe.db.get_value("Salis Vehicle", self.vehicle, "odometer") or 0
+            current = (
+                frappe.db.get_value("Salis Vehicle", self.vehicle, "odometer") or 0
+            )
             if self.odometer_end > current:
                 frappe.db.set_value(
                     "Salis Vehicle", self.vehicle, "odometer", self.odometer_end
@@ -256,43 +193,45 @@ class DispatchTrip(Document):
                 ),
             )
 
-        if self.status == "Completed" and self.transport_request:
-            self._fulfil_transport_request()
+        if self.status == "Completed" and self._request_names():
+            self._fulfil_transport_requests()
             self._post_fulfilment_ledger()
 
-    def _fulfil_transport_request(self):
-        """Drive the linked Transport Request to Fulfilled (via the native workflow
-        "Confirm Fulfilment" transition) and stamp the assignment outcome back onto
-        it. Terminal requests are left untouched by the drive helper."""
-        drive_transport_request(
-            self.transport_request,
-            action="Confirm Fulfilment",
-            target_state="Fulfilled",
-            extra_fields={
-                "fulfilled_on": now_datetime(),
-                "assigned_vehicle": self.vehicle,
-                "assigned_driver": self.driver,
-                "dispatch_trip": self.name,
-            },
-        )
+    def _fulfil_transport_requests(self):
+        """Fulfil every request; any failure aborts the whole transaction."""
+        for request in self._request_names():
+            drive_transport_request(
+                request,
+                action="Confirm Fulfilment",
+                target_state="Fulfilled",
+                extra_fields={
+                    "fulfilled_on": now_datetime(),
+                    "assigned_vehicle": self.vehicle,
+                    "assigned_driver": self.driver,
+                    "dispatch_trip": self.name,
+                },
+            )
 
     def _post_fulfilment_ledger(self):
-        """Insert a read-only Trip Fulfilment Ledger row capturing the completed
-        trip. System-written audit memo; humans never create these."""
+        """Write the immutable completion ledger once."""
         if frappe.db.exists("Trip Fulfilment Ledger", {"dispatch_trip": self.name}):
             return
-        worker_count = (
-            frappe.db.get_value(
-                "Transport Request", self.transport_request, "worker_count"
+        request_names = self._request_names()
+        worker_count = sum(
+            row.worker_count or 0
+            for row in frappe.get_all(
+                "Transport Request",
+                filters={"name": ["in", request_names]},
+                fields=["worker_count"],
             )
-            or 0
         )
         has_timestamps = 1 if (self.return_time and self.depart_time) else 0
         ledger = frappe.new_doc("Trip Fulfilment Ledger")
         ledger.update(
             {
                 "dispatch_trip": self.name,
-                "transport_request": self.transport_request,
+                "transport_request": self.transport_request
+                or (request_names[0] if request_names else None),
                 "route_plan": self.route_plan,
                 "vehicle": self.vehicle,
                 "driver": self.driver,
@@ -307,23 +246,8 @@ class DispatchTrip(Document):
         ledger.insert(ignore_permissions=True)
 
     def on_cancel(self):
-        """Reverse the on_submit fulfilment effects so a cancelled trip does not
-        leave the Transport Request permanently Fulfilled or double-count the
-        Trip Fulfilment Ledger. Odometer is monotonic and is intentionally not
-        rolled back."""
-        if self.transport_request:
-            revert_transport_request(
-                self.transport_request,
-                from_state="Fulfilled",
-                to_state="Scheduled",
-                dispatch_trip=self.name,
-                clear_fields=[
-                    "fulfilled_on",
-                    "assigned_vehicle",
-                    "assigned_driver",
-                    "dispatch_trip",
-                ],
-            )
+        """Reverse request and boarding effects; odometer stays monotonic."""
+        self._revert_transport_requests()
         for row in frappe.get_all(
             "Trip Fulfilment Ledger",
             filters={"dispatch_trip": self.name},
@@ -336,59 +260,159 @@ class DispatchTrip(Document):
 
         reverse_trip_boarding(self.name)
 
+    def _revert_transport_requests(self):
+        """Reverse every request still fulfilled by this trip."""
+        for request in self._request_names():
+            revert_transport_request(
+                request,
+                from_state="Fulfilled",
+                to_state="Scheduled",
+                dispatch_trip=self.name,
+                clear_fields=[
+                    "fulfilled_on",
+                    "assigned_vehicle",
+                    "assigned_driver",
+                    "dispatch_trip",
+                ],
+            )
 
-ASSIGNMENT_ROLES = ("Fleet Manager", "Fleet Project Manager", "Fleet Supervisor", "System Manager")
+
+ASSIGNMENT_ROLES = (
+    "Fleet Manager",
+    "Fleet Project Manager",
+    "Fleet Supervisor",
+    "System Manager",
+)
 
 
 @frappe.whitelist(methods=["POST"])
 def assign_requests_to_trip(dispatch_trip, transport_requests):
-    """Assign one-or-many Transport Requests onto a Dispatch Trip (supervisor action).
-
-    The preliminary assignment endpoint: appends each request to the trip's
-    assigned_requests child table (skipping duplicates) and saves, so the trip
-    manifest becomes the union of the assigned requests' workers and the capacity
-    guard runs. ``transport_requests`` is a request name or a JSON list of names.
-
-    Authorization (whitelisting is exposure, not authorization): the caller must
-    hold a transport-supervisor role AND write permission on this Dispatch Trip
-    (frappe.has_permission re-applies DocPerm + per-doc has_permission + User
-    Permission scoping). Returns the trip's resulting assigned-request names."""
+    """Atomically attach requests and their pickup/drop-off stops to one trip."""
     if not (set(frappe.get_roles()) & set(ASSIGNMENT_ROLES)):
         frappe.throw(
-            _("You are not permitted to assign transport requests."), frappe.PermissionError
+            _("You are not permitted to assign transport requests."),
+            frappe.PermissionError,
         )
 
-    trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
+    trip = frappe.get_doc("Dispatch Trip", dispatch_trip, for_update=True)
     if not frappe.has_permission("Dispatch Trip", "write", doc=trip):
         frappe.throw(
             _("You do not have write permission on this Dispatch Trip."),
             frappe.PermissionError,
         )
+    if trip.docstatus != 0 or trip.status != "Planned":
+        frappe.throw(_("Requests can only be assigned to a Planned trip."))
 
-    if isinstance(transport_requests, str):
-        transport_requests = (
-            frappe.parse_json(transport_requests)
-            if transport_requests.strip().startswith("[")
-            else [transport_requests]
-        )
-
+    rows = _normalise_request_assignments(transport_requests, trip)
     existing = {row.transport_request for row in (trip.assigned_requests or [])}
-    to_check = {r for r in transport_requests if r and r not in existing}
-    valid = (
-        set(
-            frappe.get_all(
-                "Transport Request", filters={"name": ["in", list(to_check)]}, pluck="name"
-            )
-        )
-        if to_check
-        else set()
-    )
-    for request in transport_requests:
-        if not request or request in existing:
+    requests = []
+    for row in rows:
+        name = row["transport_request"]
+        if not name or name in existing:
             continue
-        if request not in valid:
-            frappe.throw(_("Transport Request {0} does not exist.").format(request))
-        trip.append("assigned_requests", {"transport_request": request})
-        existing.add(request)
+
+        request = frappe.get_doc("Transport Request", name, for_update=True)
+        if not frappe.has_permission("Transport Request", "write", doc=request):
+            frappe.throw(
+                _("You do not have write permission on Transport Request {0}.").format(
+                    name
+                ),
+                frappe.PermissionError,
+            )
+        if request.status not in ("Approved", "Scheduled"):
+            frappe.throw(
+                _("Transport Request {0} must be Approved or Scheduled.").format(name)
+            )
+        linked_trip = request.assigned_to_trip or request.dispatch_trip
+        if linked_trip and linked_trip != trip.name:
+            frappe.throw(
+                _("Transport Request {0} is already assigned to trip {1}.").format(
+                    name, linked_trip
+                )
+            )
+        requests.append(request)
+
+    for request in requests:
+        row = next(item for item in rows if item["transport_request"] == request.name)
+        trip.append(
+            "assigned_requests",
+            {
+                "transport_request": request.name,
+                "pickup_stop": row["pickup_stop"],
+                "dropoff_stop": row["dropoff_stop"],
+                "requested_count": request.worker_count,
+                "purpose": request.transport_purpose,
+            },
+        )
+        existing.add(request.name)
     trip.save()
+
+    assignment_values = {
+        "is_assigned": 1,
+        "assigned_to_trip": trip.name,
+        "assigned_vehicle": trip.vehicle,
+        "assigned_driver": trip.driver,
+        "dispatch_trip": trip.name,
+    }
+    for request in requests:
+        if request.status == "Approved":
+            drive_transport_request(
+                request.name,
+                action="Schedule",
+                target_state="Scheduled",
+                extra_fields=assignment_values,
+            )
+        else:
+            frappe.db.set_value("Transport Request", request.name, assignment_values)
     return [row.transport_request for row in (trip.assigned_requests or [])]
+
+
+def _normalise_request_assignments(value, trip):
+    if isinstance(value, str):
+        value = (
+            frappe.parse_json(value)
+            if value.strip().startswith(("[", "{"))
+            else [value]
+        )
+    if isinstance(value, dict):
+        value = [value]
+    if not isinstance(value, list):
+        frappe.throw(_("Transport Requests must be a list."))
+
+    stop_keys = [row.stop_key for row in (trip.stops or []) if row.stop_key]
+    known = set(stop_keys)
+    result = []
+    seen = {}
+    for item in value:
+        row = item if isinstance(item, dict) else {"transport_request": item}
+        name = row.get("transport_request")
+        pickup = row.get("pickup_stop")
+        dropoff = row.get("dropoff_stop")
+        if not pickup and not dropoff and len(stop_keys) <= 2 and stop_keys:
+            pickup, dropoff = stop_keys[0], stop_keys[-1]
+        if not name or not pickup or not dropoff:
+            frappe.throw(
+                _(
+                    "Each request needs a Transport Request, Pickup Stop and Drop-off Stop."
+                )
+            )
+        if pickup not in known or dropoff not in known:
+            frappe.throw(_("Pickup and drop-off must belong to this trip."))
+        mapping = (pickup, dropoff)
+        if name in seen:
+            if seen[name] != mapping:
+                frappe.throw(
+                    _("Transport Request {0} has conflicting stop mappings.").format(
+                        name
+                    )
+                )
+            continue
+        seen[name] = mapping
+        result.append(
+            {
+                "transport_request": name,
+                "pickup_stop": pickup,
+                "dropoff_stop": dropoff,
+            }
+        )
+    return result
